@@ -20,6 +20,6 @@ ADD_DEFINITIONS("-Wall")
 ADD_DEFINITIONS("-ggdb")
 ADD_DEFINITIONS("-O3")
 
-include_directories(../../dep/libmpq)
+include_directories(${CMAKE_SOURCE_DIR}/../../dep/libmpq)
 
 add_subdirectory(vmapextract)

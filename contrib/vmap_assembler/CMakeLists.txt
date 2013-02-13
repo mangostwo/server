@@ -28,17 +28,21 @@ include_directories(../../dep/ACE_wrappers/)
 include_directories(../../objdir/dep/ACE_wrappers)
 include_directories(../../src/framework/)
 
-add_library(g3dlite ../../dep/src/g3dlite/AABox.cpp
+add_library(g3dlite
+	../../dep/src/g3dlite/AABox.cpp
 	../../dep/src/g3dlite/Box.cpp
 	../../dep/src/g3dlite/Crypto.cpp
 	../../dep/src/g3dlite/format.cpp
 	../../dep/src/g3dlite/Matrix3.cpp
+	../../dep/src/g3dlite/PhysicsFrame.cpp
 	../../dep/src/g3dlite/Plane.cpp
 	../../dep/src/g3dlite/System.cpp
 	../../dep/src/g3dlite/Triangle.cpp
+	../../dep/src/g3dlite/uint128.cpp
 	../../dep/src/g3dlite/Vector3.cpp
 	../../dep/src/g3dlite/Vector4.cpp
 	../../dep/src/g3dlite/debugAssert.cpp
+	../../dep/src/g3dlite/FileSystem.cpp
 	../../dep/src/g3dlite/fileutils.cpp
 	../../dep/src/g3dlite/g3dmath.cpp
 	../../dep/src/g3dlite/g3dfnmatch.cpp

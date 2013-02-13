@@ -77,6 +77,7 @@ add_library(g3dlite
     ../../dep/src/g3dlite/Crypto_md5.cpp
     ../../dep/src/g3dlite/Cylinder.cpp
     ../../dep/src/g3dlite/debugAssert.cpp
+    ../../dep/src/g3dlite/FileSystem.cpp
     ../../dep/src/g3dlite/fileutils.cpp
     ../../dep/src/g3dlite/filter.cpp
     ../../dep/src/g3dlite/format.cpp
