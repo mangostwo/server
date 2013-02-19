@@ -125,8 +125,6 @@ bool ExtractWmo()
 {
     bool success = true;
 
-    //const char* ParsArchiveNames[] = {"patch-2.MPQ", "patch.MPQ", "common.MPQ", "expansion.MPQ"};
-
     for (ArchiveSet::const_iterator ar_itr = gOpenArchives.begin(); ar_itr != gOpenArchives.end() && success; ++ar_itr)
     {
         vector<string> filelist;

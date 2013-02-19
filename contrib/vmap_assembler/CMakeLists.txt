@@ -11,8 +11,6 @@
 cmake_minimum_required (VERSION 2.6)
 project (MANGOS_VMAP_ASSEMB_IO)
 
-set(CMAKE_VERBOSE_MAKEFILE true)
-
 # uncomment next line to disable debug mode
 ADD_DEFINITIONS("-DIOMAP_DEBUG")
 ADD_DEFINITIONS("-DNO_CORE_FUNCS")
