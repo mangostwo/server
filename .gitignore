@@ -27,7 +27,6 @@ tags
 TAGS
 !.gitignore
 !.gitattributes
-!.travis.yml
 
 #
 # Build generated files
