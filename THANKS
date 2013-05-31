@@ -19,20 +19,17 @@ similar to this one:
 
  Thanks should also go out to the Ludmilla team, who are also providing the
  community with a great server. We have not gained too much help from them,
- but we have recieved some.
+ but we have received some.
 
  Thanks to WCell team (especially Ralek) for reseach on realm reconnect sequence,
  item scaling stats algorithm, gameobject rotation issues.
 
-The easiest policy with this file is to thank everyone who contributes to the
-project, without judging the value of the contribution.
-
-Unlike `AUTHORS', the `THANKS' file is not maintained for legal reasons. It is
-maintained to thank all the contributors that helped you out in your project.
-The `AUTHORS' file can not be used for this purpose because certain
-contributions, like bug reports or ideas and suggestions do not require legal
-paper exchanges.
-
-You can also decide to send some kind of special greeting when you initially
-add a name to your `THANKS' file. The mere presense of a name in `THANKS' is
-then a flag to you that the initial greeting has been sent.
+ We would also like to acknowledge the contributions made by the following
+ teams, those input and code has from time to time been included in the MaNGOS
+ code:-
+ 
+ TrinityCore
+ Project SilverPine
+ MangosR2
+ ScriptDev
+ cMangos
