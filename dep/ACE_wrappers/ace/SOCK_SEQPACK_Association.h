@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *
  *  @file    SOCK_SEQPACK_Association.h
  *
@@ -34,7 +34,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // Forward declarations.
 class ACE_Message_Block;
 
-/**
+/*
  * @class ACE_SOCK_SEQPACK_Association
  *
  * @brief Defines the methods in the ACE_SOCK_SEQPACK_Association abstraction.
@@ -88,7 +88,7 @@ public:
   /// Destructor.
   ~ACE_SOCK_SEQPACK_Association (void);
 
-  /**
+  /*
    * Return local endpoint addresses in the referenced array of
    * ACE_INET_Addr, which should have the specified @a size.  If the
    * number of local endpoint addresses is less than @a size, then
@@ -97,7 +97,7 @@ public:
    */
   int get_local_addrs (ACE_INET_Addr *addrs, size_t &size) const;
 
-  /**
+  /*
    * Return remote endpoint addresses in the referenced array of
    * ACE_INET_Addr, which should have the specified @a size.  If the
    * number of remote endpoint addresses is less than @a size, then
@@ -169,13 +169,13 @@ public:
   /// Close down the writer.
   int close_writer (void);
 
-  /**
+  /*
    * Close down the socket (we need this to make things work correctly
    * on Win32, which requires use to do a <close_writer> before doing
    * the close to avoid losing data).  */
   int close (void);
 
-  /**
+  /*
    * Abort the association according to RFC 2960 9.1 through the API
    * in draft-ietf-tsvwg-sctpsocket-09 7.1.4.
    */

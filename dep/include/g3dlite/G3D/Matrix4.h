@@ -1,4 +1,4 @@
-/**
+/*
   @file Matrix4.h
  
   4x4 matrix class
@@ -27,7 +27,7 @@ namespace G3D {
 
 class Any;
 
-/**
+/*
   A 4x4 matrix.
 
   See also G3D::CoordinateFrame, G3D::Matrix3, G3D::Quat
@@ -37,7 +37,7 @@ private:
 
     float elt[4][4];
 
-    /**
+    /*
       Computes the determinant of the 3x3 matrix that lacks excludeRow
       and excludeCol. 
     */
@@ -61,12 +61,12 @@ public:
         float r3c1, float r3c2, float r3c3, float r3c4,
         float r4c1, float r4c2, float r4c3, float r4c4);
 
-    /**
+    /*
      init should be <B>row major</B>.
      */
     Matrix4(const float* init);
     
-	/**
+	/*
 		a is the upper left 3x3 submatrix and b is the upper right 3x1 submatrix. The last row of the created matrix is (0,0,0,1).
 	*/
     Matrix4(const class Matrix3& upper3x3, const class Vector3& lastCol = Vector3::zero());
@@ -134,7 +134,7 @@ public:
     /** Homogeneous multiplication. Let k = M * [v w]^T.  result = k.xyz() / k.w */
     class Vector3 homoMul(const class Vector3& v, float w) const;
 
-    /**
+    /*
      Constructs an orthogonal projection matrix from the given parameters.
      Near and far are the <b>NEGATIVE</b> of the near and far plane Z values
      (to follow OpenGL conventions).

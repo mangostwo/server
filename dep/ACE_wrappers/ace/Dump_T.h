@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Dump_T.h
  *
  *  $Id: Dump_T.h 91626 2010-09-07 10:59:20Z johnnyw $
@@ -23,7 +23,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Dumpable_Adapter
  *
  * @brief

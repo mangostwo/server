@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    DLL.h
  *
  *  $Id: DLL.h 91064 2010-07-12 10:11:24Z johnnyw $
@@ -27,7 +27,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_DLL_Handle;
 
-/**
+/*
  * @class ACE_DLL
  *
  * @brief Provides an abstract interface for handling various DLL
@@ -44,7 +44,7 @@ class ACE_Export ACE_DLL
 public:
   // = Initialization and termination methods.
 
-  /**
+  /*
    * Default constructor.  By default, the close() operation on the
    * object will be invoked before it is destroyed.
    * @param close_handle_on_destruction  Indicates whether or not the
@@ -60,7 +60,7 @@ public:
   ACE_DLL& operator= (const ACE_DLL &rhs);
 
 
-  /**
+  /*
    * This constructor performs the actions of open() during construction.
    * @param dll_name  The name or path of the DLL to load.
    * @param open_mode  Flags to alter the actions taken when loading the DLL.
@@ -86,7 +86,7 @@ public:
   /// Copy constructor.
   ACE_DLL (const ACE_DLL &);
 
-  /**
+  /*
    * This method opens and dynamically links a specified DLL.
    * @param dll_name  The filename or path of the DLL to load.
    *        If a filename is given to @c open(), the @c ACE::ldfind() is used
@@ -123,14 +123,14 @@ public:
   /// Call to close the DLL object.
   int close (void);
 
-  /**
+  /*
    * Called when the DLL object is destroyed -- invokes close() if the
    * @a close_handle_on_destruction flag was set to non-zero in the
    * constructor or open() method.
    */
   ~ACE_DLL (void);
 
-  /**
+  /*
    * Look up a named symbol in the DLL. DLL must be successfully opened
    * before calling symbol().
    * @param symbol_name The symbol name to look up.
@@ -147,7 +147,7 @@ public:
   /// returned by the OS.
   ACE_TCHAR *error (void) const;
 
-  /**
+  /*
    * Return the handle to the caller.  If @a become_owner is non-0 then
    * caller assumes ownership of the handle and the ACE_DLL object
    * won't call close() when it goes out of scope, even if

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Time_Value.h
  *
  *  $Id: Time_Value.h 90683 2010-06-17 22:07:42Z shuston $
@@ -47,7 +47,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 
-/**
+/*
  * @class ACE_Time_Value
  *
  * @brief Operations on "timeval" structures, which express time in
@@ -64,7 +64,7 @@ public:
   /// Constant "0".
   static const ACE_Time_Value zero;
 
-  /**
+  /*
    * Constant for maximum time representable.  Note that this time is
    * not intended for use with <select> or other calls that may have
    * *their own* implementation-specific maximum time representations.
@@ -114,7 +114,7 @@ public:
 # endif /* ACE_WIN32 */
 
   /// Converts from ACE_Time_Value format into milliseconds format.
-  /**
+  /*
    * @return Sum of second field (in milliseconds) and microsecond field
    *         (in milliseconds).  Note that this method can overflow if
    *         the second and microsecond field values are large, so use
@@ -127,7 +127,7 @@ public:
   unsigned long msec (void) const;
 
   /// Converts from ACE_Time_Value format into milliseconds format.
-  /**
+  /*
    * @return Sum of second field (in milliseconds) and microsecond field
    *         (in milliseconds).
    *
@@ -138,7 +138,7 @@ public:
   ACE_UINT64 get_msec () const;
 
   /// Converts from ACE_Time_Value format into milliseconds format.
-  /**
+  /*
    * @return Sum of second field (in milliseconds) and microsecond field
    *         (in milliseconds) and return them via the @param ms parameter.
    *
@@ -151,7 +151,7 @@ public:
   void msec (ACE_UINT64 &ms) const;
 
   /// Converts from ACE_Time_Value format into milliseconds format.
-  /**
+  /*
    * @return Sum of second field (in milliseconds) and microsecond field
    *         (in milliseconds) and return them via the @param ms parameter.
    *
@@ -164,7 +164,7 @@ public:
   void msec (ACE_UINT64 &ms) /* const */;
 
   /// Converts from milli-seconds format into ACE_Time_Value format.
-  /**
+  /*
    * @note The semantics of this method differs from the sec() and
    *       usec() methods.  There is no analogous "millisecond"
    *       component in an ACE_Time_Value.
@@ -172,7 +172,7 @@ public:
   void set_msec (const ACE_UINT64 &ms);
 
   /// Converts from milli-seconds format into ACE_Time_Value format.
-  /**
+  /*
    * @note The semantics of this method differs from the sec() and
    *       usec() methods.  There is no analogous "millisecond"
    *       component in an ACE_Time_Value.
@@ -180,7 +180,7 @@ public:
   void msec (long);
 
   /// Converts from milli-seconds format into ACE_Time_Value format.
-  /**
+  /*
    * @note The semantics of this method differs from the sec() and
    *       usec() methods.  There is no analogous "millisecond"
    *       component in an ACE_Time_Value.
@@ -204,7 +204,7 @@ public:
   // = The following are accessor/mutator methods.
 
   /// Get seconds.
-  /**
+  /*
    * @return The second field/component of this ACE_Time_Value.
    *
    * @note The semantics of this method differs from the msec()
@@ -216,7 +216,7 @@ public:
   void sec (time_t sec);
 
   /// Get microseconds.
-  /**
+  /*
    * @return The microsecond field/component of this ACE_Time_Value.
    *
    * @note The semantics of this method differs from the msec()
@@ -227,7 +227,7 @@ public:
   /// Set microseconds.
   void usec (suseconds_t usec);
 
-  /**
+  /*
    * @return Sum of second field (in microseconds) and microsecond field
    *         and return them via the @param usec parameter.
    */
@@ -253,7 +253,7 @@ public:
   /// Substract @a tv to this.
   ACE_Time_Value &operator -= (time_t tv);
 
-  /**
+  /*
     \brief Multiply the time value by the @a d factor.
     \note The result of the operator is valid for results from range
     < (ACE_INT32_MIN, -999999), (ACE_INT32_MAX, 999999) >. Result
@@ -262,28 +262,28 @@ public:
   ACE_Time_Value &operator *= (double d);
 
   /// Increment microseconds as postfix.
-  /**
+  /*
    * @note The only reason this is here is to allow the use of ACE_Atomic_Op
    * with ACE_Time_Value.
    */
   ACE_Time_Value operator++ (int);
 
   /// Increment microseconds as prefix.
-  /**
+  /*
    * @note The only reason this is here is to allow the use of ACE_Atomic_Op
    * with ACE_Time_Value.
    */
   ACE_Time_Value &operator++ (void);
 
   /// Decrement microseconds as postfix.
-  /**
+  /*
    * @note The only reason this is here is to allow the use of ACE_Atomic_Op
    * with ACE_Time_Value.
    */
   ACE_Time_Value operator-- (int);
 
   /// Decrement microseconds as prefix.
-  /**
+  /*
    * @note The only reason this is here is to allow the use of ACE_Atomic_Op
    * with ACE_Time_Value.
    */
@@ -331,7 +331,7 @@ public:
   //@}
 
   /// Dump is a no-op.
-  /**
+  /*
    * The dump() method is a no-op.  It's here for backwards compatibility
    * only, but does not dump anything. Invoking logging methods here
    * violates layering restrictions in ACE because this class is part

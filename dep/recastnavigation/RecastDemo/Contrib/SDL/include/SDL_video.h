@@ -255,14 +255,14 @@ typedef enum {
 
 /* Function prototypes */
 
-/**
+/*
  * @name Video Init and Quit
  * These functions are used internally, and should not be used unless you
  * have a specific need to specify the video driver you want to use.
  * You should normally use SDL_Init() or SDL_InitSubSystem().
  */
 /*@{*/
-/**
+/*
  * Initializes the video subsystem. Sets up a connection
  * to the window manager, etc, and determines the current video mode and
  * pixel format, but does not initialize a window or graphics mode.
@@ -276,14 +276,14 @@ extern DECLSPEC int SDLCALL SDL_VideoInit(const char *driver_name, Uint32 flags)
 extern DECLSPEC void SDLCALL SDL_VideoQuit(void);
 /*@}*/
 
-/**
+/*
  * This function fills the given character buffer with the name of the
  * video driver, and returns a pointer to it if the video driver has
  * been initialized.  It returns NULL if no driver has been initialized.
  */
 extern DECLSPEC char * SDLCALL SDL_VideoDriverName(char *namebuf, int maxlen);
 
-/**
+/*
  * This function returns a pointer to the current display surface.
  * If SDL is doing format conversion on the display surface, this
  * function returns the publicly visible surface, not the real video
@@ -291,7 +291,7 @@ extern DECLSPEC char * SDLCALL SDL_VideoDriverName(char *namebuf, int maxlen);
  */
 extern DECLSPEC SDL_Surface * SDLCALL SDL_GetVideoSurface(void);
 
-/**
+/*
  * This function returns a read-only pointer to information about the
  * video hardware.  If this is called before SDL_SetVideoMode(), the 'vfmt'
  * member of the returned structure will contain the pixel format of the
@@ -299,7 +299,7 @@ extern DECLSPEC SDL_Surface * SDLCALL SDL_GetVideoSurface(void);
  */
 extern DECLSPEC const SDL_VideoInfo * SDLCALL SDL_GetVideoInfo(void);
 
-/**
+/*
  * Check to see if a particular video mode is supported.
  * It returns 0 if the requested mode is not supported under any bit depth,
  * or returns the bits-per-pixel of the closest available mode with the
@@ -312,7 +312,7 @@ extern DECLSPEC const SDL_VideoInfo * SDLCALL SDL_GetVideoInfo(void);
  */
 extern DECLSPEC int SDLCALL SDL_VideoModeOK(int width, int height, int bpp, Uint32 flags);
 
-/**
+/*
  * Return a pointer to an array of available screen dimensions for the
  * given format and video flags, sorted largest to smallest.  Returns 
  * NULL if there are no dimensions available for a particular format, 
@@ -323,7 +323,7 @@ extern DECLSPEC int SDLCALL SDL_VideoModeOK(int width, int height, int bpp, Uint
  */
 extern DECLSPEC SDL_Rect ** SDLCALL SDL_ListModes(SDL_PixelFormat *format, Uint32 flags);
 
-/**
+/*
  * Set up a video mode with the specified width, height and bits-per-pixel.
  *
  * If 'bpp' is 0, it is treated as the current display bits per pixel.
@@ -388,12 +388,12 @@ extern DECLSPEC SDL_Surface * SDLCALL SDL_SetVideoMode
  * These functions should not be called while 'screen' is locked.
  */
 /*@{*/
-/**
+/*
  * Makes sure the given list of rectangles is updated on the given screen.
  */
 extern DECLSPEC void SDLCALL SDL_UpdateRects
 		(SDL_Surface *screen, int numrects, SDL_Rect *rects);
-/**
+/*
  * If 'x', 'y', 'w' and 'h' are all 0, SDL_UpdateRect will update the entire
  * screen.
  */
@@ -401,7 +401,7 @@ extern DECLSPEC void SDLCALL SDL_UpdateRect
 		(SDL_Surface *screen, Sint32 x, Sint32 y, Uint32 w, Uint32 h);
 /*@}*/
 
-/**
+/*
  * On hardware that supports double-buffering, this function sets up a flip
  * and returns.  The hardware will wait for vertical retrace, and then swap
  * video buffers before the next video surface blit or lock will return.
@@ -413,7 +413,7 @@ extern DECLSPEC void SDLCALL SDL_UpdateRect
  */
 extern DECLSPEC int SDLCALL SDL_Flip(SDL_Surface *screen);
 
-/**
+/*
  * Set the gamma correction for each of the color channels.
  * The gamma values range (approximately) between 0.1 and 10.0
  * 
@@ -423,7 +423,7 @@ extern DECLSPEC int SDLCALL SDL_Flip(SDL_Surface *screen);
  */
 extern DECLSPEC int SDLCALL SDL_SetGamma(float red, float green, float blue);
 
-/**
+/*
  * Set the gamma translation table for the red, green, and blue channels
  * of the video hardware.  Each table is an array of 256 16-bit quantities,
  * representing a mapping between the input and output for that channel.
@@ -437,7 +437,7 @@ extern DECLSPEC int SDLCALL SDL_SetGamma(float red, float green, float blue);
  */
 extern DECLSPEC int SDLCALL SDL_SetGammaRamp(const Uint16 *red, const Uint16 *green, const Uint16 *blue);
 
-/**
+/*
  * Retrieve the current values of the gamma translation tables.
  * 
  * You must pass in valid pointers to arrays of 256 16-bit quantities.
@@ -448,7 +448,7 @@ extern DECLSPEC int SDLCALL SDL_SetGammaRamp(const Uint16 *red, const Uint16 *gr
  */
 extern DECLSPEC int SDLCALL SDL_GetGammaRamp(Uint16 *red, Uint16 *green, Uint16 *blue);
 
-/**
+/*
  * Sets a portion of the colormap for the given 8-bit surface.  If 'surface'
  * is not a palettized surface, this function does nothing, returning 0.
  * If all of the colors were set as passed to SDL_SetColors(), it will
@@ -466,7 +466,7 @@ extern DECLSPEC int SDLCALL SDL_GetGammaRamp(Uint16 *red, Uint16 *green, Uint16 
 extern DECLSPEC int SDLCALL SDL_SetColors(SDL_Surface *surface, 
 			SDL_Color *colors, int firstcolor, int ncolors);
 
-/**
+/*
  * Sets a portion of the colormap for a given 8-bit surface.
  * 'flags' is one or both of:
  * SDL_LOGPAL  -- set logical palette, which controls how blits are mapped
@@ -486,28 +486,28 @@ extern DECLSPEC int SDLCALL SDL_SetPalette(SDL_Surface *surface, int flags,
 				   SDL_Color *colors, int firstcolor,
 				   int ncolors);
 
-/**
+/*
  * Maps an RGB triple to an opaque pixel value for a given pixel format
  */
 extern DECLSPEC Uint32 SDLCALL SDL_MapRGB
 (const SDL_PixelFormat * const format,
  const Uint8 r, const Uint8 g, const Uint8 b);
 
-/**
+/*
  * Maps an RGBA quadruple to a pixel value for a given pixel format
  */
 extern DECLSPEC Uint32 SDLCALL SDL_MapRGBA
 (const SDL_PixelFormat * const format,
  const Uint8 r, const Uint8 g, const Uint8 b, const Uint8 a);
 
-/**
+/*
  * Maps a pixel value into the RGB components for a given pixel format
  */
 extern DECLSPEC void SDLCALL SDL_GetRGB(Uint32 pixel,
 				const SDL_PixelFormat * const fmt,
 				Uint8 *r, Uint8 *g, Uint8 *b);
 
-/**
+/*
  * Maps a pixel value into the RGBA components for a given pixel format
  */
 extern DECLSPEC void SDLCALL SDL_GetRGBA(Uint32 pixel,
@@ -516,7 +516,7 @@ extern DECLSPEC void SDLCALL SDL_GetRGBA(Uint32 pixel,
 
 /** @sa SDL_CreateRGBSurface */
 #define SDL_AllocSurface    SDL_CreateRGBSurface
-/**
+/*
  * Allocate and free an RGB surface (must be called after SDL_SetVideoMode)
  * If the depth is 4 or 8 bits, an empty palette is allocated for the surface.
  * If the depth is greater than 8 bits, the pixel format is set using the
@@ -559,7 +559,7 @@ extern DECLSPEC SDL_Surface * SDLCALL SDL_CreateRGBSurfaceFrom(void *pixels,
 			Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask);
 extern DECLSPEC void SDLCALL SDL_FreeSurface(SDL_Surface *surface);
 
-/**
+/*
  * SDL_LockSurface() sets up a surface for directly accessing the pixels.
  * Between calls to SDL_LockSurface()/SDL_UnlockSurface(), you can write
  * to and read from 'surface->pixels', using the pixel format stored in 
@@ -580,7 +580,7 @@ extern DECLSPEC void SDLCALL SDL_FreeSurface(SDL_Surface *surface);
 extern DECLSPEC int SDLCALL SDL_LockSurface(SDL_Surface *surface);
 extern DECLSPEC void SDLCALL SDL_UnlockSurface(SDL_Surface *surface);
 
-/**
+/*
  * Load a surface from a seekable SDL data source (memory or file.)
  * If 'freesrc' is non-zero, the source will be closed after being read.
  * Returns the new surface, or NULL if there was an error.
@@ -591,7 +591,7 @@ extern DECLSPEC SDL_Surface * SDLCALL SDL_LoadBMP_RW(SDL_RWops *src, int freesrc
 /** Convenience macro -- load a surface from a file */
 #define SDL_LoadBMP(file)	SDL_LoadBMP_RW(SDL_RWFromFile(file, "rb"), 1)
 
-/**
+/*
  * Save a surface to a seekable SDL data source (memory or file.)
  * If 'freedst' is non-zero, the source will be closed after being written.
  * Returns 0 if successful or -1 if there was an error.
@@ -603,7 +603,7 @@ extern DECLSPEC int SDLCALL SDL_SaveBMP_RW
 #define SDL_SaveBMP(surface, file) \
 		SDL_SaveBMP_RW(surface, SDL_RWFromFile(file, "wb"), 1)
 
-/**
+/*
  * Sets the color key (transparent pixel) in a blittable surface.
  * If 'flag' is SDL_SRCCOLORKEY (optionally OR'd with SDL_RLEACCEL), 
  * 'key' will be the transparent pixel in the source image of a blit.
@@ -615,7 +615,7 @@ extern DECLSPEC int SDLCALL SDL_SaveBMP_RW
 extern DECLSPEC int SDLCALL SDL_SetColorKey
 			(SDL_Surface *surface, Uint32 flag, Uint32 key);
 
-/**
+/*
  * This function sets the alpha value for the entire surface, as opposed to
  * using the alpha component of each pixel. This value measures the range
  * of transparency of the surface, 0 being completely transparent to 255
@@ -632,7 +632,7 @@ extern DECLSPEC int SDLCALL SDL_SetColorKey
  */
 extern DECLSPEC int SDLCALL SDL_SetAlpha(SDL_Surface *surface, Uint32 flag, Uint8 alpha);
 
-/**
+/*
  * Sets the clipping rectangle for the destination surface in a blit.
  *
  * If the clip rectangle is NULL, clipping will be disabled.
@@ -646,14 +646,14 @@ extern DECLSPEC int SDLCALL SDL_SetAlpha(SDL_Surface *surface, Uint32 flag, Uint
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_SetClipRect(SDL_Surface *surface, const SDL_Rect *rect);
 
-/**
+/*
  * Gets the clipping rectangle for the destination surface in a blit.
  * 'rect' must be a pointer to a valid rectangle which will be filled
  * with the correct values.
  */
 extern DECLSPEC void SDLCALL SDL_GetClipRect(SDL_Surface *surface, SDL_Rect *rect);
 
-/**
+/*
  * Creates a new surface of the specified format, and then copies and maps 
  * the given surface to it so the blit of the converted surface will be as 
  * fast as possible.  If this function fails, it returns NULL.
@@ -668,7 +668,7 @@ extern DECLSPEC void SDLCALL SDL_GetClipRect(SDL_Surface *surface, SDL_Rect *rec
 extern DECLSPEC SDL_Surface * SDLCALL SDL_ConvertSurface
 			(SDL_Surface *src, SDL_PixelFormat *fmt, Uint32 flags);
 
-/**
+/*
  * This performs a fast blit from the source surface to the destination
  * surface.  It assumes that the source and destination rectangles are
  * the same size.  If either 'srcrect' or 'dstrect' are NULL, the entire
@@ -755,7 +755,7 @@ extern DECLSPEC int SDLCALL SDL_LowerBlit
 			(SDL_Surface *src, SDL_Rect *srcrect,
 			 SDL_Surface *dst, SDL_Rect *dstrect);
 
-/**
+/*
  * This function performs a fast fill of the given rectangle with 'color'
  * The given rectangle is clipped to the destination surface clip area
  * and the final fill rectangle is saved in the passed in pointer.
@@ -767,7 +767,7 @@ extern DECLSPEC int SDLCALL SDL_LowerBlit
 extern DECLSPEC int SDLCALL SDL_FillRect
 		(SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color);
 
-/**
+/*
  * This function takes a surface and copies it to a new surface of the
  * pixel format and colors of the video framebuffer, suitable for fast
  * blitting onto the display surface.  It calls SDL_ConvertSurface()
@@ -780,7 +780,7 @@ extern DECLSPEC int SDLCALL SDL_FillRect
  */
 extern DECLSPEC SDL_Surface * SDLCALL SDL_DisplayFormat(SDL_Surface *surface);
 
-/**
+/*
  * This function takes a surface and copies it to a new surface of the
  * pixel format and colors of the video framebuffer (if possible),
  * suitable for fast alpha blitting onto the display surface.
@@ -828,7 +828,7 @@ extern DECLSPEC void SDLCALL SDL_FreeYUVOverlay(SDL_Overlay *overlay);
 /** @name OpenGL support functions.                                          */ /*@{*/
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/**
+/*
  * Dynamically load an OpenGL library, or the default one if path is NULL
  *
  * If you do this, you need to retrieve all of the GL functions used in
@@ -836,17 +836,17 @@ extern DECLSPEC void SDLCALL SDL_FreeYUVOverlay(SDL_Overlay *overlay);
  */
 extern DECLSPEC int SDLCALL SDL_GL_LoadLibrary(const char *path);
 
-/**
+/*
  * Get the address of a GL function
  */
 extern DECLSPEC void * SDLCALL SDL_GL_GetProcAddress(const char* proc);
 
-/**
+/*
  * Set an attribute of the OpenGL subsystem before intialization.
  */
 extern DECLSPEC int SDLCALL SDL_GL_SetAttribute(SDL_GLattr attr, int value);
 
-/**
+/*
  * Get an attribute of the OpenGL subsystem from the windowing
  * interface, such as glX. This is of course different from getting
  * the values from SDL's internal OpenGL subsystem, which only
@@ -857,7 +857,7 @@ extern DECLSPEC int SDLCALL SDL_GL_SetAttribute(SDL_GLattr attr, int value);
  */
 extern DECLSPEC int SDLCALL SDL_GL_GetAttribute(SDL_GLattr attr, int* value);
 
-/**
+/*
  * Swap the OpenGL buffers, if double-buffering is supported.
  */
 extern DECLSPEC void SDLCALL SDL_GL_SwapBuffers(void);
@@ -879,16 +879,16 @@ extern DECLSPEC void SDLCALL SDL_GL_Unlock(void);
 /** These functions allow interaction with the window manager, if any.       */ /*@{*/
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/**
+/*
  * Sets the title and icon text of the display window (UTF-8 encoded)
  */
 extern DECLSPEC void SDLCALL SDL_WM_SetCaption(const char *title, const char *icon);
-/**
+/*
  * Gets the title and icon text of the display window (UTF-8 encoded)
  */
 extern DECLSPEC void SDLCALL SDL_WM_GetCaption(char **title, char **icon);
 
-/**
+/*
  * Sets the icon for the display window.
  * This function must be called before the first call to SDL_SetVideoMode().
  * It takes an icon surface, and a mask in MSB format.
@@ -896,14 +896,14 @@ extern DECLSPEC void SDLCALL SDL_WM_GetCaption(char **title, char **icon);
  */
 extern DECLSPEC void SDLCALL SDL_WM_SetIcon(SDL_Surface *icon, Uint8 *mask);
 
-/**
+/*
  * This function iconifies the window, and returns 1 if it succeeded.
  * If the function succeeds, it generates an SDL_APPACTIVE loss event.
  * This function is a noop and returns 0 in non-windowed environments.
  */
 extern DECLSPEC int SDLCALL SDL_WM_IconifyWindow(void);
 
-/**
+/*
  * Toggle fullscreen mode without changing the contents of the screen.
  * If the display surface does not require locking before accessing
  * the pixel information, then the memory pointers will not change.
@@ -926,7 +926,7 @@ typedef enum {
 	SDL_GRAB_ON = 1,
 	SDL_GRAB_FULLSCREEN	/**< Used internally */
 } SDL_GrabMode;
-/**
+/*
  * This function allows you to set and query the input grab state of
  * the application.  It returns the new input grab state.
  *

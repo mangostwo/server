@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Sig_Adapter.h
  *
  *  $Id: Sig_Adapter.h 80826 2008-03-04 14:51:23Z wotte $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Sig_Adapter
  *
  * @brief Provide an adapter that transforms various types of signal

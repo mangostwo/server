@@ -1556,13 +1556,13 @@ inline void  operator delete[](void*, void*) { /* Do nothing */ }
 #endif
 
 #ifndef HAVE_RINT
-/**
+/*
    All integers up to this number can be represented exactly as double precision
    values (DBL_MANT_DIG == 53 for IEEE 754 hardware).
 */
 #define MAX_EXACT_INTEGER ((1LL << DBL_MANT_DIG) - 1)
 
-/**
+/*
    rint(3) implementation for platforms that do not have it.
    Always rounds to the nearest integer with ties being rounded to the nearest
    even integer to mimic glibc's rint() behavior in the "round-to-nearest"

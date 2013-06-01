@@ -1,4 +1,4 @@
-/**
+/*
  @file Triangle.h
   
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -25,7 +25,7 @@
 
 namespace G3D {
 
-/**
+/*
   A generic triangle representation.  This should not be used
   as the underlying triangle for creating models; it is intended
   for providing fast property queries but requires a lot of
@@ -105,7 +105,7 @@ public:
         N = normal();
     }
 
-    /**
+    /*
      For two triangles to be equal they must have
      the same vertices <I>in the same order</I>.
      That is, vertex[0] == vertex[0], etc.
@@ -129,7 +129,7 @@ public:
 
     void getBounds(class AABox&) const;
 
-    /**
+    /*
        @brief Intersect the ray at distance less than @a distance.
 
        @param distance Set to the maximum distance (can be G3D::inf())

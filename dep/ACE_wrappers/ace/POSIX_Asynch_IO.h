@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    POSIX_Asynch_IO.h
  *
  *  $Id: POSIX_Asynch_IO.h 91688 2010-09-09 11:21:50Z johnnyw $
@@ -47,7 +47,7 @@ class ACE_POSIX_Proactor;
 class ACE_Proactor_Impl;
 class ACE_Handle_Set;
 
-/**
+/*
  * @class ACE_POSIX_Asynch_Result
  *
  * This class provides concrete implementation for ACE_Asynch_Result
@@ -67,7 +67,7 @@ public:
   /// Did the operation succeed?
   int success (void) const;
 
-  /**
+  /*
    * This is the ACT associated with the handle on which the
    * Asynch_Operation takes place.
    *
@@ -81,7 +81,7 @@ public:
   /// This returns ACE_INVALID_HANDLE on POSIX4 platforms.
   ACE_HANDLE event (void) const;
 
-  /**
+  /*
    * This really make sense only when doing file I/O.
    *
    * @@ On POSIX4-Unix, offset_high should be supported using
@@ -94,7 +94,7 @@ public:
   /// Priority of the operation.
   int priority (void) const;
 
-  /**
+  /*
    * POSIX4 realtime signal number to be used for the
    * operation. <signal_number> ranges from SIGRTMIN to SIGRTMAX. By
    * default, SIGRTMIN is used to issue <aio_> calls.
@@ -126,7 +126,7 @@ protected:
   /// Handler that will be called back.
   ACE_Handler::Proxy_Ptr handler_proxy_;
 
-  /**
+  /*
    * ACT for this operation.
    * We could use <aiocb::aio_sigevent.sigev_value.sival_ptr> for
    * this. But it doesnot provide the constness, so this may be
@@ -147,7 +147,7 @@ protected:
   u_long error_;
 };
 
-/**
+/*
  * @class ACE_POSIX_Asynch_Operation
  *
  * @brief This class implements ACE_Asynch_Operation for all
@@ -157,7 +157,7 @@ protected:
 class ACE_Export ACE_POSIX_Asynch_Operation : public virtual ACE_Asynch_Operation_Impl
 {
 public:
-  /**
+  /*
    * Initializes the factory with information which will be used with
    * each asynchronous call.  If (@a handle == ACE_INVALID_HANDLE),
    * @c ACE_Handler::handle will be called on the handler to get the
@@ -197,7 +197,7 @@ protected:
   // are slots available or no. Passing a valid ptr stores the ptr
   // with the Proactor.
 
-  /**
+  /*
    * It is easy to get this specific implementation proactor here,
    * since it is the one that creates the correct POSIX_Asynch_*
    * objects. We can use this to get to the implementation proactor
@@ -215,7 +215,7 @@ protected:
   ACE_HANDLE handle_;
 };
 
-/**
+/*
  * @class ACE_POSIX_Asynch_Read_Stream_Result
  *
  * @brief This class provides concrete implementation for
@@ -274,7 +274,7 @@ protected:
   // I/O handle used for reading.
 };
 
-/**
+/*
  * @class ACE_POSIX_Asynch_Read_Stream
  *
  * This class implements <ACE_Asynch_Read_Stream> for all POSIX
@@ -301,7 +301,7 @@ public:
 };
 
 
-/**
+/*
  * @class ACE_POSIX_Asynch_Write_Stream_Result
  *
  * @brief This class provides concrete implementation for
@@ -365,7 +365,7 @@ protected:
   // I/O handle used for writing.
 };
 
-/**
+/*
  * @class ACE_POSIX_Asynch_Write_Stream
  *
  * @brief This class implements <ACE_Asynch_Write_Stream> for
@@ -390,7 +390,7 @@ public:
   virtual ~ACE_POSIX_Asynch_Write_Stream (void);
 };
 
-/**
+/*
  * @class ACE_POSIX_Asynch_Read_File_Result
  *
  * @brief This class provides concrete implementation for
@@ -431,7 +431,7 @@ protected:
   virtual ~ACE_POSIX_Asynch_Read_File_Result (void);
 };
 
-/**
+/*
  * @class ACE_POSIX_Asynch_Read_File
  *
  * @brief This class is a factory for starting off asynchronous reads
@@ -455,7 +455,7 @@ public:
   /// Constructor.
   ACE_POSIX_Asynch_Read_File (ACE_POSIX_Proactor *posix_proactor);
 
-  /**
+  /*
    * This starts off an asynchronous read.  Upto @a bytes_to_read will
    * be read and stored in the @a message_block.  The read will start
    * at @a offset from the beginning of the file.
@@ -472,7 +472,7 @@ public:
   virtual ~ACE_POSIX_Asynch_Read_File (void);
 
 private:
-  /**
+  /*
    * This belongs to ACE_POSIX_Asynch_Read_Stream. We have
    * defined this here to avoid compiler warnings and forward the
    * method to <ACE_POSIX_Asynch_Read_Stream::read>.
@@ -485,7 +485,7 @@ private:
 };
 
 
-/**
+/*
  * @class ACE_POSIX_Asynch_Write_File_Result
  *
  * @brief This class provides implementation for
@@ -535,7 +535,7 @@ protected:
   virtual ~ACE_POSIX_Asynch_Write_File_Result (void);
 };
 
-/**
+/*
  * @class ACE_POSIX_Asynch_Write_File
  *
  *     This class provides concrete implementation for
@@ -551,7 +551,7 @@ public:
   /// Constructor.
   ACE_POSIX_Asynch_Write_File (ACE_POSIX_Proactor *posix_proactor);
 
-  /**
+  /*
    * This starts off an asynchronous write.  Upto @a bytes_to_write
    * will be written and stored in the @a message_block.  The write will
    * start at @a offset from the beginning of the file.
@@ -568,7 +568,7 @@ public:
   virtual ~ACE_POSIX_Asynch_Write_File (void);
 
 private:
-  /**
+  /*
    * This <write> belongs to ACE_POSIX_Asynch_Write_Stream. We
    * have put this here to avoid compiler warnings. We forward this
    * method call to the <ACE_POSIX_Asynch_Write_Stream::write>
@@ -581,7 +581,7 @@ private:
              int signal_number = 0);
 };
 
-/**
+/*
  * @class ACE_POSIX_Asynch_Accept_Result
  *
  * @brief This is that class which will be passed back to the
@@ -652,7 +652,7 @@ protected:
 };
 
 
-/**
+/*
  * @class ACE_POSIX_Asynch_Accept
  *
  * @brief For the POSIX implementation this class is common for all Proactors
@@ -671,7 +671,7 @@ public:
   /// Destructor.
   virtual ~ACE_POSIX_Asynch_Accept (void);
 
- /**
+ /*
    * This <open> belongs to ACE_POSIX_Asynch_Operation. We forward
    * this call to that method. We have put this here to avoid the
    * compiler warnings.
@@ -681,7 +681,7 @@ public:
             const void *completion_key,
             ACE_Proactor *proactor = 0);
 
-  /**
+  /*
    * This starts off an asynchronous accept.  The asynchronous accept
    * call also allows any initial data to be returned to the
    * @c handler.  Upto @a bytes_to_read will be read and stored in the
@@ -700,13 +700,13 @@ public:
               int signal_number = 0,
               int addr_family = AF_INET);
 
-  /**
+  /*
    *  Cancel all pending pseudo-asynchronus requests
    *  Behavior as usual AIO request
    */
   int cancel (void);
 
-  /**
+  /*
    *  Close performs cancellation of all pending requests
    *  and closure the listen handle
    */
@@ -750,7 +750,7 @@ private:
   ACE_SYNCH_MUTEX lock_;
 };
 
-/**
+/*
  * @class ACE_POSIX_Asynch_Connect_Result
  *
  * @brief This is that class which will be passed back to the
@@ -799,7 +799,7 @@ protected:
 };
 
 
-/**
+/*
  * @class ACE_POSIX_Asynch_Connect
  *
  */
@@ -816,7 +816,7 @@ public:
   /// Destructor.
   virtual ~ACE_POSIX_Asynch_Connect (void);
 
- /**
+ /*
    * This belongs to ACE_POSIX_Asynch_Operation. We forward
    * this call to that method. We have put this here to avoid the
    * compiler warnings.
@@ -826,7 +826,7 @@ public:
             const void *completion_key,
             ACE_Proactor *proactor = 0);
 
-  /**
+  /*
    * This starts off an asynchronous connect.
    *
    * @arg connect_handle   will be used for the connect call.  If
@@ -841,13 +841,13 @@ public:
                int priority,
                int signal_number = 0);
 
-  /**
+  /*
    *  Cancel all pending pseudo-asynchronus requests
    *  Behavior as usual AIO request
    */
   int cancel (void);
 
-  /**
+  /*
    *  Close performs cancellation of all pending requests.
    */
   int close (void);
@@ -876,7 +876,7 @@ private:
   int post_result (ACE_POSIX_Asynch_Connect_Result *result, bool flg_post);
 
   /// Cancel uncompleted connect operations.
-  /**
+  /*
    *  @arg flg_notify  Indicates whether or not we should send notification
    *                   about canceled accepts.  If this is false, don't send
    *                   notifications about canceled connects.  If true, notify
@@ -903,7 +903,7 @@ private:
 };
 
 
-/**
+/*
  * @class ACE_POSIX_Asynch_Transmit_File_Result
  *
  * @brief This is that class which will be passed back to the
@@ -993,7 +993,7 @@ protected:
   u_long flags_;
 };
 
-/**
+/*
  * @class ACE_POSIX_Asynch_Transmit_File
  *
  * @brief Implementation for transmit_file will make use of
@@ -1006,7 +1006,7 @@ public:
   /// Constructor.
   ACE_POSIX_Asynch_Transmit_File (ACE_POSIX_Proactor *posix_proactor);
 
-  /**
+  /*
    * This starts off an asynchronous transmit file. The <file> is a
    * handle to an open file.  <header_and_trailer> is a pointer to a
    * data structure that contains pointers to data to send before and
@@ -1033,7 +1033,7 @@ public:
 };
 
 
-/**
+/*
  * @class ACE_POSIX_Asynch_Read_Dgram
  *
  * @brief This class is a factory for starting off asynchronous reads
@@ -1088,7 +1088,7 @@ protected:
   ACE_POSIX_Asynch_Read_Dgram (void);
 };
 
-/**
+/*
  * @class ACE_POSIX__Asynch_Write_Dgram_Result
  *
  * @brief This is class provides concrete implementation for
@@ -1154,7 +1154,7 @@ protected:
 
   };
 
-/**
+/*
  * @class ACE_POSIX_Asynch_Write_Dgram
  *
  * @brief This class is a factory for starting off asynchronous writes
@@ -1215,7 +1215,7 @@ protected:
 
 /*****************************************************/
 
-/**
+/*
  * @class ACE_POSIX_Asynch_Read_Dgram_Result
  *
  * @brief This is class provides concrete implementation for

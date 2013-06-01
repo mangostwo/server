@@ -1,4 +1,4 @@
-/**
+/*
  @file Welder.cpp
 
  @author Morgan McGuire, Kyle Whitson, Corey Taylor
@@ -88,7 +88,7 @@ private:
 
     float                   normalSmoothingAngle;
 
-    /**
+    /*
      Returns the index of the vertex in 
      outputVertexArray/outputNormalArray/outputTexCoordArray
      that is within the global tolerances of v,n,t. If there 
@@ -136,7 +136,7 @@ private:
     }
 
 
-    /**
+    /*
      Updates each indexArray to refer to vertices in the
      outputVertexArray.
 
@@ -227,7 +227,7 @@ private:
         }
     }
 
-    /**
+    /*
      Computes @a smoothNormalArray, whose elements are those of normalArray averaged
      with neighbors within the angular cutoff.
      */
@@ -297,7 +297,7 @@ private:
 public:
 
 
-    /**
+    /*
     Algorithm:
 
     1. Unroll the indexed triangle list into a triangle list, where

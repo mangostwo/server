@@ -1,4 +1,4 @@
-/**
+/*
  @file Vector2int16.cpp
  
  @author Morgan McGuire, http://graphics.cs.williams.edu

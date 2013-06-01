@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    QtReactor.h
  *
  *  $Id: QtReactor.h 82723 2008-09-16 09:35:44Z johnnyw $
@@ -46,7 +46,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_QtReactor
  *
  * @brief An object-oriented event demultiplexor and event handler

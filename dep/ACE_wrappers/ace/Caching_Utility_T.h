@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Caching_Utility_T.h
  *
  *  $Id: Caching_Utility_T.h 92085 2010-09-29 12:23:13Z johnnyw $
@@ -27,7 +27,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Pair_Caching_Utility
  *
  * @brief Defines a helper class for the Caching Strategies.
@@ -55,7 +55,7 @@ public:
   /// Destructor.
   ~ACE_Pair_Caching_Utility (void);
 
-  /**
+  /*
    * Purge entries from the @a container. The Cleanup_Strategy will do the
    * actual job of cleanup once the entries to be cleaned up are decided.
    */
@@ -76,7 +76,7 @@ protected:
   bool delete_cleanup_strategy_;
 };
 
-/**
+/*
  * @class ACE_Recyclable_Handler_Caching_Utility
  *
  * @brief Defines a helper class for the Caching Strategies.
@@ -106,7 +106,7 @@ public:
   /// Destructor.
   ~ACE_Recyclable_Handler_Caching_Utility (void);
 
-  /**
+  /*
    * Purge entries from the <container>. The Cleanup_Strategy will do
    * the actual job of cleanup once the entries to be cleaned up are
    * decided.
@@ -128,7 +128,7 @@ protected:
   bool delete_cleanup_strategy_;
 };
 
-/**
+/*
  * @class ACE_Refcounted_Recyclable_Handler_Caching_Utility
  *
  * @brief Defines a helper class for the Caching Strategies.
@@ -157,7 +157,7 @@ public:
   /// Destructor.
   ~ACE_Refcounted_Recyclable_Handler_Caching_Utility (void);
 
-  /**
+  /*
    * Purge entries from the <container>. The Cleanup_Strategy will do
    * the actual job of cleanup once the entries to be cleaned up are
    * decided.
@@ -178,7 +178,7 @@ protected:
   /// Whether the cleanup_strategy should be destroyed or not.
   bool delete_cleanup_strategy_;
 
-  /**
+  /*
    * This figure denotes the number of entries are there in the
    * container which have been marked as closed already but might
    * not have been unbound from the container.
@@ -186,7 +186,7 @@ protected:
   size_t marked_as_closed_entries_;
 };
 
-/**
+/*
  * @class ACE_Handler_Caching_Utility
  *
  * @brief Defines a helper class for the Caching Strategies.
@@ -215,7 +215,7 @@ public:
   /// Destructor.
   ~ACE_Handler_Caching_Utility (void);
 
-  /**
+  /*
    * Purge entries from the <container>. The Cleanup_Strategy will do
    * the actual job of cleanup once the entries to be cleaned up are
    * decided.
@@ -225,7 +225,7 @@ public:
 
 protected:
 
-  /**
+  /*
    * Find the entry with minimum caching attributes.  This is handler
    * specific since this utility is to be used very specifically for
    * handler who have caching_attributes for server side acched
@@ -243,7 +243,7 @@ protected:
   bool delete_cleanup_strategy_;
 };
 
-/**
+/*
  * @class ACE_Null_Caching_Utility
  *
  * @brief Defines a dummy helper class for the Caching Strategies.
@@ -270,7 +270,7 @@ public:
   /// Destructor.
   ~ACE_Null_Caching_Utility (void);
 
-  /**
+  /*
    * Purge entries from the <container>. The Cleanup_Strategy will do
    * the actual job of cleanup once the entries to be cleaned up are
    * decided. @note Here it is a no-op.
@@ -280,7 +280,7 @@ public:
 
 protected:
 
-  /**
+  /*
    * Find the entry with minimum caching attributes.  This is handler
    * specific since this utility is to be used very specifically for
    * handler who have caching_attributes for server side acched

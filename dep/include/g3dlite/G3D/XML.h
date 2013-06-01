@@ -1,4 +1,4 @@
-/**
+/*
  @file XML.h
   
  @author Morgan McGuire

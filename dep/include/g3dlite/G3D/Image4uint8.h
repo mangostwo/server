@@ -1,4 +1,4 @@
-/**
+/*
   @file Image4uint8.h
 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -21,7 +21,7 @@ namespace G3D {
 
 typedef ReferenceCountedPointer<class Image4uint8> Image4uint8Ref;
 
-/**
+/*
  Compact storage for RGBA 8-bit per channel images.
 
  See also G3D::Image4, G3D::GImage

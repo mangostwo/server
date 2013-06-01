@@ -1,4 +1,4 @@
-/**
+/*
  @file fileutils.cpp
  
  @author Morgan McGuire, graphics3d.com
@@ -245,7 +245,7 @@ void writeWholeFile(
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
+/*
  Creates the directory (which may optionally end in a /)
  and any parents needed to reach it.
  */
@@ -570,7 +570,7 @@ void parseFilename(
 }
 
 
-/**
+/*
  Helper for getFileList and getDirectoryList.
 
  @param wantFiles       If false, returns the directories, otherwise
@@ -691,7 +691,7 @@ static void getFileOrDirListNormal
 
 
 #if _HAVE_ZIP /* G3DFIX: Use ZIP-library only if defined */
-/**
+/*
  @param path   The zipfile name (no trailing slash)
  @param prefix Directory inside the zipfile. No leading slash, must have trailing slash if non-empty.
  @param file   Name inside the zipfile that we are testing to see if it matches prefix + "*"

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2013 MaNGOS <http://getmangos.com/>
+ * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -640,7 +640,7 @@ bool generate_sql_makefile()
     if(!fout) { pclose(cmd_pipe); return false; }
 
     fprintf(fout,
-        "# Copyright (C) 2005-2013 MaNGOS <http://getmangos.com/>\n"
+        "# This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.\n"
         "#\n"
         "# This program is free software; you can redistribute it and/or modify\n"
         "# it under the terms of the GNU General Public License as published by\n"

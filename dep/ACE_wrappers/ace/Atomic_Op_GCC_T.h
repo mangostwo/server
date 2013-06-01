@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Atomic_Op_GCC_T.h
  *
  *  $Id: Atomic_Op_GCC_T.h 89339 2010-03-05 12:20:47Z johnnyw $
@@ -27,7 +27,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @brief Specialization of ACE_Atomic_Op for platforms that
  *        support atomic integer operations.
  *

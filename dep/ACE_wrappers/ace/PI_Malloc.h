@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file   PI_Malloc.h
  *
  *  $Id: PI_Malloc.h 80826 2008-03-04 14:51:23Z wotte $
@@ -30,7 +30,7 @@
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 // prepare for position independent malloc
-/**
+/*
  * @class ACE_PI_Control_Block
  *
  * @brief This information is stored in memory allocated by the Memory_Pool.
@@ -51,7 +51,7 @@ public:
   typedef ACE_Based_Pointer<ACE_Name_Node> NAME_NODE_PTR;
   typedef ACE_Based_Pointer_Basic<char> CHAR_PTR;
 
-  /**
+  /*
    * @class ACE_Malloc_Header
    *
    * @brief This is the control block header.  It's used by ACE_Malloc
@@ -90,7 +90,7 @@ public:
 
   };
 
-  /**
+  /*
    * @class ACE_Name_Node
    *
    * @brief This class supports "named memory regions" within ACE_Malloc.

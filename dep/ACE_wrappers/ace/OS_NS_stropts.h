@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file   OS_NS_stropts.h
  *
  *  $Id: OS_NS_stropts.h 85110 2009-04-20 09:18:43Z msmit $
@@ -67,7 +67,7 @@ typedef unsigned long ACE_SOCK_GROUP;
 #endif /* (ACE_HAS_WINSOCK2) && (ACE_HAS_WINSOCK2 != 0) */
 
 // @todo: move this to it's own file... dhinton
-/**
+/*
  * @class ACE_Str_Buf
  *
  * @brief Simple wrapper for STREAM pipes strbuf.

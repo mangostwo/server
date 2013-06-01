@@ -1,4 +1,4 @@
-/**
+/*
  @file TextInput.cpp
   
  @author Morgan McGuire, graphics3d.com

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    Vector_T.h
  *
  *  $Id: Vector_T.h 92069 2010-09-28 11:38:59Z johnnyw $
@@ -32,7 +32,7 @@ static const size_t ACE_VECTOR_DEFAULT_SIZE = 32;
 // Forward declaration.
 template <class T, size_t DEFAULT_SIZE> class ACE_Vector_Iterator;
 
-/**
+/*
  * @class ACE_Vector
  *
  * @brief Defines an STL-like vector container.
@@ -70,13 +70,13 @@ template<class T, size_t DEFAULT_SIZE = ACE_VECTOR_DEFAULT_SIZE>
 class ACE_Vector : public ACE_Array<T>
 {
 public:
-  /**
+  /*
    * A short name for iterator for ACE_Vector.
    */
   typedef ACE_Vector_Iterator<T, DEFAULT_SIZE> Iterator;
 
 
-  /**
+  /*
    * General constructor.
    *
    * @param init_size Initial size of the vector with the default
@@ -87,12 +87,12 @@ public:
   ACE_Vector (const size_t init_size = DEFAULT_SIZE,
               ACE_Allocator* alloc = 0);
 
-  /**
+  /*
    * Destructor.
    */
   ~ACE_Vector ();
 
-  /**
+  /*
    * Returns the current vector capacity, that is, the currently
    * allocated buffer size.
    *
@@ -100,7 +100,7 @@ public:
    */
   size_t capacity (void) const;
 
-  /**
+  /*
    * Returns the vector's dynamic size / actual current size of the
    * vector.  Do not confuse it with ACE_Array::size(), which returns
    * the array's capacity.  Unfortunately, ACE is not very consistent
@@ -110,13 +110,13 @@ public:
    */
   size_t size (void) const;
 
-  /**
+  /*
    * Clears out the vector.  It does not reallocate the vector's
    * buffer, it is just sets the vector's dynamic size to 0.
    */
   void clear (void);
 
-  /**
+  /*
    * Resizes the vector to the new capacity.  If the vector's current
    * capacity is smaller than the size to be specified, then the
    * buffer gets reallocated.  If the new capacity is less than the
@@ -132,7 +132,7 @@ public:
   void resize (const size_t new_size,
                const T& t);
 
-  /**
+  /*
    * Appends a new element to the vector ("push back").  If the
    * dynamic size of the vector is equal to the capacity of the vector
    * (vector is at capacity), the vector automatically doubles its
@@ -144,7 +144,7 @@ public:
    */
   void push_back (const T& elem);
 
-  /**
+  /*
    * Deletes the last element from the vector ("pop back").  What this
    * function really does is decrement the dynamic size of the
    * vector.  The vector's buffer does not get reallocated for
@@ -152,7 +152,7 @@ public:
    */
   void pop_back (void);
 
-  /**
+  /*
    * This function dumps the content of the vector.  TO BE MOVED out
    * of this class.  It needs to be implemented as a global template
    * function that accepts a const ACE_Vector&lt;T&gt;, in order to
@@ -171,14 +171,14 @@ public:
   // = Compare operators
 
   /// Equality comparison operator.
-  /**
+  /*
    * Compare this vector with @arg s for equality.  Two vectors are equal
    * if their sizes are equal and all the elements are equal.
    */
   bool operator== (const ACE_Vector<T, DEFAULT_SIZE> &s) const;
 
   /// Inequality comparison operator.
-  /**
+  /*
    * Compare this vector with @arg s for inequality such that @c *this !=
    * @arg s is always the complement of the boolean return value of
    * @c *this == @arg s.
@@ -189,12 +189,12 @@ public:
 
 protected:
 
-  /**
+  /*
    * Dynamic size (length) of the vector.
    */
   size_t length_;
 
-  /**
+  /*
    * Current capacity (buffer size) of the vector.
    */
   size_t curr_max_size_;
@@ -202,7 +202,7 @@ protected:
   friend class ACE_Vector_Iterator<T, DEFAULT_SIZE>;
 };
 
-/**
+/*
  * @class ACE_Vector_Iterator
  *
  * @brief Implement an iterator over an ACE_Vector.

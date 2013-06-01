@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    TP_Reactor.h
  *
  *  $Id: TP_Reactor.h 82723 2008-09-16 09:35:44Z johnnyw $
@@ -40,7 +40,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_EH_Dispatch_Info
  *
  * @brief This structure contains information of the activated event
@@ -74,7 +74,7 @@ private:
 };
 
 
-/**
+/*
  * @class ACE_TP_Token_Guard
  *
  * @brief A helper class that helps grabbing, releasing and waiting
@@ -107,7 +107,7 @@ public:
   /// thread that owns that can do some actual work.
   int acquire_read_token (ACE_Time_Value *max_wait_time = 0);
 
-  /**
+  /*
    * A helper method that grabs the token for us, after which the
    * thread that owns that can do some actual work. This differs from
    * acquire_read_token() as it uses acquire () to get the token instead of
@@ -137,7 +137,7 @@ private:
 
 };
 
-/**
+/*
  * @class ACE_TP_Reactor
  *
  * @brief Specialization of ACE_Select_Reactor to support thread-pool
@@ -183,7 +183,7 @@ public:
                   bool mask_signals = true,
                   int s_queue = ACE_Select_Reactor_Token::FIFO);
 
-  /**
+  /*
    * Initialize the ACE_TP_Reactor to manage
    * @a max_number_of_handles.  If @a restart is non-0 then the
    * ACE_Reactor's @c handle_events() method will be restarted
@@ -198,7 +198,7 @@ public:
                   bool mask_signals = true,
                   int s_queue = ACE_Select_Reactor_Token::FIFO);
 
-  /**
+  /*
    * This event loop driver that blocks for @a max_wait_time before
    * returning.  It will return earlier if timer events, I/O events,
    * or signal events occur.  Note that @a max_wait_time can be 0, in

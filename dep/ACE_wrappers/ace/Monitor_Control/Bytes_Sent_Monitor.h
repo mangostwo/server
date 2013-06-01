@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  * @file Bytes_Sent_Monitor.h
  *
  * $Id: Bytes_Sent_Monitor.h 91743 2010-09-13 18:24:51Z johnnyw $
@@ -45,7 +45,7 @@ namespace ACE
 {
   namespace Monitor_Control
   {
-    /**
+    /*
      * @class Bytes_Sent_Monitor
      *
      * @brief Monitors total bytes sent over all network interfaces.

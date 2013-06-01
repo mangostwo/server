@@ -1,4 +1,4 @@
-/**
+/*
  @file fileutils.h
  
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -58,7 +58,7 @@ void zipRead(const std::string& file,
 void zipClose(void* data);
 
 
-/**
+/*
  @param flush If true (default), the file is ready for reading as soon
  as the function returns.  If false, the function returns immediately and
  writes the file in the background.
@@ -74,7 +74,7 @@ void writeWholeFile(
 FILE* createTempFile();
 
 
-/**
+/*
  Returns true if the given file (or directory) exists
  within a zipfile.  Called if fileExists initially
  returns false and the lookInZipfiles flag has been set.
@@ -93,7 +93,7 @@ bool zipfileExists
 
 bool zipfileExists(const std::string& filename);
 
-/**
+/*
   Parses a filename into four useful pieces.
 
   Examples:
@@ -125,13 +125,13 @@ void parseFilename(
     std::string&        ext);
 
 
-/**
+/*
  Returns the part of the filename that includes the base and ext from
  parseFilename (i.e. everything to the right of the path).
  */
 std::string filenameBaseExt(const std::string& filename);
 
-/**
+/*
  Returns the extension on a filename.
  */
 std::string filenameExt(const std::string& filename);

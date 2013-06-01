@@ -1,4 +1,4 @@
-/**
+/*
  @file NetworkDevice.h
 
  These classes abstract networking from the socket level to a
@@ -67,7 +67,7 @@ protected:
 
     SOCKET                          sock;
 
-    /**
+    /*
      Used for serialization.  One per socket
      to make this threadsafe.
      */
@@ -83,12 +83,12 @@ public:
     uint64 bytesReceived() const;
     uint64 messagesReceived() const;
 
-    /**
+    /*
      If true, receive will return true.
      */
     virtual bool messageWaiting();
 
-    /**
+    /*
      Returns the type of the waiting message (i.e. the type supplied
      with send).  The return value is zero when there is no message
      waiting.
@@ -147,7 +147,7 @@ uint32 gcchtonl(uint32);
 // sometimes an application will switch modes on a single socket.  For
 // example, when transferring 3D level geometry during handshaking with
 // a game server.
-/**
+/*
  A conduit that guarantees messages will arrive, intact and in order.
  Create on the client using NetworkDevice::createReliableConduit and
  on the server using NetListener::waitForConnection.  Set the reference
@@ -175,7 +175,7 @@ private:
 
     NetAddress                      addr;
     
-    /**
+    /*
      Type of the incoming message.
      */
     uint32                          messageType;
@@ -248,7 +248,7 @@ private:
 
 public:
 
-    /**
+    /*
      Client invokes this to connect to a server.  The call blocks until the 
      conduit is opened.  The conduit will not be ok() if it fails.
      */
@@ -262,7 +262,7 @@ public:
      this call.  Receive only deserializes.*/
     virtual bool messageWaiting();
 
-    /**
+    /*
      Serializes the message and schedules it to be sent as soon as possible,
      and then returns immediately.  The message can be any <B>class</B> with
      a serialize and deserialize method.  On the receiving side,
@@ -355,7 +355,7 @@ public:
 
 typedef ReferenceCountedPointer<class LightweightConduit> LightweightConduitRef;
 
-/**
+/*
  Provides fast but unreliable transfer of messages.  On a LAN,
  LightweightConduit will probably never drop messages but you
  <I>might</I> get your messages out of order.  On an internet
@@ -407,23 +407,23 @@ class LightweightConduit : public Conduit {
 private:
     friend class NetworkDevice;
 
-    /**
+    /*
      True when waitingForMessageType has read the message
      from the network into messageType/messageStream.
      */
     bool                    alreadyReadMessage;
 
-    /**
+    /*
      Origin of the received message.
      */
     NetAddress              messageSender;
 
-    /**
+    /*
      The type of the last message received.
      */
     uint32                  messageType;
 
-    /**
+    /*
      The message received (the type has already been read off).
      */
     Array<uint8>            messageBuffer;
@@ -538,7 +538,7 @@ public:
 
 typedef ReferenceCountedPointer<class NetListener> NetListenerRef;
 
-/**
+/*
  Runs on the server listening for clients trying to make reliable connections.
  */
 class NetListener : public ReferenceCountedObject {
@@ -571,7 +571,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
+/*
    @brief Abstraction of network (socket) functionality.
 
    An abstraction over sockets that provides a message-based network
@@ -689,17 +689,17 @@ public:
         return m_broadcastAddresses;
     }
 
-    /**
+    /*
      Returns NULL if there was a problem initializing the network.
      */
     static NetworkDevice* instance();
 
-    /**
+    /*
      Shuts down the network device (destroying the global instance).
      */
     static void cleanup();
 
-    /**
+    /*
      Prints a human-readable description of this machine
      to the text output stream.
      */

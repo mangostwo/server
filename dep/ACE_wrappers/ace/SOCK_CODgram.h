@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    SOCK_CODgram.h
  *
  *  $Id: SOCK_CODgram.h 81509 2008-04-28 22:00:49Z shuston $
@@ -27,7 +27,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_SOCK_CODgram
  *
  * @brief Defines the member functions for the ACE_SOCK connected
@@ -39,7 +39,7 @@ public:
   /// Default constructor.
   ACE_SOCK_CODgram (void);
 
-  /**
+  /*
    * Constructor with addresses specified. Calls open().
    * This constructor binds and/or connects to a specified address,
    * optionally binding an unused port number.
@@ -84,7 +84,7 @@ public:
 
   // Initiate a connected dgram.
 
-  /**
+  /*
    * Initiate a connected datagram socket, optionally binding an
    * unused port number.
    *

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    Null_Mutex.h
  *
  *  $Id: Null_Mutex.h 91626 2010-09-07 10:59:20Z johnnyw $
@@ -30,7 +30,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Time_Value;
 
-/**
+/*
  * @class ACE_Null_Mutex
  *
  * @brief Implement a do nothing ACE_Mutex, i.e., all the methods are
@@ -89,7 +89,7 @@ public:
 template <class ACE_LOCK>
 class ACE_Guard;
 
-/**
+/*
  * @brief Template specialization of ACE_Guard for the
  * ACE_Null_Mutex.
  *
@@ -127,7 +127,7 @@ private:
 template <class ACE_LOCK>
 class ACE_Write_Guard;
 
-/**
+/*
  * @brief Template specialization of ACE_Write_Guard for the
  * ACE_Null_Mutex.
  */
@@ -151,7 +151,7 @@ public:
 template <class ACE_LOCK>
 class ACE_Read_Guard;
 
-/**
+/*
  * @brief Template specialization of ACE_Read)Guard for the
  * ACE_Null_Mutex.
  */
@@ -176,7 +176,7 @@ public:
 
 template <class T> class ACE_Malloc_Lock_Adapter_T;
 
-/**
+/*
  * @brief Template specialization of ACE_Malloc_Lock_Adapter_T for the
  * ACE_Null_Mutex.
  */

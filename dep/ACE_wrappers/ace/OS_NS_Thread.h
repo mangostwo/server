@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file   OS_NS_Thread.h
  *
  *  $Id: OS_NS_Thread.h 91693 2010-09-09 12:57:54Z johnnyw $
@@ -272,7 +272,7 @@ typedef HANDLE ACE_event_t;
 #       if !defined (ACE_USES_WINCE_SEMA_SIMULATION)
 typedef HANDLE ACE_sema_t;
 #       else
-/**
+/*
  * @class ACE_sema_t
  *
  * @brief Semaphore simulation for Windows CE.
@@ -330,7 +330,7 @@ typedef CONDITION_VARIABLE ACE_cond_t;
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_cond_t
  *
  * @brief This structure is used to implement condition variables on
@@ -357,14 +357,14 @@ public:
   ACE_sema_t sema_;
 
 #     if defined (ACE_VXWORKS)
-  /**
+  /*
    * A semaphore used by the broadcast/signal thread to wait for all
    * the waiting thread(s) to wake up and be released from the
    * semaphore.
    */
   ACE_sema_t waiters_done_;
 #     elif defined (ACE_WIN32)
-  /**
+  /*
    * An auto reset event used by the broadcast/signal thread to wait
    * for the waiting thread(s) to wake up and get a chance at the
    * semaphore.
@@ -404,7 +404,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_rwlock_t
  *
  * @brief This is used to implement readers/writer locks on NT,
@@ -529,7 +529,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_recursive_thread_mutex_t
  *
  * @brief
@@ -682,7 +682,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Thread_ID
  *
  * @brief
@@ -790,7 +790,7 @@ typedef int ACE_pri_t;
 // forward declaration
 class ACE_TSS_Keys;
 
-/**
+/*
  * @class ACE_TSS_Emulation
  *
  * @brief Thread-specific storage emulation.
@@ -835,7 +835,7 @@ public:
   /// Does _not_ check for a valid key.
   static void *&ts_object (const ACE_thread_key_t key);
 
-  /**
+  /*
    * Setup an array to be used for local TSS.  Returns the array
    * address on success.  Returns 0 if local TSS had already been
    * setup for this thread.  There is no corresponding tss_close ()
@@ -897,7 +897,7 @@ private:
 // declarations from OS.cpp so they are visible to the single
 // file of template instantiations.
 # if defined (ACE_WIN32) || defined (ACE_HAS_TSS_EMULATION)
-/**
+/*
  * @class ACE_TSS_Ref
  *
  * @brief "Reference count" for thread-specific storage keys.
@@ -926,7 +926,7 @@ public:
   ACE_thread_t tid_;
 };
 
-/**
+/*
  * @class ACE_TSS_Info
  *
  * @brief Thread Specific Key management.
@@ -976,7 +976,7 @@ private:
   friend class ACE_TSS_Cleanup;
 };
 
-/**
+/*
  * @class ACE_TSS_Keys
  *
  * @brief Collection of in-use flags for a thread's TSS keys.
@@ -1088,7 +1088,7 @@ namespace ACE_OS {
   extern ACE_Export ACE_thread_key_t NULL_key;
   //@}
 
-  /**
+  /*
    * Call TSS destructors for the current thread.  If the current
    * thread is the main thread, then the argument must be 1.
    * For private use of ACE_Object_Manager and ACE_Thread_Adapter only.
@@ -1276,7 +1276,7 @@ namespace ACE_OS {
   int mutex_lock (ACE_mutex_t *m,
                   int &abandoned);
 
-  /**
+  /*
    * This method attempts to acquire a lock, but gives up if the lock
    * has not been acquired by the given time.  If the lock is not
    * acquired within the given amount of time, then this method
@@ -1292,7 +1292,7 @@ namespace ACE_OS {
   int mutex_lock (ACE_mutex_t *m,
                   const ACE_Time_Value &timeout);
 
-  /**
+  /*
    * If <timeout> == 0, calls <ACE_OS::mutex_lock(m)>.  Otherwise,
    * this method attempts to acquire a lock, but gives up if the lock
    * has not been acquired by the given time, in which case it returns
@@ -1328,7 +1328,7 @@ namespace ACE_OS {
   //@}
 
   /// Low-level interface to @c priocntl(2).
-  /**
+  /*
    * Can't call the following priocntl, because that's a macro on
    * Solaris.
    */
@@ -1603,7 +1603,7 @@ namespace ACE_OS {
                 ACE_thread_t *thr_id,
                 ACE_THR_FUNC_RETURN *status);
 
-  /**
+  /*
    * Get the thread affinity
    *
    * @param thr_id For NPTL-threads, when ACE_HAS_PTHREAD_SETAFFINITY_NP
@@ -1620,7 +1620,7 @@ namespace ACE_OS {
                         cpu_set_t * cpu_mask);
 
 
-  /**
+  /*
    * Set the thread affinity
    *
    * @param thr_id For NPTL-threads, when ACE_HAS_PTHREAD_SETAFFINITY_NP
@@ -1763,7 +1763,7 @@ namespace ACE_OS {
 
   //@}
 
-  /**
+  /*
    * This method uses process id and object pointer to come up with a
    * machine wide unique name.  The process ID will provide uniqueness
    * between processes on the same machine. The "this" pointer of the
@@ -1816,7 +1816,7 @@ extern "C"
     int is_signaled_;
 
     /// Special bool for auto_events alone
-    /**
+    /*
      * The semantics of auto events forces us to introduce this extra
      * variable to ensure that the thread is not woken up
      * spuriously. Please see event_wait and event_timedwait () to see
@@ -1835,7 +1835,7 @@ extern "C"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_event_t
  *
  * @brief Wrapper for NT events on UNIX.
@@ -1879,7 +1879,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_OS_Thread_Mutex_Guard
  *
  * This data structure is meant to be used within an ACE_OS
@@ -1924,7 +1924,7 @@ protected:
   ACE_OS_Thread_Mutex_Guard (const ACE_OS_Thread_Mutex_Guard &);
 };
 
-/**
+/*
  * @class ACE_OS_Recursive_Thread_Mutex_Guard
  *
  * @brief For internal use only by ACE_OS.

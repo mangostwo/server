@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Log_Msg.h
  *
  *  $Id: Log_Msg.h 92298 2010-10-21 11:15:17Z johnnyw $
@@ -145,7 +145,7 @@ class ACE_Thread_Descriptor;
 class ACE_Log_Record;
 template<typename M, typename T> class ACE_Atomic_Op;
 
-/**
+/*
  * @class ACE_Log_Msg
  *
  * @brief Provides a variable length argument message logging
@@ -233,7 +233,7 @@ public:
   ~ACE_Log_Msg (void);
 
   /// Initialize the ACE logging facility.
-  /**
+  /*
    * Initialize the ACE logging facility. Supplies the program name
    * that is available to each logging message call. Default arguments
    * set up logging to STDERR only.
@@ -257,17 +257,17 @@ public:
 
   // = Set/get the options flags.
 
-  /**
+  /*
    * Enable the bits in the logger's options flags.
    */
   void set_flags (u_long f);
 
-  /**
+  /*
    * Disable the bits in the logger's options flags.
    */
   void clr_flags (u_long f);
 
-  /**
+  /*
    * Return the bits in the logger's options flags.
    */
   u_long flags (void);
@@ -344,7 +344,7 @@ public:
   /// Update the ostream without overwriting the delete_ostream_ flag.
   void msg_ostream (ACE_OSTREAM_TYPE *);
 
-  /**
+  /*
    * delete_stream == true, forces Log_Msg.h to delete the stream in
    * its own ~dtor (assumes control of the stream)
    * use only with proper ostream (eg: fstream), not (cout, cerr)
@@ -354,7 +354,7 @@ public:
   /// Get the ostream that is used to print error messages.
   ACE_OSTREAM_TYPE *msg_ostream (void) const;
 
-  /**
+  /*
    * Set a new callback object and return the existing callback to
    * allow "chaining".  Note that ACE_Log_Msg_Callback objects are not
    * inherited when spawning a new thread, so you'll need to reset
@@ -363,7 +363,7 @@ public:
   ACE_Log_Msg_Callback *msg_callback (ACE_Log_Msg_Callback *c);
   ACE_Log_Msg_Callback *msg_callback (void) const;
 
-  /**
+  /*
    * Set a new backend object and return the existing backend to
    * allow "chaining". Note that as opposed to ACE_Log_Msg_Callback,
    * ACE_Log_Msg_Backend is a per-process entity.
@@ -397,7 +397,7 @@ public:
   /// Get the TSS thread descriptor.
   ACE_Thread_Descriptor *thr_desc (void) const;
 
-  /**
+  /*
    * Set the TSS thread descriptor.  This method will call
    * td->acquire_release to block execution until this call
    * return.
@@ -455,7 +455,7 @@ public:
   /// Set the name of the local host.
   void local_host (const ACE_TCHAR *);
 
-  /**
+  /*
    * Set the line number, file name, operational status, error number,
    * restart flag, ostream, and the callback object.  This combines
    * all the other set methods into a single method.
@@ -475,7 +475,7 @@ public:
                         int op_status,
                         int errnum);
 
-  /**
+  /*
    * Format a message to the thread-safe ACE logging mechanism.  Valid
    * options (prefixed by '%', as in printf format strings) include:
    *  - 'A': print an ACE_timer_t value (which could be either double
@@ -532,7 +532,7 @@ public:
   ssize_t log (ACE_Log_Priority priority, const ACE_ANTI_TCHAR *format, ...);
 #endif /* ACE_HAS_WCHAR */
 
-  /**
+  /*
    * An alternative logging mechanism that makes it possible to
    * integrate variable argument lists from other logging mechanisms
    * into the ACE mechanism.
@@ -546,7 +546,7 @@ public:
   ssize_t log (ACE_Log_Record &log_record,
                int suppress_stderr = 0);
 
-  /**
+  /*
    * Method to log hex dump.  This is useful for debugging.  Calls
    * log() to do the actual print, but formats first to make the chars
    * printable.
@@ -561,14 +561,14 @@ public:
                          , ACE_SEH_EXCEPT_HANDLER selector = 0
                          , ACE_SEH_EXCEPT_HANDLER handler = 0
 # endif /* ACE_HAS_WIN32_STRUCTURAL_EXCEPTIONS */
-  /**
+  /*
    * Init hook, create a Log_Msg_Attribute object, initialize its
    * attributes from the TSS Log_Msg and save the object in the
    * @a attributes argument
    */
                          );
 
-  /**
+  /*
    * Inherit hook, the @a attributes field is a ACE_OS_Log_Msg_Attributes
    * object, invoke the inherit_log_msg() method on it, then destroy
    * it and set the @a attribute argument to 0.
@@ -630,7 +630,7 @@ private:
   /// Are we allowing tracing in this thread?
   bool tracing_enabled_;
 
-  /**
+  /*
    * If we're running in the context of an ACE_Thread_Manager this
    * will point to the thread descriptor adapter which holds the
    * thread descriptor of the thread.  This can be used to repidly
@@ -638,7 +638,7 @@ private:
    */
   ACE_Thread_Descriptor *thr_desc_;
 
-  /**
+  /*
    * Keeps track of all the per-thread ACE_Log_Priority values that
    * are currently enabled.  Default is for all logging priorities to
    * be disabled.
@@ -652,7 +652,7 @@ private:
 
   // We only want one instance for the entire process!
 
-  /**
+  /*
    * Keeps track of all the per-process ACE_Log_Priority values that
    * are currently enabled.  Default is for all logging priorities to
    * be enabled.
@@ -675,13 +675,13 @@ private:
   /// Offset of msg_[].
   static ptrdiff_t msg_off_;
 
-  /**
+  /*
    * Number of existing ACE_Log_Msg instances; when 0, delete program/host
    * names
    */
   static int instance_count_;
 
-  /**
+  /*
    * Priority mask to use for each new instance
    */
   static u_long default_priority_mask_;

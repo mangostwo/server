@@ -1,4 +1,4 @@
-/**
+/*
   @file Vector4int8.cpp
  
   Homogeneous vector class.

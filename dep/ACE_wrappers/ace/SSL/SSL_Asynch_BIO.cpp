@@ -24,7 +24,7 @@
 # define ACE_ASYNCH_BIO_FREE_NAME  ACE_Asynch_BIO_free
 #endif  /* ACE_HAS_VERSIONED_NAMESPACE == 1 */
 
-/**
+/*
  * @name OpenSSL BIO Helper Methods for use with ACE's Asynchronous
  *       SSL I/O support.
  */
@@ -72,7 +72,7 @@ ACE_SSL_make_BIO (void * ssl_asynch_stream)
   return pBIO;
 }
 
-/**
+/*
  * @struct @c ACE_SSL_Asynch_Stream_Accessor
  *
  * @brief Privileged @c ACE_SSL_Asynch_Stream accessor.

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file   OS_Memory.h
  *
  *  $Id: OS_Memory.h 91688 2010-09-09 11:21:50Z johnnyw $
@@ -241,11 +241,11 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 //@{
-/**
+/*
  * @name Efficiently compute aligned pointers to powers of 2 boundaries.
  */
 
-/**
+/*
  * Efficiently align "value" up to "alignment", knowing that all such
  * boundaries are binary powers and that we're using two's complement
  * arithmetic.
@@ -276,7 +276,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
  * multiple we wanted.
  */
 /// Return the next integer aligned to a required boundary
-/**
+/*
  * @param ptr the base pointer
  * @param alignment the required alignment
  */

@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    Map_T.h
  *
  *  $Id: Map_T.h 92097 2010-09-30 05:41:49Z msmit $
@@ -25,7 +25,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Noop_Key_Generator
  *
  * @brief Defines a noop key generator.
@@ -39,7 +39,7 @@ public:
   int operator () (T &);
 };
 
-/**
+/*
  * @class ACE_Incremental_Key_Generator
  *
  * @brief Defines a simple incremental key generator.
@@ -72,7 +72,7 @@ protected:
   T t_;
 };
 
-/**
+/*
  * @class ACE_Iterator_Impl
  *
  * @brief Defines a abstract iterator.
@@ -103,7 +103,7 @@ public:
   virtual void minus_minus (void) = 0;
 };
 
-/**
+/*
  * @class ACE_Reverse_Iterator_Impl
  *
  * @brief Defines a abstract reverse iterator.
@@ -134,7 +134,7 @@ public:
   virtual void minus_minus (void) = 0;
 };
 
-/**
+/*
  * @class ACE_Iterator
  *
  * @brief Defines the iterator interface.
@@ -190,7 +190,7 @@ protected:
   ACE_Iterator_Impl<T> *implementation_;
 };
 
-/**
+/*
  * @class ACE_Reverse_Iterator
  *
  * @brief Defines the reverse iterator interface.
@@ -218,7 +218,7 @@ public:
   /// Assignment operator.
   ACE_Reverse_Iterator<T> &operator= (const ACE_Reverse_Iterator<T> &rhs);
 
-  /**
+  /*
    * @name Comparison Operators
    *
    * The usual equality operators.
@@ -252,7 +252,7 @@ protected:
   ACE_Reverse_Iterator_Impl<T> *implementation_;
 };
 
-/**
+/*
  * @class ACE_Map
  *
  * @brief Defines a map interface.
@@ -290,7 +290,7 @@ public:
   /// Close down a <Map> and release dynamically allocated resources.
   virtual int close (void) = 0;
 
-  /**
+  /*
    * Add @a key / @a value pair to the map.  If @a key is already in the
    * map then no changes are made and 1 is returned.  Returns 0 on a
    * successful addition.  This function fails for maps that do not
@@ -299,7 +299,7 @@ public:
   virtual int bind (const KEY &key,
                     const VALUE &value) = 0;
 
-  /**
+  /*
    * Add @a key / @a value pair to the map.  @a key is an "inout" parameter
    * and maybe modified/extended by the map to add additional
    * information.  To recover original key, call the <recover_key>
@@ -308,7 +308,7 @@ public:
   virtual int bind_modify_key (const VALUE &value,
                                KEY &key) = 0;
 
-  /**
+  /*
    * Produce a key and return it through @a key which is an "out"
    * parameter.  For maps that do not naturally produce keys, the map
    * adapters will use the @c KEY_GENERATOR class to produce a key.
@@ -318,7 +318,7 @@ public:
    */
   virtual int create_key (KEY &key) = 0;
 
-  /**
+  /*
    * Add @a value to the map, and the corresponding key produced by the
    * Map is returned through @a key which is an "out" parameter.  For
    * maps that do not naturally produce keys, the map adapters will
@@ -330,7 +330,7 @@ public:
   virtual int bind_create_key (const VALUE &value,
                                KEY &key) = 0;
 
-  /**
+  /*
    * Add @a value to the map.  The user does not care about the
    * corresponding key produced by the Map. For maps that do not
    * naturally produce keys, the map adapters will use the
@@ -346,7 +346,7 @@ public:
   virtual int recover_key (const KEY &modified_key,
                            KEY &original_key) = 0;
 
-  /**
+  /*
    * Reassociate @a key with @a value. The function fails if @a key is
    * not in the map for maps that do not allow user specified keys.
    * However, for maps that allow user specified keys, if the key is
@@ -355,7 +355,7 @@ public:
   virtual int rebind (const KEY &key,
                       const VALUE &value) = 0;
 
-  /**
+  /*
    * Reassociate @a key with @a value, storing the old value into the
    * "out" parameter @a old_value.  The function fails if @a key is not
    * in the map for maps that do not allow user specified keys.
@@ -366,7 +366,7 @@ public:
                       const VALUE &value,
                       VALUE &old_value) = 0;
 
-  /**
+  /*
    * Reassociate @a key with @a value, storing the old key and value
    * into the "out" parameters @a old_key and @a old_value.  The
    * function fails if @a key is not in the map for maps that do not
@@ -379,7 +379,7 @@ public:
                       KEY &old_key,
                       VALUE &old_value) = 0;
 
-  /**
+  /*
    * Associate @a key with @a value if and only if @a key is not in the
    * map.  If @a key is already in the map, then the @a value parameter
    * is overwritten with the existing value in the map. Returns 0 if a
@@ -444,7 +444,7 @@ private:
   ACE_UNIMPLEMENTED_FUNC (ACE_Map (const ACE_Map<KEY, VALUE> &))
 };
 
-/**
+/*
  * @class ACE_Map_Impl_Iterator_Adapter
  *
  * @brief Defines a iterator implementation for the Map_Impl class.
@@ -490,7 +490,7 @@ protected:
   IMPLEMENTATION implementation_;
 };
 
-/**
+/*
  * @class ACE_Map_Impl_Reverse_Iterator_Adapter
  *
  * @brief Defines a reverse iterator implementation for the Map_Impl class.
@@ -536,7 +536,7 @@ protected:
   IMPLEMENTATION implementation_;
 };
 
-/**
+/*
  * @class ACE_Map_Impl
  *
  * @brief Defines a map implementation.
@@ -576,7 +576,7 @@ public:
   /// Close down a <Map> and release dynamically allocated resources.
   virtual int close (void);
 
-  /**
+  /*
    * Add @a key / @a value pair to the map.  If @a key is already in the
    * map then no changes are made and 1 is returned.  Returns 0 on a
    * successful addition.  This function fails for maps that do not
@@ -585,7 +585,7 @@ public:
   virtual int bind (const KEY &key,
                     const VALUE &value);
 
-  /**
+  /*
    * Add @a key / @a value pair to the map.  @a key is an "inout" parameter
    * and maybe modified/extended by the map to add additional
    * information.  To recover original key, call the <recover_key>
@@ -594,7 +594,7 @@ public:
   virtual int bind_modify_key (const VALUE &value,
                                KEY &key);
 
-  /**
+  /*
    * Produce a key and return it through @a key which is an "out"
    * parameter.  For maps that do not naturally produce keys, the map
    * adapters will use the @c KEY_GENERATOR class to produce a key.
@@ -604,7 +604,7 @@ public:
    */
   virtual int create_key (KEY &key);
 
-  /**
+  /*
    * Add @a value to the map, and the corresponding key produced by the
    * Map is returned through @a key which is an "out" parameter.  For
    * maps that do not naturally produce keys, the map adapters will
@@ -616,7 +616,7 @@ public:
   virtual int bind_create_key (const VALUE &value,
                                KEY &key);
 
-  /**
+  /*
    * Add @a value to the map.  The user does not care about the
    * corresponding key produced by the Map. For maps that do not
    * naturally produce keys, the map adapters will use the
@@ -632,7 +632,7 @@ public:
   virtual int recover_key (const KEY &modified_key,
                            KEY &original_key);
 
-  /**
+  /*
    * Reassociate @a key with @a value. The function fails if @a key is
    * not in the map for maps that do not allow user specified keys.
    * However, for maps that allow user specified keys, if the key is
@@ -641,7 +641,7 @@ public:
   virtual int rebind (const KEY &key,
                       const VALUE &value);
 
-  /**
+  /*
    * Reassociate @a key with @a value, storing the old value into the
    * "out" parameter @a old_value.  The function fails if @a key is not
    * in the map for maps that do not allow user specified keys.
@@ -652,7 +652,7 @@ public:
                       const VALUE &value,
                       VALUE &old_value);
 
-  /**
+  /*
    * Reassociate @a key with @a value, storing the old key and value
    * into the "out" parameters @a old_key and @a old_value.  The
    * function fails if @a key is not in the map for maps that do not
@@ -665,7 +665,7 @@ public:
                       KEY &old_key,
                       VALUE &old_value);
 
-  /**
+  /*
    * Associate @a key with @a value if and only if @a key is not in the
    * map.  If @a key is already in the map, then the @a value parameter
    * is overwritten with the existing value in the map. Returns 0 if a
@@ -725,7 +725,7 @@ private:
   ACE_UNIMPLEMENTED_FUNC (ACE_Map_Impl (const ACE_Map_Impl<KEY, VALUE, IMPLEMENTATION, ITERATOR, REVERSE_ITERATOR, ENTRY> &))
 };
 
-/**
+/*
  * @class ACE_Active_Map_Manager_Iterator_Adapter
  *
  * @brief Defines a iterator implementation for the Active_Map_Manager_Adapter.
@@ -771,7 +771,7 @@ protected:
   ACE_Map_Iterator<ACE_Active_Map_Manager_Key, VALUE, ACE_Null_Mutex> implementation_;
 };
 
-/**
+/*
  * @class ACE_Active_Map_Manager_Reverse_Iterator_Adapter
  *
  * @brief Defines a reverse iterator implementation for the Active_Map_Manager_Adapter.
@@ -817,7 +817,7 @@ protected:
   ACE_Map_Reverse_Iterator<ACE_Active_Map_Manager_Key, VALUE, ACE_Null_Mutex> implementation_;
 };
 
-/**
+/*
  * @class ACE_Active_Map_Manager_Adapter
  *
  * @brief Defines a map implementation.
@@ -858,7 +858,7 @@ public:
   /// Close down a <Map> and release dynamically allocated resources.
   virtual int close (void);
 
-  /**
+  /*
    * Add @a key / @a value pair to the map.  If @a key is already in the
    * map then no changes are made and 1 is returned.  Returns 0 on a
    * successful addition.  This function fails for maps that do not
@@ -867,7 +867,7 @@ public:
   virtual int bind (const KEY &key,
                     const VALUE &value);
 
-  /**
+  /*
    * Add @a key / @a value pair to the map.  @a key is an "inout" parameter
    * and maybe modified/extended by the map to add additional
    * information.  To recover original key, call the <recover_key>
@@ -876,7 +876,7 @@ public:
   virtual int bind_modify_key (const VALUE &value,
                                KEY &key);
 
-  /**
+  /*
    * Produce a key and return it through @a key which is an "out"
    * parameter.  For maps that do not naturally produce keys, the map
    * adapters will use the @c KEY_GENERATOR class to produce a key.
@@ -886,7 +886,7 @@ public:
    */
   virtual int create_key (KEY &key);
 
-  /**
+  /*
    * Add @a value to the map, and the corresponding key produced by the
    * Map is returned through @a key which is an "out" parameter.  For
    * maps that do not naturally produce keys, the map adapters will
@@ -898,7 +898,7 @@ public:
   virtual int bind_create_key (const VALUE &value,
                                KEY &key);
 
-  /**
+  /*
    * Add @a value to the map.  The user does not care about the
    * corresponding key produced by the Map. For maps that do not
    * naturally produce keys, the map adapters will use the
@@ -914,7 +914,7 @@ public:
   virtual int recover_key (const KEY &modified_key,
                            KEY &original_key);
 
-  /**
+  /*
    * Reassociate @a key with @a value. The function fails if @a key is
    * not in the map for maps that do not allow user specified keys.
    * However, for maps that allow user specified keys, if the key is
@@ -923,7 +923,7 @@ public:
   virtual int rebind (const KEY &key,
                       const VALUE &value);
 
-  /**
+  /*
    * Reassociate @a key with @a value, storing the old value into the
    * "out" parameter @a old_value.  The function fails if @a key is not
    * in the map for maps that do not allow user specified keys.
@@ -934,7 +934,7 @@ public:
                       const VALUE &value,
                       VALUE &old_value);
 
-  /**
+  /*
    * Reassociate @a key with @a value, storing the old key and value
    * into the "out" parameters @a old_key and @a old_value.  The
    * function fails if @a key is not in the map for maps that do not
@@ -947,7 +947,7 @@ public:
                       KEY &old_key,
                       VALUE &old_value);
 
-  /**
+  /*
    * Associate @a key with @a value if and only if @a key is not in the
    * map.  If @a key is already in the map, then the @a value parameter
    * is overwritten with the existing value in the map. Returns 0 if a
@@ -1021,7 +1021,7 @@ private:
   ACE_UNIMPLEMENTED_FUNC (ACE_Active_Map_Manager_Adapter (const ACE_Active_Map_Manager_Adapter<KEY, VALUE, KEY_ADAPTER> &))
 };
 
-/**
+/*
  * @class ACE_Hash_Map_Manager_Ex_Iterator_Adapter
  *
  * @brief Defines a iterator implementation for the Hash_Map_Manager_Adapter.
@@ -1067,7 +1067,7 @@ protected:
   ACE_Hash_Map_Iterator_Ex<KEY, VALUE, HASH_KEY, COMPARE_KEYS, ACE_Null_Mutex> implementation_;
 };
 
-/**
+/*
  * @class ACE_Hash_Map_Manager_Ex_Reverse_Iterator_Adapter
  *
  * @brief Defines a reverse iterator implementation for the Hash_Map_Manager_Adapter.
@@ -1113,7 +1113,7 @@ protected:
   ACE_Hash_Map_Reverse_Iterator_Ex<KEY, VALUE, HASH_KEY, COMPARE_KEYS, ACE_Null_Mutex> implementation_;
 };
 
-/**
+/*
  * @class ACE_Hash_Map_Manager_Ex_Adapter
  *
  * @brief Defines a map implementation.
@@ -1152,7 +1152,7 @@ public:
   /// Close down a Map and release dynamically allocated resources.
   virtual int close (void);
 
-  /**
+  /*
    * Add @a key / @a value pair to the map.  If @a key is already in the
    * map then no changes are made and 1 is returned.  Returns 0 on a
    * successful addition.  This function fails for maps that do not
@@ -1161,7 +1161,7 @@ public:
   virtual int bind (const KEY &key,
                     const VALUE &value);
 
-  /**
+  /*
    * Add @a key / @a value pair to the map.  @a key is an "inout" parameter
    * and maybe modified/extended by the map to add additional
    * information.  To recover original key, call the <recover_key>
@@ -1170,7 +1170,7 @@ public:
   virtual int bind_modify_key (const VALUE &value,
                                KEY &key);
 
-  /**
+  /*
    * Produce a key and return it through @a key which is an "out"
    * parameter.  For maps that do not naturally produce keys, the map
    * adapters will use the @c KEY_GENERATOR class to produce a key.
@@ -1180,7 +1180,7 @@ public:
    */
   virtual int create_key (KEY &key);
 
-  /**
+  /*
    * Add @a value to the map, and the corresponding key produced by the
    * Map is returned through @a key which is an "out" parameter.  For
    * maps that do not naturally produce keys, the map adapters will
@@ -1192,7 +1192,7 @@ public:
   virtual int bind_create_key (const VALUE &value,
                                KEY &key);
 
-  /**
+  /*
    * Add @a value to the map.  The user does not care about the
    * corresponding key produced by the Map. For maps that do not
    * naturally produce keys, the map adapters will use the
@@ -1208,7 +1208,7 @@ public:
   virtual int recover_key (const KEY &modified_key,
                            KEY &original_key);
 
-  /**
+  /*
    * Reassociate @a key with @a value. The function fails if @a key is
    * not in the map for maps that do not allow user specified keys.
    * However, for maps that allow user specified keys, if the key is
@@ -1217,7 +1217,7 @@ public:
   virtual int rebind (const KEY &key,
                       const VALUE &value);
 
-  /**
+  /*
    * Reassociate @a key with @a value, storing the old value into the
    * "out" parameter @a old_value.  The function fails if @a key is not
    * in the map for maps that do not allow user specified keys.
@@ -1228,7 +1228,7 @@ public:
                       const VALUE &value,
                       VALUE &old_value);
 
-  /**
+  /*
    * Reassociate @a key with @a value, storing the old key and value
    * into the "out" parameters @a old_key and @a old_value.  The
    * function fails if @a key is not in the map for maps that do not
@@ -1241,7 +1241,7 @@ public:
                       KEY &old_key,
                       VALUE &old_value);
 
-  /**
+  /*
    * Associate @a key with @a value if and only if @a key is not in the
    * map.  If @a key is already in the map, then the @a value parameter
    * is overwritten with the existing value in the map. Returns 0 if a
@@ -1307,7 +1307,7 @@ private:
   ACE_UNIMPLEMENTED_FUNC (ACE_Hash_Map_Manager_Ex_Adapter (const ACE_Hash_Map_Manager_Ex_Adapter<KEY, VALUE, HASH_KEY, COMPARE_KEYS, KEY_GENERATOR> &))
 };
 
-/**
+/*
  * @class ACE_Map_Manager_Iterator_Adapter
  *
  * @brief Defines a iterator implementation for the Map_Manager_Adapter.
@@ -1353,7 +1353,7 @@ protected:
   ACE_Map_Iterator<KEY, VALUE, ACE_Null_Mutex> implementation_;
 };
 
-/**
+/*
  * @class ACE_Map_Manager_Reverse_Iterator_Adapter
  *
  * @brief Defines a reverse iterator implementation for the Map Manager.
@@ -1399,7 +1399,7 @@ protected:
   ACE_Map_Reverse_Iterator<KEY, VALUE, ACE_Null_Mutex> implementation_;
 };
 
-/**
+/*
  * @class ACE_Map_Manager_Adapter
  *
  * @brief Defines a map implementation.
@@ -1438,7 +1438,7 @@ public:
   /// Close down a <Map> and release dynamically allocated resources.
   virtual int close (void);
 
-  /**
+  /*
    * Add @a key / @a value pair to the map.  If @a key is already in the
    * map then no changes are made and 1 is returned.  Returns 0 on a
    * successful addition.  This function fails for maps that do not
@@ -1447,7 +1447,7 @@ public:
   virtual int bind (const KEY &key,
                     const VALUE &value);
 
-  /**
+  /*
    * Add @a key / @a value pair to the map.  @a key is an "inout" parameter
    * and maybe modified/extended by the map to add additional
    * information.  To recover original key, call the <recover_key>
@@ -1456,7 +1456,7 @@ public:
   virtual int bind_modify_key (const VALUE &value,
                                KEY &key);
 
-  /**
+  /*
    * Produce a key and return it through @a key which is an "out"
    * parameter.  For maps that do not naturally produce keys, the map
    * adapters will use the @c KEY_GENERATOR class to produce a key.
@@ -1466,7 +1466,7 @@ public:
    */
   virtual int create_key (KEY &key);
 
-  /**
+  /*
    * Add @a value to the map, and the corresponding key produced by the
    * Map is returned through @a key which is an "out" parameter.  For
    * maps that do not naturally produce keys, the map adapters will
@@ -1478,7 +1478,7 @@ public:
   virtual int bind_create_key (const VALUE &value,
                                KEY &key);
 
-  /**
+  /*
    * Add @a value to the map.  The user does not care about the
    * corresponding key produced by the Map. For maps that do not
    * naturally produce keys, the map adapters will use the
@@ -1494,7 +1494,7 @@ public:
   virtual int recover_key (const KEY &modified_key,
                            KEY &original_key);
 
-  /**
+  /*
    * Reassociate @a key with @a value. The function fails if @a key is
    * not in the map for maps that do not allow user specified keys.
    * However, for maps that allow user specified keys, if the key is
@@ -1503,7 +1503,7 @@ public:
   virtual int rebind (const KEY &key,
                       const VALUE &value);
 
-  /**
+  /*
    * Reassociate @a key with @a value, storing the old value into the
    * "out" parameter @a old_value.  The function fails if @a key is not
    * in the map for maps that do not allow user specified keys.
@@ -1514,7 +1514,7 @@ public:
                       const VALUE &value,
                       VALUE &old_value);
 
-  /**
+  /*
    * Reassociate @a key with @a value, storing the old key and value
    * into the "out" parameters @a old_key and @a old_value.  The
    * function fails if @a key is not in the map for maps that do not
@@ -1527,7 +1527,7 @@ public:
                       KEY &old_key,
                       VALUE &old_value);
 
-  /**
+  /*
    * Associate @a key with @a value if and only if @a key is not in the
    * map.  If @a key is already in the map, then the @a value parameter
    * is overwritten with the existing value in the map. Returns 0 if a

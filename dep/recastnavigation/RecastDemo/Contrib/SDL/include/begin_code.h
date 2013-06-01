@@ -118,7 +118,7 @@
 #endif /* !EKA2 */
 #endif /* __SYMBIAN32__ */
 
-/**
+/*
  *  @file begin_code.h
  *  Force structure packing at 4 byte alignment.
  *  This is necessary if the header is included in code which has structure
@@ -138,7 +138,7 @@
 #pragma enumsalwaysint on
 #endif /* Compiler needs structure packing set */
 
-/**
+/*
  *  @def SDL_INLINE_OKAY
  *  Set up compiler-specific options for inlining functions
  */
@@ -166,7 +166,7 @@
 #endif /* GNU C */
 #endif /* SDL_INLINE_OKAY */
 
-/**
+/*
  *  @def __inline__
  *  If inlining isn't supported, remove "__inline__", turning static
  *  inlined functions into static functions (resulting in code bloat
@@ -176,7 +176,7 @@
 #define __inline__
 #endif
 
-/**
+/*
  *  @def NULL
  *  Apparently this is needed by several Windows compilers
  */

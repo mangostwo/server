@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  * @file Monitor_Query.h
  *
  * $Id: Monitor_Query.h 81753 2008-05-21 19:02:47Z parsons $
@@ -31,7 +31,7 @@ namespace ACE
 {
   namespace Monitor_Control
   {
-    /**
+    /*
      * @class Monitor_Point_Auto_Query
      *
      * @brief Automates periodic querying of monitor point classes.
@@ -46,7 +46,7 @@ namespace ACE
                                   const void* monitor_query);
     };
 
-    /**
+    /*
      * @class Monitor_Query
      *
      * @brief Handles queries for a specific monitor point, and

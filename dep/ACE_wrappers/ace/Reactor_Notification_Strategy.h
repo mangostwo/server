@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file   Reactor_Notification_Strategy.h
  *
  *  $Id: Reactor_Notification_Strategy.h 92345 2010-10-24 12:39:33Z johnnyw $
@@ -22,7 +22,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Reactor_Notification_Strategy
  *
  * @brief Used to notify an ACE_Reactor

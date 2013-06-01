@@ -1,4 +1,4 @@
-/**
+/*
   @file Image3.h
 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -20,7 +20,7 @@ namespace G3D {
 
 typedef ReferenceCountedPointer<class Image3> Image3Ref;
 
-/**
+/*
  RGB image with 32-bit floating point storage for each channel.
 
  See also G3D::Image3uint8, G3D::GImage.

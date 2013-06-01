@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    LOCK_SOCK_Acceptor.h
  *
  *  $Id: LOCK_SOCK_Acceptor.h 82723 2008-09-16 09:35:44Z johnnyw $
@@ -23,7 +23,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_LOCK_SOCK_Acceptor
  *
  * @brief Specialize ACE_SOCK_Acceptor to lock around <accept>;

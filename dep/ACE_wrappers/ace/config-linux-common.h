@@ -177,7 +177,7 @@
 # define ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB 1
 # define ACE_LACKS_SWAB
 #elif defined (__GNUC__)
-/**
+/*
  * GNU C compiler.
  *
  * We need to recognize the GNU C compiler since TAO has at least one

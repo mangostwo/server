@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  * @file CPU_Load_Monitor.h
  *
  * $Id: CPU_Load_Monitor.h 91743 2010-09-13 18:24:51Z johnnyw $
@@ -37,7 +37,7 @@ namespace ACE
 {
   namespace Monitor_Control
   {
-    /**
+    /*
      * @class CPU_Load_Monitor
      *
      * @brief Monitors percentage CPU utilization.

@@ -16,7 +16,7 @@
 
 namespace G3D {
 
-/**
+/*
  Locate the indices of the break between of the two 
  sections of the circular queue.  These are used to
  construct two for loops that iterate over the whole
@@ -33,7 +33,7 @@ namespace G3D {
     }
 
 
-/**
+/*
  Dynamic queue that uses a circular buffer for performance.
 
  Faster than std::deque for objects with constructors.
@@ -50,22 +50,22 @@ private:
     //
     //
 
-    /**
+    /*
      Only num elements are initialized.
      */
     T*                  data;
 
-    /**
+    /*
      Index of the next element to be dequeue-d in data.
      */
     int                 head;
 
-    /**
+    /*
      Number of elements (including head) that are visible and initialized.
      */
     int                 num;
     
-    /**
+    /*
      Size of data array in elements.
      */
     int                 numAllocated;
@@ -91,7 +91,7 @@ private:
     }
 
 
-    /**
+    /*
      Computes a data array index from a queue position.  The queue position
      may be negative.
      */
@@ -99,7 +99,7 @@ private:
         return (head + i + numAllocated) % numAllocated;
     }
 
-    /**
+    /*
      Allocates newSize elements and repacks the array.
      */
     void repackAndRealloc(int newSize) {
@@ -126,7 +126,7 @@ private:
         numAllocated = newSize;
     }
 
-    /**
+    /*
       Ensure that there is at least one element between
       the tail and head, wrapping around in the circular
       buffer.
@@ -147,7 +147,7 @@ public:
     }
 
 
-    /**
+    /*
     Copy constructor
     */
     Queue(const Queue& other) : data(NULL) {
@@ -155,7 +155,7 @@ public:
     }
 
 
-   /**
+   /*
     Destructor does not delete() the objects if T is a pointer type
     (e.g. T = int*) instead, it deletes the pointers themselves and 
     leaves the objects.  Call deleteAll if you want to dealocate
@@ -165,7 +165,7 @@ public:
         clear();
     }
 
-    /**
+    /*
      Insert a new element into the front of the queue
      (a traditional queue only uses pushBack).
      */
@@ -183,7 +183,7 @@ public:
         ++num;
     }
 
-    /**
+    /*
      Insert a new element at the end of the queue.
     */
     inline void pushBack(const T& e) {
@@ -197,7 +197,7 @@ public:
         ++num;
     }
 
-    /**
+    /*
      pushBack
      */
     inline void enqueue(const T& e) {
@@ -205,7 +205,7 @@ public:
     }
 
 
-    /**
+    /*
      Remove the last element from the queue.  The queue will never
      shrink in size.  (A typical queue only uses popFront).
      */
@@ -220,7 +220,7 @@ public:
         return result;
     }
 
-    /**
+    /*
     Remove the next element from the head of the queue.  The queue will never
     shrink in size. */
     inline T popFront() {
@@ -233,14 +233,14 @@ public:
     }
 
 
-   /**
+   /*
     popFront
     */
    inline T dequeue() {
        return popFront();
    }
 
-   /**
+   /*
     Removes all elements (invoking their destructors).
 
     @param freeStorage If false, the underlying array is not deallocated
@@ -276,7 +276,7 @@ public:
        clear(false);
    }
 
-   /**
+   /*
     Assignment operator.
     */
    Queue& operator=(const Queue& other) {
@@ -285,21 +285,21 @@ public:
        return *this;
    }
 
-   /**
+   /*
     Number of elements in the queue.
     */
    inline int size() const {
       return num;
    }
 
-   /**
+   /*
     Number of elements in the queue.
     */
    inline int length() const {
       return size();
    }
 
-   /**
+   /*
     Performs bounds checks in debug mode
     */
    inline T& operator[](int n) {
@@ -307,7 +307,7 @@ public:
       return data[index(n)];
    }
 
-   /**
+   /*
     Performs bounds checks in debug mode
     */
     inline const T& operator[](int n) const {
@@ -325,7 +325,7 @@ public:
         return (*this)[size() - 1];
     }
 
-    /**
+    /*
      Returns true if the given element is in the queue.
      */
     bool contains(const T& e) const {
@@ -338,7 +338,7 @@ public:
         return false;
     }
 
-   /**
+   /*
     Calls delete on all objects[0...size-1]
     and sets the queue size to zero.
     */

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Containers.h
  *
  *  $Id: Containers.h 80826 2008-03-04 14:51:23Z wotte $
@@ -28,7 +28,7 @@ template <class T> class ACE_Double_Linked_List_Iterator_Base;
 template <class T> class ACE_Double_Linked_List_Iterator;
 template <class T> class ACE_Double_Linked_List_Reverse_Iterator;
 
-/**
+/*
  * @class ACE_DLList_Node
  *
  * @brief Base implementation of element in a DL list.  Needed for

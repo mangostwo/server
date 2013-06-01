@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Cached_Connect_Strategy_T.h
  *
  *  $Id: Cached_Connect_Strategy_T.h 92097 2010-09-30 05:41:49Z msmit $
@@ -32,7 +32,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Cached_Connect_Strategy_Ex
  *
  * @brief A connection strategy which caches connections to peers
@@ -68,7 +68,7 @@ public:
   /// connections purged.
   virtual int mark_as_closed_i (const void *recycling_act);
 
-  /**
+  /*
    * Since g++ version < 2.8 arent happy with templates, this special
    * method had to be devised to avoid memory leaks and perform
    * cleanup of the <connection_cache_>.
@@ -155,7 +155,7 @@ protected:
                                      int perms,
                                      int &found);
 
-  /**
+  /*
    * Connection of the svc_handler with the remote host.  This method
    * also encapsulates the connection done with auto_purging under the
    * hood. If the connect failed due to the process running out of
@@ -181,7 +181,7 @@ protected:
 // For linkers which cant grok long names...
 #define ACE_Bounded_Cached_Connect_Strategy ABCCS
 
-/**
+/*
  * @class ACE_Bounded_Cached_Connect_Strategy
  *
  * @brief

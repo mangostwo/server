@@ -23,7 +23,7 @@
 
 const ACE_TCHAR* g_ParameterFileName = ACE_TEXT("Parameters.txt");
 
-/**
+/*
  * This simple and small class manages user-input command line
  * parameters and parameter history file.
  *
@@ -33,28 +33,28 @@ const ACE_TCHAR* g_ParameterFileName = ACE_TEXT("Parameters.txt");
 class ParameterList
 {
 public:
-    /**
+    /*
      * Default Ctor.
      */
     ParameterList() : next_(0), param_(0) {};
 
-    /**
+    /*
      * Dtor: deletes all sub-PameterList objects as well as
      *       memory block allocated for the param_ by _wcsdup().
      */
     ~ParameterList() { free(param_); delete next_; };
 
-    /**
+    /*
      * Add a new parameter to the list.
      */
     void addParameter(char*);
 
-    /**
+    /*
      * Add a new parameter to the list.
      */
     void addParameter(ACE_TCHAR*);
 
-    /**
+    /*
      * Save all parameters stored in the list to the
      * file.
      * Note that 'outputFile' is only for the internal use
@@ -62,19 +62,19 @@ public:
      */
     void saveParameter(FILE* outputFile = 0);
 
-    /**
+    /*
      * Send out windows message to load/update parameters.
      */
     void sendParameterMSG(HWND, UINT);
 
 private:
-    /**
+    /*
      * A pointer to the next ParameterList object.
      * This attribute is totally hidden from user.
      */
     ParameterList* next_;
 
-    /**
+    /*
      * User-specified command line parameter.
      * This attribute is totally hidden from user.
      */

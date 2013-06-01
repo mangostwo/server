@@ -1,4 +1,4 @@
-/**
+/*
  @file Color1.h
  
  Monochrome Color class
@@ -21,7 +21,7 @@
 
 namespace G3D {
 
-/**
+/*
  Monochrome color.  This is just a float, but it has nice semantics
  because a scaling by 255 automatically occurs when switching between
  fixed point (Color1uint8) and floating point (Color1) formats.
@@ -37,7 +37,7 @@ private:
 public:
     float value;
 
-    /**
+    /*
     Initializes to 0
      */
     inline Color1() : value(0) {}

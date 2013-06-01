@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    XtReactor.h
  *
  *  $Id: XtReactor.h 91743 2010-09-13 18:24:51Z johnnyw $
@@ -29,7 +29,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_XtReactorID
  *
  * @brief This little class is necessary due to the way that Microsoft
@@ -48,7 +48,7 @@ public:
   ACE_XtReactorID *next_;
 };
 
-/**
+/*
  * @class ACE_XtReactor
  *
  * @brief An object-oriented event demultiplexor and event handler

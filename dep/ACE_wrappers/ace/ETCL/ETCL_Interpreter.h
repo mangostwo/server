@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    ETCL_Interpreter.h
  *
  *  $Id: ETCL_Interpreter.h 82434 2008-07-28 11:40:36Z johnnyw $
@@ -35,7 +35,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ETCL_Interpreter
  *
  * @brief ETCL_Interpreter is the superclass for all ETCL interpreters.
@@ -76,7 +76,7 @@ extern int yylex (void);
 #undef YY_INPUT
 #define YY_INPUT(b, r, ms) (r = Lex_String_Input::copy_into(b, ms))
 
-/**
+/*
  * @class Lex_String_Input
  *
  * @brief Have Lex read from a string and not from stdin. Essentially,

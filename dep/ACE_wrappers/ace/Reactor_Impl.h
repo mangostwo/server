@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Reactor_Impl.h
  *
  *  $Id: Reactor_Impl.h 84316 2009-02-03 19:46:05Z johnnyw $
@@ -36,7 +36,7 @@ class ACE_Sig_Action;
 class ACE_Sig_Handler;
 class ACE_Sig_Set;
 
-/**
+/*
  * @class ACE_Reactor_Notify
  *
  * @internal This class is for ACE internal use only.
@@ -53,7 +53,7 @@ public:
                     int disable_notify = 0) = 0;
   virtual int close (void) = 0;
 
-  /**
+  /*
    * Called by a thread when it wants to unblock the <Reactor_Impl>.
    * This wakeups the <Reactor_Impl> if currently blocked.  Pass over
    * both the <Event_Handler> *and* the @a mask to allow the caller to
@@ -89,7 +89,7 @@ public:
   /// the <Reactor_Impl>
   virtual int read_notify_pipe (ACE_HANDLE handle,
                                 ACE_Notification_Buffer &buffer) = 0;
-  /**
+  /*
    * Set the maximum number of times that the <handle_input> method
    * will iterate and dispatch the ACE_Event_Handlers that are
    * passed in via the notify queue before breaking out of the event
@@ -100,7 +100,7 @@ public:
    */
   virtual void max_notify_iterations (int) = 0;
 
-  /**
+  /*
    * Get the maximum number of times that the <handle_input> method
    * will iterate and dispatch the ACE_Event_Handlers that are
    * passed in via the notify queue before breaking out of its event
@@ -108,7 +108,7 @@ public:
    */
   virtual int max_notify_iterations (void) = 0;
 
-  /**
+  /*
    * Purge any notifications pending in this reactor for the specified
    * ACE_Event_Handler object. Returns the number of notifications
    * purged. Returns -1 on error.
@@ -120,7 +120,7 @@ public:
   virtual void dump (void) const = 0;
 };
 
-/**
+/*
  * @class ACE_Reactor_Impl
  *
  * @brief An abstract class for implementing the Reactor Pattern.
@@ -139,7 +139,7 @@ public:
                     int disable_notify_pipe = 0,
                     ACE_Reactor_Notify * = 0) = 0;
 
-  /**
+  /*
    * Returns 0, if the size of the current message has been put in
    * @a size Returns -1, if not.  ACE_HANDLE allows the reactor to
    * check if the caller is valid.
@@ -159,14 +159,14 @@ public:
   virtual int close (void) = 0;
 
   // = Event loop drivers.
-  /**
+  /*
    * Returns non-zero if there are I/O events "ready" for dispatching,
    * but does not actually dispatch the event handlers.  By default,
    * don't block while checking this, i.e., "poll".
    */
   virtual int work_pending (const ACE_Time_Value &max_wait_time =  ACE_Time_Value::zero)  = 0;
 
-  /**
+  /*
    * This event loop driver blocks for up to @a max_wait_time before
    * returning.  It will return earlier if events occur.  Note that
    * @a max_wait_time can be 0, in which case this method blocks
@@ -191,7 +191,7 @@ public:
   virtual int handle_events (ACE_Time_Value *max_wait_time = 0) = 0;
   virtual int alertable_handle_events (ACE_Time_Value *max_wait_time = 0) = 0;
 
-  /**
+  /*
    * This method is just like the one above, except the
    * @a max_wait_time value is a reference and can therefore never be
    * NULL.
@@ -206,14 +206,14 @@ public:
 
   // = Event handling control.
 
-  /**
+  /*
    * Return the status of Reactor.  If this function returns 0, the reactor is
    * actively handling events.  If it returns non-zero, <handling_events> and
    * <handle_alertable_events> return -1 immediately.
    */
   virtual int deactivated (void) = 0;
 
-  /**
+  /*
    * Control whether the Reactor will handle any more incoming events or not.
    * If @a do_stop == 1, the Reactor will be disabled.  By default, a reactor
    * is in active state and can be deactivated/reactived as wish.
@@ -242,7 +242,7 @@ public:
   // register_handler(ACE_Event_Handler*,ACE_HANDLE). Therefore, we
   // have restricted this method to Win32 only.
 
-  /**
+  /*
    * Register an @a event_handler that will be notified when
    * <event_handle> is signaled.  Since no event mask is passed
    * through this interface, it is assumed that the <event_handle>
@@ -253,7 +253,7 @@ public:
 
 #endif /* ACE_WIN32 */
 
-  /**
+  /*
    * Register an @a event_handler that will be notified when
    * <event_handle> is signaled.  @a mask specifies the network events
    * that the @a event_handler is interested in.
@@ -268,7 +268,7 @@ public:
                                 ACE_Event_Handler *event_handler,
                                 ACE_Reactor_Mask mask) = 0;
 
-  /**
+  /*
    * Register @a new_sh to handle the signal @a signum using the
    * @a new_disp.  Returns the @a old_sh that was previously registered
    * (if any), along with the @a old_disp of the signal handler.
@@ -285,7 +285,7 @@ public:
                                 ACE_Event_Handler *new_sh,
                                 ACE_Sig_Action *new_disp = 0) = 0;
 
-  /**
+  /*
    * Removes @a event_handler.  Note that the I/O handle will be
    * obtained using <get_handle> method of @a event_handler .  If
    * @a mask == ACE_Event_Handler::DONT_CALL then the <handle_close>
@@ -294,7 +294,7 @@ public:
   virtual int remove_handler (ACE_Event_Handler *event_handler,
                               ACE_Reactor_Mask mask) = 0;
 
-  /**
+  /*
    * Removes @a handle.  If @a mask == ACE_Event_Handler::DONT_CALL
    * then the <handle_close> method of the associated <event_handler>
    * is not invoked.
@@ -302,7 +302,7 @@ public:
   virtual int remove_handler (ACE_HANDLE handle,
                               ACE_Reactor_Mask mask) = 0;
 
-  /**
+  /*
    * Removes all handles in @a handle_set.  If @a mask ==
    * ACE_Event_Handler::DONT_CALL then the <handle_close> method of
    * the associated <event_handler>s is not invoked.
@@ -310,7 +310,7 @@ public:
   virtual int remove_handler (const ACE_Handle_Set &handle_set,
                               ACE_Reactor_Mask mask) = 0;
 
-  /**
+  /*
    * Remove the ACE_Event_Handler currently associated with @a signum.
    * Install the new disposition (if given) and return the previous
    * disposition (if desired by the caller).  Returns 0 on success and
@@ -365,7 +365,7 @@ public:
 
   // = Timer management.
 
-  /**
+  /*
    * Schedule an ACE_Event_Handler that will expire after an amount
    * of time.  The return value of this method, a timer_id value,
    * uniquely identifies the event_handler in the ACE_Reactor's
@@ -387,7 +387,7 @@ public:
                                const ACE_Time_Value &delay,
                                const ACE_Time_Value &interval = ACE_Time_Value::zero) = 0;
 
-  /**
+  /*
    * Resets the interval of the timer represented by @a timer_id to
    * @a interval, which is specified in relative time to the current
    * <gettimeofday>.  If @a interval is equal to
@@ -402,7 +402,7 @@ public:
   virtual int cancel_timer (ACE_Event_Handler *event_handler,
                             int dont_call_handle_close = 1) = 0;
 
-  /**
+  /*
    * Cancel the single Event_Handler that matches the @a timer_id value
    * (which was returned from the schedule method).  If arg is
    * non-NULL then it will be set to point to the ``magic cookie''
@@ -437,7 +437,7 @@ public:
 
   // = Notification methods.
 
-  /**
+  /*
    * Notify @a event_handler of @a mask event.  The ACE_Time_Value
    * indicates how long to blocking trying to notify.  If @a timeout ==
    * 0, the caller will block until action is possible, else will wait
@@ -447,7 +447,7 @@ public:
                       ACE_Reactor_Mask mask = ACE_Event_Handler::EXCEPT_MASK,
                       ACE_Time_Value * = 0) = 0;
 
-  /**
+  /*
    * Set the maximum number of times that ACE_Reactor_Impl will
    * iterate and dispatch the ACE_Event_Handlers that are passed in
    * via the notify queue before breaking out of its
@@ -459,7 +459,7 @@ public:
    */
   virtual void max_notify_iterations (int) = 0;
 
-  /**
+  /*
    * Get the maximum number of times that the ACE_Reactor_Impl will
    * iterate and dispatch the ACE_Event_Handlers that are passed in
    * via the notify queue before breaking out of its
@@ -467,7 +467,7 @@ public:
    */
   virtual int max_notify_iterations (void) = 0;
 
-  /**
+  /*
    * Purge any notifications pending in this reactor for the specified
    * ACE_Event_Handler object. Returns the number of notifications
    * purged. Returns -1 on error.
@@ -475,13 +475,13 @@ public:
   virtual int purge_pending_notifications (ACE_Event_Handler * = 0,
                                            ACE_Reactor_Mask    = ACE_Event_Handler::ALL_EVENTS_MASK) = 0;
 
-  /**
+  /*
    * Return the Event_Handler associated with @a handle.  Return 0 if
    * @a handle is not registered.
    */
   virtual ACE_Event_Handler *find_handler (ACE_HANDLE handle) = 0;
 
-  /**
+  /*
    * Check to see if @a handle is associated with a valid Event_Handler
    * bound to @a mask.  Return the @a event_handler associated with this
    * handler if @a event_handler != 0.
@@ -490,7 +490,7 @@ public:
                        ACE_Reactor_Mask mask,
                        ACE_Event_Handler **event_handler = 0) = 0;
 
-  /**
+  /*
    * Check to see if @a signum is associated with a valid Event_Handler
    * bound to a signal.  Return the @a event_handler associated with
    * this handler if @a event_handler != 0.

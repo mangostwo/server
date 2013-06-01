@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    UPIPE_Connector.h
  *
  *  $Id: UPIPE_Connector.h 82723 2008-09-16 09:35:44Z johnnyw $
@@ -25,7 +25,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_UPIPE_Connector
  *
  * @brief Defines an active connection factory for the
@@ -38,7 +38,7 @@ public:
   /// Default constructor.
   ACE_UPIPE_Connector (void);
 
-  /**
+  /*
    * Actively connect and produce a @a new_stream if things go well.
    * The @a addr is the address that we are trying to connect
    * with.  The @a timeout is the amount of time to wait to connect.
@@ -63,7 +63,7 @@ public:
                        int flags = O_RDWR,
                        int perms = 0);
 
-  /**
+  /*
    * Actively connect and produce a @a new_stream if things go well.
    * The @a addr is the address that we are trying to connect
    * with.  The @a timeout is the amount of time to wait to connect.

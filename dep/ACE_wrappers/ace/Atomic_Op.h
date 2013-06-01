@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Atomic_Op.h
  *
  *  $Id: Atomic_Op.h 91523 2010-08-27 14:18:02Z johnnyw $
@@ -62,7 +62,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 #if defined (ACE_HAS_BUILTIN_ATOMIC_OP)
 
-/**
+/*
  * @brief Specialization of ACE_Atomic_Op for platforms that
  *        support atomic integer operations.
  *
@@ -159,7 +159,7 @@ private:
   static long (*exchange_add_fn_) (volatile long *, long);
 };
 
-/**
+/*
  * @brief Specialization of ACE_Atomic_Op for platforms that
  *        support atomic integer operations.
  *

@@ -1,4 +1,4 @@
-/**
+/*
  @file Cylinder.h
   
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -21,7 +21,7 @@ namespace G3D {
 
 class Line;
 class AABox;
-/**
+/*
  Right cylinder
  */
 class Cylinder {
@@ -55,7 +55,7 @@ public:
         return (i == 0) ? p1 : p2;
     }
 
-    /**
+    /*
      Returns true if the point is inside the Cylinder or on its surface.
      */
     bool contains(const Vector3& p) const;
@@ -75,7 +75,7 @@ public:
         return (p1 - p2).magnitude();
     }
 
-    /**
+    /*
      Get close axis aligned bounding box.
      With vertical world orientation, the top and bottom might not be very tight. */
     void getBounds(AABox& out) const;

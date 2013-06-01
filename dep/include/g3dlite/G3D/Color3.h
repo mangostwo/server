@@ -1,4 +1,4 @@
-/**
+/*
  @file Color3.h
  
  Color class
@@ -26,7 +26,7 @@
 namespace G3D {
 class Any;
 
-/**
+/*
  Do not subclass-- this implementation makes assumptions about the
  memory layout.
  */
@@ -39,7 +39,7 @@ private:
     bool operator>=(const Color3&) const;
 
 public:
-    /**
+    /*
      Does not initialize fields.
      */
     Color3();
@@ -70,7 +70,7 @@ public:
         return *this;
     }
 
-    /**
+    /*
      Initialize from another color.
      */
     Color3 (const Color3& other);
@@ -87,7 +87,7 @@ public:
 
     bool isFinite() const;
 
-    /**
+    /*
      Initialize from an HTML-style color (e.g. 0xFF0000 == RED)
      */
     static Color3 fromARGB(uint32);
@@ -100,7 +100,7 @@ public:
      \sa pastelMap */
     static Color3 ansiMap(uint32 i);
 
-    /**
+    /*
        Generate colors using a hash such that adjacent values
        are unlikely to have similar colors.
 
@@ -112,7 +112,7 @@ public:
      */
     static Color3 pastelMap(uint32 i);
 
-    /**
+    /*
      * Channel value.
      */
     float r, g, b;
@@ -205,7 +205,7 @@ public:
     }
 
 
-    /**
+    /*
      *  Converts from HSV to RGB , note: toHSV(fromHSV(_hsv)) may not be _hsv, if it is at a grey point or black point.
      *  The components of _hsv should lie in the unit interval. 
      *  @cite Alvy Ray Smith SIGGRAPH 1978 "Color Gamut Transform Pairs"

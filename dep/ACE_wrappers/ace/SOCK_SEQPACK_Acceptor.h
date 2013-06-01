@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    SOCK_SEQPACK_Acceptor.h
  *
  *  $Id: SOCK_SEQPACK_Acceptor.h 84325 2009-02-04 22:46:30Z shuston $
@@ -31,7 +31,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Time_Value;
 
-/**
+/*
  * @class ACE_SOCK_SEQPACK_Acceptor
  *
  * @brief Defines a factory that creates new ACE_Associations passively.
@@ -49,7 +49,7 @@ public:
   /// Default constructor.
   ACE_SOCK_SEQPACK_Acceptor (void);
 
-  /**
+  /*
    * Initialize a passive-mode BSD-style acceptor socket (no QoS).
    * @a local_sap is the address that we're going to listen for
    * connections on.  If @a reuse_addr is 1 then we'll use the
@@ -80,7 +80,7 @@ public:
                              int backlog = ACE_DEFAULT_BACKLOG,
                              int protocol = 132);
 
-  /**
+  /*
    * Initialize a passive-mode BSD-style acceptor socket (no QoS).
    * @a local_sap is the address that we're going to listen for
    * connections on.  If @a reuse_addr is 1 then we'll use the
@@ -120,7 +120,7 @@ public:
   ~ACE_SOCK_SEQPACK_Acceptor (void);
 
   // = Passive connection <accept> methods.
-  /**
+  /*
    * Accept a new ACE_SOCK_SEQPACK_Association connection.  A @a timeout of 0
    * means block forever, a @a timeout of {0, 0} means poll.  <restart>
    * == 1 means "restart if interrupted," i.e., if errno == EINTR.
@@ -158,7 +158,7 @@ protected:
                             int in_blocking_mode,
                             bool reset_new_handle) const;
 
-  /**
+  /*
    * This method factors out the common <open> code and is called by
    * both the QoS-enabled <open> method and the BSD-style <open>
    * method.

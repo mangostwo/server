@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    Condition_T.h
  *
  *  $Id: Condition_T.h 81462 2008-04-28 11:39:40Z johnnyw $
@@ -30,7 +30,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Time_Value;
 
-/**
+/*
  * @class ACE_Condition
  *
  * @brief ACE_Condition variable wrapper, which allows threads to block
@@ -63,7 +63,7 @@ public:
   ~ACE_Condition (void);
 
   // = Lock accessors.
-  /**
+  /*
    * Block on condition, or until absolute time-of-day has passed.  If
    * @a abstime == 0 use "blocking" <wait> semantics.  Else, if @a abstime
    * != 0 and the call times out before the condition is signaled
@@ -74,7 +74,7 @@ public:
   /// Block on condition.
   int wait (void);
 
-  /**
+  /*
    * Block on condition or until absolute time-of-day has passed.  If
    * abstime == 0 use "blocking" wait() semantics on the <mutex>
    * passed as a parameter (this is useful if you need to store the
@@ -116,7 +116,7 @@ private:
   ACE_UNIMPLEMENTED_FUNC (ACE_Condition (const ACE_Condition<MUTEX> &))
 };
 
-/**
+/*
  * @class ACE_Thread_Condition
  *
  * @brief ACE_Condition variable wrapper that works within processes.

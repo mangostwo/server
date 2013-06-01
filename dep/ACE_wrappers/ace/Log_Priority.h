@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Log_Priority.h
  *
  *  $Id: Log_Priority.h 80826 2008-03-04 14:51:23Z wotte $
@@ -19,7 +19,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @enum ACE_Log_Priority
  *
  * @brief This data type indicates the relative priorities of the

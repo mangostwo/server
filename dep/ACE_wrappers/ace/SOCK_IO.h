@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    SOCK_IO.h
  *
  *  $Id: SOCK_IO.h 81014 2008-03-19 11:41:31Z johnnyw $
@@ -25,7 +25,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_SOCK_IO
  *
  * @brief Defines the methods for the ACE socket wrapper I/O routines
@@ -73,7 +73,7 @@ public:
                  int n,
                  const ACE_Time_Value *timeout = 0) const;
 
-  /**
+  /*
    * Allows a client to read from a socket without having to provide a
    * buffer to read.  This method determines how much data is in the
    * socket, allocates a buffer of this size, reads in the data, and

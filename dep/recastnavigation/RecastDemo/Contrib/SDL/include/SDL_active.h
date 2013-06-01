@@ -20,7 +20,7 @@
     slouken@libsdl.org
 */
 
-/**
+/*
  *  @file SDL_active.h
  *  Include file for SDL application focus event handling 
  */

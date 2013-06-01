@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    INET_Addr.h
  *
  *  $Id: INET_Addr.h 91626 2010-09-07 10:59:20Z johnnyw $
@@ -24,7 +24,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_INET_Addr
  *
  * @brief Defines a C++ wrapper facade for the Internet domain address
@@ -52,7 +52,7 @@ public:
                  const char host_name[],
                  int address_family = AF_UNSPEC);
 
-  /**
+  /*
    * Initializes an ACE_INET_Addr from the @a address, which can be
    * "ip-number:port-number" (e.g., "tango.cs.wustl.edu:1234" or
    * "128.252.166.57:1234").  If there is no ':' in the @a address it
@@ -62,7 +62,7 @@ public:
   explicit ACE_INET_Addr (const char address[],
                           int address_family = AF_UNSPEC);
 
-  /**
+  /*
    * Creates an ACE_INET_Addr from a @a port_number and an Internet
    * @a ip_addr.  This method assumes that @a port_number and @a ip_addr
    * are in host byte order. If you have addressing information in
@@ -77,7 +77,7 @@ public:
                  const char host_name[],
                  const char protocol[] = "tcp");
 
-  /**
+  /*
    * Uses getservbyname() to create an ACE_INET_Addr from a
    * @a port_name, an Internet @a ip_addr, and the @a protocol.  This
    * method assumes that @a ip_addr is in host byte order.
@@ -113,7 +113,7 @@ public:
   /// Initializes from another ACE_INET_Addr.
   int set (const ACE_INET_Addr &);
 
-  /**
+  /*
    * Initializes an ACE_INET_Addr from a @a port_number and the
    * remote @a host_name.  If @a encode is non-zero then @a port_number is
    * converted into network byte order, otherwise it is assumed to be
@@ -127,7 +127,7 @@ public:
            int encode = 1,
            int address_family = AF_UNSPEC);
 
-  /**
+  /*
    * Initializes an ACE_INET_Addr from a @a port_number and an Internet
    * @a ip_addr.  If @a encode is non-zero then the port number and IP address
    * are converted into network byte order, otherwise they are assumed to be
@@ -147,7 +147,7 @@ public:
            const char host_name[],
            const char protocol[] = "tcp");
 
-  /**
+  /*
    * Uses getservbyname() to initialize an ACE_INET_Addr from a
    * @a port_name, an @a ip_addr, and the @a protocol.  This assumes that
    * @a ip_addr is already in network byte order.
@@ -156,7 +156,7 @@ public:
            ACE_UINT32 ip_addr,
            const char protocol[] = "tcp");
 
-  /**
+  /*
    * Initializes an ACE_INET_Addr from the @a addr, which can be
    * "ip-number:port-number" (e.g., "tango.cs.wustl.edu:1234" or
    * "128.252.166.57:1234").  If there is no ':' in the @a address it
@@ -196,7 +196,7 @@ public:
   /// Set a pointer to the address.
   virtual void set_addr (void *, int len, int map);
 
-  /**
+  /*
    * Transform the current ACE_INET_Addr address into string format.
    * If @a ipaddr_format is ttrue this produces "ip-number:port-number"
    * (e.g., "128.252.166.57:1234"), whereas if @a ipaddr_format is false
@@ -208,7 +208,7 @@ public:
                               size_t size,
                               int ipaddr_format = 1) const;
 
-  /**
+  /*
    * Initializes an ACE_INET_Addr from the @a address, which can be
    * "ip-addr:port-number" (e.g., "tango.cs.wustl.edu:1234"),
    * "ip-addr:port-name" (e.g., "tango.cs.wustl.edu:telnet"),
@@ -226,7 +226,7 @@ public:
   */
 #endif /* ACE_HAS_WCHAR */
 
-  /**
+  /*
    * Sets the port number without affecting the host name.  If
    * @a encode is enabled then @a port_number is converted into network
    * byte order, otherwise it is assumed to be in network byte order
@@ -235,7 +235,7 @@ public:
   void set_port_number (u_short,
                         int encode = 1);
 
-  /**
+  /*
    * Sets the address without affecting the port number.  If
    * @a encode is enabled then @a ip_addr is converted into network
    * byte order, otherwise it is assumed to be in network byte order
@@ -251,7 +251,7 @@ public:
                    int map = 0);
 
 #if (defined (__linux__) || defined (ACE_WIN32)) && defined (ACE_HAS_IPV6)
-  /**
+  /*
    * Sets the interface that should be used for this address. This only has
    * an effect when the address is link local, otherwise it does nothing.
    */
@@ -261,7 +261,7 @@ public:
   /// Return the port number, converting it into host byte-order.
   u_short get_port_number (void) const;
 
-  /**
+  /*
    * Return the character representation of the name of the host,
    * storing it in the @a hostname (which is assumed to be
    * @a hostnamelen bytes long).  This version is reentrant.  If
@@ -276,7 +276,7 @@ public:
                      size_t hostnamelen) const;
 #endif /* ACE_HAS_WCHAR */
 
-  /**
+  /*
    * Return the character representation of the hostname.  This
    * version is non-reentrant since it returns a pointer to a static
    * data area.  You should therefore either (1) do a "deep copy" of
@@ -286,14 +286,14 @@ public:
    */
   const char *get_host_name (void) const;
 
-  /**
+  /*
    * Return the "dotted decimal" Internet address representation of
    * the hostname storing it in the @a addr (which is assumed to be
    * @a addr_size bytes long).  This version is reentrant.
    */
   const char *get_host_addr (char *addr, int addr_size) const;
 
-  /**
+  /*
    * Return the "dotted decimal" Internet address representation of
    * the hostname.  This version is non-reentrant since it returns a
    * pointer to a static data area.  You should therefore either
@@ -327,7 +327,7 @@ public:
   bool is_ipv4_compat_ipv6 (void) const;
 #endif /* ACE_HAS_IPV6 */
 
-  /**
+  /*
    * Returns @c true if @c this is less than @a rhs.  In this context,
    * "less than" is defined in terms of IP address and TCP port
    * number.  This operator makes it possible to use @c ACE_INET_Addrs

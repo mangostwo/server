@@ -1,4 +1,4 @@
-/**
+/*
   @file Matrix.h
   @author Morgan McGuire, http://graphics.cs.williams.edu
 
@@ -188,7 +188,7 @@ public:
         /** Matrix of all cofactors */
         void cofactor(Impl& out) const;
 
-        /**
+        /*
          Cofactor [r][c] is defined as C[r][c] = -1 ^(r+c) * det(A[r][c]),
          where A[r][c] is the (R-1)x(C-1) matrix formed by removing row r and
          column c from the original matrix. 
@@ -466,7 +466,7 @@ public:
         return negate();
     }
 
-    /**
+    /*
      A<SUP>-1</SUP> computed using the Gauss-Jordan algorithm,
      for square matrices.
      Run time is <I>O(R<sup>3</sup>)</I>, where <I>R</i> is the 
@@ -482,7 +482,7 @@ public:
         return impl->determinant();
     }
 
-    /**
+    /*
      A<SUP>T</SUP>
      */
     inline Matrix transpose() const {
@@ -511,7 +511,7 @@ public:
     /** Called from pseudoInverse when the matrix has size > 4 along some dimension.*/
     Matrix svdPseudoInverse(float tolerance = -1) const;
 
-    /**
+    /*
      (A<SUP>T</SUP>A)<SUP>-1</SUP>A<SUP>T</SUP>) computed
      using Gauss-Jordan elimination.
      */
@@ -589,7 +589,7 @@ public:
     /** 2-norm (sqrt(sum(squares)) */
     double norm() const;
 
-    /**
+    /*
       Low-level SVD functionality.  Useful for applications that do not want
       to construct a Matrix but need to perform the SVD operation.
 

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    MEM_IO.h
  *
  *  $Id: MEM_IO.h 80826 2008-03-04 14:51:23Z wotte $
@@ -39,7 +39,7 @@ public:
 
   virtual ~ACE_Reactive_MEM_IO (void);
 
-  /**
+  /*
    * Initialize the MEM_SAP object.
    *
    * @a options is used to pass in the Malloc_Options to initialize
@@ -49,7 +49,7 @@ public:
                     const ACE_TCHAR *name,
                     MALLOC_OPTIONS *options);
 
-  /**
+  /*
    * Fetch location of next available data into <recv_buffer_>.
    * As this operation read the address of the data off the socket
    * using ACE::recv, @a timeout only applies to ACE::recv.
@@ -58,7 +58,7 @@ public:
                             int flags,
                             const ACE_Time_Value *timeout);
 
-  /**
+  /*
    * Wait to to @a timeout amount of time to send @a buf.  If <send>
    * times out a -1 is returned with @c errno == ETIME.  If it succeeds
    * the number of bytes sent is returned.  */
@@ -66,7 +66,7 @@ public:
                             int flags,
                             const ACE_Time_Value *timeout);
 
-  /**
+  /*
    * Convert the buffer offset <off> to absolute address to @a buf.
    * Return the size of valid information containing in the @a buf,
    * -1 if <shm_malloc_> is not initialized.
@@ -111,14 +111,14 @@ public:
 
   virtual ~ACE_MT_MEM_IO (void);
 
-  /**
+  /*
    * Initialize the MEM_SAP object.
    */
   virtual int init (ACE_HANDLE handle,
                     const ACE_TCHAR *name,
                     MALLOC_OPTIONS *options);
 
-  /**
+  /*
    * Fetch location of next available data into <recv_buffer_>.
    * As this operation read the address of the data off the socket
    * using ACE::recv, @a timeout only applies to ACE::recv.
@@ -127,7 +127,7 @@ public:
                             int flags,
                             const ACE_Time_Value *timeout);
 
-  /**
+  /*
    * Wait to to @a timeout amount of time to send @a buf.  If <send>
    * times out a -1 is returned with @c errno == ETIME.  If it succeeds
    * the number of bytes sent is returned.  */
@@ -141,7 +141,7 @@ private:
 };
 #endif /* ACE_WIN32 || !_ACE_USE_SV_SEM */
 
-/**
+/*
  * @class ACE_MEM_IO
  *
  * @brief Defines the methods for the ACE shared memeory wrapper I/O
@@ -183,14 +183,14 @@ public:
     MT
   }  Signal_Strategy;
 
-  /**
+  /*
    * Initialize the MEM_SAP object.
    */
   int init (const ACE_TCHAR *name,
             ACE_MEM_IO::Signal_Strategy type = ACE_MEM_IO::Reactive,
             ACE_MEM_SAP::MALLOC_OPTIONS *options = 0);
 
-  /**
+  /*
    * Finalizing the MEM_IO object.  This method doesn't invoke
    * the <remove> method.
    */
@@ -216,7 +216,7 @@ public:
   ssize_t recv (void *buf,
                 size_t n) ;
 
-  /**
+  /*
    * Wait to to @a timeout amount of time to send up to @a n bytes into
    * @a buf from <handle> (uses the <send> call).  If <send> times out
    * a -1 is returned with @c errno == ETIME.  If it succeeds the
@@ -226,7 +226,7 @@ public:
                 size_t n,
                 const ACE_Time_Value *timeout);
 
-  /**
+  /*
    * Wait to to @a timeout amount of time to send up to @a n bytes into
    * @a buf from <handle> (uses the <send> call).  If <send> times out
    * a -1 is returned with @c errno == ETIME.  If it succeeds the
@@ -237,7 +237,7 @@ public:
                 int flags,
                 const ACE_Time_Value *timeout);
 
-  /**
+  /*
    * Wait to to @a timeout amount of time to send the @a message_block.
    * If <send> times out a -1 is returned with @c errno == ETIME.  If
    * it succeeds the number of bytes sent is returned.
@@ -245,7 +245,7 @@ public:
   ssize_t send (const ACE_Message_Block *message_block,
                 const ACE_Time_Value *timeout);
 
-  /**
+  /*
    * Wait up to @a timeout amount of time to receive up to @a n bytes
    * into @a buf from <handle> (uses the <recv> call).  If <recv> times
    * out a -1 is returned with @c errno == ETIME.  If it succeeds the
@@ -255,7 +255,7 @@ public:
                 size_t n,
                 const ACE_Time_Value *timeout);
 
-  /**
+  /*
    * Wait up to @a timeout amount of time to receive up to @a n bytes
    * into @a buf from <handle> (uses the <recv> call).  If <recv> times
    * out a -1 is returned with @c errno == ETIME.  If it succeeds the

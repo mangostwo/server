@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Log_Msg_IPC.h
  *
  *  $Id: Log_Msg_IPC.h 84536 2009-02-20 09:28:48Z johnnyw $
@@ -44,7 +44,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 /// Defines the interfaces for ACE_Log_Msg backend.
-/**
+/*
  * Implement an ACE_Log_Msg_Backend that logs to a remote logging
  * process.
  */
@@ -60,7 +60,7 @@ public:
   /// Open a new connection
   virtual int open (const ACE_TCHAR *logger_key);
 
-  /**
+  /*
    * Reset the backend.  When changing the logging destination the
    * backend may need to properly disconnect from the remote logging
    * daemon and reclaim some local resources.  But we try to reduce

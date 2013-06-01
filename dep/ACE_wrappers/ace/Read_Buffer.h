@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    Read_Buffer.h
  *
  *  $Id: Read_Buffer.h 92345 2010-10-24 12:39:33Z johnnyw $
@@ -29,7 +29,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Allocator;
 
-/**
+/*
  * @class ACE_Read_Buffer
  *
  * @brief Efficiently reads an arbitrarily large buffer from an input
@@ -64,7 +64,7 @@ public:
   /// Closes the FILE *.
   ~ACE_Read_Buffer (void);
 
-  /**
+  /*
    * Returns a pointer dynamically allocated with
    * ACE_Allocator::malloc() to data from the input stream up to (and
    * including) the @a terminator.  If @a search is >= 0 then all

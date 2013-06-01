@@ -1,4 +1,4 @@
-/**
+/*
   @file GLight.cpp
 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu

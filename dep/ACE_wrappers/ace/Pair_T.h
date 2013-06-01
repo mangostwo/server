@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    Pair_T.h
  *
  *  $Id: Pair_T.h 92097 2010-09-30 05:41:49Z msmit $
@@ -23,7 +23,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Reference_Pair
  *
  * @brief Defines a pair that only hold references.

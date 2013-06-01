@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    Event.h
  *
  *  $Id: Event.h 80826 2008-03-04 14:51:23Z wotte $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Event
  *
  * @brief A wrapper around the Win32 event locking mechanism.
@@ -50,7 +50,7 @@ public:
   /// Implicitly destroy the event variable.
   ~ACE_Event (void);
 
-  /**
+  /*
    * Explicitly destroy the event variable.  Note that only one thread
    * should call this method since it doesn't protect against race
    * conditions.
@@ -60,7 +60,7 @@ public:
   /// Underlying handle to event.
   ACE_event_t handle (void) const;
 
-  /**
+  /*
    * Set the underlying handle to event. Note that this method assumes
    * ownership of the <handle> and will close it down in <remove>.  If
    * you want the <handle> to stay open when <remove> is called make
@@ -70,7 +70,7 @@ public:
    */
   void handle (ACE_event_t new_handle);
 
-  /**
+  /*
    * if MANUAL reset
    *    sleep till the event becomes signaled
    *    event remains signaled after wait() completes.
@@ -86,7 +86,7 @@ public:
   int wait (const ACE_Time_Value *abstime,
             int use_absolute_time = 1);
 
-  /**
+  /*
    * if MANUAL reset
    *    wake up all waiting threads
    *    set to signaled state
@@ -97,7 +97,7 @@ public:
    */
   int signal (void);
 
-  /**
+  /*
    * if MANUAL reset
    *    wakeup all waiting threads and
    *    reset event

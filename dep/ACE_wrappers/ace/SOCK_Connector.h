@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    SOCK_Connector.h
  *
  *  $Id: SOCK_Connector.h 91626 2010-09-07 10:59:20Z johnnyw $
@@ -25,7 +25,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_QoS_Params;
 class ACE_Time_Value;
 
-/**
+/*
  * @class ACE_SOCK_Connector
  *
  * @brief Defines a factory that actively connects to a remote IP
@@ -46,7 +46,7 @@ public:
   /// Default constructor.
   ACE_SOCK_Connector (void);
 
-  /**
+  /*
    * Actively connect to a peer, producing a connected @c ACE_SOCK_Stream
    * object if the connection succeeds.
    *
@@ -93,7 +93,7 @@ public:
                       int protocol = 0);
 
 #if !defined (ACE_HAS_WINCE)
-  /**
+  /*
    * Actively connect to a peer, producing a connected @c ACE_SOCK_Stream
    * object if the connection succeeds.
    *
@@ -143,7 +143,7 @@ public:
                       int perms = 0);
 #endif  // ACE_HAS_WINCE
 
-  /**
+  /*
    * Actively connect to a peer, producing a connected @c ACE_SOCK_Stream
    * object if the connection succeeds.
    *
@@ -194,7 +194,7 @@ public:
                int protocol = 0);
 
 #if !defined (ACE_HAS_WINCE)
-  /**
+  /*
    * Actively connect to a peer, producing a connected @c ACE_SOCK_Stream
    * object if the connection succeeds.
    *
@@ -252,7 +252,7 @@ public:
   ~ACE_SOCK_Connector (void);
 
   // = Completion routine.
-  /**
+  /*
    * Try to complete a nonblocking connection that was begun by a
    * previous call to connect with a {0, 0} ACE_Time_Value timeout.
    * @see connect().

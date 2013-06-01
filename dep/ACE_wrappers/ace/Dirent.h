@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Dirent.h
  *
  *  $Id: Dirent.h 91064 2010-07-12 10:11:24Z johnnyw $
@@ -27,7 +27,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Dirent
  *
  * @brief Define a portable C++ directory-entry iterator based on the POSIX API.
@@ -53,7 +53,7 @@ public:
   void close (void);
 
   // = Iterator methods.
-  /**
+  /*
    * Returns a pointer to a structure representing the directory entry
    * at the current position in the directory stream to which dirp
    * refers, and positions the directory stream at the next entry,
@@ -72,7 +72,7 @@ public:
    */
   ACE_DIRENT *read (void);
 
-  /**
+  /*
    * Has the equivalent functionality as @c read() except that an
    * @a entry and @a result buffer must be supplied by the caller to
    * store the result.
@@ -85,7 +85,7 @@ public:
   /// stream.
   long tell (void);
 
-  /**
+  /*
    * Sets the position of the next @c read() operation on the
    * directory stream.  The new position reverts to the position
    * associated with the directory stream at the time the @c tell()
@@ -99,7 +99,7 @@ public:
    */
   void seek (long loc);
 
-  /**
+  /*
    * Resets the position of the directory stream to the beginning of
    * the directory.  It also causes the directory stream to refer to
    * the current state of the corresponding directory, as a call to

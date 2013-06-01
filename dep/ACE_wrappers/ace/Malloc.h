@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    Malloc.h
  *
  *  $Id: Malloc.h 81796 2008-05-28 13:46:21Z sma $
@@ -240,7 +240,7 @@ union ACE_max_align_info
 // ACE_MALLOC_HEADER_SIZE is the normalized malloc header size.
 #define ACE_MALLOC_HEADER_SIZE ACE_MALLOC_ROUNDUP(ACE_MALLOC_PADDING, ACE_MALLOC_ALIGN)
 
-/**
+/*
  * @class ACE_Control_Block
  *
  * @brief This information is stored in memory allocated by the <Memory_Pool>.
@@ -257,7 +257,7 @@ class ACE_Export ACE_Control_Block
 {
 public:
 
-  /**
+  /*
    * @class ACE_Malloc_Header
    *
    * @brief This is the control block header.  It's used by <ACE_Malloc>
@@ -289,7 +289,7 @@ public:
     void dump (void) const;
   };
 
-  /**
+  /*
    * @class ACE_Name_Node
    *
    * @brief This class supports "named memory regions" within ACE_Malloc.

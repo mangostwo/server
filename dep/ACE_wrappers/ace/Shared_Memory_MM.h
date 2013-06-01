@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    Shared_Memory_MM.h
  *
  *  $Id: Shared_Memory_MM.h 80826 2008-03-04 14:51:23Z wotte $
@@ -25,7 +25,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Shared_Memory_MM
  *
  * @brief Shared memory wrapper based on MMAP.

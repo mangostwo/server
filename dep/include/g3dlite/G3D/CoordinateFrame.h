@@ -1,4 +1,4 @@
-/**
+/*
  @file CoordinateFrame.h
 
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -34,7 +34,7 @@
 namespace G3D {
 class Any;
 
-/**
+/*
  A rigid body RT (rotation-translation) transformation.
     
 CoordinateFrame abstracts a 4x4 matrix that maps object space to world space:
@@ -90,7 +90,7 @@ public:
 
     bool isIdentity() const;
 
-    /**
+    /*
      Initializes to the identity coordinate frame.
      */
     CoordinateFrame();
@@ -129,7 +129,7 @@ public:
     CoordinateFrame(const CoordinateFrame &other) :
         rotation(other.rotation), translation(other.translation) {}
 
-    /**
+    /*
       Computes the inverse of this coordinate frame.
      */
     inline CoordinateFrame inverse() const {
@@ -148,13 +148,13 @@ public:
     void getXYZYPRDegrees(float& x, float& y, float& z, float& yaw, float& pitch, float& roll) const;
 
 
-    /**
+    /*
      Produces an XML serialization of this coordinate frame.
      @deprecated
      */
     std::string toXML() const;
 
-    /**
+    /*
      Returns the heading of the lookVector as an angle in radians relative to
      the world -z axis.  That is, a counter-clockwise heading where north (-z) 
      is 0 and west (-x) is PI/2.
@@ -168,7 +168,7 @@ public:
         return angle;
     }
 
-    /**
+    /*
      Takes the coordinate frame into object space.
      this->inverse() * c
      */
@@ -184,7 +184,7 @@ public:
         return Vector4(rotation * Vector3(v.x, v.y, v.z) + translation * v.w, v.w);
     }
 
-    /**
+    /*
      Transforms the point into world space.
      */
     inline Vector3 pointToWorldSpace(const Vector3& v) const {
@@ -194,7 +194,7 @@ public:
 			rotation[2][0] * v[0] + rotation[2][1] * v[1] + rotation[2][2] * v[2] + translation[2]);
     }
 
-    /**
+    /*
      Transforms the point into object space.  Assumes that the rotation matrix is orthonormal.
      */
     inline Vector3 pointToObjectSpace(const Vector3& v) const {
@@ -209,7 +209,7 @@ public:
                        rotation[0][2] * p[0] + rotation[1][2] * p[1] + rotation[2][2] * p[2]);
     }
 
-    /**
+    /*
      Transforms the vector into world space (no translation).
      */
     inline Vector3 vectorToWorldSpace(const Vector3& v) const {
@@ -224,7 +224,7 @@ public:
 
     Ray toWorldSpace(const Ray& r) const;
 
-    /**
+    /*
      Transforms the vector into object space (no translation).
      */
     inline Vector3 vectorToObjectSpace(const Vector3 &v) const {
@@ -310,7 +310,7 @@ public:
 		return rotation.column(0);
 	}
 
-    /**
+    /*
      If a viewer looks along the look vector, this is the viewer's "left".
      Useful for strafing motions and building alternative coordinate frames.
      */
@@ -318,7 +318,7 @@ public:
 		return -rotation.column(0);
     }
 
-    /**
+    /*
      Linearly interpolates between two coordinate frames, using
      Quat::slerp for the rotations.
      */

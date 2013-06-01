@@ -1,4 +1,4 @@
-/**
+/*
   @file PhysicsFrameSpline.h
 
   @author Morgan McGuire, http://graphics.cs.williams.edu
@@ -12,7 +12,7 @@
 
 namespace G3D {
 
-/**
+/*
  A subclass of Spline that keeps the rotation field of a
  PhysicsFrame normalized and rotating the short direction.
 

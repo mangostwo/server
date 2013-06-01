@@ -1,4 +1,4 @@
-/**
+/*
  @file g3dmath.cpp
  
  @author Morgan McGuire, graphics3d.com

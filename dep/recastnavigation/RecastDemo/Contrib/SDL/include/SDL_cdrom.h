@@ -20,7 +20,7 @@
     slouken@libsdl.org
 */
 
-/**
+/*
  *  @file SDL_cdrom.h
  *  This is the CD-audio control API for Simple DirectMedia Layer
  */
@@ -37,7 +37,7 @@
 extern "C" {
 #endif
 
-/**
+/*
  *  @file SDL_cdrom.h
  *  In order to use these functions, SDL_Init() must have been called
  *  with the SDL_INIT_CDROM flag.  This causes SDL to scan the system
@@ -107,13 +107,13 @@ typedef struct SDL_CD {
 
 /* CD-audio API functions: */
 
-/**
+/*
  *  Returns the number of CD-ROM drives on the system, or -1 if
  *  SDL_Init() has not been called with the SDL_INIT_CDROM flag.
  */
 extern DECLSPEC int SDLCALL SDL_CDNumDrives(void);
 
-/**
+/*
  *  Returns a human-readable, system-dependent identifier for the CD-ROM.
  *  Example:
  *   - "/dev/cdrom"
@@ -122,7 +122,7 @@ extern DECLSPEC int SDLCALL SDL_CDNumDrives(void);
  */
 extern DECLSPEC const char * SDLCALL SDL_CDName(int drive);
 
-/**
+/*
  *  Opens a CD-ROM drive for access.  It returns a drive handle on success,
  *  or NULL if the drive was invalid or busy.  This newly opened CD-ROM
  *  becomes the default CD used when other CD functions are passed a NULL
@@ -131,14 +131,14 @@ extern DECLSPEC const char * SDLCALL SDL_CDName(int drive);
  */
 extern DECLSPEC SDL_CD * SDLCALL SDL_CDOpen(int drive);
 
-/**
+/*
  *  This function returns the current status of the given drive.
  *  If the drive has a CD in it, the table of contents of the CD and current
  *  play position of the CD will be stored in the SDL_CD structure.
  */
 extern DECLSPEC CDstatus SDLCALL SDL_CDStatus(SDL_CD *cdrom);
 
-/**
+/*
  *  Play the given CD starting at 'start_track' and 'start_frame' for 'ntracks'
  *  tracks and 'nframes' frames.  If both 'ntrack' and 'nframe' are 0, play 
  *  until the end of the CD.  This function will skip data tracks.
@@ -163,7 +163,7 @@ extern DECLSPEC CDstatus SDLCALL SDL_CDStatus(SDL_CD *cdrom);
 extern DECLSPEC int SDLCALL SDL_CDPlayTracks(SDL_CD *cdrom,
 		int start_track, int start_frame, int ntracks, int nframes);
 
-/**
+/*
  *  Play the given CD starting at 'start' frame for 'length' frames.
  *  @return It returns 0, or -1 if there was an error.
  */

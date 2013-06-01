@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Future.h
  *
  *  $Id: Future.h 91626 2010-09-07 10:59:20Z johnnyw $
@@ -39,7 +39,7 @@ template <class T> class ACE_Future_Observer;
 template <class T> class ACE_Future_Rep;
 template <class T> class ACE_Future;
 
-/**
+/*
  * @class ACE_Future_Holder
  *
  * @brief Implementation of object that holds an ACE_Future.
@@ -60,7 +60,7 @@ protected:
   ACE_Future_Holder (void);
 };
 
-/**
+/*
  * @class ACE_Future_Observer
  *
  * @brief ACE_Future_Observer<T>
@@ -89,7 +89,7 @@ protected:
   ACE_Future_Observer (void);
 };
 
-/**
+/*
  * @class ACE_Future_Rep
  *
  * @internal
@@ -107,7 +107,7 @@ class ACE_Future_Rep
 private:
   friend class ACE_Future<T>;
 
-  /**
+  /*
    * Set the result value.  The specified @a caller represents the
    * future that invoked this <set> method, which is used to notify
    * the list of future observers. Returns 0 for success, -1 on error.
@@ -122,7 +122,7 @@ private:
   int get (T &value,
            ACE_Time_Value *tv) const;
 
-  /**
+  /*
    * Attaches the specified observer to a subject (i.e., the ACE_Future_Rep).
    * The update method of the specified subject will be invoked with a copy of
    * the written-to ACE_Future as input when the result gets set.
@@ -133,7 +133,7 @@ private:
   int attach (ACE_Future_Observer<T> *observer,
                ACE_Future<T> &caller);
 
-  /**
+  /*
    * Detaches the specified observer from a subject (i.e., the ACE_Future_Rep).
    * The update method of the specified subject will not be invoked when the
    * ACE_Future_Reps result gets set.  Returns 1 if the specified observer was
@@ -144,7 +144,7 @@ private:
    */
   int detach (ACE_Future_Observer<T> *observer);
 
-  /**
+  /*
    * Type conversion. will block forever until the result is
    * available.  Note that this method is going away in a subsequent
    * release since it doesn't distinguish between failure results and
@@ -173,7 +173,7 @@ private:
   /// Create a ACE_Future_Rep<T> and initialize the reference count.
   static ACE_Future_Rep<T> *create (void);
 
-  /**
+  /*
    * Increase the reference count and return argument. Uses the
    * attribute "value_ready_mutex_" to synchronize reference count
    * updating.
@@ -182,7 +182,7 @@ private:
    */
   static ACE_Future_Rep<T> *attach (ACE_Future_Rep<T> *&rep);
 
-  /**
+  /*
    * Decreases the reference count and deletes rep if there are no
    * more references to rep.
    *
@@ -190,7 +190,7 @@ private:
    */
   static void detach (ACE_Future_Rep<T> *&rep);
 
-  /**
+  /*
    * Decreases the rep's reference count and deletes rep if there
    * are no more references to rep. Then assigns new_rep to rep.
    *
@@ -228,7 +228,7 @@ protected:
 
 };
 
-/**
+/*
  * @class ACE_Future
  *
  * @brief This class implements a ``single write, multiple read''
@@ -262,7 +262,7 @@ public:
   /// client does not want to wait for the value to be produced.
   int cancel (const T &r);
 
-  /**
+  /*
    * Cancel an ACE_Future.  Put the future into its initial
    * state. Returns 0 on succes and -1 on failure. It is now possible
    * to reuse the ACE_Future. But remember, the ACE_Future
@@ -270,7 +270,7 @@ public:
    */
   int cancel (void);
 
-  /**
+  /*
    * Equality operator that returns @c true if both ACE_Future objects
    * point to the same ACE_Future_Rep object.
    *
@@ -282,7 +282,7 @@ public:
   /// Inequality operator, which is the opposite of equality.
   bool operator != (const ACE_Future<T> &r) const;
 
-  /**
+  /*
    * Make the result available. Is used by the server thread to give
    * the result to all waiting clients. Returns 0 for success, -1 on failure.
    * This function only has an effect the first time it is called for
@@ -292,7 +292,7 @@ public:
    */
   int set (const T &r);
 
-  /**
+  /*
    * Wait to get the object's value.
    *
    * @param value Receives the value of this ACE_Future when it is set.
@@ -306,7 +306,7 @@ public:
    */
   int get (T &value, ACE_Time_Value *tv = 0) const;
 
-  /**
+  /*
    * @deprecated  Note that this method is going away in a subsequent
    *              release since it doesn't distinguish between failure
    *              results and success results (exceptions should be
@@ -321,7 +321,7 @@ public:
   /// Check if the result is available.
   int ready (void) const;
 
-  /**
+  /*
    * Attaches the specified observer to a subject (this ACE_Future).
    * The update method of the specified subject will be invoked with a copy of
    * the associated ACE_Future as input when the result gets set.  If the
@@ -336,7 +336,7 @@ public:
    */
   int attach (ACE_Future_Observer<T> *observer);
 
-  /**
+  /*
    * Detaches the specified observer from a subject (this ACE_Future).
    * The update method of the specified subject will not be invoked when the
    * ACE_Future_Rep result gets set.
@@ -352,7 +352,7 @@ public:
   /// Dump the state of an object.
   void dump (void) const;
 
-  /**
+  /*
    * Get the underlying ACE_Future_Rep pointer. Note that this method should
    * rarely, if ever, be used and that modifying the underlying
    * ACE_Future_Rep should be done with extreme caution.

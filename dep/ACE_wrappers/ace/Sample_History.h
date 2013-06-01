@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Sample_History.h
  *
  *  $Id: Sample_History.h 80826 2008-03-04 14:51:23Z wotte $
@@ -27,7 +27,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Basic_Stats;
 
 /// Save multiple samples in an array
-/**
+/*
  * Save multiple samples (usually latency numbers), into an array, and
  * later print them in several formats.
  */
@@ -35,7 +35,7 @@ class ACE_Export ACE_Sample_History
 {
 public:
   /// Constructor
-  /**
+  /*
    * The number of samples is pre-allocated, and cannot changes once
    * the class is initialized.
    */
@@ -45,7 +45,7 @@ public:
   ~ACE_Sample_History (void);
 
   /// Record one sample.
-  /**
+  /*
    * Return 0 on success, -1 if the sample could not be stored
    */
   int sample (ACE_UINT64 value);
@@ -57,7 +57,7 @@ public:
   size_t sample_count (void) const;
 
   /// Dump all the samples
-  /**
+  /*
    * Prints out all the samples, using @a msg as a prefix for each
    * message.
    */

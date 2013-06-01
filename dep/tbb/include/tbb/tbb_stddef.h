@@ -48,7 +48,7 @@
 #if !defined RC_INVOKED
 
 // Define groups for Doxygen documentation
-/**
+/*
  * @defgroup algorithms         Algorithms
  * @defgroup containers         Containers
  * @defgroup memory_allocation  Memory Allocation
@@ -58,7 +58,7 @@
  */
 
 // Simple text that is displayed on the main page of Doxygen documentation.
-/**
+/*
  * \mainpage Main Page
  *
  * Click the tabs above for information about the
@@ -197,21 +197,21 @@ namespace tbb {
 namespace tbb {
 
 //! The function returns the interface version of the TBB shared library being used.
-/**
+/*
  * The version it returns is determined at runtime, not at compile/link time.
  * So it can be different than the value of TBB_INTERFACE_VERSION obtained at compile time.
  */
 extern "C" int __TBB_EXPORTED_FUNC TBB_runtime_interface_version();
 
 //! Dummy type that distinguishes splitting constructor from copy constructor.
-/**
+/*
  * See description of parallel_for and parallel_reduce for example usages.
  * @ingroup algorithms
  */
 class split {
 };
 
-/**
+/*
  * @cond INTERNAL
  * @brief Identifiers declared inside namespace internal should never be used directly by client code.
  */

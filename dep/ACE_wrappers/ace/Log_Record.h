@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Log_Record.h
  *
  *  $Id: Log_Record.h 91764 2010-09-14 13:04:37Z johnnyw $
@@ -55,7 +55,7 @@ public:
   };
 
   // = Initialization
-  /**
+  /*
    * Create a Log_Record and set its priority, time stamp, and
    * process id.
    */
@@ -93,7 +93,7 @@ public:
                   u_long verbose_flag,
                   ACE_TCHAR *verbose_msg);
 
-  /**
+  /*
    * Returns a character array with the string form of the
    * ACE_Log_Priority parameter.  This is used for the verbose
    * printing format.
@@ -109,7 +109,7 @@ public:
   /// Set the type of the Log_Record.
   void type (ACE_UINT32);
 
-  /**
+  /*
    * Get the priority of the Log_Record <type_>.  This is computed
    * as the base 2 logarithm of <type_> (which must be a power of 2,
    * as defined by the enums in ACE_Log_Priority).
@@ -162,7 +162,7 @@ private:
   /// Round up to the alignment restrictions.
   void round_up (void);
 
-  /**
+  /*
    * Total length of the logging record in bytes.  This field *must*
    * come first in order for various IPC framing mechanisms to work
    * correctly.  In addition, the field must be an ACE_INT32 in order

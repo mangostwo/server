@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Log_Msg_NT_Event_Log.h
  *
  *  $Id: Log_Msg_NT_Event_Log.h 80826 2008-03-04 14:51:23Z wotte $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Log_Msg_NT_Event_Log
  *
  * @brief Implements an ACE_Log_Msg_Backend that logs to the WinNT system
@@ -42,7 +42,7 @@ public:
   virtual ~ACE_Log_Msg_NT_Event_Log (void);
 
   /// Open a new event log.
-  /**
+  /*
    * Initialize the event logging facility.
    * @param logger_key The name of the calling program. This name is
    *                   used in the Source field of the event log. If

@@ -1,4 +1,4 @@
-/**
+/*
   @file Log.h
 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -39,7 +39,7 @@ void logPrintf(const char* fmt, ...);
 /** Does not flush the buffer; follow up with a logPrintf to force the flush. */
 void logLazyPrintf(const char* fmt, ...);
 
-/**
+/*
  System log for debugging purposes.  The first log opened
  is the "common log" and can be accessed with the static
  method common().  If you access common() and a common log
@@ -48,7 +48,7 @@ void logLazyPrintf(const char* fmt, ...);
 class Log {
 private:
 
-    /**
+    /*
      Log messages go here.
      */
     FILE*                   logFile;
@@ -61,7 +61,7 @@ private:
 
 public:
 
-    /**
+    /*
      @param stripFromStackBottom Number of call stacks to strip from the
      bottom of the stack when printing a trace.  Useful for hiding
      routines like "main" and "WinMain".  If the specified file cannot
@@ -73,17 +73,17 @@ public:
 
     virtual ~Log();
 
-    /**
+    /*
      Returns the handle to the file log.
      */
     FILE* getFile() const;
 
-    /**
+    /*
      Marks the beginning of a logfile section.
      */
     void section(const std::string& s);
 
-    /**
+    /*
      Given arguments like printf, writes characters to the debug text overlay.
      */
     // We want G3D_CHECK_PRINTF_ARGS here, but that conflicts with the

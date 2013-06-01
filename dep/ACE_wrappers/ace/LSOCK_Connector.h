@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    LSOCK_Connector.h
  *
  *  $Id: LSOCK_Connector.h 80826 2008-03-04 14:51:23Z wotte $
@@ -28,7 +28,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_LSOCK_Connector
  *
  * @brief Defines the format and interface for the connector side of
@@ -41,7 +41,7 @@ public:
   /// Default constructor.
   ACE_LSOCK_Connector (void);
 
-  /**
+  /*
    * Actively connect and produce a @a new_stream if things go well.
    * All arguments are relayed to the ACE_SOCK_Connector constructor
    * for handling.
@@ -55,7 +55,7 @@ public:
                        int flags = 0,
                        int perms = 0);
 
-  /**
+  /*
    * Actively connect and produce a @a new_stream if things go well.
    * The @c ACE_SOCK_Connector::connect() method is called to perform
    * the actual connection attempt.

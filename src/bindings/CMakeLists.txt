@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2005-2012 MaNGOS project <http://getmangos.com/>
+# This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,4 +16,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
+# Clone https://github.com/mangosthree/scripts here, and comment out
+# the next line and uncomment the last line.
+
 # add_subdirectory(universal)
+# add_subdirectory(scripts)

@@ -1,4 +1,4 @@
-/**
+/*
   @file Box.cpp
   Box class
 

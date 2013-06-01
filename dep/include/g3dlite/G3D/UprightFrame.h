@@ -1,4 +1,4 @@
-/**
+/*
  @file UprightFrame.h
 
  @author Morgan McGuire, http://graphics.cs.williams.edu
@@ -14,7 +14,7 @@
 
 namespace G3D {
 
-/**
+/*
  Coordinate frame expressed in Euler angles.
  Unlike a G3D::Quat, UprightFrame always keeps the reference frame from rolling about its own z axis.
  Particularly useful for cameras.
@@ -50,7 +50,7 @@ public:
     /** Required for use with spline */
     UprightFrame operator*(const float k) const;
 
-    /**
+    /*
        Unwraps the yaw values in the elements of the array such that
        they still represent the same angles but strictly increase/decrease
        without wrapping about zero.  For use with Spline<UprightFrame>

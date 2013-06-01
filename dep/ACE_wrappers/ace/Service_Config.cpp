@@ -88,7 +88,7 @@ ACE_Threading_Helper<ACE_Null_Mutex>::get (void)
   return ACE_Service_Config::singleton()->instance_.get ();
 }
 
-/**
+/*
   * @c ACE_Service_Config is supposed to be a Singleton. This is the
   * only Configuration Gestalt available for access from static
   * initializers at proces start-up time. Using Unmanaged Singleton

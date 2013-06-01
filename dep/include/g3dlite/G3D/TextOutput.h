@@ -1,4 +1,4 @@
-/**
+/*
   @file TextOutput.h
 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -18,7 +18,7 @@
 
 namespace G3D {
 
-/**
+/*
   Convenient formatting of ASCII text written to a file.
   <P>
 

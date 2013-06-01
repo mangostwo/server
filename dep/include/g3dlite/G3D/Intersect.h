@@ -1,4 +1,4 @@
-/**
+/*
  @file Intersect.h
  
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -21,7 +21,7 @@
 
 namespace G3D {
 
-/**
+/*
  @beta
  */
 class Intersect {

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file     Arg_Shifter.h
  *
  *  $Id: Arg_Shifter.h 91459 2010-08-25 09:51:01Z mcorino $
@@ -25,7 +25,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Arg_Shifter_T
  *
  * @brief This ADT operates on a specified set of arguments (@a argv).
@@ -56,7 +56,7 @@ class ACE_Arg_Shifter_T
 {
 public:
   // = Initialization and termination methods.
-  /**
+  /*
    * Initialize the ACE_Arg_Shifter to the vector over which to
    * iterate. Optionally, also provide the temporary array for
    * use in shifting the arguments. If ACE_Arg_Shifter must allocate
@@ -93,7 +93,7 @@ public:
   /// Get the current head of the vector.
   const CHAR_TYPE *get_current (void) const;
 
-  /**
+  /*
    * If the @a flag matches the current_arg of arg shifter
    * this method will attempt to return the associated
    * parameter value
@@ -127,7 +127,7 @@ public:
    */
   const CHAR_TYPE *get_the_parameter (const CHAR_TYPE* flag);
 
-  /**
+  /*
    * Check if the current argument matches (case insensitive) @a flag
    *
    * ------------------------------------------------------------

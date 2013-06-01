@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Token_Manager.h
  *
  *  $Id: Token_Manager.h 91688 2010-09-09 11:21:50Z johnnyw $
@@ -32,7 +32,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Local_Mutex;
 class ACE_Mutex_Token;
 
-/**
+/*
  * @class ACE_Token_Manager
  *
  * @brief Manages all tokens in a process space.
@@ -61,7 +61,7 @@ public:
   /// Set the pointer to token manager singleton.
   void instance (ACE_Token_Manager *);
 
-  /**
+  /*
    * The Token manager uses ACE_Token_Proxy::token_id_ to look for
    * an existing token.  If none is found, the Token Manager calls
    * ACE_Token_Proxy::create_token to create a new one.  When
@@ -70,7 +70,7 @@ public:
    */
   void get_token (ACE_Token_Proxy *, const ACE_TCHAR *token_name);
 
-  /**
+  /*
    * Check whether acquire will cause deadlock or not.
    * returns 1 if the acquire will _not_ cause deadlock.
    * returns 0 if the acquire _will_ cause deadlock.
@@ -85,7 +85,7 @@ public:
   /// result, there is no owner of the token, the token is deleted.
   void release_token (ACE_Tokens *&token);
 
-  /**
+  /*
    * This is to allow Tokens to perform atomic transactions.  The
    * typical usage is to acquire this mutex, check for a safe_acquire,
    * perform some queueing (if need be) and then release the lock.

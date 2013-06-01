@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    Functor_T.h
  *
  *  $Id: Functor_T.h 91396 2010-08-19 12:37:24Z johnnyw $
@@ -44,7 +44,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // GOF Command Pattern Templates //
 ///////////////////////////////////
 
-/**
+/*
  * @class ACE_Command_Callback
  *
  * @brief
@@ -83,7 +83,7 @@ private:
 // STL-style Functor Templates //
 /////////////////////////////////
 
-/**
+/*
  * @class ACE_Hash
  *
  * @brief Function object for hashing
@@ -96,7 +96,7 @@ public:
   unsigned long operator () (const TYPE &t) const;
 };
 
-/**
+/*
  * @class ACE_Pointer_Hash
  *
  * @brief
@@ -110,7 +110,7 @@ public:
   unsigned long operator () (TYPE t) const;
 };
 
-/**
+/*
  * @class ACE_Equal_To
  *
  * @brief
@@ -126,7 +126,7 @@ public:
                     const TYPE &rhs) const;
 };
 
-/**
+/*
  * @class ACE_Less_Than
  *
  * @brief

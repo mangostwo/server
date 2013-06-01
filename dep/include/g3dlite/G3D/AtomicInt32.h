@@ -1,4 +1,4 @@
-/**
+/*
  @file AtomicInt32.h
 
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -18,7 +18,7 @@
 
 namespace G3D {
 
-/**
+/*
  An integer that may safely be used on different threads without
  external locking.
 

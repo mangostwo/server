@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Token_Request_Reply.h
  *
  *  $Id: Token_Request_Reply.h 80826 2008-03-04 14:51:23Z wotte $
@@ -34,7 +34,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 /// the Transfer structure in ACE_Token_Request
 #define ACE_TOKEN_REQUEST_HEADER_SIZE 40
 
-/**
+/*
  * @class ACE_Token_Request
  *
  * @brief Message format for delivering requests to the ACE_Token Server.
@@ -63,7 +63,7 @@ public:
   /// Default constructor.
   ACE_Token_Request (void);
 
-  /**
+  /*
    * @param token_type MUTEX, RWLOCK
    * @param proxy_type MUTEX, RLOCK, WLOCK (acquires mean different things)
    * @param operation method
@@ -195,7 +195,7 @@ private:
   ACE_Synch_Options options_;
 };
 
-/**
+/*
  * @class ACE_Token_Reply
  *
  * @brief Message format for delivering replies from the ACE_Token Server.

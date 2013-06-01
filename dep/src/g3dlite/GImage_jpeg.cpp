@@ -1,4 +1,4 @@
-/**
+/*
   @file GImage_jpeg.cpp
   @author Morgan McGuire, http://graphics.cs.williams.edu
   @created 2002-05-27
@@ -26,7 +26,7 @@ namespace G3D {
 
 const int jpegQuality = 96;
 
-/**
+/*
  The IJG library needs special setup for compress/decompressing
  from memory.  These classes provide them.  
  
@@ -43,7 +43,7 @@ public:
 
 typedef memory_destination_mgr* mem_dest_ptr;
 
-/**
+/*
  Signature dictated by IJG.
  */
 static void init_destination (
@@ -56,7 +56,7 @@ static void init_destination (
 	dest->count=0;
 }
 
-/**
+/*
  Signature dictated by IJG.
  */
 static boolean empty_output_buffer (
@@ -70,7 +70,7 @@ static boolean empty_output_buffer (
 	return TRUE;
 }
 
-/**
+/*
  Signature dictated by IJG.
  */
 static void term_destination (
@@ -80,7 +80,7 @@ static void term_destination (
 	dest->count = dest->size - dest->pub.free_in_buffer;
 }
 
-/**
+/*
  Signature dictated by IJG.
  */
 static void jpeg_memory_dest (
@@ -111,7 +111,7 @@ static void jpeg_memory_dest (
 
 #define INPUT_BUF_SIZE  4096
 
-/**
+/*
  Structure dictated by IJG.
  */
 class memory_source_mgr {
@@ -127,7 +127,7 @@ public:
 typedef memory_source_mgr* mem_src_ptr;
 
 
-/**
+/*
  Signature dictated by IJG.
  */
 static void init_source(
@@ -139,7 +139,7 @@ static void init_source(
 }
 
 
-/**
+/*
  Signature dictated by IJG.
  */
 static boolean fill_input_buffer(
@@ -168,7 +168,7 @@ static boolean fill_input_buffer(
 }
 
 
-/**
+/*
  Signature dictated by IJG.
  */
 static void skip_input_data(
@@ -190,7 +190,7 @@ static void skip_input_data(
 }
 
 
-/**
+/*
  Signature dictated by IJG.
  */
 static void term_source (
@@ -200,7 +200,7 @@ static void term_source (
 }
 
 
-/**
+/*
  Signature dictated by IJG.
  */
 static void jpeg_memory_src (

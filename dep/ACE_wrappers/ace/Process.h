@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Process.h
  *
  *  $Id: Process.h 92218 2010-10-14 13:18:15Z mcorino $
@@ -30,7 +30,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // Forward declaration
 class ACE_Time_Value;
 
-/**
+/*
  * @class ACE_Process_Options
  *
  * @brief Process Options
@@ -76,7 +76,7 @@ protected:
   };
 
 public:
-  /**
+  /*
    * If @a inherit_environment == true, the new process will inherit the
    * environment of the current process.  @a command_line_buf_len is the
    * max strlen for command-line arguments.
@@ -92,7 +92,7 @@ public:
 
   // = Methods to set process creation options portably.
 
-  /**
+  /*
    * Set the standard handles of the new process to the respective
    * handles.  If you want to affect a subset of the handles, make
    * sure to set the others to ACE_INVALID_HANDLE.
@@ -121,7 +121,7 @@ public:
   int setenv (const ACE_TCHAR *format,
               ...);
 
-  /**
+  /*
    * Set a single environment variable, @a variable_name.  Since
    * different platforms separate each environment variable
    * differently, you must call this method once for each variable.
@@ -145,7 +145,7 @@ public:
   void working_directory (const wchar_t *wd);
 #endif /* ACE_HAS_WCHAR */
 
-  /**
+  /*
    * Set the command-line arguments.  @a format can use any printf
    * formats.  The first token in @a format should be the path to the
    * application.  This can either be a full path, relative path, or
@@ -164,7 +164,7 @@ public:
   /// Same as above in argv format.  @a argv must be null terminated.
   int command_line (const ACE_TCHAR * const argv[]);
 
-  /**
+  /*
    * Specify the full path or relative path, or just the executable
    * name for the process. If this is set, then @a name will be used to
    * create the process instead of argv[0] set in the command
@@ -180,7 +180,7 @@ public:
   /// Get the creation flags.
   u_long creation_flags (void) const;
 
-  /**
+  /*
    * Set the creation flags to affect how a new process is spawned.
    * The only ACE-defined flag is @c NO_EXEC which prevents the new process
    * from executing a new program image; this is a simple POSIX fork().
@@ -208,7 +208,7 @@ public:
   /// into which the total length of the command line buffer is returned.
   ACE_TCHAR *command_line_buf (int *max_len = 0);
 
-  /**
+  /*
    * argv-style command-line options.  Parses and modifies the string
    * created from <command_line_>.  All spaces not in quotes ("" or
    * '') are replaced with null (\0) bytes.  An argv array is built
@@ -217,7 +217,7 @@ public:
    */
   ACE_TCHAR * const *command_line_argv (void);
 
-  /**
+  /*
    * Null-terminated buffer of null terminated strings.  Each string
    * is an environment assignment "VARIABLE=value".  This buffer
    * should end with two null characters.
@@ -245,7 +245,7 @@ public:
 
   /// Cause the specified handle to be passed to a child process
   /// when it runs a new program image.
-  /**
+  /*
    * The specified handle value will be included in the spawned
    * process's command line as @arg +H @arg handle, if a new
    * program is spawned (always on Win32; else if NO_EXEC is not
@@ -257,7 +257,7 @@ public:
 
   /// Get a copy of the handles the ACE_Process_Options duplicated
   /// for the spawned process.
-  /**
+  /*
    * Any handles created through duplication of those passed into
    * @arg pass_handle are returned in @arg set.
    * @return 0 if there were no handles to return; 1 if there were.
@@ -266,7 +266,7 @@ public:
 
   /// Get a copy of the handles passed to the spawned process. This
   /// will be the set of handles previously passed to @arg pass_handle().
-  /**
+  /*
    * Any handles previously passed to @arg pass_handle are returned
    * in @arg set.
    * @return 0 if there were no handles to return; 1 if there were.
@@ -332,12 +332,12 @@ public:
   uid_t getrgid (void) const;
   uid_t getegid (void) const;
 
-  /**
+  /*
    * Get the inherit_environment flag.
    */
   bool inherit_environment (void) const;
 
-  /**
+  /*
    * Set the inherit_environment flag.
    */
   void inherit_environment (bool nv);
@@ -466,7 +466,7 @@ protected:
 
 //class ACE_Process_Manager;
 
-/**
+/*
  * @class ACE_Process
  *
  * @brief Process
@@ -490,14 +490,14 @@ public:
   /// Destructor.
   virtual ~ACE_Process (void);
 
-  /**
+  /*
    * Called just before <ACE_OS::fork> in the <spawn>.  If this
    * returns non-zero, the <spawn> is aborted (and returns
    * ACE_INVALID_PID).  The default simply returns zero.
    */
   virtual int prepare (ACE_Process_Options &options);
 
-  /**
+  /*
    * Launch a new process as described by @a options. On success,
    * returns 1 if the option avoid_zombies is set, else returns the
    * process id of the newly spawned child. Returns -1 on
@@ -510,7 +510,7 @@ public:
   /// <fork> succeeds.  The default is to do nothing.
   virtual void parent (pid_t child);
 
-  /**
+  /*
    * Called just after <ACE_OS::fork> in the child's context.  The
    * default does nothing.  This function is *not* called on Win32
    * because the process-creation scheme does not allow it.
@@ -521,7 +521,7 @@ public:
   /// its table of managed Processes.  Default is to do nothing.
   virtual void unmanage (void);
 
-  /**
+  /*
    * Wait for the process we've created to exit.  If @a status != 0, it
    * points to an integer where the function store the exit status of
    * child process to.  If @a wait_options == @c WNOHANG then return 0
@@ -532,7 +532,7 @@ public:
   pid_t wait (ACE_exitcode *status = 0,
               int wait_options = 0);
 
-  /**
+  /*
    * Timed wait for the process we've created to exit.  A return value
    * of -1 indicates that the something failed; 0 indicates that a
    * timeout occurred.  Otherwise, the child's process id is returned.
@@ -552,7 +552,7 @@ public:
   /// systems that support signals, such as UNIX/POSIX.
   int kill (int signum = SIGINT);
 
-  /**
+  /*
    * Terminate the process abruptly using ACE::terminate_process().
    * This call doesn't give the process a chance to cleanup, so use it
    * with caution...
@@ -625,7 +625,7 @@ private:
 #endif
 };
 
-/**
+/*
  * @class ACE_Managed_Process
  *
  * @brief A process easily managed by ACE_Process_Manager.

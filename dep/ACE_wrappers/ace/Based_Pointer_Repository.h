@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Based_Pointer_Repository.h
  *
  *  $Id: Based_Pointer_Repository.h 84837 2009-03-16 13:01:15Z johnnyw $
@@ -32,7 +32,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // Forward decl., using the "Cheshire Cat" technique.
 class ACE_Based_Pointer_Repository_Rep;
 
-/**
+/*
  * @class ACE_Based_Pointer_Repository
  *
  * @brief Maps pointers to the base address of the region to which each
@@ -48,7 +48,7 @@ public:
   ~ACE_Based_Pointer_Repository (void);
 
   // = Search structure methods.
-  /**
+  /*
    * Return the appropriate @a base_addr region that contains @a addr.
    * Returns 1 on success and 0 if the @a addr isn't contained in any
    * @a base_addr region.

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  * @file Memory_Usage_Monitor.h
  *
  * $Id: Memory_Usage_Monitor.h 91743 2010-09-13 18:24:51Z johnnyw $
@@ -37,7 +37,7 @@ namespace ACE
 {
   namespace Monitor_Control
   {
-    /**
+    /*
      * @class Memory_Usage_Monitor
      *
      * @brief Monitor percentage of total available memory used.

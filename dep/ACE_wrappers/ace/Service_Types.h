@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    Service_Types.h
  *
  *  $Id: Service_Types.h 89925 2010-04-19 12:49:11Z cbeaulac $
@@ -23,7 +23,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Service_Type_Impl
  *
  * @brief The abstract base class of the hierarchy that defines the
@@ -95,7 +95,7 @@ protected:
   int service_type_;
 };
 
-/**
+/*
  * @class ACE_Service_Object_Type
  *
  * @brief Define the methods for handling the configuration of
@@ -125,7 +125,7 @@ private:
   mutable int initialized_;
 };
 
-/**
+/*
  * @class ACE_Module_Type
  *
  * @brief Define the methods for handling the configuration of
@@ -166,7 +166,7 @@ private:
   ACE_Module_Type *link_;
 };
 
-/**
+/*
  * @class ACE_Stream_Type
  *
  * @brief Define the methods for handling the configuration of

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2013 MaNGOS <http://getmangos.com/>
+ * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -6441,7 +6441,7 @@ int32 Unit::SpellBonusWithCoeffs(SpellEntry const* spellProto, int32 total, int3
     return total;
 };
 
-/**
+/*
  * Calculates caster part of spell damage bonuses,
  * also includes different bonuses dependent from target auras
  */
@@ -6763,7 +6763,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
     return tmpDamage > 0 ? uint32(tmpDamage) : 0;
 }
 
-/**
+/*
  * Calculates target part of spell damage bonuses,
  * will be called on each tick for periodic damage over time auras
  */
@@ -7152,7 +7152,7 @@ uint32 Unit::SpellCriticalHealingBonus(SpellEntry const* spellProto, uint32 dama
     return damage;
 }
 
-/**
+/*
  * Calculates caster part of healing spell bonuses,
  * also includes different bonuses dependent from target auras
  */
@@ -7288,7 +7288,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* pVictim, SpellEntry const* spellProto, 
     return heal < 0 ? 0 : uint32(heal);
 }
 
-/**
+/*
  * Calculates target part of healing spell bonuses,
  * will be called on each tick for periodic damage over time auras
  */
@@ -7486,7 +7486,7 @@ bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex i
     return false;
 }
 
-/**
+/*
  * Calculates caster part of melee damage bonuses,
  * also includes different bonuses dependent from target auras
  */
@@ -7738,7 +7738,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* pVictim, uint32 pdamage, WeaponAttackTyp
     return tmpDamage > 0 ? uint32(tmpDamage) : 0;
 }
 
-/**
+/*
  * Calculates target part of melee damage bonuses,
  * will be called on each tick for periodic damage over time auras
  */
@@ -11139,7 +11139,7 @@ void Unit::OnRelocated()
     ScheduleAINotify(World::GetRelocationAINotifyDelay());
 }
 
-/**
+/*
  * @param entry             entry of the vehicle kit
  * @param overwriteNpcEntry use to select behaviour (like accessory) for this entry instead of GetEntry()'s result
  */

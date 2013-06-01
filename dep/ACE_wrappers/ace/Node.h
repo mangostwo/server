@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file Node.h
  *
  *  $Id: Node.h 81624 2008-05-06 17:14:57Z wotte $
@@ -33,7 +33,7 @@ template <class T> class ACE_Unbounded_Queue_Const_Iterator;
 template <class T> class ACE_Unbounded_Stack;
 template <class T> class ACE_Unbounded_Stack_Iterator;
 
-/**
+/*
  * @class ACE_Node
  *
  * @brief Implementation element in a Queue, Set, and Stack.

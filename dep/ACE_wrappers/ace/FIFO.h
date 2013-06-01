@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    FIFO.h
  *
  *  $Id: FIFO.h 91574 2010-08-30 16:52:24Z shuston $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_FIFO
  *
  * @brief Abstract base class for UNIX FIFOs
@@ -39,7 +39,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Export ACE_FIFO : public ACE_IPC_SAP
 {
 public:
-  /**
+  /*
    * Open up the named pipe (FIFO) on the @a rendezvous point in accordance
    * with the @a flags.
    *
@@ -70,7 +70,7 @@ public:
   ACE_ALLOC_HOOK_DECLARE;
 
 protected:
-  /**
+  /*
    * Protected constructors ensure this class cannot be used directly.
    * User code must use ACE_FIFO_Send and/or ACE_FIFO_Recv.
    */

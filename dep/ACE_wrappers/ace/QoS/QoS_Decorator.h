@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    QoS_Decorator.h
  *
  *  $Id: QoS_Decorator.h 80826 2008-03-04 14:51:23Z wotte $
@@ -28,7 +28,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_QoS_Decorator_Base
  *
  * @brief This class is the Decorator Pattern Base class for decorating
@@ -71,7 +71,7 @@ private:
 
 };
 
-/**
+/*
  * @class ACE_QoS_Event_Handler
  *
  * @brief This Handler is registered with the Reactor for QoS events.
@@ -115,7 +115,7 @@ private:
 
 };
 
-/**
+/*
  * @class ACE_QoS_Decorator
  *
  * @brief Concrete QoS Decorator.

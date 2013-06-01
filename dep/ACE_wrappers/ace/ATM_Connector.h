@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    ATM_Connector.h
  *
  *  $Id: ATM_Connector.h 82723 2008-09-16 09:35:44Z johnnyw $
@@ -42,7 +42,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 // Open versioned namespace, if enabled by the user.
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_ATM_Connector
  *
  * @brief Defines an active connection factory for the ACE_ATM C++
@@ -55,7 +55,7 @@ public:
   /// Default constructor.
   ACE_ATM_Connector (void);
 
-  /**
+  /*
    * Actively connect and produce a @a new_stream if things go well.
    * The @a remote_sap is the address that we are trying to connect
    * with.  The <params> are the parameters needed for either socket
@@ -85,7 +85,7 @@ public:
 #endif /* ACE_WIN32 */
                      int perms = 0);
 
-  /**
+  /*
    * Actively connect and produce a @a new_stream if things go well.
    * The @a remote_sap is the address that we are trying to connect
    * with.  The <params> are the parameters needed for either socket
@@ -116,7 +116,7 @@ public:
 #endif /* ACE_WIN32 */
                int perms = 0);
 
-  /**
+  /*
    * Try to complete a non-blocking connection.
    * If connection completion is successful then @a new_stream contains
    * the connected ACE_SOCK_Stream.  If @a remote_sap is non-NULL then it
@@ -126,7 +126,7 @@ public:
                 ACE_ATM_Addr *remote_sap,
                 ACE_Time_Value *tv);
 
-  /**
+  /*
    * Actively add a leaf to the root (i.e., point-to-multipoint). The
    * @a remote_sap is the address of the leaf that we
    * are trying to add.

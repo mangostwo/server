@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Intrusive_Auto_Ptr.h
  *
  *  $Id: Intrusive_Auto_Ptr.h 81388 2008-04-23 14:02:05Z johnnyw $
@@ -29,7 +29,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // Forward decl.
 template <class X> class ACE_Intrusive_Auto_Ptr;
 
-/**
+/*
  * @class ACE_Intrusive_Auto_Ptr
  *
  * @brief This class implements support for a reference counted
@@ -123,7 +123,7 @@ protected:
   /// Equality operator that returns @c true if both
   /// ACE_Intrusive_Auto_Ptr objects point to the same underlying
   /// representation. It does not compare the actual pointers.
-  /**
+  /*
    * @note It also returns @c true if both objects have just been
    *       instantiated and not used yet.
    */

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Basic_Types.h
  *
  *  $Id: Basic_Types.h 91161 2010-07-21 18:25:12Z schmidt $
@@ -449,7 +449,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_U_LongLong
  *
  * @brief Unsigned long long for platforms that don't have one.
@@ -648,7 +648,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 inline ACE_UINT32
 ACE_U64_TO_U32 (ACE_U_LongLong const & n)
 {
-  /**
+  /*
    * @note We could add a cast operator to ACE_U_LongLong but that may
    *       cause more problems than it solves.  Force users to perform
    *       an explicit cast via ACE_{C}U64_TO_{C}U32.

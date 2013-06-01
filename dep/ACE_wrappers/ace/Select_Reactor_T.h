@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Select_Reactor_T.h
  *
  *  $Id: Select_Reactor_T.h 86495 2009-08-13 19:35:25Z johnnyw $
@@ -37,7 +37,7 @@ typedef ACE_Token ACE_SELECT_TOKEN;
 typedef ACE_Noop_Token ACE_SELECT_TOKEN;
 #endif /* ACE_MT_SAFE && ACE_MT_SAFE != 0 */
 
-/**
+/*
  * @class ACE_Select_Reactor_T
  *
  * @brief An object oriented event demultiplexor and event handler
@@ -80,7 +80,7 @@ public:
   /// signal events, whereas if @arg mask_signals is false the reactor will
   /// be more efficient, but not signal-safe (which may be perfectly
   /// fine if your application doesn't use the reactor to handle signals).
-  /**
+  /*
    * @note On Unix platforms, the size parameter should be as large as
    *       the maximum number of file descriptors allowed for a given
    *       process.  This is necessary since a file descriptor is used
@@ -97,7 +97,7 @@ public:
                         bool mask_signals = true,
                         int s_queue = ACE_SELECT_TOKEN::FIFO);
 
-  /**
+  /*
    * Initialize the @c ACE_Select_Reactor to manage
    * @arg max_number_of_handles.  If @arg restart is non-0 then the
    * @c ACE_Reactor's @c handle_events method will be restarted
@@ -141,14 +141,14 @@ public:
 
   // = Event loop drivers.
 
-  /**
+  /*
    * Returns non-zero if there are I/O events "ready" for dispatching,
    * but does not actually dispatch the event handlers.  By default,
    * don't block while checking this, i.e., "poll".
    */
   virtual int work_pending (const ACE_Time_Value &max_wait_time = ACE_Time_Value::zero);
 
-  /**
+  /*
    * This event loop driver that blocks for @a max_wait_time before
    * returning.  It will return earlier if timer events, I/O events,
    * or signal events occur.  Note that @a max_wait_time can be 0, in
@@ -171,7 +171,7 @@ public:
   virtual int handle_events (ACE_Time_Value *max_wait_time = 0);
   virtual int alertable_handle_events (ACE_Time_Value *max_wait_time = 0);
 
-  /**
+  /*
    * This method is just like the one above, except the
    * @a max_wait_time value is a reference and can therefore never be
    * NULL.
@@ -184,14 +184,14 @@ public:
 
   // = Event handling control.
 
-  /**
+  /*
    * Return the status of Reactor.  If this function returns 0, the reactor is
    * actively handling events.  If it returns non-zero, <handling_events> and
    * <handle_alertable_events> return -1 immediately.
    */
   virtual int deactivated (void);
 
-  /**
+  /*
    * Control whether the Reactor will handle any more incoming events or not.
    * If @a do_stop == 1, the Reactor will be disabled.  By default, a reactor
    * is in active state and can be deactivated/reactived as wish.
@@ -199,7 +199,7 @@ public:
   virtual void deactivate (int do_stop);
 
   // = Register and remove ACE_Event_Handlers.
-  /**
+  /*
    * Register a @a eh with a particular @a mask.  Note that the
    * <Select_Reactor> will call ACE_Event_Handler::get_handle() to
    * extract the underlying I/O handle.
@@ -207,7 +207,7 @@ public:
   virtual int register_handler (ACE_Event_Handler *eh,
                                 ACE_Reactor_Mask mask);
 
-  /**
+  /*
    * Register a @a eh with a particular @a mask.  Note that since the
    * @a handle is given the Select_Reactor will *not* call
    * ACE_Event_Handler::get_handle() to extract the underlying I/O
@@ -243,7 +243,7 @@ public:
                                 ACE_Event_Handler *eh,
                                 ACE_Reactor_Mask mask);
 
-  /**
+  /*
    * Register @a new_sh to handle the signal @a signum using the
    * @a new_disp. Returns the @a old_sh that was previously registered
    * (if any), along with the @a old_disp of the signal handler.
@@ -260,7 +260,7 @@ public:
                                 ACE_Event_Handler *new_sh,
                                 ACE_Sig_Action *new_disp = 0);
 
-  /**
+  /*
    * Removes the @a mask binding of @a eh from the Select_Reactor.  If
    * there are no more bindings for this @a eh then it is removed from
    * the Select_Reactor.  Note that the Select_Reactor will call
@@ -270,7 +270,7 @@ public:
   virtual int remove_handler (ACE_Event_Handler *eh,
                               ACE_Reactor_Mask mask);
 
-  /**
+  /*
    * Removes the @a mask bind of Event_Handler whose handle is
    * @a handle from the Select_Reactor.  If there are no more bindings
    * for this @a eh then it is removed from the Select_Reactor.
@@ -278,7 +278,7 @@ public:
   virtual int remove_handler (ACE_HANDLE handle,
                               ACE_Reactor_Mask);
 
-  /**
+  /*
    * Removes all the @a mask bindings for handles in the @a handle_set
    * bind of Event_Handler.  If there are no more bindings for any
    * of these handlers then they are removed from the Select_Reactor.
@@ -286,7 +286,7 @@ public:
   virtual int remove_handler (const ACE_Handle_Set &handle_set,
                               ACE_Reactor_Mask);
 
-  /**
+  /*
    * Remove the ACE_Event_Handler currently associated with @a signum.
    * @a sigkey is ignored in this implementation since there is only
    * one instance of a signal handler.  Install the new disposition
@@ -329,7 +329,7 @@ public:
   /// Resume all the <Event_Handlers> in the Select_Reactor.
   virtual int resume_handlers (void);
 
-  /**
+  /*
    * Return true if we any event associations were made by the reactor
    * for the handles that it waits on, false otherwise. Since the
    * Select_Reactor does not do any event associations, this function
@@ -338,7 +338,7 @@ public:
   virtual bool uses_event_associations (void);
 
   // = Timer management.
-  /**
+  /*
    * Schedule an ACE_Event_Handler that will expire after an amount
    * of time.  The return value of this method, a timer_id value,
    * uniquely identifies the event_handler in the ACE_Reactor's
@@ -361,7 +361,7 @@ public:
                                const ACE_Time_Value &delay,
                                const ACE_Time_Value &interval = ACE_Time_Value::zero);
 
-  /**
+  /*
    * Resets the interval of the timer represented by @a timer_id to
    * @a interval, which is specified in relative time to the current
    * <gettimeofday>.  If @a interval is equal to
@@ -371,7 +371,7 @@ public:
   virtual int reset_timer_interval (long timer_id,
                                     const ACE_Time_Value &interval);
 
-  /**
+  /*
    * Cancel all <event_handlers> that match the address of
    * @a event_handler.  If @a dont_call_handle_close is 0 then the
    * <handle_close> method of @a event_handler will be invoked.
@@ -380,7 +380,7 @@ public:
   virtual int cancel_timer (ACE_Event_Handler *event_handler,
                             int dont_call_handle_close = 1);
 
-  /**
+  /*
    * Cancel the single ACE_Event_Handler that matches the @a timer_id
    * value (which was returned from the <schedule> method).  If arg is
    * non-NULL then it will be set to point to the ``magic cookie''
@@ -413,7 +413,7 @@ public:
                              ACE_Reactor_Mask mask);
 
   // = Notification methods.
-  /**
+  /*
    * Called by a thread when it wants to unblock the Select_Reactor.
    * This wakeups the <ACE_Select_Reactor> if currently blocked in
    * <select>/<poll>.  Pass over both the Event_Handler *and* the
@@ -428,7 +428,7 @@ public:
                       ACE_Reactor_Mask = ACE_Event_Handler::EXCEPT_MASK,
                       ACE_Time_Value * = 0);
 
-  /**
+  /*
    * Set the maximum number of times that the
    * <ACE_Select_Reactor_Notify::handle_input> method will iterate and
    * dispatch the ACE_Event_Handlers that are passed in via the
@@ -440,7 +440,7 @@ public:
    */
   virtual void max_notify_iterations (int);
 
-  /**
+  /*
    * Get the maximum number of times that the
    * <ACE_Select_Reactor_Notify::handle_input> method will iterate and
    * dispatch the ACE_Event_Handlers that are passed in via the
@@ -499,13 +499,13 @@ public:
 
   // = Miscellaneous Handler operations.
 
-  /**
+  /*
    * Return the Event_Handler associated with @a handle.  Return 0 if
    * @a handle is not registered.
    */
   virtual ACE_Event_Handler *find_handler (ACE_HANDLE handle);
 
-  /**
+  /*
    * Check to see if @a handle is associated with a valid Event_Handler
    * bound to @a mask.  Return the @a eh associated with this @a handler
    * if @a eh != 0.
@@ -514,7 +514,7 @@ public:
                        ACE_Reactor_Mask mask,
                        ACE_Event_Handler **eh = 0);
 
-  /**
+  /*
    * Check to see if @a signum is associated with a valid Event_Handler
    * bound to a signal.  Return the @a eh associated with this
    * handler if @a eh != 0.
@@ -529,7 +529,7 @@ public:
   /// table.
   virtual size_t size (void) const;
 
-  /**
+  /*
    * Returns a reference to the ACE_Reactor_Token that is
    * used to serialize the internal processing logic.
    * This can be useful for situations where you need to avoid
@@ -591,7 +591,7 @@ protected:
   /// Implement the public handler method.
   virtual int handler_i (int signum, ACE_Event_Handler ** = 0);
 
-  /**
+  /*
    * Check if there are any HANDLEs enabled in the <ready_set_>, and
    * if so, update the @a handle_set and return the number ready.  If
    * there aren't any HANDLEs enabled return 0.
@@ -614,7 +614,7 @@ protected:
 
   // = Dispatching methods.
 
-  /**
+  /*
    * Template Method that dispatches ACE_Event_Handlers for time
    * events, I/O events, and signal events.  Returns the total number
    * of ACE_Event_Handlers that were dispatched or -1 if something
@@ -623,7 +623,7 @@ protected:
   virtual int dispatch (int nfound,
                         ACE_Select_Reactor_Handle_Set &);
 
-  /**
+  /*
    * Dispatch all timer handlers that have expired.  Returns -1 if the
    * state of the <wait_set_> has changed, else 0.
    * <number_dispatched> is set to the number of timer handlers
@@ -631,7 +631,7 @@ protected:
    */
   virtual int dispatch_timer_handlers (int &number_dispatched);
 
-  /**
+  /*
    * Dispatch any notification handlers.  Returns -1 if the state of
    * the <wait_set_> has changed, else returns number of handlers
    * notified.
@@ -640,7 +640,7 @@ protected:
                                               int &number_of_active_handles,
                                               int &number_of_handlers_dispatched);
 
-  /**
+  /*
    * Dispatch all the input/output/except handlers that are enabled in
    * the @a dispatch_set.  Updates @a number_of_active_handles and
    * @a number_of_handlers_dispatched according to the behavior of the
@@ -651,7 +651,7 @@ protected:
                                     int &number_of_active_handles,
                                     int &number_of_handlers_dispatched);
 
-  /**
+  /*
    * Factors the dispatching of an io handle set (each WRITE, EXCEPT
    * or READ set of handles).  It updates the
    * @a number_of_handlers_dispatched and invokes this->notify_handle

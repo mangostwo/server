@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file   FlReactor.h
  *
  *  $Id: FlReactor.h 82723 2008-09-16 09:35:44Z johnnyw $
@@ -30,7 +30,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_FlReactor
  *
  * @brief A Reactor implementation that uses the Fast-Light (FL) toolkit

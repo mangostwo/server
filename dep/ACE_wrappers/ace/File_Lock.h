@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    File_Lock.h
  *
  *  $Id: File_Lock.h 91064 2010-07-12 10:11:24Z johnnyw $
@@ -24,7 +24,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_File_Lock
  *
  * @brief A wrapper around the UNIX file locking mechanism.
@@ -35,7 +35,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Export ACE_File_Lock
 {
 public:
-  /**
+  /*
    * Set the <handle_> of the File_Lock to @a handle.  Note that this
    * constructor assumes ownership of the @a handle and will close it
    * down in <remove>.  If you want the @a handle to stay open when
@@ -67,14 +67,14 @@ public:
   /// <handle_>.  If @a unlink_file is true then we unlink the file.
   int remove (bool unlink_file = true);
 
-  /**
+  /*
    * Note, for interface uniformity with other synchronization
    * wrappers we include the acquire() method. This is implemented as
    * a write-lock to be on the safe-side...
    */
   int acquire (short whence = 0, ACE_OFF_T start = 0, ACE_OFF_T len = 1);
 
-  /**
+  /*
    * Note, for interface uniformity with other synchronization
    * wrappers we include the <tryacquire> method.  This is implemented
    * as a write-lock to be on the safe-side...  Returns -1 on failure.
@@ -90,14 +90,14 @@ public:
   /// writer hold the lock.
   int acquire_write (short whence = 0, ACE_OFF_T start = 0, ACE_OFF_T len = 1);
 
-  /**
+  /*
    * Conditionally acquire a write lock (i.e., won't block).  Returns
    * -1 on failure.  If we "failed" because someone else already had
    * the lock, @c errno is set to @c EBUSY.
    */
   int tryacquire_write (short whence = 0, ACE_OFF_T start = 0, ACE_OFF_T len = 1);
 
-  /**
+  /*
    * Conditionally upgrade to a write lock (i.e., won't block).  Returns
    * -1 on failure.  If we "failed" because someone else already had
    * the lock, @c errno is set to @c EBUSY.
@@ -106,14 +106,14 @@ public:
                                 ACE_OFF_T start = 0,
                                 ACE_OFF_T len = 1);
 
-  /**
+  /*
    * Acquire a read lock, but block if a writer hold the lock.
    * Returns -1 on failure.  If we "failed" because someone else
    * already had the lock, @c errno is set to @c EBUSY.
    */
   int acquire_read (short whence = 0, ACE_OFF_T start = 0, ACE_OFF_T len = 1);
 
-  /**
+  /*
    * Conditionally acquire a read lock (i.e., won't block).  Returns
    * -1 on failure.  If we "failed" because someone else already had
    * the lock, @c errno is set to @c EBUSY.
@@ -123,7 +123,7 @@ public:
   /// Get underlying ACE_HANDLE for the file.
   ACE_HANDLE get_handle (void) const;
 
-  /**
+  /*
    * Set underlying ACE_HANDLE.  Note that this method assumes
    * ownership of the @a handle and will close it down in <remove>.  If
    * you want the @a handle to stay open when <remove> is called make

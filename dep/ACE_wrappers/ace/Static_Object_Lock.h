@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Static_Object_Lock.h
  *
  *  $Id: Static_Object_Lock.h 80826 2008-03-04 14:51:23Z wotte $
@@ -28,7 +28,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Recursive_Thread_Mutex;
 
-/**
+/*
  * @class ACE_Static_Object_Lock
  *
  * @brief Provide an interface to access a global lock.

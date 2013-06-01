@@ -1,4 +1,4 @@
-/**
+/*
  @file debugPrintf.h
  
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -33,7 +33,7 @@ void setConsolePrintHook(ConsolePrintHook h);
 
 ConsolePrintHook consolePrintHook();
 
-/**
+/*
    Sends output to the log and to the last GConsole instantiated.
 
    Guarantees that the output has been flushed by the time the routine
@@ -44,7 +44,7 @@ ConsolePrintHook consolePrintHook();
 std::string __cdecl consolePrintf(const char* fmt ...) G3D_CHECK_PRINTF_ARGS;
 std::string consolePrint(const std::string&);
 
-/**
+/*
    Under visual studio, appears in the VS debug pane.
    On unix-based operating systems the output is sent to stderr.
 

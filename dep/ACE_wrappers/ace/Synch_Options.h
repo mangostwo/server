@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file   Synch_Options.h
  *
  *  $Id: Synch_Options.h 80826 2008-03-04 14:51:23Z wotte $
@@ -25,7 +25,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Synch_Options
  *
  * @brief Contains the values of options used to determine the
@@ -57,7 +57,7 @@ class ACE_Export ACE_Synch_Options
 {
 public:
   /// Options flags for controlling synchronization.
-  /**
+  /*
    * Note that these flags can be bit-wise "or'd" together if both
    * options are desired.
    */
@@ -69,7 +69,7 @@ public:
     USE_TIMEOUT = 02
   };
 
-  /**
+  /*
    * Initialize the object to default values unless specified otherwise.
    *
    * @param options Specifies the options to use; default is neither option
@@ -116,7 +116,7 @@ public:
   /// timeout is specified as the constructor and set() do.
   void timeout (const ACE_Time_Value &tv);
 
-  /**
+  /*
    * Returns a timeout pointer if (*this)[USE_TIMEOUT] is true, else 0.
    * This should be used with care, e.g., the timeout pointer should not
    * be stored in a manner that will lead to dangling pointers.
@@ -148,7 +148,7 @@ private:
   /// Amount of time to wait for timeouts.
   ACE_Time_Value timeout_;
 
-  /**
+  /*
    * "Magic cookie" always passed in as an argument to the ACE_Reactor's
    * schedule_timer() method.  Used to communicate values for
    * asynchronous programming.

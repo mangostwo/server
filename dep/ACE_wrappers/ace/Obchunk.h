@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Obchunk.h
  *
  *  $Id: Obchunk.h 80826 2008-03-04 14:51:23Z wotte $
@@ -23,7 +23,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Obchunk
  *
  * @brief Defines the state that represents a "chunk" of memory.
@@ -59,7 +59,7 @@ public:
   /// Next chunk in the chain.
   ACE_Obchunk *next_;
 
-  /**
+  /*
    * Pointer to the beginning contents of this chunk.  This field is
    * actually overlayed by the memory allocated by
    * <ACE_Obstack::new_chunk>.  Therefore, it *must* come last.

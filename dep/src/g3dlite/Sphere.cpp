@@ -1,4 +1,4 @@
-/**
+/*
  @file Sphere.cpp
  
  Sphere class

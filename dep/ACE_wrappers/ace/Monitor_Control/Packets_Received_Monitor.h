@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  * @file Packets_Received_Monitor.h
  *
  * $Id: Packets_Received_Monitor.h 91743 2010-09-13 18:24:51Z johnnyw $
@@ -45,7 +45,7 @@ namespace ACE
 {
   namespace Monitor_Control
   {
-    /**
+    /*
      * @class Packets_Received_Monitor
      *
      * @brief Monitors total packets received over all network interfaces.

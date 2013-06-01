@@ -1,6 +1,6 @@
 // -*- C++ -*-
 //=============================================================================
-/**
+/*
  *  @file   Stack_Trace.h
  *
  *  $Id: Stack_Trace.h 91743 2010-09-13 18:24:51Z johnnyw $
@@ -25,7 +25,7 @@
 #    define ACE_STACK_TRACE_SYMBUFSIZ 4096
 #  endif
 
-/**
+/*
  *  @class ACE_Stack_Trace
  *
  *  @brief Encapsulate a string representation of a stack trace on supported platforms.
@@ -72,7 +72,7 @@
 class ACE_Export ACE_Stack_Trace
 {
 public:
-  /**
+  /*
    * @brief Grab a snapshot of the current stack trace and hold it for later use.
    *
    * @param starting_frame_offset offset into the array of frames to start printing; 0 is the
@@ -83,7 +83,7 @@ public:
    */
   explicit ACE_Stack_Trace (ssize_t starting_frame_offset = 0, size_t num_frames = 0);
 
-  /**
+  /*
    * @brief Return buffer as a C-style string.
    * @return C-style string with string representation of stack trace.
    * @note Lifecycle of string follows lifecycle of ACE_Stack_Trace instance.

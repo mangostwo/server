@@ -20,7 +20,7 @@
     slouken@libsdl.org
 */
 
-/**
+/*
  *  @file SDL_error.h
  *  Simple error message routines for SDL
  */
@@ -45,7 +45,7 @@ extern DECLSPEC char * SDLCALL SDL_GetError(void);
 extern DECLSPEC void SDLCALL SDL_ClearError(void);
 /*@}*/
 
-/**
+/*
  *  @name Private functions
  *  @internal Private error message function - used internally
  */

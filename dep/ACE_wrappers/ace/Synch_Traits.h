@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    Synch_Traits.h
  *
  *  $Id: Synch_Traits.h 91626 2010-09-07 10:59:20Z johnnyw $
@@ -38,7 +38,7 @@ class ACE_Condition_Thread_Mutex;
 class ACE_Condition_Recursive_Thread_Mutex;
 class ACE_Thread_Semaphore;
 
-/**
+/*
  * @class ACE_NULL_SYNCH
  *
  * @brief Implement a do nothing Synchronization wrapper that
@@ -64,7 +64,7 @@ public:
 class ACE_Process_Mutex;
 class ACE_Condition_Recursive_Thread_Mutex;
 
-/**
+/*
  * @class ACE_MT_SYNCH
  *
  * @brief Implement a default thread safe synchronization wrapper that

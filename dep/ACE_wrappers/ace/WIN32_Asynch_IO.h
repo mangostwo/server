@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    WIN32_Asynch_IO.h
  *
  *  $Id: WIN32_Asynch_IO.h 92298 2010-10-21 11:15:17Z johnnyw $
@@ -47,7 +47,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // Forward declaration
 class ACE_WIN32_Proactor;
 
-/**
+/*
  * @class ACE_WIN32_Asynch_Result
  *
  * @brief An abstract class which adds information to the OVERLAPPED
@@ -79,7 +79,7 @@ public:
   /// Did the operation succeed?
   int success (void) const;
 
-  /**
+  /*
    * This returns the ACT associated with the handle when it was
    * registered with the I/O completion port.  This ACT is not the
    * same as the ACT associated with the asynchronous operation.
@@ -146,7 +146,7 @@ protected:
   u_long error_;
 };
 
-/**
+/*
  * @class ACE_WIN32_Asynch_Operation
  *
  * @brief This class abstracts out the common things needed for
@@ -156,7 +156,7 @@ protected:
 class ACE_Export ACE_WIN32_Asynch_Operation : public virtual ACE_Asynch_Operation_Impl
 {
 public:
-  /**
+  /*
    * Initializes the factory with information which will be used with
    * each asynchronous call.  If (@a handle == ACE_INVALID_HANDLE),
    * ACE_Handler::handle() will be called on the @a handler to get the
@@ -167,7 +167,7 @@ public:
             const void *completion_key,
             ACE_Proactor *proactor);
 
-  /**
+  /*
    * This cancels all pending accepts operations that were issued by
    * the calling thread.  The function does not cancel asynchronous
    * operations issued by other threads.
@@ -199,7 +199,7 @@ protected:
   ACE_HANDLE handle_;
 };
 
-/**
+/*
  * @class ACE_WIN32_Asynch_Read_Stream_Result
  *
  * @brief This class provides concrete implementation for
@@ -237,7 +237,7 @@ public:
   /// Did the operation succeed?
   int success (void) const;
 
-  /**
+  /*
    * This returns the ACT associated with the handle when it was
    * registered with the I/O completion port.  This ACT is not the
    * same as the ACT associated with the asynchronous operation.
@@ -304,7 +304,7 @@ protected:
   int scatter_enabled_;
 };
 
-/**
+/*
  * @class ACE_WIN32_Asynch_Read_Stream
  *
  * @brief This class is a factory for starting off asynchronous reads
@@ -332,7 +332,7 @@ public:
             int priority,
             int signal_number = 0);
 
-  /**
+  /*
   * Same as above but with scatter support, through chaining of composite
   * message blocks using the continuation field.
   */
@@ -349,7 +349,7 @@ public:
   // methods are defined here to avoid VC++ warnings. They route the
   // call to the ACE_WIN32_Asynch_Operation base class.
 
-  /**
+  /*
    * Initializes the factory with information which will be used with
    * each asynchronous call.  If (@a handle == ACE_INVALID_HANDLE),
    * ACE_Handler::handle() will be called on the @a handler to get the
@@ -360,7 +360,7 @@ public:
             const void *completion_key,
             ACE_Proactor *proactor);
 
-  /**
+  /*
    * This cancels all pending accepts operations that were issued by
    * the calling thread.  The function does not cancel asynchronous
    * operations issued by other threads.
@@ -376,7 +376,7 @@ protected:
   int shared_read (ACE_WIN32_Asynch_Read_Stream_Result *result);
 };
 
-/**
+/*
  * @class ACE_WIN32_Asynch_Write_Stream_Result
  *
  * @brief This class provides concrete implementation for
@@ -414,7 +414,7 @@ public:
   /// Did the operation succeed?
   int success (void) const;
 
-  /**
+  /*
    * This returns the ACT associated with the handle when it was
    * registered with the I/O completion port.  This ACT is not the
    * same as the ACT associated with the asynchronous operation.
@@ -482,7 +482,7 @@ protected:
   int gather_enabled_;
 };
 
-/**
+/*
  * @class ACE_WIN32_Asynch_Write_Stream
  *
  * @brief This class is a factory for starting off asynchronous writes
@@ -510,7 +510,7 @@ public:
              int priority,
              int signal_number = 0);
 
-  /**
+  /*
   * Same as above but with gather support, through chaining of composite
   * message blocks using the continuation field.
   */
@@ -528,7 +528,7 @@ public:
   // These methods are defined here to avoid VC++ warnings. They route
   // the call to the <ACE_WIN32_Asynch_Operation> base class.
 
-  /**
+  /*
    * Initializes the factory with information which will be used with
    * each asynchronous call.  If (@a handle == ACE_INVALID_HANDLE),
    * ACE_Handler::handle() will be called on the @a handler to get the
@@ -539,7 +539,7 @@ public:
             const void *completion_key,
             ACE_Proactor *proactor);
 
-  /**
+  /*
    * This cancels all pending accepts operations that were issued by
    * the calling thread.  The function does not cancel asynchronous
    * operations issued by other threads.
@@ -555,7 +555,7 @@ protected:
   int shared_write (ACE_WIN32_Asynch_Write_Stream_Result *result);
 };
 
-/**
+/*
  * @class ACE_WIN32_Asynch_Read_File_Result
  *
  * @brief This class provides concrete implementation for
@@ -584,7 +584,7 @@ public:
   /// Did the operation succeed?
   int success (void) const;
 
-  /**
+  /*
    * This returns the ACT associated with the handle when it was
    * registered with the I/O completion port.  This ACT is not the
    * same as the ACT associated with the asynchronous operation.
@@ -653,7 +653,7 @@ protected:
   virtual ~ACE_WIN32_Asynch_Read_File_Result (void);
 };
 
-/**
+/*
  * @class ACE_WIN32_Asynch_Read_File
  *
  * @brief This class is a factory for starting off asynchronous reads
@@ -676,7 +676,7 @@ public:
   /// Constructor.
   ACE_WIN32_Asynch_Read_File (ACE_WIN32_Proactor *win32_proactor);
 
-  /**
+  /*
    * This starts off an asynchronous read.  Upto @a bytes_to_read will
    * be read and stored in the @a message_block.  The read will start
    * at @a offset from the beginning of the file.
@@ -689,7 +689,7 @@ public:
             int priority,
             int signal_number = 0);
 
-  /**
+  /*
   * Same as above but with scatter support, through chaining of
   * composite message blocks using the continuation field.
   * @note Each data block payload must be at least the size of a
@@ -712,7 +712,7 @@ public:
   //   methods are defined here to avoid VC++ warnings. They route the
   //   call to the ACE_WIN32_Asynch_Operation base class.
 
-  /**
+  /*
    * Initializes the factory with information which will be used with
    * each asynchronous call.  If (<handle> == ACE_INVALID_HANDLE),
    * <ACE_Handler::handle> will be called on the @a handler to get the
@@ -723,7 +723,7 @@ public:
             const void *completion_key,
             ACE_Proactor *proactor);
 
-  /**
+  /*
    * This cancels all pending accepts operations that were issued by
    * the calling thread.  The function does not cancel asynchronous
    * operations issued by other threads.
@@ -734,7 +734,7 @@ public:
   ACE_Proactor* proactor (void) const;
 
 private:
-  /**
+  /*
    * This method belongs to ACE_WIN32_Asynch_Read_Stream. It is here
    * to avoid the compiler warnings. We forward this call to the
    * ACE_WIN32_Asynch_Read_Stream class.
@@ -745,7 +745,7 @@ private:
             int priority,
             int signal_number = 0);
 
-  /**
+  /*
   * Same as above but with scatter support, through chaining of composite
   * message blocks using the continuation field.
   */
@@ -756,7 +756,7 @@ private:
              int signal_number = 0);
 };
 
-/**
+/*
  * @class ACE_WIN32_Asynch_Write_File_Result
  *
  * @brief  This class provides implementation for
@@ -795,7 +795,7 @@ public:
   /// Did the operation succeed?
   int success (void) const;
 
-  /**
+  /*
    * This returns the ACT associated with the handle when it was
    * registered with the I/O completion port.  This ACT is not the
    * same as the ACT associated with the asynchronous operation.
@@ -864,7 +864,7 @@ protected:
   virtual ~ACE_WIN32_Asynch_Write_File_Result (void);
 };
 
-/**
+/*
  * @class ACE_WIN32_Asynch_Write_File
  *
  * @brief This class is a factory for starting off asynchronous writes
@@ -883,7 +883,7 @@ public:
   /// Constructor.
   ACE_WIN32_Asynch_Write_File (ACE_WIN32_Proactor *win32_proactor);
 
-  /**
+  /*
    * This starts off an asynchronous write.  Upto @a bytes_to_write
    * will be write and stored in the @a message_block.  The write will
    * start at @a offset from the beginning of the file.
@@ -896,7 +896,7 @@ public:
              int priority,
              int signal_number = 0);
 
-  /**
+  /*
   * Same as above but with gather support, through chaining of
   * composite message blocks using the continuation field.
   * @note Each data block payload must be at least the size of a
@@ -918,7 +918,7 @@ public:
   //   methods are defined here to avoid VC++ warnings. They route the
   //   call to the ACE_WIN32_Asynch_Operation base class.
 
-  /**
+  /*
    * Initializes the factory with information which will be used with
    * each asynchronous call.  If (<handle> == ACE_INVALID_HANDLE),
    * <ACE_Handler::handle> will be called on the @a handler to get the
@@ -929,7 +929,7 @@ public:
             const void *completion_key,
             ACE_Proactor *proactor);
 
-  /**
+  /*
    * This cancels all pending accepts operations that were issued by
    * the calling thread.  The function does not cancel asynchronous
    * operations issued by other threads.
@@ -940,7 +940,7 @@ public:
   ACE_Proactor* proactor (void) const;
 
 private:
-  /**
+  /*
    * This method belongs to ACE_WIN32_Asynch_Write_Stream. It is here
    * to avoid compiler warnings. This method is forwarded to the
    * ACE_WIN32_Asynch_Write_Stream class.
@@ -951,7 +951,7 @@ private:
              int priority,
              int signal_number = 0);
 
-  /**
+  /*
   * Same as above but with gather support, through chaining of composite
   * message blocks using the continuation field.
   */
@@ -962,7 +962,7 @@ private:
               int signal_number = 0);
 };
 
-/**
+/*
  * @class ACE_WIN32_Asynch_Accept_Result
  *
  * @brief This class implements ACE_Asynch_Accept::Result for WIN32
@@ -1007,7 +1007,7 @@ public:
   /// Did the operation succeed?
   int success (void) const;
 
-  /**
+  /*
    * This returns the ACT associated with the handle when it was
    * registered with the I/O completion port.  This ACT is not the
    * same as the ACT associated with the asynchronous operation.
@@ -1071,7 +1071,7 @@ protected:
   ACE_HANDLE accept_handle_;
 };
 
-/**
+/*
  * @class ACE_WIN32_Asynch_Accept
  *
  * @brief This class is a factory for starting off asynchronous accepts
@@ -1090,7 +1090,7 @@ public:
   /// Constructor.
   ACE_WIN32_Asynch_Accept (ACE_WIN32_Proactor *win32_proactor);
 
-  /**
+  /*
    * This starts off an asynchronous accept.  The asynchronous accept
    * call also allows any initial data to be returned to the
    * @a handler.  Upto @a bytes_to_read will be read and stored in the
@@ -1116,7 +1116,7 @@ public:
   // methods are defined here to avoid VC++ warnings. They route the
   // call to the ACE_WIN32_Asynch_Operation base class.
 
-  /**
+  /*
    * Initializes the factory with information which will be used with
    * each asynchronous call.  If (<handle> == ACE_INVALID_HANDLE),
    * <ACE_Handler::handle> will be called on the @a handler to get the
@@ -1127,7 +1127,7 @@ public:
             const void *completion_key,
             ACE_Proactor *proactor);
 
-  /**
+  /*
    * This cancels all pending accepts operations that were issued by
    * the calling thread.  The function does not cancel asynchronous
    * operations issued by other threads.
@@ -1138,7 +1138,7 @@ public:
   ACE_Proactor* proactor (void) const;
 };
 
-/**
+/*
  * @class ACE_WIN32_Asynch_Connect_Result
  *
  * @brief This is that class which will be passed back to the
@@ -1174,7 +1174,7 @@ public:
   /// Did the operation succeed?
   int success (void) const;
 
-  /**
+  /*
    * Returns the ACT associated with the handle when it was
    * registered with the I/O completion port.  This ACT is not the
    * same as the ACT associated with the asynchronous operation.
@@ -1229,7 +1229,7 @@ protected:
 };
 
 
-/**
+/*
  * @class ACE_WIN32_Asynch_Connect
  */
 class ACE_Export ACE_WIN32_Asynch_Connect :
@@ -1245,7 +1245,7 @@ public:
   /// Destructor.
   virtual ~ACE_WIN32_Asynch_Connect (void);
 
- /**
+ /*
    * This open belongs to ACE_WIN32_Asynch_Operation. We forward
    * this call to that method. We have put this here to avoid the
    * compiler warnings.
@@ -1255,7 +1255,7 @@ public:
             const void *completion_key,
             ACE_Proactor *proactor = 0);
 
-  /**
+  /*
    * Start an asynchronous connect.
    *
    * @param connect_handle Handle to use for the connect. If the value
@@ -1272,13 +1272,13 @@ public:
                int priority,
                int signal_number = 0);
 
-  /**
+  /*
    *  Cancel all pending pseudo-asynchronus requests
    *  Behavior as usual AIO request
    */
   int cancel (void);
 
-  /**
+  /*
    *  Close performs cancellation of all pending requests
    *  and close the connect handle
    */
@@ -1313,7 +1313,7 @@ private:
   int post_result (ACE_WIN32_Asynch_Connect_Result *result, bool flg_post);
 
   /// Cancel uncompleted connect operations.
-  /**
+  /*
    * @param flg_notify Indicates whether or not to send notification about
    *                   canceled connect operations.  If false, don't send
    *                   notifications. If true, notify user about canceled
@@ -1345,7 +1345,7 @@ private:
   ACE_SYNCH_MUTEX lock_;
 };
 
-/**
+/*
  * @class ACE_WIN32_Asynch_Transmit_File_Result
  *
  *
@@ -1398,7 +1398,7 @@ public:
   /// Did the operation succeed?
   int success (void) const;
 
-  /**
+  /*
    * This returns the ACT associated with the handle when it was
    * registered with the I/O completion port.  This ACT is not the
    * same as the ACT associated with the asynchronous operation.
@@ -1474,7 +1474,7 @@ protected:
   u_long flags_;
 };
 
-/**
+/*
  * @class ACE_WIN32_Asynch_Transmit_File
  *
  * @brief This class is a factory for starting off asynchronous
@@ -1500,7 +1500,7 @@ public:
   /// Constructor.
   ACE_WIN32_Asynch_Transmit_File (ACE_WIN32_Proactor *win32_proactor);
 
-  /**
+  /*
    * This starts off an asynchronous transmit file. The <file> is a
    * handle to an open file.  <header_and_trailer> is a pointer to a
    * data structure that contains pointers to data to send before and
@@ -1529,7 +1529,7 @@ public:
   // methods are defined here to avoid VC++ warnings. They route the
   // call to the ACE_WIN32_Asynch_Operation base class.
 
-  /**
+  /*
    * Initializes the factory with information which will be used with
    * each asynchronous call.  If (<handle> == ACE_INVALID_HANDLE),
    * <ACE_Handler::handle> will be called on the @a handler to get the
@@ -1540,7 +1540,7 @@ public:
             const void *completion_key,
             ACE_Proactor *proactor);
 
-  /**
+  /*
    * This cancels all pending accepts operations that were issued by
    * the calling thread.  The function does not cancel asynchronous
    * operations issued by other threads.
@@ -1551,7 +1551,7 @@ public:
   ACE_Proactor* proactor (void) const;
 };
 
-/**
+/*
  * @class ACE_WIN32_Asynch_Read_Dgram_Result
  *
  * @brief This class provides concrete implementation for
@@ -1597,7 +1597,7 @@ public:
   /// Did the operation succeed?
   int success (void) const;
 
-  /**
+  /*
    * This returns the ACT associated with the handle when it was
    * registered with the I/O completion port.  This ACT is not the
    * same as the ACT associated with the asynchronous operation.
@@ -1667,7 +1667,7 @@ protected:
   ACE_HANDLE handle_;
 };
 
-/**
+/*
  * @class ACE_WIN32_Asynch_Read_Dgram
  *
  * @brief This class is a factory for starting off asynchronous reads
@@ -1719,7 +1719,7 @@ public:
   // methods are defined here to avoid VC++ warnings. They route the
   // call to the ACE_WIN32_Asynch_Operation base class.
 
-  /**
+  /*
    * Initializes the factory with information which will be used with
    * each asynchronous call.  If (<handle> == ACE_INVALID_HANDLE),
    * <ACE_Handler::handle> will be called on the @a handler to get the
@@ -1730,7 +1730,7 @@ public:
             const void *completion_key,
             ACE_Proactor *proactor);
 
-  /**
+  /*
    * This cancels all pending accepts operations that were issued by
    * the calling thread.  The function does not cancel asynchronous
    * operations issued by other threads.
@@ -1745,7 +1745,7 @@ protected:
   ACE_WIN32_Asynch_Read_Dgram (void);
 };
 
-/**
+/*
  * @class ACE_WIN32_Asynch_Write_Dgram_Result
  *
  * @brief This class provides concrete implementation for
@@ -1786,7 +1786,7 @@ public:
   /// Did the operation succeed?
   int success (void) const;
 
-  /**
+  /*
    * This returns the ACT associated with the handle when it was
    * registered with the I/O completion port.  This ACT is not the
    * same as the ACT associated with the asynchronous operation.
@@ -1851,7 +1851,7 @@ protected:
   ACE_HANDLE handle_;
 };
 
-/**
+/*
  * @class ACE_WIN32_Asynch_Write_Dgram
  *
  * @brief This class is a factory for starting off asynchronous writes
@@ -1904,7 +1904,7 @@ public:
   // These methods are defined here to avoid VC++ warnings. They route
   // the call to the <ACE_WIN32_Asynch_Operation> base class.
 
-  /**
+  /*
    * Initializes the factory with information which will be used with
    * each asynchronous call.  If (<handle> == ACE_INVALID_HANDLE),
    * <ACE_Handler::handle> will be called on the @a handler to get the
@@ -1915,7 +1915,7 @@ public:
             const void *completion_key,
             ACE_Proactor *proactor);
 
-  /**
+  /*
    * This cancels all pending accepts operations that were issued by
    * the calling thread.  The function does not cancel asynchronous
    * operations issued by other threads.

@@ -1,4 +1,4 @@
-/**
+/*
   @file Quat.h
  
   Quaternion
@@ -20,7 +20,7 @@
 
 namespace G3D {
 
-/**
+/*
   Arbitrary quaternion (not necessarily unit)
 
   Unit quaternions are used in computer graphics to represent
@@ -56,7 +56,7 @@ private:
 
 public:
 
-    /**
+    /*
      q = [sin(angle / 2) * axis, cos(angle / 2)]
     
      In Watt & Watt's notation, s = w, v = (x, y, z)
@@ -64,7 +64,7 @@ public:
      */
     float x, y, z, w;
 
-    /**
+    /*
      Initializes to a zero degree rotation, (0,0,0,1)
      */
     Quat() : x(0), y(0), z(0), w(1) {}
@@ -81,7 +81,7 @@ public:
     Quat(const Vector3& v, float _w = 0) : x(v.x), y(v.y), z(v.z), w(_w) {
     }
 
-    /**
+    /*
      The real part of the quaternion.
      */
     const float& real() const {
@@ -120,7 +120,7 @@ public:
         return *this;
     }
 
-    /**
+    /*
      Negates the imaginary part.
      */
     Quat conj() const {
@@ -171,7 +171,7 @@ public:
         return fuzzyEq(q) || fuzzyEq(-q);
     }
 
-    /**
+    /*
      Returns the imaginary part (x, y, z)
      */
     const Vector3& imag() const {
@@ -206,7 +206,7 @@ public:
     void toRotationMatrix(
         Matrix3&            rot) const;
     
-    /**
+    /*
      Spherical linear interpolation: linear interpolation along the 
      shortest (3D) great-circle route between two quaternions.
 
@@ -233,7 +233,7 @@ public:
         return conj() / dot(*this);
     }
 
-    /**
+    /*
      Quaternion multiplication (composition of rotations).
      Note that this does not commute.
      */
@@ -302,7 +302,7 @@ public:
     }
 
 
-    /**
+    /*
      Raise this quaternion to a power.  For a rotation, this is
      the effect of rotating x times as much as the original
      quaterion.
@@ -319,7 +319,7 @@ public:
         *this *= rsq(dot(*this));
     }
 
-    /**
+    /*
      Returns a unit quaterion obtained by dividing through by
      the magnitude.
      */
@@ -329,7 +329,7 @@ public:
         return x;
     }
 
-    /**
+    /*
      The linear algebra 2-norm, sqrt(q dot q).  This matches
      the value used in Dam's 1998 tech report but differs from the
      n(q) value used in Eberly's 1999 paper, which is the square of the

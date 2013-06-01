@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    SPIPE_Addr.h
  *
  *  $Id: SPIPE_Addr.h 80826 2008-03-04 14:51:23Z wotte $
@@ -27,7 +27,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_SPIPE_Addr
  *
  * @brief Defines the SVR4 STREAM pipe address family address format.

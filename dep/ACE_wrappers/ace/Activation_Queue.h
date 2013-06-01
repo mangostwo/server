@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Activation_Queue.h
  *
  *  $Id: Activation_Queue.h 91066 2010-07-12 11:05:04Z johnnyw $
@@ -33,7 +33,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Method_Request;
 
-/**
+/*
  * @class ACE_Activation_Queue
  *
  * @brief
@@ -53,7 +53,7 @@ class ACE_Export ACE_Activation_Queue : private ACE_Copy_Disabled
 {
 public:
   /// Constructor.
-  /**
+  /*
    * Initializes a new activation queue.
    *
    * @param new_queue The activation queue uses an ACE_Message_Queue to
@@ -84,7 +84,7 @@ public:
   // = Activate Queue operations.
 
   /// Dequeue the next available ACE_Method_Request.
-  /**
+  /*
    * @param tv  If 0, the method will block until a method request is
    *            available, else will wait until the absolute time specified
    *            in the referenced ACE_Time_Value.  This method will return,
@@ -98,7 +98,7 @@ public:
   ACE_Method_Request *dequeue (ACE_Time_Value *tv = 0);
 
   /// Enqueue the ACE_Method_Request in priority order.
-  /**
+  /*
    * The priority of the method request is obtained via the @c priority()
    * method of the queued method request. Priority ordering is determined
    * by the ACE_Message_Queue class; 0 is the lowest priority.

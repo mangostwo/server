@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file   Sock_Connect.h
  *
  *  $Id: Sock_Connect.h 80826 2008-03-04 14:51:23Z wotte $
@@ -39,7 +39,7 @@ namespace ACE
                                    ACE_UINT32 ip_addr = INADDR_ANY,
                                    int address_family = AF_UNSPEC);
 
-  /**
+  /*
    * Get our broadcast address based on our @a host_addr.  If
    * @a hostname is non-0 we'll use it to determine our IP address.  If
    * @a handle is not ACE_INVALID_HANDLE then we'll use this to
@@ -58,7 +58,7 @@ namespace ACE
                                   char hostname[],
                                   size_t len);
 
-  /**
+  /*
    * Return count and array of all configured IP interfaces on this
    * host, rc = 0 on success (count == number of interfaces else -1).
    * Caller is responsible for calling delete [] on @a addr_array.
@@ -66,7 +66,7 @@ namespace ACE
   extern ACE_Export int get_ip_interfaces (size_t &count,
                                            ACE_INET_Addr *&addr_array);
 
-  /**
+  /*
    * Helper routine for get_ip_interfaces, differs by UNIX platform so
    * put into own subroutine.  perform some ioctls to retrieve ifconf
    * list of ifreq structs.
@@ -80,7 +80,7 @@ namespace ACE
 
   /// Returns @c true if IPv4 is enabled on the current host; @c false
   /// if not.
-  /**
+  /*
    * This is an execution-time check. If ACE has not been compiled
    * with @c ACE_HAS_IPV6, it always returns @c true. This function
    * tries to create a @c PF_INET socket, returning @c true if it
@@ -89,7 +89,7 @@ namespace ACE
    */
   extern ACE_Export bool ipv4_enabled (void);
 
-  /**
+  /*
    * Returns 1 if IPv6 is enabled on the current host; 0 if not.
    * This is an execution-time check. If ACE has not been compiled
    * with ACE_HAS_IPV6, it always returns 0. If ACE_HAS_IPV6 is

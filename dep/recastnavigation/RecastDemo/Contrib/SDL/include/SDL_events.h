@@ -20,7 +20,7 @@
     slouken@libsdl.org
 */
 
-/**
+/*
  *  @file SDL_events.h
  *  Include file for SDL event handling
  */
@@ -256,7 +256,7 @@ typedef enum {
 	SDL_GETEVENT
 } SDL_eventaction;
 
-/**
+/*
  *  Checks the event queue for messages and optionally returns them.
  *
  *  If 'action' is SDL_ADDEVENT, up to 'numevents' events will be added to
@@ -298,7 +298,7 @@ extern DECLSPEC int SDLCALL SDL_PushEvent(SDL_Event *event);
 /** @name Event Filtering */
 /*@{*/
 typedef int (SDLCALL *SDL_EventFilter)(const SDL_Event *event);
-/**
+/*
  *  This function sets up a filter to process all events before they
  *  change internal state and are posted to the internal event queue.
  *
@@ -322,7 +322,7 @@ typedef int (SDLCALL *SDL_EventFilter)(const SDL_Event *event);
  */
 extern DECLSPEC void SDLCALL SDL_SetEventFilter(SDL_EventFilter filter);
 
-/**
+/*
  *  Return the current event filter - can be used to "chain" filters.
  *  If there is no event filter set, this function returns NULL.
  */
@@ -337,7 +337,7 @@ extern DECLSPEC SDL_EventFilter SDLCALL SDL_GetEventFilter(void);
 #define SDL_ENABLE	 1
 /*@}*/
 
-/**
+/*
 * This function allows you to set the state of processing certain events.
 * If 'state' is set to SDL_IGNORE, that event will be automatically dropped
 * from the event queue and will not event be filtered.

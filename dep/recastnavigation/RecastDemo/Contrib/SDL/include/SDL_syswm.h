@@ -200,7 +200,7 @@ typedef struct SDL_SysWMinfo {
 #endif /* SDL_PROTOTYPES_ONLY */
 
 /* Function prototypes */
-/**
+/*
  * This function gives you custom hooks into the window manager information.
  * It fills the structure pointed to by 'info' with custom information and
  * returns 1 if the function is implemented.  If it's not implemented, or

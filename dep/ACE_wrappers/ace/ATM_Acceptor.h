@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    ATM_Acceptor.h
  *
  *  $Id: ATM_Acceptor.h 82723 2008-09-16 09:35:44Z johnnyw $
@@ -49,7 +49,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // Forward declarations.
 class ACE_Time_Value;
 
-/**
+/*
  * @class ACE_ATM_Acceptor
  *
  * @brief Defines the member functions for ACE_ATM_Acceptor abstraction.

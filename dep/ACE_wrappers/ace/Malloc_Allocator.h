@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file   Malloc_Allocator.h
  *
  *  $Id: Malloc_Allocator.h 80826 2008-03-04 14:51:23Z wotte $
@@ -36,7 +36,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_New_Allocator
  *
  * @brief Defines a class that provided a simple implementation of
@@ -82,7 +82,7 @@ private:
   // <ACE_Allocator::instance> implementation for explanation.
 };
 
-/**
+/*
  * @class ACE_Static_Allocator_Base
  *
  * @brief Defines a class that provided a highly optimized memory

@@ -22,7 +22,7 @@
 
 namespace G3D {
 
-/**
+/*
    \brief A mutual exclusion lock that busy-waits when locking.
 
    On a machine with one (significant) thread per processor core,
@@ -61,7 +61,7 @@ public:
 
 };
 
-/**
+/*
  \brief Mutual exclusion lock used for synchronization.
 
  @sa G3D::GThread, G3D::AtomicInt32, G3D::Spinlock
@@ -96,7 +96,7 @@ public:
 };
 
 
-/**
+/*
     Automatically locks while in scope.
 */
 class GMutexLock {

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  * @file Windows_Monitor.h
  *
  * $Id: Windows_Monitor.h 91743 2010-09-13 18:24:51Z johnnyw $
@@ -33,7 +33,7 @@ namespace ACE
 {
   namespace Monitor_Control
   {
-    /**
+    /*
      * @class Windows_Monitor
      *
      * @brief Mixin class for concrete monitors compiled on Windows machines.

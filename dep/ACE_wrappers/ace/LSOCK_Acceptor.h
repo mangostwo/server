@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    LSOCK_Acceptor.h
  *
  *  $Id: LSOCK_Acceptor.h 82723 2008-09-16 09:35:44Z johnnyw $
@@ -32,7 +32,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // Forward decl.
 class ACE_Reactor;
 
-/**
+/*
  * @class ACE_LSOCK_Acceptor
  *
  * @brief Defines the format and interface for the acceptor side of the

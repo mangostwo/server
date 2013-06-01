@@ -1,4 +1,4 @@
-/**
+/*
  @file spline.h
  
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -17,7 +17,7 @@
 
 namespace G3D {
 
-/**
+/*
  Interpolates a property according to a piecewise linear spline.  This provides
  C0 continuity but the derivatives are not smooth.  
  <P>
@@ -90,7 +90,7 @@ template<class YType> YType cyclicCatmullRomSpline(
                   (-P0 + 3*P1- 3*P2 + P3) * t*t*t);
 }
 
-/**
+/*
  A cubic spline with regularly spaced 
  control points.  The spline interpolates
  the control points.  The spline

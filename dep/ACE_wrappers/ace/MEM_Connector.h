@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    MEM_Connector.h
  *
  *  $Id: MEM_Connector.h 91688 2010-09-09 11:21:50Z johnnyw $
@@ -28,7 +28,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_MEM_Connector
  *
  * @brief Defines the format and interface for connecting to a peer
@@ -41,7 +41,7 @@ public:
   /// Default constructor.
   ACE_MEM_Connector (void);
 
-  /**
+  /*
    * Actively connect to a peer, producing a connected @c ACE_MEM_Stream
    * object if the connection succeeds.
    *
@@ -86,7 +86,7 @@ public:
                      int flags = 0,
                      int perms = 0);
 
-  /**
+  /*
    * Actively connect to a peer, producing a connected @c ACE_MEM_Stream
    * object if the connection succeeds.
    *

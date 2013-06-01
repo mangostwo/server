@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    ATM_Params.h
  *
  *  $Id: ATM_Params.h 80826 2008-03-04 14:51:23Z wotte $
@@ -51,7 +51,7 @@ typedef int Param_Udata;
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_ATM_Params
  *
  * @brief Wrapper class that simplifies the information passed to the ATM
@@ -60,7 +60,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Export ACE_ATM_Params
 {
 public:
-  /**
+  /*
    * Initialize the data members.  This class combines options from
    * ACE_SOCK_Connector (@a protocol_family, @a protocol, <type>,
    * @a protocol_info, <group>, and @a flags) and

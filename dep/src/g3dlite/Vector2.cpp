@@ -1,4 +1,4 @@
-/**
+/*
  @file Vector2.cpp
  
  2D vector class, used for texture coordinates primarily.

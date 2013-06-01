@@ -1,4 +1,4 @@
-/**
+/*
   @file KDTree.h
   
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -92,7 +92,7 @@ template<> struct BoundsTrait<class G3D::Triangle*> {
 namespace G3D {
     namespace _internal {
 
-    /**
+    /*
      Wraps a pointer value so that it can be treated as the instance itself;
      convenient for inserting pointers into a Table but using the 
      object equality instead of pointer equality.
@@ -128,7 +128,7 @@ template <class Handle> struct HashTrait<typename G3D::_internal::Indirector<Han
 
 namespace G3D {
 
-/**
+/*
  A set that supports spatial queries using a KD tree (axis-aligned
  BSP tree) for speed.
 
@@ -379,7 +379,7 @@ protected:
             }
         }
 
-        /**
+        /*
          Doesn't clone children.
          */
         Node(const Node& other) : valueArray(other.valueArray), boundsArray(other.boundsArray) {
@@ -419,7 +419,7 @@ protected:
         }
 
 
-        /**
+        /*
          Recursively appends all handles and children's handles
          to the array.
          */
@@ -472,7 +472,7 @@ protected:
         }
         
 
-        /**
+        /*
           Stores the locations of the splitting planes (the structure but not the content)
           so that the tree can be quickly rebuilt from a previous configuration without 
           calling balance.
@@ -560,7 +560,7 @@ protected:
             }
         }
 
-        /**
+        /*
          Recurse through the tree, assigning splitBounds fields.
          */
         void assignSplitBounds(const AABox& myBounds) {
@@ -701,7 +701,7 @@ protected:
     };
 
 
-    /**
+    /*
      Recursively subdivides the subarray.
     
      Clears the source array as soon as it is no longer needed.
@@ -845,7 +845,7 @@ protected:
 	    return node;
     }
 
-    /**
+    /*
      Recursively clone the passed in node tree, setting
      pointers for members in the memberTable as appropriate.
      called by the assignment operator.
@@ -868,7 +868,7 @@ protected:
         return dst;
     }
 
-   /**
+   /*
     Wrapper for a Handle; used to create a memberTable that acts like Table<Handle, Node*> but
     stores only Handle* internally to avoid memory copies.
     */
@@ -905,7 +905,7 @@ public:
         clear();
     }
 
-    /**
+    /*
      Throws out all elements of the set.
      */
     void clear() {
@@ -930,7 +930,7 @@ public:
         return memberTable.size();
     }
 
-    /**
+    /*
      Inserts an object into the set if it is not
      already present.  O(log n) time.  Does not
      cause the tree to be balanced.
@@ -991,7 +991,7 @@ public:
     }
 
 
-    /**
+    /*
      Returns true if this object is in the set, otherwise
      returns false.  O(1) time.
      */
@@ -1002,7 +1002,7 @@ public:
     }
 
 
-    /**
+    /*
      Removes an object from the set in O(1) time.
      It is an error to remove members that are not already
      present.  May unbalance the tree.  
@@ -1050,7 +1050,7 @@ public:
     }
 
 
-    /**
+    /*
      If the element is in the set, it is removed.
      The element is then inserted.
 
@@ -1069,7 +1069,7 @@ public:
     }
 
 
-    /**
+    /*
      Rebalances the tree (slow).  Call when objects
      have moved substantially from their original positions
      (which unbalances the tree and causes the spatial
@@ -1142,7 +1142,7 @@ public:
 
 protected:
 
-    /**
+    /*
      @param parentMask The mask that this node returned from culledBy.
      */
     static void getIntersectingMembers(
@@ -1189,7 +1189,7 @@ protected:
 
 public:
 
-    /**
+    /*
      Returns all members inside the set of planes.  
       @param members The results are appended to this array.
      */
@@ -1209,7 +1209,7 @@ public:
         }
     }
 
-    /**
+    /*
      Typically used to find all visible
      objects inside the view frustum (see also GCamera::getClipPlanes)... i.e. all objects
      <B>not</B> culled by frustum.
@@ -1240,7 +1240,7 @@ public:
         }
     }
 
-    /**
+    /*
      C++ STL style iterator variable.  See beginBoxIntersection().
      The iterator overloads the -> (dereference) operator, so this
      acts like a pointer to the current member.
@@ -1322,7 +1322,7 @@ public:
             }
         }
 
-        /**
+        /*
          Pre increment.
          */
         BoxIntersectionIterator& operator++() {
@@ -1379,7 +1379,7 @@ public:
         }
 
     private:
-        /**
+        /*
          Post increment (much slower than preincrement!).
          Intentionally overloaded to preclude accidentally slow code.
          */
@@ -1415,7 +1415,7 @@ public:
     };
 
 
-    /**
+    /*
      Iterates through the members that intersect the box
      */
     BoxIntersectionIterator beginBoxIntersection(const AABox& box) const {
@@ -1427,7 +1427,7 @@ public:
         return BoxIntersectionIterator();
     }
 
-    /**
+    /*
      Appends all members whose bounds intersect the box.
      See also KDTree::beginBoxIntersection.
      */
@@ -1447,7 +1447,7 @@ public:
     }
 
 
-    /**
+    /*
      Invoke a callback for every member along a ray until the closest intersection is found.
 
      @param callback either a function or an instance of a class with an overloaded operator() of the form:
@@ -1515,7 +1515,7 @@ public:
     }
 
 
-    /**
+    /*
       @brief Finds all members whose bounding boxes intersect the sphere.  The actual
       elements may not intersect the sphere.
 
@@ -1539,7 +1539,7 @@ public:
         }
     }
 
-    /**
+    /*
       Stores the locations of the splitting planes (the structure but not the content)
       so that the tree can be quickly rebuilt from a previous configuration without 
       calling balance.
@@ -1554,7 +1554,7 @@ public:
         root = Node::deserializeStructure(bi);
     }
 
-    /**
+    /*
      Returns an array of all members of the set.  See also KDTree::begin.
      */
     void getMembers(Array<T>& members) const {
@@ -1582,7 +1582,7 @@ public:
     }
 
 
-    /**
+    /*
      C++ STL style iterator variable.  See begin().
      Overloads the -> (dereference) operator, so this acts like a pointer
      to the current member.
@@ -1607,7 +1607,7 @@ public:
             return it == other.it;
         }
 
-        /**
+        /*
          Pre increment.
          */
         Iterator& operator++() {
@@ -1616,7 +1616,7 @@ public:
         }
 
     private:
-        /**
+        /*
          Post increment (slower than preincrement).  Intentionally unimplemented to prevent slow code.
          */
         Iterator operator++(int);/* {
@@ -1640,7 +1640,7 @@ public:
     };
 
 
-    /**
+    /*
      C++ STL style iterator method.  Returns the first member.  
      Use preincrement (++entry) to get to the next element (iteration
      order is arbitrary).  
@@ -1651,7 +1651,7 @@ public:
     }
 
 
-    /**
+    /*
      C++ STL style iterator method.  Returns one after the last iterator
      element.
      */

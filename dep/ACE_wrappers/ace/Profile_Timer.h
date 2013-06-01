@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    Profile_Timer.h
  *
  *  $Id: Profile_Timer.h 80826 2008-03-04 14:51:23Z wotte $
@@ -25,7 +25,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Profile_Timer
  *
  * @brief This class provides both a timing mechanism and a mechanism
@@ -35,7 +35,7 @@ class ACE_Export ACE_Profile_Timer
 {
 public:
 
-  /**
+  /*
    * @class ACE_Elapsed_Time
    *
    * @brief Keeps track of the various user, system, and elapsed (real)

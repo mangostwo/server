@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file   Recyclable.h
  *
  *  $Id: Recyclable.h 82723 2008-09-16 09:35:44Z johnnyw $
@@ -43,7 +43,7 @@ enum ACE_Recyclable_State
   ACE_RECYCLABLE_UNKNOWN
 };
 
-/**
+/*
  * @class ACE_Recyclable
  */
 class ACE_Export ACE_Recyclable

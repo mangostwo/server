@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Acceptor.h
  *
  *  $Id: Acceptor.h 88800 2010-02-01 23:18:34Z shuston $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Acceptor
  *
  * @brief Abstract factory for creating a service handler
@@ -64,7 +64,7 @@ public:
   ACE_Acceptor (ACE_Reactor * = 0,
                 int use_select = 1);
 
-  /**
+  /*
    * Open the contained @c PEER_ACCEPTOR object to begin listening, and
    * register with the specified reactor for accept events.  An
    * acceptor can only listen to one port at a time, so make sure to
@@ -103,7 +103,7 @@ public:
                 int use_select = 1,
                 int reuse_addr = 1);
 
-  /**
+  /*
    * Open the contained @c PEER_ACCEPTOR object to begin listening, and
    * register with the specified reactor for accept events.  An
    * acceptor can only listen to one port at a time, so make sure to
@@ -175,7 +175,7 @@ protected:
   // for creating, accepting, and activating SVC_HANDLER's,
   // respectively.
 
-  /**
+  /*
    * Bridge method for creating a SVC_HANDLER.  The default is to
    * create a new {SVC_HANDLER} if {sh} == 0, else {sh} is unchanged.
    * However, subclasses can override this policy to perform
@@ -185,14 +185,14 @@ protected:
    */
   virtual int make_svc_handler (SVC_HANDLER *&sh);
 
-  /**
+  /*
    * Bridge method for accepting the new connection into the
    * @a svc_handler.  The default behavior delegates to the
    * PEER_ACCEPTOR::accept.
    */
   virtual int accept_svc_handler (SVC_HANDLER *svc_handler);
 
-  /**
+  /*
    * Bridge method for activating a {svc_handler} with the appropriate
    * concurrency strategy.  The default behavior of this method is to
    * activate the SVC_HANDLER by calling its {open} method (which
@@ -240,7 +240,7 @@ protected:
   /// Needed to reopen the socket if {accept} fails.
   ACE_PEER_ACCEPTOR_ADDR peer_acceptor_addr_;
 
-  /**
+  /*
    * Flags that indicate how {SVC_HANDLER}'s should be initialized
    * prior to being activated.  Right now, the only flag that is
    * processed is {ACE_NONBLOCK}, which enabled non-blocking I/O on
@@ -256,7 +256,7 @@ protected:
   int reuse_addr_;
 };
 
-/**
+/*
  * @class ACE_Strategy_Acceptor
  *
  * @brief Abstract factory for creating a service handler
@@ -299,7 +299,7 @@ public:
                          int use_select = 1,
                          int reuse_addr = 1);
 
-  /**
+  /*
    * Initialize the appropriate strategies for creation, passive
    * connection acceptance, and concurrency, and then register {this}
    * with the Reactor and listen for connection requests at the
@@ -316,7 +316,7 @@ public:
                          int use_select = 1,
                          int reuse_addr = 1);
 
-  /**
+  /*
    * Open the contained @c PEER_ACCEPTOR object to begin listening, and
    * register with the specified reactor for accept events.
    *
@@ -356,7 +356,7 @@ public:
                     int use_select = 1,
                     int reuse_addr = 1);
 
-  /**
+  /*
    * Initialize the appropriate strategies for creation, passive
    * connection acceptance, and concurrency, and then register {this}
    * with the Reactor and listen for connection requests at the
@@ -413,7 +413,7 @@ protected:
   // for creating, accepting, and activating {SVC_HANDLER}'s,
   // respectively.
 
-  /**
+  /*
    * Bridge method for creating a {SVC_HANDLER}.  The strategy for
    * creating a {SVC_HANDLER} are configured into the Acceptor via
    * it's {creation_strategy_}.  The default is to create a new
@@ -425,14 +425,14 @@ protected:
    */
   virtual int make_svc_handler (SVC_HANDLER *&);
 
-  /**
+  /*
    * Bridge method for accepting the new connection into the
    * {SVC_HANDLER}.  The default behavior delegates to the
    * {PEER_ACCEPTOR::accept} in the {Acceptor_Strategy}.
    */
   virtual int accept_svc_handler (SVC_HANDLER *svc_handler);
 
-  /**
+  /*
    * Bridge method for activating a {SVC_HANDLER} with the appropriate
    * concurrency strategy.  The default behavior of this method is to
    * activate the {SVC_HANDLER} by calling its {open} method (which
@@ -499,7 +499,7 @@ protected:
   ACE_PEER_ACCEPTOR_ADDR service_addr_;
 };
 
-/**
+/*
  * @class ACE_Oneshot_Acceptor
  *
  * @brief Generic factory for passively connecting clients and creating
@@ -542,7 +542,7 @@ public:
   /// Constructor.
   ACE_Oneshot_Acceptor (void);
 
-  /**
+  /*
    * Initialize the appropriate strategies for concurrency and then
    * open the acceptor at the designated @a local_addr.  Note
    * that unlike ACE_Acceptor and ACE_Strategy_Acceptor, this
@@ -554,7 +554,7 @@ public:
                         ACE_Reactor *reactor = ACE_Reactor::instance (),
                         ACE_Concurrency_Strategy<SVC_HANDLER> * = 0);
 
-  /**
+  /*
    * Initialize the appropriate strategies for concurrency and then
    * open the acceptor at the designated @a local_addr.  Note
    * that unlike ACE_Acceptor and ACE_Strategy_Acceptor, this
@@ -597,7 +597,7 @@ public:
   ACE_ALLOC_HOOK_DECLARE;
 
 protected:
-  /**
+  /*
    * Bridge method for activating a {svc_handler} with the appropriate
    * concurrency strategy.  Default behavior is to activate the
    * {SVC_HANDLER} as a "passive object."  However, subclasses can
@@ -654,7 +654,7 @@ protected:
   virtual int resume (void);
 
 private:
-  /**
+  /*
    * Insert ourselves into the {ACE_Reactor} so that we can continue
    * accepting this connection asynchronously.  This method should NOT
    * be called by developers directly.

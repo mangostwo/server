@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    Timer_Hash_T.h
  *
  *  $Id: Timer_Hash_T.h 80826 2008-03-04 14:51:23Z wotte $
@@ -30,7 +30,7 @@ class ACE_Timer_Hash_T;
 template <typename TYPE>
 class Hash_Token;
 
-/**
+/*
  * @class ACE_Timer_Hash_Upcall
  *
  * @brief Functor for Timer_Hash
@@ -109,7 +109,7 @@ private:
   ACE_UNIMPLEMENTED_FUNC (void operator= (const ACE_Timer_Hash_Upcall<TYPE, FUNCTOR, ACE_LOCK> &))
 };
 
-/**
+/*
  * @class ACE_Timer_Hash_Iterator_T
  *
  * @brief Iterates over an ACE_Timer_Hash_T.
@@ -148,7 +148,7 @@ protected:
   ACE_Timer_Queue_Iterator_T<TYPE, ACE_Timer_Hash_Upcall<TYPE, FUNCTOR, ACE_LOCK>, ACE_Null_Mutex> *iter_;
 };
 
-/**
+/*
  * @class ACE_Timer_Hash_T
  *
  * @brief Provides a hash table of BUCKETs as an implementation for
@@ -173,7 +173,7 @@ public:
   typedef ACE_Timer_Queue_T<TYPE, FUNCTOR, ACE_LOCK> INHERITED;
 
   // = Initialization and termination methods.
-  /**
+  /*
    * Default constructor. @a table_size determines the size of the
    * hash table.  @a upcall_functor is the instance of the FUNCTOR
    * to be used by the buckets. If @a upcall_functor is 0, a default
@@ -183,7 +183,7 @@ public:
                     FUNCTOR *upcall_functor = 0,
                     ACE_Free_List<ACE_Timer_Node_T <TYPE> > *freelist = 0);
 
-  /**
+  /*
    * Default constructor. @a upcall_functor is the instance of the
    * FUNCTOR to be used by the queue. If @a upcall_functor is 0, Timer
    * Hash will create a default FUNCTOR.  @a freelist the freelist of
@@ -202,7 +202,7 @@ public:
   /// Must be called on a non-empty queue.
   virtual const ACE_Time_Value &earliest_time (void) const;
 
-  /**
+  /*
    * Resets the interval of the timer represented by @a timer_id to
    * @a interval, which is specified in relative time to the current
    * <gettimeofday>.  If @a interval is equal to
@@ -212,7 +212,7 @@ public:
   virtual int reset_interval (long timer_id,
                               const ACE_Time_Value &interval);
 
-  /**
+  /*
    * Cancel all timer associated with @a type.  If <dont_call> is 0
    * then the <functor> will be invoked.  Returns number of timers
    * cancelled. If any valid timer is not cancelled before destruction
@@ -222,7 +222,7 @@ public:
   virtual int cancel (const TYPE &type,
                       int dont_call_handle_close = 1);
 
-  /**
+  /*
    * Cancel the single timer that matches the @a timer_id value (which
    * was returned from the <schedule> method).  If act is non-NULL
    * then it will be set to point to the ``magic cookie'' argument
@@ -237,14 +237,14 @@ public:
                       const void **act = 0,
                       int dont_call_handle_close = 1);
 
-  /**
+  /*
    * Run the <functor> for all timers whose values are <=
    * <ACE_OS::gettimeofday>.  Also accounts for <timer_skew>.  Returns
    * the number of timers canceled.
    */
   virtual int expire (void);
 
-  /**
+  /*
    * Run the <functor> for all timers whose values are <= @a current_time.
    * This does not account for <timer_skew>.  Returns the number of
    * timers canceled.
@@ -269,7 +269,7 @@ protected:
 
 private:
 
-  /**
+  /*
    * Schedule @a type that will expire at @a future_time,
    * which is specified in absolute time.  If it expires then @a act is
    * passed in as the value to the <functor>.  If @a interval is != to

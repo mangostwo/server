@@ -1,4 +1,4 @@
-/**
+/*
   @file MeshAlgWeld.cpp
 
   The MeshAlg::computeWeld method.
@@ -53,7 +53,7 @@ public:
         Array<int>&           _toOld,
         double                _radius);
         
-    /**
+    /*
      Computes the grid index from an ordinate.
      */
     void toGridCoords(Vector3 v, int& x, int& y, int& z) const;

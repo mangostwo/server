@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    TSS_Adapter.h
  *
  *  $Id: TSS_Adapter.h 80826 2008-03-04 14:51:23Z wotte $
@@ -24,7 +24,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_TSS_Adapter
  *
  * @brief This class encapsulates a TSS object and its associated

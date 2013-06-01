@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    DEV.h
  *
  *  $Id: DEV.h 91685 2010-09-09 09:35:14Z johnnyw $
@@ -25,7 +25,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_DEV
  *
  * @brief Defines the member functions for the base class of the
@@ -43,7 +43,7 @@ public:
   /// Declare the dynamic allocation hooks.
   ACE_ALLOC_HOOK_DECLARE;
 
-  /**
+  /*
    * Disable signal @a signum
    * This is here to prevent Win32 from
    * disabling SPIPE using socket calls

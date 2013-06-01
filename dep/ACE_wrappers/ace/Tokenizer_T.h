@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Tokenizer_T.h
  *
  *  $Id: Tokenizer_T.h 88793 2010-02-01 17:50:34Z cleeland $
@@ -24,7 +24,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Tokenizer_T
  *
  * @brief Tokenizer
@@ -37,7 +37,7 @@ template <class ACE_CHAR_T>
 class ACE_Tokenizer_T
 {
 public:
-  /**
+  /*
    * \a buffer will be parsed.  Notice that ACE_Tokenizer_T will modify
    * \a buffer if you use <code> delimiter_replace </code> or <code>
    * preserve_designators </code> to do character substitution.
@@ -49,7 +49,7 @@ public:
    */
   ACE_Tokenizer_T (ACE_CHAR_T *buffer);
 
-  /**
+  /*
    * \a d is a delimiter.
    * \return Returns 0 on success, -1 if there is no memory left.
    *
@@ -72,7 +72,7 @@ public:
    */
   int delimiter (ACE_CHAR_T d);
 
-  /**
+  /*
    * \a d is a delimiter and, when found, will be replaced by
    * \a replacement.
    * \return 0 on success, -1 if there is no memory left.
@@ -96,7 +96,7 @@ public:
  */
   int delimiter_replace (ACE_CHAR_T d, ACE_CHAR_T replacement);
 
-  /**
+  /*
    * Extract string between a pair of designator characters.
    * For instance, quotes, or '(' and ')'.
    * \a start specifies the begin designator.
@@ -154,7 +154,7 @@ protected:
   /// replaced with @a r, @a replace is set to 1, otherwise 0.
   int is_delimiter (ACE_CHAR_T d, int &replace, ACE_CHAR_T &r);
 
-  /**
+  /*
    * If @a start is a start preserve designator, returns 1 and sets
    * @a stop to the stop designator.  Returns 0 if @a start is not a
    * preserve designator.
@@ -164,7 +164,7 @@ protected:
   ACE_CHAR_T *buffer_;
   int index_;
 
-  /**
+  /*
    * @class Preserve_Entry
    *
    * @brief Preserve Entry
@@ -179,7 +179,7 @@ protected:
   class Preserve_Entry
   {
   public:
-    /**
+    /*
      * E.g., "(".
      * E.g., ")".
      * Whether the designators should be removed from the token.
@@ -195,7 +195,7 @@ protected:
   /// Pointer to the next free spot in preserves_.
   int preserves_index_;
 
-  /**
+  /*
    * @class Delimiter_Entry
    *
    * @brief Delimiter Entry
@@ -205,7 +205,7 @@ protected:
   class Delimiter_Entry
   {
   public:
-    /**
+    /*
      * Most commonly a space ' '.
      * What occurrences of delimiter_ should be replaced with.
      * Whether replacement_ should be used.  This should be replaced

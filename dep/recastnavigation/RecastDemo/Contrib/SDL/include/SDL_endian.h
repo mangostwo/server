@@ -20,7 +20,7 @@
     slouken@libsdl.org
 */
 
-/**
+/*
  *  @file SDL_endian.h
  *  Functions for reading and writing endian-specific values
  */
@@ -57,7 +57,7 @@
 extern "C" {
 #endif
 
-/**
+/*
  *  @name SDL_Swap Functions
  *  Use inline functions for compilers that support them, and static
  *  functions for those that do not.  Because these functions become
@@ -178,7 +178,7 @@ static __inline__ Uint64 SDL_Swap64(Uint64 x)
 #endif /* SDL_HAS_64BIT_TYPE */
 /*@}*/
 
-/**
+/*
  *  @name SDL_SwapLE and SDL_SwapBE Functions
  *  Byteswap item from the specified endianness to the native endianness
  */

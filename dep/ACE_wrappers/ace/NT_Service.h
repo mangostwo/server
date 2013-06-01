@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    NT_Service.h
  *
  *  $Id: NT_Service.h 80826 2008-03-04 14:51:23Z wotte $
@@ -39,7 +39,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_NT_Service
  *
  * @brief Provide the base class which defines the interface for controlling
@@ -118,21 +118,21 @@ public:
 
   // = Functions to operate the service
 
-  /**
+  /*
    * Hook called to open the service.  By default, sets the service
    * status to SERVICE_START_PENDING, calls the @c svc() method,
    * interprets and sets the service status, and returns.
    */
   virtual int open (void *args = 0);
 
-  /**
+  /*
    * Hook called when terminating the service. Inherited from
    * ACE_Shared_Object. Default implementation sets the service status
    * to SERVICE_STOPPED.
    */
   virtual int fini (void);
 
-  /**
+  /*
    * The actual service implementation.  This function need not be overridden
    * by applications that are just using SCM capabilities, but must be
    * by subclasses when actually running the service.  It is expected that
@@ -140,7 +140,7 @@ public:
    */
   virtual int svc (void);
 
-  /**
+  /*
    * This function is called in response to a request from the Service
    * Dispatcher.  It must interact with the <svc> function to effect the
    * requested control operation.  The default implementation handles
@@ -178,7 +178,7 @@ public:
   /// Get the host machine.
   const ACE_TCHAR *host (void) const;
 
-  /**
+  /*
    * Insert (create) the service in the NT Service Control Manager,
    * with the given creation values.  exe_path defaults to the path name
    * of the program that calls the function.  All other 0-defaulted arguments
@@ -195,7 +195,7 @@ public:
               const ACE_TCHAR *password = 0,
               DWORD desired_access = SERVICE_ALL_ACCESS);
 
-  /**
+  /*
    * Remove the service from the NT Service Control Manager.  Returns -1 on
    * error, 0 on success.  This just affects the SCM and registry - the
    * can and will keep running fine if it is already running.
@@ -210,7 +210,7 @@ public:
 
   // = Methods to control ACE_Log_Msg behavior in the service.
 
-  /**
+  /*
    * Set the ACE_Log_Msg attributes that the service thread will use to
    * initialize its ACE_Log_Msg instance. This is how the initiating
    * thread's logging ostream, etc. get into the service thread. The
@@ -222,7 +222,7 @@ public:
    */
   void capture_log_msg_attributes (void);
 
-  /**
+  /*
    * Set the ACE_Log_Msg attributes in the current thread to those saved
    * in the most recent call to @c capture_log_msg_attributes(). This function
    * should be called from the service's service thread. Ideally, it is the
@@ -259,7 +259,7 @@ public:
   // not configured to receive the request (this is most likely to
   // happen in the case of pause and continue).
 
-  /**
+  /*
    * Start the service (must have been inserted before).  wait_time is
    * the time to wait for the service to reach a steady state before
    * returning.  If it is 0, the function waits as long as it takes
@@ -275,7 +275,7 @@ public:
                  DWORD *svc_state = 0,
                  DWORD argc = 0, const ACE_TCHAR **argv = 0);
 
-  /**
+  /*
    * Requests the service to stop.  Will wait up to @a wait_time for
    * the service to actually stop.  If not specified, the function
    * waits until the service either stops or gets stuck in some other
@@ -291,7 +291,7 @@ public:
   /// Continue the service.
   int continue_svc (ACE_Time_Value *wait_time = 0, DWORD *svc_state = 0);
 
-  /**
+  /*
    * Get the current state for the service.  If <wait_hint> is not 0,
    * it receives the service's reported wait hint.  Note that this
    * function returns 0 on failure (not -1 as is usual in ACE).  A
@@ -306,7 +306,7 @@ public:
   /// The DWORD pointed to by pstate receives the state value.
   int state (DWORD *pstate, ACE_Time_Value *wait_hint = 0);
 
-  /**
+  /*
    * Test access to the object's service in the SCM.  The service must
    * already have been inserted in the SCM database.  This function
    * has no affect on the service itself.  Returns 0 if the specified
@@ -322,14 +322,14 @@ public:
 protected:
   int report_status (DWORD new_status, DWORD time_hint = 0);
 
-  /**
+  /*
    * Return the svc_sc_handle_ member. If the member is null, it
    * retrieves the handle from the Service Control Manager and caches
    * it.
    */
   SC_HANDLE svc_sc_handle (void);
 
-  /**
+  /*
    * Waits for the service to reach <desired_state> or get
    * (apparently) stuck before it reaches that state.  Will wait at
    * most @a wait_time to get to the desired state.  If @a wait_time is

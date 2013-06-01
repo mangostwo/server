@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    WIN32_Proactor.h
  *
  *  $Id: WIN32_Proactor.h 80826 2008-03-04 14:51:23Z wotte $
@@ -40,7 +40,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_WIN32_Asynch_Result;
 class ACE_WIN32_Proactor_Timer_Handler;
 
-/**
+/*
  * @class ACE_WIN32_Proactor
  *
  * @brief A manager for asynchronous event demultiplexing on Win32.
@@ -69,7 +69,7 @@ public:
   virtual int register_handle (ACE_HANDLE handle,
                                const void *completion_key);
 
-  /**
+  /*
    * Dispatch a single set of events.  If @a wait_time elapses before
    * any events occur, return 0.  Return 1 on success i.e., when a
    * completion is dispatched, non-zero (-1) on errors and errno is
@@ -77,7 +77,7 @@ public:
    */
   virtual int handle_events (ACE_Time_Value &wait_time);
 
-  /**
+  /*
    * Block indefinitely until at least one event is dispatched.
    * Dispatch a single set of events. Return 1 on success i.e., when a
    * completion is dispatched, non-zero (-1) on errors and errno is
@@ -85,7 +85,7 @@ public:
    */
   virtual int handle_events (void);
 
-  /**
+  /*
    * Post a result to the completion port of the Proactor.  If errors
    * occur, the result will be deleted by this method.  If successful,
    * the result will be deleted by the Proactor when the result is
@@ -239,7 +239,7 @@ protected:
   virtual int handle_close (ACE_HANDLE handle,
                             ACE_Reactor_Mask close_mask);
 
-  /**
+  /*
    * Dispatch a single set of events.  If @a milli_seconds elapses
    * before any events occur, return 0. Return 1 if a completion is
    * dispatched. Return -1 on errors.
@@ -253,7 +253,7 @@ protected:
                                   const void *completion_key,
                                   u_long error);
 
-  /**
+  /*
    * Post @a how_many completions to the completion port so that all
    * threads can wake up. This is used in conjunction with the
    * run_event_loop().
@@ -285,7 +285,7 @@ protected:
   ACE_Asynch_Pseudo_Task pseudo_task_;
 };
 
-/**
+/*
  * @class ACE_WIN32_Asynch_Timer
  *
  * @brief This class is posted to the completion port when a timer

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    SOCK_SEQPACK_Connector.h
  *
  *  $Id: SOCK_SEQPACK_Connector.h 84816 2009-03-13 08:16:32Z johnnyw $
@@ -33,7 +33,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // Forward declarations.
 class ACE_Time_Value;
 
-/**
+/*
  * @class ACE_SOCK_SEQPACK_Connector
  *
  * @brief Defines a factory that actively connects to a remote IP
@@ -55,7 +55,7 @@ public:
   /// Default constructor.
   ACE_SOCK_SEQPACK_Connector (void);
 
-  /**
+  /*
    * Actively connect to a peer, producing a connected @c ACE_SOCK_SEQPACK_Association
    * object if the connection succeeds.
    *
@@ -105,7 +105,7 @@ public:
                       int perms = 0,
                       int protocol = 132);
 
-  /**
+  /*
    * Actively connect to a peer, producing a connected @c ACE_SOCK_SEQPACK_Association
    * object if the connection succeeds.
    *
@@ -154,7 +154,7 @@ public:
                       int perms = 0,
                       int protocol = 132);
 
-  /**
+  /*
    * Actively connect to a peer, producing a connected @c ACE_SOCK_SEQPACK_Association
    * object if the connection succeeds.
    *
@@ -204,7 +204,7 @@ public:
                int perms = 0,
                int protocol = 132);
 
-  /**
+  /*
    * Actively connect to a peer, producing a connected @c ACE_SOCK_SEQPACK_Association
    * object if the connection succeeds.
    *
@@ -258,7 +258,7 @@ public:
   ~ACE_SOCK_SEQPACK_Connector (void);
 
   // = Completion routine.
-  /**
+  /*
    * Try to complete a nonblocking connection that was begun by a
    * previous call to connect with a {0, 0} ACE_Time_Value timeout.
    * @see connect().

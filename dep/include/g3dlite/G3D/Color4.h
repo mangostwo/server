@@ -1,4 +1,4 @@
-/**
+/*
  @file Color4.h
  
  Color class
@@ -26,7 +26,7 @@ namespace G3D {
 
 class Any;
 
-/**
+/*
  Do not subclass-- this implementation makes assumptions about the
  memory layout.
  */
@@ -50,7 +50,7 @@ public:
     /** Converts the Color4 to an Any. */
     operator Any() const;
 
-    /**
+    /*
      * Does not initialize fields.
      */
     Color4 ();
@@ -69,7 +69,7 @@ public:
  
     Color4(float value[4]);
 
-    /**
+    /*
      * Initialize from another color.
      */
     Color4(const Color4& other);
@@ -86,12 +86,12 @@ public:
     void serialize(class BinaryOutput& bo) const;
     void deserialize(class BinaryInput& bi);
 
-    /**
+    /*
      Initialize from an HTML-style color (e.g. 0xFFFF0000 == RED)
      */
     static Color4 fromARGB(uint32);
 
-    /**
+    /*
      * Channel values.
      */
     float r, g, b, a;
@@ -179,7 +179,7 @@ public:
     }
 };
 
-/**
+/*
  Extends the c3 with alpha = 1.0
  */
 Color4 operator*(const Color3& c3, const Color4& c4);

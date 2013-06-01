@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file   CDR_Stream.h
  *
  *  $Id: CDR_Stream.h 84527 2009-02-19 14:01:42Z johnnyw $
@@ -67,7 +67,7 @@ class ACE_WChar_Codeset_Translator;
 
 class ACE_InputCDR;
 
-/**
+/*
  * @class ACE_OutputCDR
  *
  * @brief A CDR stream for marshalling data, most often for transmission to
@@ -84,7 +84,7 @@ class ACE_InputCDR;
 class ACE_Export ACE_OutputCDR
 {
 public:
-  /**
+  /*
    * The Codeset translators need access to some private members to
    * efficiently marshal arrays
    * For reading from an output CDR stream.
@@ -93,7 +93,7 @@ public:
   friend class ACE_WChar_Codeset_Translator;
   friend class ACE_InputCDR;
 
-  /**
+  /*
    * Default constructor; allows one to set byte ordering, allocators, and
    * tuning information.
    *
@@ -122,7 +122,7 @@ public:
   /// Build a CDR stream with an initial buffer, it will *not* remove
   /// @a data, since it did not allocated it.  It's important to be careful
   /// with the alignment of @a data.
-  /**
+  /*
    * Create an output stream from an arbitrary buffer, care must be
    * exercised with alignment, because this contructor will align if
    * needed.  In this case @a data will not point to the start of the
@@ -143,7 +143,7 @@ public:
   /// Build a CDR stream with an initial data block, it will *not* remove
   /// <data_block>, since it did not allocated it.  It's important to be
   // careful with the alignment of <data_block>.
-  /**
+  /*
    * Create an output stream from an arbitrary data block, care must be
    * exercised with alignment, because this contructor will align if
    * needed.  In this case @a data_block will not point to the
@@ -169,7 +169,7 @@ public:
   /// destructor
   ~ACE_OutputCDR (void);
 
-  /**
+  /*
    * Disambiguate overload when inserting booleans, octets, chars, and
    * bounded strings.
    */
@@ -226,7 +226,7 @@ public:
   };
   //@}
 
-  /**
+  /*
    * @{ @name Write operations
    * Return 0 on failure and 1 on success.
    */
@@ -290,7 +290,7 @@ public:
   ACE_CDR::Boolean write_octet_array_mb (const ACE_Message_Block* mb);
   //@}
 
-  /**
+  /*
    * @{ @name Placeholder/replace operations
    * Facilitates writing a placeholder into a CDR stream to be replaced
    * later with a different value.
@@ -306,7 +306,7 @@ public:
       @endcode
   */
 
-  /**
+  /*
    * Write a placeholder into the stream. The placeholder's pointer
    * is returned so it may later be passed as the @a loc argument to
    * replace ().
@@ -319,7 +319,7 @@ public:
   char* write_long_placeholder (void);
   char* write_short_placeholder (void);
 
-  /**
+  /*
    * Writes a new value into a specific location. This is commonly
    * used to update a prior "placeholder" location in the stream.
    * The specified location is assumed to have proper CDR alignment for the
@@ -339,7 +339,7 @@ public:
   ACE_CDR::Boolean replace (ACE_CDR::Short x, char* loc);
   //@}
 
-  /**
+  /*
    * Return 0 on failure and 1 on success.
    */
   //@{ @name Append contents of own CDR stream to another
@@ -362,7 +362,7 @@ public:
   //@}
 
   /// Returns @c false if an error has ocurred.
-  /**
+  /*
    * @note The only expected error is to run out of memory.
    */
   bool good_bit (void) const;
@@ -373,7 +373,7 @@ public:
   /// Add the length of each message block in the chain.
   size_t total_length (void) const;
 
-  /**
+  /*
    * Return the start of the message block chain for this CDR stream.
    * @note The complete CDR stream is represented by a chain of
    * message blocks.
@@ -387,7 +387,7 @@ public:
   const ACE_Message_Block *current (void) const;
 
   /// Replace the message block chain with a single message block.
-  /**
+  /*
    * Upon successful completion, there will be a single message block
    * containing the data from the complete message block chain.
    *
@@ -395,21 +395,21 @@ public:
    */
   int consolidate (void);
 
-  /**
+  /*
    * Access the underlying buffer (read only).  @note This
    * method only returns a pointer to the first block in the
    * chain.
    */
   const char *buffer (void) const;
 
-  /**
+  /*
    * Return the size of first message block in the block chain. @note This
    * method only returns information about the first block in the
    * chain.
    */
   size_t length (void) const;
 
-  /**
+  /*
    * Utility function to allow the user more flexibility.
    * Pads the stream up to the nearest <alignment>-byte boundary.
    * Argument MUST be a power of 2.
@@ -433,7 +433,7 @@ public:
   /// access the serialized size of wchars.
   static size_t wchar_maxbytes (void);
 
-  /**
+  /*
    * Return alignment of the wr_ptr(), with respect to the start of
    * the CDR stream.  This is not the same as the alignment of
    * current->wr_ptr()!
@@ -442,7 +442,7 @@ public:
 
   void current_alignment (size_t current_alignment);
 
-  /**
+  /*
    * Returns (in @a buf) the next position in the buffer aligned to
    * @a size, it advances the Message_Block wr_ptr past the data
    * (i.e., @a buf + @a size). If necessary it grows the Message_Block
@@ -501,7 +501,7 @@ private:
   ACE_CDR::Boolean write_8 (const ACE_CDR::ULongLong *x);
   ACE_CDR::Boolean write_16 (const ACE_CDR::LongDouble *x);
 
-  /**
+  /*
    * write an array of @a length elements, each of @a size bytes and the
    * start aligned at a multiple of <align>. The elements are assumed
    * to be packed with the right alignment restrictions.  It is mostly
@@ -523,7 +523,7 @@ private:
                                         ACE_CDR::ULong length);
 
 
-  /**
+  /*
    * Grow the CDR stream. When it returns @a buf contains a pointer to
    * memory in the CDR stream, with at least @a size bytes ahead of it
    * and aligned to an <align> boundary. It moved the <wr_ptr> to <buf
@@ -541,7 +541,7 @@ private:
   ACE_Message_Block *current_;
 
 #if !defined (ACE_LACKS_CDR_ALIGNMENT)
-  /**
+  /*
    * The current alignment as measured from the start of the buffer.
    * Usually this coincides with the alignment of the buffer in
    * memory, but, when we chain another buffer this "quasi invariant"
@@ -552,7 +552,7 @@ private:
   size_t current_alignment_;
 #endif /* ACE_LACKS_CDR_ALIGNMENT */
 
-  /**
+  /*
    * Is the current block writable.  When we steal a buffer from the
    * user and just chain it into the message block we are not supposed
    * to write on it, even if it is past the start and end of the
@@ -560,7 +560,7 @@ private:
    */
   bool current_is_writable_;
 
-  /**
+  /*
    * If not zero swap bytes at writing so the created CDR stream byte
    * order does *not* match the machine byte order.  The motivation
    * for such a beast is that in some setting a few (fast) machines
@@ -590,7 +590,7 @@ protected:
   ACE_Char_Codeset_Translator *char_translator_;
   ACE_WChar_Codeset_Translator *wchar_translator_;
 
-  /**
+  /*
    * Some wide char codesets may be defined with a maximum number
    * of bytes that is smaller than the size of a wchar_t. This means
    * that the CDR cannot simply memcpy a block of wchars to and from
@@ -605,7 +605,7 @@ protected:
 
 // ****************************************************************
 
-/**
+/*
  * @class ACE_InputCDR
  *
  * @brief A CDR stream for demarshalling CDR-encoded data.
@@ -628,7 +628,7 @@ public:
   friend class ACE_Char_Codeset_Translator;
   friend class ACE_WChar_Codeset_Translator;
 
-  /**
+  /*
    * Create an input stream from an arbitrary buffer.  The buffer must
    * be properly aligned because this contructor will *not* work if
    * the buffer is aligned unproperly.See ACE_ptr_align_binary() for
@@ -649,7 +649,7 @@ public:
                 ACE_CDR::Octet minor_version = ACE_CDR_GIOP_MINOR_VERSION);
 
   /// Create an input stream from an ACE_Message_Block
-  /**
+  /*
    * The alignment of the @a data block is carried into the new
    * ACE_InputCDR object. This constructor either increments the
    * @a data reference count, or copies the data (if it's a compound
@@ -683,7 +683,7 @@ public:
                 ACE_CDR::Octet major_version = ACE_CDR_GIOP_MAJOR_VERSION,
                 ACE_CDR::Octet minor_version = ACE_CDR_GIOP_MINOR_VERSION);
 
-  /**
+  /*
    * These make a copy of the current stream state, but do not copy
    * the internal buffer, so the same stream can be read multiple
    * times efficiently.
@@ -754,7 +754,7 @@ public:
 
   struct ACE_Export to_string
   {
-    /**
+    /*
      * @deprecated The constructor taking a non-const string is now
      *             deprecated (C++ mapping 00-01-02), but we keep it
      *             around for backward compatibility.
@@ -781,7 +781,7 @@ public:
   };
   //@}
 
-  /**
+  /*
    * Return @c false on failure and @c true on success.
    */
   //@{ @name Read basic IDL types
@@ -804,7 +804,7 @@ public:
   ACE_CDR::Boolean read_wstring (ACE_CDR::WChar*& x);
   //@}
 
-  /**
+  /*
    * The buffer @a x must be large enough to contain @a length
    * elements.
    * Return @c false on failure and @c true on success.
@@ -838,7 +838,7 @@ public:
                                           ACE_CDR::ULong length);
   //@}
 
-  /**
+  /*
    * Return @c false on failure and @c true on success.
    */
   //@{ @name Skip elements
@@ -857,7 +857,7 @@ public:
   ACE_CDR::Boolean skip_longdouble (void);
   //@}
 
-  /**
+  /*
    * The next field must be a string, this method skips it. It is
    * useful in parsing a TypeCode.
    * @return @c false on failure and @c true on success.
@@ -866,7 +866,7 @@ public:
   ACE_CDR::Boolean skip_string (void);
 
   /// Skip @a n bytes in the CDR stream.
-  /**
+  /*
    * @return @c false on failure and @c true on success.
    */
   ACE_CDR::Boolean skip_bytes (size_t n);
@@ -874,7 +874,7 @@ public:
   /// returns @c false if a problem has been detected.
   bool good_bit (void) const;
 
-  /**
+  /*
    * @return The start of the message block chain for this CDR
    *         stream.
    *
@@ -886,14 +886,14 @@ public:
   // = The following functions are useful to read the contents of the
   //   CDR stream from a socket or file.
 
-  /**
+  /*
    * Grow the internal buffer, reset @c rd_ptr to the first byte in
    * the new buffer that is properly aligned, and set @c wr_ptr to @c
    * rd_ptr @c + @c newsize
    */
   int grow (size_t newsize);
 
-  /**
+  /*
    * After reading and partially parsing the contents the user can
    * detect a change in the byte order, this method will let him/her
    * change it.
@@ -914,7 +914,7 @@ public:
 
   /// Exchange data blocks with the caller of this method. The read
   /// and write pointers are also exchanged.
-  /**
+  /*
    * @note We now do only with the start_ message block.
    */
   void exchange_data_blocks (ACE_InputCDR &cdr);
@@ -922,7 +922,7 @@ public:
   /// Copy the data portion from the @a cdr to this cdr and return the
   /// data content (ie. the ACE_Data_Block) from this CDR to the
   /// caller.
-  /**
+  /*
    * @note The caller is responsible for managing the memory of the
    *       returned ACE_Data_Block.
    */
@@ -941,7 +941,7 @@ public:
   /// Return how many bytes are left in the stream.
   size_t length (void) const;
 
-  /**
+  /*
    * Utility function to allow the user more flexibility.
    * Skips up to the nearest @a alignment-byte boundary.
    * Argument MUST be a power of 2.
@@ -966,7 +966,7 @@ public:
   void char_translator (ACE_Char_Codeset_Translator *);
   void wchar_translator (ACE_WChar_Codeset_Translator *);
 
-  /**
+  /*
    * Returns (in @a buf) the next position in the buffer aligned to
    * @a size.  It advances the Message_Block @c rd_ptr past the data
    * (i.e., @c buf @c + @c size).  Sets the good_bit to @c false and
@@ -1033,7 +1033,7 @@ private:
   // alignment requirements of CDR streams and implement the
   // operations using asignment.
 
-  /**
+  /*
    * Read an array of @a length elements, each of @a size bytes and the
    * start aligned at a multiple of <align>. The elements are assumed
    * to be packed with the right alignment restrictions.  It is mostly
@@ -1050,7 +1050,7 @@ private:
                                size_t align,
                                ACE_CDR::ULong length);
 
-  /**
+  /*
    * On those occasions when the native codeset for wchar is smaller than
    * the size of a wchar_t, such as using UTF-16 with a 4-byte wchar_t, a
    * special form of reading the array is needed. Actually, this should be
@@ -1068,7 +1068,7 @@ private:
 
 // ****************************************************************
 
-/**
+/*
  * @class ACE_Char_Codeset_Translator
  *
  * @brief Codeset translation routines common to both Output and Input
@@ -1138,7 +1138,7 @@ protected:
                                size_t align,
                                ACE_CDR::ULong length);
 
-  /**
+  /*
    * Efficiently write @a length elements of size @a size from <x> into
    * <output>. Before inserting the elements enough padding is added
    * to ensure that the elements will be aligned to <align> in the
@@ -1150,7 +1150,7 @@ protected:
                                 size_t align,
                                 ACE_CDR::ULong length);
 
-  /**
+  /*
    * Exposes the stream implementation of <adjust>, this is useful in
    * many cases to minimize memory allocations during marshaling.
    * On success @a buf will contain a contiguous area in the CDR stream
@@ -1174,7 +1174,7 @@ protected:
 
 // ****************************************************************
 
-/**
+/*
  * @class ACE_WChar_Codeset_Translator
  *
  * @brief Codeset translation routines common to both Output and Input
@@ -1231,7 +1231,7 @@ protected:
                                size_t align,
                                ACE_CDR::ULong length);
 
-  /**
+  /*
    * Efficiently write @a length elements of size @a size from <x> into
    * <output>. Before inserting the elements enough padding is added
    * to ensure that the elements will be aligned to <align> in the
@@ -1243,7 +1243,7 @@ protected:
                                 size_t align,
                                 ACE_CDR::ULong length);
 
-  /**
+  /*
    * Exposes the stream implementation of <adjust>, this is useful in
    * many cases to minimize memory allocations during marshaling.
    * On success @a buf will contain a contiguous area in the CDR stream

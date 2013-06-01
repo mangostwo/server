@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Hash_Cache_Map_Manager_T.h
  *
  *  $Id: Hash_Cache_Map_Manager_T.h 92097 2010-09-30 05:41:49Z msmit $
@@ -42,7 +42,7 @@ class ACE_Allocator;
 // For linkers that cant grok long names.
 #define ACE_Hash_Cache_Map_Manager AHCMM
 
- /**
+ /*
   * @class ACE_Hash_Cache_Map_Manager
   *
   * @brief Defines a abstraction which will purge entries from a map.
@@ -66,7 +66,7 @@ class ACE_Hash_Cache_Map_Manager : public ACE_CACHE_MAP_MANAGER
 {
  public:
 
-  /**
+  /*
    * The actual value mapped to the key in the map. The <attributes>
    * are used by the strategy and is transparent to the user of this
    * class.
@@ -87,7 +87,7 @@ class ACE_Hash_Cache_Map_Manager : public ACE_CACHE_MAP_MANAGER
   /// resources.
   ~ACE_Hash_Cache_Map_Manager (void);
 
-  /**
+  /*
    * Associate @a key with @a value.  If @a key is already in the
    * MAP then the ENTRY is not changed.  Returns 0 if a new entry is
    * bound successfully, returns 1 if an attempt is made to bind an
@@ -96,7 +96,7 @@ class ACE_Hash_Cache_Map_Manager : public ACE_CACHE_MAP_MANAGER
   int bind (const KEY &key,
             const VALUE &value);
 
-  /**
+  /*
    * Same as a normal bind, except the cache entry is also passed back
    * to the caller.  The entry in this case will either be the newly
    * created entry, or the existing one.
@@ -116,7 +116,7 @@ class ACE_Hash_Cache_Map_Manager : public ACE_CACHE_MAP_MANAGER
   int find (const KEY &key,
             CACHE_ENTRY *&entry);
 
-  /**
+  /*
    * Reassociate the @a key with @a value. If the @a key already exists
    * in the cache then returns 1, on a new bind returns 0 and returns
    * -1 in case of any failures.
@@ -124,7 +124,7 @@ class ACE_Hash_Cache_Map_Manager : public ACE_CACHE_MAP_MANAGER
   int rebind (const KEY &key,
               const VALUE &value);
 
-  /**
+  /*
    * Reassociate @a key with @a value, storing the old value into the
    * "out" parameter @a old_value.  The function fails if @a key is not
    * in the cache for caches that do not allow user specified keys.
@@ -135,7 +135,7 @@ class ACE_Hash_Cache_Map_Manager : public ACE_CACHE_MAP_MANAGER
               const VALUE &value,
               VALUE &old_value);
 
-  /**
+  /*
    * Reassociate @a key with @a value, storing the old key and value
    * into the "out" parameters @a old_key and @a old_value.  The
    * function fails if @a key is not in the cache for caches that do not
@@ -148,7 +148,7 @@ class ACE_Hash_Cache_Map_Manager : public ACE_CACHE_MAP_MANAGER
               KEY &old_key,
               VALUE &old_value);
 
-  /**
+  /*
    * Same as a normal rebind, except the cache entry is also passed back
    * to the caller.  The entry in this case will either be the newly
    * created entry, or the existing one.
@@ -157,7 +157,7 @@ class ACE_Hash_Cache_Map_Manager : public ACE_CACHE_MAP_MANAGER
               const VALUE &value,
               CACHE_ENTRY *&entry);
 
-  /**
+  /*
    * Associate @a key with @a value if and only if @a key is not in the
    * cache.  If @a key is already in the cache, then the @a value parameter
    * is overwritten with the existing value in the cache. Returns 0 if a
@@ -168,7 +168,7 @@ class ACE_Hash_Cache_Map_Manager : public ACE_CACHE_MAP_MANAGER
   int trybind (const KEY &key,
                VALUE &value);
 
-  /**
+  /*
    * Same as a normal trybind, except the cache entry is also passed
    * back to the caller.  The entry in this case will either be the
    * newly created entry, or the existing one.

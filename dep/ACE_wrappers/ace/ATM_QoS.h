@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    ATM_QoS.h
  *
  *  $Id: ATM_QoS.h 80826 2008-03-04 14:51:23Z wotte $
@@ -46,7 +46,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_ATM_QoS
  *
  * @brief Define the QoS parameters for ATM

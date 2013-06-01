@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Argv_Type_Converter.h
  *
  *  $Id: Argv_Type_Converter.h 83891 2008-11-28 11:01:50Z johnnyw $
@@ -24,7 +24,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Argv_Type_Converter
  *
  * @brief To convert 'char' input/command line parameter to 'wchar_t'.

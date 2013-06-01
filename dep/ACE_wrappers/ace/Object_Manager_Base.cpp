@@ -450,7 +450,7 @@ ACE_OS_Object_Manager::shutting_down (void)
 /*****************************************************************************/
 
 #if !defined (ACE_HAS_NONSTATIC_OBJECT_MANAGER)
-/**
+/*
  * @class ACE_OS_Object_Manager_Manager
  *
  * @brief Ensure that the ACE_OS_Object_Manager gets initialized at

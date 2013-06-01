@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2013 MaNGOS <http://getmangos.com/>
+ * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8501,7 +8501,7 @@ void Aura::HandleArenaPreparation(bool apply, bool Real)
     }
 }
 
-/**
+/*
  * Such auras are applied from a caster(=player) to a vehicle.
  * This has been verified using spell #49256
  */

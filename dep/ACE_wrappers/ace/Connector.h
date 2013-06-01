@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Connector.h
  *
  *  $Id: Connector.h 91527 2010-08-27 15:03:31Z shuston $
@@ -27,7 +27,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Connector_Base
  *
  * @brief This base interface allows ACE_NonBlocking_Connect_Handler
@@ -52,7 +52,7 @@ public:
   virtual ACE_Unbounded_Set<ACE_HANDLE> &non_blocking_handles (void) = 0;
 };
 
-/**
+/*
  * @class ACE_NonBlocking_Connect_Handler
  *
  * @brief Performs non-blocking connects on behalf of the Connector.
@@ -71,7 +71,7 @@ public:
   ~ACE_NonBlocking_Connect_Handler (void);
 
   /// Close up and return underlying SVC_HANDLER through @c sh.
-  /**
+  /*
    * If the return value is true the close was performed succesfully,
    * implying that this object was removed from the reactor and thereby
    * (by means of reference counting decremented to 0) deleted.
@@ -140,7 +140,7 @@ private:
   long timer_id_;
 };
 
-/**
+/*
  * @class ACE_Connector
  *
  * @brief Generic factory for actively connecting clients and creating
@@ -168,7 +168,7 @@ public:
   typedef typename ACE_PEER_CONNECTOR::PEER_ADDR peer_addr_type;
   typedef ACE_PEER_CONNECTOR_ADDR                ACE_PEER_ADDR_TYPEDEF;
 
-  /**
+  /*
    * Initialize a connector.  @a flags indicates how SVC_HANDLER's
    * should be initialized prior to being activated.  Right now, the
    * only flag that is processed is ACE_NONBLOCK, which enabled
@@ -177,7 +177,7 @@ public:
   ACE_Connector (ACE_Reactor *r = ACE_Reactor::instance (),
                  int flags = 0);
 
-  /**
+  /*
    * Initialize a connector.  @a flags indicates how SVC_HANDLER's
    * should be initialized prior to being activated.  Right now, the
    * only flag that is processed is ACE_NONBLOCK, which enabled
@@ -191,7 +191,7 @@ public:
 
   // = Connection establishment methods.
 
-  /**
+  /*
    * Initiate connection of @a svc_handler to peer at @a remote_addr
    * using @a synch_options.  If the caller wants to designate the
    * selected @a local_addr they can (and can also insist that the
@@ -211,7 +211,7 @@ public:
                        int flags = O_RDWR,
                        int perms = 0);
 
-  /**
+  /*
    * This is a variation on the previous <connect> method.  On cached
    * connectors the @a svc_handler_hint variable can be used as a hint
    * for future lookups.  Since this variable is modified in the
@@ -231,7 +231,7 @@ public:
                        int flags = O_RDWR,
                        int perms = 0);
 
-  /**
+  /*
    * Initiate connection of @a n @a svc_handlers to peers at
    * @a remote_addrs using @a synch_options.  Returns -1 if failure
    * occurs and 0 otherwise.  If @a failed_svc_handlers is non-NULL, a
@@ -246,7 +246,7 @@ public:
                          const ACE_Synch_Options &synch_options =
                          ACE_Synch_Options::defaults);
 
-  /**
+  /*
    * Cancel the @a svc_handler that was started asynchronously. Note that
    * this is the only case when the Connector does not actively close
    * the @a svc_handler. It is left up to the caller of <cancel> to
@@ -284,7 +284,7 @@ protected:
   // = The following two methods define the Connector's strategies for
   // creating, connecting, and activating SVC_HANDLER's, respectively.
 
-  /**
+  /*
    * Bridge method for creating a SVC_HANDLER.  The default is to
    * create a new SVC_HANDLER only if @a sh == 0, else @a sh is
    * unchanged.  However, subclasses can override this policy to
@@ -295,7 +295,7 @@ protected:
    */
   virtual int make_svc_handler (SVC_HANDLER *&sh);
 
-  /**
+  /*
    * Bridge method for connecting the @a svc_handler to the
    * @a remote_addr.  The default behavior delegates to the
    * <PEER_CONNECTOR::connect>.
@@ -316,7 +316,7 @@ protected:
                                    int flags,
                                    int perms);
 
-  /**
+  /*
    * Bridge method for activating a @a svc_handler with the appropriate
    * concurrency strategy.  The default behavior of this method is to
    * activate the SVC_HANDLER by calling its <open> method (which
@@ -370,7 +370,7 @@ private:
   /// This is the peer connector factory.
   ACE_PEER_CONNECTOR connector_;
 
-  /**
+  /*
    * Flags that indicate how SVC_HANDLER's should be initialized
    * prior to being activated.  Right now, the only flag that is
    * processed is ACE_NONBLOCK, which enabled non-blocking I/O on
@@ -386,7 +386,7 @@ private:
 
 };
 
-/**
+/*
  * @class ACE_Strategy_Connector
  *
  * @brief Abstract factory for creating a service handler
@@ -426,7 +426,7 @@ public:
   typedef ACE_Connector <SVC_HANDLER, ACE_PEER_CONNECTOR_2>
   SUPER;
 
-  /**
+  /*
    * Initialize a connector.  @a flags indicates how SVC_HANDLER's
    * should be initialized prior to being activated.  Right now, the
    * only flag that is processed is ACE_NONBLOCK, which enabled
@@ -438,7 +438,7 @@ public:
                           ACE_Concurrency_Strategy<SVC_HANDLER> * = 0,
                           int flags = 0);
 
-  /**
+  /*
    * Initialize a connector.  @a flags indicates how SVC_HANDLER's
    * should be initialized prior to being activated.  Right now, the
    * only flag that is processed is ACE_NONBLOCK, which enabled
@@ -448,7 +448,7 @@ public:
   virtual int open (ACE_Reactor *r,
                     int flags);
 
-  /**
+  /*
    * Initialize a connector.  @a flags indicates how SVC_HANDLER's
    * should be initialized prior to being activated.  Right now, the
    * only flag that is processed is ACE_NONBLOCK, which enabled
@@ -476,7 +476,7 @@ protected:
   // for creating, connecting, and activating SVC_HANDLER's,
   // respectively.
 
-  /**
+  /*
    * Bridge method for creating a SVC_HANDLER.  The strategy for
    * creating a SVC_HANDLER are configured into the Connector via
    * it's <creation_strategy_>.  The default is to create a new
@@ -489,7 +489,7 @@ protected:
    */
   virtual int make_svc_handler (SVC_HANDLER *&sh);
 
-  /**
+  /*
    * Bridge method for connecting the new connection into the
    * SVC_HANDLER.  The default behavior delegates to the
    * <PEER_CONNECTOR::connect> in the <Connect_Strategy>.
@@ -502,7 +502,7 @@ protected:
                                    int flags,
                                    int perms);
 
-  /**
+  /*
    * Bridge method for connecting the new connection into the
    * SVC_HANDLER.  The default behavior delegates to the
    * <PEER_CONNECTOR::connect> in the <Connect_Strategy>.
@@ -521,7 +521,7 @@ protected:
                                    int flags,
                                    int perms);
 
-  /**
+  /*
    * Bridge method for activating a SVC_HANDLER with the appropriate
    * concurrency strategy.  The default behavior of this method is to
    * activate the SVC_HANDLER by calling its <open> method (which

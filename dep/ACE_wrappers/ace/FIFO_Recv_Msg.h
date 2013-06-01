@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    FIFO_Recv_Msg.h
  *
  *  $Id: FIFO_Recv_Msg.h 84480 2009-02-16 18:58:16Z johnnyw $
@@ -26,7 +26,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // Forward decls
 class ACE_Str_Buf;
 
-/**
+/*
  * @class ACE_FIFO_Recv_Msg
  *
  * @brief Receiver side for the record oriented C++ wrapper for UNIX FIFOs.
@@ -64,7 +64,7 @@ public:
             LPSECURITY_ATTRIBUTES sa = 0);
 
   /// Receive a message based on attributes in an ACE_Str_Buf.
-  /**
+  /*
    * @param msg  Reference to an ACE_Str_Buf whose @c buf member points
    *             to the memory to receive the data and @c maxlen member
    *             contains the maximum number of bytes to receive.
@@ -90,7 +90,7 @@ public:
   ssize_t recv (ACE_Str_Buf &msg);
 
   /// Receive a message based on buffer pointer and maximum size.
-  /**
+  /*
    * @param buf  Pointer to the memory to receive the data.
    * @param len  The maximum number of bytes to receive.
    *

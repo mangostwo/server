@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Bound_Ptr.h
  *
  *  $Id: Bound_Ptr.h 82723 2008-09-16 09:35:44Z johnnyw $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Bound_Ptr_Counter
  *
  * @brief An ACE_Bound_Ptr_Counter<ACE_LOCK> object encapsulates an
@@ -96,7 +96,7 @@ private:
 // Forward decl.
 template <class X, class ACE_LOCK> class ACE_Weak_Bound_Ptr;
 
-/**
+/*
  * @class ACE_Strong_Bound_Ptr
  *
  * @brief This class implements support for a reference counted
@@ -174,7 +174,7 @@ public:
   /// Equality operator that returns @c true if both
   /// ACE_Strong_Bound_Ptr instances point to the same underlying
   /// object.
-  /**
+  /*
    * @note It also returns @c true if both objects have just been
    *       instantiated and not used yet.
    */
@@ -183,7 +183,7 @@ public:
   /// Equality operator that returns true if the ACE_Strong_Bound_Ptr
   /// and ACE_Weak_Bound_Ptr objects point to the same underlying
   /// object.
-  /**
+  /*
    * @note It also returns @c true if both objects have just been
    *       instantiated and not used yet.
    */
@@ -246,7 +246,7 @@ private:
   X *ptr_;
 };
 
-/**
+/*
  * @class ACE_Weak_Bound_Ptr
  *
  * @brief This class implements support for a weak pointer that complements
@@ -287,7 +287,7 @@ public:
 
   /// Equality operator that returns @c true if both
   /// ACE_Weak_Bound_Ptr objects point to the same underlying object.
-  /**
+  /*
    * @note It also returns @c true if both objects have just been
    *       instantiated and not used yet.
    */
@@ -296,7 +296,7 @@ public:
   /// Equality operator that returns @c true if the ACE_Weak_Bound_Ptr
   /// and ACE_Strong_Bound_Ptr objects point to the same underlying
   /// object.
-  /**
+  /*
    * @note It also returns @c true if both objects have just been
    *       instantiated and not used yet.
    */
@@ -316,7 +316,7 @@ public:
   bool operator != (X *p) const;
 
   /// Redirection operator.
-  /**
+  /*
    * It returns a temporary strong pointer and makes use of the
    * chaining properties of operator-> to ensure that the underlying
    * object does not disappear while you are using it.  If you are
@@ -340,7 +340,7 @@ public:
   void reset (X *p = 0);
 
   /// Increment the reference count on the underlying object.
-  /**
+  /*
    * Returns the new reference count on the object. This function may
    * be used to integrate the bound pointers into an external
    * reference counting mechanism such as those used by COM or CORBA
@@ -350,7 +350,7 @@ public:
 
   /// Decrement the reference count on the underlying object, which is deleted
   /// if the count has reached zero.
-  /**
+  /*
    * Returns the new reference count on the object.  This function may
    * be used to integrate the bound pointers into an external
    * reference counting mechanism such as those used by COM or CORBA

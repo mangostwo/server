@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    Module.h
  *
  *  $Id: Module.h 91626 2010-09-07 10:59:20Z johnnyw $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Module_Base
  *
  * @brief Workaround HP/C++ compiler bug with enums in templates.
@@ -50,7 +50,7 @@ public:
     M_DELETE_WRITER = 2,
 
     /// Indicates that close() deletes the Tasks.
-    /**
+    /*
      * Don't change this value without updating the same enum in class
      * ACE_Stream...
      * The M_DELETE_READER and M_DELETE_WRITER flags may be or'ed
@@ -63,7 +63,7 @@ public:
   };
 };
 
-/**
+/*
  * @class ACE_Module
  *
  * @brief An abstraction for managing a bi-directional flow of messages.
@@ -93,7 +93,7 @@ public:
               void *args = 0,
               int flags = M_DELETE);
 
-  /**
+  /*
    * Initialize the module with @a module_name as its identity
    * and @a reader> and @a writer as its tasks.  Previously register
    * reader or writers or closed down and deleted according to the
@@ -106,7 +106,7 @@ public:
             void *a = 0,
             int flags = M_DELETE);
 
-  /**
+  /*
    * Close down the module and its tasks.  The flags argument can be
    * used to override the default behaviour, which depends on previous
    * @a flags values in calls to c'tor, <open>, <reader>, and <writer>.
@@ -119,7 +119,7 @@ public:
   /// Get the writer task.
   ACE_Task<ACE_SYNCH_USE> *writer (void);
 
-  /**
+  /*
    * Set the writer task. @a flags can be used to indicate that the
    * module should delete the writer during a call to close or to the
    * destructor. If a previous writer exists, it is closed.  It may
@@ -131,7 +131,7 @@ public:
   /// Get the reader task.
   ACE_Task<ACE_SYNCH_USE> *reader (void);
 
-  /**
+  /*
    * Set the reader task. @a flags can be used to indicate that the
    * module should delete the reader during a call to close or to the
    * destructor. If a previous reader exists, it is closed.  It may

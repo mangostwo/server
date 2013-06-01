@@ -1254,7 +1254,7 @@ ACE_Process_Options::command_line (const ACE_TCHAR *format, ...)
 }
 
 #if defined (ACE_HAS_WCHAR) && !defined (ACE_HAS_WINCE)
-/**
+/*
  * @note Not available on Windows CE because it doesn't have a char version of
  * vsprintf.
  */

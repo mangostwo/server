@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    Condition_Recursive_Thread_Mutex.h
  *
  *  $Id: Condition_Recursive_Thread_Mutex.h 86731 2009-09-17 12:23:48Z johnnyw $
@@ -31,7 +31,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 template <class ACE_LOCK> class ACE_Condition;
 
-/**
+/*
  * @brief ACE_Condition template specialization written using
  *  @a ACE_Recursive_Thread_Mutex.  This allows threads to block until
  *  shared data changes state using recursive mutexes.
@@ -46,14 +46,14 @@ public:
   /// Implicitly destroy the condition variable.
   ~ACE_Condition (void);
 
-  /**
+  /*
    * Explicitly destroy the condition variable.  Note that only one
    * thread should call this method since it doesn't protect against
    * race conditions.
    */
   int remove (void);
 
-  /**
+  /*
    * Block on condition, or until absolute time-of-day has passed.  If
    * abstime == 0 use "blocking" <wait> semantics.  Else, if @a abstime
    * != 0 and the call times out before the condition is signaled
@@ -61,7 +61,7 @@ public:
    */
   int wait (const ACE_Time_Value *abstime = 0);
 
-  /**
+  /*
    * Block on condition or until absolute time-of-day has passed.  If
    * abstime == 0 use "blocking" wait() semantics on the recursive @a mutex
    * passed as a parameter (this is useful if you need to store the

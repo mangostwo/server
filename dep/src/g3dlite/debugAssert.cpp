@@ -1,4 +1,4 @@
-/**
+/*
  @file debugAssert.cpp
 
  Windows implementation of assertion routines.
@@ -63,7 +63,7 @@ static void postToClipboard(const char *text) {
 }
 #endif
 
-/**
+/*
  outTitle should be set before the call
  */
 static void createErrorMessage(

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Object_Manager_Base.h
  *
  *  $Id: Object_Manager_Base.h 84163 2009-01-15 07:57:27Z johnnyw $
@@ -38,7 +38,7 @@ class ACE_TSS_Emulation;
 class ACE_Log_Msg;
 class ACE_Thread_Hook;
 
-/**
+/*
  * @class ACE_Object_Manager_Base
  *
  * @brief Base class for ACE_Object_Manager(s).
@@ -55,14 +55,14 @@ protected:
   virtual ~ACE_Object_Manager_Base (void);
 
 public:
-  /**
+  /*
    * Explicitly initialize.  Returns 0 on success, -1 on failure due
    * to dynamic allocation failure (in which case errno is set to
    * ENOMEM), or 1 if it had already been called.
    */
   virtual int init (void) = 0;
 
-  /**
+  /*
    * Explicitly destroy.  Returns 0 on success, -1 on failure because
    * the number of fini () calls hasn't reached the number of init ()
    * calls, or 1 if it had already been called.
@@ -79,7 +79,7 @@ public:
     };
 
 protected:
-  /**
+  /*
    * Returns 1 before ACE_Object_Manager_Base has been constructed.
    * This flag can be used to determine if the program is constructing
    * static objects.  If no static object spawns any threads, the
@@ -90,7 +90,7 @@ protected:
    */
   int starting_up_i (void);
 
-  /**
+  /*
    * Returns 1 after ACE_Object_Manager_Base has been destroyed.  This
    * flag can be used to determine if the program is in the midst of
    * destroying static objects.  (Note that the program might destroy
@@ -102,7 +102,7 @@ protected:
   /// State of the Object_Manager;
   Object_Manager_State object_manager_state_;
 
-  /**
+  /*
    * Flag indicating whether the ACE_Object_Manager was dynamically
    * allocated by ACE. (If is was dynamically allocated by the
    * application, then the application is responsible for destroying
@@ -135,7 +135,7 @@ public:
   /// Explicitly destroy.
   virtual int fini (void);
 
-  /**
+  /*
    * Returns 1 before the ACE_OS_Object_Manager has been
    * constructed.  See <ACE_Object_Manager::starting_up> for more
    * information.

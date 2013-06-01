@@ -1,4 +1,4 @@
-/**
+/*
  @file Cone.h
  
  Cone class
@@ -22,7 +22,7 @@
 
 namespace G3D {
 
-/**
+/*
  An infinite cone.
  */
 class Cone {
@@ -36,12 +36,12 @@ private:
 
 public:
 
-    /**
+    /*
      @param angle Angle from the center line to the edge, in radians
      */
     Cone(const Vector3& tip, const Vector3& direction, float angle);
 
-    /**
+    /*
      Forms the smallest cone that contains the box.  Undefined if
      the tip is inside or on the box.
      */
@@ -49,7 +49,7 @@ public:
 
     virtual ~Cone() {}
 
-    /**
+    /*
      Returns true if the cone touches, intersects, or contains b.
 
      If c.intersects(s) and c.intersects(Sphere(s.center, s.radius * 2)
@@ -57,7 +57,7 @@ public:
      */
     bool intersects(const class Sphere& s) const;
 
-    /**
+    /*
      True if v is a point inside the cone.
      */
     bool contains(const class Vector3& v) const;

@@ -1,4 +1,4 @@
-/**
+/*
  @file BinaryFormat.h
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
  
@@ -28,7 +28,7 @@ class Color3uint8;
 class Color4;
 class Color4uint8;
 
-/**
+/*
  Some values like float16 and int128 have no current CPU data structure that implements them but are useful
  for file formats and for GPUs.
 
@@ -79,7 +79,7 @@ public:
 }}
 
 
-/**
+/*
  Macro to declare the underlying format (as will be returned by glFormatOf)
  of a type.  For example,
 

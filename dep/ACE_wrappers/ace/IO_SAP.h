@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    IO_SAP.h
  *
  *  $Id: IO_SAP.h 80826 2008-03-04 14:51:23Z wotte $
@@ -25,7 +25,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_IO_SAP
  *
  * @brief Defines the methods for the base class of the ACE_IO_SAP
@@ -48,14 +48,14 @@ public:
 
   // = Common I/O handle options related to files.
 
-  /**
+  /*
    * Enable asynchronous I/O (ACE_SIGIO), urgent data (ACE_SIGURG),
    * non-blocking I/O (ACE_NONBLOCK), or close-on-exec (ACE_CLOEXEC),
    * which is passed as the @a value.
    */
   int enable (int value) const;
 
-  /**
+  /*
    * Disable asynchronous I/O (ACE_SIGIO), urgent data (ACE_SIGURG),
    * non-blocking I/O (ACE_NONBLOCK), or close-on-exec (ACE_CLOEXEC),
    * which is passed as the @a value.

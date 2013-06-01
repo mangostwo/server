@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2013 MaNGOS <http://getmangos.com/>
+ * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@
 
 struct ServerPktHeader
 {
-    /**
+    /*
      * size is the length of the payload _plus_ the length of the opcode
      */
     ServerPktHeader(uint32 size, uint16 cmd) : size(size)

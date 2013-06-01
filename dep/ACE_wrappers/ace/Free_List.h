@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    Free_List.h
  *
  *  $Id: Free_List.h 92298 2010-10-21 11:15:17Z johnnyw $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Free_List
  *
  * @brief Implements a free list.
@@ -55,7 +55,7 @@ public:
   virtual void resize (size_t newsize) = 0;
 };
 
-/**
+/*
  * @class ACE_Locked_Free_List
  *
  * @brief Implements a free list.
@@ -70,7 +70,7 @@ class ACE_Locked_Free_List : public ACE_Free_List<T>
 {
 public:
   // = Initialization and termination.
-  /**
+  /*
    * Constructor takes a @a mode (i.e., ACE_FREE_LIST_WITH_POOL or
    * ACE_PURE_FREE_LIST), a count of the number of nodes to
    * @a prealloc, a low and high water mark (@a lwm and @a hwm) that

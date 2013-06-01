@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file   Hash_Map_With_Allocator_T.h
  *
  *  $Id: Hash_Map_With_Allocator_T.h 91743 2010-09-13 18:24:51Z johnnyw $
@@ -24,7 +24,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Hash_Map_With_Allocator
  *
  * @brief This class is a thin wrapper around ACE_Hash_Map_Manager,

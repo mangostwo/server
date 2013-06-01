@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Caching_Strategies_T.h
  *
  *  $Id: Caching_Strategies_T.h 92097 2010-09-30 05:41:49Z msmit $
@@ -31,7 +31,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Caching_Strategy
  *
  * @brief This class is an abstract base class for a caching strategy.
@@ -94,7 +94,7 @@ public:
 
 #define ACE_Caching_Strategy_Adapter ACSA
 
-/**
+/*
  * @class ACE_Caching_Strategy_Adapter
  *
  * @brief This class follows the Adaptor pattern and is used to provide
@@ -176,7 +176,7 @@ private:
 //////////////////////////////////////////////////////////////////////////
 #define ACE_LRU_Caching_Strategy ALRU
 
-/**
+/*
  * @class ACE_LRU_Caching_Strategy
  *
  * @brief Defines a Least Recently Used strategy which will decide on
@@ -205,7 +205,7 @@ public:
 
   // = Initialisation and termination.
 
-  /**
+  /*
    * The <container> is the map in which the entries reside.  The
    * timer attribute is initialed to zero in this constructor.  And
    * the <purge_percent> field denotes the percentage of the entries
@@ -276,7 +276,7 @@ private:
 //////////////////////////////////////////////////////////////////////////
 #define ACE_LFU_Caching_Strategy ALFU
 
-/**
+/*
  * @class ACE_LFU_Caching_Strategy
  *
  * @brief Defines a Least Frequently Used strategy for which will decide on
@@ -306,7 +306,7 @@ public:
 
   // = Initialisation and termination methods.
 
-  /**
+  /*
    * The <container> is the map in which the entries reside.  The
    * timer attribute is initialed to zero in this constructor.  And
    * the <purge_percent> field denotes the percentage of the entries
@@ -371,7 +371,7 @@ private:
 /////////////////////////////////////////////////////////////
 #define ACE_FIFO_Caching_Strategy AFIFO
 
-/**
+/*
  * @class ACE_FIFO_Caching_Strategy
  *
  * @brief The First In First Out strategy is implemented wherein each
@@ -398,7 +398,7 @@ public:
 
   // = Initialisation and termination.
 
-  /**
+  /*
    * The <container> is the map in which the entries reside.  The
    * timer attribute is initialed to zero in this constructor.  And
    * the <purge_percent> field denotes the percentage of the entries
@@ -466,7 +466,7 @@ private:
 //////////////////////////////////////////////////////////////////////
 #define ACE_Null_Caching_Strategy ANULL
 
-/**
+/*
  * @class ACE_Null_Caching_Strategy
  *
  * @brief The is a special caching strategy which doesnt have the purging

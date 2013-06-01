@@ -1,4 +1,4 @@
-/**
+/*
  @file debug.h
 
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -32,7 +32,7 @@ namespace G3D {
 #endif
 
 
-/**
+/*
  Useful for debugging purposes.
  */
 inline bool isValidHeapPointer(const void* x) {
@@ -44,7 +44,7 @@ inline bool isValidHeapPointer(const void* x) {
     #endif
 }
 
-/**
+/*
  Returns true if the pointer is likely to be
  a valid pointer (instead of an arbitrary number). 
  Useful for debugging purposes.

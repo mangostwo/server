@@ -17,7 +17,7 @@
 
 namespace G3D {
 
-/**
+/*
    Acts like a pointer to a value of type ValueType (i.e.,
    ValueType*), but can operate through accessor methods as well as on
    a value in memory.  This is useful for implementing scripting

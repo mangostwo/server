@@ -23,7 +23,7 @@ namespace G3D {
         
 typedef ReferenceCountedPointer<class GThread> GThreadRef;
 
-/**
+/*
  Platform independent thread implementation.  You can either subclass and 
  override GThread::threadMain or call the create method with a method.
 
@@ -93,7 +93,7 @@ public:
         waiting for a cancelation point. */
     void terminate();
 
-    /**
+    /*
         Returns true if threadMain is currently executing.  This will
         only be set when the thread is actually running and might not
         be set when start() returns. */

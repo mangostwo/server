@@ -1,4 +1,4 @@
-/**
+/*
   @file Box.cpp
   Box class
 
@@ -16,7 +16,7 @@
 
 namespace G3D {
 
-/**
+/*
  Sets a field on four vertices.  Used by the constructor.
  */
 #define setMany(i0, i1, i2, i3, field, extreme) \

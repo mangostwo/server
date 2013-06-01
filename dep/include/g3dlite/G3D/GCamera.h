@@ -1,4 +1,4 @@
-/**
+/*
   @file GCamera.h
 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -22,7 +22,7 @@ class Matrix4;
 class Rect2D;
 class Any;
 
-/**
+/*
   Abstraction of a pinhole camera.
 
   The area a camera sees is called a frustum.  It is bounded by the
@@ -45,7 +45,7 @@ class Any;
 class GCamera  {
 
 public:
-    /**
+    /*
     Stores the direction of the field of view
     */
     enum FOVDirection {HORIZONTAL, VERTICAL};
@@ -163,7 +163,7 @@ public:
     */ // TODO: Remove
     Vector3 convertFromUnitToNormal(const Vector3& in, const Rect2D& viewport) const;
 
-    /**
+    /*
        Sets the field of view, in radians.  The 
        initial angle is toRadians(55).  Must specify
        the direction of the angle.
@@ -180,7 +180,7 @@ public:
         direction = m_direction;
     }
 
-    /**
+    /*
      Projects a world space point onto a width x height screen.  The
      returned coordinate uses pixmap addressing: x = right and y =
      down.  The resulting z value is 0 at the near plane, 1 at the far plane,
@@ -191,7 +191,7 @@ public:
     Vector3 project(const G3D::Vector3& point,
                     const class Rect2D& viewport) const;
 
-    /**
+    /*
      Projects a world space point onto a unit cube.  The resulting
      x,y,z values range between -1 and 1, where z is -1
      at the near plane and 1 at the far plane and varies hyperbolically in between.
@@ -201,27 +201,27 @@ public:
     Vector3 projectUnit(const G3D::Vector3& point,
                         const class Rect2D& viewport) const;
 
-    /**
+    /*
        Gives the world-space coordinates of screen space point v, where
        v.x is in pixels from the left, v.y is in pixels from
        the top, and v.z is on the range 0 (near plane) to 1 (far plane).
      */
     Vector3 unproject(const Vector3& v, const Rect2D& viewport) const;
 
-     /**
+     /*
        Gives the world-space coordinates of unit cube point v, where
        v varies from -1 to 1 on all axes.  The unproject first
        transforms the point into a pixel location for the viewport, then calls unproject
      */
     Vector3 unprojectUnit(const Vector3& v, const Rect2D& viewport) const;
 
-    /**
+    /*
      Returns the pixel area covered by a shape of the given
      world space area at the given z value (z must be negative).
      */
     float worldToScreenSpaceArea(float area, float z, const class Rect2D& viewport) const;
 
-    /**
+    /*
      Returns the world space 3D viewport corners.  These
      are at the near clipping plane.  The corners are constructed
      from the nearPlaneZ, viewportWidth, and viewportHeight.
@@ -231,7 +231,7 @@ public:
                                 Vector3& outUR, Vector3& outUL,
                                 Vector3& outLL, Vector3& outLR) const;
 
-    /**
+    /*
      Returns the world space 3D viewport corners.  These
      are at the Far clipping plane.  The corners are constructed
      from the nearPlaneZ, farPlaneZ, viewportWidth, and viewportHeight.
@@ -241,14 +241,14 @@ public:
                                Vector3& outUR, Vector3& outUL,
                                Vector3& outLL, Vector3& outLR) const;
 
-    /**
+    /*
      Returns the image plane depth,  assumes imagePlane
      is the same as the near clipping plane.
      returns a positive number.
      */
     float imagePlaneDepth() const;
 
-    /**
+    /*
       Returns the world space ray passing through the center of pixel
       (x, y) on the image plane.  The pixel x and y axes are opposite
       the 3D object space axes: (0,0) is the upper left corner of the screen.
@@ -266,21 +266,21 @@ public:
         float                                  y,
         const class Rect2D&                     viewport) const;
 
-    /**
+    /*
       Returns a negative z-value.
      */
     inline float nearPlaneZ() const {
         return m_nearPlaneZ;
     }
 
-    /**
+    /*
      Returns a negative z-value.
      */
     inline float farPlaneZ() const {
         return m_farPlaneZ;
     }
 
-    /**
+    /*
      Sets a new value for the far clipping plane
      Expects a negative value
      */
@@ -289,7 +289,7 @@ public:
         m_farPlaneZ = z;
     }
     
-    /**
+    /*
      Sets a new value for the near clipping plane
      Expects a negative value
      */
@@ -298,12 +298,12 @@ public:
         m_nearPlaneZ = z;
     }
 
-    /**
+    /*
      Returns the camera space width of the viewport at the near plane.
      */
     float viewportWidth(const class Rect2D& viewport) const;
 
-    /**
+    /*
      Returns the camera space height of the viewport at the near plane.
      */
     float viewportHeight(const class Rect2D& viewport) const;
@@ -317,7 +317,7 @@ public:
         camera.)*/
     void lookAt(const Vector3& position, const Vector3& up = Vector3::unitY());
 
-    /**
+    /*
        Returns the clipping planes of the frustum, in world space.  
        The planes have normals facing <B>into</B> the view frustum.
        
@@ -335,7 +335,7 @@ public:
      const Rect2D& viewport,
      Array<Plane>& outClip) const;
 
-    /**
+    /*
       Returns the world space view frustum, which is a truncated pyramid describing
       the volume of space seen by this camera.
     */

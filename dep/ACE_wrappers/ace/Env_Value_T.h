@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Env_Value_T.h
  *
  *  $Id: Env_Value_T.h 91626 2010-09-07 10:59:20Z johnnyw $
@@ -30,7 +30,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Env_Value
  *
  * @brief Environment Variable Value
@@ -42,7 +42,7 @@ template <class T>
 class ACE_Env_Value : private ACE_Copy_Disabled
 {
 public:
-  /**
+  /*
    * Default constructor which isn't bound to a specific environment
    * variable name or a default value.  Before being useful it must
    * <open>'d.

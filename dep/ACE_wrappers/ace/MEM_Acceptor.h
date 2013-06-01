@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    MEM_Acceptor.h
  *
  *  $Id: MEM_Acceptor.h 91688 2010-09-09 11:21:50Z johnnyw $
@@ -36,7 +36,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // Forward decl.
 class ACE_Reactor;
 
-/**
+/*
  * @class ACE_MEM_Acceptor
  *
  * @brief Defines the format and interface for the acceptor side of the
@@ -67,7 +67,7 @@ public:
                     int backlog = ACE_DEFAULT_BACKLOG,
                     int protocol = 0);
 
-  /**
+  /*
    * Initialize a passive-mode BSD-style acceptor socket (no QoS).
    * @a local_sap is the address that we're going to listen for
    * connections on.  If @a reuse_addr is 1 then we'll use the
@@ -92,7 +92,7 @@ public:
                             int in_blocking_mode,
                             bool reset_new_handle) const;
 
-  /**
+  /*
    * Accessor/mutator of mmap filename prefix.  By default, the
    * <mmap_prefix_> is not set and the mmap filename is
    * ${(TMP|TEMP)}//ACE_MEM_Acceptor_(port-number)_(&stream),
@@ -104,7 +104,7 @@ public:
   const ACE_TCHAR *mmap_prefix (void) const;
   void mmap_prefix (const ACE_TCHAR *prefix);
 
-  /**
+  /*
    * Change the initial MMAP buffer size (in bytes) of the MEM_Stream
    * this MEM_Acceptor creates.
    */

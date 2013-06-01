@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    FILE.h
  *
  *  $Id: FILE.h 91685 2010-09-09 09:35:14Z johnnyw $
@@ -24,7 +24,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_FILE_Info
  *
  * @brief Abstracts basic OS FILE information.
@@ -42,7 +42,7 @@ public:
   ACE_OFF_T size_;
 };
 
-/**
+/*
  * @class ACE_FILE
  *
  * @brief Defines the core methods of the ACE_FILE abstraction.
@@ -70,7 +70,7 @@ public:
   /// Set filesize to length byte.
   int truncate (ACE_OFF_T length);
 
-  /**
+  /*
    * Sets the file pointer as follows:
    *    o If @ whence is @c SEEK_SET, the pointer is set to @a offset
    *      bytes.
@@ -87,7 +87,7 @@ public:
   /// Return an offset for the file handle.
   ACE_OFF_T tell (void);
 
-  /**
+  /*
    * Disable signal @a signum
    * This is here to prevent Win32 from
    * disabling SPIPE using socket calls

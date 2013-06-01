@@ -1,4 +1,4 @@
-/**
+/*
   @file Box.h
  
   Box class
@@ -25,7 +25,7 @@ namespace G3D {
 
 class CoordinateFrame;
 
-/**
+/*
  An arbitrary 3D box, useful as a bounding box. 
 
 
@@ -40,7 +40,7 @@ private:
 
     friend class CoordinateFrame;
 
-    /**
+    /*
       <PRE>
        3    2       7    6
     
@@ -51,14 +51,14 @@ private:
      */
     Vector3 _corner[8];
 
-    /**
+    /*
      Unit axes.
      */
     Vector3 _axis[3];
    
     Vector3 _center;
 
-    /**
+    /*
      Extent along each axis.
      */
     Vector3 _extent;
@@ -72,12 +72,12 @@ private:
 
 public:
 
-    /**
+    /*
      Does not initialize the fields.
      */
     Box();
 
-    /**
+    /*
       Constructs a box from two opposite corners.
      */
     Box(
@@ -93,7 +93,7 @@ public:
 	void serialize(class BinaryOutput& b) const;
 	void deserialize(class BinaryInput& b);
 
-    /**
+    /*
      Returns the object to world transformation for 
      this box.  localFrame().worldToObject(...) takes
      objects into the space where the box axes are
@@ -104,7 +104,7 @@ public:
 
     void getLocalFrame(CoordinateFrame& frame) const;
 
-    /**
+    /*
       Returns the centroid of the box.
      */
     inline Vector3 center() const {
@@ -117,7 +117,7 @@ public:
         return _corner[i];
     }
 
-    /**
+    /*
      Unit length.
      */
     inline Vector3 axis(int a) const {
@@ -125,7 +125,7 @@ public:
         return _axis[a];
     }
 
-    /**
+    /*
      Distance from corner(0) to the next corner
      along the box's local axis a.
      */
@@ -138,7 +138,7 @@ public:
         return _extent;
     }
 
-    /**
+    /*
      Returns the four corners of a face (0 <= f < 6).
      The corners are returned to form a counter clockwise quad facing outwards.
      */
@@ -150,7 +150,7 @@ public:
         Vector3&            v3) const;
 
 
-	/**
+	/*
       See AABox::culledBy
 	 */
     bool culledBy
@@ -160,7 +160,7 @@ public:
      const uint32  			testMask,
      uint32&                            childMask) const;
 
-    /**
+    /*
      Conservative culling test that does not produce a mask for children.
      */
     bool culledBy
@@ -178,7 +178,7 @@ public:
 
     void getRandomSurfacePoint(Vector3& P, Vector3& N = Vector3::ignore()) const;
 
-    /**
+    /*
      Uniformly distributed on the interior (includes surface)
      */
     Vector3 randomInteriorPoint() const;

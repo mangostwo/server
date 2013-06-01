@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file   Notification_Strategy.h
  *
  *  $Id: Notification_Strategy.h 80826 2008-03-04 14:51:23Z wotte $
@@ -24,7 +24,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // Forward decls.
 class ACE_Reactor;
 
-/**
+/*
  * @class ACE_Notification_Strategy
  *
  * @brief Abstract class used for notifying an interested party

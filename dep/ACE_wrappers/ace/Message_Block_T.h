@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    Message_Block_T.h
  *
  *  $Id: Message_Block_T.h 80826 2008-03-04 14:51:23Z wotte $
@@ -23,7 +23,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Locked_Data_Block
  *
  * @brief A Data_Block with a concrete locking strategy.
@@ -53,7 +53,7 @@ public:
   /// Delete all the resources held in the message.
   virtual ~ACE_Locked_Data_Block (void);
 
-  /**
+  /*
    * Return an exact "deep copy" of the message, the dynamic type is
    * ACE_Locked_Data_Block<>
    * See the documentation in Message_Block.h for details.

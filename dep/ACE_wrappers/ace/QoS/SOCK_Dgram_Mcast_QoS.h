@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    SOCK_Dgram_Mcast_QoS.h
  *
  *  $Id: SOCK_Dgram_Mcast_QoS.h 80826 2008-03-04 14:51:23Z wotte $
@@ -24,7 +24,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_SOCK_Dgram_Mcast_QoS
  *
  * @brief Defines the member functions for the ACE QoS enabled socket
@@ -47,7 +47,7 @@ public:
   ~ACE_SOCK_Dgram_Mcast_QoS (void);
 
   // = Multicast group management routines.
-  /**
+  /*
    * This is a QoS-enabled method for joining a multicast group, which
    * passes <qos_params> via <ACE_OS::join_leaf>.  The network
    * interface device driver is instructed to accept datagrams with

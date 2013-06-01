@@ -1,4 +1,4 @@
-/**
+/*
  @file G3D.h
 
  This header includes all of the G3D libraries in

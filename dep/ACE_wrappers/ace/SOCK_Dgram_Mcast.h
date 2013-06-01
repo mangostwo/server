@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    SOCK_Dgram_Mcast.h
  *
  *  $Id: SOCK_Dgram_Mcast.h 91626 2010-09-07 10:59:20Z johnnyw $
@@ -39,7 +39,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_SOCK_Dgram_Mcast
  *
  * @brief Defines the ACE socket wrapper for UDP/IP multicast.
@@ -95,7 +95,7 @@ class ACE_Export ACE_SOCK_Dgram_Mcast : public ACE_SOCK_Dgram
 {
 public:
 
-  /**
+  /*
    * @brief Option parameters.
    *
    * These control per-instance optional functionality.  They are set via
@@ -181,7 +181,7 @@ public:
 
   /// Ctor - Create an unitialized instance and define per-instance optional
   /// functionality.
-  /**
+  /*
    * You must invoke <open> or <subscribe>, to create/bind a socket and define
    * operational parameters, before performing any I/O with this instance.
    */
@@ -189,7 +189,7 @@ public:
 
   /// Dtor - Release all resources and implicitly or explicitly unsubscribe
   /// from all currently subscribed groups.
-  /**
+  /*
    * The OPT_DTORUNSUB_YES_ option defines whether an explicit <unsusbcribe> is
    * done by the destructor.  If not, most systems will automatically
    * unsubscribe upon the close of the socket.
@@ -198,7 +198,7 @@ public:
 
   /// Explicitly open/bind the socket and define the network interface
   /// and default multicast address used for sending messages.
-  /**
+  /*
    * This method is optional; if not explicitly invoked, it is invoked by
    * the first <subscribe>, using the subscribed address/port# and network
    * interface parameters.
@@ -226,7 +226,7 @@ public:
 
   /// Join a multicast group on a given interface (or all interfaces, if
   /// supported).
-  /**
+  /*
    * The given group is joined on the specified interface.  If option
    * OPT_NULLIFACE_ALL is used and <net_if> is = 0, the group is joined on
    * all multicast capable interfaces (IFF supported).  Multiple subscriptions
@@ -260,7 +260,7 @@ public:
 
   /// Leave a multicast group on a given interface (or all interfaces, if
   /// supported).
-  /**
+  /*
    * The specified group/interface combination is unsubscribed.  If option
    * OPT_NULLIFACE_ALL is used and <net_if> is = 0, the group is unsubscribed
    * from all interfaces (IFF supported).
@@ -295,7 +295,7 @@ public:
   // = Options.
 
   /// Set a socket option.
-  /**
+  /*
    * Set an IP option that takes a char as input, such as IP_MULTICAST_LOOP
    * or IP_MULTICAST_TTL.  This is just a more concise, nice interface to a
    * subset of possible ACE_SOCK::set_option calls, but only works for
@@ -309,7 +309,7 @@ public:
   int set_option (int option, char optval);
 
   /// Dump the state of an object.
-  /**
+  /*
    * Logs the setting of all options, the bound address, the send address and
    * interface, and the list of current subscriptions.
    */

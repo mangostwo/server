@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Future_Set.h
  *
  *  $Id: Future_Set.h 91626 2010-09-07 10:59:20Z johnnyw $
@@ -28,7 +28,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Future_Set
  *
  * @brief This class implements a mechanism that allows the values of
@@ -53,7 +53,7 @@ public:
   /// Destructor.
   ~ACE_Future_Set (void);
 
-  /**
+  /*
    * Return 1 if their are no ACE_Future objects left on its queue and
    * 0 otherwise.
    *
@@ -65,7 +65,7 @@ public:
    */
   int is_empty (void) const;
 
-  /**
+  /*
    * Enqueus the given ACE_Future into this objects queue when it is
    * readable.
    *
@@ -74,7 +74,7 @@ public:
    */
   int insert (ACE_Future<T> &future);
 
-  /**
+  /*
    * Wait up to @a tv time to get the @a value.  Note that @a tv must be
    * specified in absolute time rather than relative time.); get the
    * next ACE_Future that is readable.  If @a tv = 0, the will block

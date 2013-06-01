@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    SSL_SOCK_Acceptor.h
  *
  *  $Id: SSL_SOCK_Acceptor.h 82723 2008-09-16 09:35:44Z johnnyw $
@@ -30,7 +30,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_SSL_SOCK_Acceptor
  *
  * @brief Defines a factory that creates new @c ACE_SSL_SOCK_Stream
@@ -58,7 +58,7 @@ public:
   /// Default destructor.
   ~ACE_SSL_SOCK_Acceptor (void);
 
-  /**
+  /*
    * Initiate a passive mode SSL/BSD-style acceptor socket.
    * @param local_sap  The address that we're going to listen for
    *                   connections on. If this is @c ACE_Addr::sap_any,
@@ -74,7 +74,7 @@ public:
                          int backlog = ACE_DEFAULT_BACKLOG,
                          int protocol = 0);
 
-  /**
+  /*
    * Initiate a passive-mode QoS-enabled acceptor socket.
    * @param local_sap  The address that we're going to listen for
    *                   connections on. If this is @c ACE_Addr::sap_any,
@@ -93,7 +93,7 @@ public:
                          int backlog = ACE_DEFAULT_BACKLOG,
                          int protocol = 0);
 
-  /**
+  /*
    * Initiate a passive mode SSL/BSD-style acceptor socket.
    * @param local_sap  The address that we're going to listen for
    *                   connections on. If this is @c ACE_Addr::sap_any,
@@ -114,13 +114,13 @@ public:
   /// Close the listening socket.
   int close (void);
 
-  /**
+  /*
    * @name Passive Connection "accept" Methods
    *
    * These are the canonical methods exposed by the Acceptor pattern.
    */
   //@{
-  /**
+  /*
    * Accept a new ACE_SSL_SOCK_Stream connection. On successful return,
    * the socket has been accepted and the SSL handshake has been completed.
    * @param new_stream  The @c ACE_SSL_SOCK_Stream object that will receive
@@ -141,7 +141,7 @@ public:
               bool restart = true,
               bool reset_new_handle = false) const;
 
-  /**
+  /*
    * Accept a new ACE_SSL_SOCK_Stream connection using the RVSP QoS
    * information in qos_params.
    * @param new_stream  The @c ACE_SSL_SOCK_Stream object that will receive

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    IOStream.h
  *
  *  $Id: IOStream.h 92102 2010-09-30 08:14:15Z johnnyw $
@@ -99,7 +99,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Streambuf
  *
  * @brief Create your custom streambuf by providing and ACE_*_Stream
@@ -155,7 +155,7 @@ class ACE_Export ACE_Streambuf : public streambuf
 {
 public:
 
-  /**
+  /*
    * If the default allocation strategey were used the common buffer
    * would be deleted when the object destructs.  Since we are
    * providing separate read/write buffers, it is up to us to manage
@@ -166,7 +166,7 @@ public:
   /// Get the current Time_Value pointer and provide a new one.
   ACE_Time_Value *recv_timeout (ACE_Time_Value *tv = 0);
 
-  /**
+  /*
    * Use this to allocate a new/different buffer for put operations.
    * If you do not provide a buffer pointer, one will be allocated.
    * That is the preferred method.  If you do provide a buffer, the
@@ -183,7 +183,7 @@ public:
   ///    pbase + put_avail = pptr
   u_int put_avail (void);
 
-  /**
+  /*
    * Use this to allocate a new/different buffer for get operations.
    * If you do not provide a buffer pointer, one will be allocated.
    * That is the preferred method.  If you do provide a buffer, the
@@ -263,7 +263,7 @@ protected:
   ACE_Time_Value recv_timeout_value_;
   ACE_Time_Value *recv_timeout_;
 
-  /**
+  /*
    * syncin is called when the input needs to be synced with the
    * source file.  In a filebuf, this results in the <seek> system
    * call being used.  We can't do that on socket-like connections, so
@@ -282,14 +282,14 @@ protected:
   /// because it gets used sometimes in different context.
   int flushbuf (void);
 
-  /**
+  /*
    * fillbuf is called in a couple of places.  This is the worker of
    * underflow.  It will attempt to fill the read buffer from the
    * peer.
    */
   int fillbuf (void);
 
-  /**
+  /*
    * Used by fillbuf and others to get exactly one byte from the peer.
    * recv_n is used to be sure we block until something is available.
    * It is virtual because we really need to override it for
@@ -297,7 +297,7 @@ protected:
    */
   virtual int get_one_byte (void);
 
-  /**
+  /*
    * Stream connections and "unconnected connections" (ie --
    * datagrams) need to work just a little differently.  We derive
    * custom Streambuf objects for them and provide these functions at

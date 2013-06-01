@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    QoS_Session.h
  *
  *  $Id: QoS_Session.h 91743 2010-09-13 18:24:51Z johnnyw $
@@ -31,7 +31,7 @@ class ACE_QoS_Manager;
 typedef int ACE_Protocol_ID;
 // IPPROTO_UDP or IPPROTO_TCP.
 
-/**
+/*
  * @class ACE_QoS_Session
  *
  * @brief A QoS Session object.
@@ -84,7 +84,7 @@ public:
                    ACE_QoS_Manager *qos_manager,
                    const ACE_QoS &ace_qos) = 0;
 
-  /**
+  /*
    * Sets the QoS for this session object to ace_qos. Does not
    * interfere with the QoS in the underlying socket. This call is
    * useful to update the QoS object when the underlying socket QoS is
@@ -94,7 +94,7 @@ public:
    */
   virtual void qos (const ACE_QoS &ace_qos) = 0;
 
-  /**
+  /*
    * This is called from handle_qos () method of the the QoS Event
    * Handler.  Invoking this method is an indication of a QoS event
    * occurring, that may have resulted in a change of QoS for the
@@ -142,7 +142,7 @@ public:
   virtual void source_addr (ACE_INET_Addr* source_addr) = 0;
 
 
-  /**
+  /*
    * Returns the version of the underlying RSVP implementation. Is
    * meaningful only when the underlying implementation has
    * versioning.

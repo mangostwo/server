@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    Recursive_Thread_Mutex.h
  *
  *  $Id: Recursive_Thread_Mutex.h 91688 2010-09-09 11:21:50Z johnnyw $
@@ -32,7 +32,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Recursive_Thread_Mutex
  *
  * @brief Implement a C++ wrapper that allows nested acquisition and
@@ -48,21 +48,21 @@ public:
   /// Implicitly release a recursive mutex.
   ~ACE_Recursive_Thread_Mutex (void);
 
-  /**
+  /*
    * Implicitly release a recursive mutex.  Note that only one thread
    * should call this method since it doesn't protect against race
    * conditions.
    */
   int remove (void);
 
-  /**
+  /*
    * Acquire a recursive mutex (will increment the nesting level and
    * not deadmutex if the owner of the mutex calls this method more
    * than once).
    */
   int acquire (void);
 
-  /**
+  /*
    * Block the thread until we acquire the mutex or until @a tv times
    * out, in which case -1 is returned with @c errno == @c ETIME.  Note
    * that @a tv is assumed to be in "absolute" rather than "relative"
@@ -71,7 +71,7 @@ public:
    */
   int acquire (ACE_Time_Value &tv);
 
-  /**
+  /*
    * If @a tv == 0 the call <acquire()> directly.  Otherwise, Block the
    * thread until we acquire the mutex or until @a tv times out, in
    * which case -1 is returned with @c errno == @c ETIME.  Note that
@@ -81,28 +81,28 @@ public:
    */
   int acquire (ACE_Time_Value *tv);
 
-  /**
+  /*
    * Conditionally acquire a recursive mutex (i.e., won't block).
    * Returns -1 on failure.  If we "failed" because someone else
    * already had the lock, @c errno is set to @c EBUSY.
    */
   int tryacquire (void);
 
-  /**
+  /*
    * Acquire mutex ownership.  This calls <acquire> and is only
    * here to make the ACE_Recusive_Thread_Mutex interface consistent
    * with the other synchronization APIs.
    */
   int acquire_read (void);
 
-  /**
+  /*
    * Acquire mutex ownership.  This calls <acquire> and is only
    * here to make the ACE_Recusive_Thread_Mutex interface consistent
    * with the other synchronization APIs.
    */
   int acquire_write (void);
 
-  /**
+  /*
    * Conditionally acquire mutex (i.e., won't block).  This calls
    * <tryacquire> and is only here to make the
    * ACE_Recusive_Thread_Mutex interface consistent with the other
@@ -112,7 +112,7 @@ public:
    */
   int tryacquire_read (void);
 
-  /**
+  /*
    * Conditionally acquire mutex (i.e., won't block).  This calls
    * <tryacquire> and is only here to make the
    * ACE_Recusive_Thread_Mutex interface consistent with the other
@@ -122,7 +122,7 @@ public:
    */
   int tryacquire_write (void);
 
-  /**
+  /*
    * This is only here to make the ACE_Recursive_Thread_Mutex
    * interface consistent with the other synchronization APIs.
    * Assumes the caller has already acquired the mutex using one of
@@ -130,7 +130,7 @@ public:
    */
   int tryacquire_write_upgrade (void);
 
-  /**
+  /*
    * Releases a recursive mutex (will not release mutex until all the
    * nesting level drops to 0, which means the mutex is no longer
    * held).
@@ -140,7 +140,7 @@ public:
   /// Return the id of the thread that currently owns the mutex.
   ACE_thread_t get_thread_id (void);
 
-  /**
+  /*
    * Return the nesting level of the recursion.  When a thread has
    * acquired the mutex for the first time, the nesting level == 1.
    * The nesting level is incremented every time the thread acquires

@@ -1,4 +1,4 @@
-/**
+/*
   @file Vector3int32.h
   
   @maintainer Morgan McGuire, matrix@brown.edu
@@ -18,7 +18,7 @@
 
 namespace G3D {
 
-/**
+/*
  \ Vector3int32
  A Vector3 that packs its fields into uint32s.
  */

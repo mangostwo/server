@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    SOCK_Acceptor.h
  *
  *  $Id: SOCK_Acceptor.h 82723 2008-09-16 09:35:44Z johnnyw $
@@ -25,7 +25,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Time_Value;
 class ACE_Accept_QoS_Params;
 
-/**
+/*
  * @class ACE_SOCK_Acceptor
  *
  * @brief Defines a factory that creates new ACE_Streams passively.
@@ -43,7 +43,7 @@ public:
   /// Default constructor.
   ACE_SOCK_Acceptor (void);
 
-  /**
+  /*
    * Initialize a passive-mode BSD-style acceptor socket (no QoS).
    * @a local_sap is the address that we're going to listen for
    * connections on.  If @a reuse_addr is 1 then we'll use the
@@ -66,7 +66,7 @@ public:
                      int backlog = ACE_DEFAULT_BACKLOG,
                      int protocol = 0);
 
-  /**
+  /*
    * Initialize a passive-mode BSD-style acceptor socket (no QoS).
    * @a local_sap is the address that we're going to listen for
    * connections on.  If @a reuse_addr is 1 then we'll use the
@@ -97,7 +97,7 @@ public:
   ~ACE_SOCK_Acceptor (void);
 
   // = Passive connection <accept> methods.
-  /**
+  /*
    * Accept a new ACE_SOCK_Stream connection.  A @a timeout of 0
    * means block forever, a @a timeout of {0, 0} means poll.  @a restart
    * == true means "restart if interrupted," i.e., if errno == EINTR.
@@ -113,7 +113,7 @@ public:
               bool reset_new_handle = false) const;
 
 #if !defined (ACE_HAS_WINCE)
-  /**
+  /*
    * Accept a new ACE_SOCK_Stream connection using the QoS
    * information in @a qos_params.  A @a timeout of 0 means block
    * forever, a @a timeout of {0, 0} means poll.  @a restart == true means
@@ -154,7 +154,7 @@ protected:
                             int in_blocking_mode,
                             bool reset_new_handle) const;
 
-  /**
+  /*
    * This method factors out the common <open> code and is called by
    * both the QoS-enabled <open> method and the BSD-style <open>
    * method.

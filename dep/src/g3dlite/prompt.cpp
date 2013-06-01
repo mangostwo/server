@@ -1,4 +1,4 @@
-/**
+/*
  @file prompt.cpp
  
  @author Morgan McGuire, http://graphics.cs.williams.edu 
@@ -46,7 +46,7 @@ namespace G3D {
 #ifdef G3D_WIN32
 
 namespace _internal {
-/**
+/*
  Generic Win32 dialog facility.
  @author Max McGuire
  */
@@ -179,7 +179,7 @@ public:
     }
 
 
-  /**
+  /*
    *
    * Returns a pointer to the Win32 dialog template which the object
    * represents. This pointer may become invalid if additional components
@@ -295,7 +295,7 @@ struct PromptParams {
     const char* title;
 };
 
-/**
+/*
  * Constants for controls.
  */
 #define IDC_MESSAGE     1000
@@ -351,7 +351,7 @@ INT_PTR CALLBACK PromptDlgProc(HWND hDlg, UINT msg,
 
 using namespace _internal;
 
-/**
+/*
  * Show a dialog prompt.
  */
 static int guiPrompt(
@@ -475,7 +475,7 @@ static int guiPrompt(
 #endif /* MANGOS exclude for disabled gui prompt */
 
 
-/**
+/*
  * Show a prompt on stdout 
  */
 static int textPrompt(
@@ -557,7 +557,7 @@ struct CallbackData {
     int*        whichButton;
 };
 
-/**
+/*
  Assumes that userData is a pointer to a carbon_evt_data_t.
  
  */

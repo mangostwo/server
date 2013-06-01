@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Refcounted_Auto_Ptr.h
  *
  *  $Id: Refcounted_Auto_Ptr.h 81179 2008-03-31 19:00:29Z iliyan $
@@ -28,7 +28,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 template <class X, class ACE_LOCK> class ACE_Refcounted_Auto_Ptr_Rep;
 template <class X, class ACE_LOCK> class ACE_Refcounted_Auto_Ptr;
 
-/**
+/*
  * @class ACE_Refcounted_Auto_Ptr
  *
  * @brief This class implements support for a reference counted auto_ptr.
@@ -72,7 +72,7 @@ public:
   /// Equality operator that returns @c true if both
   /// ACE_Refcounted_Auto_Ptr objects point to the same underlying
   /// representation. It does not compare the actual pointers.
-  /**
+  /*
    * @note It also returns @c true if both objects have just been
    *       instantiated and not used yet.
    */
@@ -121,7 +121,7 @@ protected:
   AUTO_REFCOUNTED_PTR_REP *rep_;
 };
 
-/**
+/*
  * @class ACE_Refcounted_Auto_Ptr_Rep
  *
  * @brief An ACE_Refcounted_Auto_Ptr_Rep object encapsulates a pointer

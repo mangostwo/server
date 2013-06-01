@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Asynch_Pseudo_Task.h
  *
  *  $Id: Asynch_Pseudo_Task.h 80826 2008-03-04 14:51:23Z wotte $
@@ -34,7 +34,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
  */
 //@@ REACTOR_SPL_INCLUDE_FORWARD_DECL_ADD_HOOK
 
-/**
+/*
  * @class ACE_Asynch_Pseudo_Task
  *
  */

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Timer_Queue_Adapters.h
  *
  *  $Id: Timer_Queue_Adapters.h 89482 2010-03-15 07:58:50Z johnnyw $
@@ -36,7 +36,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Sig_Set;
 
-/**
+/*
  * @class ACE_Async_Timer_Queue_Adapter
  *
  * @brief Adapts an ACE timer queue to be driven asynchronously using signals.
@@ -56,7 +56,7 @@ public:
   typedef TQ TIMER_QUEUE;
 
   /// Constructor
-  /**
+  /*
    * Register the SIGALRM handler.  If @a mask == 0 then block all
    * signals when @c SIGALRM is run.  Otherwise, just block the signals
    * indicated in @a mask.
@@ -65,7 +65,7 @@ public:
 
   /// Schedule the timer according to the semantics of the
   /// ACE_Timer_List.
-  /**
+  /*
    * This timer gets dispatched via a signal, rather than by a user
    * calling expire().  Note that interval timers are not implemented
    * yet.
@@ -105,7 +105,7 @@ private:
   ACE_Sig_Set mask_;
 };
 
-/**
+/*
  * @class ACE_Thread_Timer_Queue_Adapter
  *
  * @brief Adapts an ACE timer queue using a separate thread for dispatching.
@@ -172,7 +172,7 @@ public:
   /// Return the thread id of our active object.
   ACE_thread_t thr_id (void) const;
 
-  /**
+  /*
    * We override the default activate() method so that we can ensure
    * that only a single thread is ever spawned.  Otherwise, too many
    * weird things can happen...
@@ -191,7 +191,7 @@ public:
 
 # if defined (ACE_HAS_DEFERRED_TIMER_COMMANDS)
 
-  /**
+  /*
    * Enqueues a command object for execution just before waiting on the next
    * timer event. This allows deferred execution of commands that cannot
    * be performed in the timer event handler context, such as registering
@@ -228,7 +228,7 @@ private:
   /// <condition_>.
   ACE_SYNCH_RECURSIVE_MUTEX mutex_;
 
-  /**
+  /*
    * The dispatching thread sleeps on this condition while waiting to
    * dispatch the next timer; it is used to wake it up if there is a
    * change on the timer queue.

@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    LSOCK_Stream.h
  *
  *  $Id: LSOCK_Stream.h 92140 2010-10-04 12:37:52Z johnnyw $
@@ -29,7 +29,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_LSOCK_Stream
  *
  * @brief Create a Local ACE_SOCK stream.

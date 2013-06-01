@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    MEM_Addr.h
  *
  *  $Id: MEM_Addr.h 80826 2008-03-04 14:51:23Z wotte $
@@ -27,7 +27,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_MEM_Addr
  *
  * @brief Defines a C++ wrapper facade for the shared memory transport
@@ -62,7 +62,7 @@ public:
 
   // These methods are useful after the object has been constructed.
 
-  /**
+  /*
    * Initializes an ACE_MEM_Addr from a @a port_number.  If @a encode
    * is enabled then @a port_number is converted into network byte order,
    * otherwise it is assumed to be in network byte order already and
@@ -100,7 +100,7 @@ public:
   int get_host_name (ACE_TCHAR hostname[],
                      size_t hostnamelen) const;
 
-  /**
+  /*
    * Return the character representation of the hostname (this version
    * is non-reentrant since it returns a pointer to a static data
    * area).

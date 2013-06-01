@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    UPIPE_Stream.h
  *
  *  $Id: UPIPE_Stream.h 80826 2008-03-04 14:51:23Z wotte $
@@ -30,7 +30,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_UPIPE_Stream
  *
  * @brief Defines the method that transfer data on a UPIPE.

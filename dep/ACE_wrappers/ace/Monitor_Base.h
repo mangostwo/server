@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  * @file Monitor_Base.h
  *
  * $Id: Monitor_Base.h 82333 2008-07-16 01:01:32Z johnnyw $
@@ -38,7 +38,7 @@ namespace ACE
   {
     class Control_Action;
 
-    /**
+    /*
      * @class Monitor_Base
      *
      * @brief Base class from which the template monitor point class is

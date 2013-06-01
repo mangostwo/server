@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    Asynch_IO_Impl.h
  *
  *  $Id: Asynch_IO_Impl.h 80826 2008-03-04 14:51:23Z wotte $
@@ -41,7 +41,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // Forward declaration.
 class ACE_Proactor_Impl;
 
-/**
+/*
  * @class ACE_Asynch_Result_Impl
  *
  * @brief Abstract base class for the all the classes that provide
@@ -79,7 +79,7 @@ public:
   /// Priority of the operation.
   virtual int priority (void) const = 0;
 
-  /**
+  /*
    * POSIX4 real-time signal number to be used for the
    * operation. <signal_number> ranges from SIGRTMIN to SIGRTMAX. By
    * default, SIGRTMIN is used to issue <aio_> calls. This is a no-op
@@ -105,7 +105,7 @@ protected:
   ACE_Asynch_Result_Impl (void);
 };
 
-/**
+/*
  * @class ACE_Asynch_Operation_Impl
  *
  * @brief Abstract base class for all the concrete implementation
@@ -117,7 +117,7 @@ class ACE_Export ACE_Asynch_Operation_Impl
 public:
   virtual ~ACE_Asynch_Operation_Impl (void);
 
-  /**
+  /*
    * Initializes the factory with information which will be used with
    * each asynchronous call.  If @a handle == ACE_INVALID_HANDLE,
    * ACE_Handler::handle() will be called on the proxied handler to get the
@@ -128,7 +128,7 @@ public:
                     const void *completion_key,
                     ACE_Proactor *proactor) = 0;
 
-  /**
+  /*
    * This cancels all pending accepts operations that were issued by
    * the calling thread.  The function does not cancel asynchronous
    * operations issued by other threads.
@@ -145,7 +145,7 @@ protected:
   ACE_Asynch_Operation_Impl (void);
 };
 
-/**
+/*
  * @class ACE_Asynch_Read_Stream_Impl
  *
  * @brief Abstract base class for all the concrete implementation
@@ -167,7 +167,7 @@ public:
                     int signal_number) = 0;
 
 #if (defined (ACE_WIN32) && !defined (ACE_HAS_WINCE))
-  /**
+  /*
   * Same as above but with scatter support, through chaining of composite
   * message blocks using the continuation field.
   */
@@ -183,7 +183,7 @@ protected:
   ACE_Asynch_Read_Stream_Impl (void);
 };
 
-/**
+/*
  * @class ACE_Asynch_Read_Stream_Result_Impl
  *
  * @brief Abstract base class for all the concrete implementation
@@ -211,7 +211,7 @@ protected:
   ACE_Asynch_Read_Stream_Result_Impl (void);
 };
 
-/**
+/*
  * @class ACE_Asynch_Write_Stream_Impl
  *
  * @brief Abstract base class for all the concrete implementation
@@ -233,7 +233,7 @@ public:
                      int signal_number) = 0;
 
 #if (defined (ACE_WIN32) && !defined (ACE_HAS_WINCE))
-  /**
+  /*
   * Same as above but with gather support, through chaining of composite
   * message blocks using the continuation field.
   */
@@ -249,7 +249,7 @@ protected:
   ACE_Asynch_Write_Stream_Impl (void);
 };
 
-/**
+/*
  * @class ACE_Asynch_Write_Stream_Result_Impl
  *
  * @brief Abstract base class for all the concrete implementation
@@ -277,7 +277,7 @@ protected:
   ACE_Asynch_Write_Stream_Result_Impl (void);
 };
 
-/**
+/*
  * @class ACE_Asynch_Read_File_Impl
  *
  * @brief Abstract base class for all the concrete implementation
@@ -290,7 +290,7 @@ class ACE_Export ACE_Asynch_Read_File_Impl : public virtual ACE_Asynch_Read_Stre
 public:
   virtual ~ACE_Asynch_Read_File_Impl (void);
 
-  /**
+  /*
    * This starts off an asynchronous read.  Upto @a bytes_to_read will
    * be read and stored in the @a message_block.  The read will start
    * at @a offset from the beginning of the file.
@@ -304,7 +304,7 @@ public:
                     int signal_number) = 0;
 
 #if (defined (ACE_WIN32) && !defined (ACE_HAS_WINCE))
-  /**
+  /*
   * Same as above but with scatter support, through chaining of composite
   * message blocks using the continuation field.
   * @note In win32 Each data block payload must be at least the size of a system
@@ -328,7 +328,7 @@ public:
                     int signal_number) = 0;
 
 #if (defined (ACE_WIN32) && !defined (ACE_HAS_WINCE))
-  /**
+  /*
   * Same as above but with scatter support, through chaining of composite
   * message blocks using the continuation field.
   */
@@ -344,7 +344,7 @@ protected:
   ACE_Asynch_Read_File_Impl (void);
 };
 
-/**
+/*
  * @class ACE_Asynch_Read_File_Result_Impl
  *
  * @brief This is the abstract base class for all the concrete
@@ -362,7 +362,7 @@ protected:
   ACE_Asynch_Read_File_Result_Impl (void);
 };
 
-/**
+/*
  * @class ACE_Asynch_Write_File_Impl
  *
  * @brief Abstract base class for all the concrete implementation
@@ -375,7 +375,7 @@ class ACE_Export ACE_Asynch_Write_File_Impl : public virtual ACE_Asynch_Write_St
 public:
   virtual ~ACE_Asynch_Write_File_Impl (void);
 
-  /**
+  /*
    * This starts off an asynchronous write.  Upto @a bytes_to_write
    * will be write and stored in the @a message_block.  The write will
    * start at @a offset from the beginning of the file.
@@ -389,7 +389,7 @@ public:
                      int signal_number) = 0;
 
 #if (defined (ACE_WIN32) && !defined (ACE_HAS_WINCE))
-  /**
+  /*
   * Same as above but with gather support, through chaining of composite
   * message blocks using the continuation field.
   * @note In win32 Each data block payload must be at least the size of a system
@@ -413,7 +413,7 @@ public:
                      int signal_number) = 0;
 
 #if (defined (ACE_WIN32) && !defined (ACE_HAS_WINCE))
-  /**
+  /*
   * Same as above but with gather support, through chaining of composite
   * message blocks using the continuation field.
   */
@@ -429,7 +429,7 @@ protected:
   ACE_Asynch_Write_File_Impl (void);
 };
 
-/**
+/*
  * @class ACE_Asynch_Write_File_Result_Impl
  *
  * @brief This is the abstract base class for all the concrete
@@ -447,7 +447,7 @@ protected:
   ACE_Asynch_Write_File_Result_Impl (void);
 };
 
-/**
+/*
  * @class ACE_Asynch_Accept_Impl
  *
  * @brief Abstract base class for all the concrete implementation
@@ -460,7 +460,7 @@ class ACE_Export ACE_Asynch_Accept_Impl : public virtual ACE_Asynch_Operation_Im
 public:
   virtual ~ACE_Asynch_Accept_Impl (void);
 
-  /**
+  /*
    * This starts off an asynchronous accept.  The asynchronous accept
    * call also allows any initial data to be returned to the
    * <handler>.  Upto @a bytes_to_read will be read and stored in the
@@ -484,7 +484,7 @@ protected:
   ACE_Asynch_Accept_Impl (void);
 };
 
-/**
+/*
  * @class ACE_Asynch_Accept_Result_Impl
  *
  * @brief Abstract base class for all the concrete implementation
@@ -516,7 +516,7 @@ protected:
 };
 
 
-/**
+/*
  * @class ACE_Asynch_Connect_Impl
  *
  * @brief Abstract base class for all the concrete implementation
@@ -529,7 +529,7 @@ class ACE_Export ACE_Asynch_Connect_Impl : public virtual ACE_Asynch_Operation_I
 public:
   virtual ~ACE_Asynch_Connect_Impl (void);
 
-  /**
+  /*
    * This starts off an asynchronous connect
    */
   virtual int connect (ACE_HANDLE connect_handle,
@@ -545,7 +545,7 @@ protected:
   ACE_Asynch_Connect_Impl (void);
 };
 
-/**
+/*
  * @class ACE_Asynch_Connect_Result_Impl
  *
  * @brief Abstract base class for all the concrete implementation
@@ -567,7 +567,7 @@ protected:
 };
 
 
-/**
+/*
  * @class ACE_Asynch_Transmit_File_Impl
  *
  * @brief Abstract base class for all the concrete implementation
@@ -597,7 +597,7 @@ protected:
   ACE_Asynch_Transmit_File_Impl (void);
 };
 
-/**
+/*
  * @class ACE_Asynch_Transmit_File_Result_Impl
  *
  * @brief Abstract base class for all the concrete implementation
@@ -636,7 +636,7 @@ protected:
 };
 
 
-/**
+/*
  * @class ACE_Asynch_Read_Dgram_Impl
  *
  * @brief Abstract base class for all the concrete implementation
@@ -688,7 +688,7 @@ protected:
   ACE_Asynch_Read_Dgram_Impl (void);
 };
 
-/**
+/*
  * @class ACE_Asynch_Read_Dgram_Result_Impl
  *
  * @brief Abstract base class for all the concrete implementation
@@ -722,7 +722,7 @@ protected:
   ACE_Asynch_Read_Dgram_Result_Impl (void);
 };
 
-/**
+/*
  * @class ACE_Asynch_Write_Dgram_Impl
  *
  * @brief Abstract base class for all the concrete implementation
@@ -774,7 +774,7 @@ protected:
   ACE_Asynch_Write_Dgram_Impl (void);
 };
 
-/**
+/*
  * @class ACE_Asynch_Write_Dgram_Result_Impl
  *
  * @brief Abstract base class for all the concrete implementation

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Token_Invariants.h
  *
  *  $Id: Token_Invariants.h 91688 2010-09-09 11:21:50Z johnnyw $
@@ -34,7 +34,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Mutex_Invariants
  *
  * @brief Mutex Invariants
@@ -70,7 +70,7 @@ private:
   int owners_;
 };
 
-/**
+/*
  * @class ACE_RWLock_Invariants
  *
  * @brief RWLock Invariants
@@ -115,7 +115,7 @@ private:
   int readers_;
 };
 
-/**
+/*
  * @class ACE_Token_Invariant_Manager
  *
  * @brief Token Invariants

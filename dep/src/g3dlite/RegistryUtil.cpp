@@ -1,4 +1,4 @@
-/**
+/*
  @file RegistryUtil.cpp
 
  @created 2006-04-06

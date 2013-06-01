@@ -1,4 +1,4 @@
-/**
+/*
  @file BinaryOutput.h
  
  @maintainer Morgan McGuire, graphics3d.com
@@ -36,7 +36,7 @@
 #endif
 namespace G3D {
 
-/**
+/*
  Sequential or random access byte-order independent binary file access.
 
  The compress() call can be used to compress with zlib.
@@ -93,7 +93,7 @@ private:
 
     void reallocBuffer(size_t bytes, size_t oldBufferLen);
 
-    /**
+    /*
      Make sure at least bytes can be written, resizing if
      necessary.
      */
@@ -114,12 +114,12 @@ private:
 
 public:
 
-    /**
+    /*
      You must call setEndian() if you use this (memory) constructor.
      */
     BinaryOutput();
 
-    /**
+    /*
      Doesn't actually open the file; commit() does that.
      Use "<memory>" as the filename if you're going to commit
      to memory.
@@ -144,7 +144,7 @@ public:
     /** True if no errors have been encountered.*/
     bool ok() const;
 
-    /**
+    /*
      Returns a pointer to the internal memory buffer.
      */
     inline const uint8* getCArray() const {
@@ -161,7 +161,7 @@ public:
         return m_filename;
     }
 
-    /**
+    /*
      Write the bytes to disk.  It is ok to call this 
      multiple times; it will just overwrite the previous file.
 
@@ -176,13 +176,13 @@ public:
     */
     void commit(bool flush = true);
 
-    /**
+    /*
      Write the bytes to memory (which must be of
      at least size() bytes).
      */
     void commit(uint8*);
 
-    /**
+    /*
       A memory BinaryOutput may be reset so that it can be written to again
       without allocating new memory.  The underlying array will not be deallocated,
       but the reset structure will act like a newly intialized one.
@@ -198,7 +198,7 @@ public:
         return length();
     }
 
-    /**
+    /*
      Sets the length of the file to n, padding
      with 0's past the current end.  Does not
      change the position of the next byte to be
@@ -222,7 +222,7 @@ public:
         }
     }
 
-    /**
+    /*
      Returns the current byte position in the file,
      where 0 is the beginning and getLength() - 1 is the end.
      */
@@ -231,7 +231,7 @@ public:
     }
 
 
-    /**
+    /*
      Sets the position.  Can set past length, in which case
      the file is padded with zeros up to one byte before the
      next to be written.
@@ -264,7 +264,7 @@ public:
         m_pos += count;
     }
 
-    /**
+    /*
      Writes a signed 8-bit integer to the current position.
      */
     inline void writeInt8(int8 i) {
@@ -321,7 +321,7 @@ public:
         writeUInt64(b);
     }
 
-    /**
+    /*
      Write a string with NULL termination.
      */
     inline void writeString(const std::string& s) {
@@ -330,7 +330,7 @@ public:
 
     void writeString(const char* s);
 
-    /**
+    /*
      Write a string, ensuring that the total length
      including NULL is even.
      */
@@ -343,7 +343,7 @@ public:
 
     void writeString32(const char* s);
 
-    /**
+    /*
      Write a string with a 32-bit length field in front
      of it.
      */
@@ -361,7 +361,7 @@ public:
 
     void writeColor3(const Color3& v);
 
-    /**
+    /*
      Skips ahead n bytes.
      */
     inline void skip(int n) {

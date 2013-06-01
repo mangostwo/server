@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Msg_WFMO_Reactor.h
  *
  *  $Id: Msg_WFMO_Reactor.h 80826 2008-03-04 14:51:23Z wotte $
@@ -28,7 +28,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Msg_WFMO_Reactor
  *
  * @brief An OO event demultiplexor and event handler dispatcher for
@@ -47,7 +47,7 @@ public:
   ACE_Msg_WFMO_Reactor (ACE_Sig_Handler * = 0,
                         ACE_Timer_Queue * = 0);
 
-  /**
+  /*
    * Initialize <ACE_Msg_WFMO_Reactor> with size @a size.  Two slots will be
    * added to the @a size parameter which will store handles used for
    * internal management purposes.
@@ -60,7 +60,7 @@ public:
   /// Close down the ACE_Msg_WFMO_Reactor and release all of its resources.
   virtual ~ACE_Msg_WFMO_Reactor (void);
 
-  /**
+  /*
    * This event loop driver blocks for up to @a max_wait_time before
    * returning.  It will return earlier if timer events, I/O events,
    * window events, or signal events occur.  Note that @a max_wait_time
@@ -88,7 +88,7 @@ public:
   virtual int handle_events (ACE_Time_Value *max_wait_time = 0);
   virtual int alertable_handle_events (ACE_Time_Value *max_wait_time = 0);
 
-  /**
+  /*
    * This method is just like the one above, except the
    * @a max_wait_time value is a reference and can therefore never be
    * NULL.

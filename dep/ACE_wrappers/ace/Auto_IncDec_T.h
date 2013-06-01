@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Auto_IncDec_T.h
  *
  *  $Id: Auto_IncDec_T.h 92353 2010-10-25 06:34:35Z johnnyw $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Auto_IncDec
  *
  * @brief This class automatically increments and decrements a

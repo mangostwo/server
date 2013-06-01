@@ -1,4 +1,4 @@
-/**
+/*
  @file ParseError.h
   
  @maintainer Morgan McGuire

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Map_Manager.h
  *
  *  $Id: Map_Manager.h 91626 2010-09-07 10:59:20Z johnnyw $
@@ -30,7 +30,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // Forward declaration.
 class ACE_Allocator;
 
-/**
+/*
  * @class ACE_Map_Entry
  *
  * @brief An entry in the Map.
@@ -108,7 +108,7 @@ class ACE_Map_Const_Iterator;
 template <class EXT_ID, class INT_ID, class ACE_LOCK>
 class ACE_Map_Reverse_Iterator;
 
-/**
+/*
  * @class ACE_Map_Manager
  *
  * @brief
@@ -168,7 +168,7 @@ public:
   /// resources.
   ~ACE_Map_Manager (void);
 
-  /**
+  /*
    * Associate @a ext_id with @a int_id.  If @a ext_id is already in the
    * map then the ACE_Map_Entry is not changed.
    * @retval 0 If a new entry is bound successfully.
@@ -178,7 +178,7 @@ public:
   int bind (const EXT_ID &ext_id,
             const INT_ID &int_id);
 
-  /**
+  /*
    * Reassociate @a ext_id with @a int_id.  If @a ext_id is not in the
    * map then behaves just like bind().  Otherwise, store the old
    * values of @a ext_id and @a int_id into the "out" parameters and
@@ -194,7 +194,7 @@ public:
               EXT_ID &old_ext_id,
               INT_ID &old_int_id);
 
-  /**
+  /*
    * Reassociate @a ext_id with @a int_id.  If @a ext_id is not in the
    * map then behaves just like bind().  Otherwise, store the old
    * values of @a int_id into the "out" parameter and rebind the new
@@ -212,7 +212,7 @@ public:
   int rebind (const EXT_ID &ext_id,
               const INT_ID &int_id);
 
-  /**
+  /*
    * Associate @a ext_id with @a int_id if and only if @a ext_id is not
    * in the map.  If @a ext_id is already in the map then the @a int_id
    * parameter is overwritten with the existing value in the map
@@ -223,7 +223,7 @@ public:
   int trybind (const EXT_ID &ext_id,
                INT_ID &int_id);
 
-  /**
+  /*
    * Locate @a ext_id and pass out parameter via @a int_id.
    * @retval 0 If found.
    * @retval -1 If not found.
@@ -234,7 +234,7 @@ public:
   /// Returns 0 if the @a ext_id is in the mapping, otherwise -1.
   int find (const EXT_ID &ext_id) const;
 
-  /**
+  /*
    * Unbind (remove) the @a ext_id from the map.  Don't return the
    * @a int_id to the caller (this is useful for collections where the
    * @a int_ids are *not* dynamically allocated...)  Returns 0 if
@@ -242,7 +242,7 @@ public:
    */
   int unbind (const EXT_ID &ext_id);
 
-  /**
+  /*
    * Break any association of @a ext_id.  Returns the value of @a int_id
    * in case the caller needs to deallocate memory.  Returns 0 if
    * successful, else -1.
@@ -250,7 +250,7 @@ public:
   int unbind (const EXT_ID &ext_id,
               INT_ID &int_id);
 
-  /**
+  /*
    * Unbind all entires.
    */
   void unbind_all (void);
@@ -261,7 +261,7 @@ public:
   /// Return the total size of the map.
   size_t total_size (void) const;
 
-  /**
+  /*
    * Returns a reference to the underlying ACE_LOCK.  This makes it
    * possible to acquire the lock explicitly, which can be useful in
    * some cases if you instantiate the ACE_Atomic_Op with an
@@ -389,7 +389,7 @@ protected:
 
 #if defined (ACE_HAS_LAZY_MAP_MANAGER)
 
-  /**
+  /*
    * In the case of lazy map managers, the movement of free slots from
    * the occupied list to the free list is delayed until we run out of
    * free slots in the free list. This function goes through the
@@ -442,7 +442,7 @@ private:
   ACE_UNIMPLEMENTED_FUNC (ACE_Map_Manager (const ACE_Map_Manager<EXT_ID, INT_ID, ACE_LOCK> &))
 };
 
-/**
+/*
  * @class ACE_Map_Iterator_Base
  *
  * @brief Iterator for the ACE_Map_Manager.
@@ -501,7 +501,7 @@ protected:
   ACE_UINT32 next_;
 };
 
-/**
+/*
  * @class ACE_Map_Const_Iterator_Base
  *
  * @brief Const iterator for the ACE_Map_Manager.
@@ -560,7 +560,7 @@ protected:
   ACE_UINT32 next_;
 };
 
-/**
+/*
  * @class ACE_Map_Iterator
  *
  * @brief Forward iterator for the ACE_Map_Manager.
@@ -607,7 +607,7 @@ public:
   ACE_ALLOC_HOOK_DECLARE;
 };
 
-/**
+/*
  * @class ACE_Map_Const_Iterator
  *
  * @brief Forward const iterator for the ACE_Map_Manager.
@@ -654,7 +654,7 @@ public:
   ACE_ALLOC_HOOK_DECLARE;
 };
 
-/**
+/*
  * @class ACE_Map_Reverse_Iterator
  *
  * @brief Reverse Iterator for the ACE_Map_Manager.

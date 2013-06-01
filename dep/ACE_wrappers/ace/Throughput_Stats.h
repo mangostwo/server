@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    Throughput_Stats.h
  *
  *  $Id: Throughput_Stats.h 92069 2010-09-28 11:38:59Z johnnyw $
@@ -27,7 +27,7 @@
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 /// A simple class to make throughput and latency analysis.
-/**
+/*
  *
  * Keep the relevant information to perform throughput and latency
  * analysis, including:

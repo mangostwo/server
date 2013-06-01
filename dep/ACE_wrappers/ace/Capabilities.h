@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    Capabilities.h
  *
  *  $Id: Capabilities.h 91077 2010-07-13 14:33:08Z johnnyw $
@@ -34,7 +34,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_CapEntry
  *
  * @brief This class is the base class for all ACE Capabilities entry
@@ -67,7 +67,7 @@ protected:
 
 };
 
-/**
+/*
  * @class ACE_IntCapEntry
  *
  * @brief This class implement the ACE Integer Capability subclass.
@@ -85,7 +85,7 @@ protected:
   int val_;
 };
 
-/**
+/*
  * @class ACE_StringCapEntry
  *
  * @brief This class implement the ACE String Capability subclass.
@@ -103,7 +103,7 @@ protected:
   ACE_TString val_;
 };
 
-/**
+/*
  * @class ACE_BoolCapEntry
  *
  * @brief This class implement the ACE Bool Capability subclass.
@@ -121,7 +121,7 @@ protected:
   int val_;
 };
 
-/**
+/*
  * @class ACE_Capabilities
  *
  * @brief

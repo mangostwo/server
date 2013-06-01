@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    Functor_String.h
  *
  *  $Id: Functor_String.h 86698 2009-09-13 15:58:17Z johnnyw $
@@ -39,7 +39,7 @@ template <class TYPE> class ACE_Hash;
 template <class TYPE> class ACE_Equal_To;
 template <class TYPE> class ACE_Less_Than;
 
-/**
+/*
  * @brief Function object for determining whether two ACE_CStrings are
  * equal.
  */
@@ -52,7 +52,7 @@ public:
 };
 
 
-/**
+/*
  * @brief Function object for hashing a ACE_CString
  */
 template<>
@@ -64,7 +64,7 @@ public:
 };
 
 
-/**
+/*
  * @brief Function object for determining whether the first const string
  * is less than the second const string.
  */
@@ -80,7 +80,7 @@ public:
 
 #if defined (ACE_USES_WCHAR)
 
-/**
+/*
  * @brief Function object for determining whether two ACE_WStrings are
  * equal.
  */
@@ -93,7 +93,7 @@ public:
 };
 
 
-/**
+/*
  * @brief Function object for hashing a ACE_WString
  */
 template<>
@@ -104,7 +104,7 @@ public:
   unsigned long operator () (const ACE_WString &lhs) const;
 };
 
-/**
+/*
  * @brief Function object for determining whether the first const wstring
  * is less than the second const wstring.
  */

@@ -1,4 +1,4 @@
-/**
+/*
  @file Color4uint8.cpp
  
  @author Morgan McGuire, http://graphics.cs.williams.edu

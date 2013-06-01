@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Base_Thread_Adapter.h
  *
  *  $Id: Base_Thread_Adapter.h 81239 2008-04-04 22:28:48Z iliyan $
@@ -40,7 +40,7 @@ extern "C" ACE_Export ACE_THR_FUNC_RETURN ACE_THREAD_ADAPTER_NAME (void *args);
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_OS_Thread_Descriptor
  *
  * @brief Parent class of all ACE_Thread_Descriptor classes.
@@ -58,7 +58,7 @@ protected:
   /// For use by ACE_Thread_Descriptor.
   ACE_OS_Thread_Descriptor (long flags = 0);
 
-  /**
+  /*
    * Keeps track of whether this thread was created "detached" or not.
    * If a thread is *not* created detached then if someone calls
    * <ACE_Thread_Manager::wait>, we need to join with that thread (and
@@ -72,7 +72,7 @@ protected:
 class ACE_Service_Gestalt;
 
 
-/**
+/*
  * @class ACE_Base_Thread_Adapter
  *
  * @brief Base class for all the Thread_Adapters.
@@ -160,7 +160,7 @@ protected:
   /// linkage).
   ACE_THR_C_FUNC entry_point_;
 
-  /**
+  /*
    * Optional thread descriptor.  Passing this pointer in will force
    * the spawned thread to cache this location in <Log_Msg> and wait
    * until <Thread_Manager> fills in all information in thread

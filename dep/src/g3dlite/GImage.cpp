@@ -1,4 +1,4 @@
-/**
+/*
   \file GImage.cpp
   \author Morgan McGuire, http://graphics.cs.williams.edu
   Copyright 2002-2010, Morgan McGuire

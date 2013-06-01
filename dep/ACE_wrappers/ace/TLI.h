@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    TLI.h
  *
  *  $Id: TLI.h 80826 2008-03-04 14:51:23Z wotte $
@@ -46,7 +46,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_TLI
  *
  * @brief Defines the member functions for the base class of the

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    FIFO_Send.h
  *
  *  $Id: FIFO_Send.h 91574 2010-08-30 16:52:24Z shuston $
@@ -27,7 +27,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_FIFO_Send
  *
  * @brief Sender side for the bytestream C++ wrapper for UNIX FIFOs

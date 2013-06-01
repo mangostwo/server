@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    OS_Log_Msg_Attributes.h
  *
  *  $Id: OS_Log_Msg_Attributes.h 91066 2010-07-12 11:05:04Z johnnyw $
@@ -27,7 +27,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_OS_Log_Msg_Attributes
  *
  * @brief The attributes required by ACE_Log_Msg.

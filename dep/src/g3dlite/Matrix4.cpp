@@ -1,4 +1,4 @@
-/**
+/*
   @file Matrix4.cpp
  
  
@@ -258,7 +258,7 @@ Matrix4::Matrix4(
     elt[3][0] = r4c1;  elt[3][1] = r4c2;  elt[3][2] = r4c3;  elt[3][3] = r4c4;
 }
 
-/**
+/*
  init should be <B>row major</B>.
  */
 Matrix4::Matrix4(const float* init) {

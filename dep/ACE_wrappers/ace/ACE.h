@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  * @file    ACE.h
  *
  * $Id: ACE.h 92060 2010-09-27 18:08:48Z johnnyw $
@@ -49,7 +49,7 @@ class ACE_Time_Value;
 class ACE_Message_Block;
 class ACE_Handle_Set;
 
-/**
+/*
  * @namespace ACE
  *
  * @brief The namespace containing the ACE framework itself.
@@ -98,7 +98,7 @@ namespace ACE
   extern ACE_Export bool wild_match(const char* s, const char* pattern,
     bool case_sensitive = true, bool character_classes = false);
 
-  /**
+  /*
    * @name I/O operations
    *
    * Notes on common parameters:
@@ -209,7 +209,7 @@ namespace ACE
                   size_t *bytes_transferred = 0);
 
   /// Receive into a variable number of pieces.
-  /**
+  /*
    * Accepts a variable, caller-specified, number of pointer/length
    * pairs. Arguments following @a n are char *, size_t pairs.
    *
@@ -353,7 +353,7 @@ namespace ACE
                                       size_t *bytes_transferred = 0);
   //@}
 
-  /**
+  /*
    * Wait up to @a timeout amount of time to passively establish a
    * connection.  This method doesn't perform the @c accept, it just
    * does the timed wait.
@@ -362,7 +362,7 @@ namespace ACE
                                              ACE_Time_Value *timeout,
                                              bool restart);
 
-  /**
+  /*
    * Wait up to @a timeout amount of time to complete an actively
    * established non-blocking connection.  If @a is_tli is non-0 then
    * we are being called by a TLI wrapper (which behaves slightly
@@ -373,7 +373,7 @@ namespace ACE
     const ACE_Time_Value *timeout,
     int is_tli = 0);
 
-  /**
+  /*
    * Reset the limit on the number of open handles.  If @a new_limit
    * == -1 set the limit to the maximum allowable.  Otherwise, set
    * the limit value to @a new_limit.  If @a increase_limit_only is
@@ -382,7 +382,7 @@ namespace ACE
   extern ACE_Export int set_handle_limit (int new_limit = -1,
                                           int increase_limit_only = 0);
 
-  /**
+  /*
    * Returns the maximum number of open handles currently permitted in
    * this process.  This maximum may be extended using
    * @c ACE::set_handle_limit.
@@ -390,7 +390,7 @@ namespace ACE
   extern ACE_Export int max_handles (void);
 
   // = String functions
-  /**
+  /*
    * Return a dynamically allocated duplicate of @a str, substituting
    * the environment variable if @c str[0] @c == @c '$'.  Note that
    * the pointer is allocated with @c ACE_OS::malloc and must be freed
@@ -436,7 +436,7 @@ namespace ACE
 
 #endif /* ACE_HAS_WCHAR */
 
-  /**
+  /*
    * On Windows, determines if a specified pathname ends with ".exe"
    * (not case sensitive). If on Windows and there is no ".exe" suffix,
    * a new ACE_TCHAR array is allocated and a copy of @c pathname with
@@ -454,7 +454,7 @@ namespace ACE
    */
   extern ACE_Export const ACE_TCHAR *execname (const ACE_TCHAR *pathname);
 
-  /**
+  /*
    * Returns the "basename" of a @a pathname separated by @a delim.
    * For instance, the basename of "/tmp/foo.cpp" is "foo.cpp" when
    * @a delim is @a '/'.
@@ -463,7 +463,7 @@ namespace ACE
                                                ACE_TCHAR delim =
                                                ACE_DIRECTORY_SEPARATOR_CHAR);
 
-  /**
+  /*
    * Returns the "dirname" of a @a pathname.  For instance, the
    * dirname of "/tmp/foo.cpp" is "/tmp" when @a delim is @a '/'.  If
    * @a pathname has no @a delim ".\0" is returned.  This method does
@@ -473,7 +473,7 @@ namespace ACE
                                               ACE_TCHAR delim =
                                               ACE_DIRECTORY_SEPARATOR_CHAR);
 
-  /**
+  /*
    * Returns the given timestamp in the form
    * "hour:minute:second:microsecond."  The month, day, and year are
    * also stored in the beginning of the @a date_and_time array, which
@@ -489,7 +489,7 @@ namespace ACE
                                           size_t time_len,
                                           bool return_pointer_to_first_digit = false);
 
-  /**
+  /*
    * Returns the current timestamp in the form
    * "hour:minute:second:microsecond."  The month, day, and year are
    * also stored in the beginning of the @a date_and_time array, which
@@ -504,7 +504,7 @@ namespace ACE
                                           size_t time_len,
                                           bool return_pointer_to_first_digit = false);
 
-  /**
+  /*
    * if @a avoid_zombies == 0 call @c ACE_OS::fork directly, else
    * create an orphan process that's inherited by the init process;
    * init cleans up when the orphan process terminates so we don't
@@ -517,7 +517,7 @@ namespace ACE
     const ACE_TCHAR *program_name = ACE_TEXT ("<unknown>"),
     int avoid_zombies = 0);
 
-  /**
+  /*
    * Become a daemon process using the algorithm in Richard Stevens
    * "Advanced Programming in the UNIX Environment."  If
    * @a close_all_handles is non-zero then all open file handles are
@@ -584,7 +584,7 @@ namespace ACE
   /// Calculates the minimum enclosing frame size for the given values.
   extern ACE_Export u_long minimum_frame_size (u_long period1, u_long period2);
 
-  /**
+  /*
    * Function that can burn up noticeable CPU time:  brute-force
    * determination of whether number @a n is prime.  Returns 0 if
    * it is prime, or the smallest factor if it is not prime.
@@ -610,14 +610,14 @@ namespace ACE
   /// @internal
   extern ACE_Export bool is_sock_error (int error);
 
-  /**
+  /*
    * Checks if process with {pid} is still alive.  Returns 1 if it is
    * still alive, 0 if it isn't alive, and -1 if something weird
    * happened.
    */
   extern ACE_Export int process_active (pid_t pid);
 
-  /**
+  /*
    * Terminate the process abruptly with id @a pid.  On Win32 platforms
    * this uses {TerminateProcess} and on POSIX platforms is uses
    * {kill} with the -9 (SIGKILL) signal, which cannot be caught or
@@ -627,7 +627,7 @@ namespace ACE
    */
   extern ACE_Export int terminate_process (pid_t pid);
 
-  /**
+  /*
    * This method uses process id and object pointer to come up with a
    * machine wide unique name.  The process ID will provide uniqueness
    * between processes on the same machine. The "this" pointer of the

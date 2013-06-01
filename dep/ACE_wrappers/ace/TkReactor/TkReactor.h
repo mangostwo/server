@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    TkReactor.h
  *
  *  $Id: TkReactor.h 82723 2008-09-16 09:35:44Z johnnyw $
@@ -27,7 +27,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_TkReactorID
  *
  * @brief This little class is necessary due to the way that Microsoft
@@ -52,7 +52,7 @@ public:
   ACE_HANDLE handle_;
 };
 
-/**
+/*
  * @class ACE_TkReactor
  *
  * @brief An object-oriented event demultiplexor and event handler

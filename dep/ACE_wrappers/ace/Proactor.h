@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Proactor.h
  *
  *  $Id: Proactor.h 80826 2008-03-04 14:51:23Z wotte $
@@ -43,7 +43,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Proactor_Impl;
 class ACE_Proactor_Timer_Handler;
 
-/**
+/*
  * @class ACE_Proactor_Handle_Timeout_Upcall
  *
  * @brief Functor for ACE_Timer_Queue.
@@ -122,7 +122,7 @@ protected:
   ACE_Proactor *proactor_;
 };
 
-/**
+/*
  * @class ACE_Proactor
  *
  * @brief A manager for asynchronous event demultiplexing.
@@ -177,7 +177,7 @@ public:
     ACE_SYNCH_RECURSIVE_MUTEX>
   TIMER_QUEUE;
 
-  /**
+  /*
    * Constructor. If @a implementation is 0, the correct implementation
    * object will be created. @a delete_implementation flag determines
    * whether the implementation object should be deleted by the
@@ -218,14 +218,14 @@ public:
   /// returns -1 or the <end_event_loop> method is invoked.
   static int run_event_loop (void);
 
-  /**
+  /*
    * Run the event loop until the <ACE_Proactor::handle_events> method
    * returns -1, the <end_event_loop> method is invoked, or the
    * ACE_Time_Value expires, in which case 0 is returned.
    */
   static int run_event_loop (ACE_Time_Value &tv);
 
-  /**
+  /*
    * Instruct the <ACE_Proactor::instance> to terminate its event
    * loop.
    * This method wakes up all the threads blocked on waiting for
@@ -233,13 +233,13 @@ public:
    */
   static int end_event_loop (void);
 
-  /**
+  /*
    * Resets the <ACE_Proactor::end_event_loop_> static so that the
    * <run_event_loop> method can be restarted.
    */
   static int reset_event_loop (void);
 
-  /**
+  /*
    * The singleton proactor is used by the ACE_Service_Config.
    * Therefore, we must check for the reconfiguration request and
    * handle it after handling an event.
@@ -250,13 +250,13 @@ public:
   static int event_loop_done (void);
 
   /// Close the associated @c ACE_Proactor_Impl implementation object.
-  /**
+  /*
    * If @arg delete_implementation was specified to the @c open() method,
    * the implementation object is also deleted.
    */
   int close (void);
 
-   /**
+   /*
    * You can add a hook to various run_event methods and the hook will
    * be called after handling every proactor event.  If this function
    * returns 0, proactor_run_event_loop will check for the return value of
@@ -266,14 +266,14 @@ public:
   typedef int (*PROACTOR_EVENT_HOOK)(ACE_Proactor *);
 
   // These methods work with an instance of a proactor.
-  /**
+  /*
    * Run the event loop until the
    * <ACE_Proactor::handle_events>
    * method returns -1 or the <end_proactor_event_loop> method is invoked.
    */
   int proactor_run_event_loop (PROACTOR_EVENT_HOOK = 0);
 
-  /**
+  /*
    * Run the event loop until the <ACE_Proactor::handle_events>
    * method returns -1, the
    * <end_proactor_event_loop> method is invoked,
@@ -283,7 +283,7 @@ public:
   int proactor_run_event_loop (ACE_Time_Value &tv,
                                PROACTOR_EVENT_HOOK = 0);
 
-  /**
+  /*
    * Instruct the ACE_Proactor to terminate its event loop
    * and notifies the ACE_Proactor so that it can wake up
    * and close down gracefully.
@@ -304,7 +304,7 @@ public:
                        const void *completion_key);
 
   // = Timer management.
-  /**
+  /*
    * Schedule a @a handler that will expire after <time>.  If it
    * expires then @a act is passed in as the value to the @a handler's
    * <handle_timeout> callback method.  This method returns a
@@ -338,7 +338,7 @@ public:
   int cancel_timer (ACE_Handler &handler,
                     int dont_call_handle_close = 1);
 
-  /**
+  /*
    * Cancel the single <ACE_Handler> that matches the @a timer_id value
    * (which was returned from the <schedule> method).  If @a act is
    * non-NULL then it will be set to point to the ``magic cookie''
@@ -351,7 +351,7 @@ public:
                     const void **act = 0,
                     int dont_call_handle_close = 1);
 
-  /**
+  /*
    * Dispatch a single set of events, waiting up to a specified time limit
    * if necessary.
    * @param wait_time the time to wait for an event to occur. This is
@@ -363,7 +363,7 @@ public:
    */
   int handle_events (ACE_Time_Value &wait_time);
 
-  /**
+  /*
    * Block indefinitely until at least one event is dispatched.
    * @return Returns 1 when a completion is dispatched. On error, returns -1
    * and sets errno accordingly.
@@ -388,7 +388,7 @@ public:
   /// Set timer queue.
   void timer_queue (TIMER_QUEUE *timer_queue);
 
-  /**
+  /*
    * Get the event handle.
    * It is a no-op in POSIX platforms and it returns
    * ACE_INVALID_HANDLE.
@@ -559,7 +559,7 @@ public:
                                         int priority = 0,
                                         int signal_number = ACE_SIGRTMIN);
 
-  /**
+  /*
    * Create a timer result object which can be used with the Timer
    * mechanism of the Proactor.
    * If @a signal_number is -1, <POSIX_SIG_Proactor> will create a
@@ -576,14 +576,14 @@ public:
 
 protected:
 
-  /**
+  /*
    * Post <how_many> completions to the completion port so that all
    * threads can wake up. This is used in conjunction with the
    * <run_event_loop>.
    */
   static int post_wakeup_completions (int how_many);
 
-  /**
+  /*
    * Post <how_many> completions to the completion port so that all
    * threads can wake up. This is used in conjunction with the
    * <proactor_run_event_loop>.

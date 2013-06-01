@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file   OS_NS_stdlib.h
  *
  *  $Id: OS_NS_stdlib.h 88493 2010-01-12 19:17:42Z olli $
@@ -100,7 +100,7 @@ namespace ACE_OS {
   ACE_NAMESPACE_INLINE_FUNCTION
   void abort (void);
 
-  /**
+  /*
    * Register an at exit hook. The @a name can be used to analyze shutdown
    * problems
    */

@@ -71,7 +71,7 @@ template<typename T> class micro_queue_pop_finalizer ;
 template<typename T> class concurrent_queue_base_v3;
 
 //! parts of concurrent_queue_rep that do not have references to micro_queue
-/**
+/*
  * For internal use only.
  */
 struct concurrent_queue_rep_base : no_copy {
@@ -110,7 +110,7 @@ public:
 } ;
 
 //! Abstract class to define interface for page allocation/deallocation
-/**
+/*
  * For internal use only.
  */
 class concurrent_queue_page_allocator
@@ -370,7 +370,7 @@ template<typename T> class concurrent_queue_iterator_rep ;
 template<typename T> class concurrent_queue_iterator_base_v3;
 
 //! representation of concurrent_queue_base
-/**
+/*
  * the class inherits from concurrent_queue_rep_base and defines an array of micro_queue<T>'s
  */
 template<typename T>
@@ -389,7 +389,7 @@ struct concurrent_queue_rep : public concurrent_queue_rep_base {
 };
 
 //! base class of concurrent_queue
-/**
+/*
  * The class implements the interface defined by concurrent_queue_page_allocator
  * and has a pointer to an instance of concurrent_queue_rep.
  */

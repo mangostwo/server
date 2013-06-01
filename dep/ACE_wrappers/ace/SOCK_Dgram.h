@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    SOCK_Dgram.h
  *
  *  $Id: SOCK_Dgram.h 80826 2008-03-04 14:51:23Z wotte $
@@ -27,7 +27,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Time_Value;
 
-/**
+/*
  * @class ACE_SOCK_Dgram
  *
  * @brief Defines the member functions for the ACE_SOCK datagram
@@ -47,7 +47,7 @@ public:
                   int protocol = 0,
                   int reuse_addr = 0);
 
-  /**
+  /*
    * This is a QoS-enabed method for initiating a socket dgram that
    * will accept datagrams at the <local> address.  The @a qos_params
    * are passed to <ACE_OS::join_leaf>.
@@ -67,7 +67,7 @@ public:
             int protocol = 0,
             int reuse_addr = 0);
 
-  /**
+  /*
    * This is a QoS-enabed method for initiating a socket dgram that
    * will accept datagrams at the <local> address.  The @a qos_params
    * are passed to <ACE_OS::join_leaf>.
@@ -97,7 +97,7 @@ public:
                 ACE_Addr &addr,
                 int flags = 0) const;
 
-  /**
+  /*
    * Allows a client to read from a socket without having to provide a
    * buffer to read.  This method determines how much data is in the
    * socket, allocates a buffer of this size, reads in the data, and
@@ -124,7 +124,7 @@ public:
                 ACE_Addr &addr,
                 int flags = 0) const;
 
-  /**
+  /*
    * Wait up to @a timeout amount of time to receive a datagram into
    * @a buf.  The ACE_Time_Value indicates how long to blocking
    * trying to receive.  If @a timeout == 0, the caller will block
@@ -139,7 +139,7 @@ public:
                 int flags,
                 const ACE_Time_Value *timeout) const;
 
-  /**
+  /*
    * Wait up to @a timeout amount of time to send a datagram to
    * @a buf.  The ACE_Time_Value indicates how long to blocking
    * trying to receive.  If @a timeout == 0, the caller will block

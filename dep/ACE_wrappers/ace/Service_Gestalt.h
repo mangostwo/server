@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //====================================================================
-/**
+/*
  *  @file    Service_Gestalt.h
  *
  *  $Id: Service_Gestalt.h 91626 2010-09-07 10:59:20Z johnnyw $
@@ -46,7 +46,7 @@ class ACE_DLL;
 class ACE_Static_Svc_Descriptor;
 class ACE_Svc_Conf_Param;
 
-/**
+/*
  * @class ACE_Service_Gestalt
  *
  * @brief Supplies common server operations for dynamic and static
@@ -94,7 +94,7 @@ public:
   /// Dump the state of an object.
   void dump (void) const;
 
-   /**
+   /*
    * Performs an open without parsing command-line arguments.  The
    * @a logger_key indicates where to write the logging output, which
    * is typically either a STREAM pipe or a socket address.  If
@@ -114,7 +114,7 @@ public:
             bool ignore_default_svc_conf_file = false,
             bool ignore_debug_flag = false);
 
-  /**
+  /*
    * This is the primary entry point into the ACE_Service_Config (the
    * constructor just handles simple initializations).  It parses
    * arguments passed in from @a argc and @a argv parameters.  The
@@ -199,7 +199,7 @@ public:
   int process_directive (const ACE_TCHAR directive[]);
 
   /// Process one static service definition.
-  /**
+  /*
    * Load a new static service.
    *
    * @param ssd Service descriptor, see the document of
@@ -217,7 +217,7 @@ public:
   /// directives.
   int process_file (const ACE_TCHAR file[]);
 
-  /**
+  /*
    * Locate an entry with @a name in the table.  If @a ignore_suspended
    * is set then only consider services marked as resumed.  If the
    * caller wants the located entry, pass back a pointer to the
@@ -229,7 +229,7 @@ public:
             const ACE_Service_Type **srp = 0,
             bool ignore_suspended = true) const;
 
-  /**
+  /*
    * Handle the command-line options intended for the
    * ACE_Service_Gestalt.  Note that @c argv[0] is assumed to be the
    * program name.
@@ -248,7 +248,7 @@ public:
    */
   int parse_args (int argc, ACE_TCHAR *argv[]);
 
-  /**
+  /*
    * Process (or re-process) service configuration requests that are
    * provided in the svc.conf file(s).  Returns the number of errors
    * that occurred.
@@ -298,7 +298,7 @@ public:
   /// been resumed (e.g., a static service).
   int resume (const ACE_TCHAR svc_name[]);
 
-  /**
+  /*
    * Suspend @a svc_name.  Note that this will not unlink the service
    * from the daemon if it was dynamically linked, it will mark it as
    * being suspended in the Service Repository and call the @c suspend()
@@ -312,7 +312,7 @@ public:
   /// from the ACE_Reactor, and unlinking it if necessary.
   int remove (const ACE_TCHAR svc_name[]);
 
-  /**
+  /*
    * Using the supplied name, finds and (if needed) returns a pointer to a
    * static service descriptor. Returns 0 for success and -1 for failure
    */
@@ -335,7 +335,7 @@ protected:
   int parse_args_i (int, ACE_TCHAR *argv[],
                     bool& ignore_default_svc_conf_file);
 
-  /**
+  /*
    * Performs an open without parsing command-line arguments.  The @a
    * logger_key indicates where to write the logging output, which is
    * typically either a STREAM pipe or a socket address.  If @a
@@ -444,7 +444,7 @@ protected:
   /// Queue of services specified on the command-line.
   ACE_SVC_QUEUE* svc_queue_;
 
-  /**
+  /*
    * Queue of svc.conf files specified on the command-line.
    * @@ This should probably be made to handle unicode filenames...
    */
@@ -471,7 +471,7 @@ protected:
 }; /* class ACE_Service_Gestalt */
 
 
-/**
+/*
  * @class ACE_Service_Type_Dynamic_Guard
  *
  * @brief A forward service declaration guard.

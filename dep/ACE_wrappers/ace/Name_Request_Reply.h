@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Name_Request_Reply.h
  *
  *  $Id: Name_Request_Reply.h 84316 2009-02-03 19:46:05Z johnnyw $
@@ -31,7 +31,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Time_Value;
 
-/**
+/*
  * @class ACE_Name_Request
  *
  * @brief Message format for delivering requests to the ACE_Name Server.
@@ -185,7 +185,7 @@ private:
   char *type_;
 };
 
-/**
+/*
  * @class ACE_Name_Reply
  *
  * @brief Message format for delivering replies from the ACE_Name Server.

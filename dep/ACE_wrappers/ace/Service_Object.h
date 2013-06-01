@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    Service_Object.h
  *
  *  $Id: Service_Object.h 84170 2009-01-15 13:31:50Z johnnyw $
@@ -30,7 +30,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 #define ACE_Component ACE_Service_Object
 
-/**
+/*
  * @class ACE_Service_Object
  *
  * @brief Provide the abstract base class common to all service
@@ -63,7 +63,7 @@ public:
 // Forward decl.
 class ACE_Service_Type_Impl;
 
-/**
+/*
  * @class ACE_Service_Type
  *
  * @brief Keeps track of information related to the various
@@ -152,7 +152,7 @@ private:
   bool fini_already_called_;
 };
 
-/**
+/*
  * @class ACE_Service_Object_Ptr
  *
  * @brief This is a smart pointer that holds onto the associated
@@ -183,7 +183,7 @@ private:
 };
 
 #if defined (ACE_OPENVMS)
-/**
+/*
  * @class ACE_Dynamic_Svc_Registrar
  *
  * @brief Used to register Service allocator function by its full name.

@@ -1,4 +1,4 @@
-/**
+/*
   @file G3D/constants.h
 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu

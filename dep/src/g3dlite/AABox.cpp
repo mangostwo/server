@@ -1,4 +1,4 @@
-/**
+/*
   @file AABox.cpp
 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu

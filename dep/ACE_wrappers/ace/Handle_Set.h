@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    Handle_Set.h
  *
  *  $Id: Handle_Set.h 92298 2010-10-21 11:15:17Z johnnyw $
@@ -36,7 +36,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Handle_Set
  *
  * @brief C++ wrapper facade for the socket @c fd_set abstraction.
@@ -62,7 +62,7 @@ public:
   /// Constructor, initializes the bitmask to all 0s.
   ACE_Handle_Set (void);
 
-  /**
+  /*
    * Constructor, initializes the handle set from a given mask.
    */
   ACE_Handle_Set (const fd_set &mask);
@@ -71,7 +71,7 @@ public:
   /// Initialize the bitmask to all 0s and reset the associated fields.
   void reset (void);
 
-  /**
+  /*
    * Checks whether @a handle is enabled.  No range checking is
    * performed so @a handle must be less than
    * @c ACE_DEFAULT_SELECT_REACTOR_SIZE.
@@ -92,7 +92,7 @@ public:
   /// Returns the number of the large bit.
   ACE_HANDLE max_set (void) const;
 
-  /**
+  /*
    * Rescan the underlying @c fd_set up to handle @a max to find the new
    * <max_handle> (highest bit set) and <size> (how many bits set) values.
    * This is useful for evaluating the changes after the handle set has
@@ -162,7 +162,7 @@ private:
   static const char nbits_[NBITS];
 };
 
-/**
+/*
  * @class ACE_Handle_Set_Iterator
  *
  * @brief Iterator for the ACE_Handle_Set abstraction.
@@ -180,7 +180,7 @@ public:
   /// that we maintain.
   void reset_state (void);
 
-  /**
+  /*
    * "Next" operator.  Returns the next unseen ACE_HANDLE in the
    * <Handle_Set> up to <handle_set_.max_handle_>).  When all the
    * handles have been seen returns <ACE_INVALID_HANDLE>.  Advances

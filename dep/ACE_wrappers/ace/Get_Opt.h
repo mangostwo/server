@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    Get_Opt.h
  *
  *  $Id: Get_Opt.h 86367 2009-08-05 09:41:11Z johnnyw $
@@ -33,7 +33,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
  *  of ACE_Get_Opt.
  */
 
-/**
+/*
  * @class ACE_Get_Opt
  *
  * @brief Iterator for parsing command-line arguments.
@@ -47,7 +47,7 @@ public:
   /// Mutually exclusive ordering values.
   enum
   {
-   /**
+   /*
     * REQUIRE_ORDER means that processing stops and @c EOF is
     * returned as soon as a non-option argument is found. @c opt_ind()
     * will return the index of the next @a argv element so the program
@@ -55,7 +55,7 @@ public:
     */
     REQUIRE_ORDER = 1,
 
-   /**
+   /*
     * PERMUTE_ARGS means the @a argv elements are reordered dynamically
     * (permuted) so that all options appear first. When the elements are
     * permuted, the order of the options and the following arguments are
@@ -65,7 +65,7 @@ public:
     */
     PERMUTE_ARGS = 2,
 
-   /**
+   /*
     * RETURN_IN_ORDER means each @a argv element is processed in the
     * order is it seen.  If the element is not recognized as an option, '1'
     * is returned and @c opt_arg() refers to the @a argv element found.
@@ -88,7 +88,7 @@ public:
     ARG_OPTIONAL = 2
   };
 
-  /**
+  /*
    * Constructor initializes the command line to be parsed. All information
    * for parsing must be supplied to this constructor.
    *
@@ -200,7 +200,7 @@ public:
   /// Default dtor.
   ~ACE_Get_Opt (void);
 
-  /**
+  /*
    * Scan elements of @a argv (whose length is @a argc) for short option
    * characters given in @a optstring or long options (with no short
    * option equivalents).
@@ -238,14 +238,14 @@ public:
    */
   int operator () (void);
 
-  /**
+  /*
    * For communication from @c operator() to the caller.  When
    * @c operator() finds an option that takes an argument, the argument
    * value is returned from this method, otherwise it returns 0.
    */
   ACE_TCHAR *opt_arg (void) const;
 
-  /**
+  /*
    * Returns the most recently matched option character. Especially
    * useful when operator() returns ':' for an unspecified argument
    * that's required, since this allows the caller to learn what option
@@ -253,7 +253,7 @@ public:
    */
   int opt_opt (void);
 
-  /**
+  /*
    * Index in @a argv of the next element to be scanned.  This is used
    * for communication to and from the caller and for communication
    * between successive calls to @c operator().  On entry to
@@ -268,7 +268,7 @@ public:
   int &opt_ind (void);
 
   /// Adds a long option with no corresponding short option.
-  /**
+  /*
    * If the @a name option is seen, @c operator() returns 0.
    *
    * @param name          The long option to add.
@@ -282,7 +282,7 @@ public:
                    OPTION_ARG_MODE has_arg = NO_ARG);
 
   /// Adds a long option with a corresponding short option.
-  /**
+  /*
    * @param name          The long option to add.
    * @param short_option  A character, the short option that corresponds
    *                      to @a name.
@@ -330,7 +330,7 @@ public:
    */
 
   /// Holds the @a argc count.
-  /**
+  /*
    * @deprecated This is public for backwards compatibility only.
    * It will be made private in a release of ACE past 5.3.  Do not
    * write code that relies on this member being public; use the
@@ -339,7 +339,7 @@ public:
   int argc_;
 
   /// Holds the @a argv pointer.
-  /**
+  /*
    * @deprecated This is public for backwards compatibility only.
    * It will be made private in a release of ACE past 5.3.  Do not
    * write code that relies on this member being public; use the
@@ -348,7 +348,7 @@ public:
   ACE_TCHAR **argv_;
 
   /// Index in @c argv_ of the next element to be scanned.
-  /**
+  /*
    * @deprecated This is public for backwards compatibility only.
    * It will be made private in a release of ACE past 5.3.  Do not
    * write code that relies on this member being public; use the
@@ -358,7 +358,7 @@ public:
 
   /// Callers store zero here to inhibit the error message for
   /// unrecognized options.
-  /**
+  /*
    * @deprecated This is public for backwards compatibility only.
    * It will be made private in a release of ACE past 5.3.  Do not
    * write code that relies on this member being public; use the
@@ -368,7 +368,7 @@ public:
 
   /// Points to the option argument when one is found on last call to
   /// @c operator().
-  /**
+  /*
    * @deprecated This is public for backwards compatibility only.
    * It will be made private in a release of ACE past 5.3.  Do not
    * write code that relies on this member being public; use the
@@ -377,7 +377,7 @@ public:
   ACE_TCHAR *optarg;
 
 private:
-  /**
+  /*
    * @class ACE_Get_Opt_Long_Option  This class is for internal use
    * in the ACE_Get_Opt class, and is inaccessible to users.
    */
@@ -450,7 +450,7 @@ private:
   /// is handy to have in cases where the option passed was invalid.
   ACE_TString *last_option_;
 
-  /**
+  /*
    * The next char to be scanned in the option-element in which the
    * last option character we returned was found.  This allows us to
    * pick up the scan where we left off   *

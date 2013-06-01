@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Trace.h
  *
  *  $Id: Trace.h 87823 2009-11-30 12:38:34Z johnnyw $
@@ -23,7 +23,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Trace
  *
  * @brief A C++ trace facility that keeps track of which methods are

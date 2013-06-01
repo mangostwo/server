@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    Remote_Name_Space.h
  *
  *  $Id: Remote_Name_Space.h 80826 2008-03-04 14:51:23Z wotte $
@@ -31,7 +31,7 @@ class ACE_NS_WString;
 
 typedef ACE_Unbounded_Set<ACE_NS_WString> ACE_WSTRING_SET;
 
-/**
+/*
  * @class ACE_Remote_Name_Space
  *
  * @brief Maintaining accesses Remote Name Server Database.  Allows to
@@ -51,14 +51,14 @@ public:
   /// "Do-nothing" constructor.
   ACE_Remote_Name_Space (void);
 
-  /**
+  /*
    * Specifies the scope of this namespace, opens and memory-maps the
    * associated file (if accessible) or contacts the dedicated name
    * server process for NET_LOCAL namespace.
    */
   ACE_Remote_Name_Space (const ACE_TCHAR *hostname, u_short port);
 
-  /**
+  /*
    * Specifies the scope of this namespace, opens and memory-maps the
    * associated file (if accessible) or contacts the dedicated name
    * server process for NET_LOCAL namespace.
@@ -74,7 +74,7 @@ public:
                     const ACE_NS_WString &value_in,
                     const char *type_in = "");
 
-  /**
+  /*
    * Overwrite the value or type of an existing name in a
    * ACE_Remote_Name_Space or bind a new name to the context, if it
    * didn't exist yet. (Wide charcter strings interface).
@@ -108,7 +108,7 @@ public:
   virtual int list_types (ACE_WSTRING_SET &set_out,
                           const ACE_NS_WString &pattern_in);
 
-  /**
+  /*
    * Get a set of names matching a specified pattern (wchars). Matching
    * means the names must begin with the pattern string. Returns the
    * complete binding associated each pattern match.
@@ -116,7 +116,7 @@ public:
   virtual int list_name_entries (ACE_BINDING_SET &set,
                                  const ACE_NS_WString &pattern);
 
-  /**
+  /*
    * Get a set of values matching a specified pattern (wchars). Matching
    * means the values must begin with the pattern string. Returns the
    * complete binding associated each pattern match.
@@ -124,7 +124,7 @@ public:
   virtual int list_value_entries (ACE_BINDING_SET &set,
                                   const ACE_NS_WString &pattern);
 
-  /**
+  /*
    * Get a set of types matching a specified pattern (wchars). Matching
    * means the types must begin with the pattern string. Returns the
    * complete binding associated each pattern match.

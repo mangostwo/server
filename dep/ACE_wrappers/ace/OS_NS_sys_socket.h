@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file   OS_NS_sys_socket.h
  *
  *  $Id: OS_NS_sys_socket.h 85110 2009-04-20 09:18:43Z msmit $
@@ -80,7 +80,7 @@ namespace ACE_OS
                      struct sockaddr *addr,
                      int *addrlen);
 
-  /**
+  /*
    * QoS-enabled @c accept, which passes @a qos_params to @c accept.  If
    * the OS platform doesn't support QoS-enabled @c accept then the
    * @a qos_params are ignored and the BSD-style @c accept is called.
@@ -106,7 +106,7 @@ namespace ACE_OS
                struct sockaddr *addr,
                int addrlen);
 
-  /**
+  /*
    * QoS-enabled @c connect, which passes @a qos_params to @c connect.
    * If the OS platform doesn't support QoS-enabled @c connect then the
    * @a qos_params are ignored and the BSD-style @c connect is called.

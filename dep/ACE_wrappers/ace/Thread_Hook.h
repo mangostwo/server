@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Thread_Hook.h
  *
  *  $Id: Thread_Hook.h 80826 2008-03-04 14:51:23Z wotte $
@@ -25,7 +25,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Thread_Hook
  *
  * @brief This class makes it possible to provide user-defined "start"
@@ -40,7 +40,7 @@ public:
   /// Destructor.
   virtual ~ACE_Thread_Hook (void);
 
-  /**
+  /*
    * This method can be overridden in a subclass to customize this
    * pre-function call "hook" invocation that can perform
    * initialization processing before the thread entry point @a func

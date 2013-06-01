@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    Naming_Context.h
  *
  *  $Id: Naming_Context.h 84160 2009-01-14 14:13:58Z johnnyw $
@@ -32,7 +32,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Name_Options;
 class ACE_Static_Svc_Descriptor;
 
-/**
+/*
  * @class ACE_Naming_Context
  *
  * @brief Maintaining accesses Name Server Databases.  Allows to add
@@ -69,7 +69,7 @@ public:
   /// "Do-nothing" constructor.
   ACE_Naming_Context (void);
 
-  /**
+  /*
    * Specifies the scope of this namespace, opens and memory-maps the
    * associated file (if accessible) or contacts the dedicated name
    * server process for NET_LOCAL namespace. Note that @a light
@@ -78,7 +78,7 @@ public:
    */
   ACE_Naming_Context (Context_Scope_Type scope_in, int light = 0);
 
-  /**
+  /*
    * Specifies the scope of this namespace, opens and memory-maps the
    * associated file (if accessible) or contacts the dedicated name
    * server process for NET_LOCAL namespace. Note that @a light
@@ -123,7 +123,7 @@ public:
             const char *value_in,
             const char *type_in = "");
 
-  /**
+  /*
    * Overwrite the value or type of an existing name in a
    * ACE_Naming_Context or bind a new name to the context, if it
    * didn't exist yet. (Wide charcter strings interface).
@@ -132,7 +132,7 @@ public:
               const ACE_NS_WString &value_in,
               const char *type_in = "");
 
-  /**
+  /*
    * Overwrite the value or type of an existing name in a
    * ACE_Naming_Context or bind a new name to the context, if it
    * didn't exist yet. ( charcter strings interface)
@@ -155,7 +155,7 @@ public:
                ACE_NS_WString &value_out,
                char *&type_out);
 
-  /**
+  /*
    * Get value and type of a given name binding (Wide chars output).
    * The caller is responsible for deleting both @a value_out and
    * @a type_out!
@@ -200,7 +200,7 @@ public:
   int list_types (ACE_PWSTRING_SET &set_out,
                   const char *pattern_in);
 
-  /**
+  /*
    * Get a set of names matching a specified pattern (wchars). Matching
    * means the names must begin with the pattern string. Returns the
    * complete binding associated each pattern match.
@@ -208,7 +208,7 @@ public:
   virtual int list_name_entries (ACE_BINDING_SET &set_out,
                                  const ACE_NS_WString &pattern_in);
 
-  /**
+  /*
    * Get a set of names matching a specified pattern (wchars). Matching
    * means the names must begin with the pattern string. Returns the
    * complete binding associated each pattern match.
@@ -216,7 +216,7 @@ public:
   virtual int list_name_entries (ACE_BINDING_SET &set_out,
                                  const char *pattern_in);
 
-  /**
+  /*
    * Get a set of values matching a specified pattern (wchars). Matching
    * means the values must begin with the pattern string. Returns the
    * complete binding associated each pattern match.
@@ -224,7 +224,7 @@ public:
   virtual int list_value_entries (ACE_BINDING_SET &set_out,
                                   const ACE_NS_WString &pattern_in);
 
-  /**
+  /*
    * Get a set of values matching a specified pattern (wchars). Matching
    * means the values must begin with the pattern string. Returns the
    * complete binding associated each pattern match.
@@ -232,7 +232,7 @@ public:
   virtual int list_value_entries (ACE_BINDING_SET &set_out,
                                   const char *pattern_in);
 
-  /**
+  /*
    * Get a set of types matching a specified pattern (wchars). Matching
    * means the types must begin with the pattern string. Returns the
    * complete binding associated each pattern match.
@@ -240,7 +240,7 @@ public:
   virtual int list_type_entries (ACE_BINDING_SET &set_out,
                                  const ACE_NS_WString &pattern_in);
 
-  /**
+  /*
    * Get a set of types matching a specified pattern (wchars). Matching
    * means the types must begin with the pattern string. Returns the
    * complete binding associated each pattern match.
@@ -272,7 +272,7 @@ private:
 
 };
 
-/**
+/*
  * @class ACE_Name_Options
  *
  * @brief Manages the options for the ACE Name_Server.

@@ -1,4 +1,4 @@
-/**
+/*
  @file GThread.cpp
 
  GThread class.

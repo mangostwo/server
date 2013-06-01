@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    Guard_T.h
  *
  *  $Id: Guard_T.h 91626 2010-09-07 10:59:20Z johnnyw $
@@ -29,7 +29,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Guard
  *
  * @brief This data structure is meant to be used within a method or
@@ -132,7 +132,7 @@ private:
   ACE_UNIMPLEMENTED_FUNC (ACE_Guard (const ACE_Guard<ACE_LOCK> &))
 };
 
-/**
+/*
  * @class ACE_Write_Guard
  *
  * @brief This class is similar to class ACE_Guard, though it
@@ -178,7 +178,7 @@ public:
   // Declare the dynamic allocation hooks.
 };
 
-/**
+/*
  * @class ACE_Read_Guard
  *
  * @brief This class is similar to class ACE_Guard, though it
@@ -234,7 +234,7 @@ public:
  /* ACE platform supports some form of threading and
   thread-specific storage. */
 
-/**
+/*
  * @class ACE_TSS_Guard
  *
  * @brief This data structure is meant to be used within a method or
@@ -295,7 +295,7 @@ private:
   // FUZZ: enable check_for_ACE_Guard
 };
 
-/**
+/*
  * @class ACE_TSS_Write_Guard
  *
  * @brief This class is similar to class ACE_TSS_Guard, though it
@@ -340,7 +340,7 @@ private:
   // FUZZ: enable check_for_ACE_Guard
 };
 
-/**
+/*
  * @class ACE_TSS_Read_Guard
  *
  * @brief This class is similar to class <ACE_TSS_Guard>, though it

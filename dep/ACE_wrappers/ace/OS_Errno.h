@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file   OS_Errno.h
  *
  *  $Id: OS_Errno.h 83891 2008-11-28 11:01:50Z johnnyw $
@@ -24,7 +24,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Errno_Guard
  *
  * @brief Provides a wrapper to improve performance when thread-specific

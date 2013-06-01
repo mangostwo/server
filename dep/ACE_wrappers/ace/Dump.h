@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    Dump.h
  *
  *  $Id: Dump.h 80826 2008-03-04 14:51:23Z wotte $
@@ -60,7 +60,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Dumpable
  *
  * @brief Base class that defines a uniform interface for all object
@@ -86,7 +86,7 @@ private:
   const void *this_;
 };
 
-/**
+/*
  * @class ACE_Dumpable_Ptr
  *
  * @brief A smart pointer stored in the in-memory object database
@@ -105,7 +105,7 @@ private:
   const ACE_Dumpable *dumper_;
 };
 
-/**
+/*
  * @class ACE_ODB
  *
  * @brief This is the object database (ODB) that keeps track of all

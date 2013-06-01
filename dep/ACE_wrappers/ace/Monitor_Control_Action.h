@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  * @file Monitor_Control_Action.h
  *
  * $Id: Monitor_Control_Action.h 81691 2008-05-14 11:09:21Z johnnyw $
@@ -29,7 +29,7 @@ namespace ACE
 {
   namespace Monitor_Control
   {
-    /**
+    /*
      * @class ControlAction
      *
      * @brief Base class for control actions initiated by the

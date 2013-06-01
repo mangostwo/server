@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    ATM_Addr.h
  *
  *  $Id: ATM_Addr.h 80826 2008-03-04 14:51:23Z wotte $
@@ -51,7 +51,7 @@ typedef struct _linux_atm_addr
 typedef int ATM_Addr;
 #endif /* ACE_HAS_FORE_ATM_XTI/ACE_HAS_FORE_ATM_WS2/ACE_HAS_LINUX_ATM */
 
-/**
+/*
  * @class ACE_ATM_Addr
  *
  * @brief Defines the ATM domain address family address format.
@@ -73,7 +73,7 @@ public:
   ACE_ATM_Addr (const ACE_ATM_Addr &,
                 u_char selector = DEFAULT_SELECTOR);
 
-  /**
+  /*
    * Creates an ACE_ATM_Addr from an ATMSAPAddress structure. This
    * is vendor specific (FORE systems). May need to change when other
    * vendors are supported.
@@ -81,7 +81,7 @@ public:
   ACE_ATM_Addr (const ATM_Addr *,
                 u_char selector = DEFAULT_SELECTOR);
 
-  /**
+  /*
    * Initializes an ACE_ATM_Addr from the <sap> which can be
    * "atm-address" (e.g.,
    * "47.0005.80.ffe100.0000.f20f.2200.0020480694f9.00") or "hostname"
@@ -102,7 +102,7 @@ public:
   int set (const ACE_ATM_Addr &,
            u_char selector = DEFAULT_SELECTOR);
 
-  /**
+  /*
    * Initializes an ACE_ATM_Addr from an ATMSAPAddress/sockaddr_atm
    * structure. This is vendor specific (FORE systems). May need to
    * change when other vendors are supported.
@@ -110,7 +110,7 @@ public:
   int set (const ATM_Addr *,
            u_char selector = DEFAULT_SELECTOR);
 
-  /**
+  /*
    * Initializes an ACE_ATM_Addr from the <sap> which can be
    * "atm-address" (e.g.,
    * "47.0005.80.ffe100.0000.f20f.2200.0020480694f9.00") or "hostname"
@@ -119,7 +119,7 @@ public:
   int set (const ACE_TCHAR sap[],
            u_char selector = DEFAULT_SELECTOR);
 
-  /**
+  /*
    * Initializes an ACE_ATM_Addr from the <sap> which can be
    * "atm-address" (e.g.,
    * "47.0005.80.ffe100.0000.f20f.2200.0020480694f9.00") or "hostname"
@@ -127,7 +127,7 @@ public:
    */
   virtual int string_to_addr (const ACE_TCHAR sap[]);
 
-  /**
+  /*
    * Return the character representation of the ATM address (e.g.,
    * "47.0005.80.ffe100.0000.f20f.2200.0020480694f9.00") storing it in
    * the @a addr (which is assumed to be <addrlen> bytes long). This
@@ -137,7 +137,7 @@ public:
   virtual int addr_to_string (ACE_TCHAR addr[],
                               size_t addrlen) const;
 
-  /**
+  /*
    * Return the character representation of the ATM address (e.g.,
    * "47.0005.80.ffe100.0000.f20f.2200.0020480694f9.00"). Returns -1
    * if the <size> of the <buffer> is too small, else 0.(This version
@@ -158,7 +158,7 @@ public:
   /// Set the selector for the network address.
   void set_selector (u_char selector);
 
-  /**
+  /*
    * Compare two addresses for equality.  The addresses are considered
    * equal if they contain the same ATM address.  Q: Is there any
    * other check for equality needed for ATM?

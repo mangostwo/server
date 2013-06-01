@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file     Local_Memory_Pool.h
  *
  *  $Id: Local_Memory_Pool.h 80826 2008-03-04 14:51:23Z wotte $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Local_Memory_Pool_Options
  *
  * @brief Helper class for Local Memory Pool constructor options.
@@ -38,7 +38,7 @@ class ACE_Export ACE_Local_Memory_Pool_Options
 {
 };
 
-/**
+/*
  * @class ACE_Local_Memory_Pool
  *
  * @brief Make a memory pool that is based on C++ new/delete.  This is
@@ -69,7 +69,7 @@ public:
   /// Instruct the memory pool to release all of its resources.
   virtual int release (int destroy = 1);
 
-  /**
+  /*
    * Sync @a len bytes of the memory region to the backing store
    * starting at <this->base_addr_>.  If @a len == -1 then sync the
    * whole region.
@@ -80,7 +80,7 @@ public:
   /// starting at @a add_.
   virtual int sync (void *addr, size_t len, int flags = MS_SYNC);
 
-  /**
+  /*
    * Change the protection of the pages of the mapped region to @a prot
    * starting at <this->base_addr_> up to @a len bytes.  If @a len == -1
    * then change protection of all pages in the mapped region.
@@ -92,7 +92,7 @@ public:
   virtual int protect (void *addr, size_t len, int prot = PROT_RDWR);
 
 #if defined (ACE_WIN32)
-  /**
+  /*
    * Win32 Structural exception selector.  The return value decides
    * how to handle memory pool related structural exceptions.  Returns
    * 1, 0, or , -1.
@@ -100,7 +100,7 @@ public:
   virtual int seh_selector (void *);
 #endif /* ACE_WIN32 */
 
-  /**
+  /*
    * Try to extend the virtual address space so that @a addr is now
    * covered by the address mapping.  Always returns 0 since we can't
    * remap a local memory pool.

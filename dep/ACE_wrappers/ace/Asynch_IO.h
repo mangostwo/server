@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    Asynch_IO.h
  *
  *  $Id: Asynch_IO.h 84837 2009-03-16 13:01:15Z johnnyw $
@@ -88,7 +88,7 @@ class ACE_Addr;
 class ACE_Asynch_Result_Impl;
 class ACE_Time_Value;
 
-/**
+/*
  * @class ACE_Asynch_Result
  *
  * @brief An interface base class which allows users access to common
@@ -114,7 +114,7 @@ public:
   /// Did the operation succeed?
   int success (void) const;
 
-  /**
+  /*
    * This is the ACT associated with the handle on which the
    * Asynch_Operation takes place.
    *
@@ -128,7 +128,7 @@ public:
   /// Error value if the operation fails.
   unsigned long error (void) const;
 
-  /**
+  /*
    * On WIN32, this returns the event associated with the OVERLAPPED
    * structure.
    *
@@ -136,7 +136,7 @@ public:
    */
   ACE_HANDLE event (void) const;
 
-  /**
+  /*
    * This really makes sense only when doing file I/O.
    *
    * On WIN32, these are represented in the OVERLAPPED datastructure.
@@ -147,7 +147,7 @@ public:
   unsigned long offset (void) const;
   unsigned long offset_high (void) const;
 
-  /**
+  /*
    * Priority of the operation.
    *
    * On POSIX4-Unix, this is supported. Priority works like {nice} in
@@ -159,7 +159,7 @@ public:
    */
   int priority (void) const;
 
-  /**
+  /*
    * POSIX4 real-time signal number to be used for the
    * operation. {signal_number} ranges from ACE_SIGRTMIN to ACE_SIGRTMAX. By
    * default, ACE_SIGRTMIN is used to issue {aio_} calls. This is a no-op
@@ -186,7 +186,7 @@ protected:
 // Forward declarations
 class ACE_Asynch_Operation_Impl;
 
-/**
+/*
  * @class ACE_Asynch_Operation
  *
  * @brief This is an interface base class for all asynch
@@ -202,7 +202,7 @@ class ACE_Export ACE_Asynch_Operation
 {
 
 public:
-  /**
+  /*
    * Initializes the factory with information which will be used with
    * each asynchronous call.  If ({handle} == ACE_INVALID_HANDLE),
    * {ACE_Handler::handle} will be called on the {handler} to get the
@@ -213,7 +213,7 @@ public:
             const void *completion_key,
             ACE_Proactor *proactor);
 
-  /**
+  /*
    * (Attempts to) cancel the asynchronous operation pending against
    * the {handle} registered with this Operation.
    *
@@ -275,7 +275,7 @@ protected:
 class ACE_Asynch_Read_Stream_Result_Impl;
 class ACE_Asynch_Read_Stream_Impl;
 
-/**
+/*
  * @class ACE_Asynch_Read_Stream
  *
  * @brief This class is a factory for starting off asynchronous reads
@@ -298,7 +298,7 @@ public:
   /// Destructor
   virtual ~ACE_Asynch_Read_Stream (void);
 
-  /**
+  /*
    * Initializes the factory with information which will be used with
    * each asynchronous call.
    *
@@ -317,7 +317,7 @@ public:
             const void *completion_key = 0,
             ACE_Proactor *proactor = 0);
 
-  /**
+  /*
    * Initiate an asynchronous read operation.
    *
    * @param message_block      The ACE_Message_Block to receive the data.
@@ -348,7 +348,7 @@ public:
             int signal_number = ACE_SIGRTMIN);
 
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO)
-  /**
+  /*
   * Same as above but with scatter support, through chaining of composite
   * message blocks using the continuation field.
   */
@@ -368,7 +368,7 @@ protected:
   ACE_Asynch_Read_Stream_Impl *implementation_;
 
 public:
-/**
+/*
  * @class Result
  *
  * @brief This is the class which will be passed back to the
@@ -420,7 +420,7 @@ private:
 class ACE_Asynch_Write_Stream_Impl;
 class ACE_Asynch_Write_Stream_Result_Impl;
 
-/**
+/*
  * @class ACE_Asynch_Write_Stream
  *
  * @brief This class is a factory for initiating asynchronous writes
@@ -442,7 +442,7 @@ public:
   /// Destructor.
   virtual ~ACE_Asynch_Write_Stream (void);
 
-  /**
+  /*
    * Initializes the factory with information which will be used with
    * each asynchronous operation.
    *
@@ -467,7 +467,7 @@ public:
             const void *completion_key = 0,
             ACE_Proactor *proactor = 0);
 
-  /**
+  /*
    * Initiates an asynchronous write on a socket. If the operation completes
    * the ACE_Handler object registered in open() will receive a completion
    * callback via its handle_write_stream() method.
@@ -504,7 +504,7 @@ public:
              int signal_number = ACE_SIGRTMIN);
 
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO)
-  /**
+  /*
   * Same as above but with gather support, through chaining of composite
   * message blocks using the continuation field.
   */
@@ -524,7 +524,7 @@ protected:
   ACE_Asynch_Write_Stream_Impl *implementation_;
 
 public:
-/**
+/*
  * @class Result
  *
  * @brief This is that class which will be passed back to the
@@ -576,7 +576,7 @@ private:
 class ACE_Asynch_Read_File_Impl;
 class ACE_Asynch_Read_File_Result_Impl;
 
-/**
+/*
  * @class ACE_Asynch_Read_File
  *
  * @brief This class is a factory for starting off asynchronous reads
@@ -601,7 +601,7 @@ public:
   /// Destructor.
   virtual ~ACE_Asynch_Read_File (void);
 
-  /**
+  /*
    * Initializes the factory with information which will be used with
    * each asynchronous operation.
    *
@@ -627,7 +627,7 @@ public:
             const void *completion_key = 0,
             ACE_Proactor *proactor = 0);
 
-  /**
+  /*
    * This starts off an asynchronous read.  Upto {bytes_to_read} will
    * be read and stored in the {message_block}.  The read will start
    * at {offset} from the beginning of the file. Priority of the
@@ -649,7 +649,7 @@ public:
             int signal_number = ACE_SIGRTMIN);
 
 #if (defined (ACE_WIN32) && !defined (ACE_HAS_WINCE))
-  /**
+  /*
   * Same as above but with scatter support, through chaining of composite
   * message blocks using the continuation field.
   * @note In win32 Each data block payload must be at least the size of a system
@@ -674,7 +674,7 @@ protected:
   ACE_Asynch_Read_File_Impl *implementation_;
 
 public:
-/**
+/*
  * @class Result
  *
  * @brief This is that class which will be passed back to the
@@ -727,7 +727,7 @@ private:
 class ACE_Asynch_Write_File_Impl;
 class ACE_Asynch_Write_File_Result_Impl;
 
-/**
+/*
  * @class ACE_Asynch_Write_File
  *
  * @brief This class is a factory for starting off asynchronous writes
@@ -752,7 +752,7 @@ public:
   /// Destructor.
   virtual ~ACE_Asynch_Write_File (void);
 
-  /**
+  /*
    * Initializes the factory with information which will be used with
    * each asynchronous call. If ({handle} == ACE_INVALID_HANDLE),
    * {ACE_Handler::handle} will be called on the {handler} to get the
@@ -763,7 +763,7 @@ public:
             const void *completion_key = 0,
             ACE_Proactor *proactor = 0);
 
-  /**
+  /*
    * This starts off an asynchronous write.  Upto {bytes_to_write}
    * will be written from the {message_block}, starting at the
    * block's {rd_ptr}.  The write will go to the file, starting
@@ -786,7 +786,7 @@ public:
              int signal_number = ACE_SIGRTMIN);
 
 #if (defined (ACE_WIN32) && !defined (ACE_HAS_WINCE))
-  /**
+  /*
   * Same as above but with gather support, through chaining of composite
   * message blocks using the continuation field.
   * @note In win32 Each data block payload must be at least the size of a system
@@ -810,7 +810,7 @@ protected:
   ACE_Asynch_Write_File_Impl *implementation_;
 
 public:
-/**
+/*
  * @class Result
  *
  * @brief This is that class which will be passed back to the
@@ -863,7 +863,7 @@ private:
 class ACE_Asynch_Accept_Result_Impl;
 class ACE_Asynch_Accept_Impl;
 
-/**
+/*
  * @class ACE_Asynch_Accept
  *
  * @brief This class is a factory for starting off asynchronous accepts
@@ -886,7 +886,7 @@ public:
   /// Destructor.
   virtual ~ACE_Asynch_Accept (void);
 
-  /**
+  /*
    * Initializes the factory with information which will be used with
    * each asynchronous call. If ({handle} == ACE_INVALID_HANDLE),
    * {ACE_Handler::handle} will be called on the {handler} to get the
@@ -897,7 +897,7 @@ public:
             const void *completion_key = 0,
             ACE_Proactor *proactor = 0);
 
-  /**
+  /*
    * This starts off an asynchronous accept.  The asynchronous accept
    * call also allows any initial data to be returned to the
    * handler specified to @c open().
@@ -949,7 +949,7 @@ protected:
   ACE_Asynch_Accept_Impl *implementation_;
 
 public:
-/**
+/*
  * @class Result
  *
  * @brief This is that class which will be passed back to the
@@ -1002,7 +1002,7 @@ private:
 class ACE_Asynch_Connect_Result_Impl;
 class ACE_Asynch_Connect_Impl;
 
-/**
+/*
  * @class ACE_Asynch_Connect
  *
  * @brief This class is a factory for starting off asynchronous connects
@@ -1023,7 +1023,7 @@ public:
   /// Destructor.
   virtual ~ACE_Asynch_Connect (void);
 
-  /**
+  /*
    * Initializes the factory with information which will be used with
    * each asynchronous call.
    *
@@ -1034,7 +1034,7 @@ public:
             const void *completion_key = 0,
             ACE_Proactor *proactor = 0);
 
-  /**
+  /*
    * This starts off an asynchronous Connect.
    */
   int connect (ACE_HANDLE connect_handle,
@@ -1055,7 +1055,7 @@ protected:
   ACE_Asynch_Connect_Impl *implementation_;
 
 public:
-/**
+/*
  * @class Result
  *
  * @brief This is that class which will be passed back to the
@@ -1100,7 +1100,7 @@ private:
 class ACE_Asynch_Transmit_File_Result_Impl;
 class ACE_Asynch_Transmit_File_Impl;
 
-/**
+/*
  * @class ACE_Asynch_Transmit_File
  *
  * @brief This class is a factory for starting off asynchronous
@@ -1131,7 +1131,7 @@ public:
   /// Destructor.
   virtual ~ACE_Asynch_Transmit_File (void);
 
-  /**
+  /*
    * Initializes the factory with information which will be used with
    * each asynchronous call. If ({handle} == ACE_INVALID_HANDLE),
    * {ACE_Handler::handle} will be called on the {handler} to get the
@@ -1142,7 +1142,7 @@ public:
             const void *completion_key = 0,
             ACE_Proactor *proactor = 0);
 
-  /**
+  /*
    * This starts off an asynchronous transmit file.  The {file} is a
    * handle to an open file.  {header_and_trailer} is a pointer to a
    * data structure that contains pointers to data to send before and
@@ -1181,7 +1181,7 @@ protected:
   ACE_Asynch_Transmit_File_Impl *implementation_;
 
 public:
-/**
+/*
  * @class Result
  *
  * @brief This is that class which will be passed back to the
@@ -1234,7 +1234,7 @@ public:
     ACE_Asynch_Transmit_File_Result_Impl *implementation_;
   };
 
-/**
+/*
  * @class Header_And_Trailer
  *
  * @brief The class defines a data structure that contains pointers
@@ -1316,7 +1316,7 @@ class ACE_Asynch_Read_Dgram_Result_Impl;
 class ACE_Asynch_Read_Dgram_Impl;
 class ACE_Addr;
 
-/**
+/*
  * @class ACE_Asynch_Read_Dgram
  *
  * @brief This class is a factory for starting off asynchronous reads
@@ -1339,7 +1339,7 @@ public:
   /// Destructor
   virtual ~ACE_Asynch_Read_Dgram (void);
 
-  /**
+  /*
    * Initializes the factory with information which will be used with
    * each asynchronous call. If ({handle} == ACE_INVALID_HANDLE),
    * {ACE_Handler::handle} will be called on the {handler} to get the
@@ -1393,7 +1393,7 @@ protected:
   ACE_Asynch_Read_Dgram_Impl *implementation_;
 
 public:
-/**
+/*
  * @class Result
  *
  * @brief This is the class which will be passed back to the
@@ -1452,7 +1452,7 @@ private:
 class ACE_Asynch_Write_Dgram_Impl;
 class ACE_Asynch_Write_Dgram_Result_Impl;
 
-/**
+/*
  * @class ACE_Asynch_Write_Dgram
  *
  * @brief This class is a factory for starting off asynchronous writes
@@ -1475,7 +1475,7 @@ public:
   /// Destructor.
   virtual ~ACE_Asynch_Write_Dgram (void);
 
-  /**
+  /*
    * Initializes the factory with information which will be used with
    * each asynchronous call. If ({handle} == ACE_INVALID_HANDLE),
    * {ACE_Handler::handle} will be called on the {handler} to get the
@@ -1529,7 +1529,7 @@ protected:
   ACE_Asynch_Write_Dgram_Impl *implementation_;
 
 public:
-/**
+/*
  * @class Result
  *
  * @brief This is that class which will be passed back to the
@@ -1582,7 +1582,7 @@ private:
 };
 
 
-/**
+/*
  * @class ACE_Handler
  *
  * @brief This base class defines the interface for receiving the
@@ -1641,7 +1641,7 @@ public:
   virtual void handle_time_out (const ACE_Time_Value &tv,
                                 const void *act = 0);
 
-  /**
+  /*
    * This is method works with the {run_event_loop} of the
    * ACE_Proactor. A special {Wake_Up_Completion} is used to wake up
    * all the threads that are blocking for completions.
@@ -1654,7 +1654,7 @@ public:
   /// Set the proactor.
   void proactor (ACE_Proactor *p);
 
-  /**
+  /*
    * Get the I/O handle used by this {handler}. This method will be
    * called by the ACE_Asynch_* classes when an ACE_INVALID_HANDLE is
    * passed to {open}.
@@ -1664,7 +1664,7 @@ public:
   /// Set the ACE_HANDLE value for this Handler.
   virtual void handle (ACE_HANDLE);
 
-  /**
+  /*
    * @class Proxy
    *
    * @brief The Proxy class acts as a proxy for dispatch of completions
@@ -1708,7 +1708,7 @@ class ACE_INET_Addr;
 template <class HANDLER>
 class ACE_Asynch_Acceptor;
 
-/**
+/*
  * @class ACE_Service_Handler
  *
  * @brief This base class defines the interface for the
@@ -1732,7 +1732,7 @@ public:
   /// Virtual destruction.
   virtual ~ACE_Service_Handler (void);
 
-  /**
+  /*
    * {open} is called by ACE_Asynch_Acceptor to initialize a new
    * instance of ACE_Service_Handler that has been created after the
    * new connection is accepted. The handle for the new connection is

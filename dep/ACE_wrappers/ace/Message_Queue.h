@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Message_Queue.h
  *
  *  $Id: Message_Queue.h 91688 2010-09-09 11:21:50Z johnnyw $
@@ -29,7 +29,7 @@ class ACE_Notification_Strategy;
 template <ACE_SYNCH_DECL> class ACE_Message_Queue_Iterator;
 template <ACE_SYNCH_DECL> class ACE_Message_Queue_Reverse_Iterator;
 
-/**
+/*
  * @class ACE_Message_Queue_Base
  *
  * @brief Base class for ACE_Message_Queue, which is the central
@@ -85,7 +85,7 @@ public:
 
   // = Enqueue and dequeue methods.
 
-  /**
+  /*
    * Retrieve the first ACE_Message_Block without removing it.  Note
    * that @a timeout uses <{absolute}> time rather than <{relative}>
    * time.  If the @a timeout elapses without receiving a message -1 is
@@ -97,7 +97,7 @@ public:
   virtual int peek_dequeue_head (ACE_Message_Block *&first_item,
                                  ACE_Time_Value *timeout = 0) = 0;
 
-  /**
+  /*
    * Enqueue a <ACE_Message_Block *> into the tail of the queue.
    * Returns number of items in queue if the call succeeds or -1
    * otherwise.  These calls return -1 when queue is closed,
@@ -111,7 +111,7 @@ public:
   virtual int enqueue (ACE_Message_Block *new_item,
                        ACE_Time_Value *timeout = 0) = 0;
 
-  /**
+  /*
    * Dequeue and return the <ACE_Message_Block *> at the head of the
    * queue.  Returns number of items in queue if the call succeeds or
    * -1 otherwise.  These calls return -1 when queue is closed,
@@ -155,7 +155,7 @@ public:
 
   // = Activation control methods.
 
-  /**
+  /*
    * Deactivate the queue and wake up all threads waiting on the queue
    * so they can continue.  No messages are removed from the queue,
    * however.  Any other operations called until the queue is
@@ -166,7 +166,7 @@ public:
    */
   virtual int deactivate (void) = 0;
 
-  /**
+  /*
    * Reactivate the queue so that threads can enqueue and dequeue
    * messages again.
    *
@@ -174,7 +174,7 @@ public:
    */
   virtual int activate (void) = 0;
 
-  /**
+  /*
    * Pulse the queue to wake up any waiting threads.  Changes the
    * queue state to PULSED; future enqueue/dequeue operations proceed
    * as in ACTIVATED state.

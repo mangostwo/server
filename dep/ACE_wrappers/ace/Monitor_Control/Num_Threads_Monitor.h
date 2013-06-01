@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  * @file Num_Threads_Monitor.h
  *
  * $Id: Num_Threads_Monitor.h 91743 2010-09-13 18:24:51Z johnnyw $
@@ -43,7 +43,7 @@ namespace ACE
 {
   namespace Monitor_Control
   {
-    /**
+    /*
      * @class Num_Threads_Monitor
      *
      * @brief Monitor total number of threads in the system.

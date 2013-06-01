@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file   OS_NS_string.h
  *
  *  $Id: OS_NS_string.h 91995 2010-09-24 12:45:24Z johnnyw $
@@ -254,7 +254,7 @@ namespace ACE_OS {
   ACE_WCHAR_T *strncpy (ACE_WCHAR_T *s, const ACE_WCHAR_T *t, size_t len);
 
   /// Finds the length of a limited-length string (char version).
-  /**
+  /*
    * @param s       The character string to find the length of.
    * @param maxlen  The maximum number of characters that will be
    *                scanned for the terminating nul character.
@@ -266,7 +266,7 @@ namespace ACE_OS {
   size_t strnlen (const char *s, size_t maxlen);
 
   /// Finds the length of a limited-length string (ACE_WCHAR_T version).
-  /**
+  /*
    * @param s       The character string to find the length of.
    * @param maxlen  The maximum number of characters that will be
    *                scanned for the terminating nul character.
@@ -352,7 +352,7 @@ namespace ACE_OS {
 #endif /* ACE_LACKS_STRRCHR */
 
   /// This is a "safe" c string copy function (char version).
-  /**
+  /*
    * Unlike strncpy() this function will always add a terminating '\0'
    * char if maxlen > 0.  So the user doesn't has to provide an extra
    * '\0' if the user wants a '\0' terminated dst.  The function
@@ -373,7 +373,7 @@ namespace ACE_OS {
                   size_t maxlen);
 
   /// This is a "safe" c string copy function (wchar_t version).
-  /**
+  /*
    * Unlike strncpy() this function will always add a terminating '\0'
    * char if maxlen > 0.  So the user doesn't has to provide an extra
    * '\0' if the user wants a '\0' terminated dst.  The function

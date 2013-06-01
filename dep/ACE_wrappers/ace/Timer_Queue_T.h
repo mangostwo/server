@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Timer_Queue_T.h
  *
  *  $Id: Timer_Queue_T.h 89254 2010-02-25 22:10:39Z cleeland $
@@ -27,7 +27,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Timer_Node_Dispatch_Info_T
  *
  * @brief Maintains generated dispatch information for Timer nodes.
@@ -47,7 +47,7 @@ public:
   int recurring_timer_;
 };
 
-/**
+/*
  * @class ACE_Timer_Node_T
  *
  * @brief Maintains the state associated with a Timer entry.
@@ -160,7 +160,7 @@ private:
   long timer_id_;
 };
 
-/**
+/*
  * @class ACE_Timer_Queue_Iterator_T
  *
  * @brief Generic interface for iterating over a subclass of
@@ -194,7 +194,7 @@ public:
   virtual ACE_Timer_Node_T<TYPE> *item (void) = 0;
 };
 
-/**
+/*
  * @class ACE_Timer_Queue_T
  *
  * @brief Provides an interface to timers.
@@ -211,7 +211,7 @@ public:
   typedef ACE_Timer_Queue_Iterator_T<TYPE, FUNCTOR, ACE_LOCK> ITERATOR;
 
   // = Initialization and termination methods.
-  /**
+  /*
    * Default constructor. @a upcall_functor is the instance of the
    * FUNCTOR to be used by the queue. If @a upcall_functor is 0, Timer
    * Queue will create a default FUNCTOR.  @a freelist the freelist of
@@ -231,7 +231,7 @@ public:
   /// be called on a non-empty queue.
   virtual const ACE_Time_Value &earliest_time (void) const = 0;
 
-  /**
+  /*
    * Schedule @a type that will expire at @a future_time, which is
    * specified in absolute time.  If it expires then @a act is passed
    * in as the value to the <functor>.  If @a interval is != to
@@ -251,7 +251,7 @@ public:
                          const ACE_Time_Value &future_time,
                          const ACE_Time_Value &interval = ACE_Time_Value::zero);
 
-  /**
+  /*
    * Resets the interval of the timer represented by @a timer_id to
    * @a interval, which is specified in relative time to the current
    * <gettimeofday>.  If @a interval is equal to
@@ -261,7 +261,7 @@ public:
   virtual int reset_interval (long timer_id,
                               const ACE_Time_Value &interval) = 0;
 
-  /**
+  /*
    * Cancel all timer associated with @a type.  If
    * @a dont_call_handle_close is 0 then the <functor> will be invoked,
    * which typically invokes the <handle_close> hook.  Returns number
@@ -270,7 +270,7 @@ public:
   virtual int cancel (const TYPE &type,
                       int dont_call_handle_close = 1) = 0;
 
-  /**
+  /*
    * Cancel the single timer that matches the @a timer_id value (which
    * was returned from the <schedule> method).  If act is non-NULL
    * then it will be set to point to the ``magic cookie'' argument
@@ -284,14 +284,14 @@ public:
                       const void **act = 0,
                       int dont_call_handle_close = 1) = 0;
 
-  /**
+  /*
    * Run the <functor> for all timers whose values are <= @a current_time.
    * This does not account for <timer_skew>.  Returns the number of
    * timers canceled.
    */
   virtual int expire (const ACE_Time_Value &current_time);
 
-  /**
+  /*
    * Get the dispatch information for a timer whose value is <= @a current_time.
    * This does not account for <timer_skew>. Returns 1 if
    * there is a node whose value <= @a current_time else returns a 0.
@@ -300,7 +300,7 @@ public:
   virtual int dispatch_info (const ACE_Time_Value &current_time,
                              ACE_Timer_Node_Dispatch_Info_T<TYPE> &info);
 
-  /**
+  /*
    * Run the <functor> for all timers whose values are <=
    * <ACE_OS::gettimeofday>.  Also accounts for <timer_skew>.
    *
@@ -339,7 +339,7 @@ public:
 
   /* virtual */ int expire (void);
 
-  /**
+  /*
    * Returns the current time of day.  This method allows different
    * implementations of the timer queue to use special high resolution
    * timers.
@@ -355,7 +355,7 @@ public:
   /// This method acquires a lock internally since it modifies internal state.
   virtual ACE_Time_Value *calculate_timeout (ACE_Time_Value *max);
 
-  /**
+  /*
    * Determine the next event to timeout.  Returns @a max if there are
    * no pending timers or if all pending timers are longer than max.
    * <the_timeout> should be a pointer to storage for the timeout value,
@@ -467,7 +467,7 @@ private:
   ACE_UNIMPLEMENTED_FUNC (void operator= (const ACE_Timer_Queue_T<TYPE, FUNCTOR, ACE_LOCK> &))
 };
 
-/**
+/*
  * @class ACE_Event_Handler_Handle_Timeout_Upcall
  *
  * @brief Functor for Timer_Queues.

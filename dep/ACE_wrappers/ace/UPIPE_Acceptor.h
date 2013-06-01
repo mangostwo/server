@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    UPIPE_Acceptor.h
  *
  *  $Id: UPIPE_Acceptor.h 82723 2008-09-16 09:35:44Z johnnyw $
@@ -29,7 +29,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_UPIPE_Acceptor
  *
  * @brief Defines the format and interface for the listener side of the
@@ -61,7 +61,7 @@ public:
   int remove (void);
 
   // = Passive connection acceptance method.
-  /**
+  /*
    * Accept a new data transfer connection.  A @a timeout of 0 means
    * block forever, a @a timeout of {0, 0} means poll.  @a restart == 1
    * means "restart if interrupted."

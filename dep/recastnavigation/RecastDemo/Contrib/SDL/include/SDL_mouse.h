@@ -48,7 +48,7 @@ typedef struct SDL_Cursor {
 } SDL_Cursor;
 
 /* Function prototypes */
-/**
+/*
  * Retrieve the current state of the mouse.
  * The current button state is returned as a button bitmask, which can
  * be tested using the SDL_BUTTON(X) macros, and x and y are set to the
@@ -56,7 +56,7 @@ typedef struct SDL_Cursor {
  */
 extern DECLSPEC Uint8 SDLCALL SDL_GetMouseState(int *x, int *y);
 
-/**
+/*
  * Retrieve the current state of the mouse.
  * The current button state is returned as a button bitmask, which can
  * be tested using the SDL_BUTTON(X) macros, and x and y are set to the
@@ -64,12 +64,12 @@ extern DECLSPEC Uint8 SDLCALL SDL_GetMouseState(int *x, int *y);
  */
 extern DECLSPEC Uint8 SDLCALL SDL_GetRelativeMouseState(int *x, int *y);
 
-/**
+/*
  * Set the position of the mouse cursor (generates a mouse motion event)
  */
 extern DECLSPEC void SDLCALL SDL_WarpMouse(Uint16 x, Uint16 y);
 
-/**
+/*
  * Create a cursor using the specified data and mask (in MSB format).
  * The cursor width must be a multiple of 8 bits.
  *
@@ -85,24 +85,24 @@ extern DECLSPEC void SDLCALL SDL_WarpMouse(Uint16 x, Uint16 y);
 extern DECLSPEC SDL_Cursor * SDLCALL SDL_CreateCursor
 		(Uint8 *data, Uint8 *mask, int w, int h, int hot_x, int hot_y);
 
-/**
+/*
  * Set the currently active cursor to the specified one.
  * If the cursor is currently visible, the change will be immediately 
  * represented on the display.
  */
 extern DECLSPEC void SDLCALL SDL_SetCursor(SDL_Cursor *cursor);
 
-/**
+/*
  * Returns the currently active cursor.
  */
 extern DECLSPEC SDL_Cursor * SDLCALL SDL_GetCursor(void);
 
-/**
+/*
  * Deallocates a cursor created with SDL_CreateCursor().
  */
 extern DECLSPEC void SDLCALL SDL_FreeCursor(SDL_Cursor *cursor);
 
-/**
+/*
  * Toggle whether or not the cursor is shown on the screen.
  * The cursor start off displayed, but can be turned off.
  * SDL_ShowCursor() returns 1 if the cursor was being displayed

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    LSOCK.h
  *
  *  $Id: LSOCK.h 80826 2008-03-04 14:51:23Z wotte $
@@ -28,7 +28,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_LSOCK
  *
  * @brief Create a Local ACE_SOCK, which is used for passing file

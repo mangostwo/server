@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  * @file Monitor_Size.h
  *
  * $Id: Monitor_Size.h 81691 2008-05-14 11:09:21Z johnnyw $
@@ -31,7 +31,7 @@ namespace ACE
 {
   namespace Monitor_Control
   {
-    /**
+    /*
      * @class Size_Monitor
      *
      * @brief Base class from which ACE monitors of size are

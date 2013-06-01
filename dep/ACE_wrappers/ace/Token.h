@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Token.h
  *
  *  $Id: Token.h 85367 2009-05-18 10:11:54Z johnnyw $
@@ -44,7 +44,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Time_Value;
 
-/**
+/*
  * @class ACE_Token
  *
  * @brief Class that acquires, renews, and releases a synchronization
@@ -77,7 +77,7 @@ class ACE_Export ACE_Token
 {
 public:
 
-  /**
+  /*
    * Available queueing strategies.
    */
   enum QUEUEING_STRATEGY
@@ -106,7 +106,7 @@ public:
 
   // = Synchronization operations.
 
-  /**
+  /*
    * Acquire the token, sleeping until it is obtained or until the
    * expiration of @a timeout, which is treated as "absolute" time.  If
    * some other thread currently holds the token then <sleep_hook> is
@@ -124,21 +124,21 @@ public:
                void *arg = 0,
                ACE_Time_Value *timeout = 0);
 
-  /**
+  /*
    * This behaves just like the previous <acquire> method, except that
    * it invokes the virtual function called <sleep_hook> that can be
    * overridden by a subclass of ACE_Token.
    */
   int acquire (ACE_Time_Value *timeout = 0);
 
-  /**
+  /*
    * This should be overridden by a subclass to define the appropriate
    * behavior before <acquire> goes to sleep.  By default, this is a
    * no-op...
    */
   virtual void sleep_hook (void);
 
-  /**
+  /*
    * An optimized method that efficiently reacquires the token if no
    * other threads are waiting.  This is useful for situations where
    * you don't want to degrade the quality of service if there are

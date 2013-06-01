@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    Null_Semaphore.h
  *
  *  $Id: Null_Semaphore.h 91626 2010-09-07 10:59:20Z johnnyw $
@@ -27,7 +27,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Time_Value;
 
-/**
+/*
  * @class ACE_Null_Semaphore
  *
  * @brief Implement a do nothing ACE_Semaphore, i.e., all the methods are

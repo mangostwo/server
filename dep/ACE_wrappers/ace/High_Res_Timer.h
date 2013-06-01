@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    High_Res_Timer.h
  *
  *  $Id: High_Res_Timer.h 89483 2010-03-15 09:48:01Z johnnyw $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_High_Res_Timer
  *
  * @brief A high resolution timer class wrapper that encapsulates
@@ -102,7 +102,7 @@ class ACE_Export ACE_High_Res_Timer
 public:
   // = Initialization method.
 
-  /**
+  /*
    * global_scale_factor_ is set to @a gsf.  All High_Res_Timers use
    * global_scale_factor_.  This allows applications to set the scale
    * factor just once for all High_Res_Timers.  Check
@@ -124,7 +124,7 @@ public:
 #  define ACE_HR_SCALE_CONVERSION (ACE_ONE_SECOND_IN_USECS)
 #endif /* ACE_HR_SCALE_CONVERSION */
 
-  /**
+  /*
    * Sets the global_scale_factor to the value in the @a env
    * environment variable.  Returns 0 on success, -1 on failure.
    * @note If @a env points to string "0" (value zero), this call will fail.
@@ -134,7 +134,7 @@ public:
   static int get_env_global_scale_factor (const ACE_TCHAR *env
                                           = ACE_TEXT ("ACE_SCALE_FACTOR"));
 
-  /**
+  /*
    * Set (and return, for info) the global scale factor by sleeping
    * for @a usec and counting the number of intervening clock cycles.
    * Average over @a iterations of @a usec each.  On some platforms,
@@ -164,7 +164,7 @@ public:
   void stop (const ACE_OS::ACE_HRTimer_Op = ACE_OS::ACE_HRTIMER_GETTIME);
 
   /// Set @a tv to the number of microseconds elapsed.
-  /**
+  /*
    *  Could overflow within hours on windows with emulated 64 bit int's
    *  and a fast counter. VC++ and Borland normaly use __int64 and
    *  so normaly don't have this problem.
@@ -172,7 +172,7 @@ public:
   void elapsed_time (ACE_Time_Value &tv) const;
 
   /// Set @a nanoseconds to the number of nanoseconds elapsed.
-  /**
+  /*
    *  Will overflow when measuring more than 194 day's.
    */
   void elapsed_time (ACE_hrtime_t &nanoseconds) const;
@@ -184,7 +184,7 @@ public:
 #endif /* ACE_HAS_POSIX_TIME */
 
   /// Sets @a usecs to the elapsed (stop - start) time in microseconds.
-  /**
+  /*
    *  Will overflow on windows when measuring more than appox. 2^^54 ticks.
    *  Is still more than 48 days with a 4 Ghz counter.
    */
@@ -221,7 +221,7 @@ public:
   /// Declare the dynamic allocation hooks.
   ACE_ALLOC_HOOK_DECLARE;
 
-  /**
+  /*
    * Get the current "time" as the high resolution counter at this time.
    * This is intended to be useful for supplying to a ACE_Timer_Queue
    * as the gettimeofday function, thereby basing the timer calculations
@@ -229,7 +229,7 @@ public:
    */
   static ACE_Time_Value gettimeofday_hr (void);
 
-  /**
+  /*
    * @deprecated THIS FUNCTION IS DEPRECATED.  PLEASE USE
    * <ACE_OS::gettimeofday> INSTEAD!  Calls <ACE_High_Res_Timer::hrtime_to_tv>
    * passing <ACE_OS::gethrtime>.  This function can be used to parameterize
@@ -250,7 +250,7 @@ public:
                             const ACE_hrtime_t hrt);
 
 #if defined (linux)
-  /**
+  /*
    * This is used to find out the Mhz of the machine for the scale
    * factor.  If there are any problems getting it, we just return 1
    * (the default).
@@ -259,7 +259,7 @@ public:
 #endif /* defined (linux) */
 
 private:
-  /**
+  /*
    * For internal use: gets the high-resolution time using
    * <ACE_OS::gethrtime>.  Except on platforms that require that the
    * <global_scale_factor_> be set, such as ACE_WIN32, uses the
@@ -291,7 +291,7 @@ private:
   /// global_scale_factor_ == microseconds.
   static ACE_UINT32 global_scale_factor_;
 
-  /**
+  /*
    * Indicates the status of the global scale factor,
    * 0  = hasn't been set
    * 1  = been set

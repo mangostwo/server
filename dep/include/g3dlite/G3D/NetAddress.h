@@ -24,22 +24,22 @@ private:
     SOCKADDR_IN                 addr;
 
 public:
-    /**
+    /*
      In host byte order
      */
     NetAddress(uint32 host, uint16 port = 0);
 
-    /**
+    /*
      @param port Specified in host byte order (i.e., don't worry about endian issues)
      */
     NetAddress(const std::string& hostname, uint16 port);
 
-    /**
+    /*
        @param hostnameAndPort in the form "hostname:port" or "ip:port"
      */
     NetAddress(const std::string& hostnameAndPort);
 
-    /**
+    /*
        @deprecated Use G3D::NetworkDevice::broadcastAddressArray()
 
      @brief Creates a UDP broadcast address for use with a
@@ -90,7 +90,7 @@ template <> struct HashTrait<G3D::NetAddress> {
 
 namespace G3D {
 
-/**
+/*
  Two addresses may point to the same computer but be != because
  they have different IP's.
  */

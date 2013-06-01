@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Service_Repository.h
  *
  *  $Id: Service_Repository.h 91016 2010-07-06 11:29:50Z johnnyw $
@@ -31,7 +31,7 @@ class ACE_Service_Type;
 class ACE_DLL;
 
 #define ACE_Component_Repository ACE_Service_Repository
-/**
+/*
  * @class ACE_Service_Repository
  *
  * @brief Contains all the services offered by a Service
@@ -92,7 +92,7 @@ public:
   /// is full and 0 on success.
   int insert (const ACE_Service_Type *sr);
 
-  /**
+  /*
    * Locate a named entry in the service table, optionally ignoring
    * suspended entries.
    *
@@ -144,7 +144,7 @@ protected:
   /// responsible for properly disposing of it.
   int remove_i (const ACE_TCHAR[], ACE_Service_Type **sr);
 
-  /**
+  /*
    * Locate a named entry in the service table, optionally ignoring
    * suspended entries.
    *
@@ -204,7 +204,7 @@ protected:
 #endif /* ACE_MT_SAFE */
 };
 
-/**
+/*
  * @class ACE_Service_Repository_Iterator
  *
  * @brief Iterate through the ACE_Service_Repository.

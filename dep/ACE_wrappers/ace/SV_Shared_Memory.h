@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    SV_Shared_Memory.h
  *
  *  $Id: SV_Shared_Memory.h 80826 2008-03-04 14:51:23Z wotte $
@@ -27,7 +27,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_SV_Shared_Memory
  *
  * @brief This is a wrapper for System V shared memory.

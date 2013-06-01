@@ -1,4 +1,4 @@
-/**
+/*
  @file g3dmath.h
  
  Math util class.
@@ -65,7 +65,7 @@ inline double __fastcall drand48() {
     return ::rand() / double(RAND_MAX);
 }
 
-/**
+/*
    Win32 implementation of the C99 fast rounding routines.
    
    @cite routines are
@@ -170,7 +170,7 @@ typedef double          float64;
 int iAbs(int iValue);
 int iCeil(double fValue);
 
-/**
+/*
  Clamps the value to the range [low, hi] (inclusive)
  */
 int iClamp(int val, int low, int hi);
@@ -178,7 +178,7 @@ int16 iClamp(int16 val, int16 low, int16 hi);
 double clamp(double val, double low, double hi);
 float clamp(float val, float low, float hi);
 
-/**
+/*
  Returns a + (b - a) * f;
  */
 inline double lerp(double a, double b, double f) {
@@ -189,7 +189,7 @@ inline float lerp(float a, float b, float f) {
     return a + (b - a) * f;
 }
 
-/**
+/*
  Wraps the value to the range [0, hi) (exclusive
  on the high end).  This is like the clock arithmetic
  produced by % (modulo) except the result is guaranteed
@@ -223,7 +223,7 @@ inline int iRound(float f) {
     return lrintf(f);
 }
 
-/**
+/*
  Returns a random number uniformly at random between low and hi
  (inclusive).
  @deprecated Use Random::integer
@@ -238,12 +238,12 @@ double aTan2 (double fY, double fX);
 double sign (double fValue);
 double square (double fValue);
 
-/**
+/*
  Returns true if the argument is a finite real number.
  */
 bool isFinite(double x);
 
-/**
+/*
  Returns true if the argument is NaN (not a number).
  You can't use x == nan to test this because all
  comparisons against nan return false.
@@ -255,19 +255,19 @@ inline bool isNaN(int x) {
     return false;
 }
 
-/**
+/*
  Computes x % 3.
  */
 int iMod3(int x);
 
-/**
+/*
  Uniform random number between low and hi, inclusive. [low, hi]
  @deprecated 
  @sa Random::uniform
  */
 float uniformRandom(float low = 0.0f, float hi = 1.0f);
 
-/**
+/*
  Normally distributed random number. 
 
  @deprecated 
@@ -323,7 +323,7 @@ double sumSquares(double x, double y, double z);
 double distance(double x, double y);
 double distance(double x, double y, double z);
 
-/**
+/*
   Returnes the 0-based index of the highest 1 bit from
   the left.  -1 means the number was 0.
 
@@ -331,7 +331,7 @@ double distance(double x, double y, double z);
  */ 
 int highestBit(uint32 x);
 
-/**
+/*
  Note that fuzzyEq(a, b) && fuzzyEq(b, c) does not imply
  fuzzyEq(a, c), although that will be the case on some
  occasions.
@@ -356,14 +356,14 @@ bool fuzzyLt(double a, double b);
 /** Is a near or less than b? */
 bool fuzzyLe(double a, double b);
 
-/**
+/*
  Computes 1 / sqrt(x).
  */
 inline float rsq(float x) {
     return 1.0f / sqrtf(x);
 }
 
-/**
+/*
  Return the next power of 2 higher than the input
  If the input is already a power of 2, the output will be the same 
  as the input.
@@ -388,7 +388,7 @@ inline double log2(int x) {
 }
 
 
-/**
+/*
  * True if num is a power of two.
  */
 bool isPow2(int num);
@@ -399,28 +399,28 @@ bool isEven(int num);
 double toRadians(double deg);
 double toDegrees(double rad);
 
-/**
+/*
  Returns true if x is not exactly equal to 0.0f.
  */
 inline bool any(float x) {
     return x != 0;
 }
 
-/**
+/*
  Returns true if x is not exactly equal to 0.0f.
  */
 inline bool all(float x) {
     return x != 0;
 }
 
-/**
+/*
  v / v (for DirectX/Cg support)
  */
 inline float normalize(float v) {
     return v / v;
 }
 
-/**
+/*
  a * b (for DirectX/Cg support)
  */
 inline float dot(float a, float b) {
@@ -428,14 +428,14 @@ inline float dot(float a, float b) {
 }
 
 
-/**
+/*
  a * b (for DirectX/Cg support)
  */
 inline float mul(float a, float b) {
     return a * b;
 }
 
-/**
+/*
  2^x
  */
 inline double exp2(double x) {
@@ -457,7 +457,7 @@ inline float rsqrt(float x) {
     return 1.0 / sqrtf(x);
 }
 
-/**
+/*
  sin(x)/x
  */
 inline double sinc(double x) {
@@ -470,7 +470,7 @@ inline double sinc(double x) {
     }
 }
 
-/**
+/*
  Computes a floating point modulo; the result is t wrapped to the range [lo, hi).
  */
 inline float wrap(float t, float lo, float hi) {
@@ -789,7 +789,7 @@ inline float toRadians(int deg) {
 inline float toDegrees(int rad) {
     return rad * 180.0f / (float)pi();
 }
-/**
+/*
  Computes an appropriate epsilon for comparing a and b.
  */
 inline double eps(double a, double b) {
@@ -834,7 +834,7 @@ inline int iMod3(int x) {
     return x % 3;
 }
 
-/**
+/*
  Given a 32-bit integer, returns the integer with the bytes in the opposite order.
  */
 inline uint32 flipEndian32(const uint32 x) {
@@ -842,7 +842,7 @@ inline uint32 flipEndian32(const uint32 x) {
            ((x & 0xFF0000) >> 8) | ((x & 0xFF000000) >> 24);
 }
 
-/**
+/*
  Given a 16-bit integer, returns the integer with the bytes in the opposite order.
  */
 inline uint16 flipEndian16(const uint16 x) {

@@ -1,6 +1,6 @@
 // -*- C++ -*-
 //=============================================================================
-/**
+/*
  * @file ETCL_Constraint_Visitor.cpp
  *
  * $Id: ETCL_Constraint_Visitor.cpp 81653 2008-05-08 21:08:49Z parsons $

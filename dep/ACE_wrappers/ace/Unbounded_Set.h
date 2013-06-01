@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file Unbounded_Set.h
  *
  *  $Id: Unbounded_Set.h 91743 2010-09-13 18:24:51Z johnnyw $
@@ -24,7 +24,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Allocator;
 
-/**
+/*
  * @struct ACE_Unbounded_Set_Default_Comparator
  * @brief Simple comparator that evaluates equality using == operator.
  */
@@ -37,7 +37,7 @@ struct ACE_Unbounded_Set_Default_Comparator
 template<typename T>
 class ACE_Unbounded_Set;
 
-/**
+/*
  * @class ACE_Unbounded_Set_Iterator
  * @brief Compatibility wrapper for ACE_Unbounded_Set_Ex_Iterator.
  */
@@ -54,7 +54,7 @@ public:
   ACE_Unbounded_Set_Iterator (const base_type &s);
 };
 
-/**
+/*
  * @class ACE_Unbounded_Set_Const_Iterator
  * @brief Compatibility wrapper for ACE_Unbounded_Set_Ex_Const_Iterator.
  */
@@ -73,7 +73,7 @@ public:
   ACE_Unbounded_Set_Const_Iterator (const base_type &s);
 };
 
-/**
+/*
  * @class ACE_Unbounded_Set
  * @brief Compatibility wrapper for ACE_Unbounded_Set_Ex.
  */

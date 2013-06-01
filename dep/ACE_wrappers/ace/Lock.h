@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    Lock.h
  *
  *  $Id: Lock.h 80826 2008-03-04 14:51:23Z wotte $
@@ -24,7 +24,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Lock
  *
  * @brief This is the abstract base class that contains the uniform
@@ -49,7 +49,7 @@ public:
   /// Noop virtual destructor
   virtual ~ACE_Lock (void);
 
-  /**
+  /*
    * Explicitly destroy the lock.  Note that only one thread should
    * call this method since it doesn't protect against race
    * conditions.
@@ -60,7 +60,7 @@ public:
   /// failure.
   virtual int acquire (void) = 0;
 
-  /**
+  /*
    * Conditionally acquire the lock (i.e., won't block).  Returns -1
    * on failure.  If we "failed" because someone else already had the
    * lock, @c errno is set to @c EBUSY.
@@ -70,21 +70,21 @@ public:
   /// Release the lock.  Returns -1 on failure.
   virtual int release (void) = 0;
 
-  /**
+  /*
    * Block until the thread acquires a read lock.  If the locking
    * mechanism doesn't support read locks then this just calls
    * <acquire>.  Returns -1 on failure.
    */
   virtual int acquire_read (void) = 0;
 
-  /**
+  /*
    * Block until the thread acquires a write lock.  If the locking
    * mechanism doesn't support read locks then this just calls
    * <acquire>.  Returns -1 on failure.
    */
   virtual int acquire_write (void) = 0;
 
-  /**
+  /*
    * Conditionally acquire a read lock.  If the locking mechanism
    * doesn't support read locks then this just calls <acquire>.
    * Returns -1 on failure.  If we "failed" because someone else
@@ -92,7 +92,7 @@ public:
    */
   virtual int tryacquire_read (void) = 0;
 
-  /**
+  /*
    * Conditionally acquire a write lock.  If the locking mechanism
    * doesn't support read locks then this just calls <acquire>.
    * Returns -1 on failure.  If we "failed" because someone else
@@ -100,7 +100,7 @@ public:
    */
   virtual int tryacquire_write (void) = 0;
 
-  /**
+  /*
    * Conditionally try to upgrade a lock held for read to a write lock.
    * If the locking mechanism doesn't support read locks then this just
    * calls <acquire>. Returns 0 on success, -1 on failure.
@@ -108,7 +108,7 @@ public:
   virtual int tryacquire_write_upgrade (void) = 0;
 };
 
-/**
+/*
  * @class ACE_Adaptive_Lock
  *
  * @brief An adaptive general locking class that defers the decision of
@@ -141,7 +141,7 @@ public:
   void dump (void) const;
 
 protected:
-  /**
+  /*
    * Create and initialize create the actual lcok used in the class.
    * The default constructor simply set the <lock_> to 0 (null).  You
    * must overwrite this method for this class to work.

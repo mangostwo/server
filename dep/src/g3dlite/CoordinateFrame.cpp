@@ -1,4 +1,4 @@
-/**
+/*
  @file CoordinateFrame.cpp
 
  Coordinate frame class

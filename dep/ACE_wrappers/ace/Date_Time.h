@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    Date_Time.h
  *
  *  $Id: Date_Time.h 80826 2008-03-04 14:51:23Z wotte $
@@ -25,7 +25,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Time_Value;
 
-/**
+/*
  * @class ACE_Date_Time
  *
  * @brief System independent representation of date and time.

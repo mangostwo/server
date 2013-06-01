@@ -1,4 +1,4 @@
-/**
+/*
  @file format.cpp
 
  @author Morgan McGuire, graphics3d.com

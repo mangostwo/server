@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    os_tcp.h
  *
  *  definitions for the Internet Transmission Control Protocol (TCP)

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    Stream.h
  *
  *  $Id: Stream.h 91058 2010-07-12 08:20:09Z johnnyw $
@@ -31,7 +31,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 template<ACE_SYNCH_DECL> class ACE_Stream_Iterator;
 class ACE_Time_Value;
 
-/**
+/*
  * @class ACE_Stream
  *
  * @brief This class is the primary abstraction for the ASX framework.
@@ -59,7 +59,7 @@ public:
   };
 
   // = Initializatation and termination methods.
-  /**
+  /*
    * Create a Stream consisting of @a head and @a tail as the Stream
    * head and Stream tail, respectively.  If these are 0 then the
    * ACE_Stream_Head and ACE_Stream_Tail are used, respectively.
@@ -69,7 +69,7 @@ public:
               ACE_Module<ACE_SYNCH_USE> *head = 0,
               ACE_Module<ACE_SYNCH_USE> *tail = 0);
 
-  /**
+  /*
    * Create a Stream consisting of @a head and @a tail as the Stream
    * head and Stream tail, respectively.  If these are 0 then the
    * ACE_Stream_Head and ACE_Stream_Tail are used, respectively.
@@ -131,7 +131,7 @@ public:
   virtual int unlink (void);
 
   // = Blocking data transfer operations
-  /**
+  /*
    * Send the message @a mb down the stream, starting at the Module
    * below the Stream head.  Wait for upto @a timeout amount of
    * absolute time for the operation to complete (or block forever if
@@ -140,7 +140,7 @@ public:
   virtual int put (ACE_Message_Block *mb,
                    ACE_Time_Value *timeout = 0);
 
-  /**
+  /*
    * Read the message @a mb that is stored in the stream head.
    * Wait for upto @a timeout amount of absolute time for the operation
    * to complete (or block forever if @a timeout == 0).
@@ -192,7 +192,7 @@ private:
   ACE_SYNCH_CONDITION_T final_close_;
 };
 
-/**
+/*
  * @class ACE_Stream_Iterator
  *
  * @brief Iterate through an ACE_Stream.

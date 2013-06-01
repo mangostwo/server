@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file Intrusive_List_Node.h
  *
  *  $Id: Intrusive_List_Node.h 83968 2008-12-04 08:11:41Z johnnyw $
@@ -22,7 +22,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Intrusive_List_Node
  *
  * @brief Implement the requirements for ACE_Intrusive_List
@@ -54,7 +54,7 @@ public:
 
 protected:
   /// Constructor
-  /**
+  /*
    * The constructor is protected, because only derived classes should
    * be instantiated.
    */

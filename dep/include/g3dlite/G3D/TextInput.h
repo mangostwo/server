@@ -1,4 +1,4 @@
-/**
+/*
  @file TextInput.h
 
  Simple text lexer/tokenizer.
@@ -28,13 +28,13 @@
 
 namespace G3D {
 
-/**
+/*
  For use with TextInput.
  */
 class Token {
 public:
 
-    /**
+    /*
      More detailed type information than Type.
      */
     enum ExtendedType {
@@ -50,7 +50,7 @@ public:
       END_TYPE
     };
 
-    /**
+    /*
      Strings are enclosed in quotes, symbols are not.
      */
     enum Type {
@@ -105,7 +105,7 @@ public:
         return _extendedType;
     }
 
-    /**
+    /*
      The value of a single or double quote string (not including the quotes),
      the name of a symbol, or the exact textual representation of a number as
      parsed from the input. 
@@ -118,7 +118,7 @@ public:
         return _bool;
     }
 
-    /**
+    /*
      Starting line of the input from which this token was parsed.  Starts
      at 1.
      */
@@ -126,7 +126,7 @@ public:
         return _line;
     }
 
-    /**
+    /*
      Starting character position in the input line from which this token was
      parsed.  Starts at 1.
      */
@@ -147,7 +147,7 @@ public:
 };
 
 
-/**
+/*
  A simple style tokenizer for reading text files.  TextInput handles a
  superset of C++,Java, Matlab, and Bash code text including single
  line comments, block comments, quoted strings with escape sequences,
@@ -363,7 +363,7 @@ public:
             Defaults to true.*/
         bool                simpleFloatSpecials;
 
-        /**
+        /*
          Parse the following set of useful proof symbols:
          
            =>
@@ -380,7 +380,7 @@ public:
         */
         bool                proofSymbols;
 
-        /**
+        /*
          When parsing booleans and msvcFloatSpecials, is case significant?
          Default is {true}
         */
@@ -403,18 +403,18 @@ private:
 
     std::deque<Token>       stack;
 
-    /**
+    /*
      Characters to be tokenized.
      */
     Array<char>             buffer;
 
-    /**
+    /*
      Offset of current character (the next character to consumed) in
      input buffer.
      */
     int                     currentCharOffset;
 
-    /**
+    /*
      Line number of next character to be consumed from the input buffer.  (1
      indicates first line of input.)
 
@@ -424,7 +424,7 @@ private:
      */
     int                     lineNumber;
 
-    /**
+    /*
      Character number (within the line) of the next character to be consumed
      from the input buffer.  (1 indicates first character of the line).
 
@@ -440,7 +440,7 @@ private:
   
     void init();
 
-    /**
+    /*
      Consumes the next character from the input buffer, and returns that
      character.  Updates lineNumber and charNumber to reflect the location of
      the next character in the input buffer.
@@ -453,7 +453,7 @@ private:
      */
     int eatInputChar();
 
-    /**
+    /*
      Returns the next character from the input buffer, without consuming any
      characters.  Can also be used to look deeper into the input buffer.
      Does not modify lineNumber or charNumber.
@@ -464,7 +464,7 @@ private:
      */
     int peekInputChar(int distance = 0);
 
-    /**
+    /*
      Helper function to consume the next character in the input buffer and
      peek at the one following (without consuming it).
      */
@@ -473,13 +473,13 @@ private:
         return peekInputChar(0);
     }
 
-    /**
+    /*
      Read the next token, returning an END token if no more input is
      available.
      */
     Token nextToken();
 
-    /**
+    /*
        Helper for nextToken.  Appends characters to t._string until the end
        delimiter is reached.
        

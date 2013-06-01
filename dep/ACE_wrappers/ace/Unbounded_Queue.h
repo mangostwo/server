@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file Unbounded_Queue.h
  *
  *  $Id: Unbounded_Queue.h 84316 2009-02-03 19:46:05Z johnnyw $
@@ -29,7 +29,7 @@ class ACE_Allocator;
 template <class T>
 class ACE_Unbounded_Queue;
 
-/**
+/*
  * @class ACE_Unbounded_Queue_Iterator
  *
  * @brief Implement an iterator over an unbounded queue.
@@ -72,7 +72,7 @@ private:
   ACE_Unbounded_Queue<T> &queue_;
 };
 
-/**
+/*
  * @class ACE_Unbounded_Queue_Const_Iterator
  *
  * @brief Implement an iterator over an const unbounded queue.
@@ -115,7 +115,7 @@ private:
   const ACE_Unbounded_Queue<T> &queue_;
 };
 
-/**
+/*
  * @class ACE_Unbounded_Queue
  *
  * @brief A Queue of "infinite" length.
@@ -160,25 +160,25 @@ public:
   // = Initialization and termination methods.
   /// Construction.  Use user specified allocation strategy
   /// if specified.
-  /**
+  /*
    * Initialize an empty queue using the strategy provided.
    */
   ACE_Unbounded_Queue (ACE_Allocator *alloc = 0);
 
   /// Copy constructor.
-  /**
+  /*
    * Initialize the queue to be a copy of the provided queue.
    */
   ACE_Unbounded_Queue (const ACE_Unbounded_Queue<T> &);
 
   /// Assignment operator.
-  /**
+  /*
    * Perform a deep copy of rhs.
    */
   void operator= (const ACE_Unbounded_Queue<T> &);
 
   /// Destructor.
-  /**
+  /*
    * Clean up the memory for the queue.
    */
   ~ACE_Unbounded_Queue (void);
@@ -186,13 +186,13 @@ public:
   // = Check boundary conditions.
 
   /// Returns true if the container is empty, otherwise returns false.
-  /**
+  /*
    * Constant time check to see if the queue is empty.
    */
   bool is_empty (void) const;
 
   /// Returns 0.
-  /**
+  /*
    * The queue cannot be full, so it always returns 0.
    */
   bool is_full (void) const;
@@ -201,21 +201,21 @@ public:
 
   /// Adds @a new_item to the tail of the queue.  Returns 0 on success,
   /// -1 on failure.
-  /**
+  /*
    * Insert an item at the end of the queue.
    */
   int enqueue_tail (const T &new_item);
 
   /// Adds @a new_item to the head of the queue.  Returns 0 on success,
   /// -1 on failure.
-  /**
+  /*
    * Insert an item at the head of the queue.
    */
   int enqueue_head (const T &new_item);
 
   /// Removes and returns the first @a item on the queue.  Returns 0 on
   /// success, -1 if the queue was empty.
-  /**
+  /*
    * Remove an item from the head of the queue.
    */
   int dequeue_head (T &item);
@@ -224,21 +224,21 @@ public:
 
   /// Reset the ACE_Unbounded_Queue to be empty and release all its
   /// dynamically allocated resources.
-  /**
+  /*
    * Delete the queue nodes.
    */
   void reset (void);
 
   /// Get the @a slot th element in the set.  Returns -1 if the element
   /// isn't in the range {0..#cur_size_ - 1}, else 0.
-  /**
+  /*
    * Find the item in the queue between 0 and the provided index of the
    * queue.
    */
   int get (T *&item, size_t slot = 0) const;
 
   /// Set the @a slot th element of the queue to @a item.
-  /**
+  /*
    * Set the @a slot th element in the set.  Will pad out the set with
    * empty nodes if @a slot is beyond the range {0..#cur_size_ - 1}.
    * Returns -1 on failure, 0 if @a slot isn't initially in range, and
@@ -247,7 +247,7 @@ public:
   int set (const T &item, size_t slot);
 
   /// The number of items in the queue.
-  /**
+  /*
    * Return the size of the queue.
    */
   size_t size (void) const;

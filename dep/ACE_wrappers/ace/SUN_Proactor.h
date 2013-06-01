@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    SUN_Proactor.h
  *
  *  $Id: SUN_Proactor.h 80826 2008-03-04 14:51:23Z wotte $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_SUN_Proactor
  *
  * @brief Implementation of the fast and reliable Proactor
@@ -75,7 +75,7 @@ public:
   ACE_SUN_Proactor (size_t max_aio_operations = ACE_AIO_DEFAULT_SIZE);
 
 protected:
-  /**
+  /*
    * Dispatch a single set of events.  If @a wait_time elapses before
    * any events occur, return 0.  Return 1 on success i.e., when a
    * completion is dispatched, non-zero (-1) on errors and errno is
@@ -83,7 +83,7 @@ protected:
    */
   virtual int handle_events (ACE_Time_Value &wait_time);
 
-  /**
+  /*
    * Block indefinitely until at least one event is dispatched.
    * Dispatch a single set of events. Return 1 on success i.e., when a
    * completion is dispatched, non-zero (-1) on errors and errno is

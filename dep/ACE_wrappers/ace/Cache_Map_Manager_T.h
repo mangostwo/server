@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Cache_Map_Manager_T.h
  *
  *  $Id: Cache_Map_Manager_T.h 92097 2010-09-30 05:41:49Z msmit $
@@ -42,7 +42,7 @@ class ACE_Cache_Map_Reverse_Iterator;
 // For linkers that cant grok long names.
 #define ACE_Cache_Map_Manager ACMM
 
-/**
+/*
  * @class ACE_Cache_Map_Manager
  *
  * @brief Defines a abstraction that will purge entries from a map.
@@ -86,7 +86,7 @@ public:
   typedef REVERSE_ITERATOR
           reverse_iterator;
 
-  /**
+  /*
    * The actual value mapped to the key in the map. The <attributes>
    * are used by the strategy and is transparent to the user of this
    * class.
@@ -112,7 +112,7 @@ public:
   /// Close down a cache and release dynamically allocated resources.
   int close (void);
 
-  /**
+  /*
    * Associate @a key with @a value.  If @a key is already in the CMAP_TYPE
    * then the ENTRY is not changed.  Returns 0 if a new entry is bound
    * successfully, returns 1 if an attempt is made to bind an existing
@@ -121,7 +121,7 @@ public:
   int bind (const KEY &key,
             const VALUE &value);
 
-  /**
+  /*
    * Lookup entry<key,value> in the cache. If it is not found, returns -1.
    * If the @a key is located in the CMAP_TYPE object, the CACHING_STRATEGY is
    * notified of it via notify_find (int result, ATTRIBUTES &attribute).
@@ -131,7 +131,7 @@ public:
   int find (const KEY &key,
             VALUE &value);
 
-  /**
+  /*
    * Lookup entry<key,value> in the cache. If it is not found, returns -1.
    * If the @a key is located in the CMAP_TYPE object, the CACHING_STRATEGY is
    * notified of it via notify_find (int result, ATTRIBUTES &attribute).
@@ -140,7 +140,7 @@ public:
    */
   int find (const KEY &key);
 
-  /**
+  /*
    * Reassociate the @a key with @a value. If the @a key already exists
    * in the cache then returns 1, on a new bind returns 0 and returns
    * -1 in case of any failures.
@@ -148,7 +148,7 @@ public:
   int rebind (const KEY &key,
               const VALUE &value);
 
-  /**
+  /*
    * Reassociate @a key with @a value, storing the old value into the
    * "out" parameter @a old_value.  The function fails if @a key is not
    * in the cache for caches that do not allow user specified keys.
@@ -159,7 +159,7 @@ public:
               const VALUE &value,
               VALUE &old_value);
 
-  /**
+  /*
    * Reassociate @a key with @a value, storing the old key and value
    * into the "out" parameters @a old_key and @a old_value.  The
    * function fails if @a key is not in the cache for caches that do
@@ -172,7 +172,7 @@ public:
               KEY &old_key,
               VALUE &old_value);
 
-  /**
+  /*
    * Associate @a key with @a value if and only if @a key is not in the
    * cache.  If @a key is already in the cache, then the @a value
    * parameter is overwritten with the existing value in the
@@ -235,7 +235,7 @@ private:
 
 };
 
-/**
+/*
  * @class ACE_Cache_Map_Iterator
  *
  * @brief Defines a iterator for the Cache_Map_Manager.
@@ -312,7 +312,7 @@ protected:
   IMPLEMENTATION iterator_implementation_;
 };
 
-/**
+/*
  * @class ACE_Cache_Map_Reverse_Iterator
  *
  * @brief Defines a reverse iterator for the Cache_Map_Manager.

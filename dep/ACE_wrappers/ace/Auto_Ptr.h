@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    Auto_Ptr.h
  *
  *  $Id: Auto_Ptr.h 80826 2008-03-04 14:51:23Z wotte $
@@ -35,7 +35,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Auto_Basic_Ptr
  *
  * @brief Implements the draft C++ standard auto_ptr abstraction.
@@ -82,7 +82,7 @@ using std::auto_ptr;
 #endif /* ACE_USES_STD_NAMESPACE_FOR_STDCPP_LIB */
 #else /* ACE_HAS_STANDARD_CPP_LIBRARY */
 
-/**
+/*
  * @class auto_ptr
  *
  * @brief Implements the draft C++ standard auto_ptr abstraction.
@@ -104,7 +104,7 @@ public:
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @brief Implements the draft C++ standard auto_ptr abstraction.
  * This version can be used instead of auto_ptr<T>, and obviates
  * the need for the ACE_AUTO_PTR_RESET macro on platforms like
@@ -122,7 +122,7 @@ public:
   X *operator-> () const;
 };
 
-/**
+/*
  * @class ACE_Auto_Basic_Array_Ptr
  *
  * @brief Implements an extension to the draft C++ standard auto_ptr
@@ -160,7 +160,7 @@ protected:
   X * p_;
 };
 
-/**
+/*
  * @class ACE_Auto_Array_Ptr
  *
  * @brief Implements an extension to the draft C++ standard auto_ptr
@@ -180,7 +180,7 @@ public:
 };
 
 
-/**
+/*
  * @brief Reset given @c auto_ptr element to new element.
  *
  * Some platforms have an older version of auto_ptr support, which

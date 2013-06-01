@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2013 MaNGOS <http://getmangos.com/>
+ * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -4084,7 +4084,7 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
     return TRAINER_SPELL_GREEN;
 }
 
-/**
+/*
  * Deletes a character from the database
  *
  * The way, how the characters will be deleted is decided based on the config option.
@@ -4320,7 +4320,7 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
         sWorld.UpdateRealmCharCount(accountId);
 }
 
-/**
+/*
  * Characters which were kept back in the database after being deleted and are now too old (see config option "CharDelete.KeepDays"), will be completely deleted.
  *
  * @see Player::DeleteFromDB
@@ -4334,7 +4334,7 @@ void Player::DeleteOldCharacters()
     Player::DeleteOldCharacters(keepDays);
 }
 
-/**
+/*
  * Characters which were kept back in the database after being deleted and are older than the specified amount of days, will be completely deleted.
  *
  * @see Player::DeleteFromDB
@@ -7540,7 +7540,7 @@ void Player::UpdateEquipSpellsAtFormChange()
     }
 }
 
-/**
+/*
  * (un-)Apply item spells triggered at adding item to inventory ITEM_SPELLTRIGGER_ON_STORE
  *
  * @param item  added/removed item to/from inventory
@@ -20830,7 +20830,7 @@ float Player::GetReputationPriceDiscount(Creature const* pCreature) const
     return 1.0f - 0.05f * (rank - REP_NEUTRAL);
 }
 
-/**
+/*
  * Check spell availability for training base at SkillLineAbility/SkillRaceClassInfo data.
  * Checked allowed race/class and dependent from race/class allowed min level
  *

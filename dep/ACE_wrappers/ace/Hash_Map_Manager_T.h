@@ -1,7 +1,7 @@
 // // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Hash_Map_Manager_T.h
  *
  *  $Id: Hash_Map_Manager_T.h 91626 2010-09-07 10:59:20Z johnnyw $
@@ -27,7 +27,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Hash_Map_Entry
  *
  * @brief Define an entry in the hash table.
@@ -111,7 +111,7 @@ class ACE_Hash_Map_Bucket_Iterator;
 // Forward decl.
 class ACE_Allocator;
 
-/**
+/*
  * @class ACE_Hash_Map_Manager_Ex
  *
  * @brief Define a map abstraction that efficiently associates
@@ -178,7 +178,7 @@ public:
 
   // = Initialization and termination methods.
 
-  /**
+  /*
    * Initialize an ACE_Hash_Map_Manager_Ex with a default number of elements.
    *
    * @param table_alloc is a pointer to a memory allocator used for
@@ -193,7 +193,7 @@ public:
   ACE_Hash_Map_Manager_Ex (ACE_Allocator *table_alloc = 0,
                            ACE_Allocator *entry_alloc = 0);
 
-  /**
+  /*
    * Initialize an ACE_Hash_Map_Manager_Ex with @a size elements.
    *
    * @param table_alloc is a pointer to a memory allocator used for
@@ -209,7 +209,7 @@ public:
                            ACE_Allocator *table_alloc = 0,
                            ACE_Allocator *entry_alloc = 0);
 
-  /**
+  /*
    * Initialize an ACE_Hash_Map_Manager_Ex with @a size elements.
    * @param table_alloc is a pointer to a memory allocator used for
    *        table_, so it should supply size*sizeof (ACE_Hash_Map_Entry<EXT_ID, INT_ID>).
@@ -236,7 +236,7 @@ public:
   /// Cleanup the ACE_Hash_Map_Manager_Ex.
   ~ACE_Hash_Map_Manager_Ex (void);
 
-  /**
+  /*
    * Associate @a item with @a int_id.  If @a item is already in the
    * map then the map is not changed.
    *
@@ -247,7 +247,7 @@ public:
   int bind (const EXT_ID &item,
             const INT_ID &int_id);
 
-  /**
+  /*
    * Same as a normal bind, except the map entry is also passed back
    * to the caller.  The entry in this case will either be the newly
    * created entry, or the existing one.
@@ -256,7 +256,7 @@ public:
             const INT_ID &int_id,
             ACE_Hash_Map_Entry<EXT_ID, INT_ID> *&entry);
 
-  /**
+  /*
    * Associate @a ext_id with @a int_id if and only if @a ext_id is not
    * in the map.  If @a ext_id is already in the map then the @a int_id
    * parameter is assigned the existing value in the map.  Returns 0
@@ -266,7 +266,7 @@ public:
   int trybind (const EXT_ID &ext_id,
                INT_ID &int_id);
 
-  /**
+  /*
    * Same as a normal trybind, except the map entry is also passed
    * back to the caller.  The entry in this case will either be the
    * newly created entry, or the existing one.
@@ -275,7 +275,7 @@ public:
                INT_ID &int_id,
                ACE_Hash_Map_Entry<EXT_ID, INT_ID> *&entry);
 
-  /**
+  /*
    * Reassociate @a ext_id with @a int_id.  If @a ext_id is not in the
    * map then behaves just like <bind>.  Returns 0 if a new entry is
    * bound successfully, returns 1 if an existing entry was rebound,
@@ -284,7 +284,7 @@ public:
   int rebind (const EXT_ID &ext_id,
               const INT_ID &int_id);
 
-  /**
+  /*
    * Same as a normal rebind, except the map entry is also passed back
    * to the caller.  The entry in this case will either be the newly
    * created entry, or the existing one.
@@ -293,7 +293,7 @@ public:
               const INT_ID &int_id,
               ACE_Hash_Map_Entry<EXT_ID, INT_ID> *&entry);
 
-  /**
+  /*
    * Associate @a ext_id with @a int_id.  If @a ext_id is not in the map
    * then behaves just like <bind>.  Otherwise, store the old value of
    * @a int_id into the "out" parameter and rebind the new parameters.
@@ -304,7 +304,7 @@ public:
               const INT_ID &int_id,
               INT_ID &old_int_id);
 
-  /**
+  /*
    * Same as a normal rebind, except the map entry is also passed back
    * to the caller.  The entry in this case will either be the newly
    * created entry, or the existing one.
@@ -314,7 +314,7 @@ public:
               INT_ID &old_int_id,
               ACE_Hash_Map_Entry<EXT_ID, INT_ID> *&entry);
 
-  /**
+  /*
    * Associate @a ext_id with @a int_id.  If @a ext_id is not in the map
    * then behaves just like <bind>.  Otherwise, store the old values
    * of @a ext_id and @a int_id into the "out" parameters and rebind the
@@ -329,7 +329,7 @@ public:
               EXT_ID &old_ext_id,
               INT_ID &old_int_id);
 
-  /**
+  /*
    * Same as a normal rebind, except the map entry is also passed back
    * to the caller.  The entry in this case will either be the newly
    * created entry, or the existing one.
@@ -355,12 +355,12 @@ public:
 
   /// Locate @a ext_id and pass out an iterator that points to its
   /// corresponding value.
-  /**
+  /*
    * @param pos @a pos will be set to @c end() if not found.
    */
   void find (EXT_ID const & ext_id, iterator & pos) const;
 
-  /**
+  /*
    * Unbind (remove) the @a ext_id from the map.  Don't return the
    * @a int_id to the caller (this is useful for collections where the
    * @a int_ids are *not* dynamically allocated...)
@@ -374,7 +374,7 @@ public:
               INT_ID &int_id);
 
   /// Remove entry from map.
-  /**
+  /*
    * This unbind operation is fast relative to those that accept an
    * external ID parameter since no map lookup is performed.
    *
@@ -384,7 +384,7 @@ public:
   int unbind (ACE_Hash_Map_Entry<EXT_ID, INT_ID> *entry);
 
   /// Remove entry from map pointed to by @c iterator @a pos.
-  /**
+  /*
    * This unbind operation is fast relative to those that accept an
    * external ID parameter since no map lookup is performed.
    *
@@ -401,7 +401,7 @@ public:
   /// linked lists of ACE_Hash_Map_Entry objects in the hash table.
   size_t total_size (void) const;
 
-  /**
+  /*
    * Returns a reference to the underlying <ACE_LOCK>.  This makes it
    * possible to acquire the lock explicitly, which can be useful in
    * some cases if you instantiate the ACE_Atomic_Op with an
@@ -516,7 +516,7 @@ protected:
   /// Performs unbind.  Must be called with locks held.
   int unbind_i (ACE_Hash_Map_Entry<EXT_ID, INT_ID> *entry);
 
-  /**
+  /*
    * Resize the map.  Must be called with locks held.
    * @note This method should never be called more than once or else all the
    * hashing will get screwed up as the size will change.
@@ -560,7 +560,7 @@ protected:
   ACE_Hash_Map_Entry<EXT_ID, INT_ID> *table (void);
 
 private:
-  /**
+  /*
    * Array of ACE_Hash_Map_Entry *s, each of which points to an
    * ACE_Hash_Map_Entry that serves as the beginning of a linked
    * list of <EXT_ID>s that hash to that bucket.
@@ -580,7 +580,7 @@ private:
   ACE_UNIMPLEMENTED_FUNC (ACE_Hash_Map_Manager_Ex (const ACE_Hash_Map_Manager_Ex<EXT_ID, INT_ID,  HASH_KEY, COMPARE_KEYS, ACE_LOCK> &))
 };
 
-/**
+/*
  * @class ACE_Hash_Map_Iterator_Base_Ex
  *
  * @brief Base iterator for the ACE_Hash_Map_Manager_Ex
@@ -604,7 +604,7 @@ public:
 
   // = Initialization method.
   /// Contructor.
-  /**
+  /*
    *  If @a head != @c false, the iterator constructed is positioned
    *  at the head of the map.  It is positioned at the end otherwise.
    *  @par
@@ -618,7 +618,7 @@ public:
     bool head);
 
   /// Contructor.
-  /**
+  /*
    * This constructor positions the iterator to the given @a entry.
    */
   ACE_Hash_Map_Iterator_Base_Ex (
@@ -679,7 +679,7 @@ protected:
   ACE_Hash_Map_Entry<EXT_ID, INT_ID> *next_;
 };
 
-/**
+/*
  * @class ACE_Hash_Map_Const_Iterator_Base_Ex
  *
  * @brief Base const iterator for the ACE_Hash_Map_Manager_Ex
@@ -756,7 +756,7 @@ protected:
   ACE_Hash_Map_Entry<EXT_ID, INT_ID> *next_;
 };
 
-/**
+/*
  * @class ACE_Hash_Map_Iterator_Ex
  *
  * @brief Forward iterator for the ACE_Hash_Map_Manager_Ex.
@@ -788,7 +788,7 @@ public:
                             int tail = 0);
 
   /// Contructor.
-  /**
+  /*
    * This constructor positions the iterator to the given @a entry.
    */
   ACE_Hash_Map_Iterator_Ex (
@@ -826,7 +826,7 @@ public:
   ACE_ALLOC_HOOK_DECLARE;
 };
 
-/**
+/*
  * @class ACE_Hash_Map_Const_Iterator_Ex
  *
  * @brief Const forward iterator for the ACE_Hash_Map_Manager_Ex.
@@ -883,7 +883,7 @@ public:
   ACE_ALLOC_HOOK_DECLARE;
 };
 
-/**
+/*
  * @class ACE_Hash_Map_Bucket_Iterator
  *
  * @brief Forward iterator for the ACE_Hash_Map_Manager_Ex which
@@ -970,7 +970,7 @@ protected:
   ACE_Hash_Map_Entry<EXT_ID, INT_ID> *next_;
 };
 
-/**
+/*
  * @class ACE_Hash_Map_Reverse_Iterator_Ex
  *
  * @brief Reverse iterator for the ACE_Hash_Map_Manager_Ex.
@@ -1027,7 +1027,7 @@ public:
   ACE_ALLOC_HOOK_DECLARE;
 };
 
-/**
+/*
  * @class ACE_Hash_Map_Const_Reverse_Iterator_Ex
  *
  * @brief Const reverse iterator for the ACE_Hash_Map_Manager_Ex.
@@ -1084,7 +1084,7 @@ public:
   ACE_ALLOC_HOOK_DECLARE;
 };
 
-/**
+/*
  * @class ACE_Hash_Map_Manager
  *
  * @brief Wrapper for backward compatibility.
@@ -1129,7 +1129,7 @@ class ACE_Hash_Map_Manager : public ACE_Hash_Map_Manager_Ex<EXT_ID, INT_ID, ACE_
 {
 public:
 
-  /**
+  /*
    * Initialize a @c Hash_Map_Manager with default size elements.
    * @param table_alloc is a pointer to a memory allocator used for
    *        table_, so it should supply size*sizeof (ACE_Hash_Map_Entry<EXT_ID, INT_ID>).
@@ -1143,7 +1143,7 @@ public:
   ACE_Hash_Map_Manager (ACE_Allocator *table_alloc = 0,
                         ACE_Allocator *entry_alloc = 0);
 
-  /**
+  /*
    * Initialize a @c Hash_Map_Manager with @c size elements.
    * @param table_alloc is a pointer to a memory allocator used for
    *        table_, so it should supply size*sizeof (ACE_Hash_Map_Entry<EXT_ID, INT_ID>).
@@ -1164,7 +1164,7 @@ public:
   u_long hash (const EXT_ID &ext_id);
 };
 
-/**
+/*
  * @class ACE_Hash_Map_Iterator
  *
  * @brief Wrapper for backward compatibility.
@@ -1205,7 +1205,7 @@ public:
   operator= (const ACE_Hash_Map_Iterator_Ex<EXT_ID, INT_ID, ACE_Hash<EXT_ID>, ACE_Equal_To<EXT_ID>, ACE_LOCK> &base);
 };
 
-/**
+/*
  * @class ACE_Hash_Map_Const_Iterator
  *
  * @brief Wrapper for backward compatibility.
@@ -1247,7 +1247,7 @@ public:
   operator= (const ACE_Hash_Map_Const_Iterator_Ex<EXT_ID, INT_ID, ACE_Hash<EXT_ID>, ACE_Equal_To<EXT_ID>, ACE_LOCK> &base);
 };
 
-/**
+/*
  * @class ACE_Hash_Map_Reverse_Iterator
  *
  * @brief Wrapper for backward compatibility.

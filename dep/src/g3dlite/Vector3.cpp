@@ -1,4 +1,4 @@
-/**
+/*
  @file Vector3.cpp
  
  3D vector class

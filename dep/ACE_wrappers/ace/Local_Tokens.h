@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Local_Tokens.h
  *
  *  $Id: Local_Tokens.h 91626 2010-09-07 10:59:20Z johnnyw $
@@ -70,7 +70,7 @@
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 // 1.
-/**
+/*
  * @class ACE_TOKEN_CONST
  *
  * @brief Not a public interface.
@@ -99,7 +99,7 @@ namespace ACE_TOKEN_CONST
 class ACE_Token_Proxy;
 
 // 3..
-/**
+/*
  * @class ACE_TPQ_Entry
  *
  * @brief Token Proxy Queue entry.  Used in the ACE_Token_Proxy_Queue
@@ -204,7 +204,7 @@ typedef ACE_TPQ_Entry ACE_TPQ_ENTRY;
 typedef ACE_TSS<ACE_TPQ_Entry> ACE_TPQ_ENTRY;
 #endif /* ACE_NO_TSS_TOKENS */
 
-/**
+/*
  * @class ACE_TSS_TPQ_Entry
  *
  * @brief ACE_TSS_TPQ_Entry
@@ -256,7 +256,7 @@ private:
 class ACE_Token_Proxy_Queue;
 
 // c..
-/**
+/*
  * @class ACE_TPQ_Iterator
  *
  * @brief Iterates through ACE_Token_Proxy_Queues.
@@ -289,7 +289,7 @@ private:
 };
 
 // 4..
-/**
+/*
  * @class ACE_Token_Proxy_Queue
  *
  * @brief Token waiter list.
@@ -314,7 +314,7 @@ public:
   /// Destructor.
   ~ACE_Token_Proxy_Queue (void);
 
-  /**
+  /*
    * Enqueue a proxy, nesting level, client_id, and a magic cookie at
    * the given position in the list.  If the position is -1, we
    * enqueue at the end of the list (I think).
@@ -352,7 +352,7 @@ protected:
 };
 
 // 5..
-/**
+/*
  * @class ACE_Tokens
  *
  * @brief Abstract representation of ACE tokens.
@@ -438,14 +438,14 @@ public:
   /// Dump the state of the class.
   void dump (void) const;
 
-  /**
+  /*
    * These are the Token types supported by the library at ship time.
    * There is no restriction on the number of Token types added by
    * "3rd parties."  These are only necessary for the Token Server.
    */
   enum TOKEN_TYPES { MUTEX, RWLOCK };
 
-  /**
+  /*
    * Provides a manual RTTI mechanism.  This method is used only by
    * ACE_Token_Request so that the type of a token can be sent to a
    * remote Token Server.
@@ -482,7 +482,7 @@ protected:
 class ACE_Local_Mutex;
 
 // 6..
-/**
+/*
  * @class ACE_Mutex_Token
  *
  * @brief Class that acquires, renews, and releases a process-local
@@ -511,7 +511,7 @@ public:
   // that multiple proxies (e.g. ACE_Local_Mutex) can use the same
   // token.
 
-  /**
+  /*
    * Returns 0 on success, -1 on failure with <ACE_Log_Msg::errnum> as
    * the reason.  If errnum == EWOULDBLOCK, and notify == 1,
    * <ACE_Token_Proxy::sleep_hook> has been called on the current
@@ -525,7 +525,7 @@ public:
   /// Same as acquire, but fails if would block
   virtual int tryacquire (ACE_TPQ_Entry *caller);
 
-  /**
+  /*
    * An optimized method that efficiently reacquires the token if no
    * other threads are waiting.  This is useful for situations where
    * you don't want to degrade the quality of service if there are
@@ -548,7 +548,7 @@ public:
   virtual int renew (ACE_TPQ_Entry *caller,
                      int requeue_position);
 
-  /**
+  /*
    * Relinquish the token.  If there are any waiters then the next one
    * in line gets it.  If the caller is not the owner, caller is
    * removed from the waiter list.
@@ -577,7 +577,7 @@ private:
 };
 
 // 12..
-/**
+/*
  * @class ACE_RW_Token
  *
  * @brief Class that acquires, renews, and releases a process-local
@@ -606,7 +606,7 @@ public:
   // that multiple proxies (e.g. ACE_Local_Mutex) can use the same
   // token.
 
-  /**
+  /*
    * Returns 0 on success, -1 on failure with <ACE_Log_Msg::errnum> as
    * the reason.  If errnum == EWOULDBLOCK, and notify == 1,
    * <ACE_Token_Proxy::sleep_hook> has been called on the current
@@ -620,7 +620,7 @@ public:
   /// Same as acquire except fails on would block
   virtual int tryacquire (ACE_TPQ_Entry *caller);
 
-  /**
+  /*
    * An optimized method that efficiently reacquires the token if no
    * other threads are waiting.  This is useful for situations where
    * you don't want to degrade the quality of service if there are
@@ -643,7 +643,7 @@ public:
   virtual int renew (ACE_TPQ_Entry *caller,
                      int requeue_position);
 
-  /**
+  /*
    * Relinquish the token.  If there are any waiters then the next one
    * in line gets it.  If the caller is not the owner, caller is
    * removed from the waiter list.
@@ -681,7 +681,7 @@ protected:
 };
 
 // a..
-/**
+/*
  * @class ACE_Token_Name
  *
  * @brief Allows Token_Manger to identify tokens.
@@ -725,7 +725,7 @@ private:
 };
 
 // 7..
-/**
+/*
  * @class ACE_Token_Proxy
  *
  * @brief Abstract representation of ACE tokens.
@@ -763,7 +763,7 @@ public:
   /// Destructor.
   virtual ~ACE_Token_Proxy (void);
 
-  /**
+  /*
    * Open the <ACE_Token>.
    * @param name The string uniquely identifying the token.
    * @param ignore_deadlock Can be 1 to disable deadlock notifications.
@@ -831,14 +831,14 @@ public:
   /// thread-specific data.
   virtual const ACE_TCHAR *client_id (void) const;
 
-  /**
+  /*
    * Set the client_id for the calling thread.  I strongly recommend
    * that this not be used unless you really know what you're doing.
    * I use this in the Token Server, and it caused many headaches.
    */
   virtual void client_id (const ACE_TCHAR *client_id);
 
-  /**
+  /*
    * Return the name of the token.  This is important for use within
    * the token servers (local and remote) as well as with token
    * collections.  So, all derivations of ACE_Token_Proxy must be able to
@@ -848,7 +848,7 @@ public:
    */
   virtual const ACE_TCHAR *name (void) const;
 
-  /**
+  /*
    * This should really be called <someone_waiting>.  This is called
    * by ACE_Token_xx's when another proxy enters the waiting list and
    * requests that the current token holder be notified.
@@ -868,7 +868,7 @@ public:
   /// Dump the state of the class.
   void dump (void) const;
 
-  /**
+  /*
    * This method can be used be Tokens (e.g. Readers/Writer Tokens) to
    * distinguish between Proxy types.  For instance a Reader proxy
    * should return a different type value than a Writer proxy.  The
@@ -903,7 +903,7 @@ protected:
 };
 
 // 8..
-/**
+/*
  * @class ACE_Null_Token
  *
  * @brief No op class for nonthreaded platform protocols.
@@ -953,7 +953,7 @@ public:
 };
 
 // 9..
-/**
+/*
  * @class ACE_Local_Mutex
  *
  * @brief Class that acquires, renews, and releases a synchronization
@@ -974,7 +974,7 @@ public:
 class ACE_Export ACE_Local_Mutex : public ACE_Token_Proxy
 {
 public:
-  /**
+  /*
    * Constructor.
    * @param token_name Uniquely id's the token.
    * @param ignore_deadlock Will allow deadlock to occur (useful for testing).
@@ -999,7 +999,7 @@ protected:
 };
 
 // *.
-/**
+/*
  * @class ACE_Local_RLock
  *
  * @brief Class that acquires, renews, and releases a readers lock that
@@ -1028,7 +1028,7 @@ class ACE_Export ACE_Local_RLock : public ACE_Token_Proxy
 public:
   // = Initialization and termination.
 
-  /**
+  /*
    * Constructor.
    * @param token_name Uniquely id's the token.
    * @param ignore_deadlock Will allow deadlock to occur (useful for testing).
@@ -1056,7 +1056,7 @@ protected:
 };
 
 // *.
-/**
+/*
  * @class ACE_Local_WLock
  *
  * @brief Class that acquires, renews, and releases a writer lock that
@@ -1085,7 +1085,7 @@ class ACE_Export ACE_Local_WLock : public ACE_Token_Proxy
 public:
   // = Initialization and termination.
 
-  /**
+  /*
    * Constructor.
    * @param token_name Uniquely id's the token.
    * @param ignore_deadlock Will allow deadlock to occur (useful for testing).

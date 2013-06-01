@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file   Handle_Ops.h
  *
  *  $Id: Handle_Ops.h 80826 2008-03-04 14:51:23Z wotte $
@@ -30,7 +30,7 @@ class ACE_Time_Value;
 // = Operations on HANDLEs.
 namespace ACE
 {
-  /**
+  /*
    * Wait up to @a timeout amount of time to actively open a device.
    * This method doesn't perform the @c connect, it just does the
    * timed wait.

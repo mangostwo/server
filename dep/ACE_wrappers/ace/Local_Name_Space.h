@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Local_Name_Space.h
  *
  *  $Id: Local_Name_Space.h 80826 2008-03-04 14:51:23Z wotte $
@@ -27,7 +27,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_NS_WString;
 
-/**
+/*
  * @class ACE_NS_String
  *
  * @brief This class and ACE_NS_Internal are used as Adapters to work
@@ -90,7 +90,7 @@ private:
   bool delete_rep_;
 };
 
-/**
+/*
  * @class ACE_NS_Internal
  *
  * @brief This class and ACE_NS_String are used as Adapters to work

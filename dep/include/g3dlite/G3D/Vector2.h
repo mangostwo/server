@@ -1,4 +1,4 @@
-/**
+/*
   @file Vector2.h
  
   2D vector class
@@ -31,7 +31,7 @@ class Vector3;
 class Vector4;
 class Any;
 
-/**
+/*
  Do not subclass-- this implementation makes assumptions about the
  memory layout.
  */
@@ -109,7 +109,7 @@ public:
         return x + y;
     }
 
-    /**
+    /*
      Linear interpolation
      */
     inline Vector2 lerp(const Vector2& v, float alpha) const {
@@ -144,7 +144,7 @@ public:
     /** Returns a unit-length vector */
     Vector2 direction() const;
 
-    /**
+    /*
      Potentially less accurate but faster than direction().
      Only works if System::hasSSE is true.
      */
@@ -155,7 +155,7 @@ public:
     float squaredLength() const;
     float dot(const Vector2& s) const;
 
-    /**
+    /*
      Make this vector have unit length and return the old length.
      If the vector length was less than tolerance, do not normalize.
      */

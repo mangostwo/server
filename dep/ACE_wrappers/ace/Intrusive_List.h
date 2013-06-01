@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file Intrusive_List.h
  *
  *  $Id: Intrusive_List.h 91688 2010-09-09 11:21:50Z johnnyw $
@@ -22,7 +22,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Intrusive_List
  *
  * @brief Implement an intrusive double linked list
@@ -90,7 +90,7 @@ public:
   T *tail (void) const;
 
   /// Remove a element from the list
-  /**
+  /*
    * Verify that the element is still in the list before removing it.
    */
   void remove (T *node);
@@ -99,7 +99,7 @@ public:
   void swap(ACE_Intrusive_List<T> & rhs);
 
   /// Remove a element from the list without checking
-  /**
+  /*
    * No attempts are performed to check if T* really belongs to the
    * list.  The effects of removing an invalid element are unspecified
    */

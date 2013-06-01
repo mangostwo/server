@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    SString.h
  *
  *  $Id: SString.h 91058 2010-07-12 08:20:09Z johnnyw $
@@ -47,7 +47,7 @@ template class ACE_Export ACE_String_Base_Const_Iterator<char>;
 template class ACE_Export ACE_String_Base_Const_Iterator<ACE_WSTRING_TYPE>;
 #endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION_EXPORT */
 
-/**
+/*
  * @class ACE_NS_WString
  *
  * @brief This class retain the backward compatibility for
@@ -111,7 +111,7 @@ ACE_NS_WString operator + (const ACE_NS_WString &,
 
 // -----------------------------------------------------------------
 
-/**
+/*
  * @class ACE_SString
  *
  * @brief A very Simple String ACE_SString class.  This is not a
@@ -169,7 +169,7 @@ public:
   /// Assignment operator (does copy memory).
   ACE_SString &operator = (const ACE_SString &);
 
-  /**
+  /*
    * Return a substring given an offset and length, if length == npos
    * use rest of str return empty substring if offset or offset/length
    * are invalid
@@ -264,7 +264,7 @@ typedef ACE_CString ACE_TString;
 
 // ****************************************************************
 
-/**
+/*
  * @class ACE_Auto_String_Free
  *
  * @brief Simple class to automatically de-allocate strings

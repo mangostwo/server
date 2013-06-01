@@ -1,4 +1,4 @@
-/**
+/*
   @file Rect2D.h
  
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -33,7 +33,7 @@ namespace G3D {
 
 class Any;
 
-/**
+/*
  If you are using this class for pixel rectangles, keep in mind that the last
  pixel you can draw to is at x0() + width() - 1.
  */
@@ -41,7 +41,7 @@ class Rect2D {
 private:
     Vector2 min, max;
 
-    /**
+    /*
      Returns true if the whole polygon is clipped.
      @param p Value of the point
      @param axis Index [0 or 1] of the axis to clip along?
@@ -397,7 +397,7 @@ public:
         }
     }
 
-    /**
+    /*
      Returns the overlap region between the two rectangles.  This may have zero area
      if they do not intersect.  See the two-Rect2D constructor for a way to compute
      a union-like rectangle.

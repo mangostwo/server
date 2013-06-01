@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    SPIPE_Acceptor.h
  *
  *  $Id: SPIPE_Acceptor.h 82723 2008-09-16 09:35:44Z johnnyw $
@@ -28,7 +28,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_SPIPE_Acceptor
  *
  * @brief A factory class that produces ACE_SPIPE_Stream objects.
@@ -53,7 +53,7 @@ public:
   ACE_SPIPE_Acceptor (void);
 
   /// Initiate a passive-mode STREAM pipe listener.
-  /**
+  /*
    * @param local_sap   The name of the pipe instance to open and listen on.
    * @param reuse_addr  Optional, and ignored. Needed for API compatibility
    *                    with other acceptor classes.
@@ -75,7 +75,7 @@ public:
                       int pipe_mode = PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE);
 
   /// Initiate a passive-mode STREAM pipe listener.
-  /**
+  /*
    * @param local_sap   The name of the pipe instance to open and listen on.
    * @param reuse_addr  Optional, and ignored. Needed for API compatibility
    *                    with other acceptor classes.
@@ -106,7 +106,7 @@ public:
   int remove (void);
 
   // = Passive connection acceptance method.
-  /**
+  /*
    * Accept a new data transfer connection.
    *
    * @param ipc_sap_spipe  The ACE_SPIPE_Stream to initialize with the

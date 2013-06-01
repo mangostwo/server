@@ -135,7 +135,7 @@ ACE_OS::strerror (int errnum)
 }
 
 #if defined (ACE_LACKS_STRERROR)
-/**
+/*
  * Just returns "Unknown Error" all the time.
  */
 char *

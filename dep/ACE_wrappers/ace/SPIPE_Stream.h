@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/**
+/*
  *  @file    SPIPE_Stream.h
  *
  *  $Id: SPIPE_Stream.h 84480 2009-02-16 18:58:16Z johnnyw $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_SPIPE_Stream
  *
  * @brief Defines the methods in the ACE_SPIPE_Stream abstraction.
@@ -112,7 +112,7 @@ public:
   /// Recv iovecs via the OS "scatter-read" operation.
   ssize_t recv (iovec iov[], int len) const;
 
-  /**
+  /*
    * Send N char *ptrs and int lengths.  Note that the char *'s
    * precede the ints (basically, an varargs version of writev).  The
    * count N is the *total* number of trailing arguments, *not* a
@@ -120,7 +120,7 @@ public:
    */
   ssize_t send (size_t len, ...) const;
 
-  /**
+  /*
    * This is an interface to ::readv, that doesn't use the struct
    * iovec explicitly.  The ... can be passed as an arbitrary number
    * of (char *ptr, int len) tuples.  However, the count N is the

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file   OS_NS_errno.h
  *
  *  $Id: OS_NS_errno.h 85321 2009-05-12 08:31:31Z johnnyw $
@@ -52,7 +52,7 @@ namespace ACE_OS {
 } /* namespace ACE_OS */
 
 #if defined (ACE_HAS_WINCE_BROKEN_ERRNO)
-/**
+/*
  * @class ACE_CE_Errno
  *
  * Some versions of CE don't support @c errno and some versions'

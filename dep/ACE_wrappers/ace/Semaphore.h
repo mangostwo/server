@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/**
+/*
  *  @file    Semaphore.h
  *
  *  $Id: Semaphore.h 81014 2008-03-19 11:41:31Z johnnyw $
@@ -28,7 +28,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Time_Value;
 
-/**
+/*
  * @class ACE_Semaphore
  *
  * @brief Wrapper for Dijkstra style general semaphores.
@@ -47,7 +47,7 @@ public:
   /// Implicitly destroy the semaphore.
   ~ACE_Semaphore (void);
 
-  /**
+  /*
    * Explicitly destroy the semaphore.  Note that only one thread
    * should call this method since it doesn't protect against race
    * conditions.
@@ -58,7 +58,7 @@ public:
   /// greater than 0, then decrement it.
   int acquire (void);
 
-  /**
+  /*
    * Block the thread until the semaphore count becomes greater than 0
    * (at which point it is decremented) or until @a tv times out (in
    * which case -1 is returned and @c errno == @c ETIME).  Note that @a tv
@@ -75,7 +75,7 @@ public:
    */
   int acquire (ACE_Time_Value &tv);
 
-  /**
+  /*
    * If @a tv == 0 then call <acquire()> directly.  Otherwise, Block
    * the thread until the semaphore count becomes greater than 0
    * (at which point it is decremented) or until @a tv times out (in
@@ -92,7 +92,7 @@ public:
    * -DACE_HAS_POSIX_SEM.  */
   int acquire (ACE_Time_Value *tv);
 
-  /**
+  /*
    * Conditionally decrement the semaphore if count is greater than 0
    * (i.e., won't block).  Returns -1 on failure.  If we "failed"
    * because someone else already had the lock, @c errno is set to
@@ -108,21 +108,21 @@ public:
   /// unblocking waiting threads.
   int release (unsigned int release_count);
 
-  /**
+  /*
    * Acquire semaphore ownership.  This calls <acquire> and is only
    * here to make the ACE_Semaphore interface consistent with the
    * other synchronization APIs.
    */
   int acquire_read (void);
 
-  /**
+  /*
    * Acquire semaphore ownership.  This calls <acquire> and is only
    * here to make the ACE_Semaphore interface consistent with the
    * other synchronization APIs.
    */
   int acquire_write (void);
 
-  /**
+  /*
    * Conditionally acquire semaphore (i.e., won't block).  This calls
    * <tryacquire> and is only here to make the ACE_Semaphore
    * interface consistent with the other synchronization APIs.
@@ -131,7 +131,7 @@ public:
    */
   int tryacquire_read (void);
 
-  /**
+  /*
    * Conditionally acquire semaphore (i.e., won't block).  This calls
    * <tryacquire> and is only here to make the ACE_Semaphore
    * interface consistent with the other synchronization APIs.
@@ -140,7 +140,7 @@ public:
    */
   int tryacquire_write (void);
 
-  /**
+  /*
    * This is only here to make the ACE_Semaphore
    * interface consistent with the other synchronization APIs.
    * Assumes the caller has already acquired the semaphore using one of

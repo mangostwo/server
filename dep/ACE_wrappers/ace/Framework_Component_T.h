@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Framework_Component_T.h
  *
  *  $Id: Framework_Component_T.h 92208 2010-10-13 06:20:39Z johnnyw $
@@ -21,7 +21,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Framework_Component_T
  *
  * @brief This class inherits the interface of the abstract

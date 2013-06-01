@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Proactor_Impl.h
  *
  *  $Id: Proactor_Impl.h 80826 2008-03-04 14:51:23Z wotte $
@@ -28,7 +28,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/**
+/*
  * @class ACE_Proactor_Impl
  *
  * @brief A manager for asynchronous event demultiplexing. This class
@@ -54,7 +54,7 @@ public:
   virtual int register_handle (ACE_HANDLE handle,
                                const void *completion_key) = 0;
 
-  /**
+  /*
    * Dispatch a single set of events.  If @a wait_time elapses before
    * any events occur, return 0.  Return 1 on success i.e., when a
    * completion is dispatched, non-zero (-1) on errors and errno is
@@ -62,7 +62,7 @@ public:
    */
   virtual int handle_events (ACE_Time_Value &wait_time) = 0;
 
-  /**
+  /*
    * Block indefinitely until at least one event is dispatched.
    * Dispatch a single set of events.  If <wait_time> elapses before
    * any events occur, return 0.  Return 1 on success i.e., when a
@@ -237,7 +237,7 @@ public:
                                         int priority = 0,
                                         int signal_number = ACE_SIGRTMIN) = 0;
 
-  /**
+  /*
    * Create the correct implementation object for the Timer
    * result. POSIX_SIG_Proactor will create a Timer object with a
    * meaningful signal number, if you leave the signal number as 0.
@@ -250,7 +250,7 @@ public:
                          int priority = 0,
                          int signal_number = 0) = 0;
 
-  /**
+  /*
    * Post @a how_many completions to the completion port so that all
    * threads can wake up. This is used in conjunction with the
    * <run_event_loop>.

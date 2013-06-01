@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/**
+/*
  *  @file    Log_Msg_Callback.h
  *
  *  $Id: Log_Msg_Callback.h 91064 2010-07-12 10:11:24Z johnnyw $
@@ -24,7 +24,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Log_Record;
 
-/**
+/*
  * @class ACE_Log_Msg_Callback
  *
  * @brief An interface class used to get logging callbacks.
