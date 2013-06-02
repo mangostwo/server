@@ -1,3 +1,4 @@
+SET(CMAKE_VERBOSE_MAKEFILE ON)
 cmake_minimum_required (VERSION 2.6)
 
 INCLUDE(cmake/FindMySQL.cmake)
