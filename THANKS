@@ -26,10 +26,12 @@ similar to this one:
 
  We would also like to acknowledge the contributions made by the following
  teams, those input and code has from time to time been included in the MaNGOS
- code:-
+ code. Each of the commits will have a prefix indicating the source team :-
  
- TrinityCore
- Project SilverPine
- MangosR2
- ScriptDev
- cMangos
+ t	-	TrinityCore
+ p	-	Project SilverPine
+ r	-	MangosR2
+ s	-	ScriptDev
+ c	-	cMangos
+ m	-	mangos
+ 
