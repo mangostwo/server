@@ -114,5 +114,4 @@ namespace VMAP
             unsigned int getUniqueNameId(const std::string pName);
     };
 }                                                           // VMAP
-
 #endif                                                      /*_TILEASSEMBLER_H_*/

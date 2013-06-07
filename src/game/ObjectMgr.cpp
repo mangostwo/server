@@ -6306,8 +6306,8 @@ void ObjectMgr::LoadPetNumber()
 
 std::string ObjectMgr::GeneratePetName(uint32 entry)
 {
-    std::vector<std::string>& list0 = PetHalfName0[entry];
-    std::vector<std::string>& list1 = PetHalfName1[entry];
+    std::vector<std::string> & list0 = PetHalfName0[entry];
+    std::vector<std::string> & list1 = PetHalfName1[entry];
 
     if (list0.empty() || list1.empty())
     {
@@ -6874,7 +6874,7 @@ struct SQLSpellLoader : public SQLStorageLoaderBase<SQLSpellLoader, SQLHashStora
             dst = D(src);
     }
 
-    void default_fill_to_str(uint32 field_pos, char const* /*src*/, char*& dst)
+    void default_fill_to_str(uint32 field_pos, char const* /*src*/, char * & dst)
     {
         if (field_pos == LOADED_SPELLDBC_FIELD_POS_SPELLNAME_0)
         {
@@ -8823,9 +8823,9 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
         }
 
         ++count;
+
     }
     while (result->NextRow());
-
     delete result;
 
     sLog.outString();
@@ -8905,14 +8905,15 @@ void ObjectMgr::LoadVendors(char const* tableName, bool isTemplates)
 
         vList.AddItem(item_id, maxcount, incrtime, ExtendedCost, conditionId);
         ++count;
+
     }
     while (result->NextRow());
-
     delete result;
 
     sLog.outString();
     sLog.outString(">> Loaded %u vendor %sitems", count, isTemplates ? "template " : "");
 }
+
 
 void ObjectMgr::LoadVendorTemplates()
 {
@@ -8984,9 +8985,9 @@ void ObjectMgr::LoadNpcGossips()
 
         m_mCacheNpcTextIdMap[guid] = textid ;
         ++count;
+
     }
     while (result->NextRow());
-
     delete result;
 
     sLog.outString();
@@ -9240,6 +9241,7 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
         m_mGossipMenuItemsMap.insert(GossipMenuItemsMap::value_type(gMenuItem.menu_id, gMenuItem));
 
         ++count;
+
     }
     while (result->NextRow());
 

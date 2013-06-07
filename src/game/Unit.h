@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/**
+/*
  * \addtogroup game
  * @{
  * \file
@@ -626,7 +626,7 @@ enum MovementFlags
     MOVEFLAG_PITCH_UP           = 0x00000040,
     MOVEFLAG_PITCH_DOWN         = 0x00000080,
     MOVEFLAG_WALK_MODE          = 0x00000100,               // Walking
-    MOVEFLAG_ONTRANSPORT        = 0x00000200,
+    MOVEFLAG_ONTRANSPORT        = 0x00000200,               // Used for flying on some creatures
     MOVEFLAG_LEVITATING         = 0x00000400,
     MOVEFLAG_ROOT               = 0x00000800,
     MOVEFLAG_FALLING            = 0x00001000,
@@ -779,7 +779,7 @@ namespace Movement
     class MoveSpline;
 }
 
-/**
+/*
  * The different available diminishing return levels.
  * \see DiminishingReturn
  */
@@ -791,7 +791,7 @@ enum DiminishingLevels
     DIMINISHING_LEVEL_IMMUNE        = 3          //< The target is immune to the DiminishingGrouop
 };
 
-/**
+/*
  * Structure to keep track of diminishing returns, for more information
  * about the idea behind diminishing returns, see: http://www.wowwiki.com/Diminishing_returns
  * \see Unit::GetDiminishing
@@ -805,23 +805,23 @@ struct DiminishingReturn
         : DRGroup(group), stack(0), hitTime(t), hitCount(count)
     {}
 
-    /**
+    /*
      * Group that this diminishing return will affect
      */
     DiminishingGroup        DRGroup: 16;
-    /**
+    /*
      * Seems to be how many times this has been stacked, modified in
      * Unit::ApplyDiminishingAura
      */
     uint16                  stack: 16;
-    /**
+    /*
      * Records at what time the last hit with this DiminishingGroup was done, if it's
      * higher than 15 seconds (ie: 15 000 ms) the DiminishingReturn::hitCount will be reset
      * to DiminishingLevels::DIMINISHING_LEVEL_1, which will do no difference to the duration
      * of the stun etc.
      */
     uint32                  hitTime;
-    /**
+    /*
      * Records how many times a spell of this DiminishingGroup has hit, this in turn
      * decides how how long the duration of the stun etc is.
      */
@@ -1151,20 +1151,20 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
             return m_floatValues[UNIT_FIELD_BOUNDINGRADIUS];
         }
 
-        /**
+        /*
          * Gets the current DiminishingLevels for the given group
          * @param group The group that you would like to know the current diminishing return level for
          * @return The current diminishing level, up to DIMINISHING_LEVEL_IMMUNE
          */
         DiminishingLevels GetDiminishing(DiminishingGroup  group);
-        /**
+        /*
          * Increases the level of the DiminishingGroup by one level up until
          * DIMINISHING_LEVEL_IMMUNE where the target becomes immune to spells of
          * that DiminishingGroup
          * @param group The group to increase the level for by one
          */
         void IncrDiminishing(DiminishingGroup group);
-        /**
+        /*
          * Calculates how long the duration of a spell should be considering
          * diminishing returns, ie, if the Level passed in is DIMINISHING_LEVEL_IMMUNE
          * then the duration will be zeroed out. If it is DIMINISHING_LEVEL_1 then a full
@@ -1177,51 +1177,51 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
          * @param isReflected Whether the spell was reflected or not, used to determine if we should do any calculations at all.
          */
         void ApplyDiminishingToDuration(DiminishingGroup  group, int32& duration, Unit* caster, DiminishingLevels Level, int32 limitduration, bool isReflected);
-        /**
+        /*
          * Applies a diminishing return to the given group if apply is true,
          * otherwise lowers the level by one (?)
          * @param group The group to affect
          * @param apply whether this aura is being added/removed
          */
         void ApplyDiminishingAura(DiminishingGroup  group, bool apply);
-        /**
+        /*
          * Clears all the current diminishing returns for this Unit.
          */
         void ClearDiminishings() { m_Diminishing.clear(); }
 
         void Update(uint32 update_diff, uint32 time) override;
 
-        /**
+        /*
          * Updates the attack time for the given WeaponAttackType
          * @param type The type of weapon that we want to update the time for
          * @param time the remaining time until we can attack with the WeaponAttackType again
          */
         void setAttackTimer(WeaponAttackType type, uint32 time) { m_attackTimer[type] = time; }
-        /**
+        /*
          * Resets the attack timer to the base value decided by Unit::m_modAttackSpeedPct and
          * Unit::GetAttackTime
          * @param type The weapon attack type to reset the attack timer for.
          */
         void resetAttackTimer(WeaponAttackType type = BASE_ATTACK);
-        /**
+        /*
          * Get's the remaining time until we can do an attack
          * @param type The weapon type to check the remaining time for
          * @return The remaining time until we can attack with this weapon type.
          */
         uint32 getAttackTimer(WeaponAttackType type) const { return m_attackTimer[type]; }
-        /**
+        /*
          * Checks whether the unit can do an attack. Does this by checking the attacktimer for the
          * WeaponAttackType, can probably be thought of as a cooldown for each swing/shot
          * @param type What weapon should we check for
          * @return true if the Unit::m_attackTimer is zero for the given WeaponAttackType
          */
         bool isAttackReady(WeaponAttackType type = BASE_ATTACK) const { return m_attackTimer[type] == 0; }
-        /**
+        /*
          * Checks if the current Unit has an offhand weapon
          * @return True if there is a offhand weapon.
          */
         bool haveOffhandWeapon() const;
-        /**
+        /*
          * Does an attack if any of the timers allow it and resets them, if the user
          * isn't in range or behind the target an error is sent to the client.
          * Also makes sure to not make and offhand and mainhand attack at the same
@@ -1229,7 +1229,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
          * @return True if an attack was made and no error happened, false otherwise
          */
         bool UpdateMeleeAttackingState();
-        /**
+        /*
          * Check is a given equipped weapon can be used, ie the mainhand, offhand etc.
          * @param attackType The attack type to check, ie: main/offhand/ranged
          * @return True if the weapon can be used, true except for shapeshifts and if disarmed.
@@ -1296,7 +1296,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
             return NULL;
         }
-        /**
+        /*
          * Tries to attack a Unit/Player, also makes sure to stop attacking the current target
          * if we're already attacking someone.
          * @param victim The Unit to attack
@@ -1304,19 +1304,19 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
          * @return True if an attack was initiated, false otherwise
          */
         bool Attack(Unit* victim, bool meleeAttack);
-        /**
+        /*
          * Called when we are attacked by someone in someway, might be when a fear runs out and
          * we want to notify AI to attack again or when a spell hits.
          * @param attacker Who's attacking us
          */
         void AttackedBy(Unit* attacker);
-        /**
+        /*
          * Stop all spells from casting except the one give by except_spellid
          * @param except_spellid This spell id will not be stopped from casting, defaults to 0
          * \see Unit::InterruptSpell
          */
         void CastStop(uint32 except_spellid = 0);
-        /**
+        /*
          * Stops attacking whatever we are attacking at the moment and tells the Unit we are attacking
          * that we are not doing that anymore.
          * @param targetSwitch if we are switching targets or not, defaults to false
@@ -1324,7 +1324,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
          * \see Unit::m_attacking
          */
         bool AttackStop(bool targetSwitch = false);
-        /**
+        /*
          * Removes all attackers from the Unit::m_attackers set and logs it if someone that
          * wasn't attacking it was in the list. Does this check by checking if Unit::AttackStop()
          * returned false.

@@ -1515,13 +1515,13 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket* p_data)
     uint32 char_flags = 0;
     uint32 playerFlags = fields[14].GetUInt32();
     uint32 atLoginFlags = fields[15].GetUInt32();
-    if (playerFlags & PLAYER_FLAGS_HIDE_HELM)
+    if (playerFlags& PLAYER_FLAGS_HIDE_HELM)
         char_flags |= CHARACTER_FLAG_HIDE_HELM;
-    if (playerFlags & PLAYER_FLAGS_HIDE_CLOAK)
+    if (playerFlags& PLAYER_FLAGS_HIDE_CLOAK)
         char_flags |= CHARACTER_FLAG_HIDE_CLOAK;
-    if (playerFlags & PLAYER_FLAGS_GHOST)
+    if (playerFlags& PLAYER_FLAGS_GHOST)
         char_flags |= CHARACTER_FLAG_GHOST;
-    if (atLoginFlags & AT_LOGIN_RENAME)
+    if (atLoginFlags& AT_LOGIN_RENAME)
         char_flags |= CHARACTER_FLAG_RENAME;
     if (sWorld.getConfig(CONFIG_BOOL_DECLINED_NAMES_USED))
     {
@@ -1564,7 +1564,7 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket* p_data)
     Tokens data = StrSplit(fields[19].GetCppString(), " ");
     for (uint8 slot = 0; slot < EQUIPMENT_SLOT_END; ++slot)
     {
-        uint32 visualbase = slot * 2;
+        uint32 visualbase = slot * 2;                       // entry, perm ench., temp ench.
         uint32 item_id = GetUInt32ValueFromArray(data, visualbase);
         const ItemPrototype* proto = ObjectMgr::GetItemPrototype(item_id);
         if (!proto)
@@ -1594,8 +1594,8 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket* p_data)
         *p_data << uint32(enchant ? enchant->aura_id : 0);
     }
 
-    *p_data << uint32(0);                                   // bag 1 display id
-    *p_data << uint8(0);                                    // bag 1 inventory type
+    *p_data << uint32(0);                                   // first bag display id
+    *p_data << uint8(0);                                    // first bag inventory type
     *p_data << uint32(0);                                   // enchant?
     *p_data << uint32(0);                                   // bag 2 display id
     *p_data << uint8(0);                                    // bag 2 inventory type

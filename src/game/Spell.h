@@ -237,8 +237,8 @@ class Spell
         friend struct MaNGOS::SpellNotifierPlayer;
         friend struct MaNGOS::SpellNotifierCreatureAndPlayer;
         friend void Unit::SetCurrentCastedSpell(Spell* pSpell);
-
     public:
+
         void EffectEmpty(SpellEffectIndex eff_idx);
         void EffectNULL(SpellEffectIndex eff_idx);
         void EffectUnused(SpellEffectIndex eff_idx);
@@ -728,7 +728,7 @@ namespace MaNGOS
                     i_data.push_back(pPlayer);
             }
         }
-        template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
+        template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
     };
 
     struct MANGOS_DLL_DECL SpellNotifierCreatureAndPlayer
@@ -789,7 +789,7 @@ namespace MaNGOS
             }
         }
 
-        template<class T> inline void Visit(GridRefManager<T>&  m)
+        template<class T> inline void Visit(GridRefManager<T>  &m)
         {
             MANGOS_ASSERT(i_data);
 

@@ -8,7 +8,8 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
+
 project (MANGOS_IOMAP_EXTRACTOR)
 
 LINK_DIRECTORIES( ${LINK_DIRECTORIES} ${CMAKE_SOURCE_DIR}/../../dep/libmpq/libmpq/.libs/ )

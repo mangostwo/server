@@ -602,7 +602,7 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         explicit WorldObject();
 
         // these functions are used mostly for Relocate() and Corpse/Player specific stuff...
-        // use them ONLY in LoadFromDB()/Create()  funcs and nowhere else!
+        // use them ONLY in LoadFromDB()/Create() funcs and nowhere else!
         // mapId/instanceId should be set in SetMap() function!
         void SetLocationMapId(uint32 _mapId) { m_mapId = _mapId; }
         void SetLocationInstanceId(uint32 _instanceId) { m_InstanceId = _instanceId; }

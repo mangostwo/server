@@ -190,7 +190,7 @@ extern int main(int argc, char** argv)
                    "MM   MM     MMM MM   MM MM  MMM MM  MM     MMM\n"
                    "MM   MM MMMMMMM MM   MM MMM MMM MM  MM MMM MMM\n"
                    "MM   MM MM  MMM MM   MM  MMMMMM  MMMM   MMMMM\n"
-                   "        MM  MMM http://getmangos.com\n"
+                   "        MM  MMM http://www.getmangos.co.uk\n"
                    "        MMMMMM\n\n");
     sLog.outString("Using configuration file %s.", cfg_file);
 

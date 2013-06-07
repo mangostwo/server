@@ -81,6 +81,7 @@ namespace VMAP
             bool result;
     };
 
+
     //=========================================================
 
     std::string StaticMapTree::getTileFileName(uint32 mapID, uint32 tileX, uint32 tileY)

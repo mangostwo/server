@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="git_id.cpp">
+    <ClCompile Include="..\git_id.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

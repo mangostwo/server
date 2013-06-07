@@ -39,5 +39,4 @@ namespace VMAP
             static bool checkSpellForLoS(unsigned int pSpellId);
     };
 }
-
 #endif

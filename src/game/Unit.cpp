@@ -2822,7 +2822,8 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackT
               !(((Creature*)this)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_CRUSH)) ||
              GetTypeId() == TYPEID_PLAYER && GetCharmerOrOwnerGuid()))
     {
-        // when their weapon skill is 15 or more above victim's defense skill
+        // mobs can score crushing blows if they're 3 or more levels above victim
+        // or when their weapon skill is 15 or more above victim's defense skill
         tmp = victimDefenseSkill;
         int32 tmpmax = victimMaxSkillValueForLevel;
         // having defense above your maximum (from items, talents etc.) has no effect
@@ -5492,7 +5493,7 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo)
         data << uint32(0);
     }
 
-    SendMessageToSet(&data, true);
+    SendMessageToSet(&data, true);  /**/
 }
 
 void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit* target, uint8 /*SwingType*/, SpellSchoolMask damageSchoolMask, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, VictimState TargetState, uint32 BlockedAmount)

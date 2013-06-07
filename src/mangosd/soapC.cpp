@@ -1635,7 +1635,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTostring(struct soap* soap, const char
     return soap_out_string(soap, tag, id, *a, type);
 }
 
-SOAP_FMAC3 char*** SOAP_FMAC4 soap_get_PointerTostring(struct soap* soap, char** *p, const char* tag, const char* type)
+SOAP_FMAC3 char** * SOAP_FMAC4 soap_get_PointerTostring(struct soap* soap, char** *p, const char* tag, const char* type)
 {
     if ((p = soap_in_PointerTostring(soap, tag, p, type)))
         if (soap_getindependent(soap))
@@ -1643,7 +1643,7 @@ SOAP_FMAC3 char*** SOAP_FMAC4 soap_get_PointerTostring(struct soap* soap, char**
     return p;
 }
 
-SOAP_FMAC3 char*** SOAP_FMAC4 soap_in_PointerTostring(struct soap* soap, const char* tag, char** *a, const char* type)
+SOAP_FMAC3 char** * SOAP_FMAC4 soap_in_PointerTostring(struct soap* soap, const char* tag, char** *a, const char* type)
 {
     if (soap_element_begin_in(soap, tag, 1, NULL))
         return NULL;
@@ -1697,7 +1697,7 @@ SOAP_FMAC3 char** SOAP_FMAC4 soap_get__QName(struct soap* soap, char** p, const 
     return p;
 }
 
-SOAP_FMAC3 char** SOAP_FMAC4 soap_in__QName(struct soap* soap, const char* tag, char** a, const char* type)
+SOAP_FMAC3 char * * SOAP_FMAC4 soap_in__QName(struct soap* soap, const char* tag, char** a, const char* type)
 {
     return soap_instring(soap, tag, a, type, SOAP_TYPE__QName, 2, -1, -1);
 }
@@ -1738,7 +1738,7 @@ SOAP_FMAC3 char** SOAP_FMAC4 soap_get_string(struct soap* soap, char** p, const 
     return p;
 }
 
-SOAP_FMAC3 char** SOAP_FMAC4 soap_in_string(struct soap* soap, const char* tag, char** a, const char* type)
+SOAP_FMAC3 char * * SOAP_FMAC4 soap_in_string(struct soap* soap, const char* tag, char** a, const char* type)
 {
     return soap_instring(soap, tag, a, type, SOAP_TYPE_string, 1, -1, -1);
 }

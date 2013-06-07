@@ -135,7 +135,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         void PlayerRelocation(Player*, float x, float y, float z, float angl);
         void CreatureRelocation(Creature* creature, float x, float y, float z, float orientation);
 
-        template<class T, class CONTAINER> void Visit(const Cell& cell, TypeContainerVisitor<T, CONTAINER>& visitor);
+        template<class T, class CONTAINER> void Visit(const Cell& cell, TypeContainerVisitor<T, CONTAINER> &visitor);
 
         bool IsRemovalGrid(float x, float y) const
         {
@@ -177,7 +177,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         const char* GetMapName() const;
 
         // have meaning only for instanced map (that have set real difficulty), NOT USE its for BaseMap
-        // _currently_ spawnmode == difficulty, but this can be changes later, so use appropriate spawmmode/difficult functions
+        // _currently_ spawnmode == difficulty, but this can be changes later, so use appropriate spawnmode/difficult functions
         // for simplify later code support
         // regular difficulty = continent/dungeon normal/first raid normal difficulty
         uint8 GetSpawnMode() const { return (i_spawnMode); }
@@ -443,7 +443,7 @@ class MANGOS_DLL_SPEC BattleGroundMap : public Map
 
 template<class T, class CONTAINER>
 inline void
-Map::Visit(const Cell& cell, TypeContainerVisitor<T, CONTAINER>& visitor)
+Map::Visit(const Cell& cell, TypeContainerVisitor<T, CONTAINER> &visitor)
 {
     const uint32 x = cell.GridX();
     const uint32 y = cell.GridY();

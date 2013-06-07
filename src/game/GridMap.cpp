@@ -523,6 +523,8 @@ GridMapLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 Re
             uint32 liqTypeIdx = liquidEntry->Type;
             if (entry < 21)
             {
+                // only basic liquid stored in maps actualy so in some case we need to override type depend on area
+                // actualy only Hyjal Mount and Coilfang raid be overrided here
                 if (AreaTableEntry const* area = sAreaStore.LookupEntry(getArea(x, y)))
                 {
                     uint32 overrideLiquid = area->LiquidTypeOverride[liquidEntry->Type];

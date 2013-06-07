@@ -1534,7 +1534,7 @@ bool ScriptAction::HandleScriptStep()
 
             pPlayer->SendMovieStart(m_script->playMovie.movieId);
 
-            break;
+            break;                                      // must be skipped at loading
         }
         case SCRIPT_COMMAND_MOVEMENT:                       // 20
         {

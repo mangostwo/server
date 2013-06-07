@@ -24,7 +24,6 @@ bool ExtractSingleModel(std::string& fname, StringSet& failedPaths)
     output += "/";
     output += GetPlainName(fname.c_str());
 
-
     if (FileExists(output.c_str()))
         return true;
 
