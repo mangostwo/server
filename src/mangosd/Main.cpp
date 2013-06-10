@@ -181,17 +181,29 @@ extern int main(int argc, char** argv)
     sLog.outString("%s [world-daemon]", _FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_NR, REVISION_ID));
     sLog.outString("<Ctrl-C> to stop.");
     sLog.outString("\n\n"
-                   "MM   MM         MM   MM  MMMMM   MMMM   MMMMM\n"
-                   "MM   MM         MM   MM MMM MMM MM  MM MMM MMM\n"
-                   "MMM MMM         MMM  MM MMM MMM MM  MM MMM\n"
-                   "MM M MM         MMMM MM MMM     MM  MM  MMM\n"
-                   "MM M MM  MMMMM  MM MMMM MMM     MM  MM   MMM\n"
-                   "MM M MM M   MMM MM  MMM MMMMMMM MM  MM    MMM\n"
-                   "MM   MM     MMM MM   MM MM  MMM MM  MM     MMM\n"
-                   "MM   MM MMMMMMM MM   MM MMM MMM MM  MM MMM MMM\n"
-                   "MM   MM MM  MMM MM   MM  MMMMMM  MMMM   MMMMM\n"
-                   "        MM  MMM http://getmangos.com\n"
-                   "        MMMMMM\n\n");
+                    " ####       ####            ###     ###   ########    #######     ######## \n"
+                    " #####     #####            ####    ###  ##########  #########   ##########\n"
+                    " #####     #####            #####   ###  ##########  #########   ##########\n"
+                    " ######   ######            #####   ###  ###        ####   ####  ###       \n"
+                    " ######   ######    ####    ######  ###  ###        ###     ###  ###       \n"
+                    " ####### #######   ######   ######  ###  ###  ##### ###     ###  ########  \n"
+                    " ### ### ### ###   ######   ####### ###  ###  ##### ###     ###  ######### \n"
+                    " ### ### ### ###  ###  ###  ### ### ###  ###  ##### ###     ###   #########\n"
+                    " ### ####### ###  ###  ###  ###  ######  ###    ### ###     ###        ####\n"
+                    " ### ####### ###  ###  ###  ###  ######  ###    ### ###     ###         ###\n"
+                    " ###  #####  ### ########## ###   #####  ###   #### ####   ####        ####\n"
+                    " ###  #####  ### ########## ###   #####  #########   #########   ##########\n"
+                    " ###  #####  ### ###    ### ###    ####  #########   #########   ######### \n"
+                    " ###   ###   ### ###    ### ###     ###   #######     #######     #######  \n"
+                    "\n"
+                    "                                                     ######                \n"
+                    " Website: http://www.getmangos.co.uk                   ##   ## ## ##   ### \n"
+                    "                                                       ##   ## ## ##  ## ##\n"
+                    "    Wiki: http://github.com/mangoswiki/wiki            ##   ## ## ##  ## ##\n"
+                    "                                                       ##    ######   ## ##\n"
+                    "   Forum: http://community.getmangos.co.uk             ##     ####     ### \n"
+                    "\n\n");
+
     sLog.outString("Using configuration file %s.", cfg_file);
 
     DETAIL_LOG("%s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));

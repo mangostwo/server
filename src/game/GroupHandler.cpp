@@ -234,7 +234,7 @@ void WorldSession::HandleGroupAcceptOpcode(WorldPacket& recv_data)
         return;
 }
 
-void WorldSession::HandleGroupDeclineOpcode(WorldPacket& /*recv_data*/)
+void WorldSession::HandleGroupDeclineOpcode(WorldPacket & /*recv_data*/)
 {
     Group*  group  = GetPlayer()->GetGroupInvite();
     if (!group)
@@ -356,7 +356,7 @@ void WorldSession::HandleGroupSetLeaderOpcode(WorldPacket& recv_data)
     group->ChangeLeader(guid);
 }
 
-void WorldSession::HandleGroupDisbandOpcode(WorldPacket& /*recv_data*/)
+void WorldSession::HandleGroupDisbandOpcode(WorldPacket & /*recv_data*/)
 {
     if (!GetPlayer()->GetGroup())
         return;
@@ -417,7 +417,7 @@ void WorldSession::HandleLootRoll(WorldPacket& recv_data)
     if (rollType >= MAX_ROLL_FROM_CLIENT)
         return;
 
-    // everything is fine, do it, if false then some cheating problem found
+    // everything is fine, do it, if false then some cheating problem found (result not used in pre-3.0)
     if (!group->CountRollVote(GetPlayer(), lootedTarget, itemSlot, RollVote(rollType)))
         return;
 
@@ -512,7 +512,7 @@ void WorldSession::HandleRaidTargetUpdateOpcode(WorldPacket& recv_data)
     }
 }
 
-void WorldSession::HandleGroupRaidConvertOpcode(WorldPacket& /*recv_data*/)
+void WorldSession::HandleGroupRaidConvertOpcode(WorldPacket & /*recv_data*/)
 {
     Group* group = GetPlayer()->GetGroup();
     if (!group)
@@ -662,7 +662,7 @@ void WorldSession::HandleRaidReadyCheckOpcode(WorldPacket& recv_data)
     }
 }
 
-void WorldSession::HandleRaidReadyCheckFinishedOpcode(WorldPacket& /*recv_data*/)
+void WorldSession::HandleRaidReadyCheckFinishedOpcode(WorldPacket & /*recv_data*/)
 {
     // Group* group = GetPlayer()->GetGroup();
     // if(!group)
@@ -935,7 +935,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
     SendPacket(&data);
 }
 
-void WorldSession::HandleRequestRaidInfoOpcode(WorldPacket& /*recv_data*/)
+void WorldSession::HandleRequestRaidInfoOpcode(WorldPacket & /*recv_data*/)
 {
     // every time the player checks the character screen
     _player->SendRaidInfo();

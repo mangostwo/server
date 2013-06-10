@@ -95,5 +95,4 @@ namespace VMAP
             virtual bool GetLiquidLevel(uint32 pMapId, float x, float y, float z, uint8 ReqLiquidType, float& level, float& floor, uint32& type) const = 0;
     };
 }
-
 #endif

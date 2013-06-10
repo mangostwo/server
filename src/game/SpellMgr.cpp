@@ -482,7 +482,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             if (spellInfo->Dispel == DISPEL_POISON)
                 return SPELL_STING;
 
-            // only hunter aspects have this
+            // only hunter aspects have this (one have generic family)
             if (spellInfo->IsFitToFamilyMask(UI64LIT(0x0044000000380000), 0x00001010))
                 return SPELL_ASPECT;
 

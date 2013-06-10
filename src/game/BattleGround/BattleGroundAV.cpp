@@ -275,7 +275,6 @@ void BattleGroundAV::StartingEventOpenDoors()
     UpdateWorldState(BG_AV_SHOW_A_SCORE, WORLD_STATE_ADD);
 
     OpenDoorEvent(BG_EVENT_DOOR);
-
     // Players that join battleground after start are not available to get achievement.
     StartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, BG_AV_EVENT_START_BATTLE);
 }
@@ -380,7 +379,6 @@ void BattleGroundAV::HandleAreaTrigger(Player* source, uint32 trigger)
 
 void BattleGroundAV::UpdatePlayerScore(Player* source, uint32 type, uint32 value)
 {
-
     BattleGroundScoreMap::iterator itr = m_PlayerScores.find(source->GetObjectGuid());
     if (itr == m_PlayerScores.end())                        // player not found...
         return;

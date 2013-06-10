@@ -331,7 +331,6 @@ inline void wstrToLower(std::wstring& str)
 }
 
 std::wstring GetMainPartOfName(std::wstring wname, uint32 declension);
-
 bool utf8ToConsole(const std::string& utf8str, std::string& conStr);
 bool consoleToUtf8(const std::string& conStr, std::string& utf8str);
 bool Utf8FitTo(const std::string& str, std::wstring search);

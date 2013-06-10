@@ -8,7 +8,7 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
 
 project( MoveMapGen )
 
@@ -26,9 +26,9 @@ include_directories(
     ../../src/game
     ../../src/game/vmap
     ../../dep/include/g3dlite
-    ../../src/framework
     ../../dep/ACE_wrappers
     ../../objdir/dep/ACE_wrappers
+    ../../src/framework
     ../../dep/recastnavigation/Detour/Include
     ../../dep/recastnavigation/Recast/Include
     ../../dep/src/zlib

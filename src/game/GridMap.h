@@ -97,6 +97,7 @@ enum GridMapLiquidStatus
     LIQUID_MAP_UNDER_WATER  = 0x00000008
 };
 
+// defined in DBC and left shifted for flag usage
 #define MAP_LIQUID_TYPE_NO_WATER    0x00
 #define MAP_LIQUID_TYPE_WATER       0x01
 #define MAP_LIQUID_TYPE_OCEAN       0x02

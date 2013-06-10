@@ -8,7 +8,8 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
+
 project (MANGOS_VMAP_ASSEMB_IO)
 
 set(CMAKE_VERBOSE_MAKEFILE true)
@@ -85,4 +86,3 @@ target_link_libraries(vmap_assembler vmap)
 
 # add_executable(vmap_test coordinate_test.cpp)
 # target_link_libraries(vmap_test vmap)
-

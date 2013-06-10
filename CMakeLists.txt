@@ -94,6 +94,9 @@ endif()
 # find Git: used to get the revision number
 find_package(Git)
 
+# find Git: used to get the revision number
+find_package(Git)
+
 # check if the platform supports precomiled headers
 find_package(PCHSupport)
 

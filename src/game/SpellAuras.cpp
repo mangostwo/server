@@ -51,7 +51,7 @@
 
 #define NULL_AURA_SLOT 0xFF
 
-/**
+/*
  * An array with all the different handlers for taking care of
  * the various aura types that are defined in AuraType.
  */

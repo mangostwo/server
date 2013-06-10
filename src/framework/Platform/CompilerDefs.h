@@ -29,6 +29,7 @@
 #  define PLATFORM PLATFORM_WINDOWS
 #elif defined( __WIN32__ ) || defined( WIN32 ) || defined( _WIN32 )
 #  define PLATFORM PLATFORM_WINDOWS
+#  define WIN_X86
 #elif defined( __APPLE_CC__ )
 #  define PLATFORM PLATFORM_APPLE
 #elif defined( __INTEL_COMPILER )

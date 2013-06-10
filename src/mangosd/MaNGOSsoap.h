@@ -80,7 +80,6 @@ class SOAPCommand
             pendingCommands(0, USYNC_THREAD, "pendingCommands")
         {
         }
-
         ~SOAPCommand()
         {
         }
