@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file   config-lite.h
  *
  *  $Id: config-lite.h 85832 2009-06-28 16:14:59Z johnnyw $
@@ -99,7 +99,7 @@ typedef ACE_OS_Thread_Descriptor *(*ACE_THR_DESC_LOG_MSG_HOOK) (void);
 
 ACE_END_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @deprecated ACE_DECLARE_STL_REVERSE_ITERATORS is a crutch to be
  *             used until all C++ compiler supported by ACE support
  *             the standard reverse_iterator adapters.

@@ -1,4 +1,4 @@
-/*
+/**
  @file NetworkDevice.cpp
 
  @maintainer Morgan McGuire, morgan@cs.brown.edu
@@ -578,7 +578,7 @@ bool Conduit::messageWaiting() {
 }
 
 
-/*
+/**
  Increases the send and receive sizes of a socket to 2 MB from 8k
  */
 static void increaseBufferSize(SOCKET sock) {

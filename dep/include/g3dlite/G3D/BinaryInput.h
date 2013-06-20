@@ -1,4 +1,4 @@
-/*
+/**
  @file BinaryInput.h
  
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -45,7 +45,7 @@ namespace G3D {
     #define G3D_ALLOW_UNALIGNED_WRITES
 #endif
 
-/*
+/**
  Sequential or random access byte-order independent binary file access.
  Files compressed with zlib and beginning with an unsigned 32-bit int
  size are transparently decompressed when the compressed = true flag is
@@ -72,7 +72,7 @@ private:
     // may grow if a large memory read occurs.  50 MB
     enum {INITIAL_BUFFER_LENGTH = 50000000};
 
-    /*
+    /**
      is the file big or little endian
      */
     G3DEndian       m_fileEndian;
@@ -97,7 +97,7 @@ private:
         */
     int64           m_alreadyRead;
 
-    /*
+    /**
      Length of the entire file, in bytes.  
      For the length of the buffer, see bufferLength
      */
@@ -107,12 +107,12 @@ private:
     int64           m_bufferLength;
     uint8*          m_buffer;
 
-    /*
+    /**
      Next byte in file, relative to buffer.
      */
     int64           m_pos;
 
-    /*
+    /**
      When true, the buffer is freed in the destructor.
      */
     bool            m_freeBuffer;
@@ -143,7 +143,7 @@ public:
     /** false, constant to use with the copyMemory option */
     static const bool       NO_COPY;
 
-    /*
+    /**
        If the file cannot be opened, a zero length buffer is presented.
        Automatically opens files that are inside zipfiles.
 
@@ -156,7 +156,7 @@ public:
         G3DEndian           fileEndian,
         bool                compressed = false);
 
-    /*
+    /**
      Creates input stream from an in memory source.
      Unless you specify copyMemory = false, the data is copied
      from the pointer, so you may deallocate it as soon as the
@@ -199,7 +199,7 @@ public:
         return m_filename;
     }
 
-    /*
+    /**
      Returns a pointer to the internal memory buffer.
      May throw an exception for huge files.
      */
@@ -210,7 +210,7 @@ public:
         return m_buffer;
     }
 
-    /*
+    /**
      Performs bounds checks in debug mode.  [] are relative to
      the start of the file, not the current position.
      Seeks to the new position before reading (and leaves 
@@ -221,7 +221,7 @@ public:
         return readUInt8();
     }
 
-    /*
+    /**
      Returns the length of the file in bytes.
      */
     inline int64 getLength() const {
@@ -232,7 +232,7 @@ public:
         return getLength();
     }
 
-    /*
+    /**
      Returns the current byte position in the file,
      where 0 is the beginning and getLength() - 1 is the end.
      */
@@ -240,7 +240,7 @@ public:
         return m_pos + m_alreadyRead;
     }
 
-    /*
+    /**
      Sets the position.  Cannot set past length.
      May throw a char* when seeking backwards more than 10 MB on a huge file.
      */
@@ -252,7 +252,7 @@ public:
         }
     }
 
-    /*
+    /**
      Goes back to the beginning of the file.
      */
     inline void reset() {
@@ -358,14 +358,14 @@ public:
 
     void readBytes(void* bytes, int64 n);
 
-    /*
+    /**
      Reads an n character string.  The string is not
      required to end in NULL in the file but will
      always be a proper std::string when returned.
      */
     std::string readString(int64 n);
 
-    /*
+    /**
      Reads until NULL or the end of the file is encountered.
      */
     std::string readString();
@@ -373,7 +373,7 @@ public:
     /** Reads until \r, \r\n, \n\r, \n or the end of the file is encountered. Consumes the newline.*/
     std::string readStringNewline();
 
-    /*
+    /**
      Reads until NULL or the end of the file is encountered.
      If the string has odd length (including NULL), reads 
      another byte.
@@ -390,14 +390,14 @@ public:
     Color4 readColor4();
     Color3 readColor3();
 
-    /*
+    /**
      Skips ahead n bytes.
      */
     inline void skip(int64 n) {
         setPosition(m_pos + m_alreadyRead + n);
     }
 
-    /*
+    /**
       Returns true if the position is not at the end of the file
     */
     inline bool hasMore() const {

@@ -1,4 +1,4 @@
-/*
+/**
  @file Color3.cpp
 
  Color class.

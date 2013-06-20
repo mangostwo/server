@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    FIFO_Recv.h
  *
  *  $Id: FIFO_Recv.h 91574 2010-08-30 16:52:24Z shuston $
@@ -27,7 +27,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_FIFO_Recv
  *
  * @brief Receiver side of the bytestream C++ wrapper for UNIX

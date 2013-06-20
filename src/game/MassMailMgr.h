@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/*
+/**
  * @addtogroup mailing The mail system
  * The mailing system in MaNGOS consists of mostly 4 files:
  * - Mail.h
@@ -40,7 +40,7 @@
 
 #include <memory>
 
-/*
+/**
  * A class to represent the mail send factory to multiple (often all existing) characters.
  *
  * Note: implementation not persistence for server shutdowns
@@ -56,7 +56,7 @@ class MassMailMgr
     public:                                                 // modifiers
         typedef UNORDERED_SET<uint32> ReceiversList;
 
-        /*
+        /**
          * And new mass mail task for raceMask filter applied to characters list.
          *
          * @param mailProto     prepared mail for clone and send to characters, will deleted in result call.
@@ -66,7 +66,7 @@ class MassMailMgr
          */
         void AddMassMailTask(MailDraft* mailProto, MailSender sender, uint32 raceMask);
 
-        /*
+        /**
          * And new mass mail task with SQL query text for fill receivers list.
          *
          * @param mailProto     prepared mail for clone and send to characters, will deleted in result call
@@ -76,7 +76,7 @@ class MassMailMgr
          */
         void AddMassMailTask(MailDraft* mailProto, MailSender sender, char const* queryStr);
 
-        /*
+        /**
          * And new mass mail task and let fill receivers list returned as result.
          *
          * @param mailProto     prepared mail for clone and send to characters, will deleted in result call
@@ -90,7 +90,7 @@ class MassMailMgr
             return m_massMails.rbegin()->m_receivers;
         }
 
-        /*
+        /**
          * Next step in mass mail activity, send some amount mails from queued tasks
          */
         void Update(bool sendall = false);

@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/*
+/**
  * @addtogroup mailing The mail system
  * The mailing system in MaNGOS consists of mostly 4 files:
  * - Mail.h
@@ -47,7 +47,7 @@ class CalendarEvent;
 #define MAIL_BODY_ITEM_TEMPLATE 8383                        ///< - plain letter, A Dusty Unsent Letter: 889
 /// The maximal amount of items a mail can contain.
 #define MAX_MAIL_ITEMS 12
-/*
+/**
  * The type of the mail.
  * A mail can have 5 Different Types.
  */
@@ -59,7 +59,7 @@ enum MailMessageType
     MAIL_GAMEOBJECT     = 4,                                /// client send CMSG_GAMEOBJECT_QUERY on this mailmessagetype
     MAIL_CALENDAR       = 5,
 };
-/*
+/**
  * A Mask representing the status of the mail.
  */
 enum MailCheckMask
@@ -72,7 +72,7 @@ enum MailCheckMask
     MAIL_CHECK_MASK_HAS_BODY    = 0x10,                     /// This mail has body text.
 };
 
-/*
+/**
  * The different types of Stationaries that exist for mails.
  * They have been gathered from Stationery.dbc
  */
@@ -86,7 +86,7 @@ enum MailStationery
     MAIL_STATIONERY_CHR     = 65,
     MAIL_STATIONERY_ORP     = 67,                           // new in 3.2.2
 };
-/*
+/**
  * Representation of the State of a mail.
  */
 enum MailState
@@ -95,7 +95,7 @@ enum MailState
     MAIL_STATE_CHANGED   = 2,
     MAIL_STATE_DELETED   = 3
 };
-/*
+/**
  * Answers contained in mails from auctionhouses.
  */
 enum MailAuctionAnswers
@@ -108,7 +108,7 @@ enum MailAuctionAnswers
     AUCTION_CANCELED            = 5,
     AUCTION_SALE_PENDING        = 6
 };
-/*
+/**
  * A class to represent the sender of a mail.
  */
 class MailSender
@@ -116,7 +116,7 @@ class MailSender
     public:                                                 // Constructors
         MailSender() : m_messageType(MAIL_NORMAL), m_senderId(0), m_stationery(MAIL_STATIONERY_DEFAULT) {}
 
-        /*
+        /**
          * Creates a new MailSender object.
          *
          * @param messageType the type of the mail.
@@ -147,7 +147,7 @@ class MailSender
         uint32 m_senderId;                                  // player low guid or other object entry
         MailStationery m_stationery;
 };
-/*
+/**
  * A class to represent the receiver of a mail.
  */
 class MailReceiver
@@ -157,7 +157,7 @@ class MailReceiver
         MailReceiver(Player* receiver);
         MailReceiver(Player* receiver, ObjectGuid receiver_guid);
     public:                                                 // Accessors
-        /*
+        /**
          * Gets the player associated with this MailReciever
          *
          * @see Player
@@ -166,7 +166,7 @@ class MailReceiver
          *
          */
         Player* GetPlayer() const { return m_receiver; }
-        /*
+        /**
          * Gets the low part of the recievers GUID.
          *
          * @returns the low part of the GUID of the player associated with this MailReciever
@@ -176,24 +176,24 @@ class MailReceiver
         Player* m_receiver;
         ObjectGuid m_receiver_guid;
 };
-/*
+/**
  * The class to represent the draft of a mail.
  */
 class MailDraft
 {
-        /*
+        /**
          * Holds a Map of GUIDs of items and pointers to the items.
          */
         typedef std::map<uint32, Item*> MailItemMap;
 
     public:                                                 // Constructors
-        /*
+        /**
          * Creates a new blank MailDraft object
          *
          */
         MailDraft()
             : m_mailTemplateId(0), m_mailTemplateItemsNeed(false), m_money(0), m_COD(0) {}
-        /*
+        /**
          * Creates a new MailDraft object using mail template id.
          *
          * @param mailTemplateId The ID of the Template to be used.
@@ -203,7 +203,8 @@ class MailDraft
         explicit MailDraft(uint16 mailTemplateId, bool need_items = true)
             : m_mailTemplateId(mailTemplateId), m_mailTemplateItemsNeed(need_items), m_money(0), m_COD(0)
         {}
-        /*
+        /**
+        /**
          * Creates a new MailDraft object using subject and content texts.
          *
          * @param subject The subject of the mail.
@@ -229,13 +230,13 @@ class MailDraft
         MailDraft& SetMailTemplate(uint16 mailTemplateId, bool need_items = true) { m_mailTemplateId = mailTemplateId, m_mailTemplateItemsNeed = need_items; return *this; }
 
         MailDraft& AddItem(Item* item);
-        /*
+        /**
          * Modifies the amount of money in a MailDraft.
          *
          * @param money The amount of money included in this MailDraft.
          */
         MailDraft& SetMoney(uint32 money) { m_money = money; return *this; }
-        /*
+        /**
          * Modifies the cost of delivery of the MailDraft.
          *
          * @param COD the amount to which the cod should be set.
@@ -269,7 +270,7 @@ class MailDraft
         /// The cod amount of this MailDraft.
         uint32 m_COD;
 };
-/*
+/**
  * Structure holding information about an item in the mail.
  */
 struct MailItemInfo
@@ -279,7 +280,7 @@ struct MailItemInfo
 };
 
 typedef std::vector<MailItemInfo> MailItemInfoVec;
-/*
+/**
  * Structure that holds an actual mail.
  */
 struct Mail
@@ -319,7 +320,7 @@ struct Mail
     /// The state of this mail.
     MailState state;
 
-    /*
+    /**
      * Adds an item to the mail.
      * This method adds an item to mail represented by this structure.
      * There is no checking done whether this is a legal action or not; it is up
@@ -338,7 +339,7 @@ struct Mail
         has_items = true;
     }
 
-    /*
+    /**
      * Removes an item from the mail.
      * This method removes an item from the mail.
      *

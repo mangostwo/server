@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    TLI_Connector.h
  *
  *  $Id: TLI_Connector.h 82723 2008-09-16 09:35:44Z johnnyw $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_TLI_Connector
  *
  * @brief Defines an active connection factory for the ACE_TLI C++
@@ -39,7 +39,7 @@ public:
   /// Default constructor.
   ACE_TLI_Connector (void);
 
-  /*
+  /**
    * Actively connect and produce a <new_stream> if things go well.
    * The @a remote_sap is the address that we are trying to connect
    * with.  The @a timeout is the amount of time to wait to connect.
@@ -67,7 +67,7 @@ public:
                      struct netbuf *udata = 0,
                      struct netbuf *opt = 0);
 
-  /*
+  /**
    * Actively connect and produce a <new_stream> if things go well.
    * The @a remote_sap is the address that we are trying to connect
    * with.  The @a timeout is the amount of time to wait to connect.
@@ -95,7 +95,7 @@ public:
                struct netbuf *udata = 0,
                struct netbuf *opt = 0);
 
-  /*
+  /**
    * Try to complete a non-blocking connection.
    * If connection completion is successful then @a new_stream contains
    * the connected ACE_SOCK_Stream.  If @a remote_sap is non-NULL then it

@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -19,7 +19,7 @@
 #ifndef MANGOS_THREADINGMODEL_H
 #define MANGOS_THREADINGMODEL_H
 
-/*
+/**
  * @class ThreadingModel<T>
  *
  */
@@ -146,6 +146,7 @@ namespace MaNGOS
 
             static MUTEX si_mtx;
     };
+
 }
 
 template<class T, class MUTEX> MUTEX MaNGOS::ClassLevelLockable<T, MUTEX>::si_mtx;

@@ -1,4 +1,4 @@
-/*
+/**
  * @file Recursive_Thread_Mutex.cpp
  *
  * $Id: Recursive_Thread_Mutex.cpp 91688 2010-09-09 11:21:50Z johnnyw $

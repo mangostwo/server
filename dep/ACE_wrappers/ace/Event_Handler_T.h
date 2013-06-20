@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/*
+/**
  *  @file    Event_Handler_T.h
  *
  *  $Id: Event_Handler_T.h 91626 2010-09-07 10:59:20Z johnnyw $
@@ -22,7 +22,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Event_Handler_T
  *
  * @brief Enable a class that doesn't inherit from the

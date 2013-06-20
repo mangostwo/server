@@ -1,4 +1,4 @@
-/*
+/**
   @file ReferenceCount.h
 
   Reference Counting Garbage Collector for C++
@@ -49,7 +49,7 @@ public:
     inline _WeakPtrLinkedList(_WeakPtr* p, _WeakPtrLinkedList* n) : weakPtr(p), next(n) {}
 };
 
-/*
+/**
  Objects that are reference counted inherit from this.  Subclasses 
  <B>must</B> have a public destructor (the default destructor is fine)
  and <B>publicly</B> inherit ReferenceCountedObject.
@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
 class ReferenceCountedObject {
 public:
 
-    /*
+    /**
      The long name is to keep this from accidentally conflicting with
      a subclass's variable name.  Do not use or explicitly manipulate
      this value--its type may change in the future and is not part
@@ -128,7 +128,7 @@ public:
      */
     AtomicInt32                 ReferenceCountedObject_refCount;
  
-    /*
+    /**
      Linked list of all weak pointers that reference this (some may be
      on the stack!).  Do not use or explicitly manipulate this value.
      */
@@ -149,7 +149,7 @@ public:
     virtual ~ReferenceCountedObject();
 
 
-    /*
+    /**
       Note: copies will initially start out with 0 
       references and 0 weak references like any other object.
      */
@@ -160,7 +160,7 @@ public:
 
 
 
-/*
+/**
  Use ReferenceCountedPointer<T> in place of T* in your program.
  T must subclass ReferenceCountedObject.
 @deprecated To be replaced by boost::shared_ptr in 7.0
@@ -241,7 +241,7 @@ public:
 
     inline ReferenceCountedPointer() : m_pointer(NULL) {}
 
-    /*
+    /**
       Allow silent cast <i>to</i> the base class.
     
       <pre>
@@ -259,7 +259,7 @@ public:
     }
 
 #   if (! defined(MSC_VER) || (MSC_VER >= 1300))
-    /*
+    /**
       Explicit cast to a subclass.  Acts like dynamic cast; the result will be NULL if
       the cast cannot succeed.  Not supported on VC6.
       <pre>
@@ -356,7 +356,7 @@ public:
     }
 
     // TODO: distinguish between last strong and last any pointer
-    /*
+    /**
      Returns true if this is the last reference to an object.
      Useful for flushing memoization caches-- a cache that holds the last
      reference is unnecessarily keeping an object alive.
@@ -371,7 +371,7 @@ public:
 };
 
 
-/*
+/**
  A weak pointer allows the object it references to be garbage collected.
  Weak pointers are commonly used in caches, where it is important to hold
  a pointer to an object without keeping that object alive solely for the
@@ -393,7 +393,7 @@ private:
     T*          pointer;
 
 public:
-    /*
+    /**
       Creates a strong pointer, which prevents the object from being
       garbage collected.  The strong pointer may be NULL, which means
       that the underlying.
@@ -478,7 +478,7 @@ public:
 
     WeakReferenceCountedPointer() : pointer(0) {}
 
-    /*
+    /**
       Allow compile time subtyping rule 
       RCP&lt;<I>T</I>&gt; &lt;: RCP&lt;<I>S</I>&gt; if <I>T</I> &lt;: <I>S</I>
      */

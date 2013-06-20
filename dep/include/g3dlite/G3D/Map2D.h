@@ -1,4 +1,4 @@
-/*
+/**
  @file Map2D.h
 
  More flexible support than provided by G3D::GImage.
@@ -77,7 +77,7 @@ DECLARE_COMPUTE_TYPE( Color4uint8,  Color4)
 
 namespace G3D {
 
-/*
+/**
   Map of values across a discrete 2D plane.  Can be thought of as a generic class for 2D images, 
   allowing flexibility as to pixel format and convenient methods.
   In fact, the "pixels" can be any values
@@ -288,7 +288,7 @@ protected:
 
 public:
 
-    /*
+    /**
      Although Map2D is not threadsafe (except for the setChanged() method),
      you can use this mutex to create your own threadsafe access to a Map2D.
      Not used by the default implementation.
@@ -480,7 +480,7 @@ public:
         setChanged(true);
 	}
 
-    /*
+    /**
      Crops this map so that it only contains pixels between (x, y) and (x + w - 1, y + h - 1) inclusive.
      */
     virtual void crop(int newX, int newY, int newW, int newH) {
@@ -584,7 +584,7 @@ public:
         return bilinear(p.x, p.y, wrap);
     }
 
-    /*
+    /**
      Uses Catmull-Rom splines to interpolate between grid
      values.  Guaranteed to match nearest(x, y) at integers.
      */

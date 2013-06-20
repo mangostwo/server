@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    CE_Screen_Output.h
  *
  *  $Id: CE_Screen_Output.h 80826 2008-03-04 14:51:23Z wotte $
@@ -32,7 +32,7 @@ namespace
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_CE_Screen_Output
  *
  * @brief Replacement of text output for Windows CE.
@@ -64,7 +64,7 @@ public:
   void clear (void);
 
   /// Stream insertion operator that performs actual print out.
-  /*
+  /**
    * @note This is the only one operator that performs output.  All
    *       other perators convert the type and use this operator
    *       underneath.

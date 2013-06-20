@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    Condition_Thread_Mutex.h
  *
  *  $Id: Condition_Thread_Mutex.h 92069 2010-09-28 11:38:59Z johnnyw $
@@ -54,7 +54,7 @@ private:
   ACE_Condition_Attributes (const ACE_Condition_Attributes &);
 };
 
-/*
+/**
  * @class ACE_Condition_Thread_Mutex
  *
  * @brief ACE_Condition variable wrapper written using ACE_Mutexes This
@@ -91,14 +91,14 @@ public:
   /// Implicitly destroy the condition variable.
   ~ACE_Condition_Thread_Mutex (void);
 
-  /*
+  /**
    * Explicitly destroy the condition variable.  Note that only one
    * thread should call this method since it doesn't protect against
    * race conditions.
    */
   int remove (void);
 
-  /*
+  /**
    * Block on condition, or until absolute time-of-day has passed.  If
    * abstime == 0 use "blocking" <wait> semantics.  Else, if @a abstime
    * != 0 and the call times out before the condition is signaled
@@ -109,7 +109,7 @@ public:
   /// Block on condition.
   int wait (void);
 
-  /*
+  /**
    * Block on condition or until absolute time-of-day has passed.  If
    * abstime == 0 use "blocking" wait() semantics on the <mutex>
    * passed as a parameter (this is useful if you need to store the

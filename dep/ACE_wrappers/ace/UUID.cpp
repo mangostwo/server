@@ -445,7 +445,7 @@ namespace ACE_Utils
     clock_sequence = uuid_state_.clock_sequence;
   }
 
-  /*
+  /**
    * ACE_Time_Value is in POSIX time, seconds since Jan 1, 1970. UUIDs use
    * time in 100ns ticks since 15 October 1582. The difference is:
    *   15 Oct 1582 - 1 Jan 1600: 17 days in Oct, 30 in Nov,  31 in Dec +

@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -144,6 +144,7 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
         /* statistics */
         uint32 GetNumInstances();
         uint32 GetNumPlayersInInstances();
+
 
         // get list of all maps
         const MapMapType& Maps() const { return i_maps; }

@@ -1,4 +1,4 @@
-/*
+/**
  * @file TSS_Adapter.cpp
  *
  * $Id: TSS_Adapter.cpp 91286 2010-08-05 09:04:31Z johnnyw $

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    IPC_SAP.h
  *
  *  $Id: IPC_SAP.h 80826 2008-03-04 14:51:23Z wotte $
@@ -23,7 +23,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_IPC_SAP
  *
  * @brief Defines the member functions for the base class of the
@@ -38,14 +38,14 @@ public:
 
   // = Common I/O handle options related to sockets.
 
-  /*
+  /**
    * Enable asynchronous I/O (ACE_SIGIO), urgent data (ACE_SIGURG),
    * non-blocking I/O (ACE_NONBLOCK), or close-on-exec (ACE_CLOEXEC),
    * which is passed as the @a value.
    */
   int enable (int value) const;
 
-  /*
+  /**
    * Disable asynchronous I/O (ACE_SIGIO), urgent data (ACE_SIGURG),
    * non-blocking I/O (ACE_NONBLOCK), or close-on-exec (ACE_CLOEXEC),
    * which is passed as the @a value.
@@ -71,7 +71,7 @@ protected:
   ACE_IPC_SAP (void);
 
   /// Protected destructor.
-  /*
+  /**
    * Not a virtual destructor.  Protected destructor to prevent
    * operator delete() from being called through a base class
    * ACE_IPC_SAP pointer/reference.

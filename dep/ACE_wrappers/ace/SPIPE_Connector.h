@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    SPIPE_Connector.h
  *
  *  $Id: SPIPE_Connector.h 82723 2008-09-16 09:35:44Z johnnyw $
@@ -24,7 +24,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_SPIPE_Connector
  *
  * @brief Defines an active connection factory for ACE_SPIPE_Stream.
@@ -38,7 +38,7 @@ public:
   /// Default constructor.
   ACE_SPIPE_Connector (void);
 
-  /*
+  /**
    * Actively connect and produce a <new_stream> if things go well.
    * The @a remote_sap is the address that we are trying to connect
    * with.  The @a timeout is the amount of time to wait to connect.
@@ -66,7 +66,7 @@ public:
                        LPSECURITY_ATTRIBUTES sa = 0,
                        int pipe_mode = PIPE_READMODE_MESSAGE | PIPE_WAIT);
 
-  /*
+  /**
    * Actively connect and produce a <new_stream> if things go well.
    * The @a remote_sap is the address that we are trying to connect
    * with.  The @a timeout is the amount of time to wait to connect.

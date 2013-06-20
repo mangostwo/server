@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Typed_SV_Message_Queue.h
  *
  *  $Id: Typed_SV_Message_Queue.h 80826 2008-03-04 14:51:23Z wotte $
@@ -24,7 +24,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Typed_SV_Message_Queue
  *
  * @brief Defines the header file for the C++ wrapper facade for typed message queues.

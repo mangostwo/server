@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file Value_Ptr.h
  *
  *  $Id: Value_Ptr.h 80826 2008-03-04 14:51:23Z wotte $
@@ -24,7 +24,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace ACE
 {
-  /*
+  /**
    * @struct VP_traits
    *
    * @brief @c Value_Ptr traits template structure.
@@ -47,7 +47,7 @@ namespace ACE
     static T * clone (T const * p) { return new T (*p); }
   };
 
-  /*
+  /**
    * @class Value_Ptr
    *
    * @brief Smart pointer implementation designed for use as a class
@@ -82,7 +82,7 @@ namespace ACE
 
     /// Non-throwing swap operation used to make assignment strongly
     /// exception-safe.
-    /*
+    /**
      * @note As implemented, the swap operation may not work correctly
      *       for @c auto_ptr\<\>s, but why would one use an @c
      *       auto_ptr\<\> as the template argument for this particular

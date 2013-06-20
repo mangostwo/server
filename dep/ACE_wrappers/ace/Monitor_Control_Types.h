@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  * @file Monitor_Control_Types.h
  *
  * $Id: Monitor_Control_Types.h 83306 2008-10-17 12:19:53Z johnnyw $
@@ -49,7 +49,7 @@ namespace ACE
         MC_GROUP
       };
 
-      /*
+      /**
        * @brief An instance is contained by each enabled monitor point.
        */
       struct ACE_Export Data
@@ -70,7 +70,7 @@ namespace ACE
         double last_;
       };
 
-      /*
+      /**
        * @brief Bundles the constrain string with its associated
        *        trigger action.
        */
@@ -88,18 +88,18 @@ namespace ACE
         Control_Action* control_action;
       };
 
-      /*
+      /**
        * @brief Used by the admin class as a container for the data from
        *        a group of monitor points.
        */
       typedef ACE_Vector<Data> DataList;
 
-      /*
+      /**
        * @brief Used in various places to pass around a set of string names.
        */
       typedef ACE_Vector<ACE_CString> NameList;
 
-      /*
+      /**
        * @brief Holder for a monitor point's constraints.
        */
       typedef ACE_Array_Map<long, Constraint> ConstraintList;

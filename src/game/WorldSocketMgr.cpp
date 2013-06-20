@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -44,7 +44,7 @@
 #include "Database/DatabaseEnv.h"
 #include "WorldSocket.h"
 
-/*
+/**
 * This is a helper class to WorldSocketMgr ,that manages
 * network threads, and assigning connections from acceptor thread
 * to other network threads

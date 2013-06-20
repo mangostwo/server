@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -127,6 +127,7 @@ namespace MaNGOS
             Creature const* i_source;
             va_list* i_args;
     };
+
 
     class BattleGround2ChatBuilder
     {

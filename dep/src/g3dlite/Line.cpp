@@ -1,4 +1,4 @@
-/*
+/**
   @file Line.cpp
  
   Line class

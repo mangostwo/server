@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file   Cleanup.h
  *
  *  $Id: Cleanup.h 84163 2009-01-15 07:57:27Z johnnyw $
@@ -39,7 +39,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Cleanup
  *
  * @brief Base class for objects that are cleaned by ACE_Object_Manager.
@@ -61,7 +61,7 @@ public:
 extern "C" ACE_Export
 void ACE_CLEANUP_DESTROYER_NAME (ACE_Cleanup *, void *param = 0);
 
-/*
+/**
  * @class ACE_Cleanup_Info_Node
  *
  * @brief For maintaining a list of ACE_Cleanup_Info items.
@@ -105,7 +105,7 @@ private:
 
 typedef ACE_Intrusive_List<ACE_Cleanup_Info_Node> ACE_Cleanup_Info_Node_List;
 
-/*
+/**
  * @class ACE_OS_Exit_Info
  *
  * @brief Hold Object Manager cleanup (exit) information.
@@ -139,7 +139,7 @@ public:
   void call_hooks ();
 
 private:
-  /*
+  /**
    * Keeps track of all registered objects.
    */
   ACE_Cleanup_Info_Node_List registered_objects_;

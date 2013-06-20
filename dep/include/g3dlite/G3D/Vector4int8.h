@@ -1,4 +1,4 @@
-/*
+/**
   @file Vector4int8.h
  
   Homogeneous vector class.
@@ -23,7 +23,7 @@ namespace G3D {
 class Vector3;
 class Vector4;
 
-/*
+/**
  Homogeneous vector stored efficiently in four signed int8s.
 
  */

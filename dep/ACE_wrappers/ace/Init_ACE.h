@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file   Init_ACE.h
  *
  *  $Id: Init_ACE.h 88794 2010-02-01 19:15:36Z schmidt $
@@ -30,7 +30,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace ACE
 {
-  /*
+  /**
    * This method initializes the ACE library services and initializes
    * ACE's internal resources.  Applications should not instantiate
    * ACE classes or call methods on objects of these classes until @a
@@ -41,7 +41,7 @@ namespace ACE
    */
   extern ACE_Export int init (void);
 
-  /*
+  /**
    * Finalize the ACE library services and releases ACE's internal
    * resources.  In general, do not instantiate ACE classes or call
    * methods on objects of these classes after @a ACE::fini() has been
@@ -55,7 +55,7 @@ namespace ACE
   // private:
   //  Used internally, so not exported.
 
-  /*
+  /**
    * Counter to match <init()>/<fini()> calls.  <init()> must increment it;
    * <fini()> must decrement it.  <fini()> then does nothing until it
    * reaches 0.

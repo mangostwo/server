@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Malloc_Base.h
  *
  *  $Id: Malloc_Base.h 92085 2010-09-29 12:23:13Z johnnyw $
@@ -29,7 +29,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 // The definition of this class is located in Malloc.cpp.
 
-/*
+/**
  * @class ACE_Allocator
  *
  * @brief Interface for a dynamic memory allocator that uses inheritance
@@ -81,7 +81,7 @@ public:
 
   // = Map manager like functions
 
-  /*
+  /**
    * Associate @a name with @a pointer.  If @a duplicates == 0 then do
    * not allow duplicate @a name/@a pointer associations, else if
    * @a duplicates != 0 then allow duplicate @a name/@a pointer
@@ -92,7 +92,7 @@ public:
    */
   virtual int bind (const char *name, void *pointer, int duplicates = 0) = 0;
 
-  /*
+  /**
    * Associate @a name with @a pointer.  Does not allow duplicate
    * @a name/@a pointer associations.  Returns 0 if successfully binds
    * (1) a previously unbound @a name, 1 if trying to bind a previously
@@ -122,7 +122,7 @@ public:
   // = Protection and "sync" (i.e., flushing memory to persistent
   // backing store).
 
-  /*
+  /**
    * Sync @a len bytes of the memory region to the backing store
    * starting at @c this->base_addr_.  If @a len == -1 then sync the
    * whole region.
@@ -133,7 +133,7 @@ public:
   /// starting at @a addr.
   virtual int sync (void *addr, size_type len, int flags = MS_SYNC) = 0;
 
-  /*
+  /**
    * Change the protection of the pages of the mapped region to @a prot
    * starting at <this->base_addr_> up to @a len bytes.  If @a len == -1
    * then change protection of all pages in the mapped region.

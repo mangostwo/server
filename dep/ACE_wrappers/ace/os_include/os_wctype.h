@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    os_wctype.h
  *
  *  wide-character classification and mapping utilities

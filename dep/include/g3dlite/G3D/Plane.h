@@ -1,4 +1,4 @@
-/*
+/**
  @file Plane.h
 
  Plane class
@@ -19,7 +19,7 @@
 
 namespace G3D {
 
-/*
+/**
  An infinite 2D plane in 3D space.
  */
 class Plane {
@@ -29,7 +29,7 @@ private:
     Vector3						_normal;
     float						_distance;
 
-    /*
+    /**
      Assumes the normal has unit length.
      */
     Plane(const Vector3& n, float d) : _normal(n), _distance(d) {
@@ -40,7 +40,7 @@ public:
     Plane() : _normal(Vector3::unitY()), _distance(0) {
     }
 
-    /*
+    /**
      Constructs a plane from three points.
      */
     Plane(
@@ -48,7 +48,7 @@ public:
         const Vector3&      point1,
         const Vector3&      point2);
 
-    /*
+    /**
      Constructs a plane from three points, where at most two are
      at infinity (w = 0, not xyz = inf).
      */
@@ -57,7 +57,7 @@ public:
         Vector4             point1,
         Vector4             point2);
 
-    /*
+    /**
      The normal will be unitized.
      */
     Plane(
@@ -72,7 +72,7 @@ public:
 
     virtual ~Plane() {}
 
-    /*
+    /**
      Returns true if point is on the side the normal points to or 
      is in the plane.
      */
@@ -85,7 +85,7 @@ public:
         return _normal.dot(point) >= _distance;
     }
 
-    /*
+    /**
      Returns true if point is on the side the normal points to or 
      is in the plane.
      */
@@ -97,7 +97,7 @@ public:
         }
     }
 
-    /*
+    /**
      Returns true if point is on the side the normal points to or 
      is in the plane.  Only call on finite points.  Faster than halfSpaceContains.
      */
@@ -106,7 +106,7 @@ public:
         return _normal.dot(point) >= _distance;
     }
 
-    /*
+    /**
      Returns true if the point is nearly in the plane.
      */
     inline bool fuzzyContains(const Vector3 &point) const {
@@ -117,7 +117,7 @@ public:
 		return _normal;
 	}
 
-    /*
+    /**
       Returns distance from point to plane. Distance is negative if point is behind (not in plane in direction opposite normal) the plane.
     */
     inline float distance(const Vector3& x) const {
@@ -133,13 +133,13 @@ public:
         return _normal * _distance;
     }
 
-    /*
+    /**
      Inverts the facing direction of the plane so the new normal
      is the inverse of the old normal.
      */
     void flip();
 
-    /*
+    /**
       Returns the equation in the form:
 
       <CODE>normal.Dot(Vector3(<I>x</I>, <I>y</I>, <I>z</I>)) + d = 0</CODE>
@@ -147,7 +147,7 @@ public:
     void getEquation(Vector3 &normal, double& d) const;
     void getEquation(Vector3 &normal, float& d) const;
 
-    /*
+    /**
       ax + by + cz + d = 0
      */
     void getEquation(double& a, double& b, double& c, double& d) const;

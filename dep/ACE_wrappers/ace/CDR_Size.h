@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file   CDR_Size.h
  *
  *  $Id: CDR_Size.h 80826 2008-03-04 14:51:23Z wotte $
@@ -38,7 +38,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_SizeCDR
  *
  * @brief A CDR stream for calculating size of the representation.
@@ -140,7 +140,7 @@ private:
   ACE_CDR::Boolean write_8 (const ACE_CDR::ULongLong *x);
   ACE_CDR::Boolean write_16 (const ACE_CDR::LongDouble *x);
 
-  /*
+  /**
    * write an array of @a length elements, each of @a size bytes and the
    * start aligned at a multiple of <align>. The elements are assumed
    * to be packed with the right alignment restrictions.  It is mostly

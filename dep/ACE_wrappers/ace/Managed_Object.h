@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Managed_Object.h
  *
  *  $Id: Managed_Object.h 80826 2008-03-04 14:51:23Z wotte $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Cleanup_Adapter
  *
  * @brief Adapter for ACE_Cleanup objects that allows them to be readily
@@ -60,7 +60,7 @@ private:
   TYPE object_;
 };
 
-/*
+/**
  * @class ACE_Managed_Object
  *
  * @brief Wrapper for interface to allocate an object managed by the

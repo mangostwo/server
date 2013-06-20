@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/*
+/**
  *  @file    IOStream_T.h
  *
  *  $Id: IOStream_T.h 80826 2008-03-04 14:51:23Z wotte $
@@ -45,7 +45,7 @@ template <class STREAM>
 class ACE_Streambuf_T : public ACE_Streambuf
 {
 public:
-  /*
+  /**
    * We will be given a STREAM by the iostream object which creates
    * us.  See the ACE_IOStream template for how that works.  Like
    * other streambuf objects, we can be input-only, output-only or
@@ -78,7 +78,7 @@ protected:
   STREAM *peer_;
 };
 
-/*
+/**
  * @class ACE_IOStream
  *
  * @brief A template adapter for creating an iostream-like object using
@@ -115,7 +115,7 @@ public:
   ACE_IOStream (STREAM &stream,
                   u_int streambuf_size = ACE_STREAMBUF_SIZE);
 
-  /*
+  /**
    * The default constructor.  This will initiailze your STREAM and
    * then setup the iostream baseclass to use a custom streambuf based
    * on STREAM.
@@ -130,7 +130,7 @@ public:
   /// function.
   virtual int close (void);
 
-  /*
+  /**
    * Returns 1 if we're at the end of the <STREAM>, i.e., if the
    * connection has closed down or an error has occurred, else 0.
    * Under the covers, <eof> calls the streambuf's @a timeout function
@@ -141,7 +141,7 @@ public:
   int eof (void) const;
 
 #  if defined (ACE_HAS_STRING_CLASS)
-  /*
+  /**
    * A simple string operator.  The base <iostream> has them for char*
    * but that isn't always the best thing for a <String>.  If we don't
    * provide our own here, we may not get what we want.
@@ -240,7 +240,7 @@ private:
   ACE_UNIMPLEMENTED_FUNC (ssize_t recv_n (...))
 };
 
-/*
+/**
  * @class ACE_SOCK_Dgram_SC
  *
  * @brief "Dgram_SC" is short for "Datagram Self-Contained."

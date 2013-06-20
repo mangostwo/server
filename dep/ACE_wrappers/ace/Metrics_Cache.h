@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/*
+/**
  *  @file    Metrics_Cache.h
  *
  *  $Id: Metrics_Cache.h 80826 2008-03-04 14:51:23Z wotte $
@@ -24,7 +24,7 @@
 
 #if defined (ACE_ENABLE_TIMEPROBES) && defined (ACE_COMPILE_TIMEPROBES)
 
-/*
+/**
  * Call the appropriate 'report_ + NAME + _start' function. The start function makes a time probe measurement.
  *
  * ACE: The cache is a double-sided space of ACE_Timeprobe objects. For example if there is 10 probes there
@@ -46,7 +46,7 @@ do { if((METRICS_PTR->metrics_enabled())) { \
 METRICS_PTR->report_##NAME##_start(X); \
 } } while (0)
 
-/*
+/**
  * Call the appropriate 'report_ + NAME + _stop' function. The stop function makes a time probe measurement.
  *
  * ACE & TAO: Same as START_DISPATCH_METRIC
@@ -62,7 +62,7 @@ do { if((METRICS_PTR->metrics_enabled())) { \
 METRICS_PTR->report_##NAME##_stop(X); \
 } } while (0)
 
-/*
+/**
  * Call the appropriate 'report_ + NAME + _suspend' function. The suspend function makes a time probe measurement.
  * This marks when the object under observation has been suspended.
  *
@@ -77,7 +77,7 @@ do { if((METRICS_PTR->metrics_enabled())) { \
 METRICS_PTR->report_##NAME##_suspend(X); \
 } } while (0)
 
-/*
+/**
  * Call the appropriate 'report_ + NAME + _resume' function. The suspend function makes a time probe measurement.
  * This marks when the object under observation that was suspended is not resuming normal execution.
  *
@@ -93,7 +93,7 @@ METRICS_PTR->report_##NAME##_resume(X); \
 } } while (0)
 
 
-/*
+/**
  * Mystery macros. I could not find where there were functions like 'report_base_metrics_start ()'. All the
  * start and stop functions had an argument to find the probe in the cache
  */

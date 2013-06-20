@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    SSL_SOCK_Stream.h
  *
  *  $Id: SSL_SOCK_Stream.h 91743 2010-09-13 18:24:51Z johnnyw $
@@ -36,7 +36,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_SSL_SOCK_Stream
  *
  * @brief Defines methods in the ACE_SSL_SOCK_Stream abstraction.
@@ -64,7 +64,7 @@ class ACE_SSL_Export ACE_SSL_SOCK_Stream : public ACE_SSL_SOCK
 public:
 
   /// Constructor
-  /*
+  /**
    * @param context Pointer to @c ACE_SSL_Context instance containing
    *                the OpenSSL @c SSL data structure to be associated
    *                with this @c ACE_SSL_SOCK_Stream.  The @c SSL data
@@ -79,7 +79,7 @@ public:
 
   /// Send an n byte buffer to the ssl socket using the semantics of
   /// send(3n).
-  /*
+  /**
    * ACE_SSL supports no flags for sending at this time.
    */
   ssize_t send (const void *buf,
@@ -88,7 +88,7 @@ public:
 
   /// Recv an n byte buffer from the ssl socket using the semantics of
   /// recv(3n).
-  /*
+  /**
    * ACE_SSL supports MSG_PEEK, but no other flags at this time.
    */
   ssize_t recv (void *buf,
@@ -106,7 +106,7 @@ public:
                 size_t n) const;
 
   /// Send an iovec of size n to the ssl socket.
-  /*
+  /**
    * Note that it is not possible to perform a "scattered" write with
    * the underlying OpenSSL implementation.  As such, the expected
    * semantics are not fully reproduced with this implementation.
@@ -115,7 +115,7 @@ public:
                  size_t n,
                  const ACE_Time_Value *timeout = 0) const;
 
-  /*
+  /**
    * Allows a client to read from a socket without having to provide a
    * buffer to read.  This method determines how much data is in the
    * socket, allocates a buffer of this size, reads in the data, and
@@ -126,7 +126,7 @@ public:
   ssize_t recvv (iovec *io_vec,
                  const ACE_Time_Value *timeout = 0) const;
 
-  /*
+  /**
    * Wait to timeout amount of time to send up to n bytes into buf
    * (uses the send() call).  If send() times out -1 is returned with
    * errno == ETIME.  If it succeeds the number of bytes sent is
@@ -137,7 +137,7 @@ public:
                 int flags,
                 const ACE_Time_Value *timeout) const;
 
-  /*
+  /**
    * Wait up to timeout amount of time to receive up to n bytes into
    * buf (uses the recv() call).  If recv() times out -1 is returned
    * with errno == ETIME.  If it succeeds the number of bytes received
@@ -148,7 +148,7 @@ public:
                 int flags,
                 const ACE_Time_Value *timeout) const;
 
-  /*
+  /**
    * Wait to to timeout amount of time to send up to n bytes into
    * buf (uses the send() call).  If send() times out
    * a -1 is returned with errno == ETIME.  If it succeeds the
@@ -158,7 +158,7 @@ public:
                 size_t n,
                 const ACE_Time_Value *timeout) const;
 
-  /*
+  /**
    * Wait up to timeout amount of time to receive up to n bytes
    * into buf (uses the recv() call).  If recv() times
    * out a -1 is returned with @c errno == ETIME.  If it succeeds the
@@ -182,7 +182,7 @@ public:
   /// Recv n bytes, keep trying until n are received.
   ssize_t recv_n (void *buf, int n) const;
 
-  /*
+  /**
    * @note In the following four methods, only MSG_PEEK is supported
    * for recv_n(), and no flags are supported for send_n().
    */
@@ -193,7 +193,7 @@ public:
   /// Recv n bytes, keep trying until n are sent.
   ssize_t recv_n (void *buf, int n, int flags) const;
 
-  /*
+  /**
    * Try to send exactly len bytes into buf (uses the send() call).
    * If send() blocks for longer than timeout the number of bytes
    * actually sent is returned with errno == ETIME.  If a timeout does
@@ -206,7 +206,7 @@ public:
                   const ACE_Time_Value *timeout,
                   size_t *bytes_transferred = 0) const;
 
-  /*
+  /**
    * Try to send exactly len bytes into buf (uses the send() call).
    * If send() blocks for longer than timeout the number of bytes
    * actually sent is returned with errno == ETIME.  If a timeout does
@@ -218,7 +218,7 @@ public:
                   const ACE_Time_Value *timeout,
                   size_t *bytes_transferred = 0) const;
 
-  /*
+  /**
    * Try to receive exactly len bytes into buf (uses the recv() call).
    * The ACE_Time_Value indicates how long to blocking trying to
    * receive.  If timeout == 0, the caller will block until action is
@@ -234,7 +234,7 @@ public:
                   const ACE_Time_Value *timeout,
                   size_t *bytes_transferred = 0) const;
 
-  /*
+  /**
    * Try to receive exactly len bytes into buf (uses the recv() call).
    * The ACE_Time_Value indicates how long to blocking trying to
    * receive.  If timeout == 0, the caller will block until action is
@@ -250,7 +250,7 @@ public:
                   size_t *bytes_transferred = 0) const;
   //@}
 
-  /*
+  /**
    * Send an iovec of size n to the connected socket.  Will block
    * until all bytes are sent or an error occurs.
    */
@@ -262,7 +262,7 @@ public:
                    size_t n) const;
 
 
-  /*
+  /**
    * Selectively close endpoints.
    */
   //@{
@@ -283,7 +283,7 @@ public:
   ACE_ALLOC_HOOK_DECLARE;
 
   /// Overridden set_handle() method.
-  /*
+  /**
    * Only an ACE_SSL_SOCK_Acceptor or ACE_SSL_SOCK_Connector should
    * access this method since some state in the underlying "ssl_" data
    * structure is set during SSL connection establishment.
@@ -293,7 +293,7 @@ public:
   /// Return a pointer to the underlying SSL structure.
   SSL *ssl (void) const;
 
-  /*
+  /**
    * Return the address of the remotely connected peer (if there is
    * one), in the referenced <ACE_Addr>. Returns 0 if successful, else
    * -1.

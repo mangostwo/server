@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    Thread.h
  *
  *  $Id: Thread.h 92060 2010-09-27 18:08:48Z johnnyw $
@@ -36,7 +36,7 @@ struct cancel_state
   int canceltype;
 };
 
-/*
+/**
  * @class ACE_Thread
  *
  * @brief Provides a wrapper for threads.
@@ -51,7 +51,7 @@ struct cancel_state
 class ACE_Export ACE_Thread
 {
 public:
-  /*
+  /**
    * Creates a new thread having @a flags attributes and running @a func
    * with @a args (if @a thread_adapter is non-0 then @a func and @a args
    * are ignored and are obtained from @a thread_adapter>.  @a thr_id
@@ -92,7 +92,7 @@ public:
                     ACE_Thread_Adapter *thread_adapter = 0,
                     const char** thr_name = 0);
 
-  /*
+  /**
    * Spawn N new threads, which execute @a func with argument @a arg (if
    * @a thread_adapter is non-0 then @a func and @a args are ignored and
    * are obtained from @a thread_adapter).  If @a stack != 0 it is
@@ -116,7 +116,7 @@ public:
                          ACE_Thread_Adapter *thread_adapter = 0,
                          const char* thr_name[] = 0);
 
-  /*
+  /**
    * Spawn @a n new threads, which execute @a func with argument @a arg
    * (if @a thread_adapter is non-0 then @a func and @a args are ignored
    * and are obtained from @a thread_adapter).  The thread_ids of
@@ -146,7 +146,7 @@ public:
                          ACE_Thread_Adapter *thread_adapter = 0,
                          const char* thr_name[] = 0);
 
-  /*
+  /**
    * Wait for one or more threads to exit and reap their exit status.
    * thr_join() returns successfully when the target thread terminates.
    *
@@ -193,7 +193,7 @@ public:
   /// Yield the thread to another.
   static void yield (void);
 
-  /*
+  /**
    * Return the unique kernel handle of the thread.  Note that on
    * Win32 this is actually a pseudohandle, which cannot be shared
    * with other processes or waited on by threads.  To locate the real
@@ -219,7 +219,7 @@ public:
                          const sigset_t *sigset,
                          sigset_t *osigset = 0);
 
-  /*
+  /**
    * Allocates a @a keyp that is used to identify data that is specific
    * to each thread in the process.  The key is global to all threads
    * in the process.
@@ -256,7 +256,7 @@ public:
   static int setcancelstate (struct cancel_state &new_state,
                              struct cancel_state *old_state);
 
-  /*
+  /**
    * Cancel a thread.
    * @note This method is only portable on platforms, such as POSIX pthreads,
    * that support thread cancellation.

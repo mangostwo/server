@@ -1,4 +1,4 @@
-/*
+/**
  @file Random.h
  
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -124,7 +124,7 @@ public:
     /** Returns 3D unit vectors uniformly distributed on the sphere */
     virtual void sphere(float& x, float& y, float& z);
 
-    /*
+    /**
        A shared instance for when the performance and features but not
        consistency of the class are desired.  It is slightly (10%)
        faster to use a distinct instance than to use the common one.

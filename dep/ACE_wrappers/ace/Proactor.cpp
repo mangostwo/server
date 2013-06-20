@@ -43,7 +43,7 @@ ACE_Proactor *ACE_Proactor::proactor_ = 0;
 /// only delete it safely if we created it!)
 bool ACE_Proactor::delete_proactor_ = false;
 
-/*
+/**
  * @class ACE_Proactor_Timer_Handler
  *
  * @brief A Handler for timer. It helps in the management of timers

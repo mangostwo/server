@@ -42,7 +42,7 @@ extern "C" {
 /** This is the maximum resolution of the SDL timer on all platforms */
 #define TIMER_RESOLUTION	10	/**< Experimentally determined */
 
-/*
+/**
  * Get the number of milliseconds since the SDL library initialization.
  * Note that this value wraps if the program runs for more than ~49 days.
  */ 
@@ -54,7 +54,7 @@ extern DECLSPEC void SDLCALL SDL_Delay(Uint32 ms);
 /** Function prototype for the timer callback function */
 typedef Uint32 (SDLCALL *SDL_TimerCallback)(Uint32 interval);
 
-/*
+/**
  * Set a callback to run after the specified number of milliseconds has
  * elapsed. The callback function is passed the current timer interval
  * and returns the next timer interval.  If the returned value is the 
@@ -91,7 +91,7 @@ extern DECLSPEC int SDLCALL SDL_SetTimer(Uint32 interval, SDL_TimerCallback call
  */
 /*@{*/
 
-/*
+/**
  * Function prototype for the new timer callback function.
  * The callback function is passed the current timer interval and returns
  * the next timer interval.  If the returned value is the same as the one
@@ -108,7 +108,7 @@ typedef struct _SDL_TimerID *SDL_TimerID;
  */
 extern DECLSPEC SDL_TimerID SDLCALL SDL_AddTimer(Uint32 interval, SDL_NewTimerCallback callback, void *param);
 
-/*
+/**
  * Remove one of the multiple timers knowing its ID.
  * Returns a boolean value indicating success.
  */

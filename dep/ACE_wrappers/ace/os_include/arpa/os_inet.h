@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    os_inet.h
  *
  *  definitions for internet operations
@@ -36,7 +36,7 @@
 #  include /**/ <inetLib.h>
 #endif /* ACE_USES_INETLIB_H */
 
-/*
+/**
  * In some environments it is useful to swap the bytes on write, for
  * instance: a fast server can be feeding a lot of slow clients that
  * happen to have the wrong byte order.
@@ -47,7 +47,7 @@
  */
 // #define ACE_ENABLE_SWAP_ON_WRITE
 
-/*
+/**
  * In some environements we never need to swap bytes when reading, for
  * instance embebbed systems (such as avionics) or homogenous
  * networks.

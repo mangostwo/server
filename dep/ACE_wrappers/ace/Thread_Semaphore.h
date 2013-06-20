@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    Thread_Semaphore.h
  *
  *  $Id: Thread_Semaphore.h 86731 2009-09-17 12:23:48Z johnnyw $
@@ -31,7 +31,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Thread_Semaphore
  *
  * @brief Wrapper for Dijkstra style general semaphores that work
@@ -61,7 +61,7 @@ public:
 
 template <class T> class ACE_Malloc_Lock_Adapter_T;
 
-/*
+/**
  * @brief Template specialization of ACE_Malloc_Lock_Adapter_T for
  * ACE_Thread_Semaphore.
  *

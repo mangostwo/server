@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    IO_Cntl_Msg.h
  *
  *  $Id: IO_Cntl_Msg.h 80826 2008-03-04 14:51:23Z wotte $
@@ -25,7 +25,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_IO_Cntl_Msg
  *
  * @brief Data format for IOCTL messages

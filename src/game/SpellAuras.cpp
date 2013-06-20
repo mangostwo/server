@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -51,7 +51,7 @@
 
 #define NULL_AURA_SLOT 0xFF
 
-/*
+/**
  * An array with all the different handlers for taking care of
  * the various aura types that are defined in AuraType.
  */

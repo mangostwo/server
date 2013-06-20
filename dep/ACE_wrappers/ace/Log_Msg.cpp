@@ -109,7 +109,7 @@ public:
 /// deleted.
 int ACE_Log_Msg::instance_count_ = 0;
 
-/*
+/**
  * @class ACE_Log_Msg_Manager
  *
  * @brief Synchronize output operations.
@@ -891,7 +891,7 @@ ACE_Log_Msg::open (const ACE_TCHAR *prog_name,
   return status;
 }
 
-/*
+/**
  * Valid Options (prefixed by '%', as in printf format strings) include:
  *   'A': print an ACE_timer_t value
  *   'a': exit the program at this point (var-argument is the exit status!)
@@ -951,7 +951,7 @@ ACE_Log_Msg::log (ACE_Log_Priority log_priority,
 }
 
 #if defined (ACE_HAS_WCHAR)
-/*
+/**
  * Since this is the ANTI_TCHAR version, we need to convert
  * the format string over.
  */
@@ -2180,7 +2180,7 @@ ACE_Log_Msg::log (const ACE_TCHAR *format_str,
 }
 
 #if !defined (ACE_WIN32)
-/*
+/**
  * @class ACE_Log_Msg_Sig_Guard
  *
  * @brief For use only by ACE_Log_Msg.

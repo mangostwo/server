@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Addr.h
  *
  *  $Id: Addr.h 81030 2008-03-20 12:43:29Z johnnyw $
@@ -23,7 +23,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Addr
  *
  * @brief Defines the base class for the "address family independent"

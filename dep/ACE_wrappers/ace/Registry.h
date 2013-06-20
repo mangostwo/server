@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Registry.h
  *
  *  $Id: Registry.h 85110 2009-04-20 09:18:43Z msmit $
@@ -29,7 +29,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Registry
  *
  * @brief A Name Server implementation
@@ -119,7 +119,7 @@ public:
   // Forward declaration of iterator
   class Binding_Iterator;
 
-  /*
+  /**
    * @class Object
    *
    * @brief An object representation
@@ -167,7 +167,7 @@ public:
     u_long type_;
   };
 
-  /*
+  /**
    * @class Naming_Context
    *
    * @brief An context representation
@@ -201,7 +201,7 @@ public:
 
     // The following interfaces are for objects
 
-    /*
+    /**
      * Insert @a object with @a name into @c this context.
      * This will fail if @a name already exists
      * (Name version)
@@ -209,7 +209,7 @@ public:
     int bind_new (const Name &name,
                   const Object &object);
 
-    /*
+    /**
      * Insert @a object with @a name into @c this context
      * This will fail if @a name already exists
      * (String version)
@@ -217,7 +217,7 @@ public:
     int bind_new (const ACE_TString &name,
                   const Object &object);
 
-    /*
+    /**
      * Insert or update @a object with @a name into @c this context
      * This will not fail if @a name already exists
      * (Name version)
@@ -225,7 +225,7 @@ public:
     int bind (const Name &name,
               const Object &object);
 
-    /*
+    /**
      * Insert or update <object> with @a name into @c this context
      * This will not fail if @a name already exists
      * (String version)
@@ -264,7 +264,7 @@ public:
     /// Create new @c naming_context
     int new_context (Naming_Context &naming_context);
 
-    /*
+    /**
      * Insert <naming_context> with @a name relative to @c this context
      * This will fail if @a name already exists
      * (Name version)
@@ -283,7 +283,7 @@ public:
                           u_long security_access = KEY_ALL_ACCESS,
                           LPSECURITY_ATTRIBUTES security_attributes = 0);
 
-    /*
+    /**
      * Insert or update <naming_context> with @a name relative to @c this context
      * This will not fail if @a name already exists
      * (Name version)
@@ -332,7 +332,7 @@ public:
     /// Same as <unbind_context> with @c this as naming_context
     int destroy (void);
 
-    /*
+    /**
      * listing function: iterator creator
      * This is useful when there are many objects and contexts
      * in @c this context and you only want to look at a few entries
@@ -407,7 +407,7 @@ public:
     ACE_TString name_;
   };
 
-  /*
+  /**
    * @class Binding_Iterator
    *
    * @brief An iterator
@@ -451,7 +451,7 @@ public:
     // This should really be private
     // But the compiler is broken
 
-    /*
+    /**
      * @class Iteration_State
      *
      * Base class for state
@@ -528,7 +528,7 @@ public:
   };
 };
 
-/*
+/**
  * @class ACE_Predefined_Naming_Contexts
  *
  * @brief A factory for predefined registries, which exist by default
@@ -540,7 +540,7 @@ public:
 class ACE_Export ACE_Predefined_Naming_Contexts
 {
 public:
-  /*
+  /**
    * Factory method for connecting to predefined registries.  This
    * method works for both remote and local machines.  However, for
    * remote machines, HKEY_CLASSES_ROOT and HKEY_CURRENT_USER types

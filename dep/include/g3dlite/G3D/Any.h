@@ -1,4 +1,4 @@
-/*
+/**
  @file Any.h
   
  @author Morgan McGuire, Shawn Yarbrough, and Corey Taylor
@@ -638,7 +638,7 @@ private:
 };    // class Any
 
 
-/*
+/**
    Convenient iteration over the keys of a Any::TABLE, usually
    for implementing construction of an object from an Any.
 

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Process_Mutex.h
  *
  *  $Id: Process_Mutex.h 87179 2009-10-20 16:27:01Z shuston $
@@ -42,7 +42,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // Forward declarations
 class ACE_Time_Value;
 
-/*
+/**
  * @class ACE_Process_Mutex
  *
  * @brief A wrapper for mutexes that can be used across processes on
@@ -86,7 +86,7 @@ class ACE_Time_Value;
 class ACE_Export ACE_Process_Mutex
 {
 public:
-  /*
+  /**
    * Create an ACE_Process_Mutex.
    *
    * @param name optional, null-terminated string containing the name of
@@ -104,7 +104,7 @@ public:
                      mode_t mode = ACE_DEFAULT_FILE_PERMS);
 
 #if defined (ACE_HAS_WCHAR)
-  /*
+  /**
    * Create an ACE_Process_Mutex (@c wchar_t version)
    *
    * @param name optional, null-terminated string containing the name of
@@ -122,7 +122,7 @@ public:
                      mode_t mode = ACE_DEFAULT_FILE_PERMS);
 #endif /* ACE_HAS_WCHAR */
 
-  /*
+  /**
    * Destructor.
    *
    * @note The destructor will not release an acquired mutex except
@@ -130,7 +130,7 @@ public:
    */
   ~ACE_Process_Mutex (void);
 
-  /*
+  /**
    * Explicitly destroy the mutex.  Note that only one thread should
    * call this method since it doesn't protect against race
    * conditions.
@@ -139,14 +139,14 @@ public:
    */
   int remove (void);
 
-  /*
+  /**
    * Acquire lock ownership (wait on queue if necessary).
    *
    * @return 0 on success; -1 on failure.
    */
   int acquire (void);
 
-  /*
+  /**
    * Acquire lock ownership, but timeout if lock if hasn't been
    * acquired by given time.
    *
@@ -157,7 +157,7 @@ public:
    */
   int acquire (ACE_Time_Value &tv);
 
-  /*
+  /**
    * Conditionally acquire lock (i.e., don't wait on queue).
    *
    * @return 0 on success; -1 on failure.  If the lock could not be acquired
@@ -174,21 +174,21 @@ public:
   /// Acquire lock ownership (wait on queue if necessary).
   int acquire_write (void);
 
-  /*
+  /**
    * Conditionally acquire a lock (i.e., won't block).  Returns -1 on
    * failure.  If we "failed" because someone else already had the
    * lock, @c errno is set to @c EBUSY.
    */
   int tryacquire_read (void);
 
-  /*
+  /**
    * Conditionally acquire a lock (i.e., won't block).  Returns -1 on
    * failure.  If we "failed" because someone else already had the
    * lock, @c errno is set to @c EBUSY.
    */
   int tryacquire_write (void);
 
-  /*
+  /**
    * This is only here for consistency with the other synchronization
    * APIs and usability with Lock adapters. Assumes the caller already has
    * acquired the mutex and returns 0 in all cases.

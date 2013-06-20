@@ -1,4 +1,4 @@
-/*
+/**
  @file AnyVal.h
  @author Morgan McGuire
  @created 2006-06-11
@@ -33,7 +33,7 @@ class BinaryOutput;
 class Rect2D;
 class AABox;
 
-/*
+/**
  \deprecated
  <b>Use the G3D::Any class instead.  This is only provided for 
    backwards compatibility to G3D 7.xx.</b>

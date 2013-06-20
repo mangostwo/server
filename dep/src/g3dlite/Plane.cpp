@@ -1,4 +1,4 @@
-/*
+/**
  @file Plane.cpp
  
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu

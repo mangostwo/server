@@ -115,7 +115,7 @@ void *ACE_Object_Manager::preallocated_array[
 
 #if !defined (ACE_LACKS_ACE_SVCCONF)
 
-/*
+/**
  * @class ACE_Object_Manager_Preallocations
  *
  * @brief Performs preallocations of certain statically allocated services
@@ -843,7 +843,7 @@ ACE_Object_Manager::fini (void)
 
 
 #if !defined (ACE_HAS_NONSTATIC_OBJECT_MANAGER)
-/*
+/**
  * @class ACE_Object_Manager_Manager
  *
  * @brief Ensure that the ACE_Object_Manager gets initialized at program

@@ -1,6 +1,6 @@
 // -*- C++ -*-
 
-/*
+/**
  * @file Condition_Recursive_Thread_Mutex.cpp
  *
  * $Id: Condition_Recursive_Thread_Mutex.cpp 89127 2010-02-22 19:58:18Z schmidt $

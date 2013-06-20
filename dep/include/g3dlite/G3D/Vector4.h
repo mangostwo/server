@@ -1,4 +1,4 @@
-/*
+/**
   @file Vector4.h
  
   Homogeneous vector class.
@@ -32,7 +32,7 @@ class Vector4;
 class Vector4int8;
 class Any;
 
-/*
+/**
  Do not subclass-- this implementation makes assumptions about the
  memory layout.
  */
@@ -180,7 +180,7 @@ public:
 
     std::string toString() const;
 
-    /*
+    /**
      Linear interpolation
      */
     Vector4 lerp(const Vector4& v, float alpha) const;

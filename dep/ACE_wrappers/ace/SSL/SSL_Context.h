@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    SSL_Context.h
  *
  *  $Id: SSL_Context.h 83916 2008-11-28 16:32:21Z johnnyw $
@@ -63,7 +63,7 @@ private:
 // ****************************************************************
 
 
-/*
+/**
  * @class ACE_SSL_Context
  *
  * @brief A wrapper for the OpenSSL SSL_CTX related functions.
@@ -106,7 +106,7 @@ public:
   /// nothing else is available.
   static ACE_SSL_Context *instance (void);
 
-  /*
+  /**
    * Set the CTX mode.  The mode can be set only once, afterwards the
    * function has no effect and returns -1.
    * Once the mode is set the underlying SSL_CTX is initialized and
@@ -126,7 +126,7 @@ public:
   const char *private_key_file_name (void) const;
 
   /// Set the private key file.
-  /*
+  /**
    * @note This method should only be called after a certificate has
    *       been set since key verification is performed against the
    *       certificate, among other things.
@@ -134,7 +134,7 @@ public:
   int private_key (const char *file_name, int type = SSL_FILETYPE_PEM);
 
   /// Verify that the private key is valid.
-  /*
+  /**
    * @note This method should only be called after a certificate has
    *       been set since key verification is performed against the
    *       certificate, among other things.
@@ -152,7 +152,7 @@ public:
   /// Load certificate from memory rather than a file.
   int certificate (X509* cert);
 
-  /*
+  /**
    *  Load the location of the trusted certification authority
    *  certificates.  Note that CA certificates are stored in PEM format
    *  as a sequence of certificates in @a ca_file or as a set of
@@ -226,7 +226,7 @@ public:
                        const char* ca_dir = 0,
                        bool use_env_defaults = true);
 
-  /*
+  /**
    *  Test whether any CA locations have been successfully loaded and
    *  return the number of successful attempts.
    *
@@ -236,7 +236,7 @@ public:
   int have_trusted_ca (void) const;
 
 
-  /*
+  /**
    *  @todo Complete this documentation where elipses(...) are used
    *
    *  @doc Use this method when certificate chain verification is
@@ -271,7 +271,7 @@ public:
   // const char* ca_file_name(void) const;
   // const char* ca_dir_name(void) const;
 
-  /*
+  /**
    * Set and query the default verify mode for this context, it is
    * inherited by all the ACE_SSL objects created using the context.
    * It can be overriden on a per-ACE_SSL object.
@@ -279,7 +279,7 @@ public:
   void default_verify_mode (int mode);
   int default_verify_mode (void) const;
 
-  /*
+  /**
    * Set and query the default verify callback for this context, it is
    * inherited by all the ACE_SSL objects created using the context.
    * It can be overriden on a per-ACE_SSL object.
@@ -287,7 +287,7 @@ public:
   void default_verify_callback (int (*callback) (int, X509_STORE_CTX *));
   int (*default_verify_callback(void) const) (int,X509_STORE_CTX *);
 
-  /*
+  /**
    * @name OpenSSL Random Number Generator Seed Related Methods
    *
    * These are methods that can be used to seed OpenSSL's
@@ -303,7 +303,7 @@ public:
   /// read random seed values from.
   static int egd_file (const char * socket_file);
 
-  /*
+  /**
    * Set the file that contains the random seed value state, and the
    * amount of bytes to read.  "-1" bytes causes the entire file to be
    * read.
@@ -317,7 +317,7 @@ public:
   /// Print the last SSL error for the current thread.
   static void report_error (void);
 
-  /*
+  /**
    * @name Diffie-Hellman (DH) Parameters
    *
    * When using DSS-based certificates, Diffie-Hellman keys need to be
@@ -327,7 +327,7 @@ public:
    *
    */
   //@{
-  /*
+  /**
    * Load Diffie-Hellman parameters from file_name.  The specified file can be
    * a standalone file containing only DH parameters (e.g., as created
    * by <code>openssl dhparam</code>), or it can be a certificate which has

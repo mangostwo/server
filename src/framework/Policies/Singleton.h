@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -19,7 +19,7 @@
 #ifndef MANGOS_SINGLETON_H
 #define MANGOS_SINGLETON_H
 
-/*
+/**
  * @brief class Singleton
  */
 

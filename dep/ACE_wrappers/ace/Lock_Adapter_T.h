@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    Lock_Adapter_T.h
  *
  *  $Id: Lock_Adapter_T.h 84481 2009-02-17 10:58:31Z johnnyw $
@@ -24,7 +24,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Lock_Adapter
  *
  * @brief This is an adapter that allows applications to transparently
@@ -64,14 +64,14 @@ public:
   /// Release the lock.
   virtual int release (void);
 
-  /*
+  /**
    * Block until the thread acquires a read lock.  If the locking
    * mechanism doesn't support read locks then this just calls
    * <acquire>.
    */
   virtual int acquire_read (void);
 
-  /*
+  /**
    * Block until the thread acquires a write lock.  If the locking
    * mechanism doesn't support read locks then this just calls
    * <acquire>.
@@ -86,7 +86,7 @@ public:
   /// doesn't support read locks then this just calls <acquire>.
   virtual int tryacquire_write (void);
 
-  /*
+  /**
    * Conditionally try to upgrade a lock held for read to a write lock.
    * If the locking mechanism doesn't support read locks then this just
    * calls <acquire>. Returns 0 on success, -1 on failure.

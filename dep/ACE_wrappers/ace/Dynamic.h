@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    Dynamic.h
  *
  *  $Id: Dynamic.h 80826 2008-03-04 14:51:23Z wotte $
@@ -23,7 +23,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Dynamic
  *
  * @brief Checks to see if an object was dynamically allocated.
@@ -41,7 +41,7 @@ public:
   /// Destructor.
   ~ACE_Dynamic (void);
 
-  /*
+  /**
    * Sets a flag that indicates that the object was dynamically
    * created. This method is usually called in operator new and then
    * checked and reset in the constructor.
@@ -57,7 +57,7 @@ public:
   static ACE_Dynamic *instance (void);
 
 private:
-  /*
+  /**
    * Flag that indicates that the object was dynamically created. This
    * method is usually called in operator new and then checked and
    * reset in the constructor.

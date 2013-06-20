@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -687,7 +687,7 @@ class MANGOS_DLL_SPEC ChatHandler
         template <typename T>
         std::string PrepareStringNpcOrGoSpawnInformation(uint32 guid);
 
-        /*
+        /**
          * Stores informations about a deleted character
          */
         struct DeletedInfo
@@ -738,5 +738,8 @@ class CliHandler : public ChatHandler
         void* m_callbackArg;
         Print* m_print;
 };
+
+
+
 
 #endif

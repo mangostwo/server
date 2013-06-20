@@ -34,7 +34,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // must be searched for each new id to make sure it's not already in use. To
 // prevent having to do an exhaustive search each time, we keep extra data
 // in the dummy root Node.
-/*
+/**
 * Default Constructor that sets defaults for spoke_count_ and resolution_
 * and doesn't do any preallocation.
 *
@@ -61,7 +61,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK>::ACE_Timer_Wheel_T
                 ACE_DEFAULT_TIMER_WHEEL_RESOLUTION);
 }
 
-/*
+/**
 * Constructor that sets up the timing wheel and also may preallocate
 * some nodes on the free list
 *
@@ -123,7 +123,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK>::power2bits (int n,
   return i;
 }
 
-/*
+/**
 * Initialize the queue. Uses the established members for all needed
 * information.
 */
@@ -239,7 +239,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK>::find_node (long timer_id) const
   return 0;
 }
 
-/*
+/**
 * Check to see if the wheel is empty
 *
 * @return True if empty
@@ -252,7 +252,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK>::is_empty (void) const
 }
 
 
-/*
+/**
 * @return First (earliest) node in the wheel_'s earliest_spoke_ list
 */
 template <class TYPE, class FUNCTOR, class ACE_LOCK> const ACE_Time_Value &
@@ -369,7 +369,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK>::generate_timer_id (u_int spoke)
   return -1; // We did our best, but the spoke is full.
 }
 
-/*
+/**
 * Creates a ACE_Timer_Node_T based on the input parameters.  Then inserts
 * the node into the wheel using reschedule ().  Then returns a timer_id.
 *
@@ -412,7 +412,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK>::schedule_i (const TYPE& type,
   return -1;
 }
 
-/*
+/**
 * Takes an ACE_Timer_Node and inserts it into the correct position in
 * the correct list.  Also makes sure to update the earliest time.
 *
@@ -467,7 +467,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK>::schedule_i
 }
 
 
-/*
+/**
 * Find the timer node by using the id as a pointer.  Then use set_interval()
 * on the node to update the interval.
 *
@@ -494,7 +494,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK>::reset_interval (long timer_id,
 }
 
 
-/*
+/**
 * Goes through every list in the wheel and whenever we find one with the
 * correct type value, we remove it and continue.  At the end make sure
 * we reset the earliest time value in case the earliest timers were
@@ -572,7 +572,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK>::cancel (const TYPE& type, int skip_c
 }
 
 
-/*
+/**
 * Cancels the single timer that is specified by the timer_id.  In this
 * case the timer_id is actually a pointer to the node, so we cast it
 * to the node.  This can be dangerous if the timer_id is made up
@@ -683,7 +683,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK>::recalc_earliest
   //ACE_ERROR((LM_ERROR, "We had to search the whole wheel.\n"));
 }
 
-/*
+/**
 * Dumps out the size of the wheel, the resolution, and the contents
 * of the wheel.
 */
@@ -718,7 +718,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK>::dump (void) const
 }
 
 
-/*
+/**
 * Removes the earliest node and then find the new <earliest_spoke_>
 *
 * @return The earliest timer node.
@@ -754,7 +754,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK>::remove_first_expired (const ACE_Time
   return 0;
 }
 
-/*
+/**
 * Returns the earliest node without removing it
 *
 * @return The earliest timer node.
@@ -779,7 +779,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK>::get_first_i (void) const
 }
 
 
-/*
+/**
 * @return The iterator
 */
 template <class TYPE, class FUNCTOR, class ACE_LOCK>
@@ -790,7 +790,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK>::iter (void)
   return *this->iterator_;
 }
 
-/*
+/**
 * Dummy version of expire to get rid of warnings in Sun CC 4.2
 * Just call the expire of the base class.
 */
@@ -800,7 +800,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK>::expire ()
   return ACE_Timer_Queue_T<TYPE,FUNCTOR,ACE_LOCK>::expire ();
 }
 
-/*
+/**
 * This is a specialized version of expire that is more suited for the
 * internal data representation.
 *
@@ -860,7 +860,7 @@ ACE_Timer_Wheel_T<TYPE, FUNCTOR, ACE_LOCK>::expire (const ACE_Time_Value& cur_ti
 ///////////////////////////////////////////////////////////////////////////
 // ACE_Timer_Wheel_Iterator_T
 
-/*
+/**
 * Just initializes the iterator with a ACE_Timer_Wheel_T and then calls
 * first() to initialize the rest of itself.
 *
@@ -875,7 +875,7 @@ ACE_Timer_Wheel_Iterator_T<TYPE,FUNCTOR,ACE_LOCK>::ACE_Timer_Wheel_Iterator_T
 }
 
 
-/*
+/**
 * Destructor, at this level does nothing.
 */
 template <class TYPE, class FUNCTOR, class ACE_LOCK>
@@ -886,7 +886,7 @@ ACE_LOCK>::~ACE_Timer_Wheel_Iterator_T (void)
 }
 
 
-/*
+/**
 * Positions the iterator at the first position in the timing wheel
 * that contains something. spoke_ will be set to the spoke position of
 * this entry and current_node_ will point to the first entry in that spoke.
@@ -901,7 +901,7 @@ ACE_Timer_Wheel_Iterator_T<TYPE, FUNCTOR, ACE_LOCK>::first (void)
 }
 
 
-/*
+/**
 * Positions the iterator at the next node.
 */
 template <class TYPE, class FUNCTOR, class ACE_LOCK> void
@@ -940,7 +940,7 @@ ACE_Timer_Wheel_Iterator_T<TYPE, FUNCTOR, ACE_LOCK>::goto_next (u_int start_spok
   this->current_node_ = 0;
 }
 
-/*
+/**
 * @return True when we there aren't any more items (when current_node_ == 0)
 */
 template <class TYPE, class FUNCTOR, class ACE_LOCK> bool
@@ -949,7 +949,7 @@ ACE_Timer_Wheel_Iterator_T<TYPE, FUNCTOR, ACE_LOCK>::isdone (void) const
   return this->current_node_ == 0;
 }
 
-/*
+/**
 * @return The node at the current spokeition in the sequence or 0 if the wheel
 *         is empty
 */

@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -637,8 +637,10 @@ enum ProcFlags
                                  PROC_FLAG_SUCCESSFUL_NEGATIVE_SPELL_HIT)
 enum ProcFlagsEx
 {
-    PROC_EX_NONE                = 0x0000000,                // If none can tigger on Hit/Crit only (passive spells MUST defined by SpellFamily flag)
-    PROC_EX_NORMAL_HIT          = 0x0000001,                // If set only from normal hit (only damage spells)
+    /// If none can tigger on Hit/Crit only (passive spells MUST defined by SpellFamily flag)
+    PROC_EX_NONE                = 0x0000000,
+    /// If set only from normal hit (only damage spells)
+    PROC_EX_NORMAL_HIT          = 0x0000001,
     PROC_EX_CRITICAL_HIT        = 0x0000002,
     PROC_EX_MISS                = 0x0000004,
     PROC_EX_RESIST              = 0x0000008,
@@ -650,13 +652,17 @@ enum ProcFlagsEx
     PROC_EX_DEFLECT             = 0x0000200,
     PROC_EX_ABSORB              = 0x0000400,
     PROC_EX_REFLECT             = 0x0000800,
-    PROC_EX_INTERRUPT           = 0x0001000,                // Melee hit result can be Interrupt (not used)
+    /// Melee hit result can be Interrupt (not used)
+    PROC_EX_INTERRUPT           = 0x0001000,
     PROC_EX_FULL_BLOCK          = 0x0002000,                // block al attack damage
     PROC_EX_RESERVED2           = 0x0004000,
     PROC_EX_RESERVED3           = 0x0008000,
-    PROC_EX_EX_TRIGGER_ALWAYS   = 0x0010000,                // If set trigger always ( no matter another flags) used for drop charges
-    PROC_EX_EX_ONE_TIME_TRIGGER = 0x0020000,                // If set trigger always but only one time (not used)
-    PROC_EX_PERIODIC_POSITIVE   = 0x0040000,                // For periodic heal
+    /// If set trigger always ( no matter another flags) used for drop charges
+    PROC_EX_EX_TRIGGER_ALWAYS   = 0x0010000,
+    /// If set trigger always but only one time (not used)
+    PROC_EX_EX_ONE_TIME_TRIGGER = 0x0020000,
+    /// For periodic heal
+    PROC_EX_PERIODIC_POSITIVE   = 0x0040000, 
     PROC_EX_CAST_END            = 0x0080000                 // procs on end of cast
 };
 
@@ -812,6 +818,7 @@ typedef std::pair<SpellAreaMap::const_iterator, SpellAreaMap::const_iterator> Sp
 typedef std::pair<SpellAreaForAuraMap::const_iterator, SpellAreaForAuraMap::const_iterator>  SpellAreaForAuraMapBounds;
 typedef std::pair<SpellAreaForAreaMap::const_iterator, SpellAreaForAreaMap::const_iterator>  SpellAreaForAreaMapBounds;
 
+
 // Spell rank chain  (accessed using SpellMgr functions)
 struct SpellChainNode
 {
@@ -907,6 +914,8 @@ class SpellMgr
         SpellSpecific GetSpellElixirSpecific(uint32 spellid) const
         {
             uint32 mask = GetSpellElixirMask(spellid);
+
+            // flasks must have all bits set from ELIXIR_FLASK_MASK
             if ((mask & ELIXIR_FLASK_MASK) == ELIXIR_FLASK_MASK)
                 return SPELL_FLASK_ELIXIR;
             else if (mask & ELIXIR_BATTLE_MASK)

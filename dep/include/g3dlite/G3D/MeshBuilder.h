@@ -1,4 +1,4 @@
-/*
+/**
   @file MeshBuilder.h
 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -16,14 +16,14 @@
 
 namespace G3D {
 
-/*
+/**
  Allows creation of optimized watertight meshes from unoptimized polygon soups.
  See also G3D::MeshAlg for algorithms that operate on the output.
  */
 class MeshBuilder {
 public:
 
-    /*
+    /**
      Set setWeldRadius to AUTO_WELD to weld vertices closer than 1/2
      the smallest edge length in a model.
      */
@@ -35,7 +35,7 @@ private:
    
     std::string                 name;
     
-    /*
+    /**
      All of the triangles, as a long triangle list.
      */
     Array<Vector3>              triList;
@@ -56,12 +56,12 @@ public:
         G3D::IFSModel::save and G3D::MeshAlg */
     void commit(std::string& name, Array<int>& indexArray, Array<Vector3>& vertexArray);
 
-    /*
+    /**
      Adds a new triangle to the model. (Counter clockwise)
      */
     void addTriangle(const Vector3& a, const Vector3& b, const Vector3& c);
 
-    /*
+    /**
      Adds two new triangles to the model. (Counter clockwise)
      */
     void addQuad(const Vector3& a, const Vector3& b, const Vector3& c, const Vector3& d);

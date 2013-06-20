@@ -1,4 +1,4 @@
-/*
+/**
  @file Crypto_md5.cpp
 
  @author Morgan McGuire, http://graphics.cs.williams.edu

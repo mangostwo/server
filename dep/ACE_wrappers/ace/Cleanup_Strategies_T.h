@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Cleanup_Strategies_T.h
  *
  *  $Id: Cleanup_Strategies_T.h 81388 2008-04-23 14:02:05Z johnnyw $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Cleanup_Strategy
  *
  * @brief Defines a default strategy to be followed for cleaning up
@@ -51,7 +51,7 @@ public:
 //////////////////////////////////////////////////////////////////////
 #define ACE_Recyclable_Handler_Cleanup_Strategy ARHCLE
 
-/*
+/**
  * @class ACE_Recyclable_Handler_Cleanup_Strategy
  *
  * @brief Defines a strategy to be followed for cleaning up
@@ -75,7 +75,7 @@ public:
 //////////////////////////////////////////////////////////////////////
 #define ACE_Refcounted_Recyclable_Handler_Cleanup_Strategy ARRHCLE
 
-/*
+/**
  * @class ACE_Refcounted_Recyclable_Handler_Cleanup_Strategy
  *
  * @brief Defines a strategy to be followed for cleaning up
@@ -96,7 +96,7 @@ public:
 
 //////////////////////////////////////////////////////////////////////
 
-/*
+/**
  * @class ACE_Handler_Cleanup_Strategy
  *
  * @brief Defines a strategy to be followed for cleaning up
@@ -119,7 +119,7 @@ public:
 //////////////////////////////////////////////////////////////////////
 #define ACE_Null_Cleanup_Strategy ANCLE
 
-/*
+/**
  * @class ACE_Null_Cleanup_Strategy
  *
  * @brief Defines a do-nothing implementation of the cleanup strategy.

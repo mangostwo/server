@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Thread_Manager.h
  *
  *  $Id: Thread_Manager.h 83956 2008-12-03 07:57:38Z johnnyw $
@@ -81,7 +81,7 @@ class ACE_Task_Base;
 class ACE_Thread_Manager;
 class ACE_Thread_Descriptor;
 
-/*
+/**
   * @class ACE_At_Thread_Exit
   *
   * @brief Contains a method to be applied when a thread is terminated.
@@ -153,7 +153,7 @@ protected:
    void apply (void);
 };
 
-/*
+/**
  * @class ACE_Thread_Descriptor_Base
  *
  * @brief Basic information for thread descriptors.  These information
@@ -220,7 +220,7 @@ protected:
   ACE_Thread_Descriptor_Base *prev_;
 };
 
-/*
+/**
  * @class ACE_Thread_Descriptor
  *
  * @brief Information for controlling threads that run under the control
@@ -246,14 +246,14 @@ public:
   /// Dump the state of an object.
   void dump (void) const;
 
-  /*
+  /**
    * This cleanup function must be called only for ACE_TSS_cleanup.
    * The ACE_TSS_cleanup delegate Log_Msg instance destruction when
    * Log_Msg cleanup is called before terminate.
    */
   void log_msg_cleanup(ACE_Log_Msg* log_msg);
 
-  /*
+  /**
    * Register an At_Thread_Exit hook and the ownership is acquire by
    * Thread_Descriptor, this is the usual case when the AT is dynamically
    * allocated.
@@ -264,7 +264,7 @@ public:
   /// caller. Normally used when the at_exit hook is created in stack.
   int at_exit (ACE_At_Thread_Exit& cleanup);
 
-  /*
+  /**
    * Register an object (or array) for cleanup at thread termination.
    * "cleanup_hook" points to a (global, or static member) function
    * that is called for the object or array when it to be destroyed.
@@ -282,7 +282,7 @@ public:
   /// Do nothing destructor to keep some compilers happy
   ~ACE_Thread_Descriptor (void);
 
-  /*
+  /**
    * Do nothing but to acquire the thread descriptor's lock and
    * release.  This will first check if the thread is registered or
    * not.  If it is already registered, there's no need to reacquire
@@ -295,7 +295,7 @@ public:
   void acquire (void);
   void release (void);
 
-  /*
+  /**
    * Set/get the @c next_ pointer.  These are required by the
    * ACE_Free_List.
    */
@@ -330,7 +330,7 @@ private:
 
 #if 0
 /// Currently not used
-  /*
+  /**
    * Stores the cleanup info for a thread.
    * @note This should be generalized to be a stack of ACE_Cleanup_Info's.
    */
@@ -361,7 +361,7 @@ class ACE_Thread_Control;
 typedef int (ACE_Thread_Manager::*ACE_THR_MEMBER_FUNC)(ACE_Thread_Descriptor *, int);
 #endif /* __GNUG__ */
 
-/*
+/**
  * @class ACE_Thread_Manager
  *
  * @brief Manages a pool of threads.
@@ -422,7 +422,7 @@ public:
     ACE_THR_JOINING = 0x10000000
   };
 
-  /*
+  /**
    * @brief Initialization and termination methods.
    *
    * Internally, ACE_Thread_Manager keeps a freelist for caching
@@ -454,7 +454,7 @@ public:
   /// No-op.  Currently unused.
   int open (size_t size = 0);
 
-  /*
+  /**
    * Release all resources.
    * By default, this method will wait until all threads exit.
    * However, when called from close_singleton(), most global resources
@@ -463,7 +463,7 @@ public:
    */
   int close (void);
 
-  /*
+  /**
    * Create a new thread, which executes @a func with argument @a arg.
    *
    * @param func        The function that is called in the spawned thread.
@@ -525,7 +525,7 @@ public:
              size_t stack_size = ACE_DEFAULT_THREAD_STACKSIZE,
              const char** thr_name = 0);
 
-  /*
+  /**
    * Spawn a specified number of threads, all of which execute @a func
    * with argument @a arg.
    *
@@ -602,7 +602,7 @@ public:
                size_t stack_size[] = 0,
                const char* thr_name[] = 0);
 
-  /*
+  /**
    * Spawn a specified number of threads, all of which execute @a func
    * with argument @a arg.
    *
@@ -685,7 +685,7 @@ public:
                ACE_Task_Base *task = 0,
                const char* thr_name[] = 0);
 
-  /*
+  /**
    * Called to clean up when a thread exits.
    *
    * @param do_thread_exit If non-0 then ACE_Thread::exit is called to
@@ -697,7 +697,7 @@ public:
   ACE_THR_FUNC_RETURN exit (ACE_THR_FUNC_RETURN status = 0,
                             bool do_thread_exit = true);
 
-  /*
+  /**
    * Block until there are no more threads running in this thread
    * manager or @c timeout expires.
    *
@@ -735,14 +735,14 @@ public:
   /// Join a thread specified by @a tid.  Do not wait on a detached thread.
   int join (ACE_thread_t tid, ACE_THR_FUNC_RETURN *status = 0);
 
-  /*
+  /**
    * Block until there are no more threads running in a group.
    * Returns 0 on success and -1 on failure.  Notice that wait_grp
    * will not wait on detached threads.
    */
   int wait_grp (int grp_id);
 
-  /*
+  /**
    * Return the "real" handle to the calling thread, caching it if
    * necessary in TSS to speed up subsequent lookups. This is
    * necessary since on some platforms (e.g., Windows) we can't get this
@@ -754,20 +754,20 @@ public:
    */
   int thr_self (ACE_hthread_t &);
 
-  /*
+  /**
    * Return the unique ID of the calling thread.
    * Same as calling ACE_Thread::self().
    */
   ACE_thread_t thr_self (void);
 
-  /*
+  /**
    * Returns a pointer to the current ACE_Task_Base we're executing
    * in if this thread is indeed running in an ACE_Task_Base, else
    * return 0.
    */
   ACE_Task_Base *task (void);
 
-  /*
+  /**
    * @name Suspend and resume methods
    *
    * Suspend/resume is not supported on all platforms. For example, Pthreads
@@ -784,7 +784,7 @@ public:
   /// Suspend a group of threads.
   int suspend_grp (int grp_id);
 
-  /*
+  /**
    * True if @a t_id is inactive (i.e., suspended), else false.  Always
    * return false if @a t_id is not managed by the Thread_Manager.
    */
@@ -799,7 +799,7 @@ public:
   /// Resume a group of threads.
   int resume_grp (int grp_id);
 
-  /*
+  /**
    * True if @a t_id is active (i.e., resumed), else false.  Always
    * return false if @a t_id is not managed by the Thread_Manager.
    */
@@ -808,45 +808,45 @@ public:
   //@}
 
   // = Send signals to one or more threads without blocking.
-  /*
+  /**
    * Send @a signum to all stopped threads.  Not supported on platforms
    * that do not have advanced signal support, such as Win32.
    */
   int kill_all (int signum);
-  /*
+  /**
    * Send the @a signum to a single thread.  Not supported on platforms
    * that do not have advanced signal support, such as Win32.
    */
   int kill (ACE_thread_t, int signum);
-  /*
+  /**
    * Send @a signum to a group of threads, not supported on platforms
    * that do not have advanced signal support, such as Win32.
    */
   int kill_grp (int grp_id, int signum);
 
   // = Cancel methods, which provides a cooperative thread-termination mechanism (will not block).
-  /*
+  /**
    * Cancel's all the threads.
    */
   int cancel_all (int async_cancel = 0);
 
-  /*
+  /**
    * Cancel a single thread.
    */
   int cancel (ACE_thread_t, int async_cancel = 0);
 
-  /*
+  /**
    * Cancel a group of threads.
    */
   int cancel_grp (int grp_id, int async_cancel = 0);
 
-  /*
+  /**
    * True if @a t_id is cancelled, else false.  Always return false if
    * @a t_id is not managed by the Thread_Manager.
    */
   int testcancel (ACE_thread_t t_id);
 
-  /*
+  /**
    * True if @a t_id has terminated (i.e., is no longer running),
    * but the slot in the thread manager hasn't been reclaimed yet,
    * else false.  Always return false if @a t_id is not managed by the
@@ -862,11 +862,11 @@ public:
   int get_grp (ACE_thread_t,
                int &grp_id);
 
-  /*
+  /**
    * @name Task-related operations
    */
   //@{
-  /*
+  /**
    * Block until there are no more threads running in a specified task.
    * This method will not wait for either detached or daemon threads;
    * the threads must have been spawned with the @c THR_JOINABLE flag.
@@ -880,22 +880,22 @@ public:
    */
   int wait_task (ACE_Task_Base *task);
 
-  /*
+  /**
    * Suspend all threads in an ACE_Task.
    */
   int suspend_task (ACE_Task_Base *task);
 
-  /*
+  /**
    * Resume all threads in an ACE_Task.
    */
   int resume_task (ACE_Task_Base *task);
 
-  /*
+  /**
    * Send a signal @a signum to all threads in an ACE_Task.
    */
   int kill_task (ACE_Task_Base *task, int signum);
 
-  /*
+  /**
    * Cancel all threads in an ACE_Task.  If <async_cancel> is non-0,
    * then asynchronously cancel these threads if the OS platform
    * supports cancellation.  Otherwise, perform a "cooperative"
@@ -918,7 +918,7 @@ public:
   /// Returns the number of threads in an ACE_Task_Base.
   int num_threads_in_task (ACE_Task_Base *task);
 
-  /*
+  /**
    * Returns a list of ACE_Task_Base pointers corresponding to the tasks
    * that have active threads in a specified thread group.
    *
@@ -945,7 +945,7 @@ public:
                      ACE_Task_Base *task_list[],
                      size_t n);
 
-  /*
+  /**
    * Returns in @a thread_list a list of up to @a n thread ids in an
    * ACE_Task_Base.  The caller must allocate the memory for
    * @a thread_list.  In case of an error, -1 is returned. If no
@@ -956,7 +956,7 @@ public:
                        ACE_thread_t thread_list[],
                        size_t n);
 
-  /*
+  /**
    * Returns in @a hthread_list a list of up to @a n thread handles in
    * an ACE_Task_Base.  The caller must allocate memory for
    * @a hthread_list.  In case of an error, -1 is returned. If no
@@ -967,7 +967,7 @@ public:
                         ACE_hthread_t hthread_list[],
                         size_t n);
 
-  /*
+  /**
    * Returns in @a thread_list a list of up to @a n thread ids in a
    * group @a grp_id.  The caller must allocate the memory for
    * @a thread_list.  In case of an error, -1 is returned. If no
@@ -978,7 +978,7 @@ public:
                            ACE_thread_t thread_list[],
                            size_t n);
 
-  /*
+  /**
    * Returns in @a hthread_list a list of up to @a n thread handles in
    * a group @a grp_id.  The caller must allocate memory for
    * @a hthread_list.
@@ -987,7 +987,7 @@ public:
                             ACE_hthread_t hthread_list[],
                             size_t n);
 
-  /*
+  /**
    * Returns a list of ACE_Task_Base pointers corresponding to the tasks
    * that have active threads managed by this instance.
    *
@@ -1011,7 +1011,7 @@ public:
   ssize_t task_all_list (ACE_Task_Base *task_list[],
                          size_t n);
 
-  /*
+  /**
    * Returns in @a thread_list a list of up to @a n thread ids.  The
    * caller must allocate the memory for @a thread_list.  In case of an
    * error, -1 is returned. If no requested values are found, 0 is
@@ -1035,7 +1035,7 @@ public:
   /// managed by this thread manager.
   int thr_state (ACE_thread_t id, ACE_UINT32& state);
 
-  /*
+  /**
    * Register an At_Thread_Exit hook and the ownership is acquire by
    * Thread_Descriptor, this is the usual case when the AT is dynamically
    * allocated.
@@ -1046,7 +1046,7 @@ public:
   /// caller. Normally used when the at_exit hook is created in stack.
   int at_exit (ACE_At_Thread_Exit& cleanup);
 
-  /*
+  /**
    *
    *****
    * @deprecated This function is deprecated.  Please use the previous two
@@ -1083,7 +1083,7 @@ public:
 
 protected:
   // = Accessors for ACE_Thread_Descriptors.
-  /*
+  /**
    * Get a pointer to the calling thread's own thread_descriptor.
    * This must be called from a spawn thread.  This function will
    * fetch the info from TSS.
@@ -1122,7 +1122,7 @@ protected:
   /// -1 if <h_id> is not in the table doesn't contain <h_id>.
   ACE_Thread_Descriptor *find_hthread (ACE_hthread_t h_id);
 
-  /*
+  /**
    * Locate the thread descriptor address of the list occupied by
    * @a task.  Returns 0 if @a task is not in the table doesn't contain
    * @a task.
@@ -1155,7 +1155,7 @@ protected:
   // = The following four methods implement a simple scheme for
   // operating on a collection of threads atomically.
 
-  /*
+  /**
    * Efficiently check whether @a thread is in a particular @a state.
    * This call updates the TSS cache if possible to speed up
    * subsequent searches.
@@ -1204,7 +1204,7 @@ protected:
   /// Setting the static ACE_TSS_TYPE (ACE_Thread_Exit) *thr_exit_ pointer.
   static int set_thr_exit (ACE_TSS_TYPE (ACE_Thread_Exit) *ptr);
 
-  /*
+  /**
    * Keeping a list of thread descriptors within the thread manager.
    * Double-linked list enables us to cache the entries in TSS
    * and adding/removing thread descriptor entries without

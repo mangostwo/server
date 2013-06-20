@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  * @file Truncate.h
  *
  * $Id: Truncate.h 83306 2008-10-17 12:19:53Z johnnyw $
@@ -69,7 +69,7 @@ namespace ACE_Utils
 
   // -----------------------------------------------------
 
-  /*
+  /**
    * @struct To_Unsigned
    *
    * @brief Retrieve unsigned counterpart to given type or value.
@@ -204,7 +204,7 @@ namespace ACE_Utils
 
   // -----------------------------------------------------
 
-  /*
+  /**
    * @struct Safe_Comparator
    *
    * @brief Conservative comparison of types that may not be safely
@@ -279,7 +279,7 @@ namespace ACE_Utils
 
   // -----------------------------------------------------
 
-  /*
+  /**
    * @struct Fast_Comparator
    *
    * @brief Quick comparison of types that can be safely promoted
@@ -343,7 +343,7 @@ namespace ACE_Utils
 
   // -----------------------------------------------------
 
-  /*
+  /**
    * @struct Comparator
    *
    * @brief Structure that provides optimal comparison operation for
@@ -383,7 +383,7 @@ namespace ACE_Utils
 
   // -----------------------------------------------------
 
-  /*
+  /**
    * @struct Truncator
    *
    * @brief Truncate value of type @c FROM to value of type @c TO.
@@ -462,7 +462,7 @@ namespace ACE_Utils
 #endif /* ACE_LACKS_LONGLONG_T || ACE_LACKS_UNSIGNEDLONGLONG_T */
 
   // -----------------------------------------------------
-  /*
+  /**
    * @struct Noop_Truncator
    *
    * @brief No-op truncation.
@@ -481,7 +481,7 @@ namespace ACE_Utils
   };
   // -----------------------------------------------------
 
-  /*
+  /**
    * @class truncate_cast
    *
    * @brief Helper function to truncate an integral value to the

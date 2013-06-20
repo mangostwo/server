@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    POSIX_CB_Proactor.h
  *
  *  $Id: POSIX_CB_Proactor.h 80826 2008-03-04 14:51:23Z wotte $
@@ -30,7 +30,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_POSIX_CB_Proactor
  *
  * @brief Implementation of Callback-based Proactor
@@ -55,7 +55,7 @@ public:
 
 protected:
 
-  /*
+  /**
    * Dispatch a single set of events.  If @a wait_time elapses before
    * any events occur, return 0.  Return 1 on success i.e., when a
    * completion is dispatched, non-zero (-1) on errors and errno is
@@ -63,7 +63,7 @@ protected:
    */
   virtual int handle_events (ACE_Time_Value &wait_time);
 
-  /*
+  /**
    * Block indefinitely until at least one event is dispatched.
    * Dispatch a single set of events.  If @a wait_time elapses before
    * any events occur, return 0.  Return 1 on success i.e., when a
@@ -79,7 +79,7 @@ protected:
   /// called from post_completion method
   virtual int notify_completion (int sig_num);
 
-  /*
+  /**
    * Dispatch a single set of events.  If @a milli_seconds elapses
    * before any events occur, return 0. Return 1 if a completion is
    * dispatched. Return -1 on errors.

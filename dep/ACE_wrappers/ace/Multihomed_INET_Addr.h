@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Multihomed_INET_Addr.h
  *
  *  $Id: Multihomed_INET_Addr.h 91626 2010-09-07 10:59:20Z johnnyw $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Multihomed_INET_Addr
  *
  * @brief Extends ACE_INET_Addr with support for multi-homed
@@ -40,7 +40,7 @@ public:
   /// Default constructor.
   ACE_Multihomed_INET_Addr (void);
 
-  /*
+  /**
    * Initializes an ACE_Multihomed_INET_Addr from the @a address,
    * which can be "ip-number:port-number" (e.g., "tango.cs.wustl.edu:1234"
    * or "128.252.166.57:1234").  If there is no ':' in the @a address it
@@ -49,7 +49,7 @@ public:
    */
   explicit ACE_Multihomed_INET_Addr (const char address[]);
 
-  /*
+  /**
    * Constructs an ACE_Multihomed_INET_Addr from a @a port_number, a
    * @a primary_host_name, and an array of @a secondary_host_names.
    * @a size is taken to be the length of the array.  If @a encode is
@@ -67,7 +67,7 @@ public:
                              const char *(secondary_host_names[]) = 0,
                              size_t size = 0);
 
-  /*
+  /**
    * Constructs an ACE_Multihomed_INET_Addr from a @a port_number,
    * a @a primary_ip_addr, and an array of @a secondary_ip_addrs.  @a
    * size is taken to be the length of the array.  If @a encode is
@@ -82,7 +82,7 @@ public:
                            size_t size = 0);
 
 #if defined (ACE_HAS_WCHAR)
-    /*
+    /**
      * WCHAR versions of the methods that take char's as arguments.
      */
   ACE_Multihomed_INET_Addr(u_short port_number,
@@ -112,7 +112,7 @@ public:
 
   // These methods are useful after the object has been constructed.
 
-  /*
+  /**
    * Initializes an ACE_Multihomed_INET_Addr from a @a port_number, a
    * @a primary_host_name, and an array of @a secondary_host_names.
    * @a size is taken to be the length of the array.  If @a encode is
@@ -130,7 +130,7 @@ public:
            const char *(secondary_host_names[]) = 0,
            size_t size = 0);
 
-  /*
+  /**
    * Initializes an ACE_Multihomed_INET_Addr from a @a port_number,
    * a @a primary_ip_addr, and an array of @a secondary_ip_addrs.  @a
    * size is taken to be the length of the array.  If @a encode is
@@ -144,7 +144,7 @@ public:
            const ACE_UINT32 *secondary_ip_addrs = 0,
            size_t size = 0);
 
-  /*
+  /**
    * Sets the port number without affecting the host name.  The port
    * numbers of the primary address, and of any and all secondary
    * addresses, are affected.  If @a encode is enabled, then
@@ -157,19 +157,19 @@ public:
 
   // = Accessor methods.
 
-  /*
+  /**
    * Returns the number of secondary addresses.
    */
   size_t get_num_secondary_addresses () const;
 
-  /*
+  /**
    * Initialize user-supplied array @a secondary_addrs with the current
    * secondary addresses.  @a size is taken as the size of this array.
    */
   int get_secondary_addresses(ACE_INET_Addr *secondary_addrs,
                               size_t size) const;
 
-  /*
+  /**
    * Initialize user-supplied array @a addrs with the the current
    * primary and secondary addresses.  @a size is taken as the size of
    * this array.

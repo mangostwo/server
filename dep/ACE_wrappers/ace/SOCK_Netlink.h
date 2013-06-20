@@ -1,6 +1,6 @@
 // $Id: SOCK_Netlink.h 80826 2008-03-04 14:51:23Z wotte $
 //=============================================================================
-/*
+/**
  *  @file    SOCK_Netlink.h
  *
  *  $Id: SOCK_Netlink.h 80826 2008-03-04 14:51:23Z wotte $
@@ -29,7 +29,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_SOCK_Netlink
  *
  * @brief Defines the member functions for the ACE_SOCK Netlink
@@ -50,7 +50,7 @@ public:
   ACE_SOCK_Netlink (ACE_Netlink_Addr &local,
                     int protocol_family,
                     int protocol);
-  /*
+  /**
    * opens a RAW socket over an ACE_SOCK and binds it
    *
    **/
@@ -58,13 +58,13 @@ public:
             int protocol_family,
             int protocol);
 
-  /*
+  /**
    *  receives abuffer with the size n
    */
   ssize_t recv (void *buf,
                 size_t n,
                 int flags) const;
-  /*
+  /**
    * send a buffer of size n bytes
    *
    */
@@ -72,7 +72,7 @@ public:
                 size_t n,
                 int flags) const;
 
-  /*
+  /**
    *  Recieves an iovec of size @a n to the netlink socket
   */
   ssize_t recv (iovec iov[],
@@ -80,7 +80,7 @@ public:
                 ACE_Addr &addr,
                 int flags = 0) const;
 
-  /*
+  /**
    *  Sends an iovec of size @a n to the netlink socket
   */
   ssize_t send (const iovec iov[],

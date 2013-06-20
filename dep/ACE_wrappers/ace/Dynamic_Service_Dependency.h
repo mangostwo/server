@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Dynamic_Service_Dependency.h
  *
  *  $Id: Dynamic_Service_Dependency.h 80826 2008-03-04 14:51:23Z wotte $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Dynamic_Service_Dependency
  *
  * @brief Provides a way to declare dependency on specific service,

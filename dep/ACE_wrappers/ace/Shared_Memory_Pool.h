@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file     Shared_Memory_Pool.h
  *
  *  $Id: Shared_Memory_Pool.h 80826 2008-03-04 14:51:23Z wotte $
@@ -31,7 +31,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Shared_Memory_Pool_Options
  *
  * @brief Helper class for Shared Memory Pool constructor options.
@@ -66,7 +66,7 @@ public:
   size_t segment_size_;
 };
 
-/*
+/**
  * @class ACE_Shared_Memory_Pool
  *
  * @brief Make a memory pool that is based on System V shared memory
@@ -95,7 +95,7 @@ public:
                               size_t &rounded_bytes,
                               int &first_time);
 
-  /*
+  /**
    * Acquire at least @a nbytes from the memory pool. @a rounded_byes is
    * the actual number of bytes allocated.  Also acquires an internal
    * semaphore that ensures proper serialization of Memory_Pool
@@ -114,7 +114,7 @@ public:
   /// Sync the memory region to the backing store starting at @a addr.
   virtual int sync (void *addr, size_t len, int flags = MS_SYNC);
 
-  /*
+  /**
    * Change the protection of the pages of the mapped region to @a prot
    * starting at @c this->base_addr_ up to @a len bytes.  If @a len == -1
    * then change protection of all pages in the mapped region.
@@ -140,7 +140,7 @@ protected:
   /// appropriate chunksize.
   virtual size_t round_up (size_t nbytes);
 
-  /*
+  /**
    * Commits a new shared memory segment if necessary after an
    * <acquire> or a signal.  @a offset is set to the new offset into
    * the backing store.
@@ -161,7 +161,7 @@ protected:
     int used_;
   };
 
-  /*
+  /**
    * Base address of the shared memory segment.  If this has the value
    * of 0 then the OS is free to select any address, otherwise this
    * value is what the OS must try to use to map the shared memory

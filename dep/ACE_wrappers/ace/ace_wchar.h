@@ -1,7 +1,7 @@
 //* -*- C++ -*- */
 
 //=============================================================================
-/*
+/**
  *  @file    ace_wchar.h
  *
  *  $Id: ace_wchar.h 91688 2010-09-09 11:21:50Z johnnyw $
@@ -136,7 +136,7 @@ typedef wchar_t ACE_ANTI_TCHAR;
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Wide_To_Ascii
  *
  * @brief A lightweight wchar* to char* string conversion class.
@@ -174,7 +174,7 @@ private:
   ACE_Wide_To_Ascii& operator= (ACE_Wide_To_Ascii &);
 };
 
-/*
+/**
  * @class ACE_Ascii_To_Wide
  *
  * @brief A lightweight char* to wchar* string conversion class.

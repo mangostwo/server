@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file   Constraint_Interpreter.h
  *
  *  $Id: Constraint_Interpreter.h 81753 2008-05-21 19:02:47Z parsons $
@@ -35,7 +35,7 @@ namespace ACE
   {
     class Constraint_Visitor;
 
-    /*
+    /**
      * @class Constraint_Interpreter
      *
      * @brief "ETCL" Interpreter for MonitorControl constraints,
@@ -50,7 +50,7 @@ namespace ACE
 
       virtual ~Constraint_Interpreter (void);
 
-      /*
+      /**
        * This method builds an expression tree representing the
        * constraint specified in <constraints>, and returns -1 with
        * an error message if the constraint given has syntax errors or

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    Mutex.h
  *
  *  $Id: Mutex.h 91626 2010-09-07 10:59:20Z johnnyw $
@@ -39,7 +39,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Time_Value;
 
-/*
+/**
  * @class ACE_Mutex
  *
  * @brief @c ACE_Mutex wrapper (valid in same process or across
@@ -60,7 +60,7 @@ public:
   ~ACE_Mutex (void);
 
   /// Explicitly destroy the mutex.
-  /*
+  /**
    * @note Only one thread should call this method since it doesn't
    *        protect against race conditions.
    */
@@ -71,7 +71,7 @@ public:
 
   /// Block the thread until the mutex is acquired or @a tv times out,
   /// in which case -1 is returned and @c errno == @c ETIME.
-  /*
+  /**
    * @note @a tv is assumed  to be in "absolute" rather than
    * "     relative" time.  The value of @a tv is updated upon return
    *       to show the actual(absolute) acquisition time.
@@ -80,7 +80,7 @@ public:
 
   /// Block the thread until the mutex is acquired or @a *tv times
   /// out, in which case -1 is returned and @c errno == @c ETIME.
-  /*
+  /**
    * If @a tv == 0 then call @c acquire() directly.  Otherwise, block
    * the thread until the mutex is acquired or @a tv times out, in
    * which case -1 is returned and @c errno == @c ETIME.
@@ -92,7 +92,7 @@ public:
   int acquire (ACE_Time_Value *tv);
 
   /// Conditionally acquire lock (i.e., don't wait on queue).
-  /*
+  /**
    * @return -1 on failure.  If we "failed" because someone
    *         else already had the lock, @c errno is set to @c EBUSY.
    */
@@ -102,21 +102,21 @@ public:
   int release (void);
 
   /// Acquire mutex ownership.
-  /*
+  /**
    * This calls @c acquire and is only here to make the @c ACE_Mutex
    * interface consistent with the other synchronization APIs.
    */
   int acquire_read (void);
 
   /// Acquire mutex ownership.
-  /*
+  /**
    * This calls @c acquire and is only here to make the @c ACE_Mutex
    * interface consistent with the other synchronization APIs.
    */
   int acquire_write (void);
 
   /// Conditionally acquire mutex (i.e., won't block).
-  /*
+  /**
    * This calls @c tryacquire and is only here to make the @c ACE_Mutex
    * interface consistent with the other synchronization APIs.
    *
@@ -126,7 +126,7 @@ public:
   int tryacquire_read (void);
 
   /// Conditionally acquire mutex (i.e., won't block).
-  /*
+  /**
    * This calls @c tryacquire and is only here to make the @c ACE_Mutex
    * interface consistent with the other synchronization APIs.
    *
@@ -135,7 +135,7 @@ public:
    */
   int tryacquire_write (void);
 
-  /*
+  /**
    * This is only here for consistency with the other synchronization
    * APIs and usability with Lock adapters. Assumes the caller already has
    * acquired the mutex and returns 0 in all cases.
@@ -158,7 +158,7 @@ public:
   /// This lock resides in shared memory.
   ACE_mutex_t *process_lock_;
 
-  /*
+  /**
    * Remember the name of the mutex if we created it so we can unlink
    * it when we go away (only the actor that initialized the memory
    * can destroy it).

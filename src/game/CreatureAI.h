@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -104,7 +104,7 @@ class MANGOS_DLL_SPEC CreatureAI
         virtual ~CreatureAI();
 
         ///== Information about AI ========================
-        /*
+        /**
          * This funcion is used to display information about the AI.
          * It is called when the .npc aiinfo command is used.
          * Use this for on-the-fly debugging
@@ -114,7 +114,7 @@ class MANGOS_DLL_SPEC CreatureAI
 
         ///== Reactions At =================================
 
-        /*
+        /**
          * Called if IsVisible(Unit* pWho) is true at each (relative) override pWho move, reaction at visibility zone enter
          * Note: The Unit* pWho can be out of Line of Sight, usually this is only visibiliy (by state) and range dependendend
          * Note: This function is not called for creatures who are in evade mode
@@ -122,38 +122,38 @@ class MANGOS_DLL_SPEC CreatureAI
          */
         virtual void MoveInLineOfSight(Unit* /*pWho*/) {}
 
-        /*
+        /**
          * Called for reaction at enter to combat if not in combat yet
          * @param pEnemy Unit* of whom the Creature enters combat with, can be NULL
          */
         virtual void EnterCombat(Unit* /*pEnemy*/) {}
 
-        /*
+        /**
          * Called for reaction at stopping attack at no attackers or targets
          * This is called usually in Unit::SelectHostileTarget, if no more target exists
          */
         virtual void EnterEvadeMode() {}
 
-        /*
+        /**
          * Called at reaching home after MoveTargetedHome
          */
         virtual void JustReachedHome() {}
 
-        /*
+        /**
          * Called at any Heal received from any Unit
          * @param pHealer Unit* which deals the heal
          * @param uiHealedAmount Amount of healing received
          */
         virtual void HealedBy(Unit * /*pHealer*/, uint32& /*uiHealedAmount*/) {}
 
-        /*
+        /**
          * Called at any Damage to any victim (before damage apply)
          * @param pDoneTo Unit* to whom Damage of amount uiDamage will be dealt
          * @param uiDamage Amount of Damage that will be dealt, can be changed here
          */
         virtual void DamageDeal(Unit* /*pDoneTo*/, uint32& /*uiDamage*/) {}
 
-        /*
+        /**
          * Called at any Damage from any attacker (before damage apply)
          * Note:    Use for recalculation damage or special reaction at damage
          *          for attack reaction use AttackedBy called for not DOT damage in Unit::DealDamage also
@@ -162,87 +162,87 @@ class MANGOS_DLL_SPEC CreatureAI
          */
         virtual void DamageTaken(Unit* /*pDealer*/, uint32& /*uiDamage*/) {}
 
-        /*
+        /**
          * Called when the creature is killed
          * @param pKiller Unit* who killed the creature
          */
         virtual void JustDied(Unit* /*pKiller*/) {}
 
-        /*
+        /**
          * Called when the corpse of this creature gets removed
          * @param uiRespawnDelay Delay (in seconds). If != 0, then this is the time after which the creature will respawn, if = 0 the default respawn-delay will be used
          */
         virtual void CorpseRemoved(uint32& /*uiRespawnDelay*/) {}
 
-        /*
+        /**
          * Called when a summoned creature is killed
          * @param pSummoned Summoned Creature* that got killed
          */
         virtual void SummonedCreatureJustDied(Creature* /*pSummoned*/) {}
 
-        /*
+        /**
          * Called when the creature kills a unit
          * @param pVictim Victim that got killed
          */
         virtual void KilledUnit(Unit* /*pVictim*/) {}
 
-        /*
+        /**
          * Called when owner of m_creature (if m_creature is PROTECTOR_PET) kills a unit
          * @param pVictim Victim that got killed (by owner of creature)
          */
         virtual void OwnerKilledUnit(Unit* /*pVictim*/) {}
 
-        /*
+        /**
          * Called when the creature summon successfully other creature
          * @param pSummoned Creature that got summoned
          */
         virtual void JustSummoned(Creature* /*pSummoned*/) {}
 
-        /*
+        /**
          * Called when the creature summon successfully a gameobject
          * @param pGo GameObject that was summoned
          */
         virtual void JustSummoned(GameObject* /*pGo*/) {}
 
-        /*
+        /**
          * Called when a summoned creature gets TemporarySummon::UnSummon ed
          * @param pSummoned Summoned creature that despawned
          */
         virtual void SummonedCreatureDespawn(Creature* /*pSummoned*/) {}
 
-        /*
+        /**
          * Called when hit by a spell
          * @param pCaster Caster who casted the spell
          * @param pSpell The spell that hit the creature
          */
         virtual void SpellHit(Unit* /*pCaster*/, const SpellEntry* /*pSpell*/) {}
 
-        /*
+        /**
          * Called when spell hits creature's target
          * @param pTarget Target that we hit with the spell
          * @param pSpell Spell with which we hit pTarget
          */
         virtual void SpellHitTarget(Unit* /*pTarget*/, const SpellEntry* /*pSpell*/) {}
 
-        /*
+        /**
          * Called when the creature is target of hostile action: swing, hostile spell landed, fear/etc)
          * @param pAttacker Unit* who attacked the creature
          */
         virtual void AttackedBy(Unit* pAttacker);
 
-        /*
+        /**
          * Called when creature is respawned (for reseting variables)
          */
         virtual void JustRespawned() {}
 
-        /*
+        /**
          * Called at waypoint reached or point movement finished
          * @param uiMovementType Type of the movement (enum MovementGeneratorType)
          * @param uiData Data related to the finished movement (ie point-id)
          */
         virtual void MovementInform(uint32 /*uiMovementType*/, uint32 /*uiData*/) {}
 
-        /*
+        /**
          * Called if a temporary summoned of m_creature reach a move point
          * @param pSummoned Summoned Creature that finished some movement
          * @param uiMotionType Type of the movement (enum MovementGeneratorType)
@@ -250,7 +250,7 @@ class MANGOS_DLL_SPEC CreatureAI
          */
         virtual void SummonedMovementInform(Creature* /*pSummoned*/, uint32 /*uiMotionType*/, uint32 /*uiData*/) {}
 
-        /*
+        /**
          * Called at text emote receive from player
          * @param pPlayer Player* who sent the emote
          * @param uiEmote ID of the emote the player used with the creature as target
@@ -259,7 +259,7 @@ class MANGOS_DLL_SPEC CreatureAI
 
         ///== Triggered Actions Requested ==================
 
-        /*
+        /**
          * Called when creature attack expected (if creature can and no have current victim)
          * Note: for reaction at hostile action must be called AttackedBy function.
          * Note: Usually called by MoveInLineOfSight, in Unit::SelectHostileTarget or when the AI is forced to attack an enemy
@@ -267,7 +267,7 @@ class MANGOS_DLL_SPEC CreatureAI
          */
         virtual void AttackStart(Unit* /*pWho*/) {}
 
-        /*
+        /**
          * Called at World update tick, by default every 100ms
          * This setting is dependend on CONFIG_UINT32_INTERVAL_MAPUPDATE
          * Note: Use this function to handle Timers, Threat-Management and MeleeAttacking
@@ -277,7 +277,7 @@ class MANGOS_DLL_SPEC CreatureAI
 
         ///== State checks =================================
 
-        /*
+        /**
          * Check if unit is visible for MoveInLineOfSight
          * Note: This check is by default only the state-depending (visibility, range), NOT LineOfSight
          * @param pWho Unit* who is checked if it is visisble for the creature
@@ -296,7 +296,7 @@ class MANGOS_DLL_SPEC CreatureAI
         /// Internal helper function, to check if a spell can be cast
         CanCastResult CanCastSpell(Unit* pTarget, const SpellEntry* pSpell, bool isTriggered);
 
-        /*
+        /**
          * Function to cast a spell if possible
          * @param pTarget Unit* onto whom the spell should be cast
          * @param uiSpell ID of the spell that the creature will try to cast

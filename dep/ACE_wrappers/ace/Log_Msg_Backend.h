@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Log_Msg_Backend.h
  *
  *  $Id: Log_Msg_Backend.h 80826 2008-03-04 14:51:23Z wotte $
@@ -27,7 +27,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Log_Record;
 
-/*
+/**
  * @class ACE_Log_Msg_Backend
  *
  * @brief Defines the interface for ACE_Log_Msg back end processing.
@@ -44,7 +44,7 @@ public:
   /// No-op virtual destructor.
   virtual ~ACE_Log_Msg_Backend (void);
 
-  /*
+  /**
    * Open the back end object. Perform any actions needed to prepare
    * the object for later logging operations.
    *
@@ -57,7 +57,7 @@ public:
    */
   virtual int open (const ACE_TCHAR *logger_key) = 0;
 
-  /*
+  /**
    * Reset the backend.  If ACE_Log_Msg is reopened during execution, this
    * hook will be called. This method should perform any needed cleanup
    * activity (similar to close()) because this object won't be reopened
@@ -71,7 +71,7 @@ public:
   /// Close the backend completely.
   virtual int close (void) = 0;
 
-  /*
+  /**
    * Process a log record.
    *
    * @param log_record   The ACE_Log_Record to process.

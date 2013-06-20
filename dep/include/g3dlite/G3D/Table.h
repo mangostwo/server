@@ -1,4 +1,4 @@
-/*
+/**
   @file Table.h
 
   Templated hash table class.
@@ -33,7 +33,7 @@
 
 namespace G3D {
 
-/*
+/**
  An unordered data structure mapping keys to values.
 
  There are two ways of definining custom hash functions (G3D provides built-in ones for most classes):
@@ -100,7 +100,7 @@ template<class Key, class Value, class HashFunc = HashTrait<Key>, class EqualsFu
 class Table {
 public:
 
-    /*
+    /**
      The pairs returned by iterator.
      */
     class Entry {
@@ -118,7 +118,7 @@ private:
 
     typedef Table<Key, Value, HashFunc, EqualsFunc> ThisType;
 
-    /*
+    /**
      Linked list nodes used internally by HashTable.
      */
     class Node {
@@ -155,7 +155,7 @@ private:
             mm->free(n);
         }
 
-        /*
+        /**
         Clones a whole chain;
         */
         Node* clone(MemoryManager::Ref& mm) {
@@ -180,7 +180,7 @@ private:
     /** Number of elements in the table.*/
     size_t              m_size;
 
-    /*
+    /**
      Array of Node*. 
 
      We don't use Array<Node*> because Table is lower-level than Array.
@@ -188,7 +188,7 @@ private:
      */
     Node**              m_bucket;
     
-    /*
+    /**
      Length of the m_bucket array.
      */
     size_t              m_numBuckets;
@@ -203,7 +203,7 @@ private:
         return m_memoryManager->free(p);
     }
 
-    /*
+    /**
      Re-hashes for a larger m_bucket size.
      */
     void resize(size_t newSize) {
@@ -268,7 +268,7 @@ private:
         checkIntegrity();
     }
 
-    /*
+    /**
      Frees the heap structures for the nodes.
      */
     void freeMemory() {
@@ -291,7 +291,7 @@ private:
 
 public:
 
-    /*
+    /**
      Creates an empty hash table using the default MemoryManager.
      */
     Table() : m_bucket(NULL) {
@@ -319,7 +319,7 @@ public:
         }
     }
     
-    /*
+    /**
        Destroys all of the memory allocated by the table, but does <B>not</B>
        call delete on keys or values if they are pointers.  If you want to
        deallocate things that the table points at, use getKeys() and Array::deleteAll()
@@ -351,7 +351,7 @@ public:
         return *this;
     }
 
-    /*
+    /**
      Returns the length of the deepest m_bucket.
      */
     size_t debugGetDeepestBucketSize() const {
@@ -373,7 +373,7 @@ public:
         return deepest;
     }
 
-    /*
+    /**
        Returns the average size of non-empty buckets.
     */
     float debugGetAverageBucketSize() const {
@@ -394,7 +394,7 @@ public:
         return (float)((double)count / num);
     }
 
-    /*
+    /**
      A small load (close to zero) means the hash table is acting very
      efficiently most of the time.  A large load (close to 1) means 
      the hash table is acting poorly-- all operations will be very slow.
@@ -405,26 +405,26 @@ public:
         return debugGetDeepestBucketSize() / (double)size();
     }
 
-    /*
+    /**
      Returns the number of buckets.
      */
     size_t debugGetNumBuckets() const {
         return m_numBuckets;
     }
 
-    /*
+    /**
      C++ STL style iterator variable.  See begin().
      */
     class Iterator {
     private:
         friend class Table<Key, Value, HashFunc, EqualsFunc>;
 
-        /*
+        /**
          Bucket index.
          */
         size_t              index;
 
-        /*
+        /**
          Linked list node.
          */
         Node*               node;
@@ -433,7 +433,7 @@ public:
         Node**              m_bucket;
         bool                isDone;
 
-        /*
+        /**
          Creates the end iterator.
          */
         Iterator(const ThisType* table) : table(const_cast<ThisType*>(table)) {
@@ -457,7 +457,7 @@ public:
             findNext();
         }
 
-        /*
+        /**
          Finds the next element, setting isDone if one can't be found.
          Looks at the current element first.
          */
@@ -490,7 +490,7 @@ public:
             }
         }
 
-        /*
+        /**
          Pre increment.
          */
         Iterator& operator++() {
@@ -499,7 +499,7 @@ public:
             return *this;
         }
 
-        /*
+        /**
          Post increment (slower than preincrement).
          */
         Iterator operator++(int) {
@@ -526,7 +526,7 @@ public:
     };
 
 
-    /*
+    /**
      C++ STL style iterator method.  Returns the first Entry, which 
      contains a key and value.  Use preincrement (++entry) to get to
      the next element.  Do not modify the table while iterating.
@@ -535,7 +535,7 @@ public:
         return Iterator(this, m_numBuckets, m_bucket);
     }
 
-    /*
+    /**
      C++ STL style iterator method.  Returns one after the last iterator
      element.
      */
@@ -543,7 +543,7 @@ public:
         return Iterator(this);
     }
 
-    /*
+    /**
      Removes all elements
      */
     void clear() {
@@ -554,7 +554,7 @@ public:
     }
 
    
-    /*
+    /**
      Returns the number of keys.
      */
     size_t size() const {
@@ -562,7 +562,7 @@ public:
     }
 
 
-    /*
+    /**
      If you insert a pointer into the key or value of a table, you are
      responsible for deallocating the object eventually.  Inserting 
      key into a table is O(1), but may cause a potentially slow rehashing.
@@ -629,7 +629,7 @@ public:
        return remove(key, removedKey, removedValue, true);
     }
 
-    /*
+    /**
     Removes an element from the table if it is present.  
     @return true if the element was found and removed, otherwise  false
     */
@@ -675,7 +675,7 @@ public:
        }
    }
 
-   /*
+   /**
     Returns the value associated with key.
     @deprecated Use get(key, val) or getPointer(key) 
     */
@@ -718,7 +718,7 @@ public:
       return NULL;
    }
 
-   /*
+   /**
     If the key is present in the table, val is set to the associated value and returns true.
     If the key is not present, returns false.
     */
@@ -827,7 +827,7 @@ public:
     }
 
 
-   /*
+   /**
     Returns true if key is in the table.
     */
    bool containsKey(const Key& key) const {
@@ -851,14 +851,14 @@ public:
    }
 
 
-   /*
+   /**
     Short syntax for get.
     */
    inline Value& operator[](const Key &key) const {
       return get(key);
    }
 
-   /*
+   /**
     Returns an array of all of the keys in the table.
     You can iterate over the keys to get the values.
     @deprecated
@@ -880,7 +880,7 @@ public:
        }
    }
 
-   /*
+   /**
     Calls delete on all of the keys and then clears the table.
     */
    void deleteKeys() {
@@ -894,7 +894,7 @@ public:
        clear();
    }
 
-   /*
+   /**
     Calls delete on all of the values.  This is unsafe--
     do not call unless you know that each value appears
     at most once.

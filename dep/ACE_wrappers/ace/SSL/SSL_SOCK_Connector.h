@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    SSL_SOCK_Connector.h
  *
  *  $Id: SSL_SOCK_Connector.h 84816 2009-03-13 08:16:32Z johnnyw $
@@ -32,7 +32,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_SSL_SOCK_Connector
  *
  * @brief Defines a factory that creates new <ACE_SSL_SOCK_Stream>s
@@ -61,7 +61,7 @@ public:
   /// Default constructor.
   ACE_SSL_SOCK_Connector (void);
 
-  /*
+  /**
    * Actively connect to a peer, producing a connected @c ACE_SSL_SOCK_Stream
    * object if the connection succeeds. This method performs both the
    * initial socket connect and the SSL handshake.
@@ -109,7 +109,7 @@ public:
                           int flags = 0,
                           int perms = 0);
 
-  /*
+  /**
    * Actively connect to a peer, producing a connected @c ACE_SSL_SOCK_Stream
    * object if the connection succeeds. This method performs both the
    * initial socket connect and the SSL handshake.
@@ -166,7 +166,7 @@ public:
   /// Default dtor.
   ~ACE_SSL_SOCK_Connector (void);
 
-  /*
+  /**
    * Actively connect to a peer, producing a connected @c ACE_SSL_SOCK_Stream
    * object if the connection succeeds. This method performs both the
    * initial socket connect and the SSL handshake.
@@ -214,7 +214,7 @@ public:
                int flags = 0,
                int perms = 0);
 
-  /*
+  /**
    * Actively connect to a peer, producing a connected @c ACE_SSL_SOCK_Stream
    * object if the connection succeeds. This method performs both the
    * initial socket connect and the SSL handshake.
@@ -268,7 +268,7 @@ public:
                int reuse_addr = 0,
                int perms = 0);
 
-  /*
+  /**
    * Try to complete a non-blocking connection.
    * If connection completion is successful then <new_stream> contains
    * the connected ACE_SSL_SOCK_Stream.  If <remote_sap> is non-NULL

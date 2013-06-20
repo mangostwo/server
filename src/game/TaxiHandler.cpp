@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -201,6 +201,7 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
     recv_data >> guid.ReadAsPacked();
     recv_data >> movementInfo;
     recv_data >> Unused<uint32>();                          // unk
+
 
     // in taxi flight packet received in 2 case:
     // 1) end taxi path in far (multi-node) flight

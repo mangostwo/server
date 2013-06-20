@@ -1,4 +1,4 @@
-/*
+/**
   @file ImageFormat.h
 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -186,7 +186,7 @@ public:
      @deprecated Use cpuBitsPerPixel*/
     int                 packedBitsPerTexel;
     
-    /*
+    /**
       Amount of GPU memory per pixel on most graphics cards, for formats supported by OpenGL. This is
       only an estimate--the actual amount of memory may be different on your actual card.
 
@@ -359,7 +359,7 @@ public:
 
     static const ImageFormat* YUV444();
 
-	/*
+	/**
      NULL pointer; indicates that the G3D::Texture class should choose
      either RGBA8 or RGB8 depending on the presence of an alpha channel
      in the input.

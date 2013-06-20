@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,7 +30,7 @@
 
 #define FILENAMEBUFFER_SIZE 500
 
-/*
+/**
 This is the main Class to manage loading and unloading of maps, line of sight, height calculation and so on.
 For each map or map tile to load it reads a directory file that contains the ModelContainer files used by this map or map tile.
 Each global map or instance has its own dynamic BSP-Tree.
@@ -85,7 +85,7 @@ namespace VMAP
             void unloadMap(unsigned int pMapId) override;
 
             bool isInLineOfSight(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2) override;
-            /*
+            /**
             fill the hit pos and return true, if an object was hit
             */
             bool getObjectHitPos(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2, float& rx, float& ry, float& rz, float pModifyDist) override;

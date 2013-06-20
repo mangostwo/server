@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 
 #include "IVMapManager.h"
 
-/*
+/**
 This is the access point to the VMapManager.
 */
 

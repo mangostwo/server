@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/*
+/**
  *  @file    Active_Map_Manager_T.h
  *
  *  $Id: Active_Map_Manager_T.h 84316 2009-02-03 19:46:05Z johnnyw $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Active_Map_Manager
  *
  * @brief Define a map abstraction that associates system generated
@@ -81,7 +81,7 @@ public:
   /// corresponding key produced by the Active_Map_Manager.
   int bind (const T &value);
 
-  /*
+  /**
    * Reserves a slot in the internal structure and returns the key and
    * a pointer to the value.  User should place their @a value into
    * @a internal_value.  This method is useful in reducing the number
@@ -98,7 +98,7 @@ public:
   int rebind (const ACE_Active_Map_Manager_Key &key,
               const T &value);
 
-  /*
+  /**
    * Reassociate @a key with @a value, storing the old value into the
    * "out" parameter @a old_value.  The function fails if @a key is not
    * in the map.
@@ -107,7 +107,7 @@ public:
               const T &value,
               T &old_value);
 
-  /*
+  /**
    * Reassociate @a key with @a value, storing the old key and value
    * into the "out" parameter @a old_key and @a old_value.  The function
    * fails if @a key is not in the map.
@@ -124,7 +124,7 @@ public:
   /// Is @a key in the map?
   int find (const ACE_Active_Map_Manager_Key &key) const;
 
-  /*
+  /**
    * Locate @a value associated with @a key.  The value is returned via
    * @a internal_value and hence a copy is saved.  Note that
    * @a internal_value is only a temporary pointer and will change when
@@ -146,7 +146,7 @@ public:
   int unbind (const ACE_Active_Map_Manager_Key &key,
               T &value);
 
-  /*
+  /**
    * Locate @a value associated with @a key.  The value is returned via
    * @a internal_value and hence a copy is saved.  Note that
    * @a internal_value is only a temporary pointer and will change when

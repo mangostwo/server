@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Timeprobe_T.h
  *
  *  $Id: Timeprobe_T.h 80826 2008-03-04 14:51:23Z wotte $
@@ -27,7 +27,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Timeprobe_Ex
  *
  * @brief This class is used to instrument code.  This is accomplished
@@ -66,7 +66,7 @@ public:
   typedef ACE_Timeprobe_Ex<ACE_LOCK, ALLOCATOR>
           SELF;
 
-  /*
+  /**
    * ACE_Timeprobe
    */
   typedef ACE_Timeprobe_Ex <ACE_LOCK, ACE_Allocator> ACE_Timeprobe;
@@ -181,7 +181,7 @@ private:
 //                  u_long size = ACE_DEFAULT_TIMEPROBE_TABLE_SIZE);
 // };
 
-/*
+/**
  * @class ACE_Function_Timeprobe
  *
  * @brief Auto pointer like time probes. It will record <event> on

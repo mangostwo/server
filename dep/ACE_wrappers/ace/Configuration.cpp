@@ -180,7 +180,7 @@ ACE_Configuration::root_section (void) const
   return root_;
 }
 
-/*
+/**
  * Determine if the contents of this object is the same as the
  * contents of the object on the right hand side.
  * Returns 1 (True) if they are equal and 0 (False) if they are not equal

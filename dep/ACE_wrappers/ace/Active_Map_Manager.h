@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/*
+/**
  *  @file    Active_Map_Manager.h
  *
  *  $Id: Active_Map_Manager.h 91066 2010-07-12 11:05:04Z johnnyw $
@@ -25,7 +25,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Active_Map_Manager_Key
  *
  * @brief Key used in the Active Object Map.
@@ -40,7 +40,7 @@ public:
   /// Default constructor.
   ACE_Active_Map_Manager_Key (void);
 
-  /*
+  /**
    * Constructor given the @a slot_index and @a slot_generation number.
    * This is useful once the user has somehow recovered the
    * @a slot_index and @a slot_generation number from the client.
@@ -83,7 +83,7 @@ public:
 
 private:
 
-  /*
+  /**
    * @brief Data for the Active Object Map Key.
    *
    * This separate structure makes it easier to manage copying

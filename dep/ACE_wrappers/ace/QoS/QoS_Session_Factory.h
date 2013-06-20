@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    QoS_Session_Factory.h
  *
  *  $Id: QoS_Session_Factory.h 80826 2008-03-04 14:51:23Z wotte $
@@ -29,7 +29,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // Forward declare this, so the factory uses only references to this.
 class ACE_QoS_Session;
 
-/*
+/**
  * @class ACE_QoS_Session_Factory
  *
  * @brief Concrete factory for the QoS Session objects.

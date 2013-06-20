@@ -1,4 +1,4 @@
-/*
+/**
  @file Stopwatch.h
  
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -20,7 +20,7 @@
 
 namespace G3D {
 
-/*
+/**
   \brief Accurately measure durations and framerates.
 
   Example 1: For profiling code in the context of a rendering loop:

@@ -1,4 +1,4 @@
-/*
+/**
  @file PrecomputedRandom.h
  
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -69,7 +69,7 @@ public:
      */
     PrecomputedRandom(const HemiUniformData* data1, const SphereBitsData* data2, int dataSize, uint32 seed = 0xF018A4D2);
 
-    /*
+    /**
       \param dataSize Number of random numbers that can be requested before periodicity.  Must be a power of 2.
       */
     PrecomputedRandom(int dataSize, uint32 seed = 0xF018A4D2);

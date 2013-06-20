@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file   Lib_Find.h
  *
  *  All the static function calls needed to search and open shared
@@ -28,7 +28,7 @@ namespace ACE
 {
   // = Methods for searching and opening shared libraries.
 
-  /*
+  /**
    * Finds the file @a filename either using an absolute path or using
    * a relative path in conjunction with ACE_LD_SEARCH_PATH (e.g.,
    * $LD_LIBRARY_PATH on UNIX or the directories scaned by Win32 API
@@ -42,7 +42,7 @@ namespace ACE
                                 ACE_TCHAR pathname[],
                                 size_t maxpathnamelen);
 
-  /*
+  /**
    * Uses @c ldfind to locate and open the appropriate @a filename and
    * returns a pointer to the file, else it returns a NULL
    * pointer. @a type specifies how the file should be open.
@@ -50,7 +50,7 @@ namespace ACE
   extern ACE_Export FILE *ldopen (const ACE_TCHAR *filename,
                                   const ACE_TCHAR *type);
 
-  /*
+  /**
    * Transforms @a entry_point into a form that can be located in a
    * dynamic library using <dlsym>. For example, with Win32/Borland
    * extern "C" functions which use the default calling convention
@@ -61,7 +61,7 @@ namespace ACE
 
 
 #if defined (ACE_OPENVMS)
-  /*
+  /**
    * Registers an @a entry_point and its address for later retrieval
    * through the ACE::ldsymbol () method.
    * For use in cases where the OS compiler encodes long symbolnames.
@@ -69,7 +69,7 @@ namespace ACE
   extern ACE_Export void ldregister (const ACE_TCHAR *entry_point,
                                      void* entry_addr);
 
-  /*
+  /**
    * Looks up an @a entry_point address either from previously registered
    * symbols or through ACE_OS::dlsym ().
    * Returns 0 in case the entry_point is not found, otherwise nonzero.
@@ -79,7 +79,7 @@ namespace ACE
                                     const ACE_TCHAR *entry_point);
 #endif
 
-  /*
+  /**
    * Returns the temporary directory including the trailing slash in
    * @a buffer.  Returns -1 for an error or if the buffer_len is not
    * long enough.
@@ -100,7 +100,7 @@ namespace ACE
   /// the number of replacements made.
   extern ACE_Export size_t strrepl (char *s, char search, char replace);
 
-  /*
+  /**
    * Splits string <s> into pieces separated by the string <token>.
    * <next_start> is an opaque cookie handed back by the call to store
    * its state for the next invocation, thus making it re-entrant.

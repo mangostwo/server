@@ -17,7 +17,7 @@
 
 namespace G3D {
 
-/*
+/**
    A cache that does not prevent its members from being garbage collected.
    Useful to avoid loading or computing an expression twice.  Useful
    for memoization and dynamic programming.
@@ -56,7 +56,7 @@ private:
     Table<Key, ValueWeakRef> table;
 
 public:
-    /*
+    /**
        Returns NULL if the object is not in the cache
     */
     ValueRef operator[](const Key& k) {
@@ -93,7 +93,7 @@ private:
     Table<Key, ValueRef> table;
 
 public:
-    /*
+    /**
        Returns NULL if the object is not in the cache
     */
     ValueRef operator[](const Key& k) {

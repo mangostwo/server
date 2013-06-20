@@ -1,4 +1,4 @@
-/*
+/**
   @file G3D/enumclass.h
 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -12,7 +12,7 @@
 #include "G3D/BinaryInput.h"
 #include "G3D/BinaryOutput.h"
 
-/*
+/**
 \def G3D_DECLARE_ENUM_CLASS_METHODS
 
   \brief Creates a series of methods that turn a class into a scoped enumeration.

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    Dynamic_Message_Strategy.h
  *
  *  $Id: Dynamic_Message_Strategy.h 80826 2008-03-04 14:51:23Z wotte $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Dynamic_Message_Strategy
  *
  * @brief An abstract base class which provides dynamic priority
@@ -114,7 +114,7 @@ protected:
   /// This is a bit mask with all ones in the static bit field.
   unsigned long static_bit_field_mask_;
 
-  /*
+  /**
    * This is a left shift value to make room for static bit field:
    * this value should be the logarithm base 2 of
    * (static_bit_field_mask_ + 1).
@@ -137,7 +137,7 @@ protected:
   ACE_Time_Value pending_shift_;
 };
 
-/*
+/**
  * @class ACE_Deadline_Message_Strategy
  *
  * @brief Deadline based message priority strategy.
@@ -171,7 +171,7 @@ public:
   virtual void dump (void) const;
 };
 
-/*
+/**
  * @class ACE_Laxity_Message_Strategy
  *
  * @brief Laxity based message priority strategy.

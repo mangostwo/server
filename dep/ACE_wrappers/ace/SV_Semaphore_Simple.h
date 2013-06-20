@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    SV_Semaphore_Simple.h
  *
  *  $Id: SV_Semaphore_Simple.h 86494 2009-08-13 19:09:03Z johnnyw $
@@ -40,7 +40,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_SV_Semaphore_Simple
  *
  * @brief This is a simple semaphore package that assumes there are
@@ -105,7 +105,7 @@ public:
   /// operations...
   int close (void);
 
-  /*
+  /**
    * Remove all SV_Semaphores associated with a particular key.  This
    * call is intended to be called from a server, for example, when it
    * is being shut down, as we do an IPC_RMID on the ACE_SV_Semaphore,
@@ -115,7 +115,7 @@ public:
   int remove (void) const;
 
   // = Semaphore acquire and release methods.
-  /*
+  /**
    * Wait until a ACE_SV_Semaphore's value is greater than 0, the
    * decrement it by 1 and return. Dijkstra's P operation, Tannenbaums
    * DOWN operation.
@@ -172,7 +172,7 @@ protected:
   /// Number of semaphores we're creating.
   int sem_number_;
 
-  /*
+  /**
    * Convert name to key This function is used internally to create
    * keys for the semaphores. A valid name contains letters and
    * digits only and MUST start with a letter.

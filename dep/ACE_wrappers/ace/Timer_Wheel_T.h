@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Timer_Wheel_T.h
  *
  *  $Id: Timer_Wheel_T.h 84619 2009-02-26 12:26:16Z johnnyw $
@@ -26,7 +26,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 template <class TYPE, class FUNCTOR, class ACE_LOCK>
 class ACE_Timer_Wheel_T;
 
-/*
+/**
  * @class ACE_Timer_Wheel_Iterator_T
  *
  * @brief Iterates over an ACE_Timer_Wheel.
@@ -74,7 +74,7 @@ private:
   void goto_next(u_int start_spoke);
 };
 
-/*
+/**
  * @class ACE_Timer_Wheel_T
  *
  * @brief Provides a Timing Wheel version of ACE_Timer_Queue.

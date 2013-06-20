@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -508,6 +508,7 @@ namespace MMAP
                     break;                                              //           |   \ |
                 default: break;                                         //           |    \|
             }                                                           //          258---259 ... 515
+
     }
 
     /**************************************************************************/
@@ -846,6 +847,7 @@ namespace MMAP
                 meshData.offMeshConnectionsAreas.append((unsigned char)0xFF);
                 meshData.offMeshConnectionsFlags.append((unsigned short)0xFF);  // all movement masks can make this path
             }
+
         }
 
         delete [] buf;

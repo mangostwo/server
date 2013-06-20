@@ -509,7 +509,7 @@ ACE_TSS_Keys::is_set (const ACE_thread_key_t key) const
   return word < ACE_WORDS ? ACE_BIT_ENABLED (key_bit_words_[word], 1 << bit) : 0;
 }
 
-/*
+/**
  * @class ACE_TSS_Cleanup
  * @brief Singleton that helps to manage the lifetime of TSS objects and keys.
  */
@@ -587,7 +587,7 @@ private:
 
 
 /*****************************************************************************/
-/*
+/**
  * @class TSS_Cleanup_Instance
  * @A class to manage an instance pointer to ACE_TSS_Cleanup.
  * Note: that the double checked locking pattern doesn't allow

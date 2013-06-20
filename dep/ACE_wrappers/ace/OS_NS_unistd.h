@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file   OS_NS_unistd.h
  *
  *  $Id: OS_NS_unistd.h 91066 2010-07-12 11:05:04Z johnnyw $
@@ -252,7 +252,7 @@ namespace ACE_OS
                 size_t len,
                 ACE_OVERLAPPED *);
 
-  /*
+  /**
    * Receive @a len bytes into @a buf from @a handle (uses the
    * <ACE_OS::read> call, which uses the <read> system call on UNIX
    * and the <ReadFile> call on Win32). If errors occur, -1 is
@@ -353,7 +353,7 @@ namespace ACE_OS
                  size_t nbyte,
                  ACE_OVERLAPPED *);
 
-  /*
+  /**
    * Send @a len bytes from @a buf to @a handle (uses the <ACE_OS::write>
    * calls, which is uses the <write> system call on UNIX and the
    * <WriteFile> call on Win32).  If errors occur, -1 is returned.  If

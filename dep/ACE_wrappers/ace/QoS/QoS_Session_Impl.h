@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    QoS_Session_Impl.h
  *
  *  $Id: QoS_Session_Impl.h 91743 2010-09-13 18:24:51Z johnnyw $
@@ -29,7 +29,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_RAPI_Session
  *
  * @brief A RAPI QoS session object.
@@ -64,7 +64,7 @@ public:
                    ACE_QoS_Manager *qos_manager,
                    const ACE_QoS &ace_qos);
 
-  /*
+  /**
    * Sets the QoS for this session object to ace_qos. Does not interfere with the
    * QoS in the underlying socket. This call is useful to update the QoS object
    * when the underlying socket QoS is being set through a mechanism other than
@@ -73,7 +73,7 @@ public:
    */
   virtual void qos (const ACE_QoS &ace_qos);
 
-  /*
+  /**
    * Calls rapi_dispatch () that further triggers the call back function.
    * It is a mechanism of updating the QoS for this session asynchronously, as
    * RSVP events occur.
@@ -154,7 +154,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_GQoS_Session
  *
  * @brief A GQoS session object.
@@ -190,7 +190,7 @@ public:
                    ACE_QoS_Manager *qos_manager,
                    const ACE_QoS &ace_qos);
 
-  /*
+  /**
    * Sets the QoS for this session object to ace_qos. Does not interfere with the
    * QoS in the underlying socket. This call is useful to update the QoS object
    * when the underlying socket QoS is being set through a mechanism other than

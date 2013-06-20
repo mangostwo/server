@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Logging_Strategy.h
  *
  *  $Id: Logging_Strategy.h 91064 2010-07-12 10:11:24Z johnnyw $
@@ -27,7 +27,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Logging_Strategy
  *
  * @brief
@@ -92,7 +92,7 @@ public:
   /// Dynamic linking termination hook.
   virtual int fini (void);
 
-  /*
+  /**
    * Timeout handler which tests logfile size.  If the current logfile
    * size exceeds @c max_size_, the current logfile is closed, saved to
    * logfile.old, and a new logfile is reopened.
@@ -100,14 +100,14 @@ public:
   virtual int handle_timeout (const ACE_Time_Value& tv,
                               const void* arg);
 
-  /*
+  /**
    * This function helps to cancel timer events for this logging strategy
    * in reactor during shutdown.
    */
   virtual int handle_close (ACE_HANDLE,
                             ACE_Reactor_Mask);
 
-  /*
+  /**
    * Reactor accessors. If reactor changes then we need remove this
    * event handler from previous reactor and scheduler for timer events
    * in a new one.
@@ -116,7 +116,7 @@ public:
 
   virtual ACE_Reactor * reactor (void) const;
 
-  /*
+  /**
    * Parse arguments provided in svc.conf file.
    * @arg '-f' Pass in the flags (such as OSTREAM, STDERR, LOGGER, VERBOSE,
    *           SILENT, VERBOSE_LITE) used to control logging.

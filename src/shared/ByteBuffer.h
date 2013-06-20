@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -239,6 +239,7 @@ class ByteBuffer
             read_skip<T>();
             return *this;
         }
+
 
         uint8 operator[](size_t pos) const
         {

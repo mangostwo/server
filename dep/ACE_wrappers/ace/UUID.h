@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file  UUID.h
  *
  *  $Id: UUID.h 88604 2010-01-18 18:01:19Z hillj $
@@ -30,7 +30,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace ACE_Utils
 {
-  /*
+  /**
    * @class UUID_Node
    *
    * @brief Holds the MAC-address of the UUID.
@@ -47,7 +47,7 @@ namespace ACE_Utils
     /// Get the node id
     Node_ID & node_ID (void);
 
-    /*
+    /**
      * @overload
      */
     const Node_ID & node_ID (void) const;
@@ -63,7 +63,7 @@ namespace ACE_Utils
     Node_ID node_ID_;
   };
 
-  /*
+  /**
    * @class ACE_UUID
    *
    * ACE_UUID represents a Universally Unique IDentifier (UUID) as
@@ -147,7 +147,7 @@ namespace ACE_Utils
     /// Initialize the UUID
     void init (void);
 
-    /*
+    /**
      * Helper method to convert from a string UUID.
      *
      * @param[in]        uuid_string        String version of UUID.
@@ -184,7 +184,7 @@ namespace ACE_Utils
     mutable ACE_Auto_Ptr <ACE_CString> as_string_;
   };
 
-  /*
+  /**
    * @class ACE_UUID_Generator
    *
    * Singleton class that generates UUIDs.

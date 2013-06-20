@@ -1,4 +1,4 @@
-/*
+/**
  @file Crypto.cpp
 
  @author Morgan McGuire, http://graphics.cs.williams.edu

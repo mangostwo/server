@@ -1,6 +1,6 @@
 
 //=============================================================================
-/*
+/**
  *  @file    Hash_Multi_Map_Manager_T.cpp
  *
  *  $Id: Hash_Multi_Map_Manager_T.cpp 91688 2010-09-09 11:21:50Z johnnyw $

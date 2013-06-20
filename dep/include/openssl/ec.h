@@ -2,7 +2,7 @@
 /*
  * Originally written by Bodo Moeller for the OpenSSL project.
  */
-/*
+/**
  * \file crypto/ec/ec.h Include file for the OpenSSL EC functions
  * \author Originally written by Bodo Moeller for the OpenSSL project
  */

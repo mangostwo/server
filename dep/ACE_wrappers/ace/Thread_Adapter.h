@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Thread_Adapter.h
  *
  *  $Id: Thread_Adapter.h 92060 2010-09-27 18:08:48Z johnnyw $
@@ -28,7 +28,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Thread_Manager;
 class ACE_Thread_Descriptor;
 
-/*
+/**
  * @class ACE_Thread_Adapter
  *
  * @brief Converts a C++ function into a function that
@@ -58,7 +58,7 @@ public:
 # endif /* ACE_HAS_WIN32_STRUCTURAL_EXCEPTIONS */
                       );
 
-  /*
+  /**
    * Execute the <user_func_> with the <arg>.  This function deletes
    * @c this, thereby rendering the object useless after the call
    * returns.

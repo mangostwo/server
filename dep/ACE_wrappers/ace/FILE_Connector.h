@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/*
+/**
  *  @file    FILE_Connector.h
  *
  *  $Id: FILE_Connector.h 82723 2008-09-16 09:35:44Z johnnyw $
@@ -24,7 +24,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_FILE_Connector
  *
  * @brief Defines an active connection factory for the ACE_FILE wrappers.
@@ -43,7 +43,7 @@ public:
   /// Default constructor.
   ACE_FILE_Connector (void);
 
-  /*
+  /**
    * Actively ``connect'' and produce a @a new_io ACE_FILE_IO object
    * if things go well.  The @a remote_sap is the file that we are
    * trying to create/open.  If it's the default value of
@@ -65,7 +65,7 @@ public:
                       int flags = O_RDWR | O_CREAT,
                       int perms = ACE_DEFAULT_FILE_PERMS);
 
-  /*
+  /**
    * Actively ``connect'' and produce a @a new_io <ACE_FILE_IO> object
    * if things go well.  The @a remote_sap is the file that we are
    * trying to create/open.  If it's the default value of

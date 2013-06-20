@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file Array_Base.h
  *
  *  $Id: Array_Base.h 84477 2009-02-16 13:30:38Z johnnyw $
@@ -30,7 +30,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // Forward declaration.
 template <class T> class ACE_Array_Iterator;
 
-/*
+/**
  * @class ACE_Array_Base
  *
  * @brief Implement a simple dynamic array
@@ -72,14 +72,14 @@ public:
                   T const & default_value,
                   ACE_Allocator * the_allocator = 0);
 
-  /*
+  /**
    * The copy constructor performs initialization by making an exact
    * copy of the contents of parameter <s>, i.e., *this == s will
    * return true.
    */
   ACE_Array_Base (ACE_Array_Base<T> const & s);
 
-  /*
+  /**
    * Assignment operator performs an assignment by making an exact
    * copy of the contents of parameter <s>, i.e., *this == s will
    * return true.  Note that if the <max_size_> of <array_> is >= than
@@ -106,7 +106,7 @@ public:
   /// -1 if @a slot is not in range, else returns 0.
   int set (T const & new_item, size_type slot);
 
-  /*
+  /**
    * Get an item in the array at location @a slot.  Returns -1 if
    * @a slot is not in range, else returns 0.  Note that this function
    * copies the item.  If you want to avoid the copy, you can use
@@ -117,7 +117,7 @@ public:
   /// Returns the <cur_size_> of the array.
   size_type size (void) const;
 
-  /*
+  /**
    * Changes the size of the array to match @a new_size.
    * It copies the old contents into the new array.
    * Return -1 on failure.
@@ -127,7 +127,7 @@ public:
   /// Returns the <max_size_> of the array.
   size_type max_size (void) const;
 
-  /*
+  /**
    * Changes the size of the array to match @a new_size.
    * It copies the old contents into the new array.
    * Return -1 on failure.
@@ -135,7 +135,7 @@ public:
    */
   int max_size (size_type new_size);
 
-  /*
+  /**
    * @name Forward Iterator Accessors
    *
    * Forward iterator accessors.
@@ -147,7 +147,7 @@ public:
   const_iterator end   (void) const;
   //@}
 
-  /*
+  /**
    * @name Reverse Iterator Accessors
    *
    * Reverse iterator accessors.
@@ -173,7 +173,7 @@ protected:
   /// in @c array_.
   size_type max_size_;
 
-  /*
+  /**
    * Current size of the array.  This starts out being == to
    * <max_size_>.  However, if we are assigned a smaller array, then
    * <cur_size_> will become less than <max_size_>.  The purpose of
@@ -193,7 +193,7 @@ protected:
 
 // ****************************************************************
 
-/*
+/**
  * @class ACE_Array_Iterator
  *
  * @brief Implement an iterator over an ACE_Array.

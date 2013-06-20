@@ -1,4 +1,4 @@
-/*
+/**
  @file Ray.h
  
  Ray class
@@ -18,7 +18,7 @@
 
 namespace G3D {
 
-/*
+/**
  A 3D Ray.
  */
 class Ray {
@@ -76,7 +76,7 @@ public:
 	void serialize(class BinaryOutput& b) const;
 	void deserialize(class BinaryInput& b);
 
-    /*
+    /**
      Creates a Ray from a origin and a (nonzero) unit direction.
      */
     static Ray fromOriginAndDirection(const Vector3& point, const Vector3& direction) {
@@ -93,7 +93,7 @@ public:
 		return Ray(m_origin + bumpDirection * distance, m_direction);
 	}
 
-    /*
+    /**
      Returns the closest point on the Ray to point.
      */
     Vector3 closestPoint(const Vector3& point) const {
@@ -105,14 +105,14 @@ public:
         }
     }
 
-    /*
+    /**
      Returns the closest distance between point and the Ray
      */
     float distance(const Vector3& point) const {
         return (closestPoint(point) - point).magnitude();
     }
 
-    /*
+    /**
      Returns the point where the Ray and plane intersect.  If there
      is no intersection, returns a point at infinity.
 
@@ -121,7 +121,7 @@ public:
     */
     Vector3 intersection(const class Plane& plane) const;
 
-    /*
+    /**
      Returns the distance until intersection with the sphere or the (solid) ball bounded by the sphere.
      Will be 0 if inside the sphere, inf if there is no intersection.
 
@@ -143,7 +143,7 @@ public:
 
     float intersectionTime(const class AABox& box) const;
 
-    /*
+    /**
      The three extra arguments are the weights of vertices 0, 1, and 2
      at the intersection point; they are useful for texture mapping
      and interpolated normals.
@@ -153,7 +153,7 @@ public:
         const Vector3& edge01, const Vector3& edge02,
         double& w0, double& w1, double& w2) const;
 
-     /*
+     /**
      Ray-triangle intersection for a 1-sided triangle.  Fastest version.
        @cite http://www.acm.org/jgt/papers/MollerTrumbore97/
        http://www.graphics.cornell.edu/pubs/1997/MT97.html

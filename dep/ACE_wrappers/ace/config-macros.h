@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file   config-macros.h
  *
  *  $Id: config-macros.h 91685 2010-09-09 09:35:14Z johnnyw $
@@ -279,7 +279,7 @@
 # endif /* ACE_HAS_ALLOC_HOOKS */
 
 // ============================================================================
-/*
+/**
  * ACE_OSCALL* macros
  *
  * @deprecated ACE_OSCALL_RETURN and ACE_OSCALL should not be used.

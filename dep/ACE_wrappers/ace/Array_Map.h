@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  * @file    Array_Map.h
  *
  * $Id: Array_Map.h 84136 2009-01-12 11:01:17Z johnnyw $
@@ -34,7 +34,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Array_Map
  *
  * @brief Light weight array-based map with fast iteration, but linear
@@ -105,7 +105,7 @@ public:
   ACE_DECLARE_STL_REVERSE_ITERATORS
 
   /// Default Constructor.
-  /*
+  /**
    * Create an empty map with a preallocated buffer of size @a s.
    */
   ACE_Array_Map (size_type s = 0);
@@ -123,7 +123,7 @@ public:
   /// Destructor.
   ~ACE_Array_Map (void);
 
-  /*
+  /**
    * @name Forward Iterator Accessors
    *
    * Forward iterator accessors.
@@ -135,7 +135,7 @@ public:
   const_iterator end   (void) const;
   //@}
 
-  /*
+  /**
    * @name Reverse Iterator Accessors
    *
    * Reverse iterator accessors.
@@ -148,7 +148,7 @@ public:
   //@}
 
   /// Return current size of map.
-  /*
+  /**
    * @return The number of elements in the map.
    */
   size_type size (void) const;
@@ -159,7 +159,7 @@ public:
   /// Return @c true if the map is empty, else @c false.
   bool is_empty (void) const;  // ACE style
 
-  /*
+  /**
    * Return @c true if the map is empty, else @c false.  We recommend
    * using @c is_empty() instead since it's more consistent with the
    * ACE container naming conventions.
@@ -171,7 +171,7 @@ public:
   void swap (ACE_Array_Map & map);
 
   /// Insert the value @a x into the map.
-  /*
+  /**
    * STL-style map insertion method.
    *
    * @param x @c std::pair containing key and datum.
@@ -194,36 +194,36 @@ public:
   void erase (iterator pos);
 
   /// Remove element corresponding to key @a k from the map.
-  /*
+  /**
    * @return Number of elements that were erased.
    */
   size_type erase (key_type const & k);
 
   /// Remove range of elements [@a first, @a last) from the map.
-  /*
+  /**
    * @note [@a first, @a last) must be valid range within the map.
    */
   void erase (iterator first, iterator last);
 
   /// Clear contents of map.
-  /*
+  /**
    * @note This a constant time (O(1)) operation.
    */
   void clear (void);
 
-  /*
+  /**
    * @name Search Operations
    *
    * Search the map for data corresponding to key @a k.
    */
   //@{
-  /*
+  /**
    * @return @c end() if data corresponding to key @a k is not in the
    *         map.
    */
   iterator find (key_type const & k);
 
-  /*
+  /**
    * @return @c end() if data corresponding to key @a k is not in the
    *         map.
    */
@@ -231,14 +231,14 @@ public:
   //@}
 
   /// Count the number of elements corresponding to key @a k.
-  /*
+  /**
    * @return In the case of this map, the count will always be one if
    *         such exists in the map.
    */
   size_type count (key_type const & k);
 
   /// Convenience array index operator.
-  /*
+  /**
    * Array index operator that allows insertion and retrieval of
    * elements using an array index syntax, such as:
    * @par
@@ -257,7 +257,7 @@ private:
   size_type size_;
 
   /// Current size of underlying array.
-  /*
+  /**
    * @note @c capacity_ is always greater than or equal to @c size_;
    */
   size_type capacity_;

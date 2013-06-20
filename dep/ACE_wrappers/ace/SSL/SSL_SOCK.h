@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    SSL_SOCK.h
  *
  *  $Id: SSL_SOCK.h 91685 2010-09-09 09:35:14Z johnnyw $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_SSL_SOCK
  *
  * @brief An abstract class that forms the basis for more specific
@@ -42,7 +42,7 @@ class ACE_SSL_Export ACE_SSL_SOCK : public ACE_SOCK
 {
 public:
 
-  /*
+  /**
    * Override ACE_SOCK base class implementations with these SSL
    * specific ones.
    */
@@ -69,7 +69,7 @@ protected:
   ACE_SSL_SOCK (void);
 
   /// Destructor
-  /*
+  /**
    * Not a virtual destructor.  Protected destructor to prevent
    * operator delete() from being called through a base class
    * ACE_SSL_SOCK pointer/reference.

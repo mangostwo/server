@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -97,7 +97,7 @@ bool ChatHandler::HandleAccountDeleteCommand(char* args)
     return true;
 }
 
-/*
+/**
  * Collects all GUIDs (and related info) from deleted characters which are still in the database.
  *
  * @param foundList    a reference to an std::list which will be filled with info data
@@ -151,7 +151,7 @@ bool ChatHandler::GetDeletedCharacterInfoList(DeletedInfoList& foundList, std::s
     return true;
 }
 
-/*
+/**
  * Generate WHERE guids list by deleted info in way preventing return too long where list for existed query string length limit.
  *
  * @param itr          a reference to an deleted info list iterator, it updated in function for possible next function call if list to long
@@ -180,7 +180,7 @@ std::string ChatHandler::GenerateDeletedCharacterGUIDsWhereStr(DeletedInfoList::
     return wherestr.str();
 }
 
-/*
+/**
  * Shows all deleted characters which matches the given search string, expected non empty list
  *
  * @see ChatHandler::HandleCharacterDeletedListCommand
@@ -217,7 +217,7 @@ void ChatHandler::HandleCharacterDeletedListHelper(DeletedInfoList const& foundL
         SendSysMessage(LANG_CHARACTER_DELETED_LIST_BAR);
 }
 
-/*
+/**
  * Handles the '.character deleted list' command, which shows all deleted characters which matches the given search string
  *
  * @see ChatHandler::HandleCharacterDeletedListHelper
@@ -244,7 +244,7 @@ bool ChatHandler::HandleCharacterDeletedListCommand(char* args)
     return true;
 }
 
-/*
+/**
  * Restore a previously deleted character
  *
  * @see ChatHandler::HandleCharacterDeletedListHelper
@@ -280,7 +280,7 @@ void ChatHandler::HandleCharacterDeletedRestoreHelper(DeletedInfo const& delInfo
                                delInfo.name.c_str(), delInfo.accountId, delInfo.lowguid);
 }
 
-/*
+/**
  * Handles the '.character deleted restore' command, which restores all deleted characters which matches the given search string
  *
  * The command automatically calls '.character deleted list' command with the search string to show all restored characters.
@@ -346,7 +346,7 @@ bool ChatHandler::HandleCharacterDeletedRestoreCommand(char* args)
     return true;
 }
 
-/*
+/**
  * Handles the '.character deleted delete' command, which completely deletes all deleted characters which matches the given search string
  *
  * @see Player::GetDeletedCharacterGUIDs
@@ -382,7 +382,7 @@ bool ChatHandler::HandleCharacterDeletedDeleteCommand(char* args)
     return true;
 }
 
-/*
+/**
  * Handles the '.character deleted old' command, which completely deletes all deleted characters deleted with some days ago
  *
  * @see Player::DeleteOldCharacters
@@ -622,6 +622,7 @@ void CliRunnable::run()
                     command_str[x] = 0;
                     break;
                 }
+
 
             if (!*command_str)
             {

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Task.h
  *
  *  $Id: Task.h 91688 2010-09-09 11:21:50Z johnnyw $
@@ -24,7 +24,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Task_Flags
  *
  * @brief These flags are used within the ACE_Task.
@@ -53,7 +53,7 @@ namespace ACE_Task_Flags
   };
 }
 
-/*
+/**
  * @class ACE_Task_Base
  *
  * @brief Direct base class for the ACE_Task template.
@@ -82,7 +82,7 @@ public:
   /// @a args can be used to pass arbitrary information into <open>.
   virtual int open (void *args = 0);
 
-  /*
+  /**
    * Hook called from ACE_Thread_Exit when during thread exit and from
    * the default implementation of @c module_closed().  In general, this
    * method shouldn't be called directly by an application,
@@ -93,7 +93,7 @@ public:
    */
   virtual int close (u_long flags = 0);
 
-  /*
+  /**
    * Hook called during ACE_Module::close().  The default
    * implementation calls forwards the call to close(1).  Please
    * notice the changed value of the default argument of close().
@@ -118,7 +118,7 @@ public:
   virtual int svc (void);
 
   // = Active object activation method.
-  /*
+  /**
    * Turn the task into an active object, i.e., having @a n_threads of
    * control, all running at the @a priority level (see below) with the
    * same @a grp_id, all of which invoke <Task::svc>.  Returns -1 if
@@ -188,7 +188,7 @@ public:
                         ACE_thread_t thread_ids[] = 0,
                         const char* thr_name[] = 0);
 
-  /*
+  /**
    * Block until there are no more threads running in this task.
    * This method will not wait for either detached or daemon threads;
    * the threads must have been spawned with the @c THR_JOINABLE flag.
@@ -228,14 +228,14 @@ public:
   /// True if queue is a writer, else false.
   int is_writer (void) const;
 
-  /*
+  /**
    * Returns the number of threads currently running within a task.
    * If we're a passive object this value is 0, else it's greater than
    * 0.
    */
   size_t thr_count (void) const;
 
-  /*
+  /**
    * Returns the thread ID of the thread whose exit caused this object's
    * thread count to be decremented to 0.
    *
@@ -261,7 +261,7 @@ public:
   static void cleanup (void *object, void *params);
 
 protected:
-  /*
+  /**
    * Count of the number of threads running within the task.  If this
    * value is greater than 0 then we're an active object and the value
    * of <thr_count_> is the number of active threads at this instant.

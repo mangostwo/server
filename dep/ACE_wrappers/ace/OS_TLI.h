@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file   OS_TLI.h
  *
  *  $Id: OS_TLI.h 91688 2010-09-09 11:21:50Z johnnyw $
@@ -152,7 +152,7 @@ typedef struct t_optmgmt ACE_TOPTMGMT;
 typedef struct t_bind  ACE_TBIND;
 #endif
 
-/*
+/**
  * @namespace ACE_OS
  *
  * @brief This class is a wrapper for the XTI/TLI operations

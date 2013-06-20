@@ -14,7 +14,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_WIN32_Wakeup_Completion
  *
  * This is result object is used by the <end_event_loop> of the

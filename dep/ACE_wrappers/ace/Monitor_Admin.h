@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  * @file Monitor_Admin.h
  *
  * $Id: Monitor_Admin.h 85297 2009-05-07 01:40:41Z parsons $
@@ -33,7 +33,7 @@ namespace ACE
   {
     class Monitor_Query;
 
-    /*
+    /**
      * @class Monitor_Point_Auto_Updater
      *
      * @brief Automates periodic updating of monitor point classes.
@@ -56,7 +56,7 @@ namespace ACE
                                   const void* monitor_point);
     };
 
-    /*
+    /**
      * @class Admin
      *
      * @brief Accesses monitor points or groups and manages the registries.

@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/*
+/**
  *  @file    FIFO_Send_Msg.h
  *
  *  $Id: FIFO_Send_Msg.h 84480 2009-02-16 18:58:16Z johnnyw $
@@ -30,7 +30,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // Forward Decls
 class ACE_Str_Buf;
 
-/*
+/**
  * @class ACE_FIFO_Send_Msg
  *
  * @brief Sender side for the Record oriented C++ wrapper for UNIX

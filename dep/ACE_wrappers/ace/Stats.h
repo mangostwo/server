@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    Stats.h
  *
  *  $Id: Stats.h 80826 2008-03-04 14:51:23Z wotte $
@@ -28,7 +28,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Stats_Value
  *
  * @brief Helper class for ACE_Stats.
@@ -41,7 +41,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Export ACE_Stats_Value
 {
 public:
-  /*
+  /**
    * Constructor, which requires precision in terms of number of
    * decimal digits.  The more variation in the data, and the greater
    * the data values, the smaller the precision must be to avoid
@@ -70,7 +70,7 @@ public:
   /// precision.
   ACE_UINT32 fractional_field (void) const;
 
-  /*
+  /**
    * Access the value as an _unsigned_ 64 bit quantity.  It scales the
    * value up by {precision} decimal digits, so that no precision will
    * be lost.  It assumes that {whole_} is >= 0.
@@ -91,7 +91,7 @@ private:
   /// The fractional portion of the value.
   ACE_UINT32 fractional_;
 
-  /*
+  /**
    * The number of decimal digits of precision represented by
    * {fractional_}.  Not declared const, so the only way to change it
    * is via the assignment operator.
@@ -100,7 +100,7 @@ private:
 
 };
 
-/*
+/**
  * @class ACE_Stats
  *
  * @brief Provides simple statistical analysis.
@@ -145,7 +145,7 @@ public:
   /// Value of the maximum sample provided so far.
   ACE_INT32 max_value (void) const;
 
-  /*
+  /**
    * Access the mean of all samples provided so far.  The fractional
    * part is to the specified number of digits.  E.g., 3 fractional
    * digits specifies that the fractional part is in thousandths.
@@ -158,7 +158,7 @@ public:
   int std_dev (ACE_Stats_Value &std_dev,
                const ACE_UINT32 scale_factor = 1);
 
-  /*
+  /**
    * Print summary statistics.  If scale_factor is not 1, then the
    * results are divided by it, i.e., each of the samples is scaled
    * down by it.  If internal overflow is reached with the specified
@@ -182,7 +182,7 @@ public:
                         const ACE_UINT32 divisor,
                         ACE_Stats_Value &quotient);
 
-  /*
+  /**
    * Sqrt function, which uses an oversimplified version of Newton's
    * method.  It's not fast, but it doesn't require floating point
    * support.

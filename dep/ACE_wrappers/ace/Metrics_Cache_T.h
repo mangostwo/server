@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  * @file Metrics_Cache_T.h
  *
  * $Id: Metrics_Cache_T.h 92090 2010-09-29 14:10:45Z johnnyw $
@@ -34,7 +34,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Metrics_Timeprobe
  *
  * @brief This class implements a timeprobe for use in a Metrics framework.
@@ -110,7 +110,7 @@ private:
   void operator =(const ACE_Metrics_Timeprobe<ACE_LOCK, ALLOCATOR> &);
 };
 
-/*
+/**
  * @class ACE_Metrics_Cache
  *
  * @brief This class implements a cache for metrics timeprobe data.

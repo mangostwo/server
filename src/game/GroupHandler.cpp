@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -730,6 +730,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     {
         const uint64& auramask = player->GetAuraUpdateMask();
         *data << uint64(auramask);
+        // In all checked pre-2.x data of packets included only positive auras
         for (uint32 i = 0; i < MAX_AURAS; ++i)
         {
             if (auramask & (uint64(1) << i))
@@ -806,6 +807,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
         {
             const uint64& auramask = pet->GetAuraUpdateMask();
             *data << uint64(auramask);
+            // In all checked pre-2.x data of packets included only positive auras
             for (uint32 i = 0; i < MAX_AURAS; ++i)
             {
                 if (auramask & (uint64(1) << i))

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file   SSL_Asynch_Stream.h
  *
  *  $Id: SSL_Asynch_Stream.h 91743 2010-09-13 18:24:51Z johnnyw $
@@ -64,7 +64,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_SSL_Asynch_Stream;     // Forward decl for use in result class def.
 
-/*
+/**
  * @class ACE_SSL_Asynch_Read_Stream_Result
  *
  * Result class that communicates result of read operations initiated on
@@ -86,7 +86,7 @@ protected:
                                      int signal_number);
 };
 
-/*
+/**
  * @class ACE_SSL_Asynch_Write_Stream_Result
  *
  * Result class that communicates result of write operations initiated on
@@ -109,7 +109,7 @@ protected:
 };
 
 
-/*
+/**
  * @class ACE_SSL_Asynch_Result
  *
  * Result class that is used internally for socket close notifications.
@@ -130,7 +130,7 @@ public:
 // friend declarations in ACE_SSL_Asynch_Stream.
 struct ACE_SSL_Asynch_Stream_Accessor;
 
-/*
+/**
  * @class ACE_SSL_Asynch_Stream
  *
  * @brief This class is a factory for initiating asynchronous reads
@@ -166,7 +166,7 @@ public:
     };
 
   /// Constructor.
-  /*
+  /**
    * @arg context  Pointer to an ACE_SSL_Context instance containing
    *               the OpenSSL information to be associated with this
    *               ACE_SSL_Asynch_Stream.  The needed SSL data will be
@@ -188,7 +188,7 @@ public:
   /// Return a pointer to the underlying SSL structure.
   SSL *ssl (void) const;
 
-  /*
+  /**
    * Initializes the factory with information which will be used with
    * each asynchronous call.
    *
@@ -204,7 +204,7 @@ public:
             const void *completion_key = 0,
             ACE_Proactor *proactor = 0);
 
-  /*
+  /**
    * Initiates an asynchronous read. If the operation is successfully
    * initiated, the handle_read_stream() method will be called on the
    * ACE_Handler object passed to open() when the operation completes.
@@ -240,7 +240,7 @@ public:
             int priority = 0,
             int signal_number = ACE_SIGRTMIN);
 
-  /*
+  /**
    * Initiates an asynchronous write. If the operation is successfully
    * initiated, the handle_write_stream() method will be called on the
    * ACE_Handler object passed to open() when the operation completes.
@@ -297,7 +297,7 @@ protected:
   /// more pending AIOs exist.  It also calls users handle_wakeup().
   virtual void handle_wakeup (void);
 
-  /*
+  /**
    * This method will be called after a successful SSL handshake indicating
    * that the peer's certificate chain (if any) has been verified and the key
    * exchange has completed.  When a peer certificate is required, this
@@ -331,7 +331,7 @@ protected:
    */
   virtual bool post_handshake_check (void);
 
-  /*
+  /**
    * @name SSL State Machine
    */
   //@{
@@ -360,7 +360,7 @@ protected:
   /// future.
   int notify_close(void);
 
-  /*
+  /**
    * @name BIO Helpers
    */
   //@{
@@ -427,7 +427,7 @@ protected:
       BF_AIO   = 0x02
     };
 
-  /*
+  /**
    * @name Internal stream, buffer and info for BIO read
    */
   //@{
@@ -437,7 +437,7 @@ protected:
   int                     bio_inp_flag_;
   //@}
 
-  /*
+  /**
    * @name Internal stream, buffer and info for BIO write
    */
   //@{

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file   Codecs.h
  *
  *  $Id: Codecs.h 80826 2008-03-04 14:51:23Z wotte $
@@ -33,7 +33,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Base64
  *
  * @brief Encode/Decode a stream of bytes according to Base64 encoding.
@@ -49,7 +49,7 @@ public:
 
   //@{
 
-  /*
+  /**
    * Encodes a stream of bytes to Base64 data
    *
    * @param input Binary data in byte stream.
@@ -64,7 +64,7 @@ public:
                            const size_t input_len,
                            size_t* output_len,
                            bool is_chunked = true);
-  /*
+  /**
    * Decodes a stream of Base64 to bytes data
    *
    * @param input Encoded Base64 data in byte stream.
@@ -75,7 +75,7 @@ public:
   static ACE_Byte* decode (const ACE_Byte* input,
                            size_t* output_len);
 
-  /*
+  /**
    * Return the length of the encoded input data
    *
    * @param input Encoded Base64 data in byte stream.

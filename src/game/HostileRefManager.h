@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -84,7 +84,7 @@ class HostileRefManager : public RefManager<Unit, ThreatManager>
         Unit* iOwner;                                       // owner of manager variable, back ref. to it, always exist
 
         float      m_redirectionMod;
-        ObjectGuid m_redirectionTargetGuid;
+        ObjectGuid m_redirectionTargetGuid;                 // in 2.x redirected only full threat
 };
 //=================================================
 #endif

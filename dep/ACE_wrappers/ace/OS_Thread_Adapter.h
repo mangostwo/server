@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file OS_Thread_Adapter.h
  *
  *  $Id: OS_Thread_Adapter.h 85341 2009-05-14 11:07:37Z johnnyw $
@@ -24,7 +24,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_OS_Thread_Adapter
  *
  * @brief Converts a C++ function into a function that can be
@@ -52,7 +52,7 @@ public:
 # endif /* ACE_HAS_WIN32_STRUCTURAL_EXCEPTIONS */
                          );
 
-  /*
+  /**
    * Execute the @a user_func_ with the @a arg.  This function deletes
    * @c this, thereby rendering the object useless after the call
    * returns.

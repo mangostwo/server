@@ -1,6 +1,6 @@
 
 //=============================================================================
-/*
+/**
  *  @file    Basic_Stats.h
  *
  *  $Id: Basic_Stats.h 80826 2008-03-04 14:51:23Z wotte $
@@ -24,7 +24,7 @@
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 /// Collect basic stats about a series of samples
-/*
+/**
  * Compute the average and standard deviation (aka jitter) for an
  * arbitrary number of samples, using constant space.
  * Normally used for latency statistics.
@@ -33,7 +33,7 @@ class ACE_Export ACE_Basic_Stats
 {
 public:
   /// Constructor
-  /*
+  /**
    * The number of samples is pre-allocated, and cannot changes once
    * the class is initialized.
    */
@@ -49,7 +49,7 @@ public:
   void accumulate (const ACE_Basic_Stats &rhs);
 
   /// Dump all the samples
-  /*
+  /**
    * Prints out the results, using @a msg as a prefix for each message and
    * scaling all the numbers by @a scale_factor. The latter is useful because
    * high resolution timer samples are acquired in clock ticks, but often

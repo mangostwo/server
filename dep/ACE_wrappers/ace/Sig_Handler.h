@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Sig_Handler.h
  *
  *  $Id: Sig_Handler.h 84727 2009-03-05 19:22:29Z johnnyw $
@@ -26,7 +26,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Sig_Action;
 
-/*
+/**
  * @class ACE_Sig_Handler
  *
  * @brief This is the main dispatcher of signals for ACE.  It improves
@@ -50,7 +50,7 @@ public:
   virtual ~ACE_Sig_Handler (void);
 
   // = Registration and removal methods.
-  /*
+  /**
    * Add a new ACE_Event_Handler and a new sigaction associated with
    * @a signum.  Passes back the existing ACE_Event_Handler and its
    * sigaction if pointers are non-zero.  Returns -1 on failure and >=
@@ -62,7 +62,7 @@ public:
                                 ACE_Event_Handler **old_sh = 0,
                                 ACE_Sig_Action *old_disp = 0);
 
-  /*
+  /**
    * Remove the ACE_Event_Handler currently associated with
    * @a signum.  @a sigkey is ignored in this implementation since there
    * is only one instance of a signal handler.  Install the new
@@ -91,7 +91,7 @@ public:
   /// Return the existing handler.
   virtual ACE_Event_Handler *handler (int signum, ACE_Event_Handler *);
 
-  /*
+  /**
    * Callback routine registered with sigaction(2) that dispatches the
    * <handle_signal> method of the appropriate pre-registered
    * ACE_Event_Handler.
@@ -108,7 +108,7 @@ public:
 protected:
   // = These methods and data members are shared by derived classes.
 
-  /*
+  /**
    * Set a new ACE_Event_Handler that is associated with @a signum.
    * Return the existing handler.  Does not acquire any locks so that
    * it can be called from a signal handler, such as <dispatch>.
@@ -116,7 +116,7 @@ protected:
   static ACE_Event_Handler *handler_i (int signum,
                                        ACE_Event_Handler *);
 
-  /*
+  /**
    * This implementation method is called by <register_handler> and
    * @c dispatch.  It doesn't do any locking so that it can be called
    * within a signal handler, such as @c dispatch.  It adds a new
@@ -143,7 +143,7 @@ private:
   static ACE_Event_Handler *signal_handlers_[ACE_NSIG];
 };
 
-/*
+/**
  * @class ACE_Sig_Handlers
  *
  * @brief This is an alternative signal handling dispatcher for ACE.  It
@@ -161,7 +161,7 @@ class ACE_Export ACE_Sig_Handlers : public ACE_Sig_Handler
 {
 public:
   // = Registration and removal methods.
-  /*
+  /**
    * Add a new ACE_Event_Handler and a new sigaction associated with
    * @a signum.  Passes back the existing ACE_Event_Handler and its
    * sigaction if pointers are non-zero.  Returns -1 on failure and
@@ -173,7 +173,7 @@ public:
                                 ACE_Event_Handler **old_sh = 0,
                                 ACE_Sig_Action *old_disp = 0);
 
-  /*
+  /**
    * Remove an ACE_Event_Handler currently associated with @a signum.
    * We remove the handler if (1) its sigkey> matches the @a sigkey
    * passed as a parameter or (2) if we've been told to remove all the
@@ -193,7 +193,7 @@ public:
   /// SIGNUM.
   virtual ACE_Event_Handler *handler (int signum);
 
-  /*
+  /**
    * Set a new ACE_Event_Handler that is associated with SIGNUM at
    * the head of the list of signals.  Return the existing handler
    * that was at the head.
@@ -201,7 +201,7 @@ public:
   virtual ACE_Event_Handler *handler (int signum,
                                       ACE_Event_Handler *);
 
-  /*
+  /**
    * Callback routine registered with sigaction(2) that dispatches the
    * <handle_signal> method of all the pre-registered
    * ACE_Event_Handlers for @a signum
@@ -215,7 +215,7 @@ public:
   ACE_ALLOC_HOOK_DECLARE;
 
 private:
-  /*
+  /**
    * Keeps track of the id that uniquely identifies each registered
    * signal handler.  This id can be used to cancel a timer via the
    * <remove_handler> method.

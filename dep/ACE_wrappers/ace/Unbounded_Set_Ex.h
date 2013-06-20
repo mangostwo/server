@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file Unbounded_Set_Ex.h
  *
  *  $Id: Unbounded_Set_Ex.h 88978 2010-02-13 16:03:31Z hillj $
@@ -35,7 +35,7 @@ class ACE_Unbounded_Set_Ex_Const_Iterator;
 template <class T, class C>
 class ACE_Unbounded_Set_Ex;
 
-/*
+/**
  * @class ACE_Unbounded_Set_Ex_Iterator
  *
  * @brief Implement an iterator over an unbounded set.
@@ -104,7 +104,7 @@ private:
   ACE_Unbounded_Set_Ex<T, C> *set_;
 };
 
-/*
+/**
  * @class ACE_Unbounded_Set_Ex_Const_Iterator
  *
  * @brief Implement an const iterator over an unbounded set.
@@ -173,7 +173,7 @@ private:
   const ACE_Unbounded_Set_Ex<T, C> *set_;
 };
 
-/*
+/**
  * @class ACE_Unbounded_Set_Ex
  *
  * @brief Implement a simple unordered set of <T> of unbounded size.
@@ -238,32 +238,32 @@ public:
   // = Initialization and termination methods.
   /// Constructor.  Use user specified allocation strategy
   /// if specified.
-  /*
+  /**
    * Initialize an empty set using the allocation strategy of the user if
    * provided.
    */
   ACE_Unbounded_Set_Ex (ACE_Allocator *alloc = 0);
 
-  /*
+  /**
    * Initialize an empty set using the allocation strategy of the user if
    * provided, and a given comparator functor.
    */
   ACE_Unbounded_Set_Ex (const C &comparator, ACE_Allocator *alloc = 0);
 
   /// Copy constructor.
-  /*
+  /**
    * Initialize this set to be an exact copy of the set provided.
    */
   ACE_Unbounded_Set_Ex (const ACE_Unbounded_Set_Ex<T, C> &);
 
   /// Assignment operator.
-  /*
+  /**
    * Perform a deep copy of the rhs into the lhs.
    */
   ACE_Unbounded_Set_Ex<T, C> & operator= (const ACE_Unbounded_Set_Ex<T, C> &);
 
   /// Destructor.
-  /*
+  /**
    * Destroy the nodes of the set.
    */
   ~ACE_Unbounded_Set_Ex (void);
@@ -271,13 +271,13 @@ public:
   // = Check boundary conditions.
 
   /// Returns @c true if the container is empty, otherwise returns @c false.
-  /*
+  /**
    * Constant time is_empty check.
    */
   bool is_empty (void) const;
 
   /// Returns @c false.
-  /*
+  /**
    * Always returns @c false since the set can never fill up.
    */
   bool is_full (void) const;
@@ -285,7 +285,7 @@ public:
   // = Classic unordered set operations.
 
   /// Linear insertion of an item.
-  /*
+  /**
    * Insert @a new_item into the set (doesn't allow duplicates).
    * Returns -1 if failures occur, 1 if item is already present, else
    * 0.
@@ -294,13 +294,13 @@ public:
 
   /// Insert @a item at the tail of the set (doesn't check for
   /// duplicates).
-  /*
+  /**
    * Constant time insert at the end of the set.
    */
   int insert_tail (const T &item);
 
   /// Linear remove operation.
-  /*
+  /**
    * Remove first occurrence of @a item from the set.  Returns 0 if
    * it removes the item, -1 if it can't find the item, and -1 if a
    * failure occurs.
@@ -309,13 +309,13 @@ public:
 
   /// Finds if @a item occurs in the set.  Returns 0 if find succeeds,
   /// else -1.
-  /*
+  /**
    * Performs a linear find operation.
    */
   int find (const T &item) const;
 
   /// Size of the set.
-  /*
+  /**
    * Access the size of the set.
    */
   size_t size (void) const;
@@ -324,7 +324,7 @@ public:
   void dump (void) const;
 
   /// Reset the ACE_Unbounded_Set_Ex to be empty.
-  /*
+  /**
    * Delete the nodes of the set.
    */
   void reset (void);

@@ -1,4 +1,4 @@
-/*
+/**
  @file uint128.cpp
  
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu

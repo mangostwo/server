@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1375,6 +1375,15 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
 
 void BattleGroundMgr::BuildGroupJoinedBattlegroundPacket(WorldPacket* data, GroupJoinBattlegroundResult result)
 {
+    /*bgTypeId is:
+    0 - Your group has joined a battleground queue, but you are not eligible
+    1 - Your group has joined the queue for AV
+    2 - Your group has joined the queue for WS
+    3 - Your group has joined the queue for AB
+    4 - Your group has joined the queue for NA
+    5 - Your group has joined the queue for BE Arena
+    6 - Your group has joined the queue for All Arenas
+    7 - Your group has joined the queue for EotS*/
     data->Initialize(SMSG_GROUP_JOINED_BATTLEGROUND, 4);
     *data << int32(result);
     if (result == ERR_BATTLEGROUND_JOIN_TIMED_OUT || result == ERR_BATTLEGROUND_JOIN_FAILED)

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Codeset_IBM1047.h
  *
  *  $Id: Codeset_IBM1047.h 81388 2008-04-23 14:02:05Z johnnyw $
@@ -32,7 +32,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 // ****************************************************************
 
-/*
+/**
  * @class ACE_IBM1047_ISO8859
  *
  * @brief Codeset translation specialization.
@@ -75,7 +75,7 @@ public:
   virtual ACE_CDR::ULong tcs ();
 };
 
-/*
+/**
  * @class ACE_ISO8859_IBM1047
  *
  * @brief Codeset translation specialization.

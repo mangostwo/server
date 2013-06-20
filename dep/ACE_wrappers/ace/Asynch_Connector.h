@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/*
+/**
  *  @file    Asynch_Connector.h
  *
  *  $Id: Asynch_Connector.h 80826 2008-03-04 14:51:23Z wotte $
@@ -31,7 +31,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // Forward declarations
 class ACE_Message_Block;
 
-/*
+/**
  * @class ACE_Asynch_Connector
  *
  * @brief This class is an example of the Connector pattern.  This class
@@ -52,7 +52,7 @@ public:
   /// Virtual destruction
   virtual ~ACE_Asynch_Connector (void);
 
-  /*
+  /**
    * This opens asynch connector
    */
   virtual int open (bool pass_addresses = false,
@@ -66,7 +66,7 @@ public:
                        int reuse_addr = 1,
                        const void *act = 0);
 
-  /*
+  /**
    * This cancels all pending accepts operations that were issued by
    * the calling thread.
    *
@@ -78,7 +78,7 @@ public:
   virtual int cancel (void);
 
 
-  /*
+  /**
    * Template method to validate peer before service is opened.
    * This method is called when the connection attempt completes,
    * whether it succeeded or failed, if the @a validate_connection
@@ -137,7 +137,7 @@ protected:
   /// Return the asynch Connect object.
   ACE_Asynch_Connect & asynch_connect (void);
 
-  /*
+  /**
    * This is the template method used to create new handler.
    * Subclasses must overwrite this method if a new handler creation
    * strategy is required.

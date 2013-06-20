@@ -1,4 +1,4 @@
-/*
+/**
   @file GImage_tga.cpp
   @author Morgan McGuire, http://graphics.cs.williams.edu
   @created 2002-05-27

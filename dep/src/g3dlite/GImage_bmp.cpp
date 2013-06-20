@@ -1,4 +1,4 @@
-/*
+/**
   @file GImage_bmp.cpp
   @author Morgan McGuire, http://graphics.cs.williams.edu
   @created 2002-05-27
@@ -13,7 +13,7 @@
 namespace G3D {
 
 #ifndef G3D_WIN32
-/*
+/**
  This is used by the Windows bitmap I/O.
  */
 static const int BI_RGB = 0;

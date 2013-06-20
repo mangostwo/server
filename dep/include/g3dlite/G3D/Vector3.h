@@ -1,4 +1,4 @@
-/*
+/**
   @file Vector3.h
  
   3D vector class
@@ -33,7 +33,7 @@ class Vector4int8;
 class Vector3int32;
 class Any;
 
-/*
+/**
   <B>Swizzles</B>
  Vector classes have swizzle operators, e.g. <CODE>v.xy()</CODE>, that
  allow selection of arbitrary sub-fields.  These cannot be used as write 
@@ -108,7 +108,7 @@ public:
 
     enum Axis {X_AXIS=0, Y_AXIS=1, Z_AXIS=2, DETECT_AXIS=-1};
 
-    /*
+    /**
      Returns the largest dimension.  Particularly convenient for determining
      which plane to project a triangle onto for point-in-polygon tests.
      */
@@ -157,18 +157,18 @@ public:
 
     float magnitude() const;
     
-    /*
+    /**
      The result is a nan vector if the length is almost zero.
      */
     Vector3 direction() const;
 
-    /*
+    /**
      Potentially less accurate but faster than direction().
      Only works if System::hasSSE is true.
      */
     Vector3 fastDirection() const;
 
-    /*
+    /**
      Reflect this vector about the (not necessarily unit) normal.
      Assumes that both the before and after vectors point away from
      the base of the normal.
@@ -189,7 +189,7 @@ public:
      */
     Vector3 reflectAbout(const Vector3& normal) const;
 
-    /*
+    /**
       See also G3D::Ray::reflect.
       The length is 1. 
      <PRE>
@@ -203,7 +203,7 @@ public:
     Vector3 reflectionDirection(const Vector3& normal) const;
     
 
-    /*
+    /**
      Returns Vector3::zero() if the length is nearly zero, otherwise
      returns a unit vector.
      */
@@ -218,7 +218,7 @@ public:
         }
     }
 
-    /*
+    /**
      Returns the direction of a refracted ray,
      where iExit is the index of refraction for the
      previous material and iEnter is the index of refraction
@@ -276,7 +276,7 @@ public:
     Vector3 __fastcall cross(const Vector3& rkVector) const;
     Vector3 unitCross(const Vector3& rkVector) const;
 
-    /*
+    /**
      Returns a matrix such that v.cross() * w = v.cross(w).
      <PRE>
      [ 0  -v.z  v.y ]
@@ -315,7 +315,7 @@ public:
             G3D::clamp(z, low, high));
     }
 
-    /*
+    /**
      Linear interpolation
      */
     inline Vector3 lerp(const Vector3& v, float alpha) const {
@@ -362,7 +362,7 @@ public:
     */
     static Vector3 cosPowHemiRandom(const Vector3& n, const float k, Random& r = Random::common());
 
-    /*
+    /**
      \brief Random vector distributed over the hemisphere about normal.
 
      Distribution rendered by G3D::DirectionHistogram:

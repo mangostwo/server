@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -203,7 +203,6 @@ extern int main(int argc, char** argv)
                     "                                                       ##    ######   ## ##\n"
                     "   Forum: http://community.getmangos.co.uk             ##     ####     ### \n"
                     "\n\n");
-
     sLog.outString("Using configuration file %s.", cfg_file);
 
     DETAIL_LOG("%s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));

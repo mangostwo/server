@@ -800,7 +800,7 @@ void tbb_connection_v1::adjust_job_count_estimate( int delta ) {
 }
 
 //! wake some available tbb threads
-/*
+/**
      First, atomically grab the connection, then increase the server ref count to keep it from being released prematurely.
      Second, check if the balance is available for TBB and the tbb conneciton has slack to exploit.
      If the answer is true, go ahead and try to wake some up.

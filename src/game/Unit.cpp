@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -2422,6 +2422,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
                 currentAbsorb = RemainingDamage;
 
             RemainingDamage -= currentAbsorb;
+
 
             uint32 splitted = currentAbsorb;
             uint32 splitted_absorb = 0;
@@ -6442,7 +6443,7 @@ int32 Unit::SpellBonusWithCoeffs(SpellEntry const* spellProto, int32 total, int3
     return total;
 };
 
-/*
+/**
  * Calculates caster part of spell damage bonuses,
  * also includes different bonuses dependent from target auras
  */
@@ -6498,9 +6499,11 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
     {
         if (!(*i)->isAffectedOnSpell(spellProto))
             continue;
+            
         switch ((*i)->GetModifier()->m_miscvalue)
         {
-            case 4920: // Molten Fury
+                // Molten Fury
+            case 4920:
             case 4919:
             case 6917: // Death's Embrace
             case 6926:
@@ -7150,7 +7153,7 @@ uint32 Unit::SpellCriticalHealingBonus(SpellEntry const* spellProto, uint32 dama
     return damage;
 }
 
-/*
+/**
  * Calculates caster part of healing spell bonuses,
  * also includes different bonuses dependent from target auras
  */
@@ -7286,7 +7289,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* pVictim, SpellEntry const* spellProto, 
     return heal < 0 ? 0 : uint32(heal);
 }
 
-/*
+/**
  * Calculates target part of healing spell bonuses,
  * will be called on each tick for periodic damage over time auras
  */
@@ -7480,11 +7483,10 @@ bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex i
                     return true;
         }
     }
-
     return false;
 }
 
-/*
+/**
  * Calculates caster part of melee damage bonuses,
  * also includes different bonuses dependent from target auras
  */
@@ -7736,7 +7738,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* pVictim, uint32 pdamage, WeaponAttackTyp
     return tmpDamage > 0 ? uint32(tmpDamage) : 0;
 }
 
-/*
+/**
  * Calculates target part of melee damage bonuses,
  * will be called on each tick for periodic damage over time auras
  */
@@ -8350,6 +8352,7 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
 
 void Unit::UpdateVisibilityAndView()
 {
+
     static const AuraType auratypes[] = {SPELL_AURA_BIND_SIGHT, SPELL_AURA_FAR_SIGHT, SPELL_AURA_NONE};
     for (AuraType const* type = &auratypes[0]; *type != SPELL_AURA_NONE; ++type)
     {
@@ -8586,6 +8589,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
     if (m_speed_rate[mtype] != rate)
     {
         m_speed_rate[mtype] = rate;
+
         propagateSpeedChange();
 
         const uint16 SetSpeed2Opc_table[MAX_MOVE_TYPE][2] =
@@ -8613,7 +8617,6 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
             if (mtype == MOVE_RUN)
                 data << uint8(0);                           // new 2.1.0
             data << float(GetSpeed(mtype));
-
             ((Player*)this)->GetSession()->SendPacket(&data);
         }
 

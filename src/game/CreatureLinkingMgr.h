@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/*
+/**
  * @addtogroup npc_linking System to link groups of NPCs together
  * This NPC-linking system in MaNGOS consists of 2 files:
  * - CreatureLinkingMgr.h
@@ -89,7 +89,7 @@ struct CreatureLinkingInfo
     uint16 searchRange: 16;
 };
 
-/*
+/**
  * A class to represent the static information of linking NPCs together
  */
 
@@ -132,7 +132,7 @@ class CreatureLinkingMgr
         bool IsLinkingEntryValid(uint32 slaveEntry, CreatureLinkingInfo* pInfo, bool byEntry);
 };
 
-/*
+/**
  * A class to represent the dynamic information of linking NPCs together
  *
  * Every map has an instance of this class as member, in which the dynamic information (GUIDs) are stored

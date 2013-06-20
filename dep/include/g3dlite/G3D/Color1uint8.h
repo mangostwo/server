@@ -18,7 +18,7 @@
 
 namespace G3D {
 
-/*
+/**
  Represents a Color1 as a packed integer.  Convenient
  for creating unsigned int vertex arrays. 
 

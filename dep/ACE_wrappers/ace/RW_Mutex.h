@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    RW_Mutex.h
  *
  *  $Id: RW_Mutex.h 83934 2008-12-01 13:47:06Z johnnyw $
@@ -30,7 +30,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_RW_Mutex
  *
  * @brief Wrapper for readers/writer locks.
@@ -49,7 +49,7 @@ public:
   /// Implicitly destroy a readers/writer lock
   ~ACE_RW_Mutex (void);
 
-  /*
+  /**
    * Explicitly destroy a readers/writer lock.  Note that only one
    * thread should call this method since it doesn't protect against
    * race conditions.
@@ -63,7 +63,7 @@ public:
   /// writer hold the lock.
   int acquire_write (void);
 
-  /*
+  /**
    * Conditionally acquire a read lock (i.e., won't block).  Returns
    * -1 on failure.  If we "failed" because someone else already had
    * the lock, @c errno is set to @c EBUSY.
@@ -73,7 +73,7 @@ public:
   /// Conditionally acquire a write lock (i.e., won't block).
   int tryacquire_write (void);
 
-  /*
+  /**
    * Conditionally upgrade a read lock to a write lock.  This only
    * works if there are no other readers present, in which case the
    * method returns 0.  Otherwise, the method returns -1 and sets
@@ -83,14 +83,14 @@ public:
    */
   int tryacquire_write_upgrade (void);
 
-  /*
+  /**
    * Note, for interface uniformity with other synchronization
    * wrappers we include the <acquire> method.  This is implemented as
    * a write-lock to safe...
    */
   int acquire (void);
 
-  /*
+  /**
    * Note, for interface uniformity with other synchronization
    * wrappers we include the <tryacquire> method.  This is implemented
    * as a write-lock to be safe...  Returns -1 on failure.  If we

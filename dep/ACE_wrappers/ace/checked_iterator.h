@@ -3,7 +3,7 @@
 #ifndef ACE_CHECKED_ITERATOR_H
 #define ACE_CHECKED_ITERATOR_H
 
-/*
+/**
  * @file checked_iterator.h
  *
  * @brief Checked iterator factory function.

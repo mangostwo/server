@@ -1,4 +1,4 @@
-/*
+/**
   @file CollisionDetection.h
 
 
@@ -34,7 +34,7 @@
 namespace G3D {
 
 
-/*
+/**
   Collision detection primitives and tools for building
   higher order collision detection schemes.
 
@@ -93,19 +93,19 @@ namespace G3D {
 class CollisionDetection {
 private:
 
-	/*
+	/**
 	 Default parameter if value passed to a function as reference is
 	 not to be calculated.  Must be explicitly supported by function.
 	 */
 	static Vector3 ignore;
 
-	/*
+	/**
 	 Default parameter if value passed to a function as reference is
 	 not to be calculated.  Must be explicitly supported by function.
 	 */
     static bool    ignoreBool;
 
-	/*
+	/**
 	 Default parameter if value passed to a function as reference is
 	 not to be calculated.  Must be explicitly supported by function.
 	 */
@@ -118,7 +118,7 @@ private:
 
 public:
 
-    /*
+    /**
       Converts an index [0, 15] to the corresponding separating axis.
       Does not return normalized vector in the edge-edge case
       (indices 6 through 15).
@@ -134,7 +134,7 @@ public:
             const Box &     box1,
             const Box &     box2);
 
-    /*
+    /**
 	  Tests whether two boxes have axes that are parallel to
 	  each other.  If they are, axis1 and axis2 are set to be
 	  the parallel axes for both box1 and box2 respectively.
@@ -155,7 +155,7 @@ public:
             int &           axis1,
             int &           axis2);
 
-    /*
+    /**
       Calculates the projected distance between the two boxes along
       the specified separating axis, negative distances correspond
       to an overlap along that separating axis.  The distance is not
@@ -187,7 +187,7 @@ public:
             const double*       bd);
 
 
-	/*
+	/**
 	  Creates a set of standard information about two boxes in order to
 	  solve for their collision.  This information includes a vector to
 	  the radius of the bounding sphere for each box, the vector between
@@ -233,7 +233,7 @@ public:
             double*         ad,
             double*         bd);
 
-	/*
+	/**
 	  Performs a simple bounding sphere check between two boxes to determine
 	  whether these boxes could <i>possibly</i> intersect.  This is a very
 	  cheap operation (three dot products, two sqrts and a few others).  If
@@ -252,7 +252,7 @@ public:
             const Vector3 &     b,
             const Vector3 &     D);
 
-	/*
+	/**
  	  Determines whether two fixed solid boxes intersect.
 
       @note To speed up collision detection, the lastSeparatingAxis from
@@ -278,7 +278,7 @@ public:
         const Box&      box2,
         const int       lastSeparatingAxis = -1);
 
-    /*
+    /**
 	  Calculates the closest points on two lines with each other.   If the
 	  lines are parallel then using the starting point, else calculate the
 	  closest point on each line to the other.
@@ -303,7 +303,7 @@ public:
             Vector3 &       closest1,
             Vector3 &       closest2);
 
-    /*
+    /**
 	  Calculates the depth of penetration between two fixed boxes.
       Contact normal faces away from box1 and into box2.  If there is
       contact, only one contact point is returned.  The minimally
@@ -342,7 +342,7 @@ public:
         Array<Vector3>&     contactNormals,
         const int           lastSeparatingAxis = -1);
 
-    /*
+    /**
 	  Calculates the depth of penetration between two fixed spheres as well
 	  as the deepest point of Sphere A that penetrates Sphere B. The normal
       returned points <B>away</B> from the object A, although it may
@@ -364,7 +364,7 @@ public:
         Array<Vector3>&     contactPoints,
         Array<Vector3>&     contactNormals = ignoreArray);
 
-    /*
+    /**
 	  Calculates the depth of penetration between a fixed sphere and a fixed
 	  box as well as the deepest point of the sphere that penetrates the box
 	  and the normal at that intersection.
@@ -402,7 +402,7 @@ public:
         Array<Vector3>&     contactPoints,
         Array<Vector3>&     contactNormals = ignoreArray);
 
-	/*
+	/**
 	  Calculates the depth of penetration between a Fixed Sphere and a Fixed
 	  Plane as well as the deepest point of the sphere that penetrates the plane
 	  and the plane normal at that intersection.
@@ -422,7 +422,7 @@ public:
         Array<Vector3>&     contactPoints,
         Array<Vector3>&     contactNormals = ignoreArray);
 
-	/*
+	/**
 	  Calculates the depth of penetration between a fixed box and a fixed
 	  plane as well as the vertexes of the box that penetrate the plane
 	  and the plane normals at those intersections.
@@ -442,7 +442,7 @@ public:
         Array<Vector3>&     contactPoints,
         Array<Vector3>&     contactNormals = ignoreArray);
 
-	/*
+	/**
  	  Calculates time between the intersection of a moving point and a fixed
  	  plane.
 
@@ -467,7 +467,7 @@ public:
         Vector3&				outLocation,
         Vector3&                outNormal = ignore);
 
-	/*
+	/**
  	  Calculates time between the intersection of a moving point and a fixed
  	  triangle.
 
@@ -493,7 +493,7 @@ public:
         return Ray::fromOriginAndDirection(orig, dir).intersectionTime(v0, v1, v2);
     }
 
-	/*
+	/**
  	  Calculates time between the intersection of a moving point and a fixed
  	  triangle.
 
@@ -526,7 +526,7 @@ public:
         return t;
     }
 
-	/*
+	/**
  	  Calculates time between the intersection of a moving point and a fixed
  	  triangle.
 
@@ -561,7 +561,7 @@ public:
         return t;
     }
 
-	/*
+	/**
  	  Calculates time between the intersection of a moving point and a fixed
  	  triangle.
 
@@ -597,7 +597,7 @@ public:
         return t;
     }
 
-    /*
+    /**
      If the ray origin is inside the box, returns inf() but inside
      is set to true.
      <B>Beta API</B>
@@ -615,7 +615,7 @@ public:
         bool&                   inside = ignoreBool,
         Vector3&                outNormal = ignore);
 
-    /*
+    /**
 	 Calculates time between the intersection of a moving point and a fixed
 	 Axis-Aligned Box (AABox).
 
@@ -640,7 +640,7 @@ public:
         Vector3&                normal = ignore);
 
 
-    /*
+    /**
      @brief Calculates intersection of a ray and a static
      Axis-Aligned Box (AABox).
 
@@ -662,7 +662,7 @@ public:
         Vector3&                location,
         bool&                   inside);
 
-    /*
+    /**
 	 Calculates time between the intersection of a moving point and a fixed
 	 sphere.
 
@@ -687,7 +687,7 @@ public:
         Vector3&                outNormal = ignore,
         bool                    solid = false);
 
-    /*
+    /**
 	 Calculates time between the intersection of a moving point and a fixed
 	 box.
 
@@ -709,7 +709,7 @@ public:
         Vector3&				outLocation,
         Vector3&                outNormal = ignore);
 
-	/*
+	/**
 	 Calculates time between the intersection of a moving point and a fixed
 	 rectangle defined by the points v0, v1, v2, & v3.
 
@@ -739,7 +739,7 @@ public:
         Vector3&				outLocation,
         Vector3&                outNormal = ignore);
 
-	/*
+	/**
 	 Calculates time between the intersection of a moving point and a fixed
 	 capsule.
 
@@ -759,7 +759,7 @@ public:
         Vector3&				outLocation,
         Vector3&                outNormal = ignore);
 
-	/*
+	/**
 	 Calculates time between the intersection of a moving sphere and a fixed
 	 triangle.
 
@@ -780,7 +780,7 @@ public:
         Vector3&				outLocation,
         Vector3&                outNormal = ignore);
 
-	/*
+	/**
 	 Calculates time between the intersection of a moving sphere and a fixed
 	 triangle.
 
@@ -802,7 +802,7 @@ public:
         Vector3&				outLocation,
         float                   b[3] = (float*)&ignore);
 
-	/*
+	/**
 	 Calculates time between the intersection of a moving sphere and a fixed
 	 rectangle defined by the points v0, v1, v2, & v3.
 
@@ -829,7 +829,7 @@ public:
         Vector3&				outLocation,
         Vector3&                outNormal = ignore);
 
-	/*
+	/**
 	 Calculates time between the intersection of a moving sphere and a fixed
 	 box.
 
@@ -877,7 +877,7 @@ public:
         Vector3&	        outLocation,
         Vector3&            outNormal = ignore);
 
-    /*
+    /**
 	 Calculates time between the intersection of a moving sphere and a fixed
 	 capsule.
 
@@ -901,7 +901,7 @@ public:
         Vector3&				outLocation,
         Vector3&                outNormal = ignore);
 
-    /*
+    /**
 	 Finds the direction of bounce that a sphere would have when it 
 	 intersects an object with the  given time of collision, the 
 	 collision location and the collision normal.
@@ -923,7 +923,7 @@ public:
         const Vector3&			collisionLocation,
         const Vector3&          collisionNormal);
 
-    /*
+    /**
 	 Finds the direction of slide given a moving sphere, its velocity, the
 	 time of collision and the collision location.  This function works as
 	 if the sphere intersects the surface and continues to hug it.
@@ -945,7 +945,7 @@ public:
         const float				collisionTime,
         const Vector3&			collisionLocation);
 
-	/*
+	/**
 	 Finds the closest point on a line segment to a given point.
 
 	 @param v0 line vertex 1.
@@ -959,7 +959,7 @@ public:
         const Vector3&			v1,
         const Vector3&			point);
 
-    /*
+    /**
 	 Finds the closest point on a line segment to a given point.
 
 	 @note This is an optimization to closestPointOnLineSegment.  Edge length
@@ -981,7 +981,7 @@ public:
         float                   edgeLength,
         const Vector3&			point);
 
-    /*
+    /**
 	 Finds the closest point on the perimeter of the triangle to an external point;
 	 given a triangle defined by three points v0, v1, & v2, and the external point.
 
@@ -999,7 +999,7 @@ public:
         const Vector3&			v2,
         const Vector3&			point);
 
-	/*
+	/**
 	 Finds the closest point on the perimeter of the triangle to an external point;
 	 given a triangle defined by the array of points v, its edge directions and
 	 their lengths, as well as the external point.
@@ -1022,7 +1022,7 @@ public:
         const Vector3&			point,
         int&                    edgeIndex);
 
-    /*
+    /**
 	 Tests whether a point is contained within the triangle defined by
 	 v0, v1, and v2 and its plane's normal.
 
@@ -1059,7 +1059,7 @@ public:
         return isPointInsideTriangle(v0, v1, v2, normal, point, b, primaryAxis);
     }
 
-     /*
+     /**
 	  Tests for the intersection of a moving sphere and a fixed box in a
 	  given time limit.
 
@@ -1081,7 +1081,7 @@ public:
         const Box&              box,
         double                  timeLimit = inf());
 
-	/*
+	/**
 	 Tests for the intersection of a moving sphere and a fixed sphere in a
 	 given time limit.
 
@@ -1102,7 +1102,7 @@ public:
         const Sphere&           fixedSphere,
         double                  timeLimit = inf());
 
-	/*
+	/**
 	 Tests for the intersection of two fixed spheres.
 
 	 @param sphere1 Fixed sphere 1.
@@ -1115,7 +1115,7 @@ public:
         const Sphere&           sphere1,
         const Sphere&           sphere2);
 
-	/*
+	/**
 	 Tests for the intersection of a fixed sphere and a fixed box.
 
 	 @param sphere Fixed sphere.
@@ -1136,7 +1136,7 @@ public:
         const AABox&            box, 
         const Triangle&         triangle);
 
-    /*
+    /**
 	 Tests whether a point is inside a rectangle defined by the vertexes
 	 v0, v1, v2, & v3, and the rectangle's plane normal.
 
@@ -1158,7 +1158,7 @@ public:
         const Vector3&			normal,
         const Vector3&			point);
 
-    /*
+    /**
 	 Finds the closest point on the perimeter of the rectangle to an
 	 external point; given a rectangle defined by four points v0, v1,
 	 v2, & v3, and the external point.
@@ -1179,7 +1179,7 @@ public:
         const Vector3&			v3,
         const Vector3&			point);
 
-     /*
+     /**
 	  Finds the closest point in the rectangle to an external point; Given
 	  a rectangle defined by four points v0, v1, v2, & v3, and the external
 	  point.

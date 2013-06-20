@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/*
+/**
  *  @file    ATM_Stream.h
  *
  *  $Id: ATM_Stream.h 80826 2008-03-04 14:51:23Z wotte $
@@ -40,7 +40,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_ATM_Stream
  *
  * @brief Defines the member functions for ACE_ATM_Stream abstraction.

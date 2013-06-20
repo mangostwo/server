@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    LSOCK_CODgram.h
  *
  *  $Id: LSOCK_CODgram.h 84419 2009-02-11 22:28:11Z shuston $
@@ -29,7 +29,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_LSOCK_CODgram
  *
  * @brief Defines a fully specified (sometimes called "connected") UNIX-domain
@@ -52,11 +52,11 @@ public:
   /// Default constructor; requires a call to open() prior to communication.
   ACE_LSOCK_CODgram (void);
 
-  /*
+  /**
    * @name Initialization methods
    */
   //@{
-  /*
+  /**
    * Initialize a fully-specified datagram socket.
    *
    * @param remote_sap  Remote/peer address. This should be an ACE_UNIX_Addr
@@ -73,7 +73,7 @@ public:
                      int protocol_family = PF_UNIX,
                      int protocol = 0);
 
-  /*
+  /**
    * Initialize a fully-specified datagram socket.
    *
    * @retval 0 if no error.

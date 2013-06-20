@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file   CDR_Base.h
  *
  *  $Id: CDR_Base.h 91685 2010-09-09 09:35:14Z johnnyw $
@@ -53,7 +53,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Message_Block;
 
-/*
+/**
  * @class ACE_CDR
  *
  * @brief Keep constants and some routines common to both Output and
@@ -92,7 +92,7 @@ public:
     MAX_ALIGNMENT = 8,
 
     /// The default buffer size.
-    /*
+    /**
      * @todo We want to add options to control this
      *   default value, so this constant should be read as the default
      *   default value ;-)
@@ -109,7 +109,7 @@ public:
     LINEAR_GROWTH_CHUNK = ACE_DEFAULT_CDR_LINEAR_GROWTH_CHUNK
   };
 
-  /*
+  /**
    * @enum Byte_Order
    *
    * Defines values for the byte_order argument to ACE_OutputCDR and
@@ -125,7 +125,7 @@ public:
     BYTE_ORDER_NATIVE = ACE_CDR_BYTE_ORDER
   };
 
-  /*
+  /**
    * Do byte swapping for each basic IDL type size.  There exist only
    * routines to put byte, halfword (2 bytes), word (4 bytes),
    * doubleword (8 bytes) and quadword (16 byte); because those are
@@ -152,7 +152,7 @@ public:
   /// set by the CORBA spec at 8 bytes.
   static void mb_align (ACE_Message_Block *mb);
 
-  /*
+  /**
    * Compute the size of the smallest buffer that can contain at least
    * @a minsize bytes.
    * To understand how a "best fit" is computed look at the
@@ -168,7 +168,7 @@ public:
   /// will fir @a minsize bytes.
   static size_t next_size (size_t minsize);
 
-  /*
+  /**
    * Increase the capacity of mb to contain at least @a minsize bytes.
    * If @a minsize is zero the size is increased by an amount at least
    * large enough to contain any of the basic IDL types.
@@ -177,7 +177,7 @@ public:
    */
   static int grow (ACE_Message_Block *mb, size_t minsize);
 
-  /*
+  /**
    * Copy a message block chain into a single message block,
    * preserving the alignment of the first message block of the
    * original stream, not the following message blocks.
@@ -190,7 +190,7 @@ public:
   static size_t total_length (const ACE_Message_Block *begin,
                               const ACE_Message_Block *end);
 
-  /*
+  /**
    * @name Basic OMG IDL Types
    *
    * These types are for use in the CDR classes.  The cleanest way to
@@ -234,7 +234,7 @@ public:
           ACE_CDR::Long h;
 #     endif /* ! ACE_BIG_ENDIAN */
 
-          /*
+          /**
            * @name Overloaded Relation Operators.
            *
            * The canonical comparison operators.

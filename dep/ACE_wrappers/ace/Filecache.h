@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Filecache.h
  *
  *  $Id: Filecache.h 91066 2010-07-12 11:05:04Z johnnyw $
@@ -38,7 +38,7 @@ enum ACE_Filecache_Flag
 
 class ACE_Filecache_Object;
 
-/*
+/**
  * @class ACE_Filecache_Handle
  *
  * @brief
@@ -96,7 +96,7 @@ public:
   ACE_Filecache_Handle (const ACE_TCHAR *filename,
                         ACE_Filecache_Flag mapit = ACE_MAPIT);
 
-  /*
+  /**
    * Create new entry, and acquire it.  Presence of SIZE assumes the
    * file is being opened for writing.  If SIZE is zero, assumes the
    * file is to be removed from the cache.
@@ -155,7 +155,7 @@ typedef ACE_Hash_Map_Manager_Ex<const ACE_TCHAR *, ACE_Filecache_Object *, ACE_H
 
 typedef ACE_Hash_Map_Entry<const ACE_TCHAR *, ACE_Filecache_Object *> ACE_Filecache_Hash_Entry;
 
-/*
+/**
  * @class ACE_Filecache
  *
  * @brief
@@ -230,7 +230,7 @@ private:
   ACE_SYNCH_RW_MUTEX file_lock_[ACE_DEFAULT_VIRTUAL_FILESYSTEM_TABLE_SIZE];
 };
 
-/*
+/**
  * @class ACE_Filecache_Object
  *
  * @brief

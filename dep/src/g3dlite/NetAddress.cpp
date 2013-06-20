@@ -1,4 +1,4 @@
-/*
+/**
  @file NetMessage.cpp
 
  @maintainer Morgan McGuire, morgan@cs.brown.edu

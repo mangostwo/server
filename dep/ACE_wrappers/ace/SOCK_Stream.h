@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    SOCK_Stream.h
  *
  *  $Id: SOCK_Stream.h 80826 2008-03-04 14:51:23Z wotte $
@@ -27,7 +27,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // Forward declarations.
 class ACE_Message_Block;
 
-/*
+/**
  * @class ACE_SOCK_Stream
  *
  * @brief Defines the methods in the ACE_SOCK_Stream abstraction.
@@ -157,7 +157,7 @@ public:
   /// Close down the writer.
   int close_writer (void);
 
-  /*
+  /**
    * Close down the socket (we need this to make things work correctly
    * on Win32, which requires use to do a close_writer() before doing
    * the close to avoid losing data).

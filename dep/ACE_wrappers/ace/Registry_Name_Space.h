@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Registry_Name_Space.h
  *
  *  $Id: Registry_Name_Space.h 92345 2010-10-24 12:39:33Z johnnyw $
@@ -30,7 +30,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Registry_Name_Space
  *
  * @brief Interface to a Name Server Database which is maintained by
@@ -64,7 +64,7 @@ public:
             const ACE_NS_WString &value_in,
             const char *type_in = "");
 
-  /*
+  /**
    * Overwrite the value or type of an existing name in a
    * ACE_Name_Space or bind a new name to the context, if it didn't
    * exist yet. (Wide charcter strings interface).
@@ -98,7 +98,7 @@ public:
   int list_types (ACE_WSTRING_SET &set_out,
                   const ACE_NS_WString &pattern_in);
 
-  /*
+  /**
    * Get a set of names matching a specified pattern (wchars). Matching
    * means the names must begin with the pattern string. Returns the
    * complete binding associated each pattern match.
@@ -106,7 +106,7 @@ public:
   int list_name_entries (ACE_BINDING_SET &set,
                          const ACE_NS_WString &pattern);
 
-  /*
+  /**
    * Get a set of values matching a specified pattern (wchars). Matching
    * means the values must begin with the pattern string. Returns the
    * complete binding associated each pattern match.
@@ -114,7 +114,7 @@ public:
   int list_value_entries (ACE_BINDING_SET &set,
                           const ACE_NS_WString &pattern);
 
-  /*
+  /**
    * Get a set of types matching a specified pattern (wchars). Matching
    * means the types must begin with the pattern string. Returns the
    * complete binding associated each pattern match.

@@ -92,7 +92,7 @@ ACE_TkReactor::TimerCallbackProc (ClientData cd)
   self->reset_timeout ();
 }
 
-/*
+/**
  * @todo the unused mask argument is probably quite useful, but we
  *       ignore it, why?  In fact the following comment probably
  *       relates to that:

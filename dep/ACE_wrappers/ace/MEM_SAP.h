@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    MEM_SAP.h
  *
  *  $Id: MEM_SAP.h 92090 2010-09-29 14:10:45Z johnnyw $
@@ -65,7 +65,7 @@ public:
   ACE_MEM_SAP_NODE_PTR next_;
 };
 
-/*
+/**
  * @class ACE_MEM_SAP
  *
  * @brief Defines the methods of shared memory management for
@@ -82,20 +82,20 @@ public:
   /// Destructor.
   virtual ~ACE_MEM_SAP (void);
 
-  /*
+  /**
    * Initialize the MEM_SAP object.
    */
   virtual int init (ACE_HANDLE handle,
                     const ACE_TCHAR *name,
                     MALLOC_OPTIONS *options) = 0;
 
-  /*
+  /**
    * Finalizing the MEM_SAP object.  This method doesn't invoke
    * the <remove> method.
    */
   virtual int fini ();
 
-  /*
+  /**
    * Fetch location of next available data into <recv_buffer_>.
    * As this operation read the address of the data off the socket
    * using ACE::recv, @a timeout only applies to ACE::recv.
@@ -104,7 +104,7 @@ public:
                             int flags,
                             const ACE_Time_Value *timeout) = 0;
 
-  /*
+  /**
    * Wait to to @a timeout amount of time to send @a buf.  If <send>
    * times out a -1 is returned with @c errno == ETIME.  If it succeeds
    * the number of bytes sent is returned.  */
@@ -129,7 +129,7 @@ public:
 protected:
   // = Class initializing methods to create/connect to a shared memory pool.
 
-  /*
+  /**
    * Create a new shm_malloc object.  Return 0 if succeed and -1
    * otherwise.  This method should only be called from an acceptor
    * class that wants to create a new memory pool for inter process

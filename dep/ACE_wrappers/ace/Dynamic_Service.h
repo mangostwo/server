@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Dynamic_Service.h
  *
  *  $Id: Dynamic_Service.h 80826 2008-03-04 14:51:23Z wotte $
@@ -29,7 +29,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Service_Object;
 
-/*
+/**
  * @class ACE_Dynamic_Service
  *
  * @brief Provides a general interface to retrieve arbitrary objects

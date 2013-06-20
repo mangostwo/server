@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    Barrier.h
  *
  *  $Id: Barrier.h 92069 2010-09-28 11:38:59Z johnnyw $
@@ -31,7 +31,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Barrier
  *
  * @brief This is a no-op to make ACE "syntactically consistent."
@@ -76,7 +76,7 @@ struct ACE_Export ACE_Sub_Barrier
   ACE_ALLOC_HOOK_DECLARE;
 };
 
-/*
+/**
  * @class ACE_Barrier
  *
  * @brief Implements "barrier synchronization".
@@ -138,7 +138,7 @@ protected:
   /// Total number of threads that can be waiting at any one time.
   int count_;
 
-  /*
+  /**
    * We keep two @c sub_barriers, one for the first "generation" of
    * waiters, and one for the next "generation" of waiters.  This
    * efficiently solves the problem of what to do if all the first
@@ -156,7 +156,7 @@ private:
   ACE_Barrier (const ACE_Barrier &);
 };
 
-/*
+/**
  * @class ACE_Thread_Barrier
  *
  * @brief Implements "barrier synchronization" using ACE_Thread_Mutexes!

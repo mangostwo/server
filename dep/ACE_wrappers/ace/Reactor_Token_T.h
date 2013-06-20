@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Reactor_Token_T.h
  *
  *  $Id: Reactor_Token_T.h 80826 2008-03-04 14:51:23Z wotte $
@@ -20,7 +20,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Reactor_Token_T
  *
  * @internal For ACE internal use only.

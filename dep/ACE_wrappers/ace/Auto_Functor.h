@@ -1,6 +1,6 @@
 // -*- C++ -*-
 //=============================================================================
-/*
+/**
  * @file Auto_Functor.h
  *
  * $Id: Auto_Functor.h 80826 2008-03-04 14:51:23Z wotte $
@@ -24,7 +24,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace ACE_Utils
 {
-/*
+/**
  * @class Auto_Functor_Ref
  *
  * @brief Helper class to implement assignment and copy-construction
@@ -39,7 +39,7 @@ struct Auto_Functor_Ref
   Auto_Functor_Ref(X * p, Functor f);
 };
 
-/*
+/**
  * @class Auto_Functor
  *
  * @brief Helper template to implement auto_ptr<>-like classes, but

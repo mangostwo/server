@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Select_Reactor.h
  *
  *  $Id: Select_Reactor.h 91626 2010-09-07 10:59:20Z johnnyw $
@@ -35,7 +35,7 @@ typedef ACE_Select_Reactor_T<ACE_Select_Reactor_Token> ACE_Select_Reactor;
 
 #if defined (ACE_MT_SAFE) && (ACE_MT_SAFE == 0)
 // FUZZ: disable check_for_ACE_Guard
-/*
+/**
  * @class ACE_Guard< ACE_Reactor_Token_T<ACE_Noop_Token> >
  *
  * @brief Template specialization of ACE_Guard for the

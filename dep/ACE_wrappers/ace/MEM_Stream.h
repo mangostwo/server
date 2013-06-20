@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    MEM_Stream.h
  *
  *  $Id: MEM_Stream.h 92069 2010-09-28 11:38:59Z johnnyw $
@@ -34,7 +34,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_MEM_Acceptor;
 class ACE_MEM_Connector;
 
-/*
+/**
  * @class ACE_MEM_Stream
  *
  * @brief Defines the methods in the ACE_MEM_Stream abstraction.
@@ -87,7 +87,7 @@ public:
   /// Close down the writer.
   int close_writer (void);
 
-  /*
+  /**
    * Close down the socket (we need this to make things work correctly
    * on Win32, which requires use to do a <close_writer> before doing
    * the close to avoid losing data).

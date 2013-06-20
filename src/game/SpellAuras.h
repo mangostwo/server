@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
 #ifndef MANGOS_SPELLAURAS_H
 #define MANGOS_SPELLAURAS_H
 
@@ -22,7 +23,7 @@
 #include "DBCEnums.h"
 #include "ObjectGuid.h"
 
-/*
+/**
  * Used to modify what an Aura does to a player/npc.
  * Accessible through Aura::m_modifier.
  * \see CreateAura
@@ -32,20 +33,20 @@
  */
 struct Modifier
 {
-    /*
+    /**
      * Decides what the aura does, ie, it may have the
      * value AuraType::SPELL_AURA_MOD_BASE_RESISTANCE_PCT which
      * would change the base armor of a player.
      */
     AuraType m_auraname;
-    /*
+    /**
      * By how much the aura should change the affected
      * value. Ie, -27 would make the value decided by Modifier::m_miscvalue
      * be reduced by 27% if the earlier mentioned AuraType
      * would have been used. And 27 would increase the value by 27%
      */
     int32 m_amount;
-    /*
+    /**
      * A miscvalue that is dependent on what the aura will do, this
      * is usually decided by the AuraType, ie:
      * with AuraType::SPELL_AURA_MOD_BASE_RESISTANCE_PCT this value
@@ -55,7 +56,7 @@ struct Modifier
      * then m_miscvalue would have decided which model the mount should have
      */
     int32 m_miscvalue;
-    /*
+    /**
      * Decides how often the aura should be applied, if it is
      * set to 0 it's only applied once and then removed when
      * the Aura is removed

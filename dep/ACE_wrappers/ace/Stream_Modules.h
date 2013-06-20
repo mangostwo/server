@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Stream_Modules.h
  *
  *  $Id: Stream_Modules.h 80826 2008-03-04 14:51:23Z wotte $
@@ -23,7 +23,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Stream_Head
  *
  * @brief Standard task that acts as reader or writer at the head of
@@ -80,7 +80,7 @@ private:
   int canonical_flush (ACE_Message_Block *);
 };
 
-/*
+/**
  * @class ACE_Stream_Tail
  *
  * @brief Standard module that acts as the head of a stream.
@@ -118,7 +118,7 @@ private:
   int canonical_flush (ACE_Message_Block *);
 };
 
-/*
+/**
  * @class ACE_Thru_Task
  *
  * @brief Standard module that acts as a "no op", simply passing on all

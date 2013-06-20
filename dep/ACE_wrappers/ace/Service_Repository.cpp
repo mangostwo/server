@@ -489,7 +489,7 @@ ACE_Service_Repository::suspend (const ACE_TCHAR name[],
   return this->service_array_[i]->suspend ();
 }
 
-/*
+/**
  * @brief Completely remove a @a name entry from the Repository and
  * dynamically unlink it if it was originally dynamically linked.
  */
@@ -513,7 +513,7 @@ ACE_Service_Repository::remove (const ACE_TCHAR name[], ACE_Service_Type **ps)
   return 0;
 }
 
-/*
+/**
  * @brief Completely remove a @a name entry from the Repository and
  * dynamically unlink it if it was originally dynamically linked.
  *

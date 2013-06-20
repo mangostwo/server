@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    XTI_ATM_Mcast.h
  *
  *  $Id: XTI_ATM_Mcast.h 80826 2008-03-04 14:51:23Z wotte $
@@ -28,7 +28,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_XTI_ATM_Mcast
  *
  * @brief Defines an active connection factory for the ACE_TLI C++
@@ -41,7 +41,7 @@ public:
   /// Default constructor.
   ACE_XTI_ATM_Mcast (void);
 
-  /*
+  /**
    * Actively connect and produce a @a new_stream if things go well.
    * The @a remote_sap is the address that we are trying to connect
    * with.  The @a timeout is the amount of time to wait to connect.
@@ -69,7 +69,7 @@ public:
                      struct netbuf *udata = 0,
                      struct netbuf *opt = 0);
 
-  /*
+  /**
    * Actively connect and produce a @a new_stream if things go well.
    * The @a remote_sap is the address that we are trying to connect
    * with.  The @a timeout is the amount of time to wait to connect.
@@ -97,7 +97,7 @@ public:
                struct netbuf *udata = 0,
                struct netbuf *opt = 0);
 
-  /*
+  /**
    * Actively add a leaf to the currently connected stream (i.e.,
    * multicast). The @a remote_sap is the address of the leaf that we
    * are trying to add. The @a timeout is the amount of time to wait to

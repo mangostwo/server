@@ -1,4 +1,4 @@
-/*
+/**
  @file Spline.h
 
  @author Morgan McGuire, http://graphics.cs.williams.edu
@@ -60,7 +60,7 @@ protected:
 
 public:
     
-    /*
+    /**
        Given a time @a s, finds @a i and 0 <= @a u < 1 such that
        @a s = time[@a i] * @a u + time[@a i + 1] * (1 - @a u).  Note that
        @a i may be outside the bounds of the time and control arrays;
@@ -77,7 +77,7 @@ public:
 };
 
 
-/*
+/**
  Smooth parameteric curve implemented using a piecewise 3rd-order
  Catmull-Rom spline curve.  The spline is considered infinite and may
  either continue linearly from the specified control points or cycle
@@ -269,7 +269,7 @@ protected:
         ensureShortestPath(A, N);
     }
 
-    /*
+    /**
        Mutates the array of N control points that begins at \a A. It is useful to override this
        method by one that wraps the values if they are angles or quaternions
        for which "shortest path" interpolation is significant.
@@ -282,7 +282,7 @@ protected:
 public:
    
 
-    /*
+    /**
        Return the position at time s.  The spline is defined outside
        of the time samples by extrapolation or cycling.
      */

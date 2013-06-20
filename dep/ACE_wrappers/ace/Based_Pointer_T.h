@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Based_Pointer_T.h
  *
  *  $Id: Based_Pointer_T.h 81705 2008-05-15 14:02:02Z johnnyw $
@@ -29,7 +29,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Based_Pointer_Basic
  *
  * @brief A proxy that keeps track of the relative offset of a "pointer"
@@ -44,7 +44,7 @@ template <class CONCRETE>
 class ACE_Based_Pointer_Basic
 {
 public:
-  /*
+  /**
    * This constructor initializes the <base_offset_> by asking the
    * <ACE_BASED_POINTER_REPOSITORY> Singleton for the base address of
    * the memory region within which it is instantiated.  Two results
@@ -63,7 +63,7 @@ public:
    */
   ACE_Based_Pointer_Basic (void);
 
-  /*
+  /**
    * Initialize this object using the @a initial pointer.  This
    * constructor initializes the <base_offset_> by asking the
    * <ACE_BASED_POINTER_REPOSITORY> Singleton for the base address of
@@ -145,7 +145,7 @@ protected:
   ptrdiff_t base_offset_;
 };
 
-/*
+/**
  * @class ACE_Based_Pointer
  *
  * @brief A smart proxy that keeps track of the relative offset of a

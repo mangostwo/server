@@ -1,4 +1,4 @@
-/*
+/**
   @file Image4.h
 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -20,7 +20,7 @@ namespace G3D {
 
 typedef ReferenceCountedPointer<class Image4> Image4Ref;
 
-/*
+/**
  RGBA image with 32-bit floating point storage for each channel.
 
  Whenever a method needs to convert from RGB to RGBA, A=1 is assumed.

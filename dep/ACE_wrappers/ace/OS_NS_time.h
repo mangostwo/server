@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file   OS_NS_time.h
  *
  *  $Id: OS_NS_time.h 87260 2009-10-29 14:00:43Z olli $
@@ -58,7 +58,7 @@ struct tm {
 #endif /* ACE_LACKS_STRUCT_TM */
 
 /// Helper for the ACE_OS::timezone() function
-/*
+/**
  * We put all the timezone stuff that used to be in ACE_OS::timezone()
  * here because on some platforms "timezone" is a macro.  Because of this,
  * the name ACE_OS::timezone will cause errors.  So in order to use the
@@ -105,7 +105,7 @@ inline long ace_timezone()
 #   pragma warning (disable: 4244)
 # endif
 /// Helper for the ACE_OS::difftime() function
-/*
+/**
  * We moved the difftime code that used to be in ACE_OS::difftime()
  * here because on some platforms "difftime" is a macro.  Because of this,
  * the name ACE_OS::difftime will cause errors.  So in order to use the
@@ -236,7 +236,7 @@ namespace ACE_OS
                    const char *format,
                    const struct tm *timeptr);
 
-  /*
+  /**
    * strptime wrapper. Note that the struct @a tm will always be set to
    * zero
    */

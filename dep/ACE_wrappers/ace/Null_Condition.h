@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    Null_Condition.h
  *
  *  $Id: Null_Condition.h 91626 2010-09-07 10:59:20Z johnnyw $
@@ -28,7 +28,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Time_Value;
 
-/*
+/**
  * @class ACE_Null_Condition
  *
  * @brief Implement a do nothing ACE_Condition variable wrapper,

@@ -63,7 +63,7 @@ public:
 class Crypto {
 public:
 
-    /*
+    /**
      Computes the CRC32 value of a byte array.  CRC32 is designed to be a hash
      function that produces different values for similar strings.
 
@@ -73,7 +73,7 @@ public:
     */
     static uint32 crc32(const void* bytes, size_t numBytes);
 
-    /*
+    /**
      Computes the MD5 hash (message digest) of a byte stream, as defined by
      http://www.ietf.org/rfc/rfc1321.txt.
 
@@ -81,7 +81,7 @@ public:
      */
     MD5Hash md5(const void* bytes, size_t numBytes);
 
-    /*
+    /**
      Returns the nth prime less than 2000 in constant time.  The first prime has index
      0 and is the number 2.
      */

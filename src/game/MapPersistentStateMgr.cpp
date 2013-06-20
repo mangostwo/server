@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -458,6 +458,7 @@ void DungeonResetScheduler::LoadResetTimes()
         if (!mapDiff->resetTime)
             continue;
 
+        // only raid/heroic maps have a global reset time
         MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
         if (!mapEntry || !mapEntry->IsDungeon())
             continue;
@@ -634,6 +635,7 @@ MapPersistentState* MapPersistentStateManager::AddPersistentState(MapEntry const
         state = new BattleGroundPersistentState(mapEntry->MapID, instanceId, difficulty);
     else
         state = new WorldPersistentState(mapEntry->MapID);
+
 
     if (instanceId)
         m_instanceSaveByInstanceId[instanceId] = state;
@@ -843,6 +845,7 @@ void MapPersistentStateManager::_ResetInstance(uint32 mapid, uint32 instanceId)
         _ResetSave(m_instanceSaveByInstanceId, itr);
     }
 
+
     DeleteInstanceFromDB(instanceId);                       // even if state not loaded
 }
 
@@ -925,6 +928,7 @@ void MapPersistentStateManager::_CleanupExpiredInstancesAtTime(time_t t)
 {
     _DelHelper(CharacterDatabase, "id, map, instance.difficulty", "instance", "LEFT JOIN instance_reset ON mapid = map AND instance.difficulty =  instance_reset.difficulty WHERE (instance.resettime < '" UI64FMTD "' AND instance.resettime > '0') OR (NOT instance_reset.resettime IS NULL AND instance_reset.resettime < '" UI64FMTD "')", (uint64)t, (uint64)t);
 }
+
 
 void MapPersistentStateManager::InitWorldMaps()
 {

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file   OS_QoS.h
  *
  *  $Id: OS_QoS.h 80826 2008-03-04 14:51:23Z wotte $
@@ -154,7 +154,7 @@ typedef unsigned long ACE_SERVICE_TYPE;
 # define ACE_SIO_SET_QOS              (0x08000000 | 11)
 #endif
 
-/*
+/**
  * @class ACE_Flow_Spec
  *
  * @brief Wrapper class that defines the flow spec QoS information,
@@ -259,7 +259,7 @@ private:
           defined (ACE_HAS_WINSOCK2_GQOS) */
 };
 
-/*
+/**
  * @class ACE_QoS
  *
  * @brief Wrapper class that holds the sender and receiver flow spec
@@ -302,7 +302,7 @@ private:
 
 };
 
-/*
+/**
  * @class ACE_QoS_Params
  *
  * @brief Wrapper class that simplifies the information passed to the QoS
@@ -311,7 +311,7 @@ private:
 class ACE_Export ACE_QoS_Params
 {
 public:
-  /*
+  /**
    * Initialize the data members.  The <caller_data> is a pointer to
    * the user data that is to be transferred to the peer during
    * connection establishment.  The <callee_data> is a pointer to the
@@ -391,7 +391,7 @@ typedef int (*ACE_QOS_CONDITION_FUNC) (iovec *caller_id,
                                        unsigned long callbackdata);
 
 
-/*
+/**
  * @class ACE_Accept_QoS_Params
  *
  * @brief Wrapper class that simplifies the information passed to the QoS
@@ -400,7 +400,7 @@ typedef int (*ACE_QOS_CONDITION_FUNC) (iovec *caller_id,
 class ACE_Export ACE_Accept_QoS_Params
 {
 public:
-  /*
+  /**
    * Initialize the data members.  The <qos_condition_callback> is the
    * address of an optional, application-supplied condition function
    * that will make an accept/reject decision based on the caller
@@ -426,7 +426,7 @@ public:
   void callback_data (unsigned long cd);
 
 private:
-  /*
+  /**
    * This is the address of an optional, application-supplied
    * condition function that will make an accept/reject decision based
    * on the caller information pass in as parameters, and optionally
@@ -435,7 +435,7 @@ private:
    */
   ACE_QOS_CONDITION_FUNC qos_condition_callback_;
 
-  /*
+  /**
    * This data is passed back to the application as a condition
    * function parameter, i.e., it is an Asynchronous Completion Token
    * (ACT).

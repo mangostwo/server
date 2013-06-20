@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    Name_Space.h
  *
  *  $Id: Name_Space.h 84834 2009-03-16 12:28:51Z johnnyw $
@@ -28,7 +28,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 typedef ACE_Unbounded_Set<ACE_NS_WString> ACE_WSTRING_SET;
 
-/*
+/**
  * @class ACE_Name_Binding
  *
  * @brief Maintains a mapping from name to value and type.
@@ -73,7 +73,7 @@ typedef ACE_Unbounded_Set_Iterator<ACE_Name_Binding> ACE_BINDING_ITERATOR;
 typedef ACE_Unbounded_Set<ACE_NS_WString> ACE_PWSTRING_SET;
 typedef ACE_Unbounded_Set_Iterator<ACE_NS_WString> ACE_PWSTRING_ITERATOR;
 
-/*
+/**
  * @class ACE_Name_Space
  *
  * @brief Abstract base class that provides an abstract interface to
@@ -96,7 +96,7 @@ public:
                     const char *type_in = "") = 0;
 
 
-  /*
+  /**
    * Overwrite the value or type of an existing name in a
    * ACE_Name_Space or bind a new name to the context, if it didn't
    * exist yet. (Wide charcter strings interface).
@@ -130,7 +130,7 @@ public:
   virtual int list_types (ACE_WSTRING_SET &set_out,
                           const ACE_NS_WString &pattern_in) = 0;
 
-  /*
+  /**
    * Get a set of names matching a specified pattern (wchars). Matching
    * means the names must begin with the pattern string. Returns the
    * complete binding associated each pattern match.
@@ -138,7 +138,7 @@ public:
   virtual int list_name_entries (ACE_BINDING_SET &set,
                                  const ACE_NS_WString &pattern) = 0;
 
-  /*
+  /**
    * Get a set of values matching a specified pattern (wchars). Matching
    * means the values must begin with the pattern string. Returns the
    * complete binding associated each pattern match.
@@ -146,7 +146,7 @@ public:
   virtual int list_value_entries (ACE_BINDING_SET &set,
                                   const ACE_NS_WString &pattern) = 0;
 
-  /*
+  /**
    * Get a set of types matching a specified pattern (wchars). Matching
    * means the types must begin with the pattern string. Returns the
    * complete binding associated each pattern match.

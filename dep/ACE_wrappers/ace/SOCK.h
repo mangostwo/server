@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/*
+/**
  *  @file    SOCK.h
  *
  *  $Id: SOCK.h 91626 2010-09-07 10:59:20Z johnnyw $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_SOCK
  *
  * @brief An abstract class that forms the basis for more specific
@@ -54,7 +54,7 @@ public:
                   void *optval,
                   int *optlen) const;
 
-  /*
+  /**
    * Close the socket.
    * This method also sets the object's handle value to ACE_INVALID_HANDLE.
    *
@@ -67,7 +67,7 @@ public:
   /// Returns 0 if successful, else -1.
   int get_local_addr (ACE_Addr &) const;
 
-  /*
+  /**
    * Return the address of the remotely connected peer (if there is
    * one), in the referenced ACE_Addr. Returns 0 if successful, else
    * -1.
@@ -119,7 +119,7 @@ protected:
   ACE_SOCK (void);
 
   /// Protected destructor.
-  /*
+  /**
    * Not a virtual destructor. Protected destructor to prevent
    * operator delete() from being called through a base class ACE_SOCK
    * pointer/reference.

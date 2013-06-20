@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Framework_Component.h
  *
  *  $Id: Framework_Component.h 92208 2010-10-13 06:20:39Z johnnyw $
@@ -52,7 +52,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Framework_Component
  *
  * @brief Base class that defines a uniform interface for all managed
@@ -86,7 +86,7 @@ private:
   const ACE_TCHAR *name_;
 };
 
-/*
+/**
  * @class ACE_Framework_Repository
  *
  * @brief Contains all framework components used by an application.

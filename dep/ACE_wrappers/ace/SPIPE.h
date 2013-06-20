@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/*
+/**
  *  @file    SPIPE.h
  *
  *  $Id: SPIPE.h 80826 2008-03-04 14:51:23Z wotte $
@@ -25,7 +25,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_SPIPE
  *
  * @brief Defines the member functions for the base class of the
@@ -47,7 +47,7 @@ class ACE_Export ACE_SPIPE : public ACE_IPC_SAP
 {
 public:
   /// Close down the SPIPE without removing the rendezvous point.
-  /*
+  /**
    * Closes the underlying pipe handle and sets this object's handle value
    * to @c ACE_INVALID_HANDLE.
    * @return 0 for success; -1 for failure. If a failure occurs, further
@@ -57,21 +57,21 @@ public:
 
   /// Close down the SPIPE and remove the rendezvous point from
   /// the file system.
-  /*
+  /**
    * @return 0 for success; -1 for failure. If a failure occurs, further
    * error information is available from ACE_OS::last_error().
    */
   int remove (void);
 
   /// Return the local address of this endpoint.
-  /*
+  /**
    * Returns the local address of the SPIPE's endpoint in @arg addr.
    * @return 0 for success; -1 for failure. If a failure occurs, further
    * error information is available from ACE_OS::last_error().
    */
   int get_local_addr (ACE_SPIPE_Addr &) const;
 
-  /*
+  /**
    * Disable signal @arg signum.
    * @note This reimplements the inherited method from
    * ACE_IPC_SAP. Since the signal actions do not make any sense on

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    Reverse_Lock_T.h
  *
  *  $Id: Reverse_Lock_T.h 84481 2009-02-17 10:58:31Z johnnyw $
@@ -24,7 +24,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @namespace ACE_Acquire_Method
  *
  * @brief An enum namespace.
@@ -50,7 +50,7 @@ namespace ACE_Acquire_Method
   };
 }
 
-/*
+/**
  * @class ACE_Reverse_Lock
  *
  * @brief A reverse (or anti) lock.

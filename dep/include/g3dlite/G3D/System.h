@@ -26,7 +26,7 @@
 
 namespace G3D {
 
-/*
+/**
  Routine used by the demos to find the data.  Searches in
  ../data, ../../data, etc. up to 5 levels back.  Checks
  common locations like \verbatim c:\libraries\g3d-<version>\data \endverbatim
@@ -46,7 +46,7 @@ std::string demoFindData(bool errorIfNotFound = true);
 */
 std::string license();
 
-/*
+/**
 @brief The order in which the bytes of an integer are stored on a
 machine. 
 
@@ -59,7 +59,7 @@ enum G3DEndian {
     G3D_LITTLE_ENDIAN
 };
 
-/*
+/**
  @brief OS and processor abstraction.  
 
  The first time any method is called the processor will be analyzed.
@@ -79,7 +79,7 @@ enum G3DEndian {
  */
 class System {
 public:
-    /*
+    /**
        @param size Size of memory that the system was trying to allocate
 
        @param recoverable If true, the system will attempt to allocate again
@@ -218,7 +218,7 @@ public:
         return instance().m_cpuVendor;
     }
 
-    /*
+    /**
      Returns the endianness of this machine.
     */
     inline static G3DEndian machineEndian() {
@@ -235,18 +235,18 @@ public:
         return instance().m_cpuArch;
     }
 
-    /*
+    /**
        Returns the current date as a string in the form YYYY-MM-DD
     */
     static std::string currentDateString();
 
-    /*
+    /**
        Guarantees that the start of the array is aligned to the 
        specified number of bytes.
     */
     static void* alignedMalloc(size_t bytes, size_t alignment);
     
-    /*
+    /**
        Uses pooled storage to optimize small allocations (1 byte to 5
        kilobytes).  Can be 10x to 100x faster than calling ::malloc or
        new.
@@ -261,7 +261,7 @@ public:
     
     static void* calloc(size_t n, size_t x);
 
-    /*
+    /**
      Version of realloc that works with System::malloc.
      */
     static void* realloc(void* block, size_t bytes);
@@ -278,14 +278,14 @@ public:
      */
     static std::string mallocStatus();
 
-    /*
+    /**
      Free data allocated with System::malloc.
 
      Threadsafe on Win32.
      */
     static void free(void* p);
 
-    /*
+    /**
      Frees memory allocated with alignedMalloc.
      */
     static void alignedFree(void* ptr);
@@ -300,7 +300,7 @@ public:
         in all cases. */
     static void memset(void* dst, uint8 value, size_t numBytes);
     
-    /*
+    /**
      Returns the fully qualified filename for the currently running executable.
 
      This is more reliable than arg[0], which may be intentionally set
@@ -320,7 +320,7 @@ public:
         return instance().m_version;
     }
 
-    /*
+    /**
        @brief The optimization status of the G3D library (not the program compiled against it)
 
        Either "Debug" or "Release", depending on whether _DEBUG was
@@ -328,7 +328,7 @@ public:
       */
     static const std::string& build();
 
-    /*
+    /**
      Causes the current thread to yield for the specified duration
      and consume almost no CPU.
      The sleep will be extremely precise; it uses System::time() 
@@ -336,26 +336,26 @@ public:
      */
     static void sleep(RealTime t);
 
-    /*
+    /**
      Clears the console.
      Console programs only.
      */
     static void consoleClearScreen();
 
-    /*
+    /**
      Returns true if a key is waiting.
      Console programs only.
      */
     static bool consoleKeyPressed();
     
-    /*
+    /**
      Blocks until a key is read (use consoleKeyPressed to determine if
      a key is waiting to be read) then returns the character code for
      that key.
      */
     static int consoleReadKey();
 
-    /*
+    /**
      The actual time (measured in seconds since
      Jan 1 1970 midnight).
      
@@ -364,7 +364,7 @@ public:
     */
     static RealTime time();
 
-    /*
+    /**
      To count the number of cycles a given operation takes:
 
      <PRE>
@@ -386,7 +386,7 @@ public:
         instance().m_outOfMemoryCallback = c;
     }
 
-    /*
+    /**
      When System::malloc fails to allocate memory because the system is
      out of memory, it invokes this handler (if it is not NULL).
      The argument to the callback is the amount of memory that malloc
@@ -407,7 +407,7 @@ public:
     /** Get an environment variable for the current process.  Returns NULL if the variable doesn't exist. */
     static const char* getEnv(const std::string& name);
 
-    /*
+    /**
      Prints a human-readable description of this machine
      to the text output stream.  Either argument may be NULL.
      */
@@ -424,14 +424,14 @@ public:
     /** Copies the text to the clipboard on Win32. */
     static void setClipboardText(const std::string& s);
 
-    /*
+    /**
      Tries to locate the resource by looking in related directories.
      If found, returns the full path to the resource, otherwise
      returns the empty string.
      */    
     static std::string findDataFile(const std::string& full, bool errorIfNotFound = true);
 
-    /*
+    /**
         Sets the path that the application is using as its data directory.
         Used by findDataDir as an initial search location.  GApp sets this
         upon constrution.

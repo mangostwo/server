@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -167,5 +167,6 @@ Unit* HostileRefManager::GetThreatRedirectionTarget() const
 {
     return m_redirectionTargetGuid ? iOwner->GetMap()->GetUnit(m_redirectionTargetGuid) : NULL;
 }
+
 
 //=================================================

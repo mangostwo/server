@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    Pipe.h
  *
  *  $Id: Pipe.h 92010 2010-09-24 14:54:19Z shuston $
@@ -32,7 +32,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
 class ACE_Time_Value;
 
-/*
+/**
  * @class ACE_Pipe
  *
  * @brief Provides a portable bidirectional "pipe" abstraction.
@@ -70,14 +70,14 @@ public:
 
   // = Accessors.
 
-  /*
+  /**
    * This is the "read" side of the pipe.  Note, however, that
    * processes can also write to this handle as well since pipes are
    * bi-directional.
    */
   ACE_HANDLE read_handle (void) const;
 
-  /*
+  /**
    * This is the "write" side of the pipe.  Note, however, that
    * processes can also read to this handle as well since pipes are
    * bi-directional.
@@ -112,7 +112,7 @@ public:
   /// Recv iovecs via <::readv>.
   ssize_t recv (iovec iov[], int n) const;
 
-  /*
+  /**
    * Send N char *ptrs and int lengths.  Note that the char *'s
    * precede the ints (basically, an varargs version of writev).  The
    * count N is the *total* number of trailing arguments, *not* a
@@ -120,7 +120,7 @@ public:
    */
   ssize_t send (size_t n, ...) const;
 
-  /*
+  /**
    * This is an interface to ::readv, that doesn't use the struct
    * iovec explicitly.  The ... can be passed as an arbitrary number
    * of (char *ptr, int len) tuples.  However, the count N is the

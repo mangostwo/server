@@ -1,4 +1,4 @@
-/*
+/**
   @file Set.h
 
   Hash set
@@ -20,7 +20,7 @@
 
 namespace G3D {
 
-/*
+/**
   An unordered data structure that has at most one of each element.
   Provides O(1) time insert, remove, and member test (contains).
 
@@ -33,7 +33,7 @@ namespace G3D {
 template<class T, class HashFunc = HashTrait<T>, class EqualsFunc = EqualsTrait<T> > 
 class Set {
 
-    /*
+    /**
      If an object is a member, it is contained in
      this table.
      */
@@ -55,7 +55,7 @@ public:
         return memberTable.containsKey(member);
     }
 
-    /*
+    /**
      Inserts into the table if not already present.
      Returns true if this is the first time the element was added.
      */
@@ -65,7 +65,7 @@ public:
         return isNew;
     }
 
-    /*
+    /**
      Returns true if the element was present and removed.  Returns false
      if the element was not present.
      */
@@ -107,7 +107,7 @@ public:
         clear();
     }
 
-    /*
+    /**
      C++ STL style iterator variable.  See begin().
      */
     class Iterator {
@@ -133,7 +133,7 @@ public:
             return it == other.it;
         }
 
-        /*
+        /**
          Pre increment.
          */
         Iterator& operator++() {
@@ -141,7 +141,7 @@ public:
             return *this;
         }
 
-        /*
+        /**
          Post increment (slower than preincrement).
          */
         Iterator operator++(int) {
@@ -164,7 +164,7 @@ public:
     };
 
 
-    /*
+    /**
      C++ STL style iterator method.  Returns the first member.  
      Use preincrement (++entry) to get to the next element.  
      Do not modify the set while iterating.
@@ -174,7 +174,7 @@ public:
     }
 
 
-    /*
+    /**
      C++ STL style iterator method.  Returns one after the last iterator
      element.
      */

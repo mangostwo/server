@@ -1,4 +1,4 @@
-/*
+/**
  * @file Thread_Mutex.cpp
  *
  * $Id: Thread_Mutex.cpp 91286 2010-08-05 09:04:31Z johnnyw $

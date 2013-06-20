@@ -26,7 +26,7 @@
 
 extern "C" int LIB$FIND_IMAGE_SYMBOL(...);
 
-/*
+/**
  * @internal
  *
  * Implements a class to register symbols and addresses for use with DLL

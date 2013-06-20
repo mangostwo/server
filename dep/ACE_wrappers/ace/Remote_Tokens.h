@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Remote_Tokens.h
  *
  *  $Id: Remote_Tokens.h 92345 2010-10-24 12:39:33Z johnnyw $
@@ -32,7 +32,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Remote_Token_Proxy
  *
  * @brief Proxy for acquiring, renewing, and releasing a distributed
@@ -54,7 +54,7 @@ public:
   /// Death.
   virtual ~ACE_Remote_Token_Proxy (void);
 
-  /*
+  /**
    * Same as Token_Proxy. @a name is the string uniquely identifying
    * the token.  @a ignore_deadlock can be 1 to disable deadlock
    * notifications.  @a debug prints debug messages.
@@ -64,7 +64,7 @@ public:
             int debug = 0);
 
 
-  /*
+  /**
    * Open a connection with the token server.  This only need be used
    * when the user wishes to explicitly open a connection to check if
    * the server exists.  Connections are stored in the
@@ -74,7 +74,7 @@ public:
    */
   int initiate_connection (void);
 
-  /*
+  /**
    * Acquire the distributed token.  If notify is specified and the
    * token is already held, the owner is notified.  options contains
    * the timeout value for the acquire call.  The timer is kept at the
@@ -86,7 +86,7 @@ public:
                        ACE_Synch_Options &options =
                        ACE_Synch_Options::synch);
 
-  /*
+  /**
    * Try to acquire the distributed token.  If the token is already
    * held, the call returns without queuing the caller as a waiter.
    * Returns 0 on success (the token was acquired), and -1 with
@@ -94,7 +94,7 @@ public:
    */
   virtual int tryacquire (void (*sleep_hook)(void *) = 0);
 
-  /*
+  /**
    * Renew the token by offering to release it if there are any other
    * waiters, otherwise get the token back immediately.  This renew
    * has the same semantics as ACE_Local_Mutex release.  It is
@@ -111,7 +111,7 @@ public:
                      ACE_Synch_Options &options =
                      ACE_Synch_Options::synch);
 
-  /*
+  /**
    * Release the distributed token. Similar to ACE_Local_Mutex, if the
    * caller is not the owner, it is removed from the waiter list (if
    * applicable.) Returns 0 on success, -1 on failure with @c errno ==
@@ -130,7 +130,7 @@ public:
   /// The client id of the current token holder
   virtual const ACE_TCHAR* owner_id (void);
 
-  /*
+  /**
    * Sets the server address for all instances of ACE_Remote_Token_Proxy
    * If this isn't called, the environment variable TOKEN_SERVER is
    * checked for the server address.  If that is not specified, all
@@ -151,7 +151,7 @@ protected:
                      ACE_Synch_Options &options);
 };
 
-/*
+/**
  * @class ACE_Remote_Mutex
  *
  * @brief Proxy for acquiring, renewing, and releasing a distributed
@@ -188,7 +188,7 @@ protected:
   virtual ACE_Tokens *create_token (const ACE_TCHAR *name);
 };
 
-/*
+/**
  * @class ACE_Remote_RLock
  *
  * @brief Proxy for acquiring, renewing, and releasing a distributed
@@ -227,7 +227,7 @@ protected:
   virtual ACE_Tokens *create_token (const ACE_TCHAR *name);
 };
 
-/*
+/**
  * @class ACE_Remote_WLock
  *
  * @brief Proxy for acquiring, renewing, and releasing a distributed
@@ -265,7 +265,7 @@ protected:
   virtual ACE_Tokens *create_token (const ACE_TCHAR *name);
 };
 
-/*
+/**
  * @class ACE_TSS_Connection
  *
  * @brief Class for providing a connection per thread.

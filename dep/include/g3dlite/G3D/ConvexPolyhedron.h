@@ -1,4 +1,4 @@
-/*
+/**
   @file ConvexPolyhedron.h
   
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -43,7 +43,7 @@ public:
     ConvexPolygon(const Array<Vector3>& __vertex);
     virtual ~ConvexPolygon() {}
 
-    /*
+    /**
      Counter clockwise winding order.  
      */
     inline const Vector3& vertex(int i) const {
@@ -54,7 +54,7 @@ public:
         _vertex[i] = v;
     }
     
-    /*
+    /**
        Zero vertices indicates an empty polygon (zero area).
     */
     inline int numVertices() const {
@@ -65,12 +65,12 @@ public:
         _vertex.resize(n);
     }
     
-    /*
+    /**
        O(n) in the number of edges
     */
     bool isEmpty() const;
 
-    /*
+    /**
        Cuts the polygon at the plane. If the polygon is entirely above or below
        the plane, one of the returned polygons will be empty.
      
@@ -82,7 +82,7 @@ public:
     void cut(const Plane& plane, ConvexPolygon &above, ConvexPolygon &below, DirectedEdge& newEdge);
     void cut(const Plane& plane, ConvexPolygon &above, ConvexPolygon &below);
 
-    /*
+    /**
        When a cut plane grazes a vertex in the polygon, two near-identical vertices may be created.
        The closeness of these two points can cause a number of problems, such as ConvexPolygon::normal() 
        returning an infinite vector.  It should be noted, however, that not all applications are 
@@ -92,7 +92,7 @@ public:
     */
     void removeDuplicateVertices();
     
-    /*
+    /**
      O(n) in the number of edges
      */
     float getArea() const;
@@ -102,7 +102,7 @@ public:
         return (_vertex[1] - _vertex[0]).cross(_vertex[2] - _vertex[0]).direction();
     }
 
-    /*
+    /**
      Returns the same polygon with inverse winding.
      */
     ConvexPolygon inverse() const;
@@ -112,7 +112,7 @@ public:
 
 class ConvexPolyhedron {
 public:
-    /*
+    /**
      Zero faces indicates an empty polyhedron
      */
     Array<ConvexPolygon> face;
@@ -120,17 +120,17 @@ public:
     ConvexPolyhedron() {}
     ConvexPolyhedron(const Array<ConvexPolygon>& _face);
 
-    /*
+    /**
      O(n) in the number of edges
      */
     bool isEmpty() const;
 
-    /*
+    /**
      O(n) in the number of edges
      */
     float getVolume() const;
 
-    /*
+    /**
        Cuts the polyhedron at the plane. If the polyhedron is entirely above or below
        the plane, one of the returned polyhedra will be empty.
      
@@ -141,7 +141,7 @@ public:
     void cut(const Plane& plane, ConvexPolyhedron &above, ConvexPolyhedron &below);
 };
 
-/*
+/**
 
     */
 class ConvexPolygon2D {

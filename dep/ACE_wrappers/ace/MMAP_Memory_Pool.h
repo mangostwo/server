@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file     MMAP_Memory_Pool.h
  *
  *  $Id: MMAP_Memory_Pool.h 81589 2008-05-02 13:07:33Z johnnyw $
@@ -29,7 +29,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_MMAP_Memory_Pool_Options
  *
  * @brief Helper class for MMAP Memory Pool constructor options.
@@ -42,19 +42,19 @@ class ACE_Export ACE_MMAP_Memory_Pool_Options
 public:
   enum
   {
-    /*
+    /**
      * The base address from the first call to mmap will be used for subsequent
      * calls to mmap.
      */
     FIRSTCALL_FIXED = 0,
 
-    /*
+    /**
      * The base address specified in base_addr will be used in all calls to
      * mmap.
      */
     ALWAYS_FIXED = 1,
 
-    /*
+    /**
      * The base address will be selected by the OS for each call to mmap.
      * Caution should be used with this mode since a call that requires the
      * backing store to grow may change pointers that are cached by the
@@ -78,7 +78,7 @@ public:
   /// Base address of the memory-mapped backing store.
   const void *base_addr_;
 
-  /*
+  /**
    * Determines whether we set @c base_addr_ or if mmap(2) selects it
    * FIRSTCALL_FIXED The base address from the first call to mmap
    *                 will be used for subsequent calls to mmap
@@ -102,7 +102,7 @@ public:
   /// Any special flags that need to be used for @c mmap.
   u_int flags_;
 
-  /*
+  /**
    * Try to remap without knowing the faulting address.  This
    * parameter is ignored on platforms that know the faulting address
    * (UNIX with SI_ADDR and Win32).
@@ -127,7 +127,7 @@ private:
   ACE_MMAP_Memory_Pool_Options &operator= (const ACE_MMAP_Memory_Pool_Options &);
 };
 
-/*
+/**
  * @class ACE_MMAP_Memory_Pool
  *
  * @brief Make a memory pool that is based on @c mmap(2).  This
@@ -152,7 +152,7 @@ public:
                               size_t &rounded_bytes,
                               int &first_time);
 
-  /*
+  /**
    * Acquire at least @a nbytes from the memory pool. @a rounded_bytes
    * is the actual number of bytes allocated.  Also acquires an
    * internal semaphore that ensures proper serialization of
@@ -176,14 +176,14 @@ public:
   /// Sync the memory region to the backing store starting at @a addr.
   virtual int sync (void *addr, size_t len, int flags = MS_SYNC);
 
-  /*
+  /**
    * Change the protection of the pages of the mapped region to @a prot
    * starting at @c this->base_addr_ up to @a len bytes.  If @a len == -1
    * then change protection of all pages in the mapped region.
    */
   virtual int protect (size_t len, int prot = PROT_RDWR);
 
-  /*
+  /**
    * Change the protection of all the pages of the mapped region to @a prot
    * starting at @c this->base_addr_.
    */
@@ -194,7 +194,7 @@ public:
   virtual int protect (void *addr, size_t len, int prot = PROT_RDWR);
 
 #if defined (ACE_WIN32)
-  /*
+  /**
    * Win32 Structural exception selector.  The return value decides
    * how to handle memory pool related structural exceptions.  Returns
    * 1, 0, or , -1.
@@ -202,7 +202,7 @@ public:
   virtual int seh_selector (void *);
 #endif /* ACE_WIN32 */
 
-  /*
+  /**
    * Try to extend the virtual address space so that @a addr is now
    * covered by the address mapping.  The method succeeds and returns
    * 0 if the backing store has adequate memory to cover this address.
@@ -243,7 +243,7 @@ protected:
   virtual int map_file (size_t map_size);
 
 #if !defined (ACE_WIN32)
-  /*
+  /**
    * Handle SIGSEGV and SIGBUS signals to remap memory properly.  When a
    * process reads or writes to non-mapped memory a signal (SIGBUS or
    * SIGSEGV) will be triggered.  At that point, the ACE_Sig_Handler
@@ -265,7 +265,7 @@ protected:
   /// Memory-mapping object.
   ACE_Mem_Map mmap_;
 
-  /*
+  /**
    * Base of mapped region.  If this has the value of 0 then the OS is
    * free to select any address to map the file, otherwise this value
    * is what the OS must try to use to mmap the file.
@@ -288,7 +288,7 @@ protected:
   /// Name of the backing store where the shared memory pool is kept.
   ACE_TCHAR backing_store_name_[MAXPATHLEN + 1];
 
-  /*
+  /**
    * Try to remap without knowing the faulting address.  This
    * parameter is ignored on platforms that know the faulting address
    * (UNIX with SI_ADDR and Win32).
@@ -305,7 +305,7 @@ protected:
   bool install_signal_handler_;
 };
 
-/*
+/**
  * @class ACE_Lite_MMAP_Memory_Pool
  *
  * @brief Make a ``lighter-weight'' memory pool based ACE_Mem_Map.

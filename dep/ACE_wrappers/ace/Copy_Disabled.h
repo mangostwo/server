@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //===========================================================================
-/*
+/**
  * @file Copy_Disabled.h
  *
  * $Id: Copy_Disabled.h 80826 2008-03-04 14:51:23Z wotte $
@@ -23,7 +23,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Copy_Disabled
  *
  * @brief Helper class to disable copy construction and assignment

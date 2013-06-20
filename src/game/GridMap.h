@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -238,6 +238,7 @@ class MANGOS_DLL_SPEC TerrainInfo : public Referencable<AtomicLong>
 
         bool GetAreaInfo(float x, float y, float z, uint32& mogpflags, int32& adtId, int32& rootId, int32& groupId) const;
         bool IsOutdoors(float x, float y, float z) const;
+
 
         // this method should be used only by TerrainManager
         // to cleanup unreferenced GridMap objects - they are too heavy

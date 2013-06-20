@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file   OS_NS_stdio.h
  *
  *  $Id: OS_NS_stdio.h 92178 2010-10-08 07:44:20Z olli $
@@ -125,7 +125,7 @@ inline ACE_HANDLE ace_fileno_helper (FILE *fp)
 #if !defined (ACE_LACKS_CUSERID) && !defined(ACE_HAS_ALT_CUSERID) \
     && !defined(ACE_WIN32) && !defined (ACE_VXWORKS)
 /// Helper for the ACE_OS::cuserid() function
-/*
+/**
  * On some platforms cuserid is a macro.  Defining ACE_OS::cuserid()
  * becomes really hard, as there is no way to save the macro
  * definition using the pre-processor.
@@ -166,7 +166,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace ACE_OS {
 
-  /*
+  /**
    * @class ace_flock_t
    *
    * @brief OS file locking structure.

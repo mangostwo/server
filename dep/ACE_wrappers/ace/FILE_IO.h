@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/*
+/**
  *  @file    FILE_IO.h
  *
  *  $Id: FILE_IO.h 92298 2010-10-21 11:15:17Z johnnyw $
@@ -36,7 +36,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
 class ACE_Time_Value;
 
-/*
+/**
  * @class ACE_FILE_IO
  *
  * @brief Read/Write operations on Files
@@ -100,7 +100,7 @@ public:
   /// Recv iovecs via <::readv>.
   ssize_t recv (iovec iov[], int n) const;
 
-  /*
+  /**
    * Send N char *ptrs and int lengths.  Note that the char *'s
    * precede the ints (basically, an varargs version of writev).  The
    * count N is the *total* number of trailing arguments, *not* a
@@ -108,7 +108,7 @@ public:
    */
   ssize_t send (size_t n, ...) const;
 
-  /*
+  /**
    * This is an interface to ::readv, that doesn't use the struct
    * iovec explicitly.  The ... can be passed as an arbitrary number
    * of (char *ptr, int len) tuples.  However, the count N is the
@@ -131,7 +131,7 @@ public:
   ssize_t sendv (const iovec iov[],
                  int n) const;
 
-  /*
+  /**
    * Allows a client to read from a file without having to provide a
    * buffer to read.  This method determines how much data is in the
    * file, allocates a buffer of this size, reads in the data, and

@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/*
+/**
  * @file Configuration_Import_Export.h
  *
  *  $Id: Configuration_Import_Export.h 80826 2008-03-04 14:51:23Z wotte $
@@ -34,7 +34,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Config_ImpExp_Base
  *
  * @brief Base class for file import/export configuration.
@@ -50,18 +50,18 @@ public:
   /// Constructor taking the ACE_Configuration to import/export to
   ACE_Config_ImpExp_Base (ACE_Configuration& config);
 
-  /*
+  /**
    * Destructor
    */
   virtual ~ACE_Config_ImpExp_Base (void);
 
-   /*
+   /**
    * Imports the configuration database from @a filename.
    * No existing data is removed.
    */
   virtual int import_config (const ACE_TCHAR* filename) = 0;
 
-  /*
+  /**
    * This method exports the entire configuration database to @a filename.
    * Once the file is opened this method calls 'export_section' passing
    * the root section.
@@ -76,7 +76,7 @@ private:
   ACE_Config_ImpExp_Base& operator= (const ACE_Config_ImpExp_Base&);
 };
 
-/*
+/**
  * @class ACE_Registry_ImpExp
  *
  * @brief Configuration object that imports/exports data to a file formatted
@@ -100,13 +100,13 @@ public:
   /// Destruction.
   virtual ~ACE_Registry_ImpExp (void);
 
-  /*
+  /**
    * Imports the configuration database from filename.
    * No existing data is removed.
    */
   virtual int import_config (const ACE_TCHAR* filename);
 
-  /*
+  /**
    * This method exports the entire configuration database to @a filename.
    * Once the file is opened this method calls export_section() passing
    * the root section.
@@ -125,7 +125,7 @@ private:
   ACE_Registry_ImpExp& operator= ( const ACE_Registry_ImpExp&);
 };
 
-/*
+/**
  * @class ACE_Ini_ImpExp
  *
  * @brief Imports the configuration database from filename as strings.
@@ -162,23 +162,23 @@ private:
 class ACE_Export ACE_Ini_ImpExp  : public ACE_Config_ImpExp_Base
 {
 public:
-  /*
+  /**
    * Construction
    */
   ACE_Ini_ImpExp (ACE_Configuration&);
 
-  /*
+  /**
    * Destructor
    */
   virtual ~ACE_Ini_ImpExp (void);
 
-  /*
+  /**
    * Imports the configuration database from filename.
    * No existing data is removed.
    */
   virtual int import_config (const ACE_TCHAR* filename);
 
-  /*
+  /**
    * This method exports the entire configuration database to @a filename.
    * Once the file is opened this method calls export_section() passing
    * the root section.
@@ -186,7 +186,7 @@ public:
   virtual int export_config (const ACE_TCHAR* filename);
 
 private:
-  /*
+  /**
    * Method provided by derived classes in order to write one section
    * to the file specified.  Called by export_config() when exporting
    * the entire configuration object.
@@ -195,7 +195,7 @@ private:
                       const ACE_TString& path,
                       FILE* out);
 
-  /*
+  /**
    * Method to squish leading and trailing whitespaces in a string.
    * Whitespace is defined as: spaces (' '), tabs ('\\t') or cr/lf.
    * Returns a pointer to the first non-whitespace character in the

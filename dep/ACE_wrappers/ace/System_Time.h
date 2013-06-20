@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    System_Time.h
  *
  *  $Id: System_Time.h 80826 2008-03-04 14:51:23Z wotte $
@@ -36,7 +36,7 @@ class ACE_Null_Mutex;
 class ACE_Time_Value;
 class ACE_MMAP_Memory_Pool;
 
-/*
+/**
  * @class ACE_System_Time
  *
  * @brief Defines the timer services of the OS interface to access the
@@ -46,7 +46,7 @@ class ACE_MMAP_Memory_Pool;
 class ACE_Export ACE_System_Time
 {
 public:
-  /*
+  /**
    * Enumeration types to specify mode of synchronization with master
    * clock.  Jump will set local system time directly (thus possibly
    * producing time gaps or ambiguous local system times.  Adjust will

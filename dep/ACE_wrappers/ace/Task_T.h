@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Task_T.h
  *
  *  $Id: Task_T.h 91688 2010-09-09 11:21:50Z johnnyw $
@@ -29,7 +29,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // Forward decls...
 template <ACE_SYNCH_DECL> class ACE_Module;
 
-/*
+/**
  * @class ACE_Task
  *
  * @brief Primary interface for application message processing, as well
@@ -46,7 +46,7 @@ public:
   friend class ACE_Module_Type;
 
   // = Initialization/termination methods.
-  /*
+  /**
    * Initialize a Task, supplying a thread manager and a message
    * queue.  If the user doesn't supply a ACE_Message_Queue pointer
    * then we'll allocate one dynamically.  Otherwise, we'll use the
@@ -80,7 +80,7 @@ public: // Should be protected:
   /// <{absolute}> time rather than <{relative}> time.
   int putq (ACE_Message_Block *, ACE_Time_Value *timeout = 0);
 
-  /*
+  /**
    * Extract the first message from the queue (blocking).  Note that
    * @a timeout uses <{absolute}> time rather than <{relative}> time.
    * Returns number of items in queue if the call succeeds or -1 otherwise.
@@ -91,7 +91,7 @@ public: // Should be protected:
   /// <{absolute}> time rather than <{relative}> time.
   int ungetq (ACE_Message_Block *, ACE_Time_Value *timeout = 0);
 
-  /*
+  /**
    * Turn the message around, sending it in the opposite direction in
    * the stream. To do this, the message is put onto the task next in
    * the stream after this task's sibling.
@@ -104,7 +104,7 @@ public: // Should be protected:
    */
   int reply (ACE_Message_Block *mb, ACE_Time_Value *tv = 0);
 
-  /*
+  /**
    * Transfer message to the adjacent ACE_Task in a ACE_Stream.  Note
    * that @a timeout uses <{absolute}> time rather than <{relative}>
    * time.
@@ -130,7 +130,7 @@ public: // Should be protected:
   /// Return the Task's Module if there is one, else returns 0.
   ACE_Module<ACE_SYNCH_USE> *module (void) const;
 
-  /*
+  /**
    * Flush the task's queue, i.e., free all of the enqueued
    * message blocks and unblocks any threads waiting on the queue.
    * Note that if this conflicts with the C++ iostream <flush>

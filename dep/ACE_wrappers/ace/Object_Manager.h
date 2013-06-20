@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/*
+/**
  *  @file    Object_Manager.h
  *
  *  $Id: Object_Manager.h 91066 2010-07-12 11:05:04Z johnnyw $
@@ -73,7 +73,7 @@ template <class T> class ACE_Cleanup_Adapter;
 # define ACE_APPLICATION_PREALLOCATED_ARRAY_DECLARATIONS
 #endif /* ! ACE_APPLICATION_PREALLOCATED_ARRAY_DECLARATIONS */
 
-/*
+/**
  * @class ACE_Object_Manager
  *
  * @brief Manager for ACE library services and singleton cleanup.
@@ -199,21 +199,21 @@ class ACE_Export ACE_Object_Manager : public ACE_Object_Manager_Base
 {
 
 public:
-  /*
+  /**
    * Explicitly initialize (construct the singleton instance of) the
    * ACE_Object_Manager.  Returns 0 on success, -1 on failure, and 1
    * if it had already been called.
    */
   virtual int init (void);
 
-  /*
+  /**
    * Explicitly destroy the singleton instance of the
    * ACE_Object_Manager.  Returns 0 on success, -1 on failure, and 1
    * if it had already been called.
    */
   virtual int fini (void);
 
-  /*
+  /**
    * Returns 1 before the ACE_Object_Manager has been constructed.
    * This flag can be used to determine if the program is constructing
    * static objects.  If no static object spawns any threads, the
@@ -224,7 +224,7 @@ public:
    */
   static int starting_up (void);
 
-  /*
+  /**
    * Returns 1 after the ACE_Object_Manager has been destroyed.  This
    * flag can be used to determine if the program is in the midst of
    * destroying static objects.  (Note that the program might destroy
@@ -233,7 +233,7 @@ public:
    */
   static int shutting_down (void);
 
-  /*
+  /**
    * Register an ACE_Cleanup object for cleanup at process
    * termination.  The object is deleted via the
    * <ace_cleanup_destroyer>.  If you need more flexiblity, see the
@@ -250,7 +250,7 @@ public:
   int init_tss_i (void);
 #endif
 
-  /*
+  /**
    * Register an object (or array) for cleanup at process termination.
    * "cleanup_hook" points to a (global, or static member) function
    * that is called for the object or array when it to be destroyed.
@@ -326,7 +326,7 @@ public:
       ACE_PREALLOCATED_ARRAYS  // This enum value must be last!
     };
 
-  /*
+  /**
    * @deprecated
    * Accesses a default signal set used, for example,
    * in ACE_Sig_Guard methods.
@@ -359,35 +359,35 @@ public:
   // = The <get_singleton_lock> accessors are for internal
   // use by ACE_Singleton _only_.
 
-  /*
+  /**
    * Accesses an ACE_Null_Mutex to be used for construction of
    * ACE_Singletons.  Returns 0, and the lock in the argument, on
    * success; returns -1 on failure.
    */
   static int get_singleton_lock (ACE_Null_Mutex *&);
 
-  /*
+  /**
    * Accesses a non-recursive ACE_Thread_Mutex to be used for
    * construction of ACE_Singletons.  Returns 0, and the lock in the
    * argument, on success; returns -1 on failure.
    */
   static int get_singleton_lock (ACE_Thread_Mutex *&);
 
-  /*
+  /**
    * Accesses a non-recursive ACE_Mutex to be used for construction
    * of ACE_Singletons.  Returns 0, and the lock in the argument, on
    * success; returns -1 on failure.
    */
   static int get_singleton_lock (ACE_Mutex *&);
 
-  /*
+  /**
    * Accesses a recursive ACE_Recursive_Thread_Mutex to be used for
    * construction of ACE_Singletons.  Returns 0, and the lock in the
    * argument, on success; returns -1 on failure.
    */
   static int get_singleton_lock (ACE_Recursive_Thread_Mutex *&);
 
-  /*
+  /**
    * Accesses a readers/writer ACE_RW_Thread_Mutex to be used for
    * construction of ACE_Singletons.  Returns 0, and the lock in the
    * argument, on success; returns -1 on failure.
@@ -398,7 +398,7 @@ public:
 public:
   // For internal use only by ACE_Managed_Objects.
 
-  /*
+  /**
    * Accessor to singleton instance.  Because static member functions
    * are provided in the interface, this should not be public.  However,
    * it is public so that ACE_Managed_Object<TYPE> can access it.

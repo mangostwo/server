@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Svc_Conf_Param.h
  *
  *  $Id: Svc_Conf_Param.h 81312 2008-04-09 21:01:34Z iliyan $
@@ -35,7 +35,7 @@ class ACE_Service_Gestalt;
 
 extern void ace_yy_delete_buffer (ace_yy_buffer_state *buffer);
 
-/*
+/**
  * @class ACE_Svc_Conf_Param
  *
  * @brief An instance of this object will be passed down to the

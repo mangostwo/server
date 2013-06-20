@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  * @file    Hash_Multi_Map_Manager_T.h
  *
  * $Id: Hash_Multi_Map_Manager_T.h 91693 2010-09-09 12:57:54Z johnnyw $
@@ -40,7 +40,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Hash_Multi_Map_Entry
  *
  * @brief Define an entry in the hash table.
@@ -120,7 +120,7 @@ class ACE_Hash_Multi_Map_Bucket_Iterator;
 // Forward decl.
 class ACE_Allocator;
 
-/*
+/**
  * @class ACE_Hash_Multi_Map_Manager
  *
  * @brief Define a multi-map abstraction that efficiently associates the keys
@@ -171,7 +171,7 @@ public:
 
   // = Initialization and termination methods.
 
-  /*
+  /**
    * Initialize a @c Hash_Multi_Map_Manager with default size elements.
    * @param table_alloc is a pointer to a memory allocator used for
    *        table_, so it should supply size*sizeof (
@@ -187,7 +187,7 @@ public:
   ACE_Hash_Multi_Map_Manager (ACE_Allocator *table_alloc = 0,
                               ACE_Allocator *entry_alloc = 0);
 
-  /*
+  /**
    * Initialize a @c Hash_Multi_Map_Manager with @a size elements.
    * @param size is the number of elements in a Hash_Multi_Map_Manager.
    * @param table_alloc is a pointer to a memory allocator used for
@@ -205,7 +205,7 @@ public:
                               ACE_Allocator *table_alloc = 0,
                               ACE_Allocator *entry_alloc = 0);
 
-  /*
+  /**
    * Initialize a @c Hash_Multi_Map_Manager with @a size elements.
    * @param size is the number of elements in a Hash_Multi_Map_Manager.
    * @param table_alloc is a pointer to a memory allocator used for
@@ -235,7 +235,7 @@ public:
   /// Cleanup the Hash_Multi_Map_Manager.
   ~ACE_Hash_Multi_Map_Manager (void);
 
-  /*
+  /**
    * Associate @a ext_id with @a int_id.  If @a ext_id and @a int_id is already
    * in the map then the @c ACE_Hash_Multi_Map_Entry is not changed.  Returns 0 if
    * a new entry is bound successfully, returns 1 if an attempt is made
@@ -244,7 +244,7 @@ public:
   int bind (const EXT_ID &ext_id,
             const INT_ID &int_id);
 
-  /*
+  /**
    * Same as a normal bind, except the map entry is also passed back
    * to the caller.  The entry in this case will either be the newly
    * created entry, or the existing one.
@@ -253,7 +253,7 @@ public:
             const INT_ID &int_id,
             ACE_Hash_Multi_Map_Entry<EXT_ID, INT_ID> *&entry);
 
-  /*
+  /**
    * Associate @a ext_id with @a int_id_set.  If @a ext_id is already in the
    * map then the @c ACE_Hash_Multi_Map_Entry is not changed.  Returns 0 if a
    * new entry is bound successfully, returns 1 if an attempt is made
@@ -262,7 +262,7 @@ public:
   int bind (const EXT_ID &ext_id,
             const ACE_Unbounded_Set<INT_ID> &int_id_set);
 
-  /*
+  /**
    * Same as a normal bind, except the map entry is also passed back
    * to the caller.  The entry in this case will either be the newly
    * created entry, or the existing one.
@@ -271,7 +271,7 @@ public:
             const ACE_Unbounded_Set<INT_ID> &int_id_set,
             ACE_Hash_Multi_Map_Entry<EXT_ID, INT_ID> *&entry);
 
-  /*
+  /**
    * Associate @a ext_id with @a int_id_set if and only if @a ext_id is
    * not in the map.  If @a ext_id is already in the map then the @a int_id_set
    * parameter is assigned the existing value in the map.  Returns 0
@@ -281,7 +281,7 @@ public:
   int trybind (const EXT_ID &ext_id,
                ACE_Unbounded_Set<INT_ID> &int_id_set);
 
-  /*
+  /**
    * Same as a normal trybind, except the map entry is also passed
    * back to the caller.  The entry in this case will either be the
    * newly created entry, or the existing one.
@@ -290,7 +290,7 @@ public:
                ACE_Unbounded_Set<INT_ID> &int_id_set,
                ACE_Hash_Multi_Map_Entry<EXT_ID, INT_ID> *&entry);
 
-  /*
+  /**
    * Reassociate @a ext_id with @a int_id_set.  If @a ext_id is not in
    * the map then behaves just like bind.  Returns 0 if a new entry is
    * bound successfully, returns 1 if an existing entry was rebound,
@@ -299,7 +299,7 @@ public:
   int rebind (const EXT_ID &ext_id,
               const ACE_Unbounded_Set<INT_ID> &int_id_set);
 
-  /*
+  /**
    * Same as a normal rebind, except the map entry is also passed back
    * to the caller.  The entry in this case will either be the newly
    * created entry, or the existing one.
@@ -308,7 +308,7 @@ public:
               const ACE_Unbounded_Set<INT_ID> &int_id_set,
               ACE_Hash_Multi_Map_Entry<EXT_ID, INT_ID> *&entry);
 
-  /*
+  /**
    * Associate @a ext_id with @a int_id_set.  If @a ext_id is not in the map
    * then behaves just like bind.  Otherwise, store the old value of
    * @a int_id_set into the "out" parameter and rebind the new parameters.
@@ -319,7 +319,7 @@ public:
               const ACE_Unbounded_Set<INT_ID> &int_id_set,
               ACE_Unbounded_Set<INT_ID> &old_int_id_set);
 
-  /*
+  /**
    * Same as a normal rebind, except the map entry is also passed back
    * to the caller.  The entry in this case will either be the newly
    * created entry, or the existing one.
@@ -329,7 +329,7 @@ public:
               ACE_Unbounded_Set<INT_ID> &old_int_id_set,
               ACE_Hash_Multi_Map_Entry<EXT_ID, INT_ID> *&entry);
 
-  /*
+  /**
    * Associate @a ext_id with @a int_id_set.  If @a ext_id is not in the map
    * then behaves just like bind.  Otherwise, store the old values
    * of @a ext_id and @a int_id_set into the "out" parameters and rebind the
@@ -344,7 +344,7 @@ public:
               EXT_ID &old_ext_id,
               ACE_Unbounded_Set<INT_ID> &old_int_id_set);
 
-  /*
+  /**
    * Same as a normal rebind, except the map entry is also passed back
    * to the caller.  The entry in this case will either be the newly
    * created entry, or the existing one.
@@ -373,7 +373,7 @@ public:
   int find (const EXT_ID &ext_id,
             ACE_Hash_Multi_Map_Entry<EXT_ID, INT_ID> *&entry) const;
 
-  /*
+  /**
    * Unbind (remove) the @a ext_id from the map.  Don't return the
    * int_id to the caller (this is useful for collections where the
    * int_ids are *not* dynamically allocated...)
@@ -403,7 +403,7 @@ public:
   /// linked lists of @c ACE_Hash_Multi_Map_Entry objects in the hash table.
   size_t total_size (void) const;
 
-  /*
+  /**
    * Returns a reference to the underlying @c ACE_LOCK.  This makes it
    * possible to acquire the lock explicitly, which can be useful in
    * some cases if you instantiate the @c ACE_Atomic_Op with an
@@ -532,7 +532,7 @@ protected:
   /// Performs unbind.  Must be called with locks held.
   int unbind_i (ACE_Hash_Multi_Map_Entry<EXT_ID, INT_ID> *entry);
 
-  /*
+  /**
    * Resize the map.  Must be called with locks held.
    * @note This method should never be called more than once or else all the
    * hashing will get screwed up as the size will change.
@@ -580,7 +580,7 @@ protected:
   size_t cur_size (void) const;
 
 private:
-  /*
+  /**
    * Array of the pointers to @c ACE_Hash_Multi_Map_Entry objects, each of
    * which points to an @c ACE_Hash_Multi_Map_Entry that serves as the
    * beginning of a linked list of @c EXT_ID that hash to that bucket.
@@ -600,7 +600,7 @@ private:
   ACE_UNIMPLEMENTED_FUNC (ACE_Hash_Multi_Map_Manager (const ACE_Hash_Multi_Map_Manager<EXT_ID, INT_ID, HASH_KEY, COMPARE_KEYS, ACE_LOCK> &))
 };
 
-/*
+/**
  * @class ACE_Hash_Multi_Map_Iterator_Base
  *
  * @brief Base iterator for the @c ACE_Hash_Multi_Map_Manager
@@ -667,7 +667,7 @@ protected:
   ACE_Hash_Multi_Map_Entry<EXT_ID, INT_ID> *next_;
 };
 
-/*
+/**
  * @class ACE_Hash_Multi_Map_Const_Iterator_Base
  *
  * @brief Base const iterator for the @c ACE_Hash_Multi_Map_Manager
@@ -734,7 +734,7 @@ protected:
   ACE_Hash_Multi_Map_Entry<EXT_ID, INT_ID> *next_;
 };
 
-/*
+/**
  * @class ACE_Hash_Multi_Map_Iterator
  *
  * @brief Forward iterator for the @c ACE_Hash_Multi_Map_Manager.
@@ -780,7 +780,7 @@ public:
   ACE_ALLOC_HOOK_DECLARE;
 };
 
-/*
+/**
  * @class ACE_Hash_Multi_Map_Const_Iterator
  *
  * @brief Const forward iterator for the @c ACE_Hash_Multi_Map_Manager.
@@ -826,7 +826,7 @@ public:
   ACE_ALLOC_HOOK_DECLARE;
 };
 
-/*
+/**
  * @class ACE_Hash_Multi_Map_Bucket_Iterator
  *
  * @brief Forward iterator for the @c ACE_Hash_Multi_Map_Manager which
@@ -902,7 +902,7 @@ protected:
   ACE_Hash_Multi_Map_Entry<EXT_ID, INT_ID> *next_;
 };
 
-/*
+/**
  * @class ACE_Hash_Multi_Map_Reverse_Iterator
  *
  * @brief Reverse iterator for the @c ACE_Hash_Multi_Map_Manager.

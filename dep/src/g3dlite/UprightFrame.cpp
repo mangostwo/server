@@ -1,4 +1,4 @@
-/*
+/**
   @file UprightFrame.cpp
   Box class
 

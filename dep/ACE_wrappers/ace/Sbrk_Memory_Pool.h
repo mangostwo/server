@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file     Sbrk_Memory_Pool.h
  *
  *  $Id: Sbrk_Memory_Pool.h 80826 2008-03-04 14:51:23Z wotte $
@@ -30,7 +30,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Sbrk_Memory_Pool_Options
  *
  * @brief Helper class for Sbrk Memory Pool constructor options.
@@ -42,7 +42,7 @@ class ACE_Export ACE_Sbrk_Memory_Pool_Options
 {
 };
 
-/*
+/**
  * @class ACE_Sbrk_Memory_Pool
  *
  * @brief Make a memory pool that is based on <sbrk(2)>.
@@ -72,7 +72,7 @@ public:
   /// Instruct the memory pool to release all of its resources.
   virtual int release (int destroy = 1);
 
-  /*
+  /**
    * Sync @a len bytes of the memory region to the backing store
    * starting at @c this->base_addr_.  If @a len == -1 then sync the
    * whole region.
@@ -83,7 +83,7 @@ public:
   /// starting at @a addr.
   virtual int sync (void *addr, size_t len, int flags = MS_SYNC);
 
-  /*
+  /**
    * Change the protection of the pages of the mapped region to @a prot
    * starting at @c this->base_addr_ up to @a len bytes.  If @a len == -1
    * then change protection of all pages in the mapped region.

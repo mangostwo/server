@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/*
+/**
  *  @file    Configuration.h
  *
  *  $Id: Configuration.h 91688 2010-09-09 11:21:50Z johnnyw $
@@ -54,7 +54,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Section_Key_Internal
  *
  * @internal
@@ -84,7 +84,7 @@ protected:
   u_int ref_count_;
 };
 
-/*
+/**
  * @class ACE_Configuration_Section_Key
  *
  * @brief Reference counted wrapper for ACE_Section_Key_Internal.
@@ -101,7 +101,7 @@ public:
   ACE_Configuration_Section_Key (void);
 
   /// Constructor that initializes to a pointer to a concrete internal key.
-  /*
+  /**
    * @param key The section key to reference. Calls add_ref() with @a key.
    */
   explicit ACE_Configuration_Section_Key (ACE_Section_Key_Internal *key);
@@ -120,7 +120,7 @@ private:
   ACE_Section_Key_Internal *key_;
 };
 
-/*
+/**
  * @class ACE_Configuration
  *
  * @internal
@@ -155,7 +155,7 @@ public:
    */
   virtual const ACE_Configuration_Section_Key& root_section (void) const;
 
-  /*
+  /**
    * Opens a named section in an existing section.
    *
    * @param base        Existing section in which to open the named section.
@@ -174,7 +174,7 @@ public:
                             ACE_Configuration_Section_Key& result) = 0;
 
   /// Removes a named section.
-  /*
+  /**
    * @param key          Section key to remove the named section from.
    * @param sub_section  Name of the section to remove.
    * @param recursive    If true, any subkeys below @a sub_section are
@@ -187,7 +187,7 @@ public:
                               const ACE_TCHAR *sub_section,
                               bool recursive) = 0;
 
-  /*
+  /**
    * Enumerates through the values in a section.
    *
    * @param key    Section key to iterate through.
@@ -210,7 +210,7 @@ public:
                                 ACE_TString& name,
                                 VALUETYPE& type) = 0;
 
-  /*
+  /**
    * Enumerates through the subsections in a section.
    *
    * @param key    Section key to iterate through.
@@ -231,7 +231,7 @@ public:
                                   int index, ACE_TString& name) = 0;
 
   /// Sets a string-typed value.
-  /*
+  /**
    * @param key     Configuration section to set the value in.
    * @param name    Name of the configuration value to set. If a value with
    *                the specified name exists, it is replaced.
@@ -245,7 +245,7 @@ public:
                                 const ACE_TString& value) = 0;
 
   /// Sets a integer-typed value.
-  /*
+  /**
    * @param key     Configuration section to set the value in.
    * @param name    Name of the configuration value to set. If a value with
    *                the specified name exists, it is replaced.
@@ -259,7 +259,7 @@ public:
                                  u_int value) = 0;
 
   /// Sets a binary-typed value.
-  /*
+  /**
    * @param key     Configuration section to set the value in.
    * @param name    Name of the configuration value to set. If a value with
    *                the specified name exists, it is replaced.
@@ -275,7 +275,7 @@ public:
                                 size_t length) = 0;
 
   /// Gets a string-typed value.
-  /*
+  /**
    * @param key     Configuration section to get the value from.
    * @param name    Name of the configuration value to get.
    * @param value   Receives the configuration value if it exists and
@@ -289,7 +289,7 @@ public:
                                 ACE_TString& value) = 0;
 
   /// Gets an integer-typed value.
-  /*
+  /**
    * @param key     Configuration section to get the value from.
    * @param name    Name of the configuration value to get.
    * @param value   Receives the configuration value if it exists and
@@ -303,7 +303,7 @@ public:
                                  u_int& value) = 0;
 
   /// Gets a binary-typed value.
-  /*
+  /**
    * @param key     Configuration section to get the value from.
    * @param name    Name of the configuration value to get.
    * @param data    Receives a pointer to memory holding the binary data
@@ -321,7 +321,7 @@ public:
                                 void*& data,
                                 size_t& length) = 0;
 
-  /*
+  /**
    * Retrieves the type of a named configuration value.
    *
    * @param key     Configuration section to look up the name in.
@@ -336,7 +336,7 @@ public:
                          VALUETYPE& type) = 0;
 
   /// Removes a named value.
-  /*
+  /**
    * @param key     Configuration section to remove the named value from.
    * @param name    Name of the configuration value to remove.
    *
@@ -346,7 +346,7 @@ public:
   virtual int remove_value (const ACE_Configuration_Section_Key& key,
                             const ACE_TCHAR* name) = 0;
 
-  /*
+  /**
    * Expands @a path_in to @a key_out from @a key.  If create is true,
    * the subsections are created.  Returns 0 on success, non zero on
    * error The path consists of sections separated by the backslash
@@ -359,21 +359,21 @@ public:
                    ACE_Configuration_Section_Key& key_out,
                    int create = 1);
 
-  /*
+  /**
    * Determine if the contents of this object is the same as the
    * contents of the object on the right hand side.
    * Returns true if they are equal and false if they are not equal
    */
   bool operator==(const ACE_Configuration& rhs) const;
 
-  /*
+  /**
    * Determine if the contents of this object are different from the
    * contents of the object on the right hand side.
    * Returns false if they are equal and true if they are not equal
    */
   bool operator!=(const ACE_Configuration& rhs) const;
 
-  /*
+  /**
    *    *  Represents the "NULL" string to simplify the internal logic.
    *       */
   static ACE_TCHAR NULL_String_;
@@ -386,7 +386,7 @@ protected:
   ACE_Section_Key_Internal* get_internal_key
     (const ACE_Configuration_Section_Key& key);
 
-  /*
+  /**
    * Tests to see if @a name is valid.  @a name must be < 255 characters
    * and not contain the path separator '\', brackets [] or = (maybe
    * just restrict to alphanumeric?) returns non zero if name is not
@@ -395,7 +395,7 @@ protected:
    */
   int validate_name (const ACE_TCHAR* name, int allow_path = 0);
 
-  /*
+  /**
    * Test to see if @a name is valid.  The default value for a key can be
    * unnamed, which means either @a name is == 0 or @a name == '\0` is
    * valid.  Otherwise, it calls validate_name() to test @a name for the
@@ -413,7 +413,7 @@ protected:
 
 #if defined (ACE_WIN32) && !defined (ACE_LACKS_WIN32_REGISTRY)
 
-/*
+/**
  * @class ACE_Section_Key_Win32
  *
  * @brief The Win32 registry implementation of an internal section key.
@@ -437,7 +437,7 @@ protected:
   ACE_Section_Key_Win32& operator= (const ACE_Section_Key_Win32& rhs);
 };
 
-/*
+/**
  * @class ACE_Configuration_Win32Registry
  *
  * @brief The win32 registry implementation of a configuration database
@@ -450,7 +450,7 @@ class ACE_Export ACE_Configuration_Win32Registry : public ACE_Configuration
 {
 public:
 
-  /*
+  /**
    * Constructor for registry configuration database.  hKey is the
    * base registry key to attach to.  This class takes ownership of
    * hKey, it will invoke <RegCloseKey> on it upon destruction.
@@ -512,7 +512,7 @@ public:
   virtual int remove_value (const ACE_Configuration_Section_Key& key,
                             const ACE_TCHAR* name);
 
-  /*
+  /**
    * This method traverses <path> through <hKey>.  It is useful when
    * you want the HKEY for a specific registry key, especially when
    * initializing this implementation.  Caller is responsible for
@@ -547,7 +547,7 @@ typedef ACE_Allocator_Adapter <ACE_Malloc <ACE_LOCAL_MEMORY_POOL,
                                            ACE_SYNCH_MUTEX> >
         HEAP_ALLOCATOR;
 
-/*
+/**
  * @class ACE_Configuration_ExtId
  *
  * @brief External ID for the section and value hash
@@ -603,7 +603,7 @@ typedef ACE_Hash_Map_Manager_Ex<ACE_Configuration_ExtId,
                                 ACE_Null_Mutex>
         SUBSECTION_HASH;
 
-/*
+/**
  * @class ACE_Configuration_Value_IntId
  *
  * @brief The section hash table internal value class
@@ -640,7 +640,7 @@ public:
 
   // = Data members.
 
-  /*
+  /**
    * Points to the string value or binary data or IS the integer
    * Length is only used when type_ == BINARY
    */
@@ -665,7 +665,7 @@ typedef ACE_Hash_Map_Manager_Ex<ACE_Configuration_ExtId,
 // Deprecated typedef.  Use the VALUE_HASH::ENTRY trait instead.
 typedef VALUE_HASH::ENTRY VALUE_ENTRY;
 
-/*
+/**
  * @class ACE_Configuration_Section_IntId
  *
  * @brief The internal ID for a section hash table
@@ -714,7 +714,7 @@ typedef ACE_Hash_Map_Manager_Ex<ACE_Configuration_ExtId,
 // Deprecated typedef.  Use the SECTION_HASH::ENTRY trait instead.
 typedef SECTION_HASH::ENTRY SECTION_ENTRY;
 
-/*
+/**
  * @class ACE_Configuration_Section_Key_Heap
  *
  * @brief Internal section key class for heap based configuration
@@ -746,7 +746,7 @@ protected:
   ACE_Configuration_Section_Key_Heap& operator= (const ACE_Configuration_Section_Key_Heap& rhs);
 };
 
-/*
+/**
  * @class ACE_Configuration_Heap
  *
  * @brief The concrete implementation of a allocator based
@@ -772,7 +772,7 @@ public:
   /// Destructor
   virtual ~ACE_Configuration_Heap (void);
 
-  /*
+  /**
    * Opens a configuration that allocates its memory from a memory-mapped file.
    * This makes it possible to persist a configuration to permanent storage.
    * This is not the same as exporting the configuration to a file; the
@@ -793,7 +793,7 @@ public:
             void* base_address = ACE_DEFAULT_BASE_ADDR,
             size_t default_map_size = ACE_DEFAULT_CONFIG_SECTION_SIZE);
 
-  /*
+  /**
    * Opens a configuration that allocates memory from the heap.
    *
    * @param default_map_size Starting size for the internal hash tables that

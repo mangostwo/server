@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    os_ipc.h
  *
  *  XSI interprocess communication access structure

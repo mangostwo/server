@@ -1,4 +1,4 @@
-/*
+/**
  @file Capsule.h
   
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -21,7 +21,7 @@ namespace G3D {
 
 class Line;
 class AABox;
-/*
+/**
  A shape formed by extruding a sphere along a line segment.
  */
 class Capsule {
@@ -66,7 +66,7 @@ public:
     /** Get a reference frame in which the center of mass is the origin and Y is the axis of the capsule.*/
     void getReferenceFrame(class CoordinateFrame& cframe) const;
 
-    /*
+    /**
      Returns true if the point is inside the capsule or on its surface.
      */
     bool contains(const Vector3& p) const;

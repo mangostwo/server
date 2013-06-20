@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    TSS_T.h
  *
  *  $Id: TSS_T.h 91703 2010-09-10 11:05:38Z msmit $
@@ -44,7 +44,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_TSS_Adapter;
 #endif
 
-/*
+/**
  * @class ACE_TSS
  *
  * @brief Allows objects that are "physically" in thread specific
@@ -80,7 +80,7 @@ template <class TYPE>
 class ACE_TSS : private ACE_Copy_Disabled
 {
 public:
-  /*
+  /**
    * Default constructor. Can also initialize this ACE_TSS instance,
    * readying it for use by the calling thread as well as all other
    * threads in the process. If the constructor does not initialize this
@@ -99,7 +99,7 @@ public:
   /// Will cause all threads' copies of TYPE to be destroyed.
   virtual ~ACE_TSS (void);
 
-  /*
+  /**
    * Set the thread-specific object for the calling thread.
    * If this object has not been initialized yet, this method performs the
    * initialization.
@@ -124,7 +124,7 @@ public:
    * descriptions for complete details.
    */
   //@{
-  /*
+  /**
    * Get the thread-specific object for this object.
    *
    * @return  0 if the object has never been initialized, otherwise returns
@@ -134,7 +134,7 @@ public:
    */
   TYPE *ts_object (void) const;
 
-  /*
+  /**
    * Use a "smart pointer" to get the thread-specific data associated
    * with this object.
    * If this ACE_TSS object hasn't been initialized, this method
@@ -148,7 +148,7 @@ public:
    */
   TYPE *operator-> () const;
 
-  /*
+  /**
    * Obtain a pointer to the calling thread's TYPE object.
    * If this ACE_TSS object hasn't been initialized, this method
    * will initialize it as a side-affect. If the calling thread has not
@@ -215,7 +215,7 @@ protected:
 #endif /* defined (ACE_HAS_THREADS) && (defined (ACE_HAS_THREAD_SPECIFIC_STORAGE) || defined (ACE_HAS_TSS_EMULATION)) */
 };
 
-/*
+/**
  * @class ACE_TSS_Type_Adapter
  *
  * @brief Adapter that allows built-in types to be used with ACE_TSS.

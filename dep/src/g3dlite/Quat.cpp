@@ -1,4 +1,4 @@
-/*
+/**
   @file Quat.cpp
  
   Quaternion implementation based on Watt & Watt page 363

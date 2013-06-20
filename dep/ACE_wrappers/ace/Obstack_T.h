@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Obstack_T.h
  *
  *  $Id: Obstack_T.h 91688 2010-09-09 11:21:50Z johnnyw $
@@ -26,7 +26,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Allocator;
 
-/*
+/**
  * @class ACE_Obstack_T
  *
  * @brief Define a simple "mark and release" memory allocation utility.

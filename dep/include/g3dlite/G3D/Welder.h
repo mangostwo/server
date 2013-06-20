@@ -37,7 +37,7 @@ public:
         operator Any() const;
     };
 
-/*
+/**
      Mutates geometry, texCoord, and indexArray so that the output has collocated vertices collapsed (welded).
 
      @param vertices Input and output
@@ -54,7 +54,7 @@ public:
         Array<Array<int>*>& indices,
         const Settings&     settings);
 
-    /*
+    /**
      Mutates geometry, texCoord, and indexArray so that the output has collocated vertices collapsed (welded).
 
      @param vertices Input and output

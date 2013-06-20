@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/*
+/**
  *  @file Dynamic_Service_Base.h
  *
  *  $Id: Dynamic_Service_Base.h 89454 2010-03-11 09:35:25Z johnnyw $
@@ -27,7 +27,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Service_Gestalt;
 class ACE_Service_Type;
 
-/*
+/**
  * @class ACE_Dynamic_Service_Base
  *
  * @brief Base class for all ACE_Dynamic_Service instantiations.

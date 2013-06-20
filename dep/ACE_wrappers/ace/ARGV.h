@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    ARGV.h
  *
  *  $Id: ARGV.h 81156 2008-03-30 20:56:47Z iliyan $
@@ -27,7 +27,7 @@
 // Open versioned namespace, if enabled by the user.
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_ARGV_Queue_Entry_T
  *
  * @brief An entry in the queue which keeps user supplied arguments.
@@ -40,7 +40,7 @@ public:
   /// Initialize a ACE_ARGV_Queue_Entry_T.
   ACE_ARGV_Queue_Entry_T (void);
 
-  /*
+  /**
    * Initialize a ACE_ARGV_Queue_Entry_T.
    *
    * @param arg   Pointer to an argument
@@ -51,7 +51,7 @@ public:
   ACE_ARGV_Queue_Entry_T (const CHAR_TYPE *arg,
                           bool quote_arg);
 
-  /*
+  /**
    * Initialize a ACE_ARGV_Queue_Entry_T.
    *
    * @param entry Pointer to a queue entry
@@ -75,7 +75,7 @@ public:
   bool quote_arg_;
 };
 
-/*
+/**
  * @class ACE_ARGV_T
  *
  * @brief Builds a counted argument vector (ala argc/argv) from either
@@ -97,7 +97,7 @@ class ACE_ARGV_T
 {
 public:
   // = Initialization and termination.
-  /*
+  /**
    * Splits the specified string into an argument vector. Arguments in the
    * string are delimited by whitespace. Whitespace-containing arguments
    * must be enclosed in quotes, either single (') or double (").
@@ -113,7 +113,7 @@ public:
   explicit ACE_ARGV_T (const CHAR_TYPE buf[],
                        bool substitute_env_args = true);
 
-  /*
+  /**
    * Initializes the argument vector from a set of arguments. Any environment
    * variable references are translated (if applicable) during execution of
    * this method. In contrast with ACE_ARGV_T(CHAR_TYPE *[], bool, bool), this
@@ -140,7 +140,7 @@ public:
                        bool substitute_env_args = true,
                        bool quote_args = false);
 
-  /*
+  /**
    * Initializes the argument vector from a set of arguments. Any environment
    * variable references are translated (if applicable) during execution of
    * this method.
@@ -163,7 +163,7 @@ public:
                        bool substitute_env_args = true,
                        bool quote_args = false);
 
-  /*
+  /**
    * Initializes the argument vector from two combined argument vectors.
    *
    * @param first_argv   An array of tokens to initialize the object with.
@@ -186,7 +186,7 @@ public:
               bool substitute_env_args = true,
               bool quote_args = false);
 
-  /*
+  /**
    * Initialize this object so arguments can be added later using one
    * of the add methods. This is referred to as the @i iterative method
    * of adding arguments to this object.
@@ -201,7 +201,7 @@ public:
    * These methods access the argument vector contained in this object.
    */
   //@{
-  /*
+  /**
    * Returns the specified element of the current argument vector.
    *
    * @param index   Index to the desired element.
@@ -211,7 +211,7 @@ public:
    */
   const CHAR_TYPE *operator[] (size_t index);
 
-  /*
+  /**
    * Returns the current argument vector. The returned pointers are to data
    * maintained internally to this class. Do not change or delete either the
    * pointers or the memory to which they refer.
@@ -221,7 +221,7 @@ public:
   /// Returns the current number of arguments.
   int argc (void) const;
 
-  /*
+  /**
    * Returns a single string form of the current arguments. The returned
    * pointer refers to memory maintained internally to this class. Do not
    * change or delete it.
@@ -236,7 +236,7 @@ public:
   // Declare the dynamic allocation hooks.
   ACE_ALLOC_HOOK_DECLARE;
 
-  /*
+  /**
    * Add another argument. This only works in the iterative mode.
    *
    * @note This method copies the specified pointer, but not the data
@@ -255,7 +255,7 @@ public:
    */
   int add (const CHAR_TYPE *next_arg, bool quote_arg = false);
 
-  /*
+  /**
    * Add an array of arguments. This only works in the iterative mode.
    *
    * @note This method copies the specified pointers, but not the data

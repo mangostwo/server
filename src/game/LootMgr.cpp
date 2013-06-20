@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -762,6 +762,7 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
 
     if (lv.permission == NONE_PERMISSION)
         return b;                                           // nothing output more
+
 
     for (uint8 i = 0; i < l.items.size(); ++i)
     {

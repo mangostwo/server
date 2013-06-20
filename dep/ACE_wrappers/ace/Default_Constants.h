@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file   Default_Constants.h
  *
  *  $Id: Default_Constants.h 91688 2010-09-09 11:21:50Z johnnyw $
@@ -395,7 +395,7 @@
 #define ACE_MAX_UDP_PACKET_SIZE 65536
 #endif
 
-/*
+/**
  * @name Default values to control CDR classes memory allocation strategies
  */
 //@{
@@ -424,7 +424,7 @@
 //@}
 
 /// Control the zero-copy optimizations for octet sequences
-/*
+/**
  * Large octet sequences can be sent without any copies by chaining
  * them in the list of message blocks that represent a single CDR
  * stream.  However, if the octet sequence is too small the zero copy

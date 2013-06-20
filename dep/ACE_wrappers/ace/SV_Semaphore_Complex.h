@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file   SV_Semaphore_Complex.h
  *
  *  $Id: SV_Semaphore_Complex.h 80826 2008-03-04 14:51:23Z wotte $
@@ -22,7 +22,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_SV_Semaphore_Complex
  *
  * @brief This is a more complex semaphore wrapper that handles race
@@ -90,7 +90,7 @@ public:
             u_short nsems = 1,
             mode_t perms = ACE_DEFAULT_FILE_PERMS);
 
-  /*
+  /**
    * Close an ACE_SV_Semaphore. Unlike the <remove> method, this
    * method is for a process to call before it exits, when it is done
    * with the ACE_SV_Semaphore. We "decrement" the counter of

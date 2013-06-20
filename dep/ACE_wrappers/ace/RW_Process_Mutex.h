@@ -1,7 +1,7 @@
 // -*- C++ -*-
 //
 //=============================================================================
-/*
+/**
  *  @file    RW_Process_Mutex.h
  *
  *  $Id: RW_Process_Mutex.h 87487 2009-11-12 07:54:39Z johnnyw $
@@ -25,7 +25,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_RW_Process_Mutex
  *
  * @brief Wrapper for readers/writer locks that exist across processes.
@@ -51,7 +51,7 @@ public:
 
   ~ACE_RW_Process_Mutex (void);
 
-  /*
+  /**
    * Explicitly destroy the mutex.  Note that only one thread should
    * call this method since it doesn't protect against race
    * conditions.
@@ -63,7 +63,7 @@ public:
   /// operation fails.
   int acquire (void);
 
-  /*
+  /**
    * Same as tryacquire_write().
    * Try to acquire the lock, but do not block if the lock is not immediately
    * acquired.
@@ -84,7 +84,7 @@ public:
   /// operation fails.
   int acquire_write (void);
 
-  /*
+  /**
    * Try to acquire the read lock, but do not block if the lock is not
    * immediately acquired.
    *
@@ -93,7 +93,7 @@ public:
    */
   int tryacquire_read (void);
 
-  /*
+  /**
    * Try to acquire the write lock, but do not block if the lock is not
    * immediately acquired.
    *

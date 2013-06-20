@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Log_Msg_UNIX_Syslog.h
  *
  *  $Id: Log_Msg_UNIX_Syslog.h 90388 2010-06-02 15:27:59Z vzykov $
@@ -27,7 +27,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Log_Msg_UNIX_Syslog
  *
  * @brief Implements an ACE_Log_Msg_Backend that logs messages to a UNIX
@@ -43,7 +43,7 @@ public:
   virtual ~ACE_Log_Msg_UNIX_Syslog (void);
 
   /// Open a new event log.
-  /*
+  /**
    * Initialize the event logging facility.
    * @param logger_key The name of the calling program. This name is
    *                   used as the @c ident in the syslog entries. If

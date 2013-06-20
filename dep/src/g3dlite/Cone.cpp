@@ -1,4 +1,4 @@
-/*
+/**
  @file Cone.cpp
 
  Cone class
@@ -26,7 +26,7 @@ Cone::Cone(const Vector3 &tip, const Vector3 &direction, float angle) {
     debugAssert(angle <= pi());
 }
 
-/*
+/**
  Forms the smallest cone that contains the box.  Undefined if
  the tip is inside or on the box.
  */

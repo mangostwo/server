@@ -1,4 +1,4 @@
-/*
+/**
   @file vectorMath.h
  
   Function aliases for popular vector methods.
@@ -221,7 +221,7 @@ inline float length(const Vector4& v) {
     return v.length();
 }
 
-/*
+/**
  Computes the log of each component.  Useful for
  inverting the monitor gamma function or simulating
  perceptual response.

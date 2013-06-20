@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    os_resource.h
  *
  *  definitions for XSI resource operations

@@ -1717,7 +1717,7 @@ ACE_POSIX_Asynch_Transmit_File_Result::~ACE_POSIX_Asynch_Transmit_File_Result (v
 
 // *********************************************************************
 
-/*
+/**
  * @class ACE_POSIX_Asynch_Transmit_Handler
  *
  * @brief Auxillary handler for doing <Asynch_Transmit_File> in

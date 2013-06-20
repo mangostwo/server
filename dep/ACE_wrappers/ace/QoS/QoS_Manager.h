@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    QoS_Manager.h
  *
  *  $Id: QoS_Manager.h 80826 2008-03-04 14:51:23Z wotte $
@@ -29,7 +29,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_QoS_Manager
  *
  * @brief This class manages the QoS sessions associated with ACE_SOCK.
@@ -50,7 +50,7 @@ public:
   /// Default destructor.
   ~ACE_QoS_Manager (void);
 
-  /*
+  /**
    * Join the given QoS session. A socket can join multiple QoS
    * sessions.  This call adds the given QoS session to the list of
    * QoS sessions that the socket has already joined.

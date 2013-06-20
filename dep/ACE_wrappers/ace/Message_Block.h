@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    Message_Block.h
  *
  *  $Id: Message_Block.h 91066 2010-07-12 11:05:04Z johnnyw $
@@ -34,7 +34,7 @@ class ACE_Data_Block;
 class ACE_Lock;
 
 
-/*
+/**
  * @class ACE_Message_Block
  *
  * @brief Stores messages for use throughout ACE (particularly
@@ -131,7 +131,7 @@ public:
   /// Create an empty message.
   ACE_Message_Block (ACE_Allocator *message_block_allocator = 0);
 
-  /*
+  /**
    * Create an ACE_Message_Block that owns the specified ACE_Data_Block
    * without copying it. If the @a flags is set to @c DONT_DELETE we
    * don't delete the ACE_Data_Block. It is left to the client's
@@ -142,7 +142,7 @@ public:
                      Message_Flags flags = 0,
                      ACE_Allocator *message_block_allocator = 0);
 
-  /*
+  /**
    * Create an ACE_Message_Block that refers to @a data without
    * copying it. The @a data memory will not be freed when this block is
    * destroyed; memory management of @a data is left to the caller.
@@ -153,7 +153,7 @@ public:
                      size_t size = 0,
                      unsigned long priority = ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY);
 
-  /*
+  /**
    * Create an initialized message of type @a type containing @a size
    * bytes.  The @a cont argument initializes the continuation field in
    * the ACE_Message_Block.  If @a data == 0 then this block allocates and
@@ -188,7 +188,7 @@ public:
                      ACE_Allocator *data_block_allocator = 0,
                      ACE_Allocator *message_block_allocator = 0);
 
-  /*
+  /**
    * A copy constructor. This constructor is a bit different. If the
    * incoming Message Block has a data block from the stack this
    * constructor does a deep copy ie. allocates a new data block on
@@ -202,7 +202,7 @@ public:
   ACE_Message_Block (const ACE_Message_Block &mb,
                      size_t align);
 
-  /*
+  /**
    * Create a Message Block that assumes it has ownership of @a data,
    * but in reality it doesnt (i.e., cannot delete it since it didn't
    * malloc it!).  Note that the @c size of the Message_Block will
@@ -211,7 +211,7 @@ public:
   int init (const char *data,
             size_t size = 0);
 
-  /*
+  /**
    * Create an initialized message of type @a type containing @a size
    * bytes.  The @a cont argument initializes the continuation field in
    * the Message_Block.  If @a data == 0 then we create and own the
@@ -238,7 +238,7 @@ public:
             ACE_Allocator *data_block_allocator = 0,
             ACE_Allocator *message_block_allocator = 0);
 
-  /*
+  /**
    * Delete all the resources held in the message.
    *
    * @note Note that release() is designed to release the continuation
@@ -317,7 +317,7 @@ public:
   /// Return a "shallow" copy that increments our reference count by 1.
   virtual ACE_Message_Block *duplicate (void) const;
 
-  /*
+  /**
    * Return a "shallow" copy that increments our reference count by 1.
    * This is similar to CORBA's <_duplicate> method, which is useful
    * if you want to eliminate lots of checks for NULL @a mb pointers
@@ -325,7 +325,7 @@ public:
    */
   static ACE_Message_Block *duplicate (const ACE_Message_Block *mb);
 
-  /*
+  /**
    * Decrease the shared ACE_Data_Block's reference count by 1.  If the
    * ACE_Data_Block's reference count goes to 0, it is deleted.
    * In all cases, this ACE_Message_Block is deleted - it must have come
@@ -354,7 +354,7 @@ public:
    */
   virtual ACE_Message_Block *release (void);
 
-  /*
+  /**
    * This behaves like the non-static method <release>, except that it
    * checks if @a mb is 0.  This is similar to <CORBA::release>, which
    * is useful if you want to eliminate lots of checks for NULL
@@ -364,7 +364,7 @@ public:
 
   // = Operations on Message data
 
-  /*
+  /**
    * Copies data into this ACE_Message_Block. Data is copied into the
    * block starting at the current write pointer.
    *
@@ -378,7 +378,7 @@ public:
    */
   int copy (const char *buf, size_t n);
 
-  /*
+  /**
    * Copies a 0-terminated character string into this ACE_Message_Block.
    * The string is copied into the block starting at the current write
    * pointer. The 0-terminator is included in the copied data.
@@ -407,7 +407,7 @@ public:
   /// Access all the allocators in the message block.
   /// @todo Not sure whether we would need finer control while
   /// trying to access allocators ie. a method for every allocator.
-  /*
+  /**
    * This method returns the allocators only from the first message
    * block in the chain.
    *
@@ -427,7 +427,7 @@ public:
   /// Reset all the allocators in the message block.
   /// @todo Not sure whether we would need finer control while
   /// trying to reset allocators ie. a method for every allocator.
-  /*
+  /**
    * This method resets the allocators in all the message blocks in
    * the chain.
    */
@@ -446,7 +446,7 @@ public:
   /// Return a pointer to 1 past the end of the allocated data in a message.
   char *end (void) const;
 
-  /*
+  /**
    * Return a pointer to 1 past the end of the allotted data in a message.
    * Allotted data may be less than allocated data  if a value smaller than
    * capacity() to is passed to size().
@@ -503,7 +503,7 @@ public:
   /// does not consider the bytes in chained Message_Blocks).
   size_t size (void) const;
 
-  /*
+  /**
    * Set the number of bytes in the top-level Message_Block,
    * reallocating space if necessary.  However, the @c rd_ptr_ and
    * @c wr_ptr_ remain at the original offsets into the buffer, even if
@@ -525,14 +525,14 @@ public:
 
   // = ACE_Data_Block methods.
 
-  /*
+  /**
    * Get a pointer to the data block. Note that the ACE_Message_Block
    * still references the block; this call does not change the reference
    * count.
    */
   ACE_Data_Block *data_block (void) const;
 
-  /*
+  /**
    * Set a new data block pointer. The original ACE_Data_Block is released
    * as a result of this call. If you need to keep the original block, call
    * <replace_data_block> instead. Upon return, this ACE_Message_Block
@@ -662,7 +662,7 @@ private:
   ACE_Message_Block (const ACE_Message_Block &);
 };
 
-/*
+/**
  * @class ACE_Data_Block
  *
  * @brief Stores the data payload that is accessed via one or more
@@ -710,7 +710,7 @@ public:
   /// Return a pointer to 1 past the end of the allocated data in a message.
   char *end (void) const;
 
-  /*
+  /**
    * Return a pointer to 1 past the end of the allotted data in a message.
    * The allotted data may be less than allocated data if <size()> is passed
    * an argument less than <capacity()>.
@@ -730,7 +730,7 @@ public:
   /// Get the total amount of allocated space.
   size_t capacity (void) const;
 
-  /*
+  /**
    * Return an exact "deep copy" of the message, i.e., create fresh
    * new copies of all the Data_Blocks and continuations.
    * Notice that Data_Blocks can act as "Prototypes", i.e. derived
@@ -739,7 +739,7 @@ public:
    */
   virtual ACE_Data_Block *clone (ACE_Message_Block::Message_Flags mask = 0) const;
 
-  /*
+  /**
    * As clone above, but it does not copy the contents of the buffer,
    * i.e., create a new Data_Block of the same dynamic type, with the
    * same allocator, locking_strategy, and with the same amount of
@@ -753,7 +753,7 @@ public:
   /// Return a "shallow" copy that increments our reference count by 1.
   ACE_Data_Block *duplicate (void);
 
-  /*
+  /**
    * Decrease the shared reference count by 1.  If the reference count
    * is > 0 then return this; else if reference count == 0 then delete
    * @c this and @a mb and return 0.  Behavior is undefined if reference
@@ -799,7 +799,7 @@ protected:
   /// Internal get the current reference count.
   int reference_count_i (void) const;
 
-  /*
+  /**
    * Decrease the reference count, but don't delete the object.
    * Returns 0 if the object should be removed.
    * If @a lock is equal to the locking strategy then we assume that
@@ -826,14 +826,14 @@ protected:
   char *base_;
 
   // = Strategies.
-  /*
+  /**
    * Pointer to the allocator defined for this ACE_Data_Block.  Note
    * that this pointer is shared by all owners of this
    * ACE_Data_Block.
    */
   ACE_Allocator *allocator_strategy_;
 
-  /*
+  /**
    * Pointer to the locking strategy defined for this
    * ACE_Data_Block.  This is used to protect regions of code that
    * access shared ACE_Data_Block state.  Note that this lock is
@@ -841,7 +841,7 @@ protected:
    */
   ACE_Lock *locking_strategy_;
 
-  /*
+  /**
    * Reference count for this ACE_Data_Block, which is used to avoid
    * deep copies (i.e., <clone>).  Note that this pointer value is
    * shared by all owners of the <Data_Block>'s data, i.e., all the

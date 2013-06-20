@@ -1,4 +1,4 @@
-/*
+/**
   @file Matrix3.h
  
   3x3 matrix class
@@ -31,7 +31,7 @@ namespace G3D {
 
 class Any;
 
-/*
+/**
   3x3 matrix.  Do not subclass.
  */
 class Matrix3 {
@@ -75,14 +75,14 @@ public:
     /** Returns true if column(0).cross(column(1)).dot(column(2)) > 0. */
     bool isRightHanded() const;
 
-    /*
+    /**
      Sets all elements.
      */
     void set(float fEntry00, float fEntry01, float fEntry02,
              float fEntry10, float fEntry11, float fEntry12,
              float fEntry20, float fEntry21, float fEntry22);
 
-    /*
+    /**
      * member access, allows use of construct mat[r][c]
      */
     inline float* operator[] (int iRow) {
@@ -131,7 +131,7 @@ public:
     Matrix3& operator-= (const Matrix3& rkMatrix);
     Matrix3& operator*= (const Matrix3& rkMatrix);
 
-    /*
+    /**
      * matrix * vector [3x3 * 3x1 = 3x1]
      */
     inline Vector3 operator* (const Vector3& v) const {
@@ -148,13 +148,13 @@ public:
     }
 
 
-    /*
+    /**
      * vector * matrix [1x3 * 3x3 = 1x3]
      */
     friend Vector3 operator* (const Vector3& rkVector,
                               const Matrix3& rkMatrix);
 
-    /*
+    /**
      * matrix * scalar
      */
     Matrix3 operator* (float fScalar) const;
@@ -227,7 +227,7 @@ public:
     void qDUDecomposition (Matrix3& rkQ, Vector3& rkD,
                            Vector3& rkU) const;
 
-    /*
+    /**
        Polar decomposition of a matrix. Based on pseudocode from Nicholas J
        Higham, "Computing the Polar Decomposition -- with Applications Siam
        Journal of Science and Statistical Computing, Vol 7, No. 4, October
@@ -269,7 +269,7 @@ public:
 
     static Matrix3 fromAxisAngle(const Vector3& rkAxis, float fRadians);
 
-    /*
+    /**
      * The matrix must be orthonormal.  The decomposition is yaw*pitch*roll
      * where yaw is rotation about the Up vector, pitch is rotation about the
      * right axis, and roll is rotation about the Direction axis.

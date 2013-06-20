@@ -1,4 +1,4 @@
-/*
+/**
    @file PointHashGrid.h
 
    @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -192,7 +192,7 @@ public:
         m_invCellWidth = 1.0f / m_cellWidth;
     }
 
-    /*
+    /**
        If radiusHint is negative, it is automatically chosen to put 
        about 5 values in each grid cell (which means about 27 * 5 
        values for each beginIntersection call).
@@ -754,7 +754,7 @@ public:
     ///////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////
 
-    /*
+    /**
        Dereference to access the bounds() and size() [element count] of the underlying
        cell objet.
 

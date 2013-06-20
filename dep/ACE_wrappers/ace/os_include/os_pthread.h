@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    os_pthread.h
  *
  *  threads
@@ -325,7 +325,7 @@
 
 // This needs to be moved out of here.
 #include /**/ "ace/ACE_export.h"
-/*
+/**
  * @class ACE_sema_t
  *
  * @brief This is used to implement semaphores for platforms that support

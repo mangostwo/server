@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    TLI_Acceptor.h
  *
  *  $Id: TLI_Acceptor.h 82723 2008-09-16 09:35:44Z johnnyw $
@@ -32,7 +32,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_TLI_Request_Queue;
 class ACE_Time_Value;
 
-/*
+/**
  * @class ACE_TLI_Acceptor
  *
  * @brief Defines the member functions for ACE_TLI_Acceptor abstraction.
@@ -72,7 +72,7 @@ public:
 
   // = Passive connection acceptance method.
 
-  /*
+  /**
    * Accept a new data transfer connection.  A @a timeout of 0 means
    * block forever, a @a timeout of {0, 0} means poll.  <restart> == 1
    * means "restart if interrupted."

@@ -29,7 +29,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_POSIX_Wakeup_Completion
  *
  * This result object is used by the <end_event_loop> of the
@@ -562,7 +562,7 @@ ACE_POSIX_Proactor::get_impl_type (void)
 }
 
 
-/*
+/**
  * @class ACE_AIOCB_Notify_Pipe_Manager
  *
  * @brief This class manages the notify pipe of the AIOCB Proactor.

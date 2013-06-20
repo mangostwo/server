@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    POSIX_Proactor.h
  *
  *  $Id: POSIX_Proactor.h 80826 2008-03-04 14:51:23Z wotte $
@@ -38,7 +38,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_POSIX_Proactor
  *
  * @brief POSIX implementation of the Proactor.
@@ -106,7 +106,7 @@ public:
   /// Close down the Proactor.
   virtual int close (void);
 
-  /*
+  /**
    * Dispatch a single set of events.  If @a wait_time elapses before
    * any events occur, return 0.  Return 1 on success i.e., when a
    * completion is dispatched, non-zero (-1) on errors and errno is
@@ -114,7 +114,7 @@ public:
    */
   virtual int handle_events (ACE_Time_Value &wait_time) = 0;
 
-  /*
+  /**
    * Block indefinitely until at least one event is dispatched.
    * Dispatch a single set of events.Return 1 on success i.e., when a
    * completion is dispatched, non-zero (-1) on errors and errno is
@@ -122,7 +122,7 @@ public:
    */
   virtual int handle_events (void) = 0;
 
-  /*
+  /**
    * Post a result to the completion port of the Proactor.  If errors
    * occur, the result will be deleted by this method.  If successful,
    * the result will be deleted by the Proactor when the result is
@@ -283,7 +283,7 @@ protected:
   /// Constructor.
   ACE_POSIX_Proactor (void);
 
-  /*
+  /**
    * Protect against structured exceptions caused by user code when
    * dispatching handles. The <completion_key> is not very useful
    * compared to <AST> that can be associated each asynchronous
@@ -295,7 +295,7 @@ protected:
                                   const void *completion_key,
                                   u_long error);
 
-  /*
+  /**
    * Post <how_many> completions to the completion port so that all
    * threads can wake up. This is used in conjunction with the
    * <run_event_loop>.
@@ -317,7 +317,7 @@ private:
 // Forward declarations.
 class ACE_AIOCB_Notify_Pipe_Manager;
 
-/*
+/**
  * @class ACE_POSIX_AIOCB_Proactor
  *
  * @brief This Proactor makes use of Asynchronous I/O Control Blocks
@@ -350,7 +350,7 @@ public:
   /// Close down the Proactor.
   virtual int close (void);
 
-  /*
+  /**
    * Dispatch a single set of events.  If @a wait_time elapses before
    * any events occur, return 0.  Return 1 on success i.e., when a
    * completion is dispatched, non-zero (-1) on errors and errno is
@@ -358,7 +358,7 @@ public:
    */
   virtual int handle_events (ACE_Time_Value &wait_time);
 
-  /*
+  /**
    * Block indefinitely until at least one event is dispatched.
    * Dispatch a single set of events.  If @a wait_time elapses before
    * any events occur, return 0.  Return 1 on success i.e., when a
@@ -373,7 +373,7 @@ public:
   virtual int start_aio (ACE_POSIX_Asynch_Result *result,
                          ACE_POSIX_Proactor::Opcode op);
 
-  /*
+  /**
    * This method should be called from
    * ACE_POSIX_Asynch_Operation::cancel()
    * instead of usual ::aio_cancel.
@@ -418,7 +418,7 @@ protected:
   /// To identify requests from Notify_Pipe_Manager
   void set_notify_handle (ACE_HANDLE h);
 
-  /*
+  /**
    * Dispatch a single set of events.  If <milli_seconds> elapses
    * before any events occur, return 0. Return 1 if a completion
    * dispatched. Return -1 on errors.
@@ -495,7 +495,7 @@ protected:
 };
 
 #if defined(ACE_HAS_POSIX_REALTIME_SIGNALS)
-/*
+/**
  * @class ACE_POSIX_SIG_Proactor
  *
  * @brief This Proactor implementation does completion event detection using
@@ -508,7 +508,7 @@ protected:
 class ACE_Export ACE_POSIX_SIG_Proactor : public ACE_POSIX_AIOCB_Proactor
 {
 
-  /*
+  /**
    * This class does the registering of Asynch Operations with the
    * Proactor which is necessary in the SIG strategy, because we need
    * to store the signal number.
@@ -516,7 +516,7 @@ class ACE_Export ACE_POSIX_SIG_Proactor : public ACE_POSIX_AIOCB_Proactor
   friend class ACE_POSIX_SIG_Asynch_Operation;
 
 public:
-  /*
+  /**
    * This constructor masks only the <ACE_SIGRTMIN>
    * real-time signal. Only this signal should be used to issue
    * asynchronous operations using this Proctor.
@@ -525,7 +525,7 @@ public:
 
   virtual Proactor_Type get_impl_type (void);
 
-  /*
+  /**
    * This constructor should be used to tell the Proactor to mask and
    * wait for the real-time signals specified in this set. Only these
    * signals should be used by the asynchronous operations when they
@@ -537,7 +537,7 @@ public:
   /// Destructor.
   virtual ~ACE_POSIX_SIG_Proactor (void);
 
-  /*
+  /**
    * Dispatch a single set of events.  If @a wait_time elapses before
    * any events occur, return 0.  Return 1 on success i.e., when a
    * completion is dispatched, non-zero (-1) on errors and errno is
@@ -545,7 +545,7 @@ public:
    */
   virtual int handle_events (ACE_Time_Value &wait_time);
 
-  /*
+  /**
    * Block indefinitely until at least one event is dispatched.
    * Dispatch a single set of events.  If <wait_time> elapses before
    * any events occur, return 0.  Return 1 on success i.e., when a
@@ -558,7 +558,7 @@ public:
   /// now it is implemented in base ACE_POSIX_AIOCB_Proactor class
   ///virtual int post_completion (ACE_POSIX_Asynch_Result *result);
 
-  /*
+  /**
    * If @a signal_number is -1, check with the Proactor and use one of
    * the signals that is present in the mask set (i.e., the signals for
    * which the Proactor will be waiting) of the Proactor. If there are
@@ -579,7 +579,7 @@ protected:
   /// Insures that RT_completion_signals_ are blocked in the calling thread.
   int block_signals (void) const;
 
-  /*
+  /**
    * Dispatch a single set of events.  @a timeout is a pointer to a
    * relative time representing the maximum amount of time to wait for
    * an event to occur. If 0, wait indefinitely.
@@ -597,7 +597,7 @@ protected:
   /// called from post_completion method
   virtual int notify_completion (int sig_num);
 
-  /*
+  /**
    * These signals are used for completion notification by the
    * Proactor. The signals specified while issuing asynchronous
    * operations are stored here in this set. These signals are masked
@@ -609,7 +609,7 @@ protected:
 
 #endif /* ACE_HAS_POSIX_REALTIME_SIGNALS */
 
-/*
+/**
  * @class ACE_POSIX_Asynch_Timer
  *
  * @brief This class is posted to the completion port when a timer

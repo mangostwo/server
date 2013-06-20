@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Ping_Socket.h
  *
  *  $Id: Ping_Socket.h 81737 2008-05-20 09:46:39Z johnnyw $
@@ -30,7 +30,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_INET_Addr;
 
-/*
+/**
  * @class ACE_Ping_Socket
  *
  * @brief This class is useful to perform ICMP echo checks (pinging)

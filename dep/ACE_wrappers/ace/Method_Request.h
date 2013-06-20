@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Method_Request.h
  *
  *  $Id: Method_Request.h 80826 2008-03-04 14:51:23Z wotte $
@@ -27,7 +27,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Method_Request
  *
  * @brief Reifies a method into a request.  Subclasses must provide
@@ -57,7 +57,7 @@ public:
   unsigned long priority (void) const;
 
   /// Set priority.
-  /*
+  /**
    * Priority values are user-defined. The default (set in the constructor)
    * is 0. The priority value is used in the ACE_Activation_Queue::enqueue()
    * method to order the method requests in the queue by priority.
@@ -71,7 +71,7 @@ public:
 
   // = Invocation method (must be overridden by subclasses).
   /// Invoked by the scheduler to execute the request.
-  /*
+  /**
    * This method must be implemented by the subclass to perform the
    * desired actions.
    *

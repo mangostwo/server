@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //====================================================================
-/*
+/**
  *  @file    Service_Config.h
  *
  *  $Id: Service_Config.h 89501 2010-03-17 08:59:56Z vzykov $
@@ -96,7 +96,7 @@ extern "C"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Static_Svc_Descriptor
  *
  * @brief Holds the information necessary to describe a statically linked
@@ -135,7 +135,7 @@ public:
 };
 
 
-/*
+/**
  * @class ACE_Threading_Helper
  *
  * @brief Encapsulates responsibility for allocating, destroying and
@@ -187,7 +187,7 @@ public:
 
 #define ACE_Component_Config ACE_Service_Config
 
-/*
+/**
  * @class ACE_Service_Config
  *
  * @brief Supplies common server operations for dynamic and static
@@ -237,7 +237,7 @@ public:
 
   // = Initialization and termination methods.
 
-  /*
+  /**
    * Initialize the Service Repository. Note that initialising @a
    * signum to a negative number will prevent a signal handler being
    * registered when the repository is opened.
@@ -246,7 +246,7 @@ public:
                       size_t size = ACE_DEFAULT_SERVICE_REPOSITORY_SIZE,
                       int signum = SIGHUP);
 
-  /*
+  /**
    * Performs an open without parsing command-line arguments.  The
    * @a logger_key indicates where to write the logging output, which
    * is typically either a STREAM pipe or a socket address.
@@ -260,7 +260,7 @@ public:
 
 private:
 
-  /*
+  /**
    * Performs an open without parsing command-line arguments.
    * Implements whats different in the opening sequence
    * for this class, as opposed to the base class.
@@ -279,7 +279,7 @@ private:
                       bool ignore_default_svc_conf_file,
                       bool ignore_debug_flag);
 
-  /*
+  /**
    * Implements whats different in the command line parameter processing
    * for this class, as opposed to the base class.
    */
@@ -288,13 +288,13 @@ private:
   /// = Static interfaces
 
  public:
- /*
+ /**
    * Returns the process-wide global singleton instance. It would
    * have been created and will be managed by the Object Manager.
    */
   static ACE_Service_Config* singleton (void);
 
-  /*
+  /**
    * Mutator for the currently active configuration context instance
    * (gestalt). Intended for use by helper classes like @see
    * ACE_Service_Config_Guard. Stack-based instances can be used to
@@ -303,12 +303,12 @@ private:
    */
   static void current (ACE_Service_Gestalt*);
 
-  /*
+  /**
    * Accessor for the "current" service gestalt
    */
   static ACE_Service_Gestalt* current (void);
 
-  /*
+  /**
    * This is what the static service initializators are hard-wired to
    * use, so in order to avoid interface changes this method merely
    * forwards to @c ACE_Service_Config::current. This enables us to
@@ -321,7 +321,7 @@ private:
    */
   static ACE_Service_Gestalt* instance (void);
 
-  /*
+  /**
    * Returns a process-wide global singleton instance in contrast with
    * current (), which may return a different instance at different
    * times, dependent on the context. Modifying this method's return
@@ -331,7 +331,7 @@ private:
    */
   static ACE_Service_Gestalt* global (void);
 
-  /*
+  /**
    * Performs an open without parsing command-line arguments.  The
    * @a logger_key indicates where to write the logging output, which
    * is typically either a STREAM pipe or a socket address.  If
@@ -351,7 +351,7 @@ private:
                    bool ignore_default_svc_conf_file = false,
                    bool ignore_debug_flag = false);
 
-  /*
+  /**
    * This is the primary entry point into the ACE_Service_Config (the
    * constructor just handles simple initializations).  It parses
    * arguments passed in from @a argc and @a argv parameters.  The
@@ -477,7 +477,7 @@ private:
   /// been resumed (e.g., a static service).
   static int resume (const ACE_TCHAR svc_name[]);
 
-  /*
+  /**
    * Suspend @a svc_name.  Note that this will not unlink the service
    * from the daemon if it was dynamically linked, it will mark it as
    * being suspended in the Service Repository and call the <suspend>
@@ -518,7 +518,7 @@ private:
   /// a string.  Returns the number of errors that occurred.
   static int process_directive (const ACE_TCHAR directive[]);
 
-  /*
+  /**
    * Process one static service definition.  Load a new static service
    * into the ACE_Service_Repository.
    *
@@ -533,7 +533,7 @@ private:
   static int process_directive (const ACE_Static_Svc_Descriptor &ssd,
                                 bool force_replace = false);
 
-  /*
+  /**
    * Process (or re-process) service configuration requests that are
    * provided in the svc.conf file(s).  Returns the number of errors
    * that occurred.
@@ -543,7 +543,7 @@ private:
   /// Handles signals to trigger reconfigurations.
   static void handle_signal (int sig, siginfo_t *, ucontext_t *);
 
-  /*
+  /**
    * Handle the command-line options intended for the
    * ACE_Service_Config.  Note that @c argv[0] is assumed to be the
    * program name.
@@ -654,7 +654,7 @@ private:
   friend class ACE_Threading_Helper <ACE_Null_Mutex>;
 };
 
-/*
+/**
  * @class ACE_Service_Config_Guard
  *
  * @brief A guard class, designed to be instantiated on the stack.

@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -339,6 +339,7 @@ void AuctionHouseMgr::LoadAuctions()
         return;
     }
 
+    //                                       0  1       2        3             4          5                     6         7           8    9         10      11      12       13
     result = CharacterDatabase.Query("SELECT id,houseid,itemguid,item_template,item_count,item_randompropertyid,itemowner,buyoutprice,time,moneyTime,buyguid,lastbid,startbid,deposit FROM auction");
     if (!result)
     {

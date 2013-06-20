@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    Shared_Object.h
  *
  *  $Id: Shared_Object.h 81348 2008-04-14 09:00:32Z johnnyw $
@@ -25,7 +25,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Shared_Object
  *
  * @brief Provide the abstract base class used to access dynamic

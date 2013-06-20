@@ -37,7 +37,7 @@
 
 namespace G3D {
 
-/*
+/**
  Constant for passing to Array::resize
  */
 const bool DONT_SHRINK_UNDERLYING_ARRAY = false;
@@ -47,7 +47,7 @@ const int SORT_INCREASING = 1;
 /** Constant for Array::sort */
 const int SORT_DECREASING = -1;
 
-/*
+/**
  \brief Dynamic 1D array tuned for performance.
 
  Objects must have a default constructor (constructor that
@@ -122,7 +122,7 @@ private:
         }
     }
 
-    /*
+    /**
      Returns true iff address points to an element of this array.
      Used by append.
      */
@@ -137,7 +137,7 @@ private:
     }
 
 
-    /*
+    /**
      Allocates a new array of size numAllocated (not a parameter to the method) 
      and then copies at most oldNum elements from the old array to it.  Destructors are
      called for oldNum elements of the old array.
@@ -179,7 +179,7 @@ private:
 
 public:
 
-    /*
+    /**
      G3D C++ STL style iterator variable.  Call begin() to get 
      the first iterator, pre-increment (++i) the iterator to get to
      the next value.  Use dereference (*i) to access the element.
@@ -199,7 +199,7 @@ public:
     /** stl porting compatibility helper */
     typedef int difference_type;
 
-    /*
+    /**
      C++ STL style iterator method.  Returns the first iterator element.
      Do not change the size of the array while iterating.
      */
@@ -210,7 +210,7 @@ public:
     ConstIterator begin() const {
         return data;
     }
-    /*
+    /**
      C++ STL style iterator method.  Returns one after the last iterator
      element.
      */
@@ -222,7 +222,7 @@ public:
         return data + num;
     }
 
-   /*
+   /**
     The array returned is only valid until the next append() or resize call, or 
 	the Array is deallocated.
     */
@@ -230,7 +230,7 @@ public:
        return data;
    }
 
-   /*
+   /**
     The array returned is only valid until the next append() or resize call, or 
 	the Array is deallocated.
     */
@@ -286,7 +286,7 @@ public:
     }
 
 
-   /*
+   /**
     Copy constructor
     */
     Array(const Array& other) : num(0) {
@@ -294,7 +294,7 @@ public:
        debugAssert(num >= 0);
    }
 
-   /*
+   /**
     Destructor does not delete() the objects if T is a pointer type
     (e.g. T = int*) instead, it deletes the <B>pointers themselves</B> and 
     leaves the objects.  Call deleteAll if you want to dealocate
@@ -314,7 +314,7 @@ public:
        numAllocated = 0;
    }
 
-   /*
+   /**
     Removes all elements.  Use resize(0, false) or fastClear if you want to 
     remove all elements without deallocating the underlying array
     so that future append() calls will be faster.
@@ -335,7 +335,7 @@ public:
        clear(false);
    }
 
-   /*
+   /**
     Assignment operator.
     */
    Array& operator=(const Array& other) {
@@ -359,14 +359,14 @@ public:
        return m_memoryManager;
    }
 
-   /*
+   /**
     Number of elements in the array.
     */
    inline int size() const {
       return num;
    }
 
-   /*
+   /**
     Number of elements in the array.  (Same as size; this is just
     here for convenience).
     */
@@ -374,7 +374,7 @@ public:
       return size();
    }
 
-   /*
+   /**
     Swaps element index with the last element in the array then
     shrinks the array by one.
     */
@@ -386,7 +386,7 @@ public:
    }
 
 
-   /*
+   /**
     Inserts at the specified index and shifts all other elements up by one.
     */
    void insert(int n, const T& value) {
@@ -488,7 +488,7 @@ public:
       }
    }
 
-    /*
+    /**
      Add an element to the end of the array.  Will not shrink the underlying array
      under any circumstances.  It is safe to append an element that is already
      in the array.
@@ -583,7 +583,7 @@ public:
         }
     }
 
-    /*
+    /**
      Returns true if the given element is in the array.
      */
     bool contains(const T& e) const {
@@ -596,7 +596,7 @@ public:
         return false;
     }
 
-   /*
+   /**
     Append the elements of array.  Cannot be called with this array
     as an argument.
     */
@@ -612,7 +612,7 @@ public:
        }
    }
 
-   /*
+   /**
     Pushes a new element onto the end and returns its address.
     This is the same as A.resize(A.size() + 1, false); A.last()
     */
@@ -621,7 +621,7 @@ public:
        return last();
    }
 
-   /*
+   /**
     Pushes an element onto the end (appends)
     */
    inline void push(const T& value) {
@@ -688,7 +688,7 @@ public:
        return (*this)[size()-1];
    }
 
-   /*
+   /**
     Removes the last element and returns it.  By default, shrinks the underlying array.
     */
    inline T pop(bool shrinkUnderlyingArrayIfNecessary = true) {
@@ -706,7 +706,7 @@ public:
    }
 
 
-   /*
+   /**
     "The member function swaps the controlled sequences between *this and str."
     Note that this is slower than the optimal std implementation.
 
@@ -719,7 +719,7 @@ public:
    }
 
 
-   /*
+   /**
     Performs bounds checks in debug mode
     */
    inline T& operator[](int n) {
@@ -733,7 +733,7 @@ public:
         return data[n];
    }
 
-   /*
+   /**
     Performs bounds checks in debug mode
     */
     inline const T& operator[](int n) const {
@@ -760,7 +760,7 @@ public:
         return data[iRandom(0, num - 1)];
     }
 
-    /*
+    /**
     Returns the last element, performing a check in
     debug mode that there is at least one element.
     */
@@ -817,7 +817,7 @@ public:
         return data[num >> 1];   
     }
 
-    /*
+    /**
     Calls delete on all objects[0...size-1]
     and sets the size to zero.
     */
@@ -828,7 +828,7 @@ public:
         resize(0);
     }
 
-    /*
+    /**
      Returns the index of (the first occurance of) an index or -1 if
      not found.  Searches from the right.
      */
@@ -841,7 +841,7 @@ public:
         return -1;
     }
 
-    /*
+    /**
      Returns the index of (the first occurance of) an index or -1 if
      not found.
      */
@@ -854,7 +854,7 @@ public:
         return -1;
     }
 
-    /*
+    /**
      Finds an element and returns the iterator to it.  If the element
      isn't found then returns end().
      */
@@ -876,7 +876,7 @@ public:
         return end();
     }
 
-    /*
+    /**
      Removes count elements from the array
      referenced either by index or Iterator.
      */
@@ -900,7 +900,7 @@ public:
         remove(begin() + index, count);
     }
 
-    /*
+    /**
      Reverse the elements of the array in place.
      */
     void reverse() {
@@ -914,7 +914,7 @@ public:
         }
     }
 
-    /*
+    /**
      Sort using a specific less-than function, e.g.:
 
   <PRE>
@@ -951,7 +951,7 @@ return( lhs < rhs? true : false );
         std::sort(data, data + num, lessThan);
     }
 
-    /*
+    /**
      Sorts the array in increasing order using the > or < operator.  To 
      invoke this method on Array<T>, T must override those operator.
      You can overide these operators as follows:
@@ -972,7 +972,7 @@ return( lhs < rhs? true : false );
         }
     }
 
-    /*
+    /**
      Sorts elements beginIndex through and including endIndex.
      */
     void sortSubArray(int beginIndex, int endIndex, int direction = SORT_INCREASING) {
@@ -987,7 +987,7 @@ return( lhs < rhs? true : false );
         std::sort(data + beginIndex, data + endIndex + 1, lessThan);
     }
 
-    /*
+    /**
      The StrictWeakOrdering can be either a class that overloads the function call operator() or
      a function pointer of the form <code>bool (__cdecl *lessThan)(const T& elem1, const T& elem2)</code>
      */
@@ -1062,7 +1062,7 @@ return( lhs < rhs? true : false );
         }
     }
 
-    /*
+    /**
       Uses < and == on elements to perform a partition.  See partition().
      */
     void partition(
@@ -1222,7 +1222,7 @@ return( lhs < rhs? true : false );
         partition(median, ltMedian, eqMedian, gtMedian, comparator);
     }
 
-    /*
+    /**
       Computes a median partition using the default comparator and a dynamically allocated temporary 
       working array.  If the median is not in the array, it is chosen to be the largest value smaller
       than the true median.

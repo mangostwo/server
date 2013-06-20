@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    Manual_Event.h
  *
  *  $Id: Manual_Event.h 91066 2010-07-12 11:05:04Z johnnyw $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Manual_Event
  *
  * @brief Manual Events.

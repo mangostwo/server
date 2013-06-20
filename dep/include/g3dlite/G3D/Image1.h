@@ -1,4 +1,4 @@
-/*
+/**
   @file Image1.h
 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -20,7 +20,7 @@ namespace G3D {
 
 typedef ReferenceCountedPointer<class Image1> Image1Ref;
 
-/*
+/**
  Luminance image with 32-bit floating point storage.
 
  See also G3D::Image1uint8, G3D::GImage.

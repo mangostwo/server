@@ -1,6 +1,6 @@
 // -*- C++ -*-
 
-/*
+/**
  * This is a configuration file to define all the macros that Doxygen
  * needs
  *

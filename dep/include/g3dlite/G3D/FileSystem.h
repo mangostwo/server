@@ -1,4 +1,4 @@
-/*
+/**
  @file FileSystem.h
  
  @author Morgan McGuire, http://graphics.cs.williams.edu
@@ -193,7 +193,7 @@ private:
         return ! isDirectory(path);
     }
     
-    /*
+    /**
     \param srcPath Must name a file.
     \param dstPath Must not contain a zipfile.
 
@@ -423,7 +423,7 @@ public:
     /** Convert all slashes to '/' */
     static std::string canonicalize(std::string x);
 
-    /*
+    /**
       Parses a filename into four useful pieces.
 
       Examples:
@@ -455,7 +455,7 @@ public:
      std::string&        ext);
 
 
-    /*
+    /**
       Returns true if \a path matches \a pattern, with standard filesystem wildcards.
      */
     static bool matches(const std::string& path, const std::string& pattern, bool caseSensitive = true);

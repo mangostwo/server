@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Message_Queue_Vx.h
  *
  *  $Id: Message_Queue_Vx.h 91743 2010-09-13 18:24:51Z johnnyw $
@@ -31,7 +31,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Message_Queue_Vx
  *
  * @brief Wrapper for VxWorks message queues.
@@ -83,32 +83,32 @@ public:
   virtual ~ACE_Message_Queue_Vx (void);
 
   // = Queue statistic methods.
-  /*
+  /**
    * Number of total bytes on the queue, i.e., sum of the message
    * block sizes.
    */
   virtual size_t message_bytes (void);
 
-  /*
+  /**
    * Number of total length on the queue, i.e., sum of the message
    * block lengths.
    */
   virtual size_t message_length (void);
 
-  /*
+  /**
    * Number of total messages on the queue.
    */
   virtual size_t message_count (void);
 
   // = Manual changes to these stats (used when queued message blocks
   // change size or lengths).
-  /*
+  /**
    * New value of the number of total bytes on the queue, i.e., sum of
    * the message block sizes.
    */
   virtual void message_bytes (size_t new_size);
 
-  /*
+  /**
    * New value of the number of total length on the queue, i.e., sum
    * of the message block lengths.
    */

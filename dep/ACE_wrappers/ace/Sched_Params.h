@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Sched_Params.h
  *
  *  $Id: Sched_Params.h 80826 2008-03-04 14:51:23Z wotte $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Sched_Params
  *
  * @brief Container for scheduling-related parameters.
@@ -109,7 +109,7 @@ public:
   static int priority_max (const Policy,
                            const int scope = ACE_SCOPE_THREAD);
 
-  /*
+  /**
    * The next higher priority.  "Higher" refers to scheduling priority,
    * not to the priority value itself.  (On some platforms, higher scheduling
    * priority is indicated by a lower priority value.)  If "priority" is
@@ -120,7 +120,7 @@ public:
                             const int priority,
                             const int scope = ACE_SCOPE_THREAD);
 
-  /*
+  /**
    * The previous, lower priority.  "Lower" refers to scheduling priority,
    * not to the priority value itself.  (On some platforms, lower scheduling
    * priority is indicated by a higher priority value.)  If "priority" is
@@ -139,7 +139,7 @@ private:
   /// or thread, as indicated by the scope_ parameter.
   ACE_Sched_Priority priority_;
 
-  /*
+  /**
    * <scope_> must be one of the following:
    *   ACE_SCOPE_PROCESS:  sets the scheduling policy for the
    *     process, and the process priority.  On some platforms,
@@ -157,7 +157,7 @@ private:
    */
   int scope_;
 
-  /*
+  /**
    * The <quantum_> is for time slicing.  An ACE_Time_Value of 0 has
    * special significance: it means time-slicing is disabled; with
    * that, a thread that is running on a CPU will continue to run
@@ -168,7 +168,7 @@ private:
   ACE_Time_Value quantum_;
 };
 
-/*
+/**
  * @class ACE_Sched_Priority_Iterator
  *
  * @brief An iterator over the OS-defined scheduling priorities.
@@ -214,7 +214,7 @@ private:
   /// The current priority.
   int priority_;
 
-  /*
+  /**
    * This is set to 1 when there are no more priorities. Cannot easily
    * compare against the highest priority on platforms were priorities
    * are non-contigous or descending.

@@ -1,4 +1,4 @@
-/*
+/**
   @file ReferenceCount.cpp
 
   Reference Counting Garbage Collector for C++

@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/*
+/**
  *  @file    DEV_Connector.h
  *
  *  $Id: DEV_Connector.h 82723 2008-09-16 09:35:44Z johnnyw $
@@ -25,7 +25,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_DEV_Connector
  *
  * @brief Defines an active connection factory for the ACE_DEV wrappers.
@@ -36,7 +36,7 @@ public:
   /// Default constructor.
   ACE_DEV_Connector (void);
 
-  /*
+  /**
    * Actively connect and produce a @a new_io if things go well.
    * The @a remote_sap is the address that we are trying to connect
    * with.  The @a timeout is the amount of time to wait to connect.
@@ -61,7 +61,7 @@ public:
                      int flags = O_RDWR,
                      int perms = 0);
 
-  /*
+  /**
    * Actively connect and produce a @a new_io if things go well.
    * The @a remote_sap is the address that we are trying to connect
    * with.  The @a timeout is the amount of time to wait to connect.

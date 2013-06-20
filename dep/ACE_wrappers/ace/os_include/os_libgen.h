@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    os_libgen.h
  *
  *  definitions for pattern matching functions

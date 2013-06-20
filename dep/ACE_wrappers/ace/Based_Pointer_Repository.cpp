@@ -9,7 +9,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Based_Pointer_Repository_Rep
  *
  * @brief Implementation for the ACE_Based_Pointer_Repository.

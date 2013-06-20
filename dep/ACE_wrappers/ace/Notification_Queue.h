@@ -3,7 +3,7 @@
 
 #include /**/ "ace/pre.h"
 
-/*
+/**
  *  @file Notification_Queue.h
  *
  *  $Id: Notification_Queue.h 80826 2008-03-04 14:51:23Z wotte $
@@ -18,7 +18,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Notification_Queue_Node
  *
  * @brief Helper class
@@ -27,33 +27,33 @@ class ACE_Export ACE_Notification_Queue_Node
   : public ACE_Intrusive_List_Node<ACE_Notification_Queue_Node>
 {
 public:
-  /*
+  /**
    * @brief Constructor
    */
   ACE_Notification_Queue_Node();
 
-  /*
+  /**
    * @brief Modifier change the contained buffer
    */
   void set(ACE_Notification_Buffer const & rhs);
 
-  /*
+  /**
    * @brief Accessor, fetch the contained buffer
    */
   ACE_Notification_Buffer const & get() const;
 
-  /*
+  /**
    * @brief Checks if the event handler matches the purge condition
    */
   bool matches_for_purging(ACE_Event_Handler * eh) const;
 
-  /*
+  /**
    * @brief Return true if clearing the mask would leave no
    * notifications to deliver.
    */
   bool mask_disables_all_notifications(ACE_Reactor_Mask mask);
 
-  /*
+  /**
    * @brief Clear the notifications specified by @c mask
    */
   void clear_mask(ACE_Reactor_Mask mask);
@@ -62,7 +62,7 @@ private:
   ACE_Notification_Buffer contents_;
 };
 
-/*
+/**
  * @class ACE_Notification_Queue
  *
  * @brief Implements a user-space queue to send Reactor notifications.
@@ -83,17 +83,17 @@ public:
   ACE_Notification_Queue();
   ~ACE_Notification_Queue();
 
-  /*
+  /**
    * @brief Pre-allocate resources in the queue
    */
   int open();
 
-  /*
+  /**
    * @brief Release all resources in the queue
    */
   void reset();
 
-  /*
+  /**
    * @brief Remove all elements in the queue matching @c eh and @c mask
    *
    * I suggest reading the documentation in ACE_Reactor to find a more
@@ -102,7 +102,7 @@ public:
   int purge_pending_notifications(ACE_Event_Handler * eh,
                                   ACE_Reactor_Mask mask);
 
-  /*
+  /**
    * @brief Add a new notification to the queue
    *
    * @return -1 on failure, 1 if a new message should be sent through
@@ -110,7 +110,7 @@ public:
    */
   int push_new_notification(ACE_Notification_Buffer const & buffer);
 
-  /*
+  /**
    * @brief Extract the next notification from the queue
    *
    * @return -1 on failure, 1 if a message was popped, 0 otherwise
@@ -121,7 +121,7 @@ public:
       ACE_Notification_Buffer & next);
 
 private:
-  /*
+  /**
    * @brief Allocate more memory for the queue
    */
   int allocate_more_buffers();

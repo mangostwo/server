@@ -1,4 +1,4 @@
-/*
+/**
   @file Box2D.h
  
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -23,7 +23,7 @@ typedef class CoordinateFrame CFrame;
 class Rect2D;
 typedef class Rect2D AABox2D;
 
-/*
+/**
    2D oriented box
    @cite http://www.flipcode.com/archives/2D_OBB_Intersection.shtml
  */

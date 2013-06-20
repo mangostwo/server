@@ -20,7 +20,7 @@
     slouken@libsdl.org
 */
 
-/*
+/**
  *  @file SDL_byteorder.h
  *  @deprecated Use SDL_endian.h instead
  */

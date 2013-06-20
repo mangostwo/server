@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    Functor.h
  *
  *  $Id: Functor.h 92069 2010-09-28 11:38:59Z johnnyw $
@@ -47,7 +47,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 // GOF Command Pattern Classes and Template Specializations //
 //////////////////////////////////////////////////////////////
 
-/*
+/**
  * @class ACE_Command_Base
  *
  * @brief Defines an abstract class that allows us to invoke commands
@@ -67,7 +67,7 @@ public:
   /// Virtual destructor.
   virtual ~ACE_Command_Base (void);
 
-  /*
+  /**
    * Invokes the method encapsulated by the command, passing along the
    * passed argument (if any).  Users of classes derived from this
    * class must ensure that the resulting invocation can tolerate a
@@ -88,7 +88,7 @@ template <class TYPE> class ACE_Hash;
 template <class TYPE> class ACE_Equal_To;
 template <class TYPE> class ACE_Less_Than;
 
-/*
+/**
  * @brief Function object for hashing a char
  */
 template<>
@@ -99,7 +99,7 @@ public:
   unsigned long operator () (char t) const;
 };
 
-/*
+/**
  * @brief Function object for hashing a signed char
  */
 template<>
@@ -110,7 +110,7 @@ public:
   unsigned long operator () (signed char t) const;
 };
 
-/*
+/**
  * @brief Function object for hashing an unsigned char
  */
 template<>
@@ -121,7 +121,7 @@ public:
   unsigned long operator () (unsigned char t) const;
 };
 
-/*
+/**
  * @brief Function object for hashing a short number
  */
 template<>
@@ -132,7 +132,7 @@ public:
   unsigned long operator () (short t) const;
 };
 
-/*
+/**
  * @brief Function object for hashing an unsigned short number
  */
 template<>
@@ -143,7 +143,7 @@ public:
   unsigned long operator () (unsigned short t) const;
 };
 
-/*
+/**
  * @brief Function object for hashing an int number
  */
 template<>
@@ -154,7 +154,7 @@ public:
   unsigned long operator () (int t) const;
 };
 
-/*
+/**
  * @brief Function object for hashing an unsigned int number
  */
 template<>
@@ -165,7 +165,7 @@ public:
   unsigned long operator () (unsigned int t) const;
 };
 
-/*
+/**
  * @brief Function object for hashing a long number
  */
 template<>
@@ -176,7 +176,7 @@ public:
   unsigned long operator () (long t) const;
 };
 
-/*
+/**
  * @brief Function object for hashing an unsigned long number
  */
 template<>
@@ -188,7 +188,7 @@ public:
 };
 
 #if !defined (ACE_LACKS_LONGLONG_T) && (ACE_SIZEOF_LONG < 8)
-/*
+/**
  * @brief Function object for hashing a signed 64-bit number
  */
 template<>
@@ -203,7 +203,7 @@ public:
 // We can do this even if ACE_LACKS_UNSIGNEDLONGLONG_T because there's an
 // emulation for it in ACE_U_LongLong.
 #if (ACE_SIZEOF_LONG < 8)
-/*
+/**
  * @brief Function object for hashing an unsigned 64-bit number
  */
 template<>
@@ -215,7 +215,7 @@ public:
 };
 #endif /* ACE_SIZEOF_LONG < 8 */
 
-/*
+/**
  * @brief Function object for hashing a const string
  */
 template<>
@@ -226,7 +226,7 @@ public:
   unsigned long operator () (const char *t) const;
 };
 
-/*
+/**
  * @brief Function object for hashing a string
  */
 template<>
@@ -237,7 +237,7 @@ public:
   unsigned long operator () (const char *t) const;
 };
 
-/*
+/**
  * @brief Function object for hashing a void *
  */
 template<>
@@ -247,7 +247,7 @@ public:
   unsigned long operator () (const void *) const;
 };
 
-/*
+/**
  * @brief Function object for determining whether two const strings are equal.
  */
 template<>
@@ -259,7 +259,7 @@ public:
                    const char *rhs) const;
 };
 
-/*
+/**
  * @brief Function object for determining whether two non-const
  * strings are equal.
  */
@@ -272,7 +272,7 @@ public:
                    const char *rhs) const;
 };
 
-/*
+/**
  * @brief Function object for determining whether two unsigned
  * 16 bit ints are equal.
  */
@@ -285,7 +285,7 @@ public:
                    const ACE_UINT16 rhs) const;
 };
 
-/*
+/**
  * @brief Function object for determining whether two
  * 16 bit ints are equal.
  */
@@ -298,7 +298,7 @@ public:
                    const ACE_INT16 rhs) const;
 };
 
-/*
+/**
  * @brief Function object for determining whether two unsigned
  * 32 bit ints are equal.
  */
@@ -311,7 +311,7 @@ public:
                    const ACE_UINT32 rhs) const;
 };
 
-/*
+/**
  * @brief Function object for determining whether two
  * 32 bit ints are equal.
  */
@@ -324,7 +324,7 @@ public:
                    const ACE_INT32 rhs) const;
 };
 
-/*
+/**
  * @brief Function object for determining whether two unsigned
  * 64 bit ints are equal.
  */
@@ -337,7 +337,7 @@ public:
                    const ACE_UINT64 rhs) const;
 };
 
-/*
+/**
  * @brief Function object for determining whether the first const string
  * is less than the second const string.
  */
@@ -350,7 +350,7 @@ public:
                    const char *rhs) const;
 };
 
-/*
+/**
  * @brief Function object for determining whether the first string
  * is less than the second string.
  */
@@ -366,7 +366,7 @@ public:
 #if defined (ACE_HAS_WCHAR)
 
 #  if ! defined (ACE_LACKS_NATIVE_WCHAR_T)
-/*
+/**
  * @brief Function object for hashing a wchar_t
  */
 template<>
@@ -377,7 +377,7 @@ public:
   unsigned long operator () (wchar_t t) const;
 };
 #  endif /* ACE_LACKS_NATIVE_WCHAR_T */
-/*
+/**
  * @brief Function object for hashing a const string
  */
 template<>
@@ -388,7 +388,7 @@ public:
   unsigned long operator () (const wchar_t *t) const;
 };
 
-/*
+/**
  * @brief Function object for hashing a string
  */
 template<>
@@ -399,7 +399,7 @@ public:
   unsigned long operator () (const wchar_t *t) const;
 };
 
-/*
+/**
  * @brief Function object for determining whether two const strings are equal.
  */
 template<>
@@ -411,7 +411,7 @@ public:
                    const wchar_t *rhs) const;
 };
 
-/*
+/**
  * @brief Function object for determining whether two non-const
  * strings are equal.
  */
@@ -424,7 +424,7 @@ public:
                    const wchar_t *rhs) const;
 };
 
-/*
+/**
  * @brief Function object for determining whether the first const string
  * is less than the second const string.
  */
@@ -437,7 +437,7 @@ public:
                    const wchar_t *rhs) const;
 };
 
-/*
+/**
  * @brief Function object for determining whether the first string
  * is less than the second string.
  */

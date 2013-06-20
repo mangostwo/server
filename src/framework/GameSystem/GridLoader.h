@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -19,7 +19,7 @@
 #ifndef MANGOS_GRIDLOADER_H
 #define MANGOS_GRIDLOADER_H
 
-/*
+/**
   @class GridLoader
   The GridLoader is working in conjuction with the Grid and responsible
   for loading and unloading object-types (one or more) when objects

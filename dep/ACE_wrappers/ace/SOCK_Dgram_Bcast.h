@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    SOCK_Dgram_Bcast.h
  *
  *  $Id: SOCK_Dgram_Bcast.h 80826 2008-03-04 14:51:23Z wotte $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Bcast_Node
  *
  * @brief Linked list of broadcast interfaces.
@@ -48,7 +48,7 @@ public:
   ACE_Bcast_Node *next_;
 };
 
-/*
+/**
  * @class ACE_SOCK_Dgram_Bcast
  *
  * @brief Defines the member functions for the ACE_SOCK datagram
@@ -103,7 +103,7 @@ public:
                 const ACE_Addr &addr,
                 int flags = 0) const;
 
-  /*
+  /**
    * Broadcast an @a iovec of size @a n to @a addr as a datagram (note
    * that addr must be preassigned to the broadcast address of the
    * subnet...)

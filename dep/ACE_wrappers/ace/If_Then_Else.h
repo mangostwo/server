@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    If_Then_Else.h
  *
  *  @c ACE::If_Then_Else traits template based on the @c IfThenElse
@@ -24,7 +24,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace ACE
 {
 
-  /*
+  /**
    * @struct If_Then_Else
    *
    * @brief Compile-time selection of type based on a boolean value.
@@ -54,7 +54,7 @@ namespace ACE
   template <bool C, typename Ta, typename Tb>
   struct If_Then_Else;
 
-  /*
+  /**
    * @struct If_Then_Else
    *
    * @brief Select of type @a Ta if boolean value is @c true.
@@ -68,7 +68,7 @@ namespace ACE
     typedef Ta result_type;
   };
 
-  /*
+  /**
    * @struct If_Then_Else
    *
    * @brief Select of type @a Tb if boolean value is @c false.

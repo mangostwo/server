@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Countdown_Time.h
  *
  *  $Id: Countdown_Time.h 85365 2009-05-18 08:27:42Z johnnyw $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Countdown_Time
  *
  * @brief Keeps track of the amount of elapsed time.

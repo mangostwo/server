@@ -1,4 +1,4 @@
-/*
+/**
  @file RegistryUtil.h
 
  @created 2006-04-06

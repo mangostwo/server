@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  * @file Auto_Update_Starter.h
  *
  * $Id: Auto_Update_Starter.h 85297 2009-05-07 01:40:41Z parsons $
@@ -31,7 +31,7 @@ namespace ACE
 {
   namespace Monitor_Control
   {
-    /*
+    /**
      * @class Auto_Update_Starter
      *
      * @brief Starts reactor event loop that handles registered timers.

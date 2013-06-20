@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    Mem_Map.h
  *
  *  $Id: Mem_Map.h 91066 2010-07-12 11:05:04Z johnnyw $
@@ -30,7 +30,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Mem_Map
  *
  * @brief C++ interface OS memory mapping system call.
@@ -111,7 +111,7 @@ public:
   /// Close down the <handle_> if necessary.
   int close_handle (void);
 
-  /*
+  /**
    * Close down the internal <file_mapping_> if necessary.  This is
    * mostly necessary on Win32, which has a different handle for
    * file-mapping kernel object.
@@ -135,14 +135,14 @@ public:
   /// Unmap the region starting at addr_.
   int unmap (void *addr, ssize_t len);
 
-  /*
+  /**
    * Sync @a len bytes of the memory region to the backing store
    * starting at base_addr_.  If @a len == -1 then sync the whole
    * region.
    */
   int sync (size_t len, int flags = MS_SYNC);
 
-  /*
+  /**
    * Sync the whole memory region to the backing store
    * starting at base_addr_.
    */
@@ -152,13 +152,13 @@ public:
   /// starting at addr_.
   int sync (void *addr, size_t len, int flags = MS_SYNC);
 
-  /*
+  /**
    * Change the protection of the pages of the mapped region to @a prot
    * starting at base_addr_ up to @a len bytes.
    */
   int protect (size_t len, int prot = PROT_RDWR);
 
-  /*
+  /**
    * Change the protection of all the pages of the mapped region to @a prot
    * starting at base_addr_.
    */

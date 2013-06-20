@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -49,7 +49,7 @@ OutdoorPvPMgr::~OutdoorPvPMgr()
         m_scripts[OPVP_ID_##a] = new OutdoorPvP##a();               \
         ++counter;                                                  \
     }
-/*
+/**
    Function which loads all outdoor pvp scripts
  */
 void OutdoorPvPMgr::InitOutdoorPvP()
@@ -123,7 +123,7 @@ OutdoorPvP* OutdoorPvPMgr::GetScriptOfAffectedZone(uint32 zoneId)
     }
 }
 
-/*
+/**
    Function that handles the players which enters a specific zone
 
    @param   player to be handled in the event
@@ -137,7 +137,7 @@ void OutdoorPvPMgr::HandlePlayerEnterZone(Player* player, uint32 zoneId)
         script->HandlePlayerEnterZone(player, false);
 }
 
-/*
+/**
    Function that handles the player who leaves a specific zone
 
    @param   player to be handled in the event
@@ -165,7 +165,7 @@ void OutdoorPvPMgr::Update(uint32 diff)
     m_updateTimer.Reset();
 }
 
-/*
+/**
    Function that gets the capture point slider value
 
    @param   capture point entry

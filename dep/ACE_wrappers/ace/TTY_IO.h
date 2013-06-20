@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    TTY_IO.h
  *
  *  $Id: TTY_IO.h 82271 2008-07-09 09:23:03Z olli $
@@ -21,7 +21,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_TTY_IO
  *
  * @brief Class definitions for platform specific TTY features.

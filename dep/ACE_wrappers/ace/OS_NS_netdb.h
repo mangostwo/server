@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file   OS_NS_netdb.h
  *
  *  $Id: OS_NS_netdb.h 80826 2008-03-04 14:51:23Z wotte $
@@ -85,7 +85,7 @@ namespace ACE_OS
   struct hostent *getipnodebyname (const char *name, int family,
                                    int flags = 0);
 
-  /*
+  /**
    * Get the first adapter found on the machine.
    * @todo: this is really useless except for UUID, move there? dhinton
    */

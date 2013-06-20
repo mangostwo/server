@@ -1,4 +1,4 @@
-/*
+/**
   @file filter.cpp
 
   @author Morgan McGuire, http://graphics.cs.williams.edu

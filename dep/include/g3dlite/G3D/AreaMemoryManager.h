@@ -1,4 +1,4 @@
-/*
+/**
  @file AreaMemoryManager.h
   
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu

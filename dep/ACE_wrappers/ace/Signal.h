@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Signal.h
  *
  *  $Id: Signal.h 80826 2008-03-04 14:51:23Z wotte $
@@ -33,7 +33,7 @@ typedef void (*ACE_Sig_Handler_Ex) (int, siginfo_t *siginfo, ucontext_t *ucontex
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Sig_Set
  *
  * @brief Provide a C++ wrapper for the C sigset_t interface.
@@ -92,7 +92,7 @@ private:
   sigset_t sigset_;
 };
 
-/*
+/**
  * @class ACE_Sig_Action
  *
  * @brief C++ wrapper facade for the @c sigaction struct.
@@ -116,7 +116,7 @@ public:
                   const ACE_Sig_Set &sigmask,
                   int flags = 0);
 
-  /*
+  /**
    * Assigns the various fields of a @c sigaction struct and registers
    * the @a handler to process signal @a signum via the @c sigaction
    * function.
@@ -126,7 +126,7 @@ public:
                   sigset_t *sigmask = 0,
                   int flags = 0);
 
-  /*
+  /**
    * Assigns the various fields of a @c sigaction struct and registers
    * the @a handler to process signal @a signum via the @c sigaction
    * function.
@@ -148,7 +148,7 @@ public:
   // We could as well have it as "signal", but I am nost sure whether
   // that would cause a problem with something else - Bala <bala@cs>
 
-  /*
+  /**
    * Assigns the various fields of a @c sigaction struct and registers
    * the @a handler to process all @a signalss via the @c sigaction
    * function.
@@ -158,7 +158,7 @@ public:
                   const ACE_Sig_Set &sigmask,
                   int flags = 0);
 
-  /*
+  /**
    * Assigns the various fields of a @c sigaction struct and registers
    * the @a handler to process all @a signalss via the @c sigaction
    * function.
@@ -225,7 +225,7 @@ private:
   struct sigaction sa_;
 };
 
-/*
+/**
  * @class ACE_Sig_Guard
  *
  * @brief Hold signals in MASK for duration of a C++ statement block.

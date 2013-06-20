@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -77,6 +77,7 @@ namespace Movement
 
         // add fake Enter_Cycle flag - needed for client-side cyclic movement (client will erase first spline vertex after first cycle done)
         splineflags.enter_cycle = move_spline.isCyclic();
+        // add fake Runmode flag - client has strange issues without that flag
         data << uint32(splineflags & ~MoveSplineFlag::Mask_No_Monster_Move);
 
         if (splineflags.animation)

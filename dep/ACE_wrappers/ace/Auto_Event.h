@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    Auto_Event.h
  *
  *  $Id: Auto_Event.h 91781 2010-09-15 12:49:15Z johnnyw $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Auto_Event
  *
  * @brief Auto Events.

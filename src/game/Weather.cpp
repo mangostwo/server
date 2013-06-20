@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -194,7 +194,7 @@ void Weather::SendFineWeatherUpdateToPlayer(Player* player)
 {
     WorldPacket data(SMSG_WEATHER, (4 + 4 + 1));
 
-    data << (uint32)WEATHER_STATE_FINE << (float)0.0f << uint8(0);
+    data << (uint32)WEATHER_STATE_FINE << (float)0.0f << uint8(0); // no sound
     player->GetSession()->SendPacket(&data);
 }
 
@@ -284,21 +284,21 @@ WeatherState Weather::GetWeatherState() const
 
     switch (m_type)
     {
-        case WEATHER_TYPE_RAIN:
+        case WEATHER_TYPE_RAIN:                             // rain
             if (m_grade < 0.40f)
                 return WEATHER_STATE_LIGHT_RAIN;
             else if (m_grade < 0.70f)
                 return WEATHER_STATE_MEDIUM_RAIN;
             else
                 return WEATHER_STATE_HEAVY_RAIN;
-        case WEATHER_TYPE_SNOW:
+        case WEATHER_TYPE_SNOW:                             // snow
             if (m_grade < 0.40f)
                 return WEATHER_STATE_LIGHT_SNOW;
             else if (m_grade < 0.70f)
                 return WEATHER_STATE_MEDIUM_SNOW;
             else
                 return WEATHER_STATE_HEAVY_SNOW;
-        case WEATHER_TYPE_STORM:
+        case WEATHER_TYPE_STORM:                            // storm
             if (m_grade < 0.40f)
                 return WEATHER_STATE_LIGHT_SANDSTORM;
             else if (m_grade < 0.70f)
@@ -309,7 +309,7 @@ WeatherState Weather::GetWeatherState() const
             return WEATHER_STATE_BLACKRAIN;
         case WEATHER_TYPE_THUNDERS:
             return WEATHER_STATE_THUNDERS;
-        case WEATHER_TYPE_FINE:
+        case WEATHER_TYPE_FINE:                             // fine
         default:
             return WEATHER_STATE_FINE;
     }

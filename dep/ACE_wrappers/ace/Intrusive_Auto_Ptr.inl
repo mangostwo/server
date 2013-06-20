@@ -108,7 +108,7 @@ ACE_Intrusive_Auto_Ptr<X>::ACE_Intrusive_Auto_Ptr (const ACE_Intrusive_Auto_Ptr<
   /// Equality operator that returns @c true if both
   /// ACE_Intrusive_Auto_Ptr objects point to the same underlying
   /// representation. It does not compare the actual pointers.
-  /*
+  /**
    * @note It also returns @c true if both objects have just been
    *       instantiated and not used yet.
    */

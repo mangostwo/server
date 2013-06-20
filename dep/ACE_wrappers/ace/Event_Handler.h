@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //==========================================================================
-/*
+/**
  *  @file    Event_Handler.h
  *
  *  $Id: Event_Handler.h 92345 2010-10-24 12:39:33Z johnnyw $
@@ -35,7 +35,7 @@ class ACE_Process;
 
 typedef unsigned long ACE_Reactor_Mask;
 
-/*
+/**
  * @class ACE_Event_Handler
  *
  * @brief
@@ -113,7 +113,7 @@ public:
   /// Called when an exceptional events occur (e.g., SIGURG).
   virtual int handle_exception (ACE_HANDLE fd = ACE_INVALID_HANDLE);
 
-  /*
+  /**
    * Called when timer expires.  @a current_time represents the current
    * time that the Event_Handler was selected for timeout
    * dispatching and @a act is the asynchronous completion token that
@@ -147,7 +147,7 @@ public:
       ACE_APPLICATION_RESUMES_HANDLER
     };
 
-  /*
+  /**
    * Called to figure out whether the handler needs to resumed by the
    * reactor or the application can take care of it. The default
    * value of 0 would be returned which would allow the reactor to
@@ -173,7 +173,7 @@ public:
   /// Get only the reactor's timer related interface.
   virtual ACE_Reactor_Timer_Interface *reactor_timer_interface (void) const;
 
-  /*
+  /**
    * Used to read from non-socket ACE_HANDLEs in our own thread to
    * work around Win32 limitations that don't allow us to <select> on
    * non-sockets (such as ACE_STDIN).  This is commonly used in
@@ -185,7 +185,7 @@ public:
    */
   static ACE_THR_FUNC_RETURN read_adapter (void *event_handler);
 
-  /*
+  /**
    * Abstracts away from the differences between Win32 and ACE with
    * respect to reading from ACE_STDIN, which is non-<select>'able on
    * Win32.
@@ -203,7 +203,7 @@ public:
   typedef long Reference_Count;
 
   /// Increment reference count on the handler.
-  /*
+  /**
    * This method is called when the handler is registered with the
    * Reactor and when the Reactor makes an upcall on the handler.
    * Reference count is 1 when the handler is created.
@@ -213,7 +213,7 @@ public:
   virtual Reference_Count add_reference (void);
 
   /// Decrement reference count on the handler.
-  /*
+  /**
    * This method is called when the handler is removed from the
    * Reactor and when an upcall made on the handler by the Reactor
    * completes.  Handler is deleted when the reference count reaches
@@ -223,7 +223,7 @@ public:
    */
   virtual Reference_Count remove_reference (void);
 
-  /*
+  /**
    * @class Policy
    *
    * @brief Base class for all handler policies.
@@ -237,7 +237,7 @@ public:
     virtual ~Policy (void);
   };
 
-  /*
+  /**
    * @class Reference_Counting_Policy
    *
    * @brief
@@ -306,7 +306,7 @@ private:
   Reference_Counting_Policy reference_counting_policy_;
 };
 
-/*
+/**
  * @class ACE_Event_Handler_var
  *
  * @brief Auto pointer like class for Event Handlers.
@@ -355,7 +355,7 @@ private:
   ACE_Event_Handler *ptr_;
 };
 
-/*
+/**
  * @class ACE_Notification_Buffer
  *
  * @brief Simple wrapper for passing <ACE_Event_Handler *>s and

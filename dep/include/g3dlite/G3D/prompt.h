@@ -16,7 +16,7 @@
 
 namespace G3D {
 
-/*
+/**
   Prints a prompt to stdout and waits for user input.  The return value is
   the number of the user's choice (the first is 0, if there are no
   choices, returns 0). 
@@ -37,7 +37,7 @@ int prompt(
     int             numChoices,
     bool            useGui);
 
-/*
+/**
   Prints a prompt and waits for user input.  The return value is
   the number of the user's choice (the first is 0, if there are no
   choices, returns 0).
@@ -53,7 +53,7 @@ inline int prompt(
 }
 
 
-/*
+/**
  Displays a GUI prompt with "Ok" as the only choice.
  */
 void msgBox(

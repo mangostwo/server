@@ -1,4 +1,4 @@
-/*
+/**
  @file Vector3int32.cpp
  
  @author Morgan McGuire, http://graphics.cs.williams.edu

@@ -1,4 +1,4 @@
-/*
+/**
   @file Vector2int16.h
   
   @maintainer Morgan McGuire, matrix@brown.edu
@@ -19,7 +19,7 @@
 
 namespace G3D {
 
-/*
+/**
  \class Vector2int16 
  A Vector2 that packs its fields into uint16s.
  */

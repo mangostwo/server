@@ -1,7 +1,7 @@
 /* -*- C-*- */
 
 //=============================================================================
-/*
+/**
  *  @file   FoxReactor.h
  *
  *  $Id: FoxReactor.h 88996 2010-02-15 09:36:07Z johnnyw $
@@ -30,7 +30,7 @@
 
 #include <fx.h>
 
-/*
+/**
  * @class ACE_FoxReactor
  *
  * @brief A Reactor implementation that uses the FOX toolkit (www.fox-toolkit.org)

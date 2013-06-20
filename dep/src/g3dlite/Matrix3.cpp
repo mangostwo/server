@@ -1,4 +1,4 @@
-/*
+/**
  @file Matrix3.cpp
 
  3x3 matrix class

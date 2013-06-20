@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    DLL_Manager.h
  *
  *  $Id: DLL_Manager.h 91064 2010-07-12 10:11:24Z johnnyw $
@@ -34,7 +34,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_DLL_Handle
  *
  * @brief Provides an abstract interface for handling various DLL
@@ -67,7 +67,7 @@ public:
   /// Returns the name of the shared library (without prefixes or suffixes).
   const ACE_TCHAR *dll_name () const;
 
-  /*
+  /**
    * This method opens and dynamically links @a dll_name.  The default
    * mode is @c RTLD_LAZY, which loads identifier symbols but not the
    * symbols for functions, which are loaded dynamically on-demand.
@@ -96,7 +96,7 @@ public:
   /// available, since missing functions in that case aren't really errors.
   void *symbol (const ACE_TCHAR *symbol_name, int ignore_errors = 0);
 
-  /*
+  /**
    * Return the handle to the caller.  If @a become_owner is non-0 then
    * caller assumes ownership of the handle so we decrement the retcount.
    */
@@ -146,7 +146,7 @@ private:
 
 class ACE_Framework_Repository;
 
-/*
+/**
  * @class ACE_DLL_Manager
  *
  * @brief This class is a singleton and serves as a factory and

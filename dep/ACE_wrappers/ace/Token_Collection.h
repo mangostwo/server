@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Token_Collection.h
  *
  *  $Id: Token_Collection.h 91688 2010-09-09 11:21:50Z johnnyw $
@@ -37,7 +37,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Token_Collection
  *
  * @brief Allows atomic token group operations AND
@@ -61,7 +61,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Export ACE_Token_Collection : public ACE_Token_Proxy
 {
 public:
-  /*
+  /**
    * @a debug print out verbose debugging messages. @a name will give a
    * name to the collection.  Collections don't really need names, but
    * are sometimes useful for debugging.
@@ -71,7 +71,7 @@ public:
 
 // Collection Management operations
 
-  /*
+  /**
    * Insert a Token into the collection.  All ACE_Token type
    * operations performed on the collection will also be performed on
    * the new_proxy until it is removed.  Note that no operations
@@ -85,7 +85,7 @@ public:
    */
   int insert (ACE_Token_Proxy &token);
 
-  /*
+  /**
    * Removes the ACE_Token matching the given token_name from the
    * collection.  On success, extract returns 0. On failure
    * (token_name was not in the collection,) extract returns -1.  On
@@ -97,7 +97,7 @@ public:
   /// Returns the proxy if true.  0 otherwise.
   ACE_Token_Proxy *is_member (const ACE_TCHAR *token_name);
 
-  /*
+  /**
    * Is the specified token in the collection?
    * 1, yes.
    * 0, no.
@@ -117,7 +117,7 @@ public:
 //   inserted.  For each one it performs the operation (acquire,
 //   renew, or release).
 
-  /*
+  /**
    * Acquire "atomically" all resources in the collection.  This is
    * only successfull if all tokens in the collection could be
    * acquired.  options contains the blocking semantics, timeout
@@ -151,7 +151,7 @@ public:
   virtual int tryacquire (const ACE_TCHAR *token_name,
                           void (*sleep_hook)(void *) = 0);
 
-  /*
+  /**
    * Renews "atomically" all resources in the collection.  This is
    * only successfull if all tokens in the collection could be
    * renewed.  options contains the blocking semantics, timeout
@@ -170,7 +170,7 @@ public:
                      ACE_Synch_Options &options =
                      ACE_Synch_Options::defaults);
 
-  /*
+  /**
    * Releases "atomically" all resources in the collection.  This is
    * only successfull if all tokens in the collection could be
    * released.  options contains the blocking semantics, timeout

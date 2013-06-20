@@ -20,7 +20,7 @@
     slouken@libsdl.org
 */
 
-/*
+/**
  *  @file SDL_cpuinfo.h
  *  CPU feature detection for SDL
  */

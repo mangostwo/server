@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Select_Reactor_Base.h
  *
  *  $Id: Select_Reactor_Base.h 87252 2009-10-28 20:03:48Z cleeland $
@@ -60,7 +60,7 @@ class ACE_Sig_Handler;
  */
 //@@ REACTOR_SPL_INCLUDE_FORWARD_DECL_ADD_HOOK
 
-/*
+/**
  * @class ACE_Select_Reactor_Handle_Set
  *
  * @brief Track handles we are interested for various events.
@@ -79,7 +79,7 @@ public:
   ACE_Handle_Set ex_mask_;
 };
 
-/*
+/**
  * @class ACE_Event_Tuple
  *
  * @brief An ACE_Event_Handler and its associated ACE_HANDLE.
@@ -115,7 +115,7 @@ public:
 
 };
 
-/*
+/**
  * @class ACE_Select_Reactor_Notify
  *
  * @brief Unblock the ACE_Select_Reactor from its event loop.
@@ -148,7 +148,7 @@ public:
   /// Destroy.
   virtual int close (void);
 
-  /*
+  /**
    * Called by a thread when it wants to unblock the
    * ACE_Select_Reactor.  This wakeups the ACE_Select_Reactor if
    * currently blocked in @c select/poll.  Pass over both the
@@ -195,7 +195,7 @@ public:
   /// unblock us.
   virtual int handle_input (ACE_HANDLE handle);
 
-  /*
+  /**
    * Set the maximum number of times that the
    * ACE_Select_Reactor_Notify::handle_input() method will iterate and
    * dispatch the ACE_Event_Handlers that are passed in via the
@@ -207,7 +207,7 @@ public:
    */
   virtual void max_notify_iterations (int);
 
-  /*
+  /**
    * Get the maximum number of times that the
    * ACE_Select_Reactor_Notify::handle_input() method will iterate and
    * dispatch the ACE_Event_Handlers that are passed in via the
@@ -215,7 +215,7 @@ public:
    */
   virtual int max_notify_iterations (void);
 
-  /*
+  /**
    * Purge any notifications pending in this reactor for the specified
    * ACE_Event_Handler object. If @a eh == 0, all notifications for all
    * handlers are removed (but not any notifications posted just to wake up
@@ -233,21 +233,21 @@ public:
   ACE_ALLOC_HOOK_DECLARE;
 
 protected:
-  /*
+  /**
    * Keep a back pointer to the ACE_Select_Reactor.  If this value
    * if NULL then the ACE_Select_Reactor has been initialized with
    * disable_notify_pipe.
    */
   ACE_Select_Reactor_Impl *select_reactor_;
 
-  /*
+  /**
    * Contains the ACE_HANDLE the ACE_Select_Reactor is listening
    * on, as well as the ACE_HANDLE that threads wanting the
    * attention of the ACE_Select_Reactor will write to.
    */
   ACE_Pipe notification_pipe_;
 
-  /*
+  /**
    * Keeps track of the maximum number of times that the
    * ACE_Select_Reactor_Notify::handle_input() method will iterate and
    * dispatch the ACE_Event_Handlers that are passed in via the
@@ -257,7 +257,7 @@ protected:
   int max_notify_iterations_;
 
 #if defined (ACE_HAS_REACTOR_NOTIFICATION_QUEUE)
-  /*
+  /**
    * @brief A user-space queue to store the notifications.
    *
    * The notification pipe has OS-specific size restrictions.  That
@@ -272,7 +272,7 @@ protected:
 #endif /* ACE_HAS_REACTOR_NOTIFICATION_QUEUE */
 };
 
-/*
+/**
  * @class ACE_Select_Reactor_Handler_Repository
  *
  * @brief Used to map ACE_HANDLEs onto the appropriate
@@ -294,7 +294,7 @@ public:
 
   // = The mapping from <HANDLES> to <Event_Handlers>.
 #ifdef ACE_WIN32
-  /*
+  /**
    * The NT version implements this via a hash map
    * @c ACE_Event_Handler*.  Since NT implements @c ACE_HANDLE
    * as a void * we can't directly index into this array.  Therefore,
@@ -308,7 +308,7 @@ public:
 
   typedef map_type::size_type max_handlep1_type;
 #else
-  /*
+  /**
    * The UNIX version implements this via a dynamically allocated
    * array of @c ACE_Event_Handler* that is indexed directly using
    * the @c ACE_HANDLE value.
@@ -324,7 +324,7 @@ public:
   ACE_Select_Reactor_Handler_Repository (ACE_Select_Reactor_Impl &);
 
   /// Initialize a repository of the appropriate @a size.
-  /*
+  /**
    * On Unix platforms, the size parameter should be as large as the
    * maximum number of file descriptors allowed for a given process.
    * This is necessary since a file descriptor is used to directly
@@ -339,7 +339,7 @@ public:
 
   // = Search structure operations.
 
-  /*
+  /**
    * Return the @c ACE_Event_Handler* associated with @c ACE_HANDLE.
    */
   ACE_Event_Handler * find (ACE_HANDLE handle);
@@ -389,7 +389,7 @@ private:
               map_type::iterator pos,
               ACE_Reactor_Mask mask);
 
-  /*
+  /**
    * @return @c iterator corresponding @c ACE_Event_Handler*
    *         associated with @c ACE_HANDLE.
    */
@@ -409,7 +409,7 @@ private:
   map_type event_handlers_;
 };
 
-/*
+/**
  * @class ACE_Select_Reactor_Handler_Repository_Iterator
  *
  * @brief Iterate through the ACE_Select_Reactor_Handler_Repository.
@@ -453,7 +453,7 @@ private:
   const_base_iterator current_;
 };
 
-/*
+/**
  * @class ACE_Select_Reactor_Impl
  *
  * @brief This class simply defines how Select_Reactor's basic interface
@@ -475,7 +475,7 @@ public:
   friend class ACE_Select_Reactor_Notify;
   friend class ACE_Select_Reactor_Handler_Repository;
 
-  /*
+  /**
    * Purge any notifications pending in this reactor for the specified
    * ACE_Event_Handler object. Returns the number of notifications
    * purged. Returns -1 on error.
@@ -561,7 +561,7 @@ protected:
   /// <select> is interrupted via <EINTR>.
   bool restart_;
 
-  /*
+  /**
    * Position that the main ACE_Select_Reactor thread is requeued in
    * the list of waiters during a <notify> callback.  If this value ==
    * -1 we are requeued at the end of the list.  Else if it's 0 then
@@ -573,7 +573,7 @@ protected:
   /// The original thread that created this Select_Reactor.
   ACE_thread_t owner_;
 
-  /*
+  /**
    * True if state has changed during dispatching of
    * ACE_Event_Handlers, else false.  This is used to determine
    * whether we need to make another trip through the
@@ -581,7 +581,7 @@ protected:
    */
   bool state_changed_;
 
-  /*
+  /**
    * If false then the Reactor will not mask the signals during the event
    * dispatching.  This is useful for applications that do not
    * register any signal handlers and want to reduce the overhead

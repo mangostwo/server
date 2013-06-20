@@ -1,4 +1,4 @@
-/*
+/**
  @file format.h
  
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -20,7 +20,7 @@
 
 namespace G3D {
 
-/*
+/**
   Produces a string from arguments of the style of printf.  This avoids
   problems with buffer overflows when using sprintf and makes it easy
   to use the result functionally.  This function is fast when the resulting
@@ -31,7 +31,7 @@ std::string   __cdecl format(
     const char*                 fmt
     ...) G3D_CHECK_PRINTF_ARGS;
 
-/*
+/**
   Like format, but can be called with the argument list from a ... function.
  */
 std::string vformat(

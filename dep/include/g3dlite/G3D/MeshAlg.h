@@ -1,4 +1,4 @@
-/*
+/**
  @file MeshAlg.h
 
  Indexed Mesh algorithms.
@@ -28,7 +28,7 @@
 
 namespace G3D {
 
-/*
+/**
   Indexed <B>mesh alg</B>orithms.  You have to build your own mesh class.
   <P>
   No mesh class is provided with G3D because there isn't an "ideal" 
@@ -57,7 +57,7 @@ public:
     public:
         Vertex() {}
 
-        /*
+        /**
          Array of edges adjacent to this vertex.
          Let e = edgeIndex[i].  
          edge[(e >= 0) ? e : ~e].vertexIndex[0] == this
@@ -68,14 +68,14 @@ public:
          */
         SmallArray<int, 6>          edgeIndex;
 
-        /*
+        /**
          Returns true if e or ~e is in the edgeIndex list.
          */
         inline bool inEdge(int e) const {
             return edgeIndex.contains(~e) || edgeIndex.contains(e);
         }
 
-        /*
+        /**
          Array of faces containing this vertex.  Faces
          may be listed multiple times if they are degenerate.
         */
@@ -88,21 +88,21 @@ public:
     };
 
 
-    /*
+    /**
      Oriented, indexed triangle.
      */
     class Face {
     public:
         Face();
 
-        /*
+        /**
          Used by Edge::faceIndex to indicate a missing face.
          This is a large negative value.
          */
         static const int        NONE;
 
 
-        /*
+        /**
          Vertices in the face in counter-clockwise order.
          Degenerate faces may include the same vertex multiple times.
          */
@@ -112,7 +112,7 @@ public:
             return contains(vertexIndex, 3, v);
         }
 
-        /*
+        /**
          Edge indices in counter-clockwise order.  Edges are
          undirected, so it is important to know which way 
          each edge is pointing in a face.  This is encoded
@@ -166,7 +166,7 @@ public:
             return contains(vertexIndex, 2, v);
         }
 
-        /*
+        /**
          The edge is directed <B>forward</B> in face 0
          <B>backward</B> in face 1. Face index of MeshAlg::Face::NONE
          indicates a boundary (a.k.a. crack, broken) edge.
@@ -179,7 +179,7 @@ public:
             return contains(faceIndex, 2, f);
         }
 
-        /*
+        /**
          Returns true if either faceIndex is NONE.
          */
         inline bool boundary() const {
@@ -187,7 +187,7 @@ public:
                    (faceIndex[1] == Face::NONE);
         }
 
-        /*
+        /**
          Returns the reversed edge.
          */
         inline Edge reverse() const {
@@ -201,7 +201,7 @@ public:
     };
     
 
-    /*
+    /**
      Convenient for passing around the per-vertex data that changes under
      animation. The faces and edges are needed to interpret 
      these values.
@@ -214,7 +214,7 @@ public:
         /** Vertex normals */
         Array<Vector3>          normalArray;
 
-        /*
+        /**
          Assignment is optimized using SSE.
          */
         Geometry& operator=(const Geometry& src);
@@ -225,7 +225,7 @@ public:
         }
     };
 
-    /*
+    /**
      Given a set of vertices and a set of indices for traversing them
      to create triangles, computes other mesh properties.  
 
@@ -257,7 +257,7 @@ public:
         Array<Edge>&            edgeArray,
         Array<Vertex>&          vertexArray);
 
-    /*
+    /**
      @deprecated Use the other version of computeAdjacency, which takes Array<Vertex>.
      @param facesAdjacentToVertex <I>Output</I> adjacentFaceArray[v] is an array of
                         indices for faces touching vertex index v
@@ -269,7 +269,7 @@ public:
         Array<Edge>&            edgeArray,
         Array< Array<int> >&    facesAdjacentToVertex);
 
-    /*
+    /**
      Computes some basic mesh statistics including: min, max mean and median, 
      edge lengths; and min, mean, median, and max face area.
 
@@ -306,7 +306,7 @@ private:
 
 public:
 
-    /*
+    /**
      Computes tangent and binormal vectors,
      which provide a (mostly) consistent
      parameterization over the surface for
@@ -340,7 +340,7 @@ public:
         Array<Vector3>&         vertexNormalArray,
         Array<Vector3>&         faceNormalArray);
 
-    /*
+    /**
      Vertex normals are weighted by the area of adjacent faces.
      Nelson Max showed this is superior to uniform weighting for
      general meshes in jgt.
@@ -363,7 +363,7 @@ public:
         Geometry&               geometry,
         const Array<int>&       indexArray);
 
-    /*
+    /**
      Computes face normals only.  Significantly faster (especially if
      normalize is false) than computeNormals.
      @see weld
@@ -374,7 +374,7 @@ public:
         Array<Vector3>&                 faceNormals,
         bool                            normalize = true);
 
-    /*
+    /**
      Classifies each face as a backface or a front face relative
      to the observer point P (which is at infinity when P.w = 0).
      A face with normal exactly perpendicular to the observer vector
@@ -395,7 +395,7 @@ public:
         Array<bool>&                    backface,
         const Array<Vector3>&           faceNormals);
 
-    /*
+    /**
      Welds nearby and colocated elements of the <I>oldVertexArray</I> together so that
      <I>newVertexArray</I> contains no vertices within <I>radius</I> of one another.
      Every vertex in newVertexPositions also appears in oldVertexPositions.
@@ -446,7 +446,7 @@ public:
         Array<int>&           toOld,
         double                radius = fuzzyEpsilon);
 
-    /*
+    /**
      Modifies the face, edge, and vertex arrays in place so that
      colocated (within radius) vertices are treated as identical.
      Note that the vertexArray and corresponding geometry will
@@ -482,14 +482,14 @@ public:
         double                radius = fuzzyEpsilon);
 
 
-    /*
+    /**
      Counts the number of edges (in an edge array returned from 
      MeshAlg::computeAdjacency) that have only one adjacent face.
      */
     static int countBoundaryEdges(const Array<Edge>& edgeArray);
 
 
-    /*
+    /**
      Generates an array of integers from start to start + n - 1 that have run numbers
      in series then omit the next skip before the next run.  Useful for turning
      a triangle list into an indexed face set.
@@ -513,7 +513,7 @@ public:
         int                 run     = 1,
         int                 skip    = 0);
 
-    /*
+    /**
      Computes a conservative, near-optimal axis aligned bounding box and sphere. 
 
       @cite The bounding sphere uses the method from J. Ritter. An effcient bounding sphere. In Andrew S. Glassner, editor, Graphics Gems. Academic Press, Boston, MA, 1990.
@@ -524,7 +524,7 @@ public:
     /** Computes bounds for a subset of the vertices.  It is ok if vertices appear more than once in the index array. */
     static void computeBounds(const Array<Vector3>& vertex, const Array<int>& index, class AABox& box, class Sphere& sphere);
     
-    /*
+    /**
      In debug mode, asserts that the adjacency references between the
      face, edge, and vertex array are consistent.
      */
@@ -533,7 +533,7 @@ public:
         const Array<Edge>&      edgeArray,
         const Array<Vertex>&    vertexArray);
 
-    /*
+    /**
      Generates a unit square in the X-Z plane composed of a grid of wCells x hCells
      squares and then transforms it by xform.
 
@@ -660,7 +660,7 @@ public:
 
 protected:
 
-    /*
+    /**
      Helper for computeAdjacency.  If a directed edge with index e already
      exists from i0 to i1 then e is returned.  If a directed edge with index e
      already exists from i1 to i0, ~e is returned (the complement) and

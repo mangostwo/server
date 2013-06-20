@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Message_Queue_NT.h
  *
  *  $Id: Message_Queue_NT.h 82723 2008-09-16 09:35:44Z johnnyw $
@@ -28,7 +28,7 @@
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO)
-/*
+/**
  * @class ACE_Message_Queue_NT
  *
  * @brief Message Queue implementation using IO completion port on NT.
@@ -51,7 +51,7 @@ public:
   // = Initialization and termination methods.
   ACE_Message_Queue_NT (DWORD max_threads = ACE_Message_Queue_Base::DEFAULT_HWM);
 
-  /*
+  /**
    * Initialize the Message Queue by creating a new NT I/O completion
    * port.  The first arguemnt specifies the number of threads
    * released by the MQ that are allowed to run concurrently.  Return
@@ -68,7 +68,7 @@ public:
 
   // = Enqueue and dequeue methods.
 
-  /*
+  /**
    * Enqueue an ACE_Message_Block * at the end of the queue.
    * Returns -1 on failure, else the number of items still on the
    * queue.
@@ -78,7 +78,7 @@ public:
   virtual int enqueue (ACE_Message_Block *new_item,
                        ACE_Time_Value *timeout = 0);
 
-  /*
+  /**
    * Dequeue and return the ACE_Message_Block * at the head of the
    * queue.  Returns -1 on failure, else the number of items still on
    * the queue.
@@ -89,44 +89,44 @@ public:
                        ACE_Time_Value *timeout = 0);
 
   // = Check if queue is full/empty.
-  /*
+  /**
    * Always return false.
    */
 
   virtual bool is_full (void);
-  /*
+  /**
    * True if queue is empty, else false.  Notice the return value is
    * only transient.
    */
   virtual bool is_empty (void);
 
   // = Queue statistic methods (transient.)
-  /*
+  /**
    * Number of total bytes on the queue, i.e., sum of the message
    * block sizes.
    */
   virtual size_t message_bytes (void);
 
-  /*
+  /**
    * Number of total length on the queue, i.e., sum of the message
    * block lengths.
    */
   virtual size_t message_length (void);
 
-  /*
+  /**
    * Number of total messages on the queue.
    */
   virtual size_t message_count (void);
 
   // = Manual changes to these stats (used when queued message blocks
   // change size or lengths).
-  /*
+  /**
    * New value of the number of total bytes on the queue, i.e., sum of
    * the message block sizes.
    */
   virtual void message_bytes (size_t new_size);
 
-  /*
+  /**
    * New value of the number of total length on the queue, i.e., sum
    * of the message block lengths.
    */
@@ -137,7 +137,7 @@ public:
 
   // = Activation control methods.
 
-  /*
+  /**
    * Deactivate the queue and wake up all threads waiting on the queue
    * so they can continue.  No messages are removed from the queue,
    * however.  Any other operations called until the queue is
@@ -148,13 +148,13 @@ public:
    */
   virtual int deactivate (void);
 
-  /*
+  /**
    * Reactivate the queue so that threads can enqueue and dequeue
    * messages again.  Returns the state of the queue before the call.
    */
   virtual int activate (void);
 
-  /*
+  /**
    * Pulse the queue to wake up any waiting threads.  Changes the
    * queue state to PULSED; future enqueue/dequeue operations proceed
    * as in ACTIVATED state.
@@ -208,7 +208,7 @@ private:
   /// Current number of messages in the queue.
   size_t cur_count_;
 
-  /*
+  /**
    * Synchronizer.  This should really be an ACE_Recursive_Thread_Mutex
    * but since this class is only supported on NT, it's okay to use
    * ACE_Thread_Mutex here.

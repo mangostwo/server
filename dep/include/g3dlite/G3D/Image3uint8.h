@@ -1,4 +1,4 @@
-/*
+/**
   @file Image3uint8.h
 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -20,7 +20,7 @@ namespace G3D {
 
 typedef ReferenceCountedPointer<class Image3uint8> Image3uint8Ref;
 
-/*
+/**
  Compact storage for RGB 8-bit per channel images.
 
  See also G3D::Image3, G3D::GImage

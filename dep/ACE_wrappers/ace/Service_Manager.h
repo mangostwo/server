@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Service_Manager.h
  *
  *  $Id: Service_Manager.h 81388 2008-04-23 14:02:05Z johnnyw $
@@ -26,7 +26,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Service_Manager
  *
  * @brief Provide a standard ACE service for managing all the services

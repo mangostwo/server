@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file   Strategies_T.h
  *
  *  $Id: Strategies_T.h 91688 2010-09-09 11:21:50Z johnnyw $
@@ -36,7 +36,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Service_Repository;
 
-/*
+/**
  * @class ACE_Recycling_Strategy
  *
  * @brief Defines the interface (and default implementation) for
@@ -68,7 +68,7 @@ public:
   virtual int prepare_for_recycling (SVC_HANDLER *svc_handler);
 };
 
-/*
+/**
  * @class ACE_Creation_Strategy
  *
  * @brief Defines the interface for specifying a creation strategy for
@@ -104,7 +104,7 @@ public:
   virtual ~ACE_Creation_Strategy (void);
 
   // = Factory method.
-  /*
+  /**
    * Create a SVC_HANDLER with the appropriate creation strategy.  The
    * default behavior of this method is to make a new SVC_HANDLER if
    * @a sh == 0 (passing in the Thread_Manager), else @a sh is
@@ -126,7 +126,7 @@ protected:
   ACE_Reactor *reactor_;
 };
 
-/*
+/**
  * @class ACE_Singleton_Strategy
  *
  * @brief Defines the interface for specifying a creation strategy for
@@ -171,7 +171,7 @@ protected:
   bool delete_svc_handler_;
 };
 
-/*
+/**
  * @class ACE_DLL_Strategy
  *
  * @brief Defines the interface for specifying a creation strategy for
@@ -234,7 +234,7 @@ protected:
   ACE_Service_Repository *svc_rep_;
 };
 
-/*
+/**
  * @class ACE_Concurrency_Strategy
  *
  * @brief Defines the interface for specifying a concurrency strategy
@@ -261,7 +261,7 @@ public:
   ACE_Concurrency_Strategy (int flags = 0);
 
   // = Factory method.
-  /*
+  /**
    * Activate the @a svc_handler with an appropriate concurrency
    * strategy.  The default behavior of this method is to activate the
    * SVC_HANDLER by calling its <open> method (which allows the
@@ -285,7 +285,7 @@ protected:
   int flags_;
 };
 
-/*
+/**
  * @class ACE_Reactive_Strategy
  *
  * @brief Defines the interface for specifying a reactive concurrency
@@ -343,7 +343,7 @@ protected:
   ACE_Reactor_Mask mask_;
 };
 
-/*
+/**
  * @class ACE_Thread_Strategy
  *
  * @brief Defines the interface for specifying a concurrency strategy
@@ -382,7 +382,7 @@ public:
   virtual ~ACE_Thread_Strategy (void);
 
   // = Factory method.
-  /*
+  /**
    * Activate the @a svc_handler with an appropriate concurrency
    * strategy.  This method activates the SVC_HANDLER by first calling
    * its <open> method and then calling its <activate> method to turn
@@ -410,7 +410,7 @@ protected:
   int n_threads_;
 };
 
-/*
+/**
  * @class ACE_Process_Strategy
  *
  * @brief Defines the interface for specifying a concurrency strategy
@@ -449,7 +449,7 @@ public:
   virtual ~ACE_Process_Strategy (void);
 
   // = Factory method.
-  /*
+  /**
    * Activate the @a svc_handler with an appropriate concurrency
    * strategy.  This method activates the SVC_HANDLER by first forking
    * and then calling the @c open() method of the SVC_HANDLER in the
@@ -470,14 +470,14 @@ protected:
   /// Number of processes to spawn.
   size_t n_processes_;
 
-  /*
+  /**
    * This is the @c Acceptor in the parent is listening on.  We need to
    * make sure that we remove it from the Reactor and close it down in
    * the child.
    */
   ACE_Event_Handler *acceptor_;
 
-  /*
+  /**
    * This is the reactor the child is using in conjunction with the
    * acceptor.  We need to remove the acceptor from this reactor
    * in the child.
@@ -485,7 +485,7 @@ protected:
   ACE_Reactor *reactor_;
 };
 
-/*
+/**
  * @class ACE_Accept_Strategy
  *
  * @brief Defines the interface for specifying a passive connection
@@ -552,7 +552,7 @@ protected:
   ACE_PEER_ACCEPTOR_ADDR peer_acceptor_addr_;
 };
 
-/*
+/**
  * @class ACE_Connect_Strategy
  *
  * @brief Defines the interface for specifying an active
@@ -592,7 +592,7 @@ public:
                                    int flags,
                                    int perms);
 
-  /*
+  /**
    * The default behavior delegates to the <connect> method of the
    * <PEER_CONNECTOR::connect>.
    * Please check the documentation in Connector.h for more details.
@@ -617,7 +617,7 @@ protected:
   ACE_PEER_CONNECTOR connector_;
 };
 
-/*
+/**
  * @class ACE_Scheduling_Strategy
  *
  * @brief Defines the interface for specifying how to suspend and
@@ -657,7 +657,7 @@ public:
   virtual void dump (void) const;
 };
 
-/*
+/**
  * @class ACE_Schedule_All_Reactive_Strategy
  *
  * @brief Defines the interface for specifying how to suspend and
@@ -696,7 +696,7 @@ protected:
   ACE_Reactor *reactor_;
 };
 
-/*
+/**
  * @class ACE_Schedule_All_Threaded_Strategy
  *
  * @brief Defines the interface for specifying how to suspend and
@@ -735,7 +735,7 @@ protected:
   ACE_Thread_Manager *thr_mgr_;
 };
 
-/*
+/**
  * @class ACE_NOOP_Creation_Strategy
  *
  * @brief Implements a no-op creation strategy in order to defer
@@ -758,7 +758,7 @@ public:
   virtual int make_svc_handler (SVC_HANDLER *&);
 };
 
-/*
+/**
  * @class ACE_NOOP_Concurrency_Strategy
  *
  * @brief Implements a no-op activation strategy in order to avoid
@@ -814,7 +814,7 @@ protected:
   T t_;
 };
 
-/*
+/**
  * @class ACE_Cached_Connect_Strategy
  *
  * @brief A connection strategy which caches connections to peers
@@ -887,7 +887,7 @@ public:
   /// Template method for preparing the svc_handler for recycling.
   virtual int prepare_for_recycling (SVC_HANDLER *svc_handler);
 
-  /*
+  /**
    * Checks to see if there is already a <SVC_HANDLER> in the cache
    * connected to the <remote_addr>.  If so, we return this pointer.
    * Otherwise we establish the connection, put it into the cache, and
@@ -931,7 +931,7 @@ public:
   /// Mark as closed.
   virtual int mark_as_closed (const void *recycling_act);
 
-  /*
+  /**
    * Mark as closed (non-locking version). This method needs to be public
    * as it is used in the cleanup of handlers where teh locked version causes
    * a deadlock.

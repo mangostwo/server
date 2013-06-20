@@ -50,7 +50,7 @@ typedef struct SDL_version {
 	Uint8 patch;
 } SDL_version;
 
-/*
+/**
  * This macro can be used to fill a version structure with the compile-time
  * version of the SDL library.
  */

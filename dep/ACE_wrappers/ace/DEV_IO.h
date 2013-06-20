@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/*
+/**
  *  @file    DEV_IO.h
  *
  *  $Id: DEV_IO.h 80826 2008-03-04 14:51:23Z wotte $
@@ -32,7 +32,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ACE_Time_Value;
 
-/*
+/**
  * @class ACE_DEV_IO
  *
  * @brief Read/Write operations on Devices.
@@ -56,7 +56,7 @@ public:
   ssize_t send_n (const void *buf,
                   size_t n) const;
 
-  /*
+  /**
    * @name I/O operations
    *
    * Notes on common parameters:
@@ -129,7 +129,7 @@ public:
   /// Recv iovecs via <::readv>.
   ssize_t recv (iovec iov[], size_t n) const;
 
-  /*
+  /**
    * Send N char *ptrs and int lengths.  Note that the char *'s
    * precede the ints (basically, an varargs version of writev).  The
    * count N is the *total* number of trailing arguments, *not* a
@@ -137,7 +137,7 @@ public:
    */
   ssize_t send (size_t n, ...) const;
 
-  /*
+  /**
    * This is an interface to ::readv, that doesn't use the struct
    * iovec explicitly.  The ... can be passed as an arbitrary number
    * of (char *ptr, int len) tuples.  However, the count N is the

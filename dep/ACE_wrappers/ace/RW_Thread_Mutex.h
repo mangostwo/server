@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    RW_Thread_Mutex.h
  *
  *  $Id: RW_Thread_Mutex.h 80826 2008-03-04 14:51:23Z wotte $
@@ -31,7 +31,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_RW_Thread_Mutex
  *
  * @brief Wrapper for readers/writer locks that exist within a process.
@@ -45,7 +45,7 @@ public:
   /// Default dtor.
   ~ACE_RW_Thread_Mutex (void);
 
-  /*
+  /**
    * Conditionally upgrade a read lock to a write lock.  This only
    * works if there are no other readers present, in which case the
    * method returns 0.  Otherwise, the method returns -1 and sets

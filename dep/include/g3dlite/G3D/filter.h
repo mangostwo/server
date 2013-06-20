@@ -1,4 +1,4 @@
-/*
+/**
   @file G3D/filter.h
 
   @author Morgan McGuire, http://graphics.cs.williams.edu
@@ -16,7 +16,7 @@
 #include "G3D/g3dmath.h"
 
 namespace G3D {
-/*
+/**
  Generates a set of 1D gaussian filter coefficients of size N.  The coefficients
  are centered on element (N-1)/2 and have standard deviation given by std.  The coefficients
  are normalized such that the sum across coeff is 1.0.

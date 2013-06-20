@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  * @file Constraint_Visitor.h
  *
  * $Id: Constraint_Visitor.h 86518 2009-08-18 12:30:56Z olli $
@@ -42,7 +42,7 @@ namespace ACE
 {
   namespace Monitor_Control
   {
-    /*
+    /**
      * @class Constraint_Visitor
      *
      * @brief Backend for the non-CORBA ETCL frontend, specific to

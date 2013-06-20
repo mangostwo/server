@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/*
+/**
  * MaNGOSsoap client example
  *
  * a simple example how to invoke commands using SOAP

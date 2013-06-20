@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -170,6 +170,7 @@ void ChatHandler::ShowTriggerTargetListHelper(uint32 id, AreaTrigger const* at, 
 
 void ChatHandler::ShowTriggerListHelper(AreaTriggerEntry const* atEntry)
 {
+
     char const* tavern = sObjectMgr.IsTavernAreaTrigger(atEntry->id) ? GetMangosString(LANG_TRIGGER_TAVERN) : "";
     char const* quest = sObjectMgr.GetQuestForAreaTrigger(atEntry->id) ? GetMangosString(LANG_TRIGGER_QUEST) : "";
 
@@ -974,6 +975,7 @@ bool ChatHandler::HandleGameObjectTurnCommand(char* args)
     obj->SetWorldRotationAngles(z_rot, y_rot, x_rot);
     obj->SaveToDB();
     PSendSysMessage(LANG_COMMAND_TURNOBJMESSAGE, obj->GetGUIDLow(), obj->GetGOInfo()->name, obj->GetGUIDLow());
+
     return true;
 }
 
@@ -2441,6 +2443,7 @@ bool ChatHandler::HandleDeMorphCommand(char* /*args*/)
     if (!target)
         target = m_session->GetPlayer();
 
+
     // check online security
     else if (target->GetTypeId() == TYPEID_PLAYER && HasLowerSecurity((Player*)target))
         return false;
@@ -2840,7 +2843,7 @@ bool ChatHandler::HandleDelTicketCommand(char* args)
     return true;
 }
 
-/*
+/**
  * Add a waypoint to a creature.
  *
  * The user can either select an npc or provide its GUID.
@@ -3006,7 +3009,7 @@ bool ChatHandler::HandleWpAddCommand(char* args)
     return true;
 }                                                           // HandleWpAddCommand
 
-/*
+/**
  * .wp modify emote | spell | text | del | move | add
  *
  * add -> add a WP after the selected visual waypoint
@@ -3400,7 +3403,7 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
     return true;
 }
 
-/*
+/**
  * .wp show info | on | off
  *
  * info -> User has selected a visual waypoint before

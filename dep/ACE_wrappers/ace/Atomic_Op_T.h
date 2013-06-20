@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Atomic_Op_T.h
  *
  *  $Id: Atomic_Op_T.h 92353 2010-10-25 06:34:35Z johnnyw $
@@ -129,7 +129,7 @@ struct ACE_Type_Traits<TYPE*>
   typedef TYPE* parameter_type;
 };
 
-/*
+/**
  * @class ACE_Atomic_Op_Ex
  *
  * @brief Transparently parameterizes synchronization into basic
@@ -219,7 +219,7 @@ public:
   /// Manage copying...
   ACE_Atomic_Op_Ex (ACE_Atomic_Op_Ex<ACE_LOCK, TYPE> const &);
 
-  /*
+  /**
    * Returns a reference to the underlying ACE_LOCK.  This makes it
    * possible to acquire the lock explicitly, which can be useful in
    * some cases if you instantiate the ACE_Atomic_Op_Ex with an
@@ -229,7 +229,7 @@ public:
    */
   ACE_LOCK & mutex (void);
 
-  /*
+  /**
    * Explicitly return @c value_ (by reference).  This gives the user
    * full, unrestricted access to the underlying value.  This method
    * will usually be used in conjunction with explicit access to the
@@ -245,7 +245,7 @@ private:
   TYPE value_;
 };
 
-/*
+/**
  * @class ACE_Atomic_Op
  *
  * @brief Transparently parameterizes synchronization into basic
@@ -324,7 +324,7 @@ public:
   /// Dump the state of an object.
   void dump (void) const;
 
-  /*
+  /**
    * Explicitly return @c value_ (by reference).  This gives the user
    * full, unrestricted access to the underlying value.  This method
    * will usually be used in conjunction with explicit access to the

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file   OS_NS_sys_wait.h
  *
  *  $Id: OS_NS_sys_wait.h 83735 2008-11-14 09:41:52Z johnnyw $
@@ -43,7 +43,7 @@ namespace ACE_OS
   ACE_NAMESPACE_INLINE_FUNCTION
   pid_t wait (int * = 0);
 
-  /*
+  /**
    * Calls @c ::WaitForSingleObject on Win32 and ACE::waitpid ()
    * otherwise.  Returns the passed in @a pid_t on success and -1 on
    * failure.
@@ -58,7 +58,7 @@ namespace ACE_OS
               int wait_options = 0,
               ACE_HANDLE handle = 0);
 
-  /*
+  /**
    * Calls @c ::waitpid on UNIX/POSIX platforms Does not work on VxWorks 5.5.x.
    * On Win32, @a pid is ignored if the @a handle is not equal to 0.
    * Passing the process @a handle is prefer on Win32 because using

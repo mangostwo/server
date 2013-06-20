@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Process_Semaphore.h
  *
  *  $Id: Process_Semaphore.h 86731 2009-09-17 12:23:48Z johnnyw $
@@ -32,7 +32,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Process_Semaphore
  *
  * @brief Wrapper for Dijkstra style general semaphores that work
@@ -48,7 +48,7 @@ public:
                          void * = 0,
                          int max = 0x7FFFFFFF);
 
-  /*
+  /**
    * Explicitly destroy the semaphore.  Note that only one thread
    * should call this method since it doesn't protect against race
    * conditions.
@@ -59,7 +59,7 @@ public:
   /// 0, then decrement it.
   int acquire (void);
 
-  /*
+  /**
    * Conditionally decrement the semaphore if count is greater than 0
    * (i.e., won't block).  Returns -1 on failure.  If we "failed"
    * because someone else already had the lock, @c errno is set to
@@ -70,21 +70,21 @@ public:
   /// Increment the semaphore, potentially unblocking a waiting thread.
   int release (void);
 
-  /*
+  /**
    * Acquire semaphore ownership.  This calls <acquire> and is only
    * here to make the ACE_Process_Semaphore interface consistent
    * with the other synchronization APIs.
    */
   int acquire_read (void);
 
-  /*
+  /**
    * Acquire semaphore ownership.  This calls <acquire> and is only
    * here to make the ACE_Process_Semaphore interface consistent
    * with the other synchronization APIs.
    */
   int acquire_write (void);
 
-  /*
+  /**
    * Conditionally acquire semaphore (i.e., won't block).  This calls
    * <tryacquire> and is only here to make the ACE_Process_Semaphore
    * interface consistent with the other synchronization APIs.
@@ -93,7 +93,7 @@ public:
    */
   int tryacquire_read (void);
 
-  /*
+  /**
    * Conditionally acquire semaphore (i.e., won't block).  This calls
    * <tryacquire> and is only here to make the ACE_Process_Semaphore
    * interface consistent with the other synchronization APIs.
@@ -102,7 +102,7 @@ public:
    */
   int tryacquire_write (void);
 
-  /*
+  /**
    * This is only here to make the ACE_Process_Semaphore
    * interface consistent with the other synchronization APIs.
    * Assumes the caller has already acquired the semaphore using one of
@@ -134,7 +134,7 @@ protected:
 
 template <class T> class ACE_Malloc_Lock_Adapter_T;
 
-/*
+/**
  * @brief Template specialization of ACE_Malloc_Lock_Adapter_T for
  * ACE_Process_Semaphore.
  *

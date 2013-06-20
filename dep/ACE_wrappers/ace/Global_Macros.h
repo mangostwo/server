@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file   Global_Macros.h
  *
  *  $Id: Global_Macros.h 91685 2010-09-09 09:35:14Z johnnyw $
@@ -494,7 +494,7 @@ typedef void (*ACE_Service_Object_Exterminator)(void *);
 //@{
 /// Declare a the data structure required to register a statically
 /// linked service into the service configurator.
-/*
+/**
  * The macro should be used in the header file where the service is
  * declared, its only argument is usually the name of the class that
  * implements the service.
@@ -507,7 +507,7 @@ extern ACE_Static_Svc_Descriptor ace_svc_desc_##SERVICE_CLASS ;
 
 /// As ACE_STATIC_SVC_DECLARE, but using an export macro for NT
 /// compilers.
-/*
+/**
  * NT compilers require the use of explicit directives to export and
  * import symbols from a DLL.  If you need to define a service in a
  * dynamic library you should use this version instead.
@@ -528,7 +528,7 @@ extern EXPORT_NAME##_Export ACE_Static_Svc_Descriptor ace_svc_desc_##SERVICE_CLA
 
 /// Define the data structure used to register a statically linked
 /// service into the Service Configurator.
-/*
+/**
  * The service configurator requires several arguments to build and
  * control an statically linked service, including its name, the
  * factory function used to construct the service, and some flags.
@@ -560,7 +560,7 @@ extern EXPORT_NAME##_Export ACE_Static_Svc_Descriptor ace_svc_desc_##SERVICE_CLA
 ACE_Static_Svc_Descriptor ace_svc_desc_##SERVICE_CLASS = { NAME, TYPE, FN, FLAGS, ACTIVE };
 
 /// Automatically register a service with the service configurator
-/*
+/**
  * In some applications the services must be automatically registered
  * with the service configurator, before main() starts.
  * The ACE_STATIC_SVC_REQUIRE macro defines a class whose constructor
@@ -626,7 +626,7 @@ static ACE_Static_Svc_##SERVICE_CLASS ace_static_svc_##SERVICE_CLASS;
 
 /// Declare the factory method used to create dynamically loadable
 /// services.
-/*
+/**
  * Once the service implementation is dynamically loaded the Service
  * Configurator uses a factory method to create the object.
  * This macro declares such a factory function with the proper
@@ -646,7 +646,7 @@ ACE_MAKE_SVC_CONFIG_FACTORY_NAME(ACE_VERSIONED_NAMESPACE_NAME,SERVICE_CLASS) (AC
 
 /// Define the factory method (and destructor) for a dynamically
 /// loadable service.
-/*
+/**
  * Use with arguments matching ACE_FACTORY_DECLARE.
  * Normally used in the .cpp file that defines the service
  * implementation.
@@ -696,7 +696,7 @@ ACE_MAKE_SVC_CONFIG_FACTORY_NAME(ACE_VERSIONED_NAMESPACE_NAME,SERVICE_CLASS) (AC
 }
 #endif
 
-/*
+/**
  * For service classes scoped within namespaces, use this macro in
  * place of ACE_FACTORY_DEFINE. The third argument in this case is
  * the fully scoped name of the class as it is to be

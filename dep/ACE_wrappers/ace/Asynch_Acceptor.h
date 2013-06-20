@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/*
+/**
  *  @file    Asynch_Acceptor.h
  *
  *  $Id: Asynch_Acceptor.h 91693 2010-09-09 12:57:54Z johnnyw $
@@ -32,7 +32,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
 class ACE_INET_Addr;
 
-/*
+/**
  * @class ACE_Asynch_Acceptor
  *
  * @brief This class is an example of the Acceptor Pattern.  This class
@@ -52,7 +52,7 @@ public:
   /// Virtual destruction
   virtual ~ACE_Asynch_Acceptor (void);
 
-  /*
+  /**
    * @c open starts one or more asynchronous accept requests on a
    * @a address. Each accept operation may optionally read an
    * initial buffer from the new connection when accepted.
@@ -119,7 +119,7 @@ public:
   /// Get the underlying handle.
   virtual ACE_HANDLE get_handle (void) const;
 
-  /*
+  /**
    * Set the underlying listen handle. It is the user's responsibility
    * to make sure that the old listen handle has been appropriately
    * closed and the all outstanding asynchronous operations have
@@ -128,13 +128,13 @@ public:
   virtual int set_handle (ACE_HANDLE handle);
 
   /// This initiates a new asynchronous accept operation.
-  /*
+  /**
    * You need only call this method if the @a reissue_accept argument
    * passed to @c open() was 0.
    */
   virtual int accept (size_t bytes_to_read = 0, const void *act = 0);
 
-  /*
+  /**
    * Cancels all pending accepts operations issued by this object.
    *
    * @note On Windows, only accept operations initiated by the calling thread
@@ -142,7 +142,7 @@ public:
    */
   virtual int cancel (void);
 
-  /*
+  /**
    * Template method to validate peer before service is opened.
    * This method is called after a new connection is accepted if the
    * @a validate_connection argument to @c open() was non-zero or
@@ -166,7 +166,7 @@ public:
                                    const ACE_INET_Addr &remote,
                                    const ACE_INET_Addr& local);
 
-  /*
+  /**
    * Template method for deciding whether to reissue accept.
    *
    * This hook method is called after each accept completes to decide if
@@ -229,7 +229,7 @@ protected:
   /// Return the asynch accept object.
   ACE_Asynch_Accept &asynch_accept (void);
 
-  /*
+  /**
    * This is the template method used to create new handler.
    * Subclasses must overwrite this method if a new handler creation
    * strategy is required.

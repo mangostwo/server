@@ -1,4 +1,4 @@
-/*
+/**
   @file GLight.h
 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -18,7 +18,7 @@
 namespace G3D {
 class Any;
 
-/*
+/**
  A light representation that closely follows the OpenGL light format.
  */
 class GLight  {

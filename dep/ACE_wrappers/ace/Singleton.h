@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file    Singleton.h
  *
  *  $Id: Singleton.h 84273 2009-01-30 12:55:25Z johnnyw $
@@ -30,7 +30,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Singleton
  *
  * @brief A Singleton Adapter uses the Adapter pattern to turn ordinary
@@ -108,7 +108,7 @@ protected:
   static ACE_Singleton<TYPE, ACE_LOCK> *&instance_i (void);
 };
 
-/*
+/**
  * @class ACE_Unmanaged_Singleton
  *
  * @brief Same as ACE_Singleton, except does _not_ register with
@@ -151,7 +151,7 @@ protected:
   static ACE_Unmanaged_Singleton<TYPE, ACE_LOCK> *&instance_i (void);
 };
 
-/*
+/**
  * @class ACE_TSS_Singleton
  *
  * @brief This class uses the Adapter pattern to turn ordinary classes
@@ -202,7 +202,7 @@ protected:
   static ACE_TSS_Singleton<TYPE, ACE_LOCK> *&instance_i (void);
 };
 
-/*
+/**
  * @class ACE_Unmanaged_TSS_Singleton
  *
  * @brief Same as ACE_TSS_Singleton, except does _not_ register with
@@ -241,7 +241,7 @@ protected:
   static ACE_Unmanaged_TSS_Singleton<TYPE, ACE_LOCK> *&instance_i (void);
 };
 
-/*
+/**
  * @class ACE_DLL_Singleton_T
  *
  * @brief Same as ACE_Singleton, except that it registers for

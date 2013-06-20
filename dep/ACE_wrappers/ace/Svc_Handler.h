@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file   Svc_Handler.h
  *
  *  $Id: Svc_Handler.h 81740 2008-05-20 17:56:02Z elliott_c $
@@ -37,7 +37,7 @@ enum ACE_Svc_Handler_Close { NORMAL_CLOSE_OPERATION = 0x00,
                              CLOSE_DURING_NEW_CONNECTION = 0x01
                            };
 
-/*
+/**
  * @class ACE_Svc_Handler
  *
  * @brief Defines the interface for a service that exchanges data with
@@ -62,7 +62,7 @@ public:
   typedef ACE_PEER_STREAM_ADDR addr_type;
   typedef ACE_PEER_STREAM      stream_type;
 
-  /*
+  /**
    * Constructor initializes the @a thr_mgr and @a mq by passing them
    * down to the ACE_Task base class.  The @a reactor is passed to
    * the ACE_Event_Handler.
@@ -78,7 +78,7 @@ public:
   /// ACE_Acceptor or ACE_Connector.
   virtual int open (void * = 0);
 
-  /*
+  /**
    * Object termination hook -- application-specific cleanup code goes
    * here. This function is called by the idle() function if the object
    * does not have a ACE_Connection_Recycling_Strategy associated with it.
@@ -89,14 +89,14 @@ public:
    */
   virtual int close (u_long flags = 0);
 
-  /*
+  /**
    * Call this method if you want to recycling the @c Svc_Handler
    * instead of closing it. If the object does not have a recycler,
    * it will be closed.
    */
   virtual int idle (u_long flags = 0);
 
-  /*
+  /**
    * Call this method if you want to get/set the state of the
    * @c Svc_Handler.  If the object does not have a recycler, this call
    * will have no effect (and the accessor will return
@@ -105,7 +105,7 @@ public:
   virtual ACE_Recyclable_State recycle_state (void) const;
   virtual int recycle_state (ACE_Recyclable_State new_state);
 
-  /*
+  /**
    * When the svc_handle is no longer needed around as a hint, call
    * this method. In addition, reset @c *act_holder to zero if
    * @a act_holder != 0.
@@ -127,7 +127,7 @@ public:
 
   // = Demultiplexing hooks.
 
-  /*
+  /**
    * Perform termination activities on the SVC_HANDLER.  The default
    * behavior is to close down the <peer_> (to avoid descriptor leaks)
    * and to <destroy> this object (to avoid memory leaks)!  If you
@@ -171,7 +171,7 @@ public:
   /// This operator permits "placement new" on a per-object basis.
   void * operator new (size_t n, void *p);
 
-  /*
+  /**
    * Call this to free up dynamically allocated <Svc_Handlers>
    * (otherwise you will get memory leaks).  In general, you should
    * call this method rather than <delete> since this method knows
@@ -180,7 +180,7 @@ public:
    */
   virtual void destroy (void);
 
-  /*
+  /**
    * This really should be private so that users are forced to call
    * <destroy>.  Unfortunately, the C++ standard doesn't allow there
    * to be a public new and a private delete.  It is a bad idea to
@@ -190,7 +190,7 @@ public:
   void operator delete (void *);
 
 #if !defined (ACE_LACKS_PLACEMENT_OPERATOR_DELETE)
-  /*
+  /**
    * This operator is necessary to complement the class-specific
    * operator new above.  Unfortunately, it's not portable to all C++
    * compilers...
@@ -224,7 +224,7 @@ public:
   /// Get the recycling act.
   virtual const void *recycling_act (void) const;
 
-  /*
+  /**
    * Upcall made by the recycler when it is about to recycle the
    * connection.  This gives the object a chance to prepare itself for
    * recycling.  Return 0 if the object is ready for recycling, -1 on
@@ -251,7 +251,7 @@ protected:
   const void *recycling_act_;
 };
 
-/*
+/**
  * @class ACE_Buffered_Svc_Handler
  *
  * @brief Defines the interface for a service that exchanges data with
@@ -267,7 +267,7 @@ class ACE_Buffered_Svc_Handler : public ACE_Svc_Handler<ACE_PEER_STREAM_2, ACE_S
 {
 public:
   // = Initialization and termination methods.
-  /*
+  /**
    * Constructor initializes the @a thr_mgr and @a mq by passing them
    * down to the ACE_Task base class.  The @a reactor is passed to
    * the ACE_Event_Handler.  The @a max_buffer_size and
@@ -285,7 +285,7 @@ public:
   /// Destructor, which calls <flush>.
   virtual ~ACE_Buffered_Svc_Handler (void);
 
-  /*
+  /**
    * Insert the ACE_Message_Block chain rooted at @a message_block
    * into the ACE_Message_Queue with the designated @a timeout.  The
    * <flush> method will be called if this <put> causes the number of

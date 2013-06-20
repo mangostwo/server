@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  * @file Windows_Multi_Instance_Monitor.h
  *
  * $Id: Windows_Multi_Instance_Monitor.h 82115 2008-06-20 20:43:13Z parsons $
@@ -31,7 +31,7 @@ namespace ACE
 {
   namespace Monitor_Control
   {
-    /*
+    /**
      * @class Windows_Multi_Instance_Monitor
      *
      * @brief Mixin class for concrete monitors compiled on Windows machines

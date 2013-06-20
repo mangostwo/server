@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //=============================================================================
-/*
+/**
  *  @file     Pagefile_Memory_Pool.h
  *
  *  $Id: Pagefile_Memory_Pool.h 85318 2009-05-11 18:17:14Z johnnyw $
@@ -29,7 +29,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Pagefile_Memory_Pool_Options
  *
  * @brief Helper class for Pagefile Memory Pool constructor options.
@@ -52,7 +52,7 @@ public:
   size_t max_size_;
 };
 
-/*
+/**
  * @class ACE_Pagefile_Memory_Pool
  *
  * @brief Make a memory pool that is based on "anonymous" memory
@@ -83,14 +83,14 @@ public:
   /// Instruct the memory pool to release all of its resources.
   int release (int destroy = 1);
 
-  /*
+  /**
    * Win32 Structural exception selector.  The return value decides
    * how to handle memory pool related structural exceptions.  Returns
    * 1, 0, or , -1.
    */
   virtual int seh_selector (void *);
 
-  /*
+  /**
    * Try to extend the virtual address space so that @a addr is now
    * covered by the address mapping.  The method succeeds and returns
    * 0 if the backing store has adequate memory to cover this address.
@@ -122,7 +122,7 @@ public:
 
 protected:
 
-  /*
+  /**
    * Map portions or the entire pool into the local virtual address
    * space.  To do this, we compute the new @c file_offset of the
    * backing store and commit the memory.
@@ -134,7 +134,7 @@ protected:
 
 private:
 
-  /*
+  /**
    * @class Control_Block
    *
    * @brief Attributes that are meaningful in local storage only.
@@ -148,7 +148,7 @@ private:
     /// Base address returned from system call
     void *mapped_base_;
 
-    /*
+    /**
      * @class Shared_Control_Block
      *
      * @brief Pool statistics

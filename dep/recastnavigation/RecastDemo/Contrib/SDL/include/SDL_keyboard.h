@@ -67,7 +67,7 @@ typedef struct SDL_keysym {
 #define SDL_ALL_HOTKEYS		0xFFFFFFFF
 
 /* Function prototypes */
-/*
+/**
  * Enable/Disable UNICODE translation of keyboard input.
  *
  * This translation has some overhead, so translation defaults off.
@@ -83,7 +83,7 @@ extern DECLSPEC int SDLCALL SDL_EnableUNICODE(int enable);
 
 #define SDL_DEFAULT_REPEAT_DELAY	500
 #define SDL_DEFAULT_REPEAT_INTERVAL	30
-/*
+/**
  * Enable/Disable keyboard repeat.  Keyboard repeat defaults to off.
  *
  *  @param[in] delay
@@ -98,7 +98,7 @@ extern DECLSPEC int SDLCALL SDL_EnableUNICODE(int enable);
 extern DECLSPEC int SDLCALL SDL_EnableKeyRepeat(int delay, int interval);
 extern DECLSPEC void SDLCALL SDL_GetKeyRepeat(int *delay, int *interval);
 
-/*
+/**
  * Get a snapshot of the current state of the keyboard.
  * Returns an array of keystates, indexed by the SDLK_* syms.
  * Usage:
@@ -109,18 +109,18 @@ extern DECLSPEC void SDLCALL SDL_GetKeyRepeat(int *delay, int *interval);
  */
 extern DECLSPEC Uint8 * SDLCALL SDL_GetKeyState(int *numkeys);
 
-/*
+/**
  * Get the current key modifier state
  */
 extern DECLSPEC SDLMod SDLCALL SDL_GetModState(void);
 
-/*
+/**
  * Set the current key modifier state.
  * This does not change the keyboard state, only the key modifier flags.
  */
 extern DECLSPEC void SDLCALL SDL_SetModState(SDLMod modstate);
 
-/*
+/**
  * Get the name of an SDL virtual keysym
  */
 extern DECLSPEC char * SDLCALL SDL_GetKeyName(SDLKey key);

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 //==========================================================================
-/*
+/**
  *  @file    Null_Barrier.h
  *
  *  $Id: Null_Barrier.h 91626 2010-09-07 10:59:20Z johnnyw $
@@ -18,7 +18,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-/*
+/**
  * @class ACE_Null_Barrier
  *
  * @brief Implements "NULL barrier synchronization".

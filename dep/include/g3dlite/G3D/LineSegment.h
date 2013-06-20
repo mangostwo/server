@@ -1,4 +1,4 @@
-/*
+/**
  @file LineSegment.h
   
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -15,7 +15,7 @@
 
 namespace G3D {
 
-/*
+/**
  An finite segment of an infinite 3D line.
  */
 class LineSegment {
@@ -41,7 +41,7 @@ public:
 
     virtual ~LineSegment() {}
 
-    /*
+    /**
      * Constructs a line from two (not equal) points.
      */
     static LineSegment fromTwoPoints(const Vector3 &point1, const Vector3 &point2) {
@@ -55,12 +55,12 @@ public:
         return direction.magnitude();
     }
 
-    /*
+    /**
      * Returns the closest point on the line segment to point.
      */
     Vector3 closestPoint(const Vector3 &point) const;
 
-    /*
+    /**
      Returns the distance between point and the line
      */
     double distance(const Vector3& p) const {

@@ -1,4 +1,4 @@
-/*
+/**
  *  @file    CE_Screen_Output.h
  *
  *  $Id: CE_Screen_Output.h 85385 2009-05-19 10:12:29Z johnnyw $
@@ -16,7 +16,7 @@
 const wchar_t endl[] = L"\r\n";
 const wchar_t tab[]  = L"\t";
 
-/*
+/**
  * @class CE_Screen_Output
  *
  * @brief Replacement of text output for Windows CE.
@@ -32,27 +32,27 @@ const wchar_t tab[]  = L"\t";
 class CE_Screen_Output
 {
 public:
-    /*
+    /**
      * Default Ctor
      */
     CE_Screen_Output();
 
-    /*
+    /**
      * Default Dtor
      */
     virtual ~CE_Screen_Output();
 
-    /*
+    /**
      * Interface to specify active window handle.
      */
     void SetOutputWindow(HWND hWnd);
 
-    /*
+    /**
      * Clears text screen.
      */
     void clear();
 
-    /*
+    /**
      * << operator that performs actual print out.
      *
      * Note: This is the only one operator that performs
@@ -81,14 +81,14 @@ public:
     CE_Screen_Output& operator << (FILE* pFile);
 
 private:
-    /*
+    /**
      * Copy Ctor
      */
     CE_Screen_Output(CE_Screen_Output&);
 
     static HWND handler_;
 
-    /*
+    /**
      * File pointer that used to save output to file.
      * This class does not own the file handler pointer.
      */

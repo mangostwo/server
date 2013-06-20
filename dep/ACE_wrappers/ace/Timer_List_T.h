@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 //=============================================================================
-/*
+/**
  *  @file    Timer_List_T.h
  *
  *  $Id: Timer_List_T.h 80826 2008-03-04 14:51:23Z wotte $
@@ -24,7 +24,7 @@
 template <class TYPE, class FUNCTOR, class ACE_LOCK>
 class ACE_Timer_List_T;
 
-/*
+/**
  * @class ACE_Timer_List_Iterator_T
  *
  * @brief Iterates over an ACE_Timer_List.
@@ -64,7 +64,7 @@ protected:
   ACE_Timer_Node_T<TYPE>* current_node_;
 };
 
-/*
+/**
  * @class ACE_Timer_List_T
  *
  * @brief Provides a simple implementation of timers.
@@ -97,7 +97,7 @@ public:
   typedef ACE_Free_List<Node> FreeList;
 
   // = Initialization and termination methods.
-  /*
+  /**
    * Default constructor. @a upcall_functor is the instance of the
    * FUNCTOR to be used by the list. If @a upcall_functor is 0, a
    * default FUNCTOR will be created.  @a freelist is the freelist of
@@ -115,7 +115,7 @@ public:
   /// Must be called on a non-empty queue.
   virtual const ACE_Time_Value& earliest_time (void) const;
 
-  /*
+  /**
    * Resets the interval of the timer represented by @a timer_id to
    * @a interval, which is specified in relative time to the current
    * <gettimeofday>.  If @a interval is equal to
@@ -125,7 +125,7 @@ public:
   virtual int reset_interval (long timer_id,
                               const ACE_Time_Value& interval);
 
-  /*
+  /**
    * Cancel all timers associated with @a type.  If dont_call_handle_close is 0
    * then the @a functor will be invoked.  Returns the number of timers
    * cancelled.
@@ -133,7 +133,7 @@ public:
   virtual int cancel (const TYPE& type,
                       int dont_call_handle_close = 1);
 
-  /*
+  /**
    * Cancel the single timer that matches the @a timer_id value (which
    * was returned from the <schedule> method).  If act is non-NULL
    * then it will be set to point to the ``magic cookie'' argument
@@ -164,7 +164,7 @@ public:
 
 private:
 
-  /*
+  /**
    * Schedule @a type that will expire at @a future_time, which is
    * specified in absolute time.  If it expires then @a act is passed
    * in as the value to the <functor>.  If @a interval is != to
@@ -202,7 +202,7 @@ private:
   /// Iterator used to expire timers.
   Iterator* iterator_;
 
-  /*
+  /**
    * Keeps track of the timer id that uniquely identifies each timer.
    * This id can be used to cancel a timer via the <cancel(long)>
    * method.

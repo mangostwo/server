@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -55,6 +55,7 @@ static bool MapSessionFilterHelper(WorldSession* session, OpcodeHandler const& o
     // in Map::Update() we do not process packets where player is not in world!
     return plr->IsInWorld();
 }
+
 
 bool MapSessionFilter::Process(WorldPacket* packet)
 {
