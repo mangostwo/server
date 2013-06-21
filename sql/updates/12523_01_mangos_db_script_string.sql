@@ -1,4 +1,4 @@
-ALTER TABLE db_version CHANGE COLUMN required_12507_01_mangos_spell_proc_event required_12522_01_mangos_db_script_string bit;
+ALTER TABLE db_version CHANGE COLUMN required_12507_01_mangos_spell_proc_event required_12523_01_mangos_db_script_string bit;
 
 ALTER TABLE db_script_string ADD COLUMN sound mediumint(8) unsigned NOT NULL DEFAULT '0' AFTER content_loc8;
 ALTER TABLE db_script_string ADD COLUMN type tinyint(3) unsigned NOT NULL DEFAULT '0' AFTER sound;
