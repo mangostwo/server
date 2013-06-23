@@ -87,7 +87,7 @@ fi
 ## MMap Extraction specific
 if [ "$USE_MMAPS" = "1" ]
 then
-  ## Obtain number ob processes
+  ## Obtain number of processes
   echo "How many CPUs should be used for extracting mmaps? (1-4)"
   read line
   echo
