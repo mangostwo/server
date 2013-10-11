@@ -1,8 +1,8 @@
 MaNGOS Two [![Build Status](https://travis-ci.org/mangostwo/server.png)](https://travis-ci.org/mangostwo/server)
 ===========
 *MaNGOS Two* is a full featured server for [World of Warcraft][2], in its WotLK
-version supporting clients from the [patch 3.3.4][50] branch, specifically patch
-3.3.4.
+version supporting clients from the [patch 3.3.5a][50] branch, specifically patch
+3.3.5a.
 
 World of Warcraft, and all World of Warcraft or Warcraft art, images, and lore are
 copyrighted by [Blizzard Entertainment, Inc.][1].
@@ -67,7 +67,7 @@ License
 
 [20]: https://github.com/mangoswiki/Wiki/wiki/MaNGOS%20Installation/ "Wiki"
 
-[50]: http://www.wowpedia.org/Patch_3.3.4 "Vanilla WoW · Patch 3.3.4 release notes"
+[50]: http://www.wowpedia.org/Patch_3.3.5a "Wrath of the Lich King · Patch 3.3.5a release notes"
 
 [100]: http://getmangos.co.uk/ "MaNGOS Community Project Website"
 [101]: http://community.getmangos.co.uk/ "MaNGOS Community Discussion Forums"
