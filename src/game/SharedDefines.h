@@ -185,7 +185,7 @@ enum SpellSchoolMask
     /// not exist
     SPELL_SCHOOL_MASK_NONE    = 0x00,
     /// PHYSICAL (Armor)
-    SPELL_SCHOOL_MASK_NORMAL  = (1 << SPELL_SCHOOL_NORMAL), 
+    SPELL_SCHOOL_MASK_NORMAL  = (1 << SPELL_SCHOOL_NORMAL),
     SPELL_SCHOOL_MASK_HOLY    = (1 << SPELL_SCHOOL_HOLY),
     SPELL_SCHOOL_MASK_FIRE    = (1 << SPELL_SCHOOL_FIRE),
     SPELL_SCHOOL_MASK_NATURE  = (1 << SPELL_SCHOOL_NATURE),
@@ -254,7 +254,7 @@ enum SpellAttributes
     SPELL_ATTR_UNK4                            = 0x00000010,// 4 isAbility
     SPELL_ATTR_TRADESPELL                      = 0x00000020,// 5 trade spells, will be added by client to a sublist of profession spell
     SPELL_ATTR_PASSIVE                         = 0x00000040,// 6 Passive spell
-    SPELL_ATTR_UNK7                            = 0x00000080,// 7 can't be linked in chat?
+    SPELL_ATTR_HIDE_SPELL                      = 0x00000080,// 7 can't be linked in chat?
     SPELL_ATTR_UNK8                            = 0x00000100,// 8 hide created item in tooltip (for effect=24)
     SPELL_ATTR_UNK9                            = 0x00000200,// 9
     SPELL_ATTR_ON_NEXT_SWING_2                 = 0x00000400,// 10 on next swing 2
@@ -1214,7 +1214,7 @@ enum SpellImmunity
 #define MAX_SPELL_IMMUNITY           6
 
 /**
- * The different types of attacks you can do with 
+ * The different types of attacks you can do with
  * weapons
  */
 enum WeaponAttackType
@@ -1224,7 +1224,7 @@ enum WeaponAttackType
     ///Off-hand weapon
     OFF_ATTACK    = 1,
     ///Ranged weapon, bow/wand etc.
-    RANGED_ATTACK = 2  
+    RANGED_ATTACK = 2
 };
 
 #define MAX_ATTACK  3
@@ -1390,7 +1390,7 @@ enum SpellRangeIndex
     /// 5.5 (but dynamic), seems to indicate melee range
     SPELL_RANGE_IDX_COMBAT    = 2,
     /// 500000 (anywhere)
-    SPELL_RANGE_IDX_ANYWHERE  = 13,                         
+    SPELL_RANGE_IDX_ANYWHERE  = 13,
 };
 
 enum DamageEffectType
@@ -1398,11 +1398,11 @@ enum DamageEffectType
     /// Used for normal weapon damage (not for class abilities or spells)
     DIRECT_DAMAGE           = 0,
     /// spell/class abilities damage
-    SPELL_DIRECT_DAMAGE     = 1,                            
+    SPELL_DIRECT_DAMAGE     = 1,
     DOT                     = 2,
     HEAL                    = 3,
     /// used also in case when damage applied to health but not applied to spell channelInterruptFlags/etc
-    NODAMAGE                = 4,                            
+    NODAMAGE                = 4,
     SELF_DAMAGE             = 5
 };
 

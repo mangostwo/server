@@ -443,7 +443,7 @@ enum SpellEffectIndex
 enum SpellFamily
 {
     SPELLFAMILY_GENERIC     = 0,
-    SPELLFAMILY_UNK1        = 1,                            // events, holidays
+    SPELLFAMILY_ENVIRONMENT = 1,                            // events, holidays
     // 2 - unused
     SPELLFAMILY_MAGE        = 3,
     SPELLFAMILY_WARRIOR     = 4,
