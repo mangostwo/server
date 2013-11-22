@@ -946,6 +946,49 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             m_throwAIEventMask = action.setThrowMask.eventTypeMask;
             break;
         }
+        case ACTION_T_SUMMON_UNIQUE:                              //47
+        {
+               Creature* pCreature = NULL;
+
+                MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*m_creature, action.summon_unique.creatureId, true, false, 100, true);
+                MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pCreature, u_check);
+               Cell::VisitGridObjects(m_creature, searcher, 100);
+               WorldObject* pSpawn = NULL;
+                pSpawn = pCreature;
+
+
+            if (!pSpawn)
+            {
+            Unit* target = GetTargetByType(action.summon_unique.target, pActionInvoker, pAIEventSender, reportTargetError);
+            if (!target && reportTargetError)
+                sLog.outErrorEventAI("Event %u - NULL target for ACTION_T_SUMMON_UNIQUE(%u), target-type %u", EventId, action.type, action.summon_unique.target);
+
+            CreatureEventAI_Summon_Map::const_iterator i = sEventAIMgr.GetCreatureEventAISummonMap().find(action.summon_unique.spawnId);
+            if (i == sEventAIMgr.GetCreatureEventAISummonMap().end())
+            {
+                sLog.outErrorEventAI("failed to spawn creature %u. Summon map index %u does not exist. EventID %d. CreatureID %d", action.summon_unique.creatureId, action.summon_unique.spawnId, EventId, m_creature->GetEntry());
+                return;
+            }
+
+            Creature* pCreature = NULL;
+            if ((*i).second.SpawnTimeSecs)
+                pCreature = m_creature->SummonCreature(action.summon_unique.creatureId, (*i).second.position_x, (*i).second.position_y, (*i).second.position_z, (*i).second.orientation, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, (*i).second.SpawnTimeSecs);
+            else
+                pCreature = m_creature->SummonCreature(action.summon_unique.creatureId, (*i).second.position_x, (*i).second.position_y, (*i).second.position_z, (*i).second.orientation, TEMPSUMMON_TIMED_OOC_DESPAWN, 0);
+
+            if (!pCreature)
+                sLog.outErrorEventAI("failed to spawn creature %u. EventId %d.Creature %d", action.summon_unique.creatureId, EventId, m_creature->GetEntry());
+            else if (action.summon_unique.target != TARGET_T_SELF && target)
+                pCreature->AI()->AttackStart(target);
+
+            break;
+            }
+            if (pSpawn)
+            {
+                return;
+            }
+
+        }
     }
 }
 
