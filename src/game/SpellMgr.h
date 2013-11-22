@@ -494,7 +494,7 @@ inline bool IsChanneledSpell(SpellEntry const* spellInfo)
 
 inline bool IsNeedCastSpellAtFormApply(SpellEntry const* spellInfo, ShapeshiftForm form)
 {
-    if ((!spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) && !spellInfo->HasAttribute(SPELL_ATTR_UNK7)) || !form)
+    if ((!spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) && !spellInfo->HasAttribute(SPELL_ATTR_HIDE_SPELL)) || !form)
         return false;
 
     // passive spells with SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT are already active without shapeshift, do no recast!
@@ -662,7 +662,7 @@ enum ProcFlagsEx
     /// If set trigger always but only one time (not used)
     PROC_EX_EX_ONE_TIME_TRIGGER = 0x0020000,
     /// For periodic heal
-    PROC_EX_PERIODIC_POSITIVE   = 0x0040000, 
+    PROC_EX_PERIODIC_POSITIVE   = 0x0040000,
     PROC_EX_CAST_END            = 0x0080000                 // procs on end of cast
 };
 
