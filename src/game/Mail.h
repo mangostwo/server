@@ -204,7 +204,6 @@ class MailDraft
             : m_mailTemplateId(mailTemplateId), m_mailTemplateItemsNeed(need_items), m_money(0), m_COD(0)
         {}
         /**
-        /**
          * Creates a new MailDraft object using subject and content texts.
          *
          * @param subject The subject of the mail.
