@@ -211,7 +211,7 @@ class AiDelayEventAround : public BasicEvent
         uint32 m_miscValue;
 };
 
-void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, uint32 uiDelay, float fRadius, uint32 miscValue /*=0*/) const
+void CreatureAI::SendAIEventAround(AIEventType eventType, Unit* pInvoker, uint32 uiDelay, float fRadius, uint32 miscValue /*=0*/) const
 {
     if (fRadius > 0)
     {
@@ -230,7 +230,7 @@ void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, uint32 uiDel
     }
 }
 
-void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, Creature* pReceiver, uint32 miscValue /*=0*/) const
+void CreatureAI::SendAIEventAround(AIEventType eventType, Unit* pInvoker, Creature* pReceiver, uint32 miscValue /*=0*/) const
 {
     MANGOS_ASSERT(pReceiver);
     pReceiver->AI()->ReceiveAIEvent(eventType, m_creature, pInvoker, miscValue);
