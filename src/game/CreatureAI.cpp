@@ -230,7 +230,7 @@ void CreatureAI::SendAIEventAround(AIEventType eventType, Unit* pInvoker, uint32
     }
 }
 
-void CreatureAI::SendAIEventAround(AIEventType eventType, Unit* pInvoker, Creature* pReceiver, uint32 miscValue /*=0*/) const
+void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, Creature* pReceiver, uint32 miscValue /*=0*/) const
 {
     MANGOS_ASSERT(pReceiver);
     pReceiver->AI()->ReceiveAIEvent(eventType, m_creature, pInvoker, miscValue);
