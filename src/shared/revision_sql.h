@@ -25,6 +25,6 @@
 #ifndef __REVISION_SQL_H__
 #define __REVISION_SQL_H__
 #define REVISION_DB_CHARACTERS "required_12487_01_characters_characters"
-#define REVISION_DB_MANGOS "required_12543_01_mangos_various"
+#define REVISION_DB_MANGOS "required_12545_01_mangos_command"
 #define REVISION_DB_REALMD "required_z2426_01_realmd_relations"
 #endif // __REVISION_SQL_H__
