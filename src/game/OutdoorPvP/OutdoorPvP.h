@@ -24,6 +24,7 @@
 #include "SharedDefines.h"
 #include "OutdoorPvPMgr.h"
 
+// forward declaration
 class WorldPacket;
 class WorldObject;
 class Player;
@@ -49,7 +50,7 @@ typedef std::map < ObjectGuid /*playerGuid*/, bool /*isMainZone*/ > GuidZoneMap;
 
 class OutdoorPvP
 {
-        friend class OutdoorPvPMgr;
+    friend class OutdoorPvPMgr;
 
     public:
         OutdoorPvP() {}

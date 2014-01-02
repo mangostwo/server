@@ -172,19 +172,19 @@ void BattleGroundEY::HandleGameObjectCreate(GameObject* go)
     {
         case GO_CAPTURE_POINT_BLOOD_ELF_TOWER:
             m_towers[NODE_BLOOD_ELF_TOWER] = go->GetObjectGuid();
-            go->SetCapturePointSlider(CAPTURE_SLIDER_MIDDLE);
+            go->SetCapturePointSlider(CAPTURE_SLIDER_MIDDLE, false);
             break;
         case GO_CAPTURE_POINT_FEL_REAVER_RUINS:
             m_towers[NODE_FEL_REAVER_RUINS] = go->GetObjectGuid();
-            go->SetCapturePointSlider(CAPTURE_SLIDER_MIDDLE);
+            go->SetCapturePointSlider(CAPTURE_SLIDER_MIDDLE, false);
             break;
         case GO_CAPTURE_POINT_MAGE_TOWER:
             m_towers[NODE_MAGE_TOWER] = go->GetObjectGuid();
-            go->SetCapturePointSlider(CAPTURE_SLIDER_MIDDLE);
+            go->SetCapturePointSlider(CAPTURE_SLIDER_MIDDLE, false);
             break;
         case GO_CAPTURE_POINT_DRAENEI_RUINS:
             m_towers[NODE_DRAENEI_RUINS] = go->GetObjectGuid();
-            go->SetCapturePointSlider(CAPTURE_SLIDER_MIDDLE);
+            go->SetCapturePointSlider(CAPTURE_SLIDER_MIDDLE, false);
             break;
     }
 }
@@ -561,7 +561,6 @@ WorldSafeLocsEntry const* BattleGroundEY::GetClosestGraveYard(Player* player)
     float plr_x = player->GetPositionX();
     float plr_y = player->GetPositionY();
     float plr_z = player->GetPositionZ();
-
 
     distance = (entry->x - plr_x) * (entry->x - plr_x) + (entry->y - plr_y) * (entry->y - plr_y) + (entry->z - plr_z) * (entry->z - plr_z);
     nearestDistance = distance;
