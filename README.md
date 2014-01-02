@@ -29,7 +29,7 @@ License
 -------
 *MaNGOS Two* is open source, and licensed under the terms of the GNU GPL version 2.
 
-  Copyright (C) 2005-2013  MaNGOS <http://getmangos.co.uk>
+  Copyright (C) 2005-2014  MaNGOS <http://getmangos.co.uk>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
