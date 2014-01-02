@@ -1322,13 +1322,13 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
          */
         float GetCombatReach(Unit const* pVictim, bool forMeleeRange = true, float flat_mod = 0.0f) const;
         /** 
-         * Returns the remaining combat distance between two mobs (CombatReach substracted).
+        /** Returns the remaining combat distance between two mobs (after CombatReach substracted)
          * Does this by getting the radius of combat/aggro between them and then subtracting their
          * actual distance between them. Ie: dist between - radius for aggro. If this becomes less
          * than zero zero is returned and the mobs should probably aggro each other/the player
          * @param target The target to check against
-         * @param forMeleeRange If we want to check melee range instead
-         * @return The reach between them left until one of the creatures could/should aggro
+         * @param forMeleeRange If we want to get the distance for melee combat (if true, CombatReach will at least return ATTACK_DISTANCE)
+         * @return the distance that needs to be considered for all combat related actions (spell-range and similar)
          */
         float GetCombatDistance(Unit const* target, bool forMeleeRange) const;
         /** 
@@ -1346,7 +1346,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
          * Internal function, must only be called from Unit::Attack(Unit*)
          * @param pAttacker The attacker to add to current attackers.
          */
-        void _addAttacker(Unit* pAttacker)                  // must be called only from Unit::Attack(Unit*)
+        void _addAttacker(Unit* pAttacker)                  //< (Internal Use) must be called only from Unit::Attack(Unit*)
         {
             AttackerSet::const_iterator itr = m_attackers.find(pAttacker);
             if (itr == m_attackers.end())
@@ -1356,7 +1356,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
          * Internal function, must only be called from Unit::AttackStop()
          * @param pAttacker 
          */
-        void _removeAttacker(Unit* pAttacker)               // must be called only from Unit::AttackStop()
+        void _removeAttacker(Unit* pAttacker)               //< (Internal Use) must be called only from Unit::AttackStop()
         {
             m_attackers.erase(pAttacker);
         }
@@ -1365,7 +1365,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
          * possible Unit to attack.
          * @return A Unit to attack if this one is being attacked by anyone, NULL otherwise
          */
-        Unit* getAttackerForHelper()                        // If someone wants to help, who to give them
+        Unit* getAttackerForHelper()                        //< Return a possible enemy from this unit to help in combat
         {
             if (getVictim() != NULL)
                 return getVictim();
@@ -1383,8 +1383,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
          * @return True if an attack was initiated, false otherwise
          */
         bool Attack(Unit* victim, bool meleeAttack);
-        /** 
-         * Called when we are attack by someone in someway, might be when a fear runs out and
+        /**
+         * Called when we are attacked by someone in someway, might be when a fear runs out and
          * we want to notify AI to attack again or when a spell hits.
          * @param attacker Who's attacking us
          */
