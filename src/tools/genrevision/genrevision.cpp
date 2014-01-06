@@ -22,9 +22,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef WIN32
-#pragma warning(disable:4996)
-#endif
 
 struct RawData
 {
@@ -32,6 +29,10 @@ struct RawData
     char date_str[200];
     char time_str[200];
 };
+
+#ifdef WIN32
+#pragma warning(disable:4996)
+#endif
 
 void extractDataFromSvn(FILE* EntriesFile, bool url, RawData& data)
 {

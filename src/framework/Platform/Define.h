@@ -97,7 +97,7 @@ typedef ACE_SHLIB_HANDLE MANGOS_LIBRARY_HANDLE;
 #  define MANGOS_INLINE
 #endif //!DEBUG
 
-#if COMPILER == COMPILER_GNU
+#if COMPILER == COMPILER_GNU || COMPILER == COMPILER_CLANG
 #  define ATTR_NORETURN __attribute__((noreturn))
 #  define ATTR_PRINTF(F,V) __attribute__ ((format (printf, F, V)))
 #else // COMPILER != COMPILER_GNU
