@@ -41,13 +41,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "genrevision", "VC110\genrev
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ACE_Wrappers", "VC110\ACE_vc11.vcxproj", "{BD537C9A-FECA-1BAD-6757-8A6348EA12C8}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tbbmalloc", "VC110\tbbmalloc.vcxproj", "{B15F131E-328A-4D42-ADC2-9FF4CA6306D8}"
-	ProjectSection(ProjectDependencies) = postProject
-		{F62787DD-1327-448B-9818-030062BCFAA5} = {F62787DD-1327-448B-9818-030062BCFAA5}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tbb", "VC110\tbb.vcxproj", "{F62787DD-1327-448B-9818-030062BCFAA5}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Detour", "..\dep\recastnavigation\Detour\win\VC110\Detour.vcxproj", "{72BDF975-4D4A-42C7-B2C4-F9ED90A2ABB6}"
 EndProject
 Global
