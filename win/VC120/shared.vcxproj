@@ -496,7 +496,7 @@
     <ClInclude Include="..\..\src\shared\Util.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="ACE_vc11.vcxproj">
+    <ProjectReference Include="ACE_vc12.vcxproj">
       <Project>{bd537c9a-feca-1bad-6757-8a6348ea12c8}</Project>
     </ProjectReference>
     <ProjectReference Include="framework.vcxproj">
