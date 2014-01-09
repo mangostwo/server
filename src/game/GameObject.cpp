@@ -184,6 +184,8 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
         case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
             ForceGameObjectHealth(GetMaxHealth(), NULL);
             break;
+        default:
+            break;
     }
 
     // Notify the battleground or outdoor pvp script
@@ -245,6 +247,8 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     }
                     break;
                 }
+                default:
+                    break;
             }
             break;
         }
@@ -1061,7 +1065,7 @@ void GameObject::Use(Unit* user)
 
             GameObjectInfo const* goInfo = GetGOInfo();
             float radius = float(goInfo->trap.radius);
-            bool IsBattleGroundTrap = !radius && goInfo->trap.cooldown == 3 && m_respawnTime == 0;
+            bool IsBattleGroundTrap = radius == 0.0f && goInfo->trap.cooldown == 3 && m_respawnTime == 0;
 
             // FIXME: when GO casting will be implemented trap must cast spell to target
             if (spellId = goInfo->trap.spellId)

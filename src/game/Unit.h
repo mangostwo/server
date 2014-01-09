@@ -1321,7 +1321,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
          * \see GetFloatValue
          */
         float GetCombatReach(Unit const* pVictim, bool forMeleeRange = true, float flat_mod = 0.0f) const;
-        /** 
         /** Returns the remaining combat distance between two mobs (after CombatReach substracted)
          * Does this by getting the radius of combat/aggro between them and then subtracting their
          * actual distance between them. Ie: dist between - radius for aggro. If this becomes less
