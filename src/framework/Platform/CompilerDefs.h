@@ -42,6 +42,7 @@
 #define COMPILER_GNU       1
 #define COMPILER_BORLAND   2
 #define COMPILER_INTEL     3
+#define COMPILER_CLANG     4
 
 #ifdef _MSC_VER
 #  define COMPILER COMPILER_MICROSOFT
@@ -55,8 +56,10 @@
 #  pragma error "FATAL ERROR: Unknown compiler."
 #endif
 
-#if COMPILER == COMPILER_MICROSOFT
-#  pragma warning( disable : 4267 )                         // conversion from 'size_t' to 'int', possible loss of data
-#  pragma warning( disable : 4786 )                         // identifier was truncated to '255' characters in the debug information
+#if COMPILER == COMPILER_CLANG
+#define COMPILE_ASSERT(exp, name) _Static_assert((exp), #name)
+#else
+#define COMPILE_ASSERT(exp, name) static_assert((exp), #name) 
 #endif
+
 #endif
