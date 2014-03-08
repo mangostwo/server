@@ -754,7 +754,8 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_BATTLEGROUND_INVITATION_TYPE,              "Battleground.InvitationType", 0);
     setConfig(CONFIG_UINT32_BATTLEGROUND_PREMATURE_FINISH_TIMER,       "BattleGround.PrematureFinishTimer", 5 * MINUTE * IN_MILLISECONDS);
     setConfig(CONFIG_UINT32_BATTLEGROUND_PREMADE_GROUP_WAIT_FOR_MATCH, "BattleGround.PremadeGroupWaitForMatch", 30 * MINUTE * IN_MILLISECONDS);
-    setConfig(CONFIG_UINT32_ARENA_MAX_RATING_DIFFERENCE,               "Arena.MaxRatingDifference", 150);
+    setConfigMinMax(CONFIG_UINT32_RANDOM_BG_RESET_HOUR,                "BattleGround.Random.ResetHour", 6, 0, 23);
+	setConfig(CONFIG_UINT32_ARENA_MAX_RATING_DIFFERENCE,               "Arena.MaxRatingDifference", 150);
     setConfig(CONFIG_UINT32_ARENA_RATING_DISCARD_TIMER,                "Arena.RatingDiscardTimer", 10 * MINUTE * IN_MILLISECONDS);
     setConfig(CONFIG_BOOL_ARENA_AUTO_DISTRIBUTE_POINTS,                "Arena.AutoDistributePoints", false);
     setConfig(CONFIG_UINT32_ARENA_AUTO_DISTRIBUTE_INTERVAL_DAYS,       "Arena.AutoDistributeInterval", 7);
@@ -1427,6 +1428,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Calculate next monthly quest reset time...");
     SetMonthlyQuestResetTime();
 
+    sLog.outString("Calculate random battleground reset time...");
+    InitRandomBGResetTime();
+
     sLog.outString("Starting Game Event system...");
     uint32 nextGameEvent = sGameEventMgr.Initialize();
     m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);    // depend on next event
@@ -1518,6 +1522,10 @@ void World::Update(uint32 diff)
     /// Handle monthly quests reset time
     if (m_gameTime > m_NextMonthlyQuestReset)
         ResetMonthlyQuests();
+
+    /// Handle random battlegrounds reset time
+    if (m_gameTime > m_NextRandomBGReset)
+        ResetRandomBG();
 
     /// <ul><li> Handle auctions when the timer has passed
     if (m_timers[WUPDATE_AUCTIONS].Passed())
@@ -2145,6 +2153,36 @@ void World::SetMonthlyQuestResetTime(bool initialize)
     CharacterDatabase.PExecute("UPDATE saved_variables SET NextMonthlyQuestResetTime = '" UI64FMTD "'", uint64(m_NextMonthlyQuestReset));
 }
 
+void World::InitRandomBGResetTime()
+{
+    QueryResult * result = CharacterDatabase.Query("SELECT NextRandomBGResetTime FROM saved_variables");
+    if (!result)
+        m_NextRandomBGReset = time_t(time(NULL));         // game time not yet init
+    else
+        m_NextRandomBGReset = time_t((*result)[0].GetUInt64());
+
+    // generate time by config
+    time_t curTime = time(NULL);
+    tm localTm = *localtime(&curTime);
+    localTm.tm_hour = getConfig(CONFIG_UINT32_RANDOM_BG_RESET_HOUR);
+    localTm.tm_min  = 0;
+    localTm.tm_sec  = 0;
+
+    // current day reset time
+    time_t nextDayResetTime = mktime(&localTm);
+
+    // next reset time before current moment
+    if (curTime >= nextDayResetTime)
+        nextDayResetTime += DAY;
+
+    // normalize reset time
+    m_NextRandomBGReset = m_NextRandomBGReset < curTime ? nextDayResetTime - DAY : nextDayResetTime;
+    if (!result)
+        CharacterDatabase.PExecute("INSERT INTO saved_variables (NextRandomBGResetTime) VALUES ('"UI64FMTD"')", uint64(m_NextRandomBGReset));
+    else
+        delete result;
+}
+
 void World::ResetDailyQuests()
 {
     DETAIL_LOG("Daily quests reset for all characters.");
@@ -2155,6 +2193,18 @@ void World::ResetDailyQuests()
 
     m_NextDailyQuestReset = time_t(m_NextDailyQuestReset + DAY);
     CharacterDatabase.PExecute("UPDATE saved_variables SET NextDailyQuestResetTime = '" UI64FMTD "'", uint64(m_NextDailyQuestReset));
+}
+
+void World::ResetRandomBG()
+{
+    sLog.outDetail("Random BG status reset for all characters.");
+    CharacterDatabase.Execute("DELETE FROM character_battleground_random");
+    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+        if (itr->second->GetPlayer())
+            itr->second->GetPlayer()->SetRandomWinner(false);
+
+    m_NextRandomBGReset = time_t(m_NextRandomBGReset + DAY);
+    CharacterDatabase.PExecute("UPDATE saved_variables SET NextRandomBGResetTime = '"UI64FMTD"'", uint64(m_NextRandomBGReset));
 }
 
 void World::ResetWeeklyQuests()
