@@ -3708,6 +3708,26 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 m_caster->CastCustomSpell(m_caster, 45470, &bp, NULL, NULL, true);
                 return;
             }
+            // Death Grip
+            else if (m_spellInfo->Id == 49576)
+            {
+                if (!unitTarget)
+                    return;
+
+                m_caster->CastSpell(unitTarget, 49560, true);
+                return;
+            }
+            else if (m_spellInfo->Id == 49560)
+            {
+                if (!unitTarget || unitTarget == m_caster)
+                    return;
+
+                uint32 spellId = m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_0);
+                float dest_x, dest_y;
+                m_caster->GetNearPoint2D(dest_x, dest_y, m_caster->GetObjectBoundingRadius() + unitTarget->GetObjectBoundingRadius(), m_caster->GetOrientation());
+                unitTarget->CastSpell(dest_x, dest_y, m_caster->GetPositionZ() + 0.5f, spellId, true, NULL, NULL, m_caster->GetObjectGuid(), m_spellInfo);
+                return;
+            }
             // Obliterate
             else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0002000000000000))
             {
