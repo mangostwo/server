@@ -675,7 +675,7 @@ class World
 
         // next daily quests reset time
         time_t m_NextDailyQuestReset;
-		time_t m_NextRandomBGReset;
+        time_t m_NextRandomBGReset;
         time_t m_NextWeeklyQuestReset;
         time_t m_NextMonthlyQuestReset;
 
