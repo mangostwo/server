@@ -359,7 +359,7 @@ class BattleGround
         void DecreaseInvitedCount(Team team)      { (team == ALLIANCE) ? --m_InvitedAlliance : --m_InvitedHorde; }
         void IncreaseInvitedCount(Team team)      { (team == ALLIANCE) ? ++m_InvitedAlliance : ++m_InvitedHorde; }
         void SetRandom(bool isRandom) { m_IsRandom = isRandom; }
-		uint32 GetInvitedCount(Team team) const
+        uint32 GetInvitedCount(Team team) const
         {
             if (team == ALLIANCE)
                 return m_InvitedAlliance;
