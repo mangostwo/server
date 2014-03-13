@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef MANGOSSERVER_LOG_H
@@ -25,15 +28,22 @@
 class Config;
 class ByteBuffer;
 
+/**
+ * @brief various levels for logging
+ *
+ */
 enum LogLevel
 {
-    LOG_LVL_MINIMAL = 0,                                    // unconditional and errors
+    LOG_LVL_MINIMAL = 0,
     LOG_LVL_BASIC   = 1,
     LOG_LVL_DETAIL  = 2,
     LOG_LVL_DEBUG   = 3
 };
 
-// bitmask (not forgot update logFilterData content)
+/**
+ * @brief bitmask (not forgot update logFilterData content)
+ *
+ */
 enum LogFilters
 {
     LOG_FILTER_TRANSPORT_MOVES    = 0x000001,               //  0 any related to transport moves
@@ -60,15 +70,23 @@ enum LogFilters
 
 #define LOG_FILTER_COUNT            20
 
+/**
+ * @brief
+ *
+ */
 struct LogFilterData
 {
-    char const* name;
-    char const* configName;
-    bool defaultState;
+    char const* name; /**< TODO */
+    char const* configName; /**< TODO */
+    bool defaultState; /**< TODO */
 };
 
-extern LogFilterData logFilterData[LOG_FILTER_COUNT];
+extern LogFilterData logFilterData[LOG_FILTER_COUNT]; /**< TODO */
 
+/**
+ * @brief
+ *
+ */
 enum Color
 {
     BLACK,
@@ -88,135 +106,323 @@ enum Color
     WHITE
 };
 
-const int Color_count = int(WHITE) + 1;
+const int Color_count = int(WHITE) + 1; /**< TODO */
 
+/**
+ * @brief
+ *
+ */
 class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ACE_Thread_Mutex> >
 {
         friend class MaNGOS::OperatorNew<Log>;
+        /**
+         * @brief
+         *
+         */
         Log();
 
+        /**
+         * @brief
+         *
+         */
         ~Log()
         {
             if (logfile != NULL)
-                fclose(logfile);
+                { fclose(logfile); }
             logfile = NULL;
 
             if (gmLogfile != NULL)
-                fclose(gmLogfile);
+                { fclose(gmLogfile); }
             gmLogfile = NULL;
 
             if (charLogfile != NULL)
-                fclose(charLogfile);
+                { fclose(charLogfile); }
             charLogfile = NULL;
 
             if (dberLogfile != NULL)
-                fclose(dberLogfile);
+                { fclose(dberLogfile); }
             dberLogfile = NULL;
 
             if (eventAiErLogfile != NULL)
-                fclose(eventAiErLogfile);
+                { fclose(eventAiErLogfile); }
             eventAiErLogfile = NULL;
 
             if (scriptErrLogFile != NULL)
-                fclose(scriptErrLogFile);
+                { fclose(scriptErrLogFile); }
             scriptErrLogFile = NULL;
 
             if (raLogfile != NULL)
-                fclose(raLogfile);
+                { fclose(raLogfile); }
             raLogfile = NULL;
 
             if (worldLogfile != NULL)
-                fclose(worldLogfile);
+                { fclose(worldLogfile); }
             worldLogfile = NULL;
         }
     public:
+        /**
+         * @brief
+         *
+         */
         void Initialize();
+        /**
+         * @brief
+         *
+         * @param init_str
+         */
         void InitColors(const std::string& init_str);
 
+        /**
+         * @brief
+         *
+         * @param account
+         * @param str...
+         */
         void outCommand(uint32 account, const char* str, ...) ATTR_PRINTF(3, 4);
-        void outString();                                   // any log level
-        // any log level
+        /**
+         * @brief any log level
+         *
+         */
+        void outString();
+        /**
+         * @brief any log level
+         *
+         * @param str...
+         */
         void outString(const char* str, ...)      ATTR_PRINTF(2, 3);
-        // any log level
+        /**
+         * @brief any log level
+         *
+         * @param err...
+         */
         void outError(const char* err, ...)       ATTR_PRINTF(2, 3);
-        // log level >= 1
+        /**
+         * @brief log level >= 1
+         *
+         * @param str...
+         */
         void outBasic(const char* str, ...)       ATTR_PRINTF(2, 3);
-        // log level >= 2
+        /**
+         * @brief log level >= 2
+         *
+         * @param str...
+         */
         void outDetail(const char* str, ...)      ATTR_PRINTF(2, 3);
-        // log level >= 3
+        /**
+         * @brief log level >= 3
+         *
+         * @param str...
+         */
         void outDebug(const char* str, ...)       ATTR_PRINTF(2, 3);
-
-        void outErrorDb();                                  // any log level
-        // any log level
+        /**
+         * @brief any log level
+         *
+         */
+        void outErrorDb();
+        /**
+         * @brief any log level
+         *
+         * @param str...
+         */
         void outErrorDb(const char* str, ...)     ATTR_PRINTF(2, 3);
-        // any log level
+        /**
+         * @brief any log level
+         *
+         * @param str...
+         */
         void outChar(const char* str, ...)        ATTR_PRINTF(2, 3);
-
-        void outErrorEventAI();                             // any log level
-        // any log level
+        /**
+         * @brief any log level
+         *
+         */
+        void outErrorEventAI();
+        /**
+         * @brief any log level
+         *
+         * @param str...
+         */
         void outErrorEventAI(const char* str, ...)      ATTR_PRINTF(2, 3);
 
-        void outErrorScriptLib();                           // any log level
-        // any log level
+        /**
+         * @brief any log level
+         *
+         */
+        void outErrorScriptLib();
+        /**
+         * @brief any log level
+         *
+         * @param str...
+         */
         void outErrorScriptLib(const char* str, ...)     ATTR_PRINTF(2, 3);
 
+        /**
+         * @brief any log level
+         *
+         * @param socket
+         * @param opcode
+         * @param opcodeName
+         * @param packet
+         * @param incoming
+         */
         void outWorldPacketDump(uint32 socket, uint32 opcode, char const* opcodeName, ByteBuffer const* packet, bool incoming);
-        // any log level
+        /**
+         * @brief any log level
+         *
+         * @param str
+         * @param account_id
+         * @param guid
+         * @param name
+         */
         void outCharDump(const char* str, uint32 account_id, uint32 guid, const char* name);
+        /**
+         * @brief
+         *
+         * @param str...
+         */
         void outRALog(const char* str, ...)       ATTR_PRINTF(2, 3);
+        /**
+         * @brief
+         *
+         * @return uint32
+         */
         uint32 GetLogLevel() const { return m_logLevel; }
+        /**
+         * @brief
+         *
+         * @param Level
+         */
         void SetLogLevel(char* Level);
+        /**
+         * @brief
+         *
+         * @param Level
+         */
         void SetLogFileLevel(char* Level);
+        /**
+         * @brief
+         *
+         * @param stdout_stream
+         * @param color
+         */
         void SetColor(bool stdout_stream, Color color);
+        /**
+         * @brief
+         *
+         * @param stdout_stream
+         */
         void ResetColor(bool stdout_stream);
+        /**
+         * @brief
+         *
+         */
         void outTime();
+        /**
+         * @brief
+         *
+         * @param file
+         */
         static void outTimestamp(FILE* file);
+        /**
+         * @brief
+         *
+         * @return std::string
+         */
         static std::string GetTimestampStr();
+        /**
+         * @brief
+         *
+         * @param filter
+         * @return bool
+         */
         bool HasLogFilter(uint32 filter) const { return m_logFilter & filter; }
-        void SetLogFilter(LogFilters filter, bool on) { if (on) m_logFilter |= filter; else m_logFilter &= ~filter; }
+        /**
+         * @brief
+         *
+         * @param filter
+         * @param on
+         */
+        void SetLogFilter(LogFilters filter, bool on) { if (on) { m_logFilter |= filter; } else { m_logFilter &= ~filter; } }
+        /**
+         * @brief
+         *
+         * @param loglvl
+         * @return bool
+         */
         bool HasLogLevelOrHigher(LogLevel loglvl) const { return m_logLevel >= loglvl || (m_logFileLevel >= loglvl && logfile); }
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool IsOutCharDump() const { return m_charLog_Dump; }
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool IsIncludeTime() const { return m_includeTime; }
 
+        /**
+         * @brief
+         *
+         */
         static void WaitBeforeContinueIfNeed();
 
-        // Set filename for scriptlibrary error output
+        /**
+         * @brief Set filename for scriptlibrary error output
+         *
+         * @param fname
+         * @param libName
+         */
         void setScriptLibraryErrorFile(char const* fname, char const* libName);
 
     private:
+        /**
+         * @brief
+         *
+         * @param configFileName
+         * @param configTimeStampFlag
+         * @param mode
+         * @return FILE
+         */
         FILE* openLogFile(char const* configFileName, char const* configTimeStampFlag, char const* mode);
+        /**
+         * @brief
+         *
+         * @param account
+         * @return FILE
+         */
         FILE* openGmlogPerAccount(uint32 account);
 
-        FILE* raLogfile;
-        FILE* logfile;
-        FILE* gmLogfile;
-        FILE* charLogfile;
-        FILE* dberLogfile;
-        FILE* eventAiErLogfile;
-        FILE* scriptErrLogFile;
-        FILE* worldLogfile;
-        ACE_Thread_Mutex m_worldLogMtx;
+        FILE* raLogfile; /**< TODO */
+        FILE* logfile; /**< TODO */
+        FILE* gmLogfile; /**< TODO */
+        FILE* charLogfile; /**< TODO */
+        FILE* dberLogfile; /**< TODO */
+        FILE* eventAiErLogfile; /**< TODO */
+        FILE* scriptErrLogFile; /**< TODO */
+        FILE* worldLogfile; /**< TODO */
+        ACE_Thread_Mutex m_worldLogMtx; /**< TODO */
 
-        // log/console control
-        LogLevel m_logLevel;
-        LogLevel m_logFileLevel;
-        bool m_colored;
-        bool m_includeTime;
-        Color m_colors[4];
-        uint32 m_logFilter;
+        LogLevel m_logLevel; /**< log/console control */
+        LogLevel m_logFileLevel; /**< TODO */
+        bool m_colored; /**< TODO */
+        bool m_includeTime; /**< TODO */
+        Color m_colors[4]; /**< TODO */
+        uint32 m_logFilter; /**< TODO */
 
         // cache values for after initilization use (like gm log per account case)
-        std::string m_logsDir;
-        std::string m_logsTimestamp;
+        std::string m_logsDir; /**< TODO */
+        std::string m_logsTimestamp; /**< TODO */
 
         // char log control
-        bool m_charLog_Dump;
+        bool m_charLog_Dump; /**< TODO */
 
         // gm log control
-        bool m_gmlog_per_account;
-        std::string m_gmlog_filename_format;
+        bool m_gmlog_per_account; /**< TODO */
+        std::string m_gmlog_filename_format; /**< TODO */
 
-        char const* m_scriptLibName;
+        char const* m_scriptLibName; /**< TODO */
 };
 
 #define sLog MaNGOS::Singleton<Log>::Instance()
@@ -266,13 +472,48 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ACE_Th
 #define ERROR_DB_STRICT_LOG(...) \
     ERROR_DB_FILTER_LOG(LOG_FILTER_DB_STRICTED_CHECK, __VA_ARGS__)
 
-// primary for script library
+/**
+ * @brief primary for script library
+ *
+ * @param str...
+ */
 void MANGOS_DLL_SPEC outstring_log(const char* str, ...) ATTR_PRINTF(1, 2);
+/**
+ * @brief
+ *
+ * @param str...
+ */
 void MANGOS_DLL_SPEC detail_log(const char* str, ...) ATTR_PRINTF(1, 2);
+/**
+ * @brief
+ *
+ * @param str...
+ */
 void MANGOS_DLL_SPEC debug_log(const char* str, ...) ATTR_PRINTF(1, 2);
+/**
+ * @brief
+ *
+ * @param str...
+ */
 void MANGOS_DLL_SPEC error_log(const char* str, ...) ATTR_PRINTF(1, 2);
+/**
+ * @brief
+ *
+ * @param str...
+ */
 void MANGOS_DLL_SPEC error_db_log(const char* str, ...) ATTR_PRINTF(1, 2);
+/**
+ * @brief
+ *
+ * @param fname
+ * @param libName
+ */
 void MANGOS_DLL_SPEC setScriptLibraryErrorFile(char const* fname, char const* libName);
+/**
+ * @brief
+ *
+ * @param str...
+ */
 void MANGOS_DLL_SPEC script_error_log(const char* str, ...) ATTR_PRINTF(1, 2);
 
 #endif

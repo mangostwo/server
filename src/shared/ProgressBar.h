@@ -14,34 +14,61 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
+
 #ifndef MANGOSSERVER_PROGRESSBAR_H
 #define MANGOSSERVER_PROGRESSBAR_H
 
 #include "Platform/Define.h"
 
+/**
+ * @brief
+ *
+ */
 class MANGOS_DLL_SPEC BarGoLink
 {
-    public:                                                 // constructors
+    public:
+        /**
+         * @brief constructors
+         *
+         * @param row_count
+         */
         explicit BarGoLink(int row_count);
         explicit BarGoLink(uint32 row_count);               // row_count < ACE_INT32_MAX
         explicit BarGoLink(uint64 row_count);               // row_count < ACE_INT32_MAX
         ~BarGoLink();
 
-    public:                                                 // modifiers
+    public:
+        /**
+         * @brief modifiers
+         *
+         */
         void step();
 
+        /**
+         * @brief
+         *
+         * @param on
+         */
         static void SetOutputState(bool on);
     private:
+        /**
+         * @brief
+         *
+         * @param row_count
+         */
         void init(int row_count);
 
-        static bool m_showOutput;                           // not recommended change with existed active bar
-        static char const* const empty;
-        static char const* const full;
+        static bool m_showOutput; /**< not recommended change with existed active bar */
+        static char const* const empty; /**< TODO */
+        static char const* const full; /**< TODO */
 
-        int rec_no;
-        int rec_pos;
-        int num_rec;
-        int indic_len;
+        int rec_no; /**< TODO */
+        int rec_pos; /**< TODO */
+        int num_rec; /**< TODO */
+        int indic_len; /**< TODO */
 };
 #endif

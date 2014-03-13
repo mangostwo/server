@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #include "SQLStorage.h"
@@ -69,7 +72,7 @@ void SQLStorageBase::prepareToLoad(uint32 maxEntry, uint32 recordCount, uint32 r
 void SQLStorageBase::Free()
 {
     if (!m_data)
-        return;
+        { return; }
 
     uint32 offset = 0;
     for (uint32 x = 0; x < m_dstFieldCount; ++x)
@@ -82,7 +85,7 @@ void SQLStorageBase::Free()
             case FT_STRING:
             {
                 for (uint32 recordItr = 0; recordItr < m_recordCount; ++recordItr)
-                    delete[] *(char**)((char*)(m_data + (recordItr * m_recordSize)) + offset);
+                    { delete[] *(char**)((char*)(m_data + (recordItr * m_recordSize)) + offset); }
 
                 offset += sizeof(char*);
                 break;
@@ -131,10 +134,10 @@ void SQLStorage::Free()
     m_Index = NULL;
 }
 
-void SQLStorage::Load()
+void SQLStorage::Load(bool error_at_empty /*= true*/)
 {
     SQLStorageLoader loader;
-    loader.Load(*this);
+    loader.Load(*this, error_at_empty);
 }
 
 SQLStorage::SQLStorage(const char* fmt, const char* _entry_field, const char* sqlname)
@@ -156,7 +159,7 @@ void SQLStorage::prepareToLoad(uint32 maxRecordId, uint32 recordCount, uint32 re
 
     // Set index array
     m_Index = new char*[maxRecordId];
-    memset(m_Index, NULL, maxRecordId * sizeof(char*));
+    memset(m_Index, 0, maxRecordId * sizeof(char*));
 
     SQLStorageBase::prepareToLoad(maxRecordId, recordCount, recordSize);
 }
@@ -187,7 +190,7 @@ void SQLHashStorage::EraseEntry(uint32 id)
     // do not erase from m_records
     RecordMap::iterator find = m_indexMap.find(id);
     if (find != m_indexMap.end())
-        find->second = NULL;
+        { find->second = NULL; }
 }
 
 SQLHashStorage::SQLHashStorage(const char* fmt, const char* _entry_field, const char* sqlname)

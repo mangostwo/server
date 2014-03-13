@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef DO_POSTGRESQL
@@ -28,7 +31,7 @@ QueryResultMysql::QueryResultMysql(MYSQL_RES* result, MYSQL_FIELD* fields, uint6
     MANGOS_ASSERT(mCurrentRow);
 
     for (uint32 i = 0; i < mFieldCount; ++i)
-        mCurrentRow[i].SetType(ConvertNativeType(fields[i].type));
+        { mCurrentRow[i].SetType(ConvertNativeType(fields[i].type)); }
 }
 
 QueryResultMysql::~QueryResultMysql()
@@ -41,7 +44,7 @@ bool QueryResultMysql::NextRow()
     MYSQL_ROW row;
 
     if (!mResult)
-        return false;
+        { return false; }
 
     row = mysql_fetch_row(mResult);
     if (!row)
@@ -51,7 +54,7 @@ bool QueryResultMysql::NextRow()
     }
 
     for (uint32 i = 0; i < mFieldCount; ++i)
-        mCurrentRow[i].SetValue(row[i]);
+        { mCurrentRow[i].SetValue(row[i]); }
 
     return true;
 }

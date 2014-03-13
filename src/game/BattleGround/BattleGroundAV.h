@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef __BATTLEGROUNDAV_H
@@ -69,6 +72,11 @@
 #define BG_AV_REP_OWNED_MINE_HOLIDAY        36
 
 #define BG_AV_EVENT_START_BATTLE            9166
+
+/**
+ * @brief
+ *
+ */
 enum BG_AV_Sounds
 {
     BG_AV_SOUND_NEAR_LOSE               = 8456,             // not confirmed yet
@@ -80,9 +88,13 @@ enum BG_AV_Sounds
     BG_AV_SOUND_BOTH_TOWER_DEFEND       = 8192,
 
     BG_AV_SOUND_ALLIANCE_CAPTAIN        = 8232,             // gets called when someone attacks them and at the beginning after 3min + rand(x) * 10sec (maybe buff)
-    BG_AV_SOUND_HORDE_CAPTAIN           = 8333,
+    BG_AV_SOUND_HORDE_CAPTAIN           = 8333
 };
 
+/**
+ * @brief
+ *
+ */
 enum BG_AV_OTHER_VALUES
 {
     BG_AV_NORTH_MINE            = 0,
@@ -90,17 +102,25 @@ enum BG_AV_OTHER_VALUES
     BG_AV_MINE_TICK_TIMER       = 45000,
     BG_AV_MINE_RECLAIM_TIMER    = 1200000,                  // TODO: get the right value.. this is currently 20 minutes
     BG_AV_FACTION_A             = 730,
-    BG_AV_FACTION_H             = 729,
+    BG_AV_FACTION_H             = 729
 };
 #define BG_AV_MAX_MINES 2
 
+/**
+ * @brief
+ *
+ */
 enum BG_AV_ObjectIds
 {
     // mine supplies
     BG_AV_OBJECTID_MINE_N               = 178785,
-    BG_AV_OBJECTID_MINE_S               = 178784,
+    BG_AV_OBJECTID_MINE_S               = 178784
 };
 
+/**
+ * @brief
+ *
+ */
 enum BG_AV_Nodes
 {
     BG_AV_NODES_FIRSTAID_STATION        = 0,
@@ -118,7 +138,7 @@ enum BG_AV_Nodes
     BG_AV_NODES_TOWER_POINT             = 12,
     BG_AV_NODES_FROSTWOLF_ETOWER        = 13,
     BG_AV_NODES_FROSTWOLF_WTOWER        = 14,
-    BG_AV_NODES_ERROR                   = 255,
+    BG_AV_NODES_ERROR                   = 255
 };
 #define BG_AV_NODES_MAX                 15
 
@@ -160,6 +180,10 @@ enum BG_AV_Nodes
 #define BG_AV_NodeEventCaptainDead_A 63
 #define BG_AV_NodeEventCaptainDead_H 64
 
+/**
+ * @brief
+ *
+ */
 enum BG_AV_Graveyards
 {
     BG_AV_GRAVE_STORM_AID          = 751,
@@ -173,7 +197,7 @@ enum BG_AV_Graveyards
     BG_AV_GRAVE_MAIN_HORDE         = 610
 };
 
-const uint32 BG_AV_GraveyardIds[9] =
+const uint32 BG_AV_GraveyardIds[9] = /**< TODO */
 {
     BG_AV_GRAVE_STORM_AID,
     BG_AV_GRAVE_STORM_GRAVE,
@@ -186,6 +210,10 @@ const uint32 BG_AV_GraveyardIds[9] =
     BG_AV_GRAVE_MAIN_HORDE
 };
 
+/**
+ * @brief
+ *
+ */
 enum BG_AV_States
 {
     POINT_ASSAULTED             = 0,
@@ -193,36 +221,42 @@ enum BG_AV_States
 };
 #define BG_AV_MAX_STATES 2
 
+/**
+ * @brief
+ *
+ */
 enum BG_AV_WorldStates
 {
     BG_AV_Alliance_Score        = 3127,
     BG_AV_Horde_Score           = 3128,
     BG_AV_SHOW_H_SCORE          = 3133,
     BG_AV_SHOW_A_SCORE          = 3134,
-    AV_SNOWFALL_N               = 1966,
+    AV_SNOWFALL_N               = 1966
 };
 
-// special version with  more wide values range that BattleGroundTeamIndex
-// BattleGroundAVTeamIndex <- BattleGroundTeamIndex cast safe
-// BattleGroundAVTeamIndex -> BattleGroundTeamIndex cast safe and array with BG_TEAMS_COUNT elements must checked != BG_AV_TEAM_NEUTRAL before used
+/**
+ * @brief special version with  more wide values range that BattleGroundTeamIndex
+ *
+ * BattleGroundAVTeamIndex <- BattleGroundTeamIndex cast safe
+ * BattleGroundAVTeamIndex -> BattleGroundTeamIndex cast safe and array with BG_TEAMS_COUNT elements must checked != BG_AV_TEAM_NEUTRAL before used
+ *
+ */
 enum BattleGroundAVTeamIndex
 {
     BG_AV_TEAM_ALLIANCE        = BG_TEAM_ALLIANCE,
     BG_AV_TEAM_HORDE           = BG_TEAM_HORDE,
-    BG_AV_TEAM_NEUTRAL         = 2,                         // this is the neutral owner of snowfall
+    BG_AV_TEAM_NEUTRAL         = 2                          // this is the neutral owner of snowfall
 };
 
 #define BG_AV_TEAMS_COUNT 3
 
-// alliance_control horde_control neutral_control
-const uint32 BG_AV_MineWorldStates[2][BG_AV_TEAMS_COUNT] =
+const uint32 BG_AV_MineWorldStates[2][BG_AV_TEAMS_COUNT] = /**< alliance_control horde_control neutral_control */
 {
     {1358, 1359, 1360},
     {1355, 1356, 1357}
 };
 
-// alliance_control alliance_assault h_control h_assault
-const uint32 BG_AV_NodeWorldStates[BG_AV_NODES_MAX][4] =
+const uint32 BG_AV_NodeWorldStates[BG_AV_NODES_MAX][4] = /**< alliance_control alliance_assault h_control h_assault */
 {
     // Stormpike first aid station
     {1326, 1325, 1328, 1327},
@@ -256,8 +290,11 @@ const uint32 BG_AV_NodeWorldStates[BG_AV_NODES_MAX][4] =
     {1387, 1365, 1392, 1382},
 };
 
-// through the armorscap-quest 4 different gravedefender exist
 #define BG_AV_MAX_GRAVETYPES 4
+/**
+ * @brief through the armorscap-quest 4 different gravedefender exist
+ *
+ */
 enum BG_AV_QuestIds
 {
     BG_AV_QUEST_A_SCRAPS1       = 7223,                     // first quest
@@ -284,114 +321,320 @@ enum BG_AV_QuestIds
     BG_AV_QUEST_H_RIDER_TAME    = 7001
 };
 
+/**
+ * @brief
+ *
+ */
 struct BG_AV_NodeInfo
 {
-    BattleGroundAVTeamIndex TotalOwner;
-    BattleGroundAVTeamIndex Owner;
-    BattleGroundAVTeamIndex PrevOwner;
-    BG_AV_States State;
-    BG_AV_States PrevState;
-    uint32       Timer;
-    bool         Tower;
+    BattleGroundAVTeamIndex TotalOwner; /**< TODO */
+    BattleGroundAVTeamIndex Owner; /**< TODO */
+    BattleGroundAVTeamIndex PrevOwner; /**< TODO */
+    BG_AV_States State; /**< TODO */
+    BG_AV_States PrevState; /**< TODO */
+    uint32       Timer; /**< TODO */
+    bool         Tower; /**< TODO */
 };
 
+/**
+ * @brief
+ *
+ * @param i
+ * @return BG_AV_Nodes &operator
+ */
 inline BG_AV_Nodes& operator++(BG_AV_Nodes& i)
 {
     return i = BG_AV_Nodes(i + 1);
 }
 
+/**
+ * @brief
+ *
+ */
 class BattleGroundAVScore : public BattleGroundScore
 {
     public:
+/**
+ * @brief
+ *
+ */
         BattleGroundAVScore() : GraveyardsAssaulted(0), GraveyardsDefended(0), TowersAssaulted(0), TowersDefended(0), SecondaryObjectives(0) {};
+        /**
+         * @brief
+         *
+         */
         virtual ~BattleGroundAVScore() {};
-        uint32 GraveyardsAssaulted;
-        uint32 GraveyardsDefended;
-        uint32 TowersAssaulted;
-        uint32 TowersDefended;
-        uint32 SecondaryObjectives;
+        uint32 GraveyardsAssaulted; /**< TODO */
+        uint32 GraveyardsDefended; /**< TODO */
+        uint32 TowersAssaulted; /**< TODO */
+        uint32 TowersDefended; /**< TODO */
+        uint32 SecondaryObjectives; /**< TODO */
 };
 
+/**
+ * @brief
+ *
+ */
 class BattleGroundAV : public BattleGround
 {
         friend class BattleGroundMgr;
 
     public:
+        /**
+         * @brief
+         *
+         */
         BattleGroundAV();
+        /**
+         * @brief
+         *
+         * @param diff
+         */
         void Update(uint32 diff) override;
 
-        /* inherited from BattlegroundClass */
+        /**
+         * @brief inherited from BattlegroundClass
+         *
+         * @param plr
+         */
         virtual void AddPlayer(Player* plr) override;
 
+        /**
+         * @brief
+         *
+         */
         virtual void StartingEventOpenDoors() override;
-        // world states
+        /**
+         * @brief  world states
+         *
+         * @param data
+         * @param count
+         */
         virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
 
+        /**
+         * @brief
+         *
+         * @param source
+         * @param trigger
+         */
         void HandleAreaTrigger(Player* source, uint32 trigger) override;
+        /**
+         * @brief
+         *
+         */
         virtual void Reset() override;
 
         /*general stuff*/
+        /**
+         * @brief
+         *
+         * @param teamIdx
+         * @param points
+         */
         void UpdateScore(BattleGroundTeamIndex teamIdx, int32 points);
+        /**
+         * @brief
+         *
+         * @param source
+         * @param type
+         * @param value
+         */
         void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
 
         /*handle stuff*/ // these are functions which get called from extern scripts
+        /**
+         * @brief
+         *
+         * @param source
+         * @param target_obj
+         */
         virtual void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
+        /**
+         * @brief
+         *
+         * @param player
+         * @param killer
+         */
         void HandleKillPlayer(Player* player, Player* killer) override;
+        /**
+         * @brief
+         *
+         * @param creature
+         * @param killer
+         */
         void HandleKillUnit(Creature* creature, Player* killer) override;
+        /**
+         * @brief
+         *
+         * @param questid
+         * @param player
+         */
         void HandleQuestComplete(uint32 questid, Player* player);
+        /**
+         * @brief
+         *
+         * @param GOId
+         * @param team
+         * @return bool
+         */
         bool PlayerCanDoMineQuest(int32 GOId, Team team);
 
+        /**
+         * @brief
+         *
+         * @param winner
+         */
         void EndBattleGround(Team winner) override;
 
+        /**
+         * @brief
+         *
+         * @param plr
+         * @return const WorldSafeLocsEntry
+         */
         virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* plr) override;
 
+        /**
+         * @brief
+         *
+         * @param team
+         * @return BattleGroundAVTeamIndex
+         */
         static BattleGroundAVTeamIndex GetAVTeamIndexByTeamId(Team team) { return BattleGroundAVTeamIndex(GetTeamIndexByTeamId(team)); }
     private:
         /* Nodes occupying */
+        /**
+         * @brief
+         *
+         * @param player
+         * @param node
+         */
         void EventPlayerAssaultsPoint(Player* player, BG_AV_Nodes node);
+        /**
+         * @brief
+         *
+         * @param player
+         * @param node
+         */
         void EventPlayerDefendsPoint(Player* player, BG_AV_Nodes node);
+        /**
+         * @brief
+         *
+         * @param node
+         */
         void EventPlayerDestroyedPoint(BG_AV_Nodes node);
 
+        /**
+         * @brief
+         *
+         * @param node
+         * @param teamIdx
+         */
         void AssaultNode(BG_AV_Nodes node, BattleGroundTeamIndex teamIdx);
+        /**
+         * @brief
+         *
+         * @param node
+         */
         void DestroyNode(BG_AV_Nodes node);
+        /**
+         * @brief
+         *
+         * @param node
+         * @param teamIdx
+         * @param tower
+         */
         void InitNode(BG_AV_Nodes node, BattleGroundAVTeamIndex teamIdx, bool tower);
+        /**
+         * @brief
+         *
+         * @param node
+         * @param teamIdx
+         */
         void DefendNode(BG_AV_Nodes node, BattleGroundTeamIndex teamIdx);
 
+        /**
+         * @brief
+         *
+         * @param node
+         */
         void PopulateNode(BG_AV_Nodes node);
 
+        /**
+         * @brief
+         *
+         * @param node
+         * @return uint32
+         */
         uint32 GetNodeName(BG_AV_Nodes node) const;
+        /**
+         * @brief
+         *
+         * @param node
+         * @return bool
+         */
         bool IsTower(BG_AV_Nodes node) const { return (node == BG_AV_NODES_ERROR) ? false : m_Nodes[node].Tower; }
+        /**
+         * @brief
+         *
+         * @param node
+         * @return bool
+         */
         bool IsGrave(BG_AV_Nodes node) const { return (node == BG_AV_NODES_ERROR) ? false : !m_Nodes[node].Tower; }
 
         /*mine*/
+        /**
+         * @brief
+         *
+         * @param mine
+         * @param teamIdx
+         */
         void ChangeMineOwner(uint8 mine, BattleGroundAVTeamIndex teamIdx);
 
         /*worldstates*/
+        /**
+         * @brief
+         *
+         * @param state
+         * @param teamIdx
+         * @return uint8
+         */
         uint8 GetWorldStateType(uint8 state, BattleGroundAVTeamIndex teamIdx) const { return teamIdx * BG_AV_MAX_STATES + state; }
+        /**
+         * @brief
+         *
+         * @param mine
+         */
         void SendMineWorldStates(uint32 mine);
+        /**
+         * @brief
+         *
+         * @param node
+         */
         void UpdateNodeWorldState(BG_AV_Nodes node);
 
         /*variables */
-        uint32 m_Team_QuestStatus[BG_TEAMS_COUNT][9];       // [x][y] x=team y=questcounter
+        uint32 m_Team_QuestStatus[BG_TEAMS_COUNT][9];       /**< [x][y] x=team y=questcounter */
 
-        BG_AV_NodeInfo m_Nodes[BG_AV_NODES_MAX];
+        BG_AV_NodeInfo m_Nodes[BG_AV_NODES_MAX]; /**< TODO */
 
         // only for worldstates needed
-        BattleGroundAVTeamIndex m_Mine_Owner[BG_AV_MAX_MINES];
-        BattleGroundAVTeamIndex m_Mine_PrevOwner[BG_AV_MAX_MINES];
-        int32 m_Mine_Timer[BG_AV_MAX_MINES];
-        uint32 m_Mine_Reclaim_Timer[BG_AV_MAX_MINES];
+        BattleGroundAVTeamIndex m_Mine_Owner[BG_AV_MAX_MINES]; /**< TODO */
+        BattleGroundAVTeamIndex m_Mine_PrevOwner[BG_AV_MAX_MINES]; /**< TODO */
+        int32 m_Mine_Timer[BG_AV_MAX_MINES]; /**< TODO */
+        uint32 m_Mine_Reclaim_Timer[BG_AV_MAX_MINES]; /**< TODO */
 
-        bool m_IsInformedNearLose[BG_TEAMS_COUNT];
+        bool m_IsInformedNearLose[BG_TEAMS_COUNT]; /**< TODO */
 
-        uint32 m_HonorMapComplete;
-        uint32 m_RepTowerDestruction;
-        uint32 m_RepCaptain;
-        uint32 m_RepBoss;
-        uint32 m_RepOwnedGrave;
-        uint32 m_RepOwnedMine;
-        uint32 m_RepSurviveCaptain;
-        uint32 m_RepSurviveTower;
+        uint32 m_HonorMapComplete; /**< TODO */
+        uint32 m_RepTowerDestruction; /**< TODO */
+        uint32 m_RepCaptain; /**< TODO */
+        uint32 m_RepBoss; /**< TODO */
+        uint32 m_RepOwnedGrave; /**< TODO */
+        uint32 m_RepOwnedMine; /**< TODO */
+        uint32 m_RepSurviveCaptain; /**< TODO */
+        uint32 m_RepSurviveTower; /**< TODO */
 };
 
 #endif

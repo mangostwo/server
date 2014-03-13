@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef MANGOSSERVER_WORLDPACKET_H
@@ -25,11 +28,18 @@
 
 // Note: m_opcode and size stored in platfom dependent format
 // ignore endianess until send, and converted at receive
+/**
+ * @brief
+ *
+ */
 class WorldPacket : public ByteBuffer
 {
     public:
-        // just container for later use
-        WorldPacket()                                       : ByteBuffer(0), m_opcode(MSG_NULL_ACTION)
+        /**
+         * @brief just container for later use
+         *
+         */
+        WorldPacket() : ByteBuffer(0), m_opcode(MSG_NULL_ACTION)
         {
         }
         explicit WorldPacket(Opcodes opcode, size_t res = 200) : ByteBuffer(res), m_opcode(opcode) { }

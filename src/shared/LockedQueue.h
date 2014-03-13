@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef LOCKEDQUEUE_H
@@ -27,45 +30,61 @@
 
 namespace ACE_Based
 {
-    template <class T, class LockType, typename StorageType = std::deque<T> >
+    template < class T, class LockType, typename StorageType = std::deque<T> >
+    /**
+     * @brief
+     *
+     */
     class LockedQueue
     {
-            //! Lock access to the queue.
-            LockType _lock;
+            LockType _lock; /**< Lock access to the queue. */
 
-            //! Storage backing the queue.
-            StorageType _queue;
+            StorageType _queue; /**< Storage backing the queue. */
 
-            //! Cancellation flag.
-            /*volatile*/ bool _canceled;
+            /*volatile*/ bool _canceled; /**< Cancellation flag. */
 
         public:
 
-            //! Create a LockedQueue.
+            /**
+             * @brief Create a LockedQueue.
+             *
+             */
             LockedQueue()
                 : _canceled(false)
             {
             }
 
-            //! Destroy a LockedQueue.
+            /**
+             * @brief Destroy a LockedQueue.
+             *
+             */
             virtual ~LockedQueue()
             {
             }
 
-            //! Adds an item to the queue.
+            /**
+             * @brief Adds an item to the queue.
+             *
+             * @param item
+             */
             void add(const T& item)
             {
                 ACE_Guard<LockType> g(this->_lock);
                 _queue.push_back(item);
             }
 
-            //! Gets the next result in the queue, if any.
+            /**
+             * @brief Gets the next result in the queue, if any.
+             *
+             * @param result
+             * @return bool
+             */
             bool next(T& result)
             {
                 ACE_GUARD_RETURN(LockType, g, this->_lock, false);
 
                 if (_queue.empty())
-                    return false;
+                    { return false; }
 
                 result = _queue.front();
                 _queue.pop_front();
@@ -74,22 +93,33 @@ namespace ACE_Based
             }
 
             template<class Checker>
+            /**
+             * @brief
+             *
+             * @param result
+             * @param check
+             * @return bool
+             */
             bool next(T& result, Checker& check)
             {
                 ACE_GUARD_RETURN(LockType, g, this->_lock, false);
 
                 if (_queue.empty())
-                    return false;
+                    { return false; }
 
                 result = _queue.front();
                 if (!check.Process(result))
-                    return false;
+                    { return false; }
 
                 _queue.pop_front();
                 return true;
             }
 
-            //! Peeks at the top of the queue. Remember to unlock after use.
+            /**
+             * @brief Peeks at the top of the queue. Remember to unlock after use.
+             *
+             * @return T
+             */
             T& peek()
             {
                 lock();
@@ -99,33 +129,50 @@ namespace ACE_Based
                 return result;
             }
 
-            //! Cancels the queue.
+            /**
+             * @brief Cancels the queue.
+             *
+             */
             void cancel()
             {
                 ACE_Guard<LockType> g(this->_lock);
                 _canceled = true;
             }
 
-            //! Checks if the queue is cancelled.
+            /**
+             * @brief Checks if the queue is cancelled.
+             *
+             * @return bool
+             */
             bool cancelled()
             {
                 ACE_Guard<LockType> g(this->_lock);
                 return _canceled;
             }
 
-            //! Locks the queue for access.
+            /**
+             * @brief Locks the queue for access.
+             *
+             */
             void lock()
             {
                 this->_lock.acquire();
             }
 
-            //! Unlocks the queue.
+            /**
+             * @brief Unlocks the queue.
+             *
+             */
             void unlock()
             {
                 this->_lock.release();
             }
 
-            ///! Checks if we're empty or not with locks held
+            /**
+             * @brief Checks if we're empty or not with locks held
+             *
+             * @return bool
+             */
             bool empty()
             {
                 ACE_Guard<LockType> g(this->_lock);

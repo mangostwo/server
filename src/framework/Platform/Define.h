@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef MANGOS_DEFINE_H
@@ -39,6 +42,10 @@
 #  endif // ACE_BYTE_ORDER
 #endif // MANGOS_ENDIAN
 
+/**
+ * @brief
+ *
+ */
 typedef ACE_SHLIB_HANDLE MANGOS_LIBRARY_HANDLE;
 
 #define MANGOS_SCRIPT_NAME "mangosscript"
@@ -105,17 +112,57 @@ typedef ACE_SHLIB_HANDLE MANGOS_LIBRARY_HANDLE;
 #  define ATTR_PRINTF(F,V)
 #endif // COMPILER == COMPILER_GNU
 
+/**
+ * @brief A signed integer of 64 bits
+ *
+ */
 typedef ACE_INT64 int64;
+/**
+ * @brief A signed integer of 32 bits
+ *
+ */
 typedef ACE_INT32 int32;
+/**
+ * @brief A signed integer of 16 bits
+ *
+ */
 typedef ACE_INT16 int16;
+/**
+ * @brief A signed integer of 8 bits
+ *
+ */
 typedef ACE_INT8 int8;
+/**
+ * @brief An unsigned integer of 64 bits
+ *
+ */
 typedef ACE_UINT64 uint64;
+/**
+ * @brief An unsigned integer of 32 bits
+ *
+ */
 typedef ACE_UINT32 uint32;
+/**
+ * @brief An unsigned integer of 16 bits
+ *
+ */
 typedef ACE_UINT16 uint16;
+/**
+ * @brief An unsigned integer of 8 bits
+ *
+ */
 typedef ACE_UINT8 uint8;
 
 #if COMPILER != COMPILER_MICROSOFT
+/**
+ * @brief An unsigned integer of 16 bits, only for Win
+ *
+ */
 typedef uint16      WORD;
+/**
+ * @brief An unsigned integer of 32 bits, only for Win
+ *
+ */
 typedef uint32      DWORD;
 #endif // COMPILER
 
@@ -134,6 +181,10 @@ typedef uint32      DWORD;
 #  endif
 #endif
 
+/**
+ * @brief
+ *
+ */
 typedef uint64 OBJECT_HANDLE;
 
 #endif // MANGOS_DEFINE_H

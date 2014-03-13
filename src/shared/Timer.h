@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef MANGOS_TIMER_H
@@ -22,14 +25,28 @@
 #include "Common.h"
 #include <ace/OS_NS_sys_time.h>
 
+/**
+ * @brief
+ *
+ */
 class WorldTimer
 {
     public:
 
-        // get current server time
+        /**
+         * @brief get current server time
+         *
+         * @return uint32
+         */
         static uint32 getMSTime();
 
-        // get time difference between two timestamps
+        /**
+         * @brief get time difference between two timestamps
+         *
+         * @param oldMSTime
+         * @param newMSTime
+         * @return uint32
+         */
         static inline uint32 getMSTimeDiff(const uint32& oldMSTime, const uint32& newMSTime)
         {
             if (oldMSTime > newMSTime)
@@ -43,103 +60,271 @@ class WorldTimer
             return newMSTime - oldMSTime;
         }
 
-        // get last world tick time
+        /**
+         * @brief get last world tick time
+         *
+         * @return uint32
+         */
         static MANGOS_DLL_SPEC uint32 tickTime();
-        // get previous world tick time
+        /**
+         * @brief get previous world tick time
+         *
+         * @return uint32
+         */
         static MANGOS_DLL_SPEC uint32 tickPrevTime();
-        // tick world timer
+        /**
+         * @brief tick world timer
+         *
+         * @return uint32
+         */
         static MANGOS_DLL_SPEC uint32 tick();
 
     private:
+        /**
+         * @brief
+         *
+         */
         WorldTimer();
+        /**
+         * @brief
+         *
+         * @param
+         */
         WorldTimer(const WorldTimer&);
 
-        // analogue to getMSTime() but it persists m_SystemTickTime
+        /**
+         * @brief analogue to getMSTime() but it persists m_SystemTickTime
+         *
+         * @param savetime
+         * @return uint32
+         */
         static uint32 getMSTime_internal(bool savetime = false);
 
-        static MANGOS_DLL_SPEC uint32 m_iTime;
-        static MANGOS_DLL_SPEC uint32 m_iPrevTime;
+        static MANGOS_DLL_SPEC uint32 m_iTime; /**< TODO */
+        static MANGOS_DLL_SPEC uint32 m_iPrevTime; /**< TODO */
 };
 
+/**
+ * @brief
+ *
+ */
 class IntervalTimer
 {
     public:
+        /**
+         * @brief
+         *
+         */
         IntervalTimer() : _interval(0), _current(0) {}
 
+        /**
+         * @brief
+         *
+         * @param diff
+         */
         void Update(time_t diff)
         {
             _current += diff;
             if (_current < 0)
-                _current = 0;
+                { _current = 0; }
         }
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool Passed() const { return _current >= _interval; }
+        /**
+         * @brief
+         *
+         */
         void Reset()
         {
             if (_current >= _interval)
-                _current -= _interval;
+                { _current -= _interval; }
         }
 
+        /**
+         * @brief
+         *
+         * @param current
+         */
         void SetCurrent(time_t current) { _current = current; }
+        /**
+         * @brief
+         *
+         * @param interval
+         */
         void SetInterval(time_t interval) { _interval = interval; }
+        /**
+         * @brief
+         *
+         * @return time_t
+         */
         time_t GetInterval() const { return _interval; }
+        /**
+         * @brief
+         *
+         * @return time_t
+         */
         time_t GetCurrent() const { return _current; }
 
     private:
-        time_t _interval;
-        time_t _current;
+        time_t _interval; /**< TODO */
+        time_t _current; /**< TODO */
 };
 
+/**
+ * @brief
+ *
+ */
 class ShortIntervalTimer
 {
     public:
+        /**
+         * @brief
+         *
+         */
         ShortIntervalTimer() : _interval(0), _current(0) {}
 
+        /**
+         * @brief
+         *
+         * @param diff
+         */
         void Update(uint32 diff)
         {
             _current += diff;
         }
 
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool Passed() const { return _current >= _interval; }
+        /**
+         * @brief
+         *
+         */
         void Reset()
         {
             if (_current >= _interval)
-                _current -= _interval;
+                { _current -= _interval; }
         }
 
+        /**
+         * @brief
+         *
+         * @param current
+         */
         void SetCurrent(uint32 current) { _current = current; }
+        /**
+         * @brief
+         *
+         * @param interval
+         */
         void SetInterval(uint32 interval) { _interval = interval; }
+        /**
+         * @brief
+         *
+         * @return uint32
+         */
         uint32 GetInterval() const { return _interval; }
+        /**
+         * @brief
+         *
+         * @return uint32
+         */
         uint32 GetCurrent() const { return _current; }
 
     private:
-        uint32 _interval;
-        uint32 _current;
+        uint32 _interval; /**< TODO */
+        uint32 _current; /**< TODO */
 };
 
+/**
+ * @brief
+ *
+ */
 struct TimeTracker
 {
     public:
+        /**
+         * @brief
+         *
+         * @param expiry
+         */
         TimeTracker(time_t expiry) : i_expiryTime(expiry) {}
+        /**
+         * @brief
+         *
+         * @param diff
+         */
         void Update(time_t diff) { i_expiryTime -= diff; }
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool Passed() const { return (i_expiryTime <= 0); }
+        /**
+         * @brief
+         *
+         * @param interval
+         */
         void Reset(time_t interval) { i_expiryTime = interval; }
+        /**
+         * @brief
+         *
+         * @return time_t
+         */
         time_t GetExpiry() const { return i_expiryTime; }
 
     private:
-        time_t i_expiryTime;
+        time_t i_expiryTime; /**< TODO */
 };
 
+/**
+ * @brief
+ *
+ */
 struct ShortTimeTracker
 {
     public:
+        /**
+         * @brief
+         *
+         * @param expiry
+         */
         ShortTimeTracker(int32 expiry = 0) : i_expiryTime(expiry) {}
+        /**
+         * @brief
+         *
+         * @param diff
+         */
         void Update(int32 diff) { i_expiryTime -= diff; }
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool Passed() const { return (i_expiryTime <= 0); }
+        /**
+         * @brief
+         *
+         * @param interval
+         */
         void Reset(int32 interval) { i_expiryTime = interval; }
+        /**
+         * @brief
+         *
+         * @return int32
+         */
         int32 GetExpiry() const { return i_expiryTime; }
 
     private:
-        int32 i_expiryTime;
+        int32 i_expiryTime; /**< TODO */
 };
 
 #endif

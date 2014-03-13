@@ -14,7 +14,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-# Clone https://github.com/mangosthree/scripts here, and comment out
+# Clone https://github.com/mangostwo/scripts here, and comment out
 # the next line and uncomment the last line.
 
 if(INCLUDE_BINDINGS_DIR)

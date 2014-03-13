@@ -1,5 +1,8 @@
 /**
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+ * mangos-zero is a full featured server for World of Warcraft in its vanilla
+ * version, supporting clients for patch 1.12.x.
+ *
+ * Copyright (C) 2005-2013  MaNGOS project <http://getmangos.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef MANGOSSERVER_COMMON_H
@@ -97,6 +103,10 @@
 // Old ACE versions (pre-ACE-5.5.4) not have this type (add for allow use at Unix side external old ACE versions)
 #if PLATFORM != PLATFORM_WINDOWS
 #  ifndef ACE_OFF_T
+/**
+ * @brief
+ *
+ */
 typedef off_t ACE_OFF_T;
 #  endif
 #endif
@@ -148,6 +158,12 @@ typedef off_t ACE_OFF_T;
 
 #define SIZEFMTD ACE_SIZE_T_FORMAT_SPECIFIER
 
+/**
+ * @brief
+ *
+ * @param f
+ * @return float
+ */
 inline float finiteAlways(float f) { return finite(f) ? f : 0.0f; }
 
 #define atol(a) strtoul( a, NULL, 10)
@@ -163,6 +179,10 @@ inline float finiteAlways(float f) { return finite(f) ? f : 0.0f; }
 #define PAIR32_HIPART(x)   (uint16)((uint32(x) >> 16) & 0x0000FFFF)
 #define PAIR32_LOPART(x)   (uint16)(uint32(x)         & 0x0000FFFF)
 
+/**
+ * @brief
+ *
+ */
 enum TimeConstants
 {
     MINUTE = 60,
@@ -174,6 +194,10 @@ enum TimeConstants
     IN_MILLISECONDS = 1000
 };
 
+/**
+ * @brief
+ *
+ */
 enum AccountTypes
 {
     SEC_PLAYER         = 0,
@@ -183,7 +207,10 @@ enum AccountTypes
     SEC_CONSOLE        = 4                                  // must be always last in list, accounts must have less security level always also
 };
 
-// Used in mangosd/realmd
+/**
+ * @brief Used in mangosd/realmd
+ *
+ */
 enum RealmFlags
 {
     REALM_FLAG_NONE         = 0x00,
@@ -197,6 +224,10 @@ enum RealmFlags
     REALM_FLAG_FULL         = 0x80
 };
 
+/**
+ * @brief
+ *
+ */
 enum LocaleConstant
 {
     LOCALE_enUS = 0,                                        // also enGB
@@ -212,20 +243,34 @@ enum LocaleConstant
 
 #define MAX_LOCALE 9
 
+/**
+ * @brief
+ *
+ * @param name
+ * @return LocaleConstant
+ */
 LocaleConstant GetLocaleByName(const std::string& name);
 
-extern char const* localeNames[MAX_LOCALE];
+extern char const* localeNames[MAX_LOCALE]; /**< TODO */
 
+/**
+ * @brief
+ *
+ */
 struct LocaleNameStr
 {
-    char const* name;
-    LocaleConstant locale;
+    char const* name; /**< TODO */
+    LocaleConstant locale; /**< TODO */
 };
 
-// used for iterate all names including alternative
-extern LocaleNameStr const fullLocaleNameList[];
+extern LocaleNameStr const fullLocaleNameList[]; /**< used for iterate all names including alternative */
 
-// operator new[] based version of strdup() function! Release memory by using operator delete[] !
+/**
+ * @brief operator new[] based version of strdup() function! Release memory by using operator delete[] !
+ *
+ * @param source
+ * @return char
+ */
 inline char* mangos_strdup(const char* source)
 {
     char* dest = new char[strlen(source) + 1];
