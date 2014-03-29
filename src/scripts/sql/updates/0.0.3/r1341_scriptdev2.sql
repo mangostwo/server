@@ -1,0 +1,11 @@
+UPDATE script_texts SET content_default='Emergency power activated! Initializing ambulanory motor! CLUCK!' WHERE entry = -1000287;
+UPDATE script_texts SET comment='oox SAY_OOX_START' WHERE entry = -1000287;
+UPDATE script_texts SET comment='oox SAY_OOX_AGGRO1' WHERE entry = -1000288;
+UPDATE script_texts SET comment='oox SAY_OOX_AGGRO2' WHERE entry = -1000289;
+UPDATE script_texts SET comment='oox SAY_OOX_AMBUSH' WHERE entry = -1000290;
+UPDATE script_texts SET comment='oox SAY_OOX17_AMBUSH_REPLY' WHERE entry = -1000291;
+UPDATE script_texts SET comment='oox SAY_OOX_END' WHERE entry = -1000292;
+UPDATE script_texts SET content_default='REUSE', comment='REUSE' WHERE entry = -1000416;
+UPDATE script_texts SET content_default='REUSE', comment='REUSE' WHERE entry = -1000417;
+UPDATE script_texts SET content_default='REUSE', comment='REUSE' WHERE entry = -1000418;
+UPDATE script_texts SET content_default='REUSE', comment='REUSE' WHERE entry = -1000419;

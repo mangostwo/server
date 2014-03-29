@@ -1,0 +1,1 @@
+UPDATE script_texts SET type=6 WHERE entry IN (-1580064, -1580065, -1580066, -1580067, -1580068);

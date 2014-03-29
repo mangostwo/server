@@ -1,0 +1,18 @@
+ALTER TABLE `eventai_scripts`
+    CHANGE COLUMN `creature_id` `creature_id` mediumint unsigned NOT NULL DEFAULT 0 COMMENT 'Creature Template Identifier',
+    CHANGE COLUMN `event_type` `event_type` tinyint unsigned NOT NULL DEFAULT 0 COMMENT 'Event Type',
+    CHANGE COLUMN `event_inverse_phase_mask` `event_inverse_phase_mask` int NOT NULL DEFAULT 0 COMMENT 'Mask which phases this event will not trigger in',
+    CHANGE COLUMN `event_chance` `event_chance` tinyint unsigned NOT NULL DEFAULT 100,
+    CHANGE COLUMN `event_flags` `event_flags` tinyint unsigned NOT NULL DEFAULT 0,
+    CHANGE COLUMN `action1_param1` `action1_param1` int NOT NULL DEFAULT 0,
+    CHANGE COLUMN `action1_param2` `action1_param2` int NOT NULL DEFAULT 0,
+    CHANGE COLUMN `action1_param3` `action1_param3` int NOT NULL DEFAULT 0,
+    CHANGE COLUMN `action1_type` `action1_type` tinyint(3) unsigned NOT NULL DEFAULT 0 COMMENT 'Action Type',
+    CHANGE COLUMN `action2_param1` `action2_param1` int NOT NULL DEFAULT 0,
+    CHANGE COLUMN `action2_param2` `action2_param2` int NOT NULL DEFAULT 0,
+    CHANGE COLUMN `action2_param3` `action2_param3` int NOT NULL DEFAULT 0,
+    CHANGE COLUMN `action2_type` `action2_type` tinyint(3) unsigned NOT NULL DEFAULT 0 COMMENT 'Action Type',
+    CHANGE COLUMN `action3_param1` `action3_param1` int NOT NULL DEFAULT 0,
+    CHANGE COLUMN `action3_param2` `action3_param2` int NOT NULL DEFAULT 0,
+    CHANGE COLUMN `action3_param3` `action3_param3` int NOT NULL DEFAULT 0,
+    CHANGE COLUMN `action3_type` `action3_type` tinyint(3) unsigned NOT NULL DEFAULT 0 COMMENT 'Action Type';

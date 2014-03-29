@@ -1,0 +1,1 @@
+UPDATE script_texts SET type=6 WHERE entry BETWEEN -1568078 AND -1568067;

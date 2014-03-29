@@ -1,0 +1,3 @@
+CREATE DATABASE `scriptdev2` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, ALTER, LOCK TABLES ON `scriptdev2`.* TO 'mangos'@'localhost';
