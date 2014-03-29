@@ -2,7 +2,7 @@
 * This program is free software licensed under GPL version 2
 * Please see the included DOCS/LICENSE.TXT for more information */
 
-#include "../../../shared/revision_nr.h"
+#include "../../shared/revision_nr.h"
 
 #ifdef WIN32
 #   define MANGOS_DLL_EXPORT extern "C" __declspec(dllexport)
