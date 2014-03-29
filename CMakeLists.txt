@@ -34,6 +34,8 @@ if(PCHSupport_FOUND AND WIN32) # TODO: why only enable it on windows by default?
 else()
   option(PCH                "Use precompiled headers"               OFF)
 endif()
+option(BUILD_SCRIPTS        "Build scripts"                         ON)
+
 # TODO: options that should be checked/created:
 #option(CLI                  "With CLI"                              ON)
 #option(RA                   "With Remote Access"                    OFF)
@@ -53,6 +55,7 @@ message(
                             the folder and the folder must contain a valid
                             CMakeLists.txt
     ACE_USE_EXTERNAL        Use external ACE
+    BUILD_SCRIPTS           Build server scripts content.
   To set an option simply type -D<OPTION>=<VALUE> after 'cmake <srcs>'.
   Also, you can specify the generator with -G. see 'cmake --help' for more details
   For example: cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/opt/mangos"
