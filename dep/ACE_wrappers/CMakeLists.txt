@@ -20,7 +20,7 @@ if(WIN32)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ace/config.h.win ${CMAKE_CURRENT_SOURCE_DIR}/ace/config.h)
 endif()
 
-if(WIN32 AND (MSVC OR MINGW)
+if(WIN32 AND MSVC)
   # VS100 uses MSBuild.exe instead of devenv.com, so force it to use devenv.com
   if(VS100_FOUND)
     set(ACE_BUILD_TOOL ${VS100_DIR}/devenv.com)
