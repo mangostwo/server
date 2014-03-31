@@ -2,7 +2,7 @@
  * mangos-two is a full featured server for World of Warcraft in its wotlk
  * version, supporting clients for patch 3.2.5a.
  *
- * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.com>
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
