@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -761,25 +761,25 @@
     <CustomBuild Include="..\revision.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Extracting revision</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">cd "$(SolutionDir)"
-"$(SolutionDir)..\..\..\win\VC110\genrevision__Win32_$(Configuration)\genrevision.exe"
+"$(SolutionDir)..\..\win\VC110\genrevision__Win32_$(Configuration)\genrevision.exe"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.svn/entries;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">revision.h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Extracting revision</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">cd "$(SolutionDir)"
-"$(SolutionDir)..\..\..\win\VC110\genrevision__Win32_$(Configuration)\genrevision.exe"
+"$(SolutionDir)..\..\win\VC110\genrevision__Win32_$(Configuration)\genrevision.exe"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.svn/entries;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">revision.h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Extracting revision</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">cd "$(SolutionDir)"
-"$(SolutionDir)..\..\..\win\VC110\genrevision__Win32_$(Configuration)\genrevision.exe"
+"$(SolutionDir)..\..\win\VC110\genrevision__Win32_$(Configuration)\genrevision.exe"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.svn/entries;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">revision.h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Extracting revision</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">cd "$(SolutionDir)"
-"$(SolutionDir)..\..\..\win\VC110\genrevision__Win32_$(Configuration)\genrevision.exe"
+"$(SolutionDir)..\..\win\VC110\genrevision__Win32_$(Configuration)\genrevision.exe"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.svn/entries;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">revision.h;%(Outputs)</Outputs>
