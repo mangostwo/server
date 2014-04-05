@@ -114,7 +114,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>mangosd.lib;ACEd.lib;framework.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\..\win\VC120\mangosd__Win32_Debug;..\..\..\..\win\VC120\framework__Win32_Debug;..\..\..\..\dep\lib\win32_debug\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\win\VC120\mangosd__Win32_Debug;..\..\..\win\VC120\framework__Win32_Debug;..\..\..\dep\lib\win32_debug\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -159,7 +159,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <AdditionalOptions>/Zm200 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>..\..\..\dep\include\;..\..\..\shared\;..\..\framework\;..\..\game\;..\include\;..\base\;..\..\..\dep\ACE_wrappers\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\dep\include\;..\..\shared\;..\..\framework\;..\..\game\;..\include\;..\base\;..\..\..\dep\ACE_wrappers\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;SCRIPT;_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
