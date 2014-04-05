@@ -24,12 +24,8 @@ copy ..\%1\*.dll %2
 echo **********************
 echo ** mangosd.conf     **
 echo **********************
-copy ..\..\src\mangosd\mangosd.conf.dist.in %2
+copy ..\..\src\mangosd\mangosd.conf.dist.in %2\mangosd.conf.dist
 echo **********************
 echo ** ahbot.conf       **
 echo **********************
-copy ..\..\src\game\AuctionHouseBot\ahbot.conf.dist.in %2
-rem echo **********************
-rem echo ** mods.conf        **
-rem echo **********************
-rem copy ..\..\src\game\extras\mods.conf.dist.in %2
+copy ..\..\src\game\AuctionHouseBot\ahbot.conf.dist.in %2\ahbot.conf.dist

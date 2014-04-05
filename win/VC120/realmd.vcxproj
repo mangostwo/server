@@ -239,7 +239,7 @@
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy ..\..\src\realmd\realmd.conf.dist.in ..\..\bin\$(Platform)_$(Configuration)</Command>
+      <Command>copy ..\..\src\realmd\realmd.conf.dist.in ..\..\bin\$(Platform)_$(Configuration)\realmd.conf.dist</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
