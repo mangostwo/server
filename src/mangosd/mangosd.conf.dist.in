@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2013012201
+ConfVersion=2014030801
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -776,6 +776,11 @@ LogColors = ""
 #        You can bypass this setting by typing "/script SetAllowLowLevelRaid(true/false)" command in chat
 #        Default: 10
 #
+#    PlayerCommands
+#        Should player chat be parsed for GM commands.
+#        Default: 1 (parse commands)
+#                 0 (ignore commands)
+#
 ###################################################################################################################
 
 GameType = 1
@@ -849,6 +854,7 @@ ShowProgressBars = 1
 WaitAtStartupError = 0
 Motd = "Welcome to the Massive Network Game Object Server."
 Raid.MinLevel = 10
+PlayerCommands = 1
 
 ###################################################################################################################
 # PLAYER INTERACTION
@@ -913,6 +919,10 @@ TalentsInspecting = 1
 #        Default: 1   - 100%
 #                 1.5 - 150%
 #                 0   - off (0%)
+#
+#    CreatureRespawnAggroDelay
+#        The delay between when a creature spawns and when it can be aggroed by nearby movement.
+#        Default: 5000 (5s)
 #
 #    CreatureFamilyFleeAssistanceRadius
 #        Radius which creature will use to seek for a near creature for assistance. Creature will flee to this creature.
@@ -1001,6 +1011,7 @@ TalentsInspecting = 1
 
 ThreatRadius = 100
 Rate.Creature.Aggro = 1
+CreatureRespawnAggroDelay = 5000
 CreatureFamilyFleeAssistanceRadius = 30
 CreatureFamilyAssistanceRadius = 10
 CreatureFamilyAssistanceDelay = 1500
@@ -1484,6 +1495,10 @@ Death.Ghost.RunSpeed.Battleground = 1.0
 #        Default: 1800000 (30 minutes)
 #                 0 - disable premade group matches (group always added to bg team in normal way)
 #
+#    BattleGround.Random.ResetHour
+#        Hour when random bg reset (0..23)
+#        Default: 6
+#
 ###################################################################################################################
 
 Battleground.CastDeserter = 1
@@ -1492,6 +1507,7 @@ Battleground.QueueAnnouncer.Start = 0
 Battleground.InvitationType = 0
 BattleGround.PrematureFinishTimer = 300000
 BattleGround.PremadeGroupWaitForMatch = 1800000
+BattleGround.Random.ResetHour = 6
 
 ###################################################################################################################
 # ARENA CONFIG

@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 /// \addtogroup mangosd Mangos Daemon
@@ -179,30 +182,16 @@ extern int main(int argc, char** argv)
 #endif
 
     sLog.outString("%s [world-daemon]", _FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_NR, REVISION_ID));
-    sLog.outString("<Ctrl-C> to stop.");
-    sLog.outString("\n\n"
-                    " ####       ####            ###     ###   ########    #######     ######## \n"
-                    " #####     #####            ####    ###  ##########  #########   ##########\n"
-                    " #####     #####            #####   ###  ##########  #########   ##########\n"
-                    " ######   ######            #####   ###  ###        ####   ####  ###       \n"
-                    " ######   ######    ####    ######  ###  ###        ###     ###  ###       \n"
-                    " ####### #######   ######   ######  ###  ###  ##### ###     ###  ########  \n"
-                    " ### ### ### ###   ######   ####### ###  ###  ##### ###     ###  ######### \n"
-                    " ### ### ### ###  ###  ###  ### ### ###  ###  ##### ###     ###   #########\n"
-                    " ### ####### ###  ###  ###  ###  ######  ###    ### ###     ###        ####\n"
-                    " ### ####### ###  ###  ###  ###  ######  ###    ### ###     ###         ###\n"
-                    " ###  #####  ### ########## ###   #####  ###   #### ####   ####        ####\n"
-                    " ###  #####  ### ########## ###   #####  #########   #########   ##########\n"
-                    " ###  #####  ### ###    ### ###    ####  #########   #########   ######### \n"
-                    " ###   ###   ### ###    ### ###     ###   #######     #######     #######  \n"
-                    "\n"
-                    "                                                     ######                \n"
-                    " Website: http://www.getmangos.co.uk                   ##   ## ## ##   ### \n"
-                    "                                                       ##   ## ## ##  ## ##\n"
-                    "    Wiki: http://github.com/mangoswiki/wiki            ##   ## ## ##  ## ##\n"
-                    "                                                       ##    ######   ## ##\n"
-                    "   Forum: http://community.getmangos.co.uk             ##     ####     ### \n"
-                    "\n\n");
+    sLog.outString("<Ctrl-C> to stop.\n"
+                   "  __  __      _  _  ___  ___  ___                       \n"
+                   " |  \\/  |__ _| \\| |/ __|/ _ \\/ __|                      \n"                                         
+                   " | |\\/| / _` | .` | (_ | (_) \\__ \\                      \n"                                         
+                   " |_|  |_\\__,_|_|\\_|\\___|\\___/|___/                      \n"
+                   "                                        _____           \n"            
+                   " For help and support please visit:    |_   _|_ __ _____\n"  
+                   " Website: https://getmangos.eu           | | \\ V  V / _ \\\n"  
+                   "    Wiki: http://github.com/mangoswiki   |_|  \\_/\\_/\\___/ \n" 
+                  );
     sLog.outString("Using configuration file %s.", cfg_file);
 
     DETAIL_LOG("%s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));

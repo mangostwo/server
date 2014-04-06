@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #include "SqlOperations.h"
@@ -44,7 +47,7 @@ SqlTransaction::~SqlTransaction()
 bool SqlTransaction::Execute(SqlConnection* conn)
 {
     if (m_queue.empty())
-        return true;
+        { return true; }
 
     LOCK_DB_CONN(conn);
 
@@ -85,7 +88,7 @@ bool SqlPreparedRequest::Execute(SqlConnection* conn)
 bool SqlQuery::Execute(SqlConnection* conn)
 {
     if (!m_callback || !m_queue)
-        return false;
+        { return false; }
 
     LOCK_DB_CONN(conn);
     /// execute the query and store the result in the callback
@@ -110,7 +113,7 @@ void SqlResultQueue::Update()
 bool SqlQueryHolder::Execute(MaNGOS::IQueryCallback* callback, SqlDelayThread* thread, SqlResultQueue* queue)
 {
     if (!callback || !thread || !queue)
-        return false;
+        { return false; }
 
     /// delay the execution of the queries, sync them with the delay thread
     /// which will in turn resync on execution (via the queue) and call back
@@ -176,14 +179,14 @@ QueryResult* SqlQueryHolder::GetResult(size_t index)
         return m_queries[index].second;
     }
     else
-        return NULL;
+        { return NULL; }
 }
 
 void SqlQueryHolder::SetResult(size_t index, QueryResult* result)
 {
     /// store the result in the holder
     if (index < m_queries.size())
-        m_queries[index].second = result;
+        { m_queries[index].second = result; }
 }
 
 SqlQueryHolder::~SqlQueryHolder()
@@ -209,7 +212,7 @@ void SqlQueryHolder::SetSize(size_t size)
 bool SqlQueryHolderEx::Execute(SqlConnection* conn)
 {
     if (!m_holder || !m_callback || !m_queue)
-        return false;
+        { return false; }
 
     LOCK_DB_CONN(conn);
     /// we can do this, we are friends
@@ -218,7 +221,7 @@ bool SqlQueryHolderEx::Execute(SqlConnection* conn)
     {
         /// execute all queries in the holder and pass the results
         char const* sql = queries[i].first;
-        if (sql) m_holder->SetResult(i, conn->Query(sql));
+        if (sql) { m_holder->SetResult(i, conn->Query(sql)); }
     }
 
     /// sync with the caller thread

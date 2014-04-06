@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef MANGOS_UNORDERED_MAP_H
@@ -22,7 +25,10 @@
 #include "Platform/CompilerDefs.h"
 #include "Platform/Define.h"
 
-#if COMPILER == COMPILER_INTEL
+#if COMPILER == COMPILER_CLANG
+#  include <tr1/unordered_map>
+#  include <tr1/unordered_set>
+#elif COMPILER == COMPILER_INTEL
 #  include <ext/hash_map>
 #  include <ext/hash_set>
 #elif COMPILER == COMPILER_GNU && (__GNUC__ > 4 || __GNUC__ == 4 && __GNUC_MINOR__ >= 3)
@@ -87,12 +93,17 @@ HASH_NAMESPACE_END
 #  define HASH_NAMESPACE_END }
 using std::hash_map;
 using std::hash_set;
+#elif COMPILER == COMPILER_CLANG
+#  define UNORDERED_MAP std::tr1::unordered_map
+#  define UNORDERED_SET std::tr1::unordered_set
+#  define HASH_NAMESPACE_START namespace std { namespace tr1 {
+#  define HASH_NAMESPACE_END } }
 #elif COMPILER == COMPILER_GNU && (__GNUC__ > 4 || __GNUC__ == 4 && __GNUC_MINOR__ >= 3)
 #  define UNORDERED_MAP std::tr1::unordered_map
 #  define UNORDERED_SET std::tr1::unordered_set
 #  define HASH_NAMESPACE_START namespace std { namespace tr1 {
 #  define HASH_NAMESPACE_END } }
-#elif COMPILER == COMPILER_GNU && __GNUC__ >= 3
+#elif COMPILER == COMPILER_GNU && __GNUC__ >= 3 && (__GNUC__ < 4 || __GNUC__ == 4 && __GNUC_MINOR__ < 3)
 #  define UNORDERED_MAP __gnu_cxx::hash_map
 #  define UNORDERED_SET __gnu_cxx::hash_set
 #  define HASH_NAMESPACE_START namespace __gnu_cxx {

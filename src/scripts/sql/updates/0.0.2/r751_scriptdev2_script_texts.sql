@@ -1,0 +1,20 @@
+DELETE FROM `script_texts` WHERE `entry` BETWEEN -1534017 AND -1534000;
+INSERT INTO `script_texts` (`entry`,`content_default`,`sound`,`type`,`language`,`comment`) VALUES
+(-1534000,'I\'m in jeopardy, help me if you can!',11007,1,0,'jaina hyjal ATTACKED 1'),
+(-1534001,'They\'ve broken through!',11049,1,0,'jaina hyjal ATTACKED 2'),
+(-1534002,'Stay alert! Another wave approaches.',11008,1,0,'jaina hyjal INCOMING'),
+(-1534003,'Don\'t give up! We must prevail!',11006,1,0,'jaina hyjal BEGIN'),
+(-1534004,'Hold them back as long as possible.',11050,1,0,'jaina hyjal RALLY 1'),
+(-1534005,'We must hold strong!',11051,1,0,'jaina hyjal RALLY 2'),
+(-1534006,'We are lost. Fall back!',11009,1,0,'jaina hyjal FAILURE'),
+(-1534007,'We have won valuable time. Now we must pull back!',11011,1,0,'jaina hyjal SUCCESS'),
+(-1534008,'I did... my best.',11010,1,0,'jaina hyjal DEATH'),
+(-1534009,'I will lie down for no one!',11031,1,0,'thrall hyjal ATTACKED 1'),
+(-1534010,'Bring the fight to me and pay with your lives!',11061,1,0,'thrall hyjal ATTACKED 2'),
+(-1534011,'Make ready for another wave! LOK-TAR OGAR!',11032,1,0,'thrall hyjal INCOMING'),
+(-1534012,'Hold them back! Do not falter!',11030,1,0,'thrall hyjal BEGIN'),
+(-1534013,'Victory or death!',11059,1,0,'thrall hyjal RALLY 1'),
+(-1534014,'Do not give an inch of ground!',11060,1,0,'thrall hyjal RALLY 2'),
+(-1534015,'It is over. Withdraw! We have failed.',11033,1,0,'thrall hyjal FAILURE'),
+(-1534016,'We have played our part and done well. It is up to the others now.',11035,1,0,'thrall hyjal SUCCESS'),
+(-1534017,'Uraaa...',11034,1,0,'thrall hyjal DEATH');

@@ -1,0 +1,45 @@
+DELETE FROM `script_texts` WHERE `entry` BETWEEN -1509027 AND -1509000;
+INSERT INTO `script_texts` (`entry`,`content_default`,`sound`,`type`,`language`,`comment`) VALUES
+(-1509000,'senses your fear.',0,2,0,'moam EMOTE_AGGRO'),
+(-1509001,'bristles with energy!',0,2,0,'moan EMOTE_MANA_FULL'),
+(-1509002,'sets eyes on $N!',0,2,0,'buru EMOTE_TARGET'),
+(-1509003,'They come now. Try not to get yourself killed, young blood.',0,1,0,'andorov SAY_ANDOROV_INTRO'),
+(-1509004,'Remember, Rajaxx, when I said I\'d kill you last? I lied...',0,1,0,'andorov SAY_ANDOROV_ATTACK'),
+(-1509005,'The time of our retribution is at hand! Let darkness reign in the hearts of our enemies!',8612,1,0,'rajaxx SAY_WAVE3'),
+(-1509006,'No longer will we wait behind barred doors and walls of stone! No longer will our vengeance be denied! The dragons themselves will tremble before our wrath!',8610,1,0,'rajaxx SAY_WAVE4'),
+(-1509007,'Fear is for the enemy! Fear and death!',8608,1,0,'rajaxx SAY_WAVE5'),
+(-1509008,'Staghelm will whimper and beg for his life, just as his whelp of a son did! One thousand years of injustice will end this day!',8611,1,0,'rajaxx SAY_WAVE6'),
+(-1509009,'Fandral! Your time has come! Go and hide in the Emerald Dream and pray we never find you!',8607,1,0,'rajaxx SAY_WAVE7'),
+(-1509010,'Impudent fool! I will kill you myself!',8609,1,0,'rajaxx SAY_INTRO'),
+(-1509011,'Attack and make them pay dearly!',8603,1,0,'rajaxx SAY_UNK1'),
+(-1509012,'Crush them! Drive them out!',8605,1,0,'rajaxx SAY_UNK2'),
+(-1509013,'Do not hesitate! Destroy them!',8606,1,0,'rajaxx SAY_UNK3'),
+(-1509014,'Warriors! Captains! Continue the fight!',8613,1,0,'rajaxx SAY_UNK4'),
+(-1509015,'You are not worth my time $N!',8614,1,0,'rajaxx SAY_DEAGGRO'),
+(-1509016,'Breath your last!',8604,1,0,'rajaxx SAY_KILLS_ANDOROV'),
+(-1509017,'Soon you will know the price of your meddling, mortals... The master is nearly whole... And when he rises, your world will be cease!',0,1,0,'rajaxx SAY_COMPLETE_QUEST');
+(-1509018,'I am rejuvinated!',8593,1,0,'ossirian SAY_SURPREME1'),
+(-1509019,'My powers are renewed!',8595,1,0,'ossirian SAY_SURPREME2'),
+(-1509020,'My powers return!',8596,1,0,'ossirian SAY_SURPREME3'),
+(-1509021,'Protect the city at all costs!',8597,1,0,'ossirian SAY_RAND_INTRO1'),
+(-1509022,'The walls have been breached!',8599,1,0,'ossirian SAY_RAND_INTRO2'),
+(-1509023,'To your posts. Defend the city.',8600,1,0,'ossirian SAY_RAND_INTRO3'),
+(-1509024,'Tresspassers will be terminated.',8601,1,0,'ossirian SAY_RAND_INTRO4'),
+(-1509025,'Sands of the desert rise and block out the sun!',8598,1,0,'ossirian SAY_AGGRO'),
+(-1509026,'You are terminated.',8602,1,0,'ossirian SAY_SLAY'),
+(-1509027,'I...have...failed.',8594,1,0,'ossirian SAY_DEATH');
+
+DELETE FROM `script_texts` WHERE `entry` BETWEEN -1531011 AND -1531000;
+INSERT INTO `script_texts` (`entry`,`content_default`,`sound`,`type`,`language`,`comment`) VALUES
+(-1531000,'Are you so eager to die? I would be happy to accomodate you.',8615,1,0,'skeram SAY_AGGRO1'),
+(-1531001,'Cower mortals! The age of darkness is at hand.',8616,1,0,'skeram SAY_AGGRO2'),
+(-1531002,'Tremble! The end is upon you.',8621,1,0,'skeram SAY_AGGRO3'),
+(-1531003,'Let your death serve as an example!',8617,1,0,'skeram SAY_SLAY1'),
+(-1531004,'Spineless wretches! You will drown in rivers of blood!',8619,1,0,'skeram SAY_SLAY2'),
+(-1531005,'The screams of the dying will fill the air. A symphony of terror is about to begin!',8620,1,0,'skeram SAY_SLAY3'),
+(-1531006,'Prepare for the return of the ancient ones!',8618,1,0,'skeram SAY_SPLIT'),
+(-1531007,'You only delay... the inevetable.',8622,1,0,'skeram SAY_DEATH'),
+(-1531008,'You will be judged for defiling these sacred grounds! The laws of the Ancients will not be challenged! Trespassers will be annihilated!',8646,1,0,'sartura SAY_AGGRO'),
+(-1531009,'I sentence you to death!',8647,1,0,'sartura SAY_SLAY'),
+(-1531010,'I serve to the last!',8648,1,0,'sartura SAY_DEATH'),
+(-1531011,'is weakened!',0,2,0,'cthun EMOTE_WEAKENED');

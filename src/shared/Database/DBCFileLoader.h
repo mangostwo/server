@@ -14,14 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef DBC_FILE_LOADER_H
 #define DBC_FILE_LOADER_H
+
 #include "Platform/Define.h"
 #include "Utilities/ByteConverter.h"
 #include <cassert>
 
+/**
+ * @brief
+ *
+ */
 enum FieldFormat
 {
     FT_NA = 'x',                                            // ignore/ default, 4 byte size, in Source String means field is ignored, in Dest String means field is filled with default value
@@ -37,17 +45,46 @@ enum FieldFormat
     FT_LOGIC = 'l'                                          // Logical (boolean)
 };
 
+/**
+ * @brief
+ *
+ */
 class DBCFileLoader
 {
     public:
+        /**
+         * @brief
+         *
+         */
         DBCFileLoader();
+        /**
+         * @brief
+         *
+         */
         ~DBCFileLoader();
 
+        /**
+         * @brief
+         *
+         * @param filename
+         * @param fmt
+         * @return bool
+         */
         bool Load(const char* filename, const char* fmt);
 
+        /**
+         * @brief
+         *
+         */
         class Record
         {
             public:
+                /**
+                 * @brief
+                 *
+                 * @param field
+                 * @return float
+                 */
                 float getFloat(size_t field) const
                 {
                     assert(field < file.fieldCount);
@@ -55,6 +92,12 @@ class DBCFileLoader
                     EndianConvert(val);
                     return val;
                 }
+                /**
+                 * @brief
+                 *
+                 * @param field
+                 * @return uint32
+                 */
                 uint32 getUInt(size_t field) const
                 {
                     assert(field < file.fieldCount);
@@ -62,12 +105,24 @@ class DBCFileLoader
                     EndianConvert(val);
                     return val;
                 }
+                /**
+                 * @brief
+                 *
+                 * @param field
+                 * @return uint8
+                 */
                 uint8 getUInt8(size_t field) const
                 {
                     assert(field < file.fieldCount);
                     return *reinterpret_cast<uint8*>(offset + file.GetOffset(field));
                 }
 
+                /**
+                 * @brief
+                 *
+                 * @param field
+                 * @return const char
+                 */
                 const char* getString(size_t field) const
                 {
                     assert(field < file.fieldCount);
@@ -77,32 +132,85 @@ class DBCFileLoader
                 }
 
             private:
+                /**
+                 * @brief
+                 *
+                 * @param file_
+                 * @param offset_
+                 */
                 Record(DBCFileLoader& file_, unsigned char* offset_): offset(offset_), file(file_) {}
-                unsigned char* offset;
-                DBCFileLoader& file;
+                unsigned char* offset; /**< TODO */
+                DBCFileLoader& file; /**< TODO */
 
                 friend class DBCFileLoader;
         };
 
-        // Get record by id
+        /**
+         * @brief Get record by id
+         *
+         * @param id
+         * @return Record
+         */
         Record getRecord(size_t id);
-        /// Get begin iterator over records
 
+        /**
+         * @brief Get begin iterator over records
+         *
+         * @return uint32
+         */
         uint32 GetNumRows() const { return recordCount;}
+        /**
+         * @brief
+         *
+         * @return uint32
+         */
         uint32 GetCols() const { return fieldCount; }
+        /**
+         * @brief
+         *
+         * @param id
+         * @return uint32
+         */
         uint32 GetOffset(size_t id) const { return (fieldsOffset != NULL && id < fieldCount) ? fieldsOffset[id] : 0; }
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool IsLoaded() {return (data != NULL);}
+        /**
+         * @brief
+         *
+         * @param fmt
+         * @param count
+         * @param indexTable
+         * @return char
+         */
         char* AutoProduceData(const char* fmt, uint32& count, char**& indexTable);
+        /**
+         * @brief
+         *
+         * @param fmt
+         * @param dataTable
+         * @return char
+         */
         char* AutoProduceStrings(const char* fmt, char* dataTable);
+        /**
+         * @brief
+         *
+         * @param format
+         * @param index_pos
+         * @return uint32
+         */
         static uint32 GetFormatRecordSize(const char* format, int32* index_pos = NULL);
     private:
 
-        uint32 recordSize;
-        uint32 recordCount;
-        uint32 fieldCount;
-        uint32 stringSize;
-        uint32* fieldsOffset;
-        unsigned char* data;
-        unsigned char* stringTable;
+        uint32 recordSize; /**< TODO */
+        uint32 recordCount; /**< TODO */
+        uint32 fieldCount; /**< TODO */
+        uint32 stringSize; /**< TODO */
+        uint32* fieldsOffset; /**< TODO */
+        unsigned char* data; /**< TODO */
+        unsigned char* stringTable; /**< TODO */
 };
 #endif

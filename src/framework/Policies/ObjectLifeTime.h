@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef MANGOS_OBJECTLIFETIME_H
@@ -22,26 +25,52 @@
 #include <stdexcept>
 #include "Platform/Define.h"
 
+/**
+ * @brief
+ *
+ */
 typedef void (* Destroyer)(void);
 
 namespace MaNGOS
 {
+    /**
+     * @brief
+     *
+     * @param (func)()
+     */
     void MANGOS_DLL_SPEC at_exit(void (*func)());
 
     template<class T>
+    /**
+     * @brief
+     *
+     */
     class MANGOS_DLL_DECL ObjectLifeTime
     {
         public:
 
+            /**
+             * @brief
+             *
+             * @param (destroyer)()
+             */
             static void ScheduleCall(void (*destroyer)())
             {
                 at_exit(destroyer);
             }
 
+            /**
+             * @brief
+             *
+             */
             DECLSPEC_NORETURN static void OnDeadReference() ATTR_NORETURN;
     };
 
     template <class T>
+    /**
+     * @brief We don't handle Dead Reference for now
+     *
+     */
     void ObjectLifeTime<T>::OnDeadReference()           // We don't handle Dead Reference for now
     {
         throw std::runtime_error("Dead Reference");

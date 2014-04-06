@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
   `cache_id` int(10) default '0',
-  `required_12523_01_mangos_db_script_string` bit(1) default NULL
+  `required_12545_01_mangos_command` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -488,7 +488,7 @@ LOCK TABLES `command` WRITE;
 INSERT INTO `command` VALUES
 ('account',0,'Syntax: .account\r\n\r\nDisplay the access level of your account.'),
 ('account characters',3,'Syntax: .account characters [#accountId|$accountName]\r\n\r\nShow list all characters for account selected by provided #accountId or $accountName, or for selected player in game.'),
-('account create',4,'Syntax: .account create $account $password\r\n\r\nCreate account and set password to it.'),
+('account create',4,'Syntax: .account create $account $password [$expansion]\r\n\r\nCreate account and set password to it. Optionally, you may also set another expansion for this account than the defined default value.'),
 ('account delete',4,'Syntax: .account delete $account\r\n\r\nDelete account with all characters.'),
 ('account lock',0,'Syntax: .account lock [on|off]\r\n\r\nAllow login from account only from current used IP or remove this requirement.'),
 ('account onlinelist',4,'Syntax: .account onlinelist\r\n\r\nShow list of online accounts.'),
@@ -13311,6 +13311,7 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (10,2,27762,'Libram'),
 (10,2,28730,'Arcane Torrent'),
 (10,2,28877,'Arcane Affinity'),
+(10,2,61437,'Opening'),
 (10,2,68398, 'Opening'),
 (10,3,75,'Auto Shot'),
 (10,3,81,'Dodge'),
@@ -13350,6 +13351,7 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (10,3,28730,'Arcane Torrent'),
 (10,3,28877,'Arcane Affinity'),
 (10,3,34082,'Advantaged State (DND)'),
+(10,3,61437,'Opening'),
 (10,3,68398,'Opening'),
 (10,4,81,'Dodge'),
 (10,4,203,'Unarmed'),
@@ -13389,6 +13391,7 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (10,4,22810,'Opening - No Text'),
 (10,4,25046,'Arcane Torrent'),
 (10,4,28877,'Arcane Affinity'),
+(10,4,61437,'Opening'),
 (10,4,68398,'Opening'),
 (10,5,81,'Dodge'),
 (10,5,198,'One-Handed Maces'),
@@ -13425,6 +13428,7 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (10,5,22810,'Opening - No Text'),
 (10,5,28730,'Arcane Torrent'),
 (10,5,28877,'Arcane Affinity'),
+(10,5,61437,'Opening'),
 (10,5,68398, 'Opening'),
 (10,6,81,'Dodge'),
 (10,6,196,'One-Handed Axes'),
@@ -13527,6 +13531,7 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (10,8,22810,'Opening - No Text'),
 (10,8,28730,'Arcane Torrent'),
 (10,8,28877,'Arcane Affinity'),
+(10,8,61437,'Opening'),
 (10,8,68398,'Opening'),
 (10,9,81,'Dodge'),
 (10,9,203,'Unarmed'),
@@ -13565,6 +13570,7 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (10,9,28730,'Arcane Torrent'),
 (10,9,28877,'Arcane Affinity'),
 (10,9,58284,'Chaos Bolt Passive'),
+(10,9,61437,'Opening'),
 (10,9,68398,'Opening'),
 (10,9,75445,'Demonic Immolate'),
 (11,1,78,'Heroic Strike'),

@@ -13,7 +13,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifdef WIN32
@@ -23,6 +26,11 @@
 #include <cstring>
 #include <windows.h>
 #include <winsvc.h>
+
+// stupid ACE define
+#ifdef main
+#undef main
+#endif
 
 #if !defined(WINADVAPI)
 #if !defined(_ADVAPI32_)
@@ -156,7 +164,7 @@ bool WinServiceUninstall()
     if (QueryServiceStatus(service, &serviceStatus2))
     {
         if (serviceStatus2.dwCurrentState == SERVICE_STOPPED)
-            DeleteService(service);
+            { DeleteService(service); }
     }
 
     CloseServiceHandle(service);
@@ -194,10 +202,10 @@ void WINAPI ServiceControlHandler(DWORD controlCode)
         default:
             if (controlCode >= 128 && controlCode <= 255)
                 // user defined control code
-                break;
+                { break; }
             else
                 // unrecognized control code
-                break;
+                { break; }
     }
 
     SetServiceStatus(serviceStatusHandle, &serviceStatus);
@@ -225,7 +233,7 @@ void WINAPI ServiceMain(DWORD argc, char* argv[])
 
         for (i = 0; i < std::strlen(path); ++i)
         {
-            if (path[i] == '\\') last_slash = i;
+            if (path[i] == '\\') { last_slash = i; }
         }
 
         path[last_slash] = 0;

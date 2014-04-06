@@ -11,6 +11,7 @@ mail from the AH or get returned mail.
 
 You must copy config file template as ahbot.conf from src/game/AuctionHouseBot/ahbot.conf.dist.in
 to directory wher use store mangosd.conf file, and modify values to appropriate for you state.
-Read ahbot.conf option descriptions for details.
+Read ahbot.conf option descriptions for details. When using Visual Studio to build the project,
+This should now be copied automatically to the bin folder.
 
 Note: But default AHBot disabled by provided config options values

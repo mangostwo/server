@@ -1,0 +1,9 @@
+DELETE FROM script_texts WHERE entry BETWEEN -1554012 AND -1554006;
+INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
+(-1554006,'REUSE_ME',0,0,0,0,'REUSE_ME'),
+(-1554007,'REUSE_ME',0,0,0,0,'REUSE_ME'),
+(-1554008,'REUSE_ME',0,0,0,0,'REUSE_ME'),
+(-1554009,'REUSE_ME',0,0,0,0,'REUSE_ME'),
+(-1554010,'REUSE_ME',0,0,0,0,'REUSE_ME'),
+(-1554011,'REUSE_ME',0,0,0,0,'REUSE_ME'),
+(-1554012,'REUSE_ME',0,0,0,0,'REUSE_ME');

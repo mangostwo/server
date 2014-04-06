@@ -1,0 +1,22 @@
+DELETE FROM script_texts WHERE entry BETWEEN -1000947 AND -1000928;
+INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
+(-1000928,'%s motions for silence.',0,3,0,25,'king_ymiron EMOTE_KING_SILENCE'),
+(-1000929,'Vrykul, your king implores you listen!',0,1,0,22,'king_ymiron SAY_KING_YMIRON_SPEECH_1'),
+(-1000930,'The Gods have abandonned us!',0,1,0,22,'king_ymiron SAY_KING_YMIRON_SPEECH_2'),
+(-1000931,'The crowd gasps in horror.',0,2,0,0,'king_ymiron EMOTE_YMIRON_CROWD_1'),
+(-1000932,'Even now, in our darkest hour, they mock us!',0,1,0,22,'king_ymiron SAY_KING_YMIRON_SPEECH_3'),
+(-1000933,'Where are the titans in out time of greatest need? Our women birth abberations - disfigured runts unable to even stand on their own! Weak and ugly... Useless...',0,1,0,22,'king_ymiron SAY_KING_YMIRON_SPEECH_4'),
+(-1000934,'Ymiron has toiled. Long have I sat upon my throne and thought hard of our plight. There is only one answer... One reason...',0,1,0,22,'king_ymiron SAY_KING_YMIRON_SPEECH_5'),
+(-1000935,'For who but the titans themselves could bestow such a curse? What could have such power?',0,1,0,22,'king_ymiron SAY_KING_YMIRON_SPEECH_6'),
+(-1000936,'And the answer is nothing... For it is the titans who have cursed us!',0,1,0,22,'king_ymiron SAY_KING_YMIRON_SPEECH_7'),
+(-1000937,'The crowd clamours.',0,2,0,0,'king_ymiron EMOTE_YMIRON_CROWD_2'),
+(-1000938,'On this day all Vrykul will shed their old beliefs! We denounce our old gods! All Vrykul will pledge their allegiance to Ymiron! Ymiron will protect our noble race!',0,1,0,22,'king_ymiron SAY_KING_YMIRON_SPEECH_8'),
+(-1000939,'The crowd cheers.',0,2,0,0,'king_ymiron EMOTE_YMIRON_CROWD_3'),
+(-1000940,'And now my first decree upon the Vrykul! All malformed infants born of Vrykul mother and father are to be destroyed upon birth! Our blood must remain pure always! Those found in violation of Ymiron\'s decree will be taken to Gjalerbron for execution!',0,1,0,22,'king_ymiron SAY_KING_YMIRON_SPEECH_9'),
+(-1000941,'Vrykul must remain pure!',0,0,0,0,'king_ymiron_crowd SAY_YMIRON_CROWD_1'),
+(-1000942,'Show the aberrations no mercy, Ymiron!',0,0,0,0,'king_ymiron_crowd SAY_YMIRON_CROWD_2'),
+(-1000943,'Show them mercy, my king! They are of our flesh and blood!',0,0,0,0,'king_ymiron_crowd SAY_YMIRON_CROWD_3'),
+(-1000944,'They weaken us! Our strength is dilluted by their very existence! Destroy them all!',0,0,0,0,'king_ymiron_crowd SAY_YMIRON_CROWD_4'),
+(-1000945,'All hail our glorious king, Ymiron!',0,0,0,0,'king_ymiron_crowd SAY_YMIRON_CROWD_5'),
+(-1000946,'The King is going to speak!',0,0,0,0,'king_ymiron_crowd SAY_YMIRON_CROWD_6'),
+(-1000947,'Let him speak! Be silent!',0,0,0,0,'king_ymiron_crowd SAY_YMIRON_CROWD_7');

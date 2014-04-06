@@ -30,7 +30,6 @@ set(LIBRARY_SRCS
     Platform/CompilerDefs.h
     Platform/Define.h
     Policies/CreationPolicy.h
-    Policies/MemoryManagement.cpp
     Policies/ObjectLifeTime.cpp
     Policies/ObjectLifeTime.h
     Policies/Singleton.h

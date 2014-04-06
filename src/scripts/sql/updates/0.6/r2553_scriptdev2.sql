@@ -1,0 +1,6 @@
+DELETE FROM gossip_texts WHERE entry IN (-3000106,-3000107,-3000108,-3560000);
+INSERT INTO gossip_texts (entry,content_default,comment) VALUES
+(-3000106,'REUSE ME','REUSE ME'),
+(-3000107,'REUSE ME','REUSE ME'),
+(-3000108,'REUSE ME','REUSE ME'),
+(-3560000,'REUSE ME','REUSE ME');

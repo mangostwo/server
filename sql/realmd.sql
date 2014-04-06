@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `realmd_db_version`;
 CREATE TABLE `realmd_db_version` (
-  `required_c12484_02_realmd_account_access` bit(1) default NULL
+  `required_z2426_01_realmd_relations` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 
 --
@@ -41,7 +41,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `account`;
 CREATE TABLE `account` (
-  `id` int(11) unsigned NOT NULL auto_increment COMMENT 'Identifier',
+  `id` INT( 11 ) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT  'Account identifier',
   `username`      varchar(32) NOT NULL default '',
   `sha_pass_hash` varchar(40) NOT NULL default '',
   `gmlevel` tinyint(3) unsigned NOT NULL default '0',
@@ -83,7 +83,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `account_banned`;
 CREATE TABLE `account_banned` (
-  `id` int(11) NOT NULL default '0' COMMENT 'Account id',
+  `id` INT( 11 ) UNSIGNED NOT NULL COMMENT  'Account identifier',
   `bandate` bigint(40) NOT NULL default '0',
   `unbandate` bigint(40) NOT NULL default '0',
   `bannedby` varchar(50) NOT NULL,
@@ -130,8 +130,8 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `realmcharacters`;
 CREATE TABLE `realmcharacters` (
-  `realmid` int(11) unsigned NOT NULL default '0',
-  `acctid` bigint(20) unsigned NOT NULL,
+  `realmid` INT( 11 ) UNSIGNED NOT NULL COMMENT  'Account identifier',
+  `acctid` INT( 11 ) UNSIGNED NOT NULL COMMENT  'Realm identifier',
   `numchars` tinyint(3) unsigned NOT NULL default '0',
   PRIMARY KEY  (`realmid`,`acctid`),
   KEY (acctid)
@@ -152,7 +152,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `realmlist`;
 CREATE TABLE `realmlist` (
-  `id` int(11) unsigned NOT NULL auto_increment,
+  `id` INT( 11 ) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT  'Realm identifier',
   `name` varchar(32) NOT NULL default '',
   `address` varchar(32) NOT NULL default '127.0.0.1',
   `port` int(11) NOT NULL default '8085',
@@ -183,7 +183,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `uptime`;
 CREATE TABLE `uptime` (
-  `realmid` int(11) unsigned NOT NULL,
+  `realmid` INT( 11 ) UNSIGNED NOT NULL COMMENT  'Realm identifier',
   `starttime` bigint(20) unsigned NOT NULL default '0',
   `startstring` varchar(64) NOT NULL default '',
   `uptime` bigint(20) unsigned NOT NULL default '0',

@@ -1,0 +1,13 @@
+UPDATE creature_template SET ScriptName='' WHERE entry=12225;
+UPDATE creature_template SET ScriptName='' WHERE entry=12203;
+UPDATE creature_template SET ScriptName='' WHERE entry=12201;
+UPDATE creature_template SET ScriptName='' WHERE entry=7358;
+UPDATE creature_template SET ScriptName='' WHERE entry=15802;
+UPDATE creature_template SET ScriptName='' WHERE entry=15334;
+UPDATE creature_template SET ScriptName='' WHERE entry=15725;
+UPDATE creature_template SET ScriptName='' WHERE entry=15726;
+UPDATE creature_template SET ScriptName='' WHERE entry=17946;
+UPDATE creature_template SET ScriptName='' WHERE entry=3057;
+UPDATE creature_template SET ScriptName='' WHERE entry=17848;
+UPDATE creature_template SET ScriptName='' WHERE entry=18096;
+UPDATE creature_template SET ScriptName='' WHERE entry=17862;

@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef SQLSTORAGE_IMPL_H
@@ -24,13 +27,27 @@
 #include "DBCFileLoader.h"
 
 template<class DerivedLoader, class StorageClass>
-template<class S, class D>                                  // S source-type, D destination-type
+template<class S, class D>
+/**
+ * @brief S source-type, D destination-type
+ *
+ * @param uint32
+ * @param src
+ * @param dst
+ */
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert(uint32 /*field_pos*/, S src, D& dst)
 {
     dst = D(src);
 }
 
 template<class DerivedLoader, class StorageClass>
+/**
+ * @brief
+ *
+ * @param uint32
+ * @param src
+ * @param dst
+ */
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert_str_to_str(uint32 /*field_pos*/, char const* src, char*& dst)
 {
     if (!src)
@@ -47,7 +64,14 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert_str_to_str(uint3
 }
 
 template<class DerivedLoader, class StorageClass>
-template<class S>                                           // S source-type
+template<class S>
+/**
+ * @brief S source-type
+ *
+ * @param uint32
+ * @param S
+ * @param dst
+ */
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert_to_str(uint32 /*field_pos*/, S /*src*/, char*& dst)
 {
     dst = new char[1];
@@ -55,20 +79,41 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert_to_str(uint32 /*
 }
 
 template<class DerivedLoader, class StorageClass>
-template<class D>                                           // D destination-type
+template<class D>
+/**
+ * @brief D destination-type
+ *
+ * @param uint32
+ * @param
+ * @param dst
+ */
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert_from_str(uint32 /*field_pos*/, char const* /*src*/, D& dst)
 {
     dst = 0;
 }
 
 template<class DerivedLoader, class StorageClass>
-template<class S, class D>                                  // S source-type, D destination-type
+template<class S, class D>
+/**
+ * @brief S source-type, D destination-type
+ *
+ * @param uint32
+ * @param src
+ * @param dst
+ */
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::default_fill(uint32 /*field_pos*/, S src, D& dst)
 {
     dst = D(src);
 }
 
 template<class DerivedLoader, class StorageClass>
+/**
+ * @brief
+ *
+ * @param uint32
+ * @param
+ * @param dst
+ */
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::default_fill_to_str(uint32 /*field_pos*/, char const* /*src*/, char*& dst)
 {
     dst = new char[1];
@@ -76,7 +121,16 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::default_fill_to_str(uint
 }
 
 template<class DerivedLoader, class StorageClass>
-template<class V>                                           // V value-type
+template<class V>
+/**
+ * @brief V value-type
+ *
+ * @param value
+ * @param store
+ * @param p
+ * @param x
+ * @param offset
+ */
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::storeValue(V value, StorageClass& store, char* p, uint32 x, uint32& offset)
 {
     DerivedLoader* subclass = (static_cast<DerivedLoader*>(this));
@@ -116,7 +170,7 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::storeValue(V value, Stor
             break;
         case FT_IND:
         case FT_SORT:
-            assert(false && "SQL storage not have sort field types");
+            assert(false && "SQL storage does not have sort field types");
             break;
         default:
             assert(false && "unknown format character");
@@ -125,6 +179,15 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::storeValue(V value, Stor
 }
 
 template<class DerivedLoader, class StorageClass>
+/**
+ * @brief
+ *
+ * @param value
+ * @param store
+ * @param p
+ * @param x
+ * @param offset
+ */
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::storeValue(char const* value, StorageClass& store, char* p, uint32 x, uint32& offset)
 {
     DerivedLoader* subclass = (static_cast<DerivedLoader*>(this));
@@ -156,7 +219,7 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::storeValue(char const* v
             break;
         case FT_IND:
         case FT_SORT:
-            assert(false && "SQL storage not have sort field types");
+            assert(false && "SQL storage does not have sort field types");
             break;
         default:
             assert(false && "unknown format character");
@@ -165,6 +228,12 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::storeValue(char const* v
 }
 
 template<class DerivedLoader, class StorageClass>
+/**
+ * @brief
+ *
+ * @param store
+ * @param error_at_empty
+ */
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::Load(StorageClass& store, bool error_at_empty /*= true*/)
 {
     Field* fields = NULL;
@@ -173,7 +242,7 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::Load(StorageClass& store
     {
         sLog.outError("Error loading %s table (not exist?)\n", store.GetTableName());
         Log::WaitBeforeContinueIfNeed();
-        exit(1);                                            // Stop server at loading non exited table or not accessable table
+        exit(1);                                            // Stop server at loading non existent table or inaccessible table
     }
 
     uint32 maxRecordId = (*result)[0].GetUInt32() + 1;
@@ -194,9 +263,9 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::Load(StorageClass& store
     if (!result)
     {
         if (error_at_empty)
-            sLog.outError("%s table is empty!\n", store.GetTableName());
+            { sLog.outError("%s table is empty!\n", store.GetTableName()); }
         else
-            sLog.outString("%s table is empty!\n", store.GetTableName());
+            { sLog.outString("%s table is empty!\n", store.GetTableName()); }
 
         recordCount = 0;
         return;
@@ -205,7 +274,7 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::Load(StorageClass& store
     if (store.GetSrcFieldCount() != result->GetFieldCount())
     {
         recordCount = 0;
-        sLog.outError("Error in %s table, probably sql file format was updated (there should be %d fields in sql).\n", store.GetTableName(), store.GetSrcFieldCount());
+        sLog.outError("Error in %s table.Perhaps the table structure was changed. There should be %d fields in the table.\n", store.GetTableName(), store.GetSrcFieldCount());
         delete result;
         Log::WaitBeforeContinueIfNeed();
         exit(1);                                            // Stop server at loading broken or non-compatible table.
@@ -274,7 +343,7 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::Load(StorageClass& store
 
             // It is required that the input has at least as many columns set as the output requires
             if (y >= store.GetSrcFieldCount())
-                assert(false && "SQL storage has too few columns!");
+                { assert(false && "SQL storage has too few columns!"); }
 
             switch (store.GetSrcFormat(y))
             {

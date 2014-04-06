@@ -184,6 +184,8 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
         case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
             ForceGameObjectHealth(GetMaxHealth(), NULL);
             break;
+        default:
+            break;
     }
 
     // Notify the battleground or outdoor pvp script
@@ -245,6 +247,8 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     }
                     break;
                 }
+                default:
+                    break;
             }
             break;
         }
@@ -804,7 +808,7 @@ bool GameObject::ActivateToQuest(Player* pTarget) const
                 // look for battlegroundAV for some objects which are only activated after mine gots captured by own team
                 if (GetEntry() == BG_AV_OBJECTID_MINE_N || GetEntry() == BG_AV_OBJECTID_MINE_S)
                     if (BattleGround* bg = pTarget->GetBattleGround())
-                        if (bg->GetTypeID() == BATTLEGROUND_AV && !(((BattleGroundAV*)bg)->PlayerCanDoMineQuest(GetEntry(), pTarget->GetTeam())))
+                        if (bg->GetTypeID(true) == BATTLEGROUND_AV && !(((BattleGroundAV*)bg)->PlayerCanDoMineQuest(GetEntry(), pTarget->GetTeam())))
                             return false;
                 return true;
             }
@@ -1061,7 +1065,7 @@ void GameObject::Use(Unit* user)
 
             GameObjectInfo const* goInfo = GetGOInfo();
             float radius = float(goInfo->trap.radius);
-            bool IsBattleGroundTrap = !radius && goInfo->trap.cooldown == 3 && m_respawnTime == 0;
+            bool IsBattleGroundTrap = radius == 0.0f && goInfo->trap.cooldown == 3 && m_respawnTime == 0;
 
             // FIXME: when GO casting will be implemented trap must cast spell to target
             if (spellId = goInfo->trap.spellId)
@@ -1556,11 +1560,11 @@ void GameObject::Use(Unit* user)
                         case 179785:                        // Silverwing Flag
                         case 179786:                        // Warsong Flag
                             // check if it's correct bg
-                            if (bg->GetTypeID() == BATTLEGROUND_WS)
+                            if (bg->GetTypeID(true) == BATTLEGROUND_WS)
                                 bg->EventPlayerClickedOnFlag(player, this);
                             break;
                         case 184142:                        // Netherstorm Flag
-                            if (bg->GetTypeID() == BATTLEGROUND_EY)
+                            if (bg->GetTypeID(true) == BATTLEGROUND_EY)
                                 bg->EventPlayerClickedOnFlag(player, this);
                             break;
                     }
@@ -1992,18 +1996,15 @@ bool GameObject::HasStaticDBSpawnData() const
     return sObjectMgr.GetGOData(GetGUIDLow()) != NULL;
 }
 
-void GameObject::SetCapturePointSlider(float value)
+void GameObject::SetCapturePointSlider(float value, bool isLocked)
 {
     GameObjectInfo const* info = GetGOInfo();
 
+    m_captureSlider = value;
+
     // only activate non-locked capture point
-    if (value >= 0)
-    {
-        m_captureSlider = value;
+    if (!isLocked)
         SetLootState(GO_ACTIVATED);
-    }
-    else
-        m_captureSlider = -value;
 
     // set the state of the capture point based on the slider value
     if ((int)m_captureSlider == CAPTURE_SLIDER_ALLIANCE)
