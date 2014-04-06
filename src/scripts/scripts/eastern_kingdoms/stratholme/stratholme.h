@@ -88,20 +88,20 @@ struct EventLocation
 
 static const EventLocation aStratholmeLocation[] =
 {
-    {3725.577f, -3599.484f, 142.367f},                      // Barthilas door run
+    {3725.577f, -3599.484f, 142.367f, 0},                   // Barthilas door run
     {4068.284f, -3535.678f, 122.771f, 2.50f},               // Barthilas tele
     {4032.643f, -3378.546f, 119.752f, 4.74f},               // Ramstein summon loc
-    {4032.843f, -3390.246f, 119.732f},                      // Ramstein move loc
+    {4032.843f, -3390.246f, 119.732f, 0},                   // Ramstein move loc
     {3969.357f, -3391.871f, 119.116f, 5.91f},               // Skeletons summon loc
-    {4033.044f, -3431.031f, 119.055f},                      // Skeletons move loc
+    {4033.044f, -3431.031f, 119.055f, 0},                   // Skeletons move loc
     {4032.602f, -3378.506f, 119.752f, 4.74f},               // Guards summon loc
-    {4042.575f, -3337.929f, 115.059f}                       // Ysida move loc
+    {4042.575f, -3337.929f, 115.059f, 0}                    // Ysida move loc
 };
 
 static const EventLocation aTimmyLocation[] =
 {
     {3696.851f, -3152.736f, 127.661f, 4.024f},              // Timmy spawn loc
-    {3668.603f, -3183.314f, 126.215f}                       // Courtyard mobs sort point
+    {3668.603f, -3183.314f, 126.215f, 0}                    // Courtyard mobs sort point
 };
 
 struct ZigguratStore

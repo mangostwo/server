@@ -197,8 +197,8 @@ static const EventLocations aOutroLocations[] =
     {1725.469f, 650.939f, 30.314f, 3.78f},      // portal summon loc
     {1717.776f, 645.178f, 28.223f, 3.83f},      // velen summon loc
     {1720.024f, 643.233f, 28.133f, 3.76f},      // liadrin summon loc
-    {1712.110f, 641.044f, 27.80f},              // velen move forward
-    {1711.537f, 637.600f, 27.34f},              // liadrin move forward
+    {1712.110f, 641.044f, 27.80f,  0},          // velen move forward
+    {1711.537f, 637.600f, 27.34f,  0},          // liadrin move forward
     {1698.946f, 628.206f, 83.003f, 0.76f},      // entropius core summon loc
 };
 

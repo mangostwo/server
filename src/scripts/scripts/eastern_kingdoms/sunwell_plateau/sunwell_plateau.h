@@ -89,15 +89,15 @@ struct EventLocations
 static const EventLocations aMadrigosaLoc[] =
 {
     {1463.82f, 661.212f, 19.79f, 4.88f},            // reload spawn loc - the place where to spawn Felmyst
-    {1463.82f, 661.212f, 39.234f},                  // fly loc during the cinematig
+    {1463.82f, 661.212f, 39.234f, 0}                // fly loc during the cinematig
 };
 
 static const EventLocations aKalecLoc[] =
 {
     {1573.146f, 755.2025f, 99.524f, 3.59f},         // spawn loc
-    {1474.235f, 624.0703f, 29.325f},                // first move
-    {1511.655f, 550.7028f, 25.510f},                // open door
-    {1648.255f, 519.377f, 165.848f},                // fly away
+    {1474.235f, 624.0703f, 29.325f, 0},             // first move
+    {1511.655f, 550.7028f, 25.510f, 0},             // open door
+    {1648.255f, 519.377f, 165.848f, 0},             // fly away
 };
 
 class MANGOS_DLL_DECL instance_sunwell_plateau : public ScriptedInstance, private DialogueHelper

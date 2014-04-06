@@ -74,12 +74,12 @@ struct SpawnLocation
 static const SpawnLocation aStadiumLocs[7] =
 {
     {210.00f, -420.30f, 110.94f, 3.14f},                    // dragons summon location
-    {210.14f, -397.54f, 111.1f},                            // Gyth summon location
-    {163.62f, -420.33f, 110.47f},                           // center of the stadium location (for movement)
+    {210.14f, -397.54f, 111.1f,  0},                        // Gyth summon location
+    {163.62f, -420.33f, 110.47f, 0},                        // center of the stadium location (for movement)
     {164.63f, -444.04f, 121.97f, 3.22f},                    // Lord Nefarius summon position
     {161.01f, -443.73f, 121.97f, 6.26f},                    // Rend summon position
     {164.64f, -443.30f, 121.97f, 1.61f},                    // Nefarius move position
-    {165.74f, -466.46f, 116.80f},                           // Rend move position
+    {165.74f, -466.46f, 116.80f, 0},                        // Rend move position
 };
 
 // Stadium event description
