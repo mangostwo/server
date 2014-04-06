@@ -334,13 +334,13 @@ struct MANGOS_DLL_DECL boss_illidari_councilAI : public ScriptedAI
         }
     }
 
-    void DamageTaken(Unit* pDoneBy, uint32& uiDamage) override
+    void DamageTaken(Unit* /* pDoneBy */, uint32& uiDamage) override
     {
         int32 uiDamageTaken = (int32)uiDamage;
         m_creature->CastCustomSpell(m_creature, SPELL_SHARED_RULE_DAM, &uiDamageTaken, NULL, NULL, true);
     }
 
-    void HealedBy(Unit* pHealer, uint32& uiHealedAmount) override
+    void HealedBy(Unit* /* pHealer */, uint32& uiHealedAmount) override
     {
         int32 uHealTaken = (int32)uiHealedAmount;
         m_creature->CastCustomSpell(m_creature, SPELL_SHARED_RULE_HEAL, &uHealTaken, NULL, NULL, true);

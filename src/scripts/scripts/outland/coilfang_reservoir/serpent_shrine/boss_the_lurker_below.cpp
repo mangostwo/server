@@ -167,6 +167,8 @@ struct MANGOS_DLL_DECL boss_the_lurker_belowAI : public Scripted_NoMovementAI
 
         switch (m_uiPhase)
         {
+            case PHASE_EMERGEING:
+                break;
             case PHASE_SPOUT:
 
                 if (m_uiSpoutEndTimer < uiDiff)

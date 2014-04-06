@@ -201,11 +201,11 @@ SpellEntry const* ScriptedAI::SelectSpell(Unit* pTarget, int32 uiSchool, int32 i
 {
     // No target so we can't cast
     if (!pTarget)
-        return false;
+        return NULL;
 
     // Silenced so we can't cast
     if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
-        return false;
+        return NULL;
 
     // Using the extended script system we first create a list of viable spells
     SpellEntry const* apSpell[4];
