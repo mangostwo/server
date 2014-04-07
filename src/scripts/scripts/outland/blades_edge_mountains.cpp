@@ -539,9 +539,9 @@ struct MANGOS_DLL_DECL npc_simon_game_bunnyAI : public ScriptedAI
                 m_masterPlayerGuid = ((TemporarySummon*)m_creature)->GetSummonerGuid();
 
             // Get closest apexis
-            if (GameObject* pGo = GetClosestGameObjectWithEntry(m_creature, GO_APEXIS_RELIC, 5.0f))
+            if (GetClosestGameObjectWithEntry(m_creature, GO_APEXIS_RELIC, 5.0f))
                 m_bIsLargeEvent = false;
-            else if (GameObject* pGo = GetClosestGameObjectWithEntry(m_creature, GO_APEXIS_MONUMENT, 17.0f))
+            else if (GetClosestGameObjectWithEntry(m_creature, GO_APEXIS_MONUMENT, 17.0f))
                 m_bIsLargeEvent = true;
         }
 

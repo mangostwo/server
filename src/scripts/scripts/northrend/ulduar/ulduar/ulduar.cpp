@@ -120,7 +120,7 @@ bool GossipHello_go_ulduar_teleporter(Player* pPlayer, GameObject* pGo)
     return true;
 }
 
-bool GossipSelect_go_ulduar_teleporter(Player* pPlayer, GameObject* pGO, uint32 uiSender, uint32 uiAction)
+bool GossipSelect_go_ulduar_teleporter(Player* pPlayer, GameObject* /*pGO*/, uint32 /*uiSender*/, uint32 uiAction)
 {
     instance_ulduar* pInstance = (instance_ulduar*)pPlayer->GetInstanceData();
     if (!pInstance)
@@ -377,7 +377,7 @@ struct MANGOS_DLL_DECL npc_storm_tempered_keeperAI : public ScriptedAI
         m_uiSphereTimer     = urand(10000, 30000);
     }
 
-    void Aggro(Unit* pWho) override
+    void Aggro(Unit* /*pWho*/) override
     {
         // initialize nearby buddy
         if (Creature* pKeeper = GetClosestCreatureWithEntry(m_creature, m_creature->GetEntry() == NPC_TEMPERED_KEEPER_1 ? NPC_TEMPERED_KEEPER_2 : NPC_TEMPERED_KEEPER_1, 20))

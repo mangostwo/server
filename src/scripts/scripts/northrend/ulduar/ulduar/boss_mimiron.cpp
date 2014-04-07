@@ -587,6 +587,8 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI, private DialogueHelpe
                 if (!m_uiWakeUpTimer)
                     m_uiWakeUpTimer = 10000;
                 break;
+            default:
+                break;
         }
     }
 
@@ -626,7 +628,7 @@ struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI, private DialogueHelpe
         for (uint8 i = 0; i < 3; ++i)
         {
             // Select targets based on Leviathan threat list; if the Leviathan is not in combat select them using instance
-            Unit* pTarget;
+            Unit* pTarget = NULL;
             if (pLeviathan->getVictim())
                 pTarget = pLeviathan->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SUMMON_FLAMES_INITIAL, SELECT_FLAG_PLAYER);
             else

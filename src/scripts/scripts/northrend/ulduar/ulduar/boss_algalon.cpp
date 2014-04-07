@@ -410,7 +410,7 @@ struct MANGOS_DLL_DECL boss_algalonAI : public ScriptedAI, private DialogueHelpe
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         // notify boss that time is over
         // this will trigger the wipe spell and make the boss evade and finally despawn
@@ -617,7 +617,7 @@ struct MANGOS_DLL_DECL npc_living_constellationAI : public ScriptedAI
     void AttackStart(Unit* /*pWho*/) override { }
     void MoveInLineOfSight(Unit* /*pWho*/) override { }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         // start casting Arcane Barrage
         if (eventType == AI_EVENT_CUSTOM_A)
@@ -761,7 +761,7 @@ CreatureAI* GetAI_npc_collapsing_star(Creature* pCreature)
 ## go_celestial_access
 ######*/
 
-bool GOUse_go_celestial_access(Player* pPlayer, GameObject* pGo)
+bool GOUse_go_celestial_access(Player* /*pPlayer*/, GameObject* pGo)
 {
     ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
     if (!pInstance)

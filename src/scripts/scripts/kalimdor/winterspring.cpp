@@ -136,11 +136,11 @@ static EventLocations aWingThicketLocations[] =
     {5515.98f, -4903.43f, 846.30f, 4.58f},      // 0 right priestess summon loc
     {5501.94f, -4920.20f, 848.69f, 6.15f},      // 1 left priestess summon loc
     {5497.35f, -4906.49f, 850.83f, 2.76f},      // 2 guard of elune summon loc
-    {5518.38f, -4913.47f, 845.57f},             // 3 right priestess move loc
-    {5510.36f, -4921.17f, 846.33f},             // 4 left priestess move loc
-    {5511.31f, -4913.82f, 847.17f},             // 5 guard of elune move loc
-    {5518.51f, -4917.56f, 845.23f},             // 6 right priestess second move loc
-    {5514.40f, -4921.16f, 845.49f}              // 7 left priestess second move loc
+    {5518.38f, -4913.47f, 845.57f, 0},          // 3 right priestess move loc
+    {5510.36f, -4921.17f, 846.33f, 0},          // 4 left priestess move loc
+    {5511.31f, -4913.82f, 847.17f, 0},          // 5 guard of elune move loc
+    {5518.51f, -4917.56f, 845.23f, 0},          // 6 right priestess second move loc
+    {5514.40f, -4921.16f, 845.49f, 0}           // 7 left priestess second move loc
 };
 
 struct MANGOS_DLL_DECL npc_ranshallaAI : public npc_escortAI, private DialogueHelper

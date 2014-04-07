@@ -72,11 +72,11 @@ static const SpawnLocation aAndorovSpawnLocs[MAX_HELPERS] =
 // Movement locations for Andorov
 static const SpawnLocation aAndorovMoveLocs[] =
 {
-    {0, -8701.51f, 1561.80f, 32.092f},
-    {0, -8718.66f, 1577.69f, 21.612f},
+    {0, -8701.51f, 1561.80f, 32.092f, 0},
+    {0, -8718.66f, 1577.69f, 21.612f, 0},
     {0, -8876.97f, 1651.96f, 21.57f, 5.52f},
-    {0, -8882.15f, 1602.77f, 21.386f},
-    {0, -8940.45f, 1550.69f, 21.616f},
+    {0, -8882.15f, 1602.77f, 21.386f, 0},
+    {0, -8940.45f, 1550.69f, 21.616f, 0},
 };
 
 struct SortingParameters

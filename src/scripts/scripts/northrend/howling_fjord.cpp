@@ -724,7 +724,7 @@ CreatureAI* GetAI_npc_king_ymiron(Creature* pCreature)
     return new npc_king_ymironAI(pCreature);
 }
 
-bool AreaTrigger_at_nifflevar(Player* pPlayer, AreaTriggerEntry const* pAt)
+bool AreaTrigger_at_nifflevar(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 {
     if (pPlayer->isAlive() && pPlayer->GetQuestStatus(QUEST_ID_ANGUISH_OF_NIFFLEVAR) == QUEST_STATUS_INCOMPLETE && pPlayer->HasAura(SPELL_ECHO_OF_YMIRON_NIFFLEVAR))
     {

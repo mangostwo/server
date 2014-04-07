@@ -153,7 +153,7 @@ static const DialogueEntryTwoSide aPoSDialogues[] =
     {NPC_JAINA_PART2,      0,                  0,                    0,                   8000},
     {SAY_JAINA_OUTRO_2,    NPC_JAINA_PART2,    SAY_SYLVANAS_OUTRO_2, NPC_SYLVANAS_PART2,  15000},
     {SAY_JAINA_OUTRO_3,    NPC_JAINA_PART2,    0,                    0,                   0},
-    {0, 0, 0},
+    {0, 0, 0, 0, 0},
 };
 
 instance_pit_of_saron::instance_pit_of_saron(Map* pMap) : ScriptedInstance(pMap), DialogueHelper(aPoSDialogues),

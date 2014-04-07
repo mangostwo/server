@@ -233,7 +233,7 @@ struct MANGOS_DLL_DECL boss_razorscaleAI : public ScriptedAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         // inform about the harpoon repair event
         if (eventType == AI_EVENT_CUSTOM_A)
@@ -800,7 +800,7 @@ struct MANGOS_DLL_DECL npc_razorscale_spawnerAI : public Scripted_NoMovementAI
         pGo->Use(m_creature);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         // inform that it should spawn a sentinel
         if (eventType == AI_EVENT_CUSTOM_A)

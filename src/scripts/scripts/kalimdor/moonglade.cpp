@@ -273,29 +273,29 @@ struct EventLocations
 static EventLocations aEranikusLocations[] =
 {
     {7881.72f, -2651.23f, 493.29f, 0.40f},          // eranikus spawn loc
-    {7929.86f, -2574.88f, 505.35f},                 // eranikus flight move loc
-    {7912.98f, -2568.99f, 488.71f},                 // eranikus combat move loc
-    {7906.57f, -2565.63f, 488.39f},                 // eranikus redeemed loc
+    {7929.86f, -2574.88f, 505.35f, 0},              // eranikus flight move loc
+    {7912.98f, -2568.99f, 488.71f, 0},              // eranikus combat move loc
+    {7906.57f, -2565.63f, 488.39f. 0},              // eranikus redeemed loc
 };
 
 static EventLocations aTyrandeLocations[] =
 {
     // Tyrande should appear along the pathway, but because of the missing pathfinding we'll summon here closer to Eranikus
     {7948.89f, -2575.58f, 490.05f, 3.03f},          // tyrande spawn loc
-    {7888.32f, -2566.25f, 487.02f},                 // tyrande heal loc
-    {7901.83f, -2565.24f, 488.04f},                 // tyrande eranikus loc
+    {7888.32f, -2566.25f, 487.02f, 0},              // tyrande heal loc
+    {7901.83f, -2565.24f, 488.04f, 0},              // tyrande eranikus loc
 };
 
 static EventLocations aShadowsLocations[] =
 {
     // Inside the house shades - first wave only
-    {7832.78f, -2604.57f, 489.29f},
-    {7826.68f, -2538.46f, 489.30f},
-    {7811.48f, -2573.20f, 488.49f},
+    {7832.78f, -2604.57f, 489.29f, 0},
+    {7826.68f, -2538.46f, 489.30f, 0},
+    {7811.48f, -2573.20f, 488.49f, 0},
     // Outside shade points - basically only the first set of coords is used for the summoning; there is no solid proof of using the other coords
-    {7888.32f, -2566.25f, 487.02f},
-    {7946.12f, -2577.10f, 489.97f},
-    {7963.00f, -2492.03f, 487.84f}
+    {7888.32f, -2566.25f, 487.02f, 0},
+    {7946.12f, -2577.10f, 489.97f, 0},
+    {7963.00f, -2492.03f, 487.84f, 0}
 };
 
 struct MANGOS_DLL_DECL npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper

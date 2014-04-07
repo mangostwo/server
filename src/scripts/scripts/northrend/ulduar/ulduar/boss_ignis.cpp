@@ -265,7 +265,7 @@ struct MANGOS_DLL_DECL npc_iron_constructAI : public ScriptedAI
         DoCastSpellIfCan(m_creature, SPELL_CONSTRUCT_HITTING_YA, CAST_TRIGGERED);
     }
 
-    void DamageTaken(Unit* pDoneBy, uint32 &uiDamage) override
+    void DamageTaken(Unit* /*pDoneBy*/, uint32 &uiDamage) override
     {
         // ToDo: This may need more research related to spell proc
         if (m_creature->HasAura(m_bIsRegularMode ? SPELL_BRITTLE : SPELL_BRITTLE_H) && !m_bHasShattered)
@@ -282,7 +282,7 @@ struct MANGOS_DLL_DECL npc_iron_constructAI : public ScriptedAI
         }
     }
 
-    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
+    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
     {
         if (pSpell->Id == SPELL_HEAT)
         {
@@ -312,7 +312,7 @@ CreatureAI* GetAI_npc_iron_construct(Creature* pCreature)
     return new npc_iron_constructAI(pCreature);
 }
 
-bool EffectScriptEffectCreature_npc_iron_construct(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+bool EffectScriptEffectCreature_npc_iron_construct(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
     if (uiSpellId == SPELL_WATER_EFFECT && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_IRON_CONSTRUCT)
     {
@@ -346,7 +346,7 @@ CreatureAI* GetAI_npc_scorch(Creature* pCreature)
     return new npc_scorchAI(pCreature);
 }
 
-bool EffectScriptEffectCreature_npc_scorch(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+bool EffectScriptEffectCreature_npc_scorch(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
     if (uiSpellId == SPELL_WATER_EFFECT && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_SCORCH)
     {
