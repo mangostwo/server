@@ -825,7 +825,7 @@ struct MANGOS_DLL_DECL npc_storm_lasherAI : public three_nature_alliesAI
 
         if (m_uiLightningLashTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LIGHTNING_LASH : SPELL_LIGHTNING_LASH_H) == CAST_OK)
                     m_uiLightningLashTimer = urand(5000, 10000);
@@ -836,7 +836,7 @@ struct MANGOS_DLL_DECL npc_storm_lasherAI : public three_nature_alliesAI
 
         if (m_uiStormBoltTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_STORMBOLT : SPELL_STORMBOLT_H) == CAST_OK)
                     m_uiStormBoltTimer = 5000;

@@ -229,7 +229,7 @@ struct MANGOS_DLL_DECL boss_saraAI : public ScriptedAI
         DoScriptText(urand(0, 1) ? SAY_SARA_SLAY_1 : SAY_SARA_SLAY_2, m_creature);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* /*pSummoned*/) override
     {
         // ToDo: make the voice of Yogg cast Sanity on spawn
     }

@@ -90,27 +90,27 @@ static sSpawnLocation aLightArmySpawnLoc[MAX_LIGHT_CHAMPIONS] =
 // four guards spawned for the outro
 static sSpawnLocation aGuardsSpawnLoc[MAX_LIGHT_GUARDS] =
 {
-    {2287.581f, -5284.991f, 82.535f, 2.60f},
-    {2287.856f, -5281.127f, 82.225f, 3.44f},
-    {2275.964f, -5282.389f, 82.301f, 5.80f},
-    {2275.471f, -5277.668f, 82.058f, 5.79f}
+    {2287.581f, -5284.991f, 82.535f, 2.60f, 0},
+    {2287.856f, -5281.127f, 82.225f, 3.44f, 0},
+    {2275.964f, -5282.389f, 82.301f, 5.80f, 0},
+    {2275.471f, -5277.668f, 82.058f, 5.79f, 0}
 };
 
 // Tirion is spawned at the edge of the battle and runs toward the chapel
 // When he reach the chapel he cast some powerfull light spell and the battle ends
 static sSpawnLocation aEventLocations[] =
 {
-    {2165.711f, -5266.124f, 95.50f, 0.13f},         // 0 Tirion spawn location
-    {2281.390f, -5299.98f,  85.07f, 1.61f},         // 1 Tirion move location
-    {2289.259f, -5280.350f, 82.11f, 0.0f},          // 2 Koltira chapel loc
-    {2273.289f, -5273.675f, 81.70f, 0.0f},          // 3 Thassarian chapel loc
-    {2280.159f, -5263.561f, 81.15f, 4.70f},         // 4 Alexandros summon location
-    {2279.927f, -5265.84f,  81.39f, 0.0f},          // 5 Alexandros move loc
-    {2280.538f, -5280.103f, 82.41f, 1.60f},         // 6 Young Darion spawn
-    {2279.895f, -5269.334f, 81.73f, 0.0f},          // 7 Young Darion move
-    {2280.304f, -5257.205f, 80.09f, 4.62f},         // 8 Lich King spawn
-    {2281.523f, -5261.058f, 80.87f, 0.0f},          // 9 Lich King move
-    {2273.071f, -5293.428f, 83.06f, 0.0f},          // 10 Tirion final point
+    {2165.711f, -5266.124f, 95.50f, 0.13f, 0},       // 0 Tirion spawn location
+    {2281.390f, -5299.98f,  85.07f, 1.61f, 0},       // 1 Tirion move location
+    {2289.259f, -5280.350f, 82.11f, 0.0f,  0},       // 2 Koltira chapel loc
+    {2273.289f, -5273.675f, 81.70f, 0.0f,  0},       // 3 Thassarian chapel loc
+    {2280.159f, -5263.561f, 81.15f, 4.70f, 0},       // 4 Alexandros summon location
+    {2279.927f, -5265.84f,  81.39f, 0.0f,  0},       // 5 Alexandros move loc
+    {2280.538f, -5280.103f, 82.41f, 1.60f, 0},       // 6 Young Darion spawn
+    {2279.895f, -5269.334f, 81.73f, 0.0f,  0},       // 7 Young Darion move
+    {2280.304f, -5257.205f, 80.09f, 4.62f, 0},       // 8 Lich King spawn
+    {2281.523f, -5261.058f, 80.87f, 0.0f,  0},       // 9 Lich King move
+    {2273.071f, -5293.428f, 83.06f, 0.0f,  0},       // 10 Tirion final point
 };
 
 class MANGOS_DLL_DECL world_map_ebon_hold : public ScriptedInstance

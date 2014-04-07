@@ -202,17 +202,17 @@ static EventLocations aEternalBoardNPCs[MAX_DRAGONS] =
 
 static EventLocations aEternalBoardMovement[] =
 {
-    { -8159.951f, 1525.241f, 74.994f, 0},         // 0 Flight position for dragons
-    { -8106.238f, 1525.948f, 2.639f,  0},         // 1 Anachronos gate location
-    { -8103.861f, 1525.923f, 2.677f,  0},         // 2 Fandral gate location
-    { -8107.387f, 1523.641f, 2.609f,  0},         // 3 Shattered scepter
-    { -8100.921f, 1527.740f, 2.871f,  0},         // 4 Fandral epilogue location
-    { -8115.270f, 1515.926f, 3.305f,  0},         // 5 Anachronos gather broken scepter 1
-    { -8116.879f, 1530.615f, 3.762f,  0},         // 6 Anachronos gather broken scepter 2
-    { -7997.790f, 1548.664f, 3.738f,  0},         // 7 Fandral exit location
-    { -8061.933f, 1496.196f, 2.556f,  0},         // 8 Anachronos launch location
-    { -8008.705f, 1446.063f, 44.104f, 0},         // 9 Anachronos flight location
-    { -8085.748f, 1521.484f, 2.624f,  0}          // 10 Anchor point for the army summoning
+    { -8159.951f, 1525.241f, 74.994f, 0, 0 },         // 0 Flight position for dragons
+    { -8106.238f, 1525.948f, 2.639f,  0, 0 },         // 1 Anachronos gate location
+    { -8103.861f, 1525.923f, 2.677f,  0, 0 },         // 2 Fandral gate location
+    { -8107.387f, 1523.641f, 2.609f,  0, 0 },         // 3 Shattered scepter
+    { -8100.921f, 1527.740f, 2.871f,  0, 0 },         // 4 Fandral epilogue location
+    { -8115.270f, 1515.926f, 3.305f,  0, 0 },         // 5 Anachronos gather broken scepter 1
+    { -8116.879f, 1530.615f, 3.762f,  0, 0 },         // 6 Anachronos gather broken scepter 2
+    { -7997.790f, 1548.664f, 3.738f,  0, 0 },         // 7 Fandral exit location
+    { -8061.933f, 1496.196f, 2.556f,  0, 0 },         // 8 Anachronos launch location
+    { -8008.705f, 1446.063f, 44.104f, 0, 0 },         // 9 Anachronos flight location
+    { -8085.748f, 1521.484f, 2.624f,  0, 0 }          // 10 Anchor point for the army summoning
 };
 
 struct MANGOS_DLL_DECL npc_anachronos_the_ancientAI : public ScriptedAI, private DialogueHelper

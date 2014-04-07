@@ -335,8 +335,8 @@ struct MANGOS_DLL_DECL npc_netherspite_portalAI : public Scripted_NoMovementAI
         m_uiOrientationTimer = 0;
     }
 
-    void MoveInLineOfSight(Unit* pWho) { }
-    void AttackStart(Unit* pWho) { }
+    void MoveInLineOfSight(Unit* /*pWho*/) { }
+    void AttackStart(Unit* /*pWho*/) { }
 
     void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {

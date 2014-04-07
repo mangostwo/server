@@ -98,12 +98,12 @@ enum
 static const float aRamsayPositions[2][4] =
 {
     {559.1528f, 90.55729f, 395.2734f, 5.078908f},           // Summon Position
-    {563.556f,  78.72571f, 395.2125f, 0.0f}                 // Movement Position
+    {563.556f,  78.72571f, 395.2125f, 0}                    // Movement Position
 };
 
 static const float aSpawnPositions[][4] =
 {
-    {563.8941f, 137.3333f, 405.8467f, 0.0f},                // Beast combat stalker (Summoned when SAY_VARIAN_BEAST_1)
+    {563.8941f, 137.3333f, 405.8467f, 0},                   // Beast combat stalker (Summoned when SAY_VARIAN_BEAST_1)
     {563.9358f, 229.8299f, 394.8061f, 4.694936f},           // Gormok (vehicle) (Summoned when SAY_VARIAN_BEAST_1)
     {564.3301f, 232.1549f, 394.8188f, 1.621917f},           // Dreadscale (Summoned when Tirion says SAY_TIRION_BEAST_2)
     {549.5139f, 170.1389f, 394.7965f, 5.009095f},           // Acidmaw (Summoned(?) 14s after Dreadscale)
@@ -115,8 +115,8 @@ static const float aSpawnPositions[][4] =
     {563.6996f, 175.9826f, 394.5042f, 4.694936f},           // World Trigger Large
     {563.5712f, 174.8351f, 394.4954f, 4.712389f},           // Lich King
     {563.6858f, 139.4323f, 393.9862f, 4.694936f},           // Purple Rune / Center Position
-    {648.9169f, 131.0209f, 141.6159f, 0.0f},                // Tirion B
-    {649.1610f, 142.0399f, 141.3060f, 0.0f},                // Argent mage
+    {648.9169f, 131.0209f, 141.6159f, 0},                   // Tirion B
+    {649.1610f, 142.0399f, 141.3060f, 0},                   // Argent mage
 };
 
 static const float aMovePositions[][3] =

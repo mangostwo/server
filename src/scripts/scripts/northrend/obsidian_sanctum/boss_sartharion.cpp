@@ -153,31 +153,31 @@ struct Waypoint
 // each dragons special points. First where fly to before connect to connon, second where land point is.
 Waypoint m_aTene[] =
 {
-    {3212.854f, 575.597f, 109.856f},                        // init
-    {3246.425f, 565.367f, 61.249f}                          // end
+    {3212.854f, 575.597f, 109.856f, 0},                        // init
+    {3246.425f, 565.367f, 61.249f,  0}                         // end
 };
 
 Waypoint m_aShad[] =
 {
-    {3293.238f, 472.223f, 106.968f},
-    {3271.669f, 526.907f, 61.931f}
+    {3293.238f, 472.223f, 106.968f, 0},
+    {3271.669f, 526.907f, 61.931f,  0}
 };
 
 Waypoint m_aVesp[] =
 {
-    {3193.310f, 472.861f, 102.697f},
-    {3227.268f, 533.238f, 59.995f}
+    {3193.310f, 472.861f, 102.697f, 0},
+    {3227.268f, 533.238f, 59.995f,  0}
 };
 
 // points around raid "isle", counter clockwise. should probably be adjusted to be more alike
 Waypoint m_aDragonCommon[] =
 {
-    {3214.012f, 468.932f, 98.652f},
-    {3244.950f, 468.427f, 98.652f},
-    {3283.520f, 496.869f, 98.652f},
-    {3287.316f, 555.875f, 98.652f},
-    {3250.479f, 585.827f, 98.652f},
-    {3209.969f, 566.523f, 98.652f}
+    {3214.012f, 468.932f, 98.652f, 0},
+    {3244.950f, 468.427f, 98.652f, 0},
+    {3283.520f, 496.869f, 98.652f, 0},
+    {3287.316f, 555.875f, 98.652f, 0},
+    {3250.479f, 585.827f, 98.652f, 0},
+    {3209.969f, 566.523f, 98.652f, 0}
 };
 
 Waypoint m_aTsunamiLoc[] =

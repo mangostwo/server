@@ -275,7 +275,7 @@ static EventLocations aEranikusLocations[] =
     {7881.72f, -2651.23f, 493.29f, 0.40f},          // eranikus spawn loc
     {7929.86f, -2574.88f, 505.35f, 0},              // eranikus flight move loc
     {7912.98f, -2568.99f, 488.71f, 0},              // eranikus combat move loc
-    {7906.57f, -2565.63f, 488.39f. 0},              // eranikus redeemed loc
+    {7906.57f, -2565.63f, 488.39f, 0},              // eranikus redeemed loc
 };
 
 static EventLocations aTyrandeLocations[] =
