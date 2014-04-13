@@ -144,37 +144,37 @@ bool ChatHandler::HandleDebugSendOpcodeCommand(char* /*args*/)
         if (type == "uint8")
         {
             uint16 value;
-            ifs >> value;
+            stream >> value;
             data << uint8(value);
         }
         else if (type == "uint16")
         {
             uint16 value;
-            ifs >> value;
+            stream >> value;
             data << value;
         }
         else if (type == "uint32")
         {
             uint32 value;
-            ifs >> value;
+            stream >> value;
             data << value;
         }
         else if (type == "uint64")
         {
             uint64 value;
-            ifs >> value;
+            stream >> value;
             data << value;
         }
         else if (type == "float")
         {
             float value;
-            ifs >> value;
+            stream >> value;
             data << value;
         }
         else if (type == "string")
         {
             std::string value;
-            ifs >> value;
+            stream >> value;
             data << value;
         }
         else if (type == "pguid")
