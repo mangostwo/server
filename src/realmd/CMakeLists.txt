@@ -39,9 +39,14 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/framework
   ${CMAKE_BINARY_DIR}
   ${CMAKE_BINARY_DIR}/src/shared
-  ${MYSQL_INCLUDE_DIR}
   ${ACE_INCLUDE_DIR}
 )
+
+if(POSTGRESQL)
+  include_directories(${PGSQL_INCLUDE_DIR})
+else()
+  include_directories(${MYSQL_INCLUDE_DIR})
+endif()
 
 add_executable(${EXECUTABLE_NAME}
   ${EXECUTABLE_SRCS}
