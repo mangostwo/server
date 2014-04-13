@@ -8633,6 +8633,11 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
                     return;
                 }
+                case 61122:                                 // Contact Brann
+                {
+                    m_caster->CastSpell(m_caster, 55038, true);
+                    return;
+                }
                 case 60893:                                 // Northrend Alchemy Research
                 case 61177:                                 // Northrend Inscription Research
                 case 61288:                                 // Minor Inscription Research
