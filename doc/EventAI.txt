@@ -152,6 +152,7 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 45   ACTION_T_THROW_AI_EVENT                EventType, Radius               Throws an AIEvent of type (Param1) to nearby friendly Npcs in range of (Param2)
 46   ACTION_T_SET_THROW_MASK                EventTypeMask                   Marks for which AIEvents the npc will throw AIEvents on its own.
 47   ACTION_T_SUMMON_UNIQUE                 CreatureID, Target, SummonID    Only summons a creature when not already spawned (Param1) to attack target (Param2) at location specified by EventAI_Summons (Param3). Preventing multiple spawns of unique creatures.
+48   ACTION_T_SET_STAND_STATE               StandState                      Set the unit stand state (Param1) of the current creature.
 
 * = Use -1 where the param is expected to do nothing. Random constant is generated for each event, so if you have a random yell and a random sound, they will be linked up with each other (ie. param2 with param2).
 
@@ -881,6 +882,20 @@ Parameter 2: Radius    - Throw the AIEvent to nearby friendly creatures within t
 46 = ACTION_T_SET_THROW_MASK:
 -----------------------------
 Parameter 1: EventTypeMask - Which AIEvents to throw, supported types see CreatureAI.h enum AIEventType (mask-value is 2^type)
+
+-----------------------------
+47 = ACTION_T_SUMMON_UNIQUE
+-----------------------------
+* Parameter 1: CreatureID - The creature template ID to be summoned. The value here needs to be a valid creature template ID.
+* Parameter 2: Target - The target type defining who the summoned creature will attack. The value in this field needs to be a valid target type as specified in the reference tables below. NOTE: Using target type 0 will cause the summoned creature to not attack anyone.
+* Parameter 3: SummonID - The summon ID from the creature_ai_summons table controlling the position (and spawn time) where the summoned mob should be spawned at.
+
+Only summons a creature when not already spawned (Param1) to attack target (Param2) at location specified by EventAI_Summons (Param3). Preventing multiple spawns of unique creatures.
+
+-----------------------------
+48 = ACTION_T_SET_STAND_STATE:
+-----------------------------
+Parameter 1: StandState - Stand state id to be used by the creature as defined in Unit.h file in the core.
 
 This action sets which AIEvents a npc will throw automatically.
 Currently supported are:
