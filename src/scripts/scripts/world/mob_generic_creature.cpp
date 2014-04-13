@@ -105,7 +105,7 @@ struct MANGOS_DLL_DECL generic_creatureAI : public ScriptedAI
                 else info = SelectSpell(m_creature->getVictim(), -1, -1, SELECT_TARGET_ANY_ENEMY, 0, 0, 0, 0, SELECT_EFFECT_DONTCARE);
 
                 // 50% chance if elite or higher, 20% chance if not, to replace our white hit with a spell
-                if (info && (rand() % (m_creature->GetCreatureInfo()->rank > 1 ? 2 : 5) == 0) && !GlobalCooldown)
+                if (info && (rand() % (m_creature->GetCreatureInfo()->Rank > 1 ? 2 : 5) == 0) && !GlobalCooldown)
                 {
                     // Cast the spell
                     if (Healing)DoCastSpell(m_creature, info);

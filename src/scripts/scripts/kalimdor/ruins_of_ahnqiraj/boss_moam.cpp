@@ -66,7 +66,7 @@ struct MANGOS_DLL_DECL boss_moamAI : public ScriptedAI
     void Aggro(Unit* /*pWho*/) override
     {
         DoScriptText(EMOTE_AGGRO, m_creature);
-        m_creature->SetMaxPower(POWER_MANA, m_creature->GetCreatureInfo()->maxmana);
+        m_creature->SetMaxPower(POWER_MANA, m_creature->GetCreatureInfo()->MaxLevelHealth);
     }
 
     void UpdateAI(const uint32 uiDiff) override

@@ -120,7 +120,7 @@ bool EffectDummyCreature_npc_kitten(Unit* /*pCaster*/, uint32 uiSpellId, SpellEf
             pCreatureTarget->SetEntry(pTemp->Entry);
             pCreatureTarget->SetDisplayId(Creature::ChooseDisplayId(pTemp));
             pCreatureTarget->SetName(pTemp->Name);
-            pCreatureTarget->SetFloatValue(OBJECT_FIELD_SCALE_X, pTemp->scale);
+            pCreatureTarget->SetFloatValue(OBJECT_FIELD_SCALE_X, pTemp->Scale);
         }
 
         if (Unit* pOwner = pCreatureTarget->GetOwner())
