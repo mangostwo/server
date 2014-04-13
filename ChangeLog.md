@@ -5,12 +5,14 @@ This changelog references the relevant changes (bug and security fixes) done
 in 0.18 minor versions.
 
 * 0.18.1 (2014-xx-xx)
+--------------------------------------------------------------------------------
  * Merged scripts directly to core repository.
  * Cleaned up much gcc warnings.
  * Implemented "Random battleground".
-
+ * Fixed arena scoreboard end screen.
+ 
 * 0.18.0 (2014-04-01)
-
+--------------------------------------------------------------------------------
  * Remove a duplicate comment start.
  * Renamed SPELLFAMILY_UNK1 to SPELLFAMILY_ENVIRONMENT.
  * [m12535] Renamed table scripted_event_id to scripted_event.
