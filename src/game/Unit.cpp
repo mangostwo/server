@@ -894,11 +894,6 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             pVictim->AttackedBy(this);
         }
 
-        if (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE)
-        {
-            if (!spellProto || !(spellProto->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DIRECT_DAMAGE))
-                pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DIRECT_DAMAGE);
-        }
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
         {
             float threat = damage * sSpellMgr.GetSpellThreatMultiplier(spellProto);
@@ -10051,12 +10046,19 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
         if (!IsTriggeredAtSpellProcEvent(pTarget, itr->second, procSpell, procFlag, procExtra, attType, isVictim, spellProcEvent))
         {
             // spell seem not managed by proc system, although some case need to be handled
+            
+            // only process damage case on victim
+            if (!isVictim || !(procFlag & PROC_FLAG_TAKEN_ANY_DAMAGE))
+                continue;
+
             const SpellEntry* se = itr->second->GetSpellProto();
 
-            // check if the aura is interruptible by damage (not remove self added aura)
-            if (procSpell && procSpell->Id != se->Id && se->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE)
+            // check if the aura is interruptible by damage
+            if (se->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE)
+            {
+                itr->second->GetAuraByEffectIndex(EFFECT_INDEX_0)->GetModifier()->m_auraname;
                 removedSpells.push_back(se->Id);
-
+            }
             continue;
         }
 
