@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_01_mangos_creature_template` bit(1) DEFAULT NULL
+  `required_02_mangos_creature_classlevels` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -1352,6 +1352,36 @@ CREATE TABLE `creature_template_addon` (
 LOCK TABLES `creature_template_addon` WRITE;
 /*!40000 ALTER TABLE `creature_template_addon` DISABLE KEYS */;
 /*!40000 ALTER TABLE `creature_template_addon` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `creature_template_classlevelstats`
+--
+
+DROP TABLE IF EXISTS `creature_template_classlevelstats`;
+CREATE TABLE `creature_template_classlevelstats` (
+  `Level` tinyint(4) NOT NULL,
+  `Class` tinyint(4) NOT NULL,
+  `BaseHealthExp0` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `BaseHealthExp1` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `BaseHealthExp2` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `BaseMana` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `BaseDamageExp0` float NOT NULL DEFAULT '0',
+  `BaseDamageExp1` float NOT NULL DEFAULT '0',
+  `BaseDamageExp2` float NOT NULL DEFAULT '0',
+  `BaseMeleeAttackPower` float NOT NULL DEFAULT '0',
+  `BaseRangedAttackPower` float NOT NULL DEFAULT '0',
+  `BaseArmor` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`Level`,`Class`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `creature_template_classlevelstats`
+--
+
+LOCK TABLES `creature_template_classlevelstats` WRITE;
+/*!40000 ALTER TABLE `creature_template_classlevelstats` DISABLE KEYS */;
+/*!40000 ALTER TABLE `creature_template_classlevelstats` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
