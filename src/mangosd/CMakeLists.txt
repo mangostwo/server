@@ -50,6 +50,12 @@ include_directories(
   ${OPENSSL_INCLUDE_DIR}
 )
 
+if(POSTGRESQL)
+  include_directories(${PGSQL_INCLUDE_DIR})
+else()
+  include_directories(${MYSQL_INCLUDE_DIR})
+endif()
+
 add_executable(${EXECUTABLE_NAME}
   ${EXECUTABLE_SRCS}
 )
