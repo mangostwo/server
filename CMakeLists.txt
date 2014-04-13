@@ -35,6 +35,7 @@ else()
   option(PCH                "Use precompiled headers"               OFF)
 endif()
 option(BUILD_SCRIPTS        "Build scripts"                         ON)
+option(POSTGRESQL           "Use PostgreSQL"                        OFF)
 
 # TODO: options that should be checked/created:
 #option(CLI                  "With CLI"                              ON)
@@ -56,6 +57,7 @@ message(
                             CMakeLists.txt
     ACE_USE_EXTERNAL        Use external ACE
     BUILD_SCRIPTS           Build server scripts content.
+    POSTGRESQL              Use PostgreSQL bindings.
   To set an option simply type -D<OPTION>=<VALUE> after 'cmake <srcs>'.
   Also, you can specify the generator with -G. see 'cmake --help' for more details
   For example: cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/opt/mangos"
@@ -167,7 +169,16 @@ endif()
 
 # *nix-specific packages
 if(UNIX)
-  find_package(MySQL REQUIRED)
+  if(POSTGRESQL)
+    find_package(PostgreSQL REQUIRED)
+
+    if(POSTGRESQL_FOUND)
+      include_directories(${POSTGRESQL_INCLUDE_DIRS})
+    endif()
+  else()
+    find_package(MySQL REQUIRED)
+  endif()
+
   find_package(OpenSSL REQUIRED)
   find_package(ZLIB REQUIRED)
 endif()
@@ -340,11 +351,17 @@ add_subdirectory(dep) # TODO: add vmap extractor build support
 # Add definitions for all build types
 # Don't place this above 'dep' subdirectory! Because of defines build will crash.
 set(DEFINITIONS
-  DO_MYSQL
   HAVE_CONFIG_H
   VERSION="${MANGOS_VERSION}"
   SYSCONFDIR="${CONF_DIR}/"
 )
+
+if(POSTGRESQL)
+  set(DEFINITIONS ${DEFINITIONS} DO_POSTGRESQL)
+else()
+  set(DEFINITIONS ${DEFINITIONS} DO_MYSQL)
+endif()
+
 set(DEFINITIONS_RELEASE NDEBUG)
 set(DEFINITIONS_DEBUG _DEBUG MANGOS_DEBUG)
 if(WIN32)
