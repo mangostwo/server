@@ -19,7 +19,11 @@ green, a successful build has been performed under Linux.
 
 Requirements
 ------------
-
+Windows       >= 7 (nix systems also are supported)
+Visual studio >= 2010 (or gcc >= 4.8, or clang >= 3.2 for nix build)
+MySQL         => 5.5
+ACE           => 5.8 (included for windows users)
+OpenSSL       => 1.0.0 (included for windows users)
 
 Compilation Guides
 ------------------
