@@ -37,8 +37,6 @@ class MANGOS_DLL_SPEC BarGoLink
          * @param row_count
          */
         explicit BarGoLink(int row_count);
-        explicit BarGoLink(uint32 row_count);               // row_count < ACE_INT32_MAX
-        explicit BarGoLink(uint64 row_count);               // row_count < ACE_INT32_MAX
         ~BarGoLink();
 
     public:
