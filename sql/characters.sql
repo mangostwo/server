@@ -461,6 +461,25 @@ LOCK TABLES `character_battleground_data` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `character_battleground_random`
+--
+
+DROP TABLE IF EXISTS `character_battleground_random`;
+CREATE TABLE `character_battleground_random` (
+  `guid` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+  PRIMARY KEY  (`guid`)
+) ENGINE=MYISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `character_battleground_data`
+--
+
+LOCK TABLES `character_battleground_random` WRITE;
+/*!40000 ALTER TABLE `character_battleground_random` DISABLE KEYS */;
+/*!40000 ALTER TABLE `character_battleground_random` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `character_declinedname`
 --
 
