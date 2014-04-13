@@ -4,7 +4,7 @@ This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THAN
 
 See the COPYING file for copying conditions.
 
-== Database Updates ==
+== Database updates ==
 
 This folder contains SQL files which will apply required updates to your MySQL
 database, whenever the MaNGOS database structure has been changed or extended.
@@ -12,7 +12,7 @@ database, whenever the MaNGOS database structure has been changed or extended.
 To see if you need an update, the file names have been given a fixed structure
 that should enable you to see if you need an update or not.
 
-=== File Name Description ===
+=== File name description ===
 
 File names are divided into two parts.
 
@@ -24,20 +24,18 @@ The second part of the name is the database and the table that needs an update o
 
 See an example below:
 
-         6936_01_mangos_spell_chain.sql
-         |    |  |      |
-         |    |  |      |
-         |    |  |      The table `spell_chain`
-         |    |  |      will need an update.
-         |    |  |
-         |    |  Name of affected DB (default recommended name)
-         |    |  Can be: characters, mangos, realmd
-         |    |
-         |    Counter show number of sql updates in updates list for provided revision
-         |    and set proper order for sql updates for same revision
+         01_mangos_spell_chain.sql
+         |  |      |
+         |  |      |
+         |  |      The table `spell_chain`
+         |  |      will need an update.
+         |  |
+         |  Name of affected DB (default recommended name)
+         |  Can be: characters, mangos, realmd
          |
-         MaNGOS commit revision related to sql update.
-         It included in commit description in form [6936] as you can see at http://github.com/mangos/mangos/commits/master
+         Counter show number of sql updates in updates list for provided revision
+         and set proper order for sql updates for same revision
+
 
 After applying an update the DB is compatible with the mangos revision of this sql update.
 SQL updates include special protection against multiple and wrong order of update application.
@@ -57,3 +55,10 @@ guard queries. Include sql updates in commit. After commit adding to local repo 
 with -s option (and another, note: -s option not work propertly with -l option). Other steps
 tool will do by self and apply changes to commit. After tool use commit with sql updates ready
 to push.
+
+=== Folder describtion ===
+
+archive    - keeps old releases updates.
+characters - characters database updates.
+mangos     - world database updates.
+realmd     - realmd database updates.

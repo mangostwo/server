@@ -10,7 +10,10 @@ in 0.18 minor versions.
  * Cleaned up much gcc warnings.
  * Implemented "Random battleground".
  * Fixed arena scoreboard end screen.
- 
+ * Fixed showing skirmish or rated arena queue icon.
+ * Fix LANG_ADDON use on Guild Channels.
+ * Fix aura not removed in some case.
+
 * 0.18.0 (2014-04-01)
 --------------------------------------------------------------------------------
  * Remove a duplicate comment start.
