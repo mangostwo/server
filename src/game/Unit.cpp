@@ -1499,7 +1499,7 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, Weapo
         damageInfo->cleanDamage    = 0;
         return;
     }
-    uint32 damage += CalculateDamage(damageInfo->attackType, false);
+    uint32 damage = CalculateDamage(damageInfo->attackType, false);
     // Add melee damage bonus
     damage = MeleeDamageBonusDone(damageInfo->target, damage, damageInfo->attackType);
     damage = damageInfo->target->MeleeDamageBonusTaken(this, damage, damageInfo->attackType);
