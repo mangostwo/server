@@ -237,13 +237,20 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
     }
 
     ChrClassesEntry const* classEntry = sChrClassesStore.LookupEntry(class_);
-    ChrRacesEntry const* raceEntry = sChrRacesStore.LookupEntry(race_);
-
-    if (!classEntry || !raceEntry)
+    if (!classEntry)
     {
         data << (uint8)CHAR_CREATE_FAILED;
         SendPacket(&data);
-        sLog.outError("Class: %u or Race %u not found in DBC (Wrong DBC files?) or Cheater?", class_, race_);
+        sLog.outError("Class %u was not found in DBC while creating new character for account %u. (Wrong DBC files?) or Cheater?", class_, GetAccountId());
+        return;
+    }
+
+    ChrRacesEntry const* raceEntry = sChrRacesStore.LookupEntry(race_);
+    if (!raceEntry)
+    {
+        data << (uint8)CHAR_CREATE_FAILED;
+        SendPacket(&data);
+        sLog.outError("Race %u was not found in DBC while creating new character for account %u. (Wrong DBC files?) or Cheater?", race_, GetAccountId());
         return;
     }
 
@@ -297,8 +304,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
         return;
     }
 
-    QueryResult* resultacct = LoginDatabase.PQuery("SELECT SUM(numchars) FROM realmcharacters WHERE acctid = '%u'", GetAccountId());
-    if (resultacct)
+	if (QueryResult* resultacct = LoginDatabase.PQuery("SELECT SUM(numchars) FROM realmcharacters WHERE acctid = '%u'", GetAccountId()))
     {
         Field* fields = resultacct->Fetch();
         uint32 acctcharcount = fields[0].GetUInt32();
@@ -312,21 +318,20 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
         }
     }
 
-    QueryResult* result = CharacterDatabase.PQuery("SELECT COUNT(guid) FROM characters WHERE account = '%u'", GetAccountId());
     uint8 charcount = 0;
-    if (result)
-    {
-        Field* fields = result->Fetch();
-        charcount = fields[0].GetUInt8();
-        delete result;
+	if (QueryResult* result = CharacterDatabase.PQuery("SELECT COUNT(guid) FROM characters WHERE account = '%u'", GetAccountId()))
+	{
+		Field* fields = result->Fetch();
+		charcount = fields[0].GetUInt8();
+		delete result;
 
-        if (charcount >= sWorld.getConfig(CONFIG_UINT32_CHARACTERS_PER_REALM))
-        {
-            data << (uint8)CHAR_CREATE_SERVER_LIMIT;
-            SendPacket(&data);
-            return;
-        }
-    }
+		if (charcount >= sWorld.getConfig(CONFIG_UINT32_CHARACTERS_PER_REALM))
+		{
+			data << (uint8)CHAR_CREATE_SERVER_LIMIT;
+			SendPacket(&data);
+			return;
+		}
+	}
 
     // speedup check for heroic class disabled case
     uint32 heroic_free_slots = sWorld.getConfig(CONFIG_UINT32_HEROIC_CHARACTERS_PER_REALM);
