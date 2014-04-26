@@ -373,6 +373,7 @@ UPDATE creature_template SET ScriptName='npc_sinkhole_kill_credit' WHERE entry I
 UPDATE creature_template SET ScriptName='npc_lurgglbr' WHERE entry=25208;
 UPDATE creature_template SET ScriptName='npc_beryl_sorcerer' WHERE entry=25316;
 UPDATE creature_template SET ScriptName='npc_captured_beryl_sorcerer' WHERE entry=25474;
+UPDATE creature_template SET ScriptName='npc_nexus_drake_hatchling' WHERE entry=26127;
 
 /* BURNING STEPPES */
 UPDATE creature_template SET ScriptName='npc_ragged_john' WHERE entry=9563;

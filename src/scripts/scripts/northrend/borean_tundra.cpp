@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Borean_Tundra
 SD%Complete: 100
-SDComment: Quest support: 11570, 11590, 11728, 11865, 11897.
+SDComment: Quest support: 11570, 11590, 11728, 11865, 11897, 11919, 11940
 SDCategory: Borean Tundra
 EndScriptData */
 
@@ -26,11 +26,13 @@ npc_nesingwary_trapper
 npc_sinkhole_kill_credit
 npc_lurgglbr
 npc_beryl_sorcerer
+npc_nexus_drake_hatchling
 EndContentData */
 
 #include "precompiled.h"
 #include "escort_ai.h"
 #include "TemporarySummon.h"
+#include "follower_ai.h"
 
 /*######
 ## npc_nesingwary_trapper
@@ -581,6 +583,253 @@ bool EffectAuraDummy_npc_captured_beryl_sorcerer(const Aura* pAura, bool bApply)
     return false;
 }
 
+/*######
+## npc_nexus_drake_hatchling
+######*/
+
+enum
+{
+    // combat spells
+    SPELL_INTANGIBLE_PRESENCE           = 36513,
+    SPELL_NETHERBREATH                  = 36631,
+
+    // quest start spells
+    SPELL_DRAKE_HARPOON                 = 46607,                    // initial spell
+    SPELL_RED_DRAGONBLOOD               = 46620,                    // applied by aura 46607
+    SPELL_CAPTURE_TRIGGER               = 46673,                    // notify the drake that it was captured; triggered by aura 46620 expire
+    SPELL_SUBDUED                       = 46675,                    // visual spell; triggered by spell 46673
+    SPELL_DRAKE_HATCHLING_SUBDUED       = 46691,                    // inform player that drake has been captured; triggered by spell 46673
+    SPELL_DRAKE_VOMIT_PERIODIC          = 46678,                    // visual spell; triggered by spell 46673
+
+    // quest completion spells
+    SPELL_DRAKE_TURN_IN                 = 46696,                    // notify the drake that quest is finised
+    SPELL_STRIP_AURAS                   = 46693,                    // remove all quest auras
+    SPELL_DRAKE_COMPLETION_PING         = 46702,
+    SPELL_RAELORASZ_FIREBALL            = 46704,
+    SPELL_COMPLETE_IMMOLATION           = 46703,
+
+    NPC_RAELORASZ                       = 26117,                    // quest giver / taker
+    NPC_NEXUS_DRAKE_HATCHLING           = 26127,
+    NPC_COLDARRA_DRAKE_HUNT_INVISMAN    = 26175,                    // quest credit
+
+    QUEST_DRAKE_HUNT                    = 11919,
+    QUEST_DRAKE_HUNT_DAILY              = 11940,
+
+    FACTION_FRIENDLY                    = 35,
+};
+
+struct MANGOS_DLL_DECL npc_nexus_drake_hatchlingAI : public FollowerAI
+{
+    npc_nexus_drake_hatchlingAI(Creature* pCreature) : FollowerAI(pCreature) { Reset(); }
+
+    uint32 m_uiNetherbreathTimer;
+    uint32 m_uiPresenceTimer;
+    uint32 m_uiSubduedTimer;
+
+    void Reset() override
+    {
+        m_uiNetherbreathTimer = urand(2000, 4000);
+        m_uiPresenceTimer     = urand(15000, 17000);
+        m_uiSubduedTimer      = 0;
+    }
+
+    void EnterEvadeMode() override
+    {
+        // force check for evading when the faction is changed
+        if (m_uiSubduedTimer)
+            return;
+
+        FollowerAI::EnterEvadeMode();
+    }
+
+    void MoveInLineOfSight(Unit* pWho) override
+    {
+        FollowerAI::MoveInLineOfSight(pWho);
+
+        if (!m_creature->HasAura(SPELL_SUBDUED) || m_creature->getVictim())
+            return;
+
+        if (pWho->GetEntry() == NPC_COLDARRA_DRAKE_HUNT_INVISMAN && m_creature->IsWithinDistInMap(pWho, 20.0f))
+        {
+            Player* pPlayer = GetLeaderForFollower();
+            if (!pPlayer || !pPlayer->HasAura(SPELL_DRAKE_HATCHLING_SUBDUED))
+                return;
+
+            pWho->CastSpell(pPlayer, SPELL_STRIP_AURAS, true);
+            // give kill credit, mark the follow as completed and start the final event
+            pPlayer->KilledMonsterCredit(NPC_COLDARRA_DRAKE_HUNT_INVISMAN);
+            pPlayer->CastSpell(m_creature, SPELL_DRAKE_TURN_IN, true);
+            SetFollowComplete(true);
+        }
+    }
+
+    void JustRespawned() override
+    {
+        // reset stand state if required
+        m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+        FollowerAI::JustRespawned();
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    {
+        // start following
+        if (eventType == AI_EVENT_START_EVENT && pInvoker->GetTypeId() == TYPEID_PLAYER)
+        {
+            StartFollow((Player*)pInvoker);
+            m_uiSubduedTimer = 3 * MINUTE * IN_MILLISECONDS;
+        }
+        // timeout; quest failed
+        else if (eventType == AI_EVENT_CUSTOM_A)
+        {
+            // check if the quest isn't already completed
+            if (!HasFollowState(STATE_FOLLOW_COMPLETE))
+            {
+                // force reset
+                JustRespawned();
+                ScriptedAI::EnterEvadeMode();
+            }
+        }
+    }
+
+    void UpdateFollowerAI(const uint32 uiDiff)
+    {
+        if (m_uiSubduedTimer)
+        {
+            if (m_uiSubduedTimer <= uiDiff)
+                m_uiSubduedTimer = 0;
+            else
+                m_uiSubduedTimer -= uiDiff;
+        }
+
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_uiNetherbreathTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_NETHERBREATH) == CAST_OK)
+                m_uiNetherbreathTimer = urand(17000, 20000);
+        }
+        else
+            m_uiNetherbreathTimer -= uiDiff;
+
+        if (m_uiPresenceTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_INTANGIBLE_PRESENCE) == CAST_OK)
+                m_uiPresenceTimer = urand(18000, 20000);
+        }
+        else
+            m_uiPresenceTimer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_nexus_drake_hatchling(Creature* pCreature)
+{
+    return new npc_nexus_drake_hatchlingAI(pCreature);
+}
+
+bool EffectAuraDummy_npc_nexus_drake_hatchling(const Aura* pAura, bool bApply)
+{
+    if (pAura->GetId() == SPELL_DRAKE_HARPOON)
+    {
+        if (pAura->GetEffIndex() != EFFECT_INDEX_0 || !bApply)
+            return false;
+
+        Creature* pCreature = (Creature*)pAura->GetTarget();
+        Unit* pCaster = pAura->GetCaster();
+        if (!pCreature || !pCaster || pCaster->GetTypeId() != TYPEID_PLAYER || pCreature->GetEntry() != NPC_NEXUS_DRAKE_HATCHLING)
+            return false;
+
+        // check if drake is already doing the quest
+        if (pCreature->HasAura(SPELL_RED_DRAGONBLOOD) || pCreature->HasAura(SPELL_SUBDUED))
+            return false;
+
+        pCaster->CastSpell(pCreature, SPELL_RED_DRAGONBLOOD, true);
+        return true;
+    }
+    else if (pAura->GetId() == SPELL_RED_DRAGONBLOOD && pAura->GetEffIndex() == EFFECT_INDEX_0)
+    {
+        Creature* pCreature = (Creature*)pAura->GetTarget();
+        Unit* pCaster = pAura->GetCaster();
+        if (!pCreature || !pCaster || pCaster->GetTypeId() != TYPEID_PLAYER || pCreature->GetEntry() != NPC_NEXUS_DRAKE_HATCHLING)
+            return false;
+
+        // start attacking on apply and capture on aura expire
+        if (bApply)
+            pCreature->AI()->AttackStart(pCaster);
+        else
+            pCaster->CastSpell(pCreature, SPELL_CAPTURE_TRIGGER, true);
+
+        return true;
+    }
+    else if (pAura->GetId() == SPELL_SUBDUED && pAura->GetEffIndex() == EFFECT_INDEX_0 && !bApply)
+    {
+        Creature* pCreature = (Creature*)pAura->GetTarget();
+        if (!pCreature || pCreature->GetEntry() != NPC_NEXUS_DRAKE_HATCHLING)
+            return false;
+
+        // aura expired - evade
+        pCreature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCreature, pCreature);
+        return true;
+    }
+
+    return false;
+}
+
+bool EffectDummyCreature_npc_nexus_drake_hatchling(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+{
+    if (uiSpellId == SPELL_CAPTURE_TRIGGER && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_NEXUS_DRAKE_HATCHLING)
+    {
+        if (pCaster->GetTypeId() != TYPEID_PLAYER)
+            return true;
+
+        if (pCaster->HasAura(SPELL_DRAKE_HATCHLING_SUBDUED) || pCreatureTarget->HasAura(SPELL_SUBDUED))
+            return true;
+
+        Player* pPlayer = (Player*)pCaster;
+        if (!pPlayer)
+            return true;
+
+        // check the quest
+        if (pPlayer->GetQuestStatus(QUEST_DRAKE_HUNT) != QUEST_STATUS_INCOMPLETE && pPlayer->GetQuestStatus(QUEST_DRAKE_HUNT_DAILY) != QUEST_STATUS_INCOMPLETE)
+            return true;
+
+        // evade and set friendly and start following
+        pCreatureTarget->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
+        pCreatureTarget->DeleteThreatList();
+        pCreatureTarget->CombatStop(true);
+        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_START_EVENT, pCaster, pCreatureTarget);
+
+        // cast visual spells
+        pCreatureTarget->CastSpell(pCreatureTarget, SPELL_DRAKE_VOMIT_PERIODIC, true);
+        pCreatureTarget->CastSpell(pCreatureTarget, SPELL_SUBDUED, true);
+        pCreatureTarget->CastSpell(pCaster, SPELL_DRAKE_HATCHLING_SUBDUED, true);
+        return true;
+    }
+    else if (uiSpellId == SPELL_DRAKE_TURN_IN && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_NEXUS_DRAKE_HATCHLING)
+    {
+        if (Creature* pRaelorasz = GetClosestCreatureWithEntry(pCreatureTarget, NPC_RAELORASZ, 30.0f))
+        {
+            // Inform Raelorasz and move in front of him
+            pCreatureTarget->CastSpell(pRaelorasz, SPELL_DRAKE_COMPLETION_PING, true);
+            float fX, fY, fZ;
+            pRaelorasz->GetContactPoint(pCreatureTarget, fX, fY, fZ, CONTACT_DISTANCE);
+            pCreatureTarget->GetMotionMaster()->Clear(true, true);
+            pCreatureTarget->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
+            return true;
+        }
+    }
+    else if (uiSpellId == SPELL_RAELORASZ_FIREBALL && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_NEXUS_DRAKE_HATCHLING)
+    {
+        pCreatureTarget->CastSpell(pCreatureTarget, SPELL_COMPLETE_IMMOLATION, true);
+        pCreatureTarget->SetStandState(UNIT_STAND_STATE_DEAD);
+        pCreatureTarget->ForcedDespawn(10000);
+        return true;
+    }
+    return false;
+}
+
 void AddSC_borean_tundra()
 {
     Script* pNewScript;
@@ -616,5 +865,12 @@ void AddSC_borean_tundra()
     pNewScript = new Script;
     pNewScript->Name = "npc_captured_beryl_sorcerer";
     pNewScript->pEffectAuraDummy = &EffectAuraDummy_npc_captured_beryl_sorcerer;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_nexus_drake_hatchling";
+    pNewScript->GetAI = &GetAI_npc_nexus_drake_hatchling;
+    pNewScript->pEffectAuraDummy = &EffectAuraDummy_npc_nexus_drake_hatchling;
+    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_nexus_drake_hatchling;
     pNewScript->RegisterSelf();
 }
