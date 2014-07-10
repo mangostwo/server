@@ -1,5 +1,8 @@
 /**
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #include "Common.h"
@@ -174,7 +180,7 @@ bool ChatHandler::HandleGMListIngameCommand(char* /*args*/)
         {
             AccountTypes itr_sec = itr->second->GetSession()->GetSecurity();
             if ((itr->second->isGameMaster() || (itr_sec > SEC_PLAYER && itr_sec <= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_IN_GM_LIST))) &&
-                    (!m_session || itr->second->IsVisibleGloballyFor(m_session->GetPlayer())))
+                (!m_session || itr->second->IsVisibleGloballyFor(m_session->GetPlayer())))
                 names.push_back(std::make_pair<std::string, bool>(GetNameLink(itr->second), itr->second->isAcceptWhispers()));
         }
     }

@@ -1,5 +1,8 @@
 /**
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #include "Map.h"
@@ -1066,7 +1072,7 @@ bool Map::ActiveObjectsNearGrid(uint32 x, uint32 y) const
 
         CellPair p = MaNGOS::ComputeCellPair(plr->GetPositionX(), plr->GetPositionY());
         if ((cell_min.x_coord <= p.x_coord && p.x_coord <= cell_max.x_coord) &&
-                (cell_min.y_coord <= p.y_coord && p.y_coord <= cell_max.y_coord))
+            (cell_min.y_coord <= p.y_coord && p.y_coord <= cell_max.y_coord))
             return true;
     }
 
@@ -1076,7 +1082,7 @@ bool Map::ActiveObjectsNearGrid(uint32 x, uint32 y) const
 
         CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
         if ((cell_min.x_coord <= p.x_coord && p.x_coord <= cell_max.x_coord) &&
-                (cell_min.y_coord <= p.y_coord && p.y_coord <= cell_max.y_coord))
+            (cell_min.y_coord <= p.y_coord && p.y_coord <= cell_max.y_coord))
             return true;
     }
 
@@ -1308,7 +1314,7 @@ bool DungeonMap::Add(Player* player)
                 pGroup->BindToInstance(GetPersistanceState(), false);
             else
             {
-                // cannot jump to a different instance without resetting it
+                // can not jump to a different instance without resetting it
                 if (groupBind->state != GetPersistentState())
                 {
                     sLog.outError("DungeonMap::Add: %s is being put in instance %d,%d,%d but he is in group (Id: %d) which is bound to instance %d,%d,%d!",
@@ -1344,7 +1350,7 @@ bool DungeonMap::Add(Player* player)
             if (!playerBind)
                 player->BindToInstance(GetPersistanceState(), false);
             else
-                // cannot jump to a different instance without resetting it
+                // can not jump to a different instance without resetting it
                 MANGOS_ASSERT(playerBind->state == GetPersistentState());
         }
     }
@@ -1359,7 +1365,7 @@ bool DungeonMap::Add(Player* player)
     m_resetAfterUnload = false;
     m_unloadWhenEmpty = false;
 
-    // this will acquire the same mutex so it cannot be in the previous block
+    // this will acquire the same mutex so it can not be in the previous block
     Map::Add(player);
 
     return true;
@@ -1432,7 +1438,7 @@ void DungeonMap::PermBindAllPlayers(Player* player)
     for (MapRefManager::iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
     {
         Player* plr = itr->getSource();
-        // players inside an instance cannot be bound to other instances
+        // players inside an instance can not be bound to other instances
         // some players may already be permanently bound, in this case nothing happens
         InstancePlayerBind* bind = plr->GetBoundInstance(GetId(), GetDifficulty());
         if (!bind || !bind->perm)

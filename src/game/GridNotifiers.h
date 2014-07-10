@@ -1,5 +1,8 @@
 /**
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef MANGOS_GRIDNOTIFIERS_H
@@ -50,7 +56,7 @@ namespace MaNGOS
         WorldObject& i_object;
 
         explicit VisibleChangesNotifier(WorldObject& object) : i_object(object) {}
-        template<class T> void Visit(GridRefManager<T> &) {}
+        template<class T> void Visit(GridRefManager<T>&) {}
         void Visit(CameraMapType&);
     };
 
@@ -61,7 +67,7 @@ namespace MaNGOS
         bool i_toSelf;
         MessageDeliverer(Player const& pl, WorldPacket* msg, bool to_self) : i_player(pl), i_message(msg), i_toSelf(to_self) {}
         void Visit(CameraMapType& m);
-        template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
+        template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
     };
 
     struct MessageDelivererExcept
@@ -74,7 +80,7 @@ namespace MaNGOS
             : i_phaseMask(obj->GetPhaseMask()), i_message(msg), i_skipped_receiver(skipped) {}
 
         void Visit(CameraMapType& m);
-        template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
+        template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
     };
 
     struct MANGOS_DLL_DECL ObjectMessageDeliverer
@@ -84,7 +90,7 @@ namespace MaNGOS
         explicit ObjectMessageDeliverer(WorldObject const& obj, WorldPacket* msg)
             : i_phaseMask(obj.GetPhaseMask()), i_message(msg) {}
         void Visit(CameraMapType& m);
-        template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
+        template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
     };
 
     struct MANGOS_DLL_DECL MessageDistDeliverer
@@ -98,7 +104,7 @@ namespace MaNGOS
         MessageDistDeliverer(Player const& pl, WorldPacket* msg, float dist, bool to_self, bool ownTeamOnly)
             : i_player(pl), i_message(msg), i_toSelf(to_self), i_ownTeamOnly(ownTeamOnly), i_dist(dist) {}
         void Visit(CameraMapType& m);
-        template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
+        template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
     };
 
     struct MANGOS_DLL_DECL ObjectMessageDistDeliverer
@@ -108,14 +114,14 @@ namespace MaNGOS
         float i_dist;
         ObjectMessageDistDeliverer(WorldObject const& obj, WorldPacket* msg, float dist) : i_object(obj), i_message(msg), i_dist(dist) {}
         void Visit(CameraMapType& m);
-        template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
+        template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
     };
 
     struct MANGOS_DLL_DECL ObjectUpdater
     {
         uint32 i_timeDiff;
         explicit ObjectUpdater(const uint32& diff) : i_timeDiff(diff) {}
-        template<class T> void Visit(GridRefManager<T> &m);
+        template<class T> void Visit(GridRefManager<T>& m);
         void Visit(PlayerMapType&) {}
         void Visit(CorpseMapType&) {}
         void Visit(CameraMapType&) {}
@@ -126,7 +132,7 @@ namespace MaNGOS
     {
         Player& i_player;
         PlayerRelocationNotifier(Player& pl) : i_player(pl) {}
-        template<class T> void Visit(GridRefManager<T> &) {}
+        template<class T> void Visit(GridRefManager<T>&) {}
         void Visit(CreatureMapType&);
     };
 
@@ -134,7 +140,7 @@ namespace MaNGOS
     {
         Creature& i_creature;
         CreatureRelocationNotifier(Creature& c) : i_creature(c) {}
-        template<class T> void Visit(GridRefManager<T> &) {}
+        template<class T> void Visit(GridRefManager<T>&) {}
 #ifdef WIN32
         template<> void Visit(PlayerMapType&);
 #endif
@@ -153,7 +159,7 @@ namespace MaNGOS
                 i_check = owner;
         }
 
-        template<class T> inline void Visit(GridRefManager<T>  &) {}
+        template<class T> inline void Visit(GridRefManager<T>&) {}
 #ifdef WIN32
         template<> inline void Visit<Player>(PlayerMapType&);
         template<> inline void Visit<Creature>(CreatureMapType&);
@@ -200,7 +206,7 @@ namespace MaNGOS
     struct MANGOS_DLL_DECL WorldObjectSearcher
     {
         uint32 i_phaseMask;
-        WorldObject* &i_object;
+        WorldObject*& i_object;
         Check& i_check;
 
         WorldObjectSearcher(WorldObject*& result, Check& check)
@@ -212,14 +218,14 @@ namespace MaNGOS
         void Visit(CorpseMapType& m);
         void Visit(DynamicObjectMapType& m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
     };
 
     template<class Check>
     struct MANGOS_DLL_DECL WorldObjectListSearcher
     {
         uint32 i_phaseMask;
-        std::list<WorldObject*> &i_objects;
+        std::list<WorldObject*>& i_objects;
         Check& i_check;
 
         WorldObjectListSearcher(std::list<WorldObject*>& objects, Check& check)
@@ -231,7 +237,7 @@ namespace MaNGOS
         void Visit(GameObjectMapType& m);
         void Visit(DynamicObjectMapType& m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
     };
 
     template<class Do>
@@ -277,7 +283,7 @@ namespace MaNGOS
                     i_do(itr->getSource());
         }
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
     };
 
     // Gameobject searchers
@@ -286,7 +292,7 @@ namespace MaNGOS
     struct MANGOS_DLL_DECL GameObjectSearcher
     {
         uint32 i_phaseMask;
-        GameObject* &i_object;
+        GameObject*& i_object;
         Check& i_check;
 
         GameObjectSearcher(GameObject*& result, Check& check)
@@ -294,7 +300,7 @@ namespace MaNGOS
 
         void Visit(GameObjectMapType& m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
     };
 
     // Last accepted by Check GO if any (Check can change requirements at each call)
@@ -302,7 +308,7 @@ namespace MaNGOS
     struct MANGOS_DLL_DECL GameObjectLastSearcher
     {
         uint32 i_phaseMask;
-        GameObject* &i_object;
+        GameObject*& i_object;
         Check& i_check;
 
         GameObjectLastSearcher(GameObject*& result, Check& check)
@@ -310,14 +316,14 @@ namespace MaNGOS
 
         void Visit(GameObjectMapType& m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
     };
 
     template<class Check>
     struct MANGOS_DLL_DECL GameObjectListSearcher
     {
         uint32 i_phaseMask;
-        std::list<GameObject*> &i_objects;
+        std::list<GameObject*>& i_objects;
         Check& i_check;
 
         GameObjectListSearcher(std::list<GameObject*>& objects, Check& check)
@@ -325,7 +331,7 @@ namespace MaNGOS
 
         void Visit(GameObjectMapType& m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
     };
 
     // Unit searchers
@@ -335,7 +341,7 @@ namespace MaNGOS
     struct MANGOS_DLL_DECL UnitSearcher
     {
         uint32 i_phaseMask;
-        Unit* &i_object;
+        Unit*& i_object;
         Check& i_check;
 
         UnitSearcher(Unit*& result, Check& check)
@@ -344,7 +350,7 @@ namespace MaNGOS
         void Visit(CreatureMapType& m);
         void Visit(PlayerMapType& m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
     };
 
     // Last accepted by Check Unit if any (Check can change requirements at each call)
@@ -352,7 +358,7 @@ namespace MaNGOS
     struct MANGOS_DLL_DECL UnitLastSearcher
     {
         uint32 i_phaseMask;
-        Unit* &i_object;
+        Unit*& i_object;
         Check& i_check;
 
         UnitLastSearcher(Unit*& result, Check& check)
@@ -361,7 +367,7 @@ namespace MaNGOS
         void Visit(CreatureMapType& m);
         void Visit(PlayerMapType& m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
     };
 
     // All accepted by Check units if any
@@ -369,7 +375,7 @@ namespace MaNGOS
     struct MANGOS_DLL_DECL UnitListSearcher
     {
         uint32 i_phaseMask;
-        std::list<Unit*> &i_objects;
+        std::list<Unit*>& i_objects;
         Check& i_check;
 
         UnitListSearcher(std::list<Unit*>& objects, Check& check)
@@ -378,7 +384,7 @@ namespace MaNGOS
         void Visit(PlayerMapType& m);
         void Visit(CreatureMapType& m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
     };
 
     // Creature searchers
@@ -387,7 +393,7 @@ namespace MaNGOS
     struct MANGOS_DLL_DECL CreatureSearcher
     {
         uint32 i_phaseMask;
-        Creature* &i_object;
+        Creature*& i_object;
         Check& i_check;
 
         CreatureSearcher(Creature*& result, Check& check)
@@ -395,7 +401,7 @@ namespace MaNGOS
 
         void Visit(CreatureMapType& m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
     };
 
     // Last accepted by Check Creature if any (Check can change requirements at each call)
@@ -403,7 +409,7 @@ namespace MaNGOS
     struct MANGOS_DLL_DECL CreatureLastSearcher
     {
         uint32 i_phaseMask;
-        Creature* &i_object;
+        Creature*& i_object;
         Check& i_check;
 
         CreatureLastSearcher(Creature*& result, Check& check)
@@ -411,14 +417,14 @@ namespace MaNGOS
 
         void Visit(CreatureMapType& m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
     };
 
     template<class Check>
     struct MANGOS_DLL_DECL CreatureListSearcher
     {
         uint32 i_phaseMask;
-        std::list<Creature*> &i_objects;
+        std::list<Creature*>& i_objects;
         Check& i_check;
 
         CreatureListSearcher(std::list<Creature*>& objects, Check& check)
@@ -426,7 +432,7 @@ namespace MaNGOS
 
         void Visit(CreatureMapType& m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
     };
 
     template<class Do>
@@ -445,7 +451,7 @@ namespace MaNGOS
                     i_do(itr->getSource());
         }
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
     };
 
     // Player searchers
@@ -454,7 +460,7 @@ namespace MaNGOS
     struct MANGOS_DLL_DECL PlayerSearcher
     {
         uint32 i_phaseMask;
-        Player* &i_object;
+        Player*& i_object;
         Check& i_check;
 
         PlayerSearcher(Player*& result, Check& check)
@@ -462,22 +468,22 @@ namespace MaNGOS
 
         void Visit(PlayerMapType& m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
     };
 
     template<class Check>
     struct MANGOS_DLL_DECL PlayerListSearcher
     {
         uint32 i_phaseMask;
-        std::list<Player*> &i_objects;
+        std::list<Player*>& i_objects;
         Check& i_check;
 
-        PlayerListSearcher(std::list<Player*> &objects, Check& check)
+        PlayerListSearcher(std::list<Player*>& objects, Check& check)
             : i_phaseMask(check.GetFocusObject().GetPhaseMask()), i_objects(objects), i_check(check) {}
 
         void Visit(PlayerMapType& m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
     };
 
     template<class Do>
@@ -496,7 +502,7 @@ namespace MaNGOS
                     i_do(itr->getSource());
         }
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
     };
 
     template<class Do>
@@ -515,7 +521,7 @@ namespace MaNGOS
                 if (itr->getSource()->GetBody()->InSamePhase(i_searcher) && itr->getSource()->GetBody()->IsWithinDist(i_searcher, i_dist))
                     i_do(itr->getSource()->GetOwner());
         }
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
     };
 
     // CHECKS && DO classes
@@ -603,7 +609,7 @@ namespace MaNGOS
             bool operator()(Creature* u)
             {
                 if (i_fobj->IsFriendlyTo(u) || u->isAlive() || u->IsTaxiFlying() ||
-                        (u->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD) == 0)
+                    (u->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD) == 0)
                     return false;
 
                 return i_fobj->IsWithinDistInMap(u, i_range);
@@ -842,7 +848,7 @@ namespace MaNGOS
             bool operator()(Unit* u)
             {
                 if (u->isAlive() && u->isInCombat() && !i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range) &&
-                        !(u->HasAura(i_spell, EFFECT_INDEX_0) || u->HasAura(i_spell, EFFECT_INDEX_1) || u->HasAura(i_spell, EFFECT_INDEX_2)))
+                    !(u->HasAura(i_spell, EFFECT_INDEX_0) || u->HasAura(i_spell, EFFECT_INDEX_1) || u->HasAura(i_spell, EFFECT_INDEX_2)))
                 {
                     return true;
                 }
@@ -865,7 +871,7 @@ namespace MaNGOS
             bool operator()(Unit* u)
             {
                 if (u->isAlive() && (i_controlledByPlayer ? !i_obj->IsFriendlyTo(u) : i_obj->IsHostileTo(u))
-                        && i_obj->IsWithinDistInMap(u, i_range))
+                    && i_obj->IsWithinDistInMap(u, i_range))
                     return true;
                 else
                     return false;
@@ -1133,7 +1139,7 @@ namespace MaNGOS
             bool operator()(Creature* u)
             {
                 if (u->GetEntry() == i_entry && ((i_onlyAlive && u->isAlive()) || (i_onlyDead && u->IsCorpse()) || (!i_onlyAlive && !i_onlyDead))
-                        && (!i_excludeSelf || &i_obj != u) && i_obj.IsWithinDistInMap(u, i_range))
+                    && (!i_excludeSelf || &i_obj != u) && i_obj.IsWithinDistInMap(u, i_range))
                 {
                     i_range = i_obj.GetDistance(u);         // use found unit range as new range limit for next check
                     return true;

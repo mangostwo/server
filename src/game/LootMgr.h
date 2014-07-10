@@ -1,5 +1,8 @@
 /**
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef MANGOS_LOOTMGR_H
@@ -32,7 +38,7 @@ class LootStore;
 class WorldObject;
 
 #define MAX_NR_LOOT_ITEMS 16
-// note: the client cannot show more than 16 items total
+// note: the client can not show more than 16 items total
 #define MAX_NR_QUEST_ITEMS 32
 // unrelated to the number of quest items shown, just for reserve
 
@@ -242,7 +248,7 @@ struct Loot
         LootItemList items;
         uint32 gold;
         uint8 unlootedCount;
-        LootType loot_type;                                 // required for achievement system
+        LootType loot_type;                                 // required for for proper item loot finish (store internal loot types in different from 3.x version, in fact this meaning that it send same loot types for interesting cases like 3.x version code, skip pre-3.x client loot type limitaitons)
 
         Loot(WorldObject const* lootTarget, uint32 _gold = 0) : gold(_gold), unlootedCount(0), loot_type(LOOT_CORPSE), m_lootTarget(lootTarget) {}
         ~Loot() { clear(); }

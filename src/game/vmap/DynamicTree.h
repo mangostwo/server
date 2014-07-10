@@ -1,5 +1,8 @@
-/*
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+/**
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,11 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef DYNAMICMAP_TREE_H
 #define DYNAMICMAP_TREE_H
+
 #include "Platform/Define.h"
+
 namespace G3D
 {
     class Vector3;
@@ -28,10 +36,22 @@ namespace G3D
 }
 class GameObjectModel;
 
+/**
+ * @brief
+ *
+ */
 class DynamicMapTree
 {
     public:
+        /**
+         * @brief
+         *
+         */
         DynamicMapTree();
+        /**
+         * @brief
+         *
+         */
         ~DynamicMapTree();
 
         bool isInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, uint32 phasemask) const;
@@ -40,15 +60,45 @@ class DynamicMapTree
         bool getObjectHitPos(uint32 phasemask, float x1, float y1, float z1, float x2, float y2, float z2, float& rx, float& ry, float& rz, float pModifyDist) const;
         float getHeight(float x, float y, float z, float maxSearchDist, uint32 phasemask) const;
 
+        /**
+         * @brief
+         *
+         * @param
+         */
         void insert(const GameObjectModel&);
+        /**
+         * @brief
+         *
+         * @param
+         */
         void remove(const GameObjectModel&);
+        /**
+         * @brief
+         *
+         * @param
+         * @return bool
+         */
         bool contains(const GameObjectModel&) const;
+        /**
+         * @brief
+         *
+         * @return int
+         */
         int size() const;
 
+        /**
+         * @brief
+         *
+         */
         void balance();
+        /**
+         * @brief
+         *
+         * @param diff
+         */
         void update(uint32 diff);
     private:
-        struct DynTreeImpl& impl;
+        struct DynTreeImpl& impl; /**< TODO */
 };
 
 #endif

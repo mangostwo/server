@@ -1,5 +1,8 @@
 /**
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #include "Common.h"
@@ -32,7 +38,7 @@
 #include "MapPersistentStateMgr.h"
 #include "ObjectMgr.h"
 
-void WorldSession::HandleMoveWorldportAckOpcode(WorldPacket & /*recv_data*/)
+void WorldSession::HandleMoveWorldportAckOpcode(WorldPacket& /*recv_data*/)
 {
     DEBUG_LOG("WORLD: got MSG_MOVE_WORLDPORT_ACK.");
     HandleMoveWorldportAckOpcode();
@@ -83,7 +89,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
             GetPlayer()->SetSemaphoreTeleportFar(false);
 
-            // Teleport to previous place, if cannot be ported back TP to homebind place
+            // Teleport to previous place, if can not be ported back TP to homebind place
             if (!GetPlayer()->TeleportTo(old_loc))
             {
                 DETAIL_LOG("WorldSession::HandleMoveWorldportAckOpcode: %s cannot be ported to his previous place, teleporting him to his homebind place...",
@@ -121,7 +127,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
                    " (map:%u, x:%f, y:%f, z:%f) Trying to port him to his previous place..",
                    GetPlayer()->GetGuidStr().c_str(), loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z);
 
-        // Teleport to previous place, if cannot be ported back TP to homebind place
+        // Teleport to previous place, if can not be ported back TP to homebind place
         if (!GetPlayer()->TeleportTo(old_loc))
         {
             DETAIL_LOG("WorldSession::HandleMoveWorldportAckOpcode: %s cannot be ported to his previous place, teleporting him to his homebind place...",
@@ -443,13 +449,19 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket& recv_data)
 
     HandleMoverRelocation(movementInfo);
 
+    /* Weird size, maybe needs correcting */
     WorldPacket data(MSG_MOVE_KNOCK_BACK, recv_data.size() + 15);
     data << mover->GetPackGUID();
+    /* Includes data shown below (but in different order) */
     data << movementInfo;
+
+    /* This is sent in addition to the rest of the movement data (yes, angle+velocity are sent twice) */
     data << movementInfo.GetJumpInfo().sinAngle;
     data << movementInfo.GetJumpInfo().cosAngle;
     data << movementInfo.GetJumpInfo().xyspeed;
     data << movementInfo.GetJumpInfo().velocity;
+
+    /* Do we really need to send the data to everyone? Seemed to work better */
     mover->SendMessageToSetExcept(&data, _player);
 }
 
@@ -476,7 +488,7 @@ void WorldSession::HandleMoveHoverAck(WorldPacket& recv_data)
     MovementInfo movementInfo;
 
     recv_data >> guid.ReadAsPacked();
-    recv_data >> Unused<uint32>();                          // unk1
+    recv_data >> Unused<uint32>();                          // unk
     recv_data >> movementInfo;
     recv_data >> Unused<uint32>();                          // unk2
 }
@@ -576,7 +588,7 @@ void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
         if (movementInfo.GetPos()->z < -500.0f)
         {
             if (plMover->GetBattleGround()
-                    && plMover->GetBattleGround()->HandlePlayerUnderMap(_player))
+                && plMover->GetBattleGround()->HandlePlayerUnderMap(_player))
             {
                 // do nothing, the handle already did if returned true
             }

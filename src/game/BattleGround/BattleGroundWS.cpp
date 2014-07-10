@@ -1,5 +1,8 @@
 /**
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #include "Object.h"
@@ -341,7 +347,7 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player* source, GameObject* target
 
     // alliance flag picked up from base
     if (source->GetTeam() == HORDE && GetFlagState(ALLIANCE) == BG_WS_FLAG_STATE_ON_BASE
-            && event == WS_EVENT_FLAG_A)
+        && event == WS_EVENT_FLAG_A)
     {
         message_id = LANG_BG_WS_PICKEDUP_AF;
         type = CHAT_MSG_BG_SYSTEM_HORDE;
@@ -357,7 +363,7 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player* source, GameObject* target
 
     // horde flag picked up from base
     if (source->GetTeam() == ALLIANCE && GetFlagState(HORDE) == BG_WS_FLAG_STATE_ON_BASE
-            && event == WS_EVENT_FLAG_H)
+        && event == WS_EVENT_FLAG_H)
     {
         message_id = LANG_BG_WS_PICKEDUP_HF;
         type = CHAT_MSG_BG_SYSTEM_ALLIANCE;

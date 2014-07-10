@@ -1,5 +1,8 @@
 /**
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef MANGOSSERVER_MOVESPLINEINIT_H
@@ -33,17 +39,25 @@ namespace Movement
         ToFly       = 2, // 458 = ToFly
         FlyToGround = 3, // 463 = FlyToGround
     };
-
-    /*  Initializes and launches spline movement
+    /**
+     * @brief Initializes and launches spline movement
+     *
      */
     class MANGOS_DLL_SPEC MoveSplineInit
     {
         public:
 
+            /**
+             * @brief
+             *
+             * @param m
+             */
             explicit MoveSplineInit(Unit& m);
 
-            /* Final pass of initialization that launches spline movement.
-             * @return duration - estimated travel time
+            /**
+             * @brief Final pass of initialization that launches spline movement.
+             *
+             * @return int32 duration - estimated travel time
              */
             int32 Launch();
 
@@ -58,27 +72,52 @@ namespace Movement
              */
             void SetAnimation(AnimType anim);
 
-            /* Adds final facing animation
-             * sets unit's facing to specified point/angle after all path done
+             * @brief  Adds final facing animation
+             * sets unit's facing to specified point/angle after all path done.
              * you can have only one final facing: previous will be overriden
+             *
+             * @param angle
              */
             void SetFacing(float angle);
+            /**
+             * @brief
+             *
+             * @param point
+             */
             void SetFacing(Vector3 const& point);
+            /**
+             * @brief
+             *
+             * @param target
+             */
             void SetFacing(const Unit* target);
 
-            /* Initializes movement by path
-             * @param path - array of points, shouldn't be empty
-             * @param pointId - Id of fisrt point of the path. Example: when third path point will be done it will notify that pointId + 3 done
+            /**
+             * @brief Initializes movement by path
+             *
+             * @param path array of points, shouldn't be empty
+             * @param pointId Id of fisrt point of the path. Example: when third path point will be done it will notify that pointId + 3 done
              */
             void MovebyPath(const PointsArray& path, int32 pointId = 0);
 
-            /* Initializes simple A to B mition, A is current unit's position, B is destination
+            /**
+             * @brief Initializes simple A to B mition, A is current unit's position, B is destination
+             *
+             * @param destination
+             * @param generatePath
+             * @param forceDestination
+             * @param maxPathRange 
              */
             void MoveTo(const Vector3& destination, bool generatePath = false, bool forceDestination = false);
             void MoveTo(float x, float y, float z, bool generatePath = false, bool forceDestination = false);
 
-            /* Sets Id of fisrt point of the path. When N-th path point will be done ILisener will notify that pointId + N done
+            /**
+             * @brief Sets Id of fisrt point of the path
+             *
+             * When N-th path point will be done ILisener will notify that pointId + N done
              * Needed for waypoint movement where path splitten into parts
+             *
+             * @param pointId
              */
             void SetFirstPointId(int32 pointId) { args.path_Idx_offset = pointId; }
 
@@ -86,16 +125,26 @@ namespace Movement
              * if not enabled linear spline mode will be choosen. Disabled by default
              */
             void SetSmooth();
-            /* Enables CatmullRom spline interpolation mode, enables flying animation. Disabled by default
+            /**
+             * @brief Enables CatmullRom spline interpolation mode, enables flying animation.
+             * Disabled by default
+             *
              */
             void SetFly();
-            /* Enables walk mode. Disabled by default
+            /**
+             * @brief Enables walk mode. Disabled by default
+             *
+             * @param enable
              */
             void SetWalk(bool enable);
-            /* Makes movement cyclic. Disabled by default
+            /**
+             * @brief Makes movement cyclic. Disabled by default
+             *
              */
             void SetCyclic();
-            /* Enables falling mode. Disabled by default
+            /**
+             * @brief Enables falling mode. Disabled by default
+             *
              */
             void SetFall();
             /* Inverses unit model orientation. Disabled by default
@@ -108,7 +157,8 @@ namespace Movement
             /* Sets the velocity (in case you want to have custom movement velocity)
              * if no set, speed will be selected based on unit's speeds and current movement mode
              * Has no effect if falling mode enabled
-             * velocity shouldn't be negative
+             *
+             * @param velocity velocity shouldn't be negative
              */
             void SetVelocity(float velocity);
 
@@ -124,16 +174,19 @@ namespace Movement
 
         protected:
 
-            MoveSplineInitArgs args;
-            Unit&  unit;
+            MoveSplineInitArgs args; /**< TODO */
+            Unit&  unit; /**< TODO */
     };
 
     inline void MoveSplineInit::SetFly() { args.flags.EnableFlying();}
+
     inline void MoveSplineInit::SetWalk(bool enable) { args.flags.walkmode = enable;}
     inline void MoveSplineInit::SetSmooth() { args.flags.EnableCatmullRom();}
     inline void MoveSplineInit::SetCyclic() { args.flags.cyclic = true;}
+
     inline void MoveSplineInit::SetFall() { args.flags.EnableFalling();}
-    inline void MoveSplineInit::SetVelocity(float vel) {  args.velocity = vel;}
+
+    inline void MoveSplineInit::SetVelocity(float vel) { args.velocity = vel;}
     inline void MoveSplineInit::SetOrientationInversed() { args.flags.orientationInversed = true;}
     inline void MoveSplineInit::SetOrientationFixed(bool enable) { args.flags.orientationFixed = enable;}
     inline void MoveSplineInit::SetBoardVehicle() { args.flags.EnableBoardVehicle(); }
@@ -188,4 +241,5 @@ namespace Movement
         args.flags.EnableFacingPoint();
     }
 }
+
 #endif // MANGOSSERVER_MOVESPLINEINIT_H

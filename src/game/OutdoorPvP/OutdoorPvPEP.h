@@ -1,5 +1,8 @@
 /**
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +11,15 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef WORLD_PVP_EP
@@ -23,6 +29,10 @@
 #include "OutdoorPvP.h"
 #include "Language.h"
 
+/**
+ * @brief
+ *
+ */
 enum
 {
     TOWER_ID_NORTHPASS                              = 0,
@@ -164,12 +174,16 @@ enum
     WORLD_STATE_EP_CROWNGUARD_NEUTRAL               = 2355
 };
 
+/**
+ * @brief
+ *
+ */
 struct PlaguelandsTowerBuff
 {
-    uint32 spellIdAlliance, spellIdHorde;
+    uint32 spellIdAlliance, spellIdHorde; /**< TODO */
 };
 
-static const PlaguelandsTowerBuff plaguelandsTowerBuffs[MAX_EP_TOWERS] =
+static const PlaguelandsTowerBuff plaguelandsTowerBuffs[MAX_EP_TOWERS] = /**< TODO */
 {
     {SPELL_ECHOES_OF_LORDAERON_ALLIANCE_1, SPELL_ECHOES_OF_LORDAERON_HORDE_1},
     {SPELL_ECHOES_OF_LORDAERON_ALLIANCE_2, SPELL_ECHOES_OF_LORDAERON_HORDE_2},
@@ -177,8 +191,7 @@ static const PlaguelandsTowerBuff plaguelandsTowerBuffs[MAX_EP_TOWERS] =
     {SPELL_ECHOES_OF_LORDAERON_ALLIANCE_4, SPELL_ECHOES_OF_LORDAERON_HORDE_4}
 };
 
-// capture points coordinates to sort the banners
-static const float plaguelandsTowerLocations[MAX_EP_TOWERS][2] =
+static const float plaguelandsTowerLocations[MAX_EP_TOWERS][2] = /**< capture points coordinates to sort the banners */
 {
     {3181.08f, -4379.36f},       // Northpass
     {1860.85f, -3731.23f},       // Crownguard
@@ -186,15 +199,19 @@ static const float plaguelandsTowerLocations[MAX_EP_TOWERS][2] =
     {2962.71f, -3042.31f}        // Plaguewood
 };
 
+/**
+ * @brief
+ *
+ */
 struct PlaguelandsTowerEvent
 {
-    uint32  eventEntry;
-    Team    team;
-    uint32  defenseMessage;
-    uint32  worldState;
+    uint32  eventEntry; /**< TODO */
+    Team    team; /**< TODO */
+    uint32  defenseMessage; /**< TODO */
+    uint32  worldState; /**< TODO */
 };
 
-static const PlaguelandsTowerEvent plaguelandsTowerEvents[MAX_EP_TOWERS][4] =
+static const PlaguelandsTowerEvent plaguelandsTowerEvents[MAX_EP_TOWERS][4] = /**< TODO */
 {
     {
         {EVENT_NORTHPASS_PROGRESS_ALLIANCE,     ALLIANCE,   LANG_OPVP_EP_CAPTURE_NPT_A, WORLD_STATE_EP_NORTHPASS_ALLIANCE},
@@ -222,48 +239,132 @@ static const PlaguelandsTowerEvent plaguelandsTowerEvents[MAX_EP_TOWERS][4] =
     },
 };
 
-static const uint32 plaguelandsBanners[MAX_EP_TOWERS] = {GO_TOWER_BANNER_NORTHPASS, GO_TOWER_BANNER_CROWNGUARD, GO_TOWER_BANNER_EASTWALL, GO_TOWER_BANNER_PLAGUEWOOD};
+static const uint32 plaguelandsBanners[MAX_EP_TOWERS] = {GO_TOWER_BANNER_NORTHPASS, GO_TOWER_BANNER_CROWNGUARD, GO_TOWER_BANNER_EASTWALL, GO_TOWER_BANNER_PLAGUEWOOD}; /**< TODO */
 
+/**
+ * @brief
+ *
+ */
 class OutdoorPvPEP : public OutdoorPvP
 {
     public:
+        /**
+         * @brief
+         *
+         */
         OutdoorPvPEP();
 
+        /**
+         * @brief
+         *
+         * @param player
+         * @param isMainZone
+         */
         void HandlePlayerEnterZone(Player* player, bool isMainZone) override;
+        /**
+         * @brief
+         *
+         * @param player
+         * @param isMainZone
+         */
         void HandlePlayerLeaveZone(Player* player, bool isMainZone) override;
+        /**
+         * @brief
+         *
+         * @param data
+         * @param count
+         */
         void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+        /**
+         * @brief
+         *
+         * @param player
+         */
         void SendRemoveWorldStates(Player* player) override;
 
+        /**
+         * @brief
+         *
+         * @param eventId
+         * @param go
+         * @return bool
+         */
         bool HandleEvent(uint32 eventId, GameObject* go) override;
+        /**
+         * @brief
+         *
+         * @param eventId
+         * @param players
+         * @param team
+         */
         void HandleObjectiveComplete(uint32 eventId, std::list<Player*> players, Team team) override;
 
+        /**
+         * @brief
+         *
+         * @param creature
+         */
         void HandleCreatureCreate(Creature* creature) override;
+        /**
+         * @brief
+         *
+         * @param go
+         */
         void HandleGameObjectCreate(GameObject* go) override;
+        /**
+         * @brief
+         *
+         * @param player
+         * @param go
+         * @return bool
+         */
         bool HandleGameObjectUse(Player* player, GameObject* go) override;
 
     private:
-        // process capture events
+        /**
+         * @brief process capture events
+         *
+         * @param go
+         * @param towerId
+         * @param team
+         * @param newWorldState
+         * @return bool
+         */
         bool ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team, uint32 newWorldState);
 
+        /**
+         * @brief
+         *
+         * @param go
+         * @param towerId
+         */
         void InitBanner(GameObject* go, uint32 towerId);
 
-        // Plaguewood bonus - flight master
+        /**
+         * @brief Plaguewood bonus - flight master
+         *
+         * @param objRef
+         */
         void UnsummonFlightMaster(const WorldObject* objRef);
-        // Eastwall bonus - soldiers
+        /**
+         * @brief Eastwall bonus - soldiers
+         *
+         * @param objRef
+         */
         void UnsummonSoldiers(const WorldObject* objRef);
 
-        Team m_towerOwner[MAX_EP_TOWERS];
-        uint32 m_towerWorldState[MAX_EP_TOWERS];
-        uint8 m_towersAlliance;
-        uint8 m_towersHorde;
+        Team m_towerOwner[MAX_EP_TOWERS]; /**< TODO */
+        uint32 m_towerWorldState[MAX_EP_TOWERS]; /**< TODO */
+        uint8 m_towersAlliance; /**< TODO */
+        uint8 m_towersHorde; /**< TODO */
 
-        ObjectGuid m_flightMaster;
-        ObjectGuid m_lordaeronShrineAlliance;
-        ObjectGuid m_lordaeronShrineHorde;
+        ObjectGuid m_flightMaster; /**< TODO */
+        ObjectGuid m_lordaeronShrineAlliance; /**< TODO */
+        ObjectGuid m_lordaeronShrineHorde; /**< TODO */
 
-        GuidList m_soldiers;
+        GuidList m_soldiers; /**< TODO */
 
-        GuidList m_towerBanners[MAX_EP_TOWERS];
+        GuidList m_towerBanners[MAX_EP_TOWERS]; /**< TODO */
 };
 
 #endif

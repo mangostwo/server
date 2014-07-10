@@ -1,5 +1,8 @@
 /**
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef MANGOS_MAP_H
@@ -135,7 +141,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         void PlayerRelocation(Player*, float x, float y, float z, float angl);
         void CreatureRelocation(Creature* creature, float x, float y, float z, float orientation);
 
-        template<class T, class CONTAINER> void Visit(const Cell& cell, TypeContainerVisitor<T, CONTAINER> &visitor);
+        template<class T, class CONTAINER> void Visit(const Cell& cell, TypeContainerVisitor<T, CONTAINER>& visitor);
 
         bool IsRemovalGrid(float x, float y) const
         {
@@ -443,7 +449,7 @@ class MANGOS_DLL_SPEC BattleGroundMap : public Map
 
 template<class T, class CONTAINER>
 inline void
-Map::Visit(const Cell& cell, TypeContainerVisitor<T, CONTAINER> &visitor)
+Map::Visit(const Cell& cell, TypeContainerVisitor<T, CONTAINER>& visitor)
 {
     const uint32 x = cell.GridX();
     const uint32 y = cell.GridY();

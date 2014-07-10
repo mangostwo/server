@@ -1,5 +1,8 @@
 /**
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #include "Common.h"
@@ -769,7 +775,7 @@ void WorldSession::HandleBuyStableSlot(WorldPacket& recv_data)
         SendStableResult(STABLE_ERR_STABLE);
 }
 
-void WorldSession::HandleStableRevivePet(WorldPacket &/* recv_data */)
+void WorldSession::HandleStableRevivePet(WorldPacket& /* recv_data */)
 {
     DEBUG_LOG("HandleStableRevivePet: Not implemented");
 }
@@ -791,6 +797,7 @@ void WorldSession::HandleStableSwapPet(WorldPacket& recv_data)
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+
 
     Pet* pet = _player->GetPet();
 

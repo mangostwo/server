@@ -1,5 +1,8 @@
 /**
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #include "Chat.h"
@@ -530,7 +536,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "creature_loot_template",      SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadLootTemplatesCreatureCommand,   "", NULL },
         { "creature_questrelation",      SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadCreatureQuestRelationsCommand,  "", NULL },
         { "db_script_string",            SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadDbScriptStringCommand,          "", NULL },
-        { "dbscripts_on_creature_death", SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadDBScriptsOnCreatureDeathCommand,"", NULL },
+        { "dbscripts_on_creature_death", SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadDBScriptsOnCreatureDeathCommand, "", NULL },
         { "dbscripts_on_event",          SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadDBScriptsOnEventCommand,        "", NULL },
         { "dbscripts_on_gossip",         SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadDBScriptsOnGossipCommand,       "", NULL },
         { "dbscripts_on_go_use",         SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadDBScriptsOnGoUseCommand,        "", NULL },
@@ -1112,7 +1118,7 @@ ChatCommand const* ChatHandler::FindCommand(char const* text)
  *                              parentCommand have parent of command in command arg or NULL
  *                              cmdNamePtr store command name that not found as it extracted from command line
  */
-ChatCommandSearchResult ChatHandler::FindCommand(ChatCommand* table, char const* &text, ChatCommand*& command, ChatCommand** parentCommand /*= NULL*/, std::string* cmdNamePtr /*= NULL*/, bool allAvailable /*= false*/, bool exactlyName /*= false*/)
+ChatCommandSearchResult ChatHandler::FindCommand(ChatCommand* table, char const*& text, ChatCommand*& command, ChatCommand** parentCommand /*= NULL*/, std::string* cmdNamePtr /*= NULL*/, bool allAvailable /*= false*/, bool exactlyName /*= false*/)
 {
     std::string cmd = "";
 

@@ -1,5 +1,8 @@
-/*
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+/**
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef MANGOSSERVER_GAMEOBJECTMODEL_H
@@ -33,35 +39,63 @@ namespace VMAP
     class WorldModel;
 }
 
+/**
+ * @brief
+ *
+ */
 class GameObjectModel
 {
         uint32 phasemask;
-        G3D::AABox iBound;
-        G3D::Matrix3 iInvRot;
-        G3D::Vector3 iPos;
+        G3D::AABox iBound; /**< TODO */
+        G3D::Matrix3 iInvRot; /**< TODO */
+        G3D::Vector3 iPos; /**< TODO */
         //G3D::Vector3 iRot;
-        float iInvScale;
-        float iScale;
-        VMAP::WorldModel* iModel;
+        float iInvScale; /**< TODO */
+        float iScale; /**< TODO */
+        VMAP::WorldModel* iModel; /**< TODO */
 
         GameObjectModel() : phasemask(0), iModel(NULL) {}
         bool initialize(const GameObject* const pGo, const GameObjectDisplayInfoEntry* info);
 
     public:
-        std::string name;
+        std::string name; /**< TODO */
 
+        /**
+         * @brief
+         *
+         * @return const G3D::AABox
+         */
         const G3D::AABox& getBounds() const { return iBound; }
 
+        /**
+         * @brief
+         *
+         */
         ~GameObjectModel();
 
+        /**
+         * @brief
+         *
+         * @return const G3D::Vector3
+         */
         const G3D::Vector3& getPosition() const { return iPos;}
 
         /** Enables\disables collision. */
+        /**
+         * @brief
+         *
+         */
         void disable() { phasemask = 0;}
         void enable(uint32 ph_mask) { phasemask = ph_mask;}
 
         bool intersectRay(const G3D::Ray& Ray, float& MaxDist, bool StopAtFirstHit, uint32 ph_mask) const;
 
+        /**
+         * @brief
+         *
+         * @param pGo
+         * @return GameObjectModel
+         */
         static GameObjectModel* construct(const GameObject* const pGo);
 };
 #endif

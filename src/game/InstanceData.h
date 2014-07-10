@@ -1,5 +1,8 @@
 /**
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef MANGOS_INSTANCE_DATA_H
@@ -88,16 +94,16 @@ class MANGOS_DLL_SPEC InstanceData
         virtual void OnObjectCreate(GameObject*) {}
 
         // called on creature creation
-        virtual void OnCreatureCreate(Creature * /*creature*/) {}
+        virtual void OnCreatureCreate(Creature* /*creature*/) {}
 
         // called on creature enter combat
-        virtual void OnCreatureEnterCombat(Creature * /*creature*/) {}
+        virtual void OnCreatureEnterCombat(Creature* /*creature*/) {}
 
         // called on creature evade
-        virtual void OnCreatureEvade(Creature * /*creature*/) {}
+        virtual void OnCreatureEvade(Creature* /*creature*/) {}
 
         // called on creature death
-        virtual void OnCreatureDeath(Creature * /*creature*/) {}
+        virtual void OnCreatureDeath(Creature* /*creature*/) {}
 
         // All-purpose data storage 64 bit
         virtual uint64 GetData64(uint32 /*Data*/) const { return 0; }

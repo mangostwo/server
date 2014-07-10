@@ -1,5 +1,8 @@
 /**
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #include "Common.h"
@@ -422,7 +428,7 @@ void Group::Disband(bool hideDestroy)
         if (!player)
             continue;
 
-        // we cannot call _removeMember because it would invalidate member iterator
+        // we can not call _removeMember because it would invalidate member iterator
         // if we are removing player from battleground raid
         if (isBGGroup())
             player->RemoveFromBattleGroundRaid();
@@ -963,7 +969,7 @@ void Group::SetTargetIcon(uint8 id, ObjectGuid whoGuid, ObjectGuid targetGuid)
     BroadcastPacket(&data, true);
 }
 
-static void GetDataForXPAtKill_helper(Player* player, Unit const* victim, uint32& sum_level, Player* & member_with_max_level, Player* & not_gray_member_with_max_level)
+static void GetDataForXPAtKill_helper(Player* player, Unit const* victim, uint32& sum_level, Player*& member_with_max_level, Player*& not_gray_member_with_max_level)
 {
     sum_level += player->getLevel();
     if (!member_with_max_level || member_with_max_level->getLevel() < player->getLevel())
@@ -975,7 +981,7 @@ static void GetDataForXPAtKill_helper(Player* player, Unit const* victim, uint32
         not_gray_member_with_max_level = player;
 }
 
-void Group::GetDataForXPAtKill(Unit const* victim, uint32& count, uint32& sum_level, Player* & member_with_max_level, Player* & not_gray_member_with_max_level, Player* additional)
+void Group::GetDataForXPAtKill(Unit const* victim, uint32& count, uint32& sum_level, Player*& member_with_max_level, Player*& not_gray_member_with_max_level, Player* additional)
 {
     for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
@@ -1894,7 +1900,7 @@ static void RewardGroupAtKill_helper(Player* pGroupGuy, Unit* pVictim, uint32 co
 
         // XP updated only for alive group member
         if (pGroupGuy->isAlive() && not_gray_member_with_max_level &&
-                pGroupGuy->getLevel() <= not_gray_member_with_max_level->getLevel())
+            pGroupGuy->getLevel() <= not_gray_member_with_max_level->getLevel())
         {
             uint32 itr_xp = (member_with_max_level == not_gray_member_with_max_level) ? uint32(xp * rate) : uint32((xp * rate / 2) + 1);
 

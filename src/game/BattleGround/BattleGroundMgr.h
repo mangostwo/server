@@ -1,5 +1,8 @@
 /**
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef __BATTLEGROUNDMGR_H
@@ -27,28 +33,59 @@
 #include "BattleGround.h"
 #include "ace/Recursive_Thread_Mutex.h"
 
+/**
+ * @brief
+ *
+ */
 typedef std::map<uint32, BattleGround*> BattleGroundSet;
 
-// this container can't be deque, because deque doesn't like removing the last element - if you remove it, it invalidates next iterator and crash appears
+/**
+ * @brief this container can't be deque, because deque doesn't like removing the last element - if you remove it, it invalidates next iterator and crash appears
+ *
+ */
 typedef std::list<BattleGround*> BGFreeSlotQueueType;
 
+/**
+ * @brief
+ *
+ */
 typedef UNORDERED_MAP<uint32, BattleGroundTypeId> BattleMastersMap;
+/**
+ * @brief
+ *
+ */
 typedef UNORDERED_MAP<uint32, BattleGroundEventIdx> CreatureBattleEventIndexesMap;
+/**
+ * @brief
+ *
+ */
 typedef UNORDERED_MAP<uint32, BattleGroundEventIdx> GameObjectBattleEventIndexesMap;
 
 #define BATTLEGROUND_ARENA_POINT_DISTRIBUTION_DAY 86400     // seconds in a day
 #define COUNT_OF_PLAYERS_TO_AVERAGE_WAIT_TIME 10
 
 struct GroupQueueInfo;                                      // type predefinition
-struct PlayerQueueInfo                                      // stores information for players in queue
+/**
+ * @brief stores information for players in queue
+ *
+ */
+struct PlayerQueueInfo
 {
-    uint32  LastOnlineTime;                                 // for tracking and removing offline players from queue after 5 minutes
-    GroupQueueInfo* GroupInfo;                              // pointer to the associated groupqueueinfo
+    uint32  LastOnlineTime;                                 /**< for tracking and removing offline players from queue after 5 minutes */
+    GroupQueueInfo* GroupInfo;                              /**< pointer to the associated groupqueueinfo */
 };
 
+/**
+ * @brief
+ *
+ */
 typedef std::map<ObjectGuid, PlayerQueueInfo*> GroupQueueInfoPlayers;
 
-struct GroupQueueInfo                                       // stores information about the group in queue (also used when joined as solo!)
+/**
+ * @brief stores information about the group in queue (also used when joined as solo!)
+ *
+ */
+struct GroupQueueInfo
 {
     GroupQueueInfoPlayers Players;                          // player queue info map
     Team  GroupTeam;                                        // Player team (ALLIANCE/HORDE)
@@ -63,6 +100,10 @@ struct GroupQueueInfo                                       // stores informatio
     uint32  OpponentsTeamRating;                            // for rated arena matches
 };
 
+/**
+ * @brief
+ *
+ */
 enum BattleGroundQueueGroupTypes
 {
     BG_QUEUE_PREMADE_ALLIANCE   = 0,
@@ -73,33 +114,99 @@ enum BattleGroundQueueGroupTypes
 #define BG_QUEUE_GROUP_TYPES_COUNT 4
 
 class BattleGround;
+/**
+ * @brief
+ *
+ */
 class BattleGroundQueue
 {
     public:
+        /**
+         * @brief
+         *
+         */
         BattleGroundQueue();
+        /**
+         * @brief
+         *
+         */
         ~BattleGroundQueue();
 
         void Update(BattleGroundTypeId bgTypeId, BattleGroundBracketId bracket_id, ArenaType arenaType = ARENA_TYPE_NONE, bool isRated = false, uint32 minRating = 0);
 
+        /**
+         * @brief
+         *
+         * @param bg
+         * @param bracket_id
+         */
         void FillPlayersToBG(BattleGround* bg, BattleGroundBracketId bracket_id);
+        /**
+         * @brief
+         *
+         * @param bracket_id
+         * @param MinPlayersPerTeam
+         * @param MaxPlayersPerTeam
+         * @return bool
+         */
         bool CheckPremadeMatch(BattleGroundBracketId bracket_id, uint32 MinPlayersPerTeam, uint32 MaxPlayersPerTeam);
         bool CheckNormalMatch(BattleGround* bg_template, BattleGroundBracketId bracket_id, uint32 minPlayers, uint32 maxPlayers);
         bool CheckSkirmishForSameFaction(BattleGroundBracketId bracket_id, uint32 minPlayersPerTeam);
         GroupQueueInfo* AddGroup(Player* leader, Group* group, BattleGroundTypeId bgTypeId, PvPDifficultyEntry const*  bracketEntry, ArenaType arenaType, bool isRated, bool isPremade, uint32 ArenaRating, uint32 ArenaTeamId = 0);
+        /**
+         * @brief
+         *
+         * @param guid
+         * @param decreaseInvitedCount
+         */
         void RemovePlayer(ObjectGuid guid, bool decreaseInvitedCount);
+        /**
+         * @brief
+         *
+         * @param pl_guid
+         * @param bgInstanceGuid
+         * @param removeTime
+         * @return bool
+         */
         bool IsPlayerInvited(ObjectGuid pl_guid, const uint32 bgInstanceGuid, const uint32 removeTime);
+        /**
+         * @brief
+         *
+         * @param guid
+         * @param ginfo
+         * @return bool
+         */
         bool GetPlayerGroupInfoData(ObjectGuid guid, GroupQueueInfo* ginfo);
+        /**
+         * @brief
+         *
+         * @param ginfo
+         * @param bracket_id
+         */
         void PlayerInvitedToBGUpdateAverageWaitTime(GroupQueueInfo* ginfo, BattleGroundBracketId bracket_id);
+        /**
+         * @brief
+         *
+         * @param ginfo
+         * @param bracket_id
+         * @return uint32
+         */
         uint32 GetAverageQueueWaitTime(GroupQueueInfo* ginfo, BattleGroundBracketId bracket_id);
 
     private:
-        // mutex that should not allow changing private data, nor allowing to update Queue during private data change.
-        ACE_Recursive_Thread_Mutex  m_Lock;
+        ACE_Recursive_Thread_Mutex  m_Lock; /**< mutex that should not allow changing private data, nor allowing to update Queue during private data change. */
 
+        /**
+         * @brief
+         *
+         */
         typedef std::map<ObjectGuid, PlayerQueueInfo> QueuedPlayersMap;
-        QueuedPlayersMap m_QueuedPlayers;
+        QueuedPlayersMap m_QueuedPlayers; /**< TODO */
 
-        // we need constant add to begin and constant remove / add from the end, therefore deque suits our problem well
+        /**
+         * @brief we need constant add to begin and constant remove / add from the end, therefore deque suits our problem well
+         *
+         */
         typedef std::list<GroupQueueInfo*> GroupsQueueType;
 
         /*
@@ -111,35 +218,67 @@ class BattleGroundQueue
              BG_QUEUE_NORMAL_ALLIANCE   is used for normal (or small) alliance groups or non-rated arena matches
              BG_QUEUE_NORMAL_HORDE      is used for normal (or small) horde groups or non-rated arena matches
         */
-        GroupsQueueType m_QueuedGroups[MAX_BATTLEGROUND_BRACKETS][BG_QUEUE_GROUP_TYPES_COUNT];
+        GroupsQueueType m_QueuedGroups[MAX_BATTLEGROUND_BRACKETS][BG_QUEUE_GROUP_TYPES_COUNT]; /**< TODO */
 
-        // class to select and invite groups to bg
+        /**
+         * @brief class to select and invite groups to bg
+         *
+         */
         class SelectionPool
         {
             public:
+                /**
+                 * @brief
+                 *
+                 */
                 void Init();
+                /**
+                 * @brief
+                 *
+                 * @param ginfo
+                 * @param desiredCount
+                 * @return bool
+                 */
                 bool AddGroup(GroupQueueInfo* ginfo, uint32 desiredCount);
+                /**
+                 * @brief
+                 *
+                 * @param size
+                 * @return bool
+                 */
                 bool KickGroup(uint32 size);
+                /**
+                 * @brief
+                 *
+                 * @return uint32
+                 */
                 uint32 GetPlayerCount() const {return PlayerCount;}
             public:
-                GroupsQueueType SelectedGroups;
+                GroupsQueueType SelectedGroups; /**< TODO */
             private:
-                uint32 PlayerCount;
+                uint32 PlayerCount; /**< TODO */
         };
 
-        // one selection pool for horde, other one for alliance
-        SelectionPool m_SelectionPools[BG_TEAMS_COUNT];
+        SelectionPool m_SelectionPools[BG_TEAMS_COUNT]; /**< one selection pool for horde, other one for alliance */
 
+        /**
+         * @brief
+         *
+         * @param ginfo
+         * @param bg
+         * @param side
+         * @return bool
+         */
         bool InviteGroupToBG(GroupQueueInfo* ginfo, BattleGround* bg, Team side);
-        uint32 m_WaitTimes[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS][COUNT_OF_PLAYERS_TO_AVERAGE_WAIT_TIME];
-        uint32 m_WaitTimeLastPlayer[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS];
-        uint32 m_SumOfWaitTimes[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS];
+        uint32 m_WaitTimes[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS][COUNT_OF_PLAYERS_TO_AVERAGE_WAIT_TIME]; /**< TODO */
+        uint32 m_WaitTimeLastPlayer[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS]; /**< TODO */
+        uint32 m_SumOfWaitTimes[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS]; /**< TODO */
 };
 
-/*
-    This class is used to invite player to BG again, when minute lasts from his first invitation
-    it is capable to solve all possibilities
-*/
+/**
+ * @brief This class is used to invite player to BG again, when minute lasts from his first invitation it is capable to solve all possibilities
+ *
+ */
 class BGQueueInviteEvent : public BasicEvent
 {
     public:
@@ -147,9 +286,25 @@ class BGQueueInviteEvent : public BasicEvent
             m_PlayerGuid(pl_guid), m_BgInstanceGUID(BgInstanceGUID), m_BgTypeId(BgTypeId), m_ArenaType(arenaType), m_RemoveTime(removeTime)
         {
         };
+        /**
+         * @brief
+         *
+         */
         virtual ~BGQueueInviteEvent() {};
 
+        /**
+         * @brief
+         *
+         * @param e_time
+         * @param p_time
+         * @return bool
+         */
         virtual bool Execute(uint64 e_time, uint32 p_time) override;
+        /**
+         * @brief
+         *
+         * @param e_time
+         */
         virtual void Abort(uint64 e_time) override;
     private:
         ObjectGuid m_PlayerGuid;
@@ -159,76 +314,219 @@ class BGQueueInviteEvent : public BasicEvent
         uint32 m_RemoveTime;
 };
 
-/*
-    This class is used to remove player from BG queue after 1 minute 20 seconds from first invitation
-    We must store removeInvite time in case player left queue and joined and is invited again
-    We must store bgQueueTypeId, because battleground can be deleted already, when player entered it
-*/
+/**
+ * @brief This class is used to remove player from BG queue after 1 minute 20 seconds from first invitation
+ *
+ * We must store removeInvite time in case player left queue and joined and is invited again
+ * We must store bgQueueTypeId, because battleground can be deleted already, when player entered it
+ *
+ */
 class BGQueueRemoveEvent : public BasicEvent
 {
     public:
+        /**
+         * @brief
+         *
+         * @param plGuid
+         * @param bgInstanceGUID
+         * @param BgTypeId
+         * @param bgQueueTypeId
+         * @param removeTime
+         */
         BGQueueRemoveEvent(ObjectGuid plGuid, uint32 bgInstanceGUID, BattleGroundTypeId BgTypeId, BattleGroundQueueTypeId bgQueueTypeId, uint32 removeTime)
             : m_PlayerGuid(plGuid), m_BgInstanceGUID(bgInstanceGUID), m_RemoveTime(removeTime), m_BgTypeId(BgTypeId), m_BgQueueTypeId(bgQueueTypeId)
         {}
 
+        /**
+         * @brief
+         *
+         */
         virtual ~BGQueueRemoveEvent() {}
 
+        /**
+         * @brief
+         *
+         * @param e_time
+         * @param p_time
+         * @return bool
+         */
         virtual bool Execute(uint64 e_time, uint32 p_time) override;
+        /**
+         * @brief
+         *
+         * @param e_time
+         */
         virtual void Abort(uint64 e_time) override;
     private:
-        ObjectGuid m_PlayerGuid;
-        uint32 m_BgInstanceGUID;
-        uint32 m_RemoveTime;
-        BattleGroundTypeId m_BgTypeId;
-        BattleGroundQueueTypeId m_BgQueueTypeId;
+        ObjectGuid m_PlayerGuid; /**< TODO */
+        uint32 m_BgInstanceGUID; /**< TODO */
+        uint32 m_RemoveTime; /**< TODO */
+        BattleGroundTypeId m_BgTypeId; /**< TODO */
+        BattleGroundQueueTypeId m_BgQueueTypeId; /**< TODO */
 };
 
+/**
+ * @brief
+ *
+ */
 class BattleGroundMgr
 {
     public:
-        /* Construction */
+        /**
+         * @brief Construction
+         *
+         */
         BattleGroundMgr();
+        /**
+         * @brief
+         *
+         */
         ~BattleGroundMgr();
+        /**
+         * @brief
+         *
+         * @param diff
+         */
         void Update(uint32 diff);
 
         /* Packet Building */
+        /**
+         * @brief
+         *
+         * @param data
+         * @param plr
+         */
         void BuildPlayerJoinedBattleGroundPacket(WorldPacket* data, Player* plr);
+        /**
+         * @brief
+         *
+         * @param data
+         * @param guid
+         */
         void BuildPlayerLeftBattleGroundPacket(WorldPacket* data, ObjectGuid guid);
         void BuildBattleGroundListPacket(WorldPacket* data, ObjectGuid guid, Player* plr, BattleGroundTypeId bgTypeId, uint8 fromWhere);
         void BuildGroupJoinedBattlegroundPacket(WorldPacket* data, GroupJoinBattlegroundResult result);
+        /**
+         * @brief
+         *
+         * @param data
+         * @param field
+         * @param value
+         */
         void BuildUpdateWorldStatePacket(WorldPacket* data, uint32 field, uint32 value);
+        /**
+         * @brief
+         *
+         * @param data
+         * @param bg
+         */
         void BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg);
         void BuildBattleGroundStatusPacket(WorldPacket* data, BattleGround* bg, uint8 QueueSlot, uint8 StatusID, uint32 Time1, uint32 Time2, ArenaType arenatype, Team arenaTeam);
+        /**
+         * @brief
+         *
+         * @param data
+         * @param soundid
+         */
         void BuildPlaySoundPacket(WorldPacket* data, uint32 soundid);
 
         /* Battlegrounds */
+        /**
+         * @brief
+         *
+         * @param instanceId
+         * @param bgTypeId
+         * @return BattleGround
+         */
         BattleGround* GetBattleGroundThroughClientInstance(uint32 instanceId, BattleGroundTypeId bgTypeId);
+        /**
+         * @brief
+         *
+         * @param InstanceID
+         * @param bgTypeId
+         * @return BattleGround
+         */
         BattleGround* GetBattleGround(uint32 InstanceID, BattleGroundTypeId bgTypeId); // there must be uint32 because MAX_BATTLEGROUND_TYPE_ID means unknown
 
+        /**
+         * @brief
+         *
+         * @param bgTypeId
+         * @return BattleGround
+         */
         BattleGround* GetBattleGroundTemplate(BattleGroundTypeId bgTypeId);
         BattleGround* CreateNewBattleGround(BattleGroundTypeId bgTypeId, PvPDifficultyEntry const* bracketEntry, ArenaType arenaType, bool isRated);
 
         uint32 CreateBattleGround(BattleGroundTypeId bgTypeId, bool IsArena, uint32 MinPlayersPerTeam, uint32 MaxPlayersPerTeam, uint32 LevelMin, uint32 LevelMax, char const* BattleGroundName, uint32 MapID, float Team1StartLocX, float Team1StartLocY, float Team1StartLocZ, float Team1StartLocO, float Team2StartLocX, float Team2StartLocY, float Team2StartLocZ, float Team2StartLocO);
 
+        /**
+         * @brief
+         *
+         * @param InstanceID
+         * @param bgTypeId
+         * @param BG
+         */
         void AddBattleGround(uint32 InstanceID, BattleGroundTypeId bgTypeId, BattleGround* BG) { m_BattleGrounds[bgTypeId][InstanceID] = BG; };
+        /**
+         * @brief
+         *
+         * @param instanceID
+         * @param bgTypeId
+         */
         void RemoveBattleGround(uint32 instanceID, BattleGroundTypeId bgTypeId) { m_BattleGrounds[bgTypeId].erase(instanceID); }
+        /**
+         * @brief
+         *
+         * @param bgTypeId
+         * @param bracket_id
+         * @return uint32
+         */
         uint32 CreateClientVisibleInstanceId(BattleGroundTypeId bgTypeId, BattleGroundBracketId bracket_id);
+        /**
+         * @brief
+         *
+         * @param bgTypeId
+         * @param bracket_id
+         * @param clientInstanceID
+         */
         void DeleteClientVisibleInstanceId(BattleGroundTypeId bgTypeId, BattleGroundBracketId bracket_id, uint32 clientInstanceID)
         {
             m_ClientBattleGroundIds[bgTypeId][bracket_id].erase(clientInstanceID);
         }
 
+        /**
+         * @brief
+         *
+         */
         void CreateInitialBattleGrounds();
+        /**
+         * @brief
+         *
+         */
         void DeleteAllBattleGrounds();
 
+        /**
+         * @brief
+         *
+         * @param pl
+         * @param InstanceID
+         * @param bgTypeId
+         */
         void SendToBattleGround(Player* pl, uint32 InstanceID, BattleGroundTypeId bgTypeId);
 
         /* Battleground queues */
         // these queues are instantiated when creating BattlegroundMrg
-        BattleGroundQueue m_BattleGroundQueues[MAX_BATTLEGROUND_QUEUE_TYPES]; // public, because we need to access them in BG handler code
+        BattleGroundQueue m_BattleGroundQueues[MAX_BATTLEGROUND_QUEUE_TYPES]; /**< public, because we need to access them in BG handler code */
 
-        BGFreeSlotQueueType BGFreeSlotQueue[MAX_BATTLEGROUND_TYPE_ID];
+        BGFreeSlotQueueType BGFreeSlotQueue[MAX_BATTLEGROUND_TYPE_ID]; /**< TODO */
 
+        /**
+         * @brief
+         *
+         * @param bgQueueTypeId
+         * @param bgTypeId
+         * @param bracket_id
+         */
         void ScheduleQueueUpdate(uint32 arenaRating, ArenaType arenaType, BattleGroundQueueTypeId bgQueueTypeId, BattleGroundTypeId bgTypeId, BattleGroundBracketId bracket_id);
         uint32 GetMaxRatingDifference() const;
         uint32 GetRatingDiscardTimer()  const;
@@ -239,7 +537,17 @@ class BattleGroundMgr
         void ToggleArenaTesting();
         void ToggleTesting();
 
+        /**
+         * @brief
+         *
+         */
         void LoadBattleMastersEntry();
+        /**
+         * @brief
+         *
+         * @param entry
+         * @return BattleGroundTypeId
+         */
         BattleGroundTypeId GetBattleMasterBG(uint32 entry) const
         {
             BattleMastersMap::const_iterator itr = mBattleMastersMap.find(entry);
@@ -248,7 +556,17 @@ class BattleGroundMgr
             return BATTLEGROUND_TYPE_NONE;
         }
 
+        /**
+         * @brief
+         *
+         */
         void LoadBattleEventIndexes();
+        /**
+         * @brief
+         *
+         * @param dbTableGuidLow
+         * @return const BattleGroundEventIdx
+         */
         const BattleGroundEventIdx GetCreatureEventIndex(uint32 dbTableGuidLow) const
         {
             CreatureBattleEventIndexesMap::const_iterator itr = m_CreatureBattleEventIndexMap.find(dbTableGuidLow);
@@ -256,6 +574,12 @@ class BattleGroundMgr
                 return itr->second;
             return m_CreatureBattleEventIndexMap.find(-1)->second;
         }
+        /**
+         * @brief
+         *
+         * @param dbTableGuidLow
+         * @return const BattleGroundEventIdx
+         */
         const BattleGroundEventIdx GetGameObjectEventIndex(uint32 dbTableGuidLow) const
         {
             GameObjectBattleEventIndexesMap::const_iterator itr = m_GameObjectBattleEventIndexMap.find(dbTableGuidLow);
@@ -270,28 +594,56 @@ class BattleGroundMgr
         static bool IsArenaType(BattleGroundTypeId bgTypeId);
         static bool IsBattleGroundType(BattleGroundTypeId bgTypeId) { return !IsArenaType(bgTypeId); }
         static BattleGroundQueueTypeId BGQueueTypeId(BattleGroundTypeId bgTypeId, ArenaType arenaType);
+        /**
+         * @brief
+         *
+         * @param bgQueueTypeId
+         * @return BattleGroundTypeId
+         */
         static BattleGroundTypeId BGTemplateId(BattleGroundQueueTypeId bgQueueTypeId);
         static ArenaType BGArenaType(BattleGroundQueueTypeId bgQueueTypeId);
 
+        /**
+         * @brief
+         *
+         * @param bgTypeId
+         * @return HolidayIds
+         */
         static HolidayIds BGTypeToWeekendHolidayId(BattleGroundTypeId bgTypeId);
+        /**
+         * @brief
+         *
+         * @param holiday
+         * @return BattleGroundTypeId
+         */
         static BattleGroundTypeId WeekendHolidayIdToBGType(HolidayIds holiday);
+        /**
+         * @brief
+         *
+         * @param bgTypeId
+         * @return bool
+         */
         static bool IsBGWeekend(BattleGroundTypeId bgTypeId);
     private:
-        ACE_Thread_Mutex    SchedulerLock;
-        BattleMastersMap    mBattleMastersMap;
-        CreatureBattleEventIndexesMap m_CreatureBattleEventIndexMap;
-        GameObjectBattleEventIndexesMap m_GameObjectBattleEventIndexMap;
+        ACE_Thread_Mutex    SchedulerLock; /**< TODO */
+        BattleMastersMap    mBattleMastersMap; /**< TODO */
+        CreatureBattleEventIndexesMap m_CreatureBattleEventIndexMap; /**< TODO */
+        GameObjectBattleEventIndexesMap m_GameObjectBattleEventIndexMap; /**< TODO */
 
         /* Battlegrounds */
-        BattleGroundSet m_BattleGrounds[MAX_BATTLEGROUND_TYPE_ID];
+        BattleGroundSet m_BattleGrounds[MAX_BATTLEGROUND_TYPE_ID]; /**< TODO */
         std::vector<uint64> m_QueueUpdateScheduler;
+        /**
+         * @brief
+         *
+         */
         typedef std::set<uint32> ClientBattleGroundIdSet;
-        ClientBattleGroundIdSet m_ClientBattleGroundIds[MAX_BATTLEGROUND_TYPE_ID][MAX_BATTLEGROUND_BRACKETS]; // the instanceids just visible for the client
+        ClientBattleGroundIdSet m_ClientBattleGroundIds[MAX_BATTLEGROUND_TYPE_ID][MAX_BATTLEGROUND_BRACKETS]; /**< the instanceids just visible for the client */
         uint32 m_NextRatingDiscardUpdate;
         time_t m_NextAutoDistributionTime;
         uint32 m_AutoDistributionTimeChecker;
         bool   m_ArenaTesting;
-        bool   m_Testing;
+        bool   m_Testing; /**< TODO */
 };
 
 #define sBattleGroundMgr MaNGOS::Singleton<BattleGroundMgr>::Instance()

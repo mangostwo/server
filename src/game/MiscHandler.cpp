@@ -1,5 +1,8 @@
 /**
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #include "Common.h"
@@ -228,8 +234,8 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
             if (!str[i].empty())
             {
                 if (wgname.find(str[i]) != std::wstring::npos ||
-                        wpname.find(str[i]) != std::wstring::npos ||
-                        Utf8FitTo(aname, str[i]))
+                    wpname.find(str[i]) != std::wstring::npos ||
+                    Utf8FitTo(aname, str[i]))
                 {
                     s_show = true;
                     break;
@@ -261,7 +267,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
     DEBUG_LOG("WORLD: Send SMSG_WHO Message");
 }
 
-void WorldSession::HandleLogoutRequestOpcode(WorldPacket & /*recv_data*/)
+void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recv_data*/)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_LOGOUT_REQUEST, security %u", GetSecurity());
 
@@ -284,7 +290,7 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket & /*recv_data*/)
 
     // instant logout in taverns/cities or on taxi or for admins, gm's, mod's if its enabled in mangosd.conf
     if (GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) || GetPlayer()->IsTaxiFlying() ||
-            GetSecurity() >= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_INSTANT_LOGOUT))
+        GetSecurity() >= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_INSTANT_LOGOUT))
     {
         LogoutPlayer(true);
         return;
@@ -308,12 +314,12 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket & /*recv_data*/)
     LogoutRequest(time(NULL));
 }
 
-void WorldSession::HandlePlayerLogoutOpcode(WorldPacket & /*recv_data*/)
+void WorldSession::HandlePlayerLogoutOpcode(WorldPacket& /*recv_data*/)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_PLAYER_LOGOUT Message");
 }
 
-void WorldSession::HandleLogoutCancelOpcode(WorldPacket & /*recv_data*/)
+void WorldSession::HandleLogoutCancelOpcode(WorldPacket& /*recv_data*/)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_LOGOUT_CANCEL Message");
 
@@ -935,12 +941,12 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
     }
 }
 
-void WorldSession::HandleCompleteCinematic(WorldPacket & /*recv_data*/)
+void WorldSession::HandleCompleteCinematic(WorldPacket& /*recv_data*/)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_COMPLETE_CINEMATIC");
 }
 
-void WorldSession::HandleNextCinematicCamera(WorldPacket & /*recv_data*/)
+void WorldSession::HandleNextCinematicCamera(WorldPacket& /*recv_data*/)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_NEXT_CINEMATIC_CAMERA");
 }
@@ -956,17 +962,17 @@ void WorldSession::HandleMoveTimeSkippedOpcode(WorldPacket& recv_data)
     recv_data >> Unused<uint32>();
 
     /*
-        ObjectGuid guid;
-        uint32 time_skipped;
-        recv_data >> guid;
-        recv_data >> time_skipped;
-        DEBUG_LOG("WORLD: Received opcode CMSG_MOVE_TIME_SKIPPED");
+    ObjectGuid guid;
+    uint32 time_skipped;
+    recv_data >> guid;
+    recv_data >> time_skipped;
+    DEBUG_LOG("WORLD: Received opcode CMSG_MOVE_TIME_SKIPPED");
 
-        /// TODO
-        must be need use in mangos
-        We substract server Lags to move time ( AntiLags )
-        for exmaple
-        GetPlayer()->ModifyLastMoveTime( -int32(time_skipped) );
+    /// TODO
+    must be need use in mangos
+    We substract server Lags to move time ( AntiLags )
+    for exmaple
+    GetPlayer()->ModifyLastMoveTime( -int32(time_skipped) );
     */
 }
 
@@ -1437,7 +1443,7 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket& recv_data)
     }
 }
 
-void WorldSession::HandleCancelMountAuraOpcode(WorldPacket & /*recv_data*/)
+void WorldSession::HandleCancelMountAuraOpcode(WorldPacket& /*recv_data*/)
 {
     DEBUG_LOG("WORLD: Received opcode  CMSG_CANCEL_MOUNT_AURA");
 
@@ -1482,7 +1488,7 @@ void WorldSession::HandleMoveSetCanFlyAckOpcode(WorldPacket& recv_data)
     _player->GetMover()->m_movementInfo.SetMovementFlags(movementInfo.GetMovementFlags());
 }
 
-void WorldSession::HandleRequestPetInfoOpcode(WorldPacket & /*recv_data */)
+void WorldSession::HandleRequestPetInfoOpcode(WorldPacket& /*recv_data */)
 {
     /*
         DEBUG_LOG("WORLD: Received opcode CMSG_REQUEST_PET_INFO");

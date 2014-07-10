@@ -1,5 +1,8 @@
-/*
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+/**
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef _REGULAR_GRID_H
@@ -33,8 +39,19 @@ using G3D::AABox;
 using G3D::Ray;
 
 template<class Node>
+/**
+ * @brief
+ *
+ */
 struct NodeCreator
 {
+    /**
+     * @brief
+     *
+     * @param int
+     * @param int
+     * @return Node
+     */
     static Node* makeNode(int /*x*/, int /*y*/) { return new Node();}
 };
 
@@ -44,10 +61,18 @@ template < class T,
          /*class BoundsFunc = BoundsTrait<T>,*/
          class PositionFunc = PositionTrait<T>
          >
+/**
+ * @brief
+ *
+ */
 class RegularGrid2D
 {
     public:
 
+        /**
+         * @brief
+         *
+         */
         enum
         {
             CELL_NUMBER = 64,
@@ -56,16 +81,28 @@ class RegularGrid2D
 #define HGRID_MAP_SIZE  (533.33333f * 64.f)     // shouldn't be changed
 #define CELL_SIZE       float(HGRID_MAP_SIZE/(float)CELL_NUMBER)
 
+        /**
+         * @brief
+         *
+         */
         typedef G3D::Table<const T*, Node*> MemberTable;
 
-        MemberTable memberTable;
-        Node* nodes[CELL_NUMBER][CELL_NUMBER];
+        MemberTable memberTable; /**< TODO */
+        Node* nodes[CELL_NUMBER][CELL_NUMBER]; /**< TODO */
 
+        /**
+         * @brief
+         *
+         */
         RegularGrid2D()
         {
             memset(nodes, 0, sizeof(nodes));
         }
 
+        /**
+         * @brief
+         *
+         */
         ~RegularGrid2D()
         {
             for (int x = 0; x < CELL_NUMBER; ++x)
@@ -73,6 +110,11 @@ class RegularGrid2D
                     delete nodes[x][y];
         }
 
+        /**
+         * @brief
+         *
+         * @param value
+         */
         void insert(const T& value)
         {
             Vector3 pos;
@@ -82,6 +124,11 @@ class RegularGrid2D
             memberTable.set(&value, &node);
         }
 
+        /**
+         * @brief
+         *
+         * @param value
+         */
         void remove(const T& value)
         {
             memberTable[&value]->remove(value);
@@ -89,6 +136,10 @@ class RegularGrid2D
             memberTable.remove(&value);
         }
 
+        /**
+         * @brief
+         *
+         */
         void balance()
         {
             for (int x = 0; x < CELL_NUMBER; ++x)
@@ -97,29 +148,76 @@ class RegularGrid2D
                         n->balance();
         }
 
+        /**
+         * @brief
+         *
+         * @param value
+         * @return bool
+         */
         bool contains(const T& value) const { return memberTable.containsKey(&value); }
+        /**
+         * @brief
+         *
+         * @return int
+         */
         int size() const { return memberTable.size(); }
 
+        /**
+         * @brief
+         *
+         */
         struct Cell
         {
-            int x, y;
+            int x, y; /**< TODO */
+            /**
+             * @brief
+             *
+             * @param c2
+             * @return bool operator
+             */
             bool operator == (const Cell& c2) const { return x == c2.x && y == c2.y;}
 
+            /**
+             * @brief
+             *
+             * @param fx
+             * @param fy
+             * @return Cell
+             */
             static Cell ComputeCell(float fx, float fy)
             {
                 Cell c = {fx* (1.f / CELL_SIZE) + (CELL_NUMBER / 2), fy* (1.f / CELL_SIZE) + (CELL_NUMBER / 2)};
                 return c;
             }
 
+            /**
+             * @brief
+             *
+             * @return bool
+             */
             bool isValid() const { return x >= 0 && x < CELL_NUMBER && y >= 0 && y < CELL_NUMBER;}
         };
 
+        /**
+         * @brief
+         *
+         * @param fx
+         * @param fy
+         * @return Node
+         */
         Node& getGridFor(float fx, float fy)
         {
             Cell c = Cell::ComputeCell(fx, fy);
             return getGrid(c.x, c.y);
         }
 
+        /**
+         * @brief
+         *
+         * @param x
+         * @param y
+         * @return Node
+         */
         Node& getGrid(int x, int y)
         {
             MANGOS_ASSERT(x < CELL_NUMBER && y < CELL_NUMBER);
@@ -129,12 +227,27 @@ class RegularGrid2D
         }
 
         template<typename RayCallback>
+        /**
+         * @brief
+         *
+         * @param ray
+         * @param intersectCallback
+         * @param max_dist
+         */
         void intersectRay(const Ray& ray, RayCallback& intersectCallback, float max_dist)
         {
             intersectRay(ray, intersectCallback, max_dist, ray.origin() + ray.direction() * max_dist);
         }
 
         template<typename RayCallback>
+        /**
+         * @brief
+         *
+         * @param ray
+         * @param intersectCallback
+         * @param max_dist
+         * @param end
+         */
         void intersectRay(const Ray& ray, RayCallback& intersectCallback, float& max_dist, const Vector3& end)
         {
             Cell cell = Cell::ComputeCell(ray.origin().x, ray.origin().y);
@@ -212,6 +325,12 @@ class RegularGrid2D
         }
 
         template<typename IsectCallback>
+        /**
+         * @brief
+         *
+         * @param point
+         * @param intersectCallback
+         */
         void intersectPoint(const Vector3& point, IsectCallback& intersectCallback)
         {
             Cell cell = Cell::ComputeCell(point.x, point.y);
@@ -221,8 +340,14 @@ class RegularGrid2D
                 node->intersectPoint(point, intersectCallback);
         }
 
-        // Optimized verson of intersectRay function for rays with vertical directions
         template<typename RayCallback>
+        /**
+         * @brief Optimized verson of intersectRay function for rays with vertical directions
+         *
+         * @param ray
+         * @param intersectCallback
+         * @param max_dist
+         */
         void intersectZAllignedRay(const Ray& ray, RayCallback& intersectCallback, float& max_dist)
         {
             Cell cell = Cell::ComputeCell(ray.origin().x, ray.origin().y);

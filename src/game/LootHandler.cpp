@@ -1,5 +1,8 @@
 /**
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #include "Common.h"
@@ -175,7 +181,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
         player->SendEquipError(msg, NULL, NULL, item->itemid);
 }
 
-void WorldSession::HandleLootMoneyOpcode(WorldPacket & /*recv_data*/)
+void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
 {
     DEBUG_LOG("WORLD: CMSG_LOOT_MONEY");
 
@@ -406,9 +412,13 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
                 go->SetLootState(GO_ACTIVATED);
             break;
         }
-        case HIGHGUID_CORPSE:                               // ONLY remove insignia at BG
+        /* Only used for removing insignia in battlegrounds */
+        case HIGHGUID_CORPSE:
         {
+            /* Get pointer to corpse */
             Corpse* corpse = _player->GetMap()->GetCorpse(lguid);
+
+            /* If corpse is invalid or not in a valid position, dont allow looting */
             if (!corpse || !corpse->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
                 return;
 
@@ -473,12 +483,14 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
         case HIGHGUID_UNIT:
         case HIGHGUID_VEHICLE:
         {
+            /* Get creature pointer */
             Creature* pCreature = GetPlayer()->GetMap()->GetCreature(lguid);
 
             bool ok_loot = pCreature && pCreature->isAlive() == (player->getClass() == CLASS_ROGUE && pCreature->lootForPickPocketed);
             if (!ok_loot || !pCreature->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
                 return;
 
+            /* Copy creature loot to loot variable */
             loot = &pCreature->loot;
 
             // update next looter
@@ -486,9 +498,10 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
                 if (group->GetLooterGuid() == player->GetObjectGuid())
                     group->UpdateLooterGuid(pCreature);
 
+            /* We've completely looted the creature, mark it as available for skinning */
             if (loot->isLooted() && !pCreature->isAlive())
             {
-                // for example skinning after normal loot
+                /* Update Creature: for example skinning after normal loot */
                 pCreature->PrepareBodyLootState();
                 pCreature->AllLootRemovedFromCorpse();
             }

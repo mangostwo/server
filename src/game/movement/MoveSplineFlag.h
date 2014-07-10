@@ -1,5 +1,8 @@
 /**
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef MANGOSSERVER_MOVESPLINEFLAG_H
@@ -30,9 +36,17 @@ namespace Movement
 #pragma pack(push,1)
 #endif
 
+    /**
+     * @brief
+     *
+     */
     class MoveSplineFlag
     {
         public:
+            /**
+             * @brief
+             *
+             */
             enum eFlags
             {
                 None         = 0x00000000,
@@ -74,15 +88,44 @@ namespace Movement
                 Mask_Unused = No_Spline | Enter_Cycle | Frozen | Unknown7 | Unknown8 | Unknown10 | Unknown11 | Unknown12 | Unknown13,
             };
 
+            /**
+             * @brief
+             *
+             * @return uint32
+             */
             inline uint32& raw() { return (uint32&) * this;}
+            /**
+             * @brief
+             *
+             * @return const uint32
+             */
             inline const uint32& raw() const { return (const uint32&) * this;}
 
+            /**
+             * @brief
+             *
+             */
             MoveSplineFlag() { raw() = 0; }
+            /**
+             * @brief
+             *
+             * @param f
+             */
             MoveSplineFlag(uint32 f) { raw() = f; }
+            /**
+             * @brief
+             *
+             * @param f
+             */
             MoveSplineFlag(const MoveSplineFlag& f) { raw() = f.raw(); }
 
             // Constant interface
 
+            /**
+             * @brief
+             *
+             * @return bool
+             */
             bool isSmooth() const { return raw() & Mask_CatmullRom;}
             bool isLinear() const { return !isSmooth();}
             bool isFacing() const { return raw() & Mask_Final_Facing;}
@@ -91,12 +134,33 @@ namespace Movement
             bool hasAllFlags(uint32 f) const { return (raw() & f) == f;}
             bool hasFlag(uint32 f) const { return (raw() & f) != 0;}
             uint32 operator & (uint32 f) const { return (raw() & f);}
+            /**
+             * @brief
+             *
+             * @param f
+             * @return uint32 operator
+             */
             uint32 operator | (uint32 f) const { return (raw() | f);}
+            /**
+             * @brief
+             *
+             * @return std::string
+             */
             std::string ToString() const;
 
             // Not constant interface
 
+            /**
+             * @brief
+             *
+             * @param f
+             */
             void operator &= (uint32 f) { raw() &= f;}
+            /**
+             * @brief
+             *
+             * @param f
+             */
             void operator |= (uint32 f) { raw() |= f;}
 
             void EnableAnimation(uint8 anim) { raw() = (raw() & ~(Mask_Animations | Falling | Parabolic))   | Animation | anim;}
@@ -104,9 +168,17 @@ namespace Movement
             void EnableFalling()             { raw() = (raw() & ~(Mask_Animations | Parabolic | Animation)) | Falling;}
             void EnableFlying()              { raw() = (raw() & ~Catmullrom)                                | Flying; }
             void EnableCatmullRom()          { raw() = (raw() & ~Flying)                                    | Catmullrom; }
-            void EnableFacingPoint()         { raw() = (raw() & ~Mask_Final_Facing)                         | Final_Point;}
-            void EnableFacingAngle()         { raw() = (raw() & ~Mask_Final_Facing)                         | Final_Angle;}
-            void EnableFacingTarget()        { raw() = (raw() & ~Mask_Final_Facing)                         | Final_Target;}
+            void EnableFacingPoint()    { raw() = (raw() & ~Mask_Final_Facing) | Final_Point;}
+            /**
+             * @brief
+             *
+             */
+            void EnableFacingAngle()    { raw() = (raw() & ~Mask_Final_Facing) | Final_Angle;}
+            /**
+             * @brief
+             *
+             */
+            void EnableFacingTarget()   { raw() = (raw() & ~Mask_Final_Facing) | Final_Target;}
             void EnableBoardVehicle()        { raw() = (raw() & ~(Catmullrom | ExitVehicle))                | BoardVehicle; }
             void EnableExitVehicle()         { raw() = (raw() & ~BoardVehicle)                              | ExitVehicle; }
 

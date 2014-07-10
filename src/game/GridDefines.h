@@ -1,5 +1,8 @@
 /**
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef MANGOS_GRIDDEFINES_H
@@ -78,10 +84,10 @@ template<const unsigned int LIMIT>
 struct MANGOS_DLL_DECL CoordPair
 {
     CoordPair(uint32 x = 0, uint32 y = 0) : x_coord(x), y_coord(y) {}
-    CoordPair(const CoordPair<LIMIT> &obj) : x_coord(obj.x_coord), y_coord(obj.y_coord) {}
-    bool operator==(const CoordPair<LIMIT> &obj) const { return (obj.x_coord == x_coord && obj.y_coord == y_coord); }
-    bool operator!=(const CoordPair<LIMIT> &obj) const { return !operator==(obj); }
-    CoordPair<LIMIT>& operator=(const CoordPair<LIMIT> &obj)
+    CoordPair(const CoordPair<LIMIT>& obj) : x_coord(obj.x_coord), y_coord(obj.y_coord) {}
+    bool operator==(const CoordPair<LIMIT>& obj) const { return (obj.x_coord == x_coord && obj.y_coord == y_coord); }
+    bool operator!=(const CoordPair<LIMIT>& obj) const { return !operator==(obj); }
+    CoordPair<LIMIT>& operator=(const CoordPair<LIMIT>& obj)
     {
         x_coord = obj.x_coord;
         y_coord = obj.y_coord;
