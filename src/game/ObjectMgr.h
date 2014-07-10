@@ -1118,7 +1118,7 @@ class ObjectMgr
         * \brief: Data returned is used to compute health, mana, armor, damage of creatures. May be NULL.
         * \param uint32 level               creature level
         * \param uint32 unitClass           creature class, related to CLASSMASK_ALL_CREATURES
-        * \param uint32 expansion           creature expansion (we could have creature exp = 0 for wotlk as well as exp = 1 or exp = 2)
+        * \param uint32 expansion           creature expansion (we could have creature exp = 0 for vanilla, exp = 1 for tbc, exp = 2 for wotlk)
         * \return: CreatureClassLvlStats const* or NULL
         *
         * Description: GetCreatureClassLvlStats give fast access to creature stats data.

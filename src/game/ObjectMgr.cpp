@@ -889,19 +889,17 @@ void ObjectMgr::LoadCreatureClassLvlStats()
     // initialize data array
     memset(&m_creatureClassLvlStats, 0, sizeof(m_creatureClassLvlStats));
 
-    std::string queryStr = "SELECT Class, Level, BaseMana, BaseMeleeAttackPower, BaseRangedAttackPower, BaseArmor";
+    std::string queryStr = "SELECT `Class`, `Level`, `BaseMana`, `BaseMeleeAttackPower`, `BaseRangedAttackPower`, `BaseArmor`";
 
-    std::string expData = "";
-    for (uint8 i = 0; i <= MAX_EXPANSION; ++i)
+    for (int i = 0; i <= MAX_EXPANSION; i++)
     {
         std::ostringstream str;
-        str << ", BaseHealthExp" << i << ", BaseDamageExp" << i;
-        expData += str.str();
+        str << ", `BaseHealthExp" << i << "`, `BaseDamageExp" << i << "`";
+        queryStr.append(str.str().c_str());
     }
 
-    queryStr += expData + " FROM creature_template_classlevelstats ORDER BY Class, Level";
+    queryStr.append(" FROM `creature_template_classlevelstats` ORDER BY `Class`, `Level`");
     QueryResult* result = WorldDatabase.Query(queryStr.c_str());
-
     if (!result)
     {
         BarGoLink bar(1);
@@ -912,8 +910,7 @@ void ObjectMgr::LoadCreatureClassLvlStats()
     }
 
     BarGoLink bar(result->GetRowCount());
-    uint32 totalRow = result->GetRowCount();
-    uint32 storedRow = 0;
+    uint32 DataCount = 0;
 
     do
     {
@@ -924,13 +921,13 @@ void ObjectMgr::LoadCreatureClassLvlStats()
 
         if (creatureLevel == 0 || creatureLevel > DEFAULT_MAX_CREATURE_LEVEL)
         {
-            sLog.outErrorDb("Found stats for creature level [%u], incorrect level for this core. Skip!", creatureLevel);
+            sLog.outErrorDb("Found stats for creature level [%u] with incorrect level. Skipping!", creatureLevel);
             continue;
         }
 
         if (((1 << (creatureClass - 1)) & CLASSMASK_ALL_CREATURES) == 0)
         {
-            sLog.outErrorDb("Found stats for creature class [%u], incorrect class for this core. Skip!", creatureClass);
+            sLog.outErrorDb("Found stats for creature class [%u] with incorrect class. Skipping!", creatureClass);
             continue;
         }
 
@@ -939,9 +936,9 @@ void ObjectMgr::LoadCreatureClassLvlStats()
         float   baseRangedAttackPower      = fields[4].GetFloat();
         uint32  baseArmor                  = fields[5].GetUInt32();
 
-        for (int i = 0; i <= MAX_EXPANSION; ++i)
+        for (uint8 i = 0; i <= MAX_EXPANSION; ++i)
         {
-            CreatureClassLvlStats &cCLS = m_creatureClassLvlStats[creatureLevel][classToIndex[creatureClass]][i];
+            CreatureClassLvlStats &cCLS = m_creatureClassLvlStats[creatureLevel][classToIndex[creatureClass]][i - 1];   // values should start from 0
             cCLS.BaseMana                   = baseMana;
             cCLS.BaseMeleeAttackPower       = baseMeleeAttackPower;
             cCLS.BaseRangedAttackPower      = baseRangedAttackPower;
@@ -949,13 +946,13 @@ void ObjectMgr::LoadCreatureClassLvlStats()
             cCLS.BaseHealth = fields[6 + (i * 2)].GetUInt32();
             cCLS.BaseDamage = fields[7 + (i * 2)].GetFloat();
         }
-        ++storedRow;
+        ++DataCount;
     }
     while (result->NextRow());
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Found %u creature stats definitions.", storedRow);
+    sLog.outString(">> Loaded %u creature class level stats definitions.", DataCount);
 }
 
 CreatureClassLvlStats const* ObjectMgr::GetCreatureClassLvlStats(uint32 level, uint32 unitClass, int32 expansion) const
