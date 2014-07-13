@@ -48,6 +48,7 @@
 #include "CellImpl.h"
 #include "Language.h"
 #include "MapManager.h"
+#include "LuaEngine.h"
 
 #define NULL_AURA_SLOT 0xFF
 
@@ -444,6 +445,7 @@ Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBas
 
 Aura::~Aura()
 {
+    Eluna::RemoveRef(this);
 }
 
 AreaAura::AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target,

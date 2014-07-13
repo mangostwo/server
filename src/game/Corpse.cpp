@@ -32,6 +32,7 @@
 #include "GossipDef.h"
 #include "World.h"
 #include "ObjectMgr.h"
+#include "LuaEngine.h"
 
 Corpse::Corpse(CorpseType type) : WorldObject(),
     loot(this),
@@ -52,6 +53,7 @@ Corpse::Corpse(CorpseType type) : WorldObject(),
 
 Corpse::~Corpse()
 {
+    Eluna::RemoveRef(this);
 }
 
 void Corpse::AddToWorld()

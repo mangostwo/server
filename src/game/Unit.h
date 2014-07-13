@@ -1613,6 +1613,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
          * \see GetUInt32Value
          */
         uint32 GetHealth()    const { return GetUInt32Value(UNIT_FIELD_HEALTH); }
+        bool HealthAbovePctHealed(int32 pct, uint32 heal) const { return uint64(GetHealth()) + uint64(heal) > CountPctFromMaxHealth(pct); }
         /** 
          * Gets the maximum health of this Unit
          * @return the max health this Unit can have
@@ -1620,6 +1621,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
          * \see GetUInt32Value
          */
         uint32 GetMaxHealth() const { return GetUInt32Value(UNIT_FIELD_MAXHEALTH); }
+        bool IsFullHealth() const { return GetHealth() == GetMaxHealth(); }
+        bool HealthBelowPct(int32 pct) const { return GetHealth() < CountPctFromMaxHealth(pct); }
+        bool HealthBelowPctDamaged(int32 pct, uint32 damage) const { return int64(GetHealth()) - int64(damage) < int64(CountPctFromMaxHealth(pct)); }
+        bool HealthAbovePct(int32 pct) const { return GetHealth() > CountPctFromMaxHealth(pct); }
         /** 
          * Gets the percent of the health. The formula: (GetHealth() * 100) / GetMaxHealth()
          * @return the current percent of the health
@@ -1627,6 +1632,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
          * \see GetMaxHealth
          */
         float GetHealthPercent() const { return (GetHealth() * 100.0f) / GetMaxHealth(); }
+        uint32 CountPctFromMaxHealth(int32 pct) const { return (GetMaxHealth() * static_cast<float>(pct) / 100.0f); }
+        uint32 CountPctFromCurHealth(int32 pct) const { return (GetHealth() * static_cast<float>(pct) / 100.0f); }  
         /** 
          * Sets the health to the given value, it cant be higher than Unit::GetMaxHealth though
          * @param val the value to set the health to
@@ -2201,6 +2208,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SendThreatUpdate();
 
         bool isAlive() const { return (m_deathState == ALIVE); };
+        bool IsDying() const { return (m_deathState == JUST_DIED); }
         bool isDead() const { return (m_deathState == DEAD || m_deathState == CORPSE); };
         DeathState getDeathState() const { return m_deathState; };
         virtual void SetDeathState(DeathState s);           // overwritten in Creature/Player/Pet
@@ -2360,6 +2368,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void InterruptNonMeleeSpells(bool withDelayed, uint32 spellid = 0);
 
         Spell* GetCurrentSpell(CurrentSpellTypes spellType) const { return m_currentSpells[spellType]; }
+        Spell* GetCurrentSpell(uint32 spellType) const { return m_currentSpells[spellType]; }
         Spell* FindCurrentSpellBySpellId(uint32 spell_id) const;
 
         bool CheckAndIncreaseCastCounter();

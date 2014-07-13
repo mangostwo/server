@@ -29,3 +29,8 @@ echo **********************
 echo ** ahbot.conf       **
 echo **********************
 copy ..\..\src\game\AuctionHouseBot\ahbot.conf.dist.in %2\ahbot.conf.dist
+echo .
+echo **********************
+echo * Eluna base Scripts *
+echo **********************
+XCOPY "..\..\src\game\LuaEngine\extensions" "%2\lua_scripts\extensions" /E /I /F /Y

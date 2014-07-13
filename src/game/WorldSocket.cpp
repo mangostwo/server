@@ -42,6 +42,7 @@
 #include "WorldSocketMgr.h"
 #include "Log.h"
 #include "DBCStores.h"
+#include "LuaEngine.h"
 
 #if defined( __GNUC__ )
 #pragma pack(1)
@@ -156,15 +157,20 @@ const std::string& WorldSocket::GetRemoteAddress(void) const
     return m_Address;
 }
 
-int WorldSocket::SendPacket(const WorldPacket& pct)
+int WorldSocket::SendPacket(const WorldPacket& pkt)
 {
     ACE_GUARD_RETURN(LockType, Guard, m_OutBufferLock, -1);
 
     if (closing_)
         return -1;
 
+    WorldPacket pct = pkt;
+
     // Dump outgoing packet.
     sLog.outWorldPacketDump(uint32(get_handle()), pct.GetOpcode(), pct.GetOpcodeName(), &pct, false);
+
+    if (!sEluna->OnPacketSend(m_Session, pct))
+        return 0;
 
     ServerPktHeader header(pct.size() + 2, pct.GetOpcode());
     m_Crypt.EncryptSend((uint8*)header.header, header.getHeaderLength());
@@ -688,10 +694,13 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
                     return -1;
                 }
 
+                if (!sEluna->OnPacketReceive(m_Session, *new_pct))
+                    return 0;
                 return HandleAuthSession(*new_pct);
             case CMSG_KEEP_ALIVE:
                 DEBUG_LOG("CMSG_KEEP_ALIVE ,size: " SIZEFMTD " ", new_pct->size());
 
+                sEluna->OnPacketReceive(m_Session, *new_pct);
                 return 0;
             default:
             {

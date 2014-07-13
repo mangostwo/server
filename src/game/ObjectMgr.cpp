@@ -223,6 +223,17 @@ ArenaTeam* ObjectMgr::GetArenaTeamByCaptain(ObjectGuid guid) const
     return NULL;
 }
 
+void ObjectMgr::AddLocaleString(std::string const& s, LocaleConstant locale, StringVector& data)
+{
+    if (!s.empty())
+    {
+        if (data.size() <= size_t(locale))
+            data.resize(locale + 1);
+
+        data[locale] = s;
+    }
+}
+
 void ObjectMgr::LoadCreatureLocales()
 {
     mCreatureLocaleMap.clear();                             // need for reload case
@@ -657,7 +668,7 @@ void ObjectMgr::LoadCreatureTemplates()
             {
                 if (!GetCreatureClassLvlStats(level, cInfo->UnitClass, cInfo->Expansion))
                 {
-                    sLog.outErrorDb("Creature (Entry: %u), level(%u) has no data in `creature_template_classlevelstats`", cInfo->Entry, level);
+                    sLog.outErrorDb("Creature (Entry: %u), Class(%u), level(%u) has no data in `creature_template_classlevelstats`", cInfo->Entry, cInfo->UnitClass, level);
                     const_cast<CreatureInfo*>(cInfo)->Expansion = -1;
                     break;
                 }
