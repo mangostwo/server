@@ -19,7 +19,7 @@ green, a successful build has been performed under Linux.
 
 Requirements
 ------------
-Windows       >= 7/Server 2010 (OSX and nix systems also are supported)
+Windows       >= 7/Server 2010 (OSX and Unix systems also are supported)
 Cmake         >= 2.8 (for windows currently is not necessary to use)
 Visual studio >= 2010 (or gcc >= 4.8, or clang >= 3.2 for nix build)
 MySQL         => 5.5
