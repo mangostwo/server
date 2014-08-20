@@ -47,6 +47,7 @@
 #include "Vehicle.h"
 #include "TemporarySummon.h"
 #include "SQLStorages.h"
+#include "LuaEngine.h"
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
@@ -419,6 +420,7 @@ Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid or
 
 Spell::~Spell()
 {
+    Eluna::RemoveRef(this);
 }
 
 template<typename T>
@@ -3327,6 +3329,10 @@ void Spell::cast(bool skipCheck)
 
         ((Player*)m_caster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL, m_spellInfo->Id);
     }
+
+    // Used by Eluna
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        sEluna->OnSpellCast(m_caster->ToPlayer(), this, skipCheck);
 
     FillTargetMap();
 

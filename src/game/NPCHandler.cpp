@@ -40,6 +40,8 @@
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "Chat.h"
+#include "Item.h"
+#include "LuaEngine.h"
 
 enum StableResultCode
 {
@@ -397,6 +399,29 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recv_data)
 
         if (!sScriptMgr.OnGossipSelect(_player, pGo, sender, action, code.empty() ? NULL : code.c_str()))
             _player->OnGossipSelect(pGo, gossipListId, menuId);
+    }
+    else if (guid.IsItem())
+    {
+        Item* item = GetPlayer()->GetItemByGuid(guid);
+        if (!item)
+        {
+            DEBUG_LOG("WORLD: HandleGossipSelectOptionOpcode - %s not found or you can't interact with it.", guid.GetString().c_str());
+            return;
+        }
+
+        // Used by Eluna
+        sEluna->HandleGossipSelectOption(GetPlayer(), item, GetPlayer()->PlayerTalkClass->GossipOptionSender(gossipListId), GetPlayer()->PlayerTalkClass->GossipOptionAction(gossipListId), code);
+    }
+    else if (guid.IsPlayer())
+    {
+        if (GetPlayer()->GetGUIDLow() != guid)
+        {
+            DEBUG_LOG("WORLD: HandleGossipSelectOptionOpcode - %s not found or you can't interact with it.", guid.GetString().c_str());
+            return;
+        }
+
+        // Used by Eluna
+        sEluna->HandleGossipSelectOption(GetPlayer(), GetPlayer()->PlayerTalkClass->GetGossipMenu().GetMenuId(), GetPlayer()->PlayerTalkClass->GossipOptionSender(gossipListId), GetPlayer()->PlayerTalkClass->GossipOptionAction(gossipListId), code);
     }
 }
 
