@@ -31,6 +31,7 @@
 #include "BattleGround/BattleGround.h"
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "WaypointMovementGenerator.h"
+#include "LuaEngine.h"
 
 #include "revision_nr.h"
 
@@ -73,6 +74,7 @@ ScriptMgr::ScriptMgr() :
     m_pOnGOUse(NULL),
     m_pOnItemUse(NULL),
     m_pOnAreaTrigger(NULL),
+    m_pOnNpcSpellClick(NULL),
     m_pOnProcessEvent(NULL),
     m_pOnEffectDummyCreature(NULL),
     m_pOnEffectDummyGO(NULL),
@@ -84,7 +86,7 @@ ScriptMgr::ScriptMgr() :
 
 ScriptMgr::~ScriptMgr()
 {
-    UnloadScriptLibrary();
+    //UnloadScriptLibrary();
 }
 
 // /////////////////////////////////////////////////////////
@@ -1988,6 +1990,10 @@ char const* ScriptMgr::GetScriptLibraryVersion() const
 
 CreatureAI* ScriptMgr::GetCreatureAI(Creature* pCreature)
 {
+    // Used by Eluna
+    if (CreatureAI* luaAI = sEluna->GetAI(pCreature))
+        return luaAI;
+    
     if (!m_pGetCreatureAI)
         return NULL;
 
@@ -2004,16 +2010,37 @@ InstanceData* ScriptMgr::CreateInstanceData(Map* pMap)
 
 bool ScriptMgr::OnGossipHello(Player* pPlayer, Creature* pCreature)
 {
+    // Used by Eluna
+    if (sEluna->OnGossipHello(pPlayer, pCreature))
+        return true;
+    
     return m_pOnGossipHello != NULL && m_pOnGossipHello(pPlayer, pCreature);
 }
 
 bool ScriptMgr::OnGossipHello(Player* pPlayer, GameObject* pGameObject)
 {
+    // Used by Eluna
+    if (sEluna->OnGossipHello(pPlayer, pGameObject))
+        return true;
+    
     return m_pOnGOGossipHello != NULL && m_pOnGOGossipHello(pPlayer, pGameObject);
 }
 
 bool ScriptMgr::OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 sender, uint32 action, const char* code)
 {
+    if (code)
+    {
+        // Used by Eluna
+        if (sEluna->OnGossipSelectCode(pPlayer, pCreature, sender, action, code))
+            return true;
+    }
+    else
+    {
+        // Used by Eluna
+        if (sEluna->OnGossipSelect(pPlayer, pCreature, sender, action))
+            return true;
+    }
+    
     if (code)
         return m_pOnGossipSelectWithCode != NULL && m_pOnGossipSelectWithCode(pPlayer, pCreature, sender, action, code);
     else
@@ -2023,6 +2050,15 @@ bool ScriptMgr::OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 send
 bool ScriptMgr::OnGossipSelect(Player* pPlayer, GameObject* pGameObject, uint32 sender, uint32 action, const char* code)
 {
     if (code)
+    {
+        if (sEluna->OnGossipSelectCode(pPlayer, pGameObject, sender, action, code))
+            return true;
+    }
+    else
+        if (sEluna->OnGossipSelect(pPlayer, pGameObject, sender, action))
+            return true;
+        
+    if (code)
         return m_pOnGOGossipSelectWithCode != NULL && m_pOnGOGossipSelectWithCode(pPlayer, pGameObject, sender, action, code);
     else
         return m_pOnGOGossipSelect != NULL && m_pOnGOGossipSelect(pPlayer, pGameObject, sender, action);
@@ -2030,31 +2066,55 @@ bool ScriptMgr::OnGossipSelect(Player* pPlayer, GameObject* pGameObject, uint32 
 
 bool ScriptMgr::OnQuestAccept(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
 {
+    // used by eluna
+    if (sEluna->OnQuestAccept(pPlayer, pCreature, pQuest))
+        return true;
+    
     return m_pOnQuestAccept != NULL && m_pOnQuestAccept(pPlayer, pCreature, pQuest);
 }
 
 bool ScriptMgr::OnQuestAccept(Player* pPlayer, GameObject* pGameObject, Quest const* pQuest)
 {
+    // used by eluna
+    if (sEluna->OnQuestAccept(pPlayer, pGameObject, pQuest))
+        return true;
+    
     return m_pOnGOQuestAccept != NULL && m_pOnGOQuestAccept(pPlayer, pGameObject, pQuest);
 }
 
 bool ScriptMgr::OnQuestAccept(Player* pPlayer, Item* pItem, Quest const* pQuest)
 {
+    // used by eluna
+    if (sEluna->OnQuestAccept(pPlayer, pItem, pQuest))
+        return false;
+    
     return m_pOnItemQuestAccept != NULL && m_pOnItemQuestAccept(pPlayer, pItem, pQuest);
 }
 
 bool ScriptMgr::OnQuestRewarded(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
 {
+    // used by eluna
+    if (sEluna->OnQuestReward(pPlayer, pCreature, pQuest))
+        return false;
+    
     return m_pOnQuestRewarded != NULL && m_pOnQuestRewarded(pPlayer, pCreature, pQuest);
 }
 
 bool ScriptMgr::OnQuestRewarded(Player* pPlayer, GameObject* pGameObject, Quest const* pQuest)
 {
+    // used by eluna
+    if (sEluna->OnQuestReward(pPlayer, pGameObject, pQuest))
+        return false;
+    
     return m_pOnGOQuestRewarded != NULL && m_pOnGOQuestRewarded(pPlayer, pGameObject, pQuest);
 }
 
 uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, Creature* pCreature)
 {
+    // used by eluna
+    if (uint32 dialogId = sEluna->GetDialogStatus(pPlayer, pCreature))
+        return dialogId;
+    
     if (!m_pGetNPCDialogStatus)
         return DIALOG_STATUS_UNDEFINED;
 
@@ -2063,6 +2123,10 @@ uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, Creature* pCreature)
 
 uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, GameObject* pGameObject)
 {
+    // used by eluna
+    if (uint32 dialogId = sEluna->GetDialogStatus(pPlayer, pGameObject))
+        return dialogId;
+    
     if (!m_pGetGODialogStatus)
         return DIALOG_STATUS_UNDEFINED;
 
@@ -2076,12 +2140,25 @@ bool ScriptMgr::OnGameObjectUse(Player* pPlayer, GameObject* pGameObject)
 
 bool ScriptMgr::OnItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)
 {
+    // used by eluna
+     if(!sEluna->OnUse(pPlayer, pItem, targets)) // says if (!sEluna... on cmangos repo..)
+         return true;
+     
     return m_pOnItemUse != NULL && m_pOnItemUse(pPlayer, pItem, targets);
 }
 
 bool ScriptMgr::OnAreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry)
 {
+    // used by eluna
+    if(sEluna->OnAreaTrigger(pPlayer, atEntry))
+        return false;
+    
     return m_pOnAreaTrigger != NULL && m_pOnAreaTrigger(pPlayer, atEntry);
+}
+
+bool ScriptMgr::OnNpcSpellClick(Player* pPlayer, Creature* pClickedCreature, uint32 spellId)
+{
+    return m_pOnNpcSpellClick != NULL && m_pOnNpcSpellClick(pPlayer, pClickedCreature, spellId);
 }
 
 bool ScriptMgr::OnProcessEvent(uint32 eventId, Object* pSource, Object* pTarget, bool isStart)
@@ -2091,16 +2168,28 @@ bool ScriptMgr::OnProcessEvent(uint32 eventId, Object* pSource, Object* pTarget,
 
 bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid)
 {
+    // used by eluna
+    if(sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget))
+        return false;
+    
     return m_pOnEffectDummyCreature != NULL && m_pOnEffectDummyCreature(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 }
 
 bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, GameObject* pTarget, ObjectGuid originalCasterGuid)
 {
+    // used by eluna
+    if (sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget))
+        return false;
+    
     return m_pOnEffectDummyGO != NULL && m_pOnEffectDummyGO(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 }
 
 bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Item* pTarget, ObjectGuid originalCasterGuid)
 {
+    // used by eluna
+    if(sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget))
+        return false;
+    
     return m_pOnEffectDummyItem != NULL && m_pOnEffectDummyItem(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 }
 
@@ -2164,6 +2253,7 @@ ScriptLoadResult ScriptMgr::LoadScriptLibrary(const char* libName)
     GET_SCRIPT_HOOK_PTR(m_pOnGOUse,                    "GOUse");
     GET_SCRIPT_HOOK_PTR(m_pOnItemUse,                  "ItemUse");
     GET_SCRIPT_HOOK_PTR(m_pOnAreaTrigger,              "AreaTrigger");
+    GET_SCRIPT_HOOK_PTR(m_pOnNpcSpellClick,            "NpcSpellClick");
     GET_SCRIPT_HOOK_PTR(m_pOnProcessEvent,             "ProcessEvent");
     GET_SCRIPT_HOOK_PTR(m_pOnEffectDummyCreature,      "EffectDummyCreature");
     GET_SCRIPT_HOOK_PTR(m_pOnEffectDummyGO,            "EffectDummyGameObject");
@@ -2218,6 +2308,7 @@ void ScriptMgr::UnloadScriptLibrary()
     m_pOnGOUse                  = NULL;
     m_pOnItemUse                = NULL;
     m_pOnAreaTrigger            = NULL;
+    m_pOnNpcSpellClick          = NULL;
     m_pOnProcessEvent           = NULL;
     m_pOnEffectDummyCreature    = NULL;
     m_pOnEffectDummyGO          = NULL;

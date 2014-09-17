@@ -22,6 +22,9 @@
 #include "Platform/Define.h"
 #include <cassert>
 
+#define MANGOS
+#define WOTLK
+
 enum Gender
 {
     GENDER_MALE                        = 0,
@@ -155,6 +158,7 @@ enum Powers
     POWER_HAPPINESS                     = 4,
     POWER_RUNE                          = 5,
     POWER_RUNIC_POWER                   = 6,
+    POWER_ALL                           = 127,
     POWER_HEALTH                        = 0xFFFFFFFE    // (-2 as signed value)
 };
 
@@ -604,6 +608,13 @@ enum Language
 
 #define LANGUAGES_COUNT   19
 
+enum TeamId
+{
+    TEAM_ALLIANCE = 0,
+    TEAM_HORDE,
+    TEAM_NEUTRAL
+};
+
 // In fact !=0 values is alliance/horde root faction ids
 enum Team
 {
@@ -757,7 +768,7 @@ enum SpellEffects
     SPELL_EFFECT_LEAP_BACK                 = 138,
     SPELL_EFFECT_CLEAR_QUEST               = 139,
     SPELL_EFFECT_FORCE_CAST                = 140,
-    SPELL_EFFECT_141                       = 141,
+    SPELL_EFFECT_FORCE_CAST_WITH_VALUE     = 141,
     SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE  = 142,
     SPELL_EFFECT_APPLY_AREA_AURA_OWNER     = 143,
     SPELL_EFFECT_KNOCKBACK_FROM_POSITION   = 144,

@@ -48,6 +48,7 @@
 #include "CellImpl.h"
 #include "Language.h"
 #include "MapManager.h"
+#include "LuaEngine.h"
 
 #define NULL_AURA_SLOT 0xFF
 
@@ -300,7 +301,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
     &Aura::HandleAuraModExpertise,                          //240 SPELL_AURA_MOD_EXPERTISE
     &Aura::HandleForceMoveForward,                          //241 Forces the caster to move forward
     &Aura::HandleUnused,                                    //242 SPELL_AURA_MOD_SPELL_DAMAGE_FROM_HEALING (only 2 test spels in 3.2.2a)
-    &Aura::HandleNULL,                                      //243 faction reaction override spells
+    &Aura::HandleFactionOverride,                           //243 SPELL_AURA_FACTION_OVERRIDE
     &Aura::HandleComprehendLanguage,                        //244 SPELL_AURA_COMPREHEND_LANGUAGE
     &Aura::HandleNoImmediateEffect,                         //245 SPELL_AURA_MOD_DURATION_OF_MAGIC_EFFECTS     implemented in Unit::CalculateAuraDuration
     &Aura::HandleNoImmediateEffect,                         //246 SPELL_AURA_MOD_DURATION_OF_EFFECTS_BY_DISPEL implemented in Unit::CalculateAuraDuration
@@ -336,7 +337,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
     &Aura::HandleNULL,                                      //276 mod damage % mechanic?
     &Aura::HandleNoImmediateEffect,                         //277 SPELL_AURA_MOD_MAX_AFFECTED_TARGETS Use SpellClassMask for spell select
     &Aura::HandleAuraModDisarm,                             //278 SPELL_AURA_MOD_DISARM_RANGED disarm ranged weapon
-    &Aura::HandleNULL,                                      //279 visual effects? 58836 and 57507
+    &Aura::HandleMirrorName,                                //279 SPELL_AURA_MIRROR_NAME target receives the casters name
     &Aura::HandleModTargetArmorPct,                         //280 SPELL_AURA_MOD_TARGET_ARMOR_PCT
     &Aura::HandleNoImmediateEffect,                         //281 SPELL_AURA_MOD_HONOR_GAIN             implemented in Player::RewardHonor
     &Aura::HandleAuraIncreaseBaseHealthPercent,             //282 SPELL_AURA_INCREASE_BASE_HEALTH_PERCENT
@@ -444,6 +445,7 @@ Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBas
 
 Aura::~Aura()
 {
+    Eluna::RemoveRef(this);
 }
 
 AreaAura::AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target,
@@ -1106,8 +1108,9 @@ void Aura::TriggerSpell()
 //                    // Polymorphic Ray
 //                    case 6965: break;
                     case 9712:                              // Thaumaturgy Channel
-                        trigger_spell_id = 21029;
-                        break;
+                        if (Unit* caster = GetCaster())
+                            caster->CastSpell(caster, 21029, true);
+                        return;
 //                    // Egan's Blaster
 //                    case 17368: break;
 //                    // Haunted
@@ -8373,9 +8376,19 @@ void Aura::PeriodicDummyTick()
         }
         case SPELLFAMILY_MAGE:
         {
-            // Mirror Image
-//            if (spell->Id == 55342)
-//                return;
+            switch (spell->Id)
+            {
+                case 55342:                       // Mirror Image
+                {
+                    if (GetAuraTicks() != 1)
+                        return;
+                    if (Unit* pCaster = GetCaster())
+                        pCaster->CastSpell(pCaster, spell->EffectTriggerSpell[GetEffIndex()], true, NULL, this);
+                    return;
+                }
+                default:
+                    break;
+            }
             break;
         }
         case SPELLFAMILY_DRUID:
@@ -8737,6 +8750,29 @@ void Aura::HandleAuraMirrorImage(bool apply, bool Real)
     }
 }
 
+void Aura::HandleMirrorName(bool apply, bool Real)
+{
+    if (!Real)
+        return;
+    
+    Unit* caster = GetCaster();
+    Unit* target = GetTarget();
+    
+    if (!target || !caster || target->GetTypeId() != TYPEID_UNIT)
+        return;
+    
+    if (apply)
+        target->SetName(caster->GetName());
+    else
+    {
+        CreatureInfo const* cinfo = ((Creature*)target)->GetCreatureInfo();
+        if (!cinfo)
+            return;
+        
+        target->SetName(cinfo->Name);
+    }
+}
+
 void Aura::HandleAuraConvertRune(bool apply, bool Real)
 {
     if (!Real)
@@ -8873,6 +8909,21 @@ void Aura::HandleAuraSetVehicleId(bool apply, bool Real)
         return;
 
     GetTarget()->SetVehicleId(apply ? GetMiscValue() : 0, 0);
+}
+
+void Aura::HandleFactionOverride(bool apply, bool Real)
+{
+    if (!Real)
+        return;
+    
+    Unit* target = GetTarget();
+    if (!target || !sFactionTemplateStore.LookupEntry(GetMiscValue()))
+        return;
+    
+    if (apply)
+        target->setFaction(GetMiscValue());
+    else
+        target->RestoreOriginalFaction();
 }
 
 bool Aura::IsLastAuraOnHolder()
@@ -9891,7 +9942,48 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
             switch (GetId())
             {
                 case 49039: spellId1 = 50397; break;        // Lichborne
-
+                case 46619:                                 // Raise ally
+                {
+                    if (!m_target || m_target->GetTypeId() != TYPEID_PLAYER)
+                        return;
+                    Player* m_player = (Player*)m_target;
+                    if (apply)
+                    {
+                       // turn player into ghoul 
+                        m_player->SetDeathState(GHOULED);
+                        m_player->SetHealth(1);
+                        m_player->SetRoot(true);
+                    }
+                    else
+                    {
+                        m_player->SetRoot(false);
+                        m_player->SetHealth(0);
+                        m_player->SetDeathState(JUST_DIED);
+                    }
+                    break;
+                }
+                case 48979:                                 // Butchery, rank 1
+                case 49483:                                 // Butchery, rank 2
+                {
+                    if(GetId() == 48979) // rank 1
+                    {
+                        if (!m_target || m_target->getDeathState() != JUST_DIED)
+                            return;
+                        // give 10 runic power and 
+                        // cast spell for 2 runic power per 5 sec in combat
+                    
+                        m_target->ModifyPower(POWER_RUNIC_POWER, (int32)10);
+                    }
+                    else if(GetId() == 49483) // rank 2
+                    {
+                        if (!m_target || m_target->getDeathState() != JUST_DIED)
+                            return;
+                        // give 20 runic power and extra 2 runic power per 5 sec in combat
+                    
+                        m_target->ModifyPower(POWER_RUNIC_POWER, (int32)20);
+                    }
+                    break;
+                }
                 case 48263:                                 // Frost Presence
                 case 48265:                                 // Unholy Presence
                 case 48266:                                 // Blood Presence

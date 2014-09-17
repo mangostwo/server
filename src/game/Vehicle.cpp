@@ -46,6 +46,7 @@
 #include "movement/MoveSpline.h"
 #include "MapManager.h"
 #include "TemporarySummon.h"
+#include "LuaEngine.h"
 
 void ObjectMgr::LoadVehicleAccessory()
 {
@@ -118,6 +119,8 @@ VehicleInfo::VehicleInfo(Unit* owner, VehicleEntry const* vehicleEntry, uint32 o
 
 VehicleInfo::~VehicleInfo()
 {
+    Eluna::RemoveRef(this);
+    
     ((Unit*)m_owner)->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
 
     RemoveAccessoriesFromMap();                             // Remove accessories (for example required with player vehicles)
@@ -138,9 +141,36 @@ void VehicleInfo::Initialize()
             m_accessoryGuids.insert(summoned->GetObjectGuid());
             int32 basepoint0 = itr->seatId + 1;
             summoned->CastCustomSpell((Unit*)m_owner, SPELL_RIDE_VEHICLE_HARDCODED, &basepoint0, NULL, NULL, true);
+        
+            sEluna->OnInstallAccessory(this, summoned);
         }
     }
+    
+    // Initialize movement limitations
+   /* uint32 vehicleFlags = GetVehicleEntry()->m_flags;
+    Unit* pVehicle = (Unit*)m_owner;
+    
+    if (vehicleFlags & VEHICLE_FLAG_NO_STRAFE)
+        pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_NO_STRAFE);
+    if (vehicleFlags & VEHICLE_FLAG_NO_JUMPING)
+        pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_NO_JUMPING);
+    if (vehicleFlags & VEHICLE_FLAG_FULLSPEEDTURNING)
+        pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_FULLSPEEDTURNING);
+    if (vehicleFlags & VEHICLE_FLAG_ALLOW_PITCHING)
+        pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_ALLOW_PITCHING);
+    if (vehicleFlags & VEHICLE_FLAG_FULLSPEEDPITCHING)
+        pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_FULLSPEEDPITCHING);
+    
+    // Initialize power type based on DBC values (creatures only)
+    if (pVehicle->GetTypeId() == TYPEID_UNIT)
+    {
+        if (PowerDisplayEntry const* powerEntry = sPowerDisplayStore.LookupEntry(GetVehicleEntry()->m_powerDisplayID))
+            pVehicle->SetPowerType(Powers(powerEntry->power));
+    }*/
+    
     m_isInitialized = true;
+    
+    sEluna->OnInstall(this);
 }
 
 /*
@@ -212,6 +242,8 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
 
     // Apply passenger modifications
     ApplySeatMods(passenger, seatEntry->m_flags);
+    
+    sEluna->OnAddPassenger(this, passenger, seat);
 }
 
 /*
@@ -325,6 +357,8 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
 
     // Remove passenger modifications
     RemoveSeatMods(passenger, seatEntry->m_flags);
+    
+    sEluna->OnRemovePassenger(this, passenger);
 
     // Some creature vehicles get despawned after passenger unboarding
     if (m_owner->GetTypeId() == TYPEID_UNIT)

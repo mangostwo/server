@@ -44,6 +44,8 @@
 #include "movement/packet_builder.h"
 #include "CreatureLinkingMgr.h"
 #include "Chat.h"
+#include "LuaEngine.h"
+#include "ElunaEventMgr.h"
 
 Object::Object()
 {
@@ -59,6 +61,8 @@ Object::Object()
 
 Object::~Object()
 {
+    Eluna::RemoveRef(this);
+    
     if (IsInWorld())
     {
         ///- Do NOT call RemoveFromWorld here, if the object is a player it will crash
@@ -677,6 +681,14 @@ void Object::SetUInt32Value(uint16 index, uint32 value)
     }
 }
 
+void Object::UpdateUInt32Value(uint16 index, uint32 value)
+{
+    MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
+    
+    m_uint32Values[index] = value;
+    m_changedValues[index] = true;
+}
+
 void Object::SetUInt64Value(uint16 index, const uint64& value)
 {
     MANGOS_ASSERT(index + 1 < m_valuesCount || PrintIndexError(index, true));
@@ -940,13 +952,24 @@ void Object::MarkForClientUpdate()
 WorldObject::WorldObject() :
     m_transportInfo(NULL), m_currMap(NULL),
     m_mapId(0), m_InstanceId(0), m_phaseMask(PHASEMASK_NORMAL),
-    m_isActiveObject(false)
+    m_isActiveObject(false), elunaEvents(new ElunaEventProcessor(this))
 {
+}
+
+WorldObject::~WorldObject()
+{
+    Eluna::RemoveRef(this);
+    delete elunaEvents;
 }
 
 void WorldObject::CleanupsBeforeDelete()
 {
     RemoveFromWorld();
+}
+
+void WorldObject::Update(uint32 update_diff, uint32 time_diff)
+{
+    elunaEvents->Update(update_diff);
 }
 
 void WorldObject::_Create(uint32 guidlow, HighGuid guidhigh, uint32 phaseMask)
@@ -1582,6 +1605,9 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
 
     if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
         ((Creature*)this)->AI()->JustSummoned(pCreature);
+    
+    if (Unit* summoner = ToUnit())
+        sEluna->OnSummoned(pCreature, summoner);
 
     // Creature Linking, Initial load is handled like respawn
     if (pCreature->IsLinkingEventTrigger())
@@ -1589,6 +1615,28 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
 
     // return the creature therewith the summoner has access to it
     return pCreature;
+}
+
+GameObject* WorldObject::SummonGameObject(uint32 id, float x, float y, float z, float angle, uint32 despwtime)
+{
+    GameObject* pGameObj = new GameObject;
+    
+    Map *map = GetMap();
+    
+    if(!map)
+        return NULL;
+    
+    if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), id, map, GetPhaseMask(), x, y, z, angle))
+    {
+        delete pGameObj;
+        return NULL;
+    }
+    
+    pGameObj->SetRespawnTime(despwtime/IN_MILLISECONDS);
+    
+    map->Add(pGameObj);
+    
+    return pGameObj;
 }
 
 // how much space should be left in front of/ behind a mob that already uses a space

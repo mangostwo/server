@@ -51,6 +51,8 @@
 #include "movement/MoveSplineInit.h"
 #include "movement/MoveSpline.h"
 #include "CreatureLinkingMgr.h"
+#include "LuaEngine.h"
+#include "ElunaEventMgr.h"
 
 #include <math.h>
 #include <stdarg.h>
@@ -274,6 +276,8 @@ Unit::Unit() :
 
 Unit::~Unit()
 {
+    Eluna::RemoveRef(this);
+    
     // set current spells as deletable
     for (uint32 i = 0; i < CURRENT_MAX_SPELL; ++i)
     {
@@ -296,7 +300,7 @@ Unit::~Unit()
 }
 
 void Unit::Update(uint32 update_diff, uint32 p_time)
-{
+{   
     if (!IsInWorld())
         return;
 
@@ -307,6 +311,7 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
     }else
     m_AurasCheck -= p_time;*/
 
+    elunaEvents->Update(update_diff);
     // WARNING! Order of execution here is important, do not change.
     // Spells must be processed with event system BEFORE they go to _UpdateSpells.
     // Or else we may have some SPELL_STATE_FINISHED spells stalled in pointers, that is bad.
@@ -802,6 +807,13 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         // Call KilledUnit for creatures
         if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
             ((Creature*)this)->AI()->KilledUnit(pVictim);
+        
+        if (Creature* killer = ToCreature())
+        {
+            // used by eluna
+            if (Player* killed = pVictim->ToPlayer())
+                sEluna->OnPlayerKilledByCreature(killer, killed);
+        }
 
         // Call AI OwnerKilledUnit (for any current summoned minipet/guardian/protector)
         PetOwnerKilledUnit(pVictim);
@@ -866,6 +878,9 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
                     if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(playerVictim->GetCachedZoneId()))
                         outdoorPvP->HandlePlayerKill(player_tap, playerVictim);
                 }
+                
+                // used by eluna
+                sEluna->OnPVPKill(player_tap, playerVictim);
             }
         }
         else                                                // Killed creature
@@ -1062,8 +1077,14 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
         mapInstance->OnCreatureDeath(victim);
 
     if (responsiblePlayer)                                  // killedby Player, inform BG
+    {
         if (BattleGround* bg = responsiblePlayer->GetBattleGround())
             bg->HandleKillUnit(victim, responsiblePlayer);
+        
+        // used by eluna
+        sEluna->OnCreatureKill(responsiblePlayer, victim);
+    }
+    
     // Notify the outdoor pvp script
     if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(responsiblePlayer ? responsiblePlayer->GetCachedZoneId() : GetZoneId()))
         outdoorPvP->HandleCreatureDeath(victim);
@@ -7979,6 +8000,9 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
 
     if (PvP)
         m_CombatTimer = 5000;
+    
+    if (isInCombat())
+        return;
 
     bool creatureNotInCombat = GetTypeId() == TYPEID_UNIT && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
@@ -8017,6 +8041,10 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
         if (m_isCreatureLinkingTrigger)
             GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_AGGRO, pCreature, enemy);
     }
+    
+    // used by eluna
+    if (GetTypeId() == TYPEID_PLAYER)
+        sEluna->OnPlayerEnterCombat(ToPlayer(), enemy);
 }
 
 void Unit::ClearInCombat()
@@ -8026,6 +8054,9 @@ void Unit::ClearInCombat()
 
     if (isCharmed() || (GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->IsPet()))
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
+    
+    if (GetTypeId() == TYPEID_PLAYER)
+        sEluna->OnPlayerLeaveCombat(ToPlayer());
 
     // Player's state will be cleared in Player::UpdateContestedPvP
     if (GetTypeId() == TYPEID_UNIT)
@@ -10840,6 +10871,24 @@ void Unit::SetFFAPvP(bool state)
         RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
 
     CallForAllControlledUnits(SetFFAPvPHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
+}
+
+void Unit::RestoreOriginalFaction()
+{
+    if (GetTypeId() == TYPEID_PLAYER)
+        ((Player*)this)->setFactionForRace(getRace());
+    else
+    {
+        Creature* creature = (Creature*)this;
+        
+        if (creature->IsPet() || creature->IsTotem())
+        {
+            if (Unit* owner = GetOwner())
+                setFaction(owner->getFaction());
+        }
+        else
+            setFaction(creature->GetCreatureInfo()->FactionAlliance);
+    }
 }
 
 void Unit::KnockBackFrom(Unit* target, float horizontalSpeed, float verticalSpeed)

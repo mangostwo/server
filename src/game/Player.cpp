@@ -66,6 +66,7 @@
 #include "SQLStorages.h"
 #include "Vehicle.h"
 #include "Calendar.h"
+#include "LuaEngine.h"
 
 #include <cmath>
 
@@ -569,6 +570,8 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
 
 Player::~Player()
 {
+    Eluna::RemoveRef(this);
+    
     CleanupsBeforeDelete();
 
     // it must be unloaded already in PlayerLogout and accessed only for loggined player
@@ -1339,6 +1342,9 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         if (!m_regenTimer)
             RegenerateAll();
     }
+    
+    if(!isAlive() && !HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST) && getDeathState() != GHOULED)
+        SetHealth(0);
 
     if (m_deathState == JUST_DIED)
         KillPlayer();
@@ -1348,6 +1354,9 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         if (update_diff >= m_nextSave)
         {
             // m_nextSave reseted in SaveToDB call
+            // Used by Eluna
+            sEluna->OnSave(this);
+            
             SaveToDB();
             DETAIL_LOG("Player '%s' (GUID: %u) saved", GetName(), GetGUIDLow());
         }
@@ -1388,7 +1397,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
     }
 
     // Not auto-free ghost from body in instances
-    if (m_deathTimer > 0  && !GetMap()->Instanceable())
+    if (m_deathTimer > 0  && !GetMap()->Instanceable() && getDeathState() != GHOULED)
     {
         if (p_time >= m_deathTimer)
         {
@@ -2455,6 +2464,9 @@ void Player::GiveXP(uint32 xp, Unit* victim)
         return;
 
     uint32 level = getLevel();
+    
+    // Used by Eluna
+    sEluna->OnGiveXP(this, xp, victim);
 
     // XP to money conversion processed in Player::RewardQuest
     if (level >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
@@ -2502,6 +2514,8 @@ void Player::GiveXP(uint32 xp, Unit* victim)
 // Current player experience not update (must be update by caller)
 void Player::GiveLevel(uint32 level)
 {
+    uint8 oldLevel = getLevel();
+    
     if (level == getLevel())
         return;
 
@@ -2573,6 +2587,16 @@ void Player::GiveLevel(uint32 level)
         MailDraft(mailReward->mailTemplateId).SendMailTo(this, MailSender(MAIL_CREATURE, mailReward->senderEntry));
 
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL);
+
+    // Used by Eluna
+    sEluna->OnLevelChanged(this, oldLevel);
+}
+
+void Player::SetFreeTalentPoints(uint32 points)
+{
+    // Used by Eluna
+    sEluna->OnFreeTalentPointsChanged(this, points);
+    SetUInt32Value(PLAYER_CHARACTER_POINTS1, points);
 }
 
 void Player::UpdateFreeTalentPoints(bool resetIfNeed)
@@ -3712,6 +3736,9 @@ uint32 Player::resetTalentsCost() const
 
 bool Player::resetTalents(bool no_cost, bool all_specs)
 {
+    // Used by Eluna
+    sEluna->OnTalentsReset(this, no_cost);
+    
     // not need after this call
     if (HasAtLoginFlag(AT_LOGIN_RESET_TALENTS) && all_specs)
         RemoveAtLoginFlag(AT_LOGIN_RESET_TALENTS, true);
@@ -4022,6 +4049,12 @@ bool Player::HasSpell(uint32 spell) const
     PlayerSpellMap::const_iterator itr = m_spells.find(spell);
     return (itr != m_spells.end() && itr->second.state != PLAYERSPELL_REMOVED &&
             !itr->second.disabled);
+}
+
+bool Player::HasTalent(uint32 spell, uint8 spec) const
+{
+    PlayerTalentMap::const_iterator itr = m_talents[spec].find(spell);
+    return (itr != m_talents[spec].end() && itr->second.state != PLAYERSPELL_REMOVED);
 }
 
 bool Player::HasActiveSpell(uint32 spell) const
@@ -4413,7 +4446,8 @@ void Player::BuildPlayerRepop()
     GetMap()->Add(corpse);
 
     // convert player body to ghost
-    SetHealth(1);
+    if(getDeathState() != GHOULED)
+        SetHealth(1);
 
     SetWaterWalk(true);
     if (!GetSession()->isLogingOut())
@@ -4422,7 +4456,8 @@ void Player::BuildPlayerRepop()
     // BG - remove insignia related
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
-    SendCorpseReclaimDelay();
+    if(getDeathState() != GHOULED)
+        SendCorpseReclaimDelay();
 
     // to prevent cheating
     corpse->ResetGhostTime();
@@ -4476,6 +4511,8 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
     m_camera.UpdateVisibilityForOwner();
     // update visibility of player for nearby cameras
     UpdateObjectVisibility();
+    
+    sEluna->OnResurrect(this);
 
     if (!applySickness)
         return;
@@ -6344,6 +6381,9 @@ void Player::RewardReputation(Unit* pVictim, float rate)
 {
     if (!pVictim || pVictim->GetTypeId() == TYPEID_PLAYER)
         return;
+    
+    if (((Creature*)pVictim)->IsReputationGainDisabled())
+        return;
 
     // used current difficulty creature entry instead normal version (GetEntry())
     ReputationOnKillEntry const* Rep = sObjectMgr.GetReputationOnKillEntry(((Creature*)pVictim)->GetCreatureInfo()->Entry);
@@ -6814,6 +6854,9 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         }
     }
 
+    // Used by Eluna
+    sEluna->OnUpdateZone(this, newZone, newArea);
+    
     m_zoneUpdateId    = newZone;
     m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
 
@@ -6945,6 +6988,9 @@ void Player::DuelComplete(DuelCompleteType type)
         data << GetName();
         SendMessageToSet(&data, true);
     }
+    
+    // Used by Eluna
+    sEluna->OnDuelEnd(duel->opponent, this, type);
 
     if (type == DUEL_WON)
     {
@@ -11131,6 +11177,9 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
         pItem2->SetState(ITEM_CHANGED, this);
 
         ApplyEquipCooldown(pItem2);
+        
+        // Used by Eluna
+        sEluna->OnEquip(this, pItem2, bag, slot);
 
         return pItem2;
     }
@@ -11142,6 +11191,9 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_ITEM, pItem->GetEntry());
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_EPIC_ITEM, slot + 1);
 
+    // Used by Eluna
+    sEluna->OnEquip(this, pItem, bag, slot);
+    
     return pItem;
 }
 
@@ -11369,6 +11421,7 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
             ApplyItemOnStoreSpell(pItem, false);
 
         ItemRemovedQuestCheck(pItem->GetEntry(), pItem->GetCount());
+        sEluna->OnRemove(this, pItem);
 
         if (bag == INVENTORY_SLOT_BAG_0)
         {
@@ -14982,8 +15035,10 @@ void Player::SendQuestCompleteEvent(uint32 quest_id)
     }
 }
 
-void Player::SendQuestReward(Quest const* pQuest, uint32 XP, Object* /*questGiver*/)
+void Player::SendQuestReward(Quest const* pQuest, uint32 XP, Object* questGiver)
 {
+    Player* pPlayer = m_session->GetPlayer();
+    
     uint32 questid = pQuest->GetQuestId();
     DEBUG_LOG("WORLD: Sent SMSG_QUESTGIVER_QUEST_COMPLETE quest = %u", questid);
     WorldPacket data(SMSG_QUESTGIVER_QUEST_COMPLETE, (4 + 4 + 4 + 4 + 4));
@@ -16849,6 +16904,9 @@ InstancePlayerBind* Player::BindToInstance(DungeonPersistentState* state, bool p
         if (!load)
             DEBUG_LOG("Player::BindToInstance: %s(%d) is now bound to map %d, instance %d, difficulty %d",
                       GetName(), GetGUIDLow(), state->GetMapId(), state->GetInstanceId(), state->GetDifficulty());
+        
+        // Used by Eluna
+        sEluna->OnBindToInstance(this, state->GetDifficulty(), state->GetMapId(), permanent);
         return &bind;
     }
     else
@@ -18174,6 +18232,9 @@ void Player::UpdateDuelFlag(time_t currTime)
 {
     if (!duel || duel->startTimer == 0 || currTime < duel->startTimer + 3)
         return;
+    
+    // Used by Eluna
+    sEluna->OnDuelStart(this, duel->opponent);
 
     SetUInt32Value(PLAYER_DUEL_TEAM, 1);
     duel->opponent->SetUInt32Value(PLAYER_DUEL_TEAM, 2);
@@ -22745,6 +22806,21 @@ void Player::UpdateSpecCount(uint8 count)
     SetSpecsCount(count);
 
     SendTalentsInfoData(false);
+}
+
+void Player::ModifyMoney(int32 d)
+{
+    // Used by Eluna
+    sEluna->OnMoneyChanged(this, d);
+    
+    if (d < 0)
+        SetMoney(GetMoney() > uint32(-d) ? GetMoney() + d : 0);
+    else
+        SetMoney(GetMoney() < uint32(MAX_MONEY_AMOUNT - d) ? GetMoney() + d : MAX_MONEY_AMOUNT);
+    
+    // "At Gold Limit"
+    if (GetMoney() >= MAX_MONEY_AMOUNT)
+        SendEquipError(EQUIP_ERR_TOO_MUCH_GOLD, NULL, NULL);
 }
 
 void Player::RemoveAtLoginFlag(AtLoginFlags f, bool in_db_also /*= false*/)

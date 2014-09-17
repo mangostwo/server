@@ -47,6 +47,7 @@
 #include "Vehicle.h"
 #include "TemporarySummon.h"
 #include "SQLStorages.h"
+#include "LuaEngine.h"
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
@@ -419,6 +420,7 @@ Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid or
 
 Spell::~Spell()
 {
+    Eluna::RemoveRef(this);
 }
 
 template<typename T>
@@ -3326,6 +3328,9 @@ void Spell::cast(bool skipCheck)
             ((Player*)m_caster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_USE_ITEM, m_CastItem->GetEntry());
 
         ((Player*)m_caster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL, m_spellInfo->Id);
+    
+        // used by eluna
+        sEluna->OnSpellCast(m_caster->ToPlayer(), this, skipCheck);
     }
 
     FillTargetMap();
@@ -7677,6 +7682,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 44869:                                 // Spectral Blast (SWP, Kalecgos)
                 case 45391:                                 // Summon Demonic Vapor (SWP, Felmyst)
                 case 45785:                                 // Sinister Reflection Clone (SWP, Kil'jaeden)
+                case 45863:                                 // Cosmetic - Incinerate to Random Target (Borean Tundra)
                 case 45892:                                 // Sinister Reflection (SWP, Kil'jaeden)
                 case 45976:                                 // Open Portal (SWP, M'uru)
                 case 46372:                                 // Ice Spear Target Picker (Slave Pens, Ahune)

@@ -55,6 +55,7 @@
 #include "CellImpl.h"
 #include "movement/MoveSplineInit.h"
 #include "CreatureLinkingMgr.h"
+#include "LuaEngine.h"
 
 // apply implementation of the singletons
 #include "Policies/Singleton.h"
@@ -161,11 +162,15 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_CreatureSpellCooldowns.clear();
     m_CreatureCategoryCooldowns.clear();
 
+    DisableReputationGain = false;
+    
     SetWalk(true, true);
 }
 
 Creature::~Creature()
 {
+    Eluna::RemoveRef(this);
+    
     CleanupsBeforeDelete();
 
     m_vendorItemCounts.clear();
@@ -176,6 +181,9 @@ Creature::~Creature()
 
 void Creature::AddToWorld()
 {
+    if (!IsInWorld())
+        sEluna->OnAddToWorld(this);
+    
     ///- Register the creature for guid lookup
     if (!IsInWorld() && GetObjectGuid().IsCreatureOrVehicle())
         GetMap()->GetObjectsStore().insert<Creature>(GetObjectGuid(), (Creature*)this);
@@ -185,6 +193,9 @@ void Creature::AddToWorld()
 
 void Creature::RemoveFromWorld()
 {
+    if (IsInWorld())
+        sEluna->OnRemoveFromWorld(this);
+    
     ///- Remove the creature from the accessor
     if (IsInWorld() && GetObjectGuid().IsCreatureOrVehicle())
         GetMap()->GetObjectsStore().erase<Creature>(GetObjectGuid(), (Creature*)NULL);
@@ -1060,6 +1071,18 @@ void Creature::SaveToDB()
     }
 
     SaveToDB(GetMapId(), data->spawnMask, GetPhaseMask());
+}
+
+bool Creature::isTappedBy(Player const* player) const
+{
+    if (player == GetOriginalLootRecipient())
+        return true;
+    
+    Group const* playerGroup = player->GetGroup();
+    if (!playerGroup || playerGroup != GetGroupLootRecipient()) // if we dont have a group we arent the recipient
+        return false;
+    
+    return true;
 }
 
 void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
@@ -2181,6 +2204,13 @@ bool Creature::HasCategoryCooldown(uint32 spell_id) const
 
     CreatureSpellCooldowns::const_iterator itr = m_CreatureCategoryCooldowns.find(spellInfo->Category);
     return (itr != m_CreatureCategoryCooldowns.end() && time_t(itr->second + (spellInfo->CategoryRecoveryTime / IN_MILLISECONDS)) > time(NULL));
+}
+
+uint32 Creature::GetCreatureSpellCooldownDelay(uint32 spellId) const
+{
+    CreatureSpellCooldowns::const_iterator itr = m_CreatureSpellCooldowns.find(spellId);
+    time_t t = time(NULL);
+    return uint32(itr != m_CreatureSpellCooldowns.end() && itr->second > t ? itr->second - t : 0);
 }
 
 bool Creature::HasSpellCooldown(uint32 spell_id) const

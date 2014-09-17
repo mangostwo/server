@@ -250,6 +250,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendLfgUpdate(bool isGroup, LfgUpdateType updateType, uint32 id);
         void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res);
         void SendGroupInvite(Player* player, bool alreadyInGroup = false);
+        void SendGuildInvite(Player* player, bool alreadyInGuild = false);
         void SendAreaTriggerMessage(const char* Text, ...) ATTR_PRINTF(2, 3);
         void SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg = 0);
         void SendSetPhaseShift(uint32 phaseShift);

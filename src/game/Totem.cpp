@@ -25,6 +25,7 @@
 #include "SpellMgr.h"
 #include "CreatureAI.h"
 #include "InstanceData.h"
+#include "LuaEngine.h"
 
 Totem::Totem() : Creature(CREATURE_SUBTYPE_TOTEM)
 {
@@ -96,6 +97,7 @@ void Totem::Summon(Unit* owner)
 
     if (owner->GetTypeId() == TYPEID_UNIT && ((Creature*)owner)->AI())
         ((Creature*)owner)->AI()->JustSummoned((Creature*)this);
+    sEluna->OnSummoned(this, owner);
 
     // there are some totems, which exist just for their visual appeareance
     if (!GetSpell())

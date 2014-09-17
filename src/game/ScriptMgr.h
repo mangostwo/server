@@ -509,6 +509,7 @@ class ScriptMgr
         bool OnGameObjectUse(Player* pPlayer, GameObject* pGameObject);
         bool OnItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets);
         bool OnAreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry);
+        bool OnNpcSpellClick(Player* pPlayer, Creature* pClickedCreature, uint32 spellId);
         bool OnProcessEvent(uint32 eventId, Object* pSource, Object* pTarget, bool isStart);
         bool OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid);
         bool OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, GameObject* pTarget, ObjectGuid originalCasterGuid);
@@ -563,6 +564,7 @@ class ScriptMgr
         bool (MANGOS_IMPORT* m_pOnGOUse)(Player*, GameObject*);
         bool (MANGOS_IMPORT* m_pOnItemUse)(Player*, Item*, SpellCastTargets const&);
         bool (MANGOS_IMPORT* m_pOnAreaTrigger)(Player*, AreaTriggerEntry const*);
+        bool (MANGOS_IMPORT* m_pOnNpcSpellClick)(Player*, Creature*, uint32);
         bool (MANGOS_IMPORT* m_pOnProcessEvent)(uint32, Object*, Object*, bool);
         bool (MANGOS_IMPORT* m_pOnEffectDummyCreature)(Unit*, uint32, SpellEffectIndex, Creature*, ObjectGuid);
         bool (MANGOS_IMPORT* m_pOnEffectDummyGO)(Unit*, uint32, SpellEffectIndex, GameObject*, ObjectGuid);
