@@ -1,0 +1,381 @@
+diff --git a/CreatureMethods.h b/CreatureMethods.h
+index e90e62d..f6fb386 100644
+--- a/CreatureMethods.h
++++ b/CreatureMethods.h
+@@ -74,7 +74,7 @@ namespace LuaCreature
+     {
+         bool mustBeDead = Eluna::CHECKVAL<bool>(L, 2, false);
+ 
+-#ifdef MANGOS
++#ifdef CMANGOS
+         Eluna::Push(L, creature->IsTargetableForAttack(mustBeDead));
+ #else
+         Eluna::Push(L, creature->isTargetableForAttack(mustBeDead));
+@@ -123,7 +123,7 @@ namespace LuaCreature
+     {
+         Player* player = Eluna::CHECKOBJ<Player>(L, 2);
+ 
+-#ifdef MANGOS
++#ifdef CMANGOS
+         Eluna::Push(L, creature->IsTappedBy(player));
+ #else
+         Eluna::Push(L, creature->isTappedBy(player));
+@@ -655,7 +655,7 @@ namespace LuaCreature
+         float dist = Eluna::CHECKVAL<float>(L, 5, 0.0f);
+         int32 aura = Eluna::CHECKVAL<int32>(L, 6, 0);
+ 
+-#ifdef MANGOS
++#ifdef CMANGOS
+         ThreatList const& threatlist = creature->GetThreatManager().getThreatList();
+ #else
+         ThreatList const& threatlist = creature->getThreatManager().getThreatList();
+@@ -741,7 +741,7 @@ namespace LuaCreature
+         int tbl = lua_gettop(L);
+         uint32 i = 0;
+         
+-#ifdef MANGOS
++#ifdef CMANGOS
+         ThreatList const& threatlist = creature->GetThreatManager().getThreatList();
+ #else
+         ThreatList const& threatlist = creature->getThreatManager().getThreatList();
+@@ -770,7 +770,7 @@ namespace LuaCreature
+      */
+     int GetAITargetsCount(lua_State* L, Creature* creature)
+     {
+-#ifdef MANGOS
++#ifdef CMANGOS
+         Eluna::Push(L, creature->GetThreatManager().getThreatList().size());
+ #else
+         Eluna::Push(L, creature->getThreatManager().getThreatList().size());
+diff --git a/ElunaUtility.cpp b/ElunaUtility.cpp
+index 57f6bf5..aab55f4 100644
+--- a/ElunaUtility.cpp
++++ b/ElunaUtility.cpp
+@@ -65,7 +65,7 @@ bool ElunaUtil::WorldObjectInRangeCheck::operator()(WorldObject* u)
+         return false;
+     if (Unit* unit = u->ToUnit())
+     {
+-#ifdef CMANGOS
++#if defined(CMANGOS) || defined(MANGOS)
+         if (!unit->isAlive())
+             return false;
+ #else
+diff --git a/HookMgr.cpp b/HookMgr.cpp
+index ad01c86..72bb429 100644
+--- a/HookMgr.cpp
++++ b/HookMgr.cpp
+@@ -1403,13 +1403,19 @@ bool Eluna::OnQuestAccept(Player* pPlayer, Creature* pCreature, Quest const* pQu
+     return true;
+ }
+ 
++#if defined(TRINITY)
+ bool Eluna::OnQuestReward(Player* pPlayer, Creature* pCreature, Quest const* pQuest, uint32 opt)
++#else
++bool Eluna::OnQuestReward(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
++#endif
+ {
+     ENTRY_BEGIN(CreatureEventBindings, pCreature->GetEntry(), CREATURE_EVENT_ON_QUEST_REWARD, return false);
+     Push(L, pPlayer);
+     Push(L, pCreature);
+     Push(L, pQuest);
++#if defined(TRINITY)
+     Push(L, opt);
++#endif
+     ENTRY_EXECUTE(0);
+     ENDCALL();
+     return true;
+@@ -1822,13 +1828,19 @@ void Eluna::UpdateAI(GameObject* pGameObject, uint32 diff)
+     ENDCALL();
+ }
+ 
++#if defined(TRINITY)
+ bool Eluna::OnQuestReward(Player* pPlayer, GameObject* pGameObject, Quest const* pQuest, uint32 opt)
++#else
++bool Eluna::OnQuestReward(Player* pPlayer, GameObject* pGameObject, Quest const* pQuest)
++#endif
+ {
+     ENTRY_BEGIN(GameObjectEventBindings, pGameObject->GetEntry(), GAMEOBJECT_EVENT_ON_QUEST_REWARD, return false);
+     Push(L, pPlayer);
+     Push(L, pGameObject);
+     Push(L, pQuest);
++#if defined(TRINITY)
+     Push(L, opt);
++#endif
+     ENTRY_EXECUTE(0);
+     ENDCALL();
+     return true;
+diff --git a/LuaEngine.h b/LuaEngine.h
+index e263c43..b45169d 100644
+--- a/LuaEngine.h
++++ b/LuaEngine.h
+@@ -219,7 +219,11 @@ public:
+     bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 sender, uint32 action);
+     bool OnGossipSelectCode(Player* pPlayer, Creature* pCreature, uint32 sender, uint32 action, const char* code);
+     bool OnQuestAccept(Player* pPlayer, Creature* pCreature, Quest const* pQuest);
++#if defined(TRINITY)
+     bool OnQuestReward(Player* pPlayer, Creature* pCreature, Quest const* pQuest, uint32 opt);
++#else
++    bool OnQuestReward(Player* pPlayer, Creature* pCreature, Quest const* pQuest);
++#endif
+     uint32 GetDialogStatus(Player* pPlayer, Creature* pCreature);
+     void OnSummoned(Creature* creature, Unit* summoner);
+ 
+@@ -229,7 +233,11 @@ public:
+     bool OnGossipSelect(Player* pPlayer, GameObject* pGameObject, uint32 sender, uint32 action);
+     bool OnGossipSelectCode(Player* pPlayer, GameObject* pGameObject, uint32 sender, uint32 action, const char* code);
+     bool OnQuestAccept(Player* pPlayer, GameObject* pGameObject, Quest const* pQuest);
++#if defined(TRINITY)
+     bool OnQuestReward(Player* pPlayer, GameObject* pGameObject, Quest const* pQuest, uint32 opt);
++#else
++    bool OnQuestReward(Player* pPlayer, GameObject* pGameObject, Quest const* pQuest);
++#endif
+     uint32 GetDialogStatus(Player* pPlayer, GameObject* pGameObject);
+ #ifndef CLASSIC
+ #ifndef TBC
+diff --git a/PlayerMethods.h b/PlayerMethods.h
+index b899615..50d0c16 100644
+--- a/PlayerMethods.h
++++ b/PlayerMethods.h
+@@ -331,7 +331,7 @@ namespace LuaPlayer
+ 
+     int IsTaxiCheater(lua_State* L, Player* player)
+     {
+-#ifdef MANGOS
++#ifdef CMANGOS
+         Eluna::Push(L, player->IsTaxiCheater());
+ #else
+         Eluna::Push(L, player->isTaxiCheater());
+diff --git a/UnitMethods.h b/UnitMethods.h
+index 12621bb..998f409 100644
+--- a/UnitMethods.h
++++ b/UnitMethods.h
+@@ -52,11 +52,11 @@ namespace LuaUnit
+ #ifdef TRINITY
+         Eluna::Push(L, unit->isInRoots() || unit->HasUnitMovementFlag(MOVEMENTFLAG_ROOT));
+ #endif
+-#ifdef CMANGOS
++#if defined(CMANGOS)
+         Eluna::Push(L, unit->isInRoots() || unit->IsRooted());
+ #endif
+ #ifdef MANGOS
+-        Eluna::Push(L, unit->IsInRoots() || unit->IsRooted());
++        Eluna::Push(L, unit->isInRoots() || unit->IsRooted());
+ #endif
+         return 1;
+     }
+@@ -100,7 +100,7 @@ namespace LuaUnit
+ 
+     int IsGuildMaster(lua_State* L, Unit* unit)
+     {
+-#ifdef CMANGOS
++#if defined(CMANGOS) || defined (MANGOS)
+         Eluna::Push(L, unit->isGuildMaster());
+ #else
+         Eluna::Push(L, unit->IsGuildMaster());
+@@ -110,7 +110,7 @@ namespace LuaUnit
+ 
+     int IsInnkeeper(lua_State* L, Unit* unit)
+     {
+-#ifdef CMANGOS
++#if defined(CMANGOS) || defined (MANGOS)
+         Eluna::Push(L, unit->isInnkeeper());
+ #else
+         Eluna::Push(L, unit->IsInnkeeper());
+@@ -120,7 +120,7 @@ namespace LuaUnit
+ 
+     int IsTrainer(lua_State* L, Unit* unit)
+     {
+-#ifdef CMANGOS
++#if defined(CMANGOS) || defined (MANGOS)
+         Eluna::Push(L, unit->isTrainer());
+ #else
+         Eluna::Push(L, unit->IsTrainer());
+@@ -130,7 +130,7 @@ namespace LuaUnit
+ 
+     int IsGossip(lua_State* L, Unit* unit)
+     {
+-#ifdef CMANGOS
++#if defined(CMANGOS) || defined (MANGOS)
+         Eluna::Push(L, unit->isGossip());
+ #else
+         Eluna::Push(L, unit->IsGossip());
+@@ -140,7 +140,7 @@ namespace LuaUnit
+ 
+     int IsTaxi(lua_State* L, Unit* unit)
+     {
+-#ifdef CMANGOS
++#if defined(CMANGOS) || defined (MANGOS)
+         Eluna::Push(L, unit->isTaxi());
+ #else
+         Eluna::Push(L, unit->IsTaxi());
+@@ -150,7 +150,7 @@ namespace LuaUnit
+ 
+     int IsSpiritHealer(lua_State* L, Unit* unit)
+     {
+-#ifdef CMANGOS
++#if defined(CMANGOS) || defined (MANGOS)
+         Eluna::Push(L, unit->isSpiritHealer());
+ #else
+         Eluna::Push(L, unit->IsSpiritHealer());
+@@ -160,7 +160,7 @@ namespace LuaUnit
+ 
+     int IsSpiritGuide(lua_State* L, Unit* unit)
+     {
+-#ifdef CMANGOS
++#if defined(CMANGOS) || defined (MANGOS)
+         Eluna::Push(L, unit->isSpiritGuide());
+ #else
+         Eluna::Push(L, unit->IsSpiritGuide());
+@@ -170,7 +170,7 @@ namespace LuaUnit
+ 
+     int IsTabardDesigner(lua_State* L, Unit* unit)
+     {
+-#ifdef CMANGOS
++#if defined(CMANGOS) || defined (MANGOS)
+         Eluna::Push(L, unit->isTabardDesigner());
+ #else
+         Eluna::Push(L, unit->IsTabardDesigner());
+@@ -180,7 +180,7 @@ namespace LuaUnit
+ 
+     int IsServiceProvider(lua_State* L, Unit* unit)
+     {
+-#ifdef CMANGOS
++#if defined(CMANGOS) || defined (MANGOS)
+         Eluna::Push(L, unit->isServiceProvider());
+ #else
+         Eluna::Push(L, unit->IsServiceProvider());
+@@ -190,7 +190,7 @@ namespace LuaUnit
+ 
+     int IsSpiritService(lua_State* L, Unit* unit)
+     {
+-#ifdef CMANGOS
++#if defined(CMANGOS) || defined (MANGOS)
+         Eluna::Push(L, unit->isSpiritService());
+ #else
+         Eluna::Push(L, unit->IsSpiritService());
+@@ -200,7 +200,7 @@ namespace LuaUnit
+ 
+     int IsAlive(lua_State* L, Unit* unit)
+     {
+-#ifdef CMANGOS
++#if defined(CMANGOS) || defined (MANGOS)
+         Eluna::Push(L, unit->isAlive());
+ #else
+         Eluna::Push(L, unit->IsAlive());
+@@ -210,7 +210,7 @@ namespace LuaUnit
+ 
+     int IsDead(lua_State* L, Unit* unit)
+     {
+-#ifdef MANGOS
++#if defined(CMANGOS)
+         Eluna::Push(L, unit->IsDead());
+ #else
+         Eluna::Push(L, unit->isDead());
+@@ -220,7 +220,7 @@ namespace LuaUnit
+ 
+     int IsDying(lua_State* L, Unit* unit)
+     {
+-#ifdef MANGOS
++#ifdef CMANGOS
+         Eluna::Push(L, unit->IsDying());
+ #else
+         Eluna::Push(L, unit->isDying());
+@@ -230,7 +230,7 @@ namespace LuaUnit
+ 
+     int IsBanker(lua_State* L, Unit* unit)
+     {
+-#ifdef CMANGOS
++#if defined(CMANGOS) || defined (MANGOS)
+         Eluna::Push(L, unit->isBanker());
+ #else
+         Eluna::Push(L, unit->IsBanker());
+@@ -240,7 +240,7 @@ namespace LuaUnit
+ 
+     int IsVendor(lua_State* L, Unit* unit)
+     {
+-#ifdef CMANGOS
++#if defined(CMANGOS) || defined (MANGOS)
+         Eluna::Push(L, unit->isVendor());
+ #else
+         Eluna::Push(L, unit->IsVendor());
+@@ -250,7 +250,7 @@ namespace LuaUnit
+ 
+     int IsBattleMaster(lua_State* L, Unit* unit)
+     {
+-#ifdef CMANGOS
++#if defined(CMANGOS) || defined (MANGOS)
+         Eluna::Push(L, unit->isBattleMaster());
+ #else
+         Eluna::Push(L, unit->IsBattleMaster());
+@@ -260,7 +260,7 @@ namespace LuaUnit
+ 
+     int IsCharmed(lua_State* L, Unit* unit)
+     {
+-#ifdef CMANGOS
++#if defined(CMANGOS) || defined (MANGOS)
+         Eluna::Push(L, unit->isCharmed());
+ #else
+         Eluna::Push(L, unit->IsCharmed());
+@@ -270,7 +270,7 @@ namespace LuaUnit
+ 
+     int IsArmorer(lua_State* L, Unit* unit)
+     {
+-#ifdef CMANGOS
++#if defined(CMANGOS) || defined (MANGOS)
+         Eluna::Push(L, unit->isArmorer());
+ #else
+         Eluna::Push(L, unit->IsArmorer());
+@@ -304,7 +304,7 @@ namespace LuaUnit
+ 
+     int IsInCombat(lua_State* L, Unit* unit)
+     {
+-#ifdef CMANGOS
++#if defined(CMANGOS) || defined (MANGOS)
+         Eluna::Push(L, unit->isInCombat());
+ #else
+         Eluna::Push(L, unit->IsInCombat());
+@@ -332,7 +332,7 @@ namespace LuaUnit
+ 
+     int IsQuestGiver(lua_State* L, Unit* unit)
+     {
+-#ifdef CMANGOS
++#if defined(CMANGOS) || defined (MANGOS)
+         Eluna::Push(L, unit->isQuestGiver());
+ #else
+         Eluna::Push(L, unit->IsQuestGiver());
+@@ -555,7 +555,7 @@ namespace LuaUnit
+ 
+     Powers PowerSelectorHelper(lua_State* L, Unit* unit, int powerType = -1)
+     {
+-#ifdef TRINITY
++#if defined(TRINITY) || defined (MANGOS)
+         if (powerType == -1)
+             return unit->getPowerType();
+ #else
+@@ -603,7 +603,7 @@ namespace LuaUnit
+ 
+     int GetPowerType(lua_State* L, Unit* unit)
+     {
+-#ifdef TRINITY
++#if defined(TRINITY) || defined (MANGOS)
+         Eluna::Push(L, unit->getPowerType());
+ #else
+         Eluna::Push(L, unit->GetPowerType());
+@@ -920,7 +920,7 @@ namespace LuaUnit
+         if (type >= int(MAX_POWERS))
+             return luaL_argerror(L, 2, "valid Powers expected");
+ 
+-#ifdef TRINITY
++#if defined(TRINITY) || defined(MANGOS)
+         unit->setPowerType((Powers)type);
+ #else
+         unit->SetPowerType((Powers)type);
+@@ -1123,7 +1123,7 @@ namespace LuaUnit
+     /* OTHER */
+     int ClearThreatList(lua_State* /*L*/, Unit* unit)
+     {
+-#ifdef MANGOS
++#ifdef CMANGOS
+         unit->GetThreatManager().clearReferences();
+ #else
+         unit->getThreatManager().clearReferences();
