@@ -49,6 +49,7 @@
 #include "WorldPacket.h"
 #include "GameEventMgr.h"
 #include "Formulas.h"
+#include "LuaEngine.h"
 
 #include "Policies/Singleton.h"
 
@@ -1633,6 +1634,8 @@ uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, bool IsA
 
     // add bg to update list
     AddBattleGround(bg->GetInstanceID(), bg->GetTypeID(), bg);
+    
+    sEluna->OnBGCreate(bg, bgTypeId, bg->GetInstanceID());
 
     // return some not-null value, bgTypeId is good enough for me
     return bgTypeId;
