@@ -72,6 +72,7 @@ namespace Movement
              */
             void SetAnimation(AnimType anim);
 
+            /*
              * @brief  Adds final facing animation
              * sets unit's facing to specified point/angle after all path done.
              * you can have only one final facing: previous will be overriden

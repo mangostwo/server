@@ -6331,7 +6331,6 @@ if test "${enable_lib_streams+set}" = set; then :
 
 fi
 
-
 # Check whether --enable-lib-svcconf was given.
 if test "${enable_lib_svcconf+set}" = set; then :
   enableval=$enable_lib_svcconf;
@@ -10446,7 +10445,7 @@ else
   PRELINK=""
 fi
 
-
+ace_cv_new_throws_bad_alloc_exception=no
  # Check whether --enable-repo was given.
 if test "${enable_repo+set}" = set; then :
   enableval=$enable_repo;

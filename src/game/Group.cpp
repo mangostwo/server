@@ -39,6 +39,7 @@
 #include "MapPersistentStateMgr.h"
 #include "Util.h"
 #include "LootMgr.h"
+#include "LuaEngine.h"
 
 #define LOOT_ROLL_TIMEOUT  (1*MINUTE*IN_MILLISECONDS)
 
@@ -89,6 +90,8 @@ Group::Group() : m_Id(0), m_groupType(GROUPTYPE_NORMAL),
 
 Group::~Group()
 {
+    Eluna::RemoveRef(this);
+    
     if (m_bgGroup)
     {
         DEBUG_LOG("Group::~Group: battleground group being deleted.");
@@ -169,6 +172,9 @@ bool Group::Create(ObjectGuid guid, const char* name)
 
     if (!isBGGroup())
         CharacterDatabase.CommitTransaction();
+    
+    // Used by Eluna
+    sEluna->OnCreate(this, m_leaderGuid, m_groupType);
 
     return true;
 }
@@ -261,6 +267,9 @@ bool Group::AddInvite(Player* player)
     m_invitees.insert(player);
 
     player->SetGroupInvite(this);
+    
+    // Used by Eluna
+    sEluna->OnInviteMember(this, player->GetObjectGuid());
 
     return true;
 }
@@ -342,6 +351,9 @@ bool Group::AddMember(ObjectGuid guid, const char* name)
         }
         player->SetGroupUpdateFlag(GROUP_UPDATE_FULL);
         UpdatePlayerOutOfRange(player);
+        
+        // Used by Eluna
+        sEluna->OnAddMember(this, player->GetObjectGuid());
 
         // quest related GO state dependent from raid membership
         if (isRaidGroup())
@@ -400,6 +412,9 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 method)
     // if group before remove <= 2 disband it
     else
         Disband(true);
+    
+    // Used by Eluna
+    sEluna->OnRemoveMember(this, guid, method); // Kicker and Reason not a part of Mangos, implement?
 
     return m_memberSlots.size();
 }
@@ -409,6 +424,9 @@ void Group::ChangeLeader(ObjectGuid guid)
     member_citerator slot = _getMemberCSlot(guid);
     if (slot == m_memberSlots.end())
         return;
+    
+    // Used by Eluna
+    sEluna->OnChangeLeader(this, guid, GetLeaderGuid());
 
     _setLeader(guid);
 
@@ -484,6 +502,9 @@ void Group::Disband(bool hideDestroy)
         ResetInstances(INSTANCE_RESET_GROUP_DISBAND, false, NULL);
         ResetInstances(INSTANCE_RESET_GROUP_DISBAND, true, NULL);
     }
+    
+    // Used by Eluna
+    sEluna->OnDisband(this);
 
     m_leaderGuid.Clear();
     m_leaderName = "";

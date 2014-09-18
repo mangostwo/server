@@ -18,6 +18,7 @@
 
 # CMake policies
 cmake_minimum_required(VERSION 2.8)
+set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
 
 project(MaNGOS)
 set(MANGOS_VERSION 0.18.1)

@@ -46,6 +46,7 @@
 #include "Language.h"
 #include "SpellMgr.h"
 #include "Calendar.h"
+#include "LuaEngine.h"
 
 // config option SkipCinematics supported values
 enum CinematicsSkipMode
@@ -494,6 +495,9 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
     BASIC_LOG("Account: %d (IP: %s) Create Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), pNewChar->GetGUIDLow());
     sLog.outChar("Account: %d (IP: %s) Create Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), pNewChar->GetGUIDLow());
 
+    // Used by Eluna
+    sEluna->OnCreate(pNewChar);
+    
     delete pNewChar;                                        // created only to call SaveToDB()
 }
 
@@ -546,6 +550,9 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recv_data)
     BASIC_LOG("Account: %d (IP: %s) Delete Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), lowguid);
     sLog.outChar("Account: %d (IP: %s) Delete Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), lowguid);
 
+    // Used by Eluna
+    sEluna->OnDelete(lowguid);
+    
     if (sLog.IsOutCharDump())                               // optimize GetPlayerDump call
     {
         std::string dump = PlayerDumpWriter().GetDump(lowguid);
@@ -839,7 +846,12 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     }
 
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_FIRST))
+    {
+        // Eluna
+        sEluna->OnFirstLogin(pCurrChar);
+        
         pCurrChar->RemoveAtLoginFlag(AT_LOGIN_FIRST);
+    }
 
     /* If the server is shutting down, show shutdown time remaining */
     if (sWorld.IsShutdowning())
@@ -868,6 +880,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         pCurrChar->SetStandState(UNIT_STAND_STATE_STAND);
 
     m_playerLoading = false;
+    
+    // Eluna
+    sEluna->OnLogin(pCurrChar);
 
     // Handle Login-Achievements (should be handled after loading)
     pCurrChar->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ON_LOGIN, 1);

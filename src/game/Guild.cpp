@@ -36,6 +36,7 @@
 #include "Language.h"
 #include "World.h"
 #include "Calendar.h"
+#include "LuaEngine.h"
 
 //// MemberSlot ////////////////////////////////////////////
 void MemberSlot::SetMemberStats(Player* player)
@@ -107,6 +108,8 @@ Guild::Guild()
 
 Guild::~Guild()
 {
+    Eluna::RemoveRef(this);
+    
     DeleteGuildBankItems();
 }
 
@@ -146,6 +149,9 @@ bool Guild::Create(Player* leader, std::string gname)
     CharacterDatabase.CommitTransaction();
 
     CreateDefaultGuildRanks(lSession->GetSessionDbLocaleIndex());
+    
+    // Used by Eluna
+    sEluna->OnCreate(this, leader, gname.c_str());
 
     return AddMember(m_LeaderGuid, (uint32)GR_GUILDMASTER);
 }
@@ -246,6 +252,9 @@ bool Guild::AddMember(ObjectGuid plGuid, uint32 plRank)
     }
 
     UpdateAccountsNumber();
+    
+    // Used by Eluna
+    sEluna->OnAddMember(this, pl, newmember.RankId);
 
     return true;
 }
@@ -257,6 +266,9 @@ void Guild::SetMOTD(std::string motd)
     // motd now can be used for encoding to DB
     CharacterDatabase.escape_string(motd);
     CharacterDatabase.PExecute("UPDATE guild SET motd='%s' WHERE guildid='%u'", motd.c_str(), m_Id);
+
+    // Used by Eluna
+    sEluna->OnMOTDChanged(this, motd);
 }
 
 void Guild::SetGINFO(std::string ginfo)
@@ -266,6 +278,9 @@ void Guild::SetGINFO(std::string ginfo)
     // ginfo now can be used for encoding to DB
     CharacterDatabase.escape_string(ginfo);
     CharacterDatabase.PExecute("UPDATE guild SET info='%s' WHERE guildid='%u'", ginfo.c_str(), m_Id);
+
+    // Used by Eluna
+    sEluna->OnInfoChanged(this, ginfo);
 }
 
 bool Guild::LoadGuildFromDB(QueryResult* guildDataResult)
@@ -560,8 +575,23 @@ bool Guild::DelMember(ObjectGuid guid, bool isDisbanding)
 
     if (!isDisbanding)
         UpdateAccountsNumber();
+    
+    // Used by Eluna
+     sEluna->OnRemoveMember(this, player, isDisbanding); // IsKicked not a part of Mangos, implement?
 
     return members.empty();
+}
+
+bool Guild::ChangeMemberRank(ObjectGuid guid, uint8 newRank)
+{
+    if (newRank <= GetLowestRank()) // Validate rank (allow only existing ranks)
+        if (MemberSlot* member = GetMemberSlot(guid))
+        {
+            member->ChangeRank(newRank);
+            return true;
+        }
+        
+    return false;
 }
 
 void Guild::BroadcastToGuild(WorldSession* session, const std::string& msg, uint32 language)
@@ -761,6 +791,10 @@ void Guild::Disband()
     CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE guildid = '%u'", m_Id);
     CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE guildid = '%u'", m_Id);
     CharacterDatabase.CommitTransaction();
+    
+    // Used by Eluna
+    sEluna->OnDisband(this);
+    
     sGuildMgr.RemoveGuild(m_Id);
 }
 
@@ -1274,6 +1308,11 @@ bool Guild::MemberMoneyWithdraw(uint32 amount, uint32 LowGuid)
         CharacterDatabase.PExecute("UPDATE guild_member SET BankRemMoney='%u' WHERE guildid='%u' AND guid='%u'",
                                    itr->second.BankRemMoney, m_Id, LowGuid);
     }
+    
+    // Used by Eluna
+    Player* player = sObjectMgr.GetPlayer(ObjectGuid(HIGHGUID_PLAYER, LowGuid));
+    sEluna->OnMemberWitdrawMoney(this, player, amount, false); // IsRepair not a part of Mangos, implement?
+    
     return true;
 }
 
@@ -1662,6 +1701,9 @@ void Guild::LogBankEvent(uint8 EventType, uint8 TabId, uint32 PlayerGuidLow, uin
 
         m_GuildBankEventLog_Item[TabId].push_back(NewEvent);
     }
+    
+    // Used by Eluna
+    sEluna->OnBankEvent(this, EventType, TabId, PlayerGuidLow, ItemOrMoney, ItemStackCount, DestTabId);
 
     // save event to database
     CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE guildid='%u' AND LogGuid='%u' AND TabId='%u'", m_Id, currentLogGuid, currentTabId);

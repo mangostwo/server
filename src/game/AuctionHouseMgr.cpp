@@ -39,6 +39,7 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Mail.h"
+#include "LuaEngine.h"
 
 #include "Policies/Singleton.h"
 
@@ -59,6 +60,13 @@ AuctionHouseMgr::~AuctionHouseMgr()
         delete itr->second;
 }
 
+AuctionHouseObject::~AuctionHouseObject()
+{
+    Eluna::RemoveRef(this);
+    
+    for (AuctionEntryMap::const_iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
+        delete itr->second;
+}
 
 AuctionHouseObject* AuctionHouseMgr::GetAuctionsMap(AuctionHouseEntry const* house)
 {

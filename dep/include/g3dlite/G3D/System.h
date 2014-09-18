@@ -20,6 +20,10 @@
 #include "G3D/BinaryFormat.h"
 #include <string>
 
+#if defined(__FreeBSD__)
+#   include <sys/_timeval.h>
+#endif
+
 #ifdef G3D_OSX
 #   include <CoreServices/CoreServices.h>
 #endif

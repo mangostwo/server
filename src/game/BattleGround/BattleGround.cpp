@@ -41,6 +41,7 @@
 #include "Formulas.h"
 #include "GridNotifiersImpl.h"
 #include "Chat.h"
+#include "LuaEngine.h"
 
 namespace MaNGOS
 {
@@ -725,6 +726,8 @@ void BattleGround::UpdateWorldStateForPlayer(uint32 Field, uint32 Value, Player*
 /// <param name="winner">The winner.</param>
 void BattleGround::EndBattleGround(Team winner)
 {
+    sEluna->OnBGEnd(this, GetTypeID(), GetInstanceID(), winner);
+    
     this->RemoveFromBGFreeSlotQueue();
 
     ArenaTeam* winner_arena_team = NULL;
@@ -1286,6 +1289,8 @@ void BattleGround::StartTimedAchievement(AchievementCriteriaTypes type, uint32 e
     for (BattleGroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
         if (Player* pPlayer = GetBgMap()->GetPlayer(itr->first))
             pPlayer->GetAchievementMgr().StartTimedAchievementCriteria(type, entry);
+
+    sEluna->OnBGStart(this, GetTypeID(), GetInstanceID());
 }
 
 void BattleGround::AddPlayer(Player* plr)

@@ -67,7 +67,7 @@ struct Script
         pDialogStatusNPC(NULL), pDialogStatusGO(NULL),
         pQuestAcceptNPC(NULL), pQuestAcceptGO(NULL), pQuestAcceptItem(NULL),
         pQuestRewardedNPC(NULL), pQuestRewardedGO(NULL),
-        pGOUse(NULL), pItemUse(NULL), pAreaTrigger(NULL), pProcessEventId(NULL),
+        pGOUse(NULL), pItemUse(NULL), pAreaTrigger(NULL), pNpcSpellClick(NULL), pProcessEventId(NULL),
         pEffectDummyNPC(NULL), pEffectDummyGO(NULL), pEffectDummyItem(NULL), pEffectScriptEffectNPC(NULL),
         pEffectAuraDummy(NULL), GetAI(NULL), GetInstanceData(NULL)
     {}
@@ -90,6 +90,7 @@ struct Script
     bool (*pGOUse)(Player*, GameObject*);
     bool (*pItemUse)(Player*, Item*, SpellCastTargets const&);
     bool (*pAreaTrigger)(Player*, AreaTriggerEntry const*);
+    bool (*pNpcSpellClick)(Player*, Creature*, uint32);
     bool (*pProcessEventId)(uint32, Object*, Object*, bool);
     bool (*pEffectDummyNPC)(Unit*, uint32, SpellEffectIndex, Creature*, ObjectGuid);
     bool (*pEffectDummyGO)(Unit*, uint32, SpellEffectIndex, GameObject*, ObjectGuid);

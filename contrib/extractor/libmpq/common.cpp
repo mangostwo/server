@@ -38,7 +38,7 @@ unsigned int libmpq_lseek(mpq_archive* mpq_a, unsigned int pos)
 {
 #ifdef WIN32
     return (unsigned int)_lseeki64(mpq_a->fd, pos, SEEK_SET);
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) | defined(__FreeBSD__)
     return (unsigned int)lseek(mpq_a->fd, pos, SEEK_SET);
 #else
     return (unsigned int)lseek64(mpq_a->fd, pos, SEEK_SET);

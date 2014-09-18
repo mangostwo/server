@@ -43,6 +43,8 @@
 #include "MaNGOSsoap.h"
 #include "MassMailMgr.h"
 #include "DBCStores.h"
+#include "ScriptMgr.h"
+#include "LuaEngine.h"
 
 #include <ace/OS_NS_signal.h>
 #include <ace/TP_Reactor.h>
@@ -317,8 +319,14 @@ int Master::Run()
         World::StopNow(ERROR_EXIT_CODE);
         // go down and shutdown the server
     }
+    
+    ///- Used by Eluna
+    sEluna->OnStartup();
 
     sWorldSocketMgr->Wait();
+    
+    ///- Used by Eluna
+    sEluna->OnShutdown();
 
     ///- Stop freeze protection before shutdown tasks
     if (freeze_thread)
@@ -414,6 +422,10 @@ int Master::Run()
 
         delete cliThread;
     }
+     // This is done to make sure that we cleanup our so file before it's
+     // unloaded automatically, since the ~ScriptMgr() is called to late
+     // as it's allocated with static storage.
+     sScriptMgr.UnloadScriptLibrary();
 
     ///- Exit the process with specified return value
     return World::GetExitCode();

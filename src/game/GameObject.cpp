@@ -46,7 +46,9 @@
 #include "Util.h"
 #include "ScriptMgr.h"
 #include "vmap/GameObjectModel.h"
+#include "CreatureAISelector.h"
 #include "SQLStorages.h"
+#include "LuaEngine.h"
 #include <G3D/Quat.h>
 
 GameObject::GameObject() : WorldObject(),
@@ -78,11 +80,16 @@ GameObject::GameObject() : WorldObject(),
 
 GameObject::~GameObject()
 {
+    Eluna::RemoveRef(this);
+    
     delete m_model;
 }
 
 void GameObject::AddToWorld()
 {
+    if (!IsInWorld())
+        sEluna->OnAddToWorld(this);
+    
     ///- Register the gameobject for guid lookup
     if (!IsInWorld())
         GetMap()->GetObjectsStore().insert<GameObject>(GetObjectGuid(), (GameObject*)this);
@@ -101,6 +108,8 @@ void GameObject::RemoveFromWorld()
     ///- Remove the gameobject from the accessor
     if (IsInWorld())
     {
+        sEluna->OnRemoveFromWorld(this);
+        
         // Notify the outdoor pvp script
         if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetZoneId()))
             outdoorPvP->HandleGameObjectRemove(this);
@@ -124,6 +133,11 @@ void GameObject::RemoveFromWorld()
     }
 
     Object::RemoveFromWorld();
+}
+
+void GameObject::CleanupsBeforeDelete()
+{
+    WorldObject::CleanupsBeforeDelete();
 }
 
 bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang, QuaternionData rotation, uint8 animprogress, GOState go_state)
@@ -192,6 +206,9 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
         default:
             break;
     }
+    
+    // Used by Eluna
+    sEluna->OnSpawn(this);
 
     // Notify the battleground or outdoor pvp script
     if (map->IsBattleGroundOrArena())
@@ -215,6 +232,9 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
         //((Transport*)this)->Update(p_time);
         return;
     }
+    
+    // Used by Eluna
+    sEluna->UpdateAI(this, update_diff);
 
     switch (m_lootState)
     {
@@ -981,6 +1001,12 @@ void GameObject::Use(Unit* user)
     Unit* spellCaster = user;
     uint32 spellId = 0;
     bool triggered = false;
+    
+    if (Player* playerUser = user->ToPlayer())
+    {
+        if (sScriptMgr.OnGossipHello(playerUser, this))
+            return;
+    }
 
     // test only for exist cooldown data (cooldown timer used for door/buttons reset that not have use cooldown)
     if (uint32 cooldown = GetGOInfo()->GetCooldown())
@@ -1795,12 +1821,14 @@ bool GameObject::IsFriendlyTo(Unit const* unit) const
 void GameObject::SetLootState(LootState state)
 {
     m_lootState = state;
+    sEluna->OnLootStateChanged(this, state);
     UpdateCollisionState();
 }
 
 void GameObject::SetGoState(GOState state)
 {
     SetByteValue(GAMEOBJECT_BYTES_1, 0, state);
+    sEluna->OnGameObjectStateChanged(this, state);
     UpdateCollisionState();
 }
 
@@ -2241,6 +2269,8 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DestructibleGO: %s taken damage %u dealt by %s", GetGuidStr().c_str(), uint32(-diff), caster->GetGuidStr().c_str());
 
+        if (caster && caster->ToPlayer())
+            sEluna->OnDamaged(this, caster->ToPlayer());
         if (m_useTimes > uint32(-diff))
             m_useTimes += diff;
         else
@@ -2279,6 +2309,8 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
         {
             DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DestructibleGO: %s got destroyed", GetGuidStr().c_str());
 
+            if(caster && caster->ToPlayer())
+                sEluna->OnDestroyed(this, caster->ToPlayer());
             RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_9 | GO_FLAG_UNK_10);
             SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_11);
 
