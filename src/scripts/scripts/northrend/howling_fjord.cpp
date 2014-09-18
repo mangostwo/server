@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Howling_Fjord
 SD%Complete: ?
-SDComment: Quest support: 11300, 11343, 11344, 11464.
+SDComment: Quest support: 11241, 11300, 11343, 11344, 11464, 11476
 SDCategory: Howling Fjord
 EndScriptData */
 
@@ -737,6 +737,168 @@ bool AreaTrigger_at_nifflevar(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
     return false;
 }
 
+/*######
+## npc_apothecary_hanes
+######*/
+enum
+{
+    // yells
+    SAY_HANES_ESCORT_START = -1001064,
+    SAY_HANES_FIRE_1 = -1001065,
+    SAY_HANES_FIRE_2 = -1001066,
+    SAY_HANES_SUPPLIES_1 = -1001067,
+    SAY_HANES_SUPPLIES_2 = -1001068,
+    SAY_HANES_SUPPLIES_ESCAPE = -1001069,
+    SAY_HANES_SUPPLIES_COMPLETE = -1001070,
+    SAY_HANES_ARRIVE_BASE = -1001071,
+    // spells
+    SPELL_HEALING_POTION = 17534,
+    SPELL_LOW_POLY_FIRE = 51195,
+    // misc
+    NPC_HANES_TRIGGER = 23968,
+    QUEST_ID_TRIAL_OF_FIRE = 11241,
+};
+
+struct MANGOS_DLL_DECL npc_apothecary_hanesAI : public npc_escortAI
+{
+    npc_apothecary_hanesAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+    uint32 m_uiHealingTimer;
+
+    void Reset() override
+    {
+        m_uiHealingTimer = 0;
+    }
+    
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    {
+        if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
+        {
+            Start(true, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue));
+            DoScriptText(SAY_HANES_ESCORT_START, m_creature);
+            m_creature->SetFactionTemporary(FACTION_ESCORT_H_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
+        }
+    }
+    
+    void WaypointReached(uint32 uiPointId) override
+    {
+        switch (uiPointId)
+        {
+            case 2:
+                DoScriptText(SAY_HANES_FIRE_1, m_creature);
+                break;
+            case 3:
+                DoScriptText(SAY_HANES_FIRE_2, m_creature);
+                break;
+            case 14:
+            case 20:
+            case 21:
+            case 29:
+            {
+                m_creature->HandleEmote(EMOTE_ONESHOT_ATTACK1H);
+                
+                // set all nearby triggers on fire - ToDo: research if done by spell!
+                std::list<Creature*> lTriggersInRange;
+                GetCreatureListWithEntryInGrid(lTriggersInRange, m_creature, NPC_HANES_TRIGGER, 10.0f);
+
+                for (std::list<Creature*>::const_iterator itr = lTriggersInRange.begin(); itr != lTriggersInRange.end(); ++itr)
+                {
+                    (*itr)->CastSpell((*itr), SPELL_LOW_POLY_FIRE, true);
+                    (*itr)->ForcedDespawn(30000);
+                }
+              
+                break;
+            }
+
+            case 15:
+                DoScriptText(SAY_HANES_SUPPLIES_1, m_creature);
+                break;
+            case 22:
+                DoScriptText(SAY_HANES_SUPPLIES_2, m_creature);
+                break;
+            case 30:
+                m_creature->HandleEmote(EMOTE_ONESHOT_LAUGH_NOSHEATHE);
+                break;
+            case 31:
+                DoScriptText(SAY_HANES_SUPPLIES_COMPLETE, m_creature);
+                break;
+            case 32:
+                DoScriptText(SAY_HANES_SUPPLIES_ESCAPE, m_creature);
+                break;
+            case 40:
+                DoScriptText(SAY_HANES_ARRIVE_BASE, m_creature);
+                break;
+            case 44:
+                if (Player* pPlayer = GetPlayerForEscort())
+                    pPlayer->GroupEventHappens(QUEST_ID_TRIAL_OF_FIRE, m_creature);
+                break;
+        }
+    }
+    
+    void UpdateEscortAI(const uint32 uiDiff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+        
+        if (m_creature->GetHealthPercent() < 75.0f)
+        {
+            if (m_uiHealingTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_HEALING_POTION) == CAST_OK)
+                    m_uiHealingTimer = 10000;
+            }
+            else
+                m_uiHealingTimer -= uiDiff;
+        }
+        
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_apothecary_hanes(Creature* pCreature)
+{
+    return new npc_apothecary_hanesAI(pCreature);
+}
+
+bool QuestAccept_npc_apothecary_hanes(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+{
+    if (pQuest->GetQuestId() == QUEST_ID_TRIAL_OF_FIRE)
+    {
+        pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
+        return true;
+    }
+    
+    return false;
+}
+
+
+/*######
+## npc_scalawag_frog
+######*/
+
+enum
+{
+    ITEM_ID_SCALAWAG_FROG = 35803,
+    ITEM_ID_SHINY_KNIFE = 35813,
+    NPC_SCALAWAG_FROG = 26503,
+};
+
+bool NpcSpellClick_npc_scalawag_frog(Player* pPlayer, Creature* pClickedCreature, uint32 /*uiSpellId*/)
+{
+    if (pClickedCreature->GetEntry() == NPC_SCALAWAG_FROG && pPlayer->HasItemCount(ITEM_ID_SHINY_KNIFE, 1))
+    {
+        if (Item* pItem = pPlayer->StoreNewItemInInventorySlot(ITEM_ID_SCALAWAG_FROG, 1))
+        {
+            pPlayer->SendNewItem(pItem, 1, true, false);
+            pClickedCreature->ForcedDespawn();
+            
+            // always return true when handled special npc spell click
+            return true;
+        }
+    }
+    
+    return true;
+}
+
 void AddSC_howling_fjord()
 {
     Script* pNewScript;
@@ -777,5 +939,16 @@ void AddSC_howling_fjord()
     pNewScript = new Script;
     pNewScript->Name = "at_nifflevar";
     pNewScript->pAreaTrigger = &AreaTrigger_at_nifflevar;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_apothecary_hanes";
+    pNewScript->GetAI = &GetAI_npc_apothecary_hanes;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_apothecary_hanes;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_scalawag_frog";
+    pNewScript->pNpcSpellClick = &NpcSpellClick_npc_scalawag_frog;
     pNewScript->RegisterSelf();
 }
