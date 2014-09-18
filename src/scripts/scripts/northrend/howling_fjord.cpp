@@ -31,6 +31,7 @@ npc_king_ymiron
 EndContentData */
 
 #include "precompiled.h"
+#include "escort_ai.h"
 
 enum
 {
