@@ -544,7 +544,7 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
             }
         }
 
-        if (seatFlags & (SEAT_FLAG_USABLE | SEAT_FLAG_CAN_CAST))
+        if (seatFlags & SEAT_FLAG_CAN_CAST)
         {
             CharmInfo* charmInfo = pVehicle->InitCharmInfo(pVehicle);
             charmInfo->InitVehicleCreateSpells();
@@ -595,7 +595,7 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
             pPlayer->GetCamera().ResetView();
         }
 
-        if (seatFlags & (SEAT_FLAG_USABLE | SEAT_FLAG_CAN_CAST))
+        if (seatFlags & SEAT_FLAG_CAN_CAST)
             pPlayer->RemovePetActionBar();
     }
     else if (passenger->GetTypeId() == TYPEID_UNIT)
