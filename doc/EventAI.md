@@ -153,6 +153,7 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 46   ACTION_T_SET_THROW_MASK                EventTypeMask                   Marks for which AIEvents the npc will throw AIEvents on its own.
 47   ACTION_T_SUMMON_UNIQUE                 CreatureID, Target, SummonID    Only summons a creature when not already spawned (Param1) to attack target (Param2) at location specified by EventAI_Summons (Param3). Preventing multiple spawns of unique creatures.
 48   ACTION_T_SET_STAND_STATE               StandState                      Set the unit stand state (Param1) of the current creature.
+49   ACTION_T_CHANGE_MOVEMENT               MovementType, WanderDistance    Change the unit movement type (Param1). If the movement type is Random Movement (1), the WanderDistance (Param2) must be provided.
 
 * = Use -1 where the param is expected to do nothing. Random constant is generated for each event, so if you have a random yell and a random sound, they will be linked up with each other (ie. param2 with param2).
 
@@ -906,6 +907,12 @@ Currently supported are:
     AI_EVENT_GOT_FULL_HEALTH   |  MaskValue: 0x10  |  Sender = Healed Npc, Invoker = Healer      |  Sent when healed to full health
 
 So if you want an npc to throw AIEvents automatically on death and on critical health, you would set its EventTypeMask to 0x03
+
+-----------------------------
+49 = ACTION_T_CHANGE_MOVEMENT:
+-----------------------------
+Parameter 1: MovementType - Movement type id to be used by the creature. Can be 0 = Idle, 1 = Random, 2 = Waypoint.
+Parameter 2: WanderDistance - Wander distance to be used in case the movement type is 1 (Random).
 
 =========================================
 Target Types

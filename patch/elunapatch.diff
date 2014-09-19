@@ -343,33 +343,6 @@ index 12621bb..998f409 100644
          Eluna::Push(L, unit->isQuestGiver());
  #else
          Eluna::Push(L, unit->IsQuestGiver());
-@@ -555,7 +555,7 @@ namespace LuaUnit
- 
-     Powers PowerSelectorHelper(lua_State* L, Unit* unit, int powerType = -1)
-     {
--#ifdef TRINITY
-+#if defined(TRINITY) || defined (MANGOS)
-         if (powerType == -1)
-             return unit->getPowerType();
- #else
-@@ -603,7 +603,7 @@ namespace LuaUnit
- 
-     int GetPowerType(lua_State* L, Unit* unit)
-     {
--#ifdef TRINITY
-+#if defined(TRINITY) || defined (MANGOS)
-         Eluna::Push(L, unit->getPowerType());
- #else
-         Eluna::Push(L, unit->GetPowerType());
-@@ -920,7 +920,7 @@ namespace LuaUnit
-         if (type >= int(MAX_POWERS))
-             return luaL_argerror(L, 2, "valid Powers expected");
- 
--#ifdef TRINITY
-+#if defined(TRINITY) || defined(MANGOS)
-         unit->setPowerType((Powers)type);
- #else
-         unit->SetPowerType((Powers)type);
 @@ -1123,7 +1123,7 @@ namespace LuaUnit
      /* OTHER */
      int ClearThreatList(lua_State* /*L*/, Unit* unit)

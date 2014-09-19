@@ -110,7 +110,7 @@ VehicleInfo::VehicleInfo(Unit* owner, VehicleEntry const* vehicleEntry, uint32 o
                 if (IsUsableSeatForCreature(seatEntry->m_flags))
                     m_creatureSeats |= 1 << i;
 
-                if (IsUsableSeatForPlayer(seatEntry->m_flags))
+                if (IsUsableSeatForPlayer(seatEntry->m_flags, seatEntry->m_flagsB))
                     m_playerSeats |= 1 << i;
             }
         }
@@ -147,7 +147,7 @@ void VehicleInfo::Initialize()
     }
     
     // Initialize movement limitations
-   /* uint32 vehicleFlags = GetVehicleEntry()->m_flags;
+    uint32 vehicleFlags = GetVehicleEntry()->m_flags;
     Unit* pVehicle = (Unit*)m_owner;
     
     if (vehicleFlags & VEHICLE_FLAG_NO_STRAFE)
@@ -166,7 +166,7 @@ void VehicleInfo::Initialize()
     {
         if (PowerDisplayEntry const* powerEntry = sPowerDisplayStore.LookupEntry(GetVehicleEntry()->m_powerDisplayID))
             pVehicle->SetPowerType(Powers(powerEntry->power));
-    }*/
+    }
     
     m_isInitialized = true;
     
@@ -503,9 +503,13 @@ uint8 VehicleInfo::GetTakenSeatsMask() const
     return takenSeatsMask;
 }
 
-bool VehicleInfo:: IsUsableSeatForPlayer(uint32 seatFlags) const
+bool VehicleInfo:: IsUsableSeatForPlayer(uint32 seatFlags, uint32 seatFlagsB) const
 {
-    return seatFlags & SEAT_FLAG_USABLE;
+    return seatFlags & SEAT_FLAG_CAN_EXIT ||
+           seatFlags & SEAT_FLAG_UNCONTROLLED ||
+           seatFlagsB &
+               (SEAT_FLAG_B_USABLE_FORCED | SEAT_FLAG_B_USABLE_FORCED_2 |
+                SEAT_FLAG_B_USABLE_FORCED_3 | SEAT_FLAG_B_USABLE_FORCED_4);
 }
 
 /// Add control and such modifiers to a passenger if required
@@ -544,7 +548,7 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
             }
         }
 
-        if (seatFlags & (SEAT_FLAG_USABLE | SEAT_FLAG_CAN_CAST))
+        if (seatFlags & SEAT_FLAG_CAN_CAST)
         {
             CharmInfo* charmInfo = pVehicle->InitCharmInfo(pVehicle);
             charmInfo->InitVehicleCreateSpells();
@@ -559,6 +563,9 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
             passenger->SetCharm(pVehicle);
             pVehicle->SetCharmerGuid(passenger->GetObjectGuid());
         }
+        
+        if (seatFlags & SEAT_FLAG_NOT_SELECTABLE)
+            passenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
         ((Creature*)passenger)->AI()->SetCombatMovement(false);
         // Not entirely sure how this must be handled in relation to CONTROL
@@ -592,7 +599,7 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
             pPlayer->GetCamera().ResetView();
         }
 
-        if (seatFlags & (SEAT_FLAG_USABLE | SEAT_FLAG_CAN_CAST))
+        if (seatFlags & SEAT_FLAG_CAN_CAST)
             pPlayer->RemovePetActionBar();
     }
     else if (passenger->GetTypeId() == TYPEID_UNIT)
@@ -602,6 +609,10 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
             passenger->SetCharm(NULL);
             pVehicle->SetCharmerGuid(ObjectGuid());
         }
+        
+        if (seatFlags & SEAT_FLAG_NOT_SELECTABLE)
+            passenger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        
         // Reinitialize movement
         ((Creature*)passenger)->AI()->SetCombatMovement(true, true);
         if (!passenger->getVictim())

@@ -151,13 +151,13 @@ enum Stats
 
 enum Powers
 {
-    POWER_MANA                          = 0,
-    POWER_RAGE                          = 1,
-    POWER_FOCUS                         = 2,
-    POWER_ENERGY                        = 3,
-    POWER_HAPPINESS                     = 4,
-    POWER_RUNE                          = 5,
-    POWER_RUNIC_POWER                   = 6,
+    POWER_MANA                          = 0,            // UNIT_FIELD_POWER1
+    POWER_RAGE                          = 1,            // UNIT_FIELD_POWER2
+    POWER_FOCUS                         = 2,            // UNIT_FIELD_POWER3
+    POWER_ENERGY                        = 3,            // UNIT_FIELD_POWER4
+    POWER_HAPPINESS                     = 4,            // UNIT_FIELD_POWER5
+    POWER_RUNE                          = 5,            // UNIT_FIELD_POWER6
+    POWER_RUNIC_POWER                   = 6,            // UNIT_FIELD_POWER7
     POWER_ALL                           = 127,
     POWER_HEALTH                        = 0xFFFFFFFE    // (-2 as signed value)
 };
@@ -1419,7 +1419,9 @@ enum DamageEffectType
     HEAL                    = 3,
     /// used also in case when damage applied to health but not applied to spell channelInterruptFlags/etc
     NODAMAGE                = 4,
-    SELF_DAMAGE             = 5
+    /// used to avoid rogue loosing stealth on falling damage
+    SELF_DAMAGE_ROGUE_FALL  = 5,
+    SELF_DAMAGE             = 6
 };
 
 enum GameobjectTypes

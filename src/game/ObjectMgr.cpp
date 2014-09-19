@@ -45,6 +45,9 @@
 #include "GossipDef.h"
 #include "Mail.h"
 #include "InstanceData.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 
 #include <limits>
 
@@ -1429,9 +1432,9 @@ void ObjectMgr::LoadCreatures()
             }
         }
 
-        if (cInfo->RegenerateHealth && data.curhealth < cInfo->MinLevelHealth)
+        if (cInfo->RegenerateStats & REGEN_FLAG_HEALTH && data.curhealth < cInfo->MinLevelHealth)
         {
-            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`RegenerateHealth`=1 and low current health (%u), `creature_template`.`minhealth`=%u.", guid, data.id, data.curhealth, cInfo->MinLevelHealth);
+            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`RegenerateStats` & REGEN_FLAG_HEALTH and low current health (%u), `creature_template`.`minhealth`=%u.", guid, data.id, data.curhealth, cInfo->MinLevelHealth);
             data.curhealth = cInfo->MinLevelHealth;
         }
 
@@ -8127,6 +8130,16 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
                 case 3:                                     // Creature source is dead
                     return !source || source->GetTypeId() != TYPEID_UNIT || !((Unit*)source)->isAlive();
             }
+            case CONDITION_CREATURE_IN_RANGE:
+            {
+                Creature* creature = NULL;
+                
+                MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck creature_check(*player, m_value1, true, false, m_value2, true);
+                MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(creature, creature_check);
+                Cell::VisitGridObjects(player, searcher, m_value2);
+                
+                return creature;
+            }
         default:
             return false;
     }
@@ -8581,6 +8594,19 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
                 return false;
             }
             break;
+        }
+        case CONDITION_CREATURE_IN_RANGE:
+        {
+            if (!sCreatureStorage.LookupEntry<CreatureInfo> (value1))
+            {
+                sLog.outErrorDb("Creature in range condition (entry %u, type %u) has an invalid value in value1. (Creature %u does not exist in the database), skipping.", entry, condition, value1);
+                return false;
+            }
+            if (value2 <= 0)
+            {
+                sLog.outErrorDb("Creature in range condition (entry %u, type %u) has an invalid value in value2. (Range %u must be greater than 0), skipping.", entry, condition, value2);
+                return false;
+            }
         }
         case CONDITION_NONE:
             break;
