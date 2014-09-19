@@ -162,11 +162,12 @@ void VehicleInfo::Initialize()
         pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_FULLSPEEDPITCHING);
     
     // Initialize power type based on DBC values (creatures only)
-    /*if (pVehicle->GetTypeId() == TYPEID_UNIT)
+    if (pVehicle->GetTypeId() == TYPEID_UNIT)
     {
+        // Do not use the wrappers for setting power type in order to avoid side-effects
         if (PowerDisplayEntry const* powerEntry = sPowerDisplayStore.LookupEntry(GetVehicleEntry()->m_powerDisplayID))
             pVehicle->SetPowerType(Powers(powerEntry->power));
-    }*/
+    }
     
     m_isInitialized = true;
     
