@@ -726,7 +726,8 @@ class MovementInfo
         MovementFlags GetMovementFlags() const { return MovementFlags(moveFlags); }
         void SetMovementFlags(MovementFlags f) { moveFlags = f; }
         MovementFlags2 GetMovementFlags2() const { return MovementFlags2(moveFlags2); }
-
+        void AddMovementFlags2(MovementFlags2 f) { moveFlags2 |= f; }
+        
         // Position manipulations
         Position const* GetPos() const { return &pos; }
         void SetTransportData(ObjectGuid guid, float x, float y, float z, float o, uint32 time, int8 seat)

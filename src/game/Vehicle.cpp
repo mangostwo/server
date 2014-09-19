@@ -147,7 +147,7 @@ void VehicleInfo::Initialize()
     }
     
     // Initialize movement limitations
-   /* uint32 vehicleFlags = GetVehicleEntry()->m_flags;
+    uint32 vehicleFlags = GetVehicleEntry()->m_flags;
     Unit* pVehicle = (Unit*)m_owner;
     
     if (vehicleFlags & VEHICLE_FLAG_NO_STRAFE)
@@ -162,7 +162,7 @@ void VehicleInfo::Initialize()
         pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_FULLSPEEDPITCHING);
     
     // Initialize power type based on DBC values (creatures only)
-    if (pVehicle->GetTypeId() == TYPEID_UNIT)
+    /*if (pVehicle->GetTypeId() == TYPEID_UNIT)
     {
         if (PowerDisplayEntry const* powerEntry = sPowerDisplayStore.LookupEntry(GetVehicleEntry()->m_powerDisplayID))
             pVehicle->SetPowerType(Powers(powerEntry->power));
