@@ -182,7 +182,7 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recv_data)
             data << uint32(ci->ModelId[i]);
 
         data << float(ci->HealthMultiplier);                // health modifier
-        data << float(ci->ManaMultiplier);                  // power modifier
+        data << float(ci->PowerMultiplier);                  // power modifier
         data << uint8(ci->RacialLeader);
         for (uint32 i = 0; i < 6; ++i)
             data << uint32(ci->QuestItems[i]);              // itemId[6], quest drop
