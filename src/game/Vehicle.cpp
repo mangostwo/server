@@ -559,6 +559,9 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
             passenger->SetCharm(pVehicle);
             pVehicle->SetCharmerGuid(passenger->GetObjectGuid());
         }
+        
+        if (seatFlags & SEAT_FLAG_NOT_SELECTABLE)
+            passenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
         ((Creature*)passenger)->AI()->SetCombatMovement(false);
         // Not entirely sure how this must be handled in relation to CONTROL
@@ -602,6 +605,10 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
             passenger->SetCharm(NULL);
             pVehicle->SetCharmerGuid(ObjectGuid());
         }
+        
+        if (seatFlags & SEAT_FLAG_NOT_SELECTABLE)
+            passenger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        
         // Reinitialize movement
         ((Creature*)passenger)->AI()->SetCombatMovement(true, true);
         if (!passenger->getVictim())
