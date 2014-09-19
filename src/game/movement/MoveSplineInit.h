@@ -60,6 +60,12 @@ namespace Movement
              * @return int32 duration - estimated travel time
              */
             int32 Launch();
+            
+            /**
+             * @brief Stop any creature movement
+             * 
+             */
+            void Stop();
 
             /* Adds movement by parabolic trajectory
              * @param amplitude  - the maximum height of parabola, value could be negative and positive
