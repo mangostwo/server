@@ -3271,10 +3271,9 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
         Creature* npcCreature = m_session->GetPlayer()->GetMap()->GetCreature(data->GetObjectGuid(lowguid));
 
         // wpCreature
-        Creature* wpCreature = NULL;
         if (wpGuid != 0)
         {
-            wpCreature = m_session->GetPlayer()->GetMap()->GetCreature(ObjectGuid(HIGHGUID_UNIT, VISUAL_WAYPOINT, wpGuid));
+            Creature* wpCreature = m_session->GetPlayer()->GetMap()->GetCreature(ObjectGuid(HIGHGUID_UNIT, VISUAL_WAYPOINT, wpGuid));
             wpCreature->DeleteFromDB();
             wpCreature->AddObjectToRemoveList();
         }
@@ -3331,13 +3330,12 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
             Creature* npcCreature = m_session->GetPlayer()->GetMap()->GetCreature(data->GetObjectGuid(lowguid));
 
             // wpCreature
-            Creature* wpCreature = NULL;
             // What to do:
             // Move the visual spawnpoint
             // Respawn the owner of the waypoints
             if (wpGuid != 0)
             {
-                wpCreature = m_session->GetPlayer()->GetMap()->GetCreature(ObjectGuid(HIGHGUID_UNIT, VISUAL_WAYPOINT, wpGuid));
+                Creature* wpCreature = m_session->GetPlayer()->GetMap()->GetCreature(ObjectGuid(HIGHGUID_UNIT, VISUAL_WAYPOINT, wpGuid));
                 wpCreature->DeleteFromDB();
                 wpCreature->AddObjectToRemoveList();
                 // re-create
