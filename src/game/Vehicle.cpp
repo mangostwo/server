@@ -523,6 +523,10 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
     if (passenger->GetTypeId() == TYPEID_PLAYER)
     {
         Player* pPlayer = (Player*)passenger;
+        
+        // group update
+        if (pPlayer->GetGroup())
+            pPlayer->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_VEHICLE_SEAT);
 
         if (seatFlags & SEAT_FLAG_CAN_CONTROL)
         {
@@ -586,6 +590,10 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
     if (passenger->GetTypeId() == TYPEID_PLAYER)
     {
         Player* pPlayer = (Player*)passenger;
+        
+        // group update
+        if (pPlayer->GetGroup())
+            pPlayer->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_VEHICLE_SEAT);
 
         if (seatFlags & SEAT_FLAG_CAN_CONTROL)
         {
