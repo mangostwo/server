@@ -118,7 +118,7 @@ struct MANGOS_DLL_DECL boss_deathbringer_saurfangAI : public ScriptedAI
     boss_deathbringer_saurfangAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (instance_icecrown_citadel*)pCreature->GetInstanceData();
-        m_powerBloodPower = m_creature->getPowerType();
+        m_powerBloodPower = m_creature->GetPowerType();
         m_bIsIntroDone = false;
         Reset();
     }

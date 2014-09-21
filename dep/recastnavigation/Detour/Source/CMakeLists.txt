@@ -23,7 +23,6 @@ set(detour_SRCS
     DetourNavMesh.cpp
     DetourNavMeshQuery.cpp
     DetourNode.cpp
-    DetourObstacleAvoidance.cpp
 )
 
 include_directories(

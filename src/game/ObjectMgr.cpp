@@ -904,12 +904,6 @@ void ObjectMgr::LoadCreatureClassLvlStats()
     // initialize data array
     memset(&m_creatureClassLvlStats, 0, sizeof(m_creatureClassLvlStats));
     
-    if (!sWorld.getConfig(CONFIG_BOOL_USE_NEW_STATS))
-    {
-        sLog.outString("New Stat system is currently disabled!");
-        return;
-    }
-
     std::string queryStr = "SELECT `Class`, `Level`, `BaseMana`, `BaseMeleeAttackPower`, `BaseRangedAttackPower`, `BaseArmor`";
 
     for (int i = 0; i <= MAX_EXPANSION; i++)

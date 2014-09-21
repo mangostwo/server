@@ -206,7 +206,7 @@ struct MANGOS_DLL_DECL boss_aranAI : public ScriptedAI
             return;
 
         // Start drinking when below 20% mana
-        if (!m_bIsDrinking && m_creature->getPowerType() == POWER_MANA && (m_creature->GetPower(POWER_MANA) * 100 / m_creature->GetMaxPower(POWER_MANA)) < 20)
+        if (!m_bIsDrinking && m_creature->GetPowerType() == POWER_MANA && (m_creature->GetPower(POWER_MANA) * 100 / m_creature->GetMaxPower(POWER_MANA)) < 20)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_MASS_POLYMORPH) == CAST_OK)
             {

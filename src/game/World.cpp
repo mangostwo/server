@@ -2027,7 +2027,7 @@ void World::ProcessCliCommands()
     while (cliCmdQueue.next(command))
     {
         DEBUG_LOG("CLI command under processing...");
-        CliCommandHolder::Print*  = command->m_print;
+        CliCommandHolder::Print* zprint = command->m_print;
         void* callbackArg = command->m_callbackArg;
         CliHandler handler(command->m_cliAccountId, command->m_cliAccessLevel, callbackArg, zprint);
         handler.ParseCommands(command->m_command);
