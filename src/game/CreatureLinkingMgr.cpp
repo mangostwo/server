@@ -268,6 +268,7 @@ enum EventMask
     EVENT_MASK_ON_DIE       = FLAG_DESPAWN_ON_DEATH | FLAG_SELFKILL_ON_DEATH | FLAG_RESPAWN_ON_DEATH | FLAG_FOLLOW,
     EVENT_MASK_ON_RESPAWN   = FLAG_RESPAWN_ON_RESPAWN | FLAG_DESPAWN_ON_RESPAWN | FLAG_FOLLOW,
     EVENT_MASK_TRIGGER_TO   = FLAG_TO_AGGRO_ON_AGGRO | FLAG_TO_RESPAWN_ON_EVADE | FLAG_FOLLOW,
+    EVENT_MASK_ON_DESPAWN   = FLAG_DESPAWN_ON_DESPAWN,
 };
 
 // This functions checks if the NPC has linked NPCs for dynamic action
@@ -420,6 +421,7 @@ void CreatureLinkingHolder::DoCreatureLinkingEvent(CreatureLinkingEvent eventTyp
         case LINKING_EVENT_EVADE:   eventFlagFilter = EVENT_MASK_ON_EVADE;   reverseEventFlagFilter = FLAG_TO_RESPAWN_ON_EVADE; break;
         case LINKING_EVENT_DIE:     eventFlagFilter = EVENT_MASK_ON_DIE;     reverseEventFlagFilter = 0;                        break;
         case LINKING_EVENT_RESPAWN: eventFlagFilter = EVENT_MASK_ON_RESPAWN; reverseEventFlagFilter = FLAG_FOLLOW;              break;
+        case LINKING_EVENT_DESPAWN: eventFlagFilter = EVENT_MASK_ON_DESPAWN; reverseEventFlagFilter = 0;                        break;
     }
 
     // Process Slaves (by entry)
@@ -477,6 +479,7 @@ void CreatureLinkingHolder::DoCreatureLinkingEvent(CreatureLinkingEvent eventTyp
                             SetFollowing(pSource, pMaster);
                         break;
                     case LINKING_EVENT_DIE:                 // Nothing linked for this case
+                    case LINKING_EVENT_DESPAWN:             // Nothing linked for this case
                         break;
                 }
             }
@@ -556,6 +559,11 @@ void CreatureLinkingHolder::ProcessSlave(CreatureLinkingEvent eventType, Creatur
             if (flag & FLAG_FOLLOW && pSlave->isAlive() && !pSlave->isInCombat())
                 SetFollowing(pSlave, pSource);
 
+            break;
+        case LINKING_EVENT_DESPAWN:
+            if (flag & FLAG_DESPAWN_ON_DESPAWN && !pSlave->IsDespawned())
+                pSlave->ForcedDespawn();
+            
             break;
     }
 }

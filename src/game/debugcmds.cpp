@@ -133,7 +133,7 @@ bool ChatHandler::HandleDebugSendOpcodeCommand(char* /*args*/)
         return false;
 
     uint32 opcode;
-    if (!stream >> opcode)
+    if (!(stream >> opcode))
     {
         stream.close();
         return false;
@@ -144,7 +144,7 @@ bool ChatHandler::HandleDebugSendOpcodeCommand(char* /*args*/)
     std::string type;
     while (stream >> type)
     {
-        if (type == "")
+        if (type.empty())
             break;
 
         if (type == "uint8")

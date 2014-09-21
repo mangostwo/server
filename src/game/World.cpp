@@ -879,7 +879,7 @@ void World::LoadConfigSettings(bool reload)
         setConfig(CONFIG_UINT32_GUID_RESERVE_SIZE_CREATURE,   "GuidReserveSize.Creature",   100);
     if (configNoReload(reload, CONFIG_UINT32_GUID_RESERVE_SIZE_GAMEOBJECT, "GuidReserveSize.GameObject", 100))
         setConfig(CONFIG_UINT32_GUID_RESERVE_SIZE_GAMEOBJECT, "GuidReserveSize.GameObject", 100);
-
+    
     setConfig(CONFIG_UINT32_MIN_LEVEL_FOR_RAID, "Raid.MinLevel", 10);
 
     ///- Read the "Data" directory from the config file
@@ -1710,10 +1710,12 @@ void World::SendWorldText(int32 string_id, ...)
     MaNGOS::LocalizedPacketListDo<MaNGOS::WorldWorldTextBuilder> wt_do(wt_builder);
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
     {
-        if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld())
-            continue;
-
-        wt_do(itr->second->GetPlayer());
+        if (WorldSession* session = itr->second)
+        {
+            Player* player = session->GetPlayer();
+            if (player && player->IsInWorld())
+                wt_do(player);
+        }
     }
 
     va_end(ap);
@@ -1724,11 +1726,11 @@ void World::SendGlobalMessage(WorldPacket* packet)
 {
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
     {
-        if (itr->second &&
-                itr->second->GetPlayer() &&
-                itr->second->GetPlayer()->IsInWorld())
+        if (WorldSession* session = itr->second)
         {
-            itr->second->SendPacket(packet);
+            Player* player = session->GetPlayer();
+            if (player && player->IsInWorld())
+                session->SendPacket(packet);
         }
     }
 }
@@ -1754,13 +1756,11 @@ void World::SendZoneUnderAttackMessage(uint32 zoneId, Team team)
 
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
     {
-        if (itr->second &&
-                itr->second->GetPlayer() &&
-                itr->second->GetPlayer()->IsInWorld() &&
-                itr->second->GetPlayer()->GetTeam() == team &&
-                !itr->second->GetPlayer()->GetMap()->Instanceable())
+        if (WorldSession* session = itr->second)
         {
-            itr->second->SendPacket(&data);
+            Player* player = session->GetPlayer();
+            if (player && player->IsInWorld() && player->GetTeam() == team && !player->GetMap()->Instanceable())
+                itr->second->SendPacket(&data);
         }
     }
 }
@@ -1770,19 +1770,20 @@ void World::SendDefenseMessage(uint32 zoneId, int32 textId)
 {
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
     {
-        if (itr->second &&
-                itr->second->GetPlayer() &&
-                itr->second->GetPlayer()->IsInWorld() &&
-                !itr->second->GetPlayer()->GetMap()->Instanceable())
+        if (WorldSession* session = itr->second)
         {
-            char const* message = itr->second->GetMangosString(textId);
-            uint32 messageLength = strlen(message) + 1;
-
-            WorldPacket data(SMSG_DEFENSE_MESSAGE, 4 + 4 + messageLength);
-            data << uint32(zoneId);
-            data << uint32(messageLength);
-            data << message;
-            itr->second->SendPacket(&data);
+            Player* player = session->GetPlayer();
+            if (player && player->IsInWorld() && !player->GetMap()->Instanceable())
+            {
+                char const* message = session->GetMangosString(textId);
+                uint32 messageLength = strlen(message) + 1;
+                
+                WorldPacket data(SMSG_DEFENSE_MESSAGE, 4 + 4 + messageLength);
+                data << uint32(zoneId);
+                data << uint32(messageLength);
+                data << message;
+                session->SendPacket(&data);
+            }
         }
     }
 }
@@ -1802,8 +1803,9 @@ void World::KickAllLess(AccountTypes sec)
 {
     // session not removed at kick and will removed in next update tick
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
-        if (itr->second->GetSecurity() < sec)
-            itr->second->KickPlayer();
+        if (WorldSession* session = itr->second)
+            if (session->GetSecurity() < sec)
+                session->KickPlayer();
 }
 
 /// Ban an account or ban an IP address, duration_secs if it is positive used, otherwise permban
@@ -2021,14 +2023,12 @@ void World::UpdateSessions(uint32 diff)
 // This handles the issued and queued CLI/RA commands
 void World::ProcessCliCommands()
 {
-    CliCommandHolder::Print* zprint = NULL;
-    void* callbackArg = NULL;
     CliCommandHolder* command;
     while (cliCmdQueue.next(command))
     {
         DEBUG_LOG("CLI command under processing...");
-        zprint = command->m_print;
-        callbackArg = command->m_callbackArg;
+        CliCommandHolder::Print* zprint = command->m_print;
+        void* callbackArg = command->m_callbackArg;
         CliHandler handler(command->m_cliAccountId, command->m_cliAccessLevel, callbackArg, zprint);
         handler.ParseCommands(command->m_command);
 

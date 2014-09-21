@@ -342,7 +342,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
     &Aura::HandleNoImmediateEffect,                         //281 SPELL_AURA_MOD_HONOR_GAIN             implemented in Player::RewardHonor
     &Aura::HandleAuraIncreaseBaseHealthPercent,             //282 SPELL_AURA_INCREASE_BASE_HEALTH_PERCENT
     &Aura::HandleNoImmediateEffect,                         //283 SPELL_AURA_MOD_HEALING_RECEIVED       implemented in Unit::SpellHealingBonusTaken
-    &Aura::HandleNULL,                                      //284 51 spells
+    &Aura::HandleTriggerLinkedAura,                         //284 SPELL_AURA_TRIGGER_LINKED_AURA
     &Aura::HandleAuraModAttackPowerOfArmor,                 //285 SPELL_AURA_MOD_ATTACK_POWER_OF_ARMOR  implemented in Player::UpdateAttackPowerAndDamage
     &Aura::HandleNoImmediateEffect,                         //286 SPELL_AURA_ABILITY_PERIODIC_CRIT      implemented in Aura::IsCritFromAbilityAura called from Aura::PeriodicTick
     &Aura::HandleNoImmediateEffect,                         //287 SPELL_AURA_DEFLECT_SPELLS             implemented in Unit::MagicSpellHitResult and Unit::MeleeSpellHitResult
@@ -372,7 +372,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
     &Aura::HandleNULL,                                      //311 0 spells in 3.3
     &Aura::HandleNULL,                                      //312 0 spells in 3.3
     &Aura::HandleNULL,                                      //313 0 spells in 3.3
-    &Aura::HandleNULL,                                      //314 1 test spell (reduce duration of silince/magic)
+    &Aura::HandlePreventResurrection,                       //314 SPELL_AURA_PREVENT_RESURRECTION
     &Aura::HandleNULL,                                      //315 underwater walking
     &Aura::HandleNULL                                       //316 makes haste affect HOT/DOT ticks
 };
@@ -2254,6 +2254,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                         return;
                     }
+                    case 46637:                             // Break Ice
+                        target->CastSpell(target, 46638, true, NULL, this);
+                        return;
                     case 46699:                             // Requires No Ammo
                         if (target->GetTypeId() == TYPEID_PLAYER)
                             // not use ammo and not allow use
@@ -2263,6 +2266,12 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         target->CastSpell(target, 47189, true, NULL, this);
                         // allow script to process further (text)
                         break;
+                    case 47563:                             // Freezing Cloud
+                        target->CastSpell(target, 47574, true, NULL, this);
+                        return;
+                    case 47593:                             // Freezing Cloud
+                        target->CastSpell(target, 47594, true, NULL, this);
+                        return;
                     case 48025:                             // Headless Horseman's Mount
                         Spell::SelectMountByAreaAndSkill(target, GetSpellProto(), 51621, 48024, 51617, 48023, 0);
                         return;
@@ -2300,6 +2309,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         target->setFaction(1990);           // Ambient (hostile)
                         target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                         return;
+                    case 63122:                             // Clear Insane
+                        target->RemoveAurasDueToSpell(GetSpellProto()->CalculateSimpleValue(m_effIndex));
+                        return;
                     case 63624:                             // Learn a Second Talent Specialization
                         // Teach Learn Talent Specialization Switches, required for client triggered casts, allow after 30 sec delay
                         if (target->GetTypeId() == TYPEID_PLAYER)
@@ -2309,6 +2321,10 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         // Teach Learn Talent Specialization Switches, remove
                         if (target->GetTypeId() == TYPEID_PLAYER)
                             ((Player*)target)->removeSpell(63680);
+                        return;
+                    case 64132:                             // Constrictor Tentacle
+                        if (target->GetTypeId() == TYPEID_PLAYER)
+                            target->CastSpell(target, 64133, true, NULL, this);
                         return;
                     case 68912:                             // Wailing Souls
                         if (Unit* caster = GetCaster())
@@ -2743,7 +2759,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             }
             case 46637:                                     // Break Ice
             {
-                target->CastSpell(target, 46638, true);
+                target->CastSpell(target, 47030, true, NULL, this);
                 return;
             }
             case 48385:                                     // Create Spirit Fount Beam
@@ -3455,7 +3471,6 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     }
 
     uint32 modelid = 0;
-    Powers PowerType = POWER_MANA;
     Unit* target = GetTarget();
 
     if (ssEntry->modelID_A)
@@ -3531,6 +3546,8 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
     if (apply)
     {
+        Powers PowerType = POWER_MANA;
+
         // remove other shapeshift before applying a new one
         target->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT, GetHolder());
 
@@ -8245,6 +8262,14 @@ void Aura::PeriodicDummyTick()
                         target->CastSpell(target, 63536, true, NULL, this);
                     return;
                 }
+                case 63050:                                 // Sanity
+                {
+                    if (GetHolder()->GetStackAmount() <= 25 && !target->HasAura(63752))
+                        target->CastSpell(target, 63752, true);
+                    else if (GetHolder()->GetStackAmount() > 25 && target->HasAura(63752))
+                        target->RemoveAurasDueToSpell(63752);
+                    return;
+                }
                 case 63382:                                 // Rapid Burst
                 {
                     if (GetAuraTicks() % 2)
@@ -8911,6 +8936,21 @@ void Aura::HandleAuraSetVehicleId(bool apply, bool Real)
     GetTarget()->SetVehicleId(apply ? GetMiscValue() : 0, 0);
 }
 
+void Aura::HandlePreventResurrection(bool apply, bool Real)
+{
+    if (!Real)
+        return;
+    
+    Unit* target = GetTarget();
+    if (!target || target->GetTypeId() != TYPEID_PLAYER)
+        return;
+    
+    if (apply)
+        target->RemoveByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER);
+    else if (!target->GetMap()->Instanceable())
+        target->SetByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER);
+}
+
 void Aura::HandleFactionOverride(bool apply, bool Real)
 {
     if (!Real)
@@ -8924,6 +8964,30 @@ void Aura::HandleFactionOverride(bool apply, bool Real)
         target->setFaction(GetMiscValue());
     else
         target->RestoreOriginalFaction();
+}
+
+void Aura::HandleTriggerLinkedAura(bool apply, bool Real)
+{
+    if (!Real)
+        return;
+    
+    uint32 linkedSpell = GetSpellProto()->EffectTriggerSpell[m_effIndex];
+    SpellEntry const* spellInfo = sSpellStore.LookupEntry(linkedSpell);
+    if (!spellInfo)
+    {
+        sLog.outError("Aura::HandleTriggerLinkedAura for spell %u effect %u triggering unknown spell id %u", GetSpellProto()->Id, m_effIndex, linkedSpell);
+        return;
+    }
+    
+    Unit* target = GetTarget();
+    
+    if (apply)
+    {
+        // ToDo: handle various cases where base points need to be applied!
+        target->CastSpell(target, spellInfo, true, NULL, this);
+    }
+    else
+        target->RemoveAurasByCasterSpell(linkedSpell, GetCasterGuid());
 }
 
 bool Aura::IsLastAuraOnHolder()
@@ -8996,7 +9060,9 @@ SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit* target, Wor
         case 55166:                                         // Tidal Force
         case 58914:                                         // Kill Command (pet part)
         case 62519:                                         // Attuned to Nature
+        case 63050:                                         // Sanity
         case 64455:                                         // Feral Essence
+        case 65294:                                         // Empowered
         case 71564:                                         // Deadly Precision
         case 74396:                                         // Fingers of Frost
             m_stackAmount = m_spellProto->StackAmount;

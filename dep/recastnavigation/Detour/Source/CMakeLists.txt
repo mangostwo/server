@@ -14,6 +14,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+add_definitions(-DDT_POLYREF64)
+
 set(detour_SRCS
     DetourAlloc.cpp
     DetourCommon.cpp
@@ -21,7 +23,6 @@ set(detour_SRCS
     DetourNavMesh.cpp
     DetourNavMeshQuery.cpp
     DetourNode.cpp
-    DetourObstacleAvoidance.cpp
 )
 
 include_directories(
@@ -34,3 +35,4 @@ include_directories(
 add_library(detour STATIC
   ${detour_SRCS}
 )
+ 

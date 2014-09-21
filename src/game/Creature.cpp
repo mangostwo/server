@@ -228,6 +228,9 @@ void Creature::RemoveCorpse()
 
     if (AI())
         AI()->CorpseRemoved(respawnDelay);
+    
+    if (m_isCreatureLinkingTrigger)
+        GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_DESPAWN, this);
 
     // script can set time (in seconds) explicit, override the original
     if (respawnDelay)
@@ -689,7 +692,7 @@ void Creature::RegeneratePower()
                 }
             }
             else
-                addValue = maxValue / 3;
+                addValue = maxValue / 3.0f;
             break;
             case POWER_ENERGY:
                 // ToDo: for vehicle this is different - NEEDS TO BE FIXED!
@@ -1968,6 +1971,9 @@ bool Creature::CanInitiateAttack()
 
     if (m_aggroDelay != 0)
         return false;
+    
+    if (!CanAttackByItself())
+        return false;
 
     return true;
 }
@@ -2536,6 +2542,10 @@ void Creature::SetFactionTemporary(uint32 factionId, uint32 tempFactionFlags)
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
     if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_PASSIVE)
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+    if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_PACIFIED)
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
+    if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_NOT_SELECTABLE)
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 }
 
 void Creature::ClearTemporaryFaction()
@@ -2548,13 +2558,17 @@ void Creature::ClearTemporaryFaction()
 
     // Reset to original faction
     setFaction(GetCreatureInfo()->FactionAlliance);
-    // Reset UNIT_FLAG_NON_ATTACKABLE, UNIT_FLAG_OOC_NOT_ATTACKABLE or UNIT_FLAG_PASSIVE flags
+    // Reset UNIT_FLAG_NON_ATTACKABLE, UNIT_FLAG_OOC_NOT_ATTACKABLE, UNIT_FLAG_PASSIVE, UNIT_FLAG_PACIFIED or UNIT_FLAG_NOT_SELECTABLE flags
     if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_NON_ATTACKABLE && GetCreatureInfo()->UnitFlags & UNIT_FLAG_NON_ATTACKABLE)
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
     if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_OOC_NOT_ATTACK && GetCreatureInfo()->UnitFlags & UNIT_FLAG_OOC_NOT_ATTACKABLE && !isInCombat())
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
     if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_PASSIVE && GetCreatureInfo()->UnitFlags & UNIT_FLAG_PASSIVE)
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+    if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_PACIFIED && GetCreatureInfo()->UnitFlags & UNIT_FLAG_PACIFIED)
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
+    if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_NOT_SELECTABLE && GetCreatureInfo()->UnitFlags & UNIT_FLAG_NOT_SELECTABLE)
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
     m_temporaryFactionFlags = TEMPFACTION_NONE;
 }

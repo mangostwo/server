@@ -691,6 +691,8 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                 case 54530:                                 // Opening
                 case 56099:                                 // Throw Ice
                 case 62105:                                 // To'kini's Blowgun
+                case 63745:                                 // Sara's Blessing
+                case 63747:                                 // Sara's Fervor
                 case 64402:                                 // Rocket Strike
                     return true;
                 default:
@@ -701,6 +703,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
             // some explicitly required script effect sets
             switch (spellproto->Id)
             {
+                case 42436:                                 // Drink!
                 case 46650:                                 // Open Brutallus Back Door
                 case 62488:                                 // Activate Construct
                 case 64503:                                 // Water
@@ -825,6 +828,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                 case SPELL_AURA_PERIODIC_LEECH:
                 case SPELL_AURA_MOD_STALKED:
                 case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
+                case SPELL_AURA_PREVENT_RESURRECTION:
                     return false;
                 case SPELL_AURA_PERIODIC_DAMAGE:            // used in positive spells also.
                     // part of negative spell if casted at self (prevent cancel)
@@ -2122,6 +2126,21 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     if ((spellInfo_1->Id == 62559 && spellInfo_2->Id == 62538) ||
                             (spellInfo_2->Id == 62559 && spellInfo_1->Id == 62538))
                         return false;
+                    
+                    // Phase 2 Transform and Shadowy Barrier
+                    if ((spellInfo_1->Id == 65157 && spellInfo_2->Id == 64775) ||
+                        (spellInfo_2->Id == 65157 && spellInfo_1->Id == 64775))
+                        return false;
+                    
+                    // Empowered (dummy) and Empowered
+                    if ((spellInfo_1->Id == 64161 && spellInfo_2->Id == 65294) ||
+                        (spellInfo_2->Id == 64161 && spellInfo_1->Id == 65294))
+                        return false;
+                    
+                    // Spectral Realm (reaction) and Spectral Realm (invisibility)
+                    if ((spellInfo_1->Id == 44852 && spellInfo_2->Id == 46021) ||
+                        (spellInfo_2->Id == 44852 && spellInfo_1->Id == 46021))
+                        return false;
                     break;
                 }
                 case SPELLFAMILY_MAGE:
@@ -3353,7 +3372,11 @@ void SpellMgr::LoadSpellScriptTarget()
                     spellProto->EffectImplicitTargetA[i] == TARGET_AREAEFFECT_GO_AROUND_SOURCE ||
                     spellProto->EffectImplicitTargetB[i] == TARGET_AREAEFFECT_GO_AROUND_SOURCE ||
                     spellProto->EffectImplicitTargetA[i] == TARGET_AREAEFFECT_GO_AROUND_DEST ||
-                    spellProto->EffectImplicitTargetB[i] == TARGET_AREAEFFECT_GO_AROUND_DEST)
+                    spellProto->EffectImplicitTargetB[i] == TARGET_AREAEFFECT_GO_AROUND_DEST ||
+                    spellProto->EffectImplicitTargetA[i] == TARGET_NARROW_FRONTAL_CONE ||
+                    spellProto->EffectImplicitTargetB[i] == TARGET_NARROW_FRONTAL_CONE ||
+                    spellProto->EffectImplicitTargetA[i] == TARGET_NARROW_FRONTAL_CONE_2 ||
+                    spellProto->EffectImplicitTargetB[i] == TARGET_NARROW_FRONTAL_CONE_2)
             {
                 targetfound = true;
                 break;

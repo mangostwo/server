@@ -589,6 +589,9 @@ void WorldSession::HandleTotemDestroyed(WorldPacket& recvPacket)
 void WorldSession::HandleSelfResOpcode(WorldPacket& /*recv_data*/)
 {
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: CMSG_SELF_RES");                  // empty opcode
+    
+    if (_player->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
+        return;
 
     if (_player->GetUInt32Value(PLAYER_SELF_RES_SPELL))
     {
@@ -605,7 +608,8 @@ void WorldSession::HandleSpellClick(WorldPacket& recv_data)
     ObjectGuid guid;
     recv_data >> guid;
 
-    if (_player->isInCombat())                              // client prevent click and set different icon at combat state
+    // client prevent click and set different icon at combat state; however combat state is allowed for dungeons
+    if (_player->isInCombat() && !_player->GetMap()->IsDungeon())
         return;
 
     Creature* unit = _player->GetMap()->GetAnyTypeCreature(guid);

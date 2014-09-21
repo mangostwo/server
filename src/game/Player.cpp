@@ -1400,8 +1400,8 @@ void Player::Update(uint32 update_diff, uint32 p_time)
             HandleSobering();
     }
 
-    // Not auto-free ghost from body in instances
-    if (m_deathTimer > 0  && !GetMap()->Instanceable() && getDeathState() != GHOULED)
+    // Not auto-free ghost from body in instances; also check for resurrection prevention
+    if (m_deathTimer > 0  && !GetMap()->Instanceable() && getDeathState() != GHOULED && !HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
     {
         if (p_time >= m_deathTimer)
         {
@@ -2981,6 +2981,8 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
     if (itr != m_spells.end())
     {
         uint32 next_active_spell_id = 0;
+        bool dependent_set = false;
+        
         // fix activate state for non-stackable low rank (and find next spell for !active case)
         if (sSpellMgr.IsRankedSpellNonStackableInSpellBook(spellInfo))
         {
@@ -4556,7 +4558,7 @@ void Player::KillPlayer()
     // SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_IN_PVP );
 
     SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
-    ApplyModByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER, !sMapStore.LookupEntry(GetMapId())->Instanceable());
+    ApplyModByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER, !sMapStore.LookupEntry(GetMapId())->Instanceable() && !HasAuraType(SPELL_AURA_PREVENT_RESURRECTION));
 
     // 6 minutes until repop at graveyard
     m_deathTimer = 6 * MINUTE * IN_MILLISECONDS;
@@ -8889,10 +8891,9 @@ InventoryResult Player::CanUnequipItems(uint32 item, uint32 count) const
                 return EQUIP_ERR_OK;
         }
     }
-    Bag* pBag;
     for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
     {
-        pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+        Bag* pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, i);
         if (pBag)
         {
             for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
@@ -15706,8 +15707,8 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
         // speed collect rest bonus in offline, in logout, in tavern, city (section/in hour)
         float bubble1 = 0.125f;
         float bubble = fields[23].GetUInt32() > 0
-                       ? bubble1 * sWorld.getConfig(CONFIG_FLOAT_RATE_REST_OFFLINE_IN_TAVERN_OR_CITY)
-                       : bubble0 * sWorld.getConfig(CONFIG_FLOAT_RATE_REST_OFFLINE_IN_WILDERNESS);
+                       ? (bubble1 * sWorld.getConfig(CONFIG_FLOAT_RATE_REST_OFFLINE_IN_TAVERN_OR_CITY))
+                       : (bubble0 * sWorld.getConfig(CONFIG_FLOAT_RATE_REST_OFFLINE_IN_WILDERNESS));
 
         SetRestBonus(GetRestBonus() + time_diff * ((float)GetUInt32Value(PLAYER_NEXT_LEVEL_XP) / 72000)*bubble);
     }
@@ -18961,11 +18962,7 @@ void Player::ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs)
             continue;
         uint32 unSpellId = itr->first;
         SpellEntry const* spellInfo = sSpellStore.LookupEntry(unSpellId);
-        if (!spellInfo)
-        {
-            MANGOS_ASSERT(spellInfo);
-            continue;
-        }
+        MANGOS_ASSERT(spellInfo);
 
         // Not send cooldown for this spells
         if (spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))

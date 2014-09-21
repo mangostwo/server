@@ -13,6 +13,9 @@ cmake_minimum_required (VERSION 2.8)
 project( MoveMapGen )
 
 ADD_DEFINITIONS(-DMMAP_GENERATOR -DNO_CORE_FUNCS -DDEBUG)
+ADD_DEFINITIONS(-DDT_POLYREF64)
+set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
+
 
 # zlib
 ADD_DEFINITIONS( -DNO_vsnprintf )

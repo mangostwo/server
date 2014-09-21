@@ -206,7 +206,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectTriggerSpellWithValue,                    //142 SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE
     &Spell::EffectApplyAreaAura,                            //143 SPELL_EFFECT_APPLY_AREA_AURA_OWNER
     &Spell::EffectKnockBackFromPosition,                    //144 SPELL_EFFECT_KNOCKBACK_FROM_POSITION
-    &Spell::EffectNULL,                                     //145 SPELL_EFFECT_145                      Black Hole Effect
+    &Spell::EffectGravityPull,                              //145 SPELL_EFFECT_GRAVITY_PULL                     Black Hole Effect
     &Spell::EffectActivateRune,                             //146 SPELL_EFFECT_ACTIVATE_RUNE
     &Spell::EffectQuestFail,                                //147 SPELL_EFFECT_QUEST_FAIL               quest fail
     &Spell::EffectNULL,                                     //148 SPELL_EFFECT_148                      single spell: Inflicts Fire damage to an enemy.
@@ -2754,6 +2754,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                     return;
                 }
+                case 63030:                                 // Boil Ominously
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+                    
+                    m_caster->CastSpell(unitTarget, 63031, true);
+                    return;
+                }
                 case 63499:                                 // Dispel Magic
                 {
                     if (!unitTarget)
@@ -2774,7 +2782,27 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
 
+                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);                
+                    return;
+                }
+                case 63744:                                 // Sara's Anger
+                case 63745:                                 // Sara's Blessing
+                case 63747:                                 // Sara's Fervor
+                {
+                    if (!unitTarget)
+                        return;
+                    
                     m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    return;
+                }
+                case 64172:                                 // Titanic Storm
+                {
+                    if (!unitTarget || !unitTarget->HasAura(m_spellInfo->CalculateSimpleValue(eff_idx)))
+                        return;
+                    
+                    // There is no known spell to kill the target
+                    m_caster->DealDamage(unitTarget, unitTarget->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                    return;
                 }
                 case 64385:                                 // Spinning (from Unusual Compass)
                 {
@@ -2806,6 +2834,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, 64540, true);
                     return;
                 }
+                case 64555:                                 // Insane Periodic
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->HasAura(63050) || unitTarget->HasAura(m_spellInfo->CalculateSimpleValue(eff_idx)))
+                        return;
+                    
+                    m_caster->CastSpell(unitTarget, 64464, true);
+                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    return;
+                }
                 case 64673:                                 // Feral Rush (h)
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -2826,6 +2863,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     }
 
                     m_caster->CastSpell(m_caster, spell_id, true);
+                    return;
+                }
+                case 65206:                                 // Destabilization Matrix
+                {
+                    if (!unitTarget)
+                        return;
+                    
+                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                     return;
                 }
                 case 65346:                                 // Proximity Mine
@@ -8935,6 +8980,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         unitTarget->CastSpell(unitTarget, 65347, true);
                     return;
                 }
+                case 63122:                                 // Clear Insane
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+                    
+                    unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
+                    return;
+                }
                 case 63633:                                 // Summon Rubble
                 {
                     if (!unitTarget)
@@ -8960,6 +9013,74 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, 63036, true);
                     return;
                 }
+                case 63795:                                 // Psychosis
+                case 65301:                                 // Psychosis (h)
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->HasAura(m_spellInfo->CalculateSimpleValue(eff_idx)))
+                        return;
+                    
+                    unitTarget->RemoveAuraHolderFromStack(63050, 12);
+                    return;
+                }
+                case 63803:                                 // Brain Link
+                case 64164:                                 // Lunatic Gaze (Yogg)
+                case 64168:                                 // Lunatic Gaze (Skull)
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+                    
+                    uint8 removedAmount = 0;
+                    switch (m_spellInfo->Id)
+                    {
+                        case 63803: removedAmount = 2; break;
+                        case 64164: removedAmount = 4; break;
+                        case 64168: removedAmount = 2; break;
+                    }
+                    
+                    unitTarget->RemoveAuraHolderFromStack(63050, removedAmount);
+                    return;
+                }
+                case 63993:                                 // Cancel Illusion Room Aura
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+                    
+                    unitTarget->CastSpell(unitTarget, 63992, true);
+                    unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
+                    return;
+                }
+                case 64059:                                // Induce Madness
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || !unitTarget->HasAura(m_spellInfo->CalculateSimpleValue(eff_idx)))
+                        return;
+                    
+                    unitTarget->RemoveAurasDueToSpell(63050);
+                    return;
+                }
+                case 64069:                                 // Match Health (Rank 1)
+                {
+                    if (!unitTarget)
+                        return;
+                    
+                    unitTarget->SetHealthPercent(m_caster->GetHealthPercent());
+                    return;
+                }
+                case 64123:                                 // Lunge
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+                    
+                    unitTarget->CastSpell(unitTarget, unitTarget->GetMap()->IsRegularDifficulty() ? 64125 : 64126, true);
+                    return;
+                }
+                case 64131:                                 // Lunge
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+                    
+                    unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    return;
+                }
                 case 64456:                                 // Feral Essence Application Removal
                 {
                     if (!unitTarget)
@@ -8967,6 +9088,22 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     uint32 spellId = m_spellInfo->CalculateSimpleValue(eff_idx);
                     unitTarget->RemoveAuraHolderFromStack(spellId);
+                    return;
+                }
+                case 64466:                                 // Empowering Shadows
+                {
+                    if (!unitTarget)
+                        return;
+                    
+                    unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    return;
+                }
+                case 64467:                                 // Empowering Shadows
+                {
+                    if (!unitTarget)
+                        return;
+                    
+                    unitTarget->CastSpell(unitTarget, m_caster->GetMap()->IsRegularDifficulty() ? 64468 : 64486, true);
                     return;
                 }
                 case 64475:                                 // Strength of the Creator
@@ -9006,6 +9143,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         return;
 
                     unitTarget->CastSpell(m_caster, 63382, false);
+                    return;
+                }
+                case 65238:                                 // Shattered Illusion
+                {
+                    if (!unitTarget)
+                        return;
+                    
+                    unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
                     return;
                 }
                 case 66477:                                 // Bountiful Feast
@@ -11220,4 +11365,21 @@ void Spell::EffectKnockBackFromPosition(SpellEffectIndex eff_idx)
     float horizontalSpeed = m_spellInfo->EffectMiscValue[eff_idx] * 0.1f;
     float verticalSpeed = damage * 0.1f;
     unitTarget->KnockBackWithAngle(angle, horizontalSpeed, verticalSpeed);
+}
+
+void Spell::EffectGravityPull(SpellEffectIndex eff_idx)
+{
+    if (!unitTarget)
+        return;
+    
+    float x, y, z;
+    if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+        m_targets.getDestination(x, y, z);
+    else
+        m_caster->GetPosition(x, y, z);
+    
+    float speed = float(m_spellInfo->EffectMiscValue[eff_idx]) * 0.15f;
+    float height = float(unitTarget->GetDistance(x, y, z) * 0.2f);
+    
+    unitTarget->GetMotionMaster()->MoveJump(x, y, z, speed, height);
 }

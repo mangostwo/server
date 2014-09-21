@@ -16,6 +16,8 @@
 
 set(LIBRARY_NAME game)
 
+add_definitions(-DDT_POLYREF64)
+
 file(GLOB SRC_FILES_LUAENGINE LuaEngine/*.cpp LuaEngine/*.h)
 set(SRC_GRP_LUAENGINE
     ${SRC_FILES_LUAENGINE}
