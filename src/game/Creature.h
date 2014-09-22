@@ -90,7 +90,7 @@ struct CreatureInfo
     uint32  Family;                                         // enum CreatureFamily values (optional)
     uint32  CreatureType;                                   // enum CreatureType values
     uint32  InhabitType;
-    bool    RegenerateStats;
+    uint32    RegenerateStats;
     bool    RacialLeader;
     uint32  NpcFlags;
     uint32  UnitFlags;                                      // enum UnitFlags mask values
