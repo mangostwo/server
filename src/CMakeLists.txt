@@ -25,8 +25,7 @@ if(WIN32)
 endif()
 
 if (BUILD_SCRIPTS)
-    #add_subdirectory(scripts)
-    add_subdirectory(scriptdev2)
+    add_subdirectory(scripts)
 endif()
 
 add_subdirectory(framework)
