@@ -346,6 +346,19 @@ struct DungeonEncounter
 typedef std::multimap<uint32, DungeonEncounter const*> DungeonEncounterMap;
 typedef std::pair<DungeonEncounterMap::const_iterator, DungeonEncounterMap::const_iterator> DungeonEncounterMapBounds;
 
+struct DungeonFinderRewards
+{
+    uint32 baseXPReward;
+    int32  baseMonetaryReward;
+    uint32 baseItemReward;
+    uint8  itemAmount;
+    
+    DungeonFinderRewards() : baseXPReward(0), baseMonetaryReward(0), baseItemReward(0), itemAmount(0) {}
+    DungeonFinderRewards(uint32 BaseXPReward, int32 BaseMonetaryReward, uint32 BaseItemReward, uint8 ItemAmount) : baseXPReward(BaseXPReward), baseMonetaryReward(BaseMonetaryReward), baseItemReward(BaseItemReward), itemAmount(ItemAmount) {}
+};
+
+typedef UNORDERED_MAP<uint32, DungeonFinderRewards> DungeonFinderRewardsMap;
+
 struct GraveYardData
 {
     uint32 safeLocId;
@@ -658,6 +671,16 @@ class ObjectMgr
                 return &itr->second;
             return NULL;
         }
+        
+        DungeonFinderRewards const* GetDungeonFinderRewards(uint32 level) const
+        {
+            DungeonFinderRewardsMap::const_iterator itr = mDungeonFinderRewardsMap.find(level);
+            if (itr != mDungeonFinderRewardsMap.end())
+                return &itr->second;
+            return NULL;
+        }
+        
+        DungeonFinderRewardsMap const& GetDungeonFinderRewardsMap() const { return mDungeonFinderRewardsMap; }
 
         // Static wrappers for various accessors
         static GameObjectInfo const* GetGameObjectInfo(uint32 id);                  ///< Wrapper for sGOStorage.LookupEntry
@@ -740,6 +763,8 @@ class ObjectMgr
 
         void LoadPointsOfInterest();
         void LoadQuestPOI();
+        
+        void LoadDungeonFinderRewards();
 
         void LoadNPCSpellClickSpells();
         void LoadSpellTemplate();
@@ -1191,6 +1216,8 @@ class ObjectMgr
         PointOfInterestMap  mPointsOfInterest;
 
         QuestPOIMap         mQuestPOIMap;
+        
+        DungeonFinderRewardsMap mDungeonFinderRewardsMap;
 
         WeatherZoneMap      mWeatherZoneMap;
 

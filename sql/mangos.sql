@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_04_mangos_spell_template` bit(1) DEFAULT NULL
+  `required_05_mangos_dungeonfinder_rewards` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -18731,6 +18731,112 @@ CREATE TABLE `world_template` (
 LOCK TABLES `world_template` WRITE;
 /*!40000 ALTER TABLE `world_template` DISABLE KEYS */;
 /*!40000 ALTER TABLE `world_template` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `dungeonfinder_rewards`
+--
+
+CREATE TABLE IF NOT EXISTS `dungeonfinder_rewards` (
+`id` int(10) NOT NULL,
+  `level` mediumint(8) unsigned NOT NULL COMMENT 'uint32',
+  `base_xp_reward` mediumint(8) unsigned NOT NULL COMMENT 'uint32',
+  `base_monetary_reward` int(10) NOT NULL COMMENT 'int32',
+  `base_item_reward` mediumint(8) unsigned NOT NULL,
+  `item_amount` mediumint(4) unsigned NOT NULL DEFAULT '1'
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=67 ;
+
+--
+-- Dumping data for table `dungeonfinder_rewards`
+--
+LOCK TABLES `dungeonfinder_rewards` WRITE;
+INSERT INTO `dungeonfinder_rewards` (`id`, `level`, `base_xp_reward`, `base_monetary_reward`, `base_item_reward`, `item_amount`) VALUES
+(1, 15, 155, 1750, 51999, 1),
+(2, 16, 1525, 7650, 51999, 1),
+(3, 17, 1525, 7650, 51999, 1),
+(4, 18, 1525, 7650, 51999, 1),
+(5, 19, 1525, 7650, 51999, 1),
+(6, 20, 1525, 7650, 51999, 1),
+(7, 21, 155, 1750, 51999, 1),
+(8, 22, 155, 1750, 51999, 1),
+(9, 23, 155, 1750, 51999, 1),
+(10, 24, 155, 1750, 51999, 1),
+(11, 25, 155, 1750, 51999, 1),
+(12, 26, 235, 3500, 52000, 1),
+(13, 27, 235, 3500, 52000, 1),
+(14, 28, 235, 3500, 52000, 1),
+(15, 29, 235, 3500, 52000, 1),
+(16, 30, 235, 3500, 52000, 1),
+(17, 31, 235, 3500, 52000, 1),
+(18, 32, 235, 3500, 52000, 1),
+(19, 33, 235, 3500, 52000, 1),
+(20, 34, 412, 6500, 52000, 1),
+(21, 35, 412, 6500, 52000, 1),
+(22, 36, 412, 6500, 52001, 1),
+(23, 37, 412, 6500, 52001, 1),
+(24, 38, 412, 6500, 52001, 1),
+(25, 39, 412, 6500, 52001, 1),
+(26, 40, 4150, 20700, 52001, 1),
+(27, 41, 412, 6500, 52001, 1),
+(28, 42, 412, 6500, 52001, 1),
+(29, 43, 625, 6500, 52001, 1),
+(30, 44, 625, 6500, 52001, 1),
+(31, 45, 625, 6500, 52001, 1),
+(32, 46, 625, 8250, 52002, 1),
+(33, 47, 625, 8250, 52002, 1),
+(34, 48, 6125, 30600, 52002, 1),
+(35, 49, 6125, 30600, 52002, 1),
+(36, 50, 6125, 30600, 52002, 1),
+(37, 51, 6125, 30600, 52002, 1),
+(38, 52, 6125, 30600, 52002, 1),
+(39, 53, 6125, 30600, 52002, 1),
+(40, 54, 725, 9000, 52002, 1),
+(41, 55, 725, 9000, 52002, 1),
+(42, 56, 725, 9000, 52003, 1),
+(43, 57, 725, 9000, 52003, 1),
+(44, 58, 7150, 35700, 52003, 1),
+(45, 59, 800, 31000, 52003, 1),
+(46, 60, 800, 31000, 52003, 1),
+(47, 61, 800, 31000, 52004, 1),
+(48, 62, 800, 31000, 52004, 1),
+(49, 63, 800, 31000, 52004, 1),
+(50, 64, 800, 31000, 52004, 1),
+(51, 65, 550, 15500, 52005, 1),
+(52, 66, 550, 15500, 52005, 1),
+(53, 67, 9500, 47400, 52005, 1),
+(54, 68, 950, 44000, 52005, 1),
+(55, 69, 16550, 74000, 395, 23),
+(56, 70, 16550, 74000, 395, 23),
+(57, 71, 16550, 74000, 395, 23),
+(58, 72, 16550, 74000, 395, 23),
+(59, 73, 16550, 74000, 395, 23),
+(60, 74, 16550, 74000, 395, 23),
+(61, 75, 16550, 74000, 395, 23),
+(62, 76, 16550, 74000, 395, 23),
+(63, 77, 16550, 74000, 395, 23),
+(64, 78, 16550, 74000, 395, 23),
+(65, 79, 16550, 74000, 395, 23),
+(66, 80, 0, 99300, 395, 23);
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `dungeonfinder_rewards`
+--
+ALTER TABLE `dungeonfinder_rewards`
+ ADD PRIMARY KEY (`id`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `dungeonfinder_rewards`
+--
+ALTER TABLE `dungeonfinder_rewards`
+MODIFY `id` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=67;
 UNLOCK TABLES;
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
