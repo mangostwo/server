@@ -16,15 +16,75 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "DBCEnums.h"
 #include "DBCStores.h"
 #include "DBCStructure.h"
 #include "GameEventMgr.h"
 #include "LFGMgr.h"
+#include "ObjectMgr.h"
 #include "SharedDefines.h"
 #include "WorldSession.h"
 
 LFGMgr::LFGMgr() { }
 LFGMgr::~LFGMgr() { }
+
+ItemRewards LFGMgr::GetDungeonItemRewards(uint32 dungeonId, DungeonTypes type)
+{
+    ItemRewards rewards();
+    LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(dungeonId);
+    if (dungeon)
+    {
+        // Here we're using the target levels rather than the 
+        // actual minimum and maximum levels to avoid potential
+        // conflicts with the level ranges in the database
+        uint32 minLevel = dungeon->targetLevelMin;
+        uint32 maxLevel = dungeon->targetLevelMax;
+        
+        DungeonFinderItemsMap itemBuffer = sObjectMgr.GetDungeonFinderItemsMap();
+        for (DungeonFinderItemsMap::iterator it = itemBuffer.start(); it != itemBuffer.end(); ++it)
+        {
+            DungeonFinderItems itemCache = *it.second;
+            if (itemCache.dungeonType == (uint32)type)
+            {
+                // should only be one of this inequality in the map
+                if ((itemCache.minLevel <= minLevel) && (maxLevel <= itemCache.maxLevel))
+                {
+                    rewards.itemId = itemCache.itemReward;
+                    rewards.itemAmount = itemCache.itemAmount;
+                    return rewards;
+                }
+            }
+        }
+    }
+    return rewards;
+}
+
+DungeonTypes LFGMgr::GetDungeonType(uint32 dungeonId)
+{
+    LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(dungeonId);
+    if (dungeon)
+    {
+        switch (dungeon->expansionLevel)
+            case 0:
+                return DUNGEON_CLASSIC;
+            case 1:
+            {
+                if (dungeon->difficulty == DUNGEON_DIFFICULTY_NORMAL)
+                    return DUNGEON_TBC;
+                else if (dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC)
+                    return DUNGEON_TBC_HEROIC;
+            }
+            case 2:
+            {
+                if (dungeon->difficulty == DUNGEON_DIFFICULTY_NORMAL)
+                    return DUNGEON_WOTLK;
+                else if (dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC)
+                    return DUNGEON_WOTLK_HEROIC;
+            }
+            default:
+                return NULL;
+    }
+}
 
 void LFGMgr::RegisterPlayerDaily(uint32 guidLow, DungeonTypes dungeon)
 {
@@ -107,8 +167,31 @@ dungeonEntries LFGMgr::FindRandomDungeonsForPlayer(uint32 level, uint8 expansion
                 || (IsSeasonal(dungeon->flags) && IsSeasonActive(dungeon->ID)) )
                 if (dungeon->expansionLevel <= expansion && dungeon->minLevel <= level
                     && dungeon->maxLevel >= level)
-                    randomDungeons.push_back(dungeon->Entry());
+                    randomDungeons[dungeon->ID] = dungeon->Entry();
         }
     }
     return randomDungeons;
+}
+
+dungeonForbidden LFGMgr::FindRandomDungeonsNotForPlayer(uint32 level, uint8 expansion)
+{
+    dungeonForbidden randomDungeons;
+    /*
+     * Reasons a player cannot enter a dungeon...
+     *     - level < dungeon->minLevel
+     *     - level > dungeon->maxLevel
+     *     - expansion < dungeon->expansionLevel
+     *     - gear score < requirements [todo: mangos lacks a system to check for this]
+     *                                      (only  Player::GetEquipGearScore(false,false))
+     *     - dungeon->typeID == LFG_TYPE_RAID (dungeon finder, not raid finder)
+     */
+    for (uint32 id = 0; id < sLfgDungeonsStore.GetNumRows(); ++id)
+    {
+        LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(id);
+        if (dungeon)
+        {
+            
+        }
+    }
+    return dungeonEntries;
 }

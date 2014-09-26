@@ -350,14 +350,27 @@ struct DungeonFinderRewards
 {
     uint32 baseXPReward;
     int32  baseMonetaryReward;
-    uint32 baseItemReward;
-    uint8  itemAmount;
     
-    DungeonFinderRewards() : baseXPReward(0), baseMonetaryReward(0), baseItemReward(0), itemAmount(0) {}
-    DungeonFinderRewards(uint32 BaseXPReward, int32 BaseMonetaryReward, uint32 BaseItemReward, uint8 ItemAmount) : baseXPReward(BaseXPReward), baseMonetaryReward(BaseMonetaryReward), baseItemReward(BaseItemReward), itemAmount(ItemAmount) {}
+    DungeonFinderRewards() : baseXPReward(0), baseMonetaryReward(0) {}
+    DungeonFinderRewards(uint32 BaseXPReward, int32 BaseMonetaryReward) : baseXPReward(BaseXPReward), baseMonetaryReward(BaseMonetaryReward) {}
+};
+
+struct DungeonFinderItems
+{
+    // sorted by auto-incrementing id
+    uint32 minLevel;
+    uint32 maxLevel;
+    uint32 itemReward;
+    uint32 itemAmount;
+    uint32 dungeonType;
+
+    DungeonFinderItems() : minLevel(0), maxLevel(0), itemReward(0), itemAmount(0), dungeonType(0) {}
+    DungeonFinderItems(uint32 MinLevel, uint32 MaxLevel, uint32 ItemReward, uint32 ItemAmount, uint32 DungeonType)
+        : minLevel(MinLevel), maxLevel(MaxLevel), itemReward(ItemReward), itemAmount(ItemAmount), dungeonType(DungeonType) {}
 };
 
 typedef UNORDERED_MAP<uint32, DungeonFinderRewards> DungeonFinderRewardsMap;
+typedef UNORDERED_MAP<uint32, DungeonFinderItems> DungeonFinderItemsMap;
 
 struct GraveYardData
 {
@@ -681,6 +694,7 @@ class ObjectMgr
         }
         
         DungeonFinderRewardsMap const& GetDungeonFinderRewardsMap() const { return mDungeonFinderRewardsMap; }
+        DungeonFinderItemsMap const& GetDungeonFinderItemsMap() const { return mDungeonFinderItemsMap; }
 
         // Static wrappers for various accessors
         static GameObjectInfo const* GetGameObjectInfo(uint32 id);                  ///< Wrapper for sGOStorage.LookupEntry
@@ -765,6 +779,7 @@ class ObjectMgr
         void LoadQuestPOI();
         
         void LoadDungeonFinderRewards();
+        void LoadDungeonFinderItems();
 
         void LoadNPCSpellClickSpells();
         void LoadSpellTemplate();
@@ -1218,6 +1233,7 @@ class ObjectMgr
         QuestPOIMap         mQuestPOIMap;
         
         DungeonFinderRewardsMap mDungeonFinderRewardsMap;
+        DungeonFinderItemsMap mDungeonFinderItemsMap;
 
         WeatherZoneMap      mWeatherZoneMap;
 
