@@ -1146,6 +1146,9 @@ void World::SetInitialWorldSettings()
     
     sLog.outString("Loading Dungeon Finder Rewards...");
     sObjectMgr.LoadDungeonFinderRewards();
+    
+    sLog.outString("Loading Dungeon Finder Items...");
+    sObjectMgr.LoadDungeonFinderItems();
 
     sLog.outString("Loading Quests...");
     sObjectMgr.LoadQuests();                                // must be loaded after DBCs, creature_template, item_template, gameobject tables

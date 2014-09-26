@@ -100,14 +100,50 @@ void WorldSession::HandleLfgGetPlayerInfo(WorldPacket& recv_data)
 {
     DEBUG_LOG("CMSG_LFG_GET_PLAYER_INFO");
     /* Todo:
-     * Get the amount of dungeons available for the player (done)
-     * Get the reward for playing said dungeon [implement reward system, pref. without sql, check dbc]
      * Get the amount of dungeons not available for the player
      */
+    WorldPacket data(SMSG_LFG_PLAYER_INFO);
+    
     Player* pPlayer = GetPlayer();
     uint32 level = pPlayer->getLevel();
+    uint8 expansion = pPlayer->GetSession()->Expansion();
     
-    dungeonEntries availableDungeons = sLFGMgr->FindRandomDungeonsForPlayer(level, pPlayer->GetSession()->Expansion());
+    dungeonEntries availableDungeons = sLFGMgr.FindRandomDungeonsForPlayer(level, expansion);
+
+    data << uint8(availableDungeons.size());                // amount of available dungeons
+    for (dungeonEntries::iterator it = availableDungeons.begin(); it != availableDungeons.end() ++ it)
+    {
+        data << uint32(it->second);                                // dungeon entry
+        
+        DungeonType type = sLFGMgr.GetDungeonType(it->first);      // dungeon type
+        DungeonFinderRewards rewards = sObjectMgr.GetDungeonFinderRewards(level); // get xp and money rewards
+        ItemRewards itemRewards = sLFGMgr.GetDungeonItemRewards(*it.first, type); // item rewards
+        
+        int32 multiplier;
+        bool hasDoneToday = sLFGMgr.HasPlayerDoneDaily(pPlayer->GetGUIDLow(), type); // using variable to send later in packet
+        (hasDoneToday) ? multiplier = 1 : multiplier = 2; // 2x base reward if first dungeon of the day
+            
+        data << uint8(hasDoneToday);
+        data << uint32(multiplier*rewards.baseMonetaryReward); // cash/gold reward
+        data << uint32(((uint32)multiplier)*rewards.baseXPReward); // experience reward
+        data << uint32(0); // null
+        data << uint32(0); // null
+        if (!hasDoneToday)
+        {
+            if (ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemRewards.itemId))
+            {
+                data << uint8(1); // 1 item rewarded per dungeon
+                data << uint32(itemRewards.itemId); // entry of item
+                data << uint32(pProto->DisplayInfoID); // display id of item
+                data << uint32(itemRewards.itemAmount); // amount of item reward
+            }
+            else
+                data << uint8(0); // couldn't find the item reward
+        }
+        else
+            data << uint8(0);
+        // next: send list of dungeons player cannot enter
+    }
 }
 
 void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
