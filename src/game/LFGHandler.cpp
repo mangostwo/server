@@ -23,6 +23,7 @@
  */
 
 #include "WorldSession.h"
+#include "LFGMgr.h"
 #include "Log.h"
 #include "Player.h"
 #include "WorldPacket.h"
@@ -93,6 +94,20 @@ void WorldSession::HandleSetLfgCommentOpcode(WorldPacket& recv_data)
     std::string comment;
     recv_data >> comment;
     DEBUG_LOG("LFG comment \"%s\"", comment.c_str());
+}
+
+void WorldSession::HandleLfgGetPlayerInfo(WorldPacket& recv_data)
+{
+    DEBUG_LOG("CMSG_LFG_GET_PLAYER_INFO");
+    /* Todo:
+     * Get the amount of dungeons available for the player (done)
+     * Get the reward for playing said dungeon [implement reward system, pref. without sql, check dbc]
+     * Get the amount of dungeons not available for the player
+     */
+    Player* pPlayer = GetPlayer();
+    uint32 level = pPlayer->getLevel();
+    
+    dungeonEntries availableDungeons = sLFGMgr->FindRandomDungeonsForPlayer(level, pPlayer->GetSession()->Expansion());
 }
 
 void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)

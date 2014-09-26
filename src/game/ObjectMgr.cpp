@@ -6910,6 +6910,51 @@ void ObjectMgr::LoadQuestPOI()
     sLog.outString(">> Loaded %u quest POI definitions", count);
 }
 
+void ObjectMgr::LoadDungeonFinderRewards()
+{
+    uint32 count = 0;
+    mDungeonFinderRewardsMap.clear();    // in case of a reload
+    
+    //                                                0   1      2               3                     4                 5
+    QueryResult* result = WorldDatabase.Query("SELECT id, level, base_xp_reward, base_monetary_reward, base_item_reward, item_amount FROM dungeonfinder_rewards");
+
+    if (!result)
+    {
+        BarGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString();
+        sLog.outErrorDb(">> Loaded 0 dungeon finder rewards. DB table `dungeonfinder_rewards`, is empty!");
+        return;
+    }
+    
+    BarGoLink bar(result->GetRowCount());
+    
+    do
+    {
+        Field* fields = result->Fetch();
+        bar.step();
+        
+        uint32 level     = fields[1].GetUInt32();
+        uint32 baseXP    = fields[2].GetUInt32();
+        int32 baseMoney  = fields[3].GetInt32();
+        uint32 baseItem  = fields[4].GetUInt32();
+        uint8 itemAmount = fields[5].GetUint8();
+        
+        DungeonFinderRewards reward(baseXP, baseMoney, baseItem, itemAmount);
+        mDungeonFinderRewardsMap[level] = reward;
+        
+        ++count;
+    }
+    while (result->NextRow());
+    
+    delete result;
+    
+    sLog.outString();
+    sLog.outString(">> Loaded %u Dungeon Finder Rewards", count);
+}
+
 void ObjectMgr::LoadNPCSpellClickSpells()
 {
     uint32 count = 0;
