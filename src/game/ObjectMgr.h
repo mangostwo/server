@@ -355,6 +355,24 @@ struct DungeonEncounter
 typedef std::multimap<uint32, DungeonEncounter const*> DungeonEncounterMap;
 typedef std::pair<DungeonEncounterMap::const_iterator, DungeonEncounterMap::const_iterator> DungeonEncounterMapBounds;
 
+struct DungeonFinderRequirements
+{
+    uint32 minItemLevel;
+    uint32 item;
+    uint32 item2;
+    uint32 allianceQuestId;
+    uint32 hordeQuestId;
+    uint32 achievement;
+    const char* questIncompleteText;
+    
+    DungeonFinderRequirements()
+        : minItemLevel(0), item(0), item2(0), allianceQuestId(0), hordeQuestId(0), achievement(0) {}
+    DungeonFinderRequirements(uint32 MinItemLevel, uint32 Item, uint32 Item2, uint32 AllianceQuestId,
+                              uint32 HordeQuestId, uint32 Achievement, const char* QuestIncompleteText)
+        : minItemLevel(MinItemLevel), item(Item), item2(Item2), allianceQuestId(AllianceQuestId),
+        hordeQuestId(HordeQuestId), achievement(Achievement), questIncompleteText(QuestIncompleteText) {}
+};
+
 struct DungeonFinderRewards
 {
     uint32 baseXPReward;
@@ -378,6 +396,7 @@ struct DungeonFinderItems
         : minLevel(MinLevel), maxLevel(MaxLevel), itemReward(ItemReward), itemAmount(ItemAmount), dungeonType(DungeonType) {}
 };
 
+typedef UNORDERED_MAP<uint32, DungeonFinderRequirements> DungeonFinderRequirementsMap;
 typedef UNORDERED_MAP<uint32, DungeonFinderRewards> DungeonFinderRewardsMap;
 typedef UNORDERED_MAP<uint32, DungeonFinderItems> DungeonFinderItemsMap;
 
@@ -694,6 +713,14 @@ class ObjectMgr
             return NULL;
         }
         
+        DungeonFinderRequirements const* GetDungeonFinderRequirements(uint32 mapId, uint32 difficulty) const
+        {
+            DungeonFinderRequirementsMap::const_iterator itr = mDungeonFinderRequirementsMap.find(MAKE_PAIR32(mapId, difficulty));
+            if (itr != mDungeonFinderRequirementsMap.end())
+                return &itr->second;
+            return NULL;
+        }
+        
         DungeonFinderRewards const* GetDungeonFinderRewards(uint32 level) const
         {
             DungeonFinderRewardsMap::const_iterator itr = mDungeonFinderRewardsMap.find(level);
@@ -702,6 +729,7 @@ class ObjectMgr
             return NULL;
         }
         
+        DungeonFinderRequirementsMap const& GetDungeonFinderRequirementsMap() const { return mDungeonFinderRequirementsMap; }
         DungeonFinderRewardsMap const& GetDungeonFinderRewardsMap() const { return mDungeonFinderRewardsMap; }
         DungeonFinderItemsMap const& GetDungeonFinderItemsMap() const { return mDungeonFinderItemsMap; }
 
@@ -787,6 +815,7 @@ class ObjectMgr
         void LoadPointsOfInterest();
         void LoadQuestPOI();
         
+        void LoadDungeonFinderRequirements();
         void LoadDungeonFinderRewards();
         void LoadDungeonFinderItems();
 
@@ -1241,6 +1270,7 @@ class ObjectMgr
 
         QuestPOIMap         mQuestPOIMap;
         
+        DungeonFinderRequirementsMap mDungeonFinderRequirementsMap;
         DungeonFinderRewardsMap mDungeonFinderRewardsMap;
         DungeonFinderItemsMap mDungeonFinderItemsMap;
 

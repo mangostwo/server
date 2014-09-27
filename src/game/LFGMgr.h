@@ -20,6 +20,7 @@
 #define __MANGOS_LFGMGR_H
 
 #include "Common.h"
+#include "Player.h"
 #include "Policies/Singleton.h"
 
 #include <set>
@@ -56,7 +57,8 @@ enum DungeonTypes
     DUNGEON_TBC          = 1,
     DUNGEON_TBC_HEROIC   = 2,
     DUNGEON_WOTLK        = 3,
-    DUNGEON_WOTLK_HEROIC = 4
+    DUNGEON_WOTLK_HEROIC = 4,
+    DUNGEON_UNKNOWN
 };
 
 /// Item rewards taken from DungeonFinderItems in ObjectMgr, parsed by dbc values
@@ -69,9 +71,13 @@ struct ItemRewards
     ItemRewards(uint32 ItemId, uint32 ItemAmount) : itemId(ItemId), itemAmount(ItemAmount) {}
 };
 
+// note: player gets 2x 47241 for every wotlk heroic after the first
+const uint32 WOTLK_SPECIAL_HEROIC_ITEM = 47241;
+const uint32 WOTLK_SPECIAL_HEROIC_AMNT = 2;
+
 typedef std::set<uint32> dailyEntries; // for players who did one of X type instance per day
 typedef UNORDERED_MAP<uint32, uint32> dungeonEntries; // ID, Entry
-typedef UNORDERED_MAP<uint32, uint32> dungeonForbidden; // Entry, Why it's forbidden
+typedef UNORDERED_MAP<uint32, uint32> dungeonForbidden; // Entry, LFGForbiddenTypes
 
 class LFGMgr
 {
@@ -86,6 +92,7 @@ public:
      * @param type the type of dungeon
      */
     ItemRewards GetDungeonItemRewards(uint32 dungeonId, DungeonTypes type);
+    
     
     /**
      * @brief Used to determine the type of dungeon for ease of use.
@@ -134,7 +141,7 @@ public:
      * @param level The level of said player
      * @param expansion The player's expansion
      */
-    dungeonForbidden FindRandomDungeonsNotForPlayer(uint32 level, uint8 expansion);
+    dungeonForbidden FindRandomDungeonsNotForPlayer(Player* plr);
     
 protected:
     bool IsSeasonal(uint32 dbcFlags) { return ((dbcFlags & LFG_FLAG_SEASONAL) != 0) ? true : false; }

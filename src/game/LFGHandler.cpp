@@ -99,9 +99,7 @@ void WorldSession::HandleSetLfgCommentOpcode(WorldPacket& recv_data)
 void WorldSession::HandleLfgGetPlayerInfo(WorldPacket& recv_data)
 {
     DEBUG_LOG("CMSG_LFG_GET_PLAYER_INFO");
-    /* Todo:
-     * Get the amount of dungeons not available for the player
-     */
+
     WorldPacket data(SMSG_LFG_PLAYER_INFO);
     
     Player* pPlayer = GetPlayer();
@@ -111,21 +109,21 @@ void WorldSession::HandleLfgGetPlayerInfo(WorldPacket& recv_data)
     dungeonEntries availableDungeons = sLFGMgr.FindRandomDungeonsForPlayer(level, expansion);
 
     data << uint8(availableDungeons.size());                // amount of available dungeons
-    for (dungeonEntries::iterator it = availableDungeons.begin(); it != availableDungeons.end() ++ it)
+    for (dungeonEntries::iterator it = availableDungeons.begin(); it != availableDungeons.end(); ++it)
     {
         data << uint32(it->second);                                // dungeon entry
         
-        DungeonType type = sLFGMgr.GetDungeonType(it->first);      // dungeon type
-        DungeonFinderRewards rewards = sObjectMgr.GetDungeonFinderRewards(level); // get xp and money rewards
-        ItemRewards itemRewards = sLFGMgr.GetDungeonItemRewards(*it.first, type); // item rewards
+        DungeonTypes type = sLFGMgr.GetDungeonType(it->first);      // dungeon type
+        const DungeonFinderRewards* rewards = sObjectMgr.GetDungeonFinderRewards(level); // get xp and money rewards
+        ItemRewards itemRewards = sLFGMgr.GetDungeonItemRewards(it->first, type); // item rewards
         
         int32 multiplier;
         bool hasDoneToday = sLFGMgr.HasPlayerDoneDaily(pPlayer->GetGUIDLow(), type); // using variable to send later in packet
         (hasDoneToday) ? multiplier = 1 : multiplier = 2; // 2x base reward if first dungeon of the day
             
         data << uint8(hasDoneToday);
-        data << uint32(multiplier*rewards.baseMonetaryReward); // cash/gold reward
-        data << uint32(((uint32)multiplier)*rewards.baseXPReward); // experience reward
+        data << uint32(multiplier*rewards->baseMonetaryReward); // cash/gold reward
+        data << uint32(((uint32)multiplier)*rewards->baseXPReward); // experience reward
         data << uint32(0); // null
         data << uint32(0); // null
         if (!hasDoneToday)
@@ -140,9 +138,28 @@ void WorldSession::HandleLfgGetPlayerInfo(WorldPacket& recv_data)
             else
                 data << uint8(0); // couldn't find the item reward
         }
+        else if (hasDoneToday && (type == DUNGEON_WOTLK_HEROIC)) // special case
+        {
+            if (ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(WOTLK_SPECIAL_HEROIC_ITEM))
+            {
+                data << uint8(1);
+                data << uint32(WOTLK_SPECIAL_HEROIC_ITEM);
+                data << uint32(pProto->DisplayInfoID);
+                data << uint32(WOTLK_SPECIAL_HEROIC_AMNT);
+            }
+            else
+                data << uint8(0);
+        }
         else
             data << uint8(0);
-        // next: send list of dungeons player cannot enter
+    }
+    dungeonForbidden lockedDungeons = sLFGMgr.FindRandomDungeonsNotForPlayer(pPlayer);
+    
+    data << uint32(lockedDungeons.size());
+    for (dungeonForbidden::iterator it = lockedDungeons.begin(); it != lockedDungeons.end(); ++it)
+    {
+        data << uint32(it->first); // dungeon entry
+        data << uint32(it->second); // reason for being locked
     }
 }
 
