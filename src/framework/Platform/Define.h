@@ -109,11 +109,21 @@ typedef ACE_SHLIB_HANDLE MANGOS_LIBRARY_HANDLE;
 
 #if COMPILER == COMPILER_GNU || COMPILER == COMPILER_CLANG
 #  define ATTR_NORETURN __attribute__((noreturn))
-#  define ATTR_PRINTF(F,V) __attribute__ ((format (printf, F, V)))
-#else // COMPILER != COMPILER_GNU
+#  define ATTR_PRINTF(F, V) __attribute__ ((format (printf, F, V)))
+#  define ATTR_DEPRECATED __attribute__((deprecated))
+#else //COMPILER != COMPILER_GNU
 #  define ATTR_NORETURN
-#  define ATTR_PRINTF(F,V)
-#endif // COMPILER == COMPILER_GNU
+#  define ATTR_PRINTF(F, V)
+#  define ATTR_DEPRECATED
+#endif //COMPILER == COMPILER_GNU
+
+#if COMPILER_HAS_CPP11_SUPPORT
+#  define OVERRIDE override
+#  define FINAL final
+#else
+#  define OVERRIDE
+#  define FINAL
+#endif //COMPILER_HAS_CPP11_SUPPORT
 
 /**
  * @brief A signed integer of 64 bits
@@ -175,6 +185,11 @@ typedef uint32      DWORD;
 
 #if COMPILER == COMPILER_GNU
 #  if !defined(__GXX_EXPERIMENTAL_CXX0X__) || (__GNUC__ < 4) || (__GNUC__ == 4) && (__GNUC_MINOR__ < 7)
+#    define override
+#    define static_assert(a, b) STATIC_ASSERT_WORKAROUND(a, b)
+#  endif
+#elif COMPILER == COMPILER_CLANG
+#  ifndef __cxx_static_assert
 #    define override
 #    define static_assert(a, b) STATIC_ASSERT_WORKAROUND(a, b)
 #  endif

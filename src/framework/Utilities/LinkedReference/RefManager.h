@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _REFMANAGER_H
-#define _REFMANAGER_H
+#ifndef MANGOS_H_REFMANAGER
+#define MANGOS_H_REFMANAGER
 
 //=====================================================
 

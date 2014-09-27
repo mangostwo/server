@@ -37,7 +37,7 @@
 #elif COMPILER == COMPILER_GNU && (__GNUC__ > 4 || __GNUC__ == 4 && __GNUC_MINOR__ >= 3)
 #  include <tr1/unordered_map>
 #  include <tr1/unordered_set>
-#elif COMPILER == COMPILER_GNU && __GNUC__ >= 3
+#elif COMPILER == COMPILER_GNU && __GNUC__ >= 3 && (__GNUC__ < 4 || __GNUC__ == 4 && __GNUC_MINOR__ < 3)
 #  include <ext/hash_map>
 #  include <ext/hash_set>
 #elif COMPILER == COMPILER_MICROSOFT && (_MSC_VER > 1500 || _MSC_VER == 1500 && _HAS_TR1)   // VC9.0 SP1 and later
@@ -96,10 +96,15 @@ HASH_NAMESPACE_END
 #  define HASH_NAMESPACE_END }
 using std::hash_map;
 using std::hash_set;
-#elif COMPILER == COMPILER_CLANG
+#elif COMPILER == COMPILER_CLANG && defined(__FreeBSD__)
 #  define UNORDERED_MAP std::unordered_map
 #  define UNORDERED_SET std::unordered_set
 #  define HASH_NAMESPACE_START namespace std { namespace __1 {
+#  define HASH_NAMESPACE_END } }
+#elif COMPILER == COMPILER_CLANG
+#  define UNORDERED_MAP std::tr1::unordered_map
+#  define UNORDERED_SET std::tr1::unordered_set
+#  define HASH_NAMESPACE_START namespace std { namespace tr1 {
 #  define HASH_NAMESPACE_END } }
 #elif COMPILER == COMPILER_GNU && (__GNUC__ > 4 || __GNUC__ == 4 && __GNUC_MINOR__ >= 3)
 #  define UNORDERED_MAP std::tr1::unordered_map

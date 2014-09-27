@@ -1,6 +1,0 @@
-In order to apply Eluna compatibility patch:
-
-copy elunapatch.diff to src/game/LuaEngine
-run the following command in a terminal or GUI client:
-
-$ git apply elunapatch.diff

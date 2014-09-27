@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _REFERENCE_H
-#define _REFERENCE_H
+#ifndef MANGOS_H_REFERENCE
+#define MANGOS_H_REFERENCE
 
 #include "Utilities/LinkedList.h"
 

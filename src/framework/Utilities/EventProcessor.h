@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef __EVENTPROCESSOR_H
-#define __EVENTPROCESSOR_H
+#ifndef MANGOS_H_EVENTPROCESSOR
+#define MANGOS_H_EVENTPROCESSOR
 
 #include "Platform/Define.h"
 

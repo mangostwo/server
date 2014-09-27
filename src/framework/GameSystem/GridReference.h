@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _GRIDREFERENCE_H
-#define _GRIDREFERENCE_H
+#ifndef MANGOS_H_GRIDREFERENCE
+#define MANGOS_H_GRIDREFERENCE
 
 #include "Utilities/LinkedReference/Reference.h"
 
