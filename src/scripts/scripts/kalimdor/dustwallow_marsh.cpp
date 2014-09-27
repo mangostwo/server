@@ -389,7 +389,7 @@ struct MANGOS_DLL_DECL npc_ogronAI : public npc_escortAI
         {
             for (std::list<Creature*>::iterator itr = lCreatureList.begin(); itr != lCreatureList.end(); ++itr)
             {
-                if ((*itr)->GetEntry() == uiCreatureEntry && (*itr)->isAlive())
+                if ((*itr)->GetEntry() == uiCreatureEntry && (*itr)->IsAlive())
                     return (*itr);
             }
         }
@@ -442,7 +442,7 @@ struct MANGOS_DLL_DECL npc_ogronAI : public npc_escortAI
                 if ((*itr)->GetEntry() == NPC_REETHE)
                     continue;
 
-                if ((*itr)->isAlive())
+                if ((*itr)->IsAlive())
                 {
                     (*itr)->setFaction(FACTION_THER_HOSTILE);
                     (*itr)->AI()->AttackStart(m_creature);

@@ -236,7 +236,7 @@ struct MANGOS_DLL_DECL npc_ringoAI : public FollowerAI
             {
                 if (m_uiEndEventTimer < uiDiff)
                 {
-                    if (!pSpraggle || !pSpraggle->isAlive())
+                    if (!pSpraggle || !pSpraggle->IsAlive())
                     {
                         SetFollowComplete();
                         return;

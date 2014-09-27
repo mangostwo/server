@@ -181,7 +181,7 @@ struct MANGOS_DLL_DECL boss_malchezaarAI : public ScriptedAI
         {
             Player* pTarget = m_creature->GetMap()->GetPlayer(m_aEnfeebleTargetGuid[i]);
 
-            if (pTarget && pTarget->isAlive())
+            if (pTarget && pTarget->IsAlive())
                 pTarget->SetHealth(m_auiEnfeebleHealth[i]);
 
             m_aEnfeebleTargetGuid[i].Clear();

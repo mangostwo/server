@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -28,6 +28,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v100</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -62,7 +63,6 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\bin\win32_debug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\ScriptDev2__$(Platform)_$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
@@ -107,6 +107,7 @@
       <StringPooling>true</StringPooling>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <AdditionalOptions>/Zm200 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>mangosd.lib;ACEd.lib;framework.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -138,6 +139,7 @@
       <StringPooling>true</StringPooling>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <AdditionalOptions>/Zm200 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>mangosd.lib;ACEd.lib;framework.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -153,7 +155,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/MP /Zm200 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>..\..\..\dep\include\;..\..\shared\;..\..\framework\;..\..\game\;..\include\;..\base\;..\..\..\dep\ACE_wrappers\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;SCRIPT;_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
@@ -184,7 +186,7 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/MP /Zm200%(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>..\..\..\dep\include\;..\..\shared\;..\..\framework\;..\..\game\;..\include\;..\base\;..\..\..\dep\ACE_wrappers\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;SCRIPT;_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>

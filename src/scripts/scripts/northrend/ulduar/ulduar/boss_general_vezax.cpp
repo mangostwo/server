@@ -154,7 +154,7 @@ struct MANGOS_DLL_DECL boss_general_vezaxAI : public ScriptedAI
         {
             m_creature->RemoveAurasDueToSpell(SPELL_SARONITE_BARRIER);
 
-            if (m_creature->isAlive() && m_pInstance)
+            if (m_creature->IsAlive() && m_pInstance)
                 m_pInstance->SetData(TYPE_VEZAX_HARD, DONE);
         }
     }

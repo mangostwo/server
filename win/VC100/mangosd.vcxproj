@@ -151,8 +151,8 @@
     <ClCompile>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\..\dep\include\gsoap;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game;..\..\src\mangosd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>VERSION="0.18";WIN32;NDEBUG;_CONSOLE;ENABLE_CLI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\dep\include\gsoap;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game;..\..\dep\lualib;..\..\src\game\LuaEngine;..\..\src\mangosd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>VERSION="0.19.0";WIN32;ENABLE_ELUNA;ENABLE_SD2;NDEBUG;_CONSOLE;ENABLE_CLI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -174,7 +174,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>libmySQL.lib;libeay32.lib;ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\..\dep\lib\$(Platform)_$(Configuration);.\framework__$(Platform)_$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -190,7 +190,7 @@
       <ImportLibrary>$(IntDir)mangosd.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>..\..\win\copyfiles.cmd ..\dep\lib\$(Platform)_$(Configuration) ..\..\bin\$(Platform)_$(Configuration)</Command>
+      <Command>..\..\win\copyfiles.cmd ..\dep\lib\$(Platform)_$(Configuration) ..\..\bin\$(Platform)_$(Configuration) ..\dep\lib\$(Platform)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|X64'">
@@ -201,8 +201,8 @@
     <ClCompile>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\..\dep\include\gsoap;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game;..\..\src\mangosd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>VERSION="0.18";WIN32;NDEBUG;_CONSOLE;ENABLE_CLI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\dep\include\gsoap;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game;..\..\dep\lualib;..\..\src\game\LuaEngine;..\..\src\mangosd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>VERSION="0.19.0";WIN32;ENABLE_ELUNA;ENABLE_SD2;NDEBUG;_CONSOLE;ENABLE_CLI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -223,7 +223,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>libmySQL.lib;libeay32.lib;ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\..\dep\lib\$(Platform)_$(Configuration);.\framework__$(Platform)_$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -239,7 +239,7 @@
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>..\..\win\copyfiles.cmd ..\dep\lib\$(Platform)_$(Configuration) ..\..\bin\$(Platform)_$(Configuration)</Command>
+      <Command>..\..\win\copyfiles.cmd ..\dep\lib\$(Platform)_$(Configuration) ..\..\bin\$(Platform)_$(Configuration) ..\dep\lib\$(Platform)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -249,8 +249,8 @@
     <ClCompile>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\dep\include\gsoap;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game;..\..\src\mangosd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>VERSION="0.18";WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;ENABLE_CLI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\dep\include\gsoap;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game;..\..\dep\lualib;..\..\src\game\LuaEngine;..\..\src\mangosd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>VERSION="0.19.0";WIN32;ENABLE_ELUNA;ENABLE_SD2;_DEBUG;MANGOS_DEBUG;_CONSOLE;ENABLE_CLI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -272,7 +272,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>libmySQL.lib;libeay32.lib;ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>
       </Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -287,9 +287,10 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <ImportLibrary>$(IntDir)mangosd.lib</ImportLibrary>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
-      <Command>..\..\win\copyfiles.cmd ..\dep\lib\$(Platform)_$(Configuration) ..\..\bin\$(Platform)_$(Configuration)</Command>
+      <Command>..\..\win\copyfiles.cmd ..\dep\lib\$(Platform)_$(Configuration) ..\..\bin\$(Platform)_$(Configuration) ..\dep\lib\$(Platform)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">
@@ -300,8 +301,8 @@
     <ClCompile>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\dep\include\gsoap;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game;..\..\src\mangosd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>VERSION="0.18";WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;ENABLE_CLI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\dep\include\gsoap;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game;..\..\dep\lualib;..\..\src\game\LuaEngine;..\..\src\mangosd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>VERSION="0.19.0";WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;ENABLE_CLI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -322,7 +323,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>libmySQL.lib;libeay32.lib;ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>
       </Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -339,7 +340,7 @@
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>..\..\win\copyfiles.cmd ..\dep\lib\$(Platform)_$(Configuration) ..\..\bin\$(Platform)_$(Configuration)</Command>
+      <Command>..\..\win\copyfiles.cmd ..\dep\lib\$(Platform)_$(Configuration) ..\..\bin\$(Platform)_$(Configuration) ..\dep\lib\$(Platform)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">
@@ -349,8 +350,8 @@
     <ClCompile>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\dep\include\gsoap;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game;..\..\src\mangosd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>VERSION="0.18";WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;ENABLE_CLI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\dep\include\gsoap;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game;..\..\dep\lualib;..\..\src\game\LuaEngine;..\..\src\mangosd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>VERSION="0.19.0";WIN32;ENABLE_ELUNA;ENABLE_SD2;_DEBUG;MANGOS_DEBUG;_CONSOLE;ENABLE_CLI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -372,7 +373,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>libmySQL.lib;libeay32.lib;ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>
       </Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -389,7 +390,7 @@
       <ImportLibrary>$(IntDir)mangosd.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>..\..\win\copyfiles.cmd ..\dep\lib\$(Platform)_debug ..\..\bin\$(Platform)_$(Configuration)</Command>
+      <Command>..\..\win\copyfiles.cmd ..\dep\lib\$(Platform)_debug ..\..\bin\$(Platform)_$(Configuration) ..\dep\lib\$(Platform)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">
@@ -400,8 +401,8 @@
     <ClCompile>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\dep\include\gsoap;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game;..\..\src\mangosd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>VERSION="0.18";WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;ENABLE_CLI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\dep\include\gsoap;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game;..\..\dep\lualib;..\..\src\game\LuaEngine;..\..\src\mangosd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>VERSION="0.19.0";WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;ENABLE_CLI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -422,7 +423,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>libmySQL.lib;libeay32.lib;ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>
       </Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -439,7 +440,7 @@
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>..\..\win\copyfiles.cmd ..\dep\lib\$(Platform)_debug ..\..\bin\$(Platform)_$(Configuration)</Command>
+      <Command>..\..\win\copyfiles.cmd ..\dep\lib\$(Platform)_debug ..\..\bin\$(Platform)_$(Configuration) ..\dep\lib\$(Platform)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -482,6 +483,9 @@
     <ProjectReference Include="..\..\dep\recastnavigation\Detour\win\VC100\Detour.vcxproj">
       <Project>{72bdf975-4d4a-42c7-b2c4-f9ed90a2abb6}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\dep\recastnavigation\Recast\win\VC100\Recast.vcxproj">
+      <Project>{00b9dc66-96a6-465d-a6c1-5dff94e48a64}</Project>
+    </ProjectReference>
     <ProjectReference Include="game.vcxproj">
       <Project>{1dc6c4da-a028-41f3-877d-d5400c594f88}</Project>
     </ProjectReference>
@@ -491,6 +495,10 @@
     <ProjectReference Include="shared.vcxproj">
       <Project>{90297c34-f231-4df4-848e-a74bcc0e40ed}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\..\dep\lib\$(Platform)\libeay32.lib" />
+    <Library Include="..\..\dep\lib\$(Platform)\libmysql.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

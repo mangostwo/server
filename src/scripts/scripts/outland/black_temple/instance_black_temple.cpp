@@ -163,7 +163,7 @@ void instance_black_temple::SetData(uint32 uiType, uint32 uiData)
                 {
                     if (Creature* pChanneler = instance->GetCreature(*itr))
                     {
-                        if (!pChanneler->isAlive())
+                        if (!pChanneler->IsAlive())
                             pChanneler->Respawn();
                         else
                             pChanneler->AI()->EnterEvadeMode();

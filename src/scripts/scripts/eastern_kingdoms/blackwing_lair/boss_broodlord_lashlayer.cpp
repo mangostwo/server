@@ -114,8 +114,8 @@ struct MANGOS_DLL_DECL boss_broodlordAI : public ScriptedAI
         {
             DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCK_AWAY);
             // Drop 50% aggro - TODO should be scriptedEffect?
-            if (m_creature->getThreatManager().getThreat(m_creature->getVictim()))
-                m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -50);
+            if (m_creature->GetThreatManager().getThreat(m_creature->getVictim()))
+                m_creature->GetThreatManager().modifyThreatPercent(m_creature->getVictim(), -50);
 
             m_uiKnockAwayTimer = urand(15000, 30000);
         }

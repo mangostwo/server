@@ -419,7 +419,7 @@ void instance_dire_maul::ProcessForceFieldOpening()
 
     // Let the summoners attack Immol'Thar
     Creature* pImmolThar = GetSingleCreatureFromStorage(NPC_IMMOLTHAR);
-    if (!pImmolThar || pImmolThar->isDead())
+    if (!pImmolThar || pImmolThar->IsDead())
         return;
 
     bool bHasYelled = false;
@@ -433,7 +433,7 @@ void instance_dire_maul::ProcessForceFieldOpening()
             bHasYelled = true;
         }
 
-        if (!pSummoner || pSummoner->isDead())
+        if (!pSummoner || pSummoner->IsDead())
             continue;
 
         pSummoner->AI()->AttackStart(pImmolThar);
@@ -456,7 +456,7 @@ void instance_dire_maul::SortPylonGuards()
             for (GuidList::iterator itr = m_lGeneratorGuardGUIDs.begin(); itr != m_lGeneratorGuardGUIDs.end();)
             {
                 Creature* pGuard = instance->GetCreature(*itr);
-                if (!pGuard || pGuard->isDead())    // Remove invalid guids and dead guards
+                if (!pGuard || pGuard->IsDead())    // Remove invalid guids and dead guards
                 {
                     m_lGeneratorGuardGUIDs.erase(itr++);
                     continue;

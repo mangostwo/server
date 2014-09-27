@@ -623,7 +623,7 @@ struct MANGOS_DLL_DECL npc_brann_hosAI : public npc_escortAI
 
 bool GossipHello_npc_brann_hos(Player* pPlayer, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
 
     if (instance_halls_of_stone* pInstance = (instance_halls_of_stone*)(pCreature->GetInstanceData()))

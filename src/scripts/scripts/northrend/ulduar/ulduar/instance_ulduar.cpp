@@ -473,7 +473,7 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                 {
                     if (Creature* pDefender = instance->GetCreature(*itr))
                     {
-                        if (!pDefender->isAlive())
+                        if (!pDefender->IsAlive())
                             pDefender->Respawn();
                         else
                             pDefender->GetMotionMaster()->MoveTargetedHome();
@@ -483,7 +483,7 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                 {
                     if (Creature* pEngineer = instance->GetCreature(*itr))
                     {
-                        if (!pEngineer->isAlive())
+                        if (!pEngineer->IsAlive())
                             pEngineer->Respawn();
                         else
                             pEngineer->GetMotionMaster()->MoveTargetedHome();
@@ -493,7 +493,7 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                 {
                     if (Creature* pTrapper = instance->GetCreature(*itr))
                     {
-                        if (!pTrapper->isAlive())
+                        if (!pTrapper->IsAlive())
                             pTrapper->Respawn();
                         else
                             pTrapper->GetMotionMaster()->MoveTargetedHome();
@@ -706,7 +706,7 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                     pDoor->ResetDoorOrButton();
                 if (Creature* pColossus = GetSingleCreatureFromStorage(NPC_RUNIC_COLOSSUS))
                 {
-                    if (pColossus->isAlive())
+                    if (pColossus->IsAlive())
                         pColossus->AI()->EnterEvadeMode();
                 }
 
@@ -721,17 +721,17 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                 // despawn elders which are still alive on event complete
                 if (Creature* pElder = GetSingleCreatureFromStorage(NPC_ELDER_BRIGHTLEAF))
                 {
-                    if (pElder->isAlive())
+                    if (pElder->IsAlive())
                         pElder->ForcedDespawn();
                 }
                 if (Creature* pElder = GetSingleCreatureFromStorage(NPC_ELDER_IRONBRACH))
                 {
-                    if (pElder->isAlive())
+                    if (pElder->IsAlive())
                         pElder->ForcedDespawn();
                 }
                 if (Creature* pElder = GetSingleCreatureFromStorage(NPC_ELDER_STONEBARK))
                 {
-                    if (pElder->isAlive())
+                    if (pElder->IsAlive())
                         pElder->ForcedDespawn();
                 }
 

@@ -53,7 +53,7 @@ void PetAI::MoveInLineOfSight(Unit* u)
     if (!m_creature->GetCharmInfo() || !m_creature->GetCharmInfo()->HasReactState(REACT_AGGRESSIVE))
         return;
 
-    if (u->isTargetableForAttack() && m_creature->IsHostileTo(u) &&
+    if (u->IsTargetableForAttack() && m_creature->IsHostileTo(u) &&
             u->isInAccessablePlaceFor(m_creature))
     {
         float attackRadius = m_creature->GetAttackDistance(u);
@@ -96,10 +96,10 @@ bool PetAI::IsVisible(Unit* pl) const
 bool PetAI::_needToStop() const
 {
     // This is needed for charmed creatures, as once their target was reset other effects can trigger threat
-    if (m_creature->isCharmed() && m_creature->getVictim() == m_creature->GetCharmer())
+    if (m_creature->IsCharmed() && m_creature->getVictim() == m_creature->GetCharmer())
         return true;
 
-    return !m_creature->getVictim()->isTargetableForAttack();
+    return !m_creature->getVictim()->IsTargetableForAttack();
 }
 
 void PetAI::_stopAttack()
@@ -122,7 +122,7 @@ void PetAI::_stopAttack()
 
 void PetAI::UpdateAI(const uint32 diff)
 {
-    if (!m_creature->isAlive())
+    if (!m_creature->IsAlive())
         return;
 
     Unit* owner = m_creature->GetCharmerOrOwner();
@@ -174,7 +174,7 @@ void PetAI::UpdateAI(const uint32 diff)
     }
     else if (owner && m_creature->GetCharmInfo())
     {
-        if (owner->isInCombat() && !(m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE) || m_creature->GetCharmInfo()->HasCommandState(COMMAND_STAY)))
+        if (owner->IsInCombat() && !(m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE) || m_creature->GetCharmInfo()->HasCommandState(COMMAND_STAY)))
         {
             AttackStart(owner->getAttackerForHelper());
         }
@@ -303,7 +303,7 @@ void PetAI::UpdateAI(const uint32 diff)
 bool PetAI::_isVisible(Unit* u) const
 {
     return m_creature->IsWithinDist(u, sWorld.getConfig(CONFIG_FLOAT_SIGHT_GUARDER))
-           && u->isVisibleForOrDetect(m_creature, m_creature, true);
+           && u->IsVisibleForOrDetect(m_creature, m_creature, true);
 }
 
 void PetAI::UpdateAllies()

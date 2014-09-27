@@ -79,7 +79,7 @@ ReactorAI::UpdateAI(const uint32 /*time_diff*/)
 void
 ReactorAI::EnterEvadeMode()
 {
-    if (!m_creature->isAlive())
+    if (!m_creature->IsAlive())
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature stopped attacking, he is dead [guid=%u]", m_creature->GetGUIDLow());
         m_creature->GetMotionMaster()->MovementExpired();
@@ -106,7 +106,7 @@ ReactorAI::EnterEvadeMode()
     }
     else
     {
-        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature stopped attacking, victim %s [guid=%u]", victim->isAlive() ? "out run him" : "is dead", m_creature->GetGUIDLow());
+        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature stopped attacking, victim %s [guid=%u]", victim->IsAlive() ? "out run him" : "is dead", m_creature->GetGUIDLow());
     }
 
     m_creature->RemoveAllAurasOnEvade();

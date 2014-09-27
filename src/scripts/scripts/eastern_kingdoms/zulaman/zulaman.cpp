@@ -181,7 +181,7 @@ bool GossipHello_npc_harrison_jones_za(Player* pPlayer, Creature* pCreature)
 {
     ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
 
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
 
     if (pInstance && pInstance->GetData(TYPE_EVENT_RUN) == NOT_STARTED)

@@ -501,7 +501,7 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
                     if (Creature* pAkama = m_pInstance->GetSingleCreatureFromStorage(NPC_AKAMA))
                     {
                         pAkama->AI()->EnterEvadeMode();
-                        m_creature->getThreatManager().modifyThreatPercent(pAkama, -101);
+                        m_creature->GetThreatManager().modifyThreatPercent(pAkama, -101);
                     }
                 }
                 break;
@@ -1526,7 +1526,7 @@ struct MANGOS_DLL_DECL npc_flame_of_azzinothAI : public ScriptedAI
         if (m_uiChargeTimer < uiDiff)
         {
             std::vector<Unit*> suitableTargets;
-            ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
+            ThreatList const& threatList = m_creature->GetThreatManager().getThreatList();
 
             for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
             {

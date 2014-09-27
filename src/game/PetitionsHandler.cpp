@@ -96,7 +96,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recv_data)
     uint32 charterid = 0;
     uint32 cost = 0;
     uint32 type = 0;
-    if (pCreature->isTabardDesigner())
+    if (pCreature->IsTabardDesigner())
     {
         // if tabard designer, then trying to buy a guild charter.
         // do not let if already in guild.
@@ -927,7 +927,7 @@ void WorldSession::SendPetitionShowList(ObjectGuid guid)
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
     uint8 count = 0;
-    if (pCreature->isTabardDesigner())
+    if (pCreature->IsTabardDesigner())
         count = 1;
     else
         count = 3;

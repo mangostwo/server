@@ -140,7 +140,7 @@ struct MANGOS_DLL_DECL boss_moroesAI : public ScriptedAI
     void DoSpawnGuests()
     {
         // not if m_creature are dead, so avoid
-        if (!m_creature->isAlive())
+        if (!m_creature->IsAlive())
             return;
 
         // it's empty, so first time
@@ -190,7 +190,7 @@ struct MANGOS_DLL_DECL boss_moroesAI : public ScriptedAI
 
             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
             {
-                if (i->getSource()->isAlive() && i->getSource()->HasAura(SPELL_GARROTE))
+                if (i->getSource()->IsAlive() && i->getSource()->HasAura(SPELL_GARROTE))
                     i->getSource()->RemoveAurasDueToSpell(SPELL_GARROTE);
             }
         }

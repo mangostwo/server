@@ -153,7 +153,7 @@ struct MANGOS_DLL_DECL npc_air_force_botsAI : public ScriptedAI
     {
         Creature* pCreature = m_creature->GetMap()->GetCreature(m_spawnedGuid);
 
-        if (pCreature && pCreature->isAlive())
+        if (pCreature && pCreature->IsAlive())
             return pCreature;
 
         return NULL;
@@ -164,7 +164,7 @@ struct MANGOS_DLL_DECL npc_air_force_botsAI : public ScriptedAI
         if (!m_pSpawnAssoc)
             return;
 
-        if (pWho->isTargetableForAttack() && m_creature->IsHostileTo(pWho))
+        if (pWho->IsTargetableForAttack() && m_creature->IsHostileTo(pWho))
         {
             Player* pPlayerTarget = pWho->GetTypeId() == TYPEID_PLAYER ? (Player*)pWho : NULL;
 
@@ -549,7 +549,7 @@ struct MANGOS_DLL_DECL npc_injured_patientAI : public ScriptedAI
 
     void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
     {
-        if (pCaster->GetTypeId() == TYPEID_PLAYER && m_creature->isAlive() && pSpell->Id == 20804)
+        if (pCaster->GetTypeId() == TYPEID_PLAYER && m_creature->IsAlive() && pSpell->Id == 20804)
         {
             Player* pPlayer = static_cast<Player*>(pCaster);
             if (pPlayer->GetQuestStatus(6624) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(6622) == QUEST_STATUS_INCOMPLETE)
@@ -596,12 +596,12 @@ struct MANGOS_DLL_DECL npc_injured_patientAI : public ScriptedAI
     {
         // lower HP on every world tick makes it a useful counter, not officlone though
         uint32 uiHPLose = uint32(0.05f * uiDiff);
-        if (m_creature->isAlive() && m_creature->GetHealth() > 1 + uiHPLose)
+        if (m_creature->IsAlive() && m_creature->GetHealth() > 1 + uiHPLose)
         {
             m_creature->SetHealth(m_creature->GetHealth() - uiHPLose);
         }
 
-        if (m_creature->isAlive() && m_creature->GetHealth() <= 1 + uiHPLose)
+        if (m_creature->IsAlive() && m_creature->GetHealth() <= 1 + uiHPLose)
         {
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -833,7 +833,7 @@ struct MANGOS_DLL_DECL npc_garments_of_questsAI : public npc_escortAI
         if (pSpell->Id == SPELL_LESSER_HEAL_R2 || pSpell->Id == SPELL_FORTITUDE_R1)
         {
             // not while in combat
-            if (m_creature->isInCombat())
+            if (m_creature->IsInCombat())
                 return;
 
             // nothing to be done now
@@ -942,7 +942,7 @@ struct MANGOS_DLL_DECL npc_garments_of_questsAI : public npc_escortAI
 
     void UpdateEscortAI(const uint32 uiDiff) override
     {
-        if (m_bCanRun && !m_creature->isInCombat())
+        if (m_bCanRun && !m_creature->IsInCombat())
         {
             if (m_uiRunAwayTimer <= uiDiff)
             {

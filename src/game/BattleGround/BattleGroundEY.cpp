@@ -275,7 +275,7 @@ void BattleGroundEY::HandleAreaTrigger(Player* source, uint32 trigger)
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
 
-    if (!source->isAlive())                                 // hack code, must be removed later
+    if (!source->IsAlive())                                 // hack code, must be removed later
         return;
 
     switch (trigger)

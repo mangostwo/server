@@ -57,7 +57,7 @@ bool npc_escortAI::IsVisible(Unit* pWho) const
     if (!pWho)
         return false;
 
-    return m_creature->IsWithinDist(pWho, VISIBLE_RANGE) && pWho->isVisibleForOrDetect(m_creature, m_creature, true);
+    return m_creature->IsWithinDist(pWho, VISIBLE_RANGE) && pWho->IsVisibleForOrDetect(m_creature, m_creature, true);
 }
 
 void npc_escortAI::AttackStart(Unit* pWho)
@@ -136,7 +136,7 @@ bool npc_escortAI::AssistPlayerInCombat(Unit* pWho)
 
 void npc_escortAI::MoveInLineOfSight(Unit* pWho)
 {
-    if (pWho->isTargetableForAttack() && pWho->isInAccessablePlaceFor(m_creature))
+    if (pWho->IsTargetableForAttack() && pWho->isInAccessablePlaceFor(m_creature))
     {
         // AssistPlayerInCombat can start attack, so return if true
         if (HasEscortState(STATE_ESCORT_ESCORTING) && AssistPlayerInCombat(pWho))

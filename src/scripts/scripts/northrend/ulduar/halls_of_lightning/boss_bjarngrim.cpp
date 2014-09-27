@@ -354,7 +354,7 @@ struct MANGOS_DLL_DECL mob_stormforged_lieutenantAI : public ScriptedAI
             {
                 if (Creature* pBjarngrim = m_pInstance->GetSingleCreatureFromStorage(NPC_BJARNGRIM))
                 {
-                    if (pBjarngrim->isAlive())
+                    if (pBjarngrim->IsAlive())
                         DoCastSpellIfCan(pBjarngrim, m_bIsRegularMode ? SPELL_RENEW_STEEL_N : SPELL_RENEW_STEEL_H);
                 }
             }

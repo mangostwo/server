@@ -115,7 +115,7 @@ void HostileReference::addThreat(float pMod)
     if (isValid() && pMod >= 0)
     {
         Unit* victim_owner = getTarget()->GetOwner();
-        if (victim_owner && victim_owner->isAlive())
+        if (victim_owner && victim_owner->IsAlive())
             getSource()->addThreat(victim_owner, 0.0f);     // create a threat to the owner of a pet, if the pet attacks
     }
 }
@@ -419,7 +419,7 @@ void ThreatManager::addThreat(Unit* pVictim, float pThreat, bool crit, SpellScho
         return;
 
     // not to dead and not for dead
-    if (!pVictim->isAlive() || !getOwner()->isAlive())
+    if (!pVictim->IsAlive() || !getOwner()->IsAlive())
         return;
 
     MANGOS_ASSERT(getOwner()->GetTypeId() == TYPEID_UNIT);
@@ -428,11 +428,11 @@ void ThreatManager::addThreat(Unit* pVictim, float pThreat, bool crit, SpellScho
 
     if (threat > 0.0f)
     {
-        if (float redirectedMod = pVictim->getHostileRefManager().GetThreatRedirectionMod())
+        if (float redirectedMod = pVictim->GetHostileRefManager().GetThreatRedirectionMod())
         {
-            if (Unit* redirectedTarget = pVictim->getHostileRefManager().GetThreatRedirectionTarget())
+            if (Unit* redirectedTarget = pVictim->GetHostileRefManager().GetThreatRedirectionTarget())
             {
-                if (redirectedTarget != getOwner() && redirectedTarget->isAlive())
+                if (redirectedTarget != getOwner() && redirectedTarget->IsAlive())
                 {
                     float redirectedThreat = threat * redirectedMod;
                     threat -= redirectedThreat;

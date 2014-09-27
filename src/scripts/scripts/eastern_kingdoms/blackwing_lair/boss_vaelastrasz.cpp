@@ -334,7 +334,7 @@ bool GossipSelect_boss_vaelastrasz(Player* pPlayer, Creature* pCreature, uint32 
 
 bool GossipHello_boss_vaelastrasz(Player* pPlayer, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
 
     pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_VAEL_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
@@ -352,7 +352,7 @@ bool AreaTrigger_at_vaelastrasz(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
     if (pAt->id == AREATRIGGER_VAEL_INTRO)
     {
-        if (pPlayer->isGameMaster() || pPlayer->isDead())
+        if (pPlayer->isGameMaster() || pPlayer->IsDead())
             return false;
 
         if (instance_blackwing_lair* pInstance = (instance_blackwing_lair*)pPlayer->GetInstanceData())

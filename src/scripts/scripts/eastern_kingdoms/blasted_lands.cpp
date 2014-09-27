@@ -41,7 +41,7 @@ EndContentData */
 
 bool GossipHello_npc_fallen_hero_of_horde(Player* pPlayer, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
 
     if (pPlayer->GetQuestStatus(2784) == QUEST_STATUS_INCOMPLETE)

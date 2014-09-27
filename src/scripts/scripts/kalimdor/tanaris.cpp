@@ -336,7 +336,7 @@ bool QuestAccept_npc_oox17tn(Player* pPlayer, Creature* pCreature, const Quest* 
 
 bool GossipHello_npc_stone_watcher_of_norgannon(Player* pPlayer, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
 
     if (pPlayer->GetQuestStatus(2954) == QUEST_STATUS_INCOMPLETE)
@@ -463,7 +463,7 @@ struct MANGOS_DLL_DECL npc_toogaAI : public FollowerAI
                 {
                     m_uiPostEventTimer = 5000;
 
-                    if (!pTorta || !pTorta->isAlive())
+                    if (!pTorta || !pTorta->IsAlive())
                     {
                         // something happened, so just complete
                         SetFollowComplete();

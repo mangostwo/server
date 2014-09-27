@@ -96,7 +96,7 @@ void instance_violet_hold::ResetAll()
                     if (Creature* pGuard = instance->GetCreature(*itr))
                     {
                         // Don't allow alive original guards while the boss is dead
-                        if (!pGuard->isDead())
+                        if (!pGuard->IsDead())
                             pGuard->ForcedDespawn();
 
                         // Spawn a ghost guard for each original guard
@@ -508,7 +508,7 @@ void instance_violet_hold::CallGuards(bool bRespawn)
         {
             if (bRespawn)
                 pGuard->Respawn();
-            else if (pGuard->isAlive())
+            else if (pGuard->IsAlive())
             {
                 pGuard->SetWalk(false);
                 pGuard->GetMotionMaster()->MovePoint(0, fGuardExitLoc[0], fGuardExitLoc[1], fGuardExitLoc[2]);

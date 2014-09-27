@@ -35,7 +35,7 @@ EndContentData */
 
 bool GossipHello_npc_mountaineer_pebblebitty(Player* pPlayer, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
 
     if (!pPlayer->GetQuestRewardStatus(3181) == 1)

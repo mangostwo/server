@@ -129,7 +129,7 @@ CreatureAI* GetAI_npc_ancient_male_vrykul(Creature* pCreature)
 
 bool AreaTrigger_at_ancient_male_vrykul(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 {
-    if (pPlayer->isAlive() && pPlayer->GetQuestStatus(QUEST_ECHO_OF_YMIRON) == QUEST_STATUS_INCOMPLETE &&
+    if (pPlayer->IsAlive() && pPlayer->GetQuestStatus(QUEST_ECHO_OF_YMIRON) == QUEST_STATUS_INCOMPLETE &&
             pPlayer->HasAura(SPELL_ECHO_OF_YMIRON))
     {
         if (Creature* pCreature = GetClosestCreatureWithEntry(pPlayer, NPC_MALE_VRYKUL, 20.0f))
@@ -191,7 +191,7 @@ struct MANGOS_DLL_DECL npc_daegarnAI : public ScriptedAI
     {
         if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
         {
-            if (pPlayer->isAlive())
+            if (pPlayer->IsAlive())
             {
                 pSummon->SetWalk(false);
                 pSummon->GetMotionMaster()->MovePoint(0, afCenter[0], afCenter[1], afCenter[2]);
@@ -212,7 +212,7 @@ struct MANGOS_DLL_DECL npc_daegarnAI : public ScriptedAI
         Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
 
         // could be group, so need additional here.
-        if (!pPlayer || !pPlayer->isAlive())
+        if (!pPlayer || !pPlayer->IsAlive())
         {
             Reset();
             return;
@@ -371,10 +371,10 @@ CreatureAI* GetAI_npc_silvermoon_harry(Creature* pCreature)
 
 bool GossipHello_npc_silvermoon_harry(Player* pPlayer, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
 
-    if (pCreature->isVendor())
+    if (pCreature->IsVendor())
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
 
     if (pPlayer->GetQuestStatus(QUEST_GAMBLING_DEBT) == QUEST_STATUS_INCOMPLETE)
@@ -522,7 +522,7 @@ struct MANGOS_DLL_DECL npc_lich_king_villageAI : public ScriptedAI, private Dial
     {
         if (!m_bEventInProgress && pWho->GetTypeId() == TYPEID_PLAYER)
         {
-            if (pWho->isAlive() && m_creature->IsWithinDistInMap(pWho, 15.0) && pWho->HasAura(SPELL_ECHO_OF_YMIRON))
+            if (pWho->IsAlive() && m_creature->IsWithinDistInMap(pWho, 15.0) && pWho->HasAura(SPELL_ECHO_OF_YMIRON))
             {
                 m_pHeldPlayer = pWho->GetObjectGuid();
                 m_bEventInProgress = true;
@@ -636,7 +636,7 @@ struct MANGOS_DLL_DECL npc_king_ymironAI : public ScriptedAI, private DialogueHe
         if (!m_bEventInit && pWho->GetTypeId() == TYPEID_PLAYER)
         {
             // Get all the citizen around the king for future use
-            if (pWho->isAlive() && m_creature->IsWithinDistInMap(pWho, 60.0) && ((Player*)pWho)->GetQuestStatus(QUEST_ID_ANGUISH_OF_NIFFLEVAR) == QUEST_STATUS_INCOMPLETE
+            if (pWho->IsAlive() && m_creature->IsWithinDistInMap(pWho, 60.0) && ((Player*)pWho)->GetQuestStatus(QUEST_ID_ANGUISH_OF_NIFFLEVAR) == QUEST_STATUS_INCOMPLETE
                 && pWho->HasAura(SPELL_ECHO_OF_YMIRON_NIFFLEVAR))
             {
                 std::list<Creature*> lCrowdList;
@@ -727,7 +727,7 @@ CreatureAI* GetAI_npc_king_ymiron(Creature* pCreature)
 
 bool AreaTrigger_at_nifflevar(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 {
-    if (pPlayer->isAlive() && pPlayer->GetQuestStatus(QUEST_ID_ANGUISH_OF_NIFFLEVAR) == QUEST_STATUS_INCOMPLETE && pPlayer->HasAura(SPELL_ECHO_OF_YMIRON_NIFFLEVAR))
+    if (pPlayer->IsAlive() && pPlayer->GetQuestStatus(QUEST_ID_ANGUISH_OF_NIFFLEVAR) == QUEST_STATUS_INCOMPLETE && pPlayer->HasAura(SPELL_ECHO_OF_YMIRON_NIFFLEVAR))
     {
         if (Creature* pCreature = GetClosestCreatureWithEntry(pPlayer, NPC_KING_YMIRON, 30.0f))
             pCreature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pPlayer, pCreature);

@@ -145,11 +145,11 @@ struct MANGOS_DLL_DECL npc_valentine_boss_managerAI : public ScriptedAI, private
 
             // Make it attack a random Target
             Creature* pBoss = m_pInstance->GetSingleCreatureFromStorage(NPC_HUMMEL);
-            if (!pBoss || !pBoss->isAlive())
+            if (!pBoss || !pBoss->IsAlive())
                 pBoss = m_pInstance->GetSingleCreatureFromStorage(NPC_BAXTER);
-            if (!pBoss || !pBoss->isAlive())
+            if (!pBoss || !pBoss->IsAlive())
                 pBoss = m_pInstance->GetSingleCreatureFromStorage(NPC_FRYE);
-            if (!pBoss || !pBoss->isAlive())
+            if (!pBoss || !pBoss->IsAlive())
                 return;
 
             // Attack a random target

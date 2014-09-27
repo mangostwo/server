@@ -153,8 +153,8 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;..\..\src\game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;MANGOS_DEBUG;_LIB;DT_POLYREF64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;..\..\src\game;..\..\dep\lualib;..\..\src\game\LuaEngine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;ENABLE_ELUNA;ENABLE_SD2;_DEBUG;MANGOS_DEBUG;_LIB;DT_POLYREF64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -171,12 +171,13 @@
       <AdditionalOptions>/D_SCL_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ENABLE_ELUNA;ENABLE_SD2;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Lib>
       <AdditionalDependencies>.\shared__$(Platform)_$(Configuration)\shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalDependencies>.\g3dlite__$(Platform)_$(Configuration)\g3dlite.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>.\lualib__$(Platform)_$(Configuration)\lualib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
   </ItemDefinitionGroup>
@@ -187,8 +188,8 @@
     <ClCompile>
       <AdditionalOptions>/bigobj /D_SCL_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;..\..\src\game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;MANGOS_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;..\..\src\game;..\..\dep\lualib;..\..\src\game\LuaEngine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;ENABLE_ELUNA;ENABLE_SD2;_DEBUG;MANGOS_DEBUG;_LIB;DT_POLYREF64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -210,14 +211,15 @@
     <Lib>
       <AdditionalDependencies>.\shared__$(Platform)_$(Configuration)\shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalDependencies>.\g3dlite__$(Platform)_$(Configuration)\g3dlite.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>.\lualib__$(Platform)_$(Configuration)\lualib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;..\..\src\game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;..\..\src\game;..\..\dep\lualib;..\..\src\game\LuaEngine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;ENABLE_ELUNA;ENABLE_SD2;NDEBUG;_LIB;DT_POLYREF64;;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -232,6 +234,7 @@
       <CallingConvention>Cdecl</CallingConvention>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/D_SCL_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -240,6 +243,7 @@
     <Lib>
       <AdditionalDependencies>.\shared__$(Platform)_$(Configuration)\shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalDependencies>.\g3dlite__$(Platform)_$(Configuration)\g3dlite.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>.\lualib__$(Platform)_$(Configuration)\lualib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
   </ItemDefinitionGroup>
@@ -250,8 +254,8 @@
     <ClCompile>
       <AdditionalOptions>/bigobj /D_SCL_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;..\..\src\game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;..\..\src\game;..\..\dep\lualib;..\..\src\game\LuaEngine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;ENABLE_ELUNA;ENABLE_SD2;NDEBUG;_LIB;DT_POLYREF64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -265,6 +269,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CallingConvention>Cdecl</CallingConvention>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -273,14 +278,15 @@
     <Lib>
       <AdditionalDependencies>.\shared__$(Platform)_$(Configuration)\shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalDependencies>.\g3dlite__$(Platform)_$(Configuration)\g3dlite.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>.\lualib__$(Platform)_$(Configuration)\lualib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;..\..\src\game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;MANGOS_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;..\..\src\game;..\..\dep\lualib;..\..\src\game\LuaEngine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;ENABLE_ELUNA;ENABLE_SD2;_DEBUG;MANGOS_DEBUG;_LIB;DT_POLYREF64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -303,6 +309,7 @@
     <Lib>
       <AdditionalDependencies>.\shared__$(Platform)_$(Configuration)\shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalDependencies>.\g3dlite__$(Platform)_$(Configuration)\g3dlite.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>.\lualib__$(Platform)_$(Configuration)\lualib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
   </ItemDefinitionGroup>
@@ -313,8 +320,8 @@
     <ClCompile>
       <AdditionalOptions>/bigobj /D_SCL_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;..\..\src\game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;MANGOS_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game\vmap;..\..\dep\ACE_wrappers;..\..\dep\include\g3dlite;..\..\src\game;..\..\dep\lualib;..\..\src\game\LuaEngine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;ENABLE_ELUNA;ENABLE_SD2;_DEBUG;MANGOS_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -336,6 +343,7 @@
     <Lib>
       <AdditionalDependencies>.\shared__$(Platform)_$(Configuration)\shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalDependencies>.\g3dlite__$(Platform)_$(Configuration)\g3dlite.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>.\lualib__$(Platform)_$(Configuration)\lualib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
   </ItemDefinitionGroup>
@@ -420,6 +428,11 @@
     <ClCompile Include="..\..\src\game\LFGHandler.cpp" />
     <ClCompile Include="..\..\src\game\LootHandler.cpp" />
     <ClCompile Include="..\..\src\game\LootMgr.cpp" />
+    <ClCompile Include="..\..\src\game\LuaEngine\ElunaEventMgr.cpp" />
+    <ClCompile Include="..\..\src\game\LuaEngine\ElunaUtility.cpp" />
+    <ClCompile Include="..\..\src\game\LuaEngine\HookMgr.cpp" />
+    <ClCompile Include="..\..\src\game\LuaEngine\LuaEngine.cpp" />
+    <ClCompile Include="..\..\src\game\LuaEngine\LuaFunctions.cpp" />
     <ClCompile Include="..\..\src\game\Mail.cpp" />
     <ClCompile Include="..\..\src\game\MailHandler.cpp" />
     <ClCompile Include="..\..\src\game\Map.cpp" />
@@ -593,6 +606,33 @@
     <ClInclude Include="..\..\src\game\ItemPrototype.h" />
     <ClInclude Include="..\..\src\game\Language.h" />
     <ClInclude Include="..\..\src\game\LootMgr.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\AuraMethods.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\BattleGroundMethods.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\CorpseMethods.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\CreatureMethods.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\ElunaBinding.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\ElunaEventMgr.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\ElunaIncludes.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\ElunaTemplate.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\ElunaUtility.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\GameObjectMethods.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\GlobalMethods.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\GroupMethods.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\GuildMethods.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\HookMgr.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\ItemMethods.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\LuaEngine.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\MapMethods.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\ObjectMethods.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\PlayerMethods.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\QueryMethods.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\QuestMethods.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\SpellMethods.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\UnitMethods.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\VehicleMethods.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\WeatherMethods.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\WorldObjectMethods.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\WorldPacketMethods.h" />
     <ClInclude Include="..\..\src\game\Mail.h" />
     <ClInclude Include="..\..\src\game\Map.h" />
     <ClInclude Include="..\..\src\game\MapManager.h" />
@@ -691,6 +731,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\dep\recastnavigation\Detour\win\VC120\Detour.vcxproj">
       <Project>{72bdf975-4d4a-42c7-b2c4-f9ed90a2abb6}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\dep\recastnavigation\Recast\win\VC120\Recast.vcxproj">
+      <Project>{00b9dc66-96a6-465d-a6c1-5dff94e48a64}</Project>
     </ProjectReference>
     <ProjectReference Include="shared.vcxproj">
       <Project>{90297c34-f231-4df4-848e-a74bcc0e40ed}</Project>

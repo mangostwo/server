@@ -38,7 +38,7 @@ void ConfusedMovementGenerator<T>::Initialize(T& unit)
     // set initial position
     unit.GetPosition(i_x, i_y, i_z);
 
-    if (!unit.isAlive() || unit.hasUnitState(UNIT_STAT_NOT_MOVE))
+    if (!unit.IsAlive() || unit.hasUnitState(UNIT_STAT_NOT_MOVE))
         return;
 
     unit.StopMoving();
@@ -58,7 +58,7 @@ void ConfusedMovementGenerator<T>::Reset(T& unit)
 {
     i_nextMoveTime.Reset(0);
 
-    if (!unit.isAlive() || unit.hasUnitState(UNIT_STAT_NOT_MOVE))
+    if (!unit.IsAlive() || unit.hasUnitState(UNIT_STAT_NOT_MOVE))
         return;
 
     unit.StopMoving();

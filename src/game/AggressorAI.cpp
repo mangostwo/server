@@ -54,7 +54,7 @@ AggressorAI::MoveInLineOfSight(Unit* u)
     if (!m_creature->CanFly() && m_creature->GetDistanceZ(u) > CREATURE_Z_ATTACK_RANGE)
         return;
 
-    if (m_creature->CanInitiateAttack() && u->isTargetableForAttack() &&
+    if (m_creature->CanInitiateAttack() && u->IsTargetableForAttack() &&
         m_creature->IsHostileTo(u) && u->isInAccessablePlaceFor(m_creature))
     {
         float attackRadius = m_creature->GetAttackDistance(u);
@@ -76,7 +76,7 @@ AggressorAI::MoveInLineOfSight(Unit* u)
 
 void AggressorAI::EnterEvadeMode()
 {
-    if (!m_creature->isAlive())
+    if (!m_creature->IsAlive())
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature stopped attacking, he is dead [guid=%u]", m_creature->GetGUIDLow());
         i_victimGuid.Clear();
@@ -91,7 +91,7 @@ void AggressorAI::EnterEvadeMode()
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature stopped attacking, no victim [guid=%u]", m_creature->GetGUIDLow());
     }
-    else if (!victim->isAlive())
+    else if (!victim->IsAlive())
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature stopped attacking, victim is dead [guid=%u]", m_creature->GetGUIDLow());
     }
@@ -110,7 +110,7 @@ void AggressorAI::EnterEvadeMode()
         // i_tracker.Reset(TIME_INTERVAL_LOOK);
     }
 
-    if (!m_creature->isCharmed())
+    if (!m_creature->IsCharmed())
     {
         m_creature->RemoveAllAurasOnEvade();
 
@@ -141,7 +141,7 @@ bool
 AggressorAI::IsVisible(Unit* pl) const
 {
     return m_creature->IsWithinDist(pl, sWorld.getConfig(CONFIG_FLOAT_SIGHT_MONSTER))
-           && pl->isVisibleForOrDetect(m_creature, m_creature, true);
+           && pl->IsVisibleForOrDetect(m_creature, m_creature, true);
 }
 
 void

@@ -205,7 +205,7 @@ struct MANGOS_DLL_DECL boss_devourer_of_soulsAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->isInCombat())
+        if (!m_creature->IsInCombat())
             return;
 
         // Ending a phase
@@ -234,7 +234,7 @@ struct MANGOS_DLL_DECL boss_devourer_of_soulsAI : public ScriptedAI
                     m_creature->SetFacingTo(m_creature->GetAngle(pTarget));
             }
 
-            if (m_creature->getThreatManager().isThreatListEmpty() || !m_creature->getThreatManager().getHostileTarget())
+            if (m_creature->GetThreatManager().isThreatListEmpty() || !m_creature->GetThreatManager().getHostileTarget())
                 m_creature->SelectHostileTarget();          // Most likely must evade, use additional checks in case evading would be prevented
             return;
         }

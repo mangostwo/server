@@ -114,7 +114,7 @@ void instance_dark_portal::SetData(uint32 uiType, uint32 uiData)
             {
                 if (Creature* pMedivh = GetSingleCreatureFromStorage(NPC_MEDIVH))
                 {
-                    if (pMedivh->isAlive())
+                    if (pMedivh->IsAlive())
                         DoScriptText(SAY_MEDIVH_ENTER, pMedivh);
                     // If Medivh is not available the do not store the uiData;
                     else
@@ -183,7 +183,7 @@ void instance_dark_portal::SetData(uint32 uiType, uint32 uiData)
                 {
                     if (Creature* pMedivh = GetSingleCreatureFromStorage(NPC_MEDIVH))
                     {
-                        if (pMedivh->isAlive())
+                        if (pMedivh->IsAlive())
                             pMedivh->DealDamage(pMedivh, pMedivh->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                     }
                 }
@@ -384,7 +384,7 @@ bool AreaTrigger_at_dark_portal(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
     if (pAt->id == AREATRIGGER_MEDIVH || pAt->id == AREATRIGGER_ENTER)
     {
-        if (pPlayer->isGameMaster() || pPlayer->isDead())
+        if (pPlayer->isGameMaster() || pPlayer->IsDead())
             return false;
 
         if (instance_dark_portal* pInstance = (instance_dark_portal*)pPlayer->GetInstanceData())

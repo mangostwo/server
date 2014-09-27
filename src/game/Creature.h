@@ -647,7 +647,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 GetLootGroupRecipientId() const { return m_lootGroupRecipientId; }
         Player* GetLootRecipient() const;                   // use group cases as prefered
         Group* GetGroupLootRecipient() const;
-        bool isTappedBy(Player const* player) const;
+        bool IsTappedBy(Player const* player) const;
         bool HasLootRecipient() const { return m_lootGroupRecipientId || m_lootRecipientGuid; }
         bool IsGroupLootRecipient() const { return m_lootGroupRecipientId; }
         void SetLootRecipient(Unit* unit);
@@ -684,7 +684,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool IsVisibleInGridForPlayer(Player* pl) const override;
 
         void RemoveCorpse();
-        bool IsDeadByDefault() const { return m_isDeadByDefault; };
+        bool IsDeadByDefault() const { return m_IsDeadByDefault; };
 
         void ForcedDespawn(uint32 timeMSToDespawn = 0);
 
@@ -736,7 +736,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void GetRespawnCoord(float& x, float& y, float& z, float* ori = NULL, float* dist = NULL) const;
         void ResetRespawnCoord();
 
-        void SetDeadByDefault(bool death_state) { m_isDeadByDefault = death_state; }
+        void SetDeadByDefault(bool death_state) { m_IsDeadByDefault = death_state; }
 
         void SetFactionTemporary(uint32 factionId, uint32 tempFactionFlags = TEMPFACTION_ALL);
         void ClearTemporaryFaction();
@@ -787,7 +787,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool m_AlreadyCallAssistance;
         bool m_AlreadySearchedAssistance;
         bool m_AI_locked;
-        bool m_isDeadByDefault;
+        bool m_IsDeadByDefault;
         uint32 m_temporaryFactionFlags;                     // used for real faction changes (not auras etc)
 
         SpellSchoolMask m_meleeDamageSchoolMask;

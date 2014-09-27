@@ -169,7 +169,7 @@ struct MANGOS_DLL_DECL boss_gothikAI : public ScriptedAI
         {
             if (Player* pPlayer = itr->getSource())
             {
-                if (!m_pInstance->IsInRightSideGothArea(pPlayer) && pPlayer->isAlive())
+                if (!m_pInstance->IsInRightSideGothArea(pPlayer) && pPlayer->IsAlive())
                     return true;
             }
         }
@@ -432,7 +432,7 @@ struct MANGOS_DLL_DECL boss_gothikAI : public ScriptedAI
                     {
                         if (Creature* pCreature = m_pInstance->instance->GetCreature(*itr))
                         {
-                            if (!pCreature->isInCombat())
+                            if (!pCreature->IsInCombat())
                                 pCreature->SetInCombatWithZone();
                         }
                     }

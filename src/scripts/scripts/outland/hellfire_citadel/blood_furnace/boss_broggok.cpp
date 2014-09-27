@@ -96,7 +96,7 @@ struct MANGOS_DLL_DECL boss_broggokAI : public ScriptedAI
 
         Reset();
 
-        if (!m_creature->isAlive())
+        if (!m_creature->IsAlive())
             return;
 
         if (m_pInstance)

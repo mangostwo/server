@@ -465,17 +465,17 @@ void CreatureLinkingHolder::DoCreatureLinkingEvent(CreatureLinkingEvent eventTyp
                         if (pMaster->IsControlledByPlayer())
                             return;
 
-                        if (pMaster->isInCombat())
+                        if (pMaster->IsInCombat())
                             pMaster->SetInCombatWith(pEnemy);
                         else
                             pMaster->AI()->AttackStart(pEnemy);
                         break;
                     case LINKING_EVENT_EVADE:
-                        if (!pMaster->isAlive())
+                        if (!pMaster->IsAlive())
                             pMaster->Respawn();
                         break;
                     case LINKING_EVENT_RESPAWN:
-                        if (pMaster->isAlive())
+                        if (pMaster->IsAlive())
                             SetFollowing(pSource, pMaster);
                         break;
                     case LINKING_EVENT_DIE:                 // Nothing linked for this case
@@ -526,37 +526,37 @@ void CreatureLinkingHolder::ProcessSlave(CreatureLinkingEvent eventType, Creatur
                 if (pSlave->IsControlledByPlayer())
                     return;
 
-                if (pSlave->isInCombat())
+                if (pSlave->IsInCombat())
                     pSlave->SetInCombatWith(pEnemy);
                 else
                     pSlave->AI()->AttackStart(pEnemy);
             }
             break;
         case LINKING_EVENT_EVADE:
-            if (flag & FLAG_DESPAWN_ON_EVADE && pSlave->isAlive())
+            if (flag & FLAG_DESPAWN_ON_EVADE && pSlave->IsAlive())
                 pSlave->ForcedDespawn();
-            if (flag & FLAG_RESPAWN_ON_EVADE && !pSlave->isAlive())
+            if (flag & FLAG_RESPAWN_ON_EVADE && !pSlave->IsAlive())
                 pSlave->Respawn();
             break;
         case LINKING_EVENT_DIE:
-            if (flag & FLAG_SELFKILL_ON_DEATH && pSlave->isAlive())
+            if (flag & FLAG_SELFKILL_ON_DEATH && pSlave->IsAlive())
                 pSlave->DealDamage(pSlave, pSlave->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-            if (flag & FLAG_DESPAWN_ON_DEATH && pSlave->isAlive())
+            if (flag & FLAG_DESPAWN_ON_DEATH && pSlave->IsAlive())
                 pSlave->ForcedDespawn();
-            if (flag & FLAG_RESPAWN_ON_DEATH && !pSlave->isAlive())
+            if (flag & FLAG_RESPAWN_ON_DEATH && !pSlave->IsAlive())
                 pSlave->Respawn();
             break;
         case LINKING_EVENT_RESPAWN:
             if (flag & FLAG_RESPAWN_ON_RESPAWN)
             {
                 // Additional check to prevent endless loops (in case whole group respawns on first respawn)
-                if (!pSlave->isAlive() && pSlave->GetRespawnTime() > time(NULL))
+                if (!pSlave->IsAlive() && pSlave->GetRespawnTime() > time(NULL))
                     pSlave->Respawn();
             }
-            else if (flag & FLAG_DESPAWN_ON_RESPAWN && pSlave->isAlive())
+            else if (flag & FLAG_DESPAWN_ON_RESPAWN && pSlave->IsAlive())
                 pSlave->ForcedDespawn();
 
-            if (flag & FLAG_FOLLOW && pSlave->isAlive() && !pSlave->isInCombat())
+            if (flag & FLAG_FOLLOW && pSlave->IsAlive() && !pSlave->IsInCombat())
                 SetFollowing(pSlave, pSource);
 
             break;
@@ -641,9 +641,9 @@ bool CreatureLinkingHolder::CanSpawn(Creature* pCreature)
         if (pMaster && IsSlaveInRangeOfBoss(pCreature, pMaster, pInfo->searchRange))
         {
             if (pInfo->linkingFlag & FLAG_CANT_SPAWN_IF_BOSS_DEAD)
-                return pMaster->isAlive();
+                return pMaster->IsAlive();
             else if (pInfo->linkingFlag & FLAG_CANT_SPAWN_IF_BOSS_ALIVE)
-                return !pMaster->isAlive();
+                return !pMaster->IsAlive();
             else
                 return true;
         }
@@ -677,7 +677,7 @@ bool CreatureLinkingHolder::TryFollowMaster(Creature* pCreature)
         pMaster = pCreature->GetMap()->GetCreature(ObjectGuid(cInfo->GetHighGuid(), cInfo->Entry, pInfo->masterDBGuid));
     }
 
-    if (pMaster && pMaster->isAlive())
+    if (pMaster && pMaster->IsAlive())
     {
         SetFollowing(pCreature, pMaster);
         return true;

@@ -133,7 +133,7 @@ struct MANGOS_DLL_DECL boss_venoxisAI : public ScriptedAI
                 uint8 uiTargetsInRange = 0;
 
                 // See how many targets are in melee range
-                ThreatList const& tList = m_creature->getThreatManager().getThreatList();
+                ThreatList const& tList = m_creature->GetThreatManager().getThreatList();
                 for (ThreatList::const_iterator iter = tList.begin(); iter != tList.end(); ++iter)
                 {
                     if (Unit* pTempTarget = m_creature->GetMap()->GetUnit((*iter)->getUnitGuid()))

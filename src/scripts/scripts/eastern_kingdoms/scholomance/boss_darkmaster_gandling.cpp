@@ -98,8 +98,8 @@ struct MANGOS_DLL_DECL boss_darkmaster_gandlingAI : public ScriptedAI
                     if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_PORTAL) == CAST_OK)
                     {
                         // remove threat
-                        if (m_creature->getThreatManager().getThreat(pTarget))
-                            m_creature->getThreatManager().modifyThreatPercent(pTarget, -100);
+                        if (m_creature->GetThreatManager().getThreat(pTarget))
+                            m_creature->GetThreatManager().modifyThreatPercent(pTarget, -100);
 
                         m_uiTeleportTimer = urand(20000, 35000);
                     }

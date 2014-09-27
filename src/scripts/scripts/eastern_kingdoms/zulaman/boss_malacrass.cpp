@@ -256,7 +256,7 @@ struct MANGOS_DLL_DECL boss_malacrassAI : public ScriptedAI
     void DoInitializeAdds()
     {
         // not if m_creature are dead, so avoid
-        if (!m_creature->isAlive())
+        if (!m_creature->IsAlive())
             return;
 
         // it's empty, so first time

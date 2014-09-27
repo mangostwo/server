@@ -35,7 +35,7 @@ bool ScriptedAI::IsVisible(Unit* pWho) const
     if (!pWho)
         return false;
 
-    return m_creature->IsWithinDist(pWho, VISIBLE_RANGE) && pWho->isVisibleForOrDetect(m_creature, m_creature, true);
+    return m_creature->IsWithinDist(pWho, VISIBLE_RANGE) && pWho->IsVisibleForOrDetect(m_creature, m_creature, true);
 }
 
 /**
@@ -49,7 +49,7 @@ bool ScriptedAI::IsVisible(Unit* pWho) const
  */
 void ScriptedAI::MoveInLineOfSight(Unit* pWho)
 {
-    if (m_creature->CanInitiateAttack() && pWho->isTargetableForAttack() &&
+    if (m_creature->CanInitiateAttack() && pWho->IsTargetableForAttack() &&
             m_creature->IsHostileTo(pWho) && pWho->isInAccessablePlaceFor(m_creature))
     {
         if (!m_creature->CanFly() && m_creature->GetDistanceZ(pWho) > CREATURE_Z_ATTACK_RANGE)
@@ -127,7 +127,7 @@ void ScriptedAI::EnterEvadeMode()
     m_creature->DeleteThreatList();
     m_creature->CombatStop(true);
 
-    if (m_creature->isAlive())
+    if (m_creature->IsAlive())
         m_creature->GetMotionMaster()->MoveTargetedHome();
 
     m_creature->SetLootRecipient(NULL);
@@ -397,19 +397,19 @@ void FillSpellSummary()
 
 void ScriptedAI::DoResetThreat()
 {
-    if (!m_creature->CanHaveThreatList() || m_creature->getThreatManager().isThreatListEmpty())
+    if (!m_creature->CanHaveThreatList() || m_creature->GetThreatManager().isThreatListEmpty())
     {
         script_error_log("DoResetThreat called for creature that either cannot have threat list or has empty threat list (m_creature entry = %d)", m_creature->GetEntry());
         return;
     }
 
-    ThreatList const& tList = m_creature->getThreatManager().getThreatList();
+    ThreatList const& tList = m_creature->GetThreatManager().getThreatList();
     for (ThreatList::const_iterator itr = tList.begin(); itr != tList.end(); ++itr)
     {
         Unit* pUnit = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid());
 
-        if (pUnit && m_creature->getThreatManager().getThreat(pUnit))
-            m_creature->getThreatManager().modifyThreatPercent(pUnit, -100);
+        if (pUnit && m_creature->GetThreatManager().getThreat(pUnit))
+            m_creature->GetThreatManager().modifyThreatPercent(pUnit, -100);
     }
 }
 

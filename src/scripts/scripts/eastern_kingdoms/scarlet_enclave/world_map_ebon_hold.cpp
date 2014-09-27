@@ -102,7 +102,7 @@ void world_map_ebon_hold::OnCreatureEvade(Creature* pCreature)
         case NPC_WARRIOR_OF_THE_FROZEN_WASTES:
             if (Creature* pDarion = GetSingleCreatureFromStorage(NPC_HIGHLORD_DARION_MOGRAINE))
             {
-                if (!pDarion->isInCombat())
+                if (!pDarion->IsInCombat())
                     return;
 
                 if (Unit* pTarget = pDarion->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
@@ -246,7 +246,7 @@ void world_map_ebon_hold::DoDespawnArmy()
     {
         if (Creature* pTemp = instance->GetCreature(*itr))
         {
-            if (pTemp->isAlive())
+            if (pTemp->IsAlive())
                 pTemp->DealDamage(pTemp, pTemp->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
         }
     }

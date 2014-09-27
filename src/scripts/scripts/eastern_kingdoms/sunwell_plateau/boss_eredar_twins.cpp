@@ -133,7 +133,7 @@ struct MANGOS_DLL_DECL boss_alythessAI : public ScriptedAI
             // Respawn dead sister
             if (Creature* pSister = m_pInstance->GetSingleCreatureFromStorage(NPC_SACROLASH))
             {
-                if (!pSister->isAlive())
+                if (!pSister->IsAlive())
                     pSister->Respawn();
             }
         }
@@ -172,7 +172,7 @@ struct MANGOS_DLL_DECL boss_alythessAI : public ScriptedAI
         {
             if (Creature* pSacrolash = m_pInstance->GetSingleCreatureFromStorage(NPC_SACROLASH))
             {
-                if (!pSacrolash->isAlive())
+                if (!pSacrolash->IsAlive())
                 {
                     m_pInstance->SetData(TYPE_EREDAR_TWINS, DONE);
                     DoScriptText(SAY_ALYTHESS_DEAD, m_creature);
@@ -326,7 +326,7 @@ struct MANGOS_DLL_DECL boss_sacrolashAI : public ScriptedAI
             // Respawn dead sister
             if (Creature* pSister = m_pInstance->GetSingleCreatureFromStorage(NPC_ALYTHESS))
             {
-                if (!pSister->isAlive())
+                if (!pSister->IsAlive())
                     pSister->Respawn();
             }
         }
@@ -352,7 +352,7 @@ struct MANGOS_DLL_DECL boss_sacrolashAI : public ScriptedAI
         {
             if (Creature* pAlythess = m_pInstance->GetSingleCreatureFromStorage(NPC_ALYTHESS))
             {
-                if (!pAlythess->isAlive())
+                if (!pAlythess->IsAlive())
                 {
                     m_pInstance->SetData(TYPE_EREDAR_TWINS, DONE);
                     DoScriptText(SAY_SACROLASH_DEAD, m_creature);
@@ -401,7 +401,7 @@ struct MANGOS_DLL_DECL boss_sacrolashAI : public ScriptedAI
     {
         std::vector<Unit*> m_vRangeTargets;
 
-        ThreatList const& tList = m_creature->getThreatManager().getThreatList();
+        ThreatList const& tList = m_creature->GetThreatManager().getThreatList();
         for (ThreatList::const_iterator iter = tList.begin(); iter != tList.end(); ++iter)
         {
             if (Unit* pTempTarget = m_creature->GetMap()->GetUnit((*iter)->getUnitGuid()))
@@ -476,8 +476,8 @@ struct MANGOS_DLL_DECL boss_sacrolashAI : public ScriptedAI
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CONFOUNDING_BLOW) == CAST_OK)
             {
                 // Reset threat
-                if (m_creature->getThreatManager().getThreat(m_creature->getVictim()))
-                    m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -100);
+                if (m_creature->GetThreatManager().getThreat(m_creature->getVictim()))
+                    m_creature->GetThreatManager().modifyThreatPercent(m_creature->getVictim(), -100);
 
                 m_uiConfoundingBlowTimer = urand(25000, 30000);
             }

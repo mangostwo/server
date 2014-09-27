@@ -176,7 +176,7 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
                 {
                     if (Creature* pDwarf = GetSingleCreatureFromStorage(aTombDwarfes[i]))
                     {
-                        if (!pDwarf->isAlive())
+                        if (!pDwarf->IsAlive())
                             pDwarf->Respawn();
                     }
                 }

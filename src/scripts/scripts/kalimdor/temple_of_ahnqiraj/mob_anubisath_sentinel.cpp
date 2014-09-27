@@ -80,7 +80,7 @@ struct MANGOS_DLL_DECL npc_anubisath_sentinelAI : public ScriptedAI
 
             if (Creature* pBuddy = m_creature->GetMap()->GetCreature(*itr))
             {
-                if (pBuddy->isDead())
+                if (pBuddy->IsDead())
                     pBuddy->Respawn();
             }
         }
@@ -125,7 +125,7 @@ struct MANGOS_DLL_DECL npc_anubisath_sentinelAI : public ScriptedAI
                 if (*itr == m_creature->GetObjectGuid())
                     continue;
 
-                if (!pBuddy->isAlive())
+                if (!pBuddy->IsAlive())
                     continue;
 
                 pBuddy->SetHealth(pBuddy->GetMaxHealth());
@@ -145,7 +145,7 @@ struct MANGOS_DLL_DECL npc_anubisath_sentinelAI : public ScriptedAI
 
                 if (Creature* pBuddy = m_creature->GetMap()->GetCreature(*itr))
                 {
-                    if (pBuddy->isAlive())
+                    if (pBuddy->IsAlive())
                         pBuddy->AI()->AttackStart(pTarget);
                 }
             }

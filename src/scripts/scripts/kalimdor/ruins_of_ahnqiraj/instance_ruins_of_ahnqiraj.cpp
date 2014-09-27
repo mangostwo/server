@@ -167,7 +167,7 @@ void instance_ruins_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
             {
                 if (Creature* pAndorov = GetSingleCreatureFromStorage(NPC_GENERAL_ANDOROV))
                 {
-                    if (pAndorov->isAlive())
+                    if (pAndorov->IsAlive())
                         pAndorov->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 }
             }
@@ -276,11 +276,11 @@ void instance_ruins_of_ahnqiraj::DoSortArmyWaves()
 
             for (std::list<Creature*>::const_iterator itr = lCreatureList.begin(); itr != lCreatureList.end(); ++itr)
             {
-                if ((*itr)->isAlive())
+                if ((*itr)->IsAlive())
                     m_sArmyWavesGuids[i].insert((*itr)->GetObjectGuid());
             }
 
-            if (pTemp->isAlive())
+            if (pTemp->IsAlive())
                 m_sArmyWavesGuids[i].insert(pTemp->GetObjectGuid());
         }
     }
@@ -316,7 +316,7 @@ void instance_ruins_of_ahnqiraj::DoSendNextArmyWave()
         {
             if (Creature* pTemp = instance->GetCreature(*itr))
             {
-                if (!pTemp->isAlive())
+                if (!pTemp->IsAlive())
                     continue;
 
                 pTemp->SetWalk(false);

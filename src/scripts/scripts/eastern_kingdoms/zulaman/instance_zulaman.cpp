@@ -149,7 +149,7 @@ void instance_zulaman::OnCreatureEvade(Creature* pCreature)
             for (GuidSet::const_iterator itr = m_aNalorakkEvent[m_uiBearEventPhase].sBearTrashGuidSet.begin(); itr != m_aNalorakkEvent[m_uiBearEventPhase].sBearTrashGuidSet.end(); ++itr)
             {
                 Creature* pTemp = instance->GetCreature(*itr);
-                if (pTemp && !pTemp->isAlive())
+                if (pTemp && !pTemp->IsAlive())
                     pTemp->Respawn();
             }
             m_aNalorakkEvent[m_uiBearEventPhase].uiTrashKilled = 0;
@@ -386,7 +386,7 @@ void instance_zulaman::SendNextBearWave(Unit* pTarget)
     for (GuidSet::const_iterator itr = m_aNalorakkEvent[m_uiBearEventPhase].sBearTrashGuidSet.begin(); itr != m_aNalorakkEvent[m_uiBearEventPhase].sBearTrashGuidSet.end(); ++itr)
     {
         Creature* pTemp = instance->GetCreature(*itr);
-        if (pTemp && pTemp->isAlive())
+        if (pTemp && pTemp->IsAlive())
         {
             pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
             pTemp->AI()->AttackStart(pTarget);

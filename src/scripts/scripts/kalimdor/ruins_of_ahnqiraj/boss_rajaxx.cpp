@@ -170,7 +170,7 @@ struct MANGOS_DLL_DECL npc_general_andorovAI : public ScriptedAI, private Dialog
         m_creature->DeleteThreatList();
         m_creature->CombatStop(true);
 
-        if (m_creature->isAlive())
+        if (m_creature->IsAlive())
         {
             // reset to combat position
             if (m_uiPointId >= 4)
@@ -325,11 +325,11 @@ struct MANGOS_DLL_DECL npc_kaldorei_eliteAI : public ScriptedAI
         m_creature->CombatStop(true);
 
         // reset only to the last position
-        if (m_creature->isAlive())
+        if (m_creature->IsAlive())
         {
             if (Creature* pAndorov = m_pInstance->GetSingleCreatureFromStorage(NPC_GENERAL_ANDOROV))
             {
-                if (pAndorov->isAlive())
+                if (pAndorov->IsAlive())
                     m_creature->GetMotionMaster()->MoveFollow(pAndorov, m_creature->GetDistance(pAndorov), m_creature->GetAngle(pAndorov));
             }
         }

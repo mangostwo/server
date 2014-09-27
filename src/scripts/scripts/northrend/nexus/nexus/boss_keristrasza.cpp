@@ -86,7 +86,7 @@ struct MANGOS_DLL_DECL boss_keristraszaAI : public ScriptedAI
         if (!m_pInstance)
             return;
 
-        if (m_creature->isAlive())
+        if (m_creature->IsAlive())
         {
             if (m_pInstance->GetData(TYPE_KERISTRASZA) != SPECIAL)
                 DoCastSpellIfCan(m_creature, SPELL_FROZEN_PRISON, CAST_TRIGGERED);
@@ -127,7 +127,7 @@ struct MANGOS_DLL_DECL boss_keristraszaAI : public ScriptedAI
         {
             if (uiCheckIntenseColdTimer < uiDiff)
             {
-                ThreatList playerList = m_creature->getThreatManager().getThreatList();
+                ThreatList playerList = m_creature->GetThreatManager().getThreatList();
                 for (ThreatList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
                 {
                     if (Player* pTarget = m_creature->GetMap()->GetPlayer((*itr)->getUnitGuid()))
@@ -191,7 +191,7 @@ struct MANGOS_DLL_DECL boss_keristraszaAI : public ScriptedAI
                             {
                                 if (Player* pMember = pRef->getSource())
                                 {
-                                    if (pMember->isAlive() && pMember->IsWithinDistInMap(m_creature, 50.0f))
+                                    if (pMember->IsAlive() && pMember->IsWithinDistInMap(m_creature, 50.0f))
                                         m_creature->CastSpell(pMember, SPELL_CRYSTAL_CHAINS, true);
                                 }
                             }

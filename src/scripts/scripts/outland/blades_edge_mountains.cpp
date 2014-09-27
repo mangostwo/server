@@ -332,7 +332,7 @@ struct MANGOS_DLL_DECL npc_bloodmaul_stout_triggerAI : public ScriptedAI
 
                 do
                 {
-                    if ((*ogreItr)->isAlive() && !(*ogreItr)->HasAura(SPELL_INTOXICATION))
+                    if ((*ogreItr)->IsAlive() && !(*ogreItr)->HasAura(SPELL_INTOXICATION))
                         pOgre = *ogreItr;
 
                     ++ogreItr;

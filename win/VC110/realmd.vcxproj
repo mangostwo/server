@@ -158,7 +158,7 @@
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\realmd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>VERSION="0.18";WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VERSION="0.19.0";WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -180,7 +180,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>libmySQL.lib;libeay32.lib;ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\..\dep\lib\$(Platform)_$(Configuration);.\framework__$(Platform)_$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -205,7 +205,7 @@
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\realmd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>VERSION="0.18";WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VERSION="0.19.0";WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -226,7 +226,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>libmySQL.lib;libeay32.lib;ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\..\dep\lib\$(Platform)_$(Configuration);.\framework__$(Platform)_$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -239,7 +239,7 @@
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy ..\..\src\realmd\realmd.conf.dist.in ..\..\bin\$(Platform)_$(Configuration)\realmd.conf.dist</Command>
+      <Command>copy ..\..\src\realmd\realmd.conf.dist.in ..\..\bin\$(Platform)_$(Configuration)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -250,7 +250,7 @@
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\realmd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>VERSION="0.18";WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VERSION="0.19.0";WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -272,7 +272,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>libmySQL.lib;libeay32.lib;ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>
       </Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -300,7 +300,7 @@
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\realmd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>VERSION="0.18";WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VERSION="0.19.0";WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -321,7 +321,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>libmySQL.lib;libeay32.lib;ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>
       </Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -348,7 +348,7 @@
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\realmd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>VERSION="0.18";WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VERSION="0.19.0";WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -370,7 +370,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>libmySQL.lib;libeay32.lib;ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>
       </Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -398,7 +398,7 @@
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\realmd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>VERSION="0.18";WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VERSION="0.19.0";WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -419,7 +419,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>libmySQL.lib;libeay32.lib;ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>
       </Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -461,6 +461,10 @@
     <ProjectReference Include="shared.vcxproj">
       <Project>{90297c34-f231-4df4-848e-a74bcc0e40ed}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\..\dep\lib\$(Platform)\libeay32.lib" />
+    <Library Include="..\..\dep\lib\$(Platform)\libmysql.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

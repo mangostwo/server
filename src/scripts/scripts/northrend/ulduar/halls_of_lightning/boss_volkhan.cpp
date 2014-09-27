@@ -141,7 +141,7 @@ struct MANGOS_DLL_DECL boss_volkhanAI : public ScriptedAI
         {
             if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
             {
-                if (pTemp->isAlive())
+                if (pTemp->IsAlive())
                     pTemp->ForcedDespawn();
             }
         }

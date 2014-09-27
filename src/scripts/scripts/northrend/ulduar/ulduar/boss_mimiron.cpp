@@ -898,7 +898,7 @@ struct MANGOS_DLL_DECL boss_leviathan_mk2AI : public ScriptedAI
             // respawn the turret if necessary
             if (Creature* pTurret = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK_TURRET))
             {
-                if (!pTurret->isAlive())
+                if (!pTurret->IsAlive())
                     pTurret->Respawn();
             }
         }
@@ -1231,8 +1231,8 @@ struct MANGOS_DLL_DECL boss_vx001AI : public ScriptedAI
         Unit* pTarget = NULL;
         Unit* pOldTarget = m_creature->getVictim();
 
-        if (!m_creature->getThreatManager().isThreatListEmpty())
-            pTarget = m_creature->getThreatManager().getHostileTarget();
+        if (!m_creature->GetThreatManager().isThreatListEmpty())
+            pTarget = m_creature->GetThreatManager().getHostileTarget();
 
         if (pTarget)
         {
@@ -1240,7 +1240,7 @@ struct MANGOS_DLL_DECL boss_vx001AI : public ScriptedAI
                 AttackStart(pTarget);
 
             // Set victim to old target (if not while Burst or Laser)
-            if (pOldTarget && pOldTarget->isAlive() && !m_uiBurstEndTimer && !m_uiLaserEndTimer)
+            if (pOldTarget && pOldTarget->IsAlive() && !m_uiBurstEndTimer && !m_uiLaserEndTimer)
             {
                 m_creature->SetTargetGuid(pOldTarget->GetObjectGuid());
                 m_creature->SetInFront(pOldTarget);
@@ -1813,7 +1813,7 @@ struct MANGOS_DLL_DECL npc_mimiron_flamesAI : public Scripted_NoMovementAI
             return NULL;
 
         std::list<Unit*> lTargets;
-        ThreatList const& threatList = pLeviathan->getThreatManager().getThreatList();
+        ThreatList const& threatList = pLeviathan->GetThreatManager().getThreatList();
 
         for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
         {

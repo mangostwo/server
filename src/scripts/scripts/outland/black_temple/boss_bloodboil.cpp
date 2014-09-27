@@ -169,7 +169,7 @@ struct MANGOS_DLL_DECL boss_gurtogg_bloodboilAI : public ScriptedAI
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_EJECT_1) == CAST_OK)
                 {
                     // Script effect: reduce threat on main target
-                    m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -40);
+                    m_creature->GetThreatManager().modifyThreatPercent(m_creature->getVictim(), -40);
                     m_uiEjectTimer = 15000;
                 }
             }

@@ -170,7 +170,7 @@ struct MANGOS_DLL_DECL boss_eregosAI : public ScriptedAI
                 m_vAnomalyTargets.clear();
                 m_uiAnomalyTargetIndex = 0;
 
-                ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
+                ThreatList const& threatList = m_creature->GetThreatManager().getThreatList();
                 for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
                 {
                     if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))

@@ -202,7 +202,7 @@ void instance_stratholme::SetData(uint32 uiType, uint32 uiData)
                     if (Creature* pAbom = instance->GetCreature(*itr))
                     {
                         ++itr;
-                        if (!pAbom->isAlive())
+                        if (!pAbom->IsAlive())
                             --uiCount;
                     }
                     else
@@ -330,7 +330,7 @@ void instance_stratholme::SetData(uint32 uiType, uint32 uiData)
             if (uiData == IN_PROGRESS)
             {
                 Creature* pBarthilas = GetSingleCreatureFromStorage(NPC_BARTHILAS);
-                if (pBarthilas && pBarthilas->isAlive() && !pBarthilas->isInCombat())
+                if (pBarthilas && pBarthilas->IsAlive() && !pBarthilas->IsInCombat())
                 {
                     DoScriptText(SAY_WARN_BARON, pBarthilas);
                     pBarthilas->SetWalk(false);
@@ -490,7 +490,7 @@ void instance_stratholme::DoSortZiggurats()
         {
             if (GameObject* pZigguratDoor = instance->GetGameObject(m_zigguratStorage[i].m_doorGuid))
             {
-                if ((*itr)->isAlive() && (*itr)->IsWithinDistInMap(pZigguratDoor, 35.0f, false))
+                if ((*itr)->IsAlive() && (*itr)->IsWithinDistInMap(pZigguratDoor, 35.0f, false))
                 {
                     m_zigguratStorage[i].m_lZigguratAcolyteGuid.push_back((*itr)->GetObjectGuid());
                     itr = lAcolytes.erase(itr);
@@ -613,7 +613,7 @@ void instance_stratholme::OnCreatureDeath(Creature* pCreature)
                 for (GuidList::const_iterator itr = m_luiGuardGUIDs.begin(); itr != m_luiGuardGUIDs.end(); ++itr)
                 {
                     Creature* pGuard = instance->GetCreature(*itr);
-                    if (pGuard && pGuard->isAlive() && !pGuard->isInCombat())
+                    if (pGuard && pGuard->IsAlive() && !pGuard->IsInCombat())
                     {
                         float fX, fY, fZ;
                         pGuard->GetRandomPoint(aStratholmeLocation[5].m_fX, aStratholmeLocation[5].m_fY, aStratholmeLocation[5].m_fZ, 10.0f, fX, fY, fZ);
@@ -681,7 +681,7 @@ void instance_stratholme::Update(uint32 uiDiff)
         if (m_uiBarthilasRunTimer <= uiDiff)
         {
             Creature* pBarthilas = GetSingleCreatureFromStorage(NPC_BARTHILAS);
-            if (pBarthilas && pBarthilas->isAlive() && !pBarthilas->isInCombat())
+            if (pBarthilas && pBarthilas->IsAlive() && !pBarthilas->IsInCombat())
                 pBarthilas->NearTeleportTo(aStratholmeLocation[1].m_fX, aStratholmeLocation[1].m_fY, aStratholmeLocation[1].m_fZ, aStratholmeLocation[1].m_fO);
 
             SetData(TYPE_BARTHILAS_RUN, DONE);
@@ -753,11 +753,11 @@ void instance_stratholme::Update(uint32 uiDiff)
             {
                 Creature* pAbom = instance->GetCreature(*itr);
                 // Skip killed and already walking Abomnations
-                if (!pAbom || !pAbom->isAlive() || pAbom->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
+                if (!pAbom || !pAbom->IsAlive() || pAbom->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
                     continue;
 
                 // Let Move to somewhere in the middle
-                if (!pAbom->isInCombat())
+                if (!pAbom->IsInCombat())
                 {
                     if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_PORT_SLAUGTHER))
                     {

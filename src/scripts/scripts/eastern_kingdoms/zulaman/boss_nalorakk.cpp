@@ -135,7 +135,7 @@ struct MANGOS_DLL_DECL boss_nalorakkAI : public ScriptedAI
         m_creature->LoadCreatureAddon(true);
 
         // Boss should evade on the top of the platform
-        if (m_creature->isAlive())
+        if (m_creature->IsAlive())
             m_creature->GetMotionMaster()->MovePoint(1, aBearEventInfo[m_uiCurrentWave].fX, aBearEventInfo[m_uiCurrentWave].fY, aBearEventInfo[m_uiCurrentWave].fZ);
 
         m_creature->SetLootRecipient(NULL);

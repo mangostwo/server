@@ -134,7 +134,7 @@ enum
 
 bool GossipHello_npc_thrall_warchief(Player* pPlayer, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
 
     if (pPlayer->GetQuestStatus(QUEST_ID_WHAT_THE_WIND_CARRIES) == QUEST_STATUS_INCOMPLETE)

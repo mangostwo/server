@@ -2120,21 +2120,21 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         MeleeHitOutcome RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackType attType) const;
         MeleeHitOutcome RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackType attType, int32 crit_chance, int32 miss_chance, int32 dodge_chance, int32 parry_chance, int32 block_chance) const;
 
-        bool isVendor()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR); }
-        bool isTrainer()      const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER); }
-        bool isQuestGiver()   const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER); }
-        bool isGossip()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP); }
+        bool IsVendor()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR); }
+        bool IsTrainer()      const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER); }
+        bool IsQuestGiver()   const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER); }
+        bool IsGossip()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP); }
         bool isTaxi()         const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_FLIGHTMASTER); }
-        bool isGuildMaster()  const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER); }
-        bool isBattleMaster() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BATTLEMASTER); }
-        bool isBanker()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER); }
-        bool isInnkeeper()    const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_INNKEEPER); }
-        bool isSpiritHealer() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER); }
-        bool isSpiritGuide()  const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITGUIDE); }
-        bool isTabardDesigner()const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDDESIGNER); }
+        bool IsGuildMaster()  const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER); }
+        bool IsBattleMaster() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BATTLEMASTER); }
+        bool IsBanker()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER); }
+        bool IsInnkeeper()    const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_INNKEEPER); }
+        bool IsSpiritHealer() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER); }
+        bool IsSpiritGuide()  const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITGUIDE); }
+        bool IsTabardDesigner()const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDDESIGNER); }
         bool isAuctioner()    const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_AUCTIONEER); }
-        bool isArmorer()      const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_REPAIR); }
-        bool isServiceProvider() const
+        bool IsArmorer()      const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_REPAIR); }
+        bool IsServiceProvider() const
         {
             return HasFlag(UNIT_NPC_FLAGS,
                            UNIT_NPC_FLAG_VENDOR | UNIT_NPC_FLAG_TRAINER | UNIT_NPC_FLAG_FLIGHTMASTER |
@@ -2142,11 +2142,11 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
                            UNIT_NPC_FLAG_INNKEEPER | UNIT_NPC_FLAG_SPIRITHEALER |
                            UNIT_NPC_FLAG_SPIRITGUIDE | UNIT_NPC_FLAG_TABARDDESIGNER | UNIT_NPC_FLAG_AUCTIONEER);
         }
-        bool isSpiritService() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER | UNIT_NPC_FLAG_SPIRITGUIDE); }
+        bool IsSpiritService() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER | UNIT_NPC_FLAG_SPIRITGUIDE); }
 
         bool IsTaxiFlying()  const { return hasUnitState(UNIT_STAT_TAXI_FLIGHT); }
 
-        bool isInCombat()  const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); }
+        bool IsInCombat()  const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); }
         void SetInCombatState(bool PvP, Unit* enemy = NULL);
         void SetInCombatWith(Unit* enemy);
         void ClearInCombat();
@@ -2175,13 +2175,13 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         bool HasStealthAura()      const { return HasAuraType(SPELL_AURA_MOD_STEALTH); }
         bool HasInvisibilityAura() const { return HasAuraType(SPELL_AURA_MOD_INVISIBILITY); }
         bool isFeared()  const { return HasAuraType(SPELL_AURA_MOD_FEAR); }
-        bool isInRoots() const { return HasAuraType(SPELL_AURA_MOD_ROOT); }
+        bool IsInRoots() const { return HasAuraType(SPELL_AURA_MOD_ROOT); }
         bool IsPolymorphed() const;
 
         bool isFrozen() const;
         bool IsIgnoreUnitState(SpellEntry const* spell, IgnoreUnitState ignoreState);
 
-        bool isTargetableForAttack(bool inversAlive = false) const;
+        bool IsTargetableForAttack(bool inversAlive = false) const;
         bool isPassiveToHostile() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE); }
 
         virtual bool IsInWater() const;
@@ -2229,9 +2229,9 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         void SendThreatRemove(HostileReference* pHostileReference);
         void SendThreatUpdate();
 
-        bool isAlive() const { return (m_deathState == ALIVE); };
-        bool isDead() const { return (m_deathState == DEAD || m_deathState == CORPSE); };
-        bool isDying() const { return (m_deathState == JUST_DIED); }
+        bool IsAlive() const { return (m_deathState == ALIVE); };
+        bool IsDead() const { return (m_deathState == DEAD || m_deathState == CORPSE); };
+        bool IsDying() const { return (m_deathState == JUST_DIED); }
         DeathState getDeathState() const { return m_deathState; };
         virtual void SetDeathState(DeathState s);           // overwritten in Creature/Player/Pet
 
@@ -2264,7 +2264,7 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
                 return guid;
             return GetObjectGuid();
         }
-        bool isCharmedOwnedByPlayerOrPlayer() const { return GetCharmerOrOwnerOrOwnGuid().IsPlayer(); }
+        bool IsCharmedOwnedByPlayerOrPlayer() const { return GetCharmerOrOwnerOrOwnGuid().IsPlayer(); }
 
         Player* GetSpellModOwner() const;
 
@@ -2294,7 +2294,7 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         Pet* FindGuardianWithEntry(uint32 entry);
         Pet* GetProtectorPet();                             // expected single case in guardian list
 
-        bool isCharmed() const { return !GetCharmerGuid().IsEmpty(); }
+        bool IsCharmed() const { return !GetCharmerGuid().IsEmpty(); }
 
         CharmInfo* GetCharmInfo() { return m_charmInfo; }
         CharmInfo* InitCharmInfo(Unit* charm);
@@ -2456,7 +2456,7 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         void UpdateVisibilityAndView() override;            // overwrite WorldObject::UpdateVisibilityAndView()
 
         // common function for visibility checks for player/creatures with detection code
-        bool isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList = false, bool is3dDistance = true) const;
+        bool IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList = false, bool is3dDistance = true) const;
         bool canDetectInvisibilityOf(Unit const* u) const;
         void SetPhaseMask(uint32 newPhaseMask, bool update) override;// overwrite WorldObject::SetPhaseMask
 
@@ -2481,11 +2481,11 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         void TauntFadeOut(Unit* taunter);
         void FixateTarget(Unit* pVictim);
         ObjectGuid GetFixateTargetGuid() const { return m_fixateTargetGuid; }
-        ThreatManager& getThreatManager() { return m_ThreatManager; }
-        ThreatManager const& getThreatManager() const { return m_ThreatManager; }
+        ThreatManager& GetThreatManager() { return m_ThreatManager; }
+        ThreatManager const& GetThreatManager() const { return m_ThreatManager; }
         void addHatedBy(HostileReference* pHostileReference) { m_HostileRefManager.insertFirst(pHostileReference); };
         void removeHatedBy(HostileReference* /*pHostileReference*/) { /* nothing to do yet */ }
-        HostileRefManager& getHostileRefManager() { return m_HostileRefManager; }
+        HostileRefManager& GetHostileRefManager() { return m_HostileRefManager; }
 
         uint32 GetVisibleAura(uint8 slot) const
         {

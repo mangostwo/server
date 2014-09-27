@@ -51,7 +51,7 @@ struct MANGOS_DLL_DECL npc_dalaran_guardian_mageAI : public ScriptedAI
         if (m_creature->GetDistanceZ(pWho) > CREATURE_Z_ATTACK_RANGE)
             return;
 
-        if (pWho->isTargetableForAttack() && m_creature->IsHostileTo(pWho))
+        if (pWho->IsTargetableForAttack() && m_creature->IsHostileTo(pWho))
         {
             // exception for quests 20439 and 24451
             if (pWho->HasAura(SPELL_COVENANT_DISGUISE_1) || pWho->HasAura(SPELL_COVENANT_DISGUISE_2) ||

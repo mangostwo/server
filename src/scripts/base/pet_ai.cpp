@@ -18,7 +18,7 @@ ScriptedPetAI::ScriptedPetAI(Creature* pCreature) : CreatureAI(pCreature)
 bool ScriptedPetAI::IsVisible(Unit* pWho) const
 {
     return pWho && m_creature->IsWithinDist(pWho, VISIBLE_RANGE)
-           && pWho->isVisibleForOrDetect(m_creature, m_creature, true);
+           && pWho->IsVisibleForOrDetect(m_creature, m_creature, true);
 }
 
 void ScriptedPetAI::MoveInLineOfSight(Unit* pWho)
@@ -29,7 +29,7 @@ void ScriptedPetAI::MoveInLineOfSight(Unit* pWho)
     if (!m_creature->GetCharmInfo() || !m_creature->GetCharmInfo()->HasReactState(REACT_AGGRESSIVE))
         return;
 
-    if (m_creature->CanInitiateAttack() && pWho->isTargetableForAttack() &&
+    if (m_creature->CanInitiateAttack() && pWho->IsTargetableForAttack() &&
             m_creature->IsHostileTo(pWho) && pWho->isInAccessablePlaceFor(m_creature))
     {
         if (!m_creature->CanFly() && m_creature->GetDistanceZ(pWho) > CREATURE_Z_ATTACK_RANGE)
@@ -86,7 +86,7 @@ void ScriptedPetAI::UpdatePetAI(const uint32 /*uiDiff*/)
 
 void ScriptedPetAI::UpdateAI(const uint32 uiDiff)
 {
-    if (!m_creature->isAlive())                             // should not be needed, isAlive is checked in mangos before calling UpdateAI
+    if (!m_creature->IsAlive())                             // should not be needed, IsAlive is checked in mangos before calling UpdateAI
         return;
 
     // UpdateAllies() is done in the generic PetAI in Mangos, but we can't do this from script side.
@@ -94,7 +94,7 @@ void ScriptedPetAI::UpdateAI(const uint32 uiDiff)
 
     if (m_creature->getVictim())                            // in combat
     {
-        if (!m_creature->getVictim()->isTargetableForAttack())
+        if (!m_creature->getVictim()->IsTargetableForAttack())
         {
             // target no longer valid for pet, so either attack stops or new target are selected
             // doesn't normally reach this, because of how petAi is designed in Mangos. CombatStop
@@ -113,7 +113,7 @@ void ScriptedPetAI::UpdateAI(const uint32 uiDiff)
         if (!pOwner)
             return;
 
-        if (pOwner->isInCombat() && !m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE))
+        if (pOwner->IsInCombat() && !m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE))
         {
             // Not correct in all cases.
             // When mob initiate attack by spell, pet should not start attack before spell landed.

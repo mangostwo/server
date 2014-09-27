@@ -174,7 +174,7 @@ struct MANGOS_DLL_DECL boss_forgemaster_garfrostAI : public ScriptedAI
         {
             if (m_uiCheckPermafrostTimer <= uiDiff)
             {
-                ThreatList playerList = m_creature->getThreatManager().getThreatList();
+                ThreatList playerList = m_creature->GetThreatManager().getThreatList();
                 for (ThreatList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
                 {
                     if (Player* pTarget = m_creature->GetMap()->GetPlayer((*itr)->getUnitGuid()))

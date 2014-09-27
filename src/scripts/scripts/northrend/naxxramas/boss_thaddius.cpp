@@ -466,7 +466,7 @@ struct MANGOS_DLL_DECL boss_thaddiusAddsAI : public ScriptedAI
 
         if (Creature* pOtherAdd = GetOtherAdd())
         {
-            if (!pOtherAdd->isInCombat())
+            if (!pOtherAdd->IsInCombat())
                 pOtherAdd->AI()->AttackStart(pWho);
         }
     }
@@ -526,7 +526,7 @@ struct MANGOS_DLL_DECL boss_thaddiusAddsAI : public ScriptedAI
 
     bool IsCountingDead()
     {
-        return m_bFakeDeath || m_creature->isDead();
+        return m_bFakeDeath || m_creature->IsDead();
     }
 
     void PauseCombatMovement()

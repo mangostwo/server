@@ -117,7 +117,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (pUser->isInCombat())
+    if (pUser->IsInCombat())
     {
         for (int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
         {
@@ -534,7 +534,7 @@ void WorldSession::HandlePetCancelAuraOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (!pet->isAlive())
+    if (!pet->IsAlive())
     {
         pet->SendPetActionFeedback(FEEDBACK_PET_DEAD);
         return;
@@ -609,11 +609,11 @@ void WorldSession::HandleSpellClick(WorldPacket& recv_data)
     recv_data >> guid;
 
     // client prevent click and set different icon at combat state; however combat state is allowed for dungeons
-    if (_player->isInCombat() && !_player->GetMap()->IsDungeon())
+    if (_player->IsInCombat() && !_player->GetMap()->IsDungeon())
         return;
 
     Creature* unit = _player->GetMap()->GetAnyTypeCreature(guid);
-    if (!unit || unit->isInCombat())                        // client prevent click and set different icon at combat state
+    if (!unit || unit->IsInCombat())                        // client prevent click and set different icon at combat state
         return;
 
     SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(unit->GetEntry());

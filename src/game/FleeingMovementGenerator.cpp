@@ -161,7 +161,7 @@ void FleeingMovementGenerator<T>::Reset(T& owner)
 template<class T>
 bool FleeingMovementGenerator<T>::Update(T& owner, const uint32& time_diff)
 {
-    if (!&owner || !owner.isAlive())
+    if (!&owner || !owner.IsAlive())
         return false;
 
     // ignore in case other no reaction state
@@ -196,7 +196,7 @@ void TimedFleeingMovementGenerator::Finalize(Unit& owner)
     owner.clearUnitState(UNIT_STAT_FLEEING | UNIT_STAT_FLEEING_MOVE);
     if (Unit* victim = owner.getVictim())
     {
-        if (owner.isAlive())
+        if (owner.IsAlive())
         {
             owner.AttackStop(true);
             ((Creature*)&owner)->AI()->AttackStart(victim);
@@ -206,7 +206,7 @@ void TimedFleeingMovementGenerator::Finalize(Unit& owner)
 
 bool TimedFleeingMovementGenerator::Update(Unit& owner, const uint32& time_diff)
 {
-    if (!owner.isAlive())
+    if (!owner.IsAlive())
         return false;
 
     // ignore in case other no reaction state

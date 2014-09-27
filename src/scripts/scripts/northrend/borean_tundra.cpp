@@ -143,7 +143,7 @@ struct MANGOS_DLL_DECL npc_nesingwary_trapperAI : public ScriptedAI
 
                             if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
                             {
-                                if (pPlayer->isAlive())
+                                if (pPlayer->IsAlive())
                                     pPlayer->KilledMonsterCredit(m_creature->GetEntry());
                             }
                         }

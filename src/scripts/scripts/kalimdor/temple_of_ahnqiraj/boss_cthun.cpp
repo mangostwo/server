@@ -209,8 +209,8 @@ struct MANGOS_DLL_DECL boss_eye_of_cthunAI : public Scripted_NoMovementAI
         Unit* pTarget = NULL;
         Unit* pOldTarget = m_creature->getVictim();
 
-        if (!m_creature->getThreatManager().isThreatListEmpty())
-            pTarget = m_creature->getThreatManager().getHostileTarget();
+        if (!m_creature->GetThreatManager().isThreatListEmpty())
+            pTarget = m_creature->GetThreatManager().getHostileTarget();
 
         if (pTarget)
         {
@@ -218,7 +218,7 @@ struct MANGOS_DLL_DECL boss_eye_of_cthunAI : public Scripted_NoMovementAI
                 AttackStart(pTarget);
 
             // Set victim to old target (if not while Dark Glare)
-            if (pOldTarget && pOldTarget->isAlive() && m_Phase == PHASE_EYE_NORMAL)
+            if (pOldTarget && pOldTarget->IsAlive() && m_Phase == PHASE_EYE_NORMAL)
             {
                 m_creature->SetTargetGuid(pOldTarget->GetObjectGuid());
                 m_creature->SetInFront(pOldTarget);
@@ -513,8 +513,8 @@ struct MANGOS_DLL_DECL boss_cthunAI : public Scripted_NoMovementAI
         Unit* pTarget = NULL;
         Unit* pOldTarget = m_creature->getVictim();
 
-        if (!m_creature->getThreatManager().isThreatListEmpty())
-            pTarget = m_creature->getThreatManager().getHostileTarget();
+        if (!m_creature->GetThreatManager().isThreatListEmpty())
+            pTarget = m_creature->GetThreatManager().getHostileTarget();
 
         if (pTarget)
         {
@@ -522,7 +522,7 @@ struct MANGOS_DLL_DECL boss_cthunAI : public Scripted_NoMovementAI
                 AttackStart(pTarget);
 
             // Set victim to old target
-            if (pOldTarget && pOldTarget->isAlive())
+            if (pOldTarget && pOldTarget->IsAlive())
             {
                 m_creature->SetTargetGuid(pOldTarget->GetObjectGuid());
                 m_creature->SetInFront(pOldTarget);
@@ -758,7 +758,7 @@ bool AreaTrigger_at_stomach_cthun(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
     if (pAt->id == AREATRIGGER_STOMACH_1)
     {
-        if (pPlayer->isGameMaster() || !pPlayer->isAlive())
+        if (pPlayer->isGameMaster() || !pPlayer->IsAlive())
             return false;
 
         // Summon the exit trigger which should push the player outside the stomach - not used because missing eject spells

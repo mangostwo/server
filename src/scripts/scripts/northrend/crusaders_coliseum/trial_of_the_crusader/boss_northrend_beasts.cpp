@@ -208,7 +208,7 @@ struct MANGOS_DLL_DECL npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
                 for (uint8 i = 0; i < 4; ++i)
                 {
                     Creature* pBoss = m_creature->GetMap()->GetCreature(m_aSummonedBossGuid[i]);
-                    if (pBoss && pBoss->isAlive())
+                    if (pBoss && pBoss->IsAlive())
                         pBoss->CastSpell(pBoss, SPELL_BERSERK, true);
                 }
             }

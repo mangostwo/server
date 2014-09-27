@@ -222,7 +222,7 @@ struct MANGOS_DLL_DECL Council_Base_AI : public ScriptedAI
             return;
 
         Creature* pMaulgar = m_pInstance->GetSingleCreatureFromStorage(NPC_MAULGAR);
-        if (pMaulgar && pMaulgar->isAlive())
+        if (pMaulgar && pMaulgar->IsAlive())
         {
             if (boss_high_king_maulgarAI* pMaulgarAI = dynamic_cast<boss_high_king_maulgarAI*>(pMaulgar->AI()))
                 pMaulgarAI->EventCouncilDeath();
@@ -309,7 +309,7 @@ struct MANGOS_DLL_DECL boss_kiggler_the_crazedAI : public Council_Base_AI
             if (pVictim->GetTypeId() != TYPEID_PLAYER)
                 return;
 
-            m_creature->getThreatManager().modifyThreatPercent(pVictim, -75);
+            m_creature->GetThreatManager().modifyThreatPercent(pVictim, -75);
         }
     }
 

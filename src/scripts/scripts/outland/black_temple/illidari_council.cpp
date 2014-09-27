@@ -248,7 +248,7 @@ struct MANGOS_DLL_DECL mob_illidari_councilAI : public ScriptedAI
         for (uint8 i = 0; i < 4; ++i)
         {
             Creature* pMember = m_pInstance->GetSingleCreatureFromStorage(aCouncilMember[i]);
-            if (pMember && pMember->isAlive())
+            if (pMember && pMember->IsAlive())
                 pMember->DealDamage(pMember, pMember->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
         }
 

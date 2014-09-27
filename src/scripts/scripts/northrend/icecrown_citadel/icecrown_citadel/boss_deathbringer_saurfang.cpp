@@ -207,7 +207,7 @@ struct MANGOS_DLL_DECL boss_deathbringer_saurfangAI : public ScriptedAI
         m_creature->CombatStop(true);
 
         // Boss needs to evade to the point in front of the door
-        if (m_creature->isAlive())
+        if (m_creature->IsAlive())
             m_creature->GetMotionMaster()->MovePoint(POINT_ID_EVADE, fIntroPosition[0], fIntroPosition[1], fIntroPosition[2]);
 
         m_creature->SetLootRecipient(NULL);
@@ -256,7 +256,7 @@ struct MANGOS_DLL_DECL boss_deathbringer_saurfangAI : public ScriptedAI
     {
         // Search only for players which are not within 18 yards of the boss
         std::vector<Unit*> suitableTargets;
-        ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
+        ThreatList const& threatList = m_creature->GetThreatManager().getThreatList();
 
         for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
         {

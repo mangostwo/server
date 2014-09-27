@@ -142,7 +142,7 @@ struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
         {
             if (Creature* pZombie = m_creature->GetMap()->GetCreature(*itr))
             {
-                if (!pZombie->isAlive())
+                if (!pZombie->IsAlive())
                     continue;
 
                 // Devour a Zombie

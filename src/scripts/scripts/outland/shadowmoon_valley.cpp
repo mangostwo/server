@@ -1016,7 +1016,7 @@ struct MANGOS_DLL_DECL npc_lord_illidan_stormrageAI : public Scripted_NoMovement
             {
                 if (Player* pMember = pRef->getSource())
                 {
-                    if (!pMember->isAlive())
+                    if (!pMember->IsAlive())
                         ++uiDeadMemberCount;
 
                     // if we already failed no need to check other things
@@ -1055,7 +1055,7 @@ struct MANGOS_DLL_DECL npc_lord_illidan_stormrageAI : public Scripted_NoMovement
                 m_bEventFailed = true;
             }
         }
-        else if (pPlayer->isDead() || !pPlayer->IsWithinDistInMap(m_creature, EVENT_AREA_RADIUS))
+        else if (pPlayer->IsDead() || !pPlayer->IsWithinDistInMap(m_creature, EVENT_AREA_RADIUS))
         {
             pPlayer->FailQuest(QUEST_BATTLE_OF_THE_CRIMSON_WATCH);
             m_bEventFailed = true;
@@ -1550,12 +1550,12 @@ struct MANGOS_DLL_DECL npc_spawned_oronok_tornheartAI : public ScriptedAI, priva
 
         Reset();
 
-        if (!m_creature->isAlive())
+        if (!m_creature->IsAlive())
             return;
 
         if (Creature* pCyrukh = m_creature->GetMap()->GetCreature(m_cyrukhGuid))
         {
-            if (!pCyrukh->isAlive())
+            if (!pCyrukh->IsAlive())
                 m_creature->GetMotionMaster()->MovePoint(POINT_ID_EPILOGUE, aDamnationLocations[6].m_fX, aDamnationLocations[6].m_fY, aDamnationLocations[6].m_fZ);
         }
         else

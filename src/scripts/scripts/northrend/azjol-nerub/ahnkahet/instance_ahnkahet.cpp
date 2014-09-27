@@ -349,7 +349,7 @@ void instance_ahnkahet::HandleInsanitySwitch(Player* pPhasedPlayer)
             if (pTemp->HasAura(uiPhaseAura))
                 lSamePhasePlayers.push_back(pTemp);
             // Check only for alive players
-            else if (pTemp->isAlive())
+            else if (pTemp->IsAlive())
                 vOtherPhasePlayers.push_back(pTemp);
         }
     }

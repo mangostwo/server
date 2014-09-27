@@ -56,7 +56,7 @@ struct MANGOS_DLL_DECL generic_creatureAI : public ScriptedAI
         else GlobalCooldown = 0;
 
         // Buff timer (only buff when we are alive and not in combat
-        if (!m_creature->isInCombat() && m_creature->isAlive())
+        if (!m_creature->IsInCombat() && m_creature->IsAlive())
         {
             if (BuffTimer < diff)
             {

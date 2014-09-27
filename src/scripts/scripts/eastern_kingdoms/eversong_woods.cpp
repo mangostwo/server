@@ -166,10 +166,10 @@ struct MANGOS_DLL_DECL npc_kelerun_bloodmournAI : public ScriptedAI
             if (m_uiCheckAliveStateTimer < uiDiff)
             {
                 Creature* pChallenger = m_creature->GetMap()->GetCreature(m_aChallengerGuids[m_uiChallengerCount]);
-                if (pChallenger && !pChallenger->isAlive())
+                if (pChallenger && !pChallenger->IsAlive())
                 {
                     Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
-                    if (!pPlayer || !pPlayer->isAlive())
+                    if (!pPlayer || !pPlayer->IsAlive())
                     {
                         Reset();
                         return;
@@ -197,7 +197,7 @@ struct MANGOS_DLL_DECL npc_kelerun_bloodmournAI : public ScriptedAI
                 if (m_uiEngageTimer <= uiDiff)
                 {
                     Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
-                    if (!pPlayer || !pPlayer->isAlive())
+                    if (!pPlayer || !pPlayer->IsAlive())
                     {
                         Reset();
                         return;

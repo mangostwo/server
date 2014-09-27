@@ -205,7 +205,7 @@ struct MANGOS_DLL_DECL mob_pure_energyAI : public ScriptedAI
             {
                 Creature* pVex = m_creature->GetMap()->GetCreature(pTemporary->GetSummonerGuid());
 
-                if (!pVex || !pVex->isAlive())
+                if (!pVex || !pVex->IsAlive())
                     return;
 
                 if (Player* pPlayer = pKiller->GetCharmerOrOwnerPlayerOrPlayerItself())

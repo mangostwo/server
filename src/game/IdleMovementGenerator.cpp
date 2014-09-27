@@ -72,7 +72,7 @@ AssistanceDistractMovementGenerator::Finalize(Unit& unit)
     unit.clearUnitState(UNIT_STAT_DISTRACTED);
     if (Unit* victim = unit.getVictim())
     {
-        if (unit.isAlive())
+        if (unit.IsAlive())
         {
             unit.AttackStop(true);
             ((Creature*)&unit)->AI()->AttackStart(victim);

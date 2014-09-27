@@ -315,7 +315,7 @@ void instance_blackwing_lair::Update(uint32 uiDiff)
             // Respawn Razorgore
             if (Creature* pRazorgore = GetSingleCreatureFromStorage(NPC_RAZORGORE))
             {
-                if (!pRazorgore->isAlive())
+                if (!pRazorgore->IsAlive())
                     pRazorgore->Respawn();
             }
 

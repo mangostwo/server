@@ -112,7 +112,7 @@ void instance_magisters_terrace::OnCreatureDeath(Creature* pCreature)
             // yell on summoned death
             if (Creature* pDelrissa = GetSingleCreatureFromStorage(NPC_DELRISSA))
             {
-                if (pDelrissa->isAlive())
+                if (pDelrissa->IsAlive())
                     DoScriptText(aDelrissaAddDeath[m_uiDelrissaDeathCount - 1], pDelrissa);
                 else if (GetData(TYPE_DELRISSA) == SPECIAL)
                 {
@@ -141,7 +141,7 @@ void instance_magisters_terrace::SetData(uint32 uiType, uint32 uiData)
                         if (!pTemp->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
                             pTemp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
-                        if (pTemp->isAlive())
+                        if (pTemp->IsAlive())
                             pTemp->AI()->EnterEvadeMode();
                     }
                 }

@@ -20,4 +20,8 @@ endif()
 
 add_subdirectory(recastnavigation)
 add_subdirectory(src)
-add_subdirectory(lualib)
+add_subdirectory(libmpq)
+
+if(SCRIPT_LIB_ELUNA)
+    add_subdirectory(lualib)
+endif()

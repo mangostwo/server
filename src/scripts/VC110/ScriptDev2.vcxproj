@@ -158,8 +158,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalOptions>/Zm200 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>..\..\..\dep\include\;..\..\shared\;..\..\..\framework\;..\..\..\game\;..\include\;..\base\;..\..\..\dep\ACE_wrappers\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/MP /Zm200 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\dep\include\;..\..\shared\;..\..\framework\;..\..\game\;..\include\;..\base\;..\..\..\dep\ACE_wrappers\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;SCRIPT;_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -189,8 +189,8 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalOptions>/Zm200 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>..\..\..\dep\include\;..\..\shared\;..\..\..\framework\;..\..\game\;..\include\;..\base\;..\..\..\dep\ACE_wrappers\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/MP /Zm200%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\..\dep\include\;..\..\shared\;..\..\framework\;..\..\game\;..\include\;..\base\;..\..\..\dep\ACE_wrappers\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;SCRIPT;_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>

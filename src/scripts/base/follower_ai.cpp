@@ -86,7 +86,7 @@ bool FollowerAI::AssistPlayerInCombat(Unit* pWho)
 
 void FollowerAI::MoveInLineOfSight(Unit* pWho)
 {
-    if (pWho->isTargetableForAttack() && pWho->isInAccessablePlaceFor(m_creature))
+    if (pWho->IsTargetableForAttack() && pWho->isInAccessablePlaceFor(m_creature))
     {
         // AssistPlayerInCombat can start attack, so return if true
         if (HasFollowState(STATE_FOLLOW_INPROGRESS) && AssistPlayerInCombat(pWho))
@@ -311,7 +311,7 @@ Player* FollowerAI::GetLeaderForFollower()
 {
     if (Player* pLeader = m_creature->GetMap()->GetPlayer(m_leaderGuid))
     {
-        if (pLeader->isAlive())
+        if (pLeader->IsAlive())
             return pLeader;
         else
         {
@@ -321,7 +321,7 @@ Player* FollowerAI::GetLeaderForFollower()
                 {
                     Player* pMember = pRef->getSource();
 
-                    if (pMember && pMember->isAlive() && m_creature->IsWithinDistInMap(pMember, MAX_PLAYER_DISTANCE))
+                    if (pMember && pMember->IsAlive() && m_creature->IsWithinDistInMap(pMember, MAX_PLAYER_DISTANCE))
                     {
                         debug_log("SD2: FollowerAI GetLeader changed and returned new leader.");
                         m_leaderGuid = pMember->GetObjectGuid();

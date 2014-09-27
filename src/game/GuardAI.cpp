@@ -46,7 +46,7 @@ void GuardAI::MoveInLineOfSight(Unit* u)
     if (!m_creature->CanFly() && m_creature->GetDistanceZ(u) > CREATURE_Z_ATTACK_RANGE)
         return;
 
-    if (!m_creature->getVictim() && u->isTargetableForAttack() &&
+    if (!m_creature->getVictim() && u->IsTargetableForAttack() &&
         (u->IsHostileToPlayers() || m_creature->IsHostileTo(u) /*|| u->getVictim() && m_creature->IsFriendlyTo(u->getVictim())*/) &&
         u->isInAccessablePlaceFor(m_creature))
     {
@@ -62,7 +62,7 @@ void GuardAI::MoveInLineOfSight(Unit* u)
 
 void GuardAI::EnterEvadeMode()
 {
-    if (!m_creature->isAlive())
+    if (!m_creature->IsAlive())
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature stopped attacking because he's dead [guid=%u]", m_creature->GetGUIDLow());
         m_creature->StopMoving();
@@ -82,7 +82,7 @@ void GuardAI::EnterEvadeMode()
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature stopped attacking, no victim [guid=%u]", m_creature->GetGUIDLow());
     }
-    else if (!victim->isAlive())
+    else if (!victim->IsAlive())
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature stopped attacking, victim is dead [guid=%u]", m_creature->GetGUIDLow());
     }
@@ -124,7 +124,7 @@ void GuardAI::UpdateAI(const uint32 /*diff*/)
 bool GuardAI::IsVisible(Unit* pl) const
 {
     return m_creature->IsWithinDist(pl, sWorld.getConfig(CONFIG_FLOAT_SIGHT_GUARDER))
-           && pl->isVisibleForOrDetect(m_creature, m_creature, true);
+           && pl->IsVisibleForOrDetect(m_creature, m_creature, true);
 }
 
 void GuardAI::AttackStart(Unit* u)

@@ -335,10 +335,10 @@ struct MANGOS_DLL_DECL boss_janalaiAI : public ScriptedAI
                 Creature* pHatcer1 = m_creature->GetMap()->GetCreature(m_hatcherOneGuid);
                 Creature* pHatcer2 = m_creature->GetMap()->GetCreature(m_hatcherTwoGuid);
 
-                if (!pHatcer1 || !pHatcer1->isAlive())
+                if (!pHatcer1 || !pHatcer1->IsAlive())
                     DoCastSpellIfCan(m_creature, SPELL_SUMMON_HATCHER_1, CAST_TRIGGERED);
 
-                if (!pHatcer2 || !pHatcer2->isAlive())
+                if (!pHatcer2 || !pHatcer2->IsAlive())
                     DoCastSpellIfCan(m_creature, SPELL_SUMMON_HATCHER_2, CAST_TRIGGERED);
 
                 m_uiHatcherTimer = 90000;

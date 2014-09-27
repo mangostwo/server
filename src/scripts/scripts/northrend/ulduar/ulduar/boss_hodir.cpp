@@ -151,7 +151,7 @@ struct MANGOS_DLL_DECL boss_hodirAI : public ScriptedAI
         m_creature->DeleteThreatList();
         m_creature->CombatStop(true);
 
-        if (m_creature->isAlive() && !m_bEventFinished)
+        if (m_creature->IsAlive() && !m_bEventFinished)
             m_creature->GetMotionMaster()->MoveTargetedHome();
 
         m_creature->SetLootRecipient(NULL);
@@ -168,7 +168,7 @@ struct MANGOS_DLL_DECL boss_hodirAI : public ScriptedAI
             if (!m_bEventFinished)
             {
                 // Inform the faction helpers that the fight is over
-                ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
+                ThreatList const& threatList = m_creature->GetThreatManager().getThreatList();
                 for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
                 {
                     // only check creatures

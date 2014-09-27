@@ -228,7 +228,7 @@ struct MANGOS_DLL_DECL npc_engineer_spark_overgrindAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff) override
     {
-        if (!m_creature->isInCombat() && !m_bIsTreeEvent)
+        if (!m_creature->IsInCombat() && !m_bIsTreeEvent)
         {
             if (m_uiEmoteTimer < diff)
             {

@@ -569,7 +569,7 @@ void Pet::RegenerateAll(uint32 update_diff)
     // regenerate focus for hunter pets or energy for deathknight's ghoul
     if (m_regenTimer <= update_diff)
     {
-        if (!isInCombat() || IsPolymorphed())
+        if (!IsInCombat() || IsPolymorphed())
             RegenerateHealth();
 
         RegeneratePower();
@@ -597,7 +597,7 @@ void Pet::LooseHappiness()
     if (curValue <= 0)
         return;
     int32 addvalue = 670;                                   // value is 70/35/17/8/4 (per min) * 1000 / 8 (timer 7.5 secs)
-    if (isInCombat())                                       // we know in combat happiness fades faster, multiplier guess
+    if (IsInCombat())                                       // we know in combat happiness fades faster, multiplier guess
         addvalue = int32(addvalue * 1.5);
     ModifyPower(POWER_HAPPINESS, -addvalue);
 }
@@ -737,7 +737,7 @@ void Pet::GivePetXP(uint32 xp)
     if (xp < 1)
         return;
 
-    if (!isAlive())
+    if (!IsAlive())
         return;
 
     uint32 level = getLevel();

@@ -128,7 +128,7 @@ struct MANGOS_DLL_DECL boss_void_reaverAI : public ScriptedAI
         {
             // Search only for players which are not within 18 yards of the boss
             std::vector<Unit*> suitableTargets;
-            ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
+            ThreatList const& threatList = m_creature->GetThreatManager().getThreatList();
 
             for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
             {

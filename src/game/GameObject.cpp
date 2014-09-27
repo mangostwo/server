@@ -246,7 +246,7 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                 {
                     // Arming Time for GAMEOBJECT_TYPE_TRAP (6)
                     Unit* owner = GetOwner();
-                    if (owner && owner->isInCombat())
+                    if (owner && owner->IsInCombat())
                         m_cooldownTime = time(NULL) + GetGOInfo()->trap.startDelay;
                     m_lootState = GO_READY;
                     break;

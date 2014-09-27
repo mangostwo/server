@@ -118,7 +118,7 @@ struct MANGOS_DLL_DECL boss_vazruden_heraldAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* pWho) override
     {
-        if (m_bIsEventInProgress && !m_lastSeenPlayerGuid && pWho->GetTypeId() == TYPEID_PLAYER && pWho->isAlive() && !((Player*)pWho)->isGameMaster())
+        if (m_bIsEventInProgress && !m_lastSeenPlayerGuid && pWho->GetTypeId() == TYPEID_PLAYER && pWho->IsAlive() && !((Player*)pWho)->isGameMaster())
         {
             if (m_creature->IsWithinDistInMap(pWho, 40.0f))
                 m_lastSeenPlayerGuid = pWho->GetObjectGuid();
@@ -174,7 +174,7 @@ struct MANGOS_DLL_DECL boss_vazruden_heraldAI : public ScriptedAI
                     m_creature->SetLevitate(false);
 
                     Player* pPlayer = m_creature->GetMap()->GetPlayer(m_lastSeenPlayerGuid);
-                    if (pPlayer && pPlayer->isAlive())
+                    if (pPlayer && pPlayer->IsAlive())
                         AttackStart(pPlayer);
 
                     // Initialize for combat

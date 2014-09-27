@@ -266,7 +266,7 @@ struct MANGOS_DLL_DECL boss_grand_warlock_nethekurseAI : public ScriptedAI
         GetCreatureListWithEntryInGrid(lFelConverts, m_creature, NPC_FEL_ORC_CONVERT, 40.0f);
         for (std::list<Creature*>::iterator itr = lFelConverts.begin(); itr != lFelConverts.end(); ++itr)
         {
-            if (!(*itr)->isAlive())
+            if (!(*itr)->IsAlive())
                 (*itr)->Respawn();
         }
     }

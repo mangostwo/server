@@ -103,7 +103,7 @@ void instance_icecrown_citadel::DoHandleCitadelAreaTrigger(uint32 uiTriggerId, P
     {
         if (Creature* pSindragosa = GetSingleCreatureFromStorage(NPC_SINDRAGOSA))
         {
-            if (pSindragosa->isAlive() && !pSindragosa->isInCombat())
+            if (pSindragosa->IsAlive() && !pSindragosa->IsInCombat())
                 pSindragosa->SetInCombatWithZone();
         }
         else
@@ -279,14 +279,14 @@ void instance_icecrown_citadel::OnCreatureDeath(Creature* pCreature)
         case NPC_STINKY:
             if (Creature* pFestergut = GetSingleCreatureFromStorage(NPC_FESTERGUT))
             {
-                if (pFestergut->isAlive())
+                if (pFestergut->IsAlive())
                     DoScriptText(SAY_STINKY_DIES, pFestergut);
             }
             break;
         case NPC_PRECIOUS:
             if (Creature* pRotface = GetSingleCreatureFromStorage(NPC_ROTFACE))
             {
-                if (pRotface->isAlive())
+                if (pRotface->IsAlive())
                     DoScriptText(SAY_PRECIOUS_DIES, pRotface);
             }
             break;
@@ -482,7 +482,7 @@ bool AreaTrigger_at_icecrown_citadel(Player* pPlayer, AreaTriggerEntry const* pA
     if (pAt->id == AREATRIGGER_MARROWGAR_INTRO || pAt->id == AREATRIGGER_DEATHWHISPER_INTRO ||
             pAt->id == AREATRIGGER_SINDRAGOSA_PLATFORM)
     {
-        if (pPlayer->isGameMaster() || pPlayer->isDead())
+        if (pPlayer->isGameMaster() || pPlayer->IsDead())
             return false;
 
         if (instance_icecrown_citadel* pInstance = (instance_icecrown_citadel*)pPlayer->GetInstanceData())

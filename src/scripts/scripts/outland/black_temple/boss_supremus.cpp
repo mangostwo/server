@@ -163,7 +163,7 @@ struct MANGOS_DLL_DECL boss_supremusAI : public ScriptedAI
         uint32 uiHealth = 0;
         Unit* pTarget = NULL;
 
-        ThreatList const& tList = m_creature->getThreatManager().getThreatList();
+        ThreatList const& tList = m_creature->GetThreatManager().getThreatList();
         for (ThreatList::const_iterator iter = tList.begin(); iter != tList.end(); ++iter)
         {
             Unit* pUnit = m_creature->GetMap()->GetUnit((*iter)->getUnitGuid());

@@ -73,7 +73,7 @@ bool Totem::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* 
 void Totem::Update(uint32 update_diff, uint32 time)
 {
     Unit* owner = GetOwner();
-    if (!owner || !owner->isAlive() || !isAlive())
+    if (!owner || !owner->IsAlive() || !IsAlive())
     {
         UnSummon();                                         // remove self
         return;
@@ -147,7 +147,7 @@ void Totem::UnSummon()
     }
 
     // any totem unsummon look like as totem kill, req. for proper animation
-    if (isAlive())
+    if (IsAlive())
         SetDeathState(DEAD);
 
     AddObjectToRemoveList();

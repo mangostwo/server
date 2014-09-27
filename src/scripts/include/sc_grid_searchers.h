@@ -47,7 +47,7 @@ class AllFriendlyCreaturesInGrid
         AllFriendlyCreaturesInGrid(Unit const* obj) : pUnit(obj) {}
         bool operator() (Unit* u)
         {
-            if (u->isAlive() && u->GetVisibility() == VISIBILITY_ON && u->IsFriendlyTo(pUnit))
+            if (u->IsAlive() && u->GetVisibility() == VISIBILITY_ON && u->IsFriendlyTo(pUnit))
                 return true;
 
             return false;

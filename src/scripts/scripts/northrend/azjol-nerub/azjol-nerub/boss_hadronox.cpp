@@ -145,7 +145,7 @@ struct MANGOS_DLL_DECL boss_hadronoxAI : public ScriptedAI
 
         Reset();
 
-        if (!m_creature->isAlive() || !m_pInstance)
+        if (!m_creature->IsAlive() || !m_pInstance)
             return;
 
         // Moving upstairs, don't disturb

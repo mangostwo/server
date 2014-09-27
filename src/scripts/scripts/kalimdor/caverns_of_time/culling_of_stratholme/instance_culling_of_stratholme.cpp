@@ -224,7 +224,7 @@ void instance_culling_of_stratholme::SetData(uint32 uiType, uint32 uiData)
                 case FAIL:
                     SetData(TYPE_INFINITE_CORRUPTER_TIME, 0);
                     if (Creature* pCorrupter = GetSingleCreatureFromStorage(NPC_INFINITE_CORRUPTER))
-                        if (pCorrupter->isAlive())
+                        if (pCorrupter->IsAlive())
                             pCorrupter->ForcedDespawn();
                     break;
             }
@@ -400,7 +400,7 @@ void instance_culling_of_stratholme::DoSpawnArthasIfNeeded(Unit* pSummoner)
         return;
 
     Creature* pArthas = GetSingleCreatureFromStorage(NPC_ARTHAS, true);
-    if (pArthas && pArthas->isAlive())
+    if (pArthas && pArthas->IsAlive())
         return;
 
     uint8 uiPosition = GetInstancePosition();
@@ -524,7 +524,7 @@ bool AreaTrigger_at_culling_of_stratholme(Player* pPlayer, AreaTriggerEntry cons
 {
     if (pAt->id == AREATRIGGER_INN)
     {
-        if (pPlayer->isGameMaster() || pPlayer->isDead())
+        if (pPlayer->isGameMaster() || pPlayer->IsDead())
             return false;
 
         if (instance_culling_of_stratholme* pInstance = (instance_culling_of_stratholme*)pPlayer->GetInstanceData())

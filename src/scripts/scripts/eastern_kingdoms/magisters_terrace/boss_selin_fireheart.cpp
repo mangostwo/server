@@ -135,7 +135,7 @@ struct MANGOS_DLL_DECL boss_selin_fireheartAI : public ScriptedAI
             return;
 
         Creature* pCrystal = m_creature->GetMap()->GetCreature(m_crystalGuid);
-        if (pCrystal && pCrystal->isAlive())
+        if (pCrystal && pCrystal->IsAlive())
         {
             if (DoCastSpellIfCan(pCrystal, SPELL_MANA_RAGE) == CAST_OK)
             {
@@ -234,7 +234,7 @@ struct MANGOS_DLL_DECL boss_selin_fireheartAI : public ScriptedAI
 
                     // Kill the drained crystal
                     Creature* pCrystalChosen = m_creature->GetMap()->GetCreature(m_crystalGuid);
-                    if (pCrystalChosen && pCrystalChosen->isAlive())
+                    if (pCrystalChosen && pCrystalChosen->IsAlive())
                         pCrystalChosen->DealDamage(pCrystalChosen, pCrystalChosen->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
 
                     m_uiManaRageTimer = 0;
@@ -270,7 +270,7 @@ struct MANGOS_DLL_DECL mob_fel_crystalAI : public ScriptedAI
     void MoveInLineOfSight(Unit* pWho) override
     {
         // Cosmetic spell
-        if (m_sWretchedGuids.find(pWho->GetObjectGuid()) == m_sWretchedGuids.end() && pWho->IsWithinDist(m_creature, 5.0f) && pWho->isAlive() &&
+        if (m_sWretchedGuids.find(pWho->GetObjectGuid()) == m_sWretchedGuids.end() && pWho->IsWithinDist(m_creature, 5.0f) && pWho->IsAlive() &&
                 (pWho->GetEntry() == NPC_SKULER || pWho->GetEntry() == NPC_BRUISER || pWho->GetEntry() == NPC_HUSK))
         {
             pWho->CastSpell(m_creature, SPELL_FEL_CRYSTAL_COSMETIC, false);
@@ -283,7 +283,7 @@ struct MANGOS_DLL_DECL mob_fel_crystalAI : public ScriptedAI
         if (ScriptedInstance* pInstance = (ScriptedInstance*)m_creature->GetInstanceData())
         {
             Creature* pSelin = pInstance->GetSingleCreatureFromStorage(NPC_SELIN_FIREHEART);
-            if (!pSelin || !pSelin->isAlive())
+            if (!pSelin || !pSelin->IsAlive())
                 return;
 
             // Mark Mana rage as completed

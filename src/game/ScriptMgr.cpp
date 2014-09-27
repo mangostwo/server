@@ -949,7 +949,7 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject
                 CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(m_script->buddyEntry);
                 pBuddy = m_map->GetCreature(cinfo->GetObjectGuid(m_script->searchRadiusOrGuid));
 
-                if (pBuddy && !((Creature*)pBuddy)->isAlive())
+                if (pBuddy && !((Creature*)pBuddy)->IsAlive())
                 {
                     sLog.outError(" DB-SCRIPTS: Process table `%s` id %u, command %u has buddy %u by guid %u but buddy is dead, skipping.", m_table, m_script->id, m_script->command, m_script->buddyEntry, m_script->searchRadiusOrGuid);
                     return false;
@@ -1260,7 +1260,7 @@ bool ScriptAction::HandleScriptStep()
 
             bool failQuest = false;
             // Creature must be alive for giving credit
-            if (pWorldObject && pWorldObject->GetTypeId() == TYPEID_UNIT && !((Creature*)pWorldObject)->isAlive())
+            if (pWorldObject && pWorldObject->GetTypeId() == TYPEID_UNIT && !((Creature*)pWorldObject)->IsAlive())
                 failQuest = true;
             else if (m_script->questExplored.distance != 0 && !pWorldObject->IsWithinDistInMap(pPlayer, float(m_script->questExplored.distance)))
                 failQuest = true;
@@ -2113,8 +2113,9 @@ bool ScriptMgr::OnQuestAccept(Player* pPlayer, Item* pItem, Quest const* pQuest)
 bool ScriptMgr::OnQuestRewarded(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
 {
     // used by eluna
-    if (sEluna->OnQuestReward(pPlayer, pCreature, pQuest))
-        return false;
+	//TODO:FIX
+	//if (sEluna->OnQuestReward(pPlayer, pCreature, pQuest))
+    //    return false;
     
     return m_pOnQuestRewarded != NULL && m_pOnQuestRewarded(pPlayer, pCreature, pQuest);
 }
@@ -2122,8 +2123,9 @@ bool ScriptMgr::OnQuestRewarded(Player* pPlayer, Creature* pCreature, Quest cons
 bool ScriptMgr::OnQuestRewarded(Player* pPlayer, GameObject* pGameObject, Quest const* pQuest)
 {
     // used by eluna
-    if (sEluna->OnQuestReward(pPlayer, pGameObject, pQuest))
-        return false;
+	//TODO:FIX
+    //if (sEluna->OnQuestReward(pPlayer, pGameObject, pQuest))
+    //    return false;
     
     return m_pOnGOQuestRewarded != NULL && m_pOnGOQuestRewarded(pPlayer, pGameObject, pQuest);
 }

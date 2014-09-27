@@ -443,7 +443,7 @@ bool GOUse_go_manticron_cube(Player* pPlayer, GameObject* pGo)
 
         if (Creature* pMagtheridon = pInstance->GetSingleCreatureFromStorage(NPC_MAGTHERIDON))
         {
-            if (!pMagtheridon->isAlive())
+            if (!pMagtheridon->IsAlive())
                 return true;
 
             // visual is cast by cube

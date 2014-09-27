@@ -72,7 +72,7 @@ void RandomMovementGenerator<Creature>::Initialize(Creature& creature)
 {
     creature.addUnitState(UNIT_STAT_ROAMING);               // _MOVE set in _setRandomLocation
 
-    if (!creature.isAlive() || creature.hasUnitState(UNIT_STAT_NOT_MOVE))
+    if (!creature.IsAlive() || creature.hasUnitState(UNIT_STAT_NOT_MOVE))
         return;
 
     _setRandomLocation(creature);

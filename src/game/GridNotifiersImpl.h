@@ -81,13 +81,13 @@ inline void CreatureCreatureRelocationWorker(Creature* c1, Creature* c2)
 
 inline void MaNGOS::PlayerRelocationNotifier::Visit(CreatureMapType& m)
 {
-    if (!i_player.isAlive() || i_player.IsTaxiFlying())
+    if (!i_player.IsAlive() || i_player.IsTaxiFlying())
         return;
 
     for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
         Creature* c = iter->getSource();
-        if (c->isAlive())
+        if (c->IsAlive())
             PlayerCreatureRelocationWorker(&i_player, c);
     }
 }
@@ -95,13 +95,13 @@ inline void MaNGOS::PlayerRelocationNotifier::Visit(CreatureMapType& m)
 template<>
 inline void MaNGOS::CreatureRelocationNotifier::Visit(PlayerMapType& m)
 {
-    if (!i_creature.isAlive())
+    if (!i_creature.IsAlive())
         return;
 
     for (PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
         Player* player = iter->getSource();
-        if (player->isAlive() && !player->IsTaxiFlying())
+        if (player->IsAlive() && !player->IsTaxiFlying())
             PlayerCreatureRelocationWorker(player, &i_creature);
     }
 }
@@ -109,20 +109,20 @@ inline void MaNGOS::CreatureRelocationNotifier::Visit(PlayerMapType& m)
 template<>
 inline void MaNGOS::CreatureRelocationNotifier::Visit(CreatureMapType& m)
 {
-    if (!i_creature.isAlive())
+    if (!i_creature.IsAlive())
         return;
 
     for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
         Creature* c = iter->getSource();
-        if (c != &i_creature && c->isAlive())
+        if (c != &i_creature && c->IsAlive())
             CreatureCreatureRelocationWorker(c, &i_creature);
     }
 }
 
 inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
 {
-    if (!target->isAlive() || target->IsTaxiFlying())
+    if (!target->IsAlive() || target->IsTaxiFlying())
         return;
 
     if (target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->IsTotem())

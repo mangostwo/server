@@ -188,7 +188,7 @@ struct MANGOS_DLL_DECL boss_fathomlord_karathressAI : public ScriptedAI
                 if (Creature* pAdvisor = m_pInstance->GetSingleCreatureFromStorage(aAdvisors[i]))
                 {
                     // stack max three times (one for each alive)
-                    if (pAdvisor->isAlive())
+                    if (pAdvisor->IsAlive())
                     {
                         pAdvisor->InterruptNonMeleeSpells(false);
                         pAdvisor->CastSpell(m_creature, SPELL_BLESSING_OF_THE_TIDES, true);

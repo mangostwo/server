@@ -123,7 +123,7 @@ struct MANGOS_DLL_DECL boss_ossirianAI : public ScriptedAI
         {
             // Respawn static spawned crystal trigger
             pOssirianTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_OSSIRIAN_TRIGGER);
-            if (pOssirianTrigger && !pOssirianTrigger->isAlive())
+            if (pOssirianTrigger && !pOssirianTrigger->IsAlive())
                 pOssirianTrigger->Respawn();
         }
         else

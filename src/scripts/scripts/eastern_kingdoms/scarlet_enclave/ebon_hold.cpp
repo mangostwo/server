@@ -178,7 +178,7 @@ struct MANGOS_DLL_DECL npc_a_special_surpriseAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (m_playerGuid && !m_creature->getVictim() && m_creature->isAlive())
+        if (m_playerGuid && !m_creature->getVictim() && m_creature->IsAlive())
         {
             if (m_uiExecuteSpeech_Timer < uiDiff)
             {
@@ -770,7 +770,7 @@ struct MANGOS_DLL_DECL npc_koltira_deathweaverAI : public npc_escortAI
                     {
                         Creature* pTemp = m_creature->GetMap()->GetCreature(m_valrothGuid);
 
-                        if (!pTemp || !pTemp->isAlive())
+                        if (!pTemp || !pTemp->IsAlive())
                         {
                             DoScriptText(SAY_BREAKOUT8, m_creature);
                             m_uiWave_Timer = 5000;
@@ -1536,7 +1536,7 @@ struct MANGOS_DLL_DECL npc_highlord_darion_mograineAI : public npc_escortAI
             case NPC_WARRIOR_OF_THE_FROZEN_WASTES:
                 m_lAttackersGUIDs.push_back(pSummoned->GetObjectGuid());
                 // make the scourge attack only during the battle
-                if (m_creature->isInCombat())
+                if (m_creature->IsInCombat())
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                         pSummoned->AI()->AttackStart(pTarget);
@@ -1679,7 +1679,7 @@ struct MANGOS_DLL_DECL npc_highlord_darion_mograineAI : public npc_escortAI
                     if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(aLightArmySpawnLoc[i].m_uiEntry))
                     {
                         // normally it shouldn't happen
-                        if (!pTemp->isAlive())
+                        if (!pTemp->IsAlive())
                             pTemp->Respawn();
                         else
                             pTemp->AI()->EnterEvadeMode();
@@ -1844,7 +1844,7 @@ struct MANGOS_DLL_DECL npc_highlord_darion_mograineAI : public npc_escortAI
         for (Map::PlayerList::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
         {
             Player* pPlayer = itr->getSource();
-            if (pPlayer && pPlayer->GetQuestStatus(QUEST_ID_LIGHT_OF_DAWN) == QUEST_STATUS_INCOMPLETE && pPlayer->isAlive() && m_creature->IsWithinDistInMap(pPlayer, 50.0f))
+            if (pPlayer && pPlayer->GetQuestStatus(QUEST_ID_LIGHT_OF_DAWN) == QUEST_STATUS_INCOMPLETE && pPlayer->IsAlive() && m_creature->IsWithinDistInMap(pPlayer, 50.0f))
                 pPlayer->CastSpell(pPlayer, SPELL_THE_LIGHT_OF_DAWN_CREDIT, true);
         }
     }
@@ -2576,7 +2576,7 @@ struct MANGOS_DLL_DECL npc_highlord_darion_mograineAI : public npc_escortAI
 
 bool GossipHello_npc_highlord_darion_mograine(Player* pPlayer, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
 
     // Only allow start battle after reset
@@ -2657,7 +2657,7 @@ struct MANGOS_DLL_DECL npc_fellow_death_knightAI : public ScriptedAI
 
     void EnterEvadeMode() override
     {
-        if (!m_creature->isAlive())
+        if (!m_creature->IsAlive())
             return;
 
         if (!m_pInstance)

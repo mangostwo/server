@@ -163,7 +163,7 @@ struct MANGOS_DLL_DECL npc_ancestral_wolfAI : public npc_escortAI
                 break;
             case 50:
                 Creature* pRyga = GetClosestCreatureWithEntry(m_creature, NPC_RYGA, 30.0f);
-                if (pRyga && pRyga->isAlive() && !pRyga->isInCombat())
+                if (pRyga && pRyga->IsAlive() && !pRyga->IsInCombat())
                     DoScriptText(SAY_WOLF_WELCOME, pRyga);
                 break;
         }
@@ -280,7 +280,7 @@ struct MANGOS_DLL_DECL npc_demoniac_scryerAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (m_bIsComplete || !m_creature->isAlive())
+        if (m_bIsComplete || !m_creature->IsAlive())
             return;
 
         if (m_uiSpawnButtressTimer <= uiDiff)
@@ -289,7 +289,7 @@ struct MANGOS_DLL_DECL npc_demoniac_scryerAI : public ScriptedAI
             {
                 m_creature->CastSpell(m_creature, SPELL_SUCKER_DESPAWN_MOB, false);
 
-                if (m_creature->isInCombat())
+                if (m_creature->IsInCombat())
                 {
                     m_creature->DeleteThreatList();
                     m_creature->CombatStop();

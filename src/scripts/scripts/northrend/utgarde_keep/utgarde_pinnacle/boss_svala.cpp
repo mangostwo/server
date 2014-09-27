@@ -112,7 +112,7 @@ struct MANGOS_DLL_DECL boss_svalaAI : public ScriptedAI
         m_uiRitualStrikeTimer   = 0;
         m_bHasDoneRitual        = false;
 
-        if (m_creature->isAlive() && m_pInstance && m_pInstance->GetData(TYPE_SVALA) > IN_PROGRESS)
+        if (m_creature->IsAlive() && m_pInstance && m_pInstance->GetData(TYPE_SVALA) > IN_PROGRESS)
         {
             if (m_creature->GetEntry() != NPC_SVALA_SORROW)
                 m_creature->UpdateEntry(NPC_SVALA_SORROW);
@@ -232,7 +232,7 @@ struct MANGOS_DLL_DECL boss_svalaAI : public ScriptedAI
             if (m_bIsIntroDone)
                 return;
 
-            if (pArthas && pArthas->isAlive())
+            if (pArthas && pArthas->IsAlive())
             {
                 if (m_uiIntroTimer < uiDiff)
                 {

@@ -3880,7 +3880,7 @@ bool ChatHandler::HandleDieCommand(char* /*args*/)
             return false;
     }
 
-    if (target->isAlive())
+    if (target->IsAlive())
     {
         player->DealDamage(target, target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
     }
@@ -3902,7 +3902,7 @@ bool ChatHandler::HandleDamageCommand(char* args)
         return false;
     }
 
-    if (!target->isAlive())
+    if (!target->IsAlive())
         return true;
 
     int32 damage_int;
@@ -5962,7 +5962,7 @@ bool ChatHandler::HandleRespawnCommand(char* /*args*/)
             return false;
         }
 
-        if (target->isDead())
+        if (target->IsDead())
             ((Creature*)target)->Respawn();
         return true;
     }

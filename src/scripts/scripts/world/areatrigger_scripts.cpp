@@ -124,7 +124,7 @@ enum
 
 bool AreaTrigger_at_legion_teleporter(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 {
-    if (pPlayer->isAlive() && !pPlayer->isInCombat())
+    if (pPlayer->IsAlive() && !pPlayer->IsInCombat())
     {
         if (pPlayer->GetTeam() == ALLIANCE && pPlayer->GetQuestRewardStatus(QUEST_GAINING_ACCESS_A))
         {
@@ -204,7 +204,7 @@ enum
 
 bool AreaTrigger_at_warsong_farms(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
-    if (!pPlayer->isDead() && pPlayer->GetQuestStatus(QUEST_THE_WARSONG_FARMS) == QUEST_STATUS_INCOMPLETE)
+    if (!pPlayer->IsDead() && pPlayer->GetQuestStatus(QUEST_THE_WARSONG_FARMS) == QUEST_STATUS_INCOMPLETE)
     {
         switch (pAt->id)
         {
@@ -232,7 +232,7 @@ enum
 
 bool AreaTrigger_at_waygate(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
-    if (!pPlayer->isDead() && pPlayer->GetQuestStatus(QUEST_THE_MARKERS_OVERLOOK) == QUEST_STATUS_COMPLETE && pPlayer->GetQuestStatus(QUEST_THE_MARKERS_PERCH) == QUEST_STATUS_COMPLETE)
+    if (!pPlayer->IsDead() && pPlayer->GetQuestStatus(QUEST_THE_MARKERS_OVERLOOK) == QUEST_STATUS_COMPLETE && pPlayer->GetQuestStatus(QUEST_THE_MARKERS_PERCH) == QUEST_STATUS_COMPLETE)
     {
         switch (pAt->id)
         {
@@ -256,7 +256,7 @@ enum
 
 bool AreaTrigger_at_stormwright_shelf(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 {
-    if (!pPlayer->isDead() && pPlayer->GetQuestStatus(QUEST_STRENGTH_OF_THE_TEMPEST) == QUEST_STATUS_INCOMPLETE)
+    if (!pPlayer->IsDead() && pPlayer->GetQuestStatus(QUEST_STRENGTH_OF_THE_TEMPEST) == QUEST_STATUS_INCOMPLETE)
         pPlayer->CastSpell(pPlayer, SPELL_CREATE_TRUE_POWER_OF_THE_TEMPEST, false);
 
     return true;
@@ -274,7 +274,7 @@ enum
 
 bool AreaTrigger_at_scent_larkorwi(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
-    if (pPlayer->isAlive() && !pPlayer->isGameMaster() && pPlayer->GetQuestStatus(QUEST_SCENT_OF_LARKORWI) == QUEST_STATUS_INCOMPLETE)
+    if (pPlayer->IsAlive() && !pPlayer->isGameMaster() && pPlayer->GetQuestStatus(QUEST_SCENT_OF_LARKORWI) == QUEST_STATUS_INCOMPLETE)
     {
         if (!GetClosestCreatureWithEntry(pPlayer, NPC_LARKORWI_MATE, 25.0f, false, false))
             pPlayer->SummonCreature(NPC_LARKORWI_MATE, pAt->x, pAt->y, pAt->z, 3.3f, TEMPSUMMON_TIMED_OOC_DESPAWN, 2 * MINUTE * IN_MILLISECONDS);
@@ -291,7 +291,7 @@ bool AreaTrigger_at_murkdeep(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 {
     // Handle Murkdeep event start
     // The area trigger summons 3 Greymist Coastrunners; The rest of the event is handled by world map scripts
-    if (pPlayer->isAlive() && !pPlayer->isGameMaster() && pPlayer->GetQuestStatus(QUEST_WANTED_MURKDEEP) == QUEST_STATUS_INCOMPLETE)
+    if (pPlayer->IsAlive() && !pPlayer->isGameMaster() && pPlayer->GetQuestStatus(QUEST_WANTED_MURKDEEP) == QUEST_STATUS_INCOMPLETE)
     {
         ScriptedMap* pScriptedMap = (ScriptedMap*)pPlayer->GetInstanceData();
         if (!pScriptedMap)

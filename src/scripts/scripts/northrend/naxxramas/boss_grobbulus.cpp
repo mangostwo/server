@@ -100,7 +100,7 @@ struct MANGOS_DLL_DECL boss_grobbulusAI : public ScriptedAI
             return false;
 
         std::vector<Unit*> suitableTargets;
-        ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
+        ThreatList const& threatList = m_creature->GetThreatManager().getThreatList();
 
         for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
         {

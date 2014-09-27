@@ -594,8 +594,8 @@ struct MANGOS_DLL_DECL mob_zealot_zathAI : public boss_thekalBaseAI
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_GOUGE) == CAST_OK)
                     {
-                        if (m_creature->getThreatManager().getThreat(m_creature->getVictim()))
-                            m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -100);
+                        if (m_creature->GetThreatManager().getThreat(m_creature->getVictim()))
+                            m_creature->GetThreatManager().modifyThreatPercent(m_creature->getVictim(), -100);
 
                         m_uiGougeTimer = urand(17000, 27000);
                     }

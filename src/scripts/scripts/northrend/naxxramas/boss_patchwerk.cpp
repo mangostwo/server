@@ -105,7 +105,7 @@ struct MANGOS_DLL_DECL boss_patchwerkAI : public ScriptedAI
         uint32 uiHighestHP = 0;
         uint32 uiTargets = m_bIsRegularMode ? 1 : 2;
 
-        ThreatList const& tList = m_creature->getThreatManager().getThreatList();
+        ThreatList const& tList = m_creature->GetThreatManager().getThreatList();
         if (tList.size() > 1)                               // Check if more than two targets, and start loop with second-most aggro
         {
             ThreatList::const_iterator iter = tList.begin();

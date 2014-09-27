@@ -1069,7 +1069,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetGameMaster(bool on);
         bool isGMChat() const { return GetSession()->GetSecurity() >= SEC_MODERATOR && (m_ExtraFlags & PLAYER_EXTRA_GM_CHAT); }
         void SetGMChat(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_GM_CHAT; else m_ExtraFlags &= ~PLAYER_EXTRA_GM_CHAT; }
-        bool isTaxiCheater() const { return m_ExtraFlags & PLAYER_EXTRA_TAXICHEAT; }
+        bool IsTaxiCheater() const { return m_ExtraFlags & PLAYER_EXTRA_TAXICHEAT; }
         void SetTaxiCheater(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_TAXICHEAT; else m_ExtraFlags &= ~PLAYER_EXTRA_TAXICHEAT; }
         bool isGMVisible() const { return !(m_ExtraFlags & PLAYER_EXTRA_GM_INVISIBLE); }
         void SetGMVisible(bool on);
@@ -2222,7 +2222,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetTemporaryUnsummonedPetNumber(uint32 petnumber) { m_temporaryUnsummonedPetNumber = petnumber; }
         void UnsummonPetTemporaryIfAny();
         void ResummonPetTemporaryUnSummonedIfAny();
-        bool IsPetNeedBeTemporaryUnsummoned() const { return !IsInWorld() || !isAlive() || IsMounted() /*+in flight*/; }
+        bool IsPetNeedBeTemporaryUnsummoned() const { return !IsInWorld() || !IsAlive() || IsMounted() /*+in flight*/; }
 
         void SendCinematicStart(uint32 CinematicSequenceId);
         void SendMovieStart(uint32 MovieId);
@@ -2562,13 +2562,13 @@ class MANGOS_DLL_SPEC Player : public Unit
         {
             // we should not execute delayed teleports for now dead players but has been alive at teleport
             // because we don't want player's ghost teleported from graveyard
-            return m_bHasDelayedTeleport && (isAlive() || !m_bHasBeenAliveAtDelayedTeleport);
+            return m_bHasDelayedTeleport && (IsAlive() || !m_bHasBeenAliveAtDelayedTeleport);
         }
 
         bool SetDelayedTeleportFlagIfCan()
         {
             m_bHasDelayedTeleport = m_bCanDelayTeleport;
-            m_bHasBeenAliveAtDelayedTeleport = isAlive();
+            m_bHasBeenAliveAtDelayedTeleport = IsAlive();
             return m_bHasDelayedTeleport;
         }
 

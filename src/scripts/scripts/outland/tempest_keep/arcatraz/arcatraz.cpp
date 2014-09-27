@@ -149,7 +149,7 @@ struct MANGOS_DLL_DECL npc_millhouse_manastormAI : public ScriptedAI, private Di
         m_creature->LoadCreatureAddon(true);
 
         // Boss should evade in the center of the room
-        if (m_creature->isAlive())
+        if (m_creature->IsAlive())
             m_creature->GetMotionMaster()->MovePoint(1, fRoomCenterCoords[0], fRoomCenterCoords[1], fRoomCenterCoords[2]);
 
         m_creature->SetLootRecipient(NULL);

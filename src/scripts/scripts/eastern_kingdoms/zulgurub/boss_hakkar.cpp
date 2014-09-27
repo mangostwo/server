@@ -128,7 +128,7 @@ struct MANGOS_DLL_DECL boss_hakkarAI : public ScriptedAI
         // Cause Insanity Timer
         if (m_uiCauseInsanityTimer < uiDiff)
         {
-            if (m_creature->getThreatManager().getThreatList().size() > 1)
+            if (m_creature->GetThreatManager().getThreatList().size() > 1)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CAUSE_INSANITY) == CAST_OK)
                     m_uiCauseInsanityTimer = urand(10000, 15000);
