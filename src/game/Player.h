@@ -864,7 +864,7 @@ class MANGOS_DLL_SPEC PlayerTaxi
         void InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint32 level);
         void LoadTaxiMask(const char* data);
 
-        bool IsTaximaskNodeKnown(uint32 nodeidx) const
+        bool IsTaxiFlyingmaskNodeKnown(uint32 nodeidx) const
         {
             uint8  field   = uint8((nodeidx - 1) / 32);
             uint32 submask = 1 << ((nodeidx - 1) % 32);
@@ -1069,7 +1069,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetGameMaster(bool on);
         bool isGMChat() const { return GetSession()->GetSecurity() >= SEC_MODERATOR && (m_ExtraFlags & PLAYER_EXTRA_GM_CHAT); }
         void SetGMChat(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_GM_CHAT; else m_ExtraFlags &= ~PLAYER_EXTRA_GM_CHAT; }
-        bool IsTaxiCheater() const { return m_ExtraFlags & PLAYER_EXTRA_TAXICHEAT; }
+        bool IsTaxiFlyingCheater() const { return m_ExtraFlags & PLAYER_EXTRA_TAXICHEAT; }
         void SetTaxiCheater(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_TAXICHEAT; else m_ExtraFlags &= ~PLAYER_EXTRA_TAXICHEAT; }
         bool isGMVisible() const { return !(m_ExtraFlags & PLAYER_EXTRA_GM_INVISIBLE); }
         void SetGMVisible(bool on);
