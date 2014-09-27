@@ -1,5 +1,8 @@
 /**
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -648,7 +651,10 @@ bool generate_sql_makefile()
     if (!fout) { pclose(cmd_pipe); return false; }
 
     fprintf(fout,
-            "# This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.\n"
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>\n"
             "#\n"
             "# This program is free software; you can redistribute it and/or modify\n"
             "# it under the terms of the GNU General Public License as published by\n"
