@@ -1141,6 +1141,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Weather Data...");
     sObjectMgr.LoadWeatherZoneChances();
     
+    sLog.outString("Loading Dungeon Finder Requirements...");
+    sObjectMgr.LoadDungeonFinderRequirements();
+    
     sLog.outString("Loading Dungeon Finder Rewards...");
     sObjectMgr.LoadDungeonFinderRewards();
     

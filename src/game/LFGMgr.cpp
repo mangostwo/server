@@ -30,7 +30,7 @@ LFGMgr::~LFGMgr() { }
 
 ItemRewards LFGMgr::GetDungeonItemRewards(uint32 dungeonId, DungeonTypes type)
 {
-    ItemRewards rewards();
+    ItemRewards rewards;
     LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(dungeonId);
     if (dungeon)
     {
@@ -41,9 +41,9 @@ ItemRewards LFGMgr::GetDungeonItemRewards(uint32 dungeonId, DungeonTypes type)
         uint32 maxLevel = dungeon->targetLevelMax;
         
         DungeonFinderItemsMap itemBuffer = sObjectMgr.GetDungeonFinderItemsMap();
-        for (DungeonFinderItemsMap::iterator it = itemBuffer.start(); it != itemBuffer.end(); ++it)
+        for (DungeonFinderItemsMap::iterator it = itemBuffer.begin(); it != itemBuffer.end(); ++it)
         {
-            DungeonFinderItems itemCache = *it.second;
+            DungeonFinderItems itemCache = it->second;
             if (itemCache.dungeonType == (uint32)type)
             {
                 // should only be one of this inequality in the map
@@ -65,6 +65,7 @@ DungeonTypes LFGMgr::GetDungeonType(uint32 dungeonId)
     if (dungeon)
     {
         switch (dungeon->expansionLevel)
+        {
             case 0:
                 return DUNGEON_CLASSIC;
             case 1:
@@ -82,7 +83,8 @@ DungeonTypes LFGMgr::GetDungeonType(uint32 dungeonId)
                     return DUNGEON_WOTLK_HEROIC;
             }
             default:
-                return NULL;
+                return DUNGEON_UNKNOWN;
+        }
     }
 }
 
@@ -173,25 +175,54 @@ dungeonEntries LFGMgr::FindRandomDungeonsForPlayer(uint32 level, uint8 expansion
     return randomDungeons;
 }
 
-dungeonForbidden LFGMgr::FindRandomDungeonsNotForPlayer(uint32 level, uint8 expansion)
+dungeonForbidden LFGMgr::FindRandomDungeonsNotForPlayer(Player* plr)
 {
+    uint32 level = plr->getLevel();
+    uint8 expansion = plr->GetSession()->Expansion();
+    
     dungeonForbidden randomDungeons;
-    /*
-     * Reasons a player cannot enter a dungeon...
-     *     - level < dungeon->minLevel
-     *     - level > dungeon->maxLevel
-     *     - expansion < dungeon->expansionLevel
-     *     - gear score < requirements [todo: mangos lacks a system to check for this]
-     *                                      (only  Player::GetEquipGearScore(false,false))
-     *     - dungeon->typeID == LFG_TYPE_RAID (dungeon finder, not raid finder)
-     */
+
     for (uint32 id = 0; id < sLfgDungeonsStore.GetNumRows(); ++id)
     {
         LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(id);
         if (dungeon)
         {
+            uint32 forbiddenReason;
             
+            if ((uint32)expansion < dungeon->expansionLevel)
+                forbiddenReason = (uint32)LFG_FORBIDDEN_EXPANSION;
+            else if (dungeon->typeID == LFG_TYPE_RAID)
+                forbiddenReason = (uint32)LFG_FORBIDDEN_RAID;
+            else if (level < dungeon->minLevel)
+                forbiddenReason = (uint32)LFG_FORBIDDEN_LOW_LEVEL;
+            else if (level > dungeon->maxLevel)
+                forbiddenReason = (uint32)LFG_FORBIDDEN_HIGH_LEVEL;
+            else if (IsSeasonal(dungeon->flags) && !IsSeasonActive(dungeon->ID)) // check pointers/function args
+                forbiddenReason = (uint32)LFG_FORBIDDEN_NOT_IN_SEASON;
+            else if (DungeonFinderRequirements const* req = sObjectMgr.GetDungeonFinderRequirements((uint32)dungeon->mapID, dungeon->difficulty))
+            {
+                // [todo] check for: player not have item(s) if exist (all thats left)
+                if (req->minItemLevel && (plr->GetEquipGearScore(false,false) < req->minItemLevel))
+                    forbiddenReason = (uint32)LFG_FORBIDDEN_LOW_GEAR_SCORE;
+                else if (req->achievement && !plr->GetAchievementMgr().HasAchievement(req->achievement))
+                    forbiddenReason = (uint32)LFG_FORBIDDEN_MISSING_ACHIEVEMENT;
+                else if (plr->GetTeam() == ALLIANCE && req->allianceQuestId && !plr->GetQuestRewardStatus(req->allianceQuestId))
+                    forbiddenReason = (uint32)LFG_FORBIDDEN_QUEST_INCOMPLETE;
+                else if (plr->GetTeam() == HORDE && req->hordeQuestId && !plr->GetQuestRewardStatus(req->hordeQuestId))
+                    forbiddenReason = (uint32)LFG_FORBIDDEN_QUEST_INCOMPLETE;
+                else
+                    if (req->item)
+                    {
+                        if (!plr->HasItemCount(req->item, 1) && (!req->item2 || !plr->HasItemCount(req->item2, 1)))
+                            forbiddenReason = LFG_FORBIDDEN_MISSING_ITEM;
+                    }
+                    else if (req->item2 && !plr->HasItemCount(req->item2, 1))
+                        forbiddenReason = LFG_FORBIDDEN_MISSING_ITEM;
+            }
+            
+            if (forbiddenReason)
+                randomDungeons[dungeon->Entry()] = forbiddenReason;
         }
     }
-    return dungeonEntries;
+    return randomDungeons;
 }
