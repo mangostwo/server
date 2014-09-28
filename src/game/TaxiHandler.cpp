@@ -61,7 +61,7 @@ void WorldSession::SendTaxiStatus(ObjectGuid guid)
 
     WorldPacket data(SMSG_TAXINODE_STATUS, 9);
     data << ObjectGuid(guid);
-    data << uint8(GetPlayer()->m_taxi.IsTaxiFlyingmaskNodeKnown(curloc) ? 1 : 0);
+    data << uint8(GetPlayer()->m_taxi.IsTaximaskNodeKnown(curloc) ? 1 : 0);
     SendPacket(&data);
 
     DEBUG_LOG("WORLD: Sent SMSG_TAXINODE_STATUS");
@@ -108,7 +108,7 @@ void WorldSession::SendTaxiMenu(Creature* unit)
     data << uint32(1);
     data << unit->GetObjectGuid();
     data << uint32(curloc);
-    GetPlayer()->m_taxi.AppendTaximaskTo(data, GetPlayer()->IsTaxiFlyingCheater());
+    GetPlayer()->m_taxi.AppendTaximaskTo(data, GetPlayer()->IsTaxiCheater());
     SendPacket(&data);
 
     DEBUG_LOG("WORLD: Sent SMSG_SHOWTAXINODES");
@@ -242,7 +242,7 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
         uint32 sourcenode = GetPlayer()->m_taxi.GetTaxiSource();
 
         // Add to taximask middle hubs in taxicheat mode (to prevent having player with disabled taxicheat and not having back flight path)
-        if (GetPlayer()->IsTaxiFlyingCheater())
+        if (GetPlayer()->IsTaxiCheater())
         {
             if (GetPlayer()->m_taxi.SetTaximaskNode(sourcenode))
             {
