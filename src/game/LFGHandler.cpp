@@ -35,19 +35,23 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recv_data)
     DEBUG_LOG("CMSG_LFG_JOIN");
 
     uint8 dungeonsCount, counter2;
+    uint32 roles;
+    
     std::string comment;
-    std::vector<uint32> dungeons;
+    std::set<uint32> dungeons;
 
-    recv_data >> Unused<uint32>();                          // lfg roles
+    recv_data >> roles;                                     // lfg roles
     recv_data >> Unused<uint8>();                           // lua: GetLFGInfoLocal
     recv_data >> Unused<uint8>();                           // lua: GetLFGInfoLocal
 
     recv_data >> dungeonsCount;
 
-    dungeons.resize(dungeonsCount);
-
     for (uint8 i = 0; i < dungeonsCount; ++i)
-        recv_data >> dungeons[i];                           // dungeons id/type
+    {
+        uint32 dungeonEntry;
+        recv_data >> dungeonEntry;
+        dungeons.insert((dungeonEntry & 0x00FFFFFF));        // just dungeon id
+    }
 
     recv_data >> counter2;                                  // const count = 3, lua: GetLFGInfoLocal
 
@@ -99,18 +103,24 @@ void WorldSession::HandleSetLfgCommentOpcode(WorldPacket& recv_data)
 void WorldSession::HandleLfgGetPlayerInfo(WorldPacket& recv_data)
 {
     DEBUG_LOG("CMSG_LFG_GET_PLAYER_INFO");
-
-    WorldPacket data(SMSG_LFG_PLAYER_INFO);
     
     Player* pPlayer = GetPlayer();
     uint32 level = pPlayer->getLevel();
     uint8 expansion = pPlayer->GetSession()->Expansion();
     
     dungeonEntries availableDungeons = sLFGMgr.FindRandomDungeonsForPlayer(level, expansion);
-
+    dungeonForbidden lockedDungeons = sLFGMgr.FindRandomDungeonsNotForPlayer(pPlayer);
+    
+    uint32 availableSize = uint32(availableDungeons.size());
+    uint32 forbiddenSize = uint32(lockedDungeons.size());
+    
+    DEBUG_LOG("Sending SMSG_LFG_PLAYER_INFO...");
+    WorldPacket data(SMSG_LFG_PLAYER_INFO, 1+(availableSize*34)+4+(forbiddenSize*30));
+    
     data << uint8(availableDungeons.size());                // amount of available dungeons
     for (dungeonEntries::iterator it = availableDungeons.begin(); it != availableDungeons.end(); ++it)
     {
+        DEBUG_LOG("Parsing a dungeon entry for packet");
         data << uint32(it->second);                                // dungeon entry
         
         DungeonTypes type = sLFGMgr.GetDungeonType(it->first);      // dungeon type
@@ -153,7 +163,6 @@ void WorldSession::HandleLfgGetPlayerInfo(WorldPacket& recv_data)
         else
             data << uint8(0);
     }
-    dungeonForbidden lockedDungeons = sLFGMgr.FindRandomDungeonsNotForPlayer(pPlayer);
     
     data << uint32(lockedDungeons.size());
     for (dungeonForbidden::iterator it = lockedDungeons.begin(); it != lockedDungeons.end(); ++it)
@@ -161,6 +170,58 @@ void WorldSession::HandleLfgGetPlayerInfo(WorldPacket& recv_data)
         data << uint32(it->first); // dungeon entry
         data << uint32(it->second); // reason for being locked
     }
+}
+
+void WorldSession::HandleLfgGetPartyInfo(WorldPacket& recv_data)
+{
+    DEBUG_LOG("CMSG_LFG_GET_PARTY_INFO");
+    
+    Player* pPlayer = GetPlayer();
+    ObjectGuid guid = pPlayer->GetObjectGuid(); // send later in packet
+    
+    Group* pGroup = pPlayer->GetGroup();
+    if (!pGroup)
+        return;
+    
+    partyForbidden groupMap;
+    for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        Player* pGroupPlayer = itr->getSource();
+        if (!pGroupPlayer)
+            continue;
+        
+        ObjectGuid gPlayerGuid = pGroupPlayer->GetObjectGuid();
+        if (gPlayerGuid != guid)
+            groupMap[gPlayerGuid] = sLFGMgr.FindRandomDungeonsNotForPlayer(pGroupPlayer);
+    }
+    
+    uint32 packetSize = 0;
+    for (partyForbidden::iterator it = groupMap.begin(); it != groupMap.end(); ++it)
+        packetSize += 12 + uint32(it->second.size()) * 8;
+    
+    DEBUG_LOG("Sending SMSG_LFG_PARTY_INFO...");
+    WorldPacket data(SMSG_LFG_PARTY_INFO, packetSize);
+    
+    data << uint8(groupMap.size());
+    for (partyForbidden::iterator it = groupMap.begin(); it != groupMap.end(); ++it)
+    {
+        dungeonForbidden dungeonInfo = it->second;
+        
+        data << uint64(it->first); // object guid of player
+        data << uint32(dungeonInfo.size()); // amount of their locked dungeons
+        
+        for (dungeonForbidden::iterator itr = dungeonInfo.begin(); itr != dungeonInfo.end(); ++itr)
+        {
+            data << uint32(itr->first); // dungeon entry
+            data << uint32(itr->second); // reason for dungeon being forbidden/locked
+        }
+    }
+    SendPacket(&data);
+}
+
+void WorldSession::HandleLfgGetStatus(WorldPacket& recv_data)
+{
+    DEBUG_LOG("CMSG_LFG_GET_STATUS");
 }
 
 void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)

@@ -1143,15 +1143,6 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading Weather Data...");
     sObjectMgr.LoadWeatherZoneChances();
-    
-    sLog.outString("Loading Dungeon Finder Requirements...");
-    sObjectMgr.LoadDungeonFinderRequirements();
-    
-    sLog.outString("Loading Dungeon Finder Rewards...");
-    sObjectMgr.LoadDungeonFinderRewards();
-    
-    sLog.outString("Loading Dungeon Finder Items...");
-    sObjectMgr.LoadDungeonFinderItems();
 
     sLog.outString("Loading Quests...");
     sObjectMgr.LoadQuests();                                // must be loaded after DBCs, creature_template, item_template, gameobject tables
@@ -1170,6 +1161,15 @@ void World::SetInitialWorldSettings()
     sGameEventMgr.LoadFromDB();
     sLog.outString(">>> Game Event Data loaded");
     sLog.outString();
+    
+    sLog.outString("Loading Dungeon Finder Requirements...");
+    sObjectMgr.LoadDungeonFinderRequirements();
+    
+    sLog.outString("Loading Dungeon Finder Rewards...");
+    sObjectMgr.LoadDungeonFinderRewards();
+    
+    sLog.outString("Loading Dungeon Finder Items...");
+    sObjectMgr.LoadDungeonFinderItems();
 
     // Load Conditions
     sLog.outString("Loading Conditions...");

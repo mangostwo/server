@@ -1,5 +1,8 @@
-/*
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+/**
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #include "DBCEnums.h"
@@ -26,7 +32,42 @@
 #include "WorldSession.h"
 
 LFGMgr::LFGMgr() { }
-LFGMgr::~LFGMgr() { }
+
+LFGMgr::~LFGMgr()
+{
+    m_dailyAny.clear();
+    m_dailyTBCHeroic.clear();
+    m_dailyLKNormal.clear();
+    m_dailyLKHeroic.clear();
+    m_playerData.clear();
+}
+
+void LFGMgr::JoinLFG()
+{
+    
+}
+
+void LFGMgr::LeaveLFG()
+{
+    
+}
+
+LfgJoinResult LFGMgr::GetJoinResult(Player* plr)
+{
+    LfgJoinResult result;
+    
+    /* Reasons for not entering:
+     *   Deserter spell
+     *   Dungeon finder cooldown
+     *   In a battleground
+     *   In an arena
+     *   Queued for battleground
+     *   Too many members in group
+     *   Group member disconnected
+     *   Any group member cannot enter for x reason any other player can't
+     */
+    // if (Group* pGroup = plr->GetGroup())
+}
 
 ItemRewards LFGMgr::GetDungeonItemRewards(uint32 dungeonId, DungeonTypes type)
 {
@@ -86,6 +127,7 @@ DungeonTypes LFGMgr::GetDungeonType(uint32 dungeonId)
                 return DUNGEON_UNKNOWN;
         }
     }
+    return DUNGEON_UNKNOWN;
 }
 
 void LFGMgr::RegisterPlayerDaily(uint32 guidLow, DungeonTypes dungeon)
@@ -167,7 +209,7 @@ dungeonEntries LFGMgr::FindRandomDungeonsForPlayer(uint32 level, uint8 expansion
         {
             if ( (dungeon->typeID == LFG_TYPE_RANDOM_DUNGEON)
                 || (IsSeasonal(dungeon->flags) && IsSeasonActive(dungeon->ID)) )
-                if (dungeon->expansionLevel <= expansion && dungeon->minLevel <= level
+                if ((uint8)dungeon->expansionLevel <= expansion && dungeon->minLevel <= level
                     && dungeon->maxLevel >= level)
                     randomDungeons[dungeon->ID] = dungeon->Entry();
         }
@@ -201,7 +243,6 @@ dungeonForbidden LFGMgr::FindRandomDungeonsNotForPlayer(Player* plr)
                 forbiddenReason = (uint32)LFG_FORBIDDEN_NOT_IN_SEASON;
             else if (DungeonFinderRequirements const* req = sObjectMgr.GetDungeonFinderRequirements((uint32)dungeon->mapID, dungeon->difficulty))
             {
-                // [todo] check for: player not have item(s) if exist (all thats left)
                 if (req->minItemLevel && (plr->GetEquipGearScore(false,false) < req->minItemLevel))
                     forbiddenReason = (uint32)LFG_FORBIDDEN_LOW_GEAR_SCORE;
                 else if (req->achievement && !plr->GetAchievementMgr().HasAchievement(req->achievement))

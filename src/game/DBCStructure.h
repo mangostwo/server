@@ -1208,7 +1208,7 @@ struct LfgDungeonsEntry
     uint32 groupID;                                         // 31    m_group_id
     //char* description[16];                                // 32-49 m_Description_lang
 
-    uint32 Entry() const { return ID + (typeID << 24); }
+    uint32 Entry() const { return ID + ((uint8)typeID << 24); }
 };
 
 /*struct LfgDungeonGroupEntry
