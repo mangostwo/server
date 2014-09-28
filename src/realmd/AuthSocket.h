@@ -17,14 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 /// \addtogroup realmd
 /// @{
 /// \file
 
-#ifndef _AUTHSOCKET_H
-#define _AUTHSOCKET_H
+#ifndef MANGOS_H_AUTHSOCKET
+#define MANGOS_H_AUTHSOCKET
 
 #include "Common.h"
 #include "Auth/BigNumber.h"

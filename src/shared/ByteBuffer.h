@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _BYTEBUFFER_H
-#define _BYTEBUFFER_H
+#ifndef MANGOS_H_BYTEBUFFER
+#define MANGOS_H_BYTEBUFFER
 
 #include "Common.h"
 #include "Utilities/ByteConverter.h"

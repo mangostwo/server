@@ -52,13 +52,20 @@ if(WIN32 AND MSVC)
     COMMAND ${ACE_BUILD_TOOL} <SOURCE_DIR>\\ace\\ace_vc8.sln /project ACE /build ${CMAKE_BUILD_TYPE}|${ACE_CONFIGURATION}
     ALWAYS 0
   )
-elseif(UNIX) 
+elseif(UNIX)
+  if (${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
+    # ACE Won't build on FreeBSD 10 with the exceptions test enabled so we're just turning that test off
+    set(DISABLE_EXCEPTIONS "--enable-exceptions=no")
+  else()
+    set(DISABLE_EXCEPTIONS "")
+  endif()
+
   ExternalProject_Add(ACE_Project
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
     BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}
     INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
     DOWNLOAD_COMMAND ""
-    CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/configure --prefix=${CMAKE_INSTALL_PREFIX}
+    CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/configure --prefix=${CMAKE_INSTALL_PREFIX} --disable-ssl ${DISABLE_EXCEPTIONS}
   )
 else()
   message(FATAL_ERROR

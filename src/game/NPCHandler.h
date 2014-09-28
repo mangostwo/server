@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef __NPCHANDLER_H
-#define __NPCHANDLER_H
+#ifndef MANGOS_H_NPCHANDLER
+#define MANGOS_H_NPCHANDLER
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
 #if defined( __GNUC__ )

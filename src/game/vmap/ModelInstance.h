@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _MODELINSTANCE_H_
-#define _MODELINSTANCE_H_
+#ifndef MANGOS_H_MODELINSTANCE
+#define MANGOS_H_MODELINSTANCE
 
 #include <G3D/Matrix3.h>
 #include <G3D/Vector3.h>

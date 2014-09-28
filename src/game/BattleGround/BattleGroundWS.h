@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef __BATTLEGROUNDWS_H
-#define __BATTLEGROUNDWS_H
+#ifndef MANGOS_H_BATTLEGROUNDWS
+#define MANGOS_H_BATTLEGROUNDWS
 
 #include "BattleGround.h"
 
@@ -61,7 +61,7 @@ enum BG_WS_SpellId
 };
 
 /**
-r * @brief
+ * @brief
  *
  */
 enum BG_WS_WorldStates

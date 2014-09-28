@@ -24,8 +24,8 @@
 
 #ifndef DO_POSTGRESQL
 
-#ifndef _DATABASEMYSQL_H
-#define _DATABASEMYSQL_H
+#ifndef MANGOS_H_DATABASEMYSQL
+#define MANGOS_H_DATABASEMYSQL
 
 //#include "Common.h"
 #include "Database.h"
@@ -39,6 +39,7 @@
 #else
 #include <mysql.h>
 #endif
+
 /**
  * @brief MySQL prepared statement class
  *

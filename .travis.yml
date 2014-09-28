@@ -8,20 +8,23 @@ git:
 branches:
   only:
     - master
-    - develop
+    - Rel19
 
-# do not build with clang until fixed
+# build with both gcc and clang to ensure compatibility
 compiler:
   - gcc
-  - clang
 
 before_install:
  - sudo apt-get update -qq
  - sudo apt-get install -qq libbz2-dev libncurses5-dev libmysqlclient-dev libreadline-dev libsdl1.2-dev libssl-dev zlib1g-dev libace-dev
 
+# Get Eluna
+ - git submodule init
+ - git submodule update
+ 
 script:
   - test -d _build || mkdir _build
+  - test -d _install || mkdir _install
   - cd _build
-  - cmake -DCMAKE_BUILD_TYPE=Debug -DACE_USE_EXTERNAL=1 ..
-
+  - cmake -DCMAKE_INSTALL_PREFIX=../_install ..
   - make -j4

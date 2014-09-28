@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _ITEM_ENCHANTMENT_MGR_H
-#define _ITEM_ENCHANTMENT_MGR_H
+#ifndef MANGOS_H_ITEM_ENCHANTMENT_MGR
+#define MANGOS_H_ITEM_ENCHANTMENT_MGR
 
 #include "Common.h"
 

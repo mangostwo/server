@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _FOLLOWERREFERENCE_H
-#define _FOLLOWERREFERENCE_H
+#ifndef MANGOS_H_FOLLOWERREFERENCE
+#define MANGOS_H_FOLLOWERREFERENCE
 
 #include "Utilities/LinkedReference/Reference.h"
 

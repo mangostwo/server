@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _VMAPDEFINITIONS_H
-#define _VMAPDEFINITIONS_H
+#ifndef MANGOS_H_VMAPDEFINITIONS
+#define MANGOS_H_VMAPDEFINITIONS
 
 #include <cstring>
 

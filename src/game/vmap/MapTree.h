@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _MAPTREE_H
-#define _MAPTREE_H
+#ifndef MANGOS_H_MAPTREE
+#define MANGOS_H_MAPTREE
 
 #include "Platform/Define.h"
 #include "Utilities/UnorderedMapSet.h"

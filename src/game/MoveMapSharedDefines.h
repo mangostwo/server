@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _MOVE_MAP_SHARED_DEFINES_H
-#define _MOVE_MAP_SHARED_DEFINES_H
+#ifndef MANGOS_H_MOVE_MAP_SHARED_DEFINES
+#define MANGOS_H_MOVE_MAP_SHARED_DEFINES
 
 #include "Platform/Define.h"
 #include "../recastnavigation/Detour/Include/DetourNavMesh.h"

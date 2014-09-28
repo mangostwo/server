@@ -17,10 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef __MANGOS_REPUTATION_MGR_H
-#define __MANGOS_REPUTATION_MGR_H
+#ifndef MANGOS_H_MANGOS_REPUTATION_MGR
+#define MANGOS_H_MANGOS_REPUTATION_MGR
 
 #include "Common.h"
 #include "SharedDefines.h"

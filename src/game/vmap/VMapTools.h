@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _VMAPTOOLS_H
-#define _VMAPTOOLS_H
+#ifndef MANGOS_H_VMAPTOOLS
+#define MANGOS_H_VMAPTOOLS
 
 #include <G3D/CollisionDetection.h>
 #include <G3D/AABox.h>

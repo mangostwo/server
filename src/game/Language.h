@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef __MANGOS_LANGUAGE_H
-#define __MANGOS_LANGUAGE_H
+#ifndef MANGOS_H_MANGOS_LANGUAGE
+#define MANGOS_H_MANGOS_LANGUAGE
 
 enum MangosStrings
 {

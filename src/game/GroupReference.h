@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _GROUPREFERENCE_H
-#define _GROUPREFERENCE_H
+#ifndef MANGOS_H_GROUPREFERENCE
+#define MANGOS_H_GROUPREFERENCE
 
 #include "Utilities/LinkedReference/Reference.h"
 

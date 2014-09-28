@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _IVMAPMANAGER_H
-#define _IVMAPMANAGER_H
+#ifndef MANGOS_H_IVMAPMANAGER
+#define MANGOS_H_IVMAPMANAGER
 
 #include<string>
 #include <Platform/Define.h>

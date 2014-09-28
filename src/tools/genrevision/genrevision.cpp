@@ -17,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #include <fstream>
@@ -92,7 +95,7 @@ void extractDataFromGit(FILE* EntriesFile, std::string path, bool url, RawData& 
         char* acc_str  = NULL;
         char* repo_str = NULL;
 
-        // parse URL like git@github.com:mangos/mangos
+        // parse URL like git@github.com:mangostwo/server
         char url_buf[200];
         int res = sscanf(url_str, "git@%s", url_buf);
         if (res)
