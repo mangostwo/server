@@ -99,8 +99,8 @@ using std::hash_set;
 #elif (COMPILER == COMPILER_CLANG) && defined(__FreeBSD__)
 #  define UNORDERED_MAP std::unordered_map
 #  define UNORDERED_SET std::unordered_set
-#  define HASH_NAMESPACE_START namespace std {
-#  define HASH_NAMESPACE_END }
+#  define HASH_NAMESPACE_START namespace std { namespace __1 {
+#  define HASH_NAMESPACE_END } }
 #elif COMPILER == COMPILER_CLANG
 #  define UNORDERED_MAP std::tr1::unordered_map
 #  define UNORDERED_SET std::tr1::unordered_set
