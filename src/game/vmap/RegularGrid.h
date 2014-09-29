@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _REGULAR_GRID_H
-#define _REGULAR_GRID_H
+#ifndef MANGOS_H_REGULAR_GRID
+#define MANGOS_H_REGULAR_GRID
 
 #include <G3D/Ray.h>
 #include <G3D/AABox.h>

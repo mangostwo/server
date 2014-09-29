@@ -66,7 +66,7 @@ class BIHWrap
             bool operator()(const Ray& r, uint32 Idx, float& MaxDist, bool /*stopAtFirst*/)
             {
                 if (const T* obj = objects[Idx])
-                    return cb(r, *obj, MaxDist/*, stopAtFirst*/);
+                    { return cb(r, *obj, MaxDist/*, stopAtFirst*/); }
                 return false;
             }
 
@@ -79,7 +79,7 @@ class BIHWrap
             void operator()(const Vector3& p, uint32 Idx)
             {
                 if (const T* obj = objects[Idx])
-                    cb(p, *obj);
+                    { cb(p, *obj); }
             }
         };
 
@@ -125,9 +125,9 @@ class BIHWrap
             uint32 Idx = 0;
             const T* temp;
             if (m_obj2Idx.getRemove(&obj, temp, Idx))
-                m_objects[Idx] = NULL;
+                { m_objects[Idx] = NULL; }
             else
-                m_objects_to_push.remove(&obj);
+                { m_objects_to_push.remove(&obj); }
         }
 
         /**
@@ -137,7 +137,7 @@ class BIHWrap
         void balance()
         {
             if (unbalanced_times == 0)
-                return;
+                { return; }
 
             unbalanced_times = 0;
             m_objects.fastClear();

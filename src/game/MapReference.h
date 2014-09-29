@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _MAPREFERENCE_H
-#define _MAPREFERENCE_H
+#ifndef MANGOS_H_MAPREFERENCE
+#define MANGOS_H_MAPREFERENCE
 
 #include "Utilities/LinkedReference/Reference.h"
 #include "Map.h"

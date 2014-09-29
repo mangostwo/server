@@ -17,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 /** \file
@@ -47,12 +50,12 @@ BufferedSocket::BufferedSocket(void):
 /*virtual*/ int BufferedSocket::open(void* arg)
 {
     if (Base::open(arg) == -1)
-        return -1;
+        { return -1; }
 
     ACE_INET_Addr addr;
 
     if (peer().get_remote_addr(addr) == -1)
-        return -1;
+        { return -1; }
 
     char address[1024];
 
@@ -78,7 +81,7 @@ size_t BufferedSocket::recv_len(void) const
 bool BufferedSocket::recv_soft(char* buf, size_t len)
 {
     if (this->input_buffer_.length() < len)
-        return false;
+        { return false; }
 
     ACE_OS::memcpy(buf, this->input_buffer_.rd_ptr(), len);
 
@@ -90,7 +93,7 @@ bool BufferedSocket::recv(char* buf, size_t len)
     bool ret = this->recv_soft(buf, len);
 
     if (ret)
-        this->recv_skip(len);
+        { this->recv_skip(len); }
 
     return ret;
 }
@@ -105,7 +108,7 @@ ssize_t BufferedSocket::noblk_send(ACE_Message_Block& message_block)
     const size_t len = message_block.length();
 
     if (len == 0)
-        return -1;
+        { return -1; }
 
     // Try to send the message directly.
     ssize_t n = this->peer().send(message_block.rd_ptr(), len, MSG_NOSIGNAL);
@@ -114,10 +117,10 @@ ssize_t BufferedSocket::noblk_send(ACE_Message_Block& message_block)
     {
         if (errno == EWOULDBLOCK)
             // Blocking signal
-            return 0;
+            { return 0; }
         else
             // Error
-            return -1;
+            { return -1; }
     }
     else if (n == 0)
     {
@@ -132,7 +135,7 @@ ssize_t BufferedSocket::noblk_send(ACE_Message_Block& message_block)
 bool BufferedSocket::send(const char* buf, size_t len)
 {
     if (buf == NULL || len == 0)
-        return true;
+        { return true; }
 
     ACE_Data_Block db(
         len,
@@ -156,9 +159,9 @@ bool BufferedSocket::send(const char* buf, size_t len)
         ssize_t n = this->noblk_send(message_block);
 
         if (n < 0)
-            return false;
+            { return false; }
         else if (n == len)
-            return true;
+            { return true; }
 
         // adjust how much bytes we sent
         message_block.rd_ptr((size_t)n);
@@ -177,7 +180,7 @@ bool BufferedSocket::send(const char* buf, size_t len)
 
     // tell reactor to call handle_output() when we can send more data
     if (this->reactor()->schedule_wakeup(this, ACE_Event_Handler::WRITE_MASK) == -1)
-        return false;
+        { return false; }
 
     return true;
 }
@@ -194,7 +197,7 @@ bool BufferedSocket::send(const char* buf, size_t len)
     }
 
     if (this->msg_queue()->dequeue_head(mb, (ACE_Time_Value*) &ACE_Time_Value::zero) == -1)
-        return -1;
+        { return -1; }
 
     ssize_t n = this->noblk_send(*mb);
 

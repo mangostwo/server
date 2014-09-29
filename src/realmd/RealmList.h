@@ -17,24 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 /// \addtogroup realmd
 /// @{
 /// \file
 
-#ifndef _REALMLIST_H
-#define _REALMLIST_H
+#ifndef MANGOS_H_REALMLIST
+#define MANGOS_H_REALMLIST
 
 #include "Common.h"
 
+/**
+ * @brief
+ *
+ */
 struct RealmBuildInfo
 {
-    int build;
-    int major_version;
-    int minor_version;
-    int bugfix_version;
-    int hotfix_version;
+    int build; /**< TODO */
+    int major_version; /**< TODO */
+    int minor_version; /**< TODO */
+    int bugfix_version; /**< TODO */
+    int hotfix_version; /**< TODO */
 };
 
 RealmBuildInfo const* FindBuildInfo(uint16 _build);

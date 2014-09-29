@@ -26,6 +26,11 @@
 #define FIELD_H
 
 #include "Common.h"
+#ifdef WIN32
+#include <mysql/mysql.h>
+#else
+#include <mysql.h>
+#endif
 
 /**
  * @brief
@@ -70,7 +75,7 @@ class Field
         /**
          * @brief
          *
-         * @return DataTypes
+         * @return enum_field_type
          */
         enum DataTypes GetType() const { return mType; }
         /**
@@ -152,13 +157,13 @@ class Field
 
             return value;
         }
-        
+
         int64 GetInt64() const
         {
             int64 value = 0;
             if (!mValue || sscanf(mValue, SI64FMTD, &value) == -1)
                 return 0;
-            
+
             return value;
         }
 

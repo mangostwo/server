@@ -17,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #include <stdio.h>
@@ -37,32 +40,50 @@ bool DBCFileLoader::Load(const char* filename, const char* fmt)
     delete[] data;
 
     FILE* f = fopen(filename, "rb");
-    if (!f)return false;
+    if (!f) { return false; }
 
     if (fread(&header, 4, 1, f) != 1)                       // Number of records
+    {
+        fclose(f);
         return false;
+    }
 
     EndianConvert(header);
-    if (header != 0x43424457)
-        return false;                                       //'WDBC'
+    if (header != 0x43424457)                               //'WDBC'
+    {
+        fclose(f);
+        return false;
+    }
 
     if (fread(&recordCount, 4, 1, f) != 1)                  // Number of records
+    {
+        fclose(f);
         return false;
+    }
 
     EndianConvert(recordCount);
 
     if (fread(&fieldCount, 4, 1, f) != 1)                   // Number of fields
+    {
+        fclose(f);
         return false;
+    }
 
     EndianConvert(fieldCount);
 
     if (fread(&recordSize, 4, 1, f) != 1)                   // Size of a record
+    {
+        fclose(f);
         return false;
+    }
 
     EndianConvert(recordSize);
 
     if (fread(&stringSize, 4, 1, f) != 1)                   // String size
+    {
+        fclose(f);
         return false;
+    }
 
     EndianConvert(stringSize);
 
@@ -72,16 +93,19 @@ bool DBCFileLoader::Load(const char* filename, const char* fmt)
     {
         fieldsOffset[i] = fieldsOffset[i - 1];
         if (fmt[i - 1] == 'b' || fmt[i - 1] == 'X')         // byte fields
-            fieldsOffset[i] += 1;
+            { fieldsOffset[i] += 1; }
         else                                                // 4 byte fields (int32/float/strings)
-            fieldsOffset[i] += 4;
+            { fieldsOffset[i] += 4; }
     }
 
     data = new unsigned char[recordSize * recordCount + stringSize];
     stringTable = data + recordSize * recordCount;
 
     if (fread(data, recordSize * recordCount + stringSize, 1, f) != 1)
+    {
+        fclose(f);
         return false;
+    }
 
     fclose(f);
     return true;
@@ -139,7 +163,7 @@ uint32 DBCFileLoader::GetFormatRecordSize(const char* format, int32* index_pos)
     }
 
     if (index_pos)
-        *index_pos = i;
+        { *index_pos = i; }
 
     return recordsize;
 }
@@ -159,7 +183,7 @@ char* DBCFileLoader::AutoProduceData(const char* format, uint32& records, char**
 
     typedef char* ptr;
     if (strlen(format) != fieldCount)
-        return NULL;
+        { return NULL; }
 
     // get struct size and index pos
     int32 i;
@@ -172,7 +196,7 @@ char* DBCFileLoader::AutoProduceData(const char* format, uint32& records, char**
         for (uint32 y = 0; y < recordCount; ++y)
         {
             uint32 ind = getRecord(y).getUInt(i);
-            if (ind > maxi)maxi = ind;
+            if (ind > maxi) { maxi = ind; }
         }
 
         ++maxi;
@@ -197,7 +221,7 @@ char* DBCFileLoader::AutoProduceData(const char* format, uint32& records, char**
             indexTable[getRecord(y).getUInt(i)] = &dataTable[offset];
         }
         else
-            indexTable[y] = &dataTable[offset];
+            { indexTable[y] = &dataTable[offset]; }
 
         for (uint32 x = 0; x < fieldCount; ++x)
         {
@@ -240,7 +264,7 @@ char* DBCFileLoader::AutoProduceData(const char* format, uint32& records, char**
 char* DBCFileLoader::AutoProduceStrings(const char* format, char* dataTable)
 {
     if (strlen(format) != fieldCount)
-        return NULL;
+        { return NULL; }
 
     char* stringPool = new char[stringSize];
     memcpy(stringPool, stringTable, stringSize);

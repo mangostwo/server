@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef __SQLDELAYTHREAD_H
-#define __SQLDELAYTHREAD_H
+#ifndef MANGOS_H_SQLDELAYTHREAD
+#define MANGOS_H_SQLDELAYTHREAD
 
 #include <ace/Thread_Mutex.h>
 #include "LockedQueue.h"

@@ -17,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 /** \file
@@ -87,7 +90,7 @@ int RASocket::open(void*)
 int RASocket::close(int)
 {
     if (closing_)
-        return -1;
+        { return -1; }
     DEBUG_LOG("RASocket::close");
     shutdown();
 
@@ -100,14 +103,14 @@ int RASocket::close(int)
 int RASocket::handle_close(ACE_HANDLE h, ACE_Reactor_Mask)
 {
     if (closing_)
-        return -1;
+        { return -1; }
     DEBUG_LOG("RASocket::handle_close");
     ACE_GUARD_RETURN(ACE_Thread_Mutex, Guard, outBufferLock, -1);
 
     closing_ = true;
 
     if (h == ACE_INVALID_HANDLE)
-        peer().close_writer();
+        { peer().close_writer(); }
     remove_reference();
     return 0;
 }
@@ -117,7 +120,7 @@ int RASocket::handle_output(ACE_HANDLE)
     ACE_GUARD_RETURN(ACE_Thread_Mutex, Guard, outBufferLock, -1);
 
     if (closing_)
-        return -1;
+        { return -1; }
 
     if (!outputBufferLen)
     {
@@ -136,7 +139,7 @@ int RASocket::handle_output(ACE_HANDLE)
 #endif // MSG_NOSIGNAL
 
     if (n <= 0)
-        return -1;
+        { return -1; }
 
     ACE_OS::memmove(outputBuffer, outputBuffer + n, outputBufferLen - n);
 
@@ -223,7 +226,7 @@ int RASocket::handle_input(ACE_HANDLE)
 
                 ///- allow by remotely connected admin use console level commands dependent from config setting
                 if (accAccessLevel >= SEC_ADMINISTRATOR && !bStricted)
-                    accAccessLevel = SEC_CONSOLE;
+                    { accAccessLevel = SEC_CONSOLE; }
 
                 stage = LG;
                 sendf(sObjectMgr.GetMangosStringForDBCLocale(LANG_RA_PASS));
@@ -264,7 +267,7 @@ int RASocket::handle_input(ACE_HANDLE)
                 {
                     sLog.outRALog("Got '%s' cmd.", inputBuffer);
                     if (strncmp(inputBuffer, "quit", 4) == 0)
-                        return -1;
+                        { return -1; }
                     else
                     {
                         CliCommandHolder* cmd = new CliCommandHolder(accId, accAccessLevel, this, inputBuffer, &RASocket::zprint, &RASocket::commandFinished);
@@ -273,7 +276,7 @@ int RASocket::handle_input(ACE_HANDLE)
                     }
                 }
                 else
-                    sendf("mangos>");
+                    { sendf("mangos>"); }
                 break;
                 ///</ul>
         };
@@ -286,7 +289,7 @@ int RASocket::handle_input(ACE_HANDLE)
 void RASocket::zprint(void* callbackArg, const char* szText)
 {
     if (!szText)
-        return;
+        { return; }
 
     ((RASocket*)callbackArg)->sendf(szText);
 }
@@ -303,12 +306,12 @@ int RASocket::sendf(const char* msg)
     ACE_GUARD_RETURN(ACE_Thread_Mutex, Guard, outBufferLock, -1);
 
     if (closing_)
-        return -1;
+        { return -1; }
 
     int msgLen = strlen(msg);
 
     if (msgLen + outputBufferLen > RA_BUFF_SIZE)
-        return -1;
+        { return -1; }
 
     ACE_OS::memcpy(outputBuffer + outputBufferLen, msg, msgLen);
     outputBufferLen += msgLen;
@@ -316,7 +319,7 @@ int RASocket::sendf(const char* msg)
     if (!outActive)
     {
         if (reactor()->schedule_wakeup
-                (this, ACE_Event_Handler::WRITE_MASK) == -1)
+            (this, ACE_Event_Handler::WRITE_MASK) == -1)
         {
             sLog.outError("RASocket::sendf error while schedule_wakeup");
             return -1;

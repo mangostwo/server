@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef __BATTLEGROUNDMGR_H
-#define __BATTLEGROUNDMGR_H
+#ifndef MANGOS_H_BATTLEGROUNDMGR
+#define MANGOS_H_BATTLEGROUNDMGR
 
 #include "Common.h"
 #include "Policies/Singleton.h"
@@ -31,7 +31,7 @@
 #include "SharedDefines.h"
 #include "DBCEnums.h"
 #include "BattleGround.h"
-#include "ace/Recursive_Thread_Mutex.h"
+#include <ace/Recursive_Thread_Mutex.h>
 
 /**
  * @brief
@@ -87,15 +87,15 @@ typedef std::map<ObjectGuid, PlayerQueueInfo*> GroupQueueInfoPlayers;
  */
 struct GroupQueueInfo
 {
-    GroupQueueInfoPlayers Players;                          // player queue info map
-    Team  GroupTeam;                                        // Player team (ALLIANCE/HORDE)
-    BattleGroundTypeId BgTypeId;                            // battleground type id
+    GroupQueueInfoPlayers Players;                          /**< player queue info map */
+    Team  GroupTeam;                                        /**< Player team (ALLIANCE/HORDE) */
+    BattleGroundTypeId BgTypeId;                            /**< battleground type id */
     bool    IsRated;                                        // rated
     ArenaType arenaType;                                    // 2v2, 3v3, 5v5 or 0 when BG
     uint32  ArenaTeamId;                                    // team id if rated match
-    uint32  JoinTime;                                       // time when group was added
-    uint32  RemoveInviteTime;                               // time when we will remove invite for players in group
-    uint32  IsInvitedToBGInstanceGUID;                      // was invited to certain BG
+    uint32  JoinTime;                                       /**< time when group was added */
+    uint32  RemoveInviteTime;                               /**< time when we will remove invite for players in group */
+    uint32  IsInvitedToBGInstanceGUID;                      /**< was invited to certain BG */
     uint32  ArenaTeamRating;                                // if rated match, inited to the rating of the team
     uint32  OpponentsTeamRating;                            // for rated arena matches
 };
@@ -132,6 +132,15 @@ class BattleGroundQueue
          */
         ~BattleGroundQueue();
 
+        /**
+         * @brief
+         *
+         * @param bgTypeId
+         * @param bracket_id
+		 * @param ArenaType
+		 * @param isRated
+		 * @param minRating
+         */
         void Update(BattleGroundTypeId bgTypeId, BattleGroundBracketId bracket_id, ArenaType arenaType = ARENA_TYPE_NONE, bool isRated = false, uint32 minRating = 0);
 
         /**
@@ -307,11 +316,11 @@ class BGQueueInviteEvent : public BasicEvent
          */
         virtual void Abort(uint64 e_time) override;
     private:
-        ObjectGuid m_PlayerGuid;
-        uint32 m_BgInstanceGUID;
-        BattleGroundTypeId m_BgTypeId;
+        ObjectGuid m_PlayerGuid; /**< TODO */
+        uint32 m_BgInstanceGUID; /**< TODO */
+        BattleGroundTypeId m_BgTypeId; /**< TODO */
         ArenaType m_ArenaType;
-        uint32 m_RemoveTime;
+        uint32 m_RemoveTime; /**< TODO */
 };
 
 /**
@@ -404,7 +413,21 @@ class BattleGroundMgr
          * @param guid
          */
         void BuildPlayerLeftBattleGroundPacket(WorldPacket* data, ObjectGuid guid);
+        /**
+         * @brief
+         *
+         * @param data
+         * @param guid
+         * @param plr
+         * @param bgTypeId
+         */
         void BuildBattleGroundListPacket(WorldPacket* data, ObjectGuid guid, Player* plr, BattleGroundTypeId bgTypeId, uint8 fromWhere);
+        /**
+         * @brief
+         *
+         * @param data
+         * @param bgTypeId
+         */
         void BuildGroupJoinedBattlegroundPacket(WorldPacket* data, GroupJoinBattlegroundResult result);
         /**
          * @brief
@@ -552,7 +575,7 @@ class BattleGroundMgr
         {
             BattleMastersMap::const_iterator itr = mBattleMastersMap.find(entry);
             if (itr != mBattleMastersMap.end())
-                return itr->second;
+                { return itr->second; }
             return BATTLEGROUND_TYPE_NONE;
         }
 
@@ -571,7 +594,7 @@ class BattleGroundMgr
         {
             CreatureBattleEventIndexesMap::const_iterator itr = m_CreatureBattleEventIndexMap.find(dbTableGuidLow);
             if (itr != m_CreatureBattleEventIndexMap.end())
-                return itr->second;
+                { return itr->second; }
             return m_CreatureBattleEventIndexMap.find(-1)->second;
         }
         /**
@@ -584,7 +607,7 @@ class BattleGroundMgr
         {
             GameObjectBattleEventIndexesMap::const_iterator itr = m_GameObjectBattleEventIndexMap.find(dbTableGuidLow);
             if (itr != m_GameObjectBattleEventIndexMap.end())
-                return itr->second;
+                { return itr->second; }
             return m_GameObjectBattleEventIndexMap.find(-1)->second;
         }
 

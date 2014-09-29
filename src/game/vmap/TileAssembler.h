@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _TILEASSEMBLER_H_
-#define _TILEASSEMBLER_H_
+#ifndef MANGOS_H_TILEASSEMBLER
+#define MANGOS_H_TILEASSEMBLER
 
 #include <G3D/Vector3.h>
 #include <G3D/Matrix3.h>

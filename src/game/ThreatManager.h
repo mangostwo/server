@@ -17,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef _THREATMANAGER
@@ -75,7 +78,7 @@ class MANGOS_DLL_SPEC HostileReference : public Reference<Unit, ThreatManager>
 
         // used for temporary setting a threat and reducting it later again.
         // the threat modification is stored
-        void setTempThreat(float pThreat) { iTempThreatModifyer = pThreat - getThreat(); if (iTempThreatModifyer != 0.0f) addThreat(iTempThreatModifyer);  }
+        void setTempThreat(float pThreat) { iTempThreatModifyer = pThreat - getThreat(); if (iTempThreatModifyer != 0.0f) { addThreat(iTempThreatModifyer); }  }
 
         void resetTempThreat()
         {

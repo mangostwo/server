@@ -17,34 +17,75 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 /// \addtogroup mangosd
 /// @{
 /// \file
 
-#ifndef _MASTER_H
-#define _MASTER_H
+#ifndef MANGOS_H_MASTER
+#define MANGOS_H_MASTER
 
 #include "Common.h"
 #include "Policies/Singleton.h"
 
-/// Start the server
+/**
+ * @brief Start the server
+ *
+ */
 class Master
 {
     public:
+        /**
+         * @brief
+         *
+         */
         Master();
+        /**
+         * @brief
+         *
+         */
         ~Master();
+        /**
+         * @brief
+         *
+         * @return int
+         */
         int Run();
-        static volatile uint32 m_masterLoopCounter;
+        static volatile uint32 m_masterLoopCounter; /**< TODO */
 
     private:
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool _StartDB();
 
+        /**
+         * @brief
+         *
+         */
         void _HookSignals();
+        /**
+         * @brief
+         *
+         */
         void _UnhookSignals();
+        /**
+         * @brief
+         *
+         * @param s
+         */
         static void _OnSignal(int s);
 
+        /**
+         * @brief
+         *
+         */
         void clearOnlineAccounts();
 };
 

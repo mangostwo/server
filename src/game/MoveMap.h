@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _MOVE_MAP_H
-#define _MOVE_MAP_H
+#ifndef MANGOS_H_MOVE_MAP
+#define MANGOS_H_MOVE_MAP
 
 #include "Utilities/UnorderedMapSet.h"
 

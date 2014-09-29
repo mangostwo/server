@@ -17,10 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef __UPDATEDATA_H
-#define __UPDATEDATA_H
+#ifndef MANGOS_H_UPDATEDATA
+#define MANGOS_H_UPDATEDATA
 
 #include "ByteBuffer.h"
 #include "ObjectGuid.h"

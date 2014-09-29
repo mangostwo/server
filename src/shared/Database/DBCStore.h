@@ -113,7 +113,7 @@ class DBCStorage
             // error in dbc file at loading if NULL
             return indexTable != NULL;
         }
-        
+
         void SetEntry(uint32 id, T* t) // Cryptic they say..
         {
             if (!loaded)
@@ -164,7 +164,7 @@ class DBCStorage
                 data.clear();
                 loaded = false;
             }
-            
+
             if (!indexTable)
                 { return; }
 

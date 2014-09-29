@@ -17,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #include "TotemAI.h"
@@ -33,7 +36,7 @@ int
 TotemAI::Permissible(const Creature* creature)
 {
     if (creature->IsTotem())
-        return PERMIT_BASE_PROACTIVE;
+        { return PERMIT_BASE_PROACTIVE; }
 
     return PERMIT_BASE_NO;
 }
@@ -56,15 +59,15 @@ void
 TotemAI::UpdateAI(const uint32 /*diff*/)
 {
     if (getTotem().GetTotemType() != TOTEM_ACTIVE)
-        return;
+        { return; }
 
     if (!m_creature->IsAlive() || m_creature->IsNonMeleeSpellCasted(false))
-        return;
+        { return; }
 
     // Search spell
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(getTotem().GetSpell());
     if (!spellInfo)
-        return;
+        { return; }
 
     // Get spell rangy
     SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
@@ -98,7 +101,7 @@ TotemAI::UpdateAI(const uint32 /*diff*/)
         m_creature->CastSpell(victim, getTotem().GetSpell(), false);
     }
     else
-        i_victimGuid.Clear();
+        { i_victimGuid.Clear(); }
 }
 
 bool

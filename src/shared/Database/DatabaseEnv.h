@@ -17,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #if !defined(DATABASEENV_H)
@@ -42,6 +45,10 @@ typedef DatabasePostgre DatabaseType;
 #include "Database/QueryResultMysql.h"
 #include "Database/Database.h"
 #include "Database/DatabaseMysql.h"
+/**
+ * @brief
+ *
+ */
 typedef DatabaseMysql DatabaseType;
 #define _LIKE_           "LIKE"
 #define _TABLE_SIM_      "`"
@@ -49,8 +56,8 @@ typedef DatabaseMysql DatabaseType;
 #define _OFFSET_         "LIMIT %d,1"
 #endif
 
-extern DatabaseType WorldDatabase;
-extern DatabaseType CharacterDatabase;
-extern DatabaseType LoginDatabase;
+extern DatabaseType WorldDatabase; /**< TODO */
+extern DatabaseType CharacterDatabase; /**< TODO */
+extern DatabaseType LoginDatabase; /**< TODO */
 
 #endif

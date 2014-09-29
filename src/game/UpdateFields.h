@@ -17,10 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _UPDATEFIELDS_AUTO_H
-#define _UPDATEFIELDS_AUTO_H
+#include "Common.h"
+
+#ifndef MANGOS_H_UPDATEFIELDS_AUTO
+#define MANGOS_H_UPDATEFIELDS_AUTO
 
 // Auto generated for version 3, 3, 5, 12340
 
@@ -85,6 +90,11 @@ enum EContainerFields
     CONTAINER_END                             = ITEM_END + 0x004A,
 };
 
+/**
+ * Fields that are available for a \ref Unit ?
+ * \see Object::HasFlag
+ * \todo Document this properly!
+ */
 enum EUnitFields
 {
     UNIT_FIELD_CHARM                          = OBJECT_END + 0x0000, // Size: 2, Type: LONG, Flags: PUBLIC

@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _BIH_H
-#define _BIH_H
+#ifndef MANGOS_H_BIH
+#define MANGOS_H_BIH
 
 #include <G3D/Vector3.h>
 #include <G3D/Ray.h>

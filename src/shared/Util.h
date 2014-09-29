@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _UTIL_H
-#define _UTIL_H
+#ifndef MANGOS_H_UTIL
+#define MANGOS_H_UTIL
 
 #include "Common.h"
 
@@ -656,6 +656,13 @@ inline void wstrToLower(std::wstring& str)
 
 std::wstring GetMainPartOfName(std::wstring wname, uint32 declension);
 
+/**
+ * @brief
+ *
+ * @param utf8str
+ * @param conStr
+ * @return bool
+ */
 bool utf8ToConsole(const std::string& utf8str, std::string& conStr);
 /**
  * @brief

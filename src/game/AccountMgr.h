@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _ACCMGR_H
-#define _ACCMGR_H
+#ifndef MANGOS_H_ACCMGR
+#define MANGOS_H_ACCMGR
 
 #include "Common.h"
 #include "Policies/Singleton.h"
@@ -34,7 +34,7 @@ enum AccountOpResult
     AOR_OK,
     AOR_NAME_TOO_LONG,
     AOR_PASS_TOO_LONG,
-    AOR_NAME_ALREDY_EXIST,
+    AOR_NAME_ALREADY_EXIST,
     AOR_NAME_NOT_EXIST,
     AOR_DB_INTERNAL_ERROR
 };

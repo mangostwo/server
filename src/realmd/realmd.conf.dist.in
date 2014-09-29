@@ -1,43 +1,44 @@
-############################################
-# MaNGOS realmd configuration file         #
-############################################
+################################################################################
+# Realm list demon configuration                                               #
+################################################################################
 
 [RealmdConf]
 ConfVersion=2010062001
 
-###################################################################################################################
+################################################################################
 # REALMD SETTINGS
 #
 #    LoginDatabaseInfo
 #        Database connection settings for the realm server.
 #        Default: hostname;port;username;password;database
-#                 .;somenumber;username;password;database - use named pipes at Windows
-#                       Named pipes: mySQL required adding "enable-named-pipe" to [mysqld] section my.ini
-#                 .;/path/to/unix_socket;username;password;database - use Unix sockets at Unix/Linux
-#                       Unix sockets: experimental, not tested
+#                 Use named pipes at Windows
+#                 .;somenumber;username;password;database
+#
+#                 Use Unix sockets on Unix/Linux
+#                 .;/path/to/unix_socket;username;password;database
 #
 #    LogsDir
-#         Logs directory setting.
-#         Important: Logs dir must exists, or all logs be disable
-#         Default: "" - no log directory prefix. if used log names aren't absolute paths
-#                       then logs will be stored in the current directory of the running program.
-#
-#    MaxPingTime
-#         Settings for maximum database-ping interval (minutes between pings)
-#
-#    RealmServerPort
-#         Port on which the server will listen
-#
-#    BindIP
-#         Bind Realm Server to IP/hostname
-#         This option is useful for running multiple worldd/realmd instances
-#         on different IP addresses using default ports.
-#         DO NOT CHANGE THIS UNLESS YOU _REALLY_ KNOW WHAT YOU'RE DOING
+#         Directory where log files should be written
+#         The given path has to exist, and be writable for the realm list demon
+#         Default: "" No log directory prefix, thus log files will be stored in
+#                     the same path where the realm list demon is running
 #
 #    PidFile
-#        Realmd daemon PID file
-#        Default: ""             - do not create PID file
-#                 "./realmd.pid" - create PID file (recommended name)
+#        Realm list demon PID file
+#        Default: "" Do not create a PID file.
+#
+#    MaxPingTime
+#        Settings for maximum database-ping interval (minutes between pings)
+#        Default: 30
+#
+#    RealmServerPort
+#        Port on which the server will listen
+#        Default: 3724
+#
+#    BindIP
+#        Bind realm list demon to IP/hostname
+#        DO NOT CHANGE THIS UNLESS YOU _REALLY_ KNOW WHAT YOU'RE DOING
+#        Default: "0.0.0.0" Listen on all available addresses
 #
 #    LogLevel
 #        Server console level of logging
@@ -56,8 +57,8 @@ ConfVersion=2010062001
 #
 #    LogTimestamp
 #        Logfile with timestamp of server start in name
-#        Default: 0 - no timestamp in name
-#                 1 - add timestamp in name in form Logname_YYYY-MM-DD_HH-MM-SS.Ext for Logname.Ext
+#        Default: 0 - no timestamp appended
+#                 1 - append timestamp in form of _YYYY-MM-DD_HH-MM-SS
 #
 #    LogFileLevel
 #        Server file level of logging
@@ -94,35 +95,38 @@ ConfVersion=2010062001
 #
 #    WrongPass.MaxCount
 #        Number of login attemps with wrong password before the account or IP is banned
-#        Default: 0  (Never ban)
+#        Default: 3  (Never ban)
 #
 #    WrongPass.BanTime
 #        Duration of the ban in seconds (0 means permanent ban)
-#        Default: 600
+#        Default: 300
 #
 #    WrongPass.BanType
 #        Ban the IP or account on which login is attempted
 #        Default: 0 (Ban IP)
 #                 1 (Ban Account)
 #
-###################################################################################################################
+################################################################################
+LoginDatabaseInfo      = "127.0.0.1;3306;mangos;mangos;realmd"
+LogsDir                = ""
+PidFile                = ""
 
-LoginDatabaseInfo = "127.0.0.1;3306;mangos;mangos;realmd"
-LogsDir = ""
-MaxPingTime = 30
-RealmServerPort = 3724
-BindIP = "0.0.0.0"
-PidFile = ""
-LogLevel = 0
-LogTime = 0
-LogFile = "Realmd.log"
-LogTimestamp = 0
-LogFileLevel = 0
-LogColors = ""
-UseProcessors = 0
-ProcessPriority = 1
-WaitAtStartupError = 0
+MaxPingTime            = 30
+RealmServerPort        = 3724
+BindIP                 = "0.0.0.0"
+
+LogLevel               = 0
+LogTime                = 0
+LogFile                = "realm-list.log"
+LogTimestamp           = 0
+LogFileLevel           = 0
+LogColors              = "13 7 11 9"
+
+UseProcessors          = 0
+ProcessPriority        = 1
+WaitAtStartupError     = 0
 RealmsStateUpdateDelay = 20
-WrongPass.MaxCount = 0
-WrongPass.BanTime = 600
-WrongPass.BanType = 0
+
+WrongPass.MaxCount     = 3
+WrongPass.BanTime      = 300
+WrongPass.BanType      = 0

@@ -337,11 +337,13 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::Load(StorageClass& store
         {
             switch (store.GetDstFormat(x))
             {
-                    // For default fill continue and do not increase y
+                // For default fill continue and do not increase y
                 case FT_NA:         storeValue((uint32)0, store, record, x, offset);         ++x; continue;
                 case FT_NA_BYTE:    storeValue((char)0, store, record, x, offset);           ++x; continue;
                 case FT_NA_FLOAT:   storeValue((float)0.0f, store, record, x, offset);       ++x; continue;
                 case FT_NA_POINTER: storeValue((char const*)NULL, store, record, x, offset); ++x; continue;
+                default:
+                    break;
             }
 
             // It is required that the input has at least as many columns set as the output requires

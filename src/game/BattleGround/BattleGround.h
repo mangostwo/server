@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef __BATTLEGROUND_H
-#define __BATTLEGROUND_H
+#ifndef MANGOS_H_BATTLEGROUND
+#define MANGOS_H_BATTLEGROUND
 
 #include "Common.h"
 #include "SharedDefines.h"

@@ -1,4 +1,4 @@
-/*
+/**
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
@@ -17,10 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef __BATTLEGROUNDSA_H
-#define __BATTLEGROUNDSA_H
+#ifndef MANGOS_H_BATTLEGROUNDSA
+#define MANGOS_H_BATTLEGROUNDSA
 
 class BattleGround;
 
@@ -41,7 +44,11 @@ class BattleGroundSA : public BattleGround
     public:
         BattleGroundSA();
 
-        /* inherited from BattlegroundClass */
+        /**
+         * @brief inherited from BattlegroundClass
+         *
+         * @param plr
+         */
         virtual void AddPlayer(Player* plr) override;
 
         /* Scorekeeping */

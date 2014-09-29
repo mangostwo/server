@@ -17,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #include "TemporarySummon.h"
@@ -58,7 +61,7 @@ void TemporarySummon::Update(uint32 update_diff,  uint32 diff)
                 m_timer -= update_diff;
             }
             else if (m_timer != m_lifetime)
-                m_timer = m_lifetime;
+                { m_timer = m_lifetime; }
 
             break;
         }
@@ -119,10 +122,10 @@ void TemporarySummon::Update(uint32 update_diff,  uint32 diff)
                     return;
                 }
                 else
-                    m_timer -= update_diff;
+                    { m_timer -= update_diff; }
             }
             else if (m_timer != m_lifetime)
-                m_timer = m_lifetime;
+                { m_timer = m_lifetime; }
             break;
         }
         case TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN:
@@ -142,10 +145,10 @@ void TemporarySummon::Update(uint32 update_diff,  uint32 diff)
                     return;
                 }
                 else
-                    m_timer -= update_diff;
+                    { m_timer -= update_diff; }
             }
             else if (m_timer != m_lifetime)
-                m_timer = m_lifetime;
+                { m_timer = m_lifetime; }
             break;
         }
         case TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN:
@@ -206,7 +209,7 @@ void TemporarySummon::UnSummon()
     if (GetSummonerGuid().IsCreatureOrVehicle())
         if (Creature* sum = GetMap()->GetCreature(GetSummonerGuid()))
             if (sum->AI())
-                sum->AI()->SummonedCreatureDespawn(this);
+                { sum->AI()->SummonedCreatureDespawn(this); }
 
     AddObjectToRemoveList();
 }

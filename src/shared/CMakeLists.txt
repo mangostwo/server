@@ -1,5 +1,7 @@
 # This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
 #
+# ***** BEGIN GPL LICENSE BLOCK *****
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -13,6 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# ***** END GPL LICENSE BLOCK *****
+#
+# World of Warcraft, and all World of Warcraft or Warcraft art, images,
+# and lore are copyrighted by Blizzard Entertainment, Inc.
 
 set(LIBRARY_NAME shared)
 
@@ -120,20 +127,20 @@ source_group("Log"
 )
 
 include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/dep/include
-  ${CMAKE_SOURCE_DIR}/src/framework
-  ${CMAKE_BINARY_DIR}
-  ${ACE_INCLUDE_DIR}
+  "${CMAKE_CURRENT_SOURCE_DIR}"
+  "${CMAKE_SOURCE_DIR}/dep/include"
+  "${CMAKE_SOURCE_DIR}/src/framework"
+  "${CMAKE_BINARY_DIR}"
+  "${ACE_INCLUDE_DIR}"
 )
 
 if(POSTGRESQL)
-  include_directories(${PostgreSQL_INCLUDE_DIRS})
+  include_directories("${PostgreSQL_INCLUDE_DIRS}")
 else()
-  include_directories(${MYSQL_INCLUDE_DIR})
+  include_directories("${MYSQL_INCLUDE_DIR}")
 endif()
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/SystemConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/SystemConfig.h)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/SystemConfig.h.in" "${CMAKE_CURRENT_BINARY_DIR}/SystemConfig.h")
 
 add_library(${LIBRARY_NAME} STATIC
   ${LIBRARY_SRCS}

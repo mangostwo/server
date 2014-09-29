@@ -17,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef CONFIG_H
@@ -28,27 +31,82 @@
 
 class ACE_Configuration_Heap;
 
+/**
+ * @brief
+ *
+ */
 class MANGOS_DLL_SPEC Config
 {
     public:
-
+        /**
+         * @brief
+         *
+         */
         Config();
+        /**
+         * @brief
+         *
+         */
         ~Config();
 
+        /**
+         * @brief
+         *
+         * @param file
+         * @return bool
+         */
         bool SetSource(const char* file);
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool Reload();
 
+        /**
+         * @brief
+         *
+         * @param name
+         * @param def
+         * @return std::string
+         */
         std::string GetStringDefault(const char* name, const char* def);
+        /**
+         * @brief
+         *
+         * @param name
+         * @param def
+         * @return bool
+         */
         bool GetBoolDefault(const char* name, const bool def = false);
+        /**
+         * @brief
+         *
+         * @param name
+         * @param def
+         * @return int32
+         */
         int32 GetIntDefault(const char* name, const int32 def);
+        /**
+         * @brief
+         *
+         * @param name
+         * @param def
+         * @return float
+         */
         float GetFloatDefault(const char* name, const float def);
 
+        /**
+         * @brief
+         *
+         * @return std::string
+         */
         std::string GetFilename() const { return mFilename; }
 
     private:
 
-        std::string mFilename;
-        ACE_Configuration_Heap* mConf;
+        std::string mFilename; /**< TODO */
+        ACE_Configuration_Heap* mConf; /**< TODO */
 };
 
 #define sConfig MaNGOS::Singleton<Config>::Instance()

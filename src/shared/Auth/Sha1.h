@@ -17,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef _AUTH_SHA1_H
@@ -28,25 +31,71 @@
 
 class BigNumber;
 
+/**
+ * @brief
+ *
+ */
 class Sha1Hash
 {
     public:
+        /**
+         * @brief
+         *
+         */
         Sha1Hash();
+        /**
+         * @brief
+         *
+         */
         ~Sha1Hash();
 
+        /**
+         * @brief
+         *
+         * @param bn0...
+         */
         void UpdateBigNumbers(BigNumber* bn0, ...);
 
+        /**
+         * @brief
+         *
+         * @param dta
+         * @param len
+         */
         void UpdateData(const uint8* dta, int len);
+        /**
+         * @brief
+         *
+         * @param str
+         */
         void UpdateData(const std::string& str);
 
+        /**
+         * @brief
+         *
+         */
         void Initialize();
+        /**
+         * @brief
+         *
+         */
         void Finalize();
 
+        /**
+         * @brief
+         *
+         * @return uint8
+         */
         uint8* GetDigest(void) { return mDigest; };
+        /**
+         * @brief
+         *
+         * @return int
+         */
         int GetLength(void) { return SHA_DIGEST_LENGTH; };
 
     private:
-        SHA_CTX mC;
-        uint8 mDigest[SHA_DIGEST_LENGTH];
+        SHA_CTX mC; /**< TODO */
+        uint8 mDigest[SHA_DIGEST_LENGTH]; /**< TODO */
 };
 #endif

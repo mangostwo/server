@@ -17,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #include "SocialMgr.h"
@@ -40,14 +43,23 @@ PlayerSocial::~PlayerSocial()
     m_playerSocialMap.clear();
 }
 
+/* Called by PlayerSocial::SendFriendList */
 uint32 PlayerSocial::GetNumberOfSocialsWithFlag(SocialFlag flag)
 {
+    /* This is the value we return
+     * It indicates the number of players that have the flag specified in arg1 */
     uint32 counter = 0;
+
+    /* For each person on our player's social map
+     * This includes both friends and enemies */
     for (PlayerSocialMap::const_iterator itr = m_playerSocialMap.begin(); itr != m_playerSocialMap.end(); ++itr)
     {
         if (itr->second.Flags & flag)
+        {
             ++counter;
+        }
     }
+    /* We've done all the calculations we need to, return the counter */
     return counter;
 }
 
@@ -57,17 +69,17 @@ bool PlayerSocial::AddToSocialList(ObjectGuid friend_guid, bool ignore)
     if (ignore)
     {
         if (GetNumberOfSocialsWithFlag(SOCIAL_FLAG_IGNORED) >= SOCIALMGR_IGNORE_LIMIT)
-            return false;
+            { return false; }
     }
     else
     {
         if (GetNumberOfSocialsWithFlag(SOCIAL_FLAG_FRIEND) >= SOCIALMGR_FRIEND_LIMIT)
-            return false;
+            { return false; }
     }
 
     uint32 flag = SOCIAL_FLAG_FRIEND;
     if (ignore)
-        flag = SOCIAL_FLAG_IGNORED;
+        { flag = SOCIAL_FLAG_IGNORED; }
 
     PlayerSocialMap::const_iterator itr = m_playerSocialMap.find(friend_guid.GetCounter());
     if (itr != m_playerSocialMap.end())
@@ -89,11 +101,11 @@ void PlayerSocial::RemoveFromSocialList(ObjectGuid friend_guid, bool ignore)
 {
     PlayerSocialMap::iterator itr = m_playerSocialMap.find(friend_guid.GetCounter());
     if (itr == m_playerSocialMap.end())                     // not exist
-        return;
+        { return; }
 
     uint32 flag = SOCIAL_FLAG_FRIEND;
     if (ignore)
-        flag = SOCIAL_FLAG_IGNORED;
+        { flag = SOCIAL_FLAG_IGNORED; }
 
     itr->second.Flags &= ~flag;
     if (itr->second.Flags == 0)

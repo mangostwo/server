@@ -17,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef MANGOS_POOLHANDLER_H
@@ -151,7 +154,7 @@ class PoolManager
             if (uint16 pool_id = IsPartOfAPool<T>(db_guid_or_pool_id))
             {
                 if (uint16 top_pool_id = IsPartOfTopPool<Pool>(pool_id))
-                    return top_pool_id;
+                    { return top_pool_id; }
 
                 return pool_id;
             }
@@ -219,7 +222,7 @@ inline uint16 PoolManager::IsPartOfAPool<Creature>(uint32 db_guid) const
 {
     SearchMap::const_iterator itr = mCreatureSearchMap.find(db_guid);
     if (itr != mCreatureSearchMap.end())
-        return itr->second;
+        { return itr->second; }
 
     return 0;
 }
@@ -230,7 +233,7 @@ inline uint16 PoolManager::IsPartOfAPool<GameObject>(uint32 db_guid) const
 {
     SearchMap::const_iterator itr = mGameobjectSearchMap.find(db_guid);
     if (itr != mGameobjectSearchMap.end())
-        return itr->second;
+        { return itr->second; }
 
     return 0;
 }
@@ -241,7 +244,7 @@ inline uint16 PoolManager::IsPartOfAPool<Pool>(uint32 pool_id) const
 {
     SearchMap::const_iterator itr = mPoolSearchMap.find(pool_id);
     if (itr != mPoolSearchMap.end())
-        return itr->second;
+        { return itr->second; }
 
     return 0;
 }

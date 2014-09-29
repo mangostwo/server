@@ -17,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #include "ReputationMgr.h"
@@ -35,7 +38,7 @@ ReputationRank ReputationMgr::ReputationToRank(int32 standing)
     {
         limit -= PointsInRank[i];
         if (standing >= limit)
-            return ReputationRank(i);
+            { return ReputationRank(i); }
     }
     return MIN_REPUTATION_RANK;
 }
@@ -56,7 +59,7 @@ int32 ReputationMgr::GetReputation(uint32 faction_id) const
 int32 ReputationMgr::GetBaseReputation(FactionEntry const* factionEntry) const
 {
     if (!factionEntry)
-        return 0;
+        { return 0; }
 
     uint32 raceMask = m_player->getRaceMask();
     uint32 classMask = m_player->getClassMask();
@@ -70,10 +73,10 @@ int32 ReputationMgr::GetReputation(FactionEntry const* factionEntry) const
 {
     // Faction without recorded reputation. Just ignore.
     if (!factionEntry)
-        return 0;
+        { return 0; }
 
     if (FactionState const* state = GetState(factionEntry))
-        return GetBaseReputation(factionEntry) + state->Standing;
+        { return GetBaseReputation(factionEntry) + state->Standing; }
 
     return 0;
 }
@@ -93,15 +96,15 @@ ReputationRank ReputationMgr::GetBaseRank(FactionEntry const* factionEntry) cons
 void ReputationMgr::ApplyForceReaction(uint32 faction_id, ReputationRank rank, bool apply)
 {
     if (apply)
-        m_forcedReactions[faction_id] = rank;
+        { m_forcedReactions[faction_id] = rank; }
     else
-        m_forcedReactions.erase(faction_id);
+        { m_forcedReactions.erase(faction_id); }
 }
 
 uint32 ReputationMgr::GetDefaultStateFlags(FactionEntry const* factionEntry) const
 {
     if (!factionEntry)
-        return 0;
+        { return 0; }
 
     uint32 raceMask = m_player->getRaceMask();
     uint32 classMask = m_player->getClassMask();

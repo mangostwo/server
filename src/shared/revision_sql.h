@@ -1,6 +1,6 @@
 /**
- * mangos-two is a full featured server for World of Warcraft in its wotlk
- * version, supporting clients for patch 3.2.5a.
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
  * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
  *
@@ -22,9 +22,9 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef __REVISION_SQL_H__
-#define __REVISION_SQL_H__
+#ifndef MANGOS_H_REVISION_SQL
+#define MANGOS_H_REVISION_SQL
 #define REVISION_DB_CHARACTERS "required_12546_01_characters_random_battleground"
 #define REVISION_DB_MANGOS "required_04_mangos_spell_template"
-#define REVISION_DB_REALMD "required_z2426_01_realmd_relations"
+#define REVISION_DB_REALMD "required_20140607_Realm_Resync"
 #endif // __REVISION_SQL_H__
