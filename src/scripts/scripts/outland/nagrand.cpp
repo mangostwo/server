@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Nagrand
 SD%Complete: 90
-SDComment: Quest support: 9868, 9918, 10085, 10646.
+SDComment: Quest support: 9868, 9918, 10085, 10646, 11090.
 SDCategory: Nagrand
 EndScriptData */
 
@@ -25,6 +25,7 @@ EndScriptData */
 mob_lump
 npc_maghar_captive
 npc_creditmarker_visit_with_ancestors
+npc_rethhedron
 EndContentData */
 
 #include "precompiled.h"
@@ -341,6 +342,169 @@ CreatureAI* GetAI_npc_creditmarker_visit_with_ancestors(Creature* pCreature)
     return new npc_creditmarker_visit_with_ancestorsAI(pCreature);
 }
 
+/*#####
+## npc_rethhedron
+#####*/
+
+enum
+{
+    SAY_LOW_HP = -1000966,
+    SAY_EVENT_END = -1000967,
+    SPELL_CRIPPLE = 41281,
+    SPELL_SHADOW_BOLT = 41280,
+    SPELL_ABYSSAL_TOSS = 41283, // summon npc 23416 at target position
+    SPELL_ABYSSAL_IMPACT = 41284,
+    // SPELL_GROUND_AIR_PULSE = 41270, // spell purpose unk
+    // SPELL_AGGRO_CHECK = 41285, // spell purpose unk
+    // SPELL_AGGRO_BURST = 41286, // spell purpose unk
+    SPELL_COSMETIC_LEGION_RING = 41339,
+    SPELL_QUEST_COMPLETE = 41340,
+    NPC_SPELLBINDER = 22342,
+    NPC_RETHHEDRONS_TARGET = 23416,
+    POINT_ID_PORTAL_FRONT = 0,
+    POINT_ID_PORTAL = 1,
+};
+
+static const float afRethhedronPos[2][3] =
+{
+    {-1502.39f, 9772.33f, 200.421f},
+    {-1557.93f, 9834.34f, 200.949f}
+};
+
+struct MANGOS_DLL_DECL npc_rethhedronAI : public ScriptedAI
+{
+    npc_rethhedronAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    
+    uint32 m_uiCrippleTimer;
+    uint32 m_uiShadowBoltTimer;
+    uint32 m_uiAbyssalTossTimer;
+    uint32 m_uiDelayTimer;
+    
+    bool m_bLowHpYell;
+    bool m_bEventFinished;
+    
+    void Reset() override
+    {
+        m_uiCrippleTimer = urand(5000, 9000);
+        m_uiShadowBoltTimer = urand(1000, 3000);
+        m_uiAbyssalTossTimer = 0;
+        m_uiDelayTimer = 0;
+        m_bLowHpYell = false;
+        m_bEventFinished = false;
+    }
+    
+    void AttackStart(Unit* pWho) override
+    {
+        if (m_creature->Attack(pWho, true))
+        {
+            m_creature->AddThreat(pWho);
+            m_creature->SetInCombatWith(pWho);
+            pWho->SetInCombatWith(m_creature);
+            DoStartMovement(pWho, 30.0f);
+        }
+    }
+    
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage) override
+    {
+        // go to epilog at 10% health
+        if (!m_bEventFinished && m_creature->GetHealthPercent() < 10.0f)
+        {
+            m_creature->InterruptNonMeleeSpells(false);
+            m_creature->GetMotionMaster()->Clear();
+            m_creature->GetMotionMaster()->MovePoint(POINT_ID_PORTAL_FRONT, afRethhedronPos[0][0], afRethhedronPos[0][1], afRethhedronPos[0][2]);
+            m_bEventFinished = true;
+        }
+        
+        // npc is not allowed to die
+        if (m_creature->GetHealth() < uiDamage)
+            uiDamage = 0;
+    }
+    
+    void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
+    {
+        if (uiMoveType != POINT_MOTION_TYPE)
+            return;
+        
+        if (uiPointId == POINT_ID_PORTAL_FRONT)
+        {
+            DoScriptText(SAY_EVENT_END, m_creature);
+            m_creature->GetMotionMaster()->MoveIdle();
+            m_uiDelayTimer = 2000;
+        }
+        else if (uiPointId == POINT_ID_PORTAL)
+        {
+            DoCastSpellIfCan(m_creature, SPELL_COSMETIC_LEGION_RING, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, SPELL_QUEST_COMPLETE, CAST_TRIGGERED);
+            m_creature->GetMotionMaster()->MoveIdle();
+            m_creature->ForcedDespawn(2000);
+        }
+    }
+    
+    void JustSummoned(Creature* pSummoned) override
+    {
+        if (pSummoned->GetEntry() == NPC_RETHHEDRONS_TARGET)
+            pSummoned->CastSpell(pSummoned, SPELL_ABYSSAL_IMPACT, true);
+    }
+    
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiDelayTimer)
+        {
+            if (m_uiDelayTimer <= uiDiff)
+            {
+                m_creature->GetMotionMaster()->Clear();
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_PORTAL, afRethhedronPos[1][0], afRethhedronPos[1][1], afRethhedronPos[1][2]);
+                m_uiDelayTimer = 0;
+            }
+            else
+                m_uiDelayTimer -= uiDiff;
+        }
+        
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+        
+        if (m_bEventFinished)
+            return;
+        
+        if (m_uiCrippleTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CRIPPLE) == CAST_OK)
+                m_uiCrippleTimer = urand(20000, 30000);
+        }
+        else
+            m_uiCrippleTimer -= uiDiff;
+        
+        if (m_uiShadowBoltTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOW_BOLT) == CAST_OK)
+                m_uiShadowBoltTimer = urand(3000, 5000);
+        }
+        else
+            m_uiShadowBoltTimer -= uiDiff;
+        
+        if (m_uiAbyssalTossTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ABYSSAL_TOSS) == CAST_OK)
+                m_uiAbyssalTossTimer = urand(500, 2000);
+        }
+        else
+            m_uiAbyssalTossTimer -= uiDiff;
+        
+        if (!m_bLowHpYell && m_creature->GetHealthPercent() < 40.0f)
+        {
+            DoScriptText(SAY_LOW_HP, m_creature);
+            m_bLowHpYell = true;
+        }
+        
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_rethhedron(Creature* pCreature)
+{
+    return new npc_rethhedronAI(pCreature);
+}
+
 /*######
 ## AddSC
 ######*/
@@ -363,5 +527,10 @@ void AddSC_nagrand()
     pNewScript = new Script;
     pNewScript->Name = "npc_creditmarker_visit_with_ancestors";
     pNewScript->GetAI = &GetAI_npc_creditmarker_visit_with_ancestors;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_rethhedron";
+    pNewScript->GetAI = &GetAI_npc_rethhedron;
     pNewScript->RegisterSelf();
 }

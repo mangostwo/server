@@ -82,21 +82,23 @@ ItemRewards LFGMgr::GetDungeonItemRewards(uint32 dungeonId, DungeonTypes type)
         // Here we're using the target levels rather than the 
         // actual minimum and maximum levels to avoid potential
         // conflicts with the level ranges in the database
-        uint32 minLevel = dungeon->targetLevelMin;
-        uint32 maxLevel = dungeon->targetLevelMax;
+        uint32 minLevel = dungeon->minLevel;
+        uint32 maxLevel = dungeon->maxLevel;
         
-        DungeonFinderItemsMap itemBuffer = sObjectMgr.GetDungeonFinderItemsMap();
-        for (DungeonFinderItemsMap::iterator it = itemBuffer.begin(); it != itemBuffer.end(); ++it)
+        DungeonFinderItemsMap const& itemBuffer = sObjectMgr.GetDungeonFinderItemsMap();
+        for (DungeonFinderItemsMap::const_iterator it = itemBuffer.begin(); it != itemBuffer.end(); ++it)
         {
             DungeonFinderItems itemCache = it->second;
             if (itemCache.dungeonType == (uint32)type)
             {
                 // should only be one of this inequality in the map
-                if ((itemCache.minLevel <= minLevel) && (maxLevel <= itemCache.maxLevel))
+                if ((minLevel >= itemCache.minLevel) && (maxLevel <= itemCache.maxLevel))
                 {
-                    rewards.itemId = itemCache.itemReward;
-                    rewards.itemAmount = itemCache.itemAmount;
-                    return rewards;
+                    ItemRewards foundReward(itemCache.itemReward, itemCache.itemAmount);
+                    //rewards.itemId = itemCache.itemReward;
+                    //rewards.itemAmount = itemCache.itemAmount;
+                    //return rewards;
+                    return foundReward;
                 }
             }
         }
@@ -233,15 +235,15 @@ dungeonForbidden LFGMgr::FindRandomDungeonsNotForPlayer(Player* plr)
         LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(id);
         if (dungeon)
         {
-            uint32 forbiddenReason;
+            uint32 forbiddenReason = 0;
             
-            if ((uint32)expansion < dungeon->expansionLevel)
+            if ((uint8)dungeon->expansionLevel > expansion)
                 forbiddenReason = (uint32)LFG_FORBIDDEN_EXPANSION;
             else if (dungeon->typeID == LFG_TYPE_RAID)
                 forbiddenReason = (uint32)LFG_FORBIDDEN_RAID;
-            else if (level < dungeon->minLevel)
+            else if (dungeon->minLevel > level)
                 forbiddenReason = (uint32)LFG_FORBIDDEN_LOW_LEVEL;
-            else if (level > dungeon->maxLevel)
+            else if (dungeon->maxLevel < level)
                 forbiddenReason = (uint32)LFG_FORBIDDEN_HIGH_LEVEL;
             else if (IsSeasonal(dungeon->flags) && !IsSeasonActive(dungeon->ID)) // check pointers/function args
                 forbiddenReason = (uint32)LFG_FORBIDDEN_NOT_IN_SEASON;

@@ -1154,15 +1154,7 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading Weather Data...");
     sObjectMgr.LoadWeatherZoneChances();
-    
-    sLog.outString("Loading Dungeon Finder Requirements...");
-    sObjectMgr.LoadDungeonFinderRequirements();
-    
-    sLog.outString("Loading Dungeon Finder Rewards...");
-    sObjectMgr.LoadDungeonFinderRewards();
-    
-    sLog.outString("Loading Dungeon Finder Items...");
-    sObjectMgr.LoadDungeonFinderItems();
+   
 
     sLog.outString("Loading Quests...");
     sObjectMgr.LoadQuests();                                // must be loaded after DBCs, creature_template, item_template, gameobject tables
@@ -1361,6 +1353,15 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading GM tickets...");
     sTicketMgr.LoadGMTickets();
+    
+    sLog.outString("Loading Dungeon Finder Requirements...");
+    sObjectMgr.LoadDungeonFinderRequirements();
+    
+    sLog.outString("Loading Dungeon Finder Rewards...");
+    sObjectMgr.LoadDungeonFinderRewards();
+    
+    sLog.outString("Loading Dungeon Finder Items...");
+    sObjectMgr.LoadDungeonFinderItems();
 
     ///- Handle outdated emails (delete/return)
     sLog.outString("Returning old mails...");
@@ -2250,7 +2251,7 @@ void World::InitRandomBGResetTime()
     // normalize reset time
     m_NextRandomBGReset = m_NextRandomBGReset < curTime ? nextDayResetTime - DAY : nextDayResetTime;
     if (!result)
-        CharacterDatabase.PExecute("INSERT INTO saved_variables (NextRandomBGResetTime) VALUES ('"UI64FMTD"')", uint64(m_NextRandomBGReset));
+        CharacterDatabase.PExecute("INSERT INTO saved_variables (NextRandomBGResetTime) VALUES ('" UI64FMTD "')", uint64(m_NextRandomBGReset));
     else
         delete result;
 }
@@ -2276,7 +2277,7 @@ void World::ResetRandomBG()
             itr->second->GetPlayer()->SetRandomWinner(false);
 
     m_NextRandomBGReset = time_t(m_NextRandomBGReset + DAY);
-    CharacterDatabase.PExecute("UPDATE saved_variables SET NextRandomBGResetTime = '"UI64FMTD"'", uint64(m_NextRandomBGReset));
+    CharacterDatabase.PExecute("UPDATE saved_variables SET NextRandomBGResetTime = '" UI64FMTD "'", uint64(m_NextRandomBGReset));
 }
 
 void World::ResetWeeklyQuests()
