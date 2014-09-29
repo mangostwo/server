@@ -27,9 +27,13 @@
 #include "DBCStructure.h"
 #include "GameEventMgr.h"
 #include "LFGMgr.h"
+#include "Object.h"
+#include "Player.h"
 #include "ObjectMgr.h"
 #include "SharedDefines.h"
 #include "WorldSession.h"
+
+INSTANTIATE_SINGLETON_1(LFGMgr);
 
 LFGMgr::LFGMgr() { }
 
@@ -39,7 +43,7 @@ LFGMgr::~LFGMgr()
     m_dailyTBCHeroic.clear();
     m_dailyLKNormal.clear();
     m_dailyLKHeroic.clear();
-    m_playerData.clear();
+   // m_playerData.clear();
 }
 
 void LFGMgr::JoinLFG()

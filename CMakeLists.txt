@@ -18,7 +18,11 @@
 
 # CMake policies
 cmake_minimum_required(VERSION 2.8)
-set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
+cmake_policy(SET CMP0005 OLD)
+if(POLICY CMP0043)
+  cmake_policy(SET CMP0043 OLD) # Disable 'Ignore COMPILE_DEFINITIONS_<Config> properties'
+endif(POLICY CMP0043)
+set(CMAKE_CXX_FLAGS "-std=c++0x -stdlib=libc++")
 
 project(MaNGOS)
 set(MANGOS_VERSION 0.18.1)

@@ -31,6 +31,7 @@
 #include "ObjectGuid.h"
 #include "AuctionHouseMgr.h"
 #include "Item.h"
+#include "LFGMgr.h"
 
 struct ItemPrototype;
 struct AuctionEntry;

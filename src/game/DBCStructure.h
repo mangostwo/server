@@ -1206,7 +1206,7 @@ struct LfgDungeonsEntry
     uint32 expansionLevel;                                  // 29    m_expansionLevel
     uint32 orderIndex;                                      // 30    m_order_index
     uint32 groupID;                                         // 31    m_group_id
-    //char* description[16];                                // 32-49 m_Description_lang
+    //char* description[16]; // 32-49 m_Description_lang
 
     uint32 Entry() const { return ID + ((uint8)typeID << 24); }
 };

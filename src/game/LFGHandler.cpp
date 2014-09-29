@@ -121,6 +121,7 @@ void WorldSession::HandleLfgGetPlayerInfo(WorldPacket& recv_data)
     for (dungeonEntries::iterator it = availableDungeons.begin(); it != availableDungeons.end(); ++it)
     {
         DEBUG_LOG("Parsing a dungeon entry for packet");
+
         data << uint32(it->second);                                // dungeon entry
         
         DungeonTypes type = sLFGMgr.GetDungeonType(it->first);      // dungeon type
@@ -170,6 +171,7 @@ void WorldSession::HandleLfgGetPlayerInfo(WorldPacket& recv_data)
         data << uint32(it->first); // dungeon entry
         data << uint32(it->second); // reason for being locked
     }
+    SendPacket(&data);
 }
 
 void WorldSession::HandleLfgGetPartyInfo(WorldPacket& recv_data)
@@ -183,7 +185,7 @@ void WorldSession::HandleLfgGetPartyInfo(WorldPacket& recv_data)
     if (!pGroup)
         return;
     
-    partyForbidden groupMap;
+    /*partyForbidden groupMap;
     for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
     {
         Player* pGroupPlayer = itr->getSource();
@@ -216,7 +218,7 @@ void WorldSession::HandleLfgGetPartyInfo(WorldPacket& recv_data)
             data << uint32(itr->second); // reason for dungeon being forbidden/locked
         }
     }
-    SendPacket(&data);
+    SendPacket(&data);*/
 }
 
 void WorldSession::HandleLfgGetStatus(WorldPacket& recv_data)

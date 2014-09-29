@@ -41,7 +41,7 @@ enum
 
 bool ItemUse_item_arcane_charges(Player* pPlayer, Item* pItem, const SpellCastTargets& /*pTargets*/)
 {
-    if (pPlayer->IsTaxiFlyingFlying())
+    if (pPlayer->IsTaxiFlying())
         return false;
 
     pPlayer->SendEquipError(EQUIP_ERR_NONE, pItem, NULL);
