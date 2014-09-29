@@ -50,7 +50,10 @@ enum SpellCategories
     SPELLCATEGORY_JUDGEMENT           = 1210,               // Judgement (seal trigger)
 };
 
-// Spell clasification
+/**
+ * Spell clasification (Taken from comments)
+ * \todo Properly document this
+ */
 enum SpellSpecific
 {
     SPELL_NORMAL            = 0,
@@ -110,7 +113,7 @@ inline bool IsSpellHaveEffect(SpellEntry const* spellInfo, SpellEffects effect)
 {
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         if (SpellEffects(spellInfo->Effect[i]) == effect)
-            return true;
+            { return true; }
     return false;
 }
 
@@ -135,7 +138,7 @@ inline bool IsSpellAppliesAura(SpellEntry const* spellInfo, uint32 effectMask = 
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         if (effectMask & (1 << i))
             if (IsAuraApplyEffect(spellInfo, SpellEffectIndex(i)))
-                return true;
+                { return true; }
 
     return false;
 }
@@ -175,7 +178,7 @@ inline bool IsSpellHaveAura(SpellEntry const* spellInfo, AuraType aura, uint32 e
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         if (effectMask & (1 << i))
             if (AuraType(spellInfo->EffectApplyAuraName[i]) == aura)
-                return true;
+                { return true; }
     return false;
 }
 
@@ -183,7 +186,7 @@ inline bool IsSpellLastAuraEffect(SpellEntry const* spellInfo, SpellEffectIndex 
 {
     for (int i = effecIdx + 1; i < MAX_EFFECT_INDEX; ++i)
         if (spellInfo->EffectApplyAuraName[i])
-            return false;
+            { return false; }
     return true;
 }
 
@@ -308,18 +311,18 @@ inline bool IsSpellWithCasterSourceTargetsOnly(SpellEntry const* spellInfo)
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         if (!spellInfo->Effect[i])                          // Skip junk in DBC
-            continue;
+            { continue; }
 
         uint32 targetA = spellInfo->EffectImplicitTargetA[i];
         if (targetA && !IsCasterSourceTarget(targetA))
-            return false;
+            { return false; }
 
         uint32 targetB = spellInfo->EffectImplicitTargetB[i];
         if (targetB && !IsCasterSourceTarget(targetB))
-            return false;
+            { return false; }
 
         if (!targetA && !targetB)
-            return false;
+            { return false; }
     }
     return true;
 }
@@ -399,11 +402,11 @@ inline bool IsAreaEffectTarget(Targets target)
 inline bool IsAreaOfEffectSpell(SpellEntry const* spellInfo)
 {
     if (IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0])) || IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetB[EFFECT_INDEX_0])))
-        return true;
+        { return true; }
     if (IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetA[EFFECT_INDEX_1])) || IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetB[EFFECT_INDEX_1])))
-        return true;
+        { return true; }
     if (IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetA[EFFECT_INDEX_2])) || IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetB[EFFECT_INDEX_2])))
-        return true;
+        { return true; }
     return false;
 }
 
@@ -415,7 +418,7 @@ inline bool IsAreaAuraEffect(uint32 effect)
             effect == SPELL_EFFECT_APPLY_AREA_AURA_ENEMY    ||
             effect == SPELL_EFFECT_APPLY_AREA_AURA_PET      ||
             effect == SPELL_EFFECT_APPLY_AREA_AURA_OWNER)
-        return true;
+        { return true; }
     return false;
 }
 
@@ -423,7 +426,7 @@ inline bool HasAreaAuraEffect(SpellEntry const* spellInfo)
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
         if (IsAreaAuraEffect(spellInfo->Effect[i]))
-            return true;
+            { return true; }
     return false;
 }
 
@@ -448,7 +451,7 @@ inline bool IsOnlySelfTargeting(SpellEntry const* spellInfo)
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         if (!spellInfo->Effect[i])
-            return true;
+            { return true; }
 
         switch (spellInfo->EffectImplicitTargetA[i])
         {
@@ -501,7 +504,7 @@ inline bool IsChanneledSpell(SpellEntry const* spellInfo)
 inline bool IsNeedCastSpellAtFormApply(SpellEntry const* spellInfo, ShapeshiftForm form)
 {
     if ((!spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) && !spellInfo->HasAttribute(SPELL_ATTR_HIDE_SPELL)) || !form)
-        return false;
+        { return false; }
 
     // passive spells with SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT are already active without shapeshift, do no recast!
     return (spellInfo->Stances & (1 << (form - 1)) && !spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT));
@@ -526,15 +529,15 @@ inline uint32 GetSpellMechanicMask(SpellEntry const* spellInfo, uint32 effectMas
 {
     uint32 mask = 0;
     if (spellInfo->Mechanic)
-        mask |= 1 << (spellInfo->Mechanic - 1);
+        { mask |= 1 << (spellInfo->Mechanic - 1); }
 
     for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         if (!(effectMask & (1 << i)))
-            continue;
+            { continue; }
 
         if (spellInfo->EffectMechanic[i])
-            mask |= 1 << (spellInfo->EffectMechanic[i] - 1);
+            { mask |= 1 << (spellInfo->EffectMechanic[i] - 1); }
     }
 
     return mask;
@@ -544,19 +547,19 @@ inline uint32 GetAllSpellMechanicMask(SpellEntry const* spellInfo)
 {
     uint32 mask = 0;
     if (spellInfo->Mechanic)
-        mask |= 1 << (spellInfo->Mechanic - 1);
+        { mask |= 1 << (spellInfo->Mechanic - 1); }
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         if (spellInfo->EffectMechanic[i])
-            mask |= 1 << (spellInfo->EffectMechanic[i] - 1);
+            { mask |= 1 << (spellInfo->EffectMechanic[i] - 1); }
     return mask;
 }
 
 inline Mechanics GetEffectMechanic(SpellEntry const* spellInfo, SpellEffectIndex effect)
 {
     if (spellInfo->EffectMechanic[effect])
-        return Mechanics(spellInfo->EffectMechanic[effect]);
+        { return Mechanics(spellInfo->EffectMechanic[effect]); }
     if (spellInfo->Mechanic)
-        return Mechanics(spellInfo->Mechanic);
+        { return Mechanics(spellInfo->Mechanic); }
     return MECHANIC_NONE;
 }
 
@@ -564,9 +567,9 @@ inline uint32 GetDispellMask(DispelType dispel)
 {
     // If dispell all
     if (dispel == DISPEL_ALL)
-        return DISPEL_ALL_MASK;
+        { return DISPEL_ALL_MASK; }
     else
-        return (1 << dispel);
+        { return (1 << dispel); }
 }
 
 // Diminishing Returns interaction with spells
@@ -577,48 +580,51 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry cons
 
 SpellEntry const* GetSpellEntryByDifficulty(uint32 id, Difficulty difficulty, bool isRaid);
 
-// Spell proc event related declarations (accessed using SpellMgr functions)
+/**
+ * Spell proc event related declarations (accessed using SpellMgr functions) (Taken from comments)
+ */
 enum ProcFlags
 {
     PROC_FLAG_NONE                          = 0x00000000,
 
-    PROC_FLAG_KILLED                        = 0x00000001,   // 00 Killed by aggressor
-    PROC_FLAG_KILL                          = 0x00000002,   // 01 Kill target (in most cases need XP/Honor reward, see Unit::IsTriggeredAtSpellProcEvent for additinoal check)
+    PROC_FLAG_KILLED                        = 0x00000001,   ///< (From source) 00 Killed by aggressor
+    PROC_FLAG_KILL                          = 0x00000002,   ///< (From source) 01 Kill target (in most cases need XP/Honor reward, see Unit::IsTriggeredAtSpellProcEvent for additinoal check)
 
-    PROC_FLAG_SUCCESSFUL_MELEE_HIT          = 0x00000004,   // 02 Successful melee auto attack
-    PROC_FLAG_TAKEN_MELEE_HIT               = 0x00000008,   // 03 Taken damage from melee auto attack hit
+    PROC_FLAG_SUCCESSFUL_MELEE_HIT          = 0x00000004,   ///< (From source) 02 Successful melee auto attack
+    PROC_FLAG_TAKEN_MELEE_HIT               = 0x00000008,   ///< (From source) 03 Taken damage from melee auto attack hit
 
-    PROC_FLAG_SUCCESSFUL_MELEE_SPELL_HIT    = 0x00000010,   // 04 Successful attack by Spell that use melee weapon
-    PROC_FLAG_TAKEN_MELEE_SPELL_HIT         = 0x00000020,   // 05 Taken damage by Spell that use melee weapon
+    PROC_FLAG_SUCCESSFUL_MELEE_SPELL_HIT    = 0x00000010,   ///< (From source) 04 Successful attack by Spell that use melee weapon
+    PROC_FLAG_TAKEN_MELEE_SPELL_HIT         = 0x00000020,   ///< (From source) 05 Taken damage by Spell that use melee weapon
 
-    PROC_FLAG_SUCCESSFUL_RANGED_HIT         = 0x00000040,   // 06 Successful Ranged auto attack
-    PROC_FLAG_TAKEN_RANGED_HIT              = 0x00000080,   // 07 Taken damage from ranged auto attack
+    PROC_FLAG_SUCCESSFUL_RANGED_HIT         = 0x00000040,   ///< (From source) 06 Successful Ranged auto attack
+    PROC_FLAG_TAKEN_RANGED_HIT              = 0x00000080,   ///< (From source) 07 Taken damage from ranged auto attack
 
-    PROC_FLAG_SUCCESSFUL_RANGED_SPELL_HIT   = 0x00000100,   // 08 Successful Ranged attack by Spell that use ranged weapon
-    PROC_FLAG_TAKEN_RANGED_SPELL_HIT        = 0x00000200,   // 09 Taken damage by Spell that use ranged weapon
+    PROC_FLAG_SUCCESSFUL_RANGED_SPELL_HIT   = 0x00000100,   ///< (From source) 08 Successful Ranged attack by Spell that use ranged weapon
+    PROC_FLAG_TAKEN_RANGED_SPELL_HIT        = 0x00000200,   ///< (From source) 09 Taken damage by Spell that use ranged weapon
 
-    PROC_FLAG_SUCCESSFUL_POSITIVE_AOE_HIT   = 0x00000400,   // 10 Successful AoE (not 100% shure unused)
-    PROC_FLAG_TAKEN_POSITIVE_AOE            = 0x00000800,   // 11 Taken AoE      (not 100% shure unused)
+    PROC_FLAG_SUCCESSFUL_POSITIVE_AOE_HIT   = 0x00000400,   ///< (From source) 10 Successful AoE (not 100% shure unused)
+    PROC_FLAG_TAKEN_POSITIVE_AOE            = 0x00000800,   ///< (From source) 11 Taken AoE      (not 100% shure unused)
 
-    PROC_FLAG_SUCCESSFUL_AOE_SPELL_HIT      = 0x00001000,   // 12 Successful AoE damage spell hit (not 100% shure unused)
-    PROC_FLAG_TAKEN_AOE_SPELL_HIT           = 0x00002000,   // 13 Taken AoE damage spell hit      (not 100% shure unused)
+    PROC_FLAG_SUCCESSFUL_AOE_SPELL_HIT      = 0x00001000,   ///< (From source) 12 Successful AoE damage spell hit (not 100% shure unused)
+    PROC_FLAG_TAKEN_AOE_SPELL_HIT           = 0x00002000,   ///< (From source) 13 Taken AoE damage spell hit      (not 100% shure unused)
 
-    PROC_FLAG_SUCCESSFUL_POSITIVE_SPELL     = 0x00004000,   // 14 Successful cast positive spell (by default only on healing)
-    PROC_FLAG_TAKEN_POSITIVE_SPELL          = 0x00008000,   // 15 Taken positive spell hit (by default only on healing)
+    PROC_FLAG_SUCCESSFUL_POSITIVE_SPELL     = 0x00004000,   ///< (From source) 14 Successful cast positive spell (by default only on healing)
+    PROC_FLAG_TAKEN_POSITIVE_SPELL          = 0x00008000,   ///< (From source) 15 Taken positive spell hit (by default only on healing)
 
-    PROC_FLAG_SUCCESSFUL_NEGATIVE_SPELL_HIT = 0x00010000,   // 16 Successful negative spell cast (by default only on damage)
-    PROC_FLAG_TAKEN_NEGATIVE_SPELL_HIT      = 0x00020000,   // 17 Taken negative spell (by default only on damage)
+    PROC_FLAG_SUCCESSFUL_NEGATIVE_SPELL_HIT = 0x00010000,   ///< (From source) 16 Successful negative spell cast (by default only on damage)
+    PROC_FLAG_TAKEN_NEGATIVE_SPELL_HIT      = 0x00020000,   ///< (From source) 17 Taken negative spell (by default only on damage)
 
-    PROC_FLAG_ON_DO_PERIODIC                = 0x00040000,   // 18 Successful do periodic (damage / healing, determined by PROC_EX_PERIODIC_POSITIVE or negative if no procEx)
-    PROC_FLAG_ON_TAKE_PERIODIC              = 0x00080000,   // 19 Taken spell periodic (damage / healing, determined by PROC_EX_PERIODIC_POSITIVE or negative if no procEx)
+    PROC_FLAG_ON_DO_PERIODIC                = 0x00040000,   ///< (From source) 18 Successful do periodic (damage / healing, determined by PROC_EX_PERIODIC_POSITIVE or negative if no procEx)
+    PROC_FLAG_ON_TAKE_PERIODIC              = 0x00080000,   ///< (From source) 19 Taken spell periodic (damage / healing, determined by PROC_EX_PERIODIC_POSITIVE or negative if no procEx)
 
-    PROC_FLAG_TAKEN_ANY_DAMAGE              = 0x00100000,   // 20 Taken any damage
-    PROC_FLAG_ON_TRAP_ACTIVATION            = 0x00200000,   // 21 On trap activation
+    PROC_FLAG_TAKEN_ANY_DAMAGE              = 0x00100000,   ///< (From source) 20 Taken any damage
+    PROC_FLAG_ON_TRAP_ACTIVATION            = 0x00200000,   ///< (From source) 21 On trap activation
 
-    PROC_FLAG_TAKEN_OFFHAND_HIT             = 0x00400000,   // 22 Taken off-hand melee attacks(not used)
-    PROC_FLAG_SUCCESSFUL_OFFHAND_HIT        = 0x00800000    // 23 Successful off-hand melee attacks
+    PROC_FLAG_TAKEN_OFFHAND_HIT             = 0x00400000,   ///< (From source) 22 Taken off-hand melee attacks(not used)
+    PROC_FLAG_SUCCESSFUL_OFFHAND_HIT        = 0x00800000    ///< (From source) 23 Successful off-hand melee attacks
 };
 
+/// Proc flags for a melee based trigger
 #define MELEE_BASED_TRIGGER_MASK (PROC_FLAG_SUCCESSFUL_MELEE_HIT        | \
                                   PROC_FLAG_TAKEN_MELEE_HIT             | \
                                   PROC_FLAG_SUCCESSFUL_MELEE_SPELL_HIT  | \
@@ -628,6 +634,10 @@ enum ProcFlags
                                   PROC_FLAG_SUCCESSFUL_RANGED_SPELL_HIT | \
                                   PROC_FLAG_TAKEN_RANGED_SPELL_HIT)
 
+/**
+ * Proc flags mask for a negative trigger
+ * \todo What is negative in this case?
+ */
 #define NEGATIVE_TRIGGER_MASK (MELEE_BASED_TRIGGER_MASK                | \
                                PROC_FLAG_SUCCESSFUL_AOE_SPELL_HIT      | \
                                PROC_FLAG_TAKEN_AOE_SPELL_HIT           | \
@@ -643,7 +653,7 @@ enum ProcFlags
                                  PROC_FLAG_SUCCESSFUL_NEGATIVE_SPELL_HIT)
 enum ProcFlagsEx
 {
-    /// If none can tigger on Hit/Crit only (passive spells MUST defined by SpellFamily flag)
+    /// If none can trigger on Hit/Crit only (passive spells MUST defined by SpellFamily flag)
     PROC_EX_NONE                = 0x0000000,
     /// If set only from normal hit (only damage spells)
     PROC_EX_NORMAL_HIT          = 0x0000001,
@@ -766,14 +776,14 @@ class PetAura
         {
             std::map<uint32, uint32>::const_iterator itr = auras.find(petEntry);
             if (itr != auras.end())
-                return itr->second;
+                { return itr->second; }
             else
             {
                 std::map<uint32, uint32>::const_iterator itr2 = auras.find(0);
                 if (itr2 != auras.end())
-                    return itr2->second;
+                    { return itr2->second; }
                 else
-                    return 0;
+                    { return 0; }
             }
         }
 
@@ -817,9 +827,9 @@ struct SpellArea
     void ApplyOrRemoveSpellIfCan(Player* player, uint32 newZone, uint32 newArea, bool onlyApply) const;
 };
 
-typedef std::multimap<uint32 /*applySpellId*/, SpellArea> SpellAreaMap;
-typedef std::multimap<uint32 /*auraSpellId*/, SpellArea const*> SpellAreaForAuraMap;
-typedef std::multimap<uint32 /*areaOrZoneId*/, SpellArea const*> SpellAreaForAreaMap;
+typedef std::multimap < uint32 /*applySpellId*/, SpellArea > SpellAreaMap;
+typedef std::multimap < uint32 /*auraSpellId*/, SpellArea const* > SpellAreaForAuraMap;
+typedef std::multimap < uint32 /*areaOrZoneId*/, SpellArea const* > SpellAreaForAreaMap;
 typedef std::pair<SpellAreaMap::const_iterator, SpellAreaMap::const_iterator> SpellAreaMapBounds;
 typedef std::pair<SpellAreaForAuraMap::const_iterator, SpellAreaForAuraMap::const_iterator>  SpellAreaForAuraMapBounds;
 typedef std::pair<SpellAreaForAreaMap::const_iterator, SpellAreaForAreaMap::const_iterator>  SpellAreaForAreaMapBounds;
@@ -912,7 +922,7 @@ class SpellMgr
         {
             SpellElixirMap::const_iterator itr = mSpellElixirs.find(spellid);
             if (itr == mSpellElixirs.end())
-                return 0x0;
+                { return 0x0; }
 
             return itr->second;
         }
@@ -923,22 +933,22 @@ class SpellMgr
 
             // flasks must have all bits set from ELIXIR_FLASK_MASK
             if ((mask & ELIXIR_FLASK_MASK) == ELIXIR_FLASK_MASK)
-                return SPELL_FLASK_ELIXIR;
+                { return SPELL_FLASK_ELIXIR; }
             else if (mask & ELIXIR_BATTLE_MASK)
                 return SPELL_BATTLE_ELIXIR;
             else if (mask & ELIXIR_GUARDIAN_MASK)
                 return SPELL_GUARDIAN_ELIXIR;
             else if (mask & ELIXIR_WELL_FED)
-                return SPELL_WELL_FED;
+                { return SPELL_WELL_FED; }
             else
-                return SPELL_NORMAL;
+                { return SPELL_NORMAL; }
         }
 
         SpellThreatEntry const* GetSpellThreatEntry(uint32 spellid) const
         {
             SpellThreatMap::const_iterator itr = mSpellThreatMap.find(spellid);
             if (itr != mSpellThreatMap.end())
-                return &itr->second;
+                { return &itr->second; }
 
             return NULL;
         }
@@ -946,10 +956,10 @@ class SpellMgr
         float GetSpellThreatMultiplier(SpellEntry const* spellInfo) const
         {
             if (!spellInfo)
-                return 1.0f;
+                { return 1.0f; }
 
             if (SpellThreatEntry const* entry = GetSpellThreatEntry(spellInfo->Id))
-                return entry->multiplier;
+                { return entry->multiplier; }
 
             return 1.0f;
         }
@@ -959,7 +969,7 @@ class SpellMgr
         {
             SpellProcEventMap::const_iterator itr = mSpellProcEventMap.find(spellId);
             if (itr != mSpellProcEventMap.end())
-                return &itr->second;
+                { return &itr->second; }
             return NULL;
         }
 
@@ -968,7 +978,7 @@ class SpellMgr
         {
             SpellProcItemEnchantMap::const_iterator itr = mSpellProcItemEnchantMap.find(spellid);
             if (itr == mSpellProcItemEnchantMap.end())
-                return 0.0f;
+                { return 0.0f; }
 
             return itr->second;
         }
@@ -981,7 +991,7 @@ class SpellMgr
             // Lookup data
             SpellBonusMap::const_iterator itr = mSpellBonusMap.find(spellId);
             if (itr != mSpellBonusMap.end())
-                return &itr->second;
+                { return &itr->second; }
 
             return NULL;
         }
@@ -991,7 +1001,7 @@ class SpellMgr
         {
             SpellTargetPositionMap::const_iterator itr = mSpellTargetPositions.find(spell_id);
             if (itr != mSpellTargetPositions.end())
-                return &itr->second;
+                { return &itr->second; }
             return NULL;
         }
 
@@ -1000,7 +1010,7 @@ class SpellMgr
         {
             SpellChainMap::const_iterator itr = mSpellChains.find(spell_id);
             if (itr == mSpellChains.end())
-                return NULL;
+                { return NULL; }
 
             return &itr->second;
         }
@@ -1008,7 +1018,7 @@ class SpellMgr
         uint32 GetFirstSpellInChain(uint32 spell_id) const
         {
             if (SpellChainNode const* node = GetSpellChainNode(spell_id))
-                return node->first;
+                { return node->first; }
 
             return spell_id;
         }
@@ -1016,7 +1026,7 @@ class SpellMgr
         uint32 GetPrevSpellInChain(uint32 spell_id) const
         {
             if (SpellChainNode const* node = GetSpellChainNode(spell_id))
-                return node->prev;
+                { return node->prev; }
 
             return 0;
         }
@@ -1039,7 +1049,7 @@ class SpellMgr
         uint8 GetSpellRank(uint32 spell_id) const
         {
             if (SpellChainNode const* node = GetSpellChainNode(spell_id))
-                return node->rank;
+                { return node->rank; }
 
             return 0;
         }
@@ -1052,12 +1062,12 @@ class SpellMgr
 
             // not ordered correctly by rank value
             if (itr == mSpellChains.end() || !rank2 || itr->second.rank <= rank2)
-                return false;
+                { return false; }
 
             // check present in same rank chain
             for (; itr != mSpellChains.end(); itr = mSpellChains.find(itr->second.prev))
                 if (itr->second.prev == spell2)
-                    return true;
+                    { return true; }
 
             return false;
         }
@@ -1077,9 +1087,9 @@ class SpellMgr
         {
             SpellLearnSkillMap::const_iterator itr = mSpellLearnSkills.find(spell_id);
             if (itr != mSpellLearnSkills.end())
-                return &itr->second;
+                { return &itr->second; }
             else
-                return NULL;
+                { return NULL; }
         }
 
         bool IsSpellLearnSpell(uint32 spell_id) const
@@ -1097,7 +1107,7 @@ class SpellMgr
             SpellLearnSpellMapBounds bounds = GetSpellLearnSpellMapBounds(spell_id1);
             for (SpellLearnSpellMap::const_iterator i = bounds.first; i != bounds.second; ++i)
                 if (i->second.spell == spell_id2)
-                    return true;
+                    { return true; }
             return false;
         }
 
@@ -1126,9 +1136,9 @@ class SpellMgr
         {
             SpellPetAuraMap::const_iterator itr = mSpellPetAuraMap.find((spell_id << 8) + eff);
             if (itr != mSpellPetAuraMap.end())
-                return &itr->second;
+                { return &itr->second; }
             else
-                return NULL;
+                { return NULL; }
         }
 
         PetLevelupSpellSet const* GetPetLevelupSpellList(uint32 petFamily) const

@@ -48,7 +48,7 @@ BigNumber::BigNumber(uint32 val)
 BigNumber::~BigNumber()
 {
     BN_free(_bn);
-    if (_array) delete[] _array;
+    if (_array) { delete[] _array; }
 }
 
 void BigNumber::SetDword(uint32 val)
@@ -67,7 +67,7 @@ void BigNumber::SetBinary(const uint8* bytes, int len)
 {
     uint8 t[1000];
     for (int i = 0; i < len; ++i)
-        t[i] = bytes[len - 1 - i];
+        { t[i] = bytes[len - 1 - i]; }
     BN_bin2bn(t, len, _bn);
 }
 
@@ -180,7 +180,7 @@ uint8* BigNumber::AsByteArray(int minSize, bool reverse)
 
     // If we need more bytes than length of BigNumber set the rest to 0
     if (length > GetNumBytes())
-        memset((void*)_array, 0, length);
+        { memset((void*)_array, 0, length); }
 
     BN_bn2bin(_bn, (unsigned char*)_array);
 

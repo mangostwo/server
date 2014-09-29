@@ -46,10 +46,12 @@
 #include "RASocket.h"
 #include "Util.h"
 #include "revision_sql.h"
-#include "MaNGOSsoap.h"
 #include "MassMailMgr.h"
 #include "DBCStores.h"
 #include "ScriptMgr.h"
+#ifdef ENABLE_SOAP
+#include "MaNGOSsoap.h"
+#endif
 #include "LuaEngine.h"
 
 #include <ace/OS_NS_signal.h>
@@ -76,7 +78,7 @@ class FreezeDetectorRunnable : public ACE_Based::Runnable
         void run(void)
         {
             if (!_delaytime)
-                return;
+                { return; }
             sLog.outString("Starting up anti-freeze thread (%u seconds max stuck time)...", _delaytime / 1000);
             m_loops = 0;
             w_loops = 0;
@@ -153,14 +155,14 @@ class RARunnable : public ACE_Based::Runnable
                 sLog.outError("MaNGOS RA can not bind to port %d on %s", raport, stringip.c_str());
             }
 
-            sLog.outString("Starting Remote access listner on port %d on %s", raport, stringip.c_str());
+            sLog.outString("Starting Remote access listener on port %d on %s", raport, stringip.c_str());
 
             while (!m_Reactor->reactor_event_loop_done())
             {
                 ACE_Time_Value interval(0, 10000);
 
                 if (m_Reactor->run_reactor_event_loop(interval) == -1)
-                    break;
+                    { break; }
 
                 if (World::IsStopped())
                 {
@@ -190,7 +192,7 @@ int Master::Run()
         uint32 pid = CreatePIDFile(pidfile);
         if (!pid)
         {
-            sLog.outError("Cannot create PID file %s.\n", pidfile.c_str());
+            sLog.outError("Can not create PID file %s.\n", pidfile.c_str());
             Log::WaitBeforeContinueIfNeed();
             return 1;
         }
@@ -204,6 +206,9 @@ int Master::Run()
         Log::WaitBeforeContinueIfNeed();
         return 1;
     }
+
+    ///- Set Realm to Offline, if crash happens. Only used once.
+    LoginDatabase.DirectPExecute("UPDATE realmlist SET realmflags = realmflags | %u WHERE id = '%u'", REALM_FLAG_OFFLINE, realmID);
 
     ///- Initialize the World
     sWorld.SetInitialWorldSettings();
@@ -271,9 +276,9 @@ int Master::Run()
                 else
                 {
                     if (SetProcessAffinityMask(hProcess, curAff))
-                        sLog.outString("Using processors (bitmask, hex): %x", curAff);
+                        { sLog.outString("Using processors (bitmask, hex): %x", curAff); }
                     else
-                        sLog.outError("Can't set used processors (hex): %x", curAff);
+                        { sLog.outError("Can't set used processors (hex): %x", curAff); }
                 }
             }
             sLog.outString();
@@ -285,14 +290,15 @@ int Master::Run()
         if (Prio)
         {
             if (SetPriorityClass(hProcess, HIGH_PRIORITY_CLASS))
-                sLog.outString("mangosd process priority class set to HIGH");
+                { sLog.outString("mangosd process priority class set to HIGH"); }
             else
-                sLog.outError("Can't set mangosd process priority class.");
+                { sLog.outError("Can't set mangosd process priority class."); }
             sLog.outString();
         }
     }
 #endif
 
+#ifdef ENABLE_SOAP
     ///- Start soap serving thread
     ACE_Based::Thread* soap_thread = NULL;
 
@@ -303,6 +309,12 @@ int Master::Run()
         runnable->setListenArguments(sConfig.GetStringDefault("SOAP.IP", "127.0.0.1"), sConfig.GetIntDefault("SOAP.Port", 7878));
         soap_thread = new ACE_Based::Thread(runnable);
     }
+#else /* ENABLE_SOAP */
+    if (sConfig.GetBoolDefault("SOAP.Enabled", false))
+    {
+        sLog.outError("SOAP is enabled but wasn't included during compilation, not activating it.");
+    }
+#endif /* ENABLE_SOAP */
 
     ///- Start up freeze catcher thread
     ACE_Based::Thread* freeze_thread = NULL;
@@ -325,12 +337,12 @@ int Master::Run()
         World::StopNow(ERROR_EXIT_CODE);
         // go down and shutdown the server
     }
-    
+
     ///- Used by Eluna
     sEluna->OnStartup();
 
     sWorldSocketMgr->Wait();
-    
+
     ///- Used by Eluna
     sEluna->OnShutdown();
 
@@ -341,6 +353,7 @@ int Master::Run()
         delete freeze_thread;
     }
 
+#ifdef ENABLE_SOAP
     ///- Stop soap thread
     if (soap_thread)
     {
@@ -348,6 +361,7 @@ int Master::Run()
         soap_thread->destroy();
         delete soap_thread;
     }
+#endif
 
     ///- Set server offline in realmlist
     LoginDatabase.DirectPExecute("UPDATE realmlist SET realmflags = realmflags | %u WHERE id = '%u'", REALM_FLAG_OFFLINE, realmID);
@@ -419,19 +433,17 @@ int Master::Run()
         BOOL ret = WriteConsoleInput(hStdIn, b, 4, &numb);
 
         cliThread->wait();
-
 #else
-
         cliThread->destroy();
-
 #endif
 
         delete cliThread;
     }
-     // This is done to make sure that we cleanup our so file before it's
-     // unloaded automatically, since the ~ScriptMgr() is called to late
-     // as it's allocated with static storage.
-     sScriptMgr.UnloadScriptLibrary();
+
+    // This is done to make sure that we cleanup our so file before it's 
+    // unloaded automatically, since the ~ScriptMgr() is called to late 
+    // as it's allocated with static storage.
+    sScriptMgr.UnloadScriptLibrary();
 
     ///- Exit the process with specified return value
     return World::GetExitCode();
@@ -453,7 +465,7 @@ bool Master::_StartDB()
     ///- Initialise the world database
     if (!WorldDatabase.Initialize(dbstring.c_str(), nConnections))
     {
-        sLog.outError("Cannot connect to world database %s", dbstring.c_str());
+        sLog.outError("Can not connect to world database %s", dbstring.c_str());
         return false;
     }
 
@@ -479,7 +491,7 @@ bool Master::_StartDB()
     ///- Initialise the Character database
     if (!CharacterDatabase.Initialize(dbstring.c_str(), nConnections))
     {
-        sLog.outError("Cannot connect to Character database %s", dbstring.c_str());
+        sLog.outError("Can not connect to Character database %s", dbstring.c_str());
 
         ///- Wait for already started DB delay threads to end
         WorldDatabase.HaltDelayThread();
@@ -511,7 +523,7 @@ bool Master::_StartDB()
     sLog.outString("Login Database total connections: %i", nConnections + 1);
     if (!LoginDatabase.Initialize(dbstring.c_str(), nConnections))
     {
-        sLog.outError("Cannot connect to login database %s", dbstring.c_str());
+        sLog.outError("Can not connect to login database %s", dbstring.c_str());
 
         ///- Wait for already started DB delay threads to end
         WorldDatabase.HaltDelayThread();

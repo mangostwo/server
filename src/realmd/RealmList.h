@@ -31,13 +31,17 @@
 
 #include "Common.h"
 
+/**
+ * @brief
+ *
+ */
 struct RealmBuildInfo
 {
-    int build;
-    int major_version;
-    int minor_version;
-    int bugfix_version;
-    int hotfix_version;
+    int build; /**< TODO */
+    int major_version; /**< TODO */
+    int minor_version; /**< TODO */
+    int bugfix_version; /**< TODO */
+    int hotfix_version; /**< TODO */
 };
 
 RealmBuildInfo const* FindBuildInfo(uint16 _build);

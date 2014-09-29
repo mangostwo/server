@@ -109,22 +109,22 @@ extern int main(int argc, char** argv)
                 cfg_file = cmd_opts.opt_arg();
                 break;
             case 'v':
-                printf("%s\n", _FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_NR, REVISION_ID));
+                printf("%s\n", MANGOS_FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_NR, REVISION_ID));
                 return 0;
             case 's':
             {
                 const char* mode = cmd_opts.opt_arg();
 
                 if (!strcmp(mode, "run"))
-                    serviceDaemonMode = 'r';
+                    { serviceDaemonMode = 'r'; }
 #ifdef WIN32
                 else if (!strcmp(mode, "install"))
-                    serviceDaemonMode = 'i';
+                    { serviceDaemonMode = 'i'; }
                 else if (!strcmp(mode, "uninstall"))
-                    serviceDaemonMode = 'u';
+                    { serviceDaemonMode = 'u'; }
 #else
                 else if (!strcmp(mode, "stop"))
-                    serviceDaemonMode = 's';
+                    { serviceDaemonMode = 's'; }
 #endif
                 else
                 {
@@ -153,11 +153,11 @@ extern int main(int argc, char** argv)
     {
         case 'i':
             if (WinServiceInstall())
-                sLog.outString("Installing service");
+                { sLog.outString("Installing service"); }
             return 1;
         case 'u':
             if (WinServiceUninstall())
-                sLog.outString("Uninstalling service");
+                { sLog.outString("Uninstalling service"); }
             return 1;
         case 'r':
             WinServiceRun();
@@ -184,12 +184,12 @@ extern int main(int argc, char** argv)
     }
 #endif
 
-    sLog.outString("%s [world-daemon]", _FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_NR, REVISION_ID));
+    sLog.outString("%s [world-daemon]", MANGOS_FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_NR, REVISION_ID));
     sLog.outString("<Ctrl-C> to stop.\n"
                    "  __  __      _  _  ___  ___  ___                       \n"
-                   " |  \\/  |__ _| \\| |/ __|/ _ \\/ __|                      \n"                                         
-                   " | |\\/| / _` | .` | (_ | (_) \\__ \\                      \n"                                         
-                   " |_|  |_\\__,_|_|\\_|\\___|\\___/|___/                      \n"
+                   " |  \\/  |__ _| \\| |/ __|/ _ \\/ __|   Wrath of the    \n"                                         
+                   " | |\\/| / _` | .` | (_ | (_) \\__ \\     Lich King     \n"                                         
+                   " |_|  |_\\__,_|_|\\_|\\___|\\___/|___/                  \n"
                    "                                        _____           \n"            
                    " For help and support please visit:    |_   _|_ __ _____\n"  
                    " Website: https://getmangos.eu           | | \\ V  V / _ \\\n"  

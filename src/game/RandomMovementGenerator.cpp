@@ -63,7 +63,7 @@ void RandomMovementGenerator<Creature>::_setRandomLocation(Creature& creature)
     init.Launch();
 
     if (creature.CanFly())
-        i_nextMoveTime.Reset(0);
+        { i_nextMoveTime.Reset(0); }
     else
     {
         if (roll_chance_i(MOVEMENT_RANDOM_MMGEN_CHANCE_NO_BREAK))
@@ -79,7 +79,7 @@ void RandomMovementGenerator<Creature>::Initialize(Creature& creature)
     creature.addUnitState(UNIT_STAT_ROAMING);               // _MOVE set in _setRandomLocation
 
     if (!creature.IsAlive() || creature.hasUnitState(UNIT_STAT_NOT_MOVE))
-        return;
+        { return; }
 
     _setRandomLocation(creature);
 }
@@ -119,7 +119,7 @@ bool RandomMovementGenerator<Creature>::Update(Creature& creature, const uint32&
     {
         i_nextMoveTime.Update(diff);
         if (i_nextMoveTime.Passed())
-            _setRandomLocation(creature);
+            { _setRandomLocation(creature); }
     }
     return true;
 }

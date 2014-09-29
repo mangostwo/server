@@ -40,6 +40,10 @@ class MANGOS_DLL_SPEC BarGoLink
          * @param row_count
          */
         explicit BarGoLink(int row_count);
+        /**
+         * @brief
+         *
+         */
         ~BarGoLink();
 
     public:

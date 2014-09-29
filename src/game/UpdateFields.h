@@ -22,8 +22,10 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _UPDATEFIELDS_AUTO_H
-#define _UPDATEFIELDS_AUTO_H
+#include "Common.h"
+
+#ifndef MANGOS_H_UPDATEFIELDS_AUTO
+#define MANGOS_H_UPDATEFIELDS_AUTO
 
 // Auto generated for version 3, 3, 5, 12340
 
@@ -88,6 +90,11 @@ enum EContainerFields
     CONTAINER_END                             = ITEM_END + 0x004A,
 };
 
+/**
+ * Fields that are available for a \ref Unit ?
+ * \see Object::HasFlag
+ * \todo Document this properly!
+ */
 enum EUnitFields
 {
     UNIT_FIELD_CHARM                          = OBJECT_END + 0x0000, // Size: 2, Type: LONG, Flags: PUBLIC

@@ -601,22 +601,23 @@ class World
 
         void UpdateRealmCharCount(uint32 accid);
 
-        LocaleConstant GetAvailableDbcLocale(LocaleConstant locale) const { if (m_availableDbcLocaleMask & (1 << locale)) return locale; else return m_defaultDbcLocale; }
+        LocaleConstant GetAvailableDbcLocale(LocaleConstant locale) const { if (m_availableDbcLocaleMask & (1 << locale)) { return locale; } else { return m_defaultDbcLocale; } }
 
         // used World DB version
         void LoadDBVersion();
         char const* GetDBVersion() { return m_DBVersion.c_str(); }
         char const* GetCreatureEventAIVersion() { return m_CreatureEventAIVersion.c_str(); }
+
         
         /**
-         * \brief: force all client to request player data
-         * \param: ObjectGuid guid : guid of the specified player
-         * \returns: void
-         * 
-         * Description: InvalidatePlayerDataToAllClient force all connected clients to clear specified player cache
-         * FullName: World::InvalidatePlayerDataToAllClient
-         * Access: public 
-         **/
+        * \brief: force all client to request player data
+        * \param: ObjectGuid guid : guid of the specified player
+        * \returns: void
+        *
+        * Description: InvalidatePlayerDataToAllClient force all connected clients to clear specified player cache
+        * FullName: World::InvalidatePlayerDataToAllClient
+        * Access: public 
+        **/
         void InvalidatePlayerDataToAllClient(ObjectGuid guid);
 
     protected:

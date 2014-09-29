@@ -29,8 +29,8 @@
 #include <G3D/Vector3.h>
 #include <G3D/AABox.h>
 #include <G3D/Ray.h>
-#include "../DBCStructure.h"
-#include "../GameObject.h"
+#include "DBCStructure.h"
+#include "GameObject.h"
 
 #include "Platform/Define.h"
 
@@ -54,7 +54,18 @@ class GameObjectModel
         float iScale; /**< TODO */
         VMAP::WorldModel* iModel; /**< TODO */
 
+        /**
+         * @brief
+         *
+         */
         GameObjectModel() : phasemask(0), iModel(NULL) {}
+        /**
+         * @brief
+         *
+         * @param pGo
+         * @param info
+         * @return bool
+         */
         bool initialize(const GameObject* const pGo, const GameObjectDisplayInfoEntry* info);
 
     public:
@@ -86,8 +97,21 @@ class GameObjectModel
          *
          */
         void disable() { phasemask = 0;}
+        /**
+         * @brief
+         *
+         * @param enabled
+         */
         void enable(uint32 ph_mask) { phasemask = ph_mask;}
 
+        /**
+         * @brief
+         *
+         * @param Ray
+         * @param MaxDist
+         * @param StopAtFirstHit
+         * @return bool
+         */
         bool intersectRay(const G3D::Ray& Ray, float& MaxDist, bool StopAtFirstHit, uint32 ph_mask) const;
 
         /**

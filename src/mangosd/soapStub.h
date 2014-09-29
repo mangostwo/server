@@ -7,7 +7,7 @@
 
 #ifndef soapStub_H
 #define soapStub_H
-#include "stdsoap2.h"
+#include <stdsoap2.h>
 
 /******************************************************************************\
  *                                                                            *

@@ -36,53 +36,129 @@
 
 #include "BufferedSocket.h"
 
-/// Handle login commands
+/**
+ * @brief Handle login commands
+ *
+ */
 class AuthSocket: public BufferedSocket
 {
     public:
-        const static int s_BYTE_SIZE = 32;
+        const static int s_BYTE_SIZE = 32; /**< TODO */
 
+        /**
+         * @brief
+         *
+         */
         AuthSocket();
+        /**
+         * @brief
+         *
+         */
         ~AuthSocket();
 
+        /**
+         * @brief
+         *
+         */
         void OnAccept() override;
+        /**
+         * @brief
+         *
+         */
         void OnRead() override;
+        /**
+         * @brief
+         *
+         * @param sha
+         */
         void SendProof(Sha1Hash sha);
+        /**
+         * @brief
+         *
+         * @param pkt
+         * @param acctid
+         */
         void LoadRealmlist(ByteBuffer& pkt, uint32 acctid);
 
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool _HandleLogonChallenge();
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool _HandleLogonProof();
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool _HandleReconnectChallenge();
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool _HandleReconnectProof();
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool _HandleRealmList();
-        // data transfer handle for patch
 
+        /**
+         * @brief data transfer handle for patch
+         *
+         * @return bool
+         */
         bool _HandleXferResume();
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool _HandleXferCancel();
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool _HandleXferAccept();
 
+        /**
+         * @brief
+         *
+         * @param rI
+         */
         void _SetVSFields(const std::string& rI);
 
     private:
 
-        BigNumber N, s, g, v;
-        BigNumber b, B;
-        BigNumber K;
-        BigNumber _reconnectProof;
+        BigNumber N, s, g, v; /**< TODO */
+        BigNumber b, B; /**< TODO */
+        BigNumber K; /**< TODO */
+        BigNumber _reconnectProof; /**< TODO */
 
-        bool _authed;
+        bool _authed; /**< TODO */
 
-        std::string _login;
-        std::string _safelogin;
+        std::string _login; /**< TODO */
+        std::string _safelogin; /**< TODO */
 
-        // Since GetLocaleByName() is _NOT_ bijective, we have to store the locale as a string. Otherwise we can't differ
-        // between enUS and enGB, which is important for the patch system
-        std::string _localizationName;
-        uint16 _build;
-        AccountTypes _accountSecurityLevel;
+        std::string _localizationName; /**< Since GetLocaleByName() is _NOT_ bijective, we have to store the locale as a string. Otherwise we can't differ between enUS and enGB, which is important for the patch system */
+        uint16 _build; /**< TODO */
+        AccountTypes _accountSecurityLevel; /**< TODO */
 
-        ACE_HANDLE patch_;
+        ACE_HANDLE patch_; /**< TODO */
 
+        /**
+         * @brief
+         *
+         */
         void InitPatch();
 };
 #endif

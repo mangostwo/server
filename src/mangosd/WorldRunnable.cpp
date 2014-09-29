@@ -31,9 +31,11 @@
 #include "World.h"
 #include "WorldRunnable.h"
 #include "Timer.h"
+#include "ObjectAccessor.h"
 #include "MapManager.h"
 
 #include "Database/DatabaseEnv.h"
+
 
 #define WORLD_SLEEP_CONST 50
 
@@ -75,11 +77,18 @@ void WorldRunnable::run()
             ACE_Based::Thread::Sleep(prevSleepTime);
         }
         else
+        {
             prevSleepTime = 0;
+        }
 
 #ifdef WIN32
-        if (m_ServiceStatus == 0) World::StopNow(SHUTDOWN_EXIT_CODE);
-        while (m_ServiceStatus == 2) Sleep(1000);
+        if (m_ServiceStatus == 0)
+        {
+            World::StopNow(SHUTDOWN_EXIT_CODE);
+        }
+
+        while (m_ServiceStatus == 2)
+            Sleep(1000);
 #endif
     }
 

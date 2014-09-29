@@ -127,20 +127,20 @@ source_group("Log"
 )
 
 include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/dep/include
-  ${CMAKE_SOURCE_DIR}/src/framework
-  ${CMAKE_BINARY_DIR}
-  ${ACE_INCLUDE_DIR}
+  "${CMAKE_CURRENT_SOURCE_DIR}"
+  "${CMAKE_SOURCE_DIR}/dep/include"
+  "${CMAKE_SOURCE_DIR}/src/framework"
+  "${CMAKE_BINARY_DIR}"
+  "${ACE_INCLUDE_DIR}"
 )
 
 if(POSTGRESQL)
-  include_directories(${PostgreSQL_INCLUDE_DIRS})
+  include_directories("${PostgreSQL_INCLUDE_DIRS}")
 else()
-  include_directories(${MYSQL_INCLUDE_DIR})
+  include_directories("${MYSQL_INCLUDE_DIR}")
 endif()
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/SystemConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/SystemConfig.h)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/SystemConfig.h.in" "${CMAKE_CURRENT_BINARY_DIR}/SystemConfig.h")
 
 add_library(${LIBRARY_NAME} STATIC
   ${LIBRARY_SRCS}

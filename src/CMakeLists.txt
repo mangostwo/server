@@ -27,19 +27,41 @@
 # Needs to link against mangos_worldd.lib
 if(WIN32)
   link_directories(
-    ${CMAKE_BINARY_DIR}/src/mangosd/${CMAKE_CFG_INTDIR}
+    "${CMAKE_BINARY_DIR}/src/mangosd/${CMAKE_CFG_INTDIR}"
   )
   include_directories(
-    ${CMAKE_SOURCE_DIR}/dep/include # For Win32
+    "${CMAKE_SOURCE_DIR}/dep/include"
   )
 endif()
 
-if (BUILD_SCRIPTS)
-    add_subdirectory(scripts)
+#-----------------------------------------------------------------------------
+# Build the mangos-one framework library
+add_subdirectory(framework)
+
+#-----------------------------------------------------------------------------
+# Build the mangos-one shared library
+add_subdirectory(shared)
+
+#-----------------------------------------------------------------------------
+# Build the mangos-one game library
+add_subdirectory(game)
+
+#-----------------------------------------------------------------------------
+# Build the mangos-one realm authentication server
+add_subdirectory(realmd)
+
+#-----------------------------------------------------------------------------
+# Build the mangos-one world server
+add_subdirectory(mangosd)
+
+#-----------------------------------------------------------------------------
+# If we want the tools for map/vmap/mmap extraction
+if(BUILD_TOOLS)
+    add_subdirectory(tools)
 endif()
 
-add_subdirectory(framework)
-add_subdirectory(shared)
-add_subdirectory(realmd)
-add_subdirectory(game)
-add_subdirectory(mangosd)
+#-----------------------------------------------------------------------------
+# Build the mangos-one script library if wished for
+if(ENABLE_SD2)
+    add_subdirectory(scripts)
+endif()

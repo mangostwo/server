@@ -45,6 +45,10 @@ typedef DatabasePostgre DatabaseType;
 #include "Database/QueryResultMysql.h"
 #include "Database/Database.h"
 #include "Database/DatabaseMysql.h"
+/**
+ * @brief
+ *
+ */
 typedef DatabaseMysql DatabaseType;
 #define _LIKE_           "LIKE"
 #define _TABLE_SIM_      "`"
@@ -52,8 +56,8 @@ typedef DatabaseMysql DatabaseType;
 #define _OFFSET_         "LIMIT %d,1"
 #endif
 
-extern DatabaseType WorldDatabase;
-extern DatabaseType CharacterDatabase;
-extern DatabaseType LoginDatabase;
+extern DatabaseType WorldDatabase; /**< TODO */
+extern DatabaseType CharacterDatabase; /**< TODO */
+extern DatabaseType LoginDatabase; /**< TODO */
 
 #endif

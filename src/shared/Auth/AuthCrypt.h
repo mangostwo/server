@@ -25,21 +25,55 @@
 #ifndef MANGOS_H_AUTHCRYPT
 #define MANGOS_H_AUTHCRYPT
 
-#include <Common.h>
+#include "Common.h"
 #include "SARC4.h"
 
 class BigNumber;
 
+/**
+ * @brief
+ *
+ */
 class AuthCrypt
 {
     public:
+        /**
+         * @brief
+         *
+         */
         AuthCrypt();
+        /**
+         * @brief
+         *
+         */
         ~AuthCrypt();
 
+
+        /**
+         * @brief
+         *
+         */
         void Init(BigNumber* K);
+        /**
+         * @brief
+         *
+         * @param
+         * @param size_t
+         */
         void DecryptRecv(uint8*, size_t);
+        /**
+         * @brief
+         *
+         * @param
+         * @param size_t
+         */
         void EncryptSend(uint8*, size_t);
 
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool IsInitialized() { return _initialized; }
 
     private:

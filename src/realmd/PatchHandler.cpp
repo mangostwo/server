@@ -71,13 +71,13 @@ PatchHandler::PatchHandler(ACE_HANDLE socket, ACE_HANDLE patch)
 PatchHandler::~PatchHandler()
 {
     if (patch_fd_ != ACE_INVALID_HANDLE)
-        ACE_OS::close(patch_fd_);
+        { ACE_OS::close(patch_fd_); }
 }
 
 int PatchHandler::open(void*)
 {
     if (get_handle() == ACE_INVALID_HANDLE || patch_fd_ == ACE_INVALID_HANDLE)
-        return -1;
+        { return -1; }
 
     int nodelay = 0;
     if (-1 == peer().set_option(ACE_IPPROTO_TCP,
@@ -140,7 +140,7 @@ int PatchHandler::svc(void)
 PatchCache::~PatchCache()
 {
     for (Patches::iterator i = patches_.begin(); i != patches_.end(); ++i)
-        delete i->second;
+        { delete i->second; }
 }
 
 PatchCache::PatchCache()
@@ -162,7 +162,7 @@ void PatchCache::LoadPatchMD5(const char* szFileName)
     sLog.outDebug("Loading patch info from %s", path.c_str());
 
     if (!pPatch)
-        return;
+        { return; }
 
     // Calculate the MD5 hash
     MD5_CTX ctx;
@@ -202,7 +202,7 @@ void PatchCache::LoadPatchesInfo()
     ACE_DIR* dirp = ACE_OS::opendir(ACE_TEXT("./patches/"));
 
     if (!dirp)
-        return;
+        { return; }
 
     ACE_DIRENT* dp;
 
@@ -210,10 +210,10 @@ void PatchCache::LoadPatchesInfo()
     {
         int l = strlen(dp->d_name);
         if (l < 8)
-            continue;
+            { continue; }
 
         if (!memcmp(&dp->d_name[l - 4], ".mpq", 4))
-            LoadPatchMD5(dp->d_name);
+            { LoadPatchMD5(dp->d_name); }
     }
 
     ACE_OS::closedir(dirp);

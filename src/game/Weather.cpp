@@ -64,7 +64,7 @@ bool Weather::Update(time_t diff)
         {
             ///- Weather will be removed if not updated (no players in zone anymore)
             if (!UpdateWeather())
-                return false;
+                { return false; }
         }
     }
     return true;
@@ -88,7 +88,7 @@ bool Weather::ReGenerate()
     uint32 u = urand(0, 99);
 
     if (u < 30)
-        return false;
+        { return false; }
 
     // remember old values
     WeatherType old_type = m_type;
@@ -158,13 +158,13 @@ bool Weather::ReGenerate()
 
     uint32 rnd = urand(0, 99);
     if (rnd <= chance1)
-        m_type = WEATHER_TYPE_RAIN;
+        { m_type = WEATHER_TYPE_RAIN; }
     else if (rnd <= chance2)
-        m_type = WEATHER_TYPE_SNOW;
+        { m_type = WEATHER_TYPE_SNOW; }
     else if (rnd <= chance3)
-        m_type = WEATHER_TYPE_STORM;
+        { m_type = WEATHER_TYPE_STORM; }
     else
-        m_type = WEATHER_TYPE_FINE;
+        { m_type = WEATHER_TYPE_FINE; }
 
     /// New weather statistics (if not fine):
     ///- 85% light
@@ -185,9 +185,9 @@ bool Weather::ReGenerate()
         // Severe change, but how severe?
         rnd = urand(0, 99);
         if (rnd < 50)
-            m_grade = rand_norm_f() * 0.3333f + 0.3334f;
+            { m_grade = rand_norm_f() * 0.3333f + 0.3334f; }
         else
-            m_grade = rand_norm_f() * 0.3333f + 0.6667f;
+            { m_grade = rand_norm_f() * 0.3333f + 0.6667f; }
     }
 
     // return true only in case weather changes
@@ -215,13 +215,13 @@ bool Weather::UpdateWeather()
 {
     Player* player = sWorld.FindPlayerInZone(m_zone);
     if (!player)
-        return false;
+        { return false; }
 
     ///- Send the weather packet to all players in this zone
     if (m_grade >= 1)
-        m_grade = 0.9999f;
+        { m_grade = 0.9999f; }
     else if (m_grade < 0)
-        m_grade = 0.0001f;
+        { m_grade = 0.0001f; }
 
     WeatherState state = GetWeatherState();
 
@@ -282,7 +282,7 @@ bool Weather::UpdateWeather()
 void Weather::SetWeather(WeatherType type, float grade)
 {
     if (m_type == type && m_grade == grade)
-        return;
+        { return; }
 
     m_type = type;
     m_grade = grade;

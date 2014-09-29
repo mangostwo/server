@@ -62,20 +62,20 @@ INSTANTIATE_SINGLETON_1(ObjectMgr);
 bool normalizePlayerName(std::string& name)
 {
     if (name.empty())
-        { return false; }
+        return false;
 
     wchar_t wstr_buf[MAX_INTERNAL_PLAYER_NAME + 1];
     size_t wstr_len = MAX_INTERNAL_PLAYER_NAME;
 
     if (!Utf8toWStr(name, &wstr_buf[0], wstr_len))
-        { return false; }
+        return false;
 
     wstr_buf[0] = wcharToUpper(wstr_buf[0]);
     for (size_t i = 1; i < wstr_len; ++i)
-        { wstr_buf[i] = wcharToLower(wstr_buf[i]); }
+        wstr_buf[i] = wcharToLower(wstr_buf[i]);
 
     if (!WStrToUtf8(wstr_buf, wstr_len, name))
-        { return false; }
+        return false;
 
     return true;
 }
@@ -108,7 +108,7 @@ LanguageDesc const* GetLanguageDescByID(uint32 lang)
     for (int i = 0; i < LANGUAGES_COUNT; ++i)
     {
         if (uint32(lang_description[i].lang_id) == lang)
-            { return &lang_description[i]; }
+            return &lang_description[i];
     }
 
     return NULL;
@@ -166,22 +166,22 @@ ObjectMgr::ObjectMgr() :
 ObjectMgr::~ObjectMgr()
 {
     for (QuestMap::iterator i = mQuestTemplates.begin(); i != mQuestTemplates.end(); ++i)
-        { delete i->second; }
+        delete i->second;
 
     for (PetLevelInfoMap::iterator i = petInfo.begin(); i != petInfo.end(); ++i)
-        { delete[] i->second; }
+        delete[] i->second;
 
     // free only if loaded
     for (int class_ = 0; class_ < MAX_CLASSES; ++class_)
-        { delete[] playerClassInfo[class_].levelInfo; }
+        delete[] playerClassInfo[class_].levelInfo;
 
     for (int race = 0; race < MAX_RACES; ++race)
         for (int class_ = 0; class_ < MAX_CLASSES; ++class_)
-            { delete[] playerInfo[race][class_].levelInfo; }
+            delete[] playerInfo[race][class_].levelInfo;
 
     // free objects
     for (GroupMap::iterator itr = mGroupMap.begin(); itr != mGroupMap.end(); ++itr)
-        { delete itr->second; }
+        delete itr->second;
 
     for (ArenaTeamMap::iterator itr = mArenaTeamMap.begin(); itr != mArenaTeamMap.end(); ++itr)
         delete itr->second;

@@ -38,46 +38,127 @@
 
 #include <string>
 
+/**
+ * @brief
+ *
+ */
 class BufferedSocket: public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
 {
     protected:
+        /**
+         * @brief
+         *
+         */
         typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH> Base;
 
+        /**
+         * @brief
+         *
+         */
         virtual void OnRead(void) { }
+        /**
+         * @brief
+         *
+         */
         virtual void OnAccept(void) { }
+        /**
+         * @brief
+         *
+         */
         virtual void OnClose(void) { }
 
     public:
+        /**
+         * @brief
+         *
+         */
         BufferedSocket(void);
+        /**
+         * @brief
+         *
+         */
         virtual ~BufferedSocket(void);
 
+        /**
+         * @brief
+         *
+         * @return size_t
+         */
         size_t recv_len(void) const;
+        /**
+         * @brief
+         *
+         * @param buf
+         * @param len
+         * @return bool
+         */
         bool recv_soft(char* buf, size_t len);
+        /**
+         * @brief
+         *
+         * @param buf
+         * @param len
+         * @return bool
+         */
         bool recv(char* buf, size_t len);
+        /**
+         * @brief
+         *
+         * @param len
+         */
         void recv_skip(size_t len);
 
+        /**
+         * @brief
+         *
+         * @param buf
+         * @param len
+         * @return bool
+         */
         bool send(const char* buf, size_t len);
 
+        /**
+         * @brief
+         *
+         * @return const std::string
+         */
         const std::string& get_remote_address(void) const;
 
         virtual int open(void*) override;
 
+        /**
+         * @brief
+         *
+         */
         void close_connection(void);
 
         virtual int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE) override;
         virtual int handle_output(ACE_HANDLE = ACE_INVALID_HANDLE) override;
 
+        /**
+         * @brief
+         *
+         * @param ACE_HANDLE
+         * @param ACE_Reactor_Mask
+         * @return int
+         */
         virtual int handle_close(ACE_HANDLE = ACE_INVALID_HANDLE,
                                  ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
     private:
+        /**
+         * @brief
+         *
+         * @param message_block
+         * @return ssize_t
+         */
         ssize_t noblk_send(ACE_Message_Block& message_block);
 
     private:
-        ACE_Message_Block input_buffer_;
+        ACE_Message_Block input_buffer_; /**< TODO */
 
     protected:
-        std::string remote_address_;
+        std::string remote_address_; /**< TODO */
 };
 
 #endif /* _BUFFEREDSOCKET_H_ */

@@ -25,10 +25,18 @@
 #ifndef MANGOS_CONFIG_H
 #define MANGOS_CONFIG_H
 
+#ifndef HAVE_ACE_STACK_TRACE_H
 #cmakedefine HAVE_ACE_STACK_TRACE_H
+#endif /* HAVE_ACE_STACK_TRACE_H */
 
 #cmakedefine USE_MULTI_THREAD_MAP
 
+#cmakedefine ENABLE_SOAP
+
+#cmakedefine ENABLE_ELUNA
+
+#cmakedefine ENABLE_SD2
+
 #define VERSION "${MANGOS_VERSION}"
 
-#endif /* HAVE_CONFIG_H */
+#endif /* MANGOS_CONFIG_H */

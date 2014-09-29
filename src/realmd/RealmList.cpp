@@ -59,12 +59,12 @@ RealmBuildInfo const* FindBuildInfo(uint16 _build)
 {
     // first build is low bound of always accepted range
     if (_build >= ExpectedRealmdClientBuilds[0].build)
-        return &ExpectedRealmdClientBuilds[0];
+        { return &ExpectedRealmdClientBuilds[0]; }
 
     // continue from 1 with explicit equal check
     for (int i = 1; ExpectedRealmdClientBuilds[i].build; ++i)
         if (_build == ExpectedRealmdClientBuilds[i].build)
-            return &ExpectedRealmdClientBuilds[i];
+            { return &ExpectedRealmdClientBuilds[i]; }
 
     // none appropriate build
     return NULL;
@@ -93,7 +93,7 @@ void RealmList::UpdateRealm(uint32 ID, const std::string& name, const std::strin
 {
     ///- Create new if not exist or update existed
     Realm& realm = m_realms[name];
-
+    
     realm.m_ID       = ID;
     realm.icon       = icon;
     realm.realmflags = realmflags;
@@ -121,7 +121,7 @@ void RealmList::UpdateRealm(uint32 ID, const std::string& name, const std::strin
     if (first_build)
         if (RealmBuildInfo const* bInfo = FindBuildInfo(first_build))
             if (bInfo->build == first_build)
-                realm.realmBuildInfo = *bInfo;
+                { realm.realmBuildInfo = *bInfo; }
 
     ///- Append port to IP address.
     std::ostringstream ss;
@@ -133,7 +133,7 @@ void RealmList::UpdateIfNeed()
 {
     // maybe disabled or updated recently
     if (!m_UpdateInterval || m_NextUpdateTime > time(NULL))
-        return;
+        { return; }
 
     m_NextUpdateTime = time(NULL) + m_UpdateInterval;
 
@@ -176,7 +176,7 @@ void RealmList::UpdateRealms(bool init)
                 fields[8].GetFloat(), fields[9].GetCppString());
 
             if (init)
-                sLog.outString("Added realm id %u, name '%s'",  Id, name.c_str());
+                { sLog.outString("Added realm id %u, name '%s'",  Id, name.c_str()); }
         }
         while (result->NextRow());
         delete result;

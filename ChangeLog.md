@@ -1,20 +1,24 @@
-CHANGELOG for 0.18.x
+MaNGOS Two Changelog
 ====================
+This change log references the relevant changes (bug and security fixes) done
+in recent versions.
 
-This changelog references the relevant changes (bug and security fixes) done
-in 0.18 minor versions.
+0.19 (2014-09-31) - Untitled
+----------------------------------
+Many Thanks to all the groups and individuals who contributed to this release.
 
-* 0.18.1 (2014-xx-xx)
---------------------------------------------------------------------------------
- * Merged scripts directly to core repository.
- * Cleaned up much gcc warnings.
- * Implemented "Random battleground".
- * Fixed arena scoreboard end screen.
- * Fixed showing skirmish or rated arena queue icon.
- * Fix LANG_ADDON use on Guild Channels.
- * Fix aura not removed in some case.
+* Some of the dependant file groups have been made into submodules
+* i.e. all the dependant libraries (dep folder) and realmd
 
-* 0.18.0 (2014-04-01)
+* Merged scripts directly to core repository.
+* Cleaned up much gcc warnings.
+* Implemented "Random battleground".
+* Fixed arena scoreboard end screen.
+* Fixed showing skirmish or rated arena queue icon.
+* Fix LANG_ADDON use on Guild Channels.
+* Fix aura not removed in some case.
+
+0.18.0 (2014-04-01)
 --------------------------------------------------------------------------------
  * Remove a duplicate comment start.
  * Renamed SPELLFAMILY_UNK1 to SPELLFAMILY_ENVIRONMENT.
@@ -305,7 +309,7 @@ in 0.18 minor versions.
  * [12295] Fixup DBScriptEngine Doc file. Thx to NeatElves for pointing
  * [12294] Implement target limitations for spells 62166, 63981
  * Update script_commands.txt documentation file. Thx to Grz3s for reminding
- * [12293] Ensure that isAlive and isDead return expected results
+ * [12293] Ensure that IsAlive and IsDead return expected results
  * [12292] Add support to toggle UNIT_FLAGS with TemporaryFaction changes
  * [12291] Fix max targets for spell 64620
  * Improve recent crash fix with easier code

@@ -98,7 +98,7 @@ class ReactorRunnable : protected ACE_Task_Base
         int Start()
         {
             if (m_ThreadId != -1)
-                return -1;
+                { return -1; }
 
             return (m_ThreadId = activate());
         }
@@ -133,7 +133,7 @@ class ReactorRunnable : protected ACE_Task_Base
             ACE_GUARD(ACE_Thread_Mutex, Guard, m_NewSockets_Lock);
 
             if (m_NewSockets.empty())
-                return;
+                { return; }
 
             for (SocketSet::const_iterator i = m_NewSockets.begin(); i != m_NewSockets.end(); ++i)
             {
@@ -145,7 +145,7 @@ class ReactorRunnable : protected ACE_Task_Base
                     --m_Connections;
                 }
                 else
-                    m_Sockets.insert(sock);
+                    { m_Sockets.insert(sock); }
             }
 
             m_NewSockets.clear();
@@ -168,7 +168,7 @@ class ReactorRunnable : protected ACE_Task_Base
                 ACE_Time_Value interval(0, 10000);
 
                 if (m_Reactor->run_reactor_event_loop(interval) == -1)
-                    break;
+                    { break; }
 
                 AddNewSockets();
 
@@ -184,7 +184,7 @@ class ReactorRunnable : protected ACE_Task_Base
                         m_Sockets.erase(t);
                     }
                     else
-                        ++i;
+                        { ++i; }
                 }
             }
 
@@ -266,7 +266,7 @@ int WorldSocketMgr::StartReactiveIO(ACE_UINT16 port, const char* address)
     }
 
     for (size_t i = 0; i < m_NetThreadsCount; ++i)
-        m_NetThreads[i].Start();
+        { m_NetThreads[i].Start(); }
 
     return 0;
 }
@@ -277,10 +277,10 @@ int WorldSocketMgr::StartNetwork(ACE_UINT16 port, std::string& address)
     m_port = port;
 
     if (!sLog.HasLogLevelOrHigher(LOG_LVL_DEBUG))
-        ACE_Log_Msg::instance()->priority_mask(LM_ERROR, ACE_Log_Msg::PROCESS);
+        { ACE_Log_Msg::instance()->priority_mask(LM_ERROR, ACE_Log_Msg::PROCESS); }
 
     if (StartReactiveIO(port, address.c_str()) == -1)
-        return -1;
+        { return -1; }
 
     return 0;
 }
@@ -292,13 +292,13 @@ void WorldSocketMgr::StopNetwork()
         WorldSocket::Acceptor* acc = dynamic_cast<WorldSocket::Acceptor*>(m_Acceptor);
 
         if (acc)
-            acc->close();
+            { acc->close(); }
     }
 
     if (m_NetThreadsCount != 0)
     {
         for (size_t i = 0; i < m_NetThreadsCount; ++i)
-            m_NetThreads[i].Stop();
+            { m_NetThreads[i].Stop(); }
     }
 
     Wait();
@@ -309,7 +309,7 @@ void WorldSocketMgr::Wait()
     if (m_NetThreadsCount != 0)
     {
         for (size_t i = 0; i < m_NetThreadsCount; ++i)
-            m_NetThreads[i].Wait();
+            { m_NetThreads[i].Wait(); }
     }
 }
 
@@ -346,7 +346,7 @@ int WorldSocketMgr::OnSocketOpen(WorldSocket* sock)
 
     for (size_t i = 1; i < m_NetThreadsCount; ++i)
         if (m_NetThreads[i].Connections() < m_NetThreads[min].Connections())
-            min = i;
+            { min = i; }
 
     return m_NetThreads[min].AddSocket(sock);
 }

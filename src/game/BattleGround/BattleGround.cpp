@@ -1127,7 +1127,7 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
     {
         // should remove spirit of redemption
         if (plr->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
-            plr->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
+            { plr->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT); }
 
         plr->RemoveAurasDueToSpell(isArena() ? SPELL_ARENA_DAMPENING : SPELL_BATTLEGROUND_DAMPENING);
         plr->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
@@ -1149,7 +1149,7 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
         {
             plr->ClearAfkReports();
 
-            if (!team) team = plr->GetTeam();
+            if (!team) { team = plr->GetTeam(); }
 
             // if arena, remove the specific arena auras
             if (isArena())
@@ -1978,6 +1978,11 @@ void BattleGround::CheckArenaWinConditions()
         EndBattleGround(ALLIANCE);
 }
 
+/// <summary>
+/// Sets the bg raid.
+/// </summary>
+/// <param name="team">The team.</param>
+/// <param name="bg_raid">The bg_raid.</param>
 void BattleGround::SetBgRaid(Team team, Group* bg_raid)
 {
     Group*& old_raid = m_BgRaids[GetTeamIndexByTeamId(team)];

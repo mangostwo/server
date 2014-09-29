@@ -168,8 +168,14 @@ struct ActionButton
     ActionButtonUpdateState uState;
 
     // helpers
-    ActionButtonType GetType() const { return ActionButtonType(ACTION_BUTTON_TYPE(packedData)); }
-    uint32 GetAction() const { return ACTION_BUTTON_ACTION(packedData); }
+    ActionButtonType GetType() const
+    {
+        return ActionButtonType(ACTION_BUTTON_TYPE(packedData));
+    }
+    uint32 GetAction() const
+    {
+        return ACTION_BUTTON_ACTION(packedData);
+    }
     void SetActionAndType(uint32 action, ActionButtonType type)
     {
         uint32 newData = action | (uint32(type) << 24);
@@ -534,13 +540,13 @@ enum PlayerExtraFlags
 // 2^n values
 enum AtLoginFlags
 {
-    AT_LOGIN_NONE               = 0x00,
-    AT_LOGIN_RENAME             = 0x01,
-    AT_LOGIN_RESET_SPELLS       = 0x02,
-    AT_LOGIN_RESET_TALENTS      = 0x04,
-    AT_LOGIN_CUSTOMIZE          = 0x08,
-    AT_LOGIN_RESET_PET_TALENTS  = 0x10,
-    AT_LOGIN_FIRST              = 0x20,
+    AT_LOGIN_NONE                 = 0x00,
+    AT_LOGIN_RENAME               = 0x01,
+    AT_LOGIN_RESET_SPELLS         = 0x02,
+    AT_LOGIN_RESET_TALENTS        = 0x04,
+    AT_LOGIN_CUSTOMIZE            = 0x08,
+    AT_LOGIN_RESET_PET_TALENTS    = 0x10,
+    AT_LOGIN_FIRST                = 0x20,
 };
 
 typedef std::map<uint32, QuestStatusData> QuestStatusMap;
@@ -889,7 +895,7 @@ class MANGOS_DLL_SPEC PlayerTaxi
                 return true;
             }
             else
-                return false;
+                { return false; }
         }
         void AppendTaximaskTo(ByteBuffer& data, bool all);
 
@@ -897,17 +903,32 @@ class MANGOS_DLL_SPEC PlayerTaxi
         bool LoadTaxiDestinationsFromString(const std::string& values, Team team);
         std::string SaveTaxiDestinationsToString();
 
-        void ClearTaxiDestinations() { m_TaxiDestinations.clear(); }
-        void AddTaxiDestination(uint32 dest) { m_TaxiDestinations.push_back(dest); }
-        uint32 GetTaxiSource() const { return m_TaxiDestinations.empty() ? 0 : m_TaxiDestinations.front(); }
-        uint32 GetTaxiDestination() const { return m_TaxiDestinations.size() < 2 ? 0 : m_TaxiDestinations[1]; }
+        void ClearTaxiDestinations()
+        {
+            m_TaxiDestinations.clear();
+        }
+        void AddTaxiDestination(uint32 dest)
+        {
+            m_TaxiDestinations.push_back(dest);
+        }
+        uint32 GetTaxiSource() const
+        {
+            return m_TaxiDestinations.empty() ? 0 : m_TaxiDestinations.front();
+        }
+        uint32 GetTaxiDestination() const
+        {
+            return m_TaxiDestinations.size() < 2 ? 0 : m_TaxiDestinations[1];
+        }
         uint32 GetCurrentTaxiPath() const;
         uint32 NextTaxiDestination()
         {
             m_TaxiDestinations.pop_front();
             return GetTaxiDestination();
         }
-        bool empty() const { return m_TaxiDestinations.empty(); }
+        bool empty() const
+        {
+            return m_TaxiDestinations.empty();
+        }
 
         friend std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi);
     private:
@@ -953,20 +974,38 @@ class TradeData
 
     public:                                                 // access functions
 
-        Player* GetTrader() const { return m_trader; }
+        Player* GetTrader() const
+        {
+            return m_trader;
+        }
         TradeData* GetTraderData() const;
 
         Item* GetItem(TradeSlots slot) const;
         bool HasItem(ObjectGuid item_guid) const;
 
-        uint32 GetSpell() const { return m_spell; }
+        uint32 GetSpell() const
+        {
+            return m_spell;
+        }
         Item*  GetSpellCastItem() const;
-        bool HasSpellCastItem() const { return !m_spellCastItem.IsEmpty(); }
+        bool HasSpellCastItem() const
+        {
+            return !m_spellCastItem.IsEmpty();
+        }
 
-        uint32 GetMoney() const { return m_money; }
+        uint32 GetMoney() const
+        {
+            return m_money;
+        }
 
-        bool IsAccepted() const { return m_accepted; }
-        bool IsInAcceptProcess() const { return m_acceptProccess; }
+        bool IsAccepted() const
+        {
+            return m_accepted;
+        }
+        bool IsInAcceptProcess() const
+        {
+            return m_acceptProccess;
+        }
     public:                                                 // access functions
 
         void SetItem(TradeSlots slot, Item* item);
@@ -976,7 +1015,10 @@ class TradeData
         void SetAccepted(bool state, bool crosssend = false);
 
         // must be called only from accept handler helper functions
-        void SetInAcceptProcess(bool state) { m_acceptProccess = state; }
+        void SetInAcceptProcess(bool state)
+        {
+            m_acceptProccess = state;
+        }
 
     private:                                                // internal functions
 
@@ -1042,9 +1084,15 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SetInWater(bool apply);
 
-        bool IsInWater() const override { return m_isInWater; }
+        bool IsInWater() const override
+        {
+            return m_isInWater;
+        }
         bool IsUnderWater() const override;
-        bool IsFalling() { return GetPositionZ() < m_lastFallZ; }
+        bool IsFalling()
+        {
+            return GetPositionZ() < m_lastFallZ;
+        }
 
         void SendInitialPacketsBeforeAddToMap();
         void SendInitialPacketsAfterAddToMap();
@@ -1055,14 +1103,23 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void ToggleAFK();
         void ToggleDND();
-        bool isAFK() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK); }
-        bool isDND() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DND); }
+        bool isAFK() const
+        {
+            return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK);
+        }
+        bool isDND() const
+        {
+            return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DND);
+        }
         ChatTagFlags GetChatTag() const;
         std::string autoReplyMsg;
 
         uint32 GetBarberShopCost(uint8 newhairstyle, uint8 newhaircolor, uint8 newfacialhair, uint32 newskintone);
 
-        PlayerSocial* GetSocial() { return m_social; }
+        PlayerSocial* GetSocial()
+        {
+            return m_social;
+        }
 
         PlayerTaxi m_taxi;
         void InitTaxiNodesForLevel() { m_taxi.InitTaxiNodesForLevel(getRace(), getClass(), getLevel()); }
@@ -1071,15 +1128,15 @@ class MANGOS_DLL_SPEC Player : public Unit
         // mount_id can be used in scripting calls
         void ContinueTaxiFlight();
         bool isAcceptTickets() const { return GetSession()->GetSecurity() >= SEC_GAMEMASTER && (m_ExtraFlags & PLAYER_EXTRA_GM_ACCEPT_TICKETS); }
-        void SetAcceptTicket(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_GM_ACCEPT_TICKETS; else m_ExtraFlags &= ~PLAYER_EXTRA_GM_ACCEPT_TICKETS; }
+        void SetAcceptTicket(bool on) { if (on) { m_ExtraFlags |= PLAYER_EXTRA_GM_ACCEPT_TICKETS; } else { m_ExtraFlags &= ~PLAYER_EXTRA_GM_ACCEPT_TICKETS; } }
         bool isAcceptWhispers() const { return m_ExtraFlags & PLAYER_EXTRA_ACCEPT_WHISPERS; }
-        void SetAcceptWhispers(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_ACCEPT_WHISPERS; else m_ExtraFlags &= ~PLAYER_EXTRA_ACCEPT_WHISPERS; }
+        void SetAcceptWhispers(bool on) { if (on) { m_ExtraFlags |= PLAYER_EXTRA_ACCEPT_WHISPERS; } else { m_ExtraFlags &= ~PLAYER_EXTRA_ACCEPT_WHISPERS; } }
         bool isGameMaster() const { return m_ExtraFlags & PLAYER_EXTRA_GM_ON; }
         void SetGameMaster(bool on);
         bool isGMChat() const { return GetSession()->GetSecurity() >= SEC_MODERATOR && (m_ExtraFlags & PLAYER_EXTRA_GM_CHAT); }
-        void SetGMChat(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_GM_CHAT; else m_ExtraFlags &= ~PLAYER_EXTRA_GM_CHAT; }
+        void SetGMChat(bool on) { if (on) { m_ExtraFlags |= PLAYER_EXTRA_GM_CHAT; } else { m_ExtraFlags &= ~PLAYER_EXTRA_GM_CHAT; } }
         bool IsTaxiCheater() const { return m_ExtraFlags & PLAYER_EXTRA_TAXICHEAT; }
-        void SetTaxiCheater(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_TAXICHEAT; else m_ExtraFlags &= ~PLAYER_EXTRA_TAXICHEAT; }
+        void SetTaxiCheater(bool on) { if (on) { m_ExtraFlags |= PLAYER_EXTRA_TAXICHEAT; } else { m_ExtraFlags &= ~PLAYER_EXTRA_TAXICHEAT; } }
         bool isGMVisible() const { return !(m_ExtraFlags & PLAYER_EXTRA_GM_INVISIBLE); }
         void SetGMVisible(bool on);
         void SetPvPDeath(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH; else m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH; }
@@ -1091,10 +1148,11 @@ class MANGOS_DLL_SPEC Player : public Unit
             m_ExtraFlags &= ~(PLAYER_EXTRA_AUCTION_ENEMY | PLAYER_EXTRA_AUCTION_NEUTRAL);
 
             if (state < 0)
-                m_ExtraFlags |= PLAYER_EXTRA_AUCTION_ENEMY;
+                { m_ExtraFlags |= PLAYER_EXTRA_AUCTION_ENEMY; }
             else if (state > 0)
-                m_ExtraFlags |= PLAYER_EXTRA_AUCTION_NEUTRAL;
+                { m_ExtraFlags |= PLAYER_EXTRA_AUCTION_NEUTRAL; }
         }
+
 
         void GiveXP(uint32 xp, Unit* victim);
         void GiveLevel(uint32 level);
@@ -1106,22 +1164,39 @@ class MANGOS_DLL_SPEC Player : public Unit
         time_t m_Last_tick;
 
         uint32 m_Played_time[MAX_PLAYED_TIME_INDEX];
-        uint32 GetTotalPlayedTime() { return m_Played_time[PLAYED_TIME_TOTAL]; }
-        uint32 GetLevelPlayedTime() { return m_Played_time[PLAYED_TIME_LEVEL]; }
-
+        uint32 GetTotalPlayedTime()
+        {
+            return m_Played_time[PLAYED_TIME_TOTAL];
+        }
+        uint32 GetLevelPlayedTime()
+        {
+            return m_Played_time[PLAYED_TIME_LEVEL];
+        }
         void ResetTimeSync();
         void SendTimeSync();
 
         void SetDeathState(DeathState s) override;          // overwrite Unit::SetDeathState
 
-        float GetRestBonus() const { return m_rest_bonus; }
+        float GetRestBonus() const
+        {
+            return m_rest_bonus;
+        }
         void SetRestBonus(float rest_bonus_new);
 
-        RestType GetRestType() const { return rest_type; }
+        RestType GetRestType() const
+        {
+            return rest_type;
+        }
         void SetRestType(RestType n_r_type, uint32 areaTriggerId = 0);
 
-        time_t GetTimeInnEnter() const { return time_inn_enter; }
-        void UpdateInnerTime(time_t time) { time_inn_enter = time; }
+        time_t GetTimeInnEnter() const
+        {
+            return time_inn_enter;
+        }
+        void UpdateInnerTime(time_t time)
+        {
+            time_inn_enter = time;
+        }
 
         void RemovePet(PetSaveMode mode);
 
@@ -1147,7 +1222,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         Item* GetItemByPos(uint16 pos) const;
         Item* GetItemByPos(uint8 bag, uint8 slot) const;
         uint32 GetItemDisplayIdInSlot(uint8 bag, uint8 slot) const;
-        Item* GetWeaponForAttack(WeaponAttackType attackType) const { return GetWeaponForAttack(attackType, false, false); }
+        Item* GetWeaponForAttack(WeaponAttackType attackType) const
+        {
+            return GetWeaponForAttack(attackType, false, false);
+        }
         Item* GetWeaponForAttack(WeaponAttackType attackType, bool nonbroken, bool useable) const;
         Item* GetShield(bool useable = false) const;
         static uint32 GetAttackBySlot(uint8 slot);          // MAX_ATTACK if not weapon slot
@@ -1177,7 +1255,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         InventoryResult CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, Item* pItem, bool swap = false) const
         {
             if (!pItem)
-                return EQUIP_ERR_ITEM_NOT_FOUND;
+                { return EQUIP_ERR_ITEM_NOT_FOUND; }
             uint32 count = pItem->GetCount();
             return _CanStoreItem(bag, slot, dest, pItem->GetEntry(), count, pItem, swap, NULL);
         }
@@ -1213,7 +1291,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         void ApplyEquipCooldown(Item* pItem);
         void SetAmmo(uint32 item);
         void RemoveAmmo();
-        float GetAmmoDPS() const { return m_ammoDPS; }
+        float GetAmmoDPS() const
+        {
+            return m_ammoDPS;
+        }
         bool CheckAmmoCompatibility(const ItemPrototype* ammo_proto) const;
         void QuickEquipItem(uint16 pos, Item* pItem);
         void VisualizeItem(uint8 slot, Item* pItem);
@@ -1246,10 +1327,22 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2 = NULL, uint32 itemid = 0) const;
         void SendBuyError(BuyResult msg, Creature* pCreature, uint32 item, uint32 param);
         void SendSellError(SellResult msg, Creature* pCreature, ObjectGuid itemGuid, uint32 param);
-        void AddWeaponProficiency(uint32 newflag) { m_WeaponProficiency |= newflag; }
-        void AddArmorProficiency(uint32 newflag) { m_ArmorProficiency |= newflag; }
-        uint32 GetWeaponProficiency() const { return m_WeaponProficiency; }
-        uint32 GetArmorProficiency() const { return m_ArmorProficiency; }
+        void AddWeaponProficiency(uint32 newflag)
+        {
+            m_WeaponProficiency |= newflag;
+        }
+        void AddArmorProficiency(uint32 newflag)
+        {
+            m_ArmorProficiency |= newflag;
+        }
+        uint32 GetWeaponProficiency() const
+        {
+            return m_WeaponProficiency;
+        }
+        uint32 GetArmorProficiency() const
+        {
+            return m_ArmorProficiency;
+        }
         bool IsTwoHandUsed() const
         {
             Item* mainItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);

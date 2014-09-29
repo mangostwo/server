@@ -73,7 +73,7 @@ class UpdateMask
         void Clear()
         {
             if (mUpdateMask)
-                memset(mUpdateMask, 0, mBlocks << 2);
+                { memset(mUpdateMask, 0, mBlocks << 2); }
         }
 
         UpdateMask& operator = (const UpdateMask& mask)
@@ -88,14 +88,14 @@ class UpdateMask
         {
             MANGOS_ASSERT(mask.mCount <= mCount);
             for (uint32 i = 0; i < mBlocks; ++i)
-                mUpdateMask[i] &= mask.mUpdateMask[i];
+                { mUpdateMask[i] &= mask.mUpdateMask[i]; }
         }
 
         void operator |= (const UpdateMask& mask)
         {
             MANGOS_ASSERT(mask.mCount <= mCount);
             for (uint32 i = 0; i < mBlocks; ++i)
-                mUpdateMask[i] |= mask.mUpdateMask[i];
+                { mUpdateMask[i] |= mask.mUpdateMask[i]; }
         }
 
         UpdateMask operator & (const UpdateMask& mask) const

@@ -55,8 +55,11 @@ uint32 PlayerSocial::GetNumberOfSocialsWithFlag(SocialFlag flag)
     for (PlayerSocialMap::const_iterator itr = m_playerSocialMap.begin(); itr != m_playerSocialMap.end(); ++itr)
     {
         if (itr->second.Flags & flag)
+        {
             ++counter;
+        }
     }
+    /* We've done all the calculations we need to, return the counter */
     return counter;
 }
 
@@ -66,17 +69,17 @@ bool PlayerSocial::AddToSocialList(ObjectGuid friend_guid, bool ignore)
     if (ignore)
     {
         if (GetNumberOfSocialsWithFlag(SOCIAL_FLAG_IGNORED) >= SOCIALMGR_IGNORE_LIMIT)
-            return false;
+            { return false; }
     }
     else
     {
         if (GetNumberOfSocialsWithFlag(SOCIAL_FLAG_FRIEND) >= SOCIALMGR_FRIEND_LIMIT)
-            return false;
+            { return false; }
     }
 
     uint32 flag = SOCIAL_FLAG_FRIEND;
     if (ignore)
-        flag = SOCIAL_FLAG_IGNORED;
+        { flag = SOCIAL_FLAG_IGNORED; }
 
     PlayerSocialMap::const_iterator itr = m_playerSocialMap.find(friend_guid.GetCounter());
     if (itr != m_playerSocialMap.end())
@@ -98,11 +101,11 @@ void PlayerSocial::RemoveFromSocialList(ObjectGuid friend_guid, bool ignore)
 {
     PlayerSocialMap::iterator itr = m_playerSocialMap.find(friend_guid.GetCounter());
     if (itr == m_playerSocialMap.end())                     // not exist
-        return;
+        { return; }
 
     uint32 flag = SOCIAL_FLAG_FRIEND;
     if (ignore)
-        flag = SOCIAL_FLAG_IGNORED;
+        { flag = SOCIAL_FLAG_IGNORED; }
 
     itr->second.Flags &= ~flag;
     if (itr->second.Flags == 0)

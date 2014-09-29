@@ -656,6 +656,13 @@ inline void wstrToLower(std::wstring& str)
 
 std::wstring GetMainPartOfName(std::wstring wname, uint32 declension);
 
+/**
+ * @brief
+ *
+ * @param utf8str
+ * @param conStr
+ * @return bool
+ */
 bool utf8ToConsole(const std::string& utf8str, std::string& conStr);
 /**
  * @brief

@@ -1,11 +1,11 @@
-#####################################
-# MaNGOS Configuration file         #
-#####################################
+################################################################################
+# World server configuration                                                   #
+################################################################################
 
 [MangosdConf]
-ConfVersion=2014030801
+ConfVersion=2014060701
 
-###################################################################################################################
+################################################################################
 # CONNECTIONS AND DIRECTORIES
 #
 #    RealmID
@@ -14,7 +14,7 @@ ConfVersion=2014030801
 #    DataDir
 #        Data directory setting.
 #        Important: DataDir needs to be quoted, as it is a string which may contain space characters.
-#        Example: "@CMAKE_INSTALL_PREFIX@/share/mangos"
+#        Example: "${CMAKE_INSTALL_PREFIX}/share/mangos"
 #
 #    LogsDir
 #        Logs directory setting.
@@ -42,7 +42,8 @@ ConfVersion=2014030801
 #	CharacterDatabaseConnections
 #		 Amount of connections to database which will be used for SELECT queries. Maximum 16 connections per database.
 #		 Please, note, for data consistency only one connection for each database is used for transactions and async SELECTs.
-#		 So formula to find out how many connections will be established: X = ¹_connections + 1
+#		 So formula to find out how many connections will be established:
+#                X = LoginDatabaseConnections + WorldDatabaseConnections + CharacterDatabaseConnections + 1
 #		 Default: 1 connection for SELECT statements
 #
 #    MaxPingTime
@@ -57,22 +58,22 @@ ConfVersion=2014030801
 #        on different IP addresses using default ports.
 #        DO NOT CHANGE THIS UNLESS YOU _REALLY_ KNOW WHAT YOU'RE DOING
 #
-###################################################################################################################
+################################################################################
 
-RealmID = 1
-DataDir = "."
-LogsDir = ""
-LoginDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;realmd"
-WorldDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;mangos"
-CharacterDatabaseInfo = "127.0.0.1;3306;mangos;mangos;characters"
-LoginDatabaseConnections = 1
-WorldDatabaseConnections = 1
+RealmID                      = 1
+DataDir                      = "."
+LogsDir                      = ""
+LoginDatabaseInfo            = "127.0.0.1;3306;mangos;mangos;realmd"
+WorldDatabaseInfo            = "127.0.0.1;3306;mangos;mangos;mangos"
+CharacterDatabaseInfo        = "127.0.0.1;3306;mangos;mangos;characters"
+LoginDatabaseConnections     = 1
+WorldDatabaseConnections     = 1
 CharacterDatabaseConnections = 1
-MaxPingTime = 30
-WorldServerPort = 8085
-BindIP = "0.0.0.0"
+MaxPingTime                  = 30
+WorldServerPort              = 8085
+BindIP                       = "0.0.0.0"
 
-###################################################################################################################
+################################################################################
 # PERFORMANCE SETINGS
 #
 #    UseProcessors
@@ -197,35 +198,35 @@ BindIP = "0.0.0.0"
 #        Default: 1 (Enable)
 #                 0 (Disabled)
 #
-###################################################################################################################
+################################################################################
 
-UseProcessors = 0
-ProcessPriority = 1
-Compression = 1
-PlayerLimit = 100
-SaveRespawnTimeImmediately = 1
-MaxOverspeedPings = 2
-GridUnload = 1
-GridCleanUpDelay = 300000
-MapUpdateInterval = 100
-ChangeWeatherInterval = 600000
-PlayerSave.Interval = 900000
-PlayerSave.Stats.MinLevel = 0
+UseProcessors                     = 0
+ProcessPriority                   = 1
+Compression                       = 1
+PlayerLimit                       = 100
+SaveRespawnTimeImmediately        = 1
+MaxOverspeedPings                 = 2
+GridUnload                        = 1
+GridCleanUpDelay                  = 300000
+MapUpdateInterval                 = 100
+ChangeWeatherInterval             = 600000
+PlayerSave.Interval               = 900000
+PlayerSave.Stats.MinLevel         = 0
 PlayerSave.Stats.SaveOnlyOnLogout = 1
-vmap.enableLOS = 1
-vmap.enableHeight = 1
-vmap.ignoreSpellIds = "7720"
-vmap.enableIndoorCheck = 1
-DetectPosCollision = 1
-TargetPosRecalculateRange = 1.5
-mmap.enabled = 1
-mmap.ignoreMapIds = ""
-UpdateUptimeInterval = 10
-MaxCoreStuckTime = 0
-AddonChannel = 1
-CleanCharacterDB = 1
+vmap.enableLOS                    = 1
+vmap.enableHeight                 = 1
+vmap.ignoreSpellIds               = "7720"
+vmap.enableIndoorCheck            = 1
+DetectPosCollision                = 1
+TargetPosRecalculateRange         = 1.5
+mmap.enabled                      = 1
+mmap.ignoreMapIds                 = ""
+UpdateUptimeInterval              = 10
+MaxCoreStuckTime                  = 0
+AddonChannel                      = 1
+CleanCharacterDB                  = 1
 
-###################################################################################################################
+################################################################################
 # SERVER LOGGING
 #
 #    LogSQL
@@ -252,7 +253,7 @@ CleanCharacterDB = 1
 #
 #    LogFile
 #        Logfile name
-#        Default: "Server.log"
+#        Default: "world-server.log"
 #                 "" - Empty name disable creating log file
 #
 #    LogTimestamp
@@ -358,48 +359,47 @@ CleanCharacterDB = 1
 #        Default: "" - none colors
 #        Example: "13 7 11 9"
 #
-###################################################################################################################
+################################################################################
 
-LogSQL = 1
-PidFile = ""
-LogLevel = 3
-LogTime = 0
-LogFile = "Server.log"
-LogTimestamp = 0
-LogFileLevel = 0
+LogSQL                      = 1
+PidFile                     = ""
+LogLevel                    = 3
+LogTime                     = 0
+LogFile                     = "world-server.log"
+LogTimestamp                = 0
+LogFileLevel                = 0
+LogFilter_TransportMoves    = 1
+LogFilter_CreatureMoves     = 1
 LogFilter_AchievementUpdates = 1
-LogFilter_CreatureMoves = 1
-LogFilter_TransportMoves = 1
 LogFilter_VisibilityChanges = 1
-LogFilter_Weather = 1
-LogFilter_DbStrictedCheck = 1
-LogFilter_Pathfinding = 1
-LogFilter_MapsLoading = 1
-LogFilter_EventAiDev = 1
-LogFilter_PeriodicAffects = 0
-LogFilter_PlayerMoves = 1
-LogFilter_SQLText = 1
-LogFilter_AIAndMovegens = 0
-LogFilter_PlayerStats = 0
-LogFilter_Damage = 0
-LogFilter_Combat = 0
-LogFilter_SpellCast = 0
-LogFilter_Calendar = 1
-WorldLogFile = ""
-WorldLogTimestamp = 0
-DBErrorLogFile = "DBErrors.log"
-ElunaErrorLogFile = "ElunaErrors.log"
-EventAIErrorLogFile = "EventAIErrors.log"
-CharLogFile = "Char.log"
-CharLogTimestamp = 0
-CharLogDump = 0
-GmLogFile = ""
-GmLogTimestamp = 0
-GmLogPerAccount = 0
-RaLogFile = ""
-LogColors = ""
+LogFilter_Weather           = 1
+LogFilter_DbStrictedCheck   = 1
+LogFilter_Pathfinding       = 1
+LogFilter_MapsLoading       = 1
+LogFilter_EventAiDev        = 1
+LogFilter_PeriodicAffects   = 0
+LogFilter_PlayerMoves       = 1
+LogFilter_SQLText           = 1
+LogFilter_AIAndMovegens     = 0
+LogFilter_PlayerStats       = 0
+LogFilter_Damage            = 0
+LogFilter_Combat            = 0
+LogFilter_SpellCast         = 0
+LogFilter_Calendar          = 1
+WorldLogFile                = "world-packets.log"
+WorldLogTimestamp           = 0
+DBErrorLogFile              = "world-database.log"
+EventAIErrorLogFile         = "world-eventai.log"
+CharLogFile                 = "world-characters.log"
+CharLogTimestamp            = 0
+CharLogDump                 = 0
+GmLogFile                   = "world-gamemaster.log"
+GmLogTimestamp              = 0
+GmLogPerAccount             = 0
+RaLogFile                   = "world-remote-access.log"
+LogColors                   = "13 7 11 9"
 
-###################################################################################################################
+################################################################################
 # SERVER SETTINGS
 #
 #    GameType
@@ -452,8 +452,8 @@ LogColors = ""
 #
 #    DBC.Locale
 #        DBC Language Settings
-#        0 = English; 1 = Korean; 2 = French; 3 = German; 4 = Chinese; 5 = Taiwanese; 6 = Spanish; 7 = Spanish Mexico
-#        8 = Russian; 255 = Auto Detect (Default)
+#        0 = English; 1 = Korean; 2 = French; 3 = German; 4 = Chinese; 5 = Taiwanese; 6 = Spanish;
+#        7 = Spanish Mexico; 8 = Russian; 255 = Auto Detect (Default)
 #
 #    DeclinedNames
 #    Allow russian clients to set and use declined names
@@ -575,8 +575,8 @@ LogColors = ""
 #
 #    AllFlightPaths
 #        Players will start with all flight paths (Note: ALL flight paths, not only player's team)
-#        Default: 0 (false)
-#                 1 (true)
+#        Default: 0 (true)
+#                 1 (false)
 #
 #    AlwaysMaxSkillForLevel
 #        Players will automatically gain max level dependent (weapon/defense) skill when logging in, leveling up etc.
@@ -624,7 +624,7 @@ LogColors = ""
 #
 #    Instance.UnloadDelay
 #        Unload the instance map from memory after some time if no players are inside.
-#        Default: 1800000 (miliseconds 30 minutes)
+#        Default: 1800000 (miliseconds, i.e 30 minutes)
 #                 0 (instance maps are kept in memory until they are reset)
 #
 #    Quests.LowLevelHideDiff
@@ -730,7 +730,7 @@ LogColors = ""
 #        Default: 10
 #
 #    SkillChance.Prospecting
-#        For prospecting skillup impossible by default, but can be allowed as custom setting
+#        For prospecting skillup not possible by default, but can be allowed as custom setting
 #        Default: 0 - no skilups
 #                 1 - skilups possible
 #
@@ -745,7 +745,7 @@ LogColors = ""
 #                 1 - recheck offhand slot weapon at talent reset also
 #
 #    PetUnsummonAtMount
-#        Persmanent pet will unsummoned at player mount
+#        Permanent pet will unsummoned at player mount
 #                 0 - unsummon only for flying mounts
 #        Default: 1 - unsummon for any mount
 #
@@ -773,9 +773,6 @@ LogColors = ""
 #        Default:  0 (not wait)
 #                  N (>0, wait N secs)
 #
-#    Motd
-#        Message of the Day. Displayed at worldlogin for every user ('@' for a newline).
-#
 #    Raid.MinLevel
 #        Minimal player level to join raid groups (only affects existing raid groups, party->raid convert ignored)
 #        You can bypass this setting by typing "/script SetAllowLowLevelRaid(true/false)" command in chat
@@ -783,91 +780,94 @@ LogColors = ""
 #
 #    PlayerCommands
 #        Should player chat be parsed for GM commands.
-#        Default: 1 (parse commands)
-#                 0 (ignore commands)
+#        Default: 0 (ignore commands)
+#                 1 (parse commands)
 #
-###################################################################################################################
+#    Motd
+#        Message of the Day. Displayed at worldlogin for every user ('@' for a newline).
+#
+################################################################################
 
-GameType = 1
-RealmZone = 1
+GameType                                  = 1
+RealmZone                                 = 1
 Expansion = 2
-DBC.Locale = 255
-DeclinedNames = 0
-StrictPlayerNames = 0
-StrictCharterNames = 0
-StrictPetNames = 0
-MinPlayerName = 2
-MinCharterName = 2
-MinPetName = 2
-CharactersCreatingDisabled = 0
-CharactersPerAccount = 50
-CharactersPerRealm = 10
+DBC.Locale                                = 255
+DeclinedNames                             = 0
+StrictPlayerNames                         = 0
+StrictCharterNames                        = 0
+StrictPetNames                            = 0
+MinPlayerName                             = 2
+MinCharterName                            = 2
+MinPetName                                = 2
+CharactersCreatingDisabled                = 0
+CharactersPerAccount                      = 50
+CharactersPerRealm                        = 10
 HeroicCharactersPerRealm = 1
 MinLevelForHeroicCharacterCreating = 55
-SkipCinematics = 0
+SkipCinematics                            = 0
 MaxPlayerLevel = 80
-StartPlayerLevel = 1
+StartPlayerLevel                          = 1
 StartHeroicPlayerLevel = 55
-StartPlayerMoney = 0
-MaxHonorPoints = 75000
-StartHonorPoints = 0
+StartPlayerMoney                          = 0
+MaxHonorPoints                            = 75000
+StartHonorPoints                          = 0
 MaxArenaPoints = 5000
 StartArenaPoints = 0
-InstantLogout = 1
+InstantLogout                             = 1
 DisableWaterBreath = 4
-AllFlightPaths = 0
-AlwaysMaxSkillForLevel = 0
-ActivateWeather = 1
-CastUnstuck = 1
-MaxSpellCastsInChain = 20
+AllFlightPaths                            = 0
+AlwaysMaxSkillForLevel                    = 0
+ActivateWeather                           = 1
+CastUnstuck                               = 1
+MaxSpellCastsInChain                      = 20
 BirthdayTime = 1125180000
-RabbitDay = 0
-Instance.IgnoreLevel = 0
-Instance.IgnoreRaid = 0
-Instance.ResetTimeHour = 4
-Instance.UnloadDelay = 1800000
-Quests.LowLevelHideDiff = 4
-Quests.HighLevelHideDiff = 7
+RabbitDay                                 = 0
+Instance.IgnoreLevel                      = 0
+Instance.IgnoreRaid                       = 0
+Instance.ResetTimeHour                    = 4
+Instance.UnloadDelay                      = 1800000
+Quests.LowLevelHideDiff                   = 4
+Quests.HighLevelHideDiff                  = 7
 Quests.Daily.ResetHour = 6
 Quests.Weekly.ResetWeekDay = 3
 Quests.Weekly.ResetHour = 6
-Quests.IgnoreRaid = 0
-Guild.EventLogRecordsCount = 100
+Quests.IgnoreRaid                         = 0
+Guild.EventLogRecordsCount                = 100
 Guild.BankEventLogRecordsCount = 25
-TimerBar.Fatigue.GMLevel = 4
-TimerBar.Fatigue.Max = 60
-TimerBar.Breath.GMLevel = 4
-TimerBar.Breath.Max = 180
-TimerBar.Fire.GMLevel = 4
-TimerBar.Fire.Max = 1
-MaxPrimaryTradeSkill = 2
+TimerBar.Fatigue.GMLevel                  = 4
+TimerBar.Fatigue.Max                      = 60
+TimerBar.Breath.GMLevel                   = 4
+TimerBar.Breath.Max                       = 180
+TimerBar.Fire.GMLevel                     = 4
+TimerBar.Fire.Max                         = 1
+MaxPrimaryTradeSkill                      = 2
 TradeSkill.GMIgnore.MaxPrimarySkillsCount = 4
-TradeSkill.GMIgnore.Level = 4
-TradeSkill.GMIgnore.Skill = 4
-MinPetitionSigns = 9
-MaxGroupXPDistance = 74
-MailDeliveryDelay = 3600
-MassMailer.SendPerTick = 10
+TradeSkill.GMIgnore.Level                 = 4
+TradeSkill.GMIgnore.Skill                 = 4
+MinPetitionSigns                          = 9
+MaxGroupXPDistance                        = 74
+MailDeliveryDelay                         = 3600
+MassMailer.SendPerTick                    = 10
 SkillChance.Prospecting = 0
 SkillChance.Milling = 0
 OffhandCheckAtTalentsReset = 0
 PetUnsummonAtMount = 1
 ClientCacheVersion = 0
-Event.Announce = 0
-BeepAtStart = 1
-ShowProgressBars = 1
-WaitAtStartupError = 0
-Motd = "Welcome to the Massive Network Game Object Server."
+Event.Announce                            = 0
+BeepAtStart                               = 1
+ShowProgressBars                          = 1
+WaitAtStartupError                        = 0
 Raid.MinLevel = 10
-PlayerCommands = 1
+PlayerCommands                            = 0
+Motd = "Welcome to the Massive Network Game Object Server."
 
-###################################################################################################################
+################################################################################
 # PLAYER INTERACTION
 #
 #    AllowTwoSide.Accounts
 #        Allow accounts to create characters in both teams in any game type.
-#                 0 (Not allowed)
-#        Default: 1 (Allowed)
+#        Default: 0 (Not allowed)
+#                 1 (Allowed)
 #
 #    AllowTwoSide.Interaction.Chat
 #    AllowTwoSide.Interaction.Channel
@@ -876,8 +876,8 @@ PlayerCommands = 1
 #    AllowTwoSide.Interaction.Auction
 #    AllowTwoSide.Interaction.Mail
 #    AllowTwoSide.Interaction.Calendar
-#        Allow or not common :chat(say,yell);channel(chat)group(join)guild(join);merge all auction houses for players from
-#        different teams, send mail to different team, calendar(invite player from different team)
+#        Allow or not common :chat(say,yell);channel(chat)group(join)guild(join);trade with different team,
+#        merge all auction houses for players from different teams, send mail to different team, calendar(invite player from different team)
 #        Default: 0 (Not allowed)
 #                 1 (Allowed)
 #
@@ -897,21 +897,21 @@ PlayerCommands = 1
 #        Default: 1 (allow)
 #                 0 (not allow)
 #
-###################################################################################################################
+################################################################################
 
-AllowTwoSide.Accounts = 1
-AllowTwoSide.Interaction.Chat = 0
+AllowTwoSide.Accounts            = 0
+AllowTwoSide.Interaction.Chat    = 0
 AllowTwoSide.Interaction.Channel = 0
-AllowTwoSide.Interaction.Group = 0
-AllowTwoSide.Interaction.Guild = 0
+AllowTwoSide.Interaction.Group   = 0
+AllowTwoSide.Interaction.Guild   = 0
 AllowTwoSide.Interaction.Auction = 0
-AllowTwoSide.Interaction.Mail = 0
+AllowTwoSide.Interaction.Mail    = 0
 AllowTwoSide.Interaction.Calendar = 0
-AllowTwoSide.WhoList = 0
-AllowTwoSide.AddFriend = 0
-TalentsInspecting = 1
+AllowTwoSide.WhoList             = 0
+AllowTwoSide.AddFriend           = 0
+TalentsInspecting                = 1
 
-###################################################################################################################
+################################################################################
 # CREATURE AND GAMEOBJECT SETTINGS
 #
 #    ThreatRadius
@@ -1012,46 +1012,47 @@ TalentsInspecting = 1
 #        in game from other side
 #        Default: 100
 #
-###################################################################################################################
+################################################################################
 
-ThreatRadius = 100
-Rate.Creature.Aggro = 1
-CreatureRespawnAggroDelay = 5000
-CreatureFamilyFleeAssistanceRadius = 30
-CreatureFamilyAssistanceRadius = 10
-CreatureFamilyAssistanceDelay = 1500
-CreatureFamilyFleeDelay = 7000
-WorldBossLevelDiff = 3
-Corpse.EmptyLootShow = 1
-Corpse.Decay.NORMAL = 300
-Corpse.Decay.RARE = 900
-Corpse.Decay.ELITE = 600
-Corpse.Decay.RAREELITE = 1200
-Corpse.Decay.WORLDBOSS = 3600
-Rate.Corpse.Decay.Looted = 0.0
-Rate.Creature.Normal.Damage = 1
-Rate.Creature.Elite.Elite.Damage = 1
-Rate.Creature.Elite.RAREELITE.Damage = 1
-Rate.Creature.Elite.WORLDBOSS.Damage = 1
-Rate.Creature.Elite.RARE.Damage = 1
-Rate.Creature.Normal.SpellDamage = 1
-Rate.Creature.Elite.Elite.SpellDamage = 1
+ThreatRadius                              = 100
+Rate.Creature.Aggro                       = 1
+CreatureRespawnAggroDelay                 = 5000
+CreatureFamilyFleeAssistanceRadius        = 30
+CreatureFamilyAssistanceRadius            = 10
+CreatureFamilyAssistanceDelay             = 1500
+CreatureFamilyFleeDelay                   = 7000
+WorldBossLevelDiff                        = 3
+Corpse.EmptyLootShow                      = 1
+Corpse.Decay.NORMAL                       = 300
+Corpse.Decay.RARE                         = 900
+Corpse.Decay.ELITE                        = 600
+Corpse.Decay.RAREELITE                    = 1200
+Corpse.Decay.WORLDBOSS                    = 3600
+Rate.Corpse.Decay.Looted                  = 0.0
+Rate.Creature.Elite.Elite.Damage          = 1
+Rate.Creature.Elite.Elite.HP              = 1
+Rate.Creature.Elite.Elite.SpellDamage     = 1
+Rate.Creature.Elite.RARE.Damage           = 1
+Rate.Creature.Elite.RARE.HP               = 1
+Rate.Creature.Elite.RARE.SpellDamage      = 1
+Rate.Creature.Elite.RAREELITE.Damage      = 1
+Rate.Creature.Elite.RAREELITE.HP          = 1
 Rate.Creature.Elite.RAREELITE.SpellDamage = 1
+Rate.Creature.Elite.WORLDBOSS.Damage      = 1
+Rate.Creature.Elite.WORLDBOSS.HP          = 1
 Rate.Creature.Elite.WORLDBOSS.SpellDamage = 1
-Rate.Creature.Elite.RARE.SpellDamage = 1
-Rate.Creature.Normal.HP = 1
-Rate.Creature.Elite.Elite.HP = 1
-Rate.Creature.Elite.RAREELITE.HP = 1
-Rate.Creature.Elite.WORLDBOSS.HP = 1
-Rate.Creature.Elite.RARE.HP = 1
-ListenRange.Say = 40
-ListenRange.TextEmote = 40
-ListenRange.Yell = 300
-GuidReserveSize.Creature = 100
-GuidReserveSize.GameObject = 100
+Rate.Creature.Normal.Damage               = 1
+Rate.Creature.Normal.HP                   = 1
+Rate.Creature.Normal.SpellDamage          = 1
 
+ListenRange.Say                           = 40
+ListenRange.TextEmote                     = 40
+ListenRange.Yell                          = 300
 
-###################################################################################################################
+GuidReserveSize.Creature                  = 100
+GuidReserveSize.GameObject                = 100
+
+################################################################################
 # CHAT SETTINGS
 #
 #    ChatFakeMessagePreventing
@@ -1097,18 +1098,18 @@ GuidReserveSize.GameObject = 100
 #        Default: 0 (join announcement in normal way)
 #                 1 (GM join without announcement)
 #
-###################################################################################################################
+################################################################################
 
-ChatFakeMessagePreventing = 0
+ChatFakeMessagePreventing       = 0
 ChatStrictLinkChecking.Severity = 0
-ChatStrictLinkChecking.Kick = 0
-ChatFlood.MessageCount = 10
-ChatFlood.MessageDelay = 1
-ChatFlood.MuteTime = 10
+ChatStrictLinkChecking.Kick     = 0
+ChatFlood.MessageCount          = 10
+ChatFlood.MessageDelay          = 1
+ChatFlood.MuteTime              = 10
 Channel.RestrictedLfg = 1
-Channel.SilentlyGMJoin = 0
+Channel.SilentlyGMJoin          = 0
 
-###################################################################################################################
+################################################################################
 # GAME MASTER SETTINGS
 #
 #    GM.LoginState
@@ -1179,22 +1180,22 @@ Channel.SilentlyGMJoin = 0
 #        Default: 37800 (50% Transparency)
 #                 0 (Disabled)
 #
-###################################################################################################################
+################################################################################
 
-GM.LoginState            = 2
-GM.Visible               = 2
-GM.AcceptTickets         = 2
-GM.Chat                  = 2
-GM.WhisperingTo          = 2
-GM.InGMList.Level        = 3
-GM.InWhoList.Level       = 3
-GM.LogTrade              = 1
-GM.StartLevel            = 1
-GM.LowerSecurity         = 0
+GM.LoginState      = 2
+GM.Visible         = 2
+GM.AcceptTickets   = 2
+GM.Chat            = 2
+GM.WhisperingTo    = 2
+GM.InGMList.Level  = 3
+GM.InWhoList.Level = 3
+GM.LogTrade        = 1
+GM.StartLevel      = 1
+GM.LowerSecurity   = 0
 GM.AllowAchievementGain  = 1
 GM.InvisibleAura         = 37800
 
-###################################################################################################################
+################################################################################
 # VISIBILITY AND RADIUSES
 #
 #    Visibility.GroupMode
@@ -1235,19 +1236,19 @@ GM.InvisibleAura         = 37800
 #        Delay time between creature AI reactions on nearby movements
 #        Default: 1000 (milliseconds)
 #
-###################################################################################################################
+################################################################################
 
-Visibility.GroupMode = 0
-Visibility.Distance.Continents    = 90
-Visibility.Distance.Instances     = 120
+Visibility.GroupMode               = 0
+Visibility.Distance.Continents     = 90
+Visibility.Distance.Instances      = 120
 Visibility.Distance.BGArenas      = 180
-Visibility.Distance.InFlight      = 100
-Visibility.Distance.Grey.Unit   = 1
-Visibility.Distance.Grey.Object = 10
+Visibility.Distance.InFlight       = 100
+Visibility.Distance.Grey.Unit      = 1
+Visibility.Distance.Grey.Object    = 10
 Visibility.RelocationLowerLimit    = 10
 Visibility.AIRelocationNotifyDelay = 1000
 
-###################################################################################################################
+################################################################################
 # SERVER RATES
 #
 #    Rate.Health
@@ -1393,7 +1394,7 @@ Visibility.AIRelocationNotifyDelay = 1000
 #
 #    Death.Bones.World
 #    Death.Bones.BattlegroundOrArena
-#         Enable/disable creating bones instead corpse at resurrection (in normal zones/instacnes, or battleground/arenas)
+#         Enabled/disabled creating bones instead corpse at resurrection (in normal zones/instacnes, or battleground/arenas)
 #         Default: 1 (enabled)
 #                  0 (disabled)
 #
@@ -1402,71 +1403,76 @@ Visibility.AIRelocationNotifyDelay = 1000
 #         Modifies the speed of player's ghosts, removed upon reviving, not permanent/saved, in non-BG and BG maps
 #         Default: 1.0 (normal speed)
 #
-###################################################################################################################
+################################################################################
 
-Rate.Health = 1
-Rate.Mana = 1
-Rate.Rage.Income = 1
-Rate.Rage.Loss = 1
-Rate.RunicPower.Income = 1
-Rate.RunicPower.Loss = 1
-Rate.Focus = 1
-Rate.Energy = 1
-Rate.Skill.Discovery = 1
-Rate.Drop.Item.Poor = 1
-Rate.Drop.Item.Normal = 1
-Rate.Drop.Item.Uncommon = 1
-Rate.Drop.Item.Rare = 1
-Rate.Drop.Item.Epic = 1
-Rate.Drop.Item.Legendary = 1
-Rate.Drop.Item.Artifact = 1
-Rate.Drop.Item.Referenced = 1
-Rate.Drop.Money = 1
-Rate.XP.Kill    = 1
-Rate.XP.Quest   = 1
-Rate.XP.Explore = 1
-Rate.Rest.InGame = 1
-Rate.Rest.Offline.InTavernOrCity = 1
-Rate.Rest.Offline.InWilderness = 1
-Rate.Damage.Fall = 1
-Rate.Auction.Time = 1
-Rate.Auction.Deposit = 1
-Rate.Auction.Cut = 1
-Auction.Deposit.Min = 100
-Rate.Honor = 1
-Rate.Mining.Amount = 1
-Rate.Mining.Next   = 1
-Rate.Talent = 1
-Rate.Reputation.Gain = 1
-Rate.Reputation.LowLevel.Kill    = 1
-Rate.Reputation.LowLevel.Quest   = 1
-Rate.InstanceResetTime = 1
-SkillGain.Crafting = 1
-SkillGain.Defense = 1
-SkillGain.Gathering = 1
-SkillGain.Weapon = 1
-SkillChance.Orange = 100
-SkillChance.Yellow = 75
-SkillChance.Green  = 25
-SkillChance.Grey   = 0
-SkillChance.MiningSteps   = 0
-SkillChance.SkinningSteps = 0
-SkillFail.Loot.Fishing = 1
-SkillFail.Gain.Fishing = 1
-SkillFail.Possible.FishingPool = 0
-DurabilityLossChance.Damage = 0.5
-DurabilityLossChance.Absorb = 0.5
-DurabilityLossChance.Parry  = 0.05
-DurabilityLossChance.Block  = 0.05
-Death.SicknessLevel = 11
-Death.CorpseReclaimDelay.PvP = 1
-Death.CorpseReclaimDelay.PvE = 1
-Death.Bones.World = 1
-Death.Bones.BattlegroundOrArena = 1
-Death.Ghost.RunSpeed.World = 1.0
+Rate.Health                       = 1
+Rate.Mana                         = 1
+Rate.Rage.Income                  = 1
+Rate.Rage.Loss                    = 1
+Rate.RunicPower.Income            = 1
+Rate.RunicPower.Loss              = 1
+Rate.Focus                        = 1
+Rate.Energy                       = 1
+Rate.Skill.Discovery              = 1
+Rate.Drop.Item.Poor               = 1
+Rate.Drop.Item.Normal             = 1
+Rate.Drop.Item.Uncommon           = 1
+Rate.Drop.Item.Rare               = 1
+Rate.Drop.Item.Epic               = 1
+Rate.Drop.Item.Legendary          = 1
+Rate.Drop.Item.Artifact           = 1
+Rate.Drop.Item.Referenced         = 1
+Rate.Drop.Money                   = 1
+Rate.XP.Kill                      = 1
+Rate.XP.Quest                     = 1
+Rate.XP.Explore                   = 1
+Rate.Rest.InGame                  = 1
+Rate.Rest.Offline.InTavernOrCity  = 1
+Rate.Rest.Offline.InWilderness    = 1
+Rate.Damage.Fall                  = 1
+Rate.Auction.Time                 = 1
+Rate.Auction.Deposit              = 1
+Rate.Auction.Cut                  = 1
+Auction.Deposit.Min               = 100
+Rate.Honor                        = 1
+Rate.Mining.Amount                = 1
+Rate.Mining.Next                  = 1
+Rate.Talent                       = 1
+Rate.Reputation.Gain              = 1
+Rate.Reputation.LowLevel.Kill     = 1
+Rate.Reputation.LowLevel.Quest    = 1
+Rate.InstanceResetTime            = 1
+
+SkillGain.Crafting                = 1
+SkillGain.Defense                 = 1
+SkillGain.Gathering               = 1
+SkillGain.Weapon                  = 1
+
+SkillChance.Orange                = 100
+SkillChance.Yellow                = 75
+SkillChance.Green                 = 25
+SkillChance.Grey                  = 0
+SkillChance.MiningSteps           = 0
+SkillChance.SkinningSteps         = 0
+
+SkillFail.Loot.Fishing            = 1
+SkillFail.Gain.Fishing            = 1
+SkillFail.Possible.FishingPool    = 0
+
+DurabilityLossChance.Damage       = 0.5
+DurabilityLossChance.Absorb       = 0.5
+DurabilityLossChance.Parry        = 0.05
+DurabilityLossChance.Block        = 0.05
+
+Death.SicknessLevel               = 11
+Death.CorpseReclaimDelay.PvP      = 1
+Death.CorpseReclaimDelay.PvE      = 1
+Death.Bones.World                 = 1
+Death.Bones.BattlegroundOrArena   = 1
+Death.Ghost.RunSpeed.World        = 1.0
 Death.Ghost.RunSpeed.Battleground = 1.0
 
-###################################################################################################################
+################################################################################
 # BATTLEGROUND CONFIG
 #
 #    Battleground.CastDeserter
@@ -1504,17 +1510,17 @@ Death.Ghost.RunSpeed.Battleground = 1.0
 #        Hour when random bg reset (0..23)
 #        Default: 6
 #
-###################################################################################################################
+################################################################################
 
-Battleground.CastDeserter = 1
-Battleground.QueueAnnouncer.Join = 0
-Battleground.QueueAnnouncer.Start = 0
-Battleground.InvitationType = 0
-BattleGround.PrematureFinishTimer = 300000
+Battleground.CastDeserter             = 1
+Battleground.QueueAnnouncer.Join      = 0
+Battleground.QueueAnnouncer.Start     = 0
+Battleground.InvitationType           = 0
+BattleGround.PrematureFinishTimer     = 300000
 BattleGround.PremadeGroupWaitForMatch = 1800000
 BattleGround.Random.ResetHour = 6
 
-###################################################################################################################
+################################################################################
 # ARENA CONFIG
 #
 #    Arena.MaxRatingDifference
@@ -1565,7 +1571,7 @@ BattleGround.Random.ResetHour = 6
 #        Default Personal Rating at team creation
 #        Default: -1 (use season dependent default value)
 #
-###################################################################################################################
+################################################################################
 
 Arena.MaxRatingDifference = 150
 Arena.RatingDiscardTimer = 600000
@@ -1578,7 +1584,7 @@ Arena.ArenaSeasonPrevious.ID = 0
 Arena.StartRating = -1
 Arena.StartPersonalRating = -1
 
-###################################################################################################################
+################################################################################
 # OUTDOOR PVP CONFIG
 #
 #    OutdoorPvp.SIEnabled               #Enable Silithus Outdoor pvp
@@ -1591,7 +1597,7 @@ Arena.StartPersonalRating = -1
 #        Default: 1 (enable)
 #                 0 (disable)
 #
-###################################################################################################################
+################################################################################
 
 OutdoorPvp.SIEnabled = 1
 OutdoorPvp.EPEnabled = 1
@@ -1601,7 +1607,7 @@ OutdoorPvp.TFEnabled = 1
 OutdoorPvp.NAEnabled = 1
 OutdoorPvp.GHEnabled = 1
 
-###################################################################################################################
+################################################################################
 # NETWORK CONFIG
 #
 #    Network.Threads
@@ -1626,15 +1632,15 @@ OutdoorPvp.GHEnabled = 1
 #         Default: 0 - do not kick
 #                  1 - kick
 #
-###################################################################################################################
+################################################################################
 
-Network.Threads = 1
-Network.OutKBuff = -1
-Network.OutUBuff = 65536
-Network.TcpNodelay = 1
+Network.Threads         = 1
+Network.OutKBuff        = -1
+Network.OutUBuff        = 65536
+Network.TcpNodelay      = 1
 Network.KickOnBadPacket = 0
 
-###################################################################################################################
+################################################################################
 # CONSOLE, REMOTE ACCESS AND SOAP
 #
 #    Console.Enable
@@ -1682,21 +1688,22 @@ Network.KickOnBadPacket = 0
 #        SOAP port
 #        Default: 7878
 #
-###################################################################################################################
+################################################################################
 
 Console.Enable = 1
-Ra.Enable = 0
-Ra.IP = 0.0.0.0
-Ra.Port = 3443
-Ra.MinLevel = 3
-Ra.Secure = 1
-Ra.Stricted = 1
 
-SOAP.Enabled = 0
-SOAP.IP = 127.0.0.1
-SOAP.Port = 7878
+Ra.Enable      = 0
+Ra.IP          = 0.0.0.0
+Ra.Port        = 3443
+Ra.MinLevel    = 3
+Ra.Secure      = 1
+Ra.Stricted    = 1
 
-###################################################################################################################
+SOAP.Enabled   = 0
+SOAP.IP        = 127.0.0.1
+SOAP.Port      = 7878
+
+################################################################################
 #    CharDelete.Method
 #        Character deletion behavior
 #        Default: 0  - Completely remove the character from the database
@@ -1717,9 +1724,9 @@ SOAP.Port = 7878
 #        Default: 30
 #                 0  - Don't delete any characters, they stay in the database forever.
 #
-###################################################################################################################
+################################################################################
 
-CharDelete.Method = 0
+CharDelete.Method   = 0
 CharDelete.MinLevel = 0
 CharDelete.KeepDays = 30
 

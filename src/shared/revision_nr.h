@@ -24,5 +24,5 @@
 
 #ifndef MANGOS_H_REVISION_NR
 #define MANGOS_H_REVISION_NR
- #define REVISION_NR "12578"
+ #define REVISION_NR "19000"
 #endif // __REVISION_NR_H__

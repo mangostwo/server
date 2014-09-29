@@ -23,7 +23,7 @@
  */
 
 #include "Config.h"
-#include "ace/Configuration_Import_Export.h"
+#include <ace/Configuration_Import_Export.h>
 
 #include "Policies/Singleton.h"
 
@@ -32,7 +32,7 @@ INSTANTIATE_SINGLETON_1(Config);
 static bool GetValueHelper(ACE_Configuration_Heap* mConf, const char* name, ACE_TString& result)
 {
     if (!mConf)
-        return false;
+        { return false; }
 
     ACE_TString section_name;
     ACE_Configuration_Section_Key section_key;
@@ -43,7 +43,7 @@ static bool GetValueHelper(ACE_Configuration_Heap* mConf, const char* name, ACE_
     {
         mConf->open_section(root_key, section_name.c_str(), 0, section_key);
         if (mConf->get_string_value(section_key, name, result) == 0)
-            return true;
+            { return true; }
         ++i;
     }
 
@@ -76,7 +76,7 @@ bool Config::Reload()
     {
         ACE_Ini_ImpExp config_importer(*mConf);
         if (config_importer.import_config(mFilename.c_str()) == 0)
-            return true;
+            { return true; }
     }
 
     delete mConf;
@@ -94,15 +94,15 @@ bool Config::GetBoolDefault(const char* name, bool def)
 {
     ACE_TString val;
     if (!GetValueHelper(mConf, name, val))
-        return def;
+        { return def; }
 
     const char* str = val.c_str();
     if (strcmp(str, "true") == 0 || strcmp(str, "TRUE") == 0 ||
-            strcmp(str, "yes") == 0 || strcmp(str, "YES") == 0 ||
-            strcmp(str, "1") == 0)
-        return true;
+        strcmp(str, "yes") == 0 || strcmp(str, "YES") == 0 ||
+        strcmp(str, "1") == 0)
+        { return true; }
     else
-        return false;
+        { return false; }
 }
 
 int32 Config::GetIntDefault(const char* name, int32 def)

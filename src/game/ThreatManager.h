@@ -78,7 +78,7 @@ class MANGOS_DLL_SPEC HostileReference : public Reference<Unit, ThreatManager>
 
         // used for temporary setting a threat and reducting it later again.
         // the threat modification is stored
-        void setTempThreat(float pThreat) { iTempThreatModifyer = pThreat - getThreat(); if (iTempThreatModifyer != 0.0f) addThreat(iTempThreatModifyer);  }
+        void setTempThreat(float pThreat) { iTempThreatModifyer = pThreat - getThreat(); if (iTempThreatModifyer != 0.0f) { addThreat(iTempThreatModifyer); }  }
 
         void resetTempThreat()
         {
