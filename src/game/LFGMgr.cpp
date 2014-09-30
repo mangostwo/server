@@ -84,21 +84,20 @@ ItemRewards LFGMgr::GetDungeonItemRewards(uint32 dungeonId, DungeonTypes type)
         // conflicts with the level ranges in the database
         uint32 minLevel = dungeon->minLevel;
         uint32 maxLevel = dungeon->maxLevel;
+        uint32 avgLevel = (minLevel+maxLevel)/2; // otherwise there are issues
         
         DungeonFinderItemsMap const& itemBuffer = sObjectMgr.GetDungeonFinderItemsMap();
         for (DungeonFinderItemsMap::const_iterator it = itemBuffer.begin(); it != itemBuffer.end(); ++it)
         {
             DungeonFinderItems itemCache = it->second;
-            if (itemCache.dungeonType == (uint32)type)
+            if (itemCache.dungeonType == type)
             {
                 // should only be one of this inequality in the map
-                if ((minLevel >= itemCache.minLevel) && (maxLevel <= itemCache.maxLevel))
+                if ((avgLevel >= itemCache.minLevel) && (avgLevel <= itemCache.maxLevel))
                 {
-                    ItemRewards foundReward(itemCache.itemReward, itemCache.itemAmount);
-                    //rewards.itemId = itemCache.itemReward;
-                    //rewards.itemAmount = itemCache.itemAmount;
-                    //return rewards;
-                    return foundReward;
+                    rewards.itemId = itemCache.itemReward;
+                    rewards.itemAmount = itemCache.itemAmount;
+                    return rewards;
                 }
             }
         }

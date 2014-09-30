@@ -139,7 +139,8 @@ void WorldSession::HandleLfgGetPlayerInfo(WorldPacket& recv_data)
         data << uint32(0); // null
         if (!hasDoneToday)
         {
-            if (ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemRewards.itemId))
+            ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemRewards.itemId);
+            if (pProto)
             {
                 data << uint8(1); // 1 item rewarded per dungeon
                 data << uint32(itemRewards.itemId); // entry of item
