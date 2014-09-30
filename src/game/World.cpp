@@ -73,6 +73,7 @@
 #include "CharacterDatabaseCleaner.h"
 #include "CreatureLinkingMgr.h"
 #include "Calendar.h"
+#include "LFGMgr.h"
 #include "LuaEngine.h"
 
 INSTANTIATE_SINGLETON_1(World);
@@ -1153,6 +1154,7 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading Weather Data...");
     sObjectMgr.LoadWeatherZoneChances();
+   
 
     sLog.outString("Loading Quests...");
     sObjectMgr.LoadQuests();                                // must be loaded after DBCs, creature_template, item_template, gameobject tables
@@ -1171,6 +1173,15 @@ void World::SetInitialWorldSettings()
     sGameEventMgr.LoadFromDB();
     sLog.outString(">>> Game Event Data loaded");
     sLog.outString();
+    
+    sLog.outString("Loading Dungeon Finder Requirements...");
+    sObjectMgr.LoadDungeonFinderRequirements();
+    
+    sLog.outString("Loading Dungeon Finder Rewards...");
+    sObjectMgr.LoadDungeonFinderRewards();
+    
+    sLog.outString("Loading Dungeon Finder Items...");
+    sObjectMgr.LoadDungeonFinderItems();
 
     // Load Conditions
     sLog.outString("Loading Conditions...");
@@ -1342,6 +1353,15 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading GM tickets...");
     sTicketMgr.LoadGMTickets();
+    
+    sLog.outString("Loading Dungeon Finder Requirements...");
+    sObjectMgr.LoadDungeonFinderRequirements();
+    
+    sLog.outString("Loading Dungeon Finder Rewards...");
+    sObjectMgr.LoadDungeonFinderRewards();
+    
+    sLog.outString("Loading Dungeon Finder Items...");
+    sObjectMgr.LoadDungeonFinderItems();
 
     ///- Handle outdated emails (delete/return)
     sLog.outString("Returning old mails...");
@@ -1451,7 +1471,7 @@ void World::SetInitialWorldSettings()
     sLog.outString("Deleting expired bans...");
     LoginDatabase.Execute("DELETE FROM ip_banned WHERE unbandate<=UNIX_TIMESTAMP() AND unbandate<>bandate");
 
-    sLog.outString("Calculate next daily quest reset time...");
+    sLog.outString("Calculate next daily quest and dungeon reset time...");
     InitDailyQuestResetTime();
 
     sLog.outString("Calculate next weekly quest reset time...");
@@ -1550,9 +1570,12 @@ void World::Update(uint32 diff)
     ///-Update mass mailer tasks if any
     sMassMailMgr.Update();
 
-    /// Handle daily quests reset time
+    /// Handle daily quests and dungeon reset time
     if (m_gameTime > m_NextDailyQuestReset)
+    {
         ResetDailyQuests();
+        sLFGMgr.ResetDailyRecords();
+    }
 
     /// Handle weekly quests reset time
     if (m_gameTime > m_NextWeeklyQuestReset)
@@ -2228,7 +2251,7 @@ void World::InitRandomBGResetTime()
     // normalize reset time
     m_NextRandomBGReset = m_NextRandomBGReset < curTime ? nextDayResetTime - DAY : nextDayResetTime;
     if (!result)
-        CharacterDatabase.PExecute("INSERT INTO saved_variables (NextRandomBGResetTime) VALUES ('"UI64FMTD"')", uint64(m_NextRandomBGReset));
+        CharacterDatabase.PExecute("INSERT INTO saved_variables (NextRandomBGResetTime) VALUES ('" UI64FMTD "')", uint64(m_NextRandomBGReset));
     else
         delete result;
 }
@@ -2254,7 +2277,7 @@ void World::ResetRandomBG()
             itr->second->GetPlayer()->SetRandomWinner(false);
 
     m_NextRandomBGReset = time_t(m_NextRandomBGReset + DAY);
-    CharacterDatabase.PExecute("UPDATE saved_variables SET NextRandomBGResetTime = '"UI64FMTD"'", uint64(m_NextRandomBGReset));
+    CharacterDatabase.PExecute("UPDATE saved_variables SET NextRandomBGResetTime = '" UI64FMTD "'", uint64(m_NextRandomBGReset));
 }
 
 void World::ResetWeeklyQuests()

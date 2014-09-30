@@ -1188,26 +1188,28 @@ struct ItemSetEntry
     uint32    required_skill_value;                         // 52       m_requiredSkillRank
 };
 
-/*struct LfgDungeonsEntry
+struct LfgDungeonsEntry
 {
-    m_ID
-    m_name_lang
-    m_minLevel
-    m_maxLevel
-    m_target_level
-    m_target_level_min
-    m_target_level_max
-    m_mapID
-    m_difficulty
-    m_flags
-    m_typeID
-    m_faction
-    m_textureFilename
-    m_expansionLevel
-    m_order_index
-    m_group_id
-    m_description_lang
-};*/
+    uint32 ID;                                              // 0    m_ID
+    char*  name[16];                                        // 1-16 m_name_lang
+    uint32 minLevel;                                        // 18    m_minLevel
+    uint32 maxLevel;                                        // 19    m_maxLevel
+    uint32 targetLevel;                                     // 20    m_target_level
+    uint32 targetLevelMin;                                  // 21    m_target_level_min
+    uint32 targetLevelMax;                                  // 22    m_target_level_max
+    int32  mapID;                                           // 23    m_mapID
+    uint32 difficulty;                                      // 24    m_difficulty
+    uint32 flags;                                           // 25    m_flags
+    uint32 typeID;                                          // 26    m_typeID
+    //uint32 faction;                                       // 27    m_faction
+    //char* textureFilename;                                // 28    m_textureFilename
+    uint32 expansionLevel;                                  // 29    m_expansionLevel
+    uint32 orderIndex;                                      // 30    m_order_index
+    uint32 groupID;                                         // 31    m_group_id
+    //char* description[16]; // 32-49 m_Description_lang
+
+    uint32 Entry() const { return ID + ((uint8)typeID << 24); }
+};
 
 /*struct LfgDungeonGroupEntry
 {

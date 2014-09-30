@@ -355,6 +355,51 @@ struct DungeonEncounter
 typedef std::multimap<uint32, DungeonEncounter const*> DungeonEncounterMap;
 typedef std::pair<DungeonEncounterMap::const_iterator, DungeonEncounterMap::const_iterator> DungeonEncounterMapBounds;
 
+struct DungeonFinderRequirements
+{
+    uint32 minItemLevel;
+    uint32 item;
+    uint32 item2;
+    uint32 allianceQuestId;
+    uint32 hordeQuestId;
+    uint32 achievement;
+    const char* questIncompleteText;
+    
+    DungeonFinderRequirements()
+        : minItemLevel(0), item(0), item2(0), allianceQuestId(0), hordeQuestId(0), achievement(0) {}
+    DungeonFinderRequirements(uint32 MinItemLevel, uint32 Item, uint32 Item2, uint32 AllianceQuestId,
+                              uint32 HordeQuestId, uint32 Achievement, const char* QuestIncompleteText)
+        : minItemLevel(MinItemLevel), item(Item), item2(Item2), allianceQuestId(AllianceQuestId),
+        hordeQuestId(HordeQuestId), achievement(Achievement), questIncompleteText(QuestIncompleteText) {}
+};
+
+struct DungeonFinderRewards
+{
+    uint32 baseXPReward;
+    int32  baseMonetaryReward;
+    
+    DungeonFinderRewards() : baseXPReward(0), baseMonetaryReward(0) {}
+    DungeonFinderRewards(uint32 BaseXPReward, int32 BaseMonetaryReward) : baseXPReward(BaseXPReward), baseMonetaryReward(BaseMonetaryReward) {}
+};
+
+struct DungeonFinderItems
+{
+    // sorted by auto-incrementing id
+    uint32 minLevel;
+    uint32 maxLevel;
+    uint32 itemReward;
+    uint32 itemAmount;
+    uint32 dungeonType;
+
+    DungeonFinderItems() : minLevel(0), maxLevel(0), itemReward(0), itemAmount(0), dungeonType(0) {}
+    DungeonFinderItems(uint32 MinLevel, uint32 MaxLevel, uint32 ItemReward, uint32 ItemAmount, uint32 DungeonType)
+        : minLevel(MinLevel), maxLevel(MaxLevel), itemReward(ItemReward), itemAmount(ItemAmount), dungeonType(DungeonType) {}
+};
+
+typedef UNORDERED_MAP<uint32, DungeonFinderRequirements> DungeonFinderRequirementsMap;
+typedef UNORDERED_MAP<uint32, DungeonFinderRewards> DungeonFinderRewardsMap;
+typedef UNORDERED_MAP<uint32, DungeonFinderItems> DungeonFinderItemsMap;
+
 struct GraveYardData
 {
     uint32 safeLocId;
@@ -667,6 +712,26 @@ class ObjectMgr
                 return &itr->second;
             return NULL;
         }
+        
+        DungeonFinderRequirements const* GetDungeonFinderRequirements(uint32 mapId, uint32 difficulty) const
+        {
+            DungeonFinderRequirementsMap::const_iterator itr = mDungeonFinderRequirementsMap.find(MAKE_PAIR32(mapId, difficulty));
+            if (itr != mDungeonFinderRequirementsMap.end())
+                return &itr->second;
+            return NULL;
+        }
+        
+        DungeonFinderRewards const* GetDungeonFinderRewards(uint32 level) const
+        {
+            DungeonFinderRewardsMap::const_iterator itr = mDungeonFinderRewardsMap.find(level);
+            if (itr != mDungeonFinderRewardsMap.end())
+                return &itr->second;
+            return NULL;
+        }
+        
+        DungeonFinderRequirementsMap const& GetDungeonFinderRequirementsMap() const { return mDungeonFinderRequirementsMap; }
+        DungeonFinderRewardsMap const& GetDungeonFinderRewardsMap() const { return mDungeonFinderRewardsMap; }
+        DungeonFinderItemsMap const& GetDungeonFinderItemsMap() const { return mDungeonFinderItemsMap; }
 
         // Static wrappers for various accessors
         static GameObjectInfo const* GetGameObjectInfo(uint32 id);                  ///< Wrapper for sGOStorage.LookupEntry
@@ -749,6 +814,10 @@ class ObjectMgr
 
         void LoadPointsOfInterest();
         void LoadQuestPOI();
+        
+        void LoadDungeonFinderRequirements();
+        void LoadDungeonFinderRewards();
+        void LoadDungeonFinderItems();
 
         void LoadNPCSpellClickSpells();
         void LoadSpellTemplate();
@@ -1200,6 +1269,10 @@ class ObjectMgr
         PointOfInterestMap  mPointsOfInterest;
 
         QuestPOIMap         mQuestPOIMap;
+        
+        DungeonFinderRequirementsMap mDungeonFinderRequirementsMap;
+        DungeonFinderRewardsMap mDungeonFinderRewardsMap;
+        DungeonFinderItemsMap mDungeonFinderItemsMap;
 
         WeatherZoneMap      mWeatherZoneMap;
 

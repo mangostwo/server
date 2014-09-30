@@ -18,6 +18,7 @@
 
 # CMake policies
 cmake_minimum_required(VERSION 2.8)
+
 # Until CMake 3.0 is the standard
 # And a solution to set_directory_properties is found.
 if(POLICY CMP0043)

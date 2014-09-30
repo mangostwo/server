@@ -734,7 +734,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     pCurrChar->SendInitialPacketsBeforeAddToMap();
 
-    // Show cinematic at the first time that player login
+    // Show cinematic at the first time that player login (TODO: activate world grids first, then cinematic)
+    // move this code past the "SendInitialPacketsAfterAddToMap();" line?
     if (!pCurrChar->getCinematic())
     {
         pCurrChar->setCinematic(1);
