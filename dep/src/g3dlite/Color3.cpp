@@ -247,7 +247,7 @@ Color3 Color3::random() {
 //----------------------------------------------------------------------------
 Color3& Color3::operator/= (float fScalar) {
     if (fScalar != 0.0f) {
-		float fInvScalar = 1.0f / fScalar;
+        float fInvScalar = 1.0f / fScalar;
         r *= fInvScalar;
         g *= fInvScalar;
         b *= fInvScalar;
@@ -262,10 +262,10 @@ Color3& Color3::operator/= (float fScalar) {
 
 //----------------------------------------------------------------------------
 float Color3::unitize (float fTolerance) {
-	float fLength = length();
+    float fLength = length();
 
     if ( fLength > fTolerance ) {
-		float fInvLength = 1.0f / fLength;
+        float fInvLength = 1.0f / fLength;
         r *= fInvLength;
         g *= fInvLength;
         b *= fInvLength;
@@ -313,56 +313,56 @@ Color3 Color3::fromHSV(const Vector3& _hsv) {
 
 
 Vector3 Color3::toHSV(const Color3& _rgb) {
-	debugAssertM((_rgb.r <= 1.0f && _rgb.r >= 0.0f) 
-			&& (_rgb.g <= 1.0f && _rgb.g >= 0.0f)
-			&& (_rgb.b <= 1.0f && _rgb.b >= 0.0f), "R,G,B must be between [0,1]");
-	Vector3 hsv = Vector3::zero();
-	hsv.z = G3D::max(G3D::max(_rgb.r, _rgb.g), _rgb.b);
-	if (G3D::fuzzyEq(hsv.z, 0.0f)) {
-		return hsv;
-	}
-	
+    debugAssertM((_rgb.r <= 1.0f && _rgb.r >= 0.0f) 
+            && (_rgb.g <= 1.0f && _rgb.g >= 0.0f)
+            && (_rgb.b <= 1.0f && _rgb.b >= 0.0f), "R,G,B must be between [0,1]");
+    Vector3 hsv = Vector3::zero();
+    hsv.z = G3D::max(G3D::max(_rgb.r, _rgb.g), _rgb.b);
+    if (G3D::fuzzyEq(hsv.z, 0.0f)) {
+        return hsv;
+    }
+    
     const float x =  G3D::min(G3D::min(_rgb.r, _rgb.g), _rgb.b);
-	hsv.y = (hsv.z - x) / hsv.z; 
+    hsv.y = (hsv.z - x) / hsv.z; 
 
     if (G3D::fuzzyEq(hsv.y, 0.0f)) {
-		return hsv;
-	}
+        return hsv;
+    }
 
-	Vector3 rgbN;
-	rgbN.x = (hsv.z - _rgb.r) / (hsv.z - x);
-	rgbN.y = (hsv.z - _rgb.g) / (hsv.z - x);
-	rgbN.z = (hsv.z - _rgb.b) / (hsv.z - x);
+    Vector3 rgbN;
+    rgbN.x = (hsv.z - _rgb.r) / (hsv.z - x);
+    rgbN.y = (hsv.z - _rgb.g) / (hsv.z - x);
+    rgbN.z = (hsv.z - _rgb.b) / (hsv.z - x);
 
-	if (_rgb.r == hsv.z) {  // note from the max we know that it exactly equals one of the three.
-		hsv.x = (_rgb.g == x)? 5.0f + rgbN.z : 1.0f - rgbN.y;
-	} else if (_rgb.g == hsv.z) {
-		hsv.x = (_rgb.b == x)? 1.0f + rgbN.x : 3.0f - rgbN.z;
-	} else {
-		hsv.x = (_rgb.r == x)? 3.0f + rgbN.y : 5.0f - rgbN.x;
-	}
-	
+    if (_rgb.r == hsv.z) {  // note from the max we know that it exactly equals one of the three.
+        hsv.x = (_rgb.g == x)? 5.0f + rgbN.z : 1.0f - rgbN.y;
+    } else if (_rgb.g == hsv.z) {
+        hsv.x = (_rgb.b == x)? 1.0f + rgbN.x : 3.0f - rgbN.z;
+    } else {
+        hsv.x = (_rgb.r == x)? 3.0f + rgbN.y : 5.0f - rgbN.x;
+    }
+    
     hsv.x /= 6.0f;
 
-	return hsv;
+    return hsv;
 }
 
 Color3 Color3::jetColorMap(const float& val) {
-	debugAssertM(val <= 1.0f && val >= 0.0f , "value should be in [0,1]");
+    debugAssertM(val <= 1.0f && val >= 0.0f , "value should be in [0,1]");
 
-	//truncated triangles where sides have slope 4
-	Color3 jet;
+    //truncated triangles where sides have slope 4
+    Color3 jet;
 
-	jet.r = G3D::min(4.0f * val - 1.5f,-4.0f * val + 4.5f) ;
-	jet.g = G3D::min(4.0f * val - 0.5f,-4.0f * val + 3.5f) ;
-	jet.b = G3D::min(4.0f * val + 0.5f,-4.0f * val + 2.5f) ;
+    jet.r = G3D::min(4.0f * val - 1.5f,-4.0f * val + 4.5f) ;
+    jet.g = G3D::min(4.0f * val - 0.5f,-4.0f * val + 3.5f) ;
+    jet.b = G3D::min(4.0f * val + 0.5f,-4.0f * val + 2.5f) ;
 
 
-	jet.r = G3D::clamp(jet.r, 0.0f, 1.0f);
-	jet.g = G3D::clamp(jet.g, 0.0f, 1.0f);
-	jet.b = G3D::clamp(jet.b, 0.0f, 1.0f);
+    jet.r = G3D::clamp(jet.r, 0.0f, 1.0f);
+    jet.g = G3D::clamp(jet.g, 0.0f, 1.0f);
+    jet.b = G3D::clamp(jet.b, 0.0f, 1.0f);
 
-	return jet;
+    return jet;
 }
 
 

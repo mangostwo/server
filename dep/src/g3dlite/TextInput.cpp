@@ -656,7 +656,7 @@ numLabel:
             }
 
         } else {
-			// Non-hex number
+            // Non-hex number
 
             // Read the part before the decimal.
             while (isDigit(c)) {

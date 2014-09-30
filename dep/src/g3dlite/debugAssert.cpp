@@ -106,9 +106,9 @@ static void createErrorMessage(
             realLastErr = _T("Last error code does not exist.");
         }
 
-		if (lastErr != 0) {
-	        le = G3D::format("Last Error (0x%08X): %s\r\n\r\n", lastErr, (LPCSTR)realLastErr);
-		}
+        if (lastErr != 0) {
+            le = G3D::format("Last Error (0x%08X): %s\r\n\r\n", lastErr, (LPCSTR)realLastErr);
+        }
 
         // Get rid of the allocated memory from FormatMessage.
         if (NULL != formatMsg) {
@@ -307,7 +307,7 @@ void setAssertionHook(AssertionHook hook) {
 }
 
 AssertionHook assertionHook() {
-    return 	G3D::_internal::_debugHook;
+    return     G3D::_internal::_debugHook;
 }
 
 void setFailureHook(AssertionHook hook) {

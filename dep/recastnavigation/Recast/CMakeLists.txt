@@ -38,4 +38,3 @@ include_directories(
 #-----------------------------------------------------------------------------
 # Build the Recast library
 add_library(recast STATIC ${Recast_LIB_SRCS})
- 

@@ -62,7 +62,15 @@
 #define TRUE 1
 #endif
 
-#include "pack_begin.h"
+#ifdef _MSC_VER
+#pragma pack(push,1)
+#define PACK_STRUCT
+#else
+//#error "pack_begin.h may not be included twice!"
+/* we assume GNU here */
+#define PACK_STRUCT __attribute__((packed))
+#endif
+
 /* mpq archive header. */
 typedef struct
 {
@@ -124,7 +132,16 @@ typedef struct
     uint32_t    block_table_indices;                    /* real mapping for file number to block entry. */
     uint32_t    block_table_diff;                       /* block table difference between valid blocks and invalid blocks before. */
 } PACK_STRUCT mpq_map_s;
-#include "pack_end.h"
+
+#ifdef _PACK_BEGIN
+#undef _PACK_BEGIN
+#endif
+
+#ifdef _MSC_VER
+#pragma pack(pop)
+#endif
+
+#undef PACK_STRUCT
 
 /* archive structure used since diablo 1.00 by blizzard. */
 struct mpq_archive

@@ -95,7 +95,7 @@ public:\
     /** Support cast back to the Value type, which is needed to allow implicit assignment inside unions. */\
     /*inline operator Value() const {
         return value;
-	}*/\
+    }*/\
 \
     operator int() const {\
         return (int)value;\

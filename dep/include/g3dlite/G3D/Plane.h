@@ -26,8 +26,8 @@ class Plane {
 private:
 
     /** normal.Dot(x,y,z) = distance */
-    Vector3						_normal;
-    float						_distance;
+    Vector3                        _normal;
+    float                        _distance;
 
     /**
      Assumes the normal has unit length.
@@ -66,9 +66,9 @@ public:
 
     static Plane fromEquation(float a, float b, float c, float d);
 
-	Plane(class BinaryInput& b);
-	void serialize(class BinaryOutput& b) const;
-	void deserialize(class BinaryInput& b);
+    Plane(class BinaryInput& b);
+    void serialize(class BinaryOutput& b) const;
+    void deserialize(class BinaryInput& b);
 
     virtual ~Plane() {}
 
@@ -113,9 +113,9 @@ public:
         return fuzzyEq(point.dot(_normal), _distance);
     }
 
-	inline const Vector3& normal() const {
-		return _normal;
-	}
+    inline const Vector3& normal() const {
+        return _normal;
+    }
 
     /**
       Returns distance from point to plane. Distance is negative if point is behind (not in plane in direction opposite normal) the plane.

@@ -346,7 +346,7 @@ public:
         FIND_ENDS;
         
         int i;
-    	for (i = 0; i < secondEnd; ++i) {
+        for (i = 0; i < secondEnd; ++i) {
             delete data[i];
         }
 

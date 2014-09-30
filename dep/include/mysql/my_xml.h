@@ -1,4 +1,5 @@
-/* Copyright (C) 2000 MySQL AB
+/* Copyright (c) 2000, 2002, 2003, 2005, 2007 MySQL AB
+   Use is subject to license terms
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -11,19 +12,19 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA  */
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA  */
 
 
 #ifndef _my_xml_h
 #define _my_xml_h
 
-#ifdef	__cplusplus
+#ifdef    __cplusplus
 extern "C" {
 #endif
 
 
-#define MY_XML_OK	0
-#define MY_XML_ERROR	1
+#define MY_XML_OK    0
+#define MY_XML_ERROR    1
 
 /* 
   A flag whether to use absolute tag names in call-back functions,
@@ -67,14 +68,14 @@ void my_xml_parser_free(MY_XML_PARSER *st);
 int  my_xml_parse(MY_XML_PARSER *st,const char *str, size_t len);
 
 void my_xml_set_value_handler(MY_XML_PARSER *st, int (*)(MY_XML_PARSER *,
-							 const char *,
-							 size_t len));
+                             const char *,
+                             size_t len));
 void my_xml_set_enter_handler(MY_XML_PARSER *st, int (*)(MY_XML_PARSER *,
-							 const char *,
-							 size_t len));
+                             const char *,
+                             size_t len));
 void my_xml_set_leave_handler(MY_XML_PARSER *st, int (*)(MY_XML_PARSER *,
-							 const char *,
-							 size_t len));
+                             const char *,
+                             size_t len));
 void my_xml_set_user_data(MY_XML_PARSER *st, void *);
 
 size_t my_xml_error_pos(MY_XML_PARSER *st);
@@ -82,7 +83,7 @@ uint my_xml_error_lineno(MY_XML_PARSER *st);
 
 const char *my_xml_error_string(MY_XML_PARSER *st);
 
-#ifdef	__cplusplus
+#ifdef    __cplusplus
 }
 #endif
 

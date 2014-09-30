@@ -1,4 +1,7 @@
-/* Copyright (C) 2000 MySQL AB
+#ifndef SSLOPT_VARS_INCLUDED
+#define SSLOPT_VARS_INCLUDED
+
+/* Copyright (c) 2000, 2010, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -11,9 +14,9 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA */
 
-#ifdef HAVE_OPENSSL
+#if defined(HAVE_OPENSSL) && !defined(EMBEDDED_LIBRARY)
 #ifdef SSL_VARS_NOT_STATIC
 #define SSL_STATIC
 #else
@@ -29,3 +32,4 @@ SSL_STATIC char *opt_ssl_key    = 0;
 SSL_STATIC my_bool opt_ssl_verify_server_cert= 0;
 #endif
 #endif
+#endif /* SSLOPT_VARS_INCLUDED */

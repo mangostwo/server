@@ -83,7 +83,7 @@ template <> struct HashTrait<G3D::uint128> {
             hash ^= (mask & key);
             key >>= 8;
         }
-	
+    
         G3D::uint64 foldedHash = hash.hi ^ hash.lo;
         return static_cast<size_t>((foldedHash >> 32) ^ (foldedHash & 0xFFFFFFFF));
     }

@@ -53,7 +53,7 @@ void GImage::encodeBMP(
     out.writeUInt16(0);
     out.writeUInt16(0);
 
-	// The offset, in bytes, from the BITMAPFILEHEADER structure
+    // The offset, in bytes, from the BITMAPFILEHEADER structure
     // to the bitmap bits.
     out.writeUInt32(infoHeaderSize + fileHeaderSize);
 
@@ -75,7 +75,7 @@ void GImage::encodeBMP(
     out.writeUInt32(infoHeaderSize);
  
     // Width and height of the image
-	out.writeUInt32(m_width);
+    out.writeUInt32(m_width);
     out.writeUInt32(m_height);
 
     // Planes ("must be set to 1")
@@ -169,14 +169,14 @@ void GImage::decodeBMP(
     }
 
     m_channels = 3;
-	// Skip to the BITMAPINFOHEADER's width and height
-	input.skip(16);
+    // Skip to the BITMAPINFOHEADER's width and height
+    input.skip(16);
 
     m_width  = input.readUInt32();
     m_height = input.readUInt32();
 
-	// Skip to the bit count and compression type
-	input.skip(2);
+    // Skip to the bit count and compression type
+    input.skip(2);
 
     uint16 bitCount        = input.readUInt16();
     uint32 compressionType = input.readUInt32();
@@ -186,14 +186,14 @@ void GImage::decodeBMP(
     uint8 blue;
     uint8 blank;
 
-	// Only uncompressed bitmaps are supported by this code
+    // Only uncompressed bitmaps are supported by this code
     if ((int32)compressionType != BI_RGB) {
         throw Error("BMP images must be uncompressed", input.getFilename());
     }
 
     uint8* palette = NULL;
 
-	// Create the palette if needed
+    // Create the palette if needed
     if (bitCount <= 8) {
 
         // Skip to the palette color count in the header
@@ -220,7 +220,7 @@ void GImage::decodeBMP(
             palette[c + 1] = green;
             palette[c + 2] = blue;
         }
-	}
+    }
 
     int hStart = 0;
     int hEnd   = 0;
@@ -294,7 +294,7 @@ void GImage::decodeBMP(
             }
         }
 
-	} else if (bitCount == 4) {
+    } else if (bitCount == 4) {
 
         flags = PICTURE_BITMAP | PICTURE_UNCOMPRESSED | PICTURE_4BIT;
 
@@ -338,7 +338,7 @@ void GImage::decodeBMP(
             }
         }
 
-	} else if (bitCount == 8) {
+    } else if (bitCount == 8) {
         
         flags = PICTURE_BITMAP | PICTURE_UNCOMPRESSED | PICTURE_8BIT;
 
@@ -375,9 +375,9 @@ void GImage::decodeBMP(
         m_byte = NULL;
         System::free(palette); 
         palette = NULL;
-    	throw Error("16-bit bitmaps not supported", input.getFilename());
+        throw Error("16-bit bitmaps not supported", input.getFilename());
 
-	} else if (bitCount == 24) {
+    } else if (bitCount == 24) {
         input.skip(20);
 
         flags = PICTURE_BITMAP | PICTURE_UNCOMPRESSED | PICTURE_24BIT;
@@ -411,13 +411,13 @@ void GImage::decodeBMP(
             }
         }
 
-	} else if (bitCount == 32) {
+    } else if (bitCount == 32) {
 
         m_memMan->free(m_byte);
         m_byte = NULL;
         System::free(palette); 
         palette = NULL;
-    	throw Error("32 bit bitmaps not supported", input.getFilename());
+        throw Error("32 bit bitmaps not supported", input.getFilename());
     
     } else {
         // We support all possible bit depths, so if the
@@ -425,7 +425,7 @@ void GImage::decodeBMP(
         m_memMan->free(m_byte);
         m_byte = NULL;
         throw Error("Not a bitmap!", input.getFilename());
-	}
+    }
 
     System::free(palette); 
     palette = NULL;
@@ -435,19 +435,19 @@ void GImage::decodeBMP(
 void GImage::decodeICO(
     BinaryInput&            input) {
 
-	// Header
-	uint16 r = input.readUInt16();
-	debugAssert(r == 0);
-	r = input.readUInt16();
-	debugAssert(r == 1);
+    // Header
+    uint16 r = input.readUInt16();
+    debugAssert(r == 0);
+    r = input.readUInt16();
+    debugAssert(r == 1);
 
-	// Read the number of icons, although we'll only load the
-	// first one.
-	int count = input.readUInt16();
+    // Read the number of icons, although we'll only load the
+    // first one.
+    int count = input.readUInt16();
 
-	m_channels = 4;
+    m_channels = 4;
 
-	debugAssert(count > 0);
+    debugAssert(count > 0);
 
     const uint8* headerBuffer = input.getCArray() + input.getPosition();
     int maxWidth = 0, maxHeight = 0;
@@ -470,7 +470,7 @@ void GImage::decodeICO(
     m_width = input.readUInt8();
     m_height = input.readUInt8();
     int numColors = input.readUInt8();
-	
+    
     m_byte = (uint8*)m_memMan->alloc(m_width * m_height * m_channels);
     debugAssert(m_byte);
 
@@ -497,7 +497,7 @@ void GImage::decodeICO(
         break;
 
     default:
-    	throw Error("Unsupported ICO color count.", input.getFilename());
+        throw Error("Unsupported ICO color count.", input.getFilename());
     }
 
     input.skip(5);
@@ -521,35 +521,35 @@ void GImage::decodeICO(
         palette[c].a = input.readUInt8();
     }
 
-	// The actual image and mask follow
+    // The actual image and mask follow
 
-	// The XOR Bitmap is stored as 1-bit, 4-bit or 8-bit uncompressed Bitmap 
-	// using the same encoding as BMP files. The AND Bitmap is stored in as 
-	// 1-bit uncompressed Bitmap.
-	// 
-	// Pixels are stored bottom-up, left-to-right. Pixel lines are padded 
-	// with zeros to end on a 32bit (4byte) boundary. Every line will have the 
-	// same number of bytes. Color indices are zero based, meaning a pixel color 
-	// of 0 represents the first color table entry, a pixel color of 255 (if there
-	// are that many) represents the 256th entry.
+    // The XOR Bitmap is stored as 1-bit, 4-bit or 8-bit uncompressed Bitmap 
+    // using the same encoding as BMP files. The AND Bitmap is stored in as 
+    // 1-bit uncompressed Bitmap.
+    // 
+    // Pixels are stored bottom-up, left-to-right. Pixel lines are padded 
+    // with zeros to end on a 32bit (4byte) boundary. Every line will have the 
+    // same number of bytes. Color indices are zero based, meaning a pixel color 
+    // of 0 represents the first color table entry, a pixel color of 255 (if there
+    // are that many) represents the 256th entry.
 /*
-	int bitsPerRow  = width * bitsPerPixel;
-	int bytesPerRow = iCeil((double)bitsPerRow / 8);
-	// Rows are padded to 32-bit boundaries
-	bytesPerRow += bytesPerRow % 4;
+    int bitsPerRow  = width * bitsPerPixel;
+    int bytesPerRow = iCeil((double)bitsPerRow / 8);
+    // Rows are padded to 32-bit boundaries
+    bytesPerRow += bytesPerRow % 4;
 
-	// Read the XOR values into the color channel
-	for (int y = height - 1; y >= 0; --y) {
-		int x = 0;
-		// Read the row
-		for (int i = 0; i < bytesPerRow; ++i) {
-			uint8 byte = input.readUInt8();
-			for (int j = 0; (j < 8) && (x < width); ++x, j += bitsPerPixel) {
-				int bit = ((byte << j) >> (8 - bitsPerPixel)) & mask;
-				pixel4(x, y) = colorTable[bit];
-			}
-		}
-	}
+    // Read the XOR values into the color channel
+    for (int y = height - 1; y >= 0; --y) {
+        int x = 0;
+        // Read the row
+        for (int i = 0; i < bytesPerRow; ++i) {
+            uint8 byte = input.readUInt8();
+            for (int j = 0; (j < 8) && (x < width); ++x, j += bitsPerPixel) {
+                int bit = ((byte << j) >> (8 - bitsPerPixel)) & mask;
+                pixel4(x, y) = colorTable[bit];
+            }
+        }
+    }
 */
     int hStart = 0;
     int hEnd   = 0;
@@ -617,7 +617,7 @@ void GImage::decodeICO(
             }
         }
 
-	} else if (bitsPerPixel == 4) {
+    } else if (bitsPerPixel == 4) {
 
         // For bitmaps, each scanline is dword-aligned.
         int BMScanWidth = (m_width + 1) >> 1;
@@ -659,7 +659,7 @@ void GImage::decodeICO(
             }
         }
 
-	} else if (bitsPerPixel == 8) {
+    } else if (bitsPerPixel == 8) {
         
         // For bitmaps, each scanline is dword-aligned.
         BMScanWidth = m_width;
@@ -689,9 +689,9 @@ void GImage::decodeICO(
         }
     }
 
-	// Read the mask into the alpha channel
-	int bitsPerRow  = m_width;
-	int bytesPerRow = iCeil((double)bitsPerRow / 8);
+    // Read the mask into the alpha channel
+    int bitsPerRow  = m_width;
+    int bytesPerRow = iCeil((double)bitsPerRow / 8);
 
     // For bitmaps, each scanline is dword-aligned.
     //BMScanWidth = (width + 1) >> 1;
@@ -700,16 +700,16 @@ void GImage::decodeICO(
     }
     
     for (int y = m_height - 1; y >= 0; --y) {
-		int x = 0;
-		// Read the row
-		for (int i = 0; i < bytesPerRow; ++i) {
-			uint8 byte = input.readUInt8();
-			for (int j = 0; (j < 8) && (x < m_width); ++x, ++j) {
-				int bit = (byte >> (7 - j)) & 0x01;
-				pixel4(x, y).a = (1 - bit) * 0xFF;
-			}
-		}
-	}
+        int x = 0;
+        // Read the row
+        for (int i = 0; i < bytesPerRow; ++i) {
+            uint8 byte = input.readUInt8();
+            for (int j = 0; (j < 8) && (x < m_width); ++x, ++j) {
+                int bit = (byte >> (7 - j)) & 0x01;
+                pixel4(x, y).a = (1 - bit) * 0xFF;
+            }
+        }
+    }
 
 }
 

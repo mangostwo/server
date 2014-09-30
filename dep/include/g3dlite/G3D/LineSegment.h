@@ -33,11 +33,11 @@ public:
 
     inline LineSegment() : _point(Vector3::zero()), direction(Vector3::zero()) {}
 
-	LineSegment(class BinaryInput& b);
+    LineSegment(class BinaryInput& b);
 
-	void serialize(class BinaryOutput& b) const;
+    void serialize(class BinaryOutput& b) const;
 
-	void deserialize(class BinaryInput& b);
+    void deserialize(class BinaryInput& b);
 
     virtual ~LineSegment() {}
 
@@ -48,7 +48,7 @@ public:
         return LineSegment(point1, point2 - point1);
     }
 
-	/** Call with 0 or 1 */
+    /** Call with 0 or 1 */
     Vector3 point(int i) const;
 
     inline float length() const {

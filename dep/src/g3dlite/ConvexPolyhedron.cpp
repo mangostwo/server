@@ -210,7 +210,7 @@ void ConvexPolygon::removeDuplicateVertices(){
                 --i; // Don't move forward.
             }
         }
-	
+    
         // Check the last vertex against the first.
         if (_vertex[_vertex.size()-1].fuzzyEq(_vertex[0])){
             _vertex.pop();

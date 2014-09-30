@@ -140,9 +140,9 @@ bool AABox::intersects(const AABox& other) const {
 int AABox::dummy = 0;
 
 bool AABox::culledBy(
-    const Array<Plane>&	plane,
-    int&		cullingPlane,
-    const uint32	_inMask,
+    const Array<Plane>&    plane,
+    int&        cullingPlane,
+    const uint32    _inMask,
     uint32&             childMask) const {
 
     uint32 inMask = _inMask;
@@ -159,13 +159,13 @@ bool AABox::culledBy(
         (abs(hi.z) < G3D::finf());
 
     // See if there is one plane for which all of the
-	// vertices are in the negative half space.
+    // vertices are in the negative half space.
     for (int p = 0; p < plane.size(); ++p) {
 
-		// Only test planes that are not masked
-		if ((inMask & 1) != 0) {
-		
-			Vector3 corner;
+        // Only test planes that are not masked
+        if ((inMask & 1) != 0) {
+        
+            Vector3 corner;
 
             int numContained = 0;
             int v = 0;
@@ -173,12 +173,12 @@ bool AABox::culledBy(
             // We can early-out only if we have found one point on each
             // side of the plane (i.e. if we are straddling).  That
             // occurs when (numContained < v) && (numContained > 0)
-			for (v = 0; (v < 8) && ((numContained == v) || (numContained == 0)); ++v) {
+            for (v = 0; (v < 8) && ((numContained == v) || (numContained == 0)); ++v) {
                 // Unrolling these 3 if's into a switch decreases performance
                 // by about 2x
-				corner.x = (v & 1) ? hi.x : lo.x;
-				corner.y = (v & 2) ? hi.y : lo.y;
-				corner.z = (v & 4) ? hi.z : lo.z;
+                corner.x = (v & 1) ? hi.x : lo.x;
+                corner.y = (v & 2) ? hi.y : lo.y;
+                corner.z = (v & 4) ? hi.z : lo.z;
         
                 if (finite) { // this branch is highly predictable
                     if (plane[p].halfSpaceContainsFinite(corner)) {
@@ -189,43 +189,43 @@ bool AABox::culledBy(
                         ++numContained;
                     }
                 }
-			}
+            }
 
-			if (numContained == 0) {
-				// Plane p culled the box
-				cullingPlane = p;
+            if (numContained == 0) {
+                // Plane p culled the box
+                cullingPlane = p;
 
                 // The caller should not recurse into the children,
                 // since the parent is culled.  If they do recurse,
                 // make them only test against this one plane, which
                 // will immediately cull the volume.
                 childMask = 1 << p;
-				return true;
+                return true;
 
             } else if (numContained < v) {
                 // The bounding volume straddled the plane; we have
                 // to keep testing against this plane
                 childMask |= (1 << p);
             }
-		}
+        }
 
         // Move on to the next bit.
-		inMask = inMask >> 1;
+        inMask = inMask >> 1;
     }
 
     // None of the planes could cull this box
-	cullingPlane = -1;
+    cullingPlane = -1;
     return false;
 }
 
 
 bool AABox::culledBy(
     const Array<Plane>& plane,
-	int&				cullingPlane,
-	const uint32		_inMask) const {
+    int&                cullingPlane,
+    const uint32        _inMask) const {
 
-	uint32 inMask = _inMask;
-	assert(plane.size() < 31);
+    uint32 inMask = _inMask;
+    assert(plane.size() < 31);
     
     const bool finite = 
         (abs(lo.x) < G3D::finf()) &&
@@ -236,49 +236,49 @@ bool AABox::culledBy(
         (abs(hi.z) < G3D::finf());
 
     // See if there is one plane for which all of the
-	// vertices are in the negative half space.
+    // vertices are in the negative half space.
     for (int p = 0; p < plane.size(); ++p) {
 
-		// Only test planes that are not masked
-		if ((inMask & 1) != 0) {
-		
-			bool culled = true;
-			Vector3 corner;
+        // Only test planes that are not masked
+        if ((inMask & 1) != 0) {
+        
+            bool culled = true;
+            Vector3 corner;
 
             int v;
 
-			// Assume this plane culls all points.  See if there is a point
-			// not culled by the plane... early out when at least one point
+            // Assume this plane culls all points.  See if there is a point
+            // not culled by the plane... early out when at least one point
             // is in the positive half space.
-			for (v = 0; (v < 8) && culled; ++v) {
+            for (v = 0; (v < 8) && culled; ++v) {
 
                 // Unrolling these 3 if's into a switch decreases performance
                 // by about 2x
-				corner.x = (v & 1) ? hi.x : lo.x;
-				corner.y = (v & 2) ? hi.y : lo.y;
-				corner.z = (v & 4) ? hi.z : lo.z;
+                corner.x = (v & 1) ? hi.x : lo.x;
+                corner.y = (v & 2) ? hi.y : lo.y;
+                corner.z = (v & 4) ? hi.z : lo.z;
         
                 if (finite) { // this branch is highly predictable
                     culled = ! plane[p].halfSpaceContainsFinite(corner);
                 } else {
                     culled = ! plane[p].halfSpaceContains(corner);
                 }
-			}
-
-			if (culled) {
-				// Plane p culled the box
-				cullingPlane = p;
-
-				return true;
             }
-		}
+
+            if (culled) {
+                // Plane p culled the box
+                cullingPlane = p;
+
+                return true;
+            }
+        }
 
         // Move on to the next bit.
-		inMask = inMask >> 1;
+        inMask = inMask >> 1;
     }
 
     // None of the planes could cull this box
-	cullingPlane = -1;
+    cullingPlane = -1;
     return false;
 }
 

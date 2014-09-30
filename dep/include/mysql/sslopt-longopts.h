@@ -1,4 +1,7 @@
-/* Copyright (C) 2000 MySQL AB
+#ifndef SSLOPT_LONGOPTS_INCLUDED
+#define SSLOPT_LONGOPTS_INCLUDED
+
+/* Copyright (c) 2000, 2010, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -11,14 +14,13 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA */
 
-#ifdef HAVE_OPENSSL
+#if defined(HAVE_OPENSSL) && !defined(EMBEDDED_LIBRARY)
 
   {"ssl", OPT_SSL_SSL,
-   "Enable SSL for connection (automatically enabled with other flags)."
-   "Disable with --skip-ssl.", &opt_use_ssl, &opt_use_ssl, 0, GET_BOOL,
-   NO_ARG, 0, 0, 0, 0, 0, 0},
+   "Enable SSL for connection (automatically enabled with other flags).",
+   &opt_use_ssl, &opt_use_ssl, 0, GET_BOOL, OPT_ARG, 0, 0, 0, 0, 0, 0},
   {"ssl-ca", OPT_SSL_CA,
    "CA file in PEM format (check OpenSSL docs, implies --ssl).",
    &opt_ssl_ca, &opt_ssl_ca, 0, GET_STR, REQUIRED_ARG,
@@ -41,6 +43,7 @@
    "Verify server's \"Common Name\" in its cert against hostname used "
    "when connecting. This option is disabled by default.",
    &opt_ssl_verify_server_cert, &opt_ssl_verify_server_cert,
-    0, GET_BOOL, NO_ARG, 0, 0, 0, 0, 0, 0},
+   0, GET_BOOL, OPT_ARG, 0, 0, 0, 0, 0, 0},
 #endif
 #endif /* HAVE_OPENSSL */
+#endif /* SSLOPT_LONGOPTS_INCLUDED */

@@ -77,7 +77,7 @@ void NetAddress::init(
         addr = inet_addr(hostname.c_str());
     }
 
-	// The address wasn't in numeric form, resolve it
+    // The address wasn't in numeric form, resolve it
     if (addr == INADDR_NONE) {
         // Get the IP address of the server and store it in host
         struct hostent* host = gethostbyname(hostname.c_str());

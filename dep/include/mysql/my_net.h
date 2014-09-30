@@ -1,4 +1,4 @@
-/* Copyright (C) 2000 MySQL AB
+/* Copyright (c) 2000, 2010, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -11,12 +11,9 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA */
 
 /*
-  thread safe version of some common functions:
-  my_inet_ntoa
-
   This file is also used to make handling of sockets and ioctl()
   portable accross systems.
 
@@ -24,6 +21,9 @@
 
 #ifndef _my_net_h
 #define _my_net_h
+
+#include "my_global.h"                  /* C_MODE_START, C_MODE_END */
+
 C_MODE_START
 
 #include <errno.h>
@@ -43,7 +43,7 @@ C_MODE_START
 #include <sys/ioctl.h>
 #endif
 
-#if !defined(__WIN__) && !defined(HAVE_BROKEN_NETINET_INCLUDES) && !defined(__BEOS__) && !defined(__NETWARE__)
+#if !defined(__WIN__) && !defined(HAVE_BROKEN_NETINET_INCLUDES)
 #include <netinet/in_systm.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
@@ -73,56 +73,6 @@ C_MODE_START
 #define in_addr_t uint32
 #endif
 
-/* On some operating systems (e.g. Solaris) INADDR_NONE is not defined */
-#ifndef INADDR_NONE
-#define INADDR_NONE -1                          /* Error value from inet_addr */
-#endif
-
-/* Thread safe or portable version of some functions */
-
-void my_inet_ntoa(struct in_addr in, char *buf);
-
-/*
-  Handling of gethostbyname_r()
-*/
-
-#if !defined(HPUX10)
-struct hostent;
-#endif /* HPUX */
-#if !defined(HAVE_GETHOSTBYNAME_R)
-struct hostent *my_gethostbyname_r(const char *name,
-				   struct hostent *result, char *buffer,
-				   int buflen, int *h_errnop);
-void my_gethostbyname_r_free();
-#elif defined(HAVE_PTHREAD_ATTR_CREATE) || defined(_AIX) || defined(HAVE_GETHOSTBYNAME_R_GLIBC2_STYLE)
-struct hostent *my_gethostbyname_r(const char *name,
-				   struct hostent *result, char *buffer,
-				   int buflen, int *h_errnop);
-#define my_gethostbyname_r_free()
-#if !defined(HAVE_GETHOSTBYNAME_R_GLIBC2_STYLE) && !defined(HPUX10)
-#define GETHOSTBYNAME_BUFF_SIZE sizeof(struct hostent_data)
-#endif /* !defined(HAVE_GETHOSTBYNAME_R_GLIBC2_STYLE) */
-
-#elif defined(HAVE_GETHOSTBYNAME_R_RETURN_INT)
-#define GETHOSTBYNAME_BUFF_SIZE sizeof(struct hostent_data)
-struct hostent *my_gethostbyname_r(const char *name,
-				   struct hostent *result, char *buffer,
-				   int buflen, int *h_errnop);
-#define my_gethostbyname_r_free()
-#else
-#define my_gethostbyname_r(A,B,C,D,E) gethostbyname_r((A),(B),(C),(D),(E))
-#define my_gethostbyname_r_free()
-#endif /* !defined(HAVE_GETHOSTBYNAME_R) */
-
-#ifndef GETHOSTBYNAME_BUFF_SIZE
-#define GETHOSTBYNAME_BUFF_SIZE 2048
-#endif
-
-/* On SCO you get a link error when refering to h_errno */
-#ifdef SCO
-#undef h_errno
-#define h_errno errno
-#endif
 
 C_MODE_END
 #endif

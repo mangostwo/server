@@ -576,7 +576,7 @@ public:
     /** Serializes in Matlab source format */
     void serialize(TextOutput& t) const;
 
-	std::string toString(const std::string& name) const;
+    std::string toString(const std::string& name) const;
 
     std::string toString() const {
         static const std::string name = "";

@@ -250,7 +250,7 @@ bool NetworkDevice::init() {
 
     logPrintf("Network Startup");
     logPrintf("Starting WinSock networking.\n");
-    WSADATA wsda;		    
+    WSADATA wsda;            
     WSAStartup(MAKEWORD(G3D_WINSOCK_MAJOR_VERSION, G3D_WINSOCK_MINOR_VERSION), &wsda);
         
     std::string hostname = "localhost";

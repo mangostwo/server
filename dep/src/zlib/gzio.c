@@ -8,6 +8,7 @@
 /* @(#) $Id$ */
 
 #include <stdio.h>
+#include <errno.h>
 
 #include "zutil.h"
 

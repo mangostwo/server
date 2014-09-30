@@ -43,21 +43,21 @@ void Matrix::serialize(TextOutput& t) const {
 
 
 std::string Matrix::toString(const std::string& name) const {
-	std::string s;
+    std::string s;
 
     if (name != "") {
         s += format("%s = \n", name.c_str());
     }
 
-	s += "[";
+    s += "[";
     for (int r = 0; r < rows(); ++r) {
         for (int c = 0; c < cols(); ++c) {
             double v = impl->get(r, c);
 
-			if (::fabs(v) < 0.00001) {
-				// Don't print "negative zero"
+            if (::fabs(v) < 0.00001) {
+                // Don't print "negative zero"
                 s += format("% 10.04g", 0.0);
-			} else if (v == iRound(v)) {
+            } else if (v == iRound(v)) {
                 // Print integers nicely
                 s += format("% 10.04g", v);
             } else {
@@ -68,12 +68,12 @@ std::string Matrix::toString(const std::string& name) const {
                 s += ",";
             } else if (r < rows() - 1) {
                 s += ";\n ";
-			} else {
-				s += "]\n";
-			}
+            } else {
+                s += "]\n";
+            }
         }
     }
-	return s;
+    return s;
 }
 
 
@@ -746,7 +746,7 @@ void Matrix::Impl::inverseViaAdjoint(Impl& out) const {
         det += elt[0][r] * out.elt[r][0];
     }
 
-	out.div(Matrix::T(det), out);
+    out.div(Matrix::T(det), out);
 }
 
 
@@ -848,7 +848,7 @@ Matrix::T Matrix::Impl::determinant() const {
           float cofactor10 = elt[1][2] * elt[2][0] - elt[1][0] * elt[2][2];
           float cofactor20 = elt[1][0] * elt[2][1] - elt[1][1] * elt[2][0];
       
-		  return Matrix::T(
+          return Matrix::T(
             elt[0][0] * cofactor00 +
             elt[0][1] * cofactor10 +
             elt[0][2] * cofactor20);
@@ -897,9 +897,9 @@ Matrix Matrix::pseudoInverse(float tolerance) const {
     nonsingular matrices with at least one small (<5) dimension.
 */
 Matrix Matrix::svdPseudoInverse(float tolerance) const {
-   	if (cols() > rows()) {
-		return transpose().svdPseudoInverse(tolerance).transpose();
-	}
+       if (cols() > rows()) {
+        return transpose().svdPseudoInverse(tolerance).transpose();
+    }
 
     // Matrices from SVD
     Matrix U, V;
@@ -907,32 +907,32 @@ Matrix Matrix::svdPseudoInverse(float tolerance) const {
     // Diagonal elements
     Array<T> d;
 
-	svd(U, d, V);
+    svd(U, d, V);
 
     if (rows() == 1) {
         d.resize(1, false);
     }
 
-	if (tolerance < 0) {
-		// TODO: Should be eps(d[0]), which is the largest diagonal
-		tolerance = G3D::max(rows(), cols()) * 0.0001f;
-	}
+    if (tolerance < 0) {
+        // TODO: Should be eps(d[0]), which is the largest diagonal
+        tolerance = G3D::max(rows(), cols()) * 0.0001f;
+    }
 
-	Matrix X;
+    Matrix X;
 
-	int r = 0;
-	for (int i = 0; i < d.size(); ++i) {
-		if (d[i] > tolerance) {
-			d[i] = Matrix::T(1) / d[i];
-			++r;
-		}
-	}
+    int r = 0;
+    for (int i = 0; i < d.size(); ++i) {
+        if (d[i] > tolerance) {
+            d[i] = Matrix::T(1) / d[i];
+            ++r;
+        }
+    }
 
-	if (r == 0) {
-		// There were no non-zero elements
-		X = zero(cols(), rows());
-	} else {
-		// Use the first r columns
+    if (r == 0) {
+        // There were no non-zero elements
+        X = zero(cols(), rows());
+    } else {
+        // Use the first r columns
         
         // Test code (the rest is below)
         /*
@@ -1003,7 +1003,7 @@ Matrix Matrix::svdPseudoInverse(float tolerance) const {
         debugAssert(n < 0.0001);
         */
     }
-	return X;
+    return X;
 }
 
 // Computes pseudoinverse for a vector
@@ -1426,7 +1426,7 @@ void Matrix::Impl::inverseInPlaceGaussJordan() {
         elt[col][col] = 1.0;
 
         for (int k = 0; k < R; ++k) {
-			elt[col][k] *= Matrix::T(pivotInverse);
+            elt[col][k] *= Matrix::T(pivotInverse);
         }
 
         // Reduce all rows
@@ -1438,7 +1438,7 @@ void Matrix::Impl::inverseInPlaceGaussJordan() {
                 elt[r][col] = 0.0;
 
                 for (int k = 0; k < R; ++k) {
-					elt[r][k] -= Matrix::T(elt[col][k] * oldValue);
+                    elt[r][k] -= Matrix::T(elt[col][k] * oldValue);
                 }
             }
         }

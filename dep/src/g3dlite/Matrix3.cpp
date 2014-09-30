@@ -116,7 +116,7 @@ bool Matrix3::isOrthonormal() const {
 //----------------------------------------------------------------------------
 Matrix3::Matrix3(const Quat& _q) {
     // Implementation from Watt and Watt, pg 362
-	// See also http://www.flipcode.com/documents/matrfaq.html#Q54
+    // See also http://www.flipcode.com/documents/matrfaq.html#Q54
     Quat q = _q;
     q.unitize();
     float xx = 2.0f * q.x * q.x;
@@ -1046,19 +1046,19 @@ void Matrix3::polarDecomposition(Matrix3 &R, Matrix3 &S) const{
       Xit = tmp.transpose();
       
       if (resid < BigEps) {
-	// close enough use simple iteration
-	X += Xit;
-	X *= 0.5f;
+    // close enough use simple iteration
+    X += Xit;
+    X *= 0.5f;
       }
       else {
-	// not close to convergence, compute acceleration factor
+    // not close to convergence, compute acceleration factor
         float gamma = sqrt( sqrt(
                   (Xit.l1Norm()* Xit.lInfNorm())/(X.l1Norm()*X.lInfNorm()) ) );
 
-	X *= 0.5f * gamma;
-	tmp = Xit;
-	tmp *= 0.5f / gamma;
-	X += tmp;
+    X *= 0.5f * gamma;
+    tmp = Xit;
+    tmp *= 0.5f / gamma;
+    X += tmp;
       }
       
       resid = X.diffOneNorm(Xit);
@@ -1215,7 +1215,7 @@ float Matrix3::l1Norm() const {
       float f = fabs(elt[0][c])+ fabs(elt[1][c]) + fabs(elt[2][c]);
       
       if (f > oneNorm) {
-	oneNorm = f;
+    oneNorm = f;
       }
     }
     return oneNorm;
@@ -1231,7 +1231,7 @@ float Matrix3::lInfNorm() const {
       float f = fabs(elt[r][0]) + fabs(elt[r][1])+ fabs(elt[r][2]);
       
       if (f > infNorm) {
-	infNorm = f;
+    infNorm = f;
       }
     }
     return infNorm;
@@ -1244,10 +1244,10 @@ float Matrix3::diffOneNorm(const Matrix3 &y) const{
     for (int c = 0; c < 3; ++c){
     
       float f = fabs(elt[0][c] - y[0][c]) + fabs(elt[1][c] - y[1][c])
-	+ fabs(elt[2][c] - y[2][c]);
+    + fabs(elt[2][c] - y[2][c]);
       
       if (f > oneNorm) {
-	oneNorm = f;
+    oneNorm = f;
       }
     }
     return oneNorm;
@@ -1922,9 +1922,9 @@ void Matrix3::_transpose(const Matrix3& A, Matrix3& out) {
 //-----------------------------------------------------------------------------
 std::string Matrix3::toString() const {
     return G3D::format("[%g, %g, %g; %g, %g, %g; %g, %g, %g]", 
-			elt[0][0], elt[0][1], elt[0][2],
-			elt[1][0], elt[1][1], elt[1][2],
-			elt[2][0], elt[2][1], elt[2][2]);
+            elt[0][0], elt[0][1], elt[0][2],
+            elt[1][0], elt[1][1], elt[1][2],
+            elt[2][0], elt[2][1], elt[2][2]);
 }
 
 
