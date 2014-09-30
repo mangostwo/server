@@ -39,22 +39,22 @@ std::string readWholeFile(
 
 
 /** Reads from a zip file and decompresses the desired contents
-	into memory.  Does not support recursive zip calls (i.e. a .zip
-	stored within another .zip)
+    into memory.  Does not support recursive zip calls (i.e. a .zip
+    stored within another .zip)
 
-	@param file the path, of the format C:\\...\\something.zip\\...\\desiredfile.ext
-	@param data a pointer to the memory where the file will be stored
-	@param length the size of the file decompressed to memory */
+    @param file the path, of the format C:\\...\\something.zip\\...\\desiredfile.ext
+    @param data a pointer to the memory where the file will be stored
+    @param length the size of the file decompressed to memory */
 void zipRead(const std::string& file,
-			 void*& data,
-			 size_t& length);
+             void*& data,
+             size_t& length);
 
 
 /** Closes the contents of a zip file that had been decompressed to
-	memory.  Must be called in tandem with zipRead() to avoid memory
-	leaks.
+    memory.  Must be called in tandem with zipRead() to avoid memory
+    leaks.
 
-	@param data the pointer to the decompressed file in memory */
+    @param data the pointer to the decompressed file in memory */
 void zipClose(void* data);
 
 
@@ -88,8 +88,8 @@ FILE* createTempFile();
  */
 bool zipfileExists
 (const std::string&          filename,
- std::string&		     outZipfile,
- std::string&		     outInternalFile);
+ std::string&             outZipfile,
+ std::string&             outInternalFile);
 
 bool zipfileExists(const std::string& filename);
 

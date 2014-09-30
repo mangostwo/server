@@ -66,9 +66,9 @@ public:
      */
     Matrix4(const float* init);
     
-	/**
-		a is the upper left 3x3 submatrix and b is the upper right 3x1 submatrix. The last row of the created matrix is (0,0,0,1).
-	*/
+    /**
+        a is the upper left 3x3 submatrix and b is the upper right 3x1 submatrix. The last row of the created matrix is (0,0,0,1).
+    */
     Matrix4(const class Matrix3& upper3x3, const class Vector3& lastCol = Vector3::zero());
 
     Matrix4(const class CoordinateFrame& c);

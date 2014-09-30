@@ -129,12 +129,12 @@ void GImage::decodeTGA(
     int imageType    = input.readUInt8();
 
     (void)colorMapType;
-	
+    
     // 2 is the type supported by this routine.
     if (imageType != 2 && imageType != 10) {
         throw Error("TGA images must be type 2 (Uncompressed truecolor) or 10 (Run-length truecolor)", input.getFilename());
     }
-	
+    
     // Color map specification
     input.skip(5);
 
@@ -162,13 +162,13 @@ void GImage::decodeTGA(
     // as data indicating where the origin is
     int imageDescriptor = input.readUInt8();
     (void)imageDescriptor;
-	
+    
     // Image ID
     input.skip(IDLength);
 
     m_byte = (uint8*)m_memMan->alloc(m_width * m_height * m_channels);
     debugAssert(m_byte);
-	
+    
     // Pixel data
     int x;
     int y;

@@ -1,4 +1,4 @@
-/* Copyright (C) 2000 MySQL AB
+/* Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -11,7 +11,7 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA */
 
 /*
 ** Common definition between mysql server & client
@@ -22,13 +22,23 @@
 
 #define HOSTNAME_LENGTH 60
 #define SYSTEM_CHARSET_MBMAXLEN 3
-#define NAME_CHAR_LEN	64              /* Field/table name length */
+#define NAME_CHAR_LEN    64              /* Field/table name length */
 #define USERNAME_CHAR_LENGTH 16
 #define NAME_LEN                (NAME_CHAR_LEN*SYSTEM_CHARSET_MBMAXLEN)
 #define USERNAME_LENGTH         (USERNAME_CHAR_LENGTH*SYSTEM_CHARSET_MBMAXLEN)
 
+#define MYSQL_AUTODETECT_CHARSET_NAME "auto"
+
 #define SERVER_VERSION_LENGTH 60
 #define SQLSTATE_LENGTH 5
+
+/*
+  Maximum length of comments
+*/
+#define TABLE_COMMENT_INLINE_MAXLEN 180 /* pre 6.0: 60 characters */
+#define TABLE_COMMENT_MAXLEN 2048
+#define COLUMN_COMMENT_MAXLEN 1024
+#define INDEX_COMMENT_MAXLEN 1024
 
 /*
   USER_HOST_BUFF_SIZE -- length of string buffer, that is enough to contain
@@ -38,7 +48,7 @@
 */
 #define USER_HOST_BUFF_SIZE HOSTNAME_LENGTH + USERNAME_LENGTH + 2
 
-#define LOCAL_HOST	"localhost"
+#define LOCAL_HOST    "localhost"
 #define LOCAL_HOST_NAMEDPIPE "."
 
 
@@ -79,74 +89,93 @@ enum enum_server_command
 #define SCRAMBLED_PASSWORD_CHAR_LENGTH_323 (SCRAMBLE_LENGTH_323*2)
 
 
-#define NOT_NULL_FLAG	1		/* Field can't be NULL */
-#define PRI_KEY_FLAG	2		/* Field is part of a primary key */
-#define UNIQUE_KEY_FLAG 4		/* Field is part of a unique key */
-#define MULTIPLE_KEY_FLAG 8		/* Field is part of a key */
-#define BLOB_FLAG	16		/* Field is a blob */
-#define UNSIGNED_FLAG	32		/* Field is unsigned */
-#define ZEROFILL_FLAG	64		/* Field is zerofill */
-#define BINARY_FLAG	128		/* Field is binary   */
+#define NOT_NULL_FLAG    1        /* Field can't be NULL */
+#define PRI_KEY_FLAG    2        /* Field is part of a primary key */
+#define UNIQUE_KEY_FLAG 4        /* Field is part of a unique key */
+#define MULTIPLE_KEY_FLAG 8        /* Field is part of a key */
+#define BLOB_FLAG    16        /* Field is a blob */
+#define UNSIGNED_FLAG    32        /* Field is unsigned */
+#define ZEROFILL_FLAG    64        /* Field is zerofill */
+#define BINARY_FLAG    128        /* Field is binary   */
 
 /* The following are only sent to new clients */
-#define ENUM_FLAG	256		/* field is an enum */
-#define AUTO_INCREMENT_FLAG 512		/* field is a autoincrement field */
-#define TIMESTAMP_FLAG	1024		/* Field is a timestamp */
-#define SET_FLAG	2048		/* field is a set */
-#define NO_DEFAULT_VALUE_FLAG 4096	/* Field doesn't have default value */
+#define ENUM_FLAG    256        /* field is an enum */
+#define AUTO_INCREMENT_FLAG 512        /* field is a autoincrement field */
+#define TIMESTAMP_FLAG    1024        /* Field is a timestamp */
+#define SET_FLAG    2048        /* field is a set */
+#define NO_DEFAULT_VALUE_FLAG 4096    /* Field doesn't have default value */
 #define ON_UPDATE_NOW_FLAG 8192         /* Field is set to NOW on UPDATE */
-#define NUM_FLAG	32768		/* Field is num (for clients) */
-#define PART_KEY_FLAG	16384		/* Intern; Part of some key */
-#define GROUP_FLAG	32768		/* Intern: Group field */
-#define UNIQUE_FLAG	65536		/* Intern: Used by sql_yacc */
-#define BINCMP_FLAG	131072		/* Intern: Used by sql_yacc */
+#define NUM_FLAG    32768        /* Field is num (for clients) */
+#define PART_KEY_FLAG    16384        /* Intern; Part of some key */
+#define GROUP_FLAG    32768        /* Intern: Group field */
+#define UNIQUE_FLAG    65536        /* Intern: Used by sql_yacc */
+#define BINCMP_FLAG    131072        /* Intern: Used by sql_yacc */
 #define GET_FIXED_FIELDS_FLAG (1 << 18) /* Used to get fields in item tree */
 #define FIELD_IN_PART_FUNC_FLAG (1 << 19)/* Field part of partition func */
-#define FIELD_IN_ADD_INDEX (1<< 20)	/* Intern: Field used in ADD INDEX */
+#define FIELD_IN_ADD_INDEX (1<< 20)    /* Intern: Field used in ADD INDEX */
 #define FIELD_IS_RENAMED (1<< 21)       /* Intern: Field is being renamed */
+#define FIELD_FLAGS_STORAGE_MEDIA 22    /* Field storage media, bit 22-23,
+                                           reserved by MySQL Cluster */
+#define FIELD_FLAGS_COLUMN_FORMAT 24    /* Field column format, bit 24-25,
+                                           reserved by MySQL Cluster */
 
-#define REFRESH_GRANT		1	/* Refresh grant tables */
-#define REFRESH_LOG		2	/* Start on new log file */
-#define REFRESH_TABLES		4	/* close all tables */
-#define REFRESH_HOSTS		8	/* Flush host cache */
-#define REFRESH_STATUS		16	/* Flush status variables */
-#define REFRESH_THREADS		32	/* Flush thread cache */
+#define REFRESH_GRANT        1    /* Refresh grant tables */
+#define REFRESH_LOG        2    /* Start on new log file */
+#define REFRESH_TABLES        4    /* close all tables */
+#define REFRESH_HOSTS        8    /* Flush host cache */
+#define REFRESH_STATUS        16    /* Flush status variables */
+#define REFRESH_THREADS        32    /* Flush thread cache */
 #define REFRESH_SLAVE           64      /* Reset master info and restart slave
-					   thread */
+                       thread */
 #define REFRESH_MASTER          128     /* Remove all bin logs in the index
-					   and truncate the index */
+                       and truncate the index */
+#define REFRESH_ERROR_LOG       256 /* Rotate only the erorr log */
+#define REFRESH_ENGINE_LOG      512 /* Flush all storage engine logs */
+#define REFRESH_BINARY_LOG     1024 /* Flush the binary log */
+#define REFRESH_RELAY_LOG      2048 /* Flush the relay log */
+#define REFRESH_GENERAL_LOG    4096 /* Flush the general log */
+#define REFRESH_SLOW_LOG       8192 /* Flush the slow query log */
 
 /* The following can't be set with mysql_refresh() */
-#define REFRESH_READ_LOCK	16384	/* Lock tables for read */
-#define REFRESH_FAST		32768	/* Intern flag */
+#define REFRESH_READ_LOCK    16384    /* Lock tables for read */
+#define REFRESH_FAST        32768    /* Intern flag */
 
 /* RESET (remove all queries) from query cache */
-#define REFRESH_QUERY_CACHE	65536
+#define REFRESH_QUERY_CACHE    65536
 #define REFRESH_QUERY_CACHE_FREE 0x20000L /* pack query cache */
-#define REFRESH_DES_KEY_FILE	0x40000L
-#define REFRESH_USER_RESOURCES	0x80000L
+#define REFRESH_DES_KEY_FILE    0x40000L
+#define REFRESH_USER_RESOURCES    0x80000L
 
-#define CLIENT_LONG_PASSWORD	1	/* new more secure passwords */
-#define CLIENT_FOUND_ROWS	2	/* Found instead of affected rows */
-#define CLIENT_LONG_FLAG	4	/* Get all column flags */
-#define CLIENT_CONNECT_WITH_DB	8	/* One can specify db on connect */
-#define CLIENT_NO_SCHEMA	16	/* Don't allow database.table.column */
-#define CLIENT_COMPRESS		32	/* Can use compression protocol */
-#define CLIENT_ODBC		64	/* Odbc client */
-#define CLIENT_LOCAL_FILES	128	/* Can use LOAD DATA LOCAL */
-#define CLIENT_IGNORE_SPACE	256	/* Ignore spaces before '(' */
-#define CLIENT_PROTOCOL_41	512	/* New 4.1 protocol */
-#define CLIENT_INTERACTIVE	1024	/* This is an interactive client */
-#define CLIENT_SSL              2048	/* Switch to SSL after handshake */
+#define CLIENT_LONG_PASSWORD    1    /* new more secure passwords */
+#define CLIENT_FOUND_ROWS    2    /* Found instead of affected rows */
+#define CLIENT_LONG_FLAG    4    /* Get all column flags */
+#define CLIENT_CONNECT_WITH_DB    8    /* One can specify db on connect */
+#define CLIENT_NO_SCHEMA    16    /* Don't allow database.table.column */
+#define CLIENT_COMPRESS        32    /* Can use compression protocol */
+#define CLIENT_ODBC        64    /* Odbc client */
+#define CLIENT_LOCAL_FILES    128    /* Can use LOAD DATA LOCAL */
+#define CLIENT_IGNORE_SPACE    256    /* Ignore spaces before '(' */
+#define CLIENT_PROTOCOL_41    512    /* New 4.1 protocol */
+#define CLIENT_INTERACTIVE    1024    /* This is an interactive client */
+#define CLIENT_SSL              2048    /* Switch to SSL after handshake */
 #define CLIENT_IGNORE_SIGPIPE   4096    /* IGNORE sigpipes */
-#define CLIENT_TRANSACTIONS	8192	/* Client knows about transactions */
+#define CLIENT_TRANSACTIONS    8192    /* Client knows about transactions */
 #define CLIENT_RESERVED         16384   /* Old flag for 4.1 protocol  */
 #define CLIENT_SECURE_CONNECTION 32768  /* New 4.1 authentication */
 #define CLIENT_MULTI_STATEMENTS (1UL << 16) /* Enable/disable multi-stmt support */
 #define CLIENT_MULTI_RESULTS    (1UL << 17) /* Enable/disable multi-results */
+#define CLIENT_PS_MULTI_RESULTS (1UL << 18) /* Multi-results in PS-protocol */
+
+#define CLIENT_PLUGIN_AUTH  (1UL << 19) /* Client supports plugin authentication */
 
 #define CLIENT_SSL_VERIFY_SERVER_CERT (1UL << 30)
 #define CLIENT_REMEMBER_OPTIONS (1UL << 31)
+
+#ifdef HAVE_COMPRESS
+#define CAN_CLIENT_COMPRESS CLIENT_COMPRESS
+#else
+#define CAN_CLIENT_COMPRESS 0
+#endif
 
 /* Gather all possible capabilites (flags) supported by the server */
 #define CLIENT_ALL_FLAGS  (CLIENT_LONG_PASSWORD | \
@@ -167,8 +196,10 @@ enum enum_server_command
                            CLIENT_SECURE_CONNECTION | \
                            CLIENT_MULTI_STATEMENTS | \
                            CLIENT_MULTI_RESULTS | \
+                           CLIENT_PS_MULTI_RESULTS | \
                            CLIENT_SSL_VERIFY_SERVER_CERT | \
-                           CLIENT_REMEMBER_OPTIONS)
+                           CLIENT_REMEMBER_OPTIONS | \
+                           CLIENT_PLUGIN_AUTH)
 
 /*
   Switch off the flags that are optional and depending on build flags
@@ -179,8 +210,15 @@ enum enum_server_command
                                                & ~CLIENT_COMPRESS) \
                                                & ~CLIENT_SSL_VERIFY_SERVER_CERT)
 
-#define SERVER_STATUS_IN_TRANS     1	/* Transaction has started */
-#define SERVER_STATUS_AUTOCOMMIT   2	/* Server in auto_commit mode */
+/**
+  Is raised when a multi-statement transaction
+  has been started, either explicitly, by means
+  of BEGIN or COMMIT AND CHAIN, or
+  implicitly, by the first transactional
+  statement, when autocommit=off.
+*/
+#define SERVER_STATUS_IN_TRANS     1
+#define SERVER_STATUS_AUTOCOMMIT   2    /* Server in auto_commit mode */
 #define SERVER_MORE_RESULTS_EXISTS 8    /* Multi query - next query exists */
 #define SERVER_QUERY_NO_GOOD_INDEX_USED 16
 #define SERVER_QUERY_NO_INDEX_USED      32
@@ -203,6 +241,12 @@ enum enum_server_command
   number of result set columns.
 */
 #define SERVER_STATUS_METADATA_CHANGED 1024
+#define SERVER_QUERY_WAS_SLOW          2048
+
+/**
+  To mark ResultSet containing output parameter values.
+*/
+#define SERVER_PS_OUT_PARAMS            4096
 
 /**
   Server status flags that must be cleared when starting
@@ -215,17 +259,21 @@ enum enum_server_command
 #define SERVER_STATUS_CLEAR_SET (SERVER_QUERY_NO_GOOD_INDEX_USED| \
                                  SERVER_QUERY_NO_INDEX_USED|\
                                  SERVER_MORE_RESULTS_EXISTS|\
-                                 SERVER_STATUS_METADATA_CHANGED)
+                                 SERVER_STATUS_METADATA_CHANGED |\
+                                 SERVER_QUERY_WAS_SLOW |\
+                                 SERVER_STATUS_DB_DROPPED |\
+                                 SERVER_STATUS_CURSOR_EXISTS|\
+                                 SERVER_STATUS_LAST_ROW_SENT)
 
-#define MYSQL_ERRMSG_SIZE	512
-#define NET_READ_TIMEOUT	30		/* Timeout on read */
-#define NET_WRITE_TIMEOUT	60		/* Timeout on write */
-#define NET_WAIT_TIMEOUT	8*60*60		/* Wait for new query */
+#define MYSQL_ERRMSG_SIZE    512
+#define NET_READ_TIMEOUT    30        /* Timeout on read */
+#define NET_WRITE_TIMEOUT    60        /* Timeout on write */
+#define NET_WAIT_TIMEOUT    8*60*60        /* Wait for new query */
 
 #define ONLY_KILL_QUERY         1
 
 
-struct st_vio;					/* Only C */
+struct st_vio;                    /* Only C */
 typedef struct st_vio Vio;
 
 #define MAX_TINYINT_WIDTH       3       /* Max width for a TINY w.o. sign */
@@ -233,14 +281,14 @@ typedef struct st_vio Vio;
 #define MAX_MEDIUMINT_WIDTH     8       /* Max width for a INT24 w.o. sign */
 #define MAX_INT_WIDTH           10      /* Max width for a LONG w.o. sign */
 #define MAX_BIGINT_WIDTH        20      /* Max width for a LONGLONG */
-#define MAX_CHAR_WIDTH		255	/* Max length for a CHAR colum */
-#define MAX_BLOB_WIDTH		16777216	/* Default width for blob */
+#define MAX_CHAR_WIDTH        255    /* Max length for a CHAR colum */
+#define MAX_BLOB_WIDTH        16777216    /* Default width for blob */
 
 typedef struct st_net {
 #if !defined(CHECK_EMBEDDED_DIFFERENCES) || !defined(EMBEDDED_LIBRARY)
   Vio *vio;
   unsigned char *buff,*buff_end,*write_pos,*read_pos;
-  my_socket fd;					/* For Perl DBI/dbd */
+  my_socket fd;                    /* For Perl DBI/dbd */
   /*
     The following variable is set if we are doing several queries in one
     command ( as in LOAD TABLE ... FROM MASTER ),
@@ -254,24 +302,23 @@ typedef struct st_net {
   unsigned int *return_status;
   unsigned char reading_or_writing;
   char save_char;
-  my_bool unused0; /* Please remove with the next incompatible ABI change. */
-  my_bool unused; /* Please remove with the next incompatible ABI change */
-  my_bool compress;
   my_bool unused1; /* Please remove with the next incompatible ABI change. */
+  my_bool unused2; /* Please remove with the next incompatible ABI change */
+  my_bool compress;
+  my_bool unused3; /* Please remove with the next incompatible ABI change. */
   /*
     Pointer to query object in query cache, do not equal NULL (0) for
     queries in cache that have not stored its results yet
   */
 #endif
   /*
-    'query_cache_query' should be accessed only via query cache
-    functions and methods to maintain proper locking.
+    Unused, please remove with the next incompatible ABI change.
   */
-  unsigned char *query_cache_query;
+  unsigned char *unused;
   unsigned int last_errno;
   unsigned char error; 
-  my_bool unused2; /* Please remove with the next incompatible ABI change. */
-  my_bool return_errno;
+  my_bool unused4; /* Please remove with the next incompatible ABI change. */
+  my_bool unused5; /* Please remove with the next incompatible ABI change. */
   /** Client library error message buffer. Actually belongs to struct MYSQL. */
   char last_error[MYSQL_ERRMSG_SIZE];
   /** Client library sqlstate buffer. Set along with the error message. */
@@ -293,24 +340,24 @@ typedef struct st_net {
 #define packet_error (~(unsigned long) 0)
 
 enum enum_field_types { MYSQL_TYPE_DECIMAL, MYSQL_TYPE_TINY,
-			MYSQL_TYPE_SHORT,  MYSQL_TYPE_LONG,
-			MYSQL_TYPE_FLOAT,  MYSQL_TYPE_DOUBLE,
-			MYSQL_TYPE_NULL,   MYSQL_TYPE_TIMESTAMP,
-			MYSQL_TYPE_LONGLONG,MYSQL_TYPE_INT24,
-			MYSQL_TYPE_DATE,   MYSQL_TYPE_TIME,
-			MYSQL_TYPE_DATETIME, MYSQL_TYPE_YEAR,
-			MYSQL_TYPE_NEWDATE, MYSQL_TYPE_VARCHAR,
-			MYSQL_TYPE_BIT,
+            MYSQL_TYPE_SHORT,  MYSQL_TYPE_LONG,
+            MYSQL_TYPE_FLOAT,  MYSQL_TYPE_DOUBLE,
+            MYSQL_TYPE_NULL,   MYSQL_TYPE_TIMESTAMP,
+            MYSQL_TYPE_LONGLONG,MYSQL_TYPE_INT24,
+            MYSQL_TYPE_DATE,   MYSQL_TYPE_TIME,
+            MYSQL_TYPE_DATETIME, MYSQL_TYPE_YEAR,
+            MYSQL_TYPE_NEWDATE, MYSQL_TYPE_VARCHAR,
+            MYSQL_TYPE_BIT,
                         MYSQL_TYPE_NEWDECIMAL=246,
-			MYSQL_TYPE_ENUM=247,
-			MYSQL_TYPE_SET=248,
-			MYSQL_TYPE_TINY_BLOB=249,
-			MYSQL_TYPE_MEDIUM_BLOB=250,
-			MYSQL_TYPE_LONG_BLOB=251,
-			MYSQL_TYPE_BLOB=252,
-			MYSQL_TYPE_VAR_STRING=253,
-			MYSQL_TYPE_STRING=254,
-			MYSQL_TYPE_GEOMETRY=255
+            MYSQL_TYPE_ENUM=247,
+            MYSQL_TYPE_SET=248,
+            MYSQL_TYPE_TINY_BLOB=249,
+            MYSQL_TYPE_MEDIUM_BLOB=250,
+            MYSQL_TYPE_LONG_BLOB=251,
+            MYSQL_TYPE_BLOB=252,
+            MYSQL_TYPE_VAR_STRING=253,
+            MYSQL_TYPE_STRING=254,
+            MYSQL_TYPE_GEOMETRY=255
 
 };
 
@@ -401,17 +448,17 @@ enum enum_mysql_set_option
 extern "C" {
 #endif
 
-my_bool	my_net_init(NET *net, Vio* vio);
-void	my_net_local_init(NET *net);
-void	net_end(NET *net);
-  void	net_clear(NET *net, my_bool clear_buffer);
+my_bool    my_net_init(NET *net, Vio* vio);
+void    my_net_local_init(NET *net);
+void    net_end(NET *net);
+  void    net_clear(NET *net, my_bool clear_buffer);
 my_bool net_realloc(NET *net, size_t length);
-my_bool	net_flush(NET *net);
-my_bool	my_net_write(NET *net,const unsigned char *packet, size_t len);
-my_bool	net_write_command(NET *net,unsigned char command,
-			  const unsigned char *header, size_t head_len,
-			  const unsigned char *packet, size_t len);
-int	net_real_write(NET *net,const unsigned char *packet, size_t len);
+my_bool    net_flush(NET *net);
+my_bool    my_net_write(NET *net,const unsigned char *packet, size_t len);
+my_bool    net_write_command(NET *net,unsigned char command,
+              const unsigned char *header, size_t head_len,
+              const unsigned char *packet, size_t len);
+int    net_real_write(NET *net,const unsigned char *packet, size_t len);
 unsigned long my_net_read(NET *net);
 
 #ifdef _global_h
@@ -419,13 +466,9 @@ void my_net_set_write_timeout(NET *net, uint timeout);
 void my_net_set_read_timeout(NET *net, uint timeout);
 #endif
 
-/*
-  The following function is not meant for normal usage
-  Currently it's used internally by manager.c
-*/
 struct sockaddr;
 int my_connect(my_socket s, const struct sockaddr *name, unsigned int namelen,
-	       unsigned int timeout);
+           unsigned int timeout);
 
 struct rand_struct {
   unsigned long seed1,seed2,max_value;
@@ -443,11 +486,11 @@ enum Item_result {STRING_RESULT=0, REAL_RESULT, INT_RESULT, ROW_RESULT,
 
 typedef struct st_udf_args
 {
-  unsigned int arg_count;		/* Number of arguments */
-  enum Item_result *arg_type;		/* Pointer to item_results */
-  char **args;				/* Pointer to argument */
-  unsigned long *lengths;		/* Length of string arguments */
-  char *maybe_null;			/* Set to 1 for all maybe_null args */
+  unsigned int arg_count;        /* Number of arguments */
+  enum Item_result *arg_type;        /* Pointer to item_results */
+  char **args;                /* Pointer to argument */
+  unsigned long *lengths;        /* Length of string arguments */
+  char *maybe_null;            /* Set to 1 for all maybe_null args */
   char **attributes;                    /* Pointer to attribute name */
   unsigned long *attribute_lengths;     /* Length of attribute arguments */
   void *extension;
@@ -470,8 +513,8 @@ typedef struct st_udf_init
 */
 
   /* Constants when using compression */
-#define NET_HEADER_SIZE 4		/* standard header size */
-#define COMP_HEADER_SIZE 3		/* compression header extra size */
+#define NET_HEADER_SIZE 4        /* standard header size */
+#define COMP_HEADER_SIZE 3        /* compression header extra size */
 
   /* Prototypes to password functions */
 
@@ -492,14 +535,14 @@ void create_random_string(char *to, unsigned int length, struct rand_struct *ran
 void hash_password(unsigned long *to, const char *password, unsigned int password_len);
 void make_scrambled_password_323(char *to, const char *password);
 void scramble_323(char *to, const char *message, const char *password);
-my_bool check_scramble_323(const char *, const char *message,
+my_bool check_scramble_323(const unsigned char *reply, const char *message,
                            unsigned long *salt);
 void get_salt_from_password_323(unsigned long *res, const char *password);
 void make_password_from_salt_323(char *to, const unsigned long *salt);
 
 void make_scrambled_password(char *to, const char *password);
 void scramble(char *to, const char *message, const char *password);
-my_bool check_scramble(const char *reply, const char *message,
+my_bool check_scramble(const unsigned char *reply, const char *message,
                        const unsigned char *hash_stage2);
 void get_salt_from_password(unsigned char *res, const char *password);
 void make_password_from_salt(char *to, const unsigned char *hash_stage2);
@@ -529,4 +572,5 @@ uchar *net_store_length(uchar *pkg, ulonglong length);
 #define MYSQL_STMT_HEADER       4
 #define MYSQL_LONG_DATA_HEADER  6
 
+#define NOT_FIXED_DEC           31
 #endif

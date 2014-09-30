@@ -55,10 +55,10 @@ private:
     void init(const Vector3& v0, const Vector3& v1, const Vector3& v2);
 
 public:
-	
+    
     Triangle(class BinaryInput& b);
-	void serialize(class BinaryOutput& b);
-	void deserialize(class BinaryInput& b);
+    void serialize(class BinaryOutput& b);
+    void deserialize(class BinaryInput& b);
 
     Triangle();
     

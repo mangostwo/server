@@ -543,9 +543,9 @@ public:
 
     Particularly useful as part of the idiom:
     <PRE>
- 	    GImage normal;
-	    computeNormalMap(GImage(filename), normal);
-	    return Texture::fromGImage(filename, normal);
+         GImage normal;
+        computeNormalMap(GImage(filename), normal);
+        return Texture::fromGImage(filename, normal);
     </PRE>
 
       */

@@ -224,7 +224,7 @@ public:
 
    /**
     The array returned is only valid until the next append() or resize call, or 
-	the Array is deallocated.
+    the Array is deallocated.
     */
    T* getCArray() {
        return data;
@@ -232,7 +232,7 @@ public:
 
    /**
     The array returned is only valid until the next append() or resize call, or 
-	the Array is deallocated.
+    the Array is deallocated.
     */
    const T* getCArray() const {
        return data;
@@ -310,7 +310,7 @@ public:
        m_memoryManager->free(data);
        // Set to 0 in case this Array is global and gets referenced during app exit
        data = NULL;
-	   num = 0;
+       num = 0;
        numAllocated = 0;
    }
 

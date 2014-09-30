@@ -83,4 +83,3 @@ include_directories( ${ZLIB_INCLUDE_DIRS} )
 target_link_libraries(libmpq ${ZLIB_LIBRARIES} bzip2)
 
 set_target_properties(libmpq PROPERTIES LINKER_LANGUAGE CXX)
- 

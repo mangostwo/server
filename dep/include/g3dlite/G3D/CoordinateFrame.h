@@ -59,10 +59,10 @@ class CoordinateFrame {
 public:
 
     /**  Takes object space points to world space.  */
-    Matrix3							rotation;
+    Matrix3                            rotation;
 
     /** Takes object space points to world space. */
-    Vector3							translation;
+    Vector3                            translation;
 
     /** \param any Must be in one of the following forms: 
         - CFrame((matrix3 expr), (vector3 expr))
@@ -189,9 +189,9 @@ public:
      */
     inline Vector3 pointToWorldSpace(const Vector3& v) const {
         return Vector3(
-			rotation[0][0] * v[0] + rotation[0][1] * v[1] + rotation[0][2] * v[2] + translation[0],
-			rotation[1][0] * v[0] + rotation[1][1] * v[1] + rotation[1][2] * v[2] + translation[1],
-			rotation[2][0] * v[0] + rotation[2][1] * v[1] + rotation[2][2] * v[2] + translation[2]);
+            rotation[0][0] * v[0] + rotation[0][1] * v[1] + rotation[0][2] * v[2] + translation[0],
+            rotation[1][0] * v[0] + rotation[1][1] * v[1] + rotation[1][2] * v[2] + translation[1],
+            rotation[2][0] * v[0] + rotation[2][1] * v[1] + rotation[2][2] * v[2] + translation[2]);
     }
 
     /**
@@ -294,9 +294,9 @@ public:
         Vector3         up);
 
     /** The direction this camera is looking (its negative z axis)*/
-	inline Vector3 lookVector() const {
-		return -rotation.column(2);
-	}
+    inline Vector3 lookVector() const {
+        return -rotation.column(2);
+    }
 
     /** Returns the ray starting at the camera origin travelling in direction CoordinateFrame::lookVector. */
     class Ray lookRay() const;
@@ -307,15 +307,15 @@ public:
     }
 
     inline Vector3 rightVector() const {
-		return rotation.column(0);
-	}
+        return rotation.column(0);
+    }
 
     /**
      If a viewer looks along the look vector, this is the viewer's "left".
      Useful for strafing motions and building alternative coordinate frames.
      */
     inline Vector3 leftVector() const {
-		return -rotation.column(0);
+        return -rotation.column(0);
     }
 
     /**

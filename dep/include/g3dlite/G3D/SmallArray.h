@@ -148,13 +148,13 @@ public:
         return *this;
     }
 
-	inline const T& last() const {
-		return (*this)[size() - 1];
-	}
+    inline const T& last() const {
+        return (*this)[size() - 1];
+    }
 
-	inline T& last() {
-		return (*this)[size() - 1];
-	}
+    inline T& last() {
+        return (*this)[size() - 1];
+    }
 };
 
 }

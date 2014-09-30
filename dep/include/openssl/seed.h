@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007 KISA(Korea Information Security Agency). All rights reserved.  
+ * Copyright (c) 2007 KISA(Korea Information Security Agency). All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,7 +31,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -100,7 +100,7 @@
 #endif
 
 #define SEED_BLOCK_SIZE 16
-#define SEED_KEY_LENGTH	16
+#define SEED_KEY_LENGTH    16
 
 
 #ifdef  __cplusplus
@@ -116,7 +116,9 @@ typedef struct seed_key_st {
 #endif
 } SEED_KEY_SCHEDULE;
 
-
+#ifdef OPENSSL_FIPS
+void private_SEED_set_key(const unsigned char rawkey[SEED_KEY_LENGTH], SEED_KEY_SCHEDULE *ks);
+#endif
 void SEED_set_key(const unsigned char rawkey[SEED_KEY_LENGTH], SEED_KEY_SCHEDULE *ks);
 
 void SEED_encrypt(const unsigned char s[SEED_BLOCK_SIZE], unsigned char d[SEED_BLOCK_SIZE], const SEED_KEY_SCHEDULE *ks);

@@ -401,7 +401,7 @@ public:
       Returns true if the position is not at the end of the file
     */
     inline bool hasMore() const {
-	return m_pos + m_alreadyRead < m_length;
+    return m_pos + m_alreadyRead < m_length;
     }
 
     /** Prepares for bit reading via readBits.  Only readBits can be

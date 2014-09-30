@@ -25,56 +25,56 @@ class Ray {
 private:
     friend class Intersect;
 
-	Vector3			m_origin;
+    Vector3            m_origin;
 
-	/** Unit length */
-	Vector3			m_direction;
+    /** Unit length */
+    Vector3            m_direction;
 
-	/** 1.0 / direction */
-	Vector3         m_invDirection;
+    /** 1.0 / direction */
+    Vector3         m_invDirection;
 
 
-	// The following are for the "ray slope" optimization from
-	//  "Fast Ray / Axis-Aligned Bounding Box Overlap Tests using Ray Slopes" 
-	//  by Martin Eisemann, Thorsten Grosch, Stefan Müller and Marcus Magnor
-	//  Computer Graphics Lab, TU Braunschweig, Germany and
-	//  University of Koblenz-Landau, Germany*/
-	enum Classification {MMM, MMP, MPM, MPP, PMM, PMP, PPM, PPP, POO, MOO, OPO, OMO, OOP, OOM, OMM, OMP, OPM, OPP, MOM, MOP, POM, POP, MMO, MPO, PMO, PPO};	Classification classification;
-	// ray slope
-	float ibyj, jbyi, kbyj, jbyk, ibyk, kbyi;
-	// Precomputed components
-	float c_xy, c_xz, c_yx, c_yz, c_zx, c_zy;
+    // The following are for the "ray slope" optimization from
+    //  "Fast Ray / Axis-Aligned Bounding Box Overlap Tests using Ray Slopes" 
+    //  by Martin Eisemann, Thorsten Grosch, Stefan Müller and Marcus Magnor
+    //  Computer Graphics Lab, TU Braunschweig, Germany and
+    //  University of Koblenz-Landau, Germany*/
+    enum Classification {MMM, MMP, MPM, MPP, PMM, PMP, PPM, PPP, POO, MOO, OPO, OMO, OOP, OOM, OMM, OMP, OPM, OPP, MOM, MOP, POM, POP, MMO, MPO, PMO, PPO};    Classification classification;
+    // ray slope
+    float ibyj, jbyi, kbyj, jbyk, ibyk, kbyi;
+    // Precomputed components
+    float c_xy, c_xz, c_yx, c_yz, c_zx, c_zy;
 
 public:
 
-	void set(const Vector3& origin, const Vector3& direction);
+    void set(const Vector3& origin, const Vector3& direction);
 
-	inline const Vector3& origin() const {
-		return m_origin;
-	}
+    inline const Vector3& origin() const {
+        return m_origin;
+    }
 
-	/** Unit direction vector. */
-	inline const Vector3& direction() const {
-		return m_direction;
-	}
+    /** Unit direction vector. */
+    inline const Vector3& direction() const {
+        return m_direction;
+    }
 
-	/** Component-wise inverse of direction vector.  May have inf() components */
-	inline const Vector3& invDirection() const {
-		return m_invDirection;
-	}
+    /** Component-wise inverse of direction vector.  May have inf() components */
+    inline const Vector3& invDirection() const {
+        return m_invDirection;
+    }
 
-	inline Ray() {
-		set(Vector3::zero(), Vector3::unitX());
-	}
+    inline Ray() {
+        set(Vector3::zero(), Vector3::unitX());
+    }
 
-	inline Ray(const Vector3& origin, const Vector3& direction) {
-		set(origin, direction);
-	}
+    inline Ray(const Vector3& origin, const Vector3& direction) {
+        set(origin, direction);
+    }
 
-	Ray(class BinaryInput& b);
+    Ray(class BinaryInput& b);
 
-	void serialize(class BinaryOutput& b) const;
-	void deserialize(class BinaryInput& b);
+    void serialize(class BinaryOutput& b) const;
+    void deserialize(class BinaryInput& b);
 
     /**
      Creates a Ray from a origin and a (nonzero) unit direction.
@@ -83,15 +83,15 @@ public:
         return Ray(point, direction);
     }
 
-	/** Advances the origin along the direction by @a distance */
-	inline Ray bump(float distance) const {
-		return Ray(m_origin + m_direction * distance, m_direction);
-	}
+    /** Advances the origin along the direction by @a distance */
+    inline Ray bump(float distance) const {
+        return Ray(m_origin + m_direction * distance, m_direction);
+    }
 
-	/** Advances the origin along the @a bumpDirection by @a distance and returns the new ray*/
-	inline Ray bump(float distance, const Vector3& bumpDirection) const {
-		return Ray(m_origin + bumpDirection * distance, m_direction);
-	}
+    /** Advances the origin along the @a bumpDirection by @a distance and returns the new ray*/
+    inline Ray bump(float distance, const Vector3& bumpDirection) const {
+        return Ray(m_origin + bumpDirection * distance, m_direction);
+    }
 
     /**
      Returns the closest point on the Ray to point.

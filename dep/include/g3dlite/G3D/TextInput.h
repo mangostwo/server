@@ -398,7 +398,7 @@ public:
 
         Settings();
     };
-	
+    
 private:
 
     std::deque<Token>       stack;

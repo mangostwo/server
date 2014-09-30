@@ -36,7 +36,23 @@
 #define LIBMPQ_PKZIP_CMP_BAD_DATA       3
 #define LIBMPQ_PKZIP_CMP_ABORT          4
 
-#include "pack_begin.h"
+/* define true and false, because not all systems have them. */
+#ifndef FALSE
+#define FALSE 0
+#endif
+#ifndef TRUE
+#define TRUE 1
+#endif
+
+#ifdef _MSC_VER
+#pragma pack(push,1)
+#define PACK_STRUCT
+#else
+//#error "pack_begin.h may not be included twice!"
+/* we assume GNU here */
+#define PACK_STRUCT __attribute__((packed))
+#endif
+
 /* compression structure. */
 typedef struct
 {
@@ -67,7 +83,16 @@ typedef struct
     uint8_t     clen_bits[0x10];                                        /* 3104 - number of valid bits for copied block. */
     uint16_t    len_base[0x10];                                         /* 3114 - buffer. */
 } PACK_STRUCT pkzip_cmp_s;
-#include "pack_end.h"
+
+#ifdef _PACK_BEGIN
+#undef _PACK_BEGIN
+#endif
+
+#ifdef _MSC_VER
+#pragma pack(pop)
+#endif
+
+#undef PACK_STRUCT
 
 /* data structure. */
 typedef struct

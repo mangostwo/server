@@ -95,7 +95,7 @@ namespace G3D {
  they have different IP's.
  */
 inline bool operator==(const NetAddress& a, const NetAddress& b) {
-	return (a.ip() == b.ip()) && (a.port() == b.port());
+    return (a.ip() == b.ip()) && (a.port() == b.port());
 }
 
 

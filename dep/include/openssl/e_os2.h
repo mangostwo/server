@@ -7,7 +7,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -193,8 +193,14 @@ extern "C" {
 #endif
 
 /* --------------------------------- VOS ----------------------------------- */
-#ifdef OPENSSL_SYSNAME_VOS
+#if defined(__VOS__) || defined(OPENSSL_SYSNAME_VOS)
 # define OPENSSL_SYS_VOS
+#ifdef __HPPA__
+# define OPENSSL_SYS_VOS_HPPA
+#endif
+#ifdef __IA32__
+# define OPENSSL_SYS_VOS_IA32
+#endif
 #endif
 
 /* ------------------------------- VxWorks --------------------------------- */
@@ -265,22 +271,42 @@ extern "C" {
    required (if a shared library version requires it, for example.
    The way it's done allows definitions like this:
 
-	// in foobar.c
-	OPENSSL_IMPLEMENT_GLOBAL(int,foobar,0)
-	// in foobar.h
-	OPENSSL_DECLARE_GLOBAL(int,foobar);
-	#define foobar OPENSSL_GLOBAL_REF(foobar)
+    // in foobar.c
+    OPENSSL_IMPLEMENT_GLOBAL(int,foobar,0)
+    // in foobar.h
+    OPENSSL_DECLARE_GLOBAL(int,foobar);
+    #define foobar OPENSSL_GLOBAL_REF(foobar)
 */
 #ifdef OPENSSL_EXPORT_VAR_AS_FUNCTION
-# define OPENSSL_IMPLEMENT_GLOBAL(type,name,value)			\
-	type *_shadow_##name(void)					\
-	{ static type _hide_##name=value; return &_hide_##name; }
+# define OPENSSL_IMPLEMENT_GLOBAL(type,name,value)            \
+    type *_shadow_##name(void)                    \
+    { static type _hide_##name=value; return &_hide_##name; }
 # define OPENSSL_DECLARE_GLOBAL(type,name) type *_shadow_##name(void)
 # define OPENSSL_GLOBAL_REF(name) (*(_shadow_##name()))
 #else
 # define OPENSSL_IMPLEMENT_GLOBAL(type,name,value) OPENSSL_GLOBAL type _shadow_##name=value;
 # define OPENSSL_DECLARE_GLOBAL(type,name) OPENSSL_EXPORT type _shadow_##name
 # define OPENSSL_GLOBAL_REF(name) _shadow_##name
+#endif
+
+#if defined(OPENSSL_SYS_MACINTOSH_CLASSIC) && macintosh==1 && !defined(MAC_OS_GUSI_SOURCE)
+#  define ossl_ssize_t long
+#endif
+
+#ifdef OPENSSL_SYS_MSDOS
+#  define ossl_ssize_t long
+#endif
+
+#if defined(NeXT) || defined(OPENSSL_SYS_NEWS4) || defined(OPENSSL_SYS_SUNOS)
+#  define ssize_t int
+#endif
+
+#if defined(__ultrix) && !defined(ssize_t)
+#  define ossl_ssize_t int
+#endif
+
+#ifndef ossl_ssize_t
+#  define ossl_ssize_t ssize_t
 #endif
 
 #ifdef  __cplusplus

@@ -382,9 +382,9 @@ bool Matrix4::operator==(const Matrix4& other) const {
     // If the bit patterns are identical, they must be
     // the same matrix.  If not, they *might* still have
     // equal elements due to floating point weirdness.
-    if (memcmp(this, &other, sizeof(Matrix4) == 0)) {
+    if (memcmp(this, &other, sizeof(Matrix4)) == 0) {
         return true;
-    } 
+    }
 
     for (int r = 0; r < 4; ++r) {
         for (int c = 0; c < 4; ++c) {
@@ -401,7 +401,7 @@ bool Matrix4::operator==(const Matrix4& other) const {
 float Matrix4::determinant() const {
     // Determinant is the dot product of the first row and the first row
     // of cofactors (i.e. the first col of the adjoint matrix)
-	return cofactor().row(0).dot(row(0));
+    return cofactor().row(0).dot(row(0));
 }
 
 
@@ -417,14 +417,14 @@ Matrix4 Matrix4::inverse() const {
 
     // Determinant is the dot product of the first row and the first row
     // of cofactors (i.e. the first col of the adjoint matrix)
-	float det = A.column(0).dot(row(0));
+    float det = A.column(0).dot(row(0));
 
-	return A * (1.0f / det);
+    return A * (1.0f / det);
 }
 
 
 Matrix4 Matrix4::cofactor() const {
-	Matrix4 out;
+    Matrix4 out;
 
     // We'll use i to incrementally compute -1 ^ (r+c)
     int i = 1;
@@ -482,19 +482,19 @@ float Matrix4::subDeterminant(int excludeRow, int excludeCol) const {
 
 
 CoordinateFrame Matrix4::approxCoordinateFrame() const {
-	CoordinateFrame cframe;
+    CoordinateFrame cframe;
 
-	for (int r = 0; r < 3; ++r) {
-		for (int c = 0; c < 3; ++c) {
-			cframe.rotation[r][c] = elt[r][c];
-		}
-		cframe.translation[r] = elt[r][3];
-	}
+    for (int r = 0; r < 3; ++r) {
+        for (int c = 0; c < 3; ++c) {
+            cframe.rotation[r][c] = elt[r][c];
+        }
+        cframe.translation[r] = elt[r][3];
+    }
 
-	// Ensure that the rotation matrix is orthonormal
-	cframe.rotation.orthonormalize();
+    // Ensure that the rotation matrix is orthonormal
+    cframe.rotation.orthonormalize();
 
-	return cframe;
+    return cframe;
 }
 
 
@@ -517,10 +517,10 @@ void Matrix4::deserialize(class BinaryInput& b) {
 
 std::string Matrix4::toString() const {
     return G3D::format("[%g, %g, %g, %g; %g, %g, %g, %g; %g, %g, %g, %g; %g, %g, %g, %g]", 
-			elt[0][0], elt[0][1], elt[0][2], elt[0][3],
-			elt[1][0], elt[1][1], elt[1][2], elt[1][3],
-			elt[2][0], elt[2][1], elt[2][2], elt[2][3],
-			elt[3][0], elt[3][1], elt[3][2], elt[3][3]);
+            elt[0][0], elt[0][1], elt[0][2], elt[0][3],
+            elt[1][0], elt[1][1], elt[1][2], elt[1][3],
+            elt[2][0], elt[2][1], elt[2][2], elt[2][3],
+            elt[3][0], elt[3][1], elt[3][2], elt[3][3]);
 }
 
 } // namespace

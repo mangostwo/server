@@ -1,0 +1,6 @@
+LIBRARY FastMMx64
+
+EXPORTS
+
+FastMM_malloc
+FastMM_free

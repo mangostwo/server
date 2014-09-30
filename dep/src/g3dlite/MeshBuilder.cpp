@@ -94,9 +94,9 @@ void MeshBuilder::computeBounds(Vector3& min, Vector3& max) {
 void MeshBuilder::addTriangle(const Vector3& a, const Vector3& b, const Vector3& c) {
     triList.append(a, b, c);
 
-	if (_twoSided) {
-	    triList.append(c, b, a);
-	}
+    if (_twoSided) {
+        triList.append(c, b, a);
+    }
 }
 
 
@@ -107,7 +107,7 @@ void MeshBuilder::addQuad(const Vector3& a, const Vector3& b, const Vector3& c, 
 
 
 void MeshBuilder::addTriangle(const Triangle& t) {
-	addTriangle(t.vertex(0), t.vertex(1), t.vertex(2));
+    addTriangle(t.vertex(0), t.vertex(1), t.vertex(2));
 }
 
 } // namespace

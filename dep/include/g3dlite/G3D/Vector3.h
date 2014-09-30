@@ -87,14 +87,14 @@ public:
     explicit Vector3(float coordinate[3]);
     explicit Vector3(double coordinate[3]);
     Vector3(const class Vector3int16& v);
-	explicit Vector3(class TextInput& t);
+    explicit Vector3(class TextInput& t);
     explicit Vector3(const class Color3& c);
 
-	/** Format is three float32's */
+    /** Format is three float32's */
     void serialize(class BinaryOutput& b) const;
     void deserialize(class BinaryInput& b);
 
-	/** Format is "(%f, %f, %f)" */
+    /** Format is "(%f, %f, %f)" */
     void serialize(class TextOutput& t) const;
     void deserialize(class TextInput& t);
 
@@ -153,7 +153,7 @@ public:
     Vector3& __fastcall operator/= (const Vector3& v);
 
     /** Same as magnitude */
-	float length() const;
+    float length() const;
 
     float magnitude() const;
     
@@ -265,7 +265,7 @@ public:
     float squaredLength() const;
 
     float squaredMagnitude () const;
-	
+    
     float __fastcall dot(const Vector3& rkVector) const;
     
     float unitize(float tolerance = 1e-06);

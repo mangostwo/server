@@ -512,13 +512,13 @@ public:
     bool receive(NetAddress& sender);
 
     template<typename T> inline bool receive(NetAddress& sender, T& message) {
-		bool r = receive(sender);
-		if (r) {
-			BinaryInput b((messageBuffer.getCArray() + 4), 
-						  messageBuffer.size() - 4, 
-						  G3D_LITTLE_ENDIAN, BinaryInput::NO_COPY);
-			message.deserialize(b);
-		}
+        bool r = receive(sender);
+        if (r) {
+            BinaryInput b((messageBuffer.getCArray() + 4), 
+                          messageBuffer.size() - 4, 
+                          G3D_LITTLE_ENDIAN, BinaryInput::NO_COPY);
+            message.deserialize(b);
+        }
 
         return r;
     }

@@ -35,10 +35,10 @@ const int jpegQuality = 96;
  */ 
 class memory_destination_mgr {
 public:
-	struct jpeg_destination_mgr pub;
-	JOCTET*                     buffer;
-	int                         size;
-	int                         count;
+    struct jpeg_destination_mgr pub;
+    JOCTET*                     buffer;
+    int                         size;
+    int                         count;
 };
 
 typedef memory_destination_mgr* mem_dest_ptr;
@@ -49,11 +49,11 @@ typedef memory_destination_mgr* mem_dest_ptr;
 static void init_destination (
     j_compress_ptr              cinfo) {
 
-	mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
+    mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
 
-	dest->pub.next_output_byte = dest->buffer;
-	dest->pub.free_in_buffer = dest->size;
-	dest->count=0;
+    dest->pub.next_output_byte = dest->buffer;
+    dest->pub.free_in_buffer = dest->size;
+    dest->count=0;
 }
 
 /**
@@ -62,12 +62,12 @@ static void init_destination (
 static boolean empty_output_buffer (
     j_compress_ptr              cinfo) {
 
-	mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
+    mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
 
-	dest->pub.next_output_byte = dest->buffer;
-	dest->pub.free_in_buffer = dest->size;
+    dest->pub.next_output_byte = dest->buffer;
+    dest->pub.free_in_buffer = dest->size;
 
-	return TRUE;
+    return TRUE;
 }
 
 /**
@@ -76,8 +76,8 @@ static boolean empty_output_buffer (
 static void term_destination (
     j_compress_ptr              cinfo) {
 
-	mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
-	dest->count = dest->size - dest->pub.free_in_buffer;
+    mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
+    dest->count = dest->size - dest->pub.free_in_buffer;
 }
 
 /**
@@ -88,23 +88,23 @@ static void jpeg_memory_dest (
     JOCTET*                     buffer,
     int                         size) {
 
-	mem_dest_ptr dest;
+    mem_dest_ptr dest;
 
-	if (cinfo->dest == NULL) {
+    if (cinfo->dest == NULL) {
         // First time for this JPEG object; call the
         // IJG allocator to get space.
-		cinfo->dest = (struct jpeg_destination_mgr*)
-			(*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, 
+        cinfo->dest = (struct jpeg_destination_mgr*)
+            (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, 
                                         JPOOL_PERMANENT,
-                       				    sizeof(memory_destination_mgr));
-	}
+                                           sizeof(memory_destination_mgr));
+    }
 
-	dest                            = (mem_dest_ptr) cinfo->dest;
-	dest->size                      = size;
-	dest->buffer                    = buffer;
-	dest->pub.init_destination      = init_destination;
-	dest->pub.empty_output_buffer   = empty_output_buffer;
-	dest->pub.term_destination      = term_destination;
+    dest                            = (mem_dest_ptr) cinfo->dest;
+    dest->size                      = size;
+    dest->buffer                    = buffer;
+    dest->pub.init_destination      = init_destination;
+    dest->pub.empty_output_buffer   = empty_output_buffer;
+    dest->pub.term_destination      = term_destination;
 }
   
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -117,10 +117,10 @@ static void jpeg_memory_dest (
 class memory_source_mgr {
 public:
     struct jpeg_source_mgr  pub;
-	int                     source_size;
-	unsigned char*          source_data;
-	boolean                 start_of_data;
-	JOCTET*                 buffer;
+    int                     source_size;
+    unsigned char*          source_data;
+    boolean                 start_of_data;
+    JOCTET*                 buffer;
 };
 
 
@@ -145,26 +145,26 @@ static void init_source(
 static boolean fill_input_buffer(
     j_decompress_ptr        cinfo) {
 
-	mem_src_ptr src = (mem_src_ptr) cinfo->src;
+    mem_src_ptr src = (mem_src_ptr) cinfo->src;
 
-	size_t bytes_read = 0;
+    size_t bytes_read = 0;
 
-	if (src->source_size > INPUT_BUF_SIZE)
-		bytes_read = INPUT_BUF_SIZE;
-	else
-		bytes_read = src->source_size;
+    if (src->source_size > INPUT_BUF_SIZE)
+        bytes_read = INPUT_BUF_SIZE;
+    else
+        bytes_read = src->source_size;
 
-	memcpy (src->buffer, src->source_data, bytes_read);
+    memcpy (src->buffer, src->source_data, bytes_read);
 
-	src->source_data += bytes_read;
-	src->source_size -= bytes_read;
+    src->source_data += bytes_read;
+    src->source_size -= bytes_read;
 
-	src->pub.next_input_byte = src->buffer;
-	src->pub.bytes_in_buffer = bytes_read;
-	src->start_of_data = FALSE;
+    src->pub.next_input_byte = src->buffer;
+    src->pub.bytes_in_buffer = bytes_read;
+    src->start_of_data = FALSE;
 
 
-	return TRUE;
+    return TRUE;
 }
 
 
@@ -175,18 +175,18 @@ static void skip_input_data(
     j_decompress_ptr        cinfo,
     long                    num_bytes) {
 
-	mem_src_ptr src = (mem_src_ptr)cinfo->src;
+    mem_src_ptr src = (mem_src_ptr)cinfo->src;
 
-	if (num_bytes > 0) {
-		while (num_bytes > (long) src->pub.bytes_in_buffer) {
-			num_bytes -= (long) src->pub.bytes_in_buffer;
-			boolean s = fill_input_buffer(cinfo);
+    if (num_bytes > 0) {
+        while (num_bytes > (long) src->pub.bytes_in_buffer) {
+            num_bytes -= (long) src->pub.bytes_in_buffer;
+            boolean s = fill_input_buffer(cinfo);
             debugAssert(s); (void)s;
-		}
+        }
 
-		src->pub.next_input_byte += (size_t) num_bytes;
-		src->pub.bytes_in_buffer -= (size_t) num_bytes;
-	}
+        src->pub.next_input_byte += (size_t) num_bytes;
+        src->pub.bytes_in_buffer -= (size_t) num_bytes;
+    }
 }
 
 
@@ -196,7 +196,7 @@ static void skip_input_data(
 static void term_source (
     j_decompress_ptr        cinfo) {
     (void)cinfo;
-	// Intentionally empty
+    // Intentionally empty
 }
 
 
@@ -208,38 +208,38 @@ static void jpeg_memory_src (
     JOCTET*                 buffer,
     int                     size) {
 
-	mem_src_ptr src;
+    mem_src_ptr src;
 
-	if (cinfo->src == NULL) {
+    if (cinfo->src == NULL) {
         // First time for this JPEG object
-		cinfo->src = (struct jpeg_source_mgr*)
-			(*cinfo->mem->alloc_small)(
+        cinfo->src = (struct jpeg_source_mgr*)
+            (*cinfo->mem->alloc_small)(
                 (j_common_ptr) cinfo,
                 JPOOL_PERMANENT,
-				sizeof(memory_source_mgr));
-		
+                sizeof(memory_source_mgr));
+        
         src = (mem_src_ptr)cinfo->src;
-		
+        
         src->buffer = (JOCTET*)
-			(*cinfo->mem->alloc_small)(
+            (*cinfo->mem->alloc_small)(
                 (j_common_ptr) cinfo,
                 JPOOL_PERMANENT,
-				INPUT_BUF_SIZE * sizeof(JOCTET));
-	}
+                INPUT_BUF_SIZE * sizeof(JOCTET));
+    }
 
-	src = (mem_src_ptr)cinfo->src;
-	src->pub.init_source        = init_source;
-	src->pub.fill_input_buffer  = fill_input_buffer;
-	src->pub.skip_input_data    = skip_input_data;
+    src = (mem_src_ptr)cinfo->src;
+    src->pub.init_source        = init_source;
+    src->pub.fill_input_buffer  = fill_input_buffer;
+    src->pub.skip_input_data    = skip_input_data;
 
     // use default method
-	src->pub.resync_to_restart  = jpeg_resync_to_restart;
-	src->pub.term_source        = term_source;
-	src->source_data            = buffer;
-	src->source_size            = size;
+    src->pub.resync_to_restart  = jpeg_resync_to_restart;
+    src->pub.term_source        = term_source;
+    src->source_data            = buffer;
+    src->source_size            = size;
 
     // forces fill_input_buffer on first read
-	src->pub.bytes_in_buffer    = 0;
+    src->pub.bytes_in_buffer    = 0;
     
     // until buffer loaded
     src->pub.next_input_byte = NULL; 
@@ -249,13 +249,13 @@ static void jpeg_memory_src (
 void GImage::encodeJPEG(
     BinaryOutput&           out) const {
 
-	if (m_channels != 3) {
-		// Convert to three channel
-		GImage tmp = *this;
-		tmp.convertToRGB();
-		tmp.encodeJPEG(out);
-		return;
-	}
+    if (m_channels != 3) {
+        // Convert to three channel
+        GImage tmp = *this;
+        tmp.convertToRGB();
+        tmp.encodeJPEG(out);
+        return;
+    }
 
     debugAssert(m_channels == 3);
     out.setEndian(G3D_LITTLE_ENDIAN);
@@ -264,20 +264,20 @@ void GImage::encodeJPEG(
     jpeg_compress_struct    cinfo;
     jpeg_error_mgr          jerr;
 
-	cinfo.err = jpeg_std_error(&jerr);
-	jpeg_create_compress(&cinfo);
+    cinfo.err = jpeg_std_error(&jerr);
+    jpeg_create_compress(&cinfo);
 
     // Specify the destination for the compressed data.
     // (Overestimate the size)
     int buffer_size = m_width * m_height * 3 + 200;
     JOCTET* compressed_data = (JOCTET*)System::malloc(buffer_size);
-	jpeg_memory_dest(&cinfo, compressed_data, buffer_size);
+    jpeg_memory_dest(&cinfo, compressed_data, buffer_size);
 
 
     cinfo.image_width       = m_width;
     cinfo.image_height      = m_height;
 
-	// # of color components per pixel
+    // # of color components per pixel
     cinfo.input_components  = 3;
 
     // colorspace of input image
@@ -297,14 +297,14 @@ void GImage::encodeJPEG(
     jpeg_start_compress(&cinfo, TRUE);
 
     // Iterate over all scanlines from top to bottom
-	// pointer to a single row
+    // pointer to a single row
     JSAMPROW row_pointer[1];
     
     // JSAMPLEs per row in image_buffer
     int row_stride = cinfo.image_width * 3;
     while (cinfo.next_scanline < cinfo.image_height) {
-	    row_pointer[0] = &(m_byte[cinfo.next_scanline * row_stride]);
-	    jpeg_write_scanlines(&cinfo, row_pointer, 1);
+        row_pointer[0] = &(m_byte[cinfo.next_scanline * row_stride]);
+        jpeg_write_scanlines(&cinfo, row_pointer, 1);
     }
 
     // Shut down the compressor
@@ -313,7 +313,7 @@ void GImage::encodeJPEG(
     // Figure out how big the result was.
     int outLength = ((mem_dest_ptr)cinfo.dest)->count;
 
-    //	Release the JPEG compression object
+    //    Release the JPEG compression object
     jpeg_destroy_compress(&cinfo);
 
     // Copy into an appropriately sized output buffer.
@@ -328,53 +328,53 @@ void GImage::encodeJPEG(
 void GImage::decodeJPEG(
     BinaryInput&                input) {
 
-	struct jpeg_decompress_struct   cinfo;
-	struct jpeg_error_mgr           jerr;
+    struct jpeg_decompress_struct   cinfo;
+    struct jpeg_error_mgr           jerr;
     int                             loc = 0;
 
     m_channels = 3;
     // We have to set up the error handler, in case initialization fails.
-	cinfo.err = jpeg_std_error(&jerr);
+    cinfo.err = jpeg_std_error(&jerr);
 
     // Initialize the JPEG decompression object.
-	jpeg_create_decompress(&cinfo);
+    jpeg_create_decompress(&cinfo);
 
-	// Specify data source (eg, a file, for us, memory)
-	jpeg_memory_src(&cinfo, const_cast<uint8*>(input.getCArray()), input.size());
+    // Specify data source (eg, a file, for us, memory)
+    jpeg_memory_src(&cinfo, const_cast<uint8*>(input.getCArray()), input.size());
 
-	// Read the parameters with jpeg_read_header()
-	jpeg_read_header(&cinfo, TRUE);
+    // Read the parameters with jpeg_read_header()
+    jpeg_read_header(&cinfo, TRUE);
 
-	// Set parameters for decompression
-	// (We do nothing here since the defaults are fine)
+    // Set parameters for decompression
+    // (We do nothing here since the defaults are fine)
 
-	// Start decompressor
-	jpeg_start_decompress(&cinfo);
+    // Start decompressor
+    jpeg_start_decompress(&cinfo);
 
-	// Get and set the values of interest to this object
-	m_width     = cinfo.output_width;
-	m_height    = cinfo.output_height;
+    // Get and set the values of interest to this object
+    m_width     = cinfo.output_width;
+    m_height    = cinfo.output_height;
 
-	// Prepare the pointer object for the pixel data
+    // Prepare the pointer object for the pixel data
     m_byte = (uint8*)m_memMan->alloc(m_width * m_height * 3);
 
- 	// JSAMPLEs per row in output buffer
+     // JSAMPLEs per row in output buffer
     int bpp         = cinfo.output_components;
     int row_stride  = cinfo.output_width * bpp;
 
-	// Make a one-row-high sample array that will go away when done with image
+    // Make a one-row-high sample array that will go away when done with image
     JSAMPARRAY temp = (*cinfo.mem->alloc_sarray)
-		((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
+        ((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
 
     // Read data on a scanline by scanline basis
-	while (cinfo.output_scanline < cinfo.output_height) {
+    while (cinfo.output_scanline < cinfo.output_height) {
 
         // We may need to adjust the output based on the
         // number of channels it has.
         switch (bpp) {
-	    case 1:
+        case 1:
             // Grayscale; decompress to temp.
-    		jpeg_read_scanlines(&cinfo, temp, 1);
+            jpeg_read_scanlines(&cinfo, temp, 1);
 
             // Expand to three channels
             {
@@ -394,21 +394,21 @@ void GImage::decodeJPEG(
                     t       += 1;
                 }
             }
-		    break;
+            break;
 
-	    case 3:
+        case 3:
             // Read directly into the array
             {
                 // Need one extra level of indirection.
                 uint8*     scan = m_byte + loc;
                 JSAMPARRAY ptr  = &scan;
-    		    jpeg_read_scanlines(&cinfo, ptr, 1);
+                jpeg_read_scanlines(&cinfo, ptr, 1);
             }
-		    break;
+            break;
 
-	    case 4:
+        case 4:
             // RGBA; decompress to temp.
-    		jpeg_read_scanlines(&cinfo, temp, 1);
+            jpeg_read_scanlines(&cinfo, temp, 1);
 
             // Drop the 3rd channel
             {
@@ -425,21 +425,21 @@ void GImage::decodeJPEG(
                     t       += 4;
                 }
             }
-		    break;
+            break;
 
-	    default:
-		    throw Error("Unexpected number of channels.", input.getFilename());
-	    }
+        default:
+            throw Error("Unexpected number of channels.", input.getFilename());
+        }
 
-		loc += row_stride;
-	}
+        loc += row_stride;
+    }
 
-	// Finish decompression
-	jpeg_finish_decompress(&cinfo);
+    // Finish decompression
+    jpeg_finish_decompress(&cinfo);
 
     alwaysAssertM(this, "Corrupt GImage");
-	// Release JPEG decompression object
-	jpeg_destroy_decompress(&cinfo);
+    // Release JPEG decompression object
+    jpeg_destroy_decompress(&cinfo);
 }
 
 

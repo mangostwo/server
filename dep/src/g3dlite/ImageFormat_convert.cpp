@@ -520,7 +520,7 @@ static void rgba32f_to_rgb32f(const Array<const void*>& srcBytes, int srcWidth, 
         }
         for (int x = 0; x < srcWidth; ++x, ++srcIndex, dstByteOffset += 3 * sizeof(float)) {
             Color3& d = *reinterpret_cast<Color3*>(dst + dstByteOffset);
-            const Color4& s = src[srcIndex];	    
+            const Color4& s = src[srcIndex];        
             d = s.rgb();
         }
         dstByteOffset += dstRowPadBytes;
@@ -800,11 +800,11 @@ static const float R_BGB[5][5] =
 
 /** Applies a 5x5 filter to monochrome image I (wrapping at the boundaries) */
 static uint8 applyFilter(const uint8*    I,
-			 int             x,
-			 int             y,
-			 int             w,
-			 int             h,
-			 const float     filter[5][5]) {
+             int             x,
+             int             y,
+             int             w,
+             int             h,
+             const float     filter[5][5]) {
     
     debugAssert(isEven(w));
     debugAssert(isEven(h));
@@ -813,13 +813,13 @@ static uint8 applyFilter(const uint8*    I,
     float denom = 0.0f;
     
     for (int dy = 0; dy < 5; ++dy) {
-	int offset = ((y + dy + h - 2) % h) * w;
+    int offset = ((y + dy + h - 2) % h) * w;
     
-	for (int dx = 0; dx < 5; ++dx) {
-	    float f = filter[dy][dx];
-	    sum += f * I[((x + dx + w - 2) % w) + offset];
-	    denom += f;
-	}
+    for (int dx = 0; dx < 5; ++dx) {
+        float f = filter[dy][dx];
+        sum += f * I[((x + dx + w - 2) % w) + offset];
+        denom += f;
+    }
     }
     
     return (uint8)iClamp(iRound(sum / denom), 0, 255);
@@ -828,9 +828,9 @@ static uint8 applyFilter(const uint8*    I,
 /** Helper method for Bayer grbg and bggr --> rgb8 */
 static void swapRedAndBlue(int N, Color3uint8* out) {
     for (int i = N - 1; i >= 0; --i) {
-	uint8 tmp = out[i].r;
-	out[i].r = out[i].b;
-	out[i].b = tmp;
+    uint8 tmp = out[i].r;
+    out[i].r = out[i].b;
+    out[i].b = tmp;
     }
 }
 
@@ -840,149 +840,149 @@ static void swapRedAndBlue(int N, Color3uint8* out) {
 // rgb8 --> bayer helpers
 // =====================================================================
 static void rgb8_to_bayer_rggb8(const int w, const int h, 
-				const uint8* src, uint8* dst) {
+                const uint8* src, uint8* dst) {
     Color3uint8* srcColor = (Color3uint8*)src;
     Color1uint8* dstColor = (Color1uint8*)dst;
 
     // Top row pixels
     for (int y = 0; y < h - 1; y += 2) {
-	int offset = y * w;
+    int offset = y * w;
 
-	// Top left pixels
-	for(int x = 0; x < w - 1; x += 2) {
-	    dstColor[x + offset] = Color1(srcColor[x + offset].r);
-	}
+    // Top left pixels
+    for(int x = 0; x < w - 1; x += 2) {
+        dstColor[x + offset] = Color1(srcColor[x + offset].r);
+    }
 
-	// Top right pixels
-	for(int x = 1; x < w - 1; x += 2) {
-	    dstColor[x + offset] = Color1(srcColor[x + offset].g);
-	}
+    // Top right pixels
+    for(int x = 1; x < w - 1; x += 2) {
+        dstColor[x + offset] = Color1(srcColor[x + offset].g);
+    }
     }
 
     // Bottom row pixels
     for (int y = 1; y < h - 1; y += 2) {
-	int offset = y * w;
+    int offset = y * w;
 
-	// Bottom left pixels
-	for (int x = 0; x < w - 1; x += 2) {
-	    dstColor[x + offset] = Color1(srcColor[x + offset].g);
-	}
+    // Bottom left pixels
+    for (int x = 0; x < w - 1; x += 2) {
+        dstColor[x + offset] = Color1(srcColor[x + offset].g);
+    }
 
-	// Bottom right pixels
-	for (int x = 1; x < w - 1; x += 2) {
-	    dstColor[x + offset] = Color1(srcColor[x + offset].b);
-	}
+    // Bottom right pixels
+    for (int x = 1; x < w - 1; x += 2) {
+        dstColor[x + offset] = Color1(srcColor[x + offset].b);
+    }
     }
 }
 
 
 static void rgb8_to_bayer_grbg8(const int w, const int h, 
-				const uint8* src, uint8* dst) {
+                const uint8* src, uint8* dst) {
     Color3uint8* srcColor = (Color3uint8*)src;
     Color1uint8* dstColor = (Color1uint8*)dst;
 
     // Top row pixels
     for (int y = 0; y < h - 1; y += 2) {
-	int offset = y * w;
+    int offset = y * w;
 
-	// Top left pixels
-	for (int x = 0; x < w - 1; x += 2) {
-	    dstColor[x + offset] = Color1(srcColor[x + offset].g);
-	}
+    // Top left pixels
+    for (int x = 0; x < w - 1; x += 2) {
+        dstColor[x + offset] = Color1(srcColor[x + offset].g);
+    }
 
-	// Top right pixels
-	for (int x = 1; x < w - 1; x += 2) {
-	    dstColor[x + offset] = Color1(srcColor[x + offset].r);
-	}
+    // Top right pixels
+    for (int x = 1; x < w - 1; x += 2) {
+        dstColor[x + offset] = Color1(srcColor[x + offset].r);
+    }
     }
 
     // Bottom row pixels
     for (int y = 1; y < h - 1; y += 2) {
-	int offset = y * w;
+    int offset = y * w;
 
-	// Bottom left pixels
-	for (int x = 0; x < w - 1; x += 2) {
-	    dstColor[x + offset] = Color1(srcColor[x + offset].b);
-	}
+    // Bottom left pixels
+    for (int x = 0; x < w - 1; x += 2) {
+        dstColor[x + offset] = Color1(srcColor[x + offset].b);
+    }
 
-	// Bottom right pixels
-	for (int x = 1; x < w - 1; x += 2) {
-	    dstColor[x + offset] = Color1(srcColor[x + offset].g);
-	}
+    // Bottom right pixels
+    for (int x = 1; x < w - 1; x += 2) {
+        dstColor[x + offset] = Color1(srcColor[x + offset].g);
+    }
     }
 }
 
 
 static void rgb8_to_bayer_bggr8(const int w, const int h, 
-				const uint8* src, uint8* dst) {
+                const uint8* src, uint8* dst) {
     Color3uint8* srcColor = (Color3uint8*)src;
     Color1uint8* dstColor = (Color1uint8*)dst;
 
     // Top row pixels
     for (int y = 0; y < h - 1; y += 2) {
-	int offset = y * w;
+    int offset = y * w;
 
-	// Top left pixels
-	for (int x = 0; x < w - 1; x += 2) {
-	    dstColor[x + offset] = Color1(srcColor[x + offset].b);
-	}
+    // Top left pixels
+    for (int x = 0; x < w - 1; x += 2) {
+        dstColor[x + offset] = Color1(srcColor[x + offset].b);
+    }
 
-	// Top right pixels
-	for (int x = 1; x < w - 1; x += 2) {
-	    dstColor[x + offset] = Color1(srcColor[x + offset].g);
-	}
+    // Top right pixels
+    for (int x = 1; x < w - 1; x += 2) {
+        dstColor[x + offset] = Color1(srcColor[x + offset].g);
+    }
     }
 
     // Bottom row pixels
     for (int y = 1; y < h - 1; y += 2) {
-	int offset = y * w;
+    int offset = y * w;
 
-	// Bottom left pixels
-	for(int x = 0; x < w - 1; x += 2) {
-	    dstColor[x + offset] = Color1(srcColor[x + offset].g);
-	}
+    // Bottom left pixels
+    for(int x = 0; x < w - 1; x += 2) {
+        dstColor[x + offset] = Color1(srcColor[x + offset].g);
+    }
 
-	// Bottom right pixels
-	for(int x = 1; x < w - 1; x += 2) {
-	    dstColor[x + offset] = Color1(srcColor[x + offset].r);
-	}
+    // Bottom right pixels
+    for(int x = 1; x < w - 1; x += 2) {
+        dstColor[x + offset] = Color1(srcColor[x + offset].r);
+    }
     }
 }
 
 
 static void rgb8_to_bayer_gbrg8(const int w, const int h, 
-				const uint8* src, uint8* dst) {
+                const uint8* src, uint8* dst) {
     Color3uint8* srcColor = (Color3uint8*)src;
     Color1uint8* dstColor = (Color1uint8*)dst;
 
     // Top row pixels
     for(int y = 0; y < h - 1; y += 2) {
-	int offset = y * w;
+    int offset = y * w;
 
-	// Top left pixels
-	for(int x = 0; x < w - 1; x += 2) {
-	    dstColor[x + offset] = Color1(srcColor[x + offset].g);
-	}
+    // Top left pixels
+    for(int x = 0; x < w - 1; x += 2) {
+        dstColor[x + offset] = Color1(srcColor[x + offset].g);
+    }
 
-	// Top right pixels
-	for(int x = 1; x < w - 1; x += 2) {
-	    dstColor[x + offset] = Color1(srcColor[x + offset].b);
-	}
+    // Top right pixels
+    for(int x = 1; x < w - 1; x += 2) {
+        dstColor[x + offset] = Color1(srcColor[x + offset].b);
+    }
     }
 
     // Bottom row pixels
     for(int y = 1; y < h - 1; y += 2) {
-	int offset = y * w;
+    int offset = y * w;
 
-	// Bottom left pixels
-	for(int x = 0; x < w - 1; x += 2) {
-	    dstColor[x + offset] = Color1(srcColor[x + offset].r);
-	}
+    // Bottom left pixels
+    for(int x = 0; x < w - 1; x += 2) {
+        dstColor[x + offset] = Color1(srcColor[x + offset].r);
+    }
 
-	// Bottom right pixels
-	for(int x = 1; x < w - 1; x += 2) {
-	    dstColor[x + offset] = Color1(srcColor[x + offset].g);
-	}
+    // Bottom right pixels
+    for(int x = 1; x < w - 1; x += 2) {
+        dstColor[x + offset] = Color1(srcColor[x + offset].g);
+    }
     }
 }
 
@@ -1035,61 +1035,61 @@ static void rgba32f_to_bayer_bggr8(const Array<const void*>& srcBytes, int srcWi
 // bayer --> rgb8 helpers
 // =====================================================================
 static void bayer_rggb8_to_rgb8_mhc(int w, int h, 
-				    const uint8* in, uint8* _out) {
+                    const uint8* in, uint8* _out) {
     debugAssert(in != _out);
 
     Color3uint8* out = (Color3uint8*)_out;
 
     for (int y = 0; y < h; ++y) {
 
-	// Row beginning in the input array.
-	int offset = y * w;
+    // Row beginning in the input array.
+    int offset = y * w;
 
-	// RG row
-	for (int x = 0; x < w; ++x, ++out) {
-	    // R pixel
-	    {
-		out->r = in[x + offset];
-		out->g = applyFilter(in, x, y, w, h, G_GRR);
-		out->b = applyFilter(in, x, y, w, h, B_GRR);
-	    }
-	    ++x; ++out;
+    // RG row
+    for (int x = 0; x < w; ++x, ++out) {
+        // R pixel
+        {
+        out->r = in[x + offset];
+        out->g = applyFilter(in, x, y, w, h, G_GRR);
+        out->b = applyFilter(in, x, y, w, h, B_GRR);
+        }
+        ++x; ++out;
 
-	    // G pixel
-	    {
-		out->r = applyFilter(in, x, y, w, h, R_GRG);
-		out->g = in[x + offset];
-		out->b = applyFilter(in, x, y, w, h, B_GRG);
-	    }
-	}
+        // G pixel
+        {
+        out->r = applyFilter(in, x, y, w, h, R_GRG);
+        out->g = in[x + offset];
+        out->b = applyFilter(in, x, y, w, h, B_GRG);
+        }
+    }
 
-	++y;
-	offset += w;
+    ++y;
+    offset += w;
 
-	// GB row
-	for (int x = 0; x < w; ++x, ++out) {
-	    // G pixel
-	    {
-		out->r = applyFilter(in, x, y, w, h, R_BGG);
-		out->g = in[x + offset];
-		out->b = applyFilter(in, x, y, w, h, B_BGG);
-	    }
-	    ++x; ++out;
+    // GB row
+    for (int x = 0; x < w; ++x, ++out) {
+        // G pixel
+        {
+        out->r = applyFilter(in, x, y, w, h, R_BGG);
+        out->g = in[x + offset];
+        out->b = applyFilter(in, x, y, w, h, B_BGG);
+        }
+        ++x; ++out;
 
-	    // B pixel
-	    {
-		out->r = applyFilter(in, x, y, w, h, R_BGB);
-		out->g = applyFilter(in, x, y, w, h, G_BGB);
-		out->b = in[x + offset];
-	    }
-	}
+        // B pixel
+        {
+        out->r = applyFilter(in, x, y, w, h, R_BGB);
+        out->g = applyFilter(in, x, y, w, h, G_BGB);
+        out->b = in[x + offset];
+        }
+    }
     }
 }
 
 
 
 static void bayer_gbrg8_to_rgb8_mhc(int w, int h, 
-				    const uint8* in, uint8* _out) {
+                    const uint8* in, uint8* _out) {
 
     debugAssert(in != _out);
 
@@ -1097,32 +1097,32 @@ static void bayer_gbrg8_to_rgb8_mhc(int w, int h,
 
     for (int y = 0; y < h; ++y) {
 
-	// Row beginning in the input array.
-	int offset = y * w;
+    // Row beginning in the input array.
+    int offset = y * w;
 
-	// GB row
-	for (int x = 0; x < w; ++x, ++out) {
-	    // G pixel
-	    {
-		out->r = applyFilter(in, x, y, w, h, R_BGG);
-		out->g = in[x + offset];
-		out->b = applyFilter(in, x, y, w, h, B_BGG);
-	    }
-	    ++x; ++out;
+    // GB row
+    for (int x = 0; x < w; ++x, ++out) {
+        // G pixel
+        {
+        out->r = applyFilter(in, x, y, w, h, R_BGG);
+        out->g = in[x + offset];
+        out->b = applyFilter(in, x, y, w, h, B_BGG);
+        }
+        ++x; ++out;
 
-	    // B pixel
-	    {
-		out->r = applyFilter(in, x, y, w, h, R_BGB);
-		out->g = applyFilter(in, x, y, w, h, G_BGB);
-		out->b = in[x + offset];
-	    }
-	}
+        // B pixel
+        {
+        out->r = applyFilter(in, x, y, w, h, R_BGB);
+        out->g = applyFilter(in, x, y, w, h, G_BGB);
+        out->b = in[x + offset];
+        }
+    }
     }
 }
 
 
 static void bayer_grbg8_to_rgb8_mhc(int w, int h, 
-				    const uint8* in, uint8* _out) {
+                    const uint8* in, uint8* _out) {
     // Run the equivalent function for red
     bayer_gbrg8_to_rgb8_mhc(w, h, in, _out);
 
@@ -1132,7 +1132,7 @@ static void bayer_grbg8_to_rgb8_mhc(int w, int h,
 
 
 static void bayer_bggr8_to_rgb8_mhc(int w, int h, 
-				    const uint8* in, uint8* _out) {
+                    const uint8* in, uint8* _out) {
     // Run the equivalent function for red
     bayer_rggb8_to_rgb8_mhc(w, h, in, _out);
 
@@ -1198,60 +1198,60 @@ static void bayer_bggr8_to_rgba32f(const Array<const void*>& srcBytes, int srcWi
 // // =====================================================================
 
 // static void bayer_rggb8_to_bgr8_mhc(int w, int h, 
-// 				    const uint8* in, uint8* _out) {
+//                     const uint8* in, uint8* _out) {
 //     debugAssert(in != _out);
 
 //     Color3uint8* out = (Color3uint8*)_out;
 
 //     for (int y = 0; y < h; ++y) {
 
-// 	// Row beginning in the input array.
-// 	int offset = y * w;
+//     // Row beginning in the input array.
+//     int offset = y * w;
 
-// 	// RG row
-// 	for (int x = 0; x < w; ++x, ++out) {
-// 	    // R pixel
-// 	    {
-// 		out->b = in[x + offset];
-// 		out->g = applyFilter(in, x, y, w, h, G_GRR);
-// 		out->r = applyFilter(in, x, y, w, h, B_GRR);
-// 	    }
-// 	    ++x; ++out;
+//     // RG row
+//     for (int x = 0; x < w; ++x, ++out) {
+//         // R pixel
+//         {
+//         out->b = in[x + offset];
+//         out->g = applyFilter(in, x, y, w, h, G_GRR);
+//         out->r = applyFilter(in, x, y, w, h, B_GRR);
+//         }
+//         ++x; ++out;
 
-// 	    // G pixel
-// 	    {
-// 		out->b = applyFilter(in, x, y, w, h, R_GRG);
-// 		out->g = in[x + offset];
-// 		out->r = applyFilter(in, x, y, w, h, B_GRG);
-// 	    }
-// 	}
+//         // G pixel
+//         {
+//         out->b = applyFilter(in, x, y, w, h, R_GRG);
+//         out->g = in[x + offset];
+//         out->r = applyFilter(in, x, y, w, h, B_GRG);
+//         }
+//     }
 
-// 	++y;
-// 	offset += w;
+//     ++y;
+//     offset += w;
 
-// 	// GB row
-// 	for (int x = 0; x < w; ++x, ++out) {
-// 	    // G pixel
-// 	    {
-// 		out->b = applyFilter(in, x, y, w, h, R_BGG);
-// 		out->g = in[x + offset];
-// 		out->r = applyFilter(in, x, y, w, h, B_BGG);
-// 	    }
-// 	    ++x; ++out;
+//     // GB row
+//     for (int x = 0; x < w; ++x, ++out) {
+//         // G pixel
+//         {
+//         out->b = applyFilter(in, x, y, w, h, R_BGG);
+//         out->g = in[x + offset];
+//         out->r = applyFilter(in, x, y, w, h, B_BGG);
+//         }
+//         ++x; ++out;
 
-// 	    // B pixel
-// 	    {
-// 		out->b = applyFilter(in, x, y, w, h, R_BGB);
-// 		out->g = applyFilter(in, x, y, w, h, G_BGB);
-// 		out->r = in[x + offset];
-// 	    }
-// 	}
+//         // B pixel
+//         {
+//         out->b = applyFilter(in, x, y, w, h, R_BGB);
+//         out->g = applyFilter(in, x, y, w, h, G_BGB);
+//         out->r = in[x + offset];
+//         }
+//     }
 //     }
 // }
 
 
 // static void bayer_gbrg8_to_bgr8_mhc(int w, int h, 
-// 				    const uint8* in, uint8* _out) {
+//                     const uint8* in, uint8* _out) {
 
 //     debugAssert(in != _out);
 
@@ -1259,31 +1259,31 @@ static void bayer_bggr8_to_rgba32f(const Array<const void*>& srcBytes, int srcWi
 
 //     for (int y = 0; y < h; ++y) {
 
-// 	// Row beginning in the input array.
-// 	int offset = y * w;
+//     // Row beginning in the input array.
+//     int offset = y * w;
 
-// 	// GB row
-// 	for (int x = 0; x < srcWidth; ++x, ++out) {
-// 	    // G pixel
-// 	    {
-// 		out->b = applyFilter(in, x, y, w, h, R_BGG);
-// 		out->g = in[x + offset];
-// 		out->r = applyFilter(in, x, y, w, h, B_BGG);
-// 	    }
-// 	    ++x; ++out;
+//     // GB row
+//     for (int x = 0; x < srcWidth; ++x, ++out) {
+//         // G pixel
+//         {
+//         out->b = applyFilter(in, x, y, w, h, R_BGG);
+//         out->g = in[x + offset];
+//         out->r = applyFilter(in, x, y, w, h, B_BGG);
+//         }
+//         ++x; ++out;
 
-// 	    // B pixel
-// 	    {
-// 		out->b = applyFilter(in, x, y, w, h, R_BGB);
-// 		out->g = applyFilter(in, x, y, w, h, G_BGB);
-// 		out->r = in[x + offset];
-// 	    }
-// 	}
+//         // B pixel
+//         {
+//         out->b = applyFilter(in, x, y, w, h, R_BGB);
+//         out->g = applyFilter(in, x, y, w, h, G_BGB);
+//         out->r = in[x + offset];
+//         }
+//     }
 //     }
 // }
 
 // static void bayer_grbg8_to_bgr8_mhc(int w, int h, 
-// 				    const uint8* in, uint8* _out) {
+//                     const uint8* in, uint8* _out) {
 //     // Run the equivalent function for red
 //     bayer_gbrg8_to_bgr8_mhc(w, h, in, _out);
 
@@ -1292,7 +1292,7 @@ static void bayer_bggr8_to_rgba32f(const Array<const void*>& srcBytes, int srcWi
 // }
 
 // static void bayer_bggr8_to_bgr8_mhc(int w, int h, 
-// 				    const uint8* in, uint8* _out) {
+//                     const uint8* in, uint8* _out) {
 //     // Run the equivalent function for red
 //     bayer_rggb8_to_bgr8_mhc(w, h, in, _out);
 

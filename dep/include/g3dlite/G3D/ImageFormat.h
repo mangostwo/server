@@ -359,7 +359,7 @@ public:
 
     static const ImageFormat* YUV444();
 
-	/**
+    /**
      NULL pointer; indicates that the G3D::Texture class should choose
      either RGBA8 or RGB8 depending on the presence of an alpha channel
      in the input.
@@ -420,8 +420,8 @@ public:
         Returns true if a conversion was available, false if none occurred.
     */
     static bool convert(const Array<const void*>& srcBytes, int srcWidth, int srcHeight, const ImageFormat* srcFormat, int srcRowPadBits,
-	                    const Array<void*>& dstBytes, const ImageFormat* dstFormat, int dstRowPadBits,
-	                    bool invertY = false, BayerAlgorithm bayerAlg = BayerAlgorithm::MHC);
+                        const Array<void*>& dstBytes, const ImageFormat* dstFormat, int dstRowPadBits,
+                        bool invertY = false, BayerAlgorithm bayerAlg = BayerAlgorithm::MHC);
 
     /* Checks if a conversion between two formats is available. */
     static bool conversionAvailable(const ImageFormat* srcFormat, int srcRowPadBits, const ImageFormat* dstFormat, int dstRowPadBits, bool invertY = false);
