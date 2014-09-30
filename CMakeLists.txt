@@ -25,8 +25,6 @@ if(POLICY CMP0043)
     cmake_policy(SET CMP0043 OLD)
 endif()
 
-set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
-
 project(MaNGOS)
 set(MANGOS_VERSION 0.19)
 
