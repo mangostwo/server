@@ -43,7 +43,7 @@ LFGMgr::~LFGMgr()
     m_dailyTBCHeroic.clear();
     m_dailyLKNormal.clear();
     m_dailyLKHeroic.clear();
-   // m_playerData.clear();
+    m_playerData.clear();
 }
 
 void LFGMgr::JoinLFG()
@@ -79,9 +79,6 @@ ItemRewards LFGMgr::GetDungeonItemRewards(uint32 dungeonId, DungeonTypes type)
     LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(dungeonId);
     if (dungeon)
     {
-        // Here we're using the target levels rather than the 
-        // actual minimum and maximum levels to avoid potential
-        // conflicts with the level ranges in the database
         uint32 minLevel = dungeon->minLevel;
         uint32 maxLevel = dungeon->maxLevel;
         uint32 avgLevel = (minLevel+maxLevel)/2; // otherwise there are issues

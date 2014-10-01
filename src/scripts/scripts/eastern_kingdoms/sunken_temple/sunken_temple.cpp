@@ -77,10 +77,14 @@ struct MANGOS_DLL_DECL npc_malfurionAI : public ScriptedAI
 {
     npc_malfurionAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        DoScriptText(EMOTE_MALFURION1, m_creature);
-        m_uiSpeech   = 0;
-        m_uiSayTimer = 3000;
-        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+        // Only in Sunken Temple
+        if (m_creature->GetMap()->IsDungeon())
+        {
+            DoScriptText(EMOTE_MALFURION1, m_creature);
+            m_uiSpeech   = 0;
+            m_uiSayTimer = 3000;
+            m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+        }
     }
 
     uint32 m_uiSayTimer;

@@ -153,8 +153,8 @@ const uint32 LFG_DESERTER_SPELL = 71041;
 typedef std::set<uint32> dailyEntries; // for players who did one of X type instance per day
 typedef UNORDERED_MAP<uint32, uint32> dungeonEntries; // ID, Entry
 typedef UNORDERED_MAP<uint32, uint32> dungeonForbidden; // Entry, LFGForbiddenTypes
-//typedef UNORDERED_MAP<ObjectGuid, dungeonForbidden> partyForbidden; // map of party member's locked dungeons
-// note: use guidLow rather than objectguid
+typedef UNORDERED_MAP<uint32, dungeonForbidden> partyForbidden; // map of party member's locked dungeons
+// note: use guidLow as key
 
 /// Information the dungeon finder needs about each player
 struct LFGPlayers
@@ -165,7 +165,7 @@ struct LFGPlayers
     std::string comments;
 };
 
-//typedef UNORDERED_MAP<ObjectGuid, LFGPlayers> playerData;
+typedef UNORDERED_MAP<uint32, LFGPlayers> playerData; // guidLow = key
 
 class LFGMgr
 {
@@ -250,7 +250,7 @@ private:
     dailyEntries m_dailyLKNormal;
     dailyEntries m_dailyLKHeroic;
     
-    //playerData m_playerData;
+    playerData m_playerData;
 };
 
 #define sLFGMgr MaNGOS::Singleton<LFGMgr>::Instance()

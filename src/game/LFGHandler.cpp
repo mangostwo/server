@@ -180,20 +180,20 @@ void WorldSession::HandleLfgGetPartyInfo(WorldPacket& recv_data)
     DEBUG_LOG("CMSG_LFG_GET_PARTY_INFO");
     
     Player* pPlayer = GetPlayer();
-    ObjectGuid guid = pPlayer->GetObjectGuid(); // send later in packet
+    uint32 guid = pPlayer->GetGUIDLow(); // send later in packet
     
     Group* pGroup = pPlayer->GetGroup();
     if (!pGroup)
         return;
     
-    /*partyForbidden groupMap;
+    partyForbidden groupMap;
     for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
     {
         Player* pGroupPlayer = itr->getSource();
         if (!pGroupPlayer)
             continue;
         
-        ObjectGuid gPlayerGuid = pGroupPlayer->GetObjectGuid();
+        uint32 pPlayerGuid = pGroupPlayer->GetGUIDLow();
         if (gPlayerGuid != guid)
             groupMap[gPlayerGuid] = sLFGMgr.FindRandomDungeonsNotForPlayer(pGroupPlayer);
     }
@@ -205,7 +205,7 @@ void WorldSession::HandleLfgGetPartyInfo(WorldPacket& recv_data)
     DEBUG_LOG("Sending SMSG_LFG_PARTY_INFO...");
     WorldPacket data(SMSG_LFG_PARTY_INFO, packetSize);
     
-    data << uint8(groupMap.size());
+    /*data << uint8(groupMap.size());
     for (partyForbidden::iterator it = groupMap.begin(); it != groupMap.end(); ++it)
     {
         dungeonForbidden dungeonInfo = it->second;
