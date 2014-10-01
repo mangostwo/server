@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Zangarmarsh
 SD%Complete: 100
-SDComment: Quest support: 9752, 9785, 10009.
+SDComment: Quest support: 9729, 9752, 9785, 10009.
 SDCategory: Zangarmarsh
 EndScriptData */
 
@@ -25,6 +25,7 @@ EndScriptData */
 npc_cooshcoosh
 npc_kayra_longmane
 event_stormcrow
+npc_fhwoor
 EndContentData */
 
 #include "precompiled.h"
@@ -172,6 +173,162 @@ bool ProcessEventId_event_taxi_stormcrow(uint32 uiEventId, Object* pSource, Obje
     return false;
 }
 
+
+/*#####
+## npc_fhwoor
+#####*/
+
+enum
+{
+    SAY_ESCORT_START            = -1000995,
+    SAY_PREPARE                 = -1000996,
+    SAY_CAMP_ENTER              = -1000997,
+    SAY_AMBUSH                  = -1000998,
+    SAY_AMBUSH_CLEARED          = -1000999,
+    SAY_ESCORT_COMPLETE         = -1001000,
+
+    SPELL_STOMP                 = 31277,
+    SPELL_THUNDERSHOCK          = 31964,
+
+    NPC_ENCHANTRESS             = 18088,
+    NPC_SLAVEDRIVER             = 18089,
+    NPC_SSSLITH                 = 18154,
+
+    GO_ARK_OF_SSSLITH           = 182082,
+
+    QUEST_ID_FHWOOR_SMASH       = 9729,
+};
+
+struct MANGOS_DLL_DECL npc_fhwoorAI : public npc_escortAI
+{
+    npc_fhwoorAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+
+    uint32 m_uiStompTimer;
+    uint32 m_uiShockTimer;
+
+    bool m_bIsAmbush;
+
+    void Reset() override
+    {
+        m_uiStompTimer = urand(3000, 7000);
+        m_uiShockTimer = urand(7000, 11000);
+        m_bIsAmbush = false;
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    {
+        if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
+        {
+            DoScriptText(SAY_ESCORT_START, m_creature, pInvoker);
+            m_creature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
+            Start(true, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue), true);
+        }
+    }
+
+    void JustSummoned(Creature* pSummoned) override
+    {
+        // move summoned towards the creature
+        if (m_bIsAmbush)
+        {
+            float fX, fY, fZ;
+            m_creature->GetContactPoint(pSummoned, fX, fY, fZ);
+            pSummoned->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
+        }
+    }
+
+    void SummonedCreatureJustDied(Creature* pSummoned) override
+    {
+        // resume escort
+        if (pSummoned->GetEntry() == NPC_SSSLITH)
+            SetEscortPaused(false);
+    }
+
+    void WaypointReached(uint32 uiPointId) override
+    {
+        switch (uiPointId)
+        {
+            case 24:
+                DoScriptText(SAY_PREPARE, m_creature);
+                break;
+            case 25:
+                DoScriptText(SAY_CAMP_ENTER, m_creature);
+                SetRun(false);
+                break;
+            case 46:
+                // despawn the Ark
+                if (GameObject* pArk = GetClosestGameObjectWithEntry(m_creature, GO_ARK_OF_SSSLITH, 10.0f))
+                    pArk->SetLootState(GO_JUST_DEACTIVATED);
+                // spawn npcs
+                m_creature->SummonCreature(NPC_ENCHANTRESS, 526.12f, 8136.96f, 21.64f, 0.57f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_SLAVEDRIVER, 524.09f, 8138.67f, 21.49f, 0.58f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_SLAVEDRIVER, 526.93f, 8133.88f, 21.56f, 0.58f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                break;
+            case 70:
+                DoScriptText(SAY_AMBUSH, m_creature);
+                // spawn npcs
+                m_bIsAmbush = true;
+                m_creature->SummonCreature(NPC_SSSLITH, 162.91f, 8192.08f, 22.55f, 5.98f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_ENCHANTRESS, 162.34f, 8193.99f, 22.85f, 5.98f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_SLAVEDRIVER, 163.07f, 8187.04f, 22.71f, 0.10f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                SetEscortPaused(true);
+                break;
+            case 71:
+                DoScriptText(SAY_AMBUSH_CLEARED, m_creature);
+                SetRun();
+                break;
+            case 92:
+                SetRun(false);
+                break;
+            case 93:
+                DoScriptText(SAY_ESCORT_COMPLETE, m_creature);
+                if (Player* pPlayer = GetPlayerForEscort())
+                    pPlayer->GroupEventHappens(QUEST_ID_FHWOOR_SMASH, m_creature);
+                break;
+        }
+    }
+
+    void UpdateEscortAI(const uint32 uiDiff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_uiStompTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_STOMP) == CAST_OK)
+                m_uiStompTimer = urand(9000, 15000);
+        }
+        else
+            m_uiStompTimer -= uiDiff;
+
+        if (m_uiShockTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_THUNDERSHOCK) == CAST_OK)
+                m_uiShockTimer = urand(15000, 20000);
+        }
+        else
+            m_uiShockTimer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_fhwoor(Creature* pCreature)
+{
+    return new npc_fhwoorAI(pCreature);
+}
+
+bool QuestAccept_npc_fhwoor(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+{
+    if (pQuest->GetQuestId() == QUEST_ID_FHWOOR_SMASH)
+    {
+        pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
+        return true;
+    }
+
+    return false;
+}
+
+
 void AddSC_zangarmarsh()
 {
     Script* pNewScript;
@@ -190,5 +347,11 @@ void AddSC_zangarmarsh()
     pNewScript = new Script;
     pNewScript->Name = "event_taxi_stormcrow";
     pNewScript->pProcessEventId = &ProcessEventId_event_taxi_stormcrow;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_fhwoor";
+    pNewScript->GetAI = &GetAI_npc_fhwoor;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_fhwoor;
     pNewScript->RegisterSelf();
 }
