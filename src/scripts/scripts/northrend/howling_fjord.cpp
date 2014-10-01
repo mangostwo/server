@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Howling_Fjord
 SD%Complete: ?
-SDComment: Quest support: 11241, 11300, 11343, 11344, 11464, 11476
+SDComment: Quest support: 11154, 11241, 11300, 11343, 11344, 11464, 11476
 SDCategory: Howling Fjord
 EndScriptData */
 
@@ -28,6 +28,7 @@ npc_daegarn
 npc_silvermoon_harry
 npc_lich_king_village
 npc_king_ymiron
+npc_firecrackers_bunny
 EndContentData */
 
 #include "precompiled.h"
@@ -738,6 +739,107 @@ bool AreaTrigger_at_nifflevar(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
     return false;
 }
 
+
+/*######
+## npc_firecrackers_bunny
+######*/
+
+enum
+{
+    SPELL_FIRECRACKER_VISUAL                = 43314,
+    SPELL_SUMMON_DARKCLAW_GUANO             = 43307,
+
+    NPC_DARKCLAW_BAT                        = 23959,
+};
+
+struct MANGOS_DLL_DECL npc_firecrackers_bunnyAI : public ScriptedAI
+{
+    npc_firecrackers_bunnyAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    uint32 m_uiStartTimer;
+    bool m_bHasValidBat;
+
+    ObjectGuid m_selectedBatGuid;
+
+    void Reset() override
+    {
+        m_uiStartTimer = 1000;
+        m_bHasValidBat = false;
+
+        DoCastSpellIfCan(m_creature, SPELL_FIRECRACKER_VISUAL);
+    }
+
+    void MoveInLineOfSight(Unit* pWho) override
+    {
+        if (m_bHasValidBat && pWho->GetObjectGuid() == m_selectedBatGuid && m_creature->IsWithinDistInMap(pWho, 3.5f))
+        {
+            // spawn the Guano loot
+            pWho->GetMotionMaster()->MoveIdle();
+            pWho->CastSpell(m_creature, SPELL_SUMMON_DARKCLAW_GUANO, true);
+            m_bHasValidBat = false;
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiStartTimer)
+        {
+            if (m_uiStartTimer <= uiDiff)
+            {
+                // get all the bats list in range; note: this will compare the 2D distance
+                std::list<Creature*> lBatsList;
+                GetCreatureListWithEntryInGrid(lBatsList, m_creature, NPC_DARKCLAW_BAT, 10.0f);
+
+                if (lBatsList.empty())
+                {
+                    m_uiStartTimer = 5000;
+                    return;
+                }
+
+                // sort by distance and get only the closest
+                lBatsList.sort(ObjectDistanceOrder(m_creature));
+
+                std::list<Creature*>::const_iterator batItr = lBatsList.begin();
+                Creature* pBat = NULL;
+
+                do
+                {
+                    // check for alive and out of combat only
+                    if ((*batItr)->isAlive() && !(*batItr)->getVictim())
+                        pBat = *batItr;
+
+                    ++batItr;
+                }
+                while (!pBat && batItr != lBatsList.end());
+
+                if (!pBat)
+                {
+                    m_uiStartTimer = 5000;
+                    return;
+                }
+
+                // Move bat to the point
+                float fX, fY, fZ;
+                pBat->SetWalk(false);
+                pBat->GetMotionMaster()->Clear();
+                m_creature->GetContactPoint(pBat, fX, fY, fZ);
+                pBat->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
+
+                m_selectedBatGuid = pBat->GetObjectGuid();
+                m_uiStartTimer = 0;
+                m_bHasValidBat = true;
+            }
+            else
+                m_uiStartTimer -= uiDiff;
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_firecrackers_bunny(Creature* pCreature)
+{
+    return new npc_firecrackers_bunnyAI(pCreature);
+}
+
 /*######
 ## npc_apothecary_hanes
 ######*/
@@ -940,6 +1042,11 @@ void AddSC_howling_fjord()
     pNewScript = new Script;
     pNewScript->Name = "at_nifflevar";
     pNewScript->pAreaTrigger = &AreaTrigger_at_nifflevar;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_firecrackers_bunny";
+    pNewScript->GetAI = &GetAI_npc_firecrackers_bunny;
     pNewScript->RegisterSelf();
     
     pNewScript = new Script;
