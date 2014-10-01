@@ -26,6 +26,7 @@ npc_nesingwary_trapper
 npc_sinkhole_kill_credit
 npc_lurgglbr
 npc_beryl_sorcerer
+npc_captured_beryl_sorcerer
 npc_nexus_drake_hatchling
 EndContentData */
 
@@ -561,6 +562,10 @@ bool EffectAuraDummy_npc_beryl_sorcerer(const Aura* pAura, bool bApply)
 
     return false;
 }
+
+/*#####
+# npc_captured_beryl_sorcerer
+#####*/
 
 bool EffectAuraDummy_npc_captured_beryl_sorcerer(const Aura* pAura, bool bApply)
 {

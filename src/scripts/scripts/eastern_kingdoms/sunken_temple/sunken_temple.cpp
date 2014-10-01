@@ -83,8 +83,9 @@ struct MANGOS_DLL_DECL npc_malfurionAI : public ScriptedAI
             DoScriptText(EMOTE_MALFURION1, m_creature);
             m_uiSpeech   = 0;
             m_uiSayTimer = 3000;
-            m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
         }
+        
+        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
     }
 
     uint32 m_uiSayTimer;
