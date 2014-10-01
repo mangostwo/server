@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Borean_Tundra
 SD%Complete: 100
-SDComment: Quest support: 11570, 11590, 11728, 11865, 11897, 11919, 11940
+SDComment: Quest support: 11570, 11590, 11728, 11865, 11889, 11897, 11919, 11940
 SDCategory: Borean Tundra
 EndScriptData */
 
@@ -28,6 +28,7 @@ npc_lurgglbr
 npc_beryl_sorcerer
 npc_captured_beryl_sorcerer
 npc_nexus_drake_hatchling
+npc_scourged_flamespitter
 EndContentData */
 
 #include "precompiled.h"
@@ -835,6 +836,125 @@ bool EffectDummyCreature_npc_nexus_drake_hatchling(Unit* pCaster, uint32 uiSpell
     return false;
 }
 
+/*#####
+# npc_scourged_flamespitter
+#####*/
+
+enum
+{
+    SPELL_REINFORCED_NET                = 46361,
+    SPELL_NET                           = 47021,
+
+    SPELL_INCINERATE_COSMETIC           = 45863,
+    SPELL_INCINERATE                    = 32707,
+
+    NPC_FLAMESPITTER                    = 25582,
+};
+
+struct MANGOS_DLL_DECL npc_scourged_flamespitterAI : public ScriptedAI
+{
+    npc_scourged_flamespitterAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    uint32 m_uiIncinerateTimer;
+    uint32 m_uiNetExpireTimer;
+
+    void Reset() override
+    {
+        m_uiIncinerateTimer = urand(1000, 2000);
+        m_uiNetExpireTimer = 0;
+    }
+
+    void AttackStart(Unit* pWho) override
+    {
+        if (m_creature->Attack(pWho, false))
+        {
+            m_creature->AddThreat(pWho);
+            m_creature->SetInCombatWith(pWho);
+            pWho->SetInCombatWith(m_creature);
+            DoStartMovement(pWho, 10.0f);
+        }
+    }
+
+    void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
+    {
+        if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
+            return;
+
+        if (DoCastSpellIfCan(m_creature, SPELL_NET) == CAST_OK)
+            m_uiNetExpireTimer = 20000;
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if (m_uiNetExpireTimer)
+        {
+            if (m_uiNetExpireTimer <= uiDiff)
+            {
+                // evade when the net root has expired
+                if (!m_creature->getVictim())
+                    EnterEvadeMode();
+
+                m_uiNetExpireTimer = 0;
+            }
+            else
+                m_uiNetExpireTimer -= uiDiff;
+        }
+
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
+            // incinerate visual on OOC timer, unless creature is rooted
+            if (!m_uiNetExpireTimer)
+            {
+                if (m_uiIncinerateTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_INCINERATE_COSMETIC) == CAST_OK)
+                        m_uiIncinerateTimer = urand(3000, 5000);
+                }
+                else
+                    m_uiIncinerateTimer -= uiDiff;
+            }
+
+            return;
+        }
+
+        if (m_uiIncinerateTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_INCINERATE) == CAST_OK)
+                m_uiIncinerateTimer = urand(3000, 5000);
+        }
+        else
+            m_uiIncinerateTimer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_scourged_flamespitter(Creature* pCreature)
+{
+    return new npc_scourged_flamespitterAI(pCreature);
+}
+
+bool EffectAuraDummy_npc_scourged_flamespitter(const Aura* pAura, bool bApply)
+{
+    if (pAura->GetId() == SPELL_REINFORCED_NET && pAura->GetEffIndex() == EFFECT_INDEX_0 && bApply)
+    {
+        Creature* pCreature = (Creature*)pAura->GetTarget();
+        Unit* pCaster = pAura->GetCaster();
+        if (!pCreature || !pCaster || pCaster->GetTypeId() != TYPEID_PLAYER || pCreature->GetEntry() != NPC_FLAMESPITTER)
+            return false;
+
+        // move the flamespitter to the ground level
+        pCreature->GetMotionMaster()->Clear();
+        pCreature->SetWalk(false);
+
+        float fGroundZ = pCreature->GetMap()->GetHeight(pCreature->GetPhaseMask(), pCreature->GetPositionX(), pCreature->GetPositionY(), pCreature->GetPositionZ());
+        pCreature->GetMotionMaster()->MovePoint(1, pCreature->GetPositionX(), pCreature->GetPositionY(), fGroundZ);
+        return true;
+    }
+
+    return false;
+}
+
 void AddSC_borean_tundra()
 {
     Script* pNewScript;
@@ -877,5 +997,11 @@ void AddSC_borean_tundra()
     pNewScript->GetAI = &GetAI_npc_nexus_drake_hatchling;
     pNewScript->pEffectAuraDummy = &EffectAuraDummy_npc_nexus_drake_hatchling;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_nexus_drake_hatchling;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_scourged_flamespitter";
+    pNewScript->GetAI = &GetAI_npc_scourged_flamespitter;
+    pNewScript->pEffectAuraDummy = &EffectAuraDummy_npc_scourged_flamespitter;
     pNewScript->RegisterSelf();
 }
