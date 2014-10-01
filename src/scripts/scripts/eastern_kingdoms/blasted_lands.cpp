@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,18 +18,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Blasted_Lands
-SD%Complete: 90
-SDComment: Quest support: 2784, 2801. Missing some texts for Fallen Hero. Teleporter to Rise of the Defiler missing group support.
-SDCategory: Blasted Lands
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Blasted_Lands
+ * SD%Complete: 90
+ * SDComment:   Quest support: 2784, 2801. Missing some texts for Fallen Hero. Teleporter to Rise of the Defiler missing group support.
+ * SDCategory:  Blasted Lands
+ * EndScriptData
+ */
 
-/* ContentData
-npc_fallen_hero_of_horde
-EndContentData */
+/**
+ * ContentData
+ * npc_fallen_hero_of_horde
+ * EndContentData
+ */
 
 #include "precompiled.h"
 
@@ -42,16 +55,24 @@ EndContentData */
 bool GossipHello_npc_fallen_hero_of_horde(Player* pPlayer, Creature* pCreature)
 {
     if (pCreature->IsQuestGiver())
+    {
         pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+    }
 
     if (pPlayer->GetQuestStatus(2784) == QUEST_STATUS_INCOMPLETE)
+    {
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Why are you here?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+    }
 
     if (pPlayer->GetQuestStatus(2801) == QUEST_STATUS_INCOMPLETE && pPlayer->GetTeam() == HORDE)
+    {
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Continue story...", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+    }
 
     if (pPlayer->GetQuestStatus(2801) == QUEST_STATUS_INCOMPLETE && pPlayer->GetTeam() == ALLIANCE)
+    {
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Why are you here?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+    }
 
     pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
 
@@ -69,7 +90,9 @@ bool GossipSelect_npc_fallen_hero_of_horde(Player* pPlayer, Creature* pCreature,
         case GOSSIP_ACTION_INFO_DEF+11:
             pPlayer->SEND_GOSSIP_MENU(1411, pCreature->GetObjectGuid());
             if (pPlayer->GetQuestStatus(2784) == QUEST_STATUS_INCOMPLETE)
+            {
                 pPlayer->AreaExploredOrEventHappens(2784);
+            }
             if (pPlayer->GetTeam() == ALLIANCE)
             {
                 pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_FALLEN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);

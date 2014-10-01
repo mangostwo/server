@@ -1,6 +1,27 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
- * This program is free software licensed under GPL version 2
- * Please see the included DOCS/LICENSE.TXT for more information */
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
+ */
 
 #include "precompiled.h"
 #include "Item.h"
@@ -33,7 +54,9 @@ void ScriptedAI::GetAIInformation(ChatHandler& reader)
 bool ScriptedAI::IsVisible(Unit* pWho) const
 {
     if (!pWho)
+    {
         return false;
+    }
 
     return m_creature->IsWithinDist(pWho, VISIBLE_RANGE) && pWho->IsVisibleForOrDetect(m_creature, m_creature, true);
 }
@@ -50,10 +73,12 @@ bool ScriptedAI::IsVisible(Unit* pWho) const
 void ScriptedAI::MoveInLineOfSight(Unit* pWho)
 {
     if (m_creature->CanInitiateAttack() && pWho->IsTargetableForAttack() &&
-            m_creature->IsHostileTo(pWho) && pWho->isInAccessablePlaceFor(m_creature))
+        m_creature->IsHostileTo(pWho) && pWho->isInAccessablePlaceFor(m_creature))
     {
         if (!m_creature->CanFly() && m_creature->GetDistanceZ(pWho) > CREATURE_Z_ATTACK_RANGE)
+        {
             return;
+        }
 
         if (m_creature->IsWithinDistInMap(pWho, m_creature->GetAttackDistance(pWho)) && m_creature->IsWithinLOSInMap(pWho))
         {
@@ -93,7 +118,9 @@ void ScriptedAI::AttackStart(Unit* pWho)
 void ScriptedAI::EnterCombat(Unit* pEnemy)
 {
     if (pEnemy)
+    {
         Aggro(pEnemy);
+    }
 }
 
 /**
@@ -106,7 +133,9 @@ void ScriptedAI::UpdateAI(const uint32 /*uiDiff*/)
 {
     // Check if we have a current target
     if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+    {
         return;
+    }
 
     DoMeleeAttackIfReady();
 }
@@ -128,7 +157,9 @@ void ScriptedAI::EnterEvadeMode()
     m_creature->CombatStop(true);
 
     if (m_creature->IsAlive())
+    {
         m_creature->GetMotionMaster()->MoveTargetedHome();
+    }
 
     m_creature->SetLootRecipient(NULL);
 
@@ -144,13 +175,17 @@ void ScriptedAI::JustRespawned()
 void ScriptedAI::DoStartMovement(Unit* pVictim, float fDistance, float fAngle)
 {
     if (pVictim)
+    {
         m_creature->GetMotionMaster()->MoveChase(pVictim, fDistance, fAngle);
+    }
 }
 
 void ScriptedAI::DoStartNoMovement(Unit* pVictim)
 {
     if (!pVictim)
+    {
         return;
+    }
 
     m_creature->GetMotionMaster()->MoveIdle();
     m_creature->StopMoving();
@@ -159,13 +194,17 @@ void ScriptedAI::DoStartNoMovement(Unit* pVictim)
 void ScriptedAI::DoStopAttack()
 {
     if (m_creature->getVictim())
+    {
         m_creature->AttackStop();
+    }
 }
 
 void ScriptedAI::DoCast(Unit* pTarget, uint32 uiSpellId, bool bTriggered)
 {
     if (m_creature->IsNonMeleeSpellCasted(false) && !bTriggered)
+    {
         return;
+    }
 
     m_creature->CastSpell(pTarget, uiSpellId, bTriggered);
 }
@@ -173,7 +212,9 @@ void ScriptedAI::DoCast(Unit* pTarget, uint32 uiSpellId, bool bTriggered)
 void ScriptedAI::DoCastSpell(Unit* pTarget, SpellEntry const* pSpellInfo, bool bTriggered)
 {
     if (m_creature->IsNonMeleeSpellCasted(false) && !bTriggered)
+    {
         return;
+    }
 
     m_creature->CastSpell(pTarget, pSpellInfo, bTriggered);
 }
@@ -181,7 +222,9 @@ void ScriptedAI::DoCastSpell(Unit* pTarget, SpellEntry const* pSpellInfo, bool b
 void ScriptedAI::DoPlaySoundToSet(WorldObject* pSource, uint32 uiSoundId)
 {
     if (!pSource)
+    {
         return;
+    }
 
     if (!GetSoundEntriesStore()->LookupEntry(uiSoundId))
     {
@@ -223,16 +266,22 @@ SpellEntry const* ScriptedAI::SelectSpell(Unit* pTarget, int32 uiSchool, int32 i
 
         // This spell doesn't exist
         if (!pTempSpell)
+        {
             continue;
+        }
 
         // Targets and Effects checked first as most used restrictions
         // Check the spell targets if specified
         if (selectTargets && !(SpellSummary[m_creature->m_spells[i]].Targets & (1 << (selectTargets - 1))))
+        {
             continue;
+        }
 
         // Check the type of spell if we are looking for a specific spell type
         if (selectEffects && !(SpellSummary[m_creature->m_spells[i]].Effects & (1 << (selectEffects - 1))))
+        {
             continue;
+        }
 
         // Check for school if specified
         if (uiSchool >= 0 && pTempSpell->SchoolMask & uiSchool)
@@ -240,36 +289,52 @@ SpellEntry const* ScriptedAI::SelectSpell(Unit* pTarget, int32 uiSchool, int32 i
 
         // Check for spell mechanic if specified
         if (iMechanic >= 0 && pTempSpell->Mechanic != (uint32)iMechanic)
+        {
             continue;
+        }
 
         // Make sure that the spell uses the requested amount of power
         if (uiPowerCostMin &&  pTempSpell->manaCost < uiPowerCostMin)
+        {
             continue;
+        }
 
         if (uiPowerCostMax && pTempSpell->manaCost > uiPowerCostMax)
+        {
             continue;
+        }
 
         // Continue if we don't have the mana to actually cast this spell
         if (pTempSpell->manaCost > m_creature->GetPower((Powers)pTempSpell->powerType))
+        {
             continue;
+        }
 
         // Get the Range
         pTempRange = GetSpellRangeStore()->LookupEntry(pTempSpell->rangeIndex);
 
         // Spell has invalid range store so we can't use it
         if (!pTempRange)
+        {
             continue;
+        }
 
         // Check if the spell meets our range requirements
         if (fRangeMin && pTempRange->maxRange < fRangeMin)
+        {
             continue;
+        }
 
         if (fRangeMax && pTempRange->maxRange > fRangeMax)
+        {
             continue;
+        }
 
         // Check if our target is in range
         if (m_creature->IsWithinDistInMap(pTarget, pTempRange->minRange) || !m_creature->IsWithinDistInMap(pTarget, pTempRange->maxRange))
+        {
             continue;
+        }
 
         // All good so lets add it to the spell list
         apSpell[uiSpellCount] = pTempSpell;
@@ -278,7 +343,9 @@ SpellEntry const* ScriptedAI::SelectSpell(Unit* pTarget, int32 uiSchool, int32 i
 
     // We got our usable spells so now lets randomly pick one
     if (!uiSpellCount)
+    {
         return NULL;
+    }
 
     return apSpell[urand(0, uiSpellCount - 1)];
 }
@@ -287,25 +354,35 @@ bool ScriptedAI::CanCast(Unit* pTarget, SpellEntry const* pSpellEntry, bool bTri
 {
     // No target so we can't cast
     if (!pTarget || !pSpellEntry)
+    {
         return false;
+    }
 
     // Silenced so we can't cast
     if (!bTriggered && m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
+    {
         return false;
+    }
 
     // Check for power
     if (!bTriggered && m_creature->GetPower((Powers)pSpellEntry->powerType) < pSpellEntry->manaCost)
+    {
         return false;
+    }
 
     SpellRangeEntry const* pTempRange = GetSpellRangeStore()->LookupEntry(pSpellEntry->rangeIndex);
 
     // Spell has invalid range store so we can't use it
     if (!pTempRange)
+    {
         return false;
+    }
 
     // Unit is out of range of this spell
     if (!m_creature->IsInRange(pTarget, pTempRange->minRange, pTempRange->maxRange))
+    {
         return false;
+    }
 
     return true;
 }
@@ -324,73 +401,95 @@ void FillSpellSummary()
         pTempSpell = GetSpellStore()->LookupEntry(i);
         // This spell doesn't exist
         if (!pTempSpell)
+        {
             continue;
+        }
 
         for (uint8 j = 0; j < 3; ++j)
         {
             // Spell targets self
             if (pTempSpell->EffectImplicitTargetA[j] == TARGET_SELF)
+            {
                 SpellSummary[i].Targets |= 1 << (SELECT_TARGET_SELF - 1);
+            }
 
             // Spell targets a single enemy
             if (pTempSpell->EffectImplicitTargetA[j] == TARGET_CHAIN_DAMAGE ||
-                    pTempSpell->EffectImplicitTargetA[j] == TARGET_CURRENT_ENEMY_COORDINATES)
+                pTempSpell->EffectImplicitTargetA[j] == TARGET_CURRENT_ENEMY_COORDINATES)
+            {
                 SpellSummary[i].Targets |= 1 << (SELECT_TARGET_SINGLE_ENEMY - 1);
+            }
 
             // Spell targets AoE at enemy
             if (pTempSpell->EffectImplicitTargetA[j] == TARGET_ALL_ENEMY_IN_AREA ||
-                    pTempSpell->EffectImplicitTargetA[j] == TARGET_ALL_ENEMY_IN_AREA_INSTANT ||
-                    pTempSpell->EffectImplicitTargetA[j] == TARGET_CASTER_COORDINATES ||
-                    pTempSpell->EffectImplicitTargetA[j] == TARGET_ALL_ENEMY_IN_AREA_CHANNELED)
+                pTempSpell->EffectImplicitTargetA[j] == TARGET_ALL_ENEMY_IN_AREA_INSTANT ||
+                pTempSpell->EffectImplicitTargetA[j] == TARGET_CASTER_COORDINATES ||
+                pTempSpell->EffectImplicitTargetA[j] == TARGET_ALL_ENEMY_IN_AREA_CHANNELED)
+            {
                 SpellSummary[i].Targets |= 1 << (SELECT_TARGET_AOE_ENEMY - 1);
+            }
 
             // Spell targets an enemy
             if (pTempSpell->EffectImplicitTargetA[j] == TARGET_CHAIN_DAMAGE ||
-                    pTempSpell->EffectImplicitTargetA[j] == TARGET_CURRENT_ENEMY_COORDINATES ||
-                    pTempSpell->EffectImplicitTargetA[j] == TARGET_ALL_ENEMY_IN_AREA ||
-                    pTempSpell->EffectImplicitTargetA[j] == TARGET_ALL_ENEMY_IN_AREA_INSTANT ||
-                    pTempSpell->EffectImplicitTargetA[j] == TARGET_CASTER_COORDINATES ||
-                    pTempSpell->EffectImplicitTargetA[j] == TARGET_ALL_ENEMY_IN_AREA_CHANNELED)
+                pTempSpell->EffectImplicitTargetA[j] == TARGET_CURRENT_ENEMY_COORDINATES ||
+                pTempSpell->EffectImplicitTargetA[j] == TARGET_ALL_ENEMY_IN_AREA ||
+                pTempSpell->EffectImplicitTargetA[j] == TARGET_ALL_ENEMY_IN_AREA_INSTANT ||
+                pTempSpell->EffectImplicitTargetA[j] == TARGET_CASTER_COORDINATES ||
+                pTempSpell->EffectImplicitTargetA[j] == TARGET_ALL_ENEMY_IN_AREA_CHANNELED)
+            {
                 SpellSummary[i].Targets |= 1 << (SELECT_TARGET_ANY_ENEMY - 1);
+            }
 
             // Spell targets a single friend(or self)
             if (pTempSpell->EffectImplicitTargetA[j] == TARGET_SELF ||
-                    pTempSpell->EffectImplicitTargetA[j] == TARGET_SINGLE_FRIEND ||
-                    pTempSpell->EffectImplicitTargetA[j] == TARGET_SINGLE_PARTY)
+                pTempSpell->EffectImplicitTargetA[j] == TARGET_SINGLE_FRIEND ||
+                pTempSpell->EffectImplicitTargetA[j] == TARGET_SINGLE_PARTY)
+            {
                 SpellSummary[i].Targets |= 1 << (SELECT_TARGET_SINGLE_FRIEND - 1);
+            }
 
             // Spell targets aoe friends
             if (pTempSpell->EffectImplicitTargetA[j] == TARGET_ALL_PARTY_AROUND_CASTER ||
-                    pTempSpell->EffectImplicitTargetA[j] == TARGET_AREAEFFECT_PARTY ||
-                    pTempSpell->EffectImplicitTargetA[j] == TARGET_CASTER_COORDINATES)
+                pTempSpell->EffectImplicitTargetA[j] == TARGET_AREAEFFECT_PARTY ||
+                pTempSpell->EffectImplicitTargetA[j] == TARGET_CASTER_COORDINATES)
+            {
                 SpellSummary[i].Targets |= 1 << (SELECT_TARGET_AOE_FRIEND - 1);
+            }
 
             // Spell targets any friend(or self)
             if (pTempSpell->EffectImplicitTargetA[j] == TARGET_SELF ||
-                    pTempSpell->EffectImplicitTargetA[j] == TARGET_SINGLE_FRIEND ||
-                    pTempSpell->EffectImplicitTargetA[j] == TARGET_SINGLE_PARTY ||
-                    pTempSpell->EffectImplicitTargetA[j] == TARGET_ALL_PARTY_AROUND_CASTER ||
-                    pTempSpell->EffectImplicitTargetA[j] == TARGET_AREAEFFECT_PARTY ||
-                    pTempSpell->EffectImplicitTargetA[j] == TARGET_CASTER_COORDINATES)
+                pTempSpell->EffectImplicitTargetA[j] == TARGET_SINGLE_FRIEND ||
+                pTempSpell->EffectImplicitTargetA[j] == TARGET_SINGLE_PARTY ||
+                pTempSpell->EffectImplicitTargetA[j] == TARGET_ALL_PARTY_AROUND_CASTER ||
+                pTempSpell->EffectImplicitTargetA[j] == TARGET_AREAEFFECT_PARTY ||
+                pTempSpell->EffectImplicitTargetA[j] == TARGET_CASTER_COORDINATES)
+            {
                 SpellSummary[i].Targets |= 1 << (SELECT_TARGET_ANY_FRIEND - 1);
+            }
 
             // Make sure that this spell includes a damage effect
             if (pTempSpell->Effect[j] == SPELL_EFFECT_SCHOOL_DAMAGE ||
-                    pTempSpell->Effect[j] == SPELL_EFFECT_INSTAKILL ||
-                    pTempSpell->Effect[j] == SPELL_EFFECT_ENVIRONMENTAL_DAMAGE ||
-                    pTempSpell->Effect[j] == SPELL_EFFECT_HEALTH_LEECH)
+                pTempSpell->Effect[j] == SPELL_EFFECT_INSTAKILL ||
+                pTempSpell->Effect[j] == SPELL_EFFECT_ENVIRONMENTAL_DAMAGE ||
+                pTempSpell->Effect[j] == SPELL_EFFECT_HEALTH_LEECH)
+            {
                 SpellSummary[i].Effects |= 1 << (SELECT_EFFECT_DAMAGE - 1);
+            }
 
             // Make sure that this spell includes a healing effect (or an apply aura with a periodic heal)
             if (pTempSpell->Effect[j] == SPELL_EFFECT_HEAL ||
-                    pTempSpell->Effect[j] == SPELL_EFFECT_HEAL_MAX_HEALTH ||
-                    pTempSpell->Effect[j] == SPELL_EFFECT_HEAL_MECHANICAL ||
-                    (pTempSpell->Effect[j] == SPELL_EFFECT_APPLY_AURA  && pTempSpell->EffectApplyAuraName[j] == 8))
+                pTempSpell->Effect[j] == SPELL_EFFECT_HEAL_MAX_HEALTH ||
+                pTempSpell->Effect[j] == SPELL_EFFECT_HEAL_MECHANICAL ||
+                (pTempSpell->Effect[j] == SPELL_EFFECT_APPLY_AURA  && pTempSpell->EffectApplyAuraName[j] == 8))
+            {
                 SpellSummary[i].Effects |= 1 << (SELECT_EFFECT_HEALING - 1);
+            }
 
             // Make sure that this spell applies an aura
             if (pTempSpell->Effect[j] == SPELL_EFFECT_APPLY_AURA)
+            {
                 SpellSummary[i].Effects |= 1 << (SELECT_EFFECT_AURA - 1);
+            }
         }
     }
 }
@@ -399,7 +498,7 @@ void ScriptedAI::DoResetThreat()
 {
     if (!m_creature->CanHaveThreatList() || m_creature->GetThreatManager().isThreatListEmpty())
     {
-        script_error_log("DoResetThreat called for creature that either cannot have threat list or has empty threat list (m_creature entry = %d)", m_creature->GetEntry());
+        script_error_log("DoResetThreat called for creature that either can not have threat list or has empty threat list (m_creature entry = %d)", m_creature->GetEntry());
         return;
     }
 
@@ -409,14 +508,18 @@ void ScriptedAI::DoResetThreat()
         Unit* pUnit = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid());
 
         if (pUnit && m_creature->GetThreatManager().getThreat(pUnit))
+        {
             m_creature->GetThreatManager().modifyThreatPercent(pUnit, -100);
+        }
     }
 }
 
 void ScriptedAI::DoTeleportPlayer(Unit* pUnit, float fX, float fY, float fZ, float fO)
 {
     if (!pUnit)
+    {
         return;
+    }
 
     if (pUnit->GetTypeId() != TYPEID_PLAYER)
     {
@@ -484,13 +587,19 @@ void ScriptedAI::SetEquipmentSlots(bool bLoadDefault, int32 iMainHand, int32 iOf
     }
 
     if (iMainHand >= 0)
+    {
         m_creature->SetVirtualItem(VIRTUAL_ITEM_SLOT_0, iMainHand);
+    }
 
     if (iOffHand >= 0)
+    {
         m_creature->SetVirtualItem(VIRTUAL_ITEM_SLOT_1, iOffHand);
+    }
 
     if (iRanged >= 0)
+    {
         m_creature->SetVirtualItem(VIRTUAL_ITEM_SLOT_2, iRanged);
+    }
 }
 
 // Hacklike storage used for misc creatures that are expected to evade of outside of a certain area.
@@ -511,7 +620,9 @@ enum
 bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 uiDiff)
 {
     if (m_uiEvadeCheckCooldown < uiDiff)
+    {
         m_uiEvadeCheckCooldown = 2500;
+    }
     else
     {
         m_uiEvadeCheckCooldown -= uiDiff;
@@ -519,7 +630,9 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 uiDiff)
     }
 
     if (m_creature->IsInEvadeMode() || !m_creature->getVictim())
+    {
         return false;
+    }
 
     float fX = m_creature->GetPositionX();
     float fY = m_creature->GetPositionY();

@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: boss_cannon_master_willey
-SD%Complete: 100
-SDComment:
-SDCategory: Stratholme
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      boss_cannon_master_willey
+ * SD%Complete: 100
+ * SDComment:   None
+ * SDCategory:  Stratholme
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 
@@ -51,32 +62,40 @@ struct MANGOS_DLL_DECL boss_cannon_master_willeyAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (m_creature->getVictim())
+        {
             pSummoned->AI()->AttackStart(m_creature->getVictim());
+        }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         // Return since we have no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         // Pummel
         if (m_uiPummelTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_PUMMEL) == CAST_OK)
+            {
                 m_uiPummelTimer = 12000;
+            }
         }
         else
-            m_uiPummelTimer -= uiDiff;
+            { m_uiPummelTimer -= uiDiff; }
 
         // KnockAway
         if (m_uiKnockAwayTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
+            {
                 m_uiKnockAwayTimer = 14000;
+            }
         }
         else
-            m_uiKnockAwayTimer -= uiDiff;
+            { m_uiKnockAwayTimer -= uiDiff; }
 
         // Shoot
         if (m_uiShootTimer < uiDiff)
@@ -84,20 +103,24 @@ struct MANGOS_DLL_DECL boss_cannon_master_willeyAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SHOOT, SELECT_FLAG_NOT_IN_MELEE_RANGE))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_SHOOT) == CAST_OK)
+                {
                     m_uiShootTimer = urand(3000, 4000);
+                }
             }
         }
         else
-            m_uiShootTimer -= uiDiff;
+            { m_uiShootTimer -= uiDiff; }
 
         // SummonRifleman
         if (m_uiSummonRiflemanTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_RIFLEMAN) == CAST_OK)
+            {
                 m_uiSummonRiflemanTimer = 30000;
+            }
         }
         else
-            m_uiSummonRiflemanTimer -= uiDiff;
+            { m_uiSummonRiflemanTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

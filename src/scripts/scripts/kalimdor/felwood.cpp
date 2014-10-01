@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,6 +18,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 /* ScriptData
@@ -78,7 +87,9 @@ struct MANGOS_DLL_DECL npc_kittenAI : public FollowerAI
         if (!m_creature->getVictim() && !m_creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP) && HasFollowState(STATE_FOLLOW_INPROGRESS) && pWho->GetEntry() == NPC_WINNA)
         {
             if (m_creature->IsWithinDistInMap(pWho, INTERACTION_DISTANCE))
+            {
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            }
         }
     }
 
@@ -94,7 +105,9 @@ struct MANGOS_DLL_DECL npc_kittenAI : public FollowerAI
                     SetFollowPaused(false);
                 }
                 else
+                {
                     m_uiMoonwellCooldown -= uiDiff;
+                }
             }
 
             return;
@@ -124,7 +137,9 @@ bool EffectDummyCreature_npc_kitten(Unit* /*pCaster*/, uint32 uiSpellId, SpellEf
         }
 
         if (Unit* pOwner = pCreatureTarget->GetOwner())
+        {
             DoScriptText(EMOTE_SAB_FOLLOW, pCreatureTarget, pOwner);
+        }
 
         // always return true when we are handling this spell and effect
         return true;
@@ -137,7 +152,9 @@ bool GossipHello_npc_corrupt_saber(Player* pPlayer, Creature* pCreature)
     if (pPlayer->GetQuestStatus(QUEST_CORRUPT_SABER) == QUEST_STATUS_INCOMPLETE)
     {
         if (GetClosestCreatureWithEntry(pCreature, NPC_WINNA, INTERACTION_DISTANCE))
+        {
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_RELEASE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        }
     }
 
     pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
@@ -151,7 +168,9 @@ bool GossipSelect_npc_corrupt_saber(Player* pPlayer, Creature* pCreature, uint32
         pPlayer->CLOSE_GOSSIP_MENU();
 
         if (npc_kittenAI* pKittenAI = dynamic_cast<npc_kittenAI*>(pCreature->AI()))
+        {
             pKittenAI->SetFollowComplete();
+        }
 
         pPlayer->AreaExploredOrEventHappens(QUEST_CORRUPT_SABER);
     }
@@ -252,7 +271,9 @@ struct MANGOS_DLL_DECL npc_niby_the_almightyAI : public ScriptedAI
                 ++m_uiSpeech;
             }
             else
+            {
                 m_uiSummonTimer -= uiDiff;
+            }
         }
     }
 };
@@ -307,13 +328,17 @@ struct MANGOS_DLL_DECL npc_kroshiusAI : public ScriptedAI
         m_playerGuid.Clear();
 
         if (!m_uiPhase)
+        {
             m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+        }
     }
 
     void DoRevive(Player* pSource)
     {
         if (m_uiPhase)
+        {
             return;
+        }
 
         m_uiPhase = 1;
         m_uiPhaseTimer = 2500;
@@ -330,7 +355,9 @@ struct MANGOS_DLL_DECL npc_kroshiusAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_uiPhase)
+        {
             return;
+        }
 
         if (m_uiPhase < 4)
         {
@@ -351,19 +378,25 @@ struct MANGOS_DLL_DECL npc_kroshiusAI : public ScriptedAI
                         if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
                         {
                             if (m_creature->IsWithinDistInMap(pPlayer, 30.0f))
+                            {
                                 AttackStart(pPlayer);
+                            }
                         }
                         break;
                 }
                 ++m_uiPhase;
             }
             else
+            {
                 m_uiPhaseTimer -= uiDiff;
+            }
         }
         else
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiKnockBackTimer < uiDiff)
             {
@@ -371,7 +404,7 @@ struct MANGOS_DLL_DECL npc_kroshiusAI : public ScriptedAI
                 m_uiKnockBackTimer = urand(9000, 12000);
             }
             else
-                m_uiKnockBackTimer -= uiDiff;
+                { m_uiKnockBackTimer -= uiDiff; }
 
             DoMeleeAttackIfReady();
         }
@@ -392,7 +425,9 @@ bool ProcessEventId_npc_kroshius(uint32 uiEventId, Object* pSource, Object* /*pT
             if (Creature* pKroshius = GetClosestCreatureWithEntry((Player*)pSource, NPC_KROSHIUS, 20.0f))
             {
                 if (npc_kroshiusAI* pKroshiusAI = dynamic_cast<npc_kroshiusAI*>(pKroshius->AI()))
+                {
                     pKroshiusAI->DoRevive((Player*)pSource);
+                }
             }
         }
 

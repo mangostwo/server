@@ -1,6 +1,27 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
- * This program is free software licensed under GPL version 2
- * Please see the included DOCS/LICENSE.TXT for more information */
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
+ */
 
 #include "precompiled.h"
 
@@ -14,19 +35,27 @@
 void ScriptedInstance::DoUseDoorOrButton(ObjectGuid guid, uint32 uiWithRestoreTime, bool bUseAlternativeState)
 {
     if (!guid)
+    {
         return;
+    }
 
     if (GameObject* pGo = instance->GetGameObject(guid))
     {
         if (pGo->GetGoType() == GAMEOBJECT_TYPE_DOOR || pGo->GetGoType() == GAMEOBJECT_TYPE_BUTTON || pGo->GetGoType() == GAMEOBJECT_TYPE_TRAPDOOR)
         {
             if (pGo->getLootState() == GO_READY)
+            {
                 pGo->UseDoorOrButton(uiWithRestoreTime, bUseAlternativeState);
+            }
             else if (pGo->getLootState() == GO_ACTIVATED)
+            {
                 pGo->ResetDoorOrButton();
+            }
         }
         else
+        {
             script_error_log("Script call DoUseDoorOrButton, but gameobject entry %u is type %u.", pGo->GetEntry(), pGo->GetGoType());
+        }
     }
 }
 
@@ -35,10 +64,14 @@ void ScriptedInstance::DoUseDoorOrButton(uint32 uiEntry, uint32 uiWithRestoreTim
 {
     EntryGuidMap::iterator find = m_mGoEntryGuidStore.find(uiEntry);
     if (find != m_mGoEntryGuidStore.end())
+    {
         DoUseDoorOrButton(find->second, uiWithRestoreTime, bUseAlternativeState);
+    }
     else
         // Output log, possible reason is not added GO to storage, or not yet loaded
+    {
         debug_log("SD2: Script call DoUseDoorOrButton(by Entry), but no gameobject of entry %u was created yet, or it was not stored by script for map %u.", uiEntry, instance->GetId());
+    }
 }
 
 /**
@@ -50,17 +83,23 @@ void ScriptedInstance::DoUseDoorOrButton(uint32 uiEntry, uint32 uiWithRestoreTim
 void ScriptedInstance::DoRespawnGameObject(ObjectGuid guid, uint32 uiTimeToDespawn)
 {
     if (!guid)
+    {
         return;
+    }
 
     if (GameObject* pGo = instance->GetGameObject(guid))
     {
         // not expect any of these should ever be handled
         if (pGo->GetGoType() == GAMEOBJECT_TYPE_FISHINGNODE || pGo->GetGoType() == GAMEOBJECT_TYPE_DOOR ||
                 pGo->GetGoType() == GAMEOBJECT_TYPE_BUTTON)
+        {
             return;
+        }
 
         if (pGo->isSpawned())
+        {
             return;
+        }
 
         pGo->SetRespawnTime(uiTimeToDespawn);
         pGo->Refresh();
@@ -72,10 +111,14 @@ void ScriptedInstance::DoToggleGameObjectFlags(uint32 uiEntry, uint32 uiGOflags,
 {
     EntryGuidMap::iterator find = m_mGoEntryGuidStore.find(uiEntry);
     if (find != m_mGoEntryGuidStore.end())
+    {
         DoToggleGameObjectFlags(find->second, uiGOflags, bApply);
+    }
     else
         // Output log, possible reason is not added GO to storage, or not yet loaded
+    {
         debug_log("SD2: Script call ToogleTameObjectFlags (by Entry), but no gameobject of entry %u was created yet, or it was not stored by script for map %u.", uiEntry, instance->GetId());
+    }
 }
 
 /**
@@ -88,14 +131,20 @@ void ScriptedInstance::DoToggleGameObjectFlags(uint32 uiEntry, uint32 uiGOflags,
 void ScriptedInstance::DoToggleGameObjectFlags(ObjectGuid guid, uint32 uiGOflags, bool bApply)
 {
     if (!guid)
+    {
         return;
+    }
 
     if (GameObject* pGo = instance->GetGameObject(guid))
     {
         if (bApply)
+        {
             pGo->SetFlag(GAMEOBJECT_FLAGS, uiGOflags);
+        }
         else
+        {
             pGo->RemoveFlag(GAMEOBJECT_FLAGS, uiGOflags);
+        }
     }
 }
 
@@ -104,10 +153,14 @@ void ScriptedInstance::DoRespawnGameObject(uint32 uiEntry, uint32 uiTimeToDespaw
 {
     EntryGuidMap::iterator find = m_mGoEntryGuidStore.find(uiEntry);
     if (find != m_mGoEntryGuidStore.end())
+    {
         DoRespawnGameObject(find->second, uiTimeToDespawn);
+    }
     else
         // Output log, possible reason is not added GO to storage, or not yet loaded;
+    {
         debug_log("SD2: Script call DoRespawnGameObject(by Entry), but no gameobject of entry %u was created yet, or it was not stored by script for map %u.", uiEntry, instance->GetId());
+    }
 }
 
 /**
@@ -125,11 +178,15 @@ void ScriptedInstance::DoUpdateWorldState(uint32 uiStateId, uint32 uiStateData)
         for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
         {
             if (Player* pPlayer = itr->getSource())
+            {
                 pPlayer->SendUpdateWorldState(uiStateId, uiStateData);
+            }
         }
     }
     else
+    {
         debug_log("SD2: DoUpdateWorldState attempt send data but no players in map.");
+    }
 }
 
 /// Get the first found Player* (with requested properties) in the map. Can return NULL.
@@ -141,7 +198,9 @@ Player* ScriptedInstance::GetPlayerInMap(bool bOnlyAlive /*=false*/, bool bCanBe
     {
         Player* pPlayer = itr->getSource();
         if (pPlayer && (!bOnlyAlive || pPlayer->IsAlive()) && (bCanBeGamemaster || !pPlayer->isGameMaster()))
+        {
             return pPlayer;
+        }
     }
 
     return NULL;
@@ -152,7 +211,9 @@ GameObject* ScriptedInstance::GetSingleGameObjectFromStorage(uint32 uiEntry)
 {
     EntryGuidMap::iterator find = m_mGoEntryGuidStore.find(uiEntry);
     if (find != m_mGoEntryGuidStore.end())
+    {
         return instance->GetGameObject(find->second);
+    }
 
     // Output log, possible reason is not added GO to map, or not yet loaded;
     script_error_log("Script requested gameobject with entry %u, but no gameobject of this entry was created yet, or it was not stored by script for map %u.", uiEntry, instance->GetId());
@@ -165,11 +226,15 @@ Creature* ScriptedInstance::GetSingleCreatureFromStorage(uint32 uiEntry, bool bS
 {
     EntryGuidMap::iterator find = m_mNpcEntryGuidStore.find(uiEntry);
     if (find != m_mNpcEntryGuidStore.end())
+    {
         return instance->GetCreature(find->second);
+    }
 
     // Output log, possible reason is not added GO to map, or not yet loaded;
     if (!bSkipDebugLog)
+    {
         script_error_log("Script requested creature with entry %u, but no npc of this entry was created yet, or it was not stored by script for map %u.", uiEntry, instance->GetId());
+    }
 
     return NULL;
 }
@@ -310,22 +375,32 @@ void DialogueHelper::DoNextDialogueStep()
         if (m_pInstance && !pSpeaker)                       // Get Speaker from instance
         {
             if (m_bCanSimulate)                             // Simulate case
+            {
                 m_pInstance->DoOrSimulateScriptTextForThisInstance(iTextEntry, uiSpeakerEntry);
+            }
             else
+            {
                 pSpeaker = m_pInstance->GetSingleCreatureFromStorage(uiSpeakerEntry);
+            }
         }
 
         if (pSpeaker)
+        {
             DoScriptText(iTextEntry, pSpeaker);
+        }
     }
 
     JustDidDialogueStep(m_pDialogueArray ?  m_pCurrentEntry->iTextEntry : m_pCurrentEntryTwoSide->iTextEntry);
 
     // Increment position
     if (m_pDialogueArray)
+    {
         ++m_pCurrentEntry;
+    }
     else
+    {
         ++m_pCurrentEntryTwoSide;
+    }
 }
 
 /// Call this function within any DialogueUpdate method. This is required for saying next steps in a dialogue
@@ -334,8 +409,12 @@ void DialogueHelper::DialogueUpdate(uint32 uiDiff)
     if (m_uiTimer)
     {
         if (m_uiTimer <= uiDiff)
+        {
             DoNextDialogueStep();
+        }
         else
+        {
             m_uiTimer -= uiDiff;
+        }
     }
 }

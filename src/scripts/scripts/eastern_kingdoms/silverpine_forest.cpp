@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,19 +18,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Silverpine_Forest
-SD%Complete: 100
-SDComment: Quest support: 435, 452
-SDCategory: Silverpine Forest
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Silverpine_Forest
+ * SD%Complete: 100
+ * SDComment:   Quest support: 435, 452.
+ * SDCategory:  Silverpine Forest
+ * EndScriptData
+ */
 
-/* ContentData
-npc_deathstalker_erland
-npc_deathstalker_faerleia
-EndContentData */
+/**
+ * ContentData
+ * npc_deathstalker_erland
+ * npc_deathstalker_faerleia
+ * EndContentData
+ */
 
 #include "precompiled.h"
 #include "escort_ai.h"
@@ -97,6 +110,8 @@ struct MANGOS_DLL_DECL npc_deathstalker_erlandAI : public npc_escortAI
         }
     }
 
+
+
     void Reset() override {}
 
     void Aggro(Unit* who) override
@@ -117,7 +132,9 @@ bool QuestAccept_npc_deathstalker_erland(Player* pPlayer, Creature* pCreature, c
         DoScriptText(SAY_START_1, pCreature);
 
         if (npc_deathstalker_erlandAI* pEscortAI = dynamic_cast<npc_deathstalker_erlandAI*>(pCreature->AI()))
+        {
             pEscortAI->Start(false, pPlayer, pQuest);
+        }
     }
     return true;
 }
@@ -133,27 +150,27 @@ CreatureAI* GetAI_npc_deathstalker_erland(Creature* pCreature)
 
 enum
 {
-    QUEST_PYREWOOD_AMBUSH    = 452,
+    QUEST_PYREWOOD_AMBUSH      = 452,
 
     // cast it after every wave
-    SPELL_DRINK_POTION       = 3359,
+    SPELL_DRINK_POTION         = 3359,
 
-    SAY_START                = -1000553,
-    SAY_COMPLETED            = -1000554,
+    SAY_START                  = -1000553,
+    SAY_COMPLETED              = -1000554,
 
     // 1st wave
-    NPC_COUNCILMAN_SMITHERS  = 2060,
+    NPC_COUNCILMAN_SMITHERS    = 2060,
     // 2nd wave
-    NPC_COUNCILMAN_THATHER   = 2061,
-    NPC_COUNCILMAN_HENDRICKS = 2062,
+    NPC_COUNCILMAN_THATHER     = 2061,
+    NPC_COUNCILMAN_HENDRICKS   = 2062,
     // 3rd wave
-    NPC_COUNCILMAN_WILHELM   = 2063,
-    NPC_COUNCILMAN_HARTIN    = 2064,
-    NPC_COUNCILMAN_HIGARTH   = 2066,
+    NPC_COUNCILMAN_WILHELM     = 2063,
+    NPC_COUNCILMAN_HARTIN      = 2064,
+    NPC_COUNCILMAN_HIGARTH     = 2066,
     // final wave
-    NPC_COUNCILMAN_COOPER    = 2065,
-    NPC_COUNCILMAN_BRUNSWICK = 2067,
-    NPC_LORD_MAYOR_MORRISON  = 2068
+    NPC_COUNCILMAN_COOPER      = 2065,
+    NPC_COUNCILMAN_BRUNSWICK   = 2067,
+    NPC_LORD_MAYOR_MORRISON    = 2068
 };
 
 struct SpawnPoint
@@ -173,9 +190,10 @@ SpawnPoint SpawnPoints[] =
 
 static float m_afMoveCoords[] = { -410.69f, 1498.04f, 19.77f};
 
+
 struct MANGOS_DLL_DECL npc_deathstalker_faerleiaAI : public ScriptedAI
 {
-    npc_deathstalker_faerleiaAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_deathstalker_faerleiaAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
     void Reset() override {}
 
@@ -185,15 +203,16 @@ struct MANGOS_DLL_DECL npc_deathstalker_faerleiaAI : public ScriptedAI
     uint8  m_uiWaveCount;
     bool   m_bEventStarted;
 
+
     void StartEvent(Player* pPlayer)
     {
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
 
         m_playerGuid  = pPlayer->GetObjectGuid();
-        m_bEventStarted = true;
-        m_uiWaveTimer   = 10000;
-        m_uiSummonCount = 0;
-        m_uiWaveCount   = 0;
+        m_bEventStarted  = true;
+        m_uiWaveTimer    = 10000;
+        m_uiSummonCount  = 0;
+        m_uiWaveCount    = 0;
     }
 
     void FinishEvent()
@@ -239,6 +258,7 @@ struct MANGOS_DLL_DECL npc_deathstalker_faerleiaAI : public ScriptedAI
 
                 FinishEvent();
             }
+
         }
     }
 
@@ -263,7 +283,7 @@ struct MANGOS_DLL_DECL npc_deathstalker_faerleiaAI : public ScriptedAI
                         m_creature->SummonCreature(NPC_COUNCILMAN_WILHELM,   SpawnPoints[1].fX, SpawnPoints[1].fY, SpawnPoints[1].fZ, SpawnPoints[1].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
                         m_creature->SummonCreature(NPC_COUNCILMAN_HARTIN,    SpawnPoints[0].fX, SpawnPoints[0].fY, SpawnPoints[0].fZ, SpawnPoints[0].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
                         m_creature->SummonCreature(NPC_COUNCILMAN_HIGARTH,   SpawnPoints[2].fX, SpawnPoints[2].fY, SpawnPoints[2].fZ, SpawnPoints[2].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
-                        m_uiWaveTimer  = 8000;
+                        m_uiWaveTimer = 8000;
                         break;
                     case 3:
                         m_creature->SummonCreature(NPC_COUNCILMAN_COOPER,    SpawnPoints[1].fX, SpawnPoints[1].fY, SpawnPoints[1].fZ, SpawnPoints[1].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
@@ -275,11 +295,15 @@ struct MANGOS_DLL_DECL npc_deathstalker_faerleiaAI : public ScriptedAI
                 ++m_uiWaveCount;
             }
             else
+            {
                 m_uiWaveTimer -= uiDiff;
+            }
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         DoMeleeAttackIfReady();
     }

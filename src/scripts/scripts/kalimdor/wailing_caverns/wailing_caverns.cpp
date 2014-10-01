@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: wailing_caverns
-SD%Complete: 90
-SDComment: Missing vipers emerge effect, Naralex doesn't fly at exit(Core issue)
-SDCategory: Wailing Caverns
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      wailing_caverns
+ * SD%Complete: 90
+ * SDComment:   Missing vipers emerge effect, Naralex doesn't fly at exit(Core issue)
+ * SDCategory:  Wailing Caverns
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 #include "wailing_caverns.h"
@@ -120,7 +131,9 @@ struct MANGOS_DLL_DECL npc_disciple_of_naralexAI : public npc_escortAI
 
         // Reset event if can
         if (m_pInstance && m_pInstance->GetData(TYPE_DISCIPLE) != DONE)
+        {
             m_pInstance->SetData(TYPE_DISCIPLE, FAIL);
+        }
     }
 
     void AttackedBy(Unit* pAttacker) override
@@ -128,13 +141,19 @@ struct MANGOS_DLL_DECL npc_disciple_of_naralexAI : public npc_escortAI
         if (!m_bIsFirstHit)
         {
             if (pAttacker->GetEntry() == NPC_MUTANUS)
+            {
                 DoScriptText(SAY_MUTANUS, m_creature, pAttacker);
+            }
             // Check if already in ritual
             else if (m_uiPoint >= 30)
+            {
                 DoScriptText(SAY_AGGRO_3, m_creature, pAttacker);
+            }
             else
                 // Aggro 1 should be in 90% of the cases
+            {
                 DoScriptText(roll_chance_i(90) ? SAY_AGGRO_1 : SAY_AGGRO_2, m_creature, pAttacker);
+            }
 
             m_bIsFirstHit = true;
         }
@@ -155,7 +174,7 @@ struct MANGOS_DLL_DECL npc_disciple_of_naralexAI : public npc_escortAI
             m_creature->SetWalk(true);
         }
         else
-            npc_escortAI::EnterEvadeMode();
+            { npc_escortAI::EnterEvadeMode(); }
     }
 
     void JustStartedEscort() override
@@ -163,7 +182,9 @@ struct MANGOS_DLL_DECL npc_disciple_of_naralexAI : public npc_escortAI
         DoScriptText(SAY_PREPARE, m_creature);
 
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_DISCIPLE, IN_PROGRESS);
+        }
     }
 
     void WaypointReached(uint32 uiPointId) override
@@ -188,7 +209,9 @@ struct MANGOS_DLL_DECL npc_disciple_of_naralexAI : public npc_escortAI
                 break;
             case 32:
                 if (Creature* pNaralex = m_pInstance->GetSingleCreatureFromStorage(NPC_NARALEX))
+                {
                     m_creature->SetFacingToObject(pNaralex);
+                }
 
                 m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
                 m_uiEventTimer = 2000;
@@ -210,13 +233,17 @@ struct MANGOS_DLL_DECL npc_disciple_of_naralexAI : public npc_escortAI
     void SummonedCreatureJustDied(Creature* /*pSummoned*/) override
     {
         if (m_uiSummonedAlive == 0)
-            return;                                         // Actually if this happens, something went wrong before
+        {
+            return;    // Actually if this happens, something went wrong before
+        }
 
         --m_uiSummonedAlive;
 
         // Continue Event if all are dead and we are in a stopped subevent
         if (m_uiSummonedAlive == 0 && m_uiEventTimer == 0)
+        {
             m_uiEventTimer = 1000;
+        }
     }
 
     // Summon mobs at calculated points
@@ -272,7 +299,9 @@ struct MANGOS_DLL_DECL npc_disciple_of_naralexAI : public npc_escortAI
                             case 2:
                                 // Summon vipers at the first circle
                                 for (uint8 i = 0; i < 3; ++i)
+                                {
                                     DoSpawnMob(NPC_DEVIATE_VIPER, aSummonPositions[2][0], aSummonPositions[2][1] + 2 * M_PI_F / 3 * i);
+                                }
                                 m_uiEventTimer = 0;
                                 ++m_uiSubeventPhase;
                                 break;
@@ -307,35 +336,45 @@ struct MANGOS_DLL_DECL npc_disciple_of_naralexAI : public npc_escortAI
                                 break;
                             case 2:
                                 if (Creature* pNaralex = m_pInstance->GetSingleCreatureFromStorage(NPC_NARALEX))
+                                {
                                     DoScriptText(EMOTE_NARALEX_AWAKE, pNaralex);
+                                }
                                 m_uiEventTimer = 5000;
                                 ++m_uiSubeventPhase;
                                 break;
                             case 3:
                                 // First set of mobs
                                 for (uint8 i = 0; i < 3; ++i)
+                                {
                                     DoSpawnMob(NPC_DEVIATE_MOCCASIN, aSummonPositions[3][0], aSummonPositions[3][1] + M_PI_F / 3 * i);
+                                }
                                 m_uiEventTimer = 20000;
                                 ++m_uiSubeventPhase;
                                 break;
                             case 4:
                                 // Second set of mobs
                                 for (uint8 i = 0; i < 7; ++i)
+                                {
                                     DoSpawnMob(NPC_NIGHTMARE_ECTOPLASM, aSummonPositions[3][0], aSummonPositions[3][1] + M_PI_F / 7 * i);
+                                }
                                 m_uiEventTimer = 0;
                                 ++m_uiSubeventPhase;
                                 break;
                             case 5:
                                 // Advance only when all mobs are dead
                                 if (Creature* pNaralex = m_pInstance->GetSingleCreatureFromStorage(NPC_NARALEX))
+                                {
                                     DoScriptText(EMOTE_BREAK_THROUGH, pNaralex);
+                                }
                                 ++m_uiSubeventPhase;
                                 m_uiEventTimer = 10000;
                                 break;
                             case 6:
                                 // Mutanus
                                 if (Creature* pNaralex = m_pInstance->GetSingleCreatureFromStorage(NPC_NARALEX))
+                                {
                                     DoScriptText(EMOTE_VISION, pNaralex);
+                                }
                                 DoSpawnMob(NPC_MUTANUS, aSummonPositions[4][0], aSummonPositions[4][1]);
                                 m_uiEventTimer = 0;
                                 ++m_uiSubeventPhase;
@@ -405,7 +444,9 @@ struct MANGOS_DLL_DECL npc_disciple_of_naralexAI : public npc_escortAI
                 }
             }
             else
+            {
                 m_uiEventTimer -= uiDiff;
+            }
         }
 
         if (m_uiPotionTimer < uiDiff)
@@ -414,27 +455,35 @@ struct MANGOS_DLL_DECL npc_disciple_of_naralexAI : public npc_escortAI
             if (m_creature->GetHealthPercent() < 80.0f)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_POTION) == CAST_OK)
+                {
                     m_uiPotionTimer = 45000;
+                }
             }
             else
+            {
                 m_uiPotionTimer = 5000;
+            }
         }
         else
-            m_uiPotionTimer -= uiDiff;
+            { m_uiPotionTimer -= uiDiff; }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         if (m_uiSleepTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_SLEEP) == CAST_OK)
+                {
                     m_uiSleepTimer = 30000;
+                }
             }
         }
         else
-            m_uiSleepTimer -= uiDiff;
+            { m_uiSleepTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }
@@ -445,7 +494,9 @@ bool GossipHello_npc_disciple_of_naralex(Player* pPlayer, Creature* pCreature)
     ScriptedInstance* m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
 
     if (pCreature->IsQuestGiver())
+    {
         pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+    }
 
     // Buff the players
     pCreature->CastSpell(pPlayer, SPELL_MARK, false);
@@ -456,7 +507,9 @@ bool GossipHello_npc_disciple_of_naralex(Player* pPlayer, Creature* pCreature)
         pPlayer->SEND_GOSSIP_MENU(TEXT_ID_DISCIPLE, pCreature->GetObjectGuid());
     }
     else
+    {
         pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
+    }
 
     return true;
 }
@@ -466,7 +519,9 @@ bool GossipSelect_npc_disciple_of_naralex(Player* pPlayer, Creature* pCreature, 
     ScriptedInstance* m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
 
     if (!m_pInstance)
+    {
         return false;
+    }
 
     if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
     {

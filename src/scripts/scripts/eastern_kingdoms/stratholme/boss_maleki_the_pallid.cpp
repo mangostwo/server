@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Maleki_the_Pallid
-SD%Complete: 100
-SDComment:
-SDCategory: Stratholme
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Maleki_the_Pallid
+ * SD%Complete: 100
+ * SDComment:   None
+ * SDCategory:  Stratholme
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 
@@ -51,7 +62,9 @@ struct MANGOS_DLL_DECL boss_maleki_the_pallidAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         // Frostbolt
         if (m_uiFrostboltTimer < uiDiff)
@@ -59,11 +72,13 @@ struct MANGOS_DLL_DECL boss_maleki_the_pallidAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_FROSTBOLT) == CAST_OK)
+                {
                     m_uiFrostboltTimer = urand(3000, 4000);
+                }
             }
         }
         else
-            m_uiFrostboltTimer -= uiDiff;
+            { m_uiFrostboltTimer -= uiDiff; }
 
         // IceTomb
         if (m_uiIceTombTimer < uiDiff)
@@ -71,11 +86,13 @@ struct MANGOS_DLL_DECL boss_maleki_the_pallidAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_ICE_TOMB) == CAST_OK)
+                {
                     m_uiIceTombTimer = urand(15000, 20000);
+                }
             }
         }
         else
-            m_uiIceTombTimer -= uiDiff;
+            { m_uiIceTombTimer -= uiDiff; }
 
         // Drain Life
         if (m_uiDrainLifeTimer < uiDiff)
@@ -83,11 +100,13 @@ struct MANGOS_DLL_DECL boss_maleki_the_pallidAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_DRAIN_LIFE) == CAST_OK)
+                {
                     m_uiDrainLifeTimer = urand(15000, 20000);
+                }
             }
         }
         else
-            m_uiDrainLifeTimer -= uiDiff;
+            { m_uiDrainLifeTimer -= uiDiff; }
 
         // Drain mana
         if (m_uiDrainManaTimer < uiDiff)
@@ -95,11 +114,13 @@ struct MANGOS_DLL_DECL boss_maleki_the_pallidAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_DRAIN_MANA, SELECT_FLAG_POWER_MANA))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_DRAIN_MANA) == CAST_OK)
+                {
                     m_uiDrainManaTimer = urand(20000, 30000);
+                }
             }
         }
         else
-            m_uiDrainManaTimer -= uiDiff;
+            { m_uiDrainManaTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

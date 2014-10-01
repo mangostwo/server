@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Viscidus
-SD%Complete: 40
-SDComment: Only basic spells - freeze and explode events require more research
-SDCategory: Temple of Ahn'Qiraj
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Viscidus
+ * SD%Complete: 40
+ * SDComment:   Only basic spells - freeze and explode events require more research
+ * SDCategory:  Temple of Ahn'Qiraj
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 #include "temple_of_ahnqiraj.h"
@@ -77,41 +88,53 @@ struct MANGOS_DLL_DECL boss_viscidusAI : public ScriptedAI
         DoCastSpellIfCan(m_creature, SPELL_TOXIN);
 
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_VISCIDUS, IN_PROGRESS);
+        }
     }
 
     void JustReachedHome() override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_VISCIDUS, FAIL);
+        }
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_VISCIDUS, DONE);
+        }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         if (m_uiPoisonShockTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_POISON_SHOCK) == CAST_OK)
+            {
                 m_uiPoisonShockTimer = urand(7000, 12000);
+            }
         }
         else
-            m_uiPoisonShockTimer -= uiDiff;
+            { m_uiPoisonShockTimer -= uiDiff; }
 
         if (m_uiPoisonBoltVolleyTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_POISONBOLT_VOLLEY) == CAST_OK)
+            {
                 m_uiPoisonBoltVolleyTimer = urand(10000, 15000);
+            }
         }
         else
-            m_uiPoisonBoltVolleyTimer -= uiDiff;
+            { m_uiPoisonBoltVolleyTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

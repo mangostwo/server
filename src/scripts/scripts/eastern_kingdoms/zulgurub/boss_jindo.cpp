@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Jin'do the Hexxer
-SD%Complete: 85
-SDComment: Mind Control not working because of core bug. Shades invisible is removed as of Attacking (core bug) - MANY HACKZ!!
-SDCategory: Zul'Gurub
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Jin'do the Hexxer
+ * SD%Complete: 85
+ * SDComment:   Mind Control not working because of core bug. Shades invisible is removed as of Attacking (core bug) - MANY HACKZ!!
+ * SDCategory:  Zul'Gurub
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 #include "zulgurub.h"
@@ -82,22 +93,28 @@ struct MANGOS_DLL_DECL boss_jindoAI : public ScriptedAI
     void SummonedCreatureJustDied(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_POWERFULL_HEALING_WARD)
-            m_uiHealingWardTimer = 15000;                   // how long delay?
+        {
+            m_uiHealingWardTimer = 15000;    // how long delay?
+        }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         // Brain Wash Totem Timer
         if (m_uiBrainWashTotemTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_BRAINWASH_TOTEM) == CAST_OK)
+            {
                 m_uiBrainWashTotemTimer = urand(18000, 26000);
+            }
         }
         else
-            m_uiBrainWashTotemTimer -= uiDiff;
+            { m_uiBrainWashTotemTimer -= uiDiff; }
 
         // Healing Ward Timer
         if (m_uiHealingWardTimer)
@@ -105,20 +122,26 @@ struct MANGOS_DLL_DECL boss_jindoAI : public ScriptedAI
             if (m_uiHealingWardTimer <= uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_POWERFULL_HEALING_WARD) == CAST_OK)
+                {
                     m_uiHealingWardTimer = 0;
+                }
             }
             else
+            {
                 m_uiHealingWardTimer -= uiDiff;
+            }
         }
 
         // Hex Timer
         if (m_uiHexTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HEX) == CAST_OK)
+            {
                 m_uiHexTimer = urand(12000, 20000);
+            }
         }
         else
-            m_uiHexTimer -= uiDiff;
+            { m_uiHexTimer -= uiDiff; }
 
         // Casting the delusion curse with a shade. So shade will attack the same target with the curse.
         if (m_uiDelusionsTimer < uiDiff)
@@ -126,20 +149,24 @@ struct MANGOS_DLL_DECL boss_jindoAI : public ScriptedAI
             // random target except the tank
             Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
             if (!pTarget)
+            {
                 pTarget = m_creature->getVictim();
+            }
 
             if (DoCastSpellIfCan(pTarget, SPELL_DELUSIONS_OF_JINDO) == CAST_OK)
             {
                 float fX, fY, fZ;
                 m_creature->GetRandomPoint(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 5.0f, fX, fY, fZ);
                 if (Creature* pSummoned = m_creature->SummonCreature(NPC_SHADE_OF_JINDO, fX, fY, fZ, 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 15000))
+                {
                     pSummoned->AI()->AttackStart(pTarget);
+                }
 
                 m_uiDelusionsTimer = urand(4000, 12000);
             }
         }
         else
-            m_uiDelusionsTimer -= uiDiff;
+            { m_uiDelusionsTimer -= uiDiff; }
 
         // Teleporting a random player and spawning 9 skeletons that will attack this player
         if (m_uiTeleportTimer < uiDiff)
@@ -154,14 +181,16 @@ struct MANGOS_DLL_DECL boss_jindoAI : public ScriptedAI
                 {
                     m_creature->GetRandomPoint(aPitTeleportLocs[0], aPitTeleportLocs[1], aPitTeleportLocs[2], 4.0f, fX, fY, fZ);
                     if (Creature* pSummoned = m_creature->SummonCreature(NPC_SACRIFICED_TROLL, fX, fY, fZ, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 15000))
+                    {
                         pSummoned->AI()->AttackStart(pTarget);
+                    }
                 }
 
                 m_uiTeleportTimer = urand(15000, 23000);
             }
         }
         else
-            m_uiTeleportTimer -= uiDiff;
+            { m_uiTeleportTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }
@@ -191,7 +220,7 @@ struct MANGOS_DLL_DECL mob_healing_wardAI : public ScriptedAI
             m_uiHealTimer = 3000;
         }
         else
-            m_uiHealTimer -= uiDiff;
+            { m_uiHealTimer -= uiDiff; }
     }
 };
 

@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,18 +18,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Winterspring
-SD%Complete: 90
-SDComment: Quest support: 4901.
-SDCategory: Winterspring
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Winterspring
+ * SD%Complete: 90
+ * SDComment:   Quest support: 4901.
+ * SDCategory:  Winterspring
+ * EndScriptData
+ */
 
-/* ContentData
-npc_ranshalla
-EndContentData */
+/**
+ * ContentData
+ * npc_ranshalla
+ * EndContentData
+ */
 
 #include "precompiled.h"
 #include "escort_ai.h"
@@ -136,11 +149,11 @@ static EventLocations aWingThicketLocations[] =
     {5515.98f, -4903.43f, 846.30f, 4.58f},      // 0 right priestess summon loc
     {5501.94f, -4920.20f, 848.69f, 6.15f},      // 1 left priestess summon loc
     {5497.35f, -4906.49f, 850.83f, 2.76f},      // 2 guard of elune summon loc
-    {5518.38f, -4913.47f, 845.57f, 0},          // 3 right priestess move loc
-    {5510.36f, -4921.17f, 846.33f, 0},          // 4 left priestess move loc
-    {5511.31f, -4913.82f, 847.17f, 0},          // 5 guard of elune move loc
-    {5518.51f, -4917.56f, 845.23f, 0},          // 6 right priestess second move loc
-    {5514.40f, -4921.16f, 845.49f, 0}           // 7 left priestess second move loc
+    {5518.38f, -4913.47f, 845.57f},             // 3 right priestess move loc
+    {5510.36f, -4921.17f, 846.33f},             // 4 left priestess move loc
+    {5511.31f, -4913.82f, 847.17f},             // 5 guard of elune move loc
+    {5518.51f, -4917.56f, 845.23f},             // 6 right priestess second move loc
+    {5514.40f, -4921.16f, 845.49f}              // 7 left priestess second move loc
 };
 
 struct MANGOS_DLL_DECL npc_ranshallaAI : public npc_escortAI, private DialogueHelper
@@ -168,13 +181,19 @@ struct MANGOS_DLL_DECL npc_ranshallaAI : public npc_escortAI, private DialogueHe
     void DoContinueEscort(bool bIsAltarWaypoint = false)
     {
         if (bIsAltarWaypoint)
+        {
             DoScriptText(SAY_RANSHALLA_ALTAR_1, m_creature);
+        }
         else
         {
             switch (urand(0, 1))
             {
-                case 0: DoScriptText(SAY_AFTER_TORCH_1, m_creature); break;
-                case 1: DoScriptText(SAY_AFTER_TORCH_2, m_creature); break;
+                case 0:
+                    DoScriptText(SAY_AFTER_TORCH_1, m_creature);
+                    break;
+                case 1:
+                    DoScriptText(SAY_AFTER_TORCH_2, m_creature);
+                    break;
             }
         }
 
@@ -197,15 +216,23 @@ struct MANGOS_DLL_DECL npc_ranshallaAI : public npc_escortAI, private DialogueHe
         else
         {
             if (GameObject* pGo = GetClosestGameObjectWithEntry(m_creature, GO_ELUNE_FIRE, 10.0f))
+            {
                 pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+            }
         }
 
         // Yell and set escort to pause
         switch (urand(0, 2))
         {
-            case 0: DoScriptText(SAY_REACH_TORCH_1, m_creature); break;
-            case 1: DoScriptText(SAY_REACH_TORCH_2, m_creature); break;
-            case 2: DoScriptText(SAY_REACH_TORCH_3, m_creature); break;
+            case 0:
+                DoScriptText(SAY_REACH_TORCH_1, m_creature);
+                break;
+            case 1:
+                DoScriptText(SAY_REACH_TORCH_2, m_creature);
+                break;
+            case 2:
+                DoScriptText(SAY_REACH_TORCH_3, m_creature);
+                break;
         }
 
         DoScriptText(EMOTE_CHANT_SPELL, m_creature);
@@ -232,7 +259,9 @@ struct MANGOS_DLL_DECL npc_ranshallaAI : public npc_escortAI, private DialogueHe
     void SummonedMovementInform(Creature* pSummoned, uint32 uiType, uint32 uiPointId) override
     {
         if (uiType != POINT_MOTION_TYPE || pSummoned->GetEntry() != NPC_PRIESTESS_ELUNE || uiPointId != 1)
+        {
             return;
+        }
 
         // Start the dialogue when the priestess reach the altar (they should both reach the point in the same time)
         StartNextDialogueText(SAY_PRIESTESS_ALTAR_3);
@@ -264,14 +293,18 @@ struct MANGOS_DLL_DECL npc_ranshallaAI : public npc_escortAI, private DialogueHe
                 for (std::list<GameObject*>::const_iterator itr = m_lEluneLights.begin(); itr != m_lEluneLights.end(); ++itr)
                 {
                     if ((*itr)->isSpawned())
+                    {
                         continue;
+                    }
 
                     (*itr)->SetRespawnTime(115);
                     (*itr)->Refresh();
                 }
 
                 if (GameObject* pAltar = m_creature->GetMap()->GetGameObject(m_altarGuid))
+                {
                     m_creature->SetFacingToObject(pAltar);
+                }
                 break;
             }
             case 42:
@@ -284,7 +317,9 @@ struct MANGOS_DLL_DECL npc_ranshallaAI : public npc_escortAI, private DialogueHe
                 // Stop the escort and turn towards the altar
                 SetEscortPaused(true);
                 if (GameObject* pAltar = m_creature->GetMap()->GetGameObject(m_altarGuid))
+                {
                     m_creature->SetFacingToObject(pAltar);
+                }
                 break;
         }
     }
@@ -305,7 +340,9 @@ struct MANGOS_DLL_DECL npc_ranshallaAI : public npc_escortAI, private DialogueHe
                 if (GameObject* pGem = GetClosestGameObjectWithEntry(m_creature, GO_ELUNE_GEM, 10.0f))
                 {
                     if (pGem->isSpawned())
+                    {
                         break;
+                    }
 
                     pGem->SetRespawnTime(90);
                     pGem->Refresh();
@@ -314,7 +351,9 @@ struct MANGOS_DLL_DECL npc_ranshallaAI : public npc_escortAI, private DialogueHe
             case SAY_PRIESTESS_ALTAR_9:
                 // move near the escort npc
                 if (Creature* pPriestess = m_creature->GetMap()->GetCreature(m_firstPriestessGuid))
+                {
                     pPriestess->GetMotionMaster()->MovePoint(0, aWingThicketLocations[6].m_fX, aWingThicketLocations[6].m_fY, aWingThicketLocations[6].m_fZ);
+                }
                 break;
             case SAY_PRIESTESS_ALTAR_13:
                 // summon the Guardian of Elune
@@ -327,7 +366,9 @@ struct MANGOS_DLL_DECL npc_ranshallaAI : public npc_escortAI, private DialogueHe
                 if (GameObject* pAltar = m_creature->GetMap()->GetGameObject(m_altarGuid))
                 {
                     if (Creature* pVoice = m_creature->SummonCreature(NPC_VOICE_ELUNE, pAltar->GetPositionX(), pAltar->GetPositionY(), pAltar->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 30000))
+                    {
                         m_voiceEluneGuid = pVoice->GetObjectGuid();
+                    }
                 }
                 break;
             case SAY_VOICE_ALTAR_15:
@@ -373,10 +414,14 @@ struct MANGOS_DLL_DECL npc_ranshallaAI : public npc_escortAI, private DialogueHe
             case SAY_QUEST_END_2:
                 // Turn towards the altar and kneel - quest complete
                 if (GameObject* pAltar = m_creature->GetMap()->GetGameObject(m_altarGuid))
+                {
                     m_creature->SetFacingToObject(pAltar);
+                }
                 m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     pPlayer->GroupEventHappens(QUEST_GUARDIANS_ALTAR, m_creature);
+                }
                 break;
         }
     }
@@ -385,10 +430,14 @@ struct MANGOS_DLL_DECL npc_ranshallaAI : public npc_escortAI, private DialogueHe
     {
         switch (uiEntry)
         {
-            case NPC_RANSHALLA:        return m_creature;
-            case NPC_VOICE_ELUNE:      return m_creature->GetMap()->GetCreature(m_voiceEluneGuid);
-            case NPC_PRIESTESS_DATA_1: return m_creature->GetMap()->GetCreature(m_firstPriestessGuid);
-            case NPC_PRIESTESS_DATA_2: return m_creature->GetMap()->GetCreature(m_secondPriestessGuid);
+            case NPC_RANSHALLA:
+                return m_creature;
+            case NPC_VOICE_ELUNE:
+                return m_creature->GetMap()->GetCreature(m_voiceEluneGuid);
+            case NPC_PRIESTESS_DATA_1:
+                return m_creature->GetMap()->GetCreature(m_firstPriestessGuid);
+            case NPC_PRIESTESS_DATA_2:
+                return m_creature->GetMap()->GetCreature(m_secondPriestessGuid);
 
             default:
                 return NULL;
@@ -408,11 +457,15 @@ struct MANGOS_DLL_DECL npc_ranshallaAI : public npc_escortAI, private DialogueHe
                 m_uiDelayTimer = 0;
             }
             else
+            {
                 m_uiDelayTimer -= uiDiff;
+            }
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         DoMeleeAttackIfReady();
     }
@@ -431,7 +484,9 @@ bool QuestAccept_npc_ranshalla(Player* pPlayer, Creature* pCreature, const Quest
         pCreature->SetFactionTemporary(FACTION_ESCORT_A_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
 
         if (npc_ranshallaAI* pEscortAI = dynamic_cast<npc_ranshallaAI*>(pCreature->AI()))
+        {
             pEscortAI->Start(false, pPlayer, pQuest, true);
+        }
 
         return true;
     }
@@ -445,12 +500,16 @@ bool GOUse_go_elune_fire(Player* /*pPlayer*/, GameObject* pGo)
     bool bIsAltar = false;
 
     if (pGo->GetEntry() == GO_ELUNE_ALTAR)
+    {
         bIsAltar = true;
+    }
 
     if (Creature* pRanshalla = GetClosestCreatureWithEntry(pGo, NPC_RANSHALLA, 10.0f))
     {
         if (npc_ranshallaAI* pEscortAI = dynamic_cast<npc_ranshallaAI*>(pRanshalla->AI()))
+        {
             pEscortAI->DoContinueEscort(bIsAltar);
+        }
     }
 
     return false;

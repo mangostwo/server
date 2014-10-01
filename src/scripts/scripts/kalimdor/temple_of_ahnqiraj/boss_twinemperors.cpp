@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Twinemperors
-SD%Complete: 95
-SDComment: Timers
-SDCategory: Temple of Ahn'Qiraj
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Twinemperors
+ * SD%Complete: 95
+ * SDComment:   Timers
+ * SDCategory:  Temple of Ahn'Qiraj
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 #include "temple_of_ahnqiraj.h"
@@ -88,7 +99,9 @@ struct MANGOS_DLL_DECL boss_twin_emperorsAI : public ScriptedAI
     void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage) override
     {
         if (!m_pInstance)
+        {
             return;
+        }
 
         if (Creature* pTwin = m_pInstance->GetSingleCreatureFromStorage(m_creature->GetEntry() == NPC_VEKLOR ? NPC_VEKNILASH : NPC_VEKLOR))
         {
@@ -109,7 +122,9 @@ struct MANGOS_DLL_DECL boss_twin_emperorsAI : public ScriptedAI
     void HealedBy(Unit* /*pHealer*/, uint32& uiHealedAmount) override
     {
         if (!m_pInstance)
+        {
             return;
+        }
 
         if (Creature* pTwin = m_pInstance->GetSingleCreatureFromStorage(m_creature->GetEntry() == NPC_VEKLOR ? NPC_VEKNILASH : NPC_VEKLOR))
         {
@@ -123,19 +138,25 @@ struct MANGOS_DLL_DECL boss_twin_emperorsAI : public ScriptedAI
     void Aggro(Unit* /*pWho*/) override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_TWINS, IN_PROGRESS);
+        }
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_TWINS, DONE);
+        }
     }
 
     void JustReachedHome() override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_TWINS, FAIL);
+        }
     }
 
     void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
@@ -161,37 +182,49 @@ struct MANGOS_DLL_DECL boss_twin_emperorsAI : public ScriptedAI
     {
         // Return since we have no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         // Call emperor specific virtual function
         if (!UpdateEmperorAI(uiDiff))
+        {
             return;
+        }
 
         if (m_uiTeleportTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_TWIN_TELEPORT) == CAST_OK)
+            {
                 m_uiTeleportTimer = 35000;
+            }
         }
         else
-            m_uiTeleportTimer -= uiDiff;
+            { m_uiTeleportTimer -= uiDiff; }
 
         if (m_uiBugAbilityTimer < uiDiff)
         {
             if (DoHandleBugAbility())
+            {
                 m_uiBugAbilityTimer = urand(10000, 17000);
+            }
         }
         else
-            m_uiBugAbilityTimer -= uiDiff;
+            { m_uiBugAbilityTimer -= uiDiff; }
 
         if (m_uiBerserkTimer)
         {
             if (m_uiBerserkTimer <= uiDiff)
             {
                 if (DoHandleBerserk())
+                {
                     m_uiBerserkTimer = 0;
+                }
             }
             else
+            {
                 m_uiBerserkTimer -= uiDiff;
+            }
         }
     }
 };
@@ -214,7 +247,9 @@ struct MANGOS_DLL_DECL boss_veknilashAI : public boss_twin_emperorsAI
     void MoveInLineOfSight(Unit* pWho) override
     {
         if (m_pInstance && m_pInstance->GetData(TYPE_TWINS) == IN_PROGRESS && pWho->GetEntry() == NPC_VEKLOR && pWho->IsWithinDistInMap(m_creature, 60.0f))
+        {
             DoCastSpellIfCan(pWho, SPELL_HEAL_BROTHER);
+        }
 
         ScriptedAI::MoveInLineOfSight(pWho);
     }
@@ -225,10 +260,18 @@ struct MANGOS_DLL_DECL boss_veknilashAI : public boss_twin_emperorsAI
 
         switch (urand(0, 3))
         {
-            case 0: DoScriptText(SAY_VEKNILASH_AGGRO_1, m_creature); break;
-            case 1: DoScriptText(SAY_VEKNILASH_AGGRO_2, m_creature); break;
-            case 2: DoScriptText(SAY_VEKNILASH_AGGRO_3, m_creature); break;
-            case 3: DoScriptText(SAY_VEKNILASH_AGGRO_4, m_creature); break;
+            case 0:
+                DoScriptText(SAY_VEKNILASH_AGGRO_1, m_creature);
+                break;
+            case 1:
+                DoScriptText(SAY_VEKNILASH_AGGRO_2, m_creature);
+                break;
+            case 2:
+                DoScriptText(SAY_VEKNILASH_AGGRO_3, m_creature);
+                break;
+            case 3:
+                DoScriptText(SAY_VEKNILASH_AGGRO_4, m_creature);
+                break;
         }
     }
 
@@ -247,7 +290,9 @@ struct MANGOS_DLL_DECL boss_veknilashAI : public boss_twin_emperorsAI
     bool DoHandleBugAbility()
     {
         if (DoCastSpellIfCan(m_creature, SPELL_MUTATE_BUG) == CAST_OK)
+        {
             return true;
+        }
 
         return false;
     }
@@ -255,7 +300,9 @@ struct MANGOS_DLL_DECL boss_veknilashAI : public boss_twin_emperorsAI
     bool DoHandleBerserk()
     {
         if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+        {
             return true;
+        }
 
         return false;
     }
@@ -264,7 +311,9 @@ struct MANGOS_DLL_DECL boss_veknilashAI : public boss_twin_emperorsAI
     void DoTeleportAbility()
     {
         if (!m_pInstance)
+        {
             return;
+        }
 
         if (Creature* pVeklor = m_pInstance->GetSingleCreatureFromStorage(NPC_VEKLOR))
         {
@@ -282,21 +331,29 @@ struct MANGOS_DLL_DECL boss_veknilashAI : public boss_twin_emperorsAI
         if (m_uiUnbalancingStrikeTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_UNBALANCING_STRIKE) == CAST_OK)
+            {
                 m_uiUnbalancingStrikeTimer = urand(8000, 20000);
+            }
         }
         else
+        {
             m_uiUnbalancingStrikeTimer -= uiDiff;
+        }
 
         if (m_uiUppercutTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_UPPERCUT, SELECT_FLAG_IN_MELEE_RANGE))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_UPPERCUT) == CAST_OK)
+                {
                     m_uiUppercutTimer = urand(15000, 30000);
+                }
             }
         }
         else
+        {
             m_uiUppercutTimer -= uiDiff;
+        }
 
         DoMeleeAttackIfReady();
 
@@ -324,7 +381,9 @@ struct MANGOS_DLL_DECL boss_veklorAI : public boss_twin_emperorsAI
     void MoveInLineOfSight(Unit* pWho) override
     {
         if (m_pInstance && m_pInstance->GetData(TYPE_TWINS) == IN_PROGRESS && pWho->GetEntry() == NPC_VEKNILASH && pWho->IsWithinDistInMap(m_creature, 60.0f))
+        {
             DoCastSpellIfCan(pWho, SPELL_HEAL_BROTHER);
+        }
 
         ScriptedAI::MoveInLineOfSight(pWho);
     }
@@ -335,10 +394,18 @@ struct MANGOS_DLL_DECL boss_veklorAI : public boss_twin_emperorsAI
 
         switch (urand(0, 3))
         {
-            case 0: DoScriptText(SAY_VEKLOR_AGGRO_1, m_creature); break;
-            case 1: DoScriptText(SAY_VEKLOR_AGGRO_2, m_creature); break;
-            case 2: DoScriptText(SAY_VEKLOR_AGGRO_3, m_creature); break;
-            case 3: DoScriptText(SAY_VEKLOR_AGGRO_4, m_creature); break;
+            case 0:
+                DoScriptText(SAY_VEKLOR_AGGRO_1, m_creature);
+                break;
+            case 1:
+                DoScriptText(SAY_VEKLOR_AGGRO_2, m_creature);
+                break;
+            case 2:
+                DoScriptText(SAY_VEKLOR_AGGRO_3, m_creature);
+                break;
+            case 3:
+                DoScriptText(SAY_VEKLOR_AGGRO_4, m_creature);
+                break;
         }
     }
 
@@ -368,7 +435,9 @@ struct MANGOS_DLL_DECL boss_veklorAI : public boss_twin_emperorsAI
     bool DoHandleBugAbility()
     {
         if (DoCastSpellIfCan(m_creature, SPELL_EXPLODE_BUG) == CAST_OK)
+        {
             return true;
+        }
 
         return false;
     }
@@ -376,7 +445,9 @@ struct MANGOS_DLL_DECL boss_veklorAI : public boss_twin_emperorsAI
     bool DoHandleBerserk()
     {
         if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
+        {
             return true;
+        }
 
         return false;
     }
@@ -386,29 +457,41 @@ struct MANGOS_DLL_DECL boss_veklorAI : public boss_twin_emperorsAI
         if (m_uiShadowBoltTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOW_BOLT) == CAST_OK)
+            {
                 m_uiShadowBoltTimer = 2000;
+            }
         }
         else
+        {
             m_uiShadowBoltTimer -= uiDiff;
+        }
 
         if (m_uiBlizzardTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_BLIZZARD) == CAST_OK)
+                {
                     m_uiBlizzardTimer = urand(15000, 30000);
+                }
             }
         }
         else
+        {
             m_uiBlizzardTimer -= uiDiff;
+        }
 
         if (m_uiArcaneBurstTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_ARCANE_BURST) == CAST_OK)
+            {
                 m_uiArcaneBurstTimer = 5000;
+            }
         }
         else
+        {
             m_uiArcaneBurstTimer -= uiDiff;
+        }
 
         return true;
     }

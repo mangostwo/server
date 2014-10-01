@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,19 +18,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Orgrimmar
-SD%Complete: 100
-SDComment: Quest support: 2460, 6566
-SDCategory: Orgrimmar
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Orgrimmar
+ * SD%Complete: 100
+ * SDComment:   Quest support: 2460, 6566
+ * SDCategory:  Orgrimmar
+ * EndScriptData
+ */
 
-/* ContentData
-npc_shenthul
-npc_thrall_warchief
-EndContentData */
+/**
+ * ContentData
+ * npc_shenthul
+ * npc_thrall_warchief
+ * EndContentData
+ */
 
 #include "precompiled.h"
 
@@ -78,14 +91,18 @@ struct MANGOS_DLL_DECL npc_shenthulAI : public ScriptedAI
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
                 {
                     if (pPlayer->GetTypeId() == TYPEID_PLAYER && pPlayer->GetQuestStatus(QUEST_SHATTERED_SALUTE) == QUEST_STATUS_INCOMPLETE)
+                    {
                         pPlayer->FailQuest(QUEST_SHATTERED_SALUTE);
+                    }
                 }
 
                 m_uiResetTimer = 0;
                 EnterEvadeMode();
             }
             else
+            {
                 m_uiResetTimer -= uiDiff;
+            }
         }
 
         if (m_uiSaluteTimer)
@@ -97,11 +114,15 @@ struct MANGOS_DLL_DECL npc_shenthulAI : public ScriptedAI
                 m_uiSaluteTimer = 0;
             }
             else
+            {
                 m_uiSaluteTimer -= uiDiff;
+            }
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         DoMeleeAttackIfReady();
     }
@@ -117,7 +138,9 @@ bool QuestAccept_npc_shenthul(Player* pPlayer, Creature* pCreature, const Quest*
     if (pQuest->GetQuestId() == QUEST_SHATTERED_SALUTE)
     {
         if (npc_shenthulAI* pShenAI = dynamic_cast<npc_shenthulAI*>(pCreature->AI()))
+        {
             pShenAI->DoStartQuestEvent(pPlayer);
+        }
     }
 
     return true;
@@ -135,10 +158,14 @@ enum
 bool GossipHello_npc_thrall_warchief(Player* pPlayer, Creature* pCreature)
 {
     if (pCreature->IsQuestGiver())
+    {
         pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+    }
 
     if (pPlayer->GetQuestStatus(QUEST_ID_WHAT_THE_WIND_CARRIES) == QUEST_STATUS_INCOMPLETE)
+    {
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Please share your wisdom with me, Warchief.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+    }
 
     pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
     return true;

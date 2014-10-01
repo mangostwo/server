@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,19 +18,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Hinterlands
-SD%Complete: 100
-SDComment: Quest support: 836, 2742
-SDCategory: The Hinterlands
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Hinterlands
+ * SD%Complete: 100
+ * SDComment:   Quest support: 836, 2742.
+ * SDCategory:  The Hinterlands
+ * EndScriptData
+ */
 
-/* ContentData
-npc_00x09hl
-npc_rinji
-EndContentData */
+/**
+ * ContentData
+ * npc_00x09hl
+ * npc_rinji
+ * EndContentData
+ */
 
 #include "precompiled.h"
 #include "escort_ai.h"
@@ -66,7 +79,9 @@ struct MANGOS_DLL_DECL npc_00x09hlAI : public npc_escortAI
             case 64:
                 DoScriptText(SAY_OOX_END, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     pPlayer->GroupEventHappens(QUEST_RESQUE_OOX_09, m_creature);
+                }
                 break;
         }
     }
@@ -99,7 +114,9 @@ struct MANGOS_DLL_DECL npc_00x09hlAI : public npc_escortAI
     void Aggro(Unit* pWho) override
     {
         if (pWho->GetEntry() == NPC_MARAUDING_OWL || pWho->GetEntry() == NPC_VILE_AMBUSHER)
+        {
             return;
+        }
 
         DoScriptText(urand(0, 1) ? SAY_OOX_AGGRO1 : SAY_OOX_AGGRO2, m_creature);
     }
@@ -120,7 +137,9 @@ bool QuestAccept_npc_00x09hl(Player* pPlayer, Creature* pCreature, const Quest* 
         DoScriptText(SAY_OOX_START, pCreature, pPlayer);
 
         if (npc_00x09hlAI* pEscortAI = dynamic_cast<npc_00x09hlAI*>(pCreature->AI()))
+        {
             pEscortAI->Start(false, pPlayer, pQuest);
+        }
     }
     return true;
 }
@@ -206,7 +225,9 @@ struct MANGOS_DLL_DECL npc_rinjiAI : public npc_escortAI
             }
 
             if (urand(0, 3))
+            {
                 return;
+            }
 
             // only if attacked and escorter is not in combat?
             DoScriptText(urand(0, 1) ? SAY_RIN_HELP_1 : SAY_RIN_HELP_2, m_creature);
@@ -216,7 +237,9 @@ struct MANGOS_DLL_DECL npc_rinjiAI : public npc_escortAI
     void DoSpawnAmbush(bool bFirst)
     {
         if (!bFirst)
+        {
             m_iSpawnId = 1;
+        }
 
         m_creature->SummonCreature(NPC_RANGER,
                                    m_afAmbushSpawn[m_iSpawnId].m_fX, m_afAmbushSpawn[m_iSpawnId].m_fY, m_afAmbushSpawn[m_iSpawnId].m_fZ, 0.0f,
@@ -241,7 +264,9 @@ struct MANGOS_DLL_DECL npc_rinjiAI : public npc_escortAI
         Player* pPlayer = GetPlayerForEscort();
 
         if (!pPlayer)
+        {
             return;
+        }
 
         switch (uiPointId)
         {
@@ -295,7 +320,9 @@ struct MANGOS_DLL_DECL npc_rinjiAI : public npc_escortAI
                     }
                 }
                 else
+                {
                     m_uiPostEventTimer -= uiDiff;
+                }
             }
 
             return;
@@ -310,10 +337,14 @@ bool QuestAccept_npc_rinji(Player* pPlayer, Creature* pCreature, const Quest* pQ
     if (pQuest->GetQuestId() == QUEST_RINJI_TRAPPED)
     {
         if (GameObject* pGo = GetClosestGameObjectWithEntry(pCreature, GO_RINJI_CAGE, INTERACTION_DISTANCE))
+        {
             pGo->UseDoorOrButton();
+        }
 
         if (npc_rinjiAI* pEscortAI = dynamic_cast<npc_rinjiAI*>(pCreature->AI()))
+        {
             pEscortAI->Start(false, pPlayer, pQuest);
+        }
     }
     return true;
 }

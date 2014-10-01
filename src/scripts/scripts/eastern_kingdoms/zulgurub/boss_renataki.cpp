@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Renataki
-SD%Complete: 100
-SDComment:
-SDCategory: Zul'Gurub
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Renataki
+ * SD%Complete: 100
+ * SDComment:   None
+ * SDCategory:  Zul'Gurub
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 
@@ -52,7 +63,9 @@ struct MANGOS_DLL_DECL boss_renatakiAI : public ScriptedAI
     {
         // If is vanished, don't evade
         if (m_uiAmbushTimer)
+        {
             return;
+        }
 
         ScriptedAI::EnterEvadeMode();
     }
@@ -60,7 +73,9 @@ struct MANGOS_DLL_DECL boss_renatakiAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         // Note: because the Vanish spell adds invisibility effect on the target, the timers won't be decreased during the vanish phase
         if (m_uiAmbushTimer)
@@ -68,10 +83,14 @@ struct MANGOS_DLL_DECL boss_renatakiAI : public ScriptedAI
             if (m_uiAmbushTimer <= uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_TRASH) == CAST_OK)
+                {
                     m_uiAmbushTimer = 0;
+                }
             }
             else
+            {
                 m_uiAmbushTimer -= uiDiff;
+            }
 
             // don't do anything else while vanished
             return;
@@ -87,7 +106,7 @@ struct MANGOS_DLL_DECL boss_renatakiAI : public ScriptedAI
             }
         }
         else
-            m_uiVanishTimer -= uiDiff;
+            { m_uiVanishTimer -= uiDiff; }
 
         // Resetting some aggro so he attacks other gamers
         if (m_uiGougeTimer < uiDiff)
@@ -95,22 +114,26 @@ struct MANGOS_DLL_DECL boss_renatakiAI : public ScriptedAI
             if (DoCastSpellIfCan(m_creature, SPELL_GOUGE) == CAST_OK)
             {
                 if (m_creature->GetThreatManager().getThreat(m_creature->getVictim()))
+                {
                     m_creature->GetThreatManager().modifyThreatPercent(m_creature->getVictim(), -50);
+                }
 
                 m_uiGougeTimer = urand(7000, 20000);
             }
         }
         else
-            m_uiGougeTimer -= uiDiff;
+            { m_uiGougeTimer -= uiDiff; }
 
         // Thausand Blades
         if (m_uiThousandBladesTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_THOUSAND_BLADES) == CAST_OK)
+            {
                 m_uiThousandBladesTimer = urand(7000, 12000);
+            }
         }
         else
-            m_uiThousandBladesTimer -= uiDiff;
+            { m_uiThousandBladesTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Instance_Scarlet_Monastery
-SD%Complete: 50
-SDComment:
-SDCategory: Scarlet Monastery
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Instance_Scarlet_Monastery
+ * SD%Complete: 50
+ * SDComment:   None
+ * SDCategory:  Scarlet Monastery
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 #include "scarlet_monastery.h"
@@ -52,14 +63,18 @@ void instance_scarlet_monastery::OnCreatureDeath(Creature* pCreature)
     {
         // Any other actions to do with Vorrel? setStandState?
         if (Creature* pVorrel = GetSingleCreatureFromStorage(NPC_VORREL))
+        {
             DoScriptText(SAY_TRIGGER_VORREL, pVorrel);
+        }
     }
 }
 
 void instance_scarlet_monastery::OnObjectCreate(GameObject* pGo)
 {
     if (pGo->GetEntry() == GO_WHITEMANE_DOOR)
+    {
         m_mGoEntryGuidStore[GO_WHITEMANE_DOOR] = pGo->GetObjectGuid();
+    }
 }
 
 void instance_scarlet_monastery::SetData(uint32 uiType, uint32 uiData)
@@ -67,9 +82,13 @@ void instance_scarlet_monastery::SetData(uint32 uiType, uint32 uiData)
     if (uiType == TYPE_MOGRAINE_AND_WHITE_EVENT)
     {
         if (uiData == IN_PROGRESS)
+        {
             DoUseDoorOrButton(GO_WHITEMANE_DOOR);
+        }
         if (uiData == FAIL)
+        {
             DoUseDoorOrButton(GO_WHITEMANE_DOOR);
+        }
 
         m_auiEncounter[0] = uiData;
     }
@@ -78,7 +97,9 @@ void instance_scarlet_monastery::SetData(uint32 uiType, uint32 uiData)
 uint32 instance_scarlet_monastery::GetData(uint32 uiData) const
 {
     if (uiData == TYPE_MOGRAINE_AND_WHITE_EVENT)
+    {
         return m_auiEncounter[0];
+    }
 
     return 0;
 }

@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Onyxia
-SD%Complete: 85
-SDComment: Phase 3 need additional code. The spawning Whelps need GO-Support.
-SDCategory: Onyxia's Lair
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Onyxia
+ * SD%Complete: 85
+ * SDComment:   Phase 3 need additional code. The spawning Whelps need GO-Support.
+ * SDCategory:  Onyxia's Lair
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 #include "onyxias_lair.h"
@@ -148,7 +159,9 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
     void Reset() override
     {
         if (!IsCombatMovement())
+        {
             SetCombatMovement(true);
+        }
 
         m_uiPhase = PHASE_START;
 
@@ -179,7 +192,9 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
         DoScriptText(SAY_AGGRO, m_creature);
 
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_ONYXIA, IN_PROGRESS);
+        }
     }
 
     void JustReachedHome() override
@@ -189,19 +204,25 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
         m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0);
 
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_ONYXIA, FAIL);
+        }
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_ONYXIA, DONE);
+        }
     }
 
     void JustSummoned(Creature* pSummoned) override
     {
         if (!m_pInstance)
+        {
             return;
+        }
 
         if (Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_ONYXIA_TRIGGER))
         {
@@ -211,16 +232,20 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
             pSummoned->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
         }
         else
-            pSummoned->SetInCombatWithZone();
+            { pSummoned->SetInCombatWithZone(); }
 
         if (pSummoned->GetEntry() == NPC_ONYXIA_WHELP)
+        {
             ++m_uiSummonCount;
+        }
     }
 
     void SummonedMovementInform(Creature* pSummoned, uint32 uiMoveType, uint32 uiPointId) override
     {
         if (uiMoveType != POINT_MOTION_TYPE || uiPointId != 1 || !m_creature->getVictim())
+        {
             return;
+        }
 
         pSummoned->SetInCombatWithZone();
     }
@@ -233,13 +258,13 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
     void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
     {
         if (pSpell->Id == SPELL_BREATH_EAST_TO_WEST ||
-                pSpell->Id == SPELL_BREATH_WEST_TO_EAST ||
-                pSpell->Id == SPELL_BREATH_SE_TO_NW ||
-                pSpell->Id == SPELL_BREATH_NW_TO_SE ||
-                pSpell->Id == SPELL_BREATH_SW_TO_NE ||
-                pSpell->Id == SPELL_BREATH_NE_TO_SW ||
-                pSpell->Id == SPELL_BREATH_SOUTH_TO_NORTH ||
-                pSpell->Id == SPELL_BREATH_NORTH_TO_SOUTH)
+        pSpell->Id == SPELL_BREATH_WEST_TO_EAST ||
+        pSpell->Id == SPELL_BREATH_SE_TO_NW ||
+        pSpell->Id == SPELL_BREATH_NW_TO_SE ||
+        pSpell->Id == SPELL_BREATH_SW_TO_NE ||
+        pSpell->Id == SPELL_BREATH_NE_TO_SW ||
+        pSpell->Id == SPELL_BREATH_SOUTH_TO_NORTH ||
+        pSpell->Id == SPELL_BREATH_NORTH_TO_SOUTH)
         {
             // This was sent with SendMonsterMove - which resulted in better speed than now
             m_creature->GetMotionMaster()->MovePoint(m_uiMovePoint, aMoveData[m_uiMovePoint].fX, aMoveData[m_uiMovePoint].fY, aMoveData[m_uiMovePoint].fZ);
@@ -250,7 +275,9 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
     void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
     {
         if (uiMoveType != POINT_MOTION_TYPE || !m_pInstance)
+        {
             return;
+        }
 
         switch (uiPointId)
         {
@@ -276,19 +303,25 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
         }
 
         if (Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_ONYXIA_TRIGGER))
+        {
             m_creature->SetFacingToObject(pTrigger);
+        }
     }
 
     void AttackStart(Unit* pWho) override
     {
         if (m_uiPhase == PHASE_START || m_uiPhase == PHASE_END)
+        {
             ScriptedAI::AttackStart(pWho);
+        }
     }
 
     bool DidSummonWhelps(const uint32 uiDiff)
     {
         if (m_uiSummonCount >= MAX_WHELPS_PER_PACK)
+        {
             return true;
+        }
 
         if (m_uiWhelpTimer < uiDiff)
         {
@@ -297,14 +330,18 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
             m_uiWhelpTimer = 500;
         }
         else
+        {
             m_uiWhelpTimer -= uiDiff;
+        }
         return false;
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         switch (m_uiPhase)
         {
@@ -312,44 +349,64 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
                 if (m_uiBellowingRoarTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_BELLOWINGROAR) == CAST_OK)
+                    {
                         m_uiBellowingRoarTimer = 30000;
+                    }
                 }
                 else
+                {
                     m_uiBellowingRoarTimer -= uiDiff;
+                }
                 // no break, phase 3 will use same abilities as in 1
             case PHASE_START:
             {
                 if (m_uiFlameBreathTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FLAMEBREATH : SPELL_FLAMEBREATH_H) == CAST_OK)
+                    {
                         m_uiFlameBreathTimer = urand(10000, 20000);
+                    }
                 }
                 else
+                {
                     m_uiFlameBreathTimer -= uiDiff;
+                }
 
                 if (m_uiTailSweepTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_TAILSWEEP : SPELL_TAILSWEEP_H) == CAST_OK)
+                    {
                         m_uiTailSweepTimer = urand(15000, 20000);
+                    }
                 }
                 else
+                {
                     m_uiTailSweepTimer -= uiDiff;
+                }
 
                 if (m_uiCleaveTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                    {
                         m_uiCleaveTimer = urand(2000, 5000);
+                    }
                 }
                 else
+                {
                     m_uiCleaveTimer -= uiDiff;
+                }
 
                 if (m_uiWingBuffetTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_WINGBUFFET : SPELL_WINGBUFFET_H) == CAST_OK)
+                    {
                         m_uiWingBuffetTimer = urand(15000, 30000);
+                    }
                 }
                 else
+                {
                     m_uiWingBuffetTimer -= uiDiff;
+                }
 
                 if (m_uiCheckInLairTimer < uiDiff)
                 {
@@ -357,12 +414,16 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
                     {
                         Creature* pOnyTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_ONYXIA_TRIGGER);
                         if (pOnyTrigger && !m_creature->IsWithinDistInMap(pOnyTrigger, 90.0f, false))
+                        {
                             DoCastSpellIfCan(m_creature, SPELL_BREATH_ENTRANCE);
+                        }
                     }
                     m_uiCheckInLairTimer = 3000;
                 }
                 else
+                {
                     m_uiCheckInLairTimer -= uiDiff;
+                }
 
                 if (m_uiPhase == PHASE_START && m_creature->GetHealthPercent() < 65.0f)
                 {
@@ -420,18 +481,24 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
                     m_creature->GetMotionMaster()->MovePoint(m_uiMovePoint, aMoveData[m_uiMovePoint].fX, aMoveData[m_uiMovePoint].fY, aMoveData[m_uiMovePoint].fZ);
                 }
                 else
+                {
                     m_uiMovementTimer -= uiDiff;
+                }
 
                 if (m_uiFireballTimer < uiDiff)
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     {
                         if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FIREBALL : SPELL_FIREBALL_H) == CAST_OK)
+                        {
                             m_uiFireballTimer = urand(3000, 5000);
+                        }
                     }
                 }
                 else
-                    m_uiFireballTimer -= uiDiff;            // engulfingflames is supposed to be activated by a fireball but haven't come by
+                {
+                    m_uiFireballTimer -= uiDiff;    // engulfingflames is supposed to be activated by a fireball but haven't come by
+                }
 
                 if (m_bIsSummoningWhelps)
                 {
@@ -468,7 +535,9 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
                 // no break here
             default:                                        // Phase-switching phases
                 if (!m_uiPhaseTimer)
+                {
                     break;
+                }
                 if (m_uiPhaseTimer <= uiDiff)
                 {
                     switch (m_uiPhase)
@@ -476,7 +545,9 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
                         case PHASE_TO_LIFTOFF:
                             m_uiPhase = PHASE_BREATH_PRE;
                             if (m_pInstance)
+                            {
                                 m_pInstance->SetData(TYPE_ONYXIA, DATA_LIFTOFF);
+                            }
                             m_creature->GetMotionMaster()->MoveFlyOrLand(POINT_ID_IN_AIR, aMoveData[POINT_ID_SOUTH].fX, aMoveData[POINT_ID_SOUTH].fY, aMoveData[POINT_ID_SOUTH].fZ, true);
                             break;
                         case PHASE_BREATH_PRE:
@@ -492,7 +563,9 @@ struct MANGOS_DLL_DECL boss_onyxiaAI : public ScriptedAI
                     m_uiPhaseTimer = 0;
                 }
                 else
+                {
                     m_uiPhaseTimer -= uiDiff;
+                }
                 break;
         }
     }

@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Huhuran
-SD%Complete: 90
-SDComment: Timed enrage NYI; Timers
-SDCategory: Temple of Ahn'Qiraj
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Huhuran
+ * SD%Complete: 90
+ * SDComment:   Timed enrage NYI; Timers
+ * SDCategory:  Temple of Ahn'Qiraj
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 #include "temple_of_ahnqiraj.h"
@@ -65,26 +76,34 @@ struct MANGOS_DLL_DECL boss_huhuranAI : public ScriptedAI
     void Aggro(Unit* /*pWho*/) override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_HUHURAN, IN_PROGRESS);
+        }
     }
 
     void JustReachedHome() override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_HUHURAN, FAIL);
+        }
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_HUHURAN, DONE);
+        }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         // Return since we have no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         // Frenzy_Timer
         if (!m_bIsBerserk)
@@ -98,7 +117,9 @@ struct MANGOS_DLL_DECL boss_huhuranAI : public ScriptedAI
                 }
             }
             else
+            {
                 m_uiFrenzyTimer -= uiDiff;
+            }
         }
 
         // Wyvern Timer
@@ -107,29 +128,35 @@ struct MANGOS_DLL_DECL boss_huhuranAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_WYVERN_STING) == CAST_OK)
+                {
                     m_uiWyvernTimer = urand(15000, 32000);
+                }
             }
         }
         else
-            m_uiWyvernTimer -= uiDiff;
+            { m_uiWyvernTimer -= uiDiff; }
 
         // Spit Timer
         if (m_uiSpitTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ACID_SPIT) == CAST_OK)
+            {
                 m_uiSpitTimer = urand(5000, 10000);
+            }
         }
         else
-            m_uiSpitTimer -= uiDiff;
+            { m_uiSpitTimer -= uiDiff; }
 
         // NoxiousPoison_Timer
         if (m_uiNoxiousPoisonTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_NOXIOUS_POISON) == CAST_OK)
+            {
                 m_uiNoxiousPoisonTimer = urand(12000, 24000);
+            }
         }
         else
-            m_uiNoxiousPoisonTimer -= uiDiff;
+            { m_uiNoxiousPoisonTimer -= uiDiff; }
 
         // Berserk
         if (!m_bIsBerserk && m_creature->GetHealthPercent() < 30.0f)

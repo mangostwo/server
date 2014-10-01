@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Venoxis
-SD%Complete: 100
-SDComment:
-SDCategory: Zul'Gurub
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Venoxis
+ * SD%Complete: 100
+ * SDComment:   None
+ * SDCategory:  Zul'Gurub
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 #include "zulgurub.h"
@@ -85,7 +96,9 @@ struct MANGOS_DLL_DECL boss_venoxisAI : public ScriptedAI
     void JustReachedHome() override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_VENOXIS, FAIL);
+        }
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -93,13 +106,17 @@ struct MANGOS_DLL_DECL boss_venoxisAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_VENOXIS, DONE);
+        }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         // Troll phase
         if (!m_bPhaseTwo)
@@ -107,26 +124,38 @@ struct MANGOS_DLL_DECL boss_venoxisAI : public ScriptedAI
             if (m_uiDispellTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_DISPELL) == CAST_OK)
+                {
                     m_uiDispellTimer = urand(15000, 30000);
+                }
             }
             else
+            {
                 m_uiDispellTimer -= uiDiff;
+            }
 
             if (m_uiRenewTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_RENEW) == CAST_OK)
+                {
                     m_uiRenewTimer = urand(20000, 30000);
+                }
             }
             else
+            {
                 m_uiRenewTimer -= uiDiff;
+            }
 
             if (m_uiHolyWrathTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HOLY_WRATH) == CAST_OK)
+                {
                     m_uiHolyWrathTimer = urand(15000, 25000);
+                }
             }
             else
+            {
                 m_uiHolyWrathTimer -= uiDiff;
+            }
 
             if (m_uiHolySpellTimer < uiDiff)
             {
@@ -139,24 +168,32 @@ struct MANGOS_DLL_DECL boss_venoxisAI : public ScriptedAI
                     if (Unit* pTempTarget = m_creature->GetMap()->GetUnit((*iter)->getUnitGuid()))
                     {
                         if (pTempTarget->GetTypeId() == TYPEID_PLAYER && m_creature->CanReachWithMeleeAttack(pTempTarget))
+                        {
                             ++uiTargetsInRange;
+                        }
                     }
                 }
 
                 // If there are more targets in melee range cast holy nova, else holy fire
                 // not sure which is the minimum targets for holy nova
                 if (uiTargetsInRange > 3)
+                {
                     DoCastSpellIfCan(m_creature, SPELL_HOLY_NOVA);
+                }
                 else
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
                         DoCastSpellIfCan(pTarget, SPELL_HOLY_FIRE);
+                    }
                 }
 
                 m_uiHolySpellTimer = urand(4000, 8000);
             }
             else
+            {
                 m_uiHolySpellTimer -= uiDiff;
+            }
 
             // Transform at 50% hp
             if (m_creature->GetHealthPercent() < 50.0f)
@@ -176,35 +213,43 @@ struct MANGOS_DLL_DECL boss_venoxisAI : public ScriptedAI
             if (m_uiPoisonCloudTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_POISON_CLOUD) == CAST_OK)
+                {
                     m_uiPoisonCloudTimer = 15000;
+                }
             }
             else
-                m_uiPoisonCloudTimer -= uiDiff;
+                { m_uiPoisonCloudTimer -= uiDiff; }
 
             if (m_uiVenomSpitTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_VENOMSPIT) == CAST_OK)
+                    {
                         m_uiVenomSpitTimer = urand(15000, 20000);
+                    }
                 }
             }
             else
-                m_uiVenomSpitTimer -= uiDiff;
+                { m_uiVenomSpitTimer -= uiDiff; }
         }
 
         if (m_uiTrashTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_TRASH) == CAST_OK)
+            {
                 m_uiTrashTimer = urand(10000, 20000);
+            }
         }
         else
-            m_uiTrashTimer -= uiDiff;
+            { m_uiTrashTimer -= uiDiff; }
 
         if (!m_bInBerserk && m_creature->GetHealthPercent() < 11.0f)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
+            {
                 m_bInBerserk = true;
+            }
         }
 
         DoMeleeAttackIfReady();

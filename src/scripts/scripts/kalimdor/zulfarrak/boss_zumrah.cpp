@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: boss_zumrah
-SD%Complete: 100
-SDComment:
-SDCategory: Zul'Farrak
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      boss_zumrah
+ * SD%Complete: 100
+ * SDComment:   None
+ * SDCategory:  Zul'Farrak
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 #include "zulfarrak.h"
@@ -110,13 +121,17 @@ struct MANGOS_DLL_DECL boss_zumrahAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_ZULFARRAK_ZOMBIE || pSummoned->GetEntry() == NPC_ZULFARRAK_DEAD_HERO)
+        {
             pSummoned->AI()->AttackStart(m_creature->getVictim());
+        }
     }
 
     GameObject* SelectNearbyShallowGrave()
     {
         if (!m_pInstance)
+        {
             return NULL;
+        }
 
         // Get the list of usable graves (not used already by players)
         GuidList lTempList;
@@ -128,11 +143,15 @@ struct MANGOS_DLL_DECL boss_zumrahAI : public ScriptedAI
             GameObject* pGo = m_creature->GetMap()->GetGameObject(*itr);
             // Go spawned and no looting in process
             if (pGo && pGo->isSpawned() && pGo->getLootState() == GO_READY)
+            {
                 lGravesInRange.push_back(pGo);
+            }
         }
 
         if (lGravesInRange.empty())
+        {
             return NULL;
+        }
 
         // Sort the graves
         lGravesInRange.sort(ObjectDistanceOrder(m_creature));
@@ -143,7 +162,9 @@ struct MANGOS_DLL_DECL boss_zumrahAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         if (m_uiSpawnZombieTimer)
         {
@@ -156,15 +177,21 @@ struct MANGOS_DLL_DECL boss_zumrahAI : public ScriptedAI
                     pGrave->SetLootState(GO_JUST_DEACTIVATED);
 
                     if (roll_chance_i(30))
+                    {
                         DoScriptText(SAY_SUMMON, m_creature);
+                    }
 
                     m_uiSpawnZombieTimer = 20000;
                 }
                 else                                        // No Grave usable any more
+                {
                     m_uiSpawnZombieTimer = 0;
+                }
             }
             else
+            {
                 m_uiSpawnZombieTimer -= uiDiff;
+            }
         }
 
         if (m_uiShadowBoltTimer < uiDiff)
@@ -172,38 +199,46 @@ struct MANGOS_DLL_DECL boss_zumrahAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_BOLT) == CAST_OK)
+                {
                     m_uiShadowBoltTimer = urand(3500, 5000);
+                }
             }
         }
         else
-            m_uiShadowBoltTimer -= uiDiff;
+            { m_uiShadowBoltTimer -= uiDiff; }
 
         if (m_uiShadowBoltVolleyTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_BOLT_VOLLEY) == CAST_OK)
+            {
                 m_uiShadowBoltVolleyTimer = urand(10000, 18000);
+            }
         }
         else
-            m_uiShadowBoltVolleyTimer -= uiDiff;
+            { m_uiShadowBoltVolleyTimer -= uiDiff; }
 
         if (m_uiWardOfZumrahTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_WARD_OF_ZUMRAH) == CAST_OK)
+            {
                 m_uiWardOfZumrahTimer = urand(15000, 32000);
+            }
         }
         else
-            m_uiWardOfZumrahTimer -= uiDiff;
+            { m_uiWardOfZumrahTimer -= uiDiff; }
 
         if (m_uHealingWaveTimer < uiDiff)
         {
             if (Unit* pTarget = DoSelectLowestHpFriendly(40.0f))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_HEALING_WAVE) == CAST_OK)
+                {
                     m_uHealingWaveTimer = urand(15000, 23000);
+                }
             }
         }
         else
-            m_uHealingWaveTimer -= uiDiff;
+            { m_uHealingWaveTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

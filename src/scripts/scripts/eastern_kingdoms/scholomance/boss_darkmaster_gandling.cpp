@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Darkmaster_Gandling
-SD%Complete: 100
-SDComment:
-SDCategory: Scholomance
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Darkmaster_Gandling
+ * SD%Complete: 100
+ * SDComment:   None
+ * SDCategory:  Scholomance
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 #include "scholomance.h"
@@ -58,34 +69,42 @@ struct MANGOS_DLL_DECL boss_darkmaster_gandlingAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         // Arcane Missiles Timer
         if (m_uiArcaneMissilesTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARCANE_MISSILES) == CAST_OK)
+            {
                 m_uiArcaneMissilesTimer = 8000;
+            }
         }
         else
-            m_uiArcaneMissilesTimer -= uiDiff;
+            { m_uiArcaneMissilesTimer -= uiDiff; }
 
         // Shadow Shield Timer
         if (m_uiShadowShieldTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_SHIELD) == CAST_OK)
+            {
                 m_uiShadowShieldTimer = urand(14000, 28000);
+            }
         }
         else
-            m_uiShadowShieldTimer -= uiDiff;
+            { m_uiShadowShieldTimer -= uiDiff; }
 
         // Curse Timer
         if (m_uiCurseTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CURSE) == CAST_OK)
+            {
                 m_uiCurseTimer = urand(15000, 27000);
+            }
         }
         else
-            m_uiCurseTimer -= uiDiff;
+            { m_uiCurseTimer -= uiDiff; }
 
         // Teleporting Random Target to one of the six pre boss rooms and spawn 3-4 skeletons near the gamer.
         // We will only telport if gandling has more than 3% of hp so teleported gamers can always loot.
@@ -99,14 +118,18 @@ struct MANGOS_DLL_DECL boss_darkmaster_gandlingAI : public ScriptedAI
                     {
                         // remove threat
                         if (m_creature->GetThreatManager().getThreat(pTarget))
+                        {
                             m_creature->GetThreatManager().modifyThreatPercent(pTarget, -100);
+                        }
 
                         m_uiTeleportTimer = urand(20000, 35000);
                     }
                 }
             }
             else
+            {
                 m_uiTeleportTimer -= uiDiff;
+            }
         }
 
         DoMeleeAttackIfReady();

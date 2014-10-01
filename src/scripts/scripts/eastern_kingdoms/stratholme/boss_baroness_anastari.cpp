@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Baroness_Anastari
-SD%Complete: 100
-SDComment:
-SDCategory: Stratholme
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Baroness_Anastari
+ * SD%Complete: 100
+ * SDComment:   None
+ * SDCategory:  Stratholme
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 
@@ -58,7 +69,9 @@ struct MANGOS_DLL_DECL boss_baroness_anastariAI : public ScriptedAI
     {
         // If it's invisible don't evade
         if (m_uiPossessEndTimer)
+        {
             return;
+        }
 
         ScriptedAI::EnterEvadeMode();
     }
@@ -99,11 +112,15 @@ struct MANGOS_DLL_DECL boss_baroness_anastariAI : public ScriptedAI
                 m_uiPossessEndTimer = 1000;
             }
             else
+            {
                 m_uiPossessEndTimer -= uiDiff;
+            }
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         // BansheeWail
         if (m_uiBansheeWailTimer < uiDiff)
@@ -111,20 +128,24 @@ struct MANGOS_DLL_DECL boss_baroness_anastariAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_BANSHEE_WAIL) == CAST_OK)
+                {
                     m_uiBansheeWailTimer = urand(2000, 3000);
+                }
             }
         }
         else
-            m_uiBansheeWailTimer -= uiDiff;
+            { m_uiBansheeWailTimer -= uiDiff; }
 
         // BansheeCurse
         if (m_uiBansheeCurseTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_BANSHEE_CURSE) == CAST_OK)
+            {
                 m_uiBansheeCurseTimer = 20000;
+            }
         }
         else
-            m_uiBansheeCurseTimer -= uiDiff;
+            { m_uiBansheeCurseTimer -= uiDiff; }
 
         // Silence
         if (m_uiSilenceTimer < uiDiff)
@@ -132,11 +153,13 @@ struct MANGOS_DLL_DECL boss_baroness_anastariAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_SILENCE) == CAST_OK)
+                {
                     m_uiSilenceTimer = 25000;
+                }
             }
         }
         else
-            m_uiSilenceTimer -= uiDiff;
+            { m_uiSilenceTimer -= uiDiff; }
 
         // Possess
         if (m_uiPossessTimer < uiDiff)
@@ -155,7 +178,7 @@ struct MANGOS_DLL_DECL boss_baroness_anastariAI : public ScriptedAI
             }
         }
         else
-            m_uiPossessTimer -= uiDiff;
+            { m_uiPossessTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

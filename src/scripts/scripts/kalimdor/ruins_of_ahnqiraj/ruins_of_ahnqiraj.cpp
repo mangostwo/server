@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,18 +18,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Ruins of Ahn'Qiraj
-SD%Complete: 40
-SDComment:
-SDCategory: Ruins of Ahn'Qiraj
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Ruins of Ahn'Qiraj
+ * SD%Complete: 40
+ * SDComment:   None
+ * SDCategory:  Ruins of Ahn'Qiraj
+ * EndScriptData
+ */
 
-/* ContentData
-mob_anubisath_guardian
-EndContentData */
+/**
+ * ContentData
+ * mob_anubisath_guardian
+ * EndContentData
+ */
 
 #include "precompiled.h"
 
@@ -112,14 +125,18 @@ struct MANGOS_DLL_DECL mob_anubisath_guardianAI : public ScriptedAI
                 m_bIsEnraged = true;
             }
             else
+            {
                 DoCastSpellIfCan(m_creature->getVictim(), m_uiSpell4);
+            }
         }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         // Meteor or Plague
         if (m_uiSpell1Timer < uiDiff)
@@ -128,7 +145,7 @@ struct MANGOS_DLL_DECL mob_anubisath_guardianAI : public ScriptedAI
             m_uiSpell1Timer = 15000;
         }
         else
-            m_uiSpell1Timer -= uiDiff;
+            { m_uiSpell1Timer -= uiDiff; }
 
         // Shadow Storm or Thunder Clap
         if (m_uiSpell2Timer < uiDiff)
@@ -137,19 +154,21 @@ struct MANGOS_DLL_DECL mob_anubisath_guardianAI : public ScriptedAI
             m_uiSpell2Timer = 15000;
         }
         else
-            m_uiSpell2Timer -= uiDiff;
+            { m_uiSpell2Timer -= uiDiff; }
 
         // summon Anubisath Swarmguard or Anubisath Warrior
         if (m_uiSpell5Timer < uiDiff)
         {
             // change for summon spell
             if (m_uiSummonCount < 4)
+            {
                 DoCastSpellIfCan(m_creature->getVictim(), m_uiSpell5);
+            }
 
             m_uiSpell5Timer = 15000;
         }
         else
-            m_uiSpell5Timer -= uiDiff;
+            { m_uiSpell5Timer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

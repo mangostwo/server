@@ -1,6 +1,27 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
- * This program is free software licensed under GPL version 2
- * Please see the included DOCS/LICENSE.TXT for more information */
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
+ */
 
 /* ScriptData
 SDName: ScriptedPetAI
@@ -24,16 +45,22 @@ bool ScriptedPetAI::IsVisible(Unit* pWho) const
 void ScriptedPetAI::MoveInLineOfSight(Unit* pWho)
 {
     if (m_creature->getVictim())
+    {
         return;
+    }
 
     if (!m_creature->GetCharmInfo() || !m_creature->GetCharmInfo()->HasReactState(REACT_AGGRESSIVE))
+    {
         return;
+    }
 
     if (m_creature->CanInitiateAttack() && pWho->IsTargetableForAttack() &&
-            m_creature->IsHostileTo(pWho) && pWho->isInAccessablePlaceFor(m_creature))
+        m_creature->IsHostileTo(pWho) && pWho->isInAccessablePlaceFor(m_creature))
     {
         if (!m_creature->CanFly() && m_creature->GetDistanceZ(pWho) > CREATURE_Z_ATTACK_RANGE)
+        {
             return;
+        }
 
         if (m_creature->IsWithinDistInMap(pWho, m_creature->GetAttackDistance(pWho)) && m_creature->IsWithinLOSInMap(pWho))
         {
@@ -46,17 +73,23 @@ void ScriptedPetAI::MoveInLineOfSight(Unit* pWho)
 void ScriptedPetAI::AttackStart(Unit* pWho)
 {
     if (pWho && m_creature->Attack(pWho, true))
+    {
         m_creature->GetMotionMaster()->MoveChase(pWho);
+    }
 }
 
 void ScriptedPetAI::AttackedBy(Unit* pAttacker)
 {
     if (m_creature->getVictim())
+    {
         return;
+    }
 
     if (m_creature->GetCharmInfo() && !m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE) &&
-            m_creature->CanReachWithMeleeAttack(pAttacker))
+        m_creature->CanReachWithMeleeAttack(pAttacker))
+    {
         AttackStart(pAttacker);
+    }
 }
 
 void ScriptedPetAI::ResetPetCombat()
@@ -87,7 +120,9 @@ void ScriptedPetAI::UpdatePetAI(const uint32 /*uiDiff*/)
 void ScriptedPetAI::UpdateAI(const uint32 uiDiff)
 {
     if (!m_creature->IsAlive())                             // should not be needed, IsAlive is checked in mangos before calling UpdateAI
+    {
         return;
+    }
 
     // UpdateAllies() is done in the generic PetAI in Mangos, but we can't do this from script side.
     // Unclear what side effects this has, but is something to be resolved from Mangos.
@@ -111,7 +146,9 @@ void ScriptedPetAI::UpdateAI(const uint32 uiDiff)
         Unit* pOwner = m_creature->GetCharmerOrOwner();
 
         if (!pOwner)
+        {
             return;
+        }
 
         if (pOwner->IsInCombat() && !m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE))
         {
@@ -123,7 +160,9 @@ void ScriptedPetAI::UpdateAI(const uint32 uiDiff)
         {
             // not following, so start follow
             if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW))
+            {
                 m_creature->GetMotionMaster()->MoveFollow(pOwner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+            }
 
             // update when not in combat
             UpdatePetOOCAI(uiDiff);

@@ -1,6 +1,27 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
- * This program is free software licensed under GPL version 2
- * Please see the included DOCS/LICENSE.TXT for more information */
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
+ */
 
 /* ScriptData
 SDName: FollowerAI
@@ -28,7 +49,9 @@ FollowerAI::FollowerAI(Creature* pCreature) : ScriptedAI(pCreature),
 void FollowerAI::AttackStart(Unit* pWho)
 {
     if (!pWho)
+    {
         return;
+    }
 
     if (m_creature->Attack(pWho, true))
     {
@@ -37,7 +60,9 @@ void FollowerAI::AttackStart(Unit* pWho)
         pWho->SetInCombatWith(m_creature);
 
         if (IsCombatMovement())
+        {
             m_creature->GetMotionMaster()->MoveChase(pWho);
+        }
     }
 }
 
@@ -46,23 +71,33 @@ void FollowerAI::AttackStart(Unit* pWho)
 bool FollowerAI::AssistPlayerInCombat(Unit* pWho)
 {
     if (!pWho->getVictim())
+    {
         return false;
+    }
 
     // experimental (unknown) flag not present
     if (!(m_creature->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_CAN_ASSIST))
+    {
         return false;
+    }
 
     // unit state prevents (similar check is done in CanInitiateAttack which also include checking unit_flags. We skip those here)
     if (m_creature->hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_DIED))
+    {
         return false;
+    }
 
     // victim of pWho is not a player
     if (!pWho->getVictim()->GetCharmerOrOwnerPlayerOrPlayerItself())
+    {
         return false;
+    }
 
     // never attack friendly
     if (m_creature->IsFriendlyTo(pWho))
+    {
         return false;
+    }
 
     // too far away and no free sight?
     if (m_creature->IsWithinDistInMap(pWho, MAX_PLAYER_DISTANCE) && m_creature->IsWithinLOSInMap(pWho))
@@ -90,13 +125,19 @@ void FollowerAI::MoveInLineOfSight(Unit* pWho)
     {
         // AssistPlayerInCombat can start attack, so return if true
         if (HasFollowState(STATE_FOLLOW_INPROGRESS) && AssistPlayerInCombat(pWho))
+        {
             return;
+        }
 
         if (!m_creature->CanInitiateAttack())
+        {
             return;
+        }
 
         if (!m_creature->CanFly() && m_creature->GetDistanceZ(pWho) > CREATURE_Z_ATTACK_RANGE)
+        {
             return;
+        }
 
         if (m_creature->IsHostileTo(pWho))
         {
@@ -121,7 +162,9 @@ void FollowerAI::MoveInLineOfSight(Unit* pWho)
 void FollowerAI::JustDied(Unit* /*pKiller*/)
 {
     if (!HasFollowState(STATE_FOLLOW_INPROGRESS) || !m_leaderGuid || !m_pQuestForFollow)
+    {
         return;
+    }
 
     // TODO: need a better check for quests with time limit.
     if (Player* pPlayer = GetLeaderForFollower())
@@ -133,14 +176,18 @@ void FollowerAI::JustDied(Unit* /*pKiller*/)
                 if (Player* pMember = pRef->getSource())
                 {
                     if (pMember->GetQuestStatus(m_pQuestForFollow->GetQuestId()) == QUEST_STATUS_INCOMPLETE)
+                    {
                         pMember->FailQuest(m_pQuestForFollow->GetQuestId());
+                    }
                 }
             }
         }
         else
         {
             if (pPlayer->GetQuestStatus(m_pQuestForFollow->GetQuestId()) == QUEST_STATUS_INCOMPLETE)
+            {
                 pPlayer->FailQuest(m_pQuestForFollow->GetQuestId());
+            }
         }
     }
 }
@@ -150,7 +197,9 @@ void FollowerAI::JustRespawned()
     m_uiFollowState = STATE_FOLLOW_NONE;
 
     if (!IsCombatMovement())
+    {
         SetCombatMovement(true);
+    }
 
     Reset();
 }
@@ -176,7 +225,9 @@ void FollowerAI::EnterEvadeMode()
     else
     {
         if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
+        {
             m_creature->GetMotionMaster()->MoveTargetedHome();
+        }
     }
 
     Reset();
@@ -224,7 +275,9 @@ void FollowerAI::UpdateAI(const uint32 uiDiff)
                 else
                 {
                     if (m_creature->IsWithinDistInMap(pPlayer, MAX_PLAYER_DISTANCE))
+                    {
                         bIsMaxRangeExceeded = false;
+                    }
                 }
             }
 
@@ -238,7 +291,9 @@ void FollowerAI::UpdateAI(const uint32 uiDiff)
             m_uiUpdateFollowTimer = 1000;
         }
         else
+        {
             m_uiUpdateFollowTimer -= uiDiff;
+        }
     }
 
     UpdateFollowerAI(uiDiff);
@@ -247,7 +302,9 @@ void FollowerAI::UpdateAI(const uint32 uiDiff)
 void FollowerAI::UpdateFollowerAI(const uint32 /*uiDiff*/)
 {
     if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+    {
         return;
+    }
 
     DoMeleeAttackIfReady();
 }
@@ -255,17 +312,23 @@ void FollowerAI::UpdateFollowerAI(const uint32 /*uiDiff*/)
 void FollowerAI::MovementInform(uint32 uiMotionType, uint32 uiPointId)
 {
     if (uiMotionType != POINT_MOTION_TYPE || !HasFollowState(STATE_FOLLOW_INPROGRESS))
+    {
         return;
+    }
 
     if (uiPointId == POINT_COMBAT_START)
     {
         if (GetLeaderForFollower())
         {
             if (!HasFollowState(STATE_FOLLOW_PAUSED))
+            {
                 AddFollowState(STATE_FOLLOW_RETURNING);
+            }
         }
         else
+        {
             m_creature->ForcedDespawn();
+        }
     }
 }
 
@@ -287,7 +350,9 @@ void FollowerAI::StartFollow(Player* pLeader, uint32 uiFactionForFollower, const
     m_leaderGuid = pLeader->GetObjectGuid();
 
     if (uiFactionForFollower)
+    {
         m_creature->SetFactionTemporary(uiFactionForFollower, TEMPFACTION_RESTORE_RESPAWN);
+    }
 
     m_pQuestForFollow = pQuest;
 
@@ -312,7 +377,9 @@ Player* FollowerAI::GetLeaderForFollower()
     if (Player* pLeader = m_creature->GetMap()->GetPlayer(m_leaderGuid))
     {
         if (pLeader->IsAlive())
+        {
             return pLeader;
+        }
         else
         {
             if (Group* pGroup = pLeader->GetGroup())
@@ -346,11 +413,15 @@ void FollowerAI::SetFollowComplete(bool bWithEndEvent)
     }
 
     if (bWithEndEvent)
+    {
         AddFollowState(STATE_FOLLOW_POSTEVENT);
+    }
     else
     {
         if (HasFollowState(STATE_FOLLOW_POSTEVENT))
+        {
             RemoveFollowState(STATE_FOLLOW_POSTEVENT);
+        }
     }
 
     AddFollowState(STATE_FOLLOW_COMPLETE);
@@ -359,7 +430,9 @@ void FollowerAI::SetFollowComplete(bool bWithEndEvent)
 void FollowerAI::SetFollowPaused(bool bPaused)
 {
     if (!HasFollowState(STATE_FOLLOW_INPROGRESS) || HasFollowState(STATE_FOLLOW_COMPLETE))
+    {
         return;
+    }
 
     if (bPaused)
     {
@@ -377,6 +450,8 @@ void FollowerAI::SetFollowPaused(bool bPaused)
         RemoveFollowState(STATE_FOLLOW_PAUSED);
 
         if (Player* pLeader = GetLeaderForFollower())
+        {
             m_creature->GetMotionMaster()->MoveFollow(pLeader, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+        }
     }
 }
