@@ -905,4 +905,17 @@ void AddSC_hellfire_peninsula()
     pNewScript->GetAI = &GetAI_npc_fel_guard_hound;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_fel_guard_hound;
     pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_anchorite_barada";
+    pNewScript->GetAI = &GetAI_npc_anchorite_barada;
+    pNewScript->pGossipHello = &GossipHello_npc_anchorite_barada;
+    pNewScript->pGossipSelect = &GossipSelect_npc_anchorite_barada;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_colonel_jules";
+    pNewScript->pGossipHello = &GossipHello_npc_colonel_jules;
+    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_colonel_jules;
+    pNewScript->RegisterSelf();
 }
