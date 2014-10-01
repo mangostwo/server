@@ -17,13 +17,13 @@
 /* ScriptData
 SDName: Nagrand
 SD%Complete: 90
-SDComment: Quest support: 9868, 9918, 10085, 10646, 11090.
+SDComment: Quest support: 9868, 9879, 9918, 10085, 10646, 11090.
 SDCategory: Nagrand
 EndScriptData */
 
 /* ContentData
 mob_lump
-npc_maghar_captive
+npc_nagrand_captive
 npc_creditmarker_visit_with_ancestors
 npc_rethhedron
 EndContentData */
@@ -144,7 +144,7 @@ CreatureAI* GetAI_mob_lump(Creature* pCreature)
 }
 
 /*######
-## npc_maghar_captive
+## npc_nagrand_captive
 #####*/
 
 enum
@@ -156,6 +156,12 @@ enum
     SAY_MAG_LIGHTNING           = -1000486,
     SAY_MAG_SHOCK               = -1000487,
     SAY_MAG_COMPLETE            = -1000488,
+    
+    SAY_KUR_START               = -1001001,
+    SAY_KUR_AMBUSH_1            = -1001002,
+    SAY_KUR_AMBUSH_2            = -1001003,
+    SAY_KUR_COMPLETE_1          = -1001004,
+    SAY_KUR_COMPLETE_2          = -1001005,
 
     SPELL_CHAIN_LIGHTNING       = 16006,
     SPELL_EARTHBIND_TOTEM       = 15786,
@@ -163,6 +169,10 @@ enum
     SPELL_HEALING_WAVE          = 12491,
 
     QUEST_TOTEM_KARDASH_H       = 9868,
+    QUEST_TOTEM_KARDASH_A       = 9879,
+    
+    NPC_KURENAI_CAPTIVE         = 18209,
+    NPC_MAGHAR_CAPTIVE          = 18210,
 
     NPC_MURK_RAIDER             = 18203,
     NPC_MURK_BRUTE              = 18211,
@@ -173,9 +183,9 @@ enum
 static float m_afAmbushA[] = { -1568.805786f, 8533.873047f, 1.958f};
 static float m_afAmbushB[] = { -1491.554321f, 8506.483398f, 1.248f};
 
-struct MANGOS_DLL_DECL npc_maghar_captiveAI : public npc_escortAI
+struct MANGOS_DLL_DECL npc_nagrand_captiveAI : public npc_escortAI
 {
-    npc_maghar_captiveAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+    npc_nagrand_captiveAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
     uint32 m_uiChainLightningTimer;
     uint32 m_uiHealTimer;
@@ -190,7 +200,37 @@ struct MANGOS_DLL_DECL npc_maghar_captiveAI : public npc_escortAI
 
     void Aggro(Unit* /*pWho*/) override
     {
-        m_creature->CastSpell(m_creature, SPELL_EARTHBIND_TOTEM, false);
+        DoCastSpellIfCan(m_creature, SPELL_EARTHBIND_TOTEM);
+    }
+    
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    {
+        if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
+        {
+            if (m_creature->GetEntry() == NPC_MAGHAR_CAPTIVE)
+            {
+                m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+                m_creature->SetFactionTemporary(FACTION_ESCORT_H_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
+                
+                DoScriptText(SAY_MAG_START, m_creature);
+                
+                m_creature->SummonCreature(NPC_MURK_RAIDER, m_afAmbushA[0] + 2.5f, m_afAmbushA[1] - 2.5f, m_afAmbushA[2], 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
+                m_creature->SummonCreature(NPC_MURK_PUTRIFIER, m_afAmbushA[0] - 2.5f, m_afAmbushA[1] + 2.5f, m_afAmbushA[2], 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
+                m_creature->SummonCreature(NPC_MURK_BRUTE, m_afAmbushA[0], m_afAmbushA[1], m_afAmbushA[2], 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
+            }
+            else if (m_creature->GetEntry() == NPC_KURENAI_CAPTIVE)
+            {
+                m_creature->SetFactionTemporary(FACTION_ESCORT_A_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
+                
+                DoScriptText(SAY_KUR_START, m_creature);
+                
+                m_creature->SummonCreature(NPC_MURK_RAIDER, -1509.606f, 8484.284f, -3.841f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
+                m_creature->SummonCreature(NPC_MURK_PUTRIFIER, -1532.475f, 8454.706f, -4.102f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
+                m_creature->SummonCreature(NPC_MURK_BRUTE, -1525.484f, 8475.383f, -2.482f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
+            }
+            
+            Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue));
+        }
     }
 
     void WaypointReached(uint32 uiPointId) override
@@ -198,7 +238,10 @@ struct MANGOS_DLL_DECL npc_maghar_captiveAI : public npc_escortAI
         switch (uiPointId)
         {
             case 7:
-                DoScriptText(SAY_MAG_MORE, m_creature);
+                if (m_creature->GetEntry() == NPC_MAGHAR_CAPTIVE)
+                    DoScriptText(SAY_MAG_MORE, m_creature);
+                else if (m_creature->GetEntry() == NPC_KURENAI_CAPTIVE)
+                    DoScriptText(urand(0, 1) ? SAY_KUR_AMBUSH_1 : SAY_KUR_AMBUSH_2, m_creature);
 
                 if (Creature* pTemp = m_creature->SummonCreature(NPC_MURK_PUTRIFIER, m_afAmbushB[0], m_afAmbushB[1], m_afAmbushB[2], 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000))
                     DoScriptText(SAY_MAG_MORE_REPLY, pTemp);
@@ -209,10 +252,13 @@ struct MANGOS_DLL_DECL npc_maghar_captiveAI : public npc_escortAI
                 m_creature->SummonCreature(NPC_MURK_SCAVENGER, m_afAmbushB[0] + 2.5f, m_afAmbushB[1] - 2.5f, m_afAmbushB[2], 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
                 break;
             case 16:
-                DoScriptText(SAY_MAG_COMPLETE, m_creature);
+                if (m_creature->GetEntry() == NPC_MAGHAR_CAPTIVE)
+                    DoScriptText(SAY_MAG_COMPLETE, m_creature);
+                else if (m_creature->GetEntry() == NPC_KURENAI_CAPTIVE)
+                    DoScriptText(urand(0, 1) ? SAY_KUR_COMPLETE_1 : SAY_KUR_COMPLETE_2, m_creature);
 
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_TOTEM_KARDASH_H, m_creature);
+                   pPlayer->GroupEventHappens(m_creature->GetEntry() == NPC_MAGHAR_CAPTIVE ? QUEST_TOTEM_KARDASH_H : QUEST_TOTEM_KARDASH_A, m_creature);
 
                 SetRun();
                 break;
@@ -249,8 +295,8 @@ struct MANGOS_DLL_DECL npc_maghar_captiveAI : public npc_escortAI
 
         if (m_uiChainLightningTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHAIN_LIGHTNING);
-            m_uiChainLightningTimer = urand(7000, 14000);
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHAIN_LIGHTNING) == CAST_OK)
+                m_uiChainLightningTimer = urand(7000, 14000);
         }
         else
             m_uiChainLightningTimer -= uiDiff;
@@ -259,8 +305,8 @@ struct MANGOS_DLL_DECL npc_maghar_captiveAI : public npc_escortAI
         {
             if (m_uiHealTimer < uiDiff)
             {
-                DoCastSpellIfCan(m_creature, SPELL_HEALING_WAVE);
-                m_uiHealTimer = 5000;
+                if (DoCastSpellIfCan(m_creature, SPELL_HEALING_WAVE) == CAST_OK)
+                    m_uiHealTimer = 5000;
             }
             else
                 m_uiHealTimer -= uiDiff;
@@ -268,8 +314,8 @@ struct MANGOS_DLL_DECL npc_maghar_captiveAI : public npc_escortAI
 
         if (m_uiFrostShockTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_SHOCK);
-            m_uiFrostShockTimer = urand(7500, 15000);
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_SHOCK) == CAST_OK)
+                m_uiFrostShockTimer = urand(7500, 15000);
         }
         else
             m_uiFrostShockTimer -= uiDiff;
@@ -278,30 +324,20 @@ struct MANGOS_DLL_DECL npc_maghar_captiveAI : public npc_escortAI
     }
 };
 
-bool QuestAccept_npc_maghar_captive(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+bool QuestAccept_npc_nagrand_captive(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
 {
-    if (pQuest->GetQuestId() == QUEST_TOTEM_KARDASH_H)
+    if (pQuest->GetQuestId() == QUEST_TOTEM_KARDASH_H || pQuest->GetQuestId() == QUEST_TOTEM_KARDASH_A)
     {
-        if (npc_maghar_captiveAI* pEscortAI = dynamic_cast<npc_maghar_captiveAI*>(pCreature->AI()))
-        {
-            pCreature->SetStandState(UNIT_STAND_STATE_STAND);
-            pCreature->SetFactionTemporary(FACTION_ESCORT_H_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
-
-            pEscortAI->Start(false, pPlayer, pQuest);
-
-            DoScriptText(SAY_MAG_START, pCreature);
-
-            pCreature->SummonCreature(NPC_MURK_RAIDER, m_afAmbushA[0] + 2.5f, m_afAmbushA[1] - 2.5f, m_afAmbushA[2], 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
-            pCreature->SummonCreature(NPC_MURK_PUTRIFIER, m_afAmbushA[0] - 2.5f, m_afAmbushA[1] + 2.5f, m_afAmbushA[2], 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
-            pCreature->SummonCreature(NPC_MURK_BRUTE, m_afAmbushA[0], m_afAmbushA[1], m_afAmbushA[2], 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
-        }
+        pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
+        return true;
     }
-    return true;
+
+    return false;
 }
 
-CreatureAI* GetAI_npc_maghar_captive(Creature* pCreature)
+CreatureAI* GetAI_npc_nagrand_captive(Creature* pCreature)
 {
-    return new npc_maghar_captiveAI(pCreature);
+    return new npc_nagrand_captiveAI(pCreature);
 }
 
 /*######
@@ -519,9 +555,9 @@ void AddSC_nagrand()
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
-    pNewScript->Name = "npc_maghar_captive";
-    pNewScript->GetAI = &GetAI_npc_maghar_captive;
-    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_maghar_captive;
+    pNewScript->Name = "npc_nagrand_captive";
+    pNewScript->GetAI = &GetAI_npc_nagrand_captive;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_nagrand_captive;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
