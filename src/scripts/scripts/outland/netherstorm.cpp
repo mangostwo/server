@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Netherstorm
 SD%Complete: 80
-SDComment: Quest support: 10191, 10198, 10299, 10321, 10322, 10323, 10329, 10330, 10337, 10338, 10365(Shutting Down Manaforge), 10406, 10425, 10438, 10924.
+SDComment: Quest support: 10191, 10198, 10299, 10310, 10321, 10322, 10323, 10329, 10330, 10337, 10338, 10365(Shutting Down Manaforge), 10406, 10425, 10438, 10924.
 SDCategory: Netherstorm
 EndScriptData */
 
@@ -30,6 +30,7 @@ npc_maxx_a_million
 npc_zeppit
 npc_protectorate_demolitionist
 npc_captured_vanguard
+npc_drijya
 EndContentData */
 
 #include "precompiled.h"
@@ -1132,6 +1133,267 @@ bool QuestAccept_npc_captured_vanguard(Player* pPlayer, Creature* pCreature, con
     return true;
 }
 
+/*######
+## npc_drijya
+######*/
+
+enum
+{
+    SAY_DRIJYA_START        = -1000968,
+    SAY_DRIJYA_1            = -1000969,
+    SAY_DRIJYA_2            = -1000970,
+    SAY_DRIJYA_3            = -1000971,
+    SAY_DRIJYA_4            = -1000972,
+    SAY_DRIJYA_5            = -1000973,
+    SAY_DRIJYA_6            = -1000974,
+    SAY_DRIJYA_7            = -1000975,
+    SAY_DRIJYA_COMPLETE     = -1000976,
+
+    SPELL_SUMMON_SMOKE      = 42456,                        // summon temp GO 185318
+    SPELL_SUMMON_FIRE       = 42467,                        // summon temp GO 185319
+    SPELL_EXPLOSION_VISUAL  = 42458,
+
+    NPC_EXPLODE_TRIGGER     = 20296,
+    NPC_TERROR_IMP          = 20399,
+    NPC_LEGION_TROOPER      = 20402,
+    NPC_LEGION_DESTROYER    = 20403,
+
+    // GO_SMOKE             = 185318,
+    // GO_FIRE              = 185317,                       // not sure if this one is used
+    // GO_BIG_FIRE          = 185319,
+
+    QUEST_ID_WARP_GATE      = 10310,
+
+    MAX_TROOPERS            = 9,
+    MAX_IMPS                = 6,
+};
+
+struct MANGOS_DLL_DECL npc_drijyaAI : public npc_escortAI
+{
+    npc_drijyaAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+
+    uint8 m_uiSpawnCount;
+    uint32 m_uiSpawnImpTimer;
+    uint32 m_uiSpawnTrooperTimer;
+    uint32 m_uiSpawnDestroyerTimer;
+    uint32 m_uiDestroyingTimer;
+
+    ObjectGuid m_explodeTriggerGuid;
+
+    void Reset() override
+    {
+        if (!HasEscortState(STATE_ESCORT_ESCORTING))
+        {
+            m_uiSpawnCount          = 0;
+            m_uiSpawnImpTimer       = 0;
+            m_uiSpawnTrooperTimer   = 0;
+            m_uiSpawnDestroyerTimer = 0;
+            m_uiDestroyingTimer     = 0;
+        }
+    }
+
+    void AttackedBy(Unit* pWho) override
+    {
+        if (pWho->GetEntry() == NPC_TERROR_IMP || pWho->GetEntry() == NPC_LEGION_TROOPER || pWho->GetEntry() == NPC_LEGION_DESTROYER)
+        {
+            if (urand(0, 1))
+                DoScriptText(SAY_DRIJYA_3, m_creature);
+        }
+    }
+
+    void DoSpawnCreature(uint32 uiEntry)
+    {
+        if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_explodeTriggerGuid))
+            m_creature->SummonCreature(uiEntry, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), pTrigger->GetOrientation(), TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 10000);
+    }
+
+    void JustSummoned(Creature* pSummoned) override
+    {
+        switch (pSummoned->GetEntry())
+        {
+            case NPC_TERROR_IMP:
+            case NPC_LEGION_TROOPER:
+            case NPC_LEGION_DESTROYER:
+                pSummoned->AI()->AttackStart(m_creature);
+                break;
+        }
+     }
+
+    void WaypointReached(uint32 uiPointId) override
+    {
+        switch (uiPointId)
+        {
+            case 0:
+                DoScriptText(SAY_DRIJYA_START, m_creature);
+                SetRun();
+                break;
+            case 1:
+                DoScriptText(SAY_DRIJYA_1, m_creature);
+                break;
+            case 5:
+                DoScriptText(SAY_DRIJYA_2, m_creature);
+                break;
+            case 7:
+                SetEscortPaused(true);
+                m_uiDestroyingTimer = 60000;
+                m_uiSpawnImpTimer = 15000;
+                m_uiSpawnCount = 0;
+                m_creature->HandleEmoteCommand(EMOTE_STATE_WORK);
+                if (Creature* pTrigger = GetClosestCreatureWithEntry(m_creature, NPC_EXPLODE_TRIGGER, 30.0f))
+                    m_explodeTriggerGuid = pTrigger->GetObjectGuid();
+                break;
+            case 8:
+                if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SMOKE) == CAST_OK)
+                {
+                    if (Player* pPlayer = GetPlayerForEscort())
+                        m_creature->SetFacingToObject(pPlayer);
+
+                    DoScriptText(SAY_DRIJYA_4, m_creature);
+                }
+                break;
+            case 12:
+                SetEscortPaused(true);
+                m_uiDestroyingTimer = 60000;
+                m_uiSpawnTrooperTimer = 15000;
+                m_uiSpawnCount = 0;
+                m_creature->HandleEmoteCommand(EMOTE_STATE_WORK);
+                break;
+            case 13:
+                if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SMOKE) == CAST_OK)
+                {
+                    if (Player* pPlayer = GetPlayerForEscort())
+                        m_creature->SetFacingToObject(pPlayer);
+
+                    DoScriptText(SAY_DRIJYA_5, m_creature);
+                }
+                break;
+            case 17:
+                SetEscortPaused(true);
+                m_uiDestroyingTimer = 60000;
+                m_uiSpawnDestroyerTimer = 15000;
+                m_creature->HandleEmoteCommand(EMOTE_STATE_WORK);
+                break;
+            case 18:
+                if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SMOKE) == CAST_OK)
+                {
+                    if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_explodeTriggerGuid))
+                        m_creature->SetFacingToObject(pTrigger);
+
+                    DoScriptText(SAY_DRIJYA_6, m_creature);
+                }
+                break;
+            case 19:
+                if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_explodeTriggerGuid))
+                {
+                    pTrigger->CastSpell(pTrigger, SPELL_SUMMON_FIRE, true);
+                    pTrigger->CastSpell(pTrigger, SPELL_EXPLOSION_VISUAL, true);
+                }
+                break;
+            case 20:
+                DoScriptText(SAY_DRIJYA_7, m_creature);
+                break;
+            case 23:
+                SetRun(false);
+                break;
+            case 27:
+                if (Player* pPlayer = GetPlayerForEscort())
+                {
+                    DoScriptText(SAY_DRIJYA_COMPLETE, m_creature, pPlayer);
+                    pPlayer->GroupEventHappens(QUEST_ID_WARP_GATE, m_creature);
+                }
+                break;
+        }
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    {
+        if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
+        {
+            m_creature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
+            Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue), true);
+        }
+    }
+
+    void UpdateEscortAI(const uint32 uiDiff) override
+    {
+        if (m_uiSpawnImpTimer)
+        {
+            if (m_uiSpawnImpTimer <= uiDiff)
+            {
+                DoSpawnCreature(NPC_TERROR_IMP);
+                ++m_uiSpawnCount;
+
+                if (m_uiSpawnCount == MAX_IMPS)
+                    m_uiSpawnImpTimer = 0;
+                else
+                    m_uiSpawnImpTimer = 3500;
+            }
+            else
+                m_uiSpawnImpTimer -= uiDiff;
+        }
+
+        if (m_uiSpawnTrooperTimer)
+        {
+            if (m_uiSpawnTrooperTimer <= uiDiff)
+            {
+                DoSpawnCreature(NPC_LEGION_TROOPER);
+                ++m_uiSpawnCount;
+
+                if (m_uiSpawnCount == MAX_TROOPERS)
+                    m_uiSpawnTrooperTimer = 0;
+                else
+                    m_uiSpawnTrooperTimer = 3500;
+            }
+            else
+                m_uiSpawnTrooperTimer -= uiDiff;
+        }
+
+        if (m_uiSpawnDestroyerTimer)
+        {
+            if (m_uiSpawnDestroyerTimer <= uiDiff)
+            {
+                DoSpawnCreature(NPC_LEGION_DESTROYER);
+                m_uiSpawnDestroyerTimer = 0;
+            }
+            else
+                m_uiSpawnDestroyerTimer -= uiDiff;
+        }
+
+        if (m_uiDestroyingTimer)
+        {
+            if (m_uiDestroyingTimer <= uiDiff)
+            {
+                SetEscortPaused(false);
+                m_creature->HandleEmoteCommand(EMOTE_STATE_NONE);
+                m_uiDestroyingTimer = 0;
+            }
+            else
+                m_uiDestroyingTimer -= uiDiff;
+        }
+
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_drijya(Creature* pCreature)
+{
+    return new npc_drijyaAI(pCreature);
+}
+
+bool QuestAccept_npc_drijya(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+{
+    if (pQuest->GetQuestId() == QUEST_ID_WARP_GATE)
+    {
+        pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
+        return true;
+    }
+
+    return false;
+}
+
 void AddSC_netherstorm()
 {
     Script* pNewScript;
@@ -1182,5 +1444,11 @@ void AddSC_netherstorm()
     pNewScript->Name = "npc_captured_vanguard";
     pNewScript->GetAI = &GetAI_npc_captured_vanguard;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_captured_vanguard;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_drijya";
+    pNewScript->GetAI = &GetAI_npc_drijya;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_drijya;
     pNewScript->RegisterSelf();
 }
