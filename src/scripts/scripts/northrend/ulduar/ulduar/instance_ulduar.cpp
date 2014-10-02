@@ -71,6 +71,7 @@ static UlduarKeeperSpawns m_aKeeperHelperLocs[] =
 instance_ulduar::instance_ulduar(Map* pMap) : ScriptedInstance(pMap), DialogueHelper(aUlduarDialogue),
     m_bHelpersLoaded(false),
     m_uiAlgalonTimer(MINUTE * IN_MILLISECONDS),
+    m_uiYoggResetTimer(0),
     m_uiShatterAchievTimer(0),
     m_uiGauntletStatus(0),
     m_uiStairsSpawnTimer(0),
@@ -754,19 +755,25 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             DoUseDoorOrButton(GO_YOGG_GATE);
             if (uiData == FAIL)
             {
-                // reset Ominous clouds
+                // reset encounter
                 for (GuidList::const_iterator itr = m_lOminousCloudsGuids.begin(); itr != m_lOminousCloudsGuids.end(); ++itr)
                 {
                     if (Creature* pCloud = instance->GetCreature(*itr))
-                        pCloud->AI()->EnterEvadeMode();
+                        pCloud->ForcedDespawn();
                 }
 
-                // clear insane and despawn the voice
                 if (Creature* pVoice = GetSingleCreatureFromStorage(NPC_VOICE_OF_YOGG))
+                {
+                    // ToDo: clear insane / sanity
                     pVoice->ForcedDespawn();
+                }
 
                 if (Creature* pSara = GetSingleCreatureFromStorage(NPC_SARA))
-                    pSara->AI()->EnterEvadeMode();
+                    pSara->ForcedDespawn();
+                if (Creature* pBrain = GetSingleCreatureFromStorage(NPC_YOGG_BRAIN))
+                    pBrain->ForcedDespawn();
+                
+                m_uiYoggResetTimer = 60000;
             }
             break;
 
@@ -1159,15 +1166,6 @@ void instance_ulduar::OnCreatureDeath(Creature* pCreature)
     }
 }
 
-void instance_ulduar::OnCreatureEvade(Creature* pCreature)
-{
-    if (pCreature->GetEntry() == NPC_GUARDIAN_OF_YOGG)
-    {
-        SetData(TYPE_YOGGSARON, FAIL);
-        pCreature->ForcedDespawn();
-    }
-}
-
 void instance_ulduar::Load(const char* strIn)
 {
     if (!strIn)
@@ -1418,6 +1416,30 @@ void instance_ulduar::Update(uint32 uiDiff)
         }
         else
             m_uiAlgalonTimer -= uiDiff;
+    }
+    
+    if (m_uiYoggResetTimer)
+    {
+        if (m_uiYoggResetTimer <= uiDiff)
+        {
+            // reset encounter
+            for (GuidList::const_iterator itr = m_lOminousCloudsGuids.begin(); itr != m_lOminousCloudsGuids.end(); ++itr)
+            {
+                if (Creature* pCloud = instance->GetCreature(*itr))
+                    pCloud->Respawn();
+            }
+            
+            if (Creature* pVoice = GetSingleCreatureFromStorage(NPC_VOICE_OF_YOGG))
+                pVoice->Respawn();
+            if (Creature* pSara = GetSingleCreatureFromStorage(NPC_SARA))
+                pSara->Respawn();
+            if (Creature* pBrain = GetSingleCreatureFromStorage(NPC_YOGG_BRAIN))
+                pBrain->Respawn();
+            
+            m_uiYoggResetTimer = 0;
+        }
+        else
+            m_uiYoggResetTimer -= uiDiff;
     }
 
     if (m_uiStairsSpawnTimer)

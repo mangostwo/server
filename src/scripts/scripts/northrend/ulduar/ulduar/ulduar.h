@@ -484,7 +484,6 @@ class MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance, private Dialogu
         void OnCreatureCreate(Creature* pCreature) override;
         void OnCreatureEnterCombat(Creature* pCreature) override;
         void OnCreatureDeath(Creature* pCreature) override;
-        void OnCreatureEvade(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
@@ -510,6 +509,7 @@ class MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance, private Dialogu
         void GetThorimBunniesGuids(GuidList& lBunnies, bool bUpper) { lBunnies = bUpper ? m_lUpperBunniesGuids : m_lThorimBunniesGuids; }
         void GetThunderOrbsGuids(GuidList& lOrbs) { lOrbs = m_lUpperThunderOrbsGuids; }
         void GetSmashTargetsGuids(GuidList& lTargets, bool bLeft) { lTargets = bLeft ? m_lLeftHandBunniesGuids : m_lRightHandBunniesGuids; }
+        void GetOminousCloudGuids(GuidList& lClouds) { lClouds = m_lOminousCloudsGuids; }
 
         void Update(uint32 uiDiff);
 
@@ -531,6 +531,7 @@ class MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance, private Dialogu
         bool m_bHelpersLoaded;
 
         uint32 m_uiAlgalonTimer;
+        uint32 m_uiYoggResetTimer;
         uint32 m_uiShatterAchievTimer;
         uint32 m_uiGauntletStatus;
         uint32 m_uiStairsSpawnTimer;

@@ -29,13 +29,17 @@ enum
     SAY_SARA_INTRO_1                            = -1603197,
     SAY_SARA_INTRO_2                            = -1603198,
     SAY_SARA_AGGRO                              = -1603199,
-    SAY_SARA_HELP_1                             = -1603200,
-    SAY_SARA_HELP_2                             = -1603201,
-    SAY_SARA_SLAY_1                             = -1603202,
-    SAY_SARA_SLAY_2                             = -1603203,
-    SAY_WIPE_PHASE_1                            = -1603204,
+    SAY_SARA_HELP_1                             = -1603201,
+    SAY_SARA_HELP_2                             = -1603202,
+    SAY_SARA_SLAY_1                             = -1603203,
+    SAY_SARA_SLAY_2                             = -1603204,
+    SAY_WIPE_PHASE_1                            = -1603205,
 
-    SAY_PHASE_2_INTRO                           = -1603205,
+    SAY_PHASE_2_INTRO_1                         = -1603206,
+    SAY_PHASE_2_INTRO_2                         = -1603262,
+    SAY_PHASE_2_INTRO_3                         = -1603263,
+    SAY_PHASE_2_INTRO_4                         = -1603264,
+    SAY_PHASE_2_INTRO_5                         = -1603265,
     SAY_SARA_PHASE_2_INTRO_A                    = -1603206,
     SAY_SARA_PHASE_2_INTRO_B                    = -1603207,
 
@@ -96,10 +100,18 @@ enum
     SPELL_CLEAR_INSANE                          = 63122,                    // clear all the sanity and insane on wipe / death
     SPELL_SUMMON_GUARDIAN_YOGG                  = 62978,                    // cast by npc 33280 on an Ominus cloud
 
-    // Vision phase spells
-    SPELL_SHADOWY_BARRIER                       = 64775,                    // damage immunity spells
+    // Yogg transition spells
     SPELL_SHADOWY_BARRIER_YOGG                  = 63894,
+    SPELL_KNOCK_AWAY                            = 64022,
+    SPELL_MATCH_HEALTH                          = 64066, // periodic aura on the Brain
 
+    // Sara transition spells
+    SPELL_SHADOWY_BARRIER                       = 64775, // damage immunity spells
+    SPELL_FULL_HEAL                             = 43978,
+    SPELL_PHASE_2_TRANSFORM                     = 65157,
+    SPELL_RIDE_VEHICLE_YOGG                     = 61791, // mount vehicle Yogg
+
+    // Vision phase spells
     SPELL_PHYCHOSIS                             = 65301,                    // Sara combat spells
     SPELL_PHYCHOSIS_H                           = 63795,
     SPELL_MALADY_OF_THE_MIND                    = 63830,
@@ -158,6 +170,9 @@ enum
     // Thorim spells
     SPELL_FURY_OF_THE_STORM                     = 62702,
     SPELL_TITANIC_STORM                         = 64171,
+    
+    // other
+    FACTION_SARA_HOSTILE                        = 16,
 
     // encounter phases
     PHASE_INTRO                                 = 0,
@@ -166,23 +181,38 @@ enum
     PHASE_OLD_GOD                               = 3,
 };
 
-static const float afVoiceOfYoggSpawn[3] = {1980.137f, -25.74376f, 326.4671f};
+static const DialogueEntry aYoggSaronDialog[] =
+{
+    {SAY_PHASE_2_INTRO_1,       NPC_SARA,       4000},
+    {SAY_PHASE_2_INTRO_2,       NPC_SARA,       5000},
+    {SAY_PHASE_2_INTRO_3,       NPC_SARA,       5000},
+    {SAY_PHASE_2_INTRO_4,       NPC_SARA,       2000},
+    {SPELL_PHASE_2_TRANSFORM,   0,              4000},
+    {SAY_PHASE_2_INTRO_5,       NPC_YOGGSARON,  0},
+    {0, 0, 0},
+};
+
+static const float afYoggSaronSpawn[4] = {1980.43f, -25.7708f, 324.9724f, 3.141f};
 
 /*######
 ## boss_sara
 ######*/
 
-struct MANGOS_DLL_DECL boss_saraAI : public ScriptedAI
+struct MANGOS_DLL_DECL boss_saraAI : public ScriptedAI, private DialogueHelper
 {
-    boss_saraAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_saraAI(Creature* pCreature) : ScriptedAI(pCreature),
+        DialogueHelper(aYoggSaronDialog)
     {
         m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        InitializeDialogueHelper(m_pInstance);
         Reset();
     }
 
     instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
+    
+    bool m_bIsHostile;
 
     uint8 m_uiPhase;
     uint32 m_uiSummonGuardianTimer;
@@ -192,7 +222,10 @@ struct MANGOS_DLL_DECL boss_saraAI : public ScriptedAI
     {
         m_uiPhase                       = PHASE_INTRO;
         m_uiSummonGuardianTimer         = 1000;
-        m_uiSarasSpellTimer             = 5000;
+        m_uiSarasSpellTimer             = 15000;
+        m_bIsHostile                    = false;
+        
+        SetCombatMovement(false);
     }
 
     void AttackStart(Unit* pWho) override
@@ -201,6 +234,14 @@ struct MANGOS_DLL_DECL boss_saraAI : public ScriptedAI
             return;
 
         ScriptedAI::AttackStart(pWho);
+    }
+    
+    void EnterEvadeMode() override
+    {
+        if (!m_bIsHostile)
+            return;
+        
+        ScriptedAI::EnterEvadeMode();
     }
 
     void MoveInLineOfSight(Unit* pWho) override
@@ -214,8 +255,6 @@ struct MANGOS_DLL_DECL boss_saraAI : public ScriptedAI
 
             if (m_pInstance)
                 m_pInstance->SetData(TYPE_YOGGSARON, IN_PROGRESS);
-
-            m_creature->SummonCreature(NPC_VOICE_OF_YOGG, afVoiceOfYoggSpawn[0], afVoiceOfYoggSpawn[1], afVoiceOfYoggSpawn[2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
         }
 
         ScriptedAI::MoveInLineOfSight(pWho);
@@ -228,10 +267,66 @@ struct MANGOS_DLL_DECL boss_saraAI : public ScriptedAI
 
         DoScriptText(urand(0, 1) ? SAY_SARA_SLAY_1 : SAY_SARA_SLAY_2, m_creature);
     }
+    
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage) override
+    {
+        if (uiDamage >= m_creature->GetHealth())
+        {
+            uiDamage = 0;
+
+            if (m_uiPhase == PHASE_SARA)
+            {
+                m_uiPhase = PHASE_VISIONS;
+                StartNextDialogueText(SAY_PHASE_2_INTRO_1);
+
+                // despawn all clouds for phase 2
+                if (!m_pInstance)
+                    return;
+
+                GuidList m_lCloudGuids;
+                m_pInstance->GetOminousCloudGuids(m_lCloudGuids);
+
+                for (GuidList::const_iterator itr = m_lCloudGuids.begin(); itr != m_lCloudGuids.end(); ++itr)
+                {
+                    if (Creature* pCloud = m_creature->GetMap()->GetCreature(*itr))
+                        pCloud->ForcedDespawn();
+                }
+            }
+        }
+    }
 
     void JustSummoned(Creature* /*pSummoned*/) override
     {
-        // ToDo: make the voice of Yogg cast Sanity on spawn
+        if (pSummoned->GetEntry() == NPC_YOGGSARON)
+        {
+            pSummoned->CastSpell(pSummoned, SPELL_SHADOWY_BARRIER_YOGG, true);
+            pSummoned->CastSpell(pSummoned, SPELL_KNOCK_AWAY, true);
+            pSummoned->SetInCombatWithZone();
+        }
+    }
+    
+    void JustDidDialogueStep(int32 iEntry) override
+    {
+        switch (iEntry)
+        {
+            case SAY_PHASE_2_INTRO_4:
+                DoCastSpellIfCan(m_creature, SPELL_FULL_HEAL, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_PHASE_2_TRANSFORM, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_SHADOWY_BARRIER, CAST_TRIGGERED);
+
+                m_creature->SetFactionTemporary(FACTION_SARA_HOSTILE, TEMPFACTION_RESTORE_RESPAWN);
+                m_creature->SummonCreature(NPC_YOGGSARON, afYoggSaronSpawn[0], afYoggSaronSpawn[1], afYoggSaronSpawn[2], afYoggSaronSpawn[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_bIsHostile = true;
+                m_creature->SetInCombatWithZone();
+                break;
+            case SPELL_PHASE_2_TRANSFORM:
+                if (m_pInstance)
+                {
+                    if (Creature* pYogg = m_pInstance->GetSingleCreatureFromStorage(NPC_YOGGSARON))
+                        DoCastSpellIfCan(pYogg, SPELL_RIDE_VEHICLE_YOGG, CAST_TRIGGERED);
+                }
+                break;
+        }
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -241,6 +336,8 @@ struct MANGOS_DLL_DECL boss_saraAI : public ScriptedAI
             script_error_log("Instance Ulduar: ERROR Failed to load instance data for this instace.");
             return;
         }
+        
+        DialogueUpdate(uiDiff);
 
         if (m_uiPhase == PHASE_SARA)
         {
@@ -284,6 +381,55 @@ struct MANGOS_DLL_DECL boss_saraAI : public ScriptedAI
 CreatureAI* GetAI_boss_sara(Creature* pCreature)
 {
     return new boss_saraAI(pCreature);
+}
+
+/*######
+## boss_yogg_saron
+######*/
+
+struct MANGOS_DLL_DECL boss_yogg_saronAI : public Scripted_NoMovementAI
+{
+    boss_yogg_saronAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    {
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
+        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        Reset();
+    }
+
+    instance_ulduar* m_pInstance;
+    bool m_bIsRegularMode;
+
+    uint8 m_uiPhase;
+
+    void Reset() override
+    {
+        m_uiPhase = PHASE_VISIONS;
+    }
+
+    void JustReachedHome() override
+    {
+        // unboard passengers first to avoid issues
+        m_creature->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
+
+        if (m_pInstance)
+        {
+            if (m_pInstance->GetData(TYPE_YOGGSARON) != FAIL)
+                m_pInstance->SetData(TYPE_YOGGSARON, FAIL);
+        }
+
+        m_creature->ForcedDespawn();
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+    }
+};
+
+CreatureAI* GetAI_boss_yogg_saron(Creature* pCreature)
+{
+    return new boss_yogg_saronAI(pCreature);
 }
 
 /*######
@@ -382,9 +528,93 @@ CreatureAI* GetAI_npc_voice_yogg_saron(Creature* pCreature)
     return new npc_voice_yogg_saronAI(pCreature);
 }
 
+/*######
+## npc_guardian_of_yogg
+######*/
+
+struct MANGOS_DLL_DECL npc_guardian_of_yoggAI : public ScriptedAI
+{
+    npc_guardian_of_yoggAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
+        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        Reset();
+    }
+
+    instance_ulduar* m_pInstance;
+    bool m_bIsRegularMode;
+
+    uint32 m_uiDarkVolleyTimer;
+    uint32 m_uiDominateMindTimer;
+
+    void Reset() override
+    {
+        m_uiDarkVolleyTimer = 10000;
+        m_uiDominateMindTimer = 25000;
+    }
+
+    void AttackStart(Unit* pWho) override
+    {
+        if (pWho->GetEntry() == NPC_SARA)
+            return;
+
+        ScriptedAI::AttackStart(pWho);
+    }
+
+    void JustDied(Unit* /*pKiller*/) override
+    {
+        DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SHADOW_NOVA : SPELL_SHADOW_NOVA_H, CAST_TRIGGERED);
+    }
+
+    void JustReachedHome() override
+    {
+        if (m_pInstance)
+        {
+            if (m_pInstance->GetData(TYPE_YOGGSARON) != FAIL)
+                m_pInstance->SetData(TYPE_YOGGSARON, FAIL);
+        }
+
+        m_creature->ForcedDespawn();
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_uiDarkVolleyTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_DARK_VOLLEY) == CAST_OK)
+                m_uiDarkVolleyTimer = urand(10000, 25000);
+        }
+        else
+            m_uiDarkVolleyTimer -= uiDiff;
+
+        if (m_uiDominateMindTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_DOMINATE_MIND) == CAST_OK)
+                m_uiDominateMindTimer = urand(30000, 40000);
+        }
+        else
+            m_uiDominateMindTimer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_guardian_of_yogg(Creature* pCreature)
+{
+    return new npc_guardian_of_yoggAI(pCreature);
+}
+
 void AddSC_boss_yogg_saron()
 {
     Script* pNewScript;
+    
+    pNewScript = new Script;
+    pNewScript->Name = "boss_yogg_saron";
+    pNewScript->GetAI = &GetAI_boss_yogg_saron;
+    pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_sara";
@@ -399,5 +629,10 @@ void AddSC_boss_yogg_saron()
     pNewScript = new Script;
     pNewScript->Name = "npc_voice_yogg_saron";
     pNewScript->GetAI = &GetAI_npc_voice_yogg_saron;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_guardian_of_yogg";
+    pNewScript->GetAI = &GetAI_npc_guardian_of_yogg;
     pNewScript->RegisterSelf();
 }
