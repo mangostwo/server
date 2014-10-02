@@ -26,6 +26,7 @@
 #include "DBCStores.h"
 #include "DBCStructure.h"
 #include "GameEventMgr.h"
+#include "Group.h"
 #include "LFGMgr.h"
 #include "Object.h"
 #include "Player.h"
@@ -46,7 +47,7 @@ LFGMgr::~LFGMgr()
     m_playerData.clear();
 }
 
-void LFGMgr::JoinLFG()
+void LFGMgr::JoinLFG(Player* plr)
 {
     
 }
@@ -59,10 +60,11 @@ void LFGMgr::LeaveLFG()
 LfgJoinResult LFGMgr::GetJoinResult(Player* plr)
 {
     LfgJoinResult result;
+    Group* pGroup = plr->GetGroup();
     
     /* Reasons for not entering:
      *   Deserter spell
-     *   Dungeon finder cooldown
+     *   Dungeon finder cooldown 
      *   In a battleground
      *   In an arena
      *   Queued for battleground
@@ -70,7 +72,50 @@ LfgJoinResult LFGMgr::GetJoinResult(Player* plr)
      *   Group member disconnected
      *   Any group member cannot enter for x reason any other player can't
      */
-    // if (Group* pGroup = plr->GetGroup())
+    
+    if (!plr)
+        result = ERR_LFG_MEMBERS_NOT_PRESENT;
+    else if (plr->HasAura(LFG_DESERTER_SPELL))
+        result = ERR_LFG_DESERTER_PLAYER;
+    else if (plr->InBattleGround() || plr->InBattleGroundQueue() || plr->InArena())
+        result = ERR_LFG_CANT_USE_DUNGEONS;
+    else if (plr->HasAura(LFG_COOLDOWN_SPELL))
+        result = ERR_LFG_RANDOM_COOLDOWN_PLAYER;
+    else if (pGroup)
+    {
+        if (pGroup->GetMembersCount() > 5)
+            result = ERR_LFG_TOO_MANY_MEMBERS;
+        else
+        {
+            uint8 currentMemberCount = 0;
+            for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+            {
+                if (Player* pGroupPlr = itr->GetSource())
+                {
+                    // check if the group members are level 15+ to use finder
+                    if (pGroupPlr->getLevel() < 15)
+                        result = ERR_LFG_CANT_USE_DUNGEONS;
+                    else if (pGroupPlr->HasAura(LFG_DESERTER_SPELL))
+                        result = ERR_LFG_DESERTER_PARTY;
+                    else if (pGroupPlr->InBattleGround() || pGroupPlr->InBattleGroundQueue() || pGroupPlr->InArena())
+                        result = ERR_LFG_CANT_USE_DUNGEONS;
+                    else if (pGroupPlr->HasAura(LFG_COOLDOWN_SPELL))
+                        result = ERR_LFG_RANDOM_COOLDOWN_PARTY;
+                    else
+                        result = ERR_LFG_OK;
+                    
+                    ++currentMemberCount;
+                }
+            }
+            
+            if (result == ERR_LFG_OK && currentMemberCount != pGroup->GetMembersCount())
+                result = ERR_LFG_MEMBERS_NOT_PRESENT;
+        }
+    }
+    else
+        result = ERR_LFG_OK;
+            
+    return result;
 }
 
 ItemRewards LFGMgr::GetDungeonItemRewards(uint32 dungeonId, DungeonTypes type)

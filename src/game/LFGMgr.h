@@ -111,6 +111,12 @@ enum LFGForbiddenTypes
     LFG_FORBIDDEN_MISSING_ACHIEVEMENT   = 1034
 };
 
+enum LFGSpells
+{
+    LFG_DESERTER_SPELL = 71041,
+    LFG_COOLDOWN_SPELL = 71328,
+};
+
 enum LFGState
 {
     LFG_STATE_NONE,
@@ -147,14 +153,11 @@ struct ItemRewards
 const uint32 WOTLK_SPECIAL_HEROIC_ITEM = 47241;
 const uint32 WOTLK_SPECIAL_HEROIC_AMNT = 2;
 
-/// Spell cast on players for leaving a dungeon early
-const uint32 LFG_DESERTER_SPELL = 71041;
-
 typedef std::set<uint32> dailyEntries; // for players who did one of X type instance per day
 typedef UNORDERED_MAP<uint32, uint32> dungeonEntries; // ID, Entry
 typedef UNORDERED_MAP<uint32, uint32> dungeonForbidden; // Entry, LFGForbiddenTypes
-typedef UNORDERED_MAP<uint32, dungeonForbidden> partyForbidden; // map of party member's locked dungeons
-// note: use guidLow as key
+typedef UNORDERED_MAP<uint64, dungeonForbidden> partyForbidden; // map of party member's locked dungeons
+// note: partyForbidden key = raw value of object guid
 
 /// Information the dungeon finder needs about each player
 struct LFGPlayers
@@ -173,11 +176,12 @@ public:
     LFGMgr();
     ~LFGMgr();
     
-    void JoinLFG();
+    void JoinLFG(Player* plr);
     void LeaveLFG();
     
     /**
      * @brief Go through a number of checks to see if the player/group can join
+     *        the LFG queue
      * 
      * @param plr The pointer to the player
      */
