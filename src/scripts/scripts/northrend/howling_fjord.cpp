@@ -29,6 +29,7 @@ npc_silvermoon_harry
 npc_lich_king_village
 npc_king_ymiron
 npc_firecrackers_bunny
+npc_apothecary_hanes
 EndContentData */
 
 #include "precompiled.h"
