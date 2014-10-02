@@ -117,6 +117,7 @@ enum
     NPC_ELDER_BRIGHTLEAF        = 32915,
     NPC_ELDER_IRONBRACH         = 32913,
     NPC_ELDER_STONEBARK         = 32914,
+    NPC_FREYA_ACHIEV_TRIGGER    = 33406,                    // Cast spell 65015 for achievs 2985 and 2984
 
     // Hodir helpers
     NPC_DRUID_HORDE_N           = 32941,                    // Tor Greycloud
@@ -329,6 +330,12 @@ enum
     ACHIEV_START_IGNIS_ID       = 20951,                    // Ignis timed achievs 2930, 2929
     ACHIEV_START_XT002_ID       = 21027,                    // XT-002 timed achievs 2937, 2938
     ACHIEV_START_FREYA_ID       = 21597,                    // Freya timed achievs 2980, 2981
+    ACHIEV_START_YOGG_ID        = 21001,                    // Yogg timed achievs 3012, 3013
+    ACHIEV_START_COMING_WALLS   = 33136,                    // Guardian of Yogg timed achievs 3014, 3017
+    ACHIEV_START_DWARFAGEDDON   = 65387,                    // Ulduar gauntlet timed achievs 3097, 3098; triggered by missing spell 65387
+    ACHIEV_START_LUMBERJACKED   = 21686,                    // Ulduar elder kill timed achievs 2979, 3118; triggered by missing spell 65296
+    ACHIEV_START_NERF_BOTS      = 65037,                    // XT-002 gauntlet timed achievs 2933, 2935; triggered by missing spell 65037
+    ACHIEV_START_SUPERMASSIVE   = 21697,                    // Black hole timed achievs 3003, 3002
 
     ACHIEV_CRIT_SARONITE_N      = 10451,                    // General Vezax, achievs 3181, 3188
     ACHIEV_CRIT_SARONITE_H      = 10462,
@@ -402,6 +409,16 @@ enum
     ACHIEV_CRIT_KNOCK_3_H       = 10461,
     ACHIEV_CRIT_FIREFIGHTER_N   = 10450,                    // Mimiron, achievs 3180, 3189
     ACHIEV_CRIT_FIREFIGHTER_H   = 10463,
+    ACHIEV_CRIT_THREE_LIGHTS_N  = 10410,                    // Yogg-Saron, achievs 3157, 3161,
+    ACHIEV_CRIT_THREE_LIGHTS_H  = 10414,
+    ACHIEV_CRIT_TWO_LIGHTS_N    = 10338,                    // Yogg-Saron, achievs 3141, 3162
+    ACHIEV_CRIT_TWO_LIGHTS_H    = 10415,
+    ACHIEV_CRIT_ONE_LIGHT_N     = 10409,                    // Yogg-Saron, achievs 3158, 3163
+    ACHIEV_CRIT_ONE_LIGHT_H     = 10416,
+    ACHIEV_CRIT_ALONE_DARK_N    = 10412,                    // Yogg-Saron, achievs 3159, 3164
+    ACHIEV_CRIT_ALONE_DARK_H    = 10417,
+    ACHIEV_CRIT_DRIVE_CRAZY_N   = 10185,                    // Yogg-Saron, achievs 3008, 3010
+    ACHIEV_CRIT_DRIVE_CRAZY_H   = 10296,
 };
 
 struct UlduarSpawns

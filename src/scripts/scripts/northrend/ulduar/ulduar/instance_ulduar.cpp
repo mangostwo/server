@@ -34,6 +34,8 @@ enum
     SAY_HODIR_HELP                          = -1603093,
     SAY_THORIM_HELP                         = -1603155,
     SAY_MIMIRON_HELP                        = -1603195,
+    
+    SPELL_KEEPER_ACTIVE                     = 62647,
 };
 
 static const DialogueEntry aUlduarDialogue[] =
@@ -781,8 +783,12 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                 if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_BRAIN_DOOR_STORMWIND))
                     pDoor->ResetDoorOrButton();
                 
+                // ToDo: reset keeper helpers
+                
                 m_uiYoggResetTimer = 60000;
             }
+            else if (uiData == IN_PROGRESS)
+                DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_YOGG_ID);
             break;
 
             // Celestial Planetarium
@@ -954,6 +960,9 @@ bool instance_ulduar::CheckConditionCriteriaMeet(Player const* pPlayer, uint32 u
                     if (GetData(TYPE_VEZAX_HARD) == DONE)
                         uiCondId = 1;
                     break;
+                case NPC_YOGGSARON:
+                    uiCondId = 4 - GetData(TYPE_YOGGSARON_HARD);
+                    break;
             }
 
             return uiCondId == uiInstanceConditionId;
@@ -1080,19 +1089,31 @@ void instance_ulduar::SpawnKeeperHelper(uint32 uiWho)
     {
         case NPC_MIMIRON_HELPER:
             if (Creature* pKeeper = pPlayer->SummonCreature(uiWho, m_aKeeperHelperLocs[1].fX, m_aKeeperHelperLocs[1].fY, m_aKeeperHelperLocs[1].fZ, m_aKeeperHelperLocs[1].fO, TEMPSUMMON_CORPSE_DESPAWN, 0, true))
+            {
                 DoScriptText(m_aKeeperHelperLocs[1].iText, pKeeper);
+                pKeeper->CastSpell(pKeeper, SPELL_KEEPER_ACTIVE, false);
+            }
             break;
         case NPC_HODIR_HELPER:
             if (Creature* pKeeper = pPlayer->SummonCreature(uiWho, m_aKeeperHelperLocs[2].fX, m_aKeeperHelperLocs[2].fY, m_aKeeperHelperLocs[2].fZ, m_aKeeperHelperLocs[2].fO, TEMPSUMMON_CORPSE_DESPAWN, 0, true))
+            {
                 DoScriptText(m_aKeeperHelperLocs[2].iText, pKeeper);
+                pKeeper->CastSpell(pKeeper, SPELL_KEEPER_ACTIVE, false);
+            }
             break;
         case NPC_THORIM_HELPER:
             if (Creature* pKeeper = pPlayer->SummonCreature(uiWho, m_aKeeperHelperLocs[3].fX, m_aKeeperHelperLocs[3].fY, m_aKeeperHelperLocs[3].fZ, m_aKeeperHelperLocs[3].fO, TEMPSUMMON_CORPSE_DESPAWN, 0, true))
+            {
                 DoScriptText(m_aKeeperHelperLocs[3].iText, pKeeper);
+                pKeeper->CastSpell(pKeeper, SPELL_KEEPER_ACTIVE, false);
+            }
             break;
         case NPC_FREYA_HELPER:
             if (Creature* pKeeper = pPlayer->SummonCreature(uiWho, m_aKeeperHelperLocs[0].fX, m_aKeeperHelperLocs[0].fY, m_aKeeperHelperLocs[0].fZ, m_aKeeperHelperLocs[0].fO, TEMPSUMMON_CORPSE_DESPAWN, 0, true))
+            {
                 DoScriptText(m_aKeeperHelperLocs[0].iText, pKeeper);
+                pKeeper->CastSpell(pKeeper, SPELL_KEEPER_ACTIVE, false);
+            }
             break;
     }
 }
@@ -1309,6 +1330,18 @@ bool instance_ulduar::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player c
         case ACHIEV_CRIT_FIREFIGHTER_N:
         case ACHIEV_CRIT_FIREFIGHTER_H:
             return GetData(TYPE_MIMIRON_HARD) == DONE;
+        case ACHIEV_CRIT_THREE_LIGHTS_N:
+        case ACHIEV_CRIT_THREE_LIGHTS_H:
+            return GetData(TYPE_YOGGSARON_HARD) <= 3;
+        case ACHIEV_CRIT_TWO_LIGHTS_N:
+        case ACHIEV_CRIT_TWO_LIGHTS_H:
+            return GetData(TYPE_YOGGSARON_HARD) <= 2;
+        case ACHIEV_CRIT_ONE_LIGHT_N:
+        case ACHIEV_CRIT_ONE_LIGHT_H:
+            return GetData(TYPE_YOGGSARON_HARD) <= 1;
+        case ACHIEV_CRIT_ALONE_DARK_N:
+        case ACHIEV_CRIT_ALONE_DARK_H:
+            return GetData(TYPE_YOGGSARON_HARD) == 0;
 
         default:
             return false;

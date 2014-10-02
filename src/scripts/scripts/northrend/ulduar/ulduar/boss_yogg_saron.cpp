@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: boss_yogg_saron
-SD%Complete: 70%
-SDComment: There are still a few things left. Not fully playable yet.
+SD%Complete: 75%
+SDComment: Keeper helpers NYI. Illusion cinematics NYI. Sanity support NYI.
 SDCategory: Ulduar
 EndScriptData */
 
@@ -105,13 +105,14 @@ enum
     // Yogg transition spells
     SPELL_SHADOWY_BARRIER_YOGG                  = 63894,
     SPELL_KNOCK_AWAY                            = 64022,
-    SPELL_MATCH_HEALTH                          = 64066, // periodic aura on the Brain
+    SPELL_MATCH_HEALTH                          = 64066,                    // periodic aura on the Brain
+    SPELL_BRAIN_HURT_VISUAL                     = 64361,
 
     // Sara transition spells
-    SPELL_SHADOWY_BARRIER                       = 64775, // damage immunity spells
+    SPELL_SHADOWY_BARRIER                       = 64775,                    // damage immunity spells
     SPELL_FULL_HEAL                             = 43978,
     SPELL_PHASE_2_TRANSFORM                     = 65157,
-    SPELL_RIDE_VEHICLE_YOGG                     = 61791, // mount vehicle Yogg
+    SPELL_RIDE_VEHICLE_YOGG                     = 61791,                    // mount vehicle Yogg
 
     // Vision phase spells
     SPELL_PHYCHOSIS                             = 63795,                    // Sara combat spells
@@ -183,6 +184,7 @@ enum
     NPC_CORRUPTOR_TENTACLE                      = 33985,
     NPC_DESCEND_INTO_MADNESS                    = 34072,
     NPC_IMMORTAL_GUARDIAN                       = 33988,
+    // NPC_MARKED_IMMORTAL_GUARDIAN             = 36064,                    // purpose unk - maybe used for Shadow Beacon event
     // NPC_SANITY_WELL                          = 33991,                    // summoned by Freya
 
     // generic visions creatures
@@ -204,14 +206,15 @@ enum
     NPC_SUIT_OF_ARMOR                           = 33433,
     NPC_GARONA                                  = 33436,                    // cast spell 64063 on 33437
     NPC_KING_LLANE                              = 33437,
+    SPELL_ASSASSINATE                           = 64063,
 
     // icecrown citadel vision
     NPC_LICH_KING                               = 33441,                    // cast spell 63037 on 33442
     NPC_IMMOLATED_CHAMPION                      = 33442,
     NPC_DEATHSWORM_ZEALOT                       = 33567,
+    SPELL_DEATHGRASP                            = 63037,
 
     // keepers
-    SPELL_KEEPER_ACTIVE                         = 62647,
     // Freya spells
     SPELL_RESILIENCE_OF_NATURE                  = 62670,
     SPELL_SUMMON_SANITY_WELL                    = 64170,                    // sends event 21432; used to spawn npc 33991
@@ -329,9 +332,12 @@ struct MANGOS_DLL_DECL boss_saraAI : public Scripted_NoMovementAI, private Dialo
             {
                 m_pInstance->SetData(TYPE_YOGGSARON, IN_PROGRESS);
                 
+                // inform the voice controller over event start
                 if (Creature* pVoice = m_pInstance->GetSingleCreatureFromStorage(NPC_VOICE_OF_YOGG))
                     SendAIEvent(AI_EVENT_START_EVENT, m_creature, pVoice);
             }
+            
+            DoInitialiseKeepers();
         }
 
         ScriptedAI::MoveInLineOfSight(pWho);
@@ -351,6 +357,7 @@ struct MANGOS_DLL_DECL boss_saraAI : public Scripted_NoMovementAI, private Dialo
         {
             uiDamage = 0;
 
+            // start transition to the second phase when all the health has been drained
             if (m_uiPhase == PHASE_SARA)
             {
                 m_uiPhase = PHASE_TRANSITION;
@@ -382,6 +389,7 @@ struct MANGOS_DLL_DECL boss_saraAI : public Scripted_NoMovementAI, private Dialo
         }
         else if (pSummoned->GetEntry() == NPC_DEATH_ORB)
         {
+            // the death orb is linked to 4 death rays that are randomly moving on the ground
             float fX, fY, fZ;
             for (uint8 i = 0; i < 4; ++i)
             {
@@ -402,6 +410,7 @@ struct MANGOS_DLL_DECL boss_saraAI : public Scripted_NoMovementAI, private Dialo
         switch (iEntry)
         {
             case SAY_PHASE_2_INTRO_4:
+                // make trasition - set hostile and summon Yogg
                 DoCastSpellIfCan(m_creature, SPELL_FULL_HEAL, CAST_TRIGGERED);
                 DoCastSpellIfCan(m_creature, SPELL_PHASE_2_TRANSFORM, CAST_TRIGGERED);
                 DoCastSpellIfCan(m_creature, SPELL_SHADOWY_BARRIER, CAST_TRIGGERED);
@@ -412,6 +421,7 @@ struct MANGOS_DLL_DECL boss_saraAI : public Scripted_NoMovementAI, private Dialo
                 m_creature->SetInCombatWithZone();
                 break;
             case SPELL_PHASE_2_TRANSFORM:
+                // complete transition phase - board Yogg and infor the voice controller of phase switch
                 if (m_pInstance)
                 {
                     if (Creature* pYogg = m_pInstance->GetSingleCreatureFromStorage(NPC_YOGGSARON))
@@ -422,6 +432,42 @@ struct MANGOS_DLL_DECL boss_saraAI : public Scripted_NoMovementAI, private Dialo
                 }
                 break;
         }
+    }
+    
+    // wrapper to initialise keeper helpers
+    void DoInitialiseKeepers()
+    {
+        if (!m_pInstance)
+            return;
+        
+        uint8 uiKeeperCount = 0;
+        
+        if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_FREYA_HELPER, true))
+        {
+            // ToDo: implement abilities
+            ++uiKeeperCount;
+        }
+        
+        if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_HODIR_HELPER, true))
+        {
+            // ToDo: implement abilities
+            ++uiKeeperCount;
+        }
+        
+        if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON_HELPER, true))
+        {
+            // ToDo: implement abilities
+            ++uiKeeperCount;
+        }
+        
+        if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_THORIM_HELPER, true))
+        {
+            // ToDo: implement abilities
+            ++uiKeeperCount;
+        }
+        
+        // set hard mode data
+        m_pInstance->SetData(TYPE_YOGGSARON_HARD, uiKeeperCount);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -534,8 +580,9 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public Scripted_NoMovementAI
         m_uiLunaticGazeTimer = 15000;
         m_uiShadowBeaconTimer = 45000;
         
+        // deafening roar only available in 25man mode with 3 keepers or less active
         if (m_pInstance)
-            m_uiDeafeningRoarTimer = (!m_bIsRegularMode && m_pInstance->GetData(TYPE_YOGGSARON_HARD) >= 1) ? 20000 : 0;
+            m_uiDeafeningRoarTimer = (!m_bIsRegularMode && m_pInstance->GetData(TYPE_YOGGSARON_HARD) <= 3) ? 20000 : 0;
     }
 
     void JustReachedHome() override
@@ -552,19 +599,17 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public Scripted_NoMovementAI
         m_creature->ForcedDespawn();
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // switch to last phase when HP is dropped to 30%
-        if (m_uiPhase == PHASE_VISIONS && m_creature->GetHealthPercent() < 30.0f)
+        // AI event received at 30% health
+        if (eventType == AI_EVENT_START_EVENT && pInvoker->GetEntry() == NPC_YOGG_BRAIN && m_uiPhase == PHASE_VISIONS)
         {
             DoScriptText(SAY_PHASE_3, m_creature);
             m_uiPhase = PHASE_OLD_GOD;
             m_creature->RemoveAurasDueToSpell(SPELL_KNOCK_AWAY);
             m_creature->RemoveAurasDueToSpell(SPELL_SHADOWY_BARRIER_YOGG);
             
+            // despawn Sara and inform the voice controller of phase switch
             if (m_pInstance)
             {
                 if (Creature* pSara = m_pInstance->GetSingleCreatureFromStorage(NPC_SARA))
@@ -573,7 +618,14 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public Scripted_NoMovementAI
                     SendAIEvent(AI_EVENT_START_EVENT_B, m_creature, pVoice);
             }
         }
+    }
     
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+        
+        // last phase spells
         if (m_uiPhase == PHASE_OLD_GOD)
         {
             if (m_uiLunaticGazeTimer < uiDiff)
@@ -836,6 +888,8 @@ struct MANGOS_DLL_DECL npc_brain_yogg_saronAI : public Scripted_NoMovementAI
 
     uint8 m_uiIllusionIndex;
     uint32 m_uiIllusionTimer;
+    
+    bool m_bBrainDefeated;
 
     GuidList m_lTentaclesGuids;
 
@@ -844,7 +898,11 @@ struct MANGOS_DLL_DECL npc_brain_yogg_saronAI : public Scripted_NoMovementAI
         m_uiIllusionTimer = 0;
         m_uiIllusionIndex = 0;
 
+        m_bBrainDefeated = false;
+        
         DoCastSpellIfCan(m_creature, SPELL_MATCH_HEALTH);
+        
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
     }
 
     void AttackStart(Unit* /*pWho*/) override { }
@@ -852,6 +910,7 @@ struct MANGOS_DLL_DECL npc_brain_yogg_saronAI : public Scripted_NoMovementAI
 
     void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
+        // start illusion when informed by the voice controller
         if (eventType == AI_EVENT_START_EVENT && pInvoker->GetEntry() == NPC_VOICE_OF_YOGG)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_INDUCE_MADNESS) == CAST_OK)
@@ -892,7 +951,7 @@ struct MANGOS_DLL_DECL npc_brain_yogg_saronAI : public Scripted_NoMovementAI
         if (pSummoned->GetEntry() == NPC_INFLUENCE_TENTACLE)
             m_lTentaclesGuids.remove(pSummoned->GetObjectGuid());
 
-        // open door and start casting
+        // open door and stun all tentacles
         if (m_lTentaclesGuids.empty())
         {
             DoScriptText(EMOTE_SHATTER_BLAST, m_creature);
@@ -979,6 +1038,7 @@ struct MANGOS_DLL_DECL npc_brain_yogg_saronAI : public Scripted_NoMovementAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
+        // remove stun from tentacles after 30 sec
         if (m_uiIllusionTimer)
         {
             if (m_uiIllusionTimer <= uiDiff)
@@ -988,6 +1048,23 @@ struct MANGOS_DLL_DECL npc_brain_yogg_saronAI : public Scripted_NoMovementAI
             }
             else
                 m_uiIllusionTimer -= uiDiff;
+        }
+        
+        // inform Yogg that health has dropped
+        if (!m_bBrainDefeated && m_creature->GetHealthPercent() < 30.0f)
+        {
+            m_uiIllusionTimer = 0;
+            m_bBrainDefeated = true;
+            DoCastSpellIfCan(m_creature, SPELL_BRAIN_HURT_VISUAL, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, SPELL_SHATTERED_ILLUSION_REMOVE, CAST_TRIGGERED);
+            m_creature->RemoveAurasDueToSpell(SPELL_MATCH_HEALTH);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+            
+            if (m_pInstance)
+            {
+                if (Creature* pYogg = m_pInstance->GetSingleCreatureFromStorage(NPC_YOGGSARON))
+                    SendAIEvent(AI_EVENT_START_EVENT, m_creature, pYogg);
+            }
         }
     }
 };

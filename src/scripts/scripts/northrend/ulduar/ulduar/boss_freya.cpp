@@ -56,6 +56,7 @@ enum
 
     // general spells
     SPELL_FREYA_CREDIT                  = 65074,                // kill credit spell; added in spell_template
+    SPELL_DEFORESTATION_CREDIT          = 65015,                // used for achievs 2985 and 2984
     SPELL_TELEPORT                      = 62940,                // despawn on event end
     SPELL_BERSERK                       = 47008,
     // SPELL_FREYA_DUMMY_YELLOW         = 63292,                // dummy spells used to light up the crystals; used in dbscripts_on_creature_move
