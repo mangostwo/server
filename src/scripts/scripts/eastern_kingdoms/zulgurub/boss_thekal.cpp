@@ -31,7 +31,7 @@ enum
 
     SPELL_MORTAL_CLEAVE     = 22859,
     SPELL_SILENCE           = 23207,
-    SPELL_FRENZY            = 23342,
+    SPELL_FRENZY            = 23128,
     SPELL_FORCE_PUNCH       = 24189,
     SPELL_CHARGE            = 24408,
     SPELL_ENRAGE            = 23537,
@@ -335,7 +335,7 @@ struct MANGOS_DLL_DECL boss_thekalAI : public boss_thekalBaseAI
                 if (m_uiSummonTigersTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_TIGERS) == CAST_OK)
-                        m_uiSummonTigersTimer = urand(10000, 14000);
+                        m_uiSummonTigersTimer = 50000;
                 }
                 else
                     m_uiSummonTigersTimer -= uiDiff;
