@@ -343,7 +343,7 @@ void instance_ulduar::OnObjectCreate(GameObject* pGo)
         case GO_HODIR_ENTER:
             break;
             // Mimiron
-        case G0_MIMIRON_BUTTON:
+        case GO_MIMIRON_BUTTON:
         case GO_MIMIRON_DOOR_1:
         case GO_MIMIRON_DOOR_2:
         case GO_MIMIRON_DOOR_3:
@@ -607,13 +607,13 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                 DoOpenMadnessDoorIfCan();
             }
             else if (uiData == IN_PROGRESS)
-                DoToggleGameObjectFlags(G0_MIMIRON_BUTTON, GO_FLAG_NO_INTERACT, true);
+                DoToggleGameObjectFlags(GO_MIMIRON_BUTTON, GO_FLAG_NO_INTERACT, true);
             else if (uiData == FAIL)
             {
                 // reset objects
-                DoToggleGameObjectFlags(G0_MIMIRON_BUTTON, GO_FLAG_NO_INTERACT, false);
+                DoToggleGameObjectFlags(GO_MIMIRON_BUTTON, GO_FLAG_NO_INTERACT, false);
 
-                if (GameObject* pButton = GetSingleGameObjectFromStorage(G0_MIMIRON_BUTTON))
+                if (GameObject* pButton = GetSingleGameObjectFromStorage(GO_MIMIRON_BUTTON))
                     pButton->ResetDoorOrButton();
                 if (GameObject* pElevator = GetSingleGameObjectFromStorage(GO_MIMIRON_ELEVATOR))
                     pElevator->SetGoState(GO_STATE_ACTIVE);
