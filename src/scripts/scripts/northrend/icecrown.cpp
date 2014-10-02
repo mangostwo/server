@@ -127,7 +127,7 @@ struct MANGOS_DLL_DECL npc_squad_leaderAI : public npc_escortAI
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
-            Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue), true);
+            Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue));
             SendAIEventAround(AI_EVENT_CUSTOM_A, pInvoker, 0, 12.0f);
         }
     }
@@ -476,7 +476,7 @@ struct MANGOS_DLL_DECL npc_father_kamarosAI : public npc_escortAI
         {
             m_uiCurrentQuestId = uiMiscValue;
             m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-            Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue), true);
+            Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue));
         }
     }
 

@@ -17,16 +17,18 @@
 /* ScriptData
 SDName: Storm_Peaks
 SD%Complete: 100
-SDComment: Quest support: 12977.
+SDComment: Quest support: 12831, 12977.
 SDCategory: Storm Peaks
 EndScriptData */
 
 /* ContentData
 npc_floating_spirit
 npc_restless_frostborn
+npc_injured_miner
 EndContentData */
 
 #include "precompiled.h"
+#include "escort_ai.h"
 
 /*######
 ## npc_floating_spirit
@@ -101,6 +103,127 @@ bool EffectDummyCreature_npc_restless_frostborn(Unit* pCaster, uint32 uiSpellId,
     return false;
 }
 
+
+/*######
+## npc_injured_miner
+######*/
+
+enum
+{
+    // yells
+    SAY_MINER_READY                     = -1001051,
+    SAY_MINER_COMPLETE                  = -1001052,
+
+    // gossip
+    GOSSIP_ITEM_ID_READY                = -3000112,
+    TEXT_ID_POISONED                    = 13650,
+    TEXT_ID_READY                       = 13651,
+
+    // misc
+    SPELL_FEIGN_DEATH                   = 51329,
+    QUEST_ID_BITTER_DEPARTURE           = 12832,
+};
+
+struct MANGOS_DLL_DECL npc_injured_minerAI : public npc_escortAI
+{
+    npc_injured_minerAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+
+    void Reset() override { }
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    {
+        if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
+        {
+            Start(true, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue));
+            SetEscortPaused(true);
+
+            // set alternative waypoints if required
+            if (m_creature->GetPositionX() > 6650.0f)
+                SetCurrentWaypoint(7);
+            else if (m_creature->GetPositionX() > 6635.0f)
+                SetCurrentWaypoint(35);
+
+            DoScriptText(SAY_MINER_READY, m_creature);
+            m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+            m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            m_creature->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
+            m_creature->SetFactionTemporary(FACTION_ESCORT_N_FRIEND_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
+        }
+        else if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetTypeId() == TYPEID_PLAYER)
+        {
+            SetEscortPaused(false);
+            m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        }
+    }
+
+    void WaypointReached(uint32 uiPointId) override
+    {
+        switch (uiPointId)
+        {
+            case 33:
+                DoScriptText(SAY_MINER_COMPLETE, m_creature);
+                if (Player* pPlayer = GetPlayerForEscort())
+                {
+                    pPlayer->GroupEventHappens(QUEST_ID_BITTER_DEPARTURE, m_creature);
+                    m_creature->SetFacingToObject(pPlayer);
+                }
+                break;
+            case 34:
+                m_creature->ForcedDespawn();
+                break;
+            case 46:
+                // merge with the other wp path
+                SetEscortPaused(true);
+                SetCurrentWaypoint(13);
+                SetEscortPaused(false);
+                break;
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_injured_miner(Creature* pCreature)
+{
+    return new npc_injured_minerAI(pCreature);
+}
+
+bool GossipHello_npc_injured_miner(Player* pPlayer, Creature* pCreature)
+{
+    if (pCreature->isQuestGiver())
+        pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+
+    if (!pCreature->HasAura(SPELL_FEIGN_DEATH))
+    {
+        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_READY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        pPlayer->SEND_GOSSIP_MENU(TEXT_ID_READY, pCreature->GetObjectGuid());
+        return true;
+    }
+
+    pPlayer->SEND_GOSSIP_MENU(TEXT_ID_POISONED, pCreature->GetObjectGuid());
+    return true;
+}
+
+bool GossipSelect_npc_injured_miner(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+{
+    if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+    {
+        pPlayer->CLOSE_GOSSIP_MENU();
+        pCreature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pPlayer, pCreature);
+    }
+
+    return true;
+}
+
+bool QuestAccept_npc_injured_miner(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+{
+    if (pQuest->GetQuestId() == QUEST_ID_BITTER_DEPARTURE)
+    {
+        pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
+        return true;
+    }
+
+    return false;
+}
+
 void AddSC_storm_peaks()
 {
     Script* pNewScript;
@@ -113,5 +236,13 @@ void AddSC_storm_peaks()
     pNewScript = new Script;
     pNewScript->Name = "npc_restless_frostborn";
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_restless_frostborn;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_injured_miner";
+    pNewScript->GetAI = &GetAI_npc_injured_miner;
+    pNewScript->pGossipHello = &GossipHello_npc_injured_miner;
+    pNewScript->pGossipSelect = &GossipSelect_npc_injured_miner;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_injured_miner;
     pNewScript->RegisterSelf();
 }
