@@ -670,7 +670,7 @@ CreatureAI* GetAI_npc_private_hendel(Creature* pCreature)
 
 /*#####
 ## npc_stinky_ignatz
-## TODO Note: Possible some dynamic behaviour is missing. Faction change is guessed
+## TODO Note: Faction change is guessed
 #####*/
 
 enum
@@ -680,23 +680,38 @@ enum
 
     SAY_STINKY_BEGIN                    = -1000958,
     SAY_STINKY_FIRST_STOP               = -1000959,
-    SAY_STINKY_2_MONSTERS               = -1000960,
-    SAY_STINKY_GATHERING                = -1000961,
+    SAY_STINKY_SECOND_STOP              = -1001141,
+    SAY_STINKY_THIRD_STOP_1             = -1001142,
+    SAY_STINKY_THIRD_STOP_2             = -1001143,
+    SAY_STINKY_THIRD_STOP_3             = -1001144,
+    SAY_STINKY_PLANT_GATHERED           = -1001145,
     SAY_STINKY_END                      = -1000962,
+    SAY_STINKY_AGGRO_1                  = -1000960,
+    SAY_STINKY_AGGRO_2                  = -1000961,
+    SAY_STINKY_AGGRO_3                  = -1001146,
+    SAY_STINKY_AGGRO_4                  = -1001147,
 
     GO_BOGBEAN_PLANT                    = 20939,
 };
 
 struct MANGOS_DLL_DECL npc_stinky_ignatzAI : public npc_escortAI
 {
-    npc_stinky_ignatzAI(Creature* pCreature) : npc_escortAI(pCreature)
-    {
-        Reset();
-    }
-
+    npc_stinky_ignatzAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+    
     ObjectGuid m_bogbeanPlantGuid;
 
     void Reset() override {}
+    
+    void Aggro(Unit* pWho) override
+    {
+        switch (urand(0, 3))
+        {
+            case 0: DoScriptText(SAY_STINKY_AGGRO_1, m_creature); break;
+            case 1: DoScriptText(SAY_STINKY_AGGRO_2, m_creature); break;
+            case 2: DoScriptText(SAY_STINKY_AGGRO_3, m_creature); break;
+            case 3: DoScriptText(SAY_STINKY_AGGRO_4, m_creature, pWho); break;
+        }
+    }
 
     void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
@@ -713,35 +728,46 @@ struct MANGOS_DLL_DECL npc_stinky_ignatzAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 11:
+            case 5:
                 DoScriptText(SAY_STINKY_FIRST_STOP, m_creature);
                 break;
-            case 17:
-                // TODO Note: This text would imply some waiting till two mobs are killed, such behaviour is neither confirmed nor implemented. Input welcome!
-                DoScriptText(SAY_STINKY_2_MONSTERS, m_creature);
-
+            case 10:
+                DoScriptText(SAY_STINKY_SECOND_STOP, m_creature);
+                break;
+            case 24:
+                DoScriptText(SAY_STINKY_THIRD_STOP_1, m_creature);
+                break;
+            case 25:
+                DoScriptText(SAY_STINKY_THIRD_STOP_2, m_creature);
                 if (GameObject* pBogbeanPlant = GetClosestGameObjectWithEntry(m_creature, GO_BOGBEAN_PLANT, DEFAULT_VISIBILITY_DISTANCE))
                 {
                     m_bogbeanPlantGuid = pBogbeanPlant->GetObjectGuid();
                     m_creature->SetFacingToObject(pBogbeanPlant);
                 }
-
                 break;
-            case 19:
-                DoScriptText(SAY_STINKY_GATHERING, m_creature);
-                break;
-            case 24:
+            case 26:
                 if (Player* pPlayer = GetPlayerForEscort())
+                    DoScriptText(SAY_STINKY_THIRD_STOP_3, m_creature, pPlayer);
+                break;
+            case 29:
+                m_creature->HandleEmote(EMOTE_STATE_USESTANDING);
+                break;
+            case 30:
+                DoScriptText(SAY_STINKY_PLANT_GATHERED, m_creature);
+                break;
+            case 39:
+                if (Player* pPlayer = GetPlayerForEscort())
+                {
                     pPlayer->GroupEventHappens(pPlayer->GetTeam() == ALLIANCE ? QUEST_ID_STINKYS_ESCAPE_ALLIANCE : QUEST_ID_STINKYS_ESCAPE_HORDE, m_creature);
-
-                DoScriptText(SAY_STINKY_END, m_creature);
+                    DoScriptText(SAY_STINKY_END, m_creature, pPlayer);
+                }
                 break;
         }
     }
 
     void WaypointStart(uint32 uiPointId)
     {
-        if (uiPointId == 20)
+        if (uiPointId == 30)
         {
             if (GameObject* pBogbeanPlant = m_creature->GetMap()->GetGameObject(m_bogbeanPlantGuid))
                 pBogbeanPlant->Use(m_creature);
