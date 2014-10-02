@@ -17,12 +17,13 @@
 /* ScriptData
 SDName: Dragonblight
 SD%Complete: 100
-SDComment: Quest support: 12166, 12261.
+SDComment: Quest support: 12075, 12166, 12261.
 SDCategory: Dragonblight
 EndScriptData */
 
 /* ContentData
 npc_destructive_ward
+npc_crystalline_ice_giant
 EndContentData */
 
 #include "precompiled.h"
@@ -164,6 +165,34 @@ CreatureAI* GetAI_npc_destructive_ward(Creature* pCreature)
     return new npc_destructive_wardAI(pCreature);
 }
 
+/*######
+## npc_crystalline_ice_giant
+######*/
+
+enum
+{
+    SPELL_FEIGN_DEATH_PERMANENT     = 31261,
+    ITEM_ID_SAMPLE_ROCKFLESH        = 36765,
+    NPC_CRYSTALLINE_GIANT           = 26809,
+};
+
+bool NpcSpellClick_npc_crystalline_ice_giant(Player* pPlayer, Creature* pClickedCreature, uint32 /*uiSpellId*/)
+{
+    if (pClickedCreature->GetEntry() == NPC_CRYSTALLINE_GIANT && pClickedCreature->HasAura(SPELL_FEIGN_DEATH_PERMANENT))
+    {
+        if (Item* pItem = pPlayer->StoreNewItemInInventorySlot(ITEM_ID_SAMPLE_ROCKFLESH, 1))
+        {
+            pPlayer->SendNewItem(pItem, 1, true, false);
+            pClickedCreature->ForcedDespawn();
+
+            // always return true when handled special npc spell click
+            return true;
+        }
+    }
+
+    return true;
+}
+
 void AddSC_dragonblight()
 {
     Script* pNewScript;
@@ -171,5 +200,10 @@ void AddSC_dragonblight()
     pNewScript = new Script;
     pNewScript->Name = "npc_destructive_ward";
     pNewScript->GetAI = &GetAI_npc_destructive_ward;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_crystalline_ice_giant";
+    pNewScript->pNpcSpellClick = &NpcSpellClick_npc_crystalline_ice_giant;
     pNewScript->RegisterSelf();
 }
