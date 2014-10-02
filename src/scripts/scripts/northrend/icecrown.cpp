@@ -17,13 +17,14 @@
 /* ScriptData
 SDName: Icecrown
 SD%Complete: 100
-SDComment: Quest support: 13284, 13301.
+SDComment: Quest support: 13221, 13229, 13284, 13301, 13481, 13482.
 SDCategory: Icecrown
 EndScriptData */
 
 /* ContentData
 npc_squad_leader
 npc_infantry
+npc_father_kamaros
 EndContentData */
 
 #include "precompiled.h"
@@ -401,6 +402,160 @@ CreatureAI* GetAI_npc_infantry(Creature* pCreature)
     return new npc_infantryAI(pCreature);
 }
 
+/*######
+## npc_father_kamaros
+######*/
+
+enum
+{
+    // yells
+    SAY_KAMAROS_START_1                 = -1001044,
+    SAY_KAMAROS_START_2                 = -1001045,
+    SAY_KAMAROS_AGGRO_1                 = -1001046,
+    SAY_KAMAROS_AGGRO_2                 = -1001047,
+    SAY_KAMAROS_AGGRO_3                 = -1001048,
+    SAY_KAMAROS_COMPLETE_1              = -1001050,
+    SAY_KAMAROS_COMPLETE_2              = -1001049,
+
+    // combat spells
+    SPELL_HOLY_SMITE                    = 25054,
+    SPELL_POWER_WORD_FORTITUDE          = 58921,
+    SPELL_POWER_WORD_SHIELD             = 32595,
+    SPELL_SHADOW_WORD_PAIN              = 17146,
+
+    NPC_SPIKED_GHOUL                    = 30597,
+    NPC_KAMAROS_1                       = 31279,                    // phase 1 npc
+    NPC_KAMAROS_2                       = 32800,                    // phase 64 npc
+
+    // quests
+    // all four quests have the same script;
+    // they depend only on faction and quest giver (same npc, different entries in different phases);
+    QUEST_ID_NOT_DEAD_YET_A             = 13221,
+    QUEST_ID_NOT_DEAD_YET_H             = 13229,
+    QUEST_ID_GET_OUT_OF_HERE_A          = 13482,
+    QUEST_ID_GET_OUT_OF_HERE_H          = 13481,
+};
+
+struct MANGOS_DLL_DECL npc_father_kamarosAI : public npc_escortAI
+{
+    npc_father_kamarosAI(Creature* pCreature) : npc_escortAI(pCreature)
+    {
+        Reset();
+        m_uiCurrentQuestId = 0;
+    }
+
+    uint32 m_uiSmiteTimer;
+    uint32 m_uiShadowWordTimer;
+    uint32 m_uiCurrentQuestId;
+
+    void Reset() override
+    {
+        m_uiSmiteTimer = urand(3000, 5000);
+        m_uiShadowWordTimer = urand(1000, 3000);
+    }
+
+    void Aggro(Unit* /*pWho*/) override
+    {
+        switch (urand(0, 2))
+        {
+            case 0: DoScriptText(SAY_KAMAROS_AGGRO_1, m_creature); break;
+            case 1: DoScriptText(SAY_KAMAROS_AGGRO_2, m_creature); break;
+            case 2: DoScriptText(SAY_KAMAROS_AGGRO_3, m_creature); break;
+        }
+
+        if (DoCastSpellIfCan(m_creature, SPELL_POWER_WORD_SHIELD) != CAST_OK)
+        {
+            if (Player* pPlayer = GetPlayerForEscort())
+                DoCastSpellIfCan(pPlayer, SPELL_POWER_WORD_SHIELD);
+        }
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    {
+        if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
+        {
+            m_uiCurrentQuestId = uiMiscValue;
+            m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+            Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue), true);
+        }
+    }
+
+    void WaypointReached(uint32 uiPointId) override
+    {
+        switch (uiPointId)
+        {
+            case 0:
+                if (Player* pPlayer = GetPlayerForEscort())
+                {
+                    DoScriptText(SAY_KAMAROS_START_1, m_creature, pPlayer);
+                    DoCastSpellIfCan(pPlayer, SPELL_POWER_WORD_FORTITUDE);
+                }
+                break;
+            case 1:
+                DoScriptText(SAY_KAMAROS_START_2, m_creature);
+                break;
+            case 11:
+            case 13:
+            case 16:
+                if (Creature* pGhoul = GetClosestCreatureWithEntry(m_creature, NPC_SPIKED_GHOUL, 25.0f))
+                    pGhoul->AI()->AttackStart(m_creature);
+                break;
+            case 23:
+                if (Player* pPlayer = GetPlayerForEscort())
+                    m_creature->SetFacingToObject(pPlayer);
+                DoScriptText(SAY_KAMAROS_COMPLETE_1, m_creature);
+                break;
+            case 24:
+                SetRun();
+                DoScriptText(SAY_KAMAROS_COMPLETE_2, m_creature);
+                if (Player* pPlayer = GetPlayerForEscort())
+                    pPlayer->GroupEventHappens(m_uiCurrentQuestId, m_creature);
+                break;
+        }
+    }
+
+    void UpdateEscortAI(const uint32 uiDiff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_uiSmiteTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HOLY_SMITE) == CAST_OK)
+                m_uiSmiteTimer = urand(3000, 4000);
+        }
+        else
+            m_uiSmiteTimer -= uiDiff;
+
+        if (m_uiShadowWordTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOW_WORD_PAIN) == CAST_OK)
+                m_uiShadowWordTimer = urand(15000, 20000);
+        }
+        else
+            m_uiShadowWordTimer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_father_kamaros(Creature* pCreature)
+{
+    return new npc_father_kamarosAI(pCreature);
+}
+
+bool QuestAccept_npc_father_kamaros(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+{
+    if (pQuest->GetQuestId() == QUEST_ID_NOT_DEAD_YET_A || pQuest->GetQuestId() == QUEST_ID_NOT_DEAD_YET_H ||
+        pQuest->GetQuestId() == QUEST_ID_GET_OUT_OF_HERE_A || pQuest->GetQuestId() == QUEST_ID_GET_OUT_OF_HERE_H)
+    {
+        pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
+        return true;
+    }
+
+    return false;
+}
+
 void AddSC_icecrown()
 {
     Script* pNewScript;
@@ -414,5 +569,11 @@ void AddSC_icecrown()
     pNewScript = new Script;
     pNewScript->Name = "npc_infantry";
     pNewScript->GetAI = &GetAI_npc_infantry;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_father_kamaros";
+    pNewScript->GetAI = &GetAI_npc_father_kamaros;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_father_kamaros;
     pNewScript->RegisterSelf();
 }
