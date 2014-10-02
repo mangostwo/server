@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Dustwallow_Marsh
 SD%Complete: 95
-SDComment: Quest support: 1173, 1222, 1270, 1273, 1324, 11209, 11180.
+SDComment: Quest support: 1173, 1222, 1270, 1273, 1324, 11180, 11198, 11209.
 SDCategory: Dustwallow Marsh
 EndScriptData */
 
@@ -29,10 +29,12 @@ npc_ogron
 npc_private_hendel
 npc_stinky_ignatz
 at_nats_landing
+boss_tethyr
 EndContentData */
 
 #include "precompiled.h"
 #include "escort_ai.h"
+#include "TemporarySummon.h"
 
 /*######
 ## mobs_risen_husk_spirit
@@ -787,6 +789,252 @@ bool AreaTrigger_at_nats_landing(Player* pPlayer, const AreaTriggerEntry* /*pAt*
     return true;
 }
 
+/*######
+## boss_tethyr
+######*/
+
+enum
+{
+    SPELL_WATER_BOLT            = 42574,
+    SPELL_SPOUT_LEFT            = 42581,                // triggers 42584
+    SPELL_SPOUT_RIGHT           = 42582,
+    SPELL_CANNON_BLAST          = 42578,                // triggers 42576
+    SPELL_CANNON_BLAST_DMG      = 42576,
+
+    NPC_TETHYR                  = 23899,
+    NPC_THERAMORE_MARKSMAN      = 23900,
+    NPC_THERAMORE_CANNON        = 23907,
+
+    GO_COVE_CANNON              = 186432,               // cast 42578
+    QUEST_ID_TETHYR             = 11198,
+
+    WORLD_STATE_TETHYR_SHOW     = 3083,
+    WORLD_STATE_TETHYR_COUNT    = 3082,
+
+    MAX_MARKSMEN                = 12,
+    PHASE_NORMAL                = 1,
+    PHASE_SPOUT                 = 2,
+};
+
+struct MANGOS_DLL_DECL boss_tethyrAI : public Scripted_NoMovementAI
+{
+    boss_tethyrAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    {
+        // send world states to player summoner
+        if (m_creature->IsTemporarySummon())
+            m_summonerGuid = ((TemporarySummon*)m_creature)->GetSummonerGuid();
+
+        if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_summonerGuid))
+        {
+            pPlayer->SendUpdateWorldState(WORLD_STATE_TETHYR_SHOW, 1);
+            pPlayer->SendUpdateWorldState(WORLD_STATE_TETHYR_COUNT, MAX_MARKSMEN);
+        }
+
+        m_creature->SetLevitate(true);
+        Reset();
+    }
+
+    ObjectGuid m_summonerGuid;
+
+    uint8 m_uiPhase;
+    uint8 m_uiMarksmenKilled;
+    uint32 m_uiWaterBoltTimer;
+    uint32 m_uiSpoutEndTimer;
+
+    void Reset() override
+    {
+        m_uiPhase           = PHASE_NORMAL;
+        m_uiMarksmenKilled  = 0;
+        m_uiWaterBoltTimer  = urand(0, 1000);
+        m_uiSpoutEndTimer   = 7000;
+    }
+
+    void JustReachedHome() override
+    {
+        // cleanup
+        DoEncounterCleanup();
+        m_creature->ForcedDespawn(5000);
+    }
+
+    void JustDied(Unit* /*pVictim*/) override
+    {
+        // quest complete and cleanup
+        if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_summonerGuid))
+            pSummoner->GroupEventHappens(QUEST_ID_TETHYR, m_creature);
+
+        // ToDo: trigger some fireworks!
+        DoEncounterCleanup();
+    }
+
+    void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
+    {
+        if (uiMotionType == WAYPOINT_MOTION_TYPE)
+        {
+            // start attacking
+            if (uiPointId == 12)
+            {
+                // make cannons usable
+                std::list<GameObject*> lCannonsInRange;
+                GetGameObjectListWithEntryInGrid(lCannonsInRange, m_creature, GO_COVE_CANNON, 100.0f);
+
+                for (std::list<GameObject*>::const_iterator itr = lCannonsInRange.begin(); itr != lCannonsInRange.end(); ++itr)
+                    (*itr)->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+
+                // attack all marksmen
+                std::list<Creature*> lMarksmenInRange;
+                GetCreatureListWithEntryInGrid(lMarksmenInRange, m_creature, NPC_THERAMORE_MARKSMAN, 100.0f);
+
+                for (std::list<Creature*>::const_iterator itr = lMarksmenInRange.begin(); itr != lMarksmenInRange.end(); ++itr)
+                {
+                    (*itr)->AI()->AttackStart(m_creature);
+                    AttackStart(*itr);
+                }
+            }
+        }
+        else if (uiMotionType == POINT_MOTION_TYPE)
+        {
+            // Spout on cannon point reach
+            if (uiPointId)
+            {
+                if (DoCastSpellIfCan(m_creature, urand(0, 1) ? SPELL_SPOUT_LEFT : SPELL_SPOUT_RIGHT, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                {
+                    // Remove the target focus
+                    m_creature->SetTargetGuid(ObjectGuid());
+                    m_uiPhase = PHASE_SPOUT;
+                }
+            }
+        }
+    }
+
+    void KilledUnit(Unit* pVictim) override
+    {
+        // count the marksmen
+        if (pVictim->GetEntry() != NPC_THERAMORE_MARKSMAN)
+            return;
+
+        ++m_uiMarksmenKilled;
+
+        // update world state
+        if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_summonerGuid))
+        {
+            pSummoner->SendUpdateWorldState(WORLD_STATE_TETHYR_COUNT, MAX_MARKSMEN - m_uiMarksmenKilled);
+
+            // fail quest if all marksmen are killed
+            if (m_uiMarksmenKilled == MAX_MARKSMEN)
+            {
+                pSummoner->FailQuest(QUEST_ID_TETHYR);
+                EnterEvadeMode();
+            }
+        }
+    }
+
+    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
+    {
+        // spout on cannon
+        if (pCaster->GetEntry() == NPC_THERAMORE_CANNON && pSpell->Id == SPELL_CANNON_BLAST_DMG)
+        {
+            if (m_uiPhase == PHASE_SPOUT)
+                return;
+
+            // not all cannons have same distance range
+            uint8 uiDistMod = pCaster->GetPositionY() > -4650.0f ? 6 : 5;
+
+            float fX, fY, fZ;
+            pCaster->GetContactPoint(m_creature, fX, fY, fZ, uiDistMod * ATTACK_DISTANCE);
+            m_creature->GetMotionMaster()->MovePoint(1, fX, fY, m_creature->GetPositionZ());
+
+            m_uiWaterBoltTimer = 10000;
+        }
+    }
+
+    // function to cleanup the world states and GO flags
+    void DoEncounterCleanup()
+    {
+        // remove world state
+        if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_summonerGuid))
+            pSummoner->SendUpdateWorldState(WORLD_STATE_TETHYR_SHOW, 0);
+
+        // reset all cannons
+        std::list<GameObject*> lCannonsInRange;
+        GetGameObjectListWithEntryInGrid(lCannonsInRange, m_creature, GO_COVE_CANNON, 100.0f);
+
+        for (std::list<GameObject*>::const_iterator itr = lCannonsInRange.begin(); itr != lCannonsInRange.end(); ++itr)
+            (*itr)->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+
+        // despawn all marksmen
+        std::list<Creature*> lMarksmenInRange;
+        GetCreatureListWithEntryInGrid(lMarksmenInRange, m_creature, NPC_THERAMORE_MARKSMAN, 100.0f);
+
+        for (std::list<Creature*>::const_iterator itr = lMarksmenInRange.begin(); itr != lMarksmenInRange.end(); ++itr)
+            (*itr)->ForcedDespawn(30000);
+    }
+
+    // Custom threat management
+    bool SelectCustomHostileTarget()
+    {
+        // Not started combat or evading prevented
+        if (!m_creature->isInCombat() || m_creature->HasAuraType(SPELL_AURA_MOD_TAUNT))
+            return false;
+
+        // Check if there are still enemies (marksmen) in the threatList
+        ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
+        for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+        {
+            if ((*itr)->getUnitGuid().IsCreature())
+                return true;
+        }
+
+        EnterEvadeMode();
+        return false;
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (!SelectCustomHostileTarget())
+            return;
+
+        if (m_uiPhase == PHASE_SPOUT)
+        {
+            if (m_uiSpoutEndTimer < uiDiff)
+            {
+                // Remove rotation auras
+                m_creature->RemoveAurasDueToSpell(SPELL_SPOUT_LEFT);
+                m_creature->RemoveAurasDueToSpell(SPELL_SPOUT_RIGHT);
+
+                m_uiPhase = PHASE_NORMAL;
+                m_uiSpoutEndTimer = 7000;
+                m_uiWaterBoltTimer = urand(0, 1000);
+            }
+            else
+                m_uiSpoutEndTimer -= uiDiff;
+        }
+        else if (m_uiPhase == PHASE_NORMAL)
+        {
+            if (m_uiWaterBoltTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_WATER_BOLT) == CAST_OK)
+                    {
+                        // mimic boss turning because of the missing threat system
+                        m_creature->SetTargetGuid(pTarget->GetObjectGuid());
+                        m_creature->SetInFront(pTarget);
+
+                        m_uiWaterBoltTimer = urand(0, 1000);
+                    }
+                }
+            }
+            else
+                m_uiWaterBoltTimer -= uiDiff;
+        }
+    }
+};
+
+CreatureAI* GetAI_boss_tethyr(Creature* pCreature)
+{
+    return new boss_tethyrAI(pCreature);
+}
+
 void AddSC_dustwallow_marsh()
 {
     Script* pNewScript;
@@ -828,5 +1076,10 @@ void AddSC_dustwallow_marsh()
     pNewScript = new Script;
     pNewScript->Name = "at_nats_landing";
     pNewScript->pAreaTrigger = &AreaTrigger_at_nats_landing;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "boss_tethyr";
+    pNewScript->GetAI = &GetAI_boss_tethyr;
     pNewScript->RegisterSelf();
 }
