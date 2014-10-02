@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Felwood
 SD%Complete: 95
-SDComment: Quest support: 4506, 5203, 7603, 7603 (Summon Pollo Grande)
+SDComment: Quest support: 4261, 4506, 5203, 7603, 7603 (Summon Pollo Grande)
 SDCategory: Felwood
 EndScriptData */
 
@@ -26,6 +26,7 @@ npc_kitten
 npc_niby_the_almighty
 npc_kroshius
 npc_captured_arkonarin
+npc_arei
 EndContentData */
 
 #include "precompiled.h"
@@ -590,6 +591,191 @@ bool QuestAccept_npc_captured_arkonarin(Player* pPlayer, Creature* pCreature, co
     return true;
 }
 
+/*####
+# npc_arei
+####*/
+
+enum
+{
+    SAY_AREI_ESCORT_START           = -1001159,
+    SAY_ATTACK_IRONTREE             = -1001160,
+    SAY_ATTACK_TOXIC_HORROR         = -1001161,
+    SAY_EXIT_WOODS                  = -1001162,
+    SAY_CLEAR_PATH                  = -1001163,
+    SAY_ASHENVALE                   = -1001164,
+    SAY_TRANSFORM                   = -1001165,
+    SAY_LIFT_CURSE                  = -1001166,
+    SAY_AREI_ESCORT_COMPLETE        = -1001167,
+
+    SPELL_WITHER_STRIKE             = 5337,
+    SPELL_AREI_TRANSFORM            = 14888,
+
+    NPC_AREI                        = 9598,
+    NPC_TOXIC_HORROR                = 7132,
+    NPC_IRONTREE_WANDERER           = 7138,
+    NPC_IRONTREE_STOMPER            = 7139,
+    QUEST_ID_ANCIENT_SPIRIT         = 4261,
+};
+
+static const DialogueEntry aEpilogDialogue[] =
+{
+    {SAY_CLEAR_PATH,            NPC_AREI,   4000},
+    {SPELL_WITHER_STRIKE,       0,          5000},
+    {SAY_TRANSFORM,             NPC_AREI,   3000},
+    {SPELL_AREI_TRANSFORM,      0,          7000},
+    {QUEST_ID_ANCIENT_SPIRIT,   0,          0},
+    {0, 0, 0},
+};
+
+struct MANGOS_DLL_DECL npc_areiAI : public npc_escortAI, private DialogueHelper
+{
+    npc_areiAI(Creature* pCreature) : npc_escortAI(pCreature),
+        DialogueHelper(aEpilogDialogue)
+    {
+        m_bAggroIrontree = false;
+        m_bAggroHorror = false;
+        Reset();
+    }
+
+    uint32 m_uiWitherStrikeTimer;
+
+    bool m_bAggroIrontree;
+    bool m_bAggroHorror;
+
+    GuidList m_lSummonsGuids;
+
+    void Reset() override
+    {
+        m_uiWitherStrikeTimer = urand(1000, 4000);
+    }
+
+    void Aggro(Unit* pWho) override
+    {
+        if ((pWho->GetEntry() == NPC_IRONTREE_WANDERER || pWho->GetEntry() == NPC_IRONTREE_STOMPER) && !m_bAggroIrontree)
+        {
+            DoScriptText(SAY_ATTACK_IRONTREE, m_creature);
+            m_bAggroIrontree = true;
+        }
+        else if (pWho->GetEntry() == NPC_TOXIC_HORROR && ! m_bAggroHorror)
+        {
+            if (Player* pPlayer = GetPlayerForEscort())
+                DoScriptText(SAY_ATTACK_TOXIC_HORROR, m_creature, pPlayer);
+            m_bAggroHorror = true;
+        }
+    }
+
+    void JustSummoned(Creature* pSummoned) override
+    {
+        switch (pSummoned->GetEntry())
+        {
+            case NPC_IRONTREE_STOMPER:
+                DoScriptText(SAY_EXIT_WOODS, m_creature, pSummoned);
+                // no break;
+            case NPC_IRONTREE_WANDERER:
+                pSummoned->AI()->AttackStart(m_creature);
+                m_lSummonsGuids.push_back(pSummoned->GetObjectGuid());
+                break;
+        }
+    }
+
+    void SummonedCreatureJustDied(Creature* pSummoned) override
+    {
+        if (pSummoned->GetEntry() == NPC_IRONTREE_STOMPER || pSummoned->GetEntry() == NPC_IRONTREE_WANDERER)
+        {
+            m_lSummonsGuids.remove(pSummoned->GetObjectGuid());
+
+            if (m_lSummonsGuids.empty())
+                StartNextDialogueText(SAY_CLEAR_PATH);
+        }
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    {
+        if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
+        {
+            DoScriptText(SAY_AREI_ESCORT_START, m_creature, pInvoker);
+
+            m_creature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
+            Start(true, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue));
+        }
+    }
+
+    void WaypointReached(uint32 uiPointId) override
+    {
+        if (uiPointId == 36)
+        {
+            SetEscortPaused(true);
+
+            m_creature->SummonCreature(NPC_IRONTREE_STOMPER, 6573.321f, -1195.213f, 442.489f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+            m_creature->SummonCreature(NPC_IRONTREE_WANDERER, 6573.240f, -1213.475f, 443.643f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+            m_creature->SummonCreature(NPC_IRONTREE_WANDERER, 6583.354f, -1209.811f, 444.769f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+        }
+    }
+
+    Creature* GetSpeakerByEntry(uint32 uiEntry) override
+    {
+        if (uiEntry == NPC_AREI)
+            return m_creature;
+
+        return NULL;
+    }
+
+    void JustDidDialogueStep(int32 iEntry) override
+    {
+        switch (iEntry)
+        {
+            case SPELL_WITHER_STRIKE:
+                if (Player* pPlayer = GetPlayerForEscort())
+                    DoScriptText(SAY_ASHENVALE, m_creature, pPlayer);
+                break;
+            case SPELL_AREI_TRANSFORM:
+                DoCastSpellIfCan(m_creature, SPELL_AREI_TRANSFORM);
+                if (Player* pPlayer = GetPlayerForEscort())
+                    DoScriptText(SAY_LIFT_CURSE, m_creature, pPlayer);
+                break;
+            case QUEST_ID_ANCIENT_SPIRIT:
+                if (Player* pPlayer = GetPlayerForEscort())
+                {
+                    DoScriptText(SAY_AREI_ESCORT_COMPLETE, m_creature, pPlayer);
+                    pPlayer->GroupEventHappens(QUEST_ID_ANCIENT_SPIRIT, m_creature);
+                    m_creature->ForcedDespawn(10000);
+                }
+                break;
+        }
+    }
+
+    void UpdateEscortAI(const uint32 uiDiff) override
+    {
+        DialogueUpdate(uiDiff);
+
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_uiWitherStrikeTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_WITHER_STRIKE) == CAST_OK)
+                m_uiWitherStrikeTimer = urand(3000, 6000);
+        }
+        else
+            m_uiWitherStrikeTimer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_arei(Creature* pCreature)
+{
+    return new npc_areiAI(pCreature);
+}
+
+bool QuestAccept_npc_arei(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+{
+    if (pQuest->GetQuestId() == QUEST_ID_ANCIENT_SPIRIT)
+        pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
+
+    return true;
+}
+
 void AddSC_felwood()
 {
     Script* pNewScript;
@@ -622,5 +808,11 @@ void AddSC_felwood()
     pNewScript->Name = "npc_captured_arkonarin";
     pNewScript->GetAI = &GetAI_npc_captured_arkonarin;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_captured_arkonarin;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_arei";
+    pNewScript->GetAI = &GetAI_npc_arei;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_arei;
     pNewScript->RegisterSelf();
 }
