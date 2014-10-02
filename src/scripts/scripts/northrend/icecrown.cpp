@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Icecrown
 SD%Complete: 100
-SDComment: Quest support: 13221, 13229, 13284, 13301, 13481, 13482.
+SDComment: Quest support: 13221, 13229, 13284, 13300, 13301, 13302, 13481, 13482.
 SDCategory: Icecrown
 EndScriptData */
 
@@ -25,6 +25,7 @@ EndScriptData */
 npc_squad_leader
 npc_infantry
 npc_father_kamaros
+npc_saronite_mine_slave
 EndContentData */
 
 #include "precompiled.h"
@@ -556,6 +557,103 @@ bool QuestAccept_npc_father_kamaros(Player* pPlayer, Creature* pCreature, const 
     return false;
 }
 
+/*######
+## npc_saronite_mine_slave
+######*/
+
+enum
+{
+    SAY_MINER_SUICIDE_1                 = -1001117,
+    SAY_MINER_SUICIDE_2                 = -1001118,
+    SAY_MINER_SUICIDE_3                 = -1001119,
+    SAY_MINER_SUICIDE_4                 = -1001120,
+    SAY_MINER_SUICIDE_5                 = -1001121,
+    SAY_MINER_SUICIDE_6                 = -1001122,
+    SAY_MINER_SUICIDE_7                 = -1001123,
+    SAY_MINER_SUICIDE_8                 = -1001124,
+
+    GOSSIP_ITEM_SLAVE_FREE              = -3000113,
+    TEXT_ID                             = 14068,
+
+    NPC_SARONITE_KILL_CREDIT_BUNNY      = 31866,
+
+    FACTION_HOSTILE                     = 14,
+
+    QUEST_SLAVES_TO_SARONITE_A          = 13300,
+    QUEST_SLAVES_TO_SARONITE_H          = 13302,
+};
+
+static const float afPointSlaveSalvation[3] = {7030.59f, 1866.73f, 533.94f};
+static const float afPointSlaveSuicide1[3] = {6965.99f, 2051.44f, 519.49f};
+static const float afPointSlaveSuicide2[3] = {6920.47f, 1973.46f, 523.38f};
+static const float afPointSlaveSuicide3[3] = {6915.35f, 2026.35f, 518.53f};
+
+bool GossipHello_npc_saronite_mine_slave(Player* pPlayer, Creature* pCreature)
+{
+    if (pPlayer->GetQuestStatus(QUEST_SLAVES_TO_SARONITE_A) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(QUEST_SLAVES_TO_SARONITE_H) == QUEST_STATUS_INCOMPLETE)
+        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_SLAVE_FREE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+
+    pPlayer->SEND_GOSSIP_MENU(TEXT_ID, pCreature->GetObjectGuid());
+    return true;
+}
+
+bool GossipSelect_npc_saronite_mine_slave(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+{
+    if (uiAction != GOSSIP_ACTION_INFO_DEF + 1)
+        return false;
+
+    pPlayer->CLOSE_GOSSIP_MENU();
+
+    switch (urand(0, 5))
+    {
+        case 0:
+        case 1:
+        case 2:
+            pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            pPlayer->KilledMonsterCredit(NPC_SARONITE_KILL_CREDIT_BUNNY);
+
+            pCreature->SetWalk(false);
+            pCreature->GetMotionMaster()->MovePoint(0, afPointSlaveSalvation[0], afPointSlaveSalvation[1], afPointSlaveSalvation[2]);
+            pCreature->ForcedDespawn(20000);
+            break;
+        case 3:
+        case 4:
+            pCreature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_REACH_HOME);
+            pCreature->AI()->AttackStart(pPlayer);
+            break;
+        case 5:
+            switch (urand(0, 7))
+            {
+                case 0: DoScriptText(SAY_MINER_SUICIDE_1, pCreature); break;
+                case 1: DoScriptText(SAY_MINER_SUICIDE_2, pCreature); break;
+                case 2: DoScriptText(SAY_MINER_SUICIDE_3, pCreature); break;
+                case 3: DoScriptText(SAY_MINER_SUICIDE_4, pCreature); break;
+                case 4: DoScriptText(SAY_MINER_SUICIDE_5, pCreature); break;
+                case 5: DoScriptText(SAY_MINER_SUICIDE_6, pCreature); break;
+                case 6: DoScriptText(SAY_MINER_SUICIDE_7, pCreature); break;
+                case 7: DoScriptText(SAY_MINER_SUICIDE_8, pCreature); break;
+            }
+
+            pCreature->SetWalk(false);
+            switch (urand(0, 2))
+            {
+                case 0:
+                    pCreature->GetMotionMaster()->MovePoint(0, afPointSlaveSuicide1[0], afPointSlaveSuicide1[1], afPointSlaveSuicide1[2]);
+                    break;
+                case 1:
+                    pCreature->GetMotionMaster()->MovePoint(0, afPointSlaveSuicide2[0], afPointSlaveSuicide2[1], afPointSlaveSuicide2[2]);
+                    break;
+                 case 2:
+                    pCreature->GetMotionMaster()->MovePoint(0, afPointSlaveSuicide3[0], afPointSlaveSuicide3[1], afPointSlaveSuicide3[2]);
+                    break;
+            }
+            pCreature->ForcedDespawn(20000);
+            break;
+    }
+
+    return true;
+}
+
 void AddSC_icecrown()
 {
     Script* pNewScript;
@@ -575,5 +673,11 @@ void AddSC_icecrown()
     pNewScript->Name = "npc_father_kamaros";
     pNewScript->GetAI = &GetAI_npc_father_kamaros;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_father_kamaros;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_saronite_mine_slave";
+    pNewScript->pGossipHello = &GossipHello_npc_saronite_mine_slave;
+    pNewScript->pGossipSelect = &GossipSelect_npc_saronite_mine_slave;
     pNewScript->RegisterSelf();
 }
