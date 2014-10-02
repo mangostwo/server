@@ -73,6 +73,14 @@ void instance_temple_of_ahnqiraj::DoHandleTempleAreaTrigger(uint32 uiTriggerId)
             pEye->ForcedDespawn(1000);
         m_bIsEmperorsIntroDone = true;
     }
+    else if (uiTriggerId == AREATRIGGER_SARTURA)
+    {
+        if (GetData(TYPE_SARTURA) == NOT_STARTED || GetData(TYPE_SARTURA) == FAIL)
+        {
+            if (Creature* pSartura = GetSingleCreatureFromStorage(NPC_SARTURA))
+                pSartura->SetInCombatWithZone();
+        }
+    }
 }
 
 void instance_temple_of_ahnqiraj::OnCreatureCreate(Creature* pCreature)
@@ -83,6 +91,7 @@ void instance_temple_of_ahnqiraj::OnCreatureCreate(Creature* pCreature)
             // Don't store the summoned images guid
             if (GetData(TYPE_SKERAM) == IN_PROGRESS)
                 break;
+        case NPC_SARTURA:
         case NPC_VEKLOR:
         case NPC_VEKNILASH:
         case NPC_MASTERS_EYE:
@@ -265,7 +274,7 @@ InstanceData* GetInstanceData_instance_temple_of_ahnqiraj(Map* pMap)
 
 bool AreaTrigger_at_temple_ahnqiraj(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
-    if (pAt->id == AREATRIGGER_TWIN_EMPERORS)
+    if (pAt->id == AREATRIGGER_TWIN_EMPERORS || pAt->id == AREATRIGGER_SARTURA)
     {
         if (pPlayer->isGameMaster() || !pPlayer->IsAlive())
             return false;

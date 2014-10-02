@@ -23,6 +23,7 @@ enum
     // NPC_KRI                   = 15511,
     // NPC_VEM                   = 15544,
     // NPC_YAUJ                  = 15543,
+    NPC_SARTURA                 = 15516,
     NPC_VEKLOR                  = 15276,
     NPC_VEKNILASH               = 15275,
     NPC_MASTERS_EYE             = 15963,
@@ -54,6 +55,7 @@ enum
     SAY_CTHUN_WHISPER_8         = -1531040,
 
     AREATRIGGER_TWIN_EMPERORS   = 4047,
+    AREATRIGGER_SARTURA         = 4052,
 
     SPELL_SUMMON_PLAYER         = 20477,
 
