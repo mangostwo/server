@@ -248,7 +248,7 @@ struct Loot
         LootItemList items;
         uint32 gold;
         uint8 unlootedCount;
-        LootType loot_type;                                 // required for for proper item loot finish (store internal loot types in different from 3.x version, in fact this meaning that it send same loot types for interesting cases like 3.x version code, skip pre-3.x client loot type limitaitons)
+		LootType loot_type;                                 // required for for proper item loot finish (store internal loot types in different from 3.x version, in fact this meaning that it send same loot types for interesting cases like 3.x version code, skip pre-3.x client loot type limitaitons)
 
         Loot(WorldObject const* lootTarget, uint32 _gold = 0) : gold(_gold), unlootedCount(0), loot_type(LOOT_CORPSE), m_lootTarget(lootTarget) {}
         ~Loot() { clear(); }
@@ -263,15 +263,15 @@ struct Loot
         void clear()
         {
             for (QuestItemMap::const_iterator itr = m_playerQuestItems.begin(); itr != m_playerQuestItems.end(); ++itr)
-                delete itr->second;
+                { delete itr->second; }
             m_playerQuestItems.clear();
 
             for (QuestItemMap::const_iterator itr = m_playerFFAItems.begin(); itr != m_playerFFAItems.end(); ++itr)
-                delete itr->second;
+                { delete itr->second; }
             m_playerFFAItems.clear();
 
             for (QuestItemMap::const_iterator itr = m_playerNonQuestNonFFAConditionalItems.begin(); itr != m_playerNonQuestNonFFAConditionalItems.end(); ++itr)
-                delete itr->second;
+                { delete itr->second; }
             m_playerNonQuestNonFFAConditionalItems.clear();
 
             m_playersLooting.clear();
