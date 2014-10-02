@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Sholazar_Basin
 SD%Complete: 100
-SDComment: Quest support: 12570, 12580, 12688
+SDComment: Quest support: 12570, 12580, 12644, 12688
 SDCategory: Sholazar Basin
 EndScriptData */
 
@@ -25,6 +25,9 @@ EndScriptData */
 npc_helice
 npc_injured_rainspeaker
 npc_mosswalker_victim
+npc_tipsy_mcmanus
+npc_wants_fruit_credit
+go_quest_still_at_it_credit
 EndContentData */
 
 #include "precompiled.h"
@@ -408,6 +411,277 @@ bool GossipSelect_npc_mosswalker_victim(Player* pPlayer, Creature* pCreature, ui
     return true;
 }
 
+/*######
+## npc_tipsy_mcmanus
+######*/
+
+enum
+{
+    SAY_DISTILLATION_START          = -1001125,
+    SAY_ADD_ORANGE                  = -1001126,
+    SAY_ADD_BANANAS                 = -1001127,
+    SAY_ADD_PAPAYA                  = -1001128,
+    SAY_LIGHT_BRAZIER               = -1001129,
+    SAY_OPEN_VALVE                  = -1001130,
+    SAY_ACTION_COMPLETE_1           = -1001131,
+    SAY_ACTION_COMPLETE_2           = -1001132,
+    SAY_ACTION_COMPLETE_3           = -1001133,
+    SAY_ACTION_COMPLETE_4           = -1001134,
+    SAY_DISTILLATION_FAIL           = -1001135,
+    SAY_DISTILLATION_COMPLETE       = -1001136,
+
+    GOSSIP_ITEM_TIPSY_MCMANUS       = -3000114,
+    TEXT_ID_READY                   = 13288,
+    QUEST_ID_STILL_AT_IT            = 12644,
+
+    SPELL_TOSS_ORANGE               = 51931,
+    SPELL_TOSS_BANANA               = 51932,
+    SPELL_TOSS_PAPAYA               = 51933,
+
+    NPC_WANTS_ORANGE_TRIGGER        = 28535,
+    NPC_WANTS_PAPAYA_TRIGGER        = 28536,
+    NPC_WANTS_BANANA_TRIGGER        = 28537,
+    // NPC_STEAMING_VALVE_TRIGGER   = 28539,
+    // NPC_WANTS_FIRE_TRIGGER       = 28540,
+    NPC_TIPSY_MCMANUS               = 28566,
+
+    GO_THUNDERBREW_JUNGLE_PUNCH     = 190643,
+    GO_PRESSURE_VALVE               = 190635,
+    GO_BRAZIER                      = 190636,
+};
+
+struct StillAtItData
+{
+    int32 iText;
+    uint32 uiOwnerEntry;
+};
+
+static const StillAtItData aStillAtItFruits[3] =
+{
+    {SAY_ADD_ORANGE,     NPC_WANTS_ORANGE_TRIGGER},
+    {SAY_ADD_BANANAS,    NPC_WANTS_BANANA_TRIGGER},
+    {SAY_ADD_PAPAYA,     NPC_WANTS_PAPAYA_TRIGGER},
+};
+
+static const StillAtItData aStillAtItMachines[2] =
+{
+    {SAY_LIGHT_BRAZIER,  GO_BRAZIER},
+    {SAY_OPEN_VALVE,     GO_PRESSURE_VALVE},
+};
+
+struct MANGOS_DLL_DECL npc_tipsy_mcmanusAI : public ScriptedAI
+{
+    npc_tipsy_mcmanusAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    uint8 m_uiTaskIndex;
+    uint32 m_uiTaskOwnerEntry;
+    uint32 m_uiTaskTimer;
+    uint32 m_uiActionTimer;
+
+    void Reset() override
+    {
+        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+
+        m_uiTaskIndex       = 0;
+        m_uiTaskOwnerEntry  = 0;
+        m_uiTaskTimer       = 0;
+        m_uiActionTimer     = 0;
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    {
+        if (pInvoker->GetTypeId() != TYPEID_PLAYER)
+            return;
+
+        // start event
+        if (eventType == AI_EVENT_START_EVENT)
+        {
+            m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            DoScriptText(SAY_DISTILLATION_START, m_creature);
+            m_uiTaskTimer = 5000;
+        }
+        // check fruit tasks
+        else if (eventType == AI_EVENT_CUSTOM_A)
+        {
+            for (uint8 i = 0; i < 3; ++i)
+            {
+                if (aStillAtItFruits[i].uiOwnerEntry == uiMiscValue)
+                    DoCheckDistillationTask(uiMiscValue);
+            }
+        }
+        // check machine tasks
+        else if (eventType == AI_EVENT_CUSTOM_B)
+        {
+            for (uint8 i = 0; i < 2; ++i)
+            {
+                if (aStillAtItMachines[i].uiOwnerEntry == uiMiscValue)
+                    DoCheckDistillationTask(uiMiscValue);
+            }
+        }
+    }
+
+    // wrapper to complete a distillation task
+    void DoCheckDistillationTask(uint32 uiOwnerEntry)
+    {
+        // check if the given entry matches the expected one
+        if (uiOwnerEntry == m_uiTaskOwnerEntry)
+        {
+            switch (urand(0, 3))
+            {
+                case 0: DoScriptText(SAY_ACTION_COMPLETE_1, m_creature); break;
+                case 1: DoScriptText(SAY_ACTION_COMPLETE_2, m_creature); break;
+                case 2: DoScriptText(SAY_ACTION_COMPLETE_3, m_creature); break;
+                case 3: DoScriptText(SAY_ACTION_COMPLETE_4, m_creature); break;
+            }
+
+            m_uiTaskTimer = 6000;
+            m_uiActionTimer = 0;
+        }
+        // reset if failed
+        else
+        {
+            DoScriptText(SAY_DISTILLATION_FAIL, m_creature);
+            EnterEvadeMode();
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiTaskTimer)
+        {
+            if (m_uiTaskTimer <= uiDiff)
+            {
+                switch (m_uiTaskIndex)
+                {
+                    // fruit tasks
+                    case 0:
+                    case 1:
+                    case 3:
+                    case 6:
+                    case 7:
+                    {
+                        uint8 uiIndex = urand(0, 2);
+                        DoScriptText(aStillAtItFruits[uiIndex].iText, m_creature);
+                        m_uiTaskOwnerEntry = aStillAtItFruits[uiIndex].uiOwnerEntry;
+
+                        m_uiTaskTimer = 0;
+                        m_uiActionTimer = 5000;
+                        break;
+                    }
+                    // valve or fire task
+                    case 2:
+                    case 4:
+                    case 5:
+                    case 8:
+                    {
+                        uint8 uiIndex = urand(0, 1);
+                        DoScriptText(aStillAtItMachines[uiIndex].iText, m_creature);
+                        m_uiTaskOwnerEntry = aStillAtItMachines[uiIndex].uiOwnerEntry;
+
+                        m_uiTaskTimer = 0;
+                        m_uiActionTimer = 5000;
+                        break;
+                    }
+                    // complete event
+                    case 9:
+                        DoScriptText(SAY_DISTILLATION_COMPLETE, m_creature);
+                        if (GameObject* pPunch = GetClosestGameObjectWithEntry(m_creature, GO_THUNDERBREW_JUNGLE_PUNCH, 10.0f))
+                        {
+                            pPunch->SetRespawnTime(30);
+                            pPunch->Refresh();
+                        }
+                        m_uiTaskTimer = 20000;
+                        break;
+                    case 10:
+                        EnterEvadeMode();
+                        m_uiTaskTimer = 0;
+                        break;
+                }
+                ++m_uiTaskIndex;
+            }
+            else
+                m_uiTaskTimer -= uiDiff;
+        }
+
+        // timer delay to allow player to complete the task
+        if (m_uiActionTimer)
+        {
+            if (m_uiActionTimer <= uiDiff)
+            {
+                DoScriptText(SAY_DISTILLATION_FAIL, m_creature);
+                EnterEvadeMode();
+                m_uiActionTimer = 0;
+            }
+            else
+                m_uiActionTimer -= uiDiff;
+        }
+
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_tipsy_mcmanus(Creature* pCreature)
+{
+    return new npc_tipsy_mcmanusAI(pCreature);
+}
+
+bool GossipHello_npc_tipsy_mcmanus(Player* pPlayer, Creature* pCreature)
+{
+    if (pPlayer->GetQuestStatus(QUEST_ID_STILL_AT_IT) == QUEST_STATUS_INCOMPLETE)
+        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TIPSY_MCMANUS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+
+    pPlayer->SEND_GOSSIP_MENU(TEXT_ID_READY, pCreature->GetObjectGuid());
+    return true;
+}
+
+bool GossipSelect_npc_tipsy_mcmanus(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+{
+    if (uiAction != GOSSIP_ACTION_INFO_DEF + 1)
+        return false;
+
+    pPlayer->CLOSE_GOSSIP_MENU();
+    pCreature->AI()->SendAIEvent(AI_EVENT_START_EVENT, pPlayer, pCreature);
+    return true;
+}
+
+/*######
+## npc_wants_fruit_credit
+######*/
+
+bool EffectDummyCreature_npc_wants_fruit_credit(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+{
+    if ((uiSpellId == SPELL_TOSS_ORANGE || uiSpellId == SPELL_TOSS_BANANA || uiSpellId == SPELL_TOSS_PAPAYA) && uiEffIndex == EFFECT_INDEX_0)
+    {
+        if (pCaster->GetTypeId() == TYPEID_PLAYER && ((Player*)pCaster)->GetQuestStatus(QUEST_ID_STILL_AT_IT) == QUEST_STATUS_INCOMPLETE)
+        {
+            if (Creature* pTipsyMcmanus = GetClosestCreatureWithEntry(pCaster, NPC_TIPSY_MCMANUS, 2 * INTERACTION_DISTANCE))
+            {
+                pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pTipsyMcmanus, pCreatureTarget->GetEntry());
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+/*######
+## go_quest_still_at_it_credit
+######*/
+
+bool GOUse_go_quest_still_at_it_credit(Player* pPlayer, GameObject* pGo)
+{
+    if (pPlayer->GetQuestStatus(QUEST_ID_STILL_AT_IT) != QUEST_STATUS_INCOMPLETE)
+        return true;
+
+    if (Creature* pTipsyMcmanus = GetClosestCreatureWithEntry(pPlayer, NPC_TIPSY_MCMANUS, 2 * INTERACTION_DISTANCE))
+        pTipsyMcmanus->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, pPlayer, pTipsyMcmanus, pGo->GetEntry());
+
+    return false;
+}
+
 void AddSC_sholazar_basin()
 {
     Script* pNewScript;
@@ -430,5 +704,22 @@ void AddSC_sholazar_basin()
     pNewScript->Name = "npc_mosswalker_victim";
     pNewScript->pGossipHello = &GossipHello_npc_mosswalker_victim;
     pNewScript->pGossipSelect = &GossipSelect_npc_mosswalker_victim;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_tipsy_mcmanus";
+    pNewScript->GetAI = &GetAI_npc_tipsy_mcmanus;
+    pNewScript->pGossipHello = &GossipHello_npc_tipsy_mcmanus;
+    pNewScript->pGossipSelect = &GossipSelect_npc_tipsy_mcmanus;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_wants_fruit_credit";
+    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_wants_fruit_credit;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_quest_still_at_it_credit";
+    pNewScript->pGOUse = &GOUse_go_quest_still_at_it_credit;
     pNewScript->RegisterSelf();
 }
