@@ -17,12 +17,18 @@
 /* ScriptData
 SDName: Feralas
 SD%Complete: 100
-SDComment: Quest support: 2767.
+SDComment: Quest support: 2767, 2845.
 SDCategory: Feralas
 EndScriptData */
 
+/* ContentData
+npc_oox22fe
+npc_shay_leafrunner
+EndContentData */
+
 #include "precompiled.h"
 #include "escort_ai.h"
+#include "follower_ai.h"
 
 /*######
 ## npc_oox22fe
@@ -133,8 +139,165 @@ bool QuestAccept_npc_oox22fe(Player* pPlayer, Creature* pCreature, const Quest* 
 }
 
 /*######
-## AddSC
+## npc_shay_leafrunner
 ######*/
+
+enum
+{
+    SAY_ESCORT_START                    = -1001106,
+    SAY_WANDER_1                        = -1001107,
+    SAY_WANDER_2                        = -1001108,
+    SAY_WANDER_3                        = -1001109,
+    SAY_WANDER_4                        = -1001110,
+    SAY_WANDER_DONE_1                   = -1001111,
+    SAY_WANDER_DONE_2                   = -1001112,
+    SAY_WANDER_DONE_3                   = -1001113,
+    EMOTE_WANDER                        = -1001114,
+    SAY_EVENT_COMPLETE_1                = -1001115,
+    SAY_EVENT_COMPLETE_2                = -1001116,
+
+    SPELL_SHAYS_BELL                    = 11402,
+    NPC_ROCKBITER                       = 7765,
+    QUEST_ID_WANDERING_SHAY             = 2845,
+};
+
+struct MANGOS_DLL_DECL npc_shay_leafrunnerAI : public FollowerAI
+{
+    npc_shay_leafrunnerAI(Creature* pCreature) : FollowerAI(pCreature)
+    {
+        m_uiWanderTimer = 0;
+        Reset();
+    }
+
+    uint32 m_uiWanderTimer;
+    bool m_bIsRecalled;
+    bool m_bIsComplete;
+
+    void Reset() override
+    {
+        m_bIsRecalled = false;
+        m_bIsComplete = false;
+    }
+
+    void MoveInLineOfSight(Unit* pWho) override
+    {
+        FollowerAI::MoveInLineOfSight(pWho);
+
+        if (!m_bIsComplete && pWho->GetEntry() == NPC_ROCKBITER && m_creature->IsWithinDistInMap(pWho, 20.0f))
+        {
+            Player* pPlayer = GetLeaderForFollower();
+            if (!pPlayer)
+                return;
+
+            DoScriptText(SAY_EVENT_COMPLETE_1, m_creature);
+            DoScriptText(SAY_EVENT_COMPLETE_2, pWho);
+
+            // complete quest
+            pPlayer->GroupEventHappens(QUEST_ID_WANDERING_SHAY, m_creature);
+            SetFollowComplete(true);
+            m_creature->ForcedDespawn(30000);
+            m_bIsComplete = true;
+            m_uiWanderTimer = 0;
+
+            // move to Rockbiter
+            float fX, fY, fZ;
+            pWho->GetContactPoint(m_creature, fX, fY, fZ, INTERACTION_DISTANCE);
+            m_creature->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
+        }
+        else if (m_bIsRecalled && pWho->GetTypeId() == TYPEID_PLAYER && pWho->IsWithinDistInMap(pWho, INTERACTION_DISTANCE))
+        {
+            m_uiWanderTimer = 60000;
+            m_bIsRecalled = false;
+
+            switch (urand(0, 2))
+            {
+                case 0: DoScriptText(SAY_WANDER_DONE_1, m_creature); break;
+                case 1: DoScriptText(SAY_WANDER_DONE_2, m_creature); break;
+                case 2: DoScriptText(SAY_WANDER_DONE_3, m_creature); break;
+            }
+        }
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    {
+        // start following
+        if (eventType == AI_EVENT_START_EVENT && pInvoker->GetTypeId() == TYPEID_PLAYER)
+        {
+            StartFollow((Player*)pInvoker, 0, GetQuestTemplateStore(uiMiscValue));
+            m_uiWanderTimer = 30000;
+        }
+        else if (eventType == AI_EVENT_CUSTOM_A)
+        {
+            // resume following
+            m_bIsRecalled = true;
+            SetFollowPaused(false);
+        }
+    }
+
+    void UpdateFollowerAI(const uint32 uiDiff)
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
+            if (m_uiWanderTimer)
+            {
+                if (m_uiWanderTimer <= uiDiff)
+                {
+                    // set follow paused and wander in a random point
+                    SetFollowPaused(true);
+                    DoScriptText(EMOTE_WANDER, m_creature);
+                    m_uiWanderTimer = 0;
+
+                    switch (urand(0, 3))
+                    {
+                        case 0: DoScriptText(SAY_WANDER_1, m_creature); break;
+                        case 1: DoScriptText(SAY_WANDER_2, m_creature); break;
+                        case 2: DoScriptText(SAY_WANDER_3, m_creature); break;
+                        case 3: DoScriptText(SAY_WANDER_4, m_creature); break;
+                    }
+
+                    float fX, fY, fZ;
+                    m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, frand(25.0f, 40.0f), frand(0, 2 * M_PI_F));
+                    m_creature->GetMotionMaster()->MoveRandomAroundPoint(fX, fY, fZ, 20.0f);
+                }
+                else
+                    m_uiWanderTimer -= uiDiff;
+            }
+
+            return;
+        }
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_shay_leafrunner(Creature* pCreature)
+{
+    return new npc_shay_leafrunnerAI(pCreature);
+}
+
+bool QuestAccept_npc_shay_leafrunner(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+{
+    if (pQuest->GetQuestId() == QUEST_ID_WANDERING_SHAY)
+    {
+        DoScriptText(SAY_ESCORT_START, pCreature);
+        pCreature->AI()->SendAIEvent(AI_EVENT_START_EVENT, pPlayer, pCreature, pQuest->GetQuestId());
+    }
+    return true;
+}
+
+bool EffectDummyCreature_npc_shay_leafrunner(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+{
+    if (uiSpellId == SPELL_SHAYS_BELL && uiEffIndex == EFFECT_INDEX_0)
+    {
+        if (pCaster->GetTypeId() != TYPEID_PLAYER)
+            return true;
+
+        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
+        return true;
+    }
+
+    return false;
+}
 
 void AddSC_feralas()
 {
@@ -144,5 +307,12 @@ void AddSC_feralas()
     pNewScript->Name = "npc_oox22fe";
     pNewScript->GetAI = &GetAI_npc_oox22fe;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_oox22fe;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_shay_leafrunner";
+    pNewScript->GetAI = &GetAI_npc_shay_leafrunner;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_shay_leafrunner;
+    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_shay_leafrunner;
     pNewScript->RegisterSelf();
 }
