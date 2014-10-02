@@ -302,9 +302,10 @@ enum
     GO_ANCIENT_GATE             = 194255,                   // Door upstairs before vezax, opens when all keepers are freed
     GO_VEZAX_GATE               = 194750,                   // Door after vezax
     GO_YOGG_GATE                = 194773,                   // Yogg-Saron chamber door
-    GO_BRAIN_DOOR1              = 194635,                   // Brain chamber doors
-    GO_BRAIN_DOOR2              = 194636,
-    GO_BRAIN_DOOR3              = 194637,
+    GO_BRAIN_DOOR_CHAMBER       = 194635,                   // Brain chamber doors
+    GO_BRAIN_DOOR_ICECROWN      = 194636,
+    GO_BRAIN_DOOR_STORMWIND     = 194637,
+    GO_FLEE_TO_SURFACE          = 194625,                   // Brain chamber portals
 
     // World state used for algalon timer
     WORLD_STATE_TIMER           = 4132,

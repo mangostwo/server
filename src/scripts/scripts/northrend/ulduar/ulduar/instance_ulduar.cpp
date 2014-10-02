@@ -368,9 +368,9 @@ void instance_ulduar::OnObjectCreate(GameObject* pGo)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_YOGG_GATE:
-        case GO_BRAIN_DOOR1:
-        case GO_BRAIN_DOOR2:
-        case GO_BRAIN_DOOR3:
+        case GO_BRAIN_DOOR_CHAMBER:
+        case GO_BRAIN_DOOR_ICECROWN:
+        case GO_BRAIN_DOOR_STORMWIND:
             break;
 
             // -----------------    Chests    -----------------
@@ -772,6 +772,14 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                     pSara->ForcedDespawn();
                 if (Creature* pBrain = GetSingleCreatureFromStorage(NPC_YOGG_BRAIN))
                     pBrain->ForcedDespawn();
+                
+                // reset illusion doors
+                if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_BRAIN_DOOR_CHAMBER))
+                    pDoor->ResetDoorOrButton();
+                if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_BRAIN_DOOR_ICECROWN))
+                    pDoor->ResetDoorOrButton();
+                if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_BRAIN_DOOR_STORMWIND))
+                    pDoor->ResetDoorOrButton();
                 
                 m_uiYoggResetTimer = 60000;
             }

@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: boss_yogg_saron
-SD%Complete: 50%
-SDComment: Partially implemented. Not fully playable yet.
+SD%Complete: 70%
+SDComment: There are still a few things left. Not fully playable yet.
 SDCategory: Ulduar
 EndScriptData */
 
@@ -136,9 +136,18 @@ enum
     SPELL_SQUEEZE                               = 64125,
     SPELL_SQUEEZE_H                             = 64126,
     
+    // Vision spells
+    SPELL_LUNATIC_GAZE_SKULL                    = 64167,
+    SPELL_NONDESCRIPT_ARMOR                     = 64013,                    // stun auras for illusions
+    SPELL_NONDESCRIPT_CREATURE                  = 64010,
+    SPELL_GRIM_REPRISAL                         = 63305,                    // procs 64039 on damage taken
+    SPELL_SHATTERED_ILLUSION                    = 64173,
+    SPELL_SHATTERED_ILLUSION_REMOVE             = 65238,                    // remove aura 64173
+    SPELL_INDUCE_MADNESS                        = 64059,                    // reduce sanity by 100% to all players with aura 63988
+    
     // Old God phase spells
     SPELL_LUNATIC_GAZE_YOGG                     = 64163,
-    SPELL_SHADOW_BEACON                         = 64465,                    // trigger 64468
+    SPELL_SHADOW_BEACON                         = 64465,                    // triggers 64468
     // SPELL_EMPOWERING_SHADOWS                 = 64468,
     // SPELL_EMPOWERING_SHADOWS_H               = 64486,
     SPELL_DEAFENING_ROAR                        = 64189,
@@ -155,7 +164,7 @@ enum
     SPELL_TELEPORT_TO_STORMWIND_ILLUSION        = 63989,
     SPELL_TELEPORT_TO_CHAMBER_ILLUSION          = 63997,
     SPELL_TELEPORT_TO_ICEECROWN_ILLUSION        = 63998,
-    SPELL_TELEPORT_BACK_TO_MAIN_ROOM            = 63992,
+    //SPELL_TELEPORT_BACK_TO_MAIN_ROOM            = 63992,                  // triggered by spell 63993
     
     // immortal guardian spells
     SPELL_EMPOWERED                             = 64161,
@@ -174,8 +183,35 @@ enum
     NPC_CORRUPTOR_TENTACLE                      = 33985,
     NPC_DESCEND_INTO_MADNESS                    = 34072,
     NPC_IMMORTAL_GUARDIAN                       = 33988,
+    // NPC_SANITY_WELL                          = 33991,                    // summoned by Freya
+
+    // generic visions creatures
+    NPC_LAUGHING_SKULL                          = 33990,
+    NPC_INFLUENCE_TENTACLE                      = 33943,
+
+    // dragon soul vision
+    NPC_RUBY_CONSORT                            = 33716,
+    NPC_AZURE_CONSORT                           = 33717,
+    // NPC_BRONZE_CONSORT                       = 33718,                    // Nozdormu is not part of the event for some reason
+    NPC_EMERALD_CONSORT                         = 33719,
+    NPC_OBSIDIAN_CONSORT                        = 33720,
+    NPC_YSERA                                   = 33495,
+    NPC_NELTHARION                              = 33523,
+    NPC_MALYGOS                                 = 33535,
+    NPC_ALEXSTRASZA                             = 33536,
+
+    // stormwind vision
+    NPC_SUIT_OF_ARMOR                           = 33433,
+    NPC_GARONA                                  = 33436,                    // cast spell 64063 on 33437
+    NPC_KING_LLANE                              = 33437,
+
+    // icecrown citadel vision
+    NPC_LICH_KING                               = 33441,                    // cast spell 63037 on 33442
+    NPC_IMMOLATED_CHAMPION                      = 33442,
+    NPC_DEATHSWORM_ZEALOT                       = 33567,
 
     // keepers
+    SPELL_KEEPER_ACTIVE                         = 62647,
     // Freya spells
     SPELL_RESILIENCE_OF_NATURE                  = 62670,
     SPELL_SUMMON_SANITY_WELL                    = 64170,                    // sends event 21432; used to spawn npc 33991
@@ -198,6 +234,7 @@ enum
     
     // other
     FACTION_SARA_HOSTILE                        = 16,
+    MAX_ILLUSIONS                               = 3,
 
     // encounter phases
     PHASE_INTRO                                 = 0,
@@ -219,6 +256,8 @@ static const DialogueEntry aYoggSaronDialog[] =
 };
 
 static const float afYoggSaronSpawn[4] = {1980.43f, -25.7708f, 324.9724f, 3.141f};
+static const uint32 aMadnessTeleportSpells[MAX_ILLUSIONS] = { SPELL_TELEPORT_TO_STORMWIND_ILLUSION, SPELL_TELEPORT_TO_CHAMBER_ILLUSION, SPELL_TELEPORT_TO_ICEECROWN_ILLUSION };
+static const uint32 aMadnessChamberDoors[MAX_ILLUSIONS] = { GO_BRAIN_DOOR_STORMWIND, GO_BRAIN_DOOR_CHAMBER, GO_BRAIN_DOOR_ICECROWN };
 
 /*######
 ## boss_sara
@@ -280,7 +319,8 @@ struct MANGOS_DLL_DECL boss_saraAI : public Scripted_NoMovementAI, private Dialo
     {
         // start the encounter on range check
         // ToDo: research if there is any intro available before the actual encounter starts
-        if (m_uiPhase == PHASE_INTRO && pWho->GetTypeId() == TYPEID_PLAYER && pWho->IsAlive() && !((Player*)pWho)->isGameMaster() && m_creature->IsWithinDistInMap(pWho, 70.0f))
+        if (m_uiPhase == PHASE_INTRO && pWho->GetTypeId() == TYPEID_PLAYER && pWho->isAlive() && !((Player*)pWho)->isGameMaster() &&
+            m_creature->IsWithinDistInMap(pWho, 70.0f) && pWho->IsWithinLOSInMap(m_creature))
         {
             m_uiPhase = PHASE_SARA;
             DoScriptText(SAY_SARA_AGGRO, m_creature);
@@ -582,14 +622,21 @@ struct MANGOS_DLL_DECL npc_voice_yogg_saronAI : public Scripted_NoMovementAI
 {
     npc_voice_yogg_saronAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        
+        for (uint8 i = 0; i < MAX_ILLUSIONS; ++i)
+            m_vuiMadnessPhases.push_back(i);
+        
         Reset();
     }
 
+    instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
 
     uint8 m_uiPhase;
     uint8 m_uiMaxPortals;
+    uint8 m_uiPortalsCount;
 
     uint32 m_uiBerserkTimer;
     uint32 m_uiSummonGuardianTimer;
@@ -598,6 +645,8 @@ struct MANGOS_DLL_DECL npc_voice_yogg_saronAI : public Scripted_NoMovementAI
     uint32 m_uiConstrictorTentacleTimer;
     uint32 m_uiMadnessTimer;
     uint32 m_uiGuardianTimer;
+    
+    std::vector<uint8> m_vuiMadnessPhases;
 
     void Reset() override
     {
@@ -610,7 +659,10 @@ struct MANGOS_DLL_DECL npc_voice_yogg_saronAI : public Scripted_NoMovementAI
         m_uiMadnessTimer                = 60000;
         m_uiGuardianTimer               = 1000;
 
+        m_uiPortalsCount                = 0;
         m_uiMaxPortals                  = m_bIsRegularMode ? 4 : 10;
+        
+        std::random_shuffle(m_vuiMadnessPhases.begin(), m_vuiMadnessPhases.end());
     }
 
     void AttackStart(Unit* /*pWho*/) override { }
@@ -638,7 +690,7 @@ struct MANGOS_DLL_DECL npc_voice_yogg_saronAI : public Scripted_NoMovementAI
         switch (pSummoned->GetEntry())
         {
             case NPC_DESCEND_INTO_MADNESS:
-                // ToDo: add the teleporting spells
+                SendAIEvent(AI_EVENT_START_EVENT, m_creature, pSummoned, aMadnessTeleportSpells[m_uiPortalsCount]);
                 pSummoned->CastSpell(pSummoned, SPELL_TELEPORT_PORTAL_VISUAL, true);
                 break;
             case NPC_CONSTRICTOR_TENTACLE:
@@ -721,13 +773,30 @@ struct MANGOS_DLL_DECL npc_voice_yogg_saronAI : public Scripted_NoMovementAI
 
             if (m_uiMadnessTimer < uiDiff)
             {
+                // no more portals if we already had 3
+                if (m_uiPortalsCount == MAX_ILLUSIONS)
+                {
+                    m_uiMadnessTimer = m_uiBerserkTimer * 2;
+                    return;
+                }
+                
+                if (!m_pInstance)
+                    return;
+                
+                // inform the brain about the current illusion
+                if (Creature* pBrain = m_pInstance->GetSingleCreatureFromStorage(NPC_YOGG_BRAIN))
+                    SendAIEvent(AI_EVENT_START_EVENT, m_creature, pBrain, m_uiPortalsCount);
+                
                 float fX, fY, fZ, fAng;
                 for (uint8 i = 0; i < m_uiMaxPortals; ++i)
                 {
                     fAng = (2 * M_PI_F / m_uiMaxPortals) * i;
                     m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, 22.0f, fAng);
-                    m_creature->SummonCreature(NPC_DESCEND_INTO_MADNESS, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_DESCEND_INTO_MADNESS, fX, fY, fZ, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 }
+                
+                DoScriptText(EMOTE_VISION_BLAST, m_creature);
+                ++m_uiPortalsCount;
                 m_uiMadnessTimer = 90000;
             }
             else
@@ -749,6 +818,183 @@ struct MANGOS_DLL_DECL npc_voice_yogg_saronAI : public Scripted_NoMovementAI
 CreatureAI* GetAI_npc_voice_yogg_saron(Creature* pCreature)
 {
     return new npc_voice_yogg_saronAI(pCreature);
+}
+
+/*######
+## npc_brain_yogg_saron
+######*/
+
+struct MANGOS_DLL_DECL npc_brain_yogg_saronAI : public Scripted_NoMovementAI
+{
+    npc_brain_yogg_saronAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    {
+        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
+        Reset();
+    }
+
+    instance_ulduar* m_pInstance;
+
+    uint8 m_uiIllusionIndex;
+    uint32 m_uiIllusionTimer;
+
+    GuidList m_lTentaclesGuids;
+
+    void Reset() override
+    {
+        m_uiIllusionTimer = 0;
+        m_uiIllusionIndex = 0;
+
+        DoCastSpellIfCan(m_creature, SPELL_MATCH_HEALTH);
+    }
+
+    void AttackStart(Unit* /*pWho*/) override { }
+    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    {
+        if (eventType == AI_EVENT_START_EVENT && pInvoker->GetEntry() == NPC_VOICE_OF_YOGG)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_INDUCE_MADNESS) == CAST_OK)
+            {
+                m_lTentaclesGuids.clear();
+                DoPrepareIllusion(uiMiscValue);
+                m_uiIllusionIndex = uiMiscValue;
+            }
+        }
+    }
+
+    void JustSummoned(Creature* pSummoned) override
+    {
+        switch (pSummoned->GetEntry())
+        {
+            case NPC_LAUGHING_SKULL:
+                pSummoned->CastSpell(pSummoned, SPELL_LUNATIC_GAZE_SKULL, false);
+                break;
+            case NPC_SUIT_OF_ARMOR:
+                pSummoned->CastSpell(pSummoned, SPELL_NONDESCRIPT_ARMOR, true);
+                pSummoned->CastSpell(pSummoned, SPELL_GRIM_REPRISAL, true);
+                m_lTentaclesGuids.push_back(pSummoned->GetObjectGuid());
+                break;
+            case NPC_DEATHSWORM_ZEALOT:
+            case NPC_RUBY_CONSORT:
+            case NPC_OBSIDIAN_CONSORT:
+            case NPC_AZURE_CONSORT:
+            case NPC_EMERALD_CONSORT:
+                pSummoned->CastSpell(pSummoned, SPELL_NONDESCRIPT_CREATURE, true);
+                pSummoned->CastSpell(pSummoned, SPELL_GRIM_REPRISAL, true);
+                m_lTentaclesGuids.push_back(pSummoned->GetObjectGuid());
+                break;
+        }
+    }
+
+    void SummonedCreatureJustDied(Creature* pSummoned) override
+    {
+        if (pSummoned->GetEntry() == NPC_INFLUENCE_TENTACLE)
+            m_lTentaclesGuids.remove(pSummoned->GetObjectGuid());
+
+        // open door and start casting
+        if (m_lTentaclesGuids.empty())
+        {
+            DoScriptText(EMOTE_SHATTER_BLAST, m_creature);
+            DoCastSpellIfCan(m_creature, SPELL_SHATTERED_ILLUSION, CAST_TRIGGERED);
+            m_uiIllusionTimer = 30000;
+
+            if (!m_pInstance)
+                return;
+
+            m_pInstance->DoUseDoorOrButton(aMadnessChamberDoors[m_uiIllusionIndex]);
+
+            // respawn all nearby portals
+            std::list<GameObject*> lFleePortals;
+            GetGameObjectListWithEntryInGrid(lFleePortals, m_creature, GO_FLEE_TO_SURFACE, 40.0f);
+
+            for (std::list<GameObject*>::const_iterator itr = lFleePortals.begin(); itr != lFleePortals.end(); ++itr)
+                m_pInstance->DoRespawnGameObject((*itr)->GetObjectGuid(), 30);
+        }
+    }
+
+    // Wrapper that prepars the illusions
+    void DoPrepareIllusion(uint8 uiIndex)
+    {
+        switch (uiIndex)
+        {
+            // stormwind
+            case 0:
+                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1955.173f, 85.26153f, 239.7496f, 4.049f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1893.146f, 44.24343f, 239.7496f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1944.962f, 65.25938f, 240.4596f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1956.503f, 72.19462f, 239.7495f, 3.281f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1951.04f, 49.88875f, 239.7495f, 2.495f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1931.14f, 38.46949f, 239.7495f, 1.710f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1908.993f, 44.26659f, 239.7495f, 0.295f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1897.344f, 64.31419f, 239.7495f, 0.139f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1903.393f, 86.60285f, 239.7495f, 5.619f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1923.342f, 98.01228f, 239.7495f, 4.834f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1945.442f, 92.17952f, 239.7495f, 4.049f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                // the following are guesswork
+                m_creature->SummonCreature(NPC_GARONA, 1935.398f, 54.0177f, 240.3764f, 2.008f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_KING_LLANE, 1930.465f, 62.6740f, 242.3763f, 5.196f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                break;
+            // chamber
+            case 1:
+                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 2063.156f, 27.95839f, 244.2707f, 5.288f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 2061.257f, -53.8788f, 239.8633f, 2.478f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_RUBY_CONSORT, 2069.479f, -5.699653f, 239.8058f, 5.427f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_RUBY_CONSORT, 2069.298f, -43.53168f, 239.8006f, 0.471f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                // the following are guesswork
+                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 2125.891f, -62.390f, 239.721f, 2.197f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 2115.778f, 21.288f, 239.746f, 4.282f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_OBSIDIAN_CONSORT, 2144.349f, -36.108f, 239.719f, 3.116f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_OBSIDIAN_CONSORT, 2143.837f, -17.539f, 239.733f, 3.179f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_AZURE_CONSORT, 2139.173f, -51.239f, 239.747f, 2.413f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_AZURE_CONSORT, 2112.182f, -65.787f, 239.721f, 1.651f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_EMERALD_CONSORT, 2110.621f, 15.579f, 239.758f, 4.644f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_EMERALD_CONSORT, 2137.336f, 5.452f, 239.717f, 3.866f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_NELTHARION, 2117.588f, -25.318f,  242.646f, 3.15f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_ALEXSTRASZA, 2091.679f, -25.289f, 242.646f, 6.282f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_YSERA, 2114.504f, -16.118f, 242.646f, 3.91f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_MALYGOS, 2113.388f, -34.381f, 242.646f, 2.26f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                break;
+            // icecrown
+            case 2:
+                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1948.668f, -152.4481f, 240.073f, 1.919f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1879.845f, -72.91819f, 240.073f, 5.689f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1905.937f, -133.1651f, 240.073f, 5.777f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1935.621f, -121.0064f, 240.073f, 3.630f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1917.559f, -135.7448f, 240.073f, 4.188f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1919.125f, -140.9566f, 240.073f, 3.979f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1948.469f, -136.2951f, 240.0707f, 3.438f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1956.444f, -138.4028f, 240.1078f, 3.368f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1912.129f, -136.934f, 240.073f, 4.188f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1952.965f, -130.5295f, 240.1347f, 3.804f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1902.132f, -111.3594f, 240.0698f, 4.852f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1905.326f, -104.7865f, 240.0523f, 4.764f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1897.345f, -106.6076f, 240.1444f, 4.939f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_LICH_KING, 1908.557f, -152.4427f, 240.0719f, 4.238f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                // the following is guesswork
+                m_creature->SummonCreature(NPC_IMMOLATED_CHAMPION, 1915.371f,-139.9342f,239.9896f, 4.159f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                break;
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiIllusionTimer)
+        {
+            if (m_uiIllusionTimer <= uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_SHATTERED_ILLUSION_REMOVE) == CAST_OK)
+                    m_uiIllusionTimer = 0;
+            }
+            else
+                m_uiIllusionTimer -= uiDiff;
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_brain_yogg_saron(Creature* pCreature)
+{
+    return new npc_brain_yogg_saronAI(pCreature);
 }
 
 /*######
@@ -896,6 +1142,38 @@ CreatureAI* GetAI_npc_immortal_guardian(Creature* pCreature)
     return new npc_immortal_guardianAI(pCreature);
 }
 
+bool EffectDummyCreature_npc_immortal_guardian(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+{
+    // NOTE: this may not be 100% correct and may require additional research
+    if (uiSpellId == SPELL_EMPOWERED && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_IMMORTAL_GUARDIAN)
+    {
+        uint8 uiProjectedStacks = pCreatureTarget->GetHealthPercent() * 0.1 - 1;
+        uint8 uiCurrentStacks = 0;
+
+        if (SpellAuraHolder* pEmpowerAura = pCreatureTarget->GetSpellAuraHolder(SPELL_EMPOWERED_MOD))
+            uiCurrentStacks = pEmpowerAura->GetStackAmount();
+
+        // if creature already has the required stacks, ignore
+        if (uiProjectedStacks == uiCurrentStacks)
+            return true;
+
+        if (uiCurrentStacks > uiProjectedStacks)
+            pCreatureTarget->RemoveAuraHolderFromStack(SPELL_EMPOWERED_MOD, uiCurrentStacks - uiProjectedStacks);
+        else
+        {
+            for (uint8 i = 0; i < uiProjectedStacks - uiCurrentStacks; ++i)
+                pCreatureTarget->CastSpell(pCreatureTarget, SPELL_EMPOWERED_MOD, true);
+        }
+
+        if (uiCurrentStacks == 0 && uiCurrentStacks < uiProjectedStacks)
+            pCreatureTarget->RemoveAurasDueToSpell(SPELL_WEAKENED);
+
+        return true;
+    }
+
+    return false;
+}
+
 /*######
 ## npc_constrictor_tentacle
 ######*/
@@ -1024,6 +1302,75 @@ CreatureAI* GetAI_npc_death_ray(Creature* pCreature)
     return new npc_death_rayAI(pCreature);
 }
 
+/*######
+## npc_descent_madness
+######*/
+
+struct MANGOS_DLL_DECL npc_descent_madnessAI : public Scripted_NoMovementAI
+{
+    npc_descent_madnessAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    {
+        m_uiCurentSpell = 0;
+        Reset();
+    }
+
+    uint32 m_uiCurentSpell;
+
+    void Reset() override { }
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 uiMiscValue) override
+    {
+        if (eventType == AI_EVENT_START_EVENT)
+            m_uiCurentSpell = uiMiscValue;
+    }
+
+    uint32 GetCurrentSpell() { return m_uiCurentSpell; }
+};
+
+CreatureAI* GetAI_npc_descent_madness(Creature* pCreature)
+{
+    return new npc_descent_madnessAI(pCreature);
+}
+
+bool NpcSpellClick_npc_descent_madness(Player* pPlayer, Creature* pClickedCreature, uint32 /*uiSpellId*/)
+{
+    if (pClickedCreature->GetEntry() == NPC_DESCEND_INTO_MADNESS)
+    {
+        uint32 uiClickSpell = 0;
+        if (npc_descent_madnessAI* pDescentAI = dynamic_cast<npc_descent_madnessAI*>(pClickedCreature->AI()))
+            uiClickSpell = pDescentAI->GetCurrentSpell();
+
+        if (!uiClickSpell)
+            return true;
+
+        pPlayer->CastSpell(pPlayer, uiClickSpell, true);
+        pClickedCreature->ForcedDespawn();
+        return true;
+    }
+
+    return true;
+}
+
+/*######
+## npc_laughing_skull
+######*/
+
+// TODO Remove this 'script' when combat can be proper prevented from core-side
+struct MANGOS_DLL_DECL npc_laughing_skullAI : public Scripted_NoMovementAI
+{
+    npc_laughing_skullAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+
+    void Reset() override { }
+    void AttackStart(Unit* /*pWho*/) override { }
+    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+    void UpdateAI(const uint32 /*uiDiff*/) override { }
+};
+
+CreatureAI* GetAI_npc_laughing_skull(Creature* pCreature)
+{
+    return new npc_laughing_skullAI(pCreature);
+}
+
 void AddSC_boss_yogg_saron()
 {
     Script* pNewScript;
@@ -1044,6 +1391,11 @@ void AddSC_boss_yogg_saron()
     pNewScript->RegisterSelf();
     
     pNewScript = new Script;
+    pNewScript->Name = "npc_brain_yogg_saron";
+    pNewScript->GetAI = &GetAI_npc_brain_yogg_saron;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
     pNewScript->Name = "npc_guardian_of_yogg";
     pNewScript->GetAI = &GetAI_npc_guardian_of_yogg;
     pNewScript->RegisterSelf();
@@ -1051,6 +1403,7 @@ void AddSC_boss_yogg_saron()
     pNewScript = new Script;
     pNewScript->Name = "npc_immortal_guardian";
     pNewScript->GetAI = &GetAI_npc_immortal_guardian;
+    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_immortal_guardian;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -1066,5 +1419,16 @@ void AddSC_boss_yogg_saron()
     pNewScript = new Script;
     pNewScript->Name = "npc_death_ray";
     pNewScript->GetAI = &GetAI_npc_death_ray;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_descent_madness";
+    pNewScript->GetAI = &GetAI_npc_descent_madness;
+    pNewScript->pNpcSpellClick = &NpcSpellClick_npc_descent_madness;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_laughing_skull";
+    pNewScript->GetAI = &GetAI_npc_laughing_skull;
     pNewScript->RegisterSelf();
 }
