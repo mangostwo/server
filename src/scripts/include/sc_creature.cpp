@@ -77,6 +77,9 @@ void ScriptedAI::MoveInLineOfSight(Unit* pWho)
  */
 void ScriptedAI::AttackStart(Unit* pWho)
 {
+    if (!m_creature->CanAttackByItself())
+        return;
+    
     if (pWho && m_creature->Attack(pWho, true))             // The Attack function also uses basic checks if pWho can be attacked
     {
         m_creature->AddThreat(pWho);
@@ -583,6 +586,9 @@ void Scripted_NoMovementAI::GetAIInformation(ChatHandler& reader)
 
 void Scripted_NoMovementAI::AttackStart(Unit* pWho)
 {
+    if (!m_creature->CanAttackByItself())
+        return;
+    
     if (pWho && m_creature->Attack(pWho, true))
     {
         m_creature->AddThreat(pWho);
