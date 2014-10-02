@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "precompiled.h"
 #include "ulduar.h"
+#include "TemporarySummon.h"
 
 enum
 {
@@ -40,8 +41,8 @@ enum
     SAY_PHASE_2_INTRO_3                         = -1603263,
     SAY_PHASE_2_INTRO_4                         = -1603264,
     SAY_PHASE_2_INTRO_5                         = -1603265,
-    SAY_SARA_PHASE_2_INTRO_A                    = -1603206,
-    SAY_SARA_PHASE_2_INTRO_B                    = -1603207,
+    SAY_SARA_PHYCHOSIS                          = -1603207,
+    SAY_SARA_DEATH_RAY                          = -1603208,
 
     SAY_MADNESS                                 = -1603209,
     SAY_PHASE_3                                 = -1603210,
@@ -75,6 +76,7 @@ enum
     EMOTE_VISION_BLAST                          = -1603234,
     EMOTE_SHATTER_BLAST                         = -1603235,
     EMOTE_CLOUD_BOIL                            = -1603261,
+    EMOTE_DEAFENING_ROAR                        = -1603266,
 
     // generic spells
     SPELL_EXTINGUISH_LIFE                       = 64166,                    // berserk spell
@@ -114,9 +116,9 @@ enum
     // Vision phase spells
     SPELL_PHYCHOSIS                             = 63795,                    // Sara combat spells
     SPELL_PHYCHOSIS_H                           = 65301,
-    SPELL_MALADY_OF_THE_MIND                    = 63830,
-    SPELL_BRAIN_LINK                            = 63802,
-    SPELL_DEATH_RAY_SUMMON                      = 63891,
+    SPELL_MALADY_OF_THE_MIND                    = 63830,                    // jumps to another target using 63881; requires additional research
+    SPELL_BRAIN_LINK                            = 63802,                    // triggers 63803 for damage or 63804 for visual depending on range
+    SPELL_DEATH_RAY_SUMMON                      = 63891,                    // summons npc 33882
 
     // Tentacle spawn spells
     SPELL_CONSTRICTOR_TENTACLE                  = 64132,                    // triggers 64133
@@ -131,6 +133,8 @@ enum
     SPELL_CRUSH                                 = 64146,
     SPELL_DIMINISH_POWER                        = 64148,
     SPELL_FOCUSED_ANGER                         = 57688,
+    SPELL_SQUEEZE                               = 64125,
+    SPELL_SQUEEZE_H                             = 64126,
     
     // Old God phase spells
     SPELL_LUNATIC_GAZE_YOGG                     = 64163,
@@ -141,10 +145,10 @@ enum
     SPELL_IMMORTAL_GUARDIAN                     = 64158,
 
     // death ray spells
-    SPELL_DEATH_RAY_TRIGG                       = 63883,
-    SPELL_DEATH_RAY_VISUAL_WARN                 = 63882,
-    SPELL_DEATH_RAY_VISUAL_DAMAGE               = 63886,
-    SPELL_DEATH_RAY_VISUAL_ORIGIN               = 63893,
+    SPELL_DEATH_RAY_TRIGG                       = 63883,                    // damage spell
+    SPELL_DEATH_RAY_VISUAL_WARN                 = 63882,                    // channeled; target creature 33882
+    SPELL_DEATH_RAY_VISUAL_DAMAGE               = 63886,                    // channeled; target creature 33882
+    SPELL_DEATH_RAY_VISUAL_ORIGIN               = 63893,                    // visual for creature 33882
 
     // descend into madness spells
     SPELL_TELEPORT_PORTAL_VISUAL                = 64416,
@@ -152,6 +156,15 @@ enum
     SPELL_TELEPORT_TO_CHAMBER_ILLUSION          = 63997,
     SPELL_TELEPORT_TO_ICEECROWN_ILLUSION        = 63998,
     SPELL_TELEPORT_BACK_TO_MAIN_ROOM            = 63992,
+    
+    // immortal guardian spells
+    SPELL_EMPOWERED                             = 64161,
+    SPELL_EMPOWERED_MOD                         = 65294,
+    SPELL_RECENTLY_SPAWNED                      = 64497,
+    SPELL_SIMPLE_TELEPORT                       = 64195,
+    SPELL_DRAIN_LIFE                            = 64159,
+    SPELL_DRAIN_LIFE_H                          = 64160,
+    SPELL_WEAKENED                              = 64162,
 
     // summoned creatures
     NPC_DEATH_RAY                               = 33881,
@@ -329,9 +342,19 @@ struct MANGOS_DLL_DECL boss_saraAI : public Scripted_NoMovementAI, private Dialo
         }
         else if (pSummoned->GetEntry() == NPC_DEATH_ORB)
         {
-            // ToDo: summon 2 death rays
+            float fX, fY, fZ;
+            for (uint8 i = 0; i < 4; ++i)
+            {
+                float fDist = frand(30.0f, 45.0f);
+                float fAng = frand(0, 2 * M_PI_F);
+                m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, fDist, fAng);
+                m_creature->SummonCreature(NPC_DEATH_RAY, fX, fY, fZ, 0, TEMPSUMMON_TIMED_DESPAWN, 20000);
+            }
+            
             pSummoned->CastSpell(pSummoned, SPELL_DEATH_RAY_VISUAL_ORIGIN, true);
         }
+        else if (pSummoned->GetEntry() == NPC_DEATH_RAY)
+            pSummoned->CastSpell(pSummoned, SPELL_DEATH_RAY_VISUAL_WARN, false);
     }
     
     void JustDidDialogueStep(int32 iEntry) override
@@ -379,7 +402,7 @@ struct MANGOS_DLL_DECL boss_saraAI : public Scripted_NoMovementAI, private Dialo
 
                 if (castResult == CAST_OK)
                 {
-                    if (urand(0, 1))
+                    if (roll_chance_i(30))
                         DoScriptText(urand(0, 1) ? SAY_SARA_HELP_1 : SAY_SARA_HELP_2, m_creature);
 
                     m_uiSarasSpellTimer = 5000;
@@ -397,7 +420,12 @@ struct MANGOS_DLL_DECL boss_saraAI : public Scripted_NoMovementAI, private Dialo
             if (m_uiPsychosisTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_PHYCHOSIS : SPELL_PHYCHOSIS_H) == CAST_OK)
+                {
+                    if (roll_chance_i(10))
+                        DoScriptText(SAY_SARA_PHYCHOSIS, m_creature);
+                    
                     m_uiPsychosisTimer = urand(3000, 4000);
+                }
             }
             else
                 m_uiPsychosisTimer -= uiDiff;
@@ -420,6 +448,9 @@ struct MANGOS_DLL_DECL boss_saraAI : public Scripted_NoMovementAI, private Dialo
 
             if (m_uiDeathRayTimer < uiDiff)
             {
+                if (urand(0, 1))
+                    DoScriptText(SAY_SARA_DEATH_RAY, m_creature);
+                
                 // spawn death orb at predefined location
                 m_creature->CastSpell(1980.43f, -25.7708f, 351.5418f, SPELL_DEATH_RAY_SUMMON, true);
                 m_uiDeathRayTimer = 20000;
@@ -455,11 +486,13 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public Scripted_NoMovementAI
     
     uint32 m_uiLunaticGazeTimer;
     uint32 m_uiDeafeningRoarTimer;
+    uint32 m_uiShadowBeaconTimer;
 
     void Reset() override
     {
         m_uiPhase = PHASE_VISIONS;
         m_uiLunaticGazeTimer = 15000;
+        m_uiShadowBeaconTimer = 45000;
         
         if (m_pInstance)
             m_uiDeafeningRoarTimer = (!m_bIsRegularMode && m_pInstance->GetData(TYPE_YOGGSARON_HARD) >= 1) ? 20000 : 0;
@@ -489,7 +522,8 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public Scripted_NoMovementAI
         {
             DoScriptText(SAY_PHASE_3, m_creature);
             m_uiPhase = PHASE_OLD_GOD;
-            DoCastSpellIfCan(m_creature, SPELL_SHADOW_BEACON);
+            m_creature->RemoveAurasDueToSpell(SPELL_KNOCK_AWAY);
+            m_creature->RemoveAurasDueToSpell(SPELL_SHADOWY_BARRIER_YOGG);
             
             if (m_pInstance)
             {
@@ -505,17 +539,28 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public Scripted_NoMovementAI
             if (m_uiLunaticGazeTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_LUNATIC_GAZE_YOGG) == CAST_OK)
-                    m_uiLunaticGazeTimer = 15000;
+                    m_uiLunaticGazeTimer = 12000;
             }
             else
                 m_uiLunaticGazeTimer -= uiDiff;
+            
+            if (m_uiShadowBeaconTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_BEACON) == CAST_OK)
+                    m_uiShadowBeaconTimer = 45000;
+            }
+            else
+                m_uiShadowBeaconTimer -= uiDiff;
             
             if (m_uiDeafeningRoarTimer)
             {
                 if (m_uiDeafeningRoarTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_DEAFENING_ROAR) == CAST_OK)
+                    {
+                        DoScriptText(EMOTE_DEAFENING_ROAR, m_creature);
                         m_uiDeafeningRoarTimer = 20000;
+                    }
                 }
                 else
                     m_uiDeafeningRoarTimer -= uiDiff;
@@ -615,6 +660,13 @@ struct MANGOS_DLL_DECL npc_voice_yogg_saronAI : public Scripted_NoMovementAI
                 pSummoned->CastSpell(pSummoned, SPELL_ERUPT, true);
                 pSummoned->SetInCombatWithZone();
                 break;
+            case NPC_IMMORTAL_GUARDIAN:
+                pSummoned->CastSpell(pSummoned, SPELL_EMPOWERED, true);
+                pSummoned->CastSpell(pSummoned, SPELL_EMPOWERED_MOD, true);
+                pSummoned->CastSpell(pSummoned, SPELL_RECENTLY_SPAWNED, true);
+                pSummoned->CastSpell(pSummoned, SPELL_SIMPLE_TELEPORT, true);
+                pSummoned->SetInCombatWithZone();
+                break;
         }
     }
     
@@ -673,7 +725,7 @@ struct MANGOS_DLL_DECL npc_voice_yogg_saronAI : public Scripted_NoMovementAI
                 for (uint8 i = 0; i < m_uiMaxPortals; ++i)
                 {
                     fAng = (2 * M_PI_F / m_uiMaxPortals) * i;
-                    m_creature->GetClosePoint(fX, fY, fZ, 0, 22.0f, fAng);
+                    m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, 22.0f, fAng);
                     m_creature->SummonCreature(NPC_DESCEND_INTO_MADNESS, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
                 }
                 m_uiMadnessTimer = 90000;
@@ -779,6 +831,100 @@ CreatureAI* GetAI_npc_guardian_of_yogg(Creature* pCreature)
 }
 
 /*######
+## npc_immortal_guardian
+######*/
+
+struct MANGOS_DLL_DECL npc_immortal_guardianAI : public ScriptedAI
+{
+    npc_immortal_guardianAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        Reset();
+    }
+
+    bool m_bIsRegularMode;
+    bool m_bWeakened;
+
+    uint32 m_uiDrainLifeTimer;
+
+    void Reset() override
+    {
+        m_uiDrainLifeTimer = 10000;
+        m_bWeakened = false;
+    }
+
+    void DamageTaken(Unit* pDealer, uint32& uiDamage) override
+    {
+        if (pDealer->GetEntry() == NPC_THORIM_HELPER)
+            return;
+
+        if (uiDamage >= m_creature->GetHealth())
+        {
+            uiDamage = 0;
+
+            // mark as weakened for Thorim
+            if (!m_bWeakened)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_WEAKENED) == CAST_OK)
+                    m_bWeakened = true;
+            }
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_uiDrainLifeTimer < uiDiff)
+        {
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            {
+                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_DRAIN_LIFE : SPELL_DRAIN_LIFE_H) == CAST_OK)
+                    m_uiDrainLifeTimer = urand(10000, 15000);
+            }
+        }
+        else
+            m_uiDrainLifeTimer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_immortal_guardian(Creature* pCreature)
+{
+    return new npc_immortal_guardianAI(pCreature);
+}
+
+/*######
+## npc_constrictor_tentacle
+######*/
+
+struct MANGOS_DLL_DECL npc_constrictor_tentacleAI : public Scripted_NoMovementAI
+{
+    npc_constrictor_tentacleAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    {
+        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        Reset();
+    }
+
+    bool m_bIsRegularMode;
+
+    void Reset() override { }
+
+    void JustDied(Unit* /*pKiller*/) override
+    {
+        if (Player* pSummoner = m_creature->GetMap()->GetPlayer(((TemporarySummon*)m_creature)->GetSummonerGuid()))
+            pSummoner->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_SQUEEZE : SPELL_SQUEEZE_H);
+    }
+};
+
+CreatureAI* GetAI_npc_constrictor_tentacle(Creature* pCreature)
+{
+    return new npc_constrictor_tentacleAI(pCreature);
+}
+
+/*######
 ## npc_ominous_cloud
 ######*/
 
@@ -836,6 +982,48 @@ CreatureAI* GetAI_npc_ominous_cloud(Creature* pCreature)
     return new npc_ominous_cloudAI(pCreature);
 }
 
+/*######
+## npc_death_ray
+######*/
+
+struct MANGOS_DLL_DECL npc_death_rayAI : public ScriptedAI
+{
+    npc_death_rayAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    uint32 m_uiDeathRayTimer;
+
+    void Reset() override
+    {
+        m_uiDeathRayTimer = 5000;
+    }
+
+    void AttackStart(Unit* /*pWho*/) override { }
+    void MoveInLineOfSight(Unit* pWho) override { }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiDeathRayTimer)
+        {
+            if (m_uiDeathRayTimer <= uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_DEATH_RAY_VISUAL_DAMAGE, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                {
+                    DoCastSpellIfCan(m_creature, SPELL_DEATH_RAY_TRIGG, CAST_TRIGGERED);
+                    m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10.0f);
+                    m_uiDeathRayTimer = 0;
+                }
+            }
+            else
+                m_uiDeathRayTimer -= uiDiff;
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_death_ray(Creature* pCreature)
+{
+    return new npc_death_rayAI(pCreature);
+}
+
 void AddSC_boss_yogg_saron()
 {
     Script* pNewScript;
@@ -861,7 +1049,22 @@ void AddSC_boss_yogg_saron()
     pNewScript->RegisterSelf();
     
     pNewScript = new Script;
+    pNewScript->Name = "npc_immortal_guardian";
+    pNewScript->GetAI = &GetAI_npc_immortal_guardian;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_constrictor_tentacle";
+    pNewScript->GetAI = &GetAI_npc_constrictor_tentacle;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
     pNewScript->Name = "npc_ominous_cloud";
     pNewScript->GetAI = &GetAI_npc_ominous_cloud;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_death_ray";
+    pNewScript->GetAI = &GetAI_npc_death_ray;
     pNewScript->RegisterSelf();
 }
