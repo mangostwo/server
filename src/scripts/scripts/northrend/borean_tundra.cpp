@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Borean_Tundra
 SD%Complete: 100
-SDComment: Quest support: 11570, 11590, 11728, 11865, 11889, 11897, 11919, 11940
+SDComment: Quest support: 11570, 11590, 11673, 11728, 11865, 11889, 11897, 11919, 11940
 SDCategory: Borean Tundra
 EndScriptData */
 
@@ -29,6 +29,7 @@ npc_beryl_sorcerer
 npc_captured_beryl_sorcerer
 npc_nexus_drake_hatchling
 npc_scourged_flamespitter
+npc_bonker_togglevolt
 EndContentData */
 
 #include "precompiled.h"
@@ -955,6 +956,87 @@ bool EffectAuraDummy_npc_scourged_flamespitter(const Aura* pAura, bool bApply)
     return false;
 }
 
+/*#####
+## npc_bonker_togglevolt
+#####*/
+
+enum
+{
+    SAY_BONKER_START            = -1001013,
+    SAY_BONKER_GO               = -1001014,
+    SAY_BONKER_AGGRO            = -1001015,
+    SAY_BONKER_LEFT             = -1001016,
+    SAY_BONKER_COMPLETE         = -1001017,
+
+    QUEST_ID_GET_ME_OUTA_HERE   = 11673,
+};
+
+struct MANGOS_DLL_DECL npc_bonker_togglevoltAI : public npc_escortAI
+{
+    npc_bonker_togglevoltAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+
+    void Reset() override { }
+
+    void Aggro(Unit* /*pWho*/) override
+    {
+        if (urand(0, 1))
+            DoScriptText(SAY_BONKER_AGGRO, m_creature);
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    {
+        if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
+        {
+            m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+            Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue));
+        }
+    }
+
+    void WaypointReached(uint32 uiPointId) override
+    {
+        switch (uiPointId)
+        {
+            case 0:
+                DoScriptText(SAY_BONKER_START, m_creature);
+                break;
+            case 1:
+                DoScriptText(SAY_BONKER_GO, m_creature);
+                // WORKAROUND ALERT - temp ignore pathfinding until we pass the pool
+                // creature cannont find a proper swimming path in this area, so ignore pathfinding for the moment
+                m_creature->addUnitState(UNIT_STAT_IGNORE_PATHFINDING);
+                break;
+            case 3:
+                DoScriptText(SAY_BONKER_LEFT, m_creature);
+                // WORKAROUND END - resume pathfinding
+                m_creature->clearUnitState(UNIT_STAT_IGNORE_PATHFINDING);
+                break;
+            case 32:
+                if (Player* pPlayer = GetPlayerForEscort())
+                {
+                    pPlayer->GroupEventHappens(QUEST_ID_GET_ME_OUTA_HERE, m_creature);
+                    DoScriptText(SAY_BONKER_COMPLETE, m_creature, pPlayer);
+                }
+                break;
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_bonker_togglevolt(Creature* pCreature)
+{
+    return new npc_bonker_togglevoltAI(pCreature);
+}
+
+bool QuestAccept_npc_bonker_togglevolt(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+{
+    if (pQuest->GetQuestId() == QUEST_ID_GET_ME_OUTA_HERE)
+    {
+        pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
+        return true;
+    }
+
+    return false;
+}
+
 void AddSC_borean_tundra()
 {
     Script* pNewScript;
@@ -1003,5 +1085,11 @@ void AddSC_borean_tundra()
     pNewScript->Name = "npc_scourged_flamespitter";
     pNewScript->GetAI = &GetAI_npc_scourged_flamespitter;
     pNewScript->pEffectAuraDummy = &EffectAuraDummy_npc_scourged_flamespitter;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_bonker_togglevolt";
+    pNewScript->GetAI = &GetAI_npc_bonker_togglevolt;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_bonker_togglevolt;
     pNewScript->RegisterSelf();
 }

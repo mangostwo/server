@@ -805,7 +805,7 @@ struct MANGOS_DLL_DECL npc_firecrackers_bunnyAI : public ScriptedAI
                 do
                 {
                     // check for alive and out of combat only
-                    if ((*batItr)->isAlive() && !(*batItr)->getVictim())
+                    if ((*batItr)->IsAlive() && !(*batItr)->getVictim())
                         pBat = *batItr;
 
                     ++batItr;

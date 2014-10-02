@@ -28,6 +28,7 @@ npc_decaying_ghoul
 EndContentData */
 
 #include "precompiled.h"
+#include "TemporarySummon.h"
 
 /*######
 ## npc_gurgthock

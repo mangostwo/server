@@ -194,8 +194,8 @@ void WorldSession::HandleLfgGetPartyInfo(WorldPacket& recv_data)
             continue;
         
         uint32 pPlayerGuid = pGroupPlayer->GetGUIDLow();
-        if (gPlayerGuid != guid)
-            groupMap[gPlayerGuid] = sLFGMgr.FindRandomDungeonsNotForPlayer(pGroupPlayer);
+        if (pPlayerGuid != guid)
+            groupMap[pPlayerGuid] = sLFGMgr.FindRandomDungeonsNotForPlayer(pGroupPlayer);
     }
     
     uint32 packetSize = 0;
