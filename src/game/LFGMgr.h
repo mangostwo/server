@@ -176,7 +176,17 @@ public:
     LFGMgr();
     ~LFGMgr();
     
-    void JoinLFG(Player* plr);
+    /**
+     * @brief Attempt to join the dungeon finder queue, as long as the player(s)
+     *        fit the criteria.
+     * 
+     * @param roles Roles selected in lfg window
+     * @param dungeons List of dungeon(s) selected
+     * @param comments Comments made by the player
+     * @param plr Pointer to the player sending the packet
+     */
+    void JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string comments, Player* plr);
+    
     void LeaveLFG();
     
     /**

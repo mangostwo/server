@@ -238,6 +238,7 @@ class MANGOS_DLL_SPEC Group
         bool IsFull() const { return (m_groupType == GROUPTYPE_NORMAL) ? (m_memberSlots.size() >= MAX_GROUP_SIZE) : (m_memberSlots.size() >= MAX_RAID_SIZE); }
         bool isRaidGroup() const { return m_groupType & GROUPTYPE_RAID; }
         bool isBGGroup()   const { return m_bgGroup != NULL; }
+        bool isLFGGroup() const { return m_groupType & GROUPTYPE_LFD; }
         bool IsCreated()   const { return GetMembersCount() > 0; }
         ObjectGuid GetLeaderGuid() const { return m_leaderGuid; }
         const char* GetLeaderName() const { return m_leaderName.c_str(); }

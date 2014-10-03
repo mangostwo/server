@@ -60,6 +60,7 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recv_data)
 
     recv_data >> comment;                                   // lfg comment
 
+    sLFGMgr.JoinLFG(roles, dungeons, comment, GetPlayer()); // Attempt to join lfg system
     // SendLfgJoinResult(ERR_LFG_OK);
     // SendLfgUpdate(false, LFG_UPDATE_JOIN, dungeons[0]);
 }
@@ -67,6 +68,15 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recv_data)
 void WorldSession::HandleLfgLeaveOpcode(WorldPacket& /*recv_data*/)
 {
     DEBUG_LOG("CMSG_LFG_LEAVE");
+    
+    Player* pPlayer = GetPlayer();
+    
+    ObjectGuid guid = pPlayer->GetObjectGuid();
+    Group* pGroup = pPlayer->GetGroup();
+    
+    // If it's just one player they can leave, otherwise just the group leader
+    //if (!pGroup || pGroup->IsLeader(guid))
+    //    sLFGMgr.LeaveLFG();
 
     // SendLfgUpdate(false, LFG_UPDATE_LEAVE, 0);
 }

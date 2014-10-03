@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: boss_yogg_saron
-SD%Complete: 75%
-SDComment: Keeper helpers NYI. Illusion cinematics NYI. Sanity support NYI.
+SD%Complete: 85%
+SDComment: Illusion cinematics NYI.
 SDCategory: Ulduar
 EndScriptData */
 
@@ -27,6 +27,7 @@ EndScriptData */
 
 enum
 {
+    // phase 1 yells
     SAY_SARA_INTRO_1                            = -1603197,
     SAY_SARA_INTRO_2                            = -1603198,
     SAY_SARA_AGGRO                              = -1603199,
@@ -36,22 +37,25 @@ enum
     SAY_SARA_SLAY_2                             = -1603204,
     SAY_WIPE_PHASE_1                            = -1603205,
 
+    // phase 2 transition yells
     SAY_PHASE_2_INTRO_1                         = -1603206,
     SAY_PHASE_2_INTRO_2                         = -1603262,
     SAY_PHASE_2_INTRO_3                         = -1603263,
     SAY_PHASE_2_INTRO_4                         = -1603264,
     SAY_PHASE_2_INTRO_5                         = -1603265,
+    
+    // phase 2 and 3 yells
     SAY_SARA_PHYCHOSIS                          = -1603207,
     SAY_SARA_DEATH_RAY                          = -1603208,
-
     SAY_MADNESS                                 = -1603209,
     SAY_PHASE_3                                 = -1603210,
-    SAY_SLAY_1                                  = -1603211,
-    SAY_SLAY_2                                  = -1603212,
+    SAY_SLAY                                    = -1603212,
     SAY_DEATH                                   = -1603213,
     SAY_TO_INSANE_1                             = -1603214,
     SAY_TO_INSANE_2                             = -1603215,
+    SOUND_ID_LUNATIC_GAZE                       = 15757,
 
+    // icecrown illusion yells
     SAY_LICH_KING_1                             = -1603216,
     SAY_CHAMPION_1                              = -1603217,
     SAY_CHAMPION_2                              = -1603218,
@@ -59,12 +63,14 @@ enum
     SAY_YOGG_V3_1                               = -1603220,
     SAY_YOGG_V3_2                               = -1603221,
 
+    // chamber illusion yells
     SAY_NELTHARION_1                            = -1603222,
     SAY_YSERA                                   = -1603223,
     SAY_NELTHARION_2                            = -1603224,
     SAY_MALYGOS                                 = -1603225,
     SAY_YOGG_V2                                 = -1603226,
 
+    // stormwind illusion yells
     SAY_GARONA_1                                = -1603227,
     SAY_GARONA_2                                = -1603228,
     SAY_YOGG_V1_1                               = -1603229,
@@ -73,10 +79,12 @@ enum
     SAY_GARONA_4                                = -1603232,
     SAY_YOGG_V1_3                               = -1603233,
 
+    // emotes
     EMOTE_VISION_BLAST                          = -1603234,
     EMOTE_SHATTER_BLAST                         = -1603235,
     EMOTE_CLOUD_BOIL                            = -1603261,
     EMOTE_DEAFENING_ROAR                        = -1603266,
+    EMOTE_EMPOWERING_SHADOWS                    = -1603211,
 
     // generic spells
     SPELL_EXTINGUISH_LIFE                       = 64166,                    // berserk spell
@@ -98,8 +106,8 @@ enum
 
     // Voice of Yogg spells
     SPELL_SANITY                                = 63786,                    // add sanity when encounter starts
+    SPELL_INSANE                                = 63120,                    // charm effect on players
     SPELL_INSANE_PERIODIC                       = 64554,                    // decrease sanity
-    SPELL_CLEAR_INSANE                          = 63122,                    // clear all the sanity and insane on wipe / death
     SPELL_SUMMON_GUARDIAN_YOGG                  = 62978,                    // cast by npc 33280 on an Ominus cloud
 
     // Yogg transition spells
@@ -142,8 +150,8 @@ enum
     SPELL_NONDESCRIPT_ARMOR                     = 64013,                    // stun auras for illusions
     SPELL_NONDESCRIPT_CREATURE                  = 64010,
     SPELL_GRIM_REPRISAL                         = 63305,                    // procs 64039 on damage taken
-    SPELL_SHATTERED_ILLUSION                    = 64173,
-    SPELL_SHATTERED_ILLUSION_REMOVE             = 65238,                    // remove aura 64173
+    SPELL_SHATTERED_ILLUSION                    = 64173,                    // send event 21669
+    SPELL_SHATTERED_ILLUSION_REMOVE             = 65238,                    // remove aura 64173; send event 21671
     SPELL_INDUCE_MADNESS                        = 64059,                    // reduce sanity by 100% to all players with aura 63988
     
     // Old God phase spells
@@ -220,8 +228,8 @@ enum
     SPELL_SUMMON_SANITY_WELL                    = 64170,                    // sends event 21432; used to spawn npc 33991
 
     // sanity well spells
-    SPELL_SANITY_WELL                           = 64169,
-    SPELL_SANITY_WELL_VISUAL                    = 63288,
+    //SPELL_SANITY_WELL                           = 64169,
+    //SPELL_SANITY_WELL_VISUAL                    = 63288,
 
     // Hodir spells
     SPELL_FORTITUDE_OF_FROST                    = 62650,
@@ -442,28 +450,44 @@ struct MANGOS_DLL_DECL boss_saraAI : public Scripted_NoMovementAI, private Dialo
         
         uint8 uiKeeperCount = 0;
         
-        if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_FREYA_HELPER, true))
+        if (m_pInstance->GetData(TYPE_KEEPER_FREYA) == DONE)
         {
-            // ToDo: implement abilities
-            ++uiKeeperCount;
+            if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_FREYA_HELPER))
+            {
+                pHelper->CastSpell(pHelper, SPELL_SUMMON_SANITY_WELL, false);
+                pHelper->CastSpell(pHelper, SPELL_RESILIENCE_OF_NATURE, true);
+                ++uiKeeperCount;
+            }
         }
         
-        if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_HODIR_HELPER, true))
+        if (m_pInstance->GetData(TYPE_KEEPER_HODIR) == DONE)
         {
-            // ToDo: implement abilities
-            ++uiKeeperCount;
+            if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_HODIR_HELPER))
+            {
+                pHelper->CastSpell(pHelper, SPELL_HODIRS_PROTECTIVE_GAZE, false);
+                pHelper->CastSpell(pHelper, SPELL_FORTITUDE_OF_FROST, true);
+                ++uiKeeperCount;
+            }
         }
         
-        if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON_HELPER, true))
+        if (m_pInstance->GetData(TYPE_KEEPER_MIMIRON) == DONE)
         {
-            // ToDo: implement abilities
-            ++uiKeeperCount;
+            if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON_HELPER))
+            {
+                pHelper->CastSpell(pHelper, SPELL_SPEED_OF_INVENTION, true);
+                SendAIEvent(AI_EVENT_START_EVENT, m_creature, pHelper);
+                ++uiKeeperCount;
+            }
         }
         
-        if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_THORIM_HELPER, true))
+        if (m_pInstance->GetData(TYPE_KEEPER_THORIM) == DONE)
         {
-            // ToDo: implement abilities
-            ++uiKeeperCount;
+            if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_THORIM_HELPER))
+            {
+                pHelper->CastSpell(pHelper, SPELL_TITANIC_STORM, false);
+                pHelper->CastSpell(pHelper, SPELL_FURY_OF_THE_STORM, true);
+                ++uiKeeperCount;
+            }
         }
         
         // set hard mode data
@@ -620,6 +644,22 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public Scripted_NoMovementAI
         }
     }
     
+    void KilledUnit(Unit* pVictim) override
+    {
+        if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            return;
+        
+        DoScriptText(SAY_SLAY, m_creature);
+    }
+    
+    void JustDied(Unit* /*pKiller*/) override
+    {
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_YOGGSARON, DONE);
+        
+        DoScriptText(SAY_DEATH, m_creature);
+    }
+    
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -631,7 +671,12 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public Scripted_NoMovementAI
             if (m_uiLunaticGazeTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_LUNATIC_GAZE_YOGG) == CAST_OK)
+                {
+                    if (urand(0, 1))
+                        DoPlaySoundToSet(m_creature, SOUND_ID_LUNATIC_GAZE);
+                    
                     m_uiLunaticGazeTimer = 12000;
+                }
             }
             else
                 m_uiLunaticGazeTimer -= uiDiff;
@@ -639,7 +684,10 @@ struct MANGOS_DLL_DECL boss_yogg_saronAI : public Scripted_NoMovementAI
             if (m_uiShadowBeaconTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_BEACON) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_EMPOWERING_SHADOWS, m_creature);
                     m_uiShadowBeaconTimer = 45000;
+                }
             }
             else
                 m_uiShadowBeaconTimer -= uiDiff;
@@ -691,6 +739,7 @@ struct MANGOS_DLL_DECL npc_voice_yogg_saronAI : public Scripted_NoMovementAI
     uint8 m_uiPortalsCount;
 
     uint32 m_uiBerserkTimer;
+    uint32 m_uiSanityCheckTimer;
     uint32 m_uiSummonGuardianTimer;
     uint32 m_uiCrusherTentacleTimer;
     uint32 m_uiCorruptorTentacleTimer;
@@ -704,6 +753,7 @@ struct MANGOS_DLL_DECL npc_voice_yogg_saronAI : public Scripted_NoMovementAI
     {
         m_uiPhase                       = PHASE_INTRO;
         m_uiBerserkTimer                = 0;
+        m_uiSanityCheckTimer            = 0;
         m_uiSummonGuardianTimer         = 1000;
         m_uiCrusherTentacleTimer        = 1000;
         m_uiCorruptorTentacleTimer      = 1000;
@@ -727,6 +777,10 @@ struct MANGOS_DLL_DECL npc_voice_yogg_saronAI : public Scripted_NoMovementAI
             case AI_EVENT_START_EVENT:
                 m_uiPhase = PHASE_SARA;
                 m_uiBerserkTimer = 15 * MINUTE * IN_MILLISECONDS;
+                
+                // start sanity
+                m_uiSanityCheckTimer = 15000;
+                DoCastSpellIfCan(m_creature, SPELL_SANITY);
                 break;
             case AI_EVENT_START_EVENT_A:
                 m_uiPhase = PHASE_VISIONS;
@@ -774,6 +828,15 @@ struct MANGOS_DLL_DECL npc_voice_yogg_saronAI : public Scripted_NoMovementAI
         }
     }
     
+    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+    {
+        if (pSpell->Id == SPELL_INSANE && pTarget->GetTypeId() == TYPEID_PLAYER && m_pInstance)
+        {
+            if (Creature* pYogg = m_pInstance->GetSingleCreatureFromStorage(NPC_YOGGSARON))
+                DoScriptText(urand(0, 1) ? SAY_TO_INSANE_1 : SAY_TO_INSANE_2, pYogg, pTarget);
+        }
+    }
+    
     void UpdateAI(const uint32 uiDiff) override
     {
         if (m_uiBerserkTimer)
@@ -785,6 +848,17 @@ struct MANGOS_DLL_DECL npc_voice_yogg_saronAI : public Scripted_NoMovementAI
             }
             else
                 m_uiBerserkTimer -= uiDiff;
+        }
+        
+        if (m_uiSanityCheckTimer)
+        {
+            if (m_uiSanityCheckTimer <= uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_INSANE_PERIODIC) == CAST_OK)
+                    m_uiSanityCheckTimer = 0;
+            }
+            else
+                m_uiSanityCheckTimer -= uiDiff;
         }
         
         if (m_uiPhase == PHASE_SARA)
@@ -838,6 +912,9 @@ struct MANGOS_DLL_DECL npc_voice_yogg_saronAI : public Scripted_NoMovementAI
                 // inform the brain about the current illusion
                 if (Creature* pBrain = m_pInstance->GetSingleCreatureFromStorage(NPC_YOGG_BRAIN))
                     SendAIEvent(AI_EVENT_START_EVENT, m_creature, pBrain, m_uiPortalsCount);
+                
+                if (Creature* pYogg = m_pInstance->GetSingleCreatureFromStorage(NPC_YOGGSARON))
+                    DoScriptText(SAY_MADNESS, pYogg);
                 
                 float fX, fY, fZ, fAng;
                 for (uint8 i = 0; i < m_uiMaxPortals; ++i)
@@ -1117,7 +1194,24 @@ struct MANGOS_DLL_DECL npc_guardian_of_yoggAI : public ScriptedAI
         if (m_pInstance)
         {
             if (m_pInstance->GetData(TYPE_YOGGSARON) != FAIL)
+            {
+                if (Creature* pVoice = m_pInstance->GetSingleCreatureFromStorage(NPC_VOICE_OF_YOGG))
+                {
+                    Map::PlayerList const& lPlayers = m_pInstance->instance->GetPlayers();
+                    
+                    if (lPlayers.isEmpty())
+                        return;
+                    
+                    // whisper to all players
+                    for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+                    {
+                        if (Player* pPlayer = itr->getSource())
+                            DoScriptText(SAY_WIPE_PHASE_1, pVoice, pPlayer);
+                    }
+                }
+                
                 m_pInstance->SetData(TYPE_YOGGSARON, FAIL);
+            }
         }
 
         m_creature->ForcedDespawn();
@@ -1448,6 +1542,71 @@ CreatureAI* GetAI_npc_laughing_skull(Creature* pCreature)
     return new npc_laughing_skullAI(pCreature);
 }
 
+/*######
+## npc_keeper_mimiron
+######*/
+
+struct MANGOS_DLL_DECL npc_keeper_mimironAI : public Scripted_NoMovementAI
+{
+    npc_keeper_mimironAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+
+    uint32 m_uiMatrixTimer;
+
+    void Reset() override
+    {
+        m_uiMatrixTimer = 0;
+    }
+
+    void AttackStart(Unit* /*pWho*/) override { }
+    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    {
+        if (eventType == AI_EVENT_START_EVENT && pInvoker->GetEntry() == NPC_SARA)
+            m_uiMatrixTimer = 30000;
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiMatrixTimer)
+        {
+            if (m_uiMatrixTimer <= uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_DESTABILIZATION_MATRIX) == CAST_OK)
+                    m_uiMatrixTimer = 30000;
+            }
+            else
+                m_uiMatrixTimer -= uiDiff;
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_keeper_mimiron(Creature* pCreature)
+{
+    return new npc_keeper_mimironAI(pCreature);
+}
+
+/*######
+## npc_keeper_thorim
+######*/
+
+// TODO Remove this 'script' when combat can be proper prevented from core-side
+struct MANGOS_DLL_DECL npc_keeper_thorimAI : public Scripted_NoMovementAI
+{
+    npc_keeper_thorimAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+
+    void Reset() override { }
+    void AttackStart(Unit* /*pWho*/) override { }
+    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+    void UpdateAI(const uint32 /*uiDiff*/) override { }
+};
+
+CreatureAI* GetAI_npc_keeper_thorim(Creature* pCreature)
+{
+    return new npc_keeper_thorimAI(pCreature);
+}
+
+
 void AddSC_boss_yogg_saron()
 {
     Script* pNewScript;
@@ -1507,5 +1666,15 @@ void AddSC_boss_yogg_saron()
     pNewScript = new Script;
     pNewScript->Name = "npc_laughing_skull";
     pNewScript->GetAI = &GetAI_npc_laughing_skull;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_keeper_mimiron";
+    pNewScript->GetAI = &GetAI_npc_keeper_mimiron;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_keeper_thorim";
+    pNewScript->GetAI = &GetAI_npc_keeper_thorim;
     pNewScript->RegisterSelf();
 }

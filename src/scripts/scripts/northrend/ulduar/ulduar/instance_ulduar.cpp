@@ -36,6 +36,7 @@ enum
     SAY_MIMIRON_HELP                        = -1603195,
     
     SPELL_KEEPER_ACTIVE                     = 62647,
+    SPELL_CLEAR_INSANE                      = 63122,       // clear all the sanity and insane on wipe / death
 };
 
 static const DialogueEntry aUlduarDialogue[] =
@@ -207,6 +208,10 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
         case NPC_HODIR:
         case NPC_THORIM:
         case NPC_FREYA:
+        case NPC_THORIM_HELPER:
+        case NPC_MIMIRON_HELPER:
+        case NPC_HODIR_HELPER:
+        case NPC_FREYA_HELPER:
             break;
 
         case NPC_ULDUAR_COLOSSUS:
@@ -755,9 +760,9 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                 return;
             m_auiEncounter[uiType] = uiData;
             DoUseDoorOrButton(GO_YOGG_GATE);
-            if (uiData == FAIL)
+            if (uiData == FAIL || uiData == DONE)
             {
-                // reset encounter
+                // reset/cleanup encounter
                 for (GuidList::const_iterator itr = m_lOminousCloudsGuids.begin(); itr != m_lOminousCloudsGuids.end(); ++itr)
                 {
                     if (Creature* pCloud = instance->GetCreature(*itr))
@@ -766,7 +771,7 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
 
                 if (Creature* pVoice = GetSingleCreatureFromStorage(NPC_VOICE_OF_YOGG))
                 {
-                    // ToDo: clear insane / sanity
+                    pVoice->CastSpell(pVoice, SPELL_CLEAR_INSANE, true);
                     pVoice->ForcedDespawn();
                 }
 
@@ -783,9 +788,22 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                 if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_BRAIN_DOOR_STORMWIND))
                     pDoor->ResetDoorOrButton();
                 
-                // ToDo: reset keeper helpers
+                // reset all helpers
+                for (uint8 i = 0; i < countof(m_aKeeperHelperLocs); ++i)
+                {
+                    if (GetData(m_aKeeperHelperLocs[i].uiType == DONE))
+                    {
+                        if (Creature* pHelper = GetSingleCreatureFromStorage(m_aKeeperHelperLocs[i].uiEntry))
+                        {
+                            pHelper->AI()->EnterEvadeMode();
+                            pHelper->CastSpell(pHelper, SPELL_KEEPER_ACTIVE, true);
+                        }
+                    }
+                }
                 
-                m_uiYoggResetTimer = 60000;
+                // full reset only on fail
+                if (uiData == FAIL)
+                    m_uiYoggResetTimer = 60000;
             }
             else if (uiData == IN_PROGRESS)
                 DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_YOGG_ID);

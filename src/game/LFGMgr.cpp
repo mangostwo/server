@@ -47,7 +47,7 @@ LFGMgr::~LFGMgr()
     m_playerData.clear();
 }
 
-void LFGMgr::JoinLFG(Player* plr)
+void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string comments, Player* plr)
 {
     
 }
