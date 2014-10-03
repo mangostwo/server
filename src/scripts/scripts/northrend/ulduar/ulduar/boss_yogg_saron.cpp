@@ -834,6 +834,8 @@ struct MANGOS_DLL_DECL npc_voice_yogg_saronAI : public Scripted_NoMovementAI
         {
             if (Creature* pYogg = m_pInstance->GetSingleCreatureFromStorage(NPC_YOGGSARON))
                 DoScriptText(urand(0, 1) ? SAY_TO_INSANE_1 : SAY_TO_INSANE_2, pYogg, pTarget);
+            
+            m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_DRIVE_CRAZY, false);
         }
     }
     

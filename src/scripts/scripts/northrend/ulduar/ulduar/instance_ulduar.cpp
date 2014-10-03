@@ -806,7 +806,11 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                     m_uiYoggResetTimer = 60000;
             }
             else if (uiData == IN_PROGRESS)
+            {
                 DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_YOGG_ID);
+                
+                SetSpecialAchievementCriteria(TYPE_ACHIEV_DRIVE_CRAZY, true);
+            }
             break;
 
             // Celestial Planetarium
@@ -1360,6 +1364,9 @@ bool instance_ulduar::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player c
         case ACHIEV_CRIT_ALONE_DARK_N:
         case ACHIEV_CRIT_ALONE_DARK_H:
             return GetData(TYPE_YOGGSARON_HARD) == 0;
+        case ACHIEV_CRIT_DRIVE_CRAZY_N:
+        case ACHIEV_CRIT_DRIVE_CRAZY_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_DRIVE_CRAZY];
 
         default:
             return false;
