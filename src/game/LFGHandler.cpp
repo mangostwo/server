@@ -364,28 +364,31 @@ void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
     SendPacket(&data);
 }
 
-void WorldSession::SendLfgJoinResult(LfgJoinResult result)
+void WorldSession::SendLfgJoinResult(LfgJoinResult result, LFGState state, partyForbidden lockedDungeons)
 {
-    //todo: send role check result after join result, then send
-    // a list of dungeons the party/player cannot join
-    WorldPacket data(SMSG_LFG_JOIN_RESULT, 0);
+    uint32 packetSize = 0;
+    for (partyForbidden::iterator it = lockedDungeons.begin(); it != lockedDungeons.end(); ++it)
+        packetSize += 12 + uint32(it->second.size()) * 8;
+    
+    WorldPacket data(SMSG_LFG_JOIN_RESULT, packetSize);
     data << uint32(result);
-    data << uint32(0); // ERR_LFG_ROLE_CHECK_FAILED_TIMEOUT = 3, ERR_LFG_ROLE_CHECK_FAILED_NOT_VIABLE = (value - 3 == result)
-
-    if (result == ERR_LFG_NO_SLOTS_PARTY)
+    data << uint32(state);
+    
+    if (!lockedDungeons.empty())
     {
-        uint8 count1 = 0;
-        data << uint8(count1);                              // players count?
-        /*for (uint32 i = 0; i < count1; ++i)
+        for (partyForbidden::iterator it = lockedDungeons.begin(); it != lockedDungeons.end(); ++it)
         {
-            data << uint64(0);                              // player guid?
-            uint32 count2 = 0;
-            for (uint32 j = 0; j < count2; ++j)
+            dungeonForbidden dungeonInfo = it->second;
+        
+            data << uint64(it->first); // object guid of player
+            data << uint32(dungeonInfo.size()); // amount of their locked dungeons
+        
+            for (dungeonForbidden::iterator itr = dungeonInfo.begin(); itr != dungeonInfo.end(); ++itr)
             {
-                data << uint32(0);                          // dungeon id/type
-                data << uint32(0);                          // lock status?
+                data << uint32(itr->first); // dungeon entry
+                data << uint32(itr->second); // reason for dungeon being forbidden/locked
             }
-        }*/
+        }
     }
 
     SendPacket(&data);

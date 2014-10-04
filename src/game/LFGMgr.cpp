@@ -178,6 +178,19 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
             partyLockedDungeons.clear();
         else
             result = (pGroup) ? ERR_LFG_NO_SLOTS_PARTY : ERR_LFG_NO_SLOTS_PLAYER;
+        
+        // If our result is not ERR_LFG_OK, send join result now with err message
+        if (result != ERR_LFG_OK)
+        {
+            plr->GetSession()->SendLfgJoinResult(result, LFG_STATE_NONE, partyLockedDungeons);
+            return;
+        }
+        else
+        {
+            currentInfo->comments = comments;
+            // if it's a group: begin role check
+            // if it's one player: place in queue
+        }
     }
 }
 
