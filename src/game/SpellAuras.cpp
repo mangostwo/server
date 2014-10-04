@@ -9892,6 +9892,20 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
             {
                 case 49039: spellId1 = 50397; break;        // Lichborne
 
+                case 48979:                                 // Butchery, rank 1
+                case 49483:                                 // Butchery, rank 2
+                {
+                    if (!m_target || m_target->getDeathState() != JUST_DIED)
+                        return;
+                    
+                    //todo: 2 runic power per 5 sec in combat (ranks 1 and 2)
+                    if(GetId() == 48979) // rank 1, 10 runic power.
+                        m_target->ModifyPower(POWER_RUNIC_POWER, (int32)10);
+                    else if(GetId() == 49483) // rank 2
+                        m_target->ModifyPower(POWER_RUNIC_POWER, (int32)20);
+                    
+                    break;
+                }
                 case 48263:                                 // Frost Presence
                 case 48265:                                 // Unholy Presence
                 case 48266:                                 // Blood Presence
