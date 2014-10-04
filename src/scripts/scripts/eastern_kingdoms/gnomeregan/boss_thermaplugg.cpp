@@ -69,7 +69,7 @@ struct MANGOS_DLL_DECL boss_thermapluggAI : public ScriptedAI
         m_bIsPhaseTwo = false;
         m_asBombFaces = NULL;
 
-        memset(&m_afSpawnPos, 0.0f, sizeof(m_afSpawnPos));
+        memset(&m_afSpawnPos, 0, sizeof(m_afSpawnPos));
         m_lLandedBombGUIDs.clear();
     }
 
