@@ -57,7 +57,7 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
      *  IV. Make sure logic follows LFG rules.
      */
     Group* pGroup = plr->GetGroup();
-    uint64 rawGuid = (pGroup) ? pGroup->GetObjectGuid().GetRawValue() ? plr->GetObjectGuid().GetRawValue();
+    uint64 rawGuid = (pGroup) ? pGroup->GetObjectGuid().GetRawValue() : plr->GetObjectGuid().GetRawValue();
     
     LFGPlayers* currentInfo = GetPlayerOrPartyData(rawGuid);
     
@@ -167,7 +167,7 @@ LfgJoinResult LFGMgr::GetJoinResult(Player* plr)
             uint8 currentMemberCount = 0;
             for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
             {
-                if (Player* pGroupPlr = itr->GetSource())
+                if (Player* pGroupPlr = itr->getSource())
                 {
                     // check if the group members are level 15+ to use finder
                     if (pGroupPlr->getLevel() < 15)

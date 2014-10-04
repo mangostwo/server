@@ -354,7 +354,7 @@ struct MANGOS_DLL_DECL boss_saraAI : public Scripted_NoMovementAI, private Dialo
     {
         // start the encounter on range check
         // ToDo: research if there is any intro available before the actual encounter starts
-        if (m_uiPhase == PHASE_INTRO && pWho->GetTypeId() == TYPEID_PLAYER && pWho->isAlive() && !((Player*)pWho)->isGameMaster() &&
+        if (m_uiPhase == PHASE_INTRO && pWho->GetTypeId() == TYPEID_PLAYER && pWho->IsAlive() && !((Player*)pWho)->isGameMaster() &&
             m_creature->IsWithinDistInMap(pWho, 70.0f) && pWho->IsWithinLOSInMap(m_creature))
         {
             m_uiPhase = PHASE_SARA;
@@ -411,7 +411,7 @@ struct MANGOS_DLL_DECL boss_saraAI : public Scripted_NoMovementAI, private Dialo
         }
     }
 
-    void JustSummoned(Creature* /*pSummoned*/) override
+    void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_YOGGSARON)
         {

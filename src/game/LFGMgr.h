@@ -45,7 +45,6 @@ typedef std::set<uint32> dailyEntries; // for players who did one of X type inst
 typedef UNORDERED_MAP<uint32, uint32> dungeonEntries; // ID, Entry
 typedef UNORDERED_MAP<uint32, uint32> dungeonForbidden; // Entry, LFGForbiddenTypes
 typedef UNORDERED_MAP<uint64, dungeonForbidden> partyForbidden; // ObjectGuid (raw), map of locked dungeons
-typedef UNORDERED_MAP<uint64, LFGPlayers> playerData; // ObjectGuid(raw), info on specific player
 
 // End Section: Constants & Definitions
 
@@ -186,6 +185,8 @@ struct LFGPlayers
     uint8 currentRoles; // tank, dps, healer, etc..
     std::string comments;
 };
+
+typedef UNORDERED_MAP<uint64, LFGPlayers> playerData; // ObjectGuid(raw), info on specific player
 
 // End Section: Enumerations & Structures
 

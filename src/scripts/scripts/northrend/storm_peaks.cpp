@@ -188,7 +188,7 @@ CreatureAI* GetAI_npc_injured_miner(Creature* pCreature)
 
 bool GossipHello_npc_injured_miner(Player* pPlayer, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
 
     if (!pCreature->HasAura(SPELL_FEIGN_DEATH))

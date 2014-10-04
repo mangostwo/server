@@ -999,11 +999,11 @@ struct MANGOS_DLL_DECL boss_tethyrAI : public Scripted_NoMovementAI
     bool SelectCustomHostileTarget()
     {
         // Not started combat or evading prevented
-        if (!m_creature->isInCombat() || m_creature->HasAuraType(SPELL_AURA_MOD_TAUNT))
+        if (!m_creature->IsInCombat() || m_creature->HasAuraType(SPELL_AURA_MOD_TAUNT))
             return false;
 
         // Check if there are still enemies (marksmen) in the threatList
-        ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
+        ThreatList const& threatList = m_creature->GetThreatManager().getThreatList();
         for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
         {
             if ((*itr)->getUnitGuid().IsCreature())

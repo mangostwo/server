@@ -3767,21 +3767,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 {
                     // 33% chance
                     if (roll_chance_i(33))
-                    {
                         for(uint8 i = 2; i <= 5; i++)
                             ((Player*)m_caster)->ConvertRune(i, RUNE_DEATH);
-                        //((Player*)m_caster)->ConvertRune(2, RUNE_DEATH);
-                        //((Player*)m_caster)->ConvertRune(4, RUNE_DEATH);
-                    }
                 }
                 else if ((Player*)m_caster->HasSpell(50033))
                 {
                     // 66% chance
                     if (roll_chance_i(66))
-                    {
                         for(uint8 i = 2; i <= 5; i++)
                             ((Player*)m_caster)->ConvertRune(i, RUNE_DEATH);
-                    }
                 }
                 else if ((Player*)m_caster->HasSpell(50034))
                 {
@@ -3849,19 +3843,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 {
                     // 33% chance
                     if (roll_chance_i(33))
-                    {
                         for(uint8 i = 2; i <= 5; i++)
                             ((Player*)m_caster)->ConvertRune(i, RUNE_DEATH);
-                    }
                 }
                 else if ((Player*)m_caster->HasSpell(50033))
                 {
                     // 66% chance
                     if (roll_chance_i(66))
-                    {
                         for(uint8 i = 2; i <= 5; i++)
                             ((Player*)m_caster)->ConvertRune(i, RUNE_DEATH);
-                    }
                 }
                 else if ((Player*)m_caster->HasSpell(50034))
                 {

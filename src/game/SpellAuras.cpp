@@ -10037,23 +10037,15 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 case 48979:                                 // Butchery, rank 1
                 case 49483:                                 // Butchery, rank 2
                 {
+                    if (!m_target || m_target->getDeathState() != JUST_DIED)
+                        return;
+                    
+                    // todo: 2 runic power per 5 sec in combat
                     if(GetId() == 48979) // rank 1
-                    {
-                        if (!m_target || m_target->getDeathState() != JUST_DIED)
-                            return;
-                        // give 10 runic power and 
-                        // cast spell for 2 runic power per 5 sec in combat
-                    
                         m_target->ModifyPower(POWER_RUNIC_POWER, (int32)10);
-                    }
                     else if(GetId() == 49483) // rank 2
-                    {
-                        if (!m_target || m_target->getDeathState() != JUST_DIED)
-                            return;
-                        // give 20 runic power and extra 2 runic power per 5 sec in combat
-                    
                         m_target->ModifyPower(POWER_RUNIC_POWER, (int32)20);
-                    }
+                    
                     break;
                 }
                 case 48263:                                 // Frost Presence
