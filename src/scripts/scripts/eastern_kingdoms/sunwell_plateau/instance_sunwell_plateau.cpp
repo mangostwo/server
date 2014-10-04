@@ -163,21 +163,11 @@ void instance_sunwell_plateau::OnObjectCreate(GameObject* pGo)
             if (m_auiEncounter[TYPE_KALECGOS] == DONE && m_auiEncounter[TYPE_BRUTALLUS] == DONE && m_auiEncounter[TYPE_FELMYST] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
-        case GO_FIRST_GATE:
-            break;
-        case GO_SECOND_GATE:
-            if (m_auiEncounter[TYPE_EREDAR_TWINS] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
-            break;
         case GO_MURU_ENTER_GATE:
             if (m_auiEncounter[TYPE_EREDAR_TWINS] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_MURU_EXIT_GATE:
-            if (m_auiEncounter[TYPE_MURU] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
-            break;
-        case GO_THIRD_GATE:
             if (m_auiEncounter[TYPE_MURU] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
@@ -227,21 +217,13 @@ void instance_sunwell_plateau::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_EREDAR_TWINS:
             m_auiEncounter[uiType] = uiData;
-            if (uiData == DONE)
-            {
-                DoUseDoorOrButton(GO_SECOND_GATE);
-                DoUseDoorOrButton(GO_MURU_ENTER_GATE);
-            }
             break;
         case TYPE_MURU:
             m_auiEncounter[uiType] = uiData;
             // combat door
             DoUseDoorOrButton(GO_MURU_ENTER_GATE);
             if (uiData == DONE)
-            {
                 DoUseDoorOrButton(GO_MURU_EXIT_GATE);
-                DoUseDoorOrButton(GO_THIRD_GATE);
-            }
             else if (uiData == IN_PROGRESS)
                 m_uiMuruBerserkTimer = 10 * MINUTE * IN_MILLISECONDS;
             break;

@@ -44,11 +44,11 @@ enum
     GO_BOSS_COLLISION_2         = 188524,
     GO_ICE_BARRIER              = 188119,           // used to block the players path during the Brutallus intro event
     GO_FIRE_BARRIER             = 188075,           // door after felmyst
-    GO_FIRST_GATE               = 187766,           // door between felmyst and eredar twins
-    GO_SECOND_GATE              = 187764,           // door after eredar twins
+    //GO_FIRST_GATE               = 187766,           // door between felmyst and eredar twins
+    //GO_SECOND_GATE              = 187764,           // door after eredar twins
     GO_MURU_ENTER_GATE          = 187990,           // muru gates
     GO_MURU_EXIT_GATE           = 188118,
-    GO_THIRD_GATE               = 187765,           // door after muru; why another?
+    //GO_THIRD_GATE               = 187765,           // door after muru; why another?
 
     GO_ORB_BLUE_FLIGHT_1        = 188115,           // orbs used in the Kil'jaeden fight
     GO_ORB_BLUE_FLIGHT_2        = 188116,
