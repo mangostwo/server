@@ -49,7 +49,14 @@ LFGMgr::~LFGMgr()
 
 void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string comments, Player* plr)
 {
-    
+    /* -Implementation-
+     * Rules:
+     *   I. If already queued, remove from that one / place in this one
+     *  II. Cannot proceed if already in a dungeon/lfg group (1/2 done: lfggroup check added to group class)
+     * III. GetJoinResult must return ERR_LFG_OK
+     *  IV. Make sure logic follows LFG rules.
+     */
+    //Group* pGroup = plr->GetGroup();
 }
 
 void LFGMgr::LeaveLFG()
@@ -70,6 +77,7 @@ LfgJoinResult LFGMgr::GetJoinResult(Player* plr)
      *   Queued for battleground
      *   Too many members in group
      *   Group member disconnected
+     *   Group member too low/high level
      *   Any group member cannot enter for x reason any other player can't
      */
     
@@ -83,6 +91,8 @@ LfgJoinResult LFGMgr::GetJoinResult(Player* plr)
         result = ERR_LFG_RANDOM_COOLDOWN_PLAYER;
     else if (pGroup)
     {
+        uint32 plrLevel = plr->getLevel();
+        
         if (pGroup->GetMembersCount() > 5)
             result = ERR_LFG_TOO_MANY_MEMBERS;
         else
@@ -94,6 +104,8 @@ LfgJoinResult LFGMgr::GetJoinResult(Player* plr)
                 {
                     // check if the group members are level 15+ to use finder
                     if (pGroupPlr->getLevel() < 15)
+                        result = ERR_LFG_CANT_USE_DUNGEONS;
+                    else if (pGroupPlr->getLevel() > (plrLevel + LFG_LEVEL_RANGE) || pGroupPlr->getLevel() < (plrLevel - LFG_LEVEL_RANGE))
                         result = ERR_LFG_CANT_USE_DUNGEONS;
                     else if (pGroupPlr->HasAura(LFG_DESERTER_SPELL))
                         result = ERR_LFG_DESERTER_PARTY;

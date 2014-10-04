@@ -366,6 +366,8 @@ void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
 
 void WorldSession::SendLfgJoinResult(LfgJoinResult result)
 {
+    //todo: send role check result after join result, then send
+    // a list of dungeons the party/player cannot join
     WorldPacket data(SMSG_LFG_JOIN_RESULT, 0);
     data << uint32(result);
     data << uint32(0); // ERR_LFG_ROLE_CHECK_FAILED_TIMEOUT = 3, ERR_LFG_ROLE_CHECK_FAILED_NOT_VIABLE = (value - 3 == result)

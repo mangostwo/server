@@ -35,6 +35,7 @@ class Object;
 class ObjectGuid;
 class Player;
 
+// Begin Section: Enumerations & Structures
 enum LFGFlags
 {
     LFG_FLAG_UNK1        = 0x1,
@@ -43,6 +44,7 @@ enum LFGFlags
     LFG_FLAG_UNK3        = 0x8
 };
 
+/// Possible statuses to send after a request to join the dungeon finder
 enum LfgJoinResult
 {
     ERR_LFG_OK                                  = 0x00,
@@ -111,6 +113,7 @@ enum LFGForbiddenTypes
     LFG_FORBIDDEN_MISSING_ACHIEVEMENT   = 1034
 };
 
+/// Spells that affect the mechanisms of the dungeon finder
 enum LFGSpells
 {
     LFG_DESERTER_SPELL = 71041,
@@ -127,6 +130,18 @@ enum LFGState
     LFG_STATE_IN_DUNGEON,
     LFG_STATE_FINISHED_DUNGEON,
     LFG_STATE_RAIDBROWSER
+};
+
+/// Role check states
+enum LFGRoleCheckState
+{
+    LFG_ROLECHECK_DEFAULT                        = 0,      // Internal use = Not initialized.
+    LFG_ROLECHECK_FINISHED                       = 1,      // Role check finished
+    LFG_ROLECHECK_INITIALITING                   = 2,      // Role check begins
+    LFG_ROLECHECK_MISSING_ROLE                   = 3,      // Someone hasn't selected a role after 2 mins
+    LFG_ROLECHECK_WRONG_ROLES                    = 4,      // Can't form a group with the role selection
+    LFG_ROLECHECK_ABORTED                        = 5,      // Someone left the group
+    LFG_ROLECHECK_NO_ROLE                        = 6       // Someone didn't select a role
 };
 
 enum DungeonTypes
@@ -149,16 +164,6 @@ struct ItemRewards
     ItemRewards(uint32 ItemId, uint32 ItemAmount) : itemId(ItemId), itemAmount(ItemAmount) {}
 };
 
-/// Heroic dungeon rewards in WoTLK after already doing a dungeon
-const uint32 WOTLK_SPECIAL_HEROIC_ITEM = 47241;
-const uint32 WOTLK_SPECIAL_HEROIC_AMNT = 2;
-
-typedef std::set<uint32> dailyEntries; // for players who did one of X type instance per day
-typedef UNORDERED_MAP<uint32, uint32> dungeonEntries; // ID, Entry
-typedef UNORDERED_MAP<uint32, uint32> dungeonForbidden; // Entry, LFGForbiddenTypes
-typedef UNORDERED_MAP<uint64, dungeonForbidden> partyForbidden; // map of party member's locked dungeons
-// note: partyForbidden key = raw value of object guid
-
 /// Information the dungeon finder needs about each player
 struct LFGPlayers
 {
@@ -168,7 +173,26 @@ struct LFGPlayers
     std::string comments;
 };
 
-typedef UNORDERED_MAP<uint32, LFGPlayers> playerData; // guidLow = key
+// End Section: Enumerations & Structures
+
+// Begin Section: Constants & Definitions
+
+/// Heroic dungeon rewards in WoTLK after already doing a dungeon
+const uint32 WOTLK_SPECIAL_HEROIC_ITEM = 47241;
+const uint32 WOTLK_SPECIAL_HEROIC_AMNT = 2;
+
+/// This value might need to change, just seems like a safe guess.
+/// It's used to check that every player in the Dungeon Finder group is this many levels apart minimum.
+const uint32 LFG_LEVEL_RANGE = 12;
+
+typedef std::set<uint32> dailyEntries; // for players who did one of X type instance per day
+typedef UNORDERED_MAP<uint32, uint32> dungeonEntries; // ID, Entry
+typedef UNORDERED_MAP<uint32, uint32> dungeonForbidden; // Entry, LFGForbiddenTypes
+typedef UNORDERED_MAP<uint64, dungeonForbidden> partyForbidden; // ObjectGuid (raw), map of locked dungeons
+typedef UNORDERED_MAP<uint64, LFGState> partyState; // Group ObjectGuid(raw), LFG State [this & playerdata in joinlfg]
+typedef UNORDERED_MAP<uint32, LFGPlayers> playerData; // guidLow, info on specific player
+
+// End Section: Constants & Definitions
 
 class LFGMgr
 {
