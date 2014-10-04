@@ -3685,6 +3685,27 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
             // Death Strike
             else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000000010))
             {
+                // Death Rune Mastery talents
+                if ((Player*)m_caster->HasSpell(49467))
+                {
+                    // 33% chance
+                    if (roll_chance_i(33))
+                        for(uint8 i = 2; i <= 5; i++)
+                            ((Player*)m_caster)->ConvertRune(i, RUNE_DEATH);
+                }
+                else if ((Player*)m_caster->HasSpell(50033))
+                {
+                    // 66% chance
+                    if (roll_chance_i(66))
+                        for(uint8 i = 2; i <= 5; i++)
+                            ((Player*)m_caster)->ConvertRune(i, RUNE_DEATH);
+                }
+                else if ((Player*)m_caster->HasSpell(50034))
+                {
+                    for(uint8 i = 2; i <= 5; i++)
+                            ((Player*)m_caster)->ConvertRune(i, RUNE_DEATH);
+                }      
+                
                 uint32 count = 0;
                 Unit::SpellAuraHolderMap const& auras = unitTarget->GetSpellAuraHolderMap();
                 for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
@@ -3739,6 +3760,27 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
             // Obliterate
             else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0002000000000000))
             {
+                // Death Rune Mastery talents
+                if ((Player*)m_caster->HasSpell(49467))
+                {
+                    // 33% chance
+                    if (roll_chance_i(33))
+                        for(uint8 i = 2; i <= 5; i++)
+                            ((Player*)m_caster)->ConvertRune(i, RUNE_DEATH);
+                }
+                else if ((Player*)m_caster->HasSpell(50033))
+                {
+                    // 66% chance
+                    if (roll_chance_i(66))
+                        for(uint8 i = 2; i <= 5; i++)
+                            ((Player*)m_caster)->ConvertRune(i, RUNE_DEATH);
+                }
+                else if ((Player*)m_caster->HasSpell(50034))
+                {
+                    for(uint8 i = 2; i <= 5; i++)
+                        ((Player*)m_caster)->ConvertRune(i, RUNE_DEATH);
+                }      
+                
                 // search for Annihilation
                 Unit::AuraList const& dummyList = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
                 for (Unit::AuraList::const_iterator itr = dummyList.begin(); itr != dummyList.end(); ++itr)
