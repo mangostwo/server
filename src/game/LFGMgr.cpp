@@ -49,13 +49,6 @@ LFGMgr::~LFGMgr()
 
 void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string comments, Player* plr)
 {
-    /* -Implementation-
-     * Rules:
-     *   I. If already queued, remove from that one / place in this one
-     *  II. Cannot proceed if already in a dungeon/lfg group (1/2 done: lfggroup check added to group class)
-     * III. GetJoinResult must return ERR_LFG_OK to actually join
-     *  IV. Make sure logic follows LFG rules.
-     */
     Group* pGroup = plr->GetGroup();
     uint64 rawGuid = (pGroup) ? pGroup->GetObjectGuid().GetRawValue() : plr->GetObjectGuid().GetRawValue();
     
@@ -114,6 +107,77 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
                     break;
             }
         }
+    }
+    
+    // since our join result may have just changed, check it again
+    if (result == ERR_LFG_OK)
+    {
+        if (isRandom)
+        {
+            // fetch all dungeons with our groupID and add to set
+            LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(*dungeons.begin());
+            
+            if (dungeon)
+            {
+                uint32 group = dungeon->groupID;
+                
+                for (uint32 id = 0; id < sLfgDungeonsStore.GetNumRows(); ++id)
+                {
+                    LfgDungeonsEntry const* dungeonList = sLfgDungeonsStore.LookupEntry(id);
+                    if (dungeonList)
+                    {
+                        if (dungeonList->groupID == group)
+                            dungeons.insert(dungeonList->ID); // adding to set
+                    }
+                }
+            }
+            else
+                result = ERR_LFG_NO_LFG_OBJECT;
+        }
+        
+        // do FindRandomDungeonsNotForPlayer for the plr or whole group
+        partyForbidden partyLockedDungeons;
+        
+        if (pGroup)
+        {
+            for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+            {
+                if (Player* pGroupPlr = itr->getSource())
+                {
+                    dungeonForbidden lockedDungeons = FindRandomDungeonsNotForPlayer(pGroupPlr);
+                    for (dungeonForbidden::iterator it = lockedDungeons.begin(); it != lockedDungeons.end(); ++it)
+                    {
+                        uint32 dungeonID = (it->first & 0x00FFFFFF);
+                        
+                        std::set<uint32>::iterator setItr = dungeons.find(dungeonID);
+                        if (setItr != dungeons.end())
+                        {
+                            dungeons.erase(setItr);
+                            partyLockedDungeons[pGroupPlr->GetObjectGuid().GetRawValue()] = it;
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            dungeonForbidden lockedDungeons = FindRandomDungeonsNotForPlayer(plr);
+            for (dungeonForbidden::iterator it = lockedDungeons.begin(); it != lockedDungeons.end(); ++it)
+            {
+                uint32 dungeonID = (it->first & 0x00FFFFFF);
+                        
+                std::set<uint32>::iterator setItr = dungeons.find(dungeonID);
+                if (setItr != dungeons.end())
+                {
+                    dungeons.erase(setItr);
+                    partyLockedDungeons[plr->GetObjectGuid().GetRawValue()] = it;
+                }
+            }
+        }
+        if (!dungeons.empty())
+            partyLockedDungeons.clear();
+        else
+            result = (pGroup) ? ERR_LFG_NO_SLOTS_PARTY : ERR_LFG_NO_SLOTS_PLAYER;
     }
 }
 
