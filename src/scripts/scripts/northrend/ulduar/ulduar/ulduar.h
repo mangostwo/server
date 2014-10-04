@@ -174,6 +174,17 @@ enum
     NPC_VOICE_OF_YOGG           = 33280,
     NPC_OMINOUS_CLOUD           = 33292,
     NPC_GUARDIAN_OF_YOGG        = 33136,
+    
+    // Yogg Saron illusions actors
+    NPC_YSERA                   = 33495,
+    NPC_NELTHARION              = 33523,
+    NPC_MALYGOS                 = 33535,
+    NPC_ALEXSTRASZA             = 33536,
+    NPC_GARONA                  = 33436,                    // cast spell 64063 on 33437
+    NPC_KING_LLANE              = 33437,
+    NPC_LICH_KING               = 33441,                    // cast spell 63037 on 33442
+    NPC_IMMOLATED_CHAMPION      = 33442,
+    NPC_YOGGSARON_ILLUSION      = 33552,
 
     // Celestial planetarium
     NPC_ALGALON                 = 32871,

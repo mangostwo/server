@@ -212,6 +212,16 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
         case NPC_MIMIRON_HELPER:
         case NPC_HODIR_HELPER:
         case NPC_FREYA_HELPER:
+            
+        case NPC_YSERA:
+        case NPC_NELTHARION:
+        case NPC_MALYGOS:
+        case NPC_ALEXSTRASZA:
+        case NPC_GARONA:
+        case NPC_KING_LLANE:
+        case NPC_LICH_KING:
+        case NPC_IMMOLATED_CHAMPION:
+        case NPC_YOGGSARON_ILLUSION:
             break;
 
         case NPC_ULDUAR_COLOSSUS:

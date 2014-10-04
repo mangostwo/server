@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: boss_yogg_saron
-SD%Complete: 85%
-SDComment: Illusion cinematics NYI.
+SD%Complete: 95%
+SDComment: Illusion contain a lot of guesswork.
 SDCategory: Ulduar
 EndScriptData */
 
@@ -72,10 +72,11 @@ enum
 
     // stormwind illusion yells
     SAY_GARONA_1                                = -1603227,
-    SAY_GARONA_2                                = -1603228,
+    SAY_GARONA_2                                = -1603267,
+    SAY_GARONA_3                                = -1603228,
     SAY_YOGG_V1_1                               = -1603229,
     SAY_YOGG_V1_2                               = -1603230,
-    SAY_GARONA_3                                = -1603231,
+    SAY_KING_LLANE                              = -1603231,
     SAY_GARONA_4                                = -1603232,
     SAY_YOGG_V1_3                               = -1603233,
 
@@ -205,20 +206,12 @@ enum
     // NPC_BRONZE_CONSORT                       = 33718,                    // Nozdormu is not part of the event for some reason
     NPC_EMERALD_CONSORT                         = 33719,
     NPC_OBSIDIAN_CONSORT                        = 33720,
-    NPC_YSERA                                   = 33495,
-    NPC_NELTHARION                              = 33523,
-    NPC_MALYGOS                                 = 33535,
-    NPC_ALEXSTRASZA                             = 33536,
 
     // stormwind vision
     NPC_SUIT_OF_ARMOR                           = 33433,
-    NPC_GARONA                                  = 33436,                    // cast spell 64063 on 33437
-    NPC_KING_LLANE                              = 33437,
     SPELL_ASSASSINATE                           = 64063,
 
     // icecrown citadel vision
-    NPC_LICH_KING                               = 33441,                    // cast spell 63037 on 33442
-    NPC_IMMOLATED_CHAMPION                      = 33442,
     NPC_DEATHSWORM_ZEALOT                       = 33567,
     SPELL_DEATHGRASP                            = 63037,
 
@@ -263,6 +256,37 @@ static const DialogueEntry aYoggSaronDialog[] =
     {SAY_PHASE_2_INTRO_4,       NPC_SARA,       1000},
     {SPELL_PHASE_2_TRANSFORM,   0,              3000},
     {SAY_PHASE_2_INTRO_5,       NPC_YOGGSARON,  0},
+    {0, 0, 0},
+};
+
+static const DialogueEntry aYoggIllusionsDialog[] =
+{
+    // stormwind
+    {NPC_KING_LLANE,    0,                      10000},
+    {SAY_GARONA_1,      NPC_GARONA,             2000},
+    {SAY_GARONA_2,      NPC_GARONA,             8000},
+    {SAY_GARONA_3,      NPC_GARONA,             12000},
+    {SAY_YOGG_V1_1,     NPC_YOGGSARON_ILLUSION, 4000},
+    {SAY_YOGG_V1_2,     NPC_YOGGSARON_ILLUSION, 4000},
+    {SAY_KING_LLANE,    NPC_KING_LLANE,         12000},
+    {SAY_GARONA_4,      NPC_GARONA,             2000},
+    {SPELL_ASSASSINATE, 0,                      4000},
+    {SAY_YOGG_V1_3,     NPC_YOGGSARON_ILLUSION, 0},
+    // chamber
+    {NPC_NELTHARION,    0,                      10000},
+    {SAY_NELTHARION_1,  NPC_NELTHARION,         10000},
+    {SAY_YSERA,         NPC_YSERA,              7000},
+    {SAY_NELTHARION_2,  NPC_NELTHARION,         6000},
+    {SAY_MALYGOS,       NPC_MALYGOS,            9000},
+    {SAY_YOGG_V2,       NPC_YOGGSARON_ILLUSION, 0},
+    // icecrown
+    {NPC_LICH_KING,     0,                      10000},
+    {SAY_LICH_KING_1,   NPC_LICH_KING,          5000},
+    {SAY_CHAMPION_1,    NPC_IMMOLATED_CHAMPION, 8000},
+    {SAY_CHAMPION_2,    NPC_IMMOLATED_CHAMPION, 8000},
+    {SAY_LICH_KING_2,   NPC_LICH_KING,          7000},
+    {SAY_YOGG_V3_1,     NPC_YOGGSARON_ILLUSION, 5000},
+    {SAY_YOGG_V3_2,     NPC_YOGGSARON_ILLUSION, 0},
     {0, 0, 0},
 };
 
@@ -955,11 +979,13 @@ CreatureAI* GetAI_npc_voice_yogg_saron(Creature* pCreature)
 ## npc_brain_yogg_saron
 ######*/
 
-struct MANGOS_DLL_DECL npc_brain_yogg_saronAI : public Scripted_NoMovementAI
+struct MANGOS_DLL_DECL npc_brain_yogg_saronAI : public Scripted_NoMovementAI, private DialogueHelper
 {
-    npc_brain_yogg_saronAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    npc_brain_yogg_saronAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature),
+        DialogueHelper(aYoggIllusionsDialog)
     {
         m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
+        InitializeDialogueHelper(m_pInstance);
         Reset();
     }
 
@@ -1050,6 +1076,24 @@ struct MANGOS_DLL_DECL npc_brain_yogg_saronAI : public Scripted_NoMovementAI
                 m_pInstance->DoRespawnGameObject((*itr)->GetObjectGuid(), 30);
         }
     }
+    
+    void JustDidDialogueStep(int32 iEntry) override
+    {
+        if (!m_pInstance)
+            return;
+        
+        switch (iEntry)
+        {
+            case SPELL_ASSASSINATE:
+                if (Creature* pGarona = m_pInstance->GetSingleCreatureFromStorage(NPC_GARONA))
+                    pGarona->CastSpell(pGarona, SPELL_ASSASSINATE, true);
+                break;
+            case SAY_LICH_KING_1:
+                if (Creature* pLichKing = m_pInstance->GetSingleCreatureFromStorage(NPC_LICH_KING))
+                    pLichKing->CastSpell(pLichKing, SPELL_DEATHGRASP, false);
+                break;
+        }
+    }
 
     // Wrapper that prepars the illusions
     void DoPrepareIllusion(uint8 uiIndex)
@@ -1070,8 +1114,12 @@ struct MANGOS_DLL_DECL npc_brain_yogg_saronAI : public Scripted_NoMovementAI
                 m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1923.342f, 98.01228f, 239.7495f, 4.834f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 m_creature->SummonCreature(NPC_SUIT_OF_ARMOR, 1945.442f, 92.17952f, 239.7495f, 4.049f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 // the following are guesswork
-                m_creature->SummonCreature(NPC_GARONA, 1935.398f, 54.0177f, 240.3764f, 2.008f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_GARONA, 1931.348f, 61.0330f, 241.7094f, 2.008f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 m_creature->SummonCreature(NPC_KING_LLANE, 1930.465f, 62.6740f, 242.3763f, 5.196f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_YOGGSARON_ILLUSION, 1927.326f, 68.120f, 242.376f, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                
+                // start dialogue
+                StartNextDialogueText(NPC_KING_LLANE);
                 break;
             // chamber
             case 1:
@@ -1092,6 +1140,10 @@ struct MANGOS_DLL_DECL npc_brain_yogg_saronAI : public Scripted_NoMovementAI
                 m_creature->SummonCreature(NPC_ALEXSTRASZA, 2091.679f, -25.289f, 242.646f, 6.282f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 m_creature->SummonCreature(NPC_YSERA, 2114.504f, -16.118f, 242.646f, 3.91f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 m_creature->SummonCreature(NPC_MALYGOS, 2113.388f, -34.381f, 242.646f, 2.26f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_YOGGSARON_ILLUSION, 2104.555f, -25.635f, 242.646f, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                
+                // start dialogue
+                StartNextDialogueText(NPC_NELTHARION);
                 break;
             // icecrown
             case 2:
@@ -1111,12 +1163,18 @@ struct MANGOS_DLL_DECL npc_brain_yogg_saronAI : public Scripted_NoMovementAI
                 m_creature->SummonCreature(NPC_LICH_KING, 1908.557f, -152.4427f, 240.0719f, 4.238f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 // the following is guesswork
                 m_creature->SummonCreature(NPC_IMMOLATED_CHAMPION, 1915.371f,-139.9342f,239.9896f, 4.159f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_YOGGSARON_ILLUSION, 1915.371f,-139.9342f,239.9896f, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                
+                // start dialogue
+                StartNextDialogueText(NPC_LICH_KING);
                 break;
         }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
+        DialogueUpdate(uiDiff);
+        
         // remove stun from tentacles after 30 sec
         if (m_uiIllusionTimer)
         {
