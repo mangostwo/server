@@ -56,12 +56,79 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
      * III. GetJoinResult must return ERR_LFG_OK to actually join
      *  IV. Make sure logic follows LFG rules.
      */
-    //Group* pGroup = plr->GetGroup();
+    Group* pGroup = plr->GetGroup();
+    uint64 rawGuid = (pGroup) ? pGroup->GetObjectGuid().GetRawValue() ? plr->GetObjectGuid().GetRawValue();
+    
+    LFGPlayers* currentInfo = GetPlayerOrPartyData(rawGuid);
+    
+    // check if we actually have info on the player/group right now
+    if (currentInfo)
+    {
+        // are they already queued?
+        if (currentInfo->currentState == LFG_STATE_QUEUED)
+        {
+            // remove from that queue, place in this one
+            // todo: implement queue system
+        }
+        
+        // are they already in a dungeon?
+        if (pGroup && pGroup->isLFGGroup() && currentInfo->currentState != LFG_STATE_FINISHED_DUNGEON)
+        {
+            dungeons.clear();
+            dungeons.insert(currentInfo->currentDungeonSelection.begin()->first); // they should only have 1 dungeon in the map
+        }
+    }
+    
+    // used for upcoming checks
+    bool isRandom  = false;
+    bool isRaid    = false;
+    bool isDungeon = false;
+    
+    LfgJoinResult result = GetJoinResult(plr);
+    if (result == ERR_LFG_OK)
+    {
+        // additional checks on dungeon selection
+        for (std::set<uint32>::iterator it = dungeons.begin(); it != dungeons.end(); ++it)
+        {
+            LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(*it);
+            switch (dungeon->typeID)
+            {
+                case LFG_TYPE_RANDOM_DUNGEON:
+                    if (dungeons.size() > 1)
+                        result = ERR_LFG_INVALID_SLOT;
+                    else
+                        isRandom = true;
+                case LFG_TYPE_DUNGEON:
+                case LFG_TYPE_HEROIC_DUNGEON:
+                    if (isRaid)
+                        result = ERR_LFG_MISMATCHED_SLOTS;
+                    isDungeon = true;
+                    break;
+                case LFG_TYPE_RAID:
+                    if (isDungeon)
+                        result = ERR_LFG_MISMATCHED_SLOTS;
+                    isRaid = true;
+                    break;
+                default: // one of the other types 
+                    result = ERR_LFG_INVALID_SLOT;
+                    break;
+            }
+        }
+    }
 }
 
 void LFGMgr::LeaveLFG()
 {
     
+}
+
+LFGPlayers* LFGMgr::GetPlayerOrPartyData(uint64 rawGuid)
+{
+    playerData::iterator it = m_playerData.find(rawGuid);
+    if (it != m_playerData.end())
+        return &(it->second);
+    else
+        return NULL;
 }
 
 LfgJoinResult LFGMgr::GetJoinResult(Player* plr)
@@ -104,8 +171,6 @@ LfgJoinResult LFGMgr::GetJoinResult(Player* plr)
                 {
                     // check if the group members are level 15+ to use finder
                     if (pGroupPlr->getLevel() < 15)
-                        result = ERR_LFG_CANT_USE_DUNGEONS;
-                    else if (pGroupPlr->getLevel() > (plrLevel + LFG_LEVEL_RANGE) || pGroupPlr->getLevel() < (plrLevel - LFG_LEVEL_RANGE))
                         result = ERR_LFG_CANT_USE_DUNGEONS;
                     else if (pGroupPlr->HasAura(LFG_DESERTER_SPELL))
                         result = ERR_LFG_DESERTER_PARTY;

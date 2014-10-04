@@ -35,6 +35,20 @@ class Object;
 class ObjectGuid;
 class Player;
 
+// Begin Section: Constants & Definitions
+
+/// Heroic dungeon rewards in WoTLK after already doing a dungeon
+const uint32 WOTLK_SPECIAL_HEROIC_ITEM = 47241;
+const uint32 WOTLK_SPECIAL_HEROIC_AMNT = 2;
+
+typedef std::set<uint32> dailyEntries; // for players who did one of X type instance per day
+typedef UNORDERED_MAP<uint32, uint32> dungeonEntries; // ID, Entry
+typedef UNORDERED_MAP<uint32, uint32> dungeonForbidden; // Entry, LFGForbiddenTypes
+typedef UNORDERED_MAP<uint64, dungeonForbidden> partyForbidden; // ObjectGuid (raw), map of locked dungeons
+typedef UNORDERED_MAP<uint64, LFGPlayers> playerData; // ObjectGuid(raw), info on specific player
+
+// End Section: Constants & Definitions
+
 // Begin Section: Enumerations & Structures
 enum LFGFlags
 {
@@ -175,25 +189,6 @@ struct LFGPlayers
 
 // End Section: Enumerations & Structures
 
-// Begin Section: Constants & Definitions
-
-/// Heroic dungeon rewards in WoTLK after already doing a dungeon
-const uint32 WOTLK_SPECIAL_HEROIC_ITEM = 47241;
-const uint32 WOTLK_SPECIAL_HEROIC_AMNT = 2;
-
-/// This value might need to change, just seems like a safe guess.
-/// It's used to check that every player in the Dungeon Finder group is this many levels apart minimum.
-const uint32 LFG_LEVEL_RANGE = 12;
-
-typedef std::set<uint32> dailyEntries; // for players who did one of X type instance per day
-typedef UNORDERED_MAP<uint32, uint32> dungeonEntries; // ID, Entry
-typedef UNORDERED_MAP<uint32, uint32> dungeonForbidden; // Entry, LFGForbiddenTypes
-typedef UNORDERED_MAP<uint64, dungeonForbidden> partyForbidden; // ObjectGuid (raw), map of locked dungeons
-typedef UNORDERED_MAP<uint64, LFGState> partyState; // Group ObjectGuid(raw), LFG State [this & playerdata in joinlfg]
-typedef UNORDERED_MAP<uint32, LFGPlayers> playerData; // guidLow, info on specific player
-
-// End Section: Constants & Definitions
-
 class LFGMgr
 {
 public:
@@ -228,7 +223,6 @@ public:
      * @param type the type of dungeon
      */
     ItemRewards GetDungeonItemRewards(uint32 dungeonId, DungeonTypes type);
-    
     
     /**
      * @brief Used to determine the type of dungeon for ease of use.
@@ -281,6 +275,9 @@ public:
     
 protected:
     bool IsSeasonal(uint32 dbcFlags) { return ((dbcFlags & LFG_FLAG_SEASONAL) != 0) ? true : false; }
+    
+    /// Check if player/party is already in the system, return that data
+    LFGPlayers* GetPlayerOrPartyData(uint64 rawGuid);
     
 private:
     dailyEntries m_dailyAny;
