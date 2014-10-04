@@ -148,9 +148,15 @@ void instance_ulduar::OnPlayerEnter(Player* pPlayer)
     }
 }
 
+void instance_ulduar::OnPlayerDeath(Player* /*pPlayer*/)
+{
+    if (IsEncounterInProgress())
+        SetData(TYPE_CHAMPION_FAILED, DONE);
+}
+
 bool instance_ulduar::IsEncounterInProgress() const
 {
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (uint8 i = 0; i <= TYPE_ALGALON; ++i)
     {
         if (m_auiEncounter[i] == IN_PROGRESS)
             return true;
@@ -854,6 +860,9 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             m_auiEncounter[uiType] = uiData;
             DoUpdateWorldState(WORLD_STATE_TIMER_COUNT, m_auiEncounter[uiType]);
             break;
+        case TYPE_CHAMPION_FAILED:
+            m_auiEncounter[uiType] = uiData;
+            break;
 
             // Hard modes (not saved)
         case TYPE_LEVIATHAN_HARD:
@@ -954,9 +963,9 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                    << m_auiEncounter[6] << " " << m_auiEncounter[7] << " " << m_auiEncounter[8] << " "
                    << m_auiEncounter[9] << " " << m_auiEncounter[10] << " " << m_auiEncounter[11] << " "
                    << m_auiEncounter[12] << " " << m_auiEncounter[13] << " " << m_auiEncounter[14] << " "
-                   << m_auiUlduarKeepers[0] << " " << m_auiUlduarKeepers[1] << " " << m_auiUlduarKeepers[2] << " "
-                   << m_auiUlduarKeepers[3] << " " << m_auiUlduarTowers[0] << " " << m_auiUlduarTowers[1] << " "
-                   << m_auiUlduarTowers[2] << " " << m_auiUlduarTowers[3];
+                   << m_auiEncounter[15] << " " << m_auiUlduarKeepers[0] << " " << m_auiUlduarKeepers[1] << " "
+                   << m_auiUlduarKeepers[2] << " " << m_auiUlduarKeepers[3] << " " << m_auiUlduarTowers[0] << " "
+                   << m_auiUlduarTowers[1] << " " << m_auiUlduarTowers[2] << " " << m_auiUlduarTowers[3];
 
         m_strInstData = saveStream.str();
 
@@ -1048,6 +1057,8 @@ uint32 instance_ulduar::GetData(uint32 uiType) const
             return m_auiEncounter[13];
         case TYPE_ALGALON_TIMER:
             return m_auiEncounter[14];
+        case TYPE_CHAMPION_FAILED:
+            return m_auiEncounter[15];
 
             // Hard modes
         case TYPE_LEVIATHAN_HARD:
@@ -1241,9 +1252,9 @@ void instance_ulduar::Load(const char* strIn)
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
                >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7]
                >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11]
-               >> m_auiEncounter[12] >> m_auiEncounter[13] >> m_auiEncounter[14] >> m_auiUlduarKeepers[0]
-               >> m_auiUlduarKeepers[1] >> m_auiUlduarKeepers[2] >> m_auiUlduarKeepers[3] >> m_auiUlduarTowers[0]
-               >> m_auiUlduarTowers[1] >> m_auiUlduarTowers[2] >> m_auiUlduarTowers[3];
+               >> m_auiEncounter[12] >> m_auiEncounter[13] >> m_auiEncounter[14] >> m_auiEncounter[15]
+               >> m_auiUlduarKeepers[0] >> m_auiUlduarKeepers[1] >> m_auiUlduarKeepers[2] >> m_auiUlduarKeepers[3]
+               >> m_auiUlduarTowers[0] >> m_auiUlduarTowers[1] >> m_auiUlduarTowers[2] >> m_auiUlduarTowers[3];
 
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
     {
@@ -1377,6 +1388,42 @@ bool instance_ulduar::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player c
         case ACHIEV_CRIT_DRIVE_CRAZY_N:
         case ACHIEV_CRIT_DRIVE_CRAZY_H:
             return m_abAchievCriteria[TYPE_ACHIEV_DRIVE_CRAZY];
+            // Champion / Conquerer of Ulduar
+        case ACHIEV_CRIT_CHAMP_LEVI:
+        case ACHIEV_CRIT_CHAMP_RAZOR:
+        case ACHIEV_CRIT_CHAMP_XT:
+        case ACHIEV_CRIT_CHAMP_IGNIS:
+        case ACHIEV_CRIT_CHAMP_MIMIRON:
+        case ACHIEV_CRIT_CHAMP_KOLO:
+        case ACHIEV_CRIT_CHAMP_VEZAX:
+        case ACHIEV_CRIT_CHAMP_YOGG:
+        case ACHIEV_CRIT_CHAMP_AURIAYA:
+        case ACHIEV_CRIT_CHAMP_THORIM:
+        case ACHIEV_CRIT_CHAMP_HODIR:
+        case ACHIEV_CRIT_CHAMP_FREYA:
+        case ACHIEV_CRIT_CHAMP_COUNCIL:
+        case ACHIEV_CRIT_CONQ_LEVI:
+        case ACHIEV_CRIT_CONQ_RAZOR:
+        case ACHIEV_CRIT_CONQ_XT:
+        case ACHIEV_CRIT_CONQ_IGNIS:
+        case ACHIEV_CRIT_CONQ_KOLO:
+        case ACHIEV_CRIT_CONQ_MIMIRON:
+        case ACHIEV_CRIT_CONQ_VEZAX:
+        case ACHIEV_CRIT_CONQ_AURIAYA:
+        case ACHIEV_CRIT_CONQ_YOGG:
+        case ACHIEV_CRIT_CONQ_THORIM:
+        case ACHIEV_CRIT_CONQ_FREYA:
+        case ACHIEV_CRIT_CONQ_COUNCIL:
+        case ACHIEV_CRIT_CONQ_HODIR:
+        {
+            // First, check if all bosses are killed (except the last encounter)
+            uint8 uiEncounterDone = 0;
+            for (uint8 i = 0; i < TYPE_YOGGSARON; ++i)
+                if (m_auiEncounter[i] == DONE)
+                    ++uiEncounterDone;
+
+            return uiEncounterDone >= 13 && GetData(TYPE_CHAMPION_FAILED) != DONE;
+        }
 
         default:
             return false;

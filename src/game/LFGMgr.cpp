@@ -53,7 +53,7 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
      * Rules:
      *   I. If already queued, remove from that one / place in this one
      *  II. Cannot proceed if already in a dungeon/lfg group (1/2 done: lfggroup check added to group class)
-     * III. GetJoinResult must return ERR_LFG_OK
+     * III. GetJoinResult must return ERR_LFG_OK to actually join
      *  IV. Make sure logic follows LFG rules.
      */
     //Group* pGroup = plr->GetGroup();

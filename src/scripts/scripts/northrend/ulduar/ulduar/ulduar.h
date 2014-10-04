@@ -7,7 +7,7 @@
 
 enum
 {
-    MAX_ENCOUNTER               = 15,
+    MAX_ENCOUNTER               = 16,
     HARD_MODE_ENCOUNTER         = 8,
     KEEPER_ENCOUNTER            = 4,
 
@@ -27,34 +27,35 @@ enum
     TYPE_YOGGSARON              = 12,
     TYPE_ALGALON                = 13,
     TYPE_ALGALON_TIMER          = 14,
+    TYPE_CHAMPION_FAILED        = 15, // Achievements Champion / Conquerer of Ulduar, needs to be saved to database
 
     // Hard mode boss types
     // Used for hard mode bosses only
-    TYPE_LEVIATHAN_HARD         = 15,
-    TYPE_XT002_HARD             = 16,
-    TYPE_MIMIRON_HARD           = 17,
-    TYPE_HODIR_HARD             = 18,
-    TYPE_THORIM_HARD            = 19,
-    TYPE_FREYA_HARD             = 20,
-    TYPE_VEZAX_HARD             = 21,
-    TYPE_YOGGSARON_HARD         = 22,
+    TYPE_LEVIATHAN_HARD         = 16,
+    TYPE_XT002_HARD             = 17,
+    TYPE_MIMIRON_HARD           = 18,
+    TYPE_HODIR_HARD             = 19,
+    TYPE_THORIM_HARD            = 20,
+    TYPE_FREYA_HARD             = 21,
+    TYPE_VEZAX_HARD             = 22,
+    TYPE_YOGGSARON_HARD         = 23,
 
     // Keeper types
     // Used to store the keepers which will be used at yogg
-    TYPE_KEEPER_HODIR           = 23,
-    TYPE_KEEPER_FREYA           = 24,
-    TYPE_KEEPER_THORIM          = 25,
-    TYPE_KEEPER_MIMIRON         = 26,
+    TYPE_KEEPER_HODIR           = 24,
+    TYPE_KEEPER_FREYA           = 25,
+    TYPE_KEEPER_THORIM          = 26,
+    TYPE_KEEPER_MIMIRON         = 27,
 
     // Tower types
     // Used to store the towers which will be used at Leviathan encounter
-    TYPE_TOWER_HODIR            = 27,
-    TYPE_TOWER_FREYA            = 28,
-    TYPE_TOWER_THORIM           = 29,
-    TYPE_TOWER_MIMIRON          = 30,
+    TYPE_TOWER_HODIR            = 28,
+    TYPE_TOWER_FREYA            = 29,
+    TYPE_TOWER_THORIM           = 30,
+    TYPE_TOWER_MIMIRON          = 31,
 
     // Other types - not saved
-    TYPE_LEVIATHAN_GAUNTLET     = 31,
+    TYPE_LEVIATHAN_GAUNTLET     = 32,
 
     // The siege of ulduar
     NPC_LEVIATHAN               = 33113,
@@ -431,6 +432,35 @@ enum
     ACHIEV_CRIT_ALONE_DARK_H    = 10417,
     ACHIEV_CRIT_DRIVE_CRAZY_N   = 10185,                    // Yogg-Saron, achievs 3008, 3010
     ACHIEV_CRIT_DRIVE_CRAZY_H   = 10296,
+    
+    // Champion / Conquerer of Ulduar, achievs 2903, 2904
+    ACHIEV_CRIT_CHAMP_LEVI      = 10042,
+    ACHIEV_CRIT_CHAMP_RAZOR     = 10340,
+    ACHIEV_CRIT_CHAMP_XT        = 10341,
+    ACHIEV_CRIT_CHAMP_IGNIS     = 10342,
+    ACHIEV_CRIT_CHAMP_MIMIRON   = 10347,
+    ACHIEV_CRIT_CHAMP_KOLO      = 10348,
+    ACHIEV_CRIT_CHAMP_VEZAX     = 10349,
+    ACHIEV_CRIT_CHAMP_YOGG      = 10350,
+    ACHIEV_CRIT_CHAMP_AURIAYA   = 10351,
+    ACHIEV_CRIT_CHAMP_THORIM    = 10403,
+    ACHIEV_CRIT_CHAMP_HODIR     = 10439,
+    ACHIEV_CRIT_CHAMP_FREYA     = 10582,
+    ACHIEV_CRIT_CHAMP_COUNCIL   = 10598,
+
+    ACHIEV_CRIT_CONQ_LEVI       = 10352,
+    ACHIEV_CRIT_CONQ_RAZOR      = 10353,
+    ACHIEV_CRIT_CONQ_XT         = 10354,
+    ACHIEV_CRIT_CONQ_IGNIS      = 10355,
+    ACHIEV_CRIT_CONQ_KOLO       = 10357,
+    ACHIEV_CRIT_CONQ_MIMIRON    = 10361,
+    ACHIEV_CRIT_CONQ_VEZAX      = 10362,
+    ACHIEV_CRIT_CONQ_AURIAYA    = 10363,
+    ACHIEV_CRIT_CONQ_YOGG       = 10364,
+    ACHIEV_CRIT_CONQ_THORIM     = 10404,
+    ACHIEV_CRIT_CONQ_FREYA      = 10583,
+    ACHIEV_CRIT_CONQ_COUNCIL    = 10599,
+    ACHIEV_CRIT_CONQ_HODIR      = 10719,
 };
 
 struct UlduarSpawns
@@ -511,6 +541,8 @@ class MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance, private Dialogu
         bool IsEncounterInProgress() const override;
 
         void OnPlayerEnter(Player* pPlayer) override;
+        void OnPlayerDeath(Player* pPlayer) override;
+        
         void OnCreatureCreate(Creature* pCreature) override;
         void OnCreatureEnterCombat(Creature* pCreature) override;
         void OnCreatureDeath(Creature* pCreature) override;
