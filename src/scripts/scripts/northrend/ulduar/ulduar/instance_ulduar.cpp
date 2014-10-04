@@ -1438,12 +1438,12 @@ void instance_ulduar::DoCallLeviathanHelp()
         return;
 
     for (uint8 i = 0; i < countof(afReinforcementsNormal); ++i)
-        pLeviathan->SummonCreature(afReinforcementsNormal[i].uiAllyEntry, afReinforcementsNormal[i].fX, afReinforcementsNormal[i].fY, afReinforcementsNormal[i].fZ, afReinforcementsNormal[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true);
+        pLeviathan->SummonCreature(afReinforcementsNormal[i].uiEntry, afReinforcementsNormal[i].fX, afReinforcementsNormal[i].fY, afReinforcementsNormal[i].fZ, afReinforcementsNormal[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true);
 
     if (!instance->IsRegularDifficulty())
     {
         for (uint8 i = 0; i < countof(afReinforcementsHeroic); ++i)
-            pLeviathan->SummonCreature(afReinforcementsHeroic[i].uiAllyEntry, afReinforcementsHeroic[i].fX, afReinforcementsHeroic[i].fY, afReinforcementsHeroic[i].fZ, afReinforcementsHeroic[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true);
+            pLeviathan->SummonCreature(afReinforcementsHeroic[i].uiEntry, afReinforcementsHeroic[i].fX, afReinforcementsHeroic[i].fY, afReinforcementsHeroic[i].fZ, afReinforcementsHeroic[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true);
     }
 }
 
