@@ -49,6 +49,9 @@ enum
     SPELL_SUMMON_GAUNTLET_MOBS      = 48630,                // tick every 30 sec
     SPELL_SUMMON_GAUNTLET_MOBS_H    = 59275,                // tick every 25 sec
     SPELL_LAUNCH_HARPOON            = 48642,                // this spell hit drake to reduce HP (force triggered from 48641)
+    SPELL_CLOUD_AURA_LEFT           = 47574,
+    SPELL_CLOUD_AURA_RIGHT          = 47594,
+    SPELL_CLOUD_AURA_DAMAGE         = 47579,
 
     // phase 2 spells
     SPELL_CRUSH                     = 50234,
@@ -470,6 +473,34 @@ CreatureAI* GetAI_npc_grauf(Creature* pCreature)
 }
 
 /*######
+## npc_flame_breath_trigger
+######*/
+
+bool EffectAuraDummy_npc_flame_breath_trigger(const Aura* pAura, bool bApply)
+{
+    if (pAura->GetEffIndex() != EFFECT_INDEX_0 || !bApply)
+        return true;
+
+    Creature* pTarget = (Creature*)pAura->GetTarget();
+    if (!pTarget)
+        return true;
+
+    // apply auras based on creature position
+    if (pAura->GetId() == SPELL_CLOUD_AURA_LEFT)
+    {
+        if (pTarget->GetPositionY() > -511.0f)
+            pTarget->CastSpell(pTarget, SPELL_CLOUD_AURA_DAMAGE, true);
+    }
+    else if (pAura->GetId() == SPELL_CLOUD_AURA_RIGHT)
+    {
+        if (pTarget->GetPositionY() < -511.0f)
+            pTarget->CastSpell(pTarget, SPELL_CLOUD_AURA_DAMAGE, true);
+    }
+    return true;
+}
+
+
+/*######
 ## at_skadi
 ######*/
 
@@ -508,6 +539,11 @@ void AddSC_boss_skadi()
     pNewScript = new Script;
     pNewScript->Name = "npc_grauf";
     pNewScript->GetAI = &GetAI_npc_grauf;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_flame_breath_trigger";
+    pNewScript->pEffectAuraDummy = &EffectAuraDummy_npc_flame_breath_trigger;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
