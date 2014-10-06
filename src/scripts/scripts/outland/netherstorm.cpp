@@ -31,6 +31,7 @@ npc_zeppit
 npc_protectorate_demolitionist
 npc_captured_vanguard
 npc_drijya
+npc_dimensius
 EndContentData */
 
 #include "precompiled.h"
@@ -1394,6 +1395,152 @@ bool QuestAccept_npc_drijya(Player* pPlayer, Creature* pCreature, const Quest* p
     return false;
 }
 
+/*######
+## npc_dimensius
+######*/
+
+enum
+{
+    SAY_AGGRO                   = -1001170,
+    SAY_SUMMON                  = -1001171,
+
+    SPELL_DIMENSIUS_FEEDING     = 37450,
+    SPELL_SHADOW_SPIRAL         = 37500,
+    SPELL_SHADOW_VAULT          = 37412,
+
+    NPC_SPAWN_OF_DIMENSIUS      = 21780,
+    NPC_CAPTAIN_SAEED           = 20985,
+    MODEL_ID_DIMENSIUS_CLOUD    = 20011,
+};
+
+// order based on the increasing range of damage
+static const uint32 auiShadowRainSpells[5] = { 37399, 37405, 37397, 37396, 37409 };
+
+struct MANGOS_DLL_DECL npc_dimensiusAI : public Scripted_NoMovementAI
+{
+    npc_dimensiusAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+
+    uint32 m_uiSpiralTimer;
+    uint32 m_uiVaultTimer;
+    uint32 m_uiRainTimer;
+    uint8 m_uiRainIndex;
+    uint8 m_uiSpawnsDead;
+
+    bool m_bSpawnsFeeding;
+
+    void Reset() override
+    {
+        m_uiSpiralTimer = 1000;
+        m_uiVaultTimer  = urand(5000, 10000);
+        m_uiRainTimer   = 0;
+        m_uiRainIndex   = urand(0, 4);
+        m_uiSpawnsDead  = 0;
+
+        m_bSpawnsFeeding = false;
+
+        m_creature->SetDisplayId(MODEL_ID_DIMENSIUS_CLOUD);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PASSIVE);
+    }
+
+    void Aggro(Unit* /*pWho*/) override
+    {
+        DoScriptText(SAY_AGGRO, m_creature);
+    }
+
+    void JustSummoned(Creature* pSummoned) override
+    {
+        if (pSummoned->GetEntry() == NPC_SPAWN_OF_DIMENSIUS)
+            pSummoned->CastSpell(m_creature, SPELL_DIMENSIUS_FEEDING, true);
+    }
+
+    void SummonedCreatureJustDied(Creature* pSummoned) override
+    {
+        if (pSummoned->GetEntry() == NPC_SPAWN_OF_DIMENSIUS)
+        {
+            // interrupt the shadow rain when all spawns are dead
+            ++m_uiSpawnsDead;
+            if (m_uiSpawnsDead == 4)
+            {
+                m_creature->InterruptNonMeleeSpells(false);
+                m_uiRainTimer = 0;
+            }
+        }
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    {
+        // event is sent by dbscript
+        if (eventType == AI_EVENT_CUSTOM_EVENTAI_B && pSender->GetEntry() == NPC_CAPTAIN_SAEED)
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PASSIVE);
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (!m_bSpawnsFeeding && m_creature->GetHealthPercent() < 75.0f)
+        {
+            DoScriptText(SAY_SUMMON, m_creature);
+
+            float fX, fY, fZ;
+            for (uint8 i = 0; i < 4; ++i)
+            {
+                m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, 30.0f, i * (M_PI_F / 2));
+                m_creature->SummonCreature(NPC_SPAWN_OF_DIMENSIUS, fX, fY, fZ, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 120000);
+            }
+
+            m_uiRainTimer = 5000;
+            m_bSpawnsFeeding = true;
+        }
+
+        if (m_uiRainTimer)
+        {
+            if (m_uiRainTimer <= uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, auiShadowRainSpells[m_uiRainIndex], CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                {
+                    m_uiRainIndex = urand(0, 4);
+                    m_uiRainTimer = 5000;
+                }
+            }
+            else
+                m_uiRainTimer -= uiDiff;
+
+            return;
+        }
+
+        if (m_uiSpiralTimer < uiDiff)
+        {
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            {
+                if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_SPIRAL) == CAST_OK)
+                    m_uiSpiralTimer = urand(3000, 4000);
+            }
+        }
+        else
+            m_uiSpiralTimer -= uiDiff;
+
+        if (m_uiVaultTimer < uiDiff)
+        {
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            {
+                if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_VAULT) == CAST_OK)
+                    m_uiVaultTimer = urand(20000, 30000);
+            }
+        }
+        else
+            m_uiVaultTimer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_dimensius(Creature* pCreature)
+{
+    return new npc_dimensiusAI(pCreature);
+}
+
 void AddSC_netherstorm()
 {
     Script* pNewScript;
@@ -1450,5 +1597,10 @@ void AddSC_netherstorm()
     pNewScript->Name = "npc_drijya";
     pNewScript->GetAI = &GetAI_npc_drijya;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_drijya;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_dimensius";
+    pNewScript->GetAI = &GetAI_npc_dimensius;
     pNewScript->RegisterSelf();
 }
