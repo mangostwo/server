@@ -71,6 +71,7 @@ LfgJoinResult LFGMgr::GetJoinResult(Player* plr)
      *   Any group member cannot enter for x reason any other player can't
      */
     // if (Group* pGroup = plr->GetGroup())
+	return result;
 }
 
 ItemRewards LFGMgr::GetDungeonItemRewards(uint32 dungeonId, DungeonTypes type)
