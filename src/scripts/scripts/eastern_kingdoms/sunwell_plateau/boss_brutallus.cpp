@@ -275,7 +275,7 @@ struct MANGOS_DLL_DECL boss_brutallusAI : public ScriptedAI, private DialogueHel
                 break;
             case YELL_MADR_ICE_BARRIER:
                 if (Creature* pMadrigosa = m_pInstance->GetSingleCreatureFromStorage(NPC_MADRIGOSA))
-                    pMadrigosa->CastSpell(pMadrigosa, SPELL_FREEZE, true);
+                    pMadrigosa->CastSpell(pMadrigosa, SPELL_FREEZE, false);
                 break;
             case YELL_MADR_INTRO:
                 if (Creature* pMadrigosa = m_pInstance->GetSingleCreatureFromStorage(NPC_MADRIGOSA))
@@ -288,7 +288,7 @@ struct MANGOS_DLL_DECL boss_brutallusAI : public ScriptedAI, private DialogueHel
             case SPELL_FROST_BREATH:
                 if (Creature* pMadrigosa = m_pInstance->GetSingleCreatureFromStorage(NPC_MADRIGOSA))
                 {
-                    pMadrigosa->CastSpell(m_creature, SPELL_FROST_BREATH, true);
+                    pMadrigosa->CastSpell(m_creature, SPELL_FROST_BREATH, false);
                     pMadrigosa->GetMotionMaster()->MoveIdle();
                 }
                 break;
