@@ -155,11 +155,10 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
                         
                         std::set<uint32>::iterator setItr = dungeons.find(dungeonID);
                         if (setItr != dungeons.end())
-                        {
                             dungeons.erase(setItr);
-                            partyLockedDungeons[pGroupPlr->GetObjectGuid().GetRawValue()] = it;
-                        }
                     }
+                    if (!lockedDungeons.empty())
+                        partyLockedDungeons[pGroupPlr->GetObjectGuid().GetRawValue()] = lockedDungeons;
                 }
             }
         }
@@ -172,12 +171,12 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
                         
                 std::set<uint32>::iterator setItr = dungeons.find(dungeonID);
                 if (setItr != dungeons.end())
-                {
                     dungeons.erase(setItr);
-                    partyLockedDungeons[plr->GetObjectGuid().GetRawValue()] = it;
-                }
             }
+            if (!lockedDungeons.empty())
+                partyLockedDungeons[plr->GetObjectGuid().GetRawValue()] = lockedDungeons;
         }
+        
         if (!dungeons.empty())
             partyLockedDungeons.clear();
         else
