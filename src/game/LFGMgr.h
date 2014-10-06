@@ -200,7 +200,10 @@ struct LFGPlayers
 struct LFGQueue
 {
     time_t joinedTime;            // for calculating their avg. wait time
-    std::set<uint32> dungeonList; // The dungeons this player or group are queued for  
+    std::set<uint32> dungeonList; // The dungeons this player or group are queued for
+    uint8 neededTanks;            // x many tanks needed
+    uint8 neededHealers;          // x many healers needed
+    uint8 neededDps;              // x many dps needed
 };
 
 typedef UNORDERED_MAP<uint64, LFGPlayers> playerData; // ObjectGuid(raw), info on specific player

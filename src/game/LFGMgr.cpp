@@ -52,6 +52,7 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
 {
     // Todo: - add queue / role check elements when systems are complete
     //       - see if any of this code/information can be put into a generalized class for other use
+    //       - look into splitting this into 2 fns- one for player case, one for group
     Group* pGroup = plr->GetGroup();
     uint64 rawGuid = (pGroup) ? pGroup->GetObjectGuid().GetRawValue() : plr->GetObjectGuid().GetRawValue();
     
