@@ -43,6 +43,8 @@ struct MANGOS_DLL_DECL boss_golemaggAI : public ScriptedAI
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         Reset();
+        
+        DoCastSpellIfCan(m_creature, SPELL_MAGMA_SPLASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     ScriptedInstance* m_pInstance;
@@ -58,8 +60,6 @@ struct MANGOS_DLL_DECL boss_golemaggAI : public ScriptedAI
         m_uiEarthquakeTimer = 3 * IN_MILLISECONDS;
         m_uiBuffTimer       = 1.5 * IN_MILLISECONDS;
         m_bEnraged = false;
-
-        m_creature->CastSpell(m_creature, SPELL_MAGMA_SPLASH, true);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -78,6 +78,8 @@ struct MANGOS_DLL_DECL boss_golemaggAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_GOLEMAGG, FAIL);
+        
+        DoCastSpellIfCan(m_creature, SPELL_MAGMA_SPLASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void UpdateAI(const uint32 uiDiff) override

@@ -45,10 +45,13 @@ LFGMgr::~LFGMgr()
     m_dailyLKNormal.clear();
     m_dailyLKHeroic.clear();
     m_playerData.clear();
+    m_queueMap.clear();
 }
 
 void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string comments, Player* plr)
 {
+    // Todo: - add queue / role check elements when systems are complete
+    //       - see if any of this code/information can be put into a generalized class for other use
     Group* pGroup = plr->GetGroup();
     uint64 rawGuid = (pGroup) ? pGroup->GetObjectGuid().GetRawValue() : plr->GetObjectGuid().GetRawValue();
     

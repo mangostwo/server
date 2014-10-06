@@ -157,6 +157,16 @@ enum LFGRoleCheckState
     LFG_ROLECHECK_NO_ROLE                        = 6       // Someone didn't select a role
 };
 
+/// Role types 
+enum LFGRoles
+{
+    PLAYER_ROLE_NONE                             = 0x00,
+    PLAYER_ROLE_LEADER                           = 0x01,
+    PLAYER_ROLE_TANK                             = 0x02,
+    PLAYER_ROLE_HEALER                           = 0x04,
+    PLAYER_ROLE_DAMAGE                           = 0x08
+};
+
 enum DungeonTypes
 {
     DUNGEON_CLASSIC      = 0,
@@ -180,13 +190,21 @@ struct ItemRewards
 /// Information the dungeon finder needs about each player
 struct LFGPlayers
 {
-    LFGState currentState; // where the player is at with the dungeon finder
+    LFGState currentState;                  // where the player is at with the dungeon finder
     dungeonEntries currentDungeonSelection; // what dungeon(s) have they selected
-    uint8 currentRoles; // tank, dps, healer, etc..
+    uint8 currentRoles;                     // tank, dps, healer, etc..
     std::string comments;
 };
 
+/// Information used for the queue system
+struct LFGQueue
+{
+    time_t joinedTime;            // for calculating their avg. wait time
+    std::set<uint32> dungeonList; // The dungeons this player or group are queued for  
+};
+
 typedef UNORDERED_MAP<uint64, LFGPlayers> playerData; // ObjectGuid(raw), info on specific player
+typedef UNORDERED_MAP<uint64, LFGQueue> queueMap;     // ObjectGuid(raw), queue info
 
 // End Section: Enumerations & Structures
 
@@ -287,6 +305,7 @@ private:
     dailyEntries m_dailyLKHeroic;
     
     playerData m_playerData;
+    queueMap   m_queueMap;
 };
 
 #define sLFGMgr MaNGOS::Singleton<LFGMgr>::Instance()
