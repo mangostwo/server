@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Shadowmoon_Valley
 SD%Complete: 100
-SDComment: Quest support: 11020, 10458, 10480, 10481, 10514, 10540, 10588, 10781, 10804, 10854.
+SDComment: Quest support: 10451, 10458, 10480, 10481, 10514, 10540, 10588, 10781, 10804, 10854, 11020.
 SDCategory: Shadowmoon Valley
 EndScriptData */
 
@@ -439,13 +439,15 @@ bool EffectDummyCreature_npc_dragonmaw_peon(Unit* pCaster, uint32 uiSpellId, Spe
 enum
 {
     SAY_WIL_START               = -1000381,
-    SAY_WIL_AGGRO1              = -1000382,
-    SAY_WIL_AGGRO2              = -1000383,
-    SAY_WIL_PROGRESS1           = -1000384,
-    SAY_WIL_PROGRESS2           = -1000385,
+    SAY_WIL_AGGRO_1             = -1000382,
+    SAY_WIL_AGGRO_2             = -1000383,
+    SAY_WIL_FREE_SPIRITS        = -1000384,
     SAY_WIL_FIND_EXIT           = -1000386,
-    SAY_WIL_PROGRESS4           = -1000387,
-    SAY_WIL_PROGRESS5           = -1000388,
+    SAY_WIL_PROGRESS_1          = -1000385,
+    SAY_WIL_PROGRESS_2          = -1000387,
+    SAY_WIL_PROGRESS_3          = -1000388,
+    SAY_WIL_PROGRESS_4          = -1001168,
+    SAY_WIL_PROGRESS_5          = -1001169,
     SAY_WIL_JUST_AHEAD          = -1000389,
     SAY_WIL_END                 = -1000390,
 
@@ -453,79 +455,89 @@ enum
     SPELL_EARTHBING_TOTEM       = 15786,
     SPELL_FROST_SHOCK           = 12548,
     SPELL_HEALING_WAVE          = 12491,
+    SPELL_WATER_BUBBLE          = 35929,
 
     QUEST_ESCAPE_COILSCAR       = 10451,
     NPC_COILSKAR_ASSASSIN       = 21044,
-    FACTION_EARTHEN             = 1726                      // guessed
+    NPC_CAPTURED_WATER_SPIRIT   = 21029,
 };
 
-// this script needs verification
 struct MANGOS_DLL_DECL npc_wildaAI : public npc_escortAI
 {
-    npc_wildaAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+    npc_wildaAI(Creature* pCreature) : npc_escortAI(pCreature)
+    {
+        // the creature is floating in a prison; no quest available first;
+        // the floating prison setup and quest flag restore is handled by DB
+        m_creature->SetLevitate(true);
+        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+        
+        Reset();
+    }
 
     uint32 m_uiHealingTimer;
+    uint32 m_uiShockTimer;
+    uint32 m_uiLightningTimer;
 
     void Reset() override
     {
         m_uiHealingTimer = 0;
+        m_uiShockTimer = 1000;
+        m_uiLightningTimer = 2000;
+    }
+
+    void Aggro(Unit* pWho) override
+    {
+        if (roll_chance_i(30))
+            DoCastSpellIfCan(m_creature, SPELL_EARTHBING_TOTEM);
+    }
+    
+    void AttackStart(Unit* pWho) override
+    {
+        if (m_creature->Attack(pWho, true))
+        {
+            m_creature->AddThreat(pWho);
+            m_creature->SetInCombatWith(pWho);
+            pWho->SetInCombatWith(m_creature);
+            DoStartMovement(pWho, 10.0f);
+        }
     }
 
     void WaypointReached(uint32 uiPointId) override
     {
-        Player* pPlayer = GetPlayerForEscort();
-
-        if (!pPlayer)
-            return;
-
         switch (uiPointId)
         {
-            case 13:
-                DoScriptText(SAY_WIL_PROGRESS1, m_creature, pPlayer);
+            case 8:
+            case 26:
+            case 30:
+            case 32:
+            case 39:
+            case 43:
+            case 51:
                 DoSpawnAssassin();
+                break;
+            case 13:
+                if (Player* pPlayer = GetPlayerForEscort())
+                    DoScriptText(SAY_WIL_FREE_SPIRITS, m_creature, pPlayer);
+                DoFreeSpirits();
                 break;
             case 14:
-                DoSpawnAssassin();
+                DoScriptText(SAY_WIL_FIND_EXIT, m_creature);
                 break;
             case 15:
-                DoScriptText(SAY_WIL_FIND_EXIT, m_creature, pPlayer);
+                DoSpawnAssassin(2);
                 break;
-            case 19:
-                DoRandomSay();
+            case 40:
+                if (Player* pPlayer = GetPlayerForEscort())
+                    DoScriptText(SAY_WIL_JUST_AHEAD, m_creature, pPlayer);
                 break;
-            case 20:
-                DoSpawnAssassin();
-                break;
-            case 26:
-                DoRandomSay();
-                break;
-            case 27:
-                DoSpawnAssassin();
-                break;
-            case 33:
-                DoRandomSay();
-                break;
-            case 34:
-                DoSpawnAssassin();
-                break;
-            case 37:
-                DoRandomSay();
-                break;
-            case 38:
-                DoSpawnAssassin();
-                break;
-            case 39:
-                DoScriptText(SAY_WIL_JUST_AHEAD, m_creature, pPlayer);
-                break;
-            case 43:
-                DoRandomSay();
-                break;
-            case 44:
-                DoSpawnAssassin();
-                break;
-            case 50:
-                DoScriptText(SAY_WIL_END, m_creature, pPlayer);
-                pPlayer->GroupEventHappens(QUEST_ESCAPE_COILSCAR, m_creature);
+            case 52:
+                if (Player* pPlayer = GetPlayerForEscort())
+                {
+                    DoDespawnSpirits();
+                    m_creature->SetFacingToObject(pPlayer);
+                    DoScriptText(SAY_WIL_END, m_creature, pPlayer);
+                    pPlayer->GroupEventHappens(QUEST_ESCAPE_COILSCAR, m_creature);
+                }
                 break;
         }
     }
@@ -533,45 +545,69 @@ struct MANGOS_DLL_DECL npc_wildaAI : public npc_escortAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_COILSKAR_ASSASSIN)
-            pSummoned->AI()->AttackStart(m_creature);
-    }
-
-    // this is very unclear, random say without no real relevance to script/event
-    void DoRandomSay()
-    {
-        switch (urand(0, 2))
         {
-            case 0: DoScriptText(SAY_WIL_PROGRESS2, m_creature); break;
-            case 1: DoScriptText(SAY_WIL_PROGRESS4, m_creature); break;
-            case 2: DoScriptText(SAY_WIL_PROGRESS5, m_creature); break;
+            if (Player* pPlayer = GetPlayerForEscort())
+                pSummoned->AI()->AttackStart(pPlayer);
         }
     }
 
-    void DoSpawnAssassin()
+    // wrapper to spawn assassin and do text
+    void DoSpawnAssassin(uint8 uiCount = 1)
     {
         // unknown where they actually appear
         float fX, fY, fZ;
-        m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 15.0f, fX, fY, fZ);
+        for (uint8 i = 0; i < uiCount; ++i)
+        {
+            m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10.0f, fX, fY, fZ);
+            m_creature->SummonCreature(NPC_COILSKAR_ASSASSIN, fX, fY, fZ, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 10000);
+        }
 
-        m_creature->SummonCreature(NPC_COILSKAR_ASSASSIN, fX, fY, fZ, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
+        // random chance to yell
+        if (roll_chance_i(20))
+            return;
+        
+        // random text when assassin is summoned
+        switch (urand(0, 6))
+        {
+            case 0: DoScriptText(SAY_WIL_PROGRESS_1, m_creature); break;
+            case 1: DoScriptText(SAY_WIL_PROGRESS_2, m_creature); break;
+            case 2: DoScriptText(SAY_WIL_PROGRESS_3, m_creature); break;
+            case 3: DoScriptText(SAY_WIL_PROGRESS_4, m_creature); break;
+            case 4: DoScriptText(SAY_WIL_PROGRESS_5, m_creature); break;
+            case 5: DoScriptText(SAY_WIL_AGGRO_1, m_creature); break;
+            case 6: DoScriptText(SAY_WIL_AGGRO_2, m_creature); break;
+        }
     }
 
-    void Aggro(Unit* pWho) override
+    // free the water spirits
+    void DoFreeSpirits()
     {
-        // don't always use
-        if (urand(0, 4))
+        std::list<Creature*> lSpiritsInRange;
+        GetCreatureListWithEntryInGrid(lSpiritsInRange, m_creature, NPC_CAPTURED_WATER_SPIRIT, 50.0f);
+        
+        if (lSpiritsInRange.empty())
             return;
 
-        // only aggro text if not player
-        if (pWho->GetTypeId() != TYPEID_PLAYER)
+        // all spirits follow
+        for (std::list<Creature*>::const_iterator itr = lSpiritsInRange.begin(); itr != lSpiritsInRange.end(); ++itr)
         {
-            // appears to be random
-            switch (urand(0, 3))
-            {
-                case 0: DoScriptText(SAY_WIL_AGGRO1, m_creature, pWho); break;
-                case 1: DoScriptText(SAY_WIL_AGGRO2, m_creature, pWho); break;
-            }
+            (*itr)->RemoveAurasDueToSpell(SPELL_WATER_BUBBLE);
+            (*itr)->GetMotionMaster()->MoveFollow(m_creature, m_creature->GetDistance(*itr) * 0.25f, M_PI_F/2 + m_creature->GetAngle(*itr));
+            (*itr)->SetLevitate(false);
         }
+    }
+    
+    void DoDespawnSpirits()
+    {
+        std::list<Creature*> lSpiritsInRange;
+        GetCreatureListWithEntryInGrid(lSpiritsInRange, m_creature, NPC_CAPTURED_WATER_SPIRIT, 50.0f);
+        
+        if (lSpiritsInRange.empty())
+            return;
+        
+        // all spirits follow
+        for (std::list<Creature*>::const_iterator itr = lSpiritsInRange.begin(); itr != lSpiritsInRange.end(); ++itr)
+            (*itr)->ForcedDespawn(6000);
     }
 
     void UpdateEscortAI(const uint32 uiDiff) override
@@ -579,7 +615,22 @@ struct MANGOS_DLL_DECL npc_wildaAI : public npc_escortAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        // TODO: add more abilities
+        if (m_uiLightningTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHAIN_LIGHTNING) == CAST_OK)
+                m_uiLightningTimer = 4000;
+        }
+        else
+            m_uiLightningTimer -= uiDiff;
+        
+        if (m_uiShockTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_SHOCK) == CAST_OK)
+                m_uiShockTimer = 10000;
+        }
+        else
+            m_uiShockTimer -= uiDiff;
+        
         if (m_creature->GetHealthPercent() <= 30.0f)
         {
             if (m_uiHealingTimer < uiDiff)
@@ -605,7 +656,8 @@ bool QuestAccept_npc_wilda(Player* pPlayer, Creature* pCreature, const Quest* pQ
     if (pQuest->GetQuestId() == QUEST_ESCAPE_COILSCAR)
     {
         DoScriptText(SAY_WIL_START, pCreature, pPlayer);
-        pCreature->SetFactionTemporary(FACTION_EARTHEN, TEMPFACTION_RESTORE_RESPAWN);
+        pCreature->SetFactionTemporary(FACTION_ESCORT_A_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
+        pCreature->SetLevitate(false);
 
         if (npc_wildaAI* pEscortAI = dynamic_cast<npc_wildaAI*>(pCreature->AI()))
             pEscortAI->Start(false, pPlayer, pQuest);
