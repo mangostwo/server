@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Skeram
-SD%Complete: 90
-SDComment: Timers
-SDCategory: Temple of Ahn'Qiraj
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Skeram
+ * SD%Complete: 90
+ * SDComment:   Timers
+ * SDCategory:  Temple of Ahn'Qiraj
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 #include "temple_of_ahnqiraj.h"
@@ -54,9 +65,13 @@ struct MANGOS_DLL_DECL boss_skeramAI : public ScriptedAI
 
         // Check this for images, because the Initialize spell hits the target only after aggro
         if (m_creature->IsTemporarySummon())
+        {
             m_bIsImage = true;
+        }
         else
+        {
             m_bIsImage = false;
+        }
     }
 
     ScriptedInstance* m_pInstance;
@@ -78,16 +93,24 @@ struct MANGOS_DLL_DECL boss_skeramAI : public ScriptedAI
         m_fHpCheck               = 75.0f;
 
         if (m_creature->GetVisibility() != VISIBILITY_ON)
+        {
             m_creature->SetVisibility(VISIBILITY_ON);
+        }
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
     {
         switch (urand(0, 2))
         {
-            case 0: DoScriptText(SAY_SLAY1, m_creature); break;
-            case 1: DoScriptText(SAY_SLAY2, m_creature); break;
-            case 2: DoScriptText(SAY_SLAY3, m_creature); break;
+            case 0:
+                DoScriptText(SAY_SLAY1, m_creature);
+                break;
+            case 1:
+                DoScriptText(SAY_SLAY2, m_creature);
+                break;
+            case 2:
+                DoScriptText(SAY_SLAY3, m_creature);
+                break;
         }
     }
 
@@ -98,42 +121,60 @@ struct MANGOS_DLL_DECL boss_skeramAI : public ScriptedAI
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_SKERAM, DONE);
+            }
         }
         // Else despawn to avoid looting
         else
-            m_creature->ForcedDespawn();
+            { m_creature->ForcedDespawn(); }
     }
 
     void Aggro(Unit* /*pWho*/) override
     {
         if (m_bIsImage)
+        {
             return;
+        }
 
         switch (urand(0, 2))
         {
-            case 0: DoScriptText(SAY_AGGRO1, m_creature); break;
-            case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
-            case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
+            case 0:
+                DoScriptText(SAY_AGGRO1, m_creature);
+                break;
+            case 1:
+                DoScriptText(SAY_AGGRO2, m_creature);
+                break;
+            case 2:
+                DoScriptText(SAY_AGGRO3, m_creature);
+                break;
         }
 
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_SKERAM, IN_PROGRESS);
+        }
     }
 
     void JustReachedHome() override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_SKERAM, FAIL);
+        }
 
         if (m_bIsImage)
+        {
             m_creature->ForcedDespawn();
+        }
     }
 
     void JustSummoned(Creature* pSummoned) override
     {
         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+        {
             pSummoned->AI()->AttackStart(pTarget);
+        }
 
         DoCastSpellIfCan(pSummoned, SPELL_INITIALIZE_IMAGE, CAST_TRIGGERED);
     }
@@ -142,7 +183,9 @@ struct MANGOS_DLL_DECL boss_skeramAI : public ScriptedAI
     void DoInitializeImage()
     {
         if (!m_pInstance)
+        {
             return;
+        }
 
         // Initialize the health of the clone
         if (Creature* pProphet = m_pInstance->GetSingleCreatureFromStorage(NPC_SKERAM))
@@ -152,11 +195,17 @@ struct MANGOS_DLL_DECL boss_skeramAI : public ScriptedAI
 
             // The max health depends on the split phase. It's percent * original boss health
             if (fHealthPct < 25.0f)
+            {
                 fMaxHealthPct = 0.50f;
+            }
             else if (fHealthPct < 50.0f)
+            {
                 fMaxHealthPct = 0.20f;
+            }
             else
+            {
                 fMaxHealthPct = 0.10f;
+            }
 
             // Set the same health percent as the original boss
             m_creature->SetMaxHealth(m_creature->GetMaxHealth()*fMaxHealthPct);
@@ -168,16 +217,20 @@ struct MANGOS_DLL_DECL boss_skeramAI : public ScriptedAI
     {
         // Return since we have no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         // ArcaneExplosion_Timer
         if (m_uiArcaneExplosionTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_ARCANE_EXPLOSION) == CAST_OK)
+            {
                 m_uiArcaneExplosionTimer = urand(8000, 18000);
+            }
         }
         else
-            m_uiArcaneExplosionTimer -= uiDiff;
+            { m_uiArcaneExplosionTimer -= uiDiff; }
 
         // True Fullfilment
         if (m_uiFullFillmentTimer < uiDiff)
@@ -185,30 +238,40 @@ struct MANGOS_DLL_DECL boss_skeramAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_TRUE_FULFILLMENT) == CAST_OK)
+                {
                     m_uiFullFillmentTimer = urand(20000, 30000);
+                }
             }
         }
         else
-            m_uiFullFillmentTimer -= uiDiff;
+            { m_uiFullFillmentTimer -= uiDiff; }
 
         // Blink_Timer
         if (m_uiBlinkTimer < uiDiff)
         {
             switch (urand(0, 2))
             {
-                case 0: DoCastSpellIfCan(m_creature, SPELL_TELEPORT_1); break;
-                case 1: DoCastSpellIfCan(m_creature, SPELL_TELEPORT_2); break;
-                case 2: DoCastSpellIfCan(m_creature, SPELL_TELEPORT_3); break;
+                case 0:
+                    DoCastSpellIfCan(m_creature, SPELL_TELEPORT_1);
+                    break;
+                case 1:
+                    DoCastSpellIfCan(m_creature, SPELL_TELEPORT_2);
+                    break;
+                case 2:
+                    DoCastSpellIfCan(m_creature, SPELL_TELEPORT_3);
+                    break;
             }
 
             DoResetThreat();
             if (m_creature->GetVisibility() != VISIBILITY_ON)
+            {
                 m_creature->SetVisibility(VISIBILITY_ON);
+            }
 
             m_uiBlinkTimer = urand(10000, 30000);
         }
         else
-            m_uiBlinkTimer -= uiDiff;
+            { m_uiBlinkTimer -= uiDiff; }
 
         // Summon images at 75%, 50% and 25%
         if (!m_bIsImage && m_creature->GetHealthPercent() < m_fHpCheck)
@@ -225,13 +288,17 @@ struct MANGOS_DLL_DECL boss_skeramAI : public ScriptedAI
 
         // If we are within range melee the target
         if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
+        {
             DoMeleeAttackIfReady();
+        }
         else
         {
             if (!m_creature->IsNonMeleeSpellCasted(false))
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
                     DoCastSpellIfCan(pTarget, SPELL_EARTH_SHOCK);
+                }
             }
         }
     }
@@ -253,12 +320,16 @@ bool EffectDummyCreature_prophet_skeram(Unit* /*pCaster*/, uint32 uiSpellId, Spe
             if (Creature* pProphet = pInstance->GetSingleCreatureFromStorage(NPC_SKERAM))
             {
                 if (pProphet == pCreatureTarget)
+                {
                     return false;
+                }
             }
         }
 
         if (boss_skeramAI* pSkeramAI = dynamic_cast<boss_skeramAI*>(pCreatureTarget->AI()))
+        {
             pSkeramAI->DoInitializeImage();
+        }
     }
 
     return false;

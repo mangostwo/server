@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Kurinnaxx
-SD%Complete: 90
-SDComment: Summon Player ability NYI
-SDCategory: Ruins of Ahn'Qiraj
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Kurinnaxx
+ * SD%Complete: 90
+ * SDComment:   Summon Player ability NYI
+ * SDCategory:  Ruins of Ahn'Qiraj
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 
@@ -71,36 +82,44 @@ struct MANGOS_DLL_DECL boss_kurinnaxxAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         // If we are belowe 30% HP cast enrage
         if (!m_bEnraged && m_creature->GetHealthPercent() <= 30.0f)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+            {
                 m_bEnraged = true;
+            }
         }
 
         // Mortal Wound
         if (m_uiMortalWoundTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTAL_WOUND) == CAST_OK)
+            {
                 m_uiMortalWoundTimer = urand(8000, 10000);
+            }
         }
         else
-            m_uiMortalWoundTimer -= uiDiff;
+            { m_uiMortalWoundTimer -= uiDiff; }
 
         // Sand Trap
         if (m_uiSandTrapTimer < uiDiff)
         {
             Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
             if (!pTarget)
+            {
                 pTarget = m_creature->getVictim();
+            }
 
             pTarget->CastSpell(pTarget, SPELL_SANDTRAP, true, NULL, NULL, m_creature->GetObjectGuid());
             m_uiSandTrapTimer = urand(10000, 15000);
         }
         else
-            m_uiSandTrapTimer -= uiDiff;
+            { m_uiSandTrapTimer -= uiDiff; }
 
         // Trigger the sand trap in 3 secs after spawn
         if (m_uiTrapTriggerTimer)
@@ -108,30 +127,38 @@ struct MANGOS_DLL_DECL boss_kurinnaxxAI : public ScriptedAI
             if (m_uiTrapTriggerTimer <= uiDiff)
             {
                 if (GameObject* pTrap = m_creature->GetMap()->GetGameObject(m_sandtrapGuid))
+                {
                     pTrap->Use(m_creature);
+                }
                 m_uiTrapTriggerTimer = 0;
             }
             else
+            {
                 m_uiTrapTriggerTimer -= uiDiff;
+            }
         }
 
         // Wide Slash
         if (m_uiWideSlashTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_WIDE_SLASH) == CAST_OK)
+            {
                 m_uiWideSlashTimer = urand(12000, 15000);
+            }
         }
         else
-            m_uiWideSlashTimer -= uiDiff;
+            { m_uiWideSlashTimer -= uiDiff; }
 
         // Trash
         if (m_uiTrashTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_TRASH) == CAST_OK)
+            {
                 m_uiTrashTimer = urand(12000, 17000);
+            }
         }
         else
-            m_uiTrashTimer -= uiDiff;
+            { m_uiTrashTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

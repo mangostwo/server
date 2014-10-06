@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Ouro
-SD%Complete: 90
-SDComment: Some minor adjustments may be required
-SDCategory: Temple of Ahn'Qiraj
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Ouro
+ * SD%Complete: 90
+ * SDComment:   Some minor adjustments may be required
+ * SDCategory:  Temple of Ahn'Qiraj
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 #include "temple_of_ahnqiraj.h"
@@ -100,13 +111,17 @@ struct MANGOS_DLL_DECL boss_ouroAI : public Scripted_NoMovementAI
     void Aggro(Unit* /*pWho*/) override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_OURO, IN_PROGRESS);
+        }
     }
 
     void JustReachedHome() override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_OURO, FAIL);
+        }
 
         m_creature->ForcedDespawn();
     }
@@ -114,7 +129,9 @@ struct MANGOS_DLL_DECL boss_ouroAI : public Scripted_NoMovementAI
     void JustDied(Unit* /*pKiller*/) override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_OURO, DONE);
+        }
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -134,7 +151,9 @@ struct MANGOS_DLL_DECL boss_ouroAI : public Scripted_NoMovementAI
     {
         // Return since we have no pTarget
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         if (!m_bSubmerged)
         {
@@ -148,26 +167,36 @@ struct MANGOS_DLL_DECL boss_ouroAI : public Scripted_NoMovementAI
                     m_uiSummonBaseTimer = 0;
                 }
                 else
+                {
                     m_uiSummonBaseTimer -= uiDiff;
+                }
             }
 
             // Sweep
             if (m_uiSweepTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_SWEEP) == CAST_OK)
+                {
                     m_uiSweepTimer = 20000;
+                }
             }
             else
+            {
                 m_uiSweepTimer -= uiDiff;
+            }
 
             // Sand Blast
             if (m_uiSandBlastTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_SANDBLAST) == CAST_OK)
+                {
                     m_uiSandBlastTimer = 22000;
+                }
             }
             else
+            {
                 m_uiSandBlastTimer -= uiDiff;
+            }
 
             if (!m_bEnraged)
             {
@@ -196,7 +225,9 @@ struct MANGOS_DLL_DECL boss_ouroAI : public Scripted_NoMovementAI
                     }
                 }
                 else
+                {
                     m_uiSubmergeTimer -= uiDiff;
+                }
             }
             else
             {
@@ -204,22 +235,30 @@ struct MANGOS_DLL_DECL boss_ouroAI : public Scripted_NoMovementAI
                 if (m_uiSummonMoundTimer < uiDiff)
                 {
                     DoSpawnCreature(NPC_DIRT_MOUND, 0, 0, 0, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
-                    m_uiSummonMoundTimer = 10000;
+                    {
+                        m_uiSummonMoundTimer = 10000;
+                    }
                 }
                 else
+                {
                     m_uiSummonMoundTimer -= uiDiff;
+                }
             }
 
             // If we are within range melee the target
             if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
+            {
                 DoMeleeAttackIfReady();
+            }
             // Spam Boulder spell when enraged and not tanked
             else if (m_bEnraged)
             {
                 if (!m_creature->IsNonMeleeSpellCasted(false))
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
                         DoCastSpellIfCan(pTarget, SPELL_BOULDER);
+                    }
                 }
             }
         }
@@ -230,7 +269,9 @@ struct MANGOS_DLL_DECL boss_ouroAI : public Scripted_NoMovementAI
             {
                 // Teleport to the trigger in order to get a new location
                 if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_ouroTriggerGuid))
+                {
                     m_creature->NearTeleportTo(pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), 0);
+                }
 
                 if (DoCastSpellIfCan(m_creature, SPELL_BIRTH) == CAST_OK)
                 {
@@ -243,7 +284,7 @@ struct MANGOS_DLL_DECL boss_ouroAI : public Scripted_NoMovementAI
                 }
             }
             else
-                m_uiSubmergeTimer -= uiDiff;
+                { m_uiSubmergeTimer -= uiDiff; }
         }
     }
 };

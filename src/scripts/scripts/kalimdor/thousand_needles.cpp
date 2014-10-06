@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,22 +18,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Thousand_Needles
-SD%Complete: 90
-SDComment: Quest support: 1950, 4770, 4904, 4966
-SDCategory: Thousand Needles
-EndScriptData
-*/
+/**
+ * ScriptData
+ * SDName:      Thousand_Needles
+ * SD%Complete: 90
+ * SDComment:   Quest support: 1950, 4770, 4904, 4966
+ * SDCategory:  Thousand Needles
+ * EndScriptData
+ */
 
-/* ContentData
-npc_kanati
-npc_lakota_windsong
-npc_paoka_swiftmountain
-npc_plucky_johnson
-EndContentData */
+/**
+ * ContentData
+ * npc_kanati
+ * npc_lakota_windsong
+ * npc_paoka_swiftmountain
+ * npc_plucky_johnson
+ * EndContentData
+ */
 
 #include "precompiled.h"
 #include "escort_ai.h"
@@ -62,7 +74,9 @@ struct MANGOS_DLL_DECL npc_kanatiAI : public npc_escortAI
                 break;
             case 1:
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     pPlayer->GroupEventHappens(QUEST_PROTECT_KANATI, m_creature);
+                }
                 break;
         }
     }
@@ -91,7 +105,9 @@ bool QuestAccept_npc_kanati(Player* pPlayer, Creature* pCreature, const Quest* p
     if (pQuest->GetQuestId() == QUEST_PROTECT_KANATI)
     {
         if (npc_kanatiAI* pEscortAI = dynamic_cast<npc_kanatiAI*>(pCreature->AI()))
+        {
             pEscortAI->Start(false, pPlayer, pQuest, true);
+        }
     }
     return true;
 }
@@ -150,7 +166,9 @@ struct MANGOS_DLL_DECL npc_lakota_windsongAI : public npc_escortAI
                 break;
             case 45:
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     pPlayer->GroupEventHappens(QUEST_FREE_AT_LAST, m_creature);
+                }
                 break;
         }
     }
@@ -177,7 +195,9 @@ bool QuestAccept_npc_lakota_windsong(Player* pPlayer, Creature* pCreature, const
         pCreature->SetFactionTemporary(FACTION_ESCORT_H_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
 
         if (npc_lakota_windsongAI* pEscortAI = dynamic_cast<npc_lakota_windsongAI*>(pCreature->AI()))
+        {
             pEscortAI->Start(false, pPlayer, pQuest);
+        }
     }
     return true;
 }
@@ -222,7 +242,9 @@ struct MANGOS_DLL_DECL npc_paoka_swiftmountainAI : public npc_escortAI
                 break;
             case 27:
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     pPlayer->GroupEventHappens(QUEST_HOMEWARD, m_creature);
+                }
                 break;
         }
     }
@@ -249,7 +271,9 @@ bool QuestAccept_npc_paoka_swiftmountain(Player* pPlayer, Creature* pCreature, c
         pCreature->SetFactionTemporary(FACTION_ESCORT_H_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
 
         if (npc_paoka_swiftmountainAI* pEscortAI = dynamic_cast<npc_paoka_swiftmountainAI*>(pCreature->AI()))
+        {
             pEscortAI->Start(false, pPlayer, pQuest);
+        }
     }
     return true;
 }
@@ -282,7 +306,9 @@ struct MANGOS_DLL_DECL npc_plucky_johnsonAI : public ScriptedAI
         m_uiResetTimer = 120000;
 
         if (m_creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP))
+        {
             m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        }
 
         m_creature->CastSpell(m_creature, SPELL_PLUCKY_CHICKEN, false);
     }
@@ -302,7 +328,9 @@ struct MANGOS_DLL_DECL npc_plucky_johnsonAI : public ScriptedAI
         if (uiTextEmote == TEXTEMOTE_CHICKEN)
         {
             if (m_creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP))
+            {
                 return;
+            }
             else
             {
                 m_creature->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_COMBAT_STOP);
@@ -320,18 +348,26 @@ struct MANGOS_DLL_DECL npc_plucky_johnsonAI : public ScriptedAI
             if (m_uiResetTimer < uiDiff)
             {
                 if (!m_creature->getVictim())
+                {
                     EnterEvadeMode();
+                }
                 else
+                {
                     m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                }
 
                 return;
             }
             else
+            {
                 m_uiResetTimer -= uiDiff;
+            }
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         DoMeleeAttackIfReady();
     }
@@ -345,7 +381,9 @@ CreatureAI* GetAI_npc_plucky_johnson(Creature* pCreature)
 bool GossipHello_npc_plucky_johnson(Player* pPlayer, Creature* pCreature)
 {
     if (pPlayer->GetQuestStatus(QUEST_SCOOP) == QUEST_STATUS_INCOMPLETE)
+    {
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_QUEST, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+    }
 
     pPlayer->SEND_GOSSIP_MENU(720, pCreature->GetObjectGuid());
     return true;

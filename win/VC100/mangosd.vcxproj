@@ -464,6 +464,7 @@
     <ClCompile Include="..\..\src\mangosd\RASocket.cpp" />
     <ClCompile Include="..\..\src\mangosd\WorldRunnable.cpp" />
     <ClCompile Include="..\..\src\shared\WheatyExceptionReport.cpp" />
+    <ClCompile Include="..\..\src\game\LFGMgr.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\dep\include\gsoap\stdsoap2.h" />
@@ -475,6 +476,7 @@
     <ClInclude Include="..\..\src\mangosd\RASocket.h" />
     <ClInclude Include="..\..\src\mangosd\WorldRunnable.h" />
     <ClInclude Include="..\..\src\shared\WheatyExceptionReport.h" />
+    <ClCompile Include="..\..\src\game\LFGMgr.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\src\mangosd\mangosd.rc" />

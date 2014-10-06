@@ -23,18 +23,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/**
- * ScriptData
- * SDName:      Uldaman
- * SD%Complete: 0
- * SDComment:   Placeholder
- * SDCategory:  Uldaman
- * EndScriptData
- */
+#ifndef DEF_RFD_H
+#define DEF_RFD_H
 
-#include "precompiled.h"
-#include "uldaman.h"
-
-void AddSC_uldaman()
-{
-}
+#endif

@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Buru
-SD%Complete: 70
-SDComment: Timers; Kill eggs on transform NYI; Egg explode damage and Buru stun are missing
-SDCategory: Ruins of Ahn'Qiraj
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Buru
+ * SD%Complete: 70
+ * SDComment:   Timers; Kill eggs on transform NYI; Egg explode damage and Buru stun are missing
+ * SDCategory:  Ruins of Ahn'Qiraj
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 #include "ruins_of_ahnqiraj.h"
@@ -80,14 +91,18 @@ struct MANGOS_DLL_DECL boss_buruAI : public ScriptedAI
     {
         // Attack a new random target when a player is killed
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
+        {
             DoAttackNewTarget();
+        }
     }
 
     // Wrapper to attack a new target and remove the speed gathering buff
     void DoAttackNewTarget()
     {
         if (m_uiPhase == PHASE_TRANSFORM)
+        {
             return;
+        }
 
         m_creature->RemoveAurasDueToSpell(SPELL_FULL_SPEED);
         m_creature->RemoveAurasDueToSpell(SPELL_GATHERING_SPEED);
@@ -105,7 +120,9 @@ struct MANGOS_DLL_DECL boss_buruAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         switch (m_uiPhase)
         {
@@ -114,28 +131,40 @@ struct MANGOS_DLL_DECL boss_buruAI : public ScriptedAI
                 if (m_uiDismemberTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DISMEMBER) == CAST_OK)
+                    {
                         m_uiDismemberTimer = 5000;
+                    }
                 }
                 else
+                {
                     m_uiDismemberTimer -= uiDiff;
+                }
 
                 if (m_uiFullSpeedTimer)
                 {
                     if (m_uiGatheringSpeedTimer < uiDiff)
                     {
                         if (DoCastSpellIfCan(m_creature, SPELL_GATHERING_SPEED) == CAST_OK)
+                        {
                             m_uiGatheringSpeedTimer = 9000;
+                        }
                     }
                     else
+                    {
                         m_uiGatheringSpeedTimer -= uiDiff;
+                    }
 
                     if (m_uiFullSpeedTimer <= uiDiff)
                     {
                         if (DoCastSpellIfCan(m_creature, SPELL_FULL_SPEED) == CAST_OK)
+                        {
                             m_uiFullSpeedTimer = 0;
+                        }
                     }
                     else
+                    {
                         m_uiFullSpeedTimer -= uiDiff;
+                    }
                 }
 
                 if (m_creature->GetHealthPercent() < 20.0f)
@@ -156,10 +185,14 @@ struct MANGOS_DLL_DECL boss_buruAI : public ScriptedAI
                 if (m_uiCreepingPlagueTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_CREEPING_PLAGUE) == CAST_OK)
+                    {
                         m_uiCreepingPlagueTimer = 6000;
+                    }
                 }
                 else
+                {
                     m_uiCreepingPlagueTimer -= uiDiff;
+                }
 
                 break;
         }
@@ -190,7 +223,9 @@ struct MANGOS_DLL_DECL npc_buru_eggAI : public Scripted_NoMovementAI
     {
         // The purpose of this is unk for the moment
         if (pSummoned->GetEntry() == NPC_BURU_EGG_TRIGGER)
+        {
             pSummoned->CastSpell(pSummoned, SPELL_BURU_EGG_TRIGGER, true);
+        }
         // The Hatchling should attack a random target
         else if (pSummoned->GetEntry() == NPC_HATCHLING)
         {
@@ -199,7 +234,9 @@ struct MANGOS_DLL_DECL npc_buru_eggAI : public Scripted_NoMovementAI
                 if (Creature* pBuru = m_pInstance->GetSingleCreatureFromStorage(NPC_BURU))
                 {
                     if (Unit* pTarget = pBuru->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
                         pSummoned->AI()->AttackStart(pTarget);
+                    }
                 }
             }
         }
@@ -217,7 +254,9 @@ struct MANGOS_DLL_DECL npc_buru_eggAI : public Scripted_NoMovementAI
             if (Creature* pBuru = m_pInstance->GetSingleCreatureFromStorage(NPC_BURU))
             {
                 if (boss_buruAI* pBuruAI = dynamic_cast<boss_buruAI*>(pBuru->AI()))
+                {
                     pBuruAI->DoAttackNewTarget();
+                }
             }
         }
     }

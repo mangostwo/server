@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Noxxion
-SD%Complete: 100
-SDComment:
-SDCategory: Maraudon
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Noxxion
+ * SD%Complete: 100
+ * SDComment:   None
+ * SDCategory:  Maraudon
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 
@@ -49,37 +60,47 @@ struct MANGOS_DLL_DECL boss_noxxionAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+        {
             pSummoned->AI()->AttackStart(pTarget);
+        }
     }
 
     void UpdateAI(const uint32 diff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         if (m_uiToxicVolleyTimer < diff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_TOXICVOLLEY) == CAST_OK)
+            {
                 m_uiToxicVolleyTimer = 9000;
+            }
         }
         else
-            m_uiToxicVolleyTimer -= diff;
+            { m_uiToxicVolleyTimer -= diff; }
 
         if (m_uiUppercutTimer < diff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_UPPERCUT) == CAST_OK)
+            {
                 m_uiUppercutTimer = 12000;
+            }
         }
         else
-            m_uiUppercutTimer -= diff;
+            { m_uiUppercutTimer -= diff; }
 
         if (m_uiSummonTimer < diff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_NOXXION_SPAWNS_AURA) == CAST_OK)
+            {
                 m_uiSummonTimer = 40000;
+            }
         }
         else
-            m_uiSummonTimer -= diff;
+            { m_uiSummonTimer -= diff; }
 
         DoMeleeAttackIfReady();
     }
@@ -102,7 +123,9 @@ bool EffectAuraDummy_spell_aura_dummy_noxxion_spawns(const Aura* pAura, bool bAp
                 pTarget->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             }
             else
+            {
                 pTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            }
         }
     }
     return true;

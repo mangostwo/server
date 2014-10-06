@@ -164,7 +164,8 @@ ID | Name                                   | Parameters
 32 | SCRIPT_COMMAND_PAUSE_WAYPOINTS         | resultingSource must be Creature. `datalong` = 0/1 unpause/pause waypoint movement
 33 | SCRIPT_COMMAND_RESERVED_1              | reserved for 3.x and later. Do not use!
 34 | SCRIPT_COMMAND_TERMINATE_COND          | `datalong` = condition_id, `datalong2` = fail-quest (if provided this quest will be failed for a player), `!(data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)`: terminate when condition is true, `data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL`:  terminate when condition is false
-35 | SCRIPT_COMMAND_SEND_AI_EVENT_AROUND    | resultingSource = Creature, resultingTarget = Unit. `datalong` = AIEventType - limited only to EventAI supported events. `datalong2` = radius
+35 | SCRIPT_COMMAND_SEND_AI_EVENT_AROUND    | resultingSource = Creature, resultingTarget = Unit, datalong = AIEventType - limited only to EventAI supported events, datalong2 = radius
+36 | SCRIPT_COMMAND_TURN_TO                 | resultingSource = Creature, resultingTarget = Unit/none.
 
 TemporaryFactionFlags
 ---------------------

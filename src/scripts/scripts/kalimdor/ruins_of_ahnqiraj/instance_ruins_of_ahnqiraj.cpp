@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Instance_Ruins_of_Ahnqiraj
-SD%Complete: 80
-SDComment: It's not clear if the Rajaxx event should reset if Andorov dies, or party wipes.
-SDCategory: Ruins of Ahn'Qiraj
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Instance_Ruins_of_Ahnqiraj
+ * SD%Complete: 80
+ * SDComment:   It's not clear if the Rajaxx event should reset if Andorov dies, or party wipes.
+ * SDCategory:  Ruins of Ahn'Qiraj
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 #include "ruins_of_ahnqiraj.h"
@@ -40,7 +51,9 @@ void instance_ruins_of_ahnqiraj::OnPlayerEnter(Player* /*pPlayer*/)
 {
     // Spawn andorov if necessary
     if (m_auiEncounter[TYPE_KURINNAXX] == DONE)
+    {
         DoSapwnAndorovIfCan();
+    }
 }
 
 void instance_ruins_of_ahnqiraj::OnCreatureCreate(Creature* pCreature)
@@ -50,7 +63,9 @@ void instance_ruins_of_ahnqiraj::OnCreatureCreate(Creature* pCreature)
         case NPC_OSSIRIAN_TRIGGER:
             // Only store static spawned
             if (pCreature->IsTemporarySummon())
+            {
                 break;
+            }
         case NPC_BURU:
         case NPC_OSSIRIAN:
         case NPC_RAJAXX:
@@ -74,11 +89,21 @@ void instance_ruins_of_ahnqiraj::OnCreatureEnterCombat(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
-        case NPC_KURINNAXX: SetData(TYPE_KURINNAXX, IN_PROGRESS); break;
-        case NPC_MOAM:      SetData(TYPE_MOAM, IN_PROGRESS);      break;
-        case NPC_BURU:      SetData(TYPE_BURU, IN_PROGRESS);      break;
-        case NPC_AYAMISS:   SetData(TYPE_AYAMISS, IN_PROGRESS);   break;
-        case NPC_OSSIRIAN:  SetData(TYPE_OSSIRIAN, IN_PROGRESS);  break;
+        case NPC_KURINNAXX:
+            SetData(TYPE_KURINNAXX, IN_PROGRESS);
+            break;
+        case NPC_MOAM:
+            SetData(TYPE_MOAM, IN_PROGRESS);
+            break;
+        case NPC_BURU:
+            SetData(TYPE_BURU, IN_PROGRESS);
+            break;
+        case NPC_AYAMISS:
+            SetData(TYPE_AYAMISS, IN_PROGRESS);
+            break;
+        case NPC_OSSIRIAN:
+            SetData(TYPE_OSSIRIAN, IN_PROGRESS);
+            break;
     }
 }
 
@@ -86,11 +111,21 @@ void instance_ruins_of_ahnqiraj::OnCreatureEvade(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
-        case NPC_KURINNAXX: SetData(TYPE_KURINNAXX, FAIL); break;
-        case NPC_MOAM:      SetData(TYPE_MOAM, FAIL);      break;
-        case NPC_BURU:      SetData(TYPE_BURU, FAIL);      break;
-        case NPC_AYAMISS:   SetData(TYPE_AYAMISS, FAIL);   break;
-        case NPC_OSSIRIAN:  SetData(TYPE_OSSIRIAN, FAIL);  break;
+        case NPC_KURINNAXX:
+            SetData(TYPE_KURINNAXX, FAIL);
+            break;
+        case NPC_MOAM:
+            SetData(TYPE_MOAM, FAIL);
+            break;
+        case NPC_BURU:
+            SetData(TYPE_BURU, FAIL);
+            break;
+        case NPC_AYAMISS:
+            SetData(TYPE_AYAMISS, FAIL);
+            break;
+        case NPC_OSSIRIAN:
+            SetData(TYPE_OSSIRIAN, FAIL);
+            break;
         case NPC_RAJAXX:
             // Rajaxx yells on evade
             DoScriptText(SAY_DEAGGRO, pCreature);
@@ -111,12 +146,24 @@ void instance_ruins_of_ahnqiraj::OnCreatureDeath(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
-        case NPC_KURINNAXX: SetData(TYPE_KURINNAXX, DONE); break;
-        case NPC_RAJAXX:    SetData(TYPE_RAJAXX, DONE);    break;
-        case NPC_MOAM:      SetData(TYPE_MOAM, DONE);      break;
-        case NPC_BURU:      SetData(TYPE_BURU, DONE);      break;
-        case NPC_AYAMISS:   SetData(TYPE_AYAMISS, DONE);   break;
-        case NPC_OSSIRIAN:  SetData(TYPE_OSSIRIAN, DONE);  break;
+        case NPC_KURINNAXX:
+            SetData(TYPE_KURINNAXX, DONE);
+            break;
+        case NPC_RAJAXX:
+            SetData(TYPE_RAJAXX, DONE);
+            break;
+        case NPC_MOAM:
+            SetData(TYPE_MOAM, DONE);
+            break;
+        case NPC_BURU:
+            SetData(TYPE_BURU, DONE);
+            break;
+        case NPC_AYAMISS:
+            SetData(TYPE_AYAMISS, DONE);
+            break;
+        case NPC_OSSIRIAN:
+            SetData(TYPE_OSSIRIAN, DONE);
+            break;
         case NPC_COLONEL_ZERRAN:
         case NPC_MAJOR_PAKKON:
         case NPC_MAJOR_YEGGETH:
@@ -129,7 +176,9 @@ void instance_ruins_of_ahnqiraj::OnCreatureDeath(Creature* pCreature)
         {
             // If event isn't started by Andorov, return
             if (GetData(TYPE_RAJAXX) != IN_PROGRESS)
+            {
                 return;
+            }
 
             // Check if the dead creature belongs to the current wave
             if (m_sArmyWavesGuids[m_uiCurrentArmyWave - 1].find(pCreature->GetObjectGuid()) != m_sArmyWavesGuids[m_uiCurrentArmyWave - 1].end())
@@ -138,7 +187,9 @@ void instance_ruins_of_ahnqiraj::OnCreatureDeath(Creature* pCreature)
 
                 // If all the soldiers from the current wave are dead, then send the next one
                 if (m_sArmyWavesGuids[m_uiCurrentArmyWave - 1].empty())
+                {
                     DoSendNextArmyWave();
+                }
             }
             break;
         }
@@ -162,13 +213,17 @@ void instance_ruins_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
         case TYPE_RAJAXX:
             m_auiEncounter[uiType] = uiData;
             if (uiData == IN_PROGRESS)
+            {
                 DoSortArmyWaves();
+            }
             if (uiData == DONE)
             {
                 if (Creature* pAndorov = GetSingleCreatureFromStorage(NPC_GENERAL_ANDOROV))
                 {
                     if (pAndorov->IsAlive())
+                    {
                         pAndorov->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    }
                 }
             }
             break;
@@ -198,7 +253,9 @@ void instance_ruins_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
 uint32 instance_ruins_of_ahnqiraj::GetData(uint32 uiType) const
 {
     if (uiType < MAX_ENCOUNTER)
+    {
         return m_auiEncounter[uiType];
+    }
 
     return 0;
 }
@@ -206,14 +263,20 @@ uint32 instance_ruins_of_ahnqiraj::GetData(uint32 uiType) const
 void instance_ruins_of_ahnqiraj::DoSapwnAndorovIfCan()
 {
     if (GetSingleCreatureFromStorage(NPC_GENERAL_ANDOROV))
+    {
         return;
+    }
 
     Player* pPlayer = GetPlayerInMap();
     if (!pPlayer)
+    {
         return;
+    }
 
     for (uint8 i = 0; i < MAX_HELPERS; ++i)
+    {
         pPlayer->SummonCreature(aAndorovSpawnLocs[i].m_uiEntry, aAndorovSpawnLocs[i].m_fX, aAndorovSpawnLocs[i].m_fY, aAndorovSpawnLocs[i].m_fZ, aAndorovSpawnLocs[i].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+    }
 }
 
 void instance_ruins_of_ahnqiraj::Load(const char* chrIn)
@@ -234,7 +297,9 @@ void instance_ruins_of_ahnqiraj::Load(const char* chrIn)
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
     {
         if (m_auiEncounter[i] == IN_PROGRESS)
+        {
             m_auiEncounter[i] = NOT_STARTED;
+        }
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -252,7 +317,9 @@ void instance_ruins_of_ahnqiraj::Update(uint32 uiDiff)
                 m_uiArmyDelayTimer = 2 * MINUTE * IN_MILLISECONDS;
             }
             else
+            {
                 m_uiArmyDelayTimer -= uiDiff;
+            }
         }
     }
 }
@@ -277,11 +344,15 @@ void instance_ruins_of_ahnqiraj::DoSortArmyWaves()
             for (std::list<Creature*>::const_iterator itr = lCreatureList.begin(); itr != lCreatureList.end(); ++itr)
             {
                 if ((*itr)->IsAlive())
+                {
                     m_sArmyWavesGuids[i].insert((*itr)->GetObjectGuid());
+                }
             }
 
             if (pTemp->IsAlive())
+            {
                 m_sArmyWavesGuids[i].insert(pTemp->GetObjectGuid());
+            }
         }
     }
 
@@ -294,7 +365,9 @@ void instance_ruins_of_ahnqiraj::DoSendNextArmyWave()
 {
     // The next army wave is sent into battle after 2 min or after the previous wave is finished
     if (GetData(TYPE_RAJAXX) != IN_PROGRESS)
+    {
         return;
+    }
 
     // The last wave is General Rajaxx itself
     if (m_uiCurrentArmyWave == MAX_ARMY_WAVES)
@@ -309,7 +382,9 @@ void instance_ruins_of_ahnqiraj::DoSendNextArmyWave()
     {
         // Increase the wave id if some are already dead
         while (m_sArmyWavesGuids[m_uiCurrentArmyWave].empty())
+        {
             ++m_uiCurrentArmyWave;
+        }
 
         float fX, fY, fZ;
         for (GuidSet::const_iterator itr = m_sArmyWavesGuids[m_uiCurrentArmyWave].begin(); itr != m_sArmyWavesGuids[m_uiCurrentArmyWave].end(); ++itr)
@@ -317,7 +392,9 @@ void instance_ruins_of_ahnqiraj::DoSendNextArmyWave()
             if (Creature* pTemp = instance->GetCreature(*itr))
             {
                 if (!pTemp->IsAlive())
+                {
                     continue;
+                }
 
                 pTemp->SetWalk(false);
                 pTemp->GetRandomPoint(aAndorovMoveLocs[4].m_fX, aAndorovMoveLocs[4].m_fY, aAndorovMoveLocs[4].m_fZ, 10.0f, fX, fY, fZ);
@@ -329,7 +406,9 @@ void instance_ruins_of_ahnqiraj::DoSendNextArmyWave()
         if (aArmySortingParameters[m_uiCurrentArmyWave].m_uiYellEntry)
         {
             if (Creature* pRajaxx = GetSingleCreatureFromStorage(NPC_RAJAXX))
+            {
                 DoScriptText(aArmySortingParameters[m_uiCurrentArmyWave].m_uiYellEntry, pRajaxx);
+            }
         }
     }
 

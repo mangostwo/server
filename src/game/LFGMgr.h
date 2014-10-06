@@ -270,8 +270,8 @@ public:
     bool HasPlayerDoneDaily(uint32 guidLow, DungeonTypes dungeon);
     
      /// Reset accounts of players completing a/any dungeon for the day for new rewards
-    void ResetDailyRecords();
-    
+     void ResetDailyRecords();
+
     /**
      * @brief Find out whether or not a special dungeon is available for that season 
      * 

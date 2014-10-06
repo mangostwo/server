@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Azuregos
-SD%Complete: 90
-SDComment: Spell reflect not effecting dots (Core problem)
-SDCategory: Azshara
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Azuregos
+ * SD%Complete: 0
+ * SDComment:   Spell reflect requires core support. Core support is missing.
+ * SDCategory:  Azshara
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 
@@ -65,7 +76,9 @@ struct MANGOS_DLL_DECL boss_azuregosAI : public ScriptedAI
     {
         // Mark killed players with Mark of Frost
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
+        {
             pVictim->CastSpell(pVictim, SPELL_MARK_OF_FROST_PLAYER, true, NULL, NULL, m_creature->GetObjectGuid());
+        }
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -78,7 +91,9 @@ struct MANGOS_DLL_DECL boss_azuregosAI : public ScriptedAI
     {
         // Return since we have no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         if (m_uiTeleportTimer < uiDiff)
         {
@@ -89,25 +104,29 @@ struct MANGOS_DLL_DECL boss_azuregosAI : public ScriptedAI
             }
         }
         else
-            m_uiTeleportTimer -= uiDiff;
+            { m_uiTeleportTimer -= uiDiff; }
 
         // Chill Timer
         if (m_uiChillTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_CHILL) == CAST_OK)
+            {
                 m_uiChillTimer = urand(13000, 25000);
+            }
         }
         else
-            m_uiChillTimer -= uiDiff;
+            { m_uiChillTimer -= uiDiff; }
 
         // Breath Timer
         if (m_uiBreathTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_FROST_BREATH) == CAST_OK)
+            {
                 m_uiBreathTimer = urand(10000, 15000);
+            }
         }
         else
-            m_uiBreathTimer -= uiDiff;
+            { m_uiBreathTimer -= uiDiff; }
 
         // Mana Storm Timer
         if (m_uiManaStormTimer < uiDiff)
@@ -115,35 +134,43 @@ struct MANGOS_DLL_DECL boss_azuregosAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_MANA_STORM) == CAST_OK)
+                {
                     m_uiManaStormTimer = urand(7500, 12500);
+                }
             }
         }
         else
-            m_uiManaStormTimer -= uiDiff;
+            { m_uiManaStormTimer -= uiDiff; }
 
         // Reflect Timer
         if (m_uiReflectTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_REFLECT) == CAST_OK)
+            {
                 m_uiReflectTimer = urand(20000, 35000);
+            }
         }
         else
-            m_uiReflectTimer -= uiDiff;
+            { m_uiReflectTimer -= uiDiff; }
 
         // Cleave Timer
         if (m_uiCleaveTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+            {
                 m_uiCleaveTimer = 7000;
+            }
         }
         else
-            m_uiCleaveTimer -= uiDiff;
+            { m_uiCleaveTimer -= uiDiff; }
 
         // EnrageTimer
         if (!m_bEnraged && m_creature->GetHealthPercent() < 26.0f)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+            {
                 m_bEnraged = true;
+            }
         }
 
         DoMeleeAttackIfReady();

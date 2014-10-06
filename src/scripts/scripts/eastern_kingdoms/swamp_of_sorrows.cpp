@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,18 +18,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Swamp_of_Sorrows
-SD%Complete: 100
-SDComment: Quest support: 1393
-SDCategory: Swap of Sorrows
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Swamp_of_Sorrows
+ * SD%Complete: 100
+ * SDComment:   Quest support: 1393.
+ * SDCategory:  Swap of Sorrows
+ * EndScriptData
+ */
 
-/* ContentData
-npc_galen_goodward
-EndContentData */
+/**
+ * ContentData
+ * npc_galen_goodward
+ * EndContentData
+ */
 
 #include "precompiled.h"
 #include "escort_ai.h"
@@ -62,7 +75,9 @@ struct MANGOS_DLL_DECL npc_galen_goodwardAI : public npc_escortAI
     void Aggro(Unit* pWho) override
     {
         if (HasEscortState(STATE_ESCORT_ESCORTING))
+        {
             DoScriptText(urand(0, 1) ? SAY_ATTACKED_1 : SAY_ATTACKED_2, m_creature, pWho);
+        }
     }
 
     void WaypointStart(uint32 uiPointId) override
@@ -73,9 +88,13 @@ struct MANGOS_DLL_DECL npc_galen_goodwardAI : public npc_escortAI
             {
                 GameObject* pCage = NULL;
                 if (m_galensCageGuid)
+                {
                     pCage = m_creature->GetMap()->GetGameObject(m_galensCageGuid);
+                }
                 else
+                {
                     pCage = GetClosestGameObjectWithEntry(m_creature, GO_GALENS_CAGE, INTERACTION_DISTANCE);
+                }
 
                 if (pCage)
                 {
@@ -96,7 +115,9 @@ struct MANGOS_DLL_DECL npc_galen_goodwardAI : public npc_escortAI
         {
             case 0:
                 if (GameObject* pCage = m_creature->GetMap()->GetGameObject(m_galensCageGuid))
+                {
                     pCage->ResetDoorOrButton();
+                }
                 break;
             case 20:
                 if (Player* pPlayer = GetPlayerForEscort())
@@ -117,14 +138,18 @@ struct MANGOS_DLL_DECL npc_galen_goodwardAI : public npc_escortAI
         if (m_uiPeriodicSay < uiDiff)
         {
             if (HasEscortState(STATE_ESCORT_NONE))
+            {
                 DoScriptText(SAY_PERIODIC, m_creature);
+            }
             m_uiPeriodicSay = 6000;
         }
         else
-            m_uiPeriodicSay -= uiDiff;
+            { m_uiPeriodicSay -= uiDiff; }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         DoMeleeAttackIfReady();
     }

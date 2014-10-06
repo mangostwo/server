@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Moam
-SD%Complete: 100
-SDComment:
-SDCategory: Ruins of Ahn'Qiraj
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Moam
+ * SD%Complete: 100
+ * SDComment:   None
+ * SDCategory:  Ruins of Ahn'Qiraj
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 
@@ -72,7 +83,9 @@ struct MANGOS_DLL_DECL boss_moamAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         switch (m_uiPhase)
         {
@@ -89,7 +102,9 @@ struct MANGOS_DLL_DECL boss_moamAI : public ScriptedAI
                     }
                 }
                 else
+                {
                     m_uiCheckoutManaTimer -= uiDiff;
+                }
 
                 if (m_uiSummonManaFiendsTimer <= uiDiff)
                 {
@@ -99,18 +114,24 @@ struct MANGOS_DLL_DECL boss_moamAI : public ScriptedAI
                     m_uiSummonManaFiendsTimer = 90000;
                 }
                 else
+                {
                     m_uiSummonManaFiendsTimer -= uiDiff;
+                }
 
                 if (m_uiManaDrainTimer <= uiDiff)
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_DRAIN_MANA, SELECT_FLAG_POWER_MANA))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_DRAIN_MANA) == CAST_OK)
+                        {
                             m_uiManaDrainTimer = urand(2000, 6000);
+                        }
                     }
                 }
                 else
+                {
                     m_uiManaDrainTimer -= uiDiff;
+                }
 
                 if (m_uiTrampleTimer <= uiDiff)
                 {
@@ -118,7 +139,9 @@ struct MANGOS_DLL_DECL boss_moamAI : public ScriptedAI
                     m_uiTrampleTimer = 15000;
                 }
                 else
+                {
                     m_uiTrampleTimer -= uiDiff;
+                }
 
                 DoMeleeAttackIfReady();
                 break;
@@ -136,7 +159,9 @@ struct MANGOS_DLL_DECL boss_moamAI : public ScriptedAI
                     }
                 }
                 else
+                {
                     m_uiCheckoutManaTimer -= uiDiff;
+                }
                 break;
         }
     }

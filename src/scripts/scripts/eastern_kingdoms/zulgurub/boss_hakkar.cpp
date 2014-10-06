@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Hakkar
-SD%Complete: 100
-SDComment:
-SDCategory: Zul'Gurub
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Hakkar
+ * SD%Complete: 100
+ * SDComment:   None
+ * SDCategory:  Zul'Gurub
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 #include "zulgurub.h"
@@ -88,30 +99,44 @@ struct MANGOS_DLL_DECL boss_hakkarAI : public ScriptedAI
         if (m_pInstance)
         {
             if (m_pInstance->GetData(TYPE_JEKLIK) == DONE)
+            {
                 m_uiAspectOfJeklikTimer = 0;
+            }
             if (m_pInstance->GetData(TYPE_VENOXIS) == DONE)
+            {
                 m_uiAspectOfVenoxisTimer = 0;
+            }
             if (m_pInstance->GetData(TYPE_MARLI) == DONE)
+            {
                 m_uiAspectOfMarliTimer = 0;
+            }
             if (m_pInstance->GetData(TYPE_THEKAL) == DONE)
+            {
                 m_uiAspectOfThekalTimer = 0;
+            }
             if (m_pInstance->GetData(TYPE_ARLOKK) == DONE)
+            {
                 m_uiAspectOfArlokkTimer = 0;
+            }
         }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         if (m_uiBloodSiphonTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_BLOOD_SIPHON) == CAST_OK)
+            {
                 m_uiBloodSiphonTimer = 90000;
+            }
         }
         else
-            m_uiBloodSiphonTimer -= uiDiff;
+            { m_uiBloodSiphonTimer -= uiDiff; }
 
         // Corrupted Blood Timer
         if (m_uiCorruptedBloodTimer < uiDiff)
@@ -119,11 +144,13 @@ struct MANGOS_DLL_DECL boss_hakkarAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_CORRUPTED_BLOOD) == CAST_OK)
+                {
                     m_uiCorruptedBloodTimer = urand(30000, 45000);
+                }
             }
         }
         else
-            m_uiCorruptedBloodTimer -= uiDiff;
+            { m_uiCorruptedBloodTimer -= uiDiff; }
 
         // Cause Insanity Timer
         if (m_uiCauseInsanityTimer < uiDiff)
@@ -131,13 +158,17 @@ struct MANGOS_DLL_DECL boss_hakkarAI : public ScriptedAI
             if (m_creature->GetThreatManager().getThreatList().size() > 1)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CAUSE_INSANITY) == CAST_OK)
+                {
                     m_uiCauseInsanityTimer = urand(10000, 15000);
+                }
             }
             else // Solo case, check again later
+            {
                 m_uiCauseInsanityTimer = urand(35000, 43000);
+            }
         }
         else
-            m_uiCauseInsanityTimer -= uiDiff;
+            { m_uiCauseInsanityTimer -= uiDiff; }
 
         // Will Of Hakkar Timer
         if (m_uiWillOfHakkarTimer < uiDiff)
@@ -145,21 +176,27 @@ struct MANGOS_DLL_DECL boss_hakkarAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_WILL_OF_HAKKAR) == CAST_OK)
+                {
                     m_uiWillOfHakkarTimer = urand(25000, 35000);
+                }
             }
             else // solo attempt, try again later
+            {
                 m_uiWillOfHakkarTimer = 25000;
+            }
         }
         else
-            m_uiWillOfHakkarTimer -= uiDiff;
+            { m_uiWillOfHakkarTimer -= uiDiff; }
 
         if (m_uiEnrageTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+            {
                 m_uiEnrageTimer = 10 * MINUTE * IN_MILLISECONDS;
+            }
         }
         else
-            m_uiEnrageTimer -= uiDiff;
+            { m_uiEnrageTimer -= uiDiff; }
 
         // Checking if Jeklik is dead. If not we cast her Aspect
         if (m_uiAspectOfJeklikTimer)
@@ -167,10 +204,14 @@ struct MANGOS_DLL_DECL boss_hakkarAI : public ScriptedAI
             if (m_uiAspectOfJeklikTimer <= uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_ASPECT_OF_JEKLIK) == CAST_OK)
+                {
                     m_uiAspectOfJeklikTimer = urand(10000, 14000);
+                }
             }
             else
+            {
                 m_uiAspectOfJeklikTimer -= uiDiff;
+            }
         }
 
         // Checking if Venoxis is dead. If not we cast his Aspect
@@ -179,10 +220,14 @@ struct MANGOS_DLL_DECL boss_hakkarAI : public ScriptedAI
             if (m_uiAspectOfVenoxisTimer <= uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_ASPECT_OF_VENOXIS) == CAST_OK)
+                {
                     m_uiAspectOfVenoxisTimer = 8000;
+                }
             }
             else
+            {
                 m_uiAspectOfVenoxisTimer -= uiDiff;
+            }
         }
 
         // Checking if Marli is dead. If not we cast her Aspect
@@ -191,10 +236,14 @@ struct MANGOS_DLL_DECL boss_hakkarAI : public ScriptedAI
             if (m_uiAspectOfMarliTimer <= uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ASPECT_OF_MARLI) == CAST_OK)
+                {
                     m_uiAspectOfMarliTimer = 10000;
+                }
             }
             else
+            {
                 m_uiAspectOfMarliTimer -= uiDiff;
+            }
         }
 
         // Checking if Thekal is dead. If not we cast his Aspect
@@ -203,10 +252,14 @@ struct MANGOS_DLL_DECL boss_hakkarAI : public ScriptedAI
             if (m_uiAspectOfThekalTimer <= uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_ASPECT_OF_THEKAL) == CAST_OK)
+                {
                     m_uiAspectOfThekalTimer = 15000;
+                }
             }
             else
+            {
                 m_uiAspectOfThekalTimer -= uiDiff;
+            }
         }
 
         // Checking if Arlokk is dead. If yes we cast her Aspect
@@ -221,7 +274,9 @@ struct MANGOS_DLL_DECL boss_hakkarAI : public ScriptedAI
                 }
             }
             else
+            {
                 m_uiAspectOfArlokkTimer -= uiDiff;
+            }
         }
 
         DoMeleeAttackIfReady();

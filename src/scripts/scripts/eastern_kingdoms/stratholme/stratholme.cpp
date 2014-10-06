@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,22 +18,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Stratholme
-SD%Complete: 100
-SDComment: Misc mobs for instance. GO-script to apply aura and start event for quest 8945
-SDCategory: Stratholme
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Stratholme
+ * SD%Complete: 100
+ * SDComment:   Misc mobs for instance. GO-script to apply aura and start event for quest 8945
+ * SDCategory:  Stratholme
+ * EndScriptData
+ */
 
-/* ContentData
-go_service_gate
-go_gauntlet_gate
-go_stratholme_postbox
-mob_restless_soul
-mobs_spectral_ghostly_citizen
-EndContentData */
+/**
+ * ContentData
+ * go_service_gate
+ * go_gauntlet_gate
+ * go_stratholme_postbox
+ * mob_restless_soul
+ * mobs_spectral_ghostly_citizen
+ * EndContentData
+ */
 
 #include "precompiled.h"
 #include "stratholme.h"
@@ -41,10 +54,14 @@ bool GOUse_go_service_gate(Player* /*pPlayer*/, GameObject* pGo)
     ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
 
     if (!pInstance)
+    {
         return false;
+    }
 
     if (pInstance->GetData(TYPE_BARTHILAS_RUN) != NOT_STARTED)
+    {
         return false;
+    }
 
     // if the service gate is used make Barthilas flee
     pInstance->SetData(TYPE_BARTHILAS_RUN, IN_PROGRESS);
@@ -60,10 +77,14 @@ bool GOUse_go_gauntlet_gate(Player* pPlayer, GameObject* pGo)
     ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
 
     if (!pInstance)
+    {
         return false;
+    }
 
     if (pInstance->GetData(TYPE_BARON_RUN) != NOT_STARTED)
+    {
         return false;
+    }
 
     if (Group* pGroup = pPlayer->GetGroup())
     {
@@ -71,16 +92,22 @@ bool GOUse_go_gauntlet_gate(Player* pPlayer, GameObject* pGo)
         {
             Player* pGroupie = itr->getSource();
             if (!pGroupie)
+            {
                 continue;
+            }
 
             if (!pGroupie->HasAura(SPELL_BARON_ULTIMATUM))
+            {
                 pGroupie->CastSpell(pGroupie, SPELL_BARON_ULTIMATUM, true);
+            }
         }
     }
     else
     {
         if (!pPlayer->HasAura(SPELL_BARON_ULTIMATUM))
+        {
             pPlayer->CastSpell(pPlayer, SPELL_BARON_ULTIMATUM, true);
+        }
     }
 
     pInstance->SetData(TYPE_BARON_RUN, IN_PROGRESS);
@@ -96,10 +123,14 @@ bool GOUse_go_stratholme_postbox(Player* pPlayer, GameObject* pGo)
     ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
 
     if (!pInstance)
+    {
         return false;
+    }
 
     if (pInstance->GetData(TYPE_POSTMASTER) == DONE)
+    {
         return false;
+    }
 
     // When the data is Special, spawn the postmaster
     if (pInstance->GetData(TYPE_POSTMASTER) == SPECIAL)
@@ -108,7 +139,9 @@ bool GOUse_go_stratholme_postbox(Player* pPlayer, GameObject* pGo)
         pInstance->SetData(TYPE_POSTMASTER, DONE);
     }
     else
+    {
         pInstance->SetData(TYPE_POSTMASTER, IN_PROGRESS);
+    }
 
     // Summon 3 postmen for each postbox
     float fX, fY, fZ;
@@ -178,10 +211,18 @@ struct MANGOS_DLL_DECL mob_restless_soulAI : public ScriptedAI
 
             switch (urand(0, 3))
             {
-                case 0: DoScriptText(SAY_ZAPPED0, pSummoned); break;
-                case 1: DoScriptText(SAY_ZAPPED1, pSummoned); break;
-                case 2: DoScriptText(SAY_ZAPPED2, pSummoned); break;
-                case 3: DoScriptText(SAY_ZAPPED3, pSummoned); break;
+                case 0:
+                    DoScriptText(SAY_ZAPPED0, pSummoned);
+                    break;
+                case 1:
+                    DoScriptText(SAY_ZAPPED1, pSummoned);
+                    break;
+                case 2:
+                    DoScriptText(SAY_ZAPPED2, pSummoned);
+                    break;
+                case 3:
+                    DoScriptText(SAY_ZAPPED3, pSummoned);
+                    break;
             }
         }
     }
@@ -189,7 +230,9 @@ struct MANGOS_DLL_DECL mob_restless_soulAI : public ScriptedAI
     void JustDied(Unit* /*Killer*/) override
     {
         if (m_bIsTagged)
+        {
             m_creature->SummonCreature(NPC_FREED_SOUL, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 300000);
+        }
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -199,10 +242,14 @@ struct MANGOS_DLL_DECL mob_restless_soulAI : public ScriptedAI
             if (m_uiDieTimer < uiDiff)
             {
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_taggerGuid))
+                {
                     pPlayer->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                }
             }
             else
+            {
                 m_uiDieTimer -= uiDiff;
+            }
         }
     }
 };
@@ -238,7 +285,9 @@ struct MANGOS_DLL_DECL mobs_spectral_ghostly_citizenAI : public ScriptedAI
     void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
     {
         if (!m_bIsTagged && pSpell->Id == SPELL_EGAN_BLASTER)
+        {
             m_bIsTagged = true;
+        }
     }
 
     void JustDied(Unit* /*Killer*/) override
@@ -253,7 +302,9 @@ struct MANGOS_DLL_DECL mobs_spectral_ghostly_citizenAI : public ScriptedAI
                 // 100%, 50%, 33%, 25% chance to spawn
                 uint32 j = urand(0, i);
                 if (j == 0)
+                {
                     m_creature->SummonCreature(NPC_RESTLESS_SOUL, x, y, z, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                }
             }
         }
     }
@@ -267,11 +318,15 @@ struct MANGOS_DLL_DECL mobs_spectral_ghostly_citizenAI : public ScriptedAI
                 m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
             }
             else
+            {
                 m_uiDieTimer -= uiDiff;
+            }
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         DoMeleeAttackIfReady();
     }
@@ -285,9 +340,13 @@ struct MANGOS_DLL_DECL mobs_spectral_ghostly_citizenAI : public ScriptedAI
                 break;
             case TEXTEMOTE_RUDE:
                 if (m_creature->IsWithinDistInMap(pPlayer, INTERACTION_DISTANCE))
+                {
                     m_creature->CastSpell(pPlayer, SPELL_SLAP, false);
+                }
                 else
+                {
                     m_creature->HandleEmote(EMOTE_ONESHOT_RUDE);
+                }
                 break;
             case TEXTEMOTE_WAVE:
                 m_creature->HandleEmote(EMOTE_ONESHOT_WAVE);

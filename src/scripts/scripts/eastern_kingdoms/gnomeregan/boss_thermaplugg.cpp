@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Mekgineer_Thermaplugg
-SD%Complete: 90 - Timer
-SDComment: Timer need improvement, especially for bomb-spawning
-SDCategory: Gnomeregan
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Mekgineer_Thermaplugg
+ * SD%Complete: 90
+ * SDComment:   Timer need improvement, especially for bomb-spawning
+ * SDCategory:  Gnomeregan
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 #include "gnomeregan.h"
@@ -80,7 +91,9 @@ struct MANGOS_DLL_DECL boss_thermapluggAI : public ScriptedAI
         if (m_asBombFaces)
         {
             for (uint8 i = 0; i < MAX_GNOME_FACES; ++i)
+            {
                 reader.PSendSysMessage("Bomb face %u is %s ", (uint32)i, m_asBombFaces[i].m_bActivated ? "activated" : "not activated");
+            }
         }
     }
 
@@ -92,7 +105,9 @@ struct MANGOS_DLL_DECL boss_thermapluggAI : public ScriptedAI
     void JustDied(Unit* /*pKiller*/) override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_THERMAPLUGG, DONE);
+        }
 
         m_lSummonedBombGUIDs.clear();
     }
@@ -115,13 +130,17 @@ struct MANGOS_DLL_DECL boss_thermapluggAI : public ScriptedAI
     void JustReachedHome() override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_THERMAPLUGG, FAIL);
+        }
 
         // Remove remaining bombs
         for (GuidList::const_iterator itr = m_lSummonedBombGUIDs.begin(); itr != m_lSummonedBombGUIDs.end(); ++itr)
         {
             if (Creature* pBomb = m_creature->GetMap()->GetCreature(*itr))
+            {
                 pBomb->ForcedDespawn();
+            }
         }
         m_lSummonedBombGUIDs.clear();
     }
@@ -142,7 +161,9 @@ struct MANGOS_DLL_DECL boss_thermapluggAI : public ScriptedAI
     void SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiPointId) override
     {
         if (pSummoned->GetEntry() == NPC_WALKING_BOMB && uiMotionType == POINT_MOTION_TYPE && uiPointId == 1)
+        {
             m_lLandedBombGUIDs.push_back(pSummoned->GetObjectGuid());
+        }
     }
 
     void SummonedCreatureDespawn(Creature* pSummoned) override
@@ -153,7 +174,9 @@ struct MANGOS_DLL_DECL boss_thermapluggAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         // Movement of Summoned mobs
         if (!m_lLandedBombGUIDs.empty())
@@ -161,7 +184,9 @@ struct MANGOS_DLL_DECL boss_thermapluggAI : public ScriptedAI
             for (GuidList::const_iterator itr = m_lLandedBombGUIDs.begin(); itr != m_lLandedBombGUIDs.end(); ++itr)
             {
                 if (Creature* pBomb = m_creature->GetMap()->GetCreature(*itr))
+                {
                     pBomb->GetMotionMaster()->MoveFollow(m_creature, 0.0f, 0.0f);
+                }
             }
             m_lLandedBombGUIDs.clear();
         }
@@ -177,16 +202,20 @@ struct MANGOS_DLL_DECL boss_thermapluggAI : public ScriptedAI
             if (m_bIsPhaseTwo)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_KNOCK_AWAY_AOE) == CAST_OK)
+                {
                     m_uiKnockAwayTimer = 12000;
+                }
             }
             else
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
+                {
                     m_uiKnockAwayTimer = urand(17000, 20000);
+                }
             }
         }
         else
-            m_uiKnockAwayTimer -= uiDiff;
+            { m_uiKnockAwayTimer -= uiDiff; }
 
         if (m_uiActivateBombTimer < uiDiff)
         {
@@ -194,11 +223,13 @@ struct MANGOS_DLL_DECL boss_thermapluggAI : public ScriptedAI
             {
                 m_uiActivateBombTimer = (m_bIsPhaseTwo ? urand(6, 12) : urand(12, 17)) * IN_MILLISECONDS;
                 if (!urand(0, 5))                           // TODO, chance/ place for this correct?
+                {
                     DoScriptText(SAY_BOMB, m_creature);
+                }
             }
         }
         else
-            m_uiActivateBombTimer -= uiDiff;
+            { m_uiActivateBombTimer -= uiDiff; }
 
         // Spawn bombs
         if (m_asBombFaces)
@@ -220,7 +251,9 @@ struct MANGOS_DLL_DECL boss_thermapluggAI : public ScriptedAI
                         m_asBombFaces[i].m_uiBombTimer = urand(10000, 25000);   // TODO
                     }
                     else
+                    {
                         m_asBombFaces[i].m_uiBombTimer -= uiDiff;
+                    }
                 }
             }
         }
@@ -237,11 +270,15 @@ CreatureAI* GetAI_boss_thermaplugg(Creature* pCreature)
 bool EffectDummyCreature_spell_boss_thermaplugg(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
     if ((uiSpellId != SPELL_ACTIVATE_BOMB_A && uiSpellId != SPELL_ACTIVATE_BOMB_B) || uiEffIndex != EFFECT_INDEX_0)
+    {
         return false;
+    }
 
     // This spell should select a random Bomb-Face and activate it if needed
     if (instance_gnomeregan* pInstance = (instance_gnomeregan*)pCreatureTarget->GetInstanceData())
+    {
         pInstance->DoActivateBombFace(urand(0, MAX_GNOME_FACES - 1));
+    }
 
     return true;
 }
@@ -250,17 +287,31 @@ bool GOUse_go_gnomeface_button(Player* pPlayer, GameObject* pGo)
 {
     instance_gnomeregan* pInstance = (instance_gnomeregan*)pPlayer->GetInstanceData();
     if (!pInstance)
+    {
         return false;
+    }
 
     // If a button is used, the related face should be deactivated (if already activated)
     switch (pGo->GetEntry())
     {
-        case GO_BUTTON_1: pInstance->DoDeactivateBombFace(0); break;
-        case GO_BUTTON_2: pInstance->DoDeactivateBombFace(1); break;
-        case GO_BUTTON_3: pInstance->DoDeactivateBombFace(2); break;
-        case GO_BUTTON_4: pInstance->DoDeactivateBombFace(3); break;
-        case GO_BUTTON_5: pInstance->DoDeactivateBombFace(4); break;
-        case GO_BUTTON_6: pInstance->DoDeactivateBombFace(5); break;
+        case GO_BUTTON_1:
+            pInstance->DoDeactivateBombFace(0);
+            break;
+        case GO_BUTTON_2:
+            pInstance->DoDeactivateBombFace(1);
+            break;
+        case GO_BUTTON_3:
+            pInstance->DoDeactivateBombFace(2);
+            break;
+        case GO_BUTTON_4:
+            pInstance->DoDeactivateBombFace(3);
+            break;
+        case GO_BUTTON_5:
+            pInstance->DoDeactivateBombFace(4);
+            break;
+        case GO_BUTTON_6:
+            pInstance->DoDeactivateBombFace(5);
+            break;
     }
 
     return false;

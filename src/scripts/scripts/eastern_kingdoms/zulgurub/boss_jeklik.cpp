@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Jeklik
-SD%Complete: 85
-SDComment: Some minor improvements are required; Bat rider movement not implemented
-SDCategory: Zul'Gurub
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Jeklik
+ * SD%Complete: 85
+ * SDComment:   Some minor improvements are required; Bat rider movement not implemented
+ * SDCategory:  Zul'Gurub
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 #include "zulgurub.h"
@@ -124,7 +135,9 @@ struct MANGOS_DLL_DECL boss_jeklikAI : public ScriptedAI
         DoDespawnBombRiders();
 
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_JEKLIK, DONE);
+        }
     }
 
     void JustReachedHome() override
@@ -132,7 +145,9 @@ struct MANGOS_DLL_DECL boss_jeklikAI : public ScriptedAI
         DoDespawnBombRiders();
 
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_JEKLIK, FAIL);
+        }
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -140,7 +155,9 @@ struct MANGOS_DLL_DECL boss_jeklikAI : public ScriptedAI
         if (pSummoned->GetEntry() == NPC_FRENZIED_BAT)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            {
                 pSummoned->AI()->AttackStart(pTarget);
+            }
         }
         else if (pSummoned->GetEntry() == NPC_BAT_RIDER)
         {
@@ -164,7 +181,9 @@ struct MANGOS_DLL_DECL boss_jeklikAI : public ScriptedAI
     void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
     {
         if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
+        {
             return;
+        }
 
         SetCombatMovement(true);
         DoStartMovement(m_creature->getVictim());
@@ -174,19 +193,25 @@ struct MANGOS_DLL_DECL boss_jeklikAI : public ScriptedAI
     void DoDespawnBombRiders()
     {
         if (m_lBombRiderGuidsList.empty())
+        {
             return;
+        }
 
         for (GuidList::const_iterator itr = m_lBombRiderGuidsList.begin(); itr != m_lBombRiderGuidsList.end(); ++itr)
         {
             if (Creature* pRider = m_creature->GetMap()->GetCreature(*itr))
+            {
                 pRider->ForcedDespawn();
+            }
         }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         // Bat phase
         if (m_bIsPhaseOne)
@@ -206,27 +231,39 @@ struct MANGOS_DLL_DECL boss_jeklikAI : public ScriptedAI
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_CHARGE) == CAST_OK)
+                    {
                         m_uiChargeTimer = urand(15000, 30000);
+                    }
                 }
             }
             else
+            {
                 m_uiChargeTimer -= uiDiff;
+            }
 
             if (m_uiSwoopTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SWOOP) == CAST_OK)
+                {
                     m_uiSwoopTimer = urand(4000, 9000);
+                }
             }
             else
+            {
                 m_uiSwoopTimer -= uiDiff;
+            }
 
             if (m_uiSonicBurstTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_SONIC_BURST) == CAST_OK)
+                {
                     m_uiSonicBurstTimer = urand(8000, 13000);
+                }
             }
             else
+            {
                 m_uiSonicBurstTimer -= uiDiff;
+            }
 
             if (m_uiSpawnBatsTimer < uiDiff)
             {
@@ -237,7 +274,9 @@ struct MANGOS_DLL_DECL boss_jeklikAI : public ScriptedAI
                 }
             }
             else
+            {
                 m_uiSpawnBatsTimer -= uiDiff;
+            }
         }
         // Troll phase
         else
@@ -247,27 +286,33 @@ struct MANGOS_DLL_DECL boss_jeklikAI : public ScriptedAI
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_WORD_PAIN) == CAST_OK)
+                    {
                         m_uiShadowWordPainTimer = urand(12000, 18000);
+                    }
                 }
             }
             else
-                m_uiShadowWordPainTimer -= uiDiff;
+                { m_uiShadowWordPainTimer -= uiDiff; }
 
             if (m_uiMindFlayTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MIND_FLAY) == CAST_OK)
+                {
                     m_uiMindFlayTimer = 16000;
+                }
             }
             else
-                m_uiMindFlayTimer -= uiDiff;
+                { m_uiMindFlayTimer -= uiDiff; }
 
             if (m_uiChainMindFlayTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BLOOD_LEECH) == CAST_OK)
+                {
                     m_uiChainMindFlayTimer = urand(15000, 30000);
+                }
             }
             else
-                m_uiChainMindFlayTimer -= uiDiff;
+                { m_uiChainMindFlayTimer -= uiDiff; }
 
             if (m_uiGreaterHealTimer < uiDiff)
             {
@@ -278,7 +323,7 @@ struct MANGOS_DLL_DECL boss_jeklikAI : public ScriptedAI
                 }
             }
             else
-                m_uiGreaterHealTimer -= uiDiff;
+                { m_uiGreaterHealTimer -= uiDiff; }
 
             if (m_uiFlyingBatsTimer)
             {
@@ -288,14 +333,18 @@ struct MANGOS_DLL_DECL boss_jeklikAI : public ScriptedAI
                     for (uint8 i = 0; i < 3; ++i)
                     {
                         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                        {
                             m_creature->SummonCreature(NPC_BAT_RIDER, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ() + 15.0f, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        }
                     }
                     DoScriptText(SAY_RAIN_FIRE, m_creature);
 
                     m_uiFlyingBatsTimer = 0;
                 }
                 else
+                {
                     m_uiFlyingBatsTimer -= uiDiff;
+                }
             }
         }
 
@@ -331,7 +380,9 @@ struct MANGOS_DLL_DECL npc_gurubashi_bat_riderAI : public ScriptedAI
     {
         // Don't attack if is summoned by Jeklik - the npc gets aggro because of the Liquid Fire
         if (m_bIsSummon)
+        {
             return;
+        }
 
         DoCastSpellIfCan(m_creature, SPELL_DEMORALIZING_SHOUT);
         // For normal mobs flag needs to be removed
@@ -342,7 +393,9 @@ struct MANGOS_DLL_DECL npc_gurubashi_bat_riderAI : public ScriptedAI
     {
         // Don't attack if is summoned by Jeklik
         if (m_bIsSummon)
+        {
             return;
+        }
 
         ScriptedAI::AttackStart(pWho);
     }
@@ -351,7 +404,9 @@ struct MANGOS_DLL_DECL npc_gurubashi_bat_riderAI : public ScriptedAI
     {
         // Don't attack if is summoned by Jeklik
         if (m_bIsSummon)
+        {
             return;
+        }
 
         ScriptedAI::MoveInLineOfSight(pWho);
     }
@@ -359,29 +414,37 @@ struct MANGOS_DLL_DECL npc_gurubashi_bat_riderAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         if (!m_bHasDoneConcoction && m_creature->GetHealthPercent() < 50.0f)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_UNSTABLE_CONCOCTION) == CAST_OK)
+            {
                 m_bHasDoneConcoction = true;
+            }
         }
 
         if (m_uiInfectedBiteTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_INFECTED_BITE) == CAST_OK)
+            {
                 m_uiInfectedBiteTimer = 6500;
+            }
         }
         else
-            m_uiInfectedBiteTimer -= uiDiff;
+            { m_uiInfectedBiteTimer -= uiDiff; }
 
         if (m_uiBattleCommandTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_BATTLE_COMMAND) == CAST_OK)
+            {
                 m_uiBattleCommandTimer = 25000;
+            }
         }
         else
-            m_uiBattleCommandTimer -= uiDiff;
+            { m_uiBattleCommandTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Arcanist_Doan
-SD%Complete: 100
-SDComment:
-SDCategory: Scarlet Monastery
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Arcanist_Doan
+ * SD%Complete: 100
+ * SDComment:   None
+ * SDCategory:  Scarlet Monastery
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 
@@ -62,7 +73,9 @@ struct MANGOS_DLL_DECL boss_arcanist_doanAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         if (m_uiDetonationTimer)
         {
@@ -75,12 +88,16 @@ struct MANGOS_DLL_DECL boss_arcanist_doanAI : public ScriptedAI
                 }
             }
             else
+            {
                 m_uiDetonationTimer -= uiDiff;
+            }
         }
 
         // Do not attack while having the bubble active
         if (m_creature->HasAura(SPELL_ARCANE_BUBBLE))
+        {
             return;
+        }
 
         // If we are <50% hp cast Arcane Bubble
         if (!bShielded && m_creature->GetHealthPercent() <= 50.0f)
@@ -97,29 +114,35 @@ struct MANGOS_DLL_DECL boss_arcanist_doanAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_POLYMORPH) == CAST_OK)
+                {
                     m_uiPolymorphTimer = 20000;
+                }
             }
         }
         else
-            m_uiPolymorphTimer -= uiDiff;
+            { m_uiPolymorphTimer -= uiDiff; }
 
         // Silence_Timer
         if (m_uiSilenceTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SILENCE) == CAST_OK)
+            {
                 m_uiSilenceTimer = urand(15000, 22000);
+            }
         }
         else
-            m_uiSilenceTimer -= uiDiff;
+            { m_uiSilenceTimer -= uiDiff; }
 
         // ArcaneExplosion_Timer
         if (m_uiArcaneExplosionTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_ARCANE_EXPLOSION) == CAST_OK)
+            {
                 m_uiArcaneExplosionTimer = urand(2500, 8500);
+            }
         }
         else
-            m_uiArcaneExplosionTimer -= uiDiff;
+            { m_uiArcaneExplosionTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

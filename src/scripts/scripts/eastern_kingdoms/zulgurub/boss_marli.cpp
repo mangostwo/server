@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,14 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Marli
-SD%Complete: 90
-SDComment: Enlarge for small spiders NYI
-SDCategory: Zul'Gurub
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Marli
+ * SD%Complete: 90
+ * SDComment:   Enlarge for small spiders NYI
+ * SDCategory:  Zul'Gurub
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 #include "zulgurub.h"
@@ -97,19 +108,25 @@ struct MANGOS_DLL_DECL boss_marliAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_MARLI, DONE);
+        }
     }
 
     void JustReachedHome() override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_MARLI, FAIL);
+        }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         // Troll phase
         if (!m_bIsInPhaseTwo)
@@ -117,21 +134,29 @@ struct MANGOS_DLL_DECL boss_marliAI : public ScriptedAI
             if (m_uiPoisonVolleyTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_POISON_VOLLEY) == CAST_OK)
+                {
                     m_uiPoisonVolleyTimer = urand(10000, 20000);
+                }
             }
             else
+            {
                 m_uiPoisonVolleyTimer -= uiDiff;
+            }
 
             if (m_uiDrainLifeTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_DRAIN_LIFE) == CAST_OK)
+                    {
                         m_uiDrainLifeTimer = urand(20000, 50000);
+                    }
                 }
             }
             else
+            {
                 m_uiDrainLifeTimer -= uiDiff;
+            }
 
             if (m_uiSpawnSpiderTimer < uiDiff)
             {
@@ -141,7 +166,9 @@ struct MANGOS_DLL_DECL boss_marliAI : public ScriptedAI
                     if (GameObject* pEgg = GetClosestGameObjectWithEntry(m_creature, GO_SPIDER_EGG, 30.0f))
                     {
                         if (urand(0, 1))
+                        {
                             DoScriptText(SAY_SPIDER_SPAWN, m_creature);
+                        }
 
                         pEgg->Use(m_creature);
                         m_uiSpawnSpiderTimer = 60000;
@@ -149,7 +176,9 @@ struct MANGOS_DLL_DECL boss_marliAI : public ScriptedAI
                 }
             }
             else
+            {
                 m_uiSpawnSpiderTimer -= uiDiff;
+            }
         }
         // Spider phase
         else
@@ -163,7 +192,7 @@ struct MANGOS_DLL_DECL boss_marliAI : public ScriptedAI
                 }
             }
             else
-                m_uiWebsTimer -= uiDiff;
+                { m_uiWebsTimer -= uiDiff; }
 
             if (m_uiChargeTimer)
             {
@@ -180,7 +209,9 @@ struct MANGOS_DLL_DECL boss_marliAI : public ScriptedAI
                     }
                 }
                 else
+                {
                     m_uiChargeTimer -= uiDiff;
+                }
             }
 
             if (m_uiCorrosivePoisonTimer < uiDiff)
@@ -188,11 +219,13 @@ struct MANGOS_DLL_DECL boss_marliAI : public ScriptedAI
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_CORROSIVE_POISON) == CAST_OK)
+                    {
                         m_uiCorrosivePoisonTimer = urand(25000, 35000);
+                    }
                 }
             }
             else
-                m_uiCorrosivePoisonTimer -= uiDiff;
+                { m_uiCorrosivePoisonTimer -= uiDiff; }
         }
 
         // Transform from Troll to Spider and back
@@ -221,15 +254,17 @@ struct MANGOS_DLL_DECL boss_marliAI : public ScriptedAI
             }
         }
         else
-            m_uiTransformTimer -= uiDiff;
+            { m_uiTransformTimer -= uiDiff; }
 
         if (m_uiTrashTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_TRASH) == CAST_OK)
+            {
                 m_uiTrashTimer = urand(10000, 20000);
+            }
         }
         else
-            m_uiTrashTimer -= uiDiff;
+            { m_uiTrashTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }
