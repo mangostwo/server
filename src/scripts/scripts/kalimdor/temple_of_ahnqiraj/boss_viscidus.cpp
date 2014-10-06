@@ -60,7 +60,7 @@ enum
     // SPELL_SUMMONT_TRIGGER     = 26564,                   // summons 15992 - removed from DBC
 
     NPC_GLOB_OF_VISCIDUS        = 15667,
-    // NPC_VISCIDUS_TRIGGER      = 15922,                   // purpose unk
+    NPC_VISCIDUS_TRIGGER      = 15922,                      // handles aura 26575
 
     MAX_VISCIDUS_GLOBS          = 20,                       // there are 20 summoned globs; each glob = 5% hp
 
@@ -93,6 +93,7 @@ struct MANGOS_DLL_DECL boss_viscidusAI : public ScriptedAI
     uint8 m_uiPhase;
 
     uint32 m_uiHitCount;
+    uint32 m_uiToxinTimer;
     uint32 m_uiExplodeDelayTimer;
     uint32 m_uiPoisonShockTimer;
     uint32 m_uiPoisonBoltVolleyTimer;
@@ -105,6 +106,7 @@ struct MANGOS_DLL_DECL boss_viscidusAI : public ScriptedAI
         m_uiHitCount              = 0;
         
         m_uiExplodeDelayTimer     = 0;
+        m_uiToxinTimer            = 30000;
         m_uiPoisonShockTimer      = urand(7000, 12000);
         m_uiPoisonBoltVolleyTimer = urand(10000, 15000);
         
@@ -145,6 +147,8 @@ struct MANGOS_DLL_DECL boss_viscidusAI : public ScriptedAI
             pSummoned->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
             m_lGlobesGuidList.push_back(pSummoned->GetObjectGuid());
         }
+        else if (pSummoned->GetEntry() == NPC_VISCIDUS_TRIGGER)
+            pSummoned->CastSpell(pSummoned, SPELL_TOXIN, true);
     }
 
     void SummonedCreatureJustDied(Creature* pSummoned) override
@@ -326,6 +330,15 @@ struct MANGOS_DLL_DECL boss_viscidusAI : public ScriptedAI
         }
         else
             m_uiPoisonBoltVolleyTimer -= uiDiff;
+        
+        if (m_uiToxinTimer < uiDiff)
+        {
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                m_creature->SummonCreature(NPC_VISCIDUS_TRIGGER, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+            m_uiToxinTimer = 30000;
+        }
+        else
+            m_uiToxinTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
