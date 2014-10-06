@@ -45,6 +45,7 @@ class BIHWrap
         {
             const T* const* objects; /**< TODO */
             RayCallback& cb; /**< TODO */
+            uint32 objects_size;
 
             /**
              * @brief
@@ -52,7 +53,7 @@ class BIHWrap
              * @param callback
              * @param constobjects_array
              */
-            MDLCallback(RayCallback& callback, const T* const* objects_array) : cb(callback), objects(objects_array) {}
+            MDLCallback(RayCallback& callback, const T* const* objects_array, uint32 objects_size ) : cb(callback), objects(objects_array) {}
 
             /**
              * @brief
@@ -65,6 +66,9 @@ class BIHWrap
              */
             bool operator()(const Ray& r, uint32 Idx, float& MaxDist, bool /*stopAtFirst*/)
             {
+                if (Idx >= objects_size) 
+                    { return false; }
+
                 if (const T* obj = objects[Idx])
                     { return cb(r, *obj, MaxDist/*, stopAtFirst*/); }
                 return false;
@@ -78,6 +82,9 @@ class BIHWrap
              */
             void operator()(const Vector3& p, uint32 Idx)
             {
+                if (Idx >= objects_size) 
+                    { return false; }
+
                 if (const T* obj = objects[Idx])
                     { cb(p, *obj); }
             }
@@ -155,9 +162,10 @@ class BIHWrap
          * @param intersectCallback
          * @param maxDist
          */
-        void intersectRay(const Ray& r, RayCallback& intersectCallback, float& maxDist) const
+        void intersectRay(const Ray& r, RayCallback& intersectCallback, float& maxDist)
         {
-            MDLCallback<RayCallback> temp_cb(intersectCallback, m_objects.getCArray());
+            balance();
+            MDLCallback<RayCallback> temp_cb(intersectCallback, m_objects.getCArray(), m_objects.size());
             m_tree.intersectRay(r, temp_cb, maxDist, true);
         }
 
@@ -168,9 +176,10 @@ class BIHWrap
          * @param p
          * @param intersectCallback
          */
-        void intersectPoint(const Vector3& p, IsectCallback& intersectCallback) const
+        void intersectPoint(const Vector3& p, IsectCallback& intersectCallback)
         {
-            MDLCallback<IsectCallback> temp_cb(intersectCallback, m_objects.getCArray());
+            balance();
+            MDLCallback<IsectCallback> temp_cb(intersectCallback, m_objects.getCArray(), m_objects.size());
             m_tree.intersectPoint(p, temp_cb);
         }
 };
