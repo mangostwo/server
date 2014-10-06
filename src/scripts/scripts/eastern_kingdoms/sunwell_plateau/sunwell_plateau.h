@@ -100,6 +100,8 @@ static const EventLocations aKalecLoc[] =
     {1648.255f, 519.377f, 165.848f, 0},             // fly away
 };
 
+static const float afMuruSpawnLoc[4] = { 1816.25f, 625.484f, 69.603f, 5.624f };
+
 class MANGOS_DLL_DECL instance_sunwell_plateau : public ScriptedInstance, private DialogueHelper
 {
     public:
