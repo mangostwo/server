@@ -1,6 +1,10 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vmap_assembler", "VC120\vmap_assembler.vcxproj", "{572FFF74-480C-4472-8ABF-81733BB4049D}"
+# Visual Studio 2013
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Vmap-Assembler", "vmap_assembler_VC120.vcxproj", "{572FFF74-480C-4472-8ABF-81733BB4049D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2} = {8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}
+		{8072769E-CF10-48BF-B9E1-12752A5DAC6E} = {8072769E-CF10-48BF-B9E1-12752A5DAC6E}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "..\..\win\VC120\zlib.vcxproj", "{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}"
 EndProject

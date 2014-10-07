@@ -16,33 +16,28 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-#Used by vmap-assembler and mmap-generator
+cmake_minimum_required (VERSION 2.8)
+
+project (MANGOS_VMAP_ASSEMB_IO)
+
+set(EXECUTABLE_NAME "vmap-assembler")
+
+# comment next line to disable debug mode
+#TODO: These should be general, not with the -D part for windows to work too?
+add_definitions("-DIOMAP_DEBUG")
+add_definitions("-DNO_CORE_FUNCS")
+
 include_directories(
     "${CMAKE_SOURCE_DIR}/src/shared"
     "${CMAKE_SOURCE_DIR}/src/game/vmap/"
     "${CMAKE_SOURCE_DIR}/dep/include/g3dlite/"
     "${CMAKE_SOURCE_DIR}/dep/ACE_wrappers/"
-    "${CMAKE_SOURCE_DIR}/objdir/dep/ACE_wrappers"
+    "${CMAKE_BINARY_DIR}/dep/ACE_wrappers"
     "${CMAKE_SOURCE_DIR}/src/framework/"
 )
 
-add_definitions(-DMMAP_GENERATOR -DNO_CORE_FUNCS)
+add_executable(${EXECUTABLE_NAME} vmap_assembler.cpp)
 
-add_library(vmap
-    ${CMAKE_SOURCE_DIR}/src/game/vmap/BIH.cpp
-    ${CMAKE_SOURCE_DIR}/src/game/vmap/VMapManager2.cpp
-    ${CMAKE_SOURCE_DIR}/src/game/vmap/MapTree.cpp
-    ${CMAKE_SOURCE_DIR}/src/game/vmap/TileAssembler.cpp
-    ${CMAKE_SOURCE_DIR}/src/game/vmap/WorldModel.cpp
-    ${CMAKE_SOURCE_DIR}/src/game/vmap/ModelInstance.cpp
-)
+target_link_libraries(${EXECUTABLE_NAME} vmap g3dlite z)
 
-target_link_libraries(vmap g3dlite zlib)
-
-# Used for install targets in subdirs
-set(TOOLS_DIR "tools")
-
-add_subdirectory(Movemap-Generator)
-add_subdirectory(map-extractor)
-add_subdirectory(vmap-assembler)
-add_subdirectory(vmap-extractor)
+install(TARGETS ${EXECUTABLE_NAME} DESTINATION "${BIN_DIR}/${TOOLS_DIR}")

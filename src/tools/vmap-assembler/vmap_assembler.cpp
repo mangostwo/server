@@ -17,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #include <string>
@@ -24,12 +27,26 @@
 
 #include "TileAssembler.h"
 
+const char* szVMAPMagic = "VMAP_4.0";
+
 //=======================================================
-int main(int argc, char* argv[])
+void Usage(char* prg)
 {
+    printf("Usage: %s [OPTION]\n\n", prg);
+    printf("Assemble vmaps from extracted client model information.\n");
+    printf("\n");
+    printf("Example:\n");
+    printf("- provide source and target path:\n");
+    printf("  %s Buildings vmaps\n", prg);
+}
+
+int main(int argc, char** argv)
+{
+    printf("mangos-two vmap (version %s) assembler\n\n", szVMAPMagic);
+
     if (argc != 3)
     {
-        std::cout << "usage: " << argv[0] << " <raw data dir> <vmap dest dir>" << std::endl;
+        Usage(argv[0]);
         return 1;
     }
 
