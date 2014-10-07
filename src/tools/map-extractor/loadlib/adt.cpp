@@ -1,4 +1,26 @@
-#define _CRT_SECURE_NO_DEPRECATE
+/**
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
+ */
 
 #include "adt.h"
 
@@ -10,8 +32,8 @@ bool isHole(int holes, int i, int j)
 {
     int testi = i / 2;
     int testj = j / 4;
-    if (testi > 3) testi = 3;
-    if (testj > 3) testj = 3;
+    if (testi > 3) { testi = 3; }
+    if (testj > 3) { testj = 3; }
     return (holes & holetab_h[testi] & holetab_v[testj]) != 0;
 }
 
@@ -41,12 +63,12 @@ bool ADT_file::prepareLoadedData()
 {
     // Check parent
     if (!FileLoader::prepareLoadedData())
-        return false;
+        { return false; }
 
     // Check and prepare MHDR
     a_grid = (adt_MHDR*)(GetData() + 8 + version->size);
     if (!a_grid->prepareLoadedData())
-        return false;
+        { return false; }
 
     return true;
 }
@@ -54,18 +76,18 @@ bool ADT_file::prepareLoadedData()
 bool adt_MHDR::prepareLoadedData()
 {
     if (fcc != 'MHDR')
-        return false;
+        { return false; }
 
     if (size != sizeof(adt_MHDR) - 8)
-        return false;
+        { return false; }
 
     // Check and prepare MCIN
     if (offsMCIN && !getMCIN()->prepareLoadedData())
-        return false;
+        { return false; }
 
     // Check and prepare MH2O
     if (offsMH2O && !getMH2O()->prepareLoadedData())
-        return false;
+        { return false; }
 
     return true;
 }
@@ -73,13 +95,13 @@ bool adt_MHDR::prepareLoadedData()
 bool adt_MCIN::prepareLoadedData()
 {
     if (fcc != 'MCIN')
-        return false;
+        { return false; }
 
     // Check cells data
     for (int i = 0; i < ADT_CELLS_PER_GRID; i++)
         for (int j = 0; j < ADT_CELLS_PER_GRID; j++)
             if (cells[i][j].offsMCNK && !getMCNK(i, j)->prepareLoadedData())
-                return false;
+                { return false; }
 
     return true;
 }
@@ -87,7 +109,7 @@ bool adt_MCIN::prepareLoadedData()
 bool adt_MH2O::prepareLoadedData()
 {
     if (fcc != 'MH2O')
-        return false;
+        { return false; }
 
     // Check liquid data
 //    for (int i=0; i<ADT_CELLS_PER_GRID;i++)
@@ -99,14 +121,14 @@ bool adt_MH2O::prepareLoadedData()
 bool adt_MCNK::prepareLoadedData()
 {
     if (fcc != 'MCNK')
-        return false;
+        { return false; }
 
     // Check height map
     if (offsMCVT && !getMCVT()->prepareLoadedData())
-        return false;
+        { return false; }
     // Check liquid data
     if (offsMCLQ && !getMCLQ()->prepareLoadedData())
-        return false;
+        { return false; }
 
     return true;
 }
@@ -114,10 +136,10 @@ bool adt_MCNK::prepareLoadedData()
 bool adt_MCVT::prepareLoadedData()
 {
     if (fcc != 'MCVT')
-        return false;
+        { return false; }
 
     if (size != sizeof(adt_MCVT) - 8)
-        return false;
+        { return false; }
 
     return true;
 }
@@ -125,7 +147,7 @@ bool adt_MCVT::prepareLoadedData()
 bool adt_MCLQ::prepareLoadedData()
 {
     if (fcc != 'MCLQ')
-        return false;
+        { return false; }
 
     return true;
 }
