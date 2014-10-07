@@ -17,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #include "MMapCommon.h"
@@ -61,25 +64,32 @@ bool checkDirectories(bool debugOutput)
     return true;
 }
 
-void printUsage()
+void printUsage(char* prg)
 {
-    printf("Generator command line args\n\n");
-    printf("-? : This help\n");
-    printf("[#] : Build only the map specified by #.\n");
-    printf("--maxAngle [#] : Max walkable inclination angle\n");
-    printf("--tile [#,#] : Build the specified tile\n");
-    printf("--skipLiquid [true|false] : liquid data for maps\n");
-    printf("--skipContinents [true|false] : skip continents\n");
-    printf("--skipJunkMaps [true|false] : junk maps include some unused\n");
-    printf("--skipBattlegrounds [true|false] : does not include PVP arenas\n");
-    printf("--debugOutput [true|false] : create debugging files for use with RecastDemo\n");
-    printf("--bigBaseUnit [true|false] : Generate tile/map using bigger basic unit.\n");
-    printf("--silent : Make script friendly. No wait for user input, error, completion.\n");
-    printf("--offMeshInput [file.*] : Path to file containing off mesh connections data.\n\n");
-    printf("Exemple:\nmovemapgen (generate all mmap with default arg\n"
-        "movemapgen 0 (generate map 0)\n"
-        "movemapgen --tile 34,46 (builds only tile 34,46 of map 0)\n\n");
-    printf("Please read readme file for more information and exemples.\n");
+    printf("Usage: %s [OPTION]\n\n", prg);
+    printf("Generate movement maps from extracted client maps.\n");
+    printf("   -h, --help                        show the usage\n");
+    printf("   --maxAngle [#]                    max walkable inclination angle.\n");
+    printf("   --tile [#,#]                      build the specified tile.\n");
+    printf("   --skipLiquid [true|false]         skip liquid data for maps.\n");
+    printf("   --skipContinents [true|false]     skip continents.\n");
+    printf("   --skipJunkMaps [true|false]       skip unused junk maps.\n");
+    printf("   --skipBattlegrounds [true|false]  skip battleground maps.\n");
+    printf("   --bigBaseUnit [true|false]        generate tile/map using bigger basic unit.\n");
+    printf("   --offMeshInput [file.*]           path to file containing off mesh.\n");
+    printf("                                     connections data\n");
+    printf("   --debugOutput [true|false]        create debugging files for use with\n");
+    printf("                                     RecastDemo.\n");
+    printf("   --silent                          No questions asked.\n");
+    printf("   [#]                               Build only the map specified by #.\n");
+    printf("\n");
+    printf("Examples:\n");
+    printf("- generate all movement maps:\n");
+    printf("  %s\n", prg);
+    printf("- generate only map 0:\n");
+    printf("  %s 0\n", prg);
+    printf("- build tile 34,46 of map 0:\n");
+    printf("  %s --tile 34,46\n", prg);
 }
 
 bool handleArgs(int argc, char** argv,
@@ -103,19 +113,19 @@ bool handleArgs(int argc, char** argv,
         {
             param = argv[++i];
             if (!param)
-                return false;
+                { return false; }
 
             float maxangle = atof(param);
             if (maxangle <= 90.f && maxangle >= 45.f)
-                maxAngle = maxangle;
+                { maxAngle = maxangle; }
             else
-                printf("invalid option for '--maxAngle', using default\n");
+                { printf("invalid option for '--maxAngle', using default\n"); }
         }
         else if (strcmp(argv[i], "--tile") == 0)
         {
             param = argv[++i];
             if (!param)
-                return false;
+                { return false; }
 
             char* stileX = strtok(param, ",");
             char* stileY = strtok(NULL, ",");
@@ -123,9 +133,9 @@ bool handleArgs(int argc, char** argv,
             int tiley = atoi(stileY);
 
             if ((tilex > 0 && tilex < 64) || (tilex == 0 && strcmp(stileX, "0") == 0))
-                tileX = tilex;
+                { tileX = tilex; }
             if ((tiley > 0 && tiley < 64) || (tiley == 0 && strcmp(stileY, "0") == 0))
-                tileY = tiley;
+                { tileY = tiley; }
 
             if (tileX < 0 || tileY < 0)
             {
@@ -137,66 +147,66 @@ bool handleArgs(int argc, char** argv,
         {
             param = argv[++i];
             if (!param)
-                return false;
+                { return false; }
 
             if (strcmp(param, "true") == 0)
-                skipLiquid = true;
+                { skipLiquid = true; }
             else if (strcmp(param, "false") == 0)
-                skipLiquid = false;
+                { skipLiquid = false; }
             else
-                printf("invalid option for '--skipLiquid', using default\n");
+                { printf("invalid option for '--skipLiquid', using default\n"); }
         }
         else if (strcmp(argv[i], "--skipContinents") == 0)
         {
             param = argv[++i];
             if (!param)
-                return false;
+                { return false; }
 
             if (strcmp(param, "true") == 0)
-                skipContinents = true;
+                { skipContinents = true; }
             else if (strcmp(param, "false") == 0)
-                skipContinents = false;
+                { skipContinents = false; }
             else
-                printf("invalid option for '--skipContinents', using default\n");
+                { printf("invalid option for '--skipContinents', using default\n"); }
         }
         else if (strcmp(argv[i], "--skipJunkMaps") == 0)
         {
             param = argv[++i];
             if (!param)
-                return false;
+                { return false; }
 
             if (strcmp(param, "true") == 0)
-                skipJunkMaps = true;
+                { skipJunkMaps = true; }
             else if (strcmp(param, "false") == 0)
-                skipJunkMaps = false;
+                { skipJunkMaps = false; }
             else
-                printf("invalid option for '--skipJunkMaps', using default\n");
+                { printf("invalid option for '--skipJunkMaps', using default\n"); }
         }
         else if (strcmp(argv[i], "--skipBattlegrounds") == 0)
         {
             param = argv[++i];
             if (!param)
-                return false;
+                { return false; }
 
             if (strcmp(param, "true") == 0)
-                skipBattlegrounds = true;
+                { skipBattlegrounds = true; }
             else if (strcmp(param, "false") == 0)
-                skipBattlegrounds = false;
+                { skipBattlegrounds = false; }
             else
-                printf("invalid option for '--skipBattlegrounds', using default\n");
+                { printf("invalid option for '--skipBattlegrounds', using default\n"); }
         }
         else if (strcmp(argv[i], "--debugOutput") == 0)
         {
             param = argv[++i];
             if (!param)
-                return false;
+                { return false; }
 
             if (strcmp(param, "true") == 0)
-                debugOutput = true;
+                { debugOutput = true; }
             else if (strcmp(param, "false") == 0)
-                debugOutput = false;
+                { debugOutput = false; }
             else
-                printf("invalid option for '--debugOutput', using default true\n");
+                { printf("invalid option for '--debugOutput', using default true\n"); }
         }
         else if (strcmp(argv[i], "--silent") == 0)
         {
@@ -206,33 +216,33 @@ bool handleArgs(int argc, char** argv,
         {
             param = argv[++i];
             if (!param)
-                return false;
+                { return false; }
 
             if (strcmp(param, "true") == 0)
-                bigBaseUnit = true;
+                { bigBaseUnit = true; }
             else if (strcmp(param, "false") == 0)
-                bigBaseUnit = false;
+                { bigBaseUnit = false; }
             else
-                printf("invalid option for '--bigBaseUnit', using default false\n");
+                { printf("invalid option for '--bigBaseUnit', using default false\n"); }
         }
         else if (strcmp(argv[i], "--offMeshInput") == 0)
         {
             param = argv[++i];
             if (!param)
-                return false;
+                { return false; }
 
             offMeshInputPath = param;
         }
-        else if (strcmp(argv[i], "-?") == 0)
+        else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0)
         {
-            printUsage();
+            printUsage(argv[0]);
             exit(1);
         }
         else
         {
             int map = atoi(argv[i]);
             if (map > 0 || (map == 0 && (strcmp(argv[i], "0") == 0)))
-                mapnum = map;
+                { mapnum = map; }
             else
             {
                 printf("invalid map id\n");
@@ -247,12 +257,14 @@ bool handleArgs(int argc, char** argv,
 int finish(const char* message, int returnValue)
 {
     printf("%s", message);
-    getchar();
+    (void)getchar();
     return returnValue;
 }
 
 int main(int argc, char** argv)
 {
+    printf("mangos-two movement map (version %d) generator\n\n", MMAP_VERSION);
+
     int mapnum = -1;
     float maxAngle = 60.0f;
     int tileX = -1, tileY = -1;
@@ -271,32 +283,32 @@ int main(int argc, char** argv)
                                  debugOutput, silent, bigBaseUnit, offMeshInputPath);
 
     if (!validParam)
-        return silent ? -1 : finish("You have specified invalid parameters (use -? for more help)", -1);
+        { return silent ? -1 : finish("You have specified invalid parameters (use -? for more help)", -1); }
 
     if (mapnum == -1 && debugOutput)
     {
         if (silent)
-            return -2;
+            { return -2; }
 
         printf("You have specifed debug output, but didn't specify a map to generate.\n");
         printf("This will generate debug output for ALL maps.\n");
         printf("Are you sure you want to continue? (y/n) ");
         if (getchar() != 'y')
-            return 0;
+            { return 0; }
     }
 
     if (!checkDirectories(debugOutput))
-        return silent ? -3 : finish("Press any key to close...", -3);
+        { return silent ? -3 : finish("Press any key to close...", -3); }
 
     MapBuilder builder(maxAngle, skipLiquid, skipContinents, skipJunkMaps,
                        skipBattlegrounds, debugOutput, bigBaseUnit, offMeshInputPath);
 
     if (tileX > -1 && tileY > -1 && mapnum >= 0)
-        builder.buildSingleTile(mapnum, tileX, tileY);
+        { builder.buildSingleTile(mapnum, tileX, tileY); }
     else if (mapnum >= 0)
-        builder.buildMap(uint32(mapnum));
+        { builder.buildMap(uint32(mapnum)); }
     else
-        builder.buildAllMaps();
+        { builder.buildAllMaps(); }
 
     return silent ? 1 : finish("Movemap build is complete!", 1);
 }
