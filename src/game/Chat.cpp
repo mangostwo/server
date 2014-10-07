@@ -907,9 +907,9 @@ bool ChatHandler::HasLowerSecurity(Player* target, ObjectGuid guid, bool strong)
     uint32 target_account = 0;
 
     if (target)
-        target_session = target->GetSession();
+        { target_session = target->GetSession(); }
     else
-        target_account = sObjectMgr.GetPlayerAccountIdByGUID(guid);
+        { target_account = sObjectMgr.GetPlayerAccountIdByGUID(guid); }
 
     if (!target_session && !target_account)
     {
@@ -927,14 +927,14 @@ bool ChatHandler::HasLowerSecurityAccount(WorldSession* target, uint32 target_ac
 
     // ignore only for non-players for non strong checks (when allow apply command at least to same sec level)
     if (GetAccessLevel() > SEC_PLAYER && !strong && !sWorld.getConfig(CONFIG_BOOL_GM_LOWER_SECURITY))
-        return false;
+        { return false; }
 
     if (target)
-        target_sec = target->GetSecurity();
+        { target_sec = target->GetSecurity(); }
     else if (target_account)
-        target_sec = sAccountMgr.GetSecurity(target_account);
+        { target_sec = sAccountMgr.GetSecurity(target_account); }
     else
-        return true;                                        // caller must report error for (target==NULL && target_account==0)
+        { return true; }                                        // caller must report error for (target==NULL && target_account==0)
 
     if (GetAccessLevel() < target_sec || (strong && GetAccessLevel() <= target_sec))
     {
@@ -953,16 +953,16 @@ bool ChatHandler::hasStringAbbr(const char* name, const char* part)
     {
         // "" part from non-"" command
         if (!*part)
-            return false;
+            { return false; }
 
         for (;;)
         {
             if (!*part)
-                return true;
+                { return true; }
             else if (!*name)
-                return false;
+                { return false; }
             else if (tolower(*name) != tolower(*part))
-                return false;
+                { return false; }
             ++name; ++part;
         }
     }

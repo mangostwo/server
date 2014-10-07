@@ -33,14 +33,14 @@ void CharacterDatabaseCleaner::CleanDatabase()
 {
     // config to disable
     if (!sWorld.getConfig(CONFIG_BOOL_CLEAN_CHARACTER_DB))
-        return;
+        { return; }
 
     sLog.outString("Cleaning character database...");
 
     // check flags which clean ups are necessary
     QueryResult* result = CharacterDatabase.PQuery("SELECT cleaning_flags FROM saved_variables");
     if (!result)
-        return;
+        { return; }
     uint32 flags = (*result)[0].GetUInt32();
     delete result;
 
@@ -48,9 +48,9 @@ void CharacterDatabaseCleaner::CleanDatabase()
     if (flags & CLEANING_FLAG_ACHIEVEMENT_PROGRESS)
         CleanCharacterAchievementProgress();
     if (flags & CLEANING_FLAG_SKILLS)
-        CleanCharacterSkills();
+        { CleanCharacterSkills(); }
     if (flags & CLEANING_FLAG_SPELLS)
-        CleanCharacterSpell();
+        { CleanCharacterSpell(); }
     if (flags & CLEANING_FLAG_TALENTS)
         CleanCharacterTalent();
     CharacterDatabase.Execute("UPDATE saved_variables SET cleaning_flags = 0");
@@ -84,7 +84,7 @@ void CharacterDatabaseCleaner::CheckUnique(const char* column, const char* table
                 found = true;
             }
             else
-                ss << ",";
+                { ss << ","; }
             ss << id;
         }
     }

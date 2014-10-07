@@ -32,12 +32,12 @@ INSTANTIATE_SINGLETON_1(HordeChannelMgr);
 ChannelMgr* channelMgr(Team team)
 {
     if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
-        return &MaNGOS::Singleton<AllianceChannelMgr>::Instance();        // cross-faction
+        { return &MaNGOS::Singleton<AllianceChannelMgr>::Instance(); }        // cross-faction
 
     if (team == ALLIANCE)
-        return &MaNGOS::Singleton<AllianceChannelMgr>::Instance();
+        { return &MaNGOS::Singleton<AllianceChannelMgr>::Instance(); }
     if (team == HORDE)
-        return &MaNGOS::Singleton<HordeChannelMgr>::Instance();
+        { return &MaNGOS::Singleton<HordeChannelMgr>::Instance(); }
 
     return NULL;
 }
@@ -45,7 +45,7 @@ ChannelMgr* channelMgr(Team team)
 ChannelMgr::~ChannelMgr()
 {
     for (ChannelMap::iterator itr = channels.begin(); itr != channels.end(); ++itr)
-        delete itr->second;
+        { delete itr->second; }
 
     channels.clear();
 }
@@ -86,7 +86,7 @@ Channel* ChannelMgr::GetChannel(std::string name, Player* p, bool pkt)
         return NULL;
     }
     else
-        return i->second;
+        { return i->second; }
 }
 
 void ChannelMgr::LeftChannel(std::string name)
@@ -98,7 +98,7 @@ void ChannelMgr::LeftChannel(std::string name)
     ChannelMap::const_iterator i = channels.find(wname);
 
     if (i == channels.end())
-        return;
+        { return; }
 
     Channel* channel = i->second;
 
