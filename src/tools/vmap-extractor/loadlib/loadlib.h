@@ -17,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef LOAD_LIB_H
@@ -38,45 +41,121 @@ typedef unsigned __int8    uint8;
 #include <linux/types.h>
 #endif
 #endif
+
+/**
+ * @brief
+ *
+ */
 typedef int64_t            int64;
+/**
+ * @brief
+ *
+ */
 typedef int32_t            int32;
+/**
+ * @brief
+ *
+ */
 typedef int16_t            int16;
+/**
+ * @brief
+ *
+ */
 typedef int8_t             int8;
+/**
+ * @brief
+ *
+ */
 typedef uint64_t           uint64;
+/**
+ * @brief
+ *
+ */
 typedef uint32_t           uint32;
+/**
+ * @brief
+ *
+ */
 typedef uint16_t           uint16;
+/**
+ * @brief
+ *
+ */
 typedef uint8_t            uint8;
 #endif
 
 #define FILE_FORMAT_VERSION    18
 
-//
-// File version chunk
-//
+/**
+ * @brief File version chunk
+ *
+ */
 struct file_MVER
 {
+    /**
+     * @brief
+     *
+     */
     union
     {
-        uint32 fcc;
-        char   fcc_txt[4];
+        uint32 fcc; /**< TODO */
+        char   fcc_txt[4]; /**< TODO */
     };
-    uint32 size;
-    uint32 ver;
+    uint32 size; /**< TODO */
+    uint32 ver; /**< TODO */
 };
 
+/**
+ * @brief
+ *
+ */
 class FileLoader
 {
-        uint8*  data;
-        uint32  data_size;
+        uint8*  data; /**< TODO */
+        uint32  data_size; /**< TODO */
     public:
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         virtual bool prepareLoadedData();
+        /**
+         * @brief
+         *
+         * @return uint8
+         */
         uint8* GetData()     {return data;}
+        /**
+         * @brief
+         *
+         * @return uint32
+         */
         uint32 GetDataSize() {return data_size;}
 
-        file_MVER* version;
+        file_MVER* version; /**< TODO */
+        /**
+         * @brief
+         *
+         */
         FileLoader();
+        /**
+         * @brief
+         *
+         */
         ~FileLoader();
+        /**
+         * @brief
+         *
+         * @param filename
+         * @param log
+         * @return bool
+         */
         bool loadFile(char* filename, bool log = true);
+        /**
+         * @brief
+         *
+         */
         virtual void free();
 };
 #endif

@@ -17,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef VMAPEXPORT_H
@@ -25,8 +28,16 @@
 #include <string>
 #include <set>
 
+/**
+ * @brief
+ *
+ */
 typedef std::set<std::string> StringSet;
 
+/**
+ * @brief
+ *
+ */
 enum ModelFlags
 {
     MOD_M2 = 1,
@@ -34,20 +45,45 @@ enum ModelFlags
     MOD_HAS_BOUND = 1 << 2
 };
 
-extern const char* szWorkDirWmo;
-extern const char* szRawVMAPMagic;                          // vmap magic string for extracted raw vmap data
+extern const char* szWorkDirWmo; /**< TODO */
+extern const char* szRawVMAPMagic; /**< vmap magic string for extracted raw vmap data */
 
+/**
+ * @brief
+ *
+ * @param file
+ * @return bool
+ */
 bool FileExists(const char* file);
+/**
+ * @brief
+ *
+ * @param str
+ */
 void strToLower(char* str);
 
+/**
+ * @brief
+ *
+ * @param fname
+ * @return bool
+ */
 bool ExtractSingleWmo(std::string& fname);
 
-/* @param origPath = original path of the model, cleaned with fixnamen and fixname2
- * @param fixedName = will store the translated name (if changed)
- * @param failedPaths = Set to collect errors
+/**
+ * @brief
+ *
+ * @param origPath original path of the model, cleaned with fixnamen and fixname2
+ * @param fixedName will store the translated name (if changed)
+ * @param failedPaths Set to collect errors
+ * @return bool
  */
 bool ExtractSingleModel(std::string& origPath, std::string& fixedName, StringSet& failedPaths);
 
+/**
+ * @brief
+ *
+ */
 void ExtractGameobjectModels();
 
 #endif

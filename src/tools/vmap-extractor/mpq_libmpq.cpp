@@ -17,9 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "mpq_libmpq04.h"
+#include "mpq_libmpq.h"
 #include <deque>
 #include <cstdio>
 
@@ -74,7 +77,7 @@ MPQFile::MPQFile(const char* filename):
         mpq_archive* mpq_a = (*i)->mpq_a;
 
         uint32 filenum;
-        if (libmpq__file_number(mpq_a, filename, &filenum)) continue;
+        if (libmpq__file_number(mpq_a, filename, &filenum)) { continue; }
         libmpq__off_t transferred;
         libmpq__file_unpacked_size(mpq_a, filenum, &size);
 
@@ -86,7 +89,7 @@ MPQFile::MPQFile(const char* filename):
             buffer = 0;
             return;
         }
-        buffer = new char[size];
+        buffer = new char[(int)size];
 
         //libmpq_file_getdata
         libmpq__file_read(mpq_a, filenum, (unsigned char*)buffer, size, &transferred);
@@ -100,12 +103,12 @@ MPQFile::MPQFile(const char* filename):
 
 size_t MPQFile::read(void* dest, size_t bytes)
 {
-    if (eof) return 0;
+    if (eof) { return 0; }
 
-    size_t rpos = pointer + bytes;
+    size_t rpos = (size_t)(pointer + bytes);
     if (rpos > size)
     {
-        bytes = size - pointer;
+        bytes = (size_t)(size - pointer);
         eof = true;
     }
 
@@ -130,7 +133,7 @@ void MPQFile::seekRelative(int offset)
 
 void MPQFile::close()
 {
-    if (buffer) delete[] buffer;
+    if (buffer) { delete[] buffer; }
     buffer = 0;
     eof = true;
 }

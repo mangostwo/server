@@ -1,3 +1,27 @@
+/**
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
+ */
+
 #include "model.h"
 #include "dbcfile.h"
 #include "adtfile.h"
@@ -27,11 +51,11 @@ bool ExtractSingleModel(std::string& origPath, std::string& fixedName, StringSet
     output += fixedName;
 
     if (FileExists(output.c_str()))
-        return true;
+        { return true; }
 
     Model mdl(origPath);                                    // Possible changed fname
     if (!mdl.open(failedPaths))
-        return false;
+        { return false; }
 
     return mdl.ConvertToVMAPModel(output.c_str());
 }
@@ -59,7 +83,7 @@ void ExtractGameobjectModels()
         path = it->getString(1);
 
         if (path.length() < 4)
-            continue;
+            { continue; }
 
         fixnamen((char*)path.c_str(), path.size());
         char* name = GetPlainName((char*)path.c_str());
@@ -67,7 +91,7 @@ void ExtractGameobjectModels()
 
         char const* ch_ext = GetExtension(name);
         if (!ch_ext)
-            continue;
+            { continue; }
 
         //strToLower(ch_ext);
 
@@ -103,7 +127,7 @@ void ExtractGameobjectModels()
     {
         printf("Warning: Some models could not be extracted, see below\n");
         for (StringSet::const_iterator itr = failedPaths.begin(); itr != failedPaths.end(); ++itr)
-            printf("Could not find file of model %s\n", itr->c_str());
+            { printf("Could not find file of model %s\n", itr->c_str()); }
         printf("A few of these warnings are expected to happen, so be not alarmed!\n");
     }
 

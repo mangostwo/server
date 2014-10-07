@@ -17,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #include "vmapexport.h"
@@ -29,7 +32,7 @@ char* wdtGetPlainName(char* FileName)
     char* szTemp;
 
     if ((szTemp = strrchr(FileName, '\\')) != NULL)
-        FileName = szTemp + 1;
+        { FileName = szTemp + 1; }
     return FileName;
 }
 
@@ -128,7 +131,7 @@ WDTFile::~WDTFile(void)
 ADTFile* WDTFile::GetMap(int x, int z)
 {
     if (!(x >= 0 && z >= 0 && x < 64 && z < 64))
-        return NULL;
+        { return NULL; }
 
     char name[512];
 

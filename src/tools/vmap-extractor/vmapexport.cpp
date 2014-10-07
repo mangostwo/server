@@ -17,9 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#define _CRT_SECURE_NO_DEPRECATE
 #include <cstdio>
 #include <iostream>
 #include <vector>
@@ -48,7 +50,7 @@
 #include "wdtfile.h"
 #include "dbcfile.h"
 #include "wmo.h"
-#include "mpq_libmpq04.h"
+#include "mpq_libmpq.h"
 
 #include "vmapexport.h"
 
@@ -119,7 +121,7 @@ void ReadLiquidTypeTableDBC()
     memset(LiqType, 0xff, (LiqType_maxid + 1) * sizeof(uint16));
 
     for (uint32 x = 0; x < LiqType_count; ++x)
-        LiqType[dbc.getRecord(x).getUInt(0)] = dbc.getRecord(x).getUInt(3);
+        { LiqType[dbc.getRecord(x).getUInt(0)] = dbc.getRecord(x).getUInt(3); }
 
     printf("Done! (%u LiqTypes loaded)\n", (unsigned int)LiqType_count);
 }
@@ -136,12 +138,12 @@ bool ExtractWmo()
         for (vector<string>::iterator fname = filelist.begin(); fname != filelist.end() && success; ++fname)
         {
             if (fname->find(".wmo") != string::npos)
-                success = ExtractSingleWmo(*fname);
+                { success = ExtractSingleWmo(*fname); }
         }
     }
 
     if (success)
-        printf("\nExtract wmo complete (No (fatal) errors)\n");
+        { printf("\nExtract wmo complete (No (fatal) errors)\n"); }
 
     return success;
 }
@@ -156,7 +158,7 @@ bool ExtractSingleWmo(std::string& fname)
     fixnamen(szLocalFile, strlen(szLocalFile));
 
     if (FileExists(szLocalFile))
-        return true;
+        { return true; }
 
     int p = 0;
     //Select root wmo files
@@ -169,12 +171,12 @@ bool ExtractSingleWmo(std::string& fname)
         {
             int m = cpy[i];
             if (isdigit(m))
-                p++;
+                { p++; }
         }
     }
 
     if (p == 3)
-        return true;
+        { return true; }
 
     bool file_ok = true;
     std::cout << "Extracting " << fname << std::endl;
@@ -223,7 +225,7 @@ bool ExtractSingleWmo(std::string& fname)
 
     // Delete the extracted file in the case of an error
     if (!file_ok)
-        remove(szLocalFile);
+        { remove(szLocalFile); }
     return true;
 }
 
@@ -263,7 +265,7 @@ void ParsMapFiles()
     {
         printf("Warning: Some models could not be extracted, see below\n");
         for (StringSet::const_iterator itr = failedPaths.begin(); itr != failedPaths.end(); ++itr)
-            printf("Could not find file of model %s\n", itr->c_str());
+            { printf("Could not find file of model %s\n", itr->c_str()); }
         printf("A few not found models can be expected and are not alarming.\n");
     }
 }
@@ -364,7 +366,7 @@ bool fillArchiveNameVector(std::vector<std::string>& pArchiveNames)
     printf("Scanning patch levels from data directory.\n");
     sprintf(path, "%spatch", input_path);
     if (!scan_patches(path, pArchiveNames))
-        return(false);
+        { return(false); }
 
     // now, scan for the patch levels in locale dirs
     printf("Scanning patch levels from locale directories.\n");
@@ -388,10 +390,26 @@ bool fillArchiveNameVector(std::vector<std::string>& pArchiveNames)
     return true;
 }
 
+void Usage(char* prg)
+{
+    printf("Usage: %s [OPTION]\n\n", prg);
+    printf("Extract client database fiels and generate map files.\n");
+    printf("   -h, --help            show the usage\n");
+    printf("   -d, --data <path>     search path for game client archives\n");
+    printf("   -s, --small           extract smaller vmaps by optimizing data. Reduces\n");
+    printf("                         size by ~ 500MB\n");
+    printf("   -l, --large           extract larger vmaps with full data. Increases\n");
+    printf("                         size by ~ 500MB\n");
+    printf("\n");
+    printf("Example:\n");
+    printf("- use data path and create larger vmaps:\n");
+    printf("  %s -l -d \"c:\\games\\world of warcraft\"\n", prg);
+}
+
 bool processArgv(int argc, char** argv)
 {
     bool result = true;
-    hasInputPathParam = false;
+    bool hasInputPathParam = false;
     bool preciseVectorData = false;
 
     for (int i = 1; i < argc; ++i)
@@ -429,14 +447,10 @@ bool processArgv(int argc, char** argv)
             break;
         }
     }
+
     if (!result)
     {
-        printf("Extract for %s.\n", szRawVMAPMagic);
-        printf("%s [-?][-s][-l][-d <path>]\n", argv[0]);
-        printf("   -s : (default) small size (data size optimization), ~500MB less vmap data.\n");
-        printf("   -l : large size, ~500MB more vmap data. (might contain more details)\n");
-        printf("   -d <path>: Path to the vector data source folder.\n");
-        printf("   -? : This message.\n");
+        Usage(argv[0]);
     }
     return result;
 }
@@ -453,11 +467,13 @@ bool processArgv(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
+    printf("mangos-two vmap (version %s) extractor\n\n", szRawVMAPMagic);
+
     bool success = true;
 
     // Use command line arguments, when some
     if (!processArgv(argc, argv))
-        return 1;
+        { return 1; }
 
     // some simple check if working dir is dirty
     else
@@ -470,20 +486,20 @@ int main(int argc, char** argv)
             printf("Your output directory seems to be polluted, please use an empty directory!\n");
             printf("<press return to exit>");
             char garbage[2];
-            scanf("%c", garbage);
+            int ret = scanf("%c", garbage);
             return 1;
         }
     }
 
-    printf("Extract for %s. Beginning work ....\n", szRawVMAPMagic);
+    printf("Beginning work ....\n");
     //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     // Create the working directory
     if (mkdir(szWorkDirWmo
-#if defined(__linux__) || defined(__FreeBSD__)
+#if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__)
               , 0711
 #endif
              ))
-        success = (errno == EEXIST);
+        { success = (errno == EEXIST); }
 
     // prepare archive name list
     std::vector<std::string> archiveNames;
@@ -492,7 +508,7 @@ int main(int argc, char** argv)
     {
         MPQArchive* archive = new MPQArchive(archiveNames[i].c_str());
         if (!gOpenArchives.size() || gOpenArchives.front() != archive)
-            delete archive;
+            { delete archive; }
     }
 
     if (gOpenArchives.empty())
@@ -500,11 +516,10 @@ int main(int argc, char** argv)
         printf("FATAL ERROR: None MPQ archive found by path '%s'. Use -d option with proper path.\n", input_path);
         return 1;
     }
-    ReadLiquidTypeTableDBC();
 
     // extract data
     if (success)
-        success = ExtractWmo();
+        { success = ExtractWmo(); }
 
     //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     //map.dbc

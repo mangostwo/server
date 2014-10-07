@@ -17,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef MODEL_H
@@ -24,7 +27,6 @@
 
 #include "loadlib/loadlib.h"
 #include "vec3d.h"
-//#include "mpq.h"
 #include "modelheaders.h"
 #include <vector>
 #include "vmapexport.h"
@@ -32,26 +34,61 @@
 class WMOInstance;
 class MPQFile;
 
+/**
+ * @brief
+ *
+ * @param v
+ * @return Vec3D
+ */
 Vec3D fixCoordSystem(Vec3D v);
 
+/**
+ * @brief
+ *
+ */
 class Model
 {
     public:
-        ModelHeader header;
-        uint32 offsBB_vertices, offsBB_indices;
-        Vec3D* BB_vertices, *vertices;
-        uint16* BB_indices, *indices;
-        size_t nIndices;
+        ModelHeader header; /**< TODO */
+        ModelBoundingVertex* boundingVertices; /**< TODO */
+        Vec3D* vertices; /**< TODO */
+        uint16* indices; /**< TODO */
+        size_t nIndices; /**< TODO */
 
+        /**
+         * @brief
+         *
+         * @param failedPaths
+         * @return bool
+         */
         bool open(StringSet& failedPaths);
+        /**
+         * @brief
+         *
+         * @param outfilename
+         * @return bool
+         */
         bool ConvertToVMAPModel(const char* outfilename);
 
-        bool ok;
+        bool ok; /**< TODO */
 
+        /**
+         * @brief
+         *
+         * @param filename
+         */
         Model(std::string& filename);
+        /**
+         * @brief
+         *
+         */
         ~Model() {_unload();}
 
     private:
+        /**
+         * @brief
+         *
+         */
         void _unload()
         {
             delete[] vertices;
@@ -59,21 +96,39 @@ class Model
             vertices = NULL;
             indices = NULL;
         }
-        std::string filename;
-        char outfilename;
+        std::string filename; /**< TODO */
+        char outfilename; /**< TODO */
 };
 
+/**
+ * @brief
+ *
+ */
 class ModelInstance
 {
     public:
-        Model* model;
+        Model* model; /**< TODO */
 
-        uint32 id;
+        uint32 id; /**< TODO */
         uint16 scale;
-        Vec3D pos, rot;
-        float sc;
+        Vec3D pos, rot; /**< TODO */
+        float sc; /**< TODO */
 
+        /**
+         * @brief
+         *
+         */
         ModelInstance() {}
+        /**
+         * @brief
+         *
+         * @param f
+         * @param ModelInstName
+         * @param mapID
+         * @param tileX
+         * @param tileY
+         * @param pDirfile
+         */
         ModelInstance(MPQFile& f, const char* ModelInstName, uint32 mapID, uint32 tileX, uint32 tileY, FILE* pDirfile);
 
 };

@@ -17,41 +17,59 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
-
-#define _CRT_SECURE_NO_DEPRECATE
-#define _CRT_SECURE_NO_WARNINGS
 
 #ifndef MPQ_H
 #define MPQ_H
 
-#include "loadlib/loadlib.h"
-#include "libmpq/mpq.h"
 #include <string.h>
 #include <ctype.h>
 #include <vector>
 #include <iostream>
 #include <deque>
+#include "loadlib/loadlib.h"
+#include "libmpq/mpq.h"
 
 using namespace std;
 
+/**
+ * @brief
+ *
+ */
 class MPQArchive
 {
 
     public:
-        mpq_archive_s* mpq_a;
+        mpq_archive_s* mpq_a; /**< TODO */
 
+        /**
+         * @brief
+         *
+         * @param filename
+         */
         MPQArchive(const char* filename);
+        /**
+         * @brief
+         *
+         */
         void close();
 
+        /**
+         * @brief
+         *
+         * @param filelist
+         */
         void GetFileListTo(vector<string>& filelist)
         {
             uint32 filenum;
-            if (libmpq__file_number(mpq_a, "(listfile)", &filenum)) return;
+            if (libmpq__file_number(mpq_a, "(listfile)", &filenum)) { return; }
             libmpq__off_t size, transferred;
             libmpq__file_unpacked_size(mpq_a, filenum, &size);
 
-            char* buffer = new char[size];
+            char* buffer = new char[(int)size];
 
             libmpq__file_read(mpq_a, filenum, (unsigned char*)buffer, size, &transferred);
 
@@ -73,33 +91,110 @@ class MPQArchive
             delete[] buffer;
         }
 };
+/**
+ * @brief
+ *
+ */
 typedef std::deque<MPQArchive*> ArchiveSet;
 
+/**
+ * @brief
+ *
+ */
 class MPQFile
 {
         //MPQHANDLE handle;
-        bool eof;
-        char* buffer;
-        libmpq__off_t pointer, size;
+        bool eof; /**< TODO */
+        char* buffer; /**< TODO */
+        libmpq__off_t pointer, size; /**< TODO */
 
-        // disable copying
+        /**
+         * @brief disable copying
+         *
+         * @param f
+         */
         MPQFile(const MPQFile& f) {}
+        /**
+         * @brief
+         *
+         * @param f
+         */
         void operator=(const MPQFile& f) {}
 
     public:
-        MPQFile(const char* filename);    // filenames are not case sensitive
+        /**
+         * @brief
+         *
+         * @param filename filenames are not case sensitive
+         */
+        MPQFile(const char* filename);
+        /**
+         * @brief
+         *
+         */
         ~MPQFile() { close(); }
+        /**
+         * @brief
+         *
+         * @param dest
+         * @param bytes
+         * @return size_t
+         */
         size_t read(void* dest, size_t bytes);
-        size_t getSize() { return size; }
-        size_t getPos() { return pointer; }
+        /**
+         * @brief
+         *
+         * @return size_t
+         */
+        size_t getSize() { return (size_t)size; }
+        /**
+         * @brief
+         *
+         * @return size_t
+         */
+		size_t getPos() { return (size_t)pointer; }
+        /**
+         * @brief
+         *
+         * @return char
+         */
         char* getBuffer() { return buffer; }
+        /**
+         * @brief
+         *
+         * @return char
+         */
         char* getPointer() { return buffer + pointer; }
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool isEof() { return eof; }
+        /**
+         * @brief
+         *
+         * @param offset
+         */
         void seek(int offset);
+        /**
+         * @brief
+         *
+         * @param offset
+         */
         void seekRelative(int offset);
+        /**
+         * @brief
+         *
+         */
         void close();
 };
 
+/**
+ * @brief
+ *
+ * @param fcc
+ */
 inline void flipcc(char* fcc)
 {
     char t;
