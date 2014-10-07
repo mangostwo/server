@@ -191,7 +191,7 @@
     <ClInclude Include="map-extractor\loadlib\wdt.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\win\VC100\libmpq.vcxproj">
+    <ProjectReference Include="..\..\dep\libmpq\win\VC100\libmpq.vcxproj">
       <Project>{03ab0f44-628e-4855-99a0-c98a1eb52c50}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\win\VC100\bzip2.vcxproj">

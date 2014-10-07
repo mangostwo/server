@@ -33,7 +33,7 @@
     <ClInclude Include="..\..\src\game\vmap\VMapManager2.h" />
     <ClInclude Include="..\..\src\game\vmap\VMapTools.h" />
     <ClInclude Include="..\..\src\game\vmap\WorldModel.h" />
-    <ClInclude Include="..\..\src\game\WorldHandlers\MoveMapSharedDefines.h" />
+    <ClInclude Include="..\..\src\game\MoveMapSharedDefines.h" />
     <ClInclude Include="Movemap-Generator\MangosMap.h" />
     <ClInclude Include="Movemap-Generator\MapBuilder.h" />
     <ClInclude Include="Movemap-Generator\MMapCommon.h" />
