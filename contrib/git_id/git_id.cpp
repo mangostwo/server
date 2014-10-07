@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <algorithm>
 #include <string>
 #include <sstream>
 #include <assert.h>
@@ -276,23 +277,23 @@ bool find_rev()
 std::string generateNrHeader(char const* rev_str)
 {
     std::ostringstream newData;
-    newData << "#ifndef __REVISION_NR_H__" << std::endl;
-    newData << "#define __REVISION_NR_H__"  << std::endl;
+    newData << "#ifndef MANGOS_H_REVISION_NR" << std::endl;
+    newData << "#define MANGOS_H_REVISION_NR"  << std::endl;
     newData << " #define REVISION_NR \"" << rev_str << "\"" << std::endl;
-    newData << "#endif // __REVISION_NR_H__" << std::endl;
+    newData << "#endif // MANGOS_H_REVISION_NR" << std::endl;
     return newData.str();
 }
 
 std::string generateSqlHeader()
 {
     std::ostringstream newData;
-    newData << "#ifndef __REVISION_SQL_H__" << std::endl;
-    newData << "#define __REVISION_SQL_H__"  << std::endl;
+    newData << "#ifndef MANGOS_H_REVISION_SQL" << std::endl;
+    newData << "#define MANGOS_H_REVISION_SQL"  << std::endl;
     for (int i = 0; i < NUM_DATABASES; ++i)
     {
         newData << " #define " << db_sql_rev_field[i] << " \"required_" << last_sql_update[i] << "\"" << std::endl;
     }
-    newData << "#endif // __REVISION_SQL_H__" << std::endl;
+    newData << "#endif // MANGOS_H_REVISION_SQL" << std::endl;
     return newData.str();
 }
 
@@ -558,6 +559,9 @@ bool convert_sql_updates()
 
         std::ostringstream out_buff;
 
+        // add the update requirements for non-parent-controlled revision sql update
+        if (!db_sql_rev_parent[info.db_idx])
+        {
             // add the update requirements
             out_buff << "ALTER TABLE " << db_version_table[info.db_idx]
                      << " CHANGE COLUMN required_" << last_sql_update[info.db_idx]
@@ -575,6 +579,7 @@ bool convert_sql_updates()
                 }
                 else
                     out_buff << buffer;
+            }
         }
 
         // copy the rest of the file
@@ -651,10 +656,10 @@ bool generate_sql_makefile()
     if (!fout) { pclose(cmd_pipe); return false; }
 
     fprintf(fout,
- * MaNGOS is a full featured server for World of Warcraft, supporting
- * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
- *
- * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>\n"
+            "# MaNGOS is a full featured server for World of Warcraft, supporting\n"
+            "# the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8\n"
+            "#\n"
+            "# Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>\n"
             "#\n"
             "# This program is free software; you can redistribute it and/or modify\n"
             "# it under the terms of the GNU General Public License as published by\n"
@@ -729,9 +734,14 @@ bool change_sql_database()
         rename(old_file, tmp_file);
 
         FILE* fin = fopen(tmp_file, "r");
-        if (!fin) return false;
+        if (!fin)
+            return false;
         FILE* fout = fopen(old_file, "w");
-        if (!fout) return false;
+        if (!fout)
+        {
+            fclose(fin);
+            return false;
+        }
 
         snprintf(dummy, MAX_CMD, "CREATE TABLE `%s` (\n", db_version_table[i]);
         while (fgets(buffer, MAX_BUF, fin))
@@ -748,7 +758,7 @@ bool change_sql_database()
             fputs(buffer, fout);
         }
 
-        fprintf(fout, "  `required_%s` bit(1) default NULL\n", last_sql_update[i]);
+        fprintf(fout, "  `required_%s` bit(1) DEFAULT NULL\n", last_sql_update[i]);
 
         while (fgets(buffer, MAX_BUF, fin))
             fputs(buffer, fout);

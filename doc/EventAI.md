@@ -1,50 +1,60 @@
-===========================================================================
-MaNGOS EventAI (Creature_AI) Documentation: (Last Updated: August 22, 2012)
-===========================================================================
+mangos EventAI scripting
+========================
+**Last Updated**: September 25, 2013
 
-EventAI allows users to create new creature scripts entirely within the database.
+*mangos* provides a simple scripting feature through a set of event-based
+commands from within the database.
+
+Introduction
+------------
+Enhancing creatures with dynamic features instead of just a few spells can be
+achieved without knowing any programming language, and only requires basic
+[SQL][1] knowledge, and a database editor of your choice.
+
+*EventAI* scripts are based on in-game events, and attached to specific creature
+templates, which means they are valid for every spawn of a creature.
+
+Database documentation
+----------------------
+All scripts and related information are stored within the database tables
+`creature_ai_scripts`, `creature_ai_summons` and `creature_ai_texts`.
 
 For the AI to be used, you must first make sure to set AIname for each creature that should use this AI.
-UPDATE creature_template SET AIName = 'EventAI' WHERE entry IN (...);
 
+    UPDATE creature_template SET AIName = 'EventAI' WHERE entry IN (...);
 
-=========================================
-Basic Structure of EventAI
+Basic Structure of creature_ai_scripts
 =========================================
 
 EventAI follows a basic IF (Event) then DO (Action) format.
 Below is the list of current fields of the creature_ai_scripts table.
 
-Field_Name                      Description
--------------------------------------------
-id                              This value is merely an incrementing counter of the current Event number. Required for sql queries. (ACID Standards: CreatureID+Additional 2 digit Incriment Starting with 01)
-creature_id                     Creature ID which should trigger this event (This is entry value from `creature_template` table).
+Field_Name                    | Description
+------------------------------| -----------
+id                            | This value is merely an incrementing counter of the current Event number. Required for sql queries. (ACID Standards: CreatureID+Additional 2 digit Increment Starting with 01)
+creature_id                   | Creature ID which should trigger this event (This is entry value from `creature_template` table).
+event_type                    | The type of event you want to script. (see "Event Types" below for different values)
+event_inverse_phase_mask      | Mask with phases this event should NOT trigger in [^1]
+event_chance                  | Percentage chance of triggering the event (1 - 100)
+event_flags                   | Event Flags (Used to select Repeatable or Dungeon Heroic Mode)... See "Event Flags" Below For Defined Values
+event_param1                  | Variables for the event (depends on event_type)
+event_param2                  | Variables for the event (depends on event_type)
+event_param3                  | Variables for the event (depends on event_type)
+event_param4                  | Variables for the event (depends on event_type)
+action1_type                  | Action #1 to take when the Event occurs (see "Action types" below)
+action1_param1                | Variables used by Action1 (depends on action_type)
+action1_param2                | Variables used by Action1 (depends on action_type)
+action1_param3                | Variables used by Action1 (depends on action_type)
+action2_type                  | Action #2 to take when the Event occurs (see "Action types" below)
+action2_param1                | Variables used by Action1 (depends on action_type)
+action2_param2                | Variables used by Action1 (depends on action_type)
+action2_param3                | Variables used by Action1 (depends on action_type)
+action3_type                  | Action #3 to take when the Event occurs (see "Action types" below)
+action3_param1                | Variables used by Action1 (depends on action_type)
+action3_param2                | Variables used by Action1 (depends on action_type)
+action3_param3                | Variables used by Action1 (depends on action_type)
 
-event_type                      The type of event you want to script. (see "Event Types" below for different values)
-event_inverse_phase_mask        Mask with phases this event should NOT trigger in* (See footnote for more details on using any other value then 0)
-event_chance                    Percentage chance of triggering the event (1 - 100)
-event_flags                     Event Flags (Used to select Repeatable or Dungeon/Raid Difficulty Level)... See "Event Flags" Below For Defined Values
-event_param1                    Variables for the event (depends on event_type)
-event_param2                    Variables for the event (depends on event_type)
-event_param3                    Variables for the event (depends on event_type)
-event_param4                    Variables for the event (depends on event_type)
-
-action1_type                    Action #1 to take when the Event occurs (see "Action types" below)
-action1_param1                  Variables used by Action1 (depends on action_type)
-action1_param2                  Variables used by Action1 (depends on action_type)
-action1_param3                  Variables used by Action1 (depends on action_type)
-
-action2_type                    Action #2 to take when the Event occurs (see "Action types" below)
-action2_param1                  Variables used by Action1 (depends on action_type)
-action2_param2                  Variables used by Action1 (depends on action_type)
-action2_param3                  Variables used by Action1 (depends on action_type)
-
-action3_type                    Action #3 to take when the Event occurs (see "Action types" below)
-action3_param1                  Variables used by Action1 (depends on action_type)
-action3_param2                  Variables used by Action1 (depends on action_type)
-action3_param3                  Variables used by Action1 (depends on action_type)
-
-All params are signed 32-bit values (+/- 2147483647). Time values are always in milliseconds.
+All parameters are signed 32-bit values (+/- 2147483647). Time values are always in milliseconds.
 In case of a percentage value, use value/100 (ie. param = 500 then that means 500%, -50 = -50%)
 
 [*] Phase mask is a bitmask of phases which shouldn't trigger this event. (ie. Phase mask of value 12 (binary 1100) results in triggering this event in phases 0, 1 and all others with exception for phases 2 and 3 (counting from 0).

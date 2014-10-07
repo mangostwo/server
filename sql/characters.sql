@@ -1,8 +1,8 @@
--- MySQL dump 10.11
+-- MySQL dump 10.13  Distrib 5.5.34, for debian-linux-gnu (x86_64)
 --
 -- Host: localhost    Database: characters
 -- ------------------------------------------------------
--- Server version    5.0.45-Debian_1ubuntu3.1-log
+-- Server version	5.5.34-0ubuntu0.13.10.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -15,14 +15,18 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
+
 --
 -- Table structure for table `character_db_version`
 --
 
 DROP TABLE IF EXISTS `character_db_version`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_db_version` (
   `required_12546_01_characters_random_battleground` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `character_db_version`
@@ -154,8 +158,9 @@ CREATE TABLE `auction` (
   `lastbid` int(11) NOT NULL DEFAULT '0',
   `startbid` int(11) NOT NULL DEFAULT '0',
   `deposit` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `auction`
@@ -171,12 +176,15 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `bugreport`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `bugreport` (
-  `id` int(11) NOT NULL auto_increment COMMENT 'Identifier',
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Identifier',
   `type` longtext NOT NULL DEFAULT '',
   `content` longtext NOT NULL DEFAULT '',
-  PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Debug System';
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Debug System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `bugreport`
@@ -220,95 +228,6 @@ CREATE TABLE `calendar_invites` (
   `rank` tinyint(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY  (`inviteId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Table structure for table `characters`
---
-
-DROP TABLE IF EXISTS `characters`;
-CREATE TABLE `characters` (
-  `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
-  `account` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Account Identifier',
-  `name` varchar(12) NOT NULL DEFAULT '',
-  `race` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `class` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `gender` TINYINT UNSIGNED NOT NULL DEFAULT '0',
-  `level` TINYINT UNSIGNED NOT NULL DEFAULT '0',
-  `xp` INT UNSIGNED NOT NULL DEFAULT '0',
-  `money` INT UNSIGNED NOT NULL DEFAULT '0',
-  `playerBytes` INT UNSIGNED NOT NULL DEFAULT '0',
-  `playerBytes2` INT UNSIGNED NOT NULL DEFAULT '0',
-  `playerFlags` INT UNSIGNED NOT NULL DEFAULT '0',
-  `position_x` float NOT NULL DEFAULT '0',
-  `position_y` float NOT NULL DEFAULT '0',
-  `position_z` float NOT NULL DEFAULT '0',
-  `map` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Map Identifier',
-  `dungeon_difficulty` tinyint(1) unsigned NOT NULL DEFAULT '0',
-  `orientation` float NOT NULL DEFAULT '0',
-  `taximask` longtext,
-  `online` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `cinematic` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `totaltime` int(11) unsigned NOT NULL DEFAULT '0',
-  `leveltime` int(11) unsigned NOT NULL DEFAULT '0',
-  `logout_time` bigint(20) unsigned NOT NULL DEFAULT '0',
-  `is_logout_resting` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `rest_bonus` float NOT NULL DEFAULT '0',
-  `resettalents_cost` int(11) unsigned NOT NULL DEFAULT '0',
-  `resettalents_time` bigint(20) unsigned NOT NULL DEFAULT '0',
-  `trans_x` float NOT NULL DEFAULT '0',
-  `trans_y` float NOT NULL DEFAULT '0',
-  `trans_z` float NOT NULL DEFAULT '0',
-  `trans_o` float NOT NULL DEFAULT '0',
-  `transguid` bigint(20) unsigned NOT NULL DEFAULT '0',
-  `extra_flags` int(11) unsigned NOT NULL DEFAULT '0',
-  `stable_slots` tinyint(1) unsigned NOT NULL DEFAULT '0',
-  `at_login` int(11) unsigned NOT NULL DEFAULT '0',
-  `zone` int(11) unsigned NOT NULL DEFAULT '0',
-  `death_expire_time` bigint(20) unsigned NOT NULL DEFAULT '0',
-  `taxi_path` text,
-  `arenaPoints` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `totalHonorPoints` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `todayHonorPoints` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `yesterdayHonorPoints` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `totalKills` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `todayKills` smallint(5) UNSIGNED NOT NULL DEFAULT '0',
-  `yesterdayKills` smallint(5) UNSIGNED NOT NULL DEFAULT '0',
-  `chosenTitle` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `knownCurrencies` bigint(20) UNSIGNED NOT NULL DEFAULT '0',
-  `watchedFaction` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `drunk` tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
-  `health` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `power1` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `power2` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `power3` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `power4` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `power5` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `power6` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `power7` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `specCount` tinyint(3) UNSIGNED NOT NULL DEFAULT '1',
-  `activeSpec` tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
-  `exploredZones` longtext,
-  `equipmentCache` longtext,
-  `ammoId` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `knownTitles` longtext,
-  `actionBars` tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
-  `deleteInfos_Account` int(11) UNSIGNED DEFAULT NULL,
-  `deleteInfos_Name` varchar(12) DEFAULT NULL,
-  `deleteDate` bigint(20) unsigned DEFAULT NULL,
-  PRIMARY KEY  (`guid`),
-  KEY `idx_account` (`account`),
-  KEY `idx_online` (`online`),
-  KEY `idx_name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
-
---
--- Dumping data for table `characters`
---
-
-LOCK TABLES `characters` WRITE;
-/*!40000 ALTER TABLE `characters` DISABLE KEYS */;
-/*!40000 ALTER TABLE `characters` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `character_account_data`
@@ -388,6 +307,7 @@ CREATE TABLE `character_action` (
   `type` tinyint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY  (`guid`,`spec`,`button`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `character_action`
@@ -403,24 +323,27 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `character_aura`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_aura` (
   `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
   `caster_guid` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT 'Full Global Unique Identifier',
   `item_guid` int(11) unsigned NOT NULL DEFAULT '0',
   `spell` int(11) unsigned NOT NULL DEFAULT '0',
-  `stackcount` INT(11) UNSIGNED NOT NULL DEFAULT '1',
-  `remaincharges` INT(11) UNSIGNED NOT NULL DEFAULT '0',
-  `basepoints0` INT(11) NOT NULL DEFAULT '0',
-  `basepoints1` INT(11) NOT NULL DEFAULT '0',
-  `basepoints2` INT(11) NOT NULL DEFAULT '0',
-  `periodictime0` INT(11) UNSIGNED NOT NULL DEFAULT '0',
-  `periodictime1` INT(11) UNSIGNED NOT NULL DEFAULT '0',
-  `periodictime2` INT(11) UNSIGNED NOT NULL DEFAULT '0',
-  `maxduration` INT(11) NOT NULL DEFAULT '0',
-  `remaintime` INT(11) NOT NULL DEFAULT '0',
-  `effIndexMask` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+  `stackcount` int(11) unsigned NOT NULL DEFAULT '1',
+  `remaincharges` int(11) unsigned NOT NULL DEFAULT '0',
+  `basepoints0` int(11) NOT NULL DEFAULT '0',
+  `basepoints1` int(11) NOT NULL DEFAULT '0',
+  `basepoints2` int(11) NOT NULL DEFAULT '0',
+  `periodictime0` int(11) unsigned NOT NULL DEFAULT '0',
+  `periodictime1` int(11) unsigned NOT NULL DEFAULT '0',
+  `periodictime2` int(11) unsigned NOT NULL DEFAULT '0',
+  `maxduration` int(11) NOT NULL DEFAULT '0',
+  `remaintime` int(11) NOT NULL DEFAULT '0',
+  `effIndexMask` int(11) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`guid`,`caster_guid`,`item_guid`,`spell`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `character_aura`
@@ -436,6 +359,8 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `character_battleground_data`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_battleground_data` (
   `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
   `instance_id` int(11) unsigned NOT NULL DEFAULT '0',
@@ -448,8 +373,9 @@ CREATE TABLE `character_battleground_data` (
   `taxi_start` int(11) NOT NULL DEFAULT '0',
   `taxi_end` int(11) NOT NULL DEFAULT '0',
   `mount_spell` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`guid`)
+  PRIMARY KEY (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `character_battleground_data`
@@ -553,14 +479,17 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `character_gifts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_gifts` (
   `guid` int(20) unsigned NOT NULL DEFAULT '0',
   `item_guid` int(11) unsigned NOT NULL DEFAULT '0',
   `entry` int(20) unsigned NOT NULL DEFAULT '0',
   `flags` int(20) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`item_guid`),
+  PRIMARY KEY (`item_guid`),
   KEY `idx_guid` (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `character_gifts`
@@ -598,6 +527,8 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `character_homebind`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_homebind` (
   `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
   `map` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Map Identifier',
@@ -605,8 +536,9 @@ CREATE TABLE `character_homebind` (
   `position_x` float NOT NULL DEFAULT '0',
   `position_y` float NOT NULL DEFAULT '0',
   `position_z` float NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`guid`)
+  PRIMARY KEY (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `character_homebind`
@@ -622,13 +554,16 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `character_instance`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_instance` (
   `guid` int(11) unsigned NOT NULL DEFAULT '0',
   `instance` int(11) unsigned NOT NULL DEFAULT '0',
   `permanent` tinyint(1) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`guid`,`instance`),
+  PRIMARY KEY (`guid`,`instance`),
   KEY `instance` (`instance`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `character_instance`
@@ -644,15 +579,18 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `character_inventory`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_inventory` (
   `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
   `bag` int(11) unsigned NOT NULL DEFAULT '0',
   `slot` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `item` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Item Global Unique Identifier',
   `item_template` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Item Identifier',
-  PRIMARY KEY  (`item`),
+  PRIMARY KEY (`item`),
   KEY `idx_guid` (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `character_inventory`
@@ -668,6 +606,8 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `character_pet`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_pet` (
   `id` int(11) unsigned NOT NULL DEFAULT '0',
   `entry` int(11) unsigned NOT NULL DEFAULT '0',
@@ -688,9 +628,10 @@ CREATE TABLE `character_pet` (
   `resettalents_cost` int(11) unsigned NOT NULL DEFAULT '0',
   `resettalents_time` bigint(20) unsigned NOT NULL DEFAULT '0',
   `abdata` longtext,
-  PRIMARY KEY  (`id`),
+  PRIMARY KEY (`id`),
   KEY `owner` (`owner`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Pet System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `character_pet`
@@ -732,6 +673,8 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `character_queststatus`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_queststatus` (
   `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
   `quest` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Quest Identifier',
@@ -749,8 +692,9 @@ CREATE TABLE `character_queststatus` (
   `itemcount4` int(11) unsigned NOT NULL DEFAULT '0',
   `itemcount5` int(11) unsigned NOT NULL DEFAULT '0',
   `itemcount6` int(11) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`guid`,`quest`)
+  PRIMARY KEY (`guid`,`quest`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `character_queststatus`
@@ -829,13 +773,16 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `character_reputation`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_reputation` (
   `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
   `faction` int(11) unsigned NOT NULL DEFAULT '0',
   `standing` int(11) NOT NULL DEFAULT '0',
   `flags` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`guid`,`faction`)
+  PRIMARY KEY (`guid`,`faction`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `character_reputation`
@@ -851,13 +798,16 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `character_skills`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_skills` (
   `guid` int(11) unsigned NOT NULL COMMENT 'Global Unique Identifier',
   `skill` mediumint(9) unsigned NOT NULL,
   `value` mediumint(9) unsigned NOT NULL,
   `max` mediumint(9) unsigned NOT NULL,
-  PRIMARY KEY  (`guid`,`skill`)
+  PRIMARY KEY (`guid`,`skill`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `character_skills`
@@ -873,17 +823,20 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `character_social`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_social` (
   `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Character Global Unique Identifier',
   `friend` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Friend Global Unique Identifier',
   `flags` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Friend Flags',
   `note` varchar(48) NOT NULL DEFAULT '' COMMENT 'Friend Note',
-  PRIMARY KEY  (`guid`,`friend`,`flags`),
+  PRIMARY KEY (`guid`,`friend`,`flags`),
   KEY `guid` (`guid`),
   KEY `friend` (`friend`),
   KEY `guid_flags` (`guid`,`flags`),
   KEY `friend_flags` (`friend`,`flags`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `character_social`
@@ -899,14 +852,17 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `character_spell`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_spell` (
   `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
   `spell` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Spell Identifier',
   `active` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `disabled` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`guid`,`spell`),
+  PRIMARY KEY (`guid`,`spell`),
   KEY `Idx_spell` (`spell`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `character_spell`
@@ -922,13 +878,16 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `character_spell_cooldown`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_spell_cooldown` (
   `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier, Low part',
   `spell` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Spell Identifier',
   `item` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Item Identifier',
   `time` bigint(20) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`guid`,`spell`)
+  PRIMARY KEY (`guid`,`spell`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `character_spell_cooldown`
@@ -944,39 +903,42 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `character_stats`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_stats` (
   `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier, Low part',
-  `maxhealth` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `maxpower1` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `maxpower2` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `maxpower3` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `maxpower4` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `maxpower5` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `maxpower6` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `maxpower7` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `strength` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `agility` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `stamina` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `intellect` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `spirit` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `armor` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `resHoly` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `resFire` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `resNature` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `resFrost` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `resShadow` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `resArcane` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `blockPct` float UNSIGNED NOT NULL DEFAULT '0',
-  `dodgePct` float UNSIGNED NOT NULL DEFAULT '0',
-  `parryPct` float UNSIGNED NOT NULL DEFAULT '0',
-  `critPct` float UNSIGNED NOT NULL DEFAULT '0',
-  `rangedCritPct` float UNSIGNED NOT NULL DEFAULT '0',
+  `maxhealth` int(10) unsigned NOT NULL DEFAULT '0',
+  `maxpower1` int(10) unsigned NOT NULL DEFAULT '0',
+  `maxpower2` int(10) unsigned NOT NULL DEFAULT '0',
+  `maxpower3` int(10) unsigned NOT NULL DEFAULT '0',
+  `maxpower4` int(10) unsigned NOT NULL DEFAULT '0',
+  `maxpower5` int(10) unsigned NOT NULL DEFAULT '0',
+  `maxpower6` int(10) unsigned NOT NULL DEFAULT '0',
+  `maxpower7` int(10) unsigned NOT NULL DEFAULT '0',
+  `strength` int(10) unsigned NOT NULL DEFAULT '0',
+  `agility` int(10) unsigned NOT NULL DEFAULT '0',
+  `stamina` int(10) unsigned NOT NULL DEFAULT '0',
+  `intellect` int(10) unsigned NOT NULL DEFAULT '0',
+  `spirit` int(10) unsigned NOT NULL DEFAULT '0',
+  `armor` int(10) unsigned NOT NULL DEFAULT '0',
+  `resHoly` int(10) unsigned NOT NULL DEFAULT '0',
+  `resFire` int(10) unsigned NOT NULL DEFAULT '0',
+  `resNature` int(10) unsigned NOT NULL DEFAULT '0',
+  `resFrost` int(10) unsigned NOT NULL DEFAULT '0',
+  `resShadow` int(10) unsigned NOT NULL DEFAULT '0',
+  `resArcane` int(10) unsigned NOT NULL DEFAULT '0',
+  `blockPct` float unsigned NOT NULL DEFAULT '0',
+  `dodgePct` float unsigned NOT NULL DEFAULT '0',
+  `parryPct` float unsigned NOT NULL DEFAULT '0',
+  `critPct` float unsigned NOT NULL DEFAULT '0',
+  `rangedCritPct` float unsigned NOT NULL DEFAULT '0',
   `spellCritPct` float UNSIGNED NOT NULL DEFAULT '0',
-  `attackPower` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `rangedAttackPower` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `attackPower` int(10) unsigned NOT NULL DEFAULT '0',
+  `rangedAttackPower` int(10) unsigned NOT NULL DEFAULT '0',
   `spellPower` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`guid`)
+  PRIMARY KEY (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `character_stats`
@@ -1017,14 +979,17 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `character_ticket`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_ticket` (
-  `ticket_id` int(11) unsigned NOT NULL auto_increment,
+  `ticket_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `guid` int(11) unsigned NOT NULL DEFAULT '0',
   `ticket_text` text,
   `response_text` text,
   `ticket_lastchange` TIMESTAMP ON  UPDATE  CURRENT_TIMESTAMP  NOT  NULL  DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY  (`ticket_id`)
+  PRIMARY KEY (`ticket_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `character_ticket`
@@ -1040,8 +1005,10 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `character_tutorial`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_tutorial` (
-  `account` bigint(20) unsigned NOT NULL auto_increment COMMENT 'Account Identifier',
+  `account` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Account Identifier',
   `tut0` int(11) unsigned NOT NULL DEFAULT '0',
   `tut1` int(11) unsigned NOT NULL DEFAULT '0',
   `tut2` int(11) unsigned NOT NULL DEFAULT '0',
@@ -1050,8 +1017,9 @@ CREATE TABLE `character_tutorial` (
   `tut5` int(11) unsigned NOT NULL DEFAULT '0',
   `tut6` int(11) unsigned NOT NULL DEFAULT '0',
   `tut7` int(11) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`account`)
+  PRIMARY KEY (`account`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `character_tutorial`
@@ -1063,10 +1031,104 @@ LOCK TABLES `character_tutorial` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `characters`
+--
+
+DROP TABLE IF EXISTS `characters`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `characters` (
+  `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
+  `account` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Account Identifier',
+  `name` varchar(12) NOT NULL DEFAULT '',
+  `race` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `class` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `gender` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `level` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `xp` int(10) unsigned NOT NULL DEFAULT '0',
+  `money` int(10) unsigned NOT NULL DEFAULT '0',
+  `playerBytes` int(10) unsigned NOT NULL DEFAULT '0',
+  `playerBytes2` int(10) unsigned NOT NULL DEFAULT '0',
+  `playerFlags` int(10) unsigned NOT NULL DEFAULT '0',
+  `position_x` float NOT NULL DEFAULT '0',
+  `position_y` float NOT NULL DEFAULT '0',
+  `position_z` float NOT NULL DEFAULT '0',
+  `map` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Map Identifier',
+  `dungeon_difficulty` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `orientation` float NOT NULL DEFAULT '0',
+  `taximask` longtext,
+  `online` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `cinematic` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `totaltime` int(11) unsigned NOT NULL DEFAULT '0',
+  `leveltime` int(11) unsigned NOT NULL DEFAULT '0',
+  `logout_time` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `is_logout_resting` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `rest_bonus` float NOT NULL DEFAULT '0',
+  `resettalents_cost` int(11) unsigned NOT NULL DEFAULT '0',
+  `resettalents_time` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `trans_x` float NOT NULL DEFAULT '0',
+  `trans_y` float NOT NULL DEFAULT '0',
+  `trans_z` float NOT NULL DEFAULT '0',
+  `trans_o` float NOT NULL DEFAULT '0',
+  `transguid` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `extra_flags` int(11) unsigned NOT NULL DEFAULT '0',
+  `stable_slots` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `at_login` int(11) unsigned NOT NULL DEFAULT '0',
+  `zone` int(11) unsigned NOT NULL DEFAULT '0',
+  `death_expire_time` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `taxi_path` text,
+  `arenaPoints` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `totalHonorPoints` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `todayHonorPoints` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `yesterdayHonorPoints` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `totalKills` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `todayKills` smallint(5) UNSIGNED NOT NULL DEFAULT '0',
+  `yesterdayKills` smallint(5) UNSIGNED NOT NULL DEFAULT '0',
+  `chosenTitle` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `knownCurrencies` bigint(20) UNSIGNED NOT NULL DEFAULT '0',
+  `watchedFaction` int(10) unsigned NOT NULL DEFAULT '0',
+  `drunk` tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
+  `health` int(10) unsigned NOT NULL DEFAULT '0',
+  `power1` int(10) unsigned NOT NULL DEFAULT '0',
+  `power2` int(10) unsigned NOT NULL DEFAULT '0',
+  `power3` int(10) unsigned NOT NULL DEFAULT '0',
+  `power4` int(10) unsigned NOT NULL DEFAULT '0',
+  `power5` int(10) unsigned NOT NULL DEFAULT '0',
+  `power6` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `power7` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `specCount` tinyint(3) UNSIGNED NOT NULL DEFAULT '1',
+  `activeSpec` tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
+  `exploredZones` longtext,
+  `equipmentCache` longtext,
+  `ammoId` int(10) unsigned NOT NULL DEFAULT '0',
+  `knownTitles` longtext,
+  `actionBars` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `deleteInfos_Account` int(11) unsigned DEFAULT NULL,
+  `deleteInfos_Name` varchar(12) DEFAULT NULL,
+  `deleteDate` bigint(20) unsigned DEFAULT NULL,
+  PRIMARY KEY (`guid`),
+  KEY `idx_account` (`account`),
+  KEY `idx_online` (`online`),
+  KEY `idx_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `characters`
+--
+
+LOCK TABLES `characters` WRITE;
+/*!40000 ALTER TABLE `characters` DISABLE KEYS */;
+/*!40000 ALTER TABLE `characters` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `corpse`
 --
 
 DROP TABLE IF EXISTS `corpse`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `corpse` (
   `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
   `player` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Character Global Unique Identifier',
@@ -1079,12 +1141,13 @@ CREATE TABLE `corpse` (
   `time` bigint(20) unsigned NOT NULL DEFAULT '0',
   `corpse_type` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `instance` int(11) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`guid`),
+  PRIMARY KEY (`guid`),
   KEY `idx_type` (`corpse_type`),
   KEY `instance` (`instance`),
-  INDEX `Idx_player`(`player`),
-  INDEX `Idx_time`(`time`)
+  KEY `Idx_player` (`player`),
+  KEY `Idx_time` (`time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Death System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `corpse`
@@ -1100,13 +1163,16 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `creature_respawn`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `creature_respawn` (
   `guid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
   `respawntime` bigint(20) unsigned NOT NULL DEFAULT '0',
   `instance` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`guid`,`instance`),
+  PRIMARY KEY (`guid`,`instance`),
   KEY `instance` (`instance`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Grid Loading System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `creature_respawn`
@@ -1122,10 +1188,13 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `game_event_status`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `game_event_status` (
   `event` smallint(6) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`event`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Game event system';
+  PRIMARY KEY (`event`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Game event system';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `game_event_status`
@@ -1141,13 +1210,16 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `gameobject_respawn`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `gameobject_respawn` (
   `guid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
   `respawntime` bigint(20) unsigned NOT NULL DEFAULT '0',
   `instance` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`guid`,`instance`),
+  PRIMARY KEY (`guid`,`instance`),
   KEY `instance` (`instance`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Grid Loading System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `gameobject_respawn`
@@ -1163,6 +1235,8 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `groups`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `groups` (
   `groupId` int(11) unsigned NOT NULL,
   `leaderGuid` int(11) unsigned NOT NULL,
@@ -1185,6 +1259,7 @@ CREATE TABLE `groups` (
   PRIMARY KEY  (`groupId`),
   UNIQUE KEY  (`leaderGuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Groups';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `groups`
@@ -1244,6 +1319,8 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `guild`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `guild` (
   `guildid` int(6) unsigned NOT NULL DEFAULT '0',
   `name` varchar(255) NOT NULL DEFAULT '',
@@ -1257,8 +1334,9 @@ CREATE TABLE `guild` (
   `motd` varchar(255) NOT NULL DEFAULT '',
   `createdate` bigint(20) unsigned NOT NULL DEFAULT '0',
   `BankMoney` bigint(20) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`guildid`)
+  PRIMARY KEY (`guildid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `guild`
@@ -1377,6 +1455,8 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `guild_eventlog`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `guild_eventlog` (
   `guildid` int(11) unsigned NOT NULL COMMENT 'Guild Identificator',
   `LogGuid` int(11) unsigned NOT NULL COMMENT 'Log record identificator - auxiliary column',
@@ -1385,11 +1465,12 @@ CREATE TABLE `guild_eventlog` (
   `PlayerGuid2` int(11) unsigned NOT NULL COMMENT 'Player 2',
   `NewRank` tinyint(2) unsigned NOT NULL COMMENT 'New rank(in case promotion/demotion)',
   `TimeStamp` bigint(20) unsigned NOT NULL COMMENT 'Event UNIX time',
-  PRIMARY KEY (`guildid`, `LogGuid`),
-  INDEX `Idx_PlayerGuid1`(`PlayerGuid1`),
-  INDEX `Idx_PlayerGuid2`(`PlayerGuid2`),
-  INDEX `Idx_LogGuid`(`LogGuid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT 'Guild Eventlog';
+  PRIMARY KEY (`guildid`,`LogGuid`),
+  KEY `Idx_PlayerGuid1` (`PlayerGuid1`),
+  KEY `Idx_PlayerGuid2` (`PlayerGuid2`),
+  KEY `Idx_LogGuid` (`LogGuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Guild Eventlog';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `guild_eventlog`
@@ -1405,6 +1486,8 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `guild_member`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `guild_member` (
   `guildid` int(6) unsigned NOT NULL DEFAULT '0',
   `guid` int(11) unsigned NOT NULL DEFAULT '0',
@@ -1429,6 +1512,7 @@ CREATE TABLE `guild_member` (
   KEY `guildid_rank_key` (`guildid`,`rank`),
   UNIQUE KEY `guid_key` (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Guild System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `guild_member`
@@ -1444,15 +1528,18 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `guild_rank`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `guild_rank` (
   `guildid` int(6) unsigned NOT NULL DEFAULT '0',
   `rid` int(11) unsigned NOT NULL,
   `rname` varchar(255) NOT NULL DEFAULT '',
   `rights` int(3) unsigned NOT NULL DEFAULT '0',
   `BankMoneyPerDay` int(11) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`guildid`,`rid`),
-  INDEX `Idx_rid`(`rid`)
+  PRIMARY KEY (`guildid`,`rid`),
+  KEY `Idx_rid` (`rid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `guild_rank`
@@ -1468,6 +1555,8 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `instance`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `instance` (
   `id` int(11) unsigned NOT NULL DEFAULT '0',
   `map` int(11) unsigned NOT NULL DEFAULT '0',
@@ -1475,10 +1564,11 @@ CREATE TABLE `instance` (
   `difficulty` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `encountersMask` int(10) unsigned NOT NULL DEFAULT '0',
   `data` longtext,
-  PRIMARY KEY  (`id`),
+  PRIMARY KEY (`id`),
   KEY `map` (`map`),
   KEY `resettime` (`resettime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `instance`
@@ -1489,16 +1579,20 @@ LOCK TABLES `instance` WRITE;
 /*!40000 ALTER TABLE `instance` ENABLE KEYS */;
 UNLOCK TABLES;
 
--- ----------------------------
--- Table structure for instance_reset
--- ----------------------------
+--
+-- Table structure for table `instance_reset`
+--
+
 DROP TABLE IF EXISTS `instance_reset`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `instance_reset` (
   `mapid` int(11) unsigned NOT NULL DEFAULT '0',
   `difficulty` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `resettime` bigint(40) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY  (`mapid`,`difficulty`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `instance_reset`
@@ -1514,14 +1608,17 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `item_instance`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `item_instance` (
   `guid` int(11) unsigned NOT NULL DEFAULT '0',
   `owner_guid` int(11) unsigned NOT NULL DEFAULT '0',
   `data` longtext,
   `text` longtext,
-  PRIMARY KEY  (`guid`),
+  PRIMARY KEY (`guid`),
   KEY `idx_owner_guid` (`owner_guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Item System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `item_instance`
@@ -1537,6 +1634,8 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `item_loot`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `item_loot` (
   `guid` int(11) unsigned NOT NULL DEFAULT '0',
   `owner_guid` int(11) unsigned NOT NULL DEFAULT '0',
@@ -1544,9 +1643,10 @@ CREATE TABLE `item_loot` (
   `amount` int(11) unsigned NOT NULL DEFAULT '0',
   `suffix` int(11) unsigned NOT NULL DEFAULT '0',
   `property` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`guid`,`itemid`),
+  PRIMARY KEY (`guid`,`itemid`),
   KEY `idx_owner_guid` (`owner_guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Item System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `item_loot`
@@ -1562,6 +1662,8 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `mail`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `mail` (
   `id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Identifier',
   `messageType` tinyint(3) unsigned NOT NULL DEFAULT '0',
@@ -1577,9 +1679,10 @@ CREATE TABLE `mail` (
   `money` int(11) unsigned NOT NULL DEFAULT '0',
   `cod` int(11) unsigned NOT NULL DEFAULT '0',
   `checked` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`id`),
+  PRIMARY KEY (`id`),
   KEY `idx_receiver` (`receiver`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Mail System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `mail`
@@ -1595,14 +1698,17 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `mail_items`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `mail_items` (
   `mail_id` int(11) NOT NULL DEFAULT '0',
   `item_guid` int(11) NOT NULL DEFAULT '0',
   `item_template` int(11) NOT NULL DEFAULT '0',
   `receiver` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Character Global Unique Identifier',
-  PRIMARY KEY  (`mail_id`,`item_guid`),
+  PRIMARY KEY (`mail_id`,`item_guid`),
   KEY `idx_receiver` (`receiver`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `mail_items`
@@ -1618,24 +1724,27 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `pet_aura`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `pet_aura` (
   `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
   `caster_guid` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT 'Full Global Unique Identifier',
   `item_guid` int(11) unsigned NOT NULL DEFAULT '0',
   `spell` int(11) unsigned NOT NULL DEFAULT '0',
-  `stackcount` INT(11) UNSIGNED NOT NULL DEFAULT '1',
-  `remaincharges` INT(11) UNSIGNED NOT NULL DEFAULT '0',
-  `basepoints0` INT(11) NOT NULL DEFAULT '0',
-  `basepoints1` INT(11) NOT NULL DEFAULT '0',
-  `basepoints2` INT(11) NOT NULL DEFAULT '0',
-  `periodictime0` INT(11) UNSIGNED NOT NULL DEFAULT '0',
-  `periodictime1` INT(11) UNSIGNED NOT NULL DEFAULT '0',
-  `periodictime2` INT(11) UNSIGNED NOT NULL DEFAULT '0',
-  `maxduration` INT(11) NOT NULL DEFAULT '0',
-  `remaintime` INT(11) NOT NULL DEFAULT '0',
-  `effIndexMask` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+  `stackcount` int(11) unsigned NOT NULL DEFAULT '1',
+  `remaincharges` int(11) unsigned NOT NULL DEFAULT '0',
+  `basepoints0` int(11) NOT NULL DEFAULT '0',
+  `basepoints1` int(11) NOT NULL DEFAULT '0',
+  `basepoints2` int(11) NOT NULL DEFAULT '0',
+  `periodictime0` int(11) unsigned NOT NULL DEFAULT '0',
+  `periodictime1` int(11) unsigned NOT NULL DEFAULT '0',
+  `periodictime2` int(11) unsigned NOT NULL DEFAULT '0',
+  `maxduration` int(11) NOT NULL DEFAULT '0',
+  `remaintime` int(11) NOT NULL DEFAULT '0',
+  `effIndexMask` int(11) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`guid`,`caster_guid`,`item_guid`,`spell`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Pet System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `pet_aura`
@@ -1651,12 +1760,15 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `pet_spell`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `pet_spell` (
   `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
   `spell` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Spell Identifier',
   `active` int(11) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`guid`,`spell`)
+  PRIMARY KEY (`guid`,`spell`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Pet System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `pet_spell`
@@ -1672,12 +1784,15 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `pet_spell_cooldown`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `pet_spell_cooldown` (
   `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier, Low part',
   `spell` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Spell Identifier',
   `time` bigint(20) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`guid`,`spell`)
+  PRIMARY KEY (`guid`,`spell`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `pet_spell_cooldown`
@@ -1693,6 +1808,8 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `petition`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `petition` (
   `ownerguid` int(10) unsigned NOT NULL,
   `petitionguid` int(10) unsigned DEFAULT '0',
@@ -1701,6 +1818,7 @@ CREATE TABLE `petition` (
   PRIMARY KEY  (`ownerguid`,`type`),
   UNIQUE KEY `index_ownerguid_petitionguid` (`ownerguid`,`petitionguid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `petition`
@@ -1716,16 +1834,19 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `petition_sign`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `petition_sign` (
   `ownerguid` int(10) unsigned NOT NULL,
   `petitionguid` int(11) unsigned NOT NULL DEFAULT '0',
   `playerguid` int(11) unsigned NOT NULL DEFAULT '0',
   `player_account` int(11) unsigned NOT NULL DEFAULT '0',
   `type` int(10) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`petitionguid`,`playerguid`),
-  INDEX `Idx_playerguid`(`playerguid`),
-  INDEX `Idx_ownerguid`(`ownerguid`)
+  PRIMARY KEY (`petitionguid`,`playerguid`),
+  KEY `Idx_playerguid` (`playerguid`),
+  KEY `Idx_ownerguid` (`ownerguid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `petition_sign`
@@ -1735,21 +1856,23 @@ LOCK TABLES `petition_sign` WRITE;
 /*!40000 ALTER TABLE `petition_sign` DISABLE KEYS */;
 /*!40000 ALTER TABLE `petition_sign` ENABLE KEYS */;
 UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 --
 -- Table structure for table `saved_variables`
 --
 
 DROP TABLE IF EXISTS `saved_variables`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `saved_variables` (
-    `NextArenaPointDistributionTime` bigint(40) UNSIGNED NOT NULL DEFAULT '0',
-    `NextDailyQuestResetTime` bigint(40) unsigned NOT NULL DEFAULT '0',
-    `NextWeeklyQuestResetTime` bigint(40) unsigned NOT NULL DEFAULT '0',
-    `NextMonthlyQuestResetTime` bigint(40) unsigned NOT NULL DEFAULT '0',
-	`NextRandomBGResetTime` BIGINT(40) UNSIGNED NOT NULL DEFAULT '0',
-    `cleaning_flags` int(11) unsigned NOT NULL DEFAULT '0'
+  `NextArenaPointDistributionTime` bigint(40) UNSIGNED NOT NULL DEFAULT '0',
+  `NextDailyQuestResetTime` bigint(40) unsigned NOT NULL DEFAULT '0',
+  `NextWeeklyQuestResetTime` bigint(40) unsigned NOT NULL DEFAULT '0',
+  `NextMonthlyQuestResetTime` bigint(40) unsigned NOT NULL DEFAULT '0',
+  `NextRandomBGResetTime` BIGINT(40) UNSIGNED NOT NULL DEFAULT '0',
+  `cleaning_flags` int(11) unsigned NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Variable Saves';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `saved_variables`
@@ -1759,18 +1882,20 @@ LOCK TABLES `saved_variables` WRITE;
 /*!40000 ALTER TABLE `saved_variables` DISABLE KEYS */;
 /*!40000 ALTER TABLE `saved_variables` ENABLE KEYS */;
 UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 --
 -- Table structure for table `world`
 --
 
 DROP TABLE IF EXISTS `world`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `world` (
   `map` int(11) unsigned NOT NULL DEFAULT '0',
   `data` longtext,
-  PRIMARY KEY  (`map`)
+  PRIMARY KEY (`map`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `world`
@@ -1780,6 +1905,7 @@ LOCK TABLES `world` WRITE;
 /*!40000 ALTER TABLE `world` DISABLE KEYS */;
 /*!40000 ALTER TABLE `world` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
@@ -1789,4 +1915,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2008-01-10 11:37:06
+-- Dump completed
