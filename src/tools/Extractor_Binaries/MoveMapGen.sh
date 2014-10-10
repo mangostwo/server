@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
 #
@@ -21,6 +21,25 @@ PARAMS="--silent"
 ## Already a few map extracted, and don't care anymore
 EXCLUDE_MAPS=""
 #EXCLUDE_MAPS="0 1 530 571" # example to exclude the continents
+#EXCLUDE_MAPS="13 25 29 35 37 42 44 169 451" # example to exclude 'junk' maps
+                            # 
+## Exclude file
+EXCLUDE_MAPS_FILE="mmap_excluded.txt"
+
+## The Exclude file contains a space delimited list of map id's to skip in the same format as EXCLUDE_MAPS
+
+## Does an exclude file exist ?
+if [ "$EXCLUDE_MAPS" == "" ]
+then 
+  ## Exclude file provided?
+  if [ -f "$EXCLUDE_MAPS_FILE" ]
+  then ## Yes, read the file
+    read -d -r EXCLUDE_MAPS < $EXCLUDE_MAPS_FILE
+	echo "Excluded maps: $EXCLUDE_MAPS"
+  else ## No, remind the user that they can create the file
+	echo "Excluded maps: NONE (no file called '$EXCLUDE_MAPS_FILE' was found.)"
+  fi
+fi
 
 ## Offmesh file
 OFFMESH_FILE="offmesh.txt"
@@ -52,7 +71,24 @@ badParam()
   echo
   echo "For further fine-tuning edit this helper script"
   echo
+  read line
 }
+
+DisplayHeader()
+{
+##	clear
+	echo "  __  __      _  _  ___  ___  ___            "
+	echo " |  \\/  |__ _| \\| |/ __|/ _ \\/ __|        "                                         
+	echo " | |\\/| / _\` | .\` | (_ | (_) \\__ \\      "                                         
+	echo " |_|  |_\\__,_|_|\\_|\\___|\\___/|___/       "
+	echo "                                        ____ "
+	echo " For help and support please visit:    /_  /___ _ _ ___ " 
+	echo " Website: https://getmangos.eu          / // -_) '_/ _ \\" 
+	echo "    Wiki: http://github.com/mangoswiki /___\\___|_| \\___/" 
+	echo "=========================================================="
+
+}
+
 
 if [ "$#" = "3" ]
 then
@@ -69,11 +105,11 @@ if [ "$OFFMESH_FILE" != "" ]
 then
   if [ ! -f "$OFFMESH_FILE" ]
   then
-    echo "ERROR! Offmesh file $OFFMESH_FILE could not be found."
-    echo "Provide valid file or none. You need to edit the script"
-    exit 1
+	echo "ERROR! Offmesh file $OFFMESH_FILE could not be found."
+	echo "Provide valid file or none. You need to edit the script"
+	exit 1
   else
-    OFFMESH="--offMeshInput $OFFMESH_FILE"
+	OFFMESH="--offMeshInput $OFFMESH_FILE"
   fi
 fi
 
@@ -82,29 +118,77 @@ createMMaps()
 {
   for i in $@
   do
-    for j in $EXCLUDE_MAPS
-    do
-      if [ "$i" = "$j" ]
-      then
-        continue 2
-      fi
-    done
-    ./MoveMapGen $PARAMS $OFFMESH $i | tee -a $DETAIL_LOG_FILE
-    echo "`date`: (Re)created map $i" | tee -a $LOG_FILE
+	for j in $EXCLUDE_MAPS
+	do
+	  if [ "$i" = "$j" ]
+	  then
+		continue 2
+	  fi
+	done
+	movemap-generator $PARAMS $OFFMESH $i | tee -a $DETAIL_LOG_FILE
+	echo "`date`: (Re)created map $i" | tee -a $LOG_FILE
   done
 }
 
 createHeader()
 {
+#  read line
+DisplayHeader
+  echo
   echo "`date`: Start creating MoveMaps" | tee -a $LOG_FILE
   echo "Used params: $PARAMS $OFFMESH" | tee -a $LOG_FILE
+  echo
   echo "Detailed log can be found in $DETAIL_LOG_FILE" | tee -a $LOG_FILE
   echo "Start creating MoveMaps" | tee -a $DETAIL_LOG_FILE
   echo
-  echo "Be PATIENT - This will take a long time and might also have gaps between visible changes on the console."
-  echo "WAIT until you are informed that 'creating MoveMaps' is 'finished'!"
+  echo "################################################################"
+  echo "##                                                            ##"
+  echo "##      BE PATIENT - This process will take a long time       ##"
+  echo "##                                                            ##"
+  echo "################################################################"
+  echo "##                                                            ##"
+  echo "##   There will also be periods where the display does not    ##"
+  echo "##   update, this is normal behavior for this process         ##"
+  echo "##                                                            ##"
+  echo "##  Once you see the message 'creating MoveMaps' is finished  ##"
+  echo "##  then the process is complete.                             ##"
+  echo "################################################################"
+  echo ""
 }
 
+createSummary()
+{
+	echo
+	echo "Build Summary:"
+	echo "==============="
+	case "$1" in
+	  "1" )
+		echo "1 CPU selected:"
+		echo "=============="
+		echo " All maps will be build using this CPU"
+		;;
+	  "2" )
+		echo "2 CPUs selected:"
+		echo "==============="
+		;;
+	  "3" )
+		echo "3 CPUs selected:"
+		echo "==============="
+		;;
+	  "4" )
+		echo "4 CPUs selected:"
+		echo "==============="
+		;;
+	  * )
+		badParam
+		exit 1
+		;;
+	esac
+
+  echo
+  echo "Starting to create MoveMaps" | tee -a $DETAIL_LOG_FILE
+  wait
+}
 # Create mmaps directory if not exist
 if [ ! -d mmaps ]
 then
@@ -114,40 +198,44 @@ fi
 # Param control
 case "$1" in
   "1" )
-    createHeader $1
+	createHeader $1
+	createSummary $1
     createMMaps $MAP_LIST_A $MAP_LIST_B $MAP_LIST_C $MAP_LIST_D &
-    ;;
+	;;
   "2" )
-    createHeader $1
+	createHeader $1
+	createSummary $1
     createMMaps $MAP_LIST_A $MAP_LIST_D &
     createMMaps $MAP_LIST_B $MAP_LIST_C &
-    ;;
+	;;
   "3" )
-    createHeader $1
+	createHeader $1
+	createSummary $1
     createMMaps $MAP_LIST_A $MAP_LIST_D1&
     createMMaps $MAP_LIST_B $MAP_LIST_D2&
     createMMaps $MAP_LIST_C $MAP_LIST_D3&
-    ;;
+	;;
   "4" )
-    createHeader $1
+	createHeader $1
+	createSummary $1
     createMMaps $MAP_LIST_A &
     createMMaps $MAP_LIST_B &
     createMMaps $MAP_LIST_C &
     createMMaps $MAP_LIST_D &
-    ;;
+	;;
   "offmesh" )
-    echo "`date`: Recreate offmeshs from file $OFFMESH_FILE" | tee -a $LOG_FILE
-    echo "Recreate offmeshs from file $OFFMESH_FILE" | tee -a $DETAIL_LOG_FILE
-    while read map tile line
-    do
-      ./MoveMapGen $PARAMS $OFFMESH $map --tile $tile | tee -a $DETAIL_LOG_FILE
-      echo "`date`: Recreated $map $tile from $OFFMESH_FILE" | tee -a $LOG_FILE
-    done < $OFFMESH_FILE &
-    ;;
+	echo "`date`: Recreate offmeshs from file $OFFMESH_FILE" | tee -a $LOG_FILE
+	echo "Recreate offmeshs from file $OFFMESH_FILE" | tee -a $DETAIL_LOG_FILE
+	while read map tile line
+	do
+	  movemap-generator $PARAMS $OFFMESH $map --tile $tile | tee -a $DETAIL_LOG_FILE
+	  echo "`date`: Recreated $map $tile from $OFFMESH_FILE" | tee -a $LOG_FILE
+	done < $OFFMESH_FILE &
+	;;
   * )
-    badParam
-    exit 1
-    ;;
+	badParam
+	exit 1
+	;;
 esac
 
 wait
@@ -156,3 +244,6 @@ echo  | tee -a $LOG_FILE
 echo  | tee -a $DETAIL_LOG_FILE
 echo "`date`: Finished creating MoveMaps" | tee -a $LOG_FILE
 echo "`date`: Finished creating MoveMaps" >> $DETAIL_LOG_FILE
+echo
+echo "Press any key"
+read line
