@@ -85,7 +85,8 @@ enum WorldTimers
     WUPDATE_EVENTS      = 4,
     WUPDATE_DELETECHARS = 5,
     WUPDATE_AHBOT       = 6,
-    WUPDATE_COUNT       = 7
+    WUPDATE_LFGMGR      = 7,
+    WUPDATE_COUNT       = 8
 };
 
 /// Configuration elements

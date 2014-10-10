@@ -41,9 +41,9 @@ class Player;
 const uint32 WOTLK_SPECIAL_HEROIC_ITEM = 47241;
 const uint32 WOTLK_SPECIAL_HEROIC_AMNT = 2;
 
-typedef std::set<uint32> dailyEntries; // for players who did one of X type instance per day
-typedef UNORDERED_MAP<uint32, uint32> dungeonEntries; // ID, Entry
-typedef UNORDERED_MAP<uint32, uint32> dungeonForbidden; // Entry, LFGForbiddenTypes
+typedef std::set<uint32> dailyEntries;                          // for players who did one of X type instance per day
+typedef UNORDERED_MAP<uint32, uint32> dungeonEntries;           // ID, Entry
+typedef UNORDERED_MAP<uint32, uint32> dungeonForbidden;         // Entry, LFGForbiddenTypes
 typedef UNORDERED_MAP<uint64, dungeonForbidden> partyForbidden; // ObjectGuid (raw), map of locked dungeons
 
 // End Section: Constants & Definitions
@@ -187,13 +187,17 @@ struct ItemRewards
     ItemRewards(uint32 ItemId, uint32 ItemAmount) : itemId(ItemId), itemAmount(ItemAmount) {}
 };
 
-/// Information the dungeon finder needs about each player
+/// Information the dungeon finder needs about each player (or group)
 struct LFGPlayers
 {
     LFGState currentState;                  // where the player is at with the dungeon finder
     dungeonEntries currentDungeonSelection; // what dungeon(s) have they selected
     uint8 currentRoles;                     // tank, dps, healer, etc..
     std::string comments;
+    
+    LFGPlayers() : currentState(LFG_STATE_NONE), currentRoles(0) {}
+    LFGPlayers(LFGState state, dungeonEntries dungeonSelection, uint8 roles, std::string comment)
+        : currentState(state), currentDungeonSelection(dungeonSelection), currentRoles(roles), comments(comment) {}
 };
 
 /// Information used for the queue system
@@ -206,8 +210,34 @@ struct LFGQueue
     uint8 neededDps;              // x many dps needed
 };
 
+struct LFGWait
+{
+    int32 time;                   // current wait time for x
+    uint32 playerCount;           // amount of players in x queue for calculations
+    
+    LFGWait() : time(-1), playerCount(0) {}
+    LFGWait(int32 currentTime, uint32 currentPlayerCount)
+        : time(currentTime), playerCount(currentPlayerCount) {}
+};
+
+/// For SMSG_LFG_QUEUE_STATUS [send in this order]
+struct LFGQueueStatus
+{
+    uint32 dungeonID;             // queue info for x dungeon
+    int32  playerAvgWaitTime;     // average wait time for the current player
+    int32  avgWaitTime;           // average wait time for the dungeon
+    int32  tankAvgWaitTime;       // average wait time for the tank(s)
+    int32  healerAvgWaitTime;     // average wait time for the healer(s)
+    int32  dpsAvgWaitTime;        // average wait time for the dps'
+    uint8  neededTanks;           // amount of tanks needed
+    uint8  neededHeals;           // amount of healers needed
+    uint8  neededDps;             // amount of dps needed
+    uint32 timeSpentInQueue;      // time already spent in the queue
+};
+
 typedef UNORDERED_MAP<uint64, LFGPlayers> playerData; // ObjectGuid(raw), info on specific player
 typedef UNORDERED_MAP<uint64, LFGQueue> queueMap;     // ObjectGuid(raw), queue info
+typedef UNORDERED_MAP<uint32, LFGWait> waitTimeMap;   // DungeonID, wait info
 
 // End Section: Enumerations & Structures
 
@@ -216,6 +246,9 @@ class LFGMgr
 public:
     LFGMgr();
     ~LFGMgr();
+    
+    /// Update queue information and such
+    void Update();
     
     /**
      * @brief Attempt to join the dungeon finder queue, as long as the player(s)
@@ -269,8 +302,8 @@ public:
      */
     bool HasPlayerDoneDaily(uint32 guidLow, DungeonTypes dungeon);
     
-     /// Reset accounts of players completing a/any dungeon for the day for new rewards
-     void ResetDailyRecords();
+    /// Reset accounts of players completing a/any dungeon for the day for new rewards
+    void ResetDailyRecords();
 
     /**
      * @brief Find out whether or not a special dungeon is available for that season 
@@ -302,13 +335,21 @@ protected:
     LFGPlayers* GetPlayerOrPartyData(uint64 rawGuid);
     
 private:
+    /// Daily occurences of a player doing X type dungeon
     dailyEntries m_dailyAny;
     dailyEntries m_dailyTBCHeroic;
     dailyEntries m_dailyLKNormal;
     dailyEntries m_dailyLKHeroic;
     
+    /// General info related to joining / leaving the dungeon finder
     playerData m_playerData;
     queueMap   m_queueMap;
+    
+    /// Wait times for the queue
+    waitTimeMap m_tankWaitTime;
+    waitTimeMap m_healerWaitTime;
+    waitTimeMap m_dpsWaitTime;
+    waitTimeMap m_avgWaitTime;
 };
 
 #define sLFGMgr MaNGOS::Singleton<LFGMgr>::Instance()

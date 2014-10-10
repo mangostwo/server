@@ -179,7 +179,7 @@ void WorldSession::HandleLfgGetPlayerInfo(WorldPacket& recv_data)
     data << uint32(lockedDungeons.size());
     for (dungeonForbidden::iterator it = lockedDungeons.begin(); it != lockedDungeons.end(); ++it)
     {
-        data << uint32(it->first); // dungeon entry
+        data << uint32(it->first);  // dungeon entry
         data << uint32(it->second); // reason for being locked
     }
     SendPacket(&data);
@@ -364,10 +364,10 @@ void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
     SendPacket(&data);
 }
 
-void WorldSession::SendLfgJoinResult(LfgJoinResult result, LFGState state, partyForbidden lockedDungeons)
+void WorldSession::SendLfgJoinResult(LfgJoinResult result, LFGState state, partyForbidden const& lockedDungeons)
 {
     uint32 packetSize = 0;
-    for (partyForbidden::iterator it = lockedDungeons.begin(); it != lockedDungeons.end(); ++it)
+    for (partyForbidden::const_iterator it = lockedDungeons.begin(); it != lockedDungeons.end(); ++it)
         packetSize += 12 + uint32(it->second.size()) * 8;
     
     WorldPacket data(SMSG_LFG_JOIN_RESULT, packetSize);
@@ -376,7 +376,7 @@ void WorldSession::SendLfgJoinResult(LfgJoinResult result, LFGState state, party
     
     if (!lockedDungeons.empty())
     {
-        for (partyForbidden::iterator it = lockedDungeons.begin(); it != lockedDungeons.end(); ++it)
+        for (partyForbidden::const_iterator it = lockedDungeons.begin(); it != lockedDungeons.end(); ++it)
         {
             dungeonForbidden dungeonInfo = it->second;
         
@@ -421,5 +421,23 @@ void WorldSession::SendLfgUpdate(bool isGroup, LfgUpdateType updateType, uint32 
             data << uint32(id);
         data << "";
     }
+    SendPacket(&data);
+}
+
+void WorldSession::SendLfgQueueStatus(LFGQueueStatus const& status)
+{
+    WorldPacket data(SMSG_LFG_QUEUE_STATUS);
+    
+    data << uint32(status.dungeonID);
+    data << int32(status.playerAvgWaitTime);
+    data << int32(status.avgWaitTime);
+    data << int32(status.tankAvgWaitTime);
+    data << int32(status.healerAvgWaitTime);
+    data << int32(status.dpsAvgWaitTime);
+    data << uint8(status.neededTanks);
+    data << uint8(status.neededHeals);
+    data << uint8(status.neededDps);
+    data << uint32(status.timeSpentInQueue);
+    
     SendPacket(&data);
 }

@@ -1437,6 +1437,9 @@ void World::SetInitialWorldSettings()
 
     // for AhBot
     m_timers[WUPDATE_AHBOT].SetInterval(20 * IN_MILLISECONDS); // every 20 sec
+    
+    // for Dungeon Finder
+    m_timers[WUPDATE_LFGMGR].SetInterval(30 * IN_MILLISECONDS); // every 30 sec
 
     // to set mailtimer to return mails every day between 4 and 5 am
     // mailtimer is increased when updating auctions
@@ -1611,6 +1614,13 @@ void World::Update(uint32 diff)
         sAuctionBot.Update();
         m_timers[WUPDATE_AHBOT].Reset();
     }
+    
+    /// <li> Update Dungeon Finder
+    if (m_timers[WUPDATE_LFGMGR].Passed())
+    {
+        sLFGMgr.Update();
+        m_timers[WUPDATE_LFGMGR].Reset();
+    }
 
     /// <li> Handle session updates
     UpdateSessions(diff);
@@ -1634,6 +1644,7 @@ void World::Update(uint32 diff)
 
         m_timers[WUPDATE_WEATHERS].SetCurrent(0);
     }
+    
     /// <li> Update uptime table
     if (m_timers[WUPDATE_UPTIME].Passed())
     {
