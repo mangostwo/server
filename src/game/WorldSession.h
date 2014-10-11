@@ -232,8 +232,9 @@ class MANGOS_DLL_SPEC WorldSession
         void SendNotification(int32 string_id, ...);
         void SendPetNameInvalid(uint32 error, const std::string& name, DeclinedName* declinedName);
         void SendLfgSearchResults(LfgType type, uint32 entry);
-        void SendLfgJoinResult(LfgJoinResult result, LFGState state, partyForbidden lockedDungeons);
+        void SendLfgJoinResult(LfgJoinResult result, LFGState state, partyForbidden const& lockedDungeons);
         void SendLfgUpdate(bool isGroup, LfgUpdateType updateType, uint32 id);
+        void SendLfgQueueStatus(LFGQueueStatus const& status);
         void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res);
         void SendGroupInvite(Player* player, bool alreadyInGroup = false);
         void SendGuildInvite(Player* player, bool alreadyInGuild = false);

@@ -48,6 +48,11 @@ LFGMgr::~LFGMgr()
     m_queueMap.clear();
 }
 
+void LFGMgr::Update()
+{
+    
+}
+
 void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string comments, Player* plr)
 {
     // Todo: - add queue / role check elements when systems are complete
@@ -138,10 +143,12 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
             else
                 result = ERR_LFG_NO_LFG_OBJECT;
         }
-        
+    }
+    
+    /*partyForbidden partyLockedDungeons;
+    if (result == ERR_LFG_OK)
+    {
         // do FindRandomDungeonsNotForPlayer for the plr or whole group
-        partyForbidden partyLockedDungeons;
-        
         if (pGroup)
         {
             for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
@@ -181,20 +188,21 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
             partyLockedDungeons.clear();
         else
             result = (pGroup) ? ERR_LFG_NO_SLOTS_PARTY : ERR_LFG_NO_SLOTS_PLAYER;
-        
-        // If our result is not ERR_LFG_OK, send join result now with err message
-        if (result != ERR_LFG_OK)
-        {
-            plr->GetSession()->SendLfgJoinResult(result, LFG_STATE_NONE, partyLockedDungeons);
-            return;
-        }
-        else
-        {
-            currentInfo->comments = comments;
-            // if it's a group: begin role check
-            // if it's one player: place in queue
-        }
     }
+        
+    // If our result is not ERR_LFG_OK, send join result now with err message
+    if (result != ERR_LFG_OK)
+    {
+        plr->GetSession()->SendLfgJoinResult(result, LFG_STATE_NONE, partyLockedDungeons);
+        return;
+    }
+    else
+    {
+        currentInfo->comments = comments;
+        // if it's a group: begin role check
+        // if it's one player: place in queue
+    }
+    return;*/
 }
 
 void LFGMgr::LeaveLFG()
@@ -227,19 +235,16 @@ LfgJoinResult LFGMgr::GetJoinResult(Player* plr)
      *   Group member too low/high level
      *   Any group member cannot enter for x reason any other player can't
      */
-    
-    if (!plr)
-        result = ERR_LFG_MEMBERS_NOT_PRESENT;
-    else if (plr->HasAura(LFG_DESERTER_SPELL))
+
+    if (plr->HasAura(LFG_DESERTER_SPELL))
         result = ERR_LFG_DESERTER_PLAYER;
     else if (plr->InBattleGround() || plr->InBattleGroundQueue() || plr->InArena())
         result = ERR_LFG_CANT_USE_DUNGEONS;
     else if (plr->HasAura(LFG_COOLDOWN_SPELL))
         result = ERR_LFG_RANDOM_COOLDOWN_PLAYER;
-    else if (pGroup)
-    {
-        uint32 plrLevel = plr->getLevel();
-        
+    
+    if (pGroup)
+    {        
         if (pGroup->GetMembersCount() > 5)
             result = ERR_LFG_TOO_MANY_MEMBERS;
         else
