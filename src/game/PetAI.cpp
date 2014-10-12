@@ -132,6 +132,13 @@ void PetAI::UpdateAI(const uint32 diff)
         return;
 
     Unit* owner = m_creature->GetCharmerOrOwner();
+    
+    // Despawn minion/pet if owner dies
+    if (owner->IsDead())
+    {
+        m_creature->RemoveFromWorld();
+        return;
+    }
 
     if (m_updateAlliesTimer <= diff)
         // UpdateAllies self set update timer

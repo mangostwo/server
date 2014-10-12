@@ -1172,15 +1172,6 @@ void World::SetInitialWorldSettings()
     sGameEventMgr.LoadFromDB();
     sLog.outString(">>> Game Event Data loaded");
     sLog.outString();
-    
-    sLog.outString("Loading Dungeon Finder Requirements...");
-    sObjectMgr.LoadDungeonFinderRequirements();
-    
-    sLog.outString("Loading Dungeon Finder Rewards...");
-    sObjectMgr.LoadDungeonFinderRewards();
-    
-    sLog.outString("Loading Dungeon Finder Items...");
-    sObjectMgr.LoadDungeonFinderItems();
 
     // Load Conditions
     sLog.outString("Loading Conditions...");

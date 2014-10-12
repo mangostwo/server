@@ -41,10 +41,14 @@ class Player;
 const uint32 WOTLK_SPECIAL_HEROIC_ITEM = 47241;
 const uint32 WOTLK_SPECIAL_HEROIC_AMNT = 2;
 
+/// Default average queue time (in case we don't have data to base calculations on)
+const int32 QUEUE_DEFAULT_TIME = 15*MINUTE*IN_MILLISECONDS;     // 15 minutes
+
 typedef std::set<uint32> dailyEntries;                          // for players who did one of X type instance per day
 typedef UNORDERED_MAP<uint32, uint32> dungeonEntries;           // ID, Entry
 typedef UNORDERED_MAP<uint32, uint32> dungeonForbidden;         // Entry, LFGForbiddenTypes
 typedef UNORDERED_MAP<uint64, dungeonForbidden> partyForbidden; // ObjectGuid (raw), map of locked dungeons
+typedef UNORDERED_MAP<uint64, uint8> roleMap;                   // ObjectGuid (raw), role(s) selected
 
 // End Section: Constants & Definitions
 
@@ -160,11 +164,11 @@ enum LFGRoleCheckState
 /// Role types 
 enum LFGRoles
 {
-    PLAYER_ROLE_NONE                             = 0x00,
-    PLAYER_ROLE_LEADER                           = 0x01,
-    PLAYER_ROLE_TANK                             = 0x02,
-    PLAYER_ROLE_HEALER                           = 0x04,
-    PLAYER_ROLE_DAMAGE                           = 0x08
+    PLAYER_ROLE_NONE                             = 0,
+    PLAYER_ROLE_LEADER                           = 1,
+    PLAYER_ROLE_TANK                             = 2,
+    PLAYER_ROLE_HEALER                           = 4,
+    PLAYER_ROLE_DAMAGE                           = 8
 };
 
 enum DungeonTypes
@@ -191,16 +195,17 @@ struct ItemRewards
 struct LFGPlayers
 {
     LFGState currentState;                  // where the player is at with the dungeon finder
-    dungeonEntries currentDungeonSelection; // what dungeon(s) have they selected
-    uint8 currentRoles;                     // tank, dps, healer, etc..
+    std::set<uint32> dungeonList;           // The dungeons this player or group are queued for (ID, not entry)
+    roleMap currentRoles;                   // tank, dps, healer, etc..
     std::string comments;
+    bool isGroup;
     
     LFGPlayers() : currentState(LFG_STATE_NONE), currentRoles(0) {}
-    LFGPlayers(LFGState state, dungeonEntries dungeonSelection, uint8 roles, std::string comment)
-        : currentState(state), currentDungeonSelection(dungeonSelection), currentRoles(roles), comments(comment) {}
+    LFGPlayers(LFGState state, std::set<uint32> dungeonSelection, uint8 roles, std::string comment, bool IsGroup)
+        : currentState(state), currentDungeonSelection(dungeonSelection), currentRoles(roles), comments(comment), isGroup(IsGroup) {}
 };
 
-/// Information used for the queue system
+/// Information used for the queue system (this may be unnecessary to have)
 struct LFGQueue
 {
     time_t joinedTime;            // for calculating their avg. wait time
@@ -220,7 +225,7 @@ struct LFGWait
         : time(currentTime), playerCount(currentPlayerCount) {}
 };
 
-/// For SMSG_LFG_QUEUE_STATUS [send in this order]
+/// For SMSG_LFG_QUEUE_STATUS
 struct LFGQueueStatus
 {
     uint32 dungeonID;             // queue info for x dungeon
@@ -235,7 +240,7 @@ struct LFGQueueStatus
     uint32 timeSpentInQueue;      // time already spent in the queue
 };
 
-typedef UNORDERED_MAP<uint64, LFGPlayers> playerData; // ObjectGuid(raw), info on specific player
+typedef UNORDERED_MAP<uint64, LFGPlayers> playerData; // ObjectGuid(raw), info on specific player or group
 typedef UNORDERED_MAP<uint64, LFGQueue> queueMap;     // ObjectGuid(raw), queue info
 typedef UNORDERED_MAP<uint32, LFGWait> waitTimeMap;   // DungeonID, wait info
 
@@ -328,11 +333,23 @@ public:
      */
     dungeonForbidden FindRandomDungeonsNotForPlayer(Player* plr);
     
+    /// Queue Functions Below
+    
+    /**
+     * @brief Add the player or group to the Dungeon Finder queue
+     * 
+     * @param rawGuid the raw value of said player/group's ObjectGuid
+     */
+    void AddToQueue(uint64 rawGuid);
+    
 protected:
     bool IsSeasonal(uint32 dbcFlags) { return ((dbcFlags & LFG_FLAG_SEASONAL) != 0) ? true : false; }
     
     /// Check if player/party is already in the system, return that data
     LFGPlayers* GetPlayerOrPartyData(uint64 rawGuid);
+    
+    /// Add the player to their respective waiting map for their dungeon
+    void AddToWaitMap(uint8 role, std::set<uint32> dungeons);
     
 private:
     /// Daily occurences of a player doing X type dungeon

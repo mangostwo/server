@@ -50,7 +50,7 @@ LFGMgr::~LFGMgr()
 
 void LFGMgr::Update()
 {
-    
+    // go through a waitTimeMap::iterator for each wait map and update times based on player count
 }
 
 void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string comments, Player* plr)
@@ -58,8 +58,10 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
     // Todo: - add queue / role check elements when systems are complete
     //       - see if any of this code/information can be put into a generalized class for other use
     //       - look into splitting this into 2 fns- one for player case, one for group
+    //       - at the end before adding to queue/rolecheck, if random dungeon delete temp. set & replace w/ original value
     Group* pGroup = plr->GetGroup();
     uint64 rawGuid = (pGroup) ? pGroup->GetObjectGuid().GetRawValue() : plr->GetObjectGuid().GetRawValue();
+    uint32 randomDungeonID; // used later if random dungeon has been chosen
     
     LFGPlayers* currentInfo = GetPlayerOrPartyData(rawGuid);
     
@@ -123,6 +125,8 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
     {
         if (isRandom)
         {
+            // store the current dungeon id (replaced into the dungeon set later)
+            randomDungeonID = *dungeons.begin();
             // fetch all dungeons with our groupID and add to set
             LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(*dungeons.begin());
             
@@ -145,7 +149,7 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
         }
     }
     
-    /*partyForbidden partyLockedDungeons;
+    partyForbidden partyLockedDungeons;
     if (result == ERR_LFG_OK)
     {
         // do FindRandomDungeonsNotForPlayer for the plr or whole group
@@ -155,33 +159,37 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
             {
                 if (Player* pGroupPlr = itr->getSource())
                 {
+                    uint64 plrGuid = pGroupPlr->GetObjectGuid().GetRawValue();
+                     
                     dungeonForbidden lockedDungeons = FindRandomDungeonsNotForPlayer(pGroupPlr);
+                    partyLockedDungeons[plrGuid] = lockedDungeons;
+                    
                     for (dungeonForbidden::iterator it = lockedDungeons.begin(); it != lockedDungeons.end(); ++it)
                     {
                         uint32 dungeonID = (it->first & 0x00FFFFFF);
                         
                         std::set<uint32>::iterator setItr = dungeons.find(dungeonID);
                         if (setItr != dungeons.end())
-                            dungeons.erase(setItr);
+                            dungeons.erase(*setItr);
                     }
-                    if (!lockedDungeons.empty())
-                        partyLockedDungeons[pGroupPlr->GetObjectGuid().GetRawValue()] = lockedDungeons;
                 }
             }
         }
         else
         {
+            uint64 plrGuid = plr->GetObjectGuid().GetRawValue();
+             
             dungeonForbidden lockedDungeons = FindRandomDungeonsNotForPlayer(plr);
+            partyLockedDungeons[plrGuid] = lockedDungeons;
+            
             for (dungeonForbidden::iterator it = lockedDungeons.begin(); it != lockedDungeons.end(); ++it)
             {
                 uint32 dungeonID = (it->first & 0x00FFFFFF);
                         
                 std::set<uint32>::iterator setItr = dungeons.find(dungeonID);
                 if (setItr != dungeons.end())
-                    dungeons.erase(setItr);
+                    dungeons.erase(*setItr);
             }
-            if (!lockedDungeons.empty())
-                partyLockedDungeons[plr->GetObjectGuid().GetRawValue()] = lockedDungeons;
         }
         
         if (!dungeons.empty())
@@ -196,13 +204,15 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
         plr->GetSession()->SendLfgJoinResult(result, LFG_STATE_NONE, partyLockedDungeons);
         return;
     }
-    else
+    /* note: remove the else + brackets here
+     * else
     {
         currentInfo->comments = comments;
         // if it's a group: begin role check
-        // if it's one player: place in queue
+        // if it's one player: place in queue (AddToQueue(rawGuid))
+        m_playerData[rawGuid] = &currentInfo;
     }
-    return;*/
+    return; */
 }
 
 void LFGMgr::LeaveLFG()
@@ -475,4 +485,79 @@ dungeonForbidden LFGMgr::FindRandomDungeonsNotForPlayer(Player* plr)
         }
     }
     return randomDungeons;
+}
+
+void LFGMgr::AddToQueue(uint64 rawGuid)
+{
+    LFGPlayers* information = GetPlayerOrPartyData(rawGuid);
+    if (!information)
+        return;
+    
+    // put info into wait time maps for starters
+    //todo: handle leader/not leader case
+    for (roleMap::iterator it = information->currentRoles; it != information->currentRoles.end(); ++it)
+        AddToWaitMap(it->second, information->dungeonList);
+        
+}
+
+void LFGMgr::AddToWaitMap(uint8 role, std::set<uint32> dungeons)
+{
+    // use withoutLeader for switch operator, but add whole role to map
+    uint8 withoutLeader = role;
+    withoutLeader &= ~PLAYER_ROLE_LEADER;
+    
+    switch (withoutLeader)
+    {
+        case PLAYER_ROLE_TANK:
+        {
+            for (std::set<uint32>::iterator itr = dungeons.begin(); itr != dungeons.end(); ++itr)
+            {
+                waitTimeMap::iterator it = m_tankWaitTime.find(*itr);
+                if (it != m_tankWaitTime.end())
+                {
+                    // Increment current player count by one (wait time is recalculated on update interval)
+                    ++it->second.playerCount;
+                }
+                else
+                {
+                    LFGWait waitInfo(QUEUE_DEFAULT_TIME, 1);
+                    m_tankWaitTime[*itr] = waitInfo;
+                }
+            }
+        } break;
+        case PLAYER_ROLE_HEALER:
+        {
+            for (std::set<uint32>::iterator itr = dungeons.begin(); itr != dungeons.end(); ++itr)
+            {
+                waitTimeMap::iterator it = m_healerWaitTime.find(*itr);
+                if (it != m_healerWaitTime.end())
+                {
+                    // Increment current player count by one (wait time is recalculated on update interval)
+                    ++it->second.playerCount;
+                }
+                else
+                {
+                    LFGWait waitInfo(QUEUE_DEFAULT_TIME, 1);
+                    m_healerWaitTime[*itr] = waitInfo;
+                }
+            }
+        } break;
+        case PLAYER_ROLE_DAMAGE:
+        {
+            for (std::set<uint32>::iterator itr = dungeons.begin(); itr != dungeons.end(); ++itr)
+            {
+                waitTimeMap::iterator it = m_dpsWaitTime.find(*itr);
+                if (it != m_dpsWaitTime.end())
+                {
+                    // Increment current player count by one (wait time is recalculated on update interval)
+                    ++it->second.playerCount;
+                }
+                else
+                {
+                    LFGWait waitInfo(QUEUE_DEFAULT_TIME, 1);
+                    m_dpsWaitTime[*itr] = waitInfo;
+                }
+            }
+        } break;
+    }
 }
