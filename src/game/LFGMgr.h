@@ -200,29 +200,28 @@ struct LFGPlayers
     std::string comments;
     bool isGroup;
     
-    LFGPlayers() : currentState(LFG_STATE_NONE), currentRoles(0) {}
-    LFGPlayers(LFGState state, std::set<uint32> dungeonSelection, uint8 roles, std::string comment, bool IsGroup)
-        : currentState(state), currentDungeonSelection(dungeonSelection), currentRoles(roles), comments(comment), isGroup(IsGroup) {}
-};
-
-/// Information used for the queue system (this may be unnecessary to have)
-struct LFGQueue
-{
-    time_t joinedTime;            // for calculating their avg. wait time
-    std::set<uint32> dungeonList; // The dungeons this player or group are queued for
-    uint8 neededTanks;            // x many tanks needed
-    uint8 neededHealers;          // x many healers needed
-    uint8 neededDps;              // x many dps needed
+    time_t joinedTime;
+    uint8 neededTanks;
+    uint8 neededHealers;
+    uint8 neededDps;
+    
+    LFGPlayers() : currentState(LFG_STATE_NONE), currentRoles(0), isGroup(false) {}
+    LFGPlayers(LFGState state, std::set<uint32> dungeonSelection, roleMap CurrentRoles, std::string comment, bool IsGroup, time_t JoinedTime,
+        uint8 NeededTanks, uint8 NeededHealers, uint8 NeededDps) : currentState(state), dungeonList(dungeonSelection),
+        currentRoles(CurrentRoles), comments(comment), isGroup(IsGroup), joinedTime(JoinedTime), neededTanks(NeededTanks),
+        neededHealers(NeededHealers), neededDps(NeededDps) {}
 };
 
 struct LFGWait
 {
-    int32 time;                   // current wait time for x
-    uint32 playerCount;           // amount of players in x queue for calculations
+    int32 time;                   // current wait time for x (in seconds, so (time_t x / IN_MILLISECONDS)
+    int32 previousTime;           // how long it took for the last person to go from queue to instance
+    uint32 playerCount;           // amount of players in x queue for calculations [not sure if needed when finished implementing system]
+    bool doAverage;               // tells the lfgmgr during a world update whether or not to recalculate waiting time
     
-    LFGWait() : time(-1), playerCount(0) {}
-    LFGWait(int32 currentTime, uint32 currentPlayerCount)
-        : time(currentTime), playerCount(currentPlayerCount) {}
+    LFGWait() : time(-1), previousTime(-1), playerCount(0), doAverage(false) {}
+    LFGWait(int32 currentTime, int32 lastTime, uint32 currentPlayerCount, bool shouldRecalculate)
+        : time(currentTime), previousTime(lastTime), playerCount(currentPlayerCount), doAverage(shouldRecalculate) {}
 };
 
 /// For SMSG_LFG_QUEUE_STATUS
@@ -241,7 +240,6 @@ struct LFGQueueStatus
 };
 
 typedef UNORDERED_MAP<uint64, LFGPlayers> playerData; // ObjectGuid(raw), info on specific player or group
-typedef UNORDERED_MAP<uint64, LFGQueue> queueMap;     // ObjectGuid(raw), queue info
 typedef UNORDERED_MAP<uint32, LFGWait> waitTimeMap;   // DungeonID, wait info
 
 // End Section: Enumerations & Structures
@@ -360,7 +358,6 @@ private:
     
     /// General info related to joining / leaving the dungeon finder
     playerData m_playerData;
-    queueMap   m_queueMap;
     
     /// Wait times for the queue
     waitTimeMap m_tankWaitTime;

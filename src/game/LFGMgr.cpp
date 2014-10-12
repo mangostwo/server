@@ -44,13 +44,73 @@ LFGMgr::~LFGMgr()
     m_dailyTBCHeroic.clear();
     m_dailyLKNormal.clear();
     m_dailyLKHeroic.clear();
+    
     m_playerData.clear();
-    m_queueMap.clear();
+    
+    m_tankWaitTime.clear();
+    m_healerWaitTime.clear();
+    m_dpsWaitTime.clear();
 }
 
 void LFGMgr::Update()
 {
     // go through a waitTimeMap::iterator for each wait map and update times based on player count
+    for (waitTimeMap::iterator tankItr = m_tankWaitTime.begin(); tankItr != m_tankWaitTime.end(); ++tankItr)
+    {            
+        LFGWait waitInfo = tankItr->second;
+        if (waitInfo.doAverage)
+        {
+            int32 lastTime = waitInfo.previousTime;
+            int32 thisTime = waitInfo.time;
+            
+            // average of the two join times
+            waitInfo.time = (thisTime + lastTime) / 2;
+            
+            // now set what was just the current wait time to the previous time for a later calculation
+            waitInfo.previousTime = thisTime;
+            waitInfo.doAverage = false;
+            
+            tankItr->second = waitInfo;
+        }
+    }
+    for (waitTimeMap::iterator healItr = m_healerWaitTime.begin(); healItr != m_healerWaitTime.end(); ++healItr)
+    {
+        LFGWait waitInfo = healItr->second;
+        if (waitInfo.doAverage)
+        {
+            int32 lastTime = waitInfo.previousTime;
+            int32 thisTime = waitInfo.time;
+            
+            // average of the two join times
+            waitInfo.time = (thisTime + lastTime) / 2;
+            
+            // now set what was just the current wait time to the previous time for a later calculation
+            waitInfo.previousTime = thisTime;
+            waitInfo.doAverage = false;
+            
+            healItr->second = waitInfo;
+        }
+    }
+    for (waitTimeMap::iterator dpsItr = m_dpsWaitTime.begin(); dpsItr != m_dpsWaitTime.end(); ++dpsItr)
+    {
+        LFGWait waitInfo = dpsItr->second;
+        if (waitInfo.doAverage)
+        {
+            int32 lastTime = waitInfo.previousTime;
+            int32 thisTime = waitInfo.time;
+            
+            // average of the two join times
+            waitInfo.time = (thisTime + lastTime) / 2;
+            
+            // now set what was just the current wait time to the previous time for a later calculation
+            waitInfo.previousTime = thisTime;
+            waitInfo.doAverage = false;
+            
+            dpsItr->second = waitInfo;
+        }
+    }
+    
+    // todo: overall average time (similar to above)
 }
 
 void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string comments, Player* plr)
@@ -58,7 +118,6 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
     // Todo: - add queue / role check elements when systems are complete
     //       - see if any of this code/information can be put into a generalized class for other use
     //       - look into splitting this into 2 fns- one for player case, one for group
-    //       - at the end before adding to queue/rolecheck, if random dungeon delete temp. set & replace w/ original value
     Group* pGroup = plr->GetGroup();
     uint64 rawGuid = (pGroup) ? pGroup->GetObjectGuid().GetRawValue() : plr->GetObjectGuid().GetRawValue();
     uint32 randomDungeonID; // used later if random dungeon has been chosen
@@ -78,8 +137,10 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
         // are they already in a dungeon?
         if (pGroup && pGroup->isLFGGroup() && currentInfo->currentState != LFG_STATE_FINISHED_DUNGEON)
         {
+            std::set<uint32> currentDungeon = currentInfo->dungeonList;
+            
             dungeons.clear();
-            dungeons.insert(currentInfo->currentDungeonSelection.begin()->first); // they should only have 1 dungeon in the map
+            dungeons.insert(*currentDungeon.begin()); // they should only have 1 dungeon in the map
         }
     }
     
@@ -176,11 +237,9 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
             }
         }
         else
-        {
-            uint64 plrGuid = plr->GetObjectGuid().GetRawValue();
-             
+        {             
             dungeonForbidden lockedDungeons = FindRandomDungeonsNotForPlayer(plr);
-            partyLockedDungeons[plrGuid] = lockedDungeons;
+            partyLockedDungeons[rawGuid] = lockedDungeons;
             
             for (dungeonForbidden::iterator it = lockedDungeons.begin(); it != lockedDungeons.end(); ++it)
             {
@@ -204,15 +263,50 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
         plr->GetSession()->SendLfgJoinResult(result, LFG_STATE_NONE, partyLockedDungeons);
         return;
     }
-    /* note: remove the else + brackets here
-     * else
+    
+    // place original dungeon ID back in the set
+    if (isRandom)
     {
-        currentInfo->comments = comments;
-        // if it's a group: begin role check
-        // if it's one player: place in queue (AddToQueue(rawGuid))
-        m_playerData[rawGuid] = &currentInfo;
+        dungeons.clear();
+        dungeons.insert(randomDungeonID);
     }
-    return; */
+    
+    if (pGroup)
+    {
+        // role check, then queue
+        //   * Get each player's roles and add to the roleMap
+        return; // temporary
+    }
+    else
+    {
+        if (currentInfo)
+        {
+            currentInfo->currentState = LFG_STATE_QUEUED;
+            currentInfo->dungeonList  = dungeons;
+            currentInfo->comments     = comments;
+            currentInfo->isGroup      = false;
+            
+            currentInfo->currentRoles.clear();
+            currentInfo->currentRoles[rawGuid] = (uint8)roles;
+            
+            currentInfo->joinedTime = time(nullptr);
+            m_playerData[rawGuid] = *currentInfo;
+        }
+        else
+        {
+            // set up a role map and then an lfgplayer struct
+            roleMap playerRole;
+            playerRole[rawGuid] = (uint8)roles;
+            
+            LFGPlayers playerInfo(LFG_STATE_QUEUED, dungeons, playerRole, comments, false, time(nullptr), 0, 0, 0);
+            m_playerData[rawGuid] = playerInfo;
+        }
+        
+        // Send information back to the client
+        //plr->GetSession()->SendLfgJoinResult(result, LFG_STATE_QUEUED, partyLockedDungeons);
+        // fix up SendLfgUpdate in lfghander and send after join result.
+        // then call AddToQueue(rawGuid);
+    }
 }
 
 void LFGMgr::LeaveLFG()
@@ -494,15 +588,15 @@ void LFGMgr::AddToQueue(uint64 rawGuid)
         return;
     
     // put info into wait time maps for starters
-    //todo: handle leader/not leader case
-    for (roleMap::iterator it = information->currentRoles; it != information->currentRoles.end(); ++it)
+    for (roleMap::iterator it = information->currentRoles.begin(); it != information->currentRoles.end(); ++it)
         AddToWaitMap(it->second, information->dungeonList);
         
+    // note: this function still needs to be completed
 }
 
 void LFGMgr::AddToWaitMap(uint8 role, std::set<uint32> dungeons)
 {
-    // use withoutLeader for switch operator, but add whole role to map
+    // use withoutLeader for switch operator
     uint8 withoutLeader = role;
     withoutLeader &= ~PLAYER_ROLE_LEADER;
     
@@ -515,12 +609,12 @@ void LFGMgr::AddToWaitMap(uint8 role, std::set<uint32> dungeons)
                 waitTimeMap::iterator it = m_tankWaitTime.find(*itr);
                 if (it != m_tankWaitTime.end())
                 {
-                    // Increment current player count by one (wait time is recalculated on update interval)
+                    // Increment current player count by one
                     ++it->second.playerCount;
                 }
                 else
                 {
-                    LFGWait waitInfo(QUEUE_DEFAULT_TIME, 1);
+                    LFGWait waitInfo(QUEUE_DEFAULT_TIME, -1, 1, false);
                     m_tankWaitTime[*itr] = waitInfo;
                 }
             }
@@ -532,12 +626,12 @@ void LFGMgr::AddToWaitMap(uint8 role, std::set<uint32> dungeons)
                 waitTimeMap::iterator it = m_healerWaitTime.find(*itr);
                 if (it != m_healerWaitTime.end())
                 {
-                    // Increment current player count by one (wait time is recalculated on update interval)
+                    // Increment current player count by one
                     ++it->second.playerCount;
                 }
                 else
                 {
-                    LFGWait waitInfo(QUEUE_DEFAULT_TIME, 1);
+                    LFGWait waitInfo(QUEUE_DEFAULT_TIME, -1, 1, false);
                     m_healerWaitTime[*itr] = waitInfo;
                 }
             }
@@ -549,15 +643,17 @@ void LFGMgr::AddToWaitMap(uint8 role, std::set<uint32> dungeons)
                 waitTimeMap::iterator it = m_dpsWaitTime.find(*itr);
                 if (it != m_dpsWaitTime.end())
                 {
-                    // Increment current player count by one (wait time is recalculated on update interval)
+                    // Increment current player count by one
                     ++it->second.playerCount;
                 }
                 else
                 {
-                    LFGWait waitInfo(QUEUE_DEFAULT_TIME, 1);
+                    LFGWait waitInfo(QUEUE_DEFAULT_TIME, -1, 1, false);
                     m_dpsWaitTime[*itr] = waitInfo;
                 }
             }
         } break;
+        default:
+            break;
     }
 }
