@@ -2,3 +2,6 @@
 	path = src/game/LuaEngine
 
 	url = https://github.com/ElunaLuaEngine/Eluna.git
+[submodule "src/realmd"]
+	path = src/realmd
+	url = https://github.com/mangos/realmd.git
