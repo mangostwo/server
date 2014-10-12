@@ -1379,7 +1379,7 @@ CREATE TABLE `creature_template` (
   `AIName` char(64) NOT NULL DEFAULT '',
   `ScriptName` char(64) NOT NULL DEFAULT '',
   PRIMARY KEY (`entry`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
+) ENGINE=MYISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1389,7 +1389,7 @@ CREATE TABLE `creature_template` (
 LOCK TABLES `creature_template` WRITE;
 /*!40000 ALTER TABLE `creature_template` DISABLE KEYS */;
 INSERT INTO `creature_template` VALUES
-(1,'Waypoint (Only GM can see it)','Visual',NULL,1,1,0,0,0,10045,0,0,0,35,35,1,0,8,7,1,0,0,4096,0,130,5242886,0.91,1.14286,8,0,-1,1,1,1,1,1,1,64,64,0,0,2,3,1,2,5,10,100,2000,2200,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'','');
+(1,'Waypoint (Only GM can see it)','Visual',NULL,1,1,0,0,0,10045,0,0,0,35,35,1,0,8,7,1,0,0,4096,0,130,5242886,0.91,1.14286,8,0,-1,1,1,1,1,1,1,64,64,0,0,2,3,1,2,5,10,100,2000,2200,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'','');
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -18936,6 +18936,7 @@ UNLOCK TABLES;
 -- Table structure for table `dungeonfinder_rewards`
 --
 
+DROP TABLE IF EXISTS `dungeonfinder_rewards`;
 CREATE TABLE IF NOT EXISTS `dungeonfinder_rewards` (
 `id` int(10) NOT NULL,
   `level` mediumint(8) unsigned NOT NULL COMMENT 'uint32',
@@ -19022,6 +19023,7 @@ ALTER TABLE `dungeonfinder_rewards`
 ALTER TABLE `dungeonfinder_rewards`
 MODIFY `id` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=67;
 
+DROP TABLE IF EXISTS `dungeonfinder_requirements`;
 CREATE TABLE IF NOT EXISTS `dungeonfinder_requirements` (
   `mapId` mediumint(8) unsigned NOT NULL,
   `difficulty` tinyint(3) unsigned NOT NULL DEFAULT '0',
@@ -19082,6 +19084,7 @@ UNLOCK TABLES;
 ALTER TABLE `dungeonfinder_requirements`
  ADD PRIMARY KEY (`mapId`,`difficulty`);
 
+DROP TABLE IF EXISTS `dungeonfinder_item_rewards`;
 CREATE TABLE IF NOT EXISTS `dungeonfinder_item_rewards` (
 `id` int(10) unsigned NOT NULL,
   `min_level` smallint(3) unsigned NOT NULL COMMENT 'dbc value',
