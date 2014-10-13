@@ -587,7 +587,6 @@ dungeonForbidden LFGMgr::FindRandomDungeonsNotForPlayer(Player* plr)
 
 void LFGMgr::UpdateNeededRoles(uint64 rawGuid, LFGPlayers* information)
 {
-    // [todo: update needed tank, dps, heals here]
     uint8 tankCount = 0, dpsCount = 0, healCount = 0;
     for (roleMap::iterator it = information->currentRoles.begin(); it != information->currentRoles.end(); ++it)
     {
@@ -711,8 +710,6 @@ void LFGMgr::AddToWaitMap(uint8 role, std::set<uint32> dungeons)
 
 void LFGMgr::FindQueueMatches()
 {
-    // see notes on implementation (Q.II)
-    
     // Fetch information on all the queued players/groups
     for (queueSet::iterator itr = m_queueSet.begin(); itr != m_queueSet.end(); ++itr)
         FindSpecificQueueMatches(*itr);
@@ -725,8 +722,56 @@ void LFGMgr::FindSpecificQueueMatches(uint64 rawGuid)
     {
         // compare to everyone else in queue for compatibility
         // after a match is found call UpdateNeededRoles
-        // before implementing: do we put them in a group before proposal? if not, m_playerData will need a new
-        //   element holding the guids of each player involved
-        //for (queueSet::iterator itr = m_queueSet.begin(); itr != m_queueSet.end(); ++itr)
+        // Use the roleMap to store player guid/role information; merge into queueInfo struct & delete other struct/map entry
+        for (queueSet::iterator itr = m_queueSet.begin(); itr != m_queueSet.end(); ++itr)
+        {
+            LFGPlayers* matchInfo = GetPlayerOrPartyData(*itr);
+            if (matchInfo)
+            {
+                // 1. iterate through queueInfo's dungeon set and search the matchInfo for a matching entry.
+                // 2. if an(y) entry is found, great and proceed!
+                // 2a. if an entry is found and the amounts of players-to-roles are compatible, make
+                //     a new map of only the inter-compatible dungeons and use that if the other checks pass
+                // 3. Regardless of outcome, after the end of calculations send a LFGQueueStatus packet
+                bool fullyCompatible = false;
+                std::set<uint32> compatibleDungeons;
+                
+                for (std::set<uint32>::iterator dItr = matchInfo->dungeonList.begin(); dItr != matchInfo->dungeonList.end(); ++itr)
+                {
+                    if (queueInfo->dungeonList.find(*dItr) != queueInfo->dungeonList.end())
+                        compatibleDungeons.insert(*dItr);
+                }
+                
+                if (!compatibleDungeons.empty())
+                {
+                    // check for player / role count compatibility via:
+                    // boolean function AreRoleMapsCompatible(LFGPlayers* 1, LFGPlayers* 2)
+                    // if function returns true, then merge groups into one
+                    // if (RoleMapsAreCompatible(queueInfo, matchInfo))
+                    //     MergeGroups();
+                }
+            }
+        }
     }
+}
+
+bool LFGMgr::RoleMapsAreCompatible(LFGPlayers* groupOne, LFGPlayers* groupTwo)
+{
+    // When this is called we already know that the dungeons match, so just focus on roles
+    // compare: neededX(role) from each struct and the amount of people per role in the roleMap
+    if ((groupOne->currentRoles.size() + groupTwo->currentRoles.size()) > NORMAL_TOTAL_ROLE_COUNT)
+        return false;
+    else
+    {
+        // make sure we don't have too many players of a certain role here
+        if (((NORMAL_DAMAGE_COUNT - groupOne->neededDps) + (NORMAL_DAMAGE_COUNT - groupTwo->neededDps)) > NORMAL_DAMAGE_COUNT)
+            return false;
+        else if (((NORMAL_TANK_OR_HEALER_COUNT - groupOne->neededHealers) + (NORMAL_TANK_OR_HEALER_COUNT - groupTwo->neededHealers)) > NORMAL_TANK_OR_HEALER_COUNT)
+            return false;
+        else if (((NORMAL_TANK_OR_HEALER_COUNT - groupOne->neededTanks) + (NORMAL_TANK_OR_HEALER_COUNT - groupTwo->neededTanks)) > NORMAL_TANK_OR_HEALER_COUNT)
+            return false;
+        else
+            return true; // the player/role counts line up!
+    }
+    return false;
 }

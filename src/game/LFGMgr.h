@@ -175,8 +175,9 @@ enum LFGRoles
 /// Role amounts
 enum LFGRoleCount
 {
-    NORMAL_TANK_OR_HEALER_COUNT                  = 1,
-    NORMAL_DAMAGE_COUNT                          = 3
+    NORMAL_TANK_OR_HEALER_COUNT                  = 1,      // Tanks / Heals
+    NORMAL_DAMAGE_COUNT                          = 3,      // DPS
+    NORMAL_TOTAL_ROLE_COUNT                      = 5       // Amount of players total per normal dungeon
 }
 
 enum DungeonTypes
@@ -375,6 +376,9 @@ protected:
     
     /// Add the player to their respective waiting map for their dungeon
     void AddToWaitMap(uint8 role, std::set<uint32> dungeons);
+    
+    /// Compares two groups/players to see if their role combinations are compatible
+    bool RoleMapsAreCompatible(LFGPlayers* groupOne, LFGPlayers* groupTwo);
     
 private:
     /// Daily occurences of a player doing X type dungeon
