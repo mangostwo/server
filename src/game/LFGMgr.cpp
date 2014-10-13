@@ -46,6 +46,7 @@ LFGMgr::~LFGMgr()
     m_dailyLKHeroic.clear();
     
     m_playerData.clear();
+    m_queueSet.clear();
     
     m_tankWaitTime.clear();
     m_healerWaitTime.clear();
@@ -111,6 +112,7 @@ void LFGMgr::Update()
     }
     
     // todo: overall average time (similar to above)
+    FindQueueMatches();
 }
 
 void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string comments, Player* plr)
@@ -131,7 +133,9 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
         if (currentInfo->currentState == LFG_STATE_QUEUED)
         {
             // remove from that queue, place in this one
-            // todo: implement queue system
+            queueSet::iterator qItr = m_queueSet.find(rawGuid);
+            if (qItr != m_queueSet.end())
+                m_queueSet.erase(qItr);
         }
         
         // are they already in a dungeon?
@@ -581,17 +585,64 @@ dungeonForbidden LFGMgr::FindRandomDungeonsNotForPlayer(Player* plr)
     return randomDungeons;
 }
 
+void LFGMgr::UpdateNeededRoles(uint64 rawGuid, LFGPlayers* information)
+{
+    // [todo: update needed tank, dps, heals here]
+    uint8 tankCount = 0, dpsCount = 0, healCount = 0;
+    for (roleMap::iterator it = information->currentRoles.begin(); it != information->currentRoles.end(); ++it)
+    {
+        uint8 withoutLeader = it->second;
+        withoutLeader &= ~PLAYER_ROLE_LEADER;
+        
+        switch (withoutLeader)
+        {
+            case PLAYER_ROLE_TANK:
+                ++tankCount;
+                break;
+            case PLAYER_ROLE_HEALER:
+                ++healCount;
+                break;
+            case PLAYER_ROLE_DAMAGE:
+                ++dpsCount;
+                break;
+        }
+    }
+
+    std::set<uint32>::iterator itr = information->dungeonList.begin();
+    
+    // check dungeon type for max of each role [normal heroic etc.]
+    LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(*itr);
+    if (dungeon)
+    {
+        // atm we're just handling DUNGEON_DIFFICULTY_NORMAL
+        if (dungeon->difficulty == DUNGEON_DIFFICULTY_NORMAL)
+        {
+            information->neededTanks = NORMAL_TANK_OR_HEALER_COUNT - tankCount;
+            information->neededHealers = NORMAL_TANK_OR_HEALER_COUNT - healCount;
+            information->neededDps = NORMAL_DAMAGE_COUNT - dpsCount;
+        }
+    }
+    
+    m_playerData[rawGuid] = *information;
+}
+
 void LFGMgr::AddToQueue(uint64 rawGuid)
 {
     LFGPlayers* information = GetPlayerOrPartyData(rawGuid);
     if (!information)
         return;
     
+    // This will be necessary for finding matches in the queue
+    UpdateNeededRoles(rawGuid, information);
+    
     // put info into wait time maps for starters
     for (roleMap::iterator it = information->currentRoles.begin(); it != information->currentRoles.end(); ++it)
         AddToWaitMap(it->second, information->dungeonList);
         
-    // note: this function still needs to be completed
+    // just in case someone's already been in the queue.
+    queueSet::iterator qItr = m_queueSet.find(rawGuid);
+    if (qItr == m_queueSet.end())
+        m_queueSet.insert(rawGuid);
 }
 
 void LFGMgr::AddToWaitMap(uint8 role, std::set<uint32> dungeons)
@@ -655,5 +706,27 @@ void LFGMgr::AddToWaitMap(uint8 role, std::set<uint32> dungeons)
         } break;
         default:
             break;
+    }
+}
+
+void LFGMgr::FindQueueMatches()
+{
+    // see notes on implementation (Q.II)
+    
+    // Fetch information on all the queued players/groups
+    for (queueSet::iterator itr = m_queueSet.begin(); itr != m_queueSet.end(); ++itr)
+        FindSpecificQueueMatches(*itr);
+}
+
+void LFGMgr::FindSpecificQueueMatches(uint64 rawGuid)
+{
+    LFGPlayers* queueInfo = GetPlayerOrPartyData(rawGuid);
+    if (queueInfo)
+    {
+        // compare to everyone else in queue for compatibility
+        // after a match is found call UpdateNeededRoles
+        // before implementing: do we put them in a group before proposal? if not, m_playerData will need a new
+        //   element holding the guids of each player involved
+        //for (queueSet::iterator itr = m_queueSet.begin(); itr != m_queueSet.end(); ++itr)
     }
 }

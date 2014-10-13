@@ -42,9 +42,10 @@ const uint32 WOTLK_SPECIAL_HEROIC_ITEM = 47241;
 const uint32 WOTLK_SPECIAL_HEROIC_AMNT = 2;
 
 /// Default average queue time (in case we don't have data to base calculations on)
-const int32 QUEUE_DEFAULT_TIME = 15*MINUTE*IN_MILLISECONDS;     // 15 minutes
+const int32 QUEUE_DEFAULT_TIME = 15*MINUTE*60;                  // 15 minutes [system is measured in seconds]
 
 typedef std::set<uint32> dailyEntries;                          // for players who did one of X type instance per day
+typedef std::set<uint64> queueSet;                              // List of players / groups in the queue
 typedef UNORDERED_MAP<uint32, uint32> dungeonEntries;           // ID, Entry
 typedef UNORDERED_MAP<uint32, uint32> dungeonForbidden;         // Entry, LFGForbiddenTypes
 typedef UNORDERED_MAP<uint64, dungeonForbidden> partyForbidden; // ObjectGuid (raw), map of locked dungeons
@@ -170,6 +171,13 @@ enum LFGRoles
     PLAYER_ROLE_HEALER                           = 4,
     PLAYER_ROLE_DAMAGE                           = 8
 };
+
+/// Role amounts
+enum LFGRoleCount
+{
+    NORMAL_TANK_OR_HEALER_COUNT                  = 1,
+    NORMAL_DAMAGE_COUNT                          = 3
+}
 
 enum DungeonTypes
 {
@@ -334,11 +342,30 @@ public:
     /// Queue Functions Below
     
     /**
+     * Find the player's or group's information and update the system with
+     *     the amount of each role they need to find.
+     * 
+     * @param rawGuid The raw value of their ObjectGuid
+     * @param information The LFGPlayers structure containing their information
+     */
+    void UpdateNeededRoles(uint64 rawGuid, LFGPlayers* information);
+    
+    /**
      * @brief Add the player or group to the Dungeon Finder queue
      * 
      * @param rawGuid the raw value of said player/group's ObjectGuid
      */
     void AddToQueue(uint64 rawGuid);
+    
+    /// Search the queue for compatible matches
+    void FindQueueMatches();
+    
+    /**
+     * @brief Search the queue for matches based off of one's guid
+     * 
+     * @param rawGuid The player or group's guid
+     */
+    void FindSpecificQueueMatches(uint64 rawGuid);
     
 protected:
     bool IsSeasonal(uint32 dbcFlags) { return ((dbcFlags & LFG_FLAG_SEASONAL) != 0) ? true : false; }
@@ -358,6 +385,7 @@ private:
     
     /// General info related to joining / leaving the dungeon finder
     playerData m_playerData;
+    queueSet   m_queueSet;
     
     /// Wait times for the queue
     waitTimeMap m_tankWaitTime;
