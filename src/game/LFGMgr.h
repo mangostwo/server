@@ -380,6 +380,15 @@ protected:
     /// Compares two groups/players to see if their role combinations are compatible
     bool RoleMapsAreCompatible(LFGPlayers* groupOne, LFGPlayers* groupTwo);
     
+    /**
+     * @brief Merges two players/groups/etc into one for dungeon assignment.
+     * 
+     * @param rawGuidOne The guid assigned to the first group in m_playerData
+     * @param rawGuidTwo The guid assigned to the second group in m_playerData
+     * @param compatibleDungeons The dungeons that both players or groups agreed to doing
+     */
+    void MergeGroups(uint64 rawGuidOne, uint64 rawGuidTwo, std::set<uint32> compatibleDungeons);
+    
 private:
     /// Daily occurences of a player doing X type dungeon
     dailyEntries m_dailyAny;

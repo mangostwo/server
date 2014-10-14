@@ -744,11 +744,10 @@ void LFGMgr::FindSpecificQueueMatches(uint64 rawGuid)
                 
                 if (!compatibleDungeons.empty())
                 {
-                    // check for player / role count compatibility via:
-                    // boolean function AreRoleMapsCompatible(LFGPlayers* 1, LFGPlayers* 2)
+                    // check for player / role count compatibility
                     // if function returns true, then merge groups into one
-                    // if (RoleMapsAreCompatible(queueInfo, matchInfo))
-                    //     MergeGroups();
+                    if (RoleMapsAreCompatible(queueInfo, matchInfo))
+                        MergeGroups(rawGuid, *itr, compatibleDungeons);
                 }
             }
         }
@@ -774,4 +773,40 @@ bool LFGMgr::RoleMapsAreCompatible(LFGPlayers* groupOne, LFGPlayers* groupTwo)
             return true; // the player/role counts line up!
     }
     return false;
+}
+
+void LFGMgr::MergeGroups(uint64 rawGuidOne, uint64 rawGuidTwo, std::set<uint32> compatibleDungeons)
+{
+    // merge into the entry for rawGuidOne, then see if they are
+    // able to enter the dungeon at this point or not
+    LFGPlayers* mainGroup   = GetPlayerOrPartyData(rawGuidOne);
+    LFGPlayers* bufferGroup = GetPlayerOrPartyData(rawGuidTwo);
+    
+    if (!mainGroup || !bufferGroup)
+        return;
+        
+    // update the dungeon selection with the compatible ones
+    mainGroup->dungeonList.clear();
+    mainGroup->dungeonList = compatibleDungeons;
+        
+    // move players / roles into a single roleMap
+    for (roleMap::iterator it = bufferGroup->currentRoles.begin(); it != bufferGroup->currentRoles.end(); ++it)
+        mainGroup->currentRoles[it->first] = it->second;
+        
+    // update the role count / needed role info
+    UpdateNeededRoles(rawGuidOne, mainGroup);
+    
+    // being safe
+    mainGroup = GetPlayerOrPartyData(rawGuidOne);
+    
+    // Then do the following:
+    // if ((mainGroup->neededTanks == 0) && (mainGroup->neededHealers == 0) && (mainGroup->neededDps == 0))
+    // {
+    //     SendQueueStatus(...);
+    //     SendDungeonProposal(...);
+    // }
+    // else
+    //     SendQueueStatus(...);
+    //
+    // m_playerData.erase(rawGuidTwo);
 }
