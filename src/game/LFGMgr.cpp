@@ -30,6 +30,7 @@
 #include "LFGMgr.h"
 #include "Object.h"
 #include "Player.h"
+#include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "SharedDefines.h"
 #include "WorldSession.h"
@@ -110,9 +111,29 @@ void LFGMgr::Update()
             dpsItr->second = waitInfo;
         }
     }
+    for (waitTimeMap::iterator avgItr = m_avgWaitTime.begin(); avgItr != m_avgWaitTime.end(); ++avgItr)
+    {
+        LFGWait waitInfo = avgItr->second;
+        if (waitInfo.doAverage)
+        {
+            int32 lastTime = waitInfo.previousTime;
+            int32 thisTime = waitInfo.time;
+            
+            // average of the two join times
+            waitInfo.time = (thisTime + lastTime) / 2;
+            
+            // now set what was just the current wait time to the previous time for a later calculation
+            waitInfo.previousTime = thisTime;
+            waitInfo.doAverage = false;
+            
+            avgItr->second = waitInfo;
+        }
+    }
     
     // todo: overall average time (similar to above)
+    
     FindQueueMatches();
+    SendQueueStatus();
 }
 
 void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string comments, Player* plr)
@@ -706,6 +727,19 @@ void LFGMgr::AddToWaitMap(uint8 role, std::set<uint32> dungeons)
         default:
             break;
     }
+    
+    // insert the average time regardless of role
+    for (std::set<uint32>::iterator itr = dungeons.begin(); itr != dungeons.end(); ++itr)
+    {
+        waitTimeMap::iterator it = m_avgWaitTime.find(*itr);
+        if (it != m_avgWaitTime.end())
+            ++it->second.playerCount;
+        else
+        {
+            LFGWait waitInfo(QUEUE_DEFAULT_TIME, -1, 1, false);
+            m_avgWaitTime[*itr] = waitInfo;
+        }
+    }
 }
 
 void LFGMgr::FindQueueMatches()
@@ -777,6 +811,9 @@ bool LFGMgr::RoleMapsAreCompatible(LFGPlayers* groupOne, LFGPlayers* groupTwo)
 
 void LFGMgr::MergeGroups(uint64 rawGuidOne, uint64 rawGuidTwo, std::set<uint32> compatibleDungeons)
 {
+    // todo: perhaps create a third entry in m_playerData so in case the players
+    //       refuse to group up their old data is still here
+    
     // merge into the entry for rawGuidOne, then see if they are
     // able to enter the dungeon at this point or not
     LFGPlayers* mainGroup   = GetPlayerOrPartyData(rawGuidOne);
@@ -801,12 +838,65 @@ void LFGMgr::MergeGroups(uint64 rawGuidOne, uint64 rawGuidTwo, std::set<uint32> 
     
     // Then do the following:
     // if ((mainGroup->neededTanks == 0) && (mainGroup->neededHealers == 0) && (mainGroup->neededDps == 0))
-    // {
-    //     SendQueueStatus(...);
     //     SendDungeonProposal(...);
-    // }
-    // else
-    //     SendQueueStatus(...);
     //
     // m_playerData.erase(rawGuidTwo);
+}
+
+void LFGMgr::SendQueueStatus()
+{
+    // First we should get the current time
+    time_t timeNow = time(0);
+    
+    // Check who is listed as being in the queue
+    for (queueSet::iterator itr = m_queueSet.begin(); itr != m_queueSet.end(); ++itr)
+    {
+        // make sure it's not a false entry
+        LFGPlayers* queueInfo = GetPlayerOrPartyData(*itr);
+        if (queueInfo && queueInfo->currentState == LFG_STATE_QUEUED)
+        {
+            for (roleMap::iterator rItr = queueInfo->currentRoles.begin(); rItr != queueInfo->currentRoles.end(); ++rItr)
+            {
+                if (Player* pPlayer = ObjectAccessor::FindPlayer(ObjectGuid(rItr->first)))
+                {
+                    uint32 dungeonId = *queueInfo->dungeonList.begin();
+                    
+                    LFGQueueStatus status;
+                    status.dungeonID        = dungeonId;
+                    status.neededTanks      = queueInfo->neededTanks;
+                    status.neededHeals      = queueInfo->neededHealers;
+                    status.neededDps        = queueInfo->neededDps;
+                    status.timeSpentInQueue = uint32(timeNow - queueInfo->joinedTime);
+                    
+                    int32 playerWaitTime;
+                    
+                    // strip leader flag from role
+                    uint8 withoutLeader = rItr->second;
+                    withoutLeader &= ~PLAYER_ROLE_LEADER;
+                    
+                    switch (withoutLeader)
+                    {
+                        case PLAYER_ROLE_TANK:
+                            playerWaitTime = m_tankWaitTime[dungeonId].time;
+                            break;
+                        case PLAYER_ROLE_HEALER:
+                            playerWaitTime = m_healerWaitTime[dungeonId].time;
+                            break;
+                        case PLAYER_ROLE_DAMAGE:
+                            playerWaitTime = m_dpsWaitTime[dungeonId].time;
+                            break;
+                    }
+                    
+                    status.playerAvgWaitTime = playerWaitTime;
+                    status.dpsAvgWaitTime    = m_dpsWaitTime[dungeonId].time;
+                    status.healerAvgWaitTime = m_healerWaitTime[dungeonId].time;
+                    status.tankAvgWaitTime   = m_tankWaitTime[dungeonId].time;
+                    status.avgWaitTime       = m_avgWaitTime[dungeonId].time;
+                    
+                    // Send packet to client
+                    pPlayer->GetSession()->SendLfgQueueStatus(status);
+                }
+            }
+        }
+    }
 }

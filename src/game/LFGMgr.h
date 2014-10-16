@@ -178,7 +178,7 @@ enum LFGRoleCount
     NORMAL_TANK_OR_HEALER_COUNT                  = 1,      // Tanks / Heals
     NORMAL_DAMAGE_COUNT                          = 3,      // DPS
     NORMAL_TOTAL_ROLE_COUNT                      = 5       // Amount of players total per normal dungeon
-}
+};
 
 enum DungeonTypes
 {
@@ -367,6 +367,9 @@ public:
      * @param rawGuid The player or group's guid
      */
     void FindSpecificQueueMatches(uint64 rawGuid);
+    
+    /// Send a periodic status update for queued players
+    void SendQueueStatus();
     
 protected:
     bool IsSeasonal(uint32 dbcFlags) { return ((dbcFlags & LFG_FLAG_SEASONAL) != 0) ? true : false; }
