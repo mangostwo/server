@@ -8,7 +8,7 @@
  *
  * \section begin Where to begin?
  * If you are interested in understanding the source code of this project you can begin
- * - <A HREF="http://github.com/mangoswiki/wiki/">On the wiki</A> to get an overview of the different modules of the server
+ * - <A HREF="http://getmangos.eu/wiki/">On the wiki</A> to get an overview of the different modules of the server
  * - <A HREF="./modules.html">In this source doumentation</A>, starting at the module hierarchy
  *
  * \section conventions Naming/Coding conventions
