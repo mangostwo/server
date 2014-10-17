@@ -2817,7 +2817,7 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
          * @param triggeredByAura the \ref Aura that triggered this
          * @param originalCaster the original caster if any
          * @param triggeredBy the \ref SpellEntry that triggered this cast, if any
-		 * @param calculateDamage Indicates whether the damage calculation must be performed (in some cases, the calculation has already been executed).
+         * @param calculateDamage Indicates whether the damage calculation must be performed (in some cases, the calculation has already been executed).
          * \todo What's the original caster?
          */
         void CastCustomSpell(Unit* Victim, SpellEntry const* spellInfo, int32 const* bp0, int32 const* bp1, int32 const* bp2, bool triggered, Item* castItem = NULL, Aura* triggeredByAura = NULL, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = NULL);

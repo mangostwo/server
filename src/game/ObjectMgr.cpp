@@ -698,7 +698,7 @@ void ObjectMgr::LoadCreatureTemplates()
             const_cast<CreatureInfo*>(cInfo)->MeleeBaseAttackTime  = BASE_ATTACK_TIME;
 
         if (cInfo->RangedBaseAttackTime == 0)
-			const_cast<CreatureInfo*>(cInfo)->RangedBaseAttackTime = BASE_ATTACK_TIME;
+            const_cast<CreatureInfo*>(cInfo)->RangedBaseAttackTime = BASE_ATTACK_TIME;
 
         if (cInfo->NpcFlags & UNIT_NPC_FLAG_SPELLCLICK)
         {
@@ -9165,11 +9165,11 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
                 continue;
             }
 
-			if (TrainerSpellData const* tSpells = cInfo->TrainerTemplateId ? GetNpcTrainerTemplateSpells(cInfo->TrainerTemplateId) : NULL)
+            if (TrainerSpellData const* tSpells = cInfo->TrainerTemplateId ? GetNpcTrainerTemplateSpells(cInfo->TrainerTemplateId) : NULL)
             {
                 if (tSpells->spellList.find(spell) != tSpells->spellList.end())
                 {
-					sLog.outErrorDb("Table `%s` (Entry: %u) has spell %u listed in trainer template %u, ignore", tableName, entry, spell, cInfo->TrainerTemplateId);
+                    sLog.outErrorDb("Table `%s` (Entry: %u) has spell %u listed in trainer template %u, ignore", tableName, entry, spell, cInfo->TrainerTemplateId);
                     continue;
                 }
             }

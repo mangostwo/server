@@ -163,9 +163,9 @@ struct CreatureInfo
     {
         if (CreatureTypeFlags & CREATURE_TYPEFLAGS_HERBLOOT)
             return SKILL_HERBALISM;
-		else if (CreatureTypeFlags & CREATURE_TYPEFLAGS_MININGLOOT)
+        else if (CreatureTypeFlags & CREATURE_TYPEFLAGS_MININGLOOT)
             return SKILL_MINING;
-		else if (CreatureTypeFlags & CREATURE_TYPEFLAGS_ENGINEERLOOT)
+        else if (CreatureTypeFlags & CREATURE_TYPEFLAGS_ENGINEERLOOT)
             return SKILL_ENGINEERING;
         else
             return SKILL_SKINNING;                          // normal case
@@ -173,12 +173,12 @@ struct CreatureInfo
 
     bool IsExotic() const
     {
-		return (CreatureTypeFlags & CREATURE_TYPEFLAGS_EXOTIC);
+        return (CreatureTypeFlags & CREATURE_TYPEFLAGS_EXOTIC);
     }
 
     bool isTameable(bool exotic) const
     {
-		if (CreatureType != CREATURE_TYPE_BEAST || Family == 0 || (CreatureTypeFlags & CREATURE_TYPEFLAGS_TAMEABLE) == 0)
+        if (CreatureType != CREATURE_TYPE_BEAST || Family == 0 || (CreatureTypeFlags & CREATURE_TYPEFLAGS_TAMEABLE) == 0)
             return false;
 
         // if can tame exotic then can tame any temable
@@ -527,7 +527,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 GetCorpseDelay() const { return m_corpseDelay; }
         bool IsRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
         bool IsCivilian() const { return GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_CIVILIAN; }
-		bool IsGuard() const { return GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_GUARD; }
+        bool IsGuard() const { return GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_GUARD; }
 
         bool CanWalk() const { return GetCreatureInfo()->InhabitType & INHABIT_GROUND; }
         virtual bool CanSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }

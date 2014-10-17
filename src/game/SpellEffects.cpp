@@ -6769,7 +6769,7 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
 
     switch (m_spellInfo->SpellFamilyName)
     {
-		case SPELLFAMILY_GENERIC:
+        case SPELLFAMILY_GENERIC:
         {
             switch (m_spellInfo->Id)
             {

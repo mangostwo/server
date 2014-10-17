@@ -1551,7 +1551,7 @@ void SpellMgr::LoadSpellBonuses()
 
         SpellBonusEntry sbe;
 
-		sbe.direct_damage = fields[1].GetFloat();
+        sbe.direct_damage = fields[1].GetFloat();
         sbe.dot_damage    = fields[2].GetFloat();
         sbe.ap_bonus      = fields[3].GetFloat();
         sbe.ap_dot_bonus   = fields[4].GetFloat();
@@ -1629,7 +1629,7 @@ void SpellMgr::LoadSpellBonuses()
             dot_diff = std::abs(sbe.dot_damage - dot_calc);
         }
 
-		// direct bonus
+        // direct bonus
         if (direct_diff < 0.02f && !need_dot && !sbe.ap_bonus && !sbe.ap_dot_bonus)
             sLog.outErrorDb("`spell_bonus_data` entry for spell %u `direct_bonus` not needed (data from table: %f, calculated %f, difference of %f) and `dot_bonus` also not used",
                             entry, sbe.direct_damage, direct_calc, direct_diff);
@@ -1648,7 +1648,7 @@ void SpellMgr::LoadSpellBonuses()
         else if (!need_dot && sbe.dot_damage)
             { sLog.outErrorDb("`spell_bonus_data` entry for spell %u `dot_bonus` not used (spell not have periodic affects)", entry); }
 
-		if (!need_direct && sbe.ap_bonus)
+        if (!need_direct && sbe.ap_bonus)
             { sLog.outErrorDb("`spell_bonus_data` entry for spell %u `ap_bonus` not used (spell not have non-periodic affects)", entry); }
         else if (!need_dot && sbe.ap_dot_bonus)
             { sLog.outErrorDb("`spell_bonus_data` entry for spell %u `ap_dot_bonus` not used (spell not have periodic affects)", entry); }
@@ -2072,7 +2072,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     // Shade Soul Channel and Akama Soul Channel
                     if ((spellInfo_1->Id == 40401 && spellInfo_2->Id == 40447) ||
                             (spellInfo_2->Id == 40401 && spellInfo_1->Id == 40447))
-						{ return false; }
+                        { return false; }
 
                     // Eye Blast visual and Eye Blast
                     if ((spellInfo_1->Id == 39908 && spellInfo_2->Id == 40017) ||
