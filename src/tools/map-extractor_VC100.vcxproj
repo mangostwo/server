@@ -182,6 +182,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="map-extractor\loadlib\wdt.cpp" />
+    <ResourceCompile Include="map-extractor\map-extractor.rc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="map-extractor\loadlib\adt.h" />

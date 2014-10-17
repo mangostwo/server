@@ -164,6 +164,7 @@
     <ClCompile Include="..\..\src\game\vmap\TileAssembler.cpp" />
     <ClCompile Include="..\..\src\game\vmap\VMapManager2.cpp" />
     <ClCompile Include="..\..\src\game\vmap\WorldModel.cpp" />
+    <ResourceCompile Include="vmap-assembler\vmap-assembler.rc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\game\vmap\BIH.h" />

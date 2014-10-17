@@ -160,6 +160,7 @@
     <ClCompile Include="Movemap-Generator\TerrainBuilder.cpp" />
     <ClCompile Include="Movemap-Generator\VMapExtensions.cpp" />
     <ClCompile Include="Movemap-Generator\IntermediateValues.cpp" />
+    <ResourceCompile Include="Movemap-Generator\Movemap-Generator.rc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\game\vmap\BIH.h" />
