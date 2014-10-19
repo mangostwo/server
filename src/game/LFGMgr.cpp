@@ -49,9 +49,14 @@ LFGMgr::~LFGMgr()
     m_playerData.clear();
     m_queueSet.clear();
     
+    m_playerStatusMap.clear();
+    
+    m_roleCheckMap.clear();
+    
     m_tankWaitTime.clear();
     m_healerWaitTime.clear();
     m_dpsWaitTime.clear();
+    m_avgWaitTime.clear();
 }
 
 void LFGMgr::Update()
@@ -130,8 +135,7 @@ void LFGMgr::Update()
         }
     }
     
-    // todo: overall average time (similar to above)
-    
+    // Queue System    
     FindQueueMatches();
     SendQueueStatus();
 }
@@ -146,6 +150,8 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
     uint32 randomDungeonID; // used later if random dungeon has been chosen
     
     LFGPlayers* currentInfo = GetPlayerOrPartyData(rawGuid);
+
+    bool groupCurrentlyInDungeon = pGroup && pGroup->isLFGGroup() && currentInfo->currentState != LFG_STATE_FINISHED_DUNGEON
     
     // check if we actually have info on the player/group right now
     if (currentInfo)
@@ -153,14 +159,15 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
         // are they already queued?
         if (currentInfo->currentState == LFG_STATE_QUEUED)
         {
-            // remove from that queue, place in this one
+            // remove from that queue so they can later join this one
             queueSet::iterator qItr = m_queueSet.find(rawGuid);
             if (qItr != m_queueSet.end())
                 m_queueSet.erase(qItr);
+            // note: do we need to send a packet telling them the current queue is over?
         }
         
         // are they already in a dungeon?
-        if (pGroup && pGroup->isLFGGroup() && currentInfo->currentState != LFG_STATE_FINISHED_DUNGEON)
+        if (groupCurrentlyInDungeon)
         {
             std::set<uint32> currentDungeon = currentInfo->dungeonList;
             
@@ -289,49 +296,70 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
         return;
     }
     
-    // place original dungeon ID back in the set
-    if (isRandom)
-    {
-        dungeons.clear();
-        dungeons.insert(randomDungeonID);
-    }
-    
     if (pGroup)
     {
         // role check, then queue
-        //   * Get each player's roles and add to the roleMap
+        uint64 leaderRawGuid = plr->GetObjectGuid().GetRawValue();
+        
+        // fill up an empty role map, just so that we store the player's guids
+        roleMap groupRoles;
+        for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+        {
+            if (Player* pGroupPlr = itr->getSource())
+            {
+                uint64 plrGuid = pGroupPlr->GetObjectGuid().GetRawValue();
+                groupRoles[plrGuid] = 0;
+            }
+        }
+        
+        LFGRoleCheck roleCheck;
+        roleCheck.state = LFG_ROLECHECK_INITIALITING;
+        roleCheck.dungeonList = dungeons;
+        roleCheck.randomDungeonID = randomDungeonID;
+        roleCheck.currentRoles = groupRoles;
+        roleCheck.leaderGuidRaw = leaderRawGuid;
+        roleCheck.waitForRoleTime = time_t(time(nullptr) + LFG_TIME_ROLECHECK);
+
+        m_roleCheckMap[rawGuid] = roleCheck;
+        
+        // place original dungeon ID back in the set
+        if (isRandom)
+        {
+            dungeons.clear();
+            dungeons.insert(randomDungeonID);
+        }
+        
         return; // temporary
     }
     else
     {
-        if (currentInfo)
+        // place original dungeon ID back in the set
+        if (isRandom)
         {
-            currentInfo->currentState = LFG_STATE_QUEUED;
-            currentInfo->dungeonList  = dungeons;
-            currentInfo->comments     = comments;
-            currentInfo->isGroup      = false;
-            
-            currentInfo->currentRoles.clear();
-            currentInfo->currentRoles[rawGuid] = (uint8)roles;
-            
-            currentInfo->joinedTime = time(nullptr);
-            m_playerData[rawGuid] = *currentInfo;
-        }
-        else
-        {
-            // set up a role map and then an lfgplayer struct
-            roleMap playerRole;
-            playerRole[rawGuid] = (uint8)roles;
-            
-            LFGPlayers playerInfo(LFG_STATE_QUEUED, dungeons, playerRole, comments, false, time(nullptr), 0, 0, 0);
-            m_playerData[rawGuid] = playerInfo;
+            dungeons.clear();
+            dungeons.insert(randomDungeonID);
         }
         
+        // set up a role map and then an lfgplayer struct
+        roleMap playerRole;
+        playerRole[rawGuid] = (uint8)roles;
+            
+        LFGPlayers playerInfo(LFG_STATE_QUEUED, dungeons, playerRole, comments, false, time(nullptr), 0, 0, 0);
+        m_playerData[rawGuid] = playerInfo;
+        
+        // set up a status struct for client requests/updates
+        LFGPlayerStatus plrStatus;
+        plrStatus.updateType  = LFG_UPDATE_JOIN;
+        plrStatus.updateType  = LFG_STATE_QUEUED;
+        plrStatus.dungeonList = dungeons;
+        plrStatus.comment = comments;
+        m_playerStatusMap[rawGuid] = plrStatus;
+        
         // Send information back to the client
-        //plr->GetSession()->SendLfgJoinResult(result, LFG_STATE_QUEUED, partyLockedDungeons);
-        // fix up SendLfgUpdate in lfghander and send after join result.
-        // then call AddToQueue(rawGuid);
+        plr->GetSession()->SendLfgJoinResult(result, LFG_STATE_QUEUED, partyLockedDungeons);
+        plr->GetSession()->SendLfgUpdate(false, plrStatus);
     }
+    AddToQueue(rawGuid);
 }
 
 void LFGMgr::LeaveLFG()
@@ -407,6 +435,17 @@ LfgJoinResult LFGMgr::GetJoinResult(Player* plr)
         result = ERR_LFG_OK;
             
     return result;
+}
+
+LFGPlayerStatus LFGMgr::GetPlayerStatus(uint64 rawGuid)
+{
+    LFGPlayerStatus status;
+    
+    LFGPlayerStatus::iterator it = m_playerStatusMap.find(rawGuid);
+    if (it != m_playerStatusMap.end())
+        status = it->second;
+    
+    return status;
 }
 
 ItemRewards LFGMgr::GetDungeonItemRewards(uint32 dungeonId, DungeonTypes type)
@@ -810,10 +849,7 @@ bool LFGMgr::RoleMapsAreCompatible(LFGPlayers* groupOne, LFGPlayers* groupTwo)
 }
 
 void LFGMgr::MergeGroups(uint64 rawGuidOne, uint64 rawGuidTwo, std::set<uint32> compatibleDungeons)
-{
-    // todo: perhaps create a third entry in m_playerData so in case the players
-    //       refuse to group up their old data is still here
-    
+{    
     // merge into the entry for rawGuidOne, then see if they are
     // able to enter the dungeon at this point or not
     LFGPlayers* mainGroup   = GetPlayerOrPartyData(rawGuidOne);
@@ -840,7 +876,7 @@ void LFGMgr::MergeGroups(uint64 rawGuidOne, uint64 rawGuidTwo, std::set<uint32> 
     // if ((mainGroup->neededTanks == 0) && (mainGroup->neededHealers == 0) && (mainGroup->neededDps == 0))
     //     SendDungeonProposal(...);
     //
-    // m_playerData.erase(rawGuidTwo);
+    m_playerData.erase(rawGuidTwo);
 }
 
 void LFGMgr::SendQueueStatus()
@@ -899,4 +935,9 @@ void LFGMgr::SendQueueStatus()
             }
         }
     }
+}
+
+void LFGMgr::PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles)
+{
+    // when done call SendLfgUpdate(party)
 }

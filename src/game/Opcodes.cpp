@@ -906,7 +906,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x367*/ { "SMSG_LFG_UPDATE_PLAYER",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x368*/ { "SMSG_LFG_UPDATE_PARTY",                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x369*/ { "SMSG_LFG_UPDATE_SEARCH",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x36A*/ { "CMSG_LFG_SET_ROLES",                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
+    /*0x36A*/ { "CMSG_LFG_SET_ROLES",                           STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleLfgSetRoles               },
     /*0x36B*/ { "CMSG_LFG_SET_NEEDS",                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x36C*/ { "CMSG_LFG_BOOT_PLAYER_VOTE",                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x36D*/ { "SMSG_LFG_BOOT_PLAYER",                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },

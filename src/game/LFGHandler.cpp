@@ -127,23 +127,23 @@ void WorldSession::HandleLfgGetPlayerInfo(WorldPacket& recv_data)
     DEBUG_LOG("Sending SMSG_LFG_PLAYER_INFO...");
     WorldPacket data(SMSG_LFG_PLAYER_INFO, 1+(availableSize*34)+4+(forbiddenSize*30));
     
-    data << uint8(availableDungeons.size());                // amount of available dungeons
+    data << uint8(availableDungeons.size());                        // amount of available dungeons
     for (dungeonEntries::iterator it = availableDungeons.begin(); it != availableDungeons.end(); ++it)
     {
         DEBUG_LOG("Parsing a dungeon entry for packet");
 
-        data << uint32(it->second);                                // dungeon entry
+        data << uint32(it->second);                                 // dungeon entry
         
         DungeonTypes type = sLFGMgr.GetDungeonType(it->first);      // dungeon type
         const DungeonFinderRewards* rewards = sObjectMgr.GetDungeonFinderRewards(level); // get xp and money rewards
-        ItemRewards itemRewards = sLFGMgr.GetDungeonItemRewards(it->first, type); // item rewards
+        ItemRewards itemRewards = sLFGMgr.GetDungeonItemRewards(it->first, type);        // item rewards
         
         int32 multiplier;
         bool hasDoneToday = sLFGMgr.HasPlayerDoneDaily(pPlayer->GetGUIDLow(), type); // using variable to send later in packet
-        (hasDoneToday) ? multiplier = 1 : multiplier = 2; // 2x base reward if first dungeon of the day
+        (hasDoneToday) ? multiplier = 1 : multiplier = 2;                            // 2x base reward if first dungeon of the day
             
         data << uint8(hasDoneToday);
-        data << uint32(multiplier*rewards->baseMonetaryReward); // cash/gold reward
+        data << uint32(multiplier*rewards->baseMonetaryReward);     // cash/gold reward
         data << uint32(((uint32)multiplier)*rewards->baseXPReward); // experience reward
         data << uint32(0); // null
         data << uint32(0); // null
@@ -152,13 +152,13 @@ void WorldSession::HandleLfgGetPlayerInfo(WorldPacket& recv_data)
             ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemRewards.itemId);
             if (pProto)
             {
-                data << uint8(1); // 1 item rewarded per dungeon
-                data << uint32(itemRewards.itemId); // entry of item
-                data << uint32(pProto->DisplayInfoID); // display id of item
-                data << uint32(itemRewards.itemAmount); // amount of item reward
+                data << uint8(1);                                // 1 item rewarded per dungeon
+                data << uint32(itemRewards.itemId);              // entry of item
+                data << uint32(pProto->DisplayInfoID);           // display id of item
+                data << uint32(itemRewards.itemAmount);          // amount of item reward
             }
             else
-                data << uint8(0); // couldn't find the item reward
+                data << uint8(0);                                // couldn't find the item reward
         }
         else if (hasDoneToday && (type == DUNGEON_WOTLK_HEROIC)) // special case
         {
@@ -235,6 +235,22 @@ void WorldSession::HandleLfgGetPartyInfo(WorldPacket& recv_data)
 void WorldSession::HandleLfgGetStatus(WorldPacket& recv_data)
 {
     DEBUG_LOG("CMSG_LFG_GET_STATUS");
+}
+
+void WorldSession::HandleLfgSetRoles(WorldPacket& recv_data)
+{
+    DEBUG_LOG("CMSG_LFG_SET_ROLES");
+    
+    Player* pPlayer = GetPlayer();
+    
+    Group* pGroup = pPlayer->GetGroup();
+    if (!pGroup)                                           // role check/set is only done in groups
+        return;
+    
+    uint8 roles;
+    recv_data >> roles;
+    
+    sLFGMgr.PerformRoleCheck(pPlayer, pGroup, roles);      // handle the rules/logic in lfgmgr
 }
 
 void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
@@ -394,17 +410,49 @@ void WorldSession::SendLfgJoinResult(LfgJoinResult result, LFGState state, party
     SendPacket(&data);
 }
 
-void WorldSession::SendLfgUpdate(bool isGroup, LfgUpdateType updateType, uint32 id)
+void WorldSession::SendLfgUpdate(bool isGroup, LFGPlayerStatus status)
 {
+    uint8 dungeonSize = uint8(status.dungeonList.size());
+    
+    bool isQueued, joinLFG;
+    if (!isGroup)
+        switch (status.updateType)
+        {
+            case LFG_UPDATE_JOIN:
+            case LFG_UPDATE_ADDED_TO_QUEUE:
+                isQueued = true;
+                break;
+            case LFG_UPDATE_STATUS:
+                isQueued = (status.state == LFG_STATE_QUEUED);
+                break;
+            default:
+                isQueued = false;
+                break;
+        }
+    else
+        switch (status.updateType)
+        {
+            case LFG_UPDATE_ADDED_TO_QUEUE:
+                isQueued = true;
+            case LFG_UPDATE_PROPOSAL_BEGIN:
+                joinLFG = true;
+                break;
+            case LFG_UPDATE_STATUS:
+                isQueued = (status.state == LFG_STATE_QUEUED);
+                joinLFG = status.state != LFG_STATE_ROLECHECK && status.state != LFG_STATE_NONE;
+                break;
+        }
+    
     WorldPacket data(isGroup ? SMSG_LFG_UPDATE_PARTY : SMSG_LFG_UPDATE_PLAYER, 0);
-    data << uint8(updateType);
+    data << uint8(status.updateType);
 
-    uint8 extra = updateType == LFG_UPDATE_JOIN ? 1 : 0;
-    data << uint8(extra);
+    data << uint8(dungeonSize > 0);
 
     if (extra)
     {
-        data << uint8(0);
+        if (isGroup)
+            data << uint8(joinLFG);
+        data << uint8(isQueued);
         data << uint8(0);
         data << uint8(0);
 
@@ -415,11 +463,11 @@ void WorldSession::SendLfgUpdate(bool isGroup, LfgUpdateType updateType, uint32 
                 data << uint8(0);
         }
 
-        uint8 count = 1;
-        data << uint8(count);
-        for (uint32 i = 0; i < count; ++i)
-            data << uint32(id);
-        data << "";
+        data << uint8(dungeonSize);
+        for (std::set<uint32>::iterator it = status.dungeonList.begin(); it != status.dungeonList.end(); ++it)
+            data << uint32(*it);
+            
+        data << status.comment;
     }
     SendPacket(&data);
 }

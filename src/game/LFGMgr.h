@@ -138,6 +138,13 @@ enum LFGSpells
     LFG_COOLDOWN_SPELL = 71328,
 };
 
+enum LFGTimes
+{
+    LFG_TIME_ROLECHECK                           = 45*IN_MILLISECONDS,
+    LFG_TIME_BOOT                                = 120,
+    LFG_TIME_PROPOSAL                            = 45,
+};
+
 enum LFGState
 {
     LFG_STATE_NONE,
@@ -221,6 +228,16 @@ struct LFGPlayers
         neededHealers(NeededHealers), neededDps(NeededDps) {}
 };
 
+struct LFGRoleCheck
+{
+    LFGRoleCheckState state;      // current status of the role check
+    roleMap currentRoles;         // map of players to roles
+    std::set<uint32> dungeonList; // The dungeons this player or group are queued for 
+    uint32 randomDungeonID;       // The random dungeon ID
+    uint64 leaderGuidRaw;         // ObjectGuid(raw) of leader
+    time_t waitForRoleTime;       // How long we'll wait for the players to confirm their roles
+};
+
 struct LFGWait
 {
     int32 time;                   // current wait time for x (in seconds, so (time_t x / IN_MILLISECONDS)
@@ -248,8 +265,19 @@ struct LFGQueueStatus
     uint32 timeSpentInQueue;      // time already spent in the queue
 };
 
-typedef UNORDERED_MAP<uint64, LFGPlayers> playerData; // ObjectGuid(raw), info on specific player or group
-typedef UNORDERED_MAP<uint32, LFGWait> waitTimeMap;   // DungeonID, wait info
+/// For CMSG_LFG_GET_STATUS, SMSG_LFG_UPDATE_PARTY, and SMSG_LFG_UPDATE_PLAYER
+struct LFGPlayerStatus
+{
+    LFGState state;
+    LfgUpdateType updateType;
+    std::set<uint32> dungeonList;
+    std::string comment;
+};
+
+typedef UNORDERED_MAP<uint64, LFGPlayers> playerData;           // ObjectGuid(raw), info on specific player or group
+typedef UNORDERED_MAP<uint32, LFGWait> waitTimeMap;             // DungeonID, wait info
+typedef UNORDERED_MAP<uint64, LFGRoleCheck> roleCheckMap;       // ObjectGuid(raw) of group, role information
+typedef UNORDERED_MAP<uint64, LFGPlayerStatus> playerStatusMap; // ObjectGuid(raw), info on specific players only
 
 // End Section: Enumerations & Structures
 
@@ -282,6 +310,13 @@ public:
      * @param plr The pointer to the player
      */
     LfgJoinResult GetJoinResult(Player* plr);
+    
+    /**
+     * @brief Fetch the playerstatus struct of a player on request, if existant
+     * 
+     * @param rawGuid the player's objectguid value
+     */
+    LFGPlayerStatus GetPlayerStatus(uint64 rawGuid);
     
     /**
      * @brief Used to fetch the item rewards of a dungeon from the database
@@ -371,6 +406,17 @@ public:
     /// Send a periodic status update for queued players
     void SendQueueStatus();
     
+    /// Role-Related Functions
+    
+    /**
+     * @brief Set and/or confirm roles for a group.
+     * 
+     * @param pPlayer The pointer to the player issuing the request
+     * @param pGroup The pointer to that player's group
+     * @param roles The group leader's role(s)
+     */
+    void PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles);
+    
 protected:
     bool IsSeasonal(uint32 dbcFlags) { return ((dbcFlags & LFG_FLAG_SEASONAL) != 0) ? true : false; }
     
@@ -402,6 +448,12 @@ private:
     /// General info related to joining / leaving the dungeon finder
     playerData m_playerData;
     queueSet   m_queueSet;
+    
+    /// Dungeon Finder Status for players
+    playerStatusMap m_playerStatusMap;
+    
+    /// Role check information
+    roleCheckMap m_roleCheckMap;
     
     /// Wait times for the queue
     waitTimeMap m_tankWaitTime;

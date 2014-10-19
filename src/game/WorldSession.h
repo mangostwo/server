@@ -233,7 +233,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendPetNameInvalid(uint32 error, const std::string& name, DeclinedName* declinedName);
         void SendLfgSearchResults(LfgType type, uint32 entry);
         void SendLfgJoinResult(LfgJoinResult result, LFGState state, partyForbidden const& lockedDungeons);
-        void SendLfgUpdate(bool isGroup, LfgUpdateType updateType, uint32 id);
+        void SendLfgUpdate(bool isGroup, LFGPlayerStatus status);
         void SendLfgQueueStatus(LFGQueueStatus const& status);
         void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res);
         void SendGroupInvite(Player* player, bool alreadyInGroup = false);
@@ -911,6 +911,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleLfgGetPlayerInfo(WorldPacket& recv_data);
         void HandleLfgGetPartyInfo(WorldPacket& recv_data);
         void HandleLfgGetStatus(WorldPacket& recv_data);
+        void HandleLfgSetRoles(WorldPacket& recv_data);
 
     private:
         // private trade methods
