@@ -236,6 +236,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendLfgUpdate(bool isGroup, LFGPlayerStatus status);
         void SendLfgQueueStatus(LFGQueueStatus const& status);
         void SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck);
+        void SendLfgRoleChosen(uint64 rawGuid, uint8 roles);
         void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res);
         void SendGroupInvite(Player* player, bool alreadyInGroup = false);
         void SendGuildInvite(Player* player, bool alreadyInGuild = false);

@@ -172,11 +172,11 @@ enum LFGRoleCheckState
 /// Role types 
 enum LFGRoles
 {
-    PLAYER_ROLE_NONE                             = 0,
-    PLAYER_ROLE_LEADER                           = 1,
-    PLAYER_ROLE_TANK                             = 2,
-    PLAYER_ROLE_HEALER                           = 4,
-    PLAYER_ROLE_DAMAGE                           = 8
+    PLAYER_ROLE_NONE                             = 0x00,
+    PLAYER_ROLE_LEADER                           = 0x01,
+    PLAYER_ROLE_TANK                             = 0x02,
+    PLAYER_ROLE_HEALER                           = 0x04,
+    PLAYER_ROLE_DAMAGE                           = 0x08
 };
 
 /// Role amounts
@@ -272,6 +272,10 @@ struct LFGPlayerStatus
     LfgUpdateType updateType;
     std::set<uint32> dungeonList;
     std::string comment;
+    
+    LFGPlayerStatus() { }
+    LFGPlayerStatus(LFGState State, LfgUpdateType UpdateType, std::set<uint32> DungeonList, std::string Comment)
+        : state(State), updateType(UpdateType), dungeonList(DungeonList), comment(Comment) { }
 };
 
 typedef UNORDERED_MAP<uint64, LFGPlayers> playerData;           // ObjectGuid(raw), info on specific player or group
@@ -427,6 +431,9 @@ public:
      * @param roles The group leader's role(s)
      */
     void PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles);
+    
+    /// Make sure role selections are okay
+    bool ValidateGroupRoles(roleMap groupMap);
     
 protected:
     bool IsSeasonal(uint32 dbcFlags) { return ((dbcFlags & LFG_FLAG_SEASONAL) != 0) ? true : false; }

@@ -556,3 +556,12 @@ void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
     
     SendPacket(&data);
 }
+
+void WorldSession::SendLfgRoleChosen(uint64 rawGuid, uint8 roles)
+{
+    WorldPacket data(SMSG_LFG_ROLE_CHOSEN, 13);
+    data << uint64(rawGuid);
+    data << uint8(roles > 0);
+    data << uint32(roles);
+    SendPacket(&data);
+}
