@@ -829,8 +829,11 @@ void LFGMgr::FindSpecificQueueMatches(uint64 rawGuid)
         // compare to everyone else in queue for compatibility
         // after a match is found call UpdateNeededRoles
         // Use the roleMap to store player guid/role information; merge into queueInfo struct & delete other struct/map entry
-        for (queueSet::iterator itr = m_queueSet.begin(); itr != m_queueSet.end(); ++itr)
+        for (queueSet::iterator itr = m_queueSet.begin(); itr != m_queueSet.end(); ++itr) // todo: make sure its not the same person
         {
+            if (*itr == rawGuid)
+                continue;
+                
             LFGPlayers* matchInfo = GetPlayerOrPartyData(*itr);
             if (matchInfo)
             {

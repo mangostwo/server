@@ -42,7 +42,7 @@ const uint32 WOTLK_SPECIAL_HEROIC_ITEM = 47241;
 const uint32 WOTLK_SPECIAL_HEROIC_AMNT = 2;
 
 /// Default average queue time (in case we don't have data to base calculations on)
-const int32 QUEUE_DEFAULT_TIME = 15*MINUTE*60;                  // 15 minutes [system is measured in seconds]
+const int32 QUEUE_DEFAULT_TIME = 15*MINUTE;                     // 15 minutes [system is measured in seconds]
 
 typedef std::set<uint32> dailyEntries;                          // for players who did one of X type instance per day
 typedef std::set<uint64> queueSet;                              // List of players / groups in the queue
