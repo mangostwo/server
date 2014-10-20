@@ -463,7 +463,7 @@ void WorldSession::SendLfgUpdate(bool isGroup, LFGPlayerStatus status)
                 break;
         }
     
-    WorldPacket data(isGroup ? SMSG_LFG_UPDATE_PARTY : SMSG_LFG_UPDATE_PLAYER, 0);
+    WorldPacket data(isGroup ? SMSG_LFG_UPDATE_PARTY : SMSG_LFG_UPDATE_PLAYER);
     data << uint8(status.updateType);
 
     data << uint8(dungeonSize > 0);

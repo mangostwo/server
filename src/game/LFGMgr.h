@@ -208,7 +208,7 @@ struct ItemRewards
 };
 
 /// Information the dungeon finder needs about each player (or group)
-struct LFGPlayers
+struct LFGPlayers //TODO: rename to LFGQueueData
 {
     LFGState currentState;                  // where the player is at with the dungeon finder
     std::set<uint32> dungeonList;           // The dungeons this player or group are queued for (ID, not entry)
@@ -278,7 +278,7 @@ struct LFGPlayerStatus
         : state(State), updateType(UpdateType), dungeonList(DungeonList), comment(Comment) { }
 };
 
-typedef UNORDERED_MAP<uint64, LFGPlayers> playerData;           // ObjectGuid(raw), info on specific player or group
+typedef UNORDERED_MAP<uint64, LFGPlayers> playerData;           // ObjectGuid(raw), info on specific player or group. TODO: rename to queueData
 typedef UNORDERED_MAP<uint32, LFGWait> waitTimeMap;             // DungeonID, wait info
 typedef UNORDERED_MAP<uint64, LFGRoleCheck> roleCheckMap;       // ObjectGuid(raw) of group, role information
 typedef UNORDERED_MAP<uint64, LFGPlayerStatus> playerStatusMap; // ObjectGuid(raw), info on specific players only
@@ -329,6 +329,22 @@ public:
      * @param comment Their comments
      */
     void SetPlayerComment(uint64 rawGuid, std::string comment);
+    
+    /**
+     * @brief Set the player's LFG state
+     * 
+     * @param rawGuid The player's objectguid value
+     * @param state the LFGState value
+     */
+    void SetPlayerState(uint64 rawGuid, LFGState state);
+    
+    /**
+     * @brief Set the player's LFG update type
+     * 
+     * @param rawGuid The player's objectguid value
+     * @param updateType The LfgUpdateType value
+     */
+    void SetPlayerUpdateType(uint64 rawGuid, LfgUpdateType updateType);
     
     /**
      * @brief Used to fetch the item rewards of a dungeon from the database
@@ -455,6 +471,18 @@ protected:
      * @param compatibleDungeons The dungeons that both players or groups agreed to doing
      */
     void MergeGroups(uint64 rawGuidOne, uint64 rawGuidTwo, std::set<uint32> compatibleDungeons);
+    
+    /// Tell a group member that someone else just confirmed their role
+    void SendRoleChosen(uint64 plrGuid, uint64 confirmedGuid, uint8 roles);
+    
+    /// Send SMSG_LFG_ROLE_CHECK_UPDATE to a specific player
+    void SendRoleCheckUpdate(uint64 plrGuid, LFGRoleCheck const& roleCheck);
+    
+    /// Send SMSG_LFG_UPDATE_PARTY or SMSG_LFG_UPDATE_PLAYER
+    void SendLfgUpdate(uint64 plrGuid, LFGPlayerStatus status, bool isGroup);
+    
+    /// Send SMSG_LFG_JOIN_RESULT
+    void SendLfgJoinResult(uint64 plrGuid, LfgJoinResult result, LFGState state, partyForbidden const& lockedDungeons);
     
 private:
     /// Daily occurences of a player doing X type dungeon
