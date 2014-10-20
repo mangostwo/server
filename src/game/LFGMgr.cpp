@@ -151,7 +151,7 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
     
     LFGPlayers* currentInfo = GetPlayerOrPartyData(rawGuid);
 
-    bool groupCurrentlyInDungeon = pGroup && pGroup->isLFGGroup() && currentInfo->currentState != LFG_STATE_FINISHED_DUNGEON
+    bool groupCurrentlyInDungeon = pGroup && pGroup->isLFGGroup() && currentInfo->currentState != LFG_STATE_FINISHED_DUNGEON;
     
     // check if we actually have info on the player/group right now
     if (currentInfo)
@@ -450,7 +450,7 @@ LFGPlayerStatus LFGMgr::GetPlayerStatus(uint64 rawGuid)
 {
     LFGPlayerStatus status;
     
-    LFGPlayerStatus::iterator it = m_playerStatusMap.find(rawGuid);
+    playerStatusMap::iterator it = m_playerStatusMap.find(rawGuid);
     if (it != m_playerStatusMap.end())
         status = it->second;
     
@@ -1015,7 +1015,7 @@ void LFGMgr::PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles)
     if (roleCheck.randomDungeonID)
         dungeonBuff.insert(roleCheck.randomDungeonID);
     else
-        dungeonBuff.insert(roleCheck.dungeonList);
+        dungeonBuff = roleCheck.dungeonList;
         
     partyForbidden nullForbidden;
     
@@ -1041,7 +1041,7 @@ void LFGMgr::PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles)
                 break;
             default:
                 if (roleCheck.leaderGuidRaw == guidBuff)
-                    SendLfgJoinResult(guidBuff, ERR_LFG_ROLE_CHECK_FAILED, roleCheck.state, nullForbidden);
+                    SendLfgJoinResult(guidBuff, ERR_LFG_ROLE_CHECK_FAILED, LFG_STATE_ROLECHECK, nullForbidden);
                 SetPlayerUpdateType(guidBuff, LFG_UPDATE_ROLECHECK_FAILED);
                 SendLfgUpdate(guidBuff, GetPlayerStatus(guidBuff), true);
                 break;
@@ -1055,7 +1055,7 @@ void LFGMgr::PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles)
         queueInfo->currentRoles = roleCheck.currentRoles;
         queueInfo->joinedTime   = time(nullptr);
         
-        m_playerData[groupRawGuid] = queueInfo;
+        m_playerData[groupRawGuid] = *queueInfo;
         
         AddToQueue(groupRawGuid);
     }

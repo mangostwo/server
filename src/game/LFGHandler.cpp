@@ -468,7 +468,7 @@ void WorldSession::SendLfgUpdate(bool isGroup, LFGPlayerStatus status)
 
     data << uint8(dungeonSize > 0);
 
-    if (extra)
+    if (dungeonSize)
     {
         if (isGroup)
             data << uint8(joinLFG);
@@ -519,7 +519,7 @@ void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
     
     std::set<uint32> dungeons;
     if (roleCheck.randomDungeonID)
-        dungeons.insert(randomDungeonID);
+        dungeons.insert(roleCheck.randomDungeonID);
     else
         dungeons = roleCheck.dungeonList;
         
@@ -531,7 +531,7 @@ void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
     data << uint8(roleCheck.currentRoles.size());
     if (!roleCheck.currentRoles.empty())
     {
-        uint64 leaderGuid = rolecheck.leaderGuidRaw;
+        uint64 leaderGuid = roleCheck.leaderGuidRaw;
         uint8 leaderRoles = roleCheck.currentRoles.find(leaderGuid)->second;
         Player* pLeader = ObjectAccessor::FindPlayer(ObjectGuid(leaderGuid));
         
@@ -540,7 +540,7 @@ void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
         data << uint32(leaderRoles);
         data << uint8(pLeader->getLevel());
         
-        for (roleMap::iterator rItr = roleCheck.currentRoles.begin(); rItr != roleCheck.currentRoles.end(); ++rItr)
+        for (roleMap::const_iterator rItr = roleCheck.currentRoles.begin(); rItr != roleCheck.currentRoles.end(); ++rItr)
         {
             if (rItr->first == leaderGuid)
                 continue; // exclude the leader
@@ -559,7 +559,7 @@ void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
 
 void WorldSession::SendLfgRoleChosen(uint64 rawGuid, uint8 roles)
 {
-    WorldPacket data(SMSG_LFG_ROLE_CHOSEN, 13);
+    WorldPacket data(SMSG_ROLE_CHOSEN, 13);
     data << uint64(rawGuid);
     data << uint8(roles > 0);
     data << uint32(roles);
