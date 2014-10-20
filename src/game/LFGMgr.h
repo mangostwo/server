@@ -319,6 +319,14 @@ public:
     LFGPlayerStatus GetPlayerStatus(uint64 rawGuid);
     
     /**
+     * @brief Set the player's comment string
+     * 
+     * @param rawGuid The player's objectguid value
+     * @param comment Their comments
+     */
+    void SetPlayerComment(uint64 rawGuid, std::string comment);
+    
+    /**
      * @brief Used to fetch the item rewards of a dungeon from the database
      * 
      * @param dungeonId the dungeon ID used in the DBCs
@@ -374,6 +382,9 @@ public:
      * @param expansion The player's expansion
      */
     dungeonForbidden FindRandomDungeonsNotForPlayer(Player* plr);
+    
+    /// Given the ID of a dungeon, spit out its entry
+    uint32 GetDungeonEntry(uint32 ID);
     
     /// Queue Functions Below
     

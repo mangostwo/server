@@ -448,6 +448,17 @@ LFGPlayerStatus LFGMgr::GetPlayerStatus(uint64 rawGuid)
     return status;
 }
 
+void LFGMgr::SetPlayerComment(uint64 rawGuid, std::string comment)
+{
+    LFGPlayerStatus::iterator it = m_playerStatusMap.find(rawGuid);
+    if (it != m_playerStatusMap.end())
+    {
+        LFGPlayerStatus status = it->second;
+        status.comment = comment;
+        m_playerStatusMap[rawGuid] = status;
+    }
+}
+
 ItemRewards LFGMgr::GetDungeonItemRewards(uint32 dungeonId, DungeonTypes type)
 {
     ItemRewards rewards;
@@ -937,7 +948,23 @@ void LFGMgr::SendQueueStatus()
     }
 }
 
+uint32 LFGMgr::GetDungeonEntry(uint32 ID)
+{
+    LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(ID);
+    if (dungeon)
+        return dungeon->Entry();
+    else
+        return 0;
+}
+
 void LFGMgr::PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles)
 {
+    uint64 groupRawGuid = pGroup->GetObjectGuid().GetRawValue();
+    
+    roleCheckMap::iterator it = m_roleCheckMap.find(groupRawGuid);
+    if (it == m_roleCheckMap.end())
+        return; // no role check map found
+    
+    LFGRoleCheck roleCheck = it->second;
     // when done call SendLfgUpdate(party)
 }

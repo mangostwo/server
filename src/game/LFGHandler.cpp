@@ -27,6 +27,7 @@
 #include "Log.h"
 #include "Player.h"
 #include "WorldPacket.h"
+#include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "World.h"
 
@@ -61,8 +62,6 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recv_data)
     recv_data >> comment;                                   // lfg comment
 
     sLFGMgr.JoinLFG(roles, dungeons, comment, GetPlayer()); // Attempt to join lfg system
-    // SendLfgJoinResult(ERR_LFG_OK);
-    // SendLfgUpdate(false, LFG_UPDATE_JOIN, dungeons[0]);
 }
 
 void WorldSession::HandleLfgLeaveOpcode(WorldPacket& /*recv_data*/)
@@ -105,9 +104,12 @@ void WorldSession::HandleSetLfgCommentOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("CMSG_SET_LFG_COMMENT");
 
+    uint64 rawGuid = GetPlayer()->GetObjectGuid().GetRawValue();
+
     std::string comment;
     recv_data >> comment;
     DEBUG_LOG("LFG comment \"%s\"", comment.c_str());
+    sLFGMgr.SetPlayerComment(rawGuid, comment);
 }
 
 void WorldSession::HandleLfgGetPlayerInfo(WorldPacket& recv_data)
@@ -235,6 +237,24 @@ void WorldSession::HandleLfgGetPartyInfo(WorldPacket& recv_data)
 void WorldSession::HandleLfgGetStatus(WorldPacket& recv_data)
 {
     DEBUG_LOG("CMSG_LFG_GET_STATUS");
+    
+    Player* pPlayer = GetPlayer();
+    uint64 rawGuid = pPlayer->GetObjectGuid().GetRawValue();
+    LFGPlayerStatus currentStatus = sLFGMgr.GetPlayerStatus(rawGuid);
+    
+    if (pPlayer->GetGroup())
+    {
+        SendLfgUpdate(true, currentStatus);
+        currentStatus.dungeonList.clear();
+        SendLfgUpdate(false, currentStatus);
+    }
+    else
+    {
+        // reverse order
+        SendLfgUpdate(false, currentStatus);
+        currentStatus.dungeonList.clear();
+        SendLfgUpdate(true, currentStatus);
+    }
 }
 
 void WorldSession::HandleLfgSetRoles(WorldPacket& recv_data)
@@ -486,6 +506,53 @@ void WorldSession::SendLfgQueueStatus(LFGQueueStatus const& status)
     data << uint8(status.neededHeals);
     data << uint8(status.neededDps);
     data << uint32(status.timeSpentInQueue);
+    
+    SendPacket(&data);
+}
+
+void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
+{
+    WorldPacket data(SMSG_LFG_ROLE_CHECK_UPDATE);
+    
+    data << uint32(roleCheck.state);
+    data << uint8(roleCheck.state == LFG_ROLECHECK_INITIALITING);
+    
+    std::set<uint32> dungeons;
+    if (roleCheck.randomDungeonID)
+        dungeons.insert(randomDungeonID);
+    else
+        dungeons = roleCheck.dungeonList;
+        
+    data << uint8(dungeons.size());
+    if (!dungeons.empty())
+        for (std::set<uint32>::iterator it = dungeons.begin(); it != dungeons.end(); ++it)
+            data << uint32(sLFGMgr.GetDungeonEntry(*it));
+            
+    data << uint8(roleCheck.currentRoles.size());
+    if (!roleCheck.currentRoles.empty())
+    {
+        uint64 leaderGuid = rolecheck.leaderGuidRaw;
+        uint8 leaderRoles = roleCheck.currentRoles.find(leaderGuid)->second;
+        Player* pLeader = ObjectAccessor::FindPlayer(ObjectGuid(leaderGuid));
+        
+        data << uint64(leaderGuid);
+        data << uint8(leaderRoles > 0);
+        data << uint32(leaderRoles);
+        data << uint8(pLeader->getLevel());
+        
+        for (roleMap::iterator rItr = roleCheck.currentRoles.begin(); rItr != roleCheck.currentRoles.end(); ++rItr)
+        {
+            if (rItr->first == leaderGuid)
+                continue; // exclude the leader
+            
+            Player* pPlayer = ObjectAccessor::FindPlayer(ObjectGuid(rItr->first));
+            
+            data << uint64(rItr->first);
+            data << uint8(rItr->second > 0);
+            data << uint32(rItr->second);
+            data << uint8(pPlayer->getLevel());
+        }
+    }
     
     SendPacket(&data);
 }
