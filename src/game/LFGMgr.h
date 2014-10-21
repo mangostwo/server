@@ -305,7 +305,13 @@ public:
      */
     void JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string comments, Player* plr);
     
-    void LeaveLFG();
+    /**
+     * @brief Leave the lfg/dungeon finder system.
+     * 
+     * @param plr The pointer to the player sending the request
+     * @param isGroup Whether or not they are the leader of a group / in a group
+     */
+    void LeaveLFG(Player* plr, bool isGroup);
     
     /**
      * @brief Go through a number of checks to see if the player/group can join

@@ -74,8 +74,10 @@ void WorldSession::HandleLfgLeaveOpcode(WorldPacket& /*recv_data*/)
     Group* pGroup = pPlayer->GetGroup();
     
     // If it's just one player they can leave, otherwise just the group leader
-    //if (!pGroup || pGroup->IsLeader(guid))
-    //    sLFGMgr.LeaveLFG();
+    if (!pGroup)
+        sLFGMgr.LeaveLFG(pPlayer, false);
+    else if (pGroup && pGroup->IsLeader(guid))
+        sLFGMgr.LeaveLFG(pPlayer, true);
 
     // SendLfgUpdate(false, LFG_UPDATE_LEAVE, 0);
 }

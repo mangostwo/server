@@ -142,7 +142,7 @@ void LFGMgr::Update()
 
 void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string comments, Player* plr)
 {
-    // Todo: - add queue / role check elements when systems are complete
+    // Todo:
     //       - see if any of this code/information can be put into a generalized class for other use
     //       - look into splitting this into 2 fns- one for player case, one for group
     Group* pGroup = plr->GetGroup();
@@ -298,7 +298,6 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
     
     if (pGroup)
     {
-        // todo: set up a LFGPlayers struct for the group
         uint64 leaderRawGuid = plr->GetObjectGuid().GetRawValue();
         
         LFGRoleCheck roleCheck;
@@ -371,8 +370,60 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
     }
 }
 
-void LFGMgr::LeaveLFG()
-{
+void LFGMgr::LeaveLFG(Player* plr, bool isGroup)
+{    
+    if (isGroup)
+    {
+        Group* pGroup = plr->GetGroup();
+        uint64 grpGuid = pGroup->GetObjectGuid().GetRawValue();
+        
+        for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+        {
+            if (Player* pGroupPlr = itr->getSource())
+            {
+                uint64 grpPlrGuid = pGroupPlr->GetObjectGuid().GetRawValue();
+                
+                LFGPlayerStatus grpPlrStatus = GetPlayerStatus(grpPlrGuid);
+                switch (grpPlrStatus.state)
+                {
+                    case LFG_STATE_QUEUED:
+                        grpPlrStatus.updateType = LFG_UPDATE_LEAVE;
+                        grpPlrStatus.state = LFG_STATE_NONE;
+                        SendLfgUpdate(grpPlrGuid, grpPlrStatus, true);
+                        break;
+                    case LFG_STATE_ROLECHECK:
+                        PerformRoleCheck(nullptr, pGroup, 0);
+                        break;
+                    //todo: other state cases after they get implemented
+                }
+                
+                m_playerData.erase(grpPlrGuid);
+                m_playerStatusMap.erase(grpPlrGuid);
+            }
+        }
+        
+        m_queueSet.erase(grpGuid); // check if map find is necessary before erasing
+        m_playerData.erase(grpGuid);
+    }
+    else
+    {
+        uint64 plrGuid = plr->GetObjectGuid().GetRawValue();
+        
+        LFGPlayerStatus plrStatus = GetPlayerStatus(plrGuid);
+        switch (plrStatus.state)
+        {
+            case LFG_STATE_QUEUED:
+                plrStatus.updateType = LFG_UPDATE_LEAVE;
+                plrStatus.state = LFG_STATE_NONE;
+                SendLfgUpdate(plrGuid, plrStatus, false);
+                break;
+            // do other states after being implemented, if applicable for a single plr
+        }
+        
+        m_queueSet.erase(plrGuid);
+        m_playerData.erase(plrGuid);
+        m_playerStatusMap.erase(plrGuid);
+    }
     
 }
 
@@ -829,7 +880,7 @@ void LFGMgr::FindSpecificQueueMatches(uint64 rawGuid)
         // compare to everyone else in queue for compatibility
         // after a match is found call UpdateNeededRoles
         // Use the roleMap to store player guid/role information; merge into queueInfo struct & delete other struct/map entry
-        for (queueSet::iterator itr = m_queueSet.begin(); itr != m_queueSet.end(); ++itr) // todo: make sure its not the same person
+        for (queueSet::iterator itr = m_queueSet.begin(); itr != m_queueSet.end(); ++itr)
         {
             if (*itr == rawGuid)
                 continue;
