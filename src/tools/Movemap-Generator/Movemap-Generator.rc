@@ -22,4 +22,4 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-IDI_APPICON ICON DISCARDABLE "realmd.ico"
+IDI_APPICON ICON DISCARDABLE "../tools.ico"

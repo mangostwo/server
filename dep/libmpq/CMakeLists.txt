@@ -40,8 +40,8 @@ elseif( WIN32 )
   include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/win
-    ${CMAKE_SOURCE_DIR}/dep/zlib
-    ${CMAKE_SOURCE_DIR}/dep/bzip2
+    ${CMAKE_SOURCE_DIR}/dep/src/zlib
+    ${CMAKE_SOURCE_DIR}/dep/src/bzip2
   )
 endif()
 

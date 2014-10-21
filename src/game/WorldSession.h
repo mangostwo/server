@@ -481,16 +481,16 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleAutostoreLootItemOpcode(WorldPacket& recvPacket);
         void HandleLootMoneyOpcode(WorldPacket& recvPacket);
 
-		/**
-		* Method which handles the loot Opcode sent by the client, happens when the player is actually looting the object.
-		* It generates required loot on purpose.
-		*/
+        /**
+        * Method which handles the loot Opcode sent by the client, happens when the player is actually looting the object.
+        * It generates required loot on purpose.
+        */
         void HandleLootOpcode(WorldPacket& recvPacket);
 
-		/**
-		* Method which handles the loot release opcode sent by the client, happens when the player has end looting the object.
-		* It will take care of the looting state of the object depending on the case.
-		*/
+        /**
+        * Method which handles the loot release opcode sent by the client, happens when the player has end looting the object.
+        * It will take care of the looting state of the object depending on the case.
+        */
         void HandleLootReleaseOpcode(WorldPacket& recvPacket);
         void HandleLootMasterGiveOpcode(WorldPacket& recvPacket);
         void HandleWhoOpcode(WorldPacket& recvPacket);

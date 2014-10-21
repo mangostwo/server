@@ -36,7 +36,12 @@ include_directories(
     "${CMAKE_SOURCE_DIR}/src/framework/"
 )
 
-add_executable(${EXECUTABLE_NAME} vmap_assembler.cpp)
+if(WIN32)
+  # add resource file to windows build
+  set(EXECUTABLE_SRCS ${EXECUTABLE_SRCS} vmap-assembler.rc)
+endif()
+
+add_executable(${EXECUTABLE_NAME} vmap_assembler.cpp ${EXECUTABLE_SRCS})
 
 target_link_libraries(${EXECUTABLE_NAME} vmap g3dlite z)
 

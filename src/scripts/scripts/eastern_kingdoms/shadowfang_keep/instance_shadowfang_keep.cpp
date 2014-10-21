@@ -233,7 +233,7 @@ void instance_shadowfang_keep::SetData(uint32 uiType, uint32 uiData)
         OUT_SAVE_INST_DATA_COMPLETE;
     }
 
-	}
+    }
 }
 
 uint32 instance_shadowfang_keep::GetData(uint32 uiType) const

@@ -137,9 +137,9 @@ class BattleGroundQueue
          *
          * @param bgTypeId
          * @param bracket_id
-		 * @param ArenaType
-		 * @param isRated
-		 * @param minRating
+         * @param ArenaType
+         * @param isRated
+         * @param minRating
          */
         void Update(BattleGroundTypeId bgTypeId, BattleGroundBracketId bracket_id, ArenaType arenaType = ARENA_TYPE_NONE, bool isRated = false, uint32 minRating = 0);
 

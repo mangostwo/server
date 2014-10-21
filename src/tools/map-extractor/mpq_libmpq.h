@@ -152,7 +152,7 @@ class MPQFile
          *
          * @return size_t
          */
-		size_t getPos() { return (size_t)pointer; }
+        size_t getPos() { return (size_t)pointer; }
         /**
          * @brief
          *

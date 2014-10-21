@@ -22,6 +22,11 @@ project(MANGOS_MAP_EXTRACTOR)
 
 set(EXECUTABLE_NAME "map-extractor")
 
+if(WIN32)
+  # add resource file to windows build
+  set(EXECUTABLE_SRCS ${EXECUTABLE_SRCS} map-extractor.rc)
+endif()
+
 add_subdirectory(loadlib)
 
 include_directories(
@@ -31,7 +36,7 @@ include_directories(
 
 link_directories(${MANGOS_MAP_EXTRACTOR_SOURCE_DIR}/loadlib)
 
-add_executable(${EXECUTABLE_NAME} dbcfile.cpp mpq_libmpq.cpp System.cpp)
+add_executable(${EXECUTABLE_NAME} dbcfile.cpp mpq_libmpq.cpp System.cpp ${EXECUTABLE_SRCS})
 
 target_link_libraries(${EXECUTABLE_NAME} libmpq loadlib)
 

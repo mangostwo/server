@@ -8535,7 +8535,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
         case 139:                                           // Eastern Plaguelands
             if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zoneid))
                 outdoorPvP->FillInitialWorldStates(data, count);
-			break;
+            break;
         case 1377:                                          // Silithus
         case 3483:                                          // Hellfire Peninsula
         case 3518:                                          // Nagrand
@@ -8543,7 +8543,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
         case 3521:                                          // Zangarmarsh
             if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zoneid))
                 outdoorPvP->FillInitialWorldStates(data, count);
-			break;
+            break;
         case 2597:                                          // AV
             if (bg && bg->GetTypeID(true) == BATTLEGROUND_AV)
                 bg->FillInitialWorldStates(data, count);
@@ -8563,11 +8563,11 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
         case 3698:                                          // Nagrand Arena
             if (bg && bg->GetTypeID(true) == BATTLEGROUND_NA)
                 bg->FillInitialWorldStates(data, count);
-			break;
+            break;
         case 3702:                                          // Blade's Edge Arena
             if (bg && bg->GetTypeID(true) == BATTLEGROUND_BE)
                 bg->FillInitialWorldStates(data, count);
-			break;
+            break;
         case 3968:                                          // Ruins of Lordaeron
             if (bg && bg->GetTypeID(true) == BATTLEGROUND_RL)
                 bg->FillInitialWorldStates(data, count);

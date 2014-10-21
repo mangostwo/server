@@ -311,7 +311,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
         return;
     }
 
-	if (QueryResult* resultacct = LoginDatabase.PQuery("SELECT SUM(numchars) FROM realmcharacters WHERE acctid = '%u'", GetAccountId()))
+    if (QueryResult* resultacct = LoginDatabase.PQuery("SELECT SUM(numchars) FROM realmcharacters WHERE acctid = '%u'", GetAccountId()))
     {
         Field* fields = resultacct->Fetch();
         uint32 acctcharcount = fields[0].GetUInt32();
@@ -326,7 +326,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
     }
 
     uint8 charcount = 0;
-	if (QueryResult* result = CharacterDatabase.PQuery("SELECT COUNT(guid) FROM characters WHERE account = '%u'", GetAccountId()))
+    if (QueryResult* result = CharacterDatabase.PQuery("SELECT COUNT(guid) FROM characters WHERE account = '%u'", GetAccountId()))
     {
         Field* fields = result->Fetch();
         charcount = fields[0].GetUInt8();

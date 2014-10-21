@@ -1250,7 +1250,7 @@ void Unit::CastCustomSpell(Unit* Victim, uint32 spellId, int32 const* bp0, int32
         return;
     }
 
-	CastCustomSpell(Victim, spellInfo, bp0, bp1, bp2, triggered, castItem, triggeredByAura, originalCaster, triggeredBy);
+    CastCustomSpell(Victim, spellInfo, bp0, bp1, bp2, triggered, castItem, triggeredByAura, originalCaster, triggeredBy);
 }
 
 void Unit::CastCustomSpell(Unit* Victim, SpellEntry const* spellInfo, int32 const* bp0, int32 const* bp1, int32 const* bp2, bool triggered, Item* castItem, Aura* triggeredByAura, ObjectGuid originalCaster, SpellEntry const* triggeredBy)
@@ -1393,8 +1393,8 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage* damageInfo, int32 damage, S
         case SPELL_DAMAGE_CLASS_MELEE:
         {
             // Calculate damage bonus
-			damage = MeleeDamageBonusDone(pVictim, damage, attackType, spellInfo, SPELL_DIRECT_DAMAGE);
-			damage = pVictim->MeleeDamageBonusTaken(this, damage, attackType, spellInfo, SPELL_DIRECT_DAMAGE);
+            damage = MeleeDamageBonusDone(pVictim, damage, attackType, spellInfo, SPELL_DIRECT_DAMAGE);
+            damage = pVictim->MeleeDamageBonusTaken(this, damage, attackType, spellInfo, SPELL_DIRECT_DAMAGE);
 
             // if crit add critical bonus
             if (crit)
@@ -6474,8 +6474,8 @@ void Unit::EnergizeBySpell(Unit* pVictim, uint32 SpellID, uint32 Damage, Powers 
  */
 int32 Unit::SpellBonusWithCoeffs(SpellEntry const* spellProto, int32 total, int32 benefit, int32 ap_benefit,  DamageEffectType damagetype, bool donePart, float defCoeffMod)
 {
-	// Just don't waste time into this function if there's no benefit.
-	// Distribute Damage over multiple effects, reduce by AoE
+    // Just don't waste time into this function if there's no benefit.
+    // Distribute Damage over multiple effects, reduce by AoE
      float coeff = 1.0f;
  
      // Not apply this to creature casted spells
@@ -6487,7 +6487,7 @@ int32 Unit::SpellBonusWithCoeffs(SpellEntry const* spellProto, int32 total, int3
         coeff = damagetype == DOT ? bonus->dot_damage : bonus->direct_damage;
 
         // apply ap bonus at done part calculation only (it flat total mod so common with taken)
-		if (donePart && (bonus->ap_bonus || bonus->ap_dot_bonus))
+        if (donePart && (bonus->ap_bonus || bonus->ap_dot_bonus))
         {
             float ap_bonus = damagetype == DOT ? bonus->ap_dot_bonus : bonus->ap_bonus;
 
@@ -7573,7 +7573,7 @@ bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex i
 uint32 Unit::MeleeDamageBonusDone(Unit* pVictim, uint32 pdamage, WeaponAttackType attType, SpellEntry const* spellProto, DamageEffectType damagetype, uint32 stack)
 {
     if (!pVictim || pdamage == 0 || (spellProto && spellProto->HasAttribute(SPELL_ATTR_EX6_NO_DMG_MODS)))
-		{ return pdamage; }
+        { return pdamage; }
 
     // differentiate for weapon damage based spells
     bool isWeaponDamageBasedSpell = !(spellProto && (damagetype == DOT || IsSpellHaveEffect(spellProto, SPELL_EFFECT_SCHOOL_DAMAGE)));

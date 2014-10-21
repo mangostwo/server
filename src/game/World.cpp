@@ -453,7 +453,7 @@ void World::LoadConfigSettings(bool reload)
     }
     else
     {
-        if (confVersion < _MANGOSDCONFVERSION)
+        if (confVersion < MANGOSD_CONFIG_VERSION)
         {
             sLog.outError("*****************************************************************************");
             sLog.outError(" WARNING: Your mangosd.conf version indicates your conf file is out of date!");

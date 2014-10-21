@@ -172,6 +172,7 @@
     <ClCompile Include="vmap-extractor\vmapexport.cpp" />
     <ClCompile Include="vmap-extractor\wdtfile.cpp" />
     <ClCompile Include="vmap-extractor\wmo.cpp" />
+    <ResourceCompile Include="vmap-extractor\vmap-extractor.rc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vmap-extractor\adtfile.h" />

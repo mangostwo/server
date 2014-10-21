@@ -105,9 +105,9 @@ bool ChatHandler::HandleServerInfoCommand(char* /*args*/)
     if (m_session)
         { full = MANGOS_FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_NR, "|cffffffff|Hurl:" REVISION_ID "|h" REVISION_ID "|h|r"); }
     else
-	{
-		full = MANGOS_FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_NR, REVISION_ID);
-	}
+    {
+        full = MANGOS_FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_NR, REVISION_ID);
+    }
     SendSysMessage(full);
 
     if (sScriptMgr.IsScriptLibraryLoaded())

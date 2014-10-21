@@ -20,9 +20,14 @@ cmake_minimum_required (VERSION 2.8)
 
 set(EXECUTABLE_NAME "vmap-extractor")
 
+if(WIN32)
+  # add resource file to windows build
+  set(EXECUTABLE_SRCS ${EXECUTABLE_SRCS} vmap-extractor.rc)
+endif()
+
 include_directories("${CMAKE_SOURCE_DIR}/dep/libmpq/")
 
-add_executable(${EXECUTABLE_NAME}
+add_executable(${EXECUTABLE_NAME} ${EXECUTABLE_SRCS}
     adtfile.cpp
     dbcfile.cpp
     gameobject_extract.cpp
