@@ -37,7 +37,10 @@
 
 INSTANTIATE_SINGLETON_1(LFGMgr);
 
-LFGMgr::LFGMgr() { }
+LFGMgr::LFGMgr()
+{
+    m_proposalId = 0;
+}
 
 LFGMgr::~LFGMgr()
 {
@@ -957,12 +960,12 @@ void LFGMgr::MergeGroups(uint64 rawGuidOne, uint64 rawGuidTwo, std::set<uint32> 
     UpdateNeededRoles(rawGuidOne, mainGroup);
     
     // being safe
-    mainGroup = GetPlayerOrPartyData(rawGuidOne);
+    //mainGroup = GetPlayerOrPartyData(rawGuidOne);
     
     // Then do the following:
-    // if ((mainGroup->neededTanks == 0) && (mainGroup->neededHealers == 0) && (mainGroup->neededDps == 0))
-    //     SendDungeonProposal(...);
-    //
+    if ((mainGroup->neededTanks == 0) && (mainGroup->neededHealers == 0) && (mainGroup->neededDps == 0))
+        SendDungeonProposal(mainGroup);
+        
     m_playerData.erase(rawGuidTwo);
 }
 
@@ -1147,6 +1150,60 @@ bool LFGMgr::ValidateGroupRoles(roleMap groupMap)
     }
     
     return (tankCount + dpsCount + healCount == groupMap.size()) ? true : false;
+}
+
+void LFGMgr::SendDungeonProposal(LFGPlayers* lfgGroup)
+{
+    ++m_proposalId; // increment number to make a new proposal id
+    
+    std::set<uint32>::iterator dItr = lfgGroup->dungeonList.begin();
+    
+    LFGProposal newProposal;
+    newProposal.id = m_proposalId;
+    newProposal.state = LFG_PROPOSAL_INITIATING;
+    newProposal.encounters = 0;
+    newProposal.currentRoles = lfgGroup->currentRoles;
+    newProposal.dungeonID = *dItr;
+    newProposal.isNew = true;
+    
+    // iterate through role map just so get everyone's guid
+    for (roleMap::iterator it = lfgGroup->currentRoles.begin(); it != lfgGroup->currentRoles.end(); ++it)
+    {
+        uint64 plrGuid = it->first;
+        SetPlayerState(plrGuid, LFG_STATE_PROPOSAL);
+        SetPlayerUpdateType(plrGuid, LFG_UPDATE_PROPOSAL_BEGIN);
+
+        Player* pPlayer = ObjectAccessor::FindPlayer(ObjectGuid(plrGuid));
+        
+        if (Group* pGroup = pPlayer->GetGroup())
+        {
+            if (pGroup->IsLeader(ObjectGuid(plrGuid))
+                newProposal.groupLeaderGuid = plrGuid;
+            
+            //if (!newProposal.groupRawGuid)
+            //    newProposal.groupRawGuid = pGroup->GetObjectGuid().GetRawValue();
+            //todo: if every player is in same group already, set that value in proposal structure.
+            //      if else, leave it empty.
+            newProposal.groups[plrGuid] = pGroup->GetObjectGuid().GetRawValue();
+            
+            SendLfgUpdate(plrGuid, GetPlayerStatus(plrGuid), true);
+        }
+        else
+        {
+            newProposal.groups[plrGuid] = 0;
+            
+            SendLfgUpdate(plrGuid, GetPlayerStatus(plrGuid), false);
+        }
+            
+        newProposal.answers[plrGuid] = LFG_ANSWER_PENDING;
+        
+        // then send SMSG_LFG_PROPOSAL_UPDATE
+    }
+}
+
+void LFGMgr::ProposalUpdate(uint32 proposalID, uint64 plrRawGuid, bool accepted)
+{
+    
 }
 
 void LFGMgr::SendRoleChosen(uint64 plrGuid, uint64 confirmedGuid, uint8 roles)

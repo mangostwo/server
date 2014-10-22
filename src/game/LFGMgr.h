@@ -145,6 +145,14 @@ enum LFGTimes
     LFG_TIME_PROPOSAL                            = 45,
 };
 
+/// Proposal answers
+enum LFGProposalAnswer
+{
+    LFG_ANSWER_PENDING                           = -1,
+    LFG_ANSWER_DENY                              = 0,
+    LFG_ANSWER_AGREE                             = 1
+};
+
 enum LFGState
 {
     LFG_STATE_NONE,
@@ -155,6 +163,14 @@ enum LFGState
     LFG_STATE_IN_DUNGEON,
     LFG_STATE_FINISHED_DUNGEON,
     LFG_STATE_RAIDBROWSER
+};
+
+/// Proposal states
+enum LFGProposalState
+{
+    LFG_PROPOSAL_INITIATING                      = 0,
+    LFG_PROPOSAL_FAILED                          = 1,
+    LFG_PROPOSAL_SUCCESS                         = 2
 };
 
 /// Role check states
@@ -278,10 +294,29 @@ struct LFGPlayerStatus
         : state(State), updateType(UpdateType), dungeonList(DungeonList), comment(Comment) { }
 };
 
+typedef UNORDERED_MAP<uint64, LFGProposalAnswer> proposalAnswerMap;
+typedef UNORDERED_MAP<uint64, uint64> playerGroupMap;
+
+/// For SMSG_LFG_PROPOSAL_UPDATE
+struct LFGProposal
+{
+    uint32 id;                 // proposal id
+    uint32 dungeonID;          // dungeon id
+    LFGProposalState state;    // proposal state
+    uint32 encounters;         // encounters done
+    uint64 groupRawGuid;       // group raw guid value
+    uint64 groupLeaderGuid;    // group leader's guid
+    bool isNew;                // is new or old group
+    roleMap currentRoles;      // group player's roles
+    proposalAnswerMap answers; // answers to a proposal
+    playerGroupMap groups;     // data on which groups players belong/belonged to
+};
+
 typedef UNORDERED_MAP<uint64, LFGPlayers> playerData;           // ObjectGuid(raw), info on specific player or group. TODO: rename to queueData
 typedef UNORDERED_MAP<uint32, LFGWait> waitTimeMap;             // DungeonID, wait info
 typedef UNORDERED_MAP<uint64, LFGRoleCheck> roleCheckMap;       // ObjectGuid(raw) of group, role information
 typedef UNORDERED_MAP<uint64, LFGPlayerStatus> playerStatusMap; // ObjectGuid(raw), info on specific players only
+typedef UNORDERED_MAP<uint32, LFGProposal> proposalMap;         // Group ID, info on a proposal
 
 // End Section: Enumerations & Structures
 
@@ -457,6 +492,10 @@ public:
     /// Make sure role selections are okay
     bool ValidateGroupRoles(roleMap groupMap);
     
+    
+    /// Proposal-Related Functions
+    void ProposalUpdate(uint32 proposalID, uint64 plrRawGuid, bool accepted);
+    
 protected:
     bool IsSeasonal(uint32 dbcFlags) { return ((dbcFlags & LFG_FLAG_SEASONAL) != 0) ? true : false; }
     
@@ -477,6 +516,9 @@ protected:
      * @param compatibleDungeons The dungeons that both players or groups agreed to doing
      */
     void MergeGroups(uint64 rawGuidOne, uint64 rawGuidTwo, std::set<uint32> compatibleDungeons);
+    
+    /// Send a proposal to each member of a group
+    void SendDungeonProposal(LFGPlayers* lfgGroup);
     
     /// Tell a group member that someone else just confirmed their role
     void SendRoleChosen(uint64 plrGuid, uint64 confirmedGuid, uint8 roles);
@@ -512,6 +554,9 @@ private:
     waitTimeMap m_healerWaitTime;
     waitTimeMap m_dpsWaitTime;
     waitTimeMap m_avgWaitTime;
+    
+    /// Proposal information
+    uint32 m_proposalId;
 };
 
 #define sLFGMgr MaNGOS::Singleton<LFGMgr>::Instance()
