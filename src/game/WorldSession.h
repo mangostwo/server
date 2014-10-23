@@ -915,6 +915,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleLfgGetPartyInfo(WorldPacket& recv_data);
         void HandleLfgGetStatus(WorldPacket& recv_data);
         void HandleLfgSetRoles(WorldPacket& recv_data);
+        void HandleLfgProposalResponse(WorldPacket& recv_data);
 
     private:
         // private trade methods

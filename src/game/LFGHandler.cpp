@@ -275,6 +275,21 @@ void WorldSession::HandleLfgSetRoles(WorldPacket& recv_data)
     sLFGMgr.PerformRoleCheck(pPlayer, pGroup, roles);      // handle the rules/logic in lfgmgr
 }
 
+void WorldSession::HandleLfgProposalResponse(WorldPacket& recv_data)
+{
+    DEBUG_LOG("CMSG_LFG_PROPOSAL_RESPONSE");
+    
+    uint64 rawGuid = GetPlayer()->GetObjectGuid().GetRawValue();
+    
+    uint32 proposalID;
+    bool accepted;
+    
+    recv_data >> proposalID; // internal proposal id
+    recv_data >> accepted;   // their response
+    
+    sLFGMgr.ProposalUpdate(proposalID, rawGuid, accepted);
+}
+
 void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
 {
     WorldPacket data(SMSG_LFG_SEARCH_RESULTS);

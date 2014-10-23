@@ -316,7 +316,7 @@ typedef UNORDERED_MAP<uint64, LFGPlayers> playerData;           // ObjectGuid(ra
 typedef UNORDERED_MAP<uint32, LFGWait> waitTimeMap;             // DungeonID, wait info
 typedef UNORDERED_MAP<uint64, LFGRoleCheck> roleCheckMap;       // ObjectGuid(raw) of group, role information
 typedef UNORDERED_MAP<uint64, LFGPlayerStatus> playerStatusMap; // ObjectGuid(raw), info on specific players only
-typedef UNORDERED_MAP<uint32, LFGProposal> proposalMap;         // Group ID, info on a proposal
+typedef UNORDERED_MAP<uint32, LFGProposal> proposalMap;         // Proposal ID, info on a proposal
 
 // End Section: Enumerations & Structures
 
@@ -465,6 +465,13 @@ public:
      */
     void AddToQueue(uint64 rawGuid);
     
+    /**
+     * @brief Remove the player or group from the Dungeon Finder queue
+     * 
+     * @param rawGuid the value of said player/group's ObjectGuid
+     */
+    void RemoveFromQueue(uint64 rawGuid);
+    
     /// Search the queue for compatible matches
     void FindQueueMatches();
     
@@ -492,7 +499,6 @@ public:
     /// Make sure role selections are okay
     bool ValidateGroupRoles(roleMap groupMap);
     
-    
     /// Proposal-Related Functions
     void ProposalUpdate(uint32 proposalID, uint64 plrRawGuid, bool accepted);
     
@@ -502,11 +508,20 @@ protected:
     /// Check if player/party is already in the system, return that data
     LFGPlayers* GetPlayerOrPartyData(uint64 rawGuid);
     
+    /// Get a proposal structure given its id
+    LFGProposal* GetProposalData(uint32 proposalID);
+    
     /// Add the player to their respective waiting map for their dungeon
     void AddToWaitMap(uint8 role, std::set<uint32> dungeons);
     
     /// Compares two groups/players to see if their role combinations are compatible
     bool RoleMapsAreCompatible(LFGPlayers* groupOne, LFGPlayers* groupTwo);
+    
+    /// Are the players in a proposal already grouped up?
+    bool IsProposalSameGroup(LFGProposal const& proposal);
+    
+    /// Update a proposal after a player refused to join
+    void ProposalDeclined(uint64 plrGuid, LFGProposal* proposal);
     
     /**
      * @brief Merges two players/groups/etc into one for dungeon assignment.
@@ -557,6 +572,7 @@ private:
     
     /// Proposal information
     uint32 m_proposalId;
+    proposalMap m_proposalMap;
 };
 
 #define sLFGMgr MaNGOS::Singleton<LFGMgr>::Instance()

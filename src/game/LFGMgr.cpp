@@ -53,6 +53,7 @@ LFGMgr::~LFGMgr()
     m_queueSet.clear();
     
     m_playerStatusMap.clear();
+    m_proposalMap.clear();
     
     m_roleCheckMap.clear();
     
@@ -64,6 +65,8 @@ LFGMgr::~LFGMgr()
 
 void LFGMgr::Update()
 {
+    //todo: remove old queues by iterating through queueset
+    
     // go through a waitTimeMap::iterator for each wait map and update times based on player count
     for (waitTimeMap::iterator tankItr = m_tankWaitTime.begin(); tankItr != m_tankWaitTime.end(); ++tankItr)
     {            
@@ -389,6 +392,7 @@ void LFGMgr::LeaveLFG(Player* plr, bool isGroup)
                 LFGPlayerStatus grpPlrStatus = GetPlayerStatus(grpPlrGuid);
                 switch (grpPlrStatus.state)
                 {
+                    case LFG_STATE_PROPOSAL:
                     case LFG_STATE_QUEUED:
                         grpPlrStatus.updateType = LFG_UPDATE_LEAVE;
                         grpPlrStatus.state = LFG_STATE_NONE;
@@ -415,6 +419,7 @@ void LFGMgr::LeaveLFG(Player* plr, bool isGroup)
         LFGPlayerStatus plrStatus = GetPlayerStatus(plrGuid);
         switch (plrStatus.state)
         {
+            case LFG_STATE_PROPOSAL:
             case LFG_STATE_QUEUED:
                 plrStatus.updateType = LFG_UPDATE_LEAVE;
                 plrStatus.state = LFG_STATE_NONE;
@@ -436,7 +441,16 @@ LFGPlayers* LFGMgr::GetPlayerOrPartyData(uint64 rawGuid)
     if (it != m_playerData.end())
         return &(it->second);
     else
-        return NULL;
+        return nullptr;
+}
+
+LFGProposal* LFGMgr::GetProposalData(uint32 proposalID)
+{
+    proposalMap::iterator it = m_proposalMap.find(proposalID);
+    if (it != m_proposalMap.end())
+        return &(it->second);
+    else
+        return nullptr;
 }
 
 LfgJoinResult LFGMgr::GetJoinResult(Player* plr)
@@ -789,6 +803,13 @@ void LFGMgr::AddToQueue(uint64 rawGuid)
     queueSet::iterator qItr = m_queueSet.find(rawGuid);
     if (qItr == m_queueSet.end())
         m_queueSet.insert(rawGuid);
+}
+
+void LFGMgr::RemoveFromQueue(uint64 rawGuid)
+{
+    m_queueSet.erase(rawGuid);
+    
+    //todo - might need to implement a removefromwaitmap function
 }
 
 void LFGMgr::AddToWaitMap(uint8 role, std::set<uint32> dungeons)
@@ -1152,58 +1173,198 @@ bool LFGMgr::ValidateGroupRoles(roleMap groupMap)
     return (tankCount + dpsCount + healCount == groupMap.size()) ? true : false;
 }
 
+//todo: remove from queue, update queue average settings
 void LFGMgr::SendDungeonProposal(LFGPlayers* lfgGroup)
 {
     ++m_proposalId; // increment number to make a new proposal id
     
     std::set<uint32>::iterator dItr = lfgGroup->dungeonList.begin();
-    
+        
+    // note: group create function's parameters are leader guid & leader name
     LFGProposal newProposal;
     newProposal.id = m_proposalId;
     newProposal.state = LFG_PROPOSAL_INITIATING;
-    newProposal.encounters = 0;
+    newProposal.encounters = 0; // todo: check if group has already started a dungeon and are looking for another plr
     newProposal.currentRoles = lfgGroup->currentRoles;
     newProposal.dungeonID = *dItr;
     newProposal.isNew = true;
+    
+    bool premadeGroup = IsProposalSameGroup(newProposal);
     
     // iterate through role map just so get everyone's guid
     for (roleMap::iterator it = lfgGroup->currentRoles.begin(); it != lfgGroup->currentRoles.end(); ++it)
     {
         uint64 plrGuid = it->first;
         SetPlayerState(plrGuid, LFG_STATE_PROPOSAL);
-        SetPlayerUpdateType(plrGuid, LFG_UPDATE_PROPOSAL_BEGIN);
 
         Player* pPlayer = ObjectAccessor::FindPlayer(ObjectGuid(plrGuid));
         
         if (Group* pGroup = pPlayer->GetGroup())
         {
-            if (pGroup->IsLeader(ObjectGuid(plrGuid))
-                newProposal.groupLeaderGuid = plrGuid;
+            uint64 grpGuid = pGroup->GetObjectGuid().GetRawValue();
             
-            //if (!newProposal.groupRawGuid)
-            //    newProposal.groupRawGuid = pGroup->GetObjectGuid().GetRawValue();
-            //todo: if every player is in same group already, set that value in proposal structure.
-            //      if else, leave it empty.
-            newProposal.groups[plrGuid] = pGroup->GetObjectGuid().GetRawValue();
+            SetPlayerUpdateType(plrGuid, LFG_UPDATE_PROPOSAL_BEGIN);
+            
+            if (premadeGroup && pGroup->IsLeader(ObjectGuid(plrGuid))
+                newProposal.groupLeaderGuid = plrGuid;
+                
+            if (premadeGroup && !newProposal.groupRawGuid)
+                newProposal.groupRawGuid = grpGuid;
+
+            newProposal.groups[plrGuid] = grpGuid;
             
             SendLfgUpdate(plrGuid, GetPlayerStatus(plrGuid), true);
         }
         else
         {
             newProposal.groups[plrGuid] = 0;
+
+            SetPlayerUpdateType(plrGuid, LFG_UPDATE_GROUP_FOUND);
+            SendLfgUpdate(plrGuid, GetPlayerStatus(plrGuid), false);
             
+            SetPlayerUpdateType(plrGuid, LFG_UPDATE_PROPOSAL_BEGIN);
             SendLfgUpdate(plrGuid, GetPlayerStatus(plrGuid), false);
         }
             
         newProposal.answers[plrGuid] = LFG_ANSWER_PENDING;
         
         // then send SMSG_LFG_PROPOSAL_UPDATE
+        pPlayer->GetSession()->SendLfgProposalUpdate(newProposal);
     }
+    
+    // then if group guid is set, call Group::SetAsLfgGroup()
+    if (premadeGroup)
+    {
+        Player* pGroupLeader = ObjectAccessor::FindPlayer(ObjectGuid(newProposal.groupLeaderGuid));
+        pGroupLeader->GetGroup()->SetAsLfgGroup();
+    }
+    
+    // also save the proposal
+    m_proposalMap[newProposal.id] = newProposal;
 }
 
+bool LFGMgr::IsProposalSameGroup(LFGProposal const& proposal)
+{
+    bool firstLoop = true;
+    bool isSameGroup = true;
+    
+    uint64 priorGroupGuid;
+    
+    // when this is called we don't have the groups part filled, so iterate via role map
+    for (roleMap::iterator it = proposal.currentRoles.begin(); it != proposal.currentRoles.end(); ++it)
+    {
+        uint64 plrGuid = it->first;
+        
+        Player* pPlayer = ObjectAccessor::FindPlayer(ObjectGuid(plrGuid));
+        if (Group* pGroup = pPlayer->GetGroup())
+        {
+            uint64 grpGuid = pGroup->GetObjectGuid().GetRawValue();
+            
+            if (firstLoop)
+                priorGroupGuid = grpGuid;
+            else
+            {
+                if (isSameGroup)
+                {
+                    if (grpGuid != priorGroupGuid)
+                        isSameGroup = false;
+                }
+            }
+        }
+    }
+    return isSameGroup;
+}
+
+// From a CMSG_LFG_PROPOSAL_RESPONSE call
 void LFGMgr::ProposalUpdate(uint32 proposalID, uint64 plrRawGuid, bool accepted)
 {
+    //note: create a group here if it doesn't exist and everyone accepted proposal
+    LFGProposal* proposal = GetProposalData(proposalID);
     
+    if (!proposal)
+        return;
+        
+    bool allOkay = true; // true if everyone answered LFG_ANSWER_AGREE
+        
+    // Update answer map to given value
+    LFGProposalAnswer plrAnswer = (LFGProposalAnswer)accepted;
+    proposal->answers[plrRawGuid] = plrAnswer;
+    
+    // If the player declined, the proposal is over
+    if (plrAnswer == LFG_ANSWER_DENY)
+        ProposalDeclined(plrRawGuid, proposal);
+        
+    for (proposalAnswerMap::iterator it = proposal->answers.begin(); it != proposal->answers.end(); ++it)
+    {
+        if (it->second != LFG_ANSWER_AGREE)
+            allOkay = false;
+    }
+    
+    // if !allOkay, send proposal updates to all
+    if (!allOkay)
+    {
+        for (proposalAnswerMap::iterator itr = proposal->answers.begin(); it != proposal->answers.end(); ++itr)
+        {
+            uint64 proposalPlrGuid  = itr->first;
+            Player* pProposalPlayer = ObjectAccessor::FindPlayer(ObjectGuid(proposalPlrGuid));
+            pProposalPlayer->GetSession()->SendLfgProposalUpdate(*proposal);
+        }
+        
+        return;
+    }
+    
+    // at this point everyone's good to join the dungeon!
+}
+
+void LFGMgr::ProposalDeclined(uint64 plrGuid, LFGProposal* proposal)
+{
+    Player* pPlayer = ObjectAccessor::FindPlayer(ObjectGuid(plrGuid));
+    
+    if (!pPlayer)
+        return;
+        
+    bool leaveGroupLFG = false;
+    
+    for (roleMap::iterator it = proposal->currentRoles.begin(); it != proposal->currentRoles.end(); ++it)
+    {
+        uint64 groupPlrGuid = it->first;
+        
+        // update each player with a LFG_UPDATE_PROPOSAL_DECLINED        
+        SetPlayerUpdateType(grpPlrGuid, LFG_UPDATE_PROPOSAL_DECLINED);
+
+        Player* pGroupPlayer = ObjectAccessor::FindPlayer(ObjectGuid(groupPlrGuid));
+        Group* pGroup = pGroupPlayer->GetGroup();
+        
+        // if player was in a premade group and declined, remove the group.
+        if (groupPlrGuid == plrGuid)
+        {
+            //LeaveLFG(pGroupPlayer, true);
+            if (pGroup && (pGroup->GetObjectGuid().GetRawValue() == proposal->groupRawGuid))
+                leaveGroupLFG = true;
+                
+            SendLfgUpdate(groupPlrGuid, GetPlayerStatus(groupPlrGuid), false);
+        }
+        else
+        {
+            if (proposal->groupRawGuid)
+                SendLfgUpdate(groupPlrGuid, GetPlayerStatus(groupPlrGuid), true);
+            else
+                SendLfgUpdate(groupPlrGuid, GetPlayerStatus(groupPlrGuid), false);
+        }
+    }
+    
+    if (!leaveGroupLFG)
+    {
+        proposal->currentRoles.erase(plrGuid);
+        proposal->answers.erase(plrGuid);
+        proposal->groups.erase(plrGuid);
+    }
+    else
+    {
+        m_proposalMap.erase(proposal->id);
+    }
+    
+    LeaveLFG(pPlayer, leaveGroupLFG);
 }
 
 void LFGMgr::SendRoleChosen(uint64 plrGuid, uint64 confirmedGuid, uint8 roles)
