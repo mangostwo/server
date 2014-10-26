@@ -106,12 +106,12 @@ void WorldSession::HandleSetLfgCommentOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("CMSG_SET_LFG_COMMENT");
 
-    uint64 rawGuid = GetPlayer()->GetObjectGuid().GetRawValue();
+    ObjectGuid guid = GetPlayer()->GetObjectGuid();
 
     std::string comment;
     recv_data >> comment;
     DEBUG_LOG("LFG comment \"%s\"", comment.c_str());
-    sLFGMgr.SetPlayerComment(rawGuid, comment);
+    sLFGMgr.SetPlayerComment(guid, comment);
 }
 
 void WorldSession::HandleLfgGetPlayerInfo(WorldPacket& recv_data)
@@ -207,8 +207,8 @@ void WorldSession::HandleLfgGetPartyInfo(WorldPacket& recv_data)
         if (!pGroupPlayer)
             continue;
         
-        uint64 pPlayerGuid = pGroupPlayer->GetObjectGuid().GetRawValue();
-        if (pPlayerGuid != guid)
+        ObjectGuid pPlayerGuid = pGroupPlayer->GetObjectGuid();
+        if (pPlayerGuid.GetRawValue() != guid)
             groupMap[pPlayerGuid] = sLFGMgr.FindRandomDungeonsNotForPlayer(pGroupPlayer);
     }
     
@@ -241,8 +241,8 @@ void WorldSession::HandleLfgGetStatus(WorldPacket& recv_data)
     DEBUG_LOG("CMSG_LFG_GET_STATUS");
     
     Player* pPlayer = GetPlayer();
-    uint64 rawGuid = pPlayer->GetObjectGuid().GetRawValue();
-    LFGPlayerStatus currentStatus = sLFGMgr.GetPlayerStatus(rawGuid);
+    ObjectGuid guid = pPlayer->GetObjectGuid();
+    LFGPlayerStatus currentStatus = sLFGMgr.GetPlayerStatus(guid);
     
     if (pPlayer->GetGroup())
     {
@@ -279,7 +279,7 @@ void WorldSession::HandleLfgProposalResponse(WorldPacket& recv_data)
 {
     DEBUG_LOG("CMSG_LFG_PROPOSAL_RESPONSE");
     
-    uint64 rawGuid = GetPlayer()->GetObjectGuid().GetRawValue();
+    ObjectGuid guid = GetPlayer()->GetObjectGuid();
     
     uint32 proposalID;
     bool accepted;
@@ -287,7 +287,17 @@ void WorldSession::HandleLfgProposalResponse(WorldPacket& recv_data)
     recv_data >> proposalID; // internal proposal id
     recv_data >> accepted;   // their response
     
-    sLFGMgr.ProposalUpdate(proposalID, rawGuid, accepted);
+    sLFGMgr.ProposalUpdate(proposalID, guid, accepted);
+}
+
+void WorldSession::HandleLfgTeleportRequest(WorldPacket& recv_data)
+{
+    DEBUG_LOG("CMSG_LFG_TELEPORT");
+    
+    bool out;
+    recv_data >> out;  // exit instance
+    
+    sLFGMgr.TeleportPlayer(GetPlayer(), out);
 }
 
 void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
@@ -548,11 +558,11 @@ void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
     data << uint8(roleCheck.currentRoles.size());
     if (!roleCheck.currentRoles.empty())
     {
-        uint64 leaderGuid = roleCheck.leaderGuidRaw;
-        uint8 leaderRoles = roleCheck.currentRoles.find(leaderGuid)->second;
-        Player* pLeader = ObjectAccessor::FindPlayer(ObjectGuid(leaderGuid));
+        ObjectGuid leaderGuid = ObjectGuid(roleCheck.leaderGuidRaw);
+        uint8 leaderRoles     = roleCheck.currentRoles.find(leaderGuid)->second;
+        Player* pLeader       = ObjectAccessor::FindPlayer(leaderGuid);
         
-        data << uint64(leaderGuid);
+        data << uint64(leaderGuid.GetRawValue());
         data << uint8(leaderRoles > 0);
         data << uint32(leaderRoles);
         data << uint8(pLeader->getLevel());
@@ -562,9 +572,11 @@ void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
             if (rItr->first == leaderGuid)
                 continue; // exclude the leader
             
-            Player* pPlayer = ObjectAccessor::FindPlayer(ObjectGuid(rItr->first));
+            ObjectGuid plrGuid = rItr->first;
             
-            data << uint64(rItr->first);
+            Player* pPlayer = ObjectAccessor::FindPlayer(plrGuid);
+            
+            data << uint64(plrGuid.GetRawValue());
             data << uint8(rItr->second > 0);
             data << uint32(rItr->second);
             data << uint8(pPlayer->getLevel());
@@ -585,12 +597,12 @@ void WorldSession::SendLfgRoleChosen(uint64 rawGuid, uint8 roles)
 
 void WorldSession::SendLfgProposalUpdate(LFGProposal const& proposal)
 {
-    Player* pPlayer     = GetPlayer();
-    uint64 plrGuid      = pPlayer->GetObjectGuid().GetRawValue();
-    uint64 plrGroupGuid = proposal.groups.find(plrGuid)->second;
+    Player* pPlayer         = GetPlayer();
+    ObjectGuid plrGuid      = pPlayer->GetObjectGuid();
+    ObjectGuid plrGroupGuid = proposal.groups.find(plrGuid)->second;
     
     uint32 dungeonEntry = sLFGMgr.GetDungeonEntry(proposal.dungeonID);
-    bool showProposal   = !proposal.isNew && proposal.groupRawGuid == plrGroupGuid;
+    bool showProposal   = !proposal.isNew && proposal.groupRawGuid == plrGroupGuid.GetRawValue();
     
     WorldPacket data(SMSG_LFG_PROPOSAL_UPDATE, 15+(9*proposal.currentRoles.size()));
     
@@ -603,8 +615,8 @@ void WorldSession::SendLfgProposalUpdate(LFGProposal const& proposal)
     
     for (playerGroupMap::const_iterator it = proposal.groups.begin(); it != proposal.groups.end(); ++it)
     {
-        uint64 grpPlrGuid = it->first;
-        uint8 grpPlrRole  = proposal.currentRoles.find(grpPlrGuid)->second;
+        ObjectGuid grpPlrGuid          = it->first;
+        uint8 grpPlrRole               = proposal.currentRoles.find(grpPlrGuid)->second;
         LFGProposalAnswer grpPlrAnswer = proposal.answers.find(grpPlrGuid)->second;
         
         data << uint32(grpPlrRole);              // Player's role
@@ -612,7 +624,7 @@ void WorldSession::SendLfgProposalUpdate(LFGProposal const& proposal)
         
         if (it->second != 0)
         {
-            data << uint8(it->second == proposal.groupRawGuid); // Is player in the proposed group?
+            data << uint8(it->second == ObjectGuid(proposal.groupRawGuid)); // Is player in the proposed group?
             data << uint8(it->second == plrGroupGuid);          // Is player in the same group as myself?
         }
         else
