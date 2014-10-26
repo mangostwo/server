@@ -23,13 +23,14 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Npcs_Special
-SD%Complete: 100
-SDComment: To be used for special NPCs that are located globally.
-SDCategory: NPCs
-EndScriptData
-*/
+/**
+ * ScriptData
+ * SDName:      Npcs_Special
+ * SD%Complete: 100
+ * SDComment:   To be used for special NPCs that are located globally.
+ * SDCategory:  NPCs
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 #include "escort_ai.h"
@@ -37,19 +38,21 @@ EndScriptData
 #include "ObjectMgr.h"
 #include "GameEventMgr.h"
 
-/* ContentData
-npc_air_force_bots       80%    support for misc (invisible) guard bots in areas where player allowed to fly. Summon guards after a preset time if tagged by spell
-npc_chicken_cluck       100%    support for quest 3861 (Cluck!)
-npc_dancing_flames      100%    midsummer event NPC
-npc_guardian            100%    guardianAI used to prevent players from accessing off-limits areas. Not in use by SD2
-npc_garments_of_quests   80%    NPC's related to all Garments of-quests 5621, 5624, 5625, 5648, 5650
-npc_injured_patient     100%    patients for triage-quests (6622 and 6624)
-npc_doctor              100%    Gustaf Vanhowzen and Gregory Victor, quest 6622 and 6624 (Triage)
-npc_innkeeper            25%    ScriptName not assigned. Innkeepers in general.
-npc_spring_rabbit         1%    Used for pet "Spring Rabbit" of Noblegarden
-npc_redemption_target   100%    Used for the paladin quests: 1779,1781,9600,9685
-EndContentData */
-
+/**
+ * ContentData
+ * npc_air_force_bots          80%    support for misc (invisible) guard bots in areas where player allowed to fly. Summon guards after a preset time if tagged by spell
+ * npc_chicken_cluck          100%    support for quest 3861 (Cluck!)
+ * npc_dancing_flames         100%    midsummer event NPC
+ * npc_guardian               100%    guardianAI used to prevent players from accessing off-limits areas. Not in use by SD2
+ * npc_garments_of_quests     100%    NPC's related to all Garments of-quests 5621, 5624, 5625, 5648, 5650
+ * npc_injured_patient         80%    patients for triage-quests (6622 and 6624)
+ * npc_doctor                 100%    Gustaf Vanhowzen and Gregory Victor, quest 6622 and 6624 (Triage)
+ * npc_innkeeper               25%    ScriptName not assigned. Innkeepers in general.
+ * npc_spring_rabbit            1%    Used for pet "Spring Rabbit" of Noblegarden
+ * npc_redemption_target      100%    Used for the paladin quests: 1779,1781,9600,9685
+ * EndContentData
+ */
+ 
 /*########
 # npc_air_force_bots
 #########*/
@@ -124,7 +127,7 @@ struct MANGOS_DLL_DECL npc_air_force_botsAI : public ScriptedAI
         }
 
         if (!m_pSpawnAssoc)
-            error_db_log("SD2: Creature template entry %u has ScriptName npc_air_force_bots, but it's not handled by that script", pCreature->GetEntry());
+        { error_db_log("SD2: Creature template entry %u has ScriptName npc_air_force_bots, but it's not handled by that script", pCreature->GetEntry()); }
         else
         {
             CreatureInfo const* spawnedTemplate = GetCreatureTemplateStore(m_pSpawnAssoc->m_uiSpawnedCreatureEntry);
@@ -148,7 +151,7 @@ struct MANGOS_DLL_DECL npc_air_force_botsAI : public ScriptedAI
         Creature* pSummoned = m_creature->SummonCreature(m_pSpawnAssoc->m_uiSpawnedCreatureEntry, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 300000);
 
         if (pSummoned)
-            m_spawnedGuid = pSummoned->GetObjectGuid();
+        { m_spawnedGuid = pSummoned->GetObjectGuid(); }
         else
         {
             error_db_log("SD2: npc_air_force_bots: wasn't able to spawn creature %u", m_pSpawnAssoc->m_uiSpawnedCreatureEntry);
@@ -163,7 +166,7 @@ struct MANGOS_DLL_DECL npc_air_force_botsAI : public ScriptedAI
         Creature* pCreature = m_creature->GetMap()->GetCreature(m_spawnedGuid);
 
         if (pCreature && pCreature->IsAlive())
-            return pCreature;
+        { return pCreature; }
 
         return NULL;
     }
@@ -171,7 +174,7 @@ struct MANGOS_DLL_DECL npc_air_force_botsAI : public ScriptedAI
     void MoveInLineOfSight(Unit* pWho) override
     {
         if (!m_pSpawnAssoc)
-            return;
+        { return; }
 
         if (pWho->IsTargetableForAttack() && m_creature->IsHostileTo(pWho))
         {
@@ -179,20 +182,20 @@ struct MANGOS_DLL_DECL npc_air_force_botsAI : public ScriptedAI
 
             // airforce guards only spawn for players
             if (!pPlayerTarget)
-                return;
+            { return; }
 
             Creature* pLastSpawnedGuard = m_spawnedGuid ? GetSummonedGuard() : NULL;
 
             // prevent calling GetCreature at next MoveInLineOfSight call - speedup
             if (!pLastSpawnedGuard)
-                m_spawnedGuid.Clear();
+            { m_spawnedGuid.Clear(); }
 
             switch (m_pSpawnAssoc->m_SpawnType)
             {
                 case SPAWNTYPE_ALARMBOT:
                 {
                     if (!pWho->IsWithinDistInMap(m_creature, RANGE_GUARDS_MARK))
-                        return;
+                    { return; }
 
                     Aura* pMarkAura = pWho->GetAura(SPELL_GUARDS_MARK, EFFECT_INDEX_0);
                     if (pMarkAura)
@@ -203,22 +206,22 @@ struct MANGOS_DLL_DECL npc_air_force_botsAI : public ScriptedAI
                             pLastSpawnedGuard = SummonGuard();
 
                             if (!pLastSpawnedGuard)
-                                return;
+                            { return; }
                         }
 
                         if (pMarkAura->GetAuraDuration() < AURA_DURATION_TIME_LEFT)
                         {
                             if (!pLastSpawnedGuard->getVictim())
-                                pLastSpawnedGuard->AI()->AttackStart(pWho);
+                            { pLastSpawnedGuard->AI()->AttackStart(pWho); }
                         }
                     }
                     else
                     {
                         if (!pLastSpawnedGuard)
-                            pLastSpawnedGuard = SummonGuard();
+                        { pLastSpawnedGuard = SummonGuard(); }
 
                         if (!pLastSpawnedGuard)
-                            return;
+                        { return; }
 
                         pLastSpawnedGuard->CastSpell(pWho, SPELL_GUARDS_MARK, true);
                     }
@@ -227,19 +230,19 @@ struct MANGOS_DLL_DECL npc_air_force_botsAI : public ScriptedAI
                 case SPAWNTYPE_TRIPWIRE_ROOFTOP:
                 {
                     if (!pWho->IsWithinDistInMap(m_creature, RANGE_TRIPWIRE))
-                        return;
+                    { return; }
 
                     if (!pLastSpawnedGuard)
-                        pLastSpawnedGuard = SummonGuard();
+                    { pLastSpawnedGuard = SummonGuard(); }
 
                     if (!pLastSpawnedGuard)
-                        return;
+                    { return; }
 
                     // ROOFTOP only triggers if the player is on the ground
                     if (!pPlayerTarget->IsFlying())
                     {
                         if (!pLastSpawnedGuard->getVictim())
-                            pLastSpawnedGuard->AI()->AttackStart(pWho);
+                        { pLastSpawnedGuard->AI()->AttackStart(pWho); }
                     }
                     break;
                 }
@@ -322,13 +325,19 @@ struct MANGOS_DLL_DECL npc_chicken_cluckAI : public ScriptedAI
         if (m_creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER))
         {
             if (m_uiResetFlagTimer < uiDiff)
+            {
                 EnterEvadeMode();
+            }
             else
+            {
                 m_uiResetFlagTimer -= uiDiff;
+            }
         }
 
         if (m_creature->SelectHostileTarget() && m_creature->getVictim())
+        {
             DoMeleeAttackIfReady();
+        }
     }
 };
 
@@ -342,7 +351,9 @@ bool QuestAccept_npc_chicken_cluck(Player* /*pPlayer*/, Creature* pCreature, con
     if (pQuest->GetQuestId() == QUEST_CLUCK)
     {
         if (npc_chicken_cluckAI* pChickenAI = dynamic_cast<npc_chicken_cluckAI*>(pCreature->AI()))
+        {
             pChickenAI->Reset();
+        }
     }
 
     return true;
@@ -353,7 +364,9 @@ bool QuestRewarded_npc_chicken_cluck(Player* /*pPlayer*/, Creature* pCreature, c
     if (pQuest->GetQuestId() == QUEST_CLUCK)
     {
         if (npc_chicken_cluckAI* pChickenAI = dynamic_cast<npc_chicken_cluckAI*>(pCreature->AI()))
+        {
             pChickenAI->Reset();
+        }
     }
 
     return true;
@@ -379,7 +392,7 @@ struct MANGOS_DLL_DECL npc_dancing_flamesAI : public ScriptedAI
         m_creature->SetFacingToObject(pPlayer);
 
         if (pPlayer->HasAura(SPELL_FIERY_SEDUCTION))
-            pPlayer->RemoveAurasDueToSpell(SPELL_FIERY_SEDUCTION);
+        { pPlayer->RemoveAurasDueToSpell(SPELL_FIERY_SEDUCTION); }
 
         if (pPlayer->IsMounted())
         {
@@ -566,7 +579,9 @@ struct MANGOS_DLL_DECL npc_injured_patientAI : public ScriptedAI
                 if (Creature* pDoctor = m_creature->GetMap()->GetCreature(m_doctorGuid))
                 {
                     if (npc_doctorAI* pDocAI = dynamic_cast<npc_doctorAI*>(pDoctor->AI()))
+                    {
                         pDocAI->PatientSaved(m_creature, pPlayer, m_pCoord);
+                    }
                 }
             }
             // make not selectable
@@ -578,9 +593,15 @@ struct MANGOS_DLL_DECL npc_injured_patientAI : public ScriptedAI
 
             switch (urand(0, 2))
             {
-                case 0: DoScriptText(SAY_DOC1, m_creature); break;
-                case 1: DoScriptText(SAY_DOC2, m_creature); break;
-                case 2: DoScriptText(SAY_DOC3, m_creature); break;
+                case 0:
+                    DoScriptText(SAY_DOC1, m_creature);
+                    break;
+                case 1:
+                    DoScriptText(SAY_DOC2, m_creature);
+                    break;
+                case 2:
+                    DoScriptText(SAY_DOC3, m_creature);
+                    break;
             }
 
             m_creature->SetWalk(false);
@@ -620,7 +641,9 @@ struct MANGOS_DLL_DECL npc_injured_patientAI : public ScriptedAI
             if (Creature* pDoctor = m_creature->GetMap()->GetCreature(m_doctorGuid))
             {
                 if (npc_doctorAI* pDocAI = dynamic_cast<npc_doctorAI*>(pDoctor->AI()))
+                {
                     pDocAI->PatientDied(m_pCoord);
+                }
             }
         }
     }
@@ -648,11 +671,15 @@ void npc_doctorAI::BeginEvent(Player* pPlayer)
     {
         case DOCTOR_ALLIANCE:
             for (uint8 i = 0; i < ALLIANCE_COORDS; ++i)
+            {
                 m_vPatientSummonCoordinates.push_back(&AllianceCoords[i]);
+            }
             break;
         case DOCTOR_HORDE:
             for (uint8 i = 0; i < HORDE_COORDS; ++i)
+            {
                 m_vPatientSummonCoordinates.push_back(&HordeCoords[i]);
+            }
             break;
     }
 
@@ -671,9 +698,13 @@ void npc_doctorAI::PatientDied(Location* pPoint)
         if (m_uiPatientDiedCount > 5 && m_bIsEventInProgress)
         {
             if (pPlayer->GetQuestStatus(QUEST_TRIAGE_A) == QUEST_STATUS_INCOMPLETE)
+            {
                 pPlayer->FailQuest(QUEST_TRIAGE_A);
+            }
             else if (pPlayer->GetQuestStatus(QUEST_TRIAGE_H) == QUEST_STATUS_INCOMPLETE)
+            {
                 pPlayer->FailQuest(QUEST_TRIAGE_H);
+            }
 
             Reset();
             return;
@@ -683,7 +714,9 @@ void npc_doctorAI::PatientDied(Location* pPoint)
     }
     else
         // If no player or player abandon quest in progress
+    {
         Reset();
+    }
 }
 
 void npc_doctorAI::PatientSaved(Creature* /*soldier*/, Player* pPlayer, Location* pPoint)
@@ -699,13 +732,19 @@ void npc_doctorAI::PatientSaved(Creature* /*soldier*/, Player* pPlayer, Location
                 for (GuidList::const_iterator itr = m_lPatientGuids.begin(); itr != m_lPatientGuids.end(); ++itr)
                 {
                     if (Creature* Patient = m_creature->GetMap()->GetCreature(*itr))
+                    {
                         Patient->SetDeathState(JUST_DIED);
+                    }
                 }
 
                 if (pPlayer->GetQuestStatus(QUEST_TRIAGE_A) == QUEST_STATUS_INCOMPLETE)
+                {
                     pPlayer->GroupEventHappens(QUEST_TRIAGE_A, m_creature);
+                }
                 else if (pPlayer->GetQuestStatus(QUEST_TRIAGE_H) == QUEST_STATUS_INCOMPLETE)
+                {
                     pPlayer->GroupEventHappens(QUEST_TRIAGE_H, m_creature);
+                }
 
                 Reset();
                 return;
@@ -733,8 +772,12 @@ void npc_doctorAI::UpdateAI(const uint32 uiDiff)
 
             switch (m_creature->GetEntry())
             {
-                case DOCTOR_ALLIANCE: patientEntry = AllianceSoldierId[urand(0, 2)]; break;
-                case DOCTOR_HORDE:    patientEntry = HordeSoldierId[urand(0, 2)];    break;
+                case DOCTOR_ALLIANCE:
+                    patientEntry = AllianceSoldierId[urand(0, 2)];
+                    break;
+                case DOCTOR_HORDE:
+                    patientEntry = HordeSoldierId[urand(0, 2)];
+                    break;
                 default:
                     script_error_log("Invalid entry for Triage doctor. Please check your database");
                     return;
@@ -758,7 +801,9 @@ void npc_doctorAI::UpdateAI(const uint32 uiDiff)
             ++m_uiSummonPatientCount;
         }
         else
+        {
             m_uiSummonPatientTimer -= uiDiff;
+        }
     }
 }
 
@@ -767,7 +812,9 @@ bool QuestAccept_npc_doctor(Player* pPlayer, Creature* pCreature, const Quest* p
     if ((pQuest->GetQuestId() == QUEST_TRIAGE_A) || (pQuest->GetQuestId() == QUEST_TRIAGE_H))
     {
         if (npc_doctorAI* pDocAI = dynamic_cast<npc_doctorAI*>(pCreature->AI()))
+        {
             pDocAI->BeginEvent(pPlayer);
+        }
     }
 
     return true;
@@ -843,11 +890,15 @@ struct MANGOS_DLL_DECL npc_garments_of_questsAI : public npc_escortAI
         {
             // not while in combat
             if (m_creature->IsInCombat())
+            {
                 return;
+            }
 
             // nothing to be done now
             if (m_bIsHealed && m_bCanRun)
+            {
                 return;
+            }
 
             if (pCaster->GetTypeId() == TYPEID_PLAYER)
             {
@@ -942,7 +993,9 @@ struct MANGOS_DLL_DECL npc_garments_of_questsAI : public npc_escortAI
 
                 // give quest credit, not expect any special quest objectives
                 if (m_bCanRun)
+                {
                     ((Player*)pCaster)->TalkedToCreature(m_creature->GetEntry(), m_creature->GetObjectGuid());
+                }
             }
         }
     }
@@ -959,26 +1012,42 @@ struct MANGOS_DLL_DECL npc_garments_of_questsAI : public npc_escortAI
                 {
                     switch (m_creature->GetEntry())
                     {
-                        case ENTRY_SHAYA:   DoScriptText(SAY_SHAYA_GOODBYE, m_creature, pPlayer);   break;
-                        case ENTRY_ROBERTS: DoScriptText(SAY_ROBERTS_GOODBYE, m_creature, pPlayer); break;
-                        case ENTRY_DOLF:    DoScriptText(SAY_DOLF_GOODBYE, m_creature, pPlayer);    break;
-                        case ENTRY_KORJA:   DoScriptText(SAY_KORJA_GOODBYE, m_creature, pPlayer);   break;
-                        case ENTRY_DG_KEL:  DoScriptText(SAY_DG_KEL_GOODBYE, m_creature, pPlayer);  break;
+                        case ENTRY_SHAYA:
+                            DoScriptText(SAY_SHAYA_GOODBYE, m_creature, pPlayer);
+                            break;
+                        case ENTRY_ROBERTS:
+                            DoScriptText(SAY_ROBERTS_GOODBYE, m_creature, pPlayer);
+                            break;
+                        case ENTRY_DOLF:
+                            DoScriptText(SAY_DOLF_GOODBYE, m_creature, pPlayer);
+                            break;
+                        case ENTRY_KORJA:
+                            DoScriptText(SAY_KORJA_GOODBYE, m_creature, pPlayer);
+                            break;
+                        case ENTRY_DG_KEL:
+                            DoScriptText(SAY_DG_KEL_GOODBYE, m_creature, pPlayer);
+                            break;
                     }
 
                     Start(true);
                 }
                 else
-                    EnterEvadeMode();                       // something went wrong
+                {
+                    EnterEvadeMode();    // something went wrong
+                }
 
                 m_uiRunAwayTimer = 30000;
             }
             else
+            {
                 m_uiRunAwayTimer -= uiDiff;
+            }
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         DoMeleeAttackIfReady();
     }
@@ -1007,7 +1076,9 @@ struct MANGOS_DLL_DECL npc_guardianAI : public ScriptedAI
     void UpdateAI(const uint32 /*diff*/) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         if (m_creature->isAttackReady())
         {
@@ -1046,13 +1117,15 @@ bool GossipHello_npc_innkeeper(Player* pPlayer, Creature* pCreature)
     pPlayer->PrepareGossipMenu(pCreature, pPlayer->GetDefaultGossipMenuForSource(pCreature));
 
     if (IsHolidayActive(HOLIDAY_HALLOWS_END) && !pPlayer->HasAura(SPELL_TRICK_OR_TREATED, EFFECT_INDEX_0))
+    {
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TRICK_OR_TREAT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+    }
 
     // Should only apply to innkeeper close to start areas.
     if (AreaTableEntry const* pAreaEntry = GetAreaEntryByAreaID(pCreature->GetAreaId()))
     {
         if (pAreaEntry->flags & AREA_FLAG_LOWLEVEL)
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_WHAT_TO_DO, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        { pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_WHAT_TO_DO, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1); }
     }
 
     pPlayer->TalkedToCreature(pCreature->GetEntry(), pCreature->GetObjectGuid());
@@ -1301,7 +1374,9 @@ struct MANGOS_DLL_DECL npc_redemption_targetAI : public ScriptedAI
     {
         // Wait until he resets again
         if (m_uiEvadeTimer)
+        {
             return;
+        }
 
         DoCastSpellIfCan(m_creature, SPELL_REVIVE_SELF);
         m_creature->SetDeathState(JUST_ALIVED);
@@ -1321,7 +1396,9 @@ struct MANGOS_DLL_DECL npc_redemption_targetAI : public ScriptedAI
 
                     // Quests 9600 and 9685 requires kill credit
                     if (m_creature->GetEntry() == NPC_FURBOLG_SHAMAN || m_creature->GetEntry() == NPC_BLOOD_KNIGHT)
+                    {
                         pPlayer->KilledMonsterCredit(m_creature->GetEntry(), m_creature->GetObjectGuid());
+                    }
                 }
 
                 m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
@@ -1330,7 +1407,9 @@ struct MANGOS_DLL_DECL npc_redemption_targetAI : public ScriptedAI
                 m_uiEvadeTimer = 2 * MINUTE * IN_MILLISECONDS;
             }
             else
+            {
                 m_uiHealTimer -= uiDiff;
+            }
         }
 
         if (m_uiEvadeTimer)
@@ -1341,7 +1420,9 @@ struct MANGOS_DLL_DECL npc_redemption_targetAI : public ScriptedAI
                 m_uiEvadeTimer = 0;
             }
             else
+            {
                 m_uiEvadeTimer -= uiDiff;
+            }
         }
     }
 };
@@ -1357,7 +1438,9 @@ bool EffectDummyCreature_npc_redemption_target(Unit* pCaster, uint32 uiSpellId, 
     if ((uiSpellId == SPELL_SYMBOL_OF_LIFE || uiSpellId == SPELL_SHIMMERING_VESSEL) && uiEffIndex == EFFECT_INDEX_0)
     {
         if (npc_redemption_targetAI* pTargetAI = dynamic_cast<npc_redemption_targetAI*>(pCreatureTarget->AI()))
+        {
             pTargetAI->DoReviveSelf(pCaster->GetObjectGuid());
+        }
 
         // always return true when we are handling this spell and effect
         return true;

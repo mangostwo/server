@@ -18,7 +18,7 @@
 == Welcome to ScriptDev2 ==
 
 ScriptDev2 is a script library, an extention of the scripting capabilities
-that comes with MaNGOS ( http://www.getmangos.co.uk ), written in C++ and is
+that comes with MaNGOS (http://www.getmangos.eu/), written in C++ and is
 compatible with Windows and Linux. SQL needed for database support both
 MySQL and PostgreSQL.
 

@@ -104,8 +104,8 @@ struct MANGOS_DLL_DECL npc_spirit_guideAI : public ScriptedAI
     void SpellHitTarget(Unit* pUnit, const SpellEntry* pSpellEntry) override
     {
         if (pSpellEntry->Id == SPELL_SPIRIT_HEAL && pUnit->GetTypeId() == TYPEID_PLAYER
-                && pUnit->HasAura(SPELL_WAITING_TO_RESURRECT))
-            pUnit->CastSpell(pUnit, SPELL_SPIRIT_HEAL_MANA, true);
+            && pUnit->HasAura(SPELL_WAITING_TO_RESURRECT))
+        { pUnit->CastSpell(pUnit, SPELL_SPIRIT_HEAL_MANA, true); }
     }
 };
 

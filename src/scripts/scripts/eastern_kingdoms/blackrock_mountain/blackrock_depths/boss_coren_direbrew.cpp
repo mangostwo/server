@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos-one providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos-one.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -81,7 +87,7 @@ struct MANGOS_DLL_DECL boss_coren_direbrewAI : public ScriptedAI
     {
         // Spawn 3 minions on aggro
         for (uint8 i = 0; i < MAX_DIREBREW_MINIONS; ++i)
-            DoCastSpellIfCan(m_creature, SPELL_SUMMON_DIREBREW_MINION, CAST_TRIGGERED);
+        { DoCastSpellIfCan(m_creature, SPELL_SUMMON_DIREBREW_MINION, CAST_TRIGGERED); }
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -95,13 +101,13 @@ struct MANGOS_DLL_DECL boss_coren_direbrewAI : public ScriptedAI
         }
 
         if (m_creature->getVictim())
-            pSummoned->AI()->AttackStart(m_creature->getVictim());
+        { pSummoned->AI()->AttackStart(m_creature->getVictim()); }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         // Spawn Ilsa
         if (m_creature->GetHealthPercent() < 66.0f && m_uiPhase == 0)
@@ -124,31 +130,31 @@ struct MANGOS_DLL_DECL boss_coren_direbrewAI : public ScriptedAI
         if (m_uiDisarmTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_DIREBREW_DISARM) == CAST_OK)
-                m_uiDisarmTimer = 15000;
+            { m_uiDisarmTimer = 15000; }
         }
         else
-            m_uiDisarmTimer -= uiDiff;
+        { m_uiDisarmTimer -= uiDiff; }
 
         if (m_uiChargeTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_DIREBREW_CHARGE, SELECT_FLAG_NOT_IN_MELEE_RANGE))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_DIREBREW_CHARGE) == CAST_OK)
-                    m_uiChargeTimer = urand(5000, 10000);
+                { m_uiChargeTimer = urand(5000, 10000); }
             }
         }
         else
-            m_uiChargeTimer -= uiDiff;
+        { m_uiChargeTimer -= uiDiff; }
 
         if (m_uiSummonTimer < uiDiff)
         {
             for (uint8 i = 0; i < MAX_DIREBREW_MINIONS; ++i)
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_DIREBREW_MINION, CAST_TRIGGERED);
+            { DoCastSpellIfCan(m_creature, SPELL_SUMMON_DIREBREW_MINION, CAST_TRIGGERED); }
 
             m_uiSummonTimer = 15000;
         }
         else
-            m_uiSummonTimer -= uiDiff;
+        { m_uiSummonTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

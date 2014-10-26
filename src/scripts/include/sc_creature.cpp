@@ -247,11 +247,15 @@ SpellEntry const* ScriptedAI::SelectSpell(Unit* pTarget, int32 uiSchool, int32 i
 {
     // No target so we can't cast
     if (!pTarget)
-        return NULL;
+    {
+        return false;
+    }
 
     // Silenced so we can't cast
     if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
-        return NULL;
+    {
+        return false;
+    }
 
     // Using the extended script system we first create a list of viable spells
     SpellEntry const* apSpell[4];
@@ -288,7 +292,7 @@ SpellEntry const* ScriptedAI::SelectSpell(Unit* pTarget, int32 uiSchool, int32 i
 
         // Check for school if specified
         if (uiSchool >= 0 && pTempSpell->SchoolMask & uiSchool)
-            continue;
+        { continue; }
 
         // Check for spell mechanic if specified
         if (iMechanic >= 0 && pTempSpell->Mechanic != (uint32)iMechanic)
@@ -645,31 +649,31 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 uiDiff)
     {
         case NPC_BROODLORD:                                 // broodlord (not move down stairs)
             if (fZ > 448.60f)
-                return false;
+            { return false; }
             break;
         case NPC_VOID_REAVER:                               // void reaver (calculate from center of room)
             if (m_creature->GetDistance2d(432.59f, 371.93f) < 105.0f)
-                return false;
+            { return false; }
             break;
         case NPC_JAN_ALAI:                                  // jan'alai (calculate by Z)
             if (fZ > 12.0f)
-                return false;
+            { return false; }
             break;
         case NPC_SARTHARION:                                // sartharion (calculate box)
             if (fX > 3218.86f && fX < 3275.69f && fY < 572.40f && fY > 484.68f)
-                return false;
+            { return false; }
             break;
         case NPC_TALON_KING_IKISS:
         {
             float fX, fY, fZ;
             m_creature->GetRespawnCoord(fX, fY, fZ);
             if (m_creature->GetDistance2d(fX, fY) < 70.0f)
-                return false;
+            { return false; }
             break;
         }
         case NPC_KARGATH_BLADEFIST:
             if (fX < 255.0f && fX > 205.0f)
-                return false;
+            { return false; }
             break;
         case NPC_ANUBARAK:
             if (fY < 281.0f && fY > 228.0f)

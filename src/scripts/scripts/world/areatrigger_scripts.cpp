@@ -23,12 +23,14 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Areatrigger_Scripts
-SD%Complete: 100
-SDComment: Quest support: 4291, 6681, 10589/10604, 11686, 12548, 12575, 12741, 13315/13351, 24849/24851.
-SDCategory: Areatrigger
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Areatrigger_Scripts
+ * SD%Complete: 100
+ * SDComment:   Quest support: 4291, 6681, 10589/10604
+ * SDCategory:  Areatrigger
+ * EndScriptData
+ */
 
 /* ContentData
 at_aldurthar_gate               5284,5285,5286,5287
@@ -62,7 +64,7 @@ bool AreaTrigger_at_childrens_week_spot(Player* pPlayer, AreaTriggerEntry const*
     for (uint8 i = 0; i < 6; ++i)
     {
         if (pAt->id == TriggerOrphanSpell[i][0] &&
-                pPlayer->GetMiniPet() && pPlayer->GetMiniPet()->GetEntry() == TriggerOrphanSpell[i][1])
+            pPlayer->GetMiniPet() && pPlayer->GetMiniPet()->GetEntry() == TriggerOrphanSpell[i][1])
         {
             pPlayer->CastSpell(pPlayer, TriggerOrphanSpell[i][2], true);
             return true;
@@ -114,7 +116,7 @@ bool AreaTrigger_at_coilfang_waterfall(Player* pPlayer, AreaTriggerEntry const* 
     if (GameObject* pGo = GetClosestGameObjectWithEntry(pPlayer, GO_COILFANG_WATERFALL, 35.0f))
     {
         if (pGo->getLootState() == GO_READY)
-            pGo->UseDoorOrButton();
+        { pGo->UseDoorOrButton(); }
     }
     return false;
 }

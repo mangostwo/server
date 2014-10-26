@@ -150,7 +150,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalOptions>/MP /Zm200 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zm200 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>..\..\dep\include\;..\shared\;..\framework\;..\game\;include\;base\;..\..\dep\ACE_wrappers\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;SCRIPT;_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
@@ -181,7 +181,7 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalOptions>/MP /Zm200%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zm200 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>..\..\dep\include\;..\shared\;..\framework\;..\game\;include\;base\;..\..\dep\ACE_wrappers\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;SCRIPT;_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -237,27 +237,27 @@
     <ClCompile Include="scripts\eastern_kingdoms\western_plaguelands.cpp" />
     <ClCompile Include="scripts\eastern_kingdoms\westfall.cpp" />
     <ClCompile Include="scripts\eastern_kingdoms\wetlands.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\blackrock_depths\blackrock_depths.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\blackrock_depths\boss_ambassador_flamelash.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\blackrock_depths\boss_coren_direbrew.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\blackrock_depths\boss_emperor_dagran_thaurissan.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\blackrock_depths\boss_general_angerforge.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\blackrock_depths\boss_high_interrogator_gerstahn.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\blackrock_depths\instance_blackrock_depths.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\blackrock_spire\boss_gyth.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\blackrock_spire\boss_overlord_wyrmthalak.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\blackrock_spire\boss_pyroguard_emberseer.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\blackrock_spire\instance_blackrock_spire.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\blackwing_lair\boss_broodlord_lashlayer.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\blackwing_lair\boss_chromaggus.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\blackwing_lair\boss_ebonroc.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\blackwing_lair\boss_firemaw.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\blackwing_lair\boss_flamegor.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\blackwing_lair\boss_nefarian.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\blackwing_lair\boss_razorgore.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\blackwing_lair\boss_vaelastrasz.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\blackwing_lair\boss_victor_nefarius.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\blackwing_lair\instance_blackwing_lair.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\blackrock_depths\blackrock_depths.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\blackrock_depths\boss_ambassador_flamelash.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\blackrock_depths\boss_coren_direbrew.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\blackrock_depths\boss_emperor_dagran_thaurissan.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\blackrock_depths\boss_general_angerforge.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\blackrock_depths\boss_high_interrogator_gerstahn.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\blackrock_depths\instance_blackrock_depths.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\blackrock_spire\boss_gyth.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\blackrock_spire\boss_overlord_wyrmthalak.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\blackrock_spire\boss_pyroguard_emberseer.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\blackrock_spire\instance_blackrock_spire.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\blackwing_lair\boss_broodlord_lashlayer.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\blackwing_lair\boss_chromaggus.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\blackwing_lair\boss_ebonroc.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\blackwing_lair\boss_firemaw.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\blackwing_lair\boss_flamegor.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\blackwing_lair\boss_nefarian.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\blackwing_lair\boss_razorgore.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\blackwing_lair\boss_vaelastrasz.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\blackwing_lair\boss_victor_nefarius.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\blackwing_lair\instance_blackwing_lair.cpp" />
     <ClCompile Include="scripts\eastern_kingdoms\deadmines\boss_mr_smite.cpp" />
     <ClCompile Include="scripts\eastern_kingdoms\deadmines\deadmines.cpp" />
     <ClCompile Include="scripts\eastern_kingdoms\deadmines\instance_deadmines.cpp" />
@@ -283,18 +283,18 @@
     <ClCompile Include="scripts\eastern_kingdoms\magisters_terrace\boss_vexallus.cpp" />
     <ClCompile Include="scripts\eastern_kingdoms\magisters_terrace\instance_magisters_terrace.cpp" />
     <ClCompile Include="scripts\eastern_kingdoms\magisters_terrace\magisters_terrace.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\molten_core\boss_baron_geddon.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\molten_core\boss_garr.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\molten_core\boss_gehennas.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\molten_core\boss_golemagg.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\molten_core\boss_lucifron.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\molten_core\boss_magmadar.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\molten_core\boss_majordomo_executus.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\molten_core\boss_ragnaros.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\molten_core\boss_shazzrah.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\molten_core\boss_sulfuron_harbinger.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\molten_core\instance_molten_core.cpp" />
-    <ClCompile Include="scripts\eastern_kingdoms\molten_core\molten_core.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\molten_core\boss_baron_geddon.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\molten_core\boss_garr.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\molten_core\boss_gehennas.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\molten_core\boss_golemagg.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\molten_core\boss_lucifron.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\molten_core\boss_magmadar.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\molten_core\boss_majordomo_executus.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\molten_core\boss_ragnaros.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\molten_core\boss_shazzrah.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\molten_core\boss_sulfuron_harbinger.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\molten_core\instance_molten_core.cpp" />
+    <ClCompile Include="scripts\eastern_kingdoms\blackrock_mountain\molten_core\molten_core.cpp" />
     <ClCompile Include="scripts\eastern_kingdoms\scarlet_enclave\ebon_hold.cpp" />
     <ClCompile Include="scripts\eastern_kingdoms\scarlet_enclave\world_map_ebon_hold.cpp" />
     <ClCompile Include="scripts\eastern_kingdoms\scarlet_monastery\boss_arcanist_doan.cpp" />
@@ -346,10 +346,6 @@
     <ClCompile Include="scripts\eastern_kingdoms\zulgurub\boss_thekal.cpp" />
     <ClCompile Include="scripts\eastern_kingdoms\zulgurub\boss_venoxis.cpp" />
     <ClCompile Include="scripts\eastern_kingdoms\zulgurub\instance_zulgurub.cpp" />
-    <ClCompile Include="scripts\examples\example_creature.cpp" />
-    <ClCompile Include="scripts\examples\example_escort.cpp" />
-    <ClCompile Include="scripts\examples\example_gossip_codebox.cpp" />
-    <ClCompile Include="scripts\examples\example_misc.cpp" />
     <ClCompile Include="scripts\kalimdor\ashenvale.cpp" />
     <ClCompile Include="scripts\kalimdor\azshara.cpp" />
     <ClCompile Include="scripts\kalimdor\azuremyst_isle.cpp" />
@@ -667,21 +663,21 @@
     </ClCompile>
     <ClCompile Include="system\ScriptLoader.cpp" />
     <ClCompile Include="system\system.cpp" />
-    <ClCompile Include="ScriptMgr.cpp" />
+    <ClCompile Include="ScriptDevMgr.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base\escort_ai.h" />
     <ClInclude Include="base\follower_ai.h" />
     <ClInclude Include="base\guard_ai.h" />
     <ClInclude Include="base\pet_ai.h" />
-    <ClInclude Include="scripts\eastern_kingdoms\blackrock_depths\blackrock_depths.h" />
-    <ClInclude Include="scripts\eastern_kingdoms\blackrock_spire\blackrock_spire.h" />
-    <ClInclude Include="scripts\eastern_kingdoms\blackwing_lair\blackwing_lair.h" />
+    <ClInclude Include="scripts\eastern_kingdoms\blackrock_mountain\blackrock_depths\blackrock_depths.h" />
+    <ClInclude Include="scripts\eastern_kingdoms\blackrock_mountain\blackrock_spire\blackrock_spire.h" />
+    <ClInclude Include="scripts\eastern_kingdoms\blackrock_mountain\blackwing_lair\blackwing_lair.h" />
     <ClInclude Include="scripts\eastern_kingdoms\deadmines\deadmines.h" />
     <ClInclude Include="scripts\eastern_kingdoms\gnomeregan\gnomeregan.h" />
     <ClInclude Include="scripts\eastern_kingdoms\karazhan\karazhan.h" />
     <ClInclude Include="scripts\eastern_kingdoms\magisters_terrace\magisters_terrace.h" />
-    <ClInclude Include="scripts\eastern_kingdoms\molten_core\molten_core.h" />
+    <ClInclude Include="scripts\eastern_kingdoms\blackrock_mountain\molten_core\molten_core.h" />
     <ClInclude Include="scripts\eastern_kingdoms\scarlet_enclave\world_map_ebon_hold.h" />
     <ClInclude Include="scripts\eastern_kingdoms\scarlet_monastery\scarlet_monastery.h" />
     <ClInclude Include="scripts\eastern_kingdoms\scholomance\scholomance.h" />
@@ -774,7 +770,7 @@
     </CustomBuild>
     <ClInclude Include="sd2_revision_nr.h" />
     <ClInclude Include="sd2_revision_sql.h" />
-    <ClInclude Include="..\ScriptMgr.h" />
+    <ClInclude Include="ScriptDevMgr.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -23,7 +23,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "../../shared/revision_nr.h"
+#include "revision_nr.h"
 
 #ifdef WIN32
 #   define MANGOS_DLL_EXPORT extern "C" __declspec(dllexport)

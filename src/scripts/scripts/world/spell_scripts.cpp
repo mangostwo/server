@@ -59,10 +59,11 @@ EndContentData */
 
 #include "precompiled.h"
 
-/* When you make a spell effect:
-- always check spell id and effect index
-- always return true when the spell is handled by script
-*/
+/**
+ * When you make a spell effect:
+ * - always check spell id and effect index
+ * - always return true when the spell is handled by script
+ */
 
 enum
 {
@@ -112,17 +113,17 @@ bool EffectDummyGameObj_spell_dummy_go(Unit* pCaster, uint32 uiSpellId, SpellEff
             if (uiEffIndex == EFFECT_INDEX_0)
             {
                 if (pGOTarget->GetRespawnTime() != 0 || pGOTarget->GetEntry() != GO_RED_SNAPPER || pCaster->GetTypeId() != TYPEID_PLAYER)
-                    return true;
+                { return true; }
 
                 if (urand(0, 2))
                 {
                     if (Creature* pMurloc = pCaster->SummonCreature(NPC_ANGRY_MURLOC, pCaster->GetPositionX(), pCaster->GetPositionY() + 20.0f, pCaster->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 10000))
-                        pMurloc->AI()->AttackStart(pCaster);
+                    { pMurloc->AI()->AttackStart(pCaster); }
                 }
                 else
                 {
                     if (Item* pItem = ((Player*)pCaster)->StoreNewItemInInventorySlot(ITEM_RED_SNAPPER, 1))
-                        ((Player*)pCaster)->SendNewItem(pItem, 1, true, false);
+                    { ((Player*)pCaster)->SendNewItem(pItem, 1, true, false); }
                 }
 
                 pGOTarget->SetLootState(GO_JUST_DEACTIVATED);
@@ -401,12 +402,12 @@ bool EffectAuraDummy_spell_aura_dummy_npc(const Aura* pAura, bool bApply)
         case SPELL_HEALING_SALVE:
         {
             if (pAura->GetEffIndex() != EFFECT_INDEX_0)
-                return true;
+            { return true; }
 
             if (bApply)
             {
                 if (Unit* pCaster = pAura->GetCaster())
-                    pCaster->CastSpell(pAura->GetTarget(), SPELL_HEALING_SALVE_DUMMY, true);
+                { pCaster->CastSpell(pAura->GetTarget(), SPELL_HEALING_SALVE_DUMMY, true); }
             }
 
             return true;
@@ -414,7 +415,7 @@ bool EffectAuraDummy_spell_aura_dummy_npc(const Aura* pAura, bool bApply)
         case SPELL_HEALING_SALVE_DUMMY:
         {
             if (pAura->GetEffIndex() != EFFECT_INDEX_0)
-                return true;
+            { return true; }
 
             if (!bApply)
             {
@@ -423,7 +424,7 @@ bool EffectAuraDummy_spell_aura_dummy_npc(const Aura* pAura, bool bApply)
                 pCreature->UpdateEntry(NPC_MAGHAR_GRUNT);
 
                 if (pCreature->getStandState() == UNIT_STAND_STATE_KNEEL)
-                    pCreature->SetStandState(UNIT_STAND_STATE_STAND);
+                { pCreature->SetStandState(UNIT_STAND_STATE_STAND); }
 
                 pCreature->ForcedDespawn(60 * IN_MILLISECONDS);
             }
@@ -433,12 +434,12 @@ bool EffectAuraDummy_spell_aura_dummy_npc(const Aura* pAura, bool bApply)
         case SPELL_RECHARGING_BATTERY:
         {
             if (pAura->GetEffIndex() != EFFECT_INDEX_0)
-                return true;
+            { return true; }
 
             if (!bApply)
             {
                 if (pAura->GetTarget()->HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT))
-                    ((Creature*)pAura->GetTarget())->UpdateEntry(NPC_DRAINED_PHASE_HUNTER);
+                { ((Creature*)pAura->GetTarget())->UpdateEntry(NPC_DRAINED_PHASE_HUNTER); }
             }
 
             return true;
@@ -448,20 +449,20 @@ bool EffectAuraDummy_spell_aura_dummy_npc(const Aura* pAura, bool bApply)
             Creature* pCreature = (Creature*)pAura->GetTarget();
 
             if (pAura->GetEffIndex() != EFFECT_INDEX_0)
-                return true;
+            { return true; }
 
             if (bApply)
             {
                 if (pCreature->GetEntry() == NPC_BLACKSILT_MURLOC)
                 {
                     if (Unit* pCaster = pAura->GetCaster())
-                        pCaster->CastSpell(pCreature, SPELL_TAG_MURLOC_PROC, true);
+                    { pCaster->CastSpell(pCreature, SPELL_TAG_MURLOC_PROC, true); }
                 }
             }
             else
             {
                 if (pCreature->GetEntry() == NPC_TAGGED_MURLOC)
-                    pCreature->ForcedDespawn();
+                { pCreature->ForcedDespawn(); }
             }
 
             return true;
