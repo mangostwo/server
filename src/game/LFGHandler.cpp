@@ -624,4 +624,13 @@ void WorldSession::SendLfgProposalUpdate(LFGProposal const& proposal)
         data << uint8(grpPlrAnswer != LFG_ANSWER_PENDING);  // Has the player selected an answer?
         data << uint8(grpPlrAnswer == LFG_ANSWER_AGREE);    // Has the player agreed to do the dungeon?
     }
+    SendPacket(&data);
+}
+
+void WorldSession::SendLfgTeleportError(uint8 error)
+{
+    DEBUG_LOG("SMSG_LFG_TELEPORT_DENIED");
+    WorldPacket data(SMSG_LFG_TELEPORT_DENIED, 4);
+    data << uint32(error);
+    SendPacket(&data);
 }

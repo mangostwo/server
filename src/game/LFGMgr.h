@@ -34,6 +34,7 @@
 class Object;
 class ObjectGuid;
 class Player;
+class Group;
 
 // Begin Section: Constants & Definitions
 
@@ -153,6 +154,7 @@ enum LFGProposalAnswer
     LFG_ANSWER_AGREE                             = 1
 };
 
+/// Player states in the lfg system
 enum LFGState
 {
     LFG_STATE_NONE,
@@ -201,6 +203,19 @@ enum LFGRoleCount
     NORMAL_TANK_OR_HEALER_COUNT                  = 1,      // Tanks / Heals
     NORMAL_DAMAGE_COUNT                          = 3,      // DPS
     NORMAL_TOTAL_ROLE_COUNT                      = 5       // Amount of players total per normal dungeon
+};
+
+/// Teleport errors
+enum LFGTeleportError
+{
+    // 7 = "You can't do that right now" | 5 = No client reaction
+    LFG_TELEPORTERROR_OK                         = 0,
+    LFG_TELEPORTERROR_PLAYER_DEAD                = 1,
+    LFG_TELEPORTERROR_FALLING                    = 2,
+    LFG_TELEPORTERROR_IN_VEHICLE                 = 3,
+    LFG_TELEPORTERROR_FATIGUE                    = 4,
+    LFG_TELEPORTERROR_INVALID_LOCATION           = 6,
+    LFG_TELEPORTERROR_CHARMING                   = 8
 };
 
 enum DungeonTypes
@@ -310,6 +325,7 @@ struct LFGProposal
     roleMap currentRoles;      // group player's roles
     proposalAnswerMap answers; // answers to a proposal
     playerGroupMap groups;     // data on which groups players belong/belonged to
+    time_t joinedQueue;        // time from when the players joined the queue
 };
 
 typedef UNORDERED_MAP<uint64, LFGPlayers> playerData;           // ObjectGuid(raw), info on specific player or group. TODO: rename to queueData
@@ -447,6 +463,9 @@ public:
     /// Given the ID of a dungeon, spit out its entry
     uint32 GetDungeonEntry(uint32 ID);
     
+    /// Teleports a player out of a dungeon (called by CMSG_LFG_TELEPORT)
+    void TeleportPlayer(Player* pPlayer, bool out);
+    
     /// Queue Functions Below
     
     /**
@@ -500,6 +519,7 @@ public:
     bool ValidateGroupRoles(roleMap groupMap);
     
     /// Proposal-Related Functions
+    
     void ProposalUpdate(uint32 proposalID, uint64 plrRawGuid, bool accepted);
     
 protected:
@@ -517,11 +537,23 @@ protected:
     /// Compares two groups/players to see if their role combinations are compatible
     bool RoleMapsAreCompatible(LFGPlayers* groupOne, LFGPlayers* groupTwo);
     
+    /// Checks whether or not two combinations of players/groups are on the same team (alliance/horde)
+    bool MatchesAreOfSameTeam(LFGPlayers* groupOne, LFGPlayers* groupTwo);
+    
     /// Are the players in a proposal already grouped up?
     bool IsProposalSameGroup(LFGProposal const& proposal);
     
     /// Update a proposal after a player refused to join
     void ProposalDeclined(uint64 plrGuid, LFGProposal* proposal);
+    
+    /// Updates a wait map with the amount of time it took the last player to join
+    void UpdateWaitMap(LFGRoles role, uint32 dungeonID, time_t waitTime);
+    
+    /// Creates a group so they can enter a dungeon together
+    void CreateDungeonGroup(LFGProposal* proposal);
+    
+    /// Sends a group to the dungeon assigned to them
+    void TeleportToDungeon(uint32 dungeonID, Group* pGroup);
     
     /**
      * @brief Merges two players/groups/etc into one for dungeon assignment.
