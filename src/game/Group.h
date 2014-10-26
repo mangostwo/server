@@ -247,7 +247,7 @@ class MANGOS_DLL_SPEC Group
         ItemQualities GetLootThreshold() const { return m_lootThreshold; }
 
         // member manipulation methods
-        void SetAsLfgGroup() const { m_groupType = GroupType(m_groupType | GROUPTYPE_LFD); }
+        void SetAsLfgGroup() { m_groupType = GroupType(m_groupType | GROUPTYPE_LFD); }
         bool IsMember(ObjectGuid guid) const { return _getMemberCSlot(guid) != m_memberSlots.end(); }
         bool IsLeader(ObjectGuid guid) const { return GetLeaderGuid() == guid; }
         ObjectGuid GetMemberGuid(const std::string& name)

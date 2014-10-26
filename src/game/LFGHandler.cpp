@@ -601,7 +601,7 @@ void WorldSession::SendLfgProposalUpdate(LFGProposal const& proposal)
     data << uint8(showProposal);                 // Show or hide proposal window [todo-this]
     data << uint8(proposal.currentRoles.size()); // Size of group
     
-    for (proposal.groups::iterator it = proposal.groups.begin(); it != proposal.groups.end(); ++it)
+    for (playerGroupMap::const_iterator it = proposal.groups.begin(); it != proposal.groups.end(); ++it)
     {
         uint64 grpPlrGuid = it->first;
         uint8 grpPlrRole  = proposal.currentRoles.find(grpPlrGuid)->second;

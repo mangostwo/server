@@ -47,6 +47,7 @@ const int32 QUEUE_DEFAULT_TIME = 15*MINUTE;                     // 15 minutes [s
 
 typedef std::set<uint32> dailyEntries;                          // for players who did one of X type instance per day
 typedef std::set<uint64> queueSet;                              // List of players / groups in the queue
+typedef std::set<ObjectGuid> groupSet;                          // List of groups doing a dungeon via the finder
 typedef UNORDERED_MAP<uint32, uint32> dungeonEntries;           // ID, Entry
 typedef UNORDERED_MAP<uint32, uint32> dungeonForbidden;         // Entry, LFGForbiddenTypes
 typedef UNORDERED_MAP<uint64, dungeonForbidden> partyForbidden; // ObjectGuid (raw), map of locked dungeons
@@ -522,6 +523,9 @@ public:
     
     void ProposalUpdate(uint32 proposalID, uint64 plrRawGuid, bool accepted);
     
+    /// Handles reward hooks
+    void HandleBossKilled(Player* pPlayer);
+    
 protected:
     bool IsSeasonal(uint32 dbcFlags) { return ((dbcFlags & LFG_FLAG_SEASONAL) != 0) ? true : false; }
     
@@ -533,6 +537,9 @@ protected:
     
     /// Add the player to their respective waiting map for their dungeon
     void AddToWaitMap(uint8 role, std::set<uint32> dungeons);
+    
+    /// Checks if any players have the leader flag for their roles
+    bool HasLeaderFlag(roleMap const& roles);
     
     /// Compares two groups/players to see if their role combinations are compatible
     bool RoleMapsAreCompatible(LFGPlayers* groupOne, LFGPlayers* groupTwo);
@@ -592,6 +599,7 @@ private:
     
     /// Dungeon Finder Status for players
     playerStatusMap m_playerStatusMap;
+    groupSet m_groupSet;
     
     /// Role check information
     roleCheckMap m_roleCheckMap;

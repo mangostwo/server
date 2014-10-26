@@ -53,6 +53,7 @@ LFGMgr::~LFGMgr()
     m_queueSet.clear();
     
     m_playerStatusMap.clear();
+    m_groupSet.clear();
     m_proposalMap.clear();
     
     m_roleCheckMap.clear();
@@ -1224,7 +1225,7 @@ void LFGMgr::SendDungeonProposal(LFGPlayers* lfgGroup)
             
             SetPlayerUpdateType(plrGuid, LFG_UPDATE_PROPOSAL_BEGIN);
             
-            if (premadeGroup && pGroup->IsLeader(ObjectGuid(plrGuid))
+            if (premadeGroup && pGroup->IsLeader(ObjectGuid(plrGuid)))
                 newProposal.groupLeaderGuid = plrGuid;
                 
             if (premadeGroup && !newProposal.groupRawGuid)
@@ -1270,7 +1271,7 @@ bool LFGMgr::IsProposalSameGroup(LFGProposal const& proposal)
     uint64 priorGroupGuid;
     
     // when this is called we don't have the groups part filled, so iterate via role map
-    for (roleMap::iterator it = proposal.currentRoles.begin(); it != proposal.currentRoles.end(); ++it)
+    for (roleMap::const_iterator it = proposal.currentRoles.begin(); it != proposal.currentRoles.end(); ++it)
     {
         uint64 plrGuid = it->first;
         
@@ -1322,7 +1323,7 @@ void LFGMgr::ProposalUpdate(uint32 proposalID, uint64 plrRawGuid, bool accepted)
     // if !allOkay, send proposal updates to all
     if (!allOkay)
     {
-        for (proposalAnswerMap::iterator itr = proposal->answers.begin(); it != proposal->answers.end(); ++itr)
+        for (proposalAnswerMap::iterator itr = proposal->answers.begin(); itr != proposal->answers.end(); ++itr)
         {
             uint64 proposalPlrGuid  = itr->first;
             Player* pProposalPlayer = ObjectAccessor::FindPlayer(ObjectGuid(proposalPlrGuid));
@@ -1355,7 +1356,7 @@ void LFGMgr::ProposalUpdate(uint32 proposalID, uint64 plrRawGuid, bool accepted)
         int32 timeWaited = (joinedTime - proposal->joinedQueue) / IN_MILLISECONDS;
         
         // tell the lfg system to update the average wait times on the next tick
-        UpdateWaitMap(proposalPlrRole, proposal->dungeonID, timeWaited);
+        UpdateWaitMap(LFGRoles(proposalPlrRole), proposal->dungeonID, timeWaited);
         
         // send some updates to the player, depending on group status
         LFGPlayerStatus proposalPlrStatus = GetPlayerStatus(proposalPlrGuid);
@@ -1383,6 +1384,16 @@ void LFGMgr::ProposalUpdate(uint32 proposalID, uint64 plrRawGuid, bool accepted)
     m_proposalMap.erase(proposal->id);
 }
 
+bool LFGMgr::HasLeaderFlag(roleMap const& roles)
+{
+    for (roleMap::const_iterator it = roles.begin(); it != roles.end(); ++it)
+    {
+        if (it->second & PLAYER_ROLE_LEADER)
+            return true;
+    }
+    return false;
+}
+
 void LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
 {
     if (!proposal)
@@ -1393,6 +1404,9 @@ void LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
     if (!proposal->groupRawGuid)
     {
         bool leaderIsSet = false;
+        bool leaderRoleIsSet = HasLeaderFlag(proposal->currentRoles);
+        uint64 leaderGuid;
+        
         pGroup = new Group();
         
         for (playerGroupMap::iterator it = proposal->groups.begin(); it != proposal->groups.end(); ++it)
@@ -1407,10 +1421,32 @@ void LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
                 
             if (!leaderIsSet)
             {
-                pGroup->Create(ObjectGuid(pGroupPlrGuid), pGroupPlr->GetName());
+                bool currentPlrIsLeader = false;
+                if (leaderRoleIsSet)
+                {
+                    for (roleMap::iterator itr = proposal->currentRoles.begin(); itr != proposal->currentRoles.end(); ++itr)
+                    {
+                        if (itr->second & PLAYER_ROLE_LEADER)
+                        {
+                            leaderGuid = itr->first;
+                            Player* leaderRef = ObjectAccessor::FindPlayer(ObjectGuid(leaderGuid));
+                            
+                            pGroup->Create(leaderRef->GetObjectGuid(), leaderRef->GetName());
+                            
+                            if (pGroupPlrGuid == leaderGuid)
+                                currentPlrIsLeader = true;
+                        }
+                    }
+                }
+                else
+                    pGroup->Create(ObjectGuid(pGroupPlrGuid), pGroupPlr->GetName());
+                
+                if (!currentPlrIsLeader)
+                    pGroup->AddMember(ObjectGuid(pGroupPlrGuid), pGroupPlr->GetName());
+                    
                 leaderIsSet = true;
             }
-            else
+            else if (leaderIsSet && pGroupPlrGuid != leaderGuid)
                 pGroup->AddMember(ObjectGuid(pGroupPlrGuid), pGroupPlr->GetName());
         }
         
@@ -1423,13 +1459,16 @@ void LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
     }
     
     // set dungeon difficulty for group
-    LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(dungeonId);
-    if (dungeon)
-    {
-        pGroup->SetDungeonDifficulty(dungeon->difficulty); //todo: check for raids and if so call setraiddifficulty
-    }
+    LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(proposal->dungeonID);
+    if (!dungeon)
+        return;
+        
+    pGroup->SetDungeonDifficulty(Difficulty(dungeon->difficulty)); //todo: check for raids and if so call setraiddifficulty
     
-    TeleportToDungeon(dungeonId, pGroup);
+    // Add group to our group set and teleport to the dungeon
+    m_groupSet.insert(pGroup->GetObjectGuid());
+    TeleportToDungeon(dungeon->ID, pGroup);
+    
     pGroup->SendUpdate();
 }
 
@@ -1500,6 +1539,8 @@ void LFGMgr::TeleportToDungeon(uint32 dungeonID, Group* pGroup)
                 pGroupPlr->GetSession()->SendLfgTeleportError(err);
             else if (plrErr != LFG_TELEPORTERROR_OK)
                 pGroupPlr->GetSession()->SendLfgTeleportError(plrErr);
+            else
+                SetPlayerState(pGroupPlr->GetObjectGuid().GetRawValue(), LFG_STATE_IN_DUNGEON);
         }
     }
 }
@@ -1523,7 +1564,7 @@ void LFGMgr::ProposalDeclined(uint64 plrGuid, LFGProposal* proposal)
         uint64 groupPlrGuid = it->first;
         
         // update each player with a LFG_UPDATE_PROPOSAL_DECLINED        
-        SetPlayerUpdateType(grpPlrGuid, LFG_UPDATE_PROPOSAL_DECLINED);
+        SetPlayerUpdateType(groupPlrGuid, LFG_UPDATE_PROPOSAL_DECLINED);
 
         Player* pGroupPlayer = ObjectAccessor::FindPlayer(ObjectGuid(groupPlrGuid));
         Group* pGroup = pGroupPlayer->GetGroup();
@@ -1568,6 +1609,7 @@ void LFGMgr::UpdateWaitMap(LFGRoles role, uint32 dungeonID, time_t waitTime)
     switch (role)
     {
         case PLAYER_ROLE_TANK:
+        {
             waitTimeMap::iterator it = m_tankWaitTime.find(dungeonID);
             if (it != m_tankWaitTime.end())
             {
@@ -1579,12 +1621,14 @@ void LFGMgr::UpdateWaitMap(LFGRoles role, uint32 dungeonID, time_t waitTime)
                 
                 m_tankWaitTime[dungeonID] = wait;
             }
+        }
             break;
         case PLAYER_ROLE_HEALER:
-            waitTimeMap::iterator it = m_healerWaitTime.find(dungeonID);
-            if (it != m_healerWaitTime.end())
+        {
+            waitTimeMap::iterator hIt = m_healerWaitTime.find(dungeonID);
+            if (hIt != m_healerWaitTime.end())
             {
-                LFGWait wait = it->second;
+                LFGWait wait = hIt->second;
                 
                 wait.previousTime = wait.time;
                 wait.time = waitTime;
@@ -1592,12 +1636,14 @@ void LFGMgr::UpdateWaitMap(LFGRoles role, uint32 dungeonID, time_t waitTime)
                 
                 m_healerWaitTime[dungeonID] = wait;
             }
+        }
             break;
         case PLAYER_ROLE_DAMAGE:
-            waitTimeMap::iterator it = m_dpsWaitTime.find(dungeonID);
-            if (it != m_dpsWaitTime.end())
+        {
+            waitTimeMap::iterator dIt = m_dpsWaitTime.find(dungeonID);
+            if (dIt != m_dpsWaitTime.end())
             {
-                LFGWait wait = it->second;
+                LFGWait wait = dIt->second;
                 
                 wait.previousTime = wait.time;
                 wait.time = waitTime;
@@ -1605,12 +1651,14 @@ void LFGMgr::UpdateWaitMap(LFGRoles role, uint32 dungeonID, time_t waitTime)
                 
                 m_dpsWaitTime[dungeonID] = wait;
             }
+        }
             break;
         default:
-            waitTimeMap::iterator it = m_avgWaitTime.find(dungeonID);
-            if (it != m_avgWaitTime.end())
+        {
+            waitTimeMap::iterator aIt = m_avgWaitTime.find(dungeonID);
+            if (aIt != m_avgWaitTime.end())
             {
-                LFGWait wait = it->second;
+                LFGWait wait = aIt->second;
                 
                 wait.previousTime = wait.time;
                 wait.time = waitTime;
@@ -1618,9 +1666,16 @@ void LFGMgr::UpdateWaitMap(LFGRoles role, uint32 dungeonID, time_t waitTime)
                 
                 m_avgWaitTime[dungeonID] = wait;
             }
+        }
             break;
     }
     
+}
+
+void LFGMgr::HandleBossKilled(Player* pPlayer)
+{
+    if (!pPlayer->GetGroup())
+        return;
 }
 
 void LFGMgr::SendRoleChosen(uint64 plrGuid, uint64 confirmedGuid, uint8 roles)
