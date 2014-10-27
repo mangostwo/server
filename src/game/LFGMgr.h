@@ -27,7 +27,7 @@
 
 #include "Common.h"
 #include "Policies/Singleton.h"
-
+#include "Group.h"
 #include <set>
 #include <vector>
 
