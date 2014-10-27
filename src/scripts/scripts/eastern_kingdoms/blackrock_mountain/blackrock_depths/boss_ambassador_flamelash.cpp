@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -17,12 +23,14 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Ambassador_Flamelash
-SD%Complete: 80
-SDComment: Texts missing, Add handling rather guesswork, Add spell Burning Spirit likely won't work
-SDCategory: Blackrock Depths
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Ambassador_Flamelash
+ * SD%Complete: 80
+ * SDComment:   Texts missing, Add handling rather guesswork, Add spell Burning Spirit likely won't work
+ * SDCategory:  Blackrock Depths
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 
@@ -69,7 +77,9 @@ struct MANGOS_DLL_DECL boss_ambassador_flamelashAI : public ScriptedAI
     void SummonedMovementInform(Creature* pSummoned, uint32 /*uiMotionType*/, uint32 uiPointId) override
     {
         if (uiPointId != 1)
+        {
             return;
+        }
 
         pSummoned->CastSpell(m_creature, SPELL_BURNING_SPIRIT, true);
     }
@@ -78,7 +88,9 @@ struct MANGOS_DLL_DECL boss_ambassador_flamelashAI : public ScriptedAI
     {
         // Return since we have no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         // m_uiSpiritTimer
         if (m_uiSpiritTimer < uiDiff)
@@ -91,7 +103,7 @@ struct MANGOS_DLL_DECL boss_ambassador_flamelashAI : public ScriptedAI
             m_uiSpiritTimer = 20000;
         }
         else
-            m_uiSpiritTimer -= uiDiff;
+            { m_uiSpiritTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

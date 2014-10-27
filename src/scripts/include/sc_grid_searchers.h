@@ -34,7 +34,7 @@ struct ObjectDistanceOrder : public std::binary_function<const WorldObject, cons
 {
     const Unit* m_pSource;
 
-    ObjectDistanceOrder(const Unit* pSource) : m_pSource(pSource) {}
+    ObjectDistanceOrder(const Unit* pSource) : m_pSource(pSource) {};
 
     bool operator()(const WorldObject* pLeft, const WorldObject* pRight) const
     {
@@ -46,7 +46,7 @@ struct ObjectDistanceOrderReversed : public std::binary_function<const WorldObje
 {
     const Unit* m_pSource;
 
-    ObjectDistanceOrderReversed(const Unit* pSource) : m_pSource(pSource) {}
+    ObjectDistanceOrderReversed(const Unit* pSource) : m_pSource(pSource) {};
 
     bool operator()(const WorldObject* pLeft, const WorldObject* pRight) const
     {

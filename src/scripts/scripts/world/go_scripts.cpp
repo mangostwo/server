@@ -23,12 +23,14 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: GO_Scripts
-SD%Complete: 100
-SDComment: Quest support: 5097, 5098, 12557, 14092/14076. Barov_journal->Teaches spell 26089
-SDCategory: Game Objects
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      GO_Scripts
+ * SD%Complete: 100
+ * SDComment:   Quest support: 5097, 5098, Barov_journal->Teaches spell 26089
+ * SDCategory:  Game Objects
+ * EndScriptData
+ */
 
 /* ContentData
 go_barov_journal
@@ -115,9 +117,9 @@ bool GOUse_go_ethereum_prison(Player* pPlayer, GameObject* pGo)
                 }
 
                 if (uiSpell)
-                    pCreature->CastSpell(pPlayer, uiSpell, false);
+                { pCreature->CastSpell(pPlayer, uiSpell, false); }
                 else
-                    script_error_log("go_ethereum_prison summoned creature (entry %u) but faction (%u) are not expected by script.", pCreature->GetEntry(), pCreature->getFaction());
+                { script_error_log("go_ethereum_prison summoned creature (entry %u) but faction (%u) are not expected by script.", pCreature->GetEntry(), pCreature->getFaction()); }
             }
         }
     }
@@ -158,7 +160,7 @@ enum
 bool GOUse_go_jump_a_tron(Player* pPlayer, GameObject* pGo)
 {
     if (Creature* pCreature = GetClosestCreatureWithEntry(pGo, NPC_JUMP_A_TRON, INTERACTION_DISTANCE))
-        pCreature->CastSpell(pPlayer, SPELL_JUMP_A_TRON, false);
+    { pCreature->CastSpell(pPlayer, SPELL_JUMP_A_TRON, false); }
 
     return false;
 }
@@ -249,10 +251,18 @@ bool GOUse_go_andorhal_tower(Player* pPlayer, GameObject* pGo)
         uint32 uiKillCredit = 0;
         switch (pGo->GetEntry())
         {
-            case GO_ANDORHAL_TOWER_1:   uiKillCredit = NPC_ANDORHAL_TOWER_1;   break;
-            case GO_ANDORHAL_TOWER_2:   uiKillCredit = NPC_ANDORHAL_TOWER_2;   break;
-            case GO_ANDORHAL_TOWER_3:   uiKillCredit = NPC_ANDORHAL_TOWER_3;   break;
-            case GO_ANDORHAL_TOWER_4:   uiKillCredit = NPC_ANDORHAL_TOWER_4;   break;
+            case GO_ANDORHAL_TOWER_1:
+                uiKillCredit = NPC_ANDORHAL_TOWER_1;
+                break;
+            case GO_ANDORHAL_TOWER_2:
+                uiKillCredit = NPC_ANDORHAL_TOWER_2;
+                break;
+            case GO_ANDORHAL_TOWER_3:
+                uiKillCredit = NPC_ANDORHAL_TOWER_3;
+                break;
+            case GO_ANDORHAL_TOWER_4:
+                uiKillCredit = NPC_ANDORHAL_TOWER_4;
+                break;
         }
         if (uiKillCredit)
             pPlayer->KilledMonsterCredit(uiKillCredit);

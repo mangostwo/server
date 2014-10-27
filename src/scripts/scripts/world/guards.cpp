@@ -145,7 +145,7 @@ struct MANGOS_DLL_DECL guard_shattrath_aldorAI : public guardAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_bCanTeleport)
         {
@@ -162,7 +162,7 @@ struct MANGOS_DLL_DECL guard_shattrath_aldorAI : public guardAI
                 m_bCanTeleport = false;
             }
             else
-                m_uiExile_Timer -= uiDiff;
+            { m_uiExile_Timer -= uiDiff; }
         }
         else if (m_uiBanish_Timer < uiDiff)
         {
@@ -177,7 +177,7 @@ struct MANGOS_DLL_DECL guard_shattrath_aldorAI : public guardAI
             }
         }
         else
-            m_uiBanish_Timer -= uiDiff;
+        { m_uiBanish_Timer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }
@@ -212,7 +212,7 @@ struct MANGOS_DLL_DECL guard_shattrath_scryerAI : public guardAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_bCanTeleport)
         {
@@ -229,7 +229,7 @@ struct MANGOS_DLL_DECL guard_shattrath_scryerAI : public guardAI
                 m_bCanTeleport = false;
             }
             else
-                m_uiExile_Timer -= uiDiff;
+            { m_uiExile_Timer -= uiDiff; }
         }
         else if (m_uiBanish_Timer < uiDiff)
         {
@@ -244,7 +244,7 @@ struct MANGOS_DLL_DECL guard_shattrath_scryerAI : public guardAI
             }
         }
         else
-            m_uiBanish_Timer -= uiDiff;
+        { m_uiBanish_Timer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

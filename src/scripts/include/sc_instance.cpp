@@ -91,7 +91,7 @@ void ScriptedInstance::DoRespawnGameObject(ObjectGuid guid, uint32 uiTimeToDespa
     {
         // not expect any of these should ever be handled
         if (pGo->GetGoType() == GAMEOBJECT_TYPE_FISHINGNODE || pGo->GetGoType() == GAMEOBJECT_TYPE_DOOR ||
-                pGo->GetGoType() == GAMEOBJECT_TYPE_BUTTON)
+            pGo->GetGoType() == GAMEOBJECT_TYPE_BUTTON)
         {
             return;
         }

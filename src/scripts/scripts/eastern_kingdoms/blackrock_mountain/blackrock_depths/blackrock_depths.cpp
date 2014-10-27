@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -17,24 +23,28 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Blackrock_Depths
-SD%Complete: 80
-SDComment: Quest support: 4001, 4322, 4342, 7604, 9015.
-SDCategory: Blackrock Depths
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Blackrock_Depths
+ * SD%Complete: 80
+ * SDComment:   Quest support: 4001, 4322, 4342, 7604, 9015.
+ * SDCategory:  Blackrock Depths
+ * EndScriptData
+ */
 
-/* ContentData
-go_shadowforge_brazier
-go_relic_coffer_door
-at_ring_of_law
-npc_grimstone
-npc_kharan_mighthammer
-npc_marshal_windsor
-npc_dughal_stormwing
-npc_tobias_seecher
-boss_doomrel
-EndContentData */
+/**
+ * ContentData
+ * go_shadowforge_brazier
+ * go_relic_coffer_door
+ * at_ring_of_law
+ * npc_grimstone
+ * npc_kharan_mighthammer
+ * npc_marshal_windsor
+ * npc_dughal_stormwing
+ * npc_tobias_seecher
+ * boss_doomrel
+ * EndContentData
+ */
 
 #include "precompiled.h"
 #include "blackrock_depths.h"
@@ -49,9 +59,13 @@ bool GOUse_go_shadowforge_brazier(Player* /*pPlayer*/, GameObject* pGo)
     if (ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData())
     {
         if (pInstance->GetData(TYPE_LYCEUM) == IN_PROGRESS)
+        {
             pInstance->SetData(TYPE_LYCEUM, DONE);
+        }
         else
+        {
             pInstance->SetData(TYPE_LYCEUM, IN_PROGRESS);
+        }
     }
     return false;
 }
@@ -66,7 +80,9 @@ bool GOUse_go_relic_coffer_door(Player* /*pPlayer*/, GameObject* pGo)
     {
         // check if the event is already done
         if (pInstance->GetData(TYPE_VAULT) != DONE && pInstance->GetData(TYPE_VAULT) != IN_PROGRESS)
+        {
             pInstance->SetData(TYPE_VAULT, SPECIAL);
+        }
     }
 
     return false;
@@ -142,10 +158,14 @@ bool AreaTrigger_at_ring_of_law(Player* pPlayer, AreaTriggerEntry const* pAt)
     if (instance_blackrock_depths* pInstance = (instance_blackrock_depths*)pPlayer->GetInstanceData())
     {
         if (pInstance->GetData(TYPE_RING_OF_LAW) == IN_PROGRESS || pInstance->GetData(TYPE_RING_OF_LAW) == DONE || pInstance->GetData(TYPE_RING_OF_LAW) == SPECIAL)
+        {
             return false;
+        }
 
         if (pPlayer->isGameMaster())
+        {
             return false;
+        }
 
         pInstance->SetData(TYPE_RING_OF_LAW, pInstance->GetData(TYPE_RING_OF_LAW) == DATA_BANNER_BEFORE_EVENT ? SPECIAL : IN_PROGRESS);
 
@@ -209,7 +229,9 @@ struct MANGOS_DLL_DECL npc_grimstoneAI : public npc_escortAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (!m_pInstance)
+        {
             return;
+        }
 
         // Ring mob or boss summoned
         float fX, fY, fZ;
@@ -229,7 +251,9 @@ struct MANGOS_DLL_DECL npc_grimstoneAI : public npc_escortAI
         {
             Player* pPlayer = itr->getSource();
             if (pPlayer && pPlayer->GetQuestStatus(QUEST_THE_CHALLENGE) == QUEST_STATUS_INCOMPLETE)
+            {
                 pPlayer->KilledMonsterCredit(NPC_THELDREN_QUEST_CREDIT);
+            }
         }
     }
 
@@ -311,7 +335,9 @@ struct MANGOS_DLL_DECL npc_grimstoneAI : public npc_escortAI
     void UpdateEscortAI(const uint32 uiDiff) override
     {
         if (!m_pInstance)
+        {
             return;
+        }
 
         if (m_pInstance->GetData(TYPE_RING_OF_LAW) == FAIL)
         {
@@ -331,7 +357,9 @@ struct MANGOS_DLL_DECL npc_grimstoneAI : public npc_escortAI
             for (GuidList::const_iterator itr = m_lSummonedGUIDList.begin(); itr != m_lSummonedGUIDList.end(); ++itr)
             {
                 if (Creature* pSummoned = m_creature->GetMap()->GetCreature(*itr))
+                {
                     pSummoned->ForcedDespawn();
+                }
             }
             m_lSummonedGUIDList.clear();
 
@@ -407,7 +435,9 @@ struct MANGOS_DLL_DECL npc_grimstoneAI : public npc_escortAI
                             m_uiPhase = PHASE_GLADIATORS;
                             SummonRingMob(NPC_THELDREN, POS_NORTH);
                             for (uint8 i = 0; i < MAX_THELDREN_ADDS; ++i)
+                            {
                                 SummonRingMob(m_uiGladiatorId[i], POS_NORTH);
+                            }
                         }
                         else
                         {
@@ -429,7 +459,9 @@ struct MANGOS_DLL_DECL npc_grimstoneAI : public npc_escortAI
                 ++m_uiEventPhase;
             }
             else
+            {
                 m_uiEventTimer -= uiDiff;
+            }
         }
     }
 };
@@ -445,7 +477,9 @@ bool EffectDummyCreature_spell_banner_of_provocation(Unit* /*pCaster*/, uint32 u
     {
         instance_blackrock_depths* pInstance = (instance_blackrock_depths*)pCreatureTarget->GetInstanceData();
         if (pInstance && pInstance->GetData(TYPE_RING_OF_LAW) != DONE && pInstance->GetData(TYPE_RING_OF_LAW) != SPECIAL)
+        {
             pInstance->SetData(TYPE_RING_OF_LAW, pInstance->GetData(TYPE_RING_OF_LAW) == IN_PROGRESS ? uint32(SPECIAL) : uint32(DATA_BANNER_BEFORE_EVENT));
+        }
 
         return true;
     }
@@ -476,18 +510,28 @@ enum
 bool GossipHello_npc_kharan_mighthammer(Player* pPlayer, Creature* pCreature)
 {
     if (pCreature->IsQuestGiver())
+    {
         pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+    }
 
     if (pPlayer->GetQuestStatus(QUEST_WHAT_IS_GOING_ON) == QUEST_STATUS_INCOMPLETE)
+    {
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_KHARAN_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+    }
 
     if (pPlayer->GetQuestStatus(QUEST_KHARANS_TALE) == QUEST_STATUS_INCOMPLETE)
+    {
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_KHARAN_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+    }
 
     if (pPlayer->GetTeam() == HORDE)
+    {
         pPlayer->SEND_GOSSIP_MENU(2473, pCreature->GetObjectGuid());
+    }
     else
+    {
         pPlayer->SEND_GOSSIP_MENU(2474, pCreature->GetObjectGuid());
+    }
 
     return true;
 }
@@ -532,9 +576,13 @@ bool GossipSelect_npc_kharan_mighthammer(Player* pPlayer, Creature* pCreature, u
         case GOSSIP_ACTION_INFO_DEF+9:
             pPlayer->CLOSE_GOSSIP_MENU();
             if (pPlayer->GetTeam() == HORDE)
+            {
                 pPlayer->AreaExploredOrEventHappens(QUEST_WHAT_IS_GOING_ON);
+            }
             else
+            {
                 pPlayer->AreaExploredOrEventHappens(QUEST_KHARANS_TALE);
+            }
             break;
     }
     return true;
@@ -569,7 +617,9 @@ struct MANGOS_DLL_DECL npc_rocknotAI : public npc_escortAI
     void Reset() override
     {
         if (HasEscortState(STATE_ESCORT_ESCORTING))
+        {
             return;
+        }
 
         m_uiBreakKegTimer  = 0;
         m_uiBreakDoorTimer = 0;
@@ -578,13 +628,17 @@ struct MANGOS_DLL_DECL npc_rocknotAI : public npc_escortAI
     void DoGo(uint32 id, uint32 state)
     {
         if (GameObject* pGo = m_pInstance->GetSingleGameObjectFromStorage(id))
+        {
             pGo->SetGoState(GOState(state));
+        }
     }
 
     void WaypointReached(uint32 uiPointId) override
     {
         if (!m_pInstance)
+        {
             return;
+        }
 
         switch (uiPointId)
         {
@@ -610,7 +664,9 @@ struct MANGOS_DLL_DECL npc_rocknotAI : public npc_escortAI
     void UpdateEscortAI(const uint32 uiDiff) override
     {
         if (!m_pInstance)
+        {
             return;
+        }
 
         if (m_uiBreakKegTimer)
         {
@@ -621,7 +677,9 @@ struct MANGOS_DLL_DECL npc_rocknotAI : public npc_escortAI
                 m_uiBreakDoorTimer = 1000;
             }
             else
+            {
                 m_uiBreakKegTimer -= uiDiff;
+            }
         }
 
         if (m_uiBreakDoorTimer)
@@ -633,7 +691,9 @@ struct MANGOS_DLL_DECL npc_rocknotAI : public npc_escortAI
                 // spell by trap has effect61, this indicate the bar go hostile
 
                 if (Creature* pTmp = m_pInstance->GetSingleCreatureFromStorage(NPC_PHALANX))
+                {
                     pTmp->SetFactionTemporary(14, TEMPFACTION_NONE);
+                }
 
                 // for later, this event(s) has alot more to it.
                 // optionally, DONE can trigger bar to go hostile.
@@ -642,7 +702,9 @@ struct MANGOS_DLL_DECL npc_rocknotAI : public npc_escortAI
                 m_uiBreakDoorTimer = 0;
             }
             else
+            {
                 m_uiBreakDoorTimer -= uiDiff;
+            }
         }
     }
 };
@@ -657,15 +719,21 @@ bool QuestRewarded_npc_rocknot(Player* /*pPlayer*/, Creature* pCreature, Quest c
     ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
 
     if (!pInstance)
+    {
         return true;
+    }
 
     if (pInstance->GetData(TYPE_BAR) == DONE || pInstance->GetData(TYPE_BAR) == SPECIAL)
+    {
         return true;
+    }
 
     if (pQuest->GetQuestId() == QUEST_ALE)
     {
         if (pInstance->GetData(TYPE_BAR) != IN_PROGRESS)
+        {
             pInstance->SetData(TYPE_BAR, IN_PROGRESS);
+        }
 
         pInstance->SetData(TYPE_BAR, SPECIAL);
 
@@ -676,7 +744,9 @@ bool QuestRewarded_npc_rocknot(Player* /*pPlayer*/, Creature* pCreature, Quest c
             pCreature->CastSpell(pCreature, SPELL_DRUNKEN_RAGE, false);
 
             if (npc_rocknotAI* pEscortAI = dynamic_cast<npc_rocknotAI*>(pCreature->AI()))
+            {
                 pEscortAI->Start(false, NULL, NULL, true);
+            }
         }
     }
 
@@ -742,16 +812,24 @@ struct MANGOS_DLL_DECL npc_marshal_windsorAI : public npc_escortAI
     void Reset() override
     {
         if (!HasEscortState(STATE_ESCORT_ESCORTING))
+        {
             m_uiEventPhase = 0;
+        }
     }
 
     void Aggro(Unit* pWho) override
     {
         switch (urand(0, 2))
         {
-            case 0: DoScriptText(SAY_WINDSOR_AGGRO1, m_creature, pWho); break;
-            case 1: DoScriptText(SAY_WINDSOR_AGGRO2, m_creature); break;
-            case 2: DoScriptText(SAY_WINDSOR_AGGRO3, m_creature, pWho); break;
+            case 0:
+                DoScriptText(SAY_WINDSOR_AGGRO1, m_creature, pWho);
+                break;
+            case 1:
+                DoScriptText(SAY_WINDSOR_AGGRO2, m_creature);
+                break;
+            case 2:
+                DoScriptText(SAY_WINDSOR_AGGRO3, m_creature, pWho);
+                break;
         }
     }
 
@@ -761,13 +839,17 @@ struct MANGOS_DLL_DECL npc_marshal_windsorAI : public npc_escortAI
         {
             case 1:
                 if (m_pInstance)
+                {
                     m_pInstance->SetData(TYPE_QUEST_JAIL_BREAK, IN_PROGRESS);
+                }
 
                 DoScriptText(SAY_WINDSOR_START, m_creature);
                 break;
             case 7:
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     DoScriptText(SAY_WINDSOR_CELL_DUGHAL_1, m_creature, pPlayer);
+                }
                 if (m_pInstance)
                 {
                     if (Creature* pDughal = m_pInstance->GetSingleCreatureFromStorage(NPC_DUGHAL))
@@ -781,18 +863,24 @@ struct MANGOS_DLL_DECL npc_marshal_windsorAI : public npc_escortAI
                 break;
             case 9:
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     DoScriptText(SAY_WINDSOR_CELL_DUGHAL_3, m_creature, pPlayer);
+                }
                 break;
             case 14:
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     DoScriptText(SAY_WINDSOR_EQUIPMENT_1, m_creature, pPlayer);
+                }
                 break;
             case 15:
                 m_creature->HandleEmoteCommand(EMOTE_ONESHOT_USESTANDING);
                 break;
             case 16:
                 if (m_pInstance)
+                {
                     m_pInstance->DoUseDoorOrButton(GO_JAIL_DOOR_SUPPLY);
+                }
                 break;
             case 18:
                 DoScriptText(SAY_WINDSOR_EQUIPMENT_2, m_creature);
@@ -802,7 +890,9 @@ struct MANGOS_DLL_DECL npc_marshal_windsorAI : public npc_escortAI
                 break;
             case 20:
                 if (m_pInstance)
+                {
                     m_pInstance->DoUseDoorOrButton(GO_JAIL_SUPPLY_CRATE);
+                }
                 break;
             case 21:
                 m_creature->UpdateEntry(NPC_REGINALD_WINDSOR);
@@ -817,13 +907,17 @@ struct MANGOS_DLL_DECL npc_marshal_windsorAI : public npc_escortAI
             case 23:
                 DoScriptText(SAY_WINDSOR_EQUIPMENT_4, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     m_creature->SetFacingToObject(pPlayer);
+                }
                 break;
             case 30:
                 if (m_pInstance)
                 {
                     if (Creature* pJaz = m_pInstance->GetSingleCreatureFromStorage(NPC_JAZ))
+                    {
                         m_creature->SetFacingToObject(pJaz);
+                    }
                 }
                 DoScriptText(SAY_WINDSOR_CELL_JAZ_1, m_creature);
                 ++m_uiEventPhase;
@@ -836,7 +930,9 @@ struct MANGOS_DLL_DECL npc_marshal_windsorAI : public npc_escortAI
                 if (m_pInstance)
                 {
                     if (Creature* pShill = m_pInstance->GetSingleCreatureFromStorage(NPC_SHILL))
+                    {
                         m_creature->SetFacingToObject(pShill);
+                    }
                 }
                 DoScriptText(SAY_WINDSOR_CELL_SHILL_1, m_creature);
                 ++m_uiEventPhase;
@@ -852,7 +948,9 @@ struct MANGOS_DLL_DECL npc_marshal_windsorAI : public npc_escortAI
                 if (m_pInstance)
                 {
                     if (Creature* pCrest = m_pInstance->GetSingleCreatureFromStorage(NPC_CREST))
+                    {
                         m_creature->SetFacingToObject(pCrest);
+                    }
                 }
                 DoScriptText(SAY_WINDSOR_CELL_CREST_1, m_creature);
                 ++m_uiEventPhase;
@@ -876,20 +974,28 @@ struct MANGOS_DLL_DECL npc_marshal_windsorAI : public npc_escortAI
                 break;
             case 51:
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     DoScriptText(SAY_WINDSOR_CELL_TOBIAS_2, m_creature, pPlayer);
+                }
                 break;
             case 57:
                 DoScriptText(SAY_WINDSOR_FREE_1, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     m_creature->SetFacingToObject(pPlayer);
+                }
                 break;
             case 58:
                 DoScriptText(SAY_WINDSOR_FREE_2, m_creature);
                 if (m_pInstance)
+                {
                     m_pInstance->SetData(TYPE_QUEST_JAIL_BREAK, DONE);
+                }
 
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     pPlayer->GroupEventHappens(QUEST_JAIL_BREAK, m_creature);
+                }
                 break;
         }
     }
@@ -917,7 +1023,9 @@ struct MANGOS_DLL_DECL npc_marshal_windsorAI : public npc_escortAI
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         DoMeleeAttackIfReady();
     }
@@ -935,7 +1043,9 @@ bool QuestAccept_npc_marshal_windsor(Player* pPlayer, Creature* pCreature, const
         pCreature->SetFactionTemporary(FACTION_ESCORT_A_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
 
         if (npc_marshal_windsorAI* pEscortAI = dynamic_cast<npc_marshal_windsorAI*>(pCreature->AI()))
+        {
             pEscortAI->Start(false, pPlayer, pQuest);
+        }
 
         return true;
     }
@@ -950,7 +1060,9 @@ bool QuestAccept_npc_marshal_windsor(Player* pPlayer, Creature* pCreature, const
 bool GossipHello_npc_dughal_stormwing(Player* pPlayer, Creature* pCreature)
 {
     if (pPlayer->GetQuestStatus(QUEST_JAIL_BREAK) == QUEST_STATUS_INCOMPLETE)
+    {
         pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ID_DUGHAL, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+    }
 
     pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_DUGHAL, pCreature->GetObjectGuid());
     return true;
@@ -962,7 +1074,9 @@ bool GossipSelect_npc_dughal_stormwing(Player* pPlayer, Creature* pCreature, uin
     {
         // Set instance data in order to allow the quest to continue
         if (instance_blackrock_depths* pInstance = (instance_blackrock_depths*)pCreature->GetInstanceData())
+        {
             pInstance->SetData(TYPE_QUEST_JAIL_BREAK, SPECIAL);
+        }
 
         DoScriptText(SAY_DUGHAL_FREE, pCreature, pPlayer);
         pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
@@ -983,7 +1097,9 @@ bool GossipSelect_npc_dughal_stormwing(Player* pPlayer, Creature* pCreature, uin
 bool GossipHello_npc_tobias_seecher(Player* pPlayer, Creature* pCreature)
 {
     if (pPlayer->GetQuestStatus(QUEST_JAIL_BREAK) == QUEST_STATUS_INCOMPLETE)
+    {
         pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ID_TOBIAS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+    }
 
     pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_TOBIAS, pCreature->GetObjectGuid());
 
@@ -996,7 +1112,9 @@ bool GossipSelect_npc_tobias_seecher(Player* pPlayer, Creature* pCreature, uint3
     {
         // Set instance data in order to allow the quest to continue
         if (instance_blackrock_depths* pInstance = (instance_blackrock_depths*)pCreature->GetInstanceData())
+        {
             pInstance->SetData(TYPE_QUEST_JAIL_BREAK, SPECIAL);
+        }
 
         DoScriptText(urand(0, 1) ? SAY_TOBIAS_FREE_1 : SAY_TOBIAS_FREE_2, pCreature);
         pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
@@ -1026,7 +1144,9 @@ bool GossipHello_boss_doomrel(Player* pPlayer, Creature* pCreature)
     if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
     {
         if (pInstance->GetData(TYPE_TOMB_OF_SEVEN) == NOT_STARTED || pInstance->GetData(TYPE_TOMB_OF_SEVEN) == FAIL)
+        {
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_CHALLENGE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        }
     }
 
     pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_CHALLENGE, pCreature->GetObjectGuid());
@@ -1042,7 +1162,9 @@ bool GossipSelect_boss_doomrel(Player* pPlayer, Creature* pCreature, uint32 /*ui
             DoScriptText(SAY_DOOMREL_START_EVENT, pCreature);
             // start event
             if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
+            {
                 pInstance->SetData(TYPE_TOMB_OF_SEVEN, IN_PROGRESS);
+            }
 
             break;
     }
