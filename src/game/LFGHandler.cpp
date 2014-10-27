@@ -303,6 +303,11 @@ void WorldSession::HandleLfgTeleportRequest(WorldPacket& recv_data)
 void WorldSession::HandleLfgBootVote(WorldPacket& recv_data)
 {
     DEBUG_LOG("CMSG_LFG_BOOT_PLAYER_VOTE");
+    
+    bool vote;
+    recv_data >> vote;
+    
+    sLFGMgr.CastVote(GetPlayer(), vote);
 }
 
 void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
@@ -678,5 +683,41 @@ void WorldSession::SendLfgRewards(LFGRewards const& rewards)
     }
     else
         data << uint8(0);
+    SendPacket(&data);
+}
+
+void WorldSession::SendLfgBootUpdate(LFGBoot const& boot)
+{
+    DEBUG_LOG("SMSG_LFG_BOOT_PLAYER");
+    
+    ObjectGuid plrGuid = GetPlayer()->GetObjectGuid();
+    LFGProposalAnswer plrAnswer = boot.answers.find(plrGuid)->second;
+    
+    uint32 voteCount = 0, yayCount = 0;
+    for (proposalAnswerMap::const_iterator it = boot.answers.begin(); it != boot.answers.end(); ++it)
+    {
+        if (it->second != LFG_ANSWER_PENDING)
+        {
+            ++voteCount;
+            if (it->second == LFG_ANSWER_AGREE)
+                ++yayCount;
+        }
+    }
+    
+    uint32 timeLeft = uint8( ((boot.startTime+LFG_TIME_BOOT)-time(nullptr)) / 1000 );
+    
+    WorldPacket data(SMSG_LFG_BOOT_PLAYER, 27+boot.reason.length());
+    
+    data << uint8(boot.inProgress);                   // Is boot still ongoing?
+    data << uint8(plrAnswer != LFG_ANSWER_PENDING);   // Did this player vote yet?
+    data << uint8(plrAnswer == LFG_ANSWER_AGREE);     // Did this player agree to boot them?
+    data << uint64(boot.playerVotedOn.GetRawValue()); // Potentially booted player's objectguid value
+    data << uint32(voteCount);                        // Number of players who've voted so far
+    data << uint32(yayCount);                         // Number of players who've voted against the plr so far
+    data << uint32(0);                                // Time left on vote
+    data << uint32(timeLeft);                         // Time left in seconds
+    data << uint32(REQUIRED_VOTES_FOR_BOOT);          // Number of votes needed to win
+    data << boot.reason.c_str();                      // Reason given for booting
+    
     SendPacket(&data);
 }

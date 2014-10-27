@@ -59,6 +59,8 @@ LFGMgr::~LFGMgr()
     
     m_roleCheckMap.clear();
     
+    m_bootStatusMap.clear();
+    
     m_tankWaitTime.clear();
     m_healerWaitTime.clear();
     m_dpsWaitTime.clear();
@@ -1451,8 +1453,7 @@ void LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
             else if (leaderIsSet && pGroupPlrGuid != leaderGuid)
                 pGroup->AddMember(pGroupPlrGuid, pGroupPlr->GetName());
         }
-        
-        pGroup->SetAsLfgGroup();
+            pGroup->SetAsLfgGroup();
     }
     else
     {
@@ -1772,7 +1773,116 @@ void LFGMgr::HandleBossKilled(Player* pPlayer)
 
 void LFGMgr::AttemptToKickPlayer(Group* pGroup, ObjectGuid guid, ObjectGuid kicker, std::string reason)
 {
+    ObjectGuid groupGuid = pGroup->GetObjectGuid();
+    LFGGroupStatus* status = GetGroupStatus(groupGuid);
     
+    bootStatusMap::iterator bIt = m_bootStatusMap.find(groupGuid);
+    if (!status)
+        return;
+    
+    status->state = LFG_STATE_BOOT;
+    m_groupStatusMap[groupGuid] = *status;
+    
+    // This function is only called when a group is set/in a dungeon so we can go straight to the boot packets
+    time_t now = time(nullptr);
+    proposalAnswerMap votes;
+    
+    // safe to say the person attempting to kick them will vote yes, the kick-ee will vote no
+    votes[guid] = LFG_ANSWER_DENY;
+    votes[kicker] = LFG_ANSWER_AGREE;
+    
+    // set group state to boot vote, same for player states until it's over
+    for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next()) //todo: check if we will need to use mail or not
+    {
+        if (Player* pGroupPlr = itr->getSource())
+        {
+            ObjectGuid pGroupPlrGuid = pGroupPlr->GetObjectGuid();
+            
+            SetPlayerState(pGroupPlrGuid, LFG_STATE_BOOT);
+            
+            if ( (pGroupPlrGuid != guid) && (pGroupPlrGuid != kicker) )
+                votes[pGroupPlrGuid] = LFG_ANSWER_PENDING;
+        }
+    }
+    
+    LFGBoot boot(true, guid, reason, votes, now);
+    m_bootStatusMap[groupGuid] = boot;
+    
+    for (GroupReference* it = pGroup->GetFirstMember(); it != NULL; it = it->next())
+    {
+        if (Player* groupPlr = it->getSource())
+            groupPlr->GetSession()->SendLfgBootUpdate(boot);
+    }
+}
+
+void LFGMgr::CastVote(Player* pPlayer, bool vote)
+{
+    if (!pPlayer)
+        return;
+        
+    Group* pGroup = pPlayer->GetGroup();
+    ObjectGuid groupGuid = pGroup->GetObjectGuid();
+    
+    LFGGroupStatus* status = GetGroupStatus(groupGuid);
+    
+    if (!status || status->state != LFG_STATE_BOOT)
+        return;
+        
+    bootStatusMap::iterator it = m_bootStatusMap.find(groupGuid);
+    if (it == m_bootStatusMap.end())
+        return;
+        
+    LFGBoot boot = it->second;
+    boot.answers[pPlayer->GetObjectGuid()] = LFGProposalAnswer(vote);
+    
+    int32 yay = 0, nay = 0; // keep a count of votes
+    for (proposalAnswerMap::iterator pIt = boot.answers.begin(); pIt != boot.answers.end(); ++pIt)
+    {
+        LFGProposalAnswer answer = pIt->second;
+        if (answer == LFG_ANSWER_AGREE)
+            ++yay;
+        else if (answer == LFG_ANSWER_DENY)
+            ++nay;
+    }
+    
+    if (yay < REQUIRED_VOTES_FOR_BOOT && nay < REQUIRED_VOTES_FOR_BOOT)
+    {
+        m_bootStatusMap[groupGuid] = boot;
+        return;
+    }
+    
+    // if we dont have enough votes to kick or keep plr, don't send packet update
+    // if else, set boot.inProgress to false, set plr + group states back to lfg-state-dungeon,
+    // send packet update to group, kick plr if we had the votes, and then erase entry from boot map
+    
+    boot.inProgress = false;
+    status->state = LFG_STATE_IN_DUNGEON;
+    
+    for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        if (Player* pGroupPlr = itr->getSource())
+        {
+            ObjectGuid plrGuid = pGroupPlr->GetObjectGuid();
+            
+            if (plrGuid != boot.playerVotedOn)
+            {
+                SetPlayerState(plrGuid, LFG_STATE_IN_DUNGEON);
+                pGroupPlr->GetSession()->SendLfgBootUpdate(boot);
+            }
+        }
+    }
+    
+    if (yay == REQUIRED_VOTES_FOR_BOOT)
+    {
+        // kick player from group
+        if (pGroup->RemoveMember(boot.playerVotedOn, 1) <= 1)
+        {
+            // group->Disband(); already disbanded in RemoveMember
+            sObjectMgr.RemoveGroup(pGroup);
+            delete pGroup;
+            // removemember sets the player's group pointer to NULL
+        }
+    }
 }
 
 void LFGMgr::SendRoleChosen(ObjectGuid plrGuid, ObjectGuid confirmedGuid, uint8 roles)

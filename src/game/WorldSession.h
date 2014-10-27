@@ -240,6 +240,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendLfgProposalUpdate(LFGProposal const& proposal);
         void SendLfgTeleportError(uint8 error);
         void SendLfgRewards(LFGRewards const& rewards);
+        void SendLfgBootUpdate(LFGBoot const& boot);
         void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res);
         void SendGroupInvite(Player* player, bool alreadyInGroup = false);
         void SendGuildInvite(Player* player, bool alreadyInGuild = false);

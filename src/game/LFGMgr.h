@@ -36,6 +36,7 @@ class ObjectGuid;
 class Player;
 class Group;
 
+struct LFGBoot;
 struct LFGGroupStatus;
 struct LFGPlayers;
 struct LFGPlayerStatus;
@@ -229,6 +230,9 @@ const uint32 WOTLK_SPECIAL_HEROIC_AMNT = 2;
 /// Default average queue time (in case we don't have data to base calculations on)
 const int32 QUEUE_DEFAULT_TIME = 15*MINUTE;                              // 15 minutes [system is measured in seconds]
 
+/// Amount of votes needed to kick a player out of a group
+const int32 REQUIRED_VOTES_FOR_BOOT = 3;
+
 typedef std::set<uint32> dailyEntries;                                   // for players who did one of X type instance per day
 typedef std::set<ObjectGuid> queueSet;                                   // List of players / groups in the queue
 typedef std::set<ObjectGuid> groupSet;                                   // List of groups doing a dungeon via the finder
@@ -245,6 +249,7 @@ typedef UNORDERED_MAP<ObjectGuid, LFGPlayers> playerData;                // Obje
 typedef UNORDERED_MAP<ObjectGuid, LFGProposalAnswer> proposalAnswerMap;  // ObjectGuid of player, answer to proposal
 typedef UNORDERED_MAP<ObjectGuid, ObjectGuid> playerGroupMap;            // ObjectGuid of player, ObjectGuid of group
 typedef UNORDERED_MAP<ObjectGuid, LFGGroupStatus> groupStatusMap;        // ObjectGuid of group, group status structure
+typedef UNORDERED_MAP<ObjectGuid, LFGBoot> bootStatusMap;                // ObjectGuid of group, boot vote status
 
 // End Section: Constants & Definitions
 
@@ -377,6 +382,20 @@ struct LFGRewards
         randomDungeonEntry(RandomDungeonEntry), groupDungeonEntry(GroupDungeonEntry),
         hasDoneDaily(HasDoneDaily), moneyReward(MoneyReward), expReward(ExpReward),
         itemID(ItemID), itemAmount(ItemAmount) { }
+};
+
+// For SMSG_LFG_BOOT_PLAYER
+struct LFGBoot
+{
+    bool inProgress;           // Is the boot vote still occurring?
+    ObjectGuid playerVotedOn;  // ObjectGuid of the player being voted on
+    std::string reason;        // Reason stated for the vote
+    proposalAnswerMap answers; // Player's votes
+    time_t startTime;          // When the vote started
+    
+    LFGBoot() { }
+    LFGBoot(bool InProgress, ObjectGuid PlayerVotedOn, std::string Reason, proposalAnswerMap Answers, time_t StartTime)
+        : inProgress(InProgress), playerVotedOn(PlayerVotedOn), reason(Reason), answers(Answers), startTime(StartTime) { }
 };
 
 // End Section: Structures
@@ -573,6 +592,9 @@ public:
     /// Group kick hook
     void AttemptToKickPlayer(Group* pGroup, ObjectGuid guid, ObjectGuid kicker, std::string reason);
     
+    // Called when a player votes yes or no on a boot vote
+    void CastVote(Player* pPlayer, bool vote);
+    
 protected:
     bool IsSeasonal(uint32 dbcFlags) { return ((dbcFlags & LFG_FLAG_SEASONAL) != 0) ? true : false; }
     
@@ -655,6 +677,9 @@ private:
     
     /// Role check information
     roleCheckMap m_roleCheckMap;
+    
+    /// Boot vote information
+    bootStatusMap m_bootStatusMap;
     
     /// Wait times for the queue
     waitTimeMap m_tankWaitTime;
