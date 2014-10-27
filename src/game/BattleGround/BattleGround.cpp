@@ -41,7 +41,9 @@
 #include "Formulas.h"
 #include "GridNotifiersImpl.h"
 #include "Chat.h"
+#ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
+#endif /* ENABLE_ELUNA */
 
 namespace MaNGOS
 {
@@ -282,6 +284,10 @@ BattleGround::BattleGround()
 /// </summary>
 BattleGround::~BattleGround()
 {
+#ifdef ENABLE_ELUNA
+    // sEluna->OnBGDestroy(this, GetTypeID(), GetInstanceID());
+#endif /* ENABLE_ELUNA */
+
     // remove objects and creatures
     // (this is done automatically in mapmanager update, when the instance is reset after the reset time)
     sBattleGroundMgr.RemoveBattleGround(GetInstanceID(), GetTypeID());
@@ -726,8 +732,9 @@ void BattleGround::UpdateWorldStateForPlayer(uint32 Field, uint32 Value, Player*
 /// <param name="winner">The winner.</param>
 void BattleGround::EndBattleGround(Team winner)
 {
+#ifdef ENABLE_ELUNA
     sEluna->OnBGEnd(this, GetTypeID(), GetInstanceID(), winner);
-    
+#endif /* ENABLE_ELUNA */
     this->RemoveFromBGFreeSlotQueue();
 
     ArenaTeam* winner_arena_team = NULL;
@@ -1291,7 +1298,9 @@ void BattleGround::StartTimedAchievement(AchievementCriteriaTypes type, uint32 e
         if (Player* pPlayer = GetBgMap()->GetPlayer(itr->first))
             pPlayer->GetAchievementMgr().StartTimedAchievementCriteria(type, entry);
 
+#ifdef ENABLE_ELUNA
     sEluna->OnBGStart(this, GetTypeID(), GetInstanceID());
+#endif /* ENABLE_ELUNA */
 }
 
 /// <summary>
