@@ -48,6 +48,7 @@
 #include "InstanceData.h"
 #include "DBCStructure.h"
 #include "Chat.h"
+#include "LFGMgr.h"
 
 #include "Policies/Singleton.h"
 
@@ -1915,12 +1916,25 @@ void AchievementMgr::CompletedCriteriaFor(AchievementEntry const* achievement)
     // counter can never complete
     if (achievement->flags & ACHIEVEMENT_FLAG_COUNTER)
         return;
+ 
+    bool hasCompleted = IsCompletedAchievement(achievement);
+    uint32 categoryId = achievement->categoryId;
+       
+    // Dungeon Finder reward hook (note: apply to mangos three & four)
+    if (hasCompleted)
+    {
+        if (categoryId == 14807 || categoryId == 15062 || categoryId == 14963
+            || categoryId == 14822 || categoryId == 15021 || categoryId == 14823
+            || categoryId == 14721)
+            sLFGMgr.HandleBossKilled(GetPlayer());
+    }
+                
 
     // already completed and stored
     if (m_completedAchievements.find(achievement->ID) != m_completedAchievements.end())
         return;
 
-    if (IsCompletedAchievement(achievement))
+    if (hasCompleted)
         CompletedAchievement(achievement);
 }
 

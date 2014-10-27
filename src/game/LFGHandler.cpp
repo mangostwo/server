@@ -106,12 +106,12 @@ void WorldSession::HandleSetLfgCommentOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("CMSG_SET_LFG_COMMENT");
 
-    uint64 rawGuid = GetPlayer()->GetObjectGuid().GetRawValue();
+    ObjectGuid guid = GetPlayer()->GetObjectGuid();
 
     std::string comment;
     recv_data >> comment;
     DEBUG_LOG("LFG comment \"%s\"", comment.c_str());
-    sLFGMgr.SetPlayerComment(rawGuid, comment);
+    sLFGMgr.SetPlayerComment(guid, comment);
 }
 
 void WorldSession::HandleLfgGetPlayerInfo(WorldPacket& recv_data)
@@ -207,8 +207,8 @@ void WorldSession::HandleLfgGetPartyInfo(WorldPacket& recv_data)
         if (!pGroupPlayer)
             continue;
         
-        uint64 pPlayerGuid = pGroupPlayer->GetObjectGuid().GetRawValue();
-        if (pPlayerGuid != guid)
+        ObjectGuid pPlayerGuid = pGroupPlayer->GetObjectGuid();
+        if (pPlayerGuid.GetRawValue() != guid)
             groupMap[pPlayerGuid] = sLFGMgr.FindRandomDungeonsNotForPlayer(pGroupPlayer);
     }
     
@@ -241,8 +241,8 @@ void WorldSession::HandleLfgGetStatus(WorldPacket& recv_data)
     DEBUG_LOG("CMSG_LFG_GET_STATUS");
     
     Player* pPlayer = GetPlayer();
-    uint64 rawGuid = pPlayer->GetObjectGuid().GetRawValue();
-    LFGPlayerStatus currentStatus = sLFGMgr.GetPlayerStatus(rawGuid);
+    ObjectGuid guid = pPlayer->GetObjectGuid();
+    LFGPlayerStatus currentStatus = sLFGMgr.GetPlayerStatus(guid);
     
     if (pPlayer->GetGroup())
     {
@@ -273,6 +273,41 @@ void WorldSession::HandleLfgSetRoles(WorldPacket& recv_data)
     recv_data >> roles;
     
     sLFGMgr.PerformRoleCheck(pPlayer, pGroup, roles);      // handle the rules/logic in lfgmgr
+}
+
+void WorldSession::HandleLfgProposalResponse(WorldPacket& recv_data)
+{
+    DEBUG_LOG("CMSG_LFG_PROPOSAL_RESPONSE");
+    
+    ObjectGuid guid = GetPlayer()->GetObjectGuid();
+    
+    uint32 proposalID;
+    bool accepted;
+    
+    recv_data >> proposalID; // internal proposal id
+    recv_data >> accepted;   // their response
+    
+    sLFGMgr.ProposalUpdate(proposalID, guid, accepted);
+}
+
+void WorldSession::HandleLfgTeleportRequest(WorldPacket& recv_data)
+{
+    DEBUG_LOG("CMSG_LFG_TELEPORT");
+    
+    bool out;
+    recv_data >> out;  // exit instance
+    
+    sLFGMgr.TeleportPlayer(GetPlayer(), out);
+}
+
+void WorldSession::HandleLfgBootVote(WorldPacket& recv_data)
+{
+    DEBUG_LOG("CMSG_LFG_BOOT_PLAYER_VOTE");
+    
+    bool vote;
+    recv_data >> vote;
+    
+    sLFGMgr.CastVote(GetPlayer(), vote);
 }
 
 void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
@@ -496,7 +531,7 @@ void WorldSession::SendLfgUpdate(bool isGroup, LFGPlayerStatus status)
 
 void WorldSession::SendLfgQueueStatus(LFGQueueStatus const& status)
 {
-    WorldPacket data(SMSG_LFG_QUEUE_STATUS);
+    WorldPacket data(SMSG_LFG_QUEUE_STATUS, 31);
     
     data << uint32(status.dungeonID);
     data << int32(status.playerAvgWaitTime);
@@ -533,11 +568,11 @@ void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
     data << uint8(roleCheck.currentRoles.size());
     if (!roleCheck.currentRoles.empty())
     {
-        uint64 leaderGuid = roleCheck.leaderGuidRaw;
-        uint8 leaderRoles = roleCheck.currentRoles.find(leaderGuid)->second;
-        Player* pLeader = ObjectAccessor::FindPlayer(ObjectGuid(leaderGuid));
+        ObjectGuid leaderGuid = ObjectGuid(roleCheck.leaderGuidRaw);
+        uint8 leaderRoles     = roleCheck.currentRoles.find(leaderGuid)->second;
+        Player* pLeader       = ObjectAccessor::FindPlayer(leaderGuid);
         
-        data << uint64(leaderGuid);
+        data << uint64(leaderGuid.GetRawValue());
         data << uint8(leaderRoles > 0);
         data << uint32(leaderRoles);
         data << uint8(pLeader->getLevel());
@@ -547,9 +582,11 @@ void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
             if (rItr->first == leaderGuid)
                 continue; // exclude the leader
             
-            Player* pPlayer = ObjectAccessor::FindPlayer(ObjectGuid(rItr->first));
+            ObjectGuid plrGuid = rItr->first;
             
-            data << uint64(rItr->first);
+            Player* pPlayer = ObjectAccessor::FindPlayer(plrGuid);
+            
+            data << uint64(plrGuid.GetRawValue());
             data << uint8(rItr->second > 0);
             data << uint32(rItr->second);
             data << uint8(pPlayer->getLevel());
@@ -565,5 +602,121 @@ void WorldSession::SendLfgRoleChosen(uint64 rawGuid, uint8 roles)
     data << uint64(rawGuid);
     data << uint8(roles > 0);
     data << uint32(roles);
+    SendPacket(&data);
+}
+
+void WorldSession::SendLfgProposalUpdate(LFGProposal const& proposal)
+{
+    Player* pPlayer         = GetPlayer();
+    ObjectGuid plrGuid      = pPlayer->GetObjectGuid();
+    ObjectGuid plrGroupGuid = proposal.groups.find(plrGuid)->second;
+    
+    uint32 dungeonEntry = sLFGMgr.GetDungeonEntry(proposal.dungeonID);
+    bool showProposal   = !proposal.isNew && proposal.groupRawGuid == plrGroupGuid.GetRawValue();
+    
+    WorldPacket data(SMSG_LFG_PROPOSAL_UPDATE, 15+(9*proposal.currentRoles.size()));
+    
+    data << uint32(dungeonEntry);                // Dungeon Entry
+    data << uint8(proposal.state);               // Proposal state
+    data << uint32(proposal.id);                 // ID of proposal
+    data << uint32(proposal.encounters);         // Encounters done
+    data << uint8(showProposal);                 // Show or hide proposal window [todo-this]
+    data << uint8(proposal.currentRoles.size()); // Size of group
+    
+    for (playerGroupMap::const_iterator it = proposal.groups.begin(); it != proposal.groups.end(); ++it)
+    {
+        ObjectGuid grpPlrGuid          = it->first;
+        uint8 grpPlrRole               = proposal.currentRoles.find(grpPlrGuid)->second;
+        LFGProposalAnswer grpPlrAnswer = proposal.answers.find(grpPlrGuid)->second;
+        
+        data << uint32(grpPlrRole);              // Player's role
+        data << uint8(grpPlrGuid == plrGuid);    // Is this player me?
+        
+        if (it->second != 0)
+        {
+            data << uint8(it->second == ObjectGuid(proposal.groupRawGuid)); // Is player in the proposed group?
+            data << uint8(it->second == plrGroupGuid);          // Is player in the same group as myself?
+        }
+        else
+        {
+            data << uint8(0);
+            data << uint8(0);
+        }
+        
+        data << uint8(grpPlrAnswer != LFG_ANSWER_PENDING);  // Has the player selected an answer?
+        data << uint8(grpPlrAnswer == LFG_ANSWER_AGREE);    // Has the player agreed to do the dungeon?
+    }
+    SendPacket(&data);
+}
+
+void WorldSession::SendLfgTeleportError(uint8 error)
+{
+    DEBUG_LOG("SMSG_LFG_TELEPORT_DENIED");
+    WorldPacket data(SMSG_LFG_TELEPORT_DENIED, 4);
+    data << uint32(error);
+    SendPacket(&data);
+}
+
+void WorldSession::SendLfgRewards(LFGRewards const& rewards)
+{
+    DEBUG_LOG("SMSG_LFG_PLAYER_REWARD");
+    
+    WorldPacket data(SMSG_LFG_PLAYER_REWARD, 42);
+    data << uint32(rewards.randomDungeonEntry);
+    data << uint32(rewards.groupDungeonEntry);
+    data << uint8(rewards.hasDoneDaily);
+    data << uint32(1);
+    data << uint32(rewards.moneyReward);
+    data << uint32(rewards.expReward);
+    data << uint32(0);
+    data << uint32(0);
+    if (rewards.itemID != 0)
+    {
+        ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(rewards.itemID);
+        if (pProto)
+        {
+            data << uint8(1);
+            data << uint32(rewards.itemID);
+            data << uint32(pProto->DisplayInfoID);
+            data << uint32(rewards.itemAmount);
+        }
+    }
+    else
+        data << uint8(0);
+    SendPacket(&data);
+}
+
+void WorldSession::SendLfgBootUpdate(LFGBoot const& boot)
+{
+    DEBUG_LOG("SMSG_LFG_BOOT_PLAYER");
+    
+    ObjectGuid plrGuid = GetPlayer()->GetObjectGuid();
+    LFGProposalAnswer plrAnswer = boot.answers.find(plrGuid)->second;
+    
+    uint32 voteCount = 0, yayCount = 0;
+    for (proposalAnswerMap::const_iterator it = boot.answers.begin(); it != boot.answers.end(); ++it)
+    {
+        if (it->second != LFG_ANSWER_PENDING)
+        {
+            ++voteCount;
+            if (it->second == LFG_ANSWER_AGREE)
+                ++yayCount;
+        }
+    }
+    
+    uint32 timeLeft = uint8( ((boot.startTime+LFG_TIME_BOOT)-time(nullptr)) / 1000 );
+    
+    WorldPacket data(SMSG_LFG_BOOT_PLAYER, 27+boot.reason.length());
+    
+    data << uint8(boot.inProgress);                   // Is boot still ongoing?
+    data << uint8(plrAnswer != LFG_ANSWER_PENDING);   // Did this player vote yet?
+    data << uint8(plrAnswer == LFG_ANSWER_AGREE);     // Did this player agree to boot them?
+    data << uint64(boot.playerVotedOn.GetRawValue()); // Potentially booted player's objectguid value
+    data << uint32(voteCount);                        // Number of players who've voted so far
+    data << uint32(yayCount);                         // Number of players who've voted against the plr so far
+    data << uint32(timeLeft);                         // Time left in seconds
+    data << uint32(REQUIRED_VOTES_FOR_BOOT);          // Number of votes needed to win
+    data << boot.reason.c_str();                      // Reason given for booting
+    
     SendPacket(&data);
 }

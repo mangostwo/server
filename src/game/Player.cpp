@@ -72,6 +72,7 @@
 #include "SQLStorages.h"
 #include "Vehicle.h"
 #include "Calendar.h"
+#include "LFGMgr.h"
 #include "LuaEngine.h"
 
 #include <cmath>
@@ -2434,11 +2435,15 @@ void Player::UninviteFromGroup()
     }
 }
 
-void Player::RemoveFromGroup(Group* group, ObjectGuid guid)
+void Player::RemoveFromGroup(Group* group, ObjectGuid guid, ObjectGuid kicker, std::string reason)
 {
     if (group)
     {
-        if (group->RemoveMember(guid, 0) <= 1)
+        if (group->isLFGGroup())
+        {
+            sLFGMgr.AttemptToKickPlayer(group, guid, kicker, reason);
+        }
+        else if (group->RemoveMember(guid, 0) <= 1)
         {
             // group->Disband(); already disbanded in RemoveMember
             sObjectMgr.RemoveGroup(group);
@@ -4186,7 +4191,7 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
         uint32 groupId = (*resultGroup)[0].GetUInt32();
         delete resultGroup;
         if (Group* group = sObjectMgr.GetGroupById(groupId))
-            RemoveFromGroup(group, playerguid);
+            RemoveFromGroup(group, playerguid, playerguid, "");
     }
 
     // remove signs from petitions (also remove petitions if owner);

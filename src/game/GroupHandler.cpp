@@ -265,12 +265,15 @@ void WorldSession::HandleGroupDeclineOpcode(WorldPacket& /*recv_data*/)
 
 void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket& recv_data)
 {
+    ObjectGuid kickerGuid = GetPlayer()->GetObjectGuid();
     ObjectGuid guid;
-    recv_data >> guid;
-    recv_data.read_skip<std::string>();                     // reason
+    std::string reason;
+    recv_data >> guid;                                        // player being uninvited
+    recv_data >> reason;
+    //recv_data.read_skip<std::string>();                     // reason
 
     // can't uninvite yourself
-    if (guid == GetPlayer()->GetObjectGuid())
+    if (guid == kickerGuid)
     {
         sLog.outError("WorldSession::HandleGroupUninviteGuidOpcode: leader %s tried to uninvite himself from the group.", GetPlayer()->GetGuidStr().c_str());
         return;
@@ -289,7 +292,7 @@ void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket& recv_data)
 
     if (grp->IsMember(guid))
     {
-        Player::RemoveFromGroup(grp, guid);
+        Player::RemoveFromGroup(grp, guid, kickerGuid, reason);
         return;
     }
 
@@ -304,6 +307,7 @@ void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleGroupUninviteOpcode(WorldPacket& recv_data)
 {
+    ObjectGuid kickerGuid = GetPlayer()->GetObjectGuid();
     std::string membername;
     recv_data >> membername;
 
@@ -331,7 +335,7 @@ void WorldSession::HandleGroupUninviteOpcode(WorldPacket& recv_data)
 
     if (ObjectGuid guid = grp->GetMemberGuid(membername))
     {
-        Player::RemoveFromGroup(grp, guid);
+        Player::RemoveFromGroup(grp, guid, kickerGuid, "");
         return;
     }
 

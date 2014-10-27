@@ -34,26 +34,18 @@
 class Object;
 class ObjectGuid;
 class Player;
+class Group;
 
-// Begin Section: Constants & Definitions
+struct LFGBoot;
+struct LFGGroupStatus;
+struct LFGPlayers;
+struct LFGPlayerStatus;
+struct LFGProposal;
+struct LFGRoleCheck;
+struct LFGWait;
 
-/// Heroic dungeon rewards in WoTLK after already doing a dungeon
-const uint32 WOTLK_SPECIAL_HEROIC_ITEM = 47241;
-const uint32 WOTLK_SPECIAL_HEROIC_AMNT = 2;
+// Begin Section: Enumerations
 
-/// Default average queue time (in case we don't have data to base calculations on)
-const int32 QUEUE_DEFAULT_TIME = 15*MINUTE;                     // 15 minutes [system is measured in seconds]
-
-typedef std::set<uint32> dailyEntries;                          // for players who did one of X type instance per day
-typedef std::set<uint64> queueSet;                              // List of players / groups in the queue
-typedef UNORDERED_MAP<uint32, uint32> dungeonEntries;           // ID, Entry
-typedef UNORDERED_MAP<uint32, uint32> dungeonForbidden;         // Entry, LFGForbiddenTypes
-typedef UNORDERED_MAP<uint64, dungeonForbidden> partyForbidden; // ObjectGuid (raw), map of locked dungeons
-typedef UNORDERED_MAP<uint64, uint8> roleMap;                   // ObjectGuid (raw), role(s) selected
-
-// End Section: Constants & Definitions
-
-// Begin Section: Enumerations & Structures
 enum LFGFlags
 {
     LFG_FLAG_UNK1        = 0x1,
@@ -145,6 +137,15 @@ enum LFGTimes
     LFG_TIME_PROPOSAL                            = 45,
 };
 
+/// Proposal answers
+enum LFGProposalAnswer
+{
+    LFG_ANSWER_PENDING                           = -1,
+    LFG_ANSWER_DENY                              = 0,
+    LFG_ANSWER_AGREE                             = 1
+};
+
+/// Player states in the lfg system
 enum LFGState
 {
     LFG_STATE_NONE,
@@ -155,6 +156,14 @@ enum LFGState
     LFG_STATE_IN_DUNGEON,
     LFG_STATE_FINISHED_DUNGEON,
     LFG_STATE_RAIDBROWSER
+};
+
+/// Proposal states
+enum LFGProposalState
+{
+    LFG_PROPOSAL_INITIATING                      = 0,
+    LFG_PROPOSAL_FAILED                          = 1,
+    LFG_PROPOSAL_SUCCESS                         = 2
 };
 
 /// Role check states
@@ -187,6 +196,19 @@ enum LFGRoleCount
     NORMAL_TOTAL_ROLE_COUNT                      = 5       // Amount of players total per normal dungeon
 };
 
+/// Teleport errors
+enum LFGTeleportError
+{
+    // 7 = "You can't do that right now" | 5 = No client reaction
+    LFG_TELEPORTERROR_OK                         = 0,
+    LFG_TELEPORTERROR_PLAYER_DEAD                = 1,
+    LFG_TELEPORTERROR_FALLING                    = 2,
+    LFG_TELEPORTERROR_IN_VEHICLE                 = 3,
+    LFG_TELEPORTERROR_FATIGUE                    = 4,
+    LFG_TELEPORTERROR_INVALID_LOCATION           = 6,
+    LFG_TELEPORTERROR_CHARMING                   = 8
+};
+
 enum DungeonTypes
 {
     DUNGEON_CLASSIC      = 0,
@@ -196,6 +218,42 @@ enum DungeonTypes
     DUNGEON_WOTLK_HEROIC = 4,
     DUNGEON_UNKNOWN
 };
+
+// End Section: Enumerations
+
+// Begin Section: Constants & Definitions
+
+/// Heroic dungeon rewards in WoTLK after already doing a dungeon
+const uint32 WOTLK_SPECIAL_HEROIC_ITEM = 47241;
+const uint32 WOTLK_SPECIAL_HEROIC_AMNT = 2;
+
+/// Default average queue time (in case we don't have data to base calculations on)
+const int32 QUEUE_DEFAULT_TIME = 15*MINUTE;                              // 15 minutes [system is measured in seconds]
+
+/// Amount of votes needed to kick a player out of a group
+const int32 REQUIRED_VOTES_FOR_BOOT = 3;
+
+typedef std::set<uint32> dailyEntries;                                   // for players who did one of X type instance per day
+typedef std::set<ObjectGuid> queueSet;                                   // List of players / groups in the queue
+typedef std::set<ObjectGuid> groupSet;                                   // List of groups doing a dungeon via the finder
+
+typedef UNORDERED_MAP<uint32, uint32> dungeonEntries;                    // ID, Entry
+typedef UNORDERED_MAP<uint32, uint32> dungeonForbidden;                  // Entry, LFGForbiddenTypes
+typedef UNORDERED_MAP<uint32, LFGProposal> proposalMap;                  // Proposal ID, info on a proposal
+typedef UNORDERED_MAP<uint32, LFGWait> waitTimeMap;                      // DungeonID, wait info
+typedef UNORDERED_MAP<ObjectGuid, dungeonForbidden> partyForbidden;      // ObjectGuid of player, map of locked dungeons
+typedef UNORDERED_MAP<ObjectGuid, uint8> roleMap;                        // ObjectGuid of player, role(s) selected
+typedef UNORDERED_MAP<ObjectGuid, LFGRoleCheck> roleCheckMap;            // ObjectGuid of group, role information
+typedef UNORDERED_MAP<ObjectGuid, LFGPlayerStatus> playerStatusMap;      // ObjectGuid of player, info on specific players only
+typedef UNORDERED_MAP<ObjectGuid, LFGPlayers> playerData;                // ObjectGuid of plr/group, info on specific player or group. TODO: rename to queueData
+typedef UNORDERED_MAP<ObjectGuid, LFGProposalAnswer> proposalAnswerMap;  // ObjectGuid of player, answer to proposal
+typedef UNORDERED_MAP<ObjectGuid, ObjectGuid> playerGroupMap;            // ObjectGuid of player, ObjectGuid of group
+typedef UNORDERED_MAP<ObjectGuid, LFGGroupStatus> groupStatusMap;        // ObjectGuid of group, group status structure
+typedef UNORDERED_MAP<ObjectGuid, LFGBoot> bootStatusMap;                // ObjectGuid of group, boot vote status
+
+// End Section: Constants & Definitions
+
+// Begin Section: Structures
 
 /// Item rewards taken from DungeonFinderItems in ObjectMgr, parsed by dbc values
 struct ItemRewards
@@ -278,12 +336,69 @@ struct LFGPlayerStatus
         : state(State), updateType(UpdateType), dungeonList(DungeonList), comment(Comment) { }
 };
 
-typedef UNORDERED_MAP<uint64, LFGPlayers> playerData;           // ObjectGuid(raw), info on specific player or group. TODO: rename to queueData
-typedef UNORDERED_MAP<uint32, LFGWait> waitTimeMap;             // DungeonID, wait info
-typedef UNORDERED_MAP<uint64, LFGRoleCheck> roleCheckMap;       // ObjectGuid(raw) of group, role information
-typedef UNORDERED_MAP<uint64, LFGPlayerStatus> playerStatusMap; // ObjectGuid(raw), info on specific players only
+/// Information on a group currently in a dungeon
+struct LFGGroupStatus //todo: check for this in joinlfg function, not lfgplayers struct
+{
+    LFGState state;        // State of the group
+    uint32 dungeonID;      // ID of the dungeon the group should be in
+    roleMap playerRoles;   // Container holding each player's objectguid and their roles
+    ObjectGuid leaderGuid; // The group leader's object guid
+    
+    LFGGroupStatus() { }
+    LFGGroupStatus(LFGState State, uint32 DungeonID, roleMap PlayerRoles, ObjectGuid LeaderGuid)
+        : state(State), dungeonID(DungeonID), playerRoles(PlayerRoles), leaderGuid(LeaderGuid) { }
+};
 
-// End Section: Enumerations & Structures
+/// For SMSG_LFG_PROPOSAL_UPDATE
+struct LFGProposal
+{
+    uint32 id;                 // proposal id
+    uint32 dungeonID;          // dungeon id
+    LFGProposalState state;    // proposal state
+    uint32 encounters;         // encounters done
+    uint64 groupRawGuid;       // group raw guid value
+    uint64 groupLeaderGuid;    // group leader's guid
+    bool isNew;                // is new or old group
+    roleMap currentRoles;      // group player's roles
+    proposalAnswerMap answers; // answers to a proposal
+    playerGroupMap groups;     // data on which groups players belong/belonged to
+    time_t joinedQueue;        // time from when the players joined the queue
+};
+
+// For SMSG_LFG_PLAYER_REWARD
+struct LFGRewards
+{
+    uint32 randomDungeonEntry;  // Entry of the random dungeon done (0 if not random)
+    uint32 groupDungeonEntry;   // Entry of the dungeon done by your group
+    bool hasDoneDaily;          // First dungeon of the day?
+    uint32 moneyReward;         // Amount of money rewarded
+    uint32 expReward;           // Amount of experience rewarded
+    uint32 itemID;              // ID of item reward
+    uint32 itemAmount;          // How many of x item is rewarded
+    
+    LFGRewards() { }
+    LFGRewards(uint32 RandomDungeonEntry, uint32 GroupDungeonEntry, bool HasDoneDaily,
+        uint32 MoneyReward, uint32 ExpReward, uint32 ItemID, uint32 ItemAmount) :
+        randomDungeonEntry(RandomDungeonEntry), groupDungeonEntry(GroupDungeonEntry),
+        hasDoneDaily(HasDoneDaily), moneyReward(MoneyReward), expReward(ExpReward),
+        itemID(ItemID), itemAmount(ItemAmount) { }
+};
+
+// For SMSG_LFG_BOOT_PLAYER
+struct LFGBoot
+{
+    bool inProgress;           // Is the boot vote still occurring?
+    ObjectGuid playerVotedOn;  // ObjectGuid of the player being voted on
+    std::string reason;        // Reason stated for the vote
+    proposalAnswerMap answers; // Player's votes
+    time_t startTime;          // When the vote started
+    
+    LFGBoot() { }
+    LFGBoot(bool InProgress, ObjectGuid PlayerVotedOn, std::string Reason, proposalAnswerMap Answers, time_t StartTime)
+        : inProgress(InProgress), playerVotedOn(PlayerVotedOn), reason(Reason), answers(Answers), startTime(StartTime) { }
+};
+
+// End Section: Structures
 
 class LFGMgr
 {
@@ -324,33 +439,33 @@ public:
     /**
      * @brief Fetch the playerstatus struct of a player on request, if existant
      * 
-     * @param rawGuid the player's objectguid value
+     * @param guid the player's objectguid
      */
-    LFGPlayerStatus GetPlayerStatus(uint64 rawGuid);
+    LFGPlayerStatus GetPlayerStatus(ObjectGuid guid);
     
     /**
      * @brief Set the player's comment string
      * 
-     * @param rawGuid The player's objectguid value
+     * @param guid The player's objectguid
      * @param comment Their comments
      */
-    void SetPlayerComment(uint64 rawGuid, std::string comment);
+    void SetPlayerComment(ObjectGuid guid, std::string comment);
     
     /**
      * @brief Set the player's LFG state
      * 
-     * @param rawGuid The player's objectguid value
+     * @param guid The player's objectguid
      * @param state the LFGState value
      */
-    void SetPlayerState(uint64 rawGuid, LFGState state);
+    void SetPlayerState(ObjectGuid guid, LFGState state);
     
     /**
      * @brief Set the player's LFG update type
      * 
-     * @param rawGuid The player's objectguid value
+     * @param guid The player's objectguid
      * @param updateType The LfgUpdateType value
      */
-    void SetPlayerUpdateType(uint64 rawGuid, LfgUpdateType updateType);
+    void SetPlayerUpdateType(ObjectGuid guid, LfgUpdateType updateType);
     
     /**
      * @brief Used to fetch the item rewards of a dungeon from the database
@@ -412,23 +527,33 @@ public:
     /// Given the ID of a dungeon, spit out its entry
     uint32 GetDungeonEntry(uint32 ID);
     
+    /// Teleports a player out of a dungeon (called by CMSG_LFG_TELEPORT)
+    void TeleportPlayer(Player* pPlayer, bool out);
+    
     /// Queue Functions Below
     
     /**
      * Find the player's or group's information and update the system with
      *     the amount of each role they need to find.
      * 
-     * @param rawGuid The raw value of their ObjectGuid
+     * @param guid The guid assigned to the structure
      * @param information The LFGPlayers structure containing their information
      */
-    void UpdateNeededRoles(uint64 rawGuid, LFGPlayers* information);
+    void UpdateNeededRoles(ObjectGuid guid, LFGPlayers* information);
     
     /**
      * @brief Add the player or group to the Dungeon Finder queue
      * 
-     * @param rawGuid the raw value of said player/group's ObjectGuid
+     * @param guid the player/group's ObjectGuid
      */
-    void AddToQueue(uint64 rawGuid);
+    void AddToQueue(ObjectGuid guid);
+    
+    /**
+     * @brief Remove the player or group from the Dungeon Finder queue
+     * 
+     * @param guid the player/group's ObjectGuid
+     */
+    void RemoveFromQueue(ObjectGuid guid);
     
     /// Search the queue for compatible matches
     void FindQueueMatches();
@@ -436,9 +561,9 @@ public:
     /**
      * @brief Search the queue for matches based off of one's guid
      * 
-     * @param rawGuid The player or group's guid
+     * @param guid The player or group's guid
      */
-    void FindSpecificQueueMatches(uint64 rawGuid);
+    void FindSpecificQueueMatches(ObjectGuid guid);
     
     /// Send a periodic status update for queued players
     void SendQueueStatus();
@@ -457,38 +582,81 @@ public:
     /// Make sure role selections are okay
     bool ValidateGroupRoles(roleMap groupMap);
     
+    /// Proposal-Related Functions
+    
+    void ProposalUpdate(uint32 proposalID, ObjectGuid plrGuid, bool accepted);
+    
+    /// Handles reward hooks -- called by achievement manager
+    void HandleBossKilled(Player* pPlayer);
+    
+    /// Group kick hook
+    void AttemptToKickPlayer(Group* pGroup, ObjectGuid guid, ObjectGuid kicker, std::string reason);
+    
+    // Called when a player votes yes or no on a boot vote
+    void CastVote(Player* pPlayer, bool vote);
+    
 protected:
     bool IsSeasonal(uint32 dbcFlags) { return ((dbcFlags & LFG_FLAG_SEASONAL) != 0) ? true : false; }
     
     /// Check if player/party is already in the system, return that data
-    LFGPlayers* GetPlayerOrPartyData(uint64 rawGuid);
+    LFGPlayers* GetPlayerOrPartyData(ObjectGuid guid);
+    
+    /// Get a proposal structure given its id
+    LFGProposal* GetProposalData(uint32 proposalID);
+    
+    /// Get information on a group currently in a dungeon
+    LFGGroupStatus* GetGroupStatus(ObjectGuid guid);
     
     /// Add the player to their respective waiting map for their dungeon
     void AddToWaitMap(uint8 role, std::set<uint32> dungeons);
     
+    /// Checks if any players have the leader flag for their roles
+    bool HasLeaderFlag(roleMap const& roles);
+    
     /// Compares two groups/players to see if their role combinations are compatible
     bool RoleMapsAreCompatible(LFGPlayers* groupOne, LFGPlayers* groupTwo);
+    
+    /// Checks whether or not two combinations of players/groups are on the same team (alliance/horde)
+    bool MatchesAreOfSameTeam(LFGPlayers* groupOne, LFGPlayers* groupTwo);
+    
+    /// Are the players in a proposal already grouped up?
+    bool IsProposalSameGroup(LFGProposal const& proposal);
+    
+    /// Update a proposal after a player refused to join
+    void ProposalDeclined(ObjectGuid guid, LFGProposal* proposal);
+    
+    /// Updates a wait map with the amount of time it took the last player to join
+    void UpdateWaitMap(LFGRoles role, uint32 dungeonID, time_t waitTime);
+    
+    /// Creates a group so they can enter a dungeon together
+    void CreateDungeonGroup(LFGProposal* proposal);
+    
+    /// Sends a group to the dungeon assigned to them
+    void TeleportToDungeon(uint32 dungeonID, Group* pGroup);
     
     /**
      * @brief Merges two players/groups/etc into one for dungeon assignment.
      * 
-     * @param rawGuidOne The guid assigned to the first group in m_playerData
-     * @param rawGuidTwo The guid assigned to the second group in m_playerData
+     * @param guidOne The guid assigned to the first group in m_playerData
+     * @param guidTwo The guid assigned to the second group in m_playerData
      * @param compatibleDungeons The dungeons that both players or groups agreed to doing
      */
-    void MergeGroups(uint64 rawGuidOne, uint64 rawGuidTwo, std::set<uint32> compatibleDungeons);
+    void MergeGroups(ObjectGuid guidOne, ObjectGuid guidTwo, std::set<uint32> compatibleDungeons);
+    
+    /// Send a proposal to each member of a group
+    void SendDungeonProposal(LFGPlayers* lfgGroup);
     
     /// Tell a group member that someone else just confirmed their role
-    void SendRoleChosen(uint64 plrGuid, uint64 confirmedGuid, uint8 roles);
+    void SendRoleChosen(ObjectGuid plrGuid, ObjectGuid confirmedGuid, uint8 roles);
     
     /// Send SMSG_LFG_ROLE_CHECK_UPDATE to a specific player
-    void SendRoleCheckUpdate(uint64 plrGuid, LFGRoleCheck const& roleCheck);
+    void SendRoleCheckUpdate(ObjectGuid plrGuid, LFGRoleCheck const& roleCheck);
     
     /// Send SMSG_LFG_UPDATE_PARTY or SMSG_LFG_UPDATE_PLAYER
-    void SendLfgUpdate(uint64 plrGuid, LFGPlayerStatus status, bool isGroup);
+    void SendLfgUpdate(ObjectGuid plrGuid, LFGPlayerStatus status, bool isGroup);
     
     /// Send SMSG_LFG_JOIN_RESULT
-    void SendLfgJoinResult(uint64 plrGuid, LfgJoinResult result, LFGState state, partyForbidden const& lockedDungeons);
+    void SendLfgJoinResult(ObjectGuid plrGuid, LfgJoinResult result, LFGState state, partyForbidden const& lockedDungeons);
     
 private:
     /// Daily occurences of a player doing X type dungeon
@@ -504,14 +672,24 @@ private:
     /// Dungeon Finder Status for players
     playerStatusMap m_playerStatusMap;
     
+    groupSet m_groupSet;
+    groupStatusMap m_groupStatusMap;
+    
     /// Role check information
     roleCheckMap m_roleCheckMap;
+    
+    /// Boot vote information
+    bootStatusMap m_bootStatusMap;
     
     /// Wait times for the queue
     waitTimeMap m_tankWaitTime;
     waitTimeMap m_healerWaitTime;
     waitTimeMap m_dpsWaitTime;
     waitTimeMap m_avgWaitTime;
+    
+    /// Proposal information
+    uint32 m_proposalId;
+    proposalMap m_proposalMap;
 };
 
 #define sLFGMgr MaNGOS::Singleton<LFGMgr>::Instance()

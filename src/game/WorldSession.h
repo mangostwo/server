@@ -237,6 +237,10 @@ class MANGOS_DLL_SPEC WorldSession
         void SendLfgQueueStatus(LFGQueueStatus const& status);
         void SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck);
         void SendLfgRoleChosen(uint64 rawGuid, uint8 roles);
+        void SendLfgProposalUpdate(LFGProposal const& proposal);
+        void SendLfgTeleportError(uint8 error);
+        void SendLfgRewards(LFGRewards const& rewards);
+        void SendLfgBootUpdate(LFGBoot const& boot);
         void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res);
         void SendGroupInvite(Player* player, bool alreadyInGroup = false);
         void SendGuildInvite(Player* player, bool alreadyInGuild = false);
@@ -914,6 +918,9 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleLfgGetPartyInfo(WorldPacket& recv_data);
         void HandleLfgGetStatus(WorldPacket& recv_data);
         void HandleLfgSetRoles(WorldPacket& recv_data);
+        void HandleLfgProposalResponse(WorldPacket& recv_data);
+        void HandleLfgTeleportRequest(WorldPacket& recv_data);
+        void HandleLfgBootVote(WorldPacket& recv_data);
 
     private:
         // private trade methods
