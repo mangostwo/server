@@ -239,6 +239,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendLfgRoleChosen(uint64 rawGuid, uint8 roles);
         void SendLfgProposalUpdate(LFGProposal const& proposal);
         void SendLfgTeleportError(uint8 error);
+        void SendLfgRewards(LFGRewards const& rewards);
         void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res);
         void SendGroupInvite(Player* player, bool alreadyInGroup = false);
         void SendGuildInvite(Player* player, bool alreadyInGuild = false);

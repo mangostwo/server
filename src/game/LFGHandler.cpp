@@ -646,3 +646,32 @@ void WorldSession::SendLfgTeleportError(uint8 error)
     data << uint32(error);
     SendPacket(&data);
 }
+
+void WorldSession::SendLfgRewards(LFGRewards const& rewards)
+{
+    DEBUG_LOG("SMSG_LFG_PLAYER_REWARD");
+    
+    WorldPacket data(SMSG_LFG_PLAYER_REWARD, 42);
+    data << uint32(rewards.randomDungeonEntry);
+    data << uint32(rewards.groupDungeonEntry);
+    data << uint8(rewards.hasDoneDaily);
+    data << uint32(1);
+    data << uint32(rewards.moneyReward);
+    data << uint32(rewards.expReward);
+    data << uint32(0);
+    data << uint32(0);
+    if (rewards.itemID != 0)
+    {
+        ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(rewards.itemID);
+        if (pProto)
+        {
+            data << uint8(1);
+            data << uint32(rewards.itemID);
+            data << uint32(pProto->DisplayInfoID);
+            data << uint32(rewards.itemAmount);
+        }
+    }
+    else
+        data << uint8(0);
+    SendPacket(&data);
+}

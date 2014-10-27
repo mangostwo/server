@@ -53,6 +53,7 @@ LFGMgr::~LFGMgr()
     m_queueSet.clear();
     
     m_playerStatusMap.clear();
+    m_groupStatusMap.clear();
     m_groupSet.clear();
     m_proposalMap.clear();
     
@@ -1466,8 +1467,12 @@ void LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
         
     pGroup->SetDungeonDifficulty(Difficulty(dungeon->difficulty)); //todo: check for raids and if so call setraiddifficulty
     
-    // Add group to our group set and teleport to the dungeon
-    m_groupSet.insert(pGroup->GetObjectGuid());
+    // Add group to our group set and group map, then teleport to the dungeon
+    ObjectGuid groupGuid = pGroup->GetObjectGuid();
+    LFGGroupStatus groupStatus(LFG_STATE_IN_DUNGEON, dungeon->ID, proposal->currentRoles, pGroup->GetLeaderGuid());
+    
+    m_groupSet.insert(groupGuid);
+    m_groupStatusMap[groupGuid] = groupStatus;
     TeleportToDungeon(dungeon->ID, pGroup);
     
     pGroup->SendUpdate();
@@ -1548,7 +1553,32 @@ void LFGMgr::TeleportToDungeon(uint32 dungeonID, Group* pGroup)
 
 void LFGMgr::TeleportPlayer(Player* pPlayer, bool out)
 {
+    // Fetch necessary data first
+    Group* pGroup = pPlayer->GetGroup();
+    LFGGroupStatus* status = GetGroupStatus(pGroup->GetObjectGuid());
     
+    if (!pGroup || !status)
+    {
+        pPlayer->GetSession()->SendLfgTeleportError((uint8)LFG_TELEPORTERROR_INVALID_LOCATION);
+        return;
+    }
+    
+    // Get dungeon info and then teleport the player out if applicable
+    if (out)
+    {
+        LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(status->dungeonID);
+        if (dungeon && pPlayer->GetMapId() == dungeon->mapID)
+            pPlayer->TeleportToBGEntryPoint();
+    }
+}
+
+LFGGroupStatus* LFGMgr::GetGroupStatus(ObjectGuid guid)
+{
+    groupStatusMap::iterator it = m_groupStatusMap.find(guid);
+    if (it != m_groupStatusMap.end())
+        return &(it->second);
+    else
+        return nullptr;
 }
 
 void LFGMgr::ProposalDeclined(ObjectGuid guid, LFGProposal* proposal)
@@ -1675,8 +1705,69 @@ void LFGMgr::UpdateWaitMap(LFGRoles role, uint32 dungeonID, time_t waitTime)
 
 void LFGMgr::HandleBossKilled(Player* pPlayer)
 {
-    if (!pPlayer->GetGroup())
+    Group* pGroup = pPlayer->GetGroup();
+    
+    ObjectGuid groupGuid = pGroup->GetObjectGuid();
+    LFGGroupStatus* status = GetGroupStatus(groupGuid);
+    
+    if (!pGroup || !status)
         return;
+        
+    // set each player's lfgstate to LFG_STATE_FINISHED_DUNGEON
+    // fetch reward info, and if it's the first dungeon of the day (per player),
+    //    give them 2x the xp (or 1x if it's not the first), and the reward item
+    //    (special case for 2nd wotlk heroic and +). If no room in inventory, send
+    //    via ingame mail.
+    status->state = LFG_STATE_FINISHED_DUNGEON;
+    
+    DungeonTypes type = GetDungeonType(status->dungeonID);
+    for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next()) //todo: check if we will need to use mail or not
+    {
+        if (Player* pGroupPlr = itr->getSource())
+        {
+            SetPlayerState(pGroupPlr->GetObjectGuid(), LFG_STATE_FINISHED_DUNGEON);
+            
+            // check if player did a random dungeon
+            uint32 randomDungeonId = 0;
+            LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(status->dungeonID);
+            if (dungeon->typeID == LFG_TYPE_RANDOM_DUNGEON || IsSeasonal(dungeon->flags))
+                randomDungeonId = dungeon->ID;
+            
+            // get rewards
+            uint32 groupPlrLevel = pGroupPlr->getLevel();
+            const DungeonFinderRewards* rewards = sObjectMgr.GetDungeonFinderRewards(groupPlrLevel); // Fetch base xp/money reward
+            ItemRewards itemRewards = GetDungeonItemRewards(status->dungeonID, type);                // fetch item reward
+            
+            int32 multiplier;                                                                        // base reward modifier
+            bool hasDoneDaily = HasPlayerDoneDaily(pGroupPlr->GetGUIDLow(), type);                                 // first dungeon of the day?
+            (hasDoneDaily) ? multiplier = 1 : multiplier = 2;
+            
+            uint32 xpReward = multiplier*rewards->baseXPReward;                                      // player's xp reward
+            uint32 moneyReward = uint32(multiplier*rewards->baseMonetaryReward);                              // player's money reward
+            
+            uint32 itemReward = 0;                                                                   // reward item
+            uint32 itemAmount = 0;                                                                   // amount of item
+            if (hasDoneDaily && (type == DUNGEON_WOTLK_HEROIC))
+            {
+                itemReward = WOTLK_SPECIAL_HEROIC_ITEM;
+                itemAmount = WOTLK_SPECIAL_HEROIC_AMNT;
+            }
+            else if (!hasDoneDaily)
+            {
+                itemReward = itemRewards.itemId;
+                itemAmount = itemRewards.itemAmount;
+            }
+            
+            // and then fill a structure corresponding to SMSG_LFG_PLAYER_REWARD and
+            // send one of these to each player
+            LFGRewards reward(randomDungeonId, status->dungeonID, hasDoneDaily, moneyReward, xpReward, itemReward, itemAmount);
+            pGroupPlr->GetSession()->SendLfgRewards(reward);
+        }
+    }
+    
+    // now we can remove the group from our maps
+    m_groupStatusMap.erase(groupGuid);
+    m_groupSet.erase(groupGuid);
 }
 
 void LFGMgr::SendRoleChosen(ObjectGuid plrGuid, ObjectGuid confirmedGuid, uint8 roles)

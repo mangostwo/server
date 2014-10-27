@@ -36,6 +36,7 @@ class ObjectGuid;
 class Player;
 class Group;
 
+struct LFGGroupStatus;
 struct LFGPlayers;
 struct LFGPlayerStatus;
 struct LFGProposal;
@@ -243,6 +244,7 @@ typedef UNORDERED_MAP<ObjectGuid, LFGPlayerStatus> playerStatusMap;      // Obje
 typedef UNORDERED_MAP<ObjectGuid, LFGPlayers> playerData;                // ObjectGuid of plr/group, info on specific player or group. TODO: rename to queueData
 typedef UNORDERED_MAP<ObjectGuid, LFGProposalAnswer> proposalAnswerMap;  // ObjectGuid of player, answer to proposal
 typedef UNORDERED_MAP<ObjectGuid, ObjectGuid> playerGroupMap;            // ObjectGuid of player, ObjectGuid of group
+typedef UNORDERED_MAP<ObjectGuid, LFGGroupStatus> groupStatusMap;        // ObjectGuid of group, group status structure
 
 // End Section: Constants & Definitions
 
@@ -329,6 +331,19 @@ struct LFGPlayerStatus
         : state(State), updateType(UpdateType), dungeonList(DungeonList), comment(Comment) { }
 };
 
+/// Information on a group currently in a dungeon
+struct LFGGroupStatus //todo: check for this in joinlfg function, not lfgplayers struct
+{
+    LFGState state;        // State of the group
+    uint32 dungeonID;      // ID of the dungeon the group should be in
+    roleMap playerRoles;   // Container holding each player's objectguid and their roles
+    ObjectGuid leaderGuid; // The group leader's object guid
+    
+    LFGGroupStatus() { }
+    LFGGroupStatus(LFGState State, uint32 DungeonID, roleMap PlayerRoles, ObjectGuid LeaderGuid)
+        : state(State), dungeonID(DungeonID), playerRoles(PlayerRoles), leaderGuid(LeaderGuid) { }
+};
+
 /// For SMSG_LFG_PROPOSAL_UPDATE
 struct LFGProposal
 {
@@ -343,6 +358,25 @@ struct LFGProposal
     proposalAnswerMap answers; // answers to a proposal
     playerGroupMap groups;     // data on which groups players belong/belonged to
     time_t joinedQueue;        // time from when the players joined the queue
+};
+
+// For SMSG_LFG_PLAYER_REWARD
+struct LFGRewards
+{
+    uint32 randomDungeonEntry;  // Entry of the random dungeon done (0 if not random)
+    uint32 groupDungeonEntry;   // Entry of the dungeon done by your group
+    bool hasDoneDaily;          // First dungeon of the day?
+    uint32 moneyReward;         // Amount of money rewarded
+    uint32 expReward;           // Amount of experience rewarded
+    uint32 itemID;              // ID of item reward
+    uint32 itemAmount;          // How many of x item is rewarded
+    
+    LFGRewards() { }
+    LFGRewards(uint32 RandomDungeonEntry, uint32 GroupDungeonEntry, bool HasDoneDaily,
+        uint32 MoneyReward, uint32 ExpReward, uint32 ItemID, uint32 ItemAmount) :
+        randomDungeonEntry(RandomDungeonEntry), groupDungeonEntry(GroupDungeonEntry),
+        hasDoneDaily(HasDoneDaily), moneyReward(MoneyReward), expReward(ExpReward),
+        itemID(ItemID), itemAmount(ItemAmount) { }
 };
 
 // End Section: Structures
@@ -533,7 +567,7 @@ public:
     
     void ProposalUpdate(uint32 proposalID, ObjectGuid plrGuid, bool accepted);
     
-    /// Handles reward hooks
+    /// Handles reward hooks -- called by achievement manager
     void HandleBossKilled(Player* pPlayer);
     
 protected:
@@ -544,6 +578,9 @@ protected:
     
     /// Get a proposal structure given its id
     LFGProposal* GetProposalData(uint32 proposalID);
+    
+    /// Get information on a group currently in a dungeon
+    LFGGroupStatus* GetGroupStatus(ObjectGuid guid);
     
     /// Add the player to their respective waiting map for their dungeon
     void AddToWaitMap(uint8 role, std::set<uint32> dungeons);
@@ -609,7 +646,9 @@ private:
     
     /// Dungeon Finder Status for players
     playerStatusMap m_playerStatusMap;
+    
     groupSet m_groupSet;
+    groupStatusMap m_groupStatusMap;
     
     /// Role check information
     roleCheckMap m_roleCheckMap;
