@@ -34,6 +34,11 @@
 #include "system/system.h"
 #include "ScriptDevMgr.h"
 
+#include "Spell.h"
+
+
+
+
 typedef std::vector<Script*> SDScriptVec;
 int num_sc_scripts;
 SDScriptVec m_scripts;
@@ -509,6 +514,7 @@ bool AreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry)
     if (!pTempScript || !pTempScript->pAreaTrigger)
     {
         return false;
+    }
 
     return pTempScript->pAreaTrigger(pPlayer, atEntry);
 }

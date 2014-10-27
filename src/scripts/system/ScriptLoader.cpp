@@ -487,11 +487,6 @@ void AddScripts()
 
     // custom
 
-    // examples
-    AddSC_example_creature();
-    AddSC_example_escort();
-    AddSC_example_gossip_codebox();
-    AddSC_example_misc();
 
     // world
     AddSC_areatrigger_scripts();
