@@ -164,14 +164,14 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
         // check if already in queue
         if (_player->GetBattleGroundQueueIndex(bgQueueTypeId) < PLAYER_MAX_BATTLEGROUND_QUEUES)
             // player is already in this queue
-            return;
+            { return; }
         // check if has free queue slots
         if (!_player->HasFreeBattleGroundQueueId())
         {
             WorldPacket data;
             sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(&data, ERR_BATTLEGROUND_TOO_MANY_QUEUES);
             _player->GetSession()->SendPacket(&data);
-             return;
+            { return; }
         }
     }
     else
@@ -179,9 +179,9 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
         grp = _player->GetGroup();
         // no group found, error
         if (!grp)
-            return;
+            { return; }
         if (grp->GetLeaderGuid() != _player->GetObjectGuid())
-            return;
+            { return; }
         err = grp->CanJoinBattleGroundQueue(bg, bgQueueTypeId, 0, bg->GetMaxPlayersPerTeam(), false, 0);
         isPremade = sWorld.getConfig(CONFIG_UINT32_BATTLEGROUND_PREMADE_GROUP_WAIT_FOR_MATCH) &&
                     (grp->GetMembersCount() >= bg->GetMinPlayersPerTeam());
@@ -485,7 +485,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket& recv_data)
             // this is still needed here if battleground "jumping" shouldn't add deserter debuff
             // also this is required to prevent stuck at old battleground after SetBattleGroundId set to new
             if (BattleGround* currentBg = _player->GetBattleGround())
-                currentBg->RemovePlayerAtLeave(_player->GetObjectGuid(), false, true);
+                { currentBg->RemovePlayerAtLeave(_player->GetObjectGuid(), false, true); }
 
             // set the destination instance id
             _player->SetBattleGroundId(bg->GetInstanceID(), bgTypeId);
