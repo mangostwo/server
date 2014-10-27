@@ -714,7 +714,6 @@ void WorldSession::SendLfgBootUpdate(LFGBoot const& boot)
     data << uint64(boot.playerVotedOn.GetRawValue()); // Potentially booted player's objectguid value
     data << uint32(voteCount);                        // Number of players who've voted so far
     data << uint32(yayCount);                         // Number of players who've voted against the plr so far
-    data << uint32(0);                                // Time left on vote
     data << uint32(timeLeft);                         // Time left in seconds
     data << uint32(REQUIRED_VOTES_FOR_BOOT);          // Number of votes needed to win
     data << boot.reason.c_str();                      // Reason given for booting
