@@ -1770,6 +1770,11 @@ void LFGMgr::HandleBossKilled(Player* pPlayer)
     m_groupSet.erase(groupGuid);
 }
 
+void LFGMgr::AttemptToKickPlayer(Group* pGroup, ObjectGuid guid, ObjectGuid kicker, std::string reason)
+{
+    
+}
+
 void LFGMgr::SendRoleChosen(ObjectGuid plrGuid, ObjectGuid confirmedGuid, uint8 roles)
 {
     Player* pPlayer = ObjectAccessor::FindPlayer(plrGuid);

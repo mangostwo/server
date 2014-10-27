@@ -919,6 +919,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleLfgSetRoles(WorldPacket& recv_data);
         void HandleLfgProposalResponse(WorldPacket& recv_data);
         void HandleLfgTeleportRequest(WorldPacket& recv_data);
+        void HandleLfgBootVote(WorldPacket& recv_data);
 
     private:
         // private trade methods

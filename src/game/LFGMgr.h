@@ -570,6 +570,9 @@ public:
     /// Handles reward hooks -- called by achievement manager
     void HandleBossKilled(Player* pPlayer);
     
+    /// Group kick hook
+    void AttemptToKickPlayer(Group* pGroup, ObjectGuid guid, ObjectGuid kicker, std::string reason);
+    
 protected:
     bool IsSeasonal(uint32 dbcFlags) { return ((dbcFlags & LFG_FLAG_SEASONAL) != 0) ? true : false; }
     

@@ -300,6 +300,11 @@ void WorldSession::HandleLfgTeleportRequest(WorldPacket& recv_data)
     sLFGMgr.TeleportPlayer(GetPlayer(), out);
 }
 
+void WorldSession::HandleLfgBootVote(WorldPacket& recv_data)
+{
+    DEBUG_LOG("CMSG_LFG_BOOT_PLAYER_VOTE");
+}
+
 void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
 {
     WorldPacket data(SMSG_LFG_SEARCH_RESULTS);
