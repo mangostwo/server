@@ -281,6 +281,12 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
         case NPC_OMINOUS_CLOUD:
             m_lOminousCloudsGuids.push_back(pCreature->GetObjectGuid());
             return;
+        case NPC_VEZAX_BUNNY:
+            if (pCreature->GetPositionY() < 100.0f)
+                m_animusVezaxBunnyGuid = pCreature->GetObjectGuid();
+            else
+                m_vaporVezaxBunnyGuid = pCreature->GetObjectGuid();
+            return;
 
         default:
             return;
@@ -386,8 +392,7 @@ void instance_ulduar::OnObjectCreate(GameObject* pGo)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_VEZAX_GATE:
-            pGo->SetGoState(GO_STATE_READY);
-            if (m_auiEncounter[TYPE_VEZAX])
+            if (m_auiEncounter[TYPE_VEZAX] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_YOGG_GATE:
@@ -1236,6 +1241,16 @@ void instance_ulduar::OnCreatureDeath(Creature* pCreature)
             break;
         case NPC_RUNE_GIANT:
             DoUseDoorOrButton(GO_THORIM_STONE_DOOR);
+            break;
+        case NPC_SARONITE_ANIMUS:
+            if (Creature* pVezax = GetSingleCreatureFromStorage(NPC_VEZAX))
+            {
+                if (pVezax->isAlive())
+                {
+                    pCreature->AI()->SendAIEvent(AI_EVENT_CUSTOM_C, pCreature, pVezax);
+                    SetData(TYPE_VEZAX_HARD, DONE);
+                }
+            }
             break;
     }
 }
