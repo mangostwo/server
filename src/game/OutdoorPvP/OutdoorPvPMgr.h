@@ -166,7 +166,12 @@ class OutdoorPvPMgr
          */
         void Update(uint32 diff);
 
-        // Save and load capture point slider
+        /**
+         * Save and load capture point slider
+         *
+         * @param entry
+         * @param value
+         */
         CapturePointSliderMap const* GetCapturePointSliderMap() const { return &m_capturePointSlider; }
         void SetCapturePointSlider(uint32 entry, CapturePointSlider value) { m_capturePointSlider[entry] = value; }
 
@@ -181,6 +186,10 @@ class OutdoorPvPMgr
 
         OutdoorPvP* m_scripts[MAX_OPVP_ID]; /**< contains all outdoor pvp scripts */
 
+        /**
+         * @brief
+         *
+         */
         CapturePointSliderMap m_capturePointSlider;
 
         ShortIntervalTimer m_updateTimer; /**< update interval */

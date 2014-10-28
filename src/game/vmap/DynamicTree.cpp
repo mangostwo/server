@@ -90,14 +90,14 @@ struct DynTreeImpl : public ParentTree/*, public Intersectable*/
     void update(uint32 difftime)
     {
         if (!size())
-            return;
+            { return; }
 
         rebalance_timer.Update(difftime);
         if (rebalance_timer.Passed())
         {
             rebalance_timer.Reset(CHECK_TREE_PERIOD);
             if (unbalanced_times > 0)
-                balance();
+                { balance(); }
         }
     }
 
@@ -191,7 +191,7 @@ bool DynamicMapTree::getIntersectionTime(const uint32 phasemask, const G3D::Ray&
     DynamicTreeIntersectionCallback callback(phasemask);
     impl.intersectRay(ray, callback, distance, endPos);
     if (callback.didHit())
-        pMaxDist = distance;
+        { pMaxDist = distance; }
     return callback.didHit();
 }
 //=========================================================
@@ -263,7 +263,7 @@ bool DynamicMapTree::isInLineOfSight(float x1, float y1, float z1, float x2, flo
     float maxDist = (v2 - v1).magnitude();
 
     if (!G3D::fuzzyGt(maxDist, 0))
-        return true;
+        { return true; }
 
     G3D::Ray r(v1, (v2 - v1) / maxDist);
     DynamicTreeIntersectionCallback callback(phasemask);
@@ -280,7 +280,7 @@ float DynamicMapTree::getHeight(float x, float y, float z, float maxSearchDist, 
     impl.intersectZAllignedRay(r, callback, maxSearchDist);
 
     if (callback.didHit())
-        return v.z - maxSearchDist;
+        { return v.z - maxSearchDist; }
     else
-        return -G3D::inf();
+        { return -G3D::inf(); }
 }

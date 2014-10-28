@@ -42,9 +42,9 @@ namespace Movement
         else if (moveFlags & MOVEFLAG_SWIMMING)
         {
             if (moveFlags & MOVEFLAG_BACKWARD /*&& speed_obj.swim >= speed_obj.swim_back*/)
-                return MOVE_SWIM_BACK;
+                { return MOVE_SWIM_BACK; }
             else
-                return MOVE_SWIM;
+                { return MOVE_SWIM; }
         }
         else if (moveFlags & MOVEFLAG_WALK_MODE)
         {
@@ -52,7 +52,7 @@ namespace Movement
             return MOVE_WALK;
         }
         else if (moveFlags & MOVEFLAG_BACKWARD /*&& speed_obj.run >= speed_obj.run_back*/)
-            return MOVE_RUN_BACK;
+            { return MOVE_RUN_BACK; }
 
         return MOVE_RUN;
     }
@@ -68,10 +68,10 @@ namespace Movement
         if (transportInfo)
             transportInfo->GetLocalPosition(real_position.x, real_position.y, real_position.z, real_position.orientation);
 
-        // there is a big chane that current position is unknown if current state is not finalized, need compute it
+        // there is a big chance that current position is unknown if current state is not finalized, need compute it
         // this also allows calculate spline position and update map position in much greater intervals
         if (!move_spline.Finalized() && !transportInfo)
-            real_position = move_spline.ComputePosition();
+            { real_position = move_spline.ComputePosition(); }
 
         if (args.path.empty())
         {
@@ -92,10 +92,10 @@ namespace Movement
         moveFlags |= (MOVEFLAG_SPLINE_ENABLED | MOVEFLAG_FORWARD);
 
         if (args.velocity == 0.f)
-            args.velocity = unit.GetSpeed(SelectSpeedType(moveFlags));
+            { args.velocity = unit.GetSpeed(SelectSpeedType(moveFlags)); }
 
         if (!args.Validate(&unit))
-            return 0;
+            { return 0; }
 
         unit.m_movementInfo.SetMovementFlags((MovementFlags)moveFlags);
         move_spline.Initialize(args);
@@ -115,19 +115,19 @@ namespace Movement
 
         return move_spline.Duration();
     }
-    
+
     void MoveSplineInit::Stop()
     {
         MoveSpline& move_spline = *unit.movespline;
-        
+
         // No need to stop if we are not moving
         if (move_spline.Finalized())
             return;
-        
+
         TransportInfo* transportInfo = unit.GetTransportInfo();
-        
+
         Location real_position(unit.GetPositionX(), unit.GetPositionY(), unit.GetPositionZ(), unit.GetOrientation());
-        
+
         // If boarded use current local position
         if (transportInfo)
             transportInfo->GetLocalPosition(real_position.x, real_position.y, real_position.z, real_position.orientation);

@@ -170,6 +170,11 @@ class AuctionSorter
         Player* m_viewPlayer;
 };
 
+/**
+ * This describes the type of auction house that we are dealing with, they can be either:
+ * - neutral (anyone can do their shopping there)
+ * - alliance/horde (only the respective faction can shop there)
+ */
 enum AuctionHouseType
 {
     AUCTION_HOUSE_ALLIANCE  = 0, ///< Alliance only auction house

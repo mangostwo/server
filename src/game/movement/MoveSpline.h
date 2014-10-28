@@ -231,7 +231,7 @@ namespace Movement
             {
                 MANGOS_ASSERT(Initialized());
                 do
-                    handler(_updateState(difftime));
+                    { handler(_updateState(difftime)); }
                 while (difftime > 0);
             }
 
@@ -243,7 +243,7 @@ namespace Movement
             void updateState(int32 difftime)
             {
                 MANGOS_ASSERT(Initialized());
-                do _updateState(difftime);
+                do { _updateState(difftime); }
                 while (difftime > 0);
             }
 
