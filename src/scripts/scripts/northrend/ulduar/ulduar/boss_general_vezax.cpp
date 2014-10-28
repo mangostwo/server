@@ -43,6 +43,7 @@ enum
 
     SPELL_AURA_OF_DESPAIR               = 62692,
     SPELL_SHADOW_CRASH                  = 62660,
+    SPELL_SHADOW_CRASH_DAMAGE           = 62659,
     SPELL_MARK_OF_FACELESS              = 63276,            // triggers 63278
     SPELL_SEARING_FLAMES                = 62661,
     SPELL_SURGE_OF_DARKNESS             = 62662,
@@ -184,6 +185,16 @@ struct MANGOS_DLL_DECL boss_general_vezaxAI : public ScriptedAI
             DoScriptText(EMOTE_ANIMUS, m_creature);
             m_uiSaroniteBarrierTimer = 4000;
         }
+    }
+    
+    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+    {
+        if (pTarget->GetTypeId() != TYPEID_PLAYER || !m_pInstance)
+            return;
+        
+        // Check achiev criterias
+        if (pSpell->Id == SPELL_SHADOW_CRASH_DAMAGE)
+            m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_SHADOWDODGER, false);
     }
 
     // Merge vapors

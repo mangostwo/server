@@ -769,6 +769,8 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
                 DoUseDoorOrButton(GO_VEZAX_GATE);
+            else if (uiData == IN_PROGRESS)
+                SetSpecialAchievementCriteria(TYPE_ACHIEV_SHADOWDODGER, true);
             break;
         case TYPE_YOGGSARON:
             // Don't set the same encounter data twice
@@ -1278,6 +1280,9 @@ bool instance_ulduar::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player c
         case ACHIEV_CRIT_SARONITE_N:
         case ACHIEV_CRIT_SARONITE_H:
             return GetData(TYPE_VEZAX_HARD) == DONE;
+        case ACHIEV_CRIT_SHADOWDODGER_N:
+        case ACHIEV_CRIT_SHADOWDODGER_H:
+            return m_abAchievCriteria[TYPE_ACHIEV_SHADOWDODGER];
         case ACHIEV_CRIT_CAT_LADY_N:
         case ACHIEV_CRIT_CAT_LADY_H:
             return m_abAchievCriteria[TYPE_ACHIEV_CAT_LADY];

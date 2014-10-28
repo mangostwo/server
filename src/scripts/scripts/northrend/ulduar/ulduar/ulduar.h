@@ -202,7 +202,7 @@ enum
     NPC_KEEPER_MIMIRON          = 33244,
     NPC_KEEPER_THORIM           = 33242,
 
-    MAX_SPECIAL_ACHIEV_CRITS    = 19,
+    MAX_SPECIAL_ACHIEV_CRITS    = 20,
 
     TYPE_ACHIEV_CAT_LADY        = 0,
     TYPE_ACHIEV_NINE_LIVES      = 1,
@@ -223,6 +223,7 @@ enum
     TYPE_ACHIEV_LIGHTNING       = 16,
     TYPE_ACHIEV_BACK_NATURE     = 17,
     TYPE_ACHIEV_DRIVE_CRAZY     = 18,
+    TYPE_ACHIEV_SHADOWDODGER    = 19,
 
     // Loot chests
     // Kologarn
@@ -352,6 +353,8 @@ enum
 
     ACHIEV_CRIT_SARONITE_N      = 10451,                    // General Vezax, achievs 3181, 3188
     ACHIEV_CRIT_SARONITE_H      = 10462,
+    ACHIEV_CRIT_SHADOWDODGER_N  = 10173,                    // General Vezax, achievs 2996, 2997
+    ACHIEV_CRIT_SHADOWDODGER_H  = 10306,
     ACHIEV_CRIT_CAT_LADY_N      = 10400,                    // Auriaya, achievs 3006, 3007
     ACHIEV_CRIT_CAT_LADY_H      = 10184,
     ACHIEV_CRIT_NINE_LIVES_N    = 10399,                    // Auriaya, achievs 3076, 3077

@@ -289,6 +289,15 @@ struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI, private DialogueHelper
 
         StartNextDialogueText(SAY_AGGRO_1);
     }
+    
+    void AttackStart(Unit* pWho) override
+    {
+        // don't attack again after being defeated
+        if (m_bEventFinished)
+            return;
+        
+        ScriptedAI::AttackStart(pWho);
+    }
 
     void MoveInLineOfSight(Unit* pWho) override
     {
