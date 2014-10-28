@@ -34,6 +34,7 @@ enum
     SAY_CHROMIE_HURRY           = -1000000,                         // TODO
 
     WHISPER_CHROMIE_CRATES      = -1595001,
+    WHISPER_CHROMIE_GUARDIAN    = -1595002,
 };
 
 struct sSpawnLocation
@@ -56,7 +57,13 @@ static sSpawnLocation m_aIntroActorsSpawnLocs[] =
     {1786.18f, 1268.63f, 140.02f, 0.42f},                   // Uther
     {1780.26f, 1261.87f, 139.55f, 0.57f},                   // Silverhand knights
     {1778.59f, 1265.03f, 139.43f, 0.40f},
-    {1777.04f, 1268.16f, 139.35f, 0.59f}
+    {1777.04f, 1268.16f, 139.35f, 0.59f},
+    {2091.47f, 1294.28f, 139.82f, 6.27f},                   // High elf priests
+    {2091.26f, 1281.71f, 139.92f, 6.27f},
+    {2096.12f, 1290.53f, 138.81f, 6.27f},                   // Footman
+    {2096.41f, 1284.22f, 138.79f, 6.27f},
+    {2096.93f, 1297.57f, 138.96f, 6.27f},
+    {2096.32f, 1278.98f, 139.43f, 6.27f}
 };
 
 static sSpawnLocation m_aChromieSpawnLocs[] =
@@ -104,8 +111,16 @@ void instance_culling_of_stratholme::OnCreatureCreate(Creature* pCreature)
             m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
 
-        case NPC_GRAIN_CRATE_HELPER:            m_luiCratesBunnyGUIDs.push_back(pCreature->GetObjectGuid()); break;
-        case NPC_LORDAERON_FOOTMAN:             m_luiFootmanGUIDs.push_back(pCreature->GetObjectGuid());     break;
+        case NPC_GRAIN_CRATE_HELPER:
+            m_luiCratesBunnyGUIDs.push_back(pCreature->GetObjectGuid());
+            break;
+        case NPC_LORDAERON_FOOTMAN:
+            m_luiFootmanGUIDs.push_back(pCreature->GetObjectGuid());
+            // no break;
+        case NPC_HIGH_ELF_MAGE_PRIEST:
+            if (pCreature->GetPositionX() > 2000.0f)
+                m_luiGateSoldiersGUIDs.push_back(pCreature->GetObjectGuid());
+            break;
 
         case NPC_STRATHOLME_CITIZEN:
         case NPC_STRATHOLME_RESIDENT:
@@ -182,6 +197,7 @@ void instance_culling_of_stratholme::SetData(uint32 uiType, uint32 uiData)
             if (uiData == DONE)
             {
                 // ToDo: start the wave event
+                DoUpdateZombieResidents();
             }
             break;
         case TYPE_ARTHAS_ESCORT_EVENT:
@@ -455,6 +471,9 @@ void instance_culling_of_stratholme::DoSpawnArthasIfNeeded(Unit* pSummoner)
                 pKnight->GetMotionMaster()->MoveFollow(pUther, pKnight->GetDistance(pUther), 2 * M_PI_F - pKnight->GetAngle(pUther));
         }
     }
+    // setup the entrance soldiers in case of reload or intro skip
+    else if (uiPosition == POS_ARTHAS_WAVES)
+        DoSetupEntranceSoldiers(pSummoner);
 }
 
 // Atm here only new Chromies are spawned - despawning depends on Mangos featuring such a thing
@@ -478,6 +497,39 @@ void instance_culling_of_stratholme::DoSpawnChromieIfNeeded(Unit* pSummoner)
             pSummoner->SummonCreature(NPC_CHROMIE_ENTRANCE, m_aChromieSpawnLocs[0].m_fX, m_aChromieSpawnLocs[0].m_fY, m_aChromieSpawnLocs[0].m_fZ, m_aChromieSpawnLocs[0].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
             pSummoner->SummonCreature(NPC_HOURGLASS, m_aChromieSpawnLocs[2].m_fX, m_aChromieSpawnLocs[2].m_fY, m_aChromieSpawnLocs[2].m_fZ, m_aChromieSpawnLocs[2].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
         }
+    }
+}
+
+// Function that sets up the city entrance soldiers in case of reload or if the intro is skipped
+void instance_culling_of_stratholme::DoSetupEntranceSoldiers(Unit* pSummoner)
+{
+    if (!pSummoner)
+        return;
+        
+    // despawn the current set of soldiers
+    for (GuidList::const_iterator itr = m_luiGateSoldiersGUIDs.begin(); itr != m_luiGateSoldiersGUIDs.end(); ++itr)
+    {
+        if (Creature* pSoldier = instance->GetCreature(*itr))
+            pSoldier->ForcedDespawn();
+    }
+    
+    // spawn others in the right spot
+    pSummoner->SummonCreature(NPC_HIGH_ELF_MAGE_PRIEST, m_aIntroActorsSpawnLocs[5].m_fX, m_aIntroActorsSpawnLocs[5].m_fY, m_aIntroActorsSpawnLocs[5].m_fZ, m_aIntroActorsSpawnLocs[5].m_fO, TEMPSUMMON_CORPSE_DESPAWN, 10000);
+    pSummoner->SummonCreature(NPC_HIGH_ELF_MAGE_PRIEST, m_aIntroActorsSpawnLocs[6].m_fX, m_aIntroActorsSpawnLocs[6].m_fY, m_aIntroActorsSpawnLocs[6].m_fZ, m_aIntroActorsSpawnLocs[6].m_fO, TEMPSUMMON_CORPSE_DESPAWN, 10000);
+    pSummoner->SummonCreature(NPC_LORDAERON_FOOTMAN, m_aIntroActorsSpawnLocs[7].m_fX, m_aIntroActorsSpawnLocs[7].m_fY, m_aIntroActorsSpawnLocs[7].m_fZ, m_aIntroActorsSpawnLocs[7].m_fO, TEMPSUMMON_CORPSE_DESPAWN, 10000);
+    pSummoner->SummonCreature(NPC_LORDAERON_FOOTMAN, m_aIntroActorsSpawnLocs[8].m_fX, m_aIntroActorsSpawnLocs[8].m_fY, m_aIntroActorsSpawnLocs[8].m_fZ, m_aIntroActorsSpawnLocs[8].m_fO, TEMPSUMMON_CORPSE_DESPAWN, 10000);
+    pSummoner->SummonCreature(NPC_LORDAERON_FOOTMAN, m_aIntroActorsSpawnLocs[9].m_fX, m_aIntroActorsSpawnLocs[9].m_fY, m_aIntroActorsSpawnLocs[9].m_fZ, m_aIntroActorsSpawnLocs[9].m_fO, TEMPSUMMON_CORPSE_DESPAWN, 10000);
+    pSummoner->SummonCreature(NPC_LORDAERON_FOOTMAN, m_aIntroActorsSpawnLocs[10].m_fX, m_aIntroActorsSpawnLocs[10].m_fY, m_aIntroActorsSpawnLocs[10].m_fZ, m_aIntroActorsSpawnLocs[10].m_fO, TEMPSUMMON_CORPSE_DESPAWN, 10000);
+}
+
+// Function that updates all the stratholme humans to zombies
+void instance_culling_of_stratholme::DoUpdateZombieResidents()
+{
+    // update all residents
+    for (GuidList::const_iterator itr = m_luiResidentGUIDs.begin(); itr != m_luiResidentGUIDs.end(); ++itr)
+    {
+        if (Creature* pResident = instance->GetCreature(*itr))
+            pResident->UpdateEntry(NPC_ZOMBIE);
     }
 }
 

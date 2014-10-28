@@ -55,6 +55,7 @@ enum
     NPC_UTHER_LIGHTBRINGER          = 26528,
     NPC_KNIGHT_SILVERHAND           = 28612,
     NPC_LORDAERON_FOOTMAN           = 27745,
+    NPC_HIGH_ELF_MAGE_PRIEST        = 27747,
     NPC_STRATHOLME_CITIZEN          = 28167,
     NPC_STRATHOLME_RESIDENT         = 28169,
 
@@ -144,14 +145,16 @@ class MANGOS_DLL_DECL instance_culling_of_stratholme : public ScriptedInstance
         Creature* GetStratIntroFootman();
         void GetResidentOrderedList(std::list<Creature*>& lList);
 
+        void DoSpawnChromieIfNeeded(Unit* pSummoner);
         void DoSpawnArthasIfNeeded(Unit* pSummoner);
         bool CanGrainEventProgress(Creature* pCrate);
 
         void DoEventAtTriggerIfCan(uint32 uiTriggerId);
 
     protected:
+        void DoSetupEntranceSoldiers(Unit* pSummoner);
         void DoChromieWhisper(int32 iEntry);
-        void DoSpawnChromieIfNeeded(Unit* pSummoner);
+        void DoUpdateZombieResidents();
         uint8 GetInstancePosition();
         void ArthasJustDied();
 
@@ -167,6 +170,7 @@ class MANGOS_DLL_DECL instance_culling_of_stratholme : public ScriptedInstance
         GuidList m_luiCratesBunnyGUIDs;
         GuidList m_luiFootmanGUIDs;
         GuidList m_luiResidentGUIDs;
+        GuidList m_luiGateSoldiersGUIDs;
 
         GuidList m_lAgiatedCitizenGUIDList;
         GuidList m_lAgiatedResidentGUIDList;

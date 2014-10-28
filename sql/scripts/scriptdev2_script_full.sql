@@ -3410,7 +3410,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 -- -1 595 000 CULLING OF STRATHOLME
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
 (-1595000,'All soldiers of Lordaeron should immediately report to the entrance of Stratholme, and await further orders from Prince Arthas.',0,6,0,0,'lordaeron crier SAY_SOLDIERS_REPORT'),
-(-1595001,'Good work with the crates! Come talk to me in front of Stratholme for your next assignment!',0,4,0,0,'chromie WHISPER_CHROMIE_CRATES');
+(-1595001,'Good work with the crates! Come talk to me in front of Stratholme for your next assignment!',0,4,0,0,'chromie WHISPER_CHROMIE_CRATES'),
+(-1595002,'Oh, no! Adventurers, something awful has happened! A colleague of mine has been captured by the Infinite Dragonflight, and they\'re doing something horrible to him! Keeping Arthas is still your highest priority, but if you act fast you could help save a Guardian of Time!',0,4,0,0,'chromie WHISPER_CHROMIE_GUARDIAN');
 
 -- -1 599 000 HALLS OF STONE
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES

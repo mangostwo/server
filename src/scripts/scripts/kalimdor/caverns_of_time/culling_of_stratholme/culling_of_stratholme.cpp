@@ -132,7 +132,14 @@ bool GossipSelect_npc_chromie(Player* pPlayer, Creature* pCreature, uint32 /*sen
                     {
                         // only skip intro if not already started;
                         if (pInstance->GetData(TYPE_ARTHAS_INTRO_EVENT) == NOT_STARTED && pInstance->GetData(TYPE_GRAIN_EVENT) == NOT_STARTED)
+                        {
                             pInstance->SetData(TYPE_ARTHAS_INTRO_EVENT, DONE);
+                            pInstance->SetData(TYPE_GRAIN_EVENT, DONE);
+                            
+                            // spawn Arthas and Chromie
+                            pInstance->DoSpawnChromieIfNeeded(pPlayer);
+                            pInstance->DoSpawnArthasIfNeeded(pPlayer);
+                        }
                     }
                     pPlayer->CLOSE_GOSSIP_MENU();
                     break;
@@ -296,6 +303,7 @@ enum
 
     SPELL_HOLY_LIGHT            = 52444,
     SPELL_EXORCISM              = 52445,
+    SPELL_EXORCISM_H            = 58822,
     SPELL_DEVOTION_AURA         = 52442,
 };
 
