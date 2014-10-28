@@ -145,7 +145,7 @@ ID | Name                                   | Parameters
 13 | SCRIPT_COMMAND_ACTIVATE_OBJECT         | source = unit, target=GO.
 14 | SCRIPT_COMMAND_REMOVE_AURA             | resultingSource = Unit. `datalong` = spell_id
 15 | SCRIPT_COMMAND_CAST_SPELL              | resultingSource = Unit, cast spell at resultingTarget = Unit. `datalong` = spell id, `data_flags` & SCRIPT_FLAG_COMMAND_ADDITIONAL: cast triggered
-16 | SCRIPT_COMMAND_PLAY_SOUND              | source = any object, target=any/player. `datalong` = sound_id, `datalong2` (bit mask: 0/1=target-player, 0/2=with distance dependent, 0/4=map wide, 0/8=zone wide; so 1|2 = 3 is target with distance dependent)
+16 | SCRIPT_COMMAND_PLAY_SOUND              | source = any object, target=any/player. `datalong` = sound_id, `datalong2` (bit mask: 0/1=target-player, 0/2=with distance dependent, 0/4=map wide, 0/8=zone wide; so 1|2 = 3 is target with distance dependent), `data_flags` & SCRIPT_FLAG_COMMAND_ADDITIONAL: play music instead of sound
 17 | SCRIPT_COMMAND_CREATE_ITEM             | source or target must be player. `datalong` = item entry, `datalong2` = amount
 18 | SCRIPT_COMMAND_DESPAWN_SELF            | resultingSource = Creature. `datalong` = despawn delay
 19 | SCRIPT_COMMAND_PLAY_MOVIE              | target can only be a player. `datalong` = movie id
