@@ -20,7 +20,7 @@
 /* ScriptData
 SDName: Grizzly_Hills
 SD%Complete:
-SDComment: Quest support: 12082, 12138, 12198
+SDComment: Quest support: 12027, 12082, 12138, 12198
 SDCategory: Grizzly Hills
 EndScriptData */
 
@@ -366,6 +366,168 @@ bool QuestAccept_npc_harrison_jones(Player* pPlayer, Creature* pCreature, const 
     return false;
 }
 
+/*######
+## npc_emily
+######*/
+
+enum
+{
+    SAY_ESCORT_START                    = -1001173,
+    SAY_FIRST_WOLF                      = -1001174,
+    SAY_FIRST_WOLF_ATTACK               = -1001175,
+    SAY_HELP_FLOPPY_1                   = -1001176,
+    SAY_FIRST_WOLF_DEFEAT               = -1001177,
+    SAY_SECOND_WOLF                     = -1001178,
+    SAY_HELP_FLOPPY_2                   = -1001179,
+    SAY_FLOPPY_ALMOST_DEAD              = -1001180,
+    SAY_SECOND_WOLF_DEFEAT              = -1001181,
+    SAY_RESUME_ESCORT                   = -1001182,
+    SAY_ESCORT_COMPLETE                 = -1001183,
+
+    SPELL_FLOPPY_BECOMES_LUNCH          = 47184,
+
+    NPC_HUNGRY_WORG                     = 26586,
+    NPC_RAVENOUS_WORG                   = 26590,
+    NPC_MR_FLOPPY                       = 26589,
+
+    QUEST_ID_MR_FLOPPY_ADVENTURE        = 12027,
+};
+
+struct MANGOS_DLL_DECL npc_emilyAI : public npc_escortAI
+{
+    npc_emilyAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+
+    ObjectGuid m_floppyGuid;
+
+    void Reset() override { }
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 uiMiscValue) override
+    {
+        if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
+        {
+            Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue));
+
+            if (Creature* pFloppy = GetClosestCreatureWithEntry(m_creature, NPC_MR_FLOPPY, 10.0f))
+                m_floppyGuid = pFloppy->GetObjectGuid();
+        }
+        else if (eventType == AI_EVENT_JUST_DIED && pSender->GetEntry() == NPC_MR_FLOPPY)
+        {
+            npc_escortAI::JustDied(m_creature);
+            m_creature->ForcedDespawn();
+        }
+        else if (eventType == AI_EVENT_CRITICAL_HEALTH && pSender->GetEntry() == NPC_MR_FLOPPY)
+            DoScriptText(SAY_FLOPPY_ALMOST_DEAD, m_creature);
+        else if (eventType == AI_EVENT_LOST_SOME_HEALTH && pSender->GetEntry() == NPC_MR_FLOPPY)
+            DoScriptText(urand(0, 1) ? SAY_HELP_FLOPPY_1 : SAY_HELP_FLOPPY_2, m_creature);
+    }
+
+    void JustSummoned(Creature* pSummoned) override
+    {
+        switch (pSummoned->GetEntry())
+        {
+            case NPC_RAVENOUS_WORG:
+            case NPC_HUNGRY_WORG:
+                if (Creature* pFloppy = m_creature->GetMap()->GetCreature(m_floppyGuid))
+                {
+                    float fX, fY, fZ;
+                    pFloppy->GetContactPoint(pSummoned, fX, fY, fZ);
+                    pSummoned->SetWalk(false);
+                    pSummoned->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
+                }
+                break;
+        }
+    }
+
+    void SummonedCreatureJustDied(Creature* pSummoned) override
+    {
+        switch (pSummoned->GetEntry())
+        {
+            case NPC_RAVENOUS_WORG:
+                DoScriptText(SAY_SECOND_WOLF_DEFEAT, m_creature);
+                SetEscortPaused(false);
+                // resume follow after vehicle unboard
+                if (Creature* pFloppy = m_creature->GetMap()->GetCreature(m_floppyGuid))
+                    pFloppy->GetMotionMaster()->MoveFollow(m_creature, pFloppy->GetDistance(m_creature), M_PI_F - pFloppy->GetAngle(m_creature));
+                break;
+            case NPC_HUNGRY_WORG:
+                DoScriptText(SAY_FIRST_WOLF_DEFEAT, m_creature);
+                SetEscortPaused(false);
+                break;
+        }
+    }
+
+    void SummonedMovementInform(Creature* pSummoned, uint32 uiType, uint32 uiPointId) override
+    {
+        if (uiType != POINT_MOTION_TYPE || !uiPointId)
+            return;
+
+        switch (pSummoned->GetEntry())
+        {
+            case NPC_RAVENOUS_WORG:
+                // board the ravenous worg vehicle
+                if (Creature* pFloppy = m_creature->GetMap()->GetCreature(m_floppyGuid))
+                    pFloppy->CastSpell(pSummoned, SPELL_FLOPPY_BECOMES_LUNCH, true);
+                // no break;
+            case NPC_HUNGRY_WORG:
+                if (Creature* pFloppy = m_creature->GetMap()->GetCreature(m_floppyGuid))
+                    pSummoned->AI()->AttackStart(pFloppy);
+                break;
+        }
+    }
+
+    void WaypointReached(uint32 uiPointId) override
+    {
+        switch (uiPointId)
+        {
+            case 0:
+                DoScriptText(SAY_ESCORT_START, m_creature);
+                break;
+            case 10:
+                DoScriptText(SAY_FIRST_WOLF, m_creature);
+                m_creature->SummonCreature(NPC_HUNGRY_WORG, 4305.514f, -3799.008f, 237.034f, 2.20f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                break;
+            case 11:
+                SetEscortPaused(true);
+                DoScriptText(SAY_FIRST_WOLF_ATTACK, m_creature);
+                break;
+            case 22:
+                SetEscortPaused(true);
+                DoScriptText(SAY_SECOND_WOLF, m_creature);
+                m_creature->SummonCreature(NPC_RAVENOUS_WORG, 4339.643f, -3948.972f, 194.904f, 0.90f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                break;
+            case 24:
+                DoScriptText(SAY_RESUME_ESCORT, m_creature);
+                SetRun();
+                if (Player* pPlayer = GetPlayerForEscort())
+                    pPlayer->GroupEventHappens(QUEST_ID_MR_FLOPPY_ADVENTURE, m_creature);
+                break;
+            case 25:
+                DoScriptText(SAY_ESCORT_COMPLETE, m_creature);
+                break;
+            case 27:
+                if (Creature* pFloppy = m_creature->GetMap()->GetCreature(m_floppyGuid))
+                    pFloppy->ForcedDespawn();
+                break;
+        }
+    }  
+};
+
+CreatureAI* GetAI_npc_emily(Creature* pCreature)
+{
+    return new npc_emilyAI(pCreature);
+}
+
+bool QuestAccept_npc_emily(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+{
+    if (pQuest->GetQuestId() == QUEST_ID_MR_FLOPPY_ADVENTURE)
+    {
+        pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
+        return true;
+    }
+
+    return false;
+}
+
 void AddSC_grizzly_hills()
 {
     Script* pNewScript;
@@ -380,5 +542,11 @@ void AddSC_grizzly_hills()
     pNewScript->Name = "npc_harrison_jones";
     pNewScript->GetAI = &GetAI_npc_harrison_jones;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_harrison_jones;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_emily";
+    pNewScript->GetAI = &GetAI_npc_emily;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_emily;
     pNewScript->RegisterSelf();
 }
