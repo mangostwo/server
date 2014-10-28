@@ -1,5 +1,13 @@
 /*  */
 
+/* ACHIEVEMENTS */
+DELETE FROM achievement_criteria_requirement WHERE criteria_id IN (10173,10306);
+INSERT INTO achievement_criteria_requirement VALUES
+(10173, 12, 0, 0),
+(10173, 18, 0, 0),
+(10306, 12, 1, 0),
+(10306, 18, 0, 0);
+
 /* AREATRIGGER */
 DELETE FROM scripted_areatrigger WHERE entry=4591;
 INSERT INTO scripted_areatrigger VALUES (4591,'at_coilfang_waterfall');
@@ -607,6 +615,7 @@ UPDATE instance_template SET ScriptName='instance_gnomeregan' WHERE map=90;
 /* GRIZZLY HILLS */
 UPDATE creature_template SET ScriptName='npc_depleted_war_golem' WHERE entry=27017;
 UPDATE creature_template SET ScriptName='npc_harrison_jones' WHERE entry=26814;
+UPDATE creature_template SET ScriptName='npc_emily' WHERE entry=26588;
 
 /* GRUUL'S LAIR */
 UPDATE instance_template SET ScriptName='instance_gruuls_lair' WHERE map =565;
@@ -678,6 +687,8 @@ UPDATE creature_template SET ScriptName='npc_wounded_blood_elf' WHERE entry=1699
 UPDATE creature_template SET ScriptName='npc_fel_guard_hound' WHERE entry=21847;
 UPDATE creature_template SET ScriptName='npc_anchorite_barada' WHERE entry=22431;
 UPDATE creature_template SET ScriptName='npc_colonel_jules' WHERE entry=22432;
+UPDATE creature_template SET ScriptName='npc_magister_aledis' WHERE entry=20159;
+
 
 /* HILLSBRAD FOOTHILLS */
 
@@ -1386,6 +1397,8 @@ UPDATE creature_template SET ScriptName='npc_descent_madness' WHERE entry=34072;
 UPDATE creature_template SET ScriptName='npc_laughing_skull' WHERE entry=33990;
 UPDATE creature_template SET ScriptName='npc_keeper_mimiron' WHERE entry=33412;
 UPDATE creature_template SET ScriptName='npc_keeper_thorim' WHERE entry=33413;
+UPDATE creature_template SET ScriptName='npc_saronite_vapor' WHERE entry=33488;
+
 DELETE FROM scripted_event_id WHERE id IN (9735,20907,20964,21030,21031,21032,21033,21045,21605,21606,21620);
 INSERT INTO scripted_event_id VALUES
 (9735, 'event_spell_saronite_barrier'), -- Vezax saronite barrier event

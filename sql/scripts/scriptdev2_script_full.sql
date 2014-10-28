@@ -8521,4 +8521,53 @@ INSERT INTO script_waypoint VALUES
 (9598, 35, 6557.279, -1211.125, 441.452, 0, ''),
 (9598, 36, 6574.568, -1204.589, 443.216, 0, 'SAY_EXIT_IRONTREE');
 
+DELETE FROM script_texts WHERE entry=-1001172;
+INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
+(-1001172,'Spare my life! I will tell you about Arelion\'s secret.',0,0,0,0,'magister_aledis SAY_ALEDIS_DEFEAT');
+
+DELETE FROM script_texts WHERE entry BETWEEN -1001183 AND -1001173;
+INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
+(-1001173,'Are you ready, Mr. Floppy? Stay close to me and watch out for those wolves!',0,0,0,0,'emily SAY_ESCORT_START'),
+(-1001174,'Um... I think one of those wolves is back...',0,0,0,0,'emily SAY_FIRST_WOLF'),
+(-1001175,'He\'s going for Mr. Floppy!',0,0,0,0,'emily SAY_WOLF_ATTACK'),
+(-1001176,'There\'s a big meanie attacking Mr. Floppy! Help!',0,0,0,0,'emily SAY_HELP_FLOPPY_1'),
+(-1001177,'Let\'s get out of here before more wolves find us!',0,0,0,0,'emily SAY_FIRST_WOLF_DEFEAT'),
+(-1001178,'Oh, no! Look, it\'s another wolf, and it\'s a biiiiiiig one!',0,0,0,0,'emily SAY_SECOND_WOLF'),
+(-1001179,'He\'s gonna eat Mr. Floppy! You gotta help Mr. Floppy! You just gotta!',0,0,0,0,'emily SAY_HELP_FLOPPY_2'),
+(-1001180,'Don\'t go toward the light, Mr. Floppy!',0,0,0,0,'emily SAY_FLOPPY_ALMOST_DEAD'),
+(-1001181,'Mr. Floppy, you\'re ok! Thank you so much for saving Mr. Floppy!',0,0,0,0,'emily SAY_SECOND_WOLF_DEFEAT'),
+(-1001182,'I think I see the camp! We\'re almost home, Mr. Floppy! Let\'s go!',0,0,0,0,'emily SAY_RESUME_ESCORT'),
+(-1001183,'Thank you for helping me to get back to the camp. Go tell Walter that I\'m safe now!',0,0,0,0,'emily SAY_ESCORT_COMPLETE');
+
+DELETE FROM script_waypoint WHERE entry=26588;
+INSERT INTO script_waypoint VALUES
+(26588, 0, 4322.890, -3693.610, 263.910, 4000, 'SAY_ESCORT_START'),
+(26588, 1, 4330.509, -3689.442, 263.627, 0, ''),
+(26588, 2, 4341.477, -3684.207, 257.441, 0, ''),
+(26588, 3, 4346.749, -3685.898, 256.866, 0, ''),
+(26588, 4, 4347.176, -3694.563, 256.560, 0, ''),
+(26588, 5, 4335.924, -3704.452, 258.113, 0, ''),
+(26588, 6, 4317.913, -3722.990, 256.835, 0, ''),
+(26588, 7, 4309.215, -3736.347, 257.451, 0, ''),
+(26588, 8, 4301.650, -3751.553, 257.810, 0, ''),
+(26588, 9, 4296.501, -3769.056, 251.977, 0, ''),
+(26588, 10, 4291.985, -3785.022, 245.880, 2000, 'SAY_FIRST_WOLF'),
+(26588, 11, 4291.985, -3785.022, 245.880, 0, 'SAY_WOLF_ATTACK'),
+(26588, 12, 4291.985, -3785.022, 245.880, 3000, ''),
+(26588, 13, 4299.542, -3807.021, 237.238, 0, ''),
+(26588, 14, 4308.171, -3835.070, 226.317, 0, ''),
+(26588, 15, 4312.530, -3847.574, 222.333, 0, ''),
+(26588, 16, 4317.506, -3861.733, 214.915, 0, ''),
+(26588, 17, 4325.013, -3882.172, 208.888, 0, ''),
+(26588, 18, 4332.627, -3893.466, 203.584, 0, ''),
+(26588, 19, 4338.521, -3899.447, 199.843, 0, ''),
+(26588, 20, 4344.693, -3911.864, 197.886, 0, ''),
+(26588, 21, 4349.635, -3922.679, 195.293, 0, ''),
+(26588, 22, 4351.970, -3934.677, 191.418, 0, 'SAY_SECOND_WOLF'),
+(26588, 23, 4351.970, -3934.677, 191.418, 3000, ''),
+(26588, 24, 4351.970, -3934.677, 191.418, 2000, 'SAY_RESUME_ESCORT'),
+(26588, 25, 4350.807, -3944.965, 190.528, 0, 'SAY_ESCORT_COMPLETE'),
+(26588, 26, 4347.947, -3958.875, 193.360, 0, ''),
+(26588, 27, 4345.956, -3988.083, 187.320, 0, '');
+
 -- EOF

@@ -1245,7 +1245,7 @@ void instance_ulduar::OnCreatureDeath(Creature* pCreature)
         case NPC_SARONITE_ANIMUS:
             if (Creature* pVezax = GetSingleCreatureFromStorage(NPC_VEZAX))
             {
-                if (pVezax->isAlive())
+                if (pVezax->IsAlive())
                 {
                     pCreature->AI()->SendAIEvent(AI_EVENT_CUSTOM_C, pCreature, pVezax);
                     SetData(TYPE_VEZAX_HARD, DONE);
