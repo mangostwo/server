@@ -20,7 +20,7 @@
 /* ScriptData
 SDName: Hellfire_Peninsula
 SD%Complete: 100
-SDComment: Quest support: 9375, 9410, 9418, 10629, 10838, 10935.
+SDComment: Quest support: 9375, 9410, 9418, 10286, 10629, 10838, 10935.
 SDCategory: Hellfire Peninsula
 EndScriptData */
 
@@ -32,6 +32,7 @@ npc_wounded_blood_elf
 npc_fel_guard_hound
 npc_anchorite_barada
 npc_colonel_jules
+npc_magister_aledis
 EndContentData */
 
 #include "precompiled.h"
@@ -876,6 +877,128 @@ bool EffectDummyCreature_npc_colonel_jules(Unit* pCaster, uint32 uiSpellId, Spel
     return false;
 }
 
+/*######
+## npc_magister_aledis
+######*/
+
+enum
+{
+    SAY_ALEDIS_DEFEAT               = -1001172,
+
+    SPELL_PYROBLAST                 = 33975,
+    SPELL_FROST_NOVA                = 11831,
+    SPELL_FIREBALL                  = 20823,
+};
+
+struct MANGOS_DLL_DECL npc_magister_aledisAI : public ScriptedAI
+{
+    npc_magister_aledisAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_bIsDefeated = false;
+        Reset();
+    }
+
+    uint32 m_uiPyroblastTimer;
+    uint32 m_uiFrostNovaTimer;
+    uint32 m_uiFireballTimer;
+
+    bool m_bIsDefeated;
+
+    void Reset() override
+    {
+        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+
+        m_uiPyroblastTimer      = urand(10000, 14000);
+        m_uiFrostNovaTimer      = 0;
+        m_uiFireballTimer       = 1000;
+    }
+
+    void AttackStart(Unit* pWho) override
+    {
+        if (m_creature->Attack(pWho, false))
+        {
+            m_creature->AddThreat(pWho);
+            m_creature->SetInCombatWith(pWho);
+            pWho->SetInCombatWith(m_creature);
+            DoStartMovement(pWho, 10.0f);
+        }
+    }
+
+    void EnterEvadeMode() override
+    {
+        m_creature->RemoveAllAurasOnEvade();
+        m_creature->DeleteThreatList();
+        m_creature->CombatStop(true);
+
+        if (!m_bIsDefeated)
+            m_creature->LoadCreatureAddon(true);
+
+        if (m_creature->IsAlive())
+        {
+            if (!m_bIsDefeated)
+            {
+                m_creature->SetWalk(true);
+                m_creature->GetMotionMaster()->MoveWaypoint();
+            }
+            else
+                m_creature->GetMotionMaster()->MoveIdle();
+        }
+
+        m_creature->SetLootRecipient(NULL);
+
+        Reset();
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (!m_bIsDefeated && m_creature->GetHealthPercent() < 25.0f)
+        {
+            // evade when defeated; faction is reset automatically
+            m_bIsDefeated = true;
+            EnterEvadeMode();
+
+            m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+            DoScriptText(SAY_ALEDIS_DEFEAT, m_creature);
+            m_creature->ForcedDespawn(60000);
+            return;
+        }
+
+        if (m_uiPyroblastTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_PYROBLAST) == CAST_OK)
+                m_uiPyroblastTimer = urand(18000, 21000);
+        }
+        else
+            m_uiPyroblastTimer -= uiDiff;
+
+        if (m_uiFireballTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FIREBALL) == CAST_OK)
+                m_uiFireballTimer = urand(3000, 4000);
+        }
+        else
+            m_uiFireballTimer -= uiDiff;
+
+        if (m_uiFrostNovaTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_FROST_NOVA) == CAST_OK)
+                m_uiFrostNovaTimer = urand(12000, 16000);
+        }
+        else
+            m_uiFrostNovaTimer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }  
+};
+
+CreatureAI* GetAI_npc_magister_aledis(Creature* pCreature)
+{
+    return new npc_magister_aledisAI(pCreature);
+}
+
 void AddSC_hellfire_peninsula()
 {
     Script* pNewScript;
@@ -920,5 +1043,10 @@ void AddSC_hellfire_peninsula()
     pNewScript->Name = "npc_colonel_jules";
     pNewScript->pGossipHello = &GossipHello_npc_colonel_jules;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_colonel_jules;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_magister_aledis";
+    pNewScript->GetAI = &GetAI_npc_magister_aledis;
     pNewScript->RegisterSelf();
 }
