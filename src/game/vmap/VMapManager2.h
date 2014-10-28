@@ -226,7 +226,13 @@ namespace VMAP
              */
             float getHeight(unsigned int pMapId, float x, float y, float z, float maxSearchDist) override;
 
-            bool processCommand(char* pCommand) override { return false; }      // for debug and extensions
+            /**
+             * @brief
+             *
+             * @param pCommand
+             * @return bool
+             */
+            bool processCommand(char* /*pCommand*/) override { return false; }      // for debug and extensions
 
             /**
              * @brief
@@ -272,8 +278,16 @@ namespace VMAP
              */
             void releaseModelInstance(const std::string& filename);
 
+            /**
+             * @brief what's the use of this? o.O
+             *
+             * @param pMapId
+             * @param x
+             * @param y
+             * @return std::string
+             */
             // what's the use of this? o.O
-            std::string getDirFileName(unsigned int pMapId, int x, int y) const override
+            std::string getDirFileName(unsigned int pMapId, int /*x*/, int /*y*/) const override
             {
                 return getMapFileName(pMapId);
             }
