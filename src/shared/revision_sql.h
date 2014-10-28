@@ -25,6 +25,6 @@
 #ifndef MANGOS_H_REVISION_SQL
 #define MANGOS_H_REVISION_SQL
 #define REVISION_DB_CHARACTERS "required_12546_01_characters_random_battleground"
-#define REVISION_DB_MANGOS "required_05_mangos_dungeonfinder_rewards"
+#define REVISION_DB_MANGOS "required_20141028_mangos_spell_template"
 #define REVISION_DB_REALMD "required_20140607_Realm_Resync"
 #endif // __REVISION_SQL_H__
