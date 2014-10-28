@@ -134,6 +134,19 @@ set(sources_northrend
     scripts/northrend/zuldrak.cpp
 )
 
+set(sources_outland
+    scripts/outland/blades_edge_mountains.cpp
+    scripts/outland/boss_doomlord_kazzak.cpp
+    scripts/outland/boss_doomwalker.cpp
+    scripts/outland/hellfire_peninsula.cpp
+    scripts/outland/nagrand.cpp
+    scripts/outland/netherstorm.cpp
+    scripts/outland/shadowmoon_valley.cpp
+    scripts/outland/shattrath_city.cpp
+    scripts/outland/terokkar_forest.cpp
+    scripts/outland/zangarmarsh.cpp
+)
+
 set(sources_instance_ek_brd
     scripts/eastern_kingdoms/blackrock_mountain/blackrock_depths/blackrock_depths.cpp
     scripts/eastern_kingdoms/blackrock_mountain/blackrock_depths/boss_ambassador_flamelash.cpp
@@ -545,6 +558,143 @@ set(sources_instance_n_vh
     scripts/northrend/violet_hold/violet_hold.h
 )
 
+set(sources_instance_o_au_ac
+    scripts/outland/auchindoun/auchenai_crypts/boss_exarch_maladaar.cpp
+    scripts/outland/auchindoun/auchenai_crypts/boss_shirrak.cpp
+)
+
+set(sources_instance_o_au_mt
+    scripts/outland/auchindoun/mana_tombs/boss_nexusprince_shaffar.cpp
+    scripts/outland/auchindoun/mana_tombs/boss_pandemonius.cpp
+)
+
+set(sources_instance_o_au_sh
+    scripts/outland/auchindoun/sethekk_halls/boss_anzu.cpp
+    scripts/outland/auchindoun/sethekk_halls/boss_darkweaver_syth.cpp
+    scripts/outland/auchindoun/sethekk_halls/boss_talon_king_ikiss.cpp
+    scripts/outland/auchindoun/sethekk_halls/instance_sethekk_halls.cpp
+    scripts/outland/auchindoun/sethekk_halls/sethekk_halls.h
+)
+
+set(sources_instance_o_au_sl
+    scripts/outland/auchindoun/shadow_labyrinth/boss_ambassador_hellmaw.cpp
+    scripts/outland/auchindoun/shadow_labyrinth/boss_blackheart_the_inciter.cpp
+    scripts/outland/auchindoun/shadow_labyrinth/boss_grandmaster_vorpil.cpp
+    scripts/outland/auchindoun/shadow_labyrinth/boss_murmur.cpp
+    scripts/outland/auchindoun/shadow_labyrinth/instance_shadow_labyrinth.cpp
+    scripts/outland/auchindoun/shadow_labyrinth/shadow_labyrinth.h
+)
+
+set(sources_instance_o_bt
+    scripts/outland/black_temple/black_temple.cpp
+    scripts/outland/black_temple/black_temple.h
+    scripts/outland/black_temple/boss_bloodboil.cpp
+    scripts/outland/black_temple/boss_illidan.cpp
+    scripts/outland/black_temple/boss_mother_shahraz.cpp
+    scripts/outland/black_temple/boss_reliquary_of_souls.cpp
+    scripts/outland/black_temple/boss_shade_of_akama.cpp
+    scripts/outland/black_temple/boss_supremus.cpp
+    scripts/outland/black_temple/boss_teron_gorefiend.cpp
+    scripts/outland/black_temple/boss_warlord_najentus.cpp
+    scripts/outland/black_temple/illidari_council.cpp
+    scripts/outland/black_temple/instance_black_temple.cpp
+)
+
+set(sources_instance_o_cr_ss
+    scripts/outland/coilfang_reservoir/serpent_shrine/boss_fathomlord_karathress.cpp
+    scripts/outland/coilfang_reservoir/serpent_shrine/boss_hydross_the_unstable.cpp
+    scripts/outland/coilfang_reservoir/serpent_shrine/boss_lady_vashj.cpp
+    scripts/outland/coilfang_reservoir/serpent_shrine/boss_leotheras_the_blind.cpp
+    scripts/outland/coilfang_reservoir/serpent_shrine/boss_morogrim_tidewalker.cpp
+    scripts/outland/coilfang_reservoir/serpent_shrine/boss_the_lurker_below.cpp
+    scripts/outland/coilfang_reservoir/serpent_shrine/instance_serpent_shrine.cpp
+    scripts/outland/coilfang_reservoir/serpent_shrine/serpent_shrine.h
+)
+
+set(sources_instance_o_cr_sp
+    scripts/outland/coilfang_reservoir/slave_pens/boss_ahune.cpp
+)
+
+set(sources_instance_o_cr_sv
+    scripts/outland/coilfang_reservoir/steam_vault/boss_hydromancer_thespia.cpp
+    scripts/outland/coilfang_reservoir/steam_vault/boss_mekgineer_steamrigger.cpp
+    scripts/outland/coilfang_reservoir/steam_vault/boss_warlord_kalithresh.cpp
+    scripts/outland/coilfang_reservoir/steam_vault/instance_steam_vault.cpp
+    scripts/outland/coilfang_reservoir/steam_vault/steam_vault.h
+)
+
+set(sources_instance_o_cr_ub
+    scripts/outland/coilfang_reservoir/underbog/boss_hungarfen.cpp
+)
+
+set(sources_instance_o_gl
+    scripts/outland/gruuls_lair/boss_gruul.cpp
+    scripts/outland/gruuls_lair/boss_high_king_maulgar.cpp
+    scripts/outland/gruuls_lair/gruuls_lair.h
+    scripts/outland/gruuls_lair/instance_gruuls_lair.cpp
+)
+
+set(sources_instance_o_hc_bf
+    scripts/outland/hellfire_citadel/blood_furnace/blood_furnace.h
+    scripts/outland/hellfire_citadel/blood_furnace/boss_broggok.cpp
+    scripts/outland/hellfire_citadel/blood_furnace/boss_kelidan_the_breaker.cpp
+    scripts/outland/hellfire_citadel/blood_furnace/boss_the_maker.cpp
+    scripts/outland/hellfire_citadel/blood_furnace/instance_blood_furnace.cpp
+)
+
+set(sources_instance_o_hc_hr
+    scripts/outland/hellfire_citadel/hellfire_ramparts/boss_nazan_and_vazruden.cpp
+    scripts/outland/hellfire_citadel/hellfire_ramparts/boss_omor_the_unscarred.cpp
+    scripts/outland/hellfire_citadel/hellfire_ramparts/boss_watchkeeper_gargolmar.cpp
+    scripts/outland/hellfire_citadel/hellfire_ramparts/hellfire_ramparts.h
+    scripts/outland/hellfire_citadel/hellfire_ramparts/instance_hellfire_ramparts.cpp
+)
+
+set(sources_instance_o_hc_ml
+    scripts/outland/hellfire_citadel/magtheridons_lair/boss_magtheridon.cpp
+    scripts/outland/hellfire_citadel/magtheridons_lair/instance_magtheridons_lair.cpp
+    scripts/outland/hellfire_citadel/magtheridons_lair/magtheridons_lair.h
+)
+
+set(sources_instance_o_hc_sh
+    scripts/outland/hellfire_citadel/shattered_halls/boss_nethekurse.cpp
+    scripts/outland/hellfire_citadel/shattered_halls/boss_warbringer_omrogg.cpp
+    scripts/outland/hellfire_citadel/shattered_halls/boss_warchief_kargath_bladefist.cpp
+    scripts/outland/hellfire_citadel/shattered_halls/instance_shattered_halls.cpp
+    scripts/outland/hellfire_citadel/shattered_halls/shattered_halls.h
+)
+
+set(sources_instance_o_tk_az
+    scripts/outland/tempest_keep/arcatraz/arcatraz.cpp
+    scripts/outland/tempest_keep/arcatraz/arcatraz.h
+    scripts/outland/tempest_keep/arcatraz/boss_dalliah.cpp
+    scripts/outland/tempest_keep/arcatraz/boss_harbinger_skyriss.cpp
+    scripts/outland/tempest_keep/arcatraz/boss_soccothrates.cpp
+    scripts/outland/tempest_keep/arcatraz/instance_arcatraz.cpp
+)
+
+set(sources_instance_o_tk_ba
+    scripts/outland/tempest_keep/botanica/boss_high_botanist_freywinn.cpp
+    scripts/outland/tempest_keep/botanica/boss_laj.cpp
+    scripts/outland/tempest_keep/botanica/boss_warp_splinter.cpp
+)
+
+set(sources_instance_o_tk_te
+    scripts/outland/tempest_keep/the_eye/boss_alar.cpp
+    scripts/outland/tempest_keep/the_eye/boss_astromancer.cpp
+    scripts/outland/tempest_keep/the_eye/boss_kaelthas.cpp
+    scripts/outland/tempest_keep/the_eye/boss_void_reaver.cpp
+    scripts/outland/tempest_keep/the_eye/instance_the_eye.cpp
+    scripts/outland/tempest_keep/the_eye/the_eye.h
+)
+
+set(sources_instance_o_tk_tm
+    scripts/outland/tempest_keep/the_mechanar/boss_nethermancer_sepethrea.cpp
+    scripts/outland/tempest_keep/the_mechanar/boss_pathaleon_the_calculator.cpp
+    scripts/outland/tempest_keep/the_mechanar/instance_mechanar.cpp
+    scripts/outland/tempest_keep/the_mechanar/mechanar.h
+)
+
 set(mangosscript_LIB_SRCS
     ${sources}
     ${sources_battlegrounds}
@@ -552,6 +702,7 @@ set(mangosscript_LIB_SRCS
     ${sources_eastern_kingdoms}
     ${sources_kalimdor}
     ${sources_northrend}
+    ${sources_outland}
     ${sources_instance_ek_brd}
     ${sources_instance_ek_brs}
     ${sources_instance_ek_tdm}
@@ -598,6 +749,24 @@ set(mangosscript_LIB_SRCS
     ${sources_instance_n_uk_up}
     ${sources_instance_n_voa}
     ${sources_instance_n_vh}
+    ${sources_instance_o_au_ac}
+    ${sources_instance_o_au_mt}
+    ${sources_instance_o_au_sh}
+    ${sources_instance_o_au_sl}
+    ${sources_instance_o_bt}
+    ${sources_instance_o_cr_ss}
+    ${sources_instance_o_cr_sp}
+    ${sources_instance_o_cr_sv}
+    ${sources_instance_o_cr_ub}
+    ${sources_instance_o_gl}
+    ${sources_instance_o_hc_bf}
+    ${sources_instance_o_hc_hr}
+    ${sources_instance_o_hc_ml}
+    ${sources_instance_o_hc_sh}
+    ${sources_instance_o_tk_az}
+    ${sources_instance_o_tk_ba}
+    ${sources_instance_o_tk_te}
+    ${sources_instance_o_tk_tm}
 )
 
 mangos_source_group(${mangosscript_LIB_SRCS})
