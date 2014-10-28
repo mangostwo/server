@@ -38,15 +38,15 @@ template<class T>
 void FleeingMovementGenerator<T>::_setTargetLocation(T& owner)
 {
     if (!&owner)
-        return;
+        { return; }
 
     // ignore in case other no reaction state
     if (owner.hasUnitState((UNIT_STAT_CAN_NOT_REACT | UNIT_STAT_NOT_MOVE) & ~UNIT_STAT_FLEEING))
-        return;
+        { return; }
 
     float x, y, z;
     if (!_getPoint(owner, x, y, z))
-        return;
+        { return; }
 
     owner.addUnitState(UNIT_STAT_FLEEING_MOVE);
 
@@ -70,16 +70,16 @@ template<class T>
 bool FleeingMovementGenerator<T>::_getPoint(T& owner, float& x, float& y, float& z)
 {
     if (!&owner)
-        return false;
+        { return false; }
 
     float dist_from_caster, angle_to_caster;
     if (Unit* fright = ObjectAccessor::GetUnit(owner, i_frightGuid))
     {
         dist_from_caster = fright->GetDistance(&owner);
         if (dist_from_caster > 0.2f)
-            angle_to_caster = fright->GetAngle(&owner);
+            { angle_to_caster = fright->GetAngle(&owner); }
         else
-            angle_to_caster = frand(0, 2 * M_PI_F);
+            { angle_to_caster = frand(0, 2 * M_PI_F); }
     }
     else
     {
@@ -162,7 +162,7 @@ template<class T>
 bool FleeingMovementGenerator<T>::Update(T& owner, const uint32& time_diff)
 {
     if (!&owner || !owner.IsAlive())
-        return false;
+        { return false; }
 
     // ignore in case other no reaction state
     if (owner.hasUnitState((UNIT_STAT_CAN_NOT_REACT | UNIT_STAT_NOT_MOVE) & ~UNIT_STAT_FLEEING))
@@ -173,7 +173,7 @@ bool FleeingMovementGenerator<T>::Update(T& owner, const uint32& time_diff)
 
     i_nextCheckTime.Update(time_diff);
     if (i_nextCheckTime.Passed() && owner.movespline->Finalized())
-        _setTargetLocation(owner);
+        { _setTargetLocation(owner); }
 
     return true;
 }
@@ -207,7 +207,7 @@ void TimedFleeingMovementGenerator::Finalize(Unit& owner)
 bool TimedFleeingMovementGenerator::Update(Unit& owner, const uint32& time_diff)
 {
     if (!owner.IsAlive())
-        return false;
+        { return false; }
 
     // ignore in case other no reaction state
     if (owner.hasUnitState((UNIT_STAT_CAN_NOT_REACT | UNIT_STAT_NOT_MOVE) & ~UNIT_STAT_FLEEING))
@@ -218,7 +218,7 @@ bool TimedFleeingMovementGenerator::Update(Unit& owner, const uint32& time_diff)
 
     i_totalFleeTime.Update(time_diff);
     if (i_totalFleeTime.Passed())
-        return false;
+        { return false; }
 
     // This calls grant-parent Update method hiden by FleeingMovementGenerator::Update(Creature &, const uint32 &) version
     // This is done instead of casting Unit& to Creature& and call parent method, then we can use Unit directly

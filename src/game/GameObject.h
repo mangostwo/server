@@ -672,9 +672,9 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         {
             time_t now = time(NULL);
             if (m_respawnTime > now)
-                return m_respawnTime;
+                { return m_respawnTime; }
             else
-                return now;
+                { return now; }
         }
 
         void SetRespawnTime(time_t respawn)

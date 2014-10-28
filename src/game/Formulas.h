@@ -36,6 +36,8 @@ namespace MaNGOS
             return (float)ceil(count * (-0.53177f + 0.59357f * exp((level + 23.54042f) / 26.07859f)));
         }
     }
+
+
     namespace XP
     {
         enum XPColorChar { RED, ORANGE, YELLOW, GREEN, GRAY };
@@ -43,9 +45,9 @@ namespace MaNGOS
         inline uint32 GetGrayLevel(uint32 pl_level)
         {
             if (pl_level <= 5)
-                return 0;
+                { return 0; }
             else if (pl_level <= 39)
-                return pl_level - 5 - pl_level / 10;
+                { return pl_level - 5 - pl_level / 10; }
             else if (pl_level <= 59)
                 return pl_level - 1 - pl_level / 5;
             else
@@ -55,30 +57,30 @@ namespace MaNGOS
         inline XPColorChar GetColorCode(uint32 pl_level, uint32 mob_level)
         {
             if (mob_level >= pl_level + 5)
-                return RED;
+                { return RED; }
             else if (mob_level >= pl_level + 3)
-                return ORANGE;
+                { return ORANGE; }
             else if (mob_level >= pl_level - 2)
-                return YELLOW;
+                { return YELLOW; }
             else if (mob_level > GetGrayLevel(pl_level))
-                return GREEN;
+                { return GREEN; }
             else
-                return GRAY;
+                { return GRAY; }
         }
 
         inline uint32 GetZeroDifference(uint32 pl_level)
         {
-            if (pl_level < 8)  return 5;
-            if (pl_level < 10) return 6;
-            if (pl_level < 12) return 7;
-            if (pl_level < 16) return 8;
-            if (pl_level < 20) return 9;
-            if (pl_level < 30) return 11;
-            if (pl_level < 40) return 12;
-            if (pl_level < 45) return 13;
-            if (pl_level < 50) return 14;
-            if (pl_level < 55) return 15;
-            if (pl_level < 60) return 16;
+            if (pl_level < 8)  { return 5; }
+            if (pl_level < 10) { return 6; }
+            if (pl_level < 12) { return 7; }
+            if (pl_level < 16) { return 8; }
+            if (pl_level < 20) { return 9; }
+            if (pl_level < 30) { return 11; }
+            if (pl_level < 40) { return 12; }
+            if (pl_level < 45) { return 13; }
+            if (pl_level < 50) { return 14; }
+            if (pl_level < 55) { return 15; }
+            if (pl_level < 60) { return 16; }
             return 17;
         }
 
@@ -99,7 +101,7 @@ namespace MaNGOS
             {
                 uint32 nLevelDiff = mob_level - pl_level;
                 if (nLevelDiff > 4)
-                    nLevelDiff = 4;
+                    { nLevelDiff = 4; }
                 return ((pl_level * 5 + nBaseExp) * (20 + nLevelDiff) / 10 + 1) / 2;
             }
             else
@@ -117,16 +119,16 @@ namespace MaNGOS
         inline uint32 Gain(Player* pl, Unit* u)
         {
             if (u->GetTypeId() == TYPEID_UNIT && (
-                        ((Creature*)u)->IsTotem() || ((Creature*)u)->IsPet() ||
+                    ((Creature*)u)->IsTotem() || ((Creature*)u)->IsPet() ||
                         (((Creature*)u)->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_NO_XP_AT_KILL)))
-                return 0;
+                { return 0; }
 
             uint32 xp_gain = BaseGain(pl->getLevel(), u->getLevel(), GetContentLevelsForMapAndZone(pl->GetMapId(), pl->GetZoneId()));
             if (xp_gain == 0)
-                return 0;
+                { return 0; }
 
             if (u->GetTypeId() == TYPEID_UNIT && ((Creature*)u)->IsElite())
-                xp_gain *= 2;
+                { xp_gain *= 2; }
 
             return (uint32)(xp_gain * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_KILL));
         }

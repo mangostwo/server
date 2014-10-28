@@ -32,7 +32,7 @@
 
 class WorldSession;
 
-#define GOSSIP_MAX_MENU_ITEMS       32                      // Client supports showing max 32 items
+#define GOSSIP_MAX_MENU_ITEMS       32                      // client supports showing max 32 items
 #define DEFAULT_GOSSIP_MESSAGE      0xffffff
 
 enum Gossip_Option

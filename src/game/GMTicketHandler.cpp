@@ -64,7 +64,7 @@ void WorldSession::SendGMResponse(GMTicket* ticket)
     SendPacket(&data);
 }
 
-void WorldSession::HandleGMTicketGetTicketOpcode(WorldPacket & /*recv_data*/)
+void WorldSession::HandleGMTicketGetTicketOpcode(WorldPacket& /*recv_data*/)
 {
     SendQueryTimeResponse();
 
@@ -74,10 +74,10 @@ void WorldSession::HandleGMTicketGetTicketOpcode(WorldPacket & /*recv_data*/)
         if (ticket->HasResponse())
             SendGMResponse(ticket);
         else
-            SendGMTicketGetTicket(0x06, ticket);
+        { SendGMTicketGetTicket(0x06, ticket); }
     }
     else
-        SendGMTicketGetTicket(0x0A);
+        { SendGMTicketGetTicket(0x0A); }
 }
 
 void WorldSession::HandleGMTicketUpdateTextOpcode(WorldPacket& recv_data)
@@ -86,9 +86,10 @@ void WorldSession::HandleGMTicketUpdateTextOpcode(WorldPacket& recv_data)
     recv_data >> ticketText;
 
     if (GMTicket* ticket = sTicketMgr.GetGMTicket(GetPlayer()->GetObjectGuid()))
-        ticket->SetText(ticketText.c_str());
+        { ticket->SetText(ticketText.c_str()); }
     else
-        sLog.outError("Ticket update: Player %s (GUID: %u) doesn't have active ticket", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow());
+        { sLog.outError("Ticket update: Player %s (GUID: %u) doesn't have active ticket", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow()); }
+    
 }
 
 void WorldSession::HandleGMTicketDeleteTicketOpcode(WorldPacket& /*recv_data*/)
@@ -143,11 +144,11 @@ void WorldSession::HandleGMTicketCreateOpcode(WorldPacket& recv_data)
     for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if (itr->second->GetSession()->GetSecurity() >= SEC_GAMEMASTER && itr->second->isAcceptTickets())
-            ChatHandler(itr->second).PSendSysMessage(LANG_COMMAND_TICKETNEW, GetPlayer()->GetName());
+            { ChatHandler(itr->second).PSendSysMessage(LANG_COMMAND_TICKETNEW, GetPlayer()->GetName()); }
     }
 }
 
-void WorldSession::HandleGMTicketSystemStatusOpcode(WorldPacket & /*recv_data*/)
+void WorldSession::HandleGMTicketSystemStatusOpcode(WorldPacket& /*recv_data*/)
 {
     WorldPacket data(SMSG_GMTICKET_SYSTEMSTATUS, 4);
     data << uint32(1);                                      // we can also disable ticket system by sending 0 value

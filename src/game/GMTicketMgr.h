@@ -86,8 +86,8 @@ class GMTicket
 {
     public:
         explicit GMTicket() : m_lastUpdate(0)
-        {
-        }
+        {}
+
 
         void Init(ObjectGuid guid, const std::string& text, const std::string& responsetext, time_t update)
         {
@@ -97,6 +97,10 @@ class GMTicket
             m_lastUpdate = update;
         }
 
+        /** 
+         * Gets the \ref Player s \ref ObjectGuid which asked the question and created the ticket
+         * @return the \ref ObjectGuid for the \ref Player that asked the question
+         */
         ObjectGuid const& GetPlayerGuid() const
         {
             return m_guid;
@@ -183,10 +187,10 @@ class GMTicketMgr
         {
             GMTicketMap::iterator itr = m_GMTicketMap.find(guid);
             if (itr == m_GMTicketMap.end())
-                return NULL;
+                { return NULL; }
             return &(itr->second);
         }
-
+        
         size_t GetTicketCount() const
         {
             return m_GMTicketMap.size();
@@ -195,12 +199,12 @@ class GMTicketMgr
         GMTicket* GetGMTicketByOrderPos(uint32 pos)
         {
             if (pos >= GetTicketCount())
-                return NULL;
+                { return NULL; }
 
             GMTicketList::iterator itr = m_GMTicketListByCreatingOrder.begin();
             std::advance(itr, pos);
             if (itr == m_GMTicketListByCreatingOrder.end())
-                return NULL;
+                { return NULL; }
             return *itr;
         }
 
@@ -216,7 +220,7 @@ class GMTicketMgr
         {
             GMTicketMap::iterator itr = m_GMTicketMap.find(guid);
             if (itr == m_GMTicketMap.end())
-                return;
+                { return; }
             itr->second.DeleteFromDB();
             m_GMTicketListByCreatingOrder.remove(&itr->second);
             m_GMTicketMap.erase(itr);

@@ -97,33 +97,33 @@ struct MANGOS_DLL_DECL CoordPair
     void operator<<(const uint32 val)
     {
         if (x_coord > val)
-            x_coord -= val;
+            { x_coord -= val; }
         else
-            x_coord = 0;
+            { x_coord = 0; }
     }
 
     void operator>>(const uint32 val)
     {
         if (x_coord + val < LIMIT)
-            x_coord += val;
+            { x_coord += val; }
         else
-            x_coord = LIMIT - 1;
+            { x_coord = LIMIT - 1; }
     }
 
     void operator-=(const uint32 val)
     {
         if (y_coord > val)
-            y_coord -= val;
+            { y_coord -= val; }
         else
-            y_coord = 0;
+            { y_coord = 0; }
     }
 
     void operator+=(const uint32 val)
     {
         if (y_coord + val < LIMIT)
-            y_coord += val;
+            { y_coord += val; }
         else
-            y_coord = LIMIT - 1;
+            { y_coord = LIMIT - 1; }
     }
 
     CoordPair& normalize()
@@ -167,9 +167,9 @@ namespace MaNGOS
     inline void NormalizeMapCoord(float& c)
     {
         if (c > MAP_HALFSIZE - 0.5)
-            c = MAP_HALFSIZE - 0.5;
+            { c = MAP_HALFSIZE - 0.5; }
         else if (c < -(MAP_HALFSIZE - 0.5))
-            c = -(MAP_HALFSIZE - 0.5);
+            { c = -(MAP_HALFSIZE - 0.5); }
     }
 
     inline bool IsValidMapCoord(float c)

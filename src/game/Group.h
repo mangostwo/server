@@ -155,8 +155,14 @@ class Roll : public LootValidatorRef
               itemCount(li.count), totalPlayersRolling(0), totalNeed(0), totalGreed(0), totalPass(0), itemSlot(0),
               m_method(method), m_commonVoteMask(ROLL_VOTE_MASK_ALL) {}
         ~Roll() { }
-        void setLoot(Loot* pLoot) { link(pLoot, this); }
-        Loot* getLoot() { return getTarget(); }
+        void setLoot(Loot* pLoot)
+        {
+            link(pLoot, this);
+        }
+        Loot* getLoot()
+        {
+            return getTarget();
+        }
         void targetObjectBuildLink() override;
 
         void CalculateCommonVoteMask(uint32 max_enchanting_skill);
@@ -194,11 +200,19 @@ struct InstanceGroupBind
 class MANGOS_DLL_SPEC Group
 {
     public:
+		/**
+		* Struct MemberSlot
+		* Represent a member of a group with some of its caracteristics
+		*/
         struct MemberSlot
         {
+			/* GUID of the player. */
             ObjectGuid  guid;
+			/* Name of the player. */
             std::string name;
+			/* Group of the player. */
             uint8       group;
+			/* Indicates whether the player is assistant. */
             bool        assistant;
             uint32      lastMap;
         };
@@ -226,35 +240,80 @@ class MANGOS_DLL_SPEC Group
         bool   AddMember(ObjectGuid guid, const char* name);
         uint32 RemoveMember(ObjectGuid guid, uint8 method); // method: 0=just remove, 1=kick
         void   ChangeLeader(ObjectGuid guid);
-        void   SetLootMethod(LootMethod method) { m_lootMethod = method; }
-        void   SetLooterGuid(ObjectGuid guid) { m_looterGuid = guid; }
+        void   SetLootMethod(LootMethod method)
+        {
+            m_lootMethod = method;
+        }
+        void   SetLooterGuid(ObjectGuid guid)
+        {
+            m_looterGuid = guid;
+        }
         void   UpdateLooterGuid(WorldObject* pSource, bool ifneed = false);
-        void   SetLootThreshold(ItemQualities threshold) { m_lootThreshold = threshold; }
+        void   SetLootThreshold(ItemQualities threshold)
+        {
+            m_lootThreshold = threshold;
+        }
         void   Disband(bool hideDestroy = false);
 
         // properties accessories
-        uint32 GetId() const { return m_Id; }
+        uint32 GetId() const
+        {
+            return m_Id;
+        }
         ObjectGuid GetObjectGuid() const { return ObjectGuid(HIGHGUID_GROUP, GetId()); }
-        bool IsFull() const { return (m_groupType == GROUPTYPE_NORMAL) ? (m_memberSlots.size() >= MAX_GROUP_SIZE) : (m_memberSlots.size() >= MAX_RAID_SIZE); }
-        bool isRaidGroup() const { return m_groupType & GROUPTYPE_RAID; }
-        bool isBGGroup()   const { return m_bgGroup != NULL; }
+        bool IsFull() const
+        {
+            return (m_groupType == GROUPTYPE_NORMAL) ? (m_memberSlots.size() >= MAX_GROUP_SIZE) : (m_memberSlots.size() >= MAX_RAID_SIZE);
+        }
+        bool isRaidGroup() const
+        {
+            return m_groupType == GROUPTYPE_RAID;
+        }
+        bool isBGGroup()   const
+        {
+            return m_bgGroup != NULL;
+        }
         bool isLFGGroup() const { return m_groupType & GROUPTYPE_LFD; }
-        bool IsCreated()   const { return GetMembersCount() > 0; }
-        ObjectGuid GetLeaderGuid() const { return m_leaderGuid; }
-        const char* GetLeaderName() const { return m_leaderName.c_str(); }
-        LootMethod    GetLootMethod() const { return m_lootMethod; }
-        ObjectGuid GetLooterGuid() const { return m_looterGuid; }
-        ItemQualities GetLootThreshold() const { return m_lootThreshold; }
+        bool IsCreated()   const
+        {
+            return GetMembersCount() > 0;
+        }
+        ObjectGuid GetLeaderGuid() const
+        {
+            return m_leaderGuid;
+        }
+        const char* GetLeaderName() const
+        {
+            return m_leaderName.c_str();
+        }
+        LootMethod    GetLootMethod() const
+        {
+            return m_lootMethod;
+        }
+        ObjectGuid GetLooterGuid() const
+        {
+            return m_looterGuid;
+        }
+        ItemQualities GetLootThreshold() const
+        {
+            return m_lootThreshold;
+        }
 
         // member manipulation methods
         void SetAsLfgGroup() { m_groupType = GroupType(m_groupType | GROUPTYPE_LFD); }
-        bool IsMember(ObjectGuid guid) const { return _getMemberCSlot(guid) != m_memberSlots.end(); }
-        bool IsLeader(ObjectGuid guid) const { return GetLeaderGuid() == guid; }
+        bool IsMember(ObjectGuid guid) const
+        {
+            return _getMemberCSlot(guid) != m_memberSlots.end();
+        }
+        bool IsLeader(ObjectGuid guid) const
+        {
+            return GetLeaderGuid() == guid;
+        }
         ObjectGuid GetMemberGuid(const std::string& name)
         {
             for (member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
                 if (itr->name == name)
-                    return itr->guid;
+                    { return itr->guid; }
 
             return ObjectGuid();
         }
@@ -262,7 +321,7 @@ class MANGOS_DLL_SPEC Group
         {
             member_citerator mslot = _getMemberCSlot(guid);
             if (mslot == m_memberSlots.end())
-                return false;
+                { return false; }
 
             return mslot->assistant;
         }
@@ -285,7 +344,7 @@ class MANGOS_DLL_SPEC Group
         {
             member_citerator mslot = _getMemberCSlot(guid);
             if (mslot == m_memberSlots.end())
-                return MAX_RAID_SUBGROUPS + 1;
+                { return MAX_RAID_SUBGROUPS + 1; }
 
             return mslot->group;
         }
@@ -293,37 +352,46 @@ class MANGOS_DLL_SPEC Group
         // some additional raid methods
         void ConvertToRaid();
 
-        void SetBattlegroundGroup(BattleGround* bg) { m_bgGroup = bg; }
+        void SetBattlegroundGroup(BattleGround* bg)
+        {
+            m_bgGroup = bg;
+        }
         GroupJoinBattlegroundResult CanJoinBattleGroundQueue(BattleGround const* bgOrTemplate, BattleGroundQueueTypeId bgQueueTypeId, uint32 MinPlayerCount, uint32 MaxPlayerCount, bool isRated, uint32 arenaSlot);
 
         void ChangeMembersGroup(ObjectGuid guid, uint8 group);
         void ChangeMembersGroup(Player* player, uint8 group);
 
-        ObjectGuid GetMainTankGuid() const { return m_mainTankGuid; }
-        ObjectGuid GetMainAssistantGuid() const { return m_mainAssistantGuid; }
+        ObjectGuid GetMainTankGuid() const
+        {
+            return m_mainTankGuid;
+        }
+        ObjectGuid GetMainAssistantGuid() const
+        {
+            return m_mainAssistantGuid;
+        }
 
         void SetAssistant(ObjectGuid guid, bool state)
         {
             if (!isRaidGroup())
-                return;
+                { return; }
             if (_setAssistantFlag(guid, state))
-                SendUpdate();
+                { SendUpdate(); }
         }
         void SetMainTank(ObjectGuid guid)
         {
             if (!isRaidGroup())
-                return;
+                { return; }
 
             if (_setMainTank(guid))
-                SendUpdate();
+                { SendUpdate(); }
         }
         void SetMainAssistant(ObjectGuid guid)
         {
             if (!isRaidGroup())
-                return;
+                { return; }
 
             if (_setMainAssistant(guid))
-                SendUpdate();
+                { SendUpdate(); }
         }
 
         void SetTargetIcon(uint8 id, ObjectGuid whoGuid, ObjectGuid targetGuid);
@@ -364,7 +432,10 @@ class MANGOS_DLL_SPEC Group
         void StartLootRoll(WorldObject* lootTarget, LootMethod method, Loot* loot, uint8 itemSlot, uint32 maxEnchantingSkill);
         void EndRoll();
 
-        void LinkMember(GroupReference* pRef) { m_memberMgr.insertFirst(pRef); }
+        void LinkMember(GroupReference* pRef)
+        {
+            m_memberMgr.insertFirst(pRef);
+        }
         void DelinkMember(GroupReference* /*pRef*/) { }
 
         InstanceGroupBind* BindToInstance(DungeonPersistentState* save, bool permanent, bool load = false);
@@ -392,19 +463,19 @@ class MANGOS_DLL_SPEC Group
         {
             // Sub group counters initialization
             if (!m_subGroupsCounts)
-                m_subGroupsCounts = new uint8[MAX_RAID_SUBGROUPS];
+                { m_subGroupsCounts = new uint8[MAX_RAID_SUBGROUPS]; }
 
             memset((void*)m_subGroupsCounts, 0, MAX_RAID_SUBGROUPS * sizeof(uint8));
 
             for (member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
-                ++m_subGroupsCounts[itr->group];
+                { ++m_subGroupsCounts[itr->group]; }
         }
 
         member_citerator _getMemberCSlot(ObjectGuid guid) const
         {
             for (member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
                 if (itr->guid == guid)
-                    return itr;
+                    { return itr; }
 
             return m_memberSlots.end();
         }
@@ -413,7 +484,7 @@ class MANGOS_DLL_SPEC Group
         {
             for (member_witerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
                 if (itr->guid == guid)
-                    return itr;
+                    { return itr; }
 
             return m_memberSlots.end();
         }
@@ -421,13 +492,13 @@ class MANGOS_DLL_SPEC Group
         void SubGroupCounterIncrease(uint8 subgroup)
         {
             if (m_subGroupsCounts)
-                ++m_subGroupsCounts[subgroup];
+                { ++m_subGroupsCounts[subgroup]; }
         }
 
         void SubGroupCounterDecrease(uint8 subgroup)
         {
             if (m_subGroupsCounts)
-                --m_subGroupsCounts[subgroup];
+                { --m_subGroupsCounts[subgroup]; }
         }
 
         uint32 GetMaxSkillValueForGroup(SkillType skill);

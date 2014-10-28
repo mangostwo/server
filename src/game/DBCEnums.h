@@ -415,11 +415,11 @@ enum SummonPropFlags
 enum SpellCastTargetFlags
 {
     TARGET_FLAG_SELF            = 0x00000000,
-    TARGET_FLAG_UNUSED1         = 0x00000001,               // not used in any spells as of 3.0.3 (can be set dynamically)
-    TARGET_FLAG_UNIT            = 0x00000002,               // pguid
-    TARGET_FLAG_UNUSED2         = 0x00000004,               // not used in any spells as of 3.0.3 (can be set dynamically)
-    TARGET_FLAG_UNUSED3         = 0x00000008,               // not used in any spells as of 3.0.3 (can be set dynamically)
-    TARGET_FLAG_ITEM            = 0x00000010,               // pguid
+    TARGET_FLAG_UNUSED1         = 0x00000001,       ///< not used in any spells (can be set dynamically)
+    TARGET_FLAG_UNIT            = 0x00000002,       ///< pguid
+    TARGET_FLAG_UNUSED2         = 0x00000004,       ///< not used in any spells (can be set dynamically)
+    TARGET_FLAG_UNUSED3         = 0x00000008,       ///< not used in any spells (can be set dynamically)
+    TARGET_FLAG_ITEM            = 0x00000010,       ///< pguid
     TARGET_FLAG_SOURCE_LOCATION = 0x00000020,               // pguid + 3 float
     TARGET_FLAG_DEST_LOCATION   = 0x00000040,               // pguid + 3 float
     TARGET_FLAG_OBJECT_UNK      = 0x00000080,               // used in 7 spells only
@@ -437,11 +437,17 @@ enum SpellCastTargetFlags
     TARGET_FLAG_VISUAL_CHAIN    = 0x00080000                // uint32, loop { vec3, guid -> if guid == 0 break }
 };
 
+/**
+ * Used in \ref Unit::HasAura for example, also used in \ref Spell::m_currentBasePoints. These
+ * reference the three effects a \ref Spell can have which do different things, for instance it
+ * can be applying a \ref Aura. For a reference see QSW which you can get at
+ * https://bitbucket.org/sidsukana/qsw
+ */
 enum SpellEffectIndex
 {
-    EFFECT_INDEX_0     = 0,
-    EFFECT_INDEX_1     = 1,
-    EFFECT_INDEX_2     = 2
+    EFFECT_INDEX_0     = 0, ///< The first spell effect
+    EFFECT_INDEX_1     = 1, ///< The second spell effect
+    EFFECT_INDEX_2     = 2  ///< The third spell effect
 };
 
 #define MAX_EFFECT_INDEX 3
