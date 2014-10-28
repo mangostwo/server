@@ -315,48 +315,48 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recv_data)
 
         uint32 stackSize = stackSizes[i];
 
-        Item* it = pl->GetItemByGuid(itemGuid);
+    Item* it = pl->GetItemByGuid(itemGuid);
 
-        // do not allow to sell already auctioned items
-        if (sAuctionMgr.GetAItem(itemGuid.GetCounter()))
-        {
-            sLog.outError("AuctionError, %s is sending %s, but item is already in another auction", pl->GetGuidStr().c_str(), itemGuid.GetString().c_str());
-            SendAuctionCommandResult(NULL, AUCTION_STARTED, AUCTION_ERR_INVENTORY, EQUIP_ERR_ITEM_NOT_FOUND);
-            continue;
-        }
+    // do not allow to sell already auctioned items
+    if (sAuctionMgr.GetAItem(itemGuid.GetCounter()))
+    {
+        sLog.outError("AuctionError, %s is sending %s, but item is already in another auction", pl->GetGuidStr().c_str(), itemGuid.GetString().c_str());
+        SendAuctionCommandResult(NULL, AUCTION_STARTED, AUCTION_ERR_INVENTORY, EQUIP_ERR_ITEM_NOT_FOUND);
+        return;
+    }
 
-        // prevent sending bag with items (cheat: can be placed in bag after adding equipped empty bag to auction)
-        if (!it)
-        {
-            SendAuctionCommandResult(NULL, AUCTION_STARTED, AUCTION_ERR_INVENTORY, EQUIP_ERR_ITEM_NOT_FOUND);
-            continue;
-        }
+    // prevent sending bag with items (cheat: can be placed in bag after adding equipped empty bag to auction)
+    if (!it)
+    {
+        SendAuctionCommandResult(NULL, AUCTION_STARTED, AUCTION_ERR_INVENTORY, EQUIP_ERR_ITEM_NOT_FOUND);
+        return;
+    }
 
-        if (!it->CanBeTraded())
-        {
-            SendAuctionCommandResult(NULL, AUCTION_STARTED, AUCTION_ERR_INVENTORY, EQUIP_ERR_CANNOT_TRADE_THAT);
-            continue;
-        }
+    if (!it->CanBeTraded())
+    {
+        SendAuctionCommandResult(NULL, AUCTION_STARTED, AUCTION_ERR_INVENTORY, EQUIP_ERR_CANNOT_TRADE_THAT);
+        return;
+    }
 
-        if ((it->GetProto()->Flags & ITEM_FLAG_CONJURED) || it->GetUInt32Value(ITEM_FIELD_DURATION))
-        {
-            SendAuctionCommandResult(NULL, AUCTION_STARTED, AUCTION_ERR_INVENTORY, EQUIP_ERR_CANNOT_TRADE_THAT);
-            continue;
-        }
+    if ((it->GetProto()->Flags & ITEM_FLAG_CONJURED) || it->GetUInt32Value(ITEM_FIELD_DURATION))
+    {
+        SendAuctionCommandResult(NULL, AUCTION_STARTED, AUCTION_ERR_INVENTORY, EQUIP_ERR_CANNOT_TRADE_THAT);
+        return;
+    }
 
-        // check money for deposit
-        uint32 deposit = AuctionHouseMgr::GetAuctionDeposit(auctionHouseEntry, etime, it);
-        if (pl->GetMoney() < deposit)
-        {
-            SendAuctionCommandResult(NULL, AUCTION_STARTED, AUCTION_ERR_NOT_ENOUGH_MONEY);
-            continue;
-        }
+    // check money for deposit
+    uint32 deposit = AuctionHouseMgr::GetAuctionDeposit(auctionHouseEntry, etime, it);
+    if (pl->GetMoney() < deposit)
+    {
+        SendAuctionCommandResult(NULL, AUCTION_STARTED, AUCTION_ERR_NOT_ENOUGH_MONEY);
+        return;
+    }
 
-        if (GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_BOOL_GM_LOG_TRADE))
-        {
-            sLog.outCommand(GetAccountId(), "GM %s (Account: %u) create auction: %s (Entry: %u Count: %u)",
-                            GetPlayerName(), GetAccountId(), it->GetProto()->Name1, it->GetEntry(), it->GetCount());
-        }
+    if (GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_BOOL_GM_LOG_TRADE))
+    {
+        sLog.outCommand(GetAccountId(), "GM %s (Account: %u) create auction: %s (Entry: %u Count: %u)",
+                        GetPlayerName(), GetAccountId(), it->GetProto()->Name1, it->GetEntry(), it->GetCount());
+    }
 
         if (stackSize == 0)
             stackSize = 1;
@@ -371,20 +371,20 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recv_data)
 
         pl->DestroyItemCount(it, stackSize, true);
 
-        pl->ModifyMoney(-int32(deposit));
+    pl->ModifyMoney(-int32(deposit));
 
         AuctionEntry* AH = auctionHouse->AddAuction(auctionHouseEntry, newItem, etime, bid, buyout, deposit, pl);
 
-        DETAIL_LOG("selling %s to auctioneer %s with initial bid %u with buyout %u and with time %u (in sec) in auctionhouse %u",
-                   itemGuid.GetString().c_str(), auctioneerGuid.GetString().c_str(), bid, buyout, etime, auctionHouseEntry->houseId);
+    DETAIL_LOG("selling %s to auctioneer %s with initial bid %u with buyout %u and with time %u (in sec) in auctionhouse %u",
+               itemGuid.GetString().c_str(), auctioneerGuid.GetString().c_str(), bid, buyout, etime, auctionHouseEntry->houseId);
 
         SendAuctionCommandResult(AH, AUCTION_STARTED, AUCTION_OK);
 
         GetPlayer()->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CREATE_AUCTION, 1);
     
-        // Used by Eluna
+    // Used by Eluna
 #ifdef ENABLE_ELUNA
-        sEluna->OnAdd(auctionHouse);
+    sEluna->OnAdd(auctionHouse);
 #endif /* ENABLE_ELUNA */
     }
 }

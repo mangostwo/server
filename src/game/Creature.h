@@ -90,7 +90,7 @@ struct CreatureInfo
     uint32  Family;                                         // enum CreatureFamily values (optional)
     uint32  CreatureType;                                   // enum CreatureType values
     uint32  InhabitType;
-    uint32    RegenerateStats;
+    uint32  RegenerateStats;
     bool    RacialLeader;
     uint32  NpcFlags;
     uint32  UnitFlags;                                      // enum UnitFlags mask values
@@ -162,13 +162,13 @@ struct CreatureInfo
     SkillType GetRequiredLootSkill() const
     {
         if (CreatureTypeFlags & CREATURE_TYPEFLAGS_HERBLOOT)
-            return SKILL_HERBALISM;
+            { return SKILL_HERBALISM; }
         else if (CreatureTypeFlags & CREATURE_TYPEFLAGS_MININGLOOT)
-            return SKILL_MINING;
+            { return SKILL_MINING; }
         else if (CreatureTypeFlags & CREATURE_TYPEFLAGS_ENGINEERLOOT)
             return SKILL_ENGINEERING;
         else
-            return SKILL_SKINNING;                          // normal case
+            { return SKILL_SKINNING; }                          // normal case
     }
 
     bool IsExotic() const
@@ -337,8 +337,8 @@ enum SelectFlags
 
 enum RegenStatsFlags
 {
-    REGEN_FLAG_HEALTH = 0x001,
-    REGEN_FLAG_POWER  = 0x002,
+    REGEN_FLAG_HEALTH               = 0x001,
+    REGEN_FLAG_POWER                = 0x002,
 };
 
 // Vendors
@@ -376,7 +376,7 @@ struct VendorItemData
     void Clear()
     {
         for (VendorItemList::const_iterator itr = m_items.begin(); itr != m_items.end(); ++itr)
-            delete(*itr);
+            { delete(*itr); }
         m_items.clear();
     }
 };
@@ -546,7 +546,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool IsElite() const
         {
             if (IsPet())
-                return false;
+                { return false; }
 
             uint32 rank = GetCreatureInfo()->Rank;
             return rank != CREATURE_ELITE_NORMAL && rank != CREATURE_ELITE_RARE;
@@ -555,7 +555,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool IsWorldBoss() const
         {
             if (IsPet())
-                return false;
+                { return false; }
 
             return GetCreatureInfo()->Rank == CREATURE_ELITE_WORLDBOSS;
         }
@@ -637,18 +637,58 @@ class MANGOS_DLL_SPEC Creature : public Unit
         virtual void DeleteFromDB();                        // overwrited in Pet
         static void DeleteFromDB(uint32 lowguid, CreatureData const* data);
 
+		/// Represent the loots available on the creature.
         Loot loot;
+
+		/// Indicates whether the creature has has been pickpocked.
         bool lootForPickPocketed;
+
+		/// Indicates whether the creature has been checked.
         bool lootForBody;
+
+		/// Indicates whether the creature has been skinned.
         bool lootForSkin;
 
+		/**
+		* Method preparing the creature for the loot state. Based on the previous loot state, the loot ID provided in the database and the creature's type,
+		* this method updates the state of the creature for loots.
+		*
+		* At the end of this method, the creature loot state may be:
+		* Lootable: UNIT_DYNFLAG_LOOTABLE
+		* Skinnable: UNIT_FLAG_SKINNABLE
+		* Not lootable: No flag
+		*/
         void PrepareBodyLootState();
+
+		/**
+		* function returning the GUID of the loot recipient (a player GUID).
+		*
+		* \return ObjectGuid Player GUID.
+		*/
         ObjectGuid GetLootRecipientGuid() const { return m_lootRecipientGuid; }
+
+		/**
+		* function returning the group recipient ID.
+		*
+		* \return uint32 Group ID.
+		*/
         uint32 GetLootGroupRecipientId() const { return m_lootGroupRecipientId; }
         Player* GetLootRecipient() const;                   // use group cases as prefered
         Group* GetGroupLootRecipient() const;
         bool IsTappedBy(Player const* player) const;
-        bool HasLootRecipient() const { return m_lootGroupRecipientId || m_lootRecipientGuid; }
+
+		/**
+		* function indicating whether the whether the creature has a looter recipient defined (either a group ID, either a player GUID).
+		*
+		* \return boolean true if the creature has a recipient defined, false otherwise.
+		*/
+		bool HasLootRecipient() const { return m_lootGroupRecipientId || m_lootRecipientGuid; }
+
+		/**
+		* function indicating whether the recipient is a group.
+		* 
+		* \return boolean true if the creature's recipient is a group, false otherwise.
+		*/
         bool IsGroupLootRecipient() const { return m_lootGroupRecipientId; }
         void SetLootRecipient(Unit* unit);
         void AllLootRemovedFromCorpse();
@@ -723,9 +763,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
         virtual uint32 GetPetAutoSpellOnPos(uint8 pos) const
         {
             if (pos >= CREATURE_MAX_SPELLS || m_charmInfo->GetCharmSpell(pos)->GetType() != ACT_ENABLED)
-                return 0;
+                { return 0; }
             else
-                return m_charmInfo->GetCharmSpell(pos)->GetAction();
+                { return m_charmInfo->GetCharmSpell(pos)->GetAction(); }
         }
 
         void SetCombatStartPosition(float x, float y, float z) { m_combatStartX = x; m_combatStartY = y; m_combatStartZ = z; }
@@ -748,7 +788,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         void SetDisableReputationGain(bool disable) { DisableReputationGain = disable; }
         bool IsReputationGainDisabled() { return DisableReputationGain; }
-        
     protected:
         bool MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* pSpellInfo, uint32 selectFlags) const;
 
@@ -798,12 +837,12 @@ class MANGOS_DLL_SPEC Creature : public Unit
         float m_combatStartZ;
 
         Position m_respawnPos;
-        
+
         bool DisableReputationGain;
 
     private:
         GridReference<Creature> m_gridRef;
-        CreatureInfo const* m_creatureInfo;                 // in difficulty mode > 0 can different from ObjMgr::GetCreatureTemplate(GetEntry())
+        CreatureInfo const* m_creatureInfo;
 };
 
 class ForcedDespawnDelayEvent : public BasicEvent

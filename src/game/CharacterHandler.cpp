@@ -46,14 +46,16 @@
 #include "Language.h"
 #include "SpellMgr.h"
 #include "Calendar.h"
+#ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
+#endif /* ENABLE_ELUNA */
 
 // config option SkipCinematics supported values
 enum CinematicsSkipMode
 {
     CINEMATICS_SKIP_NONE      = 0,
     CINEMATICS_SKIP_SAME_RACE = 1,
-    CINEMATICS_SKIP_ALL       = 2,
+    CINEMATICS_SKIP_ALL       = 2
 };
 
 class LoginQueryHolder : public SqlQueryHolder
@@ -497,7 +499,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
 
     // Used by Eluna
     sEluna->OnCreate(pNewChar);
-    
+
     delete pNewChar;                                        // created only to call SaveToDB()
 }
 
@@ -552,7 +554,7 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recv_data)
 
     // Used by Eluna
     sEluna->OnDelete(lowguid);
-    
+
     if (sLog.IsOutCharDump())                               // optimize GetPlayerDump call
     {
         std::string dump = PlayerDumpWriter().GetDump(lowguid);
@@ -623,7 +625,6 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     /* Validation check completely, assign player to WorldSession::_player for later use */
     SetPlayer(pCurrChar);
-
     pCurrChar->SendDungeonDifficulty(false);
 
     WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 20);
@@ -648,23 +649,28 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         data.Initialize(SMSG_MOTD, 50);                     // new in 2.0.1
         data << (uint32)0;
 
-    uint32 linecount = 0;
-    /* The MOTD itself */
-    std::string str_motd = sWorld.GetMotd();
-    /* Used for tracking our position within the MOTD while iterating through it */
-        std::string::size_type pos, nextpos;
+        uint32 linecount = 0;
+        /* The MOTD itself */
+        std::string str_motd = sWorld.GetMotd();
+        /* Used for tracking our position within the MOTD while iterating through it */
+        std::string::size_type pos = 0, nextpos;
 
-        pos = 0;
+        /* Find the next occurance of @ in the string
+         * This is how newlines are represented */
         while ((nextpos = str_motd.find('@', pos)) != std::string::npos)
         {
+            /* If these are not equal, it means a '@' was found
+             * These are used to represent newlines in the string
+             * It is set by the code above here */
             if (nextpos != pos)
             {
+                /* Send the player a system message containing the substring from pos to nextpos - pos */
                 data << str_motd.substr(pos, nextpos - pos);
                 ++linecount;
             }
             pos = nextpos + 1;
         }
-
+        /* There are no more newlines in our MOTD, so we send whatever is left */
         if (pos < str_motd.length())
         {
             data << str_motd.substr(pos);
@@ -715,7 +721,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
             DEBUG_LOG("WORLD: Sent guild-motd (SMSG_GUILD_EVENT)");
 
             guild->DisplayGuildBankTabsInfo(this);
-
+            /* Let everyone in the guild know you've just signed in */
             guild->BroadcastEvent(GE_SIGNED_ON, pCurrChar->GetObjectGuid(), pCurrChar->GetName());
         }
         /* If the player is not in a guild */
@@ -758,7 +764,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         // Some basic checks in case of a map without areatrigger
         MapEntry const* mapEntry = sMapStore.LookupEntry(pCurrChar->GetMapId());
         if (!mapEntry)
-            lockStatus = AREA_LOCKSTATUS_UNKNOWN_ERROR;
+            { lockStatus = AREA_LOCKSTATUS_UNKNOWN_ERROR; }
         else if (pCurrChar->GetSession()->Expansion() < mapEntry->Expansion())
             lockStatus = AREA_LOCKSTATUS_INSUFFICIENT_EXPANSION;
     }
@@ -771,7 +777,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         if (at)
             lockStatus = pCurrChar->GetAreaTriggerLockStatus(at, pCurrChar->GetDifficulty(pCurrChar->GetMap()->IsRaid()), miscRequirement);
         if (!at || lockStatus != AREA_LOCKSTATUS_OK || !pCurrChar->TeleportTo(at->target_mapId, at->target_X, at->target_Y, at->target_Z, pCurrChar->GetOrientation()))
+        {
             pCurrChar->TeleportToHomebind();
+        }
     }
 
     sObjectAccessor.AddObject(pCurrChar);
@@ -863,13 +871,21 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     /* If the server is shutting down, show shutdown time remaining */
     if (sWorld.IsShutdowning())
+    {
         sWorld.ShutdownMsg(true, pCurrChar);
+    }
 
+    /* If player should have all taxi paths, give them to the player */
     if (sWorld.getConfig(CONFIG_BOOL_ALL_TAXI_PATHS))
+    {
         pCurrChar->SetTaxiCheater(true);
+    }
 
+    /* Send GM notifications */
     if (pCurrChar->isGameMaster())
+    {
         SendNotification(LANG_GM_ON);
+    }
 
     if (!pCurrChar->isGMVisible())
     {
@@ -1025,7 +1041,7 @@ void WorldSession::HandleChangePlayerNameOpcodeCallBack(QueryResult* result, uin
     WorldSession* session = sWorld.FindSession(accountId);
     if (!session)
     {
-        delete result;
+        if (result) { delete result; }
         return;
     }
 
@@ -1055,7 +1071,7 @@ void WorldSession::HandleChangePlayerNameOpcodeCallBack(QueryResult* result, uin
     data << guid;
     data << newname;
     session->SendPacket(&data);
-    
+
     sWorld.InvalidatePlayerDataToAllClient(guid);
 }
 
