@@ -281,7 +281,7 @@ bool ChatHandler::HandleReloadAllLootCommand(char* /*args*/)
 bool ChatHandler::HandleReloadAllNpcCommand(char* args)
 {
     if (*args != 'a')                                       // will be reloaded from all_gossips
-        HandleReloadNpcGossipCommand((char*)"a");
+        { HandleReloadNpcGossipCommand((char*)"a"); }
     HandleReloadNpcTrainerCommand((char*)"a");
     HandleReloadNpcVendorCommand((char*)"a");
     HandleReloadPointsOfInterestCommand((char*)"a");
@@ -5118,7 +5118,7 @@ bool ChatHandler::HandleResetSpecsCommand(char* args)
 
         ChatHandler(target).SendSysMessage(LANG_RESET_TALENTS);
         if (!m_session || m_session->GetPlayer() != target)
-            PSendSysMessage(LANG_RESET_TALENTS_ONLINE, GetNameLink(target).c_str());
+            { PSendSysMessage(LANG_RESET_TALENTS_ONLINE, GetNameLink(target).c_str()); }
 
         Pet* pet = target->GetPet();
         Pet::resetTalentsForAllPetsOf(target, pet);
@@ -5257,17 +5257,17 @@ bool ChatHandler::HandleServerRestartCommand(char* args)
 {
     uint32 delay;
     if (!ExtractUInt32(&args, delay))
-        return false;
+        { return false; }
 
     uint32 exitcode;
     if (!ExtractOptUInt32(&args, exitcode, RESTART_EXIT_CODE))
-        return false;
+        { return false; }
 
     // Exit code should be in range of 0-125, 126-255 is used
     // in many shells for their own return codes and code > 255
     // is not supported in many others
     if (exitcode > 125)
-        return false;
+        { return false; }
 
     sWorld.ShutdownServ(delay, SHUTDOWN_MASK_RESTART, exitcode);
     return true;

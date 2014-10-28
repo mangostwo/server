@@ -113,7 +113,7 @@ enum ItemPrototypeFlags
     ITEM_FLAG_UNK0                            = 0x00000001, // not used
     ITEM_FLAG_CONJURED                        = 0x00000002, // items created by spells with SPELL_EFFECT_CREATE_ITEM
     ITEM_FLAG_LOOTABLE                        = 0x00000004, // affect only non container items that can be "open" for loot. It or lockid set enable for client show "Right click to open". See also ITEM_DYNFLAG_UNLOCKED
-    ITEM_FLAG_HEROIC                          = 0x00000008, // heroic item version
+    ITEM_FLAG_HEROIC                          = 0x00000008, // heroic item version. not used in pre-3.x
     ITEM_FLAG_UNK4                            = 0x00000010, // can't repeat old note: appears red icon (like when item durability==0)
     ITEM_FLAG_INDESTRUCTIBLE                  = 0x00000020, // used for totem. Item can not be destroyed, except by using spell (item can be reagent for spell and then allowed)
     ITEM_FLAG_UNK6                            = 0x00000040, // ? old note: usable
@@ -122,9 +122,9 @@ enum ItemPrototypeFlags
     ITEM_FLAG_WRAPPER                         = 0x00000200, // used or not used wrapper
     ITEM_FLAG_IGNORE_BAG_SPACE                = 0x00000400, // ignore bag space at new item creation?
     ITEM_FLAG_PARTY_LOOT                      = 0x00000800, // items which can be looted by all party members
-    ITEM_FLAG_REFUNDABLE                      = 0x00001000, // item cost can be refunded within 2 hours after purchase
+    ITEM_FLAG_REFUNDABLE                      = 0x00001000, // item cost can be refunded within 2 hours after purchase, not used in pre-3.x
     ITEM_FLAG_CHARTER                         = 0x00002000, // arena/guild charter
-    ITEM_FLAG_LETTER                           = 0x00004000,
+    ITEM_FLAG_LETTER                          = 0x00004000, // readable letter items
     ITEM_FLAG_UNK15                           = 0x00008000, // a lot of items have this
     ITEM_FLAG_UNK16                           = 0x00010000, // a lot of items have this
     ITEM_FLAG_UNK17                           = 0x00020000, // last used flag in 1.12.1
@@ -591,7 +591,7 @@ struct ItemPrototype
     uint32 AmmoType;
     float  RangedModRange;
     _Spell Spells[MAX_ITEM_PROTO_SPELLS];
-    uint32 Bonding;
+    uint32 Bonding;                              ///< See \ref ItemBondingType
     char*  Description;
     uint32 PageText;
     uint32 LanguageID;
@@ -644,7 +644,7 @@ struct ItemPrototype
 
         return false;
     }
-    
+
     bool IsCurrencyToken() const { return BagFamily & BAG_FAMILY_MASK_CURRENCY_TOKENS; }
 
     uint32 GetMaxStackSize() const { return Stackable > 0 ? uint32(Stackable) : uint32(0x7FFFFFFF - 1); }

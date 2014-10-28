@@ -89,16 +89,16 @@ class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator*>
         void Clear(bool reset = true, bool all = false)
         {
             if (m_cleanFlag & MMCF_UPDATE)
-                DelayedClean(reset, all);
+                { DelayedClean(reset, all); }
             else
-                DirectClean(reset, all);
+                { DirectClean(reset, all); }
         }
         void MovementExpired(bool reset = true)
         {
             if (m_cleanFlag & MMCF_UPDATE)
-                DelayedExpire(reset);
+                { DelayedExpire(reset); }
             else
-                DirectExpire(reset);
+                { DirectExpire(reset); }
         }
 
         void MoveIdle();
