@@ -23,7 +23,7 @@ enum
     NPC_CHROMIE_INN                 = 26527,
     NPC_CHROMIE_ENTRANCE            = 27915,
     NPC_CHROMIE_END                 = 30997,
-    // NPC_HOURGLASS                = 28656,
+    NPC_HOURGLASS                   = 28656,
     NPC_ARTHAS                      = 26499,
     // NPC_MEATHOOK                 = 26529,
     // NPC_SALRAMM_THE_FLESHCRAFTER = 26530,
@@ -51,6 +51,9 @@ enum
     // NPC_CRATES_BUNNY             = 30996,
 
     // Intro Event NPCs
+    NPC_JAINA_PROUDMOORE            = 26497,
+    NPC_UTHER_LIGHTBRINGER          = 26528,
+    NPC_KNIGHT_SILVERHAND           = 28612,
     NPC_LORDAERON_FOOTMAN           = 27745,
     NPC_STRATHOLME_CITIZEN          = 28167,
     NPC_STRATHOLME_RESIDENT         = 28169,

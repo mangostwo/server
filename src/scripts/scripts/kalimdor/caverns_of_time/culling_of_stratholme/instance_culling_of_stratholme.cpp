@@ -43,19 +43,27 @@ struct sSpawnLocation
 
 static sSpawnLocation m_aArthasSpawnLocs[] =                // need tuning
 {
-    {1969.73f, 1287.12f, 145.48f, 3.14f},
-    {2049.43f, 1287.43f, 142.75f, 0.06f},
+    {1957.13f, 1287.43f, 145.65f, 2.96f},                   // bridge
+    {2091.99f, 1277.25f, 140.47f, 0.43f},                   // city entrance
     {2365.54f, 1194.85f, 131.98f, 0.47f},
     {2534.46f, 1125.99f, 130.75f, 0.27f},
     {2363.77f, 1406.31f, 128.64f, 3.23f}
 };
 
-static sSpawnLocation m_aChromieSpawnLocs[] =               // need tuning, escpecially EndPositions!
+static sSpawnLocation m_aIntroActorsSpawnLocs[] =
 {
-    {1814.46f, 1283.97f, 142.30f, 4.32f},                   // near bridge
+    {1876.78f, 1305.72f, 146.24f, 6.07f},                   // Jaina
+    {1786.18f, 1268.63f, 140.02f, 0.42f},                   // Uther
+    {1780.26f, 1261.87f, 139.55f, 0.57f},                   // Silverhand knights
+    {1778.59f, 1265.03f, 139.43f, 0.40f},
+    {1777.04f, 1268.16f, 139.35f, 0.59f}
+};
+
+static sSpawnLocation m_aChromieSpawnLocs[] =
+{
+    {1813.298f, 1283.578f, 142.3258f, 3.96f},               // near bridge
     {2319.562f, 1506.409f, 152.0499f, 3.78f},               // End
-    {1811.52f, 1285.92f, 142.37f, 4.47f},                   // Hourglass, near bridge
-    {2186.42f, 1323.77f, 129.91f, 0.0f},                    // Hourglass, End
+    {1810.875f, 1285.035f, 142.4917f, 4.48f},               // Hourglass, near bridge
 };
 
 instance_culling_of_stratholme::instance_culling_of_stratholme(Map* pMap) : ScriptedInstance(pMap),
@@ -171,6 +179,10 @@ void instance_culling_of_stratholme::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_ARTHAS_INTRO_EVENT:
             m_auiEncounter[uiType] = uiData;
+            if (uiData == DONE)
+            {
+                // ToDo: start the wave event
+            }
             break;
         case TYPE_ARTHAS_ESCORT_EVENT:
             m_auiEncounter[uiType] = uiData;
@@ -283,7 +295,9 @@ void instance_culling_of_stratholme::Load(const char* chrIn)
 void instance_culling_of_stratholme::OnPlayerEnter(Player* pPlayer)
 {
     // spawn Chromie and Arthas
-    DoSpawnArthasIfNeeded(pPlayer);
+    if (GetData(TYPE_ARTHAS_INTRO_EVENT) == DONE)
+        DoSpawnArthasIfNeeded(pPlayer);
+        
     DoSpawnChromieIfNeeded(pPlayer);
 
     // Show World States if needed
@@ -408,7 +422,39 @@ void instance_culling_of_stratholme::DoSpawnArthasIfNeeded(Unit* pSummoner)
 
     uint8 uiPosition = GetInstancePosition();
     if (uiPosition && uiPosition <= MAX_ARTHAS_SPAWN_POS)
-        pSummoner->SummonCreature(NPC_ARTHAS, m_aArthasSpawnLocs[uiPosition - 1].m_fX, m_aArthasSpawnLocs[uiPosition - 1].m_fY, m_aArthasSpawnLocs[uiPosition - 1].m_fZ, m_aArthasSpawnLocs[uiPosition - 1].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
+        pSummoner->SummonCreature(NPC_ARTHAS, m_aArthasSpawnLocs[uiPosition - 1].m_fX, m_aArthasSpawnLocs[uiPosition - 1].m_fY, m_aArthasSpawnLocs[uiPosition - 1].m_fZ, m_aArthasSpawnLocs[uiPosition - 1].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000, true);
+    
+    // no gossip flag by default - added on demand
+    if (Creature* pArthas = GetSingleCreatureFromStorage(NPC_ARTHAS))
+        pArthas->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        
+    // summon the other intro actors
+    if (uiPosition == POS_ARTHAS_INTRO)
+    {
+        // start intro event by dbscripts
+        if (Creature* pArthas = GetSingleCreatureFromStorage(NPC_ARTHAS))
+        {
+            pArthas->SetWalk(false);
+            pArthas->GetMotionMaster()->MoveWaypoint();
+        }
+        
+        // spawn Jaina and Uther
+        if (Creature* pJaina = pSummoner->SummonCreature(NPC_JAINA_PROUDMOORE, m_aIntroActorsSpawnLocs[0].m_fX, m_aIntroActorsSpawnLocs[0].m_fY, m_aIntroActorsSpawnLocs[0].m_fZ, m_aIntroActorsSpawnLocs[0].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+            pJaina->GetMotionMaster()->MoveWaypoint();
+        if (Creature* pUther = pSummoner->SummonCreature(NPC_UTHER_LIGHTBRINGER, m_aIntroActorsSpawnLocs[1].m_fX, m_aIntroActorsSpawnLocs[1].m_fY, m_aIntroActorsSpawnLocs[1].m_fZ, m_aIntroActorsSpawnLocs[1].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+        {
+            pUther->SetWalk(false);
+            pUther->GetMotionMaster()->MoveWaypoint();
+            
+            // spawn the knights
+            if (Creature* pKnight = pSummoner->SummonCreature(NPC_KNIGHT_SILVERHAND, m_aIntroActorsSpawnLocs[2].m_fX, m_aIntroActorsSpawnLocs[2].m_fY, m_aIntroActorsSpawnLocs[2].m_fZ, m_aIntroActorsSpawnLocs[2].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+                pKnight->GetMotionMaster()->MoveFollow(pUther, pKnight->GetDistance(pUther), 2 * M_PI_F - pKnight->GetAngle(pUther));
+            if (Creature* pKnight = pSummoner->SummonCreature(NPC_KNIGHT_SILVERHAND, m_aIntroActorsSpawnLocs[3].m_fX, m_aIntroActorsSpawnLocs[3].m_fY, m_aIntroActorsSpawnLocs[3].m_fZ, m_aIntroActorsSpawnLocs[3].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+                pKnight->GetMotionMaster()->MoveFollow(pUther, pKnight->GetDistance(pUther), 2 * M_PI_F - pKnight->GetAngle(pUther));
+            if (Creature* pKnight = pSummoner->SummonCreature(NPC_KNIGHT_SILVERHAND, m_aIntroActorsSpawnLocs[4].m_fX, m_aIntroActorsSpawnLocs[4].m_fY, m_aIntroActorsSpawnLocs[4].m_fZ, m_aIntroActorsSpawnLocs[4].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+                pKnight->GetMotionMaster()->MoveFollow(pUther, pKnight->GetDistance(pUther), 2 * M_PI_F - pKnight->GetAngle(pUther));
+        }
+    }
 }
 
 // Atm here only new Chromies are spawned - despawning depends on Mangos featuring such a thing
@@ -428,7 +474,10 @@ void instance_culling_of_stratholme::DoSpawnChromieIfNeeded(Unit* pSummoner)
     {
         Creature* pChromie = GetSingleCreatureFromStorage(NPC_CHROMIE_ENTRANCE, true);
         if (!pChromie)
+        {
             pSummoner->SummonCreature(NPC_CHROMIE_ENTRANCE, m_aChromieSpawnLocs[0].m_fX, m_aChromieSpawnLocs[0].m_fY, m_aChromieSpawnLocs[0].m_fZ, m_aChromieSpawnLocs[0].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
+            pSummoner->SummonCreature(NPC_HOURGLASS, m_aChromieSpawnLocs[2].m_fX, m_aChromieSpawnLocs[2].m_fY, m_aChromieSpawnLocs[2].m_fZ, m_aChromieSpawnLocs[2].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
+        }
     }
 }
 

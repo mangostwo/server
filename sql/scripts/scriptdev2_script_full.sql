@@ -1671,6 +1671,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1329017,'You fools think you can defeat me so easily? Face the true might of the Nathrezim!',0,1,0,0,'dathrohan SAY_TRANSFORM'),
 (-1329018,'Damn you mortals! All my plans of revenge, all my hate... all burned to ash...',0,0,0,0,'dathrohan SAY_DEATH');
 
+INSERT INTO gossip_texts (entry,content_default,comment) VALUES
+(-3595006,'Chromie, you and I both know what\'s going to happen in this time stream. We\'ve seen this all before. Can you just skip us ahead to all the real action?','chromie GOSSIP_ITEM_INN_SKIP'),
+(-3595008,'Yes, my Prince. We are ready.','arthas GOSSIP_ITEM_CITY_GATES');
+
 -- -1 349 000 MARAUDON
 
 -- -1 389 000 RAGEFIRE CHASM
