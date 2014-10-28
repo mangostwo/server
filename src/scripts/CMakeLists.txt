@@ -122,6 +122,18 @@ set(sources_kalimdor
     scripts/kalimdor/winterspring.cpp
 )
 
+set(sources_northrend
+    scripts/northrend/borean_tundra.cpp
+    scripts/northrend/dalaran.cpp
+    scripts/northrend/dragonblight.cpp
+    scripts/northrend/grizzly_hills.cpp
+    scripts/northrend/howling_fjord.cpp
+    scripts/northrend/icecrown.cpp
+    scripts/northrend/scholazar_basin.cpp
+    scripts/northrend/storm_peaks.cpp
+    scripts/northrend/zuldrak.cpp
+)
+
 set(sources_instance_ek_brd
     scripts/eastern_kingdoms/blackrock_mountain/blackrock_depths/blackrock_depths.cpp
     scripts/eastern_kingdoms/blackrock_mountain/blackrock_depths/boss_ambassador_flamelash.cpp
@@ -216,26 +228,6 @@ set(sources_raid_ek_bwl
     scripts/eastern_kingdoms/blackrock_mountain/blackwing_lair/blackwing_lair.h
 )
 
-set(sources_raid_ek_naxx
-    scripts/eastern_kingdoms/naxxramas/boss_anubrekhan.cpp
-    scripts/eastern_kingdoms/naxxramas/boss_faerlina.cpp
-    scripts/eastern_kingdoms/naxxramas/boss_four_horsemen.cpp
-    scripts/eastern_kingdoms/naxxramas/boss_gluth.cpp
-    scripts/eastern_kingdoms/naxxramas/boss_gothik.cpp
-    scripts/eastern_kingdoms/naxxramas/boss_grobbulus.cpp
-    scripts/eastern_kingdoms/naxxramas/boss_heigan.cpp
-    scripts/eastern_kingdoms/naxxramas/boss_kelthuzad.cpp
-    scripts/eastern_kingdoms/naxxramas/boss_loatheb.cpp
-    scripts/eastern_kingdoms/naxxramas/boss_maexxna.cpp
-    scripts/eastern_kingdoms/naxxramas/boss_noth.cpp
-    scripts/eastern_kingdoms/naxxramas/boss_patchwerk.cpp
-    scripts/eastern_kingdoms/naxxramas/boss_razuvious.cpp
-    scripts/eastern_kingdoms/naxxramas/boss_sapphiron.cpp
-    scripts/eastern_kingdoms/naxxramas/boss_thaddius.cpp
-    scripts/eastern_kingdoms/naxxramas/instance_naxxramas.cpp
-    scripts/eastern_kingdoms/naxxramas/naxxramas.h
-)
-
 set(sources_raid_ek_zg
     scripts/eastern_kingdoms/zulgurub/boss_arlokk.cpp
     scripts/eastern_kingdoms/zulgurub/boss_hakkar.cpp
@@ -326,12 +318,240 @@ set(sources_raid_k_taq
     scripts/kalimdor/temple_of_ahnqiraj/temple_of_ahnqiraj.h
 )
 
+set(sources_instance_n_an_ahnk
+    scripts/northrend/azjol-nerub/ahnkahet/ahnkahet.h
+    scripts/northrend/azjol-nerub/ahnkahet/boss_amanitar.cpp
+    scripts/northrend/azjol-nerub/ahnkahet/boss_jedoga.cpp
+    scripts/northrend/azjol-nerub/ahnkahet/boss_nadox.cpp
+    scripts/northrend/azjol-nerub/ahnkahet/boss_taldaram.cpp
+    scripts/northrend/azjol-nerub/ahnkahet/boss_volazj.cpp
+    scripts/northrend/azjol-nerub/ahnkahet/instance_ahnkahet.cpp
+)
+
+set(sources_instance_n_an_an
+    scripts/northrend/azjol-nerub/azjol-nerub/azjol-nerub.h
+    scripts/northrend/azjol-nerub/azjol-nerub/boss_anubarak.cpp
+    scripts/northrend/azjol-nerub/azjol-nerub/boss_hadronox.cpp
+    scripts/northrend/azjol-nerub/azjol-nerub/boss_krikthir.cpp
+    scripts/northrend/azjol-nerub/azjol-nerub/instance_azjol-nerub.cpp
+)
+
+set(sources_instance_n_cc_tcn
+    scripts/northrend/crusaders_coliseum/trial_of_the_champion/boss_grand_champions.cpp
+    scripts/northrend/crusaders_coliseum/trial_of_the_champion/instance_trial_of_the_champion.cpp
+    scripts/northrend/crusaders_coliseum/trial_of_the_champion/trial_of_the_champion.cpp
+    scripts/northrend/crusaders_coliseum/trial_of_the_champion/trial_of_the_champion.h
+)
+
+set(sources_instance_n_cc_tcr
+    scripts/northrend/crusaders_coliseum/trial_of_the_crusader/boss_anubarak_trial.cpp
+    scripts/northrend/crusaders_coliseum/trial_of_the_crusader/boss_faction_champions.cpp
+    scripts/northrend/crusaders_coliseum/trial_of_the_crusader/boss_jaraxxus.cpp
+    scripts/northrend/crusaders_coliseum/trial_of_the_crusader/boss_northrend_beasts.cpp
+    scripts/northrend/crusaders_coliseum/trial_of_the_crusader/boss_twin_valkyr.cpp
+    scripts/northrend/crusaders_coliseum/trial_of_the_crusader/instance_trial_of_the_crusader.cpp
+    scripts/northrend/crusaders_coliseum/trial_of_the_crusader/trial_of_the_crusader.cpp
+    scripts/northrend/crusaders_coliseum/trial_of_the_crusader/trial_of_the_crusader.h
+)
+
+set(sources_instance_n_dkp
+    scripts/northrend/draktharon_keep/boss_novos.cpp
+    scripts/northrend/draktharon_keep/boss_tharonja.cpp
+    scripts/northrend/draktharon_keep/boss_trollgore.cpp
+    scripts/northrend/draktharon_keep/draktharon_keep.h
+    scripts/northrend/draktharon_keep/instance_draktharon_keep.cpp
+)
+
+set(sources_instance_n_gk
+    scripts/northrend/gundrak/boss_colossus.cpp
+    scripts/northrend/gundrak/boss_eck.cpp
+    scripts/northrend/gundrak/boss_galdarah.cpp
+    scripts/northrend/gundrak/boss_moorabi.cpp
+    scripts/northrend/gundrak/boss_sladran.cpp
+    scripts/northrend/gundrak/gundrak.h
+    scripts/northrend/gundrak/instance_gundrak.cpp
+)
+
+set(sources_instance_n_icc_fh_fos
+    scripts/northrend/icecrown_citadel/frozen_halls/forge_of_souls/boss_bronjahm.cpp
+    scripts/northrend/icecrown_citadel/frozen_halls/forge_of_souls/boss_devourer_of_souls.cpp
+    scripts/northrend/icecrown_citadel/frozen_halls/forge_of_souls/forge_of_souls.h
+    scripts/northrend/icecrown_citadel/frozen_halls/forge_of_souls/instance_forge_of_souls.cpp
+)
+
+set(sources_instance_n_icc_fh_hor
+    scripts/northrend/icecrown_citadel/frozen_halls/halls_of_reflection/boss_falric.cpp
+    scripts/northrend/icecrown_citadel/frozen_halls/halls_of_reflection/boss_lich_king.cpp
+    scripts/northrend/icecrown_citadel/frozen_halls/halls_of_reflection/boss_marwyn.cpp
+    scripts/northrend/icecrown_citadel/frozen_halls/halls_of_reflection/halls_of_reflection.cpp
+    scripts/northrend/icecrown_citadel/frozen_halls/halls_of_reflection/halls_of_reflection.h
+    scripts/northrend/icecrown_citadel/frozen_halls/halls_of_reflection/instance_halls_of_reflection.cpp
+)
+
+set(sources_instance_n_icc_fh_pos
+    scripts/northrend/icecrown_citadel/frozen_halls/pit_of_saron/boss_forgemaster_garfrost.cpp
+    scripts/northrend/icecrown_citadel/frozen_halls/pit_of_saron/boss_krick_and_ick.cpp
+    scripts/northrend/icecrown_citadel/frozen_halls/pit_of_saron/boss_scourgelord_tyrannus.cpp
+    scripts/northrend/icecrown_citadel/frozen_halls/pit_of_saron/instance_pit_of_saron.cpp
+    scripts/northrend/icecrown_citadel/frozen_halls/pit_of_saron/pit_of_saron.cpp
+    scripts/northrend/icecrown_citadel/frozen_halls/pit_of_saron/pit_of_saron.h
+)
+
+set(sources_instance_n_icc_icc
+    scripts/northrend/icecrown_citadel/icecrown_citadel/blood_prince_council.cpp
+    scripts/northrend/icecrown_citadel/icecrown_citadel/boss_blood_queen_lanathel.cpp
+    scripts/northrend/icecrown_citadel/icecrown_citadel/boss_deathbringer_saurfang.cpp
+    scripts/northrend/icecrown_citadel/icecrown_citadel/boss_festergut.cpp
+    scripts/northrend/icecrown_citadel/icecrown_citadel/boss_lady_deathwhisper.cpp
+    scripts/northrend/icecrown_citadel/icecrown_citadel/boss_lord_marrowgar.cpp
+    scripts/northrend/icecrown_citadel/icecrown_citadel/boss_professor_putricide.cpp
+    scripts/northrend/icecrown_citadel/icecrown_citadel/boss_rotface.cpp
+    scripts/northrend/icecrown_citadel/icecrown_citadel/boss_sindragosa.cpp
+    scripts/northrend/icecrown_citadel/icecrown_citadel/boss_the_lich_king.cpp
+    scripts/northrend/icecrown_citadel/icecrown_citadel/boss_valithria_dreamwalker.cpp
+    scripts/northrend/icecrown_citadel/icecrown_citadel/gunship_battle.cpp
+    scripts/northrend/icecrown_citadel/icecrown_citadel/icecrown_citadel.h
+    scripts/northrend/icecrown_citadel/icecrown_citadel/instance_icecrown_citadel.cpp
+)
+
+set(sources_instance_n_naxx
+    scripts/northrend/naxxramas/boss_anubrekhan.cpp
+    scripts/northrend/naxxramas/boss_faerlina.cpp
+    scripts/northrend/naxxramas/boss_four_horsemen.cpp
+    scripts/northrend/naxxramas/boss_gluth.cpp
+    scripts/northrend/naxxramas/boss_gothik.cpp
+    scripts/northrend/naxxramas/boss_grobbulus.cpp
+    scripts/northrend/naxxramas/boss_heigan.cpp
+    scripts/northrend/naxxramas/boss_kelthuzad.cpp
+    scripts/northrend/naxxramas/boss_loatheb.cpp
+    scripts/northrend/naxxramas/boss_maexxna.cpp
+    scripts/northrend/naxxramas/boss_noth.cpp
+    scripts/northrend/naxxramas/boss_patchwerk.cpp
+    scripts/northrend/naxxramas/boss_razuvious.cpp
+    scripts/northrend/naxxramas/boss_sapphiron.cpp
+    scripts/northrend/naxxramas/boss_thaddius.cpp
+    scripts/northrend/naxxramas/instance_naxxramas.cpp
+    scripts/northrend/naxxramas/naxxramas.h
+)
+
+set(sources_instance_n_nxs_ee
+    scripts/northrend/nexus/eye_of_eternity/boss_malygos.cpp
+    scripts/northrend/nexus/eye_of_eternity/eye_of_eternity.h
+    scripts/northrend/nexus/eye_of_eternity/instance_eye_of_eternity.cpp
+)
+
+set(sources_instance_n_nxs_nxs
+    scripts/northrend/nexus/nexus/boss_anomalus.cpp
+    scripts/northrend/nexus/nexus/boss_keristrasza.cpp
+    scripts/northrend/nexus/nexus/boss_ormorok.cpp
+    scripts/northrend/nexus/nexus/boss_telestra.cpp
+    scripts/northrend/nexus/nexus/instance_nexus.cpp
+    scripts/northrend/nexus/nexus/nexus.h
+)
+
+set(sources_instance_n_nxs_os
+    scripts/northrend/nexus/oculus/boss_eregos.cpp
+    scripts/northrend/nexus/oculus/boss_urom.cpp
+    scripts/northrend/nexus/oculus/boss_varos.cpp
+    scripts/northrend/nexus/oculus/instance_oculus.cpp
+    scripts/northrend/nexus/oculus/oculus.cpp
+    scripts/northrend/nexus/oculus/oculus.h
+)
+
+set(sources_instance_n_obs
+    scripts/northrend/obsidian_sanctum/boss_sartharion.cpp
+    scripts/northrend/obsidian_sanctum/instance_obsidian_sanctum.cpp
+    scripts/northrend/obsidian_sanctum/obsidian_sanctum.h
+)
+
+set(sources_instance_n_rbs
+    scripts/northrend/ruby_sanctum/boss_baltharus.cpp
+    scripts/northrend/ruby_sanctum/boss_halion.cpp
+    scripts/northrend/ruby_sanctum/boss_saviana.cpp
+    scripts/northrend/ruby_sanctum/boss_zarithrian.cpp
+    scripts/northrend/ruby_sanctum/instance_ruby_sanctum.cpp
+    scripts/northrend/ruby_sanctum/ruby_sanctum.h
+)
+
+set(sources_instance_n_ur_hol
+    scripts/northrend/ulduar/halls_of_lightning/boss_bjarngrim.cpp
+    scripts/northrend/ulduar/halls_of_lightning/boss_ionar.cpp
+    scripts/northrend/ulduar/halls_of_lightning/boss_loken.cpp
+    scripts/northrend/ulduar/halls_of_lightning/boss_volkhan.cpp
+    scripts/northrend/ulduar/halls_of_lightning/halls_of_lightning.h
+    scripts/northrend/ulduar/halls_of_lightning/instance_halls_of_lightning.cpp
+)
+
+set(sources_instance_n_ur_hos
+    scripts/northrend/ulduar/halls_of_stone/boss_maiden_of_grief.cpp
+    scripts/northrend/ulduar/halls_of_stone/boss_sjonnir.cpp
+    scripts/northrend/ulduar/halls_of_stone/halls_of_stone.cpp
+    scripts/northrend/ulduar/halls_of_stone/halls_of_stone.h
+    scripts/northrend/ulduar/halls_of_stone/instance_halls_of_stone.cpp
+)
+
+set(sources_instance_n_ur_ur
+    scripts/northrend/ulduar/ulduar/assembly_of_iron.cpp
+    scripts/northrend/ulduar/ulduar/boss_algalon.cpp
+    scripts/northrend/ulduar/ulduar/boss_auriaya.cpp
+    scripts/northrend/ulduar/ulduar/boss_flame_leviathan.cpp
+    scripts/northrend/ulduar/ulduar/boss_freya.cpp
+    scripts/northrend/ulduar/ulduar/boss_general_vezax.cpp
+    scripts/northrend/ulduar/ulduar/boss_hodir.cpp
+    scripts/northrend/ulduar/ulduar/boss_ignis.cpp
+    scripts/northrend/ulduar/ulduar/boss_kologarn.cpp
+    scripts/northrend/ulduar/ulduar/boss_mimiron.cpp
+    scripts/northrend/ulduar/ulduar/boss_razorscale.cpp
+    scripts/northrend/ulduar/ulduar/boss_thorim.cpp
+    scripts/northrend/ulduar/ulduar/boss_xt_002.cpp
+    scripts/northrend/ulduar/ulduar/boss_yogg_saron.cpp
+    scripts/northrend/ulduar/ulduar/instance_ulduar.cpp
+    scripts/northrend/ulduar/ulduar/ulduar.cpp
+    scripts/northrend/ulduar/ulduar/ulduar.h
+)
+
+set(sources_instance_n_uk_uk
+    scripts/northrend/utgarde_keep/utgarde_keep/boss_ingvar.cpp
+    scripts/northrend/utgarde_keep/utgarde_keep/boss_keleseth.cpp
+    scripts/northrend/utgarde_keep/utgarde_keep/boss_skarvald_and_dalronn.cpp
+    scripts/northrend/utgarde_keep/utgarde_keep/instance_utgarde_keep.cpp
+    scripts/northrend/utgarde_keep/utgarde_keep/utgarde_keep.cpp
+    scripts/northrend/utgarde_keep/utgarde_keep/utgarde_keep.h
+)
+
+set(sources_instance_n_uk_up
+    scripts/northrend/utgarde_keep/utgarde_pinnacle/boss_gortok.cpp
+    scripts/northrend/utgarde_keep/utgarde_pinnacle/boss_skadi.cpp
+    scripts/northrend/utgarde_keep/utgarde_pinnacle/boss_svala.cpp
+    scripts/northrend/utgarde_keep/utgarde_pinnacle/boss_ymiron.cpp
+    scripts/northrend/utgarde_keep/utgarde_pinnacle/instance_utgarde_pinnacle.cpp
+    scripts/northrend/utgarde_keep/utgarde_pinnacle/utgarde_pinnacle.h
+)
+
+set(sources_instance_n_voa
+    scripts/northrend/vault_of_archavon/boss_archavon.cpp
+    scripts/northrend/vault_of_archavon/boss_emalon.cpp
+    scripts/northrend/vault_of_archavon/boss_koralon.cpp
+    scripts/northrend/vault_of_archavon/boss_toravon.cpp
+    scripts/northrend/vault_of_archavon/instance_vault_of_archavon.cpp
+    scripts/northrend/vault_of_archavon/vault_of_archavon.h
+)
+
+set(sources_instance_n_vh
+    scripts/northrend/violet_hold/boss_erekem.cpp
+    scripts/northrend/violet_hold/boss_ichoron.cpp
+    scripts/northrend/violet_hold/instance_violet_hold.cpp
+    scripts/northrend/violet_hold/violet_hold.cpp
+    scripts/northrend/violet_hold/violet_hold.h
+)
+
 set(mangosscript_LIB_SRCS
     ${sources}
     ${sources_battlegrounds}
     ${sources_world}
     ${sources_eastern_kingdoms}
     ${sources_kalimdor}
+    ${sources_northrend}
     ${sources_instance_ek_brd}
     ${sources_instance_ek_brs}
     ${sources_instance_ek_tdm}
@@ -344,7 +564,6 @@ set(mangosscript_LIB_SRCS
     ${sources_instance_ek_uld}
     ${sources_raid_ek_mc}
     ${sources_raid_ek_bwl}
-    ${sources_raid_ek_naxx}
     ${sources_raid_ek_zg}
     ${sources_instance_k_bdf}
     ${sources_instance_k_dm}
@@ -356,6 +575,29 @@ set(mangosscript_LIB_SRCS
     ${sources_raid_k_ony}
     ${sources_raid_k_raq}
     ${sources_raid_k_taq}
+    ${sources_instance_n_an_ahnk}
+    ${sources_instance_n_an_an}
+    ${sources_instance_n_cc_tcn}
+    ${sources_instance_n_cc_tcr}
+    ${sources_instance_n_dkp}
+    ${sources_instance_n_gk}
+    ${sources_instance_n_icc_fh_fos}
+    ${sources_instance_n_icc_fh_hor}
+    ${sources_instance_n_icc_fh_pos}
+    ${sources_instance_n_icc_icc}
+    ${sources_instance_n_naxx}
+    ${sources_instance_n_nxs_ee}
+    ${sources_instance_n_nxs_nxs}
+    ${sources_instance_n_nxs_os}
+    ${sources_instance_n_obs}
+    ${sources_instance_n_rbs}
+    ${sources_instance_n_ur_hol}
+    ${sources_instance_n_ur_hos}
+    ${sources_instance_n_ur_ur}
+    ${sources_instance_n_uk_uk}
+    ${sources_instance_n_uk_up}
+    ${sources_instance_n_voa}
+    ${sources_instance_n_vh}
 )
 
 mangos_source_group(${mangosscript_LIB_SRCS})
