@@ -136,12 +136,12 @@ namespace Movement
         if (splineflags & MoveSplineFlag::Mask_CatmullRom)
         {
             if (splineflags.cyclic)
-                WriteCatmullRomCyclicPath(spline, data);
+                { WriteCatmullRomCyclicPath(spline, data); }
             else
-                WriteCatmullRomPath(spline, data);
+                { WriteCatmullRomPath(spline, data); }
         }
         else
-            WriteLinearPath(spline, data);
+            { WriteLinearPath(spline, data); }
     }
 
     void PacketBuilder::WriteCreate(const MoveSpline& move_spline, ByteBuffer& data)

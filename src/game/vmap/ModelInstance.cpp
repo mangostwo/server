@@ -80,9 +80,9 @@ namespace VMAP
 
         // M2 files don't contain area info, only WMO files
         if (flags & MOD_M2)
-            return;
+            { return; }
         if (!iBound.contains(p))
-            return;
+            { return; }
         // child bounds are defined in object space:
         Vector3 pModel = iInvRot * (p - iPos) * iInvScale;
         Vector3 zDirModel = iInvRot * Vector3(0.f, 0.f, -1.f);
@@ -114,9 +114,9 @@ namespace VMAP
 
         // M2 files don't contain area info, only WMO files
         if (flags & MOD_M2)
-            return false;
+            { return false; }
         if (!iBound.contains(p))
-            return false;
+            { return false; }
         // child bounds are defined in object space:
         Vector3 pModel = iInvRot * (p - iPos) * iInvScale;
         Vector3 zDirModel = iInvRot * Vector3(0.f, 0.f, -1.f);
@@ -164,7 +164,7 @@ namespace VMAP
         if (!check)
         {
             if (ferror(rf))
-                ERROR_LOG("Error reading ModelSpawn!");
+                { ERROR_LOG("Error reading ModelSpawn!"); }
             return false;
         }
         check += fread(&spawn.adtId, sizeof(uint16), 1, rf);
@@ -219,9 +219,9 @@ namespace VMAP
         }
         uint32 nameLen = spawn.name.length();
         check += fwrite(&nameLen, sizeof(uint32), 1, wf);
-        if (check != uint32(has_bound ? 17 : 11)) return false;
+        if (check != uint32(has_bound ? 17 : 11)) { return false; }
         check = fwrite(spawn.name.c_str(), sizeof(char), nameLen, wf);
-        if (check != nameLen) return false;
+        if (check != nameLen) { return false; }
         return true;
     }
 }

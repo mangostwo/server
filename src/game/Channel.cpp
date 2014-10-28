@@ -691,9 +691,15 @@ void Channel::SetOwner(ObjectGuid guid, bool exclaim)
 void Channel::SendToAll(WorldPacket* data, ObjectGuid guid)
 {
     for (PlayerList::const_iterator i = m_players.begin(); i != m_players.end(); ++i)
+    {
         if (Player* plr = sObjectMgr.GetPlayer(i->first))
+        {
             if (!guid || !plr->GetSocial()->HasIgnore(guid))
+            {
                 plr->GetSession()->SendPacket(data);
+            }
+        }
+    }
 }
 
 void Channel::SendToOne(WorldPacket* data, ObjectGuid who)

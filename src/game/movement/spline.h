@@ -27,6 +27,7 @@
 
 #include "typedefs.h"
 #include <G3D/Vector3.h>
+#include <limits>
 
 namespace Movement
 {
@@ -81,7 +82,7 @@ namespace Movement
                 // lesser value saves more performance in cost of lover precision
                 // minimal value is 1
                 // client's value is 20, blizzs use 2-3 steps to compute length
-                STEPS_PER_SEGMENT = 3,
+                STEPS_PER_SEGMENT = 3
             };
             static_assert(STEPS_PER_SEGMENT > 0, "shouldn't be lesser than 1");
 
@@ -465,10 +466,10 @@ namespace Movement
                 while (i < index_hi)
                 {
                     new_length = cacher(*this, i);
-                    
-                    if (new_length < 0)     // length overflowed, assign to max positive value (stop case only?)
+
+                    if (new_length < 0)         // length overflowed, assign to max positive value (stop case only?)
                         new_length = std::numeric_limits<length_type>::max();
-                    
+
                     lengths[++i] = new_length;
 
                     MANGOS_ASSERT(prev_length <= new_length);
