@@ -1077,7 +1077,7 @@ void WorldSession::HandleWardenDataOpcode(WorldPacket& recv_data)
     */
 }
 
-void WorldSession::HandlePlayedTime(WorldPacket& /*recv_data*/)
+void WorldSession::HandlePlayedTime(WorldPacket& recv_data)
 {
     uint8 unk1;
     recv_data >> unk1;                                      // 0 or 1 expected

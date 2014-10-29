@@ -72,28 +72,7 @@ void LFGMgr::Update()
     //todo: remove old queues, proposals & boot votes
     
     // remove old role checks
-    for (roleCheckMap::iterator roleItr = m_roleCheckMap.begin(); roleItr != m_roleCheckMap.end(); ++roleItr)
-    {
-        ObjectGuid groupGuid = roleItr->first;
-        
-        LFGRoleCheck roleCheck = roleItr->second;
-        if ((roleCheck.waitForRoleTime - time(nullptr)) <= 0) // no time left
-        {
-            roleCheck.state = LFG_ROLECHECK_NO_ROLE;
-            
-            for (roleMap::iterator roleMapItr = roleCheck.currentRoles.begin(); roleMapItr != roleCheck.currentRoles.end(); ++roleMapItr)
-            {
-                ObjectGuid plrGuid = roleMapItr->first;
-                
-                SetPlayerState(plrGuid, LFG_STATE_NONE);
-                
-                SendRoleCheckUpdate(plrGuid, roleCheck);                 // role check failed 
-                SendLfgUpdate(plrGuid, GetPlayerStatus(plrGuid), true);  // not in lfg system anymore
-            }
-            
-            m_roleCheckMap.erase(groupGuid);
-        }
-    }
+    RemoveOldRoleChecks();
     
     // go through a waitTimeMap::iterator for each wait map and update times based on player count
     for (waitTimeMap::iterator tankItr = m_tankWaitTime.begin(); tankItr != m_tankWaitTime.end(); ++tankItr)
@@ -1950,4 +1929,30 @@ void LFGMgr::SendLfgJoinResult(ObjectGuid plrGuid, LfgJoinResult result, LFGStat
     
     if (pPlayer)
         pPlayer->GetSession()->SendLfgJoinResult(result, state, lockedDungeons);
+}
+
+void LFGMgr::RemoveOldRoleChecks()
+{
+    for (roleCheckMap::iterator roleItr = m_roleCheckMap.begin(); roleItr != m_roleCheckMap.end(); ++roleItr)
+    {
+        ObjectGuid groupGuid = roleItr->first;
+        
+        LFGRoleCheck roleCheck = roleItr->second;
+        if ((roleCheck.waitForRoleTime - time(nullptr)) <= 0) // no time left
+        {
+            roleCheck.state = LFG_ROLECHECK_NO_ROLE;
+            
+            for (roleMap::iterator roleMapItr = roleCheck.currentRoles.begin(); roleMapItr != roleCheck.currentRoles.end(); ++roleMapItr)
+            {
+                ObjectGuid plrGuid = roleMapItr->first;
+                
+                SetPlayerState(plrGuid, LFG_STATE_NONE);
+                
+                SendRoleCheckUpdate(plrGuid, roleCheck);                 // role check failed 
+                SendLfgUpdate(plrGuid, GetPlayerStatus(plrGuid), true);  // not in lfg system anymore
+            }
+            
+            m_roleCheckMap.erase(groupGuid);
+        }
+    }
 }

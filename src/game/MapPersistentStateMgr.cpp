@@ -652,7 +652,7 @@ MapPersistentState* MapPersistentStateManager::AddPersistentState(MapEntry const
             // initialize reset time
             // for normal instances if no creatures are killed the instance will reset in two hours
             if (mapEntry->map_type == MAP_RAID || difficulty > DUNGEON_DIFFICULTY_NORMAL)
-                { resetTime = m_Scheduler.GetResetTimeFor(mapEntry->MapID); }
+                { resetTime = m_Scheduler.GetResetTimeFor(mapEntry->MapID, difficulty); }
             else
             {
                 resetTime = time(NULL) + 2 * HOUR;

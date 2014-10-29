@@ -658,6 +658,9 @@ protected:
     /// Send SMSG_LFG_JOIN_RESULT
     void SendLfgJoinResult(ObjectGuid plrGuid, LfgJoinResult result, LFGState state, partyForbidden const& lockedDungeons);
     
+    /// Get rid of expired role checks
+    void RemoveOldRoleChecks();
+    
 private:
     /// Daily occurences of a player doing X type dungeon
     dailyEntries m_dailyAny;
