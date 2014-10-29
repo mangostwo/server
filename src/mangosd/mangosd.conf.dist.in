@@ -26,6 +26,7 @@ ConfVersion=2014060701
 #    LoginDatabaseInfo
 #    WorldDatabaseInfo
 #    CharacterDatabaseInfo
+#    ScriptDev2DatabaseInfo
 #        Database connection settings for the world server.
 #        Default:
 #                ---MYSQL---
@@ -66,6 +67,7 @@ LogsDir                      = ""
 LoginDatabaseInfo            = "127.0.0.1;3306;mangos;mangos;realmd"
 WorldDatabaseInfo            = "127.0.0.1;3306;mangos;mangos;mangos"
 CharacterDatabaseInfo        = "127.0.0.1;3306;mangos;mangos;characters"
+ScriptDev2DatabaseInfo       = "127.0.0.1;3306;mangos;mangos;scripts"
 LoginDatabaseConnections     = 1
 WorldDatabaseConnections     = 1
 CharacterDatabaseConnections = 1
@@ -398,6 +400,7 @@ GmLogTimestamp              = 0
 GmLogPerAccount             = 0
 RaLogFile                   = "world-remote-access.log"
 LogColors                   = "13 7 11 9"
+SD2ErrorLogFile             = "scriptdev2-errors.log"
 
 ################################################################################
 # SERVER SETTINGS
