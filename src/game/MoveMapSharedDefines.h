@@ -25,8 +25,8 @@
 #ifndef MANGOS_H_MOVE_MAP_SHARED_DEFINES
 #define MANGOS_H_MOVE_MAP_SHARED_DEFINES
 
-#include "Platform/Define.h"
 #include "../recastnavigation/Detour/Include/DetourNavMesh.h"
+#include "Platform/Define.h"
 
 #define MMAP_MAGIC 0x4d4d4150   // 'MMAP'
 #define MMAP_VERSION 4

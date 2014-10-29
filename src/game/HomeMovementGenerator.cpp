@@ -42,7 +42,7 @@ void HomeMovementGenerator<Creature>::Reset(Creature&)
 void HomeMovementGenerator<Creature>::_setTargetLocation(Creature& owner)
 {
     if (owner.hasUnitState(UNIT_STAT_NOT_MOVE))
-        return;
+        { return; }
 
     Movement::MoveSplineInit init(owner);
     float x, y, z, o;
@@ -61,7 +61,7 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature& owner)
     owner.clearUnitState(UNIT_STAT_ALL_DYN_STATES);
 }
 
-bool HomeMovementGenerator<Creature>::Update(Creature& owner, const uint32& time_diff)
+bool HomeMovementGenerator<Creature>::Update(Creature& owner, const uint32& /*time_diff*/)
 {
     arrived = owner.movespline->Finalized();
     return !arrived;
@@ -72,7 +72,7 @@ void HomeMovementGenerator<Creature>::Finalize(Creature& owner)
     if (arrived)
     {
         if (owner.GetTemporaryFactionFlags() & TEMPFACTION_RESTORE_REACH_HOME)
-            owner.ClearTemporaryFaction();
+            { owner.ClearTemporaryFaction(); }
 
         owner.SetWalk(!owner.hasUnitState(UNIT_STAT_RUNNING_STATE) && !owner.IsLevitating(), false);
         owner.LoadCreatureAddon(true);

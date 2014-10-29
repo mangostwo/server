@@ -28,7 +28,7 @@
 #include "Common.h"
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
-#include "ace/Thread_Mutex.h"
+#include <ace/Thread_Mutex.h>
 #include <list>
 #include <map>
 #include "Utilities/UnorderedMapSet.h"
@@ -91,7 +91,7 @@ class MapPersistentState
         {
             m_usedByMap = map;
             if (!map)
-                UnloadIfEmpty();
+                { UnloadIfEmpty(); }
         }
 
         time_t GetCreatureRespawnTime(uint32 loguid) const
@@ -194,8 +194,8 @@ class DungeonPersistentState : public MapPersistentState
 
         InstanceTemplate const* GetTemplate() const;
 
-        uint8 GetPlayerCount() const { return m_playerList.size(); }
-        uint8 GetGroupCount() const { return m_groupList.size(); }
+        uint8 GetPlayerCount() const { return (uint8)m_playerList.size(); }
+        uint8 GetGroupCount() const { return (uint8)m_groupList.size(); }
 
         /* online players bound to the instance (perm/solo)
            does not include the members of the group unless they have permanent saves */
@@ -405,22 +405,22 @@ inline void MapPersistentStateManager::DoForAllStatesWithMapId(uint32 mapId, Do&
 {
     MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
     if (!mapEntry)
-        return;
+        { return; }
 
     if (mapEntry->Instanceable())
     {
         for (PersistentStateMap::iterator itr = m_instanceSaveByInstanceId.begin(); itr != m_instanceSaveByInstanceId.end();)
         {
             if (itr->second->GetMapId() == mapId)
-                _do((itr++)->second);
+                { _do((itr++)->second); }
             else
-                ++itr;
+                { ++itr; }
         }
     }
     else
     {
         if (MapPersistentState* state = GetPersistentState(mapId, 0))
-            _do(state);
+            { _do(state); }
     }
 }
 

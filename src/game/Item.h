@@ -306,7 +306,7 @@ class MANGOS_DLL_SPEC Item : public Object
 
         Bag* ToBag() { if (IsBag()) return reinterpret_cast<Bag*>(this); else return NULL; }
         const Bag* ToBag() const { if (IsBag()) return reinterpret_cast<const Bag*>(this); else return NULL; }
-        
+
         bool IsLocked() const { return !HasFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_UNLOCKED); }
         bool IsBag() const { return GetProto()->InventoryType == INVTYPE_BAG; }
         bool IsCurrencyToken() const { return GetProto()->IsCurrencyToken(); }
@@ -393,7 +393,7 @@ class MANGOS_DLL_SPEC Item : public Object
         bool IsConjuredConsumable() const { return GetProto()->IsConjuredConsumable(); }
         bool IsWeaponVellum() const { return GetProto()->IsWeaponVellum(); }
         bool IsArmorVellum() const { return GetProto()->IsArmorVellum(); }
-       
+
         void AddToClientUpdateList() override;
         void RemoveFromClientUpdateList() override;
         void BuildUpdateData(UpdateDataMapType& update_players) override;
