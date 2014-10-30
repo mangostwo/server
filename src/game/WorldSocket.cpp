@@ -699,7 +699,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
                     sLog.outError("WorldSocket::ProcessIncoming: Player send CMSG_AUTH_SESSION again");
                     return -1;
                 }
-                
+
                 if (!sEluna->OnPacketReceive(m_Session, *new_pct))
                     return 0;
                 return HandleAuthSession(*new_pct);
@@ -747,7 +747,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
             return -1;
         }
         else
-            return 0;
+            { return 0; }
     }
 
     ACE_NOTREACHED(return 0);

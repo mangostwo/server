@@ -52,7 +52,9 @@
 #ifdef ENABLE_SOAP
 #include "MaNGOSsoap.h"
 #endif
+#ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
+#endif /* ENABLE_ELUNA */
 
 #include <ace/OS_NS_signal.h>
 #include <ace/TP_Reactor.h>
@@ -339,12 +341,16 @@ int Master::Run()
     }
 
     ///- Used by Eluna
+#ifdef ENABLE_ELUNA
     sEluna->OnStartup();
+#endif /* ENABLE_ELUNA */
 
     sWorldSocketMgr->Wait();
 
     ///- Used by Eluna
+#ifdef ENABLE_ELUNA
     sEluna->OnShutdown();
+#endif /* ENABLE_ELUNA */
 
     ///- Stop freeze protection before shutdown tasks
     if (freeze_thread)

@@ -391,6 +391,7 @@ LogFilter_Calendar          = 1
 WorldLogFile                = "world-packets.log"
 WorldLogTimestamp           = 0
 DBErrorLogFile              = "world-database.log"
+ElunaErrorLogFile           = "ElunaErrors.log"
 EventAIErrorLogFile         = "world-eventai.log"
 CharLogFile                 = "world-characters.log"
 CharLogTimestamp            = 0

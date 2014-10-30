@@ -111,6 +111,7 @@ bool MySQLConnection::Initialize(const char* infoString)
         { database = *iter++; }
 
     mysql_options(mysqlInit, MYSQL_SET_CHARSET_NAME, "utf8");
+    mysql_options(mysqlInit, MYSQL_OPT_RECONNECT, "1");
 #ifdef WIN32
     if (host == ".")                                        // named pipe use option (Windows)
     {

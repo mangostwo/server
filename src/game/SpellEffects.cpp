@@ -1555,7 +1555,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 42628:                                 // Fire Bomb (throw)
+                 case 42628:                                 // Fire Bomb (throw)
                 {
                     if (!unitTarget)
                         return;
@@ -4047,18 +4047,22 @@ void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
             m_caster->CastSpell(unitTarget, spellId, true);
             return;
         }
-        case 29284:                                         // Brittle Armor - (need add max stack of 24575 Brittle Armor)
+            // Brittle Armor - (need add max stack of 24575 Brittle Armor)
+        case 29284:
             m_caster->CastSpell(unitTarget, 24575, true, m_CastItem, NULL, m_originalCasterGUID);
             return;
-        case 29286:                                         // Mercurial Shield - (need add max stack of 26464 Mercurial Shield)
+            // Mercurial Shield - (need add max stack of 26464 Mercurial Shield)
+        case 29286:
             m_caster->CastSpell(unitTarget, 26464, true, m_CastItem, NULL, m_originalCasterGUID);
             return;
-        case 31980:                                         // Righteous Defense
+            // Righteous Defense
+        case 31980:
         {
             m_caster->CastSpell(unitTarget, 31790, true, m_CastItem, NULL, m_originalCasterGUID);
             return;
         }
-        case 35729:                                         // Cloak of Shadows
+        // Cloak of Shadows
+        case 35729:
         {
             Unit::SpellAuraHolderMap& Auras = unitTarget->GetSpellAuraHolderMap();
             for (Unit::SpellAuraHolderMap::iterator iter = Auras.begin(); iter != Auras.end(); ++iter)
@@ -4075,7 +4079,8 @@ void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
             }
             return;
         }
-        case 41967:                                         // Priest Shadowfiend (34433) need apply mana gain trigger aura on pet
+        // Priest Shadowfiend (34433) need apply mana gain trigger aura on pet
+        case 41967:
         {
             if (Unit* pet = unitTarget->GetPet())
                 pet->CastSpell(pet, 28305, true);
@@ -4449,7 +4454,7 @@ void Spell::EffectApplyAura(SpellEffectIndex eff_idx)
 
     // ghost spell check, allow apply any auras at player loading in ghost mode (will be cleanup after load)
     if ((!unitTarget->IsAlive() && !(IsDeathOnlySpell(m_spellInfo) || IsDeathPersistentSpell(m_spellInfo))) &&
-            (unitTarget->GetTypeId() != TYPEID_PLAYER || !((Player*)unitTarget)->GetSession()->PlayerLoading()))
+        (unitTarget->GetTypeId() != TYPEID_PLAYER || !((Player*)unitTarget)->GetSession()->PlayerLoading()))
         { return; }
 
     Unit* caster = GetAffectiveCaster();
@@ -6748,7 +6753,7 @@ void Spell::EffectTaunt(SpellEffectIndex /*eff_idx*/)
 
     // Also use this effect to set the taunter's threat to the taunted creature's highest value
     if (unitTarget->CanHaveThreatList() && unitTarget->GetThreatManager().getCurrentVictim())
-        unitTarget->GetThreatManager().addThreat(m_caster, unitTarget->GetThreatManager().getCurrentVictim()->getThreat());
+        { unitTarget->GetThreatManager().addThreat(m_caster, unitTarget->GetThreatManager().getCurrentVictim()->getThreat()); }
 }
 
 void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
@@ -7749,18 +7754,18 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 {
                     if (!unitTarget)
                         return;
-                    
+
                     unitTarget->RemoveAurasDueToSpell(42280);
                     unitTarget->RemoveAurasDueToSpell(42294);
                     unitTarget->CastSpell(unitTarget, 42285, true);
                     unitTarget->CastSpell(unitTarget, 42291, true);
                     return;
                 }
-                case 42578:                                 // Cannon Blast 
+                case 42578:                                 // Cannon Blast
                 {
                     if (!unitTarget)
                         return;
-                    
+
                     int32 basePoints = m_spellInfo->CalculateSimpleValue(eff_idx);
                     unitTarget->CastCustomSpell(unitTarget, 42576, &basePoints, NULL, NULL, true);
                     return;
@@ -8181,7 +8186,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->SetHealth(m_caster->GetHealth());
                     return;
                 }
-                case 46642:                                 // 5,000 Gold
+                case 46642:                                 //5,000 Gold
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
@@ -9618,7 +9623,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     spellId2 = (*itr)->GetModifier()->m_amount;
                     SpellEntry const* judge = sSpellStore.LookupEntry(spellId2);
                     if (!judge)
-                        continue;
+                        { continue; }
                     break;
                 }
 
@@ -9904,8 +9909,8 @@ void Spell::EffectDuel(SpellEffectIndex eff_idx)
 
     caster->SetGuidValue(PLAYER_DUEL_ARBITER, pGameObj->GetObjectGuid());
     target->SetGuidValue(PLAYER_DUEL_ARBITER, pGameObj->GetObjectGuid());
-    
-    // used by eluna
+
+    // Used by Eluna
     sEluna->OnDuelRequest(target, caster);
 }
 
@@ -10418,7 +10423,7 @@ void Spell::EffectLeapBack(SpellEffectIndex eff_idx)
     if (unitTarget->IsTaxiFlying())
         return;
 
-    m_caster->KnockBackFrom(unitTarget, float(m_spellInfo->EffectMiscValue[eff_idx]) / 10, float(damage) / 10);
+    ((Player*)m_caster)->KnockBackFrom(unitTarget, float(m_spellInfo->EffectMiscValue[eff_idx]) / 10, float(damage) / 10);
 }
 
 void Spell::EffectReputation(SpellEffectIndex eff_idx)
@@ -10578,7 +10583,7 @@ void Spell::EffectKnockBack(SpellEffectIndex eff_idx)
     if (!unitTarget)
         { return; }
 
-    unitTarget->KnockBackFrom(m_caster, float(m_spellInfo->EffectMiscValue[eff_idx]) / 10, float(damage) / 10);
+    ((Player*)unitTarget)->KnockBackFrom(m_caster, float(m_spellInfo->EffectMiscValue[eff_idx]) / 10, float(damage) / 10);
 }
 
 void Spell::EffectSendTaxi(SpellEffectIndex eff_idx)
@@ -10598,7 +10603,7 @@ void Spell::EffectPlayerPull(SpellEffectIndex eff_idx)
     if (damage && dist > damage)
         { dist = float(damage); }
 
-    unitTarget->KnockBackFrom(m_caster, -dist, float(m_spellInfo->EffectMiscValue[eff_idx]) / 10);
+    ((Player*)unitTarget)->KnockBackFrom(m_caster, -dist, float(m_spellInfo->EffectMiscValue[eff_idx]) / 10);
 }
 
 void Spell::EffectDispelMechanic(SpellEffectIndex eff_idx)
@@ -10681,7 +10686,7 @@ void Spell::EffectDestroyAllTotems(SpellEffectIndex /*eff_idx*/)
                     mana += manacost * damage / 100;
                 }
             }
-            totem->UnSummon();
+            { totem->UnSummon(); }
         }
     }
 
@@ -10988,7 +10993,7 @@ void Spell::EffectStealBeneficialBuff(SpellEffectIndex eff_idx)
         for (int32 count = 0; count < damage && list_size > 0; ++count)
         {
             // Random select buff for dispel
-            SpellAuraHolder* holder = steal_list[urand(0, list_size - 1)];
+            SpellAuraHolder* holder = steal_list[urand(0, list_size-1)];
             // Not use chance for steal
             // TODO possible need do it
             success_list.push_back(SuccessList::value_type(holder->GetId(), holder->GetCasterGuid()));

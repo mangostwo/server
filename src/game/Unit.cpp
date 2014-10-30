@@ -57,8 +57,10 @@
 #include "movement/MoveSplineInit.h"
 #include "movement/MoveSpline.h"
 #include "CreatureLinkingMgr.h"
+#ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #include "ElunaEventMgr.h"
+#endif /* ENABLE_ELUNA */
 
 #include <math.h>
 #include <stdarg.h>
@@ -329,7 +331,9 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
     }else
     m_AurasCheck -= p_time;*/
 
+#ifdef ENABLE_ELUNA
     elunaEvents->Update(update_diff);
+#endif /* ENABLE_ELUNA */
 
     // WARNING! Order of execution here is important, do not change.
     // Spells must be processed with event system BEFORE they go to _UpdateSpells.
@@ -622,10 +626,12 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         return 0;
     }
 
+
     DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamageStart");
 
     uint32 health = pVictim->GetHealth();
     DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "deal dmg:%d to health:%d ", damage, health);
+
 
     // Rage from Damage made (only from direct weapon damage)
     if (cleanDamage && damagetype == DIRECT_DAMAGE && this != pVictim && GetTypeId() == TYPEID_PLAYER && (GetPowerType() == POWER_RAGE))
@@ -830,7 +836,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
 
         if (Creature* killer = ToCreature())
         {
-            // used by eluna
+            // Used by Eluna
             if (Player* killed = pVictim->ToPlayer())
                 sEluna->OnPlayerKilledByCreature(killer, killed);
         }
@@ -3560,9 +3566,9 @@ uint32 Unit::GetWeaponSkillValue(WeaponAttackType attType, Unit const* target) c
         value += uint32(((Player*)this)->GetRatingBonusValue(CR_WEAPON_SKILL));
         switch (attType)
         {
-            case BASE_ATTACK:   value += uint32(((Player*)this)->GetRatingBonusValue(CR_WEAPON_SKILL_MAINHAND)); break;
-            case OFF_ATTACK:    value += uint32(((Player*)this)->GetRatingBonusValue(CR_WEAPON_SKILL_OFFHAND)); break;
-            case RANGED_ATTACK: value += uint32(((Player*)this)->GetRatingBonusValue(CR_WEAPON_SKILL_RANGED)); break;
+            case BASE_ATTACK:   value+=uint32(((Player*)this)->GetRatingBonusValue(CR_WEAPON_SKILL_MAINHAND)); break;
+            case OFF_ATTACK:    value+=uint32(((Player*)this)->GetRatingBonusValue(CR_WEAPON_SKILL_OFFHAND)); break;
+            case RANGED_ATTACK: value+=uint32(((Player*)this)->GetRatingBonusValue(CR_WEAPON_SKILL_RANGED)); break;
         }
     }
     else
@@ -3712,7 +3718,7 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
             // it also does break autorepeat if not Auto Shot
             if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL] &&
                     m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != SPELL_ID_AUTOSHOT)
-                InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
+                { InterruptSpell(CURRENT_AUTOREPEAT_SPELL); }
         } break;
 
         case CURRENT_AUTOREPEAT_SPELL:
@@ -6476,9 +6482,9 @@ int32 Unit::SpellBonusWithCoeffs(SpellEntry const* spellProto, int32 total, int3
 {
     // Just don't waste time into this function if there's no benefit.
     // Distribute Damage over multiple effects, reduce by AoE
-     float coeff = 1.0f;
- 
-     // Not apply this to creature casted spells
+    float coeff = 1.0f;
+
+    // Not apply this to creature casted spells
     if (GetTypeId() == TYPEID_UNIT && !((Creature*)this)->IsPet())
         { coeff = 1.0f; }
     // Check for table values
@@ -6520,7 +6526,7 @@ int32 Unit::SpellBonusWithCoeffs(SpellEntry const* spellProto, int32 total, int3
         total += int32(benefit * coeff * LvlPenalty);
     }
 
-     return total;
+    return total;
 };
 
 /**
@@ -6934,9 +6940,9 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
     for (AuraList::const_iterator i = mDamageDone.begin(); i != mDamageDone.end(); ++i)
     {
         if (((*i)->GetModifier()->m_miscvalue & schoolMask) != 0 &&
-                (*i)->GetSpellProto()->EquippedItemClass == -1 &&                   // -1 == any item class (not wand then)
-                (*i)->GetSpellProto()->EquippedItemInventoryTypeMask == 0)          //  0 == any inventory type (not wand then)
-            DoneAdvertisedBenefit += (*i)->GetModifier()->m_amount;
+            (*i)->GetSpellProto()->EquippedItemClass == -1 &&                   // -1 == any item class (not wand then)
+            (*i)->GetSpellProto()->EquippedItemInventoryTypeMask == 0)          //  0 == any inventory type (not wand then)
+            { DoneAdvertisedBenefit += (*i)->GetModifier()->m_amount; }
     }
 
     if (GetTypeId() == TYPEID_PLAYER)
@@ -6975,7 +6981,7 @@ int32 Unit::SpellBaseDamageBonusTaken(SpellSchoolMask schoolMask)
     for (AuraList::const_iterator i = mDamageTaken.begin(); i != mDamageTaken.end(); ++i)
     {
         if (((*i)->GetModifier()->m_miscvalue & schoolMask) != 0)
-            TakenAdvertisedBenefit += (*i)->GetModifier()->m_amount;
+            { TakenAdvertisedBenefit += (*i)->GetModifier()->m_amount; }
     }
 
     return TakenAdvertisedBenefit;
@@ -6985,7 +6991,7 @@ bool Unit::IsSpellCrit(Unit* pVictim, SpellEntry const* spellProto, SpellSchoolM
 {
     // not critting spell
     if (spellProto->HasAttribute(SPELL_ATTR_EX2_CANT_CRIT))
-        return false;
+        { return false; }
 
     float crit_chance = 0.0f;
     switch (spellProto->DmgClass)
@@ -6995,7 +7001,7 @@ bool Unit::IsSpellCrit(Unit* pVictim, SpellEntry const* spellProto, SpellSchoolM
         case SPELL_DAMAGE_CLASS_MAGIC:
         {
             if (schoolMask & SPELL_SCHOOL_MASK_NORMAL)
-                crit_chance = 0.0f;
+                { crit_chance = 0.0f; }
             // For other schools
             else if (GetTypeId() == TYPEID_PLAYER)
                 crit_chance = GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(schoolMask));
@@ -7632,9 +7638,9 @@ uint32 Unit::MeleeDamageBonusDone(Unit* pVictim, uint32 pdamage, WeaponAttackTyp
         for (AuraList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
         {
             if ((*i)->GetModifier()->m_miscvalue & schoolMask &&                         // schoolmask has to fit with the intrinsic spell school
-                    (*i)->GetModifier()->m_miscvalue & GetMeleeDamageSchoolMask() &&         // AND schoolmask has to fit with weapon damage school (essential for non-physical spells)
-                    (((*i)->GetSpellProto()->EquippedItemClass == -1) ||                     // general, weapon independent
-                     (pWeapon && pWeapon->IsFitToSpellRequirements((*i)->GetSpellProto()))))  // OR used weapon fits aura requirements
+                (*i)->GetModifier()->m_miscvalue & GetMeleeDamageSchoolMask() &&         // AND schoolmask has to fit with weapon damage school (essential for non-physical spells)
+                (((*i)->GetSpellProto()->EquippedItemClass == -1) ||                     // general, weapon independent
+                 (pWeapon && pWeapon->IsFitToSpellRequirements((*i)->GetSpellProto()))))  // OR used weapon fits aura requirements
             {
                 DonePercent *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
             }
@@ -8121,8 +8127,8 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
         if (m_isCreatureLinkingTrigger)
             { GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_AGGRO, pCreature, enemy); }
     }
-    
-    // used by eluna
+
+    // Used by Eluna
     if (GetTypeId() == TYPEID_PLAYER)
         sEluna->OnPlayerEnterCombat(ToPlayer(), enemy);
 }
@@ -8134,7 +8140,8 @@ void Unit::ClearInCombat()
 
     if (IsCharmed() || (GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->IsPet()))
         { RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT); }
-    
+
+    // Used by Eluna
     if (GetTypeId() == TYPEID_PLAYER)
         sEluna->OnPlayerLeaveCombat(ToPlayer());
 
@@ -8303,7 +8310,7 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
         if (u->GetTypeId() != TYPEID_PLAYER || !((Player*)u)->isGameMaster())
             { return false; }
 
-    // Visible units, always are visible for all units, except for units under invisibility
+    // Visible units, always are visible for all units, except for units under invisibility and phases
     if (m_Visibility == VISIBILITY_ON && u->m_invisibilityMask == 0)
         { return true; }
 
@@ -8325,11 +8332,11 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
 
     // detectable invisibility case
     if (invisible && (
-            // Invisible units, always are visible for units under same invisibility type
-            (m_invisibilityMask & u->m_invisibilityMask) != 0 ||
-            // Invisible units, always are visible for unit that can detect this invisibility (have appropriate level for detect)
+                // Invisible units, always are visible for units under same invisibility type
+                (m_invisibilityMask & u->m_invisibilityMask) != 0 ||
+                // Invisible units, always are visible for unit that can detect this invisibility (have appropriate level for detect)
                 u->canDetectInvisibilityOf(this) ||
-            // Units that can detect invisibility always are visible for units that can be detected
+                // Units that can detect invisibility always are visible for units that can be detected
                 canDetectInvisibilityOf(u)))
     {
         invisible = false;
@@ -8410,27 +8417,27 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     // if doesn't have stealth detection (Shadow Sight), then check how stealthy the unit is, otherwise just check los
     if (!u->HasAuraType(SPELL_AURA_DETECT_STEALTH))
     {
-    // Calculation if target is in front
+        // Calculation if target is in front
 
-    // Visible distance based on stealth value (stealth rank 4 300MOD, 10.5 - 3 = 7.5)
-    visibleDistance = 10.5f - (GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH) / 100.0f);
+        // Visible distance based on stealth value (stealth rank 4 300MOD, 10.5 - 3 = 7.5)
+        visibleDistance = 10.5f - (GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH) / 100.0f);
 
-    // Visible distance is modified by
-    //-Level Diff (every level diff = 1.0f in visible distance)
-    visibleDistance += int32(u->GetLevelForTarget(this)) - int32(GetLevelForTarget(u));
+        // Visible distance is modified by
+        //-Level Diff (every level diff = 1.0f in visible distance)
+        visibleDistance += int32(u->GetLevelForTarget(this)) - int32(GetLevelForTarget(u));
 
-    // This allows to check talent tree and will add addition stealth dependent on used points)
-    int32 stealthMod = GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH_LEVEL);
-    if (stealthMod < 0)
+        // This allows to check talent tree and will add addition stealth dependent on used points)
+        int32 stealthMod = GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH_LEVEL);
+        if (stealthMod < 0)
         { stealthMod = 0; }
 
-    //-Stealth Mod(positive like Master of Deception) and Stealth Detection(negative like paranoia)
-    // based on wowwiki every 5 mod we have 1 more level diff in calculation
-    visibleDistance += (int32(u->GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH_DETECT)) - stealthMod) / 5.0f;
-    visibleDistance = visibleDistance > MAX_PLAYER_STEALTH_DETECT_RANGE ? MAX_PLAYER_STEALTH_DETECT_RANGE : visibleDistance;
+        //-Stealth Mod(positive like Master of Deception) and Stealth Detection(negative like paranoia)
+        // based on wowwiki every 5 mod we have 1 more level diff in calculation
+        visibleDistance += (int32(u->GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH_DETECT)) - stealthMod) / 5.0f;
+        visibleDistance = visibleDistance > MAX_PLAYER_STEALTH_DETECT_RANGE ? MAX_PLAYER_STEALTH_DETECT_RANGE : visibleDistance;
 
-    // recheck new distance
-    if (visibleDistance <= 0 || !IsWithinDist(viewPoint, visibleDistance))
+        // recheck new distance
+        if (visibleDistance <= 0 || !IsWithinDist(viewPoint, visibleDistance))
         { return false; }
     }
 
@@ -8709,7 +8716,6 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
             data << float(GetSpeed(mtype));
             ((Player*)this)->GetSession()->SendPacket(&data);
         }
-        
         WorldPacket data(Opcodes(SetSpeed2Opc_table[mtype][1]), 12);
         data << GetPackGUID();
         data << float(GetSpeed(mtype));
@@ -8979,8 +8985,8 @@ bool Unit::SelectHostileTarget()
         for (AuraList::const_reverse_iterator aura = tauntAuras.rbegin(); aura != tauntAuras.rend(); ++aura)
         {
             if ((caster = (*aura)->GetCaster()) && caster->IsInMap(this) &&
-                    caster->IsTargetableForAttack() && caster->isInAccessablePlaceFor((Creature*)this) &&
-                    !IsSecondChoiceTarget(caster, true))
+                caster->IsTargetableForAttack() && caster->isInAccessablePlaceFor((Creature*)this) &&
+                !IsSecondChoiceTarget(caster, true))
             {
                 target = caster;
                 break;
@@ -9102,7 +9108,7 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
 
     // random damage
     if (comboDamage != 0 && unitPlayer && target && (target->GetObjectGuid() == unitPlayer->GetComboTargetGuid()))
-        value += (int32)(comboDamage * comboPoints);
+        { value += (int32)(comboDamage * comboPoints); }
 
     if (Player* modOwner = GetSpellModOwner())
     {
@@ -9775,9 +9781,9 @@ void Unit::CleanupsBeforeDelete()
         ClearComboPointHolders();
         DeleteThreatList();
         if (GetTypeId() == TYPEID_PLAYER)
-            GetHostileRefManager().setOnlineOfflineState(false);
+            { GetHostileRefManager().setOnlineOfflineState(false); }
         else
-            GetHostileRefManager().deleteReferences();
+            { GetHostileRefManager().deleteReferences(); }
         RemoveAllAuras(AURA_REMOVE_BY_DELETE);
     }
     WorldObject::CleanupsBeforeDelete();

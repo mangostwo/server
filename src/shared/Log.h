@@ -145,7 +145,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ACE_Th
             if (dberLogfile != NULL)
                 { fclose(dberLogfile); }
             dberLogfile = NULL;
-            
+
             if (elunaErrLogfile != NULL)
                 fclose(elunaErrLogfile);
             elunaErrLogfile = NULL;
@@ -240,12 +240,13 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ACE_Th
         void outChar(const char* str, ...)        ATTR_PRINTF(2, 3);
         /**
          * @brief any log level
-         * 
+         *
+         * @param str...
          */
         void outErrorEluna();
         /**
          * @brief any log level
-         * 
+         *
          * @param str...
          */
         void outErrorEluna(const char* str, ...)        ATTR_PRINTF(2, 3);

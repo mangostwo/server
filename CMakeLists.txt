@@ -18,7 +18,6 @@
 
 # CMake policies
 cmake_minimum_required(VERSION 2.8)
-
 # Until CMake 3.0 is the standard
 # And a solution to set_directory_properties is found.
 if(POLICY CMP0043)
@@ -435,6 +434,7 @@ set_directory_properties(PROPERTIES COMPILE_DEFINITIONS_RELEASE "${DEFINITIONS_R
 set_directory_properties(PROPERTIES COMPILE_DEFINITIONS_DEBUG "${DEFINITIONS_DEBUG}")
 
 add_subdirectory(src)
+
 # if(SQL)
 #   add_subdirectory(sql)
 # endif()
