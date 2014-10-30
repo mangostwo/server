@@ -33,8 +33,8 @@
 #include "Log.h"
 #include "Master.h"
 #include "SystemConfig.h"
-#include "AuctionHouseBot/AuctionHouseBot.h"
-#include "revision.h"
+#include "AuctionHouseBot.h"
+// #include "revision.h"
 #include "revision_nr.h"
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
@@ -109,7 +109,7 @@ extern int main(int argc, char** argv)
                 cfg_file = cmd_opts.opt_arg();
                 break;
             case 'v':
-                printf("%s\n", MANGOS_FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_NR, REVISION_ID));
+                printf("%s\n", REVISION_NR);
                 return 0;
             case 's':
             {
@@ -184,7 +184,7 @@ extern int main(int argc, char** argv)
     }
 #endif
 
-    sLog.outString("%s [world-daemon]", MANGOS_FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_NR, REVISION_ID));
+    sLog.outString("%s [world-daemon]", REVISION_NR);
     sLog.outString("<Ctrl-C> to stop.\n"
                    "  __  __      _  _  ___  ___  ___                       \n"
                    " |  \\/  |__ _| \\| |/ __|/ _ \\/ __|   Wrath of the    \n"                                         

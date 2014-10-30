@@ -35,33 +35,31 @@ if(WIN32)
 endif()
 
 #-----------------------------------------------------------------------------
-# Build the mangos-one framework library
+# Build the mangos-zero framework library
 add_subdirectory(framework)
 
 #-----------------------------------------------------------------------------
-# Build the mangos-one shared library
+# Build the mangos-zero shared library
 add_subdirectory(shared)
 
 #-----------------------------------------------------------------------------
-# Build the mangos-one game library
+# Build the mangos-zero game library
 add_subdirectory(game)
 
 #-----------------------------------------------------------------------------
-# Build the mangos-one realm authentication server
+# Build the mangos-zero realm authentication server
 add_subdirectory(realmd)
 
 #-----------------------------------------------------------------------------
-# Build the mangos-one world server
+# Build the mangos-zero world server
 add_subdirectory(mangosd)
+
+#-----------------------------------------------------------------------------
+# Build the selected modules
+add_subdirectory(modules)
 
 #-----------------------------------------------------------------------------
 # If we want the tools for map/vmap/mmap extraction
 if(BUILD_TOOLS)
     add_subdirectory(tools)
-endif()
-
-#-----------------------------------------------------------------------------
-# Build the mangos-one script library if wished for
-if(ENABLE_SD2)
-    add_subdirectory(scripts)
 endif()

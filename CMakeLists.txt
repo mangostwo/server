@@ -25,7 +25,7 @@ if(POLICY CMP0043)
 endif()
 
 project(MaNGOS)
-set(MANGOS_VERSION 0.19)
+set(MANGOS_VERSION 0.20)
 
 set(CMAKE_MODULE_PATH
   "${CMAKE_MODULE_PATH}"
@@ -33,6 +33,11 @@ set(CMAKE_MODULE_PATH
 )
 
 # define all options here
+if(WIN32)
+  set(CONF_DIR "" CACHE STRING "Config path. Can be absolute or relative")
+else()
+  set(CONF_DIR "etc/" CACHE STRING "Config path. Can be absolute or relative")
+endif()
 option(DEBUG                "Debug mode"                             OFF)
 option(USE_STD_MALLOC       "Use standard malloc instead of TBB"     ON)
 option(ACE_USE_EXTERNAL     "Use external ACE"                       OFF)
@@ -41,12 +46,7 @@ option(BUILD_TOOLS          "Build tools (map/vmap/mmap extractors)" OFF)
 option(SCRIPT_LIB_ELUNA     "Use Eluna as the scripting engine"      ON)
 option(SCRIPT_LIB_SD2       "Use ScriptDev2 as the scripting engine" ON)
 option(SOAP                 "Enable access via SOAP or not"          OFF)
-
-if(PCHSupport_FOUND AND WIN32) # TODO: why only enable it on windows by default?
-  option(PCH                "Use precompiled headers"               ON)
-else()
-  option(PCH                "Use precompiled headers"               OFF)
-endif()
+option(PCH                  "Use precompiled headers"                ON)
 # TODO: options that should be checked/created:
 #option(CLI                  "With CLI"                              ON)
 #option(RA                   "With Remote Access"                    OFF)
@@ -59,6 +59,7 @@ message(
   Options that can be used in order to configure the process:
    General:
     CMAKE_INSTALL_PREFIX    Path where the server should be installed to
+    CONF_DIR                Path to the configs, can be absolute or relative.
     PCH                     Use precompiled headers
     DEBUG                   Debug mode
     USE_STD_MALLOC          Use standard malloc instead of TBB
@@ -72,6 +73,8 @@ message(
   To set an option simply type -D<OPTION>=<VALUE> after 'cmake <srcs>'.
   Also, you can specify the generator with -G. see 'cmake --help' for more details
   For example: cmake .. -DDEBUG=1 -DCMAKE_INSTALL_PREFIX=/opt/mangos"
+  
+  Note: On UNIX systems, CONF_DIR is relative to the bin folder.
 )
 message("")
 
@@ -107,7 +110,9 @@ if(WIN32)
 endif()
 
 # Used by map-extractor for now
-find_package(BZip2 REQUIRED)
+if(UNIX)
+  find_package(BZip2 REQUIRED)
+endif()
 
 # find Git: used to get the revision number
 find_package(Git)
@@ -129,11 +134,42 @@ if(CMAKE_CONFIGURATION_TYPES)
     FORCE)
 endif()
 
-set(BIN_DIR ${CMAKE_INSTALL_PREFIX}/bin)
-set(CONF_DIR ${CMAKE_INSTALL_PREFIX}/etc)
-# If win32 put it in the bin dir not lib
+#Force set the default install path if it is default
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/bin/" CACHE PATH "MaNGOS default install prefix" FORCE)
+endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+
+#Output the compiled exes and DLLs to build/bin directory on windows by default
 if(WIN32)
-  set(LIBS_DIR ${CMAKE_INSTALL_PREFIX}/bin)
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+endif()
+
+#Set config install path correctly from given path
+string(FIND "${CONF_DIR}" ":" CONF_DIR_ABSOLUTE)
+if(${CONF_DIR_ABSOLUTE} EQUAL -1)
+  #Path was not absolute
+  set(CONF_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${CONF_DIR}")
+  if(MSVC)
+    set(CONF_COPY_DIR "${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/${CONF_DIR}")
+  endif()
+else()
+  #Path was absolute
+  set(CONF_INSTALL_DIR "${CONF_DIR}")
+  if(MSVC)
+    set(CONF_COPY_DIR "${CONF_DIR}")
+  endif()
+endif()
+
+# If win32 put binaries in root folder, else bin.
+if(WIN32)
+  set(BIN_DIR ${CMAKE_INSTALL_PREFIX}/)
+else()
+  set(BIN_DIR ${CMAKE_INSTALL_PREFIX}/bin)
+endif()
+
+# If win32 put libs in root folder, else bin.
+if(WIN32)
+  set(LIBS_DIR ${CMAKE_INSTALL_PREFIX}/)
 else()
   set(LIBS_DIR ${CMAKE_INSTALL_PREFIX}/lib)
 endif()
@@ -168,11 +204,11 @@ endif()
 # Win32 delivered packages
 if(WIN32)
   set(MYSQL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/dep/include/mysql")
-  set(MYSQL_LIBRARY "${CMAKE_SOURCE_DIR}/dep/lib/libmySQL.lib")
-  set(MYSQL_DEBUG_LIBRARY "${CMAKE_SOURCE_DIR}/dep/lib/libmySQL.lib")
+  set(MYSQL_LIBRARY "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}/libmySQL.lib")
+  set(MYSQL_DEBUG_LIBRARY "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}/libmySQL.lib")
   set(OPENSSL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/dep/include/openssl")
-  set(OPENSSL_LIBRARIES "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libeay32.lib")
-  set(OPENSSL_DEBUG_LIBRARIES "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libeay32.lib")
+  set(OPENSSL_LIBRARIES "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}/libeay32.lib")
+  set(OPENSSL_DEBUG_LIBRARIES "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}/libeay32.lib")
   # zlib is build
 endif()
 
@@ -223,6 +259,12 @@ endif()
 
 message(STATUS "MaNGOS-Core revision  : ${GIT_REVISION}")
 message(STATUS "Install server to     : ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "Install configs to    : ${CONF_INSTALL_DIR}")
+if("${CONF_DIR}" STREQUAL "")
+  message(STATUS "Search configs from   : binary directory (default)")
+else()
+  message(STATUS "Search configs from   : ${CONF_DIR}")
+endif()
 
 # if(CLI)
 #   message(STATUS "Build with CLI        : Yes (default)")
@@ -240,18 +282,21 @@ message(STATUS "Install server to     : ${CMAKE_INSTALL_PREFIX}")
 
 if(SOAP)
   message(STATUS "Support for SOAP      : Yes")
+  set(DEFINITIONS ${DEFINITIONS} -DENABLE_SOAP)
 else()
   message(STATUS "Support for SOAP      : No (default)")
 endif()
 
 if(SCRIPT_LIB_ELUNA)
   message(STATUS "Script engine Eluna   : Yes (default)")
+  add_definitions(-DENABLE_ELUNA)
 else()
   message(STATUS "Script engine Eluna   : No")
 endif()
 
 if(SCRIPT_LIB_SD2)
   message(STATUS "Script engine SD2     : Yes (default)")
+  add_definitions(-DENABLE_SD2)
 else()
   message(STATUS "Script engine SD2     : No")
 endif()
@@ -262,15 +307,8 @@ else()
   message(STATUS "Build tools           : No (default)")
 endif()
 
-if(PCH AND NOT PCHSupport_FOUND)
-  set(PCH 0 CACHE BOOL
-    "Use precompiled headers"
-    FORCE)
-  message(WARNING "No PCH for your system possible but PCH was set to 1. Resetting it."
-  )
-endif()
 if(PCH)
-  message(STATUS "Use PCH               : Yes")
+  message(STATUS "Use PCH               : Yes (default)")
 else()
   message(STATUS "Use PCH               : No")
 endif()
@@ -292,8 +330,8 @@ endif()
 if(UNIX)
   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} --no-warnings")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} --no-warnings")
-  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wfatal-errors -Wextra")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wfatal-errors -Wextra")
+  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wfatal-errors -Wextra -Winvalid-pch")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wfatal-errors -Wextra -Winvalid-pch")
 elseif(WIN32)
   # Disable warnings in Visual Studio 8 and above and add /MP
   if(MSVC AND NOT CMAKE_GENERATOR MATCHES "Visual Studio 7")
@@ -324,50 +362,31 @@ set(CMAKE_INSTALL_RPATH "${LIBS_DIR}")
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # Generate revision-extractor
-set(GENREV_SRC
-  src/tools/genrevision/genrevision.cpp
-)
+#set(GENREV_SRC
+#  src/tools/genrevision/genrevision.cpp
+#)
 
-add_executable(genrev
-  ${GENREV_SRC}
-)
-
-add_custom_target("revision.h" ALL
-  COMMAND $<TARGET_FILE:genrev> ${CMAKE_SOURCE_DIR}
-  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
-  DEPENDS genrev
-)
+#add_executable(genrev
+#  ${GENREV_SRC}
+#)
 
 if(WIN32)
   install(
     FILES
-      "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libeay32.dll"
-      "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libmySQL.dll"
+      "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}/libeay32.dll"
+      "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}/ssleay32.dll"
+      "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}/libmySQL.dll"
     DESTINATION ${LIBS_DIR}
     CONFIGURATIONS Release
   )
   install(
     FILES
-      "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libeay32.dll"
-      "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libmySQL.dll"
+      "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}/libeay32.dll"
+      "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}/ssleay32.dll"
+      "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}/libmySQL.dll"
     DESTINATION ${LIBS_DIR}
     CONFIGURATIONS Debug
   )
-  if(PLATFORM MATCHES X86)
-    # Copy dll's Windows needs
-    install(
-      FILES
-        "${CMAKE_SOURCE_DIR}/dep/lib/win32_release/dbghelp.dll"
-      DESTINATION ${LIBS_DIR}
-      CONFIGURATIONS Release
-    )
-    install(
-      FILES
-        "${CMAKE_SOURCE_DIR}/dep/lib/win32_debug/dbghelp.dll"
-      DESTINATION ${LIBS_DIR}
-      CONFIGURATIONS Debug
-    )
-  endif()
 endif()
 
 if(XCODE)
@@ -385,30 +404,31 @@ else()
   set(ENABLE_SOAP OFF)
 endif()
 
-set(ENABLE_ELUNA OFF)
-set(ENABLE_SD2 OFF)
-
-if (SCRIPT_LIB_ELUNA)
-   set(ENABLE_ELUNA ON)
-endif()
-
-if (SCRIPT_LIB_SD2)
-   set(ENABLE_SD2 ON)
-endif()
-
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
 
 add_subdirectory(dep)
 
 # Add definitions for all build types
 # Don't place this above 'dep' subdirectory! Because of defines build will crash.
+# Remember, this overwrites global preprocessors, thus SOAP, Eluna, SD2 etc. has to be defined twice.
+# TODO: Clean this up?
 
 set(DEFINITIONS
   HAVE_CONFIG_H
-  VERSION="${MANGOS_VERSION}"
-  SYSCONFDIR="${CONF_DIR}/"
   MANGOS
 )
+
+if(SOAP)
+  set(DEFINITIONS ${DEFINITIONS} ENABLE_SOAP)
+endif()
+
+if(SCRIPT_LIB_ELUNA)
+   set(DEFINITIONS ${DEFINITIONS} ENABLE_ELUNA)
+endif()
+
+if(SCRIPT_LIB_SD2)
+   set(DEFINITIONS ${DEFINITIONS} ENABLE_SD2)
+endif()
 
 if(POSTGRESQL)
   set(DEFINITIONS ${DEFINITIONS} DO_POSTGRESQL)
@@ -417,7 +437,7 @@ else()
 endif()
 
 set(DEFINITIONS_RELEASE NDEBUG)
-set(DEFINITIONS_DEBUG _DEBUG MANGOS_DEBUG)
+set(DEFINITIONS_DEBUG) # _DEBUG MANGOS_DEBUG) was here..
 if(WIN32)
   set(DEFINITIONS ${DEFINITIONS} WIN32 _WIN32)
   set(DEFINITIONS_RELEASE ${DEFINITIONS_RELEASE} _CRT_SECURE_NO_WARNINGS)
@@ -427,6 +447,15 @@ if(USE_STD_MALLOC)
   set(DEFINITIONS ${DEFINITIONS} USE_STANDARD_MALLOC)
 endif()
 
+# Specify the maximum PreCompiled Header memory allocation limit
+# Fixes a compiler-problem when using PCH - the /Ym flag is adjusted by the compiler in MSVC2012, hence we need to set an upper limit with /Zm to avoid discrepancies)
+# (And yes, this is a verified , unresolved bug with MSVC... *sigh*)
+# Make it MSVC specific, otherwise g++ etc pukes
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    string(REGEX REPLACE "/Zm[0-9]+ *" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm500" CACHE STRING "" FORCE)
+endif()
+
 set_directory_properties(PROPERTIES COMPILE_DEFINITIONS "${DEFINITIONS}")
 #Something like this is what i've imagined with the new generator expressions in cmake 3.0 / lfx
 #set_directory_properties(PROPERTIES COMPILE_DEFINITIONS "$<$<CONFIG:Release>:"${DEFINITIONS} ${DEFINITIONS_RELEASE}">$<$<CONFIG:Debug>:"${DEFINITIONS} ${DEFINITIONS_DEBUG}">")
@@ -434,7 +463,3 @@ set_directory_properties(PROPERTIES COMPILE_DEFINITIONS_RELEASE "${DEFINITIONS_R
 set_directory_properties(PROPERTIES COMPILE_DEFINITIONS_DEBUG "${DEFINITIONS_DEBUG}")
 
 add_subdirectory(src)
-
-# if(SQL)
-#   add_subdirectory(sql)
-# endif()

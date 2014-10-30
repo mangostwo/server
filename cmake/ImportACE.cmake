@@ -20,24 +20,18 @@
 # add_dependencies(ace ACE_Project)
 # set_target_properties(ace PROPERTIES DEPENDS ACE_Project)
 
-if(WIN32)
-  set(ACE_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/dep/ACE_wrappers)
-  set(ACE_LIBRARIES_DIR ${CMAKE_SOURCE_DIR}/dep/ACE_wrappers/lib)
-  set(ACE_LIBRARIES optimized ACE debug ACEd)
-else()
-  set(ACE_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include)
-  set(ACE_LIBRARIES_DIR ${CMAKE_INSTALL_PREFIX}/lib)
-  set(ACE_LIBRARIES ACE)
-endif()
+set(ACE_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/dep/acelite)
+set(ACE_LIBRARIES_DIR ${CMAKE_BINARY_DIR}/dep/acelite/ace)
+set(ACE_LIBRARIES optimized ACE debug ACE)
 
 # Little Hack to remove the link warnings because of not found directories
-if(XCODE)
-  foreach(DIR ${ACE_LIBRARIES_DIR})
-    foreach(CONF ${CMAKE_CONFIGURATION_TYPES})
-      file(MAKE_DIRECTORY ${DIR}/${CONF})
-    endforeach(CONF)
-  endforeach(DIR)
-endif()
+#if(XCODE)
+#  foreach(DIR ${ACE_LIBRARIES_DIR})
+#    foreach(CONF ${CMAKE_CONFIGURATION_TYPES})
+#      file(MAKE_DIRECTORY ${DIR}/${CONF})
+#    endforeach(CONF)
+#  endforeach(DIR)
+#endif()
 
 link_directories(
   ${ACE_LIBRARIES_DIR}
@@ -45,12 +39,12 @@ link_directories(
 
 set(HAVE_ACE_STACK_TRACE_H ON) # config.h.cmake
 
-if(WIN32)
-  foreach(DIR ${ACE_LIBRARIES_DIR})
-    install(
-      DIRECTORY ${DIR}/ DESTINATION ${LIBS_DIR}
-      FILES_MATCHING PATTERN "*.dll*" #"*.${LIB_SUFFIX}*"
-      PATTERN "pkgconfig" EXCLUDE
-    )
-  endforeach(DIR)
-endif()
+#if(WIN32)
+#  foreach(DIR ${ACE_LIBRARIES_DIR})
+#    install(
+#      DIRECTORY ${DIR}/ DESTINATION ${LIBS_DIR}
+#      FILES_MATCHING PATTERN "*.dll*" #"*.${LIB_SUFFIX}*"
+#      PATTERN "pkgconfig" EXCLUDE
+#    )
+#  endforeach(DIR)
+#endif()

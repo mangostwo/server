@@ -31,9 +31,8 @@ include_directories(
     "${CMAKE_SOURCE_DIR}/src/shared"
     "${CMAKE_SOURCE_DIR}/src/game/vmap/"
     "${CMAKE_SOURCE_DIR}/dep/include/g3dlite/"
-    "${CMAKE_SOURCE_DIR}/dep/ACE_wrappers/"
-    "${CMAKE_BINARY_DIR}/dep/ACE_wrappers"
     "${CMAKE_SOURCE_DIR}/src/framework/"
+    "${ACE_INCLUDE_DIR}"
 )
 
 if(WIN32)
@@ -43,6 +42,30 @@ endif()
 
 add_executable(${EXECUTABLE_NAME} vmap_assembler.cpp ${EXECUTABLE_SRCS})
 
-target_link_libraries(${EXECUTABLE_NAME} vmap g3dlite z)
+if(NOT ACE_USE_EXTERNAL)
+  add_dependencies(${EXECUTABLE_NAME} ace)
+else()
+  target_link_libraries(${EXECUTABLE_NAME} ACE)
+endif()
+
+target_link_libraries(${EXECUTABLE_NAME} vmap g3dlite zlib)
+
+#Output the compiled exes to build/bin/$(Configuration)/tools directory on windows by default
+if(WIN32)
+  if ( MSVC )
+    set_target_properties(${EXECUTABLE_NAME} PROPERTIES
+      RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin/Release/tools
+      RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin/Debug/tools
+    )
+  elseif ( MINGW )
+    set_target_properties(${EXECUTABLE_NAME} PROPERTIES
+      RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin/tools
+      RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin/tools
+    )
+  endif()
+endif()
 
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION "${BIN_DIR}/${TOOLS_DIR}")
+if(WIN32 AND MSVC)
+  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/\${BUILD_TYPE}/${EXECUTABLE_NAME}.pdb" DESTINATION "${BIN_DIR}/${TOOLS_DIR}" CONFIGURATIONS Debug)
+endif()

@@ -20,7 +20,7 @@ cmake_minimum_required (VERSION 2.8)
 
 project(mmap-generator)
 
-set(EXECUTABLE_NAME mmap-generator)
+set(EXECUTABLE_NAME movemap-generator)
 
 if(WIN32)
   # add resource file to windows build
@@ -61,7 +61,28 @@ set(SOURCES
 
 add_executable(${EXECUTABLE_NAME} ${SOURCES} ${EXECUTABLE_SRCS})
 
-target_link_libraries(${EXECUTABLE_NAME} ace g3dlite vmap detour recast zlib shared)
+if(NOT ACE_USE_EXTERNAL)
+  target_link_libraries(${EXECUTABLE_NAME} ace)
+else()
+  target_link_libraries(${EXECUTABLE_NAME} ACE)
+endif()
+
+target_link_libraries(${EXECUTABLE_NAME} g3dlite vmap detour recast zlib shared)
+
+#Output the compiled exes to build/bin/$(Configuration)/tools directory on windows by default
+if(WIN32)
+  if ( MSVC )
+    set_target_properties(${EXECUTABLE_NAME} PROPERTIES
+      RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin/Release/tools
+      RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin/Debug/tools
+    )
+  elseif ( MINGW )
+    set_target_properties(${EXECUTABLE_NAME} PROPERTIES
+      RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin/tools
+      RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin/tools
+    )
+  endif()
+endif()
 
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION "${BIN_DIR}/${TOOLS_DIR}")
 if(WIN32 AND MSVC)

@@ -1,6 +1,0 @@
-LIBRARY FastMM
-
-EXPORTS
-
-FastMM_malloc
-FastMM_free
