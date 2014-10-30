@@ -36,7 +36,6 @@
 
 #include "Database/DatabaseEnv.h"
 
-
 #define WORLD_SLEEP_CONST 50
 
 #ifdef WIN32

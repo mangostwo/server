@@ -222,7 +222,7 @@ class MailDraft
         uint16 GetMailTemplateId() const { return m_mailTemplateId; }
         /// Returns the subject of this MailDraft.
         std::string const& GetSubject() const { return m_subject; }
-        /// Returns the ID of the text of this MailDraft.
+        /// Returns the subject of this MailDraft.
         std::string const& GetBody() const { return m_body; }
         /// Returns the amount of money in this MailDraft.
         uint32 GetMoney() const { return m_money; }
@@ -230,7 +230,7 @@ class MailDraft
         uint32 GetCOD() const { return m_COD; }
     public:                                                 // modifiers
 
-        // this two modifiers expected to be applied in normal case to blank draft and exclusively, It DON'T must overwrite already set itemTextId, in other cases it will work and with mixed cases but this will be not normal way use.
+        // this two modifiers expected to be applied in normal case to blank draft and exclusively, it will work and with mixed cases but this will be not normal way use.
         MailDraft& SetSubjectAndBody(std::string subject, std::string body) { m_subject = subject; m_body = body; return *this; }
         MailDraft& SetMailTemplate(uint16 mailTemplateId, bool need_items = true) { m_mailTemplateId = mailTemplateId, m_mailTemplateItemsNeed = need_items; return *this; }
 

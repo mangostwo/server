@@ -28,7 +28,9 @@
 #include "Platform/Define.h"
 #include <cassert>
 
+#ifndef MANGOS
 #define MANGOS
+#endif /* MANGOS */
 #define WOTLK
 
 enum Gender
@@ -71,9 +73,9 @@ enum Races
 
 #define RACEMASK_ALL_PLAYABLE \
     ((1<<(RACE_HUMAN-1))    |(1<<(RACE_ORC-1))      |(1<<(RACE_DWARF-1))   | \
-    (1<<(RACE_NIGHTELF-1))  |(1<<(RACE_UNDEAD-1))   |(1<<(RACE_TAUREN-1))  | \
-    (1<<(RACE_GNOME-1))     |(1<<(RACE_TROLL-1))    |(1<<(RACE_BLOODELF-1))| \
-    (1<<(RACE_DRAENEI-1)))
+     (1<<(RACE_NIGHTELF-1))  |(1<<(RACE_UNDEAD-1))   |(1<<(RACE_TAUREN-1))  | \
+     (1<<(RACE_GNOME-1))     |(1<<(RACE_TROLL-1))    |(1<<(RACE_BLOODELF-1))| \
+     (1<<(RACE_DRAENEI-1)))
 
 // for most cases batter use ChrRace data for team check as more safe, but when need full mask of team can be use this defines.
 #define RACEMASK_ALLIANCE \
@@ -105,9 +107,9 @@ enum Classes
 
 #define CLASSMASK_ALL_PLAYABLE \
     ((1<<(CLASS_WARRIOR-1))|(1<<(CLASS_PALADIN-1))|(1<<(CLASS_HUNTER-1))| \
-    (1<<(CLASS_ROGUE-1))  |(1<<(CLASS_PRIEST-1)) |(1<<(CLASS_SHAMAN-1))| \
-    (1<<(CLASS_MAGE-1))   |(1<<(CLASS_WARLOCK-1))|(1<<(CLASS_DRUID-1)) | \
-    (1<<(CLASS_DEATH_KNIGHT-1)) )
+     (1<<(CLASS_ROGUE-1))  |(1<<(CLASS_PRIEST-1)) |(1<<(CLASS_SHAMAN-1))| \
+     (1<<(CLASS_MAGE-1))   |(1<<(CLASS_WARLOCK-1))|(1<<(CLASS_DRUID-1)) | \
+     (1<<(CLASS_DEATH_KNIGHT-1)) )
 
 #define CLASSMASK_ALL_CREATURES ((1<<(CLASS_WARRIOR-1)) | (1<<(CLASS_PALADIN-1)) | (1<<(CLASS_ROGUE-1)) | (1<<(CLASS_MAGE-1)) )
 #define MAX_CREATURE_CLASS 4
@@ -155,28 +157,32 @@ enum Stats
 
 #define MAX_STATS                        5
 
+/**
+ * These are the different possible powers that are available to us, they should
+ * be fairly familiar if you've played WoW.
+ */
 enum Powers
 {
-    POWER_MANA                          = 0,            // UNIT_FIELD_POWER1
-    POWER_RAGE                          = 1,            // UNIT_FIELD_POWER2
-    POWER_FOCUS                         = 2,            // UNIT_FIELD_POWER3
-    POWER_ENERGY                        = 3,            // UNIT_FIELD_POWER4
-    POWER_HAPPINESS                     = 4,            // UNIT_FIELD_POWER5
+    POWER_MANA                          = 0,         ///< The most common one, mobs usually have this or rage
+    POWER_RAGE                          = 1,         ///< This is what warriors use to cast their spells
+    POWER_FOCUS                         = 2,         ///< Used by hunters after Cataclysm (4.x)
+    POWER_ENERGY                        = 3,         ///< Used by rouges to do their spells
+    POWER_HAPPINESS                     = 4,         ///< Hunters pet's happiness affect their damage
     POWER_RUNE                          = 5,            // UNIT_FIELD_POWER6
     POWER_RUNIC_POWER                   = 6,            // UNIT_FIELD_POWER7
-    POWER_ALL                           = 127,
-    POWER_HEALTH                        = 0xFFFFFFFE    // (-2 as signed value)
+    POWER_ALL                           = 127,          // default for class? - need check for TBC
+    POWER_HEALTH                        = 0xFFFFFFFE ///< Health, everyone has this (-2 as signed value)
 };
 
 #define MAX_POWERS                        7
 
 /**
  * The different spell schools that are available, used in both damage calculation
- * and spell casting to decide what should be affected, the SPELL_SCHOOL_NORMAL
+ * and spell casting to decide what should be affected, the \ref SpellSchools::SPELL_SCHOOL_NORMAL
  * is the armor, others should be self explanatory.
  *
  * Note that these are the values to use for changing ie, the armor via a
- * Modifier, and it is the Modifier::m_miscValue that should be set.
+ * \ref Modifier, and it is the \ref Modifier::m_miscValue that should be set.
  */
 enum SpellSchools
 {
@@ -212,8 +218,8 @@ enum SpellSchoolMask
 
     /// 124, not include normal and holy damage
     SPELL_SCHOOL_MASK_SPELL   = (SPELL_SCHOOL_MASK_FIRE   |
-                                 SPELL_SCHOOL_MASK_NATURE | SPELL_SCHOOL_MASK_FROST  |
-                                 SPELL_SCHOOL_MASK_SHADOW | SPELL_SCHOOL_MASK_ARCANE),
+    SPELL_SCHOOL_MASK_NATURE | SPELL_SCHOOL_MASK_FROST  |
+    SPELL_SCHOOL_MASK_SHADOW | SPELL_SCHOOL_MASK_ARCANE),
     /// 126
     SPELL_SCHOOL_MASK_MAGIC   = (SPELL_SCHOOL_MASK_HOLY | SPELL_SCHOOL_MASK_SPELL),
 
@@ -225,7 +231,7 @@ inline SpellSchools GetFirstSchoolInMask(SpellSchoolMask mask)
 {
     for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)
         if (mask & (1 << i))
-            return SpellSchools(i);
+            { return SpellSchools(i); }
 
     return SPELL_SCHOOL_NORMAL;
 }
@@ -631,6 +637,10 @@ enum Team
     ALLIANCE            = 469,
 };
 
+/**
+ * This are the different things that a spell can have as it's spell effect, see
+ * \ref SpellEntry::Effect for where in the DBC this is stored. Also see \ref HowSpellsWork
+ */
 enum SpellEffects
 {
     SPELL_EFFECT_NONE                      = 0,
@@ -1182,10 +1192,10 @@ enum Mechanics
     (1<<(MECHANIC_DAZE    -1))|(1<<(MECHANIC_SAPPED     -1)))
 
 #define IMMUNE_TO_ROOT_AND_SNARE_MASK ( \
-    (1<<(MECHANIC_ROOT-1))|(1<<(MECHANIC_SNARE-1)))
+                                        (1<<(MECHANIC_ROOT-1))|(1<<(MECHANIC_SNARE-1)))
 
 #define IMMUNE_TO_ROOT_AND_STUN_MASK ( \
-    (1<<(MECHANIC_ROOT-1))|(1<<(MECHANIC_STUN-1)))
+                                       (1<<(MECHANIC_ROOT-1))|(1<<(MECHANIC_STUN-1)))
 
 #define IMMUNE_TO_SILENCE_AND_STUN_AND_FEAR_MASK ( \
     (1<<(MECHANIC_SILENCE-1))|(1<<(MECHANIC_STUN-1))|(1<<(MECHANIC_FEAR-1)))
@@ -1193,14 +1203,15 @@ enum Mechanics
 #define IMMUNE_TO_INTERRUPT_AND_SILENCE_MASK ( \
     (1<<(MECHANIC_INTERRUPT-1))|(1<<(MECHANIC_SILENCE-1)))
 
-// Daze and all croud control spells except polymorph are not removed
+/// Daze and all crowd control spells except polymorph are not removed
 #define MECHANIC_NOT_REMOVED_BY_SHAPESHIFT ( \
-    (1<<(MECHANIC_CHARM -1))|(1<<(MECHANIC_DISORIENTED-1))|(1<<(MECHANIC_FEAR  -1))| \
-    (1<<(MECHANIC_PACIFY-1))|(1<<(MECHANIC_STUN       -1))|(1<<(MECHANIC_FREEZE-1))| \
-    (1<<(MECHANIC_BANISH-1))|(1<<(MECHANIC_SHACKLE    -1))|(1<<(MECHANIC_HORROR-1))| \
-    (1<<(MECHANIC_TURN  -1))|(1<<(MECHANIC_DAZE       -1))|(1<<(MECHANIC_SAPPED-1)))
+        (1<<(MECHANIC_CHARM -1))|(1<<(MECHANIC_DISORIENTED-1))|(1<<(MECHANIC_FEAR  -1))| \
+        (1<<(MECHANIC_PACIFY-1))|(1<<(MECHANIC_STUN       -1))|(1<<(MECHANIC_FREEZE-1))| \
+        (1<<(MECHANIC_BANISH-1))|(1<<(MECHANIC_SHACKLE    -1))|(1<<(MECHANIC_HORROR-1))| \
+        (1<<(MECHANIC_TURN  -1))|(1<<(MECHANIC_DAZE       -1))|(1<<(MECHANIC_SAPPED-1)))
 
-// Spell dispell type
+/// Different types of \ref Spell s that can be dispelled and what the reason for the dispel is.
+/// Also coupled with \ref Aura s as \ref Spell s have \ref Aura s.
 enum DispelType
 {
     DISPEL_NONE         = 0,
@@ -1355,11 +1366,16 @@ enum Targets
     TARGET_NARROW_FRONTAL_CONE_2       = 110,
 };
 
+/**
+ * Tells how a spell that was cast missed or hit, ie it might have been
+ * resisted or dodged etc. This enum tells which of those it was. The only
+ * one which indicates a hit is SPELL_MISS_NONE
+ */
 enum SpellMissInfo
 {
-    SPELL_MISS_NONE                    = 0,
+    SPELL_MISS_NONE                    = 0, ///< Indicates an actual hit
     SPELL_MISS_MISS                    = 1,
-    SPELL_MISS_RESIST                  = 2,
+    SPELL_MISS_RESIST                  = 2, ///< The spell was resisted
     SPELL_MISS_DODGE                   = 3,
     SPELL_MISS_PARRY                   = 4,
     SPELL_MISS_BLOCK                   = 5,
@@ -1424,9 +1440,8 @@ enum DamageEffectType
     DOT                     = 2,
     HEAL                    = 3,
     /// used also in case when damage applied to health but not applied to spell channelInterruptFlags/etc
-    NODAMAGE                = 4,
-    /// used to avoid rogue loosing stealth on falling damage
-    SELF_DAMAGE_ROGUE_FALL  = 5,
+    NODAMAGE                = 4,                            //< used also in case when damage applied to health but not applied to spell channelInterruptFlags/etc
+    SELF_DAMAGE_ROGUE_FALL  = 5,                            //< used to avoid rogue loosing stealth on falling damage
     SELF_DAMAGE             = 6
 };
 
@@ -1476,9 +1491,9 @@ enum GameObjectFlags
 {
     GO_FLAG_IN_USE          = 0x00000001,                   // disables interaction while animated
     GO_FLAG_LOCKED          = 0x00000002,                   // require key, spell, event, etc to be opened. Makes "Locked" appear in tooltip
-    GO_FLAG_INTERACT_COND   = 0x00000004,                   // cannot interact (condition to interact)
+    GO_FLAG_INTERACT_COND   = 0x00000004,                   // can not interact (condition to interact)
     GO_FLAG_TRANSPORT       = 0x00000008,                   // any kind of transport? Object can transport (elevator, boat, car)
-    GO_FLAG_NO_INTERACT     = 0x00000010,                   // players cannot interact with this go (often need to remove flag in event)
+    GO_FLAG_NO_INTERACT     = 0x00000010,                   // players can not interact with this go (often need to remove flag in event)
     GO_FLAG_NODESPAWN       = 0x00000020,                   // never despawn, typically for doors, they just change state
     GO_FLAG_TRIGGERED       = 0x00000040,                   // typically, summoned objects. Triggered by spell or other events
     GO_FLAG_UNK_8           = 0x00000080,
@@ -1492,7 +1507,7 @@ enum GameObjectDynamicLowFlags
     GO_DYNFLAG_LO_ACTIVATE          = 0x01,                 // enables interaction with GO
     GO_DYNFLAG_LO_ANIMATE           = 0x02,                 // possibly more distinct animation of GO
     GO_DYNFLAG_LO_NO_INTERACT       = 0x04,                 // appears to disable interaction (not fully verified)
-    GO_DYNFLAG_LO_SPARKLE           = 0x08,                 // makes GO sparkle
+    GO_DYNFLAG_LO_SPARKLE           = 0x08                  // makes GO sparkle
 };
 
 enum TextEmotes
@@ -2552,7 +2567,7 @@ enum UnitDynFlags
     UNIT_DYNFLAG_NONE                       = 0x0000,
     UNIT_DYNFLAG_LOOTABLE                   = 0x0001,
     UNIT_DYNFLAG_TRACK_UNIT                 = 0x0002,
-    UNIT_DYNFLAG_TAPPED                     = 0x0004,       // Lua_UnitIsTapped
+    UNIT_DYNFLAG_TAPPED                     = 0x0004,       // Lua_UnitIsTapped - Indicates the target as grey for the client.
     UNIT_DYNFLAG_TAPPED_BY_PLAYER           = 0x0008,       // Lua_UnitIsTappedByPlayer
     UNIT_DYNFLAG_SPECIALINFO                = 0x0010,
     UNIT_DYNFLAG_DEAD                       = 0x0020,
@@ -2980,7 +2995,12 @@ enum PetTameFailureReason
     PETTAME_UNKNOWNERROR            = 13
 };
 
-// Stored in SummonProperties.dbc with slot+1 values
+/**
+ * These are the different totem types that are available.
+ * Stored in SummonProperties.dbc with slot+1 values
+ * \see Totem
+ * \see Unit::GetTotemGuid
+ */
 enum TotemSlot
 {
     TOTEM_SLOT_FIRE   = 0,

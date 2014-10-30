@@ -359,6 +359,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
               spellId, cast_count, unk_flags, recvPacket.size());
 
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
+
     if (!spellInfo)
     {
         sLog.outError("WORLD: unknown spell id %u", spellId);
@@ -371,7 +372,6 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     if (mover->GetTypeId() == TYPEID_PLAYER)
     {
         // not have spell in spellbook or spell passive and not casted by client
-
         if ((!((Player*)mover)->HasActiveSpell(spellId) && !triggeredByAura) || IsPassiveSpell(spellInfo))
         {
             sLog.outError("World: %s casts spell %u which he shouldn't have", mover->GetGuidStr().c_str(), spellId);

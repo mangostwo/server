@@ -515,6 +515,7 @@ inline bool IsNeedCastSpellAtOutdoor(SpellEntry const* spellInfo)
     return (spellInfo->HasAttribute(SPELL_ATTR_OUTDOORS_ONLY) && spellInfo->HasAttribute(SPELL_ATTR_PASSIVE));
 }
 
+
 inline bool NeedsComboPoints(SpellEntry const* spellInfo)
 {
     return spellInfo->HasAttribute(SPELL_ATTR_EX_REQ_TARGET_COMBO_POINTS) || spellInfo->HasAttribute(SPELL_ATTR_EX_REQ_COMBO_POINTS);

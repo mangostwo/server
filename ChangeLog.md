@@ -3,7 +3,7 @@ MaNGOS Two Changelog
 This change log references the relevant changes (bug and security fixes) done
 in recent versions.
 
-0.19 (2014-09-31) - Untitled
+0.19 (2014-10-31) - Untitled
 ----------------------------------
 Many Thanks to all the groups and individuals who contributed to this release.
 

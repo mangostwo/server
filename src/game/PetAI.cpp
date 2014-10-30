@@ -37,7 +37,7 @@
 int PetAI::Permissible(const Creature* creature)
 {
     if (creature->IsPet())
-        return PERMIT_BASE_SPECIAL;
+        { return PERMIT_BASE_SPECIAL; }
 
     return PERMIT_BASE_NO;
 }
@@ -51,16 +51,16 @@ PetAI::PetAI(Creature* c) : CreatureAI(c), i_tracker(TIME_INTERVAL_LOOK), inComb
 void PetAI::MoveInLineOfSight(Unit* u)
 {
     if (m_creature->getVictim())
-        return;
+        { return; }
 
     if (m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
-        return;
+        { return; }
 
     if (!m_creature->GetCharmInfo() || !m_creature->GetCharmInfo()->HasReactState(REACT_AGGRESSIVE))
-        return;
+        { return; }
 
     if (u->IsTargetableForAttack() && m_creature->IsHostileTo(u) &&
-            u->isInAccessablePlaceFor(m_creature))
+        u->isInAccessablePlaceFor(m_creature))
     {
         float attackRadius = m_creature->GetAttackDistance(u);
         if (m_creature->IsWithinDistInMap(u, attackRadius) && m_creature->GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE)
@@ -77,7 +77,7 @@ void PetAI::MoveInLineOfSight(Unit* u)
 void PetAI::AttackStart(Unit* u)
 {
     if (!u || (m_creature->IsPet() && ((Pet*)m_creature)->getPetType() == MINI_PET))
-        return;
+        { return; }
 
     if (m_creature->Attack(u, true))
     {
@@ -103,7 +103,7 @@ bool PetAI::_needToStop() const
 {
     // This is needed for charmed creatures, as once their target was reset other effects can trigger threat
     if (m_creature->IsCharmed() && m_creature->getVictim() == m_creature->GetCharmer())
-        return true;
+        { return true; }
 
     return !m_creature->getVictim()->IsTargetableForAttack();
 }
@@ -129,7 +129,7 @@ void PetAI::_stopAttack()
 void PetAI::UpdateAI(const uint32 diff)
 {
     if (!m_creature->IsAlive())
-        return;
+        { return; }
 
     Unit* owner = m_creature->GetCharmerOrOwner();
     
@@ -142,12 +142,12 @@ void PetAI::UpdateAI(const uint32 diff)
 
     if (m_updateAlliesTimer <= diff)
         // UpdateAllies self set update timer
-        UpdateAllies();
+        { UpdateAllies(); }
     else
-        m_updateAlliesTimer -= diff;
+        { m_updateAlliesTimer -= diff; }
 
     if (inCombat && (!m_creature->getVictim() || (m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)))
-        _stopAttack();
+        { _stopAttack(); }
 
     // i_pet.getVictim() can't be used for check in case stop fighting, i_pet.getVictim() clear at Unit death etc.
     if (m_creature->getVictim())
@@ -167,21 +167,21 @@ void PetAI::UpdateAI(const uint32 diff)
             if (m_creature->IsStopped() && m_creature->IsNonMeleeSpellCasted(false))
             {
                 if (m_creature->hasUnitState(UNIT_STAT_FOLLOW_MOVE))
-                    m_creature->InterruptNonMeleeSpells(false);
+                    { m_creature->InterruptNonMeleeSpells(false); }
                 else
-                    return;
+                    { return; }
             }
             // not required to be stopped case
             else if (DoMeleeAttackIfReady())
             {
                 if (!m_creature->getVictim())
-                    return;
+                    { return; }
 
                 // if pet misses its target, it will also be the first in threat list
                 m_creature->getVictim()->AddThreat(m_creature);
 
                 if (_needToStop())
-                    _stopAttack();
+                    { _stopAttack(); }
             }
         }
     }
@@ -210,21 +210,21 @@ void PetAI::UpdateAI(const uint32 diff)
         {
             uint32 spellID = m_creature->GetPetAutoSpellOnPos(i);
             if (!spellID)
-                continue;
+                { continue; }
 
             SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellID);
             if (!spellInfo)
-                continue;
+                { continue; }
 
             if (m_creature->GetCharmInfo() && m_creature->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
-                continue;
+                { continue; }
 
             // ignore some combinations of combat state and combat/noncombat spells
             if (!inCombat)
             {
                 // ignore attacking spells, and allow only self/around spells
                 if (!IsPositiveSpell(spellInfo->Id))
-                    continue;
+                    { continue; }
 
                 // non combat spells allowed
                 // only pet spells have IsNonCombatSpell and not fit this reqs:
@@ -234,19 +234,19 @@ void PetAI::UpdateAI(const uint32 diff)
                     // allow only spell without spell cost or with spell cost but not duration limit
                     int32 duration = GetSpellDuration(spellInfo);
                     if ((spellInfo->manaCost || spellInfo->ManaCostPercentage || spellInfo->manaPerSecond) && duration > 0)
-                        continue;
+                        { continue; }
 
                     // allow only spell without cooldown > duration
                     int32 cooldown = GetSpellRecoveryTime(spellInfo);
                     if (cooldown >= 0 && duration >= 0 && cooldown > duration)
-                        continue;
+                        { continue; }
                 }
             }
             else
             {
                 // just ignore non-combat spells
                 if (IsNonCombatSpell(spellInfo))
-                    continue;
+                    { continue; }
             }
 
             Spell* spell = new Spell(m_creature, spellInfo, false);
@@ -265,7 +265,7 @@ void PetAI::UpdateAI(const uint32 diff)
 
                     // only buff targets that are in combat, unless the spell can only be cast while out of combat
                     if (!Target)
-                        continue;
+                        { continue; }
 
                     if (spell->CanAutoCast(Target))
                     {
@@ -275,7 +275,7 @@ void PetAI::UpdateAI(const uint32 diff)
                     }
                 }
                 if (!spellUsed)
-                    delete spell;
+                    { delete spell; }
             }
         }
 
@@ -296,10 +296,10 @@ void PetAI::UpdateAI(const uint32 diff)
             {
                 m_creature->SetInFront(target);
                 if (target->GetTypeId() == TYPEID_PLAYER)
-                    m_creature->SendCreateUpdateToPlayer((Player*)target);
+                    { m_creature->SendCreateUpdateToPlayer((Player*)target); }
 
                 if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-                    m_creature->SendCreateUpdateToPlayer((Player*)owner);
+                    { m_creature->SendCreateUpdateToPlayer((Player*)owner); }
             }
 
             m_creature->AddCreatureSpellCooldown(spell->m_spellInfo->Id);
@@ -309,7 +309,7 @@ void PetAI::UpdateAI(const uint32 diff)
 
         // deleted cached Spell objects
         for (TargetSpellList::const_iterator itr = targetSpellStore.begin(); itr != targetSpellStore.end(); ++itr)
-            delete itr->second;
+            { delete itr->second; }
     }
 }
 
@@ -327,16 +327,16 @@ void PetAI::UpdateAllies()
     m_updateAlliesTimer = 10 * IN_MILLISECONDS;             // update friendly targets every 10 seconds, lesser checks increase performance
 
     if (!owner)
-        return;
+        { return; }
     else if (owner->GetTypeId() == TYPEID_PLAYER)
-        pGroup = ((Player*)owner)->GetGroup();
+        { pGroup = ((Player*)owner)->GetGroup(); }
 
     // only pet and owner/not in group->ok
     if (m_AllySet.size() == 2 && !pGroup)
-        return;
+        { return; }
     // owner is in group; group members filled in already (no raid -> subgroupcount = whole count)
     if (pGroup && !pGroup->isRaidGroup() && m_AllySet.size() == (pGroup->GetMembersCount() + 2))
-        return;
+        { return; }
 
     m_AllySet.clear();
     m_AllySet.insert(m_creature->GetObjectGuid());
@@ -346,22 +346,22 @@ void PetAI::UpdateAllies()
         {
             Player* target = itr->getSource();
             if (!target || !pGroup->SameSubGroup((Player*)owner, target))
-                continue;
+                { continue; }
 
             if (target->GetObjectGuid() == owner->GetObjectGuid())
-                continue;
+                { continue; }
 
             m_AllySet.insert(target->GetObjectGuid());
         }
     }
     else                                                    // remove group
-        m_AllySet.insert(owner->GetObjectGuid());
+        { m_AllySet.insert(owner->GetObjectGuid()); }
 }
 
 void PetAI::AttackedBy(Unit* attacker)
 {
     // when attacked, fight back in case 1)no victim already AND 2)not set to passive AND 3)not set to stay, unless can it can reach attacker with melee attack anyway
     if (!m_creature->getVictim() && m_creature->GetCharmInfo() && !m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE) &&
-            (!m_creature->GetCharmInfo()->HasCommandState(COMMAND_STAY) || m_creature->CanReachWithMeleeAttack(attacker)))
-        AttackStart(attacker);
+        (!m_creature->GetCharmInfo()->HasCommandState(COMMAND_STAY) || m_creature->CanReachWithMeleeAttack(attacker)))
+        { AttackStart(attacker); }
 }

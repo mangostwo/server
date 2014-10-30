@@ -1877,10 +1877,12 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case SPELL_EFFECT_KILL_CREDIT_PERSONAL:
                 case SPELL_EFFECT_KILL_CREDIT_GROUP:
                     targetB = SPELL_TARGETS_ALL;
+                    break;
                 default:
                     // Select friendly targets for positive effect
                     if (IsPositiveEffect(m_spellInfo, effIndex))
                         targetB = SPELL_TARGETS_FRIENDLY;
+                    break;
             }
 
             UnitList tempTargetUnitMap;
@@ -2649,7 +2651,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 // TODO: some summoned will make caster be half inside summoned object. Need to fix
                 // that in the below code (nearpoint vs closepoint, etc).
                 if (m_spellInfo->EffectRadiusIndex[effIndex] == 0)
-                    radius = 0.0f;
+                    { radius = 0.0f; }
 
                 if (m_spellInfo->Id == 50019)               // Hawk Hunting, problematic 50K radius
                     radius = 10.0f;
@@ -2693,8 +2695,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     case TARGET_POINT_AT_WEST:  angle +=   M_PI_F / 2;    break;
                     case TARGET_POINT_AT_NE:    angle -=   M_PI_F / 4;    break;
                     case TARGET_POINT_AT_NW:    angle +=   M_PI_F / 4;    break;
-                    case TARGET_POINT_AT_SE:    angle -= 3 * M_PI_F / 4;    break;
-                    case TARGET_POINT_AT_SW:    angle += 3 * M_PI_F / 4;    break;
+                    case TARGET_POINT_AT_SE:    angle -= 3*M_PI_F / 4;    break;
+                    case TARGET_POINT_AT_SW:    angle += 3*M_PI_F / 4;    break;
                 }
 
                 float x, y;
@@ -4316,14 +4318,14 @@ void Spell::SendChannelStart(uint32 duration)
 
     // select dynobject created by first effect if any
     if (m_spellInfo->Effect[EFFECT_INDEX_0] == SPELL_EFFECT_PERSISTENT_AREA_AURA)
-        target = m_caster->GetDynObject(m_spellInfo->Id, EFFECT_INDEX_0);
+        { target = m_caster->GetDynObject(m_spellInfo->Id, EFFECT_INDEX_0); }
     // select first not resisted target from target list for _0_ effect
     else if (!m_UniqueTargetInfo.empty())
     {
         for (TargetList::const_iterator itr = m_UniqueTargetInfo.begin(); itr != m_UniqueTargetInfo.end(); ++itr)
         {
             if ((itr->effectMask & (1 << EFFECT_INDEX_0)) && itr->reflectResult == SPELL_MISS_NONE &&
-                    itr->targetGUID != m_caster->GetObjectGuid())
+                itr->targetGUID != m_caster->GetObjectGuid())
             {
                 target = ObjectAccessor::GetUnit(*m_caster, itr->targetGUID);
                 break;
@@ -4885,7 +4887,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             return SPELL_FAILED_TARGET_AURASTATE;
 
         if (!m_IsTriggeredSpell && IsDeathOnlySpell(m_spellInfo) && target->IsAlive())
-            return SPELL_FAILED_TARGET_NOT_DEAD;
+            { return SPELL_FAILED_TARGET_NOT_DEAD; }
 
         // Target aura req check if need
         if (m_spellInfo->targetAuraSpell && !target->HasAura(m_spellInfo->targetAuraSpell))
@@ -4906,10 +4908,10 @@ SpellCastResult Spell::CheckCast(bool strict)
         // totem immunity for channeled spells(needs to be before spell cast)
         // spell attribs for player channeled spells
         if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_UNK14)
-                && m_spellInfo->HasAttribute(SPELL_ATTR_EX5_UNK13)
-                && target->GetTypeId() == TYPEID_UNIT
-                && ((Creature*)target)->IsTotem())
-            return SPELL_FAILED_IMMUNE;
+            && m_spellInfo->HasAttribute(SPELL_ATTR_EX5_UNK13)
+            && target->GetTypeId() == TYPEID_UNIT
+            && ((Creature*)target)->IsTotem())
+            { return SPELL_FAILED_IMMUNE; }
 
         bool non_caster_target = target != m_caster && !IsSpellWithCasterSourceTargetsOnly(m_spellInfo);
 
@@ -5413,7 +5415,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     // spell different for friends and enemies
                     // hart version required facing
                     if (m_targets.getUnitTarget() && !m_caster->IsFriendlyTo(m_targets.getUnitTarget()) && !m_caster->HasInArc(M_PI_F, m_targets.getUnitTarget()))
-                        return SPELL_FAILED_UNIT_NOT_INFRONT;
+                        { return SPELL_FAILED_UNIT_NOT_INFRONT; }
                 }
                 else if (m_spellInfo->Id == 49576) // Death Grip
                 {
@@ -6196,7 +6198,7 @@ SpellCastResult Spell::CheckCasterAuras() const
         prevented_reason = SPELL_FAILED_CONFUSED;
     else if (unitflag & UNIT_FLAG_FLEEING && !m_spellInfo->HasAttribute(SPELL_ATTR_EX5_USABLE_WHILE_FEARED))
         prevented_reason = SPELL_FAILED_FLEEING;
-    else if (unitflag & UNIT_FLAG_SILENCED && m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
+    else if (unitflag& UNIT_FLAG_SILENCED && m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
         { prevented_reason = SPELL_FAILED_SILENCED; }
     else if (unitflag & UNIT_FLAG_PACIFIED && m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_PACIFY)
         { prevented_reason = SPELL_FAILED_PACIFIED; }
@@ -6632,7 +6634,7 @@ SpellCastResult Spell::CheckItems()
     else
     {
         if (m_caster->GetTypeId() == TYPEID_PLAYER && !((Player*)m_caster)->HasItemFitToSpellReqirements(m_spellInfo))
-            return m_IsTriggeredSpell ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_EQUIPPED_ITEM_CLASS;
+            { return m_IsTriggeredSpell ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_EQUIPPED_ITEM_CLASS; }
     }
 
     // check reagents (ignore triggered spells with reagents processed by original spell) and special reagent ignore case.
@@ -6764,7 +6766,7 @@ SpellCastResult Spell::CheckItems()
                     return SPELL_FAILED_ITEM_NOT_FOUND;
 
                 if (targetItem->GetProto()->ItemLevel < m_spellInfo->baseLevel)
-                    return SPELL_FAILED_LOWLEVEL;
+                    { return SPELL_FAILED_LOWLEVEL; }
                 // Check if we can store a new scroll, enchanting vellum has implicit SPELL_EFFECT_CREATE_ITEM
                 if (isVellumTarget && m_spellInfo->EffectItemType[i])
                 {
@@ -6963,9 +6965,9 @@ void Spell::Delayed()
     if (isDelayableNoMore())                                // Spells may only be delayed twice
         return;
 
-    // spells not loosing casting time ( slam, dynamites, bombs.. )
+    // spells not losing casting time ( slam, dynamites, bombs.. )
     if (!(m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_DAMAGE))
-        return;
+        { return; }
 
     // check pushback reduce
     int32 delaytime = 500;                                  // spellcasting delay is normally 500ms
@@ -6973,7 +6975,7 @@ void Spell::Delayed()
     ((Player*)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_NOT_LOSE_CASTING_TIME, delayReduce, this);
     delayReduce += m_caster->GetTotalAuraModifier(SPELL_AURA_REDUCE_PUSHBACK) - 100;
     if (delayReduce >= 100)
-        return;
+        { return; }
 
     delaytime = delaytime * (100 - delayReduce) / 100;
 
@@ -6983,7 +6985,7 @@ void Spell::Delayed()
         m_timer = m_casttime;
     }
     else
-        m_timer += delaytime;
+        { m_timer += delaytime; }
 
     DETAIL_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u partially interrupted for (%d) ms at damage", m_spellInfo->Id, delaytime);
 
@@ -6997,7 +6999,7 @@ void Spell::Delayed()
 void Spell::DelayedChannel()
 {
     if (!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER || getState() != SPELL_STATE_CASTING)
-        return;
+        { return; }
 
     if (isDelayableNoMore())                                // Spells may only be delayed twice
         return;
@@ -7008,7 +7010,7 @@ void Spell::DelayedChannel()
     ((Player*)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_NOT_LOSE_CASTING_TIME, delayReduce, this);
     delayReduce += m_caster->GetTotalAuraModifier(SPELL_AURA_REDUCE_PUSHBACK) - 100;
     if (delayReduce >= 100)
-        return;
+        { return; }
 
     delaytime = delaytime * (100 - delayReduce) / 100;
 
@@ -7018,7 +7020,7 @@ void Spell::DelayedChannel()
         m_timer = 0;
     }
     else
-        m_timer -= delaytime;
+        { m_timer -= delaytime; }
 
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u partially interrupted for %i ms, new duration: %u ms", m_spellInfo->Id, delaytime, m_timer);
 
@@ -7027,7 +7029,7 @@ void Spell::DelayedChannel()
         if ((*ihit).missCondition == SPELL_MISS_NONE)
         {
             if (Unit* unit = m_caster->GetObjectGuid() == ihit->targetGUID ? m_caster : ObjectAccessor::GetUnit(*m_caster, ihit->targetGUID))
-                unit->DelaySpellAuraHolder(m_spellInfo->Id, delaytime, unit->GetObjectGuid());
+                { unit->DelaySpellAuraHolder(m_spellInfo->Id, delaytime, unit->GetObjectGuid()); }
         }
     }
 
@@ -7035,7 +7037,7 @@ void Spell::DelayedChannel()
     {
         // partially interrupt persistent area auras
         if (DynamicObject* dynObj = m_caster->GetDynObject(m_spellInfo->Id, SpellEffectIndex(j)))
-            dynObj->Delay(delaytime);
+            { dynObj->Delay(delaytime); }
     }
 
     SendChannelUpdate(m_timer);
@@ -7044,7 +7046,7 @@ void Spell::DelayedChannel()
 void Spell::UpdateOriginalCasterPointer()
 {
     if (m_originalCasterGUID == m_caster->GetObjectGuid())
-        m_originalCaster = m_caster;
+        { m_originalCaster = m_caster; }
     else if (m_originalCasterGUID.IsGameObject())
     {
         GameObject* go = m_caster->IsInWorld() ? m_caster->GetMap()->GetGameObject(m_originalCasterGUID) : NULL;
@@ -7068,12 +7070,12 @@ bool Spell::CheckTargetCreatureType(Unit* target) const
 {
     uint32 spellCreatureTargetMask = m_spellInfo->TargetCreatureType;
 
-    // Curse of Doom: not find another way to fix spell target check :/
+    // Curse of Doom : not find another way to fix spell target check :/
     if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellInfo->Category == 1179)
     {
         // not allow cast at player
         if (target->GetTypeId() == TYPEID_PLAYER)
-            return false;
+            { return false; }
 
         spellCreatureTargetMask = 0x7FF;
     }

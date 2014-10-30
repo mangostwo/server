@@ -40,7 +40,7 @@ char const* ObjectGuid::GetTypeName(HighGuid high)
         case HIGHGUID_UNIT:         return "Creature";
         case HIGHGUID_PET:          return "Pet";
         case HIGHGUID_VEHICLE:      return "Vehicle";
-        case HIGHGUID_DYNAMICOBJECT:return "DynObject";
+        case HIGHGUID_DYNAMICOBJECT: return "DynObject";
         case HIGHGUID_CORPSE:       return "Corpse";
         case HIGHGUID_MO_TRANSPORT: return "MoTransport";
         case HIGHGUID_INSTANCE:     return "InstanceID";
@@ -59,12 +59,12 @@ std::string ObjectGuid::GetString() const
     {
         std::string name;
         if (sObjectMgr.GetPlayerNameByGUID(*this, name))
-            str << " " << name;
+            { str << " " << name; }
     }
 
     str << " (";
     if (HasEntry())
-        str << (IsPet() ? "Petnumber: " : "Entry: ") << GetEntry() << " ";
+        { str << (IsPet() ? "Petnumber: " : "Entry: ") << GetEntry() << " "; }
     str << "Guid: " << GetCounter() << ")";
     return str.str();
 }

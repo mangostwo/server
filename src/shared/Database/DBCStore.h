@@ -58,9 +58,16 @@ class DBCStorage
          * @param id
          * @return const T
          */
-        //T const* LookupEntry(uint32 id) const { return (id >= nCount) ? NULL : indexTable[id]; }
-        T const* LookupEntry(uint32 id) const
-        {
+
+		/**
+		* @brief
+		*
+		* @param id
+		* @return const T
+		*/
+		//T const* LookupEntry(uint32 id) const { return (id >= nCount) ? NULL : indexTable[id]; }
+		T const* LookupEntry(uint32 id) const
+		{
             if (loaded)
             {
                 typename std::map<uint32, T const*>::const_iterator it = data.find(id);

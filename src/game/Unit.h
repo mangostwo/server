@@ -567,7 +567,11 @@ enum UnitVisibility
     VISIBILITY_REMOVE_CORPSE      = 5                       // special totally not detectable visibility for force delete object while removing a corpse
 };
 
-// Value masks for UNIT_FIELD_FLAGS
+/**
+ * [-ZERO] Need recheck values
+ * Value masks for UNIT_FIELD_FLAGS (Taken from source)
+ * \todo Document all the flags, not just the ones already commented
+ */
 enum UnitFlags
 {
     UNIT_FLAG_UNK_0                 = 0x00000001,
@@ -578,28 +582,28 @@ enum UnitFlags
     UNIT_FLAG_PREPARATION           = 0x00000020,           // don't take reagents for spells with SPELL_ATTR_EX5_NO_REAGENT_WHILE_PREP
     UNIT_FLAG_UNK_6                 = 0x00000040,
     UNIT_FLAG_NOT_ATTACKABLE_1      = 0x00000080,           // ?? (UNIT_FLAG_PVP_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1) is NON_PVP_ATTACKABLE
-    UNIT_FLAG_OOC_NOT_ATTACKABLE    = 0x00000100,           // 2.0.8 - (OOC Out Of Combat) Can not be attacked when not in combat. Removed if unit for some reason enter combat (flag probably removed for the attacked and it's party/group only)
-    UNIT_FLAG_PASSIVE               = 0x00000200,           // makes you unable to attack everything. Almost identical to our "civilian"-term. Will ignore it's surroundings and not engage in combat unless "called upon" or engaged by another unit.
+    UNIT_FLAG_OOC_NOT_ATTACKABLE    = 0x00000100,           ///< (OOC Out Of Combat) Can not be attacked when not in combat. Removed if unit for some reason enter combat (flag probably removed for the attacked and it's party/group only) \todo Needs more documentation
+    UNIT_FLAG_PASSIVE               = 0x00000200,           ///< makes you unable to attack everything. Almost identical to our "civilian"-term. Will ignore it's surroundings and not engage in combat unless "called upon" or engaged by another unit.
     UNIT_FLAG_LOOTING               = 0x00000400,           // loot animation
     UNIT_FLAG_PET_IN_COMBAT         = 0x00000800,           // in combat?, 2.0.8
     UNIT_FLAG_PVP                   = 0x00001000,           // changed in 3.0.3
-    UNIT_FLAG_SILENCED              = 0x00002000,           // silenced, 2.1.1
+    UNIT_FLAG_SILENCED              = 0x00002000,           ///< silenced, 2.1.1
     UNIT_FLAG_UNK_14                = 0x00004000,           // 2.0.8
     UNIT_FLAG_UNK_15                = 0x00008000,
-    UNIT_FLAG_UNK_16                = 0x00010000,           // removes attackable icon
-    UNIT_FLAG_PACIFIED              = 0x00020000,           // 3.0.3 ok
-    UNIT_FLAG_STUNNED               = 0x00040000,           // 3.0.3 ok
+    UNIT_FLAG_UNK_16                = 0x00010000,           ///< removes attackable icon
+    UNIT_FLAG_PACIFIED              = 0x00020000,
+    UNIT_FLAG_STUNNED               = 0x00040000,           // stunned, 2.1.1
     UNIT_FLAG_IN_COMBAT             = 0x00080000,
-    UNIT_FLAG_TAXI_FLIGHT           = 0x00100000,           // disable casting at client side spell not allowed by taxi flight (mounted?), probably used with 0x4 flag
-    UNIT_FLAG_DISARMED              = 0x00200000,           // 3.0.3, disable melee spells casting..., "Required melee weapon" added to melee spells tooltip.
+    UNIT_FLAG_TAXI_FLIGHT           = 0x00100000,           ///< disable casting at client side spell not allowed by taxi flight (mounted?), probably used with 0x4 flag
+    UNIT_FLAG_DISARMED              = 0x00200000,           ///< disable melee spells casting..., "Required melee weapon" added to melee spells tooltip.
     UNIT_FLAG_CONFUSED              = 0x00400000,
     UNIT_FLAG_FLEEING               = 0x00800000,
-    UNIT_FLAG_PLAYER_CONTROLLED     = 0x01000000,           // used in spell Eyes of the Beast for pet... let attack by controlled creature
+    UNIT_FLAG_PLAYER_CONTROLLED     = 0x01000000,           ///< used in spell Eyes of the Beast for pet... let attack by controlled creature
     UNIT_FLAG_NOT_SELECTABLE        = 0x02000000,
     UNIT_FLAG_SKINNABLE             = 0x04000000,
     UNIT_FLAG_MOUNT                 = 0x08000000,
     UNIT_FLAG_UNK_28                = 0x10000000,
-    UNIT_FLAG_UNK_29                = 0x20000000,           // used in Feing Death spell
+    UNIT_FLAG_UNK_29                = 0x20000000,           ///< used in Feign Death spell
     UNIT_FLAG_SHEATHE               = 0x40000000,
     UNIT_FLAG_UNK_31                = 0x80000000            // set skinnable icon and also changes color of portrait
 };
@@ -620,16 +624,18 @@ enum UnitFlags2
     UNIT_FLAG2_DISARM_RANGED        = 0x00000400,
     UNIT_FLAG2_REGENERATE_POWER     = 0x00000800,
 };
-
-/// Non Player Character flags
+/**
+ * Non Player Character flags
+ * \todo Properly document this
+ */
 enum NPCFlags
 {
     UNIT_NPC_FLAG_NONE                  = 0x00000000,
-    UNIT_NPC_FLAG_GOSSIP                = 0x00000001,       // 100%
-    UNIT_NPC_FLAG_QUESTGIVER            = 0x00000002,       // guessed, probably ok
+    UNIT_NPC_FLAG_GOSSIP                = 0x00000001,       ///< 100%
+    UNIT_NPC_FLAG_QUESTGIVER            = 0x00000002,       ///< guessed, probably ok
     UNIT_NPC_FLAG_UNK1                  = 0x00000004,
     UNIT_NPC_FLAG_UNK2                  = 0x00000008,
-    UNIT_NPC_FLAG_TRAINER               = 0x00000010,       // 100%
+    UNIT_NPC_FLAG_TRAINER               = 0x00000010,       ///< 100%
     UNIT_NPC_FLAG_TRAINER_CLASS         = 0x00000020,       // 100%
     UNIT_NPC_FLAG_TRAINER_PROFESSION    = 0x00000040,       // 100%
     UNIT_NPC_FLAG_VENDOR                = 0x00000080,       // 100%
@@ -653,19 +659,27 @@ enum NPCFlags
     UNIT_NPC_FLAG_PLAYER_VEHICLE        = 0x02000000,       // players with mounts that have vehicle data should have it set
 };
 
-// used in most movement packets (send and received)
+/**
+ * These flags denote the different kinds of movement you can do. You can have many at the
+ * same time as this is used as a bitmask.
+ * \todo [-ZERO] Need check and update used in most movement packets (send and received)
+ * \see MovementInfo
+ */
 enum MovementFlags
 {
+    // Byte 1 (Resets on Movement Key Press)
     MOVEFLAG_NONE               = 0x00000000,
     MOVEFLAG_FORWARD            = 0x00000001,
     MOVEFLAG_BACKWARD           = 0x00000002,
-    MOVEFLAG_STRAFE_LEFT        = 0x00000004,
-    MOVEFLAG_STRAFE_RIGHT       = 0x00000008,
-    MOVEFLAG_TURN_LEFT          = 0x00000010,
-    MOVEFLAG_TURN_RIGHT         = 0x00000020,
-    MOVEFLAG_PITCH_UP           = 0x00000040,
-    MOVEFLAG_PITCH_DOWN         = 0x00000080,
-    MOVEFLAG_WALK_MODE          = 0x00000100,               // Walking
+    MOVEFLAG_STRAFE_LEFT            = 0x00000004,           /// verified
+    MOVEFLAG_STRAFE_RIGHT           = 0x00000008,           /// verified
+    MOVEFLAG_TURN_LEFT              = 0x00000010,           /// verified
+    MOVEFLAG_TURN_RIGHT             = 0x00000020,           /// verified
+    MOVEFLAG_PITCH_UP               = 0x00000040,           /// not confirmed
+    MOVEFLAG_PITCH_DOWN             = 0x00000080,           /// not confirmed
+
+    // Byte 2 (Resets on Situation Change)
+    MOVEFLAG_WALK_MODE              = 0x00000100,           /// verified
     MOVEFLAG_ONTRANSPORT        = 0x00000200,               // Used for flying on some creatures
     MOVEFLAG_LEVITATING         = 0x00000400,
     MOVEFLAG_ROOT               = 0x00000800,
@@ -1214,12 +1228,12 @@ enum IgnoreUnitState
 // Power type values defines
 enum PowerDefaults
 {
-    POWER_RAGE_DEFAULT        = 1000,
-    POWER_FOCUS_DEFAULT       = 100,
-    POWER_ENERGY_DEFAULT      = 100,
-    POWER_HAPPINESS_DEFAULT   = 1000000,
-    POWER_RUNE_DEFAULT        = 8,
-    POWER_RUNIC_POWER_DEFAULT = 1000,
+    POWER_RAGE_DEFAULT              = 1000,
+    POWER_FOCUS_DEFAULT             = 100,
+    POWER_ENERGY_DEFAULT            = 100,
+    POWER_HAPPINESS_DEFAULT         = 1000000,
+    POWER_RUNE_DEFAULT              = 8,
+    POWER_RUNIC_POWER_DEFAULT       = 1000,
 };
 
 struct SpellProcEventEntry;                                 // used only privately
@@ -3057,20 +3071,19 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         void SendThreatRemove(HostileReference* pHostileReference);
         void SendThreatUpdate();
 
-
         /**
          * Checks whether or not this \ref Unit is alive by checking the \ref Unit::m_deathState member
          * for the value \ref DeathState::ALIVE
          * @return true if this \ref Unit is alive, false otherwise
          */
         bool IsAlive() const { return (m_deathState == ALIVE); };
+        bool IsDying() const { return (m_deathState == JUST_DIED); }
         /**
          * Checks whether or not this \ref Unit is dead by checking the \ref Unit::m_deathState member
          * for the value \ref DeathState::DEAD or \ref DeathState::CORPSE
          * @return true if this \ref Unit is dead or a corpse (also dead), false otherwise
          */
         bool IsDead() const { return (m_deathState == DEAD || m_deathState == CORPSE); };
-        bool IsDying() const { return (m_deathState == JUST_DIED); }
         /**
          * Returns the current \ref DeathState for this \ref Unit.
          * @return the value of the member \ref Unit::m_deathState
@@ -3465,7 +3478,18 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
          */
         void RemoveAllAuras(AuraRemoveMode mode = AURA_REMOVE_BY_DEFAULT);
         void RemoveArenaAuras(bool onleave = false);
+        /** 
+         * Removes all \ref Aura s on this \ref Unit s death. Removes all visible \ref Aura s and
+         * disabled the mods for the passive ones (taken from old docs). The reason used is
+         * \ref AuraRemoveMode::AURA_REMOVE_BY_DEATH
+         * \todo Where does it remove the passive ones?
+         */
         void RemoveAllAurasOnDeath();
+        /** 
+         * used when evading to remove all auras except some special auras. Linked and flying
+         * \ref Aura s shouldn't be removed on evade.
+         * \todo Are linked and flying auras really not removed on evade?
+         */
         void RemoveAllAurasOnEvade();
         
         // removing specific aura FROM stack by diff reasons and selections

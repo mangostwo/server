@@ -152,7 +152,6 @@ class MANGOS_DLL_SPEC Pet : public Creature
         void setPetType(PetType type) { m_petType = type; }
         bool isControlled() const { return getPetType() == SUMMON_PET || getPetType() == HUNTER_PET; }
         bool isTemporarySummoned() const { return m_duration > 0; }
-
         bool IsPermanentPetFor(Player* owner);              // pet have tab in character windows and set UNIT_FIELD_PETNUMBER
 
         bool Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, uint32 pet_number);
@@ -169,18 +168,18 @@ class MANGOS_DLL_SPEC Pet : public Creature
         uint32 GetPetAutoSpellOnPos(uint8 pos) const override
         {
             if (pos >= m_autospells.size())
-                return 0;
-            else
-                return m_autospells[pos];
+        { return 0; }
+    else
+        { return m_autospells[pos]; }
         }
 
         bool CanSwim() const override
         {
             Unit const* owner = GetOwner();
             if (owner)
-                return owner->GetTypeId() == TYPEID_PLAYER ? true : ((Creature const*)owner)->CanSwim();
-            else
-                return Creature::CanSwim();
+        { return owner->GetTypeId() == TYPEID_PLAYER ? true : ((Creature const*)owner)->CanSwim(); }
+        else
+            { return Creature::CanSwim(); }
         }
 
         void RegenerateAll(uint32 update_diff) override;    // overwrite Creature::RegenerateAll

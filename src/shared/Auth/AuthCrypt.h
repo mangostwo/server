@@ -79,6 +79,6 @@ class AuthCrypt
     private:
         SARC4 _clientDecrypt;
         SARC4 _serverEncrypt;
-        bool _initialized;
+        bool _initialized; /**< TODO */
 };
 #endif
