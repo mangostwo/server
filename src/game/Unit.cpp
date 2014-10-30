@@ -2481,6 +2481,9 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
 
             CleanDamage cleanDamage = CleanDamage(splitted, BASE_ATTACK, MELEE_HIT_NORMAL);
             pCaster->DealDamage(caster, splitted, &cleanDamage, DIRECT_DAMAGE, schoolMask, (*i)->GetSpellProto(), false);
+            
+            // Break 'fear' and such
+            pCaster->ProcDamageAndSpellFor(true, this, PROC_FLAG_TAKEN_NEGATIVE_SPELL_HIT, PROC_EX_NORMAL_HIT, BASE_ATTACK, (*i)->GetSpellProto(), splitted);
         }
     }
 
@@ -10378,7 +10381,7 @@ void Unit::SetFeared(bool apply, ObjectGuid casterGuid, uint32 spellID, uint32 t
             {
                 SetTargetGuid(getVictim()->GetObjectGuid());  // restore target
                 GetMotionMaster()->MoveChase(getVictim());
-                c->AttackedBy(getVictim());
+                //c->AttackedBy(getVictim());
             }
             else
                 { GetMotionMaster()->Initialize(); }
