@@ -10378,6 +10378,7 @@ void Unit::SetFeared(bool apply, ObjectGuid casterGuid, uint32 spellID, uint32 t
             {
                 SetTargetGuid(getVictim()->GetObjectGuid());  // restore target
                 GetMotionMaster()->MoveChase(getVictim());
+                c->AttackedBy(getVictim());
             }
             else
                 { GetMotionMaster()->Initialize(); }
