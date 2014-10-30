@@ -2777,6 +2777,13 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                 // triggered_spell_id in spell data
                 break;
             }
+            // Unholy Blight
+            if (dummySpell->SpellIconID == 1494) // id = 49194 in dbc, spelliconid = 1494
+            {
+                basepoints[0] = int32(damage/10); // Deal 10% of death coil damage
+                triggered_spell_id = 50536;
+                break;
+            }
             break;
         }
         default:
