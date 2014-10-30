@@ -43,7 +43,7 @@ endif()
 add_executable(${EXECUTABLE_NAME} vmap_assembler.cpp ${EXECUTABLE_SRCS})
 
 if(NOT ACE_USE_EXTERNAL)
-  add_dependencies(${EXECUTABLE_NAME} ace)
+  target_link_libraries(${EXECUTABLE_NAME} ace)
 else()
   target_link_libraries(${EXECUTABLE_NAME} ACE)
 endif()

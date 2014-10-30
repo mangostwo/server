@@ -104,6 +104,11 @@ file(GLOB sources_kalimdor scripts/kalimdor/*.cpp scripts/kalimdor/*.h)
 file(GLOB sources_outlands scripts/outland/*.cpp scripts/outland/*.h)
   LIST(APPEND mangosscript_LIB_SRCS ${sources_outlands})
   source_group("Outlands Scripts" FILES ${sources_outlands})
+  
+#Northrend Scripts
+file(GLOB sources_northrend scripts/northrend/*.cpp scripts/northrend/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_northrend})
+  source_group("Northrend Scripts" FILES ${sources_northrend})
 
 #Instance: Blackrock Depths Scripts
 file(GLOB sources_instance_ek_brd scripts/eastern_kingdoms/blackrock_mountain/blackrock_depths/*.cpp scripts/eastern_kingdoms/blackrock_mountain/blackrock_depths/*.h)
@@ -185,11 +190,6 @@ file(GLOB sources_raid_ek_bwl scripts/eastern_kingdoms/blackrock_mountain/blackw
   LIST(APPEND mangosscript_LIB_SRCS ${sources_raid_ek_bwl})
   source_group("Eastern Kingdoms Scripts\\Raids\\Blackwing Lair" FILES ${sources_raid_ek_bwl})
 
-#Raid: Naxxramas Scripts
-file(GLOB sources_raid_ek_naxx scripts/eastern_kingdoms/naxxramas/*.cpp scripts/eastern_kingdoms/naxxramas/*.h)
-  LIST(APPEND mangosscript_LIB_SRCS ${sources_raid_ek_naxx})
-  source_group("Eastern Kingdoms Scripts\\Raids\\Naxxramas" FILES ${sources_raid_ek_naxx})
-
 #Raid: Zul Gurub Scripts
 file(GLOB sources_raid_ek_zg scripts/eastern_kingdoms/zulgurub/*.cpp scripts/eastern_kingdoms/zulgurub/*.h)
   LIST(APPEND mangosscript_LIB_SRCS ${sources_raid_ek_zg})
@@ -234,6 +234,11 @@ file(GLOB sources_instance_k_cot_bm scripts/kalimdor/caverns_of_time/dark_portal
 file(GLOB sources_instance_k_cot_oh scripts/kalimdor/caverns_of_time/old_hillsbrad/*.cpp scripts/kalimdor/caverns_of_time/old_hillsbrad/*.h)
   LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_k_cot_oh})
   source_group("Kalimdor Scripts\\Instances\\Caverns of Time\\Old Hillsbrad" FILES ${sources_instance_k_cot_oh})
+
+#Instance: Caverns of Time - Culling of Stratholme
+file(GLOB sources_instance_k_cot_cos scripts/kalimdor/caverns_of_time/culling_of_stratholme/*.cpp scripts/kalimdor/caverns_of_time/culling_of_stratholme/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_k_cot_cos})
+  source_group("Kalimdor Scripts\\Instances\\Caverns of Time\\Culling of Stratholme" FILES ${sources_instance_k_cot_cos})
   
 #Instance: Zul Farrak Scripts
 file(GLOB sources_instance_k_zf scripts/kalimdor/zulfarrak/*.cpp scripts/kalimdor/zulfarrak/*.h)
@@ -349,6 +354,126 @@ file(GLOB sources_raid_ol_bt scripts/outland/black_temple/*.cpp scripts/outland/
 file(GLOB sources_raid_ol_gl scripts/outland/gruuls_lair/*.cpp scripts/outland/gruuls_lair/*.h)
   LIST(APPEND mangosscript_LIB_SRCS ${sources_raid_ol_gl})
   source_group("Outlands Scripts\\Raids\\Gruul's Lair" FILES ${sources_raid_ol_gl})
+
+#Instance: Azjol Nerub
+file(GLOB sources_instance_nr_aznj scripts/northrend/azjol-nerub/azjol-nerub/*.cpp scripts/northrend/azjol-nerub/azjol-nerub/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_nr_aznj})
+  source_group("Northrend Scripts\\Instances\\Azjol Nerub" FILES ${sources_instance_nr_aznj})
+
+#Instance: Ahn'Kahet
+file(GLOB sources_instance_nr_ahnk scripts/northrend/azjol-nerub/ahnkahet/*.cpp scripts/northrend/azjol-nerub/ahnkahet/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_nr_ahnk})
+  source_group("Northrend Scripts\\Instances\\Ahn'Kahet" FILES ${sources_instance_nr_ahnk})
+
+#Instance: Trial of the Champion
+file(GLOB sources_instance_nr_totch scripts/northrend/crusaders_coliseum/trial_of_the_champion/*.cpp scripts/northrend/crusaders_coliseum/trial_of_the_champion/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_nr_totch})
+  source_group("Northrend Scripts\\Instances\\Trial of the Champion" FILES ${sources_instance_nr_totch})
+
+#Instance: Drak'Tharon Keep
+file(GLOB sources_instance_nr_dtk scripts/northrend/draktharon_keep/*.cpp scripts/northrend/draktharon_keep/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_nr_dtk})
+  source_group("Northrend Scripts\\Instances\\Drak'Tharon Keep" FILES ${sources_instance_nr_dtk})
+  
+#Instance: Gundrak
+file(GLOB sources_instance_nr_gdk scripts/northrend/gundrak/*.cpp scripts/northrend/gundrak/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_nr_gdk})
+  source_group("Northrend Scripts\\Instances\\Gundrak" FILES ${sources_instance_nr_gdk})
+  
+#Instance: Frozen Halls: Forge of Souls
+file(GLOB sources_instance_nr_fh_fos scripts/northrend/icecrown_citadel/frozen_halls/forge_of_souls/*.cpp scripts/northrend/icecrown_citadel/frozen_halls/forge_of_souls/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_nr_fh_fos})
+  source_group("Northrend Scripts\\Instances\\Forge of Souls" FILES ${sources_instance_nr_fh_fos})
+
+#Instance: Frozen Halls: Halls of Reflection
+file(GLOB sources_instance_nr_fh_hor scripts/northrend/icecrown_citadel/frozen_halls/halls_of_reflection/*.cpp scripts/northrend/icecrown_citadel/frozen_halls/halls_of_reflection/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_nr_fh_hor})
+  source_group("Northrend Scripts\\Instances\\Halls of Reflection" FILES ${sources_instance_nr_fh_hor})
+
+#Instance: Frozen Halls: Pit of Saron
+file(GLOB sources_instance_nr_fh_pos scripts/northrend/icecrown_citadel/frozen_halls/pit_of_saron/*.cpp scripts/northrend/icecrown_citadel/frozen_halls/pit_of_saron/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_nr_fh_pos})
+  source_group("Northrend Scripts\\Instances\\Pit of Saron" FILES ${sources_instance_nr_fh_pos})
+  
+#Instance: The Nexus
+file(GLOB sources_instance_nr_nex scripts/northrend/nexus/nexus/*.cpp scripts/northrend/nexus/nexus/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_nr_nex})
+  source_group("Northrend Scripts\\Instances\\The Nexus" FILES ${sources_instance_nr_nex})
+  
+#Instance: The Oculus
+file(GLOB sources_instance_nr_oculus scripts/northrend/nexus/oculus/*.cpp scripts/northrend/nexus/oculus/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_nr_oculus})
+  source_group("Northrend Scripts\\Instances\\The Oculus" FILES ${sources_instance_nr_oculus})
+  
+#Instance: Halls of Lightning
+file(GLOB sources_instance_nr_uld_hol scripts/northrend/ulduar/halls_of_lightning/*.cpp scripts/northrend/ulduar/halls_of_lightning/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_nr_uld_hol})
+  source_group("Northrend Scripts\\Instances\\Halls of Lightning" FILES ${sources_instance_nr_uld_hol})
+  
+#Instance: Halls of Stone
+file(GLOB sources_instance_nr_uld_hos scripts/northrend/ulduar/halls_of_stone/*.cpp scripts/northrend/ulduar/halls_of_stone/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_nr_uld_hos})
+  source_group("Northrend Scripts\\Instances\\Halls of Stone" FILES ${sources_instance_nr_uld_hos})
+  
+#Instance: Utgarde Keep
+file(GLOB sources_instance_nr_uk scripts/northrend/utgarde_keep/utgarde_keep/*.cpp scripts/northrend/utgarde_keep/utgarde_keep/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_nr_uk})
+  source_group("Northrend Scripts\\Instances\\Utgarde Keep" FILES ${sources_instance_nr_uk})
+
+#Instance: Utgarde Pinnacle
+file(GLOB sources_instance_nr_up scripts/northrend/utgarde_keep/utgarde_pinnacle/*.cpp scripts/northrend/utgarde_keep/utgarde_pinnacle/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_nr_up})
+  source_group("Northrend Scripts\\Instances\\Utgarde Pinnacle" FILES ${sources_instance_nr_up})
+  
+#Instance: Violet Hold
+file(GLOB sources_instance_nr_vh scripts/northrend/violet_hold/*.cpp scripts/northrend/violet_hold/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_nr_vh})
+  source_group("Northrend Scripts\\Instances\\Violet Hold" FILES ${sources_instance_nr_vh})
+
+#Raid: Naxxramas
+file(GLOB sources_raid_nr_naxx scripts/northrend/naxxramas/*.cpp scripts/northrend/naxxramas/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_raid_nr_naxx})
+  source_group("Northrend Scripts\\Raids\\Naxxramas" FILES ${sources_raid_nr_naxx})
+  
+#Raid: Vault of Archavon
+file(GLOB sources_raid_nr_voa scripts/northrend/vault_of_archavon/*.cpp scripts/northrend/vault_of_archavon/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_raid_nr_voa})
+  source_group("Northrend Scripts\\Raids\\Vault of Archavon" FILES ${sources_raid_nr_voa})
+  
+#Raid: Obsidian Sanctum
+file(GLOB sources_raid_nr_os scripts/northrend/obsidian_sanctum/*.cpp scripts/northrend/obsidian_sanctum/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_raid_nr_os})
+  source_group("Northrend Scripts\\Raids\\Obsidian Sanctum" FILES ${sources_raid_nr_os})
+  
+#Raid: Ruby Sanctum
+file(GLOB sources_raid_nr_rs scripts/northrend/ruby_sanctum/*.cpp scripts/northrend/ruby_sanctum/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_raid_nr_rs})
+  source_group("Northrend Scripts\\Raids\\Ruby Sanctum" FILES ${sources_raid_nr_rs})
+  
+#Raid: Icecrown Citadel
+file(GLOB sources_raid_nr_icc scripts/northrend/icecrown_citadel/icecrown_citadel/*.cpp scripts/northrend/icecrown_citadel/icecrown_citadel/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_raid_nr_icc})
+  source_group("Northrend Scripts\\Raids\\Icecrown Citadel" FILES ${sources_raid_nr_icc})
+  
+#Raid: Trial of the Crusader
+file(GLOB sources_raid_nr_totc scripts/northrend/crusaders_coliseum/trial_of_the_crusader/*.cpp scripts/northrend/crusaders_coliseum/trial_of_the_crusader/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_raid_nr_totc})
+  source_group("Northrend Scripts\\Raids\\Trial of the Crusader" FILES ${sources_raid_nr_totc})
+  
+#Raid: Eye of Eternity
+file(GLOB sources_raid_nr_eoe scripts/northrend/nexus/eye_of_eternity/*.cpp scripts/northrend/nexus/eye_of_eternity/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_raid_nr_eoe})
+  source_group("Northrend Scripts\\Raids\\Eye of Eternity" FILES ${sources_raid_nr_eoe})
+  
+#Raid: Ulduar
+file(GLOB sources_raid_nr_uld scripts/northrend/ulduar/ulduar/*.cpp scripts/northrend/ulduar/ulduar/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_raid_nr_uld})
+  source_group("Northrend Scripts\\Raids\\Ulduar" FILES ${sources_raid_nr_uld})
+  
+#WorldScript: Scarlet Enclave
+file(GLOB sources_world_scarlet_enclave scripts/eastern_kingdoms/scarlet_enclave/*.cpp scripts/eastern_kingdoms/scarlet_enclave/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_world_scarlet_enclave})
+  source_group("Eastern Kingdoms Scripts\\World\\Scarlet Enclave" FILES ${sources_world_scarlet_enclave})
   
 add_library(mangosscript STATIC
   ${mangosscript_PCH_CPP}
