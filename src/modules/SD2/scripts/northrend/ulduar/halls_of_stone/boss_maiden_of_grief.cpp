@@ -53,7 +53,7 @@ enum
 ## boss_maiden_of_grief
 ######*/
 
-struct MANGOS_DLL_DECL boss_maiden_of_griefAI : public ScriptedAI
+struct  boss_maiden_of_griefAI : public ScriptedAI
 {
     boss_maiden_of_griefAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

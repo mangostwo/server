@@ -53,7 +53,7 @@ enum
     MAX_BUDDY                       = 4
 };
 
-struct MANGOS_DLL_DECL npc_anubisath_sentinelAI : public ScriptedAI
+struct  npc_anubisath_sentinelAI : public ScriptedAI
 {
     npc_anubisath_sentinelAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

@@ -70,7 +70,7 @@ struct Face
     uint32 m_uiTimer;
 };
 
-class MANGOS_DLL_DECL instance_halls_of_stone : public ScriptedInstance
+class  instance_halls_of_stone : public ScriptedInstance
 {
     public:
         instance_halls_of_stone(Map* pMap);

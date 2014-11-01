@@ -47,7 +47,7 @@ enum
     SPELL_HOPELESS           = 29125
 };
 
-struct MANGOS_DLL_DECL boss_razuviousAI : public ScriptedAI
+struct  boss_razuviousAI : public ScriptedAI
 {
     boss_razuviousAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

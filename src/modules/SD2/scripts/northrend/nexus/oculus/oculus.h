@@ -64,7 +64,7 @@ static const float aOculusBossSpawnLocs[2][4] =
     {1077.04f, 1086.21f, 655.497f, 4.18879f}            // Eregos
 };
 
-class MANGOS_DLL_DECL instance_oculus : public ScriptedInstance
+class  instance_oculus : public ScriptedInstance
 {
     public:
         instance_oculus(Map* pMap);

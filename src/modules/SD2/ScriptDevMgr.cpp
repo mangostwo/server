@@ -85,100 +85,16 @@ struct TSpellSummary
 } extern* SpellSummary;
 
 
-MANGOS_DLL_EXPORT
-void FreeScriptLibrary()
-{
-    // Free Spell Summary
-    delete []SpellSummary;
-
-    // Free resources before library unload
-    for (SDScriptVec::const_iterator itr = m_scripts.begin(); itr != m_scripts.end(); ++itr)
-    {
-        delete *itr;
-    }
-
-    m_scripts.clear();
-
-    num_sc_scripts = 0;
-
-    setScriptLibraryErrorFile(NULL, NULL);
-}
-
-MANGOS_DLL_EXPORT
-void InitScriptLibrary()
-{
-    // ScriptDev2 startup
-    outstring_log("  ___         _      _   ___          ___ ");
-    outstring_log(" / __| __ _ _(_)_ __| |_|   \\ _____ _|_  )");
-    outstring_log(" \\__ \\/ _| '_| | '_ \\  _| |) / -_) V // / ");
-    outstring_log(" |___/\\__|_| |_| .__/\\__|___/\\___|\\_//___|");
-    outstring_log("               |_|                        ");
-    outstring_log("                    http://scriptdev2.com/\n");
-
-    // Get configuration file
-    bool configFailure = false;
-    if (!SD2Config.SetSource(MANGOSD_CONFIG_LOCATION))
-    {
-        configFailure = true;
-    }
-    else
-    {
-        outstring_log("SD2: Using configuration file %s", MANGOSD_CONFIG_LOCATION);
-    }
-
-    // Set SD2 Error Log File
-    std::string sd2LogFile = SD2Config.GetStringDefault("SD2ErrorLogFile", "scriptdev2-errors.log");
-    setScriptLibraryErrorFile(sd2LogFile.c_str(), "SD2");
-
-    if (configFailure)
-    {
-        script_error_log("Unable to open configuration file. Database will be unaccessible. Configuration values will use default.");
-    }
-
-    // Check config file version
-    if (SD2Config.GetIntDefault("ConfVersion", 0) != MANGOSD_CONFIG_VERSION)
-    {
-        script_error_log("Configuration file version doesn't match expected version. Some config variables may be wrong or missing.");
-    }
-
-    outstring_log("\n");
-
-    // Load database (must be called after SD2Config.SetSource).
-    LoadDatabase();
-
-    outstring_log("SD2: Loading C++ scripts");
-    BarGoLink bar(1);
-    bar.step();
-
-    // Resize script ids to needed ammount of assigned ScriptNames (from core)
-    m_scripts.resize(GetScriptIdsCount(), NULL);
-
-    FillSpellSummary();
-
-    AddScripts();
-
-    // Check existance scripts for all registered by core script names
-    for (uint32 i = 1; i < GetScriptIdsCount(); ++i)
-    {
-        if (!m_scripts[i])
-        {
-            script_error_log("No script found for ScriptName '%s'.", GetScriptName(i));
-        }
-    }
-
-    outstring_log(">> Loaded %i C++ Scripts.", num_sc_scripts);
-}
-
 //*********************************
 //*** Functions used globally ***
 
 /**
- * Function that does script text
- *
- * @param iTextEntry Entry of the text, stored in SD2-database
- * @param pSource Source of the text
- * @param pTarget Can be NULL (depending on CHAT_TYPE of iTextEntry). Possible target for the text
- */
+  * Function that does script text
+  *
+  * @param iTextEntry Entry of the text, stored in SD2-database
+  * @param pSource Source of the text
+  * @param pTarget Can be NULL (depending on CHAT_TYPE of iTextEntry). Possible target for the text
+  */
 void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
 {
     if (!pSource)
@@ -190,7 +106,7 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
     if (iTextEntry >= 0)
     {
         script_error_log("DoScriptText with source entry %u (TypeId=%u, guid=%u) attempts to process text entry %i, but text entry must be negative.",
-                         pSource->GetEntry(), pSource->GetTypeId(), pSource->GetGUIDLow(), iTextEntry);
+                            pSource->GetEntry(), pSource->GetTypeId(), pSource->GetGUIDLow(), iTextEntry);
 
         return;
     }
@@ -200,14 +116,14 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
 }
 
 /**
- * Function that either simulates or does script text for a map
- *
- * @param iTextEntry Entry of the text, stored in SD2-database, only type CHAT_TYPE_ZONE_YELL supported
- * @param uiCreatureEntry Id of the creature of whom saying will be simulated
- * @param pMap Given Map on which the map-wide text is displayed
- * @param pCreatureSource Can be NULL. If pointer to Creature is given, then the creature does the map-wide text
- * @param pTarget Can be NULL. Possible target for the text
- */
+  * Function that either simulates or does script text for a map
+  *
+  * @param iTextEntry Entry of the text, stored in SD2-database, only type CHAT_TYPE_ZONE_YELL supported
+  * @param uiCreatureEntry Id of the creature of whom saying will be simulated
+  * @param pMap Given Map on which the map-wide text is displayed
+  * @param pCreatureSource Can be NULL. If pointer to Creature is given, then the creature does the map-wide text
+  * @param pTarget Can be NULL. Possible target for the text
+  */
 void DoOrSimulateScriptTextForMap(int32 iTextEntry, uint32 uiCreatureEntry, Map* pMap, Creature* pCreatureSource /*=NULL*/, Unit* pTarget /*=NULL*/)
 {
     if (!pMap)
@@ -281,32 +197,111 @@ void Script::RegisterSelf(bool bReportError)
     }
 }
 
-//********************************
-//*** Functions to be Exported ***
+    //************************************
+    //*** Functions to be used by core ***
 
-MANGOS_DLL_EXPORT
-char const* GetScriptLibraryVersion()
+void SD2::FreeScriptLibrary()
+{
+    // Free Spell Summary
+    delete []SpellSummary;
+        
+    // Free resources before library unload
+    for (SDScriptVec::const_iterator itr = m_scripts.begin(); itr != m_scripts.end(); ++itr)
+    {
+        delete *itr;
+    }
+        
+    m_scripts.clear();
+        
+    num_sc_scripts = 0;
+       
+    setScriptLibraryErrorFile(NULL, NULL);
+}
+    
+void SD2::InitScriptLibrary()
+{
+    // ScriptDev2 startup
+    outstring_log("  ___         _      _   ___          ___ ");
+    outstring_log(" / __| __ _ _(_)_ __| |_|   \\ _____ _|_  )");
+    outstring_log(" \\__ \\/ _| '_| | '_ \\  _| |) / -_) V // / ");
+    outstring_log(" |___/\\__|_| |_| .__/\\__|___/\\___|\\_//___|");
+    outstring_log("               |_|                        ");
+    outstring_log("                    http://scriptdev2.com/\n");
+        
+    // Get configuration file
+    bool configFailure = false;
+    if (!SD2Config.SetSource(MANGOSD_CONFIG_LOCATION))
+    {
+        configFailure = true;
+    }
+    else
+    {
+        outstring_log("SD2: Using configuration file %s", MANGOSD_CONFIG_LOCATION);
+    }
+        
+    // Set SD2 Error Log File
+    std::string sd2LogFile = SD2Config.GetStringDefault("SD2ErrorLogFile", "scriptdev2-errors.log");
+    setScriptLibraryErrorFile(sd2LogFile.c_str(), "SD2");
+        
+    if (configFailure)
+    {
+        script_error_log("Unable to open configuration file. Database will be unaccessible. Configuration values will use default.");
+    }
+        
+    // Check config file version
+    if (SD2Config.GetIntDefault("ConfVersion", 0) != MANGOSD_CONFIG_VERSION)
+    {
+        script_error_log("Configuration file version doesn't match expected version. Some config variables may be wrong or missing.");
+    }
+        
+    outstring_log("\n");
+        
+    // Load database (must be called after SD2Config.SetSource).
+    LoadDatabase();
+        
+    outstring_log("SD2: Loading C++ scripts");
+    BarGoLink bar(1);
+    bar.step();
+        
+    // Resize script ids to needed ammount of assigned ScriptNames (from core)
+    m_scripts.resize(GetScriptIdsCount(), NULL);
+        
+    FillSpellSummary();
+        
+    AddScripts();
+        
+    // Check existance scripts for all registered by core script names
+    for (uint32 i = 1; i < GetScriptIdsCount(); ++i)
+    {
+        if (!m_scripts[i])
+        {
+            script_error_log("No script found for ScriptName '%s'.", GetScriptName(i));
+        }
+    }
+        
+    outstring_log(">> Loaded %i C++ Scripts.", num_sc_scripts);
+}
+    
+char const* SD2::GetScriptLibraryVersion()
 {
     return strSD2Version.c_str();
 }
-
-MANGOS_DLL_EXPORT
-bool GossipHello(Player* pPlayer, Creature* pCreature)
+    
+bool SD2::GossipHello(Player* pPlayer, Creature* pCreature)
 {
     Script* pTempScript = m_scripts[pCreature->GetScriptId()];
-
+        
     if (!pTempScript || !pTempScript->pGossipHello)
     {
         return false;
     }
-
+        
     pPlayer->PlayerTalkClass->ClearMenus();
-
+        
     return pTempScript->pGossipHello(pPlayer, pCreature);
 }
-
-MANGOS_DLL_EXPORT
-bool GOGossipHello(Player* pPlayer, GameObject* pGo)
+    
+bool SD2::GOGossipHello(Player* pPlayer, GameObject* pGo)
 {
     Script* pTempScript = m_scripts[pGo->GetGOInfo()->ScriptId];
 
@@ -319,9 +314,8 @@ bool GOGossipHello(Player* pPlayer, GameObject* pGo)
 
     return pTempScript->pGossipHelloGO(pPlayer, pGo);
 }
-
-MANGOS_DLL_EXPORT
-bool GossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
+    
+bool SD2::GossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 {
     debug_log("SD2: Gossip selection, sender: %u, action: %u", uiSender, uiAction);
 
@@ -337,8 +331,7 @@ bool GossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 
     return pTempScript->pGossipSelect(pPlayer, pCreature, uiSender, uiAction);
 }
 
-MANGOS_DLL_EXPORT
-bool GOGossipSelect(Player* pPlayer, GameObject* pGo, uint32 uiSender, uint32 uiAction)
+bool SD2::GOGossipSelect(Player* pPlayer, GameObject* pGo, uint32 uiSender, uint32 uiAction)
 {
     debug_log("SD2: GO Gossip selection, sender: %u, action: %u", uiSender, uiAction);
 
@@ -354,8 +347,7 @@ bool GOGossipSelect(Player* pPlayer, GameObject* pGo, uint32 uiSender, uint32 ui
     return pTempScript->pGossipSelectGO(pPlayer, pGo, uiSender, uiAction);
 }
 
-MANGOS_DLL_EXPORT
-bool GossipSelectWithCode(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction, const char* sCode)
+bool SD2::GossipSelectWithCode(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction, const char* sCode)
 {
     debug_log("SD2: Gossip selection with code, sender: %u, action: %u", uiSender, uiAction);
 
@@ -371,8 +363,7 @@ bool GossipSelectWithCode(Player* pPlayer, Creature* pCreature, uint32 uiSender,
     return pTempScript->pGossipSelectWithCode(pPlayer, pCreature, uiSender, uiAction, sCode);
 }
 
-MANGOS_DLL_EXPORT
-bool GOGossipSelectWithCode(Player* pPlayer, GameObject* pGo, uint32 uiSender, uint32 uiAction, const char* sCode)
+bool SD2::GOGossipSelectWithCode(Player* pPlayer, GameObject* pGo, uint32 uiSender, uint32 uiAction, const char* sCode)
 {
     debug_log("SD2: GO Gossip selection with code, sender: %u, action: %u", uiSender, uiAction);
 
@@ -388,8 +379,7 @@ bool GOGossipSelectWithCode(Player* pPlayer, GameObject* pGo, uint32 uiSender, u
     return pTempScript->pGossipSelectGOWithCode(pPlayer, pGo, uiSender, uiAction, sCode);
 }
 
-MANGOS_DLL_EXPORT
-bool QuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+bool SD2::QuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
 {
     Script* pTempScript = m_scripts[pCreature->GetScriptId()];
 
@@ -403,8 +393,7 @@ bool QuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
     return pTempScript->pQuestAcceptNPC(pPlayer, pCreature, pQuest);
 }
 
-MANGOS_DLL_EXPORT
-bool QuestRewarded(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
+bool SD2::QuestRewarded(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
 {
     Script* pTempScript = m_scripts[pCreature->GetScriptId()];
 
@@ -418,8 +407,7 @@ bool QuestRewarded(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
     return pTempScript->pQuestRewardedNPC(pPlayer, pCreature, pQuest);
 }
 
-MANGOS_DLL_EXPORT
-uint32 GetNPCDialogStatus(Player* pPlayer, Creature* pCreature)
+uint32 SD2::GetNPCDialogStatus(Player* pPlayer, Creature* pCreature)
 {
     Script* pTempScript = m_scripts[pCreature->GetScriptId()];
 
@@ -433,8 +421,7 @@ uint32 GetNPCDialogStatus(Player* pPlayer, Creature* pCreature)
     return pTempScript->pDialogStatusNPC(pPlayer, pCreature);
 }
 
-MANGOS_DLL_EXPORT
-uint32 GetGODialogStatus(Player* pPlayer, GameObject* pGo)
+uint32 SD2::GetGODialogStatus(Player* pPlayer, GameObject* pGo)
 {
     Script* pTempScript = m_scripts[pGo->GetGOInfo()->ScriptId];
 
@@ -448,8 +435,7 @@ uint32 GetGODialogStatus(Player* pPlayer, GameObject* pGo)
     return pTempScript->pDialogStatusGO(pPlayer, pGo);
 }
 
-MANGOS_DLL_EXPORT
-bool ItemQuestAccept(Player* pPlayer, Item* pItem, Quest const* pQuest)
+bool SD2::ItemQuestAccept(Player* pPlayer, Item* pItem, Quest const* pQuest)
 {
     Script* pTempScript = m_scripts[pItem->GetProto()->ScriptId];
 
@@ -463,8 +449,7 @@ bool ItemQuestAccept(Player* pPlayer, Item* pItem, Quest const* pQuest)
     return pTempScript->pQuestAcceptItem(pPlayer, pItem, pQuest);
 }
 
-MANGOS_DLL_EXPORT
-bool GOUse(Player* pPlayer, GameObject* pGo)
+bool SD2::GOUse(Player* pPlayer, GameObject* pGo)
 {
     Script* pTempScript = m_scripts[pGo->GetGOInfo()->ScriptId];
 
@@ -476,11 +461,10 @@ bool GOUse(Player* pPlayer, GameObject* pGo)
     return pTempScript->pGOUse(pPlayer, pGo);
 }
 
-MANGOS_DLL_EXPORT
-bool GOQuestAccept(Player* pPlayer, GameObject* pGo, const Quest* pQuest)
+bool SD2::GOQuestAccept(Player* pPlayer, GameObject* pGo, const Quest* pQuest)
 {
     Script* pTempScript = m_scripts[pGo->GetGOInfo()->ScriptId];
-
+    
     if (!pTempScript || !pTempScript->pQuestAcceptGO)
     {
         return false;
@@ -491,8 +475,7 @@ bool GOQuestAccept(Player* pPlayer, GameObject* pGo, const Quest* pQuest)
     return pTempScript->pQuestAcceptGO(pPlayer, pGo, pQuest);
 }
 
-MANGOS_DLL_EXPORT
-bool GOQuestRewarded(Player* pPlayer, GameObject* pGo, Quest const* pQuest)
+bool SD2::GOQuestRewarded(Player* pPlayer, GameObject* pGo, Quest const* pQuest)
 {
     Script* pTempScript = m_scripts[pGo->GetGOInfo()->ScriptId];
 
@@ -506,8 +489,7 @@ bool GOQuestRewarded(Player* pPlayer, GameObject* pGo, Quest const* pQuest)
     return pTempScript->pQuestRewardedGO(pPlayer, pGo, pQuest);
 }
 
-MANGOS_DLL_EXPORT
-bool AreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry)
+bool SD2::AreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry)
 {
     Script* pTempScript = m_scripts[GetAreaTriggerScriptId(atEntry->id)];
 
@@ -519,8 +501,7 @@ bool AreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry)
     return pTempScript->pAreaTrigger(pPlayer, atEntry);
 }
 
-MANGOS_DLL_EXPORT
-bool NpcSpellClick(Player* pPlayer, Creature* pClickedCreature, uint32 uiSpellId)
+bool SD2::NpcSpellClick(Player* pPlayer, Creature* pClickedCreature, uint32 uiSpellId)
 {
     Script* pTempScript = m_scripts[pClickedCreature->GetScriptId()];
     
@@ -530,8 +511,7 @@ bool NpcSpellClick(Player* pPlayer, Creature* pClickedCreature, uint32 uiSpellId
     return pTempScript->pNpcSpellClick(pPlayer, pClickedCreature, uiSpellId);
 }
 
-MANGOS_DLL_EXPORT
-bool ProcessEvent(uint32 uiEventId, Object* pSource, Object* pTarget, bool bIsStart)
+bool SD2::ProcessEvent(uint32 uiEventId, Object* pSource, Object* pTarget, bool bIsStart)
 {
     Script* pTempScript = m_scripts[GetEventIdScriptId(uiEventId)];
 
@@ -544,8 +524,7 @@ bool ProcessEvent(uint32 uiEventId, Object* pSource, Object* pTarget, bool bIsSt
     return pTempScript->pProcessEventId(uiEventId, pSource, pTarget, bIsStart);
 }
 
-MANGOS_DLL_EXPORT
-CreatureAI* GetCreatureAI(Creature* pCreature)
+CreatureAI* SD2::GetCreatureAI(Creature* pCreature)
 {
     Script* pTempScript = m_scripts[pCreature->GetScriptId()];
 
@@ -557,8 +536,7 @@ CreatureAI* GetCreatureAI(Creature* pCreature)
     return pTempScript->GetAI(pCreature);
 }
 
-MANGOS_DLL_EXPORT
-bool ItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)
+bool SD2::ItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)
 {
     Script* pTempScript = m_scripts[pItem->GetProto()->ScriptId];
 
@@ -570,8 +548,7 @@ bool ItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)
     return pTempScript->pItemUse(pPlayer, pItem, targets);
 }
 
-MANGOS_DLL_EXPORT
-bool EffectDummyCreature(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid)
+bool SD2::EffectDummyCreature(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid)
 {
     Script* pTempScript = m_scripts[pTarget->GetScriptId()];
 
@@ -583,8 +560,7 @@ bool EffectDummyCreature(Unit* pCaster, uint32 spellId, SpellEffectIndex effInde
     return pTempScript->pEffectDummyNPC(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 }
 
-MANGOS_DLL_EXPORT
-bool EffectDummyGameObject(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, GameObject* pTarget, ObjectGuid originalCasterGuid)
+bool SD2::EffectDummyGameObject(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, GameObject* pTarget, ObjectGuid originalCasterGuid)
 {
     Script* pTempScript = m_scripts[pTarget->GetGOInfo()->ScriptId];
 
@@ -596,8 +572,7 @@ bool EffectDummyGameObject(Unit* pCaster, uint32 spellId, SpellEffectIndex effIn
     return pTempScript->pEffectDummyGO(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 }
 
-MANGOS_DLL_EXPORT
-bool EffectDummyItem(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Item* pTarget, ObjectGuid originalCasterGuid)
+bool SD2::EffectDummyItem(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Item* pTarget, ObjectGuid originalCasterGuid)
 {
     Script* pTempScript = m_scripts[pTarget->GetProto()->ScriptId];
 
@@ -609,8 +584,7 @@ bool EffectDummyItem(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, I
     return pTempScript->pEffectDummyItem(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 }
 
-MANGOS_DLL_EXPORT
-bool EffectScriptEffectCreature(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid)
+bool SD2::EffectScriptEffectCreature(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid)
 {
     Script* pTempScript = m_scripts[pTarget->GetScriptId()];
 
@@ -622,8 +596,7 @@ bool EffectScriptEffectCreature(Unit* pCaster, uint32 spellId, SpellEffectIndex 
     return pTempScript->pEffectScriptEffectNPC(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 }
 
-MANGOS_DLL_EXPORT
-bool AuraDummy(Aura const* pAura, bool bApply)
+bool SD2::AuraDummy(Aura const* pAura, bool bApply)
 {
     Script* pTempScript = m_scripts[((Creature*)pAura->GetTarget())->GetScriptId()];
 
@@ -635,8 +608,7 @@ bool AuraDummy(Aura const* pAura, bool bApply)
     return pTempScript->pEffectAuraDummy(pAura, bApply);
 }
 
-MANGOS_DLL_EXPORT
-InstanceData* CreateInstanceData(Map* pMap)
+InstanceData* SD2::CreateInstanceData(Map* pMap)
 {
     Script* pTempScript = m_scripts[pMap->GetScriptId()];
 

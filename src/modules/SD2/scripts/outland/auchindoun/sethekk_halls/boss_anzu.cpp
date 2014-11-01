@@ -53,7 +53,7 @@ enum
 
 static const uint32 aSpiritsEntries[3] = {NPC_FALCON_SPIRIT, NPC_HAWK_SPIRIT, NPC_EAGLE_SPIRIT};
 
-struct MANGOS_DLL_DECL boss_anzuAI : public ScriptedAI
+struct  boss_anzuAI : public ScriptedAI
 {
     boss_anzuAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

@@ -268,7 +268,7 @@ static const float afCenterMovePos[3] = {2744.61f, 2569.38f, 364.3136f};
 ## boss_mimiron
 ######*/
 
-struct MANGOS_DLL_DECL boss_mimironAI : public ScriptedAI, private DialogueHelper
+struct  boss_mimironAI : public ScriptedAI, private DialogueHelper
 {
     boss_mimironAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aMimironDialogue)
@@ -783,7 +783,7 @@ CreatureAI* GetAI_boss_mimiron(Creature* pCreature)
 ## boss_leviathan_mk2
 ######*/
 
-struct MANGOS_DLL_DECL boss_leviathan_mk2AI : public ScriptedAI
+struct  boss_leviathan_mk2AI : public ScriptedAI
 {
     boss_leviathan_mk2AI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -1067,7 +1067,7 @@ CreatureAI* GetAI_boss_leviathan_mk2(Creature* pCreature)
 ## boss_vx001
 ######*/
 
-struct MANGOS_DLL_DECL boss_vx001AI : public ScriptedAI
+struct  boss_vx001AI : public ScriptedAI
 {
     boss_vx001AI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -1367,7 +1367,7 @@ CreatureAI* GetAI_boss_vx001(Creature* pCreature)
 ## boss_aerial_unit
 ######*/
 
-struct MANGOS_DLL_DECL boss_aerial_unitAI : public ScriptedAI
+struct  boss_aerial_unitAI : public ScriptedAI
 {
     boss_aerial_unitAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -1621,7 +1621,7 @@ CreatureAI* GetAI_boss_aerial_unit(Creature* pCreature)
 ## npc_proximity_mine
 ######*/
 
-struct MANGOS_DLL_DECL npc_proximity_mineAI : public Scripted_NoMovementAI
+struct  npc_proximity_mineAI : public Scripted_NoMovementAI
 {
     npc_proximity_mineAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 
@@ -1670,7 +1670,7 @@ CreatureAI* GetAI_npc_proximity_mine(Creature* pCreature)
 ## npc_bot_trigger
 ######*/
 
-struct MANGOS_DLL_DECL npc_bot_triggerAI : public Scripted_NoMovementAI
+struct  npc_bot_triggerAI : public Scripted_NoMovementAI
 {
     npc_bot_triggerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
@@ -1785,7 +1785,7 @@ bool EffectDummyCreature_npc_bot_trigger(Unit* pCaster, uint32 uiSpellId, SpellE
 ## npc_mimiron_flames
 ######*/
 
-struct MANGOS_DLL_DECL npc_mimiron_flamesAI : public Scripted_NoMovementAI
+struct  npc_mimiron_flamesAI : public Scripted_NoMovementAI
 {
     npc_mimiron_flamesAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
@@ -1862,7 +1862,7 @@ CreatureAI* GetAI_npc_mimiron_flames(Creature* pCreature)
 ######*/
 
 // TODO Move this 'script' to EventAI when combat can be proper prevented from core-side
-struct MANGOS_DLL_DECL npc_frost_bombAI : public Scripted_NoMovementAI
+struct  npc_frost_bombAI : public Scripted_NoMovementAI
 {
     npc_frost_bombAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 
@@ -1919,7 +1919,7 @@ CreatureAI* GetAI_npc_frost_bomb(Creature* pCreature)
 ## npc_rocket_strike
 ######*/
 
-struct MANGOS_DLL_DECL npc_rocket_strikeAI : public Scripted_NoMovementAI
+struct  npc_rocket_strikeAI : public Scripted_NoMovementAI
 {
     npc_rocket_strikeAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 
@@ -1950,7 +1950,7 @@ CreatureAI* GetAI_npc_rocket_strike(Creature* pCreature)
 ######*/
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct MANGOS_DLL_DECL boss_leviathan_mk2_turretAI : public Scripted_NoMovementAI
+struct  boss_leviathan_mk2_turretAI : public Scripted_NoMovementAI
 {
     boss_leviathan_mk2_turretAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 
@@ -1970,7 +1970,7 @@ CreatureAI* GetAI_boss_leviathan_mk2_turret(Creature* pCreature)
 ######*/
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct MANGOS_DLL_DECL npc_computerAI : public Scripted_NoMovementAI
+struct  npc_computerAI : public Scripted_NoMovementAI
 {
     npc_computerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 

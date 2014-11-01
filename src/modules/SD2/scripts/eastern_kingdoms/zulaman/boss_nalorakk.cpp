@@ -55,7 +55,7 @@ enum
     SPELL_DEAFENING_ROAR    = 42398
 };
 
-struct MANGOS_DLL_DECL boss_nalorakkAI : public ScriptedAI
+struct  boss_nalorakkAI : public ScriptedAI
 {
     boss_nalorakkAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

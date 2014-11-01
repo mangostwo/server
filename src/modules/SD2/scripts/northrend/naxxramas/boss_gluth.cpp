@@ -56,7 +56,7 @@ static const float aZombieSummonLoc[MAX_ZOMBIE_LOCATIONS][3] =
     {3308.3f, -3185.8f, 297.42f},
 };
 
-struct MANGOS_DLL_DECL boss_gluthAI : public ScriptedAI
+struct  boss_gluthAI : public ScriptedAI
 {
     boss_gluthAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

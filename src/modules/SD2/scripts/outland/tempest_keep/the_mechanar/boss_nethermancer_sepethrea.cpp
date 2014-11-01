@@ -46,7 +46,7 @@ enum
     NPC_RAGING_FLAMES               = 20481,
 };
 
-struct MANGOS_DLL_DECL boss_nethermancer_sepethreaAI : public ScriptedAI
+struct  boss_nethermancer_sepethreaAI : public ScriptedAI
 {
     boss_nethermancer_sepethreaAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

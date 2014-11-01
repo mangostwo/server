@@ -34,7 +34,7 @@ enum
     SPELL_SHADOWSHOCK       = 19460
 };
 
-struct MANGOS_DLL_DECL boss_lucifronAI : public ScriptedAI
+struct  boss_lucifronAI : public ScriptedAI
 {
     boss_lucifronAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

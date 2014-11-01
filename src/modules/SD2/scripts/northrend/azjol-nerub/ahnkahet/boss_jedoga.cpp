@@ -86,7 +86,7 @@ static const float aVolunteerPosition[2][3] =
 ## boss_jedoga
 ######*/
 
-struct MANGOS_DLL_DECL boss_jedogaAI : public ScriptedAI
+struct  boss_jedogaAI : public ScriptedAI
 {
     boss_jedogaAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -410,7 +410,7 @@ CreatureAI* GetAI_boss_jedoga(Creature* pCreature)
 ## npc_twilight_volunteer
 ######*/
 
-struct MANGOS_DLL_DECL npc_twilight_volunteerAI : public Scripted_NoMovementAI
+struct  npc_twilight_volunteerAI : public Scripted_NoMovementAI
 {
     npc_twilight_volunteerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {

@@ -60,7 +60,7 @@ enum
     NPC_NETHER_PORTAL                   = 34825
 };
 
-struct MANGOS_DLL_DECL boss_jaraxxusAI : public ScriptedAI
+struct  boss_jaraxxusAI : public ScriptedAI
 {
     boss_jaraxxusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

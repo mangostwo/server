@@ -73,7 +73,7 @@ enum
     NPC_DIRT_MOUND          = 15712,                        // summoned also by missing spell 26617
 };
 
-struct MANGOS_DLL_DECL boss_ouroAI : public Scripted_NoMovementAI
+struct  boss_ouroAI : public Scripted_NoMovementAI
 {
     boss_ouroAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
@@ -294,7 +294,7 @@ CreatureAI* GetAI_boss_ouro(Creature* pCreature)
     return new boss_ouroAI(pCreature);
 }
 
-struct MANGOS_DLL_DECL npc_ouro_spawnerAI : public Scripted_NoMovementAI
+struct  npc_ouro_spawnerAI : public Scripted_NoMovementAI
 {
     npc_ouro_spawnerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) {Reset();}
 

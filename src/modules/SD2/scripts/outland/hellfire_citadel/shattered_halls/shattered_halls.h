@@ -59,7 +59,7 @@ static SpawnLocation aSoldiersLocs[] =
     {NPC_OFFICER_ALLIANCE,   NPC_OFFICER_HORDE,   138.241f, -84.198f, 1.907f, 0.055f}
 };
 
-class MANGOS_DLL_DECL instance_shattered_halls : public ScriptedInstance
+class  instance_shattered_halls : public ScriptedInstance
 {
     public:
         instance_shattered_halls(Map* pMap);

@@ -54,7 +54,7 @@ enum
     SPELL_LEOTHERAS_BANISH          = 37546,
 };
 
-class MANGOS_DLL_DECL instance_serpentshrine_cavern : public ScriptedInstance
+class  instance_serpentshrine_cavern : public ScriptedInstance
 {
     public:
         instance_serpentshrine_cavern(Map* pMap);

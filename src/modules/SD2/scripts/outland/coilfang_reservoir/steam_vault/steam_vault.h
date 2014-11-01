@@ -23,7 +23,7 @@ enum
     GO_ACCESS_PANEL_MEK             = 184126,
 };
 
-class MANGOS_DLL_DECL instance_steam_vault : public ScriptedInstance
+class  instance_steam_vault : public ScriptedInstance
 {
     public:
         instance_steam_vault(Map* pMap);

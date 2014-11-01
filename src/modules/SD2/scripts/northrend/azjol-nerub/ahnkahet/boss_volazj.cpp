@@ -77,7 +77,7 @@ static const uint32 aSpawnVisageSpells[MAX_INSANITY_SPELLS] = {SPELL_SUMMON_VISA
 ## boss_volazj
 ######*/
 
-struct MANGOS_DLL_DECL boss_volazjAI : public ScriptedAI
+struct  boss_volazjAI : public ScriptedAI
 {
     boss_volazjAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

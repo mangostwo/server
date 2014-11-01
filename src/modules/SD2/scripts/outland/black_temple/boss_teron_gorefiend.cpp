@@ -64,7 +64,7 @@ enum
     // NPC_VENGEFUL_SPIRIT       = 23109,                   // npc controlled by the dead player
 };
 
-struct MANGOS_DLL_DECL boss_teron_gorefiendAI : public ScriptedAI
+struct  boss_teron_gorefiendAI : public ScriptedAI
 {
     boss_teron_gorefiendAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

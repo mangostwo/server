@@ -62,7 +62,7 @@ enum
 
 static const uint32 aWaterGlobuleSpells[5] = {SPELL_WATER_GLOBULE_SPAWN_1, SPELL_WATER_GLOBULE_SPAWN_2, SPELL_WATER_GLOBULE_SPAWN_3, SPELL_WATER_GLOBULE_SPAWN_4, SPELL_WATER_GLOBULE_SPAWN_5};
 
-struct MANGOS_DLL_DECL boss_ichoronAI : public ScriptedAI
+struct  boss_ichoronAI : public ScriptedAI
 {
     boss_ichoronAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

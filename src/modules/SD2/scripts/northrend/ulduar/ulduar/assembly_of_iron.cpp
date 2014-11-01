@@ -115,7 +115,7 @@ enum
     POINT_ID_LAND                       = 2,
 };
 
-struct MANGOS_DLL_DECL boss_brundirAI : public ScriptedAI
+struct  boss_brundirAI : public ScriptedAI
 {
     boss_brundirAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -425,7 +425,7 @@ CreatureAI* GetAI_boss_brundir(Creature* pCreature)
     return new boss_brundirAI(pCreature);
 }
 
-struct MANGOS_DLL_DECL boss_molgeimAI : public ScriptedAI
+struct  boss_molgeimAI : public ScriptedAI
 {
     boss_molgeimAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -610,7 +610,7 @@ CreatureAI* GetAI_boss_molgeim(Creature* pCreature)
     return new boss_molgeimAI(pCreature);
 }
 
-struct MANGOS_DLL_DECL boss_steelbreakerAI : public ScriptedAI
+struct  boss_steelbreakerAI : public ScriptedAI
 {
     boss_steelbreakerAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

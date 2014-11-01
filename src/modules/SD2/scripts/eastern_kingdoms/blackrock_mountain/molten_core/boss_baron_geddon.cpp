@@ -37,7 +37,7 @@ enum
     SPELL_ARMAGEDDON            = 20478
 };
 
-struct MANGOS_DLL_DECL boss_baron_geddonAI : public ScriptedAI
+struct  boss_baron_geddonAI : public ScriptedAI
 {
     boss_baron_geddonAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

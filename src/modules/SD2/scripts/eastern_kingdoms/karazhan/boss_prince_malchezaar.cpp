@@ -70,7 +70,7 @@ enum
     MAX_ENFEEBLE_TARGETS        = 5,
 };
 
-struct MANGOS_DLL_DECL boss_malchezaarAI : public ScriptedAI
+struct  boss_malchezaarAI : public ScriptedAI
 {
     boss_malchezaarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -336,7 +336,7 @@ CreatureAI* GetAI_boss_malchezaar(Creature* pCreature)
 }
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct MANGOS_DLL_DECL npc_infernal_targetAI : public Scripted_NoMovementAI
+struct  npc_infernal_targetAI : public Scripted_NoMovementAI
 {
     npc_infernal_targetAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 

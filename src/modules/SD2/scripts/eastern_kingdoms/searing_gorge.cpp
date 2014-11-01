@@ -52,7 +52,7 @@ enum
     QUEST_ID_SUNTARA_STONES         = 3367,
 };
 
-struct MANGOS_DLL_DECL npc_dorius_stonetenderAI : public npc_escortAI
+struct  npc_dorius_stonetenderAI : public npc_escortAI
 {
     npc_dorius_stonetenderAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 

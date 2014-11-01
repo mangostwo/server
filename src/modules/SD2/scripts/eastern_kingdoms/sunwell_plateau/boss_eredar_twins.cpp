@@ -96,7 +96,7 @@ static const DialogueEntry aIntroDialogue[] =
 ## boss_alythess
 ######*/
 
-struct MANGOS_DLL_DECL boss_alythessAI : public ScriptedAI
+struct  boss_alythessAI : public ScriptedAI
 {
     boss_alythessAI(Creature* pCreature) : ScriptedAI(pCreature),
         m_introDialogue(aIntroDialogue)
@@ -294,7 +294,7 @@ struct MANGOS_DLL_DECL boss_alythessAI : public ScriptedAI
 ## boss_sacrolash
 ######*/
 
-struct MANGOS_DLL_DECL boss_sacrolashAI : public ScriptedAI
+struct  boss_sacrolashAI : public ScriptedAI
 {
     boss_sacrolashAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -518,7 +518,7 @@ struct MANGOS_DLL_DECL boss_sacrolashAI : public ScriptedAI
 ## npc_shadow_image
 ######*/
 
-struct MANGOS_DLL_DECL npc_shadow_imageAI : public ScriptedAI
+struct  npc_shadow_imageAI : public ScriptedAI
 {
     npc_shadow_imageAI(Creature* pCreature) : ScriptedAI(pCreature)  { Reset(); }
 

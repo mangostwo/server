@@ -84,7 +84,7 @@ enum
     SPELL_INTERRUPT_2            = 35176,                   // ACID mobs should cast this (Manaforge Ara-version)
 };
 
-struct MANGOS_DLL_DECL npc_manaforge_control_consoleAI : public ScriptedAI
+struct  npc_manaforge_control_consoleAI : public ScriptedAI
 {
     npc_manaforge_control_consoleAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
@@ -389,7 +389,7 @@ enum
     NPC_PATHALEON_THE_CALCULATOR_IMAGE     = 21504
 };
 
-struct MANGOS_DLL_DECL npc_commander_dawnforgeAI : public ScriptedAI
+struct  npc_commander_dawnforgeAI : public ScriptedAI
 {
     npc_commander_dawnforgeAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -634,7 +634,7 @@ enum
     NPC_SEVERED_SPIRIT   = 19881
 };
 
-struct MANGOS_DLL_DECL npc_bessyAI : public npc_escortAI
+struct  npc_bessyAI : public npc_escortAI
 {
     npc_bessyAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -699,7 +699,7 @@ enum
     SAY_ALLEY_FINISH            = -1000624
 };
 
-struct MANGOS_DLL_DECL npc_maxx_a_million_escortAI : public npc_escortAI
+struct  npc_maxx_a_million_escortAI : public npc_escortAI
 {
     npc_maxx_a_million_escortAI(Creature* pCreature) : npc_escortAI(pCreature) {Reset();}
 
@@ -849,7 +849,7 @@ enum
     SPELL_GATHER_WARP_BLOOD     = 39244,                    // for quest 10924
 };
 
-struct MANGOS_DLL_DECL npc_zeppitAI : public ScriptedPetAI
+struct  npc_zeppitAI : public ScriptedPetAI
 {
     npc_zeppitAI(Creature* pCreature) : ScriptedPetAI(pCreature) { Reset(); }
 
@@ -902,7 +902,7 @@ enum
     QUEST_ID_DELIVERING_MESSAGE     = 10406,
 };
 
-struct MANGOS_DLL_DECL npc_protectorate_demolitionistAI : public npc_escortAI
+struct  npc_protectorate_demolitionistAI : public npc_escortAI
 {
     npc_protectorate_demolitionistAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -1052,7 +1052,7 @@ enum
     QUEST_ID_ESCAPE_STAGING_GROUNDS = 10425,
 };
 
-struct MANGOS_DLL_DECL npc_captured_vanguardAI : public npc_escortAI
+struct  npc_captured_vanguardAI : public npc_escortAI
 {
     npc_captured_vanguardAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -1172,7 +1172,7 @@ enum
     MAX_IMPS                = 6,
 };
 
-struct MANGOS_DLL_DECL npc_drijyaAI : public npc_escortAI
+struct  npc_drijyaAI : public npc_escortAI
 {
     npc_drijyaAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -1419,7 +1419,7 @@ enum
 // order based on the increasing range of damage
 static const uint32 auiShadowRainSpells[5] = { 37399, 37405, 37397, 37396, 37409 };
 
-struct MANGOS_DLL_DECL npc_dimensiusAI : public Scripted_NoMovementAI
+struct  npc_dimensiusAI : public Scripted_NoMovementAI
 {
     npc_dimensiusAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 

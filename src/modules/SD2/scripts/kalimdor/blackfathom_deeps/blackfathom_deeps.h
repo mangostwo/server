@@ -106,7 +106,7 @@ static const SummonInformation aWaveSummonInformation[] =
     {3, NPC_MURKSHALLOW_SOFTSHELL,  {{1, 3}, {2, 4}, {2, 5}}}
 };
 
-class MANGOS_DLL_DECL instance_blackfathom_deeps : public ScriptedInstance
+class  instance_blackfathom_deeps : public ScriptedInstance
 {
     public:
         instance_blackfathom_deeps(Map* pMap);

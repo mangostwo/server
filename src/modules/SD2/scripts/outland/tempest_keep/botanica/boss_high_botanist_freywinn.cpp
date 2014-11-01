@@ -46,7 +46,7 @@ enum
     NPC_FRAYER_PROTECTOR        = 19953,
 };
 
-struct MANGOS_DLL_DECL boss_high_botanist_freywinnAI : public ScriptedAI
+struct  boss_high_botanist_freywinnAI : public ScriptedAI
 {
     boss_high_botanist_freywinnAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

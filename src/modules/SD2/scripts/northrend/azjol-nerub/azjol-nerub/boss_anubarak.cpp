@@ -78,7 +78,7 @@ enum
 ## boss_anubarak
 ######*/
 
-struct MANGOS_DLL_DECL boss_anubarakAI : public ScriptedAI
+struct  boss_anubarakAI : public ScriptedAI
 {
     boss_anubarakAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -328,7 +328,7 @@ CreatureAI* GetAI_boss_anubarak(Creature* pCreature)
 ## npc_impale_target
 ######*/
 
-struct MANGOS_DLL_DECL npc_impale_targetAI : public Scripted_NoMovementAI
+struct  npc_impale_targetAI : public Scripted_NoMovementAI
 {
     npc_impale_targetAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {

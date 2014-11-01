@@ -121,7 +121,7 @@ static const float fZuljinMoveLoc[3] = {120.148811f, 703.713684f, 45.111477f};
 ## boss_zuljin
 ######*/
 
-struct MANGOS_DLL_DECL boss_zuljinAI : public ScriptedAI
+struct  boss_zuljinAI : public ScriptedAI
 {
     boss_zuljinAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -485,7 +485,7 @@ CreatureAI* GetAI_boss_zuljin(Creature* pCreature)
 ## npc_feather_vortex
 ######*/
 
-struct MANGOS_DLL_DECL npc_feather_vortexAI : public ScriptedAI
+struct  npc_feather_vortexAI : public ScriptedAI
 {
     npc_feather_vortexAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

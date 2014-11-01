@@ -56,7 +56,7 @@ enum
     NPC_ATTUMEN_MOUNTED         = 16152,
 };
 
-struct MANGOS_DLL_DECL boss_midnightAI : public ScriptedAI
+struct  boss_midnightAI : public ScriptedAI
 {
     boss_midnightAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -193,7 +193,7 @@ CreatureAI* GetAI_boss_midnight(Creature* pCreature)
     return new boss_midnightAI(pCreature);
 }
 
-struct MANGOS_DLL_DECL boss_attumenAI : public ScriptedAI
+struct  boss_attumenAI : public ScriptedAI
 {
     boss_attumenAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

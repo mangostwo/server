@@ -53,7 +53,7 @@ enum
 
 static const float fBombSpawnZ  = -316.2625f;
 
-struct MANGOS_DLL_DECL boss_thermapluggAI : public ScriptedAI
+struct  boss_thermapluggAI : public ScriptedAI
 {
     boss_thermapluggAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

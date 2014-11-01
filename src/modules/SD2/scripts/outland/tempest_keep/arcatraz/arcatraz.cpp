@@ -85,7 +85,7 @@ static const DialogueEntry aIntroDialogue[] =
 
 static const float fRoomCenterCoords[3] = {445.8804f, -158.7055f, 43.06898f};
 
-struct MANGOS_DLL_DECL npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
+struct  npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
 {
     npc_millhouse_manastormAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aIntroDialogue)
@@ -270,7 +270,7 @@ enum
     SPELL_SIMPLE_TELEPORT   = 12980,
 };
 
-struct MANGOS_DLL_DECL npc_warden_mellicharAI : public ScriptedAI
+struct  npc_warden_mellicharAI : public ScriptedAI
 {
     npc_warden_mellicharAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

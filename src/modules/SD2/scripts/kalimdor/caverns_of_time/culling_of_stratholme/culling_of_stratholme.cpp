@@ -307,7 +307,7 @@ enum
     SPELL_DEVOTION_AURA         = 52442,
 };
 
-struct MANGOS_DLL_DECL npc_arthasAI : public npc_escortAI
+struct  npc_arthasAI : public npc_escortAI
 {
     npc_arthasAI(Creature* pCreature) : npc_escortAI(pCreature)
     {

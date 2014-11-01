@@ -76,7 +76,7 @@ static uint32 uiTrashPacks[MAX_PLATFORMS][MAX_PLATFORMS] =
     {NPC_PHANTASMAL_MURLOC,         NPC_PHANTASMAL_NAGAL,   NPC_PHANTASMAL_OGRE},
 };
 
-struct MANGOS_DLL_DECL boss_uromAI : public ScriptedAI
+struct  boss_uromAI : public ScriptedAI
 {
     boss_uromAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

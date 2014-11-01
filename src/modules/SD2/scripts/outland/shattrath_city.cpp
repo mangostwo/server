@@ -48,7 +48,7 @@ enum
     GOSSIP_ITEM_BOOK        = -3000105,
 };
 
-struct MANGOS_DLL_DECL npc_dirty_larryAI : public ScriptedAI
+struct  npc_dirty_larryAI : public ScriptedAI
 {
     npc_dirty_larryAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -311,7 +311,7 @@ enum
     QUEST_CITY_LIGHT        = 10211
 };
 
-struct MANGOS_DLL_DECL npc_khadgars_servantAI : public npc_escortAI
+struct  npc_khadgars_servantAI : public npc_escortAI
 {
     npc_khadgars_servantAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
@@ -560,7 +560,7 @@ enum
     SPELL_MAGNETIC_PULL             = 31705,
 };
 
-struct MANGOS_DLL_DECL npc_salsalabimAI : public ScriptedAI
+struct  npc_salsalabimAI : public ScriptedAI
 {
     npc_salsalabimAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

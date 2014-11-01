@@ -51,7 +51,7 @@ enum
     // SPELL_ETHEREAL_BEACON_VISUAL  = 32368,               // included in creature_template_addon
 };
 
-struct MANGOS_DLL_DECL boss_nexusprince_shaffarAI : public ScriptedAI
+struct  boss_nexusprince_shaffarAI : public ScriptedAI
 {
     boss_nexusprince_shaffarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

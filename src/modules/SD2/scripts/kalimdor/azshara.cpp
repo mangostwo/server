@@ -78,7 +78,7 @@ enum
 
 #define GOSSIP_ITEM_MOONSTONE   "Hand over the Southfury moonstone and I'll let you go."
 
-struct MANGOS_DLL_DECL npc_rizzle_sprysprocketAI : public npc_escortAI
+struct  npc_rizzle_sprysprocketAI : public npc_escortAI
 {
     npc_rizzle_sprysprocketAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
@@ -214,7 +214,7 @@ bool GossipSelect_npc_rizzle_sprysprocket(Player* pPlayer, Creature* /*pCreature
     return true;
 }
 
-struct MANGOS_DLL_DECL npc_depth_chargeAI : public ScriptedAI
+struct  npc_depth_chargeAI : public ScriptedAI
 {
     npc_depth_chargeAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -300,7 +300,7 @@ static SpitelashAbilityStruct m_aSpitelashAbility[8] =
     {NPC_SPITELASH_MYRMIDON,    SPELL_STRIKE,       TARGET_TYPE_VICTIM,     3000,  7000}
 };
 
-struct MANGOS_DLL_DECL mobs_spitelashesAI : public ScriptedAI
+struct  mobs_spitelashesAI : public ScriptedAI
 {
     mobs_spitelashesAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

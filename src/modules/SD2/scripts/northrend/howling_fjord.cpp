@@ -56,7 +56,7 @@ enum
     SAY_VRYKUL_HIDE                         = -1000641,
 };
 
-struct MANGOS_DLL_DECL npc_ancient_male_vrykulAI : public ScriptedAI
+struct  npc_ancient_male_vrykulAI : public ScriptedAI
 {
     npc_ancient_male_vrykulAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -170,7 +170,7 @@ static float afSummon[] = {838.81f, -4678.06f, -94.182f};
 static float afCenter[] = {801.88f, -4721.87f, -96.143f};
 
 // TODO: make prisoners help (unclear if summoned or using npc's from surrounding cages (summon inside small cages?))
-struct MANGOS_DLL_DECL npc_daegarnAI : public ScriptedAI
+struct  npc_daegarnAI : public ScriptedAI
 {
     npc_daegarnAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -282,7 +282,7 @@ enum
     FACTION_HOSTILE_SH          = 90,                       // guessed, possibly not correct
 };
 
-struct MANGOS_DLL_DECL npc_silvermoon_harryAI : public ScriptedAI
+struct  npc_silvermoon_harryAI : public ScriptedAI
 {
     npc_silvermoon_harryAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -475,7 +475,7 @@ static const DialogueEntry aLichDialogue[] =
     {0, 0, 0},
 };
 
-struct MANGOS_DLL_DECL npc_lich_king_villageAI : public ScriptedAI, private DialogueHelper
+struct  npc_lich_king_villageAI : public ScriptedAI, private DialogueHelper
 {
     npc_lich_king_villageAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aLichDialogue)
@@ -614,7 +614,7 @@ static const DialogueEntry aNifflevarDialogue[] =
 
 static const int32 aRandomTextEntries[MAX_CROWD_TEXT_ENTRIES] = { -1000941, -1000942, -1000943, -1000944, -1000945, -1000946, -1000947};
 
-struct MANGOS_DLL_DECL npc_king_ymironAI : public ScriptedAI, private DialogueHelper
+struct  npc_king_ymironAI : public ScriptedAI, private DialogueHelper
 {
     npc_king_ymironAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aNifflevarDialogue)
@@ -757,7 +757,7 @@ enum
     NPC_DARKCLAW_BAT                        = 23959,
 };
 
-struct MANGOS_DLL_DECL npc_firecrackers_bunnyAI : public ScriptedAI
+struct  npc_firecrackers_bunnyAI : public ScriptedAI
 {
     npc_firecrackers_bunnyAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -867,7 +867,7 @@ enum
     QUEST_ID_TRIAL_OF_FIRE = 11241,
 };
 
-struct MANGOS_DLL_DECL npc_apothecary_hanesAI : public npc_escortAI
+struct  npc_apothecary_hanesAI : public npc_escortAI
 {
     npc_apothecary_hanesAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
     uint32 m_uiHealingTimer;

@@ -206,7 +206,7 @@ enum
 ## npc_echo_of_medivh
 ######*/
 
-struct MANGOS_DLL_DECL npc_echo_of_medivhAI : public ScriptedAI
+struct  npc_echo_of_medivhAI : public ScriptedAI
 {
     npc_echo_of_medivhAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -300,7 +300,7 @@ bool GossipSelect_npc_echo_of_medivh(Player* pPlayer, Creature* pCreature, uint3
 ## npc_chess_piece_generic
 ######*/
 
-struct MANGOS_DLL_DECL npc_chess_piece_genericAI : public ScriptedAI
+struct  npc_chess_piece_genericAI : public ScriptedAI
 {
     npc_chess_piece_genericAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -653,7 +653,7 @@ bool EffectDummyCreature_npc_chess_generic(Unit* pCaster, uint32 uiSpellId, Spel
 ## npc_king_llane
 ######*/
 
-struct MANGOS_DLL_DECL npc_king_llaneAI : public npc_chess_piece_genericAI
+struct  npc_king_llaneAI : public npc_chess_piece_genericAI
 {
     npc_king_llaneAI(Creature* pCreature) : npc_chess_piece_genericAI(pCreature)
     {
@@ -764,7 +764,7 @@ bool GossipHello_npc_king_llane(Player* pPlayer, Creature* pCreature)
 ## npc_warchief_blackhand
 ######*/
 
-struct MANGOS_DLL_DECL npc_warchief_blackhandAI : public npc_chess_piece_genericAI
+struct  npc_warchief_blackhandAI : public npc_chess_piece_genericAI
 {
     npc_warchief_blackhandAI(Creature* pCreature) : npc_chess_piece_genericAI(pCreature)
     {
@@ -875,7 +875,7 @@ bool GossipHello_npc_warchief_blackhand(Player* pPlayer, Creature* pCreature)
 ## npc_human_conjurer
 ######*/
 
-struct MANGOS_DLL_DECL npc_human_conjurerAI : public npc_chess_piece_genericAI
+struct  npc_human_conjurerAI : public npc_chess_piece_genericAI
 {
     npc_human_conjurerAI(Creature* pCreature) : npc_chess_piece_genericAI(pCreature) { Reset(); }
 
@@ -951,7 +951,7 @@ bool GossipHello_npc_human_conjurer(Player* pPlayer, Creature* pCreature)
 ## npc_orc_warlock
 ######*/
 
-struct MANGOS_DLL_DECL npc_orc_warlockAI : public npc_chess_piece_genericAI
+struct  npc_orc_warlockAI : public npc_chess_piece_genericAI
 {
     npc_orc_warlockAI(Creature* pCreature) : npc_chess_piece_genericAI(pCreature) { Reset(); }
 
@@ -1027,7 +1027,7 @@ bool GossipHello_npc_orc_warlock(Player* pPlayer, Creature* pCreature)
 ## npc_human_footman
 ######*/
 
-struct MANGOS_DLL_DECL npc_human_footmanAI : public npc_chess_piece_genericAI
+struct  npc_human_footmanAI : public npc_chess_piece_genericAI
 {
     npc_human_footmanAI(Creature* pCreature) : npc_chess_piece_genericAI(pCreature) { Reset(); }
 
@@ -1117,7 +1117,7 @@ bool GossipHello_npc_human_footman(Player* pPlayer, Creature* pCreature)
 ## npc_orc_grunt
 ######*/
 
-struct MANGOS_DLL_DECL npc_orc_gruntAI : public npc_chess_piece_genericAI
+struct  npc_orc_gruntAI : public npc_chess_piece_genericAI
 {
     npc_orc_gruntAI(Creature* pCreature) : npc_chess_piece_genericAI(pCreature) { Reset(); }
 
@@ -1207,7 +1207,7 @@ bool GossipHello_npc_orc_grunt(Player* pPlayer, Creature* pCreature)
 ## npc_water_elemental
 ######*/
 
-struct MANGOS_DLL_DECL npc_water_elementalAI : public npc_chess_piece_genericAI
+struct  npc_water_elementalAI : public npc_chess_piece_genericAI
 {
     npc_water_elementalAI(Creature* pCreature) : npc_chess_piece_genericAI(pCreature) { Reset(); }
 
@@ -1283,7 +1283,7 @@ bool GossipHello_npc_water_elemental(Player* pPlayer, Creature* pCreature)
 ## npc_summoned_daemon
 ######*/
 
-struct MANGOS_DLL_DECL npc_summoned_daemonAI : public npc_chess_piece_genericAI
+struct  npc_summoned_daemonAI : public npc_chess_piece_genericAI
 {
     npc_summoned_daemonAI(Creature* pCreature) : npc_chess_piece_genericAI(pCreature) { Reset(); }
 
@@ -1359,7 +1359,7 @@ bool GossipHello_npc_summoned_daemon(Player* pPlayer, Creature* pCreature)
 ## npc_human_charger
 ######*/
 
-struct MANGOS_DLL_DECL npc_human_chargerAI : public npc_chess_piece_genericAI
+struct  npc_human_chargerAI : public npc_chess_piece_genericAI
 {
     npc_human_chargerAI(Creature* pCreature) : npc_chess_piece_genericAI(pCreature) { Reset(); }
 
@@ -1435,7 +1435,7 @@ bool GossipHello_npc_human_charger(Player* pPlayer, Creature* pCreature)
 ## npc_orc_wolf
 ######*/
 
-struct MANGOS_DLL_DECL npc_orc_wolfAI : public npc_chess_piece_genericAI
+struct  npc_orc_wolfAI : public npc_chess_piece_genericAI
 {
     npc_orc_wolfAI(Creature* pCreature) : npc_chess_piece_genericAI(pCreature) { Reset(); }
 
@@ -1511,7 +1511,7 @@ bool GossipHello_npc_orc_wolf(Player* pPlayer, Creature* pCreature)
 ## npc_human_cleric
 ######*/
 
-struct MANGOS_DLL_DECL npc_human_clericAI : public npc_chess_piece_genericAI
+struct  npc_human_clericAI : public npc_chess_piece_genericAI
 {
     npc_human_clericAI(Creature* pCreature) : npc_chess_piece_genericAI(pCreature) { Reset(); }
 
@@ -1587,7 +1587,7 @@ bool GossipHello_npc_human_cleric(Player* pPlayer, Creature* pCreature)
 ## npc_orc_necrolyte
 ######*/
 
-struct MANGOS_DLL_DECL npc_orc_necrolyteAI : public npc_chess_piece_genericAI
+struct  npc_orc_necrolyteAI : public npc_chess_piece_genericAI
 {
     npc_orc_necrolyteAI(Creature* pCreature) : npc_chess_piece_genericAI(pCreature) { Reset(); }
 

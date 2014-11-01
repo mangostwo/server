@@ -58,7 +58,7 @@ enum
     SPELL_QUID9889              = 32174,
 };
 
-struct MANGOS_DLL_DECL mob_unkor_the_ruthlessAI : public ScriptedAI
+struct  mob_unkor_the_ruthlessAI : public ScriptedAI
 {
     mob_unkor_the_ruthlessAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -154,7 +154,7 @@ const uint32 netherwebVictims[6] =
     18470, 16805, 21242, 18452, 22482, 21285
 };
 
-struct MANGOS_DLL_DECL mob_netherweb_victimAI : public ScriptedAI
+struct  mob_netherweb_victimAI : public ScriptedAI
 {
     mob_netherweb_victimAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -209,7 +209,7 @@ enum
 static float m_afAmbushB1[] = { -2895.525879f, 5336.431641f, -11.800f};
 static float m_afAmbushB2[] = { -2890.604980f, 5331.938965f, -11.282f};
 
-struct MANGOS_DLL_DECL npc_akunoAI : public npc_escortAI
+struct  npc_akunoAI : public npc_escortAI
 {
     npc_akunoAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -303,7 +303,7 @@ enum
     SPELL_FEED_CREDIT           = 41427,                    // credit for quest 11093
 };
 
-struct MANGOS_DLL_DECL npc_hungry_nether_rayAI : public ScriptedPetAI
+struct  npc_hungry_nether_rayAI : public ScriptedPetAI
 {
     npc_hungry_nether_rayAI(Creature* pCreature) : ScriptedPetAI(pCreature) { Reset(); }
 
@@ -365,7 +365,7 @@ enum
 };
 
 // Some details still missing from here, and will also have issues if followers evade for any reason.
-struct MANGOS_DLL_DECL npc_letollAI : public npc_escortAI
+struct  npc_letollAI : public npc_escortAI
 {
     npc_letollAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
@@ -597,7 +597,7 @@ enum
     NPC_MANA_BOMB_KILL_TRIGGER  = 21039
 };
 
-struct MANGOS_DLL_DECL npc_mana_bomb_exp_triggerAI : public ScriptedAI
+struct  npc_mana_bomb_exp_triggerAI : public ScriptedAI
 {
     npc_mana_bomb_exp_triggerAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -735,7 +735,7 @@ bool GOUse_go_veil_skith_cage(Player* pPlayer, GameObject* pGo)
     return false;
 };
 
-struct MANGOS_DLL_DECL npc_captive_child : public ScriptedAI
+struct  npc_captive_child : public ScriptedAI
 {
     npc_captive_child(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -779,7 +779,7 @@ enum
     SPELL_TRAVELFORM                    = 32447             // guesswork
 };
 
-struct MANGOS_DLL_DECL npc_isla_starmaneAI : public npc_escortAI
+struct  npc_isla_starmaneAI : public npc_escortAI
 {
     npc_isla_starmaneAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
@@ -928,7 +928,7 @@ enum
 
 static const float aLuangaSpawnCoords[3] = { -3507.203f, 4084.619f, 92.947f};
 
-struct MANGOS_DLL_DECL npc_skywingAI : public npc_escortAI
+struct  npc_skywingAI : public npc_escortAI
 {
     npc_skywingAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -1045,7 +1045,7 @@ enum
     GO_RAVEN_STONE              = 185541,
 };
 
-struct MANGOS_DLL_DECL npc_cenarion_sparrowhawkAI : public ScriptedAI
+struct  npc_cenarion_sparrowhawkAI : public ScriptedAI
 {
     npc_cenarion_sparrowhawkAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -1142,7 +1142,7 @@ enum
     QUEST_ID_ESCAPE_SKETTIS     = 11085,
 };
 
-struct MANGOS_DLL_DECL npc_skyguard_prisonerAI : public npc_escortAI
+struct  npc_skyguard_prisonerAI : public npc_escortAI
 {
     npc_skyguard_prisonerAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 

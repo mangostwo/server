@@ -63,7 +63,7 @@ static const float aNefariusSpawnLoc[4] = { -7466.16f, -1040.80f, 412.053f, 2.14
 
 static const uint32 aRazorgoreSpawns[MAX_EGGS_DEFENDERS] = {NPC_BLACKWING_LEGIONNAIRE, NPC_BLACKWING_MAGE, NPC_DRAGONSPAWN, NPC_DRAGONSPAWN};
 
-class MANGOS_DLL_DECL instance_blackwing_lair : public ScriptedInstance
+class  instance_blackwing_lair : public ScriptedInstance
 {
     public:
         instance_blackwing_lair(Map* pMap);

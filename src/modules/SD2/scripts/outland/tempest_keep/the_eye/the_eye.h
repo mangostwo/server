@@ -36,7 +36,7 @@ enum
 
 static const uint32 aAdvisors[MAX_ADVISORS] = {NPC_CAPERNIAN, NPC_SANGUINAR, NPC_TELONICUS, NPC_THALADRED};
 
-class MANGOS_DLL_DECL instance_the_eye : public ScriptedInstance
+class  instance_the_eye : public ScriptedInstance
 {
     public:
         instance_the_eye(Map* pMap);

@@ -55,7 +55,7 @@ enum
     SAY_PHRASE_4            = -1000602
 };
 
-struct MANGOS_DLL_DECL npc_nesingwary_trapperAI : public ScriptedAI
+struct  npc_nesingwary_trapperAI : public ScriptedAI
 {
     npc_nesingwary_trapperAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -185,7 +185,7 @@ enum
     POINT_DEST                      = 1
 };
 
-struct MANGOS_DLL_DECL npc_oil_stained_wolfAI : public ScriptedAI
+struct  npc_oil_stained_wolfAI : public ScriptedAI
 {
     npc_oil_stained_wolfAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -303,7 +303,7 @@ enum
     SPELL_CANNON_FIRE                   = 42445,
 };
 
-struct MANGOS_DLL_DECL npc_sinkhole_kill_creditAI : public ScriptedAI
+struct  npc_sinkhole_kill_creditAI : public ScriptedAI
 {
     npc_sinkhole_kill_creditAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -401,7 +401,7 @@ enum
     SAY_END_2                           = -1000578
 };
 
-struct MANGOS_DLL_DECL npc_lurgglbrAI : public npc_escortAI
+struct  npc_lurgglbrAI : public npc_escortAI
 {
     npc_lurgglbrAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
@@ -628,7 +628,7 @@ enum
     FACTION_FRIENDLY                    = 35,
 };
 
-struct MANGOS_DLL_DECL npc_nexus_drake_hatchlingAI : public FollowerAI
+struct  npc_nexus_drake_hatchlingAI : public FollowerAI
 {
     npc_nexus_drake_hatchlingAI(Creature* pCreature) : FollowerAI(pCreature) { Reset(); }
 
@@ -855,7 +855,7 @@ enum
     NPC_FLAMESPITTER                    = 25582,
 };
 
-struct MANGOS_DLL_DECL npc_scourged_flamespitterAI : public ScriptedAI
+struct  npc_scourged_flamespitterAI : public ScriptedAI
 {
     npc_scourged_flamespitterAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -974,7 +974,7 @@ enum
     QUEST_ID_GET_ME_OUTA_HERE   = 11673,
 };
 
-struct MANGOS_DLL_DECL npc_bonker_togglevoltAI : public npc_escortAI
+struct  npc_bonker_togglevoltAI : public npc_escortAI
 {
     npc_bonker_togglevoltAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 

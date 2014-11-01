@@ -123,7 +123,7 @@ static const float aBurrowSpawnPositions[MAX_BURROWS][4] =
 ## boss_anubarak_trial
 ######*/
 
-struct MANGOS_DLL_DECL boss_anubarak_trialAI : public ScriptedAI
+struct  boss_anubarak_trialAI : public ScriptedAI
 {
     boss_anubarak_trialAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -406,7 +406,7 @@ CreatureAI* GetAI_boss_anubarak_trial(Creature* pCreature)
 ## npc_anubarak_trial_spike
 ######*/
 
-struct MANGOS_DLL_DECL npc_anubarak_trial_spikeAI : public ScriptedAI
+struct  npc_anubarak_trial_spikeAI : public ScriptedAI
 {
     npc_anubarak_trial_spikeAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -538,7 +538,7 @@ bool EffectDummyCreature_spell_dummy_permafrost(Unit* pCaster, uint32 uiSpellId,
 ## npc_anubarak_trial_frostsphere
 ######*/
 
-struct MANGOS_DLL_DECL npc_anubarak_trial_frostsphereAI : public Scripted_NoMovementAI
+struct  npc_anubarak_trial_frostsphereAI : public Scripted_NoMovementAI
 {
     npc_anubarak_trial_frostsphereAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 
@@ -608,7 +608,7 @@ CreatureAI* GetAI_npc_anubarak_trial_frostsphere(Creature* pCreature)
 ######*/
 
 // TODO Remove this 'script' when combat movement can be proper prevented from core-side
-struct MANGOS_DLL_DECL npc_nerubian_borrowAI : public Scripted_NoMovementAI
+struct  npc_nerubian_borrowAI : public Scripted_NoMovementAI
 {
     npc_nerubian_borrowAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 

@@ -75,7 +75,7 @@ enum
 ## boss_bjarngrim
 ######*/
 
-struct MANGOS_DLL_DECL boss_bjarngrimAI : public ScriptedAI
+struct  boss_bjarngrimAI : public ScriptedAI
 {
     boss_bjarngrimAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -316,7 +316,7 @@ struct MANGOS_DLL_DECL boss_bjarngrimAI : public ScriptedAI
 ## mob_stormforged_lieutenant
 ######*/
 
-struct MANGOS_DLL_DECL mob_stormforged_lieutenantAI : public ScriptedAI
+struct  mob_stormforged_lieutenantAI : public ScriptedAI
 {
     mob_stormforged_lieutenantAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

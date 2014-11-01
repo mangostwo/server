@@ -184,7 +184,7 @@ static const float afConstellations[MAX_CONSTELATIONS][4] =
 ## boss_algalon
 ######*/
 
-struct MANGOS_DLL_DECL boss_algalonAI : public ScriptedAI, private DialogueHelper
+struct  boss_algalonAI : public ScriptedAI, private DialogueHelper
 {
     boss_algalonAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aAlgalonDialogue)
@@ -613,7 +613,7 @@ CreatureAI* GetAI_boss_algalon(Creature* pCreature)
 ## npc_living_constellation
 ######*/
 
-struct MANGOS_DLL_DECL npc_living_constellationAI : public ScriptedAI
+struct  npc_living_constellationAI : public ScriptedAI
 {
     npc_living_constellationAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -663,7 +663,7 @@ CreatureAI* GetAI_npc_living_constellation(Creature* pCreature)
 ## npc_worm_hole
 ######*/
 
-struct MANGOS_DLL_DECL npc_worm_holeAI : public Scripted_NoMovementAI
+struct  npc_worm_holeAI : public Scripted_NoMovementAI
 {
     npc_worm_holeAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 
@@ -710,7 +710,7 @@ CreatureAI* GetAI_npc_worm_hole(Creature* pCreature)
 ## npc_black_hole
 ######*/
 
-struct MANGOS_DLL_DECL npc_black_holeAI : public Scripted_NoMovementAI
+struct  npc_black_holeAI : public Scripted_NoMovementAI
 {
     npc_black_holeAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 
@@ -757,7 +757,7 @@ CreatureAI* GetAI_npc_black_hole(Creature* pCreature)
 ## npc_collapsing_star
 ######*/
 
-struct MANGOS_DLL_DECL npc_collapsing_starAI : public ScriptedAI
+struct  npc_collapsing_starAI : public ScriptedAI
 {
     npc_collapsing_starAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

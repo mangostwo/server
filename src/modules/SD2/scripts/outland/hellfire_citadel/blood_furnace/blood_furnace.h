@@ -54,7 +54,7 @@ struct BroggokEventInfo
     GuidSet m_sSortedOrcGuids;
 };
 
-class MANGOS_DLL_DECL instance_blood_furnace : public ScriptedInstance
+class  instance_blood_furnace : public ScriptedInstance
 {
     public:
         instance_blood_furnace(Map* pMap);

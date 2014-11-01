@@ -73,7 +73,7 @@ enum
     NPC_BAT_RIDER               = 14750,
 };
 
-struct MANGOS_DLL_DECL boss_jeklikAI : public ScriptedAI
+struct  boss_jeklikAI : public ScriptedAI
 {
     boss_jeklikAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -352,7 +352,7 @@ struct MANGOS_DLL_DECL boss_jeklikAI : public ScriptedAI
     }
 };
 
-struct MANGOS_DLL_DECL npc_gurubashi_bat_riderAI : public ScriptedAI
+struct  npc_gurubashi_bat_riderAI : public ScriptedAI
 {
     npc_gurubashi_bat_riderAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

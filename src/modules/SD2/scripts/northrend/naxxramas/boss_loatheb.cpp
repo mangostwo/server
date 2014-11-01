@@ -44,7 +44,7 @@ enum
     NPC_SPORE               = 16286
 };
 
-struct MANGOS_DLL_DECL boss_loathebAI : public ScriptedAI
+struct  boss_loathebAI : public ScriptedAI
 {
     boss_loathebAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

@@ -57,7 +57,7 @@ enum
 ## Boss Loken
 ######*/
 
-struct MANGOS_DLL_DECL boss_lokenAI : public ScriptedAI
+struct  boss_lokenAI : public ScriptedAI
 {
     boss_lokenAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

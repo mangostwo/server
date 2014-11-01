@@ -36,7 +36,7 @@ enum
     SPELL_GATE_OF_SHAZZRAH          = 23138                 // effect spell: 23139
 };
 
-struct MANGOS_DLL_DECL boss_shazzrahAI : public ScriptedAI
+struct  boss_shazzrahAI : public ScriptedAI
 {
     boss_shazzrahAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

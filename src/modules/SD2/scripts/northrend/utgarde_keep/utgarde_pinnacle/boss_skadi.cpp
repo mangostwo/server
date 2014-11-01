@@ -97,7 +97,7 @@ static const GauntletIntroData aSkadiIntroData[MAX_INTRO_MOBS] =
 ## boss_skadi
 ######*/
 
-struct MANGOS_DLL_DECL boss_skadiAI : public ScriptedAI
+struct  boss_skadiAI : public ScriptedAI
 {
     boss_skadiAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -311,7 +311,7 @@ CreatureAI* GetAI_boss_skadi(Creature* pCreature)
 ## npc_grauf
 ######*/
 
-struct MANGOS_DLL_DECL npc_graufAI : public ScriptedAI
+struct  npc_graufAI : public ScriptedAI
 {
     npc_graufAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

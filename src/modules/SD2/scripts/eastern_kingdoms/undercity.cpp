@@ -66,7 +66,7 @@ static const float aHighborneLoc[MAX_LAMENTERS][4] =
     {1292.51f, 310.50f, -61.0f, 1.99f},
 };
 
-struct MANGOS_DLL_DECL npc_lady_sylvanas_windrunnerAI : public ScriptedAI
+struct  npc_lady_sylvanas_windrunnerAI : public ScriptedAI
 {
     npc_lady_sylvanas_windrunnerAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

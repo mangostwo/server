@@ -52,7 +52,7 @@ enum
     SPELL_BERSERK                   = 32965,        // triggers 32963
 };
 
-struct MANGOS_DLL_DECL boss_doomlordkazzakAI : public ScriptedAI
+struct  boss_doomlordkazzakAI : public ScriptedAI
 {
     boss_doomlordkazzakAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

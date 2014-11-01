@@ -56,7 +56,7 @@ static const float afInstanceLoc[][4] =
 
 static const float aDrakeSummonLoc[4] = {2128.43f, 71.01f, 64.42f, 1.74f};
 
-class MANGOS_DLL_DECL instance_old_hillsbrad : public ScriptedInstance
+class  instance_old_hillsbrad : public ScriptedInstance
 {
     public:
         instance_old_hillsbrad(Map* pMap);

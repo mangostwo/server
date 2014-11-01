@@ -50,7 +50,7 @@ enum
     SPELL_KNOCKBACK             = 26027,
 };
 
-struct MANGOS_DLL_DECL boss_sarturaAI : public ScriptedAI
+struct  boss_sarturaAI : public ScriptedAI
 {
     boss_sarturaAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -228,7 +228,7 @@ struct MANGOS_DLL_DECL boss_sarturaAI : public ScriptedAI
     }
 };
 
-struct MANGOS_DLL_DECL mob_sartura_royal_guardAI : public ScriptedAI
+struct  mob_sartura_royal_guardAI : public ScriptedAI
 {
     mob_sartura_royal_guardAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

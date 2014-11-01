@@ -103,7 +103,7 @@ static const float afKoloArmsLoc[4] = {1797.15f, -24.4027f, 448.741f, 3.1939f};
 ## boss_kologarn
 ######*/
 
-struct MANGOS_DLL_DECL boss_kologarnAI : public Scripted_NoMovementAI
+struct  boss_kologarnAI : public Scripted_NoMovementAI
 {
     boss_kologarnAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
@@ -478,7 +478,7 @@ CreatureAI* GetAI_boss_kologarn(Creature* pCreature)
 ## npc_focused_eyebeam
 ######*/
 
-struct MANGOS_DLL_DECL npc_focused_eyebeamAI : public ScriptedAI
+struct  npc_focused_eyebeamAI : public ScriptedAI
 {
     npc_focused_eyebeamAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -510,7 +510,7 @@ CreatureAI* GetAI_npc_focused_eyebeam(Creature* pCreature)
 ## npc_rubble_stalker
 ######*/
 
-struct MANGOS_DLL_DECL npc_rubble_stalkerAI : public Scripted_NoMovementAI
+struct  npc_rubble_stalkerAI : public Scripted_NoMovementAI
 {
     npc_rubble_stalkerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {

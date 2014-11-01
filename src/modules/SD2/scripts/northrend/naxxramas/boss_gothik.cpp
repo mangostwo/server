@@ -71,7 +71,7 @@ enum eSpellDummy
     SPELL_C_TO_SKULL        = 27937
 };
 
-struct MANGOS_DLL_DECL boss_gothikAI : public ScriptedAI
+struct  boss_gothikAI : public ScriptedAI
 {
     boss_gothikAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

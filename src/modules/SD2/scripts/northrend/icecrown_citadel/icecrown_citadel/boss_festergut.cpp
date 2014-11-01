@@ -79,7 +79,7 @@ enum
     SAY_FESTERGUT_DEATH         = -1631091,
 };
 
-struct MANGOS_DLL_DECL boss_festergutAI : public ScriptedAI
+struct  boss_festergutAI : public ScriptedAI
 {
     boss_festergutAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

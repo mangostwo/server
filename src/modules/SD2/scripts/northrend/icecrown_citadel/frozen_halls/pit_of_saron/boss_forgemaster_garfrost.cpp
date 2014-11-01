@@ -64,7 +64,7 @@ static const float aGarfrostMoveLocs[2][3] =
 
 static const float afOutroNpcSpawnLoc[4] = {695.0146f, -123.7532f, 515.3067f, 4.59f};
 
-struct MANGOS_DLL_DECL boss_forgemaster_garfrostAI : public ScriptedAI
+struct  boss_forgemaster_garfrostAI : public ScriptedAI
 {
     boss_forgemaster_garfrostAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

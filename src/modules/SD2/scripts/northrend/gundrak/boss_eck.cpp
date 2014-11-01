@@ -41,7 +41,7 @@ enum
 ## boss_eck
 ######*/
 
-struct MANGOS_DLL_DECL boss_eckAI : public ScriptedAI
+struct  boss_eckAI : public ScriptedAI
 {
     boss_eckAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

@@ -363,7 +363,7 @@ enum
     MAX_KEEPER_DISTANCE             = 70,
 };
 
-struct MANGOS_DLL_DECL npc_storm_tempered_keeperAI : public ScriptedAI
+struct  npc_storm_tempered_keeperAI : public ScriptedAI
 {
     npc_storm_tempered_keeperAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -467,7 +467,7 @@ CreatureAI* GetAI_npc_storm_tempered_keeper(Creature* pCreature)
 ## npc_charged_sphere
 ######*/
 
-struct MANGOS_DLL_DECL npc_charged_sphereAI : public ScriptedAI
+struct  npc_charged_sphereAI : public ScriptedAI
 {
     npc_charged_sphereAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

@@ -52,7 +52,7 @@ enum
 
 static const float aArchimondeSpawnLoc[4] = {5581.49f, -3445.63f, 1575.1f, 3.905f};
 
-class MANGOS_DLL_DECL instance_mount_hyjal : public ScriptedInstance
+class  instance_mount_hyjal : public ScriptedInstance
 {
     public:
         instance_mount_hyjal(Map* pMap);

@@ -34,7 +34,7 @@ enum
     SPELL_GEHENNAS_CURSE        = 19716
 };
 
-struct MANGOS_DLL_DECL boss_gehennasAI : public ScriptedAI
+struct  boss_gehennasAI : public ScriptedAI
 {
     boss_gehennasAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

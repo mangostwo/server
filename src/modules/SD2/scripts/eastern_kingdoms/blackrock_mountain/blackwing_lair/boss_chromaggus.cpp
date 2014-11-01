@@ -64,7 +64,7 @@ enum
 
 static const uint32 aPossibleBreaths[MAX_BREATHS] = {SPELL_INCINERATE, SPELL_TIME_LAPSE, SPELL_CORROSIVE_ACID, SPELL_IGNITE_FLESH, SPELL_FROST_BURN};
 
-struct MANGOS_DLL_DECL boss_chromaggusAI : public ScriptedAI
+struct  boss_chromaggusAI : public ScriptedAI
 {
     boss_chromaggusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

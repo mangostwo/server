@@ -175,7 +175,7 @@ static const float aCenterPos[3] = {795.00f, -0.46f, 48.72f};
 ## boss_kaelthas
 ######*/
 
-struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
+struct  boss_kaelthasAI : public ScriptedAI
 {
     boss_kaelthasAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -723,7 +723,7 @@ bool EffectDummyCreature_kael_phase_2(Unit* pCaster, uint32 uiSpellId, SpellEffe
 ## advisor_base_ai
 ######*/
 
-struct MANGOS_DLL_DECL advisor_base_ai : public ScriptedAI
+struct  advisor_base_ai : public ScriptedAI
 {
     advisor_base_ai(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -815,7 +815,7 @@ struct MANGOS_DLL_DECL advisor_base_ai : public ScriptedAI
 ## boss_thaladred_the_darkener
 ######*/
 
-struct MANGOS_DLL_DECL boss_thaladred_the_darkenerAI : public advisor_base_ai
+struct  boss_thaladred_the_darkenerAI : public advisor_base_ai
 {
     boss_thaladred_the_darkenerAI(Creature* pCreature) : advisor_base_ai(pCreature) { Reset(); }
 
@@ -899,7 +899,7 @@ struct MANGOS_DLL_DECL boss_thaladred_the_darkenerAI : public advisor_base_ai
 ## boss_lord_sanguinar
 ######*/
 
-struct MANGOS_DLL_DECL boss_lord_sanguinarAI : public advisor_base_ai
+struct  boss_lord_sanguinarAI : public advisor_base_ai
 {
     boss_lord_sanguinarAI(Creature* pCreature) : advisor_base_ai(pCreature) { Reset(); }
 
@@ -947,7 +947,7 @@ struct MANGOS_DLL_DECL boss_lord_sanguinarAI : public advisor_base_ai
 ## boss_grand_astromancer_capernian
 ######*/
 
-struct MANGOS_DLL_DECL boss_grand_astromancer_capernianAI : public advisor_base_ai
+struct  boss_grand_astromancer_capernianAI : public advisor_base_ai
 {
     boss_grand_astromancer_capernianAI(Creature* pCreature) : advisor_base_ai(pCreature) { Reset(); }
 
@@ -1036,7 +1036,7 @@ struct MANGOS_DLL_DECL boss_grand_astromancer_capernianAI : public advisor_base_
 ## boss_master_engineer_telonicus
 ######*/
 
-struct MANGOS_DLL_DECL boss_master_engineer_telonicusAI : public advisor_base_ai
+struct  boss_master_engineer_telonicusAI : public advisor_base_ai
 {
     boss_master_engineer_telonicusAI(Creature* pCreature) : advisor_base_ai(pCreature) { Reset(); }
 
@@ -1097,7 +1097,7 @@ struct MANGOS_DLL_DECL boss_master_engineer_telonicusAI : public advisor_base_ai
 ## mob_phoenix_tk
 ######*/
 
-struct MANGOS_DLL_DECL mob_phoenix_tkAI : public ScriptedAI
+struct  mob_phoenix_tkAI : public ScriptedAI
 {
     mob_phoenix_tkAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
@@ -1222,7 +1222,7 @@ struct MANGOS_DLL_DECL mob_phoenix_tkAI : public ScriptedAI
 ######*/
 
 // TODO Remove this 'script' when combat movement can be proper prevented from core-side
-struct MANGOS_DLL_DECL mob_phoenix_egg_tkAI : public Scripted_NoMovementAI
+struct  mob_phoenix_egg_tkAI : public Scripted_NoMovementAI
 {
     mob_phoenix_egg_tkAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 

@@ -123,7 +123,7 @@ static const float afRazorscaleSpawnersPos[3][3] =
 ## boss_razorscale
 ######*/
 
-struct MANGOS_DLL_DECL boss_razorscaleAI : public ScriptedAI
+struct  boss_razorscaleAI : public ScriptedAI
 {
     boss_razorscaleAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -652,7 +652,7 @@ CreatureAI* GetAI_boss_razorscale(Creature* pCreature)
 ## npc_expedition_commander
 ######*/
 
-struct MANGOS_DLL_DECL npc_expedition_commanderAI : public ScriptedAI, private DialogueHelper
+struct  npc_expedition_commanderAI : public ScriptedAI, private DialogueHelper
 {
     npc_expedition_commanderAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aIntroDialogue)
@@ -780,7 +780,7 @@ bool GossipSelect_npc_expedition_commander(Player* pPlayer, Creature* pCreature,
 ## npc_razorscale_spawner
 ######*/
 
-struct MANGOS_DLL_DECL npc_razorscale_spawnerAI : public Scripted_NoMovementAI
+struct  npc_razorscale_spawnerAI : public Scripted_NoMovementAI
 {
     npc_razorscale_spawnerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 
@@ -841,7 +841,7 @@ CreatureAI* GetAI_npc_razorscale_spawner(Creature* pCreature)
 ######*/
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct MANGOS_DLL_DECL npc_harpoon_fire_stateAI : public Scripted_NoMovementAI
+struct  npc_harpoon_fire_stateAI : public Scripted_NoMovementAI
 {
     npc_harpoon_fire_stateAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 

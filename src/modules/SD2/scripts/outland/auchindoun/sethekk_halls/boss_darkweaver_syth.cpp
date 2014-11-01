@@ -60,7 +60,7 @@ enum
     NPC_SHADOW_ELEMENTAL        = 19206,
 };
 
-struct MANGOS_DLL_DECL boss_darkweaver_sythAI : public ScriptedAI
+struct  boss_darkweaver_sythAI : public ScriptedAI
 {
     boss_darkweaver_sythAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

@@ -212,7 +212,7 @@ static const float aKalegSpawnLoc[4] = {1734.431f, 593.1974f, 130.6977f, 4.55f};
 ## npc_kiljaeden_controller
 ######*/
 
-struct MANGOS_DLL_DECL npc_kiljaeden_controllerAI : public Scripted_NoMovementAI, private DialogueHelper
+struct  npc_kiljaeden_controllerAI : public Scripted_NoMovementAI, private DialogueHelper
 {
     npc_kiljaeden_controllerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature),
         DialogueHelper(aOutroDialogue)
@@ -372,7 +372,7 @@ struct MANGOS_DLL_DECL npc_kiljaeden_controllerAI : public Scripted_NoMovementAI
 ## boss_kiljaeden
 ######*/
 
-struct MANGOS_DLL_DECL boss_kiljaedenAI : public Scripted_NoMovementAI, private DialogueHelper
+struct  boss_kiljaedenAI : public Scripted_NoMovementAI, private DialogueHelper
 {
     boss_kiljaedenAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature),
         DialogueHelper(aPhaseDialogue)
@@ -738,7 +738,7 @@ bool EffectAuraDummy_spell_aura_dummy_darkness_of_souls(const Aura* pAura, bool 
 ## npc_shield_orb
 ######*/
 
-struct MANGOS_DLL_DECL npc_shield_orbAI : public ScriptedAI
+struct  npc_shield_orbAI : public ScriptedAI
 {
     npc_shield_orbAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -782,7 +782,7 @@ struct MANGOS_DLL_DECL npc_shield_orbAI : public ScriptedAI
 ## npc_power_blue_flight
 ######*/
 
-struct MANGOS_DLL_DECL npc_power_blue_flightAI : public ScriptedAI
+struct  npc_power_blue_flightAI : public ScriptedAI
 {
     npc_power_blue_flightAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

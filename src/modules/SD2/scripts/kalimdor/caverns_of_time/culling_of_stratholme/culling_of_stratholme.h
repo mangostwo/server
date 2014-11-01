@@ -118,7 +118,7 @@ enum eInstancePosition
     POS_INSTANCE_FINISHED   = 6
 };
 
-class MANGOS_DLL_DECL instance_culling_of_stratholme : public ScriptedInstance
+class  instance_culling_of_stratholme : public ScriptedInstance
 {
     public:
         instance_culling_of_stratholme(Map* pMap);

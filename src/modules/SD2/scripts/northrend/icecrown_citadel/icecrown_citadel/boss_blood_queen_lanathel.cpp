@@ -79,7 +79,7 @@ static const float aQueenPosition[2][3] =
     {4595.90f, 2769.31f, 421.83f},
 };
 
-struct MANGOS_DLL_DECL boss_blood_queen_lanathelAI : public ScriptedAI
+struct  boss_blood_queen_lanathelAI : public ScriptedAI
 {
     boss_blood_queen_lanathelAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

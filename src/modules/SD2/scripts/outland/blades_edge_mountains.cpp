@@ -62,7 +62,7 @@ enum
 
 static const uint32 aNetherDrakeEntries[MAX_ENTRIES] = {NPC_PROTO, NPC_ADOLESCENT, NPC_MATURE, NPC_NIHIL};
 
-struct MANGOS_DLL_DECL mobs_nether_drakeAI : public ScriptedAI
+struct mobs_nether_drakeAI : public ScriptedAI
 {
     mobs_nether_drakeAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -225,7 +225,7 @@ enum
     SPELL_LASHHAN_CHANNEL   = 36904
 };
 
-struct MANGOS_DLL_DECL npc_daranelleAI : public ScriptedAI
+struct  npc_daranelleAI : public ScriptedAI
 {
     npc_daranelleAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
@@ -270,7 +270,7 @@ enum
 
 static const uint32 aOgreEntries[] = {19995, 19998, 20334, 20723, 20726, 20730, 20731, 20732, 21296};
 
-struct MANGOS_DLL_DECL npc_bloodmaul_stout_triggerAI : public ScriptedAI
+struct  npc_bloodmaul_stout_triggerAI : public ScriptedAI
 {
     npc_bloodmaul_stout_triggerAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -493,7 +493,7 @@ static const SimonGame aApexisGameData[4] =
     {COLOR_IDX_YELLOW,  SPELL_BUTTON_PUSH_YELLOW,   SPELL_INTROSPECTION_YELLOW, SOUND_ID_YELLOW}
 };
 
-struct MANGOS_DLL_DECL npc_simon_game_bunnyAI : public ScriptedAI
+struct  npc_simon_game_bunnyAI : public ScriptedAI
 {
     npc_simon_game_bunnyAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

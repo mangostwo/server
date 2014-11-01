@@ -140,7 +140,7 @@ static const float SindragosaPosition[10][3] =
     {4505.00f, 2524.37f, 235.37f},      // 9 Sindragosa west flying point
 };
 
-struct MANGOS_DLL_DECL boss_sindragosaAI : public ScriptedAI
+struct  boss_sindragosaAI : public ScriptedAI
 {
     boss_sindragosaAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -464,7 +464,7 @@ CreatureAI* GetAI_boss_sindragosa(Creature* pCreature)
     return new boss_sindragosaAI(pCreature);
 }
 
-struct MANGOS_DLL_DECL npc_rimefang_iccAI : public ScriptedAI
+struct  npc_rimefang_iccAI : public ScriptedAI
 {
     npc_rimefang_iccAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -660,7 +660,7 @@ CreatureAI* GetAI_npc_rimefang_icc(Creature* pCreature)
 }
 
 
-struct MANGOS_DLL_DECL npc_spinestalker_iccAI : public ScriptedAI
+struct  npc_spinestalker_iccAI : public ScriptedAI
 {
     npc_spinestalker_iccAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -801,7 +801,7 @@ CreatureAI* GetAI_npc_spinestalker_icc(Creature* pCreature)
 /**
  * Frost Bomb - npc marking the target of Frost Bomb
  */
-struct MANGOS_DLL_DECL mob_frost_bombAI : public ScriptedAI
+struct  mob_frost_bombAI : public ScriptedAI
 {
     mob_frost_bombAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

@@ -47,7 +47,7 @@ enum
     SPELL_SUMMON_FIENDISH_HOUND = 30707,
 };
 
-struct MANGOS_DLL_DECL boss_omor_the_unscarredAI : public ScriptedAI
+struct  boss_omor_the_unscarredAI : public ScriptedAI
 {
     boss_omor_the_unscarredAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

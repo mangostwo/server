@@ -74,7 +74,7 @@ static const AddsLocations aLurkerLoc[MAX_SUBMERGE_ADDS] =
     {NPC_COILFANG_GUARDIAN, 42.471f, -445.115f, -19.76f},
 };
 
-struct MANGOS_DLL_DECL boss_the_lurker_belowAI : public Scripted_NoMovementAI
+struct  boss_the_lurker_belowAI : public Scripted_NoMovementAI
 {
     boss_the_lurker_belowAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {

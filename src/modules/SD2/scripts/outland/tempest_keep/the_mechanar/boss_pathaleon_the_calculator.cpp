@@ -59,7 +59,7 @@ enum
 
 static const uint32 aWraithSummonSpells[4] = {SPELL_SUMMON_NETHER_WRAITH_1, SPELL_SUMMON_NETHER_WRAITH_2, SPELL_SUMMON_NETHER_WRAITH_3, SPELL_SUMMON_NETHER_WRAITH_4};
 
-struct MANGOS_DLL_DECL boss_pathaleon_the_calculatorAI : public ScriptedAI
+struct  boss_pathaleon_the_calculatorAI : public ScriptedAI
 {
     boss_pathaleon_the_calculatorAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -202,7 +202,7 @@ struct MANGOS_DLL_DECL boss_pathaleon_the_calculatorAI : public ScriptedAI
     }
 };
 
-struct MANGOS_DLL_DECL mob_nether_wraithAI : public ScriptedAI
+struct  mob_nether_wraithAI : public ScriptedAI
 {
     mob_nether_wraithAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 

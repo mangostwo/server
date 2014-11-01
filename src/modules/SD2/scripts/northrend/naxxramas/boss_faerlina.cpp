@@ -52,7 +52,7 @@ enum
     SPELL_WIDOWS_EMBRACE_H      = 54097,
 };
 
-struct MANGOS_DLL_DECL boss_faerlinaAI : public ScriptedAI
+struct  boss_faerlinaAI : public ScriptedAI
 {
     boss_faerlinaAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

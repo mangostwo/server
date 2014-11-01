@@ -105,7 +105,7 @@ static const BoatSpirits aYmironBoatsSpirits[MAX_BOATS] =
 ## boss_ymiron
 ######*/
 
-struct MANGOS_DLL_DECL boss_ymironAI : public ScriptedAI
+struct  boss_ymironAI : public ScriptedAI
 {
     boss_ymironAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

@@ -52,7 +52,7 @@ enum
     POINT_ID                = 1
 };
 
-struct MANGOS_DLL_DECL npc_kyle_the_frenziedAI : public ScriptedAI
+struct  npc_kyle_the_frenziedAI : public ScriptedAI
 {
     npc_kyle_the_frenziedAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 

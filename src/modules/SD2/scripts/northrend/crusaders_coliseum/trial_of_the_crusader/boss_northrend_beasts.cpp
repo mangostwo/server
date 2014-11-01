@@ -43,7 +43,7 @@ enum
     PHASE_ICEHOWL                       = 2,
 };
 
-struct MANGOS_DLL_DECL npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
+struct  npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
 {
     npc_beast_combat_stalkerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
@@ -232,7 +232,7 @@ CreatureAI* GetAI_npc_beast_combat_stalker(Creature* pCreature)
 ## boss_gormok, vehicle driven by 34800 (multiple times)
 ######*/
 
-struct MANGOS_DLL_DECL boss_gormokAI : public ScriptedAI
+struct  boss_gormokAI : public ScriptedAI
 {
     boss_gormokAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -270,7 +270,7 @@ CreatureAI* GetAI_boss_gormok(Creature* pCreature)
 ## boss_acidmaw
 ######*/
 
-struct MANGOS_DLL_DECL boss_acidmawAI : public ScriptedAI
+struct  boss_acidmawAI : public ScriptedAI
 {
     boss_acidmawAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -308,7 +308,7 @@ CreatureAI* GetAI_boss_acidmaw(Creature* pCreature)
 ## boss_dreadscale
 ######*/
 
-struct MANGOS_DLL_DECL boss_dreadscaleAI : public ScriptedAI
+struct  boss_dreadscaleAI : public ScriptedAI
 {
     boss_dreadscaleAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -351,7 +351,7 @@ enum
     EMOTE_MASSIVE_CRASH                 = -1649039,
 };
 
-struct MANGOS_DLL_DECL boss_icehowlAI : public ScriptedAI
+struct  boss_icehowlAI : public ScriptedAI
 {
     boss_icehowlAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

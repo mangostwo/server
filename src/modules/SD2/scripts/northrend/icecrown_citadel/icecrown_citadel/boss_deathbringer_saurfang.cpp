@@ -116,7 +116,7 @@ enum
 
 static const float fIntroPosition[4] = { -491.30f, 2211.35f, 541.11f, 3.16f};
 
-struct MANGOS_DLL_DECL boss_deathbringer_saurfangAI : public ScriptedAI
+struct  boss_deathbringer_saurfangAI : public ScriptedAI
 {
     boss_deathbringer_saurfangAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

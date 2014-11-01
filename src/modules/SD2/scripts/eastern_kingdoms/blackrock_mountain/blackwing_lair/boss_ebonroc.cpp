@@ -35,7 +35,7 @@ enum
     SPELL_THRASH                = 3391,                     // TODO missing
 };
 
-struct MANGOS_DLL_DECL boss_ebonrocAI : public ScriptedAI
+struct  boss_ebonrocAI : public ScriptedAI
 {
     boss_ebonrocAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

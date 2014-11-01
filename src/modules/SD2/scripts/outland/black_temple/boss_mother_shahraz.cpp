@@ -66,7 +66,7 @@ static const uint32 aPrismaticAuras[] =
 
 static const uint32 aPeriodicBeams[] = {SPELL_SINFUL_PERIODIC, SPELL_SINISTER_PERIODIC, SPELL_VILE_PERIODIC, SPELL_WICKED_PERIODIC};
 
-struct MANGOS_DLL_DECL boss_shahrazAI : public ScriptedAI
+struct  boss_shahrazAI : public ScriptedAI
 {
     boss_shahrazAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

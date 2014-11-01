@@ -53,7 +53,7 @@ static const float aMushroomPos[3] = {362.8f, -869.16f, -75.03f};
 ## boss_amanitar
 ######*/
 
-struct MANGOS_DLL_DECL boss_amanitarAI : public ScriptedAI
+struct  boss_amanitarAI : public ScriptedAI
 {
     boss_amanitarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -198,7 +198,7 @@ CreatureAI* GetAI_boss_amanitar(Creature* pCreature)
 ## npc_amanitar_mushroom
 ######*/
 
-struct MANGOS_DLL_DECL npc_amanitar_mushroomAI : public Scripted_NoMovementAI
+struct  npc_amanitar_mushroomAI : public Scripted_NoMovementAI
 {
     npc_amanitar_mushroomAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 

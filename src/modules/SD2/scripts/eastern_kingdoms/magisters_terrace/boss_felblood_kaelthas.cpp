@@ -92,7 +92,7 @@ static const uint32 aGravityLapseSpells[] = {44219, 44220, 44221, 44222, 44223};
 ## boss_felblood_kaelthas
 ######*/
 
-struct MANGOS_DLL_DECL boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
+struct  boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
 {
     boss_felblood_kaelthasAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aIntroDialogue)
@@ -440,7 +440,7 @@ struct MANGOS_DLL_DECL boss_felblood_kaelthasAI : public ScriptedAI, private Dia
 ## mob_felkael_phoenix
 ######*/
 
-struct MANGOS_DLL_DECL mob_felkael_phoenixAI : public ScriptedAI
+struct  mob_felkael_phoenixAI : public ScriptedAI
 {
     mob_felkael_phoenixAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -565,7 +565,7 @@ struct MANGOS_DLL_DECL mob_felkael_phoenixAI : public ScriptedAI
 ######*/
 
 // TODO Remove this 'script' when combat movement can be proper prevented from core-side
-struct MANGOS_DLL_DECL mob_felkael_phoenix_eggAI : public Scripted_NoMovementAI
+struct  mob_felkael_phoenix_eggAI : public Scripted_NoMovementAI
 {
     mob_felkael_phoenix_eggAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 
@@ -579,7 +579,7 @@ struct MANGOS_DLL_DECL mob_felkael_phoenix_eggAI : public Scripted_NoMovementAI
 ## mob_arcane_sphere
 ######*/
 
-struct MANGOS_DLL_DECL mob_arcane_sphereAI : public ScriptedAI
+struct  mob_arcane_sphereAI : public ScriptedAI
 {
     mob_arcane_sphereAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

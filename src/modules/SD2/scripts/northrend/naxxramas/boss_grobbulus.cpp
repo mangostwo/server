@@ -48,7 +48,7 @@ enum
     NPC_FALLOUT_SLIME               = 16290
 };
 
-struct MANGOS_DLL_DECL boss_grobbulusAI : public ScriptedAI
+struct  boss_grobbulusAI : public ScriptedAI
 {
     boss_grobbulusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

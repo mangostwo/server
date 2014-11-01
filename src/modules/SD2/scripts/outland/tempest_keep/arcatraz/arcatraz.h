@@ -78,7 +78,7 @@ static const float aSoccotharesStartPos[4] = {122.1035f, 192.7203f, 22.44115f, 5
 static const float aEntranceMoveLoc[3] = {82.020f, 0.306f, -11.026f};
 static const float aEntranceSpawnLoc[4] = {173.471f, -0.138f, -10.101f, 3.123f};
 
-class MANGOS_DLL_DECL instance_arcatraz : public ScriptedInstance, private DialogueHelper
+class  instance_arcatraz : public ScriptedInstance, private DialogueHelper
 {
     public:
         instance_arcatraz(Map* pMap);

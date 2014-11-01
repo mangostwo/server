@@ -103,7 +103,7 @@ enum
 ## boss_xt_002
 ######*/
 
-struct MANGOS_DLL_DECL boss_xt_002AI : public ScriptedAI
+struct  boss_xt_002AI : public ScriptedAI
 {
     boss_xt_002AI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -371,7 +371,7 @@ CreatureAI* GetAI_boss_xt_002(Creature* pCreature)
 ## boss_heart_deconstructor
 ######*/
 
-struct MANGOS_DLL_DECL boss_heart_deconstructorAI : public ScriptedAI
+struct  boss_heart_deconstructorAI : public ScriptedAI
 {
     boss_heart_deconstructorAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -486,7 +486,7 @@ CreatureAI* GetAI_boss_heart_deconstructor(Creature* pCreature)
 ## npc_scrapbot
 ######*/
 
-struct MANGOS_DLL_DECL npc_scrapbotAI : public ScriptedAI
+struct  npc_scrapbotAI : public ScriptedAI
 {
     npc_scrapbotAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -520,7 +520,7 @@ CreatureAI* GetAI_npc_scrapbot(Creature* pCreature)
 ######*/
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct MANGOS_DLL_DECL npc_xt_toy_pileAI : public Scripted_NoMovementAI
+struct  npc_xt_toy_pileAI : public Scripted_NoMovementAI
 {
     npc_xt_toy_pileAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 

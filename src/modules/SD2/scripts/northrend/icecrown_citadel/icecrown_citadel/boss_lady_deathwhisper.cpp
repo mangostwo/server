@@ -71,7 +71,7 @@ enum
 static const uint32 aLeftSummonedCultists[3] = {NPC_CULT_ADHERENT, NPC_CULT_FANATIC, NPC_CULT_ADHERENT};
 static const uint32 aRightSummonedCultists[3] = {NPC_CULT_FANATIC, NPC_CULT_ADHERENT, NPC_CULT_FANATIC};
 
-struct MANGOS_DLL_DECL boss_lady_deathwhisperAI : public ScriptedAI
+struct  boss_lady_deathwhisperAI : public ScriptedAI
 {
     boss_lady_deathwhisperAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

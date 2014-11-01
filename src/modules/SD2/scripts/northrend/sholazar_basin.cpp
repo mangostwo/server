@@ -56,7 +56,7 @@ enum
     SPELL_DETONATE_EXPLOSIVES_2         = 52371,            // second "barrel"
 };
 
-struct MANGOS_DLL_DECL npc_heliceAI : public npc_escortAI
+struct  npc_heliceAI : public npc_escortAI
 {
     npc_heliceAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
@@ -224,7 +224,7 @@ enum
     SPELL_ORACLE_INTRO                  = 51448,
 };
 
-struct MANGOS_DLL_DECL npc_injured_rainspeakerAI : public npc_escortAI
+struct  npc_injured_rainspeakerAI : public npc_escortAI
 {
     npc_injured_rainspeakerAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -472,7 +472,7 @@ static const StillAtItData aStillAtItMachines[2] =
     {SAY_OPEN_VALVE,     GO_PRESSURE_VALVE},
 };
 
-struct MANGOS_DLL_DECL npc_tipsy_mcmanusAI : public ScriptedAI
+struct  npc_tipsy_mcmanusAI : public ScriptedAI
 {
     npc_tipsy_mcmanusAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

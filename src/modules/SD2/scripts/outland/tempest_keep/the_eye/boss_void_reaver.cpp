@@ -45,7 +45,7 @@ enum
     NPC_ARCANE_ORB_TARGET       = 19577,
 };
 
-struct MANGOS_DLL_DECL boss_void_reaverAI : public ScriptedAI
+struct  boss_void_reaverAI : public ScriptedAI
 {
     boss_void_reaverAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

@@ -158,7 +158,7 @@ static const float afArenaCenterLoc[3] = {2134.8f, -263.056f, 419.983f};
 ## boss_thorim
 ######*/
 
-struct MANGOS_DLL_DECL boss_thorimAI : public ScriptedAI, private DialogueHelper
+struct  boss_thorimAI : public ScriptedAI, private DialogueHelper
 {
     boss_thorimAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aThorimDialogue)
@@ -684,7 +684,7 @@ CreatureAI* GetAI_boss_thorim(Creature* pCreature)
 ## boss_sif
 ######*/
 
-struct MANGOS_DLL_DECL boss_sifAI : public ScriptedAI
+struct  boss_sifAI : public ScriptedAI
 {
     boss_sifAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -833,7 +833,7 @@ CreatureAI* GetAI_boss_sif(Creature* pCreature)
 ## npc_runic_colossus
 ######*/
 
-struct MANGOS_DLL_DECL npc_runic_colossusAI : public ScriptedAI
+struct  npc_runic_colossusAI : public ScriptedAI
 {
     npc_runic_colossusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -1009,7 +1009,7 @@ CreatureAI* GetAI_npc_runic_colossus(Creature* pCreature)
 ## npc_thunder_orb
 ######*/
 
-struct MANGOS_DLL_DECL npc_thunder_orbAI : public Scripted_NoMovementAI
+struct  npc_thunder_orbAI : public Scripted_NoMovementAI
 {
     npc_thunder_orbAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 

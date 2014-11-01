@@ -60,7 +60,7 @@ enum
 ## Boss Ionar
 ######*/
 
-struct MANGOS_DLL_DECL boss_ionarAI : public ScriptedAI
+struct  boss_ionarAI : public ScriptedAI
 {
     boss_ionarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -333,7 +333,7 @@ bool EffectDummyCreature_boss_ionar(Unit* /*pCaster*/, uint32 uiSpellId, SpellEf
 ## mob_spark_of_ionar
 ######*/
 
-struct MANGOS_DLL_DECL mob_spark_of_ionarAI : public ScriptedAI
+struct  mob_spark_of_ionarAI : public ScriptedAI
 {
     mob_spark_of_ionarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

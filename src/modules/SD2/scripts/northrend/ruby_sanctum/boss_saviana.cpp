@@ -50,7 +50,7 @@ enum
 
 static const float aAirPositions[3] = {3155.51f, 683.844f, 90.50f};
 
-struct MANGOS_DLL_DECL boss_savianaAI : public ScriptedAI
+struct  boss_savianaAI : public ScriptedAI
 {
     boss_savianaAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

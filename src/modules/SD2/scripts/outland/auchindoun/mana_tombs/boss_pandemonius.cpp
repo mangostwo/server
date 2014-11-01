@@ -44,7 +44,7 @@ enum
     MAX_VOID_BLASTS                 = 5,
 };
 
-struct MANGOS_DLL_DECL boss_pandemoniusAI : public ScriptedAI
+struct  boss_pandemoniusAI : public ScriptedAI
 {
     boss_pandemoniusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

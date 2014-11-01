@@ -52,7 +52,7 @@ struct NovosCrystalInfo
     bool m_bWasUsed;
 };
 
-class MANGOS_DLL_DECL instance_draktharon_keep : public ScriptedInstance
+class  instance_draktharon_keep : public ScriptedInstance
 {
     public:
         instance_draktharon_keep(Map* pMap);

@@ -84,7 +84,7 @@ enum
 ## boss_ignis
 ######*/
 
-struct MANGOS_DLL_DECL boss_ignisAI : public ScriptedAI
+struct  boss_ignisAI : public ScriptedAI
 {
     boss_ignisAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -239,7 +239,7 @@ CreatureAI* GetAI_boss_ignis(Creature* pCreature)
 ## npc_iron_construct
 ######*/
 
-struct MANGOS_DLL_DECL npc_iron_constructAI : public ScriptedAI
+struct  npc_iron_constructAI : public ScriptedAI
 {
     npc_iron_constructAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -334,7 +334,7 @@ bool EffectScriptEffectCreature_npc_iron_construct(Unit* /*pCaster*/, uint32 uiS
 ######*/
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct MANGOS_DLL_DECL npc_scorchAI : public Scripted_NoMovementAI
+struct  npc_scorchAI : public Scripted_NoMovementAI
 {
     npc_scorchAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 

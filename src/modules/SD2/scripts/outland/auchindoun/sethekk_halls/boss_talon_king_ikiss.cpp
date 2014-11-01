@@ -53,7 +53,7 @@ enum
     SPELL_ARCANE_EXPLOSION_H    = 40425,
 };
 
-struct MANGOS_DLL_DECL boss_talon_king_ikissAI : public ScriptedAI
+struct  boss_talon_king_ikissAI : public ScriptedAI
 {
     boss_talon_king_ikissAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

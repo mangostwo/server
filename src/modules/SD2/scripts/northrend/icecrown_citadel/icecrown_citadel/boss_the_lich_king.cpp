@@ -238,7 +238,7 @@ static const float fLichKingPosition[11][3] =
     {494.31f, -2523.08f, 1249.87f},    // 10 center of platform inside Frostmourne
 };
 
-struct MANGOS_DLL_DECL boss_the_lich_king_iccAI : public ScriptedAI
+struct  boss_the_lich_king_iccAI : public ScriptedAI
 {
     boss_the_lich_king_iccAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

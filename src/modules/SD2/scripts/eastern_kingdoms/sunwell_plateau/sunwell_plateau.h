@@ -102,7 +102,7 @@ static const EventLocations aKalecLoc[] =
 
 static const float afMuruSpawnLoc[4] = { 1816.25f, 625.484f, 69.603f, 5.624f };
 
-class MANGOS_DLL_DECL instance_sunwell_plateau : public ScriptedInstance, private DialogueHelper
+class  instance_sunwell_plateau : public ScriptedInstance, private DialogueHelper
 {
     public:
         instance_sunwell_plateau(Map* pMap);

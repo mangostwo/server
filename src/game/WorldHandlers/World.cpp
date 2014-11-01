@@ -1384,8 +1384,8 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading CreatureEventAI Scripts...");
     sEventAIMgr.LoadCreatureEventAI_Scripts();
 
-#ifdef ENABLE_SD2
     sLog.outString("Initializing Scripts...");
+#ifdef ENABLE_SD2
     switch (sScriptMgr.LoadScriptLibrary(MANGOS_SCRIPT_NAME))
     {
         case SCRIPT_LOAD_OK:
@@ -1402,7 +1402,7 @@ void World::SetInitialWorldSettings()
             break;
     }
 #else /* ENABLE_SD2 */
-    sLog.outError("SD2 is enabled but wasn't included during compilation, not activating it.");
+    sLog.outError("SD2 was not included in compilation, not using it.");
 #endif /* ENABLE_SD2 */
 
     ///- Initialize game time and timers

@@ -52,7 +52,7 @@ enum
     NPC_FROSTBORN_GHOST                 = 30144,
 };
 
-struct MANGOS_DLL_DECL npc_floating_spiritAI : public ScriptedAI
+struct  npc_floating_spiritAI : public ScriptedAI
 {
     npc_floating_spiritAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -127,7 +127,7 @@ enum
     QUEST_ID_BITTER_DEPARTURE           = 12832,
 };
 
-struct MANGOS_DLL_DECL npc_injured_minerAI : public npc_escortAI
+struct  npc_injured_minerAI : public npc_escortAI
 {
     npc_injured_minerAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 

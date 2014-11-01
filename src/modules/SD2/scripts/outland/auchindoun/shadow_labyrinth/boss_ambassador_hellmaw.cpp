@@ -42,7 +42,7 @@ enum
     SPELL_ENRAGE            = 34970
 };
 
-struct MANGOS_DLL_DECL boss_ambassador_hellmawAI : public ScriptedAI
+struct  boss_ambassador_hellmawAI : public ScriptedAI
 {
     boss_ambassador_hellmawAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

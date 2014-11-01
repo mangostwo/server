@@ -27,7 +27,7 @@
 #define SC_PET_H
 
 // Using CreatureAI for now. Might change later and use PetAI (need to export for dll first)
-class MANGOS_DLL_DECL ScriptedPetAI : public CreatureAI
+class  ScriptedPetAI : public CreatureAI
 {
     public:
         explicit ScriptedPetAI(Creature* pCreature);

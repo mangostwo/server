@@ -38,7 +38,7 @@ enum
     SPELL_KNOCK_AWAY            = 25778
 };
 
-struct MANGOS_DLL_DECL boss_broodlordAI : public ScriptedAI
+struct  boss_broodlordAI : public ScriptedAI
 {
     boss_broodlordAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

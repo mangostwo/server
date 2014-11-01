@@ -71,7 +71,7 @@ enum
 ## boss_sladran
 ######*/
 
-struct MANGOS_DLL_DECL boss_sladranAI : public ScriptedAI
+struct  boss_sladranAI : public ScriptedAI
 {
     boss_sladranAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

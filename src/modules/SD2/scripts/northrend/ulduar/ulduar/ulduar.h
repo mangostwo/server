@@ -541,7 +541,7 @@ static const float afProspectorSpawnPos[4] = { 1556.469f, 143.5023f, 427.2918f, 
 // spawn location for Algalon in reload case
 static const float afAlgalonMovePos[4] = {1632.668f, -302.7656f, 417.3211f, 1.53f};
 
-class MANGOS_DLL_DECL instance_ulduar : public ScriptedInstance, private DialogueHelper
+class  instance_ulduar : public ScriptedInstance, private DialogueHelper
 {
     public:
         instance_ulduar(Map* pMap);

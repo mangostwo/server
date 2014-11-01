@@ -61,7 +61,7 @@ static const float afRimefangExitPos[3] = {1248.29f, 145.924f, 733.914f};
 ## boss_tyrannus
 ######*/
 
-struct MANGOS_DLL_DECL boss_tyrannusAI : public ScriptedAI
+struct  boss_tyrannusAI : public ScriptedAI
 {
     boss_tyrannusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -210,7 +210,7 @@ CreatureAI* GetAI_boss_tyrannus(Creature* pCreature)
 ## boss_rimefang_pos
 ######*/
 
-struct MANGOS_DLL_DECL boss_rimefang_posAI : public ScriptedAI
+struct  boss_rimefang_posAI : public ScriptedAI
 {
     boss_rimefang_posAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

@@ -106,7 +106,7 @@ enum SpecialSurprise
     NPC_PLAGUEFIST              = 29053
 };
 
-struct MANGOS_DLL_DECL npc_a_special_surpriseAI : public ScriptedAI
+struct  npc_a_special_surpriseAI : public ScriptedAI
 {
     npc_a_special_surpriseAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -543,7 +543,7 @@ int32 m_auiRandomSay[] =
     SAY_DUEL_A, SAY_DUEL_B, SAY_DUEL_C, SAY_DUEL_D, SAY_DUEL_E, SAY_DUEL_F, SAY_DUEL_G, SAY_DUEL_H, SAY_DUEL_I
 };
 
-struct MANGOS_DLL_DECL npc_death_knight_initiateAI : public ScriptedAI
+struct  npc_death_knight_initiateAI : public ScriptedAI
 {
     npc_death_knight_initiateAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -778,7 +778,7 @@ enum eKoltira
     MODEL_DEATH_KNIGHT_MOUNT        = 25278
 };
 
-struct MANGOS_DLL_DECL npc_koltira_deathweaverAI : public npc_escortAI
+struct  npc_koltira_deathweaverAI : public npc_escortAI
 {
     npc_koltira_deathweaverAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -956,7 +956,7 @@ enum
 ## npc_unworthy_initiate_anchor
 ######*/
 
-struct MANGOS_DLL_DECL npc_unworthy_initiate_anchorAI : public ScriptedAI
+struct  npc_unworthy_initiate_anchorAI : public ScriptedAI
 {
     npc_unworthy_initiate_anchorAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -998,7 +998,7 @@ CreatureAI* GetAI_npc_unworthy_initiate_anchor(Creature* pCreature)
 ## npc_unworthy_initiate
 ######*/
 
-struct MANGOS_DLL_DECL npc_unworthy_initiateAI : public ScriptedAI
+struct  npc_unworthy_initiateAI : public ScriptedAI
 {
     npc_unworthy_initiateAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -1211,7 +1211,7 @@ enum
 // movement destination coords
 static const float aEyeDestination[3] = {1750.8276f, -5873.788f, 147.2266f};
 
-struct MANGOS_DLL_DECL npc_eye_of_acherusAI : public ScriptedAI
+struct  npc_eye_of_acherusAI : public ScriptedAI
 {
     npc_eye_of_acherusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -1296,7 +1296,7 @@ enum
 
 static const float aPitPosition[3] = {2380.13f, -5783.06f, 151.367f};
 
-struct MANGOS_DLL_DECL npc_scarlet_ghoulAI : public ScriptedPetAI
+struct  npc_scarlet_ghoulAI : public ScriptedPetAI
 {
     npc_scarlet_ghoulAI(Creature* pCreature) : ScriptedPetAI(pCreature)
     {
@@ -1545,7 +1545,7 @@ enum LightOfDawn
     GOSSIP_TEXT_ID_READY                = 13485,
 };
 
-struct MANGOS_DLL_DECL npc_highlord_darion_mograineAI : public npc_escortAI
+struct  npc_highlord_darion_mograineAI : public npc_escortAI
 {
     npc_highlord_darion_mograineAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
@@ -2715,7 +2715,7 @@ CreatureAI* GetAI_npc_highlord_darion_mograine(Creature* pCreature)
     return new npc_highlord_darion_mograineAI(pCreature);
 }
 
-struct MANGOS_DLL_DECL npc_fellow_death_knightAI : public ScriptedAI
+struct  npc_fellow_death_knightAI : public ScriptedAI
 {
     npc_fellow_death_knightAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -2850,7 +2850,7 @@ CreatureAI* GetAI_npc_fellow_death_knight(Creature* pCreature)
 }
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct MANGOS_DLL_DECL npc_lich_king_light_dawnAI : public ScriptedAI
+struct  npc_lich_king_light_dawnAI : public ScriptedAI
 {
     npc_lich_king_light_dawnAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -2883,7 +2883,7 @@ enum
     FACTION_FRIENDLY            = 35,
 };
 
-struct MANGOS_DLL_DECL npc_acherus_deathchargerAI : public ScriptedAI
+struct  npc_acherus_deathchargerAI : public ScriptedAI
 {
     npc_acherus_deathchargerAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

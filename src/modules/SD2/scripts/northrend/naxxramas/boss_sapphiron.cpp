@@ -78,7 +78,7 @@ enum Phases
     PHASE_LANDING       = 5,
 };
 
-struct MANGOS_DLL_DECL boss_sapphironAI : public ScriptedAI
+struct  boss_sapphironAI : public ScriptedAI
 {
     boss_sapphironAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

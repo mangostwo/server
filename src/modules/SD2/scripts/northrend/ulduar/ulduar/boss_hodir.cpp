@@ -97,7 +97,7 @@ enum
 ## boss_hodir
 ######*/
 
-struct MANGOS_DLL_DECL boss_hodirAI : public ScriptedAI
+struct  boss_hodirAI : public ScriptedAI
 {
     boss_hodirAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -313,7 +313,7 @@ CreatureAI* GetAI_boss_hodir(Creature* pCreature)
 ## npc_flash_freeze
 ######*/
 
-struct MANGOS_DLL_DECL npc_flash_freezeAI : public Scripted_NoMovementAI
+struct  npc_flash_freezeAI : public Scripted_NoMovementAI
 {
     npc_flash_freezeAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
@@ -424,7 +424,7 @@ bool ProcessEventId_event_boss_hodir(uint32 uiEventId, Object* pSource, Object* 
 ######*/
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct MANGOS_DLL_DECL npc_icicle_targetAI : public Scripted_NoMovementAI
+struct  npc_icicle_targetAI : public Scripted_NoMovementAI
 {
     npc_icicle_targetAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 

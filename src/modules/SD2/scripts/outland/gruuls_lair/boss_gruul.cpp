@@ -55,7 +55,7 @@ enum
     SPELL_KNOCK_BACK            = 24199                     // Knockback spell until correct implementation is made
 };
 
-struct MANGOS_DLL_DECL boss_gruulAI : public ScriptedAI
+struct  boss_gruulAI : public ScriptedAI
 {
     boss_gruulAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

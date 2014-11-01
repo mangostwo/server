@@ -147,7 +147,7 @@ struct NalorakkTrashInfo
     uint8 uiTrashKilled;
 };
 
-class MANGOS_DLL_DECL instance_zulaman : public ScriptedInstance
+class  instance_zulaman : public ScriptedInstance
 {
     public:
         instance_zulaman(Map* pMap);

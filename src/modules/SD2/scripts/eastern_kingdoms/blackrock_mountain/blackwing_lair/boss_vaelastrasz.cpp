@@ -59,7 +59,7 @@ enum
     AREATRIGGER_VAEL_INTRO      = 3626,
 };
 
-struct MANGOS_DLL_DECL boss_vaelastraszAI : public ScriptedAI
+struct  boss_vaelastraszAI : public ScriptedAI
 {
     boss_vaelastraszAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

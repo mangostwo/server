@@ -87,7 +87,7 @@ enum
 ## boss_magtheridon
 ######*/
 
-struct MANGOS_DLL_DECL boss_magtheridonAI : public ScriptedAI
+struct  boss_magtheridonAI : public ScriptedAI
 {
     boss_magtheridonAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -305,7 +305,7 @@ struct MANGOS_DLL_DECL boss_magtheridonAI : public ScriptedAI
 ## mob_hellfire_channeler
 ######*/
 
-struct MANGOS_DLL_DECL mob_hellfire_channelerAI : public ScriptedAI
+struct  mob_hellfire_channelerAI : public ScriptedAI
 {
     mob_hellfire_channelerAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -462,7 +462,7 @@ bool GOUse_go_manticron_cube(Player* pPlayer, GameObject* pGo)
 }
 
 // TODO Remove this 'script' when combat and persistent area auras can be proper prevented from core-side
-struct MANGOS_DLL_DECL npc_target_triggerAI : public Scripted_NoMovementAI
+struct  npc_target_triggerAI : public Scripted_NoMovementAI
 {
     npc_target_triggerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) {Reset();}
 
@@ -503,7 +503,7 @@ struct MANGOS_DLL_DECL npc_target_triggerAI : public Scripted_NoMovementAI
 };
 
 // ToDo: move this script to eventAI
-struct MANGOS_DLL_DECL mob_abyssalAI : public ScriptedAI
+struct  mob_abyssalAI : public ScriptedAI
 {
     mob_abyssalAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

@@ -55,7 +55,7 @@ enum
     GO_ILLIDAN_DOOR_L               = 186262,
 };
 
-class MANGOS_DLL_DECL instance_black_temple : public ScriptedInstance
+class  instance_black_temple : public ScriptedInstance
 {
     public:
         instance_black_temple(Map* pMap);

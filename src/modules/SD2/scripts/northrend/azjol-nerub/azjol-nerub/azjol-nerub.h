@@ -48,7 +48,7 @@ static const uint32 aWatchers[] = {NPC_GASHRA, NPC_NARJIL, NPC_SILTHIK};
 // Used to sort the summont triggers
 static const int aSortDistance[4] = { -90, 10, 20, 30};
 
-class MANGOS_DLL_DECL instance_azjol_nerub : public ScriptedInstance
+class  instance_azjol_nerub : public ScriptedInstance
 {
     public:
         instance_azjol_nerub(Map* pMap);

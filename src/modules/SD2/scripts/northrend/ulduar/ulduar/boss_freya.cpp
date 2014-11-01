@@ -185,7 +185,7 @@ static const uint32 aAlliesSpawnSpells[MAX_ALLIES_SPELLS] = {SPELL_SUMMON_WAVE_1
 ## boss_freya
 ######*/
 
-struct MANGOS_DLL_DECL boss_freyaAI : public ScriptedAI
+struct  boss_freyaAI : public ScriptedAI
 {
     boss_freyaAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -671,7 +671,7 @@ bool EffectScriptEffectCreature_boss_freya(Unit* pCaster, uint32 uiSpellId, Spel
 ## three_nature_allies
 ######*/
 
-struct MANGOS_DLL_DECL three_nature_alliesAI : public ScriptedAI
+struct  three_nature_alliesAI : public ScriptedAI
 {
     three_nature_alliesAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -743,7 +743,7 @@ struct MANGOS_DLL_DECL three_nature_alliesAI : public ScriptedAI
 ## npc_water_spirit
 ######*/
 
-struct MANGOS_DLL_DECL npc_water_spiritAI : public three_nature_alliesAI
+struct  npc_water_spiritAI : public three_nature_alliesAI
 {
     npc_water_spiritAI(Creature* pCreature) : three_nature_alliesAI(pCreature) { Reset(); }
 
@@ -784,7 +784,7 @@ CreatureAI* GetAI_npc_water_spirit(Creature* pCreature)
 ## npc_snaplasher
 ######*/
 
-struct MANGOS_DLL_DECL npc_snaplasherAI : public three_nature_alliesAI
+struct  npc_snaplasherAI : public three_nature_alliesAI
 {
     npc_snaplasherAI(Creature* pCreature) : three_nature_alliesAI(pCreature) { Reset(); }
 
@@ -808,7 +808,7 @@ CreatureAI* GetAI_npc_snaplasher(Creature* pCreature)
 ## npc_storm_lasher
 ######*/
 
-struct MANGOS_DLL_DECL npc_storm_lasherAI : public three_nature_alliesAI
+struct  npc_storm_lasherAI : public three_nature_alliesAI
 {
     npc_storm_lasherAI(Creature* pCreature) : three_nature_alliesAI(pCreature) { Reset(); }
 
@@ -862,7 +862,7 @@ CreatureAI* GetAI_npc_storm_lasher(Creature* pCreature)
 ## npc_eonars_gift
 ######*/
 
-struct MANGOS_DLL_DECL npc_eonars_giftAI : public Scripted_NoMovementAI
+struct  npc_eonars_giftAI : public Scripted_NoMovementAI
 {
     npc_eonars_giftAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
@@ -902,7 +902,7 @@ CreatureAI* GetAI_npc_eonars_gift(Creature* pCreature)
 ## npc_nature_bomb
 ######*/
 
-struct MANGOS_DLL_DECL npc_nature_bombAI : public Scripted_NoMovementAI
+struct  npc_nature_bombAI : public Scripted_NoMovementAI
 {
     npc_nature_bombAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
@@ -952,7 +952,7 @@ CreatureAI* GetAI_npc_nature_bomb(Creature* pCreature)
 ## npc_iron_roots
 ######*/
 
-struct MANGOS_DLL_DECL npc_iron_rootsAI : public Scripted_NoMovementAI
+struct  npc_iron_rootsAI : public Scripted_NoMovementAI
 {
     npc_iron_rootsAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
@@ -990,7 +990,7 @@ CreatureAI* GetAI_npc_iron_roots(Creature* pCreature)
 ######*/
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct MANGOS_DLL_DECL npc_healthy_sporeAI : public Scripted_NoMovementAI
+struct  npc_healthy_sporeAI : public Scripted_NoMovementAI
 {
     npc_healthy_sporeAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 

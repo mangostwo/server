@@ -35,7 +35,7 @@ enum
     ACHIEV_CRIT_SPLIT_PERSONALITY   = 7577,                 // Telestra, achiev 2150
 };
 
-class MANGOS_DLL_DECL instance_nexus : public ScriptedInstance
+class  instance_nexus : public ScriptedInstance
 {
     public:
         instance_nexus(Map* pMap);

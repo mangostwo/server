@@ -113,7 +113,7 @@ static sSpawnLocation aEventLocations[] =
     {2273.071f, -5293.428f, 83.06f, 0.0f,  0},       // 10 Tirion final point
 };
 
-class MANGOS_DLL_DECL world_map_ebon_hold : public ScriptedInstance
+class  world_map_ebon_hold : public ScriptedInstance
 {
     public:
         world_map_ebon_hold(Map* pMap);

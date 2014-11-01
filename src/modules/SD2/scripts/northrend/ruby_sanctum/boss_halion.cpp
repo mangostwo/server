@@ -144,7 +144,7 @@ static const float aOrbCarrierPosition2[3] = {3153.75f, 487.1875f, 70.47f};
 ## boss_halion_real
 ######*/
 
-struct MANGOS_DLL_DECL boss_halion_realAI : public ScriptedAI
+struct  boss_halion_realAI : public ScriptedAI
 {
     boss_halion_realAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -364,7 +364,7 @@ struct MANGOS_DLL_DECL boss_halion_realAI : public ScriptedAI
 ## boss_halion_twilight
 ######*/
 
-struct MANGOS_DLL_DECL boss_halion_twilightAI : public ScriptedAI
+struct  boss_halion_twilightAI : public ScriptedAI
 {
     boss_halion_twilightAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

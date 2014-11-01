@@ -43,7 +43,7 @@ enum
     SPELL_CORRUPT           = 31326,
 };
 
-struct MANGOS_DLL_DECL npc_medivh_black_morassAI : public ScriptedAI
+struct  npc_medivh_black_morassAI : public ScriptedAI
 {
     npc_medivh_black_morassAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -134,7 +134,7 @@ static const RiftWaveData aPortalWaves[] =
     {{NPC_EXECUTIONER, NPC_VANQUISHER,   NPC_CHRONOMANCER, NPC_ASSASSIN}}
 };
 
-struct MANGOS_DLL_DECL npc_time_riftAI : public ScriptedAI
+struct  npc_time_riftAI : public ScriptedAI
 {
     npc_time_riftAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

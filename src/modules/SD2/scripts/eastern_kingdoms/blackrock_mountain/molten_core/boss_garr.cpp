@@ -41,7 +41,7 @@ enum
     SPELL_SEPARATION_ANXIETY    = 23492,                    // Used if separated too far from Garr
 };
 
-struct MANGOS_DLL_DECL boss_garrAI : public ScriptedAI
+struct  boss_garrAI : public ScriptedAI
 {
     boss_garrAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -105,7 +105,7 @@ struct MANGOS_DLL_DECL boss_garrAI : public ScriptedAI
     }
 };
 
-struct MANGOS_DLL_DECL mob_fireswornAI : public ScriptedAI
+struct  mob_fireswornAI : public ScriptedAI
 {
     mob_fireswornAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

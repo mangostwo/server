@@ -42,7 +42,7 @@ enum
     SPELL_REFLECT           = 38592
 };
 
-struct MANGOS_DLL_DECL boss_temporusAI : public ScriptedAI
+struct  boss_temporusAI : public ScriptedAI
 {
     boss_temporusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

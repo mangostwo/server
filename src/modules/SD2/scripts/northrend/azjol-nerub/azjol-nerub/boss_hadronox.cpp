@@ -62,7 +62,7 @@ static const uint32 aSpiderEntries[MAX_SPIDERS] = {28924, 28925, 29051, 29062, 2
 ## boss_hadronox
 ######*/
 
-struct MANGOS_DLL_DECL boss_hadronoxAI : public ScriptedAI
+struct  boss_hadronoxAI : public ScriptedAI
 {
     boss_hadronoxAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

@@ -138,7 +138,7 @@ static const OperaSpawns aOperaLocJul  = {NPC_JULIANNE,    -10893.56f, -1760.43f
 
 static const float afChroneSpawnLoc[4] = { -10893.11f, -1757.85f, 90.55f, 4.60f};
 
-class MANGOS_DLL_DECL instance_karazhan : public ScriptedInstance
+class  instance_karazhan : public ScriptedInstance
 {
     public:
         instance_karazhan(Map* pMap);

@@ -50,7 +50,7 @@ enum
     QUEST_PROTECT_KAYA          = 6523
 };
 
-struct MANGOS_DLL_DECL npc_kayaAI : public npc_escortAI
+struct  npc_kayaAI : public npc_escortAI
 {
     npc_kayaAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 

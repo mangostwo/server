@@ -91,7 +91,7 @@ enum
 
 static const uint32 auiGlobSummonSpells[MAX_VISCIDUS_GLOBS] = { 25865, 25866, 25867, 25868, 25869, 25870, 25871, 25872, 25873, 25874, 25875, 25876, 25877, 25878, 25879, 25880, 25881, 25882, 25883, 25884 };
 
-struct MANGOS_DLL_DECL boss_viscidusAI : public ScriptedAI
+struct  boss_viscidusAI : public ScriptedAI
 {
     boss_viscidusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -384,7 +384,7 @@ bool EffectAuraDummy_spell_aura_dummy_viscidus_freeze(const Aura* pAura, bool bA
 }
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct MANGOS_DLL_DECL npc_glob_of_viscidusAI : public ScriptedAI
+struct  npc_glob_of_viscidusAI : public ScriptedAI
 {
     npc_glob_of_viscidusAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 

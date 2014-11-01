@@ -69,7 +69,7 @@ static const DialogueEntry aIntroDialogue[] =
 
 static const float aCryptGuardLoc[4] = {3333.5f, -3475.9f, 287.1f, 3.17f};
 
-struct MANGOS_DLL_DECL boss_anubrekhanAI : public ScriptedAI
+struct  boss_anubrekhanAI : public ScriptedAI
 {
     boss_anubrekhanAI(Creature* pCreature) : ScriptedAI(pCreature),
         m_introDialogue(aIntroDialogue)

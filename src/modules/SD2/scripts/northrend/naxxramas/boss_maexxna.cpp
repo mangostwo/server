@@ -67,7 +67,7 @@ static const float aWebWrapLoc[MAX_WEB_WRAP_POSITIONS][3] =
     {3497.067f, -3843.384f, 302.384f}
 };
 
-struct MANGOS_DLL_DECL npc_web_wrapAI : public ScriptedAI
+struct  npc_web_wrapAI : public ScriptedAI
 {
     npc_web_wrapAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -143,7 +143,7 @@ struct MANGOS_DLL_DECL npc_web_wrapAI : public ScriptedAI
     }
 };
 
-struct MANGOS_DLL_DECL boss_maexxnaAI : public ScriptedAI
+struct  boss_maexxnaAI : public ScriptedAI
 {
     boss_maexxnaAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

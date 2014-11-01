@@ -71,7 +71,7 @@ float fChallengerLoc[4][4] =
     {10104.807f, -6611.145f, 4.101f, 4.265f}
 };
 
-struct MANGOS_DLL_DECL npc_kelerun_bloodmournAI : public ScriptedAI
+struct  npc_kelerun_bloodmournAI : public ScriptedAI
 {
     npc_kelerun_bloodmournAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -272,7 +272,7 @@ enum
     QUEST_THE_DWARVEN_SPY = 8483
 };
 
-struct MANGOS_DLL_DECL npc_prospector_anvilwardAI : public npc_escortAI
+struct  npc_prospector_anvilwardAI : public npc_escortAI
 {
     // CreatureAI functions
     npc_prospector_anvilwardAI(Creature* pCreature) : npc_escortAI(pCreature) {Reset();}
@@ -350,7 +350,7 @@ enum
     NPC_ANGERSHADE          = 15656
 };
 
-struct MANGOS_DLL_DECL npc_apprentice_mirvedaAI : public ScriptedAI
+struct  npc_apprentice_mirvedaAI : public ScriptedAI
 {
     npc_apprentice_mirvedaAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -457,7 +457,7 @@ static const float aSummonPos[6][4] =
     {8301.548f, -7247.548f, 139.974f, 1.828518f}
 };
 
-struct MANGOS_DLL_DECL npc_infused_crystalAI : public Scripted_NoMovementAI
+struct  npc_infused_crystalAI : public Scripted_NoMovementAI
 {
     npc_infused_crystalAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {

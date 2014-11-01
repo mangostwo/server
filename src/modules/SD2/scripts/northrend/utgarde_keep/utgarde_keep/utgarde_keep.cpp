@@ -44,7 +44,7 @@ enum
     MAX_FORGE               = 3
 };
 
-struct MANGOS_DLL_DECL mob_dragonflayer_forge_masterAI : public ScriptedAI
+struct  mob_dragonflayer_forge_masterAI : public ScriptedAI
 {
     mob_dragonflayer_forge_masterAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

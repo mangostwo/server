@@ -80,7 +80,7 @@ static const float aVorpilTeleportLoc[3] = { -253.06f, -264.02f, 17.08f};
 
 static const uint32 aTravelerSummonSpells[5] = {SPELL_SUMMON_VOIDWALKER_A, SPELL_SUMMON_VOIDWALKER_B, SPELL_SUMMON_VOIDWALKER_C, SPELL_SUMMON_VOIDWALKER_D, SPELL_SUMMON_VOIDWALKER_E};
 
-struct MANGOS_DLL_DECL boss_grandmaster_vorpilAI : public ScriptedAI
+struct  boss_grandmaster_vorpilAI : public ScriptedAI
 {
     boss_grandmaster_vorpilAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -266,7 +266,7 @@ CreatureAI* GetAI_boss_grandmaster_vorpil(Creature* pCreature)
     return new boss_grandmaster_vorpilAI(pCreature);
 }
 
-struct MANGOS_DLL_DECL npc_void_travelerAI : public ScriptedAI
+struct  npc_void_travelerAI : public ScriptedAI
 {
     npc_void_travelerAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

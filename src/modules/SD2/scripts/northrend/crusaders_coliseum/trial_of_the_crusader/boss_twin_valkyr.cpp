@@ -43,7 +43,7 @@ enum
 ## boss_fjola
 ######*/
 
-struct MANGOS_DLL_DECL boss_fjolaAI : public ScriptedAI
+struct  boss_fjolaAI : public ScriptedAI
 {
     boss_fjolaAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
@@ -74,7 +74,7 @@ CreatureAI* GetAI_boss_fjola(Creature* pCreature)
 ## boss_eydis
 ######*/
 
-struct MANGOS_DLL_DECL boss_eydisAI : public ScriptedAI
+struct  boss_eydisAI : public ScriptedAI
 {
     boss_eydisAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 

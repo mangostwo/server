@@ -43,7 +43,7 @@ enum
     SPELL_SAND_BREATH_H     = 39049
 };
 
-struct MANGOS_DLL_DECL boss_aeonusAI : public ScriptedAI
+struct  boss_aeonusAI : public ScriptedAI
 {
     boss_aeonusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

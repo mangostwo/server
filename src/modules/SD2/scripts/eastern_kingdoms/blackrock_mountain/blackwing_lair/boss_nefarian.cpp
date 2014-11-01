@@ -66,7 +66,7 @@ enum
     SPELL_ROGUE                 = 23414,                // Paralise
 };
 
-struct MANGOS_DLL_DECL boss_nefarianAI : public ScriptedAI
+struct  boss_nefarianAI : public ScriptedAI
 {
     boss_nefarianAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

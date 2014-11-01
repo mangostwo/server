@@ -43,7 +43,7 @@ enum
     NPC_FOREST_FROG          = 24396
 };
 
-struct MANGOS_DLL_DECL npc_forest_frogAI : public ScriptedAI
+struct  npc_forest_frogAI : public ScriptedAI
 {
     npc_forest_frogAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -126,7 +126,7 @@ enum
     SPELL_BANGING_THE_GONG  = 45225
 };
 
-struct MANGOS_DLL_DECL npc_harrison_jones_zaAI : public npc_escortAI
+struct  npc_harrison_jones_zaAI : public npc_escortAI
 {
     npc_harrison_jones_zaAI(Creature* pCreature) : npc_escortAI(pCreature)
     {

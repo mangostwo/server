@@ -121,7 +121,7 @@ enum
 ## npc_brann_hos
 ######*/
 
-struct MANGOS_DLL_DECL npc_brann_hosAI : public npc_escortAI
+struct  npc_brann_hosAI : public npc_escortAI
 {
     npc_brann_hosAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
@@ -685,7 +685,7 @@ enum
 ## npc_dark_matter
 ######*/
 
-struct MANGOS_DLL_DECL npc_dark_matterAI : public ScriptedAI
+struct  npc_dark_matterAI : public ScriptedAI
 {
     npc_dark_matterAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -755,7 +755,7 @@ CreatureAI* GetAI_npc_dark_matter(Creature* pCreature)
 ######*/
 
 // TODO Move this 'script' to eventAI when combat can be proper prevented from core-side
-struct MANGOS_DLL_DECL npc_searing_gazeAI : public Scripted_NoMovementAI
+struct  npc_searing_gazeAI : public Scripted_NoMovementAI
 {
     npc_searing_gazeAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {

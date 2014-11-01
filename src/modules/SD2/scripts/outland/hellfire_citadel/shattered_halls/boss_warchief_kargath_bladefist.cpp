@@ -56,7 +56,7 @@ float AssassEntrance[3] = {275.136f, -84.29f, 2.3f};        // y -8
 float AssassExit[3] = {184.233f, -84.29f, 2.3f};            // y -8
 float AddsEntrance[3] = {306.036f, -84.29f, 1.93f};
 
-struct MANGOS_DLL_DECL boss_warchief_kargath_bladefistAI : public ScriptedAI
+struct  boss_warchief_kargath_bladefistAI : public ScriptedAI
 {
     boss_warchief_kargath_bladefistAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

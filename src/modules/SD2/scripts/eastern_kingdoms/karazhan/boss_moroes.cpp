@@ -65,7 +65,7 @@ static const uint32 auiGuests[MAX_GUESTS] =
     NPC_LORD_ROBIN_DARIS
 };
 
-struct MANGOS_DLL_DECL boss_moroesAI : public ScriptedAI
+struct  boss_moroesAI : public ScriptedAI
 {
     boss_moroesAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

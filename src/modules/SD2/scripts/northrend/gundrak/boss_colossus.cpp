@@ -59,7 +59,7 @@ enum
 ## boss_drakkari_elemental
 ######*/
 
-struct MANGOS_DLL_DECL boss_drakkari_elementalAI : public ScriptedAI
+struct  boss_drakkari_elementalAI : public ScriptedAI
 {
     boss_drakkari_elementalAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -154,7 +154,7 @@ CreatureAI* GetAI_boss_drakkari_elemental(Creature* pCreature)
 ## boss_drakkari_colossus
 ######*/
 
-struct MANGOS_DLL_DECL boss_drakkari_colossusAI : public ScriptedAI
+struct  boss_drakkari_colossusAI : public ScriptedAI
 {
     boss_drakkari_colossusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -309,7 +309,7 @@ CreatureAI* GetAI_boss_drakkari_colossus(Creature* pCreature)
 ## npc_living_mojo
 ######*/
 
-struct MANGOS_DLL_DECL npc_living_mojoAI : public ScriptedAI
+struct  npc_living_mojoAI : public ScriptedAI
 {
     npc_living_mojoAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

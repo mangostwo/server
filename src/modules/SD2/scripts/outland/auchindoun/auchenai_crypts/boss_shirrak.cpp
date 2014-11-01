@@ -39,7 +39,7 @@ enum
     NPC_FOCUS_FIRE                  = 18374
 };
 
-struct MANGOS_DLL_DECL boss_shirrakAI : public ScriptedAI
+struct boss_shirrakAI : public ScriptedAI
 {
     boss_shirrakAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

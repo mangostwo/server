@@ -43,7 +43,7 @@ enum
     TIME_PET_DURATION           = 7500
 };
 
-struct MANGOS_DLL_DECL npc_converted_sentryAI : public ScriptedAI
+struct  npc_converted_sentryAI : public ScriptedAI
 {
     npc_converted_sentryAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

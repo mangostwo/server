@@ -125,7 +125,7 @@ CreatureAI* GetAI_guard_shattrath(Creature* pCreature)
  * guard_shattrath_aldor
  *******************************************************/
 
-struct MANGOS_DLL_DECL guard_shattrath_aldorAI : public guardAI
+struct  guard_shattrath_aldorAI : public guardAI
 {
     guard_shattrath_aldorAI(Creature* pCreature) : guardAI(pCreature) { Reset(); }
 
@@ -192,7 +192,7 @@ CreatureAI* GetAI_guard_shattrath_aldor(Creature* pCreature)
  * guard_shattrath_scryer
  *******************************************************/
 
-struct MANGOS_DLL_DECL guard_shattrath_scryerAI : public guardAI
+struct  guard_shattrath_scryerAI : public guardAI
 {
     guard_shattrath_scryerAI(Creature* pCreature) : guardAI(pCreature) { Reset(); }
 

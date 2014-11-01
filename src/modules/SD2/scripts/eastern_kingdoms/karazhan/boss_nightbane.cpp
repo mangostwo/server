@@ -59,7 +59,7 @@ enum
     POINT_ID_GROUND             = 2,
 };
 
-struct MANGOS_DLL_DECL boss_nightbaneAI : public npc_escortAI
+struct  boss_nightbaneAI : public npc_escortAI
 {
     boss_nightbaneAI(Creature* pCreature) : npc_escortAI(pCreature)
     {

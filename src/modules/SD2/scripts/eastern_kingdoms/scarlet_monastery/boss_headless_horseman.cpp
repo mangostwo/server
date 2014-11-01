@@ -113,7 +113,7 @@ enum HorsemanPhase
     PHASE_HEAD_TOSS             = 4,
 };
 
-struct MANGOS_DLL_DECL boss_headless_horsemanAI : public ScriptedAI
+struct  boss_headless_horsemanAI : public ScriptedAI
 {
     boss_headless_horsemanAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -363,7 +363,7 @@ bool EffectScriptEffectCreature_boss_headless_horseman(Unit* pCaster, uint32 uiS
     return false;
 }
 
-struct MANGOS_DLL_DECL boss_head_of_horsemanAI : public ScriptedAI
+struct  boss_head_of_horsemanAI : public ScriptedAI
 {
     boss_head_of_horsemanAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

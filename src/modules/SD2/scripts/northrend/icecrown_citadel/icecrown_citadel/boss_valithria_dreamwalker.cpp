@@ -105,7 +105,7 @@ enum
     SUMMON_TYPES_NUMBER             = 4
 };
 
-struct MANGOS_DLL_DECL boss_valithria_dreamwalkerAI : public ScriptedAI
+struct  boss_valithria_dreamwalkerAI : public ScriptedAI
 {
     boss_valithria_dreamwalkerAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

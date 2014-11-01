@@ -43,7 +43,7 @@ enum
     SPELL_DOMINATION            = 30923
 };
 
-struct MANGOS_DLL_DECL boss_the_makerAI : public ScriptedAI
+struct  boss_the_makerAI : public ScriptedAI
 {
     boss_the_makerAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

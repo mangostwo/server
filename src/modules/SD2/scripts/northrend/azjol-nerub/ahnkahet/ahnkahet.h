@@ -63,7 +63,7 @@ enum
 static const float aTaldaramLandingLoc[4] = {528.734f, -845.998f, 11.54f, 0.68f};
 static const float aJedogaLandingLoc[4] = {375.4977f, -707.3635f, -16.094f, 5.42f};
 
-class MANGOS_DLL_DECL instance_ahnkahet : public ScriptedInstance
+class  instance_ahnkahet : public ScriptedInstance
 {
     public:
         instance_ahnkahet(Map* pMap);

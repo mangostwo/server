@@ -97,7 +97,7 @@ enum
 ************/
 
 // Actually this boss behaves like a NoMovement Boss (SPELL_BALL_LIGHTNING) - but there are some movement packages used, unknown what this means!
-struct MANGOS_DLL_DECL boss_thaddiusAI : public Scripted_NoMovementAI
+struct  boss_thaddiusAI : public Scripted_NoMovementAI
 {
     boss_thaddiusAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
@@ -282,7 +282,7 @@ bool EffectDummyNPC_spell_thaddius_encounter(Unit* /*pCaster*/, uint32 uiSpellId
 ** npc_tesla_coil
 ************/
 
-struct MANGOS_DLL_DECL npc_tesla_coilAI : public Scripted_NoMovementAI
+struct  npc_tesla_coilAI : public Scripted_NoMovementAI
 {
     npc_tesla_coilAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
@@ -414,7 +414,7 @@ CreatureAI* GetAI_npc_tesla_coil(Creature* pCreature)
 ** boss_thaddiusAddsAI - Superclass for Feugen & Stalagg
 ************/
 
-struct MANGOS_DLL_DECL boss_thaddiusAddsAI : public ScriptedAI
+struct  boss_thaddiusAddsAI : public ScriptedAI
 {
     boss_thaddiusAddsAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -645,7 +645,7 @@ struct MANGOS_DLL_DECL boss_thaddiusAddsAI : public ScriptedAI
 ** boss_stalagg
 ************/
 
-struct MANGOS_DLL_DECL boss_stalaggAI : public boss_thaddiusAddsAI
+struct  boss_stalaggAI : public boss_thaddiusAddsAI
 {
     boss_stalaggAI(Creature* pCreature) : boss_thaddiusAddsAI(pCreature)
     {
@@ -697,7 +697,7 @@ CreatureAI* GetAI_boss_stalagg(Creature* pCreature)
 ** boss_feugen
 ************/
 
-struct MANGOS_DLL_DECL boss_feugenAI : public boss_thaddiusAddsAI
+struct  boss_feugenAI : public boss_thaddiusAddsAI
 {
     boss_feugenAI(Creature* pCreature) : boss_thaddiusAddsAI(pCreature)
     {

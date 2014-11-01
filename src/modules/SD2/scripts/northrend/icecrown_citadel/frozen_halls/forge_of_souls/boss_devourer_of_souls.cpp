@@ -85,7 +85,7 @@ static const int aTexts[6][3] =
     {SAY_MALE_1_DARK_GLARE,  SAY_FEMALE_DARK_GLARE,  0}     // 5 - glare
 };
 
-struct MANGOS_DLL_DECL boss_devourer_of_soulsAI : public ScriptedAI
+struct  boss_devourer_of_soulsAI : public ScriptedAI
 {
     boss_devourer_of_soulsAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

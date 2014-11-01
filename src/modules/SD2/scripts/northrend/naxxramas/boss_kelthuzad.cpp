@@ -91,7 +91,7 @@ enum Phase
     PHASE_GUARDIANS,
 };
 
-struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
+struct  boss_kelthuzadAI : public ScriptedAI
 {
     boss_kelthuzadAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

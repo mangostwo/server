@@ -44,7 +44,7 @@ enum
 
 static const int32 aDelrissaAddDeath[MAX_DELRISSA_ADDS] = { -1585013, -1585014, -1585015, -1585016};
 
-class MANGOS_DLL_DECL instance_magisters_terrace : public ScriptedInstance
+class  instance_magisters_terrace : public ScriptedInstance
 {
     public:
         instance_magisters_terrace(Map* pMap);

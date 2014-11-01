@@ -68,7 +68,7 @@ static const DialogueEntry aDiplomatDialogue[] =
     {0, 0, 0},
 };
 
-struct MANGOS_DLL_DECL npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
+struct  npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
 {
     npc_tapoke_slim_jahnAI(Creature* pCreature) : npc_escortAI(pCreature),
         DialogueHelper(aDiplomatDialogue)

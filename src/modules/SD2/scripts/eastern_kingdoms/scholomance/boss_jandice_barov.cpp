@@ -41,7 +41,7 @@ enum
     SPELL_BANISH                = 8994,
 };
 
-struct MANGOS_DLL_DECL boss_jandicebarovAI : public ScriptedAI
+struct  boss_jandicebarovAI : public ScriptedAI
 {
     boss_jandicebarovAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 

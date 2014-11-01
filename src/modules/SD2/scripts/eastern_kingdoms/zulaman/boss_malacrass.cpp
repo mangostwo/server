@@ -216,7 +216,7 @@ static PlayerAbilityStruct m_aMalacrassStolenAbility[][4] =
     }
 };
 
-struct MANGOS_DLL_DECL boss_malacrassAI : public ScriptedAI
+struct  boss_malacrassAI : public ScriptedAI
 {
     boss_malacrassAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

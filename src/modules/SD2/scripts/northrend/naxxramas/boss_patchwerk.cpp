@@ -44,7 +44,7 @@ enum
     SPELL_SLIMEBOLT       = 32309
 };
 
-struct MANGOS_DLL_DECL boss_patchwerkAI : public ScriptedAI
+struct  boss_patchwerkAI : public ScriptedAI
 {
     boss_patchwerkAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

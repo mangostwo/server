@@ -307,7 +307,7 @@ static const Locations aEyeBlastPos[] =
 ## boss_illidan_stormrage
 ######*/
 
-struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
+struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
 {
     boss_illidan_stormrageAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aEventDialogue)
@@ -1005,7 +1005,7 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 ## npc_akama_illidan
 ######*/
 
-struct MANGOS_DLL_DECL npc_akama_illidanAI : public npc_escortAI, private DialogueHelper
+struct  npc_akama_illidanAI : public npc_escortAI, private DialogueHelper
 {
     npc_akama_illidanAI(Creature* pCreature) : npc_escortAI(pCreature),
         DialogueHelper(aIntroDialogue)
@@ -1288,7 +1288,7 @@ bool GossipSelect_npc_akama_illidan(Player* pPlayer, Creature* pCreature, uint32
 ## boss_maiev
 ######*/
 
-struct MANGOS_DLL_DECL boss_maievAI : public ScriptedAI, private DialogueHelper
+struct  boss_maievAI : public ScriptedAI, private DialogueHelper
 {
     boss_maievAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aEpilogueDialogue)
@@ -1416,7 +1416,7 @@ struct MANGOS_DLL_DECL boss_maievAI : public ScriptedAI, private DialogueHelper
 ## npc_cage_trap_trigger
 ######*/
 
-struct MANGOS_DLL_DECL npc_cage_trap_triggerAI : public ScriptedAI
+struct  npc_cage_trap_triggerAI : public ScriptedAI
 {
     npc_cage_trap_triggerAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -1457,7 +1457,7 @@ struct MANGOS_DLL_DECL npc_cage_trap_triggerAI : public ScriptedAI
 ## npc_flame_of_azzinoth
 ######*/
 
-struct MANGOS_DLL_DECL npc_flame_of_azzinothAI : public ScriptedAI
+struct  npc_flame_of_azzinothAI : public ScriptedAI
 {
     npc_flame_of_azzinothAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
@@ -1564,7 +1564,7 @@ struct MANGOS_DLL_DECL npc_flame_of_azzinothAI : public ScriptedAI
 ## npc_shadow_demon
 ######*/
 
-struct MANGOS_DLL_DECL npc_shadow_demonAI : public ScriptedAI
+struct  npc_shadow_demonAI : public ScriptedAI
 {
     npc_shadow_demonAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -1605,7 +1605,7 @@ struct MANGOS_DLL_DECL npc_shadow_demonAI : public ScriptedAI
 ## npc_blade_of_azzinoth
 ######*/
 
-struct MANGOS_DLL_DECL npc_blade_of_azzinothAI : public ScriptedAI
+struct  npc_blade_of_azzinothAI : public ScriptedAI
 {
     npc_blade_of_azzinothAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

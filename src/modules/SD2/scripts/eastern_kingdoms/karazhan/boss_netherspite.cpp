@@ -122,7 +122,7 @@ static const uint32 auiPortals[MAX_PORTALS] =
 ## boss_netherspite
 ######*/
 
-struct MANGOS_DLL_DECL boss_netherspiteAI : public ScriptedAI
+struct  boss_netherspiteAI : public ScriptedAI
 {
     boss_netherspiteAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -319,7 +319,7 @@ CreatureAI* GetAI_boss_netherspite(Creature* pCreature)
 ## npc_netherspite_portal
 ######*/
 
-struct MANGOS_DLL_DECL npc_netherspite_portalAI : public Scripted_NoMovementAI
+struct  npc_netherspite_portalAI : public Scripted_NoMovementAI
 {
     npc_netherspite_portalAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {

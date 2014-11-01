@@ -132,7 +132,7 @@ static const float aLanathelFlyPos[3] = {4660.49f, 2769.2f, 430.0f};
 ## npc_queen_lanathel_intro
 ######*/
 
-struct MANGOS_DLL_DECL npc_queen_lanathel_introAI : public ScriptedAI, private DialogueHelper
+struct  npc_queen_lanathel_introAI : public ScriptedAI, private DialogueHelper
 {
     npc_queen_lanathel_introAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aIntroDialogue)
@@ -232,7 +232,7 @@ CreatureAI* GetAI_npc_queen_lanathel_intro(Creature* pCreature)
 ## npc_ball_of_flame
 ######*/
 
-struct MANGOS_DLL_DECL npc_ball_of_flameAI : public ScriptedAI
+struct  npc_ball_of_flameAI : public ScriptedAI
 {
     npc_ball_of_flameAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -284,7 +284,7 @@ CreatureAI* GetAI_npc_ball_of_flame(Creature* pCreature)
 ## npc_kinetic_bomb
 ######*/
 
-struct MANGOS_DLL_DECL npc_kinetic_bombAI : public ScriptedAI
+struct  npc_kinetic_bombAI : public ScriptedAI
 {
     npc_kinetic_bombAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -325,7 +325,7 @@ CreatureAI* GetAI_npc_kinetic_bomb(Creature* pCreature)
 ## npc_dark_nucleus
 ######*/
 
-struct MANGOS_DLL_DECL npc_dark_nucleusAI : public ScriptedAI
+struct  npc_dark_nucleusAI : public ScriptedAI
 {
     npc_dark_nucleusAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -386,7 +386,7 @@ CreatureAI* GetAI_npc_dark_nucleus(Creature* pCreature)
 ## npc_blood_orb_control
 ######*/
 
-struct MANGOS_DLL_DECL npc_blood_orb_controlAI : public Scripted_NoMovementAI
+struct  npc_blood_orb_controlAI : public Scripted_NoMovementAI
 {
     npc_blood_orb_controlAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
@@ -478,7 +478,7 @@ CreatureAI* GetAI_npc_blood_orb_control(Creature* pCreature)
 ## blood_prince_council_base
 ######*/
 
-struct MANGOS_DLL_DECL blood_prince_council_baseAI : public ScriptedAI
+struct  blood_prince_council_baseAI : public ScriptedAI
 {
     blood_prince_council_baseAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -605,7 +605,7 @@ struct MANGOS_DLL_DECL blood_prince_council_baseAI : public ScriptedAI
 ## boss_valanar_icc
 ######*/
 
-struct MANGOS_DLL_DECL boss_valanar_iccAI : public blood_prince_council_baseAI
+struct  boss_valanar_iccAI : public blood_prince_council_baseAI
 {
     boss_valanar_iccAI(Creature* pCreature) : blood_prince_council_baseAI(pCreature)
     {
@@ -697,7 +697,7 @@ CreatureAI* GetAI_boss_valanar_icc(Creature* pCreature)
 ## boss_keleseth_icc
 ######*/
 
-struct MANGOS_DLL_DECL boss_keleseth_iccAI : public blood_prince_council_baseAI
+struct  boss_keleseth_iccAI : public blood_prince_council_baseAI
 {
     boss_keleseth_iccAI(Creature* pCreature) : blood_prince_council_baseAI(pCreature)
     {
@@ -786,7 +786,7 @@ CreatureAI* GetAI_boss_keleseth_icc(Creature* pCreature)
 ## boss_taldaram_icc
 ######*/
 
-struct MANGOS_DLL_DECL boss_taldaram_iccAI : public blood_prince_council_baseAI
+struct  boss_taldaram_iccAI : public blood_prince_council_baseAI
 {
     boss_taldaram_iccAI(Creature* pCreature) : blood_prince_council_baseAI(pCreature)
     {

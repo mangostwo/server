@@ -35,7 +35,7 @@ enum
     ITEM_PILGRIMS_ATTIRE        = 46800,
 };
 
-class MANGOS_DLL_DECL instance_sethekk_halls : public ScriptedInstance
+class instance_sethekk_halls : public ScriptedInstance
 {
     public:
         instance_sethekk_halls(Map* pMap);

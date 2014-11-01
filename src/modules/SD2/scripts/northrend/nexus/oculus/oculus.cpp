@@ -47,7 +47,7 @@ enum
 ## npc_oculus_drake
 ######*/
 
-struct MANGOS_DLL_DECL npc_oculus_drakeAI : public ScriptedAI
+struct  npc_oculus_drakeAI : public ScriptedAI
 {
     npc_oculus_drakeAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

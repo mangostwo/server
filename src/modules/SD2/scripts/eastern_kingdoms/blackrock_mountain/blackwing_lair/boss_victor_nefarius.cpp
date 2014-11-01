@@ -99,7 +99,7 @@ static const uint32 aPossibleDrake[MAX_DRAKES] = {NPC_BRONZE_DRAKANOID, NPC_BLUE
 
 // Dev note: Lord Victor Nefarius should despawn completely, then ~5 seconds later Nefarian should appear.
 
-struct MANGOS_DLL_DECL boss_victor_nefariusAI : public ScriptedAI, private DialogueHelper
+struct  boss_victor_nefariusAI : public ScriptedAI, private DialogueHelper
 {
     boss_victor_nefariusAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aIntroDialogue)

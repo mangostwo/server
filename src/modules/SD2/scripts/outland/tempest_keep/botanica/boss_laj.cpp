@@ -50,7 +50,7 @@ enum
     MODEL_ID_NATURE             = 14214,
 };
 
-struct MANGOS_DLL_DECL boss_lajAI : public ScriptedAI
+struct  boss_lajAI : public ScriptedAI
 {
     boss_lajAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

@@ -97,7 +97,7 @@ static const DialogueEntry aIntroDialogue[] =
     {0, 0, 0},
 };
 
-struct MANGOS_DLL_DECL npc_barnesAI : public npc_escortAI, private DialogueHelper
+struct  npc_barnesAI : public npc_escortAI, private DialogueHelper
 {
     npc_barnesAI(Creature* pCreature) : npc_escortAI(pCreature),
         DialogueHelper(aIntroDialogue)
@@ -359,7 +359,7 @@ static const DialogueEntry aMedivhDialogue[] =
     {0, 0, 0},
 };
 
-struct MANGOS_DLL_DECL npc_image_of_medivhAI : public ScriptedAI, private DialogueHelper
+struct  npc_image_of_medivhAI : public ScriptedAI, private DialogueHelper
 {
     npc_image_of_medivhAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aMedivhDialogue)
@@ -458,7 +458,7 @@ CreatureAI* GetAI_npc_image_of_medivhAI(Creature* pCreature)
 # npc_image_arcanagos
 ######*/
 
-struct MANGOS_DLL_DECL npc_image_arcanagosAI : public ScriptedAI
+struct  npc_image_arcanagosAI : public ScriptedAI
 {
     npc_image_arcanagosAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

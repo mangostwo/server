@@ -53,7 +53,7 @@ enum
     SPELL_PYROBLAST         = 20228                         // guesswork, but best fitting in spells-area, was 17274 (has mana cost)
 };
 
-struct MANGOS_DLL_DECL boss_pyroguard_emberseerAI : public ScriptedAI
+struct  boss_pyroguard_emberseerAI : public ScriptedAI
 {
     boss_pyroguard_emberseerAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

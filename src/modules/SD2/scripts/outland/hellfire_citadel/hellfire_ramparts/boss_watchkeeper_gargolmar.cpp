@@ -45,7 +45,7 @@ enum
     SPELL_OVERPOWER             = 32154,
 };
 
-struct MANGOS_DLL_DECL boss_watchkeeper_gargolmarAI : public ScriptedAI
+struct  boss_watchkeeper_gargolmarAI : public ScriptedAI
 {
     boss_watchkeeper_gargolmarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

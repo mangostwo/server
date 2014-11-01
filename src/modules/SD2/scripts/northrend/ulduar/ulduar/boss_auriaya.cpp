@@ -72,7 +72,7 @@ enum
 ## boss_auriaya
 ######*/
 
-struct MANGOS_DLL_DECL boss_auriayaAI : public ScriptedAI
+struct  boss_auriayaAI : public ScriptedAI
 {
     boss_auriayaAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -216,7 +216,7 @@ CreatureAI* GetAI_boss_auriaya(Creature* pCreature)
 ## boss_feral_defender
 ######*/
 
-struct MANGOS_DLL_DECL boss_feral_defenderAI : public ScriptedAI
+struct  boss_feral_defenderAI : public ScriptedAI
 {
     boss_feral_defenderAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

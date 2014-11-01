@@ -62,7 +62,7 @@ static const float aLackeyLocations[MAX_DELRISSA_ADDS][4] =
 ## boss_priestess_delrissa
 ######*/
 
-struct MANGOS_DLL_DECL boss_priestess_delrissaAI : public ScriptedAI
+struct  boss_priestess_delrissaAI : public ScriptedAI
 {
     boss_priestess_delrissaAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -284,7 +284,7 @@ CreatureAI* GetAI_boss_priestess_delrissa(Creature* pCreature)
 ## priestess_companion_common
 ######*/
 
-struct MANGOS_DLL_DECL priestess_companion_commonAI : public ScriptedAI
+struct  priestess_companion_commonAI : public ScriptedAI
 {
     priestess_companion_commonAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -388,7 +388,7 @@ enum
 ## npc_kagani_nightstrike - Rogue
 ######*/
 
-struct MANGOS_DLL_DECL npc_kagani_nightstrikeAI : public priestess_companion_commonAI
+struct  npc_kagani_nightstrikeAI : public priestess_companion_commonAI
 {
     npc_kagani_nightstrikeAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
 
@@ -504,7 +504,7 @@ enum
 ## npc_ellris_duskhallow - Warlock
 ######*/
 
-struct MANGOS_DLL_DECL npc_ellris_duskhallowAI : public priestess_companion_commonAI
+struct  npc_ellris_duskhallowAI : public priestess_companion_commonAI
 {
     npc_ellris_duskhallowAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
 
@@ -630,7 +630,7 @@ enum
 ## npc_eramas_brightblaze - Monk
 ######*/
 
-struct MANGOS_DLL_DECL npc_eramas_brightblazeAI : public priestess_companion_commonAI
+struct  npc_eramas_brightblazeAI : public priestess_companion_commonAI
 {
     npc_eramas_brightblazeAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
 
@@ -691,7 +691,7 @@ enum
 ## npc_yazzai - Mage
 ######*/
 
-struct MANGOS_DLL_DECL npc_yazzaiAI : public priestess_companion_commonAI
+struct  npc_yazzaiAI : public priestess_companion_commonAI
 {
     npc_yazzaiAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
 
@@ -831,7 +831,7 @@ enum
 ## npc_warlord_salaris - Warrior
 ######*/
 
-struct MANGOS_DLL_DECL npc_warlord_salarisAI : public priestess_companion_commonAI
+struct  npc_warlord_salarisAI : public priestess_companion_commonAI
 {
     npc_warlord_salarisAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
 
@@ -945,7 +945,7 @@ enum
 ## npc_garaxxas - Hunter
 ######*/
 
-struct MANGOS_DLL_DECL npc_garaxxasAI : public priestess_companion_commonAI
+struct  npc_garaxxasAI : public priestess_companion_commonAI
 {
     npc_garaxxasAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
 
@@ -1076,7 +1076,7 @@ enum
 ## npc_apoko - Shaman
 ######*/
 
-struct MANGOS_DLL_DECL npc_apokoAI : public priestess_companion_commonAI
+struct  npc_apokoAI : public priestess_companion_commonAI
 {
     npc_apokoAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
 
@@ -1176,7 +1176,7 @@ enum
 ## npc_zelfan - Engineer
 ######*/
 
-struct MANGOS_DLL_DECL npc_zelfanAI : public priestess_companion_commonAI
+struct  npc_zelfanAI : public priestess_companion_commonAI
 {
     npc_zelfanAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
 

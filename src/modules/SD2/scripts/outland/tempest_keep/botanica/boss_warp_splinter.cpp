@@ -50,7 +50,7 @@ enum
 // Summon Saplings spells (too many to declare them above)
 static const uint32 aSaplingsSummonSpells[10] = {34727, 34730, 34731, 34732, 34733, 34734, 34735, 34736, 34737, 34739};
 
-struct MANGOS_DLL_DECL boss_warp_splinterAI : public ScriptedAI
+struct  boss_warp_splinterAI : public ScriptedAI
 {
     boss_warp_splinterAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -149,7 +149,7 @@ struct MANGOS_DLL_DECL boss_warp_splinterAI : public ScriptedAI
 /*#####
 # mob_treant (Sapling)
 #####*/
-struct MANGOS_DLL_DECL npc_saplingAI  : public ScriptedAI
+struct  npc_saplingAI  : public ScriptedAI
 {
     npc_saplingAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

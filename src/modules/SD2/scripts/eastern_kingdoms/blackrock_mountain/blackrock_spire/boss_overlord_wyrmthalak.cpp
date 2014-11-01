@@ -43,7 +43,7 @@ const float afLocations[2][4] =
     { -49.875881f, -511.896942f, 88.195160f, 4.613114f}
 };
 
-struct MANGOS_DLL_DECL boss_overlordwyrmthalakAI : public ScriptedAI
+struct  boss_overlordwyrmthalakAI : public ScriptedAI
 {
     boss_overlordwyrmthalakAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 

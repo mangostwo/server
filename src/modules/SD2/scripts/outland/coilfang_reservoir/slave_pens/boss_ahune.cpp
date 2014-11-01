@@ -81,7 +81,7 @@ enum
 ## boss_ahune
 ######*/
 
-struct MANGOS_DLL_DECL boss_ahuneAI : public Scripted_NoMovementAI
+struct  boss_ahuneAI : public Scripted_NoMovementAI
 {
     boss_ahuneAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
@@ -278,7 +278,7 @@ CreatureAI* GetAI_boss_ahune(Creature* pCreature)
 ## npc_frozen_core
 ######*/
 
-struct MANGOS_DLL_DECL npc_frozen_coreAI : public Scripted_NoMovementAI
+struct  npc_frozen_coreAI : public Scripted_NoMovementAI
 {
     npc_frozen_coreAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 
@@ -324,7 +324,7 @@ CreatureAI* GetAI_npc_frozen_core(Creature* pCreature)
 ## npc_ice_spear_bunny
 ######*/
 
-struct MANGOS_DLL_DECL npc_ice_spear_bunnyAI : public Scripted_NoMovementAI
+struct  npc_ice_spear_bunnyAI : public Scripted_NoMovementAI
 {
     npc_ice_spear_bunnyAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 

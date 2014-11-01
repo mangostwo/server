@@ -86,7 +86,7 @@ enum
 ## boss_muru
 ######*/
 
-struct MANGOS_DLL_DECL boss_muruAI : public Scripted_NoMovementAI
+struct  boss_muruAI : public Scripted_NoMovementAI
 {
     boss_muruAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
@@ -231,7 +231,7 @@ struct MANGOS_DLL_DECL boss_muruAI : public Scripted_NoMovementAI
 ## boss_entropius
 ######*/
 
-struct MANGOS_DLL_DECL boss_entropiusAI : public ScriptedAI
+struct  boss_entropiusAI : public ScriptedAI
 {
     boss_entropiusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -312,7 +312,7 @@ struct MANGOS_DLL_DECL boss_entropiusAI : public ScriptedAI
 ## npc_portal_target
 ######*/
 
-struct MANGOS_DLL_DECL npc_portal_targetAI : public Scripted_NoMovementAI
+struct  npc_portal_targetAI : public Scripted_NoMovementAI
 {
     npc_portal_targetAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
@@ -404,7 +404,7 @@ struct MANGOS_DLL_DECL npc_portal_targetAI : public Scripted_NoMovementAI
 ## npc_darkness
 ######*/
 
-struct MANGOS_DLL_DECL npc_darknessAI : public Scripted_NoMovementAI
+struct  npc_darknessAI : public Scripted_NoMovementAI
 {
     npc_darknessAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
     
@@ -445,7 +445,7 @@ struct MANGOS_DLL_DECL npc_darknessAI : public Scripted_NoMovementAI
 ## npc_singularity
 ######*/
 
-struct MANGOS_DLL_DECL npc_singularityAI : public Scripted_NoMovementAI
+struct  npc_singularityAI : public Scripted_NoMovementAI
 {
     npc_singularityAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 

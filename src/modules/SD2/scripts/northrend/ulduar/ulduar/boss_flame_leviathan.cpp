@@ -167,7 +167,7 @@ static const float afMimironInferno[3] = {329.1809f, 8.02577f, 409.887f};
 ## boss_flame_leviathan
 ######*/
 
-struct MANGOS_DLL_DECL boss_flame_leviathanAI : public ScriptedAI
+struct  boss_flame_leviathanAI : public ScriptedAI
 {
     boss_flame_leviathanAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -567,7 +567,7 @@ CreatureAI* GetAI_boss_flame_leviathan(Creature* pCreature)
 ## npc_hodir_fury_reticle
 ######*/
 
-struct MANGOS_DLL_DECL npc_hodir_fury_reticleAI : public ScriptedAI
+struct  npc_hodir_fury_reticleAI : public ScriptedAI
 {
     npc_hodir_fury_reticleAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -639,7 +639,7 @@ CreatureAI* GetAI_npc_hodir_fury_reticle(Creature* pCreature)
 ######*/
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct MANGOS_DLL_DECL npc_hodir_furyAI : public Scripted_NoMovementAI
+struct  npc_hodir_furyAI : public Scripted_NoMovementAI
 {
     npc_hodir_furyAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 
@@ -659,7 +659,7 @@ CreatureAI* GetAI_npc_hodir_fury(Creature* pCreature)
 ######*/
 
 // TODO Move this 'script' to eventAI when combat can be proper prevented from core-side
-struct MANGOS_DLL_DECL npc_freya_wardAI : public Scripted_NoMovementAI
+struct  npc_freya_wardAI : public Scripted_NoMovementAI
 {
     npc_freya_wardAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset();}
 
@@ -701,7 +701,7 @@ CreatureAI* GetAI_npc_freya_ward(Creature* pCreature)
 ######*/
 
 // TODO Move this 'script' to eventAI when combat can be proper prevented from core-side
-struct MANGOS_DLL_DECL npc_mimiron_infernoAI : public Scripted_NoMovementAI
+struct  npc_mimiron_infernoAI : public Scripted_NoMovementAI
 {
     npc_mimiron_infernoAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 

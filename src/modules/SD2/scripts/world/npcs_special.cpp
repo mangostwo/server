@@ -110,7 +110,7 @@ SpawnAssociation m_aSpawnAssociations[] =
     {22126, 22122, SPAWNTYPE_ALARMBOT}                      // Air Force Trip Wire - Rooftop (Cenarion Expedition)
 };
 
-struct MANGOS_DLL_DECL npc_air_force_botsAI : public ScriptedAI
+struct  npc_air_force_botsAI : public ScriptedAI
 {
     npc_air_force_botsAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -271,7 +271,7 @@ enum
     FACTION_CHICKEN         = 31
 };
 
-struct MANGOS_DLL_DECL npc_chicken_cluckAI : public ScriptedAI
+struct  npc_chicken_cluckAI : public ScriptedAI
 {
     npc_chicken_cluckAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
@@ -381,7 +381,7 @@ enum
     SPELL_FIERY_SEDUCTION = 47057
 };
 
-struct MANGOS_DLL_DECL npc_dancing_flamesAI : public ScriptedAI
+struct  npc_dancing_flamesAI : public ScriptedAI
 {
     npc_dancing_flamesAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
@@ -489,7 +489,7 @@ const uint32 HordeSoldierId[3] =
 ## npc_doctor (handles both Gustaf Vanhowzen and Gregory Victor)
 ######*/
 
-struct MANGOS_DLL_DECL npc_doctorAI : public ScriptedAI
+struct  npc_doctorAI : public ScriptedAI
 {
     npc_doctorAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
@@ -532,7 +532,7 @@ struct MANGOS_DLL_DECL npc_doctorAI : public ScriptedAI
 ## npc_injured_patient (handles all the patients, no matter Horde or Alliance)
 #####*/
 
-struct MANGOS_DLL_DECL npc_injured_patientAI : public ScriptedAI
+struct  npc_injured_patientAI : public ScriptedAI
 {
     npc_injured_patientAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
@@ -859,7 +859,7 @@ enum
     SAY_SHAYA_GOODBYE       = -1000263,
 };
 
-struct MANGOS_DLL_DECL npc_garments_of_questsAI : public npc_escortAI
+struct  npc_garments_of_questsAI : public npc_escortAI
 {
     npc_garments_of_questsAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -1064,7 +1064,7 @@ CreatureAI* GetAI_npc_garments_of_quests(Creature* pCreature)
 
 #define SPELL_DEATHTOUCH                5
 
-struct MANGOS_DLL_DECL npc_guardianAI : public ScriptedAI
+struct  npc_guardianAI : public ScriptedAI
 {
     npc_guardianAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
@@ -1174,7 +1174,7 @@ enum
 
 static const float DIST_START_EVENT = 15.0f;                // Guesswork
 
-struct MANGOS_DLL_DECL npc_spring_rabbitAI : public ScriptedPetAI
+struct  npc_spring_rabbitAI : public ScriptedPetAI
 {
     npc_spring_rabbitAI(Creature* pCreature) : ScriptedPetAI(pCreature) { Reset(); }
 
@@ -1352,7 +1352,7 @@ enum
     NPC_BLOOD_KNIGHT            = 17768,        // blood elf side
 };
 
-struct MANGOS_DLL_DECL npc_redemption_targetAI : public ScriptedAI
+struct  npc_redemption_targetAI : public ScriptedAI
 {
     npc_redemption_targetAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

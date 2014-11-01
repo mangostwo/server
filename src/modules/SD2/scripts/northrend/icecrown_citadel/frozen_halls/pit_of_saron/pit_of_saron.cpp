@@ -46,7 +46,7 @@ enum
 ## npc_ymirjar_deathbringer
 ######*/
 
-struct MANGOS_DLL_DECL npc_ymirjar_deathbringerAI : public ScriptedAI
+struct  npc_ymirjar_deathbringerAI : public ScriptedAI
 {
     npc_ymirjar_deathbringerAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -116,7 +116,7 @@ bool EffectDummyCreature_spell_summon_undead(Unit* /*pCaster*/, uint32 uiSpellId
 ## npc_collapsing_icicle
 ######*/
 
-struct MANGOS_DLL_DECL npc_collapsing_icicleAI : public ScriptedAI
+struct  npc_collapsing_icicleAI : public ScriptedAI
 {
     npc_collapsing_icicleAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

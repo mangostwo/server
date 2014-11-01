@@ -61,7 +61,7 @@ enum
     NPC_ASPECT_OF_RAVEN     = 22915,
 };
 
-struct MANGOS_DLL_DECL npc_clintar_dw_spiritAI : public npc_escortAI
+struct  npc_clintar_dw_spiritAI : public npc_escortAI
 {
     npc_clintar_dw_spiritAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -307,7 +307,7 @@ static EventLocations aShadowsLocations[] =
     {7963.00f, -2492.03f, 487.84f, 0}
 };
 
-struct MANGOS_DLL_DECL npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
+struct  npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
 {
     npc_keeper_remulosAI(Creature* pCreature) : npc_escortAI(pCreature),
         DialogueHelper(aIntroDialogue)
@@ -684,7 +684,7 @@ enum
     POINT_ID_TYRANDE_ABSOLUTION = 1,
 };
 
-struct MANGOS_DLL_DECL boss_eranikusAI : public ScriptedAI
+struct  boss_eranikusAI : public ScriptedAI
 {
     boss_eranikusAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

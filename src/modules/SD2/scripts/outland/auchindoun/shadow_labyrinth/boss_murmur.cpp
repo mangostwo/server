@@ -47,7 +47,7 @@ enum
     SPELL_THUNDERING_STORM      = 39365,        // Heroic Spell
 };
 
-struct MANGOS_DLL_DECL boss_murmurAI : public Scripted_NoMovementAI
+struct  boss_murmurAI : public Scripted_NoMovementAI
 {
     boss_murmurAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {

@@ -80,7 +80,7 @@ enum
 ## boss_sjonnir
 ######*/
 
-struct MANGOS_DLL_DECL boss_sjonnirAI : public ScriptedAI
+struct  boss_sjonnirAI : public ScriptedAI
 {
     boss_sjonnirAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

@@ -108,7 +108,7 @@ static const RamseyInfo aRamseyInfo[] =
     {NPC_RAMSEY_5, GOSSIP_TEXT_ANUB_START, GOSSIP_ITEM_ANUB_START, 0, 0, TYPE_ANUBARAK},
 };
 
-struct MANGOS_DLL_DECL npc_barrett_ramseyAI : public ScriptedAI
+struct  npc_barrett_ramseyAI : public ScriptedAI
 {
     npc_barrett_ramseyAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 

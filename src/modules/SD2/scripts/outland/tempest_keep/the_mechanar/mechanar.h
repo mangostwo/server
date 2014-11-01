@@ -84,7 +84,7 @@ static const SpawnLocation aBridgeEventLocs[MAX_BRIDGE_LOCATIONS][4] =
     },
 };
 
-class MANGOS_DLL_DECL instance_mechanar : public ScriptedInstance
+class  instance_mechanar : public ScriptedInstance
 {
     public:
         instance_mechanar(Map* pMap);

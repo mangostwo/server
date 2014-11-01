@@ -31,14 +31,6 @@
 #include "sd2_revision_nr.h"
 #include "SystemConfig.h"
 
-#ifdef WIN32
-  #define MANGOS_DLL_EXPORT extern "C" __declspec(dllexport)
-#elif defined( __GNUC__ )
-  #define MANGOS_DLL_EXPORT extern "C"
-#else
-  #define MANGOS_DLL_EXPORT extern "C" export
-#endif
-
 #ifndef SCRIPTDEV2_VERSION
   #define SCRIPTDEV2_VERSION "Revision [" SD2_REVISION_NR "] (" REVISION_ID ") " REVISION_DATE " " REVISION_TIME
 #endif

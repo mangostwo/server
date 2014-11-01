@@ -63,7 +63,7 @@ const float RANGE_MOLTEN_PUNCH      = 40.0;
  */
 
 // TODO Remove this 'script' when combat movement can be proper prevented from core-side
-struct MANGOS_DLL_DECL molten_flameAI : public Scripted_NoMovementAI
+struct  molten_flameAI : public Scripted_NoMovementAI
 {
     molten_flameAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 
@@ -74,7 +74,7 @@ struct MANGOS_DLL_DECL molten_flameAI : public Scripted_NoMovementAI
 };
 
 // TODO Remove this 'script' when combat movement can be proper prevented from core-side
-struct MANGOS_DLL_DECL npc_volcanoAI : public Scripted_NoMovementAI
+struct  npc_volcanoAI : public Scripted_NoMovementAI
 {
     npc_volcanoAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 
@@ -84,7 +84,7 @@ struct MANGOS_DLL_DECL npc_volcanoAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override {}
 };
 
-struct MANGOS_DLL_DECL boss_supremusAI : public ScriptedAI
+struct  boss_supremusAI : public ScriptedAI
 {
     boss_supremusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

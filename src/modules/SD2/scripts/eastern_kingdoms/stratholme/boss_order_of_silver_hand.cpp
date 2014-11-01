@@ -73,7 +73,7 @@ static SilverHandAbilityStruct m_aSilverHandAbility[8] =
     {NPC_VICAR_HYERONIMUS,      SPELL_BLESSING,         TARGET_TYPE_FRIENDLY,   2000,  13000},
     {NPC_VICAR_HYERONIMUS,      SPELL_HOLY_LIGHT,       TARGET_TYPE_FRIENDLY,   5000,  9000},
 };
-struct MANGOS_DLL_DECL boss_silver_hand_bossesAI : public ScriptedAI
+struct  boss_silver_hand_bossesAI : public ScriptedAI
 {
     boss_silver_hand_bossesAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

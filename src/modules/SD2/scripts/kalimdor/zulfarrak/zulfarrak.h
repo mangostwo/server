@@ -65,7 +65,7 @@ enum
     AREATRIGGER_ANTUSUL             = 1447,
 };
 
-class MANGOS_DLL_DECL instance_zulfarrak : public ScriptedInstance
+class  instance_zulfarrak : public ScriptedInstance
 {
     public:
         instance_zulfarrak(Map* pMap);

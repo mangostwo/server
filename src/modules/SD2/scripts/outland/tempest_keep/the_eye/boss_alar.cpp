@@ -81,7 +81,7 @@ static const EventLocation aCenterLocation[] =
     {331.0, 0.01f, -2.39f},
 };
 
-struct MANGOS_DLL_DECL boss_alarAI : public ScriptedAI
+struct  boss_alarAI : public ScriptedAI
 {
     boss_alarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

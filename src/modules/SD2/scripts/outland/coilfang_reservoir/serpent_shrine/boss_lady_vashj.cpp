@@ -105,7 +105,7 @@ const float afCoilfangStriderPos[3][4] =
     { -12.843f, -907.798f, 41.239620f, 6.087f}
 };
 
-struct MANGOS_DLL_DECL boss_lady_vashjAI : public ScriptedAI
+struct  boss_lady_vashjAI : public ScriptedAI
 {
     boss_lady_vashjAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -446,7 +446,7 @@ struct MANGOS_DLL_DECL boss_lady_vashjAI : public ScriptedAI
     }
 };
 
-struct MANGOS_DLL_DECL mob_enchanted_elementalAI : public ScriptedAI
+struct  mob_enchanted_elementalAI : public ScriptedAI
 {
     mob_enchanted_elementalAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

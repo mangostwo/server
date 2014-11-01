@@ -66,7 +66,7 @@ enum
     SPELL_RAGNA_EMERGE      = 20568,
 };
 
-struct MANGOS_DLL_DECL boss_majordomoAI : public ScriptedAI
+struct  boss_majordomoAI : public ScriptedAI
 {
     boss_majordomoAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

@@ -59,7 +59,7 @@ enum
 // Probably caused by either a change in a patch (bugfix?) or the powerup has a condition (some
 // sources suggest this, but without any explanation about what this might be)
 
-struct MANGOS_DLL_DECL npc_destructive_wardAI : public Scripted_NoMovementAI
+struct  npc_destructive_wardAI : public Scripted_NoMovementAI
 {
     npc_destructive_wardAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {

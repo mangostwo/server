@@ -66,7 +66,7 @@ enum
     MAX_CHARGES_HEROIC          = 5,
 };
 
-struct MANGOS_DLL_DECL boss_lord_marrowgarAI : public ScriptedAI
+struct  boss_lord_marrowgarAI : public ScriptedAI
 {
     boss_lord_marrowgarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

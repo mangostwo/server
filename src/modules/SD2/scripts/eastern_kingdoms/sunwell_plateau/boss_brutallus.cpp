@@ -104,7 +104,7 @@ static const DialogueEntry aIntroDialogue[] =
 ## boss_brutallus
 ######*/
 
-struct MANGOS_DLL_DECL boss_brutallusAI : public ScriptedAI, private DialogueHelper
+struct  boss_brutallusAI : public ScriptedAI, private DialogueHelper
 {
     boss_brutallusAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aIntroDialogue)

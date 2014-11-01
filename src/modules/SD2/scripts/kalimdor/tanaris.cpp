@@ -62,7 +62,7 @@ enum
     FACTION_ELEMENTAL       = 91,
 };
 
-struct MANGOS_DLL_DECL mob_aquementasAI : public ScriptedAI
+struct  mob_aquementasAI : public ScriptedAI
 {
     mob_aquementasAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -176,7 +176,7 @@ enum
     QUEST_ID_CAVERNS_OF_TIME    = 10277,
 };
 
-struct MANGOS_DLL_DECL npc_custodian_of_timeAI : public npc_escortAI
+struct  npc_custodian_of_timeAI : public npc_escortAI
 {
     npc_custodian_of_timeAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -258,7 +258,7 @@ enum
     NPC_SHADOW_MAGE         = 5617
 };
 
-struct MANGOS_DLL_DECL npc_oox17tnAI : public npc_escortAI
+struct  npc_oox17tnAI : public npc_escortAI
 {
     npc_oox17tnAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -437,7 +437,7 @@ enum
 
 const float m_afToWaterLoc[] = { -7032.664551f, -4906.199219f, -1.606446f};
 
-struct MANGOS_DLL_DECL npc_toogaAI : public FollowerAI
+struct  npc_toogaAI : public FollowerAI
 {
     npc_toogaAI(Creature* pCreature) : FollowerAI(pCreature) { Reset(); }
 

@@ -67,7 +67,7 @@ static const uint32 aMarkCorruption[MAX_HYDROSS_MARKS] = {38219, 38220, 38221, 3
 static const float aElementalCleanPoint[3] = { -231.48f, -343.05f, -1.58f};
 static const float aElementalExitPoint[3] = { -177.41f, -395.72f, -1.60f};
 
-struct MANGOS_DLL_DECL boss_hydross_the_unstableAI : public ScriptedAI
+struct  boss_hydross_the_unstableAI : public ScriptedAI
 {
     boss_hydross_the_unstableAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

@@ -51,7 +51,7 @@ enum
     FACTION_SMOON_E     = 1603,
 };
 
-struct MANGOS_DLL_DECL npc_ranger_lilathaAI : public npc_escortAI
+struct  npc_ranger_lilathaAI : public npc_escortAI
 {
     npc_ranger_lilathaAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 

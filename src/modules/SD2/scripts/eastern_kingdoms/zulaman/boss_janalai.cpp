@@ -108,7 +108,7 @@ static const WaypointDef m_aHatcherLeft[] =
     { -33.097f, 1195.359f, 18.709f}
 };
 
-struct MANGOS_DLL_DECL boss_janalaiAI : public ScriptedAI
+struct  boss_janalaiAI : public ScriptedAI
 {
     boss_janalaiAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -377,7 +377,7 @@ CreatureAI* GetAI_boss_janalaiAI(Creature* pCreature)
     return new boss_janalaiAI(pCreature);
 }
 
-struct MANGOS_DLL_DECL npc_amanishi_hatcherAI : public ScriptedAI
+struct  npc_amanishi_hatcherAI : public ScriptedAI
 {
     npc_amanishi_hatcherAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -487,7 +487,7 @@ CreatureAI* GetAI_npc_amanishi_hatcherAI(Creature* pCreature)
 }
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct MANGOS_DLL_DECL npc_dragonhawk_eggAI : public Scripted_NoMovementAI
+struct  npc_dragonhawk_eggAI : public Scripted_NoMovementAI
 {
     npc_dragonhawk_eggAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) {Reset();}
 
@@ -504,7 +504,7 @@ CreatureAI* GetAI_npc_dragonhawk_eggAI(Creature* pCreature)
 }
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct MANGOS_DLL_DECL npc_janalai_firebombAI : public Scripted_NoMovementAI
+struct  npc_janalai_firebombAI : public Scripted_NoMovementAI
 {
     npc_janalai_firebombAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) {Reset();}
 

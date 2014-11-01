@@ -48,7 +48,7 @@ static const float afKaelLandPoint[4] = {200.36f, -270.77f, -8.73f, 0.01f};
 
 // This is friendly keal that appear after used Orb.
 // If we assume DB handle summon, summon appear somewhere outside the platform where Orb is
-struct MANGOS_DLL_DECL npc_kalecgosAI : public ScriptedAI
+struct  npc_kalecgosAI : public ScriptedAI
 {
     npc_kalecgosAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

@@ -42,7 +42,7 @@ enum
     NPC_ONYX_FLAMECALLER        = 39814,                // handled in ACID
 };
 
-struct MANGOS_DLL_DECL boss_zarithrianAI : public ScriptedAI
+struct  boss_zarithrianAI : public ScriptedAI
 {
     boss_zarithrianAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

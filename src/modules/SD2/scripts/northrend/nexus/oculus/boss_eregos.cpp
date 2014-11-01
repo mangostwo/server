@@ -60,7 +60,7 @@ enum
 ## boss_eregos
 ######*/
 
-struct MANGOS_DLL_DECL boss_eregosAI : public ScriptedAI
+struct  boss_eregosAI : public ScriptedAI
 {
     boss_eregosAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -252,7 +252,7 @@ CreatureAI* GetAI_boss_eregos(Creature* pCreature)
 ## npc_planar_anomaly
 ######*/
 
-struct MANGOS_DLL_DECL npc_planar_anomalyAI : public ScriptedAI
+struct  npc_planar_anomalyAI : public ScriptedAI
 {
     npc_planar_anomalyAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

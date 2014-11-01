@@ -61,7 +61,7 @@ enum
 
 #define GOSSIP_ITEM_RELEASE     "I want to release the corrupted saber to Winna."
 
-struct MANGOS_DLL_DECL npc_kittenAI : public FollowerAI
+struct  npc_kittenAI : public FollowerAI
 {
     npc_kittenAI(Creature* pCreature) : FollowerAI(pCreature)
     {
@@ -200,7 +200,7 @@ enum
     SAY_NIBY_3         = -1000570
 };
 
-struct MANGOS_DLL_DECL npc_niby_the_almightyAI : public ScriptedAI
+struct  npc_niby_the_almightyAI : public ScriptedAI
 {
     npc_niby_the_almightyAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -311,7 +311,7 @@ enum
     FACTION_HOSTILE         = 16,
 };
 
-struct MANGOS_DLL_DECL npc_kroshiusAI : public ScriptedAI
+struct  npc_kroshiusAI : public ScriptedAI
 {
     npc_kroshiusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -468,7 +468,7 @@ enum
     GO_ARKONARIN_CAGE               = 176306,
 };
 
-struct MANGOS_DLL_DECL npc_captured_arkonarinAI : public npc_escortAI
+struct  npc_captured_arkonarinAI : public npc_escortAI
 {
     npc_captured_arkonarinAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -662,7 +662,7 @@ static const DialogueEntry aEpilogDialogue[] =
     {0, 0, 0},
 };
 
-struct MANGOS_DLL_DECL npc_areiAI : public npc_escortAI, private DialogueHelper
+struct  npc_areiAI : public npc_escortAI, private DialogueHelper
 {
     npc_areiAI(Creature* pCreature) : npc_escortAI(pCreature),
         DialogueHelper(aEpilogDialogue)

@@ -83,7 +83,7 @@ enum Phases
     PHASE_NORMAL    = 2,
 };
 
-struct MANGOS_DLL_DECL boss_novosAI : public Scripted_NoMovementAI
+struct  boss_novosAI : public Scripted_NoMovementAI
 {
     boss_novosAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
@@ -323,7 +323,7 @@ CreatureAI* GetAI_boss_novos(Creature* pCreature)
 }
 
 // Small helper script to handle summoned adds for Novos
-struct MANGOS_DLL_DECL npc_crystal_channel_targetAI : public ScriptedAI
+struct  npc_crystal_channel_targetAI : public ScriptedAI
 {
     npc_crystal_channel_targetAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

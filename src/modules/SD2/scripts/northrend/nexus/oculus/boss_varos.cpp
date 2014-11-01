@@ -85,7 +85,7 @@ static const CaptainData aVarosCaptainData[4] =
 ## boss_varos
 ######*/
 
-struct MANGOS_DLL_DECL boss_varosAI : public ScriptedAI
+struct  boss_varosAI : public ScriptedAI
 {
     boss_varosAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -258,7 +258,7 @@ bool ProcessEventId_event_spell_call_captain(uint32 uiEventId, Object* pSource, 
 ## npc_azure_ring_captain
 ######*/
 
-struct MANGOS_DLL_DECL npc_azure_ring_captainAI : public ScriptedAI
+struct  npc_azure_ring_captainAI : public ScriptedAI
 {
     npc_azure_ring_captainAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -311,7 +311,7 @@ CreatureAI* GetAI_npc_azure_ring_captain(Creature* pCreature)
 ## npc_arcane_beam
 ######*/
 
-struct MANGOS_DLL_DECL npc_arcane_beamAI : public ScriptedAI
+struct  npc_arcane_beamAI : public ScriptedAI
 {
     npc_arcane_beamAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -345,7 +345,7 @@ CreatureAI* GetAI_npc_arcane_beam(Creature* pCreature)
 ######*/
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct MANGOS_DLL_DECL npc_centrifuge_coreAI : public Scripted_NoMovementAI
+struct  npc_centrifuge_coreAI : public Scripted_NoMovementAI
 {
     npc_centrifuge_coreAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 

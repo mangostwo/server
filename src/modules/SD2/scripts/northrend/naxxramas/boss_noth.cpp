@@ -87,7 +87,7 @@ enum
     PHASE_SKELETON_3                    = 3
 };
 
-struct MANGOS_DLL_DECL boss_nothAI : public ScriptedAI
+struct  boss_nothAI : public ScriptedAI
 {
     boss_nothAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

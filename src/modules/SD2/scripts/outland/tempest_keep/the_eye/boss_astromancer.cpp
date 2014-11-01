@@ -82,7 +82,7 @@ enum Phases
     PHASE_VOID          = 3,
 };
 
-struct MANGOS_DLL_DECL boss_high_astromancer_solarianAI : public ScriptedAI
+struct  boss_high_astromancer_solarianAI : public ScriptedAI
 {
     boss_high_astromancer_solarianAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -407,7 +407,7 @@ struct MANGOS_DLL_DECL boss_high_astromancer_solarianAI : public ScriptedAI
     }
 };
 
-struct MANGOS_DLL_DECL mob_solarium_priestAI : public ScriptedAI
+struct  mob_solarium_priestAI : public ScriptedAI
 {
     mob_solarium_priestAI(Creature* pCreature) : ScriptedAI(pCreature)  { Reset(); }
 

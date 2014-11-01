@@ -53,7 +53,7 @@ enum
     EVENT_ID_ALTAR_ARCHAEDAS    = 2268                      // spell 10340
 };
 
-class MANGOS_DLL_DECL instance_uldaman : public ScriptedInstance
+class  instance_uldaman : public ScriptedInstance
 {
     public:
         instance_uldaman(Map* pMap);

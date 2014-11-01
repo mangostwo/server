@@ -47,7 +47,7 @@ enum
     SPELL_MARK_OF_DEATH_AURA    = 37125,        // triggers 37131 on target if it has aura 37128
 };
 
-struct MANGOS_DLL_DECL boss_doomwalkerAI : public ScriptedAI
+struct  boss_doomwalkerAI : public ScriptedAI
 {
     boss_doomwalkerAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

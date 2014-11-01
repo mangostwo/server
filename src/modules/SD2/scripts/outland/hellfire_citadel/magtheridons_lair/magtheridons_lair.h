@@ -31,7 +31,7 @@ enum
 
 static const int32 aRandomTaunt[] = { -1544000, -1544001, -1544002, -1544003, -1544004, -1544005};
 
-class MANGOS_DLL_DECL instance_magtheridons_lair : public ScriptedInstance
+class  instance_magtheridons_lair : public ScriptedInstance
 {
     public:
         instance_magtheridons_lair(Map* pMap);

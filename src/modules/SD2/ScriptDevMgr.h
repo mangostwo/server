@@ -45,6 +45,44 @@ class Object;
 class ObjectGuid;
 
 // *********************************************************
+// **************** Functions used by core *****************
+
+class SD2
+{
+public:
+    static void FreeScriptLibrary();
+    static void InitScriptLibrary();
+    static char const* GetScriptLibraryVersion();
+    
+    static CreatureAI* GetCreatureAI(Creature* pCreature);
+    static InstanceData* CreateInstanceData(Map* pMap);
+    
+    static bool GossipHello(Player*, Creature*);
+    static bool GOGossipHello(Player*, GameObject*);
+    static bool GossipSelect(Player*, Creature*, uint32, uint32);
+    static bool GOGossipSelect(Player*, GameObject*, uint32, uint32);
+    static bool GossipSelectWithCode(Player*, Creature*, uint32, uint32, const char*);
+    static bool GOGossipSelectWithCode(Player*, GameObject*, uint32, uint32, const char*);
+    static bool QuestAccept(Player*, Creature*, Quest const*);
+    static bool GOQuestAccept(Player*, GameObject*, Quest const*);
+    static bool ItemQuestAccept(Player*, Item*, Quest const*);
+    static bool QuestRewarded(Player*, Creature*, Quest const*);
+    static bool GOQuestRewarded(Player*, GameObject*, Quest const*);
+    static uint32 GetNPCDialogStatus(Player*, Creature*);
+    static uint32 GetGODialogStatus(Player*, GameObject*);
+    static bool GOUse(Player*, GameObject*);
+    static bool ItemUse(Player*, Item*, SpellCastTargets const&);
+    static bool AreaTrigger(Player*, AreaTriggerEntry const*);
+    static bool NpcSpellClick(Player* pPlayer, Creature* pClickedCreature, uint32 uiSpellId);
+    static bool ProcessEvent(uint32, Object*, Object*, bool);
+    static bool EffectDummyCreature(Unit*, uint32, SpellEffectIndex, Creature*, ObjectGuid);
+    static bool EffectDummyGameObject(Unit*, uint32, SpellEffectIndex, GameObject*, ObjectGuid);
+    static bool EffectDummyItem(Unit*, uint32, SpellEffectIndex, Item*, ObjectGuid);
+    static bool EffectScriptEffectCreature(Unit*, uint32, SpellEffectIndex, Creature*, ObjectGuid);
+    static bool AuraDummy(Aura const*, bool);
+};
+
+// *********************************************************
 // ************** Some defines used globally ***************
 
 // Basic defines

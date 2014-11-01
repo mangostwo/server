@@ -56,7 +56,7 @@ enum
     SAY2_DEATH              = -1555027,
 };
 
-struct MANGOS_DLL_DECL boss_blackheart_the_inciterAI : public ScriptedAI
+struct  boss_blackheart_the_inciterAI : public ScriptedAI
 {
     boss_blackheart_the_inciterAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

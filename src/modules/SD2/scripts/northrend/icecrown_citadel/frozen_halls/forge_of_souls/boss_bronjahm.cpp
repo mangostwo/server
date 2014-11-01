@@ -50,7 +50,7 @@ enum
     SPELL_FEAR                  = 68950,
 };
 
-struct MANGOS_DLL_DECL boss_bronjahmAI : public ScriptedAI
+struct  boss_bronjahmAI : public ScriptedAI
 {
     boss_bronjahmAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -214,7 +214,7 @@ CreatureAI* GetAI_boss_bronjahm(Creature* pCreature)
     return new boss_bronjahmAI(pCreature);
 }
 
-struct MANGOS_DLL_DECL npc_corrupted_soul_fragmentAI : public ScriptedAI
+struct  npc_corrupted_soul_fragmentAI : public ScriptedAI
 {
     npc_corrupted_soul_fragmentAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

@@ -98,7 +98,7 @@ static const float fDarkPortalCrystalLoc[3] = { -2024.31f, 7127.75f, 22.65419f};
 
 static const int32 uiMedivhWeakYell[3] = {SAY_MEDIVH_WEAK75, SAY_MEDIVH_WEAK50, SAY_MEDIVH_WEAK25};
 
-class MANGOS_DLL_DECL instance_dark_portal : public ScriptedInstance
+class  instance_dark_portal : public ScriptedInstance
 {
     public:
         instance_dark_portal(Map* pMap);

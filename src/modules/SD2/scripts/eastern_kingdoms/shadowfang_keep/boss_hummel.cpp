@@ -57,7 +57,7 @@ static const DialogueEntry aIntroDialogue[] =
     {0, 0, 0},
 };
 
-struct MANGOS_DLL_DECL npc_valentine_boss_managerAI : public ScriptedAI, private DialogueHelper
+struct  npc_valentine_boss_managerAI : public ScriptedAI, private DialogueHelper
 {
     npc_valentine_boss_managerAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aIntroDialogue)

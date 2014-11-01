@@ -57,7 +57,7 @@ enum
     NPC_FLAME_OF_RAGNAROS       = 13148,
 };
 
-struct MANGOS_DLL_DECL boss_ragnarosAI : public Scripted_NoMovementAI
+struct  boss_ragnarosAI : public Scripted_NoMovementAI
 {
     boss_ragnarosAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {

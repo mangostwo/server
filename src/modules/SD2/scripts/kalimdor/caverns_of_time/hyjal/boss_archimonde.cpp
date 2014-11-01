@@ -85,7 +85,7 @@ enum
    randomly select it's target to follow and then we create the random movement making it unpredictable.
 */
 
-struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
+struct  boss_archimondeAI : public ScriptedAI
 {
     boss_archimondeAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -345,7 +345,7 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 };
 
 /* This is the script for the Doomfire Spirit Mob. This mob controls the doomfire npc and allows it to move randomly around the map. */
-struct MANGOS_DLL_DECL npc_doomfire_spiritAI : public ScriptedAI
+struct  npc_doomfire_spiritAI : public ScriptedAI
 {
     npc_doomfire_spiritAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

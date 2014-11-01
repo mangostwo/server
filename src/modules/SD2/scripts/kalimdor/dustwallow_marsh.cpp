@@ -59,7 +59,7 @@ enum
     NPC_RISEN_SPIRIT                 = 23554
 };
 
-struct MANGOS_DLL_DECL mobs_risen_husk_spiritAI : public ScriptedAI
+struct  mobs_risen_husk_spiritAI : public ScriptedAI
 {
     mobs_risen_husk_spiritAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
@@ -147,7 +147,7 @@ enum
     SAY_RAND_8      = -1000550
 };
 
-struct MANGOS_DLL_DECL npc_restless_apparitionAI : public ScriptedAI
+struct  npc_restless_apparitionAI : public ScriptedAI
 {
     npc_restless_apparitionAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
@@ -204,7 +204,7 @@ enum
     FACTION_MOR_RUNNING             = 35
 };
 
-struct MANGOS_DLL_DECL npc_morokkAI : public npc_escortAI
+struct  npc_morokkAI : public npc_escortAI
 {
     npc_morokkAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
@@ -365,7 +365,7 @@ enum
 static float m_afSpawn[] = { -3383.501953f, -3203.383301f, 36.149f};
 static float m_afMoveTo[] = { -3371.414795f, -3212.179932f, 34.210f};
 
-struct MANGOS_DLL_DECL npc_ogronAI : public npc_escortAI
+struct  npc_ogronAI : public npc_escortAI
 {
     npc_ogronAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
@@ -680,7 +680,7 @@ enum
 };
 
 // TODO: develop this further, end event not created
-struct MANGOS_DLL_DECL npc_private_hendelAI : public ScriptedAI
+struct  npc_private_hendelAI : public ScriptedAI
 {
     npc_private_hendelAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -759,7 +759,7 @@ enum
     GO_BOGBEAN_PLANT                    = 20939,
 };
 
-struct MANGOS_DLL_DECL npc_stinky_ignatzAI : public npc_escortAI
+struct  npc_stinky_ignatzAI : public npc_escortAI
 {
     npc_stinky_ignatzAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
     
@@ -907,7 +907,7 @@ enum
     PHASE_SPOUT                 = 2,
 };
 
-struct MANGOS_DLL_DECL boss_tethyrAI : public Scripted_NoMovementAI
+struct  boss_tethyrAI : public Scripted_NoMovementAI
 {
     boss_tethyrAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {

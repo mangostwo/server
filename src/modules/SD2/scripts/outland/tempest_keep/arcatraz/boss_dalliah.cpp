@@ -49,7 +49,7 @@ enum
     SPELL_SHADOW_WAVE               = 39016,                // heroic spell only
 };
 
-struct MANGOS_DLL_DECL boss_dalliahAI : public ScriptedAI
+struct  boss_dalliahAI : public ScriptedAI
 {
     boss_dalliahAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

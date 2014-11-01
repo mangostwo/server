@@ -85,7 +85,7 @@ enum
 ## boss_ingvar
 ######*/
 
-struct MANGOS_DLL_DECL boss_ingvarAI : public ScriptedAI
+struct  boss_ingvarAI : public ScriptedAI
 {
     boss_ingvarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -305,7 +305,7 @@ CreatureAI* GetAI_boss_ingvar(Creature* pCreature)
 ## npc_annhylde
 ######*/
 
-struct MANGOS_DLL_DECL npc_annhyldeAI : public ScriptedAI
+struct  npc_annhyldeAI : public ScriptedAI
 {
     npc_annhyldeAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

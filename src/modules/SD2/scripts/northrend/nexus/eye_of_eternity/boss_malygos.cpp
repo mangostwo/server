@@ -159,7 +159,7 @@ static const float aAlextraszaMovePos[3] = {726.754f, 1307.259f, 282.679f};
 ## boss_malygos
 ######*/
 
-struct MANGOS_DLL_DECL boss_malygosAI : public ScriptedAI, private DialogueHelper
+struct  boss_malygosAI : public ScriptedAI, private DialogueHelper
 {
     boss_malygosAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aIntroDialogue)
@@ -575,7 +575,7 @@ CreatureAI* GetAI_boss_malygos(Creature* pCreature)
 ## npc_power_spark
 ######*/
 
-struct MANGOS_DLL_DECL npc_power_sparkAI : public ScriptedAI
+struct  npc_power_sparkAI : public ScriptedAI
 {
     npc_power_sparkAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -612,7 +612,7 @@ CreatureAI* GetAI_npc_power_spark(Creature* pCreature)
 ## npc_wyrmrest_skytalon
 ######*/
 
-struct MANGOS_DLL_DECL npc_wyrmrest_skytalonAI : public ScriptedAI
+struct  npc_wyrmrest_skytalonAI : public ScriptedAI
 {
     npc_wyrmrest_skytalonAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

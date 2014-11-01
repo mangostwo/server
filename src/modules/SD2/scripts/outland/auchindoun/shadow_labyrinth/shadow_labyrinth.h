@@ -29,7 +29,7 @@ enum
     SPELL_BANISH            = 30231,                        // spell is handled in creature_template_addon;
 };
 
-class MANGOS_DLL_DECL instance_shadow_labyrinth : public ScriptedInstance
+class instance_shadow_labyrinth : public ScriptedInstance
 {
     public:
         instance_shadow_labyrinth(Map* pMap);

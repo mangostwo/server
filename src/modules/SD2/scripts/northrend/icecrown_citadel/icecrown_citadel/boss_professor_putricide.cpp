@@ -127,7 +127,7 @@ static const float fPutricidePosition[1][3] =
     {4356.78f, 3263.51f, 389.40f}   // 0 Putricide spawn point
 };
 
-struct MANGOS_DLL_DECL boss_professor_putricideAI : public ScriptedAI
+struct  boss_professor_putricideAI : public ScriptedAI
 {
     boss_professor_putricideAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

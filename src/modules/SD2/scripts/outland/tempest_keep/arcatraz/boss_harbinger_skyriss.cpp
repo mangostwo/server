@@ -48,7 +48,7 @@ enum
     SPELL_33_ILLUSION           = 36932,                    // Summons 21467
 };
 
-struct MANGOS_DLL_DECL boss_harbinger_skyrissAI : public ScriptedAI
+struct  boss_harbinger_skyrissAI : public ScriptedAI
 {
     boss_harbinger_skyrissAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

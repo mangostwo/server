@@ -41,7 +41,7 @@ enum
     SPELL_IMMOLATE              = 20294
 };
 
-struct MANGOS_DLL_DECL boss_sulfuronAI : public ScriptedAI
+struct  boss_sulfuronAI : public ScriptedAI
 {
     boss_sulfuronAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -153,7 +153,7 @@ struct MANGOS_DLL_DECL boss_sulfuronAI : public ScriptedAI
     }
 };
 
-struct MANGOS_DLL_DECL mob_flamewaker_priestAI : public ScriptedAI
+struct  mob_flamewaker_priestAI : public ScriptedAI
 {
     mob_flamewaker_priestAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

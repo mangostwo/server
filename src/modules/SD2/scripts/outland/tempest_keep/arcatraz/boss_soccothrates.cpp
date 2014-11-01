@@ -66,7 +66,7 @@ static const DialogueEntry aIntroDialogue[] =
     {0, 0, 0},
 };
 
-struct MANGOS_DLL_DECL boss_soccothratesAI : public ScriptedAI, private DialogueHelper
+struct  boss_soccothratesAI : public ScriptedAI, private DialogueHelper
 {
     boss_soccothratesAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aIntroDialogue)
