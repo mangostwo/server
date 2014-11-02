@@ -1,92 +1,29 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug_NoPCH|Win32">
-      <Configuration>Debug_NoPCH</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug_NoPCH|Win32">
-      <Configuration>Debug_NoPCH</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug_NoPCH|x64">
-      <Configuration>Debug_NoPCH</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug_NoPCH|x64">
-      <Configuration>Debug_NoPCH</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug|Win32">
-      <Configuration>Debug</Configuration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug|x64">
-      <Configuration>Debug</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug|x64">
-      <Configuration>Debug</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|x64">
-      <Configuration>Release</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|x64">
-      <Configuration>Release</Configuration>
-      <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGUID>{A3A04E47-43A2-4C08-90B3-029CEF558594}</ProjectGUID>
-    <RootNamespace>mangosd</RootNamespace>
+    <ProjectGUID>{485F08B8-BAD4-47C1-8B49-17B9949B123E}</ProjectGUID>
     <Keyword>Win32Proj</Keyword>
+    <Platform>Win32</Platform>
+    <ProjectName>mangosd</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
-  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|X64'">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
-  </PropertyGroup>
-  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
-  </PropertyGroup>
-  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
-  </PropertyGroup>
-  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
@@ -96,417 +33,175 @@
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Label="PropertySheets">
-    <Import Project="$(LocalAppData)\Microsoft\VisualStudio\10.0\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(LocalAppData)\Microsoft\VisualStudio\10.0\Microsoft.Cpp.$(Platform).user.props')" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\bin\$(Platform)_$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\mangosd__$(Platform)_$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\_temp\mangosd\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">mangosd</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|X64'">..\..\bin\$(Platform)_$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|X64'">.\mangosd__$(Platform)_$(Configuration)\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|X64'">mangosd</TargetName>
-    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|X64'">.exe</TargetExt>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|X64'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\bin\$(Platform)_$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\mangosd__$(Platform)_$(Configuration)\</IntDir>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\_temp\mangosd\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mangosd</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">..\..\bin\$(Platform)_$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">.\mangosd__$(Platform)_$(Configuration)\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">mangosd</TargetName>
-    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">.exe</TargetExt>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">..\..\bin\$(Platform)_$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">.\mangosd__$(Platform)_$(Configuration)\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">mangosd</TargetName>
-    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">.exe</TargetExt>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">..\..\bin\$(Platform)_$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">.\mangosd__$(Platform)_$(Configuration)\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">mangosd</TargetName>
-    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">.exe</TargetExt>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">false</LinkIncremental>
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'" />
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'" />
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|X64'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|X64'" />
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|X64'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|X64'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|X64'" />
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateManifest>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <Midl>
-      <TypeLibraryName>.\..\..\bin\Release\mangosd.tlb</TypeLibraryName>
-    </Midl>
     <ClCompile>
-      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\..\dep\include\gsoap;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game;..\..\dep\lualib;..\..\src\game\LuaEngine;..\..\src\mangosd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>VERSION="0.19.0";WIN32;ENABLE_ELUNA;ENABLE_SD2;NDEBUG;_CONSOLE;ENABLE_CLI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>true</StringPooling>
+      <AdditionalOptions> /Zm500 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>.\;..\..\dep\include;..\..\src\shared;..\..\src\framework;..\..\src\game\AuctionHouseBot;..\..\src\game\BattleGround;..\..\src\game\Server;..\..\src\game\WorldHandlers;..\..\src\game\Object;..\..\src\game\Tools;..\..\src\game\References;..\..\src\game\MotionGenerators;..\..\src\game\vmap;..\..\src\shared;..\..\dep\acelite;..\..\dep\include\openssl;..\..\src\modules\Eluna;..\..\dep\lualib;..\..\src\modules\SD2;..\..\dep\include\gsoap;..\..\dep\include\mysql;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>Release/</AssemblerListingLocation>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <DisableSpecificWarnings>4996;4355;4244;4267</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <PrecompiledHeaderOutputFile>.\mangosd__$(Platform)_$(Configuration)\mangosd.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\mangosd__$(Platform)_$(Configuration)\</AssemblerListingLocation>
-      <ObjectFileName>.\mangosd__$(Platform)_$(Configuration)\</ObjectFileName>
-      <ProgramDataBaseFileName>.\mangosd__$(Platform)_$(Configuration)\</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <CallingConvention>Cdecl</CallingConvention>
-      <CompileAs>Default</CompileAs>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <PreprocessorDefinitions>PREPARED_SLN;WIN32;_WINDOWS;NDEBUG;HAVE_CONFIG_H;MANGOS;DO_MYSQL;WIN32;_WIN32;USE_STANDARD_MALLOC;NDEBUG;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x0409</Culture>
+      <PreprocessorDefinitions>PREPARED_SLN;WIN32;_WINDOWS;NDEBUG;HAVE_CONFIG_H;MANGOS;DO_MYSQL;WIN32;_WIN32;USE_STANDARD_MALLOC;NDEBUG;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\;..\..\dep\include;..\..\src\shared;..\..\src\framework;..\..\src\game\AuctionHouseBot;..\..\src\game\BattleGround;..\..\src\game\Server;..\..\src\game\WorldHandlers;..\..\src\game\Object;..\..\src\game\Tools;..\..\src\game\References;..\..\src\game\MotionGenerators;..\..\src\game\vmap;..\..\src\shared;..\..\dep\acelite;..\..\dep\include\openssl;..\..\src\modules\Eluna;..\..\dep\lualib;..\..\src\modules\SD2;..\..\dep\include\gsoap;..\..\dep\include\mysql;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>.\;..\..\dep\include;..\..\src\shared;..\..\src\framework;..\..\src\game\AuctionHouseBot;..\..\src\game\BattleGround;..\..\src\game\Server;..\..\src\game\WorldHandlers;..\..\src\game\Object;..\..\src\game\Tools;..\..\src\game\References;..\..\src\game\MotionGenerators;..\..\src\game\vmap;..\..\src\shared;..\..\dep\acelite;..\..\dep\include\openssl;..\..\src\modules\Eluna;..\..\dep\lualib;..\..\src\modules\SD2;..\..\dep\include\gsoap;..\..\dep\include\mysql;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(Configuration)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
     <Link>
-      <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>..\..\dep\lib\$(Platform)_$(Configuration);.\framework__$(Platform)_$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <MapFileName>$(TargetDir)$(TargetName).map</MapFileName>
-      <SubSystem>Console</SubSystem>
+      <AdditionalOptions> /machine:X86 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;$(Configuration)\game.lib;$(Configuration)\shared.lib;$(Configuration)\framework.lib;$(Configuration)\g3dlite.lib;$(Configuration)\ace.lib;$(Configuration)\gsoap.lib;$(Configuration)\zlib.lib;..\..\dep\lib\win32\libmySQL.lib;..\..\dep\lib\win32\libeay32.lib;$(Configuration)\detour.lib;$(Configuration)\mangosscript.lib;$(Configuration)\LuaEngine.lib;$(Configuration)\lualib.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../dep/acelite/ace;../../dep/acelite/ace/$(Configuration);;../../src/mangosd/$(Configuration);../../src/mangosd/$(Configuration)/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <ImportLibrary>$(Configuration)/mangosd.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
-      <LinkTimeCodeGeneration>
-      </LinkTimeCodeGeneration>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
-      <ImportLibrary>$(IntDir)mangosd.lib</ImportLibrary>
-    </Link>
-    <PostBuildEvent>
-      <Command>..\..\win\copyfiles.cmd ..\dep\lib\$(Platform)_$(Configuration) ..\..\bin\$(Platform)_$(Configuration) ..\dep\lib\$(Platform)</Command>
-    </PostBuildEvent>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|X64'">
-    <Midl>
-      <TargetEnvironment>X64</TargetEnvironment>
-      <TypeLibraryName>.\..\..\bin\Release\mangosd.tlb</TypeLibraryName>
-    </Midl>
-    <ClCompile>
-      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\..\dep\include\gsoap;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game;..\..\dep\lualib;..\..\src\game\LuaEngine;..\..\src\mangosd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>VERSION="0.19.0";WIN32;ENABLE_ELUNA;ENABLE_SD2;NDEBUG;_CONSOLE;ENABLE_CLI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
-      <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <PrecompiledHeaderOutputFile>.\mangosd__$(Platform)_$(Configuration)\mangosd.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\mangosd__$(Platform)_$(Configuration)\</AssemblerListingLocation>
-      <ObjectFileName>.\mangosd__$(Platform)_$(Configuration)\</ObjectFileName>
-      <ProgramDataBaseFileName>.\mangosd__$(Platform)_$(Configuration)\</ProgramDataBaseFileName>
-      <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <CallingConvention>Cdecl</CallingConvention>
-      <CompileAs>Default</CompileAs>
-    </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x0409</Culture>
-    </ResourceCompile>
-    <Link>
-      <AdditionalDependencies>ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>..\..\dep\lib\$(Platform)_$(Configuration);.\framework__$(Platform)_$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <MapFileName>$(TargetDir)$(TargetName).map</MapFileName>
+      <ProgramDataBaseFile>$(Configuration)/mangosd.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
-      <LinkTimeCodeGeneration>
-      </LinkTimeCodeGeneration>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
-      <ImportLibrary>$(IntDir)mangosd.lib</ImportLibrary>
-      <TargetMachine>MachineX64</TargetMachine>
+      <Version>
+      </Version>
     </Link>
-    <PostBuildEvent>
-      <Command>..\..\win\copyfiles.cmd ..\dep\lib\$(Platform)_$(Configuration) ..\..\bin\$(Platform)_$(Configuration) ..\dep\lib\$(Platform)</Command>
-    </PostBuildEvent>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Midl>
-      <TypeLibraryName>.\mangosd__$(Platform)_$(Configuration)\mangosd.tlb</TypeLibraryName>
-    </Midl>
     <ClCompile>
-      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
-      <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\dep\include\gsoap;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game;..\..\dep\lualib;..\..\src\game\LuaEngine;..\..\src\mangosd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>VERSION="0.19.0";WIN32;ENABLE_ELUNA;ENABLE_SD2;_DEBUG;MANGOS_DEBUG;_CONSOLE;ENABLE_CLI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+      <AdditionalOptions> /Zm500 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>.\;..\..\dep\include;..\..\src\shared;..\..\src\framework;..\..\src\game\AuctionHouseBot;..\..\src\game\BattleGround;..\..\src\game\Server;..\..\src\game\WorldHandlers;..\..\src\game\Object;..\..\src\game\Tools;..\..\src\game\References;..\..\src\game\MotionGenerators;..\..\src\game\vmap;..\..\src\shared;..\..\dep\acelite;..\..\dep\include\openssl;..\..\src\modules\Eluna;..\..\dep\lualib;..\..\src\modules\SD2;..\..\dep\include\gsoap;..\..\dep\include\mysql;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>Debug/</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <PrecompiledHeaderOutputFile>.\mangosd__$(Platform)_$(Configuration)\mangosd.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\mangosd__$(Platform)_$(Configuration)\</AssemblerListingLocation>
-      <ObjectFileName>.\mangosd__$(Platform)_$(Configuration)\</ObjectFileName>
-      <ProgramDataBaseFileName>.\mangosd__$(Platform)_$(Configuration)\</ProgramDataBaseFileName>
-      <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <CompileAs>CompileAsCpp</CompileAs>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <CallingConvention>Cdecl</CallingConvention>
-      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>4996;4355;4244;4985;4267</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>PREPARED_SLN;WIN32;_WINDOWS;_DEBUG;HAVE_CONFIG_H;MANGOS;DO_MYSQL;WIN32;_WIN32;USE_STANDARD_MALLOC;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <MinimalRebuild>false</MinimalRebuild>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x0409</Culture>
+      <PreprocessorDefinitions>PREPARED_SLN;WIN32;_WINDOWS;_DEBUG;HAVE_CONFIG_H;MANGOS;DO_MYSQL;WIN32;_WIN32;USE_STANDARD_MALLOC;CMAKE_INTDIR=\"Debug\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\;..\..\dep\include;..\..\src\shared;..\..\src\framework;..\..\src\game\AuctionHouseBot;..\..\src\game\BattleGround;..\..\src\game\Server;..\..\src\game\WorldHandlers;..\..\src\game\Object;..\..\src\game\Tools;..\..\src\game\References;..\..\src\game\MotionGenerators;..\..\src\game\vmap;..\..\src\shared;..\..\dep\acelite;..\..\dep\include\openssl;..\..\src\modules\Eluna;..\..\dep\lualib;..\..\src\modules\SD2;..\..\dep\include\gsoap;..\..\dep\include\mysql;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>.\;..\..\dep\include;..\..\src\shared;..\..\src\framework;..\..\src\game\AuctionHouseBot;..\..\src\game\BattleGround;..\..\src\game\Server;..\..\src\game\WorldHandlers;..\..\src\game\Object;..\..\src\game\Tools;..\..\src\game\References;..\..\src\game\MotionGenerators;..\..\src\game\vmap;..\..\src\shared;..\..\dep\acelite;..\..\dep\include\openssl;..\..\src\modules\Eluna;..\..\dep\lualib;..\..\src\modules\SD2;..\..\dep\include\gsoap;..\..\dep\include\mysql;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(Configuration)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
     <Link>
-      <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <Version>
-      </Version>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>..\..\dep\lib\$(Platform)_$(Configuration);.\framework__$(Platform)_$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions> /machine:X86 /debug %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;$(Configuration)\game.lib;$(Configuration)\shared.lib;$(Configuration)\framework.lib;$(Configuration)\g3dlite.lib;$(Configuration)\ace.lib;$(Configuration)\gsoap.lib;$(Configuration)\zlib.lib;..\..\dep\lib\win32\libmySQL.lib;..\..\dep\lib\win32\libeay32.lib;$(Configuration)\detour.lib;$(Configuration)\mangosscript.lib;$(Configuration)\LuaEngine.lib;$(Configuration)\lualib.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../dep/acelite/ace;../../dep/acelite/ace/$(Configuration);;../../src/mangosd/$(Configuration);../../src/mangosd/$(Configuration)/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <MapFileName>$(TargetDir)$(TargetName).map</MapFileName>
-      <SubSystem>Console</SubSystem>
+      <ImportLibrary>$(Configuration)/mangosd.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <FixedBaseAddress>false</FixedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
-      <ImportLibrary>$(IntDir)mangosd.lib</ImportLibrary>
-      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-    </Link>
-    <PostBuildEvent>
-      <Command>..\..\win\copyfiles.cmd ..\dep\lib\$(Platform)_$(Configuration) ..\..\bin\$(Platform)_$(Configuration) ..\dep\lib\$(Platform)</Command>
-    </PostBuildEvent>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">
-    <Midl>
-      <TargetEnvironment>X64</TargetEnvironment>
-      <TypeLibraryName>.\mangosd__$(Platform)_$(Configuration)\mangosd.tlb</TypeLibraryName>
-    </Midl>
-    <ClCompile>
-      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
-      <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\dep\include\gsoap;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game;..\..\dep\lualib;..\..\src\game\LuaEngine;..\..\src\mangosd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>VERSION="0.19.0";WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;ENABLE_CLI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <PrecompiledHeaderOutputFile>.\mangosd__$(Platform)_$(Configuration)\mangosd.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\mangosd__$(Platform)_$(Configuration)\</AssemblerListingLocation>
-      <ObjectFileName>.\mangosd__$(Platform)_$(Configuration)\</ObjectFileName>
-      <ProgramDataBaseFileName>.\mangosd__$(Platform)_$(Configuration)\</ProgramDataBaseFileName>
-      <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <CallingConvention>Cdecl</CallingConvention>
-      <CompileAs>Default</CompileAs>
-    </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x0409</Culture>
-    </ResourceCompile>
-    <Link>
-      <AdditionalDependencies>ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ProgramDataBaseFile>$(Configuration)/mangosd.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
       <Version>
       </Version>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>..\..\dep\lib\$(Platform)_$(Configuration);.\framework__$(Platform)_$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <MapFileName>$(TargetDir)$(TargetName).map</MapFileName>
-      <SubSystem>Console</SubSystem>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <FixedBaseAddress>false</FixedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
-      <ImportLibrary>$(IntDir)mangosd.lib</ImportLibrary>
-      <TargetMachine>MachineX64</TargetMachine>
     </Link>
-    <PostBuildEvent>
-      <Command>..\..\win\copyfiles.cmd ..\dep\lib\$(Platform)_$(Configuration) ..\..\bin\$(Platform)_$(Configuration) ..\dep\lib\$(Platform)</Command>
-    </PostBuildEvent>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">
-    <Midl>
-      <TypeLibraryName>.\mangosd__$(Platform)_$(Configuration)\mangosd.tlb</TypeLibraryName>
-    </Midl>
-    <ClCompile>
-      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
-      <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\dep\include\gsoap;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game;..\..\dep\lualib;..\..\src\game\LuaEngine;..\..\src\mangosd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>VERSION="0.19.0";WIN32;ENABLE_ELUNA;ENABLE_SD2;_DEBUG;MANGOS_DEBUG;_CONSOLE;ENABLE_CLI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <PrecompiledHeaderOutputFile>.\mangosd__$(Platform)_$(Configuration)\mangosd.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\mangosd__$(Platform)_$(Configuration)\</AssemblerListingLocation>
-      <ObjectFileName>.\mangosd__$(Platform)_$(Configuration)\</ObjectFileName>
-      <ProgramDataBaseFileName>.\mangosd__$(Platform)_$(Configuration)\</ProgramDataBaseFileName>
-      <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <CallingConvention>Cdecl</CallingConvention>
-      <CompileAs>Default</CompileAs>
-    </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x0409</Culture>
-    </ResourceCompile>
-    <Link>
-      <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <Version>
-      </Version>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>..\..\dep\lib\$(Platform)_debug;.\framework__$(Platform)_$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <MapFileName>$(TargetDir)$(TargetName).map</MapFileName>
-      <SubSystem>Console</SubSystem>
-      <LargeAddressAware>true</LargeAddressAware>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <FixedBaseAddress>false</FixedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
-      <ImportLibrary>$(IntDir)mangosd.lib</ImportLibrary>
-    </Link>
-    <PostBuildEvent>
-      <Command>..\..\win\copyfiles.cmd ..\dep\lib\$(Platform)_debug ..\..\bin\$(Platform)_$(Configuration) ..\dep\lib\$(Platform)</Command>
-    </PostBuildEvent>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">
-    <Midl>
-      <TargetEnvironment>X64</TargetEnvironment>
-      <TypeLibraryName>.\mangosd__$(Platform)_$(Configuration)\mangosd.tlb</TypeLibraryName>
-    </Midl>
-    <ClCompile>
-      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
-      <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\dep\include\gsoap;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\game;..\..\dep\lualib;..\..\src\game\LuaEngine;..\..\src\mangosd;..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>VERSION="0.19.0";WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;ENABLE_CLI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <PrecompiledHeaderOutputFile>.\mangosd__$(Platform)_$(Configuration)\mangosd.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\mangosd__$(Platform)_$(Configuration)\</AssemblerListingLocation>
-      <ObjectFileName>.\mangosd__$(Platform)_$(Configuration)\</ObjectFileName>
-      <ProgramDataBaseFileName>.\mangosd__$(Platform)_$(Configuration)\</ProgramDataBaseFileName>
-      <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <CallingConvention>Cdecl</CallingConvention>
-      <CompileAs>Default</CompileAs>
-    </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x0409</Culture>
-    </ResourceCompile>
-    <Link>
-      <AdditionalDependencies>ws2_32.lib;winmm.lib;odbc32.lib;odbccp32.lib;advapi32.lib;dbghelp.lib;framework.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <Version>
-      </Version>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>..\..\dep\lib\$(Platform)_debug;.\framework__$(Platform)_$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <MapFileName>$(TargetDir)$(TargetName).map</MapFileName>
-      <SubSystem>Console</SubSystem>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <FixedBaseAddress>false</FixedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
-      <ImportLibrary>$(IntDir)mangosd.lib</ImportLibrary>
-      <TargetMachine>MachineX64</TargetMachine>
-    </Link>
-    <PostBuildEvent>
-      <Command>..\..\win\copyfiles.cmd ..\dep\lib\$(Platform)_debug ..\..\bin\$(Platform)_$(Configuration) ..\dep\lib\$(Platform)</Command>
-    </PostBuildEvent>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="..\..\AUTHORS" />
-    <None Include="..\..\ChangeLog" />
-    <None Include="..\..\COPYING" />
-    <None Include="..\..\INSTALL" />
-    <None Include="..\..\NEWS" />
-    <None Include="..\..\README" />
-    <None Include="..\..\THANKS" />
-    <None Include="..\..\WARNING" />
+    <ClInclude Include="..\..\src\mangosd\CliRunnable.h" />
+    <ClInclude Include="..\..\src\mangosd\Master.h" />
+    <ClInclude Include="..\..\src\mangosd\RASocket.h" />
+    <ClInclude Include="..\..\src\mangosd\WorldRunnable.h" />
+    <ClInclude Include="..\..\src\mangosd\MaNGOSsoap.h" />
+    <ClInclude Include="..\..\src\mangosd\soapH.h" />
+    <ClInclude Include="..\..\src\mangosd\soapStub.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\dep\src\gsoap\stdsoap2.cpp" />
-    <ClCompile Include="..\..\src\mangosd\soapServer.cpp" />
-    <ClCompile Include="..\..\src\mangosd\soapC.cpp" />
-    <ClCompile Include="..\..\src\mangosd\MaNGOSsoap.cpp" />
     <ClCompile Include="..\..\src\mangosd\CliRunnable.cpp" />
     <ClCompile Include="..\..\src\mangosd\Main.cpp" />
     <ClCompile Include="..\..\src\mangosd\Master.cpp" />
     <ClCompile Include="..\..\src\mangosd\RASocket.cpp" />
     <ClCompile Include="..\..\src\mangosd\WorldRunnable.cpp" />
-    <ClCompile Include="..\..\src\shared\WheatyExceptionReport.cpp" />
-    <ClCompile Include="..\..\src\game\LFGMgr.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\dep\include\gsoap\stdsoap2.h" />
-    <ClInclude Include="..\..\src\mangosd\soapStub.h" />
-    <ClInclude Include="..\..\src\mangosd\soapH.h" />
-    <ClInclude Include="..\..\src\mangosd\MaNGOSsoap.h" />
-    <ClInclude Include="..\..\src\mangosd\CliRunnable.h" />
-    <ClInclude Include="..\..\src\mangosd\Master.h" />
-    <ClInclude Include="..\..\src\mangosd\RASocket.h" />
-    <ClInclude Include="..\..\src\mangosd\WorldRunnable.h" />
-    <ClInclude Include="..\..\src\shared\WheatyExceptionReport.h" />
-    <ClCompile Include="..\..\src\game\LFGMgr.h" />
-  </ItemGroup>
-  <ItemGroup>
+    <ClCompile Include="..\..\src\mangosd\MaNGOSsoap.cpp" />
+    <ClCompile Include="..\..\src\mangosd\soapC.cpp" />
+    <ClCompile Include="..\..\src\mangosd\soapServer.cpp" />
     <ResourceCompile Include="..\..\src\mangosd\mangosd.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\dep\recastnavigation\Detour\win\VC110\Detour.vcxproj">
-      <Project>{72bdf975-4d4a-42c7-b2c4-f9ed90a2abb6}</Project>
+    <ProjectReference Include="LuaEngine.vcxproj">
+      <Project>61BCE72F-B726-48F3-9D02-7FD551F82DF8</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\dep\recastnavigation\Recast\win\VC110\Recast.vcxproj">
-      <Project>{00b9dc66-96a6-465d-a6c1-5dff94e48a64}</Project>
+    <ProjectReference Include="ace.vcxproj">
+      <Project>D70895A7-4EA1-48BE-A557-834D4357BAD3</Project>
+    </ProjectReference>
+    <ProjectReference Include="detour.vcxproj">
+      <Project>3FECACB6-BD35-4857-BF55-A56B5E6C6D77</Project>
+    </ProjectReference>
+    <ProjectReference Include="framework.vcxproj">
+      <Project>915B99FF-5340-4BCE-AAE7-D3737443498B</Project>
+    </ProjectReference>
+    <ProjectReference Include="g3dlite.vcxproj">
+      <Project>367CCE76-14A7-4871-93D6-579DA35FBEFD</Project>
     </ProjectReference>
     <ProjectReference Include="game.vcxproj">
-      <Project>{1dc6c4da-a028-41f3-877d-d5400c594f88}</Project>
+      <Project>C69C7C98-6E13-4A3A-BD7C-7BA82BAA1933</Project>
     </ProjectReference>
-    <ProjectReference Include="realmd.vcxproj">
-      <Project>{563e9905-3657-460c-ae63-0ac39d162e23}</Project>
+    <ProjectReference Include="gsoap.vcxproj">
+      <Project>53CF48ED-FEFE-4165-A9CA-F000ABC572B6</Project>
+    </ProjectReference>
+    <ProjectReference Include="lualib.vcxproj">
+      <Project>0AC3742A-F311-428C-8EF1-8D6B8627A8A2</Project>
+    </ProjectReference>
+    <ProjectReference Include="mangosscript.vcxproj">
+      <Project>DA729B06-9097-4DA6-A86C-E97BC843B7C2</Project>
     </ProjectReference>
     <ProjectReference Include="shared.vcxproj">
-      <Project>{90297c34-f231-4df4-848e-a74bcc0e40ed}</Project>
+      <Project>594C9AA1-A759-4DEB-A6E4-F079A5DFBA31</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="..\..\dep\lib\$(Platform)\libeay32.lib" />
-    <Library Include="..\..\dep\lib\$(Platform)\libmysql.lib" />
+    <ProjectReference Include="zlib.vcxproj">
+      <Project>8D3CF9B7-05F2-4BCF-B833-27B279FDEAF3</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
