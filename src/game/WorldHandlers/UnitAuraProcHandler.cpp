@@ -3189,6 +3189,22 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                 if (int32(pVictim->GetHealth() * 100 / pVictim->GetMaxHealth()) > aur->GetModifier()->m_amount)
                     return SPELL_AURA_PROC_FAILED;
             }
+            // Molten Core
+            else if (auraSpellInfo->SpellIconID == 3175)
+            {
+                //todo: test whether or not to do the % chance here, it may have already been done to be triggered
+               // int pctChance = rand() % 100 + 1; // random # from 1 to 100
+               // if (pctChance <= (int)auraSpellInfo->procChance) // procChance is 4, 8 or 12%
+               // {
+                //if (!procSpell)
+                //   return SPELL_AURA_PROC_FAILED;
+                   
+                trigger_spell_id = auraSpellInfo->EffectTriggerSpell[EFFECT_INDEX_0];
+                target = this;
+                //}
+                //else
+                //    { return SPELL_AURA_PROC_FAILED; }
+            }
             break;
         }
         case SPELLFAMILY_PRIEST:
@@ -3988,6 +4004,13 @@ SpellAuraProcResult Unit::HandleAddFlatModifierAuraProc(Unit* pVictim, uint32 /*
         int bp = triggeredByAura->GetModifier()->m_amount;
         CastCustomSpell(pVictim, 68055, &bp, NULL, NULL, true, NULL, triggeredByAura);
     }
+    /*else if (spellInfo->SpellIconID == 3175)   // Molten Core
+    {
+        // Incinerate: increases damage done by 6/12/18% and reduces cast time by 10/20/30%
+        // Soul Fire: increases damage done by 6/12/18% and increases critical strike chance by 5/10/15%
+        if (!procSpell)
+            return SPELL_AURA_PROC_FAILED;
+    }*/
 
     return SPELL_AURA_PROC_OK;
 }

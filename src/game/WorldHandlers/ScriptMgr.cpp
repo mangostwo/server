@@ -2154,11 +2154,11 @@ bool ScriptMgr::OnQuestAccept(Player* pPlayer, Item* pItem, Quest const* pQuest)
 #endif
 }
 
-bool ScriptMgr::OnQuestRewarded(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
+bool ScriptMgr::OnQuestRewarded(Player* pPlayer, Creature* pCreature, Quest const* pQuest, uint32 reward)
 {
         // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (sEluna->OnQuestReward(pPlayer, pCreature, pQuest))
+    if (sEluna->OnQuestReward(pPlayer, pCreature, pQuest, reward))
         return false;
 #endif /* ENABLE_ELUNA */
 
@@ -2169,11 +2169,11 @@ bool ScriptMgr::OnQuestRewarded(Player* pPlayer, Creature* pCreature, Quest cons
 #endif
 }
 
-bool ScriptMgr::OnQuestRewarded(Player* pPlayer, GameObject* pGameObject, Quest const* pQuest)
+bool ScriptMgr::OnQuestRewarded(Player* pPlayer, GameObject* pGameObject, Quest const* pQuest, uint32 reward)
 {
         // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (sEluna->OnQuestReward(pPlayer, pGameObject, pQuest))
+    if (sEluna->OnQuestReward(pPlayer, pGameObject, pQuest, reward))
         return false;
 #endif /* ENABLE_ELUNA */
 
