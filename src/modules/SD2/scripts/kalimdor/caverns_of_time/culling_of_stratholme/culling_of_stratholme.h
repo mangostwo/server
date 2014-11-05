@@ -26,7 +26,6 @@ enum
     NPC_CHROMIE_ENTRANCE            = 27915,
     NPC_CHROMIE_END                 = 30997,
     NPC_HOURGLASS                   = 28656,
-    NPC_LORDAERON_CRIER             = 27913,
     NPC_ARTHAS                      = 26499,
     
     // Dungeon bosses
@@ -34,9 +33,7 @@ enum
     NPC_SALRAMM_THE_FLESHCRAFTER    = 26530,
     // NPC_CHRONO_LORD_EPOCH        = 26532,
     // NPC_MALGANIS                 = 26533,
-    NPC_INFINITE_CORRUPTER          = 32273,
     NPC_LORDAERON_CRIER             = 27913,
-    NPC_ZOMBIE                      = 27737,
 
     // Inn Event related NPC
     NPC_MICHAEL_BELFAST             = 30571,

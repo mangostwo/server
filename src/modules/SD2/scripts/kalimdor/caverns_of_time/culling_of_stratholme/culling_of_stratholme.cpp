@@ -301,6 +301,7 @@ enum
     GOSSIP_ITEM_TOWN_HALL       = -3595009,
 
     TEXT_ID_CITY_GATES          = 13076,
+    TEXT_ID_TOWN_HALL           = 13125,
 
     SPELL_HOLY_LIGHT            = 52444,
     SPELL_EXORCISM              = 52445,
