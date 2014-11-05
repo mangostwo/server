@@ -298,6 +298,7 @@ bool EffectAuraDummy_spell_aura_dummy_npc_crates_dummy(const Aura* pAura, bool b
 enum
 {
     GOSSIP_ITEM_CITY_GATES      = -3595008,
+    GOSSIP_ITEM_TOWN_HALL       = -3595009,
 
     TEXT_ID_CITY_GATES          = 13076,
 
@@ -318,6 +319,14 @@ struct  npc_arthasAI : public npc_escortAI
     instance_culling_of_stratholme* m_pInstance;
 
     void Reset() override { }
+    
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    {
+        if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
+        {
+            //ToDo: start escort
+        }
+    }
 
     void MovementInform(uint32 uiType, uint32 uiPointId) override
     {
@@ -361,6 +370,11 @@ bool GossipHello_npc_arthas(Player* pPlayer, Creature* pCreature)
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_CITY_GATES, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
             pPlayer->SEND_GOSSIP_MENU(TEXT_ID_CITY_GATES, pCreature->GetObjectGuid());
         }
+        else if (pInstance->GetData(TYPE_SALRAMM_EVENT) == DONE && pInstance->GetData(TYPE_EPOCH_EVENT) != DONE)
+        {
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TOWN_HALL, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+            pPlayer->SEND_GOSSIP_MENU(TEXT_ID_TOWN_HALL, pCreature->GetObjectGuid());
+        }
     }
     return true;
 }
@@ -369,12 +383,17 @@ bool GossipSelect_npc_arthas(Player* pPlayer, Creature* pCreature, uint32 /*send
 {
     switch (uiAction)
     {
-    case GOSSIP_ACTION_INFO_DEF+1:
-        // resume WP movement - rest is handled by DB
-        pCreature->clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
-        pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-        pPlayer->CLOSE_GOSSIP_MENU();
-        break;
+        case GOSSIP_ACTION_INFO_DEF+1:
+            // resume WP movement - rest is handled by DB
+            pCreature->clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
+            pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            pPlayer->CLOSE_GOSSIP_MENU();
+            break;
+        case GOSSIP_ACTION_INFO_DEF+2:
+            // start initial escort event
+            pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature);
+            pPlayer->CLOSE_GOSSIP_MENU();
+            break;
     }
     return true;
 }

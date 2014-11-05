@@ -8,6 +8,8 @@
 enum
 {
     MAX_ENCOUNTER                   = 9,
+    MAX_SCOURGE_WAVES               = 10,
+    MAX_SCOURGE_TYPE_PER_WAVE       = 4,
 
     TYPE_GRAIN_EVENT                = 0,                    // crates with plagued grain identified
     TYPE_ARTHAS_INTRO_EVENT         = 1,                    // Arhas Speech and Walk to Gates and short intro with MalGanis
@@ -24,9 +26,12 @@ enum
     NPC_CHROMIE_ENTRANCE            = 27915,
     NPC_CHROMIE_END                 = 30997,
     NPC_HOURGLASS                   = 28656,
+    NPC_LORDAERON_CRIER             = 27913,
     NPC_ARTHAS                      = 26499,
-    // NPC_MEATHOOK                 = 26529,
-    // NPC_SALRAMM_THE_FLESHCRAFTER = 26530,
+    
+    // Dungeon bosses
+    NPC_MEATHOOK                    = 26529,
+    NPC_SALRAMM_THE_FLESHCRAFTER    = 26530,
     // NPC_CHRONO_LORD_EPOCH        = 26532,
     // NPC_MALGANIS                 = 26533,
     NPC_INFINITE_CORRUPTER          = 32273,
@@ -76,6 +81,31 @@ enum
     NPC_AGIATED_STRATHOLME_CITIZEN  = 31126,
     NPC_AGIATED_STRATHOLME_RESIDENT = 31127,
     NPC_PATRICIA_O_REILLY           = 31028,
+    
+    // Scourge waves
+    NPC_ENRAGING_GHOUL              = 27729,
+    NPC_ACOLYTE                     = 27731,
+    NPC_MASTER_NECROMANCER          = 27732,
+    NPC_CRYPT_FIEND                 = 27734,
+    NPC_PATCHWORK_CONSTRUCT         = 27736,
+    NPC_TOMB_STALKER                = 28199,
+    NPC_DARK_NECROMANCER            = 28200,
+    NPC_BILE_GOLEM                  = 28201,
+    NPC_DEVOURING_GHOUL             = 28249,
+    NPC_ZOMBIE                      = 27737,
+    // NPC_INVISIBLE_STALKER        = 20562,
+
+    // Infinite dragons
+    NPC_TOWNHALL_CITIZEN            = 28340,
+    NPC_TOWNHALL_RESIDENT           = 28341,
+    NPC_INFINITE_ADVERSARY          = 27742,
+    NPC_INFINITE_AGENT              = 27744,
+    NPC_INFINITE_HUNTER             = 27743,
+
+    // Heroic event npcs
+    NPC_INFINITE_CORRUPTER          = 32273,
+    NPC_TIME_RIFT                   = 28409,
+    NPC_GUARDIAN_OF_TIME            = 32281,
 
     // Gameobjects
     GO_DOOR_BOOKCASE                = 188686,
@@ -118,6 +148,41 @@ enum eInstancePosition
     POS_INSTANCE_FINISHED   = 6
 };
 
+enum eScourgeLocation
+{
+    POS_FESTIVAL_LANE       = 0,
+    POS_KINGS_SQUARE        = 1,
+    POS_MARKET_ROW          = 2,
+    POS_TOWN_HALL           = 3,
+    POS_ELDERS_SQUARE       = 4,
+};
+
+enum eScourgeType
+{
+    SCOURGE_TYPE_GHOUL          = 1,
+    SCOURGE_TYPE_NECROMANCER    = 2,
+    SCOURGE_TYPE_FIEND          = 3,
+    SCOURGE_TYPE_GOLEM          = 4,
+    SCOURGE_TYPE_ACOLYTES       = 5,
+    SCOURGE_TYPE_BOSS           = 6,
+};
+
+static const uint32 uiScourgeWaveDef[MAX_SCOURGE_WAVES][MAX_SCOURGE_TYPE_PER_WAVE] =
+{
+    // first half of scourge waves
+    {SCOURGE_TYPE_GHOUL,       SCOURGE_TYPE_GHOUL,       SCOURGE_TYPE_GHOUL,       0},
+    {SCOURGE_TYPE_NECROMANCER, SCOURGE_TYPE_GHOUL,       SCOURGE_TYPE_GHOUL,       0},
+    {SCOURGE_TYPE_FIEND,       SCOURGE_TYPE_NECROMANCER, SCOURGE_TYPE_GHOUL,       SCOURGE_TYPE_GHOUL},
+    {SCOURGE_TYPE_FIEND,       SCOURGE_TYPE_NECROMANCER, SCOURGE_TYPE_ACOLYTES,    0},
+    {SCOURGE_TYPE_BOSS,        0,                        0,                        0},
+    // second half of scourge waves
+    {SCOURGE_TYPE_FIEND,       SCOURGE_TYPE_FIEND,       SCOURGE_TYPE_NECROMANCER, SCOURGE_TYPE_GHOUL},
+    {SCOURGE_TYPE_GOLEM,       SCOURGE_TYPE_GHOUL,       SCOURGE_TYPE_GHOUL,       SCOURGE_TYPE_GHOUL},
+    {SCOURGE_TYPE_GOLEM,       SCOURGE_TYPE_NECROMANCER, SCOURGE_TYPE_GHOUL,       SCOURGE_TYPE_GHOUL},
+    {SCOURGE_TYPE_GOLEM,       SCOURGE_TYPE_FIEND,       SCOURGE_TYPE_NECROMANCER, SCOURGE_TYPE_GHOUL},
+    {SCOURGE_TYPE_BOSS,        0,                        0,                        0}
+};
+
 class  instance_culling_of_stratholme : public ScriptedInstance
 {
     public:
@@ -129,6 +194,7 @@ class  instance_culling_of_stratholme : public ScriptedInstance
         void OnPlayerEnter(Player* pPlayer) override;
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
+        void OnCreatureDeath(Creature* pCreature) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
@@ -138,12 +204,7 @@ class  instance_culling_of_stratholme : public ScriptedInstance
 
         void Update(uint32 uiDiff) override;
 
-        void GetStratAgiatedCitizenList(GuidList& lList) { lList = m_lAgiatedCitizenGUIDList; };
-        void GetStratAgiatedResidentList(GuidList& lList) { lList = m_lAgiatedResidentGUIDList; };
-
         void GetCratesBunnyOrderedList(std::list<Creature*>& lList);
-        Creature* GetStratIntroFootman();
-        void GetResidentOrderedList(std::list<Creature*>& lList);
 
         void DoSpawnChromieIfNeeded(Unit* pSummoner);
         void DoSpawnArthasIfNeeded(Unit* pSummoner);
@@ -153,10 +214,12 @@ class  instance_culling_of_stratholme : public ScriptedInstance
 
     protected:
         void DoSetupEntranceSoldiers(Unit* pSummoner);
+        void DoSpawnCorruptorIfNeeded(Unit* pSummoner);
         void DoChromieWhisper(int32 iEntry);
         void DoUpdateZombieResidents();
+        void DoSpawnNextScourgeWave();
+        uint32 GetRandomMobOfType(uint8 uiType);
         uint8 GetInstancePosition();
-        void ArthasJustDied();
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
@@ -166,14 +229,16 @@ class  instance_culling_of_stratholme : public ScriptedInstance
         uint8 m_uiGrainCrateCount;
         uint32 m_uiRemoveCrateStateTimer;
         uint32 m_uiArthasRespawnTimer;
+        
+        uint32 m_uiScourgeWaveTimer;
+        uint32 m_uiScourgeWaveCount;
+        uint8 m_uiCurrentUndeadPos;
 
         GuidList m_luiCratesBunnyGUIDs;
-        GuidList m_luiFootmanGUIDs;
         GuidList m_luiResidentGUIDs;
         GuidList m_luiGateSoldiersGUIDs;
-
-        GuidList m_lAgiatedCitizenGUIDList;
-        GuidList m_lAgiatedResidentGUIDList;
+        
+        GuidList m_luiCurrentScourgeWaveGUIDs;
 
         GuidSet m_sGrainCratesGuidSet;
 };

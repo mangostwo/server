@@ -1673,7 +1673,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3595006,'Chromie, you and I both know what\'s going to happen in this time stream. We\'ve seen this all before. Can you just skip us ahead to all the real action?','chromie GOSSIP_ITEM_INN_SKIP'),
-(-3595008,'Yes, my Prince. We are ready.','arthas GOSSIP_ITEM_CITY_GATES');
+(-3595008,'Yes, my Prince. We are ready.','arthas GOSSIP_ITEM_CITY_GATES'),
+(-3595009,'We\'re only doing what is best for Lordaeron, your Highness.','arthas GOSSIP_ITEM_TOWN_HALL');
 
 -- -1 349 000 MARAUDON
 
@@ -3411,7 +3412,13 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
 (-1595000,'All soldiers of Lordaeron should immediately report to the entrance of Stratholme, and await further orders from Prince Arthas.',0,6,0,0,'lordaeron crier SAY_SOLDIERS_REPORT'),
 (-1595001,'Good work with the crates! Come talk to me in front of Stratholme for your next assignment!',0,4,0,0,'chromie WHISPER_CHROMIE_CRATES'),
-(-1595002,'Oh, no! Adventurers, something awful has happened! A colleague of mine has been captured by the Infinite Dragonflight, and they\'re doing something horrible to him! Keeping Arthas is still your highest priority, but if you act fast you could help save a Guardian of Time!',0,4,0,0,'chromie WHISPER_CHROMIE_GUARDIAN');
+(-1595002,'Oh, no! Adventurers, something awful has happened! A colleague of mine has been captured by the Infinite Dragonflight, and they\'re doing something horrible to him! Keeping Arthas is still your highest priority, but if you act fast you could help save a Guardian of Time!',0,4,0,0,'chromie WHISPER_CHROMIE_GUARDIAN'),
+(-1595003,'Scourge forces have been spotted near the Festival Lane Gate!',0,6,0,0,'lordaeron crier SAY_SCOURGE_FESTIVAL_LANE'),
+(-1595004,'Scourge forces have been spotted near the King\'s Square fountain!',0,6,0,0,'lordaeron crier SAY_SCOURGE_KINGS_SQUARE'),
+(-1595005,'Scourge forces have been spotted near the Market Row Gate!',0,6,0,0,'lordaeron crier SAY_SCOURGE_MARKET_ROW'),
+(-1595006,'Scourge forces have been spotted near the Town Hall!',0,6,0,0,'lordaeron crier SAY_SCOURGE_TOWN_HALL'),
+(-1595007,'Scourge forces have been spotted near the Elder\'s Square Gate!',0,6,0,0,'lordaeron crier SAY_SCOURGE_ELDERS_SQUARE'),
+(-1595008,'Champions, meet me at the Town Hall at once. We must take the fight to Mal\'Ganis.',14297,6,0,0,'arthas SAY_MEET_TOWN_HALL');
 
 -- -1 599 000 HALLS OF STONE
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
