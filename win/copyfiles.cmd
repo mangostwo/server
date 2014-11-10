@@ -73,6 +73,11 @@ echo ====================
 copy ..\..\src\mangosd\mangosd.conf.dist.in %2\%3
 
 echo .
+echo =   realmd.conf   =
+echo ====================
+copy ..\..\src\realmd\realmd.conf.dist.in %2\%3
+
+echo .
 echo =    ahbot.conf    =
 echo ====================
 copy ..\..\src\game\AuctionHouseBot\ahbot.conf.dist.in %2\%3
