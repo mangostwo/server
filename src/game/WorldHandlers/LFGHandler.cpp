@@ -471,7 +471,7 @@ void WorldSession::SendLfgUpdate(bool isGroup, LFGPlayerStatus status)
 {
     uint8 dungeonSize = uint8(status.dungeonList.size());
     
-    bool isQueued, joinLFG;
+    bool isQueued = false, joinLFG = false;
     if (!isGroup)
         switch (status.updateType)
         {
