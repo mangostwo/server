@@ -43,7 +43,7 @@ enum
     NPC_BURNING_SPIRIT          = 9178,
 };
 
-struct  boss_ambassador_flamelashAI : public ScriptedAI
+struct boss_ambassador_flamelashAI : public ScriptedAI
 {
     boss_ambassador_flamelashAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 

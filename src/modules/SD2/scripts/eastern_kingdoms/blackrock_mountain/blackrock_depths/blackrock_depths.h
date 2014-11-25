@@ -139,7 +139,7 @@ static const float aVaultPositions[4] = {821.905f, -338.382f, -50.134f, 3.78736f
 // Tomb of the Seven dwarfs
 static const uint32 aTombDwarfes[MAX_DWARFS] = {NPC_ANGERREL, NPC_SEETHREL, NPC_DOPEREL, NPC_GLOOMREL, NPC_VILEREL, NPC_HATEREL, NPC_DOOMREL};
 
-class  instance_blackrock_depths : public ScriptedInstance
+class instance_blackrock_depths : public ScriptedInstance
 {
     public:
         instance_blackrock_depths(Map* pMap);

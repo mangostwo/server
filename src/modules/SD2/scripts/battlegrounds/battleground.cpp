@@ -57,7 +57,7 @@ enum
     SPELL_WAITING_TO_RESURRECT      = 2584                  // players who cancel this aura don't want a resurrection
 };
 
-struct MANGOS_DLL_DECL npc_spirit_guideAI : public ScriptedAI
+struct npc_spirit_guideAI : public ScriptedAI
 {
     npc_spirit_guideAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

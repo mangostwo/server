@@ -45,7 +45,7 @@ enum eEmperor
     SPELL_AVATAROFFLAME         = 15636
 };
 
-struct  boss_emperor_dagran_thaurissanAI : public ScriptedAI
+struct boss_emperor_dagran_thaurissanAI : public ScriptedAI
 {
     boss_emperor_dagran_thaurissanAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -157,7 +157,7 @@ enum ePrincess
     SPELL_OPEN_PORTAL           = 13912
 };
 
-struct  boss_moira_bronzebeardAI : public ScriptedAI
+struct boss_moira_bronzebeardAI : public ScriptedAI
 {
     boss_moira_bronzebeardAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
