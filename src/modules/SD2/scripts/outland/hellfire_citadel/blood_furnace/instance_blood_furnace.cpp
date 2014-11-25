@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -67,21 +73,21 @@ void instance_blood_furnace::OnObjectCreate(GameObject* pGo)
             break;
         case GO_DOOR_MAKER_REAR:                            // the maker rear door
             if (m_auiEncounter[TYPE_THE_MAKER_EVENT] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+            { pGo->SetGoState(GO_STATE_ACTIVE); }
             break;
         case GO_DOOR_BROGGOK_FRONT:                         // broggok front door
             break;
         case GO_DOOR_BROGGOK_REAR:                          // broggok rear door
             if (m_auiEncounter[TYPE_BROGGOK_EVENT] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+            { pGo->SetGoState(GO_STATE_ACTIVE); }
             break;
         case GO_DOOR_KELIDAN_EXIT:                          // kelidan exit door
             if (m_auiEncounter[TYPE_KELIDAN_EVENT] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+            { pGo->SetGoState(GO_STATE_ACTIVE); }
             break;
         case GO_DOOR_FINAL_EXIT:                            // final exit door
             if (m_auiEncounter[TYPE_KELIDAN_EVENT] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+            { pGo->SetGoState(GO_STATE_ACTIVE); }
             break;
 
         case GO_PRISON_CELL_BROGGOK_1: m_aBroggokEvent[0].m_cellGuid = pGo->GetObjectGuid(); return;
@@ -101,9 +107,9 @@ void instance_blood_furnace::SetData(uint32 uiType, uint32 uiData)
     {
         case TYPE_THE_MAKER_EVENT:
             if (uiData == IN_PROGRESS)
-                DoUseDoorOrButton(GO_DOOR_MAKER_FRONT);
+            { DoUseDoorOrButton(GO_DOOR_MAKER_FRONT); }
             if (uiData == FAIL)
-                DoUseDoorOrButton(GO_DOOR_MAKER_FRONT);
+            { DoUseDoorOrButton(GO_DOOR_MAKER_FRONT); }
             if (uiData == DONE)
             {
                 DoUseDoorOrButton(GO_DOOR_MAKER_FRONT);
@@ -113,7 +119,7 @@ void instance_blood_furnace::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_BROGGOK_EVENT:
             if (m_auiEncounter[uiType] == uiData)
-                return;
+            { return; }
 
             // Combat door; the exit door is opened in event
             DoUseDoorOrButton(GO_DOOR_BROGGOK_FRONT);
@@ -136,7 +142,7 @@ void instance_blood_furnace::SetData(uint32 uiType, uint32 uiData)
                     {
                         // Reset Orcs
                         if (!m_aBroggokEvent[i].m_bIsCellOpened)
-                            continue;
+                        { continue; }
 
                         m_aBroggokEvent[i].m_uiKilledOrcCount = 0;
                         for (GuidSet::const_iterator itr = m_aBroggokEvent[i].m_sSortedOrcGuids.begin(); itr != m_aBroggokEvent[i].m_sSortedOrcGuids.end(); ++itr)
@@ -144,7 +150,7 @@ void instance_blood_furnace::SetData(uint32 uiType, uint32 uiData)
                             if (Creature* pOrc = instance->GetCreature(*itr))
                             {
                                 if (!pOrc->IsAlive())
-                                    pOrc->Respawn();
+                                { pOrc->Respawn(); }
                             }
                         }
 
@@ -204,7 +210,7 @@ void instance_blood_furnace::DoNextBroggokEventPhase()
     {
         // Open cage door
         if (!m_aBroggokEvent[m_uiBroggokEventPhase].m_bIsCellOpened)
-            DoUseDoorOrButton(m_aBroggokEvent[m_uiBroggokEventPhase].m_cellGuid);
+        { DoUseDoorOrButton(m_aBroggokEvent[m_uiBroggokEventPhase].m_cellGuid); }
 
         m_aBroggokEvent[m_uiBroggokEventPhase].m_bIsCellOpened = true;
 
@@ -231,17 +237,17 @@ void instance_blood_furnace::DoNextBroggokEventPhase()
 void instance_blood_furnace::OnCreatureEvade(Creature* pCreature)
 {
     if (m_auiEncounter[TYPE_BROGGOK_EVENT] == FAIL)
-        return;
+    { return; }
 
     if (pCreature->GetEntry() == NPC_BROGGOK)
-        SetData(TYPE_BROGGOK_EVENT, FAIL);
+    { SetData(TYPE_BROGGOK_EVENT, FAIL); }
 
     else if (pCreature->GetEntry() == NPC_NASCENT_FEL_ORC)
     {
         for (uint8 i = 0; i < std::min<uint32>(m_uiBroggokEventPhase, MAX_ORC_WAVES); ++i)
         {
             if (m_aBroggokEvent[i].m_sSortedOrcGuids.find(pCreature->GetObjectGuid()) != m_aBroggokEvent[i].m_sSortedOrcGuids.end())
-                SetData(TYPE_BROGGOK_EVENT, FAIL);
+            { SetData(TYPE_BROGGOK_EVENT, FAIL); }
         }
     }
 }
@@ -249,7 +255,7 @@ void instance_blood_furnace::OnCreatureEvade(Creature* pCreature)
 void instance_blood_furnace::OnCreatureDeath(Creature* pCreature)
 {
     if (m_auiEncounter[TYPE_BROGGOK_EVENT] != IN_PROGRESS)
-        return;
+    { return; }
 
     if (pCreature->GetEntry() == NPC_NASCENT_FEL_ORC)
     {
@@ -264,15 +270,15 @@ void instance_blood_furnace::OnCreatureDeath(Creature* pCreature)
 
             // Increase kill counter, if we found a mob of this cell
             if (m_aBroggokEvent[i].m_sSortedOrcGuids.find(pCreature->GetObjectGuid()) != m_aBroggokEvent[i].m_sSortedOrcGuids.end())
-                m_aBroggokEvent[i].m_uiKilledOrcCount++;
+            { m_aBroggokEvent[i].m_uiKilledOrcCount++; }
 
             if (m_aBroggokEvent[i].m_sSortedOrcGuids.size() == m_aBroggokEvent[i].m_uiKilledOrcCount)
-                ++uiClearedCells;
+            { ++uiClearedCells; }
         }
 
         // Increase phase when all opened cells are cleared
         if (uiClearedCells == m_uiBroggokEventPhase)
-            DoNextBroggokEventPhase();
+        { DoNextBroggokEventPhase(); }
     }
 }
 
@@ -282,9 +288,9 @@ void instance_blood_furnace::Update(uint32 uiDiff)
     if (m_auiEncounter[TYPE_BROGGOK_EVENT] == IN_PROGRESS && m_uiBroggokEventPhase < MAX_ORC_WAVES && !instance->IsRegularDifficulty())
     {
         if (m_uiBroggokEventTimer < uiDiff)
-            DoNextBroggokEventPhase();
+        { DoNextBroggokEventPhase(); }
         else
-            m_uiBroggokEventTimer -= uiDiff;
+        { m_uiBroggokEventTimer -= uiDiff; }
     }
 
     if (m_uiRandYellTimer < uiDiff)
@@ -296,13 +302,13 @@ void instance_blood_furnace::Update(uint32 uiDiff)
         }
     }
     else
-        m_uiRandYellTimer -= uiDiff;
+    { m_uiRandYellTimer -= uiDiff; }
 }
 
 uint32 instance_blood_furnace::GetData(uint32 uiType) const
 {
     if (uiType < MAX_ENCOUNTER)
-        return m_auiEncounter[uiType];
+    { return m_auiEncounter[uiType]; }
 
     return 0;
 }
@@ -322,7 +328,7 @@ void instance_blood_furnace::Load(const char* chrIn)
 
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
         if (m_auiEncounter[i] == IN_PROGRESS || m_auiEncounter[i] == FAIL)
-            m_auiEncounter[i] = NOT_STARTED;
+        { m_auiEncounter[i] = NOT_STARTED; }
 
     OUT_LOAD_INST_DATA_COMPLETE;
 }
@@ -342,7 +348,7 @@ void instance_blood_furnace::DoSortBroggokOrcs()
                     {
                         m_aBroggokEvent[i].m_sSortedOrcGuids.insert(pOrc->GetObjectGuid());
                         if (!pOrc->IsAlive())
-                            pOrc->Respawn();
+                        { pOrc->Respawn(); }
                         break;
                     }
                 }
@@ -371,7 +377,7 @@ void instance_blood_furnace::GetMovementDistanceForIndex(uint32 uiIndex, float& 
     }
 
     if (!pDoor[0] || !pDoor[1])
-        return;
+    { return; }
 
     if (uiIndex < MAX_ORC_WAVES)
     {
@@ -395,7 +401,7 @@ bool GOUse_go_prison_cell_lever(Player* /*pPlayer*/, GameObject* pGo)
     ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
 
     if (!pInstance)
-        return false;
+    { return false; }
 
     // Set broggok event in progress
     if (pInstance->GetData(TYPE_BROGGOK_EVENT) != DONE && pInstance->GetData(TYPE_BROGGOK_EVENT) != IN_PROGRESS)
@@ -404,7 +410,7 @@ bool GOUse_go_prison_cell_lever(Player* /*pPlayer*/, GameObject* pGo)
 
         // Yell intro
         if (Creature* pBroggok = pInstance->GetSingleCreatureFromStorage(NPC_BROGGOK))
-            DoScriptText(SAY_BROGGOK_INTRO, pBroggok);
+        { DoScriptText(SAY_BROGGOK_INTRO, pBroggok); }
     }
 
     return false;

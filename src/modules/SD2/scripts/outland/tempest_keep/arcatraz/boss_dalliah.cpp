@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -49,7 +55,7 @@ enum
     SPELL_SHADOW_WAVE               = 39016,                // heroic spell only
 };
 
-struct  boss_dalliahAI : public ScriptedAI
+struct boss_dalliahAI : public ScriptedAI
 {
     boss_dalliahAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -83,7 +89,7 @@ struct  boss_dalliahAI : public ScriptedAI
         DoScriptText(SAY_AGGRO, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_DALLIAH, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_DALLIAH, IN_PROGRESS); }
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -96,7 +102,7 @@ struct  boss_dalliahAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_DALLIAH, DONE);
+        { m_pInstance->SetData(TYPE_DALLIAH, DONE); }
     }
 
     void EnterEvadeMode() override
@@ -108,10 +114,10 @@ struct  boss_dalliahAI : public ScriptedAI
 
         // should evade to the attack position
         if (m_creature->IsAlive())
-            m_creature->GetMotionMaster()->MovePoint(1, aDalliahStartPos[0], aDalliahStartPos[1], aDalliahStartPos[2]);
+        { m_creature->GetMotionMaster()->MovePoint(1, aDalliahStartPos[0], aDalliahStartPos[1], aDalliahStartPos[2]); }
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_DALLIAH, FAIL);
+        { m_pInstance->SetData(TYPE_DALLIAH, FAIL); }
 
         m_creature->SetLootRecipient(NULL);
 
@@ -121,25 +127,25 @@ struct  boss_dalliahAI : public ScriptedAI
     void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
     {
         if (uiMoveType != POINT_MOTION_TYPE)
-            return;
+        { return; }
 
         // Adjust orientation
         if (uiPointId)
-            m_creature->SetFacingTo(aDalliahStartPos[3]);
+        { m_creature->SetFacingTo(aDalliahStartPos[3]); }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiGiftDoomsayerTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_GIFT_DOOMSAYER : SPELL_GIFT_DOOMSAYER_H) == CAST_OK)
-                m_uiGiftDoomsayerTimer = urand(14000, 19000);
+            { m_uiGiftDoomsayerTimer = urand(14000, 19000); }
         }
         else
-            m_uiGiftDoomsayerTimer -= uiDiff;
+        { m_uiGiftDoomsayerTimer -= uiDiff; }
 
         if (m_uiWhirlwindTimer < uiDiff)
         {
@@ -151,7 +157,7 @@ struct  boss_dalliahAI : public ScriptedAI
             }
         }
         else
-            m_uiWhirlwindTimer -= uiDiff;
+        { m_uiWhirlwindTimer -= uiDiff; }
 
         if (m_uiHealTimer)
         {
@@ -164,7 +170,7 @@ struct  boss_dalliahAI : public ScriptedAI
                 }
             }
             else
-                m_uiHealTimer -= uiDiff;
+            { m_uiHealTimer -= uiDiff; }
         }
 
         if (!m_bIsRegularMode)
@@ -174,11 +180,11 @@ struct  boss_dalliahAI : public ScriptedAI
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_WAVE) == CAST_OK)
-                        m_uiShadowWaveTimer = urand(13000, 17000);
+                    { m_uiShadowWaveTimer = urand(13000, 17000); }
                 }
             }
             else
-                m_uiShadowWaveTimer -= uiDiff;
+            { m_uiShadowWaveTimer -= uiDiff; }
         }
 
         if (!m_bHasTaunted && m_creature->GetHealthPercent() < 25.0f)

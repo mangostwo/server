@@ -156,7 +156,7 @@ static EventLocations aWingThicketLocations[] =
     {5514.40f, -4921.16f, 845.49f}              // 7 left priestess second move loc
 };
 
-struct  npc_ranshallaAI : public npc_escortAI, private DialogueHelper
+struct npc_ranshallaAI : public npc_escortAI, private DialogueHelper
 {
     npc_ranshallaAI(Creature* pCreature) : npc_escortAI(pCreature),
         DialogueHelper(aIntroDialogue)

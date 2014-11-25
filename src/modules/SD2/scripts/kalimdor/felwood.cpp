@@ -23,20 +23,24 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Felwood
-SD%Complete: 95
-SDComment: Quest support: 4261, 4506, 5203, 7603, 7603 (Summon Pollo Grande)
-SDCategory: Felwood
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Felwood
+ * SD%Complete: 95
+ * SDComment: Quest support: 4261, 4506, 5203, 7603, 7603 (Summon Pollo Grande)
+ * SDCategory:  Felwood
+ * EndScriptData
+ */
 
-/* ContentData
-npc_kitten
-npc_niby_the_almighty
-npc_kroshius
-npc_captured_arkonarin
-npc_arei
-EndContentData */
+/**
+ * ContentData
+ * npc_kitten
+ * npc_niby_the_almighty
+ * npc_kroshius
+ * npc_captured_arkonarin
+ * npc_arei
+ * EndContentData
+ */
 
 #include "precompiled.h"
 #include "follower_ai.h"
@@ -61,7 +65,7 @@ enum
 
 #define GOSSIP_ITEM_RELEASE     "I want to release the corrupted saber to Winna."
 
-struct  npc_kittenAI : public FollowerAI
+struct npc_kittenAI : public FollowerAI
 {
     npc_kittenAI(Creature* pCreature) : FollowerAI(pCreature)
     {
@@ -200,7 +204,7 @@ enum
     SAY_NIBY_3         = -1000570
 };
 
-struct  npc_niby_the_almightyAI : public ScriptedAI
+struct npc_niby_the_almightyAI : public ScriptedAI
 {
     npc_niby_the_almightyAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -311,7 +315,7 @@ enum
     FACTION_HOSTILE         = 16,
 };
 
-struct  npc_kroshiusAI : public ScriptedAI
+struct npc_kroshiusAI : public ScriptedAI
 {
     npc_kroshiusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -468,7 +472,7 @@ enum
     GO_ARKONARIN_CAGE               = 176306,
 };
 
-struct  npc_captured_arkonarinAI : public npc_escortAI
+struct npc_captured_arkonarinAI : public npc_escortAI
 {
     npc_captured_arkonarinAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -662,7 +666,7 @@ static const DialogueEntry aEpilogDialogue[] =
     {0, 0, 0},
 };
 
-struct  npc_areiAI : public npc_escortAI, private DialogueHelper
+struct npc_areiAI : public npc_escortAI, private DialogueHelper
 {
     npc_areiAI(Creature* pCreature) : npc_escortAI(pCreature),
         DialogueHelper(aEpilogDialogue)
@@ -838,13 +842,13 @@ void AddSC_felwood()
     pNewScript->GetAI = &GetAI_npc_kroshius;
     pNewScript->pProcessEventId = &ProcessEventId_npc_kroshius;
     pNewScript->RegisterSelf();
-    
+
     pNewScript = new Script;
     pNewScript->Name = "npc_captured_arkonarin";
     pNewScript->GetAI = &GetAI_npc_captured_arkonarin;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_captured_arkonarin;
     pNewScript->RegisterSelf();
-    
+
     pNewScript = new Script;
     pNewScript->Name = "npc_arei";
     pNewScript->GetAI = &GetAI_npc_arei;

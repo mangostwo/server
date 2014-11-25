@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -63,7 +69,7 @@ const float RANGE_MOLTEN_PUNCH      = 40.0;
  */
 
 // TODO Remove this 'script' when combat movement can be proper prevented from core-side
-struct  molten_flameAI : public Scripted_NoMovementAI
+struct molten_flameAI : public Scripted_NoMovementAI
 {
     molten_flameAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 
@@ -74,7 +80,7 @@ struct  molten_flameAI : public Scripted_NoMovementAI
 };
 
 // TODO Remove this 'script' when combat movement can be proper prevented from core-side
-struct  npc_volcanoAI : public Scripted_NoMovementAI
+struct npc_volcanoAI : public Scripted_NoMovementAI
 {
     npc_volcanoAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 
@@ -84,7 +90,7 @@ struct  npc_volcanoAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override {}
 };
 
-struct  boss_supremusAI : public ScriptedAI
+struct boss_supremusAI : public ScriptedAI
 {
     boss_supremusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -120,24 +126,24 @@ struct  boss_supremusAI : public ScriptedAI
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_SUPREMUS, NOT_STARTED);
+        { m_pInstance->SetData(TYPE_SUPREMUS, NOT_STARTED); }
     }
 
     void Aggro(Unit* /*pWho*/) override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_SUPREMUS, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_SUPREMUS, IN_PROGRESS); }
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_SUPREMUS, DONE);
+        { m_pInstance->SetData(TYPE_SUPREMUS, DONE); }
 
         for (GuidList::const_iterator itr = m_lSummonedGUIDs.begin(); itr != m_lSummonedGUIDs.end(); ++itr)
         {
             if (Creature* pSummoned = m_creature->GetMap()->GetCreature(*itr))
-                pSummoned->ForcedDespawn();
+            { pSummoned->ForcedDespawn(); }
         }
     }
 
@@ -147,7 +153,7 @@ struct  boss_supremusAI : public ScriptedAI
         {
             Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
             if (!pTarget)
-                pTarget = m_creature->getVictim();
+            { pTarget = m_creature->getVictim(); }
 
             if (pTarget)
             {
@@ -158,7 +164,7 @@ struct  boss_supremusAI : public ScriptedAI
         }
 
         else if (pSummoned->GetEntry() == NPC_VOLCANO)
-            pSummoned->CastSpell(pSummoned, SPELL_VOLCANIC_ERUPTION_VOLCANO, false, NULL, NULL, m_creature->GetObjectGuid());
+        { pSummoned->CastSpell(pSummoned, SPELL_VOLCANIC_ERUPTION_VOLCANO, false, NULL, NULL, m_creature->GetObjectGuid()); }
     }
 
     Unit* GetHatefulStrikeTarget()
@@ -188,33 +194,33 @@ struct  boss_supremusAI : public ScriptedAI
     {
         // The current target is the fixated target - repick a new one
         if (!m_bTankPhase && pKilled == m_creature->getVictim())
-            m_uiSwitchTargetTimer = 0;
+        { m_uiSwitchTargetTimer = 0; }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiBerserkTimer)
         {
             if (m_uiBerserkTimer <= uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                    m_uiBerserkTimer = 0;
+                { m_uiBerserkTimer = 0; }
             }
             else
-                m_uiBerserkTimer -= uiDiff;
+            { m_uiBerserkTimer -= uiDiff; }
         }
 
         if (m_uiSummonFlameTimer < uiDiff)
         {
             // This currently is entirely screwed, because the npc is summoned somewhere far away as of big bounding box of supremus
             if (DoCastSpellIfCan(m_creature, SPELL_MOLTEN_PUNCH) == CAST_OK)
-                m_uiSummonFlameTimer = 20000;
+            { m_uiSummonFlameTimer = 20000; }
         }
         else
-            m_uiSummonFlameTimer -= uiDiff;
+        { m_uiSummonFlameTimer -= uiDiff; }
 
         if (m_uiPhaseSwitchTimer < uiDiff)
         {
@@ -236,7 +242,7 @@ struct  boss_supremusAI : public ScriptedAI
             m_uiPhaseSwitchTimer = MINUTE * IN_MILLISECONDS;
         }
         else
-            m_uiPhaseSwitchTimer -= uiDiff;
+        { m_uiPhaseSwitchTimer -= uiDiff; }
 
         if (m_bTankPhase)
         {
@@ -245,11 +251,11 @@ struct  boss_supremusAI : public ScriptedAI
                 if (Unit* pTarget = GetHatefulStrikeTarget())
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_HATEFUL_STRIKE) == CAST_OK)
-                        m_uiHatefulStrikeTimer = 5000;
+                    { m_uiHatefulStrikeTimer = 5000; }
                 }
             }
             else
-                m_uiHatefulStrikeTimer -= uiDiff;
+            { m_uiHatefulStrikeTimer -= uiDiff; }
         }
         else                                                // !m_bTankPhase
         {
@@ -263,7 +269,7 @@ struct  boss_supremusAI : public ScriptedAI
                 }
             }
             else
-                m_uiSwitchTargetTimer -= uiDiff;
+            { m_uiSwitchTargetTimer -= uiDiff; }
 
             if (m_uiSummonVolcanoTimer < uiDiff)
             {
@@ -276,7 +282,7 @@ struct  boss_supremusAI : public ScriptedAI
                 }
             }
             else
-                m_uiSummonVolcanoTimer -= uiDiff;
+            { m_uiSummonVolcanoTimer -= uiDiff; }
 
             if (m_uiMoltenPunchTimer < uiDiff)
             {
@@ -288,7 +294,7 @@ struct  boss_supremusAI : public ScriptedAI
                 m_uiMoltenPunchTimer = 8000;                // might be better with small timer and some sort of cast-chance
             }
             else
-                m_uiMoltenPunchTimer -= uiDiff;
+            { m_uiMoltenPunchTimer -= uiDiff; }
 
             /* Not understood how this really must work
              * if (m_creature->GetSpeedRate(MOVE_RUN) > SPEED_CHASE && m_creature->GetCombatDistance(m_creature->getVictim()) < RANGE_MIN_DASHING)

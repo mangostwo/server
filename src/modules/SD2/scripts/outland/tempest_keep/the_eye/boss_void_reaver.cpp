@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -45,7 +51,7 @@ enum
     NPC_ARCANE_ORB_TARGET       = 19577,
 };
 
-struct  boss_void_reaverAI : public ScriptedAI
+struct boss_void_reaverAI : public ScriptedAI
 {
     boss_void_reaverAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -71,7 +77,7 @@ struct  boss_void_reaverAI : public ScriptedAI
     void KilledUnit(Unit* pVictim) override
     {
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
+        { return; }
 
         switch (urand(0, 2))
         {
@@ -86,7 +92,7 @@ struct  boss_void_reaverAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_VOIDREAVER, DONE);
+        { m_pInstance->SetData(TYPE_VOIDREAVER, DONE); }
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -94,13 +100,13 @@ struct  boss_void_reaverAI : public ScriptedAI
         DoScriptText(SAY_AGGRO, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_VOIDREAVER, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_VOIDREAVER, IN_PROGRESS); }
     }
 
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_VOIDREAVER, NOT_STARTED);
+        { m_pInstance->SetData(TYPE_VOIDREAVER, NOT_STARTED); }
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -112,7 +118,7 @@ struct  boss_void_reaverAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         // Pounding
         if (m_uiPoundingTimer < uiDiff)
@@ -124,7 +130,7 @@ struct  boss_void_reaverAI : public ScriptedAI
             }
         }
         else
-            m_uiPoundingTimer -= uiDiff;
+        { m_uiPoundingTimer -= uiDiff; }
 
         // Arcane Orb
         if (m_uiArcaneOrbTimer < uiDiff)
@@ -138,33 +144,33 @@ struct  boss_void_reaverAI : public ScriptedAI
                 if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
                 {
                     if (pTarget->GetTypeId() == TYPEID_PLAYER && !pTarget->IsWithinDist(m_creature, 18.0f))
-                        suitableTargets.push_back(pTarget);
+                    { suitableTargets.push_back(pTarget); }
                 }
             }
 
             if (suitableTargets.empty())
-                m_uiArcaneOrbTimer = 3000;
+            { m_uiArcaneOrbTimer = 3000; }
             else
             {
                 Unit* pTarget = suitableTargets[urand(0, suitableTargets.size() - 1)];
 
                 if (pTarget)
-                    m_creature->SummonCreature(NPC_ARCANE_ORB_TARGET, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                { m_creature->SummonCreature(NPC_ARCANE_ORB_TARGET, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 0); }
 
                 m_uiArcaneOrbTimer = 3000;
             }
         }
         else
-            m_uiArcaneOrbTimer -= uiDiff;
+        { m_uiArcaneOrbTimer -= uiDiff; }
 
         // Single Target knock back, reduces aggro
         if (m_uiKnockAwayTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
-                m_uiKnockAwayTimer = 30000;
+            { m_uiKnockAwayTimer = 30000; }
         }
         else
-            m_uiKnockAwayTimer -= uiDiff;
+        { m_uiKnockAwayTimer -= uiDiff; }
 
         // Berserk
         if (m_uiBerserkTimer)
@@ -172,10 +178,10 @@ struct  boss_void_reaverAI : public ScriptedAI
             if (m_uiBerserkTimer <= uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                    m_uiBerserkTimer = 0;
+                { m_uiBerserkTimer = 0; }
             }
             else
-                m_uiBerserkTimer -= uiDiff;
+            { m_uiBerserkTimer -= uiDiff; }
         }
 
         DoMeleeAttackIfReady();

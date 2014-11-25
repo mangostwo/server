@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -50,7 +56,7 @@ enum
     MODEL_ID_NATURE             = 14214,
 };
 
-struct  boss_lajAI : public ScriptedAI
+struct boss_lajAI : public ScriptedAI
 {
     boss_lajAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -150,13 +156,13 @@ struct  boss_lajAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            pSummoned->AI()->AttackStart(pTarget);
+        { pSummoned->AI()->AttackStart(pTarget); }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiSummonTimer)
         {
@@ -167,20 +173,20 @@ struct  boss_lajAI : public ScriptedAI
                 DoScriptText(EMOTE_SUMMON, m_creature);
 
                 if (m_creature->getVictim())
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                { m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim()); }
                 m_uiSummonTimer = 0;
             }
             else
-                m_uiSummonTimer -= uiDiff;
+            { m_uiSummonTimer -= uiDiff; }
         }
 
         if (m_uiAllergicTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ALLERGIC_REACTION) == CAST_OK)
-                m_uiAllergicTimer = urand(21000, 32000);
+            { m_uiAllergicTimer = urand(21000, 32000); }
         }
         else
-            m_uiAllergicTimer -= uiDiff;
+        { m_uiAllergicTimer -= uiDiff; }
 
         if (m_uiTeleportTimer < uiDiff)
         {
@@ -192,7 +198,7 @@ struct  boss_lajAI : public ScriptedAI
             }
         }
         else
-            m_uiTeleportTimer -= uiDiff;
+        { m_uiTeleportTimer -= uiDiff; }
 
         if (m_uiTransformTimer < uiDiff)
         {
@@ -200,15 +206,15 @@ struct  boss_lajAI : public ScriptedAI
             m_uiTransformTimer = urand(25000, 40000);
         }
         else
-            m_uiTransformTimer -= uiDiff;
+        { m_uiTransformTimer -= uiDiff; }
 
         if (m_uiTrashTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_TRASH) == CAST_OK)
-                m_uiTrashTimer = urand(10000, 24000);
+            { m_uiTrashTimer = urand(10000, 24000); }
         }
         else
-            m_uiTrashTimer -= uiDiff;
+        { m_uiTrashTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

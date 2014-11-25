@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -46,7 +52,7 @@ enum
     NPC_FRAYER_PROTECTOR        = 19953,
 };
 
-struct  boss_high_botanist_freywinnAI : public ScriptedAI
+struct boss_high_botanist_freywinnAI : public ScriptedAI
 {
     boss_high_botanist_freywinnAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -75,11 +81,11 @@ struct  boss_high_botanist_freywinnAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_FRAYER_PROTECTOR)
-            ++m_uiFrayerAddsCount;
+        { ++m_uiFrayerAddsCount; }
 
         // Attack players
         if (m_creature->getVictim())
-            pSummoned->AI()->AttackStart(m_creature->getVictim());
+        { pSummoned->AI()->AttackStart(m_creature->getVictim()); }
     }
 
     void SummonedCreatureJustDied(Creature* pSummoned) override
@@ -94,7 +100,7 @@ struct  boss_high_botanist_freywinnAI : public ScriptedAI
                 m_uiTreeFormEndTimer = 0;
 
                 if (m_creature->getVictim())
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                { m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim()); }
 
                 // Interrupt all spells and remove auras
                 m_creature->InterruptNonMeleeSpells(true);
@@ -129,7 +135,7 @@ struct  boss_high_botanist_freywinnAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiTreeFormTimer < uiDiff)
         {
@@ -149,7 +155,7 @@ struct  boss_high_botanist_freywinnAI : public ScriptedAI
             }
         }
         else
-            m_uiTreeFormTimer -= uiDiff;
+        { m_uiTreeFormTimer -= uiDiff; }
 
         // The Frayer is summoned after one second in the tree phase
         if (m_uiFrayerTimer)
@@ -157,10 +163,10 @@ struct  boss_high_botanist_freywinnAI : public ScriptedAI
             if (m_uiFrayerTimer <= uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_FRAYER, CAST_TRIGGERED) == CAST_OK)
-                    m_uiFrayerTimer = 0;
+                { m_uiFrayerTimer = 0; }
             }
             else
-                m_uiFrayerTimer -= uiDiff;
+            { m_uiFrayerTimer -= uiDiff; }
         }
 
         // Tree phase will be removed when the timer expires;
@@ -169,17 +175,17 @@ struct  boss_high_botanist_freywinnAI : public ScriptedAI
             if (m_uiTreeFormEndTimer <= uiDiff)
             {
                 if (m_creature->getVictim())
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                { m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim()); }
                 m_bCanMoveFree = true;
                 m_uiTreeFormEndTimer = 0;
             }
             else
-                m_uiTreeFormEndTimer -= uiDiff;
+            { m_uiTreeFormEndTimer -= uiDiff; }
         }
 
         // Don't do any other actions during tree form
         if (!m_bCanMoveFree)
-            return;
+        { return; }
 
         // one random seedling every 5 secs, but not in tree form
         if (m_uiSummonSeedlingTimer < uiDiff)
@@ -188,7 +194,7 @@ struct  boss_high_botanist_freywinnAI : public ScriptedAI
             m_uiSummonSeedlingTimer = 6000;
         }
         else
-            m_uiSummonSeedlingTimer -= uiDiff;
+        { m_uiSummonSeedlingTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

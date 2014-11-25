@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -307,7 +313,7 @@ static const Locations aEyeBlastPos[] =
 ## boss_illidan_stormrage
 ######*/
 
-struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
+struct boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
 {
     boss_illidan_stormrageAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aEventDialogue)
@@ -402,7 +408,7 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
     void Aggro(Unit* /*pWho*/) override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_ILLIDAN, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_ILLIDAN, IN_PROGRESS); }
     }
 
     // Do not attack using LoS function. The attack is triggered in script
@@ -411,7 +417,7 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_ILLIDAN, FAIL);
+        { m_pInstance->SetData(TYPE_ILLIDAN, FAIL); }
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -419,13 +425,13 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_ILLIDAN, DONE);
+        { m_pInstance->SetData(TYPE_ILLIDAN, DONE); }
     }
 
     void KilledUnit(Unit* pVictim) override
     {
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
+        { return; }
 
         DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
     }
@@ -433,7 +439,7 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
     void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage) override
     {
         if (uiDamage < m_creature->GetHealth())
-            return;
+        { return; }
 
         // Make sure it won't die by accident
         if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
@@ -459,7 +465,7 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
         if (m_pInstance)
         {
             if (Creature* pMaiev = m_pInstance->GetSingleCreatureFromStorage(NPC_MAIEV_SHADOWSONG))
-                pMaiev->AI()->KilledUnit(m_creature);
+            { pMaiev->AI()->KilledUnit(m_creature); }
         }
     }
 
@@ -471,7 +477,7 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
                 if (m_pInstance)
                 {
                     if (Creature* pAkama = m_pInstance->GetSingleCreatureFromStorage(NPC_AKAMA))
-                        m_creature->SetFacingToObject(pAkama);
+                    { m_creature->SetFacingToObject(pAkama); }
                 }
                 m_creature->RemoveAurasDueToSpell(SPELL_KNEEL_INTRO);
                 break;
@@ -515,14 +521,14 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
                 if (m_pInstance)
                 {
                     if (Creature* pMaiev = m_pInstance->GetSingleCreatureFromStorage(NPC_MAIEV_SHADOWSONG))
-                        pMaiev->HandleEmote(EMOTE_ONESHOT_EXCLAMATION);
+                    { pMaiev->HandleEmote(EMOTE_ONESHOT_EXCLAMATION); }
                 }
                 break;
             case EMOTE_ONESHOT_YES:
                 if (m_pInstance)
                 {
                     if (Creature* pMaiev = m_pInstance->GetSingleCreatureFromStorage(NPC_MAIEV_SHADOWSONG))
-                        pMaiev->HandleEmote(EMOTE_ONESHOT_YES);
+                    { pMaiev->HandleEmote(EMOTE_ONESHOT_YES); }
                 }
                 break;
             case NPC_MAIEV_SHADOWSONG:
@@ -535,7 +541,7 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
                 if (m_pInstance)
                 {
                     if (Creature* pMaiev = m_pInstance->GetSingleCreatureFromStorage(NPC_MAIEV_SHADOWSONG))
-                        pMaiev->AI()->AttackStart(m_creature);
+                    { pMaiev->AI()->AttackStart(m_creature); }
                 }
                 m_uiPhase = PHASE_MAIEV;
                 m_uiTransformTimer = 60000;
@@ -603,7 +609,7 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
     bool DoCastEyeBlastIfCan()
     {
         if (m_creature->IsNonMeleeSpellCasted(false))
-            return false;
+        { return false; }
 
         DoScriptText(SAY_EYE_BLAST, m_creature);
 
@@ -631,7 +637,7 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
         DialogueUpdate(uiDiff);
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         // Make Akama evade combat at 85%
         if (!m_bHasSummonedElites && m_creature->GetHealthPercent() < 85.0f)
@@ -686,7 +692,7 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
                 }
             }
             else
-                m_uiBerserkTimer -= uiDiff;
+            { m_uiBerserkTimer -= uiDiff; }
         }
 
         switch (m_uiPhase)
@@ -703,15 +709,15 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
                     }
                 }
                 else
-                    m_uiEnrageTimer -= uiDiff;
+                { m_uiEnrageTimer -= uiDiff; }
 
                 if (m_uiTrapTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_CAGE_TRAP) == CAST_OK)
-                        m_uiTrapTimer = urand(40000, 50000);
+                    { m_uiTrapTimer = urand(40000, 50000); }
                 }
                 else
-                    m_uiTrapTimer -= uiDiff;
+                { m_uiTrapTimer -= uiDiff; }
 
                 // no break;
             case PHASE_DUAL_NORMAL:
@@ -720,10 +726,10 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
                 if (m_uiAgonizingFlamesTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_AGONIZING_FLAMES) == CAST_OK)
-                        m_uiAgonizingFlamesTimer = 60000;
+                    { m_uiAgonizingFlamesTimer = 60000; }
                 }
                 else
-                    m_uiAgonizingFlamesTimer -= uiDiff;
+                { m_uiAgonizingFlamesTimer -= uiDiff; }
 
                 if (m_uiTransformTimer < uiDiff)
                 {
@@ -743,7 +749,7 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
                     }
                 }
                 else
-                    m_uiTransformTimer -= uiDiff;
+                { m_uiTransformTimer -= uiDiff; }
 
                 // no break;
             case PHASE_AKAMA:
@@ -751,37 +757,37 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
                 if (m_uiShearTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHEAR) == CAST_OK)
-                        m_uiShearTimer = urand(10000, 15000);
+                    { m_uiShearTimer = urand(10000, 15000); }
                 }
                 else
-                    m_uiShearTimer -= uiDiff;
+                { m_uiShearTimer -= uiDiff; }
 
                 if (m_uiFlameCrashTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_FLAME_CRASH) == CAST_OK)
-                        m_uiFlameCrashTimer = urand(25000, 35000);
+                    { m_uiFlameCrashTimer = urand(25000, 35000); }
                 }
                 else
-                    m_uiFlameCrashTimer -= uiDiff;
+                { m_uiFlameCrashTimer -= uiDiff; }
 
                 if (m_uiShadowFiendTimer < uiDiff)
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_PARASITIC_SHADOWFIEND, SELECT_FLAG_PLAYER))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_PARASITIC_SHADOWFIEND) == CAST_OK)
-                            m_uiShadowFiendTimer = 40000;
+                        { m_uiShadowFiendTimer = 40000; }
                     }
                 }
                 else
-                    m_uiShadowFiendTimer -= uiDiff;
+                { m_uiShadowFiendTimer -= uiDiff; }
 
                 if (m_uiDrawSoulTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_DRAW_SOUL) == CAST_OK)
-                        m_uiDrawSoulTimer = 35000;
+                    { m_uiDrawSoulTimer = 35000; }
                 }
                 else
-                    m_uiDrawSoulTimer -= uiDiff;
+                { m_uiDrawSoulTimer -= uiDiff; }
 
                 DoMeleeAttackIfReady();
 
@@ -798,7 +804,7 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
                         m_uiCenterMoveTimer = 0;
                     }
                     else
-                        m_uiCenterMoveTimer -= uiDiff;
+                    { m_uiCenterMoveTimer -= uiDiff; }
                 }
 
                 if (m_uiSummonBladesTimer)
@@ -814,7 +820,7 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
                             Creature* pGlaive1 = m_creature->GetMap()->GetCreature(vTargetsVect[0]);
                             Creature* pGlaive2 = m_creature->GetMap()->GetCreature(vTargetsVect[1]);
                             if (!pGlaive1 || !pGlaive2)
-                                return;
+                            { return; }
 
                             // Summon both blades and remove them from equipment
                             if (DoCastSpellIfCan(pGlaive1, SPELL_THROW_GLAIVE_VISUAL) == CAST_OK)
@@ -826,7 +832,7 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
                         }
                     }
                     else
-                        m_uiSummonBladesTimer -= uiDiff;
+                    { m_uiSummonBladesTimer -= uiDiff; }
 
                     // no other spells during takeoff
                     return;
@@ -837,22 +843,22 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_FIREBALL) == CAST_OK)
-                            m_uiFireballTimer = urand(2000, 3000);
+                        { m_uiFireballTimer = urand(2000, 3000); }
                     }
                 }
                 else
-                    m_uiFireballTimer -= uiDiff;
+                { m_uiFireballTimer -= uiDiff; }
 
                 if (m_uiDarkBarrageTimer < uiDiff)
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_DARK_BARRAGE) == CAST_OK)
-                            m_uiDarkBarrageTimer = 45000;
+                        { m_uiDarkBarrageTimer = 45000; }
                     }
                 }
                 else
-                    m_uiDarkBarrageTimer -= uiDiff;
+                { m_uiDarkBarrageTimer -= uiDiff; }
 
                 if (m_uiEyeBlastTimer < uiDiff)
                 {
@@ -863,7 +869,7 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
                     }
                 }
                 else
-                    m_uiEyeBlastTimer -= uiDiff;
+                { m_uiEyeBlastTimer -= uiDiff; }
 
                 break;
             case PHASE_DUAL_DEMON:
@@ -895,34 +901,34 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
                     }
                 }
                 else
-                    m_uiTransformTimer -= uiDiff;
+                { m_uiTransformTimer -= uiDiff; }
 
                 if (m_uiShadowDemonTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SHADOW_DEMONS) == CAST_OK)
-                        m_uiShadowDemonTimer = 60000;
+                    { m_uiShadowDemonTimer = 60000; }
                 }
                 else
-                    m_uiShadowDemonTimer -= uiDiff;
+                { m_uiShadowDemonTimer -= uiDiff; }
 
                 if (m_uiShadowBlastTimer < uiDiff)
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_BLAST) == CAST_OK)
-                            m_uiShadowBlastTimer = urand(2000, 3000);
+                        { m_uiShadowBlastTimer = urand(2000, 3000); }
                     }
                 }
                 else
-                    m_uiShadowBlastTimer -= uiDiff;
+                { m_uiShadowBlastTimer -= uiDiff; }
 
                 if (m_uiFlameBurstTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_FLAME_BURST) == CAST_OK)
-                        m_uiFlameBurstTimer = 20000;
+                    { m_uiFlameBurstTimer = 20000; }
                 }
                 else
-                    m_uiFlameBurstTimer -= uiDiff;
+                { m_uiFlameBurstTimer -= uiDiff; }
 
                 break;
             case PHASE_TRANSITION:
@@ -968,7 +974,7 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
                         ++m_uiLandStage;
                     }
                     else
-                        m_uiLandTimer -= uiDiff;
+                    { m_uiLandTimer -= uiDiff; }
                 }
 
                 if (m_uiTransformTimer)
@@ -993,7 +999,7 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
                         }
                     }
                     else
-                        m_uiTransformTimer -= uiDiff;
+                    { m_uiTransformTimer -= uiDiff; }
                 }
 
                 break;
@@ -1005,7 +1011,7 @@ struct  boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
 ## npc_akama_illidan
 ######*/
 
-struct  npc_akama_illidanAI : public npc_escortAI, private DialogueHelper
+struct npc_akama_illidanAI : public npc_escortAI, private DialogueHelper
 {
     npc_akama_illidanAI(Creature* pCreature) : npc_escortAI(pCreature),
         DialogueHelper(aIntroDialogue)
@@ -1040,18 +1046,18 @@ struct  npc_akama_illidanAI : public npc_escortAI, private DialogueHelper
     void MoveInLineOfSight(Unit* pWho) override
     {
         if (HasEscortState(STATE_ESCORT_ESCORTING))
-            return;
+        { return; }
 
         // Star the event
         if (pWho->GetTypeId() == TYPEID_PLAYER && pWho->IsWithinDistInMap(m_creature, 70.0f) && pWho->IsWithinLOSInMap(m_creature))
-            Start(true);
+        { Start(true); }
     }
 
     void AttackStart(Unit* pWho) override
     {
         // Don't attack Illidan again
         if (m_bIsIntroFinished && pWho->GetEntry() == NPC_ILLIDAN_STORMRAGE)
-            return;
+        { return; }
 
         npc_escortAI::AttackStart(pWho);
     }
@@ -1088,7 +1094,7 @@ struct  npc_akama_illidanAI : public npc_escortAI, private DialogueHelper
                 if (m_pInstance)
                 {
                     if (Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_ILLIDAN_DOOR_TRIGGER))
-                        m_creature->SetFacingToObject(pTrigger);
+                    { m_creature->SetFacingToObject(pTrigger); }
                 }
                 StartNextDialogueText(SAY_AKAMA_OPEN_DOOR_1);
                 break;
@@ -1098,7 +1104,7 @@ struct  npc_akama_illidanAI : public npc_escortAI, private DialogueHelper
                 if (m_pInstance)
                 {
                     if (Creature* pIllidan = m_pInstance->GetSingleCreatureFromStorage(NPC_ILLIDAN_STORMRAGE))
-                        m_creature->SetFacingToObject(pIllidan);
+                    { m_creature->SetFacingToObject(pIllidan); }
                 }
                 break;
             case 17:
@@ -1108,7 +1114,7 @@ struct  npc_akama_illidanAI : public npc_escortAI, private DialogueHelper
                     if (Creature* pIllidan = m_pInstance->GetSingleCreatureFromStorage(NPC_ILLIDAN_STORMRAGE))
                     {
                         if (boss_illidan_stormrageAI* pIllidanAI = dynamic_cast<boss_illidan_stormrageAI*>(pIllidan->AI()))
-                            pIllidanAI->DoStartCombatEvent();
+                        { pIllidanAI->DoStartCombatEvent(); }
 
                         m_creature->SetFacingToObject(pIllidan);
                     }
@@ -1139,13 +1145,13 @@ struct  npc_akama_illidanAI : public npc_escortAI, private DialogueHelper
         npc_escortAI::MovementInform(uiMoveType, uiPointId);
 
         if (uiMoveType != POINT_MOTION_TYPE || uiPointId != 100)
-            return;
+        { return; }
 
         // Do outro
         if (m_pInstance)
         {
             if (Creature* pIllidan = m_pInstance->GetSingleCreatureFromStorage(NPC_ILLIDAN_STORMRAGE))
-                m_creature->SetFacingToObject(pIllidan);
+            { m_creature->SetFacingToObject(pIllidan); }
         }
 
         DoScriptText(SAY_AKAMA_EPILOGUE_5, m_creature);
@@ -1168,14 +1174,14 @@ struct  npc_akama_illidanAI : public npc_escortAI, private DialogueHelper
                 if (m_pInstance)
                 {
                     if (Creature* pOlum = m_pInstance->GetSingleCreatureFromStorage(NPC_SPIRIT_OF_OLUM))
-                        pOlum->CastSpell(pOlum, SPELL_DEATHSWORN_DOOR_CHANNEL, true);
+                    { pOlum->CastSpell(pOlum, SPELL_DEATHSWORN_DOOR_CHANNEL, true); }
                     if (Creature* pUdalo = m_pInstance->GetSingleCreatureFromStorage(NPC_SPIRIT_OF_UDALO))
-                        pUdalo->CastSpell(pUdalo, SPELL_DEATHSWORN_DOOR_CHANNEL, true);
+                    { pUdalo->CastSpell(pUdalo, SPELL_DEATHSWORN_DOOR_CHANNEL, true); }
                 }
                 break;
             case GO_ILLIDAN_GATE:
                 if (m_pInstance)
-                    m_pInstance->DoUseDoorOrButton(GO_ILLIDAN_GATE);
+                { m_pInstance->DoUseDoorOrButton(GO_ILLIDAN_GATE); }
                 break;
             case NPC_SPIRIT_OF_UDALO:
                 SetEscortPaused(false);
@@ -1213,23 +1219,23 @@ struct  npc_akama_illidanAI : public npc_escortAI, private DialogueHelper
             if (m_uiSummonMinionTimer < uiDiff)
             {
                 for (uint8 i = 0; i < MAX_ILLIDARI_ELITES; ++i)
-                    m_creature->SummonCreature(NPC_ILLIDARI_ELITE, aIllidariElitesPos[i].fX, aIllidariElitesPos[i].fY, aIllidariElitesPos[i].fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                { m_creature->SummonCreature(NPC_ILLIDARI_ELITE, aIllidariElitesPos[i].fX, aIllidariElitesPos[i].fY, aIllidariElitesPos[i].fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0); }
 
                 m_uiSummonMinionTimer = urand(35000, 50000);
             }
             else
-                m_uiSummonMinionTimer -= uiDiff;
+            { m_uiSummonMinionTimer -= uiDiff; }
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiHealDelayTimer)
         {
             if (m_uiHealDelayTimer <= uiDiff)
-                m_uiHealDelayTimer = 0;
+            { m_uiHealDelayTimer = 0; }
             else
-                m_uiHealDelayTimer -= uiDiff;
+            { m_uiHealDelayTimer -= uiDiff; }
         }
 
         if (m_bFightMinions)
@@ -1237,16 +1243,16 @@ struct  npc_akama_illidanAI : public npc_escortAI, private DialogueHelper
             if (m_uiChainLightningTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHAIN_LIGHTNING) == CAST_OK)
-                    m_uiChainLightningTimer = urand(4000, 8000);
+                { m_uiChainLightningTimer = urand(4000, 8000); }
             }
             else
-                m_uiChainLightningTimer -= uiDiff;
+            { m_uiChainLightningTimer -= uiDiff; }
         }
 
         if (m_creature->GetHealthPercent() < 10.0f && !m_uiHealDelayTimer)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_HEALING_POTION) == CAST_OK)
-                m_uiHealDelayTimer = 30000;
+            { m_uiHealDelayTimer = 30000; }
         }
 
         DoMeleeAttackIfReady();
@@ -1278,7 +1284,7 @@ bool GossipSelect_npc_akama_illidan(Player* pPlayer, Creature* pCreature, uint32
         pPlayer->CLOSE_GOSSIP_MENU();
 
         if (npc_akama_illidanAI* pAkamaAI = dynamic_cast<npc_akama_illidanAI*>(pCreature->AI()))
-            pAkamaAI->DoResumeEvent();
+        { pAkamaAI->DoResumeEvent(); }
     }
 
     return true;
@@ -1288,7 +1294,7 @@ bool GossipSelect_npc_akama_illidan(Player* pPlayer, Creature* pCreature, uint32
 ## boss_maiev
 ######*/
 
-struct  boss_maievAI : public ScriptedAI, private DialogueHelper
+struct boss_maievAI : public ScriptedAI, private DialogueHelper
 {
     boss_maievAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aEpilogueDialogue)
@@ -1321,7 +1327,7 @@ struct  boss_maievAI : public ScriptedAI, private DialogueHelper
     {
         // Dummy function - used to start the epilogue
         if (pVictim->GetEntry() == NPC_ILLIDAN_STORMRAGE)
-            StartNextDialogueText(SAY_MAIEV_EPILOGUE_1);
+        { StartNextDialogueText(SAY_MAIEV_EPILOGUE_1); }
     }
 
     // Custom evade - don't allow her to return to home position
@@ -1348,12 +1354,12 @@ struct  boss_maievAI : public ScriptedAI, private DialogueHelper
                 if (m_pInstance)
                 {
                     if (Creature* pIllidan = m_pInstance->GetSingleCreatureFromStorage(NPC_ILLIDAN_STORMRAGE))
-                        pIllidan->DealDamage(pIllidan, pIllidan->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+                    { pIllidan->DealDamage(pIllidan, pIllidan->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false); }
                 }
                 break;
             case SPELL_TELEPORT_VISUAL:
                 if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT_VISUAL) == CAST_OK)
-                    m_creature->ForcedDespawn(1000);
+                { m_creature->ForcedDespawn(1000); }
                 break;
         }
     }
@@ -1377,7 +1383,7 @@ struct  boss_maievAI : public ScriptedAI, private DialogueHelper
         DialogueUpdate(uiDiff);
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiTauntTimer < uiDiff)
         {
@@ -1390,23 +1396,23 @@ struct  boss_maievAI : public ScriptedAI, private DialogueHelper
             m_uiTauntTimer = urand(40000, 60000);
         }
         else
-            m_uiTauntTimer -= uiDiff;
+        { m_uiTauntTimer -= uiDiff; }
 
         if (m_uiShadowStriketimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOW_STRIKE) == CAST_OK)
-                m_uiShadowStriketimer = urand(12000, 16000);
+            { m_uiShadowStriketimer = urand(12000, 16000); }
         }
         else
-            m_uiShadowStriketimer -= uiDiff;
+        { m_uiShadowStriketimer -= uiDiff; }
 
         if (m_uiThrowDaggerTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_THROW_DAGGER) == CAST_OK)
-                m_uiThrowDaggerTimer = urand(6000, 10000);
+            { m_uiThrowDaggerTimer = urand(6000, 10000); }
         }
         else
-            m_uiThrowDaggerTimer -= uiDiff;
+        { m_uiThrowDaggerTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }
@@ -1416,7 +1422,7 @@ struct  boss_maievAI : public ScriptedAI, private DialogueHelper
 ## npc_cage_trap_trigger
 ######*/
 
-struct  npc_cage_trap_triggerAI : public ScriptedAI
+struct npc_cage_trap_triggerAI : public ScriptedAI
 {
     npc_cage_trap_triggerAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -1437,13 +1443,13 @@ struct  npc_cage_trap_triggerAI : public ScriptedAI
 
             // Cast the visual effects
             for (uint8 i = 0; i < MAX_CAGE_SPELLS; ++i)
-                DoCastSpellIfCan(m_creature, aCagedSummonSpells[i], CAST_TRIGGERED);
+            { DoCastSpellIfCan(m_creature, aCagedSummonSpells[i], CAST_TRIGGERED); }
 
             for (uint8 i = 0; i < MAX_CAGE_SPELLS; ++i)
-                DoCastSpellIfCan(m_creature, aCagedVisualSpells[i], CAST_TRIGGERED);
+            { DoCastSpellIfCan(m_creature, aCagedVisualSpells[i], CAST_TRIGGERED); }
 
             if (GameObject* pCageTrap = GetClosestGameObjectWithEntry(m_creature, GO_CAGE_TRAP, 5.0f))
-                pCageTrap->Use(m_creature);
+            { pCageTrap->Use(m_creature); }
 
             m_bActive = true;
             m_creature->ForcedDespawn(15000);
@@ -1457,7 +1463,7 @@ struct  npc_cage_trap_triggerAI : public ScriptedAI
 ## npc_flame_of_azzinoth
 ######*/
 
-struct  npc_flame_of_azzinothAI : public ScriptedAI
+struct npc_flame_of_azzinothAI : public ScriptedAI
 {
     npc_flame_of_azzinothAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
@@ -1477,13 +1483,13 @@ struct  npc_flame_of_azzinothAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_BLAZE)
-            pSummoned->CastSpell(pSummoned, SPELL_BLAZE_EFFECT, false);
+        { pSummoned->CastSpell(pSummoned, SPELL_BLAZE_EFFECT, false); }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiFlameBlastTimer < uiDiff)
         {
@@ -1494,17 +1500,17 @@ struct  npc_flame_of_azzinothAI : public ScriptedAI
             }
         }
         else
-            m_uiFlameBlastTimer -= uiDiff;
+        { m_uiFlameBlastTimer -= uiDiff; }
 
         if (m_uiSummonBlazeTimer)
         {
             if (m_uiSummonBlazeTimer <= uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BLAZE) == CAST_OK)
-                    m_uiSummonBlazeTimer = 0;
+                { m_uiSummonBlazeTimer = 0; }
             }
             else
-                m_uiSummonBlazeTimer -= uiDiff;
+            { m_uiSummonBlazeTimer -= uiDiff; }
         }
 
         // Workaround for broken aura 41997; the creature should enrage if not within dist of 30 from summoner
@@ -1514,15 +1520,15 @@ struct  npc_flame_of_azzinothAI : public ScriptedAI
             if (m_uiWrathCheckTimer <= uiDiff)
             {
                 if (GetClosestCreatureWithEntry(m_creature, NPC_BLADE_OF_AZZINOTH, 30.0f))
-                    m_uiWrathCheckTimer = 1000;
+                { m_uiWrathCheckTimer = 1000; }
                 else
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_UNCAGED_WRATH, CAST_TRIGGERED) == CAST_OK)
-                        m_uiWrathCheckTimer = 0;
+                    { m_uiWrathCheckTimer = 0; }
                 }
             }
             else
-                m_uiWrathCheckTimer -= uiDiff;
+            { m_uiWrathCheckTimer -= uiDiff; }
         }
 
         // Try to find a suitable target to charge
@@ -1536,12 +1542,12 @@ struct  npc_flame_of_azzinothAI : public ScriptedAI
                 if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
                 {
                     if (pTarget->GetTypeId() == TYPEID_PLAYER && !pTarget->IsWithinDist(m_creature, 30.0f))
-                        suitableTargets.push_back(pTarget);
+                    { suitableTargets.push_back(pTarget); }
                 }
             }
 
             if (suitableTargets.empty())
-                m_uiChargeTimer = 3000;
+            { m_uiChargeTimer = 3000; }
             else
             {
                 Unit* pTarget = suitableTargets[urand(0, suitableTargets.size() - 1)];
@@ -1549,12 +1555,12 @@ struct  npc_flame_of_azzinothAI : public ScriptedAI
                 if (pTarget)
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_CHARGE) == CAST_OK)
-                        m_uiChargeTimer = urand(5000, 10000);
+                    { m_uiChargeTimer = urand(5000, 10000); }
                 }
             }
         }
         else
-            m_uiChargeTimer -= uiDiff;
+        { m_uiChargeTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }
@@ -1564,7 +1570,7 @@ struct  npc_flame_of_azzinothAI : public ScriptedAI
 ## npc_shadow_demon
 ######*/
 
-struct  npc_shadow_demonAI : public ScriptedAI
+struct npc_shadow_demonAI : public ScriptedAI
 {
     npc_shadow_demonAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -1583,18 +1589,18 @@ struct  npc_shadow_demonAI : public ScriptedAI
     void JustDied(Unit* /*pKiller*/) override
     {
         if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_targetGuid))
-            pPlayer->RemoveAurasDueToSpell(SPELL_PARALYZE);
+        { pPlayer->RemoveAurasDueToSpell(SPELL_PARALYZE); }
     }
 
     void MovementInform(uint32 uiMovementType, uint32 uiPointId) override
     {
         if (uiMovementType != POINT_MOTION_TYPE || !uiPointId)
-            return;
+        { return; }
 
         if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_targetGuid))
         {
             if (DoCastSpellIfCan(pPlayer, SPELL_CONSUME_SOUL) == CAST_OK)
-                m_creature->ForcedDespawn(1000);
+            { m_creature->ForcedDespawn(1000); }
         }
     }
 
@@ -1605,7 +1611,7 @@ struct  npc_shadow_demonAI : public ScriptedAI
 ## npc_blade_of_azzinoth
 ######*/
 
-struct  npc_blade_of_azzinothAI : public ScriptedAI
+struct npc_blade_of_azzinothAI : public ScriptedAI
 {
     npc_blade_of_azzinothAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -1637,13 +1643,13 @@ struct  npc_blade_of_azzinothAI : public ScriptedAI
         if (pSummoned->GetEntry() == NPC_FLAME_OF_AZZINOTH)
         {
             if (!m_pInstance)
-                return;
+            { return; }
 
             // For some reason it doesn't work with Spell Hit for SPELL_GLAIVE_RETURNS script effect, so we need to inform him manually
             if (Creature* pIllidan = m_pInstance->GetSingleCreatureFromStorage(NPC_ILLIDAN_STORMRAGE))
             {
                 if (boss_illidan_stormrageAI* pIllidanAI = dynamic_cast<boss_illidan_stormrageAI*>(pIllidan->AI()))
-                    pIllidanAI->DoInformFlameKilled();
+                { pIllidanAI->DoInformFlameKilled(); }
             }
         }
     }

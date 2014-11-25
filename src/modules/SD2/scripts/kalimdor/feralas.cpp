@@ -23,13 +23,14 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Feralas
-SD%Complete: 100
-SDComment: Quest support: 2767, 2845.
-SDCategory: Feralas
-EndScriptData */
-
+/**
+ * ScriptData
+ * SDName:      Feralas
+ * SD%Complete: 100
+ * SDComment:   Quest support: 2767, 2845, 2987.
+ * SDCategory:  Feralas
+ * EndScriptData
+ */
 /* ContentData
 npc_oox22fe
 npc_shay_leafrunner
@@ -61,7 +62,7 @@ enum
     QUEST_RESCUE_OOX22FE    = 2767
 };
 
-struct  npc_oox22feAI : public npc_escortAI
+struct npc_oox22feAI : public npc_escortAI
 {
     npc_oox22feAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -162,6 +163,25 @@ bool QuestAccept_npc_oox22fe(Player* pPlayer, Creature* pCreature, const Quest* 
 }
 
 /*######
+## go_gordunni_trap
+######*/
+
+bool GOUse_go_gordunni_trap(Player* pPlayer, GameObject* pGo)
+{
+    switch (urand(0, 1))
+    {
+    case 0:
+        pPlayer->CastSpell(pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), 19394, false);
+        break;
+    case 1:
+        pPlayer->CastSpell(pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), 11756, false);
+        break;
+    }
+    pGo->SetLootState(GO_JUST_DEACTIVATED);
+    return true;
+}
+
+/*######
 ## npc_shay_leafrunner
 ######*/
 
@@ -184,7 +204,7 @@ enum
     QUEST_ID_WANDERING_SHAY             = 2845,
 };
 
-struct  npc_shay_leafrunnerAI : public FollowerAI
+struct npc_shay_leafrunnerAI : public FollowerAI
 {
     npc_shay_leafrunnerAI(Creature* pCreature) : FollowerAI(pCreature)
     {
@@ -331,8 +351,13 @@ void AddSC_feralas()
     pNewScript->GetAI = &GetAI_npc_oox22fe;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_oox22fe;
     pNewScript->RegisterSelf();
-    
+
     pNewScript = new Script;
+    pNewScript->Name = "go_gordunni_trap";
+    pNewScript->pGOUse = &GOUse_go_gordunni_trap;
+    pNewScript->RegisterSelf();
+	
+	pNewScript = new Script;
     pNewScript->Name = "npc_shay_leafrunner";
     pNewScript->GetAI = &GetAI_npc_shay_leafrunner;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_shay_leafrunner;

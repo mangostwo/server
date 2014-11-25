@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -60,7 +66,7 @@ enum
     NPC_SHADOW_ELEMENTAL        = 19206,
 };
 
-struct  boss_darkweaver_sythAI : public ScriptedAI
+struct boss_darkweaver_sythAI : public ScriptedAI
 {
     boss_darkweaver_sythAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -106,7 +112,7 @@ struct  boss_darkweaver_sythAI : public ScriptedAI
     void KilledUnit(Unit* /*pVictim*/) override
     {
         if (urand(0, 1))
-            return;
+        { return; }
 
         DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
     }
@@ -130,7 +136,7 @@ struct  boss_darkweaver_sythAI : public ScriptedAI
         }
 
         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            pSummoned->AI()->AttackStart(pTarget);
+        { pSummoned->AI()->AttackStart(pTarget); }
     }
 
     // Wrapper to handle the elementals summon
@@ -139,7 +145,7 @@ struct  boss_darkweaver_sythAI : public ScriptedAI
         DoScriptText(SAY_SUMMON, m_creature);
 
         if (m_creature->IsNonMeleeSpellCasted(false))
-            m_creature->InterruptNonMeleeSpells(false);
+        { m_creature->InterruptNonMeleeSpells(false); }
 
         DoCastSpellIfCan(m_creature, SPELL_SUMMON_SYTH_ARCANE, CAST_TRIGGERED); // front
         DoCastSpellIfCan(m_creature, SPELL_SUMMON_SYTH_FIRE,   CAST_TRIGGERED); // back
@@ -150,7 +156,7 @@ struct  boss_darkweaver_sythAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         // Summon elementals at 90%, 50% and 10% health
         if (m_creature->GetHealthPercent() < m_fHpCheck)
@@ -164,55 +170,55 @@ struct  boss_darkweaver_sythAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FLAME_SHOCK : SPELL_FLAME_SHOCK_H) == CAST_OK)
-                    m_uiFlameshockTimer = m_bIsRegularMode ? urand(13000, 28000) : urand(11000, 20000);
+                { m_uiFlameshockTimer = m_bIsRegularMode ? urand(13000, 28000) : urand(11000, 20000); }
             }
         }
         else
-            m_uiFlameshockTimer -= uiDiff;
+        { m_uiFlameshockTimer -= uiDiff; }
 
         if (m_uiArcaneshockTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_ARCANE_SHOCK : SPELL_ARCANE_SHOCK_H) == CAST_OK)
-                    m_uiArcaneshockTimer = m_bIsRegularMode ? urand(13000, 28000) : urand(11000, 20000);
+                { m_uiArcaneshockTimer = m_bIsRegularMode ? urand(13000, 28000) : urand(11000, 20000); }
             }
         }
         else
-            m_uiArcaneshockTimer -= uiDiff;
+        { m_uiArcaneshockTimer -= uiDiff; }
 
         if (m_uiFrostshockTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FROST_SHOCK : SPELL_FROST_SHOCK_H) == CAST_OK)
-                    m_uiFrostshockTimer = m_bIsRegularMode ? urand(13000, 28000) : urand(11000, 20000);
+                { m_uiFrostshockTimer = m_bIsRegularMode ? urand(13000, 28000) : urand(11000, 20000); }
             }
         }
         else
-            m_uiFrostshockTimer -= uiDiff;
+        { m_uiFrostshockTimer -= uiDiff; }
 
         if (m_uiShadowshockTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOW_SHOCK : SPELL_SHADOW_SHOCK_H) == CAST_OK)
-                    m_uiShadowshockTimer = m_bIsRegularMode ? urand(13000, 28000) : urand(11000, 20000);
+                { m_uiShadowshockTimer = m_bIsRegularMode ? urand(13000, 28000) : urand(11000, 20000); }
             }
         }
         else
-            m_uiShadowshockTimer -= uiDiff;
+        { m_uiShadowshockTimer -= uiDiff; }
 
         if (m_uiChainlightningTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CHAIN_LIGHTNING : SPELL_CHAIN_LIGHTNING_H) == CAST_OK)
-                    m_uiChainlightningTimer = m_bIsRegularMode ? urand(14000, 26000) : urand(13000, 19000);
+                { m_uiChainlightningTimer = m_bIsRegularMode ? urand(14000, 26000) : urand(13000, 19000); }
             }
         }
         else
-            m_uiChainlightningTimer -= uiDiff;
+        { m_uiChainlightningTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

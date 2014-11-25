@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -67,7 +73,7 @@ static const uint32 aMarkCorruption[MAX_HYDROSS_MARKS] = {38219, 38220, 38221, 3
 static const float aElementalCleanPoint[3] = { -231.48f, -343.05f, -1.58f};
 static const float aElementalExitPoint[3] = { -177.41f, -395.72f, -1.60f};
 
-struct  boss_hydross_the_unstableAI : public ScriptedAI
+struct boss_hydross_the_unstableAI : public ScriptedAI
 {
     boss_hydross_the_unstableAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -110,15 +116,15 @@ struct  boss_hydross_the_unstableAI : public ScriptedAI
         DoScriptText(SAY_AGGRO, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_HYDROSS_EVENT, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_HYDROSS_EVENT, IN_PROGRESS); }
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
     {
         if (m_bCorruptedForm)
-            DoScriptText(urand(0, 1) ? SAY_CORRUPT_SLAY1 : SAY_CORRUPT_SLAY2, m_creature);
+        { DoScriptText(urand(0, 1) ? SAY_CORRUPT_SLAY1 : SAY_CORRUPT_SLAY2, m_creature); }
         else
-            DoScriptText(urand(0, 1) ? SAY_CLEAN_SLAY1 : SAY_CLEAN_SLAY2, m_creature);
+        { DoScriptText(urand(0, 1) ? SAY_CLEAN_SLAY1 : SAY_CLEAN_SLAY2, m_creature); }
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -126,13 +132,13 @@ struct  boss_hydross_the_unstableAI : public ScriptedAI
         DoScriptText(m_bCorruptedForm ? SAY_CORRUPT_DEATH : SAY_CLEAN_DEATH, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_HYDROSS_EVENT, DONE);
+        { m_pInstance->SetData(TYPE_HYDROSS_EVENT, DONE); }
     }
 
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_HYDROSS_EVENT, FAIL);
+        { m_pInstance->SetData(TYPE_HYDROSS_EVENT, FAIL); }
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -152,13 +158,13 @@ struct  boss_hydross_the_unstableAI : public ScriptedAI
 
         // Attack only in combat
         if (m_creature->getVictim())
-            pSummoned->AI()->AttackStart(m_creature->getVictim());
+        { pSummoned->AI()->AttackStart(m_creature->getVictim()); }
     }
 
     void SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiPointId) override
     {
         if (uiMotionType != POINT_MOTION_TYPE)
-            return;
+        { return; }
 
         if (uiPointId == POINT_ID_ELEMENTAL_CLEAN)
         {
@@ -166,7 +172,7 @@ struct  boss_hydross_the_unstableAI : public ScriptedAI
             DoCastSpellIfCan(pSummoned, SPELL_PURIFY_ELEMENTAL);
         }
         else if (uiPointId == POINT_ID_ELEMENTAL_EXIT)
-            pSummoned->ForcedDespawn();
+        { pSummoned->ForcedDespawn(); }
     }
 
     void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
@@ -194,7 +200,7 @@ struct  boss_hydross_the_unstableAI : public ScriptedAI
     void DoHandleBeamHelpers(bool bReset)
     {
         if (!m_pInstance)
-            return;
+        { return; }
 
         GuidList lBeamHelpersGuid;
         m_pInstance->GetBeamHelpersGUIDList(lBeamHelpersGuid);
@@ -204,9 +210,9 @@ struct  boss_hydross_the_unstableAI : public ScriptedAI
             if (Creature* pBeam = m_creature->GetMap()->GetCreature(*itr))
             {
                 if (bReset)
-                    pBeam->InterruptNonMeleeSpells(false);
+                { pBeam->InterruptNonMeleeSpells(false); }
                 else
-                    pBeam->CastSpell(m_creature, SPELL_BLUE_BEAM, false);
+                { pBeam->CastSpell(m_creature, SPELL_BLUE_BEAM, false); }
             }
         }
     }
@@ -219,10 +225,10 @@ struct  boss_hydross_the_unstableAI : public ScriptedAI
             if (m_uiElementalTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_WATER_ELEMENT) == CAST_OK)
-                    m_uiElementalTimer = 20000;
+                { m_uiElementalTimer = 20000; }
             }
             else
-                m_uiElementalTimer -= uiDiff;
+            { m_uiElementalTimer -= uiDiff; }
 
             return;
         }
@@ -235,7 +241,7 @@ struct  boss_hydross_the_unstableAI : public ScriptedAI
                 m_uiBeamInitTimer = 0;
             }
             else
-                m_uiBeamInitTimer -= uiDiff;
+            { m_uiBeamInitTimer -= uiDiff; }
         }
 
         // corrupted form
@@ -246,11 +252,11 @@ struct  boss_hydross_the_unstableAI : public ScriptedAI
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_VILE_SLUDGE) == CAST_OK)
-                        m_uiVileSludgeTimer = 15000;
+                    { m_uiVileSludgeTimer = 15000; }
                 }
             }
             else
-                m_uiVileSludgeTimer -= uiDiff;
+            { m_uiVileSludgeTimer -= uiDiff; }
 
             // Change to clean
             if (m_uiPosCheckTimer < uiDiff)
@@ -279,7 +285,7 @@ struct  boss_hydross_the_unstableAI : public ScriptedAI
                 m_uiPosCheckTimer = 2000;
             }
             else
-                m_uiPosCheckTimer -= uiDiff;
+            { m_uiPosCheckTimer -= uiDiff; }
         }
         // clean form
         else
@@ -289,11 +295,11 @@ struct  boss_hydross_the_unstableAI : public ScriptedAI
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_WATER_TOMB) == CAST_OK)
-                        m_uiWaterTombTimer = 7000;
+                    { m_uiWaterTombTimer = 7000; }
                 }
             }
             else
-                m_uiWaterTombTimer -= uiDiff;
+            { m_uiWaterTombTimer -= uiDiff; }
 
             // Change to corrupt
             if (m_uiPosCheckTimer < uiDiff)
@@ -324,7 +330,7 @@ struct  boss_hydross_the_unstableAI : public ScriptedAI
                 m_uiPosCheckTimer = 2000;
             }
             else
-                m_uiPosCheckTimer -= uiDiff;
+            { m_uiPosCheckTimer -= uiDiff; }
         }
 
         // Apply mark debuff
@@ -337,21 +343,21 @@ struct  boss_hydross_the_unstableAI : public ScriptedAI
 
                 // limit the mark counter to 6
                 if (m_uiMarkCount == MAX_HYDROSS_MARKS)
-                    m_uiMarkCount = MAX_HYDROSS_MARKS - 1;
+                { m_uiMarkCount = MAX_HYDROSS_MARKS - 1; }
             }
         }
         else
-            m_uiMarkTimer -= uiDiff;
+        { m_uiMarkTimer -= uiDiff; }
 
         if (m_uiEnrageTimer)
         {
             if (m_uiEnrageTimer <= uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
-                    m_uiEnrageTimer = 0;
+                { m_uiEnrageTimer = 0; }
             }
             else
-                m_uiEnrageTimer -= uiDiff;
+            { m_uiEnrageTimer -= uiDiff; }
         }
 
         DoMeleeAttackIfReady();

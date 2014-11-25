@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -44,14 +50,14 @@ void instance_shattered_halls::OnPlayerEnter(Player* pPlayer)
 {
     // Only on heroic
     if (instance->IsRegularDifficulty() || m_uiTeam)
-        return;
+    { return; }
 
     m_uiTeam = pPlayer->GetTeam();
 
     if (m_uiTeam == ALLIANCE)
-        pPlayer->SummonCreature(aSoldiersLocs[1].m_uiAllianceEntry, aSoldiersLocs[1].m_fX, aSoldiersLocs[1].m_fY, aSoldiersLocs[1].m_fZ, aSoldiersLocs[1].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+    { pPlayer->SummonCreature(aSoldiersLocs[1].m_uiAllianceEntry, aSoldiersLocs[1].m_fX, aSoldiersLocs[1].m_fY, aSoldiersLocs[1].m_fZ, aSoldiersLocs[1].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0); }
     else
-        pPlayer->SummonCreature(aSoldiersLocs[0].m_uiHordeEntry, aSoldiersLocs[0].m_fX, aSoldiersLocs[0].m_fY, aSoldiersLocs[0].m_fZ, aSoldiersLocs[0].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+    { pPlayer->SummonCreature(aSoldiersLocs[0].m_uiHordeEntry, aSoldiersLocs[0].m_fX, aSoldiersLocs[0].m_fY, aSoldiersLocs[0].m_fZ, aSoldiersLocs[0].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0); }
 }
 
 void instance_shattered_halls::OnObjectCreate(GameObject* pGo)
@@ -60,11 +66,11 @@ void instance_shattered_halls::OnObjectCreate(GameObject* pGo)
     {
         case GO_NETHEKURSE_DOOR:
             if (m_auiEncounter[TYPE_NETHEKURSE] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+            { pGo->SetGoState(GO_STATE_ACTIVE); }
             break;
         case GO_NETHEKURSE_ENTER_DOOR:
             if (m_auiEncounter[TYPE_NETHEKURSE] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+            { pGo->SetGoState(GO_STATE_ACTIVE); }
             break;
 
         default:
@@ -113,7 +119,7 @@ void instance_shattered_halls::SetData(uint32 uiType, uint32 uiData)
             {
                 // Make executioner attackable only after the final boss is dead
                 if (Creature* pExecutioner = GetSingleCreatureFromStorage(NPC_EXECUTIONER, true))
-                    pExecutioner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+                { pExecutioner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE); }
             }
             break;
         case TYPE_EXECUTION:
@@ -124,11 +130,11 @@ void instance_shattered_halls::SetData(uint32 uiType, uint32 uiData)
                 {
                     // summon the 3 npcs for execution
                     for (uint8 i = 2; i < 5; ++i)
-                        pPlayer->SummonCreature(m_uiTeam == ALLIANCE ? aSoldiersLocs[i].m_uiAllianceEntry : aSoldiersLocs[i].m_uiHordeEntry, aSoldiersLocs[i].m_fX, aSoldiersLocs[i].m_fY, aSoldiersLocs[i].m_fZ, aSoldiersLocs[i].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    { pPlayer->SummonCreature(m_uiTeam == ALLIANCE ? aSoldiersLocs[i].m_uiAllianceEntry : aSoldiersLocs[i].m_uiHordeEntry, aSoldiersLocs[i].m_fX, aSoldiersLocs[i].m_fY, aSoldiersLocs[i].m_fZ, aSoldiersLocs[i].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0); }
 
                     // Summon the executioner; Note: according to wowhead he shouldn't be targetable until Kargath encounter is finished
                     if (Creature* pExecutioner = pPlayer->SummonCreature(NPC_EXECUTIONER, afExecutionerLoc[0], afExecutionerLoc[1], afExecutionerLoc[2], afExecutionerLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0, true))
-                        pExecutioner->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+                    { pExecutioner->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE); }
 
                     // cast the execution spell
                     DoCastGroupDebuff(SPELL_KARGATH_EXECUTIONER_1);
@@ -138,7 +144,7 @@ void instance_shattered_halls::SetData(uint32 uiType, uint32 uiData)
             {
                 // If the officer is already killed, then skip the quest completion
                 if (m_uiExecutionStage)
-                    break;
+                { break; }
 
                 // Complete quest 9524 or 9525
                 if (Creature* pOfficer = GetSingleCreatureFromStorage(m_uiTeam == ALLIANCE ? NPC_OFFICER_ALLIANCE : NPC_OFFICER_HORDE))
@@ -148,7 +154,7 @@ void instance_shattered_halls::SetData(uint32 uiType, uint32 uiData)
                     for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
                     {
                         if (Player* pPlayer = itr->getSource())
-                            pPlayer->KilledMonsterCredit(pOfficer->GetEntry(), pOfficer->GetObjectGuid());
+                        { pPlayer->KilledMonsterCredit(pOfficer->GetEntry(), pOfficer->GetObjectGuid()); }
                     }
                 }
             }
@@ -185,7 +191,7 @@ void instance_shattered_halls::Load(const char* chrIn)
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
     {
         if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        { m_auiEncounter[i] = NOT_STARTED; }
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -194,7 +200,7 @@ void instance_shattered_halls::Load(const char* chrIn)
 uint32 instance_shattered_halls::GetData(uint32 uiType) const
 {
     if (uiType < MAX_ENCOUNTER)
-        return m_auiEncounter[uiType];
+    { return m_auiEncounter[uiType]; }
 
     return 0;
 }
@@ -202,7 +208,7 @@ uint32 instance_shattered_halls::GetData(uint32 uiType) const
 void instance_shattered_halls::OnCreatureDeath(Creature* pCreature)
 {
     if (pCreature->GetEntry() == NPC_EXECUTIONER)
-        SetData(TYPE_EXECUTION, DONE);
+    { SetData(TYPE_EXECUTION, DONE); }
 }
 
 void instance_shattered_halls::OnCreatureEnterCombat(Creature* pCreature)
@@ -210,14 +216,14 @@ void instance_shattered_halls::OnCreatureEnterCombat(Creature* pCreature)
     // Set data to special in order to pause the event timer
     // This is according to the blizz comments which say that it is possible to complete the event if you engage the npc while you have only a few seconds left
     if (pCreature->GetEntry() == NPC_EXECUTIONER)
-        SetData(TYPE_EXECUTION, SPECIAL);
+    { SetData(TYPE_EXECUTION, SPECIAL); }
 }
 
 void instance_shattered_halls::OnCreatureEvade(Creature* pCreature)
 {
     // If npc evades continue the counting
     if (pCreature->GetEntry() == NPC_EXECUTIONER)
-        SetData(TYPE_EXECUTION, IN_PROGRESS);
+    { SetData(TYPE_EXECUTION, IN_PROGRESS); }
 }
 
 bool instance_shattered_halls::CheckConditionCriteriaMeet(Player const* pPlayer, uint32 uiInstanceConditionId, WorldObject const* pConditionSource, uint32 conditionSourceType) const
@@ -239,7 +245,7 @@ bool instance_shattered_halls::CheckConditionCriteriaMeet(Player const* pPlayer,
 void instance_shattered_halls::Update(uint32 uiDiff)
 {
     if (m_auiEncounter[TYPE_EXECUTION] != IN_PROGRESS)
-        return;
+    { return; }
 
     if (m_uiExecutionTimer < uiDiff)
     {
@@ -248,7 +254,7 @@ void instance_shattered_halls::Update(uint32 uiDiff)
             case 0:
                 // Kill the officer
                 if (Creature* pSoldier = GetSingleCreatureFromStorage(m_uiTeam == ALLIANCE ? NPC_OFFICER_ALLIANCE : NPC_OFFICER_HORDE))
-                    pSoldier->DealDamage(pSoldier, pSoldier->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                { pSoldier->DealDamage(pSoldier, pSoldier->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false); }
 
                 // Make Kargath yell
                 DoOrSimulateScriptTextForThisInstance(m_uiTeam == ALLIANCE ? SAY_KARGATH_EXECUTE_ALLY : SAY_KARGATH_EXECUTE_HORDE, NPC_KARGATH_BLADEFIST);
@@ -259,14 +265,14 @@ void instance_shattered_halls::Update(uint32 uiDiff)
                 break;
             case 1:
                 if (Creature* pSoldier = GetSingleCreatureFromStorage(m_uiTeam == ALLIANCE ? NPC_SOLDIER_ALLIANCE_2 : NPC_SOLDIER_HORDE_2))
-                    pSoldier->DealDamage(pSoldier, pSoldier->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                { pSoldier->DealDamage(pSoldier, pSoldier->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false); }
 
                 DoCastGroupDebuff(SPELL_KARGATH_EXECUTIONER_3);
                 m_uiExecutionTimer = 15 * MINUTE * IN_MILLISECONDS;
                 break;
             case 2:
                 if (Creature* pSoldier = GetSingleCreatureFromStorage(m_uiTeam == ALLIANCE ? NPC_SOLDIER_ALLIANCE_3 : NPC_SOLDIER_HORDE_3))
-                    pSoldier->DealDamage(pSoldier, pSoldier->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                { pSoldier->DealDamage(pSoldier, pSoldier->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false); }
 
                 SetData(TYPE_EXECUTION, FAIL);
                 m_uiExecutionTimer = 0;
@@ -275,7 +281,7 @@ void instance_shattered_halls::Update(uint32 uiDiff)
         ++m_uiExecutionStage;
     }
     else
-        m_uiExecutionTimer -= uiDiff;
+    { m_uiExecutionTimer -= uiDiff; }
 }
 
 // Add debuff to all players in the instance
@@ -287,7 +293,7 @@ void instance_shattered_halls::DoCastGroupDebuff(uint32 uiSpellId)
     {
         Player* pPlayer = itr->getSource();
         if (pPlayer && !pPlayer->HasAura(uiSpellId))
-            pPlayer->CastSpell(pPlayer, uiSpellId, true);
+        { pPlayer->CastSpell(pPlayer, uiSpellId, true); }
     }
 }
 
@@ -299,23 +305,23 @@ InstanceData* GetInstanceData_instance_shattered_halls(Map* pMap)
 bool AreaTrigger_at_shattered_halls(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 {
     if (pPlayer->isGameMaster() || !pPlayer->IsAlive())
-        return false;
+    { return false; }
 
     instance_shattered_halls* pInstance = (instance_shattered_halls*)pPlayer->GetInstanceData();
 
     if (!pInstance)
-        return false;
+    { return false; }
 
     // Only on heroic
     if (pInstance->instance->IsRegularDifficulty())
-        return false;
+    { return false; }
 
     // Don't allow players to cheat
     if (pInstance->GetData(TYPE_BLADEFIST) == DONE || pInstance->GetData(TYPE_OMROGG) == DONE)
-        return false;
+    { return false; }
 
     if (pInstance->GetData(TYPE_EXECUTION) == NOT_STARTED)
-        pInstance->SetData(TYPE_EXECUTION, IN_PROGRESS);
+    { pInstance->SetData(TYPE_EXECUTION, IN_PROGRESS); }
 
     return true;
 }

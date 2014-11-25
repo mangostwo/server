@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -53,7 +59,7 @@ enum
     SPELL_ARCANE_EXPLOSION_H    = 40425,
 };
 
-struct  boss_talon_king_ikissAI : public ScriptedAI
+struct boss_talon_king_ikissAI : public ScriptedAI
 {
     boss_talon_king_ikissAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -112,7 +118,7 @@ struct  boss_talon_king_ikissAI : public ScriptedAI
         }
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_IKISS, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_IKISS, IN_PROGRESS); }
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -120,13 +126,13 @@ struct  boss_talon_king_ikissAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_IKISS, DONE);
+        { m_pInstance->SetData(TYPE_IKISS, DONE); }
     }
 
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_IKISS, FAIL);
+        { m_pInstance->SetData(TYPE_IKISS, FAIL); }
     }
 
     void KilledUnit(Unit* /*pVctim*/) override
@@ -137,10 +143,10 @@ struct  boss_talon_king_ikissAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (EnterEvadeIfOutOfCombatArea(uiDiff))
-            return;
+        { return; }
 
         if (m_bBlink)
         {
@@ -153,25 +159,25 @@ struct  boss_talon_king_ikissAI : public ScriptedAI
         if (m_uiArcaneVolleyTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ARCANE_VOLLEY : SPELL_ARCANE_VOLLEY_H) == CAST_OK)
-                m_uiArcaneVolleyTimer = urand(8000, 12000);
+            { m_uiArcaneVolleyTimer = urand(8000, 12000); }
         }
         else
-            m_uiArcaneVolleyTimer -= uiDiff;
+        { m_uiArcaneVolleyTimer -= uiDiff; }
 
         if (m_uiSheepTimer < uiDiff)
         {
             // second top aggro target in normal, random target in heroic
             if (Unit* pTarget = m_bIsRegularMode ? m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 1) : m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_POLYMORPH : SPELL_POLYMORPH_H);
+            { DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_POLYMORPH : SPELL_POLYMORPH_H); }
             m_uiSheepTimer = urand(15000, 17500);
         }
         else
-            m_uiSheepTimer -= uiDiff;
+        { m_uiSheepTimer -= uiDiff; }
 
         if (!m_bManaShield && m_creature->GetHealthPercent() < 15.0f)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_MANA_SHIELD) == CAST_OK)
-                m_bManaShield = true;
+            { m_bManaShield = true; }
         }
 
         if (!m_bIsRegularMode)
@@ -179,10 +185,10 @@ struct  boss_talon_king_ikissAI : public ScriptedAI
             if (m_uiSlowTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_SLOW_H) == CAST_OK)
-                    m_uiSlowTimer = urand(15000, 24000);
+                { m_uiSlowTimer = urand(15000, 24000); }
             }
             else
-                m_uiSlowTimer -= uiDiff;
+            { m_uiSlowTimer -= uiDiff; }
         }
 
         if (m_creature->GetHealthPercent() < m_fHealthCheck)
@@ -205,7 +211,7 @@ struct  boss_talon_king_ikissAI : public ScriptedAI
         }
 
         if (!m_bBlink)
-            DoMeleeAttackIfReady();
+        { DoMeleeAttackIfReady(); }
     }
 };
 

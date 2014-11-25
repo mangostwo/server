@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -58,7 +64,7 @@ enum
     SPELL_QUID9889              = 32174,
 };
 
-struct  mob_unkor_the_ruthlessAI : public ScriptedAI
+struct mob_unkor_the_ruthlessAI : public ScriptedAI
 {
     mob_unkor_the_ruthlessAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -93,13 +99,13 @@ struct  mob_unkor_the_ruthlessAI : public ScriptedAI
         if (m_uiUnfriendlyTimer)
         {
             if (m_uiUnfriendlyTimer <= uiDiff)
-                EnterEvadeMode();
+            { EnterEvadeMode(); }
             else
-                m_uiUnfriendlyTimer -= uiDiff;
+            { m_uiUnfriendlyTimer -= uiDiff; }
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         // Do quest kill credit at 30%
         if (!m_bCanDoQuest && m_creature->GetHealthPercent() < 30.0f)
@@ -118,7 +124,7 @@ struct  mob_unkor_the_ruthlessAI : public ScriptedAI
                 m_uiFriendlyTimer = 0;
             }
             else
-                m_uiFriendlyTimer -= uiDiff;
+            { m_uiFriendlyTimer -= uiDiff; }
         }
 
         if (m_uiPulverizeTimer < uiDiff)
@@ -127,7 +133,7 @@ struct  mob_unkor_the_ruthlessAI : public ScriptedAI
             m_uiPulverizeTimer = 9000;
         }
         else
-            m_uiPulverizeTimer -= uiDiff;
+        { m_uiPulverizeTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }
@@ -154,7 +160,7 @@ const uint32 netherwebVictims[6] =
     18470, 16805, 21242, 18452, 22482, 21285
 };
 
-struct  mob_netherweb_victimAI : public ScriptedAI
+struct mob_netherweb_victimAI : public ScriptedAI
 {
     mob_netherweb_victimAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -177,7 +183,7 @@ struct  mob_netherweb_victimAI : public ScriptedAI
                     pPlayer->KilledMonsterCredit(NPC_FREED_WARRIOR, m_creature->GetObjectGuid());
                 }
                 else
-                    m_creature->SummonCreature(netherwebVictims[urand(0, 5)], 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 60000);
+                { m_creature->SummonCreature(netherwebVictims[urand(0, 5)], 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 60000); }
             }
         }
     }
@@ -209,7 +215,7 @@ enum
 static float m_afAmbushB1[] = { -2895.525879f, 5336.431641f, -11.800f};
 static float m_afAmbushB2[] = { -2890.604980f, 5331.938965f, -11.282f};
 
-struct  npc_akunoAI : public npc_escortAI
+struct npc_akunoAI : public npc_escortAI
 {
     npc_akunoAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -232,7 +238,7 @@ struct  npc_akunoAI : public npc_escortAI
                 DoScriptText(SAY_AKU_AMBUSH_B, m_creature);
 
                 if (Creature* pTemp = m_creature->SummonCreature(NPC_CABAL_SKIRMISHER, m_afAmbushB1[0], m_afAmbushB1[1], m_afAmbushB1[2], 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000))
-                    DoScriptText(SAY_AKU_AMBUSH_B_REPLY, pTemp);
+                { DoScriptText(SAY_AKU_AMBUSH_B_REPLY, pTemp); }
 
                 m_creature->SummonCreature(NPC_CABAL_SKIRMISHER, m_afAmbushB2[0], m_afAmbushB2[1], m_afAmbushB2[2], 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
                 break;
@@ -243,7 +249,7 @@ struct  npc_akunoAI : public npc_escortAI
                 DoScriptText(SAY_AKU_COMPLETE, m_creature);
 
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_ESCAPING_TOMB, m_creature);
+                { pPlayer->GroupEventHappens(QUEST_ESCAPING_TOMB, m_creature); }
 
                 break;
         }
@@ -257,7 +263,7 @@ struct  npc_akunoAI : public npc_escortAI
     void UpdateEscortAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiChainLightningTimer < uiDiff)
         {
@@ -265,7 +271,7 @@ struct  npc_akunoAI : public npc_escortAI
             m_uiChainLightningTimer = urand(7000, 14000);
         }
         else
-            m_uiChainLightningTimer -= uiDiff;
+        { m_uiChainLightningTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }
@@ -303,7 +309,7 @@ enum
     SPELL_FEED_CREDIT           = 41427,                    // credit for quest 11093
 };
 
-struct  npc_hungry_nether_rayAI : public ScriptedPetAI
+struct npc_hungry_nether_rayAI : public ScriptedPetAI
 {
     npc_hungry_nether_rayAI(Creature* pCreature) : ScriptedPetAI(pCreature) { Reset(); }
 
@@ -365,7 +371,7 @@ enum
 };
 
 // Some details still missing from here, and will also have issues if followers evade for any reason.
-struct  npc_letollAI : public npc_escortAI
+struct npc_letollAI : public npc_escortAI
 {
     npc_letollAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
@@ -391,7 +397,7 @@ struct  npc_letollAI : public npc_escortAI
             float fAngle = uiCount < MAX_RESEARCHER ? M_PI / MAX_RESEARCHER - (uiCount * 2 * M_PI / MAX_RESEARCHER) : 0.0f;
 
             if ((*itr)->IsAlive() && !(*itr)->IsInCombat())
-                (*itr)->GetMotionMaster()->MoveFollow(m_creature, 2.5f, fAngle);
+            { (*itr)->GetMotionMaster()->MoveFollow(m_creature, 2.5f, fAngle); }
 
             ++uiCount;
         }
@@ -412,7 +418,7 @@ struct  npc_letollAI : public npc_escortAI
                 }
 
                 if ((*itr)->IsAlive() && (*itr)->IsWithinDistInMap(m_creature, 20.0f))
-                    return (*itr);
+                { return (*itr); }
             }
         }
 
@@ -429,7 +435,7 @@ struct  npc_letollAI : public npc_escortAI
         GetCreatureListWithEntryInGrid(m_lResearchersList, m_creature, NPC_RESEARCHER, 25.0f);
 
         if (!m_lResearchersList.empty())
-            SetFormation();
+        { SetFormation(); }
     }
 
     void WaypointReached(uint32 uiPointId) override
@@ -438,7 +444,7 @@ struct  npc_letollAI : public npc_escortAI
         {
             case 0:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    DoScriptText(SAY_LE_KEEP_SAFE, m_creature, pPlayer);
+                { DoScriptText(SAY_LE_KEEP_SAFE, m_creature, pPlayer); }
                 break;
             case 1:
                 DoScriptText(SAY_LE_NORTH, m_creature);
@@ -459,7 +465,7 @@ struct  npc_letollAI : public npc_escortAI
     void Aggro(Unit* pWho) override
     {
         if (pWho->IsInCombat() && pWho->GetTypeId() == TYPEID_UNIT && pWho->GetEntry() == NPC_BONE_SIFTER)
-            DoScriptText(SAY_LE_HELP_HIM, m_creature);
+        { DoScriptText(SAY_LE_HELP_HIM, m_creature); }
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -467,9 +473,9 @@ struct  npc_letollAI : public npc_escortAI
         Player* pPlayer = GetPlayerForEscort();
 
         if (pPlayer && pPlayer->IsAlive())
-            pSummoned->AI()->AttackStart(pPlayer);
+        { pSummoned->AI()->AttackStart(pPlayer); }
         else
-            pSummoned->AI()->AttackStart(m_creature);
+        { pSummoned->AI()->AttackStart(m_creature); }
     }
 
     void UpdateEscortAI(const uint32 uiDiff) override
@@ -492,40 +498,40 @@ struct  npc_letollAI : public npc_escortAI
                             break;
                         case 2:
                             if (Creature* pResearcher = GetAvailableResearcher(0))
-                                DoScriptText(SAY_LE_DRUM_REPLY, pResearcher);
+                            { DoScriptText(SAY_LE_DRUM_REPLY, pResearcher); }
                             break;
                         case 3:
                             DoScriptText(SAY_LE_DISCOVERY, m_creature);
                             break;
                         case 4:
                             if (Creature* pResearcher = GetAvailableResearcher(0))
-                                DoScriptText(SAY_LE_DISCOVERY_REPLY, pResearcher);
+                            { DoScriptText(SAY_LE_DISCOVERY_REPLY, pResearcher); }
                             break;
                         case 5:
                             DoScriptText(SAY_LE_NO_LEAVE, m_creature);
                             break;
                         case 6:
                             if (Creature* pResearcher = GetAvailableResearcher(1))
-                                DoScriptText(SAY_LE_NO_LEAVE_REPLY1, pResearcher);
+                            { DoScriptText(SAY_LE_NO_LEAVE_REPLY1, pResearcher); }
                             break;
                         case 7:
                             if (Creature* pResearcher = GetAvailableResearcher(2))
-                                DoScriptText(SAY_LE_NO_LEAVE_REPLY2, pResearcher);
+                            { DoScriptText(SAY_LE_NO_LEAVE_REPLY2, pResearcher); }
                             break;
                         case 8:
                             if (Creature* pResearcher = GetAvailableResearcher(3))
-                                DoScriptText(SAY_LE_NO_LEAVE_REPLY3, pResearcher);
+                            { DoScriptText(SAY_LE_NO_LEAVE_REPLY3, pResearcher); }
                             break;
                         case 9:
                             if (Creature* pResearcher = GetAvailableResearcher(4))
-                                DoScriptText(SAY_LE_NO_LEAVE_REPLY4, pResearcher);
+                            { DoScriptText(SAY_LE_NO_LEAVE_REPLY4, pResearcher); }
                             break;
                         case 10:
                             DoScriptText(SAY_LE_SHUT, m_creature);
                             break;
                         case 11:
                             if (Creature* pResearcher = GetAvailableResearcher(0))
-                                DoScriptText(SAY_LE_REPLY_HEAR, pResearcher);
+                            { DoScriptText(SAY_LE_REPLY_HEAR, pResearcher); }
                             break;
                         case 12:
                             DoScriptText(SAY_LE_IN_YOUR_FACE, m_creature);
@@ -547,7 +553,7 @@ struct  npc_letollAI : public npc_escortAI
                     ++m_uiEventCount;
                 }
                 else
-                    m_uiEventTimer -= uiDiff;
+                { m_uiEventTimer -= uiDiff; }
             }
 
             return;
@@ -597,7 +603,7 @@ enum
     NPC_MANA_BOMB_KILL_TRIGGER  = 21039
 };
 
-struct  npc_mana_bomb_exp_triggerAI : public ScriptedAI
+struct npc_mana_bomb_exp_triggerAI : public ScriptedAI
 {
     npc_mana_bomb_exp_triggerAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -618,7 +624,7 @@ struct  npc_mana_bomb_exp_triggerAI : public ScriptedAI
     void DoTrigger(Player* pPlayer, GameObject* pGo)
     {
         if (m_bIsActivated)
-            return;
+        { return; }
 
         m_bIsActivated = true;
 
@@ -630,20 +636,20 @@ struct  npc_mana_bomb_exp_triggerAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_bIsActivated)
-            return;
+        { return; }
 
         if (m_uiEventTimer < uiDiff)
         {
             m_uiEventTimer = 1000;
 
             if (m_uiEventCounter < 10)
-                m_creature->CastSpell(m_creature, SPELL_MANA_BOMB_LIGHTNING, false);
+            { m_creature->CastSpell(m_creature, SPELL_MANA_BOMB_LIGHTNING, false); }
 
             switch (m_uiEventCounter)
             {
                 case 5:
                     if (pManaBomb)
-                        pManaBomb->SetGoState(GO_STATE_ACTIVE);
+                    { pManaBomb->SetGoState(GO_STATE_ACTIVE); }
 
                     DoScriptText(SAY_COUNT_1, m_creature);
                     break;
@@ -664,7 +670,7 @@ struct  npc_mana_bomb_exp_triggerAI : public ScriptedAI
                     break;
                 case 30:
                     if (pManaBomb)
-                        pManaBomb->SetGoState(GO_STATE_READY);
+                    { pManaBomb->SetGoState(GO_STATE_READY); }
 
                     Reset();
                     break;
@@ -673,7 +679,7 @@ struct  npc_mana_bomb_exp_triggerAI : public ScriptedAI
             ++m_uiEventCounter;
         }
         else
-            m_uiEventTimer -= uiDiff;
+        { m_uiEventTimer -= uiDiff; }
     }
 };
 
@@ -691,7 +697,7 @@ bool GOUse_go_mana_bomb(Player* pPlayer, GameObject* pGo)
     if (Creature* pCreature = GetClosestCreatureWithEntry(pGo, NPC_MANA_BOMB_EXPL_TRIGGER, INTERACTION_DISTANCE))
     {
         if (npc_mana_bomb_exp_triggerAI* pBombAI = dynamic_cast<npc_mana_bomb_exp_triggerAI*>(pCreature->AI()))
-            pBombAI->DoTrigger(pPlayer, pGo);
+        { pBombAI->DoTrigger(pPlayer, pGo); }
     }
 
     return true;
@@ -735,7 +741,7 @@ bool GOUse_go_veil_skith_cage(Player* pPlayer, GameObject* pGo)
     return false;
 };
 
-struct  npc_captive_child : public ScriptedAI
+struct npc_captive_child : public ScriptedAI
 {
     npc_captive_child(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -744,7 +750,7 @@ struct  npc_captive_child : public ScriptedAI
     void MovementInform(uint32 uiMotionType, uint32 /*uiPointId*/) override
     {
         if (uiMotionType == POINT_MOTION_TYPE)
-            m_creature->ForcedDespawn();                    // we only have one waypoint
+        { m_creature->ForcedDespawn(); }                    // we only have one waypoint
     }
 };
 
@@ -779,7 +785,7 @@ enum
     SPELL_TRAVELFORM                    = 32447             // guesswork
 };
 
-struct  npc_isla_starmaneAI : public npc_escortAI
+struct npc_isla_starmaneAI : public npc_escortAI
 {
     npc_isla_starmaneAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
@@ -799,7 +805,7 @@ struct  npc_isla_starmaneAI : public npc_escortAI
         m_uiWrathTimer = 2000;
 
         if (!HasEscortState(STATE_ESCORT_ESCORTING))
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+        { m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE); }
     }
 
     void JustStartedEscort() override
@@ -807,7 +813,7 @@ struct  npc_isla_starmaneAI : public npc_escortAI
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
         DoScriptText(SAY_ISLA_START, m_creature);
         if (GameObject* pCage = GetClosestGameObjectWithEntry(m_creature, GO_CAGE, 2 * INTERACTION_DISTANCE))
-            pCage->Use(m_creature);
+        { pCage->Use(m_creature); }
     }
 
     void WaypointStart(uint32 uiPointId) override
@@ -828,11 +834,11 @@ struct  npc_isla_starmaneAI : public npc_escortAI
                 break;
             case 61:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(pPlayer->GetTeam() == ALLIANCE ? QUEST_ESCAPE_FROM_FIREWING_POINT_A : QUEST_ESCAPE_FROM_FIREWING_POINT_H, m_creature);
+                { pPlayer->GroupEventHappens(pPlayer->GetTeam() == ALLIANCE ? QUEST_ESCAPE_FROM_FIREWING_POINT_A : QUEST_ESCAPE_FROM_FIREWING_POINT_H, m_creature); }
                 break;
             case 67:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    m_creature->SetFacingToObject(pPlayer);
+                { m_creature->SetFacingToObject(pPlayer); }
                 m_creature->HandleEmote(EMOTE_ONESHOT_WAVE);
                 break;
         }
@@ -853,35 +859,35 @@ struct  npc_isla_starmaneAI : public npc_escortAI
                 }
             }
             else
-                m_uiPeriodicTalkTimer -= uiDiff;
+            { m_uiPeriodicTalkTimer -= uiDiff; }
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiEntanglingRootsTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ENTANGLING_ROOTS) == CAST_OK)
-                m_uiEntanglingRootsTimer = urand(8000, 16000);
+            { m_uiEntanglingRootsTimer = urand(8000, 16000); }
         }
         else
-            m_uiEntanglingRootsTimer -= uiDiff;
+        { m_uiEntanglingRootsTimer -= uiDiff; }
 
         if (m_uiMoonfireTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MOONFIRE) == CAST_OK)
-                m_uiMoonfireTimer = urand(6000, 12000);
+            { m_uiMoonfireTimer = urand(6000, 12000); }
         }
         else
-            m_uiMoonfireTimer -= uiDiff;
+        { m_uiMoonfireTimer -= uiDiff; }
 
         if (m_uiWrathTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_WRATH) == CAST_OK)
-                m_uiWrathTimer = 2000;
+            { m_uiWrathTimer = 2000; }
         }
         else
-            m_uiWrathTimer -= uiDiff;
+        { m_uiWrathTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }
@@ -928,7 +934,7 @@ enum
 
 static const float aLuangaSpawnCoords[3] = { -3507.203f, 4084.619f, 92.947f};
 
-struct  npc_skywingAI : public npc_escortAI
+struct npc_skywingAI : public npc_escortAI
 {
     npc_skywingAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -973,7 +979,7 @@ struct  npc_skywingAI : public npc_escortAI
                 DoScriptText(SAY_SKYWING_END, m_creature);
 
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_SKYWING, m_creature);
+                { pPlayer->GroupEventHappens(QUEST_SKYWING, m_creature); }
         }
     }
 
@@ -993,21 +999,21 @@ struct  npc_skywingAI : public npc_escortAI
                     ++m_uiCycloneCounter;
 
                     if (m_uiCycloneCounter == 30)
-                        DoCastSpellIfCan(m_creature, SPELL_RILAK_THE_REDEEMED, CAST_TRIGGERED);
+                    { DoCastSpellIfCan(m_creature, SPELL_RILAK_THE_REDEEMED, CAST_TRIGGERED); }
 
                     // Only cast this spell 50 times
                     if (m_uiCycloneCounter == 50)
-                        m_uiCycloneTimer = 0;
+                    { m_uiCycloneTimer = 0; }
                     else
-                        m_uiCycloneTimer = 100;
+                    { m_uiCycloneTimer = 100; }
                 }
             }
             else
-                m_uiCycloneTimer -= uiDiff;
+            { m_uiCycloneTimer -= uiDiff; }
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
     }
 };
 
@@ -1045,7 +1051,7 @@ enum
     GO_RAVEN_STONE              = 185541,
 };
 
-struct  npc_cenarion_sparrowhawkAI : public ScriptedAI
+struct npc_cenarion_sparrowhawkAI : public ScriptedAI
 {
     npc_cenarion_sparrowhawkAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -1142,7 +1148,7 @@ enum
     QUEST_ID_ESCAPE_SKETTIS     = 11085,
 };
 
-struct  npc_skyguard_prisonerAI : public npc_escortAI
+struct npc_skyguard_prisonerAI : public npc_escortAI
 {
     npc_skyguard_prisonerAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -1161,14 +1167,14 @@ struct  npc_skyguard_prisonerAI : public npc_escortAI
                 SetEscortPaused(true);
                 //SetCurrentWaypoint(WP_ID_SPAWN_1);
                 //SetEscortPaused(false);
-                script_error_log("NPC entry %u, location %f, %f, %f does not have waypoints implemneted for current spawn location. Please contact customer support!", m_creature->GetEntry(), m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
+                script_error_log("NPC entry %u, location %f, %f, %f does not have waypoints implemented for current spawn location. Please contact customer support!", m_creature->GetEntry(), m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
             }
             else if (m_creature->GetPositionZ() < 330.0f)
             {
                 SetEscortPaused(true);
                 //SetCurrentWaypoint(WP_ID_SPAWN_2);
                 //SetEscortPaused(false);
-                script_error_log("NPC entry %u, location %f, %f, %f does not have waypoints implemneted for current spawn location. Please contact customer support!", m_creature->GetEntry(), m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
+                script_error_log("NPC entry %u, location %f, %f, %f does not have waypoints implemented for current spawn location. Please contact customer support!", m_creature->GetEntry(), m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
             }
             // else just use standard WP
 
@@ -1302,7 +1308,7 @@ void AddSC_terokkar_forest()
     pNewScript->Name = "npc_cenarion_sparrowhawk";
     pNewScript->GetAI = &GetAI_npc_cenarion_sparrowhawk;
     pNewScript->RegisterSelf();
-    
+
     pNewScript = new Script;
     pNewScript->Name = "npc_skyguard_prisoner";
     pNewScript->GetAI = &GetAI_npc_skyguard_prisoner;

@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -51,7 +57,7 @@ enum
     // SPELL_ETHEREAL_BEACON_VISUAL  = 32368,               // included in creature_template_addon
 };
 
-struct  boss_nexusprince_shaffarAI : public ScriptedAI
+struct boss_nexusprince_shaffarAI : public ScriptedAI
 {
     boss_nexusprince_shaffarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -100,7 +106,7 @@ struct  boss_nexusprince_shaffarAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            pSummoned->AI()->AttackStart(pTarget);
+        { pSummoned->AI()->AttackStart(pTarget); }
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -116,31 +122,31 @@ struct  boss_nexusprince_shaffarAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiFrostNovaTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_FROSTNOVA) == CAST_OK)
-                m_uiFrostNovaTimer = urand(10000, 20000);
+            { m_uiFrostNovaTimer = urand(10000, 20000); }
         }
         else
-            m_uiFrostNovaTimer -= uiDiff;
+        { m_uiFrostNovaTimer -= uiDiff; }
 
         if (m_uiFrostboltTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROSTBOLT) == CAST_OK)
-                m_uiFrostboltTimer = urand(3000, 8000);
+            { m_uiFrostboltTimer = urand(3000, 8000); }
         }
         else
-            m_uiFrostboltTimer -= uiDiff;
+        { m_uiFrostboltTimer -= uiDiff; }
 
         if (m_uiFireBallTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FIREBALL) == CAST_OK)
-                m_uiFireBallTimer = urand(3000, 8000);
+            { m_uiFireBallTimer = urand(3000, 8000); }
         }
         else
-            m_uiFireBallTimer -= uiDiff;
+        { m_uiFireBallTimer -= uiDiff; }
 
         if (m_uiBlinkTimer <= uiDiff)
         {
@@ -149,26 +155,26 @@ struct  boss_nexusprince_shaffarAI : public ScriptedAI
                 // expire movement, will prevent from running right back to victim after cast
                 //(but should MoveChase be used again at a certain time or should he not move?)
                 if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
-                    m_creature->GetMotionMaster()->MovementExpired();
+                { m_creature->GetMotionMaster()->MovementExpired(); }
 
                 m_uiBlinkTimer = urand(25000, 30000);
             }
         }
         else
-            m_uiBlinkTimer -= uiDiff;
+        { m_uiBlinkTimer -= uiDiff; }
 
         if (m_uiBeaconTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_ETHEREAL_BEACON) == CAST_OK)
             {
                 if (!urand(0, 3))
-                    DoScriptText(SAY_SUMMON, m_creature);
+                { DoScriptText(SAY_SUMMON, m_creature); }
 
                 m_uiBeaconTimer = urand(45000, 75000);
             }
         }
         else
-            m_uiBeaconTimer -= uiDiff;
+        { m_uiBeaconTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

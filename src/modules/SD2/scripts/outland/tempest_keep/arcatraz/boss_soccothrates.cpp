@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -66,7 +72,7 @@ static const DialogueEntry aIntroDialogue[] =
     {0, 0, 0},
 };
 
-struct  boss_soccothratesAI : public ScriptedAI, private DialogueHelper
+struct boss_soccothratesAI : public ScriptedAI, private DialogueHelper
 {
     boss_soccothratesAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aIntroDialogue)
@@ -103,7 +109,7 @@ struct  boss_soccothratesAI : public ScriptedAI, private DialogueHelper
         DoScriptText(SAY_AGGRO, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_SOCCOTHRATES, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_SOCCOTHRATES, IN_PROGRESS); }
     }
 
     void MoveInLineOfSight(Unit* pWho) override
@@ -127,7 +133,7 @@ struct  boss_soccothratesAI : public ScriptedAI, private DialogueHelper
         DoScriptText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_SOCCOTHRATES, DONE);
+        { m_pInstance->SetData(TYPE_SOCCOTHRATES, DONE); }
     }
 
     void EnterEvadeMode() override
@@ -139,10 +145,10 @@ struct  boss_soccothratesAI : public ScriptedAI, private DialogueHelper
 
         // should evade to the attack position
         if (m_creature->IsAlive())
-            m_creature->GetMotionMaster()->MovePoint(1, aSoccotharesStartPos[0], aSoccotharesStartPos[1], aSoccotharesStartPos[2]);
+        { m_creature->GetMotionMaster()->MovePoint(1, aSoccotharesStartPos[0], aSoccotharesStartPos[1], aSoccotharesStartPos[2]); }
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_SOCCOTHRATES, FAIL);
+        { m_pInstance->SetData(TYPE_SOCCOTHRATES, FAIL); }
 
         m_creature->SetLootRecipient(NULL);
 
@@ -152,11 +158,11 @@ struct  boss_soccothratesAI : public ScriptedAI, private DialogueHelper
     void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
     {
         if (uiMoveType != POINT_MOTION_TYPE)
-            return;
+        { return; }
 
         // Adjust orientation
         if (uiPointId)
-            m_creature->SetFacingTo(aSoccotharesStartPos[3]);
+        { m_creature->SetFacingTo(aSoccotharesStartPos[3]); }
     }
 
     void JustDidDialogueStep(int32 iEntry) override
@@ -169,7 +175,7 @@ struct  boss_soccothratesAI : public ScriptedAI, private DialogueHelper
             if (m_pInstance)
             {
                 if (Creature* pDalliah = m_pInstance->GetSingleCreatureFromStorage(NPC_DALLIAH))
-                    pDalliah->GetMotionMaster()->MovePoint(1, aDalliahStartPos[0], aDalliahStartPos[1], aDalliahStartPos[2]);
+                { pDalliah->GetMotionMaster()->MovePoint(1, aDalliahStartPos[0], aDalliahStartPos[1], aDalliahStartPos[2]); }
             }
         }
     }
@@ -179,15 +185,15 @@ struct  boss_soccothratesAI : public ScriptedAI, private DialogueHelper
         DialogueUpdate(uiDiff);
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiFelfireShockTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FELFIRE_SHOCK : SPELL_FELFIRE_SHOCK_H) == CAST_OK)
-                m_uiFelfireShockTimer = urand(35000, 45000);
+            { m_uiFelfireShockTimer = urand(35000, 45000); }
         }
         else
-            m_uiFelfireShockTimer -= uiDiff;
+        { m_uiFelfireShockTimer -= uiDiff; }
 
         if (m_uiKnockAwayTimer < uiDiff)
         {
@@ -198,7 +204,7 @@ struct  boss_soccothratesAI : public ScriptedAI, private DialogueHelper
             }
         }
         else
-            m_uiKnockAwayTimer -= uiDiff;
+        { m_uiKnockAwayTimer -= uiDiff; }
 
         // Prepare the boss for charging
         if (m_uiFelfireLineupTimer)
@@ -219,7 +225,7 @@ struct  boss_soccothratesAI : public ScriptedAI, private DialogueHelper
                 }
             }
             else
-                m_uiFelfireLineupTimer -= uiDiff;
+            { m_uiFelfireLineupTimer -= uiDiff; }
         }
 
         // Charge the target
@@ -229,10 +235,10 @@ struct  boss_soccothratesAI : public ScriptedAI, private DialogueHelper
             {
                 // Note: this spell will also light up the Wrath-Scryer's Felfire npcs
                 if (DoCastSpellIfCan(m_creature, SPELL_CHARGE) == CAST_OK)
-                    m_uiChargeTimer = 0;
+                { m_uiChargeTimer = 0; }
             }
             else
-                m_uiChargeTimer -= uiDiff;
+            { m_uiChargeTimer -= uiDiff; }
         }
 
         DoMeleeAttackIfReady();

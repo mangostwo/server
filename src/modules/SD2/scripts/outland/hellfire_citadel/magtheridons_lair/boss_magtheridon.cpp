@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -87,7 +93,7 @@ enum
 ## boss_magtheridon
 ######*/
 
-struct  boss_magtheridonAI : public ScriptedAI
+struct boss_magtheridonAI : public ScriptedAI
 {
     boss_magtheridonAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -143,7 +149,7 @@ struct  boss_magtheridonAI : public ScriptedAI
     void JustDied(Unit* /*pKiller*/) override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_MAGTHERIDON_EVENT, DONE);
+        { m_pInstance->SetData(TYPE_MAGTHERIDON_EVENT, DONE); }
 
         DoScriptText(SAY_DEATH, m_creature);
     }
@@ -151,20 +157,20 @@ struct  boss_magtheridonAI : public ScriptedAI
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_MAGTHERIDON_EVENT, FAIL);
+        { m_pInstance->SetData(TYPE_MAGTHERIDON_EVENT, FAIL); }
     }
 
     void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
     {
         // When banished by the cubes
         if (pSpell->Id == SPELL_SHADOW_CAGE)
-            DoScriptText(SAY_BANISH, m_creature);
+        { DoScriptText(SAY_BANISH, m_creature); }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiBerserkTimer)
         {
@@ -177,7 +183,7 @@ struct  boss_magtheridonAI : public ScriptedAI
                 }
             }
             else
-                m_uiBerserkTimer -= uiDiff;
+            { m_uiBerserkTimer -= uiDiff; }
         }
 
         // Transition to phase 3
@@ -192,25 +198,25 @@ struct  boss_magtheridonAI : public ScriptedAI
                         if (DoCastSpellIfCan(m_creature, SPELL_CAMERA_SHAKE) == CAST_OK)
                         {
                             if (m_pInstance)
-                                m_pInstance->SetData(TYPE_MAGTHERIDON_EVENT, SPECIAL);
+                            { m_pInstance->SetData(TYPE_MAGTHERIDON_EVENT, SPECIAL); }
 
                             m_uiTransitionTimer = 8000;
                         }
                         break;
                     case 1:
                         if (DoCastSpellIfCan(m_creature, SPELL_DEBRIS_KNOCKDOWN) == CAST_OK)
-                            m_uiTransitionTimer = 0;
+                        { m_uiTransitionTimer = 0; }
                         break;
                 }
 
                 ++m_uiTransitionCount;
             }
             else
-                m_uiTransitionTimer -= uiDiff;
+            { m_uiTransitionTimer -= uiDiff; }
 
             // Workaround for missing spell: no other spells during transition
             if (!m_uiTransitionCount)
-                return;
+            { return; }
         }
 
         if (m_uiQuakeTimer < uiDiff)
@@ -243,19 +249,19 @@ struct  boss_magtheridonAI : public ScriptedAI
             }
         }
         else
-            m_uiQuakeTimer -= uiDiff;
+        { m_uiQuakeTimer -= uiDiff; }
 
         // don't use other spells during quake
         if (m_uiQuakeCount)
-            return;
+        { return; }
 
         if (m_uiCleaveTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
-                m_uiCleaveTimer = 10000;
+            { m_uiCleaveTimer = 10000; }
         }
         else
-            m_uiCleaveTimer -= uiDiff;
+        { m_uiCleaveTimer -= uiDiff; }
 
         if (m_uiBlastNovaTimer < uiDiff)
         {
@@ -266,15 +272,15 @@ struct  boss_magtheridonAI : public ScriptedAI
             }
         }
         else
-            m_uiBlastNovaTimer -= uiDiff;
+        { m_uiBlastNovaTimer -= uiDiff; }
 
         if (m_uiBlazeTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_BLAZE) == CAST_OK)
-                m_uiBlazeTimer = urand(10000, 15000);
+            { m_uiBlazeTimer = urand(10000, 15000); }
         }
         else
-            m_uiBlazeTimer -= uiDiff;
+        { m_uiBlazeTimer -= uiDiff; }
 
         // Transition to phase 3
         if (!m_bIsPhase3 && m_creature->GetHealthPercent() < 30.0f)
@@ -291,10 +297,10 @@ struct  boss_magtheridonAI : public ScriptedAI
             if (m_uiDebrisTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_QUAKE_EFFECT) == CAST_OK)
-                    m_uiDebrisTimer = urand(20000, 30000);
+                { m_uiDebrisTimer = urand(20000, 30000); }
             }
             else
-                m_uiDebrisTimer -= uiDiff;
+            { m_uiDebrisTimer -= uiDiff; }
         }
 
         DoMeleeAttackIfReady();
@@ -305,7 +311,7 @@ struct  boss_magtheridonAI : public ScriptedAI
 ## mob_hellfire_channeler
 ######*/
 
-struct  mob_hellfire_channelerAI : public ScriptedAI
+struct mob_hellfire_channelerAI : public ScriptedAI
 {
     mob_hellfire_channelerAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -335,7 +341,7 @@ struct  mob_hellfire_channelerAI : public ScriptedAI
         m_creature->InterruptNonMeleeSpells(false);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_CHANNELER_EVENT, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_CHANNELER_EVENT, IN_PROGRESS); }
     }
 
     // Don't attack on LoS check
@@ -349,19 +355,19 @@ struct  mob_hellfire_channelerAI : public ScriptedAI
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_CHANNELER_EVENT, FAIL);
+        { m_pInstance->SetData(TYPE_CHANNELER_EVENT, FAIL); }
     }
 
     void JustSummoned(Creature* pSummoned) override
     {
         if (m_creature->getVictim())
-            pSummoned->AI()->AttackStart(m_creature->getVictim());
+        { pSummoned->AI()->AttackStart(m_creature->getVictim()); }
     }
 
     void SummonedCreatureDespawn(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_BURNING_ABYSS)
-            m_uiInfernalTimer = urand(10000, 15000);
+        { m_uiInfernalTimer = urand(10000, 15000); }
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -372,44 +378,44 @@ struct  mob_hellfire_channelerAI : public ScriptedAI
             if (m_uiShadowGraspTimer <= uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_GRASP_DUMMY) == CAST_OK)
-                    m_uiShadowGraspTimer = 0;
+                { m_uiShadowGraspTimer = 0; }
             }
             else
-                m_uiShadowGraspTimer -= uiDiff;
+            { m_uiShadowGraspTimer -= uiDiff; }
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiShadowBoltVolleyTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_BOLT_VOLLEY) == CAST_OK)
-                m_uiShadowBoltVolleyTimer = urand(10000, 20000);
+            { m_uiShadowBoltVolleyTimer = urand(10000, 20000); }
         }
         else
-            m_uiShadowBoltVolleyTimer -= uiDiff;
+        { m_uiShadowBoltVolleyTimer -= uiDiff; }
 
         if (m_uiDarkMendingTimer < uiDiff)
         {
             if (Unit* pTarget = DoSelectLowestHpFriendly(30.0f))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_DARK_MENDING) == CAST_OK)
-                    m_uiDarkMendingTimer = urand(10000, 20000);
+                { m_uiDarkMendingTimer = urand(10000, 20000); }
             }
         }
         else
-            m_uiDarkMendingTimer -= uiDiff;
+        { m_uiDarkMendingTimer -= uiDiff; }
 
         if (m_uiFearTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_FEAR) == CAST_OK)
-                    m_uiFearTimer = urand(25000, 40000);
+                { m_uiFearTimer = urand(25000, 40000); }
             }
         }
         else
-            m_uiFearTimer -= uiDiff;
+        { m_uiFearTimer -= uiDiff; }
 
         if (m_uiInfernalTimer)
         {
@@ -418,11 +424,11 @@ struct  mob_hellfire_channelerAI : public ScriptedAI
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_BURNING_ABYSSAL) == CAST_OK)
-                        m_uiInfernalTimer = 0;
+                    { m_uiInfernalTimer = 0; }
                 }
             }
             else
-                m_uiInfernalTimer -= uiDiff;
+            { m_uiInfernalTimer -= uiDiff; }
         }
 
         DoMeleeAttackIfReady();
@@ -437,21 +443,21 @@ bool GOUse_go_manticron_cube(Player* pPlayer, GameObject* pGo)
 {
     // if exhausted or already channeling return
     if (pPlayer->HasAura(SPELL_MIND_EXHAUSTION) || pPlayer->HasAura(SPELL_SHADOW_GRASP))
-        return true;
+    { return true; }
 
     if (ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData())
     {
         if (pInstance->GetData(TYPE_MAGTHERIDON_EVENT) != IN_PROGRESS)
-            return true;
+        { return true; }
 
         if (Creature* pMagtheridon = pInstance->GetSingleCreatureFromStorage(NPC_MAGTHERIDON))
         {
             if (!pMagtheridon->IsAlive())
-                return true;
+            { return true; }
 
             // visual is cast by cube
             if (Creature* pTrigger = GetClosestCreatureWithEntry(pGo, NPC_RAID_TRIGGER, 5.0f))
-                pTrigger->CastSpell(pTrigger, SPELL_SHADOW_GRASP_VISUAL, false);
+            { pTrigger->CastSpell(pTrigger, SPELL_SHADOW_GRASP_VISUAL, false); }
 
             // the real spell is cast by player
             pPlayer->CastSpell(pPlayer, SPELL_SHADOW_GRASP, false, NULL, NULL, pGo->GetObjectGuid());
@@ -462,7 +468,7 @@ bool GOUse_go_manticron_cube(Player* pPlayer, GameObject* pGo)
 }
 
 // TODO Remove this 'script' when combat and persistent area auras can be proper prevented from core-side
-struct  npc_target_triggerAI : public Scripted_NoMovementAI
+struct npc_target_triggerAI : public Scripted_NoMovementAI
 {
     npc_target_triggerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) {Reset();}
 
@@ -482,7 +488,7 @@ struct  npc_target_triggerAI : public Scripted_NoMovementAI
         if (pSpell->Id == SPELL_QUAKE_EFFECT)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_DEBRIS_VISUAL) == CAST_OK)
-                m_uiDebrisTimer = 5000;
+            { m_uiDebrisTimer = 5000; }
         }
     }
 
@@ -494,16 +500,16 @@ struct  npc_target_triggerAI : public Scripted_NoMovementAI
             if (m_uiDebrisTimer <= uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_DEBRIS_DAMAGE) == CAST_OK)
-                    m_uiDebrisTimer = 0;
+                { m_uiDebrisTimer = 0; }
             }
             else
-                m_uiDebrisTimer -= uiDiff;
+            { m_uiDebrisTimer -= uiDiff; }
         }
     }
 };
 
 // ToDo: move this script to eventAI
-struct  mob_abyssalAI : public ScriptedAI
+struct mob_abyssalAI : public ScriptedAI
 {
     mob_abyssalAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -519,7 +525,7 @@ struct  mob_abyssalAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiDespawnTimer < uiDiff)
         {
@@ -527,15 +533,15 @@ struct  mob_abyssalAI : public ScriptedAI
             m_uiDespawnTimer = 10000;
         }
         else
-            m_uiDespawnTimer -= uiDiff;
+        { m_uiDespawnTimer -= uiDiff; }
 
         if (m_uiFireBlastTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FIRE_BLAST) == CAST_OK)
-                m_uiFireBlastTimer = urand(5000, 15000);
+            { m_uiFireBlastTimer = urand(5000, 15000); }
         }
         else
-            m_uiFireBlastTimer -= uiDiff;
+        { m_uiFireBlastTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

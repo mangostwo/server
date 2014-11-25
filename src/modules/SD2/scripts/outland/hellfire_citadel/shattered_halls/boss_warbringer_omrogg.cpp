@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -101,7 +107,7 @@ static Yell KillingDelay[] =
     { -1000000, NPC_LEFT_HEAD},
 };
 
-struct  mob_omrogg_headsAI : public ScriptedAI
+struct mob_omrogg_headsAI : public ScriptedAI
 {
     mob_omrogg_headsAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -122,7 +128,7 @@ struct  mob_omrogg_headsAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_bDeathYell)
-            return;
+        { return; }
 
         if (m_uiDeathTimer < uiDiff)
         {
@@ -131,11 +137,11 @@ struct  mob_omrogg_headsAI : public ScriptedAI
             m_creature->ForcedDespawn(1000);
         }
         else
-            m_uiDeathTimer -= uiDiff;
+        { m_uiDeathTimer -= uiDiff; }
     }
 };
 
-struct  boss_warbringer_omroggAI : public ScriptedAI
+struct boss_warbringer_omroggAI : public ScriptedAI
 {
     boss_warbringer_omroggAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -189,7 +195,7 @@ struct  boss_warbringer_omroggAI : public ScriptedAI
         Creature* pRightHead = m_creature->GetMap()->GetCreature(m_rightHeadGuid);
 
         if (!pLeftHead || !pRightHead)
-            return;
+        { return; }
 
         m_iThreat = irand(0, 3);
 
@@ -217,15 +223,15 @@ struct  boss_warbringer_omroggAI : public ScriptedAI
         }
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_OMROGG, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_OMROGG, IN_PROGRESS); }
     }
 
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_LEFT_HEAD)
-            m_leftHeadGuid = pSummoned->GetObjectGuid();
+        { m_leftHeadGuid = pSummoned->GetObjectGuid(); }
         else if (pSummoned->GetEntry() == NPC_RIGHT_HEAD)
-            m_rightHeadGuid = pSummoned->GetObjectGuid();
+        { m_rightHeadGuid = pSummoned->GetObjectGuid(); }
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -234,7 +240,7 @@ struct  boss_warbringer_omroggAI : public ScriptedAI
         Creature* pRightHead = m_creature->GetMap()->GetCreature(m_rightHeadGuid);
 
         if (!pLeftHead || !pRightHead)
-            return;
+        { return; }
 
         m_iKilling = irand(0, 1);
 
@@ -260,16 +266,16 @@ struct  boss_warbringer_omroggAI : public ScriptedAI
         Creature* pRightHead = m_creature->GetMap()->GetCreature(m_rightHeadGuid);
 
         if (!pLeftHead || !pRightHead)
-            return;
+        { return; }
 
         DoScriptText(YELL_DIE_L, pLeftHead);
         pLeftHead->ForcedDespawn(1000);
 
         if (mob_omrogg_headsAI* pHeadAI = dynamic_cast<mob_omrogg_headsAI*>(pRightHead->AI()))
-            pHeadAI->DoDeathYell();
+        { pHeadAI->DoDeathYell(); }
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_OMROGG, DONE);
+        { m_pInstance->SetData(TYPE_OMROGG, DONE); }
     }
 
     void JustReachedHome() override
@@ -287,7 +293,7 @@ struct  boss_warbringer_omroggAI : public ScriptedAI
         }
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_OMROGG, FAIL);
+        { m_pInstance->SetData(TYPE_OMROGG, FAIL); }
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -300,7 +306,7 @@ struct  boss_warbringer_omroggAI : public ScriptedAI
             Creature* pRightHead = m_creature->GetMap()->GetCreature(m_rightHeadGuid);
 
             if (!pLeftHead || !pRightHead)
-                return;
+            { return; }
 
             if (m_bAggroYell)
             {
@@ -334,10 +340,10 @@ struct  boss_warbringer_omroggAI : public ScriptedAI
             }
         }
         else
-            m_uiDelayTimer -= uiDiff;
+        { m_uiDelayTimer -= uiDiff; }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiBlastCount && m_uiBlastWaveTimer)
         {
@@ -349,11 +355,11 @@ struct  boss_warbringer_omroggAI : public ScriptedAI
                     ++m_uiBlastCount;
 
                     if (m_uiBlastCount == 3)
-                        m_uiBlastCount = 0;
+                    { m_uiBlastCount = 0; }
                 }
             }
             else
-                m_uiBlastWaveTimer -= uiDiff;
+            { m_uiBlastWaveTimer -= uiDiff; }
         }
 
         if (m_uiBurningMaulTimer < uiDiff)
@@ -367,7 +373,7 @@ struct  boss_warbringer_omroggAI : public ScriptedAI
             }
         }
         else
-            m_uiBurningMaulTimer -= uiDiff;
+        { m_uiBurningMaulTimer -= uiDiff; }
 
         if (m_uiResetThreatTimer < uiDiff)
         {
@@ -380,23 +386,23 @@ struct  boss_warbringer_omroggAI : public ScriptedAI
             m_uiResetThreatTimer = urand(25000, 40000);
         }
         else
-            m_uiResetThreatTimer -= uiDiff;
+        { m_uiResetThreatTimer -= uiDiff; }
 
         if (m_uiFearTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_FEAR) == CAST_OK)
-                m_uiFearTimer = urand(15000, 35000);
+            { m_uiFearTimer = urand(15000, 35000); }
         }
         else
-            m_uiFearTimer -= uiDiff;
+        { m_uiFearTimer -= uiDiff; }
 
         if (m_uiThunderClapTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_THUNDERCLAP) == CAST_OK)
-                m_uiThunderClapTimer = urand(15000, 30000);
+            { m_uiThunderClapTimer = urand(15000, 30000); }
         }
         else
-            m_uiThunderClapTimer -= uiDiff;
+        { m_uiThunderClapTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

@@ -228,7 +228,7 @@ static EventLocations aEternalBoardMovement[] =
     { -8085.748f, 1521.484f, 2.624f,  0, 0 }          // 10 Anchor point for the army summoning
 };
 
-struct  npc_anachronos_the_ancientAI : public ScriptedAI, private DialogueHelper
+struct npc_anachronos_the_ancientAI : public ScriptedAI, private DialogueHelper
 {
     npc_anachronos_the_ancientAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aEventDialogue)

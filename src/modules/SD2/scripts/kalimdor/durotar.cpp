@@ -56,7 +56,7 @@ enum
     GO_LUMBERPILE           = 175784,
 };
 
-struct  npc_lazy_peonAI : public ScriptedAI
+struct npc_lazy_peonAI : public ScriptedAI
 {
     npc_lazy_peonAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

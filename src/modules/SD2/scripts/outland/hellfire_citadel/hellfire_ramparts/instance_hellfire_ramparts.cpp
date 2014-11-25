@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -71,22 +77,22 @@ void instance_ramparts::SetData(uint32 uiType, uint32 uiData)
     {
         case TYPE_VAZRUDEN:
             if (m_auiEncounter[0] == uiData)
-                return;
+            { return; }
             if (uiData == DONE && m_auiEncounter[1] == DONE)
-                DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_FEL_IRON_CHEST : GO_FEL_IRON_CHEST_H, HOUR);
+            { DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_FEL_IRON_CHEST : GO_FEL_IRON_CHEST_H, HOUR); }
             if (uiData == FAIL && m_auiEncounter[0] != FAIL)
-                DoFailVazruden();
+            { DoFailVazruden(); }
             m_auiEncounter[0] = uiData;
             break;
         case TYPE_NAZAN:
             if (m_auiEncounter[1] == uiData)
-                return;
+            { return; }
             if (uiData == SPECIAL)                          // SPECIAL set via ACID
             {
                 ++m_uiSentryCounter;
 
                 if (m_uiSentryCounter == 2)
-                    m_auiEncounter[1] = uiData;
+                { m_auiEncounter[1] = uiData; }
 
                 return;
             }
@@ -96,7 +102,7 @@ void instance_ramparts::SetData(uint32 uiType, uint32 uiData)
                 DoToggleGameObjectFlags(instance->IsRegularDifficulty() ? GO_FEL_IRON_CHEST : GO_FEL_IRON_CHEST_H, GO_FLAG_NO_INTERACT, false);
             }
             if (uiData == FAIL && m_auiEncounter[1] != FAIL)
-                DoFailVazruden();
+            { DoFailVazruden(); }
 
             m_auiEncounter[1] = uiData;
             break;
@@ -106,10 +112,10 @@ void instance_ramparts::SetData(uint32 uiType, uint32 uiData)
 uint32 instance_ramparts::GetData(uint32 uiType) const
 {
     if (uiType == TYPE_VAZRUDEN)
-        return m_auiEncounter[0];
+    { return m_auiEncounter[0]; }
 
     if (uiType == TYPE_NAZAN)
-        return m_auiEncounter[1];
+    { return m_auiEncounter[1]; }
 
     return 0;
 }
@@ -125,24 +131,24 @@ void instance_ramparts::DoFailVazruden()
     for (GuidList::const_iterator itr = m_lSentryGUIDs.begin(); itr != m_lSentryGUIDs.end(); ++itr)
     {
         if (Creature* pSentry = instance->GetCreature(*itr))
-            pSentry->Respawn();
+        { pSentry->Respawn(); }
     }
 
     // Respawn or Reset Vazruden the herald
     if (Creature* pVazruden = GetSingleCreatureFromStorage(NPC_VAZRUDEN_HERALD))
     {
         if (!pVazruden->IsAlive())
-            pVazruden->Respawn();
+        { pVazruden->Respawn(); }
         else
         {
             if (ScriptedAI* pVazrudenAI = dynamic_cast<ScriptedAI*>(pVazruden->AI()))
-                pVazrudenAI->EnterEvadeMode();
+            { pVazrudenAI->EnterEvadeMode(); }
         }
     }
 
     // Despawn Vazruden
     if (Creature* pVazruden = GetSingleCreatureFromStorage(NPC_VAZRUDEN))
-        pVazruden->ForcedDespawn();
+    { pVazruden->ForcedDespawn(); }
 }
 
 InstanceData* GetInstanceData_instance_ramparts(Map* pMap)

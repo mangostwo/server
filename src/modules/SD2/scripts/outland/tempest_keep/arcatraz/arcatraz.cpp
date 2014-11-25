@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -85,7 +91,7 @@ static const DialogueEntry aIntroDialogue[] =
 
 static const float fRoomCenterCoords[3] = {445.8804f, -158.7055f, 43.06898f};
 
-struct  npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
+struct npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
 {
     npc_millhouse_manastormAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aIntroDialogue)
@@ -153,7 +159,7 @@ struct  npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
 
         // Boss should evade in the center of the room
         if (m_creature->IsAlive())
-            m_creature->GetMotionMaster()->MovePoint(1, fRoomCenterCoords[0], fRoomCenterCoords[1], fRoomCenterCoords[2]);
+        { m_creature->GetMotionMaster()->MovePoint(1, fRoomCenterCoords[0], fRoomCenterCoords[1], fRoomCenterCoords[2]); }
 
         m_creature->SetLootRecipient(NULL);
 
@@ -166,7 +172,7 @@ struct  npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
         {
             case TYPE_WARDEN_2:
                 if (m_pInstance)
-                    m_pInstance->SetData(TYPE_WARDEN_2, DONE);
+                { m_pInstance->SetData(TYPE_WARDEN_2, DONE); }
                 break;
             case SAY_WATER:
                 DoCastSpellIfCan(m_creature, SPELL_CONJURE_WATER);
@@ -192,7 +198,7 @@ struct  npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
         DialogueUpdate(uiDiff);
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (!m_bHasLowHp && m_creature->GetHealthPercent() < 20.0f)
         {
@@ -209,47 +215,47 @@ struct  npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
             }
         }
         else
-            m_uiPyroblastTimer -= uiDiff;
+        { m_uiPyroblastTimer -= uiDiff; }
 
         if (m_uiFireballTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FIREBALL) == CAST_OK)
-                m_uiFireballTimer = 4000;
+            { m_uiFireballTimer = 4000; }
         }
         else
-            m_uiFireballTimer -= uiDiff;
+        { m_uiFireballTimer -= uiDiff; }
 
         if (m_uiFrostBoltTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROSTBOLT) == CAST_OK)
-                m_uiFrostBoltTimer = urand(4000, 6000);
+            { m_uiFrostBoltTimer = urand(4000, 6000); }
         }
         else
-            m_uiFrostBoltTimer -= uiDiff;
+        { m_uiFrostBoltTimer -= uiDiff; }
 
         if (m_uiConeColtTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_CONE_OF_COLD) == CAST_OK)
-                m_uiConeColtTimer = urand(7000, 12000);
+            { m_uiConeColtTimer = urand(7000, 12000); }
         }
         else
-            m_uiConeColtTimer -= uiDiff;
+        { m_uiConeColtTimer -= uiDiff; }
 
         if (m_uiFireBlastTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FIRE_BLAST) == CAST_OK)
-                m_uiFireBlastTimer = urand(5000, 16000);
+            { m_uiFireBlastTimer = urand(5000, 16000); }
         }
         else
-            m_uiFireBlastTimer -= uiDiff;
+        { m_uiFireBlastTimer -= uiDiff; }
 
         if (m_uiArcaneMissileTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARCANE_MISSILES) == CAST_OK)
-                m_uiArcaneMissileTimer = urand(5000, 8000);
+            { m_uiArcaneMissileTimer = urand(5000, 8000); }
         }
         else
-            m_uiArcaneMissileTimer -= uiDiff;
+        { m_uiArcaneMissileTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }
@@ -270,7 +276,7 @@ enum
     SPELL_SIMPLE_TELEPORT   = 12980,
 };
 
-struct  npc_warden_mellicharAI : public ScriptedAI
+struct npc_warden_mellicharAI : public ScriptedAI
 {
     npc_warden_mellicharAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -303,7 +309,7 @@ struct  npc_warden_mellicharAI : public ScriptedAI
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_HARBINGERSKYRISS, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_HARBINGERSKYRISS, IN_PROGRESS); }
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -313,7 +319,7 @@ struct  npc_warden_mellicharAI : public ScriptedAI
         if (pSummoned->GetEntry() != NPC_MILLHOUSE && pSummoned->GetEntry() != NPC_SKYRISS)
         {
             if (Unit* pTarget = m_creature->GetMap()->GetUnit(m_targetPlayerGuid))
-                pSummoned->AI()->AttackStart(pTarget);
+            { pSummoned->AI()->AttackStart(pTarget); }
         }
     }
 
@@ -324,7 +330,7 @@ struct  npc_warden_mellicharAI : public ScriptedAI
             if (Creature* pSkyriss = m_pInstance->GetSingleCreatureFromStorage(NPC_SKYRISS))
             {
                 if (Unit* pTarget = m_creature->GetMap()->GetUnit(m_targetPlayerGuid))
-                    pSkyriss->AI()->AttackStart(pTarget);
+                { pSkyriss->AI()->AttackStart(pTarget); }
             }
         }
     }
@@ -340,7 +346,7 @@ struct  npc_warden_mellicharAI : public ScriptedAI
                 m_uiIntroTimer = 0;
             }
             else
-                m_uiIntroTimer -= uiDiff;
+            { m_uiIntroTimer -= uiDiff; }
         }
     }
 };

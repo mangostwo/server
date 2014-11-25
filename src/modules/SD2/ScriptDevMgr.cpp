@@ -33,11 +33,7 @@
 #include "system/ScriptLoader.h"
 #include "system/system.h"
 #include "ScriptDevMgr.h"
-
 #include "Spell.h"
-
-
-
 
 typedef std::vector<Script*> SDScriptVec;
 int num_sc_scripts;
@@ -85,16 +81,43 @@ struct TSpellSummary
 } extern* SpellSummary;
 
 
+    // Free Spell Summary
+
+    // Free resources before library unload
+
+
+
+
+    // ScriptDev2 startup
+
+    // Get configuration file
+
+    // Set SD2 Error Log File
+
+
+    // Check config file version
+
+
+    // Load database (must be called after SD2Config.SetSource).
+
+
+    // Resize script ids to needed ammount of assigned ScriptNames (from core)
+
+
+
+    // Check existance scripts for all registered by core script names
+
+
 //*********************************
 //*** Functions used globally ***
 
 /**
-  * Function that does script text
-  *
-  * @param iTextEntry Entry of the text, stored in SD2-database
-  * @param pSource Source of the text
-  * @param pTarget Can be NULL (depending on CHAT_TYPE of iTextEntry). Possible target for the text
-  */
+ * Function that does script text
+ *
+ * @param iTextEntry Entry of the text, stored in SD2-database
+ * @param pSource Source of the text
+ * @param pTarget Can be NULL (depending on CHAT_TYPE of iTextEntry). Possible target for the text
+ */
 void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
 {
     if (!pSource)
@@ -106,7 +129,7 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
     if (iTextEntry >= 0)
     {
         script_error_log("DoScriptText with source entry %u (TypeId=%u, guid=%u) attempts to process text entry %i, but text entry must be negative.",
-                            pSource->GetEntry(), pSource->GetTypeId(), pSource->GetGUIDLow(), iTextEntry);
+                         pSource->GetEntry(), pSource->GetTypeId(), pSource->GetGUIDLow(), iTextEntry);
 
         return;
     }
@@ -116,14 +139,14 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
 }
 
 /**
-  * Function that either simulates or does script text for a map
-  *
-  * @param iTextEntry Entry of the text, stored in SD2-database, only type CHAT_TYPE_ZONE_YELL supported
-  * @param uiCreatureEntry Id of the creature of whom saying will be simulated
-  * @param pMap Given Map on which the map-wide text is displayed
-  * @param pCreatureSource Can be NULL. If pointer to Creature is given, then the creature does the map-wide text
-  * @param pTarget Can be NULL. Possible target for the text
-  */
+ * Function that either simulates or does script text for a map
+ *
+ * @param iTextEntry Entry of the text, stored in SD2-database, only type CHAT_TYPE_ZONE_YELL supported
+ * @param uiCreatureEntry Id of the creature of whom saying will be simulated
+ * @param pMap Given Map on which the map-wide text is displayed
+ * @param pCreatureSource Can be NULL. If pointer to Creature is given, then the creature does the map-wide text
+ * @param pTarget Can be NULL. Possible target for the text
+ */
 void DoOrSimulateScriptTextForMap(int32 iTextEntry, uint32 uiCreatureEntry, Map* pMap, Creature* pCreatureSource /*=NULL*/, Unit* pTarget /*=NULL*/)
 {
     if (!pMap)
@@ -197,8 +220,8 @@ void Script::RegisterSelf(bool bReportError)
     }
 }
 
-    //************************************
-    //*** Functions to be used by core ***
+//********************************
+//*** Functions to be Exported ***
 
 void SD2::FreeScriptLibrary()
 {
@@ -210,14 +233,11 @@ void SD2::FreeScriptLibrary()
     {
         delete *itr;
     }
-        
     m_scripts.clear();
-        
     num_sc_scripts = 0;
-       
     setScriptLibraryErrorFile(NULL, NULL);
 }
-    
+
 void SD2::InitScriptLibrary()
 {
     // ScriptDev2 startup
@@ -242,7 +262,6 @@ void SD2::InitScriptLibrary()
     // Set SD2 Error Log File
     std::string sd2LogFile = SD2Config.GetStringDefault("SD2ErrorLogFile", "scriptdev2-errors.log");
     setScriptLibraryErrorFile(sd2LogFile.c_str(), "SD2");
-        
     if (configFailure)
     {
         script_error_log("Unable to open configuration file. Database will be unaccessible. Configuration values will use default.");
@@ -253,21 +272,17 @@ void SD2::InitScriptLibrary()
     {
         script_error_log("Configuration file version doesn't match expected version. Some config variables may be wrong or missing.");
     }
-        
     outstring_log("\n");
         
     // Load database (must be called after SD2Config.SetSource).
     LoadDatabase();
-        
     outstring_log("SD2: Loading C++ scripts");
     BarGoLink bar(1);
     bar.step();
         
     // Resize script ids to needed ammount of assigned ScriptNames (from core)
     m_scripts.resize(GetScriptIdsCount(), NULL);
-        
     FillSpellSummary();
-        
     AddScripts();
         
     // Check existance scripts for all registered by core script names
@@ -278,7 +293,6 @@ void SD2::InitScriptLibrary()
             script_error_log("No script found for ScriptName '%s'.", GetScriptName(i));
         }
     }
-        
     outstring_log(">> Loaded %i C++ Scripts.", num_sc_scripts);
 }
     
@@ -286,21 +300,21 @@ char const* SD2::GetScriptLibraryVersion()
 {
     return strSD2Version.c_str();
 }
-    
+
 bool SD2::GossipHello(Player* pPlayer, Creature* pCreature)
 {
     Script* pTempScript = m_scripts[pCreature->GetScriptId()];
-        
+
     if (!pTempScript || !pTempScript->pGossipHello)
     {
         return false;
     }
-        
+
     pPlayer->PlayerTalkClass->ClearMenus();
-        
+
     return pTempScript->pGossipHello(pPlayer, pCreature);
 }
-    
+
 bool SD2::GOGossipHello(Player* pPlayer, GameObject* pGo)
 {
     Script* pTempScript = m_scripts[pGo->GetGOInfo()->ScriptId];
@@ -314,7 +328,7 @@ bool SD2::GOGossipHello(Player* pPlayer, GameObject* pGo)
 
     return pTempScript->pGossipHelloGO(pPlayer, pGo);
 }
-    
+
 bool SD2::GossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 {
     debug_log("SD2: Gossip selection, sender: %u, action: %u", uiSender, uiAction);
@@ -464,7 +478,7 @@ bool SD2::GOUse(Player* pPlayer, GameObject* pGo)
 bool SD2::GOQuestAccept(Player* pPlayer, GameObject* pGo, const Quest* pQuest)
 {
     Script* pTempScript = m_scripts[pGo->GetGOInfo()->ScriptId];
-    
+
     if (!pTempScript || !pTempScript->pQuestAcceptGO)
     {
         return false;

@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -44,7 +50,7 @@ enum
     MAX_VOID_BLASTS                 = 5,
 };
 
-struct  boss_pandemoniusAI : public ScriptedAI
+struct boss_pandemoniusAI : public ScriptedAI
 {
     boss_pandemoniusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -88,12 +94,12 @@ struct  boss_pandemoniusAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiVoidBlastTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_VOID_BLAST : SPELL_VOID_BLAST_H);
+            { DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_VOID_BLAST : SPELL_VOID_BLAST_H); }
 
             // reset timer and counter when counter has reached the max limit
             if (m_uiVoidBlastCounter == MAX_VOID_BLASTS)
@@ -109,7 +115,7 @@ struct  boss_pandemoniusAI : public ScriptedAI
             }
         }
         else
-            m_uiVoidBlastTimer -= uiDiff;
+        { m_uiVoidBlastTimer -= uiDiff; }
 
         // use the darkshell only when the boss isn't casting the void blasts
         if (!m_uiVoidBlastCounter)
@@ -123,7 +129,7 @@ struct  boss_pandemoniusAI : public ScriptedAI
                 }
             }
             else
-                m_uiDarkShellTimer -= uiDiff;
+            { m_uiDarkShellTimer -= uiDiff; }
         }
 
         DoMeleeAttackIfReady();

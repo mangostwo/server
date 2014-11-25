@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -71,29 +77,29 @@ struct boss_shirrakAI : public ScriptedAI
     {
         // The focus fire creature casts the focus fire visual
         if (pSummoned->GetEntry() == NPC_FOCUS_FIRE)
-            pSummoned->CastSpell(pSummoned, SPELL_FOCUS_TARGET_VISUAL, true);
+        { pSummoned->CastSpell(pSummoned, SPELL_FOCUS_TARGET_VISUAL, true); }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiCarnivorousBiteTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_CARNIVOROUS_BITE : SPELL_CARNIVOROUS_BITE_H) == CAST_OK)
-                m_uiCarnivorousBiteTimer = urand(4000, 10000);
+            { m_uiCarnivorousBiteTimer = urand(4000, 10000); }
         }
         else
-            m_uiCarnivorousBiteTimer -= uiDiff;
+        { m_uiCarnivorousBiteTimer -= uiDiff; }
 
         if (m_uiAttractMagicTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_ATTRACT_MAGIC) == CAST_OK)
-                m_uiAttractMagicTimer = urand(25000, 38000);
+            { m_uiAttractMagicTimer = urand(25000, 38000); }
         }
         else
-            m_uiAttractMagicTimer -= uiDiff;
+        { m_uiAttractMagicTimer -= uiDiff; }
 
         if (m_uiFocusFireTimer < uiDiff)
         {
@@ -108,7 +114,7 @@ struct boss_shirrakAI : public ScriptedAI
                     pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, uint32(0), SELECT_FLAG_PLAYER);
 
                     if (!pTarget)
-                        pTarget = m_creature->getVictim();
+                    { pTarget = m_creature->getVictim(); }
 
                     DoScriptText(EMOTE_FOCUS, m_creature, pTarget);
                     m_focusTargetGuid = pTarget->GetObjectGuid();
@@ -126,14 +132,14 @@ struct boss_shirrakAI : public ScriptedAI
             }
 
             if (!pTarget)
-                pTarget = m_creature->GetMap()->GetUnit(m_focusTargetGuid);
+            { pTarget = m_creature->GetMap()->GetUnit(m_focusTargetGuid); }
 
             // Summon focus fire at target location
             if (pTarget)
-                m_creature->SummonCreature(NPC_FOCUS_FIRE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 10000);
+            { m_creature->SummonCreature(NPC_FOCUS_FIRE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 10000); }
         }
         else
-            m_uiFocusFireTimer -= uiDiff;
+        { m_uiFocusFireTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

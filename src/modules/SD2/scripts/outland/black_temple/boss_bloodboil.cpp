@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -69,7 +75,7 @@ enum
     MAX_BLOODBOILS              = 5,
 };
 
-struct  boss_gurtogg_bloodboilAI : public ScriptedAI
+struct boss_gurtogg_bloodboilAI : public ScriptedAI
 {
     boss_gurtogg_bloodboilAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -111,7 +117,7 @@ struct  boss_gurtogg_bloodboilAI : public ScriptedAI
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_BLOODBOIL, FAIL);
+        { m_pInstance->SetData(TYPE_BLOODBOIL, FAIL); }
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -119,7 +125,7 @@ struct  boss_gurtogg_bloodboilAI : public ScriptedAI
         DoScriptText(SAY_AGGRO, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_BLOODBOIL, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_BLOODBOIL, IN_PROGRESS); }
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -130,7 +136,7 @@ struct  boss_gurtogg_bloodboilAI : public ScriptedAI
     void JustDied(Unit* /*pKiller*/) override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_BLOODBOIL, DONE);
+        { m_pInstance->SetData(TYPE_BLOODBOIL, DONE); }
 
         DoScriptText(SAY_DEATH, m_creature);
     }
@@ -138,23 +144,23 @@ struct  boss_gurtogg_bloodboilAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiArcingSmashTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, m_bIsPhase1 ? SPELL_ARCING_SMASH_1 : SPELL_ARCING_SMASH_2) == CAST_OK)
-                m_uiArcingSmashTimer = 10000;
+            { m_uiArcingSmashTimer = 10000; }
         }
         else
-            m_uiArcingSmashTimer -= uiDiff;
+        { m_uiArcingSmashTimer -= uiDiff; }
 
         if (m_uiFelAcidTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsPhase1 ? SPELL_FEL_ACID_1 : SPELL_FEL_ACID_2) == CAST_OK)
-                m_uiFelAcidTimer = 25000;
+            { m_uiFelAcidTimer = 25000; }
         }
         else
-            m_uiFelAcidTimer -= uiDiff;
+        { m_uiFelAcidTimer -= uiDiff; }
 
         // Phase 1 spells
         if (m_bIsPhase1)
@@ -162,10 +168,10 @@ struct  boss_gurtogg_bloodboilAI : public ScriptedAI
             if (m_uiStrikeTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BEWILDERING_STRIKE) == CAST_OK)
-                    m_uiStrikeTimer = 20000;
+                { m_uiStrikeTimer = 20000; }
             }
             else
-                m_uiStrikeTimer -= uiDiff;
+            { m_uiStrikeTimer -= uiDiff; }
 
             if (m_uiEjectTimer < uiDiff)
             {
@@ -177,15 +183,15 @@ struct  boss_gurtogg_bloodboilAI : public ScriptedAI
                 }
             }
             else
-                m_uiEjectTimer -= uiDiff;
+            { m_uiEjectTimer -= uiDiff; }
 
             if (m_uiAcidicWoundTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ACIDIC_WOUND) == CAST_OK)
-                    m_uiAcidicWoundTimer = 10000;
+                { m_uiAcidicWoundTimer = 10000; }
             }
             else
-                m_uiAcidicWoundTimer -= uiDiff;
+            { m_uiAcidicWoundTimer -= uiDiff; }
 
             if (m_uiBloodboilTimer)
             {
@@ -197,13 +203,13 @@ struct  boss_gurtogg_bloodboilAI : public ScriptedAI
 
                         // Allow only 5 Bloodboils per phase.
                         if (m_uiBloodboilCount == MAX_BLOODBOILS)
-                            m_uiBloodboilTimer = 0;
+                        { m_uiBloodboilTimer = 0; }
                         else
-                            m_uiBloodboilTimer = 10000;
+                        { m_uiBloodboilTimer = 10000; }
                     }
                 }
                 else
-                    m_uiBloodboilTimer -= uiDiff;
+                { m_uiBloodboilTimer -= uiDiff; }
             }
         }
         // Phase 2 spells
@@ -214,19 +220,19 @@ struct  boss_gurtogg_bloodboilAI : public ScriptedAI
                 if (m_uiAcidGeyserTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_ACID_GEYSER) == CAST_OK)
-                        m_uiAcidGeyserTimer = 0;
+                    { m_uiAcidGeyserTimer = 0; }
                 }
                 else
-                    m_uiAcidGeyserTimer -= uiDiff;
+                { m_uiAcidGeyserTimer -= uiDiff; }
             }
 
             if (m_uiEjectTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_EJECT_2) == CAST_OK)
-                    m_uiEjectTimer = 15000;
+                { m_uiEjectTimer = 15000; }
             }
             else
-                m_uiEjectTimer -= uiDiff;
+            { m_uiEjectTimer -= uiDiff; }
         }
 
         if (m_uiPhaseChangeTimer < uiDiff)
@@ -271,7 +277,7 @@ struct  boss_gurtogg_bloodboilAI : public ScriptedAI
             }
         }
         else
-            m_uiPhaseChangeTimer -= uiDiff;
+        { m_uiPhaseChangeTimer -= uiDiff; }
 
         if (m_uiBerserkTimer)
         {
@@ -284,7 +290,7 @@ struct  boss_gurtogg_bloodboilAI : public ScriptedAI
                 }
             }
             else
-                m_uiBerserkTimer -= uiDiff;
+            { m_uiBerserkTimer -= uiDiff; }
         }
 
         DoMeleeAttackIfReady();
