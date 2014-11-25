@@ -36,7 +36,7 @@
 
 #define GENERIC_CREATURE_COOLDOWN   5000
 
-struct  generic_creatureAI : public ScriptedAI
+struct generic_creatureAI : public ScriptedAI
 {
     generic_creatureAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 

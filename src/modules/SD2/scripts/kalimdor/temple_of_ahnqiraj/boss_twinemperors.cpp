@@ -74,7 +74,7 @@ enum
     SPELL_BERSERK               = 27680,
 };
 
-struct  boss_twin_emperorsAI : public ScriptedAI
+struct boss_twin_emperorsAI : public ScriptedAI
 {
     boss_twin_emperorsAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -229,7 +229,7 @@ struct  boss_twin_emperorsAI : public ScriptedAI
     }
 };
 
-struct  boss_veknilashAI : public boss_twin_emperorsAI
+struct boss_veknilashAI : public boss_twin_emperorsAI
 {
     boss_veknilashAI(Creature* pCreature) : boss_twin_emperorsAI(pCreature) { Reset(); }
 
@@ -361,7 +361,7 @@ struct  boss_veknilashAI : public boss_twin_emperorsAI
     }
 };
 
-struct  boss_veklorAI : public boss_twin_emperorsAI
+struct boss_veklorAI : public boss_twin_emperorsAI
 {
     boss_veklorAI(Creature* pCreature) : boss_twin_emperorsAI(pCreature) { Reset(); }
 

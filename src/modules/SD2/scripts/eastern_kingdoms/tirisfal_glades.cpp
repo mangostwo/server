@@ -101,7 +101,7 @@ enum
     FACTION_HOSTILE     = 168
 };
 
-struct  npc_calvin_montagueAI : public ScriptedAI
+struct npc_calvin_montagueAI : public ScriptedAI
 {
     npc_calvin_montagueAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

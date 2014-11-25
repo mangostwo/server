@@ -23,20 +23,24 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Western_Plaguelands
-SD%Complete: 90
-SDComment: Quest support: 5216, 5219, 5222, 5225, 5229, 5231, 5233, 5235, 5862, 5944, 9446.
-SDCategory: Western Plaguelands
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Western_Plaguelands
+ * SD%Complete: 90
+ * SDComment: Quest support: 5216, 5219, 5222, 5225, 5229, 5231, 5233, 5235, 5862, 5944, 9446.
+ * SDCategory:  Western Plaguelands
+ * EndScriptData
+ */
 
-/* ContentData
-npc_the_scourge_cauldron
-npc_anchorite_truuen
-npc_taelan_fordring
-npc_isillien
-npc_tirion_fordring
-EndContentData */
+/**
+ * ContentData
+ * npc_the_scourge_cauldron
+ * npc_anchorite_truuen
+ * npc_taelan_fordring
+ * npc_isillien
+ * npc_tirion_fordring
+ * EndContentData
+ */
 
 #include "precompiled.h"
 #include "escort_ai.h"
@@ -45,7 +49,7 @@ EndContentData */
 ## npc_the_scourge_cauldron
 ######*/
 
-struct  npc_the_scourge_cauldronAI : public ScriptedAI
+struct npc_the_scourge_cauldronAI : public ScriptedAI
 {
     npc_the_scourge_cauldronAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
@@ -142,7 +146,7 @@ enum
     QUEST_ID_TOMB_LIGHTBRINGER  = 9446,
 };
 
-struct  npc_anchorite_truuenAI: public npc_escortAI
+struct npc_anchorite_truuenAI: public npc_escortAI
 {
     npc_anchorite_truuenAI(Creature* pCreature): npc_escortAI(pCreature) { Reset(); }
 
@@ -356,7 +360,7 @@ static const DialogueEntry aScarletDialogue[] =
     {0, 0, 0},
 };
 
-struct  npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
+struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
 {
     npc_taelan_fordringAI(Creature* pCreature): npc_escortAI(pCreature),
         DialogueHelper(aScarletDialogue)
@@ -786,7 +790,7 @@ bool EffectDummyCreature_npc_taelan_fordring(Unit* pCaster, uint32 uiSpellId, Sp
 ## npc_isillien
 ######*/
 
-struct  npc_isillienAI: public npc_escortAI
+struct npc_isillienAI: public npc_escortAI
 {
     npc_isillienAI(Creature* pCreature): npc_escortAI(pCreature)
     {
@@ -952,7 +956,7 @@ CreatureAI* GetAI_npc_isillien(Creature* pCreature)
 ## npc_tirion_fordring
 ######*/
 
-struct  npc_tirion_fordringAI: public npc_escortAI
+struct npc_tirion_fordringAI: public npc_escortAI
 {
     npc_tirion_fordringAI(Creature* pCreature): npc_escortAI(pCreature) { Reset(); }
 
@@ -1090,7 +1094,7 @@ void AddSC_western_plaguelands()
     pNewScript->GetAI = &GetAI_npc_anchorite_truuen;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_anchorite_truuen;
     pNewScript->RegisterSelf();
-    
+
     pNewScript = new Script;
     pNewScript->Name = "npc_taelan_fordring";
     pNewScript->GetAI = &GetAI_npc_taelan_fordring;

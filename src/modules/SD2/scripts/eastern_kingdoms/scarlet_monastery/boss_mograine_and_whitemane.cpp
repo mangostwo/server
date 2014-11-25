@@ -62,7 +62,7 @@ enum
     SPELL_POWERWORDSHIELD        = 22187
 };
 
-struct  boss_scarlet_commander_mograineAI : public ScriptedAI
+struct boss_scarlet_commander_mograineAI : public ScriptedAI
 {
     boss_scarlet_commander_mograineAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -237,7 +237,7 @@ struct  boss_scarlet_commander_mograineAI : public ScriptedAI
     }
 };
 
-struct  boss_high_inquisitor_whitemaneAI : public ScriptedAI
+struct boss_high_inquisitor_whitemaneAI : public ScriptedAI
 {
     boss_high_inquisitor_whitemaneAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

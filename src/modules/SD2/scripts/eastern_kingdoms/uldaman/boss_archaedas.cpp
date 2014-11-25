@@ -51,7 +51,7 @@ enum
     EMOTE_BREAKS_FREE               = -1070005,
 };
 
-struct  boss_archaedasAI : public ScriptedAI
+struct boss_archaedasAI : public ScriptedAI
 {
     boss_archaedasAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

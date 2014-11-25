@@ -42,7 +42,7 @@ enum
     SPELL_NOXXION_SPAWNS_SUMMON = 21707,
 };
 
-struct  boss_noxxionAI : public ScriptedAI
+struct boss_noxxionAI : public ScriptedAI
 {
     boss_noxxionAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 

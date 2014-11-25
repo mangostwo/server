@@ -1,5 +1,11 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
-* This program is free software; you can redistribute it and/or modify
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
+ * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
@@ -113,7 +119,7 @@ enum HorsemanPhase
     PHASE_HEAD_TOSS             = 4,
 };
 
-struct  boss_headless_horsemanAI : public ScriptedAI
+struct boss_headless_horsemanAI : public ScriptedAI
 {
     boss_headless_horsemanAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -282,7 +288,7 @@ struct  boss_headless_horsemanAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         switch (m_fightPhase)
         {
@@ -363,7 +369,7 @@ bool EffectScriptEffectCreature_boss_headless_horseman(Unit* pCaster, uint32 uiS
     return false;
 }
 
-struct  boss_head_of_horsemanAI : public ScriptedAI
+struct boss_head_of_horsemanAI : public ScriptedAI
 {
     boss_head_of_horsemanAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

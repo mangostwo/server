@@ -41,7 +41,7 @@ enum
     SPELL_BANISH                = 8994,
 };
 
-struct  boss_jandicebarovAI : public ScriptedAI
+struct boss_jandicebarovAI : public ScriptedAI
 {
     boss_jandicebarovAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 

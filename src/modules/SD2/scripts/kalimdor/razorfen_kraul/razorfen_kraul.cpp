@@ -76,7 +76,7 @@ static const float aBoarSpawn[4][3] =
     {1958.971f, 1599.01f, 81.44f}
 };
 
-struct  npc_willix_the_importerAI : public npc_escortAI
+struct npc_willix_the_importerAI : public npc_escortAI
 {
     npc_willix_the_importerAI(Creature* m_creature) : npc_escortAI(m_creature) { Reset(); }
 
@@ -184,7 +184,7 @@ enum
     GO_BLUELEAF_TUBBER          = 20920,
 };
 
-struct  npc_snufflenose_gopherAI : public ScriptedPetAI
+struct npc_snufflenose_gopherAI : public ScriptedPetAI
 {
     npc_snufflenose_gopherAI(Creature* pCreature) : ScriptedPetAI(pCreature) { Reset(); }
 

@@ -53,7 +53,7 @@ enum
     FACTION_ID_HORDE_GENERIC    = 83,                       // Note: faction may not be correct!
 };
 
-struct  mob_yennikuAI : public ScriptedAI
+struct mob_yennikuAI : public ScriptedAI
 {
     mob_yennikuAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

@@ -58,7 +58,7 @@ enum
 static const uint32 aSummonWormSpells[3] = {SPELL_SUMMON_WORM_1, SPELL_SUMMON_WORM_2, SPELL_SUMMON_WORM_3};
 static const uint32 aEntangleSpells[3] = {SPELL_ENTANGLE_1, SPELL_ENTANGLE_2, SPELL_ENTANGLE_3};
 
-struct  boss_fankrissAI : public ScriptedAI
+struct boss_fankrissAI : public ScriptedAI
 {
     boss_fankrissAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

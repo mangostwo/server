@@ -56,7 +56,7 @@ enum
     SPELL_SUMMON_IMAGES         = 747,
 };
 
-struct  boss_skeramAI : public ScriptedAI
+struct boss_skeramAI : public ScriptedAI
 {
     boss_skeramAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

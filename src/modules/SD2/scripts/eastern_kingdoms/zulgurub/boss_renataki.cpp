@@ -42,7 +42,7 @@ enum
     SPELL_TRASH             = 3391
 };
 
-struct  boss_renatakiAI : public ScriptedAI
+struct boss_renatakiAI : public ScriptedAI
 {
     boss_renatakiAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

@@ -118,7 +118,7 @@ static const SortingParameters aArmySortingParameters[MAX_ARMY_WAVES] =
     {NPC_COLONEL_ZERRAN, SAY_WAVE7, 17.0f},
 };
 
-class  instance_ruins_of_ahnqiraj : public ScriptedInstance
+class instance_ruins_of_ahnqiraj : public ScriptedInstance
 {
     public:
         instance_ruins_of_ahnqiraj(Map* pMap);

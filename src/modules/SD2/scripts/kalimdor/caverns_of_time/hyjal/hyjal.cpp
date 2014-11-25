@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -80,14 +86,14 @@ bool GossipHello_npc_jaina_proudmoore(Player* pPlayer, Creature* pCreature)
                 if (pInstance->GetData(TYPE_KAZROGAL) != DONE)
                 {
                     if (pInstance->GetData(TYPE_WINTERCHILL) == NOT_STARTED || pInstance->GetData(TYPE_WINTERCHILL) == FAIL)
-                        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_JAINA_BEGIN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+                    { pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_JAINA_BEGIN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1); }
                     else if (pInstance->GetData(TYPE_WINTERCHILL) == DONE && (pInstance->GetData(TYPE_ANETHERON) == NOT_STARTED || pInstance->GetData(TYPE_ANETHERON) == FAIL))
-                        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_JAINA_ANATHERON, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+                    { pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_JAINA_ANATHERON, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2); }
                     else if (pInstance->GetData(TYPE_ANETHERON) == DONE)
-                        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_JAINA_SUCCCESS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+                    { pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_JAINA_SUCCCESS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3); }
 
                     if (pPlayer->isGameMaster())
-                        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[GM] Toggle Debug Timers", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+                    { pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[GM] Toggle Debug Timers", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF); }
                 }
             }
         }
@@ -152,14 +158,14 @@ bool GossipHello_npc_thrall(Player* pPlayer, Creature* pCreature)
                 if (pInstance->GetData(TYPE_ANETHERON) == DONE && pInstance->GetData(TYPE_ARCHIMONDE) != DONE)
                 {
                     if (pInstance->GetData(TYPE_KAZROGAL) == NOT_STARTED || pInstance->GetData(TYPE_KAZROGAL) == FAIL)
-                        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_THRALL_BEGIN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+                    { pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_THRALL_BEGIN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1); }
                     else if (pInstance->GetData(TYPE_KAZROGAL) == DONE && (pInstance->GetData(TYPE_AZGALOR) == NOT_STARTED || pInstance->GetData(TYPE_AZGALOR) == FAIL))
-                        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_THRALL_AZGALOR, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+                    { pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_THRALL_AZGALOR, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2); }
                     else if (pInstance->GetData(TYPE_AZGALOR) == DONE)
-                        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_THRALL_SUCCESS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+                    { pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_THRALL_SUCCESS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3); }
 
                     if (pPlayer->isGameMaster())
-                        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[GM] Toggle Debug Timers", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+                    { pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[GM] Toggle Debug Timers", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF); }
                 }
             }
         }
@@ -203,7 +209,7 @@ bool GossipHello_npc_tyrande_whisperwind(Player* pPlayer, Creature* pCreature)
     {
         // Only let them get item if Azgalor is dead.
         if (pInstance->GetData(TYPE_AZGALOR) == DONE && !pPlayer->HasItemCount(ITEM_TEAR_OF_GODDESS, 1))
-            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TYRANDE_AID, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+        { pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TYRANDE_AID, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF); }
     }
 
     pPlayer->SEND_GOSSIP_MENU(GOSSIP_MENU_ID_DEFAULT, pCreature->GetObjectGuid());
@@ -215,7 +221,7 @@ bool GossipSelect_npc_tyrande_whisperwind(Player* pPlayer, Creature* /*pCreature
     if (uiAction == GOSSIP_ACTION_INFO_DEF)
     {
         if (Item* pItem = pPlayer->StoreNewItemInInventorySlot(ITEM_TEAR_OF_GODDESS, 1))
-            pPlayer->SendNewItem(pItem, 1, true, false);
+        { pPlayer->SendNewItem(pItem, 1, true, false); }
     }
 
     pPlayer->CLOSE_GOSSIP_MENU();

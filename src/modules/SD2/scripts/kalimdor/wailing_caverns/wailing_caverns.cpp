@@ -86,7 +86,7 @@ static const float aSummonPositions[5][2] =
     {47.0f, 0.5901f}                                        // Mutanus
 };
 
-struct  npc_disciple_of_naralexAI : public npc_escortAI
+struct npc_disciple_of_naralexAI : public npc_escortAI
 {
     npc_disciple_of_naralexAI(Creature* pCreature) : npc_escortAI(pCreature)
     {

@@ -62,7 +62,7 @@ enum
     SPELL_HATCH_EGGS            = 24083,                    // note this should only target 4 eggs!
 };
 
-struct  boss_marliAI : public ScriptedAI
+struct boss_marliAI : public ScriptedAI
 {
     boss_marliAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

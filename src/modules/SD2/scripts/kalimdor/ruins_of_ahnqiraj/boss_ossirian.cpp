@@ -75,7 +75,7 @@ static const float aSandVortexSpawnPos[2][4] =
 static const float aCrystalSpawnPos[3] = { -9355.75f, 1905.43f, 85.55f};
 static const uint32 aWeaknessSpell[] = {SPELL_WEAKNESS_FIRE, SPELL_WEAKNESS_FROST, SPELL_WEAKNESS_NATURE, SPELL_WEAKNESS_ARCANE, SPELL_WEAKNESS_SHADOW};
 
-struct  boss_ossirianAI : public ScriptedAI
+struct boss_ossirianAI : public ScriptedAI
 {
 
     boss_ossirianAI(Creature* pCreature) : ScriptedAI(pCreature)

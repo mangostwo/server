@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -49,7 +55,7 @@ void instance_mount_hyjal::Initialize()
 bool instance_mount_hyjal::IsEncounterInProgress() const
 {
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-        if (m_auiEncounter[i] == IN_PROGRESS) return true;
+        if (m_auiEncounter[i] == IN_PROGRESS) { return true; }
 
     return false;
 }
@@ -57,19 +63,19 @@ bool instance_mount_hyjal::IsEncounterInProgress() const
 void instance_mount_hyjal::OnPlayerEnter(Player* /*pPlayer*/)
 {
     if (GetData(TYPE_AZGALOR) == DONE)
-        DoSpawnArchimonde();
+    { DoSpawnArchimonde(); }
 }
 
 void instance_mount_hyjal::OnCreatureCreate(Creature* pCreature)
 {
     if (pCreature->GetEntry() == NPC_ARCHIMONDE)
-        m_mNpcEntryGuidStore[NPC_ARCHIMONDE] = pCreature->GetObjectGuid();
+    { m_mNpcEntryGuidStore[NPC_ARCHIMONDE] = pCreature->GetObjectGuid(); }
 }
 
 void instance_mount_hyjal::OnObjectCreate(GameObject* pGo)
 {
     if (pGo->GetEntry() == GO_ANCIENT_GEM)
-        lAncientGemGUIDList.push_back(pGo->GetObjectGuid());
+    { lAncientGemGUIDList.push_back(pGo->GetObjectGuid()); }
 }
 
 void instance_mount_hyjal::OnCreatureEnterCombat(Creature* pCreature)
@@ -137,7 +143,7 @@ void instance_mount_hyjal::SetData(uint32 uiType, uint32 uiData)
         case TYPE_AZGALOR:
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
-                DoSpawnArchimonde();
+            { DoSpawnArchimonde(); }
             break;
         case TYPE_ARCHIMONDE:
             m_auiEncounter[uiType] = uiData;
@@ -184,15 +190,15 @@ void instance_mount_hyjal::DoSpawnArchimonde()
 {
     // Don't spawn if already killed
     if (GetData(TYPE_ARCHIMONDE) == DONE)
-        return;
+    { return; }
 
     // Don't spawn him twice
     if (GetSingleCreatureFromStorage(NPC_ARCHIMONDE, true))
-        return;
+    { return; }
 
     // Summon Archimonde
     if (Player* pPlayer = GetPlayerInMap())
-        pPlayer->SummonCreature(NPC_ARCHIMONDE, aArchimondeSpawnLoc[0], aArchimondeSpawnLoc[1], aArchimondeSpawnLoc[2], aArchimondeSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+    { pPlayer->SummonCreature(NPC_ARCHIMONDE, aArchimondeSpawnLoc[0], aArchimondeSpawnLoc[1], aArchimondeSpawnLoc[2], aArchimondeSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0); }
 }
 
 uint32 instance_mount_hyjal::GetData(uint32 uiType) const
@@ -227,7 +233,7 @@ void instance_mount_hyjal::Load(const char* chrIn)
 
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
         if (m_auiEncounter[i] == IN_PROGRESS)               // Do not load an encounter as IN_PROGRESS - reset it instead.
-            m_auiEncounter[i] = NOT_STARTED;
+        { m_auiEncounter[i] = NOT_STARTED; }
 
     OUT_LOAD_INST_DATA_COMPLETE;
 }

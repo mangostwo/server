@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -56,7 +62,7 @@ enum
     NPC_ATTUMEN_MOUNTED         = 16152,
 };
 
-struct  boss_midnightAI : public ScriptedAI
+struct boss_midnightAI : public ScriptedAI
 {
     boss_midnightAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -80,7 +86,7 @@ struct  boss_midnightAI : public ScriptedAI
     void Aggro(Unit* /*pWho*/) override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_ATTUMEN, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_ATTUMEN, IN_PROGRESS); }
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -88,20 +94,20 @@ struct  boss_midnightAI : public ScriptedAI
         if (m_uiPhase == 1 && m_pInstance)
         {
             if (Creature* pAttumen = m_pInstance->GetSingleCreatureFromStorage(NPC_ATTUMEN))
-                DoScriptText(SAY_MIDNIGHT_KILL, pAttumen);
+            { DoScriptText(SAY_MIDNIGHT_KILL, pAttumen); }
         }
     }
 
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_ATTUMEN, FAIL);
+        { m_pInstance->SetData(TYPE_ATTUMEN, FAIL); }
     }
 
     void JustSummoned(Creature* pSummoned) override
     {
         if (m_creature->getVictim())
-            pSummoned->AI()->AttackStart(m_creature->getVictim());
+        { pSummoned->AI()->AttackStart(m_creature->getVictim()); }
 
         if (pSummoned->GetEntry() == NPC_ATTUMEN)
         {
@@ -118,24 +124,24 @@ struct  boss_midnightAI : public ScriptedAI
             DoScriptText(SAY_MOUNT, pSummoned);
 
             if (!m_pInstance)
-                return;
+            { return; }
 
             // The summoned has the health equal to the one which has the higher HP percentage of both
             if (Creature* pAttumen = m_pInstance->GetSingleCreatureFromStorage(NPC_ATTUMEN))
-                pSummoned->SetHealth(pAttumen->GetHealth() > m_creature->GetHealth() ? pAttumen->GetHealth() : m_creature->GetHealth());
+            { pSummoned->SetHealth(pAttumen->GetHealth() > m_creature->GetHealth() ? pAttumen->GetHealth() : m_creature->GetHealth()); }
         }
     }
 
     void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
     {
         if (uiMoveType != POINT_MOTION_TYPE || !uiPointId || !m_pInstance)
-            return;
+        { return; }
 
         // Spawn the mounted Attumen and despawn
         if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_ATTUMEN_MOUNTED, CAST_TRIGGERED) == CAST_OK)
         {
             if (Creature* pAttumen = m_pInstance->GetSingleCreatureFromStorage(NPC_ATTUMEN))
-                pAttumen->ForcedDespawn();
+            { pAttumen->ForcedDespawn(); }
 
             m_creature->ForcedDespawn();
         }
@@ -156,33 +162,33 @@ struct  boss_midnightAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         // Stop attacking during the mount phase
         if (m_uiPhase == 2)
-            return;
+        { return; }
 
         // Spawn Attumen on 95% hp
         if (m_uiPhase == 0 && m_creature->GetHealthPercent() < 95.0f)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_ATTUMEN) == CAST_OK)
-                m_uiPhase = 1;
+            { m_uiPhase = 1; }
         }
 
         // Spawn Attumen mounted at 25%
         if (m_uiPhase == 1 && m_creature->GetHealthPercent() < 25.0f)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_MOUNT, CAST_TRIGGERED) == CAST_OK)
-                m_uiPhase = 2;
+            { m_uiPhase = 2; }
         }
 
         if (m_uiKnockDown < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCKDOWN) == CAST_OK)
-                m_uiKnockDown = urand(6000, 9000);
+            { m_uiKnockDown = urand(6000, 9000); }
         }
         else
-            m_uiKnockDown -= uiDiff;
+        { m_uiKnockDown -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }
@@ -193,7 +199,7 @@ CreatureAI* GetAI_boss_midnight(Creature* pCreature)
     return new boss_midnightAI(pCreature);
 }
 
-struct  boss_attumenAI : public ScriptedAI
+struct boss_attumenAI : public ScriptedAI
 {
     boss_attumenAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -230,7 +236,7 @@ struct  boss_attumenAI : public ScriptedAI
     void SpellHit(Unit* /*pSource*/, const SpellEntry* pSpell) override
     {
         if (pSpell->Mechanic == MECHANIC_DISARM)
-            DoScriptText(SAY_DISARMED, m_creature);
+        { DoScriptText(SAY_DISARMED, m_creature); }
     }
 
     void JustDied(Unit* /*pVictim*/) override
@@ -238,13 +244,13 @@ struct  boss_attumenAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_ATTUMEN, DONE);
+        { m_pInstance->SetData(TYPE_ATTUMEN, DONE); }
     }
 
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_ATTUMEN, FAIL);
+        { m_pInstance->SetData(TYPE_ATTUMEN, FAIL); }
 
         // Despawn Attumen on fail
         m_creature->ForcedDespawn();
@@ -253,23 +259,23 @@ struct  boss_attumenAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiCleaveTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOWCLEAVE) == CAST_OK)
-                m_uiCleaveTimer = urand(10000, 16000);
+            { m_uiCleaveTimer = urand(10000, 16000); }
         }
         else
-            m_uiCleaveTimer -= uiDiff;
+        { m_uiCleaveTimer -= uiDiff; }
 
         if (m_uiCurseTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_INTANGIBLE_PRESENCE) == CAST_OK)
-                m_uiCurseTimer = 30000;
+            { m_uiCurseTimer = 30000; }
         }
         else
-            m_uiCurseTimer -= uiDiff;
+        { m_uiCurseTimer -= uiDiff; }
 
         if (m_uiRandomYellTimer < uiDiff)
         {
@@ -277,16 +283,16 @@ struct  boss_attumenAI : public ScriptedAI
             m_uiRandomYellTimer = urand(30000, 60000);
         }
         else
-            m_uiRandomYellTimer -= uiDiff;
+        { m_uiRandomYellTimer -= uiDiff; }
 
         if (m_uiKnockDown < uiDiff)
         {
             // Cast knockdown when mounted, otherwise uppercut
             if (DoCastSpellIfCan(m_creature->getVictim(), m_creature->GetEntry() == NPC_ATTUMEN_MOUNTED ? SPELL_KNOCKDOWN : SPELL_UPPERCUT) == CAST_OK)
-                m_uiKnockDown = urand(6000, 9000);
+            { m_uiKnockDown = urand(6000, 9000); }
         }
         else
-            m_uiKnockDown -= uiDiff;
+        { m_uiKnockDown -= uiDiff; }
 
         // If creature is mounted then cast charge
         if (m_creature->GetEntry() == NPC_ATTUMEN_MOUNTED)
@@ -296,13 +302,13 @@ struct  boss_attumenAI : public ScriptedAI
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_BERSERKER_CHARGE, SELECT_FLAG_NOT_IN_MELEE_RANGE | SELECT_FLAG_IN_LOS))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_BERSERKER_CHARGE) == CAST_OK)
-                        m_uiChargeTimer = 20000;
+                    { m_uiChargeTimer = 20000; }
                 }
                 else
-                    m_uiChargeTimer = 2000;
+                { m_uiChargeTimer = 2000; }
             }
             else
-                m_uiChargeTimer -= uiDiff;
+            { m_uiChargeTimer -= uiDiff; }
         }
         // Else, mount if below 25%
         else if (!m_bHasSummonRider && m_creature->GetHealthPercent() < 25.0f)
@@ -333,7 +339,7 @@ bool EffectDummyCreature_spell_mount_attumen(Unit* pCaster, uint32 uiSpellId, Sp
         {
             // Prepare for mount
             if (boss_midnightAI* pMidnightAI = dynamic_cast<boss_midnightAI*>(((Creature*)pCaster)->AI()))
-                pMidnightAI->DoPrepareMount(pCreatureTarget);
+            { pMidnightAI->DoPrepareMount(pCreatureTarget); }
         }
 
         // always return true when we are handling this spell and effect

@@ -88,7 +88,7 @@ enum
     SPELL_WHISPERINGS_CTHUN_5   = 26259,
 };
 
-class  instance_temple_of_ahnqiraj : public ScriptedInstance
+class instance_temple_of_ahnqiraj : public ScriptedInstance
 {
     public:
         instance_temple_of_ahnqiraj(Map* pMap);

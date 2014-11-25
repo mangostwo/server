@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -80,7 +86,7 @@ static const float aKalecHumanLoc[4] = {1709.094f, 927.5035f, -74.28364f, 2.9321
 ## boss_kalecgos
 ######*/
 
-struct  boss_kalecgosAI : public ScriptedAI
+struct boss_kalecgosAI : public ScriptedAI
 {
     boss_kalecgosAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -148,7 +154,7 @@ struct  boss_kalecgosAI : public ScriptedAI
         DoScriptText(SAY_EVIL_AGGRO, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_KALECGOS, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_KALECGOS, IN_PROGRESS); }
     }
 
     void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage) override
@@ -161,10 +167,10 @@ struct  boss_kalecgosAI : public ScriptedAI
             if (!m_bIsUncorrupted)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BANISH, CAST_TRIGGERED) == CAST_OK)
-                    m_bIsBanished = true;
+                { m_bIsBanished = true; }
             }
             else
-                DoStartOutro();
+            { DoStartOutro(); }
         }
     }
 
@@ -176,7 +182,7 @@ struct  boss_kalecgosAI : public ScriptedAI
     void DoStartOutro()
     {
         if (!m_pInstance)
-            return;
+        { return; }
 
         // Bring Sathrovarr in the normal realm and kill him
         if (Creature* pSathrovarr = m_pInstance->GetSingleCreatureFromStorage(NPC_SATHROVARR))
@@ -187,7 +193,7 @@ struct  boss_kalecgosAI : public ScriptedAI
         }
 
         if (Creature* pKalec = m_pInstance->GetSingleCreatureFromStorage(NPC_KALECGOS_HUMAN))
-            pKalec->ForcedDespawn();
+        { pKalec->ForcedDespawn(); }
 
         EnterEvadeMode();
         m_creature->SetFactionTemporary(35, TEMPFACTION_RESTORE_RESPAWN);
@@ -199,12 +205,12 @@ struct  boss_kalecgosAI : public ScriptedAI
     void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
     {
         if (uiMotionType != POINT_MOTION_TYPE)
-            return;
+        { return; }
 
         if (uiPointId)
         {
             if (m_pInstance)
-                m_pInstance->SetData(TYPE_KALECGOS, DONE);
+            { m_pInstance->SetData(TYPE_KALECGOS, DONE); }
 
             m_creature->ForcedDespawn(1000);
         }
@@ -232,17 +238,17 @@ struct  boss_kalecgosAI : public ScriptedAI
                 m_uiExitTimer = 0;
             }
             else
-                m_uiExitTimer -= uiDiff;
+            { m_uiExitTimer -= uiDiff; }
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_bIsBanished)
         {
             // When Sathrovarr is banished then start outro
             if (m_bIsUncorrupted)
-                DoStartOutro();
+            { DoStartOutro(); }
 
             // return when banished
             return;
@@ -252,12 +258,12 @@ struct  boss_kalecgosAI : public ScriptedAI
         {
             // If the boss already has the aura, then mark the enraged as true
             if (m_creature->HasAura(SPELL_CRAZED_RAGE))
-                m_bIsEnraged = true;
+            { m_bIsEnraged = true; }
             else
             {
                 // Spell is targeting both bosses
                 if (DoCastSpellIfCan(m_creature, SPELL_CRAZED_RAGE) == CAST_OK)
-                    m_bIsEnraged = true;
+                { m_bIsEnraged = true; }
             }
         }
 
@@ -266,53 +272,53 @@ struct  boss_kalecgosAI : public ScriptedAI
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARCANE_BUFFET) == CAST_OK)
             {
                 if (!urand(0, 2))
-                    DoScriptText(SAY_EVIL_SPELL_1, m_creature);
+                { DoScriptText(SAY_EVIL_SPELL_1, m_creature); }
 
                 m_uiArcaneBuffetTimer = 20000;
             }
         }
         else
-            m_uiArcaneBuffetTimer -= uiDiff;
+        { m_uiArcaneBuffetTimer -= uiDiff; }
 
         if (m_uiFrostBreathTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_BREATH) == CAST_OK)
             {
                 if (!urand(0, 1))
-                    DoScriptText(SAY_EVIL_SPELL_2, m_creature);
+                { DoScriptText(SAY_EVIL_SPELL_2, m_creature); }
 
                 m_uiFrostBreathTimer = 25000;
             }
         }
         else
-            m_uiFrostBreathTimer -= uiDiff;
+        { m_uiFrostBreathTimer -= uiDiff; }
 
         if (m_uiTailLashTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_TAIL_LASH) == CAST_OK)
-                m_uiTailLashTimer = urand(10000, 20000);
+            { m_uiTailLashTimer = urand(10000, 20000); }
         }
         else
-            m_uiTailLashTimer -= uiDiff;
+        { m_uiTailLashTimer -= uiDiff; }
 
         if (m_uiWildMagicTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, aWildMagicSpells[urand(0, 5)]) == CAST_OK)
-                    m_uiWildMagicTimer = 19000;
+                { m_uiWildMagicTimer = 19000; }
             }
         }
         else
-            m_uiWildMagicTimer -= uiDiff;
+        { m_uiWildMagicTimer -= uiDiff; }
 
         if (m_uiSpectralBlastTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SPECTRAL_BLAST) == CAST_OK)
-                m_uiSpectralBlastTimer = 25000;
+            { m_uiSpectralBlastTimer = 25000; }
         }
         else
-            m_uiSpectralBlastTimer -= uiDiff;
+        { m_uiSpectralBlastTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }
@@ -322,7 +328,7 @@ struct  boss_kalecgosAI : public ScriptedAI
 ## boss_sathrovarr
 ######*/
 
-struct  boss_sathrovarrAI : public ScriptedAI
+struct boss_sathrovarrAI : public ScriptedAI
 {
     boss_sathrovarrAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -356,7 +362,7 @@ struct  boss_sathrovarrAI : public ScriptedAI
         DoScriptText(SAY_SATH_AGGRO, m_creature);
 
         if (!m_pInstance)
-            return;
+        { return; }
 
         // spawn human Kalec; he starts to attack
         m_creature->SummonCreature(NPC_KALECGOS_HUMAN, aKalecHumanLoc[0], aKalecHumanLoc[1], aKalecHumanLoc[2], aKalecHumanLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0, true);
@@ -373,15 +379,15 @@ struct  boss_sathrovarrAI : public ScriptedAI
 
             // banish Sathrovarr and eject the players
             if (DoCastSpellIfCan(m_creature, SPELL_BANISH, CAST_TRIGGERED) == CAST_OK)
-                m_bIsBanished = true;
+            { m_bIsBanished = true; }
 
             if (!m_pInstance)
-                return;
+            { return; }
 
             if (Creature* pKalecgos = m_pInstance->GetSingleCreatureFromStorage(NPC_KALECGOS_DRAGON))
             {
                 if (boss_kalecgosAI* pKalecgosAI = dynamic_cast<boss_kalecgosAI*>(pKalecgos->AI()))
-                    pKalecgosAI->m_bIsUncorrupted = true;
+                { pKalecgosAI->m_bIsUncorrupted = true; }
             }
 
             m_pInstance->DoEjectSpectralPlayers();
@@ -438,21 +444,21 @@ struct  boss_sathrovarrAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_bIsBanished)
-            return;
+        { return; }
 
         if (!m_bIsEnraged && m_creature->GetHealthPercent() < 10.0f)
         {
             // If the boss already has the aura, then mark the enraged as true
             if (m_creature->HasAura(SPELL_CRAZED_RAGE))
-                m_bIsEnraged = true;
+            { m_bIsEnraged = true; }
             else
             {
                 // Spell is targeting both bosses
                 if (DoCastSpellIfCan(m_creature, SPELL_CRAZED_RAGE) == CAST_OK)
-                    m_bIsEnraged = true;
+                { m_bIsEnraged = true; }
             }
         }
 
@@ -461,37 +467,37 @@ struct  boss_sathrovarrAI : public ScriptedAI
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CORRUPTING_STRIKE) == CAST_OK)
             {
                 if (!urand(0, 1))
-                    DoScriptText(SAY_SATH_SPELL_2, m_creature);
+                { DoScriptText(SAY_SATH_SPELL_2, m_creature); }
 
                 m_uiCorruptingStrikeTimer = 13000;
             }
         }
         else
-            m_uiCorruptingStrikeTimer -= uiDiff;
+        { m_uiCorruptingStrikeTimer -= uiDiff; }
 
         if (m_uiCurseOfBoundlessAgonyTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_CURSE_OF_BOUNDLESS_AGONY) == CAST_OK)
-                    m_uiCurseOfBoundlessAgonyTimer = 35000;
+                { m_uiCurseOfBoundlessAgonyTimer = 35000; }
             }
         }
         else
-            m_uiCurseOfBoundlessAgonyTimer -= uiDiff;
+        { m_uiCurseOfBoundlessAgonyTimer -= uiDiff; }
 
         if (m_uiShadowBoltVolleyTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOW_BOLT_VOLLEY) == CAST_OK)
             {
                 if (!urand(0, 1))
-                    DoScriptText(SAY_SATH_SPELL_1, m_creature);
+                { DoScriptText(SAY_SATH_SPELL_1, m_creature); }
 
                 m_uiShadowBoltVolleyTimer = 15000;
             }
         }
         else
-            m_uiShadowBoltVolleyTimer -= uiDiff;
+        { m_uiShadowBoltVolleyTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }
@@ -501,7 +507,7 @@ struct  boss_sathrovarrAI : public ScriptedAI
 ## boss_kalecgos_humanoid
 ######*/
 
-struct  boss_kalecgos_humanoidAI : public ScriptedAI
+struct boss_kalecgos_humanoidAI : public ScriptedAI
 {
     boss_kalecgos_humanoidAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -546,24 +552,24 @@ struct  boss_kalecgos_humanoidAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiRevitalizeTimer < uiDiff)
         {
             // Cast on self because spell has target "all friendly units around the caster"
             if (DoCastSpellIfCan(m_creature, SPELL_REVITALIZE) == CAST_OK)
-                m_uiRevitalizeTimer = 30000;
+            { m_uiRevitalizeTimer = 30000; }
         }
         else
-            m_uiRevitalizeTimer -= uiDiff;
+        { m_uiRevitalizeTimer -= uiDiff; }
 
         if (m_uiHeroicStrikeTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HEROIC_STRIKE) == CAST_OK)
-                m_uiHeroicStrikeTimer = 30000;
+            { m_uiHeroicStrikeTimer = 30000; }
         }
         else
-            m_uiHeroicStrikeTimer -= uiDiff;
+        { m_uiHeroicStrikeTimer -= uiDiff; }
 
         if (m_creature->GetHealthPercent() < 20.0f && !m_bHasYelled20Percent)
         {

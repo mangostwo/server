@@ -88,7 +88,7 @@ static const float aPeasantMoveLoc[3] = {3335.0f, -2994.04f, 161.14f};
 
 static const int32 aPeasantSpawnYells[3] = {SAY_PEASANT_APPEAR_1, SAY_PEASANT_APPEAR_2, SAY_PEASANT_APPEAR_3};
 
-struct  npc_eris_havenfireAI : public ScriptedAI
+struct npc_eris_havenfireAI : public ScriptedAI
 {
     npc_eris_havenfireAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

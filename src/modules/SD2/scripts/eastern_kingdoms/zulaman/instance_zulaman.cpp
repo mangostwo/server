@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -48,7 +54,7 @@ bool instance_zulaman::IsEncounterInProgress() const
     for (uint8 i = 1; i < MAX_ENCOUNTER - 1; ++i)
     {
         if (m_auiEncounter[i] == IN_PROGRESS)
-            return true;
+        { return true; }
     }
 
     return false;
@@ -100,13 +106,13 @@ void instance_zulaman::OnCreatureCreate(Creature* pCreature)
         case NPC_WARBRINGER:
         case NPC_AXETHROWER:
             if (pCreature->GetPositionZ() > 10.0f && pCreature->GetPositionZ() < 15.0f)
-                m_aNalorakkEvent[0].sBearTrashGuidSet.insert(pCreature->GetObjectGuid());
+            { m_aNalorakkEvent[0].sBearTrashGuidSet.insert(pCreature->GetObjectGuid()); }
             else if (pCreature->GetPositionZ() > 25.0f && pCreature->GetPositionZ() < 30.0f)
-                m_aNalorakkEvent[1].sBearTrashGuidSet.insert(pCreature->GetObjectGuid());
+            { m_aNalorakkEvent[1].sBearTrashGuidSet.insert(pCreature->GetObjectGuid()); }
             else if (pCreature->GetPositionZ() > 40.0f && pCreature->GetPositionZ() < 41.0f)
-                m_aNalorakkEvent[2].sBearTrashGuidSet.insert(pCreature->GetObjectGuid());
+            { m_aNalorakkEvent[2].sBearTrashGuidSet.insert(pCreature->GetObjectGuid()); }
             else if (pCreature->GetPositionZ() > 41.0f)
-                m_aNalorakkEvent[3].sBearTrashGuidSet.insert(pCreature->GetObjectGuid());
+            { m_aNalorakkEvent[3].sBearTrashGuidSet.insert(pCreature->GetObjectGuid()); }
             break;
     }
 }
@@ -128,7 +134,7 @@ void instance_zulaman::OnCreatureDeath(Creature* pCreature)
                     {
                         ++m_uiBearEventPhase;
                         if (m_uiBearEventPhase == MAX_BEAR_WAVES)
-                            pNalorakk->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                        { pNalorakk->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE); }
                         else
                         {
                             pNalorakk->SetWalk(false);
@@ -153,7 +159,7 @@ void instance_zulaman::OnCreatureEvade(Creature* pCreature)
             {
                 Creature* pTemp = instance->GetCreature(*itr);
                 if (pTemp && !pTemp->IsAlive())
-                    pTemp->Respawn();
+                { pTemp->Respawn(); }
             }
             m_aNalorakkEvent[m_uiBearEventPhase].uiTrashKilled = 0;
             m_bIsBearPhaseInProgress = false;
@@ -170,7 +176,7 @@ void instance_zulaman::OnObjectCreate(GameObject* pGo)
         case GO_MASSIVE_GATE:
             // The gate needs to be opened even if the event is still in progress
             if (m_auiEncounter[TYPE_EVENT_RUN] == DONE || m_auiEncounter[TYPE_EVENT_RUN] == FAIL || m_auiEncounter[TYPE_EVENT_RUN] == IN_PROGRESS)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+            { pGo->SetGoState(GO_STATE_ACTIVE); }
             break;
         case GO_WIND_DOOR:
             break;
@@ -178,15 +184,15 @@ void instance_zulaman::OnObjectCreate(GameObject* pGo)
             break;
         case GO_LYNX_TEMPLE_EXIT:
             if (m_auiEncounter[TYPE_HALAZZI] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+            { pGo->SetGoState(GO_STATE_ACTIVE); }
             break;
         case GO_HEXLORD_ENTRANCE:
             if (GetKilledPreBosses() == 4)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+            { pGo->SetGoState(GO_STATE_ACTIVE); }
             break;
         case GO_WOODEN_DOOR:
             if (m_auiEncounter[TYPE_MALACRASS] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+            { pGo->SetGoState(GO_STATE_ACTIVE); }
             break;
         case GO_FIRE_DOOR:
             break;
@@ -208,7 +214,7 @@ void instance_zulaman::SetData(uint32 uiType, uint32 uiData)
             {
                 ++m_uiGongCount;
                 if (m_uiGongCount == 5)
-                    m_auiEncounter[TYPE_EVENT_RUN] = uiData;
+                { m_auiEncounter[TYPE_EVENT_RUN] = uiData; }
                 return;
             }
             if (uiData == IN_PROGRESS)
@@ -216,9 +222,9 @@ void instance_zulaman::SetData(uint32 uiType, uint32 uiData)
                 DoTimeRunSay(RUN_START);
                 DoUseDoorOrButton(GO_MASSIVE_GATE);
                 if (m_auiEncounter[TYPE_RUN_EVENT_TIME])
-                    SetData(TYPE_RUN_EVENT_TIME, m_auiEncounter[TYPE_RUN_EVENT_TIME]);
+                { SetData(TYPE_RUN_EVENT_TIME, m_auiEncounter[TYPE_RUN_EVENT_TIME]); }
                 else
-                    SetData(TYPE_RUN_EVENT_TIME, 20);   // 20 Minutes as default time
+                { SetData(TYPE_RUN_EVENT_TIME, 20); }   // 20 Minutes as default time
                 DoUpdateWorldState(WORLD_STATE_ID, 1);
             }
             if (uiData == FAIL)
@@ -232,7 +238,7 @@ void instance_zulaman::SetData(uint32 uiType, uint32 uiData)
                     if (!m_aEventNpcInfo[i].uiSavePosition)
                     {
                         if (Creature* pCreature = instance->GetCreature(m_aEventNpcInfo[i].npGuid))
-                            pCreature->ForcedDespawn();
+                        { pCreature->ForcedDespawn(); }
                     }
                 }
             }
@@ -272,7 +278,7 @@ void instance_zulaman::SetData(uint32 uiType, uint32 uiData)
             if (uiData == DONE)
             {
                 if (m_auiEncounter[TYPE_EVENT_RUN] == IN_PROGRESS)
-                    DoChestEvent(INDEX_JANALAI);
+                { DoChestEvent(INDEX_JANALAI); }
             }
             m_auiEncounter[uiType] = uiData;
             break;
@@ -282,14 +288,14 @@ void instance_zulaman::SetData(uint32 uiType, uint32 uiData)
             {
                 DoUseDoorOrButton(GO_LYNX_TEMPLE_EXIT);
                 if (m_auiEncounter[TYPE_EVENT_RUN] == IN_PROGRESS)
-                    DoChestEvent(INDEX_HALAZZI);
+                { DoChestEvent(INDEX_HALAZZI); }
             }
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_MALACRASS:
             DoUseDoorOrButton(GO_HEXLORD_ENTRANCE);
             if (uiData == DONE)
-                DoUseDoorOrButton(GO_WOODEN_DOOR);
+            { DoUseDoorOrButton(GO_WOODEN_DOOR); }
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_ZULJIN:
@@ -317,7 +323,7 @@ void instance_zulaman::SetData(uint32 uiType, uint32 uiData)
     {
         DoUseDoorOrButton(GO_HEXLORD_ENTRANCE);
         if (m_auiEncounter[TYPE_EVENT_RUN] == IN_PROGRESS)
-            SetData(TYPE_EVENT_RUN, DONE);
+        { SetData(TYPE_EVENT_RUN, DONE); }
     }
 
     if (uiData == DONE || uiType == TYPE_RUN_EVENT_TIME || uiType == TYPE_EVENT_RUN)
@@ -354,12 +360,12 @@ void instance_zulaman::Load(const char* chrIn)
     for (uint8 i = 0; i < MAX_ENCOUNTER - 1; ++i)
     {
         if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        { m_auiEncounter[i] = NOT_STARTED; }
     }
 
     // Restart TYPE_EVENT_RUN if was already started
     if (m_auiEncounter[TYPE_RUN_EVENT_TIME] != 0 && m_auiEncounter[TYPE_EVENT_RUN] != DONE && m_auiEncounter[TYPE_EVENT_RUN] != FAIL)
-        SetData(TYPE_EVENT_RUN, IN_PROGRESS);
+    { SetData(TYPE_EVENT_RUN, IN_PROGRESS); }
 
     OUT_LOAD_INST_DATA_COMPLETE;
 }
@@ -418,7 +424,7 @@ bool instance_zulaman::CheckConditionCriteriaMeet(Player const* pPlayer, uint32 
         case INSTANCE_CONDITION_ID_HARD_MODE_4:             // Rescued as third
         {
             if (!pConditionSource)
-                break;
+            { break; }
 
             int32 index = -1;
             switch (pConditionSource->GetEntry())
@@ -441,7 +447,7 @@ bool instance_zulaman::CheckConditionCriteriaMeet(Player const* pPlayer, uint32 
                     break;
             }
             if (index < 0)
-                break;
+            { break; }
 
             return m_aEventNpcInfo[index].uiSavePosition == uiInstanceConditionId;
         }
@@ -504,7 +510,7 @@ void instance_zulaman::Update(uint32 uiDiff)
         if (m_uiEventTimer <= uiDiff)
         {
             if (m_auiEncounter[TYPE_RUN_EVENT_TIME] == 5)   // TODO, verify 5min for warning texts
-                DoTimeRunSay(RUN_FAIL_SOON);
+            { DoTimeRunSay(RUN_FAIL_SOON); }
 
             if (m_auiEncounter[TYPE_RUN_EVENT_TIME] == 0)
             {
@@ -520,7 +526,7 @@ void instance_zulaman::Update(uint32 uiDiff)
             m_uiEventTimer = MINUTE * IN_MILLISECONDS;
         }
         else
-            m_uiEventTimer -= uiDiff;
+        { m_uiEventTimer -= uiDiff; }
     }
 }
 

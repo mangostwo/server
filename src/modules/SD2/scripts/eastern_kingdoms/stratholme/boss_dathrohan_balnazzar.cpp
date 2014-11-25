@@ -84,7 +84,7 @@ SummonDef m_aSummonPoint[] =
     {NPC_SKELETAL_GUARDIAN, 3518.825f, -3060.926f, 135.080f, 3.944f}
 };
 
-struct  boss_dathrohan_balnazzarAI : public ScriptedAI
+struct boss_dathrohan_balnazzarAI : public ScriptedAI
 {
     boss_dathrohan_balnazzarAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 

@@ -105,7 +105,7 @@ enum
     SPELL_KING_OF_GORDOK        = 22799,
 };
 
-class  instance_dire_maul : public ScriptedInstance
+class instance_dire_maul : public ScriptedInstance
 {
     public:
         instance_dire_maul(Map* pMap);

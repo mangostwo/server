@@ -67,7 +67,7 @@ enum
     NPC_QUINN           = 1951
 };
 
-struct  npc_deathstalker_erlandAI : public npc_escortAI
+struct npc_deathstalker_erlandAI : public npc_escortAI
 {
     npc_deathstalker_erlandAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 

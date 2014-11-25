@@ -73,7 +73,7 @@ enum
     NPC_DIRT_MOUND          = 15712,                        // summoned also by missing spell 26617
 };
 
-struct  boss_ouroAI : public Scripted_NoMovementAI
+struct boss_ouroAI : public Scripted_NoMovementAI
 {
     boss_ouroAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
@@ -294,7 +294,7 @@ CreatureAI* GetAI_boss_ouro(Creature* pCreature)
     return new boss_ouroAI(pCreature);
 }
 
-struct  npc_ouro_spawnerAI : public Scripted_NoMovementAI
+struct npc_ouro_spawnerAI : public Scripted_NoMovementAI
 {
     npc_ouro_spawnerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) {Reset();}
 
@@ -313,7 +313,7 @@ struct  npc_ouro_spawnerAI : public Scripted_NoMovementAI
         if (!m_bHasSummoned && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() && m_creature->IsWithinDistInMap(pWho, 50.0f))
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_OURO) == CAST_OK)
-                m_bHasSummoned = true;
+            { m_bHasSummoned = true; }
         }
 
         ScriptedAI::MoveInLineOfSight(pWho);
@@ -337,10 +337,10 @@ struct  npc_ouro_spawnerAI : public Scripted_NoMovementAI
             if (m_uiQuakeTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_QUAKE) == CAST_OK)
-                    m_uiQuakeTimer = 1000;
+                { m_uiQuakeTimer = 1000; }
             }
             else
-                m_uiQuakeTimer -= uiDiff;
+            { m_uiQuakeTimer -= uiDiff; }
         }
     }
 };

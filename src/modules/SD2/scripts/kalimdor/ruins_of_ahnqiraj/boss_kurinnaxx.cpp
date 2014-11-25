@@ -46,7 +46,7 @@ enum
     GO_SAND_TRAP            = 180647,
 };
 
-struct  boss_kurinnaxxAI : public ScriptedAI
+struct boss_kurinnaxxAI : public ScriptedAI
 {
     boss_kurinnaxxAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 

@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -216,7 +222,7 @@ static PlayerAbilityStruct m_aMalacrassStolenAbility[][4] =
     }
 };
 
-struct  boss_malacrassAI : public ScriptedAI
+struct boss_malacrassAI : public ScriptedAI
 {
     boss_malacrassAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -253,14 +259,14 @@ struct  boss_malacrassAI : public ScriptedAI
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_MALACRASS, FAIL);
+        { m_pInstance->SetData(TYPE_MALACRASS, FAIL); }
     }
 
     void DoInitializeAdds()
     {
         // not if m_creature are dead, so avoid
         if (!m_creature->IsAlive())
-            return;
+        { return; }
 
         // it's empty, so first time
         if (m_vAddsEntryList.empty())
@@ -278,13 +284,13 @@ struct  boss_malacrassAI : public ScriptedAI
         else
         {
             if (!m_pInstance)
-                return;
+            { return; }
 
             for (uint8 i = 0; i < MAX_ACTIVE_ADDS; ++i)
             {
                 // If we already have the creature on the map, then don't summon it
                 if (m_pInstance->GetSingleCreatureFromStorage(m_vAddsEntryList[i], true))
-                    continue;
+                { continue; }
 
                 m_creature->SummonCreature(m_vAddsEntryList[i], m_aAddPositions[i][0], m_aAddPositions[i][1], m_aAddPositions[i][2], m_aAddPositions[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
             }
@@ -296,13 +302,13 @@ struct  boss_malacrassAI : public ScriptedAI
         DoScriptText(SAY_AGGRO, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_MALACRASS, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_MALACRASS, IN_PROGRESS); }
     }
 
     void KilledUnit(Unit* pVictim) override
     {
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
+        { return; }
 
         DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
     }
@@ -312,7 +318,7 @@ struct  boss_malacrassAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_MALACRASS, DONE);
+        { m_pInstance->SetData(TYPE_MALACRASS, DONE); }
     }
 
     void SummonedCreatureJustDied(Creature* /*pSummoned*/) override
@@ -335,7 +341,7 @@ struct  boss_malacrassAI : public ScriptedAI
 
             // In case the player it's priest we can choose either a holy priest or a shadow priest
             if (m_uiPlayerClass == CLASS_PRIEST)
-                m_uiPlayerClass = urand(0, 1) ? CLASS_PRIEST : 0;
+            { m_uiPlayerClass = urand(0, 1) ? CLASS_PRIEST : 0; }
 
             // Init the spell timers
             uint8 m_uiMaxSpells = m_uiPlayerClass == CLASS_MAGE ? 4 : 3;
@@ -343,7 +349,7 @@ struct  boss_malacrassAI : public ScriptedAI
             m_vPlayerSpellTimer.clear();
             m_vPlayerSpellTimer.reserve(m_uiMaxSpells);
             for (uint8 i = 0; i < m_uiMaxSpells; ++i)
-                m_vPlayerSpellTimer.push_back(m_aMalacrassStolenAbility[m_uiPlayerClass][i].m_uiInitialTimer);
+            { m_vPlayerSpellTimer.push_back(m_aMalacrassStolenAbility[m_uiPlayerClass][i].m_uiInitialTimer); }
         }
     }
 
@@ -370,7 +376,7 @@ struct  boss_malacrassAI : public ScriptedAI
         if (pTarget)
         {
             if (DoCastSpellIfCan(pTarget, m_aMalacrassStolenAbility[m_uiPlayerClass][uiSpellIndex].m_uiSpellId, CAST_TRIGGERED) == CAST_OK)
-                return true;
+            { return true; }
         }
 
         return false;
@@ -379,7 +385,7 @@ struct  boss_malacrassAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         // Acts as an enrage timer
         if (m_creature->GetHealthPercent() < 80.0f)
@@ -393,7 +399,7 @@ struct  boss_malacrassAI : public ScriptedAI
                 }
             }
             else
-                m_uiDrainPowerTimer -= uiDiff;
+            { m_uiDrainPowerTimer -= uiDiff; }
         }
 
         if (m_uiSpiritBoltsTimer < uiDiff)
@@ -406,7 +412,7 @@ struct  boss_malacrassAI : public ScriptedAI
             }
         }
         else
-            m_uiSpiritBoltsTimer -= uiDiff;
+        { m_uiSpiritBoltsTimer -= uiDiff; }
 
         if (m_uiSiphonSoulTimer < uiDiff)
         {
@@ -417,7 +423,7 @@ struct  boss_malacrassAI : public ScriptedAI
             }
         }
         else
-            m_uiSiphonSoulTimer -= uiDiff;
+        { m_uiSiphonSoulTimer -= uiDiff; }
 
         // Use abilities only during the siphon soul phases
         if (m_bCanUsePlayerSpell)
@@ -428,10 +434,10 @@ struct  boss_malacrassAI : public ScriptedAI
                 if (m_vPlayerSpellTimer[i] < uiDiff)
                 {
                     if (CanUseSpecialAbility(i))
-                        m_vPlayerSpellTimer[i] = m_aMalacrassStolenAbility[m_uiPlayerClass][i].m_uiCooldown;
+                    { m_vPlayerSpellTimer[i] = m_aMalacrassStolenAbility[m_uiPlayerClass][i].m_uiCooldown; }
                 }
                 else
-                    m_vPlayerSpellTimer[i] -= uiDiff;
+                { m_vPlayerSpellTimer[i] -= uiDiff; }
             }
         }
 

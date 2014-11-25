@@ -125,7 +125,7 @@ static const Location m_afAmbushSpawn[] =
     { -5706.98f, -3745.39f, 318.728f, 1.04f}
 };
 
-struct  npc_miranAI: public npc_escortAI
+struct npc_miranAI: public npc_escortAI
 {
     npc_miranAI(Creature* pCreature): npc_escortAI(pCreature)
     {

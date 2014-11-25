@@ -59,7 +59,7 @@ enum
     SAY_CORPORAL_KEESHAN_5  = -1000565,
 };
 
-struct  npc_corporal_keeshan_escortAI : public npc_escortAI
+struct npc_corporal_keeshan_escortAI : public npc_escortAI
 {
     npc_corporal_keeshan_escortAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 

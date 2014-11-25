@@ -67,7 +67,7 @@ enum
     MAX_APOTHECARY          = 3,
 };
 
-class  instance_shadowfang_keep : public ScriptedInstance
+class instance_shadowfang_keep : public ScriptedInstance
 {
     public:
         instance_shadowfang_keep(Map* pMap);

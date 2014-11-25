@@ -47,7 +47,7 @@ enum
     QUEST_FORTUNE_AWAITS    = 7944,
 };
 
-class  instance_wailing_caverns : public ScriptedInstance
+class instance_wailing_caverns : public ScriptedInstance
 {
     public:
         instance_wailing_caverns(Map* pMap);

@@ -63,7 +63,7 @@ enum
     NPC_ANUB_SWARM               = 15538
 };
 
-struct  mob_anubisath_guardianAI : public ScriptedAI
+struct mob_anubisath_guardianAI : public ScriptedAI
 {
     mob_anubisath_guardianAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 

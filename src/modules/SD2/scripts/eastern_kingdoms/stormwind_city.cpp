@@ -56,7 +56,7 @@ enum
     QUEST_BEAT          = 1640
 };
 
-struct  npc_bartlebyAI : public ScriptedAI
+struct npc_bartlebyAI : public ScriptedAI
 {
     npc_bartlebyAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -121,7 +121,7 @@ enum
     FACTION_HOSTILE             = 168
 };
 
-struct  npc_dashel_stonefistAI : public ScriptedAI
+struct npc_dashel_stonefistAI : public ScriptedAI
 {
     npc_dashel_stonefistAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -261,7 +261,7 @@ static const DialogueEntry aIntroDialogue[] =
 static const float aWindsorSpawnLoc[3] = { -9145.68f, 373.79f, 90.64f};
 static const float aWindsorMoveLoc[3] = { -9050.39f, 443.55f, 93.05f};
 
-struct  npc_squire_roweAI : public npc_escortAI, private DialogueHelper
+struct npc_squire_roweAI : public npc_escortAI, private DialogueHelper
 {
     npc_squire_roweAI(Creature* m_creature) : npc_escortAI(m_creature),
         DialogueHelper(aIntroDialogue)
@@ -611,7 +611,7 @@ static const DialogueEntry aMasqueradeDialogue[] =
 
 static const int32 aGuardSalute[MAX_GUARD_SALUTES] = { -1000842, -1000843, -1000844, -1000845, -1000846, -1000847, -1000848};
 
-struct  npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
+struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
 {
     npc_reginald_windsorAI(Creature* m_creature) : npc_escortAI(m_creature),
         DialogueHelper(aMasqueradeDialogue)

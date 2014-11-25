@@ -141,7 +141,7 @@ static const sSummonInformation asSummonInfo[MAX_SUMMON_POSITIONS] =
     {7, NPC_CHOMPER, -473.1326f, -103.0901f, -146.1155f, 2.042035f}
 };
 
-struct  npc_blastmaster_emi_shortfuseAI : public npc_escortAI
+struct npc_blastmaster_emi_shortfuseAI : public npc_escortAI
 {
     npc_blastmaster_emi_shortfuseAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
@@ -713,7 +713,7 @@ static const float aKernobeePositions[2][3] =
     { -297.32f, -7.32f, -152.85f}                           // Walk out of the door
 };
 
-struct  npc_kernobeeAI : public FollowerAI
+struct npc_kernobeeAI : public FollowerAI
 {
     npc_kernobeeAI(Creature* pCreature) : FollowerAI(pCreature)
     {

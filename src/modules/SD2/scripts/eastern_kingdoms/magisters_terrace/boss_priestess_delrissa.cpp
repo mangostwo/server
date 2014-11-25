@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -62,7 +68,7 @@ static const float aLackeyLocations[MAX_DELRISSA_ADDS][4] =
 ## boss_priestess_delrissa
 ######*/
 
-struct  boss_priestess_delrissaAI : public ScriptedAI
+struct boss_priestess_delrissaAI : public ScriptedAI
 {
     boss_priestess_delrissaAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -102,18 +108,18 @@ struct  boss_priestess_delrissaAI : public ScriptedAI
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_DELRISSA, FAIL);
+        { m_pInstance->SetData(TYPE_DELRISSA, FAIL); }
     }
 
     void Aggro(Unit* pWho) override
     {
         if (pWho->GetTypeId() != TYPEID_PLAYER)
-            return;
+        { return; }
 
         DoScriptText(SAY_AGGRO, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_DELRISSA, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_DELRISSA, IN_PROGRESS); }
     }
 
     // Summon four random adds to help during the fight
@@ -121,7 +127,7 @@ struct  boss_priestess_delrissaAI : public ScriptedAI
     {
         // can be called if creature are dead, so avoid
         if (!m_creature->IsAlive())
-            return;
+        { return; }
 
         // it's empty, so first time
         if (m_vuiLackeyEnties.empty())
@@ -131,25 +137,25 @@ struct  boss_priestess_delrissaAI : public ScriptedAI
 
             // fill vector array with entries from creature array
             for (uint8 i = 0; i < MAX_COMPANIONS; ++i)
-                m_vuiLackeyEnties[i] = aDelrissaLackeys[i];
+            { m_vuiLackeyEnties[i] = aDelrissaLackeys[i]; }
 
             std::random_shuffle(m_vuiLackeyEnties.begin(), m_vuiLackeyEnties.end());
 
             // Summon the 4 entries
             for (uint8 i = 0; i < MAX_DELRISSA_ADDS; ++i)
-                m_creature->SummonCreature(m_vuiLackeyEnties[i], aLackeyLocations[i][0], aLackeyLocations[i][1], aLackeyLocations[i][2], aLackeyLocations[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
+            { m_creature->SummonCreature(m_vuiLackeyEnties[i], aLackeyLocations[i][0], aLackeyLocations[i][1], aLackeyLocations[i][2], aLackeyLocations[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0); }
         }
         // Resummon the killed adds
         else
         {
             if (!m_pInstance)
-                return;
+            { return; }
 
             for (uint8 i = 0; i < MAX_DELRISSA_ADDS; ++i)
             {
                 // If we already have the creature on the map, then don't summon it
                 if (m_pInstance->GetSingleCreatureFromStorage(m_vuiLackeyEnties[i], true))
-                    continue;
+                { continue; }
 
                 m_creature->SummonCreature(m_vuiLackeyEnties[i], aLackeyLocations[i][0], aLackeyLocations[i][1], aLackeyLocations[i][2], aLackeyLocations[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
             }
@@ -159,14 +165,14 @@ struct  boss_priestess_delrissaAI : public ScriptedAI
     void KilledUnit(Unit* pVictim) override
     {
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
+        { return; }
 
         DoScriptText(aPlayerDeath[m_uiPlayersKilled], m_creature);
         ++m_uiPlayersKilled;
 
         // reset counter
         if (m_uiPlayersKilled == 5)
-            m_uiPlayersKilled = 0;
+        { m_uiPlayersKilled = 0; }
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -174,49 +180,49 @@ struct  boss_priestess_delrissaAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
 
         if (!m_pInstance)
-            return;
+        { return; }
 
         // Remove lootable flag if the lackeys are not killed
         if (m_pInstance->GetData(TYPE_DELRISSA) == SPECIAL)
-            m_pInstance->SetData(TYPE_DELRISSA, DONE);
+        { m_pInstance->SetData(TYPE_DELRISSA, DONE); }
         else
-            m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+        { m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE); }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiHealTimer < uiDiff)
         {
             if (Unit* pTarget = DoSelectLowestHpFriendly(50.0f))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_FLASH_HEAL) == CAST_OK)
-                    m_uiHealTimer = urand(15000, 20000);
+                { m_uiHealTimer = urand(15000, 20000); }
             }
         }
         else
-            m_uiHealTimer -= uiDiff;
+        { m_uiHealTimer -= uiDiff; }
 
         if (m_uiRenewTimer < uiDiff)
         {
             if (Unit* pTarget = DoSelectLowestHpFriendly(50.0f))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_RENEW : SPELL_RENEW_H) == CAST_OK)
-                    m_uiRenewTimer = urand(5000, 10000);
+                { m_uiRenewTimer = urand(5000, 10000); }
             }
         }
         else
-            m_uiRenewTimer -= uiDiff;
+        { m_uiRenewTimer -= uiDiff; }
 
         if (m_uiShieldTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SHIELD : SPELL_SHIELD_H) == CAST_OK)
-                m_uiShieldTimer = urand(30000, 35000);
+            { m_uiShieldTimer = urand(30000, 35000); }
         }
         else
-            m_uiShieldTimer -= uiDiff;
+        { m_uiShieldTimer -= uiDiff; }
 
         if (m_uiDispelTimer < uiDiff)
         {
@@ -224,18 +230,18 @@ struct  boss_priestess_delrissaAI : public ScriptedAI
             std::list<Creature*> lTempList = DoFindFriendlyCC(50.0f);
 
             if (!lTempList.empty())
-                pTarget = *(lTempList.begin());
+            { pTarget = *(lTempList.begin()); }
             else
-                pTarget = DoSelectLowestHpFriendly(50.0f);
+            { pTarget = DoSelectLowestHpFriendly(50.0f); }
 
             if (pTarget)
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_DISPEL_MAGIC) == CAST_OK)
-                    m_uiDispelTimer = urand(12000, 15000);
+                { m_uiDispelTimer = urand(12000, 15000); }
             }
         }
         else
-            m_uiDispelTimer -= uiDiff;
+        { m_uiDispelTimer -= uiDiff; }
 
         // Use the Medallion if CC - only on heroic. Not sure how many times they are allowed to use it.
         if (!m_bIsRegularMode && m_uiMedallionTimer)
@@ -245,10 +251,10 @@ struct  boss_priestess_delrissaAI : public ScriptedAI
                 if (m_uiMedallionTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_MEDALLION, CAST_TRIGGERED) == CAST_OK)
-                        m_uiMedallionTimer = 0;
+                    { m_uiMedallionTimer = 0; }
                 }
                 else
-                    m_uiMedallionTimer -= uiDiff;
+                { m_uiMedallionTimer -= uiDiff; }
             }
         }
 
@@ -257,19 +263,19 @@ struct  boss_priestess_delrissaAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOW_WORD_PAIN : SPELL_SHADOW_WORD_PAIN_H) == CAST_OK)
-                    m_uiSWPainTimer = 10000;
+                { m_uiSWPainTimer = 10000; }
             }
         }
         else
-            m_uiSWPainTimer -= uiDiff;
+        { m_uiSWPainTimer -= uiDiff; }
 
         if (m_uiScreamTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SCREAM) == CAST_OK)
-                m_uiScreamTimer = urand(15000, 20000);
+            { m_uiScreamTimer = urand(15000, 20000); }
         }
         else
-            m_uiScreamTimer -= uiDiff;
+        { m_uiScreamTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }
@@ -284,7 +290,7 @@ CreatureAI* GetAI_boss_priestess_delrissa(Creature* pCreature)
 ## priestess_companion_common
 ######*/
 
-struct  priestess_companion_commonAI : public ScriptedAI
+struct priestess_companion_commonAI : public ScriptedAI
 {
     priestess_companion_commonAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -315,10 +321,10 @@ struct  priestess_companion_commonAI : public ScriptedAI
     void KilledUnit(Unit* pVictim) override
     {
         if (!m_pInstance)
-            return;
+        { return; }
 
         if (Creature* pDelrissa = m_pInstance->GetSingleCreatureFromStorage(NPC_DELRISSA))
-            pDelrissa->AI()->KilledUnit(pVictim);
+        { pDelrissa->AI()->KilledUnit(pVictim); }
     }
 
     // Return true to handle shared timers and MeleeAttack
@@ -328,16 +334,16 @@ struct  priestess_companion_commonAI : public ScriptedAI
     {
         // Return since we have no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         // Call specific virtual function
         if (!UpdateCompanionAI(uiDiff))
-            return;
+        { return; }
 
         if (!m_bUsedPotion && m_creature->GetHealthPercent() < 25.0f)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_HEALING_POTION) == CAST_OK)
-                m_bUsedPotion = true;
+            { m_bUsedPotion = true; }
         }
 
         // Change target
@@ -351,7 +357,7 @@ struct  priestess_companion_commonAI : public ScriptedAI
             }
         }
         else
-            m_uiResetThreatTimer -= uiDiff;
+        { m_uiResetThreatTimer -= uiDiff; }
 
         // Use the Medallion if CC - only on heroic. Not sure how many times they are allowed to use it.
         if (!m_bIsRegularMode && m_uiMedallionTimer)
@@ -361,10 +367,10 @@ struct  priestess_companion_commonAI : public ScriptedAI
                 if (m_uiMedallionTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_MEDALLION, CAST_TRIGGERED) == CAST_OK)
-                        m_uiMedallionTimer = 0;
+                    { m_uiMedallionTimer = 0; }
                 }
                 else
-                    m_uiMedallionTimer -= uiDiff;
+                { m_uiMedallionTimer -= uiDiff; }
             }
         }
 
@@ -388,7 +394,7 @@ enum
 ## npc_kagani_nightstrike - Rogue
 ######*/
 
-struct  npc_kagani_nightstrikeAI : public priestess_companion_commonAI
+struct npc_kagani_nightstrikeAI : public priestess_companion_commonAI
 {
     npc_kagani_nightstrikeAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
 
@@ -412,7 +418,7 @@ struct  npc_kagani_nightstrikeAI : public priestess_companion_commonAI
     void EnterEvadeMode() override
     {
         if (m_uiVanishEndTimer)
-            return;
+        { return; }
 
         ScriptedAI::EnterEvadeMode();
     }
@@ -428,7 +434,7 @@ struct  npc_kagani_nightstrikeAI : public priestess_companion_commonAI
                 m_uiVanishEndTimer = 0;
             }
             else
-                m_uiVanishEndTimer -= uiDiff;
+            { m_uiVanishEndTimer -= uiDiff; }
 
             return false;
         }
@@ -449,31 +455,31 @@ struct  npc_kagani_nightstrikeAI : public priestess_companion_commonAI
             }
         }
         else
-            m_uiVanishTimer -= uiDiff;
+        { m_uiVanishTimer -= uiDiff; }
 
         if (m_uiGougeTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_GOUGE) == CAST_OK)
-                m_uiGougeTimer = 5500;
+            { m_uiGougeTimer = 5500; }
         }
         else
-            m_uiGougeTimer -= uiDiff;
+        { m_uiGougeTimer -= uiDiff; }
 
         if (m_uiKickTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KICK) == CAST_OK)
-                m_uiKickTimer = 7000;
+            { m_uiKickTimer = 7000; }
         }
         else
-            m_uiKickTimer -= uiDiff;
+        { m_uiKickTimer -= uiDiff; }
 
         if (m_uiEviscerateTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_EVISCERATE : SPELL_EVISCERATE_H) == CAST_OK)
-                m_uiEviscerateTimer = 4000;
+            { m_uiEviscerateTimer = 4000; }
         }
         else
-            m_uiEviscerateTimer -= uiDiff;
+        { m_uiEviscerateTimer -= uiDiff; }
 
         return true;
     }
@@ -504,7 +510,7 @@ enum
 ## npc_ellris_duskhallow - Warlock
 ######*/
 
-struct  npc_ellris_duskhallowAI : public priestess_companion_commonAI
+struct npc_ellris_duskhallowAI : public priestess_companion_commonAI
 {
     npc_ellris_duskhallowAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
 
@@ -528,7 +534,7 @@ struct  npc_ellris_duskhallowAI : public priestess_companion_commonAI
 
         // Check if we already have an imp summoned
         if (!GetClosestCreatureWithEntry(m_creature, NPC_FIZZLE, 50.0f))
-            DoCastSpellIfCan(m_creature, SPELL_SUMMON_IMP);
+        { DoCastSpellIfCan(m_creature, SPELL_SUMMON_IMP); }
     }
 
     void AttackStart(Unit* pWho) override
@@ -549,66 +555,66 @@ struct  npc_ellris_duskhallowAI : public priestess_companion_commonAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ?  SPELL_IMMOLATE : SPELL_IMMOLATE_H) == CAST_OK)
-                    m_uiImmolateTimer = 6000;
+                { m_uiImmolateTimer = 6000; }
             }
         }
         else
-            m_uiImmolateTimer -= uiDiff;
+        { m_uiImmolateTimer -= uiDiff; }
 
         if (m_uiShadowBoltTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H) == CAST_OK)
-                    m_uiShadowBoltTimer = 5000;
+                { m_uiShadowBoltTimer = 5000; }
             }
         }
         else
-            m_uiShadowBoltTimer -= uiDiff;
+        { m_uiShadowBoltTimer -= uiDiff; }
 
         if (m_uiSeedCorruptionTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_SEED_OF_CORRUPTION) == CAST_OK)
-                    m_uiSeedCorruptionTimer = 10000;
+                { m_uiSeedCorruptionTimer = 10000; }
             }
         }
         else
-            m_uiSeedCorruptionTimer -= uiDiff;
+        { m_uiSeedCorruptionTimer -= uiDiff; }
 
         if (m_uiCurseAgonyTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CURSE_OF_AGONY : SPELL_CURSE_OF_AGONY_H) == CAST_OK)
-                    m_uiCurseAgonyTimer = 13000;
+                { m_uiCurseAgonyTimer = 13000; }
             }
         }
         else
-            m_uiCurseAgonyTimer -= uiDiff;
+        { m_uiCurseAgonyTimer -= uiDiff; }
 
         if (m_uiFearTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_FEAR) == CAST_OK)
-                    m_uiFearTimer = 10000;
+                { m_uiFearTimer = 10000; }
             }
         }
         else
-            m_uiFearTimer -= uiDiff;
+        { m_uiFearTimer -= uiDiff; }
 
         if (m_uiDeathCoilTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_DEATH_COIL) == CAST_OK)
-                    m_uiDeathCoilTimer = urand(8000, 13000);
+                { m_uiDeathCoilTimer = urand(8000, 13000); }
             }
         }
         else
-            m_uiDeathCoilTimer -= uiDiff;
+        { m_uiDeathCoilTimer -= uiDiff; }
 
         return true;
     }
@@ -630,7 +636,7 @@ enum
 ## npc_eramas_brightblaze - Monk
 ######*/
 
-struct  npc_eramas_brightblazeAI : public priestess_companion_commonAI
+struct npc_eramas_brightblazeAI : public priestess_companion_commonAI
 {
     npc_eramas_brightblazeAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
 
@@ -650,18 +656,18 @@ struct  npc_eramas_brightblazeAI : public priestess_companion_commonAI
         if (m_uiKnockdownTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_KNOCKDOWN : SPELL_KNOCKDOWN_H) == CAST_OK)
-                m_uiKnockdownTimer = 6000;
+            { m_uiKnockdownTimer = 6000; }
         }
         else
-            m_uiKnockdownTimer -= uiDiff;
+        { m_uiKnockdownTimer -= uiDiff; }
 
         if (m_uiSnapKickTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SNAP_KICK) == CAST_OK)
-                m_uiSnapKickTimer  = 4500;
+            { m_uiSnapKickTimer  = 4500; }
         }
         else
-            m_uiSnapKickTimer -= uiDiff;
+        { m_uiSnapKickTimer -= uiDiff; }
 
         return true;
     }
@@ -691,7 +697,7 @@ enum
 ## npc_yazzai - Mage
 ######*/
 
-struct  npc_yazzaiAI : public priestess_companion_commonAI
+struct npc_yazzaiAI : public priestess_companion_commonAI
 {
     npc_yazzaiAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
 
@@ -740,16 +746,16 @@ struct  npc_yazzaiAI : public priestess_companion_commonAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_POLYMORPH) == CAST_OK)
-                    m_uiPolymorphTimer = 20000;
+                { m_uiPolymorphTimer = 20000; }
             }
         }
         else
-            m_uiPolymorphTimer -= uiDiff;
+        { m_uiPolymorphTimer -= uiDiff; }
 
         if (m_creature->GetHealthPercent() < 35.0f && !m_bHasIceBlocked)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_ICE_BLOCK) == CAST_OK)
-                m_bHasIceBlocked = true;
+            { m_bHasIceBlocked = true; }
         }
 
         if (m_uiBlizzardTimer < uiDiff)
@@ -757,41 +763,41 @@ struct  npc_yazzaiAI : public priestess_companion_commonAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_BLIZZARD : SPELL_BLIZZARD_H) == CAST_OK)
-                    m_uiBlizzardTimer = urand(8000, 15000);
+                { m_uiBlizzardTimer = urand(8000, 15000); }
             }
         }
         else
-            m_uiBlizzardTimer -= uiDiff;
+        { m_uiBlizzardTimer -= uiDiff; }
 
         if (m_uiIceLanceTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_ICE_LANCE : SPELL_ICE_LANCE_H) == CAST_OK)
-                    m_uiIceLanceTimer = 12000;
+                { m_uiIceLanceTimer = 12000; }
             }
         }
         else
-            m_uiIceLanceTimer -= uiDiff;
+        { m_uiIceLanceTimer -= uiDiff; }
 
         if (m_uiConeColdTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_CONE_OF_COLD : SPELL_CONE_OF_COLD_H) == CAST_OK)
-                m_uiConeColdTimer = 10000;
+            { m_uiConeColdTimer = 10000; }
         }
         else
-            m_uiConeColdTimer -= uiDiff;
+        { m_uiConeColdTimer -= uiDiff; }
 
         if (m_uiFrostboltTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FROSTBOLT : SPELL_FROSTBOLT_H) == CAST_OK)
-                    m_uiFrostboltTimer = 8000;
+                { m_uiFrostboltTimer = 8000; }
             }
         }
         else
-            m_uiFrostboltTimer -= uiDiff;
+        { m_uiFrostboltTimer -= uiDiff; }
 
         if (m_uiBlinkTimer < uiDiff)
         {
@@ -799,13 +805,13 @@ struct  npc_yazzaiAI : public priestess_companion_commonAI
             if (m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_IN_MELEE_RANGE))
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BLINK) == CAST_OK)
-                    m_uiBlinkTimer = 8000;
+                { m_uiBlinkTimer = 8000; }
             }
             else
-                m_uiBlinkTimer = 2000;
+            { m_uiBlinkTimer = 2000; }
         }
         else
-            m_uiBlinkTimer -= uiDiff;
+        { m_uiBlinkTimer -= uiDiff; }
 
         return true;
     }
@@ -831,7 +837,7 @@ enum
 ## npc_warlord_salaris - Warrior
 ######*/
 
-struct  npc_warlord_salarisAI : public priestess_companion_commonAI
+struct npc_warlord_salarisAI : public priestess_companion_commonAI
 {
     npc_warlord_salarisAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
 
@@ -869,54 +875,54 @@ struct  npc_warlord_salarisAI : public priestess_companion_commonAI
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_INTERCEPT_STUN, SELECT_FLAG_NOT_IN_MELEE_RANGE | SELECT_FLAG_IN_LOS))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_INTERCEPT_STUN) == CAST_OK)
-                        m_uiInterceptStunTimer = 10000;
+                    { m_uiInterceptStunTimer = 10000; }
                 }
             }
             else
-                m_uiInterceptStunTimer = 2000;
+            { m_uiInterceptStunTimer = 2000; }
         }
         else
-            m_uiInterceptStunTimer -= uiDiff;
+        { m_uiInterceptStunTimer -= uiDiff; }
 
         if (m_uiDisarmTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DISARM) == CAST_OK)
-                m_uiDisarmTimer = 6000;
+            { m_uiDisarmTimer = 6000; }
         }
         else
-            m_uiDisarmTimer -= uiDiff;
+        { m_uiDisarmTimer -= uiDiff; }
 
         if (m_uiHamstringTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HAMSTRING) == CAST_OK)
-                m_uiHamstringTimer = 4500;
+            { m_uiHamstringTimer = 4500; }
         }
         else
-            m_uiHamstringTimer -= uiDiff;
+        { m_uiHamstringTimer -= uiDiff; }
 
         if (m_uiMortalStrikeTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTAL_STRIKE) == CAST_OK)
-                m_uiMortalStrikeTimer = 4500;
+            { m_uiMortalStrikeTimer = 4500; }
         }
         else
-            m_uiMortalStrikeTimer -= uiDiff;
+        { m_uiMortalStrikeTimer -= uiDiff; }
 
         if (m_uiPiercingHowlTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_PIERCING_HOWL) == CAST_OK)
-                m_uiPiercingHowlTimer = 10000;
+            { m_uiPiercingHowlTimer = 10000; }
         }
         else
-            m_uiPiercingHowlTimer -= uiDiff;
+        { m_uiPiercingHowlTimer -= uiDiff; }
 
         if (m_uiFrighteningShoutTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FRIGHTENING_SHOUT) == CAST_OK)
-                m_uiFrighteningShoutTimer = 18000;
+            { m_uiFrighteningShoutTimer = 18000; }
         }
         else
-            m_uiFrighteningShoutTimer -= uiDiff;
+        { m_uiFrighteningShoutTimer -= uiDiff; }
 
         return true;
     }
@@ -945,7 +951,7 @@ enum
 ## npc_garaxxas - Hunter
 ######*/
 
-struct  npc_garaxxasAI : public priestess_companion_commonAI
+struct npc_garaxxasAI : public priestess_companion_commonAI
 {
     npc_garaxxasAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
 
@@ -969,7 +975,7 @@ struct  npc_garaxxasAI : public priestess_companion_commonAI
 
         // Check if the pet was killed
         if (!GetClosestCreatureWithEntry(m_creature, NPC_SLIVER, 50.0f))
-            m_creature->SummonCreature(NPC_SLIVER, 0, 0, 0, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
+        { m_creature->SummonCreature(NPC_SLIVER, 0, 0, 0, 0, TEMPSUMMON_CORPSE_DESPAWN, 0); }
     }
 
     void AttackStart(Unit* pWho) override
@@ -990,18 +996,18 @@ struct  npc_garaxxasAI : public priestess_companion_commonAI
             if (m_uiWingClipTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_WING_CLIP) == CAST_OK)
-                    m_uiWingClipTimer = 4000;
+                { m_uiWingClipTimer = 4000; }
             }
             else
-                m_uiWingClipTimer -= uiDiff;
+            { m_uiWingClipTimer -= uiDiff; }
 
             if (m_uiFreezingTrapTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_FREEZING_TRAP) == CAST_OK)
-                    m_uiFreezingTrapTimer = urand(15000, 30000);
+                { m_uiFreezingTrapTimer = urand(15000, 30000); }
             }
             else
-                m_uiFreezingTrapTimer -= uiDiff;
+            { m_uiFreezingTrapTimer -= uiDiff; }
         }
         else
         {
@@ -1010,44 +1016,44 @@ struct  npc_garaxxasAI : public priestess_companion_commonAI
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_CONCUSSIVE_SHOT) == CAST_OK)
-                        m_uiConcussiveShotTimer = 8000;
+                    { m_uiConcussiveShotTimer = 8000; }
                 }
             }
             else
-                m_uiConcussiveShotTimer -= uiDiff;
+            { m_uiConcussiveShotTimer -= uiDiff; }
 
             if (m_uiMultiShotTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_MULTI_SHOT : SPELL_MULTI_SHOT_H) == CAST_OK)
-                        m_uiMultiShotTimer = 10000;
+                    { m_uiMultiShotTimer = 10000; }
                 }
             }
             else
-                m_uiMultiShotTimer -= uiDiff;
+            { m_uiMultiShotTimer -= uiDiff; }
 
             if (m_uiAimedShotTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_AIMED_SHOT) == CAST_OK)
-                        m_uiAimedShotTimer = 6000;
+                    { m_uiAimedShotTimer = 6000; }
                 }
             }
             else
-                m_uiAimedShotTimer -= uiDiff;
+            { m_uiAimedShotTimer -= uiDiff; }
 
             if (m_uiShootTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHOOT : SPELL_SHOOT_H) == CAST_OK)
-                        m_uiShootTimer = 2500;
+                    { m_uiShootTimer = 2500; }
                 }
             }
             else
-                m_uiShootTimer -= uiDiff;
+            { m_uiShootTimer -= uiDiff; }
         }
 
         return true;
@@ -1076,7 +1082,7 @@ enum
 ## npc_apoko - Shaman
 ######*/
 
-struct  npc_apokoAI : public priestess_companion_commonAI
+struct npc_apokoAI : public priestess_companion_commonAI
 {
     npc_apokoAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
 
@@ -1111,45 +1117,45 @@ struct  npc_apokoAI : public priestess_companion_commonAI
             m_uiTotemTimer = urand(2000, 6000);
         }
         else
-            m_uiTotemTimer -= uiDiff;
+        { m_uiTotemTimer -= uiDiff; }
 
         if (m_uiWarStompTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_WAR_STOMP) == CAST_OK)
-                m_uiWarStompTimer = 10000;
+            { m_uiWarStompTimer = 10000; }
         }
         else
-            m_uiWarStompTimer -= uiDiff;
+        { m_uiWarStompTimer -= uiDiff; }
 
         if (m_uiPurgeTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_PURGE) == CAST_OK)
-                    m_uiPurgeTimer = 15000;
+                { m_uiPurgeTimer = 15000; }
             }
         }
         else
-            m_uiPurgeTimer -= uiDiff;
+        { m_uiPurgeTimer -= uiDiff; }
 
         if (m_uiFrostShockTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FROST_SHOCK : SPELL_FROST_SHOCK_H) == CAST_OK)
-                m_uiFrostShockTimer = 7000;
+            { m_uiFrostShockTimer = 7000; }
         }
         else
-            m_uiFrostShockTimer -= uiDiff;
+        { m_uiFrostShockTimer -= uiDiff; }
 
         if (m_uiHealingWaveTimer < uiDiff)
         {
             if (Unit* pTarget = DoSelectLowestHpFriendly(50.0f))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_LESSER_HEALING_WAVE : SPELL_LESSER_HEALING_WAVE_H) == CAST_OK)
-                    m_uiHealingWaveTimer = 5000;
+                { m_uiHealingWaveTimer = 5000; }
             }
         }
         else
-            m_uiHealingWaveTimer -= uiDiff;
+        { m_uiHealingWaveTimer -= uiDiff; }
 
         return true;
     }
@@ -1176,7 +1182,7 @@ enum
 ## npc_zelfan - Engineer
 ######*/
 
-struct  npc_zelfanAI : public priestess_companion_commonAI
+struct npc_zelfanAI : public priestess_companion_commonAI
 {
     npc_zelfanAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
 
@@ -1200,7 +1206,7 @@ struct  npc_zelfanAI : public priestess_companion_commonAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (m_creature->getVictim())
-            pSummoned->AI()->AttackStart(m_creature->getVictim());
+        { pSummoned->AI()->AttackStart(m_creature->getVictim()); }
     }
 
     bool UpdateCompanionAI(const uint32 uiDiff)
@@ -1208,32 +1214,32 @@ struct  npc_zelfanAI : public priestess_companion_commonAI
         if (m_uiGoblinDragonGunTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_GOBLIN_DRAGON_GUN : SPELL_GOBLIN_DRAGON_GUN_H) == CAST_OK)
-                m_uiGoblinDragonGunTimer = urand(10000, 20000);
+            { m_uiGoblinDragonGunTimer = urand(10000, 20000); }
         }
         else
-            m_uiGoblinDragonGunTimer -= uiDiff;
+        { m_uiGoblinDragonGunTimer -= uiDiff; }
 
         if (m_uiRocketLaunchTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_ROCKET_LAUNCH : SPELL_ROCKET_LAUNCH_H) == CAST_OK)
-                    m_uiRocketLaunchTimer = 9000;
+                { m_uiRocketLaunchTimer = 9000; }
             }
         }
         else
-            m_uiRocketLaunchTimer -= uiDiff;
+        { m_uiRocketLaunchTimer -= uiDiff; }
 
         if (m_uiFelIronBombTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FEL_IRON_BOMB : SPELL_FEL_IRON_BOMB_H) == CAST_OK)
-                    m_uiFelIronBombTimer = 15000;
+                { m_uiFelIronBombTimer = 15000; }
             }
         }
         else
-            m_uiFelIronBombTimer -= uiDiff;
+        { m_uiFelIronBombTimer -= uiDiff; }
 
         if (m_uiRecombobulateTimer < uiDiff)
         {
@@ -1242,26 +1248,26 @@ struct  npc_zelfanAI : public priestess_companion_commonAI
             std::list<Creature*> lTempList = DoFindFriendlyCC(50.0f);
 
             if (!lTempList.empty())
-                pTarget = *(lTempList.begin());
+            { pTarget = *(lTempList.begin()); }
             else
-                pTarget = DoSelectLowestHpFriendly(50.0f);
+            { pTarget = DoSelectLowestHpFriendly(50.0f); }
 
             if (pTarget)
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_RECOMBOBULATE) == CAST_OK)
-                    m_uiRecombobulateTimer = 2000;
+                { m_uiRecombobulateTimer = 2000; }
             }
         }
         else
-            m_uiRecombobulateTimer -= uiDiff;
+        { m_uiRecombobulateTimer -= uiDiff; }
 
         if (m_uiHighExplosiveSheepTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_HIGH_EXPLOSIVE_SHEEP) == CAST_OK)
-                m_uiHighExplosiveSheepTimer = 65000;
+            { m_uiHighExplosiveSheepTimer = 65000; }
         }
         else
-            m_uiHighExplosiveSheepTimer -= uiDiff;
+        { m_uiHighExplosiveSheepTimer -= uiDiff; }
 
         return true;
     }

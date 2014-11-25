@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -96,7 +102,7 @@ static const DialogueEntry aIntroDialogue[] =
 ## boss_alythess
 ######*/
 
-struct  boss_alythessAI : public ScriptedAI
+struct boss_alythessAI : public ScriptedAI
 {
     boss_alythessAI(Creature* pCreature) : ScriptedAI(pCreature),
         m_introDialogue(aIntroDialogue)
@@ -131,13 +137,13 @@ struct  boss_alythessAI : public ScriptedAI
         if (m_pInstance)
         {
             if (m_pInstance->GetData(TYPE_EREDAR_TWINS) != FAIL)
-                m_pInstance->SetData(TYPE_EREDAR_TWINS, FAIL);
+            { m_pInstance->SetData(TYPE_EREDAR_TWINS, FAIL); }
 
             // Respawn dead sister
             if (Creature* pSister = m_pInstance->GetSingleCreatureFromStorage(NPC_SACROLASH))
             {
                 if (!pSister->IsAlive())
-                    pSister->Respawn();
+                { pSister->Respawn(); }
             }
         }
     }
@@ -147,7 +153,7 @@ struct  boss_alythessAI : public ScriptedAI
         if (m_pInstance)
         {
             if (m_pInstance->GetData(TYPE_EREDAR_TWINS) != IN_PROGRESS)
-                m_pInstance->SetData(TYPE_EREDAR_TWINS, IN_PROGRESS);
+            { m_pInstance->SetData(TYPE_EREDAR_TWINS, IN_PROGRESS); }
         }
     }
 
@@ -195,7 +201,7 @@ struct  boss_alythessAI : public ScriptedAI
     void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
     {
         if (pTarget->HasAura(SPELL_DARK_FLAME))
-            return;
+        { return; }
 
         if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_FIRE)
         {
@@ -205,7 +211,7 @@ struct  boss_alythessAI : public ScriptedAI
                 pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, true);
             }
             else
-                pTarget->CastSpell(pTarget, SPELL_FLAME_TOUCHED, true);
+            { pTarget->CastSpell(pTarget, SPELL_FLAME_TOUCHED, true); }
         }
         else if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_SHADOW)
         {
@@ -215,7 +221,7 @@ struct  boss_alythessAI : public ScriptedAI
                 pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, true);
             }
             else
-                pTarget->CastSpell(pTarget, SPELL_DARK_TOUCHED, true);
+            { pTarget->CastSpell(pTarget, SPELL_DARK_TOUCHED, true); }
         }
     }
 
@@ -232,7 +238,7 @@ struct  boss_alythessAI : public ScriptedAI
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiEnrageTimer < uiDiff)
         {
@@ -243,50 +249,50 @@ struct  boss_alythessAI : public ScriptedAI
             }
         }
         else
-            m_uiEnrageTimer -= uiDiff;
+        { m_uiEnrageTimer -= uiDiff; }
 
         if (m_uiPyrogenicsTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_PYROGENICS) == CAST_OK)
-                m_uiPyrogenicsTimer = urand(25000, 30000);
+            { m_uiPyrogenicsTimer = urand(25000, 30000); }
         }
         else
-            m_uiPyrogenicsTimer -= uiDiff;
+        { m_uiPyrogenicsTimer -= uiDiff; }
 
         if (m_uiConflagrationTimer < uiDiff)
         {
             Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 3);
             if (!pTarget)
-                pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
+            { pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0); }
 
             // If sister is dead cast shadownova instead of conflagration
             bool bSwitchSpell = m_creature->HasAura(SPELL_EMPOWER);
             if (DoCastSpellIfCan(pTarget, bSwitchSpell ? SPELL_SHADOW_NOVA : SPELL_CONFLAGRATION) == CAST_OK)
             {
                 if (!bSwitchSpell)
-                    DoScriptText(SAY_ALYTHESS_CANFLAGRATION, m_creature);
+                { DoScriptText(SAY_ALYTHESS_CANFLAGRATION, m_creature); }
 
                 m_uiConflagrationTimer = urand(20000, 25000);
             }
         }
         else
-            m_uiConflagrationTimer -= uiDiff;
+        { m_uiConflagrationTimer -= uiDiff; }
 
         if (m_uiFlameSearTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_FLAME_SEAR) == CAST_OK)
-                m_uiFlameSearTimer = 10000;
+            { m_uiFlameSearTimer = 10000; }
         }
         else
-            m_uiFlameSearTimer -= uiDiff;
+        { m_uiFlameSearTimer -= uiDiff; }
 
         if (m_uiBlazeTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BLAZE) == CAST_OK)
-                m_uiBlazeTimer = 3000;
+            { m_uiBlazeTimer = 3000; }
         }
         else
-            m_uiBlazeTimer -= uiDiff;
+        { m_uiBlazeTimer -= uiDiff; }
     }
 };
 
@@ -294,7 +300,7 @@ struct  boss_alythessAI : public ScriptedAI
 ## boss_sacrolash
 ######*/
 
-struct  boss_sacrolashAI : public ScriptedAI
+struct boss_sacrolashAI : public ScriptedAI
 {
     boss_sacrolashAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -324,13 +330,13 @@ struct  boss_sacrolashAI : public ScriptedAI
         if (m_pInstance)
         {
             if (m_pInstance->GetData(TYPE_EREDAR_TWINS) != FAIL)
-                m_pInstance->SetData(TYPE_EREDAR_TWINS, FAIL);
+            { m_pInstance->SetData(TYPE_EREDAR_TWINS, FAIL); }
 
             // Respawn dead sister
             if (Creature* pSister = m_pInstance->GetSingleCreatureFromStorage(NPC_ALYTHESS))
             {
                 if (!pSister->IsAlive())
-                    pSister->Respawn();
+                { pSister->Respawn(); }
             }
         }
     }
@@ -340,7 +346,7 @@ struct  boss_sacrolashAI : public ScriptedAI
         if (m_pInstance)
         {
             if (m_pInstance->GetData(TYPE_EREDAR_TWINS) != IN_PROGRESS)
-                m_pInstance->SetData(TYPE_EREDAR_TWINS, IN_PROGRESS);
+            { m_pInstance->SetData(TYPE_EREDAR_TWINS, IN_PROGRESS); }
         }
     }
 
@@ -375,7 +381,7 @@ struct  boss_sacrolashAI : public ScriptedAI
     void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
     {
         if (pTarget->HasAura(SPELL_DARK_FLAME))
-            return;
+        { return; }
 
         if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_FIRE)
         {
@@ -385,7 +391,7 @@ struct  boss_sacrolashAI : public ScriptedAI
                 pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, true);
             }
             else
-                pTarget->CastSpell(pTarget, SPELL_FLAME_TOUCHED, true);
+            { pTarget->CastSpell(pTarget, SPELL_FLAME_TOUCHED, true); }
         }
         else if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_SHADOW)
         {
@@ -395,7 +401,7 @@ struct  boss_sacrolashAI : public ScriptedAI
                 pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, true);
             }
             else
-                pTarget->CastSpell(pTarget, SPELL_DARK_TOUCHED, true);
+            { pTarget->CastSpell(pTarget, SPELL_DARK_TOUCHED, true); }
         }
     }
 
@@ -410,14 +416,14 @@ struct  boss_sacrolashAI : public ScriptedAI
             if (Unit* pTempTarget = m_creature->GetMap()->GetUnit((*iter)->getUnitGuid()))
             {
                 if (!pTempTarget->IsWithinDistInMap(m_creature, fDist))
-                    m_vRangeTargets.push_back(pTempTarget);
+                { m_vRangeTargets.push_back(pTempTarget); }
             }
         }
 
         if (!m_vRangeTargets.empty())
-            return m_vRangeTargets[urand(0, m_vRangeTargets.size() - 1)];
+        { return m_vRangeTargets[urand(0, m_vRangeTargets.size() - 1)]; }
         else
-            return m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
+        { return m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1); }
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -427,14 +433,14 @@ struct  boss_sacrolashAI : public ScriptedAI
             pSummoned->CastSpell(pSummoned, SPELL_IMAGE_VISUAL, false);
             // Attack random range target
             if (Unit* pTarget = GetRandomTargetAtDist(10.0f))
-                pSummoned->AI()->AttackStart(pTarget);
+            { pSummoned->AI()->AttackStart(pTarget); }
         }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiEnrageTimer < uiDiff)
         {
@@ -445,34 +451,34 @@ struct  boss_sacrolashAI : public ScriptedAI
             }
         }
         else
-            m_uiEnrageTimer -= uiDiff;
+        { m_uiEnrageTimer -= uiDiff; }
 
         if (m_uiShadowBladesTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_BLADES) == CAST_OK)
-                m_uiShadowBladesTimer = urand(13000, 15000);
+            { m_uiShadowBladesTimer = urand(13000, 15000); }
         }
         else
-            m_uiShadowBladesTimer -= uiDiff;
+        { m_uiShadowBladesTimer -= uiDiff; }
 
         if (m_uiShadowNovaTimer < uiDiff)
         {
             Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 2);
             if (!pTarget)
-                pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
+            { pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0); }
 
             // If sister is dead cast conflagration instead of shadownova
             bool bSwitchSpell = m_creature->HasAura(SPELL_EMPOWER);
             if (DoCastSpellIfCan(pTarget, bSwitchSpell ? SPELL_CONFLAGRATION : SPELL_SHADOW_NOVA) == CAST_OK)
             {
                 if (!bSwitchSpell)
-                    DoScriptText(SAY_SACROLASH_SHADOW_NOVA, m_creature);
+                { DoScriptText(SAY_SACROLASH_SHADOW_NOVA, m_creature); }
 
                 m_uiShadowNovaTimer = urand(30000, 35000);
             }
         }
         else
-            m_uiShadowNovaTimer -= uiDiff;
+        { m_uiShadowNovaTimer -= uiDiff; }
 
         if (m_uiConfoundingBlowTimer < uiDiff)
         {
@@ -480,24 +486,24 @@ struct  boss_sacrolashAI : public ScriptedAI
             {
                 // Reset threat
                 if (m_creature->GetThreatManager().getThreat(m_creature->getVictim()))
-                    m_creature->GetThreatManager().modifyThreatPercent(m_creature->getVictim(), -100);
+                { m_creature->GetThreatManager().modifyThreatPercent(m_creature->getVictim(), -100); }
 
                 m_uiConfoundingBlowTimer = urand(25000, 30000);
             }
         }
         else
-            m_uiConfoundingBlowTimer -= uiDiff;
+        { m_uiConfoundingBlowTimer -= uiDiff; }
 
         if (m_uiSummonShadowImage < uiDiff)
         {
             // Summon 3 shadow images at the boss position
             for (uint8 i = 0; i < 3; ++i)
-                m_creature->SummonCreature(NPC_SHADOW_IMAGE, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+            { m_creature->SummonCreature(NPC_SHADOW_IMAGE, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000); }
 
             m_uiSummonShadowImage = urand(10000, 12000);
         }
         else
-            m_uiSummonShadowImage -= uiDiff;
+        { m_uiSummonShadowImage -= uiDiff; }
 
         // Overwrite the melee attack in order to apply the dark strike
         if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
@@ -518,7 +524,7 @@ struct  boss_sacrolashAI : public ScriptedAI
 ## npc_shadow_image
 ######*/
 
-struct  npc_shadow_imageAI : public ScriptedAI
+struct npc_shadow_imageAI : public ScriptedAI
 {
     npc_shadow_imageAI(Creature* pCreature) : ScriptedAI(pCreature)  { Reset(); }
 
@@ -539,7 +545,7 @@ struct  npc_shadow_imageAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         // Suicide on timer; this is needed because of the cast time
         if (m_uiSuicideTimer)
@@ -550,7 +556,7 @@ struct  npc_shadow_imageAI : public ScriptedAI
                 return;
             }
             else
-                m_uiSuicideTimer -= uiDiff;
+            { m_uiSuicideTimer -= uiDiff; }
         }
         else
         {
@@ -563,11 +569,11 @@ struct  npc_shadow_imageAI : public ScriptedAI
                         if (m_creature->IsWithinDistInMap(m_creature->getVictim(), INTERACTION_DISTANCE))
                         {
                             if (DoCastSpellIfCan(m_creature, SPELL_SHADOWFURY) == CAST_OK)
-                                m_uiSuicideTimer = 1000;
+                            { m_uiSuicideTimer = 1000; }
                         }
                     }
                     else
-                        m_uiAbilityTimer -= uiDiff;
+                    { m_uiAbilityTimer -= uiDiff; }
                     break;
                 case SPELL_DARK_STRIKE:
                     if (m_uiAbilityTimer < uiDiff)
@@ -577,13 +583,13 @@ struct  npc_shadow_imageAI : public ScriptedAI
                             ++m_uiDarkStrikes;
                             // kill itself after 2 strikes
                             if (m_uiDarkStrikes == 2)
-                                m_uiSuicideTimer = 1000;
+                            { m_uiSuicideTimer = 1000; }
                             else
-                                m_uiAbilityTimer = 1000;
+                            { m_uiAbilityTimer = 1000; }
                         }
                     }
                     else
-                        m_uiAbilityTimer -= uiDiff;
+                    { m_uiAbilityTimer -= uiDiff; }
                     break;
             }
         }

@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -48,7 +54,7 @@ static const float afKaelLandPoint[4] = {200.36f, -270.77f, -8.73f, 0.01f};
 
 // This is friendly keal that appear after used Orb.
 // If we assume DB handle summon, summon appear somewhere outside the platform where Orb is
-struct  npc_kalecgosAI : public ScriptedAI
+struct npc_kalecgosAI : public ScriptedAI
 {
     npc_kalecgosAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -69,7 +75,7 @@ struct  npc_kalecgosAI : public ScriptedAI
     void MovementInform(uint32 uiType, uint32 uiPointId) override
     {
         if (uiType != POINT_MOTION_TYPE)
-            return;
+        { return; }
 
         if (uiPointId)
         {
@@ -95,7 +101,7 @@ struct  npc_kalecgosAI : public ScriptedAI
                 }
             }
             else
-                m_uiTransformTimer -= uiDiff;
+            { m_uiTransformTimer -= uiDiff; }
         }
     }
 };
@@ -113,7 +119,7 @@ bool ProcessEventId_event_go_scrying_orb(uint32 /*uiEventId*/, Object* pSource, 
         {
             // Check if the Dragon is already spawned and don't allow it to spawn it multiple times
             if (pInstance->GetSingleCreatureFromStorage(NPC_KALECGOS_DRAGON, true))
-                return true;
+            { return true; }
         }
     }
     return false;

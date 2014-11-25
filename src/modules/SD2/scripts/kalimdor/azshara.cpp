@@ -78,7 +78,7 @@ enum
 
 #define GOSSIP_ITEM_MOONSTONE   "Hand over the Southfury moonstone and I'll let you go."
 
-struct  npc_rizzle_sprysprocketAI : public npc_escortAI
+struct npc_rizzle_sprysprocketAI : public npc_escortAI
 {
     npc_rizzle_sprysprocketAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
@@ -102,7 +102,7 @@ struct  npc_rizzle_sprysprocketAI : public npc_escortAI
             if (!HasEscortState(STATE_ESCORT_PAUSED) && m_creature->IsWithinDistInMap(pUnit, INTERACTION_DISTANCE) && m_creature->IsWithinLOSInMap(pUnit))
             {
                 if (((Player*)pUnit)->GetQuestStatus(QUEST_MOONSTONE) == QUEST_STATUS_INCOMPLETE)
-                    m_creature->CastSpell(m_creature, SPELL_SURRENDER, true);
+                { m_creature->CastSpell(m_creature, SPELL_SURRENDER, true); }
             }
         }
 
@@ -135,7 +135,7 @@ struct  npc_rizzle_sprysprocketAI : public npc_escortAI
     void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
     {
         if (pTarget->GetTypeId() == TYPEID_PLAYER && pSpell->Id == SPELL_FROST_GRENADE)
-            DoScriptText(SAY_WHISPER_CHILL, m_creature, pTarget);
+        { DoScriptText(SAY_WHISPER_CHILL, m_creature, pTarget); }
     }
 
     // this may be wrong
@@ -149,7 +149,7 @@ struct  npc_rizzle_sprysprocketAI : public npc_escortAI
         if (m_bIsIntro)
         {
             if (m_uiIntroTimer < uiDiff)
-                m_uiIntroTimer = 1500;
+            { m_uiIntroTimer = 1500; }
             else
             {
                 m_uiIntroTimer -= uiDiff;
@@ -180,12 +180,12 @@ struct  npc_rizzle_sprysprocketAI : public npc_escortAI
         if (m_uiDepthChargeTimer < uiDiff)
         {
             if (!HasEscortState(STATE_ESCORT_PAUSED))
-                m_creature->CastSpell(m_creature, SPELL_SUMMON_DEPTH_CHARGE, false);
+            { m_creature->CastSpell(m_creature, SPELL_SUMMON_DEPTH_CHARGE, false); }
 
             m_uiDepthChargeTimer = urand(10000, 15000);
         }
         else
-            m_uiDepthChargeTimer -= uiDiff;
+        { m_uiDepthChargeTimer -= uiDiff; }
     }
 };
 
@@ -197,7 +197,7 @@ CreatureAI* GetAI_npc_rizzle_sprysprocket(Creature* pCreature)
 bool GossipHello_npc_rizzle_sprysprocket(Player* pPlayer, Creature* pCreature)
 {
     if (pPlayer->GetQuestStatus(QUEST_MOONSTONE) == QUEST_STATUS_INCOMPLETE)
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_MOONSTONE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+    { pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_MOONSTONE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1); }
 
     pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
     return true;
@@ -214,17 +214,17 @@ bool GossipSelect_npc_rizzle_sprysprocket(Player* pPlayer, Creature* /*pCreature
     return true;
 }
 
-struct  npc_depth_chargeAI : public ScriptedAI
+struct npc_depth_chargeAI : public ScriptedAI
 {
     npc_depth_chargeAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
     void MoveInLineOfSight(Unit* pUnit) override
     {
         if (pUnit->GetTypeId() != TYPEID_PLAYER)
-            return;
+        { return; }
 
         if (m_creature->IsWithinDistInMap(pUnit, INTERACTION_DISTANCE) && m_creature->IsWithinLOSInMap(pUnit))
-            m_creature->CastSpell(pUnit, SPELL_TRAP, false);
+        { m_creature->CastSpell(pUnit, SPELL_TRAP, false); }
     }
 
     void Reset() override { }
@@ -245,7 +245,7 @@ bool GOUse_go_southfury_moonstone(Player* pPlayer, GameObject* /*pGo*/)
     // pPlayer->CastSpell(pPlayer,SPELL_SUMMON_RIZZLE,false);
 
     if (Creature* pCreature = pPlayer->SummonCreature(NPC_RIZZLE, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0))
-        pCreature->CastSpell(pPlayer, SPELL_BLACKJACK, false);
+    { pCreature->CastSpell(pPlayer, SPELL_BLACKJACK, false); }
 
     return false;
 }
@@ -300,7 +300,7 @@ static SpitelashAbilityStruct m_aSpitelashAbility[8] =
     {NPC_SPITELASH_MYRMIDON,    SPELL_STRIKE,       TARGET_TYPE_VICTIM,     3000,  7000}
 };
 
-struct  mobs_spitelashesAI : public ScriptedAI
+struct mobs_spitelashesAI : public ScriptedAI
 {
     mobs_spitelashesAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

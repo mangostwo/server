@@ -60,7 +60,7 @@ enum
     EQUIP_ID_RIFLE      = 2511
 };
 
-struct  npc_daphne_stilwellAI : public npc_escortAI
+struct npc_daphne_stilwellAI : public npc_escortAI
 {
     npc_daphne_stilwellAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
@@ -225,7 +225,7 @@ enum
     QUEST_DEFIAS_BROTHERHOOD = 155
 };
 
-struct  npc_defias_traitorAI : public npc_escortAI
+struct npc_defias_traitorAI : public npc_escortAI
 {
     npc_defias_traitorAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 

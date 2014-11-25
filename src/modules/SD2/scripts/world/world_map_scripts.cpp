@@ -36,7 +36,7 @@ EndScriptData */
 /* *********************************************************
  *                  EASTERN KINGDOMS
  */
-struct  world_map_eastern_kingdoms : public ScriptedMap
+struct world_map_eastern_kingdoms : public ScriptedMap
 {
     world_map_eastern_kingdoms(Map* pMap) : ScriptedMap(pMap) {}
 
@@ -64,7 +64,7 @@ InstanceData* GetInstanceData_world_map_eastern_kingdoms(Map* pMap)
 /* *********************************************************
  *                     KALIMDOR
  */
-struct  world_map_kalimdor : public ScriptedMap
+struct world_map_kalimdor : public ScriptedMap
 {
     world_map_kalimdor(Map* pMap) : ScriptedMap(pMap) { Initialize(); }
 
@@ -151,7 +151,7 @@ InstanceData* GetInstanceData_world_map_kalimdor(Map* pMap)
 /* *********************************************************
  *                     OUTLAND
  */
-struct  world_map_outland : public ScriptedMap
+struct world_map_outland : public ScriptedMap
 {
     world_map_outland(Map* pMap) : ScriptedMap(pMap) { Initialize(); }
 
@@ -165,7 +165,7 @@ struct  world_map_outland : public ScriptedMap
     void OnCreatureCreate(Creature* pCreature)
     {
         if (pCreature->GetEntry() == NPC_EMISSARY_OF_HATE)
-            m_mNpcEntryGuidStore[NPC_EMISSARY_OF_HATE] = pCreature->GetObjectGuid();
+        { m_mNpcEntryGuidStore[NPC_EMISSARY_OF_HATE] = pCreature->GetObjectGuid(); }
     }
 
     void OnCreatureDeath(Creature* pCreature)

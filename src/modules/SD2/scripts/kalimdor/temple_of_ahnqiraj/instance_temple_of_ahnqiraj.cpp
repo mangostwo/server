@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -17,11 +23,12 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/** ScriptData
- * SDName: Instance_Temple_of_Ahnqiraj
+/**
+ * ScriptData
+ * SDName:      Instance_Temple_of_Ahnqiraj
  * SD%Complete: 80
- * SDComment: C'thun whisperings spells NYI.
- * SDCategory: Temple of Ahn'Qiraj
+ * SDComment:   C'thun whisperings spells NYI.
+ * SDCategory:  Temple of Ahn'Qiraj
  * EndScriptData
  */
 
@@ -61,7 +68,9 @@ bool instance_temple_of_ahnqiraj::IsEncounterInProgress() const
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
     {
         if (m_auiEncounter[i] == IN_PROGRESS)
+        {
             return true;
+        }
     }
 
     return false;
@@ -74,7 +83,9 @@ void instance_temple_of_ahnqiraj::DoHandleTempleAreaTrigger(uint32 uiTriggerId)
         m_dialogueHelper.StartNextDialogueText(EMOTE_EYE_INTRO);
         // Note: there may be more related to this; The emperors should kneel before the Eye and they stand up after it despawns
         if (Creature* pEye = GetSingleCreatureFromStorage(NPC_MASTERS_EYE))
+        {
             pEye->ForcedDespawn(1000);
+        }
         m_bIsEmperorsIntroDone = true;
     }
     else if (uiTriggerId == AREATRIGGER_SARTURA)
@@ -94,7 +105,9 @@ void instance_temple_of_ahnqiraj::OnCreatureCreate(Creature* pCreature)
         case NPC_SKERAM:
             // Don't store the summoned images guid
             if (GetData(TYPE_SKERAM) == IN_PROGRESS)
+            {
                 break;
+            }
         case NPC_SARTURA:
         case NPC_VEKLOR:
         case NPC_VEKNILASH:
@@ -112,13 +125,17 @@ void instance_temple_of_ahnqiraj::OnObjectCreate(GameObject* pGo)
     {
         case GO_SKERAM_GATE:
             if (m_auiEncounter[TYPE_SKERAM] == DONE)
+            {
                 pGo->SetGoState(GO_STATE_ACTIVE);
+            }
             break;
         case GO_TWINS_ENTER_DOOR:
             break;
         case GO_TWINS_EXIT_DOOR:
             if (m_auiEncounter[TYPE_TWINS] == DONE)
+            {
                 pGo->SetGoState(GO_STATE_ACTIVE);
+            }
             break;
         case GO_SANDWORM_BASE:
             break;
@@ -137,20 +154,26 @@ void instance_temple_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
         case TYPE_SKERAM:
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
+            {
                 DoUseDoorOrButton(GO_SKERAM_GATE);
+            }
             break;
         case TYPE_BUG_TRIO:
             if (uiData == SPECIAL)
             {
                 ++m_uiBugTrioDeathCount;
                 if (m_uiBugTrioDeathCount == 2)
+                {
                     SetData(TYPE_BUG_TRIO, DONE);
+                }
 
                 // don't store any special data
                 break;
             }
             if (uiData == FAIL)
+            {
                 m_uiBugTrioDeathCount = 0;
+            }
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_SARTURA:
@@ -162,12 +185,16 @@ void instance_temple_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
         case TYPE_TWINS:
             // Either of the twins can set data, so return to avoid double changing
             if (m_auiEncounter[uiType] ==  uiData)
+            {
                 return;
+            }
 
             m_auiEncounter[uiType] = uiData;
             DoUseDoorOrButton(GO_TWINS_ENTER_DOOR);
             if (uiData == DONE)
+            {
                 DoUseDoorOrButton(GO_TWINS_EXIT_DOOR);
+            }
             break;
         case TYPE_OURO:
             switch (uiData)
@@ -175,12 +202,16 @@ void instance_temple_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
                 case FAIL:
                     // Respawn the Ouro spawner on fail
                     if (Creature* pSpawner = GetSingleCreatureFromStorage(NPC_OURO_SPAWNER))
+                    {
                         pSpawner->Respawn();
+                    }
                     // no break;
                 case DONE:
                     // Despawn the sandworm base on Done or Fail
                     if (GameObject* pBase = GetSingleGameObjectFromStorage(GO_SANDWORM_BASE))
+                    {
                         pBase->SetLootState(GO_JUST_DEACTIVATED);
+                    }
                     break;
             }
             m_auiEncounter[uiType] = uiData;
@@ -224,7 +255,9 @@ void instance_temple_of_ahnqiraj::Load(const char* chrIn)
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
     {
         if (m_auiEncounter[i] == IN_PROGRESS)
+        {
             m_auiEncounter[i] = NOT_STARTED;
+        }
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -233,7 +266,9 @@ void instance_temple_of_ahnqiraj::Load(const char* chrIn)
 uint32 instance_temple_of_ahnqiraj::GetData(uint32 uiType) const
 {
     if (uiType < MAX_ENCOUNTER)
+    {
         return m_auiEncounter[uiType];
+    }
 
     return 0;
 }
@@ -243,7 +278,9 @@ void instance_temple_of_ahnqiraj::Update(uint32 uiDiff)
     m_dialogueHelper.DialogueUpdate(uiDiff);
 
     if (GetData(TYPE_CTHUN) == IN_PROGRESS || GetData(TYPE_CTHUN) == DONE)
+    {
         return;
+    }
 
     if (m_uiCthunWhisperTimer < uiDiff)
     {
@@ -254,21 +291,39 @@ void instance_temple_of_ahnqiraj::Update(uint32 uiDiff)
                 // ToDo: also cast the C'thun Whispering charm spell - requires additional research
                 switch (urand(0, 7))
                 {
-                    case 0: DoScriptText(SAY_CTHUN_WHISPER_1, pCthun, pPlayer); break;
-                    case 1: DoScriptText(SAY_CTHUN_WHISPER_2, pCthun, pPlayer); break;
-                    case 2: DoScriptText(SAY_CTHUN_WHISPER_3, pCthun, pPlayer); break;
-                    case 3: DoScriptText(SAY_CTHUN_WHISPER_4, pCthun, pPlayer); break;
-                    case 4: DoScriptText(SAY_CTHUN_WHISPER_5, pCthun, pPlayer); break;
-                    case 5: DoScriptText(SAY_CTHUN_WHISPER_6, pCthun, pPlayer); break;
-                    case 6: DoScriptText(SAY_CTHUN_WHISPER_7, pCthun, pPlayer); break;
-                    case 7: DoScriptText(SAY_CTHUN_WHISPER_8, pCthun, pPlayer); break;
+                    case 0:
+                        DoScriptText(SAY_CTHUN_WHISPER_1, pCthun, pPlayer);
+                        break;
+                    case 1:
+                        DoScriptText(SAY_CTHUN_WHISPER_2, pCthun, pPlayer);
+                        break;
+                    case 2:
+                        DoScriptText(SAY_CTHUN_WHISPER_3, pCthun, pPlayer);
+                        break;
+                    case 3:
+                        DoScriptText(SAY_CTHUN_WHISPER_4, pCthun, pPlayer);
+                        break;
+                    case 4:
+                        DoScriptText(SAY_CTHUN_WHISPER_5, pCthun, pPlayer);
+                        break;
+                    case 5:
+                        DoScriptText(SAY_CTHUN_WHISPER_6, pCthun, pPlayer);
+                        break;
+                    case 6:
+                        DoScriptText(SAY_CTHUN_WHISPER_7, pCthun, pPlayer);
+                        break;
+                    case 7:
+                        DoScriptText(SAY_CTHUN_WHISPER_8, pCthun, pPlayer);
+                        break;
                 }
             }
         }
         m_uiCthunWhisperTimer = urand(1.5 * MINUTE * IN_MILLISECONDS, 5 * MINUTE * IN_MILLISECONDS);
     }
     else
+    {
         m_uiCthunWhisperTimer -= uiDiff;
+    }
 }
 
 InstanceData* GetInstanceData_instance_temple_of_ahnqiraj(Map* pMap)

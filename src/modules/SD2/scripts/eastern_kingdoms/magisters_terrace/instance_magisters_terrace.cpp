@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -76,15 +82,15 @@ void instance_magisters_terrace::OnObjectCreate(GameObject* pGo)
     {
         case GO_VEXALLUS_DOOR:
             if (m_auiEncounter[TYPE_VEXALLUS] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+            { pGo->SetGoState(GO_STATE_ACTIVE); }
             break;
         case GO_SELIN_DOOR:
             if (m_auiEncounter[TYPE_SELIN] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+            { pGo->SetGoState(GO_STATE_ACTIVE); }
             break;
         case GO_DELRISSA_DOOR:
             if (m_auiEncounter[TYPE_DELRISSA] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+            { pGo->SetGoState(GO_STATE_ACTIVE); }
             break;
         case GO_SELIN_ENCOUNTER_DOOR:
         case GO_KAEL_DOOR:
@@ -111,12 +117,12 @@ void instance_magisters_terrace::OnCreatureDeath(Creature* pCreature)
         case NPC_ZELFAN:
             ++m_uiDelrissaDeathCount;
             if (m_uiDelrissaDeathCount == MAX_DELRISSA_ADDS)
-                SetData(TYPE_DELRISSA, SPECIAL);
+            { SetData(TYPE_DELRISSA, SPECIAL); }
             // yell on summoned death
             if (Creature* pDelrissa = GetSingleCreatureFromStorage(NPC_DELRISSA))
             {
                 if (pDelrissa->IsAlive())
-                    DoScriptText(aDelrissaAddDeath[m_uiDelrissaDeathCount - 1], pDelrissa);
+                { DoScriptText(aDelrissaAddDeath[m_uiDelrissaDeathCount - 1], pDelrissa); }
                 else if (GetData(TYPE_DELRISSA) == SPECIAL)
                 {
                     SetData(TYPE_DELRISSA, DONE);
@@ -133,7 +139,7 @@ void instance_magisters_terrace::SetData(uint32 uiType, uint32 uiData)
     {
         case TYPE_SELIN:
             if (uiData == DONE)
-                DoUseDoorOrButton(GO_SELIN_DOOR);
+            { DoUseDoorOrButton(GO_SELIN_DOOR); }
             if (uiData == FAIL)
             {
                 // Reset crystals - respawn and kill is handled by creature linking
@@ -142,10 +148,10 @@ void instance_magisters_terrace::SetData(uint32 uiType, uint32 uiData)
                     if (Creature* pTemp = instance->GetCreature(*itr))
                     {
                         if (!pTemp->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
-                            pTemp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        { pTemp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE); }
 
                         if (pTemp->IsAlive())
-                            pTemp->AI()->EnterEvadeMode();
+                        { pTemp->AI()->EnterEvadeMode(); }
                     }
                 }
             }
@@ -155,7 +161,7 @@ void instance_magisters_terrace::SetData(uint32 uiType, uint32 uiData)
                 for (GuidList::const_iterator itr = m_lFelCrystalGuid.begin(); itr != m_lFelCrystalGuid.end(); ++itr)
                 {
                     if (Creature* pTemp = instance->GetCreature(*itr))
-                        pTemp->InterruptNonMeleeSpells(false);
+                    { pTemp->InterruptNonMeleeSpells(false); }
                 }
             }
             DoUseDoorOrButton(GO_SELIN_ENCOUNTER_DOOR);
@@ -163,20 +169,20 @@ void instance_magisters_terrace::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_VEXALLUS:
             if (uiData == DONE)
-                DoUseDoorOrButton(GO_VEXALLUS_DOOR);
+            { DoUseDoorOrButton(GO_VEXALLUS_DOOR); }
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_DELRISSA:
             if (uiData == DONE)
-                DoUseDoorOrButton(GO_DELRISSA_DOOR);
+            { DoUseDoorOrButton(GO_DELRISSA_DOOR); }
             if (uiData == IN_PROGRESS)
-                m_uiDelrissaDeathCount = 0;
+            { m_uiDelrissaDeathCount = 0; }
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_KAELTHAS:
             DoUseDoorOrButton(GO_KAEL_DOOR);
             if (uiData == DONE)
-                DoToggleGameObjectFlags(GO_ESCAPE_QUEL_DANAS, GO_FLAG_NO_INTERACT, false);
+            { DoToggleGameObjectFlags(GO_ESCAPE_QUEL_DANAS, GO_FLAG_NO_INTERACT, false); }
             m_auiEncounter[uiType] = uiData;
             break;
     }
@@ -211,7 +217,7 @@ void instance_magisters_terrace::Load(const char* chrIn)
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
     {
         if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        { m_auiEncounter[i] = NOT_STARTED; }
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -220,7 +226,7 @@ void instance_magisters_terrace::Load(const char* chrIn)
 uint32 instance_magisters_terrace::GetData(uint32 uiType) const
 {
     if (uiType < MAX_ENCOUNTER)
-        return m_auiEncounter[uiType];
+    { return m_auiEncounter[uiType]; }
 
     return 0;
 }

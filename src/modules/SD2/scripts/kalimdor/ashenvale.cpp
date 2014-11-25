@@ -93,7 +93,7 @@ static float m_afSecondNagaCoord[3][3] =
 
 static float m_fVorshaCoord[] = {3633.056885f, 1172.924072f, -5.388f};
 
-struct  npc_muglashAI : public npc_escortAI
+struct npc_muglashAI : public npc_escortAI
 {
     npc_muglashAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
@@ -277,7 +277,7 @@ enum
     NPC_T_PATHFINDER        = 3926
 };
 
-struct  npc_ruul_snowhoofAI : public npc_escortAI
+struct npc_ruul_snowhoofAI : public npc_escortAI
 {
     npc_ruul_snowhoofAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -355,7 +355,7 @@ enum
     NPC_SILVERWING_WARRIOR      = 12897
 };
 
-struct  npc_torekAI : public npc_escortAI
+struct npc_torekAI : public npc_escortAI
 {
     npc_torekAI(Creature* pCreature) : npc_escortAI(pCreature) {Reset();}
 
@@ -501,7 +501,7 @@ static const float aEliteSummonPositions[3][4] =
     {4235.78f, 118.09f, 38.08f, 4.12f}
 };
 
-struct  npc_feero_ironhandAI : public npc_escortAI
+struct npc_feero_ironhandAI : public npc_escortAI
 {
     npc_feero_ironhandAI(Creature* pCreature) : npc_escortAI(pCreature)
     {

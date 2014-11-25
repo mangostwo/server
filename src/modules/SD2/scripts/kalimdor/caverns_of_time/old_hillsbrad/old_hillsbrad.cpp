@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -50,12 +56,12 @@ enum
 bool GossipHello_npc_erozion(Player* pPlayer, Creature* pCreature)
 {
     if (pCreature->IsQuestGiver())
-        pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+    { pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid()); }
 
     ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
 
     if (pInstance && pInstance->GetData(TYPE_BARREL_DIVERSION) != DONE && !pPlayer->HasItemCount(ITEM_ENTRY_BOMBS, 1))
-        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NEED_BOMBS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+    { pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NEED_BOMBS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1); }
 
     // Need info, should have option to teleport or not
     /*if (!pPlayer->GetQuestRewardStatus(QUEST_ENTRY_RETURN) && pPlayer->GetQuestStatus(QUEST_ENTRY_RETURN) == QUEST_STATUS_COMPLETE)
@@ -71,13 +77,13 @@ bool GossipSelect_npc_erozion(Player* pPlayer, Creature* pCreature, uint32 /*uiS
     if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
     {
         if (Item* pItem = pPlayer->StoreNewItemInInventorySlot(ITEM_ENTRY_BOMBS, 1))
-            pPlayer->SendNewItem(pItem, 1, true, false);
+        { pPlayer->SendNewItem(pItem, 1, true, false); }
 
         pPlayer->SEND_GOSSIP_MENU(TEXT_ID_GOT_ITEM, pCreature->GetObjectGuid());
     }
 
     if (uiAction == GOSSIP_ACTION_INFO_DEF + 2)
-        pPlayer->CLOSE_GOSSIP_MENU();
+    { pPlayer->CLOSE_GOSSIP_MENU(); }
 
     return true;
 }
@@ -234,7 +240,7 @@ static const DialogueEntry aThrallDialogue[] =
     {0, 0, 0},
 };
 
-struct  npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
+struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
 {
     npc_thrall_old_hillsbradAI(Creature* pCreature) : npc_escortAI(pCreature),
         DialogueHelper(aThrallDialogue)
@@ -272,7 +278,7 @@ struct  npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
         m_uiShieldBlockTimer = urand(6000, 11000);
 
         if (m_bHadMount)
-            m_creature->Mount(MODEL_SKARLOC_MOUNT);
+        { m_creature->Mount(MODEL_SKARLOC_MOUNT); }
 
         if (!HasEscortState(STATE_ESCORT_ESCORTING))
         {
@@ -320,7 +326,7 @@ struct  npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
     {
         // fail, and relocation handled in instance script
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_THRALL_EVENT, FAIL);
+        { m_pInstance->SetData(TYPE_THRALL_EVENT, FAIL); }
 
         DoScriptText(urand(0, 1) ? SAY_TH_RANDOM_DIE1 : SAY_TH_RANDOM_DIE2, m_creature);
         DoCastSpellIfCan(m_creature, SPELL_SUMMON_EROZION_IMAGE, CAST_TRIGGERED);
@@ -329,12 +335,12 @@ struct  npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
         for (GuidList::const_iterator itr = m_lSkarlocAddsGuids.begin(); itr != m_lSkarlocAddsGuids.end(); ++itr)
         {
             if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
-                pTemp->ForcedDespawn();
+            { pTemp->ForcedDespawn(); }
         }
         for (GuidList::const_iterator itr = m_lTarrenMillSoldiersGuids.begin(); itr != m_lTarrenMillSoldiersGuids.end(); ++itr)
         {
             if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
-                pTemp->ForcedDespawn();
+            { pTemp->ForcedDespawn(); }
         }
     }
 
@@ -344,7 +350,7 @@ struct  npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
 
         // if we're done, just set some high so he never really respawn
         if (m_pInstance && (m_pInstance->GetData(TYPE_THRALL_EVENT) == DONE || m_pInstance->GetData(TYPE_THRALL_EVENT) == FAIL))
-            uiRespawnDelay = 12 * HOUR;
+        { uiRespawnDelay = 12 * HOUR; }
     }
 
     void JustRespawned() override
@@ -352,7 +358,7 @@ struct  npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
         npc_escortAI::JustRespawned();
 
         if (!m_pInstance)
-            return;
+        { return; }
 
         if (m_pInstance->GetData(TYPE_THRALL_EVENT) == IN_PROGRESS)
         {
@@ -378,10 +384,10 @@ struct  npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 m_pInstance->DoUseDoorOrButton(GO_PRISON_DOOR);
                 // respawn the Armorer
                 if (Creature* pArmorer = m_pInstance->GetSingleCreatureFromStorage(NPC_ARMORER))
-                    pArmorer->Respawn();
+                { pArmorer->Respawn(); }
                 // despwn the horse
                 if (Creature* pHorse = m_creature->GetMap()->GetCreature(m_skarlocMountGuid))
-                    pHorse->ForcedDespawn();
+                { pHorse->ForcedDespawn(); }
             }
             else if (m_pInstance->GetData(TYPE_ESCORT_BARN) != DONE)
             {
@@ -451,7 +457,7 @@ struct  npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
 
                     // Transform on timer
                     if (!m_uiEpochAttackTimer)
-                        m_uiEpochAttackTimer = 7000;
+                    { m_uiEpochAttackTimer = 7000; }
                 }
                 break;
                 // Epoch wave spawns
@@ -496,7 +502,7 @@ struct  npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 // Spawned when Thrall is dead
             case NPC_IMAGE_OF_ERONZION:
                 if (m_pInstance)
-                    DoScriptText(m_pInstance->GetThrallEventCount() < MAX_WIPE_COUNTER ? SAY_ERONZION_RESET_THRALL : SAY_ERONZION_RESET_LAST, pSummoned);
+                { DoScriptText(m_pInstance->GetThrallEventCount() < MAX_WIPE_COUNTER ? SAY_ERONZION_RESET_THRALL : SAY_ERONZION_RESET_LAST, pSummoned); }
                 pSummoned->CastSpell(pSummoned, SPELL_SPAWN_EROZION_IMAGE, false);
                 pSummoned->ForcedDespawn(30000);
                 break;
@@ -515,13 +521,13 @@ struct  npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 {
                     // Allow these to follow Skarloc and attack only on command
                     if (Creature* pSkarloc = m_pInstance->GetSingleCreatureFromStorage(NPC_SKARLOC))
-                        pSummoned->GetMotionMaster()->MoveFollow(pSkarloc, 5.0f, pSummoned->GetAngle(pSkarloc) + M_PI_F);
+                    { pSummoned->GetMotionMaster()->MoveFollow(pSkarloc, 5.0f, pSummoned->GetAngle(pSkarloc) + M_PI_F); }
 
                     pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
                     m_lSkarlocAddsGuids.push_back(pSummoned->GetObjectGuid());
                 }
                 else
-                    pSummoned->AI()->AttackStart(m_creature);
+                { pSummoned->AI()->AttackStart(m_creature); }
                 break;
             default:
                 pSummoned->AI()->AttackStart(m_creature);
@@ -595,7 +601,7 @@ struct  npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
     void SummonedMovementInform(Creature* pSummoned, uint32 uiType, uint32 uiPointId) override
     {
         if (uiType != POINT_MOTION_TYPE)
-            return;
+        { return; }
 
         switch (pSummoned->GetEntry())
         {
@@ -645,7 +651,7 @@ struct  npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
     void JustDidDialogueStep(int32 iEntry) override
     {
         if (!m_pInstance)
-            return;
+        { return; }
 
         switch (iEntry)
         {
@@ -654,7 +660,7 @@ struct  npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 break;
             case EMOTE_TH_CALM_HORSE:
                 if (Creature* pHorse = m_pInstance->GetSingleCreatureFromStorage(NPC_YOUNG_BLANCHY))
-                    m_creature->SetFacingToObject(pHorse);
+                { m_creature->SetFacingToObject(pHorse); }
                 break;
             case SAY_PROTECTOR_BARN_3:
                 // Move the soldiers inside
@@ -683,7 +689,7 @@ struct  npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 break;
             case SAY_TH_EPOCH_KILL_TARETHA:
                 if (Creature* pTaretha = m_pInstance->GetSingleCreatureFromStorage(NPC_TARETHA))
-                    m_creature->SetFacingToObject(pTaretha);
+                { m_creature->SetFacingToObject(pTaretha); }
                 break;
             case NPC_THRALL:
                 SetRun();
@@ -695,7 +701,7 @@ struct  npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
     void WaypointReached(uint32 uiPoint) override
     {
         if (!m_pInstance)
-            return;
+        { return; }
 
         switch (uiPoint)
         {
@@ -715,7 +721,7 @@ struct  npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 DoCastSpellIfCan(m_creature, SPELL_KNOCKOUT_ARMORER);
                 // also kill the armorer
                 if (Creature* pArmorer = m_pInstance->GetSingleCreatureFromStorage(NPC_ARMORER))
-                    pArmorer->DealDamage(pArmorer, pArmorer->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+                { pArmorer->DealDamage(pArmorer, pArmorer->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false); }
                 break;
             case 10:
                 DoScriptText(SAY_TH_ARMORY_1, m_creature);
@@ -728,7 +734,7 @@ struct  npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 break;
             case 12:
                 if (Creature* pArmorer = m_pInstance->GetSingleCreatureFromStorage(NPC_ARMORER))
-                    m_creature->SetFacingToObject(pArmorer);
+                { m_creature->SetFacingToObject(pArmorer); }
                 DoScriptText(SAY_TH_ARMORY_2, m_creature);
                 break;
                 // *** Escort event - Part I - outside the keep ***
@@ -785,7 +791,7 @@ struct  npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
             case 34:
                 // wait for player input
                 if (Creature* pMount = m_creature->GetMap()->GetCreature(m_skarlocMountGuid))
-                    m_creature->SetFacingToObject(pMount);
+                { m_creature->SetFacingToObject(pMount); }
 
                 SetEscortPaused(true);
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
@@ -811,7 +817,7 @@ struct  npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 break;
             case 65:
                 if (Creature* pMount = m_creature->GetMap()->GetCreature(m_skarlocMountGuid))
-                    m_creature->SetFacingToObject(pMount);
+                { m_creature->SetFacingToObject(pMount); }
                 DoScriptText(EMOTE_TH_STARTLE_HORSE, m_creature);
                 break;
             case 66:
@@ -869,7 +875,7 @@ struct  npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 // *** Escort event - Part III - meet Taretha ***
             case 106:
                 if (Creature* pTaretha = m_pInstance->GetSingleCreatureFromStorage(NPC_TARETHA))
-                    DoScriptText(SAY_TA_ESCAPED, pTaretha, m_creature);
+                { DoScriptText(SAY_TA_ESCAPED, pTaretha, m_creature); }
                 break;
             case 107:
                 // wait for player input
@@ -877,7 +883,7 @@ struct  npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 m_pInstance->SetData(TYPE_ESCORT_INN, DONE);
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 if (Creature* pTaretha = m_pInstance->GetSingleCreatureFromStorage(NPC_TARETHA))
-                    pTaretha->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                { pTaretha->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP); }
                 SetEscortPaused(true);
                 break;
                 // *** Escort event - Part IV - Epoch ***
@@ -931,7 +937,7 @@ struct  npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
             for (Map::PlayerList::const_iterator itr = lPlayerList.begin(); itr != lPlayerList.end(); ++itr)
             {
                 if (Player* pPlayer = itr->getSource())
-                    pPlayer->KilledMonsterCredit(NPC_THRALL_QUEST_TRIGGER, m_creature->GetObjectGuid());
+                { pPlayer->KilledMonsterCredit(NPC_THRALL_QUEST_TRIGGER, m_creature->GetObjectGuid()); }
             }
         }
     }
@@ -976,27 +982,27 @@ struct  npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 m_uiEpochAttackTimer = 0;
             }
             else
-                m_uiEpochAttackTimer -= uiDiff;
+            { m_uiEpochAttackTimer -= uiDiff; }
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiStrikeTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_STRIKE) == CAST_OK)
-                m_uiStrikeTimer = urand(4000, 7000);
+            { m_uiStrikeTimer = urand(4000, 7000); }
         }
         else
-            m_uiStrikeTimer -= uiDiff;
+        { m_uiStrikeTimer -= uiDiff; }
 
         if (m_uiShieldBlockTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SHIELD_BLOCK) == CAST_OK)
-                m_uiShieldBlockTimer = urand(8000, 15000);
+            { m_uiShieldBlockTimer = urand(8000, 15000); }
         }
         else
-            m_uiShieldBlockTimer -= uiDiff;
+        { m_uiShieldBlockTimer -= uiDiff; }
 
         if (!m_bIsLowHp && m_creature->GetHealthPercent() < 20.0f)
         {
@@ -1025,7 +1031,7 @@ bool GossipHello_npc_thrall_old_hillsbrad(Player* pPlayer, Creature* pCreature)
     {
         // If the inn escort has started, skip the gossip
         if (pInstance->GetData(TYPE_ESCORT_INN) == DONE)
-            pPlayer->SEND_GOSSIP_MENU(TEXT_ID_INN, pCreature->GetObjectGuid());
+        { pPlayer->SEND_GOSSIP_MENU(TEXT_ID_INN, pCreature->GetObjectGuid()); }
         // Escort - barn to inn
         else if (pInstance->GetData(TYPE_ESCORT_BARN) == DONE)
         {
@@ -1062,10 +1068,10 @@ bool GossipSelect_npc_thrall_old_hillsbrad(Player* pPlayer, Creature* pCreature,
             DoScriptText(SAY_TH_START_EVENT_PART_1, pCreature);
 
             if (pInstance)
-                pInstance->SetData(TYPE_THRALL_EVENT, IN_PROGRESS);
+            { pInstance->SetData(TYPE_THRALL_EVENT, IN_PROGRESS); }
 
             if (npc_thrall_old_hillsbradAI* pThrallAI = dynamic_cast<npc_thrall_old_hillsbradAI*>(pCreature->AI()))
-                pThrallAI->Start(true, pPlayer);
+            { pThrallAI->Start(true, pPlayer); }
 
             break;
         }
@@ -1089,10 +1095,10 @@ bool GossipSelect_npc_thrall_old_hillsbrad(Player* pPlayer, Creature* pCreature,
             DoScriptText(SAY_TH_START_EVENT_PART2, pCreature);
 
             if (pInstance)
-                pInstance->SetData(TYPE_ESCORT_BARN, IN_PROGRESS);
+            { pInstance->SetData(TYPE_ESCORT_BARN, IN_PROGRESS); }
 
             if (npc_thrall_old_hillsbradAI* pThrallAI = dynamic_cast<npc_thrall_old_hillsbradAI*>(pCreature->AI()))
-                pThrallAI->DoRestartEscortMovement();
+            { pThrallAI->DoRestartEscortMovement(); }
 
             break;
         }
@@ -1102,10 +1108,10 @@ bool GossipSelect_npc_thrall_old_hillsbrad(Player* pPlayer, Creature* pCreature,
             pPlayer->CLOSE_GOSSIP_MENU();
 
             if (pInstance)
-                pInstance->SetData(TYPE_ESCORT_INN, IN_PROGRESS);
+            { pInstance->SetData(TYPE_ESCORT_INN, IN_PROGRESS); }
 
             if (npc_thrall_old_hillsbradAI* pThrallAI = dynamic_cast<npc_thrall_old_hillsbradAI*>(pCreature->AI()))
-                pThrallAI->DoRestartEscortMovement();
+            { pThrallAI->DoRestartEscortMovement(); }
 
             break;
         }
@@ -1159,7 +1165,7 @@ static const DialogueEntry aTarethaDialogue[] =
     {0, 0, 0},
 };
 
-struct  npc_tarethaAI : public npc_escortAI, private DialogueHelper
+struct npc_tarethaAI : public npc_escortAI, private DialogueHelper
 {
     npc_tarethaAI(Creature* pCreature) : npc_escortAI(pCreature),
         DialogueHelper(aTarethaDialogue)
@@ -1198,7 +1204,7 @@ struct  npc_tarethaAI : public npc_escortAI, private DialogueHelper
             if (m_pInstance)
             {
                 if (Creature* pThrall = m_pInstance->GetSingleCreatureFromStorage(NPC_THRALL))
-                    pThrall->SetFacingToObject(m_creature);
+                { pThrall->SetFacingToObject(m_creature); }
             }
 
             m_creature->HandleEmote(EMOTE_ONESHOT_CHEER);
@@ -1210,7 +1216,7 @@ struct  npc_tarethaAI : public npc_escortAI, private DialogueHelper
     void JustDidDialogueStep(int32 iEntry) override
     {
         if (!m_pInstance)
-            return;
+        { return; }
 
         switch (iEntry)
         {
@@ -1219,30 +1225,30 @@ struct  npc_tarethaAI : public npc_escortAI, private DialogueHelper
                 break;
             case SPELL_MEMORY_WIPE:
                 if (Creature* pErozion = m_pInstance->GetSingleCreatureFromStorage(NPC_EROZION))
-                    pErozion->CastSpell(pErozion, SPELL_MEMORY_WIPE, false);
+                { pErozion->CastSpell(pErozion, SPELL_MEMORY_WIPE, false); }
                 break;
             case SAY_TH_EVENT_COMPLETE:
                 if (Creature* pErozion = m_pInstance->GetSingleCreatureFromStorage(NPC_EROZION))
-                    pErozion->CastSpell(pErozion, SPELL_MEMORY_WP_RESUME, false);
+                { pErozion->CastSpell(pErozion, SPELL_MEMORY_WP_RESUME, false); }
                 if (Creature* pThrall = m_pInstance->GetSingleCreatureFromStorage(NPC_THRALL))
-                    pThrall->RemoveAurasDueToSpell(SPELL_MEMORY_WIPE);
+                { pThrall->RemoveAurasDueToSpell(SPELL_MEMORY_WIPE); }
                 m_creature->RemoveAurasDueToSpell(SPELL_MEMORY_WIPE);
                 break;
             case NPC_THRALL:
                 if (Creature* pThrall = m_pInstance->GetSingleCreatureFromStorage(NPC_THRALL))
                 {
                     if (npc_thrall_old_hillsbradAI* pThrallAI = dynamic_cast<npc_thrall_old_hillsbradAI*>(pThrall->AI()))
-                        pThrallAI->SetEscortPaused(false);
+                    { pThrallAI->SetEscortPaused(false); }
                 }
                 break;
             case SAY_TA_FAREWELL:
                 if (Creature* pThrall = m_pInstance->GetSingleCreatureFromStorage(NPC_THRALL))
-                    m_creature->SetFacingToObject(pThrall);
+                { m_creature->SetFacingToObject(pThrall); }
                 m_creature->HandleEmote(EMOTE_ONESHOT_WAVE);
                 break;
             case NPC_TARETHA:
                 if (Creature* pErozion = m_pInstance->GetSingleCreatureFromStorage(NPC_EROZION))
-                    pErozion->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                { pErozion->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER); }
                 m_pInstance->SetData(TYPE_THRALL_EVENT, DONE);
                 SetEscortPaused(false);
                 break;
@@ -1308,7 +1314,7 @@ bool GossipSelect_npc_taretha(Player* pPlayer, Creature* pCreature, uint32 /*uiS
             if (Creature* pThrall = pInstance->GetSingleCreatureFromStorage(NPC_THRALL))
             {
                 if (npc_thrall_old_hillsbradAI* pThrallAI = dynamic_cast<npc_thrall_old_hillsbradAI*>(pThrall->AI()))
-                    pThrallAI->DoRestartEscortMovement();
+                { pThrallAI->DoRestartEscortMovement(); }
             }
         }
     }
