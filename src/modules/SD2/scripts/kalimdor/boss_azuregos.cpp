@@ -49,7 +49,7 @@ enum
     SPELL_ENRAGE                = 23537,
 };
 
-struct  boss_azuregosAI : public ScriptedAI
+struct boss_azuregosAI : public ScriptedAI
 {
     boss_azuregosAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 

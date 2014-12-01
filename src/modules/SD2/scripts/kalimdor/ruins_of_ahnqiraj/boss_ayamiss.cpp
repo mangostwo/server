@@ -71,7 +71,7 @@ static const SummonLocation aAyamissSpawnLocs[] =
     { -9717.18f, 1517.72f, 27.4677f},           // teleport location - need to be hardcoded because the player is teleported after the larva is summoned
 };
 
-struct  boss_ayamissAI : public ScriptedAI
+struct boss_ayamissAI : public ScriptedAI
 {
     boss_ayamissAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
@@ -293,7 +293,7 @@ CreatureAI* GetAI_boss_ayamiss(Creature* pCreature)
     return new boss_ayamissAI(pCreature);
 }
 
-struct  npc_hive_zara_larvaAI : public ScriptedAI
+struct npc_hive_zara_larvaAI : public ScriptedAI
 {
     npc_hive_zara_larvaAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

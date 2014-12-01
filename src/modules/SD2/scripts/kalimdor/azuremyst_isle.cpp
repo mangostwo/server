@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -54,7 +60,7 @@ enum
     SPELL_STUNNED       = 28630
 };
 
-struct  npc_draenei_survivorAI : public ScriptedAI
+struct npc_draenei_survivorAI : public ScriptedAI
 {
     npc_draenei_survivorAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
@@ -87,7 +93,7 @@ struct  npc_draenei_survivorAI : public ScriptedAI
     void MoveInLineOfSight(Unit* pWho) override
     {
         if (m_bCanSayHelp && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsFriendlyTo(pWho) &&
-                m_creature->IsWithinDistInMap(pWho, 25.0f))
+            m_creature->IsWithinDistInMap(pWho, 25.0f))
         {
             // Random switch between 4 texts
             switch (urand(0, 3))
@@ -129,7 +135,7 @@ struct  npc_draenei_survivorAI : public ScriptedAI
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_casterGuid))
                 {
                     if (pPlayer->GetTypeId() != TYPEID_PLAYER)
-                        return;
+                    { return; }
 
                     switch (urand(0, 3))
                     {
@@ -148,7 +154,7 @@ struct  npc_draenei_survivorAI : public ScriptedAI
                 m_uiRunAwayTimer = 10000;
                 m_uiSayThanksTimer = 0;
             }
-            else m_uiSayThanksTimer -= uiDiff;
+            else { m_uiSayThanksTimer -= uiDiff; }
 
             return;
         }
@@ -156,9 +162,9 @@ struct  npc_draenei_survivorAI : public ScriptedAI
         if (m_uiRunAwayTimer)
         {
             if (m_uiRunAwayTimer <= uiDiff)
-                m_creature->ForcedDespawn();
+            { m_creature->ForcedDespawn(); }
             else
-                m_uiRunAwayTimer -= uiDiff;
+            { m_uiRunAwayTimer -= uiDiff; }
 
             return;
         }
@@ -168,7 +174,7 @@ struct  npc_draenei_survivorAI : public ScriptedAI
             m_bCanSayHelp = true;
             m_uiSayHelpTimer = 20000;
         }
-        else m_uiSayHelpTimer -= uiDiff;
+        else { m_uiSayHelpTimer -= uiDiff; }
     }
 };
 
@@ -196,7 +202,7 @@ enum
 
 #define GOSSIP_FIGHT        "Traitor! You will be brought to justice!"
 
-struct  npc_engineer_spark_overgrindAI : public ScriptedAI
+struct npc_engineer_spark_overgrindAI : public ScriptedAI
 {
     npc_engineer_spark_overgrindAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -204,7 +210,7 @@ struct  npc_engineer_spark_overgrindAI : public ScriptedAI
         Reset();
 
         if (pCreature->GetAreaId() == AREA_COVE || pCreature->GetAreaId() == AREA_ISLE)
-            m_bIsTreeEvent = true;
+        { m_bIsTreeEvent = true; }
     }
 
     uint32 m_uiNpcFlags;
@@ -239,7 +245,7 @@ struct  npc_engineer_spark_overgrindAI : public ScriptedAI
                 DoScriptText(EMOTE_SHELL, m_creature);
                 m_uiEmoteTimer = urand(120000, 150000);
             }
-            else m_uiEmoteTimer -= diff;
+            else { m_uiEmoteTimer -= diff; }
         }
         else if (m_bIsTreeEvent)
         {
@@ -248,14 +254,14 @@ struct  npc_engineer_spark_overgrindAI : public ScriptedAI
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiDynamiteTimer < diff)
         {
             DoCastSpellIfCan(m_creature->getVictim(), SPELL_DYNAMITE);
             m_uiDynamiteTimer = 8000;
         }
-        else m_uiDynamiteTimer -= diff;
+        else { m_uiDynamiteTimer -= diff; }
 
         DoMeleeAttackIfReady();
     }
@@ -269,7 +275,7 @@ CreatureAI* GetAI_npc_engineer_spark_overgrind(Creature* pCreature)
 bool GossipHello_npc_engineer_spark_overgrind(Player* pPlayer, Creature* pCreature)
 {
     if (pPlayer->GetQuestStatus(QUEST_GNOMERCY) == QUEST_STATUS_INCOMPLETE)
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_FIGHT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+    { pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_FIGHT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF); }
 
     pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
     return true;
@@ -290,7 +296,7 @@ bool GossipSelect_npc_engineer_spark_overgrind(Player* pPlayer, Creature* pCreat
 ## npc_injured_draenei
 ######*/
 
-struct  npc_injured_draeneiAI : public ScriptedAI
+struct npc_injured_draeneiAI : public ScriptedAI
 {
     npc_injured_draeneiAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
@@ -331,7 +337,7 @@ enum
     QUEST_A_CRY_FOR_HELP    = 9528
 };
 
-struct  npc_magwinAI : public npc_escortAI
+struct npc_magwinAI : public npc_escortAI
 {
     npc_magwinAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -340,7 +346,7 @@ struct  npc_magwinAI : public npc_escortAI
         Player* pPlayer = GetPlayerForEscort();
 
         if (!pPlayer)
-            return;
+        { return; }
 
         switch (uiPointId)
         {
@@ -376,7 +382,7 @@ bool QuestAccept_npc_magwin(Player* pPlayer, Creature* pCreature, const Quest* p
         pCreature->SetFactionTemporary(FACTION_ESCORT_A_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
 
         if (npc_magwinAI* pEscortAI = dynamic_cast<npc_magwinAI*>(pCreature->AI()))
-            pEscortAI->Start(false, pPlayer, pQuest);
+        { pEscortAI->Start(false, pPlayer, pQuest); }
     }
     return true;
 }

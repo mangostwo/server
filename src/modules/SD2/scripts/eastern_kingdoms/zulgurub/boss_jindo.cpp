@@ -61,7 +61,7 @@ static const float aPitTeleportLocs[4] =
     -11583.7783f, -1249.4278f, 77.5471f, 4.745f
 };
 
-struct  boss_jindoAI : public ScriptedAI
+struct boss_jindoAI : public ScriptedAI
 {
     boss_jindoAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -197,7 +197,7 @@ struct  boss_jindoAI : public ScriptedAI
 };
 
 // HACK script! Should not need to have totems in sd2
-struct  mob_healing_wardAI : public ScriptedAI
+struct mob_healing_wardAI : public ScriptedAI
 {
     mob_healing_wardAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

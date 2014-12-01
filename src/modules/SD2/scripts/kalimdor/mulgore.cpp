@@ -52,7 +52,7 @@ enum
     POINT_ID                = 1
 };
 
-struct  npc_kyle_the_frenziedAI : public ScriptedAI
+struct npc_kyle_the_frenziedAI : public ScriptedAI
 {
     npc_kyle_the_frenziedAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
@@ -71,7 +71,7 @@ struct  npc_kyle_the_frenziedAI : public ScriptedAI
         m_uiEventPhase = 0;
 
         if (m_creature->GetEntry() == NPC_KYLE_FRIENDLY)
-            m_creature->UpdateEntry(NPC_KYLE_FRENZIED);
+        { m_creature->UpdateEntry(NPC_KYLE_FRENZIED); }
     }
 
     void SpellHit(Unit* pCaster, SpellEntry const* pSpell) override
@@ -79,7 +79,7 @@ struct  npc_kyle_the_frenziedAI : public ScriptedAI
         if (!m_creature->getVictim() && !m_bEvent && pSpell->Id == SPELL_LUNCH)
         {
             if (pCaster->GetTypeId() == TYPEID_PLAYER)
-                m_playerGuid = pCaster->GetObjectGuid();
+            { m_playerGuid = pCaster->GetObjectGuid(); }
 
             if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
             {
@@ -97,10 +97,10 @@ struct  npc_kyle_the_frenziedAI : public ScriptedAI
     void MovementInform(uint32 uiType, uint32 uiPointId) override
     {
         if (uiType != POINT_MOTION_TYPE || !m_bEvent)
-            return;
+        { return; }
 
         if (uiPointId == POINT_ID)
-            m_bIsMovingToLunch = false;
+        { m_bIsMovingToLunch = false; }
     }
 
     void UpdateAI(const uint32 diff) override
@@ -108,7 +108,7 @@ struct  npc_kyle_the_frenziedAI : public ScriptedAI
         if (m_bEvent)
         {
             if (m_bIsMovingToLunch)
-                return;
+            { return; }
 
             if (m_uiEventTimer < diff)
             {
@@ -149,7 +149,7 @@ struct  npc_kyle_the_frenziedAI : public ScriptedAI
                         break;
                     case 3:
                         if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
-                            pPlayer->TalkedToCreature(m_creature->GetEntry(), m_creature->GetObjectGuid());
+                        { pPlayer->TalkedToCreature(m_creature->GetEntry(), m_creature->GetObjectGuid()); }
 
                         m_creature->UpdateEntry(NPC_KYLE_FRIENDLY);
                         break;
@@ -166,7 +166,7 @@ struct  npc_kyle_the_frenziedAI : public ScriptedAI
                 }
             }
             else
-                m_uiEventTimer -= diff;
+            { m_uiEventTimer -= diff; }
         }
     }
 };

@@ -67,7 +67,7 @@ enum
     SPELL_KODO_KOMBO_GOSSIP         = 18362
 };
 
-struct  npc_aged_dying_ancient_kodoAI : public ScriptedAI
+struct npc_aged_dying_ancient_kodoAI : public ScriptedAI
 {
     npc_aged_dying_ancient_kodoAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -204,7 +204,7 @@ enum
     QUEST_RETURN_TO_VAHLARRIEL  = 1440,
 };
 
-struct  npc_dalinda_malemAI : public npc_escortAI
+struct npc_dalinda_malemAI : public npc_escortAI
 {
     npc_dalinda_malemAI(Creature* m_creature) : npc_escortAI(m_creature) { Reset(); }
 
@@ -300,7 +300,7 @@ static const SummonLocation aMarauderSpawn[] =
 
 static const SummonLocation wranglerSpawn = { -1393.194f, 2429.465f, 88.689f };
 
-struct  npc_melizza_brimbuzzleAI : public npc_escortAI, private DialogueHelper
+struct npc_melizza_brimbuzzleAI : public npc_escortAI, private DialogueHelper
 {
     npc_melizza_brimbuzzleAI(Creature* m_creature) : npc_escortAI(m_creature),
         DialogueHelper(aIntroDialogue)

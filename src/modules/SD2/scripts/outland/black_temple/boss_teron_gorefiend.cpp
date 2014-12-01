@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -64,7 +70,7 @@ enum
     // NPC_VENGEFUL_SPIRIT       = 23109,                   // npc controlled by the dead player
 };
 
-struct  boss_teron_gorefiendAI : public ScriptedAI
+struct boss_teron_gorefiendAI : public ScriptedAI
 {
     boss_teron_gorefiendAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -95,7 +101,7 @@ struct  boss_teron_gorefiendAI : public ScriptedAI
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_GOREFIEND, FAIL);
+        { m_pInstance->SetData(TYPE_GOREFIEND, FAIL); }
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -103,7 +109,7 @@ struct  boss_teron_gorefiendAI : public ScriptedAI
         DoScriptText(SAY_AGGRO, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_GOREFIEND, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_GOREFIEND, IN_PROGRESS); }
     }
 
     void MoveInLineOfSight(Unit* pWho) override
@@ -120,7 +126,7 @@ struct  boss_teron_gorefiendAI : public ScriptedAI
     void KilledUnit(Unit* pVictim) override
     {
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
+        { return; }
 
         DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
     }
@@ -128,7 +134,7 @@ struct  boss_teron_gorefiendAI : public ScriptedAI
     void JustDied(Unit* /*pKiller*/) override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_GOREFIEND, DONE);
+        { m_pInstance->SetData(TYPE_GOREFIEND, DONE); }
 
         DoScriptText(SAY_DEATH, m_creature);
     }
@@ -136,7 +142,7 @@ struct  boss_teron_gorefiendAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_SHADOWY_CONSTRUCT)
-            pSummoned->CastSpell(pSummoned, SPELL_SHADOWY_CONSTRUCT, true);
+        { pSummoned->CastSpell(pSummoned, SPELL_SHADOWY_CONSTRUCT, true); }
 
         pSummoned->SetInCombatWithZone();
     }
@@ -144,43 +150,43 @@ struct  boss_teron_gorefiendAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiSummonDoomBlossomTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_DOOM_BLOSSOM) == CAST_OK)
             {
                 if (urand(0, 1))
-                    DoScriptText(urand(0, 1) ? SAY_SPELL1 : SAY_SPELL2, m_creature);
+                { DoScriptText(urand(0, 1) ? SAY_SPELL1 : SAY_SPELL2, m_creature); }
 
                 m_uiSummonDoomBlossomTimer = 35000;
             }
         }
         else
-            m_uiSummonDoomBlossomTimer -= uiDiff;
+        { m_uiSummonDoomBlossomTimer -= uiDiff; }
 
         if (m_uiIncinerateTimer < uiDiff)
         {
             Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
 
             if (DoCastSpellIfCan(pTarget ? pTarget : m_creature->getVictim(), SPELL_INCINERATE) == CAST_OK)
-                m_uiIncinerateTimer = urand(20000, 50000);
+            { m_uiIncinerateTimer = urand(20000, 50000); }
         }
         else
-            m_uiIncinerateTimer -= uiDiff;
+        { m_uiIncinerateTimer -= uiDiff; }
 
         if (m_uiCrushingShadowsTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_CRUSHING_SHADOWS) == CAST_OK)
             {
                 if (urand(0, 1))
-                    DoScriptText(urand(0, 1) ? SAY_SPECIAL1 : SAY_SPECIAL2, m_creature);
+                { DoScriptText(urand(0, 1) ? SAY_SPECIAL1 : SAY_SPECIAL2, m_creature); }
 
                 m_uiCrushingShadowsTimer = urand(10000, 26000);
             }
         }
         else
-            m_uiCrushingShadowsTimer -= uiDiff;
+        { m_uiCrushingShadowsTimer -= uiDiff; }
 
         if (m_uiShadowOfDeathTimer < uiDiff)
         {
@@ -194,7 +200,7 @@ struct  boss_teron_gorefiendAI : public ScriptedAI
             }
         }
         else
-            m_uiShadowOfDeathTimer -= uiDiff;
+        { m_uiShadowOfDeathTimer -= uiDiff; }
 
         if (m_uiBerserkTimer)
         {
@@ -207,7 +213,7 @@ struct  boss_teron_gorefiendAI : public ScriptedAI
                 }
             }
             else
-                m_uiBerserkTimer -= uiDiff;
+            { m_uiBerserkTimer -= uiDiff; }
         }
 
         DoMeleeAttackIfReady();

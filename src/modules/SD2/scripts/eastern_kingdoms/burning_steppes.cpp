@@ -46,7 +46,7 @@
 ## npc_ragged_john
 ######*/
 
-struct  npc_ragged_johnAI : public ScriptedAI
+struct npc_ragged_johnAI : public ScriptedAI
 {
     npc_ragged_johnAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -212,7 +212,7 @@ static const DialogueEntry aOutroDialogue[] =
     {0, 0, 0},
 };
 
-struct  npc_grark_lorkrubAI : public npc_escortAI, private DialogueHelper
+struct npc_grark_lorkrubAI : public npc_escortAI, private DialogueHelper
 {
     npc_grark_lorkrubAI(Creature* pCreature) : npc_escortAI(pCreature),
         DialogueHelper(aOutroDialogue)

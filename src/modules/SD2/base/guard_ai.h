@@ -45,7 +45,7 @@ enum eShattrathGuard
     SPELL_EXILE                     = 39533
 };
 
-struct  guardAI : public ScriptedAI
+struct guardAI : public ScriptedAI
 {
     public:
         explicit guardAI(Creature* pCreature);
@@ -66,14 +66,14 @@ struct  guardAI : public ScriptedAI
         void DoReplyToTextEmote(uint32 uiTextEmote);
 };
 
-struct  guardAI_orgrimmar : public guardAI
+struct guardAI_orgrimmar : public guardAI
 {
     guardAI_orgrimmar(Creature* pCreature) : guardAI(pCreature) {}
 
     void ReceiveEmote(Player* pPlayer, uint32 uiTextEmote) override;
 };
 
-struct  guardAI_stormwind : public guardAI
+struct guardAI_stormwind : public guardAI
 {
     guardAI_stormwind(Creature* pCreature) : guardAI(pCreature) {}
 

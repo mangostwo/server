@@ -52,7 +52,7 @@ enum
     PHASE_ENERGIZING         = 1
 };
 
-struct  boss_moamAI : public ScriptedAI
+struct boss_moamAI : public ScriptedAI
 {
     boss_moamAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 

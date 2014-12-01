@@ -54,7 +54,7 @@ enum
     NPC_YAUJ_BROOD          = 15621
 };
 
-struct  boss_kriAI : public ScriptedAI
+struct boss_kriAI : public ScriptedAI
 {
     boss_kriAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -133,7 +133,7 @@ struct  boss_kriAI : public ScriptedAI
     }
 };
 
-struct  boss_vemAI : public ScriptedAI
+struct boss_vemAI : public ScriptedAI
 {
     boss_vemAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -220,7 +220,7 @@ struct  boss_vemAI : public ScriptedAI
     }
 };
 
-struct  boss_yaujAI : public ScriptedAI
+struct boss_yaujAI : public ScriptedAI
 {
     boss_yaujAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

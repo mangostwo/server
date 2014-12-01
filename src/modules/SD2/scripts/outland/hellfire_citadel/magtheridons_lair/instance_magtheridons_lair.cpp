@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -45,7 +51,7 @@ bool instance_magtheridons_lair::IsEncounterInProgress() const
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
     {
         if (m_auiEncounter[i] == IN_PROGRESS)
-            return true;
+        { return true; }
     }
 
     return false;
@@ -100,7 +106,7 @@ void instance_magtheridons_lair::SetData(uint32 uiType, uint32 uiData)
                         if (Creature* pChanneler = instance->GetCreature(*itr))
                         {
                             if (!pChanneler->IsAlive())
-                                pChanneler->Respawn();
+                            { pChanneler->Respawn(); }
                         }
                     }
 
@@ -108,12 +114,12 @@ void instance_magtheridons_lair::SetData(uint32 uiType, uint32 uiData)
                     for (GuidList::const_iterator itr = m_lColumnGuidList.begin(); itr != m_lColumnGuidList.end(); ++itr)
                     {
                         if (GameObject* pColumn = instance->GetGameObject(*itr))
-                            pColumn->ResetDoorOrButton();
+                        { pColumn->ResetDoorOrButton(); }
                     }
 
                     // Reset cubes
                     for (GuidList::const_iterator itr = m_lCubeGuidList.begin(); itr != m_lCubeGuidList.end(); ++itr)
-                        DoToggleGameObjectFlags(*itr, GO_FLAG_NO_INTERACT, true);
+                    { DoToggleGameObjectFlags(*itr, GO_FLAG_NO_INTERACT, true); }
 
                     // Reset timers and doors
                     SetData(TYPE_CHANNELER_EVENT, NOT_STARTED);
@@ -124,7 +130,7 @@ void instance_magtheridons_lair::SetData(uint32 uiType, uint32 uiData)
                 case DONE:
                     // Reset door on Fail or Done
                     if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_DOODAD_HF_MAG_DOOR01))
-                        pDoor->ResetDoorOrButton();
+                    { pDoor->ResetDoorOrButton(); }
                     break;
                 case IN_PROGRESS:
                     // Set boss in combat
@@ -138,12 +144,12 @@ void instance_magtheridons_lair::SetData(uint32 uiType, uint32 uiData)
                     }
                     // Enable cubes
                     for (GuidList::const_iterator itr = m_lCubeGuidList.begin(); itr != m_lCubeGuidList.end(); ++itr)
-                        DoToggleGameObjectFlags(*itr, GO_FLAG_NO_INTERACT, false);
+                    { DoToggleGameObjectFlags(*itr, GO_FLAG_NO_INTERACT, false); }
                     break;
                 case SPECIAL:
                     // Collapse the hall - don't store this value
                     for (GuidList::const_iterator itr = m_lColumnGuidList.begin(); itr != m_lColumnGuidList.end(); ++itr)
-                        DoUseDoorOrButton(*itr);
+                    { DoUseDoorOrButton(*itr); }
                     // return, don't set encounter as special
                     return;
             }
@@ -152,7 +158,7 @@ void instance_magtheridons_lair::SetData(uint32 uiType, uint32 uiData)
         case TYPE_CHANNELER_EVENT:
             // don't set the same data twice
             if (m_auiEncounter[1] == uiData)
-                break;
+            { break; }
             // stop the event timer on fail
             if (uiData == FAIL)
             {
@@ -161,13 +167,13 @@ void instance_magtheridons_lair::SetData(uint32 uiType, uint32 uiData)
 
                 // Reset door on Fail
                 if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_DOODAD_HF_MAG_DOOR01))
-                    pDoor->ResetDoorOrButton();
+                { pDoor->ResetDoorOrButton(); }
 
                 // Reset Magtheridon
                 if (Creature* pMagtheridon = GetSingleCreatureFromStorage(NPC_MAGTHERIDON))
                 {
                     if (pMagtheridon->IsAlive())
-                        pMagtheridon->AI()->EnterEvadeMode();
+                    { pMagtheridon->AI()->EnterEvadeMode(); }
                 }
             }
             // prepare Magtheridon for release
@@ -195,7 +201,7 @@ void instance_magtheridons_lair::SetData(uint32 uiType, uint32 uiData)
 uint32 instance_magtheridons_lair::GetData(uint32 uiType) const
 {
     if (uiType < MAX_ENCOUNTER)
-        return m_auiEncounter[uiType];
+    { return m_auiEncounter[uiType]; }
 
     return 0;
 }
@@ -228,12 +234,12 @@ void instance_magtheridons_lair::Update(uint32 uiDiff)
             ++m_uiCageBreakStage;
         }
         else
-            m_uiCageBreakTimer -= uiDiff;
+        { m_uiCageBreakTimer -= uiDiff; }
     }
 
     // no yell if event is in progress or finished
     if (m_auiEncounter[TYPE_CHANNELER_EVENT] == IN_PROGRESS || m_auiEncounter[TYPE_MAGTHERIDON_EVENT] == DONE)
-        return;
+    { return; }
 
     if (m_uiRandYellTimer < uiDiff)
     {
@@ -241,7 +247,7 @@ void instance_magtheridons_lair::Update(uint32 uiDiff)
         m_uiRandYellTimer = 90000;
     }
     else
-        m_uiRandYellTimer -= uiDiff;
+    { m_uiRandYellTimer -= uiDiff; }
 }
 
 InstanceData* GetInstanceData_instance_magtheridons_lair(Map* pMap)

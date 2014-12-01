@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -92,7 +98,7 @@ enum SuperSpells
     SUPER_ARCANE_EXPL   = 2,
 };
 
-struct  boss_aranAI : public ScriptedAI
+struct boss_aranAI : public ScriptedAI
 {
     boss_aranAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -149,7 +155,7 @@ struct  boss_aranAI : public ScriptedAI
         m_creature->RemoveGuardians();
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_ARAN, DONE);
+        { m_pInstance->SetData(TYPE_ARAN, DONE); }
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -162,13 +168,13 @@ struct  boss_aranAI : public ScriptedAI
         }
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_ARAN, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_ARAN, IN_PROGRESS); }
     }
 
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_ARAN, FAIL);
+        { m_pInstance->SetData(TYPE_ARAN, FAIL); }
 
         // Remove the summoned elementals - which are considered guardians
         m_creature->RemoveGuardians();
@@ -179,7 +185,7 @@ struct  boss_aranAI : public ScriptedAI
         if (!m_bDrinkInturrupted && m_bIsDrinking && uiDamage > 0)
         {
             if (!m_creature->HasAura(SPELL_DRINK))
-                return;
+            { return; }
 
             if (DoCastSpellIfCan(m_creature, SPELL_MANA_POTION) == CAST_OK)
             {
@@ -206,7 +212,7 @@ struct  boss_aranAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         // Start drinking when below 20% mana
         if (!m_bIsDrinking && m_creature->GetPowerType() == POWER_MANA && (m_creature->GetPower(POWER_MANA) * 100 / m_creature->GetMaxPower(POWER_MANA)) < 20)
@@ -234,7 +240,7 @@ struct  boss_aranAI : public ScriptedAI
                 {
                     case 0:
                         if (DoCastSpellIfCan(m_creature, SPELL_CONJURE_WATER) == CAST_OK)
-                            m_uiManaRecoveryTimer = 2000;
+                        { m_uiManaRecoveryTimer = 2000; }
                         break;
                     case 1:
                         if (DoCastSpellIfCan(m_creature, SPELL_DRINK) == CAST_OK)
@@ -258,7 +264,7 @@ struct  boss_aranAI : public ScriptedAI
                 ++m_uiManaRecoveryStage;
             }
             else
-                m_uiManaRecoveryTimer -= uiDiff;
+            { m_uiManaRecoveryTimer -= uiDiff; }
 
             // no other spells during mana recovery
             return;
@@ -271,14 +277,14 @@ struct  boss_aranAI : public ScriptedAI
             {
                 Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
                 if (!pTarget)
-                    return;
+                { return; }
 
                 uint8 uiCurrentSpell = urand(0, 2);
                 uint32 uiCurrentSpellId = 0;
 
                 // randomize so it won't be the same spell twice in a row
                 while (uiCurrentSpell == m_uiLastNormalSpell)
-                    uiCurrentSpell = urand(0, 2);
+                { uiCurrentSpell = urand(0, 2); }
 
                 m_uiLastNormalSpell = uiCurrentSpell;
 
@@ -299,11 +305,11 @@ struct  boss_aranAI : public ScriptedAI
                 }
 
                 if (uiCurrentSpellId)
-                    DoCastSpellIfCan(pTarget, uiCurrentSpellId);
+                { DoCastSpellIfCan(pTarget, uiCurrentSpellId); }
             }
         }
         else
-            m_uiNormalCastTimer -= uiDiff;
+        { m_uiNormalCastTimer -= uiDiff; }
 
         // Secondary spells
         if (m_uiSecondarySpellTimer < uiDiff)
@@ -317,14 +323,14 @@ struct  boss_aranAI : public ScriptedAI
                     break;
                 case 1:
                     if (Unit* pUnit = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                        spellResult = DoCastSpellIfCan(pUnit, SPELL_CHAINS_OF_ICE);
+                    { spellResult = DoCastSpellIfCan(pUnit, SPELL_CHAINS_OF_ICE); }
                     break;
             }
             if (spellResult == CAST_OK)
-                m_uiSecondarySpellTimer = urand(5000, 20000);
+            { m_uiSecondarySpellTimer = urand(5000, 20000); }
         }
         else
-            m_uiSecondarySpellTimer -= uiDiff;
+        { m_uiSecondarySpellTimer -= uiDiff; }
 
         if (m_uiSuperCastTimer < uiDiff)
         {
@@ -334,7 +340,7 @@ struct  boss_aranAI : public ScriptedAI
 
                 // randomize so it won't be the same spell twice in a row
                 while (uiAvailableSpell == m_uiLastSuperSpell)
-                    uiAvailableSpell = urand(SUPER_FLAME_WREATH, SUPER_ARCANE_EXPL);
+                { uiAvailableSpell = urand(SUPER_FLAME_WREATH, SUPER_ARCANE_EXPL); }
 
                 m_uiLastSuperSpell = uiAvailableSpell;
 
@@ -352,18 +358,18 @@ struct  boss_aranAI : public ScriptedAI
                         break;
                     case SUPER_FLAME_WREATH:
                         if (DoCastSpellIfCan(m_creature, SPELL_FLAME_WREATH) == CAST_OK)
-                            DoScriptText(urand(0, 1) ? SAY_FLAMEWREATH1 : SAY_FLAMEWREATH2, m_creature);
+                        { DoScriptText(urand(0, 1) ? SAY_FLAMEWREATH1 : SAY_FLAMEWREATH2, m_creature); }
                         break;
                     case SUPER_BLIZZARD:
                         if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_BLIZZARD) == CAST_OK)
-                            DoScriptText(urand(0, 1) ? SAY_BLIZZARD1 : SAY_BLIZZARD2, m_creature);
+                        { DoScriptText(urand(0, 1) ? SAY_BLIZZARD1 : SAY_BLIZZARD2, m_creature); }
                         break;
                 }
                 m_uiSuperCastTimer = 30000;
             }
         }
         else
-            m_uiSuperCastTimer -= uiDiff;
+        { m_uiSuperCastTimer -= uiDiff; }
 
         if (!m_bElementalsSpawned && m_creature->GetHealthPercent() < 40.0f)
         {
@@ -383,13 +389,13 @@ struct  boss_aranAI : public ScriptedAI
             if (m_uiBerserkTimer <= uiDiff)
             {
                 for (uint8 i = 0; i < MAX_SHADOWS_OF_ARAN; ++i)
-                    DoSpawnCreature(NPC_SHADOW_OF_ARAN, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
+                { DoSpawnCreature(NPC_SHADOW_OF_ARAN, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000); }
 
                 DoScriptText(SAY_TIMEOVER, m_creature);
                 m_uiBerserkTimer = 0;
             }
             else
-                m_uiBerserkTimer -= uiDiff;
+            { m_uiBerserkTimer -= uiDiff; }
         }
 
         DoMeleeAttackIfReady();
@@ -402,7 +408,7 @@ CreatureAI* GetAI_boss_aran(Creature* pCreature)
 }
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct  npc_shade_of_aran_blizzardAI : public ScriptedAI
+struct npc_shade_of_aran_blizzardAI : public ScriptedAI
 {
     npc_shade_of_aran_blizzardAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

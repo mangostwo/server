@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -82,7 +88,7 @@ enum Phases
     PHASE_VOID          = 3,
 };
 
-struct  boss_high_astromancer_solarianAI : public ScriptedAI
+struct boss_high_astromancer_solarianAI : public ScriptedAI
 {
     boss_high_astromancer_solarianAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -126,7 +132,7 @@ struct  boss_high_astromancer_solarianAI : public ScriptedAI
 
         m_creature->SetArmor(m_uiDefaultArmor);
         if (m_creature->GetVisibility() != VISIBILITY_ON)
-            m_creature->SetVisibility(VISIBILITY_ON);
+        { m_creature->SetVisibility(VISIBILITY_ON); }
 
         SetCombatMovement(true);
     }
@@ -134,7 +140,7 @@ struct  boss_high_astromancer_solarianAI : public ScriptedAI
     void KilledUnit(Unit* pVictim) override
     {
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
+        { return; }
 
         switch (urand(0, 2))
         {
@@ -149,7 +155,7 @@ struct  boss_high_astromancer_solarianAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_SOLARIAN, DONE);
+        { m_pInstance->SetData(TYPE_SOLARIAN, DONE); }
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -157,13 +163,13 @@ struct  boss_high_astromancer_solarianAI : public ScriptedAI
         DoScriptText(SAY_AGGRO, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_SOLARIAN, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_SOLARIAN, IN_PROGRESS); }
     }
 
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_SOLARIAN, FAIL);
+        { m_pInstance->SetData(TYPE_SOLARIAN, FAIL); }
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -179,7 +185,7 @@ struct  boss_high_astromancer_solarianAI : public ScriptedAI
             case NPC_SOLARIUM_AGENT:
             case NPC_SOLARIUM_PRIEST:
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                    pSummoned->AI()->AttackStart(pTarget);
+                { pSummoned->AI()->AttackStart(pTarget); }
                 break;
         }
     }
@@ -194,7 +200,7 @@ struct  boss_high_astromancer_solarianAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         // When Solarian reaches 20% she will transform into a huge void walker.
         if (m_Phase != PHASE_VOID && m_creature->GetHealthPercent() < 20.0f)
@@ -208,7 +214,7 @@ struct  boss_high_astromancer_solarianAI : public ScriptedAI
                 m_Phase = PHASE_VOID;
 
                 if (m_creature->GetVisibility() != VISIBILITY_ON)
-                    m_creature->SetVisibility(VISIBILITY_ON);
+                { m_creature->SetVisibility(VISIBILITY_ON); }
 
                 // Stop the combat for a small delay
                 SetCombatMovement(false);
@@ -250,7 +256,7 @@ struct  boss_high_astromancer_solarianAI : public ScriptedAI
                 m_uiDelayTimer = 0;
             }
             else
-                m_uiDelayTimer -= uiDiff;
+            { m_uiDelayTimer -= uiDiff; }
 
             // Combat is still on hold
             return;
@@ -266,23 +272,23 @@ struct  boss_high_astromancer_solarianAI : public ScriptedAI
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_WRATH_OF_THE_ASTROMANCER, SELECT_FLAG_PLAYER))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_WRATH_OF_THE_ASTROMANCER) == CAST_OK)
-                            m_uiWrathOfTheAstromancerTimer = urand(15000, 25000);
+                        { m_uiWrathOfTheAstromancerTimer = urand(15000, 25000); }
                     }
                     else
-                        m_uiWrathOfTheAstromancerTimer = 10000;
+                    { m_uiWrathOfTheAstromancerTimer = 10000; }
                 }
                 else
-                    m_uiWrathOfTheAstromancerTimer -= uiDiff;
+                { m_uiWrathOfTheAstromancerTimer -= uiDiff; }
 
                 // Blinding Light Timer
                 if (m_uiBlindingLightTimer < uiDiff)
                 {
                     // She casts this spell every 45 seconds. It is a kind of Moonfire spell, which she strikes down on the whole raid simultaneously. It hits everyone in the raid for 2280 to 2520 arcane damage.
                     if (DoCastSpellIfCan(m_creature, SPELL_BLINDING_LIGHT) == CAST_OK)
-                        m_uiBlindingLightTimer = 45000;
+                    { m_uiBlindingLightTimer = 45000; }
                 }
                 else
-                    m_uiBlindingLightTimer -= uiDiff;
+                { m_uiBlindingLightTimer -= uiDiff; }
 
                 // Arcane Missiles Timer
                 if (m_uiArcaneMissilesTimer < uiDiff)
@@ -291,16 +297,16 @@ struct  boss_high_astromancer_solarianAI : public ScriptedAI
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     {
                         if (!m_creature->HasInArc(2.5f, pTarget))
-                            pTarget = m_creature->getVictim();
+                        { pTarget = m_creature->getVictim(); }
 
                         if (pTarget)
-                            DoCastSpellIfCan(pTarget, SPELL_ARCANE_MISSILES);
+                        { DoCastSpellIfCan(pTarget, SPELL_ARCANE_MISSILES); }
                     }
 
                     m_uiArcaneMissilesTimer = urand(3000, 4000);
                 }
                 else
-                    m_uiArcaneMissilesTimer -= uiDiff;
+                { m_uiArcaneMissilesTimer -= uiDiff; }
 
                 // Phase 1 Timer
                 if (m_uiSplitTimer < uiDiff)
@@ -321,7 +327,7 @@ struct  boss_high_astromancer_solarianAI : public ScriptedAI
                     return;
                 }
                 else
-                    m_uiSplitTimer -= uiDiff;
+                { m_uiSplitTimer -= uiDiff; }
 
                 DoMeleeAttackIfReady();
                 break;
@@ -338,14 +344,14 @@ struct  boss_high_astromancer_solarianAI : public ScriptedAI
                             if (Creature* pSpotlight = m_creature->GetMap()->GetCreature(m_vSpotLightsGuidVector[i]))
                             {
                                 for (uint8 j = 0; j < MAX_AGENTS; ++j)
-                                    m_creature->SummonCreature(NPC_SOLARIUM_AGENT, pSpotlight->GetPositionX(), pSpotlight->GetPositionY(), pSpotlight->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                                { m_creature->SummonCreature(NPC_SOLARIUM_AGENT, pSpotlight->GetPositionX(), pSpotlight->GetPositionY(), pSpotlight->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0); }
                             }
                         }
                         m_uiSummonAgentsTimer  = 0;
                         m_uiSummonPriestsTimer = 15000;
                     }
                     else
-                        m_uiSummonAgentsTimer -= uiDiff;
+                    { m_uiSummonAgentsTimer -= uiDiff; }
                 }
 
                 if (m_uiSummonPriestsTimer)
@@ -359,11 +365,11 @@ struct  boss_high_astromancer_solarianAI : public ScriptedAI
                         for (uint8 i = 0; i < 2; ++i)
                         {
                             if (Creature* pSpotlight = m_creature->GetMap()->GetCreature(m_vSpotLightsGuidVector[i]))
-                                m_creature->SummonCreature(NPC_SOLARIUM_PRIEST, pSpotlight->GetPositionX(), pSpotlight->GetPositionY(), pSpotlight->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                            { m_creature->SummonCreature(NPC_SOLARIUM_PRIEST, pSpotlight->GetPositionX(), pSpotlight->GetPositionY(), pSpotlight->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0); }
                         }
                         // Teleport the boss at the last portal
                         if (Creature* pSpotlight = m_creature->GetMap()->GetCreature(m_vSpotLightsGuidVector[2]))
-                            m_creature->NearTeleportTo(pSpotlight->GetPositionX(), pSpotlight->GetPositionY(), pSpotlight->GetPositionZ(), pSpotlight->GetOrientation(), true);
+                        { m_creature->NearTeleportTo(pSpotlight->GetPositionX(), pSpotlight->GetPositionY(), pSpotlight->GetPositionZ(), pSpotlight->GetOrientation(), true); }
 
                         SetCombatMovement(true);
                         m_creature->GetMotionMaster()->Clear();
@@ -377,7 +383,7 @@ struct  boss_high_astromancer_solarianAI : public ScriptedAI
                         m_uiWrathOfTheAstromancerTimer = urand(15000, 25000);
                     }
                     else
-                        m_uiSummonPriestsTimer -= uiDiff;
+                    { m_uiSummonPriestsTimer -= uiDiff; }
                 }
 
                 break;
@@ -387,19 +393,19 @@ struct  boss_high_astromancer_solarianAI : public ScriptedAI
                 if (m_uiFearTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_PSYHIC_SCREAM) == CAST_OK)
-                        m_uiFearTimer = 20000;
+                    { m_uiFearTimer = 20000; }
                 }
                 else
-                    m_uiFearTimer -= uiDiff;
+                { m_uiFearTimer -= uiDiff; }
 
                 // Void Bolt Timer
                 if (m_uiVoidBoltTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_VOID_BOLT) == CAST_OK)
-                        m_uiVoidBoltTimer = 10000;
+                    { m_uiVoidBoltTimer = 10000; }
                 }
                 else
-                    m_uiVoidBoltTimer -= uiDiff;
+                { m_uiVoidBoltTimer -= uiDiff; }
 
                 DoMeleeAttackIfReady();
                 break;
@@ -407,7 +413,7 @@ struct  boss_high_astromancer_solarianAI : public ScriptedAI
     }
 };
 
-struct  mob_solarium_priestAI : public ScriptedAI
+struct mob_solarium_priestAI : public ScriptedAI
 {
     mob_solarium_priestAI(Creature* pCreature) : ScriptedAI(pCreature)  { Reset(); }
 
@@ -436,37 +442,37 @@ struct  mob_solarium_priestAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiHealTimer < uiDiff)
         {
             if (Unit* pTarget = DoSelectLowestHpFriendly(50.0f))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_SOLARIUM_GREAT_HEAL) == CAST_OK)
-                    m_uiHealTimer = 9000;
+                { m_uiHealTimer = 9000; }
             }
         }
         else
-            m_uiHealTimer -= uiDiff;
+        { m_uiHealTimer -= uiDiff; }
 
         if (m_uiHolySmiteTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_SOLARIUM_HOLY_SMITE) == CAST_OK)
-                    m_uiHolySmiteTimer = 4000;
+                { m_uiHolySmiteTimer = 4000; }
             }
         }
         else
-            m_uiHolySmiteTimer -= uiDiff;
+        { m_uiHolySmiteTimer -= uiDiff; }
 
         if (m_uiAoESilenceTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SOLARIUM_ARCANE_TORRENT) == CAST_OK)
-                m_uiAoESilenceTimer = 13000;
+            { m_uiAoESilenceTimer = 13000; }
         }
         else
-            m_uiAoESilenceTimer -= uiDiff;
+        { m_uiAoESilenceTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

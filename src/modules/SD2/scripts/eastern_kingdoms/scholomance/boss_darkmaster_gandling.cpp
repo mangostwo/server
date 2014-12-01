@@ -43,7 +43,7 @@ enum
     SPELL_SHADOW_PORTAL            = 17950
 };
 
-struct  boss_darkmaster_gandlingAI : public ScriptedAI
+struct boss_darkmaster_gandlingAI : public ScriptedAI
 {
     boss_darkmaster_gandlingAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

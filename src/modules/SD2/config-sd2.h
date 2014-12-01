@@ -27,7 +27,7 @@
 #define SC_CONFIG_H
 
 #include "Platform/CompilerDefs.h"
-// #include "revision.h"
+//#include "revision.h"
 #include "sd2_revision_nr.h"
 #include "SystemConfig.h"
 

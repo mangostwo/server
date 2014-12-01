@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -43,7 +49,7 @@ enum
     SPELL_ATTRACTION            = 38540
 };
 
-struct  boss_chrono_lord_dejaAI : public ScriptedAI
+struct boss_chrono_lord_dejaAI : public ScriptedAI
 {
     boss_chrono_lord_dejaAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -81,7 +87,7 @@ struct  boss_chrono_lord_dejaAI : public ScriptedAI
             if (m_creature->IsWithinDistInMap(pWho, 20.0f))
             {
                 if (DoCastSpellIfCan(pWho, SPELL_BANISH_HELPER) == CAST_OK)
-                    DoScriptText(SAY_BANISH, m_creature);
+                { DoScriptText(SAY_BANISH, m_creature); }
             }
         }
 
@@ -102,34 +108,34 @@ struct  boss_chrono_lord_dejaAI : public ScriptedAI
     {
         // Return since we have no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         // Arcane Blast
         if (m_uiArcaneBlastTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_ARCANE_BLAST : SPELL_ARCANE_BLAST_H) == CAST_OK)
-                m_uiArcaneBlastTimer = urand(15000, 25000);
+            { m_uiArcaneBlastTimer = urand(15000, 25000); }
         }
         else
-            m_uiArcaneBlastTimer -= uiDiff;
+        { m_uiArcaneBlastTimer -= uiDiff; }
 
         // Arcane Discharge
         if (m_uiArcaneDischargeTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ARCANE_DISCHARGE : SPELL_ARCANE_DISCHARGE_H) == CAST_OK)
-                m_uiArcaneDischargeTimer = urand(20000, 30000);
+            { m_uiArcaneDischargeTimer = urand(20000, 30000); }
         }
         else
-            m_uiArcaneDischargeTimer -= uiDiff;
+        { m_uiArcaneDischargeTimer -= uiDiff; }
 
         // Time Lapse
         if (m_uiTimeLapseTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_TIME_LAPSE) == CAST_OK)
-                m_uiTimeLapseTimer = urand(15000, 25000);
+            { m_uiTimeLapseTimer = urand(15000, 25000); }
         }
         else
-            m_uiTimeLapseTimer -= uiDiff;
+        { m_uiTimeLapseTimer -= uiDiff; }
 
         // Attraction
         if (!m_bIsRegularMode)
@@ -137,10 +143,10 @@ struct  boss_chrono_lord_dejaAI : public ScriptedAI
             if (m_uiAttractionTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_ATTRACTION) == CAST_OK)
-                    m_uiAttractionTimer = urand(25000, 35000);
+                { m_uiAttractionTimer = urand(25000, 35000); }
             }
             else
-                m_uiAttractionTimer -= uiDiff;
+            { m_uiAttractionTimer -= uiDiff; }
         }
 
         DoMeleeAttackIfReady();

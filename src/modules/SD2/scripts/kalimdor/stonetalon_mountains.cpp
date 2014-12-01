@@ -23,12 +23,20 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Stonetalon_Mountains
-SD%Complete: 100
-SDComment: Quest support: 6523.
-SDCategory: Stonetalon Mountains
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Stonetalon_Mountains
+ * SD%Complete: 100
+ * SDComment:   Quest support: 6523.
+ * SDCategory:  Stonetalon Mountains
+ * EndScriptData
+ */
+
+/**
+ * ContentData
+ * npc_kaya
+ * EndContentData
+ */
 
 #include "precompiled.h"
 #include "escort_ai.h"
@@ -50,7 +58,7 @@ enum
     QUEST_PROTECT_KAYA          = 6523
 };
 
-struct  npc_kayaAI : public npc_escortAI
+struct npc_kayaAI : public npc_escortAI
 {
     npc_kayaAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 

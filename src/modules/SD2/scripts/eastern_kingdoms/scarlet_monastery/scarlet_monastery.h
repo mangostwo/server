@@ -42,7 +42,7 @@ enum
     SAY_TRIGGER_VORREL              = -1189015,
 };
 
-class  instance_scarlet_monastery : public ScriptedInstance
+class instance_scarlet_monastery : public ScriptedInstance
 {
     public:
         instance_scarlet_monastery(Map* pMap);

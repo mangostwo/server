@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -50,7 +56,7 @@ enum
     SPELL_BERSERK               = 26662
 };
 
-struct  boss_curatorAI : public ScriptedAI
+struct boss_curatorAI : public ScriptedAI
 {
     boss_curatorAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -86,7 +92,7 @@ struct  boss_curatorAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_CURATOR, DONE);
+        { m_pInstance->SetData(TYPE_CURATOR, DONE); }
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -94,13 +100,13 @@ struct  boss_curatorAI : public ScriptedAI
         DoScriptText(SAY_AGGRO, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_CURATOR, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_CURATOR, IN_PROGRESS); }
     }
 
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_CURATOR, FAIL);
+        { m_pInstance->SetData(TYPE_CURATOR, FAIL); }
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -113,14 +119,14 @@ struct  boss_curatorAI : public ScriptedAI
             pSummoned->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ARCANE, true);
 
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                pSummoned->AI()->AttackStart(pTarget);
+            { pSummoned->AI()->AttackStart(pTarget); }
         }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         // always decrease BerserkTimer
         if (m_uiBerserkTimer)
@@ -140,12 +146,12 @@ struct  boss_curatorAI : public ScriptedAI
                 }
             }
             else
-                m_uiBerserkTimer -= uiDiff;
+            { m_uiBerserkTimer -= uiDiff; }
         }
 
         // not supposed to do anything while evocate
         if (m_creature->HasAura(SPELL_EVOCATION))
-            return;
+        { return; }
 
         if (!m_bIsEnraged)
         {
@@ -185,7 +191,7 @@ struct  boss_curatorAI : public ScriptedAI
                 }
             }
             else
-                m_uiFlareTimer -= uiDiff;
+            { m_uiFlareTimer -= uiDiff; }
 
             if (m_creature->GetHealthPercent() < 15.0f)
             {
@@ -205,11 +211,11 @@ struct  boss_curatorAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 1))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_HATEFUL_BOLT) == CAST_OK)
-                    m_uiHatefulBoltTimer = m_bIsEnraged ? 7000 : 15000;
+                { m_uiHatefulBoltTimer = m_bIsEnraged ? 7000 : 15000; }
             }
         }
         else
-            m_uiHatefulBoltTimer -= uiDiff;
+        { m_uiHatefulBoltTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -17,12 +23,14 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Overlord_Wyrmthalak
-SD%Complete: 100
-SDComment:
-SDCategory: Blackrock Spire
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Overlord_Wyrmthalak
+ * SD%Complete: 100
+ * SDComment:   None
+ * SDCategory:  Blackrock Spire
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 
@@ -43,7 +51,7 @@ const float afLocations[2][4] =
     { -49.875881f, -511.896942f, 88.195160f, 4.613114f}
 };
 
-struct  boss_overlordwyrmthalakAI : public ScriptedAI
+struct boss_overlordwyrmthalakAI : public ScriptedAI
 {
     boss_overlordwyrmthalakAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
@@ -65,7 +73,9 @@ struct  boss_overlordwyrmthalakAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() != NPC_SPIRESTONE_WARLORD && pSummoned->GetEntry() != NPC_SMOLDERTHORN_BERSERKER)
+        {
             return;
+        }
 
         if (m_creature->getVictim())
         {
@@ -78,7 +88,9 @@ struct  boss_overlordwyrmthalakAI : public ScriptedAI
     {
         // Return since we have no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         // BlastWave
         if (m_uiBlastWaveTimer < uiDiff)
@@ -87,7 +99,7 @@ struct  boss_overlordwyrmthalakAI : public ScriptedAI
             m_uiBlastWaveTimer = 20000;
         }
         else
-            m_uiBlastWaveTimer -= uiDiff;
+            { m_uiBlastWaveTimer -= uiDiff; }
 
         // Shout
         if (m_uiShoutTimer < uiDiff)
@@ -96,7 +108,7 @@ struct  boss_overlordwyrmthalakAI : public ScriptedAI
             m_uiShoutTimer = 10000;
         }
         else
-            m_uiShoutTimer -= uiDiff;
+            { m_uiShoutTimer -= uiDiff; }
 
         // Cleave
         if (m_uiCleaveTimer < uiDiff)
@@ -105,7 +117,7 @@ struct  boss_overlordwyrmthalakAI : public ScriptedAI
             m_uiCleaveTimer = 7000;
         }
         else
-            m_uiCleaveTimer -= uiDiff;
+            { m_uiCleaveTimer -= uiDiff; }
 
         // Knockaway
         if (m_uiKnockawayTimer < uiDiff)
@@ -114,7 +126,7 @@ struct  boss_overlordwyrmthalakAI : public ScriptedAI
             m_uiKnockawayTimer = 14000;
         }
         else
-            m_uiKnockawayTimer -= uiDiff;
+            { m_uiKnockawayTimer -= uiDiff; }
 
         // Summon two Beserks
         if (!m_bSummoned && m_creature->GetHealthPercent() < 51.0f)

@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -88,7 +94,7 @@ struct mobs_nether_drakeAI : public ScriptedAI
     void MoveInLineOfSight(Unit* pWho) override
     {
         if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-            return;
+        { return; }
 
         ScriptedAI::MoveInLineOfSight(pWho);
     }
@@ -97,10 +103,10 @@ struct mobs_nether_drakeAI : public ScriptedAI
     void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
     {
         if (uiMoveType != POINT_MOTION_TYPE)
-            return;
+        { return; }
 
         if (uiPointId)
-            m_creature->ForcedDespawn();
+        { m_creature->ForcedDespawn(); }
     }
 
     void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
@@ -120,7 +126,7 @@ struct mobs_nether_drakeAI : public ScriptedAI
 
             // If we choose the same entry, try again
             while (aNetherDrakeEntries[uiIndex] == m_creature->GetEntry())
-                uiIndex = urand(0, MAX_ENTRIES - 1);
+            { uiIndex = urand(0, MAX_ENTRIES - 1); }
 
             if (m_creature->UpdateEntry(aNetherDrakeEntries[uiIndex]))
             {
@@ -132,7 +138,7 @@ struct mobs_nether_drakeAI : public ScriptedAI
                     m_bIsNihil = true;
                 }
                 else
-                    AttackStart(pCaster);
+                { AttackStart(pCaster); }
             }
         }
     }
@@ -169,41 +175,41 @@ struct mobs_nether_drakeAI : public ScriptedAI
                 m_uiNihilSpeechTimer = 5000;
             }
             else
-                m_uiNihilSpeechTimer -= uiDiff;
+            { m_uiNihilSpeechTimer -= uiDiff; }
 
             // anything below here is not interesting for Nihil, so skip it
             return;
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiIntangiblePresenceTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_INTANGIBLE_PRESENCE) == CAST_OK)
-                m_uiIntangiblePresenceTimer = urand(15000, 30000);
+            { m_uiIntangiblePresenceTimer = urand(15000, 30000); }
         }
         else
-            m_uiIntangiblePresenceTimer -= uiDiff;
+        { m_uiIntangiblePresenceTimer -= uiDiff; }
 
         if (m_uiManaBurnTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_MANA_BURN, SELECT_FLAG_POWER_MANA))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_MANA_BURN) == CAST_OK)
-                    m_uiManaBurnTimer = urand(8000, 16000);
+                { m_uiManaBurnTimer = urand(8000, 16000); }
             }
         }
         else
-            m_uiManaBurnTimer -= uiDiff;
+        { m_uiManaBurnTimer -= uiDiff; }
 
         if (m_uiArcaneBlastTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARCANE_BLAST) == CAST_OK)
-                m_uiArcaneBlastTimer = urand(2500, 7500);
+            { m_uiArcaneBlastTimer = urand(2500, 7500); }
         }
         else
-            m_uiArcaneBlastTimer -= uiDiff;
+        { m_uiArcaneBlastTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }
@@ -225,7 +231,7 @@ enum
     SPELL_LASHHAN_CHANNEL   = 36904
 };
 
-struct  npc_daranelleAI : public ScriptedAI
+struct npc_daranelleAI : public ScriptedAI
 {
     npc_daranelleAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
@@ -270,7 +276,7 @@ enum
 
 static const uint32 aOgreEntries[] = {19995, 19998, 20334, 20723, 20726, 20730, 20731, 20732, 21296};
 
-struct  npc_bloodmaul_stout_triggerAI : public ScriptedAI
+struct npc_bloodmaul_stout_triggerAI : public ScriptedAI
 {
     npc_bloodmaul_stout_triggerAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -303,7 +309,7 @@ struct  npc_bloodmaul_stout_triggerAI : public ScriptedAI
                 TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
 
                 if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
-                    pSummoner->KilledMonsterCredit(m_creature->GetEntry(), m_creature->GetObjectGuid());
+                { pSummoner->KilledMonsterCredit(m_creature->GetEntry(), m_creature->GetObjectGuid()); }
             }
 
             m_bHasValidOgre = false;
@@ -319,7 +325,7 @@ struct  npc_bloodmaul_stout_triggerAI : public ScriptedAI
                 // get all the ogres in range
                 std::list<Creature*> lOgreList;
                 for (uint8 i = 0; i < countof(aOgreEntries); ++i)
-                    GetCreatureListWithEntryInGrid(lOgreList, m_creature,  aOgreEntries[i], 30.0f);
+                { GetCreatureListWithEntryInGrid(lOgreList, m_creature,  aOgreEntries[i], 30.0f); }
 
                 if (lOgreList.empty())
                 {
@@ -336,7 +342,7 @@ struct  npc_bloodmaul_stout_triggerAI : public ScriptedAI
                 do
                 {
                     if ((*ogreItr)->IsAlive() && !(*ogreItr)->HasAura(SPELL_INTOXICATION))
-                        pOgre = *ogreItr;
+                    { pOgre = *ogreItr; }
 
                     ++ogreItr;
                 }
@@ -366,7 +372,7 @@ struct  npc_bloodmaul_stout_triggerAI : public ScriptedAI
                 m_bHasValidOgre = true;
             }
             else
-                m_uiStartTimer -= uiDiff;
+            { m_uiStartTimer -= uiDiff; }
         }
     }
 };
@@ -493,7 +499,7 @@ static const SimonGame aApexisGameData[4] =
     {COLOR_IDX_YELLOW,  SPELL_BUTTON_PUSH_YELLOW,   SPELL_INTROSPECTION_YELLOW, SOUND_ID_YELLOW}
 };
 
-struct  npc_simon_game_bunnyAI : public ScriptedAI
+struct npc_simon_game_bunnyAI : public ScriptedAI
 {
     npc_simon_game_bunnyAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -529,7 +535,7 @@ struct  npc_simon_game_bunnyAI : public ScriptedAI
     {
         // this visual is cast only after the first level
         if (m_uiLevelCount)
-            DoCastSpellIfCan(m_creature, SPELL_VISUAL_GAME_START, CAST_TRIGGERED);
+        { DoCastSpellIfCan(m_creature, SPELL_VISUAL_GAME_START, CAST_TRIGGERED); }
         // this part is done only on the first tick
         else
         {
@@ -539,13 +545,13 @@ struct  npc_simon_game_bunnyAI : public ScriptedAI
 
             // Get original summoner
             if (m_creature->IsTemporarySummon())
-                m_masterPlayerGuid = ((TemporarySummon*)m_creature)->GetSummonerGuid();
+            { m_masterPlayerGuid = ((TemporarySummon*)m_creature)->GetSummonerGuid(); }
 
             // Get closest apexis
-            if (GetClosestGameObjectWithEntry(m_creature, GO_APEXIS_RELIC, 5.0f))
-                m_bIsLargeEvent = false;
-            else if (GetClosestGameObjectWithEntry(m_creature, GO_APEXIS_MONUMENT, 17.0f))
-                m_bIsLargeEvent = true;
+            if (GameObject* pGo = GetClosestGameObjectWithEntry(m_creature, GO_APEXIS_RELIC, 5.0f))
+            { m_bIsLargeEvent = false; }
+            else if (GameObject* pGo = GetClosestGameObjectWithEntry(m_creature, GO_APEXIS_MONUMENT, 17.0f))
+            { m_bIsLargeEvent = true; }
         }
 
         // prepare the buttons and summon the visual auras
@@ -589,7 +595,7 @@ struct  npc_simon_game_bunnyAI : public ScriptedAI
 
         // Complete game if all the levels
         if (m_uiLevelCount == MAX_SIMON_LEVELS)
-            DoCompleteGame();
+        { DoCompleteGame(); }
     }
 
     // Complete event - called when the game has been completed succesfully
@@ -606,13 +612,13 @@ struct  npc_simon_game_bunnyAI : public ScriptedAI
                     {
                         // distance check - they need to be close to the Apexis
                         if (!pMember->IsWithinDistInMap(m_creature, 20.0f))
-                            continue;
+                        { continue; }
 
                         // on group event cast Enlightment on daily quest and Emanations on normal quest
                         if (pMember->GetQuestStatus(QUEST_AN_APEXIS_RELIC) == QUEST_STATUS_INCOMPLETE)
-                            DoCastSpellIfCan(pMember, SPELL_APEXIS_EMANATIONS, CAST_TRIGGERED);
+                        { DoCastSpellIfCan(pMember, SPELL_APEXIS_EMANATIONS, CAST_TRIGGERED); }
                         else if (pMember->GetQuestStatus(QUEST_RELICS_EMANATION) == QUEST_STATUS_INCOMPLETE)
-                            DoCastSpellIfCan(pMember, SPELL_APEXIS_ENLIGHTENMENT, CAST_TRIGGERED);
+                        { DoCastSpellIfCan(pMember, SPELL_APEXIS_ENLIGHTENMENT, CAST_TRIGGERED); }
                     }
                 }
             }
@@ -620,9 +626,9 @@ struct  npc_simon_game_bunnyAI : public ScriptedAI
             {
                 // solo event - cast Emanations on daily quest and vibrations on normal quest
                 if (pPlayer->GetQuestStatus(QUEST_AN_APEXIS_RELIC) == QUEST_STATUS_INCOMPLETE)
-                    DoCastSpellIfCan(pPlayer, SPELL_APEXIS_VIBRATIONS, CAST_TRIGGERED);
+                { DoCastSpellIfCan(pPlayer, SPELL_APEXIS_VIBRATIONS, CAST_TRIGGERED); }
                 else if (pPlayer->GetQuestStatus(QUEST_RELICS_EMANATION) == QUEST_STATUS_INCOMPLETE)
-                    DoCastSpellIfCan(pPlayer, SPELL_APEXIS_EMANATIONS, CAST_TRIGGERED);
+                { DoCastSpellIfCan(pPlayer, SPELL_APEXIS_EMANATIONS, CAST_TRIGGERED); }
             }
         }
 
@@ -654,7 +660,7 @@ struct  npc_simon_game_bunnyAI : public ScriptedAI
             case PHASE_LEVEL_PREPARE:
                 // delay before each level - handled by big timer aura
                 if (eventType == AI_EVENT_CUSTOM_A)
-                    m_uiGamePhase = PHASE_AI_GAME;
+                { m_uiGamePhase = PHASE_AI_GAME; }
                 break;
             case PHASE_AI_GAME:
                 // AI game - handled by small timer aura
@@ -709,7 +715,7 @@ struct  npc_simon_game_bunnyAI : public ScriptedAI
                         }
                         // cast tick sound
                         else
-                            DoCastSpellIfCan(pInvoker, m_bIsLargeEvent ? SPELL_VISUAL_GAME_TICK_LARGE : SPELL_VISUAL_GAME_TICK, CAST_TRIGGERED);
+                        { DoCastSpellIfCan(pInvoker, m_bIsLargeEvent ? SPELL_VISUAL_GAME_TICK_LARGE : SPELL_VISUAL_GAME_TICK, CAST_TRIGGERED); }
                     }
                     // bad button pressed
                     else
@@ -767,7 +773,7 @@ CreatureAI* GetAI_npc_simon_game_bunny(Creature* pCreature)
 bool EffectDummyCreature_npc_simon_game_bunny(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
     if (pCreatureTarget->GetEntry() != NPC_SIMON_GAME_BUNNY)
-        return false;
+    { return false; }
 
     if (uiSpellId == SPELL_SIMON_GAME_START && uiEffIndex == EFFECT_INDEX_0)
     {
@@ -786,10 +792,10 @@ bool EffectDummyCreature_npc_simon_game_bunny(Unit* pCaster, uint32 uiSpellId, S
 bool EffectScriptEffectCreature_npc_simon_game_bunny(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid originalCasterGuid)
 {
     if ((uiSpellId == SPELL_INTROSPECTION_BLUE || uiSpellId == SPELL_INTROSPECTION_GREEN || uiSpellId == SPELL_INTROSPECTION_RED ||
-        uiSpellId == SPELL_INTROSPECTION_YELLOW) && uiEffIndex == EFFECT_INDEX_1)
+         uiSpellId == SPELL_INTROSPECTION_YELLOW) && uiEffIndex == EFFECT_INDEX_1)
     {
         if (pCreatureTarget->GetEntry() == NPC_SIMON_GAME_BUNNY && pCaster->GetTypeId() == TYPEID_PLAYER && originalCasterGuid.IsGameObject())
-            pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_C, pCaster, pCreatureTarget, uiSpellId);
+        { pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_C, pCaster, pCreatureTarget, uiSpellId); }
 
         return true;
     }

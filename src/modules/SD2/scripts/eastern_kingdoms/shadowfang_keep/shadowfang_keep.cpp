@@ -68,7 +68,7 @@ enum
     GOSSIP_ITEM_DOOR        = -3033000
 };
 
-struct  npc_shadowfang_prisonerAI : public npc_escortAI
+struct npc_shadowfang_prisonerAI : public npc_escortAI
 {
     npc_shadowfang_prisonerAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
@@ -241,7 +241,7 @@ enum
     SPELL_DARK_OFFERING = 7154
 };
 
-struct  mob_arugal_voidwalkerAI : public ScriptedAI
+struct mob_arugal_voidwalkerAI : public ScriptedAI
 {
     mob_arugal_voidwalkerAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -501,7 +501,7 @@ static const SpawnPoint VWSpawns[] =
 // Used to tell how he should behave
 const float HEIGHT_FENRUS_ROOM      = 140.0f;
 
-struct  boss_arugalAI : public ScriptedAI
+struct boss_arugalAI : public ScriptedAI
 {
     boss_arugalAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -831,7 +831,7 @@ enum
     SPELL_SPAWN             = 7741,
 };
 
-struct  npc_arugalAI : public ScriptedAI
+struct npc_arugalAI : public ScriptedAI
 {
     npc_arugalAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -956,7 +956,7 @@ enum
     FACTION_FRIENDLY    = 35
 };
 
-struct  npc_deathstalker_vincentAI : public ScriptedAI
+struct npc_deathstalker_vincentAI : public ScriptedAI
 {
     npc_deathstalker_vincentAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

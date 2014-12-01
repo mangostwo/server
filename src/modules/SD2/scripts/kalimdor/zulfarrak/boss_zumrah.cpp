@@ -56,7 +56,7 @@ enum
     FACTION_HOSTILE             = 14,
 };
 
-struct  boss_zumrahAI : public ScriptedAI
+struct boss_zumrahAI : public ScriptedAI
 {
     boss_zumrahAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -82,7 +88,7 @@ enum
 ## boss_felmyst
 ######*/
 
-struct  boss_felmystAI : public ScriptedAI
+struct boss_felmystAI : public ScriptedAI
 {
     boss_felmystAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -186,7 +192,7 @@ struct  boss_felmystAI : public ScriptedAI
         DoCastSpellIfCan(m_creature, SPELL_NOXIOUS_FUMES);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_FELMYST, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_FELMYST, IN_PROGRESS); }
 
         float fGroundZ = m_creature->GetMap()->GetHeight(m_creature->GetPhaseMask(), m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
         m_creature->GetMotionMaster()->MovePoint(PHASE_TRANSITION, pWho->GetPositionX(), pWho->GetPositionY(), fGroundZ, false);
@@ -203,13 +209,13 @@ struct  boss_felmystAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_FELMYST, DONE);
+        { m_pInstance->SetData(TYPE_FELMYST, DONE); }
     }
 
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_FELMYST, FAIL);
+        { m_pInstance->SetData(TYPE_FELMYST, FAIL); }
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -224,7 +230,7 @@ struct  boss_felmystAI : public ScriptedAI
     void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
     {
         if (uiMoveType != POINT_MOTION_TYPE)
-            return;
+        { return; }
 
         switch (uiPointId)
         {
@@ -255,7 +261,7 @@ struct  boss_felmystAI : public ScriptedAI
             case SUBPHASE_BREATH_PREPARE:
                 // move across the arena
                 if (!m_pInstance)
-                    return;
+                { return; }
 
                 // Fly to the other side, casting the breath. Keep the same trigger index
                 if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_pInstance->SelectFelmystFlightTrigger(!m_bIsLeftSide, m_uiCorruptionIndex)))
@@ -268,14 +274,14 @@ struct  boss_felmystAI : public ScriptedAI
                 break;
             case SUBPHASE_BREATH_MOVE:
                 if (!m_pInstance)
-                    return;
+                { return; }
 
                 // remove speed aura
                 m_creature->RemoveAurasDueToSpell(SPELL_SPEED_BURST);
 
                 // Get to the flight trigger on the same side of the arena
                 if (Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(!m_bIsLeftSide ? NPC_FLIGHT_TRIGGER_LEFT : NPC_FLIGHT_TRIGGER_RIGHT))
-                    m_creature->GetMotionMaster()->MovePoint(SUBPHASE_VAPOR, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), false);
+                { m_creature->GetMotionMaster()->MovePoint(SUBPHASE_VAPOR, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), false); }
 
                 // switch sides
                 m_bIsLeftSide = !m_bIsLeftSide;
@@ -293,7 +299,7 @@ struct  boss_felmystAI : public ScriptedAI
     void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
     {
         if (pTarget->GetTypeId() == TYPEID_PLAYER && pSpell->Id == SPELL_ENCAPSULATE_CHANNEL)
-            pTarget->CastSpell(pTarget, SPELL_ENCAPSULATE, true, NULL, NULL, m_creature->GetObjectGuid());
+        { pTarget->CastSpell(pTarget, SPELL_ENCAPSULATE, true, NULL, NULL, m_creature->GetObjectGuid()); }
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -307,11 +313,11 @@ struct  boss_felmystAI : public ScriptedAI
                 m_uiMovementTimer = 0;
             }
             else
-                m_uiMovementTimer -= uiDiff;
+            { m_uiMovementTimer -= uiDiff; }
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiBerserkTimer)
         {
@@ -324,7 +330,7 @@ struct  boss_felmystAI : public ScriptedAI
                 }
             }
             else
-                m_uiBerserkTimer -= uiDiff;
+            { m_uiBerserkTimer -= uiDiff; }
         }
 
         switch (m_uiPhase)
@@ -334,10 +340,10 @@ struct  boss_felmystAI : public ScriptedAI
                 if (m_uiCleaveTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
-                        m_uiCleaveTimer = urand(2000, 5000);
+                    { m_uiCleaveTimer = urand(2000, 5000); }
                 }
                 else
-                    m_uiCleaveTimer -= uiDiff;
+                { m_uiCleaveTimer -= uiDiff; }
 
                 if (m_uiCorrosionTimer < uiDiff)
                 {
@@ -348,26 +354,26 @@ struct  boss_felmystAI : public ScriptedAI
                     }
                 }
                 else
-                    m_uiCorrosionTimer -= uiDiff;
+                { m_uiCorrosionTimer -= uiDiff; }
 
                 if (m_uiGasNovaTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_GAS_NOVA) == CAST_OK)
-                        m_uiGasNovaTimer = 23000;
+                    { m_uiGasNovaTimer = 23000; }
                 }
                 else
-                    m_uiGasNovaTimer -= uiDiff;
+                { m_uiGasNovaTimer -= uiDiff; }
 
                 if (m_uiEncapsulateTimer < uiDiff)
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_ENCAPSULATE_CHANNEL) == CAST_OK)
-                            m_uiEncapsulateTimer = urand(30000, 40000);
+                        { m_uiEncapsulateTimer = urand(30000, 40000); }
                     }
                 }
                 else
-                    m_uiEncapsulateTimer -= uiDiff;
+                { m_uiEncapsulateTimer -= uiDiff; }
 
                 if (m_uiFlyPhaseTimer < uiDiff)
                 {
@@ -385,7 +391,7 @@ struct  boss_felmystAI : public ScriptedAI
                     m_uiFlyPhaseTimer = 60000;
                 }
                 else
-                    m_uiFlyPhaseTimer -= uiDiff;
+                { m_uiFlyPhaseTimer -= uiDiff; }
 
                 DoMeleeAttackIfReady();
 
@@ -402,14 +408,14 @@ struct  boss_felmystAI : public ScriptedAI
                             if (m_uiDemonicVaporCount == 2)
                             {
                                 if (!m_pInstance)
-                                    return;
+                                { return; }
 
                                 // select the side on which we want to fly
                                 m_bIsLeftSide = urand(0, 1) ? true : false;
                                 m_uiCorruptionCount = 0;
                                 m_uiSubPhase = SUBPHASE_BREATH_PREPARE;
                                 if (Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(m_bIsLeftSide ? NPC_FLIGHT_TRIGGER_LEFT : NPC_FLIGHT_TRIGGER_RIGHT))
-                                    m_creature->GetMotionMaster()->MovePoint(SUBPHASE_VAPOR, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), false);
+                                { m_creature->GetMotionMaster()->MovePoint(SUBPHASE_VAPOR, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), false); }
                             }
                             else
                             {
@@ -421,7 +427,7 @@ struct  boss_felmystAI : public ScriptedAI
                             }
                         }
                         else
-                            m_uiDemonicVaporTimer -= uiDiff;
+                        { m_uiDemonicVaporTimer -= uiDiff; }
 
                         break;
                     case SUBPHASE_BREATH_PREPARE:
@@ -431,18 +437,18 @@ struct  boss_felmystAI : public ScriptedAI
                             if (m_uiCorruptionTimer <= uiDiff)
                             {
                                 if (!m_pInstance)
-                                    return;
+                                { return; }
 
                                 // Fly to trigger on the same side - choose a random index for the trigger
                                 m_uiCorruptionIndex = urand(0, 2);
                                 if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_pInstance->SelectFelmystFlightTrigger(m_bIsLeftSide, m_uiCorruptionIndex)))
-                                    m_creature->GetMotionMaster()->MovePoint(SUBPHASE_BREATH_PREPARE, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), false);
+                                { m_creature->GetMotionMaster()->MovePoint(SUBPHASE_BREATH_PREPARE, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), false); }
 
                                 m_uiSubPhase = SUBPHASE_BREATH_MOVE;
                                 m_uiCorruptionTimer = 0;
                             }
                             else
-                                m_uiCorruptionTimer -= uiDiff;
+                            { m_uiCorruptionTimer -= uiDiff; }
                         }
 
                         break;
@@ -467,7 +473,7 @@ CreatureAI* GetAI_boss_felmyst(Creature* pCreature)
 ## npc_demonic_vapor
 ######*/
 
-struct  npc_demonic_vaporAI : public ScriptedAI
+struct npc_demonic_vaporAI : public ScriptedAI
 {
     npc_demonic_vaporAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -479,14 +485,14 @@ struct  npc_demonic_vaporAI : public ScriptedAI
             TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
 
             if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
-                m_creature->GetMotionMaster()->MoveFollow(pSummoner, 0, 0);
+            { m_creature->GetMotionMaster()->MoveFollow(pSummoner, 0, 0); }
         }
     }
 
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_DEMONIC_VAPOR_TRAIL)
-            pSummoned->CastSpell(pSummoned, SPELL_DEMONIC_VAPOR, true);
+        { pSummoned->CastSpell(pSummoned, SPELL_DEMONIC_VAPOR, true); }
     }
 
     void AttackStart(Unit* /*pWho*/) override { }

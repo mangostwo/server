@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -43,7 +49,7 @@ enum
     SPELL_HOLYGROUND        = 29512
 };
 
-struct  boss_maiden_of_virtueAI : public ScriptedAI
+struct boss_maiden_of_virtueAI : public ScriptedAI
 {
     boss_maiden_of_virtueAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -81,7 +87,7 @@ struct  boss_maiden_of_virtueAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_MAIDEN, DONE);
+        { m_pInstance->SetData(TYPE_MAIDEN, DONE); }
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -89,27 +95,27 @@ struct  boss_maiden_of_virtueAI : public ScriptedAI
         DoScriptText(SAY_AGGRO, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_MAIDEN, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_MAIDEN, IN_PROGRESS); }
     }
 
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_MAIDEN, FAIL);
+        { m_pInstance->SetData(TYPE_MAIDEN, FAIL); }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiHolygroundTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_HOLYGROUND, CAST_TRIGGERED) == CAST_OK)
-                m_uiHolygroundTimer = 3000;
+            { m_uiHolygroundTimer = 3000; }
         }
         else
-            m_uiHolygroundTimer -= uiDiff;
+        { m_uiHolygroundTimer -= uiDiff; }
 
         if (m_uiRepentanceTimer < uiDiff)
         {
@@ -120,28 +126,28 @@ struct  boss_maiden_of_virtueAI : public ScriptedAI
             }
         }
         else
-            m_uiRepentanceTimer -= uiDiff;
+        { m_uiRepentanceTimer -= uiDiff; }
 
         if (m_uiHolyfireTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_HOLYFIRE, SELECT_FLAG_NOT_IN_MELEE_RANGE))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_HOLYFIRE) == CAST_OK)
-                    m_uiHolyfireTimer = urand(8000, 23000);
+                { m_uiHolyfireTimer = urand(8000, 23000); }
             }
         }
         else
-            m_uiHolyfireTimer -= uiDiff;
+        { m_uiHolyfireTimer -= uiDiff; }
 
         if (m_uiHolywrathTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                DoCastSpellIfCan(pTarget, SPELL_HOLYWRATH);
+            { DoCastSpellIfCan(pTarget, SPELL_HOLYWRATH); }
 
             m_uiHolywrathTimer = urand(20000, 25000);
         }
         else
-            m_uiHolywrathTimer -= uiDiff;
+        { m_uiHolywrathTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

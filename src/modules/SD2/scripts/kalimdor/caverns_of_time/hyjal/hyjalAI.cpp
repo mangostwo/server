@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -179,7 +185,7 @@ void hyjalAI::Reset()
     m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
 
     if (!m_pInstance)
-        return;
+    { return; }
 
     // Reset World States
     m_pInstance->DoUpdateWorldState(WORLD_STATE_WAVES, 0);
@@ -196,14 +202,14 @@ void hyjalAI::Reset()
 bool hyjalAI::IsEventInProgress() const
 {
     if (m_bIsEventInProgress)
-        return true;
+    { return true; }
 
     // The boss might still be around and alive
     for (uint8 i = 0; i < 2; ++i)
     {
         Creature* pBoss = m_creature->GetMap()->GetCreature(m_aBossGuid[i]);
         if (pBoss && pBoss->IsAlive())
-            return true;
+        { return true; }
     }
 
     return false;
@@ -216,7 +222,7 @@ void hyjalAI::EnterEvadeMode()
     m_creature->CombatStop(true);
 
     if (m_creature->IsAlive())
-        m_creature->GetMotionMaster()->MoveTargetedHome();
+    { m_creature->GetMotionMaster()->MoveTargetedHome(); }
 
     m_creature->SetLootRecipient(NULL);
 }
@@ -224,7 +230,7 @@ void hyjalAI::EnterEvadeMode()
 void hyjalAI::JustReachedHome()
 {
     if (m_uiBase == BASE_ALLY)
-        DoCastSpellIfCan(m_creature, SPELL_BRILLIANCE_AURA, CAST_TRIGGERED);
+    { DoCastSpellIfCan(m_creature, SPELL_BRILLIANCE_AURA, CAST_TRIGGERED); }
 
     m_bIsFirstBossDead = m_uiBase ? m_pInstance->GetData(TYPE_KAZROGAL) == DONE : m_pInstance->GetData(TYPE_WINTERCHILL) == DONE;
     m_bIsSecondBossDead = m_uiBase ? m_pInstance->GetData(TYPE_AZGALOR) == DONE : m_pInstance->GetData(TYPE_ANETHERON) == DONE;
@@ -234,7 +240,7 @@ void hyjalAI::Aggro(Unit* /*who*/)
 {
     for (uint8 i = 0; i < MAX_SPELL; ++i)
         if (m_aSpells[i].m_uiCooldown)
-            m_uiSpellTimer[i] = m_aSpells[i].m_uiCooldown;
+        { m_uiSpellTimer[i] = m_aSpells[i].m_uiCooldown; }
 
     DoTalk(ATTACKED);
 }
@@ -251,7 +257,7 @@ void hyjalAI::SpawnCreatureForWave(uint32 uiMobEntry)
     for (uint32 i = 0; i < uiMaxCount; ++i)
     {
         if (aHyjalSpawnLoc[i].m_pBaseArea != (eBaseArea)m_uiBase)
-            continue;
+        { continue; }
 
         ++uiJ;
 
@@ -263,14 +269,14 @@ void hyjalAI::SpawnCreatureForWave(uint32 uiMobEntry)
     }
 
     if (pSpawn)
-        m_creature->SummonCreature(uiMobEntry, pSpawn->m_fX, pSpawn->m_fY, pSpawn->m_fZ, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 120000);
+    { m_creature->SummonCreature(uiMobEntry, pSpawn->m_fX, pSpawn->m_fY, pSpawn->m_fZ, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 120000); }
 }
 
 void hyjalAI::JustSummoned(Creature* pSummoned)
 {
     // not interesting for us
     if (pSummoned->GetEntry() == NPC_WATER_ELEMENTAL || pSummoned->GetEntry() == NPC_DIRE_WOLF)
-        return;
+    { return; }
 
     // Increment Enemy Count to be used in World States and instance script
     ++m_uiEnemyCount;
@@ -280,7 +286,7 @@ void hyjalAI::JustSummoned(Creature* pSummoned)
     for (uint32 i = 0; i < countof(aHyjalWaveMoveTo); ++i)
     {
         if (aHyjalWaveMoveTo[i].m_pBaseArea != (eBaseArea)m_uiBase)
-            continue;
+        { continue; }
 
         pMove = &aHyjalWaveMoveTo[i];
         break;
@@ -297,15 +303,15 @@ void hyjalAI::JustSummoned(Creature* pSummoned)
 
     // Check if creature is a boss.
     if (pSummoned->IsWorldBoss())
-        m_aBossGuid[!m_bIsFirstBossDead ? 0 : 1] = pSummoned->GetObjectGuid();
+    { m_aBossGuid[!m_bIsFirstBossDead ? 0 : 1] = pSummoned->GetObjectGuid(); }
     else
-        lWaveMobGUIDList.push_back(pSummoned->GetObjectGuid());
+    { lWaveMobGUIDList.push_back(pSummoned->GetObjectGuid()); }
 }
 
 void hyjalAI::SummonedCreatureJustDied(Creature* pSummoned)
 {
     if (!pSummoned->IsWorldBoss())                          // Only do stuff when bosses die
-        return;
+    { return; }
 
     if (m_aBossGuid[0] == pSummoned->GetObjectGuid())
     {
@@ -332,10 +338,10 @@ void hyjalAI::SummonNextWave()
 {
     // 1 in 4 chance we give a rally yell. Not sure if the chance is offilike.
     if (!urand(0, 3))
-        DoTalk(RALLY);
+    { DoTalk(RALLY); }
 
     if (!m_pInstance)
-        return;
+    { return; }
 
     HyjalWave const* pWaveData = m_uiBase ? &aHyjalWavesHorde[m_uiWaveCount] : &aHyjalWavesAlliance[m_uiWaveCount];
 
@@ -350,7 +356,7 @@ void hyjalAI::SummonNextWave()
     for (uint8 i = 0; i < MAX_WAVE_MOB; ++i)
     {
         if (pWaveData->m_auiMobEntry[i])
-            SpawnCreatureForWave(pWaveData->m_auiMobEntry[i]);
+        { SpawnCreatureForWave(pWaveData->m_auiMobEntry[i]); }
     }
 
     if (!pWaveData->m_bIsBoss)
@@ -358,7 +364,7 @@ void hyjalAI::SummonNextWave()
         uint32 stateValue = m_uiWaveCount + 1;
 
         if (m_bIsFirstBossDead)
-            stateValue -= MAX_WAVES;                        // Subtract 9 from it to give the proper wave number if we are greater than 8
+        { stateValue -= MAX_WAVES; }                        // Subtract 9 from it to give the proper wave number if we are greater than 8
 
         // Set world state to our current wave number
         m_pInstance->DoUpdateWorldState(WORLD_STATE_WAVES, stateValue);
@@ -368,7 +374,7 @@ void hyjalAI::SummonNextWave()
         m_pInstance->SetData(TYPE_TRASH_COUNT, m_uiEnemyCount);   // Send data for instance script to update count
 
         if (!m_bDebugMode)
-            m_uiNextWaveTimer = pWaveData->m_uiWaveTimer;
+        { m_uiNextWaveTimer = pWaveData->m_uiWaveTimer; }
         else
         {
             m_uiNextWaveTimer = 15000;
@@ -394,10 +400,10 @@ void hyjalAI::SummonNextWave()
 void hyjalAI::StartEvent()
 {
     if (!m_pInstance)
-        return;
+    { return; }
 
     if (IsEventInProgress())
-        return;
+    { return; }
 
     DoTalk(BEGIN);
 
@@ -441,7 +447,7 @@ void hyjalAI::DoTalk(YellType pYellType)
     }
 
     if (pYell)
-        DoScriptText(pYell->m_iTextId, m_creature);
+    { DoScriptText(pYell->m_iTextId, m_creature); }
 }
 
 void hyjalAI::SpellHitTarget(Unit* /*pTarget*/, const SpellEntry* /*pSpell*/)
@@ -457,7 +463,7 @@ void hyjalAI::Retreat()
 {
     // this will trigger ancient gem respawn
     if (m_pInstance)
-        m_pInstance->SetData(TYPE_RETREAT, SPECIAL);
+    { m_pInstance->SetData(TYPE_RETREAT, SPECIAL); }
 
     DoCastSpellIfCan(m_creature, SPELL_MASS_TELEPORT);
 
@@ -475,7 +481,7 @@ void hyjalAI::JustDied(Unit* /*pKiller*/)
 void hyjalAI::UpdateAI(const uint32 uiDiff)
 {
     if (!m_bIsEventInProgress)
-        return;
+    { return; }
 
     if (m_bIsSummoningWaves && m_pInstance)
     {
@@ -493,7 +499,7 @@ void hyjalAI::UpdateAI(const uint32 uiDiff)
                 if (Creature* pTemp = m_pInstance->instance->GetCreature(*itr))
                 {
                     if (!pTemp->IsAlive() || pTemp->getVictim())
-                        continue;
+                    { continue; }
 
                     pTemp->SetWalk(false);
                     pTemp->GetMotionMaster()->MovePoint(1, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
@@ -502,16 +508,16 @@ void hyjalAI::UpdateAI(const uint32 uiDiff)
             m_uiWaveMoveTimer = 10000;
         }
         else
-            m_uiWaveMoveTimer -= uiDiff;
+        { m_uiWaveMoveTimer -= uiDiff; }
 
         if (m_uiNextWaveTimer < uiDiff)
-            SummonNextWave();
+        { SummonNextWave(); }
         else
-            m_uiNextWaveTimer -= uiDiff;
+        { m_uiNextWaveTimer -= uiDiff; }
     }
 
     if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        return;
+    { return; }
 
     for (uint8 i = 0; i < MAX_SPELL; ++i)
     {
@@ -520,7 +526,7 @@ void hyjalAI::UpdateAI(const uint32 uiDiff)
             if (m_uiSpellTimer[i] < uiDiff)
             {
                 if (m_creature->IsNonMeleeSpellCasted(false))
-                    m_creature->InterruptNonMeleeSpells(false);
+                { m_creature->InterruptNonMeleeSpells(false); }
 
                 Unit* pTarget = NULL;
 
@@ -538,7 +544,7 @@ void hyjalAI::UpdateAI(const uint32 uiDiff)
                 }
             }
             else
-                m_uiSpellTimer[i] -= uiDiff;
+            { m_uiSpellTimer[i] -= uiDiff; }
         }
     }
 

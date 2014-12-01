@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -59,7 +65,7 @@ bool instance_black_temple::IsEncounterInProgress() const
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
     {
         if (m_auiEncounter[i] == IN_PROGRESS)
-            return true;
+        { return true; }
     }
 
     return false;
@@ -73,7 +79,7 @@ void instance_black_temple::OnCreatureCreate(Creature* pCreature)
         case NPC_SPIRIT_OF_UDALO:
             // Use only the summoned versions
             if (!pCreature->IsTemporarySummon())
-                break;
+            { break; }
         case NPC_AKAMA:
         case NPC_ILLIDAN_STORMRAGE:
         case NPC_MAIEV_SHADOWSONG:
@@ -107,26 +113,26 @@ void instance_black_temple::OnObjectCreate(GameObject* pGo)
     {
         case GO_NAJENTUS_GATE:                              // Gate past Naj'entus (at the entrance to Supermoose's courtyards)
             if (m_auiEncounter[TYPE_NAJENTUS] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+            { pGo->SetGoState(GO_STATE_ACTIVE); }
             break;
         case GO_SUPREMUS_DOORS:                             // Main Temple Doors - right past Supermoose (Supremus)
             if (m_auiEncounter[TYPE_SUPREMUS] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+            { pGo->SetGoState(GO_STATE_ACTIVE); }
             break;
         case GO_SHADE_OF_AKAMA:                             // Door close during encounter
         case GO_GOREFIEND_DOOR:                             // Door close during encounter
             break;
         case GO_GURTOGG_DOOR:                               // Door opens after encounter
             if (m_auiEncounter[TYPE_BLOODBOIL] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+            { pGo->SetGoState(GO_STATE_ACTIVE); }
             break;
         case GO_PRE_SHAHRAZ_DOOR:                           // Door leading to Mother Shahraz
             if (m_auiEncounter[TYPE_SHADE] == DONE && m_auiEncounter[TYPE_GOREFIEND] == DONE && m_auiEncounter[TYPE_BLOODBOIL] == DONE && m_auiEncounter[TYPE_RELIQUIARY] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+            { pGo->SetGoState(GO_STATE_ACTIVE); }
             break;
         case GO_POST_SHAHRAZ_DOOR:                          // Door after shahraz
             if (m_auiEncounter[TYPE_SHAHRAZ] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+            { pGo->SetGoState(GO_STATE_ACTIVE); }
             break;
         case GO_PRE_COUNCIL_DOOR:                           // Door leading to the Council (grand promenade)
         case GO_COUNCIL_DOOR:                               // Door leading to the Council (inside)
@@ -148,12 +154,12 @@ void instance_black_temple::SetData(uint32 uiType, uint32 uiData)
         case TYPE_NAJENTUS:
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
-                DoUseDoorOrButton(GO_NAJENTUS_GATE);
+            { DoUseDoorOrButton(GO_NAJENTUS_GATE); }
             break;
         case TYPE_SUPREMUS:
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
-                DoUseDoorOrButton(GO_SUPREMUS_DOORS);
+            { DoUseDoorOrButton(GO_SUPREMUS_DOORS); }
             break;
         case TYPE_SHADE:
             m_auiEncounter[uiType] = uiData;
@@ -167,20 +173,20 @@ void instance_black_temple::SetData(uint32 uiType, uint32 uiData)
                     if (Creature* pChanneler = instance->GetCreature(*itr))
                     {
                         if (!pChanneler->IsAlive())
-                            pChanneler->Respawn();
+                        { pChanneler->Respawn(); }
                         else
-                            pChanneler->AI()->EnterEvadeMode();
+                        { pChanneler->AI()->EnterEvadeMode(); }
                     }
                 }
             }
             if (uiData == DONE)
-                DoOpenPreMotherDoor();
+            { DoOpenPreMotherDoor(); }
             break;
         case TYPE_GOREFIEND:
             m_auiEncounter[uiType] = uiData;
             DoUseDoorOrButton(GO_GOREFIEND_DOOR);
             if (uiData == DONE)
-                DoOpenPreMotherDoor();
+            { DoOpenPreMotherDoor(); }
             break;
         case TYPE_BLOODBOIL:
             m_auiEncounter[uiType] = uiData;
@@ -193,21 +199,21 @@ void instance_black_temple::SetData(uint32 uiType, uint32 uiData)
         case TYPE_RELIQUIARY:
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
-                DoOpenPreMotherDoor();
+            { DoOpenPreMotherDoor(); }
             break;
         case TYPE_SHAHRAZ:
             if (uiData == DONE)
-                DoUseDoorOrButton(GO_POST_SHAHRAZ_DOOR);
+            { DoUseDoorOrButton(GO_POST_SHAHRAZ_DOOR); }
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_COUNCIL:
             // Don't set the same data twice
             if (m_auiEncounter[uiType] == uiData)
-                return;
+            { return; }
             DoUseDoorOrButton(GO_COUNCIL_DOOR);
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
-                DoSpawnAkamaIfCan();
+            { DoSpawnAkamaIfCan(); }
             break;
         case TYPE_ILLIDAN:
             DoUseDoorOrButton(GO_ILLIDAN_DOOR_R);
@@ -244,7 +250,7 @@ void instance_black_temple::SetData(uint32 uiType, uint32 uiData)
 uint32 instance_black_temple::GetData(uint32 uiType) const
 {
     if (uiType < MAX_ENCOUNTER)
-        return m_auiEncounter[uiType];
+    { return m_auiEncounter[uiType]; }
 
     return 0;
 }
@@ -252,21 +258,21 @@ uint32 instance_black_temple::GetData(uint32 uiType) const
 void instance_black_temple::DoOpenPreMotherDoor()
 {
     if (GetData(TYPE_SHADE) == DONE && GetData(TYPE_GOREFIEND) == DONE && GetData(TYPE_BLOODBOIL) == DONE && GetData(TYPE_RELIQUIARY) == DONE)
-        DoUseDoorOrButton(GO_PRE_SHAHRAZ_DOOR);
+    { DoUseDoorOrButton(GO_PRE_SHAHRAZ_DOOR); }
 }
 
 void instance_black_temple::DoSpawnAkamaIfCan()
 {
     if (GetData(TYPE_ILLIDAN) == DONE || GetData(TYPE_COUNCIL) != DONE)
-        return;
+    { return; }
 
     // If already spawned return
     if (GetSingleCreatureFromStorage(NPC_AKAMA, true))
-        return;
+    { return; }
 
     // Summon Akama after the council has been defeated
     if (Player* pPlayer = GetPlayerInMap())
-        pPlayer->SummonCreature(NPC_AKAMA, 617.754f, 307.768f, 271.735f, 6.197f, TEMPSUMMON_DEAD_DESPAWN, 0);
+    { pPlayer->SummonCreature(NPC_AKAMA, 617.754f, 307.768f, 271.735f, 6.197f, TEMPSUMMON_DEAD_DESPAWN, 0); }
 }
 
 void instance_black_temple::Load(const char* chrIn)
@@ -286,7 +292,7 @@ void instance_black_temple::Load(const char* chrIn)
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
     {
         if (m_auiEncounter[i] == IN_PROGRESS)            // Do not load an encounter as "In Progress" - reset it instead.
-            m_auiEncounter[i] = NOT_STARTED;
+        { m_auiEncounter[i] = NOT_STARTED; }
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;

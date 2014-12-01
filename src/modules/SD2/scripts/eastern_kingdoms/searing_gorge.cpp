@@ -23,16 +23,20 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Searing_Gorge
-SD%Complete: 80
-SDComment: Quest support: 3367.
-SDCategory: Searing Gorge
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Searing_Gorge
+ * SD%Complete: 80
+ * SDComment:   Quest support: 3367.
+ * SDCategory:  Searing Gorge
+ * EndScriptData
+ */
 
-/* ContentData
-npc_dorius_stonetender
-EndContentData */
+/**
+ * ContentData
+ * npc_dorius_stonetender
+ * EndContentData
+ */
 
 #include "precompiled.h"
 #include "escort_ai.h"
@@ -52,7 +56,7 @@ enum
     QUEST_ID_SUNTARA_STONES         = 3367,
 };
 
-struct  npc_dorius_stonetenderAI : public npc_escortAI
+struct npc_dorius_stonetenderAI : public npc_escortAI
 {
     npc_dorius_stonetenderAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -130,7 +134,7 @@ bool QuestAccept_npc_dorius_stonetender(Player* pPlayer, Creature* pCreature, co
 void AddSC_searing_gorge()
 {
     Script* pNewScript;
-    
+
     pNewScript = new Script;
     pNewScript->Name = "npc_dorius_stonetender";
     pNewScript->GetAI = &GetAI_npc_dorius_stonetender;

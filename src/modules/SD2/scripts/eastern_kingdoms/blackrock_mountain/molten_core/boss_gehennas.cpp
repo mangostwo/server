@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -17,12 +23,14 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Gehennas
-SD%Complete: 90
-SDComment:
-SDCategory: Molten Core
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Gehennas
+ * SD%Complete: 90
+ * SDComment:   None
+ * SDCategory:  Molten Core
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 #include "molten_core.h"
@@ -34,7 +42,7 @@ enum
     SPELL_GEHENNAS_CURSE        = 19716
 };
 
-struct  boss_gehennasAI : public ScriptedAI
+struct boss_gehennasAI : public ScriptedAI
 {
     boss_gehennasAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -58,25 +66,33 @@ struct  boss_gehennasAI : public ScriptedAI
     void Aggro(Unit* /*pwho*/) override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_GEHENNAS, IN_PROGRESS);
+        }
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_GEHENNAS, DONE);
+        }
     }
 
     void JustReachedHome() override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_GEHENNAS, FAIL);
+        }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         // ShadowBolt Timer
         if (m_uiShadowBoltTimer < uiDiff)
@@ -84,13 +100,17 @@ struct  boss_gehennasAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_BOLT) == CAST_OK)
+                {
                     m_uiShadowBoltTimer = 7000;
+                }
             }
             else                                            // In case someone attempts soloing, we don't need to scan for targets every tick
+            {
                 m_uiShadowBoltTimer = 7000;
+            }
         }
         else
-            m_uiShadowBoltTimer -= uiDiff;
+            { m_uiShadowBoltTimer -= uiDiff; }
 
         // Rain of Fire Timer
         if (m_uiRainOfFireTimer < uiDiff)
@@ -98,20 +118,24 @@ struct  boss_gehennasAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_RAIN_OF_FIRE) == CAST_OK)
+                {
                     m_uiRainOfFireTimer = urand(4000, 12000);
+                }
             }
         }
         else
-            m_uiRainOfFireTimer -= uiDiff;
+            { m_uiRainOfFireTimer -= uiDiff; }
 
         // GehennasCurse Timer
         if (m_uiGehennasCurseTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_GEHENNAS_CURSE) == CAST_OK)
+            {
                 m_uiGehennasCurseTimer = 30000;
+            }
         }
         else
-            m_uiGehennasCurseTimer -= uiDiff;
+            { m_uiGehennasCurseTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

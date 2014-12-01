@@ -110,7 +110,7 @@ enum CThunPhase
 ## boss_eye_of_cthun
 ######*/
 
-struct  boss_eye_of_cthunAI : public Scripted_NoMovementAI
+struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
 {
     boss_eye_of_cthunAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
@@ -328,6 +328,7 @@ struct  boss_eye_of_cthunAI : public Scripted_NoMovementAI
                 {
                     m_uiDarkGlareEndTimer -= uiDiff;
                 }
+
                 break;
             default:
                 break;
@@ -369,7 +370,7 @@ struct  boss_eye_of_cthunAI : public Scripted_NoMovementAI
 ## boss_cthun
 ######*/
 
-struct  boss_cthunAI : public Scripted_NoMovementAI
+struct boss_cthunAI : public Scripted_NoMovementAI
 {
     boss_cthunAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
@@ -453,7 +454,7 @@ struct  boss_cthunAI : public Scripted_NoMovementAI
         {
             // Workaround for missing spell 26648
             if (Player* pPlayer = m_creature->GetMap()->GetPlayer(*itr))
-                m_creature->DealDamage(pPlayer, pPlayer->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+            { m_creature->DealDamage(pPlayer, pPlayer->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false); }
         }
 
         Scripted_NoMovementAI::EnterEvadeMode();
@@ -761,7 +762,7 @@ struct  boss_cthunAI : public Scripted_NoMovementAI
 ## npc_giant_claw_tentacle
 ######*/
 
-struct  npc_giant_claw_tentacleAI : public Scripted_NoMovementAI
+struct npc_giant_claw_tentacleAI : public Scripted_NoMovementAI
 {
     npc_giant_claw_tentacleAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {

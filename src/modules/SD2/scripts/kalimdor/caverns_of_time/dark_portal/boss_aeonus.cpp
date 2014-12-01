@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -43,7 +49,7 @@ enum
     SPELL_SAND_BREATH_H     = 39049
 };
 
-struct  boss_aeonusAI : public ScriptedAI
+struct boss_aeonusAI : public ScriptedAI
 {
     boss_aeonusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -81,7 +87,7 @@ struct  boss_aeonusAI : public ScriptedAI
             if (m_creature->IsWithinDistInMap(pWho, 20.0f))
             {
                 if (DoCastSpellIfCan(pWho, SPELL_BANISH_HELPER) == CAST_OK)
-                    DoScriptText(SAY_BANISH, m_creature);
+                { DoScriptText(SAY_BANISH, m_creature); }
             }
         }
 
@@ -102,34 +108,34 @@ struct  boss_aeonusAI : public ScriptedAI
     {
         // Return since we have no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         // Sand Breath
         if (m_uiSandBreathTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SAND_BREATH : SPELL_SAND_BREATH_H) == CAST_OK)
-                m_uiSandBreathTimer = urand(15000, 25000);
+            { m_uiSandBreathTimer = urand(15000, 25000); }
         }
         else
-            m_uiSandBreathTimer -= uiDiff;
+        { m_uiSandBreathTimer -= uiDiff; }
 
         // Time Stop
         if (m_uiTimeStopTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_TIME_STOP) == CAST_OK)
-                m_uiTimeStopTimer = urand(20000, 35000);
+            { m_uiTimeStopTimer = urand(20000, 35000); }
         }
         else
-            m_uiTimeStopTimer -= uiDiff;
+        { m_uiTimeStopTimer -= uiDiff; }
 
         // Cleave
         if (m_uiCleaveTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
-                m_uiCleaveTimer = urand(7000, 12000);
+            { m_uiCleaveTimer = urand(7000, 12000); }
         }
         else
-            m_uiCleaveTimer -= uiDiff;
+        { m_uiCleaveTimer -= uiDiff; }
 
         // Frenzy
         if (m_uiFrenzyTimer < uiDiff)
@@ -141,7 +147,7 @@ struct  boss_aeonusAI : public ScriptedAI
             }
         }
         else
-            m_uiFrenzyTimer -= uiDiff;
+        { m_uiFrenzyTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

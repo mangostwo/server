@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -56,7 +62,7 @@ float AssassEntrance[3] = {275.136f, -84.29f, 2.3f};        // y -8
 float AssassExit[3] = {184.233f, -84.29f, 2.3f};            // y -8
 float AddsEntrance[3] = {306.036f, -84.29f, 1.93f};
 
-struct  boss_warchief_kargath_bladefistAI : public ScriptedAI
+struct boss_warchief_kargath_bladefistAI : public ScriptedAI
 {
     boss_warchief_kargath_bladefistAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -107,7 +113,7 @@ struct  boss_warchief_kargath_bladefistAI : public ScriptedAI
         }
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_BLADEFIST, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_BLADEFIST, IN_PROGRESS); }
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -118,7 +124,7 @@ struct  boss_warchief_kargath_bladefistAI : public ScriptedAI
             case NPC_SHARPSHOOTER_GUARD:
             case NPC_REAVER_GUARD:
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                    pSummoned->AI()->AttackStart(pTarget);
+                { pSummoned->AI()->AttackStart(pTarget); }
 
                 m_vAddGuids.push_back(pSummoned->GetObjectGuid());
                 break;
@@ -131,7 +137,7 @@ struct  boss_warchief_kargath_bladefistAI : public ScriptedAI
     void KilledUnit(Unit* pVictim) override
     {
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
-            DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
+        { DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature); }
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -140,7 +146,7 @@ struct  boss_warchief_kargath_bladefistAI : public ScriptedAI
         DoDespawnAdds();
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_BLADEFIST, DONE);
+        { m_pInstance->SetData(TYPE_BLADEFIST, DONE); }
     }
 
     void JustReachedHome() override
@@ -148,7 +154,7 @@ struct  boss_warchief_kargath_bladefistAI : public ScriptedAI
         DoDespawnAdds();
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_BLADEFIST, FAIL);
+        { m_pInstance->SetData(TYPE_BLADEFIST, FAIL); }
     }
 
     void MovementInform(uint32 uiType, uint32 uiPointId) override
@@ -156,10 +162,10 @@ struct  boss_warchief_kargath_bladefistAI : public ScriptedAI
         if (m_bInBlade)
         {
             if (uiType != POINT_MOTION_TYPE)
-                return;
+            { return; }
 
             if (uiPointId != 1)
-                return;
+            { return; }
 
             if (m_uiTargetNum > 0) // to prevent loops
             {
@@ -176,7 +182,7 @@ struct  boss_warchief_kargath_bladefistAI : public ScriptedAI
         for (GuidVector::const_iterator itr = m_vAddGuids.begin(); itr != m_vAddGuids.end(); ++itr)
         {
             if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
-                pTemp->ForcedDespawn();
+            { pTemp->ForcedDespawn(); }
         }
 
         m_vAddGuids.clear();
@@ -184,7 +190,7 @@ struct  boss_warchief_kargath_bladefistAI : public ScriptedAI
         for (GuidVector::const_iterator itr = m_vAssassinGuids.begin(); itr != m_vAssassinGuids.end(); ++itr)
         {
             if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
-                pTemp->ForcedDespawn();
+            { pTemp->ForcedDespawn(); }
         }
 
         m_vAssassinGuids.clear();
@@ -201,7 +207,7 @@ struct  boss_warchief_kargath_bladefistAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         // Check if out of range
         if (EnterEvadeIfOutOfCombatArea(uiDiff))
@@ -218,7 +224,7 @@ struct  boss_warchief_kargath_bladefistAI : public ScriptedAI
                 m_uiAssassinsTimer = 0;
             }
             else
-                m_uiAssassinsTimer -= uiDiff;
+            { m_uiAssassinsTimer -= uiDiff; }
         }
 
         if (m_bInBlade)
@@ -235,7 +241,7 @@ struct  boss_warchief_kargath_bladefistAI : public ScriptedAI
                         m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
                         m_uiWaitTimer = 0;
                         if (!m_bIsRegularMode)
-                            m_uiChargeTimer = 5000;
+                        { m_uiChargeTimer = 5000; }
                     }
                     else
                     {
@@ -250,7 +256,7 @@ struct  boss_warchief_kargath_bladefistAI : public ScriptedAI
                     }
                 }
                 else
-                    m_uiWaitTimer -= uiDiff;
+                { m_uiWaitTimer -= uiDiff; }
             }
         }
         else                                                // !m_bInBlade
@@ -265,19 +271,19 @@ struct  boss_warchief_kargath_bladefistAI : public ScriptedAI
                 return;
             }
             else
-                m_uiBladeDanceTimer -= uiDiff;
+            { m_uiBladeDanceTimer -= uiDiff; }
 
             if (m_uiChargeTimer)
             {
                 if (m_uiChargeTimer <= uiDiff)
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                        DoCastSpellIfCan(pTarget, SPELL_CHARGE_H);
+                    { DoCastSpellIfCan(pTarget, SPELL_CHARGE_H); }
 
                     m_uiChargeTimer = 0;
                 }
                 else
-                    m_uiChargeTimer -= uiDiff;
+                { m_uiChargeTimer -= uiDiff; }
             }
 
             if (m_uiSummonAssistantTimer < uiDiff)
@@ -293,12 +299,12 @@ struct  boss_warchief_kargath_bladefistAI : public ScriptedAI
                 }
 
                 if (!urand(0, 4))
-                    ++m_uiSummoned;
+                { ++m_uiSummoned; }
 
                 m_uiSummonAssistantTimer = urand(25000, 35000);
             }
             else
-                m_uiSummonAssistantTimer -= uiDiff;
+            { m_uiSummonAssistantTimer -= uiDiff; }
 
             DoMeleeAttackIfReady();
         }

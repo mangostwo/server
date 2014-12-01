@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -44,7 +50,7 @@ enum
     SPELL_WARLORDS_RAGE_NAGA    = 31543,        // triggers 37076
 };
 
-struct  boss_warlord_kalithreshAI : public ScriptedAI
+struct boss_warlord_kalithreshAI : public ScriptedAI
 {
     boss_warlord_kalithreshAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -75,7 +81,7 @@ struct  boss_warlord_kalithreshAI : public ScriptedAI
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_WARLORD_KALITHRESH, FAIL);
+        { m_pInstance->SetData(TYPE_WARLORD_KALITHRESH, FAIL); }
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -88,7 +94,7 @@ struct  boss_warlord_kalithreshAI : public ScriptedAI
         }
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_WARLORD_KALITHRESH, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_WARLORD_KALITHRESH, IN_PROGRESS); }
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -101,7 +107,7 @@ struct  boss_warlord_kalithreshAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_WARLORD_KALITHRESH, DONE);
+        { m_pInstance->SetData(TYPE_WARLORD_KALITHRESH, DONE); }
     }
 
     void MoveInLineOfSight(Unit* pWho) override
@@ -118,7 +124,7 @@ struct  boss_warlord_kalithreshAI : public ScriptedAI
     void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
     {
         if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
-            return;
+        { return; }
 
         // There is a small delay between the point reach and the channeling start
         m_uiRageCastTimer = 1000;
@@ -127,7 +133,7 @@ struct  boss_warlord_kalithreshAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiRageCastTimer)
         {
@@ -148,7 +154,7 @@ struct  boss_warlord_kalithreshAI : public ScriptedAI
                 }
             }
             else
-                m_uiRageCastTimer -= uiDiff;
+            { m_uiRageCastTimer -= uiDiff; }
         }
 
         // Move to closest distiller
@@ -166,16 +172,16 @@ struct  boss_warlord_kalithreshAI : public ScriptedAI
             m_uiRageTimer = urand(35000, 45000);
         }
         else
-            m_uiRageTimer -= uiDiff;
+            { m_uiRageTimer -= uiDiff; }
 
         // Reflection_Timer
         if (m_uiReflectionTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SPELL_REFLECTION) == CAST_OK)
-                m_uiReflectionTimer = 30000;
+            { m_uiReflectionTimer = 30000; }
         }
         else
-            m_uiReflectionTimer -= uiDiff;
+        { m_uiReflectionTimer -= uiDiff; }
 
         // Impale_Timer
         if (m_uiImpaleTimer < uiDiff)
@@ -183,11 +189,11 @@ struct  boss_warlord_kalithreshAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_IMPALE) == CAST_OK)
-                    m_uiImpaleTimer = urand(7500, 12500);
+                { m_uiImpaleTimer = urand(7500, 12500); }
             }
         }
         else
-            m_uiImpaleTimer -= uiDiff;
+        { m_uiImpaleTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }
@@ -214,7 +220,7 @@ bool EffectAuraDummy_spell_aura_dummy_warlord_rage(const Aura* pAura, bool bAppl
     return true;
 }
 
-struct  mob_naga_distillerAI : public Scripted_NoMovementAI
+struct mob_naga_distillerAI : public Scripted_NoMovementAI
 {
     mob_naga_distillerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 

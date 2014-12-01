@@ -132,7 +132,7 @@ struct ZigguratStore
     GuidList m_lZigguratAcolyteGuid;
 };
 
-class  instance_stratholme : public ScriptedInstance
+class instance_stratholme : public ScriptedInstance
 {
     public:
         instance_stratholme(Map* pMap);

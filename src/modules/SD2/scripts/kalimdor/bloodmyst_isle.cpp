@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -42,7 +48,7 @@ enum
 // possible creatures to be spawned (too many to be added to enum)
 const uint32 possibleSpawns[31] = {17322, 17661, 17496, 17522, 17340, 17352, 17333, 17524, 17654, 17348, 17339, 17345, 17359, 17353, 17336, 17550, 17330, 17701, 17321, 17325, 17320, 17683, 17342, 17715, 17334, 17341, 17338, 17337, 17346, 17344, 17327};
 
-struct  mob_webbed_creatureAI : public Scripted_NoMovementAI
+struct mob_webbed_creatureAI : public Scripted_NoMovementAI
 {
     mob_webbed_creatureAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 
@@ -59,7 +65,7 @@ struct  mob_webbed_creatureAI : public Scripted_NoMovementAI
             case 0:
                 uiSpawnCreatureEntry = NPC_EXPEDITION_RESEARCHER;
                 if (pKiller->GetTypeId() == TYPEID_PLAYER)
-                    ((Player*)pKiller)->KilledMonsterCredit(uiSpawnCreatureEntry, m_creature->GetObjectGuid());
+                { ((Player*)pKiller)->KilledMonsterCredit(uiSpawnCreatureEntry, m_creature->GetObjectGuid()); }
                 break;
             case 1:
             case 2:
@@ -68,7 +74,7 @@ struct  mob_webbed_creatureAI : public Scripted_NoMovementAI
         }
 
         if (uiSpawnCreatureEntry)
-            m_creature->SummonCreature(uiSpawnCreatureEntry, 0.0f, 0.0f, 0.0f, m_creature->GetOrientation(), TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
+        { m_creature->SummonCreature(uiSpawnCreatureEntry, 0.0f, 0.0f, 0.0f, m_creature->GetOrientation(), TEMPSUMMON_TIMED_OOC_DESPAWN, 25000); }
     }
 };
 

@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -66,7 +72,7 @@ static const uint32 aPrismaticAuras[] =
 
 static const uint32 aPeriodicBeams[] = {SPELL_SINFUL_PERIODIC, SPELL_SINISTER_PERIODIC, SPELL_VILE_PERIODIC, SPELL_WICKED_PERIODIC};
 
-struct  boss_shahrazAI : public ScriptedAI
+struct boss_shahrazAI : public ScriptedAI
 {
     boss_shahrazAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -104,7 +110,7 @@ struct  boss_shahrazAI : public ScriptedAI
     void Aggro(Unit* /*pWho*/) override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_SHAHRAZ, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_SHAHRAZ, IN_PROGRESS); }
 
         DoScriptText(SAY_AGGRO, m_creature);
     }
@@ -112,7 +118,7 @@ struct  boss_shahrazAI : public ScriptedAI
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_SHAHRAZ, FAIL);
+        { m_pInstance->SetData(TYPE_SHAHRAZ, FAIL); }
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -123,7 +129,7 @@ struct  boss_shahrazAI : public ScriptedAI
     void JustDied(Unit* /*pKiller*/) override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_SHAHRAZ, DONE);
+        { m_pInstance->SetData(TYPE_SHAHRAZ, DONE); }
 
         DoScriptText(SAY_DEATH, m_creature);
     }
@@ -131,7 +137,7 @@ struct  boss_shahrazAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_creature->GetHealthPercent() < 10.0f && !m_bIsEnraged)
         {
@@ -153,16 +159,16 @@ struct  boss_shahrazAI : public ScriptedAI
             }
         }
         else
-            m_uiBeamTimer -= uiDiff;
+        { m_uiBeamTimer -= uiDiff; }
 
         // Random Prismatic Shield every 15 seconds.
         if (m_uiPrismaticShieldTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, aPrismaticAuras[urand(0, 5)]) == CAST_OK)
-                m_uiPrismaticShieldTimer = 15000;
+            { m_uiPrismaticShieldTimer = 15000; }
         }
         else
-            m_uiPrismaticShieldTimer -= uiDiff;
+        { m_uiPrismaticShieldTimer -= uiDiff; }
 
         if (m_uiFatalAttractionTimer < uiDiff)
         {
@@ -178,15 +184,15 @@ struct  boss_shahrazAI : public ScriptedAI
             }
         }
         else
-            m_uiFatalAttractionTimer -= uiDiff;
+        { m_uiFatalAttractionTimer -= uiDiff; }
 
         if (m_uiShriekTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SILENCING_SHRIEK) == CAST_OK)
-                m_uiShriekTimer = 30000;
+            { m_uiShriekTimer = 30000; }
         }
         else
-            m_uiShriekTimer -= uiDiff;
+        { m_uiShriekTimer -= uiDiff; }
 
         if (m_uiBerserkTimer)
         {
@@ -199,7 +205,7 @@ struct  boss_shahrazAI : public ScriptedAI
                 }
             }
             else
-                m_uiBerserkTimer -= uiDiff;
+            { m_uiBerserkTimer -= uiDiff; }
         }
 
         // Random taunts
@@ -215,7 +221,7 @@ struct  boss_shahrazAI : public ScriptedAI
             m_uiRandomYellTimer = urand(60000, 150000);
         }
         else
-            m_uiRandomYellTimer -= uiDiff;
+        { m_uiRandomYellTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

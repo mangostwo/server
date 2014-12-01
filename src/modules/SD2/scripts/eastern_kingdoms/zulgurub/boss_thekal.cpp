@@ -70,7 +70,7 @@ enum
 };
 
 // abstract base class for faking death
-struct  boss_thekalBaseAI : public ScriptedAI
+struct boss_thekalBaseAI : public ScriptedAI
 {
     boss_thekalBaseAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -158,7 +158,7 @@ struct  boss_thekalBaseAI : public ScriptedAI
     }
 };
 
-struct  boss_thekalAI : public boss_thekalBaseAI
+struct boss_thekalAI : public boss_thekalBaseAI
 {
     boss_thekalAI(Creature* pCreature) : boss_thekalBaseAI(pCreature)
     {
@@ -396,7 +396,9 @@ struct  boss_thekalAI : public boss_thekalBaseAI
                 if (m_uiSummonTigersTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_TIGERS) == CAST_OK)
+                    {
                         m_uiSummonTigersTimer = 50000;
+                    }
                 }
                 else
                 {
@@ -422,7 +424,7 @@ struct  boss_thekalAI : public boss_thekalBaseAI
 ## mob_zealot_lorkhan
 ######*/
 
-struct  mob_zealot_lorkhanAI : public boss_thekalBaseAI
+struct mob_zealot_lorkhanAI : public boss_thekalBaseAI
 {
     mob_zealot_lorkhanAI(Creature* pCreature) : boss_thekalBaseAI(pCreature)
     {
@@ -591,7 +593,7 @@ struct  mob_zealot_lorkhanAI : public boss_thekalBaseAI
 ## npc_zealot_zath
 ######*/
 
-struct  mob_zealot_zathAI : public boss_thekalBaseAI
+struct mob_zealot_zathAI : public boss_thekalBaseAI
 {
     mob_zealot_zathAI(Creature* pCreature) : boss_thekalBaseAI(pCreature)
     {

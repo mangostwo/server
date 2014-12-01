@@ -54,7 +54,7 @@ enum
     SPELL_ASPECT_OF_ARLOKK      = 24690
 };
 
-struct  boss_hakkarAI : public ScriptedAI
+struct boss_hakkarAI : public ScriptedAI
 {
     boss_hakkarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

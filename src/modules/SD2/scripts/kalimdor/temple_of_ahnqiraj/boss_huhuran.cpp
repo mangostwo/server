@@ -47,7 +47,7 @@ enum
     SPELL_ACID_SPIT             = 26050
 };
 
-struct  boss_huhuranAI : public ScriptedAI
+struct boss_huhuranAI : public ScriptedAI
 {
     boss_huhuranAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

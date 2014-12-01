@@ -44,7 +44,7 @@ enum
     NPC_ANVILRAGE_MEDIC         = 8894,
 };
 
-struct  boss_general_angerforgeAI : public ScriptedAI
+struct boss_general_angerforgeAI : public ScriptedAI
 {
     boss_general_angerforgeAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

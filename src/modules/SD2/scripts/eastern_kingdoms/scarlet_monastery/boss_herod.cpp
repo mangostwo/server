@@ -53,7 +53,7 @@ enum
     NPC_SCARLET_TRAINEE    = 6575
 };
 
-struct  boss_herodAI : public ScriptedAI
+struct boss_herodAI : public ScriptedAI
 {
     boss_herodAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
@@ -148,7 +148,7 @@ CreatureAI* GetAI_boss_herod(Creature* pCreature)
     return new boss_herodAI(pCreature);
 }
 
-struct  mob_scarlet_traineeAI : public npc_escortAI
+struct mob_scarlet_traineeAI : public npc_escortAI
 {
     mob_scarlet_traineeAI(Creature* pCreature) : npc_escortAI(pCreature)
     {

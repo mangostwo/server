@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -47,7 +53,7 @@ bool instance_gruuls_lair::IsEncounterInProgress() const
 {
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
         if (m_auiEncounter[i] == IN_PROGRESS)
-            return true;
+        { return true; }
 
     return false;
 }
@@ -55,7 +61,7 @@ bool instance_gruuls_lair::IsEncounterInProgress() const
 void instance_gruuls_lair::OnCreatureCreate(Creature* pCreature)
 {
     if (pCreature->GetEntry() == NPC_MAULGAR)
-        m_mNpcEntryGuidStore[NPC_MAULGAR] = pCreature->GetObjectGuid();
+    { m_mNpcEntryGuidStore[NPC_MAULGAR] = pCreature->GetObjectGuid(); }
 }
 
 void instance_gruuls_lair::OnObjectCreate(GameObject* pGo)
@@ -64,7 +70,7 @@ void instance_gruuls_lair::OnObjectCreate(GameObject* pGo)
     {
         case GO_PORT_GRONN_1:
             if (m_auiEncounter[TYPE_MAULGAR_EVENT] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+            { pGo->SetGoState(GO_STATE_ACTIVE); }
             break;
         case GO_PORT_GRONN_2:
             break;
@@ -85,14 +91,14 @@ void instance_gruuls_lair::SetData(uint32 uiType, uint32 uiData)
                 ++m_uiCouncilMembersDied;
 
                 if (m_uiCouncilMembersDied == MAX_COUNCIL)
-                    SetData(TYPE_MAULGAR_EVENT, DONE);
+                { SetData(TYPE_MAULGAR_EVENT, DONE); }
                 // Don't store special data
                 break;
             }
             if (uiData == FAIL)
-                m_uiCouncilMembersDied = 0;
+            { m_uiCouncilMembersDied = 0; }
             if (uiData == DONE)
-                DoUseDoorOrButton(GO_PORT_GRONN_1);
+            { DoUseDoorOrButton(GO_PORT_GRONN_1); }
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_GRUUL_EVENT:
@@ -118,7 +124,7 @@ void instance_gruuls_lair::SetData(uint32 uiType, uint32 uiData)
 uint32 instance_gruuls_lair::GetData(uint32 uiType) const
 {
     if (uiType < MAX_ENCOUNTER)
-        return m_auiEncounter[uiType];
+    { return m_auiEncounter[uiType]; }
 
     return 0;
 }
@@ -139,7 +145,7 @@ void instance_gruuls_lair::Load(const char* chrIn)
 
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
         if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        { m_auiEncounter[i] = NOT_STARTED; }
 
     OUT_LOAD_INST_DATA_COMPLETE;
 }

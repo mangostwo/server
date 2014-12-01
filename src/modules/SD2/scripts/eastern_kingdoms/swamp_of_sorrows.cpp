@@ -60,7 +60,7 @@ enum Galen
     EMOTE_DISAPPEAR         = -1000588
 };
 
-struct  npc_galen_goodwardAI : public npc_escortAI
+struct npc_galen_goodwardAI : public npc_escortAI
 {
     npc_galen_goodwardAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 

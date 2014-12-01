@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -56,7 +62,7 @@ enum
     SAY2_DEATH              = -1555027,
 };
 
-struct  boss_blackheart_the_inciterAI : public ScriptedAI
+struct boss_blackheart_the_inciterAI : public ScriptedAI
 {
     boss_blackheart_the_inciterAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -91,7 +97,7 @@ struct  boss_blackheart_the_inciterAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_INCITER, DONE);
+        { m_pInstance->SetData(TYPE_INCITER, DONE); }
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -104,20 +110,20 @@ struct  boss_blackheart_the_inciterAI : public ScriptedAI
         }
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_INCITER, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_INCITER, IN_PROGRESS); }
     }
 
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_INCITER, FAIL);
+        { m_pInstance->SetData(TYPE_INCITER, FAIL); }
     }
 
     void EnterEvadeMode() override
     {
         // if we are waiting for Incite chaos to expire don't evade
         if (m_uiInciteChaosWaitTimer)
-            return;
+        { return; }
 
         ScriptedAI::EnterEvadeMode();
     }
@@ -132,19 +138,19 @@ struct  boss_blackheart_the_inciterAI : public ScriptedAI
                 for (GuidVector::const_iterator itr = m_vTargetsGuids.begin(); itr != m_vTargetsGuids.end(); ++itr)
                 {
                     if (Unit* pTarget = m_creature->GetMap()->GetUnit(*itr))
-                        AttackStart(pTarget);
+                    { AttackStart(pTarget); }
                 }
 
                 m_creature->HandleEmote(EMOTE_STATE_NONE);
                 m_uiInciteChaosWaitTimer = 0;
             }
             else
-                m_uiInciteChaosWaitTimer -= uiDiff;
+            { m_uiInciteChaosWaitTimer -= uiDiff; }
         }
 
         // Return since we have no pTarget
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiInciteChaosTimer < uiDiff)
         {
@@ -161,7 +167,7 @@ struct  boss_blackheart_the_inciterAI : public ScriptedAI
             }
         }
         else
-            m_uiInciteChaosTimer -= uiDiff;
+        { m_uiInciteChaosTimer -= uiDiff; }
 
         // Charge Timer
         if (m_uiChargeTimer < uiDiff)
@@ -169,20 +175,20 @@ struct  boss_blackheart_the_inciterAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_CHARGE, SELECT_FLAG_NOT_IN_MELEE_RANGE))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_CHARGE) == CAST_OK)
-                    m_uiChargeTimer = urand(30000, 43000);
+                { m_uiChargeTimer = urand(30000, 43000); }
             }
         }
         else
-            m_uiChargeTimer -= uiDiff;
+        { m_uiChargeTimer -= uiDiff; }
 
         // Knockback Timer
         if (m_uiKnockbackTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_WAR_STOMP) == CAST_OK)
-                m_uiKnockbackTimer = urand(15000, 30000);
+            { m_uiKnockbackTimer = urand(15000, 30000); }
         }
         else
-            m_uiKnockbackTimer -= uiDiff;
+        { m_uiKnockbackTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

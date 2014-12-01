@@ -64,7 +64,7 @@ enum
 
 static const float aMandokirDownstairsPos[3] = { -12196.30f, -1948.37f, 130.31f};
 
-class  instance_zulgurub : public ScriptedInstance
+class instance_zulgurub : public ScriptedInstance
 {
     public:
         instance_zulgurub(Map* pMap);

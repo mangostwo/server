@@ -99,7 +99,7 @@ static const uint32 aGandlingEvents[MAX_EVENTS] = {EVENT_ID_POLKELT, EVENT_ID_TH
 
 typedef std::map<uint32, GandlingEventData> GandlingEventMap;
 
-class  instance_scholomance : public ScriptedInstance
+class instance_scholomance : public ScriptedInstance
 {
     public:
         instance_scholomance(Map* pMap);

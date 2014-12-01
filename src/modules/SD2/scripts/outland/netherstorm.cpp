@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -34,7 +40,6 @@ npc_zeppit
 npc_protectorate_demolitionist
 npc_captured_vanguard
 npc_drijya
-npc_dimensius
 EndContentData */
 
 #include "precompiled.h"
@@ -84,7 +89,7 @@ enum
     SPELL_INTERRUPT_2            = 35176,                   // ACID mobs should cast this (Manaforge Ara-version)
 };
 
-struct  npc_manaforge_control_consoleAI : public ScriptedAI
+struct npc_manaforge_control_consoleAI : public ScriptedAI
 {
     npc_manaforge_control_consoleAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
@@ -143,7 +148,7 @@ struct  npc_manaforge_control_consoleAI : public ScriptedAI
         }
 
         if (GameObject* pGo = m_creature->GetMap()->GetGameObject(m_consoleGuid))
-            pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+        { pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE); }
     }
 
     void DoWaveSpawnForCreature(Creature* pCreature)
@@ -154,47 +159,47 @@ struct  npc_manaforge_control_consoleAI : public ScriptedAI
                 if (urand(0, 1))
                 {
                     if (Creature* pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2933.68f, 4162.55f, 164.00f, 1.60f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000))
-                        pAdd->GetMotionMaster()->MovePoint(0, 2927.36f, 4212.97f, 164.00f);
+                    { pAdd->GetMotionMaster()->MovePoint(0, 2927.36f, 4212.97f, 164.00f); }
                 }
                 else
                 {
                     if (Creature* pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2927.36f, 4212.97f, 164.00f, 4.94f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000))
-                        pAdd->GetMotionMaster()->MovePoint(0, 2933.68f, 4162.55f, 164.00f);
+                    { pAdd->GetMotionMaster()->MovePoint(0, 2933.68f, 4162.55f, 164.00f); }
                 }
                 m_uiWaveTimer = 30000;
                 break;
             case NPC_CORUU_C_CONSOLE:
                 if (Creature* pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2445.21f, 2765.26f, 134.49f, 3.93f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000))
-                    pAdd->GetMotionMaster()->MovePoint(0, 2424.21f, 2740.15f, 133.81f);
+                { pAdd->GetMotionMaster()->MovePoint(0, 2424.21f, 2740.15f, 133.81f); }
                 if (Creature* pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2429.86f, 2731.85f, 134.53f, 1.31f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000))
-                    pAdd->GetMotionMaster()->MovePoint(0, 2435.37f, 2766.04f, 133.81f);
+                { pAdd->GetMotionMaster()->MovePoint(0, 2435.37f, 2766.04f, 133.81f); }
                 m_uiWaveTimer = 20000;
                 break;
             case NPC_DURO_C_CONSOLE:
                 if (Creature* pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2986.80f, 2205.36f, 165.37f, 3.74f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000))
-                    pAdd->GetMotionMaster()->MovePoint(0, 2985.15f, 2197.32f, 164.79f);
+                { pAdd->GetMotionMaster()->MovePoint(0, 2985.15f, 2197.32f, 164.79f); }
                 if (Creature* pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2952.91f, 2191.20f, 165.32f, 0.22f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000))
-                    pAdd->GetMotionMaster()->MovePoint(0, 2060.01f, 2185.27f, 164.67f);
+                { pAdd->GetMotionMaster()->MovePoint(0, 2060.01f, 2185.27f, 164.67f); }
                 m_uiWaveTimer = 15000;
                 break;
             case NPC_ARA_C_CONSOLE:
                 if (urand(0, 1))
                 {
                     if (Creature* pAdd = m_creature->SummonCreature(NPC_ARA_TECH, 4035.11f, 4038.97f, 194.27f, 2.57f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000))
-                        pAdd->GetMotionMaster()->MovePoint(0, 4003.42f, 4040.19f, 193.49f);
+                    { pAdd->GetMotionMaster()->MovePoint(0, 4003.42f, 4040.19f, 193.49f); }
                     if (Creature* pAdd = m_creature->SummonCreature(NPC_ARA_TECH, 4033.66f, 4036.79f, 194.28f, 2.57f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000))
-                        pAdd->GetMotionMaster()->MovePoint(0, 4003.42f, 4040.19f, 193.49f);
+                    { pAdd->GetMotionMaster()->MovePoint(0, 4003.42f, 4040.19f, 193.49f); }
                     if (Creature* pAdd = m_creature->SummonCreature(NPC_ARA_TECH, 4037.13f, 4037.30f, 194.23f, 2.57f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000))
-                        pAdd->GetMotionMaster()->MovePoint(0, 4003.42f, 4040.19f, 193.49f);
+                    { pAdd->GetMotionMaster()->MovePoint(0, 4003.42f, 4040.19f, 193.49f); }
                 }
                 else
                 {
                     if (Creature* pAdd = m_creature->SummonCreature(NPC_ARA_TECH, 3099.59f, 4049.30f, 194.22f, 0.05f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000))
-                        pAdd->GetMotionMaster()->MovePoint(0, 4028.01f, 4035.17f, 193.59f);
+                    { pAdd->GetMotionMaster()->MovePoint(0, 4028.01f, 4035.17f, 193.59f); }
                     if (Creature* pAdd = m_creature->SummonCreature(NPC_ARA_TECH, 3999.72f, 4046.75f, 194.22f, 0.05f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000))
-                        pAdd->GetMotionMaster()->MovePoint(0, 4028.01f, 4035.17f, 193.59f);
+                    { pAdd->GetMotionMaster()->MovePoint(0, 4028.01f, 4035.17f, 193.59f); }
                     if (Creature* pAdd = m_creature->SummonCreature(NPC_ARA_TECH, 3996.81f, 4048.26f, 194.22f, 0.05f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000))
-                        pAdd->GetMotionMaster()->MovePoint(0, 4028.01f, 4035.17f, 193.59f);
+                    { pAdd->GetMotionMaster()->MovePoint(0, 4028.01f, 4035.17f, 193.59f); }
                 }
                 m_uiWaveTimer = 15000;
                 break;
@@ -207,29 +212,29 @@ struct  npc_manaforge_control_consoleAI : public ScriptedAI
         {
             case NPC_BNAAR_C_CONSOLE:
                 if (Creature* pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2946.52f, 4201.42f, 163.47f, 3.54f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000))
-                    pAdd->GetMotionMaster()->MovePoint(0, 2927.49f, 4192.81f, 163.00f);
+                { pAdd->GetMotionMaster()->MovePoint(0, 2927.49f, 4192.81f, 163.00f); }
                 break;
             case NPC_CORUU_C_CONSOLE:
                 if (Creature* pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2453.88f, 2737.85f, 133.27f, 2.59f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000))
-                    pAdd->GetMotionMaster()->MovePoint(0, 2433.96f, 2751.53f, 133.85f);
+                { pAdd->GetMotionMaster()->MovePoint(0, 2433.96f, 2751.53f, 133.85f); }
                 if (Creature* pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2441.62f, 2735.32f, 134.49f, 1.97f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000))
-                    pAdd->GetMotionMaster()->MovePoint(0, 2433.96f, 2751.53f, 133.85f);
+                { pAdd->GetMotionMaster()->MovePoint(0, 2433.96f, 2751.53f, 133.85f); }
                 if (Creature* pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2450.73f, 2754.50f, 134.49f, 3.29f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000))
-                    pAdd->GetMotionMaster()->MovePoint(0, 2433.96f, 2751.53f, 133.85f);
+                { pAdd->GetMotionMaster()->MovePoint(0, 2433.96f, 2751.53f, 133.85f); }
                 break;
             case NPC_DURO_C_CONSOLE:
                 if (Creature* pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2956.18f, 2202.85f, 165.32f, 5.45f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000))
-                    pAdd->GetMotionMaster()->MovePoint(0, 2972.27f, 2193.22f, 164.48f);
+                { pAdd->GetMotionMaster()->MovePoint(0, 2972.27f, 2193.22f, 164.48f); }
                 if (Creature* pAdd = m_creature->SummonCreature(NPC_SUNFURY_TECH, 2975.30f, 2211.50f, 165.32f, 4.55f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000))
-                    pAdd->GetMotionMaster()->MovePoint(0, 2972.27f, 2193.22f, 164.48f);
+                { pAdd->GetMotionMaster()->MovePoint(0, 2972.27f, 2193.22f, 164.48f); }
                 if (Creature* pAdd = m_creature->SummonCreature(NPC_SUNFURY_PROT, 2965.02f, 2217.45f, 164.16f, 4.96f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000))
-                    pAdd->GetMotionMaster()->MovePoint(0, 2972.27f, 2193.22f, 164.48f);
+                { pAdd->GetMotionMaster()->MovePoint(0, 2972.27f, 2193.22f, 164.48f); }
                 break;
             case NPC_ARA_C_CONSOLE:
                 if (Creature* pAdd = m_creature->SummonCreature(NPC_ARA_ENGI, 3994.51f, 4020.46f, 192.18f, 0.91f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000))
-                    pAdd->GetMotionMaster()->MovePoint(0, 4008.35f, 4035.04f, 192.70f);
+                { pAdd->GetMotionMaster()->MovePoint(0, 4008.35f, 4035.04f, 192.70f); }
                 if (Creature* pAdd = m_creature->SummonCreature(NPC_ARA_GORKLONN, 4021.56f, 4059.35f, 193.59f, 4.44f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000))
-                    pAdd->GetMotionMaster()->MovePoint(0, 4016.62f, 4039.89f, 193.46f);
+                { pAdd->GetMotionMaster()->MovePoint(0, 4016.62f, 4039.89f, 193.46f); }
                 break;
         }
     }
@@ -244,7 +249,7 @@ struct  npc_manaforge_control_consoleAI : public ScriptedAI
             {
                 // Reset Event
                 if (GameObject* pGo = m_creature->GetMap()->GetGameObject(m_consoleGuid))
-                    pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+                { pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE); }
 
                 m_creature->ForcedDespawn();
                 return;
@@ -281,14 +286,14 @@ struct  npc_manaforge_control_consoleAI : public ScriptedAI
                     DoCastSpellIfCan(m_creature, SPELL_DISABLE_VISUAL);
 
                     if (GameObject* pGo = m_creature->GetMap()->GetGameObject(m_consoleGuid))
-                        pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+                    { pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE); }
 
                     ++m_uiPhase;
                     break;
             }
         }
         else
-            m_uiEventTimer -= uiDiff;
+        { m_uiEventTimer -= uiDiff; }
 
         if (m_bWave)
         {
@@ -297,7 +302,7 @@ struct  npc_manaforge_control_consoleAI : public ScriptedAI
                 DoWaveSpawnForCreature(m_creature);
             }
             else
-                m_uiWaveTimer -= uiDiff;
+            { m_uiWaveTimer -= uiDiff; }
         }
     }
 };
@@ -325,27 +330,27 @@ bool GOUse_go_manaforge_control_console(Player* pPlayer, GameObject* pGo)
     {
         case 3726:                                          // b'naar
             if ((pPlayer->GetQuestStatus(QUEST_SHUTDOWN_BNAAR_ALDOR) == QUEST_STATUS_INCOMPLETE
-                    || pPlayer->GetQuestStatus(QUEST_SHUTDOWN_BNAAR_SCRYERS) == QUEST_STATUS_INCOMPLETE)
-                    && pPlayer->HasItemCount(ITEM_BNAAR_ACESS_CRYSTAL, 1))
-                pManaforge = pPlayer->SummonCreature(NPC_BNAAR_C_CONSOLE, 2918.95f, 4189.98f, 161.88f, 0.34f, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 125000);
+                 || pPlayer->GetQuestStatus(QUEST_SHUTDOWN_BNAAR_SCRYERS) == QUEST_STATUS_INCOMPLETE)
+                && pPlayer->HasItemCount(ITEM_BNAAR_ACESS_CRYSTAL, 1))
+            { pManaforge = pPlayer->SummonCreature(NPC_BNAAR_C_CONSOLE, 2918.95f, 4189.98f, 161.88f, 0.34f, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 125000); }
             break;
         case 3730:                                          // coruu
             if ((pPlayer->GetQuestStatus(QUEST_SHUTDOWN_CORUU_ALDOR) == QUEST_STATUS_INCOMPLETE
-                    || pPlayer->GetQuestStatus(QUEST_SHUTDOWN_CORUU_SCRYERS) == QUEST_STATUS_INCOMPLETE)
-                    && pPlayer->HasItemCount(ITEM_CORUU_ACESS_CRYSTAL, 1))
-                pManaforge = pPlayer->SummonCreature(NPC_CORUU_C_CONSOLE, 2426.77f, 2750.38f, 133.24f, 2.14f, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 125000);
+                 || pPlayer->GetQuestStatus(QUEST_SHUTDOWN_CORUU_SCRYERS) == QUEST_STATUS_INCOMPLETE)
+                && pPlayer->HasItemCount(ITEM_CORUU_ACESS_CRYSTAL, 1))
+            { pManaforge = pPlayer->SummonCreature(NPC_CORUU_C_CONSOLE, 2426.77f, 2750.38f, 133.24f, 2.14f, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 125000); }
             break;
         case 3734:                                          // duro
             if ((pPlayer->GetQuestStatus(QUEST_SHUTDOWN_DURO_ALDOR) == QUEST_STATUS_INCOMPLETE
-                    || pPlayer->GetQuestStatus(QUEST_SHUTDOWN_DURO_SCRYERS) == QUEST_STATUS_INCOMPLETE)
-                    && pPlayer->HasItemCount(ITEM_DURO_ACESS_CRYSTAL, 1))
-                pManaforge = pPlayer->SummonCreature(NPC_DURO_C_CONSOLE, 2976.48f, 2183.29f, 163.20f, 1.85f, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 125000);
+                 || pPlayer->GetQuestStatus(QUEST_SHUTDOWN_DURO_SCRYERS) == QUEST_STATUS_INCOMPLETE)
+                && pPlayer->HasItemCount(ITEM_DURO_ACESS_CRYSTAL, 1))
+            { pManaforge = pPlayer->SummonCreature(NPC_DURO_C_CONSOLE, 2976.48f, 2183.29f, 163.20f, 1.85f, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 125000); }
             break;
         case 3722:                                          // ara
             if ((pPlayer->GetQuestStatus(QUEST_SHUTDOWN_ARA_ALDOR) == QUEST_STATUS_INCOMPLETE
-                    || pPlayer->GetQuestStatus(QUEST_SHUTDOWN_ARA_SCRYERS) == QUEST_STATUS_INCOMPLETE)
-                    && pPlayer->HasItemCount(ITEM_ARA_ACESS_CRYSTAL, 1))
-                pManaforge = pPlayer->SummonCreature(NPC_ARA_C_CONSOLE, 4013.71f, 4028.76f, 192.10f, 1.25f, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 125000);
+                 || pPlayer->GetQuestStatus(QUEST_SHUTDOWN_ARA_SCRYERS) == QUEST_STATUS_INCOMPLETE)
+                && pPlayer->HasItemCount(ITEM_ARA_ACESS_CRYSTAL, 1))
+            { pManaforge = pPlayer->SummonCreature(NPC_ARA_C_CONSOLE, 4013.71f, 4028.76f, 192.10f, 1.25f, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 125000); }
             break;
     }
 
@@ -389,7 +394,7 @@ enum
     NPC_PATHALEON_THE_CALCULATOR_IMAGE     = 21504
 };
 
-struct  npc_commander_dawnforgeAI : public ScriptedAI
+struct npc_commander_dawnforgeAI : public ScriptedAI
 {
     npc_commander_dawnforgeAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -417,7 +422,7 @@ struct  npc_commander_dawnforgeAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_PATHALEON_THE_CALCULATOR_IMAGE)
-            m_pathaleonGuid = pSummoned->GetObjectGuid();
+        { m_pathaleonGuid = pSummoned->GetObjectGuid(); }
     }
 
     void TurnToPathaleonsImage()
@@ -427,7 +432,7 @@ struct  npc_commander_dawnforgeAI : public ScriptedAI
         Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
 
         if (!pArdonis || !pPathaleon || !pPlayer)
-            return;
+        { return; }
 
         m_creature->SetFacingToObject(pPathaleon);
         pArdonis->SetFacingToObject(pPathaleon);
@@ -444,7 +449,7 @@ struct  npc_commander_dawnforgeAI : public ScriptedAI
             Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
 
             if (!pPlayer)
-                return;
+            { return; }
 
             m_creature->SetFacingToObject(pArdonis);
             pArdonis->SetFacingToObject(m_creature);
@@ -462,7 +467,7 @@ struct  npc_commander_dawnforgeAI : public ScriptedAI
             Creature* pArdonis = GetClosestCreatureWithEntry(m_creature, NPC_ARCANIST_ARDONIS, 10.0f);
 
             if (!pArdonis)
-                return false;
+            { return false; }
 
             m_ardonisGuid = pArdonis->GetObjectGuid();
             m_playerGuid = pPlayer->GetObjectGuid();
@@ -481,7 +486,7 @@ struct  npc_commander_dawnforgeAI : public ScriptedAI
     {
         // Is event even running?
         if (!m_bIsEvent)
-            return;
+        { return; }
 
         // Phase timing
         if (m_uiPhaseTimer >= uiDiff)
@@ -603,14 +608,14 @@ bool AreaTrigger_at_commander_dawnforge(Player* pPlayer, AreaTriggerEntry const*
 {
     // if player lost aura or not have at all, we should not try start event.
     if (!pPlayer->HasAura(SPELL_SUNFURY_DISGUISE, EFFECT_INDEX_0))
-        return false;
+    { return false; }
 
     if (pPlayer->IsAlive() && pPlayer->GetQuestStatus(QUEST_INFO_GATHERING) == QUEST_STATUS_INCOMPLETE)
     {
         Creature* pDawnforge = GetClosestCreatureWithEntry(pPlayer, NPC_COMMANDER_DAWNFORGE, 30.0f);
 
         if (!pDawnforge)
-            return false;
+        { return false; }
 
         if (npc_commander_dawnforgeAI* pDawnforgeAI = dynamic_cast<npc_commander_dawnforgeAI*>(pDawnforge->AI()))
         {
@@ -634,7 +639,7 @@ enum
     NPC_SEVERED_SPIRIT   = 19881
 };
 
-struct  npc_bessyAI : public npc_escortAI
+struct npc_bessyAI : public npc_escortAI
 {
     npc_bessyAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -653,7 +658,7 @@ struct  npc_bessyAI : public npc_escortAI
                 break;
             case 12:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_COWS_COME_HOME, m_creature);
+                { pPlayer->GroupEventHappens(QUEST_COWS_COME_HOME, m_creature); }
                 break;
         }
     }
@@ -673,7 +678,7 @@ bool QuestAccept_npc_bessy(Player* pPlayer, Creature* pCreature, const Quest* pQ
         pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_NON_ATTACKABLE);
 
         if (npc_bessyAI* pBessyAI = dynamic_cast<npc_bessyAI*>(pCreature->AI()))
-            pBessyAI->Start(true, pPlayer, pQuest);
+        { pBessyAI->Start(true, pPlayer, pQuest); }
     }
     return true;
 }
@@ -699,7 +704,7 @@ enum
     SAY_ALLEY_FINISH            = -1000624
 };
 
-struct  npc_maxx_a_million_escortAI : public npc_escortAI
+struct npc_maxx_a_million_escortAI : public npc_escortAI
 {
     npc_maxx_a_million_escortAI(Creature* pCreature) : npc_escortAI(pCreature) {Reset();}
 
@@ -744,15 +749,15 @@ struct  npc_maxx_a_million_escortAI : public npc_escortAI
                     m_uiSubEventTimer = 1000;
                 }
                 else
-                    m_lastDraeneiMachineGuid.Clear();
+                { m_lastDraeneiMachineGuid.Clear(); }
 
                 break;
             case 36:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_MARK_V_IS_ALIVE, m_creature);
+                { pPlayer->GroupEventHappens(QUEST_MARK_V_IS_ALIVE, m_creature); }
 
                 if (Creature* pAlley = m_creature->GetMap()->GetCreature(m_alleyGuid))
-                    DoScriptText(SAY_ALLEY_FINISH, pAlley);
+                { DoScriptText(SAY_ALLEY_FINISH, pAlley); }
 
                 break;
         }
@@ -796,7 +801,7 @@ struct  npc_maxx_a_million_escortAI : public npc_escortAI
                             break;
                         case 3:                             // Despawn machine after 2s
                             if (GameObject* pMachine = m_creature->GetMap()->GetGameObject(m_lastDraeneiMachineGuid))
-                                pMachine->Use(m_creature);
+                            { pMachine->Use(m_creature); }
 
                             m_lastDraeneiMachineGuid.Clear();
                             m_uiSubEventTimer = 0;
@@ -808,11 +813,11 @@ struct  npc_maxx_a_million_escortAI : public npc_escortAI
                     }
                 }
                 else
-                    m_uiSubEventTimer -= uiDiff;
+                { m_uiSubEventTimer -= uiDiff; }
             }
         }
         else
-            DoMeleeAttackIfReady();
+        { DoMeleeAttackIfReady(); }
     }
 };
 
@@ -849,7 +854,7 @@ enum
     SPELL_GATHER_WARP_BLOOD     = 39244,                    // for quest 10924
 };
 
-struct  npc_zeppitAI : public ScriptedPetAI
+struct npc_zeppitAI : public ScriptedPetAI
 {
     npc_zeppitAI(Creature* pCreature) : ScriptedPetAI(pCreature) { Reset(); }
 
@@ -902,7 +907,7 @@ enum
     QUEST_ID_DELIVERING_MESSAGE     = 10406,
 };
 
-struct  npc_protectorate_demolitionistAI : public npc_escortAI
+struct npc_protectorate_demolitionistAI : public npc_escortAI
 {
     npc_protectorate_demolitionistAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -929,7 +934,7 @@ struct  npc_protectorate_demolitionistAI : public npc_escortAI
     void MoveInLineOfSight(Unit* pWho) override
     {
         if (HasEscortState(STATE_ESCORT_ESCORTING))
-            return;
+        { return; }
 
         // Star the escort
         if (pWho->GetTypeId() == TYPEID_PLAYER)
@@ -948,9 +953,9 @@ struct  npc_protectorate_demolitionistAI : public npc_escortAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_NEXUS_STALKER)
-            DoScriptText(SAY_NEXUS_PROTECT, pSummoned);
+        { DoScriptText(SAY_NEXUS_PROTECT, pSummoned); }
         else if (pSummoned->GetEntry() == NPC_ARCHON)
-            pSummoned->CastSpell(pSummoned, SPELL_ETHEREAL_TELEPORT, true);
+        { pSummoned->CastSpell(pSummoned, SPELL_ETHEREAL_TELEPORT, true); }
 
         pSummoned->AI()->AttackStart(m_creature);
     }
@@ -1014,14 +1019,14 @@ struct  npc_protectorate_demolitionistAI : public npc_escortAI
                         break;
                     case 3:
                         if (DoCastSpellIfCan(m_creature, SPELL_ETHEREAL_TELEPORT, CAST_TRIGGERED) == CAST_OK)
-                            m_creature->ForcedDespawn(1000);
+                        { m_creature->ForcedDespawn(1000); }
                         m_uiEventTimer = 0;
                         break;
                 }
                 ++m_uiEventStage;
             }
             else
-                m_uiEventTimer -= uiDiff;
+            { m_uiEventTimer -= uiDiff; }
         }
 
         // ToDo: research if the npc uses spells or melee for combat
@@ -1052,7 +1057,7 @@ enum
     QUEST_ID_ESCAPE_STAGING_GROUNDS = 10425,
 };
 
-struct  npc_captured_vanguardAI : public npc_escortAI
+struct npc_captured_vanguardAI : public npc_escortAI
 {
     npc_captured_vanguardAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -1077,7 +1082,7 @@ struct  npc_captured_vanguardAI : public npc_escortAI
         {
             case 15:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_ID_ESCAPE_STAGING_GROUNDS, m_creature);
+                { pPlayer->GroupEventHappens(QUEST_ID_ESCAPE_STAGING_GROUNDS, m_creature); }
                 break;
             case 16:
                 DoScriptText(SAY_VANGUARD_FINISH, m_creature);
@@ -1085,11 +1090,11 @@ struct  npc_captured_vanguardAI : public npc_escortAI
                 break;
             case 17:
                 if (Creature* pAmeer = GetClosestCreatureWithEntry(m_creature, NPC_COMMANDER_AMEER, 5.0f))
-                    DoScriptText(EMOTE_VANGUARD_FINISH, m_creature, pAmeer);
+                { DoScriptText(EMOTE_VANGUARD_FINISH, m_creature, pAmeer); }
                 break;
             case 18:
                 if (DoCastSpellIfCan(m_creature, SPELL_ETHEREAL_TELEPORT, CAST_TRIGGERED) == CAST_OK)
-                    m_creature->ForcedDespawn(1000);
+                { m_creature->ForcedDespawn(1000); }
                 break;
         }
     }
@@ -1097,23 +1102,23 @@ struct  npc_captured_vanguardAI : public npc_escortAI
     void UpdateEscortAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiGlaiveTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_GLAIVE) == CAST_OK)
-                m_uiGlaiveTimer = urand(5000, 9000);
+            { m_uiGlaiveTimer = urand(5000, 9000); }
         }
         else
-            m_uiGlaiveTimer -= uiDiff;
+        { m_uiGlaiveTimer -= uiDiff; }
 
         if (m_uiHamstringTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HAMSTRING) == CAST_OK)
-                m_uiHamstringTimer = urand(10000, 16000);
+            { m_uiHamstringTimer = urand(10000, 16000); }
         }
         else
-            m_uiHamstringTimer -= uiDiff;
+        { m_uiHamstringTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }
@@ -1129,7 +1134,7 @@ bool QuestAccept_npc_captured_vanguard(Player* pPlayer, Creature* pCreature, con
     if (pQuest->GetQuestId() == QUEST_ID_ESCAPE_STAGING_GROUNDS)
     {
         if (npc_captured_vanguardAI* pEscortAI = dynamic_cast<npc_captured_vanguardAI*>(pCreature->AI()))
-            pEscortAI->Start(false, pPlayer, pQuest);
+        { pEscortAI->Start(false, pPlayer, pQuest); }
 
         DoScriptText(SAY_VANGUARD_START, pCreature, pPlayer);
     }
@@ -1172,7 +1177,7 @@ enum
     MAX_IMPS                = 6,
 };
 
-struct  npc_drijyaAI : public npc_escortAI
+struct npc_drijyaAI : public npc_escortAI
 {
     npc_drijyaAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -1221,7 +1226,7 @@ struct  npc_drijyaAI : public npc_escortAI
                 pSummoned->AI()->AttackStart(m_creature);
                 break;
         }
-     }
+    }
 
     void WaypointReached(uint32 uiPointId) override
     {
@@ -1595,7 +1600,7 @@ void AddSC_netherstorm()
     pNewScript->GetAI = &GetAI_npc_captured_vanguard;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_captured_vanguard;
     pNewScript->RegisterSelf();
-    
+
     pNewScript = new Script;
     pNewScript->Name = "npc_drijya";
     pNewScript->GetAI = &GetAI_npc_drijya;

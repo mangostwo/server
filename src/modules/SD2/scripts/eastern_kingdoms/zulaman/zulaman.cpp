@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -43,7 +49,7 @@ enum
     NPC_FOREST_FROG          = 24396
 };
 
-struct  npc_forest_frogAI : public ScriptedAI
+struct npc_forest_frogAI : public ScriptedAI
 {
     npc_forest_frogAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -77,20 +83,20 @@ struct  npc_forest_frogAI : public ScriptedAI
 
             if (!m_pInstance->GetData(TYPE_RAND_VENDOR_1))
                 if (!urand(0, 9))
-                    cEntry = 24408;                         // Gunter
+                { cEntry = 24408; }                         // Gunter
 
             if (!m_pInstance->GetData(TYPE_RAND_VENDOR_2))
                 if (!urand(0, 9))
-                    cEntry = 24409;                         // Kyren
+                { cEntry = 24409; }                         // Kyren
 
             if (cEntry)
-                m_creature->UpdateEntry(cEntry);
+            { m_creature->UpdateEntry(cEntry); }
 
             if (cEntry == 24408)
-                m_pInstance->SetData(TYPE_RAND_VENDOR_1, DONE);
+            { m_pInstance->SetData(TYPE_RAND_VENDOR_1, DONE); }
 
             if (cEntry == 24409)
-                m_pInstance->SetData(TYPE_RAND_VENDOR_2, DONE);
+            { m_pInstance->SetData(TYPE_RAND_VENDOR_2, DONE); }
         }
     }
 
@@ -100,9 +106,9 @@ struct  npc_forest_frogAI : public ScriptedAI
         {
             // increase or decrease chance of mojo?
             if (!urand(0, 49))
-                DoCastSpellIfCan(caster, SPELL_PUSH_MOJO, CAST_TRIGGERED);
+            { DoCastSpellIfCan(caster, SPELL_PUSH_MOJO, CAST_TRIGGERED); }
             else
-                DoSpawnRandom();
+            { DoSpawnRandom(); }
         }
     }
 };
@@ -126,7 +132,7 @@ enum
     SPELL_BANGING_THE_GONG  = 45225
 };
 
-struct  npc_harrison_jones_zaAI : public npc_escortAI
+struct npc_harrison_jones_zaAI : public npc_escortAI
 {
     npc_harrison_jones_zaAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
@@ -139,7 +145,7 @@ struct  npc_harrison_jones_zaAI : public npc_escortAI
     void WaypointReached(uint32 uiPointId) override
     {
         if (!m_pInstance)
-            return;
+        { return; }
 
         switch (uiPointId)
         {
@@ -176,7 +182,7 @@ struct  npc_harrison_jones_zaAI : public npc_escortAI
 
         // Stop banging gong if still
         if (m_pInstance && m_pInstance->GetData(TYPE_EVENT_RUN) == SPECIAL && m_creature->HasAura(SPELL_BANGING_THE_GONG))
-            m_creature->RemoveAurasDueToSpell(SPELL_BANGING_THE_GONG);
+        { m_creature->RemoveAurasDueToSpell(SPELL_BANGING_THE_GONG); }
     }
 };
 
@@ -185,10 +191,10 @@ bool GossipHello_npc_harrison_jones_za(Player* pPlayer, Creature* pCreature)
     ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
 
     if (pCreature->IsQuestGiver())
-        pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+    { pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid()); }
 
     if (pInstance && pInstance->GetData(TYPE_EVENT_RUN) == NOT_STARTED)
-        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_BEGIN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+    { pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_BEGIN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1); }
 
     pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
     return true;
@@ -199,7 +205,7 @@ bool GossipSelect_npc_harrison_jones_za(Player* pPlayer, Creature* pCreature, ui
     if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
     {
         if (npc_harrison_jones_zaAI* pHarrisonAI = dynamic_cast<npc_harrison_jones_zaAI*>(pCreature->AI()))
-            pHarrisonAI->StartEvent();
+        { pHarrisonAI->StartEvent(); }
 
         pPlayer->CLOSE_GOSSIP_MENU();
     }
@@ -221,17 +227,17 @@ bool GOUse_go_strange_gong(Player* /*pPlayer*/, GameObject* pGo)
     ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
 
     if (!pInstance)
-        return false;
+    { return false; }
 
     if (pInstance->GetData(TYPE_EVENT_RUN) == SPECIAL)
     {
         if (Creature* pCreature = pInstance->GetSingleCreatureFromStorage(NPC_HARRISON))
         {
             if (npc_harrison_jones_zaAI* pHarrisonAI = dynamic_cast<npc_harrison_jones_zaAI*>(pCreature->AI()))
-                pHarrisonAI->SetHoldState(false);
+            { pHarrisonAI->SetHoldState(false); }
         }
         else
-            script_error_log("Instance Zulaman: go_strange_gong failed");
+        { script_error_log("Instance Zulaman: go_strange_gong failed"); }
 
         pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
         return false;

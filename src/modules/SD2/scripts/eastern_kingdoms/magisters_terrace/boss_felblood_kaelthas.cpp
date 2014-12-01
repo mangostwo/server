@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -92,7 +98,7 @@ static const uint32 aGravityLapseSpells[] = {44219, 44220, 44221, 44222, 44223};
 ## boss_felblood_kaelthas
 ######*/
 
-struct  boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
+struct boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
 {
     boss_felblood_kaelthasAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aIntroDialogue)
@@ -145,26 +151,26 @@ struct  boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
     void JustDied(Unit* /*pKiller*/) override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_KAELTHAS, DONE);
+        { m_pInstance->SetData(TYPE_KAELTHAS, DONE); }
     }
 
     void Aggro(Unit* /*pWho*/) override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_KAELTHAS, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_KAELTHAS, IN_PROGRESS); }
     }
 
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_KAELTHAS, FAIL);
+        { m_pInstance->SetData(TYPE_KAELTHAS, FAIL); }
     }
 
     // Boss has an interesting speech before killed, so we need to fake death (without stand state) and allow him to finish his theatre
     void DamageTaken(Unit* /*pKiller*/, uint32& uiDamage) override
     {
         if (uiDamage < m_creature->GetHealth())
-            return;
+        { return; }
 
         // Make sure it won't die by accident
         if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
@@ -194,7 +200,7 @@ struct  boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
     void MoveInLineOfSight(Unit* pWho) override
     {
         if (!m_bHasTaunted && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() &&
-                m_creature->IsWithinDistInMap(pWho, 40.0) && m_creature->IsWithinLOSInMap(pWho))
+            m_creature->IsWithinDistInMap(pWho, 40.0) && m_creature->IsWithinLOSInMap(pWho))
         {
             StartNextDialogueText(SAY_INTRO_1);
             m_creature->HandleEmote(EMOTE_STATE_TALK);
@@ -204,7 +210,7 @@ struct  boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
 
         // Allow him to finish intro
         if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE))
-            return;
+        { return; }
 
         ScriptedAI::MoveInLineOfSight(pWho);
     }
@@ -250,16 +256,16 @@ struct  boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_FLAME_STRIKE_TRIGGER)
-            pSummoned->CastSpell(pSummoned, SPELL_FLAME_STRIKE_DUMMY, false, NULL, NULL, m_creature->GetObjectGuid());
+        { pSummoned->CastSpell(pSummoned, SPELL_FLAME_STRIKE_DUMMY, false, NULL, NULL, m_creature->GetObjectGuid()); }
         else
         {
             // Attack or follow target
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (pSummoned->GetEntry() == NPC_ARCANE_SPHERE)
-                    pSummoned->GetMotionMaster()->MoveFollow(pTarget, 0, 0);
+                { pSummoned->GetMotionMaster()->MoveFollow(pTarget, 0, 0); }
                 else
-                    pSummoned->AI()->AttackStart(pTarget);
+                { pSummoned->AI()->AttackStart(pTarget); }
             }
         }
     }
@@ -299,11 +305,11 @@ struct  boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
         DialogueUpdate(uiDiff);
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         // Don't use spells during the epilogue
         if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
-            return;
+        { return; }
 
         if (m_bIsFirstPhase)
         {
@@ -319,17 +325,17 @@ struct  boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
                     }
                 }
                 else
-                    m_uiShockBarrierTimer -= uiDiff;
+                { m_uiShockBarrierTimer -= uiDiff; }
 
                 if (m_uiPyroblastTimer)
                 {
                     if (m_uiPyroblastTimer <= uiDiff)
                     {
                         if (DoCastSpellIfCan(m_creature, SPELL_PYROBLAST) == CAST_OK)
-                            m_uiPyroblastTimer = 0;
+                        { m_uiPyroblastTimer = 0; }
                     }
                     else
-                        m_uiPyroblastTimer -= uiDiff;
+                    { m_uiPyroblastTimer -= uiDiff; }
                 }
             }
 
@@ -338,11 +344,11 @@ struct  boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FIREBALL : SPELL_FIREBALL_H) == CAST_OK)
-                        m_uiFireballTimer = urand(2000, 4000);
+                    { m_uiFireballTimer = urand(2000, 4000); }
                 }
             }
             else
-                m_uiFireballTimer -= uiDiff;
+            { m_uiFireballTimer -= uiDiff; }
 
             if (m_uiPhoenixTimer < uiDiff)
             {
@@ -353,7 +359,7 @@ struct  boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
                 }
             }
             else
-                m_uiPhoenixTimer -= uiDiff;
+            { m_uiPhoenixTimer -= uiDiff; }
 
             if (m_uiFlameStrikeTimer < uiDiff)
             {
@@ -367,7 +373,7 @@ struct  boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
                 }
             }
             else
-                m_uiFlameStrikeTimer -= uiDiff;
+            { m_uiFlameStrikeTimer -= uiDiff; }
 
             // Below 50%
             if (m_creature->GetHealthPercent() < 50.0f)
@@ -400,7 +406,7 @@ struct  boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
                                 m_bFirstGravityLapse = false;
                             }
                             else
-                                DoScriptText(SAY_RECAST_GRAVITY, m_creature);
+                            { DoScriptText(SAY_RECAST_GRAVITY, m_creature); }
 
                             m_uiGravityLapseTimer = 2000;
                             m_uiGravityIndex = 0;
@@ -412,7 +418,7 @@ struct  boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
                         if (DoCastSpellIfCan(m_creature, SPELL_GRAVITY_LAPSE_VISUAL) == CAST_OK)
                         {
                             for (uint8 i = 0; i < MAX_ARCANE_SPHERES; ++i)
-                                DoCastSpellIfCan(m_creature, SPELL_ARCANE_SPHERE_SUMMON, CAST_TRIGGERED);
+                            { DoCastSpellIfCan(m_creature, SPELL_ARCANE_SPHERE_SUMMON, CAST_TRIGGERED); }
 
                             m_uiGravityLapseTimer = 30000;
                             ++m_uiGravityLapseStage;
@@ -431,7 +437,7 @@ struct  boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
                 }
             }
             else
-                m_uiGravityLapseTimer -= uiDiff;
+            { m_uiGravityLapseTimer -= uiDiff; }
         }
     }
 };
@@ -440,7 +446,7 @@ struct  boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
 ## mob_felkael_phoenix
 ######*/
 
-struct  mob_felkael_phoenixAI : public ScriptedAI
+struct mob_felkael_phoenixAI : public ScriptedAI
 {
     mob_felkael_phoenixAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -463,7 +469,7 @@ struct  mob_felkael_phoenixAI : public ScriptedAI
     {
         // Don't evade during ember blast
         if (m_bFakeDeath)
-            return;
+        { return; }
 
         ScriptedAI::EnterEvadeMode();
     }
@@ -471,7 +477,7 @@ struct  mob_felkael_phoenixAI : public ScriptedAI
     void DamageTaken(Unit* /*pKiller*/, uint32& uiDamage) override
     {
         if (uiDamage < m_creature->GetHealth())
-            return;
+        { return; }
 
         // Prevent glitch if in fake death
         if (m_bFakeDeath)
@@ -530,16 +536,16 @@ struct  mob_felkael_phoenixAI : public ScriptedAI
     {
         // Self kill if the egg is killed
         if (m_bFakeDeath)
-            m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+        { m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false); }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_bFakeDeath)
-            return;
+        { return; }
 
         // ToDo: research if this is correct and how can this be done by spell
         if (m_uiBurnTimer < uiDiff)
@@ -547,14 +553,14 @@ struct  mob_felkael_phoenixAI : public ScriptedAI
             // spell Burn should possible do this, but it doesn't, so do this for now.
             uint32 uiDmg = urand(1650, 2050);
             if (uiDmg > m_creature->GetHealth())
-                DoSetFakeDeath();
+            { DoSetFakeDeath(); }
             else
-                m_creature->DealDamage(m_creature, uiDmg, 0, DOT, SPELL_SCHOOL_MASK_FIRE, NULL, false);
+            { m_creature->DealDamage(m_creature, uiDmg, 0, DOT, SPELL_SCHOOL_MASK_FIRE, NULL, false); }
 
             m_uiBurnTimer = 2000;
         }
         else
-            m_uiBurnTimer -= uiDiff;
+        { m_uiBurnTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }
@@ -565,7 +571,7 @@ struct  mob_felkael_phoenixAI : public ScriptedAI
 ######*/
 
 // TODO Remove this 'script' when combat movement can be proper prevented from core-side
-struct  mob_felkael_phoenix_eggAI : public Scripted_NoMovementAI
+struct mob_felkael_phoenix_eggAI : public Scripted_NoMovementAI
 {
     mob_felkael_phoenix_eggAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 
@@ -579,7 +585,7 @@ struct  mob_felkael_phoenix_eggAI : public Scripted_NoMovementAI
 ## mob_arcane_sphere
 ######*/
 
-struct  mob_arcane_sphereAI : public ScriptedAI
+struct mob_arcane_sphereAI : public ScriptedAI
 {
     mob_arcane_sphereAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -612,24 +618,24 @@ struct  mob_arcane_sphereAI : public ScriptedAI
             m_uiDespawnTimer = 0;
         }
         else
-            m_uiDespawnTimer -= uiDiff;
+        { m_uiDespawnTimer -= uiDiff; }
 
         if (m_uiChangeTargetTimer < uiDiff)
         {
             if (!m_pInstance)
-                return;
+            { return; }
 
             // Follow the target - do not attack
             if (Creature* pKael = m_pInstance->GetSingleCreatureFromStorage(NPC_KAELTHAS))
             {
                 if (Unit* pTarget = pKael->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                    m_creature->GetMotionMaster()->MoveFollow(pTarget, 0, 0);
+                { m_creature->GetMotionMaster()->MoveFollow(pTarget, 0, 0); }
             }
 
             m_uiChangeTargetTimer = urand(5000, 15000);
         }
         else
-            m_uiChangeTargetTimer -= uiDiff;
+        { m_uiChangeTargetTimer -= uiDiff; }
     }
 };
 

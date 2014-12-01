@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -108,7 +114,7 @@ static const WaypointDef m_aHatcherLeft[] =
     { -33.097f, 1195.359f, 18.709f}
 };
 
-struct  boss_janalaiAI : public ScriptedAI
+struct boss_janalaiAI : public ScriptedAI
 {
     boss_janalaiAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -157,7 +163,7 @@ struct  boss_janalaiAI : public ScriptedAI
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_JANALAI, FAIL);
+        { m_pInstance->SetData(TYPE_JANALAI, FAIL); }
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -165,7 +171,7 @@ struct  boss_janalaiAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_JANALAI, DONE);
+        { m_pInstance->SetData(TYPE_JANALAI, DONE); }
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -178,7 +184,7 @@ struct  boss_janalaiAI : public ScriptedAI
         DoScriptText(SAY_AGGRO, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_JANALAI, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_JANALAI, IN_PROGRESS); }
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -189,23 +195,23 @@ struct  boss_janalaiAI : public ScriptedAI
                 m_hatcherOneGuid = pSummoned->GetObjectGuid();
                 // If all the eggs from one side are hatched, move to the other side
                 if (m_uiEggsHatchedRight == MAX_EGGS_ON_SIDE)
-                    pSummoned->GetMotionMaster()->MovePoint(1, m_aHatcherLeft[0].m_fX, m_aHatcherLeft[0].m_fY, m_aHatcherLeft[0].m_fZ);
+                { pSummoned->GetMotionMaster()->MovePoint(1, m_aHatcherLeft[0].m_fX, m_aHatcherLeft[0].m_fY, m_aHatcherLeft[0].m_fZ); }
                 else
-                    pSummoned->GetMotionMaster()->MovePoint(1, m_aHatcherRight[0].m_fX, m_aHatcherRight[0].m_fY, m_aHatcherRight[0].m_fZ);
+                { pSummoned->GetMotionMaster()->MovePoint(1, m_aHatcherRight[0].m_fX, m_aHatcherRight[0].m_fY, m_aHatcherRight[0].m_fZ); }
                 break;
             case NPC_AMANI_HATCHER_2:
                 m_hatcherTwoGuid = pSummoned->GetObjectGuid();
                 // If all the eggs from one side are hatched, move to the other side
                 if (m_uiEggsHatchedLeft == MAX_EGGS_ON_SIDE)
-                    pSummoned->GetMotionMaster()->MovePoint(1, m_aHatcherRight[0].m_fX, m_aHatcherRight[0].m_fY, m_aHatcherRight[0].m_fZ);
+                { pSummoned->GetMotionMaster()->MovePoint(1, m_aHatcherRight[0].m_fX, m_aHatcherRight[0].m_fY, m_aHatcherRight[0].m_fZ); }
                 else
-                    pSummoned->GetMotionMaster()->MovePoint(1, m_aHatcherLeft[0].m_fX, m_aHatcherLeft[0].m_fY, m_aHatcherLeft[0].m_fZ);
+                { pSummoned->GetMotionMaster()->MovePoint(1, m_aHatcherLeft[0].m_fX, m_aHatcherLeft[0].m_fY, m_aHatcherLeft[0].m_fZ); }
                 break;
             case NPC_FIRE_BOMB:
                 if (!m_bIsFlameWall)
-                    DoCastSpellIfCan(pSummoned, SPELL_FIRE_BOMB_THROW, CAST_TRIGGERED);
+                { DoCastSpellIfCan(pSummoned, SPELL_FIRE_BOMB_THROW, CAST_TRIGGERED); }
                 else
-                    pSummoned->CastSpell(pSummoned, SPELL_FIRE_WALL, true);
+                { pSummoned->CastSpell(pSummoned, SPELL_FIRE_WALL, true); }
                 break;
             case NPC_HATCHLING:
                 pSummoned->SetInCombatWithZone();
@@ -213,17 +219,17 @@ struct  boss_janalaiAI : public ScriptedAI
                 pSummoned->GetPositionY() > 1100.0f ? ++m_uiEggsHatchedLeft : ++m_uiEggsHatchedRight;
                 // Notify the script when all the eggs were hatched
                 if (m_uiEggsHatchedRight == MAX_EGGS_ON_SIDE && m_uiEggsHatchedLeft == MAX_EGGS_ON_SIDE)
-                    m_bHasHatchedEggs = true;
+                { m_bHasHatchedEggs = true; }
                 // Change the side of the hatcher if necessary
                 if (m_uiEggsHatchedRight == MAX_EGGS_ON_SIDE && m_uiEggsHatchedLeft < MAX_EGGS_ON_SIDE)
                 {
                     if (Creature* pHatcer = m_creature->GetMap()->GetCreature(m_hatcherOneGuid))
-                        pHatcer->GetMotionMaster()->MovePoint(1, m_aHatcherLeft[5].m_fX, m_aHatcherLeft[5].m_fY, m_aHatcherLeft[5].m_fZ);
+                    { pHatcer->GetMotionMaster()->MovePoint(1, m_aHatcherLeft[5].m_fX, m_aHatcherLeft[5].m_fY, m_aHatcherLeft[5].m_fZ); }
                 }
                 if (m_uiEggsHatchedLeft == MAX_EGGS_ON_SIDE && m_uiEggsHatchedRight < MAX_EGGS_ON_SIDE)
                 {
                     if (Creature* pHatcer = m_creature->GetMap()->GetCreature(m_hatcherTwoGuid))
-                        pHatcer->GetMotionMaster()->MovePoint(1, m_aHatcherRight[5].m_fX, m_aHatcherRight[5].m_fY, m_aHatcherRight[5].m_fZ);
+                    { pHatcer->GetMotionMaster()->MovePoint(1, m_aHatcherRight[5].m_fX, m_aHatcherRight[5].m_fY, m_aHatcherRight[5].m_fZ); }
                 }
                 break;
         }
@@ -245,7 +251,7 @@ struct  boss_janalaiAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         // Start bombing
         if (m_uiBombTimer < uiDiff)
@@ -262,18 +268,18 @@ struct  boss_janalaiAI : public ScriptedAI
             }
         }
         else
-            m_uiBombTimer -= uiDiff;
+        { m_uiBombTimer -= uiDiff; }
 
         if (m_uiFireBreathTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_FLAME_BREATH) == CAST_OK)
-                    m_uiFireBreathTimer = 8000;
+                { m_uiFireBreathTimer = 8000; }
             }
         }
         else
-            m_uiFireBreathTimer -= uiDiff;
+        { m_uiFireBreathTimer -= uiDiff; }
 
         // Remove bomb aura after five seconds
         if (m_uiBombAuraTimer)
@@ -285,7 +291,7 @@ struct  boss_janalaiAI : public ScriptedAI
                 m_uiExplodeTimer  = 5000;
             }
             else
-                m_uiBombAuraTimer -= uiDiff;
+            { m_uiBombAuraTimer -= uiDiff; }
         }
 
         // Explode the summoned bombs on timer
@@ -294,10 +300,10 @@ struct  boss_janalaiAI : public ScriptedAI
             if (m_uiExplodeTimer <= uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_FIRE_BOMB_EXPLODE) == CAST_OK)
-                    m_uiExplodeTimer = 0;
+                { m_uiExplodeTimer = 0; }
             }
             else
-                m_uiExplodeTimer -= uiDiff;
+            { m_uiExplodeTimer -= uiDiff; }
         }
 
         // Hatch all eggs at 35% health
@@ -316,15 +322,15 @@ struct  boss_janalaiAI : public ScriptedAI
             if (m_uiEnrageTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
-                    m_bIsEnraged = true;
+                { m_bIsEnraged = true; }
             }
             else
-                m_uiEnrageTimer -= uiDiff;
+            { m_uiEnrageTimer -= uiDiff; }
 
             if (m_creature->GetHealthPercent() < 20.0f)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
-                    m_bIsEnraged = true;
+                { m_bIsEnraged = true; }
             }
         }
 
@@ -339,15 +345,15 @@ struct  boss_janalaiAI : public ScriptedAI
                 Creature* pHatcer2 = m_creature->GetMap()->GetCreature(m_hatcherTwoGuid);
 
                 if (!pHatcer1 || !pHatcer1->IsAlive())
-                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_HATCHER_1, CAST_TRIGGERED);
+                { DoCastSpellIfCan(m_creature, SPELL_SUMMON_HATCHER_1, CAST_TRIGGERED); }
 
                 if (!pHatcer2 || !pHatcer2->IsAlive())
-                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_HATCHER_2, CAST_TRIGGERED);
+                { DoCastSpellIfCan(m_creature, SPELL_SUMMON_HATCHER_2, CAST_TRIGGERED); }
 
                 m_uiHatcherTimer = 90000;
             }
             else
-                m_uiHatcherTimer -= uiDiff;
+            { m_uiHatcherTimer -= uiDiff; }
         }
 
         // Hard enrage
@@ -362,7 +368,7 @@ struct  boss_janalaiAI : public ScriptedAI
                 }
             }
             else
-                m_uiBerserkTimer -= uiDiff;
+            { m_uiBerserkTimer -= uiDiff; }
         }
 
         DoMeleeAttackIfReady();
@@ -377,7 +383,7 @@ CreatureAI* GetAI_boss_janalaiAI(Creature* pCreature)
     return new boss_janalaiAI(pCreature);
 }
 
-struct  npc_amanishi_hatcherAI : public ScriptedAI
+struct npc_amanishi_hatcherAI : public ScriptedAI
 {
     npc_amanishi_hatcherAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -410,7 +416,7 @@ struct  npc_amanishi_hatcherAI : public ScriptedAI
     void MovementInform(uint32 uiType, uint32 uiPointId) override
     {
         if (uiType != POINT_MOTION_TYPE)
-            return;
+        { return; }
 
         // Used when a hatcher is forced to switch sides
         if (m_bWaypointEnd && uiPointId)
@@ -433,23 +439,23 @@ struct  npc_amanishi_hatcherAI : public ScriptedAI
         else
         {
             if (m_creature->GetEntry() == NPC_AMANI_HATCHER_1)
-                m_creature->GetMotionMaster()->MovePoint(m_uiWaypoint, m_aHatcherRight[m_uiWaypoint].m_fX, m_aHatcherRight[m_uiWaypoint].m_fY, m_aHatcherRight[m_uiWaypoint].m_fZ);
+            { m_creature->GetMotionMaster()->MovePoint(m_uiWaypoint, m_aHatcherRight[m_uiWaypoint].m_fX, m_aHatcherRight[m_uiWaypoint].m_fY, m_aHatcherRight[m_uiWaypoint].m_fZ); }
             else
-                m_creature->GetMotionMaster()->MovePoint(m_uiWaypoint, m_aHatcherLeft[m_uiWaypoint].m_fX, m_aHatcherLeft[m_uiWaypoint].m_fY, m_aHatcherLeft[m_uiWaypoint].m_fZ);
+            { m_creature->GetMotionMaster()->MovePoint(m_uiWaypoint, m_aHatcherLeft[m_uiWaypoint].m_fX, m_aHatcherLeft[m_uiWaypoint].m_fY, m_aHatcherLeft[m_uiWaypoint].m_fZ); }
         }
     }
 
     void SpellHitTarget(Unit* pTarget, SpellEntry const* pSpell) override
     {
         if ((pSpell->Id != SPELL_HATCH_EGG_1 && pSpell->Id != SPELL_HATCH_EGG_2) || pTarget->GetEntry() != NPC_DRAGONHAWK_EGG)
-            return;
+        { return; }
 
         // If we already hatched the number of eggs allowed per hatch phase, stop the hatching
         if (m_uiEggsHatched >= m_uiHatchlingCount)
-            return;
+        { return; }
 
         if (!m_pInstance)
-            return;
+        { return; }
 
         if (Creature* pJanalai = m_pInstance->GetSingleCreatureFromStorage(NPC_JANALAI))
         {
@@ -461,7 +467,7 @@ struct  npc_amanishi_hatcherAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_bWaypointEnd)
-            return;
+        { return; }
 
         if (m_uiHatchlingTimer)
         {
@@ -476,7 +482,7 @@ struct  npc_amanishi_hatcherAI : public ScriptedAI
                 }
             }
             else
-                m_uiHatchlingTimer -= uiDiff;
+            { m_uiHatchlingTimer -= uiDiff; }
         }
     }
 };
@@ -487,7 +493,7 @@ CreatureAI* GetAI_npc_amanishi_hatcherAI(Creature* pCreature)
 }
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct  npc_dragonhawk_eggAI : public Scripted_NoMovementAI
+struct npc_dragonhawk_eggAI : public Scripted_NoMovementAI
 {
     npc_dragonhawk_eggAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) {Reset();}
 
@@ -504,7 +510,7 @@ CreatureAI* GetAI_npc_dragonhawk_eggAI(Creature* pCreature)
 }
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct  npc_janalai_firebombAI : public Scripted_NoMovementAI
+struct npc_janalai_firebombAI : public Scripted_NoMovementAI
 {
     npc_janalai_firebombAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) {Reset();}
 

@@ -66,7 +66,7 @@ enum
     MAX_DIREBREW_MINIONS            = 3,
 };
 
-struct  boss_coren_direbrewAI : public ScriptedAI
+struct boss_coren_direbrewAI : public ScriptedAI
 {
     boss_coren_direbrewAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

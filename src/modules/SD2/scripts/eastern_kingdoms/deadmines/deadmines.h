@@ -58,7 +58,7 @@ enum
     QUEST_FORTUNE_AWAITS    = 7938,
 };
 
-class  instance_deadmines : public ScriptedInstance
+class instance_deadmines : public ScriptedInstance
 {
     public:
         instance_deadmines(Map* pMap);

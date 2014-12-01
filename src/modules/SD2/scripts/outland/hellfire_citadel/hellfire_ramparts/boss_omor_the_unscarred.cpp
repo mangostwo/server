@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -47,7 +53,7 @@ enum
     SPELL_SUMMON_FIENDISH_HOUND = 30707,
 };
 
-struct  boss_omor_the_unscarredAI : public ScriptedAI
+struct boss_omor_the_unscarredAI : public ScriptedAI
 {
     boss_omor_the_unscarredAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -94,7 +100,7 @@ struct  boss_omor_the_unscarredAI : public ScriptedAI
     void KilledUnit(Unit* /*pVictim*/) override
     {
         if (urand(0, 1))
-            return;
+        { return; }
 
         DoScriptText(SAY_KILL_1, m_creature);
     }
@@ -104,7 +110,7 @@ struct  boss_omor_the_unscarredAI : public ScriptedAI
         DoScriptText(SAY_SUMMON, m_creature);
 
         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            pSummoned->AI()->AttackStart(pTarget);
+        { pSummoned->AI()->AttackStart(pTarget); }
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -115,15 +121,15 @@ struct  boss_omor_the_unscarredAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         if (m_uiSummonTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_FIENDISH_HOUND) == CAST_OK)
-                m_uiSummonTimer = urand(24100, 26900);
+            { m_uiSummonTimer = urand(24100, 26900); }
         }
         else
-            m_uiSummonTimer -= uiDiff;
+        { m_uiSummonTimer -= uiDiff; }
 
         if (m_bCanPullBack)
         {
@@ -133,22 +139,22 @@ struct  boss_omor_the_unscarredAI : public ScriptedAI
                 {
                     // if unit dosen't have this flag, then no pulling back (script will attempt cast, even if orbital strike was resisted)
                     if (pPlayer->HasMovementFlag(MOVEFLAG_FALLING))
-                        DoCastSpellIfCan(pPlayer, SPELL_SHADOW_WHIP, CAST_INTERRUPT_PREVIOUS);
+                    { DoCastSpellIfCan(pPlayer, SPELL_SHADOW_WHIP, CAST_INTERRUPT_PREVIOUS); }
                 }
                 m_playerGuid.Clear();
                 m_uiShadowWhipTimer = 2000;
                 m_bCanPullBack = false;
             }
             else
-                m_uiShadowWhipTimer -= uiDiff;
+            { m_uiShadowWhipTimer -= uiDiff; }
         }
         else if (m_uiOrbitalStrikeTimer < uiDiff)
         {
             Unit* pTemp = NULL;
             if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
-                pTemp = m_creature->getVictim();
+            { pTemp = m_creature->getVictim(); }
             else
-                pTemp = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
+            { pTemp = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0); }
 
             if (pTemp && pTemp->GetTypeId() == TYPEID_PLAYER)
             {
@@ -162,17 +168,17 @@ struct  boss_omor_the_unscarredAI : public ScriptedAI
             }
         }
         else
-            m_uiOrbitalStrikeTimer -= uiDiff;
+        { m_uiOrbitalStrikeTimer -= uiDiff; }
 
         if (m_creature->GetHealthPercent() < 20.0f)
         {
             if (m_uiDemonicShieldTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_DEMONIC_SHIELD) == CAST_OK)
-                    m_uiDemonicShieldTimer = 15000;
+                { m_uiDemonicShieldTimer = 15000; }
             }
             else
-                m_uiDemonicShieldTimer -= uiDiff;
+            { m_uiDemonicShieldTimer -= uiDiff; }
         }
 
         if (m_uiAuraTimer < uiDiff)
@@ -187,20 +193,20 @@ struct  boss_omor_the_unscarredAI : public ScriptedAI
             }
         }
         else
-            m_uiAuraTimer -= uiDiff;
+        { m_uiAuraTimer -= uiDiff; }
 
         if (m_uiShadowboltTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H) == CAST_OK)
-                    m_uiShadowboltTimer = urand(4200, 7300);
+                { m_uiShadowboltTimer = urand(4200, 7300); }
             }
             else
-                m_uiShadowboltTimer = 2000;
+            { m_uiShadowboltTimer = 2000; }
         }
         else
-            m_uiShadowboltTimer -= uiDiff;
+        { m_uiShadowboltTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

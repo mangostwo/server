@@ -176,7 +176,7 @@ enum
 };
 
 // TODO - likely entirely not needed workaround
-struct  mob_restless_soulAI : public ScriptedAI
+struct mob_restless_soulAI : public ScriptedAI
 {
     mob_restless_soulAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -269,7 +269,7 @@ enum
     SPELL_SLAP              = 6754
 };
 
-struct  mobs_spectral_ghostly_citizenAI : public ScriptedAI
+struct mobs_spectral_ghostly_citizenAI : public ScriptedAI
 {
     mobs_spectral_ghostly_citizenAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 

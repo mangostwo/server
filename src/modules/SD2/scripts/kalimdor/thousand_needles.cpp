@@ -58,7 +58,7 @@ enum
 
 const float m_afGalakLoc[] = { -4867.387695f, -1357.353760f, -48.226f};
 
-struct  npc_kanatiAI : public npc_escortAI
+struct npc_kanatiAI : public npc_escortAI
 {
     npc_kanatiAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -142,7 +142,7 @@ float m_afBanditLoc[6][6] =
     { -4788.861328f, -1888.007813f, 89.888f}
 };
 
-struct  npc_lakota_windsongAI : public npc_escortAI
+struct npc_lakota_windsongAI : public npc_escortAI
 {
     npc_lakota_windsongAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -223,7 +223,7 @@ float m_afWyvernLoc[3][3] =
     { -4985.364f, -952.528f, -5.199f}
 };
 
-struct  npc_paoka_swiftmountainAI : public npc_escortAI
+struct npc_paoka_swiftmountainAI : public npc_escortAI
 {
     npc_paoka_swiftmountainAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -292,7 +292,7 @@ enum
 
 #define GOSSIP_ITEM_QUEST   "Please tell me the Phrase.."
 
-struct  npc_plucky_johnsonAI : public ScriptedAI
+struct npc_plucky_johnsonAI : public ScriptedAI
 {
     npc_plucky_johnsonAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

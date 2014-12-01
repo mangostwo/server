@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -47,10 +53,10 @@ void instance_old_hillsbrad::OnPlayerEnter(Player* pPlayer)
 
     // Spawn Drake if necessary
     if (GetData(TYPE_DRAKE) == DONE || GetData(TYPE_BARREL_DIVERSION) != DONE)
-        return;
+    { return; }
 
     if (GetSingleCreatureFromStorage(NPC_DRAKE, true))
-        return;
+    { return; }
 
     pPlayer->SummonCreature(NPC_DRAKE, aDrakeSummonLoc[0], aDrakeSummonLoc[1], aDrakeSummonLoc[2], aDrakeSummonLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0);
 }
@@ -76,9 +82,9 @@ void instance_old_hillsbrad::OnCreatureCreate(Creature* pCreature)
             if (pCreature->GetPositionZ() > 53.4f)
             {
                 if (pCreature->GetPositionY() > 150.0f)
-                    m_lLeftPrisonersList.push_back(pCreature->GetObjectGuid());
+                { m_lLeftPrisonersList.push_back(pCreature->GetObjectGuid()); }
                 else
-                    m_lRightPrisonersList.push_back(pCreature->GetObjectGuid());
+                { m_lRightPrisonersList.push_back(pCreature->GetObjectGuid()); }
             }
             break;
     }
@@ -120,9 +126,9 @@ void instance_old_hillsbrad::OnCreatureEvade(Creature* pCreature)
 void instance_old_hillsbrad::OnObjectCreate(GameObject* pGo)
 {
     if (pGo->GetEntry() == GO_ROARING_FLAME)
-        m_lRoaringFlamesList.push_back(pGo->GetObjectGuid());
+    { m_lRoaringFlamesList.push_back(pGo->GetObjectGuid()); }
     else if (pGo->GetEntry() == GO_PRISON_DOOR)
-        m_mGoEntryGuidStore[GO_PRISON_DOOR] = pGo->GetObjectGuid();
+    { m_mGoEntryGuidStore[GO_PRISON_DOOR] = pGo->GetObjectGuid(); }
 }
 
 void instance_old_hillsbrad::HandleThrallRelocation()
@@ -135,20 +141,20 @@ void instance_old_hillsbrad::HandleThrallRelocation()
         debug_log("SD2: Instance Old Hillsbrad: Thrall relocation");
 
         if (!pThrall->IsAlive())
-            pThrall->Respawn();
+        { pThrall->Respawn(); }
 
         // epoch failed, reloc to inn
         if (GetData(TYPE_ESCORT_INN) == DONE)
-            pThrall->GetMap()->CreatureRelocation(pThrall, 2660.57f, 659.173f, 61.9370f, 5.76f);
+        { pThrall->GetMap()->CreatureRelocation(pThrall, 2660.57f, 659.173f, 61.9370f, 5.76f); }
         // barn to inn failed, reloc to barn
         else if (GetData(TYPE_ESCORT_BARN) == DONE)
-            pThrall->GetMap()->CreatureRelocation(pThrall, 2486.91f, 626.356f, 58.0761f, 4.66f);
+        { pThrall->GetMap()->CreatureRelocation(pThrall, 2486.91f, 626.356f, 58.0761f, 4.66f); }
         // keep to barn failed, reloc to keep
         else if (GetData(TYPE_SKARLOC) == DONE)
-            pThrall->GetMap()->CreatureRelocation(pThrall, 2063.40f, 229.509f, 64.4883f, 2.23f);
+        { pThrall->GetMap()->CreatureRelocation(pThrall, 2063.40f, 229.509f, 64.4883f, 2.23f); }
         // prison to keep failed, reloc to prison
         else
-            pThrall->GetMap()->CreatureRelocation(pThrall, 2231.89f, 119.95f, 82.2979f, 4.21f);
+        { pThrall->GetMap()->CreatureRelocation(pThrall, 2231.89f, 119.95f, 82.2979f, 4.21f); }
     }
 }
 
@@ -161,7 +167,7 @@ void instance_old_hillsbrad::SetData(uint32 uiType, uint32 uiData)
             if (uiData == IN_PROGRESS)
             {
                 if (m_uiBarrelCount >= MAX_BARRELS)
-                    return;
+                { return; }
 
                 // Update barrels used and world state
                 ++m_uiBarrelCount;
@@ -180,7 +186,7 @@ void instance_old_hillsbrad::SetData(uint32 uiType, uint32 uiData)
 
                         // set the houses on fire
                         for (GuidList::const_iterator itr = m_lRoaringFlamesList.begin(); itr != m_lRoaringFlamesList.end(); ++itr)
-                            DoRespawnGameObject(*itr, 30 * MINUTE);
+                        { DoRespawnGameObject(*itr, 30 * MINUTE); }
 
                         // move the orcs outside the houses
                         float fX, fY, fZ;
@@ -204,7 +210,7 @@ void instance_old_hillsbrad::SetData(uint32 uiType, uint32 uiData)
                         }
                     }
                     else
-                        debug_log("SD2: Instance Old Hillsbrad: SetData (Type: %u Data %u) cannot find any pPlayer.", uiType, uiData);
+                    { debug_log("SD2: Instance Old Hillsbrad: SetData (Type: %u Data %u) cannot find any pPlayer.", uiType, uiData); }
 
                     SetData(TYPE_BARREL_DIVERSION, DONE);
                 }
@@ -213,15 +219,15 @@ void instance_old_hillsbrad::SetData(uint32 uiType, uint32 uiData)
         case TYPE_THRALL_EVENT:
             // nothing to do if already done and thrall respawn
             if (GetData(TYPE_THRALL_EVENT) == DONE)
-                return;
+            { return; }
             m_auiEncounter[uiType] = uiData;
             if (uiData == FAIL)
             {
                 // despawn the bosses if necessary
                 if (Creature* pSkarloc = GetSingleCreatureFromStorage(NPC_SKARLOC, true))
-                    pSkarloc->ForcedDespawn();
+                { pSkarloc->ForcedDespawn(); }
                 if (Creature* pEpoch = GetSingleCreatureFromStorage(NPC_EPOCH, true))
-                    pEpoch->ForcedDespawn();
+                { pEpoch->ForcedDespawn(); }
 
                 if (m_uiThrallEventCount <= MAX_WIPE_COUNTER)
                 {
@@ -233,7 +239,7 @@ void instance_old_hillsbrad::SetData(uint32 uiType, uint32 uiData)
                 }
                 // If we already respawned Thrall too many times, the event is failed for good
                 else if (m_uiThrallEventCount > MAX_WIPE_COUNTER)
-                    debug_log("SD2: Instance Old Hillsbrad: Thrall event failed %u times. Reset instance required.", m_uiThrallEventCount);
+                { debug_log("SD2: Instance Old Hillsbrad: Thrall event failed %u times. Reset instance required.", m_uiThrallEventCount); }
             }
             break;
         case TYPE_DRAKE:
@@ -265,7 +271,7 @@ void instance_old_hillsbrad::SetData(uint32 uiType, uint32 uiData)
 uint32 instance_old_hillsbrad::GetData(uint32 uiType) const
 {
     if (uiType < MAX_ENCOUNTER)
-        return m_auiEncounter[uiType];
+    { return m_auiEncounter[uiType]; }
 
     return 0;
 }
@@ -287,7 +293,7 @@ void instance_old_hillsbrad::Load(const char* chrIn)
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
     {
         if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        { m_auiEncounter[i] = NOT_STARTED; }
     }
 
     // custom reload - if the escort event or the Epoch event are not done, then reset the escort
@@ -311,7 +317,7 @@ void instance_old_hillsbrad::UpdateLodgeQuestCredit()
         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
         {
             if (Player* pPlayer = itr->getSource())
-                pPlayer->KilledMonsterCredit(NPC_LODGE_QUEST_TRIGGER);
+            { pPlayer->KilledMonsterCredit(NPC_LODGE_QUEST_TRIGGER); }
         }
     }
 }
@@ -326,7 +332,7 @@ void instance_old_hillsbrad::Update(uint32 uiDiff)
             m_uiThrallResetTimer = 0;
         }
         else
-            m_uiThrallResetTimer -= uiDiff;
+        { m_uiThrallResetTimer -= uiDiff; }
     }
 }
 
@@ -342,13 +348,13 @@ bool ProcessEventId_event_go_barrel_old_hillsbrad(uint32 /*uiEventId*/, Object* 
         if (instance_old_hillsbrad* pInstance = (instance_old_hillsbrad*)((Player*)pSource)->GetInstanceData())
         {
             if (pInstance->GetData(TYPE_BARREL_DIVERSION) == DONE)
-                return true;
+            { return true; }
 
             pInstance->SetData(TYPE_BARREL_DIVERSION, IN_PROGRESS);
 
             // Don't allow players to use same object twice
             if (pTarget->GetTypeId() == TYPEID_GAMEOBJECT)
-                ((GameObject*)pTarget)->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+            { ((GameObject*)pTarget)->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT); }
 
             return true;
         }

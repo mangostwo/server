@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -65,7 +71,7 @@ static const uint32 auiGuests[MAX_GUESTS] =
     NPC_LORD_ROBIN_DARIS
 };
 
-struct  boss_moroesAI : public ScriptedAI
+struct boss_moroesAI : public ScriptedAI
 {
     boss_moroesAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -101,7 +107,7 @@ struct  boss_moroesAI : public ScriptedAI
         DoScriptText(SAY_AGGRO, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_MOROES, IN_PROGRESS);
+        { m_pInstance->SetData(TYPE_MOROES, IN_PROGRESS); }
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -119,7 +125,7 @@ struct  boss_moroesAI : public ScriptedAI
         DoRemoveGarroteAura();
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_MOROES, FAIL);
+        { m_pInstance->SetData(TYPE_MOROES, FAIL); }
     }
 
     void JustDied(Unit* /*pVictim*/) override
@@ -128,14 +134,14 @@ struct  boss_moroesAI : public ScriptedAI
         DoRemoveGarroteAura();
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_MOROES, DONE);
+        { m_pInstance->SetData(TYPE_MOROES, DONE); }
     }
 
     void EnterEvadeMode() override
     {
         // Don't evade during vanish phase
         if (m_uiWaitTimer)
-            return;
+        { return; }
 
         ScriptedAI::EnterEvadeMode();
     }
@@ -144,7 +150,7 @@ struct  boss_moroesAI : public ScriptedAI
     {
         // not if m_creature are dead, so avoid
         if (!m_creature->IsAlive())
-            return;
+        { return; }
 
         // it's empty, so first time
         if (m_vGuestsEntryList.empty())
@@ -154,25 +160,25 @@ struct  boss_moroesAI : public ScriptedAI
 
             // fill vector array with entries from creature array
             for (uint8 i = 0; i < MAX_GUESTS; ++i)
-                m_vGuestsEntryList[i] = auiGuests[i];
+            { m_vGuestsEntryList[i] = auiGuests[i]; }
 
             std::random_shuffle(m_vGuestsEntryList.begin(), m_vGuestsEntryList.end());
 
             // Summon the 4 entries
             for (uint8 i = 0; i < MAX_ACTIVE_GUESTS; ++i)
-                m_creature->SummonCreature(m_vGuestsEntryList[i], afLocations[i][0], afLocations[i][1], afLocations[i][2], afLocations[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
+            { m_creature->SummonCreature(m_vGuestsEntryList[i], afLocations[i][0], afLocations[i][1], afLocations[i][2], afLocations[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0); }
         }
         // Resummon the killed adds
         else
         {
             if (!m_pInstance)
-                return;
+            { return; }
 
             for (uint8 i = 0; i < MAX_ACTIVE_GUESTS; ++i)
             {
                 // If we already have the creature on the map, then don't summon it
                 if (m_pInstance->GetSingleCreatureFromStorage(m_vGuestsEntryList[i], true))
-                    continue;
+                { continue; }
 
                 m_creature->SummonCreature(m_vGuestsEntryList[i], afLocations[i][0], afLocations[i][1], afLocations[i][2], afLocations[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
             }
@@ -189,12 +195,12 @@ struct  boss_moroesAI : public ScriptedAI
             Map::PlayerList const& PlayerList = pMap->GetPlayers();
 
             if (PlayerList.isEmpty())
-                return;
+            { return; }
 
             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
             {
                 if (i->getSource()->IsAlive() && i->getSource()->HasAura(SPELL_GARROTE))
-                    i->getSource()->RemoveAurasDueToSpell(SPELL_GARROTE);
+                { i->getSource()->RemoveAurasDueToSpell(SPELL_GARROTE); }
             }
         }
     }
@@ -202,7 +208,7 @@ struct  boss_moroesAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         // Note: because the Vanish spell adds invisibility effect on the target, the timers won't be decreased during the vanish phase
         if (m_uiWaitTimer)
@@ -220,7 +226,7 @@ struct  boss_moroesAI : public ScriptedAI
                 m_uiWaitTimer = 0;
             }
             else
-                m_uiWaitTimer -= uiDiff;
+            { m_uiWaitTimer -= uiDiff; }
 
             // Don't user other abilities in vanish
             return;
@@ -229,7 +235,7 @@ struct  boss_moroesAI : public ScriptedAI
         if (!m_bEnrage && m_creature->GetHealthPercent() < 30.0f)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
-                m_bEnrage = true;
+            { m_bEnrage = true; }
         }
 
         // No other spells are cast after enrage
@@ -244,27 +250,27 @@ struct  boss_moroesAI : public ScriptedAI
                 }
             }
             else
-                m_uiVanishTimer -= uiDiff;
+            { m_uiVanishTimer -= uiDiff; }
 
             // Gouge highest aggro, and attack second highest
             if (m_uiGougeTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_GOUGE) == CAST_OK)
-                    m_uiGougeTimer = 40000;
+                { m_uiGougeTimer = 40000; }
             }
             else
-                m_uiGougeTimer -= uiDiff;
+            { m_uiGougeTimer -= uiDiff; }
 
             if (m_uiBlindTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_BLIND, SELECT_FLAG_PLAYER))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_BLIND) == CAST_OK)
-                        m_uiBlindTimer = 40000;
+                    { m_uiBlindTimer = 40000; }
                 }
             }
             else
-                m_uiBlindTimer -= uiDiff;
+            { m_uiBlindTimer -= uiDiff; }
         }
 
         DoMeleeAttackIfReady();

@@ -86,7 +86,7 @@ enum
     MAX_MALFURION_TEMPLE_SPEECHES = 6
 };
 
-struct  npc_malfurionAI : public ScriptedAI
+struct npc_malfurionAI : public ScriptedAI
 {
     npc_malfurionAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -97,7 +97,7 @@ struct  npc_malfurionAI : public ScriptedAI
             m_uiSpeech   = 0;
             m_uiSayTimer = 3000;
         }
-        
+
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
     }
 

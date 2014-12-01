@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -73,7 +79,7 @@ static SilverHandAbilityStruct m_aSilverHandAbility[8] =
     {NPC_VICAR_HYERONIMUS,      SPELL_BLESSING,         TARGET_TYPE_FRIENDLY,   2000,  13000},
     {NPC_VICAR_HYERONIMUS,      SPELL_HOLY_LIGHT,       TARGET_TYPE_FRIENDLY,   5000,  9000},
 };
-struct  boss_silver_hand_bossesAI : public ScriptedAI
+struct boss_silver_hand_bossesAI : public ScriptedAI
 {
     boss_silver_hand_bossesAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -81,7 +87,7 @@ struct  boss_silver_hand_bossesAI : public ScriptedAI
         for (uint8 i = 0; i < countof(m_aSilverHandAbility); ++i)
         {
             if (m_aSilverHandAbility[i].m_uiCreatureEntry == m_creature->GetEntry())
-                m_mSpellTimers[i] = m_aSilverHandAbility[i].m_uiInitialTimer;
+            { m_mSpellTimers[i] = m_aSilverHandAbility[i].m_uiInitialTimer; }
         }
         Reset();
     }
@@ -93,7 +99,7 @@ struct  boss_silver_hand_bossesAI : public ScriptedAI
     void Reset() override
     {
         for (UNORDERED_MAP<uint8, uint32>::iterator itr = m_mSpellTimers.begin(); itr != m_mSpellTimers.end(); ++itr)
-            itr->second = m_aSilverHandAbility[itr->first].m_uiInitialTimer;
+        { itr->second = m_aSilverHandAbility[itr->first].m_uiInitialTimer; }
     }
 
     void JustDied(Unit* pKiller) override
@@ -109,7 +115,7 @@ struct  boss_silver_hand_bossesAI : public ScriptedAI
                 if (pKiller->GetTypeId() == TYPEID_PLAYER)
                 {
                     if (Creature* pCredit = m_pInstance->GetSingleCreatureFromStorage(NPC_PALADIN_QUEST_CREDIT))
-                        ((Player*)pKiller)->KilledMonsterCredit(NPC_PALADIN_QUEST_CREDIT, pCredit->GetObjectGuid());
+                    { ((Player*)pKiller)->KilledMonsterCredit(NPC_PALADIN_QUEST_CREDIT, pCredit->GetObjectGuid()); }
                 }
             }
         }
@@ -138,7 +144,7 @@ struct  boss_silver_hand_bossesAI : public ScriptedAI
         if (pTarget)
         {
             if (DoCastSpellIfCan(pTarget, m_aSilverHandAbility[uiIndex].m_uiSpellId) == CAST_OK)
-                return true;
+            { return true; }
         }
 
         return false;
@@ -148,7 +154,7 @@ struct  boss_silver_hand_bossesAI : public ScriptedAI
     {
         // Return since we have no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         for (UNORDERED_MAP<uint8, uint32>::iterator itr = m_mSpellTimers.begin(); itr != m_mSpellTimers.end(); ++itr)
         {
@@ -161,7 +167,7 @@ struct  boss_silver_hand_bossesAI : public ScriptedAI
                 }
             }
             else
-                itr->second -= uiDiff;
+            { itr->second -= uiDiff; }
         }
 
         DoMeleeAttackIfReady();

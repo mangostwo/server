@@ -121,7 +121,7 @@ static const float afSpawnLocations[3][3] =
     { -126.57f, -214.609f, -71.446f}                        // guardians
 };
 
-struct  boss_onyxiaAI : public ScriptedAI
+struct boss_onyxiaAI : public ScriptedAI
 {
     boss_onyxiaAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

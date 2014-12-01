@@ -23,20 +23,24 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Tanaris
-SD%Complete: 80
-SDComment: Quest support: 648, 1560, 2954, 4005, 10277.
-SDCategory: Tanaris
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Tanaris
+ * SD%Complete: 80
+ * SDComment:   Quest support: 648, 1560, 2954, 4005, 10277.
+ * SDCategory:  Tanaris
+ * EndScriptData
+ */
 
-/* ContentData
-mob_aquementas
-npc_custodian_of_time
-npc_oox17tn
-npc_stone_watcher_of_norgannon
-npc_tooga
-EndContentData */
+/**
+ * ContentData
+ * mob_aquementas
+ * npc_custodian_of_time
+ * npc_oox17tn
+ * npc_stone_watcher_of_norgannon
+ * npc_tooga
+ * EndContentData
+ */
 
 #include "precompiled.h"
 #include "escort_ai.h"
@@ -62,7 +66,7 @@ enum
     FACTION_ELEMENTAL       = 91,
 };
 
-struct  mob_aquementasAI : public ScriptedAI
+struct mob_aquementasAI : public ScriptedAI
 {
     mob_aquementasAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -176,7 +180,7 @@ enum
     QUEST_ID_CAVERNS_OF_TIME    = 10277,
 };
 
-struct  npc_custodian_of_timeAI : public npc_escortAI
+struct npc_custodian_of_timeAI : public npc_escortAI
 {
     npc_custodian_of_timeAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -185,7 +189,7 @@ struct  npc_custodian_of_timeAI : public npc_escortAI
         Player* pPlayer = GetPlayerForEscort();
 
         if (!pPlayer)
-            return;
+        { return; }
 
         switch (uiPointId)
         {
@@ -216,7 +220,7 @@ struct  npc_custodian_of_timeAI : public npc_escortAI
     void MoveInLineOfSight(Unit* pWho) override
     {
         if (HasEscortState(STATE_ESCORT_ESCORTING))
-            return;
+        { return; }
 
         if (pWho->GetTypeId() == TYPEID_PLAYER)
         {
@@ -225,7 +229,7 @@ struct  npc_custodian_of_timeAI : public npc_escortAI
                 float fRadius = 10.0f;
 
                 if (m_creature->IsWithinDistInMap(pWho, fRadius))
-                    Start(false, (Player*)pWho);
+                { Start(false, (Player*)pWho); }
             }
         }
     }
@@ -258,7 +262,7 @@ enum
     NPC_SHADOW_MAGE         = 5617
 };
 
-struct  npc_oox17tnAI : public npc_escortAI
+struct npc_oox17tnAI : public npc_escortAI
 {
     npc_oox17tnAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
@@ -437,7 +441,7 @@ enum
 
 const float m_afToWaterLoc[] = { -7032.664551f, -4906.199219f, -1.606446f};
 
-struct  npc_toogaAI : public FollowerAI
+struct npc_toogaAI : public FollowerAI
 {
     npc_toogaAI(Creature* pCreature) : FollowerAI(pCreature) { Reset(); }
 

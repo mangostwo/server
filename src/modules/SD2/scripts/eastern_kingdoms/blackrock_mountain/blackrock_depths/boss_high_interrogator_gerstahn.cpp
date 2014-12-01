@@ -42,7 +42,7 @@ enum
     SPELL_SHADOWSHIELD          = 12040
 };
 
-struct  boss_high_interrogator_gerstahnAI : public ScriptedAI
+struct boss_high_interrogator_gerstahnAI : public ScriptedAI
 {
     boss_high_interrogator_gerstahnAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 

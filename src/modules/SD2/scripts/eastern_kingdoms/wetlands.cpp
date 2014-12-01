@@ -23,12 +23,14 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Wetlands
-SD%Complete: 100
-SDComment: Quest support: 1249
-SDCategory: Wetlands
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Wetlands
+ * SD%Complete: 100
+ * SDComment:   Quest support: 1249.
+ * SDCategory:  Wetlands
+ * EndScriptData
+ */
 
 /**
  * ContentData
@@ -50,25 +52,25 @@ enum
     SAY_SLIM_DEFEAT             = -1000978,
     SAY_FRIEND_DEFEAT           = -1000979,
     SAY_SLIM_NOTES              = -1000980,
-    
+
     QUEST_MISSING_DIPLO_PT11    = 1249,
     FACTION_ENEMY               = 168,                      // ToDo: faction needs to be confirmed!
+
     SPELL_STEALTH               = 1785,
-    SPELL_CALL_FRIENDS          = 16457,                    // summon npc 4971
-    
+    SPELL_CALL_FRIENDS          = 16457,                    // summons 1x friend
     NPC_SLIMS_FRIEND            = 4971,
     NPC_TAPOKE_SLIM_JAHN        = 4962
 };
 
 static const DialogueEntry aDiplomatDialogue[] =
 {
-    {SAY_SLIM_DEFEAT, NPC_TAPOKE_SLIM_JAHN, 4000},
-    {SAY_SLIM_NOTES, NPC_TAPOKE_SLIM_JAHN, 7000},
-    {QUEST_MISSING_DIPLO_PT11, 0, 0},
+    {SAY_SLIM_DEFEAT,           NPC_TAPOKE_SLIM_JAHN,   4000},
+    {SAY_SLIM_NOTES,            NPC_TAPOKE_SLIM_JAHN,   7000},
+    {QUEST_MISSING_DIPLO_PT11,  0,                      0},
     {0, 0, 0},
 };
 
-struct  npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
+struct npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
 {
     npc_tapoke_slim_jahnAI(Creature* pCreature) : npc_escortAI(pCreature),
         DialogueHelper(aDiplomatDialogue)
@@ -121,7 +123,9 @@ struct  npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
     {
         // Note: may not work on guardian pets
         if (Player* pPlayer = GetPlayerForEscort())
+        {
             pSummoned->AI()->AttackStart(pPlayer);
+        }
     }
 
     void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage) override
@@ -137,33 +141,33 @@ struct  npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
                 DoScriptText(SAY_FRIEND_DEFEAT, pFriend);
                 pFriend->ForcedDespawn(1000);
             }
-            
+
             // set escort on pause and evade
             uiDamage = 0;
             m_bEventComplete = true;
-            
+
             SetEscortPaused(true);
             EnterEvadeMode();
         }
     }
-    
+
     void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
     {
         if (uiMoveType != POINT_MOTION_TYPE || !HasEscortState(STATE_ESCORT_ESCORTING))
             return;
 
         npc_escortAI::MovementInform(uiMoveType, uiPointId);
-        
+
         // after the npc is defeated, start the dialog right after it reaches the evade point
         if (m_bEventComplete)
         {
             if (Player* pPlayer = GetPlayerForEscort())
                 m_creature->SetFacingToObject(pPlayer);
-            
+
             StartNextDialogueText(SAY_SLIM_DEFEAT);
         }
     }
-    
+
     void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         // start escort
@@ -184,22 +188,22 @@ struct  npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
             m_creature->SetRespawnDelay(2);
         }
     }
-    
+
     Creature* GetSpeakerByEntry(uint32 uiEntry) override
     {
         if (uiEntry == NPC_TAPOKE_SLIM_JAHN)
             return m_creature;
-        
+
         return NULL;
     }
 
     void UpdateEscortAI(const uint32 uiDiff) override
     {
         DialogueUpdate(uiDiff);
-        
+
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
-        
+
         DoMeleeAttackIfReady();
     }
 };
@@ -231,7 +235,7 @@ bool QuestAccept_npc_mikhail(Player* pPlayer, Creature* pCreature, const Quest* 
         pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pSlim, pQuest->GetQuestId());
         return true;
     }
-    
+
     return false;
 }
 

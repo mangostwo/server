@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -52,7 +58,7 @@ enum
     SPELL_BERSERK                   = 32965,        // triggers 32963
 };
 
-struct  boss_doomlordkazzakAI : public ScriptedAI
+struct boss_doomlordkazzakAI : public ScriptedAI
 {
     boss_doomlordkazzakAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
@@ -92,7 +98,7 @@ struct  boss_doomlordkazzakAI : public ScriptedAI
     {
         // When Kazzak kills a player (not pets/totems), he regens some health
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
+        { return; }
 
         switch (urand(0, 2))
         {
@@ -111,34 +117,34 @@ struct  boss_doomlordkazzakAI : public ScriptedAI
     {
         // Return since we have no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        { return; }
 
         // ShadowVolley_Timer
         if (m_uiShadowVolleyTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_VOLLEY) == CAST_OK)
-                m_uiShadowVolleyTimer = urand(10000, 30000);
+            { m_uiShadowVolleyTimer = urand(10000, 30000); }
         }
         else
-            m_uiShadowVolleyTimer -= uiDiff;
+        { m_uiShadowVolleyTimer -= uiDiff; }
 
         // Cleave_Timer
         if (m_uiCleaveTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
-                m_uiCleaveTimer = urand(8000, 12000);
+            { m_uiCleaveTimer = urand(8000, 12000); }
         }
         else
-            m_uiCleaveTimer -= uiDiff;
+        { m_uiCleaveTimer -= uiDiff; }
 
         // ThunderClap_Timer
         if (m_uiThunderClapTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_THUNDERCLAP) == CAST_OK)
-                m_uiThunderClapTimer = urand(10000, 14000);
+            { m_uiThunderClapTimer = urand(10000, 14000); }
         }
         else
-            m_uiThunderClapTimer -= uiDiff;
+        { m_uiThunderClapTimer -= uiDiff; }
 
         // VoidBolt_Timer
         if (m_uiVoidBoltTimer < uiDiff)
@@ -146,11 +152,11 @@ struct  boss_doomlordkazzakAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_VOID_BOLT) == CAST_OK)
-                    m_uiVoidBoltTimer = urand(15000, 18000);
+                { m_uiVoidBoltTimer = urand(15000, 18000); }
             }
         }
         else
-            m_uiVoidBoltTimer -= uiDiff;
+        { m_uiVoidBoltTimer -= uiDiff; }
 
         // MarkOfKazzak_Timer
         if (m_uiMarkOfKazzakTimer < uiDiff)
@@ -158,11 +164,11 @@ struct  boss_doomlordkazzakAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_MARK_OF_KAZZAK, SELECT_FLAG_POWER_MANA))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_MARK_OF_KAZZAK) == CAST_OK)
-                    m_uiMarkOfKazzakTimer = 20000;
+                { m_uiMarkOfKazzakTimer = 20000; }
             }
         }
         else
-            m_uiMarkOfKazzakTimer -= uiDiff;
+        { m_uiMarkOfKazzakTimer -= uiDiff; }
 
         // Enrage_Timer
         if (m_uiEnrageTimer < uiDiff)
@@ -174,7 +180,7 @@ struct  boss_doomlordkazzakAI : public ScriptedAI
             }
         }
         else
-            m_uiEnrageTimer -= uiDiff;
+        { m_uiEnrageTimer -= uiDiff; }
 
         // Great_Enrage_Timer
         if (m_uiGreatEnrageTimer)
@@ -182,10 +188,10 @@ struct  boss_doomlordkazzakAI : public ScriptedAI
             if (m_uiGreatEnrageTimer <= uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                    m_uiGreatEnrageTimer = 0;
+                { m_uiGreatEnrageTimer = 0; }
             }
             else
-                m_uiGreatEnrageTimer -= uiDiff;
+            { m_uiGreatEnrageTimer -= uiDiff; }
         }
 
         // Twisted Reflection
@@ -194,11 +200,11 @@ struct  boss_doomlordkazzakAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_TWISTED_REFLECTION) == CAST_OK)
-                    m_uiTwistedReflectionTimer = 15000;
+                { m_uiTwistedReflectionTimer = 15000; }
             }
         }
         else
-            m_uiTwistedReflectionTimer -= uiDiff;
+        { m_uiTwistedReflectionTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

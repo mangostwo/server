@@ -49,7 +49,7 @@ enum
     ACHIEV_START_ONYXIA_ID      = 6601,
 };
 
-class  instance_onyxias_lair : public ScriptedInstance
+class instance_onyxias_lair : public ScriptedInstance
 {
     public:
         instance_onyxias_lair(Map* pMap);

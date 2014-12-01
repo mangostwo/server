@@ -58,7 +58,7 @@ enum
     SPELL_TRASH             = 3391
 };
 
-struct  boss_venoxisAI : public ScriptedAI
+struct boss_venoxisAI : public ScriptedAI
 {
     boss_venoxisAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

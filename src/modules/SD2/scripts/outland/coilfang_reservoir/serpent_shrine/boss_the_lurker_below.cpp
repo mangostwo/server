@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -74,7 +80,7 @@ static const AddsLocations aLurkerLoc[MAX_SUBMERGE_ADDS] =
     {NPC_COILFANG_GUARDIAN, 42.471f, -445.115f, -19.76f},
 };
 
-struct  boss_the_lurker_belowAI : public Scripted_NoMovementAI
+struct boss_the_lurker_belowAI : public Scripted_NoMovementAI
 {
     boss_the_lurker_belowAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
@@ -111,7 +117,7 @@ struct  boss_the_lurker_belowAI : public Scripted_NoMovementAI
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_THELURKER_EVENT, FAIL);
+        { m_pInstance->SetData(TYPE_THELURKER_EVENT, FAIL); }
 
         m_creature->ForcedDespawn();
     }
@@ -119,7 +125,7 @@ struct  boss_the_lurker_belowAI : public Scripted_NoMovementAI
     void JustDied(Unit* /*pVictim*/) override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_THELURKER_EVENT, DONE);
+        { m_pInstance->SetData(TYPE_THELURKER_EVENT, DONE); }
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -132,7 +138,7 @@ struct  boss_the_lurker_belowAI : public Scripted_NoMovementAI
     void DoSummonCoilfangNaga()
     {
         for (uint8 i = 0; i < MAX_SUBMERGE_ADDS; ++i)
-            m_creature->SummonCreature(aLurkerLoc[i].uiEntry, aLurkerLoc[i].fX, aLurkerLoc[i].fY, aLurkerLoc[i].fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+        { m_creature->SummonCreature(aLurkerLoc[i].uiEntry, aLurkerLoc[i].fX, aLurkerLoc[i].fY, aLurkerLoc[i].fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0); }
     }
 
     // Custom threat management
@@ -142,12 +148,12 @@ struct  boss_the_lurker_belowAI : public Scripted_NoMovementAI
         Unit* pOldTarget = m_creature->getVictim();
 
         if (!m_creature->GetThreatManager().isThreatListEmpty())
-            pTarget = m_creature->GetThreatManager().getHostileTarget();
+        { pTarget = m_creature->GetThreatManager().getHostileTarget(); }
 
         if (pTarget)
         {
             if (pOldTarget != pTarget && m_uiPhase != PHASE_SPOUT)
-                AttackStart(pTarget);
+            { AttackStart(pTarget); }
 
             // Set victim to old target (if not while Spout)
             if (pOldTarget && pOldTarget->IsAlive() && m_uiPhase != PHASE_SPOUT)
@@ -166,7 +172,7 @@ struct  boss_the_lurker_belowAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!SelectHostileTarget())
-            return;
+        { return; }
 
         switch (m_uiPhase)
         {
@@ -184,7 +190,7 @@ struct  boss_the_lurker_belowAI : public Scripted_NoMovementAI
                     m_uiSpoutEndTimer = 23000;
                 }
                 else
-                    m_uiSpoutEndTimer -= uiDiff;
+                { m_uiSpoutEndTimer -= uiDiff; }
 
                 // no break;
             case PHASE_NORMAL:
@@ -201,7 +207,7 @@ struct  boss_the_lurker_belowAI : public Scripted_NoMovementAI
                     }
                 }
                 else
-                    m_uiPhaseChangeTimer -= uiDiff;
+                { m_uiPhaseChangeTimer -= uiDiff; }
 
                 // Combat spells are only in normal phase
                 if (m_uiPhase == PHASE_NORMAL)
@@ -221,37 +227,37 @@ struct  boss_the_lurker_belowAI : public Scripted_NoMovementAI
                         }
                     }
                     else
-                        m_uiSpoutTimer -= uiDiff;
+                    { m_uiSpoutTimer -= uiDiff; }
 
                     if (m_uiWhirlTimer < uiDiff)
                     {
                         if (DoCastSpellIfCan(m_creature, SPELL_WHIRL) == CAST_OK)
-                            m_uiWhirlTimer = 18000;
+                        { m_uiWhirlTimer = 18000; }
                     }
                     else
-                        m_uiWhirlTimer -= uiDiff;
+                    { m_uiWhirlTimer -= uiDiff; }
 
                     if (m_uiGeyserTimer < uiDiff)
                     {
                         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                         {
                             if (DoCastSpellIfCan(pTarget, SPELL_GEYSER) == CAST_OK)
-                                m_uiGeyserTimer = urand(50000, 60000);
+                            { m_uiGeyserTimer = urand(50000, 60000); }
                         }
                     }
                     else
-                        m_uiGeyserTimer -= uiDiff;
+                    { m_uiGeyserTimer -= uiDiff; }
 
                     // If we are within range melee the target
                     if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
-                        DoMeleeAttackIfReady();
+                    { DoMeleeAttackIfReady(); }
                     // Spam Waterbolt spell when not tanked
                     else
                     {
                         if (!m_creature->IsNonMeleeSpellCasted(false))
                         {
                             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                                DoCastSpellIfCan(pTarget, SPELL_WATERBOLT);
+                            { DoCastSpellIfCan(pTarget, SPELL_WATERBOLT); }
                         }
                     }
                 }
@@ -268,7 +274,7 @@ struct  boss_the_lurker_belowAI : public Scripted_NoMovementAI
                     m_uiPhaseChangeTimer = 2 * MINUTE * IN_MILLISECONDS;
                 }
                 else
-                    m_uiPhaseChangeTimer -= uiDiff;
+                { m_uiPhaseChangeTimer -= uiDiff; }
 
                 break;
         }

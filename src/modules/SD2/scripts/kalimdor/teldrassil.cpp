@@ -54,7 +54,7 @@ enum
     FACTION_DARNASSUS       = 79
 };
 
-struct  npc_mistAI : public FollowerAI
+struct npc_mistAI : public FollowerAI
 {
     npc_mistAI(Creature* pCreature) : FollowerAI(pCreature) { Reset(); }
 

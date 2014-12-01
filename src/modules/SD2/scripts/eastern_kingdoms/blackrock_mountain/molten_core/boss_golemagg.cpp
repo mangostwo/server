@@ -1,4 +1,10 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/**
+ * ScriptDev2 is an extension for mangos providing enhanced features for
+ * area triggers, creatures, game objects, instances, items, and spells beyond
+ * the default database scripting in mangos.
+ *
+ * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -17,12 +23,14 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Boss_Golemagg
-SD%Complete: 80
-SDComment: Rager need to be tied to boss (Despawn on boss-death)
-SDCategory: Molten Core
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Boss_Golemagg
+ * SD%Complete: 80
+ * SDComment:   Rager need to be tied to boss (Despawn on boss-death)
+ * SDCategory:  Molten Core
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 #include "molten_core.h"
@@ -40,7 +48,7 @@ enum
     SPELL_MANGLE            = 19820
 };
 
-struct  boss_golemaggAI : public ScriptedAI
+struct boss_golemaggAI : public ScriptedAI
 {
     boss_golemaggAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -68,27 +76,34 @@ struct  boss_golemaggAI : public ScriptedAI
     void Aggro(Unit* /*pWho*/) override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_GOLEMAGG, IN_PROGRESS);
+        }
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_GOLEMAGG, DONE);
+        }
     }
 
     void JustReachedHome() override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_GOLEMAGG, FAIL);
-        
+        }
         DoCastSpellIfCan(m_creature, SPELL_MAGMA_SPLASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         // Pyroblast
         if (m_uiPyroblastTimer < uiDiff)
@@ -96,17 +111,21 @@ struct  boss_golemaggAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_PYROBLAST) == CAST_OK)
+                {
                     m_uiPyroblastTimer = 7 * IN_MILLISECONDS;
+                }
             }
         }
         else
-            m_uiPyroblastTimer -= uiDiff;
+            { m_uiPyroblastTimer -= uiDiff; }
 
         // Enrage
         if (!m_bEnraged && m_creature->GetHealthPercent() < 10.0f)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+            {
                 m_bEnraged = true;
+            }
         }
 
         // Earthquake
@@ -115,10 +134,14 @@ struct  boss_golemaggAI : public ScriptedAI
             if (m_uiEarthquakeTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_EARTHQUAKE) == CAST_OK)
+                {
                     m_uiEarthquakeTimer = 3 * IN_MILLISECONDS;
+                }
             }
             else
+            {
                 m_uiEarthquakeTimer -= uiDiff;
+            }
         }
 
         // Golemagg's Trust
@@ -128,13 +151,13 @@ struct  boss_golemaggAI : public ScriptedAI
             m_uiBuffTimer = 1.5 * IN_MILLISECONDS;
         }
         else
-            m_uiBuffTimer -= uiDiff;
+            { m_uiBuffTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }
 };
 
-struct  mob_core_ragerAI : public ScriptedAI
+struct mob_core_ragerAI : public ScriptedAI
 {
     mob_core_ragerAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -166,16 +189,20 @@ struct  mob_core_ragerAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         // Mangle
         if (m_uiMangleTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MANGLE) == CAST_OK)
+            {
                 m_uiMangleTimer = 10 * IN_MILLISECONDS;
+            }
         }
         else
-            m_uiMangleTimer -= uiDiff;
+            { m_uiMangleTimer -= uiDiff; }
 
         DoMeleeAttackIfReady();
     }

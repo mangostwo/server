@@ -42,7 +42,7 @@ enum
     SPELL_SUMMON_RIFLEMAN   = 17279,        // spell needs script target
 };
 
-struct  boss_cannon_master_willeyAI : public ScriptedAI
+struct boss_cannon_master_willeyAI : public ScriptedAI
 {
     boss_cannon_master_willeyAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

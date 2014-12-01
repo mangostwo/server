@@ -37,7 +37,7 @@ enum
     NPC_WARD_KEEPER   = 4625
 };
 
-class  instance_razorfen_kraul : public ScriptedInstance
+class instance_razorfen_kraul : public ScriptedInstance
 {
     public:
         instance_razorfen_kraul(Map* pMap);

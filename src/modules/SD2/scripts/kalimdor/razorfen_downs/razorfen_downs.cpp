@@ -85,7 +85,7 @@ static float m_fSpawnerCoord[3][4] =
     {2570.62f, 942.393f, 53.7433f, 0.71558f}
 };
 
-struct  npc_belnistraszAI : public npc_escortAI
+struct npc_belnistraszAI : public npc_escortAI
 {
     npc_belnistraszAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
