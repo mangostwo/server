@@ -491,12 +491,14 @@ void WorldSession::SendLfgUpdate(bool isGroup, LFGPlayerStatus status)
         {
             case LFG_UPDATE_ADDED_TO_QUEUE:
                 isQueued = true;
+                joinLFG = true;
+                break;
             case LFG_UPDATE_PROPOSAL_BEGIN:
                 joinLFG = true;
                 break;
             case LFG_UPDATE_STATUS:
                 isQueued = (status.state == LFG_STATE_QUEUED);
-                joinLFG = status.state != LFG_STATE_ROLECHECK && status.state != LFG_STATE_NONE;
+                joinLFG = (status.state != LFG_STATE_ROLECHECK) && (status.state != LFG_STATE_NONE);
                 break;
         }
     
