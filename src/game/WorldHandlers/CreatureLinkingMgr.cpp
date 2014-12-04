@@ -723,7 +723,7 @@ bool CreatureLinkingHolder::TryFollowMaster(Creature* pCreature)
     if (pInfo->mapId != INVALID_MAP_ID)                     // entry case
     {
         BossGuidMapBounds finds = m_masterGuid.equal_range(pInfo->masterId);
-        for (BossGuidMap::iterator itr = finds.first; itr != finds.second; ++itr)
+        for (BossGuidMap::const_iterator itr = finds.first; itr != finds.second; ++itr)
         {
             pMaster = pCreature->GetMap()->GetCreature(itr->second);
             if (pMaster && IsSlaveInRangeOfBoss(pCreature, pMaster, pInfo->searchRange))
