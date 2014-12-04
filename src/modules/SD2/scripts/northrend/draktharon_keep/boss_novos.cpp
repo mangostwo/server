@@ -341,12 +341,12 @@ struct  npc_crystal_channel_targetAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_HULKING_CORPSE || pSummoned->GetEntry() == NPC_FETID_TROLL_CORPSE || pSummoned->GetEntry() == NPC_RISON_SHADOWCASTER)
         {
-            // Let them move down the stairs
-            float fX, fY, fZ;
-
             // The end of the stairs is approximately at 1/3 of the way between summoning-position and novos, height of Novos
             if (Creature* pNovos = m_pInstance->GetSingleCreatureFromStorage(NPC_NOVOS))
             {
+                // Let them move down the stairs
+                float fX, fY, fZ;
+            
                 m_creature->GetRandomPoint(0.70 * pNovos->GetPositionX() + 0.30 * pSummoned->GetPositionX(), 0.70 * pNovos->GetPositionY() + 0.30 * pSummoned->GetPositionY(), pNovos->GetPositionZ() + 1.5f, 4.0f, fX, fY, fZ);
                 pSummoned->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
             }
