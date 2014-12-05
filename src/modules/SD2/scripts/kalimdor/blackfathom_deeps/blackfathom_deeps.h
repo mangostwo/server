@@ -28,14 +28,16 @@
 
 enum
 {
-    MAX_ENCOUNTER               = 2,
+    MAX_ENCOUNTER               = 3,
     MAX_FIRES                   = 4,
     MAX_COUNT_POS               = 3,
 
     TYPE_KELRIS                 = 1,
     TYPE_SHRINE                 = 2,
+    TYPE_AQUANIS                = 3,
 
     NPC_KELRIS                  = 4832,
+    NPC_BARON_AQUANIS           = 12876,
 
     // Shrine event
     NPC_AKUMAI_SERVANT          = 4978,
@@ -48,6 +50,7 @@ enum
     GO_SHRINE_2                 = 21119,
     GO_SHRINE_3                 = 21120,
     GO_SHRINE_4                 = 21121,
+    GO_FATHOM_STONE             = 177964,
 };
 
 /* This is the spawn pattern for the event mobs
@@ -105,6 +108,8 @@ static const SummonInformation aWaveSummonInformation[] =
     {3, NPC_MURKSHALLOW_SOFTSHELL,  {{2, 0}, {1, 1}, {2, 2}}},
     {3, NPC_MURKSHALLOW_SOFTSHELL,  {{1, 3}, {2, 4}, {2, 5}}}
 };
+
+static const float afAquanisPos[4] = { -782.21f, -63.26f, -42.43f, 2.36f };
 
 class instance_blackfathom_deeps : public ScriptedInstance
 {
