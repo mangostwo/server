@@ -33,7 +33,6 @@ enum
     MAX_GRAIN_CRATES            = 5,
     MAX_SCOURGE_SPAWN_POS       = 5,
     
-    SAY_CHROMIE_HURRY           = -1000000,                         // TODO
     SAY_SCOURGE_FESTIVAL_LANE   = -1595003,
     SAY_SCOURGE_KINGS_SQUARE    = -1595004,
     SAY_SCOURGE_MARKET_ROW      = -1595005,
@@ -41,9 +40,11 @@ enum
     SAY_SCOURGE_ELDERS_SQUARE   = -1595007,
     
     SAY_MEET_TOWN_HALL          = -1595008,
+    SAY_CORRUPTOR_DESPAWN       = -1595041,
 
     WHISPER_CHROMIE_CRATES      = -1595001,
     WHISPER_CHROMIE_GUARDIAN    = -1595002,
+    WHISPER_CHROMIE_HURRY       = -1000000,                         // TODO
     
     SPELL_CORRUPTION_OF_TIME    = 60422,                            // triggers 60451
 };
@@ -58,8 +59,8 @@ static sSpawnLocation m_aArthasSpawnLocs[] =                // need tuning
     {1957.13f, 1287.43f, 145.65f, 2.96f},                   // bridge
     {2091.99f, 1277.25f, 140.47f, 0.43f},                   // city entrance
     {2366.24f, 1195.25f, 132.04f, 3.15f},                   // town hall
-    {2534.46f, 1125.99f, 130.75f, 0.27f},
-    {2363.77f, 1406.31f, 128.64f, 3.23f}
+    {2534.98f, 1126.16f, 130.86f, 2.84f},                   // burning stratholme
+    {2363.44f, 1404.90f, 128.64f, 2.77f},                   // crusader square gate
 };
 
 static sSpawnLocation m_aIntroActorsSpawnLocs[] =
@@ -206,6 +207,8 @@ void instance_culling_of_stratholme::OnCreatureCreate(Creature* pCreature)
         case NPC_PATRICIA_O_REILLY:
         case NPC_LORDAERON_CRIER:
         case NPC_INFINITE_CORRUPTER:
+        case NPC_LORD_EPOCH:
+        case NPC_MALGANIS:
             m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
 
@@ -253,6 +256,7 @@ void instance_culling_of_stratholme::OnObjectCreate(GameObject* pGo)
             break;
         case GO_DARK_RUNED_CHEST:
         case GO_DARK_RUNED_CHEST_H:
+        case GO_CITY_ENTRANCE_GATE:
             break;
 
         default:
@@ -296,11 +300,6 @@ void instance_culling_of_stratholme::SetData(uint32 uiType, uint32 uiData)
                 SetData(TYPE_MEATHOOK_EVENT, IN_PROGRESS);
             }
             break;
-        case TYPE_ARTHAS_ESCORT_EVENT:
-            m_auiEncounter[uiType] = uiData;
-            if (uiData == FAIL)
-                m_uiArthasRespawnTimer = 10000;
-            break;
         case TYPE_MEATHOOK_EVENT:
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
@@ -314,13 +313,41 @@ void instance_culling_of_stratholme::SetData(uint32 uiType, uint32 uiData)
             if (uiData == DONE)
                 m_uiScourgeWaveTimer = 5000;
             break;
+        case TYPE_ARTHAS_TOWNHALL_EVENT:
+            m_auiEncounter[uiType] = uiData;
+            if (uiData == DONE)
+            {
+                // despawn arthas and spawn him in the next point
+                if (Creature* pArthas = GetSingleCreatureFromStorage(NPC_ARTHAS))
+                    { pArthas->ForcedDespawn(); }
+                    
+                if (Player* pPlayer = GetPlayerInMap())
+                    { DoSpawnArthasIfNeeded(pPlayer); }
+            }
+            break;
         case TYPE_EPOCH_EVENT:
             m_auiEncounter[uiType] = uiData;
+            break;
+        case TYPE_ARTHAS_ESCORT_EVENT:
+            // use fail in order to respawn Arthas
+            if (uiData == FAIL)
+            {
+                m_uiArthasRespawnTimer = 10000;
+                
+                // despawn the bosses if Arthas dies in order to avoid exploits
+                if (Creature* pEpoch = GetSingleCreatureFromStorage(NPC_LORD_EPOCH, true))
+                    { pEpoch->ForcedDespawn(); }
+                if (Creature* pMalganis = GetSingleCreatureFromStorage(NPC_MALGANIS, true))
+                    { pMalganis->ForcedDespawn(); }
+            }
+            else
+                { m_auiEncounter[uiType] = uiData; }
             break;
         case TYPE_MALGANIS_EVENT:
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
             {
+                DoUseDoorOrButton(GO_CITY_ENTRANCE_GATE);
                 DoToggleGameObjectFlags(instance->IsRegularDifficulty() ? GO_DARK_RUNED_CHEST : GO_DARK_RUNED_CHEST_H, GO_FLAG_NO_INTERACT, false);
                 DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_DARK_RUNED_CHEST : GO_DARK_RUNED_CHEST_H, 30 * MINUTE);
 
@@ -359,13 +386,15 @@ void instance_culling_of_stratholme::SetData(uint32 uiType, uint32 uiData)
                     SetData(TYPE_INFINITE_CORRUPTER_TIME, 0);
                     break;
                 case SPECIAL:
-                    DoChromieWhisper(SAY_CHROMIE_HURRY);
+                    DoChromieWhisper(WHISPER_CHROMIE_HURRY);
                     break;
                 case FAIL:
                     // event failed - despawn the corruptor
                     SetData(TYPE_INFINITE_CORRUPTER_TIME, 0);
                     if (Creature* pCorrupter = GetSingleCreatureFromStorage(NPC_INFINITE_CORRUPTER))
                     {
+                        DoOrSimulateScriptTextForThisInstance(SAY_CORRUPTOR_DESPAWN, NPC_INFINITE_CORRUPTER);
+                        
                         if (pCorrupter->IsAlive())
                             pCorrupter->ForcedDespawn();
                     }
@@ -374,14 +403,15 @@ void instance_culling_of_stratholme::SetData(uint32 uiType, uint32 uiData)
             break;
     }
 
-    if (uiData == DONE || uiData == FAIL || uiType == TYPE_INFINITE_CORRUPTER_TIME)
+    if (uiData == DONE || uiType == TYPE_INFINITE_CORRUPTER_TIME)
     {
         OUT_SAVE_INST_DATA;
 
         std::ostringstream saveStream;
         saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " "
                    << m_auiEncounter[3] << " " << m_auiEncounter[4] << " " << m_auiEncounter[5] << " "
-                   << m_auiEncounter[6] << " " << m_auiEncounter[7] << " " << m_auiEncounter[8];
+                   << m_auiEncounter[6] << " " << m_auiEncounter[7] << " " << m_auiEncounter[8] << " "
+                   << m_auiEncounter[9];
 
         m_strInstData = saveStream.str();
 
@@ -402,6 +432,10 @@ void instance_culling_of_stratholme::OnCreatureDeath(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
+        case NPC_MEATHOOK:                 SetData(TYPE_MEATHOOK_EVENT, DONE); break;
+        case NPC_SALRAMM_THE_FLESHCRAFTER: SetData(TYPE_SALRAMM_EVENT, DONE);  break;
+        case NPC_LORD_EPOCH:               SetData(TYPE_EPOCH_EVENT, DONE);    break;
+        
         case NPC_ENRAGING_GHOUL:
         case NPC_ACOLYTE:
         case NPC_MASTER_NECROMANCER:
@@ -435,7 +469,8 @@ void instance_culling_of_stratholme::Load(const char* chrIn)
 
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
-               >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7] >> m_auiEncounter[8];
+               >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7] 
+               >> m_auiEncounter[8] >> m_auiEncounter[9];
 
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
     {
