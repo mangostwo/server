@@ -142,13 +142,6 @@ static const float aHeraldPositions[3][4] =
     {743.377f, 630.240f, 411.073f, 0.0f},                               // Near center position
 };
 
-static const float aHeraldPositions[3][4] =
-{
-    {745.606f, 619.705f, 411.172f, 4.66003f},                           // Spawn position
-    {732.524f, 663.007f, 412.393f, 0.0f},                               // Gate movement position
-    {743.377f, 630.240f, 411.073f, 0.0f},                               // Near center position
-};
-
 // data that provides grand champion entry, vehicle mount, trash champions with the spawn locations as well as crowd stalker and emote entry
 struct ChampionsData
 {
