@@ -33,6 +33,72 @@ EndScriptData */
 2 - Black Knight
 */
 
+enum
+{
+    // grand champions
+    SAY_HERALD_HORDE_CHALLENGE              = -1650000,
+    SAY_HERALD_HORDE_WARRIOR                = -1650001,
+    SAY_HERALD_HORDE_MAGE                   = -1650002,
+    SAY_HERALD_HORDE_SHAMAN                 = -1650003,
+    SAY_HERALD_HORDE_HUNTER                 = -1650004,
+    SAY_HERALD_HORDE_ROGUE                  = -1650005,
+
+    SAY_HERALD_ALLIANCE_CHALLENGE           = -1650006,
+    SAY_HERALD_ALLIANCE_WARRIOR             = -1650007,
+    SAY_HERALD_ALLIANCE_MAGE                = -1650008,
+    SAY_HERALD_ALLIANCE_SHAMAN              = -1650009,
+    SAY_HERALD_ALLIANCE_HUNTER              = -1650010,
+    SAY_HERALD_ALLIANCE_ROGUE               = -1650011,
+
+    SAY_TIRION_CHALLENGE_WELCOME            = -1650012,
+    SAY_TIRION_FIRST_CHALLENGE              = -1650013,
+    SAY_THRALL_ALLIANCE_CHALLENGE           = -1650014,
+    SAY_GARROSH_ALLIANCE_CHALLENGE          = -1650015,
+    SAY_VARIAN_HORDE_CHALLENGE              = -1650016,
+    SAY_TIRION_CHALLENGE_BEGIN              = -1650017,
+
+    // argent champion
+    SAY_TIRION_ARGENT_CHAMPION              = -1650028,
+    SAY_TIRION_ARGENT_CHAMPION_BEGIN        = -1650029,
+    SAY_HERALD_EADRIC                       = -1650030,
+    SAY_HERALD_PALETRESS                    = -1650031,
+    EMOTE_HORDE_ARGENT_CHAMPION             = -1650032,
+    EMOTE_ALLIANCE_ARGENT_CHAMPION          = -1650033,
+    SAY_EADRIC_INTRO                        = -1650034,
+    SAY_PALETRESS_INTRO_1                   = -1650035,
+    SAY_PALETRESS_INTRO_2                   = -1650036,
+
+    // black knight
+    SAY_TIRION_ARGENT_CHAMPION_COMPLETE     = -1650037,
+    SAY_HERALD_BLACK_KNIGHT_SPAWN           = -1650038,
+    SAY_BLACK_KNIGHT_INTRO_1                = -1650039,
+    SAY_TIRION_BLACK_KNIGHT_INTRO_2         = -1650040,
+    SAY_BLACK_KNIGHT_INTRO_3                = -1650041,
+    SAY_BLACK_KNIGHT_INTRO_4                = -1650042,
+
+    // event complete
+    SAY_TIRION_EPILOG_1                     = -1650043,
+    SAY_TIRION_EPILOG_2                     = -1650044,
+    SAY_VARIAN_ALLIANCE_EPILOG_3            = -1650045,
+    SAY_THRALL_HORDE_EPILOG_3               = -1650046,
+
+    // other texts
+    SAY_GARROSH_OTHER_1                     = -1650047,
+    SAY_THRALL_OTHER_2                      = -1650048,
+    SAY_GARROSH_OTHER_3                     = -1650049,
+    SAY_VARIAN_OTHER_4                      = -1650050,
+    SAY_VARIAN_OTHER_5                      = -1650051,
+
+    // spells
+    SPELL_ARGENT_GET_PLAYER_COUNT           = 66986,
+    SPELL_ARGENT_SUMMON_CHAMPION_1          = 66654,
+    SPELL_ARGENT_SUMMON_CHAMPION_2          = 66671,
+    SPELL_ARGENT_SUMMON_CHAMPION_3          = 66673,
+    SPELL_ARGENT_SUMMON_CHAMPION_WAVE       = 67295,
+    SPELL_ARGENT_SUMMON_BOSS_4              = 67396,
+    SPELL_ARGENT_HERALD_FEIGN_DEATH         = 66804,
+};
+
 static const DialogueEntryTwoSide aTocDialogues[] =
 {
     // ToDo:
@@ -65,20 +131,20 @@ void instance_trial_of_the_champion::OnPlayerEnter(Player* pPlayer)
         // set a random grand champion
         m_uiGrandChampionEntry = urand(0, 1) ? NPC_EADRIC : NPC_PALETRESS;
 
-        if (m_vChampionsEntries.empty())
+        if (m_vChampionsIndex.empty())
         {
-            m_vChampionsEntries.resize(MAX_CHAMPIONS_AVAILABLE);
+            m_vChampionsIndex.resize(MAX_CHAMPIONS_AVAILABLE);
 
-            // fill vector array with entries from creature array
+            // fill vector array with indexes from creature array
             for (uint8 i = 0; i < MAX_CHAMPIONS_AVAILABLE; ++i)
-                m_vChampionsEntries[i] = m_uiTeam == ALLIANCE ? aHordeChampions[i] : aAllianceChampions[i];
+                m_vChampionsIndex[i] = i;
 
             // set a random champion list
-            std::random_shuffle(m_vChampionsEntries.begin(), m_vChampionsEntries.end());
+            std::random_shuffle(m_vChampionsIndex.begin(), m_vChampionsIndex.end());
         }
     }
 
-    DoSummonHeraldIfNeeded();
+    DoSummonHeraldIfNeeded(pPlayer);
 }
 
 void instance_trial_of_the_champion::OnCreatureCreate(Creature* pCreature)
@@ -90,16 +156,17 @@ void instance_trial_of_the_champion::OnCreatureCreate(Creature* pCreature)
         case NPC_TIRION_FORDRING:
         case NPC_VARIAN_WRYNN:
         case NPC_THRALL:
-        case NPC_JACOB_ALERIUS:
-        case NPC_AMBROSE_BOLTSPARK:
-        case NPC_COLOSOS:
-        case NPC_JAELYNE_EVENSONG:
-        case NPC_LANA_STOUTHAMMER:
-        case NPC_MOKRA_SKULLCRUSHER:
-        case NPC_ERESSEA_DAWNSINGER:
-        case NPC_RUNOK_WILDMANE:
-        case NPC_ZULTORE:
-        case NPC_DEATHSTALKER_VISCERI:
+        case NPC_GARROSH:
+        case NPC_ALLIANCE_WARRIOR:
+        case NPC_ALLIANCE_MAGE:
+        case NPC_ALLIANCE_SHAMAN:
+        case NPC_ALLIANCE_HUNTER:
+        case NPC_ALLIANCE_ROGUE:
+        case NPC_HORDE_WARRIOR:
+        case NPC_HORDE_MAGE:
+        case NPC_HORDE_SHAMAN:
+        case NPC_HORDE_HUNTER:
+        case NPC_HORDE_ROGUE:
         case NPC_EADRIC:
         case NPC_PALETRESS:
             break;
@@ -201,19 +268,30 @@ void instance_trial_of_the_champion::Load(const char* chrIn)
     OUT_LOAD_INST_DATA_COMPLETE;
 }
 
-void instance_trial_of_the_champion::DoSummonHeraldIfNeeded()
+void instance_trial_of_the_champion::DoSummonHeraldIfNeeded(Unit* pSummoner)
 {
-    Player* pPlayer = GetPlayerInMap();
-    if (!pPlayer)
+    if (!pSummoner)
         return;
 
     if (GetSingleCreatureFromStorage(m_uiHeraldEntry, true))
         return;
 
-    pPlayer->SummonCreature(m_uiHeraldEntry, aHeraldPositions[0][0], aHeraldPositions[0][1], aHeraldPositions[0][2], aHeraldPositions[0][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+    pSummoner->SummonCreature(m_uiHeraldEntry, aHeraldPositions[0][0], aHeraldPositions[0][1], aHeraldPositions[0][2], aHeraldPositions[0][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+    
+    // summon champion mounts if required
+    if (GetData(TYPE_GRAND_CHAMPIONS) != DONE)
+    {
+        for (uint8 i = 0; i < MAX_CHAMPIONS_MOUNTS; ++i)
+            pSummoner->SummonCreature(m_uiTeam == ALLIANCE ? aTrialChampionsMounts[i].uiEntryAlliance : aTrialChampionsMounts[i].uiEntryHorde, aTrialChampionsMounts[i].fX, aTrialChampionsMounts[i].fY, aTrialChampionsMounts[i].fZ, aTrialChampionsMounts[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+    }
 }
 
 void instance_trial_of_the_champion::JustDidDialogueStep(int32 iEntry)
+{
+    // ToDo:
+}
+
+void instance_trial_of_the_champion::DoPrepareChampions(bool bSkipIntro)
 {
     // ToDo:
 }

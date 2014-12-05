@@ -4716,6 +4716,65 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1649075,'Champions, you\'re alive! Not only have you defeated every challenge of the Trial of the Crusader, but also thwarted Arthas\' plans! Your skill and cunning will prove to be a powerful weapon against the Scourge. Well done! Allow one of the Crusade\'s mages to transport you to the surface!',0,0,0,1,'tirion SAY_EPILOGUE');
 
 -- -1 650 000 TRIAL OF THE CHAMPION
+INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
+(-1650000,'The Silver Covenant is pleased to present their contenders for this event, Highlord.',0,1,0,396,'toc herald SAY_HORDE_CHALLENGE'),
+(-1650001,'Presenting the fierce Grand Champion of Orgrimmar, Mokra the Skullcrusher!',0,0,0,0,'toc herald SAY_HORDE_WARRIOR'),
+(-1650002,'Coming out of the gate is Eressea Dawnsinger, skilled mage and Grand Champion of Silvermoon!',0,0,0,0,'toc herald SAY_HORDE_MAGE'),
+(-1650003,'Tall in the saddle of his kodo, here is the venerable Runok Wildmane, Grand Champion of Thunder Bluff!',0,0,0,0,'toc herald SAY_HORDE_SHAMAN'),
+(-1650004,'Entering the arena is the lean and dangerous Zul\'tore, Grand Champion of Sen\'jin!',0,0,0,0,'toc herald SAY_HORDE_HUNTER'),
+(-1650005,'Representing the tenacity of the Forsaken, here is the Grand Champion of the Undercity, Deathstalker Visceri!',0,0,0,0,'toc herald SAY_HORDE_ROGUE'),
+
+(-1650006,'The Sunreavers are proud to present their representatives in this trial by combat.',0,1,0,396,'toc herald SAY_ALLIANCE_CHALLENGE'),
+(-1650007,'Proud and strong, give a cheer for Marshal Jacob Alerius, the Grand Champion of Stormwind!',0,0,0,0,'toc herald SAY_ALLIANCE_WARRIOR'),
+(-1650008,'Here comes the small but deadly Ambrose Boltspark, Grand Champion of Gnomeregan!',0,0,0,0,'toc herald SAY_ALLIANCE_MAGE'),
+(-1650009,'Coming out of the gate is Colosos, the towering Grand Champion of the Exodar!',0,0,0,0,'toc herald SAY_ALLIANCE_SHAMAN'),
+(-1650010,'Entering the arena is the Grand Champion of Darnassus, the skilled sentinel Jaelyne Evensong!',0,0,0,0,'toc herald SAY_ALLIANCE_HUNTER'),
+(-1650011,'The might of the dwarves is represented today by the Grand Champion of Ironforge, Lana Stouthammer!',0,0,0,0,'toc herald SAY_ALLIANCE_ROGUE'),
+
+(-1650012,'Welcome, champions. Today, before the eyes of your leaders and peers, you will prove yourselves worthy combatants.',0,1,0,1,'tirion SAY_TIRION_WELCOME'),
+(-1650013,'You will first be facing three of the Grand Champions of the Tournament! These fierce contenders have beaten out all others to reach the pinnacle of skill in the joust.',0,1,0,1,'tirion SAY_TIRION_FIRST_CHALLENGE'),
+(-1650014,'Fight well, Horde! Lok\'tar Ogar!',0,1,0,22,'thrall SAY_THRALL_ALLIANCE_CHALLENGE'),
+(-1650015,'Finally, a fight worth watching.',0,1,0,396,'garrosh SAY_GARROSH_ALLIANCE_CHALLENGE'),
+(-1650016,'I have no taste for these games, Tirion. Still... I trust they will perform admirably.',0,1,0,1,'king varian SAY_VARIAN_HORDE_CHALLENGE'),
+(-1650017,'Begin!',0,1,0,0,'tirion SAY_TIRION_CHAMPIONS_BEGIN'),
+(-1650018,'The blood elves of Silvermoon cheer for $n.',0,2,0,0,'raid spectator EMOTE_BLOOD_ELVES'),
+(-1650019,'The trolls of the Sen\'jin Village begin a chant to celebrate $n.',0,2,0,0,'raid spectator EMOTE_TROLLS'),
+(-1650020,'The tauren of Thunder Bluff cheer for $n.',0,2,0,0,'raid spectator EMOTE_TAUREN'),
+(-1650021,'The forsaken of the Undercity cheer for $n.',0,2,0,0,'raid spectator EMOTE_UNDEAD'),
+(-1650022,'The orcs of Orgrimmar cheer for $n.',0,2,0,0,'raid spectator EMOTE_ORCS'),
+(-1650023,'The dwarves of Ironforge begin a cheer for $n.',0,2,0,0,'raid spectator EMOTE_BLOOD_DWARVES'),
+(-1650024,'The gnomes of Gnomeregan cheer for $n.',0,2,0,0,'raid spectator EMOTE_GNOMES'),
+(-1650025,'The night elves of Darnassus cheer for $n.',0,2,0,0,'raid spectator EMOTE_NIGHT_ELVES'),
+(-1650026,'The humans of Stormwind cheer for $n.',0,2,0,0,'raid spectator EMOTE_HUMANS'),
+(-1650027,'The draenei of the Exodar cheer for $n.',0,2,0,0,'raid spectator EMOTE_DRAENEI'),
+
+(-1650028,'Well fought! Your next challenge comes from the Crusade\'s own ranks. You will be tested against their considerable prowess.',0,1,0,0,'tirion SAY_TIRION_ARGENT_CHAMPION'),
+(-1650029,'You may begin!',0,1,0,22,'tirion SAY_TIRION_ARGENT_CHAMPION_BEGIN'),
+(-1650030,'Entering the arena, a paladin who is no stranger to the battlefield or tournament ground, the Grand Champion of the Argent Crusade, Eadric the Pure!',0,1,0,0,'toc herald SAY_EADRIC'),
+(-1650031,'The next combatant is second to none in her passion for upholding the Light. I give you Argent Confessor Paletress!',0,1,0,0,'toc herald SAY_PALETRESS'),
+(-1650032,'The Horde spectators cheer for $n.',0,2,0,0,'raid spectator EMOTE_HORDE_ARGENT_CHAMPION'),
+(-1650033,'The Alliance spectators cheer for $n.',0,2,0,0,'raid spectator EMOTE_ALLIANCE_ARGENT_CHAMPION'),
+(-1650034,'Are you up to the challenge? I will not hold back.',16134,0,0,397,'eadric SAY_EADRIC_INTRO'),
+(-1650035,'Thank you, good herald. Your words are too kind.',16245,0,0,2,'paletress SAY_PALETRESS_INTRO_1'),
+(-1650036,'May the Light give me strength to provide a worthy challenge.',16246,0,0,16,'paletress SAY_PALETRESS_INTRO_2'),
+
+(-1650037,'Well done. You have proven yourself today-',0,1,0,0,'tirion SAY_ARGENT_CHAMPION_COMPLETE'),
+(-1650038,'What\'s that, up near the rafters?',0,0,0,25,'toc herald SAY_BLACK_KNIGHT_SPAWN'),
+(-1650039,'You spoiled my grand entrance, rat.',16256,0,0,0,'black knight SAY_BLACK_KNIGHT_INTRO_1'),
+(-1650040,'What is the meaning of this?',0,1,0,0,'tirion SAY_TIRION_BLACK_KNIGHT_INTRO_2'),
+(-1650041,'Did you honestly think an agent of the Lich King would be bested on the field of your pathetic little tournament?',16257,0,0,396,'black knight SAY_BLACK_KNIGHT_INTRO_3'),
+(-1650042,'I\'ve come to finish my task.',16258,0,0,396,'black knight SAY_BLACK_KNIGHT_INTRO_4'),
+
+(-1650043,'My congratulations, champions. Through trials both planned and unexpected, you have triumphed.',0,1,0,0,'tirion SAY_EPILOG_1'),
+(-1650044,'Go now and rest; you\'ve earned it.',0,1,0,0,'tirion SAY_EPILOG_2'),
+(-1650045,'You fought well.',0,1,0,66,'king varian SAY_VARIAN_EPILOG_3'),
+(-1650046,'Well done, Horde!',0,1,0,66,'thrall SAY_THRALL_HORDE_EPILOG_3'),
+
+(-1650047,'Tear him apart!',0,1,0,22,'garrosh SAY_GARROSH_OTHER_1'),
+(-1650048,'Garrosh, enough.',0,1,0,396,'thrall SAY_THRALL_OTHER_2'),
+(-1650049,'Admirably? Hah! I will enjoy watching your weak little champions fail, human.',0,1,0,22,'garrosh SAY_GARROSH_OTHER_3'),
+(-1650050,'Don\'t just stand there; kill him!',0,1,0,22,'king varian SAY_VARIAN_OTHER_4'),
+(-1650051,'I did not come here to watch animals tear at each other senselessly, Tirion.',0,1,0,1,'king varian SAY_VARIAN_OTHER_5');
 
 -- -1 658 000 ICC: PIT OF SARON
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES

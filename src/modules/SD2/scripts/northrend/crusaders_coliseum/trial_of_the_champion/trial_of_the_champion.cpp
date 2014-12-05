@@ -77,10 +77,10 @@ bool GossipSelect_npc_toc_herald(Player* pPlayer, Creature* pCreature, uint32 /*
     switch (uiAction)
     {
         case GOSSIP_ACTION_INFO_DEF+1:
-            pInstance->SetData(TYPE_GRAND_CHAMPIONS, SPECIAL);
+            pInstance->DoPrepareChampions(false);
             break;
         case GOSSIP_ACTION_INFO_DEF+2:
-            pInstance->SetData(TYPE_GRAND_CHAMPIONS, IN_PROGRESS);
+            pInstance->DoPrepareChampions(true);
             break;
         case GOSSIP_ACTION_INFO_DEF+3:
             pInstance->SetData(TYPE_ARGENT_CHAMPION, SPECIAL);
