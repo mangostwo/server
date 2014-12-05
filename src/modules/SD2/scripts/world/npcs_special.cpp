@@ -1202,7 +1202,7 @@ struct  npc_spring_rabbitAI : public ScriptedPetAI
         float m_fMoveAngle = m_creature->GetAngle(pPartner);
         float fDist = m_creature->GetDistance(pPartner);
         float fX, fY, fZ;
-        m_creature->GetNearPoint(m_creature, fX, fY, fZ, m_creature->GetObjectBoundingRadius(), fDist * 0.5f - m_creature->GetObjectBoundingRadius(), m_fMoveAngle);
+        m_creature->GetNearPoint(m_creature, fX, fY, fZ, m_creature->GetObjectBoundingRadius(), fDist * 0.5f, m_fMoveAngle);
 
         m_creature->GetMotionMaster()->Clear();
         m_creature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);

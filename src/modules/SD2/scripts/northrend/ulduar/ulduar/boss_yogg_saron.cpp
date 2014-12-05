@@ -529,7 +529,7 @@ struct  boss_saraAI : public Scripted_NoMovementAI, private DialogueHelper
         {
             if (m_uiSarasSpellTimer < uiDiff)
             {
-                CanCastResult castResult;
+                CanCastResult castResult = CAST_OK;
                 switch (urand(0, 2))
                 {
                     case 0: castResult = DoCastSpellIfCan(m_creature, SPELL_SARAS_FERVOR);   break;
