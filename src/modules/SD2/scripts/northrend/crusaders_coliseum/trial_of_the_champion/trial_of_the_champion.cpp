@@ -19,14 +19,90 @@
 
 /* ScriptData
 SDName: trial_of_the_champion
-SD%Complete: 0
-SDComment:
+SD%Complete: 20
+SDComment: Gossip
 SDCategory: Crusader Coliseum, Trial of the Champion
 EndScriptData */
 
 #include "precompiled.h"
 #include "trial_of_the_champion.h"
 
+/*######
+## npc_toc_herald
+######*/
+
+enum
+{
+    GOSSIP_ITEM_READY                   = -3650000,
+    GOSSIP_ITEM_READY_SKIP_INTRO        = -3650001,
+    GOSSIP_ITEM_READY_NEXT_CHALLENGE    = -3650002,
+
+    TEXT_ID_READY_FIRST_CHALLENGE       = 14688,
+    TEXT_ID_READY_NEXT_CHALLENGE        = 14737,
+    TEXT_ID_READY_FINAL_CHALLENGE       = 14738,
+};
+
+bool GossipHello_npc_toc_herald(Player* pPlayer, Creature* pCreature)
+{
+    instance_trial_of_the_champion* pInstance = (instance_trial_of_the_champion*)pCreature->GetInstanceData();
+    if (!pInstance)
+        return true;
+
+    if (pInstance->GetData(TYPE_GRAND_CHAMPIONS) == NOT_STARTED)
+    {
+        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_READY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_READY_SKIP_INTRO, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+        pPlayer->SEND_GOSSIP_MENU(TEXT_ID_READY_FIRST_CHALLENGE, pCreature->GetObjectGuid());
+    }
+    else if (pInstance->GetData(TYPE_GRAND_CHAMPIONS) == DONE && pInstance->GetData(TYPE_ARGENT_CHAMPION) == NOT_STARTED)
+    {
+        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_READY_NEXT_CHALLENGE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+        pPlayer->SEND_GOSSIP_MENU(TEXT_ID_READY_NEXT_CHALLENGE, pCreature->GetObjectGuid());
+    }
+    else if (pInstance->GetData(TYPE_ARGENT_CHAMPION) == DONE && pInstance->GetData(TYPE_BLACK_KNIGHT) == NOT_STARTED)
+    {
+        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_READY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+        pPlayer->SEND_GOSSIP_MENU(TEXT_ID_READY_FINAL_CHALLENGE, pCreature->GetObjectGuid());
+    }
+
+    return true;
+}
+
+bool GossipSelect_npc_toc_herald(Player* pPlayer, Creature* pCreature, uint32 /*sender*/, uint32 uiAction)
+{
+    instance_trial_of_the_champion* pInstance = (instance_trial_of_the_champion*)pCreature->GetInstanceData();
+    if (!pInstance)
+        return true;
+
+    switch (uiAction)
+    {
+        case GOSSIP_ACTION_INFO_DEF+1:
+            pInstance->SetData(TYPE_GRAND_CHAMPIONS, SPECIAL);
+            break;
+        case GOSSIP_ACTION_INFO_DEF+2:
+            pInstance->SetData(TYPE_GRAND_CHAMPIONS, IN_PROGRESS);
+            break;
+        case GOSSIP_ACTION_INFO_DEF+3:
+            pInstance->SetData(TYPE_ARGENT_CHAMPION, SPECIAL);
+            break;
+        case GOSSIP_ACTION_INFO_DEF+4:
+            pInstance->SetData(TYPE_BLACK_KNIGHT, SPECIAL);
+            break;
+    }
+
+    pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+    pPlayer->CLOSE_GOSSIP_MENU();
+
+    return true;
+}
+
 void AddSC_trial_of_the_champion()
 {
+    Script* pNewScript;
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_toc_herald";
+    pNewScript->pGossipHello = &GossipHello_npc_toc_herald;
+    pNewScript->pGossipSelect = &GossipSelect_npc_toc_herald;
+    pNewScript->RegisterSelf();
 }

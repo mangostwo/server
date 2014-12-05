@@ -5061,6 +5061,11 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3649009,'Your words of praise are appreciated, Coliseum Master.','barrett GOSSIP_ITEM_ANUB_INIT'),
 (-3649010,'That is strange...','barrett GOSSIP_ITEM_ANUB_START');
 
+-- -3 650 000 TRIAL OF THE CHAMPION
+INSERT INTO gossip_texts (entry,content_default,comment) VALUES
+(-3650000,'I am ready.','herald GOSSIP_ITEM_READY'),
+(-3650001,'I am ready. However, I\'d like to skip the pageantry.','herald GOSSIP_ITEM_READY_SKIP_INTRO'),
+(-3650002,'I am ready for the next challenge.','herald GOSSIP_ITEM_READY_NEXT_CHALLENGE');
 
 --
 -- Below just for beautiful view in table, run at own desire
