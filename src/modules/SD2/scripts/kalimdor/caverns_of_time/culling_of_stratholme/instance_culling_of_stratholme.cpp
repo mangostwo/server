@@ -32,6 +32,7 @@ enum
     MAX_ARTHAS_SPAWN_POS        = 5,
     MAX_GRAIN_CRATES            = 5,
     MAX_SCOURGE_SPAWN_POS       = 5,
+    MAX_BURNING_SCOURGE_POS     = 15,
     
     SAY_SCOURGE_FESTIVAL_LANE   = -1595003,
     SAY_SCOURGE_KINGS_SQUARE    = -1595004,
@@ -106,6 +107,31 @@ static sScourgeSpawnLoc m_aScourgeWavesLocs[] =
     {POS_MARKET_ROW,    SAY_SCOURGE_MARKET_ROW,     2219.825f, 1331.119f, 127.978f, 3.08f},
     {POS_TOWN_HALL,     SAY_SCOURGE_TOWN_HALL,      2351.475f, 1211.893f, 130.361f, 4.50f},
     {POS_ELDERS_SQUARE, SAY_SCOURGE_ELDERS_SQUARE,  2259.153f, 1153.199f, 138.431f, 2.39f},
+};
+
+struct sBurningScourgeSpawnLoc
+{
+    uint8 m_uiType;
+    float m_fX, m_fY, m_fZ;
+};
+
+static sBurningScourgeSpawnLoc m_aBurningScourgeLocs[MAX_BURNING_SCOURGE_POS] =
+{
+    {SCOURGE_TYPE_GHOUL, 2571.570f, 1169.945f, 126.191f},
+    {SCOURGE_TYPE_GOLEM, 2560.524f, 1208.296f, 125.613f},
+    {SCOURGE_TYPE_GHOUL, 2562.075f, 1182.137f, 126.499f},
+    {SCOURGE_TYPE_FIEND, 2552.720f, 1227.233f, 125.620f},
+    {SCOURGE_TYPE_GHOUL, 2545.070f, 1245.650f, 125.991f},
+    {SCOURGE_TYPE_GHOUL, 2534.250f, 1258.379f, 127.030f},
+    {SCOURGE_TYPE_ACOLYTES, 2532.075f, 1271.579f, 127.243f},
+    {SCOURGE_TYPE_GHOUL, 2529.144f, 1281.680f, 128.429f},
+    {SCOURGE_TYPE_GHOUL, 2491.742f, 1365.169f, 130.827f},
+    {SCOURGE_TYPE_FIEND, 2490.869f, 1366.189f, 130.678f},
+    {SCOURGE_TYPE_GHOUL, 2479.944f, 1393.666f, 129.975f},
+    {SCOURGE_TYPE_GOLEM, 2484.858f, 1380.665f, 130.075f},
+    {SCOURGE_TYPE_GHOUL, 2474.965f, 1399.063f, 130.317f},
+    {SCOURGE_TYPE_ACOLYTES, 2461.411f, 1416.090f, 130.663f},
+    {SCOURGE_TYPE_GHOUL, 2448.391f, 1426.428f, 130.853f},
 };
 
 instance_culling_of_stratholme::instance_culling_of_stratholme(Map* pMap) : ScriptedInstance(pMap),
@@ -240,7 +266,7 @@ void instance_culling_of_stratholme::OnCreatureCreate(Creature* pCreature)
         case NPC_DARK_NECROMANCER:
         case NPC_BILE_GOLEM:
         case NPC_DEVOURING_GHOUL:
-            if (pCreature->IsTemporarySummon())
+            if (pCreature->IsTemporarySummon() && GetData(TYPE_SALRAMM_EVENT) != DONE)
                 m_luiCurrentScourgeWaveGUIDs.push_back(pCreature->GetObjectGuid());
             break;
     }
@@ -435,6 +461,7 @@ void instance_culling_of_stratholme::OnCreatureDeath(Creature* pCreature)
         case NPC_MEATHOOK:                 SetData(TYPE_MEATHOOK_EVENT, DONE); break;
         case NPC_SALRAMM_THE_FLESHCRAFTER: SetData(TYPE_SALRAMM_EVENT, DONE);  break;
         case NPC_LORD_EPOCH:               SetData(TYPE_EPOCH_EVENT, DONE);    break;
+        case NPC_INFINITE_CORRUPTER: SetData(TYPE_INFINITE_CORRUPTER, DONE);   break;
         
         case NPC_ENRAGING_GHOUL:
         case NPC_ACOLYTE:
@@ -445,7 +472,7 @@ void instance_culling_of_stratholme::OnCreatureDeath(Creature* pCreature)
         case NPC_DARK_NECROMANCER:
         case NPC_BILE_GOLEM:
         case NPC_DEVOURING_GHOUL:
-            if (pCreature->IsTemporarySummon())
+            if (pCreature->IsTemporarySummon() && GetData(TYPE_SALRAMM_EVENT) != DONE)
             {
                 m_luiCurrentScourgeWaveGUIDs.remove(pCreature->GetObjectGuid());
 
@@ -755,7 +782,7 @@ void instance_culling_of_stratholme::DoSpawnNextScourgeWave()
     }
 
     // start infinite curruptor event on the first wave
-    if (m_uiScourgeWaveCount == 1 && !instance->IsRegularDifficulty())
+    if (m_uiScourgeWaveCount == 1 && !instance->IsRegularDifficulty() && GetData(TYPE_INFINITE_CORRUPTER) != DONE)
         SetData(TYPE_INFINITE_CORRUPTER, IN_PROGRESS);
 
     // get a random position that is different from the previous one for the next round
@@ -765,6 +792,46 @@ void instance_culling_of_stratholme::DoSpawnNextScourgeWave()
         uiCurrentPos = urand(POS_FESTIVAL_LANE, POS_ELDERS_SQUARE);
 
     m_uiCurrentUndeadPos = uiCurrentPos;
+}
+
+// function that spawns all the scourge elites in burning stratholme
+void instance_culling_of_stratholme::DoSpawnBurningCityUndead(Unit* pSummoner)
+{
+    for (uint8 i = 0; i < MAX_BURNING_SCOURGE_POS; ++i)
+    {
+        uint32 uiEntry = GetRandomMobOfType(m_aBurningScourgeLocs[i].m_uiType);
+        if (!uiEntry)
+            continue;
+
+        float fX, fY, fZ;
+
+        // special requirement for acolytes - spawn a pack of 3
+        if (m_aBurningScourgeLocs[i].m_uiType == SCOURGE_TYPE_ACOLYTES)
+        {
+            for (uint8 j = 0; j < 3; ++j)
+            {
+                pSummoner->GetRandomPoint(m_aBurningScourgeLocs[i].m_fX, m_aBurningScourgeLocs[i].m_fY, m_aBurningScourgeLocs[i].m_fZ, 5.0f, fX, fY, fZ);
+
+                if (Creature* pUndead = pSummoner->SummonCreature(uiEntry, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+                    pUndead->GetMotionMaster()->MoveRandomAroundPoint(pUndead->GetPositionX(), pUndead->GetPositionY(), pUndead->GetPositionZ(), 10.0f);
+            }
+        }
+        // spawn the selected mob
+        else
+        {
+            if (Creature* pUndead = pSummoner->SummonCreature(uiEntry, m_aBurningScourgeLocs[i].m_fX, m_aBurningScourgeLocs[i].m_fY, m_aBurningScourgeLocs[i].m_fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+                pUndead->GetMotionMaster()->MoveRandomAroundPoint(pUndead->GetPositionX(), pUndead->GetPositionY(), pUndead->GetPositionZ(), 10.0f);
+        }
+
+        // spawn a few random zombies
+        for (uint8 j = 0; j < 5; ++j)
+        {
+            pSummoner->GetRandomPoint(m_aBurningScourgeLocs[i].m_fX, m_aBurningScourgeLocs[i].m_fY, m_aBurningScourgeLocs[i].m_fZ, 20.0f, fX, fY, fZ);
+
+            if (Creature* pUndead = pSummoner->SummonCreature(NPC_ZOMBIE, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+                pUndead->GetMotionMaster()->MoveRandomAroundPoint(pUndead->GetPositionX(), pUndead->GetPositionY(), pUndead->GetPositionZ(), 10.0f);
+        }
+    }
 }
 
 // function that returns a random scourge mob of a specified type

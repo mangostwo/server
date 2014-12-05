@@ -212,6 +212,7 @@ class  instance_culling_of_stratholme : public ScriptedInstance
         void DoSpawnChromieIfNeeded(Unit* pSummoner);
         void DoSpawnArthasIfNeeded(Unit* pSummoner);
         bool CanGrainEventProgress(Creature* pCrate);
+        void DoSpawnBurningCityUndead(Unit* pSummoner);
 
         void DoEventAtTriggerIfCan(uint32 uiTriggerId);
 
