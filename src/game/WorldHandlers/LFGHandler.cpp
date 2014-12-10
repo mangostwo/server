@@ -473,26 +473,25 @@ void WorldSession::SendLfgUpdate(bool isGroup, LFGPlayerStatus status)
     
     bool isQueued = false, joinLFG = false;
     if (!isGroup)
+    {
         switch (status.updateType)
         {
             case LFG_UPDATE_JOIN:
             case LFG_UPDATE_ADDED_TO_QUEUE:
                 isQueued = true;
-                break;
             case LFG_UPDATE_STATUS:
                 isQueued = (status.state == LFG_STATE_QUEUED);
                 break;
             default:
-                isQueued = false;
                 break;
         }
+    }
     else
+    {
         switch (status.updateType)
         {
             case LFG_UPDATE_ADDED_TO_QUEUE:
                 isQueued = true;
-                joinLFG = true;
-                break;
             case LFG_UPDATE_PROPOSAL_BEGIN:
                 joinLFG = true;
                 break;
@@ -501,6 +500,7 @@ void WorldSession::SendLfgUpdate(bool isGroup, LFGPlayerStatus status)
                 joinLFG = (status.state != LFG_STATE_ROLECHECK) && (status.state != LFG_STATE_NONE);
                 break;
         }
+    }
     
     WorldPacket data(isGroup ? SMSG_LFG_UPDATE_PARTY : SMSG_LFG_UPDATE_PLAYER);
     data << uint8(status.updateType);
@@ -517,7 +517,6 @@ void WorldSession::SendLfgUpdate(bool isGroup, LFGPlayerStatus status)
 
         if (isGroup)
         {
-            data << uint8(0);
             for (uint32 i = 0; i < 3; ++i)
                 data << uint8(0);
         }

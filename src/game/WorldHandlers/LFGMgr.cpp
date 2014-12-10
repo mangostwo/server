@@ -163,12 +163,12 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
     uint32 randomDungeonID; // used later if random dungeon has been chosen
     
     LFGPlayers* currentInfo = GetPlayerOrPartyData(guid);
-
-    bool groupCurrentlyInDungeon = pGroup && pGroup->isLFGGroup() && currentInfo->currentState != LFG_STATE_FINISHED_DUNGEON;
     
     // check if we actually have info on the player/group right now
     if (currentInfo)
     {
+        bool groupCurrentlyInDungeon = pGroup && pGroup->isLFGGroup() && currentInfo->currentState != LFG_STATE_FINISHED_DUNGEON;
+        
         // are they already queued?
         if (currentInfo->currentState == LFG_STATE_QUEUED)
         {
@@ -311,7 +311,7 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
     
     if (pGroup)
     {
-        ObjectGuid leaderGuid = plr->GetObjectGuid();
+        ObjectGuid leaderGuid = pGroup->GetLeaderGuid();
         
         LFGRoleCheck roleCheck;
         roleCheck.state = LFG_ROLECHECK_INITIALITING;
