@@ -472,34 +472,24 @@ void WorldSession::SendLfgUpdate(bool isGroup, LFGPlayerStatus status)
     uint8 dungeonSize = uint8(status.dungeonList.size());
     
     bool isQueued = false, joinLFG = false;
-    if (!isGroup)
+
+    switch (status.updateType)
     {
-        switch (status.updateType)
-        {
-            case LFG_UPDATE_JOIN:
-            case LFG_UPDATE_ADDED_TO_QUEUE:
-                isQueued = true;
-            case LFG_UPDATE_STATUS:
-                isQueued = (status.state == LFG_STATE_QUEUED);
-                break;
-            default:
-                break;
-        }
-    }
-    else
-    {
-        switch (status.updateType)
-        {
-            case LFG_UPDATE_ADDED_TO_QUEUE:
-                isQueued = true;
-            case LFG_UPDATE_PROPOSAL_BEGIN:
+        case LFG_UPDATE_JOIN:
+        case LFG_UPDATE_ADDED_TO_QUEUE:
+            isQueued = true;
+        case LFG_UPDATE_PROPOSAL_BEGIN:
+            if (isGroup)
                 joinLFG = true;
-                break;
-            case LFG_UPDATE_STATUS:
-                isQueued = (status.state == LFG_STATE_QUEUED);
+            break;
+        case LFG_UPDATE_STATUS:
+            isQueued = (status.state == LFG_STATE_QUEUED);
+                
+            if (isGroup)
                 joinLFG = (status.state != LFG_STATE_ROLECHECK) && (status.state != LFG_STATE_NONE);
-                break;
-        }
+            break;
+        default:
+            break;
     }
     
     WorldPacket data(isGroup ? SMSG_LFG_UPDATE_PARTY : SMSG_LFG_UPDATE_PLAYER);
