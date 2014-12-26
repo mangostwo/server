@@ -3701,6 +3701,7 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
 
         // at any changes to scale and/or displayId
         void UpdateModelData();
+        void SendCollisionHeightUpdate(float height);
 
         DynamicObject* GetDynObject(uint32 spellId, SpellEffectIndex effIndex);
         DynamicObject* GetDynObject(uint32 spellId);
