@@ -141,6 +141,12 @@ void ScriptedAI::UpdateAI(const uint32 /*uiDiff*/)
     }
 
     DoMeleeAttackIfReady();
+    
+    Unit* victim = m_creature->getVictim();
+        
+    const SpellEntry* potentialSpell = m_creature->ReachWithSpellAttack(victim);
+    if (potentialSpell)
+        m_creature->CastSpell(victim, potentialSpell->Id, true);
 }
 
 /**
