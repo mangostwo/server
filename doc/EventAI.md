@@ -66,8 +66,8 @@ Event Types
 =========================================
 
 This is the list of available Event Types EventAI is able to handle.
-Each event type has its own specific interpretation of the params that accompany it.
-Params are always read in the ascending order (from Param1 to Param3).
+Each event type has its own specific interpretation of the parameters that accompany it.
+Parameters are always read in the ascending order (from Param1 to Param3).
 
 NOTE: Events will not repeat until the creature exits combat or unless EFLAG_REPEATABLE value is set in Event Flags.
 Some events such as EVENT_T_AGGRO, EVENT_T_DEATH, EVENT_T_SPAWNED, and EVENT_T_EVADE cannot repeat even if EFLAG_REPEATABLE value is set.
