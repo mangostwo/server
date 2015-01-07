@@ -714,7 +714,9 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
             if (uiEffIndex == EFFECT_INDEX_1)
             {
                 if (pCreatureTarget->GetEntry() != NPC_MORBENT)
-                { return true; }
+                {
+                    return true;
+                }
 
                 pCreatureTarget->UpdateEntry(NPC_WEAKENED_MORBENT);
                 return true;
