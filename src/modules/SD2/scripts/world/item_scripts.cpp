@@ -56,7 +56,7 @@ bool ItemUse_item_arcane_charges(Player* pPlayer, Item* pItem, const SpellCastTa
     pPlayer->SendEquipError(EQUIP_ERR_NONE, pItem, NULL);
 
     if (const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry(SPELL_ARCANE_CHARGES))
-        Spell::SendCastResult(pPlayer, pSpellInfo, 1, SPELL_FAILED_NOT_ON_GROUND);
+    { Spell::SendCastResult(pPlayer, pSpellInfo, 1, SPELL_FAILED_NOT_ON_GROUND); }
 
     return true;
 }
@@ -99,7 +99,7 @@ bool ItemUse_item_gor_dreks_ointment(Player* pPlayer, Item* pItem, const SpellCa
         pPlayer->SendEquipError(EQUIP_ERR_NONE, pItem, NULL);
 
         if (const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry(SPELL_GORDREKS_OINTMENT))
-            Spell::SendCastResult(pPlayer, pSpellInfo, 1, SPELL_FAILED_TARGET_AURASTATE);
+        { Spell::SendCastResult(pPlayer, pSpellInfo, 1, SPELL_FAILED_TARGET_AURASTATE); }
 
         return true;
     }
