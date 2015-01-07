@@ -32,20 +32,22 @@
  * EndScriptData
  */
 
-/* ContentData
-at_aldurthar_gate               5284,5285,5286,5287
-at_coilfang_waterfall           4591
-at_legion_teleporter            4560 Teleporter TO Invasion Point: Cataclysm
-at_ravenholdt
-at_spearborn_encampment         5030
-at_warsong_farms
-at_stormwright_shelf            5108
-at_childrens_week_spot          3546,3547,3548,3552,3549,3550
-at_scent_larkorwi               1726,1727,1728,1729,1730,1731,1732,1733,1734,1735,1736,1737,1738,1739,1740
-at_murkdeep                     1966
-at_hot_on_the_trail             5710, 5711, 5712, 5714, 5715, 5716
-at_ancient_leaf                 3587
-EndContentData */
+/**
+ * ContentData
+ * at_aldurthar_gate                5284, 5285, 5286, 5287
+ * at_coilfang_waterfall            4591
+ * at_legion_teleporter             4560 Teleporter TO Invasion Point: Cataclysm
+ * at_ravenholdt
+ * at_spearborn_encampment          5030
+ * at_warsong_farms
+ * at_stormwright_shelf             5108
+ * at_childrens_week_spot           3546, 3547, 3548, 3549, 3550, 3552
+ * at_scent_larkorwi                1726, 1727, 1728, 1729, 1730, 1731, 1732, 1733, 1734, 1735, 1736, 1737, 1738, 1739, 1740
+ * at_murkdeep                      1966
+ * at_hot_on_the_trail              5710, 5711, 5712, 5714, 5715, 5716
+ * at_ancient_leaf                  3587
+ * EndContentData
+ */
 
 #include "precompiled.h"
 #include "world_map_scripts.h"
