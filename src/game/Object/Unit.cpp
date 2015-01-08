@@ -8064,6 +8064,56 @@ void Unit::Unmount(bool from_aura)
     }
 }
 
+bool Unit::IsNearWaypoint(float currentPositionX, float currentPositionY, float currentPositionZ, float destinationPostionX, float destinationPostionY, float destinationPostionZ, float distanceX, float distanceY, float distanceZ)
+{
+    // actual distance between the creature's X ordinate and destination X ordinate
+    float xDifference = 0;
+    // actual distance between the creature's Y ordinate and destination Y ordinate
+    float yDifference = 0;
+    // actual distance between the creature's Z ordinate and destination Y ordinate
+    float zDifference = 0;
+
+    // distanceX == 0, means do not test the distance between the creature's current X ordinate and the destination X ordinate
+    // A test for 0 is used, because it is not worth testing for exact coordinates, seeing as we have to use an integar in the database for the event parameters that holds the cordinates.
+    // Therefore a test for the distance between waypoints does the job more than well enough
+    if (distanceX > 0)
+    {
+        if (currentPositionX > destinationPostionX)
+            xDifference = currentPositionX - destinationPostionX;
+        else
+            xDifference = destinationPostionX - currentPositionX;
+    }
+    // distanceY == 0, means do not test the distance between the creature's current Y ordinate and the destination Y ordinate
+    if (distanceY > 0)
+    {
+        if (currentPositionY > destinationPostionY)
+            yDifference = currentPositionY - destinationPostionY;
+        else
+            yDifference = destinationPostionY - currentPositionY;
+    }
+    // distanceZ == 0, means do not test the distance between the creature's current Z ordinate and the destination Z ordinate
+    if (distanceZ > 0)
+    {
+        if (currentPositionZ > destinationPostionZ)
+            zDifference = currentPositionZ - destinationPostionZ;
+        else
+            zDifference = destinationPostionZ - currentPositionZ;
+    }
+
+    // check based on which ordinates to test the current distance from (distance along the X, and/or Y, and/or Z ordinates)
+    if (((distanceX > 0 && xDifference < distanceX) && (distanceY > 0 && yDifference < distanceY) && (distanceZ > 0 && zDifference < distanceZ)) ||
+        ((distanceX == 0) && (distanceY > 0 && yDifference < distanceY) && (distanceZ > 0 && zDifference < distanceZ)) ||
+        ((distanceX > 0 && xDifference < distanceX) && (distanceY == 0) && (distanceZ > 0 && zDifference < distanceZ)) ||
+        ((distanceX > 0 && xDifference < distanceX) && (distanceY > 0 && yDifference < distanceY) && (distanceZ == 0)) ||
+        ((distanceX > 0 && xDifference < distanceX) && (distanceY == 0) && (distanceZ == 0)) ||
+        ((distanceX == 0) && (distanceY > 0 && yDifference < distanceY) && (distanceZ == 0)) ||
+        ((distanceX == 0) && (distanceY == 0) && (distanceZ > 0 && zDifference < distanceZ))
+        )
+        return true;
+
+    return false;
+}
+
 void Unit::SetInCombatWith(Unit* enemy)
 {
     Unit* eOwner = enemy->GetCharmerOrOwnerOrSelf();
