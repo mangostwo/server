@@ -2664,7 +2664,7 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
          * \see AuraType
          * \todo Move the implementation to .h file exactly as the earlier ones?
          */
-        bool isFrozen() const;
+        bool IsFrozen() const;
         bool IsIgnoreUnitState(SpellEntry const* spell, IgnoreUnitState ignoreState);
 
         /**
