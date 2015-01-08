@@ -69,14 +69,19 @@ enum
 
 struct npc_deathstalker_erlandAI : public npc_escortAI
 {
-    npc_deathstalker_erlandAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+    npc_deathstalker_erlandAI(Creature* pCreature) : npc_escortAI(pCreature)
+    {
+        Reset();
+    }
 
     void WaypointReached(uint32 i) override
     {
         Player* pPlayer = GetPlayerForEscort();
 
         if (!pPlayer)
+        {
             return;
+        }
 
         switch (i)
         {
@@ -114,13 +119,19 @@ struct npc_deathstalker_erlandAI : public npc_escortAI
 
     void Reset() override {}
 
-    void Aggro(Unit* who) override
+    void Aggro(Unit* pWho) override
     {
         switch (urand(0, 2))
         {
-            case 0: DoScriptText(SAY_AGGRO_1, m_creature, who); break;
-            case 1: DoScriptText(SAY_AGGRO_2, m_creature, who); break;
-            case 2: DoScriptText(SAY_AGGRO_3, m_creature, who); break;
+            case 0:
+                DoScriptText(SAY_AGGRO_1, m_creature, pWho);
+                break;
+            case 1:
+                DoScriptText(SAY_AGGRO_2, m_creature, pWho);
+                break;
+            case 2:
+                DoScriptText(SAY_AGGRO_3, m_creature, pWho);
+                break;
         }
     }
 };
@@ -191,7 +202,7 @@ SpawnPoint SpawnPoints[] =
 static float m_afMoveCoords[] = { -410.69f, 1498.04f, 19.77f};
 
 
-struct  npc_deathstalker_faerleiaAI : public ScriptedAI
+struct npc_deathstalker_faerleiaAI : public ScriptedAI
 {
     npc_deathstalker_faerleiaAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
@@ -225,7 +236,9 @@ struct  npc_deathstalker_faerleiaAI : public ScriptedAI
     void JustDied(Unit* /*pKiller*/) override
     {
         if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
+        {
             pPlayer->SendQuestFailed(QUEST_PYREWOOD_AMBUSH);
+        }
 
         FinishEvent();
     }
@@ -280,15 +293,15 @@ struct  npc_deathstalker_faerleiaAI : public ScriptedAI
                         m_uiWaveTimer = 10000;
                         break;
                     case 2:
-                        m_creature->SummonCreature(NPC_COUNCILMAN_WILHELM,   SpawnPoints[1].fX, SpawnPoints[1].fY, SpawnPoints[1].fZ, SpawnPoints[1].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
                         m_creature->SummonCreature(NPC_COUNCILMAN_HARTIN,    SpawnPoints[0].fX, SpawnPoints[0].fY, SpawnPoints[0].fZ, SpawnPoints[0].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
+                        m_creature->SummonCreature(NPC_COUNCILMAN_WILHELM,   SpawnPoints[1].fX, SpawnPoints[1].fY, SpawnPoints[1].fZ, SpawnPoints[1].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
                         m_creature->SummonCreature(NPC_COUNCILMAN_HIGARTH,   SpawnPoints[2].fX, SpawnPoints[2].fY, SpawnPoints[2].fZ, SpawnPoints[2].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
                         m_uiWaveTimer = 8000;
                         break;
                     case 3:
+                        m_creature->SummonCreature(NPC_LORD_MAYOR_MORRISON,  SpawnPoints[0].fX, SpawnPoints[0].fY, SpawnPoints[0].fZ, SpawnPoints[0].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
                         m_creature->SummonCreature(NPC_COUNCILMAN_COOPER,    SpawnPoints[1].fX, SpawnPoints[1].fY, SpawnPoints[1].fZ, SpawnPoints[1].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
                         m_creature->SummonCreature(NPC_COUNCILMAN_BRUNSWICK, SpawnPoints[2].fX, SpawnPoints[2].fY, SpawnPoints[2].fZ, SpawnPoints[2].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
-                        m_creature->SummonCreature(NPC_LORD_MAYOR_MORRISON,  SpawnPoints[0].fX, SpawnPoints[0].fY, SpawnPoints[0].fZ, SpawnPoints[0].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
                         break;
                 }
 
@@ -316,7 +329,9 @@ bool QuestAccept_npc_deathstalker_faerleia(Player* pPlayer, Creature* pCreature,
         DoScriptText(SAY_START, pCreature, pPlayer);
 
         if (npc_deathstalker_faerleiaAI* pFaerleiaAI = dynamic_cast<npc_deathstalker_faerleiaAI*>(pCreature->AI()))
+        {
             pFaerleiaAI->StartEvent(pPlayer);
+        }
     }
     return true;
 }

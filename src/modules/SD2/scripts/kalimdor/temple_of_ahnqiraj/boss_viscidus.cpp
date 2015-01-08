@@ -91,7 +91,7 @@ enum
 
 static const uint32 auiGlobSummonSpells[MAX_VISCIDUS_GLOBS] = { 25865, 25866, 25867, 25868, 25869, 25870, 25871, 25872, 25873, 25874, 25875, 25876, 25877, 25878, 25879, 25880, 25881, 25882, 25883, 25884 };
 
-struct  boss_viscidusAI : public ScriptedAI
+struct boss_viscidusAI : public ScriptedAI
 {
     boss_viscidusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

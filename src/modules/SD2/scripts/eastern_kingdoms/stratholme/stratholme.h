@@ -114,6 +114,7 @@ static const EventLocation aStratholmeLocation[] =
     {4032.643f, -3378.546f, 119.752f, 4.74f},               // Ramstein summon loc
     {4032.843f, -3390.246f, 119.732f, 0},                   // Ramstein move loc
     {3969.357f, -3391.871f, 119.116f, 5.91f},               // Skeletons summon loc
+
     {4033.044f, -3431.031f, 119.055f, 0},                   // Skeletons move loc
     {4032.602f, -3378.506f, 119.752f, 4.74f},               // Guards summon loc
     {4042.575f, -3337.929f, 115.059f, 0}                    // Ysida move loc

@@ -471,7 +471,7 @@ enum
     NPC_CAPTURED_WATER_SPIRIT   = 21029,
 };
 
-struct  npc_wildaAI : public npc_escortAI
+struct npc_wildaAI : public npc_escortAI
 {
     npc_wildaAI(Creature* pCreature) : npc_escortAI(pCreature)
     {

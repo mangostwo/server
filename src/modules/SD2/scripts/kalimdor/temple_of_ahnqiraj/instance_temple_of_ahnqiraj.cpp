@@ -339,7 +339,9 @@ bool AreaTrigger_at_temple_ahnqiraj(Player* pPlayer, AreaTriggerEntry const* pAt
             return false;
 
         if (instance_temple_of_ahnqiraj* pInstance = (instance_temple_of_ahnqiraj*)pPlayer->GetInstanceData())
+        {
             pInstance->DoHandleTempleAreaTrigger(pAt->id);
+        }
     }
 
     return false;

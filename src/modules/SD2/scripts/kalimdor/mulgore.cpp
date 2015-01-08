@@ -23,16 +23,20 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Mulgore
-SD%Complete: 100
-SDComment: Quest support: 11129.
-SDCategory: Mulgore
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Mulgore
+ * SD%Complete: 100
+ * SDComment: Quest support: 11129.
+ * SDCategory:  Mulgore
+ * EndScriptData
+ */
 
-/* ContentData
-npc_kyle_the_frenzied
-EndContentData */
+/**
+ * ContentData
+ * npc_kyle_the_frenzied
+ * EndContentData
+ */
 
 #include "precompiled.h"
 

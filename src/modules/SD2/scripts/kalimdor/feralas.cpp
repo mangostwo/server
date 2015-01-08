@@ -31,10 +31,12 @@
  * SDCategory:  Feralas
  * EndScriptData
  */
-/* ContentData
-npc_oox22fe
-npc_shay_leafrunner
-EndContentData */
+
+/** ContentData
+ * npc_oox22fe
+ * npc_shay_leafrunner
+ * EndContentData
+ */
 
 #include "precompiled.h"
 #include "escort_ai.h"
@@ -342,6 +344,10 @@ bool EffectDummyCreature_npc_shay_leafrunner(Unit* pCaster, uint32 uiSpellId, Sp
     return false;
 }
 
+/*######
+## AddSC
+######*/
+
 void AddSC_feralas()
 {
     Script* pNewScript;
@@ -356,8 +362,8 @@ void AddSC_feralas()
     pNewScript->Name = "go_gordunni_trap";
     pNewScript->pGOUse = &GOUse_go_gordunni_trap;
     pNewScript->RegisterSelf();
-	
-	pNewScript = new Script;
+
+    pNewScript = new Script;
     pNewScript->Name = "npc_shay_leafrunner";
     pNewScript->GetAI = &GetAI_npc_shay_leafrunner;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_shay_leafrunner;

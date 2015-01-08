@@ -90,7 +90,7 @@ static sSpawnLocation m_aMajordomoLocations[2] =
     {NPC_MAJORDOMO, 847.103f, -816.153f, -229.775f, 4.344f}     // Summon and teleport location (near Ragnaros)
 };
 
-class  instance_molten_core : public ScriptedInstance
+class instance_molten_core : public ScriptedInstance
 {
     public:
         instance_molten_core(Map* pMap);

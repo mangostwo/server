@@ -429,6 +429,7 @@
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\caverns_of_time\hyjal\instance_hyjal.cpp"  />
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\onyxias_lair\boss_onyxia.cpp"  />
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\onyxias_lair\instance_onyxias_lair.cpp"  />
+    <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\onyxias_lair\npc_onyxian_warder.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\ruins_of_ahnqiraj\boss_ayamiss.cpp"  />
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\ruins_of_ahnqiraj\boss_buru.cpp"  />
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\ruins_of_ahnqiraj\boss_kurinnaxx.cpp"  />

@@ -27,7 +27,7 @@
  * ScriptData
  * SDName:      Felwood
  * SD%Complete: 95
- * SDComment: Quest support: 4261, 4506, 5203, 7603, 7603 (Summon Pollo Grande)
+ * SDComment:   Quest support: 4261, 4506, 5203, 7603, 7603 (Summon Pollo Grande).
  * SDCategory:  Felwood
  * EndScriptData
  */

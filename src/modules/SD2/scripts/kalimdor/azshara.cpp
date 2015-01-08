@@ -23,20 +23,24 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Azshara
-SD%Complete: 90
-SDComment: Quest support: 2744, 3141, 9364, 10994
-SDCategory: Azshara
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Azshara
+ * SD%Complete: 90
+ * SDComment: Quest support: 2744, 3141, 9364, 10994
+ * SDCategory:  Azshara
+ * EndScriptData
+ */
 
-/* ContentData
-npc_rizzle_sprysprocket
-npc_depth_charge
-go_southfury_moonstone
-mobs_spitelashes
-npc_loramus_thalipedes
-EndContentData */
+/**
+ * ContentData
+* npc_rizzle_sprysprocket
+ * npc_depth_charge
+ * go_southfury_moonstone
+ * mobs_spitelashes
+ * npc_loramus_thalipedes
+ * EndContentData
+ */
 
 #include "precompiled.h"
 #include "escort_ai.h"

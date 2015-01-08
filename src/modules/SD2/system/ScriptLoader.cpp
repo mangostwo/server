@@ -953,9 +953,8 @@ void AddScripts()
     AddWorldScripts();
     AddEasternKingdomsScripts();
     AddKalimdorScripts();
-    AddNorthrendScripts();
-
     AddOutlandsScripts();
+    AddNorthrendScripts();
 
     AddBattlegroundScripts();
 }

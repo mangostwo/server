@@ -313,7 +313,9 @@ struct npc_ouro_spawnerAI : public Scripted_NoMovementAI
         if (!m_bHasSummoned && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() && m_creature->IsWithinDistInMap(pWho, 50.0f))
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_OURO) == CAST_OK)
-            { m_bHasSummoned = true; }
+            {
+                m_bHasSummoned = true;
+            }
         }
 
         ScriptedAI::MoveInLineOfSight(pWho);
