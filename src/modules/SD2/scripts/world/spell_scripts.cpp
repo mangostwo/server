@@ -564,10 +564,14 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
             if (uiEffIndex == EFFECT_INDEX_0)
             {
                 if (pCaster->GetTypeId() != TYPEID_PLAYER)
-                { return true; }
+                {
+                    return true;
+                }
 
                 if (pCreatureTarget->GetEntry() != NPC_SICKLY_DEER && pCreatureTarget->GetEntry() != NPC_SICKLY_GAZELLE)
-                { return true; }
+                {
+                    return true;
+                }
 
                 // Update entry, remove aura, set the kill credit and despawn
                 uint32 uiUpdateEntry = pCreatureTarget->GetEntry() == NPC_SICKLY_DEER ? NPC_CURED_DEER : NPC_CURED_GAZELLE;
