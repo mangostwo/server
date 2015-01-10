@@ -259,7 +259,7 @@ struct boss_reliquary_of_soulsAI : public Scripted_NoMovementAI
             if (m_uiAnimationTimer <= uiDiff)
             {
                 m_creature->HandleEmote(EMOTE_ONESHOT_SUBMERGE);
-                m_uiAnimationTimer = 0;
+                { m_uiAnimationTimer = 0; }
             }
             else
             { m_uiAnimationTimer -= uiDiff; }

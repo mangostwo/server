@@ -44,7 +44,7 @@ enum
     SPELL_POSSESS_INV       = 17250,        // baroness becomes invisible while possessing a target
 };
 
-struct  boss_baroness_anastariAI : public ScriptedAI
+struct boss_baroness_anastariAI : public ScriptedAI
 {
     boss_baroness_anastariAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 

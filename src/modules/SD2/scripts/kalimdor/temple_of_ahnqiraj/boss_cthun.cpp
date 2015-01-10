@@ -454,7 +454,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
         {
             // Workaround for missing spell 26648
             if (Player* pPlayer = m_creature->GetMap()->GetPlayer(*itr))
-            { m_creature->DealDamage(pPlayer, pPlayer->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false); }
+                m_creature->DealDamage(pPlayer, pPlayer->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
         }
 
         Scripted_NoMovementAI::EnterEvadeMode();

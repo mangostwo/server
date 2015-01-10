@@ -15,7 +15,7 @@ optional support for SOAP, and aims to be 100% compatible with [World of Warcraf
 WotLK version, namely [patch 3.3.5a][5].
 
 If you liked the third incarnation of [World of Warcraft][2] and still want to play
-[WoTLK WoW][4], you should try *MangosZero*. We provide an authentication
+[WoTLK WoW][4], you should try *MangosTwo*. We provide an authentication
 server where you can manage your users, and a world server which serves game
 content just like the original did back then.
 
@@ -29,14 +29,14 @@ copyrighted by [Blizzard Entertainment, Inc.][1]
 
 Requirements
 ------------
-*MangosTwo* server supports a wide range of operating systems, and various
+*Mangos* servers supports a wide range of operating systems, and various
 compiler platforms. In order to do that, we use various free cross-platform
 libraries and use [CMake][19] to provide a cross-platform build system which
 adapts to your chosen operating system and compiler.
 
 Operating systems
 -----------------
-Currently we support running *MangosZero* on these operating systems:
+Currently we support running *Mangos* on these operating systems:
 
 * **Windows**, 32 bit and 64 bit. [Windows][20] 7 or newer is recommended.
 * **Linux**, 32 bit and 64 bit. [Debian 7][21] and [Ubuntu 12.04 LTS][22] are
@@ -49,7 +49,7 @@ server version will work, too.
 
 Compilers
 ---------
-Building *MangosTwo* is currently possible with these compilers:
+Building *Mangos* is currently possible with these compilers:
 
 * **Microsoft Visual Studio (Express[^1])**, 32 bit and 64 bit. Both
   [Visual Studio][30] and the Express editions of [Visual Studio][31]
@@ -62,7 +62,7 @@ Building *MangosTwo* is currently possible with these compilers:
 
 Dependencies
 ------------
-*MangosTwo* server stands on the shoulders of well-known Open Source
+*Mangos* server stands on the shoulders of well-known Open Source
 libraries, and a few awesome, but less known libraries to prevent us from
 inventing the wheel again.
 
@@ -98,14 +98,14 @@ Optional dependencies
 ---------------------
 
 * **Doxygen**: if you want to export HTML or PDF formatted documentation for the
-  *MangosTwo* API, you should install [Doxygen][49].
+  *Mangos* API, you should install [Doxygen][49].
 * **Lua**: if you want to test drive how *MangosTwo* feels with [Lua][50] as
   scripting language instead of the scripting library, you will need Lua **5.2.3**
   installed.
 
 Discuss
 -------
-If you need help with building and installing *MangosZero* there is thousands
+If you need help with building and installing *Mangos* there is thousands
 of users out there already running *MangosZero* and many you can find on our
 project website and discussion forum
 
@@ -129,7 +129,7 @@ Street, Fifth Floor, Boston, MA 02110-1301 USA.
 The full license is included in the file `License.md`.
 
 In addition, as a special exception, permission is granted to link the code of
-*MangosZero* with the OpenSSL project's [OpenSSL library][48] (or with modified
+*MangosTwo* with the OpenSSL project's [OpenSSL library][48] (or with modified
 versions of it that use the same license as the OpenSSL library), and distribute
 the linked executables. You must obey the GNU General Public License in all
 respects for all of the code used other than [OpenSSL][48].

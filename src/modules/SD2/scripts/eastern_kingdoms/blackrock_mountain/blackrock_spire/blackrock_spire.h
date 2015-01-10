@@ -115,7 +115,7 @@ static const uint32 aStadiumEventNpcs[MAX_STADIUM_WAVES][5] =
     {NPC_CHROMATIC_WHELP, NPC_CHROMATIC_WHELP, NPC_CHROMATIC_DRAGON, NPC_CHROMATIC_DRAGON, NPC_BLACKHAND_HANDLER},
 };
 
-class  instance_blackrock_spire : public ScriptedInstance, private DialogueHelper
+class instance_blackrock_spire : public ScriptedInstance, private DialogueHelper
 {
     public:
         instance_blackrock_spire(Map* pMap);

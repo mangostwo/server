@@ -122,37 +122,37 @@ void instance_molten_core::SetData(uint32 uiType, uint32 uiData)
         case TYPE_MAGMADAR:
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
-                DoUseDoorOrButton(GO_RUNE_KRESS);
+                { DoUseDoorOrButton(GO_RUNE_KRESS); }
             break;
         case TYPE_GEHENNAS:
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
-                DoUseDoorOrButton(GO_RUNE_MOHN);
+                { DoUseDoorOrButton(GO_RUNE_MOHN); }
             break;
         case TYPE_GARR:
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
-                DoUseDoorOrButton(GO_RUNE_BLAZ);
+                { DoUseDoorOrButton(GO_RUNE_BLAZ); }
             break;
         case TYPE_SHAZZRAH:
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
-                DoUseDoorOrButton(GO_RUNE_MAZJ);
+                { DoUseDoorOrButton(GO_RUNE_MAZJ); }
             break;
         case TYPE_GEDDON:
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
-                DoUseDoorOrButton(GO_RUNE_ZETH);
+                { DoUseDoorOrButton(GO_RUNE_ZETH); }
             break;
         case TYPE_GOLEMAGG:
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
-                DoUseDoorOrButton(GO_RUNE_THERI);
+                { DoUseDoorOrButton(GO_RUNE_THERI); }
             break;
         case TYPE_SULFURON:
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
-                DoUseDoorOrButton(GO_RUNE_KORO);
+                { DoUseDoorOrButton(GO_RUNE_KORO); }
             break;
         case TYPE_MAJORDOMO:
             m_auiEncounter[uiType] = uiData;

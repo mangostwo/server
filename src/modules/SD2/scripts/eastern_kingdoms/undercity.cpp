@@ -23,16 +23,20 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: Undercity
-SD%Complete: 95
-SDComment: Quest support: 9180(post-event).
-SDCategory: Undercity
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      Undercity
+ * SD%Complete: 95
+ * SDComment: Quest support: 9180(post-event).
+ * SDCategory:  Undercity
+ * EndScriptData
+ */
 
-/* ContentData
-npc_lady_sylvanas_windrunner
-EndContentData */
+/**
+ * ContentData
+ * npc_lady_sylvanas_windrunner
+ * EndContentData
+ */
 
 #include "precompiled.h"
 

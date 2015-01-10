@@ -194,6 +194,7 @@ void instance_shadowfang_keep::SetData(uint32 uiType, uint32 uiData)
                 if (m_auiEncounter[5] > 3)
                 {
                     DoUseDoorOrButton(GO_SORCERER_DOOR);
+                }
             }
             break;
         case TYPE_APOTHECARY:
@@ -232,19 +233,22 @@ void instance_shadowfang_keep::SetData(uint32 uiType, uint32 uiData)
         SaveToDB();
         OUT_SAVE_INST_DATA_COMPLETE;
     }
-
-    }
 }
 
 uint32 instance_shadowfang_keep::GetData(uint32 uiType) const
 {
     switch (uiType)
     {
-        case TYPE_FREE_NPC:   return m_auiEncounter[0];
-        case TYPE_RETHILGORE: return m_auiEncounter[1];
-        case TYPE_FENRUS:     return m_auiEncounter[2];
-        case TYPE_NANDOS:     return m_auiEncounter[3];
-        case TYPE_INTRO:      return m_auiEncounter[4];
+        case TYPE_FREE_NPC:
+            return m_auiEncounter[0];
+        case TYPE_RETHILGORE:
+            return m_auiEncounter[1];
+        case TYPE_FENRUS:
+            return m_auiEncounter[2];
+        case TYPE_NANDOS:
+            return m_auiEncounter[3];
+        case TYPE_INTRO:
+            return m_auiEncounter[4];
         case TYPE_APOTHECARY: return m_auiEncounter[6];
 
         default:

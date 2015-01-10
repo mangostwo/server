@@ -35,10 +35,11 @@
 #include "precompiled.h"
 #include "blackfathom_deeps.h"
 
-/* Encounter 0 = Twilight Lord Kelris
-   Encounter 1 = Shrine event
-   Must kill twilight lord for shrine event to be possible
-   Encounter 2 = Baron Aquanis (spawned by GO use but should only spawn once per instance)
+/**
+ * Encounter 0 = Twilight Lord Kelris
+ * Encounter 1 = Shrine event
+ * Must kill twilight lord for shrine event to be possible
+ * Encounter 2 = Baron Aquanis (spawned by GO use but should only spawn once per instance)
  */
 
 instance_blackfathom_deeps::instance_blackfathom_deeps(Map* pMap) : ScriptedInstance(pMap),
@@ -156,6 +157,7 @@ void instance_blackfathom_deeps::SetData(uint32 uiType, uint32 uiData)
         case TYPE_AQUANIS:
             m_auiEncounter[2] = uiData;;
             break;
+
     }
 
     if (uiData == DONE)
@@ -176,9 +178,12 @@ uint32 instance_blackfathom_deeps::GetData(uint32 uiType) const
 {
     switch (uiType)
     {
-        case TYPE_KELRIS: return m_auiEncounter[0];
-        case TYPE_SHRINE: return m_auiEncounter[1];
-        case TYPE_AQUANIS: return m_auiEncounter[2];
+        case TYPE_KELRIS:
+            return m_auiEncounter[0];
+        case TYPE_SHRINE:
+            return m_auiEncounter[1];
+        case TYPE_AQUANIS:
+            return m_auiEncounter[2];
         default:
             return 0;
     }
@@ -314,6 +319,10 @@ bool GOUse_go_fire_of_akumai(Player* /*pPlayer*/, GameObject* pGo)
 
     return true;
 }
+
+/*######
+## go_fathom_stone
+######*/
 
 bool GOUse_go_fathom_stone(Player* pPlayer, GameObject* pGo)
 {

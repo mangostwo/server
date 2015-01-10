@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
+ * Copyright (C) 2005-2015  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -2491,6 +2491,22 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         bool IsTaxiFlying()  const { return hasUnitState(UNIT_STAT_TAXI_FLIGHT); }
 
         /**
+         * Checks to see if a creature, whilst moving along a path, has reached a specific waypoint, or near to
+         * @param currentPositionX is the creature's current X ordinate in the game world
+         * @param currentPositionY is the creature's current Y ordinate in the game world
+         * @param currentPositionZ is the creature's current Z ordinate in the game world
+         * @param destinationPositionX is the in game ordinate that we wish to check against the creature's current X ordinate (are they the same, or very close?)
+         * @param destinationPositionY is the in game ordinate that we wish to check against the creature's current Y ordinate (are they the same, or very close?)
+         * @param destinationPositionZ is the in game ordinate that we wish to check against the creature's current Z ordinate (are they the same, or very close?)
+         * @param distanceX is the distance from the creature's current X ordinate to the destination X ordinate 
+         * @param distanceY is the distance from the creature's current Y ordinate to the destination Y ordinate 
+         * @param distanceZ is the distance from the creature's current Z ordinate to the destination Z ordinate 
+         * 
+         */
+        bool IsNearWaypoint(float currentPositionX, float currentPositionY, float currentPositionZ, float destinationPositionX, float destinationPositionY, float destinationPositionZ, float distanceX, float distanceY, float distanceZ);
+
+
+        /**
          * Is this unit in combat?
          * @return true if the Unit has the flag \ref UNIT_FLAG_IN_COMBAT (is in combat), false otherwise
          * \see EUnitFields
@@ -2648,7 +2664,7 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
          * \see AuraType
          * \todo Move the implementation to .h file exactly as the earlier ones?
          */
-        bool isFrozen() const;
+        bool IsFrozen() const;
         bool IsIgnoreUnitState(SpellEntry const* spell, IgnoreUnitState ignoreState);
 
         /**

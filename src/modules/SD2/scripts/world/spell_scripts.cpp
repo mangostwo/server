@@ -32,30 +32,32 @@
  * EndScriptData
  */
 
-/* ContentData
-spell 8913
-spell 19512
-spell 21014
-spell 21050
-spell 29528
-spell 29866
-spell 34665
-spell 37136
-spell 39246
-spell 43340
-spell 44935
-spell 45109
-spell 45111
-spell 46023
-spell 46770
-spell 47575
-spell 50706
-spell 51331
-spell 51332
-spell 51366
-spell 52090
-spell 56099
-EndContentData */
+/**
+ * ContentData
+ * Spell 8913:  Sacred Cleansing
+ * Spell 19512: Apply Salve
+ * spell 21014
+ * Spell 21050: Melodious Rapture
+ * spell 29528
+ * spell 29866
+ * spell 34665
+ * spell 37136
+ * spell 39246
+ * spell 43340
+ * spell 44935
+ * spell 45109
+ * spell 45111
+ * spell 46023
+ * spell 46770
+ * spell 47575
+ * spell 50706
+ * spell 51331
+ * spell 51332
+ * spell 51366
+ * spell 52090
+ * spell 56099
+ * EndContentData
+ */
 
 #include "precompiled.h"
 
@@ -562,10 +564,14 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
             if (uiEffIndex == EFFECT_INDEX_0)
             {
                 if (pCaster->GetTypeId() != TYPEID_PLAYER)
-                { return true; }
+                {
+                    return true;
+                }
 
                 if (pCreatureTarget->GetEntry() != NPC_SICKLY_DEER && pCreatureTarget->GetEntry() != NPC_SICKLY_GAZELLE)
-                { return true; }
+                {
+                    return true;
+                }
 
                 // Update entry, remove aura, set the kill credit and despawn
                 uint32 uiUpdateEntry = pCreatureTarget->GetEntry() == NPC_SICKLY_DEER ? NPC_CURED_DEER : NPC_CURED_GAZELLE;
@@ -712,7 +718,9 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
             if (uiEffIndex == EFFECT_INDEX_1)
             {
                 if (pCreatureTarget->GetEntry() != NPC_MORBENT)
-                { return true; }
+                {
+                    return true;
+                }
 
                 pCreatureTarget->UpdateEntry(NPC_WEAKENED_MORBENT);
                 return true;

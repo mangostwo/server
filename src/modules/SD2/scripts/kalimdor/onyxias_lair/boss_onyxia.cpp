@@ -512,9 +512,13 @@ struct boss_onyxiaAI : public ScriptedAI
                 else
                 {
                     if (m_uiSummonWhelpsTimer < uiDiff)
+                    {
                         m_bIsSummoningWhelps = true;
+                    }
                     else
+                    {
                         m_uiSummonWhelpsTimer -= uiDiff;
+                    }
                 }
 
                 if (m_uiSummonGuardTimer < uiDiff)

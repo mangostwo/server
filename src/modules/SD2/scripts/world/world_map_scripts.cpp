@@ -23,12 +23,14 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/* ScriptData
-SDName: world_map_scripts
-SD%Complete: 100
-SDComment: Quest support: 4740, 11538
-SDCategory: World Map Scripts
-EndScriptData */
+/**
+ * ScriptData
+ * SDName:      world_map_scripts
+ * SD%Complete: 100
+ * SDComment:   Quest support: 4740, 11538
+ * SDCategory:  World Map Scripts
+ * EndScriptData
+ */
 
 #include "precompiled.h"
 #include "world_map_scripts.h"

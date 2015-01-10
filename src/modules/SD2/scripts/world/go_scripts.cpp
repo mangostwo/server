@@ -32,17 +32,19 @@
  * EndScriptData
  */
 
-/* ContentData
-go_barov_journal
-go_ethereum_prison
-go_ethereum_stasis
-go_mysterious_snow_mound
-go_tele_to_dalaran_crystal
-go_tele_to_violet_stand
-go_andorhal_tower
-go_scourge_enclosure
-go_lab_work_reagents
-EndContentData */
+/**
+ * ContentData
+ * go_barov_journal
+ * go_ethereum_prison
+ * go_ethereum_stasis
+ * go_mysterious_snow_mound
+ * go_tele_to_dalaran_crystal
+ * go_tele_to_violet_stand
+ * go_andorhal_tower
+ * go_scourge_enclosure
+ * go_lab_work_reagents
+ * EndContentData
+ */
 
 #include "precompiled.h"
 
@@ -265,7 +267,9 @@ bool GOUse_go_andorhal_tower(Player* pPlayer, GameObject* pGo)
                 break;
         }
         if (uiKillCredit)
+        {
             pPlayer->KilledMonsterCredit(uiKillCredit);
+        }
     }
     return true;
 }

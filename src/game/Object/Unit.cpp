@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
+ * Copyright (C) 2005-2015  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -6706,7 +6706,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
             // Ice Lance
             if (spellProto->SpellIconID == 186)
             {
-                if (pVictim->isFrozen() || IsIgnoreUnitState(spellProto, IGNORE_UNIT_TARGET_NON_FROZEN))
+                if (pVictim->IsFrozen() || IsIgnoreUnitState(spellProto, IGNORE_UNIT_TARGET_NON_FROZEN))
                 {
                     float multiplier = 3.0f;
 
@@ -7036,15 +7036,15 @@ bool Unit::IsSpellCrit(Unit* pVictim, SpellEntry const* spellProto, SpellSchoolM
                     switch ((*i)->GetModifier()->m_miscvalue)
                     {
                         case  849:                          // Shatter Rank 1
-                            if (pVictim->isFrozen() || IsIgnoreUnitState(spellProto, IGNORE_UNIT_TARGET_NON_FROZEN))
+                            if (pVictim->IsFrozen() || IsIgnoreUnitState(spellProto, IGNORE_UNIT_TARGET_NON_FROZEN))
                                 crit_chance += 17.0f;
                             break;
                         case  910:                          // Shatter Rank 2
-                            if (pVictim->isFrozen() || IsIgnoreUnitState(spellProto, IGNORE_UNIT_TARGET_NON_FROZEN))
+                            if (pVictim->IsFrozen() || IsIgnoreUnitState(spellProto, IGNORE_UNIT_TARGET_NON_FROZEN))
                                 crit_chance += 34.0f;
                             break;
                         case  911:                          // Shatter Rank 3
-                            if (pVictim->isFrozen() || IsIgnoreUnitState(spellProto, IGNORE_UNIT_TARGET_NON_FROZEN))
+                            if (pVictim->IsFrozen() || IsIgnoreUnitState(spellProto, IGNORE_UNIT_TARGET_NON_FROZEN))
                                 crit_chance += 50.0f;
                             break;
                         case 7917:                          // Glyph of Shadowburn
@@ -8062,6 +8062,56 @@ void Unit::Unmount(bool from_aura)
         if (height)
             { SendCollisionHeightUpdate(height); }
     }
+}
+
+bool Unit::IsNearWaypoint(float currentPositionX, float currentPositionY, float currentPositionZ, float destinationPostionX, float destinationPostionY, float destinationPostionZ, float distanceX, float distanceY, float distanceZ)
+{
+    // actual distance between the creature's X ordinate and destination X ordinate
+    float xDifference = 0;
+    // actual distance between the creature's Y ordinate and destination Y ordinate
+    float yDifference = 0;
+    // actual distance between the creature's Z ordinate and destination Y ordinate
+    float zDifference = 0;
+
+    // distanceX == 0, means do not test the distance between the creature's current X ordinate and the destination X ordinate
+    // A test for 0 is used, because it is not worth testing for exact coordinates, seeing as we have to use an integar in the database for the event parameters that holds the cordinates.
+    // Therefore a test for the distance between waypoints does the job more than well enough
+    if (distanceX > 0)
+    {
+        if (currentPositionX > destinationPostionX)
+            xDifference = currentPositionX - destinationPostionX;
+        else
+            xDifference = destinationPostionX - currentPositionX;
+    }
+    // distanceY == 0, means do not test the distance between the creature's current Y ordinate and the destination Y ordinate
+    if (distanceY > 0)
+    {
+        if (currentPositionY > destinationPostionY)
+            yDifference = currentPositionY - destinationPostionY;
+        else
+            yDifference = destinationPostionY - currentPositionY;
+    }
+    // distanceZ == 0, means do not test the distance between the creature's current Z ordinate and the destination Z ordinate
+    if (distanceZ > 0)
+    {
+        if (currentPositionZ > destinationPostionZ)
+            zDifference = currentPositionZ - destinationPostionZ;
+        else
+            zDifference = destinationPostionZ - currentPositionZ;
+    }
+
+    // check based on which ordinates to test the current distance from (distance along the X, and/or Y, and/or Z ordinates)
+    if (((distanceX > 0 && xDifference < distanceX) && (distanceY > 0 && yDifference < distanceY) && (distanceZ > 0 && zDifference < distanceZ)) ||
+        ((distanceX == 0) && (distanceY > 0 && yDifference < distanceY) && (distanceZ > 0 && zDifference < distanceZ)) ||
+        ((distanceX > 0 && xDifference < distanceX) && (distanceY == 0) && (distanceZ > 0 && zDifference < distanceZ)) ||
+        ((distanceX > 0 && xDifference < distanceX) && (distanceY > 0 && yDifference < distanceY) && (distanceZ == 0)) ||
+        ((distanceX > 0 && xDifference < distanceX) && (distanceY == 0) && (distanceZ == 0)) ||
+        ((distanceX == 0) && (distanceY > 0 && yDifference < distanceY) && (distanceZ == 0)) ||
+        ((distanceX == 0) && (distanceY == 0) && (distanceZ > 0 && zDifference < distanceZ))
+        )
+        return true;
+
+    return false;
 }
 
 void Unit::SetInCombatWith(Unit* enemy)
@@ -10029,7 +10079,7 @@ void CharmInfo::SetSpellAutocast(uint32 spell_id, bool state)
     }
 }
 
-bool Unit::isFrozen() const
+bool Unit::IsFrozen() const
 {
     return HasAuraState(AURA_STATE_FROZEN);
 }
