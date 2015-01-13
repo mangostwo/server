@@ -318,7 +318,7 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
         roleCheck.dungeonList = dungeons;
         roleCheck.randomDungeonID = randomDungeonID;
         roleCheck.leaderGuidRaw = leaderGuid.GetRawValue();
-        roleCheck.waitForRoleTime = time_t(time(nullptr) + LFG_TIME_ROLECHECK);
+        roleCheck.waitForRoleTime = time_t(time(NULL) + LFG_TIME_ROLECHECK);
 
         m_roleCheckMap[guid] = roleCheck;
         
@@ -345,7 +345,7 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
             }
         }
         // used later if they enter the queue
-        LFGPlayers groupInfo(LFG_STATE_NONE, dungeons, roleCheck.currentRoles, comments, false, time(nullptr), 0, 0, 0);
+        LFGPlayers groupInfo(LFG_STATE_NONE, dungeons, roleCheck.currentRoles, comments, false, time(NULL), 0, 0, 0);
         m_playerData[guid] = groupInfo;
         
         PerformRoleCheck(plr, pGroup, (uint8)roles);
@@ -363,7 +363,7 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
         roleMap playerRole;
         playerRole[guid] = (uint8)roles;
             
-        LFGPlayers playerInfo(LFG_STATE_QUEUED, dungeons, playerRole, comments, false, time(nullptr), 0, 0, 0);
+        LFGPlayers playerInfo(LFG_STATE_QUEUED, dungeons, playerRole, comments, false, time(NULL), 0, 0, 0);
         m_playerData[guid] = playerInfo;
         
         // set up a status struct for client requests/updates
@@ -406,7 +406,7 @@ void LFGMgr::LeaveLFG(Player* plr, bool isGroup)
                         SendLfgUpdate(grpPlrGuid, grpPlrStatus, true);
                         break;
                     case LFG_STATE_ROLECHECK:
-                        PerformRoleCheck(nullptr, pGroup, 0);
+                        PerformRoleCheck(NULL, pGroup, 0);
                         break;
                     //todo: other state cases after they get implemented
                 }
@@ -448,7 +448,7 @@ LFGPlayers* LFGMgr::GetPlayerOrPartyData(ObjectGuid guid)
     if (it != m_playerData.end())
         return &(it->second);
     else
-        return nullptr;
+        return NULL;
 }
 
 LFGProposal* LFGMgr::GetProposalData(uint32 proposalID)
@@ -457,7 +457,7 @@ LFGProposal* LFGMgr::GetProposalData(uint32 proposalID)
     if (it != m_proposalMap.end())
         return &(it->second);
     else
-        return nullptr;
+        return NULL;
 }
 
 LfgJoinResult LFGMgr::GetJoinResult(Player* plr)
@@ -1157,7 +1157,7 @@ void LFGMgr::PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles)
         LFGPlayers* queueInfo   = GetPlayerOrPartyData(groupGuid);
         queueInfo->currentState = LFG_STATE_QUEUED;
         queueInfo->currentRoles = roleCheck.currentRoles;
-        queueInfo->joinedTime   = time(nullptr);
+        queueInfo->joinedTime   = time(NULL);
         
         m_playerData[groupGuid] = *queueInfo;
         
@@ -1353,7 +1353,7 @@ void LFGMgr::ProposalUpdate(uint32 proposalID, ObjectGuid plrGuid, bool accepted
     
     // at this point everyone's good to join the dungeon!
     
-    time_t joinedTime = time(nullptr);
+    time_t joinedTime = time(NULL);
     bool sendProposalUpdate = proposal->state != LFG_PROPOSAL_SUCCESS;
     
     // now update the proposal's state to successful and inform the players
@@ -1593,7 +1593,7 @@ LFGGroupStatus* LFGMgr::GetGroupStatus(ObjectGuid guid)
     if (it != m_groupStatusMap.end())
         return &(it->second);
     else
-        return nullptr;
+        return NULL;
 }
 
 void LFGMgr::ProposalDeclined(ObjectGuid guid, LFGProposal* proposal)
@@ -1798,7 +1798,7 @@ void LFGMgr::AttemptToKickPlayer(Group* pGroup, ObjectGuid guid, ObjectGuid kick
     m_groupStatusMap[groupGuid] = *status;
     
     // This function is only called when a group is set/in a dungeon so we can go straight to the boot packets
-    time_t now = time(nullptr);
+    time_t now = time(NULL);
     proposalAnswerMap votes;
     
     // safe to say the person attempting to kick them will vote yes, the kick-ee will vote no
@@ -1938,7 +1938,7 @@ void LFGMgr::RemoveOldRoleChecks()
         ObjectGuid groupGuid = roleItr->first;
         
         LFGRoleCheck roleCheck = roleItr->second;
-        if ((roleCheck.waitForRoleTime - time(nullptr)) <= 0) // no time left
+        if ((roleCheck.waitForRoleTime - time(NULL)) <= 0) // no time left
         {
             roleCheck.state = LFG_ROLECHECK_NO_ROLE;
             

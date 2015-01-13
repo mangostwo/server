@@ -695,7 +695,7 @@ void WorldSession::SendLfgBootUpdate(LFGBoot const& boot)
         }
     }
     
-    uint32 timeLeft = uint8( ((boot.startTime+LFG_TIME_BOOT)-time(nullptr)) / 1000 );
+    uint32 timeLeft = uint8( ((boot.startTime+LFG_TIME_BOOT)-time(NULL)) / 1000 );
     
     WorldPacket data(SMSG_LFG_BOOT_PLAYER, 27+boot.reason.length());
     
