@@ -815,9 +815,150 @@ bool QuestAccept_npc_arei(Player* pPlayer, Creature* pCreature, const Quest* pQu
     return true;
 }
 
+/*######
+## go_corrupted_plant
+######*/
+
+enum
+{
+    FAILED_TO_LOCATE_QUEST = 0,
+    QUEST_CORRUPTED_SONGFLOWER = 1,
+    QUEST_CORRUPTED_NIGHT_DRAGON = 2,
+    QUEST_CORRUPTED_WINDBLOSSOM = 3,
+    QUEST_CORRUPTED_WHIPPER_ROOT = 4,
+
+    GO_CLEANSED_SONGFLOWER = 164882,
+    SPELL_SONGFLOWER_SERENADE = 15366,
+
+    GO_CLEANSED_NIGHT_DRAGON = 164881,
+    GO_CLEANSED_WINDBLOSSOM = 164884,
+    GO_CLEANSED_WHIPPER_ROOT = 164883,
+
+    PLANT_SPAWN_DURATION = 60
+};
+
+static const uint32 aCorruptedSongflowerQuestId[] =
+{ 2278, 2523, 3363, 4113, 4116, 4118, 4401, 4464, 4465 };            // Corrupted Songflower
+static const uint32 aCorruptedNightDragonQuestId[] =
+{ 4119, 4447, 4448, 4462 };                                          // Corrupted Night Dragon
+static const uint32 aCorruptedWindblossomQuestId[] =
+{ 996, 998, 1514, 4115, 4221, 4222, 4343, 4403, 4466, 4466, 4467 };  // Corrupted Windblossom
+static const uint32 aCorruptedWhipperRootQuestId[] =
+{ 4117, 4443, 4444, 4445, 4446, 4461 };                              // Corrupted Whipper Root
+
+uint32 locateQuestId(uint32 uQuestToSearchFor, uint32 uQuestId)
+{
+    int index = 0;
+    if (uQuestToSearchFor == QUEST_CORRUPTED_SONGFLOWER)
+    {
+        // check Cleansed Songflower Quest IDs
+        for (index = 0; index < 9; index++)
+        {
+            if (uQuestId == aCorruptedSongflowerQuestId[index])
+                return QUEST_CORRUPTED_SONGFLOWER;
+        }
+    }
+    else if (uQuestToSearchFor == QUEST_CORRUPTED_NIGHT_DRAGON)
+    {
+        // check Cleansed Night Dragon Quest IDs
+        for (int index = 0; index < 4; index++)
+        {
+            if (uQuestId == aCorruptedNightDragonQuestId[index])
+                return QUEST_CORRUPTED_NIGHT_DRAGON;
+        }
+    }
+    else if (uQuestToSearchFor == QUEST_CORRUPTED_WINDBLOSSOM)
+    {
+        // check Cleansed Windblossom Quest IDs
+        for (int index = 0; index < 10; index++)
+        {
+            if (uQuestId == aCorruptedWindblossomQuestId[index])
+                return QUEST_CORRUPTED_WINDBLOSSOM;
+        }
+    }
+    else if (uQuestToSearchFor == QUEST_CORRUPTED_WHIPPER_ROOT)
+    {
+        // check Cleansed Whipper Root Quest IDs
+        for (int index = 0; index < 6; index++)
+        {
+            if (uQuestId == aCorruptedWhipperRootQuestId[index])
+                return QUEST_CORRUPTED_WHIPPER_ROOT;
+        }
+    }
+
+    return FAILED_TO_LOCATE_QUEST; // quest ID not located
+}
+
+void DespawnCorruptedPlant(GameObject* pGo)
+{
+    pGo->SetSpawnedByDefault(false);
+    pGo->SetRespawnTime(1);
+}
+
+bool QuestRewarded_go_corrupted_plant(Player* pPlayer, GameObject* pGo, const Quest* pQuest)
+{
+    // acquire plant's coordinates
+    float fX, fY, fZ;
+    pGo->GetPosition(fX, fY, fZ);
+
+    uint32 uQuestId = pQuest->GetQuestId();
+
+    if (locateQuestId(QUEST_CORRUPTED_SONGFLOWER, uQuestId) == QUEST_CORRUPTED_SONGFLOWER)
+    {
+        // despawn corrupted plant
+        DespawnCorruptedPlant(pGo);
+        // spawn cleansed plant
+        pPlayer->SummonGameObject(GO_CLEANSED_SONGFLOWER, fX, fY, fZ, 0.0f, PLANT_SPAWN_DURATION);
+    }
+    else if (locateQuestId(QUEST_CORRUPTED_NIGHT_DRAGON, uQuestId) == QUEST_CORRUPTED_NIGHT_DRAGON)
+    {
+        // despawn corrupted plant
+        DespawnCorruptedPlant(pGo);
+        // spawn cleansed plant
+        pPlayer->SummonGameObject(GO_CLEANSED_NIGHT_DRAGON, fX, fY, fZ, 0.0f, PLANT_SPAWN_DURATION);
+    }
+    else if (locateQuestId(QUEST_CORRUPTED_WINDBLOSSOM, uQuestId) == QUEST_CORRUPTED_WINDBLOSSOM)
+    {
+        // despawn corrupted plant
+        DespawnCorruptedPlant(pGo);
+        // spawn cleansed plant
+        pPlayer->SummonGameObject(GO_CLEANSED_WINDBLOSSOM, fX, fY, fZ, 0.0f, PLANT_SPAWN_DURATION);
+    }
+    else if (locateQuestId(QUEST_CORRUPTED_WHIPPER_ROOT, uQuestId) == QUEST_CORRUPTED_WHIPPER_ROOT)
+    {
+        // despawn corrupted plant
+        DespawnCorruptedPlant(pGo);
+        // spawn cleansed plant
+        pPlayer->SummonGameObject(GO_CLEANSED_WHIPPER_ROOT, fX, fY, fZ, 0.0f, PLANT_SPAWN_DURATION);
+    }
+    else
+        return false;
+
+    return true;
+}
+
+// This is only used for the Corrupted Songflower quest; actually for when interacting with the cleansed songflower
+bool GOUse_go_cleansed_plant(Player* pPlayer, GameObject* pGo)
+{
+    // cast spell on player
+    pPlayer->CastSpell(pPlayer, SPELL_SONGFLOWER_SERENADE, true);
+
+    return true;
+}
+
 void AddSC_felwood()
 {
     Script* pNewScript;
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_corrupted_plant";
+    pNewScript->pQuestRewardedGO = &QuestRewarded_go_corrupted_plant;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_cleansed_plant";
+    pNewScript->pGOUse = &GOUse_go_cleansed_plant;
+    pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_kitten";
