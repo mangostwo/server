@@ -210,6 +210,7 @@ struct boss_skeramAI : public ScriptedAI
             // Set the same health percent as the original boss
             m_creature->SetMaxHealth(m_creature->GetMaxHealth()*fMaxHealthPct);
             m_creature->SetHealthPercent(fHealthPct);
+            m_creature->SetCorpseDelay(0);
         }
     }
 
