@@ -1,1 +1,0 @@
-UPDATE script_texts SET type=0 WHERE entry IN (-1580088, -1580086, -1580084, -1580082);

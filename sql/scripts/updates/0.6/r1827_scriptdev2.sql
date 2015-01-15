@@ -1,1 +1,0 @@
-UPDATE script_texts SET type=4 WHERE entry BETWEEN -1000230 AND -1000217;

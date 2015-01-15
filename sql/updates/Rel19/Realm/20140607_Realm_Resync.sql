@@ -1,1 +1,0 @@
-ALTER TABLE realmd_db_version CHANGE COLUMN required_c12484_02_realmd_account_access required_20140607_Realm_Resync BIT;
