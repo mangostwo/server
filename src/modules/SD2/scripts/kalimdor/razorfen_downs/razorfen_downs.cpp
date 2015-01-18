@@ -360,17 +360,17 @@ void SummonCreatures(Player* pPlayer, int NPC_ID, int iTotalToSpawn)
     for (int i = 0; i < iTotalToSpawn; i++)
     {
         pTombCreature = pPlayer->SummonCreature(NPC_ID, aCreatureLocation[i].fX, aCreatureLocation[i].fY, aCreatureLocation[i].fZ, aCreatureLocation[i].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7200000);
-        pTombCreature->GetMotionMaster()->MovePoint(0, 2547.565, 904.983, 46.776);
-        pTombCreature->GetMotionMaster()->MovePoint(0, 2547.496, 895.083, 47.736);
-        pTombCreature->GetMotionMaster()->MovePoint(0, 2543.796, 884.629, 47.764);
+        pTombCreature->GetMotionMaster()->MovePoint(0, 2547.565f, 904.983f, 46.776f);
+        pTombCreature->GetMotionMaster()->MovePoint(0, 2547.496f, 895.083f, 47.736f);
+        pTombCreature->GetMotionMaster()->MovePoint(0, 2543.796f, 884.629f, 47.764f);
         // randomise coordinates
         fXdifference = rand() % 3;
         fYdifference = rand() % 3;
-        pTombCreature->GetMotionMaster()->MovePoint(0, 2532.118 + fXdifference, 866.656 + fYdifference, 47.678146);
+        pTombCreature->GetMotionMaster()->MovePoint(0, 2532.118f + fXdifference, 866.656f + fYdifference, 47.678146f);
         // randomise last coordinates
         fXdifference = rand() % 5;
         fYdifference = rand() % 5;
-        pTombCreature->GetMotionMaster()->MovePoint(0, 2522.604 + fXdifference, 858.547 + fYdifference, 47.678673);
+        pTombCreature->GetMotionMaster()->MovePoint(0, 2522.604f + fXdifference, 858.547f + fYdifference, 47.678673f);
         pTombCreature->GetMotionMaster()->MoveIdle();
     }
 }
@@ -396,15 +396,15 @@ bool GOUse_go_tutenkash_gong(Player* pPlayer, GameObject* pGo)
             // spawn boss (Tuten'kash)
             bWaveInMotion = true; // last wave,so will never be set back to false, therefore this event cannot happen again
             Creature* pTutenkash = pPlayer->SummonCreature(NPC_TUTENKASH, aTutenkashLocation[0].fX, aTutenkashLocation[0].fY, aTutenkashLocation[0].fZ, aTutenkashLocation[0].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7200000);
-            pTutenkash->GetMotionMaster()->MovePoint(0, 2488.502686, 801.684021, 42.731823);
-            pTutenkash->GetMotionMaster()->MovePoint(0, 2485.428955, 815.734619, 43.195621);
-            pTutenkash->GetMotionMaster()->MovePoint(0, 2486.951904, 826.718079, 43.586765);
-            pTutenkash->GetMotionMaster()->MovePoint(0, 2496.677002, 838.880005, 45.809792);
-            pTutenkash->GetMotionMaster()->MovePoint(0, 2501.559814, 847.080750, 47.408485);
-            pTutenkash->GetMotionMaster()->MovePoint(0, 2506.661377, 855.430359, 47.678036);
-            pTutenkash->GetMotionMaster()->MovePoint(0, 2514.890869, 861.339966, 47.678036);
-            pTutenkash->GetMotionMaster()->MovePoint(0, 2526.009033, 865.386108, 47.678036);
-            pTutenkash->GetMotionMaster()->MovePoint(0, 2539.416504, 874.278931, 47.711197);
+            pTutenkash->GetMotionMaster()->MovePoint(0, 2488.502686f, 801.684021f, 42.731823f);
+            pTutenkash->GetMotionMaster()->MovePoint(0, 2485.428955f, 815.734619f, 43.195621f);
+            pTutenkash->GetMotionMaster()->MovePoint(0, 2486.951904f, 826.718079f, 43.586765f);
+            pTutenkash->GetMotionMaster()->MovePoint(0, 2496.677002f, 838.880005f, 45.809792f);
+            pTutenkash->GetMotionMaster()->MovePoint(0, 2501.559814f, 847.080750f, 47.408485f);
+            pTutenkash->GetMotionMaster()->MovePoint(0, 2506.661377f, 855.430359f, 47.678036f);
+            pTutenkash->GetMotionMaster()->MovePoint(0, 2514.890869f, 861.339966f, 47.678036f);
+            pTutenkash->GetMotionMaster()->MovePoint(0, 2526.009033f, 865.386108f, 47.678036f);
+            pTutenkash->GetMotionMaster()->MovePoint(0, 2539.416504f, 874.278931f, 47.711197f);
             pTutenkash->GetMotionMaster()->MoveIdle();
             break;
         }
