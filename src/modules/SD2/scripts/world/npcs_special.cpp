@@ -1070,7 +1070,6 @@ struct npc_guardianAI : public ScriptedAI
 
     void Reset() override
     {
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
     }
 
     void UpdateAI(const uint32 /*diff*/) override
