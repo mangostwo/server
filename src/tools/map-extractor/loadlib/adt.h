@@ -388,7 +388,7 @@ class adt_MH2O
             if (h->offsData2a)
                 { return *((uint64*)((uint8*)this + 8 + h->offsData2a)); }
             else
-                { return 0xFFFFFFFFFFFFFFFFLL; }
+                { return (uint64)0xFFFFFFFFFFFFFFFFLL; }
         }
 
 };

@@ -40,7 +40,51 @@ add_executable(${EXECUTABLE_NAME} dbcfile.cpp mpq_libmpq.cpp System.cpp ${EXECUT
 
 target_link_libraries(${EXECUTABLE_NAME} libmpq loadlib)
 
+#Output the compiled exes to build/bin/$(Configuration)/tools directory on windows by default
+if(WIN32)
+  if ( MSVC )
+    set_target_properties(${EXECUTABLE_NAME} PROPERTIES
+      RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin/Release/tools
+      RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin/Debug/tools
+    )
+  elseif ( MINGW )
+    set_target_properties(${EXECUTABLE_NAME} PROPERTIES
+      RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin/tools
+      RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin/tools
+    )
+  endif()
+endif()
+
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION "${BIN_DIR}/${TOOLS_DIR}")
 if(WIN32 AND MSVC)
   install(FILES "${CMAKE_CURRENT_BINARY_DIR}/\${BUILD_TYPE}/${EXECUTABLE_NAME}.pdb" DESTINATION "${BIN_DIR}/${TOOLS_DIR}" CONFIGURATIONS Debug)
+endif()
+
+#install documentation and generation scripts
+install(
+  FILES
+    "${CMAKE_CURRENT_SOURCE_DIR}/../Extractor_Binaries/ExtractResources.sh"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../Extractor_Binaries/make_vmaps.bat"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../Extractor_Binaries/mmap_excluded.txt"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../Extractor_Binaries/MoveMapGen.sh"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../Extractor_Binaries/offmesh.txt"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../Extractor_Binaries/README.txt"
+  DESTINATION
+    "${BIN_DIR}/${TOOLS_DIR}"
+)
+
+if( WIN32 )
+  if ( MSVC )
+    add_custom_command(TARGET ${EXECUTABLE_NAME}
+      POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/tools/"
+      COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/../Extractor_Binaries" "${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/tools/"
+    )
+  elseif ( MINGW )
+    add_custom_command(TARGET ${EXECUTABLE_NAME}
+      POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/bin/tools/"
+      COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/../Extractor_Binaries" "${CMAKE_BINARY_DIR}/bin/tools/"
+    )
+  endif()
 endif()

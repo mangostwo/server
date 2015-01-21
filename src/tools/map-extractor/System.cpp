@@ -96,7 +96,7 @@ int   CONF_extract = EXTRACT_MAP | EXTRACT_DBC; /**< Select data for extract */
 bool  CONF_allow_height_limit       = true;     /**< Allows to limit minimum height */
 float CONF_use_minHeight            = -500.0f;  /**< Default minimum height */
 
-bool  CONF_allow_float_to_int      = true;      /**< Allows float to int conversion */
+bool  CONF_allow_float_to_int      = false;      /**< Allows float to int conversion */
 float CONF_float_to_int8_limit     = 2.0f;      /**< Max accuracy = val/256 */
 float CONF_float_to_int16_limit    = 2048.0f;   /**< Max accuracy = val/65536 */
 float CONF_flat_height_delta_limit = 0.005f;    /**< If max - min less this value - surface is flat */
@@ -115,9 +115,14 @@ const char* CONF_mpq_list[] = /**< List MPQ for extract from */
     "patch-5.MPQ",
 };
 
-static char* const langs[] = {"enGB", "enUS", "deDE", "esES", "frFR", "koKR", "zhCN", "zhTW", "enCN", "enTW", "esMX", "ruRU" };
+static  const char *langs[] = {"enGB", "enUS", "deDE", "esES", "frFR", "koKR", "zhCN", "zhTW", "enCN", "enTW", "esMX", "ruRU" };
 #define LANG_COUNT 12
 
+/**
+ * @brief
+ *
+ * @param Path
+ */
 void CreateDir(const std::string& Path)
 {
 #ifdef WIN32
@@ -471,7 +476,7 @@ float liquid_height[ADT_GRID_SIZE + 1][ADT_GRID_SIZE + 1];      /**< TODO */
  * @param cell_x
  * @return bool
  */
-bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x, uint32 build)
+bool ConvertADT(char* filename, char* filename2, uint32 build)
 {
     ADT_file adt;
 
@@ -679,7 +684,7 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x, uint32 
     // Try store as packed in uint16 or uint8 values
     if (!(heightHeader.flags & MAP_HEIGHT_NO_HEIGHT))
     {
-        float step;
+        float step = 0.0f;
         // Try Store as uint values
         if (CONF_allow_float_to_int)
         {
@@ -1055,7 +1060,7 @@ void ExtractMapsFromMpq(uint32 build)
                     { continue; }
                 sprintf(mpq_filename, "World\\Maps\\%s\\%s_%u_%u.adt", map_ids[z].name, map_ids[z].name, x, y);
                 sprintf(output_filename, "%s/maps/%03u%02u%02u.map", output_path, map_ids[z].id, y, x);
-                ConvertADT(mpq_filename, output_filename, y, x, build);
+                ConvertADT(mpq_filename, output_filename, build);// , y, x);
             }
             // draw progress bar
             printf("Processing........................%d%%\r", (100 * (y + 1)) / WDT_MAP_SIZE);
@@ -1136,7 +1141,7 @@ void ExtractDBCFiles(int locale, bool basicLocale)
         if (ExtractFile(iter->c_str(), filename))
             { ++count; }
     }
-    printf("Extracted %u DBC files\n\n", count);
+    printf("Extracted %u client database files\n\n", count);
 }
 
 void LoadLocaleMPQFiles(int const locale)
@@ -1150,14 +1155,18 @@ void LoadLocaleMPQFiles(int const locale)
     {
         char ext[3] = "";
         if (i > 1)
-            sprintf(ext, "-%i", i);
+        { sprintf(ext, "-%i", i); }
 
         sprintf(filename, "%s/Data/%s/patch-%s%s.MPQ", input_path, langs[locale], langs[locale], ext);
         if (FileExists(filename))
-            new MPQArchive(filename);
+        { new MPQArchive(filename); }
     }
 }
 
+/**
+ * @brief
+ *
+ */
 void LoadCommonMPQFiles()
 {
     char filename[512];
@@ -1189,8 +1198,7 @@ inline void CloseMPQFiles()
  */
 int main(int argc, char* arg[])
 {
-    printf("Map & DBC Extractor\n");
-    printf("===================\n\n");
+    printf("mangos-two DBC & map (version %s) extractor\n\n", MAP_VERSION_MAGIC);
 
     HandleArgs(argc, arg);
 
@@ -1225,7 +1233,7 @@ int main(int argc, char* arg[])
                 ExtractDBCFiles(i, true);
             }
             else
-                ExtractDBCFiles(i, false);
+            { ExtractDBCFiles(i, false); }
 
             //Close MPQs
             CloseMPQFiles();
@@ -1247,7 +1255,7 @@ int main(int argc, char* arg[])
         LoadCommonMPQFiles();
 
         // Extract maps
-        ExtractMapsFromMpq(build);
+        { ExtractMapsFromMpq(FirstLocale); }
 
         // Close MPQs
         CloseMPQFiles();
