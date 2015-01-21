@@ -32,11 +32,11 @@ DisplayHeader()
 {
 	clear
 	echo "  __  __      _  _  ___  ___  ___      "
-	echo " |  \\/  |__ _| \\| |/ __|/ _ \\/ __|  "                                         
+	echo " |  \\/  |__ _| \\| |/ __|/ _ \\/ __|  "
 	echo " | |\\/| / _\` | .\` | (_ | (_) \\__ \\"
 	echo " |_|  |_\\__,_|_|\\_|\\___|\\___/|___/ "
 	echo "                                       "
-	echo " For help and support please visit:    " 
+	echo " For help and support please visit:    "
 	echo " Website: https://getmangos.eu         "
 	echo "    Wiki: http://github.com/mangoswiki "
 	echo "======================================="
@@ -54,8 +54,8 @@ else
 	## do some questioning!
     DisplayHeader
 	echo "  Welcome to the MaNGOS Zero Extraction helper script !"
-    echo "=========================================================="	
-    echo
+        echo "=========================================================="
+        echo
 	echo "Should all data (dbc, maps, vmaps and mmaps be extracted ?"
 	echo "(Selecting n will give you the option to pick each step) (y/n):"
 	read line
@@ -104,7 +104,7 @@ fi
 if [ "$USE_MMAPS_OFFMESH" = "1" ]
 then
 	echo "Only extracting offmesh meshes"
-	MoveMapGen.sh offmesh $LOG_FILE $DETAIL_LOG_FILE
+	./MoveMapGen.sh offmesh $LOG_FILE $DETAIL_LOG_FILE
 	exit 0
 fi
 
@@ -191,7 +191,7 @@ echo | tee -a $DETAIL_LOG_FILE
 if [ "$USE_AD" = "1" ]
 then
  echo "`date`: Start extraction of DBCs and map files..." | tee -a $LOG_FILE
- map-extractor | tee -a $DETAIL_LOG_FILE
+ ./map-extractor | tee -a $DETAIL_LOG_FILE
  echo "`date`: Extracting of DBCs and map files finished" | tee -a $LOG_FILE
  echo | tee -a $LOG_FILE
  echo | tee -a $DETAIL_LOG_FILE
@@ -201,11 +201,11 @@ fi
 if [ "$USE_VMAPS" = "1" ]
 then
 	echo "`date`: Start extraction of vmaps..." | tee -a $LOG_FILE
-	vmap-extractor | tee -a $DETAIL_LOG_FILE
+	./vmap-extractor | tee -a $DETAIL_LOG_FILE
 	echo "`date`: Extracting of vmaps finished" | tee -a $LOG_FILE
-	mkdir vmaps
+	mkdir ./vmaps
 	echo "`date`: Start assembling of vmaps..." | tee -a $LOG_FILE
-	vmap-assembler Buildings vmaps | tee -a $DETAIL_LOG_FILE
+	./vmap-assembler Buildings vmaps | tee -a $DETAIL_LOG_FILE
 	echo "`date`: Assembling of vmaps finished" | tee -a $LOG_FILE
 
 	echo | tee -a $LOG_FILE
@@ -220,6 +220,6 @@ then
 		echo "Current time: $(date)"
 		sleep $USE_MMAPS_DELAY
 	fi
-	sh MoveMapGen.sh $NUM_CPU $LOG_FILE $DETAIL_LOG_FILE
+	sh ./MoveMapGen.sh $NUM_CPU $LOG_FILE $DETAIL_LOG_FILE
 fi
 

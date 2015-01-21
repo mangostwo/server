@@ -125,7 +125,7 @@ createMMaps()
 		continue 2
 	  fi
 	done
-	movemap-generator $PARAMS $OFFMESH $i | tee -a $DETAIL_LOG_FILE
+	./movemap-generator $PARAMS $OFFMESH $i | tee -a $DETAIL_LOG_FILE
 	echo "`date`: (Re)created map $i" | tee -a $LOG_FILE
   done
 }
@@ -192,7 +192,7 @@ createSummary()
 # Create mmaps directory if not exist
 if [ ! -d mmaps ]
 then
-  mkdir mmaps
+  mkdir ./mmaps
 fi
 
 # Param control
@@ -200,35 +200,35 @@ case "$1" in
   "1" )
 	createHeader $1
 	createSummary $1
-    createMMaps $MAP_LIST_A $MAP_LIST_B $MAP_LIST_C $MAP_LIST_D &
+	createMMaps $MAP_LIST_A $MAP_LIST_B $MAP_LIST_C $MAP_LIST_D &
 	;;
   "2" )
 	createHeader $1
 	createSummary $1
-    createMMaps $MAP_LIST_A $MAP_LIST_D &
-    createMMaps $MAP_LIST_B $MAP_LIST_C &
+	createMMaps $MAP_LIST_A $MAP_LIST_D &
+	createMMaps $MAP_LIST_B $MAP_LIST_C &
 	;;
   "3" )
 	createHeader $1
 	createSummary $1
-    createMMaps $MAP_LIST_A $MAP_LIST_D1&
-    createMMaps $MAP_LIST_B $MAP_LIST_D2&
-    createMMaps $MAP_LIST_C $MAP_LIST_D3&
+	createMMaps $MAP_LIST_A $MAP_LIST_D1&
+	createMMaps $MAP_LIST_B $MAP_LIST_D2&
+	createMMaps $MAP_LIST_C $MAP_LIST_D3&
 	;;
   "4" )
 	createHeader $1
 	createSummary $1
-    createMMaps $MAP_LIST_A &
-    createMMaps $MAP_LIST_B &
-    createMMaps $MAP_LIST_C &
-    createMMaps $MAP_LIST_D &
+	createMMaps $MAP_LIST_A &
+	createMMaps $MAP_LIST_B &
+	createMMaps $MAP_LIST_C &
+	createMMaps $MAP_LIST_D &
 	;;
   "offmesh" )
 	echo "`date`: Recreate offmeshs from file $OFFMESH_FILE" | tee -a $LOG_FILE
 	echo "Recreate offmeshs from file $OFFMESH_FILE" | tee -a $DETAIL_LOG_FILE
 	while read map tile line
 	do
-	  movemap-generator $PARAMS $OFFMESH $map --tile $tile | tee -a $DETAIL_LOG_FILE
+	  ./movemap-generator $PARAMS $OFFMESH $map --tile $tile | tee -a $DETAIL_LOG_FILE
 	  echo "`date`: Recreated $map $tile from $OFFMESH_FILE" | tee -a $LOG_FILE
 	done < $OFFMESH_FILE &
 	;;
