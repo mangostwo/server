@@ -1,29 +1,36 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+/**
+* ScriptDev2 is an extension for mangos providing enhanced features for
+* area triggers, creatures, game objects, instances, items, and spells beyond
+* the default database scripting in mangos.
+*
+* Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*
+* World of Warcraft, and all World of Warcraft or Warcraft art, images,
+* and lore are copyrighted by Blizzard Entertainment, Inc.
+*/
 
-/* ScriptData
-SDName: Boss_Netherspite
-SD%Complete: 60
-SDComment:      - Find spell ID for tail swipe added in patch 3.0.2
-                - void zone deals no damage
-                - portal modells should be invisible
-                - portal creatures should be in fight but dont do autohits and dont move -> so we can turn triggered spells to false
-                - range of areatrigger is to high and it bugs netherspite -> he is in combat but doesnt attack anything
-SDCategory: Karazhan
-EndScriptData */
+/**
+* ScriptData
+* SDName:      Boss Netherspite
+* SD%Complete: 75
+* SDComment:   Nether portal partially implemented. Find spell ID for tail swipe added in patch 3.0.2
+* SDCategory:  Karazhan
+* EndScriptData
+*/
 
 #include "precompiled.h"
 #include "karazhan.h"
@@ -31,59 +38,59 @@ EndScriptData */
 enum
 {
     // netherspite spells
-    SPELL_NETHERBURN            = 30522,
-    SPELL_VOID_ZONE             = 37063,
-    SPELL_NETHERBREATH          = 38523,
-    SPELL_EMPOWERMENT           = 38549,
-    SPELL_NETHER_INFUSION       = 38688,                // hard enrage spell
-    SPELL_NETHERSPITE_ROAR      = 38684,                // on banish phase begin
-    SPELL_SHADOWFORM            = 38542,                // banish visual spell
-    SPELL_FACE_RANDOM_TARGET    = 38546,                // triggered by spell 38684 - currently not used
-    SPELL_PORTAL_ATTUNEMENT     = 30425,
+    SPELL_NETHERBURN = 30522,
+    SPELL_VOID_ZONE = 37063,
+    SPELL_NETHERBREATH = 38523,
+    SPELL_EMPOWERMENT = 38549,
+    SPELL_NETHER_INFUSION = 38688,                // hard enrage spell
+    SPELL_NETHERSPITE_ROAR = 38684,                // on banish phase begin
+    SPELL_SHADOWFORM = 38542,                // banish visual spell
+    SPELL_FACE_RANDOM_TARGET = 38546,                // triggered by spell 38684 - currently not used
+    SPELL_PORTAL_ATTUNEMENT = 30425,
 
     // void zone spells
-    SPELL_CONSUMPTION           = 28865,
+    SPELL_CONSUMPTION = 28865,
 
     // beam buffs
-    SPELL_SERENITY_NS           = 30467,
-    SPELL_SERENITY_PLR          = 30422,
-    SPELL_DOMINANCE_NS          = 30468,
-    SPELL_DOMINANCE_PLR         = 30423,
-    SPELL_PERSEVERENCE_NS       = 30466,
-    SPELL_PERSEVERENCE_PLR      = 30421,
+    SPELL_SERENITY_NS = 30467,
+    SPELL_SERENITY_PLR = 30422,
+    SPELL_DOMINANCE_NS = 30468,
+    SPELL_DOMINANCE_PLR = 30423,
+    SPELL_PERSEVERENCE_NS = 30466,
+    SPELL_PERSEVERENCE_PLR = 30421,
 
     // beam debuffs
-    SPELL_EXHAUSTION_SER        = 38638,
-    SPELL_EXHAUSTION_DOM        = 38639,
-    SPELL_EXHAUSTION_PER        = 38637,
+    SPELL_EXHAUSTION_SER = 38638,
+    SPELL_EXHAUSTION_DOM = 38639,
+    SPELL_EXHAUSTION_PER = 38637,
 
     // beam visual spells which hit players
-    SPELL_BEAM_SER              = 30401,
-    SPELL_BEAM_DOM              = 30402,
-    SPELL_BEAM_PER              = 30400,
+    SPELL_BEAM_SER = 30401,
+    SPELL_BEAM_DOM = 30402,
+    SPELL_BEAM_PER = 30400,
 
     // beam visual spells which hit Netherspite
-    SPELL_BEAM_GREEN            = 30464,
-    SPELL_BEAM_BLUE             = 30463,
-    SPELL_BEAM_RED              = 30465,
+    SPELL_BEAM_GREEN = 30464,
+    SPELL_BEAM_BLUE = 30463,
+    SPELL_BEAM_RED = 30465,
 
     // portal visual spells
-    SPELL_GREEN_PORTAL          = 30490,
-    SPELL_BLUE_PORTAL           = 30491,
-    SPELL_RED_PORTAL            = 30487,
+    SPELL_GREEN_PORTAL = 30490,
+    SPELL_BLUE_PORTAL = 30491,
+    SPELL_RED_PORTAL = 30487,
 
     // emotes
-    EMOTE_PHASE_BEAM            = -1532089,
-    EMOTE_PHASE_BANISH          = -1532090,
+    EMOTE_PHASE_BEAM = -1532089,
+    EMOTE_PHASE_BANISH = -1532090,
 
     // npcs
     NPC_VOID_ZONE = 16697,
-    NPC_PORTAL_GREEN = 17367,
-    NPC_PORTAL_BLUE = 17368,
-    NPC_PORTAL_RED = 17369,
+    NPC_PORTAL_GREEN = 17367, // Nether Portal - Serenity
+    NPC_PORTAL_BLUE = 17368,  // Nether Portal - Dominance
+    NPC_PORTAL_RED = 17369,   // Nether Portal - Perseverence
 
-    MAX_PORTALS                 = 3,
-    MAX_PORTAL_PROPERTIES		= 7,
+    MAX_PORTALS = 3,
+    MAX_PORTAL_PROPERTIES = 7,
 };
 
 struct SpawnLocation
@@ -94,38 +101,38 @@ struct SpawnLocation
 // at first spawn portals got fixed coords, should be shuffled in subsequent beam phases
 static const SpawnLocation aPortalCoordinates[MAX_PORTALS] =
 {
-    { -11195.14f, -1616.375f, 278.3217f, 6.230825f},
-    { -11108.13f, -1602.839f, 280.0323f, 3.717551f},
-    { -11139.78f, -1681.278f, 278.3217f, 1.396263f},
+    { -11195.14f, -1616.375f, 278.3217f, 6.230825f },
+    { -11108.13f, -1602.839f, 280.0323f, 3.717551f },
+    { -11139.78f, -1681.278f, 278.3217f, 1.396263f },
 };
 
 enum NetherspitePhases
 {
-    BEAM_PHASE   = 0,
+    BEAM_PHASE = 0,
     BANISH_PHASE = 1,
 };
 
 enum PortalProperties
 {
-    ENTRY       = 0,
-    VISUAL      = 1,
-    VISUAL_PLR  = 2,
-    VISUAL_NS   = 3,
-    BUFF_PLR    = 4,
-    BUFF_NS	    = 5,
-    DEBUFF      = 6,
+    PORTAL_ENTRY = 0,    
+    PORTAL_VISUAL = 1,
+    PORTAL_VISUAL_PLR = 2,
+    PORTAL_VISUAL_NS = 3,
+    PORTAL_BUFF_PLR = 4,
+    PORTAL_BUFF_NS = 5,
+    PORTAL_DEBUFF = 6,
 };
 
 static const uint32 auiPortalVector[MAX_PORTAL_PROPERTIES][MAX_PORTALS] =
 {
     //      0 - GREEN               1 - BLUE                2 - RED
-    {       NPC_PORTAL_GREEN,       NPC_PORTAL_BLUE,        NPC_PORTAL_RED          },	// 0 - portal entries
-    {       SPELL_GREEN_PORTAL,     SPELL_BLUE_PORTAL,      SPELL_RED_PORTAL        },	// 1 - visual spells for portals
-    {       SPELL_BEAM_SER,         SPELL_BEAM_DOM,         SPELL_BEAM_PER          },  // 2 - visual spells for players
-    {       SPELL_BEAM_GREEN,       SPELL_BEAM_BLUE,        SPELL_BEAM_RED          },	// 3 - visual spells for netherspite
-    {       SPELL_SERENITY_PLR,     SPELL_DOMINANCE_PLR,    SPELL_PERSEVERENCE_PLR  },  // 4 - buffs for players
-    {       SPELL_SERENITY_NS,      SPELL_DOMINANCE_NS,     SPELL_PERSEVERENCE_NS   },  // 5 - buffs for netherspite
-    {       SPELL_EXHAUSTION_SER,   SPELL_EXHAUSTION_DOM,   SPELL_EXHAUSTION_PER    },	// 6 - debuffs	
+    { NPC_PORTAL_GREEN, NPC_PORTAL_BLUE, NPC_PORTAL_RED },	// 0 - portal entries
+    { SPELL_GREEN_PORTAL, SPELL_BLUE_PORTAL, SPELL_RED_PORTAL },	// 1 - visual spells for portals
+    { SPELL_BEAM_SER, SPELL_BEAM_DOM, SPELL_BEAM_PER },  // 2 - visual spells for players
+    { SPELL_BEAM_GREEN, SPELL_BEAM_BLUE, SPELL_BEAM_RED },	// 3 - visual spells for netherspite
+    { SPELL_SERENITY_PLR, SPELL_DOMINANCE_PLR, SPELL_PERSEVERENCE_PLR },  // 4 - buffs for players
+    { SPELL_SERENITY_NS, SPELL_DOMINANCE_NS, SPELL_PERSEVERENCE_NS },  // 5 - buffs for netherspite
+    { SPELL_EXHAUSTION_SER, SPELL_EXHAUSTION_DOM, SPELL_EXHAUSTION_PER },	// 6 - debuffs	
 };
 
 //adjust how easy it is to catch the beam
@@ -157,13 +164,13 @@ struct MANGOS_DLL_DECL boss_netherspiteAI : public ScriptedAI
 
     void Reset() override
     {
-        m_uiActivePhase       = BEAM_PHASE;
+        m_uiActivePhase = BEAM_PHASE;
 
-        m_uiEmpowermentTimer  = 10000;
-        m_uiEnrageTimer       = 9 * MINUTE * IN_MILLISECONDS;
-        m_uiVoidZoneTimer     = 15000;
-        m_uiPhaseSwitchTimer  = MINUTE * IN_MILLISECONDS;
-        m_uiConnectionTimer	  = 10000;
+        m_uiEmpowermentTimer = 10000;
+        m_uiEnrageTimer = 9 * MINUTE * IN_MILLISECONDS;
+        m_uiVoidZoneTimer = 15000;
+        m_uiPhaseSwitchTimer = MINUTE * IN_MILLISECONDS;
+        m_uiConnectionTimer = 10000;
 
         SetCombatMovement(true);
 
@@ -172,7 +179,7 @@ struct MANGOS_DLL_DECL boss_netherspiteAI : public ScriptedAI
         m_vPortalEntryList.resize(MAX_PORTALS);
 
         for (uint8 i = 0; i < MAX_PORTALS; ++i)
-            m_vPortalEntryList[i] = auiPortalVector[ENTRY][i];
+            m_vPortalEntryList[i] = auiPortalVector[PORTAL_ENTRY][i];
 
         DoResetPortals();
     }
@@ -221,7 +228,7 @@ struct MANGOS_DLL_DECL boss_netherspiteAI : public ScriptedAI
                 DoScriptText(EMOTE_PHASE_BANISH, m_creature);
 
                 m_uiNetherbreathTimer = 2000;
-                m_uiPhaseSwitchTimer  = 30000;
+                m_uiPhaseSwitchTimer = 30000;
             }
         }
         else
@@ -234,9 +241,9 @@ struct MANGOS_DLL_DECL boss_netherspiteAI : public ScriptedAI
             DoScriptText(EMOTE_PHASE_BEAM, m_creature);
 
             DoSummonPortals();
-            m_uiConnectionTimer   = 5000;
-            m_uiEmpowermentTimer  = 10000;
-            m_uiPhaseSwitchTimer  = MINUTE * IN_MILLISECONDS;
+            m_uiConnectionTimer = 5000;
+            m_uiEmpowermentTimer = 10000;
+            m_uiPhaseSwitchTimer = MINUTE * IN_MILLISECONDS;
         }
 
         // reset threat every phase switch
@@ -258,7 +265,7 @@ struct MANGOS_DLL_DECL boss_netherspiteAI : public ScriptedAI
         {
             for (uint8 i = 0; i < MAX_PORTALS; ++i)
             {
-                if (Creature* pPortal = m_pInstance->GetSingleCreatureFromStorage(auiPortalVector[ENTRY][i]))
+                if (Creature* pPortal = m_pInstance->GetSingleCreatureFromStorage(auiPortalVector[PORTAL_ENTRY][i]))
                 {
                     pPortal->ForcedDespawn();
                     pPortal->RemoveFromWorld();
@@ -279,7 +286,7 @@ struct MANGOS_DLL_DECL boss_netherspiteAI : public ScriptedAI
     void DoDebuffPortalHolder(uint8 portalIndex)
     {
         if (m_portalHolder[portalIndex] && m_portalHolder[portalIndex] != m_creature)
-            m_portalHolder[portalIndex]->CastSpell(m_portalHolder[portalIndex], auiPortalVector[DEBUFF][portalIndex], true);
+            m_portalHolder[portalIndex]->CastSpell(m_portalHolder[portalIndex], auiPortalVector[PORTAL_DEBUFF][portalIndex], true);
     }
 
     void DoDebuffPortalHolderInBanishPhase()
@@ -303,21 +310,21 @@ struct MANGOS_DLL_DECL boss_netherspiteAI : public ScriptedAI
 
         switch (pSummoned->GetEntry())
         {
-            case NPC_VOID_ZONE:
-                pSummoned->CastSpell(pSummoned, SPELL_CONSUMPTION, true);
-                break;
-            case NPC_PORTAL_RED:			
-                pSummoned->CastSpell(pSummoned, SPELL_RED_PORTAL, true);
-                m_portal[2] = pSummoned;
-                break;
-            case NPC_PORTAL_GREEN:
-                pSummoned->CastSpell(pSummoned, SPELL_GREEN_PORTAL, true);
-                m_portal[0] = pSummoned;
-                break;
-            case NPC_PORTAL_BLUE:
-                pSummoned->CastSpell(pSummoned, SPELL_BLUE_PORTAL, true);
-                m_portal[1] = pSummoned;
-                break;
+        case NPC_VOID_ZONE:
+            pSummoned->CastSpell(pSummoned, SPELL_CONSUMPTION, true);
+            break;
+        case NPC_PORTAL_RED:
+            pSummoned->CastSpell(pSummoned, SPELL_RED_PORTAL, true);
+            m_portal[2] = pSummoned;
+            break;
+        case NPC_PORTAL_GREEN:
+            pSummoned->CastSpell(pSummoned, SPELL_GREEN_PORTAL, true);
+            m_portal[0] = pSummoned;
+            break;
+        case NPC_PORTAL_BLUE:
+            pSummoned->CastSpell(pSummoned, SPELL_BLUE_PORTAL, true);
+            m_portal[1] = pSummoned;
+            break;
         }
     }
 
@@ -329,25 +336,25 @@ struct MANGOS_DLL_DECL boss_netherspiteAI : public ScriptedAI
             {
                 if (Player* pPlayer = GetClosestPlayerToPortalBetweenPortalAndNetherspite(i))
                 {
-                    m_portal[i]->CastSpell(pPlayer, auiPortalVector[BUFF_PLR][i], true);
+                    m_portal[i]->CastSpell(pPlayer, auiPortalVector[PORTAL_BUFF_PLR][i], true);
 
                     if (!m_portalHolder[i] || pPlayer != m_portalHolder[i])
                     {
                         DoDebuffPortalHolder(i);
 
-                        m_portal[i]->CastSpell(pPlayer, auiPortalVector[VISUAL_PLR][i], true);
+                        m_portal[i]->CastSpell(pPlayer, auiPortalVector[PORTAL_VISUAL_PLR][i], true);
                         m_portalHolder[i] = pPlayer;
                     }
                 }
                 else
-                {											
-                    m_portal[i]->CastSpell(m_creature, auiPortalVector[BUFF_NS][i], true);
+                {
+                    m_portal[i]->CastSpell(m_creature, auiPortalVector[PORTAL_BUFF_NS][i], true);
 
                     if (!m_portalHolder[i] || m_creature != m_portalHolder[i])
                     {
                         DoDebuffPortalHolder(i);
 
-                        m_portal[i]->CastSpell(m_creature, auiPortalVector[VISUAL_NS][i], true); 
+                        m_portal[i]->CastSpell(m_creature, auiPortalVector[PORTAL_VISUAL_NS][i], true);
                         m_portalHolder[i] = m_creature;
                     }
                 }
@@ -363,7 +370,7 @@ struct MANGOS_DLL_DECL boss_netherspiteAI : public ScriptedAI
         {
             float delta = m_portal[portalIndex]->GetDistance2d(pPlayer) + pPlayer->GetDistance2d(m_creature) - m_portal[portalIndex]->GetDistance2d(m_creature);
 
-            if  (delta >= -beamHitbox && delta <= 0)
+            if (delta >= -beamHitbox && delta <= 0)
                 success = true;
         }
 
@@ -379,7 +386,7 @@ struct MANGOS_DLL_DECL boss_netherspiteAI : public ScriptedAI
         {
             if (Player* pPlayer = itr->getSource())
             {
-                if (m_portal[portalIndex] && !pPlayer->HasAura(auiPortalVector[DEBUFF][portalIndex]) && IsPlayerPositionBetweenPortalAndNetherspite(portalIndex, pPlayer) && m_portal[portalIndex]->GetDistance2d(m_creature) > m_portal[portalIndex]->GetDistance2d(pPlayer))
+                if (m_portal[portalIndex] && !pPlayer->HasAura(auiPortalVector[PORTAL_DEBUFF][portalIndex]) && IsPlayerPositionBetweenPortalAndNetherspite(portalIndex, pPlayer) && m_portal[portalIndex]->GetDistance2d(m_creature) > m_portal[portalIndex]->GetDistance2d(pPlayer))
                 {
                     if (!closestPlayer || m_portal[portalIndex]->GetDistance2d(closestPlayer) > m_portal[portalIndex]->GetDistance2d(pPlayer))
                         closestPlayer = pPlayer;
