@@ -41,7 +41,7 @@ namespace MaNGOS
      *
      * @param (func)()
      */
-    void MANGOS_DLL_SPEC at_exit(void (*func)());
+    void  at_exit(void (*func)());
 
     template<class T>
     /**

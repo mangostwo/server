@@ -603,10 +603,10 @@ bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool
 
 #define sScriptMgr MaNGOS::Singleton<ScriptMgr>::Instance()
 
-MANGOS_DLL_SPEC uint32 GetAreaTriggerScriptId(uint32 triggerId);
-MANGOS_DLL_SPEC uint32 GetEventIdScriptId(uint32 eventId);
-MANGOS_DLL_SPEC uint32 GetScriptId(const char* name);
-MANGOS_DLL_SPEC char const* GetScriptName(uint32 id);
-MANGOS_DLL_SPEC uint32 GetScriptIdsCount();
+ uint32 GetAreaTriggerScriptId(uint32 triggerId);
+ uint32 GetEventIdScriptId(uint32 eventId);
+ uint32 GetScriptId(const char* name);
+ char const* GetScriptName(uint32 id);
+ uint32 GetScriptIdsCount();
 
 #endif

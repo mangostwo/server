@@ -47,7 +47,7 @@ class Database;
  * @brief
  *
  */
-class MANGOS_DLL_SPEC SqlConnection
+class  SqlConnection
 {
     public:
         /**
@@ -212,7 +212,7 @@ class MANGOS_DLL_SPEC SqlConnection
  * @brief
  *
  */
-class MANGOS_DLL_SPEC Database
+class  Database
 {
     public:
         /**
@@ -679,7 +679,7 @@ class MANGOS_DLL_SPEC Database
          * @brief
          *
          */
-        class MANGOS_DLL_SPEC TransHelper
+        class  TransHelper
         {
             public:
                 /**

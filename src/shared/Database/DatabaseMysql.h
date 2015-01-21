@@ -44,7 +44,7 @@
  * @brief MySQL prepared statement class
  *
  */
-class MANGOS_DLL_SPEC MySqlPreparedStatement : public SqlPreparedStatement
+class  MySqlPreparedStatement : public SqlPreparedStatement
 {
     public:
         /**
@@ -118,7 +118,7 @@ class MANGOS_DLL_SPEC MySqlPreparedStatement : public SqlPreparedStatement
  * @brief
  *
  */
-class MANGOS_DLL_SPEC MySQLConnection : public SqlConnection
+class  MySQLConnection : public SqlConnection
 {
     public:
         /**
@@ -228,7 +228,7 @@ class MANGOS_DLL_SPEC MySQLConnection : public SqlConnection
  * @brief
  *
  */
-class MANGOS_DLL_SPEC DatabaseMysql : public Database
+class  DatabaseMysql : public Database
 {
         friend class MaNGOS::OperatorNew<DatabaseMysql>;
 

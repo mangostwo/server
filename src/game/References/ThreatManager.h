@@ -52,7 +52,7 @@ class ThreatCalcHelper
 };
 
 //==============================================================
-class MANGOS_DLL_SPEC HostileReference : public Reference<Unit, ThreatManager>
+class  HostileReference : public Reference<Unit, ThreatManager>
 {
     public:
         HostileReference(Unit* pUnit, ThreatManager* pThreatManager, float pThreat);
@@ -142,7 +142,7 @@ class ThreatManager;
 
 typedef std::list<HostileReference*> ThreatList;
 
-class MANGOS_DLL_SPEC ThreatContainer
+class  ThreatContainer
 {
     private:
         ThreatList iThreatList;
@@ -180,7 +180,7 @@ class MANGOS_DLL_SPEC ThreatContainer
 
 //=================================================
 
-class MANGOS_DLL_SPEC ThreatManager
+class  ThreatManager
 {
     public:
         friend class HostileReference;

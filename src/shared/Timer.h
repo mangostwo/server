@@ -68,19 +68,19 @@ class WorldTimer
          *
          * @return uint32
          */
-        static MANGOS_DLL_SPEC uint32 tickTime();
+        static  uint32 tickTime();
         /**
          * @brief get previous world tick time
          *
          * @return uint32
          */
-        static MANGOS_DLL_SPEC uint32 tickPrevTime();
+        static  uint32 tickPrevTime();
         /**
          * @brief tick world timer
          *
          * @return uint32
          */
-        static MANGOS_DLL_SPEC uint32 tick();
+        static  uint32 tick();
 
     private:
         /**
@@ -103,8 +103,8 @@ class WorldTimer
          */
         static uint32 getMSTime_internal(bool savetime = false);
 
-        static MANGOS_DLL_SPEC uint32 m_iTime; /**< TODO */
-        static MANGOS_DLL_SPEC uint32 m_iPrevTime; /**< TODO */
+        static  uint32 m_iTime; /**< TODO */
+        static  uint32 m_iPrevTime; /**< TODO */
 };
 
 /**

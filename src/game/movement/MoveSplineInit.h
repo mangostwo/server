@@ -43,7 +43,7 @@ namespace Movement
      * @brief Initializes and launches spline movement
      *
      */
-    class MANGOS_DLL_SPEC MoveSplineInit
+    class  MoveSplineInit
     {
         public:
 

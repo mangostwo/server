@@ -34,7 +34,7 @@ template<class OBJECT>
  * @brief
  *
  */
-class MANGOS_DLL_SPEC GridReference : public Reference<GridRefManager<OBJECT>, OBJECT>
+class  GridReference : public Reference<GridRefManager<OBJECT>, OBJECT>
 {
     protected:
 

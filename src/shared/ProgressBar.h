@@ -31,7 +31,7 @@
  * @brief
  *
  */
-class MANGOS_DLL_SPEC BarGoLink
+class  BarGoLink
 {
     public:
         /**

@@ -35,7 +35,7 @@ class ACE_Configuration_Heap;
  * @brief
  *
  */
-class MANGOS_DLL_SPEC Config
+class  Config
 {
     public:
         /**

@@ -78,7 +78,7 @@ enum SqlStmtFieldType
  * @brief templates might be the best choice here
  *
  */
-class MANGOS_DLL_SPEC SqlStmtFieldData
+class  SqlStmtFieldData
 {
     public:
         /**
@@ -307,7 +307,7 @@ class SqlStatement;
  * @brief
  *
  */
-class MANGOS_DLL_SPEC SqlStmtParameters
+class  SqlStmtParameters
 {
     public:
         /**
@@ -428,7 +428,7 @@ class SqlStatementID
  * @brief statement index
  *
  */
-class MANGOS_DLL_SPEC SqlStatement
+class  SqlStatement
 {
     public:
         /**
@@ -694,7 +694,7 @@ class MANGOS_DLL_SPEC SqlStatement
  * @brief base prepared statement class
  *
  */
-class MANGOS_DLL_SPEC SqlPreparedStatement
+class  SqlPreparedStatement
 {
     public:
         /**
@@ -775,7 +775,7 @@ class MANGOS_DLL_SPEC SqlPreparedStatement
  * @brief prepared statements via plain SQL string requests
  *
  */
-class MANGOS_DLL_SPEC SqlPlainPreparedStatement : public SqlPreparedStatement
+class  SqlPlainPreparedStatement : public SqlPreparedStatement
 {
     public:
         /**

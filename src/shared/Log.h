@@ -497,43 +497,43 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ACE_Th
  *
  * @param str...
  */
-void MANGOS_DLL_SPEC outstring_log(const char* str, ...) ATTR_PRINTF(1, 2);
+void  outstring_log(const char* str, ...) ATTR_PRINTF(1, 2);
 /**
  * @brief
  *
  * @param str...
  */
-void MANGOS_DLL_SPEC detail_log(const char* str, ...) ATTR_PRINTF(1, 2);
+void  detail_log(const char* str, ...) ATTR_PRINTF(1, 2);
 /**
  * @brief
  *
  * @param str...
  */
-void MANGOS_DLL_SPEC debug_log(const char* str, ...) ATTR_PRINTF(1, 2);
+void  debug_log(const char* str, ...) ATTR_PRINTF(1, 2);
 /**
  * @brief
  *
  * @param str...
  */
-void MANGOS_DLL_SPEC error_log(const char* str, ...) ATTR_PRINTF(1, 2);
+void  error_log(const char* str, ...) ATTR_PRINTF(1, 2);
 /**
  * @brief
  *
  * @param str...
  */
-void MANGOS_DLL_SPEC error_db_log(const char* str, ...) ATTR_PRINTF(1, 2);
+void  error_db_log(const char* str, ...) ATTR_PRINTF(1, 2);
 /**
  * @brief
  *
  * @param fname
  * @param libName
  */
-void MANGOS_DLL_SPEC setScriptLibraryErrorFile(char const* fname, char const* libName);
+void  setScriptLibraryErrorFile(char const* fname, char const* libName);
 /**
  * @brief
  *
  * @param str...
  */
-void MANGOS_DLL_SPEC script_error_log(const char* str, ...) ATTR_PRINTF(1, 2);
+void  script_error_log(const char* str, ...) ATTR_PRINTF(1, 2);
 
 #endif

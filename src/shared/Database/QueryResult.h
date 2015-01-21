@@ -33,7 +33,7 @@
  * @brief
  *
  */
-class MANGOS_DLL_SPEC QueryResult
+class  QueryResult
 {
     public:
         /**
@@ -102,7 +102,7 @@ typedef std::vector<std::string> QueryFieldNames;
  * @brief
  *
  */
-class MANGOS_DLL_SPEC QueryNamedResult
+class  QueryNamedResult
 {
     public:
         /**
