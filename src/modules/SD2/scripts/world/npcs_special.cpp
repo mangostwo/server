@@ -886,6 +886,7 @@ struct npc_garments_of_questsAI : public npc_escortAI
         m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
         // expect database to have RegenHealth=0
         m_creature->SetHealth(int(m_creature->GetMaxHealth() * 0.7));
+        m_creature->SetPvP(true);   // allow the mob to be healed by player
     }
 
     void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
