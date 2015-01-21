@@ -68,7 +68,9 @@ enum
     NPC_NEMAS_THE_ARBITER       = 17912,
     NPC_AELMAR_THE_VANQUISHER   = 17913,
     NPC_VICAR_HYERONIMUS        = 17914,
-    NPC_PALADIN_QUEST_CREDIT    = 17915,
+    NPC_PALADIN_QUEST_CREDIT	= 17915,
+    NPC_THE_UNFORGIVEN          = 10516,
+    NPC_VENGEFUL_PHANTOM        = 10387,                    // Adds for The Unforgiven
 
     GO_SERVICE_ENTRANCE         = 175368,
     GO_GAUNTLET_GATE1           = 175357,
@@ -109,21 +111,21 @@ struct EventLocation
 
 static const EventLocation aStratholmeLocation[] =
 {
-    {3725.577f, -3599.484f, 142.367f, 0},                   // Barthilas door run
+    {3725.577f, -3599.484f, 142.367f},                      // Barthilas door run
     {4068.284f, -3535.678f, 122.771f, 2.50f},               // Barthilas tele
     {4032.643f, -3378.546f, 119.752f, 4.74f},               // Ramstein summon loc
-    {4032.843f, -3390.246f, 119.732f, 0},                   // Ramstein move loc
+    {4032.843f, -3390.246f, 119.732f},                      // Ramstein move loc
     {3969.357f, -3391.871f, 119.116f, 5.91f},               // Skeletons summon loc
-
-    {4033.044f, -3431.031f, 119.055f, 0},                   // Skeletons move loc
+    {4033.044f, -3431.031f, 119.055f},                      // Skeletons move loc
     {4032.602f, -3378.506f, 119.752f, 4.74f},               // Guards summon loc
-    {4042.575f, -3337.929f, 115.059f, 0}                    // Ysida move loc
+    {4042.575f, -3337.929f, 115.059f},                      // Ysida move loc
+    {3713.681f, -3427.814f, 131.198f, 6.2f}                 // The Unforgiven spawn area
 };
 
 static const EventLocation aTimmyLocation[] =
 {
     {3696.851f, -3152.736f, 127.661f, 4.024f},              // Timmy spawn loc
-    {3668.603f, -3183.314f, 126.215f, 0}                    // Courtyard mobs sort point
+    {3668.603f, -3183.314f, 126.215f}                       // Courtyard mobs sort point
 };
 
 struct ZigguratStore
@@ -182,6 +184,9 @@ class instance_stratholme : public ScriptedInstance
         GuidList m_luiAcolyteGUIDs;
         GuidList m_luiUndeadGUIDs;
         GuidList m_luiGuardGUIDs;
+
+        // this ensures that the code that deals with the initial spawning of The Unforgiven and its adds (Vengful Phantoms) is only run once
+        bool m_bTheUnforgivenSpawnHasTriggered;
 };
 
 #endif
