@@ -180,50 +180,72 @@ void Usage(char* prg)
  * @param argv
  * @return bool
  */
-void HandleArgs(int argc, char* arg[])
+bool HandleArgs(int argc, char** argv)
 {
-    for (int c = 1; c < argc; ++c)
-    {
-        // i - input path
-        // o - output path
-        // e - extract only MAP(1)/DBC(2) - standard both(3)
-        // f - use float to int conversion
-        // h - limit minimum height
-        if (arg[c][0] != '-')
-            Usage(arg[0]);
+    char* param = NULL;
 
-        switch (arg[c][1])
+    for (int i = 1; i < argc; ++i)
+    {
+        if (strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--input") == 0)
         {
-            case 'i':
-                if (c + 1 < argc)                           // all ok
-                    strcpy(input_path, arg[(c++) + 1]);
-                else
-                    Usage(arg[0]);
-                break;
-            case 'o':
-                if (c + 1 < argc)                           // all ok
-                    strcpy(output_path, arg[(c++) + 1]);
-                else
-                    Usage(arg[0]);
-                break;
-            case 'f':
-                if (c + 1 < argc)                           // all ok
-                    CONF_allow_float_to_int = atoi(arg[(c++) + 1]) != 0;
-                else
-                    Usage(arg[0]);
-                break;
-            case 'e':
-                if (c + 1 < argc)                           // all ok
-                {
-                    CONF_extract = atoi(arg[(c++) + 1]);
-                    if (!(CONF_extract > 0 && CONF_extract < 4))
-                        Usage(arg[0]);
-                }
-                else
-                    Usage(arg[0]);
-                break;
+            param = argv[++i];
+            if (!param)
+            {
+                return false;
+            }
+
+            strcpy(input_path, param);
+        }
+        else if (strcmp(argv[i], "-o") == 0 || strcmp(argv[i], "--output") == 0)
+        {
+            param = argv[++i];
+            if (!param)
+            {
+                return false;
+            }
+
+            strcpy(output_path, param);
+        }
+        else if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "--flat") == 0)
+        {
+            param = argv[++i];
+            if (!param)
+            {
+                return false;
+            }
+
+            int convertFloatToInt = atoi(param);
+            if (convertFloatToInt != 0)
+            {
+                CONF_allow_float_to_int = true;
+            }
+        }
+        else if (strcmp(argv[i], "-e") == 0 || strcmp(argv[i], "--extract") == 0)
+        {
+            param = argv[++i];
+            if (!param)
+            {
+                return false;
+            }
+
+            int convertExtract = atoi(param);
+            if (convertExtract > 0 && convertExtract < 4)
+            {
+                CONF_extract = convertExtract;
+            }
+            else
+            {
+                Usage(argv[0]);
+            }
+        }
+        else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0)
+        {
+            Usage(argv[0]);
         }
     }
+
+    return true;
+
 }
 
 uint32 ReadBuild(int locale)
@@ -1196,11 +1218,14 @@ inline void CloseMPQFiles()
  * @param argv
  * @return int
  */
-int main(int argc, char* arg[])
+int main(int argc, char** argv)
 {
     printf("mangos-two DBC & map (version %s) extractor\n\n", MAP_VERSION_MAGIC);
 
-    HandleArgs(argc, arg);
+    if (!HandleArgs(argc, argv))
+    {
+        return 1;
+    }
 
     int FirstLocale = -1;
     uint32 build = 0;
