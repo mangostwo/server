@@ -121,6 +121,7 @@
     <ClInclude Include="..\..\src\modules\Eluna\CorpseMethods.h" />
     <ClInclude Include="..\..\src\modules\Eluna\CreatureMethods.h" />
     <ClInclude Include="..\..\src\modules\Eluna\ElunaBinding.h" />
+    <ClInclude Include="..\..\src\modules\Eluna\ElunaCreatureAI.h" />
     <ClInclude Include="..\..\src\modules\Eluna\ElunaEventMgr.h" />
     <ClInclude Include="..\..\src\modules\Eluna\ElunaIncludes.h" />
     <ClInclude Include="..\..\src\modules\Eluna\ElunaQueryMethods.h" />
@@ -130,7 +131,8 @@
     <ClInclude Include="..\..\src\modules\Eluna\GlobalMethods.h" />
     <ClInclude Include="..\..\src\modules\Eluna\GroupMethods.h" />
     <ClInclude Include="..\..\src\modules\Eluna\GuildMethods.h" />
-    <ClInclude Include="..\..\src\modules\Eluna\HookMgr.h" />
+    <ClInclude Include="..\..\src\modules\Eluna\HookHelpers.h" />
+    <ClInclude Include="..\..\src\modules\Eluna\Hooks.h" />
     <ClInclude Include="..\..\src\modules\Eluna\ItemMethods.h" />
     <ClInclude Include="..\..\src\modules\Eluna\LuaEngine.h" />
     <ClInclude Include="..\..\src\modules\Eluna\MapMethods.h" />
@@ -140,12 +142,18 @@
     <ClInclude Include="..\..\src\modules\Eluna\SpellMethods.h" />
     <ClInclude Include="..\..\src\modules\Eluna\UnitMethods.h" />
     <ClInclude Include="..\..\src\modules\Eluna\VehicleMethods.h" />
-    <ClInclude Include="..\..\src\modules\Eluna\WeatherMethods.h" />
     <ClInclude Include="..\..\src\modules\Eluna\WorldObjectMethods.h" />
     <ClInclude Include="..\..\src\modules\Eluna\WorldPacketMethods.h" />
     <ClCompile Include="..\..\src\modules\Eluna\ElunaEventMgr.cpp" />
     <ClCompile Include="..\..\src\modules\Eluna\ElunaUtility.cpp" />
-    <ClCompile Include="..\..\src\modules\Eluna\HookMgr.cpp" />
+    <ClCompile Include="..\..\src\modules\Eluna\BattleGroundHooks.cpp" />
+    <ClCompile Include="..\..\src\modules\Eluna\CreatureHooks.cpp" />
+    <ClCompile Include="..\..\src\modules\Eluna\GameObjectHooks.cpp" />
+    <ClCompile Include="..\..\src\modules\Eluna\GroupHooks.cpp" />
+    <ClCompile Include="..\..\src\modules\Eluna\GuildHooks.cpp" />
+    <ClCompile Include="..\..\src\modules\Eluna\ItemHooks.cpp" />
+    <ClCompile Include="..\..\src\modules\Eluna\PlayerHooks.cpp" />
+    <ClCompile Include="..\..\src\modules\Eluna\ServerHooks.cpp" />
     <ClCompile Include="..\..\src\modules\Eluna\LuaEngine.cpp" />
     <ClCompile Include="..\..\src\modules\Eluna\LuaFunctions.cpp" />
   </ItemGroup>
