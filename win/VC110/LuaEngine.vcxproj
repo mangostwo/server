@@ -154,6 +154,7 @@
     <ClCompile Include="..\..\src\modules\Eluna\ItemHooks.cpp" />
     <ClCompile Include="..\..\src\modules\Eluna\PlayerHooks.cpp" />
     <ClCompile Include="..\..\src\modules\Eluna\ServerHooks.cpp" />
+    <ClCompile Include="..\..\src\modules\Eluna\VehicleHooks.cpp" />
     <ClCompile Include="..\..\src\modules\Eluna\LuaEngine.cpp" />
     <ClCompile Include="..\..\src\modules\Eluna\LuaFunctions.cpp" />
   </ItemGroup>
