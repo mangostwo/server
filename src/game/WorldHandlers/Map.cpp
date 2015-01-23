@@ -53,7 +53,6 @@ Map::~Map()
 {
 #ifdef ENABLE_ELUNA
     sEluna->OnDestroy(this);
-    Eluna::RemoveRef(this);
 #endif /* ENABLE_ELUNA */
 
     UnloadAll(true);

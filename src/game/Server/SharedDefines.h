@@ -627,6 +627,9 @@ enum TeamId
     TEAM_NEUTRAL
 };
 
+// Temporarily define TEAM_INDEX_NEUTRAL till BG update is done
+#define TEAM_INDEX_NEUTRAL TEAM_NEUTRAL
+
 // In fact !=0 values is alliance/horde root faction ids
 enum Team
 {

@@ -120,11 +120,11 @@ class AuctionHouseObject
 {
     public:
         AuctionHouseObject() {}
-        ~AuctionHouseObject();
-        //{
-        //    for (AuctionEntryMap::const_iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
-        //        { delete itr->second; }
-        //}
+        ~AuctionHouseObject()
+        {
+            for (AuctionEntryMap::const_iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
+                { delete itr->second; }
+        }
 
         typedef std::map<uint32, AuctionEntry*> AuctionEntryMap;
         typedef std::pair<AuctionEntryMap::const_iterator, AuctionEntryMap::const_iterator> AuctionEntryMapBounds;

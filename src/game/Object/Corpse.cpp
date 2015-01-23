@@ -32,9 +32,6 @@
 #include "GossipDef.h"
 #include "World.h"
 #include "ObjectMgr.h"
-#ifdef ENABLE_ELUNA
-#include "LuaEngine.h"
-#endif /* ENABLE_ELUNA */
 
 Corpse::Corpse(CorpseType type) : WorldObject(),
     loot(this),
@@ -55,9 +52,6 @@ Corpse::Corpse(CorpseType type) : WorldObject(),
 
 Corpse::~Corpse()
 {
-#ifdef ENABLE_ELUNA
-    Eluna::RemoveRef(this);
-#endif /* ENABLE_ELUNA */
 }
 
 void Corpse::AddToWorld()

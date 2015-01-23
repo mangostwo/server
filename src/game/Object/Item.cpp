@@ -258,9 +258,6 @@ Item::Item() :
 
 Item::~Item()
 {
-#ifdef ENABLE_ELUNA
-    Eluna::RemoveRef(this);
-#endif /* ENABLE_ELUNA */
 }
 
 bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)

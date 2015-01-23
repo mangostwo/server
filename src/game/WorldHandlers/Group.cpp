@@ -92,10 +92,6 @@ Group::Group() : m_Id(0), m_groupType(GROUPTYPE_NORMAL),
 
 Group::~Group()
 {
-#ifdef ENABLE_ELUNA
-    Eluna::RemoveRef(this);
-#endif /* ENABLE_ELUNA */
-
     if (m_bgGroup)
     {
         DEBUG_LOG("Group::~Group: battleground group being deleted.");

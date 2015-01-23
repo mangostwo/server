@@ -52,7 +52,9 @@
 #include "movement/MoveSpline.h"
 #include "MapManager.h"
 #include "TemporarySummon.h"
+#ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
+#endif /*ENABLE_ELUNA*/
 
 void ObjectMgr::LoadVehicleAccessory()
 {
@@ -125,8 +127,6 @@ VehicleInfo::VehicleInfo(Unit* owner, VehicleEntry const* vehicleEntry, uint32 o
 
 VehicleInfo::~VehicleInfo()
 {
-    Eluna::RemoveRef(this);
-    
     ((Unit*)m_owner)->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
 
     RemoveAccessoriesFromMap();                             // Remove accessories (for example required with player vehicles)

@@ -1033,11 +1033,6 @@ void World::SetInitialWorldSettings()
     ///- Initialize Lua Engine
     sLog.outString("Initialize Eluna Lua Engine...");
     Eluna::Initialize();
-#else /* ENABLE_ELUNA */
-    if (sConfig.GetBoolDefault("Eluna.Enabled", false))
-    {
-        sLog.outError("Eluna is enabled but wasn't included during compilation, not activating it.");
-    }
 #endif /* ENABLE_ELUNA */
 
     sLog.outString("Loading Page Texts...");

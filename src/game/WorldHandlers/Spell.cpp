@@ -53,7 +53,9 @@
 #include "Vehicle.h"
 #include "TemporarySummon.h"
 #include "SQLStorages.h"
+#ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
+#endif /*ENABLE_ELUNA*/
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
@@ -426,7 +428,6 @@ Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid or
 
 Spell::~Spell()
 {
-    Eluna::RemoveRef(this);
 }
 
 template<typename T>

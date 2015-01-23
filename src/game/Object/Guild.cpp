@@ -111,9 +111,6 @@ Guild::Guild()
 
 Guild::~Guild()
 {
-#ifdef ENABLE_ELUNA
-    Eluna::RemoveRef(this);
-#endif /* ENABLE_ELUNA */
     DeleteGuildBankItems();
 }
 

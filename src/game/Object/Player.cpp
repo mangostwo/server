@@ -73,7 +73,9 @@
 #include "Vehicle.h"
 #include "Calendar.h"
 #include "LFGMgr.h"
+#ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
+#endif /*ENABLE_ELUNA*/
 
 #include <cmath>
 
@@ -578,8 +580,6 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
 
 Player::~Player()
 {
-    Eluna::RemoveRef(this);
-    
     CleanupsBeforeDelete();
 
     // it must be unloaded already in PlayerLogout and accessed only for loggined player
@@ -10872,6 +10872,12 @@ InventoryResult Player::CanUseItem(ItemPrototype const* pProto) const
         if (getLevel() < pProto->RequiredLevel)
             return EQUIP_ERR_CANT_EQUIP_LEVEL_I;
 
+#ifdef ENABLE_ELUNA
+        InventoryResult eres = sEluna->OnCanUseItem(this, pProto->ItemId);
+        if (eres != EQUIP_ERR_OK)
+            return eres;
+#endif
+
         return EQUIP_ERR_OK;
     }
     return EQUIP_ERR_ITEM_NOT_FOUND;
@@ -15062,7 +15068,7 @@ void Player::SendQuestCompleteEvent(uint32 quest_id)
     }
 }
 
-void Player::SendQuestReward(Quest const* pQuest, uint32 XP, Object* questGiver)
+void Player::SendQuestReward(Quest const* pQuest, uint32 XP, Object* /*questGiver*/)
 {    
     uint32 questid = pQuest->GetQuestId();
     DEBUG_LOG("WORLD: Sent SMSG_QUESTGIVER_QUEST_COMPLETE quest = %u", questid);
@@ -22098,6 +22104,10 @@ void Player::LearnTalent(uint32 talentId, uint32 talentRank)
     // learn! (other talent ranks will unlearned at learning)
     learnSpell(spellid, false);
     DETAIL_LOG("TalentID: %u Rank: %u Spell: %u\n", talentId, talentRank, spellid);
+
+#ifdef ENABLE_ELUNA
+    sEluna->OnLearnTalents(this, talentId, talentRank, spellid);
+#endif /*ENABLE_ELUNA*/
 }
 
 void Player::LearnPetTalent(ObjectGuid petGuid, uint32 talentId, uint32 talentRank)

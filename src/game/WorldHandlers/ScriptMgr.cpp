@@ -2180,11 +2180,11 @@ bool ScriptMgr::OnQuestAccept(Player* pPlayer, Item* pItem, Quest const* pQuest)
 
 bool ScriptMgr::OnQuestRewarded(Player* pPlayer, Creature* pCreature, Quest const* pQuest, uint32 reward)
 {
-        // Used by Eluna
-//#ifdef ENABLE_ELUNA
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
     if (sEluna->OnQuestReward(pPlayer, pCreature, pQuest, reward))
-//        return false;
-//#endif /* ENABLE_ELUNA */
+        return true;
+#endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD2
     return SD2::QuestRewarded(pPlayer, pCreature, pQuest);
@@ -2195,11 +2195,11 @@ bool ScriptMgr::OnQuestRewarded(Player* pPlayer, Creature* pCreature, Quest cons
 
 bool ScriptMgr::OnQuestRewarded(Player* pPlayer, GameObject* pGameObject, Quest const* pQuest, uint32 reward)
 {
-        // Used by Eluna
-//#ifdef ENABLE_ELUNA
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
     if (sEluna->OnQuestReward(pPlayer, pGameObject, pQuest, reward))
-//        return false;
-//#endif /* ENABLE_ELUNA */
+    return true;
+#endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD2
     return SD2::GOQuestRewarded(pPlayer, pGameObject, pQuest);
@@ -2240,6 +2240,11 @@ uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, GameObject* pGameObject)
 
 bool ScriptMgr::OnGameObjectUse(Player* pPlayer, GameObject* pGameObject)
 {
+#ifdef ENABLE_ELUNA
+    if (sEluna->OnGameObjectUse(pPlayer, pGameObject))
+        return true;
+#endif /* ENABLE_ELUNA */
+
 #ifdef ENABLE_SD2
     return SD2::GOUse(pPlayer, pGameObject);
 #else
