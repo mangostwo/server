@@ -194,7 +194,7 @@ enum
     SAY_ATTACK              = -1000186,
 
     AREA_COVE               = 3579,
-    AREA_ISLE               = 3639,
+    //AREA_ISLE               = 3639,
     QUEST_GNOMERCY          = 9537,
     FACTION_HOSTILE         = 14,
     SPELL_DYNAMITE          = 7978
@@ -207,10 +207,6 @@ struct npc_engineer_spark_overgrindAI : public ScriptedAI
     npc_engineer_spark_overgrindAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_uiNpcFlags = pCreature->GetUInt32Value(UNIT_NPC_FLAGS);
-        Reset();
-
-        if (pCreature->GetAreaId() == AREA_COVE || pCreature->GetAreaId() == AREA_ISLE)
-        { m_bIsTreeEvent = true; }
     }
 
     uint32 m_uiNpcFlags;
@@ -218,16 +214,12 @@ struct npc_engineer_spark_overgrindAI : public ScriptedAI
     uint32 m_uiDynamiteTimer;
     uint32 m_uiEmoteTimer;
 
-    bool m_bIsTreeEvent;
-
     void Reset() override
     {
         m_creature->SetUInt32Value(UNIT_NPC_FLAGS, m_uiNpcFlags);
 
         m_uiDynamiteTimer = 8000;
         m_uiEmoteTimer = urand(120000, 150000);
-
-        m_bIsTreeEvent = false;
     }
 
     void Aggro(Unit* who) override
@@ -237,7 +229,7 @@ struct npc_engineer_spark_overgrindAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff) override
     {
-        if (!m_creature->IsInCombat() && !m_bIsTreeEvent)
+        if (!m_creature->IsInCombat())
         {
             if (m_uiEmoteTimer < diff)
             {
@@ -246,11 +238,6 @@ struct npc_engineer_spark_overgrindAI : public ScriptedAI
                 m_uiEmoteTimer = urand(120000, 150000);
             }
             else { m_uiEmoteTimer -= diff; }
-        }
-        else if (m_bIsTreeEvent)
-        {
-            // nothing here yet
-            return;
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -269,7 +256,15 @@ struct npc_engineer_spark_overgrindAI : public ScriptedAI
 
 CreatureAI* GetAI_npc_engineer_spark_overgrind(Creature* pCreature)
 {
-    return new npc_engineer_spark_overgrindAI(pCreature);
+    if (pCreature->GetAreaId() == AREA_COVE)    //temp spawn related to quest 9531, controlled by db script
+    {
+        pCreature->SetDefaultMovementType(IDLE_MOTION_TYPE);
+        pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        pCreature->StopMoving(true);
+        return NULL;
+    }
+    else
+        return new npc_engineer_spark_overgrindAI(pCreature);
 }
 
 bool GossipHello_npc_engineer_spark_overgrind(Player* pPlayer, Creature* pCreature)
