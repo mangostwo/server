@@ -2276,9 +2276,10 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
     if (diff < 0)                                           // Taken damage
     {
         DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DestructibleGO: %s taken damage %u dealt by %s", GetGuidStr().c_str(), uint32(-diff), caster->GetGuidStr().c_str());
-
+#ifdef ENABLE_ELUNA
         if (caster && caster->ToPlayer())
             sEluna->OnDamaged(this, caster->ToPlayer());
+#endif
         if (m_useTimes > uint32(-diff))
             m_useTimes += diff;
         else
@@ -2316,9 +2317,10 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
         if (!HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_11))     // Was not destroyed before
         {
             DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DestructibleGO: %s got destroyed", GetGuidStr().c_str());
-
+#ifdef ENABLE_ELUNA
             if(caster && caster->ToPlayer())
                 sEluna->OnDestroyed(this, caster->ToPlayer());
+#endif
             RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_9 | GO_FLAG_UNK_10);
             SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_11);
 

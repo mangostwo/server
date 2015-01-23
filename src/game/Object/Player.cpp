@@ -1364,8 +1364,9 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         if (update_diff >= m_nextSave)
         {
             // m_nextSave reseted in SaveToDB call
-            // Used by Eluna
+#ifdef ENABLE_ELUNA
             sEluna->OnSave(this);
+#endif
             
             SaveToDB();
             DETAIL_LOG("Player '%s' (GUID: %u) saved", GetName(), GetGUIDLow());
@@ -2479,8 +2480,9 @@ void Player::GiveXP(uint32 xp, Unit* victim)
 
     uint32 level = getLevel();
     
-    // Used by Eluna
+#ifdef ENABLE_ELUNA
     sEluna->OnGiveXP(this, xp, victim);
+#endif
 
     // XP to money conversion processed in Player::RewardQuest
     if (level >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
@@ -2602,14 +2604,16 @@ void Player::GiveLevel(uint32 level)
 
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL);
 
-    // Used by Eluna
+#ifdef ENABLE_ELUNA
     sEluna->OnLevelChanged(this, oldLevel);
+#endif
 }
 
 void Player::SetFreeTalentPoints(uint32 points)
 {
-    // Used by Eluna
+#ifdef ENABLE_ELUNA
     sEluna->OnFreeTalentPointsChanged(this, points);
+#endif
     SetUInt32Value(PLAYER_CHARACTER_POINTS1, points);
 }
 
@@ -3752,8 +3756,9 @@ uint32 Player::resetTalentsCost() const
 
 bool Player::resetTalents(bool no_cost, bool all_specs)
 {
-    // Used by Eluna
+#ifdef ENABLE_ELUNA
     sEluna->OnTalentsReset(this, no_cost);
+#endif
     
     // not need after this call
     if (HasAtLoginFlag(AT_LOGIN_RESET_TALENTS) && all_specs)
@@ -4528,7 +4533,9 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
     // update visibility of player for nearby cameras
     UpdateObjectVisibility();
     
+#ifdef ENABLE_ELUNA
     sEluna->OnResurrect(this);
+#endif
 
     if (!applySickness)
         return;
@@ -6872,8 +6879,9 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         }
     }
 
-    // Used by Eluna
+#ifdef ENABLE_ELUNA
     sEluna->OnUpdateZone(this, newZone, newArea);
+#endif
     
     m_zoneUpdateId    = newZone;
     m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
@@ -7007,8 +7015,9 @@ void Player::DuelComplete(DuelCompleteType type)
         SendMessageToSet(&data, true);
     }
     
-    // Used by Eluna
+#ifdef ENABLE_ELUNA
     sEluna->OnDuelEnd(duel->opponent, this, type);
+#endif
 
     if (type == DUEL_WON)
     {
@@ -11204,8 +11213,9 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
 
         ApplyEquipCooldown(pItem2);
         
-        // Used by Eluna
+#ifdef ENABLE_ELUNA
         sEluna->OnEquip(this, pItem2, bag, slot);
+#endif
 
         return pItem2;
     }
@@ -11217,8 +11227,9 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_ITEM, pItem->GetEntry());
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_EPIC_ITEM, slot + 1);
 
-    // Used by Eluna
+#ifdef ENABLE_ELUNA
     sEluna->OnEquip(this, pItem, bag, slot);
+#endif
     
     return pItem;
 }
@@ -11447,7 +11458,9 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
             ApplyItemOnStoreSpell(pItem, false);
 
         ItemRemovedQuestCheck(pItem->GetEntry(), pItem->GetCount());
+#ifdef ENABLE_ELUNA
         sEluna->OnRemove(this, pItem);
+#endif
 
         if (bag == INVENTORY_SLOT_BAG_0)
         {
@@ -22836,8 +22849,9 @@ void Player::UpdateSpecCount(uint8 count)
 
 void Player::ModifyMoney(int32 d)
 {
-    // Used by Eluna
+#ifdef ENABLE_ELUNA
     sEluna->OnMoneyChanged(this, d);
+#endif
     
     if (d < 0)
         { SetMoney(GetMoney() > uint32(-d) ? GetMoney() + d : 0); }

@@ -147,8 +147,9 @@ void VehicleInfo::Initialize()
             m_accessoryGuids.insert(summoned->GetObjectGuid());
             int32 basepoint0 = itr->seatId + 1;
             summoned->CastCustomSpell((Unit*)m_owner, SPELL_RIDE_VEHICLE_HARDCODED, &basepoint0, NULL, NULL, true);
-        
+#ifdef ENABLE_ELUNA
             sEluna->OnInstallAccessory(this, summoned);
+#endif
         }
     }
     
@@ -176,7 +177,9 @@ void VehicleInfo::Initialize()
     
     m_isInitialized = true;
     
+#ifdef ENABLE_ELUNA
     sEluna->OnInstall(this);
+#endif
 }
 
 /*
@@ -249,7 +252,9 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
     // Apply passenger modifications
     ApplySeatMods(passenger, seatEntry->m_flags);
     
+#ifdef ENABLE_ELUNA
     sEluna->OnAddPassenger(this, passenger, seat);
+#endif
 }
 
 /*
@@ -365,7 +370,9 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
     // Remove passenger modifications
     RemoveSeatMods(passenger, seatEntry->m_flags);
     
+#ifdef ENABLE_ELUNA
     sEluna->OnRemovePassenger(this, passenger);
+#endif
 
     // Some creature vehicles get despawned after passenger unboarding
     if (m_owner->GetTypeId() == TYPEID_UNIT)

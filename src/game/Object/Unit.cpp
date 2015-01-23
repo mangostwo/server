@@ -832,12 +832,13 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
             { ((Creature*)this)->AI()->KilledUnit(pVictim); }
 
+#ifdef ENABLE_ELUNA
         if (Creature* killer = ToCreature())
         {
-            // Used by Eluna
             if (Player* killed = pVictim->ToPlayer())
                 sEluna->OnPlayerKilledByCreature(killer, killed);
         }
+#endif
 
         // Call AI OwnerKilledUnit (for any current summoned minipet/guardian/protector)
         PetOwnerKilledUnit(pVictim);
@@ -903,8 +904,9 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
                         { outdoorPvP->HandlePlayerKill(player_tap, playerVictim); }
                 }
 
-                // Used by Eluna
+#ifdef ENABLE_ELUNA
                 sEluna->OnPVPKill(player_tap, playerVictim);
+#endif
             }
         }
         else                                                // Killed creature
@@ -8187,9 +8189,10 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
             { GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_AGGRO, pCreature, enemy); }
     }
 
-    // Used by Eluna
+#ifdef ENABLE_ELUNA
     if (GetTypeId() == TYPEID_PLAYER)
         sEluna->OnPlayerEnterCombat(ToPlayer(), enemy);
+#endif
 }
 
 void Unit::ClearInCombat()
@@ -8200,9 +8203,10 @@ void Unit::ClearInCombat()
     if (IsCharmed() || (GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->IsPet()))
         { RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT); }
 
-    // Used by Eluna
+#ifdef ENABLE_ELUNA
     if (GetTypeId() == TYPEID_PLAYER)
         sEluna->OnPlayerLeaveCombat(ToPlayer());
+#endif
 
     // Player's state will be cleared in Player::UpdateContestedPvP
     if (GetTypeId() == TYPEID_UNIT)

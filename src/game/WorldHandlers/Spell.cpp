@@ -3338,8 +3338,9 @@ void Spell::cast(bool skipCheck)
 
         ((Player*)m_caster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL, m_spellInfo->Id);
     
-        // used by eluna
+#ifdef ENABLE_ELUNA
         sEluna->OnSpellCast(m_caster->ToPlayer(), this, skipCheck);
+#endif
     }
 
     FillTargetMap();

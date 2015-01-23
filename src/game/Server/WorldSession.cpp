@@ -45,7 +45,9 @@
 #include "Auth/AuthCrypt.h"
 #include "Auth/HMACSHA1.h"
 #include "zlib/zlib.h"
+#ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
+#endif /*ENABLE_ELUNA*/
 
 // select opcodes appropriate for processing in Map::Update context for current session state
 static bool MapSessionFilterHelper(WorldSession* session, OpcodeHandler const& opHandle)
@@ -471,8 +473,9 @@ void WorldSession::LogoutPlayer(bool Save)
         sSocialMgr.SendFriendStatus(_player, FRIEND_OFFLINE, _player->GetObjectGuid(), true);
         sSocialMgr.RemovePlayerSocial(_player->GetGUIDLow());
 
-        ///- Used by Eluna
+#ifdef ENABLE_ELUNA
         sEluna->OnLogout(_player);
+#endif
 
         ///- Remove the player from the world
         // the player may not be in the world when logging out
@@ -972,8 +975,10 @@ void WorldSession::SendRedirectClient(std::string& ip, uint16 port)
 
 void WorldSession::ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket* packet)
 {
+#ifdef ENABLE_ELUNA
     if (!sEluna->OnPacketReceive(this, *packet))
         return;
+#endif
     
     // need prevent do internal far teleports in handlers because some handlers do lot steps
     // or call code that can do far teleports in some conditions unexpectedly for generic way work code

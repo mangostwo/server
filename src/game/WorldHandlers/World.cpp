@@ -74,7 +74,9 @@
 #include "CreatureLinkingMgr.h"
 #include "Calendar.h"
 #include "LFGMgr.h"
+#ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
+#endif /*ENABLE_ELUNA*/
 
 INSTANTIATE_SINGLETON_1(World);
 
@@ -158,8 +160,9 @@ void World::CleanupsBeforeStop()
     KickAll();                                       // save and kick all players
     UpdateSessions(1);                               // real players unload required UpdateSessions call
     sBattleGroundMgr.DeleteAllBattleGrounds();       // unload battleground templates before different singletons destroyed
-
+#ifdef ENABLE_ELUNA
     Eluna::Uninitialize();
+#endif
 }
 
 /// Find a player in a specified zone
@@ -1649,7 +1652,9 @@ void World::Update(uint32 diff)
     sOutdoorPvPMgr.Update(diff);
 
     ///- Used by Eluna
+#ifdef ENABLE_ELUNA
     sEluna->OnWorldUpdate(diff);
+#endif
 
     ///- Delete all characters which have been deleted X days before
     if (m_timers[WUPDATE_DELETECHARS].Passed())

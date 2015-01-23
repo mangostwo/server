@@ -1329,9 +1329,10 @@ bool Guild::MemberMoneyWithdraw(uint32 amount, uint32 LowGuid)
                                    itr->second.BankRemMoney, m_Id, LowGuid);
     }
     
-    // Used by Eluna
+#ifdef ENABLE_ELUNA
     Player* player = sObjectMgr.GetPlayer(ObjectGuid(HIGHGUID_PLAYER, LowGuid));
     sEluna->OnMemberWitdrawMoney(this, player, amount, false); // IsRepair not a part of Mangos, implement?
+#endif
     
     return true;
 }
@@ -1722,8 +1723,9 @@ void Guild::LogBankEvent(uint8 EventType, uint8 TabId, uint32 PlayerGuidLow, uin
         m_GuildBankEventLog_Item[TabId].push_back(NewEvent);
     }
     
-    // Used by Eluna
+#ifdef ENABLE_ELUNA
     sEluna->OnBankEvent(this, EventType, TabId, PlayerGuidLow, ItemOrMoney, ItemStackCount, DestTabId);
+#endif
 
     // save event to database
     CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE guildid='%u' AND LogGuid='%u' AND TabId='%u'", m_Id, currentLogGuid, currentTabId);

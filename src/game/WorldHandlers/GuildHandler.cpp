@@ -937,8 +937,9 @@ void WorldSession::HandleGuildBankDepositMoney(WorldPacket& recv_data)
     // log
     pGuild->LogBankEvent(GUILD_BANK_LOG_DEPOSIT_MONEY, uint8(0), GetPlayer()->GetGUIDLow(), money);
 
-    // Used by Eluna
+#ifdef ENABLE_ELUNA
     sEluna->OnMemberDepositMoney(pGuild, GetPlayer(), money);
+#endif
     
     pGuild->DisplayGuildBankTabsInfo(this);
     pGuild->DisplayGuildBankContent(this, 0);

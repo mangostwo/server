@@ -497,8 +497,9 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
     BASIC_LOG("Account: %d (IP: %s) Create Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), pNewChar->GetGUIDLow());
     sLog.outChar("Account: %d (IP: %s) Create Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), pNewChar->GetGUIDLow());
 
-    // Used by Eluna
+#ifdef ENABLE_ELUNA
     sEluna->OnCreate(pNewChar);
+#endif
 
     delete pNewChar;                                        // created only to call SaveToDB()
 }
@@ -552,8 +553,9 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recv_data)
     BASIC_LOG("Account: %d (IP: %s) Delete Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), lowguid);
     sLog.outChar("Account: %d (IP: %s) Delete Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), lowguid);
 
-    // Used by Eluna
+#ifdef ENABLE_ELUNA
     sEluna->OnDelete(lowguid);
+#endif
 
     if (sLog.IsOutCharDump())                               // optimize GetPlayerDump call
     {
@@ -863,8 +865,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_FIRST))
     {
-        // Eluna
+#ifdef ENABLE_ELUNA
         sEluna->OnFirstLogin(pCurrChar);
+#endif
         
         pCurrChar->RemoveAtLoginFlag(AT_LOGIN_FIRST);
     }
@@ -905,8 +908,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     m_playerLoading = false;
     
-    // Eluna
+#ifdef ENABLE_ELUNA
     sEluna->OnLogin(pCurrChar);
+#endif
 
     // Handle Login-Achievements (should be handled after loading)
     pCurrChar->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ON_LOGIN, 1);
