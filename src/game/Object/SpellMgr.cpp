@@ -1606,7 +1606,7 @@ void SpellMgr::LoadSpellBonuses()
                     break;
                 }
             }
-            direct_calc = CalculateDefaultCoefficient(spell, SPELL_DIRECT_DAMAGE) * (isHeal ? 1.88f : 1.0f);
+            direct_calc = CalculateDefaultCoefficient(spell, SPELL_DIRECT_DAMAGE) * (isHeal ? SCALE_SPELLPOWER_HEALING : 1.0f);
             direct_diff = std::abs(sbe.direct_damage - direct_calc);
         }
 
@@ -1625,7 +1625,7 @@ void SpellMgr::LoadSpellBonuses()
                     break;
                 }
             }
-            dot_calc = CalculateDefaultCoefficient(spell, DOT) * (isHeal ? 1.88f : 1.0f);
+            dot_calc = CalculateDefaultCoefficient(spell, DOT) * (isHeal ? SCALE_SPELLPOWER_HEALING : 1.0f);
             dot_diff = std::abs(sbe.dot_damage - dot_calc);
         }
 
