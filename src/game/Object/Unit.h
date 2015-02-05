@@ -142,6 +142,8 @@ enum SpellFacingFlags
 #define BASE_MAXDAMAGE 2.0f
 #define BASE_ATTACK_TIME 2000
 
+#define SCALE_SPELLPOWER_HEALING        1.88f
+
 /**
  * byte value (UNIT_FIELD_BYTES_1,0).
  *
