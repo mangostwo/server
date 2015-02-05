@@ -86,7 +86,7 @@ class  WaypointMovementGenerator<Creature>
         // now path movement implmementation
         void LoadPath(Creature& c);
 
-        bool GetResetPosition(Creature&, float& x, float& y, float& z) const;
+        bool GetResetPosition(Creature&, float& /*x*/, float& /*y*/, float& /*z*/, float& /*o*/) const;
 
         void AddToWaypointPauseTime(int32 waitTimeDiff);
 
@@ -133,7 +133,7 @@ class  FlightPathMovementGenerator
         void SetCurrentNodeAfterTeleport();
         void SkipCurrentNode() { ++i_currentNode; }
         void DoEventIfAny(Player& player, TaxiPathNodeEntry const& node, bool departure);
-        bool GetResetPosition(Player&, float& x, float& y, float& z) const;
+        bool GetResetPosition(Player&, float& /*x*/, float& /*y*/, float& /*z*/, float& /*o*/) const;
 };
 
 #endif

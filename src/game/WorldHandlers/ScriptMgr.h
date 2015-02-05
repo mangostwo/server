@@ -108,7 +108,13 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_TERMINATE_COND           = 34,           // datalong = condition_id, datalong2 = if != 0 then quest_id of quest that will be failed for player's group if the script is terminated
                                                             // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL terminate when condition is false ELSE terminate when condition is true
     SCRIPT_COMMAND_SEND_AI_EVENT_AROUND     = 35,           // resSource = Creature, resTarget = Unit, datalong = AIEventType, datalong2 = radius
-    SCRIPT_COMMAND_TURN_TO                  = 36,           // resSource = Unit, resTarget = Unit/none
+    SCRIPT_COMMAND_SET_FACING               = 36,           // resSource = Creature, resTarget WorldObject. Turn resSource towards Taget
+                                                            // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL also set TargetGuid of resSource to resTarget. In this case resTarget MUST be Creature/ Player
+                                                            // datalong != 0 Reset TargetGuid, Reset orientation
+    SCRIPT_COMMAND_MOVE_DYNAMIC             = 37,           // resSource = Creature, resTarget Worldobject.
+                                                            // datalong = 0: Move resSource towards resTarget
+                                                            // datalong != 0: Move resSource to a random point between datalong2..datalong around resTarget.
+                                                            //      orientation != 0: Obtain a random point around resTarget in direction of orientation
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK, SCRIPT_COMMAND_EMOTE, SCRIPT_COMMAND_CAST_SPELL, SCRIPT_COMMAND_TERMINATE_SCRIPT
@@ -338,17 +344,22 @@ struct ScriptInfo
             uint32 radius;                                  // datalong2
         } sendAIEvent;
 
+        struct                                              // SCRIPT_COMMAND_SET_FACING (36)
+        {
+            uint32 resetFacing;                             // datalong
+            uint32 empty;                                   // datalong2
+        } setFacing;
+
+        struct                                              // SCRIPT_COMMAND_MOVE_DYNAMIC (37)
+        {
+            uint32 maxDist;                                 // datalong
+            uint32 minDist;                                 // datalong2
+        } moveDynamic;
+
         struct
         {
             uint32 data[2];
         } raw;
-
-        struct                                              // SCRIPT_COMMAND_TURN_TO (36)
-        {
-            uint32 targetId;                                // datalong
-            uint32 empty1;                                  // datalong2
-        } turnTo;
-
     };
 
     // Buddy system (entry can be npc or go entry, depending on command)
@@ -406,6 +417,7 @@ struct ScriptInfo
             case SCRIPT_COMMAND_MOUNT_TO_ENTRY_OR_MODEL:
             case SCRIPT_COMMAND_TERMINATE_SCRIPT:
             case SCRIPT_COMMAND_TERMINATE_COND:
+            case SCRIPT_COMMAND_SET_FACING:
                 return true;
             default:
                 return false;
