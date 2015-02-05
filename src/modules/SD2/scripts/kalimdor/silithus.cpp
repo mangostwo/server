@@ -323,7 +323,7 @@ struct npc_anachronos_the_ancientAI : public ScriptedAI, private DialogueHelper
                 // Move Merithra to the exit point
                 if (Creature* pMerithra = m_creature->GetMap()->GetCreature(m_merithraGuid))
                 {
-                    pMerithra->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+                    pMerithra->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
                     pMerithra->SetLevitate(true);
                     pMerithra->GetMotionMaster()->MovePoint(POINT_ID_EXIT, aEternalBoardMovement[0].m_fX, aEternalBoardMovement[0].m_fY, aEternalBoardMovement[0].m_fZ);
                     pMerithra->ForcedDespawn(9000);
@@ -345,7 +345,7 @@ struct npc_anachronos_the_ancientAI : public ScriptedAI, private DialogueHelper
                 // Move Arygos to the exit point
                 if (Creature* pArygos = m_creature->GetMap()->GetCreature(m_arygosGuid))
                 {
-                    pArygos->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+                    pArygos->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
                     pArygos->SetLevitate(true);
                     pArygos->GetMotionMaster()->MovePoint(POINT_ID_EXIT, aEternalBoardMovement[0].m_fX, aEternalBoardMovement[0].m_fY, aEternalBoardMovement[0].m_fZ);
                     pArygos->ForcedDespawn(9000);
@@ -378,7 +378,7 @@ struct npc_anachronos_the_ancientAI : public ScriptedAI, private DialogueHelper
                 // Send Caelestrasz on flight
                 if (Creature* pCaelestrasz = m_creature->GetMap()->GetCreature(m_CaelestraszGuid))
                 {
-                    pCaelestrasz->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+                    pCaelestrasz->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
                     pCaelestrasz->SetLevitate(true);
                     pCaelestrasz->GetMotionMaster()->MovePoint(POINT_ID_EXIT, aEternalBoardMovement[0].m_fX, aEternalBoardMovement[0].m_fY, aEternalBoardMovement[0].m_fZ);
                     pCaelestrasz->ForcedDespawn(9000);
@@ -686,7 +686,7 @@ struct npc_anachronos_the_ancientAI : public ScriptedAI, private DialogueHelper
                         break;
                     case 4:
                         // Take off and fly
-                        m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+                        m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
                         m_creature->SetLevitate(true);
                         m_creature->GetMotionMaster()->MovePoint(0, aEternalBoardMovement[9].m_fX, aEternalBoardMovement[9].m_fY, aEternalBoardMovement[9].m_fZ);
                         m_creature->ForcedDespawn(10000);

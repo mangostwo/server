@@ -192,7 +192,7 @@ struct  boss_razorscaleAI : public ScriptedAI
         SetCombatMovement(false);
 
         m_creature->SetLevitate(true);
-        m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+        m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -501,7 +501,7 @@ struct  boss_razorscaleAI : public ScriptedAI
                     if (DoCastSpellIfCan(m_creature, SPELL_STUN) == CAST_OK)
                     {
                         m_creature->SetLevitate(false);
-                        m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+                        m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
 
                         m_uiPhase = PHASE_GROUNDED;
                         m_uiGroundedTimer = 30000;
@@ -548,7 +548,7 @@ struct  boss_razorscaleAI : public ScriptedAI
                             else
                             {
                                 m_creature->SetLevitate(true);
-                                m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+                                m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
 
                                 float fX, fY, fZ;
                                 m_creature->GetRespawnCoord(fX, fY, fZ);

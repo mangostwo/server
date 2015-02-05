@@ -121,7 +121,7 @@ struct boss_vazruden_heraldAI : public ScriptedAI
 
         // see boss_onyxia
         // sort of a hack, it is unclear how this really work but the values appear to be valid
-        m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+        m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
         m_creature->SetLevitate(true);
     }
 

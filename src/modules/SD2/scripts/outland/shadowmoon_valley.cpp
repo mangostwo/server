@@ -108,7 +108,7 @@ struct mob_mature_netherwing_drakeAI : public ScriptedAI
             m_uiCreditTimer = 7000;
             m_creature->SetLevitate(false);
             m_creature->HandleEmote(EMOTE_ONESHOT_ATTACKUNARMED);
-            m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+            m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
         }
     }
 
@@ -150,7 +150,7 @@ struct mob_mature_netherwing_drakeAI : public ScriptedAI
 
                 Reset();
                 m_creature->SetLevitate(true);
-                m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+                m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
                 m_creature->GetMotionMaster()->Clear();
                 m_uiCreditTimer = 0;
             }

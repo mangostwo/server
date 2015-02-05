@@ -191,7 +191,7 @@ enum UnitStandFlags
 enum UnitBytes1_Flags
 {
     UNIT_BYTE1_FLAG_ALWAYS_STAND = 0x01,
-    UNIT_BYTE1_FLAG_UNK_2        = 0x02,                    // Creature that can fly and are not on the ground appear to have this flag. If they are on the ground, flag is not present.
+    UNIT_BYTE1_FLAG_FLY_ANIM     = 0x02,                    // Creature that can fly and are not on the ground appear to have this flag. If they are on the ground, flag is not present.
     UNIT_BYTE1_FLAG_UNTRACKABLE  = 0x04,
     UNIT_BYTE1_FLAG_ALL          = 0xFF
 };
@@ -3046,6 +3046,12 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
          * \see MovementInfo::HasMovementFlag
          */
         bool IsRooted() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_ROOT); }
+
+        virtual void SetLevitate(bool /*enabled*/) {}
+        virtual void SetSwim(bool /*enabled*/) {}
+        virtual void SetCanFly(bool /*enabled*/) {}
+        virtual void SetFeatherFall(bool /*enabled*/) {}
+        virtual void SetHover(bool /*enabled*/) {}
         /**
          * Roots or unroots this \ref Unit depending on the enabled parameter.
          * @param enabled whether we should root (true) or unroot (false) this \ref Unit

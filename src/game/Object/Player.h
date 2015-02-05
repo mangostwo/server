@@ -2075,6 +2075,10 @@ class  Player : public Unit
             StopMirrorTimer(FIRE_TIMER);
         }
 
+        void SetLevitate(bool enable) override;
+        void SetCanFly(bool enable) override;
+        void SetFeatherFall(bool enable) override;
+        void SetHover(bool enable) override;
         void SetRoot(bool enable) override;
         void SetWaterWalk(bool enable) override;
 

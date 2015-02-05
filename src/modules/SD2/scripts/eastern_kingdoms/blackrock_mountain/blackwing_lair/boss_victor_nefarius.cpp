@@ -208,7 +208,7 @@ struct boss_victor_nefariusAI : public ScriptedAI, private DialogueHelper
             pSummoned->SetWalk(false);
 
             // see boss_onyxia (also note the removal of this in boss_nefarian)
-            pSummoned->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+            pSummoned->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
             pSummoned->SetLevitate(true);
 
             // Let Nefarian fly towards combat area

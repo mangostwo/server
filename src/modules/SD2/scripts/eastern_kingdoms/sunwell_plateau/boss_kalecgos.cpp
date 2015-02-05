@@ -232,7 +232,7 @@ struct boss_kalecgosAI : public ScriptedAI
                 m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 30.0f, fX, fY, fZ);
                 fZ = 70.0f;
 
-                m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+                m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
                 m_creature->SetLevitate(true);
                 m_creature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
                 m_uiExitTimer = 0;

@@ -426,7 +426,7 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
                                 {
                                     // ToDo: Make Naralex fly
                                     // sort of a hack, compare to boss_onyxia
-                                    pNaralex->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+                                    pNaralex->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
 
                                     // Set to flying
                                     pNaralex->SetLevitate(true);

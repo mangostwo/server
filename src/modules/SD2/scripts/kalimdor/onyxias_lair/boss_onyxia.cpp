@@ -283,7 +283,7 @@ struct boss_onyxiaAI : public ScriptedAI
         {
             case POINT_ID_IN_AIR:
                 // sort of a hack, it is unclear how this really work but the values are valid
-                m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+                m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
                 m_creature->SetLevitate(true);
                 m_uiPhaseTimer = 1000;                          // Movement to Initial North Position is delayed
                 return;

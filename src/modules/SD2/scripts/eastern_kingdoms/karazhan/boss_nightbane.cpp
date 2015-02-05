@@ -148,7 +148,7 @@ struct boss_nightbaneAI : public npc_escortAI
             SetEscortPaused(true);
             m_creature->SetLevitate(false);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+            m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
 
             m_creature->SetInCombatWithZone();
         }
@@ -170,7 +170,7 @@ struct boss_nightbaneAI : public npc_escortAI
                     break;
                 case POINT_ID_GROUND:
                     m_creature->SetLevitate(false);
-                    m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+                    m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
 
                     m_uiPhase = PHASE_GROUND;
                     SetCombatMovement(true);
@@ -273,7 +273,7 @@ struct boss_nightbaneAI : public npc_escortAI
                 {
                     // Start air phase movement (handled by creature_movement_template)
                     SetCombatMovement(false);
-                    m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+                    m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
                     m_creature->SetLevitate(true);
                     DoMoveToClosestTrigger(false);
 
@@ -380,7 +380,7 @@ bool ProcessEventId_event_spell_summon_nightbane(uint32 /*uiEventId*/, Object* p
 
                 // Sort of a hack, it is unclear how this really work but the values appear to be valid (see Onyxia, too)
                 pNightbane->SetStandState(UNIT_STAND_STATE_STAND);
-                pNightbane->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+                pNightbane->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
                 pNightbane->SetLevitate(true);
 
                 // Switch to waypoint movement

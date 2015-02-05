@@ -541,8 +541,8 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                     // Checking SPELL_AURA_EMPATHY and caster
                     if (dynflagsValue & UNIT_DYNFLAG_SPECIALINFO && ((Unit*)this)->IsAlive())
                     {
-                        bool bIsEmpathy = false, bIsCaster = false;
-                        
+                        bool bIsEmpathy = false;
+                        bool bIsCaster = false;
                         Unit::AuraList const& mAuraEmpathy = ((Unit*)this)->GetAurasByType(SPELL_AURA_EMPATHY);
                         for (Unit::AuraList::const_iterator itr = mAuraEmpathy.begin(); !bIsCaster && itr != mAuraEmpathy.end(); ++itr)
                         {

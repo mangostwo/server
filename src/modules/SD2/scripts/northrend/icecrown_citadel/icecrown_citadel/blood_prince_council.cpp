@@ -150,7 +150,7 @@ struct  npc_queen_lanathel_introAI : public ScriptedAI, private DialogueHelper
     void Reset() override
     {
         // Flying animation
-        m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+        m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
     }
 
     void MoveInLineOfSight(Unit* pWho) override

@@ -218,7 +218,7 @@ struct  boss_malygosAI : public ScriptedAI, private DialogueHelper
 
         // reset flags
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-        m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+        m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
 
         SetCombatMovement(false);
     }
@@ -293,7 +293,7 @@ struct  boss_malygosAI : public ScriptedAI, private DialogueHelper
             m_creature->SetLevitate(false);
             SetCombatMovement(true);
             DoStartMovement(m_creature->getVictim());
-            m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+            m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
         }
     }
 
@@ -302,7 +302,7 @@ struct  boss_malygosAI : public ScriptedAI, private DialogueHelper
         switch (pSummoned->GetEntry())
         {
             case NPC_ALEXSTRASZA:
-                pSummoned->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+                pSummoned->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
                 pSummoned->GetMotionMaster()->MovePoint(0, aAlextraszaMovePos[0], aAlextraszaMovePos[1], aAlextraszaMovePos[2]);
                 break;
             case NPC_POWER_SPARK:
@@ -467,7 +467,7 @@ struct  boss_malygosAI : public ScriptedAI, private DialogueHelper
                 {
                     SetCombatMovement(false);
                     m_creature->SetLevitate(true);
-                    m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
+                    m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
                     // Move idle first, so we can avoid evading, because of the waypoint movement
                     m_creature->GetMotionMaster()->MoveIdle();
                     m_creature->GetMotionMaster()->MovePoint(0, aCenterMovePos[0], aCenterMovePos[1], aCenterMovePos[2] + 30.0f);
