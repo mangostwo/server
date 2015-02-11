@@ -35,7 +35,6 @@
 #include "Opcodes.h"
 #include "WorldSession.h"
 #include "WorldPacket.h"
-#include "Weather.h"
 #include "Player.h"
 #include "SkillExtraItems.h"
 #include "SkillDiscovery.h"
@@ -73,6 +72,8 @@
 #include "CharacterDatabaseCleaner.h"
 #include "CreatureLinkingMgr.h"
 #include "Calendar.h"
+#include "Weather.h"
+
 #include "LFGMgr.h"
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
@@ -138,12 +139,6 @@ World::~World()
         m_sessions.erase(m_sessions.begin());
     }
 
-    ///- Empty the WeatherMap
-    for (WeatherMap::const_iterator itr = m_weathers.begin(); itr != m_weathers.end(); ++itr)
-        { delete itr->second; }
-
-    m_weathers.clear();
-
     CliCommandHolder* command = NULL;
     while (cliCmdQueue.next(command))
         { delete command; }
@@ -163,27 +158,6 @@ void World::CleanupsBeforeStop()
 #ifdef ENABLE_ELUNA
     Eluna::Uninitialize();
 #endif
-}
-
-/// Find a player in a specified zone
-Player* World::FindPlayerInZone(uint32 zone)
-{
-    ///- circle through active sessions and return the first player found in the zone
-    SessionMap::const_iterator itr;
-    for (itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
-    {
-        if (!itr->second)
-            { continue; }
-        Player* player = itr->second->GetPlayer();
-        if (!player)
-            { continue; }
-        if (player->IsInWorld() && player->GetZoneId() == zone)
-        {
-            // Used by the weather system. We return the player to broadcast the change weather message to him and all players in the zone.
-            return player;
-        }
-    }
-    return NULL;
 }
 
 /// Find a session by its id
@@ -390,46 +364,6 @@ bool World::RemoveQueuedSession(WorldSession* sess)
         { (*iter)->SendAuthWaitQue(position); }
 
     return found;
-}
-
-/// Find a Weather object by the given zoneid
-Weather* World::FindWeather(uint32 id) const
-{
-    WeatherMap::const_iterator itr = m_weathers.find(id);
-
-    if (itr != m_weathers.end())
-        { return itr->second; }
-    else
-        { return 0; }
-}
-
-/// Remove a Weather object for the given zoneid
-void World::RemoveWeather(uint32 id)
-{
-    // not called at the moment. Kept for completeness
-    WeatherMap::iterator itr = m_weathers.find(id);
-
-    if (itr != m_weathers.end())
-    {
-        delete itr->second;
-        m_weathers.erase(itr);
-    }
-}
-
-/// Add a Weather object to the list
-Weather* World::AddWeather(uint32 zone_id)
-{
-    WeatherZoneChances const* weatherChances = sObjectMgr.GetWeatherChances(zone_id);
-
-    // if zone not have no weatherchanges return.
-    if (!weatherChances)
-        { return NULL; }
-
-    Weather* w = new Weather(zone_id, weatherChances);
-    m_weathers[w->GetZone()] = w;
-    w->ReGenerate();
-    w->UpdateWeather();
-    return w;
 }
 
 /// Initialize config values
@@ -931,7 +865,7 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_MMAP_ENABLED, "mmap.enabled", true);
     std::string ignoreMapIds = sConfig.GetStringDefault("mmap.ignoreMapIds", "");
     MMAP::MMapFactory::preventPathfindingOnMaps(ignoreMapIds.c_str());
-    sLog.outString("WORLD: mmap pathfinding %sabled", getConfig(CONFIG_BOOL_MMAP_ENABLED) ? "en" : "dis");
+    sLog.outString("WORLD: MMap pathfinding %sabled", getConfig(CONFIG_BOOL_MMAP_ENABLED) ? "en" : "dis");
 
     setConfig(CONFIG_BOOL_ELUNA_ENABLED, "Eluna.Enabled", true);
     
@@ -975,7 +909,6 @@ void World::SetInitialWorldSettings()
     }
 
     ///- Loading strings. Getting no records means core load has to be canceled because no error message can be output.
-    sLog.outString();
     sLog.outString("Loading MaNGOS strings...");
     if (!sObjectMgr.LoadMangosStrings())
     {
@@ -995,7 +928,7 @@ void World::SetInitialWorldSettings()
     CharacterDatabase.PExecute("DELETE FROM corpse WHERE corpse_type = '0' OR time < (UNIX_TIMESTAMP()-'%u')", 3 * DAY);
 
     ///- Load the DBC files
-    sLog.outString("Initialize data stores...");
+    sLog.outString("Initialize DBC data stores...");
     LoadDBCStores(m_dataPath);
     DetectDBCLang();
     sObjectMgr.SetDBCLocaleIndex(GetDefaultDbcLocale());    // Get once for all the locale index of DBC language (console/broadcasts)
@@ -1046,6 +979,7 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading GameObject models...");
     LoadGameObjectModelList();
+    sLog.outString();
 
     sLog.outString("Loading Spell Chain Data...");
     sSpellMgr.LoadSpellChains();
@@ -1077,7 +1011,7 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Item Random Enchantments Table...");
     LoadRandomEnchantmentsTable();
 
-    sLog.outString("Loading Items...");                     // must be after LoadRandomEnchantmentsTable and LoadPageTexts
+    sLog.outString("Loading Item Templates...");            // must be after LoadRandomEnchantmentsTable and LoadPageTexts
     sObjectMgr.LoadItemPrototypes();
 
     sLog.outString("Loading Item converts...");             // must be after LoadItemPrototypes
@@ -1107,7 +1041,7 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading SpellsScriptTarget...");
     sSpellMgr.LoadSpellScriptTarget();                      // must be after LoadCreatureTemplates and LoadGameobjectInfo
 
-    sLog.outString("Loading Vehicle Accessory...");         // must be after creature templates
+    sLog.outString("Loading Vehicle Accessory...");         // must be after LoadCreatureTemplates
     sObjectMgr.LoadVehicleAccessory();
 
     sLog.outString("Loading ItemRequiredTarget...");
@@ -1135,7 +1069,6 @@ void World::SetInitialWorldSettings()
     sSpellMgr.LoadPetDefaultSpells();
 
     sLog.outString("Loading Creature Addon Data...");
-    sLog.outString();
     sObjectMgr.LoadCreatureAddons();                        // must be after LoadCreatureTemplates() and LoadCreatures()
     sLog.outString(">>> Creature Addon Data loaded");
     sLog.outString();
@@ -1153,7 +1086,7 @@ void World::SetInitialWorldSettings()
     sPoolMgr.LoadFromDB();
 
     sLog.outString("Loading Weather Data...");
-    sObjectMgr.LoadWeatherZoneChances();
+    sWeatherMgr.LoadWeatherZoneChances();
 
     sLog.outString("Loading Quests...");
     sObjectMgr.LoadQuests();                                // must be loaded after DBCs, creature_template, item_template, gameobject tables
@@ -1162,13 +1095,11 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadQuestPOI();
 
     sLog.outString("Loading Quests Relations...");
-    sLog.outString();
     sObjectMgr.LoadQuestRelations();                        // must be after quest load
     sLog.outString(">>> Quests Relations loaded");
     sLog.outString();
 
     sLog.outString("Loading Game Event Data...");           // must be after sPoolMgr.LoadFromDB and quests to properly load pool events and quests for events
-    sLog.outString();
     sGameEventMgr.LoadFromDB();
     sLog.outString(">>> Game Event Data loaded");
     sLog.outString();
@@ -1179,6 +1110,7 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Creating map persistent states for non-instanceable maps...");     // must be after PackInstances(), LoadCreatures(), sPoolMgr.LoadFromDB(), sGameEventMgr.LoadFromDB();
     sMapPersistentStateMgr.InitWorldMaps();
+    sLog.outString();
 
     sLog.outString("Loading Creature Respawn Data...");     // must be after LoadCreatures(), and sMapPersistentStateMgr.InitWorldMaps()
     sMapPersistentStateMgr.LoadCreatureRespawnTimes();
@@ -1217,7 +1149,6 @@ void World::SetInitialWorldSettings()
     sSpellMgr.LoadSpellPetAuras();
 
     sLog.outString("Loading Player Create Info & Level Stats...");
-    sLog.outString();
     sObjectMgr.LoadPlayerInfo();
     sLog.outString(">>> Player Create Info & Level Stats loaded");
     sLog.outString();
@@ -1229,6 +1160,7 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadPetNames();
 
     CharacterDatabaseCleaner::CleanDatabase();
+    sLog.outString();
 
     sLog.outString("Loading the max pet number...");
     sObjectMgr.LoadPetNumber();
@@ -1243,7 +1175,6 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadMailLevelRewards();
 
     sLog.outString("Loading Loot Tables...");
-    sLog.outString();
     LoadLootTables();
     sLog.outString(">>> Loot Tables loaded");
     sLog.outString();
@@ -1257,7 +1188,6 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Skill Fishing base level requirements...");
     sObjectMgr.LoadFishingBaseSkillLevel();
 
-    sLog.outString();
     sLog.outString("Loading Achievements...");
     sAchievementMgr.LoadAchievementReferenceList();
     sAchievementMgr.LoadAchievementCriteriaList();
@@ -1291,40 +1221,7 @@ void World::SetInitialWorldSettings()
     sScriptMgr.LoadCreatureMovementScripts();
 
     sLog.outString("Loading Waypoints...");
-    sLog.outString();
     sWaypointMgr.Load();
-
-    ///- Loading localization data
-    sLog.outString("Loading Localization strings...");
-    sObjectMgr.LoadCreatureLocales();                       // must be after CreatureInfo loading
-    sObjectMgr.LoadGameObjectLocales();                     // must be after GameobjectInfo loading
-    sObjectMgr.LoadItemLocales();                           // must be after ItemPrototypes loading
-    sObjectMgr.LoadQuestLocales();                          // must be after QuestTemplates loading
-    sObjectMgr.LoadGossipTextLocales();                     // must be after LoadGossipText
-    sObjectMgr.LoadPageTextLocales();                       // must be after PageText loading
-    sObjectMgr.LoadGossipMenuItemsLocales();                // must be after gossip menu items loading
-    sObjectMgr.LoadPointOfInterestLocales();                // must be after POI loading
-    sLog.outString(">>> Localization strings loaded");
-    sLog.outString();
-
-    ///- Load dynamic data tables from the database
-    sLog.outString("Loading Auctions...");
-    sLog.outString();
-    sAuctionMgr.LoadAuctionItems();
-    sAuctionMgr.LoadAuctions();
-    sLog.outString(">>> Auctions loaded");
-    sLog.outString();
-
-    sLog.outString("Loading Guilds...");
-    sGuildMgr.LoadGuilds();
-
-    sLog.outString("Loading ArenaTeams...");
-    sObjectMgr.LoadArenaTeams();
-
-    sLog.outString("Loading Groups...");
-    sObjectMgr.LoadGroups();
-
-    sCalendarMgr.LoadCalendarsFromDB();
 
     sLog.outString("Loading ReservedNames...");
     sObjectMgr.LoadReservedPlayersNames();
@@ -1341,25 +1238,45 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading GameTeleports...");
     sObjectMgr.LoadGameTele();
 
-    sLog.outString("Loading GM tickets...");
-    sTicketMgr.LoadGMTickets();
-    
-    sLog.outString("Loading Dungeon Finder Requirements...");
-    sObjectMgr.LoadDungeonFinderRequirements();
-    
-    sLog.outString("Loading Dungeon Finder Rewards...");
-    sObjectMgr.LoadDungeonFinderRewards();
-    
-    sLog.outString("Loading Dungeon Finder Items...");
-    sObjectMgr.LoadDungeonFinderItems();
+    ///- Loading localization data
+    sLog.outString("Loading Localization strings...");
+    sObjectMgr.LoadCreatureLocales();                       // must be after CreatureInfo loading
+    sObjectMgr.LoadGameObjectLocales();                     // must be after GameobjectInfo loading
+    sObjectMgr.LoadItemLocales();                           // must be after ItemPrototypes loading
+    sObjectMgr.LoadQuestLocales();                          // must be after QuestTemplates loading
+    sObjectMgr.LoadGossipTextLocales();                     // must be after LoadGossipText
+    sObjectMgr.LoadPageTextLocales();                       // must be after PageText loading
+    sObjectMgr.LoadGossipMenuItemsLocales();                // must be after gossip menu items loading
+    sObjectMgr.LoadPointOfInterestLocales();                // must be after POI loading
+    sLog.outString(">>> Localization strings loaded");
+    sLog.outString();
 
-    ///- Handle outdated emails (delete/return)
+    ///- Load dynamic data tables from the database
+    sLog.outString("Loading Auctions...");
+    sAuctionMgr.LoadAuctionItems();
+    sAuctionMgr.LoadAuctions();
+    sLog.outString(">>> Auctions loaded");
+    sLog.outString();
+
+    sLog.outString("Loading Guilds...");
+    sGuildMgr.LoadGuilds();
+
+    sLog.outString("Loading ArenaTeams...");
+    sObjectMgr.LoadArenaTeams();
+
+    sLog.outString("Loading Groups...");
+    sObjectMgr.LoadGroups();
+
+    sCalendarMgr.LoadCalendarsFromDB();
+
     sLog.outString("Returning old mails...");
     sObjectMgr.ReturnOrDeleteOldMails(false);
 
-    ///- Load and initialize scripts
-    sLog.outString("Loading Scripts...");
-    sLog.outString();
+    sLog.outString("Loading GM tickets...");
+    sTicketMgr.LoadGMTickets();
+
+    ///- Load and initialize DBScripts Engine
+    sLog.outString("Loading DB-Scripts Engine...");
     sScriptMgr.LoadQuestStartScripts();                     // must be after load Creature/Gameobject(Template/Data) and QuestTemplate
     sScriptMgr.LoadQuestEndScripts();                       // must be after load Creature/Gameobject(Template/Data) and QuestTemplate
     sScriptMgr.LoadSpellScripts();                          // must be after load Creature/Gameobject(Template/Data)
@@ -1373,6 +1290,7 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Scripts text locales...");      // must be after Load*Scripts calls
     sScriptMgr.LoadDbScriptStrings();
 
+    ///- Load and initialize EventAI Scripts
     sLog.outString("Loading CreatureEventAI Texts...");
     sEventAIMgr.LoadCreatureEventAI_Texts(false);           // false, will checked in LoadCreatureEventAI_Scripts
 
@@ -1382,6 +1300,7 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading CreatureEventAI Scripts...");
     sEventAIMgr.LoadCreatureEventAI_Scripts();
 
+    ///- Load and initialize scripting libraries
     sLog.outString("Initializing Scripts...");
 #ifdef ENABLE_SD2
     switch (sScriptMgr.LoadScriptLibrary(MANGOS_SCRIPT_NAME))
@@ -1403,8 +1322,10 @@ void World::SetInitialWorldSettings()
     sLog.outError("SD2 was not included in compilation, not using it.");
 #endif /* ENABLE_SD2 */
 
+    sLog.outString();
+
     ///- Initialize game time and timers
-    sLog.outString("DEBUG:: Initialize game time and timers");
+    sLog.outString("Initialize game time and timers");
     m_gameTime = time(NULL);
     m_startTime = m_gameTime;
 
@@ -1419,7 +1340,6 @@ void World::SetInitialWorldSettings()
     LoginDatabase.PExecute("INSERT INTO uptime (realmid, starttime, startstring, uptime) VALUES('%u', " UI64FMTD ", '%s', 0)",
                            realmID, uint64(m_startTime), isoDate);
 
-    m_timers[WUPDATE_WEATHERS].SetInterval(1 * IN_MILLISECONDS);
     m_timers[WUPDATE_AUCTIONS].SetInterval(MINUTE * IN_MILLISECONDS);
     m_timers[WUPDATE_UPTIME].SetInterval(getConfig(CONFIG_UINT32_UPTIME_UPDATE)*MINUTE * IN_MILLISECONDS);
     // Update "uptime" table based on configuration entry in minutes.
@@ -1447,6 +1367,7 @@ void World::SetInitialWorldSettings()
     ///- Initialize MapManager
     sLog.outString("Starting Map System");
     sMapMgr.Initialize();
+    sLog.outString();
 
     ///- Initialize Battlegrounds
     sLog.outString("Starting BattleGround System");
@@ -1463,22 +1384,28 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Deleting expired bans...");
     LoginDatabase.Execute("DELETE FROM ip_banned WHERE unbandate<=UNIX_TIMESTAMP() AND unbandate<>bandate");
+    sLog.outString();
 
-    sLog.outString("Calculate next daily quest and dungeon reset time...");
+    sLog.outString("Calculate next daily quest reset time...");
     InitDailyQuestResetTime();
+    sLog.outString();
 
     sLog.outString("Calculate next weekly quest reset time...");
     InitWeeklyQuestResetTime();
+    sLog.outString();
 
     sLog.outString("Calculate next monthly quest reset time...");
     SetMonthlyQuestResetTime();
-
-    sLog.outString("Calculate random battleground reset time...");
-    InitRandomBGResetTime();
+    sLog.outString();
 
     sLog.outString("Starting Game Event system...");
     uint32 nextGameEvent = sGameEventMgr.Initialize();
     m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);    // depend on next event
+    sLog.outString();
+
+//    sLog.outString("Loading grids for active creatures or transports...");
+//    sObjectMgr.LoadActiveEntities(NULL);
+//    sLog.outString();
 
     // Delete all characters which have been deleted X days before
     Player::DeleteOldCharacters();
@@ -1492,11 +1419,13 @@ void World::SetInitialWorldSettings()
     sEluna->RunScripts();
     sEluna->OnConfigLoad(false); // Must be done after Eluna is initialized and scripts have run.
 #endif
+    sLog.outString();
 
     sLog.outString("WORLD: World initialized");
 
     uint32 uStartInterval = WorldTimer::getMSTimeDiff(uStartTime, WorldTimer::getMSTime());
     sLog.outString("SERVER STARTUP TIME: %i minutes %i seconds", uStartInterval / 60000, (uStartInterval % 60000) / 1000);
+    sLog.outString();
 }
 
 void World::DetectDBCLang()
@@ -1616,25 +1545,6 @@ void World::Update(uint32 diff)
     /// <li> Handle session updates
     UpdateSessions(diff);
 
-    /// <li> Handle weather updates when the timer has passed
-    if (m_timers[WUPDATE_WEATHERS].Passed())
-    {
-        ///- Send an update signal to Weather objects
-        for (WeatherMap::iterator itr = m_weathers.begin(); itr != m_weathers.end();)
-        {
-            ///- and remove Weather objects for zones with no player
-            // As interval > WorldTick
-            if (!itr->second->Update(m_timers[WUPDATE_WEATHERS].GetInterval()))
-            {
-                delete itr->second;
-                m_weathers.erase(itr++);
-            }
-            else
-                { ++itr; }
-        }
-
-        m_timers[WUPDATE_WEATHERS].SetCurrent(0);
-    }
     /// <li> Update uptime table
     if (m_timers[WUPDATE_UPTIME].Passed())
     {
@@ -1856,7 +1766,7 @@ void World::KickAllLess(AccountTypes sec)
 }
 
 /// Ban an account or ban an IP address, duration_secs if it is positive used, otherwise permban
-BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_secs, std::string reason, std::string author)
+BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_secs, std::string reason, const std::string &author)
 {
     LoginDatabase.escape_string(nameOrIP);
     LoginDatabase.escape_string(reason);
@@ -2047,7 +1957,7 @@ void World::ShutdownCancel()
 #endif /* ENABLE_ELUNA */
 }
 
-void World::UpdateSessions(uint32 diff)
+void World::UpdateSessions(uint32 /*diff*/)
 {
     ///- Add new sessions
     WorldSession* sess;

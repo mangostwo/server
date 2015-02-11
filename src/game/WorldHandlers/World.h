@@ -79,14 +79,13 @@ enum ShutdownExitCode
 enum WorldTimers
 {
     WUPDATE_AUCTIONS    = 0,
-    WUPDATE_WEATHERS    = 1,
-    WUPDATE_UPTIME      = 2,
-    WUPDATE_CORPSES     = 3,
-    WUPDATE_EVENTS      = 4,
-    WUPDATE_DELETECHARS = 5,
-    WUPDATE_AHBOT       = 6,
-    WUPDATE_LFGMGR      = 7,
-    WUPDATE_COUNT       = 8
+    WUPDATE_UPTIME      = 1,
+    WUPDATE_CORPSES     = 2,
+    WUPDATE_EVENTS      = 3,
+    WUPDATE_DELETECHARS = 4,
+    WUPDATE_AHBOT       = 5,
+    WUPDATE_LFGMGR      = 6,
+    WUPDATE_COUNT       = 7
 };
 
 /// Configuration elements
@@ -453,9 +452,6 @@ struct CliCommandHolder
 };
 
 /// The World
-
-typedef UNORDERED_MAP<uint32, WorldSession*> SessionMap;
-
 class World
 {
     public:
@@ -471,18 +467,12 @@ class World
         bool RemoveSession(uint32 id);
         /// Get the number of current active sessions
         void UpdateMaxSessionCounters();
-        const SessionMap& GetAllSessions() const { return m_sessions; }
         uint32 GetActiveAndQueuedSessionCount() const { return m_sessions.size(); }
         uint32 GetActiveSessionCount() const { return m_sessions.size() - m_QueuedSessions.size(); }
         uint32 GetQueuedSessionCount() const { return m_QueuedSessions.size(); }
         /// Get the maximum number of parallel sessions on the server since last reboot
         uint32 GetMaxQueuedSessionCount() const { return m_maxQueuedSessionCount; }
         uint32 GetMaxActiveSessionCount() const { return m_maxActiveSessionCount; }
-        Player* FindPlayerInZone(uint32 zone);
-
-        Weather* FindWeather(uint32 id) const;
-        Weather* AddWeather(uint32 zone_id);
-        void RemoveWeather(uint32 zone_id);
 
         /// Get the active session server limit (or security level limitations)
         uint32 GetPlayerAmountLimit() const { return m_playerLimit >= 0 ? m_playerLimit : 0; }
@@ -579,7 +569,7 @@ class World
 
         void KickAll();
         void KickAllLess(AccountTypes sec);
-        BanReturn BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_secs, std::string reason, std::string author);
+        BanReturn BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_secs, std::string reason, const std::string &author);
         bool RemoveBanAccount(BanMode mode, std::string nameOrIP);
 
         // for max speed access
@@ -609,7 +599,7 @@ class World
         char const* GetDBVersion() { return m_DBVersion.c_str(); }
         char const* GetCreatureEventAIVersion() { return m_CreatureEventAIVersion.c_str(); }
 
-        
+
         /**
         * \brief: force all client to request player data
         * \param: ObjectGuid guid : guid of the specified player
@@ -617,7 +607,7 @@ class World
         *
         * Description: InvalidatePlayerDataToAllClient force all connected clients to clear specified player cache
         * FullName: World::InvalidatePlayerDataToAllClient
-        * Access: public 
+        * Access: public
         **/
         void InvalidatePlayerDataToAllClient(ObjectGuid guid);
 
@@ -663,9 +653,7 @@ class World
         uint32 mail_timer;
         uint32 mail_timer_expires;
 
-        typedef UNORDERED_MAP<uint32, Weather*> WeatherMap;
-        WeatherMap m_weathers;
-//        typedef UNORDERED_MAP<uint32, WorldSession*> SessionMap;
+        typedef UNORDERED_MAP<uint32, WorldSession*> SessionMap;
         SessionMap m_sessions;
         uint32 m_maxActiveSessionCount;
         uint32 m_maxQueuedSessionCount;
