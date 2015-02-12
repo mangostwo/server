@@ -591,7 +591,7 @@ enum UnitFlags
     UNIT_FLAG_PVP                   = 0x00001000,           // changed in 3.0.3
     UNIT_FLAG_SILENCED              = 0x00002000,           ///< silenced, 2.1.1
     UNIT_FLAG_UNK_14                = 0x00004000,           // 2.0.8
-    UNIT_FLAG_UNK_15                = 0x00008000,
+    UNIT_FLAG_UNK_15                = 0x00008000,           // related to jerky movement in water?
     UNIT_FLAG_UNK_16                = 0x00010000,           ///< removes attackable icon
     UNIT_FLAG_PACIFIED              = 0x00020000,
     UNIT_FLAG_STUNNED               = 0x00040000,           // stunned, 2.1.1
@@ -3892,6 +3892,9 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         void OnRelocated();
 
         bool IsLinkingEventTrigger() const { return m_isCreatureLinkingTrigger; }
+
+        virtual bool CanSwim() const = 0;
+        virtual bool CanFly() const = 0;
 
     protected:
         explicit Unit();
