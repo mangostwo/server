@@ -283,6 +283,7 @@ class  Map : public GridRefManager<NGridType>
 
         // Dynamic VMaps
         float GetHeight(uint32 phasemask, float x, float y, float z) const;
+        bool GetHeightInRange(uint32 phasemask, float x, float y, float &z, float maxSearchDist = 4.0f) const;
         bool IsInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, uint32 phasemask) const;
         bool GetHitPosition(float srcX, float srcY, float srcZ, float& destX, float& destY, float& destZ, uint32 phasemask, float modifyDist) const;
 
@@ -306,6 +307,12 @@ class  Map : public GridRefManager<NGridType>
          * @param permanently set the weather permanently?
          */
         void SetWeather(uint32 zoneId, WeatherType type, float grade, bool permanently);
+        
+        // Random on map generation
+        bool GetReachableRandomPosition(Unit* unit, float& x, float& y, float& z, float radius);
+        bool GetReachableRandomPointOnGround(uint32 phaseMask, float& x, float& y, float& z, float radius);
+        bool GetRandomPointInTheAir(uint32 phaseMask, float& x, float& y, float& z, float radius);
+        bool GetRandomPointUnderWater(uint32 phaseMask, float& x, float& y, float& z, float radius, GridMapLiquidData& liquid_status);
 
     private:
         void LoadMapAndVMap(int gx, int gy);
@@ -394,7 +401,6 @@ class  Map : public GridRefManager<NGridType>
 
         template<class T>
         void RemoveFromGrid(T*, NGridType*, Cell const&);
-
         // Holder for information about linked mobs
         CreatureLinkingHolder m_creatureLinkingHolder;
 
