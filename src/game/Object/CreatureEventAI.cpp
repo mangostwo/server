@@ -982,6 +982,11 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             m_throwAIEventMask = action.setThrowMask.eventTypeMask;
             break;
         }
+        case ACTION_T_SET_STAND_STATE:
+        {
+            m_creature->SetStandState(action.setStandState.standState);
+            break;
+        }
         case ACTION_T_SUMMON_UNIQUE:                              //47
         {
             Creature* pCreature = NULL;
@@ -997,7 +1002,9 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             {
                 Unit* target = GetTargetByType(action.summon_unique.target, pActionInvoker, pAIEventSender, reportTargetError);
                 if (!target && reportTargetError)
-                    { sLog.outErrorEventAI("Event %u - NULL target for ACTION_T_SUMMON_UNIQUE(%u), target-type %u", EventId, action.type, action.summon_unique.target); }
+                {
+                    sLog.outErrorEventAI("Event %u - NULL target for ACTION_T_SUMMON_UNIQUE(%u), target-type %u", EventId, action.type, action.summon_unique.target);
+                }
 
                 CreatureEventAI_Summon_Map::const_iterator i = sEventAIMgr.GetCreatureEventAISummonMap().find(action.summon_unique.spawnId);
                 if (i == sEventAIMgr.GetCreatureEventAISummonMap().end())
@@ -1008,35 +1015,52 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
 
                 Creature* pCreature = NULL;
                 if ((*i).second.SpawnTimeSecs)
-                    { pCreature = m_creature->SummonCreature(action.summon_unique.creatureId, (*i).second.position_x, (*i).second.position_y, (*i).second.position_z, (*i).second.orientation, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, (*i).second.SpawnTimeSecs); }
+                {
+                    pCreature = m_creature->SummonCreature(action.summon_unique.creatureId, (*i).second.position_x, (*i).second.position_y, (*i).second.position_z, (*i).second.orientation, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, (*i).second.SpawnTimeSecs);
+                }
                 else
-                    { pCreature = m_creature->SummonCreature(action.summon_unique.creatureId, (*i).second.position_x, (*i).second.position_y, (*i).second.position_z, (*i).second.orientation, TEMPSUMMON_TIMED_OOC_DESPAWN, 0); }
+                {
+                    pCreature = m_creature->SummonCreature(action.summon_unique.creatureId, (*i).second.position_x, (*i).second.position_y, (*i).second.position_z, (*i).second.orientation, TEMPSUMMON_TIMED_OOC_DESPAWN, 0);
+                }
 
                 if (!pCreature)
-                    { sLog.outErrorEventAI("failed to spawn creature %u. EventId %d.Creature %d", action.summon_unique.creatureId, EventId, m_creature->GetEntry()); }
+                {
+                    sLog.outErrorEventAI("failed to spawn creature %u. EventId %d.Creature %d", action.summon_unique.creatureId, EventId, m_creature->GetEntry());
+                }
                 else if (action.summon_unique.target != TARGET_T_SELF && target)
-                    { pCreature->AI()->AttackStart(target); }
+                {
+                    pCreature->AI()->AttackStart(target);
+                }
             }
             break;
         }
-        case ACTION_T_SET_STAND_STATE:
+        case ACTION_T_EMOTE_TARGET:
         {
-            m_creature->SetStandState(action.setStandState.standState);
+            Unit* pCreature = m_creature->GetMap()->GetCreature(ObjectGuid(HIGHGUID_UNIT, action.emoteTarget.targetGuid));
+            if (!pCreature)
+            {
+                sLog.outErrorEventAI("Event %d. Cannot find creature by guid %d", EventId, action.emoteTarget.targetGuid);
+                return;
+            }
+
+
+            m_creature->SetFacingToObject(pCreature);
+            m_creature->HandleEmote(action.emoteTarget.emoteId);
             break;
         }
         case ACTION_T_CHANGE_MOVEMENT:
         {
             switch (action.changeMovement.movementType)
             {
-                case IDLE_MOTION_TYPE:
-                    m_creature->GetMotionMaster()->MoveIdle();
-                    break;
-                case RANDOM_MOTION_TYPE:
-                    m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), float(action.changeMovement.wanderDistance));
-                    break;
-                case WAYPOINT_MOTION_TYPE:
-                    m_creature->GetMotionMaster()->MoveWaypoint();
-                    break;
+            case IDLE_MOTION_TYPE:
+                m_creature->GetMotionMaster()->MoveIdle();
+                break;
+            case RANDOM_MOTION_TYPE:
+                m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), float(action.changeMovement.wanderDistance));
+                break;
+            case WAYPOINT_MOTION_TYPE:
+                m_creature->GetMotionMaster()->MoveWaypoint();
+                break;
             }
             break;
         }

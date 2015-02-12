@@ -124,9 +124,10 @@ enum EventAI_ActionType
     ACTION_T_CHANCED_TEXT               = 44,               // Chance to display the text, TextId1, optionally TextId2. If more than just -TextId1 is defined, randomize. Negative values.
     ACTION_T_THROW_AI_EVENT             = 45,               // EventType, Radius, unused
     ACTION_T_SET_THROW_MASK             = 46,               // EventTypeMask, unused, unused
-    ACTION_T_SUMMON_UNIQUE              = 47,               // CreatureId, Target, SpawnId
-    ACTION_T_SET_STAND_STATE            = 48,               // StandState, unused, unused
-    ACTION_T_CHANGE_MOVEMENT            = 49,               // MovementType, WanderDistance, unused
+    ACTION_T_SET_STAND_STATE            = 47,               // StandState, unused, unused
+    ACTION_T_CHANGE_MOVEMENT            = 48,               // MovementType, WanderDistance, unused
+    ACTION_T_SUMMON_UNIQUE              = 49,               // CreatureId, Target, SpawnId
+    ACTION_T_EMOTE_TARGET               = 50,               // EmoteId, TargetGuid
     
     ACTION_T_END,
 };
@@ -407,27 +408,33 @@ struct CreatureEventAI_Action
             uint32 unused1;
             uint32 unused2;
         } setThrowMask;
-        // ACTION_T_SUMMON_ID                               = 47
-        struct
-        {
-            uint32 creatureId;
-            uint32 target;
-            uint32 spawnId;
-        } summon_unique;
-        // ACTION_T_SET_STAND_STATE                         = 48
+        // ACTION_T_SET_STAND_STATE                         = 47
         struct
         {
             uint32 standState;
             uint32 unused1;
             uint32 unused2;
         } setStandState;
-        // ACTION_T_CHANGE_MOVEMENT                         = 49
+        // ACTION_T_CHANGE_MOVEMENT                         = 48
         struct
         {
             uint32 movementType;
             uint32 wanderDistance;
             uint32 unused1;
         } changeMovement;
+        // ACTION_T_SUMMON_ID                               = 49
+        struct
+        {
+            uint32 creatureId;
+            uint32 target;
+            uint32 spawnId;
+        } summon_unique;
+        // ACTION_T_EMOTE_TARGET                            = 50
+        struct
+        {
+            uint32 emoteId;
+            uint32 targetGuid;
+        } emoteTarget;
         // RAW
         struct
         {
