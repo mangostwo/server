@@ -173,7 +173,7 @@ class  Pet : public Creature
         { return m_autospells[pos]; }
         }
 
-        bool CanSwim() const override
+        bool CanSwim() const
         {
             Unit const* owner = GetOwner();
             if (owner)
@@ -181,6 +181,8 @@ class  Pet : public Creature
         else
             { return Creature::CanSwim(); }
         }
+
+        bool CanFly() const { return false; } // pet are not able to fly. TODO: check if this is right
 
         void RegenerateAll(uint32 update_diff) override;    // overwrite Creature::RegenerateAll
         void LooseHappiness();

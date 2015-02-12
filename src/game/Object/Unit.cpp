@@ -10455,26 +10455,34 @@ void Unit::SetConfused(bool apply, ObjectGuid casterGuid, uint32 spellID)
 {
     if (apply)
     {
-        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
+         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
 
-        CastStop(GetObjectGuid() == casterGuid ? spellID : 0);
+         GetMotionMaster()->MovementExpired(false);
+         CastStop(GetObjectGuid() == casterGuid ? spellID : 0);
 
-        GetMotionMaster()->MoveConfused();
+         if (GetTypeId() == TYPEID_UNIT)
+         {
+                 SetTargetGuid(ObjectGuid());
+                 GetMotionMaster()->MoveConfused();
+         }
     }
     else
     {
-        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
+         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
 
-        GetMotionMaster()->MovementExpired(false);
+         GetMotionMaster()->MovementExpired(false);
 
-        if (GetTypeId() != TYPEID_PLAYER && IsAlive())
-        {
-            // restore appropriate movement generator
-            if (getVictim())
-                { GetMotionMaster()->MoveChase(getVictim()); }
-            else
-                { GetMotionMaster()->Initialize(); }
-        }
+         if (GetTypeId() != TYPEID_PLAYER && IsAlive())
+         {
+         // restore appropriate movement generator
+                if (getVictim())
+                {
+                       SetTargetGuid(getVictim()->GetObjectGuid());
+                       GetMotionMaster()->MoveChase(getVictim());
+                 }
+                 else
+                 { GetMotionMaster()->Initialize(); }
+          }
     }
 
     if (GetTypeId() == TYPEID_PLAYER)

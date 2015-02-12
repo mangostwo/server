@@ -1021,14 +1021,14 @@ void Creature::PrepareBodyLootState()
       }
     }
 
-    lootForBody = true;                                     // pass this loot mode
+    lootForBody = true; // pass this loot mode
 
     // if not have normal loot allow skinning if need
     if (!lootForSkin && GetCreatureInfo()->SkinningLootId)
     {
-        RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
-        return;
+      RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+      SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+      return;
     }
 
     RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
