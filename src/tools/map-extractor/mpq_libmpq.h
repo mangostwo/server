@@ -113,13 +113,8 @@ class MPQFile
          *
          * @param f
          */
-        MPQFile(const MPQFile& f) {}
-        /**
-         * @brief
-         *
-         * @param f
-         */
-        void operator=(const MPQFile& f) {}
+        MPQFile() {}
+
 
     public:
         /**

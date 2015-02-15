@@ -159,7 +159,7 @@ void Usage(char* prg)
 {
     printf("Usage: %s [OPTION]\n\n", prg);
     printf("Extract client database files and generate map files.\n");
-    printf("   -h, --help            show the usage\n");
+    printf("   -h, --help, /?        show the usage\n");
     printf("   -i, --input <path>    search path for game client archives\n");
     printf("   -o, --output <path>   target path for generated files\n");
     printf("   -f, --flat #          store height information as integers reducing map\n");
@@ -186,7 +186,7 @@ bool HandleArgs(int argc, char** argv)
 
     for (int i = 1; i < argc; ++i)
     {
-        if (strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--input") == 0)
+        if (strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--input") == 0 || strcmp(argv[i], "/?") == 0)
         {
             param = argv[++i];
             if (!param)
@@ -1280,7 +1280,7 @@ int main(int argc, char** argv)
         LoadCommonMPQFiles();
 
         // Extract maps
-        { ExtractMapsFromMpq(FirstLocale); }
+        { ExtractMapsFromMpq(build); }
 
         // Close MPQs
         CloseMPQFiles();
