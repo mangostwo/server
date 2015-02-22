@@ -1364,7 +1364,6 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         if (update_diff >= m_nextSave)
         {
             // m_nextSave reseted in SaveToDB call
-
             SaveToDB();
             DETAIL_LOG("Player '%s' (GUID: %u) saved", GetName(), GetGUIDLow());
         }
@@ -17226,6 +17225,12 @@ void Player::SaveToDB()
 
     // first save/honor gain after midnight will also update the player's honor fields
     UpdateHonorFields();
+
+#ifdef ENABLE_ELUNA
+    // Hack to check that this is not on create save
+    if (!HasAtLoginFlag(AT_LOGIN_FIRST))
+        sEluna->OnSave(this);
+#endif /* ENABLE_ELUNA */
 
     DEBUG_FILTER_LOG(LOG_FILTER_PLAYER_STATS, "The value of player %s at save: ", m_name.c_str());
     outDebugStatsValues();
