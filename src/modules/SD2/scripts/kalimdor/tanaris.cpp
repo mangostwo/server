@@ -604,7 +604,7 @@ enum
     NPC_TREASURE_HUNTING_SWASHBUCKLER = 7901,
     NPC_TREASURE_HUNTING_BUCCANEER = 7902,
     GO_PIRATE_TREASURE = 142194,
-    SPAWN_DURATION = 600000 // pirates and chest will exist in world for 10 minutes
+    SPAWN_DURATION = 300000 // pirates will exist in world for 3 minutes
 };
 
 bool GOUse_go_pirate_treasure(Player* pPlayer, GameObject* pGo)
@@ -616,33 +616,43 @@ bool GOUse_go_pirate_treasure(Player* pPlayer, GameObject* pGo)
     return true;
 }
 
-void SpawnPirates(Player* pPlayer, uint32 iNumberOfPirates)
+void SpawnPirates(Player* pPlayer, int iTotalPirates)
 {
-    for (uint8 i = 0; i<iNumberOfPirates; i++)
+    Creature * pCreature;
+    for (int i = 0; i<iTotalPirates; i++)
     {
+        float fPlayerX = pPlayer->GetPositionX();
+        float fPlayerY = pPlayer->GetPositionY();
+        float fPlayerZ = pPlayer->GetPositionZ();
+        // Pirate's spawn location
+        float fX = fPlayerX + rand() % 30 + 8;
+        float fY = fPlayerY + rand() % 30 + 8;
         // spawn 4 or 5 sailor boys
-        switch (urand(0, 2))
+        switch (rand() % 3)
         {    
             case 0: // spawn treasure hunting pirate
-                pPlayer->SummonCreature(NPC_TREASURE_HUNTING_PIRATE, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, SPAWN_DURATION);
+                pCreature = pPlayer->SummonCreature(NPC_TREASURE_HUNTING_PIRATE, fX, fY, fPlayerZ, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, SPAWN_DURATION);
                 break;
             case 1: // spawn treasure hunting swashbuckler
-                pPlayer->SummonCreature(NPC_TREASURE_HUNTING_SWASHBUCKLER, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, SPAWN_DURATION);
+                pCreature = pPlayer->SummonCreature(NPC_TREASURE_HUNTING_SWASHBUCKLER, fX, fY, fPlayerZ, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, SPAWN_DURATION);
                 break;
             default: // spawn treasure hunting buccaneer
-                pPlayer->SummonCreature(NPC_TREASURE_HUNTING_BUCCANEER, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, SPAWN_DURATION);
+                pCreature = pPlayer->SummonCreature(NPC_TREASURE_HUNTING_BUCCANEER, fX, fY, fPlayerZ, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, SPAWN_DURATION);
                 break;
         }
+        pCreature->SetWalk(false, true); // run, fat boy, RUN!!!!
+        pCreature->GetMotionMaster()->MovePoint(0, fPlayerX, fPlayerY, fPlayerZ);
     }
 }
 
 bool GOUse_go_inconspicuous_landmark(Player* pPlayer, GameObject* pGo)
 {
     // spawn 4 or 5 sailor boys
-    SpawnPirates(pPlayer, urand(4, 5));
+    int iTotalPirates = rand() % 2 + 4;
+    SpawnPirates(pPlayer, iTotalPirates);
 
     // spawn chest
-    pPlayer->SummonGameObject(GO_PIRATE_TREASURE, -10117.715f, -4051.644f, 5.407f, 0.0f, SPAWN_DURATION);
+    pGo->SummonGameObject(GO_PIRATE_TREASURE, -10117.715f, -4051.644f, 5.407f, 0.0f, 60);
     return true;
 }
 
