@@ -8353,6 +8353,17 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
 
             return creature;
         }
+        case CONDITION_GAMEOBJECT_IN_RANGE:
+        {
+            GameObject* pGo = NULL;
+
+            MaNGOS::NearestGameObjectEntryInObjectRangeCheck go_check(*source, m_value1, m_value2);
+            MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck> searcher(pGo, go_check);
+
+            Cell::VisitGridObjects(source, searcher, m_value2);
+
+            return pGo;
+        }
         default:
             return false;
     }
@@ -8818,6 +8829,19 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
             if (value2 <= 0)
             {
                 sLog.outErrorDb("Creature in range condition (entry %u, type %u) has an invalid value in value2. (Range %u must be greater than 0), skipping.", entry, condition, value2);
+                return false;
+            }
+        }
+        case CONDITION_GAMEOBJECT_IN_RANGE:
+        {
+            if (!sCreatureStorage.LookupEntry<GameObjectInfo>(value1))
+            {
+                sLog.outErrorDb("Game object in range condition (entry %u, type %u) has an invalid value in value1 (gameobject). (Game object %u does not exist in the database), skipping.", entry, condition, value1);
+                return false;
+            }
+            if (value2 <= 0)
+            {
+                sLog.outErrorDb("Game object in range condition (entry %u, type %u) has an invalid value in value2 (range). (Range %u must be greater than 0), skipping.", entry, condition, value2);
                 return false;
             }
         }
