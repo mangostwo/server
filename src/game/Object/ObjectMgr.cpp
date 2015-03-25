@@ -8830,7 +8830,8 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
             {
                 sLog.outErrorDb("Creature in range condition (entry %u, type %u) has an invalid value in value2. (Range %u must be greater than 0), skipping.", entry, condition, value2);
                 return false;
-            }
+			}
+			break;
         }
         case CONDITION_GAMEOBJECT_IN_RANGE:
         {
@@ -8843,7 +8844,8 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
             {
                 sLog.outErrorDb("Game object in range condition (entry %u, type %u) has an invalid value in value2 (range). (Range %u must be greater than 0), skipping.", entry, condition, value2);
                 return false;
-            }
+			}
+			break;
         }
         case CONDITION_NONE:
             break;
