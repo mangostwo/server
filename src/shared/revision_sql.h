@@ -25,6 +25,6 @@
 #ifndef MANGOS_H_REVISION_SQL
 #define MANGOS_H_REVISION_SQL
 #define REVISION_DB_CHARACTERS "required_20000_00_Rel20_Initial"
-#define REVISION_DB_MANGOS "required_20000_25_Tortured_skeleton_issue_fix"
+#define REVISION_DB_MANGOS "required_20000_26_Fel_Stalker_issue_fix"
 #define REVISION_DB_REALMD "required_20140607_Realm_Resync"
 #endif // __REVISION_SQL_H__
