@@ -49,37 +49,30 @@
 
 enum
 {
-    BLUE_OGRE_BREW	= 32783,
-    RED_OGRE_BREW	= 32784,
-    TRANCHANTES		= 3522,
-    OGRE_BREW_MANA	= 41304,
-    OGRE_BREW_LIFE	= 41306
+    BLUE_OGRE_BREW = 32783,
+    RED_OGRE_BREW = 32784,
+    TRANCHANTES = 3522
 };
 
 bool ItemUse_item_ogre_brew(Player* pPlayer, Item* pItem, const SpellCastTargets&)
 {
-    uint32 itemId	= pItem->GetEntry();
-    uint32 pZoneId	= pPlayer->GetZoneId();
-    
-    if (itemId == BLUE_OGRE_BREW || itemId == RED_OGRE_BREW)
+    uint32 itemId = pItem->GetEntry();
+    uint32 pZoneId = pPlayer->GetZoneId();
+
+    if (itemId == BLUE_OGRE_BREW || itemId == RED_OGRE_BREW)    //an excessive check of DB sanity, may be dropped
     {
         if (pZoneId == TRANCHANTES)
         {
-            return false;
+            return false;   // allowing cast, i.e. this script did not handle it
         }
-        debug_log("SD2: Player attempt to use item %u, but did not meet zone requirement : %u", itemId,pZoneId);
-        if (itemId == BLUE_OGRE_BREW)
+
+        debug_log("SD2: Player attempt to use item %u, but did not meet zone requirement : %u", itemId, pZoneId);
+        if (const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry(pItem->GetProto()->Spells[0].SpellId))
         {
-            const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry(OGRE_BREW_LIFE);
             Spell::SendCastResult(pPlayer, pSpellInfo, 1, SPELL_FAILED_NOT_HERE);
         }
-        if (itemId == RED_OGRE_BREW)
-        {
-            const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry(OGRE_BREW_MANA);
-            Spell::SendCastResult(pPlayer, pSpellInfo, 1, SPELL_FAILED_NOT_HERE);
-        }
-        return true;
     }
+    return true;
 }
 
 /*#####
