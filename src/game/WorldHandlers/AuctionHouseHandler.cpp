@@ -384,7 +384,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recv_data)
     
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->OnAdd(auctionHouse);
+    sEluna->OnAdd(auctionHouse, AH);
 #endif /* ENABLE_ELUNA */
     }
 }
@@ -542,7 +542,7 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket& recv_data)
     auctionHouse->RemoveAuction(auction->Id);
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->OnRemove(auctionHouse);
+    sEluna->OnRemove(auctionHouse, auction);
 #endif /* ENABLE_ELUNA */
     delete auction;
 }

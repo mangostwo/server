@@ -35,7 +35,6 @@
 #include "Opcodes.h"
 #include "WorldSession.h"
 #include "WorldPacket.h"
-#include "Weather.h"
 #include "Player.h"
 #include "SkillExtraItems.h"
 #include "SkillDiscovery.h"
@@ -73,10 +72,14 @@
 #include "CharacterDatabaseCleaner.h"
 #include "CreatureLinkingMgr.h"
 #include "Calendar.h"
+#include "Weather.h"
 #include "LFGMgr.h"
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /*ENABLE_ELUNA*/
+
+// Warden
+#include "WardenCheckMgr.h"
 
 INSTANTIATE_SINGLETON_1(World);
 
@@ -138,12 +141,6 @@ World::~World()
         m_sessions.erase(m_sessions.begin());
     }
 
-    ///- Empty the WeatherMap
-    for (WeatherMap::const_iterator itr = m_weathers.begin(); itr != m_weathers.end(); ++itr)
-        { delete itr->second; }
-
-    m_weathers.clear();
-
     CliCommandHolder* command = NULL;
     while (cliCmdQueue.next(command))
         { delete command; }
@@ -163,27 +160,6 @@ void World::CleanupsBeforeStop()
 #ifdef ENABLE_ELUNA
     Eluna::Uninitialize();
 #endif
-}
-
-/// Find a player in a specified zone
-Player* World::FindPlayerInZone(uint32 zone)
-{
-    ///- circle through active sessions and return the first player found in the zone
-    SessionMap::const_iterator itr;
-    for (itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
-    {
-        if (!itr->second)
-            { continue; }
-        Player* player = itr->second->GetPlayer();
-        if (!player)
-            { continue; }
-        if (player->IsInWorld() && player->GetZoneId() == zone)
-        {
-            // Used by the weather system. We return the player to broadcast the change weather message to him and all players in the zone.
-            return player;
-        }
-    }
-    return NULL;
 }
 
 /// Find a session by its id
@@ -390,46 +366,6 @@ bool World::RemoveQueuedSession(WorldSession* sess)
         { (*iter)->SendAuthWaitQue(position); }
 
     return found;
-}
-
-/// Find a Weather object by the given zoneid
-Weather* World::FindWeather(uint32 id) const
-{
-    WeatherMap::const_iterator itr = m_weathers.find(id);
-
-    if (itr != m_weathers.end())
-        { return itr->second; }
-    else
-        { return 0; }
-}
-
-/// Remove a Weather object for the given zoneid
-void World::RemoveWeather(uint32 id)
-{
-    // not called at the moment. Kept for completeness
-    WeatherMap::iterator itr = m_weathers.find(id);
-
-    if (itr != m_weathers.end())
-    {
-        delete itr->second;
-        m_weathers.erase(itr);
-    }
-}
-
-/// Add a Weather object to the list
-Weather* World::AddWeather(uint32 zone_id)
-{
-    WeatherZoneChances const* weatherChances = sObjectMgr.GetWeatherChances(zone_id);
-
-    // if zone not have no weatherchanges return.
-    if (!weatherChances)
-        { return NULL; }
-
-    Weather* w = new Weather(zone_id, weatherChances);
-    m_weathers[w->GetZone()] = w;
-    w->ReGenerate();
-    w->UpdateWeather();
-    return w;
 }
 
 /// Initialize config values
@@ -818,6 +754,18 @@ void World::LoadConfigSettings(bool reload)
 
     setConfig(CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT,      "PetUnsummonAtMount", true);
 
+    // Warden
+
+    setConfig(CONFIG_BOOL_WARDEN_WIN_ENABLED, "Warden.WinEnabled", true);
+    setConfig(CONFIG_BOOL_WARDEN_OSX_ENABLED, "Warden.OSXEnabled", false);
+    setConfig(CONFIG_UINT32_WARDEN_NUM_MEM_CHECKS, "Warden.NumMemChecks", 3);
+    setConfig(CONFIG_UINT32_WARDEN_NUM_OTHER_CHECKS, "Warden.NumOtherChecks", 7);
+    setConfig(CONFIG_UINT32_WARDEN_CLIENT_BAN_DURATION, "Warden.BanDuration", 86400);
+    setConfig(CONFIG_UINT32_WARDEN_CLIENT_CHECK_HOLDOFF, "Warden.ClientCheckHoldOff", 30);
+    setConfig(CONFIG_UINT32_WARDEN_CLIENT_FAIL_ACTION, "Warden.ClientCheckFailAction", 0);
+    setConfig(CONFIG_UINT32_WARDEN_CLIENT_RESPONSE_DELAY, "Warden.ClientResponseDelay", 600);
+    setConfig(CONFIG_UINT32_WARDEN_DB_LOGLEVEL, "Warden.DBLogLevel", 0);
+
     m_relocation_ai_notify_delay = sConfig.GetIntDefault("Visibility.AIRelocationNotifyDelay", 1000u);
     m_relocation_lower_limit_sq  = pow(sConfig.GetFloatDefault("Visibility.RelocationLowerLimit", 10), 2);
 
@@ -1153,7 +1101,7 @@ void World::SetInitialWorldSettings()
     sPoolMgr.LoadFromDB();
 
     sLog.outString("Loading Weather Data...");
-    sObjectMgr.LoadWeatherZoneChances();
+    sWeatherMgr.LoadWeatherZoneChances();
 
     sLog.outString("Loading Quests...");
     sObjectMgr.LoadQuests();                                // must be loaded after DBCs, creature_template, item_template, gameobject tables
@@ -1419,7 +1367,6 @@ void World::SetInitialWorldSettings()
     LoginDatabase.PExecute("INSERT INTO uptime (realmid, starttime, startstring, uptime) VALUES('%u', " UI64FMTD ", '%s', 0)",
                            realmID, uint64(m_startTime), isoDate);
 
-    m_timers[WUPDATE_WEATHERS].SetInterval(1 * IN_MILLISECONDS);
     m_timers[WUPDATE_AUCTIONS].SetInterval(MINUTE * IN_MILLISECONDS);
     m_timers[WUPDATE_UPTIME].SetInterval(getConfig(CONFIG_UINT32_UPTIME_UPDATE)*MINUTE * IN_MILLISECONDS);
     // Update "uptime" table based on configuration entry in minutes.
@@ -1460,6 +1407,15 @@ void World::SetInitialWorldSettings()
     // Not sure if this can be moved up in the sequence (with static data loading) as it uses MapManager
     sLog.outString("Loading Transports...");
     sMapMgr.LoadTransports();
+
+    // Initialize Warden
+    sLog.outString("Loading Warden Checks...");
+    sWardenCheckMgr->LoadWardenChecks();
+    sLog.outString();
+
+    sLog.outString("Loading Warden Action Overrides...");
+    sWardenCheckMgr->LoadWardenOverrides();
+    sLog.outString();
 
     sLog.outString("Deleting expired bans...");
     LoginDatabase.Execute("DELETE FROM ip_banned WHERE unbandate<=UNIX_TIMESTAMP() AND unbandate<>bandate");
@@ -1616,25 +1572,6 @@ void World::Update(uint32 diff)
     /// <li> Handle session updates
     UpdateSessions(diff);
 
-    /// <li> Handle weather updates when the timer has passed
-    if (m_timers[WUPDATE_WEATHERS].Passed())
-    {
-        ///- Send an update signal to Weather objects
-        for (WeatherMap::iterator itr = m_weathers.begin(); itr != m_weathers.end();)
-        {
-            ///- and remove Weather objects for zones with no player
-            // As interval > WorldTick
-            if (!itr->second->Update(m_timers[WUPDATE_WEATHERS].GetInterval()))
-            {
-                delete itr->second;
-                m_weathers.erase(itr++);
-            }
-            else
-                { ++itr; }
-        }
-
-        m_timers[WUPDATE_WEATHERS].SetCurrent(0);
-    }
     /// <li> Update uptime table
     if (m_timers[WUPDATE_UPTIME].Passed())
     {

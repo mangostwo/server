@@ -33,7 +33,7 @@
 
 #ifndef MANGOS_VERSION
 #if PLATFORM == PLATFORM_WINDOWS
-# define MANGOS_VERSION(REVD,REVT,REVN,REVH) "0.19.0" " (" REVD " " REVT " Revision " REVN " - " REVH ")"
+# define MANGOS_VERSION(REVD,REVT,REVN,REVH) "0.21.0" " (" REVD " " REVT " Revision " REVN " - " REVH ")"
 #else
 # define MANGOS_VERSION(REVD,REVT,REVN,REVH) "@VERSION@" " (" REVD " " REVT " Revision " REVN " - " REVH ")"
 #endif
@@ -42,7 +42,7 @@
 // Format is YYYYMMDDRR where RR is the change in the conf file
 // for that day.
 #ifndef MANGOSD_CONFIG_VERSION
-# define MANGOSD_CONFIG_VERSION 2014060701
+# define MANGOSD_CONFIG_VERSION 2015052601
 #endif
 #ifndef REALMD_CONFIG_VERSION
 # define REALMD_CONFIG_VERSION 2010062001

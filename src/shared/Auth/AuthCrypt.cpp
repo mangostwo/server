@@ -24,7 +24,7 @@
 
 #include "AuthCrypt.h"
 #include "HMACSHA1.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "BigNumber.h"
 
 AuthCrypt::AuthCrypt() : _clientDecrypt(SHA_DIGEST_LENGTH), _serverEncrypt(SHA_DIGEST_LENGTH)

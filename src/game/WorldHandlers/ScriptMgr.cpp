@@ -42,12 +42,12 @@
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
 #ifdef ENABLE_SD2
-#include "ScriptDevMgr.h"
+#include "system/ScriptDevMgr.h"
 #endif
 
 #include <cstring> /* std::strcmp */
 
-#include "revision_nr.h"
+#include "revision.h"
 
 ScriptMapMapName sQuestEndScripts;
 ScriptMapMapName sQuestStartScripts;

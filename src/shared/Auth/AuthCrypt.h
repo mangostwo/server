@@ -25,8 +25,8 @@
 #ifndef MANGOS_H_AUTHCRYPT
 #define MANGOS_H_AUTHCRYPT
 
-#include "Common.h"
-#include "SARC4.h"
+#include "Common/Common.h"
+#include "ARC4.h"
 
 class BigNumber;
 
@@ -77,8 +77,8 @@ class AuthCrypt
         bool IsInitialized() { return _initialized; }
 
     private:
-        SARC4 _clientDecrypt;
-        SARC4 _serverEncrypt;
+        ARC4 _clientDecrypt;
+        ARC4 _serverEncrypt;
         bool _initialized; /**< TODO */
 };
 #endif

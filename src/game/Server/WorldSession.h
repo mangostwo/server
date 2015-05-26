@@ -30,6 +30,7 @@
 #define MANGOS_H_WORLDSESSION
 
 #include "Common.h"
+#include "Auth/BigNumber.h"
 #include "SharedDefines.h"
 #include "ObjectGuid.h"
 #include "AuctionHouseMgr.h"
@@ -47,6 +48,7 @@ class Item;
 class Object;
 class Player;
 class Unit;
+class Warden;
 class WorldPacket;
 class WorldSocket;
 class QueryResult;
@@ -273,6 +275,9 @@ class  WorldSession
         }
         void SetPlayer(Player* plr);
         uint8 Expansion() const { return m_expansion; }
+
+        // Warden
+        void InitWarden(BigNumber* k, std::string const& os);
 
         /// Session in auth.queue currently
         void SetInQueue(bool state)
@@ -942,6 +947,9 @@ class  WorldSession
         AccountTypes _security;
         uint32 _accountId;
         uint8 m_expansion;
+
+        // Warden
+        Warden* _warden;                                    // Remains NULL if Warden system is not enabled by config
 
         time_t _logoutTime;
         bool m_inQueue;                                     // session wait in auth.queue

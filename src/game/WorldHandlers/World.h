@@ -43,7 +43,6 @@ class ObjectGuid;
 class WorldPacket;
 class WorldSession;
 class Player;
-class Weather;
 class SqlResultQueue;
 class QueryResult;
 class WorldSocket;
@@ -79,14 +78,13 @@ enum ShutdownExitCode
 enum WorldTimers
 {
     WUPDATE_AUCTIONS    = 0,
-    WUPDATE_WEATHERS    = 1,
-    WUPDATE_UPTIME      = 2,
-    WUPDATE_CORPSES     = 3,
-    WUPDATE_EVENTS      = 4,
-    WUPDATE_DELETECHARS = 5,
-    WUPDATE_AHBOT       = 6,
-    WUPDATE_LFGMGR      = 7,
-    WUPDATE_COUNT       = 8
+    WUPDATE_UPTIME      = 1,
+    WUPDATE_CORPSES     = 2,
+    WUPDATE_EVENTS      = 3,
+    WUPDATE_DELETECHARS = 4,
+    WUPDATE_AHBOT       = 5,
+    WUPDATE_LFGMGR      = 6,
+    WUPDATE_COUNT       = 7
 };
 
 /// Configuration elements
@@ -200,6 +198,14 @@ enum eConfigUInt32Values
     CONFIG_UINT32_MIN_LEVEL_FOR_RAID,
     CONFIG_UINT32_CREATURE_RESPAWN_AGGRO_DELAY,
     CONFIG_UINT32_RANDOM_BG_RESET_HOUR,
+    // Warden
+    CONFIG_UINT32_WARDEN_CLIENT_RESPONSE_DELAY,
+    CONFIG_UINT32_WARDEN_CLIENT_CHECK_HOLDOFF,
+    CONFIG_UINT32_WARDEN_CLIENT_FAIL_ACTION,
+    CONFIG_UINT32_WARDEN_CLIENT_BAN_DURATION,
+    CONFIG_UINT32_WARDEN_NUM_MEM_CHECKS,
+    CONFIG_UINT32_WARDEN_NUM_OTHER_CHECKS,
+    CONFIG_UINT32_WARDEN_DB_LOGLEVEL,
     CONFIG_UINT32_VALUE_COUNT
 };
 
@@ -355,6 +361,9 @@ enum eConfigBoolValues
     CONFIG_BOOL_MMAP_ENABLED,
     CONFIG_BOOL_ELUNA_ENABLED,
     CONFIG_BOOL_PLAYER_COMMANDS,
+    // Warden
+    CONFIG_BOOL_WARDEN_WIN_ENABLED,
+    CONFIG_BOOL_WARDEN_OSX_ENABLED,
     CONFIG_BOOL_VALUE_COUNT
 };
 
@@ -478,11 +487,6 @@ class World
         /// Get the maximum number of parallel sessions on the server since last reboot
         uint32 GetMaxQueuedSessionCount() const { return m_maxQueuedSessionCount; }
         uint32 GetMaxActiveSessionCount() const { return m_maxActiveSessionCount; }
-        Player* FindPlayerInZone(uint32 zone);
-
-        Weather* FindWeather(uint32 id) const;
-        Weather* AddWeather(uint32 zone_id);
-        void RemoveWeather(uint32 zone_id);
 
         /// Get the active session server limit (or security level limitations)
         uint32 GetPlayerAmountLimit() const { return m_playerLimit >= 0 ? m_playerLimit : 0; }
@@ -663,9 +667,7 @@ class World
         uint32 mail_timer;
         uint32 mail_timer_expires;
 
-        typedef UNORDERED_MAP<uint32, Weather*> WeatherMap;
-        WeatherMap m_weathers;
-//        typedef UNORDERED_MAP<uint32, WorldSession*> SessionMap;
+        //typedef UNORDERED_MAP<uint32, WorldSession*> SessionMap;
         SessionMap m_sessions;
         uint32 m_maxActiveSessionCount;
         uint32 m_maxQueuedSessionCount;

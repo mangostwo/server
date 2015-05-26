@@ -25,12 +25,8 @@
 #ifndef FIELD_H
 #define FIELD_H
 
-#include "Common.h"
-#ifdef WIN32
-#include <mysql/mysql.h>
-#else
+#include "Common/Common.h"
 #include <mysql.h>
-#endif
 
 /**
  * @brief
