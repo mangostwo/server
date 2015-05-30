@@ -50,7 +50,7 @@
 #include "DBCStores.h"
 #include "ScriptMgr.h"
 #ifdef ENABLE_SOAP
-#include "MaNGOSsoap.h"
+#include "SOAP/MaNGOSsoap.h"
 #endif
 
 #include <ace/OS_NS_signal.h>
