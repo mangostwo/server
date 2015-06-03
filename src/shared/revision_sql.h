@@ -25,6 +25,6 @@
 #ifndef MANGOS_H_REVISION_SQL
 #define MANGOS_H_REVISION_SQL
 #define REVISION_DB_CHARACTERS "required_20000_00_Rel20_Initial"
-#define REVISION_DB_MANGOS "required_20000_27_Terl_Arakor_Wetlands_gossip_text"
+#define REVISION_DB_MANGOS "required_20000_28_db_script_string_correction"
 #define REVISION_DB_REALMD "required_20140607_Realm_Resync"
 #endif // __REVISION_SQL_H__
