@@ -63,17 +63,29 @@ enum
 
     MAX_SPECIAL_ACHIEV_CRITS    = 6,
 
-    TYPE_ACHIEV_SAFETY_DANCE    = 0,
-    TYPE_ACHIEV_KNOCK_YOU_OUT   = 1,
-    TYPE_ACHIEV_HUNDRED_CLUB    = 2,
-    TYPE_ACHIEV_SHOCKING        = 3,
-    TYPE_ACHIEV_SPORE_LOSER     = 4,
-    TYPE_ACHIEV_GET_ENOUGH      = 5,
+    TYPE_ACHIEV_SAFETY_DANCE    = MAX_ENCOUNTER + 0,
+    TYPE_ACHIEV_KNOCK_YOU_OUT   = MAX_ENCOUNTER + 1,
+    TYPE_ACHIEV_HUNDRED_CLUB    = MAX_ENCOUNTER + 2,
+    TYPE_ACHIEV_SHOCKING        = MAX_ENCOUNTER + 3,
+    TYPE_ACHIEV_SPORE_LOSER     = MAX_ENCOUNTER + 4,
+    TYPE_ACHIEV_GET_ENOUGH      = MAX_ENCOUNTER + 5,
+
+    TYPE_DO_SET_CHAMBER_CENTER  = MAX_ENCOUNTER + 6,
+    TYPE_DO_GOTH_SUMMON         = MAX_ENCOUNTER + 7,
+    TYPE_DO_HEIGAN_TRAPS        = MAX_ENCOUNTER + 8,
+    TYPE_DO_THAD_OVERLOAD       = MAX_ENCOUNTER + 9,
+    TYPE_DO_THAD_CHAIN          = MAX_ENCOUNTER + 10,
+
+    DATA64_GOTH_LEFT_ANCHOR     = 0,
+    DATA64_GOTH_RIGHT_ANCHOR    = 1,
+    DATA64_GOTH_RANDOM_LEFT     = 2,
+    DATA64_GOTH_RANDOM_RIGHT    = 3,
 
     MAX_HEIGAN_TRAP_AREAS       = 4,
 
     NPC_ANUB_REKHAN             = 15956,
     NPC_FAERLINA                = 15953,
+    NPC_HEIGAN_THE_UNCLEAN      = 15936,
 
     NPC_THADDIUS                = 15928,
     NPC_STALAGG                 = 15929,
@@ -198,81 +210,4 @@ enum
     ACHIEV_START_PATCHWERK_ID   = 10286,
     ACHIEV_START_MAEXXNA_ID     = 9891,
 };
-
-struct GothTrigger
-{
-    bool bIsRightSide;
-    bool bIsAnchorHigh;
-};
-
-static const float aSapphPositions[4] = {3521.48f, -5234.87f, 137.626f, 4.53329f};
-
-class  instance_naxxramas : public ScriptedInstance
-{
-    public:
-        instance_naxxramas(Map* pMap);
-        ~instance_naxxramas() {}
-
-        void Initialize() override;
-
-        bool IsEncounterInProgress() const override;
-
-        void OnPlayerEnter(Player* pPlayer) override;
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-
-        void OnPlayerDeath(Player* pPlayer) override;
-        void OnCreatureDeath(Creature* pCreature) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        void SetSpecialAchievementCriteria(uint32 uiType, bool bIsMet);
-        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-        void Load(const char* chrIn) override;
-
-        void Update(uint32 uiDiff) override;
-
-        // Heigan
-        void DoTriggerHeiganTraps(Creature* pHeigan, uint32 uiAreaIndex);
-
-        // goth
-        void SetGothTriggers();
-        Creature* GetClosestAnchorForGoth(Creature* pSource, bool bRightSide);
-        void GetGothSummonPointCreatures(std::list<Creature*>& lList, bool bRightSide);
-        bool IsInRightSideGothArea(Unit* pUnit);
-
-        // thaddius
-        void GetThadTeslaCreatures(GuidList& lList) { lList = m_lThadTeslaCoilList; };
-
-        // kel
-        void SetChamberCenterCoords(float fX, float fY, float fZ);
-        void GetChamberCenterCoords(float& fX, float& fY, float& fZ) { fX = m_fChamberCenterX; fY = m_fChamberCenterY; fZ = m_fChamberCenterZ; }
-        void DoTaunt();
-
-    protected:
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        bool m_abAchievCriteria[MAX_SPECIAL_ACHIEV_CRITS];
-        std::string m_strInstData;
-
-        GuidList m_lThadTeslaCoilList;
-        GuidList m_lGothTriggerList;
-
-        UNORDERED_MAP<ObjectGuid, GothTrigger> m_mGothTriggerMap;
-        GuidList m_alHeiganTrapGuids[MAX_HEIGAN_TRAP_AREAS];
-
-        float m_fChamberCenterX;
-        float m_fChamberCenterY;
-        float m_fChamberCenterZ;
-
-        uint32 m_uiSapphSpawnTimer;
-        uint32 m_uiTauntTimer;
-        uint32 m_uiHorsemenAchievTimer;
-        uint8 m_uiHorseMenKilled;
-
-        DialogueHelper m_dialogueHelper;
-};
-
 #endif

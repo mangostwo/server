@@ -77,7 +77,7 @@ Yell m_aYell[] =
     {SAY_DAL_DEATH, SAY_SKA_DAL_DIES_REPLY}
 };
 
-struct  boss_s_and_d_dummyAI : public ScriptedAI
+struct boss_s_and_d_dummyAI : public ScriptedAI
 {
     boss_s_and_d_dummyAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -169,169 +169,184 @@ struct  boss_s_and_d_dummyAI : public ScriptedAI
 ## boss_skarvald
 ######*/
 
-struct  boss_skarvaldAI : public boss_s_and_d_dummyAI
+struct boss_skarvald : public CreatureScript
 {
-    boss_skarvaldAI(Creature* pCreature) : boss_s_and_d_dummyAI(pCreature) { Reset(); }
+    boss_skarvald() : CreatureScript("boss_skarvald") {}
 
-    uint32 m_uiYellDelayTimer;
-    uint32 m_uiChargeTimer;
-    uint32 m_uiEnrageTimer;
-    uint32 m_uiStoneStrikeTimer;
-
-    void Reset() override
+    struct boss_skarvaldAI : public boss_s_and_d_dummyAI
     {
-        m_uiYellDelayTimer = 0;
-        m_uiChargeTimer = urand(2000, 6000);
-        m_uiEnrageTimer = 15000;
-        m_uiStoneStrikeTimer = 8000;
-    }
+        boss_skarvaldAI(Creature* pCreature) : boss_s_and_d_dummyAI(pCreature) { }
 
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(m_aYell[0].m_iTextId, m_creature);
-        m_uiYellDelayTimer = 5000;
-    }
+        uint32 m_uiYellDelayTimer;
+        uint32 m_uiChargeTimer;
+        uint32 m_uiEnrageTimer;
+        uint32 m_uiStoneStrikeTimer;
 
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(SAY_SKA_KILL, m_creature);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiYellDelayTimer)
+        void Reset() override
         {
-            if (m_uiYellDelayTimer <= uiDiff)
-            {
-                if (Creature* pBuddy = GetBuddy())
-                    DoScriptText(m_aYell[0].m_iTextReplyId, pBuddy);
+            m_uiYellDelayTimer = 0;
+            m_uiChargeTimer = urand(2000, 6000);
+            m_uiEnrageTimer = 15000;
+            m_uiStoneStrikeTimer = 8000;
+        }
 
-                m_uiYellDelayTimer = 0;
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(m_aYell[0].m_iTextId, m_creature);
+            m_uiYellDelayTimer = 5000;
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            DoScriptText(SAY_SKA_KILL, m_creature);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            if (m_uiYellDelayTimer)
+            {
+                if (m_uiYellDelayTimer <= uiDiff)
+                {
+                    if (Creature* pBuddy = GetBuddy())
+                        DoScriptText(m_aYell[0].m_iTextReplyId, pBuddy);
+
+                    m_uiYellDelayTimer = 0;
+                }
+                else
+                    m_uiYellDelayTimer -= uiDiff;
+            }
+
+            if (m_uiChargeTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+                    DoCastSpellIfCan(pTarget, SPELL_CHARGE);
+
+                m_uiChargeTimer = urand(8000, 16000);
             }
             else
-                m_uiYellDelayTimer -= uiDiff;
+                m_uiChargeTimer -= uiDiff;
+
+            if (m_uiEnrageTimer < uiDiff)
+            {
+                DoCastSpellIfCan(m_creature, SPELL_ENRAGE);
+                m_uiEnrageTimer = 20000;
+            }
+            else
+                m_uiEnrageTimer -= uiDiff;
+
+            if (m_uiStoneStrikeTimer < uiDiff)
+            {
+                DoCastSpellIfCan(m_creature->getVictim(), SPELL_STONE_STRIKE);
+                m_uiStoneStrikeTimer = urand(5000, 15000);
+            }
+            else
+                m_uiStoneStrikeTimer -= uiDiff;
+
+            DoMeleeAttackIfReady();
         }
+    };
 
-        if (m_uiChargeTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
-                DoCastSpellIfCan(pTarget, SPELL_CHARGE);
-
-            m_uiChargeTimer = urand(8000, 16000);
-        }
-        else
-            m_uiChargeTimer -= uiDiff;
-
-        if (m_uiEnrageTimer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature, SPELL_ENRAGE);
-            m_uiEnrageTimer = 20000;
-        }
-        else
-            m_uiEnrageTimer -= uiDiff;
-
-        if (m_uiStoneStrikeTimer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_STONE_STRIKE);
-            m_uiStoneStrikeTimer = urand(5000, 15000);
-        }
-        else
-            m_uiStoneStrikeTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_skarvaldAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_skarvald(Creature* pCreature)
-{
-    return new boss_skarvaldAI(pCreature);
-}
 
 /*######
 ## boss_dalronn
 ######*/
 
-struct  boss_dalronnAI : public boss_s_and_d_dummyAI
+struct boss_dalronn : public CreatureScript
 {
-    boss_dalronnAI(Creature* pCreature) : boss_s_and_d_dummyAI(pCreature) { Reset(); }
+    boss_dalronn() : CreatureScript("boss_dalronn") {}
 
-    uint32 m_uiDebilitateTimer;
-    uint32 m_uiShadowBoltTimer;
-    uint32 m_uiSkeletonTimer;
-
-    void Reset() override
+    struct boss_dalronnAI : public boss_s_and_d_dummyAI
     {
-        m_uiDebilitateTimer = urand(5000, 10000);
-        m_uiShadowBoltTimer = urand(2500, 6000);
-        m_uiSkeletonTimer = urand(25000, 35000);
-    }
+        boss_dalronnAI(Creature* pCreature) : boss_s_and_d_dummyAI(pCreature) { }
 
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(SAY_DAL_KILL, m_creature);
-    }
+        uint32 m_uiDebilitateTimer;
+        uint32 m_uiShadowBoltTimer;
+        uint32 m_uiSkeletonTimer;
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiDebilitateTimer < uiDiff)
+        void Reset() override
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_DEBILITATE : SPELL_DEBILITATE_H);
-
-            m_uiDebilitateTimer = urand(12000, 20000);
+            m_uiDebilitateTimer = urand(5000, 10000);
+            m_uiShadowBoltTimer = urand(2500, 6000);
+            m_uiSkeletonTimer = urand(25000, 35000);
         }
-        else
-            m_uiDebilitateTimer -= uiDiff;
 
-        if (m_uiShadowBoltTimer < uiDiff)
+        void KilledUnit(Unit* /*pVictim*/) override
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H);
-
-            m_uiShadowBoltTimer = urand(3000, 6000);
+            DoScriptText(SAY_DAL_KILL, m_creature);
         }
-        else
-            m_uiShadowBoltTimer -= uiDiff;
 
-        if (!m_bIsRegularMode)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (m_uiSkeletonTimer < uiDiff)
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            if (m_uiDebilitateTimer < uiDiff)
             {
-                if (!m_creature->FindGuardianWithEntry(NPC_SKELETAL))
-                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_SKELETONS);
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_DEBILITATE : SPELL_DEBILITATE_H);
 
-                m_uiSkeletonTimer = 30000;
+                m_uiDebilitateTimer = urand(12000, 20000);
             }
             else
-                m_uiSkeletonTimer -= uiDiff;
-        }
+                m_uiDebilitateTimer -= uiDiff;
 
-        DoMeleeAttackIfReady();
+            if (m_uiShadowBoltTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H);
+
+                m_uiShadowBoltTimer = urand(3000, 6000);
+            }
+            else
+                m_uiShadowBoltTimer -= uiDiff;
+
+            if (!m_bIsRegularMode)
+            {
+                if (m_uiSkeletonTimer < uiDiff)
+                {
+                    if (!m_creature->FindGuardianWithEntry(NPC_SKELETAL))
+                        DoCastSpellIfCan(m_creature, SPELL_SUMMON_SKELETONS);
+
+                    m_uiSkeletonTimer = 30000;
+                }
+                else
+                    m_uiSkeletonTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_dalronnAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_dalronn(Creature* pCreature)
-{
-    return new boss_dalronnAI(pCreature);
-}
-
 void AddSC_boss_skarvald_and_dalronn()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_skarvald";
-    pNewScript->GetAI = &GetAI_boss_skarvald;
-    pNewScript->RegisterSelf();
+    s = new boss_skarvald();
+    s->RegisterSelf();
+    s = new boss_dalronn();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_dalronn";
-    pNewScript->GetAI = &GetAI_boss_dalronn;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_skarvald";
+    //pNewScript->GetAI = &GetAI_boss_skarvald;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_dalronn";
+    //pNewScript->GetAI = &GetAI_boss_dalronn;
+    //pNewScript->RegisterSelf();
 }

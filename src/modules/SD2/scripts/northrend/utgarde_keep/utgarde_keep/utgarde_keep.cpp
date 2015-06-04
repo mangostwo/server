@@ -44,118 +44,125 @@ enum
     MAX_FORGE               = 3
 };
 
-struct  mob_dragonflayer_forge_masterAI : public ScriptedAI
+struct mob_dragonflayer_forge_master : public CreatureScript
 {
-    mob_dragonflayer_forge_masterAI(Creature* pCreature) : ScriptedAI(pCreature)
+    mob_dragonflayer_forge_master() : CreatureScript("mob_dragonflayer_forge_master") {}
+
+    struct mob_dragonflayer_forge_masterAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_uiForgeEncounterId = 0;
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiForgeEncounterId;
-    uint32 m_uiBurningBrandTimer;
-
-    void Reset() override
-    {
-        m_uiBurningBrandTimer = 2000;
-    }
-
-    void SetMyForge()
-    {
-        std::list<GameObject*> lGOList;
-        uint32 uiGOBellow = 0;
-        uint32 uiGOFire = 0;
-
-        for (uint8 i = 0; i < MAX_FORGE; ++i)
+        mob_dragonflayer_forge_masterAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            switch (i)
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+            m_uiForgeEncounterId = 0;
+        }
+
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        uint32 m_uiForgeEncounterId;
+        uint32 m_uiBurningBrandTimer;
+
+        void Reset() override
+        {
+            m_uiBurningBrandTimer = 2000;
+        }
+
+        void SetMyForge()
+        {
+            std::list<GameObject*> lGOList;
+            uint32 uiGOBellow = 0;
+            uint32 uiGOFire = 0;
+
+            for (uint8 i = 0; i < MAX_FORGE; ++i)
             {
+                switch (i)
+                {
                 case 0: uiGOBellow = GO_BELLOW_1; break;
                 case 1: uiGOBellow = GO_BELLOW_2; break;
                 case 2: uiGOBellow = GO_BELLOW_3; break;
+                }
+
+                if (GameObject* pGOTemp = m_pInstance->GetSingleGameObjectFromStorage(uiGOBellow))
+                    lGOList.push_back(pGOTemp);
             }
 
-            if (GameObject* pGOTemp = m_pInstance->GetSingleGameObjectFromStorage(uiGOBellow))
-                lGOList.push_back(pGOTemp);
-        }
-
-        if (!lGOList.empty())
-        {
-            if (lGOList.size() != MAX_FORGE)
-                script_error_log("mob_dragonflayer_forge_master expected %u in lGOList, but does not match.", MAX_FORGE);
-
-            lGOList.sort(ObjectDistanceOrder(m_creature));
-
-            if (lGOList.front()->getLootState() == GO_READY)
-                lGOList.front()->UseDoorOrButton(DAY);
-            else if (lGOList.front()->getLootState() == GO_ACTIVATED)
-                lGOList.front()->ResetDoorOrButton();
-
-            switch (lGOList.front()->GetEntry())
+            if (!lGOList.empty())
             {
+                if (lGOList.size() != MAX_FORGE)
+                    script_error_log("mob_dragonflayer_forge_master expected %u in lGOList, but does not match.", MAX_FORGE);
+
+                lGOList.sort(ObjectDistanceOrder(m_creature));
+
+                if (lGOList.front()->getLootState() == GO_READY)
+                    lGOList.front()->UseDoorOrButton(DAY);
+                else if (lGOList.front()->getLootState() == GO_ACTIVATED)
+                    lGOList.front()->ResetDoorOrButton();
+
+                switch (lGOList.front()->GetEntry())
+                {
                 case GO_BELLOW_1: uiGOFire = GO_FORGEFIRE_1; m_uiForgeEncounterId = TYPE_BELLOW_1; break;
                 case GO_BELLOW_2: uiGOFire = GO_FORGEFIRE_2; m_uiForgeEncounterId = TYPE_BELLOW_2; break;
                 case GO_BELLOW_3: uiGOFire = GO_FORGEFIRE_3; m_uiForgeEncounterId = TYPE_BELLOW_3; break;
-            }
+                }
 
-            if (GameObject* pGOTemp = m_pInstance->GetSingleGameObjectFromStorage(uiGOFire))
-            {
-                if (pGOTemp->getLootState() == GO_READY)
-                    pGOTemp->UseDoorOrButton(DAY);
-                else if (pGOTemp->getLootState() == GO_ACTIVATED)
-                    pGOTemp->ResetDoorOrButton();
+                if (GameObject* pGOTemp = m_pInstance->GetSingleGameObjectFromStorage(uiGOFire))
+                {
+                    if (pGOTemp->getLootState() == GO_READY)
+                        pGOTemp->UseDoorOrButton(DAY);
+                    else if (pGOTemp->getLootState() == GO_ACTIVATED)
+                        pGOTemp->ResetDoorOrButton();
+                }
             }
         }
-    }
 
-    void Aggro(Unit* /*pWho*/) override
-    {
-        SetMyForge();
-    }
-
-    void JustReachedHome() override
-    {
-        SetMyForge();
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(m_uiForgeEncounterId, DONE);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiBurningBrandTimer < uiDiff)
+        void Aggro(Unit* /*pWho*/) override
         {
-            DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_BURNING_BRAND : SPELL_BURNING_BRAND_H);
-            m_uiBurningBrandTimer = 15000;
+            SetMyForge();
         }
-        else m_uiBurningBrandTimer -= uiDiff;
 
-        DoMeleeAttackIfReady();
+        void JustReachedHome() override
+        {
+            SetMyForge();
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(m_uiForgeEncounterId, DONE);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            if (m_uiBurningBrandTimer < uiDiff)
+            {
+                DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_BURNING_BRAND : SPELL_BURNING_BRAND_H);
+                m_uiBurningBrandTimer = 15000;
+            }
+            else m_uiBurningBrandTimer -= uiDiff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new mob_dragonflayer_forge_masterAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_mob_dragonflayer_forge_master(Creature* pCreature)
-{
-    return new mob_dragonflayer_forge_masterAI(pCreature);
-}
-
 void AddSC_utgarde_keep()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "mob_dragonflayer_forge_master";
-    pNewScript->GetAI = &GetAI_mob_dragonflayer_forge_master;
-    pNewScript->RegisterSelf();
+    s = new mob_dragonflayer_forge_master();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "mob_dragonflayer_forge_master";
+    //pNewScript->GetAI = &GetAI_mob_dragonflayer_forge_master;
+    //pNewScript->RegisterSelf();
 }

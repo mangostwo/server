@@ -197,161 +197,164 @@ Waypoint m_aTsunamiLoc[] =
 ## Boss Sartharion
 ######*/
 
-struct  boss_sartharionAI : public ScriptedAI
+struct boss_sartharion : public CreatureScript
 {
-    boss_sartharionAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_sartharion() : CreatureScript("boss_sartharion") {}
+
+    struct boss_sartharionAI : public ScriptedAI
     {
-        m_pInstance = (instance_obsidian_sanctum*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    instance_obsidian_sanctum* m_pInstance;
-    bool m_bIsRegularMode;
-
-    bool m_bIsBerserk;
-    bool m_bIsSoftEnraged;
-
-    uint32 m_uiEnrageTimer;
-    bool m_bIsHardEnraged;
-
-    uint32 m_uiTenebronTimer;
-    uint32 m_uiShadronTimer;
-    uint32 m_uiVesperonTimer;
-
-    uint32 m_uiFlameTsunamiTimer;
-    uint32 m_uiFlameBreathTimer;
-    uint32 m_uiTailSweepTimer;
-    uint32 m_uiCleaveTimer;
-    uint32 m_uiLavaStrikeTimer;
-
-    bool m_bHasCalledTenebron;
-    bool m_bHasCalledShadron;
-    bool m_bHasCalledVesperon;
-
-    void Reset() override
-    {
-        m_bIsBerserk            = false;
-        m_bIsSoftEnraged        = false;
-
-        m_uiEnrageTimer         = 15 * MINUTE * IN_MILLISECONDS;
-        m_bIsHardEnraged        = false;
-
-        m_uiTenebronTimer       = 30000;
-        m_uiShadronTimer        = 75000;
-        m_uiVesperonTimer       = 120000;
-
-        m_uiFlameTsunamiTimer   = 30000;
-        m_uiFlameBreathTimer    = 20000;
-        m_uiTailSweepTimer      = 20000;
-        m_uiCleaveTimer         = 7000;
-        m_uiLavaStrikeTimer     = urand(20000, 30000);
-
-        m_bHasCalledTenebron    = false;
-        m_bHasCalledShadron     = false;
-        m_bHasCalledVesperon    = false;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_SARTHARION_AGGRO, m_creature);
-
-        if (m_pInstance)
+        boss_sartharionAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            m_pInstance->SetData(TYPE_SARTHARION_EVENT, IN_PROGRESS);
-            FetchDragons();
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         }
-    }
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_SARTHARION_DEATH, m_creature);
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SARTHARION_EVENT, DONE);
-    }
+        bool m_bIsBerserk;
+        bool m_bIsSoftEnraged;
 
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        switch (urand(0, 2))
+        uint32 m_uiEnrageTimer;
+        bool m_bIsHardEnraged;
+
+        uint32 m_uiTenebronTimer;
+        uint32 m_uiShadronTimer;
+        uint32 m_uiVesperonTimer;
+
+        uint32 m_uiFlameTsunamiTimer;
+        uint32 m_uiFlameBreathTimer;
+        uint32 m_uiTailSweepTimer;
+        uint32 m_uiCleaveTimer;
+        uint32 m_uiLavaStrikeTimer;
+
+        bool m_bHasCalledTenebron;
+        bool m_bHasCalledShadron;
+        bool m_bHasCalledVesperon;
+
+        void Reset() override
         {
+            m_bIsBerserk = false;
+            m_bIsSoftEnraged = false;
+
+            m_uiEnrageTimer = 15 * MINUTE * IN_MILLISECONDS;
+            m_bIsHardEnraged = false;
+
+            m_uiTenebronTimer = 30000;
+            m_uiShadronTimer = 75000;
+            m_uiVesperonTimer = 120000;
+
+            m_uiFlameTsunamiTimer = 30000;
+            m_uiFlameBreathTimer = 20000;
+            m_uiTailSweepTimer = 20000;
+            m_uiCleaveTimer = 7000;
+            m_uiLavaStrikeTimer = urand(20000, 30000);
+
+            m_bHasCalledTenebron = false;
+            m_bHasCalledShadron = false;
+            m_bHasCalledVesperon = false;
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_SARTHARION_AGGRO, m_creature);
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_SARTHARION_EVENT, IN_PROGRESS);
+                FetchDragons();
+            }
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(SAY_SARTHARION_DEATH, m_creature);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_SARTHARION_EVENT, DONE);
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            switch (urand(0, 2))
+            {
             case 0: DoScriptText(SAY_SARTHARION_SLAY_1, m_creature); break;
             case 1: DoScriptText(SAY_SARTHARION_SLAY_2, m_creature); break;
             case 2: DoScriptText(SAY_SARTHARION_SLAY_3, m_creature); break;
-        }
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SARTHARION_EVENT, FAIL);
-
-        // Despawn portal
-        if (GameObject* pPortal = GetClosestGameObjectWithEntry(m_creature, GO_TWILIGHT_PORTAL, 50.0f))
-            pPortal->SetLootState(GO_JUST_DEACTIVATED);
-    }
-
-    void FetchDragons()
-    {
-        Creature* pTene = m_pInstance->GetSingleCreatureFromStorage(NPC_TENEBRON);
-        Creature* pShad = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADRON);
-        Creature* pVesp = m_pInstance->GetSingleCreatureFromStorage(NPC_VESPERON);
-
-        // if at least one of the dragons are alive and are being called
-        uint8 uiCountFetchableDragons = 0;
-
-        if (pTene && pTene->IsAlive() && !pTene->getVictim())
-        {
-            ++uiCountFetchableDragons;
-            pTene->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aTene[0].m_fX, m_aTene[0].m_fY, m_aTene[0].m_fZ);
-
-            if (!pTene->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-                pTene->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            }
         }
 
-        if (pShad && pShad->IsAlive() && !pShad->getVictim())
+        void JustReachedHome() override
         {
-            ++uiCountFetchableDragons;
-            pShad->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aShad[0].m_fX, m_aShad[0].m_fY, m_aShad[0].m_fZ);
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_SARTHARION_EVENT, FAIL);
 
-            if (!pShad->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-                pShad->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            // Despawn portal
+            if (GameObject* pPortal = GetClosestGameObjectWithEntry(m_creature, GO_TWILIGHT_PORTAL, 50.0f))
+                pPortal->SetLootState(GO_JUST_DEACTIVATED);
         }
 
-        if (pVesp && pVesp->IsAlive() && !pVesp->getVictim())
+        void FetchDragons()
         {
-            ++uiCountFetchableDragons;
-            pVesp->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aVesp[0].m_fX, m_aVesp[0].m_fY, m_aVesp[0].m_fZ);
+            Creature* pTene = m_pInstance->GetSingleCreatureFromStorage(NPC_TENEBRON);
+            Creature* pShad = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADRON);
+            Creature* pVesp = m_pInstance->GetSingleCreatureFromStorage(NPC_VESPERON);
 
-            if (!pVesp->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-                pVesp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-        }
+            // if at least one of the dragons are alive and are being called
+            uint8 uiCountFetchableDragons = 0;
 
-        if (uiCountFetchableDragons)
-            DoCastSpellIfCan(m_creature, SPELL_WILL_OF_SARTHARION);
-
-        m_pInstance->SetData(TYPE_ALIVE_DRAGONS, uiCountFetchableDragons);
-    }
-
-    void CallDragon(uint32 uiEntry)
-    {
-        if (m_pInstance)
-        {
-            Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiEntry);
-            if (pTemp && pTemp->IsAlive())
+            if (pTene && pTene->IsAlive() && !pTene->getVictim())
             {
-                if (pTemp->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-                    pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                ++uiCountFetchableDragons;
+                pTene->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aTene[0].m_fX, m_aTene[0].m_fY, m_aTene[0].m_fZ);
 
-                if (pTemp->getVictim())
-                    return;
+                if (!pTene->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                    pTene->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            }
 
-                pTemp->SetWalk(false);
+            if (pShad && pShad->IsAlive() && !pShad->getVictim())
+            {
+                ++uiCountFetchableDragons;
+                pShad->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aShad[0].m_fX, m_aShad[0].m_fY, m_aShad[0].m_fZ);
 
-                int32 iTextId = 0;
+                if (!pShad->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                    pShad->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            }
 
-                switch (uiEntry)
+            if (pVesp && pVesp->IsAlive() && !pVesp->getVictim())
+            {
+                ++uiCountFetchableDragons;
+                pVesp->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aVesp[0].m_fX, m_aVesp[0].m_fY, m_aVesp[0].m_fZ);
+
+                if (!pVesp->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                    pVesp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            }
+
+            if (uiCountFetchableDragons)
+                DoCastSpellIfCan(m_creature, SPELL_WILL_OF_SARTHARION);
+
+            m_pInstance->SetData(TYPE_ALIVE_DRAGONS, uiCountFetchableDragons);
+        }
+
+        void CallDragon(uint32 uiEntry)
+        {
+            if (m_pInstance)
+            {
+                Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiEntry);
+                if (pTemp && pTemp->IsAlive())
                 {
+                    if (pTemp->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                        pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+
+                    if (pTemp->getVictim())
+                        return;
+
+                    pTemp->SetWalk(false);
+
+                    int32 iTextId = 0;
+
+                    switch (uiEntry)
+                    {
                     case NPC_TENEBRON:
                         iTextId = SAY_SARTHARION_CALL_TENEBRON;
                         pTemp->GetMotionMaster()->MovePoint(POINT_ID_LAND, m_aTene[1].m_fX, m_aTene[1].m_fY, m_aTene[1].m_fZ);
@@ -364,170 +367,171 @@ struct  boss_sartharionAI : public ScriptedAI
                         iTextId = SAY_SARTHARION_CALL_VESPERON;
                         pTemp->GetMotionMaster()->MovePoint(POINT_ID_LAND, m_aVesp[1].m_fX, m_aVesp[1].m_fY, m_aVesp[1].m_fZ);
                         break;
+                    }
+
+                    DoScriptText(iTextId, m_creature);
                 }
-
-                DoScriptText(iTextId, m_creature);
-            }
-        }
-    }
-
-    void SendFlameTsunami()
-    {
-        DoScriptText(EMOTE_LAVA_CHURN, m_creature);
-
-        uint8 uiTsunamiStartLoc = 0;
-        uint8 uiTsunamiEndLoc = 3;
-        if (urand(0, 1))
-        {
-            uiTsunamiStartLoc = 3;
-            uiTsunamiEndLoc = 5;
-        }
-
-        for (uint8 i = uiTsunamiStartLoc; i < uiTsunamiEndLoc; ++i)
-            m_creature->SummonCreature(NPC_FLAME_TSUNAMI, m_aTsunamiLoc[i].m_fX, m_aTsunamiLoc[i].m_fY, m_aTsunamiLoc[i].m_fZ, m_aTsunamiLoc[i].m_fO, TEMPSUMMON_TIMED_DESPAWN, 15000);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // spell will target dragons, if they are still alive at 35%
-        if (!m_bIsBerserk && m_creature->GetHealthPercent() < 35.0f)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-            {
-                DoScriptText(SAY_SARTHARION_BERSERK, m_creature);
-                m_bIsBerserk = true;
             }
         }
 
-        // soft enrage
-        if (!m_bIsSoftEnraged && m_creature->GetHealthPercent() <= 10.0f)
+        void SendFlameTsunami()
         {
-            // TODO
-            m_bIsSoftEnraged = true;
+            DoScriptText(EMOTE_LAVA_CHURN, m_creature);
+
+            uint8 uiTsunamiStartLoc = 0;
+            uint8 uiTsunamiEndLoc = 3;
+            if (urand(0, 1))
+            {
+                uiTsunamiStartLoc = 3;
+                uiTsunamiEndLoc = 5;
+            }
+
+            for (uint8 i = uiTsunamiStartLoc; i < uiTsunamiEndLoc; ++i)
+                m_creature->SummonCreature(NPC_FLAME_TSUNAMI, m_aTsunamiLoc[i].m_fX, m_aTsunamiLoc[i].m_fY, m_aTsunamiLoc[i].m_fZ, m_aTsunamiLoc[i].m_fO, TEMPSUMMON_TIMED_DESPAWN, 15000);
         }
 
-        // hard enrage
-        if (!m_bIsHardEnraged)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (m_uiEnrageTimer < uiDiff)
+            // Return since we have no target
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            // spell will target dragons, if they are still alive at 35%
+            if (!m_bIsBerserk && m_creature->GetHealthPercent() < 35.0f)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_PYROBUFFET, CAST_TRIGGERED) == CAST_OK)
-                    m_bIsHardEnraged = true;
+                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                {
+                    DoScriptText(SAY_SARTHARION_BERSERK, m_creature);
+                    m_bIsBerserk = true;
+                }
+            }
+
+            // soft enrage
+            if (!m_bIsSoftEnraged && m_creature->GetHealthPercent() <= 10.0f)
+            {
+                // TODO
+                m_bIsSoftEnraged = true;
+            }
+
+            // hard enrage
+            if (!m_bIsHardEnraged)
+            {
+                if (m_uiEnrageTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_PYROBUFFET, CAST_TRIGGERED) == CAST_OK)
+                        m_bIsHardEnraged = true;
+                }
+                else
+                    m_uiEnrageTimer -= uiDiff;
+            }
+
+            // flame tsunami
+            if (m_uiFlameTsunamiTimer < uiDiff)
+            {
+                SendFlameTsunami();
+                m_uiFlameTsunamiTimer = 30000;
             }
             else
-                m_uiEnrageTimer -= uiDiff;
-        }
+                m_uiFlameTsunamiTimer -= uiDiff;
 
-        // flame tsunami
-        if (m_uiFlameTsunamiTimer < uiDiff)
-        {
-            SendFlameTsunami();
-            m_uiFlameTsunamiTimer = 30000;
-        }
-        else
-            m_uiFlameTsunamiTimer -= uiDiff;
-
-        // flame breath
-        if (m_uiFlameBreathTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FLAME_BREATH : SPELL_FLAME_BREATH_H) == CAST_OK)
+            // flame breath
+            if (m_uiFlameBreathTimer < uiDiff)
             {
-                DoScriptText(SAY_SARTHARION_BREATH, m_creature);
-                m_uiFlameBreathTimer = urand(25000, 35000);
-            }
-        }
-        else
-            m_uiFlameBreathTimer -= uiDiff;
-
-        // Tail Sweep
-        if (m_uiTailSweepTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_TAIL_LASH : SPELL_TAIL_LASH_H) == CAST_OK)
-                m_uiTailSweepTimer = urand(15000, 20000);
-        }
-        else
-            m_uiTailSweepTimer -= uiDiff;
-
-        // Cleave
-        if (m_uiCleaveTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
-                m_uiCleaveTimer = urand(7000, 10000);
-        }
-        else
-            m_uiCleaveTimer -= uiDiff;
-
-        // Lavas Strike
-        if (m_uiLavaStrikeTimer < uiDiff)
-        {
-            if (m_pInstance)
-            {
-                if (Creature* pCyclone = m_creature->GetMap()->GetCreature(m_pInstance->SelectRandomFireCycloneGuid()))
-                    pCyclone->CastSpell(pCyclone, SPELL_CYCLONE_AURA_STRIKE, true);
-
-                switch (urand(0, 5))
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FLAME_BREATH : SPELL_FLAME_BREATH_H) == CAST_OK)
                 {
+                    DoScriptText(SAY_SARTHARION_BREATH, m_creature);
+                    m_uiFlameBreathTimer = urand(25000, 35000);
+                }
+            }
+            else
+                m_uiFlameBreathTimer -= uiDiff;
+
+            // Tail Sweep
+            if (m_uiTailSweepTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_TAIL_LASH : SPELL_TAIL_LASH_H) == CAST_OK)
+                    m_uiTailSweepTimer = urand(15000, 20000);
+            }
+            else
+                m_uiTailSweepTimer -= uiDiff;
+
+            // Cleave
+            if (m_uiCleaveTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                    m_uiCleaveTimer = urand(7000, 10000);
+            }
+            else
+                m_uiCleaveTimer -= uiDiff;
+
+            // Lavas Strike
+            if (m_uiLavaStrikeTimer < uiDiff)
+            {
+                if (m_pInstance)
+                {
+                    if (Creature* pCyclone = m_creature->GetMap()->GetCreature(ObjectGuid(m_pInstance->GetData64(DATA64_FIRE_CYCLONE))))
+                        pCyclone->CastSpell(pCyclone, SPELL_CYCLONE_AURA_STRIKE, true);
+
+                    switch (urand(0, 5))
+                    {
                     case 0: DoScriptText(SAY_SARTHARION_SPECIAL_1, m_creature); break;
                     case 1: DoScriptText(SAY_SARTHARION_SPECIAL_2, m_creature); break;
                     case 2: DoScriptText(SAY_SARTHARION_SPECIAL_3, m_creature); break;
                     case 3: DoScriptText(SAY_SARTHARION_SPECIAL_4, m_creature); break;
+                    }
                 }
-            }
-            m_uiLavaStrikeTimer = 30000;
-        }
-        else
-            m_uiLavaStrikeTimer -= uiDiff;
-
-        // call tenebron
-        if (!m_bHasCalledTenebron)
-        {
-            if (m_uiTenebronTimer < uiDiff)
-            {
-                CallDragon(NPC_TENEBRON);
-                m_bHasCalledTenebron = true;
+                m_uiLavaStrikeTimer = 30000;
             }
             else
-                m_uiTenebronTimer -= uiDiff;
-        }
+                m_uiLavaStrikeTimer -= uiDiff;
 
-        // call shadron
-        if (!m_bHasCalledShadron)
-        {
-            if (m_uiShadronTimer < uiDiff)
+            // call tenebron
+            if (!m_bHasCalledTenebron)
             {
-                CallDragon(NPC_SHADRON);
-                m_bHasCalledShadron = true;
+                if (m_uiTenebronTimer < uiDiff)
+                {
+                    CallDragon(NPC_TENEBRON);
+                    m_bHasCalledTenebron = true;
+                }
+                else
+                    m_uiTenebronTimer -= uiDiff;
             }
-            else
-                m_uiShadronTimer -= uiDiff;
-        }
 
-        // call vesperon
-        if (!m_bHasCalledVesperon)
-        {
-            if (m_uiVesperonTimer < uiDiff)
+            // call shadron
+            if (!m_bHasCalledShadron)
             {
-                CallDragon(NPC_VESPERON);
-                m_bHasCalledVesperon = true;
+                if (m_uiShadronTimer < uiDiff)
+                {
+                    CallDragon(NPC_SHADRON);
+                    m_bHasCalledShadron = true;
+                }
+                else
+                    m_uiShadronTimer -= uiDiff;
             }
-            else
-                m_uiVesperonTimer -= uiDiff;
+
+            // call vesperon
+            if (!m_bHasCalledVesperon)
+            {
+                if (m_uiVesperonTimer < uiDiff)
+                {
+                    CallDragon(NPC_VESPERON);
+                    m_bHasCalledVesperon = true;
+                }
+                else
+                    m_uiVesperonTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+
+            EnterEvadeIfOutOfCombatArea(uiDiff);
         }
+    };
 
-        DoMeleeAttackIfReady();
-
-        EnterEvadeIfOutOfCombatArea(uiDiff);
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_sartharionAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_sartharion(Creature* pCreature)
-{
-    return new boss_sartharionAI(pCreature);
-}
 
 enum TeneText
 {
@@ -566,16 +570,16 @@ enum VespText
 };
 
 // to control each dragons common abilities
-struct  dummy_dragonAI : public ScriptedAI
+struct dummy_dragonAI : public ScriptedAI
 {
     dummy_dragonAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_obsidian_sanctum*)pCreature->GetInstanceData();
+        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    instance_obsidian_sanctum* m_pInstance;
+    ScriptedInstance* m_pInstance;
     bool m_bIsRegularMode;
     uint8 m_uiPortalId;
 
@@ -611,7 +615,7 @@ struct  dummy_dragonAI : public ScriptedAI
 
         // reset portal events (in case some remain active); summons cleanup handled by creature linking
         if (m_pInstance)
-            m_pInstance->SetPortalStatus(m_uiPortalId, false);
+            m_pInstance->SetData(TYPE_DATA_PORTAL_OFF, m_uiPortalId);
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -686,7 +690,7 @@ struct  dummy_dragonAI : public ScriptedAI
 
         // set portal status as active when Sartharion is in progress
         if (m_pInstance && m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
-            m_pInstance->SetPortalStatus(m_uiPortalId, true);
+            m_pInstance->SetData(TYPE_DATA_PORTAL_ON, m_uiPortalId);
 
         // Unclear what are expected to happen if one drake has a portal open already
         // Refresh respawnTime so time again are set to 30secs?
@@ -718,7 +722,7 @@ struct  dummy_dragonAI : public ScriptedAI
         if (!m_pInstance || !pCreature)
             return;
 
-        if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) != IN_PROGRESS || !m_pInstance->IsActivePortal())
+        if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) != IN_PROGRESS || !m_pInstance->GetData(TYPE_DATA_PORTAL_STATUS))
         {
             pCreature->CastSpell(pCreature, SPELL_TWILIGHT_SHIFT_REMOVAL_ALL, true);
 
@@ -759,7 +763,7 @@ struct  dummy_dragonAI : public ScriptedAI
         // respawn portal
         if (m_uiPortalRespawnTimer < uiDiff)
         {
-            if (m_pInstance && m_pInstance->IsActivePortal())
+            if (m_pInstance && m_pInstance->GetData(TYPE_DATA_PORTAL_STATUS))
                 m_uiPortalRespawnTimer = 10000;
             else
             {
@@ -802,576 +806,624 @@ struct  dummy_dragonAI : public ScriptedAI
 ## Mob Tenebron
 ######*/
 
-struct  mob_tenebronAI : public dummy_dragonAI
+struct mob_tenebron : public CreatureScript
 {
-    mob_tenebronAI(Creature* pCreature) : dummy_dragonAI(pCreature)
+    mob_tenebron() : CreatureScript("mob_tenebron") {}
+
+    struct mob_tenebronAI : public dummy_dragonAI
     {
-        m_uiPortalId = TYPE_PORTAL_TENEBRON;
-        Reset();
-    }
-
-    uint32 m_uiSpawnEggsTimer;
-
-    void Reset() override
-    {
-        m_uiSpawnEggsTimer = 20000;
-
-        dummy_dragonAI::Reset();
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_TENEBRON_AGGRO, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_POWER_OF_TENEBRON);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_TENEBRON_SLAY_1 : SAY_TENEBRON_SLAY_2, m_creature);
-    }
-
-    void JustDied(Unit* pKiller) override
-    {
-        DoScriptText(SAY_TENEBRON_DEATH, m_creature);
-
-        if (m_pInstance)
+        mob_tenebronAI(Creature* pCreature) : dummy_dragonAI(pCreature)
         {
-            // Cast Twilight Revent - script target on Sartharion
-            if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
-                DoCastSpellIfCan(m_creature, SPELL_TWILIGHT_REVENGE, CAST_TRIGGERED);
-            else
-                dummy_dragonAI::JustDied(pKiller);
+            m_uiPortalId = TYPE_PORTAL_TENEBRON;
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_TWILIGHT_EGG_CONTROLLER)
-            m_portalOwnerGuid = pSummoned->GetObjectGuid();
+        uint32 m_uiSpawnEggsTimer;
 
-        // update phasemask manually
-        pSummoned->SetPhaseMask(PHASEMASK_TWILIGHT_REALM, true);
-    }
-
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
-    {
-        if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetEntry() == NPC_TWILIGHT_EGG_CONTROLLER)
+        void Reset() override
         {
-            if (m_pInstance)
-                m_pInstance->SetPortalStatus(m_uiPortalId, false);
+            m_uiSpawnEggsTimer = 20000;
 
-            DoEjectTwilightPlayersIfCan((Creature*)pInvoker);
+            dummy_dragonAI::Reset();
         }
-    }
 
-    void DoHandleBreathYell()
-    {
-        DoScriptText(SAY_TENEBRON_BREATH, m_creature);
-    }
-
-    void UpdateDragonAI(const uint32 uiDiff)
-    {
-        if (m_uiSpawnEggsTimer < uiDiff)
+        void Aggro(Unit* /*pWho*/) override
         {
-            uint32 uiSpawnEntry = NPC_TWILIGHT_EGG;
+            DoScriptText(SAY_TENEBRON_AGGRO, m_creature);
+            DoCastSpellIfCan(m_creature, SPELL_POWER_OF_TENEBRON);
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            DoScriptText(urand(0, 1) ? SAY_TENEBRON_SLAY_1 : SAY_TENEBRON_SLAY_2, m_creature);
+        }
+
+        void JustDied(Unit* pKiller) override
+        {
+            DoScriptText(SAY_TENEBRON_DEATH, m_creature);
+
             if (m_pInstance)
             {
+                // Cast Twilight Revent - script target on Sartharion
                 if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
-                    uiSpawnEntry = NPC_SARTHARION_TWILIGHT_EGG;
+                    DoCastSpellIfCan(m_creature, SPELL_TWILIGHT_REVENGE, CAST_TRIGGERED);
+                else
+                    dummy_dragonAI::JustDied(pKiller);
             }
-
-            float fX, fY, fZ;
-            for (uint8 i = 0; i < MAX_TWILIGHT_EGGS; ++i)
-            {
-                m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 20.0f, fX, fY, fZ);
-                m_creature->SummonCreature(uiSpawnEntry, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
-            }
-
-            // spawn the controller as well in order to eject players from twilight realm
-            m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 20.0f, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_TWILIGHT_EGG_CONTROLLER, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
-
-            // used only for visual - the result is handled by the Twilight eggs script
-            if (DoCastSpellIfCan(m_creature, SPELL_HATCH_EGGS_MAIN) == CAST_OK)
-            {
-                DoScriptText(EMOTE_HATCH_EGGS, m_creature);
-                if (urand(0, 1))
-                    DoScriptText(urand(0, 1) ? SAY_TENEBRON_SPECIAL_1 : SAY_TENEBRON_SPECIAL_2, m_creature);
-            }
-
-            m_uiSpawnEggsTimer = 60000;
         }
-        else
-            m_uiSpawnEggsTimer -= uiDiff;
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_TWILIGHT_EGG_CONTROLLER)
+                m_portalOwnerGuid = pSummoned->GetObjectGuid();
+
+            // update phasemask manually
+            pSummoned->SetPhaseMask(PHASEMASK_TWILIGHT_REALM, true);
+        }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+        {
+            if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetEntry() == NPC_TWILIGHT_EGG_CONTROLLER)
+            {
+                if (m_pInstance)
+                    m_pInstance->SetData(TYPE_DATA_PORTAL_OFF, m_uiPortalId);
+
+                DoEjectTwilightPlayersIfCan((Creature*)pInvoker);
+            }
+        }
+
+        void DoHandleBreathYell()
+        {
+            DoScriptText(SAY_TENEBRON_BREATH, m_creature);
+        }
+
+        void UpdateDragonAI(const uint32 uiDiff)
+        {
+            if (m_uiSpawnEggsTimer < uiDiff)
+            {
+                uint32 uiSpawnEntry = NPC_TWILIGHT_EGG;
+                if (m_pInstance)
+                {
+                    if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
+                        uiSpawnEntry = NPC_SARTHARION_TWILIGHT_EGG;
+                }
+
+                float fX, fY, fZ;
+                for (uint8 i = 0; i < MAX_TWILIGHT_EGGS; ++i)
+                {
+                    m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 20.0f, fX, fY, fZ);
+                    m_creature->SummonCreature(uiSpawnEntry, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                }
+
+                // spawn the controller as well in order to eject players from twilight realm
+                m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 20.0f, fX, fY, fZ);
+                m_creature->SummonCreature(NPC_TWILIGHT_EGG_CONTROLLER, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+
+                // used only for visual - the result is handled by the Twilight eggs script
+                if (DoCastSpellIfCan(m_creature, SPELL_HATCH_EGGS_MAIN) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_HATCH_EGGS, m_creature);
+                    if (urand(0, 1))
+                        DoScriptText(urand(0, 1) ? SAY_TENEBRON_SPECIAL_1 : SAY_TENEBRON_SPECIAL_2, m_creature);
+                }
+
+                m_uiSpawnEggsTimer = 60000;
+            }
+            else
+                m_uiSpawnEggsTimer -= uiDiff;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new mob_tenebronAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_mob_tenebron(Creature* pCreature)
-{
-    return new mob_tenebronAI(pCreature);
-}
 
 /*######
 ## Mob Shadron
 ######*/
 
-struct  mob_shadronAI : public dummy_dragonAI
+struct mob_shadron : public CreatureScript
 {
-    mob_shadronAI(Creature* pCreature) : dummy_dragonAI(pCreature)
+    mob_shadron() : CreatureScript("mob_shadron") {}
+
+    struct mob_shadronAI : public dummy_dragonAI
     {
-        m_uiPortalId = TYPE_PORTAL_SHADRON;
-        Reset();
-    }
-
-    uint32 m_uiAcolyteShadronTimer;
-
-    void Reset() override
-    {
-        m_uiAcolyteShadronTimer = 25000;
-
-        dummy_dragonAI::Reset();
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_SHADRON_AGGRO, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_POWER_OF_SHADRON);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SHADRON_SLAY_1 : SAY_SHADRON_SLAY_2, m_creature);
-    }
-
-    void JustDied(Unit* pKiller) override
-    {
-        DoScriptText(SAY_SHADRON_DEATH, m_creature);
-
-        if (m_pInstance)
+        mob_shadronAI(Creature* pCreature) : dummy_dragonAI(pCreature)
         {
-            // Cast Twilight Revent - script target on Sartharion
-            if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
-                DoCastSpellIfCan(m_creature, SPELL_TWILIGHT_REVENGE, CAST_TRIGGERED);
-            else
-                dummy_dragonAI::JustDied(pKiller);
+            m_uiPortalId = TYPE_PORTAL_SHADRON;
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_DISCIPLE_OF_SHADRON)
+        uint32 m_uiAcolyteShadronTimer;
+
+        void Reset() override
         {
-            pSummoned->CastSpell(pSummoned, SPELL_GIFT_OF_TWILIGTH_SHA, true);
-            m_portalOwnerGuid = pSummoned->GetObjectGuid();
+            m_uiAcolyteShadronTimer = 25000;
+
+            dummy_dragonAI::Reset();
         }
-        else if (pSummoned->GetEntry() == NPC_ACOLYTE_OF_SHADRON)
-            pSummoned->CastSpell(pSummoned, SPELL_GIFT_OF_TWILIGTH_SAR, true);
 
-        // update phasemask manually
-        pSummoned->SetPhaseMask(PHASEMASK_TWILIGHT_REALM, true);
-    }
-
-    void SummonedCreatureJustDied(Creature* pSummoned) override
-    {
-        if (m_pInstance)
+        void Aggro(Unit* /*pWho*/) override
         {
-            m_pInstance->SetPortalStatus(m_uiPortalId, false);
+            DoScriptText(SAY_SHADRON_AGGRO, m_creature);
+            DoCastSpellIfCan(m_creature, SPELL_POWER_OF_SHADRON);
+        }
 
-            if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            DoScriptText(urand(0, 1) ? SAY_SHADRON_SLAY_1 : SAY_SHADRON_SLAY_2, m_creature);
+        }
+
+        void JustDied(Unit* pKiller) override
+        {
+            DoScriptText(SAY_SHADRON_DEATH, m_creature);
+
+            if (m_pInstance)
             {
-                if (Creature* pSartharion = m_pInstance->GetSingleCreatureFromStorage(NPC_SARTHARION))
-                    pSartharion->RemoveAurasDueToSpell(SPELL_GIFT_OF_TWILIGTH_SAR);
+                // Cast Twilight Revent - script target on Sartharion
+                if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
+                    DoCastSpellIfCan(m_creature, SPELL_TWILIGHT_REVENGE, CAST_TRIGGERED);
+                else
+                    dummy_dragonAI::JustDied(pKiller);
             }
-            else
-                m_creature->RemoveAurasDueToSpell(SPELL_GIFT_OF_TWILIGTH_SHA);
         }
 
-        DoEjectTwilightPlayersIfCan(pSummoned);
-        m_uiAcolyteShadronTimer = m_uiPortalRespawnTimer + 5000;
-    }
-
-    void DoHandleBreathYell()
-    {
-        DoScriptText(SAY_SHADRON_BREATH, m_creature);
-    }
-
-    void UpdateDragonAI(const uint32 uiDiff)
-    {
-        if (m_uiAcolyteShadronTimer)
+        void JustSummoned(Creature* pSummoned) override
         {
-            if (m_uiAcolyteShadronTimer <= uiDiff)
+            if (pSummoned->GetEntry() == NPC_DISCIPLE_OF_SHADRON)
             {
-                DoScriptText(EMOTE_SHADRON_DICIPLE, m_creature);
-                if (urand(0, 1))
-                    DoScriptText(urand(0, 1) ? SAY_SHADRON_SPECIAL_1 : SAY_SHADRON_SPECIAL_2, m_creature);
+                pSummoned->CastSpell(pSummoned, SPELL_GIFT_OF_TWILIGTH_SHA, true);
+                m_portalOwnerGuid = pSummoned->GetObjectGuid();
+            }
+            else if (pSummoned->GetEntry() == NPC_ACOLYTE_OF_SHADRON)
+                pSummoned->CastSpell(pSummoned, SPELL_GIFT_OF_TWILIGTH_SAR, true);
 
-                uint32 uiSpawnEntry = NPC_DISCIPLE_OF_SHADRON;
-                if (m_pInstance)
+            // update phasemask manually
+            pSummoned->SetPhaseMask(PHASEMASK_TWILIGHT_REALM, true);
+        }
+
+        void SummonedCreatureJustDied(Creature* pSummoned) override
+        {
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_DATA_PORTAL_OFF, m_uiPortalId);
+
+                if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
                 {
-                    if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
-                        uiSpawnEntry = NPC_ACOLYTE_OF_SHADRON;
+                    if (Creature* pSartharion = m_pInstance->GetSingleCreatureFromStorage(NPC_SARTHARION))
+                        pSartharion->RemoveAurasDueToSpell(SPELL_GIFT_OF_TWILIGTH_SAR);
                 }
-
-                float fX, fY, fZ;
-                m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 20.0f, fX, fY, fZ);
-                m_creature->SummonCreature(uiSpawnEntry, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
-
-                m_uiAcolyteShadronTimer = 0;
+                else
+                    m_creature->RemoveAurasDueToSpell(SPELL_GIFT_OF_TWILIGTH_SHA);
             }
-            else
-                m_uiAcolyteShadronTimer -= uiDiff;
+
+            DoEjectTwilightPlayersIfCan(pSummoned);
+            m_uiAcolyteShadronTimer = m_uiPortalRespawnTimer + 5000;
         }
+
+        void DoHandleBreathYell()
+        {
+            DoScriptText(SAY_SHADRON_BREATH, m_creature);
+        }
+
+        void UpdateDragonAI(const uint32 uiDiff)
+        {
+            if (m_uiAcolyteShadronTimer)
+            {
+                if (m_uiAcolyteShadronTimer <= uiDiff)
+                {
+                    DoScriptText(EMOTE_SHADRON_DICIPLE, m_creature);
+                    if (urand(0, 1))
+                        DoScriptText(urand(0, 1) ? SAY_SHADRON_SPECIAL_1 : SAY_SHADRON_SPECIAL_2, m_creature);
+
+                    uint32 uiSpawnEntry = NPC_DISCIPLE_OF_SHADRON;
+                    if (m_pInstance)
+                    {
+                        if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
+                            uiSpawnEntry = NPC_ACOLYTE_OF_SHADRON;
+                    }
+
+                    float fX, fY, fZ;
+                    m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 20.0f, fX, fY, fZ);
+                    m_creature->SummonCreature(uiSpawnEntry, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+
+                    m_uiAcolyteShadronTimer = 0;
+                }
+                else
+                    m_uiAcolyteShadronTimer -= uiDiff;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new mob_shadronAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_mob_shadron(Creature* pCreature)
-{
-    return new mob_shadronAI(pCreature);
-}
 
 /*######
 ## Mob Vesperon
 ######*/
 
-struct  mob_vesperonAI : public dummy_dragonAI
+struct mob_vesperon : public CreatureScript
 {
-    mob_vesperonAI(Creature* pCreature) : dummy_dragonAI(pCreature)
+    mob_vesperon() : CreatureScript("mob_vesperon") {}
+
+    struct mob_vesperonAI : public dummy_dragonAI
     {
-        m_uiPortalId = TYPE_PORTAL_VESPERON;
-        Reset();
-    }
-
-    uint32 m_uiAcolyteVesperonTimer;
-
-    void Reset() override
-    {
-        m_uiAcolyteVesperonTimer = 25000;
-
-        dummy_dragonAI::Reset();
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_VESPERON_AGGRO, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_POWER_OF_VESPERON);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_VESPERON_SLAY_1 : SAY_VESPERON_SLAY_2, m_creature);
-    }
-
-    void JustDied(Unit* pKiller) override
-    {
-        DoScriptText(SAY_VESPERON_DEATH, m_creature);
-
-        if (m_pInstance)
+        mob_vesperonAI(Creature* pCreature) : dummy_dragonAI(pCreature)
         {
-            // Cast Twilight Revent - script target on Sartharion
-            if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
-                DoCastSpellIfCan(m_creature, SPELL_TWILIGHT_REVENGE, CAST_TRIGGERED);
-            else
-                dummy_dragonAI::JustDied(pKiller);
+            m_uiPortalId = TYPE_PORTAL_VESPERON;
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        // ToDo: these spells may break the encounter and make it unplayable. More research is required!!!
-        if (pSummoned->GetEntry() == NPC_DISCIPLE_OF_VESPERON)
+        uint32 m_uiAcolyteVesperonTimer;
+
+        void Reset() override
         {
-            //pSummoned->CastSpell(pSummoned, SPELL_TWILIGHT_TORMENT_VESP, true);
-            m_portalOwnerGuid = pSummoned->GetObjectGuid();
+            m_uiAcolyteVesperonTimer = 25000;
+
+            dummy_dragonAI::Reset();
         }
-        //else if (pSummoned->GetEntry() == NPC_ACOLYTE_OF_VESPERON)
-        //    pSummoned->CastSpell(pSummoned, SPELL_TWILIGHT_TORMENT_VESP_ACO, true);
 
-        // update phasemask manually
-        pSummoned->SetPhaseMask(PHASEMASK_TWILIGHT_REALM, true);
-    }
-
-    void SummonedCreatureJustDied(Creature* pSummoned) override
-    {
-        // ToDo: remove Twilight Torment debuff
-        if (m_pInstance)
-            m_pInstance->SetPortalStatus(m_uiPortalId, false);
-
-        DoEjectTwilightPlayersIfCan(pSummoned);
-        m_uiAcolyteVesperonTimer = m_uiPortalRespawnTimer + 5000;
-    }
-
-    void DoHandleBreathYell()
-    {
-        DoScriptText(SAY_VESPERON_BREATH, m_creature);
-    }
-
-    void UpdateDragonAI(const uint32 uiDiff)
-    {
-        if (m_uiAcolyteVesperonTimer)
+        void Aggro(Unit* /*pWho*/) override
         {
-            if (m_uiAcolyteVesperonTimer <= uiDiff)
+            DoScriptText(SAY_VESPERON_AGGRO, m_creature);
+            DoCastSpellIfCan(m_creature, SPELL_POWER_OF_VESPERON);
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            DoScriptText(urand(0, 1) ? SAY_VESPERON_SLAY_1 : SAY_VESPERON_SLAY_2, m_creature);
+        }
+
+        void JustDied(Unit* pKiller) override
+        {
+            DoScriptText(SAY_VESPERON_DEATH, m_creature);
+
+            if (m_pInstance)
             {
-                DoScriptText(EMOTE_VESPERON_DICIPLE, m_creature);
-                if (urand(0, 1))
-                    DoScriptText(urand(0, 1) ? SAY_VESPERON_SPECIAL_1 : SAY_VESPERON_SPECIAL_2, m_creature);
-
-                uint32 uiSpawnEntry = NPC_DISCIPLE_OF_VESPERON;
-                if (m_pInstance)
-                {
-                    if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
-                        uiSpawnEntry = NPC_ACOLYTE_OF_VESPERON;
-                }
-
-                float fX, fY, fZ;
-                m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 20.0f, fX, fY, fZ);
-                m_creature->SummonCreature(uiSpawnEntry, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
-
-                m_uiAcolyteVesperonTimer = 0;
+                // Cast Twilight Revent - script target on Sartharion
+                if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
+                    DoCastSpellIfCan(m_creature, SPELL_TWILIGHT_REVENGE, CAST_TRIGGERED);
+                else
+                    dummy_dragonAI::JustDied(pKiller);
             }
-            else
-                m_uiAcolyteVesperonTimer -= uiDiff;
         }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            // ToDo: these spells may break the encounter and make it unplayable. More research is required!!!
+            if (pSummoned->GetEntry() == NPC_DISCIPLE_OF_VESPERON)
+            {
+                //pSummoned->CastSpell(pSummoned, SPELL_TWILIGHT_TORMENT_VESP, true);
+                m_portalOwnerGuid = pSummoned->GetObjectGuid();
+            }
+            //else if (pSummoned->GetEntry() == NPC_ACOLYTE_OF_VESPERON)
+            //    pSummoned->CastSpell(pSummoned, SPELL_TWILIGHT_TORMENT_VESP_ACO, true);
+
+            // update phasemask manually
+            pSummoned->SetPhaseMask(PHASEMASK_TWILIGHT_REALM, true);
+        }
+
+        void SummonedCreatureJustDied(Creature* pSummoned) override
+        {
+            // ToDo: remove Twilight Torment debuff
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_DATA_PORTAL_OFF, m_uiPortalId);
+
+            DoEjectTwilightPlayersIfCan(pSummoned);
+            m_uiAcolyteVesperonTimer = m_uiPortalRespawnTimer + 5000;
+        }
+
+        void DoHandleBreathYell()
+        {
+            DoScriptText(SAY_VESPERON_BREATH, m_creature);
+        }
+
+        void UpdateDragonAI(const uint32 uiDiff)
+        {
+            if (m_uiAcolyteVesperonTimer)
+            {
+                if (m_uiAcolyteVesperonTimer <= uiDiff)
+                {
+                    DoScriptText(EMOTE_VESPERON_DICIPLE, m_creature);
+                    if (urand(0, 1))
+                        DoScriptText(urand(0, 1) ? SAY_VESPERON_SPECIAL_1 : SAY_VESPERON_SPECIAL_2, m_creature);
+
+                    uint32 uiSpawnEntry = NPC_DISCIPLE_OF_VESPERON;
+                    if (m_pInstance)
+                    {
+                        if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
+                            uiSpawnEntry = NPC_ACOLYTE_OF_VESPERON;
+                    }
+
+                    float fX, fY, fZ;
+                    m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 20.0f, fX, fY, fZ);
+                    m_creature->SummonCreature(uiSpawnEntry, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+
+                    m_uiAcolyteVesperonTimer = 0;
+                }
+                else
+                    m_uiAcolyteVesperonTimer -= uiDiff;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new mob_vesperonAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_mob_vesperon(Creature* pCreature)
-{
-    return new mob_vesperonAI(pCreature);
-}
 
 /*######
 ## Mob Twilight Eggs
 ######*/
 
-struct  mob_twilight_eggsAI : public Scripted_NoMovementAI
+struct mob_twilight_eggs : public CreatureScript
 {
-    mob_twilight_eggsAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    mob_twilight_eggs() : CreatureScript("mob_twilight_eggs") {}
 
-    uint32 m_uiHatchTimer;
-
-    void Reset() override
+    struct mob_twilight_eggsAI : public Scripted_NoMovementAI
     {
-        m_uiHatchTimer = 20000;
-    }
+        mob_twilight_eggsAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { }
 
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        uint32 m_uiHatchTimer;
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_TWILIGHT_WHELP || pSummoned->GetEntry() == NPC_SHARTHARION_TWILIGHT_WHELP)
-            pSummoned->SetInCombatWithZone();
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiHatchTimer < uiDiff)
+        void Reset() override
         {
-            uint32 uiSpellEntry = 0;
-            switch (m_creature->GetEntry())
-            {
-                case NPC_TWILIGHT_EGG: uiSpellEntry = SPELL_SUMMON_TWILIGHT_WHELP; break;
-                case NPC_SARTHARION_TWILIGHT_EGG: uiSpellEntry = SPELL_SUMMON_SARTHARION_TWILIGHT_WHELP; break;
-            }
-
-            m_creature->SetPhaseMask(PHASEMASK_NORMAL, true);
-            DoCastSpellIfCan(m_creature, uiSpellEntry, CAST_TRIGGERED);
-
-            m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
-            m_uiHatchTimer = 0;
+            m_uiHatchTimer = 20000;
         }
-        else
-            m_uiHatchTimer -= uiDiff;
-    }
-};
 
-CreatureAI* GetAI_mob_twilight_eggs(Creature* pCreature)
-{
-    return new mob_twilight_eggsAI(pCreature);
-}
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
 
-/*######
-## npc_tenebron_egg_controller
-######*/
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_TWILIGHT_WHELP || pSummoned->GetEntry() == NPC_SHARTHARION_TWILIGHT_WHELP)
+                pSummoned->SetInCombatWithZone();
+        }
 
-struct  npc_tenebron_egg_controllerAI : public Scripted_NoMovementAI
-{
-    npc_tenebron_egg_controllerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
-    {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiHatchTimer;
-
-    void Reset() override
-    {
-        m_uiHatchTimer = 20000;
-    }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiHatchTimer)
+        void UpdateAI(const uint32 uiDiff) override
         {
             if (m_uiHatchTimer < uiDiff)
             {
-                if (m_pInstance)
+                uint32 uiSpellEntry = 0;
+                switch (m_creature->GetEntry())
                 {
-                    // Inform Tenebron to hatch the eggs
-                    if (Creature* pTenebron = m_pInstance->GetSingleCreatureFromStorage(NPC_TENEBRON))
-                        m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pTenebron);
+                case NPC_TWILIGHT_EGG: uiSpellEntry = SPELL_SUMMON_TWILIGHT_WHELP; break;
+                case NPC_SARTHARION_TWILIGHT_EGG: uiSpellEntry = SPELL_SUMMON_SARTHARION_TWILIGHT_WHELP; break;
                 }
-                m_creature->ForcedDespawn(1000);
+
+                m_creature->SetPhaseMask(PHASEMASK_NORMAL, true);
+                DoCastSpellIfCan(m_creature, uiSpellEntry, CAST_TRIGGERED);
+
+                m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
                 m_uiHatchTimer = 0;
             }
             else
                 m_uiHatchTimer -= uiDiff;
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new mob_twilight_eggsAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_npc_tenebron_egg_controller(Creature* pCreature)
+/*######
+## npc_tenebron_egg_controller
+######*/
+
+struct npc_tenebron_egg_controller : public CreatureScript
 {
-    return new npc_tenebron_egg_controllerAI(pCreature);
-}
+    npc_tenebron_egg_controller() : CreatureScript("npc_tenebron_egg_controller") {}
+
+    struct npc_tenebron_egg_controllerAI : public Scripted_NoMovementAI
+    {
+        npc_tenebron_egg_controllerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+        {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        }
+
+        ScriptedInstance* m_pInstance;
+
+        uint32 m_uiHatchTimer;
+
+        void Reset() override
+        {
+            m_uiHatchTimer = 20000;
+        }
+
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiHatchTimer)
+            {
+                if (m_uiHatchTimer < uiDiff)
+                {
+                    if (m_pInstance)
+                    {
+                        // Inform Tenebron to hatch the eggs
+                        if (Creature* pTenebron = m_pInstance->GetSingleCreatureFromStorage(NPC_TENEBRON))
+                            m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pTenebron);
+                    }
+                    m_creature->ForcedDespawn(1000);
+                    m_uiHatchTimer = 0;
+                }
+                else
+                    m_uiHatchTimer -= uiDiff;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_tenebron_egg_controllerAI(pCreature);
+    }
+};
 
 /*######
 ## npc_flame_tsunami
 ######*/
 
-struct  npc_flame_tsunamiAI : public ScriptedAI
+struct npc_flame_tsunami : public CreatureScript
 {
-    npc_flame_tsunamiAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_flame_tsunami() : CreatureScript("npc_flame_tsunami") {}
 
-    uint32 m_uiTsunamiTimer;
-
-    void Reset() override
+    struct npc_flame_tsunamiAI : public ScriptedAI
     {
-        m_uiTsunamiTimer = 2000;
+        npc_flame_tsunamiAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-        DoCastSpellIfCan(m_creature, SPELL_FLAME_TSUNAMI, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_FLAME_TSUNAMI_DMG_AURA, CAST_TRIGGERED);
-    }
+        uint32 m_uiTsunamiTimer;
 
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-
-    void MovementInform(uint32 uiType, uint32 uiPointId) override
-    {
-        if (uiType != POINT_MOTION_TYPE || !uiPointId)
-            return;
-
-        m_creature->RemoveAllAurasOnEvade();
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiTsunamiTimer)
+        void Reset() override
         {
-            if (m_uiTsunamiTimer <= uiDiff)
+            m_uiTsunamiTimer = 2000;
+
+            DoCastSpellIfCan(m_creature, SPELL_FLAME_TSUNAMI, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, SPELL_FLAME_TSUNAMI_DMG_AURA, CAST_TRIGGERED);
+        }
+
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+        void MovementInform(uint32 uiType, uint32 uiPointId) override
+        {
+            if (uiType != POINT_MOTION_TYPE || !uiPointId)
+                return;
+
+            m_creature->RemoveAllAurasOnEvade();
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiTsunamiTimer)
             {
-                // Note: currently the way in which spell 60241 works is unk, so for the moment we'll use simple movement
-                m_creature->SetWalk(false);
-                m_creature->GetMotionMaster()->MovePoint(1, m_creature->GetPositionX() < 3250.0f ? m_creature->GetPositionX() + 86.5f : m_creature->GetPositionX() - 86.5f,
+                if (m_uiTsunamiTimer <= uiDiff)
+                {
+                    // Note: currently the way in which spell 60241 works is unk, so for the moment we'll use simple movement
+                    m_creature->SetWalk(false);
+                    m_creature->GetMotionMaster()->MovePoint(1, m_creature->GetPositionX() < 3250.0f ? m_creature->GetPositionX() + 86.5f : m_creature->GetPositionX() - 86.5f,
                         m_creature->GetPositionY(), m_creature->GetPositionZ());
 
-                m_uiTsunamiTimer = 0;
+                    m_uiTsunamiTimer = 0;
+                }
+                else
+                    m_uiTsunamiTimer -= uiDiff;
             }
-            else
-                m_uiTsunamiTimer -= uiDiff;
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_flame_tsunamiAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_flame_tsunami(Creature* pCreature)
-{
-    return new npc_flame_tsunamiAI(pCreature);
-}
 
 /*######
 ## npc_fire_cyclone
 ######*/
 
-struct  npc_fire_cycloneAI : public ScriptedAI
+struct npc_fire_cyclone : public CreatureScript
 {
-    npc_fire_cycloneAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_fire_cyclone() : CreatureScript("npc_fire_cyclone") {}
+
+    struct npc_fire_cycloneAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
+        npc_fire_cycloneAI(Creature* pCreature) : ScriptedAI(pCreature)
+        {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        }
 
-    ScriptedInstance* m_pInstance;
+        ScriptedInstance* m_pInstance;
 
-    void Reset()  override { }
+        void Reset()  override { }
 
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
 
-    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+        void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+        {
+            // Mark the achiev failed for the hit target
+            if (pSpell->Id == SPELL_LAVA_STRIKE_IMPACT && pTarget->GetTypeId() == TYPEID_PLAYER && m_pInstance)
+                m_pInstance->SetData(TYPE_VOLCANO_BLOW_FAILED, pTarget->GetGUIDLow());
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_LAVA_BLAZE)
+                pSummoned->SetInCombatWithZone();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        // Mark the achiev failed for the hit target
-        if (pSpell->Id == SPELL_LAVA_STRIKE_IMPACT && pTarget->GetTypeId() == TYPEID_PLAYER && m_pInstance)
-            m_pInstance->SetData(TYPE_VOLCANO_BLOW_FAILED, pTarget->GetGUIDLow());
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_LAVA_BLAZE)
-            pSummoned->SetInCombatWithZone();
+        return new npc_fire_cycloneAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_npc_fire_cyclone(Creature* pCreature)
-{
-    return new npc_fire_cycloneAI(pCreature);
-}
-
 void AddSC_boss_sartharion()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_sartharion";
-    pNewScript->GetAI = &GetAI_boss_sartharion;
-    pNewScript->RegisterSelf();
+    s = new boss_sartharion();
+    s->RegisterSelf();
+    s = new mob_vesperon();
+    s->RegisterSelf();
+    s = new mob_shadron();
+    s->RegisterSelf();
+    s = new mob_tenebron();
+    s->RegisterSelf();
+    s = new mob_twilight_eggs();
+    s->RegisterSelf();
+    s = new npc_tenebron_egg_controller();
+    s->RegisterSelf();
+    s = new npc_flame_tsunami();
+    s->RegisterSelf();
+    s = new npc_fire_cyclone();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "mob_vesperon";
-    pNewScript->GetAI = &GetAI_mob_vesperon;
-    pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "mob_shadron";
-    pNewScript->GetAI = &GetAI_mob_shadron;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_sartharion";
+    //pNewScript->GetAI = &GetAI_boss_sartharion;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "mob_tenebron";
-    pNewScript->GetAI = &GetAI_mob_tenebron;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "mob_vesperon";
+    //pNewScript->GetAI = &GetAI_mob_vesperon;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "mob_twilight_eggs";
-    pNewScript->GetAI = &GetAI_mob_twilight_eggs;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "mob_shadron";
+    //pNewScript->GetAI = &GetAI_mob_shadron;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_tenebron_egg_controller";
-    pNewScript->GetAI = &GetAI_npc_tenebron_egg_controller;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "mob_tenebron";
+    //pNewScript->GetAI = &GetAI_mob_tenebron;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_flame_tsunami";
-    pNewScript->GetAI = &GetAI_npc_flame_tsunami;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "mob_twilight_eggs";
+    //pNewScript->GetAI = &GetAI_mob_twilight_eggs;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_fire_cyclone";
-    pNewScript->GetAI = &GetAI_npc_fire_cyclone;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_tenebron_egg_controller";
+    //pNewScript->GetAI = &GetAI_npc_tenebron_egg_controller;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_flame_tsunami";
+    //pNewScript->GetAI = &GetAI_npc_flame_tsunami;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_fire_cyclone";
+    //pNewScript->GetAI = &GetAI_npc_fire_cyclone;
+    //pNewScript->RegisterSelf();
 }

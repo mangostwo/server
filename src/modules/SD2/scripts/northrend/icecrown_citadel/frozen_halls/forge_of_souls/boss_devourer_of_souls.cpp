@@ -20,7 +20,7 @@
 /* ScriptData
 SDName: boss_devourer_of_souls
 SD%Complete: 90%
-SDComment: Timers need more love, NPC_UNLEASHED_SOUL are not handled proper
+SDComment: Timers need more love, NPC_UNLEASHED_SOUL are not handled properly
 SDCategory: The Forge of Souls
 EndScriptData */
 
@@ -85,114 +85,117 @@ static const int aTexts[6][3] =
     {SAY_MALE_1_DARK_GLARE,  SAY_FEMALE_DARK_GLARE,  0}     // 5 - glare
 };
 
-struct  boss_devourer_of_soulsAI : public ScriptedAI
+struct boss_devourer_of_souls : public CreatureScript
 {
-    boss_devourer_of_soulsAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_devourer_of_souls() : CreatureScript("boss_devourer_of_souls") {}
+
+    struct boss_devourer_of_soulsAI : public ScriptedAI
     {
-        m_pInstance = (instance_forge_of_souls*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    instance_forge_of_souls* m_pInstance;
-    uint8 m_uiFace;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiPhantomBlastTimer;
-    uint32 m_uiWellTimer;
-    uint32 m_uiMirrorTimer;
-    uint32 m_uiUnleashTimer;
-    uint32 m_uiWailingTimer;
-    uint32 m_uiEndPhaseTimer;
-
-    GuidList m_lWellGuids;
-
-    void Reset() override
-    {
-        m_uiFace = FACE_NORMAL;
-
-        m_uiPhantomBlastTimer = urand(5000, 10000);
-        m_uiWellTimer = urand(10000, 15000);
-        m_uiMirrorTimer  = urand(10000, 15000);
-        m_uiUnleashTimer = urand(15000, 20000);
-        m_uiWailingTimer = urand(40000, 60000);
-        m_uiEndPhaseTimer = 0;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(aTexts[0][m_uiFace], m_creature);
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_DEVOURER_OF_SOULS, IN_PROGRESS);
-    }
-
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        if (urand(0, 1))
-            DoScriptText(aTexts[urand(1, 2)][m_uiFace], m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(aTexts[3][m_uiFace], m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_DEVOURER_OF_SOULS, DONE);
-
-        for (GuidList::const_iterator itr = m_lWellGuids.begin(); itr != m_lWellGuids.end(); ++itr)
+        boss_devourer_of_soulsAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (Creature* pWell = m_creature->GetMap()->GetCreature(*itr))
-                pWell->ForcedDespawn();
-        }
-        m_lWellGuids.clear();
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-        {
-            m_pInstance->SetData(NPC_DEVOURER_OF_SOULS, FAIL);
-            // If we previously failed, set such that possible to try again
-            m_pInstance->SetData(TYPE_ACHIEV_PHANTOM_BLAST, IN_PROGRESS);
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         }
 
-        for (GuidList::const_iterator itr = m_lWellGuids.begin(); itr != m_lWellGuids.end(); ++itr)
-        {
-            if (Creature* pWell = m_creature->GetMap()->GetCreature(*itr))
-                pWell->ForcedDespawn();
-        }
-        m_lWellGuids.clear();
-    }
+        ScriptedInstance* m_pInstance;
+        uint8 m_uiFace;
+        bool m_bIsRegularMode;
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_WELL_OF_SOULS)
+        uint32 m_uiPhantomBlastTimer;
+        uint32 m_uiWellTimer;
+        uint32 m_uiMirrorTimer;
+        uint32 m_uiUnleashTimer;
+        uint32 m_uiWailingTimer;
+        uint32 m_uiEndPhaseTimer;
+
+        GuidList m_lWellGuids;
+
+        void Reset() override
         {
-            m_lWellGuids.push_back(pSummoned->GetObjectGuid());
-            pSummoned->CastSpell(pSummoned, SPELL_WELL_OF_SOULS_TRIGGER, true, NULL, NULL, m_creature->GetObjectGuid());
-            // Commented as of not stacking auras
-            // pSummoned->CastSpell(pSummoned, SPELL_WELL_OF_SOULS_VISUAL1, true);
-            // pSummoned->CastSpell(pSummoned, SPELL_WELL_OF_SOULS_VISUAL2, true);
+            m_uiFace = FACE_NORMAL;
+
+            m_uiPhantomBlastTimer = urand(5000, 10000);
+            m_uiWellTimer = urand(10000, 15000);
+            m_uiMirrorTimer = urand(10000, 15000);
+            m_uiUnleashTimer = urand(15000, 20000);
+            m_uiWailingTimer = urand(40000, 60000);
+            m_uiEndPhaseTimer = 0;
         }
-        else if (pSummoned->GetEntry() == NPC_UNLEASHED_SOUL)
+
+        void Aggro(Unit* /*pWho*/) override
         {
-            if (Unit* pEnemy = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            DoScriptText(aTexts[0][m_uiFace], m_creature);
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_DEVOURER_OF_SOULS, IN_PROGRESS);
+        }
+
+        void KilledUnit(Unit* pVictim) override
+        {
+            if (pVictim->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            if (urand(0, 1))
+                DoScriptText(aTexts[urand(1, 2)][m_uiFace], m_creature);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(aTexts[3][m_uiFace], m_creature);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_DEVOURER_OF_SOULS, DONE);
+
+            for (GuidList::const_iterator itr = m_lWellGuids.begin(); itr != m_lWellGuids.end(); ++itr)
             {
-                // It seems the summoned should rather walk towards the boss, but this results in them attacking the healer
-                pSummoned->AI()->AttackStart(pEnemy);
-                pSummoned->AddThreat(pEnemy, 10000.0f);
+                if (Creature* pWell = m_creature->GetMap()->GetCreature(*itr))
+                    pWell->ForcedDespawn();
             }
-            pSummoned->ForcedDespawn(15000);                // Note that this is sort of a hack, the more correct fix however would require to toggle the interpretation of summon properties in mangos
+            m_lWellGuids.clear();
         }
-    }
 
-    void SpellHitTarget(Unit* /*pTarget*/, SpellEntry const* pSpellEntry) override
-    {
-        switch (pSpellEntry->Id)
+        void JustReachedHome() override
         {
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(NPC_DEVOURER_OF_SOULS, FAIL);
+                // If we previously failed, set such that possible to try again
+                m_pInstance->SetData(TYPE_ACHIEV_PHANTOM_BLAST, IN_PROGRESS);
+            }
+
+            for (GuidList::const_iterator itr = m_lWellGuids.begin(); itr != m_lWellGuids.end(); ++itr)
+            {
+                if (Creature* pWell = m_creature->GetMap()->GetCreature(*itr))
+                    pWell->ForcedDespawn();
+            }
+            m_lWellGuids.clear();
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_WELL_OF_SOULS)
+            {
+                m_lWellGuids.push_back(pSummoned->GetObjectGuid());
+                pSummoned->CastSpell(pSummoned, SPELL_WELL_OF_SOULS_TRIGGER, true, NULL, NULL, m_creature->GetObjectGuid());
+                // Commented as of not stacking auras
+                // pSummoned->CastSpell(pSummoned, SPELL_WELL_OF_SOULS_VISUAL1, true);
+                // pSummoned->CastSpell(pSummoned, SPELL_WELL_OF_SOULS_VISUAL2, true);
+            }
+            else if (pSummoned->GetEntry() == NPC_UNLEASHED_SOUL)
+            {
+                if (Unit* pEnemy = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    // It seems the summoned should rather walk towards the boss, but this results in them attacking the healer
+                    pSummoned->AI()->AttackStart(pEnemy);
+                    pSummoned->AddThreat(pEnemy, 10000.0f);
+                }
+                pSummoned->ForcedDespawn(15000);                // Note that this is sort of a hack, the more correct fix however would require to toggle the interpretation of summon properties in mangos
+            }
+        }
+
+        void SpellHitTarget(Unit* /*pTarget*/, SpellEntry const* pSpellEntry) override
+        {
+            switch (pSpellEntry->Id)
+            {
                 // If we hit a target with phantom blast, the achievement_criteria is failed
             case SPELL_PHANTOM_BLAST:
             case SPELL_PHANTOM_BLAST_H:
@@ -203,135 +206,139 @@ struct  boss_devourer_of_soulsAI : public ScriptedAI
             case SPELL_WAILING_SOULS:
                 DoScriptText(aTexts[5][m_uiFace], m_creature);
                 break;
+            }
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->IsInCombat())
-            return;
-
-        // Ending a phase
-        if (m_uiEndPhaseTimer)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (m_uiEndPhaseTimer <= uiDiff)
-            {
-                DoCastSpellIfCan(m_creature, SPELL_DRUID_MORPH, CAST_INTERRUPT_PREVIOUS);
-                // Sumberge visual might be cast as effect of the above spell.
-                DoCastSpellIfCan(m_creature, SPELL_SUBMERGE_VISUAL, CAST_TRIGGERED);
-                m_uiEndPhaseTimer = 0;
+            if (!m_creature->IsInCombat())
+                return;
 
-                m_uiFace = FACE_NORMAL;
+            // Ending a phase
+            if (m_uiEndPhaseTimer)
+            {
+                if (m_uiEndPhaseTimer <= uiDiff)
+                {
+                    DoCastSpellIfCan(m_creature, SPELL_DRUID_MORPH, CAST_INTERRUPT_PREVIOUS);
+                    // Sumberge visual might be cast as effect of the above spell.
+                    DoCastSpellIfCan(m_creature, SPELL_SUBMERGE_VISUAL, CAST_TRIGGERED);
+                    m_uiEndPhaseTimer = 0;
+
+                    m_uiFace = FACE_NORMAL;
+                }
+                else
+                    m_uiEndPhaseTimer -= uiDiff;
+            }
+
+            // No additional spells, no target selection for wailing souls
+            if (m_uiFace == FACE_WAILING)
+            {
+                // Some special handling in case of starting phase of wailings
+                if (ObjectGuid targetGuid = m_creature->GetTargetGuid())
+                {
+                    if (Unit* pTarget = m_creature->GetMap()->GetUnit(targetGuid))
+                        m_creature->SetFacingTo(m_creature->GetAngle(pTarget));
+                }
+
+                if (m_creature->GetThreatManager().isThreatListEmpty() || !m_creature->GetThreatManager().getHostileTarget())
+                    m_creature->SelectHostileTarget();          // Most likely must evade, use additional checks in case evading would be prevented
+                return;
+            }
+
+            // Update Target and do Combat Spells
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            // No additional abilities while unleashing
+            if (m_uiFace == FACE_UNLEASHING)
+                return;
+
+            // Phantom Blast
+            if (m_uiPhantomBlastTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_PHANTOM_BLAST : SPELL_PHANTOM_BLAST_H) == CAST_OK)
+                        m_uiPhantomBlastTimer = urand(5000, 10000); // TODO
+                }
             }
             else
-                m_uiEndPhaseTimer -= uiDiff;
-        }
+                m_uiPhantomBlastTimer -= uiDiff;
 
-        // No additional spells, no target selection for wailing souls
-        if (m_uiFace == FACE_WAILING)
-        {
-            // Some special handling in case of starting phase of wailings
-            if (ObjectGuid targetGuid = m_creature->GetTargetGuid())
+            // Jump towards random enemy
+            if (m_uiWellTimer < uiDiff)
             {
-                if (Unit* pTarget = m_creature->GetMap()->GetUnit(targetGuid))
-                    m_creature->SetFacingTo(m_creature->GetAngle(pTarget));
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_WELL_OF_SOULS) == CAST_OK)
+                        m_uiWellTimer = urand(15000, 25000);    // TODO
+                }
             }
+            else
+                m_uiWellTimer -= uiDiff;
 
-            if (m_creature->GetThreatManager().isThreatListEmpty() || !m_creature->GetThreatManager().getHostileTarget())
-                m_creature->SelectHostileTarget();          // Most likely must evade, use additional checks in case evading would be prevented
-            return;
-        }
-
-        // Update Target and do Combat Spells
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // No additional abilities while unleashing
-        if (m_uiFace == FACE_UNLEASHING)
-            return;
-
-        // Phantom Blast
-        if (m_uiPhantomBlastTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            // DMG reflection
+            if (m_uiMirrorTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_PHANTOM_BLAST : SPELL_PHANTOM_BLAST_H) == CAST_OK)
-                    m_uiPhantomBlastTimer = urand(5000, 10000); // TODO
+                if (!m_creature->IsNonMeleeSpellCasted(true))
+                {
+                    DoCastSpellIfCan(m_creature, SPELL_MIRRORED_SOUL, CAST_TRIGGERED);
+                    m_uiMirrorTimer = urand(25000, 35000);      // TODO
+                    DoScriptText(EMOTE_MIRRORED_SOUL, m_creature);
+                }
             }
-        }
-        else
-            m_uiPhantomBlastTimer -= uiDiff;
+            else
+                m_uiMirrorTimer -= uiDiff;
 
-        // Jump towards random enemy
-        if (m_uiWellTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            // Spawning of Adds
+            if (m_uiUnleashTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_WELL_OF_SOULS) == CAST_OK)
-                    m_uiWellTimer = urand(15000, 25000);    // TODO
-            }
-        }
-        else
-            m_uiWellTimer -= uiDiff;
+                if (DoCastSpellIfCan(m_creature, SPELL_UNLEASHED_SOULS) == CAST_OK && DoCastSpellIfCan(m_creature, SPELL_DRUID_MORPH_0_5, CAST_TRIGGERED) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_UNLEASH_SOULS, m_creature);
+                    m_uiUnleashTimer = urand(30000, 60000);     // TODO
 
-        // DMG reflection
-        if (m_uiMirrorTimer < uiDiff)
-        {
-            if (!m_creature->IsNonMeleeSpellCasted(true))
+                    m_uiFace = FACE_UNLEASHING;
+                    DoScriptText(aTexts[4][m_uiFace], m_creature);
+                    m_uiEndPhaseTimer = 4500;                   // 5000 (Duration of Unleasing) + 850(Cast time for unleashing) - 1000(duration of whirl) - a bit air
+                }
+            }
+            else
+                m_uiUnleashTimer -= uiDiff;
+
+            if (m_uiWailingTimer < uiDiff)
             {
-                DoCastSpellIfCan(m_creature, SPELL_MIRRORED_SOUL, CAST_TRIGGERED);
-                m_uiMirrorTimer = urand(25000, 35000);      // TODO
-                DoScriptText(EMOTE_MIRRORED_SOUL, m_creature);
+                if (DoCastSpellIfCan(m_creature, SPELL_WALIING_SOULS_TARGETS) == CAST_OK)
+                {
+                    DoCastSpellIfCan(m_creature, SPELL_DRUID_MORPH_1_5, CAST_TRIGGERED);
+                    DoScriptText(EMOTE_WAILING_SOULS, m_creature);
+                    m_uiFace = FACE_WAILING;
+                    m_uiEndPhaseTimer = 12500;                  // 100000 (Duration of Wailing) + 3000(casting time) - 1000 (duration of whirl) + 500 (some add. time)
+                    m_uiWailingTimer = urand(25000, 35000);     // TODO
+                }
             }
+            else
+                m_uiWailingTimer -= uiDiff;
+
+            DoMeleeAttackIfReady();
         }
-        else
-            m_uiMirrorTimer -= uiDiff;
+    };
 
-        // Spawning of Adds
-        if (m_uiUnleashTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_UNLEASHED_SOULS) == CAST_OK && DoCastSpellIfCan(m_creature, SPELL_DRUID_MORPH_0_5, CAST_TRIGGERED) == CAST_OK)
-            {
-                DoScriptText(EMOTE_UNLEASH_SOULS, m_creature);
-                m_uiUnleashTimer = urand(30000, 60000);     // TODO
-
-                m_uiFace = FACE_UNLEASHING;
-                DoScriptText(aTexts[4][m_uiFace], m_creature);
-                m_uiEndPhaseTimer = 4500;                   // 5000 (Duration of Unleasing) + 850(Cast time for unleashing) - 1000(duration of whirl) - a bit air
-            }
-        }
-        else
-            m_uiUnleashTimer -= uiDiff;
-
-        if (m_uiWailingTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_WALIING_SOULS_TARGETS) == CAST_OK)
-            {
-                DoCastSpellIfCan(m_creature, SPELL_DRUID_MORPH_1_5, CAST_TRIGGERED);
-                DoScriptText(EMOTE_WAILING_SOULS, m_creature);
-                m_uiFace = FACE_WAILING;
-                m_uiEndPhaseTimer = 12500;                  // 100000 (Duration of Wailing) + 3000(casting time) - 1000 (duration of whirl) + 500 (some add. time)
-                m_uiWailingTimer = urand(25000, 35000);     // TODO
-            }
-        }
-        else
-            m_uiWailingTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_devourer_of_soulsAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_devourer_of_souls(Creature* pCreature)
-{
-    return new boss_devourer_of_soulsAI(pCreature);
-}
-
 void AddSC_boss_devourer_of_souls()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_devourer_of_souls";
-    pNewScript->GetAI = &GetAI_boss_devourer_of_souls;
-    pNewScript->RegisterSelf();
+    s = new boss_devourer_of_souls();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_devourer_of_souls";
+    //pNewScript->GetAI = &GetAI_boss_devourer_of_souls;
+    //pNewScript->RegisterSelf();
 }

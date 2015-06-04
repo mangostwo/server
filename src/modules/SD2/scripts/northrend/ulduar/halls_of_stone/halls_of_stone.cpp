@@ -104,15 +104,7 @@ enum
     TEXT_ID_START                       = 13100,
     TEXT_ID_PROGRESS                    = 13101,
 
-    SPELL_SUMMON_PROTECTOR              = 51780,                // all spells are casted by stalker npcs 28130
-    SPELL_SUMMON_STORMCALLER            = 51050,
-    SPELL_SUMMON_CUSTODIAN              = 51051,
-
     SPELL_STEALTH                       = 58506,
-
-    NPC_DARK_RUNE_PROTECTOR             = 27983,
-    NPC_DARK_RUNE_STORMCALLER           = 27984,
-    NPC_IRON_GOLEM_CUSTODIAN            = 27985,
 
     QUEST_HALLS_OF_STONE                = 13207,
 };
@@ -121,114 +113,114 @@ enum
 ## npc_brann_hos
 ######*/
 
-struct  npc_brann_hosAI : public npc_escortAI
+struct npc_brann_hos : public CreatureScript
 {
-    npc_brann_hosAI(Creature* pCreature) : npc_escortAI(pCreature)
+    npc_brann_hos() : CreatureScript("npc_brann_hos") {}
+
+    struct npc_brann_hosAI : public npc_escortAI
     {
-        m_pInstance = (instance_halls_of_stone*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    instance_halls_of_stone* m_pInstance;
-    bool m_bIsRegularMode;
-
-    bool m_bHasContinued;
-    bool m_bIsBattle;
-    bool m_bIsLowHP;
-
-    uint32 m_uiStep;
-    uint32 m_uiPhaseTimer;
-
-    GuidList m_luiDwarfGUIDs;
-
-    void Reset() override
-    {
-        if (!HasEscortState(STATE_ESCORT_ESCORTING))
+        npc_brann_hosAI(Creature* pCreature) : npc_escortAI(pCreature)
         {
-            m_bIsLowHP = false;
-            m_bIsBattle = false;
-            m_bHasContinued = false;
-
-            m_uiStep = 0;
-            m_uiPhaseTimer = 0;
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         }
-    }
 
-    void KilledUnit(Unit* /*pVictim*/) override                          // TODO - possible better as SummonedJustDied
-    {
-        switch (urand(0, 2))
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        bool m_bHasContinued;
+        bool m_bIsBattle;
+        bool m_bIsLowHP;
+
+        uint32 m_uiStep;
+        uint32 m_uiPhaseTimer;
+
+        GuidList m_luiDwarfGUIDs;
+
+        void Reset() override
         {
+            if (!HasEscortState(STATE_ESCORT_ESCORTING))
+            {
+                m_bIsLowHP = false;
+                m_bIsBattle = false;
+                m_bHasContinued = false;
+
+                m_uiStep = 0;
+                m_uiPhaseTimer = 0;
+            }
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override                          // TODO - possible better as SummonedJustDied
+        {
+            switch (urand(0, 2))
+            {
             case 0: DoScriptText(SAY_KILL_1, m_creature); break;
             case 1: DoScriptText(SAY_KILL_2, m_creature); break;
             case 2: DoScriptText(SAY_KILL_3, m_creature); break;
+            }
         }
-    }
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
+        void JustDied(Unit* /*pKiller*/) override
         {
-            m_pInstance->SetData(TYPE_TRIBUNAL, FAIL);
-            // Continue at right state after respawn
-            if (m_bHasContinued)
+            DoScriptText(SAY_DEATH, m_creature);
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_TRIBUNAL, FAIL);
+                // Continue at right state after respawn
+                if (m_bHasContinued)
+                    m_pInstance->SetData(TYPE_TRIBUNAL, IN_PROGRESS);
+            }
+
+            for (GuidList::const_iterator itr = m_luiDwarfGUIDs.begin(); itr != m_luiDwarfGUIDs.end(); ++itr)
+            {
+                if (Creature* pDwarf = m_creature->GetMap()->GetCreature(*itr))
+                    pDwarf->ForcedDespawn();
+            }
+            m_luiDwarfGUIDs.clear();
+        }
+
+        void AttackStart(Unit* pWho) override
+        {
+            if (!pWho || !m_bIsBattle)
+                return;
+
+            npc_escortAI::AttackStart(pWho);
+        }
+
+        void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage) override
+        {
+            // If Brann takes damage, mark the achiev as failed
+            if (uiDamage && m_pInstance)
+                m_pInstance->SetData(TYPE_ACHIEV_BRANN_SPANKIN, uint32(false));
+        }
+
+        void ContinueEvent()
+        {
+            if (!m_pInstance || m_pInstance->GetData(TYPE_TRIBUNAL) != IN_PROGRESS)
+                return;
+
+            // Set the achiev in progress
+            m_pInstance->SetData(TYPE_ACHIEV_BRANN_SPANKIN, uint32(true));
+
+            m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            SetRun(true);
+            SetEscortPaused(false);
+            m_bHasContinued = true;
+        }
+
+        void JustStartedEscort() override
+        {
+            if (m_pInstance)
                 m_pInstance->SetData(TYPE_TRIBUNAL, IN_PROGRESS);
+
+            DoScriptText(SAY_ESCORT_START, m_creature);
         }
 
-        for (GuidList::const_iterator itr = m_luiDwarfGUIDs.begin(); itr != m_luiDwarfGUIDs.end(); ++itr)
+        void WaypointReached(uint32 uiPointId) override
         {
-            if (Creature* pDwarf = m_creature->GetMap()->GetCreature(*itr))
-                pDwarf->ForcedDespawn();
-        }
-        m_luiDwarfGUIDs.clear();
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (!pWho)
-            return;
-
-        if (!m_bIsBattle)
-            return;
-
-        npc_escortAI::AttackStart(pWho);
-    }
-
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage) override
-    {
-        // If Brann takes damage, mark the achiev as failed
-        if (uiDamage && m_pInstance)
-            m_pInstance->SetBrannSpankin(false);
-    }
-
-    void ContinueEvent()
-    {
-        if (!m_pInstance || m_pInstance->GetData(TYPE_TRIBUNAL) != IN_PROGRESS)
-            return;
-
-        // Set the achiev in progress
-        m_pInstance->SetBrannSpankin(true);
-
-        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-        SetRun(true);
-        SetEscortPaused(false);
-        m_bHasContinued = true;
-    }
-
-    void JustStartedEscort() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_TRIBUNAL, IN_PROGRESS);
-
-        DoScriptText(SAY_ESCORT_START, m_creature);
-    }
-
-    void WaypointReached(uint32 uiPointId) override
-    {
-        switch (uiPointId)
-        {
+            switch (uiPointId)
+            {
             case 13:                                        // Before Tribunal Event, Continue with Gossip Interaction
                 DoScriptText(SAY_EVENT_INTRO_1, m_creature);
                 SetEscortPaused(true);
@@ -248,64 +240,29 @@ struct  npc_brann_hosAI : public npc_escortAI
                 }
                 m_uiPhaseTimer = 1000;
                 break;
-        }
-    }
-
-    void SpawnDwarf(uint32 uEntry)
-    {
-        if (!m_pInstance)
-            return;
-
-        // each case has an individual spawn stalker
-        switch (uEntry)
-        {
-            case NPC_DARK_RUNE_PROTECTOR:
-            {
-                Creature* pStalker = m_creature->GetMap()->GetCreature(m_pInstance->GetProtectorStalkerGuid());
-                if (!pStalker)
-                    return;
-
-                uint32 uiSpawnNumber = (m_bIsRegularMode ? 2 : 3);
-                for (uint8 i = 0; i < uiSpawnNumber; ++i)
-                    pStalker->CastSpell(pStalker, SPELL_SUMMON_PROTECTOR, true, NULL, NULL, m_creature->GetObjectGuid());
-                pStalker->CastSpell(pStalker, SPELL_SUMMON_STORMCALLER, true, NULL, NULL, m_creature->GetObjectGuid());
-                break;
-            }
-            case NPC_DARK_RUNE_STORMCALLER:
-            {
-                Creature* pStalker = m_creature->GetMap()->GetCreature(m_pInstance->GeStormcallerStalkerGuid());
-                if (!pStalker)
-                    return;
-
-                for (uint8 i = 0; i < 2; ++i)
-                    pStalker->CastSpell(pStalker, SPELL_SUMMON_STORMCALLER, true, NULL, NULL, m_creature->GetObjectGuid());
-                break;
-            }
-            case NPC_IRON_GOLEM_CUSTODIAN:
-            {
-                Creature* pStalker = m_creature->GetMap()->GetCreature(m_pInstance->GetCustodianStalkerGuid());
-                if (!pStalker)
-                    return;
-
-                pStalker->CastSpell(pStalker, SPELL_SUMMON_CUSTODIAN, true, NULL, NULL, m_creature->GetObjectGuid());
-                break;
             }
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        m_luiDwarfGUIDs.push_back(pSummoned->GetObjectGuid());
-
-        pSummoned->AI()->AttackStart(m_creature);
-    }
-
-    void UpdateEscortAI(const uint32 uiDiff) override
-    {
-        if (m_uiPhaseTimer && m_uiPhaseTimer <= uiDiff)
+        void SpawnDwarf(uint32 uEntry)
         {
-            switch (m_uiStep)
+            if (!m_pInstance)
+                return;
+            m_pInstance->SetData(TYPE_DO_SPAWN_DWARF, uEntry);
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            m_luiDwarfGUIDs.push_back(pSummoned->GetObjectGuid());
+
+            pSummoned->AI()->AttackStart(m_creature);
+        }
+
+        void UpdateEscortAI(const uint32 uiDiff) override
+        {
+            if (m_uiPhaseTimer && m_uiPhaseTimer <= uiDiff)
             {
+                switch (m_uiStep)
+                {
                     // Begin Event
                 case 0:
                     // TODO, this is wrong, must be "using or similar"
@@ -323,7 +280,7 @@ struct  npc_brann_hosAI : public npc_escortAI
                     break;
                 case 3:
                     if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_ABEDNEUM, SAY_EVENT_INTRO_3_ABED);
+                        m_pInstance->SetData(TYPE_DO_ABEDNEUM_SPEAK, -SAY_EVENT_INTRO_3_ABED);
                     m_uiPhaseTimer = 8500;
                     break;
 
@@ -334,7 +291,7 @@ struct  npc_brann_hosAI : public npc_escortAI
                     break;
                 case 5:
                     if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_KADDRAK, SAY_EVENT_A_2_KADD);
+                        m_pInstance->SetData(TYPE_DO_KADDRAK_SPEAK, -SAY_EVENT_A_2_KADD);
                     m_uiPhaseTimer = 12500;
                     break;
                 case 6:
@@ -343,7 +300,7 @@ struct  npc_brann_hosAI : public npc_escortAI
                     break;
                 case 7:
                     if (m_pInstance)
-                        m_pInstance->ActivateFace(FACE_KADDRAK, false);
+                        m_pInstance->SetData(TYPE_DO_KADDRAK_ACTIVATE, uint32(false));
                     m_uiPhaseTimer = 5000;
                     break;
                 case 8:
@@ -358,7 +315,7 @@ struct  npc_brann_hosAI : public npc_escortAI
                     break;
                 case 10:
                     if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_MARNAK, SAY_EVENT_B_2_MARN);
+                        m_pInstance->SetData(TYPE_DO_MARNAK_SPEAK, -SAY_EVENT_B_2_MARN);
                     SpawnDwarf(NPC_DARK_RUNE_PROTECTOR);
                     m_uiPhaseTimer = 20000;
                     break;
@@ -368,7 +325,7 @@ struct  npc_brann_hosAI : public npc_escortAI
                     break;
                 case 12:
                     if (m_pInstance)
-                        m_pInstance->ActivateFace(FACE_MARNAK, false);
+                        m_pInstance->SetData(TYPE_DO_MARNAK_ACTIVATE, uint32(false));
                     m_uiPhaseTimer = 10000;
                     break;
                 case 13:
@@ -392,7 +349,7 @@ struct  npc_brann_hosAI : public npc_escortAI
                     // Activate Abedneum
                 case 17:
                     if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_ABEDNEUM, SAY_EVENT_C_2_ABED);
+                        m_pInstance->SetData(TYPE_DO_ABEDNEUM_SPEAK, -SAY_EVENT_C_2_ABED);
                     SpawnDwarf(NPC_DARK_RUNE_PROTECTOR);
                     m_uiPhaseTimer = 20000;
                     break;
@@ -402,7 +359,7 @@ struct  npc_brann_hosAI : public npc_escortAI
                     break;
                 case 19:
                     if (m_pInstance)
-                        m_pInstance->ActivateFace(FACE_ABEDNEUM, false);
+                        m_pInstance->SetData(TYPE_DO_ABEDNEUM_ACTIVATE, uint32(false));
                     m_uiPhaseTimer = 5000;
                     break;
                 case 20:
@@ -421,7 +378,7 @@ struct  npc_brann_hosAI : public npc_escortAI
                     break;
                 case 23:
                     if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_ABEDNEUM, SAY_EVENT_D_2_ABED);
+                        m_pInstance->SetData(TYPE_DO_ABEDNEUM_SPEAK, -SAY_EVENT_D_2_ABED);
                     SpawnDwarf(NPC_DARK_RUNE_PROTECTOR);
                     m_uiPhaseTimer = 5000;
                     break;
@@ -444,7 +401,7 @@ struct  npc_brann_hosAI : public npc_escortAI
                     break;
                 case 28:
                     if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_ABEDNEUM, SAY_EVENT_D_4_ABED);
+                        m_pInstance->SetData(TYPE_DO_ABEDNEUM_SPEAK, -SAY_EVENT_D_4_ABED);
                     SpawnDwarf(NPC_DARK_RUNE_PROTECTOR);
                     m_uiPhaseTimer = 10000;
                     break;
@@ -466,7 +423,7 @@ struct  npc_brann_hosAI : public npc_escortAI
                     // break;
                     // case 30:
                     if (m_pInstance)
-                        m_pInstance->ActivateFace(FACE_ABEDNEUM, true);
+                        m_pInstance->SetData(TYPE_DO_ABEDNEUM_ACTIVATE, uint32(true));
                     m_uiPhaseTimer = 0;
                     break;
                 case 30:
@@ -475,7 +432,7 @@ struct  npc_brann_hosAI : public npc_escortAI
                     break;
                 case 31:
                     if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_ABEDNEUM, SAY_EVENT_END_03_ABED);
+                        m_pInstance->SetData(TYPE_DO_ABEDNEUM_SPEAK, -SAY_EVENT_END_03_ABED);
                     m_uiPhaseTimer = 8500;
                     break;
                 case 32:
@@ -484,7 +441,7 @@ struct  npc_brann_hosAI : public npc_escortAI
                     break;
                 case 33:
                     if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_ABEDNEUM, SAY_EVENT_END_05_ABED);
+                        m_pInstance->SetData(TYPE_DO_ABEDNEUM_SPEAK, -SAY_EVENT_END_05_ABED);
                     m_uiPhaseTimer = 11500;
                     break;
                 case 34:
@@ -493,7 +450,7 @@ struct  npc_brann_hosAI : public npc_escortAI
                     break;
                 case 35:
                     if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_ABEDNEUM, SAY_EVENT_END_07_ABED);
+                        m_pInstance->SetData(TYPE_DO_ABEDNEUM_SPEAK, -SAY_EVENT_END_07_ABED);
                     m_uiPhaseTimer = 22500;
                     break;
                 case 36:
@@ -502,7 +459,7 @@ struct  npc_brann_hosAI : public npc_escortAI
                     break;
                 case 37:
                     if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_KADDRAK, SAY_EVENT_END_09_KADD);
+                        m_pInstance->SetData(TYPE_DO_KADDRAK_SPEAK, -SAY_EVENT_END_09_KADD);
                     m_uiPhaseTimer = 18500;
                     break;
                 case 38:
@@ -511,7 +468,7 @@ struct  npc_brann_hosAI : public npc_escortAI
                     break;
                 case 39:
                     if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_KADDRAK, SAY_EVENT_END_11_KADD);
+                        m_pInstance->SetData(TYPE_DO_KADDRAK_SPEAK, -SAY_EVENT_END_11_KADD);
                     m_uiPhaseTimer = 20500;
                     break;
                 case 40:
@@ -520,7 +477,7 @@ struct  npc_brann_hosAI : public npc_escortAI
                     break;
                 case 41:
                     if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_KADDRAK, SAY_EVENT_END_13_KADD);
+                        m_pInstance->SetData(TYPE_DO_KADDRAK_SPEAK, -SAY_EVENT_END_13_KADD);
                     m_uiPhaseTimer = 19500;
                     break;
                 case 42:
@@ -529,7 +486,7 @@ struct  npc_brann_hosAI : public npc_escortAI
                     break;
                 case 43:
                     if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_MARNAK, SAY_EVENT_END_15_MARN);
+                        m_pInstance->SetData(TYPE_DO_MARNAK_SPEAK, -SAY_EVENT_END_15_MARN);
                     m_uiPhaseTimer = 6500;
                     break;
                 case 44:
@@ -538,7 +495,7 @@ struct  npc_brann_hosAI : public npc_escortAI
                     break;
                 case 45:
                     if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_MARNAK, SAY_EVENT_END_17_MARN);
+                        m_pInstance->SetData(TYPE_DO_MARNAK_SPEAK, -SAY_EVENT_END_17_MARN);
                     m_uiPhaseTimer = 25500;
                     break;
                 case 46:
@@ -547,7 +504,7 @@ struct  npc_brann_hosAI : public npc_escortAI
                     break;
                 case 47:
                     if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_MARNAK, SAY_EVENT_END_19_MARN);
+                        m_pInstance->SetData(TYPE_DO_MARNAK_SPEAK, -SAY_EVENT_END_19_MARN);
                     m_uiPhaseTimer = 3500;
                     break;
                 case 48:
@@ -556,100 +513,96 @@ struct  npc_brann_hosAI : public npc_escortAI
                     break;
                 case 49:
                     if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_ABEDNEUM, SAY_EVENT_END_21_ABED);
+                        m_pInstance->SetData(TYPE_DO_ABEDNEUM_SPEAK, -SAY_EVENT_END_21_ABED);
                     m_uiPhaseTimer = 5500;
                     break;
                 case 50:
-                {
                     if (m_pInstance)
                     {
                         m_pInstance->DoUseDoorOrButton(GO_TRIBUNAL_FLOOR);
                         m_pInstance->SetData(TYPE_TRIBUNAL, DONE);
                     }
 
-                    Player* pPlayer = GetPlayerForEscort();
-                    if (pPlayer)
+                    if (Player* pPlayer = GetPlayerForEscort())
                         pPlayer->GroupEventHappens(QUEST_HALLS_OF_STONE, m_creature);
 
-                    m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                    m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                    m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
 
                     m_uiPhaseTimer = 180000;
                     break;
-                }
                 case 51:
                     SetEscortPaused(false);
                     break;
+                }
+                ++m_uiStep;
             }
-            ++m_uiStep;
-        }
-        else if (m_uiPhaseTimer)
-            m_uiPhaseTimer -= uiDiff;
+            else if (m_uiPhaseTimer)
+                m_uiPhaseTimer -= uiDiff;
 
-        if (!m_bIsLowHP && m_creature->GetHealthPercent() < 30)
+            if (!m_bIsLowHP && m_creature->GetHealthPercent() < 30)
+            {
+                DoScriptText(SAY_LOW_HEALTH, m_creature);
+                m_bIsLowHP = true;
+            }
+            else if (m_bIsLowHP && m_creature->GetHealthPercent() > 30)
+                m_bIsLowHP = false;
+
+            // No Combat abilities needed here
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+        }
+
+        // Respawn Handling: Relocate and Set Escort to WP 13
+        void JustRespawned() override
         {
-            DoScriptText(SAY_LOW_HEALTH, m_creature);
-            m_bIsLowHP = true;
-        }
-        else if (m_bIsLowHP && m_creature->GetHealthPercent() > 30)
-            m_bIsLowHP = false;
+            if (!m_pInstance)
+                return;
 
-        // No Combat abilities needed here
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+            Reset();
+
+            if (m_pInstance->GetData(TYPE_TRIBUNAL) == IN_PROGRESS)
+            {
+                SetEscortPaused(true);
+
+                m_uiStep = 0;
+                m_uiPhaseTimer = 0;
+
+                m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+
+                // Relocate to position of WP 13
+                m_creature->GetMap()->CreatureRelocation(m_creature, 941.101563f, 377.373413f, 207.421f, 3.85f);
+
+                SetCurrentWaypoint(13);
+            }
+        }
+    };
+
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
+    {
+        if (pCreature->IsQuestGiver())
+            pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+
+        if (InstanceData* pInstance = (pCreature->GetInstanceData()))
+        {
+            if (pInstance->GetData(TYPE_TRIBUNAL) == NOT_STARTED || pInstance->GetData(TYPE_TRIBUNAL) == FAIL)
+            {
+                pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_START, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+                pPlayer->SEND_GOSSIP_MENU(TEXT_ID_START, pCreature->GetObjectGuid());
+            }
+            else if (pInstance->GetData(TYPE_TRIBUNAL) == IN_PROGRESS)
+            {
+                pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_PROGRESS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+                pPlayer->SEND_GOSSIP_MENU(TEXT_ID_PROGRESS, pCreature->GetObjectGuid());
+            }
+        }
+
+        return true;
     }
 
-    // Respawn Handling: Relocate and Set Escort to WP 13
-    void JustRespawned() override
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction) override
     {
-        if (!m_pInstance)
-            return;
-
-        Reset();
-
-        if (m_pInstance->GetData(TYPE_TRIBUNAL) == IN_PROGRESS)
+        switch (uiAction)
         {
-            SetEscortPaused(true);
-
-            m_uiStep = 0;
-            m_uiPhaseTimer = 0;
-
-            m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-
-            // Relocate to position of WP 13
-            m_creature->GetMap()->CreatureRelocation(m_creature, 941.101563f, 377.373413f, 207.421f, 3.85f);
-
-            SetCurrentWaypoint(13);
-        }
-    }
-};
-
-bool GossipHello_npc_brann_hos(Player* pPlayer, Creature* pCreature)
-{
-    if (pCreature->IsQuestGiver())
-        pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
-
-    if (instance_halls_of_stone* pInstance = (instance_halls_of_stone*)(pCreature->GetInstanceData()))
-    {
-        if (pInstance->GetData(TYPE_TRIBUNAL) == NOT_STARTED || pInstance->GetData(TYPE_TRIBUNAL) == FAIL)
-        {
-            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_START, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-            pPlayer->SEND_GOSSIP_MENU(TEXT_ID_START, pCreature->GetObjectGuid());
-        }
-        else if (pInstance->GetData(TYPE_TRIBUNAL) == IN_PROGRESS)
-        {
-            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_PROGRESS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-            pPlayer->SEND_GOSSIP_MENU(TEXT_ID_PROGRESS, pCreature->GetObjectGuid());
-        }
-    }
-
-    return true;
-}
-
-bool GossipSelect_npc_brann_hos(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
-{
-    switch (uiAction)
-    {
         case GOSSIP_ACTION_INFO_DEF + 1:
             if (npc_brann_hosAI* pBrannAi = dynamic_cast<npc_brann_hosAI*>(pCreature->AI()))
                 pBrannAi->Start(false, pPlayer);
@@ -658,16 +611,17 @@ bool GossipSelect_npc_brann_hos(Player* pPlayer, Creature* pCreature, uint32 /*u
             if (npc_brann_hosAI* pBrannAi = dynamic_cast<npc_brann_hosAI*>(pCreature->AI()))
                 pBrannAi->ContinueEvent();
             break;
+        }
+        pPlayer->CLOSE_GOSSIP_MENU();
+
+        return true;
     }
-    pPlayer->CLOSE_GOSSIP_MENU();
 
-    return true;
-}
-
-CreatureAI* GetAI_npc_brann_hos(Creature* pCreature)
-{
-    return new npc_brann_hosAI(pCreature);
-}
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_brann_hosAI(pCreature);
+    }
+};
 
 enum
 {
@@ -685,121 +639,136 @@ enum
 ## npc_dark_matter
 ######*/
 
-struct  npc_dark_matterAI : public ScriptedAI
+struct npc_dark_matter : public CreatureScript
 {
-    npc_dark_matterAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_dark_matter() : CreatureScript("npc_dark_matter") {}
+
+    struct npc_dark_matterAI : public ScriptedAI
     {
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    bool m_bIsRegularMode;
-
-    uint32 m_uiSummonTimer;
-
-    void Reset() override
-    {
-        m_uiSummonTimer = 0;
-    }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
-    {
-        if (pSpell->Id == SPELL_DARK_MATTER_START)
-            m_uiSummonTimer = 5000;
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_DARK_MATTER_TARGET)
-            m_creature->GetMotionMaster()->MovePoint(1, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ());
-    }
-
-    void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
-    {
-        if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
-            return;
-
-        // Cast the Dark Matter spell and despawn for reset
-        if (DoCastSpellIfCan(m_creature,  m_bIsRegularMode ? SPELL_DARK_MATTER : SPELL_DARK_MATTER_H) == CAST_OK)
+        npc_dark_matterAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            m_creature->SetRespawnDelay(3);
-            m_creature->ForcedDespawn(1000);
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiSummonTimer)
+        bool m_bIsRegularMode;
+
+        uint32 m_uiSummonTimer;
+
+        void Reset() override
         {
-            if (m_uiSummonTimer <= uiDiff)
+            m_uiSummonTimer = 0;
+        }
+
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+        void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
+        {
+            if (pSpell->Id == SPELL_DARK_MATTER_START)
+                m_uiSummonTimer = 5000;
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_DARK_MATTER_TARGET)
+                m_creature->GetMotionMaster()->MovePoint(1, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ());
+        }
+
+        void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
+        {
+            if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
+                return;
+
+            // Cast the Dark Matter spell and despawn for reset
+            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DARK_MATTER : SPELL_DARK_MATTER_H) == CAST_OK)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_DARK_MATTER_TARGET) == CAST_OK)
-                    m_uiSummonTimer = 0;
+                m_creature->SetRespawnDelay(3);
+                m_creature->ForcedDespawn(1000);
             }
-            else
-                m_uiSummonTimer -= uiDiff;
         }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiSummonTimer)
+            {
+                if (m_uiSummonTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_DARK_MATTER_TARGET) == CAST_OK)
+                        m_uiSummonTimer = 0;
+                }
+                else
+                    m_uiSummonTimer -= uiDiff;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_dark_matterAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_dark_matter(Creature* pCreature)
-{
-    return new npc_dark_matterAI(pCreature);
-}
 
 /*######
 ## npc_searing_gaze
 ######*/
 
 // TODO Move this 'script' to eventAI when combat can be proper prevented from core-side
-struct  npc_searing_gazeAI : public Scripted_NoMovementAI
+struct npc_searing_gaze : public CreatureScript
 {
-    npc_searing_gazeAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    npc_searing_gaze() : CreatureScript("npc_searing_gaze") {}
+
+    struct  npc_searing_gazeAI : public Scripted_NoMovementAI
     {
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
+        npc_searing_gazeAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+        {
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        }
 
-    bool m_bIsRegularMode;
+        bool m_bIsRegularMode;
 
-    void Reset() override
+        void Reset() override
+        {
+            DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SEARING_GAZE : SPELL_SEARING_GAZE_H);
+            // despawn manually because of combat bug
+            m_creature->ForcedDespawn(30000);
+        }
+
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        void UpdateAI(const uint32 /*uiDiff*/) override { }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SEARING_GAZE : SPELL_SEARING_GAZE_H);
-        // despawn manually because of combat bug
-        m_creature->ForcedDespawn(30000);
+        return new npc_searing_gazeAI(pCreature);
     }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
-
-CreatureAI* GetAI_npc_searing_gaze(Creature* pCreature)
-{
-    return new npc_searing_gazeAI(pCreature);
-}
 
 void AddSC_halls_of_stone()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_brann_hos";
-    pNewScript->GetAI = &GetAI_npc_brann_hos;
-    pNewScript->pGossipHello = &GossipHello_npc_brann_hos;
-    pNewScript->pGossipSelect = &GossipSelect_npc_brann_hos;
-    pNewScript->RegisterSelf();
+    s = new npc_brann_hos();
+    s->RegisterSelf();
+    s = new npc_dark_matter();
+    s->RegisterSelf();
+    s = new npc_searing_gaze();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_dark_matter";
-    pNewScript->GetAI = &GetAI_npc_dark_matter;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_brann_hos";
+    //pNewScript->GetAI = &GetAI_npc_brann_hos;
+    //pNewScript->pGossipHello = &GossipHello_npc_brann_hos;
+    //pNewScript->pGossipSelect = &GossipSelect_npc_brann_hos;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_searing_gaze";
-    pNewScript->GetAI = &GetAI_npc_searing_gaze;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_dark_matter";
+    //pNewScript->GetAI = &GetAI_npc_dark_matter;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_searing_gaze";
+    //pNewScript->GetAI = &GetAI_npc_searing_gaze;
+    //pNewScript->RegisterSelf();
 }

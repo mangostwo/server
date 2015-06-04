@@ -144,75 +144,78 @@ static const float aOrbCarrierPosition2[3] = {3153.75f, 487.1875f, 70.47f};
 ## boss_halion_real
 ######*/
 
-struct  boss_halion_realAI : public ScriptedAI
+struct boss_halion_real : public CreatureScript
 {
-    boss_halion_realAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_halion_real() : CreatureScript("boss_halion_real") {}
+
+    struct boss_halion_realAI : public ScriptedAI
     {
-        m_pInstance = (instance_ruby_sanctum*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    instance_ruby_sanctum* m_pInstance;
-
-    uint8 m_uiPhase;
-
-    uint32 m_uiTailLashTimer;
-    uint32 m_uiCleaveTimer;
-    uint32 m_uiFieryCombustionTimer;
-    uint32 m_uiMeteorTimer;
-    uint32 m_uiFlameBreathTimer;
-    uint32 m_uiBerserkTimer;
-
-    void Reset() override
-    {
-        m_uiPhase                   = PHASE_PHISYCAL_REALM;
-
-        m_uiTailLashTimer           = 10000;
-        m_uiCleaveTimer             = urand(5000, 10000);
-        m_uiFieryCombustionTimer    = 15000;
-        m_uiMeteorTimer             = 20000;
-        m_uiBerserkTimer            = 8 * MINUTE * IN_MILLISECONDS;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_HALION, IN_PROGRESS);
-
-        DoScriptText(SAY_AGGRO, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_TWILIGHT_PRECISION, CAST_TRIGGERED);
-    }
-
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() == TYPEID_PLAYER)
+        boss_halion_realAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            switch (urand(0, 1))
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        }
+
+        ScriptedInstance* m_pInstance;
+
+        uint8 m_uiPhase;
+
+        uint32 m_uiTailLashTimer;
+        uint32 m_uiCleaveTimer;
+        uint32 m_uiFieryCombustionTimer;
+        uint32 m_uiMeteorTimer;
+        uint32 m_uiFlameBreathTimer;
+        uint32 m_uiBerserkTimer;
+
+        void Reset() override
+        {
+            m_uiPhase = PHASE_PHISYCAL_REALM;
+
+            m_uiTailLashTimer = 10000;
+            m_uiCleaveTimer = urand(5000, 10000);
+            m_uiFieryCombustionTimer = 15000;
+            m_uiMeteorTimer = 20000;
+            m_uiBerserkTimer = 8 * MINUTE * IN_MILLISECONDS;
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_HALION, IN_PROGRESS);
+
+            DoScriptText(SAY_AGGRO, m_creature);
+            DoCastSpellIfCan(m_creature, SPELL_TWILIGHT_PRECISION, CAST_TRIGGERED);
+        }
+
+        void KilledUnit(Unit* pVictim) override
+        {
+            if (pVictim->GetTypeId() == TYPEID_PLAYER)
             {
+                switch (urand(0, 1))
+                {
                 case 0: DoScriptText(SAY_SLAY_1, m_creature); break;
                 case 1: DoPlaySoundToSet(m_creature, SOUND_SLAY_2); break;
+                }
             }
         }
-    }
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_HALION, DONE);
-
-        DoScriptText(SAY_DEATH, m_creature);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_HALION, FAIL);
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
+        void JustDied(Unit* /*pKiller*/) override
         {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_HALION, DONE);
+
+            DoScriptText(SAY_DEATH, m_creature);
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_HALION, FAIL);
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_COMBUSTION:
                 pSummoned->CastSpell(pSummoned, SPELL_COMBUSTION_PERIODIC, true);
                 break;
@@ -221,61 +224,61 @@ struct  boss_halion_realAI : public ScriptedAI
                 pSummoned->CastSpell(pSummoned, SPELL_BIRTH, true);
                 pSummoned->CastSpell(pSummoned, SPELL_METEOR_VISUAL, true);
                 break;
-        }
-    }
-
-    void DoPrepareTwilightPhase()
-    {
-        if (!m_pInstance)
-            return;
-
-        // Spawn the orbs and the carriers. Use the twilight Halion version to preserve the phase
-        if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_TWILIGHT))
-        {
-            // Set current Halion hp
-            pHalion->SetHealth(m_creature->GetHealth());
-
-            // NOTE: the spawn coords seem to be totally off, compared to the actual map layout - requires additional research!!!
-
-            // Spawn the rotation focus first
-            // pHalion->SummonCreature(NPC_ORB_ROTATION_FOCUS, aRotationFocusPosition[0], aRotationFocusPosition[1], aRotationFocusPosition[2], aRotationFocusPosition[3], TEMPSUMMON_DEAD_DESPAWN, 0);
-
-            // Then spawn the orb carriers and the shadow orbs. ToDo: research if it's possible to make this dynamic
-            // pHalion->SummonCreature(NPC_ORB_CARRIER, aOrbCarrierPosition1[0], aOrbCarrierPosition1[1], aOrbCarrierPosition1[2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
-            // pHalion->SummonCreature(NPC_ORB_CARRIER, aOrbCarrierPosition2[0], aOrbCarrierPosition2[1], aOrbCarrierPosition2[2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
-            // pHalion->SummonCreature(NPC_SHADOW_ORB_1, aOrbCarrierPosition1[0], aOrbCarrierPosition1[1], aOrbCarrierPosition1[2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
-            // pHalion->SummonCreature(NPC_SHADOW_ORB_2, aOrbCarrierPosition2[0], aOrbCarrierPosition2[1], aOrbCarrierPosition2[2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiBerserkTimer)
-        {
-            if (m_uiBerserkTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                {
-                    // Do the same for the Twilight halion
-                    if (m_pInstance)
-                    {
-                        if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_TWILIGHT, true))
-                            pHalion->CastSpell(pHalion, SPELL_BERSERK, true);
-                    }
-
-                    DoScriptText(SAY_BERSERK, m_creature);
-                    m_uiBerserkTimer = 0;
-                }
             }
-            else
-                m_uiBerserkTimer -= uiDiff;
         }
 
-        switch (m_uiPhase)
+        void DoPrepareTwilightPhase()
         {
+            if (!m_pInstance)
+                return;
+
+            // Spawn the orbs and the carriers. Use the twilight Halion version to preserve the phase
+            if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_TWILIGHT))
+            {
+                // Set current Halion hp
+                pHalion->SetHealth(m_creature->GetHealth());
+
+                // NOTE: the spawn coords seem to be totally off, compared to the actual map layout - requires additional research!!!
+
+                // Spawn the rotation focus first
+                // pHalion->SummonCreature(NPC_ORB_ROTATION_FOCUS, aRotationFocusPosition[0], aRotationFocusPosition[1], aRotationFocusPosition[2], aRotationFocusPosition[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+
+                // Then spawn the orb carriers and the shadow orbs. ToDo: research if it's possible to make this dynamic
+                // pHalion->SummonCreature(NPC_ORB_CARRIER, aOrbCarrierPosition1[0], aOrbCarrierPosition1[1], aOrbCarrierPosition1[2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                // pHalion->SummonCreature(NPC_ORB_CARRIER, aOrbCarrierPosition2[0], aOrbCarrierPosition2[1], aOrbCarrierPosition2[2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                // pHalion->SummonCreature(NPC_SHADOW_ORB_1, aOrbCarrierPosition1[0], aOrbCarrierPosition1[1], aOrbCarrierPosition1[2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                // pHalion->SummonCreature(NPC_SHADOW_ORB_2, aOrbCarrierPosition2[0], aOrbCarrierPosition2[1], aOrbCarrierPosition2[2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            if (m_uiBerserkTimer)
+            {
+                if (m_uiBerserkTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                    {
+                        // Do the same for the Twilight halion
+                        if (m_pInstance)
+                        {
+                            if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_TWILIGHT, true))
+                                pHalion->CastSpell(pHalion, SPELL_BERSERK, true);
+                        }
+
+                        DoScriptText(SAY_BERSERK, m_creature);
+                        m_uiBerserkTimer = 0;
+                    }
+                }
+                else
+                    m_uiBerserkTimer -= uiDiff;
+            }
+
+            switch (m_uiPhase)
+            {
             case PHASE_BOTH_REALMS:
                 // ToDo: handle corporeality
                 // no break;
@@ -354,9 +357,15 @@ struct  boss_halion_realAI : public ScriptedAI
                 }
 
                 break;
-        }
+            }
 
-        DoMeleeAttackIfReady();
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_halion_realAI(pCreature);
     }
 };
 
@@ -364,70 +373,73 @@ struct  boss_halion_realAI : public ScriptedAI
 ## boss_halion_twilight
 ######*/
 
-struct  boss_halion_twilightAI : public ScriptedAI
+struct boss_halion_twilight : public CreatureScript
 {
-    boss_halion_twilightAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_halion_twilight() : CreatureScript("boss_halion_twilight") {}
+
+    struct boss_halion_twilightAI : public ScriptedAI
     {
-        m_pInstance = (instance_ruby_sanctum*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    instance_ruby_sanctum* m_pInstance;
-
-    uint8 m_uiPhase;
-    uint32 m_uiTailLashTimer;
-    uint32 m_uiCleaveTimer;
-    uint32 m_uiDarkBreathTimer;
-    uint32 m_uiSoulConsumptionTimer;
-
-    void Reset() override
-    {
-        m_uiPhase                = PHASE_TWILIGHT_REALM;
-        m_uiTailLashTimer        = 10000;
-        m_uiCleaveTimer          = urand(5000, 10000);
-        m_uiDarkBreathTimer      = 15000;
-        m_uiSoulConsumptionTimer = 20000;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoCastSpellIfCan(m_creature, SPELL_DUSK_SHROUD, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_TWILIGHT_PRECISION, CAST_TRIGGERED);
-    }
-
-    void JustReachedHome() override
-    {
-        // Allow real Halion to evade
-        if (m_pInstance)
+        boss_halion_twilightAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_REAL))
-                pHalion->AI()->EnterEvadeMode();
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         }
-    }
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        // ToDo: handle the damage sharing!
+        ScriptedInstance* m_pInstance;
 
-        DoScriptText(SAY_DEATH, m_creature);
-    }
+        uint8 m_uiPhase;
+        uint32 m_uiTailLashTimer;
+        uint32 m_uiCleaveTimer;
+        uint32 m_uiDarkBreathTimer;
+        uint32 m_uiSoulConsumptionTimer;
 
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() == TYPEID_PLAYER)
+        void Reset() override
         {
-            switch (urand(0, 1))
+            m_uiPhase = PHASE_TWILIGHT_REALM;
+            m_uiTailLashTimer = 10000;
+            m_uiCleaveTimer = urand(5000, 10000);
+            m_uiDarkBreathTimer = 15000;
+            m_uiSoulConsumptionTimer = 20000;
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoCastSpellIfCan(m_creature, SPELL_DUSK_SHROUD, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, SPELL_TWILIGHT_PRECISION, CAST_TRIGGERED);
+        }
+
+        void JustReachedHome() override
+        {
+            // Allow real Halion to evade
+            if (m_pInstance)
             {
-                case 0: DoScriptText(SAY_SLAY_1, m_creature); break;
-                case 1: DoPlaySoundToSet(m_creature, SOUND_SLAY_2); break;
+                if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_REAL))
+                    pHalion->AI()->EnterEvadeMode();
             }
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
+        void JustDied(Unit* /*pKiller*/) override
         {
+            // ToDo: handle the damage sharing!
+
+            DoScriptText(SAY_DEATH, m_creature);
+        }
+
+        void KilledUnit(Unit* pVictim) override
+        {
+            if (pVictim->GetTypeId() == TYPEID_PLAYER)
+            {
+                switch (urand(0, 1))
+                {
+                case 0: DoScriptText(SAY_SLAY_1, m_creature); break;
+                case 1: DoPlaySoundToSet(m_creature, SOUND_SLAY_2); break;
+                }
+            }
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_CONSUMPTION:
                 pSummoned->CastSpell(pSummoned, SPELL_CONSUMPTION_PERIODIC, true);
                 break;
@@ -441,16 +453,16 @@ struct  boss_halion_twilightAI : public ScriptedAI
             case NPC_ORB_CARRIER:
                 pSummoned->CastSpell(pSummoned, SPELL_TRACK_ROTATION, true);
                 break;
+            }
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        switch (m_uiPhase)
+        void UpdateAI(const uint32 uiDiff) override
         {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            switch (m_uiPhase)
+            {
             case PHASE_PHISYCAL_REALM:
                 // nothing here - phase not handled by this npc
                 break;
@@ -514,33 +526,34 @@ struct  boss_halion_twilightAI : public ScriptedAI
                 }
 
                 break;
+            }
+
+            DoMeleeAttackIfReady();
         }
+    };
 
-        DoMeleeAttackIfReady();
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_halion_twilightAI(pCreature);
     }
-};
-
-CreatureAI* GetAI_boss_halion_real(Creature* pCreature)
-{
-    return new boss_halion_realAI(pCreature);
-};
-
-CreatureAI* GetAI_boss_halion_twilight(Creature* pCreature)
-{
-    return new boss_halion_twilightAI(pCreature);
 };
 
 void AddSC_boss_halion()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_halion_real";
-    pNewScript->GetAI = &GetAI_boss_halion_real;
-    pNewScript->RegisterSelf();
+    s = new boss_halion_real();
+    s->RegisterSelf();
+    s = new boss_halion_twilight();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_halion_twilight";
-    pNewScript->GetAI = &GetAI_boss_halion_twilight;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_halion_real";
+    //pNewScript->GetAI = &GetAI_boss_halion_real;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_halion_twilight";
+    //pNewScript->GetAI = &GetAI_boss_halion_twilight;
+    //pNewScript->RegisterSelf();
 }

@@ -60,218 +60,225 @@ enum
     NPC_NETHER_PORTAL                   = 34825
 };
 
-struct  boss_jaraxxusAI : public ScriptedAI
+struct boss_jaraxxus : public CreatureScript
 {
-    boss_jaraxxusAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_jaraxxus() : CreatureScript("boss_jaraxxus") {}
+
+    struct boss_jaraxxusAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiFelFireballTimer;
-    uint32 m_uiFelLightningTimer;
-    uint32 m_uiIncinerateFleshTimer;
-    uint32 m_uiBurningInfernoTimer;
-    uint32 m_uiLegionFlameTimer;
-    uint32 m_uiSummonTimer;
-    uint32 m_uiNetherPowerTimer;
-    uint32 m_uiBerserkTimer;
-    bool m_bVolcanoSummon;
-
-    void Reset() override
-    {
-        m_uiFelFireballTimer        = urand(20000, 25000);  // maybe too early, and too often!
-        m_uiFelLightningTimer       = urand(5000, 8000);
-        m_uiIncinerateFleshTimer    = 25000;
-        m_uiLegionFlameTimer        = 10000;
-        m_uiSummonTimer             = 20000;
-        m_uiNetherPowerTimer        = urand(20000, 30000);
-        m_uiBerserkTimer            = 10 * MINUTE * IN_MILLISECONDS;
-
-        m_bVolcanoSummon            = true;
-
-        DoCastSpellIfCan(m_creature, SPELL_JARAXXUS_HITTIN_YA);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_JARAXXUS, FAIL);
-
-        m_creature->ForcedDespawn();
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_JARAXXUS, DONE);
-    }
-
-    void Aggro(Unit* pWho) override
-    {
-        if (pWho->GetEntry() == NPC_FIZZLEBANG)
-            return;
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_JARAXXUS, IN_PROGRESS);
-
-        DoCastSpellIfCan(m_creature, SPELL_NETHER_POWER);
-        m_creature->SetInCombatWithZone();
-    }
-
-    void EnterEvadeMode() override
-    {
-        if (m_pInstance && m_pInstance->GetData(TYPE_JARAXXUS) != IN_PROGRESS)
-            return;
-
-        ScriptedAI::EnterEvadeMode();
-    }
-
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetEntry() == NPC_FIZZLEBANG)
-            return;
-
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
+        boss_jaraxxusAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        }
+
+        ScriptedInstance* m_pInstance;
+
+        uint32 m_uiFelFireballTimer;
+        uint32 m_uiFelLightningTimer;
+        uint32 m_uiIncinerateFleshTimer;
+        uint32 m_uiBurningInfernoTimer;
+        uint32 m_uiLegionFlameTimer;
+        uint32 m_uiSummonTimer;
+        uint32 m_uiNetherPowerTimer;
+        uint32 m_uiBerserkTimer;
+        bool m_bVolcanoSummon;
+
+        void Reset() override
+        {
+            m_uiFelFireballTimer = urand(20000, 25000);  // maybe too early, and too often!
+            m_uiFelLightningTimer = urand(5000, 8000);
+            m_uiIncinerateFleshTimer = 25000;
+            m_uiLegionFlameTimer = 10000;
+            m_uiSummonTimer = 20000;
+            m_uiNetherPowerTimer = urand(20000, 30000);
+            m_uiBerserkTimer = 10 * MINUTE * IN_MILLISECONDS;
+
+            m_bVolcanoSummon = true;
+
+            DoCastSpellIfCan(m_creature, SPELL_JARAXXUS_HITTIN_YA);
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_JARAXXUS, FAIL);
+
+            m_creature->ForcedDespawn();
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_JARAXXUS, DONE);
+        }
+
+        void Aggro(Unit* pWho) override
+        {
+            if (pWho->GetEntry() == NPC_FIZZLEBANG)
+                return;
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_JARAXXUS, IN_PROGRESS);
+
+            DoCastSpellIfCan(m_creature, SPELL_NETHER_POWER);
+            m_creature->SetInCombatWithZone();
+        }
+
+        void EnterEvadeMode() override
+        {
+            if (m_pInstance && m_pInstance->GetData(TYPE_JARAXXUS) != IN_PROGRESS)
+                return;
+
+            ScriptedAI::EnterEvadeMode();
+        }
+
+        void KilledUnit(Unit* pVictim) override
+        {
+            if (pVictim->GetEntry() == NPC_FIZZLEBANG)
+                return;
+
+            DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_INFERNAL_VOLCANO:
                 pSummoned->CastSpell(pSummoned, SPELL_ERUPTION, true, NULL, NULL, m_creature->GetObjectGuid());
                 break;
             case NPC_NETHER_PORTAL:
                 pSummoned->CastSpell(pSummoned, SPELL_NETHER_PORTAL, true, NULL, NULL, m_creature->GetObjectGuid());
                 break;
+            }
         }
-    }
 
-    void MovementInform(uint32 uiMovementType, uint32 uiPointId) override
-    {
-        if (uiMovementType != POINT_MOTION_TYPE)
-            return;
+        void MovementInform(uint32 uiMovementType, uint32 uiPointId) override
+        {
+            if (uiMovementType != POINT_MOTION_TYPE)
+                return;
 
-        if (m_pInstance && uiPointId == POINT_COMBAT_POSITION)
+            if (m_pInstance && uiPointId == POINT_COMBAT_POSITION)
             if (Creature* pFizzlebang = m_pInstance->GetSingleCreatureFromStorage(NPC_FIZZLEBANG))
                 m_creature->SetFacingToObject(pFizzlebang);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Spells
-        if (m_uiIncinerateFleshTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_INCINERATE_FLESH) == CAST_OK)
-                    m_uiIncinerateFleshTimer = 25000;
-            }
         }
-        else
-            m_uiIncinerateFleshTimer -= uiDiff;
 
-        if (m_uiFelFireballTimer < uiDiff)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_FEL_FIREBALL) == CAST_OK)
-                    m_uiFelFireballTimer = urand(20000, 30000);
-            }
-        }
-        else
-            m_uiFelFireballTimer -= uiDiff;
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
 
-        if (m_uiFelLightningTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            // Spells
+            if (m_uiIncinerateFleshTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_FEL_LIGHTNING) == CAST_OK)
-                    m_uiFelLightningTimer = urand(10000, 18000);
-            }
-        }
-        else
-            m_uiFelLightningTimer -= uiDiff;
-
-        if (m_uiSummonTimer < uiDiff)
-        {
-            if (m_bVolcanoSummon)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_NETHER_PORTAL_SUMMON) == CAST_OK)
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
-                    // TODO missing emote?
-                    // DoScriptText(EMOTE_PORTAL, m_creature);
-                    m_bVolcanoSummon = false;
-                    m_uiSummonTimer = 60000;
+                    if (DoCastSpellIfCan(pTarget, SPELL_INCINERATE_FLESH) == CAST_OK)
+                        m_uiIncinerateFleshTimer = 25000;
                 }
             }
-            // summon volcano
             else
+                m_uiIncinerateFleshTimer -= uiDiff;
+
+            if (m_uiFelFireballTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_INFERNAL_ERUPTION) == CAST_OK)
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0))
                 {
-                    // TODO missing emote?
-                    // DoScriptText(EMOTE_VOLCANO, m_creature);
-                    m_bVolcanoSummon = true;
-                    m_uiSummonTimer = 60000;
+                    if (DoCastSpellIfCan(pTarget, SPELL_FEL_FIREBALL) == CAST_OK)
+                        m_uiFelFireballTimer = urand(20000, 30000);
                 }
             }
-        }
-        else
-            m_uiSummonTimer -= uiDiff;
+            else
+                m_uiFelFireballTimer -= uiDiff;
 
-        if (m_uiLegionFlameTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (m_uiFelLightningTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_LEGION_FLAME) == CAST_OK)
-                    m_uiLegionFlameTimer = 30000;
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_FEL_LIGHTNING) == CAST_OK)
+                        m_uiFelLightningTimer = urand(10000, 18000);
+                }
             }
-        }
-        else
-            m_uiLegionFlameTimer -= uiDiff;
+            else
+                m_uiFelLightningTimer -= uiDiff;
 
-        if (m_uiNetherPowerTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_NETHER_POWER) == CAST_OK)
-                m_uiNetherPowerTimer = 42000;
-        }
-        else
-            m_uiNetherPowerTimer -= uiDiff;
-
-        // berserk
-        if (m_uiBerserkTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+            if (m_uiSummonTimer < uiDiff)
             {
-                DoScriptText(SAY_BERSERK, m_creature);
-                m_uiBerserkTimer = 60000;
+                if (m_bVolcanoSummon)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_NETHER_PORTAL_SUMMON) == CAST_OK)
+                    {
+                        // TODO missing emote?
+                        // DoScriptText(EMOTE_PORTAL, m_creature);
+                        m_bVolcanoSummon = false;
+                        m_uiSummonTimer = 60000;
+                    }
+                }
+                // summon volcano
+                else
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_INFERNAL_ERUPTION) == CAST_OK)
+                    {
+                        // TODO missing emote?
+                        // DoScriptText(EMOTE_VOLCANO, m_creature);
+                        m_bVolcanoSummon = true;
+                        m_uiSummonTimer = 60000;
+                    }
+                }
             }
-        }
-        else
-            m_uiBerserkTimer -= uiDiff;
+            else
+                m_uiSummonTimer -= uiDiff;
 
-        DoMeleeAttackIfReady();
+            if (m_uiLegionFlameTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_LEGION_FLAME) == CAST_OK)
+                        m_uiLegionFlameTimer = 30000;
+                }
+            }
+            else
+                m_uiLegionFlameTimer -= uiDiff;
+
+            if (m_uiNetherPowerTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_NETHER_POWER) == CAST_OK)
+                    m_uiNetherPowerTimer = 42000;
+            }
+            else
+                m_uiNetherPowerTimer -= uiDiff;
+
+            // berserk
+            if (m_uiBerserkTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                {
+                    DoScriptText(SAY_BERSERK, m_creature);
+                    m_uiBerserkTimer = 60000;
+                }
+            }
+            else
+                m_uiBerserkTimer -= uiDiff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_jaraxxusAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_jaraxxus(Creature* pCreature)
-{
-    return new boss_jaraxxusAI(pCreature);
-}
-
 void AddSC_boss_jaraxxus()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_jaraxxus";
-    pNewScript->GetAI = &GetAI_boss_jaraxxus;
-    pNewScript->RegisterSelf();
+    s = new boss_jaraxxus();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_jaraxxus";
+    //pNewScript->GetAI = &GetAI_boss_jaraxxus;
+    //pNewScript->RegisterSelf();
 }

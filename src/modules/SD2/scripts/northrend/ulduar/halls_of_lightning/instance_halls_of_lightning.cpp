@@ -34,156 +34,176 @@ EndScriptData */
 3 - Loken
 */
 
-instance_halls_of_lightning::instance_halls_of_lightning(Map* pMap) : ScriptedInstance(pMap),
-    m_bLightningStruck(false),
-    m_bIsShatterResistant(false)
+struct is_halls_of_lightning : public InstanceScript
 {
-    Initialize();
-}
+    is_halls_of_lightning() : InstanceScript("instance_halls_of_lightning") {}
 
-void instance_halls_of_lightning::Initialize()
-{
-    memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
-}
-
-void instance_halls_of_lightning::OnCreatureCreate(Creature* pCreature)
-{
-    switch (pCreature->GetEntry())
+    class instance_halls_of_lightning : public ScriptedInstance
     {
-        case NPC_BJARNGRIM:
-        case NPC_IONAR:
-        case NPC_VOLKHAN_ANVIL:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
-            break;
-    }
-}
+    public:
+        instance_halls_of_lightning(Map* pMap) : ScriptedInstance(pMap),
+            m_bLightningStruck(false),
+            m_bIsShatterResistant(false)
+        {
+            Initialize();
+        }
 
-void instance_halls_of_lightning::OnObjectCreate(GameObject* pGo)
-{
-    switch (pGo->GetEntry())
-    {
-        case GO_VOLKHAN_DOOR:
-            if (m_auiEncounter[TYPE_VOLKHAN] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
-            break;
-        case GO_IONAR_DOOR:
-            if (m_auiEncounter[TYPE_IONAR] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
-            break;
-        case GO_LOKEN_THRONE:
-            break;
+        void Initialize() override
+        {
+            memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+        }
 
-        default:
-            return;
-    }
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
-}
-
-void instance_halls_of_lightning::SetData(uint32 uiType, uint32 uiData)
-{
-    switch (uiType)
-    {
-        case TYPE_BJARNGRIM:
-            if (uiData == SPECIAL)
-                m_bLightningStruck = true;
-            else if (uiData == FAIL)
-                m_bLightningStruck = false;
-            m_auiEncounter[uiType] = uiData;
-            break;
-        case TYPE_VOLKHAN:
-            if (uiData == DONE)
-                DoUseDoorOrButton(GO_VOLKHAN_DOOR);
-            else if (uiData == IN_PROGRESS)
-                m_bIsShatterResistant = true;
-            else if (uiData == SPECIAL)
-                m_bIsShatterResistant = false;
-            m_auiEncounter[uiType] = uiData;
-            break;
-        case TYPE_IONAR:
-            if (uiData == DONE)
-                DoUseDoorOrButton(GO_IONAR_DOOR);
-            m_auiEncounter[uiType] = uiData;
-            break;
-        case TYPE_LOKEN:
-            if (uiData == IN_PROGRESS)
-                DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_LOKEN_ID);
-            else if (uiData == DONE)
+        void OnCreatureCreate(Creature* pCreature) override
+        {
+            switch (pCreature->GetEntry())
             {
-                if (GameObject* pGlobe = GetSingleGameObjectFromStorage(GO_LOKEN_THRONE))
-                    pGlobe->SendGameObjectCustomAnim(pGlobe->GetObjectGuid());
+            case NPC_BJARNGRIM:
+            case NPC_IONAR:
+            case NPC_VOLKHAN_ANVIL:
+                m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+                break;
             }
-            m_auiEncounter[uiType] = uiData;
-            break;
-    }
+        }
 
-    if (uiData == DONE)
+        void OnObjectCreate(GameObject* pGo) override
+        {
+            switch (pGo->GetEntry())
+            {
+            case GO_VOLKHAN_DOOR:
+                if (m_auiEncounter[TYPE_VOLKHAN] == DONE)
+                    pGo->SetGoState(GO_STATE_ACTIVE);
+                break;
+            case GO_IONAR_DOOR:
+                if (m_auiEncounter[TYPE_IONAR] == DONE)
+                    pGo->SetGoState(GO_STATE_ACTIVE);
+                break;
+            case GO_LOKEN_THRONE:
+                break;
+
+            default:
+                return;
+            }
+            m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+        }
+
+        void SetData(uint32 uiType, uint32 uiData) override
+        {
+            switch (uiType)
+            {
+            case TYPE_BJARNGRIM:
+                if (uiData == SPECIAL)
+                    m_bLightningStruck = true;
+                else if (uiData == FAIL)
+                    m_bLightningStruck = false;
+                m_auiEncounter[uiType] = uiData;
+                break;
+            case TYPE_VOLKHAN:
+                if (uiData == DONE)
+                    DoUseDoorOrButton(GO_VOLKHAN_DOOR);
+                else if (uiData == IN_PROGRESS)
+                    m_bIsShatterResistant = true;
+                else if (uiData == SPECIAL)
+                    m_bIsShatterResistant = false;
+                m_auiEncounter[uiType] = uiData;
+                break;
+            case TYPE_IONAR:
+                if (uiData == DONE)
+                    DoUseDoorOrButton(GO_IONAR_DOOR);
+                m_auiEncounter[uiType] = uiData;
+                break;
+            case TYPE_LOKEN:
+                if (uiData == IN_PROGRESS)
+                    DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_LOKEN_ID);
+                else if (uiData == DONE)
+                {
+                    if (GameObject* pGlobe = GetSingleGameObjectFromStorage(GO_LOKEN_THRONE))
+                        pGlobe->SendGameObjectCustomAnim(pGlobe->GetObjectGuid());
+                }
+                m_auiEncounter[uiType] = uiData;
+                break;
+            }
+
+            if (uiData == DONE)
+            {
+                OUT_SAVE_INST_DATA;
+
+                std::ostringstream saveStream;
+                saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " " << m_auiEncounter[3];
+
+                m_strInstData = saveStream.str();
+
+                SaveToDB();
+                OUT_SAVE_INST_DATA_COMPLETE;
+            }
+        }
+
+        uint32 GetData(uint32 uiType) const override
+        {
+            if (uiType < MAX_ENCOUNTER)
+                return m_auiEncounter[uiType];
+
+            return 0;
+        }
+
+        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override
+        {
+            switch (uiCriteriaId)
+            {
+            case ACHIEV_CRIT_LIGHTNING:
+                return m_bLightningStruck;
+            case ACHIEV_CRIT_RESISTANT:
+                return m_bIsShatterResistant;
+            }
+
+            return false;
+        }
+
+        const char* Save() const override { return m_strInstData.c_str(); }
+        void Load(const char* chrIn) override
+        {
+            if (!chrIn)
+            {
+                OUT_LOAD_INST_DATA_FAIL;
+                return;
+            }
+
+            OUT_LOAD_INST_DATA(chrIn);
+
+            std::istringstream loadStream(chrIn);
+            loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3];
+
+            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+            {
+                if (m_auiEncounter[i] == IN_PROGRESS)
+                    m_auiEncounter[i] = NOT_STARTED;
+            }
+
+            OUT_LOAD_INST_DATA_COMPLETE;
+        }
+
+    private:
+        uint32 m_auiEncounter[MAX_ENCOUNTER];
+        std::string m_strInstData;
+
+        bool m_bLightningStruck;
+        bool m_bIsShatterResistant;
+    };
+
+    InstanceData* GetInstanceData(Map* pMap) override
     {
-        OUT_SAVE_INST_DATA;
-
-        std::ostringstream saveStream;
-        saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " " << m_auiEncounter[3];
-
-        m_strInstData = saveStream.str();
-
-        SaveToDB();
-        OUT_SAVE_INST_DATA_COMPLETE;
+        return new instance_halls_of_lightning(pMap);
     }
-}
-
-uint32 instance_halls_of_lightning::GetData(uint32 uiType) const
-{
-    if (uiType < MAX_ENCOUNTER)
-        return m_auiEncounter[uiType];
-
-    return 0;
-}
-
-bool instance_halls_of_lightning::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* /*pSource*/, Unit const* /*pTarget*/, uint32 /*uiMiscValue1 = 0*/) const
-{
-    switch (uiCriteriaId)
-    {
-        case ACHIEV_CRIT_LIGHTNING:
-            return m_bLightningStruck;
-        case ACHIEV_CRIT_RESISTANT:
-            return m_bIsShatterResistant;
-    }
-
-    return false;
-}
-
-void instance_halls_of_lightning::Load(const char* chrIn)
-{
-    if (!chrIn)
-    {
-        OUT_LOAD_INST_DATA_FAIL;
-        return;
-    }
-
-    OUT_LOAD_INST_DATA(chrIn);
-
-    std::istringstream loadStream(chrIn);
-    loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3];
-
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-    {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
-    }
-
-    OUT_LOAD_INST_DATA_COMPLETE;
-}
-
-InstanceData* GetInstanceData_instance_halls_of_lightning(Map* pMap)
-{
-    return new instance_halls_of_lightning(pMap);
-}
+};
 
 void AddSC_instance_halls_of_lightning()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "instance_halls_of_lightning";
-    pNewScript->GetInstanceData = &GetInstanceData_instance_halls_of_lightning;
-    pNewScript->RegisterSelf();
+    s = new is_halls_of_lightning();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "instance_halls_of_lightning";
+    //pNewScript->GetInstanceData = &GetInstanceData_instance_halls_of_lightning;
+    //pNewScript->RegisterSelf();
 }

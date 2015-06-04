@@ -16,8 +16,8 @@ enum
     TYPE_KERISTRASZA               = 3,
     TYPE_INTENSE_COLD_FAILED       = 4,
 
-    TYPE_ACHIEV_CHAOS_THEORY       = 0,
-    TYPE_ACHIEV_SPLIT_PERSONALITY  = 1,
+    TYPE_ACHIEV_CHAOS_THEORY       = 5,     //order to be met in ScriptedInstance
+    TYPE_ACHIEV_SPLIT_PERSONALITY  = 6,
 
     NPC_TELESTRA                   = 26731,
     NPC_ANOMALUS                   = 26763,
@@ -34,34 +34,4 @@ enum
     ACHIEV_CRIT_INTENSE_COLD        = 7315,                 // Keristrasza, achiev 2036
     ACHIEV_CRIT_SPLIT_PERSONALITY   = 7577,                 // Telestra, achiev 2150
 };
-
-class  instance_nexus : public ScriptedInstance
-{
-    public:
-        instance_nexus(Map* pMap);
-
-        void Initialize() override;
-
-        void OnObjectCreate(GameObject* pGo) override;
-        void OnCreatureCreate(Creature* pCreature) override;
-
-        uint32 GetData(uint32 uiType) const override;
-        void SetData(uint32 uiType, uint32 uiData) override;
-
-        void SetSpecialAchievementCriteria(uint32 uiType, bool bIsMet);
-        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-
-        void Load(const char* chrIn) override;
-
-    private:
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string m_strInstData;
-
-        bool m_abAchievCriteria[MAX_SPECIAL_ACHIEV_CRITS];
-
-        std::set<uint32> m_sIntenseColdFailPlayers;
-};
-
 #endif

@@ -64,74 +64,77 @@ static const float aGarfrostMoveLocs[2][3] =
 
 static const float afOutroNpcSpawnLoc[4] = {695.0146f, -123.7532f, 515.3067f, 4.59f};
 
-struct  boss_forgemaster_garfrostAI : public ScriptedAI
+struct boss_forgemaster_garfrost : public CreatureScript
 {
-    boss_forgemaster_garfrostAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_forgemaster_garfrost() : CreatureScript("boss_forgemaster_garfrost") {}
+
+    struct boss_forgemaster_garfrostAI : public ScriptedAI
     {
-        m_pInstance = (instance_pit_of_saron*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    instance_pit_of_saron* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiThrowSaroniteTimer;
-    uint32 m_uiPhase;
-    uint32 m_uiChillingWaveTimer;
-    uint32 m_uiDeepFreezeTimer;
-    uint32 m_uiCheckPermafrostTimer;
-
-    void Reset() override
-    {
-        m_uiCheckPermafrostTimer = 2000;
-        m_uiThrowSaroniteTimer = 13000;
-        m_uiChillingWaveTimer = 10000;
-        m_uiDeepFreezeTimer = 10000;
-        SetCombatMovement(true);
-        m_uiPhase = PHASE_NO_ENCHANTMENT;
-    }
-
-    void Aggro(Unit* pWho) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature, pWho);
-        DoCastSpellIfCan(m_creature, SPELL_PERMAFROST);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GARFROST, IN_PROGRESS);
-    }
-
-    void JustDied(Unit* pKiller) override
-    {
-        DoScriptText(SAY_DEATH, m_creature, pKiller);
-
-        if (m_pInstance)
+        boss_forgemaster_garfrostAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            m_pInstance->SetData(TYPE_GARFROST, DONE);
-
-            // Summon Ironskull or Victus for outro
-            m_creature->SummonCreature(m_pInstance->GetPlayerTeam() == HORDE ? NPC_IRONSKULL_PART1 : NPC_VICTUS_PART1,
-                                       afOutroNpcSpawnLoc[0], afOutroNpcSpawnLoc[1], afOutroNpcSpawnLoc[2], afOutroNpcSpawnLoc[3], TEMPSUMMON_TIMED_DESPAWN, 2 * MINUTE * IN_MILLISECONDS);
-
-            // ToDo: handle the other npcs movement
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         }
-    }
 
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(SAY_SLAY_1, m_creature);
-    }
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
 
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GARFROST, FAIL);
-    }
+        uint32 m_uiThrowSaroniteTimer;
+        uint32 m_uiPhase;
+        uint32 m_uiChillingWaveTimer;
+        uint32 m_uiDeepFreezeTimer;
+        uint32 m_uiCheckPermafrostTimer;
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
+        void Reset() override
         {
+            m_uiCheckPermafrostTimer = 2000;
+            m_uiThrowSaroniteTimer = 13000;
+            m_uiChillingWaveTimer = 10000;
+            m_uiDeepFreezeTimer = 10000;
+            SetCombatMovement(true);
+            m_uiPhase = PHASE_NO_ENCHANTMENT;
+        }
+
+        void Aggro(Unit* pWho) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature, pWho);
+            DoCastSpellIfCan(m_creature, SPELL_PERMAFROST);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_GARFROST, IN_PROGRESS);
+        }
+
+        void JustDied(Unit* pKiller) override
+        {
+            DoScriptText(SAY_DEATH, m_creature, pKiller);
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_GARFROST, DONE);
+
+                // Summon Ironskull or Victus for outro
+                m_creature->SummonCreature(m_pInstance->GetData(TYPE_DATA_PLAYER_TEAM) == HORDE ? NPC_IRONSKULL_PART1 : NPC_VICTUS_PART1,
+                    afOutroNpcSpawnLoc[0], afOutroNpcSpawnLoc[1], afOutroNpcSpawnLoc[2], afOutroNpcSpawnLoc[3], TEMPSUMMON_TIMED_DESPAWN, 2 * MINUTE * IN_MILLISECONDS);
+
+                // ToDo: handle the other npcs movement
+            }
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            DoScriptText(SAY_SLAY_1, m_creature);
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_GARFROST, FAIL);
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_IRONSKULL_PART1:
             case NPC_VICTUS_PART1:
             {
@@ -141,92 +144,91 @@ struct  boss_forgemaster_garfrostAI : public ScriptedAI
                 pSummoned->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
                 break;
             }
+            }
         }
-    }
 
-    void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
-    {
-        if (uiMotionType != EFFECT_MOTION_TYPE)
-            return;
-
-        if (uiPointId != PHASE_BLADE_ENCHANTMENT && uiPointId != PHASE_MACE_ENCHANTMENT)
-            return;
-
-        // Cast and say expected spell
-        DoCastSpellIfCan(m_creature, uiPointId == PHASE_BLADE_ENCHANTMENT ? SPELL_FORGE_FROZEN_BLADE : SPELL_FORGE_FROSTBORN_MACE);
-        DoScriptText(uiPointId == PHASE_BLADE_ENCHANTMENT ? SAY_FORGE_1 : SAY_FORGE_2, m_creature);
-
-        m_uiThrowSaroniteTimer += 5000;                     // Delay next Saronit
-        m_uiPhase = uiPointId;
-        SetCombatMovement(true);
-
-        if (m_creature->getVictim())
+        void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
         {
-            m_creature->GetMotionMaster()->Clear();
-            m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
-        }
-    }
+            if (uiMotionType != EFFECT_MOTION_TYPE)
+                return;
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+            if (uiPointId != PHASE_BLADE_ENCHANTMENT && uiPointId != PHASE_MACE_ENCHANTMENT)
+                return;
 
-        // This needs to be checked only on heroic
-        if (!m_bIsRegularMode && m_uiCheckPermafrostTimer)
-        {
-            if (m_uiCheckPermafrostTimer <= uiDiff)
+            // Cast and say expected spell
+            DoCastSpellIfCan(m_creature, uiPointId == PHASE_BLADE_ENCHANTMENT ? SPELL_FORGE_FROZEN_BLADE : SPELL_FORGE_FROSTBORN_MACE);
+            DoScriptText(uiPointId == PHASE_BLADE_ENCHANTMENT ? SAY_FORGE_1 : SAY_FORGE_2, m_creature);
+
+            m_uiThrowSaroniteTimer += 5000;                     // Delay next Saronit
+            m_uiPhase = uiPointId;
+            SetCombatMovement(true);
+
+            if (m_creature->getVictim())
             {
-                ThreatList playerList = m_creature->GetThreatManager().getThreatList();
-                for (ThreatList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                m_creature->GetMotionMaster()->Clear();
+                m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            // This needs to be checked only on heroic
+            if (!m_bIsRegularMode && m_uiCheckPermafrostTimer)
+            {
+                if (m_uiCheckPermafrostTimer <= uiDiff) //@TODO rethink it with spellscripts maybe
                 {
-                    if (Player* pTarget = m_creature->GetMap()->GetPlayer((*itr)->getUnitGuid()))
+                    ThreatList playerList = m_creature->GetThreatManager().getThreatList();
+                    for (ThreatList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
                     {
-                        Aura* pAuraIntenseCold = pTarget->GetAura(SPELL_PERMAFROST_AURA_H, EFFECT_INDEX_2);
-
-                        if (pAuraIntenseCold)
+                        if (Player* pTarget = m_creature->GetMap()->GetPlayer((*itr)->getUnitGuid()))
                         {
-                            if (pAuraIntenseCold->GetStackAmount() > MAX_PERMAFROST_STACK)
-                            {
-                                if (m_pInstance)
-                                    m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_DOESNT_GO_ELEVEN, false);
+                            Aura* pAuraIntenseCold = pTarget->GetAura(SPELL_PERMAFROST_AURA_H, EFFECT_INDEX_2);
 
-                                m_uiCheckPermafrostTimer = 0;
-                                return;
+                            if (pAuraIntenseCold)
+                            {
+                                if (pAuraIntenseCold->GetStackAmount() > MAX_PERMAFROST_STACK)
+                                {
+                                    if (m_pInstance)
+                                        m_pInstance->SetData(TYPE_ACHIEV_DOESNT_GO_ELEVEN, uint32(false));
+
+                                    m_uiCheckPermafrostTimer = 0;
+                                    return;
+                                }
                             }
                         }
                     }
+                    m_uiCheckPermafrostTimer = 1000;
                 }
-                m_uiCheckPermafrostTimer = 1000;
+                else
+                    m_uiCheckPermafrostTimer -= uiDiff;
+            }
+
+            // Do nothing more while moving
+            if (m_uiPhase == PHASE_MOVEMENT)
+                return;
+
+            // Casted in every phase
+            if (m_uiThrowSaroniteTimer < uiDiff)
+            {
+                // TODO - only target players?
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_THROW_SARONITE) == CAST_OK)
+                    {
+                        DoScriptText(EMOTE_THROW_SARONITE, m_creature, pTarget);
+                        m_uiThrowSaroniteTimer = 16000;
+                    }
+                }
             }
             else
-                m_uiCheckPermafrostTimer -= uiDiff;
-        }
+                m_uiThrowSaroniteTimer -= uiDiff;
 
-        // Do nothing more while moving
-        if (m_uiPhase == PHASE_MOVEMENT)
-            return;
-
-        // Casted in every phase
-        if (m_uiThrowSaroniteTimer < uiDiff)
-        {
-            // TODO - only target players?
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            switch (m_uiPhase)
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_THROW_SARONITE) == CAST_OK)
-                {
-                    DoScriptText(EMOTE_THROW_SARONITE, m_creature, pTarget);
-                    m_uiThrowSaroniteTimer = 16000;
-                }
-            }
-        }
-        else
-            m_uiThrowSaroniteTimer -= uiDiff;
-
-        switch (m_uiPhase)
-        {
             case PHASE_NO_ENCHANTMENT:
-            {
                 if (m_creature->GetHealthPercent() < 66.0f)
                 {
                     DoCastSpellIfCan(m_creature, SPELL_THUNDERING_STOMP, CAST_INTERRUPT_PREVIOUS);
@@ -239,9 +241,7 @@ struct  boss_forgemaster_garfrostAI : public ScriptedAI
                     return;
                 }
                 break;
-            }
             case PHASE_BLADE_ENCHANTMENT:
-            {
                 if (m_creature->GetHealthPercent() < 33.0f)
                 {
                     DoCastSpellIfCan(m_creature, SPELL_THUNDERING_STOMP, CAST_INTERRUPT_PREVIOUS);
@@ -263,9 +263,7 @@ struct  boss_forgemaster_garfrostAI : public ScriptedAI
                     m_uiChillingWaveTimer -= uiDiff;
 
                 break;
-            }
             case PHASE_MACE_ENCHANTMENT:
-            {
                 if (m_uiDeepFreezeTimer < uiDiff)
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
@@ -282,23 +280,26 @@ struct  boss_forgemaster_garfrostAI : public ScriptedAI
 
                 break;
             }
-        }
 
-        DoMeleeAttackIfReady();
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_forgemaster_garfrostAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_forgemaster_garfrost(Creature* pCreature)
-{
-    return new boss_forgemaster_garfrostAI(pCreature);
-}
-
 void AddSC_boss_garfrost()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_forgemaster_garfrost";
-    pNewScript->GetAI = &GetAI_boss_forgemaster_garfrost;
-    pNewScript->RegisterSelf();
+    s = new boss_forgemaster_garfrost();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_forgemaster_garfrost";
+    //pNewScript->GetAI = &GetAI_boss_forgemaster_garfrost;
+    //pNewScript->RegisterSelf();
 }

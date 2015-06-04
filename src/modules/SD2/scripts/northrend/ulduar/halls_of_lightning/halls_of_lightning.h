@@ -30,31 +30,4 @@ enum
     ACHIEV_CRIT_LIGHTNING   = 6835,                         // Bjarngrim, achiev 1834
     ACHIEV_CRIT_RESISTANT   = 7321,                         // Volkhan, achiev 2042
 };
-
-class  instance_halls_of_lightning : public ScriptedInstance
-{
-    public:
-        instance_halls_of_lightning(Map* pMap);
-
-        void Initialize() override;
-
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-        void Load(const char* chrIn) override;
-
-    private:
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string m_strInstData;
-
-        bool m_bLightningStruck;
-        bool m_bIsShatterResistant;
-};
-
 #endif

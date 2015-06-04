@@ -47,138 +47,145 @@ enum
     SPELL_HOPELESS           = 29125
 };
 
-struct  boss_razuviousAI : public ScriptedAI
+struct boss_razuvious : public CreatureScript
 {
-    boss_razuviousAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_razuvious() : CreatureScript("boss_razuvious") {}
+
+    struct boss_razuviousAI : public ScriptedAI
     {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    instance_naxxramas* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiUnbalancingStrikeTimer;
-    uint32 m_uiDisruptingShoutTimer;
-    uint32 m_uiJaggedKnifeTimer;
-    uint32 m_uiCommandSoundTimer;
-
-    void Reset() override
-    {
-        m_uiUnbalancingStrikeTimer = 30000;                 // 30 seconds
-        m_uiDisruptingShoutTimer   = 15000;                 // 15 seconds
-        m_uiJaggedKnifeTimer       = urand(10000, 15000);
-        m_uiCommandSoundTimer      = 40000;                 // 40 seconds
-    }
-
-    void KilledUnit(Unit* /*Victim*/) override
-    {
-        if (urand(0, 3))
-            return;
-
-        switch (urand(0, 1))
+        boss_razuviousAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        }
+
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        uint32 m_uiUnbalancingStrikeTimer;
+        uint32 m_uiDisruptingShoutTimer;
+        uint32 m_uiJaggedKnifeTimer;
+        uint32 m_uiCommandSoundTimer;
+
+        void Reset() override
+        {
+            m_uiUnbalancingStrikeTimer = 30000;                 // 30 seconds
+            m_uiDisruptingShoutTimer = 15000;                 // 15 seconds
+            m_uiJaggedKnifeTimer = urand(10000, 15000);
+            m_uiCommandSoundTimer = 40000;                 // 40 seconds
+        }
+
+        void KilledUnit(Unit* /*Victim*/) override
+        {
+            if (urand(0, 3))
+                return;
+
+            switch (urand(0, 1))
+            {
             case 0: DoScriptText(SAY_SLAY1, m_creature); break;
             case 1: DoScriptText(SAY_SLAY2, m_creature); break;
+            }
         }
-    }
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        DoCastSpellIfCan(m_creature, SPELL_HOPELESS, CAST_TRIGGERED);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_RAZUVIOUS, DONE);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        switch (urand(0, 2))
+        void JustDied(Unit* /*pKiller*/) override
         {
+            DoScriptText(SAY_DEATH, m_creature);
+
+            DoCastSpellIfCan(m_creature, SPELL_HOPELESS, CAST_TRIGGERED);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_RAZUVIOUS, DONE);
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            switch (urand(0, 2))
+            {
             case 0: DoScriptText(SAY_AGGRO1, m_creature); break;
             case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
             case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
-        }
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_RAZUVIOUS, IN_PROGRESS);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_RAZUVIOUS, FAIL);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Unbalancing Strike
-        if (m_uiUnbalancingStrikeTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_UNBALANCING_STRIKE) == CAST_OK)
-                m_uiUnbalancingStrikeTimer = 30000;
-        }
-        else
-            m_uiUnbalancingStrikeTimer -= uiDiff;
-
-        // Disrupting Shout
-        if (m_uiDisruptingShoutTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DISRUPTING_SHOUT : SPELL_DISRUPTING_SHOUT_H) == CAST_OK)
-                m_uiDisruptingShoutTimer = 25000;
-        }
-        else
-            m_uiDisruptingShoutTimer -= uiDiff;
-
-        // Jagged Knife
-        if (m_uiJaggedKnifeTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_JAGGED_KNIFE) == CAST_OK)
-                    m_uiJaggedKnifeTimer = 10000;
             }
-        }
-        else
-            m_uiJaggedKnifeTimer -= uiDiff;
 
-        // Random say
-        if (m_uiCommandSoundTimer < uiDiff)
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_RAZUVIOUS, IN_PROGRESS);
+        }
+
+        void JustReachedHome() override
         {
-            switch (urand(0, 3))
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_RAZUVIOUS, FAIL);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            // Unbalancing Strike
+            if (m_uiUnbalancingStrikeTimer < uiDiff)
             {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_UNBALANCING_STRIKE) == CAST_OK)
+                    m_uiUnbalancingStrikeTimer = 30000;
+            }
+            else
+                m_uiUnbalancingStrikeTimer -= uiDiff;
+
+            // Disrupting Shout
+            if (m_uiDisruptingShoutTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DISRUPTING_SHOUT : SPELL_DISRUPTING_SHOUT_H) == CAST_OK)
+                    m_uiDisruptingShoutTimer = 25000;
+            }
+            else
+                m_uiDisruptingShoutTimer -= uiDiff;
+
+            // Jagged Knife
+            if (m_uiJaggedKnifeTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_JAGGED_KNIFE) == CAST_OK)
+                        m_uiJaggedKnifeTimer = 10000;
+                }
+            }
+            else
+                m_uiJaggedKnifeTimer -= uiDiff;
+
+            // Random say
+            if (m_uiCommandSoundTimer < uiDiff)
+            {
+                switch (urand(0, 3))
+                {
                 case 0: DoScriptText(SAY_COMMAND1, m_creature); break;
                 case 1: DoScriptText(SAY_COMMAND2, m_creature); break;
                 case 2: DoScriptText(SAY_COMMAND3, m_creature); break;
                 case 3: DoScriptText(SAY_COMMAND4, m_creature); break;
+                }
+
+                m_uiCommandSoundTimer = 40000;
             }
+            else
+                m_uiCommandSoundTimer -= uiDiff;
 
-            m_uiCommandSoundTimer = 40000;
+            DoMeleeAttackIfReady();
         }
-        else
-            m_uiCommandSoundTimer -= uiDiff;
+    };
 
-        DoMeleeAttackIfReady();
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_razuviousAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_razuvious(Creature* pCreature)
-{
-    return new boss_razuviousAI(pCreature);
-}
-
 void AddSC_boss_razuvious()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_razuvious";
-    pNewScript->GetAI = &GetAI_boss_razuvious;
-    pNewScript->RegisterSelf();
+    s = new boss_razuvious();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_razuvious";
+    //pNewScript->GetAI = &GetAI_boss_razuvious;
+    //pNewScript->RegisterSelf();
 }

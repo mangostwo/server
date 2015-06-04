@@ -15,6 +15,7 @@ enum
     TYPE_GRAND_CHAMPIONS                = 0,
     TYPE_ARGENT_CHAMPION                = 1,
     TYPE_BLACK_KNIGHT                   = 2,
+    TYPE_DO_PREPARE_CHAMPIONS           = MAX_ENCOUNTER,
 
     // event handler
     NPC_ARELAS_BRIGHTSTAR               = 35005,                        // alliance
@@ -134,113 +135,4 @@ enum
     EMOTE_HUMANS                        = -1650026,
     EMOTE_DRAENEI                       = -1650027,
 };
-
-static const float aHeraldPositions[3][4] =
-{
-    {745.606f, 619.705f, 411.172f, 4.66003f},                           // Spawn position
-    {732.524f, 663.007f, 412.393f, 0.0f},                               // Gate movement position
-    {743.377f, 630.240f, 411.073f, 0.0f},                               // Near center position
-};
-
-// data that provides grand champion entry, vehicle mount, trash champions with the spawn locations as well as crowd stalker and emote entry
-struct ChampionsData
-{
-    uint32 uiEntry, uiMount, uiChampion, uiCrowdStalker;
-    int32 iEmoteEntry;
-    float fX, fY, fZ, fO;
-};
-
-// ToDo: add coords
-static const ChampionsData aAllianceChampions[MAX_CHAMPIONS_AVAILABLE] =
-{
-    { NPC_ALLIANCE_WARRIOR, NPC_ALLIANCE_WARRIOR_MOUNT, NPC_ALLIANCE_WARRIOR_CHAMPION, NPC_SPECTATOR_HUMAN,     EMOTE_HUMANS },
-    { NPC_ALLIANCE_MAGE,    NPC_ALLIANCE_MAGE_MOUNT,    NPC_ALLIANCE_MAGE_CHAMPION,    NPC_SPECTATOR_GNOME,     EMOTE_GNOMES },
-    { NPC_ALLIANCE_SHAMAN,  NPC_ALLIANCE_SHAMAN_MOUNT,  NPC_ALLIANCE_SHAMAN_CHAMPION,  NPC_SPECTATOR_DRAENEI,   EMOTE_DRAENEI },
-    { NPC_ALLIANCE_HUNTER,  NPC_ALLIANCE_HUNTER_MOUNT,  NPC_ALLIANCE_HUNTER_CHAMPION,  NPC_SPECTATOR_NIGHT_ELF, EMOTE_NIGHT_ELVES },
-    { NPC_ALLIANCE_ROGUE,   NPC_ALLIANCE_ROGUE_MOUNT,   NPC_ALLIANCE_ROGUE_CHAMPION,   NPC_SPECTATOR_DWARF,     EMOTE_DWARVES }
-};
-
-// ToDo: add coords
-static const ChampionsData aHordeChampions[MAX_CHAMPIONS_AVAILABLE] =
-{
-    { NPC_HORDE_WARRIOR, NPC_HORDE_WARRIOR_MOUNT, NPC_HORDE_WARRIOR_CHAMPION, NPC_SPECTATOR_ORC,       EMOTE_ORCS },
-    { NPC_HORDE_MAGE,    NPC_HORDE_MAGE_MOUNT,    NPC_HORDE_MAGE_CHAMPION,    NPC_SPECTATOR_BLOOD_ELF, EMOTE_BLOOD_ELVES },
-    { NPC_HORDE_SHAMAN,  NPC_HORDE_SHAMAN_MOUNT,  NPC_HORDE_SHAMAN_CHAMPION,  NPC_SPECTATOR_TAUREN,    EMOTE_TAUREN },
-    { NPC_HORDE_HUNTER,  NPC_HORDE_HUNTER_MOUNT,  NPC_HORDE_HUNTER_CHAMPION,  NPC_SPECTATOR_TROLL,     EMOTE_TROLLS },
-    { NPC_HORDE_ROGUE,   NPC_HORDE_ROGUE_MOUNT,   NPC_HORDE_ROGUE_CHAMPION,   NPC_SPECTATOR_UNDEAD,    EMOTE_UNDEAD }
-};
-
-// data that provides spawn coordinates and entry for the player mounts
-struct ChampionsMountsData
-{
-    uint32 uiEntryAlliance, uiEntryHorde;
-    float fX, fY, fZ, fO;
-};
-
-static const ChampionsMountsData aTrialChampionsMounts[MAX_CHAMPIONS_MOUNTS] =
-{
-    {NPC_WARHORSE_ALLIANCE,   NPC_WARHORSE_HORDE,   720.569f, 571.285f, 412.475f, 1.064f},
-    {NPC_WARHORSE_ALLIANCE,   NPC_WARHORSE_HORDE,   722.363f, 660.745f, 412.468f, 4.834f},
-    {NPC_WARHORSE_ALLIANCE,   NPC_WARHORSE_HORDE,   699.943f, 643.370f, 412.474f, 5.777f},
-    {NPC_WARHORSE_ALLIANCE,   NPC_WARHORSE_HORDE,   768.255f, 661.606f, 412.470f, 4.555f},
-    {NPC_WARHORSE_ALLIANCE,   NPC_WARHORSE_HORDE,   787.439f, 584.969f, 412.476f, 2.478f},
-    {NPC_WARHORSE_ALLIANCE,   NPC_WARHORSE_HORDE,   793.009f, 592.667f, 412.475f, 2.652f},
-    {NPC_WARHORSE_ALLIANCE,   NPC_WARHORSE_HORDE,   704.943f, 651.330f, 412.475f, 5.602f},
-    {NPC_WARHORSE_ALLIANCE,   NPC_WARHORSE_HORDE,   702.967f, 587.649f, 412.475f, 0.610f},
-    {NPC_WARHORSE_ALLIANCE,   NPC_WARHORSE_HORDE,   712.594f, 576.260f, 412.476f, 0.890f},
-    {NPC_WARHORSE_ALLIANCE,   NPC_WARHORSE_HORDE,   774.898f, 573.736f, 412.475f, 2.146f},
-    {NPC_WARHORSE_ALLIANCE,   NPC_WARHORSE_HORDE,   790.490f, 646.533f, 412.474f, 3.717f},
-    {NPC_WARHORSE_ALLIANCE,   NPC_WARHORSE_HORDE,   777.564f, 660.300f, 412.467f, 4.345f},
-    {NPC_BATTLEWORG_ALLIANCE, NPC_BATTLEWORG_HORDE, 705.497f, 583.944f, 412.476f, 0.698f},
-    {NPC_BATTLEWORG_ALLIANCE, NPC_BATTLEWORG_HORDE, 790.177f, 589.059f, 412.475f, 2.565f},
-    {NPC_BATTLEWORG_ALLIANCE, NPC_BATTLEWORG_HORDE, 702.165f, 647.267f, 412.475f, 5.689f},
-    {NPC_BATTLEWORG_ALLIANCE, NPC_BATTLEWORG_HORDE, 717.443f, 660.646f, 412.467f, 4.921f},
-    {NPC_BATTLEWORG_ALLIANCE, NPC_BATTLEWORG_HORDE, 716.665f, 573.495f, 412.475f, 0.977f},
-    {NPC_BATTLEWORG_ALLIANCE, NPC_BATTLEWORG_HORDE, 793.052f, 642.851f, 412.474f, 3.630f},
-    {NPC_BATTLEWORG_ALLIANCE, NPC_BATTLEWORG_HORDE, 726.826f, 661.201f, 412.472f, 4.660f},
-    {NPC_BATTLEWORG_ALLIANCE, NPC_BATTLEWORG_HORDE, 773.097f, 660.733f, 412.467f, 4.450f},
-    {NPC_BATTLEWORG_ALLIANCE, NPC_BATTLEWORG_HORDE, 788.016f, 650.788f, 412.475f, 3.804f},
-    {NPC_BATTLEWORG_ALLIANCE, NPC_BATTLEWORG_HORDE, 700.531f, 591.927f, 412.475f, 0.523f},
-    {NPC_BATTLEWORG_ALLIANCE, NPC_BATTLEWORG_HORDE, 770.486f, 571.552f, 412.475f, 2.059f},
-    {NPC_BATTLEWORG_ALLIANCE, NPC_BATTLEWORG_HORDE, 778.741f, 576.049f, 412.476f, 2.234f},
-};
-
-class instance_trial_of_the_champion : public ScriptedInstance, private DialogueHelper
-{
-    public:
-        instance_trial_of_the_champion(Map* pMap);
-
-        void Initialize() override;
-
-        void OnPlayerEnter(Player* pPlayer) override;
-
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-        void Load(const char* chrIn) override;
-        
-        void DoPrepareChampions(bool bSkipIntro);
-
-        void Update(uint32 uiDiff) override { DialogueUpdate(uiDiff); }
-
-    private:
-        void JustDidDialogueStep(int32 iEntry) override;
-
-        void DoSummonHeraldIfNeeded(Unit* pSummoner);
-
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string m_strInstData;
-
-        Team m_uiTeam;
-
-        uint32 m_uiHeraldEntry;
-        uint32 m_uiGrandChampionEntry;
-
-        std::vector<uint8> m_vChampionsIndex;
-};
-
 #endif

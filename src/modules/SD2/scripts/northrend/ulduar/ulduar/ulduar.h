@@ -55,7 +55,7 @@ enum
     TYPE_TOWER_MIMIRON          = 31,
 
     // Other types - not saved
-    TYPE_LEVIATHAN_GAUNTLET     = 32,
+    TYPE_LEVIATHAN_GAUNTLET     = 32,   //types continued by TYPE_ACHIEV
 
     // The siege of ulduar
     NPC_LEVIATHAN               = 33113,
@@ -156,6 +156,7 @@ enum
     NPC_LEFT_HAND_BUNNY         = 33141,
     NPC_HONOR_GUARD_STAIRS      = 33125,                    // summoned mobs before the Rune Giant
     NPC_RUNE_ACOLYTE_STAIRS     = 32957,
+    NPC_DARK_RUNE_COMMONER      = 32904,
 
     // Mimiron event npcs
     NPC_LEVIATHAN_MK            = 33432,
@@ -205,26 +206,53 @@ enum
 
     MAX_SPECIAL_ACHIEV_CRITS    = 20,
 
-    TYPE_ACHIEV_CAT_LADY        = 0,
-    TYPE_ACHIEV_NINE_LIVES      = 1,
-    TYPE_ACHIEV_STEELBREAKER    = 2,
-    TYPE_ACHIEV_BRUNDIR         = 3,
-    TYPE_ACHIEV_MOLGEIM         = 4,
-    TYPE_ACHIEV_STUNNED         = 5,
-    TYPE_ACHIEV_SHATTERED       = 6,
-    TYPE_ACHIEV_QUICK_SHAVE     = 7,
-    TYPE_ACHIEV_SHUTOUT         = 8,
-    TYPE_ACHIEV_NERF_ENG        = 9,
-    TYPE_ACHIEV_RUBBLE          = 10,
-    TYPE_ACHIEV_LOOKS_KILL      = 11,
-    TYPE_ACHIEV_OPEN_ARMS       = 12,
-    TYPE_ACHIEV_DISARMED        = 13,
-    TYPE_ACHIEV_CHEESE_FREEZE   = 14,
-    TYPE_ACHIEV_COOL_FRIENDS    = 15,
-    TYPE_ACHIEV_LIGHTNING       = 16,
-    TYPE_ACHIEV_BACK_NATURE     = 17,
-    TYPE_ACHIEV_DRIVE_CRAZY     = 18,
-    TYPE_ACHIEV_SHADOWDODGER    = 19,
+    TYPE_ACHIEV_CAT_LADY        = 33,   //order may be important in ScriptedInstance
+    TYPE_ACHIEV_NINE_LIVES      = 34,
+    TYPE_ACHIEV_STEELBREAKER    = 35,
+    TYPE_ACHIEV_BRUNDIR         = 36,
+    TYPE_ACHIEV_MOLGEIM         = 37,
+    TYPE_ACHIEV_STUNNED         = 38,
+    TYPE_ACHIEV_SHATTERED       = 39,
+    TYPE_ACHIEV_QUICK_SHAVE     = 40,
+    TYPE_ACHIEV_SHUTOUT         = 41,
+    TYPE_ACHIEV_NERF_ENG        = 42,
+    TYPE_ACHIEV_RUBBLE          = 43,
+    TYPE_ACHIEV_LOOKS_KILL      = 44,
+    TYPE_ACHIEV_OPEN_ARMS       = 45,
+    TYPE_ACHIEV_DISARMED        = 46,
+    TYPE_ACHIEV_CHEESE_FREEZE   = 47,
+    TYPE_ACHIEV_COOL_FRIENDS    = 48,
+    TYPE_ACHIEV_LIGHTNING       = 49,
+    TYPE_ACHIEV_BACK_NATURE     = 50,
+    TYPE_ACHIEV_DRIVE_CRAZY     = 51,
+    TYPE_ACHIEV_SHADOWDODGER    = 52,
+
+    TYPE_DO_SHATTERED_EVENT     = 53,   //TYPEs cont'd
+    TYPE_DO_MOVE_DEFENDERS      = 54,
+    TYPE_DATA_CURRENT_HARPOON   = 55,
+    TYPE_DO_MOVE_TO_HARPOON     = 56,   //@TODO the next 5 parameterless types my be joined in 1 using uiData
+    TYPE_DO_HARPOONS_OK         = 57,
+    TYPE_DO_TRAPPERS_MOVE       = 58,
+    TYPE_DO_TRAPPERS_CAST       = 59,
+    TYPE_DO_TRAPPERS_EVADE      = 60,
+    TYPE_DO_THORIM_SPAWN_PACK   = 61,
+    TYPE_DATA_THORIM_SMASH_SIDE = 62,
+    TYOE_DO_THORIM_SMASH        = 63,
+    TYPE_DATA_THORIM_SMASHINDEX = 64,
+    TYPE_DO_YOGG_DESPAWN_CLOUDS = 65,
+
+    DATA64_VEZAX_ANIMUS         = 0,
+    DATA64_VEZAX_VAPOR          = 1,
+    DATA64_KOLO_STALKER_RIGHT   = 2,
+    DATA64_KOLO_STALKER_LEFT    = 3,
+    DATA64_BROKEN_HARPOON       = 4,    //Guid is harpoon (GO) one
+    DATA64_THORIM_TRIGGERED_BY  = 5,
+    DATA64_THORIM_RANDOM_ORB    = 6,
+    DATA64_RANDOM_UPPER_BUNNY   = 7,
+    DATA64_THORIM_BUNNY         = 8,
+    DATA64_THORIM_SMASH_CASTER  = 9,
+    DATA64_XT_TOY_PILE          = 10,
+
 
     // Loot chests
     // Kologarn
@@ -467,168 +495,7 @@ enum
     ACHIEV_CRIT_CONQ_HODIR      = 10719,
 };
 
-struct UlduarSpawn
-{
-    float fX, fY, fZ, fO;
-    uint32 uiEntry;
-};
-
-struct UlduarSpawnTwoSide
-{
-    float fX, fY, fZ, fO;
-    uint32 uiAllyEntry, uiHordeEntry;
-};
-
-// Note: coordinates are guessed, but pretty close to what they should be
-// ToDo: spawn additional Engineers, Demolitionists, Mages and Liquid Pyrite near the columns
-// ToDo: do ckeck for horde entries
-static const UlduarSpawn afReinforcementsNormal[] =
-{
-    {118.797f, -26.9963f,409.80f, 3.14f, NPC_SALVAGED_SIEGE_ENGINE},
-    {118.847f, -43.758f, 409.80f, 3.15f, NPC_SALVAGED_SIEGE_ENGINE},
-    {116.602f, 8.464f, 409.80f, 3.10f, NPC_SALVAGED_CHOPPER},
-    {116.859f, -4.199f, 409.80f, 3.12f, NPC_SALVAGED_CHOPPER},
-    {122.479f, 25.093f, 410.60f, 3.10f, NPC_SALVAGED_DEMOLISHER},
-    {123.022f, 39.671f, 409.80f, 3.10f, NPC_SALVAGED_DEMOLISHER},
-};
-
-// ToDo: do check for horde entries
-static const UlduarSpawn afReinforcementsHeroic[] =
-{
-    {106.359f, -35.269f, 409.80f, 3.12f, NPC_SALVAGED_SIEGE_ENGINE},
-    {135.351f, -20.767f, 409.80f, 3.15f, NPC_SALVAGED_SIEGE_ENGINE},
-    {135.408f, -50.178f, 409.80f, 3.12f, NPC_SALVAGED_SIEGE_ENGINE},
-    {116.429f, 4.036f, 409.79f, 3.10f, NPC_SALVAGED_CHOPPER},
-    {116.272f, -0.013f, 409.79f, 3.10f, NPC_SALVAGED_CHOPPER},
-    {116.948f, -8.351f, 409.79f, 3.10f, NPC_SALVAGED_CHOPPER},
-    {137.523f, 32.346f, 409.80f, 3.12f, NPC_SALVAGED_DEMOLISHER},
-    {112.818f, 18.981f, 409.83f, 3.10f, NPC_SALVAGED_DEMOLISHER},
-    {112.700f, 47.884f, 409.79f, 3.10f, NPC_SALVAGED_DEMOLISHER},
-};
-
-static const UlduarSpawnTwoSide afHodirHelpersNormal[] =
-{
-    {1999.903f, -230.4966f, 432.7581f, 1.53589f,  NPC_DRUID_ALLIANCE_N,  NPC_DRUID_HORDE_N},
-    {2010.058f, -243.4553f, 432.7672f, 1.361357f, NPC_SHAMAN_ALLIANCE_N, NPC_SHAMAN_HORDE_N},
-    {2021.118f, -236.6482f, 432.7672f, 1.937315f, NPC_MAGE_ALLIANCE_N,   NPC_MAGE_HORDE_N},
-    {1983.751f, -243.3579f, 432.7672f, 1.570796f, NPC_PRIEST_ALLIANCE_N, NPC_PRIEST_HORDE_N},
-};
-
-static const UlduarSpawnTwoSide afHodirHelpersHeroic[] =
-{
-    {2013.37f, -240.331f, 432.687f, 1.80463f, NPC_DRUID_ALLIANCE_H,  NPC_DRUID_HORDE_H},
-    {1983.89f, -240.369f, 432.687f, 1.37658f, NPC_SHAMAN_ALLIANCE_H, NPC_SHAMAN_HORDE_H},
-    {2000.9f, -231.232f, 432.687f, 1.59846f,  NPC_MAGE_ALLIANCE_H,   NPC_MAGE_HORDE_H},
-    {1997.88f, -239.394f, 432.687f, 1.4237f,  NPC_PRIEST_ALLIANCE_H, NPC_PRIEST_HORDE_H},
-};
-
-static const UlduarSpawnTwoSide afThorimSpawns[] =
-{
-    {2127.24f, -251.309f, 419.7935f, 5.899213f,   NPC_SOLDIER_HORDE, NPC_SOLDIER_ALLIANCE},
-    {2123.316f, -254.7708f, 419.7886f, 6.178465f, NPC_SOLDIER_HORDE, NPC_SOLDIER_ALLIANCE},
-    {2120.431f, -259.0431f, 419.6813f, 6.122538f, NPC_SOLDIER_HORDE, NPC_SOLDIER_ALLIANCE},
-    {2145.503f, -256.3357f, 419.7306f, 3.520873f, NPC_CAPTAIN_HORDE, NPC_CAPTAIN_ALLIANCE},
-};
-
-// note: original spawn loc is 607.9199f, -12.90516f, 409.887f but we won't use it because it's too far and grid won't be loaded that far
-static const float afLeviathanSpawnPos[4] = { 422.8898f, -13.32677f, 409.8839f, 3.12f };
-static const float afLeviathanMovePos[4] = { 296.5809f, -11.55668f, 409.8278f, 3.12f };
-
-// spawn locations for Brann and Doren at the archivum
-static const float afBrannArchivumSpawnPos[4] = { 1554.274f, 142.1644f, 427.273f, 3.61f };
-static const float afProspectorSpawnPos[4] = { 1556.469f, 143.5023f, 427.2918f, 4.04f };
-
 // spawn location for Algalon in reload case
 static const float afAlgalonMovePos[4] = {1632.668f, -302.7656f, 417.3211f, 1.53f};
-
-class  instance_ulduar : public ScriptedInstance, private DialogueHelper
-{
-    public:
-        instance_ulduar(Map* pMap);
-        ~instance_ulduar() {}
-
-        void Initialize() override;
-        bool IsEncounterInProgress() const override;
-
-        void OnPlayerEnter(Player* pPlayer) override;
-        void OnPlayerDeath(Player* pPlayer) override;
-        
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnCreatureEnterCombat(Creature* pCreature) override;
-        void OnCreatureDeath(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-        void Load(const char* chrIn) override;
-
-        void SetSpecialAchievementCriteria(uint32 uiType, bool bIsMet);
-        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
-        bool CheckConditionCriteriaMeet(Player const* pPlayer, uint32 uiInstanceConditionId, WorldObject const* pConditionSource, uint32 conditionSourceType) const override;
-
-        void DoSpawnThorimNpcs(Player* pSummoner);
-        void DoProcessShatteredEvent();
-
-        ObjectGuid GetKoloRubbleStalker(bool bRightSide) { return bRightSide ? m_rightKoloStalkerGuid : m_leftKoloStalkerGuid; }
-        ObjectGuid GetVezaxBunnyGuid(bool bAnimus) { return bAnimus ? m_animusVezaxBunnyGuid : m_vaporVezaxBunnyGuid; }
-
-        void GetDefenderGuids(GuidList& lDefenders) { lDefenders = m_lDefendersGuids; }
-        void GetEngineersGuids(GuidList& lEngineers) { lEngineers = m_lEngineersGuids; }
-        void GetTrappersGuids(GuidList& lTrappers) { lTrappers = m_lTrappersGuids; }
-        void GetHarpoonsGuids(GuidVector& vHarpoons) { vHarpoons = m_vBrokenHarpoonsGuids; }
-        void GetToyPileGuids(GuidVector& vToyPiles) { vToyPiles = m_vToyPileGuidVector; }
-        void GetThorimBunniesGuids(GuidList& lBunnies, bool bUpper) { lBunnies = bUpper ? m_lUpperBunniesGuids : m_lThorimBunniesGuids; }
-        void GetThunderOrbsGuids(GuidList& lOrbs) { lOrbs = m_lUpperThunderOrbsGuids; }
-        void GetSmashTargetsGuids(GuidList& lTargets, bool bLeft) { lTargets = bLeft ? m_lLeftHandBunniesGuids : m_lRightHandBunniesGuids; }
-        void GetOminousCloudGuids(GuidList& lClouds) { lClouds = m_lOminousCloudsGuids; }
-
-        void Update(uint32 uiDiff);
-
-    protected:
-        void JustDidDialogueStep(int32 iEntry) override;
-        void SpawnFriendlyKeeper(uint32 uiWho);
-        void SpawnKeeperHelper(uint32 uiWho);
-        void DoSpawnHodirNpcs(Player* pSummoner);
-        void DoOpenMadnessDoorIfCan();
-        void DoCallLeviathanHelp();
-
-        std::string m_strInstData;
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        uint32 m_auiHardBoss[HARD_MODE_ENCOUNTER];
-        uint32 m_auiUlduarKeepers[KEEPER_ENCOUNTER];
-        uint32 m_auiUlduarTowers[KEEPER_ENCOUNTER];
-        bool m_abAchievCriteria[MAX_SPECIAL_ACHIEV_CRITS];
-
-        bool m_bHelpersLoaded;
-
-        uint32 m_uiAlgalonTimer;
-        uint32 m_uiYoggResetTimer;
-        uint32 m_uiShatterAchievTimer;
-        uint32 m_uiGauntletStatus;
-        uint32 m_uiStairsSpawnTimer;
-        uint8 m_uiSlayedArenaMobs;
-
-        ObjectGuid m_leftKoloStalkerGuid;
-        ObjectGuid m_rightKoloStalkerGuid;
-        ObjectGuid m_animusVezaxBunnyGuid;
-        ObjectGuid m_vaporVezaxBunnyGuid;
-
-        GuidVector m_vToyPileGuidVector;
-        GuidVector m_vBrokenHarpoonsGuids;
-        GuidList m_lEngineersGuids;
-        GuidList m_lTrappersGuids;
-        GuidList m_lDefendersGuids;
-        GuidList m_lHarpoonDummyGuids;
-        GuidList m_lRepairedHarpoonsGuids;
-        GuidList m_lThorimBunniesGuids;
-        GuidList m_lUpperBunniesGuids;
-        GuidList m_lUpperThunderOrbsGuids;
-        GuidList m_lLeftHandBunniesGuids;
-        GuidList m_lRightHandBunniesGuids;
-        GuidList m_lOminousCloudsGuids;
-        GuidSet m_sColossusGuidSet;
-};
 
 #endif

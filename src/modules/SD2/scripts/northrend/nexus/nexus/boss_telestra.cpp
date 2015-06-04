@@ -74,89 +74,91 @@ enum
 ## boss_telestra
 ######*/
 
-struct  boss_telestraAI : public ScriptedAI
+struct boss_telestra : public CreatureScript
 {
-    boss_telestraAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_telestra() : CreatureScript("boss_telestra") {}
+
+    struct boss_telestraAI : public ScriptedAI
     {
-        m_pInstance = (instance_nexus*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    instance_nexus* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint8 m_uiPhase;
-    uint8 m_uiCloneDeadCount;
-
-    uint32 m_uiPersonalityTimer;
-    uint32 m_uiFirebombTimer;
-    uint32 m_uiIceNovaTimer;
-    uint32 m_uiGravityWellTimer;
-
-    bool m_bCanCheckAchiev;
-
-    void Reset() override
-    {
-        m_uiPhase = PHASE_1;
-        m_uiCloneDeadCount = 0;
-
-        m_uiPersonalityTimer = 0;
-        m_uiFirebombTimer = urand(2000, 4000);
-        m_uiIceNovaTimer = urand(8000, 12000);
-        m_uiGravityWellTimer = urand(15000, 25000);
-
-        m_bCanCheckAchiev = false;
-    }
-
-    void JustReachedHome() override
-    {
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
+        boss_telestraAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-
-            m_creature->GetMotionMaster()->MoveChase(pWho, 15.0f);
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         }
-    }
 
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_TELESTRA, IN_PROGRESS);
-    }
+        uint8 m_uiPhase;
+        uint8 m_uiCloneDeadCount;
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
+        uint32 m_uiPersonalityTimer;
+        uint32 m_uiFirebombTimer;
+        uint32 m_uiIceNovaTimer;
+        uint32 m_uiGravityWellTimer;
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_TELESTRA, DONE);
-    }
+        bool m_bCanCheckAchiev;
 
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        if (urand(0, 1))
-            DoScriptText(SAY_KILL, m_creature);
-    }
-
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
-    {
-        switch (pSpell->Id)
+        void Reset() override
         {
+            m_uiPhase = PHASE_1;
+            m_uiCloneDeadCount = 0;
+
+            m_uiPersonalityTimer = 0;
+            m_uiFirebombTimer = urand(2000, 4000);
+            m_uiIceNovaTimer = urand(8000, 12000);
+            m_uiGravityWellTimer = urand(15000, 25000);
+
+            m_bCanCheckAchiev = false;
+        }
+
+        void JustReachedHome() override
+        {
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
+
+        void AttackStart(Unit* pWho) override
+        {
+            if (m_creature->Attack(pWho, true))
+            {
+                m_creature->AddThreat(pWho);
+                m_creature->SetInCombatWith(pWho);
+                pWho->SetInCombatWith(m_creature);
+
+                m_creature->GetMotionMaster()->MoveChase(pWho, 15.0f);
+            }
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_TELESTRA, IN_PROGRESS);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(SAY_DEATH, m_creature);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_TELESTRA, DONE);
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            if (urand(0, 1))
+                DoScriptText(SAY_KILL, m_creature);
+        }
+
+        void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
+        {
+            switch (pSpell->Id)
+            {
                 // eventAi must make sure clones cast spells when each of them die
             case SPELL_FIRE_DIES:
             case SPELL_ARCANE_DIES:
             case SPELL_FROST_DIES:
-            {
                 ++m_uiCloneDeadCount;
 
                 // After the first clone from each split phase is dead start the achiev timer
@@ -179,44 +181,42 @@ struct  boss_telestraAI : public ScriptedAI
                     if (m_uiPersonalityTimer > 5000)
                     {
                         if (m_pInstance)
-                            m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_SPLIT_PERSONALITY, false);
+                            m_pInstance->SetData(TYPE_ACHIEV_SPLIT_PERSONALITY, uint32(false));
                     }
                     m_bCanCheckAchiev = false;
 
                     m_uiPhase = m_uiCloneDeadCount == 3 ? PHASE_3 : PHASE_4;
                 }
                 break;
-            }
             case SPELL_SUMMON_CLONES:
                 m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 break;
+            }
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
+        void JustSummoned(Creature* pSummoned) override
         {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_TELEST_FIRE: pSummoned->CastSpell(pSummoned, SPELL_FIRE_VISUAL, true); break;
             case NPC_TELEST_ARCANE: pSummoned->CastSpell(pSummoned, SPELL_ARCANE_VISUAL, true); break;
             case NPC_TELEST_FROST: pSummoned->CastSpell(pSummoned, SPELL_FROST_VISUAL, true); break;
+            }
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_bCanCheckAchiev)
-            m_uiPersonalityTimer += uiDiff;
-
-        switch (m_uiPhase)
+        void UpdateAI(const uint32 uiDiff) override
         {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            if (m_bCanCheckAchiev)
+                m_uiPersonalityTimer += uiDiff;
+
+            switch (m_uiPhase)
+            {
             case PHASE_1:
             case PHASE_3:
             case PHASE_4:
-            {
                 if (!m_creature->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
                 {
                     if (m_uiFirebombTimer < uiDiff)
@@ -265,26 +265,27 @@ struct  boss_telestraAI : public ScriptedAI
                     m_uiGravityWellTimer -= uiDiff;
 
                 break;
-            }
             case PHASE_2:
-            {
                 break;
             }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_telestraAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_telestra(Creature* pCreature)
-{
-    return new boss_telestraAI(pCreature);
-}
-
 void AddSC_boss_telestra()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_telestra";
-    pNewScript->GetAI = &GetAI_boss_telestra;
-    pNewScript->RegisterSelf();
+    s = new boss_telestra();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_telestra";
+    //pNewScript->GetAI = &GetAI_boss_telestra;
+    //pNewScript->RegisterSelf();
 }

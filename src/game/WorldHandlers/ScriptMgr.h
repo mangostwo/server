@@ -47,6 +47,24 @@ class SpellCastTargets;
 class Unit;
 class WorldObject;
 
+enum ScriptedObjectType
+{
+    SCRIPTED_UNIT = 0,    //CreatureScript
+    SCRIPTED_GAMEOBJECT = 1,    //GameObjectScript
+    SCRIPTED_ITEM = 2,    //ItemScript
+    SCRIPTED_AREATRIGGER = 3,    //AreaTriggerScript
+    SCRIPTED_SPELL = 4,    //SpellScript
+    SCRIPTED_AURASPELL = 5,    //AuraScript
+    SCRIPTED_MAPEVENT = 6,    //MapEventScript
+    SCRIPTED_MAP = 7,    //ZoneScript
+    SCRIPTED_BATTLEGROUND = 8,    //BattleGroundScript
+    SCRIPTED_PVP_ZONE = 9,    //OutdoorPvPScript
+    SCRIPTED_INSTANCE = 10,   //InstanceScript
+    SCRIPTED_CONDITION = 11,   //ConditionScript
+    SCRIPTED_ACHIEVEMENT = 12,   //AchievementScript
+    SCRIPTED_MAX_TYPE
+};
+
 enum ScriptCommand                                          // resSource, resTarget are the resulting Source/ Target after buddy search is done
 {
     SCRIPT_COMMAND_TALK                     = 0,            // resSource = WorldObject, resTarget = Unit/none

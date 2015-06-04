@@ -45,55 +45,63 @@ enum
     AREA_ID_SILVER_ENCLAVE      = 4740
 };
 
-struct  npc_dalaran_guardian_mageAI : public ScriptedAI
+struct npc_dalaran_guardian_mage : public CreatureScript
 {
-    npc_dalaran_guardian_mageAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_dalaran_guardian_mage() : CreatureScript("npc_dalaran_guardian_mage") {}
 
-    void MoveInLineOfSight(Unit* pWho) override
+    struct npc_dalaran_guardian_mageAI : public ScriptedAI
     {
-        if (m_creature->GetDistanceZ(pWho) > CREATURE_Z_ATTACK_RANGE)
-            return;
+        npc_dalaran_guardian_mageAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-        if (pWho->IsTargetableForAttack() && m_creature->IsHostileTo(pWho))
+        void MoveInLineOfSight(Unit* pWho) override
         {
-            // exception for quests 20439 and 24451
-            if (pWho->HasAura(SPELL_COVENANT_DISGUISE_1) || pWho->HasAura(SPELL_COVENANT_DISGUISE_2) ||
-                    pWho->HasAura(SPELL_SUNREAVER_DISGUISE_1) || pWho->HasAura(SPELL_SUNREAVER_DISGUISE_2))
+            if (m_creature->GetDistanceZ(pWho) > CREATURE_Z_ATTACK_RANGE)
                 return;
 
-            if (m_creature->IsWithinDistInMap(pWho, m_creature->GetAttackDistance(pWho)) && m_creature->IsWithinLOSInMap(pWho))
+            if (pWho->IsTargetableForAttack() && m_creature->IsHostileTo(pWho))
             {
-                if (Player* pPlayer = pWho->GetCharmerOrOwnerPlayerOrPlayerItself())
-                {
-                    // it's mentioned that pet may also be teleported, if so, we need to tune script to apply to those in addition.
+                // exception for quests 20439 and 24451
+                if (pWho->HasAura(SPELL_COVENANT_DISGUISE_1) || pWho->HasAura(SPELL_COVENANT_DISGUISE_2) ||
+                    pWho->HasAura(SPELL_SUNREAVER_DISGUISE_1) || pWho->HasAura(SPELL_SUNREAVER_DISGUISE_2))
+                    return;
 
-                    if (pPlayer->GetAreaId() == AREA_ID_SILVER_ENCLAVE)
-                        DoCastSpellIfCan(pPlayer, SPELL_TRESPASSER_A);
-                    else if (pPlayer->GetAreaId() == AREA_ID_SUNREAVER)
-                        DoCastSpellIfCan(pPlayer, SPELL_TRESPASSER_H);
+                if (m_creature->IsWithinDistInMap(pWho, m_creature->GetAttackDistance(pWho)) && m_creature->IsWithinLOSInMap(pWho))
+                {
+                    if (Player* pPlayer = pWho->GetCharmerOrOwnerPlayerOrPlayerItself())
+                    {
+                        // it's mentioned that pet may also be teleported, if so, we need to tune script to apply to those in addition.
+
+                        if (pPlayer->GetAreaId() == AREA_ID_SILVER_ENCLAVE)
+                            DoCastSpellIfCan(pPlayer, SPELL_TRESPASSER_A);
+                        else if (pPlayer->GetAreaId() == AREA_ID_SUNREAVER)
+                            DoCastSpellIfCan(pPlayer, SPELL_TRESPASSER_H);
+                    }
                 }
             }
         }
+
+        void AttackedBy(Unit* /*pAttacker*/) override {}
+
+        void Reset() override {}
+
+        void UpdateAI(const uint32 /*uiDiff*/) override {}
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_dalaran_guardian_mageAI(pCreature);
     }
-
-    void AttackedBy(Unit* /*pAttacker*/) override {}
-
-    void Reset() override {}
-
-    void UpdateAI(const uint32 /*uiDiff*/) override {}
 };
-
-CreatureAI* GetAI_npc_dalaran_guardian_mage(Creature* pCreature)
-{
-    return new npc_dalaran_guardian_mageAI(pCreature);
-}
 
 void AddSC_dalaran()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_dalaran_guardian_mage";
-    pNewScript->GetAI = &GetAI_npc_dalaran_guardian_mage;
-    pNewScript->RegisterSelf();
+    s = new npc_dalaran_guardian_mage();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_dalaran_guardian_mage";
+    //pNewScript->GetAI = &GetAI_npc_dalaran_guardian_mage;
+    //pNewScript->RegisterSelf();
 }

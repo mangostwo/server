@@ -66,108 +66,111 @@ enum
     MAX_CHARGES_HEROIC          = 5,
 };
 
-struct  boss_lord_marrowgarAI : public ScriptedAI
+struct boss_lord_marrowgar : public CreatureScript
 {
-    boss_lord_marrowgarAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_lord_marrowgar() : CreatureScript("boss_lord_marrowgar") {}
+
+    struct boss_lord_marrowgarAI : public ScriptedAI
     {
-        m_pInstance = (instance_icecrown_citadel*)pCreature->GetInstanceData();
-        // on heroic, there is 1 more Bone Storm charge
-        m_uiMaxCharges = m_pInstance && m_pInstance->IsHeroicDifficulty() ? MAX_CHARGES_HEROIC : MAX_CHARGES_NORMAL;
-        Reset();
-    }
-
-    instance_icecrown_citadel* m_pInstance;
-
-    uint8 m_uiPhase;
-    uint8 m_uiChargesCount;
-    uint8 m_uiMaxCharges;
-    uint32 m_uiBerserkTimer;
-    uint32 m_uiBoneSliceTimer;
-    uint32 m_uiColdflameTimer;
-    uint32 m_uiBoneSpikeTimer;
-    uint32 m_uiBoneStormTimer;
-    uint32 m_uiBoneStormChargeTimer;
-    uint32 m_uiBoneStormColdflameTimer;
-
-    void Reset() override
-    {
-        SetCombatMovement(true);
-
-        m_uiPhase                   = PHASE_NORMAL;
-        m_uiChargesCount            = 0;
-        m_uiBerserkTimer            = 10 * MINUTE * IN_MILLISECONDS;
-        m_uiBoneSliceTimer          = 1000;
-        m_uiColdflameTimer          = 5000;
-        m_uiBoneSpikeTimer          = 15000;
-        m_uiBoneStormTimer          = 45000;
-        m_uiBoneStormChargeTimer    = 3000;
-        m_uiBoneStormColdflameTimer = 1000;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MARROWGAR, IN_PROGRESS);
-    }
-
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        if (urand(0, 1))
-            DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MARROWGAR, DONE);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MARROWGAR, FAIL);
-    }
-
-    void MovementInform(uint32 uiType, uint32 uiPointId) override
-    {
-        if (uiType != POINT_MOTION_TYPE)
-            return;
-
-        if (uiPointId)
+        boss_lord_marrowgarAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            m_uiPhase = PHASE_BONE_STORM_COLDFLAME;
-            ++m_uiChargesCount;
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            // on heroic, there is 1 more Bone Storm charge
+            m_uiMaxCharges = (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC)) ? MAX_CHARGES_HEROIC : MAX_CHARGES_NORMAL;
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_COLDFLAME)
+        ScriptedInstance* m_pInstance;
+
+        uint8 m_uiPhase;
+        uint8 m_uiChargesCount;
+        uint8 m_uiMaxCharges;
+        uint32 m_uiBerserkTimer;
+        uint32 m_uiBoneSliceTimer;
+        uint32 m_uiColdflameTimer;
+        uint32 m_uiBoneSpikeTimer;
+        uint32 m_uiBoneStormTimer;
+        uint32 m_uiBoneStormChargeTimer;
+        uint32 m_uiBoneStormColdflameTimer;
+
+        void Reset() override
         {
-            pSummoned->CastSpell(pSummoned, SPELL_COLDFLAME_AURA, true);
+            SetCombatMovement(true);
 
-            float fX, fY;
-            float fZ = pSummoned->GetPositionZ();
-            // Note: the NearPoint2D function may not be correct here, because we may use a wrong Z value
-            m_creature->GetNearPoint2D(fX, fY, 80.0f, m_creature->GetAngle(pSummoned));
-            pSummoned->GetMotionMaster()->MovePoint(0, fX, fY, fZ, false);
+            m_uiPhase = PHASE_NORMAL;
+            m_uiChargesCount = 0;
+            m_uiBerserkTimer = 10 * MINUTE * IN_MILLISECONDS;
+            m_uiBoneSliceTimer = 1000;
+            m_uiColdflameTimer = 5000;
+            m_uiBoneSpikeTimer = 15000;
+            m_uiBoneStormTimer = 45000;
+            m_uiBoneStormChargeTimer = 3000;
+            m_uiBoneStormColdflameTimer = 1000;
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        switch (m_uiPhase)
+        void Aggro(Unit* /*pWho*/) override
         {
+            DoScriptText(SAY_AGGRO, m_creature);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_MARROWGAR, IN_PROGRESS);
+        }
+
+        void KilledUnit(Unit* pVictim) override
+        {
+            if (pVictim->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            if (urand(0, 1))
+                DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(SAY_DEATH, m_creature);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_MARROWGAR, DONE);
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_MARROWGAR, FAIL);
+        }
+
+        void MovementInform(uint32 uiType, uint32 uiPointId) override
+        {
+            if (uiType != POINT_MOTION_TYPE)
+                return;
+
+            if (uiPointId)
+            {
+                m_uiPhase = PHASE_BONE_STORM_COLDFLAME;
+                ++m_uiChargesCount;
+            }
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_COLDFLAME)
+            {
+                pSummoned->CastSpell(pSummoned, SPELL_COLDFLAME_AURA, true);
+
+                float fX, fY;
+                float fZ = pSummoned->GetPositionZ();
+                // Note: the NearPoint2D function may not be correct here, because we may use a wrong Z value
+                m_creature->GetNearPoint2D(fX, fY, 80.0f, m_creature->GetAngle(pSummoned));
+                pSummoned->GetMotionMaster()->MovePoint(0, fX, fY, fZ, false);
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            switch (m_uiPhase)
+            {
             case PHASE_NORMAL:
 
                 // Coldflame
@@ -256,57 +259,61 @@ struct  boss_lord_marrowgarAI : public ScriptedAI
                     m_uiBoneStormColdflameTimer -= uiDiff;
 
                 break;
-        }
+            }
 
-        // Bone spike - different spells for the normal phase or storm phase
-        // ToDo: uncommnet this when vehicles and the Bone spike spells are properly supported by core
-        /*if (m_pInstance && (m_pInstance->IsHeroicDifficulty() || m_uiPhase == PHASE_NORMAL))
-        {
+            // Bone spike - different spells for the normal phase or storm phase
+            // ToDo: uncommnet this when vehicles and the Bone spike spells are properly supported by core
+            /*if (m_pInstance && (m_pInstance->IsHeroicDifficulty() || m_uiPhase == PHASE_NORMAL))
+            {
             if (m_uiBoneSpikeTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature, m_uiPhase == PHASE_NORMAL ? SPELL_BONE_SPIKE : SPELL_BONE_SPIKE_STORM) == CAST_OK)
-                {
-                    switch (urand(0, 2))
-                    {
-                        case 0: DoScriptText(SAY_BONE_SPIKE_1, m_creature); break;
-                        case 1: DoScriptText(SAY_BONE_SPIKE_2, m_creature); break;
-                        case 2: DoScriptText(SAY_BONE_SPIKE_3, m_creature); break;
-                    }
-                    m_uiBoneSpikeTimer = 18000;
-                }
-            }
-            else
-                m_uiBoneSpikeTimer -= uiDiff;
-        }*/
-
-        // Berserk
-        if (m_uiBerserkTimer)
-        {
-            if (m_uiBerserkTimer <= uiDiff)
+            if (DoCastSpellIfCan(m_creature, m_uiPhase == PHASE_NORMAL ? SPELL_BONE_SPIKE : SPELL_BONE_SPIKE_STORM) == CAST_OK)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK))
-                {
-                    DoScriptText(SAY_BERSERK, m_creature);
-                    m_uiBerserkTimer = 0;
-                }
+            switch (urand(0, 2))
+            {
+            case 0: DoScriptText(SAY_BONE_SPIKE_1, m_creature); break;
+            case 1: DoScriptText(SAY_BONE_SPIKE_2, m_creature); break;
+            case 2: DoScriptText(SAY_BONE_SPIKE_3, m_creature); break;
+            }
+            m_uiBoneSpikeTimer = 18000;
+            }
             }
             else
-                m_uiBerserkTimer -= uiDiff;
+            m_uiBoneSpikeTimer -= uiDiff;
+            }*/
+
+            // Berserk
+            if (m_uiBerserkTimer)
+            {
+                if (m_uiBerserkTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_BERSERK))
+                    {
+                        DoScriptText(SAY_BERSERK, m_creature);
+                        m_uiBerserkTimer = 0;
+                    }
+                }
+                else
+                    m_uiBerserkTimer -= uiDiff;
+            }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_lord_marrowgarAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_lord_marrowgar(Creature* pCreature)
-{
-    return new boss_lord_marrowgarAI(pCreature);
-}
-
 void AddSC_boss_lord_marrowgar()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_lord_marrowgar";
-    pNewScript->GetAI = &GetAI_boss_lord_marrowgar;
-    pNewScript->RegisterSelf();
+    s = new boss_lord_marrowgar();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_lord_marrowgar";
+    //pNewScript->GetAI = &GetAI_boss_lord_marrowgar;
+    //pNewScript->RegisterSelf();
 }

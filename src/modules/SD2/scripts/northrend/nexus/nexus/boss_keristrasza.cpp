@@ -56,203 +56,210 @@ enum
 ## boss_keristrasza
 ######*/
 
-struct  boss_keristraszaAI : public ScriptedAI
+struct boss_keristrasza : public CreatureScript
 {
-    boss_keristraszaAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_keristrasza() : CreatureScript("boss_keristrasza") {}
+
+    struct boss_keristraszaAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 uiCrystalChainTimer;
-    uint32 uiTailSweepTimer;
-    uint32 uiCrystalfireBreathTimer;
-    uint32 uiCrystallizeTimer;
-    uint32 uiCheckIntenseColdTimer;
-
-    bool m_bIsEnraged;
-
-    void Reset() override
-    {
-        uiCrystalChainTimer = 30000;
-        uiTailSweepTimer = urand(5000, 7500);
-        uiCrystalfireBreathTimer = urand(10000, 20000);
-        uiCrystallizeTimer = urand(20000, 30000);
-        uiCheckIntenseColdTimer = 2000;
-
-        m_bIsEnraged = false;
-
-        if (!m_pInstance)
-            return;
-
-        if (m_creature->IsAlive())
+        boss_keristraszaAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (m_pInstance->GetData(TYPE_KERISTRASZA) != SPECIAL)
-                DoCastSpellIfCan(m_creature, SPELL_FROZEN_PRISON, CAST_TRIGGERED);
-        }
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        m_creature->CastSpell(m_creature, SPELL_INTENSE_COLD, true);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_KERISTRASZA, IN_PROGRESS);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_KERISTRASZA, DONE);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        if (urand(0, 1))
-            DoScriptText(SAY_KILL, m_creature);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // This needs to be checked only on heroic
-        if (!m_bIsRegularMode)
-        {
-            if (uiCheckIntenseColdTimer < uiDiff)
-            {
-                ThreatList playerList = m_creature->GetThreatManager().getThreatList();
-                for (ThreatList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
-                {
-                    if (Player* pTarget = m_creature->GetMap()->GetPlayer((*itr)->getUnitGuid()))
-                    {
-                        Aura* pAuraIntenseCold = pTarget->GetAura(SPELL_INTENSE_COLD_AURA, EFFECT_INDEX_0);
-
-                        if (pAuraIntenseCold)
-                        {
-                            if (pAuraIntenseCold->GetStackAmount() > MAX_INTENSE_COLD_STACK)
-                            {
-                                if (m_pInstance)
-                                    m_pInstance->SetData(TYPE_INTENSE_COLD_FAILED, pTarget->GetGUIDLow());
-                            }
-                        }
-                    }
-                }
-                uiCheckIntenseColdTimer = 1000;
-            }
-            else
-                uiCheckIntenseColdTimer -= uiDiff;
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         }
 
-        if (!m_bIsEnraged && m_creature->GetHealthPercent() < 25.0f)
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        uint32 uiCrystalChainTimer;
+        uint32 uiTailSweepTimer;
+        uint32 uiCrystalfireBreathTimer;
+        uint32 uiCrystallizeTimer;
+        uint32 uiCheckIntenseColdTimer;
+
+        bool m_bIsEnraged;
+
+        void Reset() override
         {
-            if (!m_creature->IsNonMeleeSpellCasted(false))
+            uiCrystalChainTimer = 30000;
+            uiTailSweepTimer = urand(5000, 7500);
+            uiCrystalfireBreathTimer = urand(10000, 20000);
+            uiCrystallizeTimer = urand(20000, 30000);
+            uiCheckIntenseColdTimer = 2000;
+
+            m_bIsEnraged = false;
+
+            if (!m_pInstance)
+                return;
+
+            if (m_creature->IsAlive())
             {
-                m_bIsEnraged = true;
-                DoScriptText(SAY_ENRAGE, m_creature);
-                DoCastSpellIfCan(m_creature, SPELL_ENRAGE);
+                if (m_pInstance->GetData(TYPE_KERISTRASZA) != SPECIAL)
+                    DoCastSpellIfCan(m_creature, SPELL_FROZEN_PRISON, CAST_TRIGGERED);
             }
         }
 
-        if (uiCrystalChainTimer < uiDiff)
+        void Aggro(Unit* /*pWho*/) override
         {
-            if (!m_creature->IsNonMeleeSpellCasted(false))
+            DoScriptText(SAY_AGGRO, m_creature);
+
+            m_creature->CastSpell(m_creature, SPELL_INTENSE_COLD, true);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_KERISTRASZA, IN_PROGRESS);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(SAY_DEATH, m_creature);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_KERISTRASZA, DONE);
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            if (urand(0, 1))
+                DoScriptText(SAY_KILL, m_creature);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            // This needs to be checked only on heroic
+            if (!m_bIsRegularMode)
             {
-                if (m_bIsRegularMode)
+                if (uiCheckIntenseColdTimer < uiDiff)
                 {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+                    ThreatList playerList = m_creature->GetThreatManager().getThreatList();
+                    for (ThreatList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
                     {
-                        if (Player* pPlayer = pTarget->GetCharmerOrOwnerPlayerOrPlayerItself())
-                            DoCastSpellIfCan(pPlayer, SPELL_CRYSTAL_CHAINS);
-
-                        uiCrystalChainTimer = 30000;
-                    }
-                }
-                else
-                {
-                    if (Unit* pSource = m_creature->getVictim())
-                    {
-                        uiCrystalChainTimer = 15000;
-
-                        Player* pPlayer = pSource->GetCharmerOrOwnerPlayerOrPlayerItself();
-
-                        if (!pPlayer)
-                            return;
-
-                        if (Group* pGroup = pPlayer->GetGroup())
+                        if (Player* pTarget = m_creature->GetMap()->GetPlayer((*itr)->getUnitGuid()))
                         {
-                            for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != NULL; pRef = pRef->next())
+                            Aura* pAuraIntenseCold = pTarget->GetAura(SPELL_INTENSE_COLD_AURA, EFFECT_INDEX_0);
+
+                            if (pAuraIntenseCold)
                             {
-                                if (Player* pMember = pRef->getSource())
+                                if (pAuraIntenseCold->GetStackAmount() > MAX_INTENSE_COLD_STACK)
                                 {
-                                    if (pMember->IsAlive() && pMember->IsWithinDistInMap(m_creature, 50.0f))
-                                        m_creature->CastSpell(pMember, SPELL_CRYSTAL_CHAINS, true);
+                                    if (m_pInstance)
+                                        m_pInstance->SetData(TYPE_INTENSE_COLD_FAILED, pTarget->GetGUIDLow());
                                 }
                             }
                         }
-                        else
-                            m_creature->CastSpell(pPlayer, SPELL_CRYSTAL_CHAINS, false);
+                    }
+                    uiCheckIntenseColdTimer = 1000;
+                }
+                else
+                    uiCheckIntenseColdTimer -= uiDiff;
+            }
+
+            if (!m_bIsEnraged && m_creature->GetHealthPercent() < 25.0f)
+            {
+                if (!m_creature->IsNonMeleeSpellCasted(false))
+                {
+                    m_bIsEnraged = true;
+                    DoScriptText(SAY_ENRAGE, m_creature);
+                    DoCastSpellIfCan(m_creature, SPELL_ENRAGE);
+                }
+            }
+
+            if (uiCrystalChainTimer < uiDiff)
+            {
+                if (!m_creature->IsNonMeleeSpellCasted(false))
+                {
+                    if (m_bIsRegularMode)
+                    {
+                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+                        {
+                            if (Player* pPlayer = pTarget->GetCharmerOrOwnerPlayerOrPlayerItself())
+                                DoCastSpellIfCan(pPlayer, SPELL_CRYSTAL_CHAINS);
+
+                            uiCrystalChainTimer = 30000;
+                        }
+                    }
+                    else
+                    {
+                        if (Unit* pSource = m_creature->getVictim())
+                        {
+                            uiCrystalChainTimer = 15000;
+
+                            Player* pPlayer = pSource->GetCharmerOrOwnerPlayerOrPlayerItself();
+
+                            if (!pPlayer)
+                                return;
+
+                            if (Group* pGroup = pPlayer->GetGroup())
+                            {
+                                for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != NULL; pRef = pRef->next())
+                                {
+                                    if (Player* pMember = pRef->getSource())
+                                    {
+                                        if (pMember->IsAlive() && pMember->IsWithinDistInMap(m_creature, 50.0f))
+                                            m_creature->CastSpell(pMember, SPELL_CRYSTAL_CHAINS, true);
+                                    }
+                                }
+                            }
+                            else
+                                m_creature->CastSpell(pPlayer, SPELL_CRYSTAL_CHAINS, false);
+                        }
                     }
                 }
             }
-        }
-        else
-            uiCrystalChainTimer -= uiDiff;
+            else
+                uiCrystalChainTimer -= uiDiff;
 
-        if (uiTailSweepTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_TAIL_SWEEP) == CAST_OK)
-                uiTailSweepTimer = urand(2500, 7500);
-        }
-        else
-            uiCrystalChainTimer -= uiDiff;
-
-        if (uiCrystalfireBreathTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_CRYSTALFIRE_BREATH : SPELL_CRYSTALFIRE_BREATH_H) == CAST_OK)
-                uiCrystalfireBreathTimer = urand(15000, 20000);
-        }
-        else
-            uiCrystalfireBreathTimer -= uiDiff;
-
-        if (!m_bIsRegularMode)
-        {
-            if (uiCrystallizeTimer < uiDiff)
+            if (uiTailSweepTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_CRYSTALLIZE) == CAST_OK)
-                {
-                    uiCrystallizeTimer = urand(15000, 25000);
-                    DoScriptText(SAY_CRYSTAL_NOVA, m_creature);
-                }
+                if (DoCastSpellIfCan(m_creature, SPELL_TAIL_SWEEP) == CAST_OK)
+                    uiTailSweepTimer = urand(2500, 7500);
             }
             else
-                uiCrystallizeTimer -= uiDiff;
-        }
+                uiCrystalChainTimer -= uiDiff;
 
-        DoMeleeAttackIfReady();
+            if (uiCrystalfireBreathTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_CRYSTALFIRE_BREATH : SPELL_CRYSTALFIRE_BREATH_H) == CAST_OK)
+                    uiCrystalfireBreathTimer = urand(15000, 20000);
+            }
+            else
+                uiCrystalfireBreathTimer -= uiDiff;
+
+            if (!m_bIsRegularMode)
+            {
+                if (uiCrystallizeTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_CRYSTALLIZE) == CAST_OK)
+                    {
+                        uiCrystallizeTimer = urand(15000, 25000);
+                        DoScriptText(SAY_CRYSTAL_NOVA, m_creature);
+                    }
+                }
+                else
+                    uiCrystallizeTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_keristraszaAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_keristrasza(Creature* pCreature)
-{
-    return new boss_keristraszaAI(pCreature);
-}
-
 void AddSC_boss_keristrasza()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_keristrasza";
-    pNewScript->GetAI = &GetAI_boss_keristrasza;
-    pNewScript->RegisterSelf();
+    s = new boss_keristrasza();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_keristrasza";
+    //pNewScript->GetAI = &GetAI_boss_keristrasza;
+    //pNewScript->RegisterSelf();
 }

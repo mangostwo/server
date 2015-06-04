@@ -15,9 +15,12 @@ enum
     TYPE_SKADI                      = 2,
     TYPE_YMIRON                     = 3,
 
-    TYPE_ACHIEV_INCREDIBLE_HULK     = 0,
-    TYPE_ACHIEV_LOVE_SKADI          = 1,
-    TYPE_ACHIEV_KINGS_BANE          = 2,
+    TYPE_ACHIEV_INCREDIBLE_HULK     = 4,
+    TYPE_ACHIEV_LOVE_SKADI          = 5,
+    TYPE_ACHIEV_KINGS_BANE          = 6,
+
+    DATA64_GORTHOK_EVENT_STARTER    = 0,
+    DATA64_SKADI_MOBS_TRIGGER       = 1,
 
     GO_STASIS_GENERATOR             = 188593,
     GO_DOOR_SKADI                   = 192173,
@@ -60,56 +63,4 @@ enum
     // If the spell doesn't hit any player then the event resets
     // SPELL_GAUNTLET_RESET_CHECK   = 49308,            // for the moment we don't use this because of the lack of core support
 };
-
-static const float aOrbPositions[2][3] =
-{
-    {238.6077f, -460.7103f, 112.5671f},                 // Orb lift up
-    {279.26f,   -452.1f,    110.0f},                    // Orb center stop
-};
-
-static const uint32 aGortokMiniBosses[MAX_ENCOUNTER] = {NPC_WORGEN, NPC_FURBOLG, NPC_JORMUNGAR, NPC_RHINO};
-
-class  instance_pinnacle : public ScriptedInstance
-{
-    public:
-        instance_pinnacle(Map* pMap);
-
-        void Initialize() override;
-
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-
-        void OnCreatureEvade(Creature* pCreature);
-        void OnCreatureDeath(Creature* pCreature) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        void SetSpecialAchievementCriteria(uint32 uiType, bool bIsMet);
-        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
-
-        void SetGortokEventStarter(ObjectGuid playerGuid) { m_gortokEventStarterGuid = playerGuid; }
-        ObjectGuid GetGortokEventStarter() { return m_gortokEventStarterGuid; }
-        ObjectGuid GetSkadiMobsTrigger() { return m_skadiMobsTriggerGuid; }
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-        void Load(const char* chrIn) override;
-
-        void Update(uint32 uiDiff) override;
-
-    private:
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        bool m_abAchievCriteria[MAX_SPECIAL_ACHIEV_CRITS];
-        std::string m_strInstData;
-
-        uint32 m_uiGortokOrbTimer;
-        uint8 m_uiGortokOrbPhase;
-
-        ObjectGuid m_gortokEventTriggerGuid;
-        ObjectGuid m_gortokEventStarterGuid;
-        ObjectGuid m_skadiMobsTriggerGuid;
-
-        GuidList m_lskadiGauntletMobsList;
-};
-
 #endif

@@ -167,103 +167,106 @@ static const float afMimironInferno[3] = {329.1809f, 8.02577f, 409.887f};
 ## boss_flame_leviathan
 ######*/
 
-struct  boss_flame_leviathanAI : public ScriptedAI
+struct boss_flame_leviathan : public CreatureScript
 {
-    boss_flame_leviathanAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_flame_leviathan() : CreatureScript("boss_flame_leviathan") {}
+
+    struct boss_flame_leviathanAI : public ScriptedAI
     {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_bInitTowers = false;
-        Reset();
-    }
-
-    instance_ulduar* m_pInstance;
-    bool m_bIsRegularMode;
-    bool m_bInitTowers;
-    bool m_bUlduarTower[KEEPER_ENCOUNTER];
-
-    uint32 m_uiBatteringRamTimer;
-    uint32 m_uiFlameVentsTimer;
-    uint32 m_uiMissileBarrageTimer;
-    uint32 m_uiPursueTimer;
-    uint32 m_uiGatheringSpeedTimer;
-
-    uint32 m_uiHardModeTimer;
-    uint8 m_uiHardModeStep;
-
-    uint8 m_uiThorimHammerCount;
-    uint32 m_uiThorimHammerTimer;
-
-    void Reset() override
-    {
-        DoCastSpellIfCan(m_creature, SPELL_INVISIBILITY_DETECTION, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-
-        for (uint8 i = 0; i < KEEPER_ENCOUNTER; ++i)
-            m_bUlduarTower[i] = false;
-
-        m_uiBatteringRamTimer   = 10000;
-        m_uiFlameVentsTimer     = 30000;
-        m_uiMissileBarrageTimer = 1000;
-        m_uiPursueTimer         = 1000;
-        m_uiGatheringSpeedTimer = 10000;
-
-        m_uiHardModeTimer       = 10000;
-        m_uiHardModeStep        = 0;
-        m_uiThorimHammerCount   = 0;
-        m_uiThorimHammerTimer   = 0;
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
+        boss_flame_leviathanAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            m_pInstance->SetData(TYPE_LEVIATHAN, DONE);
-
-            // clear hard mode auras
-            if (Creature* pOrbital = m_pInstance->GetSingleCreatureFromStorage(NPC_ORBITAL_SUPPORT))
-                pOrbital->RemoveAllAuras();
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+            m_bInitTowers = false;
         }
 
-        DoScriptText(SAY_DEATH, m_creature);
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+        bool m_bInitTowers;
+        bool m_bUlduarTower[KEEPER_ENCOUNTER];
 
-        // start epilogue event
-        if (Creature* pFlyMachine = m_creature->SummonCreature(NPC_BRANN_FLYING_MACHINE, 175.2838f, -210.4325f, 501.2375f, 1.42f, TEMPSUMMON_CORPSE_DESPAWN, 0))
+        uint32 m_uiBatteringRamTimer;
+        uint32 m_uiFlameVentsTimer;
+        uint32 m_uiMissileBarrageTimer;
+        uint32 m_uiPursueTimer;
+        uint32 m_uiGatheringSpeedTimer;
+
+        uint32 m_uiHardModeTimer;
+        uint8 m_uiHardModeStep;
+
+        uint8 m_uiThorimHammerCount;
+        uint32 m_uiThorimHammerTimer;
+
+        void Reset() override
         {
-            if (Creature* pBrann = m_creature->SummonCreature(NPC_BRANN_BRONZEBEARD_LEVIATHAN, 175.2554f, -210.6305f, 500.7375f, 1.42f, TEMPSUMMON_CORPSE_DESPAWN, 0))
-                pBrann->CastSpell(pFlyMachine, SPELL_RIDE_VEHICLE, true);
+            DoCastSpellIfCan(m_creature, SPELL_INVISIBILITY_DETECTION, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
 
-            pFlyMachine->SetWalk(false);
-            pFlyMachine->GetMotionMaster()->MovePoint(1, 229.9419f, -130.3764f, 409.5681f);
+            for (uint8 i = 0; i < KEEPER_ENCOUNTER; ++i)
+                m_bUlduarTower[i] = false;
+
+            m_uiBatteringRamTimer = 10000;
+            m_uiFlameVentsTimer = 30000;
+            m_uiMissileBarrageTimer = 1000;
+            m_uiPursueTimer = 1000;
+            m_uiGatheringSpeedTimer = 10000;
+
+            m_uiHardModeTimer = 10000;
+            m_uiHardModeStep = 0;
+            m_uiThorimHammerCount = 0;
+            m_uiThorimHammerTimer = 0;
         }
-    }
 
-    void Aggro(Unit* /*pWho*/) override
-    {
-        // check the towers again to make sure that some of them were not destroyed in the meanwhile
-        FetchTowers();
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LEVIATHAN, IN_PROGRESS);
-
-        DoScriptText(SAY_AGGRO, m_creature);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        if (urand(0, 1))
-            DoScriptText(SAY_SLAY, m_creature);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LEVIATHAN, FAIL);
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
+        void JustDied(Unit* /*pKiller*/) override
         {
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_LEVIATHAN, DONE);
+
+                // clear hard mode auras
+                if (Creature* pOrbital = m_pInstance->GetSingleCreatureFromStorage(NPC_ORBITAL_SUPPORT))
+                    pOrbital->RemoveAllAuras();
+            }
+
+            DoScriptText(SAY_DEATH, m_creature);
+
+            // start epilogue event
+            if (Creature* pFlyMachine = m_creature->SummonCreature(NPC_BRANN_FLYING_MACHINE, 175.2838f, -210.4325f, 501.2375f, 1.42f, TEMPSUMMON_CORPSE_DESPAWN, 0))
+            {
+                if (Creature* pBrann = m_creature->SummonCreature(NPC_BRANN_BRONZEBEARD_LEVIATHAN, 175.2554f, -210.6305f, 500.7375f, 1.42f, TEMPSUMMON_CORPSE_DESPAWN, 0))
+                    pBrann->CastSpell(pFlyMachine, SPELL_RIDE_VEHICLE, true);
+
+                pFlyMachine->SetWalk(false);
+                pFlyMachine->GetMotionMaster()->MovePoint(1, 229.9419f, -130.3764f, 409.5681f);
+            }
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            // check the towers again to make sure that some of them were not destroyed in the meanwhile
+            FetchTowers();
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_LEVIATHAN, IN_PROGRESS);
+
+            DoScriptText(SAY_AGGRO, m_creature);
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            if (urand(0, 1))
+                DoScriptText(SAY_SLAY, m_creature);
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_LEVIATHAN, FAIL);
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_THORIM_HAMMER_VEHICLE:
                 pSummoned->CastSpell(pSummoned, SPELL_LIGHTNING_SKYBEAM, true);
                 break;
@@ -276,223 +279,223 @@ struct  boss_flame_leviathanAI : public ScriptedAI
             case NPC_FREYA_WARD_VEHICLE:
                 pSummoned->CastSpell(pSummoned, SPELL_GREEN_SKYBEAM, true);
                 break;
-        }
-    }
-
-    void SummonedMovementInform(Creature* pSummoned, uint32 uiMoveType, uint32 uiPointId) override
-    {
-        if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
-            return;
-
-        if (pSummoned->GetEntry() == NPC_BRANN_FLYING_MACHINE)
-        {
-            // spawn the Archmange and eject Brann
-            if (Creature* pArchmage = m_creature->SummonCreature(NPC_ARCHMANGE_RHYDIAN, 235.5596f, -136.1876f, 409.6508f, 1.78f, TEMPSUMMON_CORPSE_DESPAWN, 0))
-            {
-                pArchmage->SetWalk(false);
-                pArchmage->GetMotionMaster()->MovePoint(1, 239.3158f, -123.6443f, 409.8174f);
-            }
-
-            pSummoned->RemoveAllAuras();
-        }
-        else if (pSummoned->GetEntry() == NPC_ARCHMANGE_RHYDIAN)
-        {
-            if (Creature* pBrann = GetClosestCreatureWithEntry(pSummoned, NPC_BRANN_BRONZEBEARD_LEVIATHAN, 30.0f))
-            {
-                // rest will be handled by DB scripts
-                pBrann->SetWalk(false);
-                pBrann->GetMotionMaster()->MoveWaypoint();
             }
         }
-    }
 
-    void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
-    {
-        if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
-            return;
-
-        // set boss in combat (if not already)
-        m_creature->SetInCombatWithZone();
-    }
-
-    void SpellHitTarget(Unit* pTarget, SpellEntry const* pSpellEntry) override
-    {
-        if (pTarget->IsVehicle() && pSpellEntry->Id == SPELL_PURSUED)
+        void SummonedMovementInform(Creature* pSummoned, uint32 uiMoveType, uint32 uiPointId) override
         {
-            m_creature->FixateTarget(pTarget);
+            if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
+                return;
 
-            if (Player* pPlayer = pTarget->GetCharmerOrOwnerPlayerOrPlayerItself())
-                DoScriptText(EMOTE_PURSUE, m_creature, pPlayer);
-        }
-    }
-
-    // check for all active towers
-    void FetchTowers()
-    {
-        if (!m_pInstance)
-            return;
-
-        // the orbital support applies the tower auras
-        Creature* pOrbital = m_pInstance->GetSingleCreatureFromStorage(NPC_ORBITAL_SUPPORT);
-        if (!pOrbital)
-            return;
-
-        uint8 uiActiveTowers = 0;
-
-        // check the states twice: at reset and at aggro to make sure that some towers were not destroyed in the meanwhile
-        if (m_pInstance->GetData(TYPE_TOWER_HODIR) == DONE)
-        {
-            pOrbital->CastSpell(pOrbital, SPELL_TOWER_OF_FROST, true);
-            ++uiActiveTowers;
-            m_bUlduarTower[TOWER_ID_HODIR] = true;
-        }
-        else
-            pOrbital->RemoveAurasDueToSpell(SPELL_TOWER_OF_FROST);
-        if (m_pInstance->GetData(TYPE_TOWER_FREYA) == DONE)
-        {
-            pOrbital->CastSpell(pOrbital, SPELL_TOWER_OF_LIFE, true);
-            ++uiActiveTowers;
-            m_bUlduarTower[TOWER_ID_FREYA] = true;
-        }
-        else
-            pOrbital->RemoveAurasDueToSpell(SPELL_TOWER_OF_LIFE);
-        if (m_pInstance->GetData(TYPE_TOWER_MIMIRON) == DONE)
-        {
-            pOrbital->CastSpell(pOrbital, SPELL_TOWER_OF_FLAMES, true);
-            ++uiActiveTowers;
-            m_bUlduarTower[TOWER_ID_MIMIRON] = true;
-        }
-        else
-            pOrbital->RemoveAurasDueToSpell(SPELL_TOWER_OF_FLAMES);
-        if (m_pInstance->GetData(TYPE_TOWER_THORIM) == DONE)
-        {
-            pOrbital->CastSpell(pOrbital, SPELL_TOWER_OF_STORMS, true);
-            ++uiActiveTowers;
-            m_bUlduarTower[TOWER_ID_THORIM] = true;
-        }
-        else
-            pOrbital->RemoveAurasDueToSpell(SPELL_TOWER_OF_STORMS);
-
-        // inform instance about all active towers for future use in achievements and hard mode loot
-        m_pInstance->SetData(TYPE_LEVIATHAN_HARD, uiActiveTowers);
-    }
-
-    // Functions which handle the spawn of each type of add
-    void DoSpawnHodirFury()
-    {
-        for (uint8 i = 0; i < MAX_HODIR_FURY; ++i)
-            m_creature->SummonCreature(NPC_HODIR_FURY_VEHICLE, afHodirFury[i][0], afHodirFury[i][1], afHodirFury[i][2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
-    }
-
-    void DoSpawnFreyaWard()
-    {
-        for (uint8 i = 0; i < MAX_FREYA_WARD; ++i)
-            m_creature->SummonCreature(NPC_FREYA_WARD_VEHICLE, afFreyaWard[i][0], afFreyaWard[i][1], afFreyaWard[i][2], afFreyaWard[i][3], TEMPSUMMON_DEAD_DESPAWN, 0);
-    }
-
-    void DoSpawnMimironInferno()
-    {
-        // Mimiron inferno has waypoint movement
-        m_creature->SummonCreature(NPC_MIMIRON_INFERNO_VEHICLE, afMimironInferno[0], afMimironInferno[1], afMimironInferno[2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
-    }
-
-    void DoSpawnThorimHammer()
-    {
-        if (!m_pInstance)
-            return;
-
-        // get a random point compared to the center and spawn the npcs
-        if (Creature* pOrbital = m_pInstance->GetSingleCreatureFromStorage(NPC_ORBITAL_SUPPORT))
-        {
-            float fX, fY, fZ;
-            m_creature->GetRandomPoint(pOrbital->GetPositionX(), pOrbital->GetPositionY(), pOrbital->GetPositionZ(), 150.0f, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_THORIM_HAMMER_VEHICLE, fX, fY, fZ, 0, TEMPSUMMON_TIMED_DESPAWN, 8000);
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        // fetch all tower buffs on the first update
-        if (!m_bInitTowers)
-        {
-            FetchTowers();
-            m_bInitTowers = true;
-        }
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiPursueTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_PURSUED) == CAST_OK)
+            if (pSummoned->GetEntry() == NPC_BRANN_FLYING_MACHINE)
             {
-                // don't yell from the beginning
-                if (!m_uiHardModeTimer)
+                // spawn the Archmange and eject Brann
+                if (Creature* pArchmage = m_creature->SummonCreature(NPC_ARCHMANGE_RHYDIAN, 235.5596f, -136.1876f, 409.6508f, 1.78f, TEMPSUMMON_CORPSE_DESPAWN, 0))
                 {
-                    switch (urand(0, 2))
+                    pArchmage->SetWalk(false);
+                    pArchmage->GetMotionMaster()->MovePoint(1, 239.3158f, -123.6443f, 409.8174f);
+                }
+
+                pSummoned->RemoveAllAuras();
+            }
+            else if (pSummoned->GetEntry() == NPC_ARCHMANGE_RHYDIAN)
+            {
+                if (Creature* pBrann = GetClosestCreatureWithEntry(pSummoned, NPC_BRANN_BRONZEBEARD_LEVIATHAN, 30.0f))
+                {
+                    // rest will be handled by DB scripts
+                    pBrann->SetWalk(false);
+                    pBrann->GetMotionMaster()->MoveWaypoint();
+                }
+            }
+        }
+
+        void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
+        {
+            if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
+                return;
+
+            // set boss in combat (if not already)
+            m_creature->SetInCombatWithZone();
+        }
+
+        void SpellHitTarget(Unit* pTarget, SpellEntry const* pSpellEntry) override
+        {
+            if (pTarget->IsVehicle() && pSpellEntry->Id == SPELL_PURSUED)
+            {
+                m_creature->FixateTarget(pTarget);
+
+                if (Player* pPlayer = pTarget->GetCharmerOrOwnerPlayerOrPlayerItself())
+                    DoScriptText(EMOTE_PURSUE, m_creature, pPlayer);
+            }
+        }
+
+        // check for all active towers
+        void FetchTowers()
+        {
+            if (!m_pInstance)
+                return;
+
+            // the orbital support applies the tower auras
+            Creature* pOrbital = m_pInstance->GetSingleCreatureFromStorage(NPC_ORBITAL_SUPPORT);
+            if (!pOrbital)
+                return;
+
+            uint8 uiActiveTowers = 0;
+
+            // check the states twice: at reset and at aggro to make sure that some towers were not destroyed in the meanwhile
+            if (m_pInstance->GetData(TYPE_TOWER_HODIR) == DONE)
+            {
+                pOrbital->CastSpell(pOrbital, SPELL_TOWER_OF_FROST, true);
+                ++uiActiveTowers;
+                m_bUlduarTower[TOWER_ID_HODIR] = true;
+            }
+            else
+                pOrbital->RemoveAurasDueToSpell(SPELL_TOWER_OF_FROST);
+            if (m_pInstance->GetData(TYPE_TOWER_FREYA) == DONE)
+            {
+                pOrbital->CastSpell(pOrbital, SPELL_TOWER_OF_LIFE, true);
+                ++uiActiveTowers;
+                m_bUlduarTower[TOWER_ID_FREYA] = true;
+            }
+            else
+                pOrbital->RemoveAurasDueToSpell(SPELL_TOWER_OF_LIFE);
+            if (m_pInstance->GetData(TYPE_TOWER_MIMIRON) == DONE)
+            {
+                pOrbital->CastSpell(pOrbital, SPELL_TOWER_OF_FLAMES, true);
+                ++uiActiveTowers;
+                m_bUlduarTower[TOWER_ID_MIMIRON] = true;
+            }
+            else
+                pOrbital->RemoveAurasDueToSpell(SPELL_TOWER_OF_FLAMES);
+            if (m_pInstance->GetData(TYPE_TOWER_THORIM) == DONE)
+            {
+                pOrbital->CastSpell(pOrbital, SPELL_TOWER_OF_STORMS, true);
+                ++uiActiveTowers;
+                m_bUlduarTower[TOWER_ID_THORIM] = true;
+            }
+            else
+                pOrbital->RemoveAurasDueToSpell(SPELL_TOWER_OF_STORMS);
+
+            // inform instance about all active towers for future use in achievements and hard mode loot
+            m_pInstance->SetData(TYPE_LEVIATHAN_HARD, uiActiveTowers);
+        }
+
+        // Functions which handle the spawn of each type of add
+        void DoSpawnHodirFury()
+        {
+            for (uint8 i = 0; i < MAX_HODIR_FURY; ++i)
+                m_creature->SummonCreature(NPC_HODIR_FURY_VEHICLE, afHodirFury[i][0], afHodirFury[i][1], afHodirFury[i][2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+        }
+
+        void DoSpawnFreyaWard()
+        {
+            for (uint8 i = 0; i < MAX_FREYA_WARD; ++i)
+                m_creature->SummonCreature(NPC_FREYA_WARD_VEHICLE, afFreyaWard[i][0], afFreyaWard[i][1], afFreyaWard[i][2], afFreyaWard[i][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+        }
+
+        void DoSpawnMimironInferno()
+        {
+            // Mimiron inferno has waypoint movement
+            m_creature->SummonCreature(NPC_MIMIRON_INFERNO_VEHICLE, afMimironInferno[0], afMimironInferno[1], afMimironInferno[2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+        }
+
+        void DoSpawnThorimHammer()
+        {
+            if (!m_pInstance)
+                return;
+
+            // get a random point compared to the center and spawn the npcs
+            if (Creature* pOrbital = m_pInstance->GetSingleCreatureFromStorage(NPC_ORBITAL_SUPPORT))
+            {
+                float fX, fY, fZ;
+                m_creature->GetRandomPoint(pOrbital->GetPositionX(), pOrbital->GetPositionY(), pOrbital->GetPositionZ(), 150.0f, fX, fY, fZ);
+                m_creature->SummonCreature(NPC_THORIM_HAMMER_VEHICLE, fX, fY, fZ, 0, TEMPSUMMON_TIMED_DESPAWN, 8000);
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            // fetch all tower buffs on the first update
+            if (!m_bInitTowers)
+            {
+                FetchTowers();
+                m_bInitTowers = true;
+            }
+
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            if (m_uiPursueTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_PURSUED) == CAST_OK)
+                {
+                    // don't yell from the beginning
+                    if (!m_uiHardModeTimer)
                     {
+                        switch (urand(0, 2))
+                        {
                         case 0: DoScriptText(SAY_CHANGE_1, m_creature); break;
                         case 1: DoScriptText(SAY_CHANGE_2, m_creature); break;
                         case 2: DoScriptText(SAY_CHANGE_3, m_creature); break;
+                        }
                     }
+                    m_uiPursueTimer = 30000;
                 }
-                m_uiPursueTimer = 30000;
             }
-        }
-        else
-            m_uiPursueTimer -= uiDiff;
+            else
+                m_uiPursueTimer -= uiDiff;
 
-        if (m_uiFlameVentsTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_FLAME_VENTS) == CAST_OK)
-                m_uiFlameVentsTimer = urand(15000, 25000);
-        }
-        else
-            m_uiFlameVentsTimer -= uiDiff;
-
-        if (m_uiBatteringRamTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BATTERING_RAM) == CAST_OK)
-                m_uiBatteringRamTimer = urand(10000, 15000);
-        }
-        else
-            m_uiBatteringRamTimer -= uiDiff;
-
-        if (m_uiMissileBarrageTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (m_uiFlameVentsTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_MISSILE_BARRAGE_TARGET) == CAST_OK)
-                    m_uiMissileBarrageTimer = urand(1000, 2000);
+                if (DoCastSpellIfCan(m_creature, SPELL_FLAME_VENTS) == CAST_OK)
+                    m_uiFlameVentsTimer = urand(15000, 25000);
             }
-        }
-        else
-            m_uiMissileBarrageTimer -= uiDiff;
+            else
+                m_uiFlameVentsTimer -= uiDiff;
 
-        if (m_uiGatheringSpeedTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_GATHERING_SPEED) == CAST_OK)
-                m_uiGatheringSpeedTimer = 10000;
-        }
-        else
-            m_uiGatheringSpeedTimer -= uiDiff;
-
-        // start hard mode
-        if (m_uiHardModeTimer)
-        {
-            if (m_uiHardModeTimer <= uiDiff)
+            if (m_uiBatteringRamTimer < uiDiff)
             {
-                // if all towers are deactivated then skip the rest
-                if (!m_bUlduarTower[TOWER_ID_HODIR] && !m_bUlduarTower[TOWER_ID_FREYA] && !m_bUlduarTower[TOWER_ID_MIMIRON] && !m_bUlduarTower[TOWER_ID_THORIM])
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BATTERING_RAM) == CAST_OK)
+                    m_uiBatteringRamTimer = urand(10000, 15000);
+            }
+            else
+                m_uiBatteringRamTimer -= uiDiff;
+
+            if (m_uiMissileBarrageTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
-                    DoScriptText(SAY_TOWER_DOWN, m_creature);
-                    m_uiHardModeTimer = 0;
+                    if (DoCastSpellIfCan(pTarget, SPELL_MISSILE_BARRAGE_TARGET) == CAST_OK)
+                        m_uiMissileBarrageTimer = urand(1000, 2000);
                 }
-                else
+            }
+            else
+                m_uiMissileBarrageTimer -= uiDiff;
+
+            if (m_uiGatheringSpeedTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_GATHERING_SPEED) == CAST_OK)
+                    m_uiGatheringSpeedTimer = 10000;
+            }
+            else
+                m_uiGatheringSpeedTimer -= uiDiff;
+
+            // start hard mode
+            if (m_uiHardModeTimer)
+            {
+                if (m_uiHardModeTimer <= uiDiff)
                 {
-                    // yell hard mode start and start activating each tower one by one
-                    switch (m_uiHardModeStep)
+                    // if all towers are deactivated then skip the rest
+                    if (!m_bUlduarTower[TOWER_ID_HODIR] && !m_bUlduarTower[TOWER_ID_FREYA] && !m_bUlduarTower[TOWER_ID_MIMIRON] && !m_bUlduarTower[TOWER_ID_THORIM])
                     {
+                        DoScriptText(SAY_TOWER_DOWN, m_creature);
+                        m_uiHardModeTimer = 0;
+                    }
+                    else
+                    {
+                        // yell hard mode start and start activating each tower one by one
+                        switch (m_uiHardModeStep)
+                        {
                         case 0:
                             DoScriptText(SAY_HARD_MODE, m_creature);
                             m_uiHardModeTimer = 10000;
@@ -511,10 +514,10 @@ struct  boss_flame_leviathanAI : public ScriptedAI
                                     // activate the timer for each tower ability
                                     switch (i)
                                     {
-                                        case TOWER_ID_HODIR:    DoSpawnHodirFury();           break;
-                                        case TOWER_ID_FREYA:    DoSpawnFreyaWard();           break;
-                                        case TOWER_ID_MIMIRON:  DoSpawnMimironInferno();      break;
-                                        case TOWER_ID_THORIM:   m_uiThorimHammerTimer = 1000; break;
+                                    case TOWER_ID_HODIR:    DoSpawnHodirFury();           break;
+                                    case TOWER_ID_FREYA:    DoSpawnFreyaWard();           break;
+                                    case TOWER_ID_MIMIRON:  DoSpawnMimironInferno();      break;
+                                    case TOWER_ID_THORIM:   m_uiThorimHammerTimer = 1000; break;
                                     }
 
                                     // reset timer and wait for another turn
@@ -530,234 +533,265 @@ struct  boss_flame_leviathanAI : public ScriptedAI
                                     m_uiHardModeTimer = 0;
                             }
                             break;
+                        }
                     }
                 }
-            }
-            else
-                m_uiHardModeTimer -= uiDiff;
-        }
-
-        // Tower of Storm abilities
-        if (m_uiThorimHammerTimer)
-        {
-            if (m_uiThorimHammerTimer <= uiDiff)
-            {
-                DoSpawnThorimHammer();
-                ++m_uiThorimHammerCount;
-
-                if (m_uiThorimHammerCount == MAX_THORIM_HAMMER)
-                    m_uiThorimHammerTimer = 0;
                 else
-                    m_uiThorimHammerTimer = 1000;
+                    m_uiHardModeTimer -= uiDiff;
             }
-            else
-                m_uiThorimHammerTimer -= uiDiff;
-        }
 
-        DoMeleeAttackIfReady();
+            // Tower of Storm abilities
+            if (m_uiThorimHammerTimer)
+            {
+                if (m_uiThorimHammerTimer <= uiDiff)
+                {
+                    DoSpawnThorimHammer();
+                    ++m_uiThorimHammerCount;
+
+                    if (m_uiThorimHammerCount == MAX_THORIM_HAMMER)
+                        m_uiThorimHammerTimer = 0;
+                    else
+                        m_uiThorimHammerTimer = 1000;
+                }
+                else
+                    m_uiThorimHammerTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_flame_leviathanAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_flame_leviathan(Creature* pCreature)
-{
-    return new boss_flame_leviathanAI(pCreature);
-}
 
 /*######
 ## npc_hodir_fury_reticle
 ######*/
 
-struct  npc_hodir_fury_reticleAI : public ScriptedAI
+struct npc_hodir_fury_reticle : public CreatureScript
 {
-    npc_hodir_fury_reticleAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_hodir_fury_reticle() : CreatureScript("npc_hodir_fury_reticle") {}
+
+    struct npc_hodir_fury_reticleAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiTargetChaseTimer;
-    ObjectGuid m_hodirFuryGuid;
-
-    void Reset() override
-    {
-        m_uiTargetChaseTimer = 5000;
-        SetCombatMovement(false);
-    }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_HODIR_FURY)
-            m_hodirFuryGuid = pSummoned->GetObjectGuid();
-    }
-
-    void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
-    {
-        if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
-            return;
-
-        // cast Hodir Fury on point reached and search for another target
-        if (Creature* pHodirFury = m_creature->GetMap()->GetCreature(m_hodirFuryGuid))
-            pHodirFury->CastSpell(m_creature, SPELL_HODIR_FURY, true);
-
-        m_uiTargetChaseTimer = 5000;
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiTargetChaseTimer)
+        npc_hodir_fury_reticleAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (m_uiTargetChaseTimer <= uiDiff)
-            {
-                if (m_pInstance)
-                {
-                    if (Creature* pLeviathan = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN))
-                    {
-                        if (Unit* pTarget = pLeviathan->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                            m_creature->GetMotionMaster()->MovePoint(1, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ());
-                    }
-                }
-                m_uiTargetChaseTimer = 0;
-            }
-            else
-                m_uiTargetChaseTimer -= uiDiff;
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         }
+
+        ScriptedInstance* m_pInstance;
+
+        uint32 m_uiTargetChaseTimer;
+        ObjectGuid m_hodirFuryGuid;
+
+        void Reset() override
+        {
+            m_uiTargetChaseTimer = 5000;
+            SetCombatMovement(false);
+        }
+
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_HODIR_FURY)
+                m_hodirFuryGuid = pSummoned->GetObjectGuid();
+        }
+
+        void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
+        {
+            if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
+                return;
+
+            // cast Hodir Fury on point reached and search for another target
+            if (Creature* pHodirFury = m_creature->GetMap()->GetCreature(m_hodirFuryGuid))
+                pHodirFury->CastSpell(m_creature, SPELL_HODIR_FURY, true);
+
+            m_uiTargetChaseTimer = 5000;
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiTargetChaseTimer)
+            {
+                if (m_uiTargetChaseTimer <= uiDiff)
+                {
+                    if (m_pInstance)
+                    {
+                        if (Creature* pLeviathan = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN))
+                        {
+                            if (Unit* pTarget = pLeviathan->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                                m_creature->GetMotionMaster()->MovePoint(1, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ());
+                        }
+                    }
+                    m_uiTargetChaseTimer = 0;
+                }
+                else
+                    m_uiTargetChaseTimer -= uiDiff;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_hodir_fury_reticleAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_hodir_fury_reticle(Creature* pCreature)
-{
-    return new npc_hodir_fury_reticleAI(pCreature);
-}
 
 /*######
 ## npc_hodir_fury
 ######*/
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct  npc_hodir_furyAI : public Scripted_NoMovementAI
+struct npc_hodir_fury : public CreatureScript
 {
-    npc_hodir_furyAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    npc_hodir_fury() : CreatureScript("npc_hodir_fury") {}
 
-    void Reset() override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
+    struct npc_hodir_furyAI : public Scripted_NoMovementAI
+    {
+        npc_hodir_furyAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { }
+
+        void Reset() override { }
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        void UpdateAI(const uint32 /*uiDiff*/) override { }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_hodir_furyAI(pCreature);
+    }
 };
-
-CreatureAI* GetAI_npc_hodir_fury(Creature* pCreature)
-{
-    return new npc_hodir_furyAI(pCreature);
-}
 
 /*######
 ## npc_freya_ward
 ######*/
 
 // TODO Move this 'script' to eventAI when combat can be proper prevented from core-side
-struct  npc_freya_wardAI : public Scripted_NoMovementAI
+struct npc_freya_ward : public CreatureScript
 {
-    npc_freya_wardAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset();}
+    npc_freya_ward() : CreatureScript("npc_freya_ward") {}
 
-    uint32 m_uiFreyaWardTimer;
-
-    void Reset() override
+    struct npc_freya_wardAI : public Scripted_NoMovementAI
     {
-        m_uiFreyaWardTimer = 30000;
-    }
+        npc_freya_wardAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        uint32 m_uiFreyaWardTimer;
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_WRITHING_LASHER || pSummoned->GetEntry() == NPC_WARD_OF_LIFE)
-            pSummoned->SetInCombatWithZone();
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiFreyaWardTimer < uiDiff)
+        void Reset() override
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_FREYA_WARD) == CAST_OK)
-                m_uiFreyaWardTimer = 30000;
+            m_uiFreyaWardTimer = 30000;
         }
-        else
-            m_uiFreyaWardTimer -= uiDiff;
+
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_WRITHING_LASHER || pSummoned->GetEntry() == NPC_WARD_OF_LIFE)
+                pSummoned->SetInCombatWithZone();
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiFreyaWardTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_FREYA_WARD) == CAST_OK)
+                    m_uiFreyaWardTimer = 30000;
+            }
+            else
+                m_uiFreyaWardTimer -= uiDiff;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_freya_wardAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_freya_ward(Creature* pCreature)
-{
-    return new npc_freya_wardAI(pCreature);
-}
 
 /*######
 ## npc_mimiron_inferno
 ######*/
 
 // TODO Move this 'script' to eventAI when combat can be proper prevented from core-side
-struct  npc_mimiron_infernoAI : public Scripted_NoMovementAI
+struct npc_mimiron_inferno : public CreatureScript
 {
-    npc_mimiron_infernoAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    npc_mimiron_inferno() : CreatureScript("npc_mimiron_inferno") {}
 
-    uint32 m_uiMimironInfernoTimer;
-
-    void Reset() override
+    struct npc_mimiron_infernoAI : public Scripted_NoMovementAI
     {
-        m_uiMimironInfernoTimer = 15000;
-    }
+        npc_mimiron_infernoAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        uint32 m_uiMimironInfernoTimer;
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiMimironInfernoTimer < uiDiff)
+        void Reset() override
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_MIMIRON_INFERNO) == CAST_OK)
-                m_uiMimironInfernoTimer = 1000;
+            m_uiMimironInfernoTimer = 15000;
         }
-        else
-            m_uiMimironInfernoTimer -= uiDiff;
+
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiMimironInfernoTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_MIMIRON_INFERNO) == CAST_OK)
+                    m_uiMimironInfernoTimer = 1000;
+            }
+            else
+                m_uiMimironInfernoTimer -= uiDiff;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_mimiron_infernoAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_npc_mimiron_inferno(Creature* pCreature)
-{
-    return new npc_mimiron_infernoAI(pCreature);
-}
-
 void AddSC_boss_flame_leviathan()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_flame_leviathan";
-    pNewScript->GetAI = GetAI_boss_flame_leviathan;
-    pNewScript->RegisterSelf();
+    s = new boss_flame_leviathan();
+    s->RegisterSelf();
+    s = new npc_hodir_fury_reticle();
+    s->RegisterSelf();
+    s = new npc_hodir_fury();
+    s->RegisterSelf();
+    s = new npc_freya_ward();
+    s->RegisterSelf();
+    s = new npc_mimiron_inferno();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_hodir_fury_reticle";
-    pNewScript->GetAI = GetAI_npc_hodir_fury_reticle;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_flame_leviathan";
+    //pNewScript->GetAI = GetAI_boss_flame_leviathan;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_hodir_fury";
-    pNewScript->GetAI = GetAI_npc_hodir_fury;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_hodir_fury_reticle";
+    //pNewScript->GetAI = GetAI_npc_hodir_fury_reticle;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_freya_ward";
-    pNewScript->GetAI = GetAI_npc_freya_ward;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_hodir_fury";
+    //pNewScript->GetAI = GetAI_npc_hodir_fury;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_mimiron_inferno";
-    pNewScript->GetAI = GetAI_npc_mimiron_inferno;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_freya_ward";
+    //pNewScript->GetAI = GetAI_npc_freya_ward;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_mimiron_inferno";
+    //pNewScript->GetAI = GetAI_npc_mimiron_inferno;
+    //pNewScript->RegisterSelf();
 }

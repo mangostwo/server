@@ -97,134 +97,137 @@ enum
 ## boss_hodir
 ######*/
 
-struct  boss_hodirAI : public ScriptedAI
+struct boss_hodir : public CreatureScript
 {
-    boss_hodirAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_hodir() : CreatureScript("boss_hodir") {}
+
+    struct boss_hodirAI : public ScriptedAI
     {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_bEventFinished = false;
-        m_uiEpilogueTimer = 0;
-        m_uiEpilogueStage = 0;
-        Reset();
-    }
-
-    instance_ulduar* m_pInstance;
-    bool m_bIsRegularMode;
-    bool m_bEventFinished;
-
-    uint32 m_uiEpilogueTimer;
-    uint32 m_uiBerserkTimer;
-    uint32 m_uiFlashFreezeTimer;
-    uint32 m_uiFrozenBlowsTimer;
-    uint32 m_uiFreezeTimer;
-    uint8 m_uiEpilogueStage;
-
-    void Reset() override
-    {
-        m_uiBerserkTimer     = 8 * MINUTE * IN_MILLISECONDS;
-        m_uiFlashFreezeTimer = 50000;
-        m_uiFrozenBlowsTimer = 70000;
-        m_uiFreezeTimer      = urand(25000, 30000);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        if (m_pInstance)
+        boss_hodirAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            m_pInstance->SetData(TYPE_HODIR, IN_PROGRESS);
-            m_pInstance->SetData(TYPE_HODIR_HARD, DONE);
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+            m_bEventFinished = false;
+            m_uiEpilogueTimer = 0;
+            m_uiEpilogueStage = 0;
         }
 
-        DoScriptText(SAY_AGGRO, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_BITTING_COLD, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_ICICLE_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-        DoCastSpellIfCan(m_creature, SPELL_SHATTER_CHEST, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-    }
-    
-    void AttackStart(Unit* pWho) override
-    {
-        // don't attack again after being defeated
-        if (m_bEventFinished)
-            return;
-        
-        ScriptedAI::AttackStart(pWho);
-    }
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+        bool m_bEventFinished;
 
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_HODIR, FAIL);
-    }
+        uint32 m_uiEpilogueTimer;
+        uint32 m_uiBerserkTimer;
+        uint32 m_uiFlashFreezeTimer;
+        uint32 m_uiFrozenBlowsTimer;
+        uint32 m_uiFreezeTimer;
+        uint8 m_uiEpilogueStage;
 
-    void EnterEvadeMode() override
-    {
-        m_creature->RemoveAllAurasOnEvade();
-        m_creature->DeleteThreatList();
-        m_creature->CombatStop(true);
-
-        if (m_creature->IsAlive() && !m_bEventFinished)
-            m_creature->GetMotionMaster()->MoveTargetedHome();
-
-        m_creature->SetLootRecipient(NULL);
-
-        Reset();
-    }
-
-    void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage) override
-    {
-        if (uiDamage >= m_creature->GetHealth())
+        void Reset() override
         {
-            uiDamage = 0;
+            m_uiBerserkTimer = 8 * MINUTE * IN_MILLISECONDS;
+            m_uiFlashFreezeTimer = 50000;
+            m_uiFrozenBlowsTimer = 70000;
+            m_uiFreezeTimer = urand(25000, 30000);
+        }
 
-            if (!m_bEventFinished)
+        void Aggro(Unit* /*pWho*/) override
+        {
+            if (m_pInstance)
             {
-                // Inform the faction helpers that the fight is over
-                ThreatList const& threatList = m_creature->GetThreatManager().getThreatList();
-                for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+                m_pInstance->SetData(TYPE_HODIR, IN_PROGRESS);
+                m_pInstance->SetData(TYPE_HODIR_HARD, DONE);
+            }
+
+            DoScriptText(SAY_AGGRO, m_creature);
+            DoCastSpellIfCan(m_creature, SPELL_BITTING_COLD, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, SPELL_ICICLE_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+            DoCastSpellIfCan(m_creature, SPELL_SHATTER_CHEST, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        }
+
+        void AttackStart(Unit* pWho) override
+        {
+            // don't attack again after being defeated
+            if (m_bEventFinished)
+                return;
+
+            ScriptedAI::AttackStart(pWho);
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_HODIR, FAIL);
+        }
+
+        void EnterEvadeMode() override
+        {
+            m_creature->RemoveAllAurasOnEvade();
+            m_creature->DeleteThreatList();
+            m_creature->CombatStop(true);
+
+            if (m_creature->IsAlive() && !m_bEventFinished)
+                m_creature->GetMotionMaster()->MoveTargetedHome();
+
+            m_creature->SetLootRecipient(NULL);
+
+            Reset();
+        }
+
+        void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage) override
+        {
+            if (uiDamage >= m_creature->GetHealth())
+            {
+                uiDamage = 0;
+
+                if (!m_bEventFinished)
                 {
-                    // only check creatures
-                    if (!(*itr)->getUnitGuid().IsCreature())
-                        continue;
+                    // Inform the faction helpers that the fight is over
+                    ThreatList const& threatList = m_creature->GetThreatManager().getThreatList();
+                    for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+                    {
+                        // only check creatures
+                        if (!(*itr)->getUnitGuid().IsCreature())
+                            continue;
 
-                    if (Creature* pTarget = m_creature->GetMap()->GetCreature((*itr)->getUnitGuid()))
-                        pTarget->AI()->EnterEvadeMode();
+                        if (Creature* pTarget = m_creature->GetMap()->GetCreature((*itr)->getUnitGuid()))
+                            pTarget->AI()->EnterEvadeMode();
+                    }
+
+                    m_uiEpilogueTimer = 10000;
+                    m_creature->setFaction(FACTION_ID_FRIENDLY);
+                    m_bEventFinished = true;
+                    EnterEvadeMode();
                 }
-
-                m_uiEpilogueTimer = 10000;
-                m_creature->setFaction(FACTION_ID_FRIENDLY);
-                m_bEventFinished = true;
-                EnterEvadeMode();
             }
         }
-    }
 
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_ICICLE)
+        void KilledUnit(Unit* pVictim) override
         {
-            pSummoned->CastSpell(pSummoned, SPELL_ICICLE_DUMMY, false);
-            pSummoned->CastSpell(pSummoned, SPELL_ICICLE, true);
-            pSummoned->ForcedDespawn(5000);
+            if (pVictim->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiEpilogueTimer)
+        void JustSummoned(Creature* pSummoned) override
         {
-            if (m_uiEpilogueTimer <= uiDiff)
+            if (pSummoned->GetEntry() == NPC_ICICLE)
             {
-                switch (m_uiEpilogueStage)
+                pSummoned->CastSpell(pSummoned, SPELL_ICICLE_DUMMY, false);
+                pSummoned->CastSpell(pSummoned, SPELL_ICICLE, true);
+                pSummoned->ForcedDespawn(5000);
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiEpilogueTimer)
+            {
+                if (m_uiEpilogueTimer <= uiDiff)
                 {
+                    switch (m_uiEpilogueStage)
+                    {
                     case 0:
                         if (m_pInstance)
                             m_pInstance->SetData(TYPE_HODIR, DONE);
@@ -240,230 +243,255 @@ struct  boss_hodirAI : public ScriptedAI
                             m_uiEpilogueTimer = 0;
                         }
                         break;
+                    }
+                    ++m_uiEpilogueStage;
                 }
-                ++m_uiEpilogueStage;
+                else
+                    m_uiEpilogueTimer -= uiDiff;
             }
-            else
-                m_uiEpilogueTimer -= uiDiff;
-        }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
 
-        if (m_uiBerserkTimer)
-        {
-            if (m_uiBerserkTimer <= uiDiff)
+            if (m_uiBerserkTimer)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                if (m_uiBerserkTimer <= uiDiff)
                 {
-                    DoScriptText(SAY_BERSERK, m_creature);
-                    m_uiBerserkTimer = 0;
+                    if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                    {
+                        DoScriptText(SAY_BERSERK, m_creature);
+                        m_uiBerserkTimer = 0;
+                    }
+                }
+                else
+                    m_uiBerserkTimer -= uiDiff;
+            }
+
+            if (m_uiFlashFreezeTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_FLASH_FREEZE) == CAST_OK)
+                {
+                    DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ICICLE_SNOWPACK : SPELL_ICICLE_SNOWPACK_H, CAST_TRIGGERED);
+                    DoScriptText(EMOTE_FLASH_FREEZE, m_creature);
+                    DoScriptText(SAY_FLASH_FREEZE, m_creature);
+                    m_uiFlashFreezeTimer = 50000;
                 }
             }
             else
-                m_uiBerserkTimer -= uiDiff;
-        }
+                m_uiFlashFreezeTimer -= uiDiff;
 
-        if (m_uiFlashFreezeTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_FLASH_FREEZE) == CAST_OK)
+            if (m_uiFrozenBlowsTimer < uiDiff)
             {
-                DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ICICLE_SNOWPACK : SPELL_ICICLE_SNOWPACK_H, CAST_TRIGGERED);
-                DoScriptText(EMOTE_FLASH_FREEZE, m_creature);
-                DoScriptText(SAY_FLASH_FREEZE, m_creature);
-                m_uiFlashFreezeTimer = 50000;
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FROZEN_BLOWS : SPELL_FROZEN_BLOWS_H) == CAST_OK)
+                {
+                    DoScriptText(SAY_FROZEN_BLOWS, m_creature);
+                    DoScriptText(EMOTE_FROZEN_BLOWS, m_creature);
+                    m_uiFrozenBlowsTimer = 60000;
+                }
             }
-        }
-        else
-            m_uiFlashFreezeTimer -= uiDiff;
+            else
+                m_uiFrozenBlowsTimer -= uiDiff;
 
-        if (m_uiFrozenBlowsTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FROZEN_BLOWS : SPELL_FROZEN_BLOWS_H) == CAST_OK)
+            if (m_uiFreezeTimer < uiDiff)
             {
-                DoScriptText(SAY_FROZEN_BLOWS, m_creature);
-                DoScriptText(EMOTE_FROZEN_BLOWS, m_creature);
-                m_uiFrozenBlowsTimer = 60000;
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_FREEZE) == CAST_OK)
+                        m_uiFreezeTimer = 15000;
+                }
             }
-        }
-        else
-            m_uiFrozenBlowsTimer -= uiDiff;
+            else
+                m_uiFreezeTimer -= uiDiff;
 
-        if (m_uiFreezeTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_FREEZE) == CAST_OK)
-                    m_uiFreezeTimer = 15000;
-            }
+            DoMeleeAttackIfReady();
         }
-        else
-            m_uiFreezeTimer -= uiDiff;
+    };
 
-        DoMeleeAttackIfReady();
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_hodirAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_hodir(Creature* pCreature)
-{
-    return new boss_hodirAI(pCreature);
-}
 
 /*######
 ## npc_flash_freeze
 ######*/
 
-struct  npc_flash_freezeAI : public Scripted_NoMovementAI
+struct npc_flash_freeze : public CreatureScript
 {
-    npc_flash_freezeAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    npc_flash_freeze() : CreatureScript("npc_flash_freeze") {}
+
+    struct npc_flash_freezeAI : public Scripted_NoMovementAI
     {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    instance_ulduar* m_pInstance;
-
-    bool m_bFreezeInit;
-
-    void Reset() override
-    {
-        m_bFreezeInit = false;
-    }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        // On Flash Freeze death, the owner should attack Hodir
-        if (m_creature->GetEntry() == NPC_FLASH_FREEZE_NPC && m_creature->IsTemporarySummon() && m_pInstance)
+        npc_flash_freezeAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
         {
-            if (Creature* pHodir = m_pInstance->GetSingleCreatureFromStorage(NPC_HODIR))
-            {
-                if (Creature* pSummoner = m_creature->GetMap()->GetCreature(((TemporarySummon*)m_creature)->GetSummonerGuid()))
-                    pSummoner->AI()->AttackStart(pHodir);
-            }
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         }
-    }
 
-    void UpdateAI(const uint32 /*uiDiff*/) override
-    {
-        // Flash Freeze npcs should be always be summoned
-        if (!m_creature->IsTemporarySummon())
-            return;
+        ScriptedInstance* m_pInstance;
 
-        // do the freezing on the first update tick
-        if (!m_bFreezeInit)
+        bool m_bFreezeInit;
+
+        void Reset() override
         {
-            // Flash Freeze npc will always stun or kill the summoner
-            if (m_creature->GetEntry() == NPC_FLASH_FREEZE_NPC)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_FLASH_FREEZE_AURA_NPC) == CAST_OK)
-                    DoCastSpellIfCan(m_creature, SPELL_FLASH_FREEZE_INITIAL, CAST_TRIGGERED);
-            }
-            else if (m_creature->GetEntry() == NPC_FLASH_FREEZE)
-            {
-                if (Unit* pSummoner = m_creature->GetMap()->GetUnit(((TemporarySummon*)m_creature)->GetSummonerGuid()))
-                {
-                    // kill frozen players
-                    if (pSummoner->HasAura(SPELL_FREEZE))
-                        DoCastSpellIfCan(pSummoner, SPELL_FLASH_FREEZE_KILL);
-                    else
-                        DoCastSpellIfCan(m_creature, SPELL_FLASH_FREEZE_AURA);
+            m_bFreezeInit = false;
+        }
 
-                    if (pSummoner->GetTypeId() == TYPEID_PLAYER && m_pInstance)
-                        m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_CHEESE_FREEZE, false);
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            // On Flash Freeze death, the owner should attack Hodir
+            if (m_creature->GetEntry() == NPC_FLASH_FREEZE_NPC && m_creature->IsTemporarySummon() && m_pInstance)
+            {
+                if (Creature* pHodir = m_pInstance->GetSingleCreatureFromStorage(NPC_HODIR))
+                {
+                    if (Creature* pSummoner = m_creature->GetMap()->GetCreature(((TemporarySummon*)m_creature)->GetSummonerGuid()))
+                        pSummoner->AI()->AttackStart(pHodir);
                 }
             }
-
-            m_bFreezeInit = true;
         }
+
+        void UpdateAI(const uint32 /*uiDiff*/) override
+        {
+            // Flash Freeze npcs should be always be summoned
+            if (!m_creature->IsTemporarySummon())
+                return;
+
+            // do the freezing on the first update tick
+            if (!m_bFreezeInit)
+            {
+                // Flash Freeze npc will always stun or kill the summoner
+                if (m_creature->GetEntry() == NPC_FLASH_FREEZE_NPC)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_FLASH_FREEZE_AURA_NPC) == CAST_OK)
+                        DoCastSpellIfCan(m_creature, SPELL_FLASH_FREEZE_INITIAL, CAST_TRIGGERED);
+                }
+                else if (m_creature->GetEntry() == NPC_FLASH_FREEZE)
+                {
+                    if (Unit* pSummoner = m_creature->GetMap()->GetUnit(((TemporarySummon*)m_creature)->GetSummonerGuid()))
+                    {
+                        // kill frozen players
+                        if (pSummoner->HasAura(SPELL_FREEZE))
+                            DoCastSpellIfCan(pSummoner, SPELL_FLASH_FREEZE_KILL);
+                        else
+                            DoCastSpellIfCan(m_creature, SPELL_FLASH_FREEZE_AURA);
+
+                        if (pSummoner->GetTypeId() == TYPEID_PLAYER && m_pInstance)
+                            m_pInstance->SetData(TYPE_ACHIEV_CHEESE_FREEZE, uint32(false));
+                    }
+                }
+
+                m_bFreezeInit = true;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_flash_freezeAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_flash_freeze(Creature* pCreature)
-{
-    return new npc_flash_freezeAI(pCreature);
-}
 
 /*######
 ## event_boss_hodir
 ######*/
 
-bool ProcessEventId_event_boss_hodir(uint32 uiEventId, Object* pSource, Object* /*pTarget*/, bool /*bIsStart*/)
+struct event_boss_hodir : public MapEventScript
 {
-    if (pSource->GetTypeId() == TYPEID_UNIT)
+    event_boss_hodir() : MapEventScript("event_boss_hodir") {}
+
+    bool OnReceived(uint32 uiEventId, Object* pSource, Object* /*pTarget*/, bool /*bIsStart*/) override
     {
-        instance_ulduar* pInstance = (instance_ulduar*)((Creature*)pSource)->GetInstanceData();
-        if (!pInstance)
+        if (pSource->GetTypeId() == TYPEID_UNIT)
+        {
+            ScriptedInstance* pInstance = (ScriptedInstance*)((Creature*)pSource)->GetInstanceData();
+            if (!pInstance)
+                return true;
+
+            if (uiEventId == EVENT_ID_SHATTER_CHEST)
+            {
+                // Mark hard mode as failed and despawn the Rare cache
+                pInstance->SetData(TYPE_HODIR_HARD, FAIL);
+
+                if (GameObject* pChest = pInstance->GetSingleGameObjectFromStorage(pInstance->instance->IsRegularDifficulty() ? GO_CACHE_OF_RARE_WINTER_10 : GO_CACHE_OF_RARE_WINTER_25))
+                    pChest->SetLootState(GO_JUST_DEACTIVATED);
+            }
+            else if (uiEventId == EVENT_ID_ATTACK_START)
+            {
+                // Start encounter
+                if (Creature* pHodir = pInstance->GetSingleCreatureFromStorage(NPC_HODIR))
+                    pHodir->SetInCombatWithZone();
+            }
+
             return true;
-
-        if (uiEventId == EVENT_ID_SHATTER_CHEST)
-        {
-            // Mark hard mode as failed and despawn the Rare cache
-            pInstance->SetData(TYPE_HODIR_HARD, FAIL);
-
-            if (GameObject* pChest = pInstance->GetSingleGameObjectFromStorage(pInstance->instance->IsRegularDifficulty() ? GO_CACHE_OF_RARE_WINTER_10 : GO_CACHE_OF_RARE_WINTER_25))
-                pChest->SetLootState(GO_JUST_DEACTIVATED);
-        }
-        else if (uiEventId == EVENT_ID_ATTACK_START)
-        {
-            // Start encounter
-            if (Creature* pHodir = pInstance->GetSingleCreatureFromStorage(NPC_HODIR))
-                pHodir->SetInCombatWithZone();
         }
 
-        return true;
+        return false;
     }
-
-    return false;
-}
+};
 
 /*######
 ## npc_icicle_target
 ######*/
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct  npc_icicle_targetAI : public Scripted_NoMovementAI
+struct npc_icicle_target : public CreatureScript
 {
-    npc_icicle_targetAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    npc_icicle_target() : CreatureScript("npc_icicle_target") {}
 
-    void Reset() override
+    struct npc_icicle_targetAI : public Scripted_NoMovementAI
     {
-        DoCastSpellIfCan(m_creature, SPELL_SAFE_AREA);
+        npc_icicle_targetAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { }
+
+        void Reset() override
+        {
+            DoCastSpellIfCan(m_creature, SPELL_SAFE_AREA);
+        }
+
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        void UpdateAI(const uint32 /*uiDiff*/) override { }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_icicle_targetAI(pCreature);
     }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
-
-CreatureAI* GetAI_npc_icicle_target(Creature* pCreature)
-{
-    return new npc_icicle_targetAI(pCreature);
-}
 
 void AddSC_boss_hodir()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_hodir";
-    pNewScript->GetAI = GetAI_boss_hodir;
-    pNewScript->RegisterSelf();
+    s = new boss_hodir();
+    s->RegisterSelf();
+    s = new npc_flash_freeze();
+    s->RegisterSelf();
+    s = new npc_icicle_target();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_flash_freeze";
-    pNewScript->GetAI = GetAI_npc_flash_freeze;
-    pNewScript->RegisterSelf();
+    s = new event_boss_hodir();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "event_boss_hodir";
-    pNewScript->pProcessEventId = &ProcessEventId_event_boss_hodir;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_hodir";
+    //pNewScript->GetAI = GetAI_boss_hodir;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_icicle_target";
-    pNewScript->GetAI = GetAI_npc_icicle_target;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_flash_freeze";
+    //pNewScript->GetAI = GetAI_npc_flash_freeze;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "event_boss_hodir";
+    //pNewScript->pProcessEventId = &ProcessEventId_event_boss_hodir;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_icicle_target";
+    //pNewScript->GetAI = GetAI_npc_icicle_target;
+    //pNewScript->RegisterSelf();
 }

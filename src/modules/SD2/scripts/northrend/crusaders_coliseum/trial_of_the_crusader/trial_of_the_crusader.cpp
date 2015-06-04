@@ -108,114 +108,122 @@ static const RamseyInfo aRamseyInfo[] =
     {NPC_RAMSEY_5, GOSSIP_TEXT_ANUB_START, GOSSIP_ITEM_ANUB_START, 0, 0, TYPE_ANUBARAK},
 };
 
-struct  npc_barrett_ramseyAI : public ScriptedAI
+struct npc_barrett_ramsey : public CreatureScript
 {
-    npc_barrett_ramseyAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
+    npc_barrett_ramsey() : CreatureScript("npc_barrett_ramsey") {}
 
-    ScriptedInstance* m_pInstance;
-
-    void Reset() override {}
-
-    void MovementInform(uint32 uiType, uint32 uiPointId) override
+    struct npc_barrett_ramseyAI : public ScriptedAI
     {
-        if (uiType == POINT_MOTION_TYPE && uiPointId == 1)
-            m_creature->ForcedDespawn();
-    }
-};
+        npc_barrett_ramseyAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-bool GossipHello_npc_barrett_ramsey(Player* pPlayer, Creature* pCreature)
-{
-    ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-    uint8 uiPos = 0;
-    uint32 uiType = 0;
+        ScriptedInstance* m_pInstance;
 
-    for (uint8 i = 0; i < countof(aRamseyInfo); ++i)
-    {
-        if (pCreature->GetEntry() == aRamseyInfo[i].uiEntry)
+        void Reset() override {}
+
+        void MovementInform(uint32 uiType, uint32 uiPointId) override
         {
-            if (!aRamseyInfo[i].uiOptionId)
-                uiPos = i;
-            else
+            if (uiType == POINT_MOTION_TYPE && uiPointId == 1)
+                m_creature->ForcedDespawn();
+        }
+    };
+
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
+    {
+        ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        uint8 uiPos = 0;
+        uint32 uiType = 0;
+
+        for (uint8 i = 0; i < countof(aRamseyInfo); ++i)
+        {
+            if (pCreature->GetEntry() == aRamseyInfo[i].uiEntry)
             {
-                uiType = aRamseyInfo[i].uiOptionId;
-                break;
+                if (!aRamseyInfo[i].uiOptionId)
+                    uiPos = i;
+                else
+                {
+                    uiType = aRamseyInfo[i].uiOptionId;
+                    break;
+                }
             }
         }
-    }
 
-    if (!uiType || !pInstance)
-        return true;
+        if (!uiType || !pInstance)
+            return true;
 
-    if (pInstance->GetData(uiType) == FAIL)
-    {
-        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, aRamseyInfo[uiPos].iWipeGossipItem, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
-        pPlayer->SEND_GOSSIP_MENU(aRamseyInfo[uiPos].uiWipeTextEntry, pCreature->GetObjectGuid());
-    }
-    else
-    {
-        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, aRamseyInfo[uiPos].iGossipItem, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
-        pPlayer->SEND_GOSSIP_MENU(aRamseyInfo[uiPos].uiTextEntry, pCreature->GetObjectGuid());
-    }
-
-    return true;
-}
-
-bool GossipSelect_npc_barrett_ramsey(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
-{
-    ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-    if (!pInstance)
-        return true;
-
-    if (uiAction > GOSSIP_ACTION_INFO_DEF)
-    {
-        // Begin Event
-        uint32 uiType = uiAction - GOSSIP_ACTION_INFO_DEF;
-        if (pInstance->GetData(uiType) == FAIL || pInstance->GetData(uiType) == NOT_STARTED)
-            pInstance->SetData(uiAction - GOSSIP_ACTION_INFO_DEF, SPECIAL);
-
-        pPlayer->CLOSE_GOSSIP_MENU();
-        pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-        pCreature->GetMotionMaster()->MovePoint(1, aRamsayPositions[1][0], aRamsayPositions[1][1], aRamsayPositions[1][2]);
-
-        return true;
-    }
-
-    for (uint8 i = 0; i < countof(aRamseyInfo); ++i)
-    {
-        if (pCreature->GetEntry() == aRamseyInfo[i].uiEntry && aRamseyInfo[i].uiOptionId)
+        if (pInstance->GetData(uiType) == FAIL)
         {
-            if (pInstance->GetData(aRamseyInfo[i].uiOptionId) == FAIL)
-            {
-                pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, aRamseyInfo[i].iWipeGossipItem, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + aRamseyInfo[i].uiOptionId);
-                pPlayer->SEND_GOSSIP_MENU(aRamseyInfo[i].uiWipeTextEntry, pCreature->GetObjectGuid());
-            }
-            else
-            {
-                pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, aRamseyInfo[i].iGossipItem, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + aRamseyInfo[i].uiOptionId);
-                pPlayer->SEND_GOSSIP_MENU(aRamseyInfo[i].uiTextEntry, pCreature->GetObjectGuid());
-            }
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, aRamseyInfo[uiPos].iWipeGossipItem, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+            pPlayer->SEND_GOSSIP_MENU(aRamseyInfo[uiPos].uiWipeTextEntry, pCreature->GetObjectGuid());
+        }
+        else
+        {
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, aRamseyInfo[uiPos].iGossipItem, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+            pPlayer->SEND_GOSSIP_MENU(aRamseyInfo[uiPos].uiTextEntry, pCreature->GetObjectGuid());
+        }
+
+        return true;
+    }
+
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction) override
+    {
+        ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        if (!pInstance)
+            return true;
+
+        if (uiAction > GOSSIP_ACTION_INFO_DEF)
+        {
+            // Begin Event
+            uint32 uiType = uiAction - GOSSIP_ACTION_INFO_DEF;
+            if (pInstance->GetData(uiType) == FAIL || pInstance->GetData(uiType) == NOT_STARTED)
+                pInstance->SetData(uiAction - GOSSIP_ACTION_INFO_DEF, SPECIAL);
+
+            pPlayer->CLOSE_GOSSIP_MENU();
+            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            pCreature->GetMotionMaster()->MovePoint(1, aRamsayPositions[1][0], aRamsayPositions[1][1], aRamsayPositions[1][2]);
 
             return true;
         }
+
+        for (uint8 i = 0; i < countof(aRamseyInfo); ++i)
+        {
+            if (pCreature->GetEntry() == aRamseyInfo[i].uiEntry && aRamseyInfo[i].uiOptionId)
+            {
+                if (pInstance->GetData(aRamseyInfo[i].uiOptionId) == FAIL)
+                {
+                    pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, aRamseyInfo[i].iWipeGossipItem, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + aRamseyInfo[i].uiOptionId);
+                    pPlayer->SEND_GOSSIP_MENU(aRamseyInfo[i].uiWipeTextEntry, pCreature->GetObjectGuid());
+                }
+                else
+                {
+                    pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, aRamseyInfo[i].iGossipItem, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + aRamseyInfo[i].uiOptionId);
+                    pPlayer->SEND_GOSSIP_MENU(aRamseyInfo[i].uiTextEntry, pCreature->GetObjectGuid());
+                }
+
+                return true;
+            }
+        }
+
+        return true;
     }
 
-    return true;
-}
-
-CreatureAI* GetAI_npc_barrett_ramsey(Creature* pCreature)
-{
-    return new npc_barrett_ramseyAI(pCreature);
-}
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_barrett_ramseyAI(pCreature);
+    }
+};
 
 void AddSC_trial_of_the_crusader()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_barrett_ramsey";
-    pNewScript->GetAI = &GetAI_npc_barrett_ramsey;
-    pNewScript->pGossipHello = &GossipHello_npc_barrett_ramsey;
-    pNewScript->pGossipSelect = &GossipSelect_npc_barrett_ramsey;
-    pNewScript->RegisterSelf();
+    s = new npc_barrett_ramsey();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_barrett_ramsey";
+    //pNewScript->GetAI = &GetAI_npc_barrett_ramsey;
+    //pNewScript->pGossipHello = &GossipHello_npc_barrett_ramsey;
+    //pNewScript->pGossipSelect = &GossipSelect_npc_barrett_ramsey;
+    //pNewScript->RegisterSelf();
 }

@@ -25,6 +25,7 @@ enum
     EVENT_ARTHAS_PORTAL         = 11,
     EVENT_SUMMON_THE_LICHKING   = 12,
     EVENT_DESTROY_FLOOR         = 13,
+    TYPE_DATA_IS_HEROIC         = 14,
 
     NPC_BEAST_COMBAT_STALKER    = 36549,
     NPC_GORMOK                  = 34796,
@@ -126,41 +127,4 @@ static const float aMovePositions[][3] =
     {563.8577f, 176.5885f, 394.4417f},                      // Icehowl
     {563.7223f, 131.2344f, 393.9901f},                      // Jaraxxus
 };
-
-class  instance_trial_of_the_crusader : public ScriptedInstance, private DialogueHelper
-{
-    public:
-        instance_trial_of_the_crusader(Map* pMap);
-
-        void Initialize() override;
-        bool IsEncounterInProgress() const override;
-
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-
-        void OnPlayerEnter(Player* pPlayer) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        // Difficulty wrappers
-        bool IsHeroicDifficulty() { return instance->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC; }
-        bool Is25ManDifficulty() { return instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC; }
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-        void Load(const char* chrIn) override;
-
-        void Update(uint32 uiDiff) { DialogueUpdate(uiDiff); }
-
-    private:
-        void DoSummonRamsey(uint32 uiEntry);
-        void JustDidDialogueStep(int32 iEntry) override;
-        void DoHandleEventEpilogue();
-
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string m_strInstData;
-
-        Team m_uiTeam;
-};
-
 #endif

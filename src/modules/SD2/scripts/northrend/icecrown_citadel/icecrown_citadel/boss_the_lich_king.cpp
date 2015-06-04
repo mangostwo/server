@@ -238,95 +238,97 @@ static const float fLichKingPosition[11][3] =
     {494.31f, -2523.08f, 1249.87f},    // 10 center of platform inside Frostmourne
 };
 
-struct  boss_the_lich_king_iccAI : public ScriptedAI
+struct boss_the_lich_king_icc : public CreatureScript
 {
-    boss_the_lich_king_iccAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_the_lich_king_icc() : CreatureScript("boss_the_lich_king_icc") {}
+
+    struct boss_the_lich_king_iccAI : public ScriptedAI
     {
-        m_pInstance = (instance_icecrown_citadel*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    instance_icecrown_citadel* m_pInstance;
-
-    uint32 m_uiPhase;
-    uint32 m_uiPhaseTimer;
-    uint32 m_uiBerserkTimer;
-    uint32 m_uiGhoulsTimer;
-    uint32 m_uiHorrorTimer;
-    uint32 m_uiNecroticPlagueTimer;
-    uint32 m_uiInfestTimer;
-    uint32 m_uiShadowTrapTimer;
-    uint32 m_uiPainSufferingTimer;
-    uint32 m_uiRagingSpiritTimer;
-    uint32 m_uiIceSphereTimer;
-    uint32 m_uiValkyrTimer;
-    uint32 m_uiDefileTimer;
-    uint32 m_uiSoulReaperTimer;
-    uint32 m_uiHarvestSoulTimer;
-    uint32 m_uiFrostmournePhaseTimer;
-    uint32 m_uiVileSpiritsTimer;
-
-    void Reset() override
-    {
-        // TODO: handling phases "intro" and "one" and aggroing depending on resetting encounter
-        m_uiPhase               = PHASE_INTRO;
-
-        m_uiBerserkTimer        = 15 * MINUTE * IN_MILLISECONDS;
-        m_uiGhoulsTimer         = 13000;
-        m_uiHorrorTimer         = 21000;
-        m_uiInfestTimer         = 20000;
-        m_uiNecroticPlagueTimer = 23000;
-        m_uiShadowTrapTimer     = 15000;
-        m_uiPainSufferingTimer  = 6000;
-        m_uiRagingSpiritTimer   = 20000;
-        m_uiIceSphereTimer      = 6000;
-        m_uiValkyrTimer         = 10000;
-        m_uiDefileTimer         = 30000;
-        m_uiSoulReaperTimer     = 25000;
-        m_uiHarvestSoulTimer    = 5000;
-        m_uiVileSpiritsTimer    = 20000;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LICH_KING, IN_PROGRESS);
-
-        DoScriptText(SAY_AGGRO, m_creature);
-        m_uiPhase = PHASE_ONE;
-    }
-
-    void KilledUnit(Unit* pWho) override
-    {
-        if (pWho->GetTypeId() == TYPEID_PLAYER)
-            DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LICH_KING, DONE);
-
-        DoScriptText(SAY_OUTRO_14, m_creature);
-
-        // TODO: finish event, after around 8 seconds play cinematic
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LICH_KING, FAIL);
-    }
-
-    void MovementInform(uint32 uiMovementType, uint32 uiData) override
-    {
-        if (uiMovementType != POINT_MOTION_TYPE)
-            return;
-
-        switch (uiData)
+        boss_the_lich_king_iccAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            case POINT_CENTER_LAND:
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        }
+
+        ScriptedInstance* m_pInstance;
+
+        uint32 m_uiPhase;
+        uint32 m_uiPhaseTimer;
+        uint32 m_uiBerserkTimer;
+        uint32 m_uiGhoulsTimer;
+        uint32 m_uiHorrorTimer;
+        uint32 m_uiNecroticPlagueTimer;
+        uint32 m_uiInfestTimer;
+        uint32 m_uiShadowTrapTimer;
+        uint32 m_uiPainSufferingTimer;
+        uint32 m_uiRagingSpiritTimer;
+        uint32 m_uiIceSphereTimer;
+        uint32 m_uiValkyrTimer;
+        uint32 m_uiDefileTimer;
+        uint32 m_uiSoulReaperTimer;
+        uint32 m_uiHarvestSoulTimer;
+        uint32 m_uiFrostmournePhaseTimer;
+        uint32 m_uiVileSpiritsTimer;
+
+        void Reset() override
+        {
+            // TODO: handling phases "intro" and "one" and aggroing depending on resetting encounter
+            m_uiPhase = PHASE_INTRO;
+
+            m_uiBerserkTimer = 15 * MINUTE * IN_MILLISECONDS;
+            m_uiGhoulsTimer = 13000;
+            m_uiHorrorTimer = 21000;
+            m_uiInfestTimer = 20000;
+            m_uiNecroticPlagueTimer = 23000;
+            m_uiShadowTrapTimer = 15000;
+            m_uiPainSufferingTimer = 6000;
+            m_uiRagingSpiritTimer = 20000;
+            m_uiIceSphereTimer = 6000;
+            m_uiValkyrTimer = 10000;
+            m_uiDefileTimer = 30000;
+            m_uiSoulReaperTimer = 25000;
+            m_uiHarvestSoulTimer = 5000;
+            m_uiVileSpiritsTimer = 20000;
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_LICH_KING, IN_PROGRESS);
+
+            DoScriptText(SAY_AGGRO, m_creature);
+            m_uiPhase = PHASE_ONE;
+        }
+
+        void KilledUnit(Unit* pWho) override
+        {
+            if (pWho->GetTypeId() == TYPEID_PLAYER)
+                DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_LICH_KING, DONE);
+
+            DoScriptText(SAY_OUTRO_14, m_creature);
+
+            // TODO: finish event, after around 8 seconds play cinematic
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_LICH_KING, FAIL);
+        }
+
+        void MovementInform(uint32 uiMovementType, uint32 uiData) override
+        {
+            if (uiMovementType != POINT_MOTION_TYPE)
+                return;
+
+            switch (uiData)
             {
+            case POINT_CENTER_LAND:
                 if (m_uiPhase == PHASE_RUNNING_WINTER_ONE)
                 {
                     DoScriptText(SAY_REMORSELESS_WINTER, m_creature);
@@ -335,7 +337,7 @@ struct  boss_the_lich_king_iccAI : public ScriptedAI
                     // DoCastSpellIfCan(m_creature, SPELL_REMORSELESS_WINTER_1);
 
                     m_uiPhase = PHASE_TRANSITION_ONE;
-                    m_uiPhaseTimer          = 62000;
+                    m_uiPhaseTimer = 62000;
 
                     // TODO: set phase initial timers
                     // TODO: on heroic despawn Shadow Traps
@@ -348,7 +350,7 @@ struct  boss_the_lich_king_iccAI : public ScriptedAI
                     // DoCastSpellIfCan(m_creature, SPELL_REMORSELESS_WINTER_2);
 
                     m_uiPhase = PHASE_TRANSITION_TWO;
-                    m_uiPhaseTimer          = 62000;
+                    m_uiPhaseTimer = 62000;
 
                     // TODO: set phase initial timers
                 }
@@ -360,41 +362,37 @@ struct  boss_the_lich_king_iccAI : public ScriptedAI
                 break;
             }
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiPhase != PHASE_INTRO && m_uiPhase != PHASE_DEATH_AWAITS)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            // check evade
-            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-                return;
-
-            // Berserk
-            if (m_uiBerserkTimer)
+            if (m_uiPhase != PHASE_INTRO && m_uiPhase != PHASE_DEATH_AWAITS)
             {
-                if (m_uiBerserkTimer < uiDiff)
+                // check evade
+                if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                    return;
+
+                // Berserk
+                if (m_uiBerserkTimer)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                    if (m_uiBerserkTimer < uiDiff)
                     {
-                        DoScriptText(SAY_ENRAGE, m_creature);
-                        m_uiBerserkTimer = 0;
+                        if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                        {
+                            DoScriptText(SAY_ENRAGE, m_creature);
+                            m_uiBerserkTimer = 0;
+                        }
                     }
+                    else
+                        m_uiBerserkTimer -= uiDiff;
                 }
-                else
-                    m_uiBerserkTimer -= uiDiff;
             }
-        }
 
-        switch (m_uiPhase)
-        {
-            case PHASE_INTRO:
+            switch (m_uiPhase)
             {
+            case PHASE_INTRO:
                 // wait until set in combat
                 return;
-            }
             case PHASE_ONE:
-            {
                 // check HP
                 if (m_creature->GetHealthPercent() <= 70.0f)
                 {
@@ -446,7 +444,7 @@ struct  boss_the_lich_king_iccAI : public ScriptedAI
                     m_uiHorrorTimer -= uiDiff;
 
                 // Shadow Trap (heroic)
-                if (m_pInstance && m_pInstance->IsHeroicDifficulty())
+                if (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC))
                 {
                     if (m_uiShadowTrapTimer < uiDiff)
                     {
@@ -463,16 +461,12 @@ struct  boss_the_lich_king_iccAI : public ScriptedAI
                 DoMeleeAttackIfReady();
 
                 break;
-            }
             case PHASE_RUNNING_WINTER_ONE:
             case PHASE_RUNNING_WINTER_TWO:
-            {
                 // wait for waypoint arrival
                 break;
-            }
             case PHASE_TRANSITION_ONE:
             case PHASE_TRANSITION_TWO:
-            {
                 // phase end timer
                 if (m_uiPhaseTimer < uiDiff)
                 {
@@ -520,10 +514,8 @@ struct  boss_the_lich_king_iccAI : public ScriptedAI
                     m_uiRagingSpiritTimer -= uiDiff;
 
                 break;
-            }
             case PHASE_QUAKE_ONE:
             case PHASE_QUAKE_TWO:
-            {
                 // Casting Quake spell - phase end timer
                 if (m_uiPhaseTimer < uiDiff)
                 {
@@ -538,9 +530,7 @@ struct  boss_the_lich_king_iccAI : public ScriptedAI
                     m_uiPhaseTimer -= uiDiff;
 
                 break;
-            }
             case PHASE_TWO:
-            {
                 // check HP
                 if (m_creature->GetHealthPercent() <= 40.0f)
                 {
@@ -597,9 +587,7 @@ struct  boss_the_lich_king_iccAI : public ScriptedAI
                 DoMeleeAttackIfReady();
 
                 break;
-            }
             case PHASE_THREE:
-            {
                 // check HP
                 if (m_creature->GetHealthPercent() <= 10.0f)
                 {
@@ -640,7 +628,7 @@ struct  boss_the_lich_king_iccAI : public ScriptedAI
                 if (m_uiHarvestSoulTimer < uiDiff)
                 {
                     Unit* pTarget = NULL;
-                    bool m_bIsHeroic = m_pInstance && m_pInstance->IsHeroicDifficulty();
+                    bool m_bIsHeroic = m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC);
                     if (m_bIsHeroic)
                         pTarget = m_creature;
                     else
@@ -681,9 +669,7 @@ struct  boss_the_lich_king_iccAI : public ScriptedAI
                 DoMeleeAttackIfReady();
 
                 break;
-            }
             case PHASE_IN_FROSTMOURNE:
-            {
                 // check if players are alive before entering evade mode?
                 // wait until they leave Frostmourne
                 if (m_uiFrostmournePhaseTimer < uiDiff)
@@ -697,27 +683,28 @@ struct  boss_the_lich_king_iccAI : public ScriptedAI
                     m_uiFrostmournePhaseTimer -= uiDiff;
 
                 break;
-            }
             case PHASE_DEATH_AWAITS:
-            {
                 // wait for swift death
                 break;
             }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_the_lich_king_iccAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_the_lich_king_icc(Creature* pCreature)
-{
-    return new boss_the_lich_king_iccAI(pCreature);
-}
-
 void AddSC_boss_the_lich_king()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_the_lich_king_icc";
-    pNewScript->GetAI = &GetAI_boss_the_lich_king_icc;
-    pNewScript->RegisterSelf();
+    s = new boss_the_lich_king_icc();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_the_lich_king_icc";
+    //pNewScript->GetAI = &GetAI_boss_the_lich_king_icc;
+    //pNewScript->RegisterSelf();
 }

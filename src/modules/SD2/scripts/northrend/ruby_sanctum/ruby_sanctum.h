@@ -14,6 +14,10 @@ enum
     TYPE_ZARITHRIAN                 = 2,
     TYPE_HALION                     = 3,
 
+    TYPE_DATA_IS_25MAN              = MAX_ENCOUNTER,
+
+    DATA64_SUMMON_FLAMECALLERS      = 0,
+
     NPC_HALION_REAL                 = 39863,            // Halion - Physical Realm NPC
     NPC_HALION_TWILIGHT             = 40142,            // Halion - Twilight Realm NPC
     NPC_HALION_CONTROLLER           = 40146,
@@ -55,45 +59,8 @@ enum
     WORLD_STATE_CORP_PHYSICAL       = 5049,
     WORLD_STATE_CORP_TWILIGHT       = 5050,
     WORLD_STATE_CORPOREALITY        = 5051,
-};
 
-class  instance_ruby_sanctum : public ScriptedInstance
-{
-    public:
-        instance_ruby_sanctum(Map* pMap);
-
-        void Initialize() override;
-        bool IsEncounterInProgress() const override;
-
-        void OnPlayerEnter(Player* pPlayer) override;
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        void Update(uint32 uiDiff) override;
-
-        void GetSpawnStalkersGuidList(GuidList& lList) { lList = m_lSpawnStalkersGuidList; }
-
-        const char* Save() const override { return strInstData.c_str(); }
-        void Load(const char* chrIn) override;
-
-        // Difficulty wrappers
-        bool IsHeroicDifficulty() { return instance->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC; }
-        bool Is25ManDifficulty() { return instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC; }
-
-    protected:
-        void DoHandleZarithrianDoor();
-
-        std::string strInstData;
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-
-        uint32 m_uiHalionSummonTimer;
-        uint32 m_uiHalionSummonStage;
-        uint32 m_uiHalionResetTimer;
-
-        GuidList m_lSpawnStalkersGuidList;
+    SPELL_SUMMON_FLAMECALLER        = 74398,
 };
 
 #endif

@@ -75,127 +75,130 @@ enum
 ## boss_bjarngrim
 ######*/
 
-struct  boss_bjarngrimAI : public ScriptedAI
+struct boss_bjarngrim : public CreatureScript
 {
-    boss_bjarngrimAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_bjarngrim() : CreatureScript("boss_bjarngrim") {}
+
+    struct boss_bjarngrimAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_uiStance = STANCE_DEFENSIVE;
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    bool m_bIsRegularMode;
-    bool m_bIsChangingStance;
-
-    uint8 m_uiChargingStatus;
-    uint8 m_uiStance;
-
-    uint32 m_uiChargeTimer;
-    uint32 m_uiChangeStanceTimer;
-
-    uint32 m_uiReflectionTimer;
-    uint32 m_uiKnockAwayTimer;
-    uint32 m_uiPummelTimer;
-    uint32 m_uiIronformTimer;
-
-    uint32 m_uiInterceptTimer;
-    uint32 m_uiWhirlwindTimer;
-    uint32 m_uiCleaveTimer;
-
-    uint32 m_uiMortalStrikeTimer;
-    uint32 m_uiSlamTimer;
-
-    void Reset() override
-    {
-        m_bIsChangingStance     = false;
-
-        m_uiChargingStatus      = 0;
-        m_uiChargeTimer         = 1000;
-
-        m_uiChangeStanceTimer   = urand(20000, 25000);
-
-        m_uiReflectionTimer     = 8000;
-        m_uiKnockAwayTimer      = 20000;
-        m_uiPummelTimer         = 10000;
-        m_uiIronformTimer       = 25000;
-
-        m_uiInterceptTimer      = 5000;
-        m_uiWhirlwindTimer      = 10000;
-        m_uiCleaveTimer         = 8000;
-
-        m_uiMortalStrikeTimer   = 8000;
-        m_uiSlamTimer           = 10000;
-
-        if (m_uiStance != STANCE_DEFENSIVE)
+        boss_bjarngrimAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            DoCastSpellIfCan(m_creature, SPELL_DEFENSIVE_STANCE);
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
             m_uiStance = STANCE_DEFENSIVE;
         }
-    }
 
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
+        ScriptedInstance* m_pInstance;
 
-        if (m_pInstance)
+        bool m_bIsRegularMode;
+        bool m_bIsChangingStance;
+
+        uint8 m_uiChargingStatus;
+        uint8 m_uiStance;
+
+        uint32 m_uiChargeTimer;
+        uint32 m_uiChangeStanceTimer;
+
+        uint32 m_uiReflectionTimer;
+        uint32 m_uiKnockAwayTimer;
+        uint32 m_uiPummelTimer;
+        uint32 m_uiIronformTimer;
+
+        uint32 m_uiInterceptTimer;
+        uint32 m_uiWhirlwindTimer;
+        uint32 m_uiCleaveTimer;
+
+        uint32 m_uiMortalStrikeTimer;
+        uint32 m_uiSlamTimer;
+
+        void Reset() override
         {
-            // Set the achiev in progress
-            if (m_creature->HasAura(SPELL_TEMPORARY_ELECTRICAL_CHARGE))
-                m_pInstance->SetData(TYPE_BJARNGRIM, SPECIAL);
+            m_bIsChangingStance = false;
 
-            m_pInstance->SetData(TYPE_BJARNGRIM, IN_PROGRESS);
+            m_uiChargingStatus = 0;
+            m_uiChargeTimer = 1000;
+
+            m_uiChangeStanceTimer = urand(20000, 25000);
+
+            m_uiReflectionTimer = 8000;
+            m_uiKnockAwayTimer = 20000;
+            m_uiPummelTimer = 10000;
+            m_uiIronformTimer = 25000;
+
+            m_uiInterceptTimer = 5000;
+            m_uiWhirlwindTimer = 10000;
+            m_uiCleaveTimer = 8000;
+
+            m_uiMortalStrikeTimer = 8000;
+            m_uiSlamTimer = 10000;
+
+            if (m_uiStance != STANCE_DEFENSIVE)
+            {
+                DoCastSpellIfCan(m_creature, SPELL_DEFENSIVE_STANCE);
+                m_uiStance = STANCE_DEFENSIVE;
+            }
         }
-    }
 
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        switch (urand(0, 2))
+        void Aggro(Unit* /*pWho*/) override
         {
+            DoScriptText(SAY_AGGRO, m_creature);
+
+            if (m_pInstance)
+            {
+                // Set the achiev in progress
+                if (m_creature->HasAura(SPELL_TEMPORARY_ELECTRICAL_CHARGE))
+                    m_pInstance->SetData(TYPE_BJARNGRIM, SPECIAL);
+
+                m_pInstance->SetData(TYPE_BJARNGRIM, IN_PROGRESS);
+            }
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            switch (urand(0, 2))
+            {
             case 0: DoScriptText(SAY_SLAY_1, m_creature); break;
             case 1: DoScriptText(SAY_SLAY_2, m_creature); break;
             case 2: DoScriptText(SAY_SLAY_3, m_creature); break;
+            }
         }
-    }
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_BJARNGRIM, DONE);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_BJARNGRIM, FAIL);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Change stance
-        if (m_uiChangeStanceTimer < uiDiff)
+        void JustDied(Unit* /*pKiller*/) override
         {
-            // wait for current spell to finish before change stance
-            if (m_creature->IsNonMeleeSpellCasted(false))
+            DoScriptText(SAY_DEATH, m_creature);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_BJARNGRIM, DONE);
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_BJARNGRIM, FAIL);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            // Return since we have no target
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
                 return;
 
-            int uiTempStance = rand() % (3 - 1);
-
-            if (uiTempStance >= m_uiStance)
-                ++uiTempStance;
-
-            m_uiStance = uiTempStance;
-
-            switch (m_uiStance)
+            // Change stance
+            if (m_uiChangeStanceTimer < uiDiff)
             {
+                // wait for current spell to finish before change stance
+                if (m_creature->IsNonMeleeSpellCasted(false))
+                    return;
+
+                int uiTempStance = rand() % (3 - 1);
+
+                if (uiTempStance >= m_uiStance)
+                    ++uiTempStance;
+
+                m_uiStance = uiTempStance;
+
+                switch (m_uiStance)
+                {
                 case STANCE_DEFENSIVE:
                     DoScriptText(SAY_DEFENSIVE_STANCE, m_creature);
                     DoScriptText(EMOTE_DEFENSIVE_STANCE, m_creature);
@@ -211,18 +214,17 @@ struct  boss_bjarngrimAI : public ScriptedAI
                     DoScriptText(EMOTE_BATTLE_STANCE, m_creature);
                     DoCastSpellIfCan(m_creature, SPELL_BATTLE_STANCE);
                     break;
+                }
+
+                m_uiChangeStanceTimer = urand(20000, 25000);
+                return;
             }
+            else
+                m_uiChangeStanceTimer -= uiDiff;
 
-            m_uiChangeStanceTimer = urand(20000, 25000);
-            return;
-        }
-        else
-            m_uiChangeStanceTimer -= uiDiff;
-
-        switch (m_uiStance)
-        {
-            case STANCE_DEFENSIVE:
+            switch (m_uiStance)
             {
+            case STANCE_DEFENSIVE:
                 if (m_uiReflectionTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_SPELL_REFLECTION) == CAST_OK)
@@ -256,9 +258,7 @@ struct  boss_bjarngrimAI : public ScriptedAI
                     m_uiIronformTimer -= uiDiff;
 
                 break;
-            }
             case STANCE_BERSERKER:
-            {
                 if (m_uiInterceptTimer < uiDiff)
                 {
                     // not much point is this, better random target and more often?
@@ -285,9 +285,7 @@ struct  boss_bjarngrimAI : public ScriptedAI
                     m_uiCleaveTimer -= uiDiff;
 
                 break;
-            }
             case STANCE_BATTLE:
-            {
                 if (m_uiMortalStrikeTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTAL_STRIKE) == CAST_OK)
@@ -306,9 +304,14 @@ struct  boss_bjarngrimAI : public ScriptedAI
 
                 break;
             }
-        }
 
-        DoMeleeAttackIfReady();
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_bjarngrimAI(pCreature);
     }
 };
 
@@ -316,81 +319,85 @@ struct  boss_bjarngrimAI : public ScriptedAI
 ## mob_stormforged_lieutenant
 ######*/
 
-struct  mob_stormforged_lieutenantAI : public ScriptedAI
+struct mob_stormforged_lieutenant : public CreatureScript
 {
-    mob_stormforged_lieutenantAI(Creature* pCreature) : ScriptedAI(pCreature)
+    mob_stormforged_lieutenant() : CreatureScript("mob_stormforged_lieutenant") {}
+
+    struct mob_stormforged_lieutenantAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiArcWeldTimer;
-    uint32 m_uiRenewSteelTimer;
-
-    void Reset() override
-    {
-        m_uiArcWeldTimer    = urand(20000, 21000);
-        m_uiRenewSteelTimer = urand(10000, 11000);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiArcWeldTimer < uiDiff)
+        mob_stormforged_lieutenantAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARC_WELD) == CAST_OK)
-                m_uiArcWeldTimer = urand(20000, 21000);
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         }
-        else
-            m_uiArcWeldTimer -= uiDiff;
 
-        if (m_uiRenewSteelTimer < uiDiff)
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        uint32 m_uiArcWeldTimer;
+        uint32 m_uiRenewSteelTimer;
+
+        void Reset() override
         {
-            if (m_pInstance)
+            m_uiArcWeldTimer = urand(20000, 21000);
+            m_uiRenewSteelTimer = urand(10000, 11000);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            // Return since we have no target
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            if (m_uiArcWeldTimer < uiDiff)
             {
-                if (Creature* pBjarngrim = m_pInstance->GetSingleCreatureFromStorage(NPC_BJARNGRIM))
-                {
-                    if (pBjarngrim->IsAlive())
-                        DoCastSpellIfCan(pBjarngrim, m_bIsRegularMode ? SPELL_RENEW_STEEL_N : SPELL_RENEW_STEEL_H);
-                }
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARC_WELD) == CAST_OK)
+                    m_uiArcWeldTimer = urand(20000, 21000);
             }
-            m_uiRenewSteelTimer = urand(10000, 14000);
-        }
-        else
-            m_uiRenewSteelTimer -= uiDiff;
+            else
+                m_uiArcWeldTimer -= uiDiff;
 
-        DoMeleeAttackIfReady();
+            if (m_uiRenewSteelTimer < uiDiff)
+            {
+                if (m_pInstance)
+                {
+                    if (Creature* pBjarngrim = m_pInstance->GetSingleCreatureFromStorage(NPC_BJARNGRIM))
+                    {
+                        if (pBjarngrim->IsAlive())
+                            DoCastSpellIfCan(pBjarngrim, m_bIsRegularMode ? SPELL_RENEW_STEEL_N : SPELL_RENEW_STEEL_H);
+                    }
+                }
+                m_uiRenewSteelTimer = urand(10000, 14000);
+            }
+            else
+                m_uiRenewSteelTimer -= uiDiff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new mob_stormforged_lieutenantAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_bjarngrim(Creature* pCreature)
-{
-    return new boss_bjarngrimAI(pCreature);
-}
-
-CreatureAI* GetAI_mob_stormforged_lieutenant(Creature* pCreature)
-{
-    return new mob_stormforged_lieutenantAI(pCreature);
-}
-
 void AddSC_boss_bjarngrim()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_bjarngrim";
-    pNewScript->GetAI = &GetAI_boss_bjarngrim;
-    pNewScript->RegisterSelf();
+    s = new boss_bjarngrim();
+    s->RegisterSelf();
+    s = new mob_stormforged_lieutenant();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "mob_stormforged_lieutenant";
-    pNewScript->GetAI = &GetAI_mob_stormforged_lieutenant;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_bjarngrim";
+    //pNewScript->GetAI = &GetAI_boss_bjarngrim;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "mob_stormforged_lieutenant";
+    //pNewScript->GetAI = &GetAI_mob_stormforged_lieutenant;
+    //pNewScript->RegisterSelf();
 }

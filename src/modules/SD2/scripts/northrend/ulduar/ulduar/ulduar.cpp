@@ -77,68 +77,72 @@ enum TeleporterGossipItems
     GOSSIP_ITEM_TELE_YOGG_SARON             = -3603008,
 };
 
-bool GossipHello_go_ulduar_teleporter(Player* pPlayer, GameObject* pGo)
+struct go_ulduar_teleporter : public GameObjectScript
 {
-    instance_ulduar* pInstance = (instance_ulduar*)pPlayer->GetInstanceData();
-    if (!pInstance)
-        return true;
+    go_ulduar_teleporter() : GameObjectScript("go_ulduar_teleporter") {}
 
-    // Base camp
-    pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_BASE_CAMP, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
-
-    // Formation grounds
-    if (pInstance->GetData(TYPE_LEVIATHAN) != NOT_STARTED || pPlayer->isGameMaster())
-        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_FORMATION_GROUNDS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-
-    // Colossal Forge
-    if (pInstance->GetData(TYPE_LEVIATHAN) == DONE || pPlayer->isGameMaster())
-        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_COLOSSAL_FORGE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-
-    // Scrapyard
-    if (pInstance->GetData(TYPE_XT002) != NOT_STARTED || pPlayer->isGameMaster())
-        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_SCRAPYARD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
-
-    // Antechamber
-    if (pInstance->GetData(TYPE_XT002) == DONE || pPlayer->isGameMaster())
-        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_ANTECHAMBER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
-
-    // Shattered walkway
-    if (pInstance->GetData(TYPE_KOLOGARN) == DONE || pPlayer->isGameMaster())
-        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_WALKWAY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
-
-    // Conservatory of life
-    if (pInstance->GetData(TYPE_AURIAYA) == DONE || pPlayer->isGameMaster())
-        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_CONSERVATORY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
-
-    // Spark of imagination
-    if (pInstance->GetData(TYPE_MIMIRON) != NOT_STARTED || pPlayer->isGameMaster())
-        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_SPARK_IMAGINATION, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7);
-
-    // Prison of Yogg-Saron
-    if (pInstance->GetData(TYPE_VEZAX) == DONE || pPlayer->isGameMaster())
-        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_YOGG_SARON, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8);
-
-    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pGo->GetGOInfo()->GetGossipMenuId(), pGo), pGo->GetObjectGuid());
-
-    return true;
-}
-
-bool GossipSelect_go_ulduar_teleporter(Player* pPlayer, GameObject* /*pGO*/, uint32 /*uiSender*/, uint32 uiAction)
-{
-    instance_ulduar* pInstance = (instance_ulduar*)pPlayer->GetInstanceData();
-    if (!pInstance)
-        return true;
-
-    // Additional checks for the teleporters to prevent exploiting
-    // -- TODO -- HACK HERE, use spells when possible!
-
-    // There needs to be displayed a msg when in Combat, it is likely that this is to be handled by core and spell can-cast check
-    // -- TODO -- Remove the combat check when spells are correctly working
-    if (pPlayer->IsInCombat())
-        return true;
-
-    switch (uiAction)
+    bool OnGossipHello(Player* pPlayer, GameObject* pGo) override
     {
+        ScriptedInstance* pInstance = (ScriptedInstance*)pPlayer->GetInstanceData();
+        if (!pInstance)
+            return true;
+
+        // Base camp
+        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_BASE_CAMP, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+
+        // Formation grounds
+        if (pInstance->GetData(TYPE_LEVIATHAN) != NOT_STARTED || pPlayer->isGameMaster())
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_FORMATION_GROUNDS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+
+        // Colossal Forge
+        if (pInstance->GetData(TYPE_LEVIATHAN) == DONE || pPlayer->isGameMaster())
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_COLOSSAL_FORGE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+
+        // Scrapyard
+        if (pInstance->GetData(TYPE_XT002) != NOT_STARTED || pPlayer->isGameMaster())
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_SCRAPYARD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+
+        // Antechamber
+        if (pInstance->GetData(TYPE_XT002) == DONE || pPlayer->isGameMaster())
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_ANTECHAMBER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+
+        // Shattered walkway
+        if (pInstance->GetData(TYPE_KOLOGARN) == DONE || pPlayer->isGameMaster())
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_WALKWAY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
+
+        // Conservatory of life
+        if (pInstance->GetData(TYPE_AURIAYA) == DONE || pPlayer->isGameMaster())
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_CONSERVATORY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
+
+        // Spark of imagination
+        if (pInstance->GetData(TYPE_MIMIRON) != NOT_STARTED || pPlayer->isGameMaster())
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_SPARK_IMAGINATION, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7);
+
+        // Prison of Yogg-Saron
+        if (pInstance->GetData(TYPE_VEZAX) == DONE || pPlayer->isGameMaster())
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_YOGG_SARON, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8);
+
+        pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pGo->GetGOInfo()->GetGossipMenuId(), pGo), pGo->GetObjectGuid());
+
+        return true;
+    }
+
+    bool OnGossipSelect(Player* pPlayer, GameObject* /*pGO*/, uint32 /*uiSender*/, uint32 uiAction) override
+    {
+        ScriptedInstance* pInstance = (ScriptedInstance*)pPlayer->GetInstanceData();
+        if (!pInstance)
+            return true;
+
+        // Additional checks for the teleporters to prevent exploiting
+        // -- TODO -- HACK HERE, use spells when possible!
+
+        // There needs to be displayed a msg when in Combat, it is likely that this is to be handled by core and spell can-cast check
+        // -- TODO -- Remove the combat check when spells are correctly working
+        if (pPlayer->IsInCombat())
+            return true;
+
+        switch (uiAction)
+        {
             // Basecamp
         case GOSSIP_ACTION_INFO_DEF:
             // pPlayer->CastSpell(pPlayer, SPELL_TELE_EXPEDITION_BASE_CAMP, true, NULL, NULL, pGo->GetObjectGuid());
@@ -146,51 +150,52 @@ bool GossipSelect_go_ulduar_teleporter(Player* pPlayer, GameObject* /*pGO*/, uin
             break;
             // Formation Grounds
         case GOSSIP_ACTION_INFO_DEF + 1:
-                // pPlayer->CastSpell(pPlayer, SPELL_TELE_FORMATION_GROUNDS, true, NULL, NULL, pGo->GetObjectGuid());
-                pPlayer->TeleportTo(603, 131.248f, -35.3802f, 409.804f, 0);
+            // pPlayer->CastSpell(pPlayer, SPELL_TELE_FORMATION_GROUNDS, true, NULL, NULL, pGo->GetObjectGuid());
+            pPlayer->TeleportTo(603, 131.248f, -35.3802f, 409.804f, 0);
             break;
             // Colossal Forge
         case GOSSIP_ACTION_INFO_DEF + 2:
-                // pPlayer->CastSpell(pPlayer, SPELL_TELE_COLOSSAL_FORGE, true, NULL, NULL, pGo->GetObjectGuid());
-                pPlayer->TeleportTo(603, 553.233f, -12.3247f, 409.679f, 0);
+            // pPlayer->CastSpell(pPlayer, SPELL_TELE_COLOSSAL_FORGE, true, NULL, NULL, pGo->GetObjectGuid());
+            pPlayer->TeleportTo(603, 553.233f, -12.3247f, 409.679f, 0);
             break;
             // Scrapyard
         case GOSSIP_ACTION_INFO_DEF + 3:
-                // pPlayer->CastSpell(pPlayer, SPELL_TELE_SCRAPYARD, true, NULL, NULL, pGo->GetObjectGuid());
-                pPlayer->TeleportTo(603, 926.292f, -11.4635f, 418.595f, 0);
+            // pPlayer->CastSpell(pPlayer, SPELL_TELE_SCRAPYARD, true, NULL, NULL, pGo->GetObjectGuid());
+            pPlayer->TeleportTo(603, 926.292f, -11.4635f, 418.595f, 0);
             break;
             // Antechamber
         case GOSSIP_ACTION_INFO_DEF + 4:
-                // pPlayer->CastSpell(pPlayer, SPELL_TELE_ANTECHAMBER_OF_ULDUAR, true, NULL, NULL, pGo->GetObjectGuid());
-                pPlayer->TeleportTo(603, 1498.09f, -24.246f, 420.967f, 0);
+            // pPlayer->CastSpell(pPlayer, SPELL_TELE_ANTECHAMBER_OF_ULDUAR, true, NULL, NULL, pGo->GetObjectGuid());
+            pPlayer->TeleportTo(603, 1498.09f, -24.246f, 420.967f, 0);
             break;
             // Shattered walkway
         case GOSSIP_ACTION_INFO_DEF + 5:
-                // pPlayer->CastSpell(pPlayer, SPELL_TELE_SHATTERED_WALKWAY, true, NULL, NULL, pGo->GetObjectGuid());
-                pPlayer->TeleportTo(603, 1859.45f, -24.1f, 448.9f, 0);
+            // pPlayer->CastSpell(pPlayer, SPELL_TELE_SHATTERED_WALKWAY, true, NULL, NULL, pGo->GetObjectGuid());
+            pPlayer->TeleportTo(603, 1859.45f, -24.1f, 448.9f, 0);
             break;
             // Conservatory of life
         case GOSSIP_ACTION_INFO_DEF + 6:
-                // pPlayer->CastSpell(pPlayer, SPELL_TELE_CONSERVATORY_OF_LIFE, true, NULL, NULL, pGo->GetObjectGuid());
-                pPlayer->TeleportTo(603, 2086.27f, -24.3134f, 421.239f, 0);
+            // pPlayer->CastSpell(pPlayer, SPELL_TELE_CONSERVATORY_OF_LIFE, true, NULL, NULL, pGo->GetObjectGuid());
+            pPlayer->TeleportTo(603, 2086.27f, -24.3134f, 421.239f, 0);
             break;
             // Spark of imagination
         case GOSSIP_ACTION_INFO_DEF + 7:
-                // pPlayer->CastSpell(pPlayer, SPELL_TELE_SPARK_OF_IMAGINATION, true, NULL, NULL, pGo->GetObjectGuid());
-                pPlayer->TeleportTo(603, 2518.16f, 2569.03f, 412.299f, 0);
+            // pPlayer->CastSpell(pPlayer, SPELL_TELE_SPARK_OF_IMAGINATION, true, NULL, NULL, pGo->GetObjectGuid());
+            pPlayer->TeleportTo(603, 2518.16f, 2569.03f, 412.299f, 0);
             break;
             // Prison of Yogg-Saron
         case GOSSIP_ACTION_INFO_DEF + 8:
-                // pPlayer->CastSpell(pPlayer, SPELL_TELE_PRISON_OF_YOGG, true, NULL, NULL, pGo->GetObjectGuid());
-                pPlayer->TeleportTo(603, 1854.82f, -11.56f, 334.175f, 4.71f);
+            // pPlayer->CastSpell(pPlayer, SPELL_TELE_PRISON_OF_YOGG, true, NULL, NULL, pGo->GetObjectGuid());
+            pPlayer->TeleportTo(603, 1854.82f, -11.56f, 334.175f, 4.71f);
             break;
         default:
             return true;
-    }
+        }
 
-    pPlayer->CLOSE_GOSSIP_MENU();
-    return true;
-}
+        pPlayer->CLOSE_GOSSIP_MENU();
+        return true;
+    }
+};
 
 /*######
 ## npc_brann_ulduar
@@ -202,40 +207,45 @@ enum
     GOSSIP_TEXT_ID_BRANN                        = 14369,
 };
 
-bool GossipHello_npc_brann_ulduar(Player* pPlayer, Creature* pCreature)
+struct npc_brann_ulduar : public CreatureScript
 {
-    if (instance_ulduar* pInstance = (instance_ulduar*)pCreature->GetInstanceData())
-    {
-        if (pInstance->GetData(TYPE_LEVIATHAN_GAUNTLET) == NOT_STARTED && pInstance->GetData(TYPE_LEVIATHAN) == NOT_STARTED)
-            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_BEGIN_ASSAULT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+    npc_brann_ulduar() : CreatureScript("npc_brann_ulduar") {}
 
-        pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_BRANN, pCreature->GetObjectGuid());
-    }
-    return true;
-}
-
-bool GossipSelect_npc_brann_ulduar(Player* pPlayer, Creature* pCreature, uint32 /*sender*/, uint32 uiAction)
-{
-    if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
-        if (instance_ulduar* pInstance = (instance_ulduar*)pCreature->GetInstanceData())
+        if (InstanceData* pInstance = pCreature->GetInstanceData())
         {
-            // if encounter is started by Brann then hard mode is failed
-            pInstance->SetData(TYPE_TOWER_FREYA, FAIL);
-            pInstance->SetData(TYPE_TOWER_HODIR, FAIL);
-            pInstance->SetData(TYPE_TOWER_MIMIRON, FAIL);
-            pInstance->SetData(TYPE_TOWER_THORIM, FAIL);
+            if (pInstance->GetData(TYPE_LEVIATHAN_GAUNTLET) == NOT_STARTED && pInstance->GetData(TYPE_LEVIATHAN) == NOT_STARTED)
+                pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_BEGIN_ASSAULT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
-            // set gauntlet in progress; rest of the event is done by DB scripts
-            pInstance->SetData(TYPE_LEVIATHAN_GAUNTLET, IN_PROGRESS);
-            pCreature->GetMotionMaster()->MoveWaypoint();
+            pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_BRANN, pCreature->GetObjectGuid());
+        }
+        return true;
+    }
+
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*sender*/, uint32 uiAction) override
+    {
+        if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            if (InstanceData* pInstance = pCreature->GetInstanceData())
+            {
+                // if encounter is started by Brann then hard mode is failed
+                pInstance->SetData(TYPE_TOWER_FREYA, FAIL);
+                pInstance->SetData(TYPE_TOWER_HODIR, FAIL);
+                pInstance->SetData(TYPE_TOWER_MIMIRON, FAIL);
+                pInstance->SetData(TYPE_TOWER_THORIM, FAIL);
+
+                // set gauntlet in progress; rest of the event is done by DB scripts
+                pInstance->SetData(TYPE_LEVIATHAN_GAUNTLET, IN_PROGRESS);
+                pCreature->GetMotionMaster()->MoveWaypoint();
+            }
+
+            pPlayer->CLOSE_GOSSIP_MENU();
         }
 
-        pPlayer->CLOSE_GOSSIP_MENU();
+        return true;
     }
-
-    return true;
-}
+};
 
 /*######
 ## npc_keeper_norgannon
@@ -251,29 +261,33 @@ enum
     GOSSIP_TEXT_ID_ACTIVATED                    = 14497,
 };
 
-bool GossipHello_npc_keeper_norgannon(Player* pPlayer, Creature* pCreature)
+struct npc_keeper_norgannon : public CreatureScript
 {
-    if (instance_ulduar* pInstance = (instance_ulduar*)pCreature->GetInstanceData())
+    npc_keeper_norgannon() : CreatureScript("npc_keeper_norgannon") {}
+
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
-        if (pInstance->GetData(TYPE_LEVIATHAN_GAUNTLET) == NOT_STARTED && pInstance->GetData(TYPE_LEVIATHAN) == NOT_STARTED && pInstance->GetData(TYPE_TOWER_HODIR) == NOT_STARTED &&
+        if (InstanceData* pInstance = pCreature->GetInstanceData())
+        {
+            if (pInstance->GetData(TYPE_LEVIATHAN_GAUNTLET) == NOT_STARTED && pInstance->GetData(TYPE_LEVIATHAN) == NOT_STARTED && pInstance->GetData(TYPE_TOWER_HODIR) == NOT_STARTED &&
                 pInstance->GetData(TYPE_TOWER_FREYA) == NOT_STARTED && pInstance->GetData(TYPE_TOWER_MIMIRON) == NOT_STARTED && pInstance->GetData(TYPE_TOWER_THORIM) == NOT_STARTED)
-            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ACTIVATE_SYSTEMS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+                pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ACTIVATE_SYSTEMS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
-        pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_GREET, pCreature->GetObjectGuid());
+            pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_GREET, pCreature->GetObjectGuid());
+        }
+        return true;
     }
-    return true;
-}
 
-bool GossipSelect_npc_keeper_norgannon(Player* pPlayer, Creature* pCreature, uint32 /*sender*/, uint32 uiAction)
-{
-    switch (uiAction)
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*sender*/, uint32 uiAction) override
     {
-        case GOSSIP_ACTION_INFO_DEF+1:
+        switch (uiAction)
+        {
+        case GOSSIP_ACTION_INFO_DEF + 1:
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_CONFIRMED, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
             pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_DEFENSES, pCreature->GetObjectGuid());
             break;
-        case GOSSIP_ACTION_INFO_DEF+2:
-            if (instance_ulduar* pInstance = (instance_ulduar*)pCreature->GetInstanceData())
+        case GOSSIP_ACTION_INFO_DEF + 2:
+            if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
             {
                 // if hard mode is triggered all towers become active and encounter starts automatically
                 pInstance->SetData(TYPE_TOWER_FREYA, DONE);
@@ -293,26 +307,31 @@ bool GossipSelect_npc_keeper_norgannon(Player* pPlayer, Creature* pCreature, uin
 
             pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_ACTIVATED, pCreature->GetObjectGuid());
             break;
-    }
+        }
 
-    return true;
-}
+        return true;
+    }
+};
 
 /*######
 ## event_go_ulduar_tower
 ######*/
 
-bool ProcessEventId_event_go_ulduar_tower(uint32 uiEventId, Object* pSource, Object* /*pTarget*/, bool /*bIsStart*/)
+struct event_go_ulduar_tower : public MapEventScript
 {
-    if (pSource->GetTypeId() == TYPEID_GAMEOBJECT && ((GameObject*)pSource)->GetGoType() == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
-    {
-        instance_ulduar* pInstance = (instance_ulduar*)((GameObject*)pSource)->GetInstanceData();
-        if (!pInstance)
-            return true;
+    event_go_ulduar_tower() : MapEventScript("event_go_ulduar_tower") {}
 
-        // Towers can be deactivated by destroying them. Notify instance data in case they get destroyed.
-        switch (uiEventId)
+    bool OnReceived(uint32 uiEventId, Object* pSource, Object* /*pTarget*/, bool /*bIsStart*/) override
+    {
+        if (pSource->GetTypeId() == TYPEID_GAMEOBJECT && ((GameObject*)pSource)->GetGoType() == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
         {
+            InstanceData* pInstance = ((GameObject*)pSource)->GetInstanceData();
+            if (!pInstance)
+                return true;
+
+            // Towers can be deactivated by destroying them. Notify instance data in case they get destroyed.
+            switch (uiEventId)
+            {
             case EVENT_ID_TOWER_LIFE:
                 pInstance->SetData(TYPE_TOWER_FREYA, FAIL);
                 break;
@@ -327,20 +346,21 @@ bool ProcessEventId_event_go_ulduar_tower(uint32 uiEventId, Object* pSource, Obj
                 break;
             default:
                 return false;
+            }
+
+            // despawn all generators in range
+            std::list<Creature*> lGenerators;
+            GetCreatureListWithEntryInGrid(lGenerators, (GameObject*)pSource, NPC_GENERATOR_SMALL, 100.0f);
+            for (std::list<Creature*>::iterator itr = lGenerators.begin(); itr != lGenerators.end(); ++itr)
+                (*itr)->ForcedDespawn();
+
+            // allow further DB processing
+            return false;
         }
 
-        // despawn all generators in range
-        std::list<Creature*> lGenerators;
-        GetCreatureListWithEntryInGrid(lGenerators, (GameObject*)pSource, NPC_GENERATOR_SMALL, 100.0f);
-        for (std::list<Creature*>::iterator itr = lGenerators.begin(); itr != lGenerators.end(); ++itr)
-            (*itr)->ForcedDespawn();
-
-        // allow further DB processing
         return false;
     }
-
-    return false;
-}
+};
 
 /*######
 ## npc_storm_tempered_keeper
@@ -363,149 +383,159 @@ enum
     MAX_KEEPER_DISTANCE             = 70,
 };
 
-struct  npc_storm_tempered_keeperAI : public ScriptedAI
+struct npc_storm_tempered_keeper : public CreatureScript
 {
-    npc_storm_tempered_keeperAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_storm_tempered_keeper() : CreatureScript("npc_storm_tempered_keeper") {}
 
-    uint32 m_uiCheckBuddyTimer;
-    uint32 m_uiLightningTimer;
-    uint32 m_uiSphereTimer;
-
-    ObjectGuid m_buddyGuid;
-
-    void Reset() override
+    struct npc_storm_tempered_keeperAI : public ScriptedAI
     {
-        m_uiCheckBuddyTimer = 1000;
-        m_uiLightningTimer  = urand(5000, 10000);
-        m_uiSphereTimer     = urand(10000, 30000);
-    }
+        npc_storm_tempered_keeperAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-    void Aggro(Unit* /*pWho*/) override
-    {
-        // initialize nearby buddy
-        if (Creature* pKeeper = GetClosestCreatureWithEntry(m_creature, m_creature->GetEntry() == NPC_TEMPERED_KEEPER_1 ? NPC_TEMPERED_KEEPER_2 : NPC_TEMPERED_KEEPER_1, 20))
-            m_buddyGuid = pKeeper->GetObjectGuid();
-    }
+        uint32 m_uiCheckBuddyTimer;
+        uint32 m_uiLightningTimer;
+        uint32 m_uiSphereTimer;
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_CHARGED_SPHERE)
+        ObjectGuid m_buddyGuid;
+
+        void Reset() override
         {
-            pSummoned->CastSpell(pSummoned, SPELL_CHARGED_SPERE, true);
+            m_uiCheckBuddyTimer = 1000;
+            m_uiLightningTimer = urand(5000, 10000);
+            m_uiSphereTimer = urand(10000, 30000);
+        }
 
-            // move to buddy location and notify about buddy entry
-            if (Creature* pBuddy = m_creature->GetMap()->GetCreature(m_buddyGuid))
+        void Aggro(Unit* /*pWho*/) override
+        {
+            // initialize nearby buddy
+            if (Creature* pKeeper = GetClosestCreatureWithEntry(m_creature, m_creature->GetEntry() == NPC_TEMPERED_KEEPER_1 ? NPC_TEMPERED_KEEPER_2 : NPC_TEMPERED_KEEPER_1, 20))
+                m_buddyGuid = pKeeper->GetObjectGuid();
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_CHARGED_SPHERE)
             {
-                pSummoned->GetMotionMaster()->MoveFollow(pBuddy, 0, 0);
-                SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pSummoned, pBuddy->GetEntry());
+                pSummoned->CastSpell(pSummoned, SPELL_CHARGED_SPERE, true);
+
+                // move to buddy location and notify about buddy entry
+                if (Creature* pBuddy = m_creature->GetMap()->GetCreature(m_buddyGuid))
+                {
+                    pSummoned->GetMotionMaster()->MoveFollow(pBuddy, 0, 0);
+                    SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pSummoned, pBuddy->GetEntry());
+                }
             }
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiCheckBuddyTimer)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (m_uiCheckBuddyTimer <= uiDiff)
-            {
-                Creature* pBuddy = m_creature->GetMap()->GetCreature(m_buddyGuid);
-                if (!pBuddy)
-                {
-                    script_error_log("npc_storm_tempered_keeper for %s couldn't find its buddy.", m_creature->GetGuidStr().c_str());
-                    m_uiCheckBuddyTimer = 0;
-                    return;
-                }
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
 
-                // check if buddy is withind distance or alive
-                if (!pBuddy->IsWithinDistInMap(m_creature, MAX_KEEPER_DISTANCE))
+            if (m_uiCheckBuddyTimer)
+            {
+                if (m_uiCheckBuddyTimer <= uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_SEPARATION_ANXIETY) == CAST_OK)
-                        m_uiCheckBuddyTimer = 5000;
-                }
-                else if (!pBuddy->IsAlive())
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_VENGEFUL_SURGE) == CAST_OK)
+                    Creature* pBuddy = m_creature->GetMap()->GetCreature(m_buddyGuid);
+                    if (!pBuddy)
+                    {
+                        script_error_log("npc_storm_tempered_keeper for %s couldn't find its buddy.", m_creature->GetGuidStr().c_str());
                         m_uiCheckBuddyTimer = 0;
+                        return;
+                    }
+
+                    // check if buddy is withind distance or alive
+                    if (!pBuddy->IsWithinDistInMap(m_creature, MAX_KEEPER_DISTANCE))
+                    {
+                        if (DoCastSpellIfCan(m_creature, SPELL_SEPARATION_ANXIETY) == CAST_OK)
+                            m_uiCheckBuddyTimer = 5000;
+                    }
+                    else if (!pBuddy->IsAlive())
+                    {
+                        if (DoCastSpellIfCan(m_creature, SPELL_VENGEFUL_SURGE) == CAST_OK)
+                            m_uiCheckBuddyTimer = 0;
+                    }
+                    else
+                        m_uiCheckBuddyTimer = 1000;
                 }
                 else
-                    m_uiCheckBuddyTimer = 1000;
-            }
-            else
-                m_uiCheckBuddyTimer -= uiDiff;
+                    m_uiCheckBuddyTimer -= uiDiff;
 
-            // spawn a sphere only if the buddy is stil alive
-            if (m_uiSphereTimer < uiDiff)
+                // spawn a sphere only if the buddy is stil alive
+                if (m_uiSphereTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_CHARGED_SPHERE) == CAST_OK)
+                        m_uiSphereTimer = urand(20000, 35000);
+                }
+                else
+                    m_uiSphereTimer -= uiDiff;
+            }
+
+            if (m_uiLightningTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_CHARGED_SPHERE) == CAST_OK)
-                    m_uiSphereTimer = urand(20000, 35000);
+                if (DoCastSpellIfCan(m_creature, SPELL_FORKED_LIGHTNING) == CAST_OK)
+                    m_uiLightningTimer = urand(10000, 15000);
             }
             else
-                m_uiSphereTimer -= uiDiff;
-        }
+                m_uiLightningTimer -= uiDiff;
 
-        if (m_uiLightningTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_FORKED_LIGHTNING) == CAST_OK)
-                m_uiLightningTimer = urand(10000, 15000);
+            DoMeleeAttackIfReady();
         }
-        else
-            m_uiLightningTimer -= uiDiff;
+    };
 
-        DoMeleeAttackIfReady();
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_storm_tempered_keeperAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_storm_tempered_keeper(Creature* pCreature)
-{
-    return new npc_storm_tempered_keeperAI(pCreature);
-}
 
 /*######
 ## npc_charged_sphere
 ######*/
 
-struct  npc_charged_sphereAI : public ScriptedAI
+struct npc_charged_sphere : public CreatureScript
 {
-    npc_charged_sphereAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_charged_sphere() : CreatureScript("npc_charged_sphere") {}
 
-    bool m_bIsCharged;
-    uint32 m_uiBuddyEntry;
-
-    void Reset() override
+    struct npc_charged_sphereAI : public ScriptedAI
     {
-        m_bIsCharged = false;
-        m_uiBuddyEntry = 0;
-    }
+        npc_charged_sphereAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        // cast supercharged if reached the buddy
-        if (!m_bIsCharged && pWho->GetEntry() == m_uiBuddyEntry && pWho->IsAlive() && pWho->IsWithinDistInMap(m_creature, 5.0f))
+        bool m_bIsCharged;
+        uint32 m_uiBuddyEntry;
+
+        void Reset() override
         {
-            DoCastSpellIfCan(pWho, SPELL_SUPERCHARGED, CAST_TRIGGERED);
-            m_creature->ForcedDespawn(1000);
-            m_bIsCharged = true;
+            m_bIsCharged = false;
+            m_uiBuddyEntry = 0;
         }
-    }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 uiMiscValue) override
+        void MoveInLineOfSight(Unit* pWho) override
+        {
+            // cast supercharged if reached the buddy
+            if (!m_bIsCharged && pWho->GetEntry() == m_uiBuddyEntry && pWho->IsAlive() && pWho->IsWithinDistInMap(m_creature, 5.0f))
+            {
+                DoCastSpellIfCan(pWho, SPELL_SUPERCHARGED, CAST_TRIGGERED);
+                m_creature->ForcedDespawn(1000);
+                m_bIsCharged = true;
+            }
+        }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 uiMiscValue) override
+        {
+            // inity entry of the buddy keeper
+            if (eventType == AI_EVENT_CUSTOM_A)
+                m_uiBuddyEntry = uiMiscValue;
+        }
+
+        void AttackStart(Unit* /*pWho*/) override { }
+        void UpdateAI(const uint32 /*uiDiff*/) override { }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        // inity entry of the buddy keeper
-        if (eventType == AI_EVENT_CUSTOM_A)
-            m_uiBuddyEntry = uiMiscValue;
+        return new npc_charged_sphereAI(pCreature);
     }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
-
-CreatureAI* GetAI_npc_charged_sphere(Creature* pCreature)
-{
-    return new npc_charged_sphereAI(pCreature);
-}
 
 /*######
 ## npc_ulduar_keeper
@@ -526,16 +556,20 @@ enum
     GOSSIP_TEXT_ID_YOGG_DEFEATED                = 384,                      // ToDo: add the right text id here!
 };
 
-bool GossipHello_npc_ulduar_keeper(Player* pPlayer, Creature* pCreature)
+struct npc_ulduar_keeper : public CreatureScript
 {
-    if (instance_ulduar* pInstance = (instance_ulduar*)pCreature->GetInstanceData())
+    npc_ulduar_keeper() : CreatureScript("npc_ulduar_keeper") {}
+
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
-        if (pInstance->GetData(TYPE_YOGGSARON) == DONE)
-            pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_YOGG_DEFEATED, pCreature->GetObjectGuid());
-        else
+        if (InstanceData* pInstance = pCreature->GetInstanceData())
         {
-            switch (pCreature->GetEntry())
+            if (pInstance->GetData(TYPE_YOGGSARON) == DONE)
+                pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_YOGG_DEFEATED, pCreature->GetObjectGuid());
+            else
             {
+                switch (pCreature->GetEntry())
+                {
                 case NPC_KEEPER_HODIR:
                     if (pInstance->GetData(TYPE_KEEPER_HODIR) != DONE)
                         pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_LEND_AID, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
@@ -560,80 +594,96 @@ bool GossipHello_npc_ulduar_keeper(Player* pPlayer, Creature* pCreature)
 
                     pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_MIMIRON, pCreature->GetObjectGuid());
                     break;
+                }
             }
         }
+        return true;
     }
-    return true;
-}
 
-bool GossipSelect_npc_ulduar_keeper(Player* pPlayer, Creature* pCreature, uint32 /*sender*/, uint32 uiAction)
-{
-    switch (uiAction)
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*sender*/, uint32 uiAction) override
     {
-        case GOSSIP_ACTION_INFO_DEF+1:
+        switch (uiAction)
+        {
+        case GOSSIP_ACTION_INFO_DEF + 1:
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_KEEPER_CONFIRM, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
             pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_KEEPER_CONFIRM, pCreature->GetObjectGuid());
             break;
-        case GOSSIP_ACTION_INFO_DEF+2:
+        case GOSSIP_ACTION_INFO_DEF + 2:
             DoScriptText(SAY_KEEPER_ACTIVE, pCreature, pPlayer);
             pPlayer->CLOSE_GOSSIP_MENU();
 
-            if (instance_ulduar* pInstance = (instance_ulduar*)pCreature->GetInstanceData())
+            if (InstanceData* pInstance = pCreature->GetInstanceData())
             {
                 switch (pCreature->GetEntry())
                 {
-                    case NPC_KEEPER_HODIR:   pInstance->SetData(TYPE_KEEPER_HODIR,   DONE); break;
-                    case NPC_KEEPER_FREYA:   pInstance->SetData(TYPE_KEEPER_FREYA,   DONE); break;
-                    case NPC_KEEPER_THORIM:  pInstance->SetData(TYPE_KEEPER_THORIM,  DONE); break;
-                    case NPC_KEEPER_MIMIRON: pInstance->SetData(TYPE_KEEPER_MIMIRON, DONE); break;
+                case NPC_KEEPER_HODIR:   pInstance->SetData(TYPE_KEEPER_HODIR, DONE); break;
+                case NPC_KEEPER_FREYA:   pInstance->SetData(TYPE_KEEPER_FREYA, DONE); break;
+                case NPC_KEEPER_THORIM:  pInstance->SetData(TYPE_KEEPER_THORIM, DONE); break;
+                case NPC_KEEPER_MIMIRON: pInstance->SetData(TYPE_KEEPER_MIMIRON, DONE); break;
                 }
             }
             break;
-    }
+        }
 
-    return true;
-}
+        return true;
+    }
+};
 
 void AddSC_ulduar()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "go_ulduar_teleporter";
-    pNewScript->pGossipHelloGO = &GossipHello_go_ulduar_teleporter;
-    pNewScript->pGossipSelectGO = &GossipSelect_go_ulduar_teleporter;
-    pNewScript->RegisterSelf();
+    s = new go_ulduar_teleporter();
+    s->RegisterSelf();
+    s = new npc_brann_ulduar();
+    s->RegisterSelf();
+    s = new npc_keeper_norgannon();
+    s->RegisterSelf();
+    s = new event_go_ulduar_tower();
+    s->RegisterSelf();
+    s = new npc_storm_tempered_keeper();
+    s->RegisterSelf();
+    s = new npc_charged_sphere();
+    s->RegisterSelf();
+    s = new npc_ulduar_keeper();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_brann_ulduar";
-    pNewScript->pGossipHello = &GossipHello_npc_brann_ulduar;
-    pNewScript->pGossipSelect = &GossipSelect_npc_brann_ulduar;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "go_ulduar_teleporter";
+    //pNewScript->pGossipHelloGO = &GossipHello_go_ulduar_teleporter;
+    //pNewScript->pGossipSelectGO = &GossipSelect_go_ulduar_teleporter;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_keeper_norgannon";
-    pNewScript->pGossipHello = &GossipHello_npc_keeper_norgannon;
-    pNewScript->pGossipSelect = &GossipSelect_npc_keeper_norgannon;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_brann_ulduar";
+    //pNewScript->pGossipHello = &GossipHello_npc_brann_ulduar;
+    //pNewScript->pGossipSelect = &GossipSelect_npc_brann_ulduar;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "event_go_ulduar_tower";
-    pNewScript->pProcessEventId = &ProcessEventId_event_go_ulduar_tower;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_keeper_norgannon";
+    //pNewScript->pGossipHello = &GossipHello_npc_keeper_norgannon;
+    //pNewScript->pGossipSelect = &GossipSelect_npc_keeper_norgannon;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_storm_tempered_keeper";
-    pNewScript->GetAI = &GetAI_npc_storm_tempered_keeper;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "event_go_ulduar_tower";
+    //pNewScript->pProcessEventId = &ProcessEventId_event_go_ulduar_tower;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_charged_sphere";
-    pNewScript->GetAI = &GetAI_npc_charged_sphere;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_storm_tempered_keeper";
+    //pNewScript->GetAI = &GetAI_npc_storm_tempered_keeper;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_ulduar_keeper";
-    pNewScript->pGossipHello = &GossipHello_npc_ulduar_keeper;
-    pNewScript->pGossipSelect = &GossipSelect_npc_ulduar_keeper;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_charged_sphere";
+    //pNewScript->GetAI = &GetAI_npc_charged_sphere;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_ulduar_keeper";
+    //pNewScript->pGossipHello = &GossipHello_npc_ulduar_keeper;
+    //pNewScript->pGossipSelect = &GossipSelect_npc_ulduar_keeper;
+    //pNewScript->RegisterSelf();
 }

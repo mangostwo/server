@@ -72,325 +72,338 @@ enum
 ## boss_auriaya
 ######*/
 
-struct  boss_auriayaAI : public ScriptedAI
+struct boss_auriaya : public CreatureScript
 {
-    boss_auriayaAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_auriaya() : CreatureScript("boss_auriaya") {}
+
+    struct boss_auriayaAI : public ScriptedAI
     {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    instance_ulduar* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiEnrageTimer;
-    uint32 m_uiSwarmTimer;
-    uint32 m_uiSonicScreechTimer;
-    uint32 m_uiSentinelBlastTimer;
-    uint32 m_uiTerrifyingScreechTimer;
-    uint32 m_uiDefenderTimer;
-
-    void Reset() override
-    {
-        m_uiEnrageTimer             = 10 * MINUTE * IN_MILLISECONDS;
-        m_uiSwarmTimer              = 50000;
-        m_uiSonicScreechTimer       = 58000;
-        m_uiSentinelBlastTimer      = 40000;
-        m_uiTerrifyingScreechTimer  = 38000;
-        m_uiDefenderTimer           = 1 * MINUTE * IN_MILLISECONDS;
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_AURIAYA, DONE);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_AURIAYA, IN_PROGRESS);
-
-        DoScriptText(SAY_AGGRO, m_creature);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_AURIAYA, FAIL);
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        // Summon the feral defender
-        if (pSummoned->GetEntry() == NPC_FERAL_DEFENDER_STALKER)
-            DoCastSpellIfCan(pSummoned, SPELL_ACTIVATE_FERAL_DEFENDER, CAST_INTERRUPT_PREVIOUS);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiTerrifyingScreechTimer < uiDiff)
+        boss_auriayaAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_TERRIFYING_SCREECH) == CAST_OK)
-            {
-                DoScriptText(EMOTE_SCREECH, m_creature);
-                m_uiTerrifyingScreechTimer = 35000;
-                m_uiSentinelBlastTimer = 2000;
-            }
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         }
-        else
-            m_uiTerrifyingScreechTimer -= uiDiff;
 
-        if (m_uiSentinelBlastTimer < uiDiff)
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        uint32 m_uiEnrageTimer;
+        uint32 m_uiSwarmTimer;
+        uint32 m_uiSonicScreechTimer;
+        uint32 m_uiSentinelBlastTimer;
+        uint32 m_uiTerrifyingScreechTimer;
+        uint32 m_uiDefenderTimer;
+
+        void Reset() override
         {
-            // Cast Sentinel blast right after terrifying screech
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SENTINEL_BLAST : SPELL_SENTINEL_BLAST_H) == CAST_OK)
-                m_uiSentinelBlastTimer = 35000;
+            m_uiEnrageTimer = 10 * MINUTE * IN_MILLISECONDS;
+            m_uiSwarmTimer = 50000;
+            m_uiSonicScreechTimer = 58000;
+            m_uiSentinelBlastTimer = 40000;
+            m_uiTerrifyingScreechTimer = 38000;
+            m_uiDefenderTimer = 1 * MINUTE * IN_MILLISECONDS;
         }
-        else
-            m_uiSentinelBlastTimer -= uiDiff;
 
-        if (m_uiDefenderTimer)
+        void JustDied(Unit* /*pKiller*/) override
         {
-            if (m_uiDefenderTimer <= uiDiff)
+            DoScriptText(SAY_DEATH, m_creature);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_AURIAYA, DONE);
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_AURIAYA, IN_PROGRESS);
+
+            DoScriptText(SAY_AGGRO, m_creature);
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_AURIAYA, FAIL);
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            // Summon the feral defender
+            if (pSummoned->GetEntry() == NPC_FERAL_DEFENDER_STALKER)
+                DoCastSpellIfCan(pSummoned, SPELL_ACTIVATE_FERAL_DEFENDER, CAST_INTERRUPT_PREVIOUS);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            if (m_uiTerrifyingScreechTimer < uiDiff)
             {
-                // Summon the feral defender trigger
-                if (DoCastSpellIfCan(m_creature, SPELL_ACTIVATE_FERAL_DEFENDER_TRIGG) == CAST_OK)
-                    m_uiDefenderTimer = 0;
+                if (DoCastSpellIfCan(m_creature, SPELL_TERRIFYING_SCREECH) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_SCREECH, m_creature);
+                    m_uiTerrifyingScreechTimer = 35000;
+                    m_uiSentinelBlastTimer = 2000;
+                }
             }
             else
-                m_uiDefenderTimer -= uiDiff;
-        }
+                m_uiTerrifyingScreechTimer -= uiDiff;
 
-        if (m_uiSonicScreechTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SONIC_SCREECH : SPELL_SONIC_SCREECH_H) == CAST_OK)
-                m_uiSonicScreechTimer = 27000;
-        }
-        else
-            m_uiSonicScreechTimer -= uiDiff;
-
-        if (m_uiSwarmTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (m_uiSentinelBlastTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_GUARDIAN_SWARM) == CAST_OK)
-                    m_uiSwarmTimer = 37000;
+                // Cast Sentinel blast right after terrifying screech
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SENTINEL_BLAST : SPELL_SENTINEL_BLAST_H) == CAST_OK)
+                    m_uiSentinelBlastTimer = 35000;
             }
-        }
-        else
-            m_uiSwarmTimer -= uiDiff;
+            else
+                m_uiSentinelBlastTimer -= uiDiff;
 
-        if (m_uiEnrageTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+            if (m_uiDefenderTimer)
             {
-                DoScriptText(SAY_BERSERK, m_creature);
-                m_uiEnrageTimer = 10 * MINUTE * IN_MILLISECONDS;
+                if (m_uiDefenderTimer <= uiDiff)
+                {
+                    // Summon the feral defender trigger
+                    if (DoCastSpellIfCan(m_creature, SPELL_ACTIVATE_FERAL_DEFENDER_TRIGG) == CAST_OK)
+                        m_uiDefenderTimer = 0;
+                }
+                else
+                    m_uiDefenderTimer -= uiDiff;
             }
-        }
-        else
-            m_uiEnrageTimer -= uiDiff;
 
-        DoMeleeAttackIfReady();
+            if (m_uiSonicScreechTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SONIC_SCREECH : SPELL_SONIC_SCREECH_H) == CAST_OK)
+                    m_uiSonicScreechTimer = 27000;
+            }
+            else
+                m_uiSonicScreechTimer -= uiDiff;
+
+            if (m_uiSwarmTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_GUARDIAN_SWARM) == CAST_OK)
+                        m_uiSwarmTimer = 37000;
+                }
+            }
+            else
+                m_uiSwarmTimer -= uiDiff;
+
+            if (m_uiEnrageTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                {
+                    DoScriptText(SAY_BERSERK, m_creature);
+                    m_uiEnrageTimer = 10 * MINUTE * IN_MILLISECONDS;
+                }
+            }
+            else
+                m_uiEnrageTimer -= uiDiff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_auriayaAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_auriaya(Creature* pCreature)
-{
-    return new boss_auriayaAI(pCreature);
-}
 
 /*######
 ## boss_feral_defender
 ######*/
 
-struct  boss_feral_defenderAI : public ScriptedAI
+struct boss_feral_defender : public CreatureScript
 {
-    boss_feral_defenderAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_feral_defender() : CreatureScript("boss_feral_defender") {}
+
+    struct boss_feral_defenderAI : public ScriptedAI
     {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_uiMaxFeralRush = m_bIsRegularMode ? 6 : 10;
-        Reset();
-    }
-
-    instance_ulduar* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint8 m_uiFeralRushCount;
-    uint8 m_uiMaxFeralRush;
-    uint32 m_uiPounceTimer;
-    uint32 m_uiFeralRushTimer;
-    uint32 m_uiReviveDelayTimer;
-    uint32 m_uiAttackDelayTimer;
-    uint32 m_uiKilledCount;
-
-    void Reset() override
-    {
-        m_uiFeralRushCount      = 0;
-        m_uiReviveDelayTimer    = 0;
-        m_uiAttackDelayTimer    = 0;
-        m_uiPounceTimer         = urand(9000, 12000);
-        m_uiFeralRushTimer      = urand(3000, 5000);
-        m_uiKilledCount         = 0;
-
-        DoCastSpellIfCan(m_creature, SPELL_FERAL_ESSENCE);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        // Set achiev criteria to true
-        if (m_pInstance)
-            m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_NINE_LIVES, true);
-    }
-
-    void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage) override
-    {
-        // If we don't have the feral essence anymore then ignore this
-        if (m_uiKilledCount >= 8)                           // 9-1 == 8
-            return;
-
-        if (m_uiReviveDelayTimer)                           // Already faking
+        boss_feral_defenderAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            uiDamage = 0;
-            return;
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+            m_uiMaxFeralRush = m_bIsRegularMode ? 6 : 10;
         }
 
-        if (uiDamage > m_creature->GetHealth())
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        uint8 m_uiFeralRushCount;
+        uint8 m_uiMaxFeralRush;
+        uint32 m_uiPounceTimer;
+        uint32 m_uiFeralRushTimer;
+        uint32 m_uiReviveDelayTimer;
+        uint32 m_uiAttackDelayTimer;
+        uint32 m_uiKilledCount;
+
+        void Reset() override
         {
-            uiDamage = 0;
+            m_uiFeralRushCount = 0;
+            m_uiReviveDelayTimer = 0;
+            m_uiAttackDelayTimer = 0;
+            m_uiPounceTimer = urand(9000, 12000);
+            m_uiFeralRushTimer = urand(3000, 5000);
+            m_uiKilledCount = 0;
 
-            // Set Feign death, remove one aura stack and summon a feral essence
-            DoCastSpellIfCan(m_creature, SPELL_FEIGN_DEATH, CAST_TRIGGERED);
-            DoCastSpellIfCan(m_creature, SPELL_FERAL_ESSENCE_REMOVAL, CAST_TRIGGERED);
-            DoCastSpellIfCan(m_creature, SPELL_SEEPING_FERAL_ESSENCE_SUMMON, CAST_TRIGGERED);
-
-            // the feign death aura doesn't do everything, so keep the following here as well
-            m_creature->SetHealth(0);
-            m_creature->ClearComboPointHolders();
-            m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
-            m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            m_creature->ClearAllReactives();
-            m_creature->GetMotionMaster()->Clear();
-            m_creature->GetMotionMaster()->MoveIdle();
-            m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
-
-            m_uiReviveDelayTimer = 30000;
-            ++m_uiKilledCount;
+            DoCastSpellIfCan(m_creature, SPELL_FERAL_ESSENCE);
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        // Cast seeping feral essence on the summoned
-        if (pSummoned->GetEntry() == NPC_SEEPING_FERAL_ESSENCE)
-            pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_SEEPING_FERAL_ESSENCE : SPELL_SEEPING_FERAL_ESSENCE_H, true, NULL, NULL, m_creature->GetObjectGuid());
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiReviveDelayTimer)
+        void JustDied(Unit* /*pKiller*/) override
         {
-            if (m_uiReviveDelayTimer <= uiDiff)
+            // Set achiev criteria to true
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_ACHIEV_NINE_LIVES, uint32(true));
+        }
+
+        void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage) override
+        {
+            // If we don't have the feral essence anymore then ignore this
+            if (m_uiKilledCount >= 8)                           // 9-1 == 8
+                return;
+
+            if (m_uiReviveDelayTimer)                           // Already faking
             {
-                // ToDo: figure out how to enable the ressurrect animation
-                DoCastSpellIfCan(m_creature, SPELL_FULL_HEAL, CAST_TRIGGERED);
-                m_uiReviveDelayTimer = 0;
-                m_uiAttackDelayTimer = 3000;
+                uiDamage = 0;
+                return;
             }
-            else
-                m_uiReviveDelayTimer -= uiDiff;
 
-            // No Further action while faking
-            return;
-        }
-
-        if (m_uiAttackDelayTimer)
-        {
-            if (m_uiAttackDelayTimer <= uiDiff)
+            if (uiDamage > m_creature->GetHealth())
             {
-                DoResetThreat();
-                m_creature->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
-                m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                uiDamage = 0;
 
-                m_uiPounceTimer = urand(9000, 10000);
-                m_uiFeralRushCount = 0;
-                m_uiFeralRushTimer = 1000;
-                m_uiAttackDelayTimer = 0;
-            }
-            else
-                m_uiAttackDelayTimer -= uiDiff;
+                // Set Feign death, remove one aura stack and summon a feral essence
+                DoCastSpellIfCan(m_creature, SPELL_FEIGN_DEATH, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_FERAL_ESSENCE_REMOVAL, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_SEEPING_FERAL_ESSENCE_SUMMON, CAST_TRIGGERED);
 
-            // No Further action while faking
-            return;
-        }
+                // the feign death aura doesn't do everything, so keep the following here as well
+                m_creature->SetHealth(0);
+                m_creature->ClearComboPointHolders();
+                m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
+                m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->ClearAllReactives();
+                m_creature->GetMotionMaster()->Clear();
+                m_creature->GetMotionMaster()->MoveIdle();
+                m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
 
-        if (m_uiPounceTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FERAL_POUNCE : SPELL_FERAL_POUNCE_H) == CAST_OK)
-                    m_uiPounceTimer = urand(13000, 16000);
+                m_uiReviveDelayTimer = 30000;
+                ++m_uiKilledCount;
             }
         }
-        else
-            m_uiPounceTimer -= uiDiff;
 
-        if (m_uiFeralRushTimer < uiDiff)
+        void JustSummoned(Creature* pSummoned) override
         {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FERAL_RUSH : SPELL_FERAL_RUSH_H) == CAST_OK)
-            {
-                ++m_uiFeralRushCount;
+            // Cast seeping feral essence on the summoned
+            if (pSummoned->GetEntry() == NPC_SEEPING_FERAL_ESSENCE)
+                pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_SEEPING_FERAL_ESSENCE : SPELL_SEEPING_FERAL_ESSENCE_H, true, NULL, NULL, m_creature->GetObjectGuid());
+        }
 
-                if (m_uiFeralRushCount == m_uiMaxFeralRush)
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            if (m_uiReviveDelayTimer)
+            {
+                if (m_uiReviveDelayTimer <= uiDiff)
                 {
-                    m_uiFeralRushCount = 0;
-                    m_uiFeralRushTimer = 12000;
+                    // ToDo: figure out how to enable the ressurrect animation
+                    DoCastSpellIfCan(m_creature, SPELL_FULL_HEAL, CAST_TRIGGERED);
+                    m_uiReviveDelayTimer = 0;
+                    m_uiAttackDelayTimer = 3000;
                 }
                 else
-                    m_uiFeralRushTimer = 400;
-            }
-        }
-        else
-            m_uiFeralRushTimer -= uiDiff;
+                    m_uiReviveDelayTimer -= uiDiff;
 
-        DoMeleeAttackIfReady();
+                // No Further action while faking
+                return;
+            }
+
+            if (m_uiAttackDelayTimer)
+            {
+                if (m_uiAttackDelayTimer <= uiDiff)
+                {
+                    DoResetThreat();
+                    m_creature->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
+                    m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+                    m_uiPounceTimer = urand(9000, 10000);
+                    m_uiFeralRushCount = 0;
+                    m_uiFeralRushTimer = 1000;
+                    m_uiAttackDelayTimer = 0;
+                }
+                else
+                    m_uiAttackDelayTimer -= uiDiff;
+
+                // No Further action while faking
+                return;
+            }
+
+            if (m_uiPounceTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FERAL_POUNCE : SPELL_FERAL_POUNCE_H) == CAST_OK)
+                        m_uiPounceTimer = urand(13000, 16000);
+                }
+            }
+            else
+                m_uiPounceTimer -= uiDiff;
+
+            if (m_uiFeralRushTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FERAL_RUSH : SPELL_FERAL_RUSH_H) == CAST_OK)
+                {
+                    ++m_uiFeralRushCount;
+
+                    if (m_uiFeralRushCount == m_uiMaxFeralRush)
+                    {
+                        m_uiFeralRushCount = 0;
+                        m_uiFeralRushTimer = 12000;
+                    }
+                    else
+                        m_uiFeralRushTimer = 400;
+                }
+            }
+            else
+                m_uiFeralRushTimer -= uiDiff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_feral_defenderAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_feral_defender(Creature* pCreature)
-{
-    return new boss_feral_defenderAI(pCreature);
-}
-
 void AddSC_boss_auriaya()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_auriaya";
-    pNewScript->GetAI = GetAI_boss_auriaya;
-    pNewScript->RegisterSelf();
+    s = new boss_auriaya();
+    s->RegisterSelf();
+    s = new boss_feral_defender();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_feral_defender";
-    pNewScript->GetAI = &GetAI_boss_feral_defender;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_auriaya";
+    //pNewScript->GetAI = GetAI_boss_auriaya;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_feral_defender";
+    //pNewScript->GetAI = &GetAI_boss_feral_defender;
+    //pNewScript->RegisterSelf();
 }

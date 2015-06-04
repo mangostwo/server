@@ -44,99 +44,102 @@ enum
     NPC_SPORE               = 16286
 };
 
-struct  boss_loathebAI : public ScriptedAI
+struct boss_loatheb : public CreatureScript
 {
-    boss_loathebAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_loatheb() : CreatureScript("boss_loatheb") {}
+
+    struct boss_loathebAI : public ScriptedAI
     {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    instance_naxxramas* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiDeathbloomTimer;
-    uint32 m_uiNecroticAuraTimer;
-    uint32 m_uiInevitableDoomTimer;
-    uint32 m_uiSummonTimer;
-    uint32 m_uiBerserkTimer;
-    uint8  m_uiNecroticAuraCount;                           // Used for emotes, 5min check
-
-    void Reset() override
-    {
-        m_uiDeathbloomTimer = 5000;
-        m_uiNecroticAuraTimer = 12000;
-        m_uiInevitableDoomTimer = MINUTE * 2 * IN_MILLISECONDS;
-        m_uiSummonTimer = urand(10000, 15000);              // first seen in vid after approx 12s
-        m_uiBerserkTimer = MINUTE * 12 * IN_MILLISECONDS;   // only in heroic, after 12min
-        m_uiNecroticAuraCount = 0;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LOATHEB, IN_PROGRESS);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LOATHEB, DONE);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LOATHEB, NOT_STARTED);
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() != NPC_SPORE)
-            return;
-
-        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            pSummoned->AddThreat(pTarget);
-    }
-
-    void SummonedCreatureJustDied(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_SPORE && m_pInstance)
-            m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_SPORE_LOSER, false);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Berserk (only heroic)
-        if (!m_bIsRegularMode)
+        boss_loathebAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (m_uiBerserkTimer < uiDiff)
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        }
+
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        uint32 m_uiDeathbloomTimer;
+        uint32 m_uiNecroticAuraTimer;
+        uint32 m_uiInevitableDoomTimer;
+        uint32 m_uiSummonTimer;
+        uint32 m_uiBerserkTimer;
+        uint8  m_uiNecroticAuraCount;                           // Used for emotes, 5min check
+
+        void Reset() override
+        {
+            m_uiDeathbloomTimer = 5000;
+            m_uiNecroticAuraTimer = 12000;
+            m_uiInevitableDoomTimer = MINUTE * 2 * IN_MILLISECONDS;
+            m_uiSummonTimer = urand(10000, 15000);              // first seen in vid after approx 12s
+            m_uiBerserkTimer = MINUTE * 12 * IN_MILLISECONDS;   // only in heroic, after 12min
+            m_uiNecroticAuraCount = 0;
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_LOATHEB, IN_PROGRESS);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_LOATHEB, DONE);
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_LOATHEB, NOT_STARTED);
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() != NPC_SPORE)
+                return;
+
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                pSummoned->AddThreat(pTarget);
+        }
+
+        void SummonedCreatureJustDied(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_SPORE && m_pInstance)
+                m_pInstance->SetData(TYPE_ACHIEV_SPORE_LOSER, uint32(false));
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            // Berserk (only heroic)
+            if (!m_bIsRegularMode)
             {
-                DoCastSpellIfCan(m_creature, SPELL_BERSERK);
-                m_uiBerserkTimer = 300000;
+                if (m_uiBerserkTimer < uiDiff)
+                {
+                    DoCastSpellIfCan(m_creature, SPELL_BERSERK);
+                    m_uiBerserkTimer = 300000;
+                }
+                else
+                    m_uiBerserkTimer -= uiDiff;
+            }
+
+            // Inevitable Doom
+            if (m_uiInevitableDoomTimer < uiDiff)
+            {
+                DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_INEVITABLE_DOOM : SPELL_INEVITABLE_DOOM_H);
+                m_uiInevitableDoomTimer = (m_uiNecroticAuraCount <= 40) ? 30000 : 15000;
             }
             else
-                m_uiBerserkTimer -= uiDiff;
-        }
+                m_uiInevitableDoomTimer -= uiDiff;
 
-        // Inevitable Doom
-        if (m_uiInevitableDoomTimer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_INEVITABLE_DOOM : SPELL_INEVITABLE_DOOM_H);
-            m_uiInevitableDoomTimer = (m_uiNecroticAuraCount <= 40) ? 30000 : 15000;
-        }
-        else
-            m_uiInevitableDoomTimer -= uiDiff;
-
-        // Necrotic Aura
-        if (m_uiNecroticAuraTimer < uiDiff)
-        {
-            switch (m_uiNecroticAuraCount % 3)
+            // Necrotic Aura
+            if (m_uiNecroticAuraTimer < uiDiff)
             {
+                switch (m_uiNecroticAuraCount % 3)
+                {
                 case 0:
                     DoCastSpellIfCan(m_creature, SPELL_NECROTIC_AURA);
                     DoScriptText(EMOTE_AURA_BLOCKING, m_creature);
@@ -150,45 +153,49 @@ struct  boss_loathebAI : public ScriptedAI
                     DoScriptText(EMOTE_AURA_FADING, m_creature);
                     m_uiNecroticAuraTimer = 3000;
                     break;
+                }
+                ++m_uiNecroticAuraCount;
             }
-            ++m_uiNecroticAuraCount;
-        }
-        else
-            m_uiNecroticAuraTimer -= uiDiff;
+            else
+                m_uiNecroticAuraTimer -= uiDiff;
 
-        // Summon
-        if (m_uiSummonTimer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPORE);
-            m_uiSummonTimer = m_bIsRegularMode ? 36000 : 18000;
-        }
-        else
-            m_uiSummonTimer -= uiDiff;
+            // Summon
+            if (m_uiSummonTimer < uiDiff)
+            {
+                DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPORE);
+                m_uiSummonTimer = m_bIsRegularMode ? 36000 : 18000;
+            }
+            else
+                m_uiSummonTimer -= uiDiff;
 
-        // Deathbloom
-        if (m_uiDeathbloomTimer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DEATHBLOOM : SPELL_DEATHBLOOM_H);
-            m_uiDeathbloomTimer = 30000;
-        }
-        else
-            m_uiDeathbloomTimer -= uiDiff;
+            // Deathbloom
+            if (m_uiDeathbloomTimer < uiDiff)
+            {
+                DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DEATHBLOOM : SPELL_DEATHBLOOM_H);
+                m_uiDeathbloomTimer = 30000;
+            }
+            else
+                m_uiDeathbloomTimer -= uiDiff;
 
-        DoMeleeAttackIfReady();
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_loathebAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_loatheb(Creature* pCreature)
-{
-    return new boss_loathebAI(pCreature);
-}
-
 void AddSC_boss_loatheb()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_loatheb";
-    pNewScript->GetAI = &GetAI_boss_loatheb;
-    pNewScript->RegisterSelf();
+    s = new boss_loatheb();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_loatheb";
+    //pNewScript->GetAI = &GetAI_boss_loatheb;
+    //pNewScript->RegisterSelf();
 }
