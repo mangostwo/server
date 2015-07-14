@@ -7193,9 +7193,68 @@ bool ChatHandler::HandleMmapTestArea(char* args)
     return true;
 }
 
+// use ".mmap testheight 10" selecting any creature/player
+bool ChatHandler::HandleMmapTestHeight(char* args)
+{
+    float radius = 0.0f;
+    ExtractFloat(&args, radius);
+    if (radius > 40.0f)
+        radius = 40.0f;
+
+    Unit* unit = getSelectedUnit();
+
+    Player* player = m_session->GetPlayer();
+    if (!unit)
+        unit = player;
+
+    if (unit->GetTypeId() == TYPEID_UNIT)
+    {
+        if (radius < 0.1f)
+            radius = static_cast<Creature*>(unit)->GetRespawnRadius();
+    }
+    else
+    {
+        if (unit->GetTypeId() != TYPEID_PLAYER)
+        {
+            PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+            return false;
+        }
+    }
+
+    if (radius < 0.1f)
+    {
+        PSendSysMessage("Provided spawn radius for %s is too small. Using 5.0f instead.", unit->GetGuidStr().c_str());
+        radius = 5.0f;
+    }
+
+    float gx, gy, gz;
+    unit->GetPosition(gx, gy, gz);
+
+    Creature* summoned = unit->SummonCreature(VISUAL_WAYPOINT, gx, gy, gz + 0.5f, 0, TEMPSUMMON_TIMED_DESPAWN, 20000);
+    summoned->CastSpell(summoned, 8599, false);
+    uint32 tries = 1;
+    uint32 successes = 0;
+    uint32 startTime = WorldTimer::getMSTime();
+    for (; tries < 500; ++tries)
+    {
+        unit->GetPosition(gx, gy, gz);
+        if (unit->GetMap()->GetReachableRandomPosition(unit, gx, gy, gz, radius))
+        {
+            unit->SummonCreature(VISUAL_WAYPOINT, gx, gy, gz, 0, TEMPSUMMON_TIMED_DESPAWN, 15000);
+            ++successes;
+            if (successes >= 100)
+                break;
+        }
+    }
+    uint32 genTime = WorldTimer::getMSTimeDiff(startTime, WorldTimer::getMSTime());
+    PSendSysMessage("Generated %u valid points for %u try in %ums.", successes, tries, genTime);
+    return true;
+}
+
 bool ChatHandler::HandleServerResetAllRaidCommand(char* args)
 {
     PSendSysMessage("Global raid instances reset, all players in raid instances will be teleported to homebind!");
     sMapPersistentStateMgr.GetScheduler().ResetAllRaid();
     return true;
 }
+
