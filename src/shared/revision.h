@@ -26,6 +26,6 @@
 #define MANGOS_H_REVISION
  #define REVISION_NR "20000"
  #define REVISION_DB_CHARACTERS "required_21000_00_Release_021_Initial"
- #define REVISION_DB_MANGOS "required_21000_01_Release21_initial"
+ #define REVISION_DB_MANGOS "required_21000_07_command"
  #define REVISION_DB_REALMD "required_20150420_warden_db_log"
 #endif // __REVISION_H__

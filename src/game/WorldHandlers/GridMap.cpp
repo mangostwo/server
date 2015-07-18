@@ -55,6 +55,7 @@ GridMap::GridMap()
     m_gridGetHeight = &GridMap::getHeightFromFlat;
     m_V9 = NULL;
     m_V8 = NULL;
+    memset(m_holes, 0, sizeof(m_holes));
 
     // Liquid data
     m_liquidType    = 0;
@@ -93,6 +94,14 @@ bool GridMap::loadData(char* filename)
         if (header.areaMapOffset && !loadAreaData(in, header.areaMapOffset, header.areaMapSize))
         {
             sLog.outError("Error loading map area data\n");
+            fclose(in);
+            return false;
+        }
+
+        // loadup holes data
+        if (header.holesOffset && !loadHolesData(in, header.holesOffset, header.holesSize))
+        {
+            sLog.outError("Error loading map holes data\n");
             fclose(in);
             return false;
         }
@@ -202,6 +211,16 @@ bool GridMap::loadHeightData(FILE* in, uint32 offset, uint32 /*size*/)
     return true;
 }
 
+bool GridMap::loadHolesData(FILE* in, uint32 offset, uint32 size)
+{
+    if (fseek(in, offset, SEEK_SET) != 0)
+        return false;
+
+    if (fread(&m_holes, sizeof(m_holes), 1, in) != 1)
+        return false;
+    return true;
+}
+
 bool GridMap::loadGridMapLiquidData(FILE* in, uint32 offset, uint32 /*size*/)
 {
     GridMapLiquidHeader header;
@@ -252,10 +271,22 @@ float GridMap::getHeightFromFlat(float /*x*/, float /*y*/) const
     return m_gridHeight;
 }
 
+bool GridMap::IsHole(int row, int col) const
+{
+    int cellRow = row / 8;     // 8 squares per cell
+    int cellCol = col / 8;
+    int holeRow = row % 8 / 2;
+    int holeCol = (col - (cellCol * 8)) / 2;
+
+    uint16 hole = m_holes[cellRow][cellCol];
+
+    return (hole & holetab_h[holeCol] & holetab_v[holeRow]) != 0;
+}
+
 float GridMap::getHeightFromFloat(float x, float y) const
 {
     if (!m_V8 || !m_V9)
-        { return m_gridHeight; }
+        { return INVALID_HEIGHT_VALUE; }
 
     x = MAP_RESOLUTION * (32 - x / SIZE_OF_GRIDS);
     y = MAP_RESOLUTION * (32 - y / SIZE_OF_GRIDS);
@@ -266,6 +297,9 @@ float GridMap::getHeightFromFloat(float x, float y) const
     y -= y_int;
     x_int &= (MAP_RESOLUTION - 1);
     y_int &= (MAP_RESOLUTION - 1);
+
+    if (IsHole(x_int, y_int))
+        return INVALID_HEIGHT_VALUE;
 
     // Height stored as: h5 - its v8 grid, h1-h4 - its v9 grid
     // +--------------> X
