@@ -139,10 +139,13 @@ bool Thread::start()
     if (m_task == 0 || m_iThreadId != 0)
         { return false; }
 
+    // incRef before spawing the thread, otherwise Thread::ThreadTask() might call decRef and delete m_task
+    m_task->incReference();
+
     bool res = (ACE_Thread::spawn(&Thread::ThreadTask, (void*)m_task, THREADFLAG, &m_iThreadId, &m_hThreadHandle) == 0);
 
     if (res)
-        { m_task->incReference(); }
+        { m_task->decReference(); }
 
     return res;
 }
@@ -188,7 +191,9 @@ void Thread::resume()
 
 ACE_THR_FUNC_RETURN Thread::ThreadTask(void* param)
 {
-    Runnable* _task = (Runnable*)param;
+    Runnable* _task = static_cast<Runnable*>(param);
+    _task->incReference();
+    
     _task->run();
 
     // task execution complete, free referecne added at
@@ -232,7 +237,7 @@ void Thread::setPriority(Priority type)
     int _priority = m_TpEnum.getPriority(type);
     int _ok = ACE_Thread::setprio(m_hThreadHandle, _priority);
     // remove this ASSERT in case you don't want to know is thread priority change was successful or not
-    MANGOS_ASSERT (_ok == 0 || (_ok == -1 && errno == ENOTSUP));
+    MANGOS_ASSERT(_ok == 0);
 #endif
 }
 

@@ -28,6 +28,7 @@
 
 #include "Common.h"
 #include "DBCStructure.h"
+#include "ScriptMgr.h"
 
 class Player;
 class Creature;

@@ -524,7 +524,7 @@ inline bool isExtendedLatinString(const std::wstring &wstr, bool numericOrSpace)
  * @param numericOrSpace
  * @return bool
  */
-inline bool isCyrillicString(std::wstring wstr, bool numericOrSpace)
+inline bool isCyrillicString(const std::wstring &wstr, bool numericOrSpace)
 {
     for (size_t i = 0; i < wstr.size(); ++i)
         if (!isCyrillicCharacter(wstr[i]) && (!numericOrSpace || !isNumericOrSpace(wstr[i])))

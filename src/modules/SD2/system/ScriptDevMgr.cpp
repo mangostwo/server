@@ -80,44 +80,16 @@ struct TSpellSummary
     uint8 Effects;                                          // set of enum SelectEffect
 } extern* SpellSummary;
 
-
-    // Free Spell Summary
-
-    // Free resources before library unload
-
-
-
-
-    // ScriptDev2 startup
-
-    // Get configuration file
-
-    // Set SD2 Error Log File
-
-
-    // Check config file version
-
-
-    // Load database (must be called after SD2Config.SetSource).
-
-
-    // Resize script ids to needed ammount of assigned ScriptNames (from core)
-
-
-
-    // Check existance scripts for all registered by core script names
-
-
 //*********************************
 //*** Functions used globally ***
 
 /**
- * Function that does script text
- *
- * @param iTextEntry Entry of the text, stored in SD2-database
- * @param pSource Source of the text
- * @param pTarget Can be NULL (depending on CHAT_TYPE of iTextEntry). Possible target for the text
- */
+    * Function that does script text
+    *
+    * @param iTextEntry Entry of the text, stored in SD2-database
+    * @param pSource Source of the text
+    * @param pTarget Can be NULL (depending on CHAT_TYPE of iTextEntry). Possible target for the text
+    */
 void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
 {
     if (!pSource)
@@ -129,7 +101,7 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
     if (iTextEntry >= 0)
     {
         script_error_log("DoScriptText with source entry %u (TypeId=%u, guid=%u) attempts to process text entry %i, but text entry must be negative.",
-                         pSource->GetEntry(), pSource->GetTypeId(), pSource->GetGUIDLow(), iTextEntry);
+                            pSource->GetEntry(), pSource->GetTypeId(), pSource->GetGUIDLow(), iTextEntry);
 
         return;
     }
@@ -139,14 +111,14 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
 }
 
 /**
- * Function that either simulates or does script text for a map
- *
- * @param iTextEntry Entry of the text, stored in SD2-database, only type CHAT_TYPE_ZONE_YELL supported
- * @param uiCreatureEntry Id of the creature of whom saying will be simulated
- * @param pMap Given Map on which the map-wide text is displayed
- * @param pCreatureSource Can be NULL. If pointer to Creature is given, then the creature does the map-wide text
- * @param pTarget Can be NULL. Possible target for the text
- */
+    * Function that either simulates or does script text for a map
+    *
+    * @param iTextEntry Entry of the text, stored in SD2-database, only type CHAT_TYPE_ZONE_YELL supported
+    * @param uiCreatureEntry Id of the creature of whom saying will be simulated
+    * @param pMap Given Map on which the map-wide text is displayed
+    * @param pCreatureSource Can be NULL. If pointer to Creature is given, then the creature does the map-wide text
+    * @param pTarget Can be NULL. Possible target for the text
+    */
 void DoOrSimulateScriptTextForMap(int32 iTextEntry, uint32 uiCreatureEntry, Map* pMap, Creature* pCreatureSource /*=NULL*/, Unit* pTarget /*=NULL*/)
 {
     if (!pMap)
@@ -176,7 +148,7 @@ void DoOrSimulateScriptTextForMap(int32 iTextEntry, uint32 uiCreatureEntry, Map*
     }
 
     debug_log("SD2: DoOrSimulateScriptTextForMap: text entry=%i, Sound=%u, Type=%u, Language=%u, Emote=%u",
-              iTextEntry, pData->SoundId, pData->Type, pData->LanguageId, pData->Emote);
+                iTextEntry, pData->SoundId, pData->Type, pData->LanguageId, pData->Emote);
 
     if (pData->Type != CHAT_TYPE_ZONE_YELL)
     {
@@ -220,21 +192,24 @@ void Script::RegisterSelf(bool bReportError)
     }
 }
 
-//********************************
-//*** Functions to be Exported ***
+//************************************
+//*** Functions to be used by core ***
 
 void SD2::FreeScriptLibrary()
 {
     // Free Spell Summary
     delete []SpellSummary;
-        
+
     // Free resources before library unload
     for (SDScriptVec::const_iterator itr = m_scripts.begin(); itr != m_scripts.end(); ++itr)
     {
         delete *itr;
     }
+
     m_scripts.clear();
+
     num_sc_scripts = 0;
+
     setScriptLibraryErrorFile(NULL, NULL);
 }
 
@@ -247,7 +222,7 @@ void SD2::InitScriptLibrary()
     outstring_log(" |___/\\__|_| |_| .__/\\__|___/\\___|\\_//___|");
     outstring_log("               |_|                        ");
     outstring_log("                    http://scriptdev2.com/\n");
-        
+
     // Get configuration file
     bool configFailure = false;
     if (!SD2Config.SetSource(MANGOSD_CONFIG_LOCATION))
@@ -258,33 +233,38 @@ void SD2::InitScriptLibrary()
     {
         outstring_log("SD2: Using configuration file %s", MANGOSD_CONFIG_LOCATION);
     }
-        
+
     // Set SD2 Error Log File
     std::string sd2LogFile = SD2Config.GetStringDefault("SD2ErrorLogFile", "scriptdev2-errors.log");
     setScriptLibraryErrorFile(sd2LogFile.c_str(), "SD2");
+
     if (configFailure)
     {
         script_error_log("Unable to open configuration file. Database will be unaccessible. Configuration values will use default.");
     }
-        
+
     // Check config file version
     if (SD2Config.GetIntDefault("ConfVersion", 0) != MANGOSD_CONFIG_VERSION)
     {
         script_error_log("Configuration file version doesn't match expected version. Some config variables may be wrong or missing.");
     }
+
     outstring_log("\n");
-        
+
     // Load database (must be called after SD2Config.SetSource).
     LoadDatabase();
+
     outstring_log("SD2: Loading C++ scripts");
     BarGoLink bar(1);
     bar.step();
-        
+
     // Resize script ids to needed ammount of assigned ScriptNames (from core)
     m_scripts.resize(GetScriptIdsCount(), NULL);
+
     FillSpellSummary();
+
     AddScripts();
-        
+
     // Check existance scripts for all registered by core script names
     for (uint32 i = 1; i < GetScriptIdsCount(); ++i)
     {
@@ -293,9 +273,10 @@ void SD2::InitScriptLibrary()
             script_error_log("No script found for ScriptName '%s'.", GetScriptName(i));
         }
     }
+
     outstring_log(">> Loaded %i C++ Scripts.", num_sc_scripts);
 }
-    
+
 char const* SD2::GetScriptLibraryVersion()
 {
     return strSD2Version.c_str();
@@ -634,10 +615,10 @@ InstanceData* SD2::CreateInstanceData(Map* pMap)
     return pTempScript->GetInstanceData(pMap);
 }
 
-#ifdef WIN32
-#  include <windows.h>
-BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
-{
-    return true;
-}
-#endif
+//#ifdef WIN32
+//#  include <windows.h>
+//BOOL APIENTRY DllMain(HANDLE /*hModule*/, DWORD /*ul_reason_for_call*/, LPVOID /*lpReserved*/)
+//{
+//    return true;
+//}
+//#endif
