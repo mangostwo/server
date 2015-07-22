@@ -113,6 +113,7 @@ void Channel::Join(Player* player, const char* password)
 
     MakeYouJoined(&data);
     SendToOne(&data, guid);
+
     JoinNotify(guid);
 
     // if no owner first logged will become
@@ -158,7 +159,7 @@ void Channel::Leave(Player* player, bool send)
         SendToAll(&data);
     }
 
-        LeaveNotify(guid);
+    LeaveNotify(guid);
 
     if (changeowner)
     {

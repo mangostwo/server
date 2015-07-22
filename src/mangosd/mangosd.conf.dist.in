@@ -41,6 +41,7 @@ ConfVersion=2015052601
 #	LoginDatabaseConnections
 #	WorldDatabaseConnections
 #	CharacterDatabaseConnections
+#       ScriptDev2DatabaseConnections
 #		 Amount of connections to database which will be used for SELECT queries. Maximum 16 connections per database.
 #		 Please, note, for data consistency only one connection for each database is used for transactions and async SELECTs.
 #		 So formula to find out how many connections will be established:
@@ -67,10 +68,11 @@ LogsDir                      = ""
 LoginDatabaseInfo            = "127.0.0.1;3306;mangos;mangos;realmd"
 WorldDatabaseInfo            = "127.0.0.1;3306;mangos;mangos;mangos"
 CharacterDatabaseInfo        = "127.0.0.1;3306;mangos;mangos;characters"
-ScriptDev2DatabaseInfo       = "127.0.0.1;3306;mangos;mangos;scripts"
+ScriptDev2DatabaseInfo       = "127.0.0.1;3306;mangos;mangos;mangos"
 LoginDatabaseConnections     = 1
 WorldDatabaseConnections     = 1
 CharacterDatabaseConnections = 1
+ScriptDev2DatabaseConnections= 1
 MaxPingTime                  = 30
 WorldServerPort              = 8085
 BindIP                       = "0.0.0.0"
@@ -816,7 +818,7 @@ CharactersPerRealm                        = 10
 HeroicCharactersPerRealm = 1
 MinLevelForHeroicCharacterCreating = 55
 SkipCinematics                            = 0
-MaxPlayerLevel = 80
+MaxPlayerLevel                            = 80
 StartPlayerLevel                          = 1
 StartHeroicPlayerLevel = 55
 StartPlayerMoney                          = 0
@@ -870,7 +872,7 @@ ShowProgressBars                          = 1
 WaitAtStartupError                        = 0
 Raid.MinLevel = 10
 PlayerCommands                            = 0
-Motd = "Welcome to the Massive Network Game Object Server."
+Motd                                      = "Welcome to the Massive Network Game Object Server."
 
 ################################################################################
 # PLAYER INTERACTION

@@ -34,7 +34,6 @@
 #include "Master.h"
 #include "SystemConfig.h"
 #include "AuctionHouseBot.h"
-// #include "revision.h"
 #include "revision.h"
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
@@ -211,7 +210,13 @@ extern int main(int argc, char** argv)
 
     ///- and run the 'Master'
     /// \todo Why do we need this 'Master'? Can't all of this be in the Main as for Realmd?
-    return sMaster.Run();
+    int code = sMaster.Run();
+
+#ifdef WIN32
+    _set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+#endif
+
+    return code;
 
     // at sMaster return function exist with codes
     // 0 - normal shutdown

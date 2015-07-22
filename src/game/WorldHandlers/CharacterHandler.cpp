@@ -313,7 +313,8 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if (QueryResult* resultacct = LoginDatabase.PQuery("SELECT SUM(numchars) FROM realmcharacters WHERE acctid = '%u'", GetAccountId()))
+    QueryResult* resultacct = LoginDatabase.PQuery("SELECT SUM(numchars) FROM realmcharacters WHERE acctid = '%u'", GetAccountId());
+    if (resultacct)
     {
         Field* fields = resultacct->Fetch();
         uint32 acctcharcount = fields[0].GetUInt32();
@@ -327,8 +328,9 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
         }
     }
 
+    QueryResult* result = CharacterDatabase.PQuery("SELECT COUNT(guid) FROM characters WHERE account = '%u'", GetAccountId());
     uint8 charcount = 0;
-    if (QueryResult* result = CharacterDatabase.PQuery("SELECT COUNT(guid) FROM characters WHERE account = '%u'", GetAccountId()))
+    if (result)
     {
         Field* fields = result->Fetch();
         charcount = fields[0].GetUInt8();
@@ -497,9 +499,10 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
     BASIC_LOG("Account: %d (IP: %s) Create Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), pNewChar->GetGUIDLow());
     sLog.outChar("Account: %d (IP: %s) Create Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), pNewChar->GetGUIDLow());
 
+    // Used by Eluna
 #ifdef ENABLE_ELUNA
     sEluna->OnCreate(pNewChar);
-#endif
+#endif /* ENABLE_ELUNA */
 
     delete pNewChar;                                        // created only to call SaveToDB()
 }
@@ -553,9 +556,10 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recv_data)
     BASIC_LOG("Account: %d (IP: %s) Delete Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), lowguid);
     sLog.outChar("Account: %d (IP: %s) Delete Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), lowguid);
 
+    // Used by Eluna
 #ifdef ENABLE_ELUNA
     sEluna->OnDelete(lowguid);
-#endif
+#endif /* ENABLE_ELUNA */
 
     if (sLog.IsOutCharDump())                               // optimize GetPlayerDump call
     {
@@ -760,7 +764,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     uint32 miscRequirement = 0;
     AreaLockStatus lockStatus = AREA_LOCKSTATUS_OK;
     if (AreaTrigger const* at = sObjectMgr.GetMapEntranceTrigger(pCurrChar->GetMapId()))
+    {
         lockStatus = pCurrChar->GetAreaTriggerLockStatus(at, pCurrChar->GetDifficulty(pCurrChar->GetMap()->IsRaid()), miscRequirement);
+    }
     else
     {
         // Some basic checks in case of a map without areatrigger
@@ -777,7 +783,11 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         /* Attempt to find an areatrigger to teleport the player for us */
         AreaTrigger const* at = sObjectMgr.GetGoBackTrigger(pCurrChar->GetMapId());
         if (at)
+        {
             lockStatus = pCurrChar->GetAreaTriggerLockStatus(at, pCurrChar->GetDifficulty(pCurrChar->GetMap()->IsRaid()), miscRequirement);
+        }
+
+        /* We couldn't find an areatrigger to teleport, so just move the player back to their home bind */
         if (!at || lockStatus != AREA_LOCKSTATUS_OK || !pCurrChar->TeleportTo(at->target_mapId, at->target_X, at->target_Y, at->target_Z, pCurrChar->GetOrientation()))
         {
             pCurrChar->TeleportToHomebind();
@@ -822,6 +832,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
             pCurrChar->CastSpell(pCurrChar, 20584, true);   // auras SPELL_AURA_INCREASE_SPEED(+speed in wisp form), SPELL_AURA_INCREASE_SWIM_SPEED(+swim speed in wisp form), SPELL_AURA_TRANSFORM (to wisp form)
         }
 
+        /* Apply ghost spell to player */
         pCurrChar->CastSpell(pCurrChar, 8326, true);        // auras SPELL_AURA_GHOST, SPELL_AURA_INCREASE_SPEED(why?), SPELL_AURA_INCREASE_SWIM_SPEED(why?)
 
         /* Allow player to walk on water */
@@ -863,12 +874,16 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         SendNotification(LANG_RESET_TALENTS);               // we can use SMSG_TALENTS_INVOLUNTARILY_RESET here
     }
 
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    if (pCurrChar->HasAtLoginFlag(AT_LOGIN_FIRST))
+        sEluna->OnFirstLogin(pCurrChar);
+#endif /* ENABLE_ELUNA */
+
+
+    /* We've done what we need to, remove the flag */
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_FIRST))
     {
-#ifdef ENABLE_ELUNA
-        sEluna->OnFirstLogin(pCurrChar);
-#endif
-        
         pCurrChar->RemoveAtLoginFlag(AT_LOGIN_FIRST);
     }
 
@@ -907,10 +922,11 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         { pCurrChar->SetStandState(UNIT_STAND_STATE_STAND); }
 
     m_playerLoading = false;
-    
+
+    // Used by Eluna
 #ifdef ENABLE_ELUNA
     sEluna->OnLogin(pCurrChar);
-#endif
+#endif /* ENABLE_ELUNA */
 
     // Handle Login-Achievements (should be handled after loading)
     pCurrChar->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ON_LOGIN, 1);

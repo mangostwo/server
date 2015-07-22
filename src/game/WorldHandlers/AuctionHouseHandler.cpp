@@ -624,7 +624,7 @@ void WorldSession::HandleAuctionListOwnerItems(WorldPacket& recv_data)
         { GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH); }
 
     WorldPacket data(SMSG_AUCTION_OWNER_LIST_RESULT, (4 + 4 + 4));
-    data << uint32(0);                                      // amount place holder
+    data << (uint32) 0;                                     // amount place holder
 
     uint32 count = 0;
     uint32 totalcount = 0;

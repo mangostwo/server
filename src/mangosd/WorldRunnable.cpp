@@ -33,11 +33,12 @@
 #include "Timer.h"
 #include "ObjectAccessor.h"
 #include "MapManager.h"
-#ifdef ENABLE_ELUNA
-#include "LuaEngine.h"
-#endif /*ENABLE_ELUNA*/
 
 #include "Database/DatabaseEnv.h"
+
+#ifdef ENABLE_ELUNA 
+#include "LuaEngine.h" 
+#endif /* ENABLE_ELUNA */ 
 
 #define WORLD_SLEEP_CONST 50
 
@@ -88,7 +89,7 @@ void WorldRunnable::run()
             prevSleepTime = 0;
         }
 
-#ifdef WIN32
+#ifdef _WIN32
         if (m_ServiceStatus == 0)
         {
             World::StopNow(SHUTDOWN_EXIT_CODE);
