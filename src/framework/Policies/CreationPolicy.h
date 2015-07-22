@@ -35,7 +35,7 @@ namespace MaNGOS
      * @brief OperatorNew policy creates an object on the heap using new.
      *
      */
-    class MANGOS_DLL_DECL OperatorNew
+    class OperatorNew
     {
         public:
 
@@ -65,7 +65,7 @@ namespace MaNGOS
      * @brief LocalStaticCreation policy creates an object on the stack the first time call Create.
      *
      */
-    class MANGOS_DLL_DECL LocalStaticCreation
+    class LocalStaticCreation
     {
             /**
              * @brief
@@ -123,7 +123,7 @@ namespace MaNGOS
      * @brief
      *
      */
-    class MANGOS_DLL_DECL CreateUsingMalloc
+    class CreateUsingMalloc
     {
         public:
 
@@ -159,7 +159,7 @@ namespace MaNGOS
      * @brief CreateOnCallBack creates the object base on the call back.
      *
      */
-    class MANGOS_DLL_DECL CreateOnCallBack
+    class CreateOnCallBack
     {
         public:
             /**

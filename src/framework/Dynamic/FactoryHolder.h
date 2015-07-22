@@ -35,7 +35,7 @@ template < class T, class Key = std::string >
  * @brief FactoryHolder holds a factory object of a specific type
  *
  */
-class MANGOS_DLL_DECL FactoryHolder
+class FactoryHolder
 {
     public:
         /**

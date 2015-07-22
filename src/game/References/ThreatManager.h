@@ -52,7 +52,7 @@ class ThreatCalcHelper
 };
 
 //==============================================================
-class  HostileReference : public Reference<Unit, ThreatManager>
+class HostileReference : public Reference<Unit, ThreatManager>
 {
     public:
         HostileReference(Unit* pUnit, ThreatManager* pThreatManager, float pThreat);
@@ -142,7 +142,7 @@ class ThreatManager;
 
 typedef std::list<HostileReference*> ThreatList;
 
-class  ThreatContainer
+class ThreatContainer
 {
     private:
         ThreatList iThreatList;
@@ -180,7 +180,7 @@ class  ThreatContainer
 
 //=================================================
 
-class  ThreatManager
+class ThreatManager
 {
     public:
         friend class HostileReference;

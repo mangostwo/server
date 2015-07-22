@@ -79,7 +79,7 @@ enum PlayerChatTag
 };
 typedef uint32 ChatTagFlags;
 
-class  ChatHandler
+class ChatHandler
 {
     public:
         explicit ChatHandler(WorldSession* session);

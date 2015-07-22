@@ -189,7 +189,7 @@ static const BossInformation aBossInformation[] =
     {TYPE_MORAGG,    NPC_MORAGG,    NPC_WATCHER,    1, 1890.51f, 752.85f, 47.66f, 0}
 };
 
-class  instance_violet_hold : public ScriptedInstance
+class instance_violet_hold : public ScriptedInstance
 {
     public:
         instance_violet_hold(Map* pMap);

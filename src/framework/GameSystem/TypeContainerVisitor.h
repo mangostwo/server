@@ -103,7 +103,7 @@ template<class VISITOR, class TYPE_CONTAINER>
  * @brief
  *
  */
-class MANGOS_DLL_DECL TypeContainerVisitor
+class TypeContainerVisitor
 {
     public:
 

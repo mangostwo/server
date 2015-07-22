@@ -48,7 +48,7 @@ namespace MaNGOS
      * @brief
      *
      */
-    class MANGOS_DLL_DECL ObjectLifeTime
+    class ObjectLifeTime
     {
         public:
 

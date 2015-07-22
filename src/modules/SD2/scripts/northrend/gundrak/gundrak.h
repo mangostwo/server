@@ -70,7 +70,7 @@ enum
 typedef std::map<uint8, uint32>  TypeTimerMap;
 typedef std::pair<uint8, uint32> TypeTimerPair;
 
-class  instance_gundrak : public ScriptedInstance
+class instance_gundrak : public ScriptedInstance
 {
     public:
         instance_gundrak(Map* pMap);

@@ -47,7 +47,7 @@ class Database;
  * @brief
  *
  */
-class  SqlConnection
+class SqlConnection
 {
     public:
         /**
@@ -212,7 +212,7 @@ class  SqlConnection
  * @brief
  *
  */
-class  Database
+class Database
 {
     public:
         /**
@@ -679,7 +679,7 @@ class  Database
          * @brief
          *
          */
-        class  TransHelper
+        class TransHelper
         {
             public:
                 /**

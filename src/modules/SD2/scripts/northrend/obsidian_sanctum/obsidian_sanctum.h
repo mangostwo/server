@@ -40,7 +40,7 @@ enum
     ACHIEV_DRAGONS_ALIVE_3_H    = 7333,
 };
 
-class  instance_obsidian_sanctum : public ScriptedInstance
+class instance_obsidian_sanctum : public ScriptedInstance
 {
     public:
         instance_obsidian_sanctum(Map* pMap);

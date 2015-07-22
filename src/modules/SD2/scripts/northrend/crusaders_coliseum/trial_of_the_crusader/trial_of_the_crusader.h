@@ -127,7 +127,7 @@ static const float aMovePositions[][3] =
     {563.7223f, 131.2344f, 393.9901f},                      // Jaraxxus
 };
 
-class  instance_trial_of_the_crusader : public ScriptedInstance, private DialogueHelper
+class instance_trial_of_the_crusader : public ScriptedInstance, private DialogueHelper
 {
     public:
         instance_trial_of_the_crusader(Map* pMap);

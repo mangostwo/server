@@ -207,7 +207,7 @@ struct GothTrigger
 
 static const float aSapphPositions[4] = {3521.48f, -5234.87f, 137.626f, 4.53329f};
 
-class  instance_naxxramas : public ScriptedInstance
+class instance_naxxramas : public ScriptedInstance
 {
     public:
         instance_naxxramas(Map* pMap);

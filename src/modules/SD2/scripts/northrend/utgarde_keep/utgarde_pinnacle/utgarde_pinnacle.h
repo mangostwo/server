@@ -69,7 +69,7 @@ static const float aOrbPositions[2][3] =
 
 static const uint32 aGortokMiniBosses[MAX_ENCOUNTER] = {NPC_WORGEN, NPC_FURBOLG, NPC_JORMUNGAR, NPC_RHINO};
 
-class  instance_pinnacle : public ScriptedInstance
+class instance_pinnacle : public ScriptedInstance
 {
     public:
         instance_pinnacle(Map* pMap);

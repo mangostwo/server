@@ -36,7 +36,7 @@ enum
     SPELL_ALEXSTRASZAS_GIFT_VISUAL  = 61023,
 };
 
-class  instance_eye_of_eternity : public ScriptedInstance, private DialogueHelper
+class instance_eye_of_eternity : public ScriptedInstance, private DialogueHelper
 {
     public:
         instance_eye_of_eternity(Map* pMap);

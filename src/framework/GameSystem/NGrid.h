@@ -143,7 +143,7 @@ uint32 N,
  * @brief
  *
  */
-class MANGOS_DLL_DECL NGrid
+class NGrid
 {
     public:
 

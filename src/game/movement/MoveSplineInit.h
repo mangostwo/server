@@ -43,7 +43,7 @@ namespace Movement
      * @brief Initializes and launches spline movement
      *
      */
-    class  MoveSplineInit
+    class MoveSplineInit
     {
         public:
 

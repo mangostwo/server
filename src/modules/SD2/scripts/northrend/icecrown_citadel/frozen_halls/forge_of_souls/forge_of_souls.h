@@ -88,7 +88,7 @@ const sExtroEventNpcLocations aEventEndLocations[18] =
     {NPC_COLISEUM_CHAMPION_H_M, NPC_COLISEUM_CHAMPION_A_M, 0.8726646f, 0.977384f, 5593.93652f, 2410.875f, 705.9351f,   5642.629f, 2474.331f, 708.6959f}
 };
 
-class  instance_forge_of_souls : public ScriptedInstance
+class instance_forge_of_souls : public ScriptedInstance
 {
     public:
         instance_forge_of_souls(Map* pMap);

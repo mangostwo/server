@@ -31,7 +31,7 @@ enum
     ACHIEV_CRIT_RESISTANT   = 7321,                         // Volkhan, achiev 2042
 };
 
-class  instance_halls_of_lightning : public ScriptedInstance
+class instance_halls_of_lightning : public ScriptedInstance
 {
     public:
         instance_halls_of_lightning(Map* pMap);

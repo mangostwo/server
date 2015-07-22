@@ -202,7 +202,7 @@ enum
     ACHIEV_CRIT_WAITING_A_LONG_TIME_25H    = 13245,
 };
 
-class  instance_icecrown_citadel : public ScriptedInstance, private DialogueHelper
+class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelper
 {
     public:
         instance_icecrown_citadel(Map* pMap);

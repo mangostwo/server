@@ -57,7 +57,7 @@ enum
     WORLD_STATE_CORPOREALITY        = 5051,
 };
 
-class  instance_ruby_sanctum : public ScriptedInstance
+class instance_ruby_sanctum : public ScriptedInstance
 {
     public:
         instance_ruby_sanctum(Map* pMap);

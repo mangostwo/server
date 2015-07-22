@@ -100,7 +100,7 @@ enum LevelRequirementVsMode
 
 #define MIN_UNLOAD_DELAY      1                             // immediate unload
 
-class  Map : public GridRefManager<NGridType>
+class Map : public GridRefManager<NGridType>
 {
         friend class MapReference;
         friend class ObjectGridLoader;
@@ -412,7 +412,7 @@ class  Map : public GridRefManager<NGridType>
         WeatherSystem* m_weatherSystem;
 };
 
-class  WorldMap : public Map
+class WorldMap : public Map
 {
     private:
         using Map::GetPersistentState;                      // hide in subclass for overwrite
@@ -424,7 +424,7 @@ class  WorldMap : public Map
         WorldPersistentState* GetPersistanceState() const;
 };
 
-class  DungeonMap : public Map
+class DungeonMap : public Map
 {
     private:
         using Map::GetPersistentState;                      // hide in subclass for overwrite
@@ -449,7 +449,7 @@ class  DungeonMap : public Map
         bool m_unloadWhenEmpty;
 };
 
-class  BattleGroundMap : public Map
+class BattleGroundMap : public Map
 {
     private:
         using Map::GetPersistentState;                      // hide in subclass for overwrite

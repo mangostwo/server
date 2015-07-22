@@ -186,7 +186,7 @@ static const uint32 uiScourgeWaveDef[MAX_SCOURGE_WAVES][MAX_SCOURGE_TYPE_PER_WAV
     {SCOURGE_TYPE_BOSS,        0,                        0,                        0}
 };
 
-class  instance_culling_of_stratholme : public ScriptedInstance
+class instance_culling_of_stratholme : public ScriptedInstance
 {
     public:
         instance_culling_of_stratholme(Map* pMap);

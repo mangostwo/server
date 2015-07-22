@@ -138,7 +138,7 @@ static const uint32 auiPortalVector[MAX_PORTAL_PROPERTIES][MAX_PORTALS] =
 //adjust how easy it is to catch the beam
 static const float beamHitbox = 0.8f;
 
-struct MANGOS_DLL_DECL boss_netherspiteAI : public ScriptedAI
+struct boss_netherspiteAI : public ScriptedAI
 {
     boss_netherspiteAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

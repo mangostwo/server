@@ -130,7 +130,7 @@ const EventNpcLocations aEventOutroLocations[] =
 };
 
 
-class  instance_pit_of_saron : public ScriptedInstance, private DialogueHelper
+class instance_pit_of_saron : public ScriptedInstance, private DialogueHelper
 {
     public:
         instance_pit_of_saron(Map* pMap);

@@ -36,7 +36,7 @@ enum
     ACHIEV_CRIT_ON_THE_ROCKS    = 7231,
 };
 
-class  instance_utgarde_keep : public ScriptedInstance
+class instance_utgarde_keep : public ScriptedInstance
 {
     public:
         instance_utgarde_keep(Map* pMap);
