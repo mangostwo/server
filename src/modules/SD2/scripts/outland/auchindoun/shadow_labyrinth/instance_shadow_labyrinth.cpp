@@ -40,166 +40,188 @@ EndScriptData */
 4 - Murmur event
 */
 
-instance_shadow_labyrinth::instance_shadow_labyrinth(Map* pMap) : ScriptedInstance(pMap)
+struct is_shadow_labyrinth : public InstanceScript
 {
-    Initialize();
-}
+    is_shadow_labyrinth() : InstanceScript("instance_shadow_labyrinth") {}
 
-void instance_shadow_labyrinth::Initialize()
-{
-    memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
-}
-
-void instance_shadow_labyrinth::OnObjectCreate(GameObject* pGo)
-{
-    switch (pGo->GetEntry())
+    class instance_shadow_labyrinth : public ScriptedInstance
     {
-        case GO_REFECTORY_DOOR:
-            if (m_auiEncounter[2] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
-            break;
-        case GO_SCREAMING_HALL_DOOR:
-            if (m_auiEncounter[3] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
-            break;
-
-        default:
-            return;
-    }
-
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
-}
-
-void instance_shadow_labyrinth::OnCreatureCreate(Creature* pCreature)
-{
-    switch (pCreature->GetEntry())
-    {
-        case NPC_VORPIL:
-        case NPC_HELLMAW:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
-            break;
-    }
-}
-
-void instance_shadow_labyrinth::SetData(uint32 uiType, uint32 uiData)
-{
-    switch (uiType)
-    {
-        case TYPE_HELLMAW:
-            m_auiEncounter[0] = uiData;
-            break;
-
-        case TYPE_INCITER:
-            if (uiData == DONE)
-                DoUseDoorOrButton(GO_REFECTORY_DOOR);
-            m_auiEncounter[1] = uiData;
-            break;
-
-        case TYPE_VORPIL:
-            if (uiData == DONE)
-                DoUseDoorOrButton(GO_SCREAMING_HALL_DOOR);
-            m_auiEncounter[2] = uiData;
-            break;
-
-        case TYPE_MURMUR:
-            m_auiEncounter[3] = uiData;
-            break;
-    }
-
-    if (uiData == DONE)
-    {
-        OUT_SAVE_INST_DATA;
-
-        std::ostringstream saveStream;
-        saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " "
-                   << m_auiEncounter[2] << " " << m_auiEncounter[3];
-
-        m_strInstData = saveStream.str();
-
-        SaveToDB();
-        OUT_SAVE_INST_DATA_COMPLETE;
-    }
-}
-
-uint32 instance_shadow_labyrinth::GetData(uint32 uiType) const
-{
-    switch (uiType)
-    {
-        case TYPE_HELLMAW:  return m_auiEncounter[0];
-        case TYPE_INCITER:  return m_auiEncounter[1];
-        case TYPE_VORPIL:   return m_auiEncounter[2];
-        case TYPE_MURMUR:   return m_auiEncounter[3];
-
-        default:
-            return 0;
-    }
-}
-
-void instance_shadow_labyrinth::SetData64(uint32 uiData, uint64 uiGuid)
-{
-    // If Hellmaw already completed, just ignore
-    if (GetData(TYPE_HELLMAW) == DONE)
-        return;
-
-    // Note: this is handled in Acid. The purpose is check which Cabal Ritualists is alive, in case of server reset
-    // The function is triggered by eventAI on generic timer
-    if (uiData == DATA_CABAL_RITUALIST)
-        m_sRitualistsAliveGUIDSet.insert(ObjectGuid(uiGuid));
-}
-
-void instance_shadow_labyrinth::OnCreatureDeath(Creature* pCreature)
-{
-    // unbanish Hellmaw when all Cabal Ritualists are dead
-    if (pCreature->GetEntry() == NPC_CABAL_RITUALIST)
-    {
-        m_sRitualistsAliveGUIDSet.erase(pCreature->GetObjectGuid());
-
-        if (m_sRitualistsAliveGUIDSet.empty())
+    public:
+        instance_shadow_labyrinth(Map* pMap) : ScriptedInstance(pMap)
         {
-            if (Creature* pHellmaw = GetSingleCreatureFromStorage(NPC_HELLMAW))
+            Initialize();
+        }
+
+        void Initialize() override
+        {
+            memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+        }
+
+        void OnObjectCreate(GameObject* pGo) override
+        {
+            switch (pGo->GetEntry())
             {
-                // yell intro and remove banish aura
-                DoScriptText(SAY_HELLMAW_INTRO, pHellmaw);
-                pHellmaw->GetMotionMaster()->MoveWaypoint();
-                pHellmaw->RemoveAurasDueToSpell(SPELL_BANISH);
+            case GO_REFECTORY_DOOR:
+                if (m_auiEncounter[2] == DONE)
+                    pGo->SetGoState(GO_STATE_ACTIVE);
+                break;
+            case GO_SCREAMING_HALL_DOOR:
+                if (m_auiEncounter[3] == DONE)
+                    pGo->SetGoState(GO_STATE_ACTIVE);
+                break;
+
+            default:
+                return;
+            }
+
+            m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+        }
+
+        void OnCreatureCreate(Creature* pCreature) override
+        {
+            switch (pCreature->GetEntry())
+            {
+            case NPC_VORPIL:
+            case NPC_HELLMAW:
+                m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+                break;
             }
         }
-    }
-}
 
-void instance_shadow_labyrinth::Load(const char* chrIn)
-{
-    if (!chrIn)
+        void OnCreatureDeath(Creature* pCreature) override
+        {
+            // unbanish Hellmaw when all Cabal Ritualists are dead
+            if (pCreature->GetEntry() == NPC_CABAL_RITUALIST)
+            {
+                m_sRitualistsAliveGUIDSet.erase(pCreature->GetObjectGuid());
+
+                if (m_sRitualistsAliveGUIDSet.empty())
+                {
+                    if (Creature* pHellmaw = GetSingleCreatureFromStorage(NPC_HELLMAW))
+                    {
+                        // yell intro and remove banish aura
+                        DoScriptText(SAY_HELLMAW_INTRO, pHellmaw);
+                        pHellmaw->GetMotionMaster()->MoveWaypoint();
+                        pHellmaw->RemoveAurasDueToSpell(SPELL_BANISH);
+                    }
+                }
+            }
+        }
+
+        void SetData(uint32 uiType, uint32 uiData) override
+        {
+            switch (uiType)
+            {
+            case TYPE_HELLMAW:
+                m_auiEncounter[0] = uiData;
+                break;
+
+            case TYPE_INCITER:
+                if (uiData == DONE)
+                    DoUseDoorOrButton(GO_REFECTORY_DOOR);
+                m_auiEncounter[1] = uiData;
+                break;
+
+            case TYPE_VORPIL:
+                if (uiData == DONE)
+                    DoUseDoorOrButton(GO_SCREAMING_HALL_DOOR);
+                m_auiEncounter[2] = uiData;
+                break;
+
+            case TYPE_MURMUR:
+                m_auiEncounter[3] = uiData;
+                break;
+            }
+
+            if (uiData == DONE)
+            {
+                OUT_SAVE_INST_DATA;
+
+                std::ostringstream saveStream;
+                saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " "
+                    << m_auiEncounter[2] << " " << m_auiEncounter[3];
+
+                m_strInstData = saveStream.str();
+
+                SaveToDB();
+                OUT_SAVE_INST_DATA_COMPLETE;
+            }
+        }
+
+        uint32 GetData(uint32 uiType) const override
+        {
+            switch (uiType)
+            {
+            case TYPE_HELLMAW:  return m_auiEncounter[0];
+            case TYPE_INCITER:  return m_auiEncounter[1];
+            case TYPE_VORPIL:   return m_auiEncounter[2];
+            case TYPE_MURMUR:   return m_auiEncounter[3];
+            case TYPE_IS_UNBANISHED: return uint32(m_sRitualistsAliveGUIDSet.empty());
+
+            default:
+                return 0;
+            }
+        }
+
+        void SetData64(uint32 uiType, uint64 uiGuid) override
+        {
+            // If Hellmaw already completed, just ignore
+            if (GetData(TYPE_HELLMAW) == DONE)
+                return;
+
+            // Note: this is handled in Acid. The purpose is check which Cabal Ritualists is alive, in case of server reset
+            // The function is triggered by eventAI on generic timer
+            if (uiType == DATA_CABAL_RITUALIST)
+                m_sRitualistsAliveGUIDSet.insert(ObjectGuid(uiGuid));
+        }
+
+        const char* Save() const override { return m_strInstData.c_str(); }
+        void Load(const char* chrIn) override
+        {
+            if (!chrIn)
+            {
+                OUT_LOAD_INST_DATA_FAIL;
+                return;
+            }
+
+            OUT_LOAD_INST_DATA(chrIn);
+
+            std::istringstream loadStream(chrIn);
+            loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3];
+
+            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+            {
+                if (m_auiEncounter[i] == IN_PROGRESS)
+                {
+                    m_auiEncounter[i] = NOT_STARTED;
+                }
+            }
+
+            OUT_LOAD_INST_DATA_COMPLETE;
+        }
+
+    private:
+        uint32 m_auiEncounter[MAX_ENCOUNTER];
+        std::string m_strInstData;
+
+        GuidSet m_sRitualistsAliveGUIDSet;
+    };
+
+    InstanceData* GetInstanceData(Map* pMap) override
     {
-        OUT_LOAD_INST_DATA_FAIL;
-        return;
+        return new instance_shadow_labyrinth(pMap);
     }
-
-    OUT_LOAD_INST_DATA(chrIn);
-
-    std::istringstream loadStream(chrIn);
-    loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3];
-
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-    {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-        { m_auiEncounter[i] = NOT_STARTED; }
-    }
-
-    OUT_LOAD_INST_DATA_COMPLETE;
-}
-
-InstanceData* GetInstanceData_instance_shadow_labyrinth(Map* pMap)
-{
-    return new instance_shadow_labyrinth(pMap);
-}
+};
 
 void AddSC_instance_shadow_labyrinth()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "instance_shadow_labyrinth";
-    pNewScript->GetInstanceData = &GetInstanceData_instance_shadow_labyrinth;
-    pNewScript->RegisterSelf();
+    s = new is_shadow_labyrinth();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "instance_shadow_labyrinth";
+    //pNewScript->GetInstanceData = &GetInstanceData_instance_shadow_labyrinth;
+    //pNewScript->RegisterSelf();
 }

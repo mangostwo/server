@@ -45,80 +45,97 @@ enum
     NPC_FOCUS_FIRE                  = 18374
 };
 
-struct boss_shirrakAI : public ScriptedAI
+struct boss_shirrak : public CreatureScript
 {
-    boss_shirrakAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_shirrak() : CreatureScript("boss_shirrak") {}
+
+    struct boss_shirrakAI : public ScriptedAI
     {
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    bool m_bIsRegularMode;
-
-    uint32 m_uiCarnivorousBiteTimer;
-    uint32 m_uiFocusFireTimer;
-    uint32 m_uiAttractMagicTimer;
-
-    uint8 m_uiFocusFireCount;
-
-    ObjectGuid m_focusTargetGuid;
-
-    void Reset() override
-    {
-        m_uiCarnivorousBiteTimer    = urand(4000, 7000);
-        m_uiFocusFireTimer          = 15000;
-        m_uiAttractMagicTimer       = urand(20000, 24000);
-        m_uiFocusFireCount          = 0;
-
-        DoCastSpellIfCan(m_creature, SPELL_INHIBIT_MAGIC);
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        // The focus fire creature casts the focus fire visual
-        if (pSummoned->GetEntry() == NPC_FOCUS_FIRE)
-        { pSummoned->CastSpell(pSummoned, SPELL_FOCUS_TARGET_VISUAL, true); }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiCarnivorousBiteTimer < uiDiff)
+        boss_shirrakAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_CARNIVOROUS_BITE : SPELL_CARNIVOROUS_BITE_H) == CAST_OK)
-            { m_uiCarnivorousBiteTimer = urand(4000, 10000); }
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         }
-        else
-        { m_uiCarnivorousBiteTimer -= uiDiff; }
 
-        if (m_uiAttractMagicTimer < uiDiff)
+        bool m_bIsRegularMode;
+
+        uint32 m_uiCarnivorousBiteTimer;
+        uint32 m_uiFocusFireTimer;
+        uint32 m_uiAttractMagicTimer;
+
+        uint8 m_uiFocusFireCount;
+
+        ObjectGuid m_focusTargetGuid;
+
+        void Reset() override
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_ATTRACT_MAGIC) == CAST_OK)
-            { m_uiAttractMagicTimer = urand(25000, 38000); }
+            m_uiCarnivorousBiteTimer = urand(4000, 7000);
+            m_uiFocusFireTimer = 15000;
+            m_uiAttractMagicTimer = urand(20000, 24000);
+            m_uiFocusFireCount = 0;
+
+            DoCastSpellIfCan(m_creature, SPELL_INHIBIT_MAGIC);
         }
-        else
-        { m_uiAttractMagicTimer -= uiDiff; }
 
-        if (m_uiFocusFireTimer < uiDiff)
+        void JustSummoned(Creature* pSummoned) override
         {
-            ++m_uiFocusFireCount;
-            Unit* pTarget = NULL;
-
-            switch (m_uiFocusFireCount)
+            // The focus fire creature casts the focus fire visual
+            if (pSummoned->GetEntry() == NPC_FOCUS_FIRE)
             {
+                pSummoned->CastSpell(pSummoned, SPELL_FOCUS_TARGET_VISUAL, true);
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_uiCarnivorousBiteTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_CARNIVOROUS_BITE : SPELL_CARNIVOROUS_BITE_H) == CAST_OK)
+                {
+                    m_uiCarnivorousBiteTimer = urand(4000, 10000);
+                }
+            }
+            else
+            {
+                m_uiCarnivorousBiteTimer -= uiDiff;
+            }
+
+            if (m_uiAttractMagicTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_ATTRACT_MAGIC) == CAST_OK)
+                {
+                    m_uiAttractMagicTimer = urand(25000, 38000);
+                }
+            }
+            else
+            {
+                m_uiAttractMagicTimer -= uiDiff;
+            }
+
+            if (m_uiFocusFireTimer < uiDiff)
+            {
+                ++m_uiFocusFireCount;
+                Unit* pTarget = NULL;
+
+                switch (m_uiFocusFireCount)
+                {
                 case 1:
                 {
-                    // engage the target
-                    pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, uint32(0), SELECT_FLAG_PLAYER);
+                          // engage the target
+                          pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, uint32(0), SELECT_FLAG_PLAYER);
 
-                    if (!pTarget)
-                    { pTarget = m_creature->getVictim(); }
+                          if (!pTarget)
+                          {
+                              pTarget = m_creature->getVictim();
+                          }
 
-                    DoScriptText(EMOTE_FOCUS, m_creature, pTarget);
-                    m_focusTargetGuid = pTarget->GetObjectGuid();
-                    // no break;
+                          DoScriptText(EMOTE_FOCUS, m_creature, pTarget);
+                          m_focusTargetGuid = pTarget->GetObjectGuid();
+                          // no break;
                 }
                 case 2:
                     // we have a delay of 1 sec between the summons
@@ -129,33 +146,43 @@ struct boss_shirrakAI : public ScriptedAI
                     m_uiFocusFireCount = 0;
                     m_uiFocusFireTimer = 15000;
                     break;
+                }
+
+                if (!pTarget)
+                {
+                    pTarget = m_creature->GetMap()->GetUnit(m_focusTargetGuid);
+                }
+
+                // Summon focus fire at target location
+                if (pTarget)
+                {
+                    m_creature->SummonCreature(NPC_FOCUS_FIRE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 10000);
+                }
+            }
+            else
+            {
+                m_uiFocusFireTimer -= uiDiff;
             }
 
-            if (!pTarget)
-            { pTarget = m_creature->GetMap()->GetUnit(m_focusTargetGuid); }
-
-            // Summon focus fire at target location
-            if (pTarget)
-            { m_creature->SummonCreature(NPC_FOCUS_FIRE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 10000); }
+            DoMeleeAttackIfReady();
         }
-        else
-        { m_uiFocusFireTimer -= uiDiff; }
+    };
 
-        DoMeleeAttackIfReady();
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_shirrakAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_shirrak(Creature* pCreature)
-{
-    return new boss_shirrakAI(pCreature);
-}
-
 void AddSC_boss_shirrak()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_shirrak";
-    pNewScript->GetAI = &GetAI_boss_shirrak;
-    pNewScript->RegisterSelf();
+    s = new boss_shirrak();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_shirrak";
+    //pNewScript->GetAI = &GetAI_boss_shirrak;
+    //pNewScript->RegisterSelf();
 }

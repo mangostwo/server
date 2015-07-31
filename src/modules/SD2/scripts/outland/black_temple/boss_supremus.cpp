@@ -69,276 +69,331 @@ const float RANGE_MOLTEN_PUNCH      = 40.0;
  */
 
 // TODO Remove this 'script' when combat movement can be proper prevented from core-side
-struct molten_flameAI : public Scripted_NoMovementAI
+struct molten_flame : public CreatureScript
 {
-    molten_flameAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    molten_flame() : CreatureScript("molten_flame") {}
 
-    void Reset() override {}
-    void AttackStart(Unit* /*pWho*/) override {}
-    void MoveInLineOfSight(Unit* /*pWho*/) override {}
-    void UpdateAI(const uint32 /*uiDiff*/) override {}
+    struct molten_flameAI : public Scripted_NoMovementAI
+    {
+        molten_flameAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { }
+
+        void AttackStart(Unit* /*pWho*/) override {}
+        void MoveInLineOfSight(Unit* /*pWho*/) override {}
+        void UpdateAI(const uint32 /*uiDiff*/) override {}
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new molten_flameAI(pCreature);
+    }
 };
 
 // TODO Remove this 'script' when combat movement can be proper prevented from core-side
-struct npc_volcanoAI : public Scripted_NoMovementAI
+struct npc_volcano : public CreatureScript
 {
-    npc_volcanoAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    npc_volcano() : CreatureScript("npc_volcano") {}
 
-    void Reset() override {}
-    void AttackStart(Unit* /*pWho*/) override {}
-    void MoveInLineOfSight(Unit* /*pWho*/) override {}
-    void UpdateAI(const uint32 /*uiDiff*/) override {}
+    struct npc_volcanoAI : public Scripted_NoMovementAI
+    {
+        npc_volcanoAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { }
+
+        void AttackStart(Unit* /*pWho*/) override {}
+        void MoveInLineOfSight(Unit* /*pWho*/) override {}
+        void UpdateAI(const uint32 /*uiDiff*/) override {}
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_volcanoAI(pCreature);
+    }
 };
 
-struct boss_supremusAI : public ScriptedAI
+struct boss_supremus : public CreatureScript
 {
-    boss_supremusAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_supremus() : CreatureScript("boss_supremus") {}
+
+    struct boss_supremusAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiSummonFlameTimer;
-    uint32 m_uiSwitchTargetTimer;
-    uint32 m_uiPhaseSwitchTimer;
-    uint32 m_uiSummonVolcanoTimer;
-    uint32 m_uiHatefulStrikeTimer;
-    uint32 m_uiBerserkTimer;
-    uint32 m_uiMoltenPunchTimer;
-
-    bool m_bTankPhase;
-
-    GuidList m_lSummonedGUIDs;
-
-    void Reset() override
-    {
-        m_uiHatefulStrikeTimer = 5000;
-        m_uiSummonFlameTimer   = 20000;
-        m_uiPhaseSwitchTimer   = 60000;
-        m_uiMoltenPunchTimer   = 8000;
-        m_uiBerserkTimer       = 15 * MINUTE * IN_MILLISECONDS;
-
-        m_bTankPhase = true;
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_SUPREMUS, NOT_STARTED); }
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_SUPREMUS, IN_PROGRESS); }
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_SUPREMUS, DONE); }
-
-        for (GuidList::const_iterator itr = m_lSummonedGUIDs.begin(); itr != m_lSummonedGUIDs.end(); ++itr)
+        boss_supremusAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (Creature* pSummoned = m_creature->GetMap()->GetCreature(*itr))
-            { pSummoned->ForcedDespawn(); }
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_STALKER)
+        ScriptedInstance* m_pInstance;
+
+        uint32 m_uiSummonFlameTimer;
+        uint32 m_uiSwitchTargetTimer;
+        uint32 m_uiPhaseSwitchTimer;
+        uint32 m_uiSummonVolcanoTimer;
+        uint32 m_uiHatefulStrikeTimer;
+        uint32 m_uiBerserkTimer;
+        uint32 m_uiMoltenPunchTimer;
+
+        bool m_bTankPhase;
+
+        GuidList m_lSummonedGUIDs;
+
+        void Reset() override
         {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
-            if (!pTarget)
-            { pTarget = m_creature->getVictim(); }
+            m_uiHatefulStrikeTimer = 5000;
+            m_uiSummonFlameTimer = 20000;
+            m_uiPhaseSwitchTimer = 60000;
+            m_uiMoltenPunchTimer = 8000;
+            m_uiBerserkTimer = 15 * MINUTE * IN_MILLISECONDS;
 
-            if (pTarget)
+            m_bTankPhase = true;
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
             {
-                pSummoned->GetMotionMaster()->Clear();
-                pSummoned->GetMotionMaster()->MoveFollow(pTarget, 0.0f, 0.0f);
-                pSummoned->CastSpell(pSummoned, SPELL_MOLTEN_FLAME, false, NULL, NULL, m_creature->GetObjectGuid());
+                m_pInstance->SetData(TYPE_SUPREMUS, NOT_STARTED);
             }
         }
 
-        else if (pSummoned->GetEntry() == NPC_VOLCANO)
-        { pSummoned->CastSpell(pSummoned, SPELL_VOLCANIC_ERUPTION_VOLCANO, false, NULL, NULL, m_creature->GetObjectGuid()); }
-    }
-
-    Unit* GetHatefulStrikeTarget()
-    {
-        uint32 uiHealth = 0;
-        Unit* pTarget = NULL;
-
-        ThreatList const& tList = m_creature->GetThreatManager().getThreatList();
-        for (ThreatList::const_iterator iter = tList.begin(); iter != tList.end(); ++iter)
+        void Aggro(Unit* /*pWho*/) override
         {
-            Unit* pUnit = m_creature->GetMap()->GetUnit((*iter)->getUnitGuid());
-
-            if (pUnit && m_creature->CanReachWithMeleeAttack(pUnit))
+            if (m_pInstance)
             {
-                if (pUnit->GetHealth() > uiHealth)
+                m_pInstance->SetData(TYPE_SUPREMUS, IN_PROGRESS);
+            }
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_SUPREMUS, DONE);
+            }
+
+            for (GuidList::const_iterator itr = m_lSummonedGUIDs.begin(); itr != m_lSummonedGUIDs.end(); ++itr)
+            {
+                if (Creature* pSummoned = m_creature->GetMap()->GetCreature(*itr))
                 {
-                    uiHealth = pUnit->GetHealth();
-                    pTarget = pUnit;
+                    pSummoned->ForcedDespawn();
                 }
             }
         }
 
-        return pTarget;
-    }
-
-    void KilledUnit(Unit* pKilled) override
-    {
-        // The current target is the fixated target - repick a new one
-        if (!m_bTankPhase && pKilled == m_creature->getVictim())
-        { m_uiSwitchTargetTimer = 0; }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiBerserkTimer)
+        void JustSummoned(Creature* pSummoned) override
         {
-            if (m_uiBerserkTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                { m_uiBerserkTimer = 0; }
-            }
-            else
-            { m_uiBerserkTimer -= uiDiff; }
-        }
-
-        if (m_uiSummonFlameTimer < uiDiff)
-        {
-            // This currently is entirely screwed, because the npc is summoned somewhere far away as of big bounding box of supremus
-            if (DoCastSpellIfCan(m_creature, SPELL_MOLTEN_PUNCH) == CAST_OK)
-            { m_uiSummonFlameTimer = 20000; }
-        }
-        else
-        { m_uiSummonFlameTimer -= uiDiff; }
-
-        if (m_uiPhaseSwitchTimer < uiDiff)
-        {
-            if (!m_bTankPhase)
-            {
-                m_bTankPhase = true;
-                m_creature->RemoveAurasDueToSpell(SPELL_SLOW_SELF);
-                m_creature->FixateTarget(NULL);
-            }
-            else
-            {
-                m_bTankPhase = false;
-                m_uiSwitchTargetTimer = 0;
-                m_uiSummonVolcanoTimer = 2000;
-
-                DoCastSpellIfCan(m_creature, SPELL_SLOW_SELF, CAST_INTERRUPT_PREVIOUS);
-            }
-
-            m_uiPhaseSwitchTimer = MINUTE * IN_MILLISECONDS;
-        }
-        else
-        { m_uiPhaseSwitchTimer -= uiDiff; }
-
-        if (m_bTankPhase)
-        {
-            if (m_uiHatefulStrikeTimer < uiDiff)
-            {
-                if (Unit* pTarget = GetHatefulStrikeTarget())
-                {
-                    if (DoCastSpellIfCan(pTarget, SPELL_HATEFUL_STRIKE) == CAST_OK)
-                    { m_uiHatefulStrikeTimer = 5000; }
-                }
-            }
-            else
-            { m_uiHatefulStrikeTimer -= uiDiff; }
-        }
-        else                                                // !m_bTankPhase
-        {
-            if (m_uiSwitchTargetTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                {
-                    m_creature->FixateTarget(pTarget);
-                    DoScriptText(EMOTE_NEW_TARGET, m_creature);
-                    m_uiSwitchTargetTimer = 10000;
-                }
-            }
-            else
-            { m_uiSwitchTargetTimer -= uiDiff; }
-
-            if (m_uiSummonVolcanoTimer < uiDiff)
+            if (pSummoned->GetEntry() == NPC_STALKER)
             {
                 Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
-
-                if (DoCastSpellIfCan(pTarget ? pTarget : m_creature->getVictim(), SPELL_VOLCANIC_ERUPTION_BOSS) == CAST_OK)
+                if (!pTarget)
                 {
-                    DoScriptText(EMOTE_GROUND_CRACK, m_creature);
-                    m_uiSummonVolcanoTimer = 10000;
+                    pTarget = m_creature->getVictim();
+                }
+
+                if (pTarget)
+                {
+                    pSummoned->GetMotionMaster()->Clear();
+                    pSummoned->GetMotionMaster()->MoveFollow(pTarget, 0.0f, 0.0f);
+                    pSummoned->CastSpell(pSummoned, SPELL_MOLTEN_FLAME, false, NULL, NULL, m_creature->GetObjectGuid());
                 }
             }
-            else
-            { m_uiSummonVolcanoTimer -= uiDiff; }
 
-            if (m_uiMoltenPunchTimer < uiDiff)
+            else if (pSummoned->GetEntry() == NPC_VOLCANO)
             {
-                if (m_creature->GetCombatDistance(m_creature->getVictim(), false) < RANGE_MOLTEN_PUNCH)
-                {
-                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHARGE);
-                    DoScriptText(EMOTE_PUNCH_GROUND, m_creature);
-                }
-                m_uiMoltenPunchTimer = 8000;                // might be better with small timer and some sort of cast-chance
+                pSummoned->CastSpell(pSummoned, SPELL_VOLCANIC_ERUPTION_VOLCANO, false, NULL, NULL, m_creature->GetObjectGuid());
             }
-            else
-            { m_uiMoltenPunchTimer -= uiDiff; }
-
-            /* Not understood how this really must work
-             * if (m_creature->GetSpeedRate(MOVE_RUN) > SPEED_CHASE && m_creature->GetCombatDistance(m_creature->getVictim()) < RANGE_MIN_DASHING)
-             *     m_creature->SetSpeedRate(MOVE_RUN, SPEED_CHASE);
-             * else if (m_creature->GetCombatDistance(m_creature->getVictim()) > RANGE_MOLTEN_PUNCH)
-             *     m_creature->SetSpeedRate(MOVE_RUN, SPEED_DASHING);
-             */
         }
 
-        DoMeleeAttackIfReady();
+        Unit* GetHatefulStrikeTarget()
+        {
+            uint32 uiHealth = 0;
+            Unit* pTarget = NULL;
+
+            ThreatList const& tList = m_creature->GetThreatManager().getThreatList();
+            for (ThreatList::const_iterator iter = tList.begin(); iter != tList.end(); ++iter)
+            {
+                Unit* pUnit = m_creature->GetMap()->GetUnit((*iter)->getUnitGuid());
+
+                if (pUnit && m_creature->CanReachWithMeleeAttack(pUnit))
+                {
+                    if (pUnit->GetHealth() > uiHealth)
+                    {
+                        uiHealth = pUnit->GetHealth();
+                        pTarget = pUnit;
+                    }
+                }
+            }
+
+            return pTarget;
+        }
+
+        void KilledUnit(Unit* pKilled) override
+        {
+            // The current target is the fixated target - repick a new one
+            if (!m_bTankPhase && pKilled == m_creature->getVictim())
+            {
+                m_uiSwitchTargetTimer = 0;
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_uiBerserkTimer)
+            {
+                if (m_uiBerserkTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                    {
+                        m_uiBerserkTimer = 0;
+                    }
+                }
+                else
+                {
+                    m_uiBerserkTimer -= uiDiff;
+                }
+            }
+
+            if (m_uiSummonFlameTimer < uiDiff)
+            {
+                // This currently is entirely screwed, because the npc is summoned somewhere far away as of big bounding box of supremus
+                if (DoCastSpellIfCan(m_creature, SPELL_MOLTEN_PUNCH) == CAST_OK)
+                {
+                    m_uiSummonFlameTimer = 20000;
+                }
+            }
+            else
+            {
+                m_uiSummonFlameTimer -= uiDiff;
+            }
+
+            if (m_uiPhaseSwitchTimer < uiDiff)
+            {
+                if (!m_bTankPhase)
+                {
+                    m_bTankPhase = true;
+                    m_creature->RemoveAurasDueToSpell(SPELL_SLOW_SELF);
+                    m_creature->FixateTarget(NULL);
+                }
+                else
+                {
+                    m_bTankPhase = false;
+                    m_uiSwitchTargetTimer = 0;
+                    m_uiSummonVolcanoTimer = 2000;
+
+                    DoCastSpellIfCan(m_creature, SPELL_SLOW_SELF, CAST_INTERRUPT_PREVIOUS);
+                }
+
+                m_uiPhaseSwitchTimer = MINUTE * IN_MILLISECONDS;
+            }
+            else
+            {
+                m_uiPhaseSwitchTimer -= uiDiff;
+            }
+
+            if (m_bTankPhase)
+            {
+                if (m_uiHatefulStrikeTimer < uiDiff)
+                {
+                    if (Unit* pTarget = GetHatefulStrikeTarget())
+                    {
+                        if (DoCastSpellIfCan(pTarget, SPELL_HATEFUL_STRIKE) == CAST_OK)
+                        {
+                            m_uiHatefulStrikeTimer = 5000;
+                        }
+                    }
+                }
+                else
+                {
+                    m_uiHatefulStrikeTimer -= uiDiff;
+                }
+            }
+            else                                                // !m_bTankPhase
+            {
+                if (m_uiSwitchTargetTimer < uiDiff)
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        m_creature->FixateTarget(pTarget);
+                        DoScriptText(EMOTE_NEW_TARGET, m_creature);
+                        m_uiSwitchTargetTimer = 10000;
+                    }
+                }
+                else
+                {
+                    m_uiSwitchTargetTimer -= uiDiff;
+                }
+
+                if (m_uiSummonVolcanoTimer < uiDiff)
+                {
+                    Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
+
+                    if (DoCastSpellIfCan(pTarget ? pTarget : m_creature->getVictim(), SPELL_VOLCANIC_ERUPTION_BOSS) == CAST_OK)
+                    {
+                        DoScriptText(EMOTE_GROUND_CRACK, m_creature);
+                        m_uiSummonVolcanoTimer = 10000;
+                    }
+                }
+                else
+                {
+                    m_uiSummonVolcanoTimer -= uiDiff;
+                }
+
+                if (m_uiMoltenPunchTimer < uiDiff)
+                {
+                    if (m_creature->GetCombatDistance(m_creature->getVictim(), false) < RANGE_MOLTEN_PUNCH)
+                    {
+                        DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHARGE);
+                        DoScriptText(EMOTE_PUNCH_GROUND, m_creature);
+                    }
+                    m_uiMoltenPunchTimer = 8000;                // might be better with small timer and some sort of cast-chance
+                }
+                else
+                {
+                    m_uiMoltenPunchTimer -= uiDiff;
+                }
+
+                /* Not understood how this really must work
+                 * if (m_creature->GetSpeedRate(MOVE_RUN) > SPEED_CHASE && m_creature->GetCombatDistance(m_creature->getVictim()) < RANGE_MIN_DASHING)
+                 *     m_creature->SetSpeedRate(MOVE_RUN, SPEED_CHASE);
+                 * else if (m_creature->GetCombatDistance(m_creature->getVictim()) > RANGE_MOLTEN_PUNCH)
+                 *     m_creature->SetSpeedRate(MOVE_RUN, SPEED_DASHING);
+                 */
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_supremusAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_supremus(Creature* pCreature)
-{
-    return new boss_supremusAI(pCreature);
-}
-
-CreatureAI* GetAI_molten_flame(Creature* pCreature)
-{
-    return new molten_flameAI(pCreature);
-}
-
-CreatureAI* GetAI_npc_volcano(Creature* pCreature)
-{
-    return new npc_volcanoAI(pCreature);
-}
 
 void AddSC_boss_supremus()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_supremus";
-    pNewScript->GetAI = &GetAI_boss_supremus;
-    pNewScript->RegisterSelf();
+    s = new boss_supremus();
+    s->RegisterSelf();
+    s = new molten_flame();
+    s->RegisterSelf();
+    s = new npc_volcano();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "molten_flame";
-    pNewScript->GetAI = &GetAI_molten_flame;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_supremus";
+    //pNewScript->GetAI = &GetAI_boss_supremus;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_volcano";
-    pNewScript->GetAI = &GetAI_npc_volcano;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "molten_flame";
+    //pNewScript->GetAI = &GetAI_molten_flame;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_volcano";
+    //pNewScript->GetAI = &GetAI_npc_volcano;
+    //pNewScript->RegisterSelf();
 }

@@ -39,6 +39,9 @@ enum
     TYPE_SHAHRAZ                    = 6,
     TYPE_COUNCIL                    = 7,
     TYPE_ILLIDAN                    = 8,
+    TYPE_GLAIVE_1                   = MAX_ENCOUNTER,
+    TYPE_GLAIVE_2                   = MAX_ENCOUNTER+1,
+    TYPE_CHANNELERS                 = MAX_ENCOUNTER+2,
 
     // NPC_WARLORD_NAJENTUS         = 22887,
     // NPC_SUPREMUS                 = 22898,
@@ -56,6 +59,7 @@ enum
     NPC_ILLIDAN_STORMRAGE           = 22917,
 
     NPC_ASH_CHANNELER               = 23421,
+    NPC_ASH_BROKEN                  = 23319,
     NPC_CREATURE_GENERATOR          = 23210,
     NPC_ILLIDAN_DOOR_TRIGGER        = 23412,
     NPC_GLAIVE_TARGET               = 23448,
@@ -76,39 +80,15 @@ enum
     GO_ILLIDAN_DOOR_L               = 186262,
 };
 
-class instance_black_temple : public ScriptedInstance
+struct Location
 {
-    public:
-        instance_black_temple(Map* pMap);
+    float m_fX, m_fY, m_fZ;
+};
 
-        void Initialize() override;
-
-        bool IsEncounterInProgress() const override;
-
-        void OnPlayerEnter(Player* pPlayer) override;
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        void GetChannelersGuidList(GuidList& lList) { lList = m_lChannelersGuidList; }
-        void GetGeneratorGuidVector(GuidVector& vVector) { vVector = m_vCreatureGeneratorGuidVector; }
-        void GetGlaiveTargetGuidVector(GuidVector& vVector) { vVector = m_vGlaiveTargetGuidVector; }
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-        void Load(const char* chrIn) override;
-
-    private:
-        void DoOpenPreMotherDoor();
-        void DoSpawnAkamaIfCan();
-
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string m_strInstData;
-
-        GuidList m_lChannelersGuidList;
-        GuidVector m_vCreatureGeneratorGuidVector;
-        GuidVector m_vGlaiveTargetGuidVector;
+static const Location afBrokenSpawnLoc[] =
+{
+    { 541.375916f, 401.439575f, 112.784f },       // The place where Akama channels
+    { 534.130005f, 352.394531f, 112.784f },       // Behind a 'pillar' which is behind the east alcove
 };
 
 #endif

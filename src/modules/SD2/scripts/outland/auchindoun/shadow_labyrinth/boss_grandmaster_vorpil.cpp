@@ -86,259 +86,304 @@ static const float aVorpilTeleportLoc[3] = { -253.06f, -264.02f, 17.08f};
 
 static const uint32 aTravelerSummonSpells[5] = {SPELL_SUMMON_VOIDWALKER_A, SPELL_SUMMON_VOIDWALKER_B, SPELL_SUMMON_VOIDWALKER_C, SPELL_SUMMON_VOIDWALKER_D, SPELL_SUMMON_VOIDWALKER_E};
 
-struct boss_grandmaster_vorpilAI : public ScriptedAI
+struct boss_grandmaster_vorpil : public CreatureScript
 {
-    boss_grandmaster_vorpilAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_grandmaster_vorpil() : CreatureScript("boss_grandmaster_vorpil") {}
+
+    struct boss_grandmaster_vorpilAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_bHasDoneIntro = false;
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiShadowBoltVolleyTimer;
-    uint32 m_uiDrawShadowsTimer;
-    uint32 m_uiRainOfFireTimer;
-    uint32 m_uiVoidTravelerTimer;
-    uint32 m_uiBanishTimer;
-    bool m_bHasDoneIntro;
-
-    void Reset() override
-    {
-        m_uiShadowBoltVolleyTimer   = urand(13000, 19000);
-        m_uiDrawShadowsTimer        = urand(38000, 44000);
-        m_uiRainOfFireTimer         = 0;
-        m_uiVoidTravelerTimer       = 5000;
-        m_uiBanishTimer             = urand(12000, 16000);
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        // not sure about right radius
-        if (!m_bHasDoneIntro && pWho->GetTypeId() == TYPEID_PLAYER && pWho->IsWithinDistInMap(m_creature, 50.0f) && pWho->IsWithinLOSInMap(m_creature))
+        boss_grandmaster_vorpilAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            DoScriptText(SAY_INTRO, m_creature);
-            m_bHasDoneIntro = true;
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+            m_bHasDoneIntro = false;
         }
 
-        ScriptedAI::MoveInLineOfSight(pWho);
-    }
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
 
-    void Aggro(Unit* /*pWho*/) override
-    {
-        switch (urand(0, 2))
+        uint32 m_uiShadowBoltVolleyTimer;
+        uint32 m_uiDrawShadowsTimer;
+        uint32 m_uiRainOfFireTimer;
+        uint32 m_uiVoidTravelerTimer;
+        uint32 m_uiBanishTimer;
+        bool m_bHasDoneIntro;
+
+        void Reset() override
         {
+            m_uiShadowBoltVolleyTimer = urand(13000, 19000);
+            m_uiDrawShadowsTimer = urand(38000, 44000);
+            m_uiRainOfFireTimer = 0;
+            m_uiVoidTravelerTimer = 5000;
+            m_uiBanishTimer = urand(12000, 16000);
+        }
+
+        void MoveInLineOfSight(Unit* pWho) override
+        {
+            // not sure about right radius
+            if (!m_bHasDoneIntro && pWho->GetTypeId() == TYPEID_PLAYER && pWho->IsWithinDistInMap(m_creature, 50.0f) && pWho->IsWithinLOSInMap(m_creature))
+            {
+                DoScriptText(SAY_INTRO, m_creature);
+                m_bHasDoneIntro = true;
+            }
+
+            ScriptedAI::MoveInLineOfSight(pWho);
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            switch (urand(0, 2))
+            {
             case 0: DoScriptText(SAY_AGGRO_1, m_creature); break;
             case 1: DoScriptText(SAY_AGGRO_2, m_creature); break;
             case 2: DoScriptText(SAY_AGGRO_3, m_creature); break;
-        }
+            }
 
-        DoCastSpellIfCan(m_creature, SPELL_VOID_PORTAL_A);
+            DoCastSpellIfCan(m_creature, SPELL_VOID_PORTAL_A);
 
-        // summon the other 4 portals
-        for (uint8 i = 0; i < MAX_PORTALS; ++i)
-        { m_creature->SummonCreature(NPC_VOID_PORTAL, aVorpilLocation[i].m_fX, aVorpilLocation[i].m_fY, aVorpilLocation[i].m_fZ, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0); }
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_VORPIL, IN_PROGRESS); }
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_VORPIL, FAIL); }
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_VOID_TRAVELER)
-        { pSummoned->GetMotionMaster()->MoveFollow(m_creature, 0.0f, 0.0f); }
-
-        if (pSummoned->GetEntry() == NPC_VOID_PORTAL)
-        { pSummoned->CastSpell(pSummoned, SPELL_VOID_PORTAL_VISUAL, true); }
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_VORPIL, DONE); }
-    }
-
-    // Wrapper to teleport all players to the platform - Workaround for missing spell
-    void DoTeleportToPlatform()
-    {
-        m_creature->NearTeleportTo(aVorpilTeleportLoc[0], aVorpilTeleportLoc[1], aVorpilTeleportLoc[2], 0.0f);
-
-        float fX, fY, fZ;
-
-        GuidVector vGuids;
-        m_creature->FillGuidsListFromThreatList(vGuids);
-        for (GuidVector::const_iterator itr = vGuids.begin(); itr != vGuids.end(); ++itr)
-        {
-            Unit* pTarget = m_creature->GetMap()->GetUnit(*itr);
-
-            if (pTarget && pTarget->GetTypeId() == TYPEID_PLAYER)
+            // summon the other 4 portals
+            for (uint8 i = 0; i < MAX_PORTALS; ++i)
             {
-                pTarget->GetRandomPoint(aVorpilTeleportLoc[0], aVorpilTeleportLoc[1], aVorpilTeleportLoc[2], 4.0f, fX, fY, fZ);
-                DoTeleportPlayer(pTarget, fX, fY, fZ, m_creature->GetAngle(fX, fY));
+                m_creature->SummonCreature(NPC_VOID_PORTAL, aVorpilLocation[i].m_fX, aVorpilLocation[i].m_fY, aVorpilLocation[i].m_fZ, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+            }
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_VORPIL, IN_PROGRESS);
             }
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiRainOfFireTimer)
+        void JustReachedHome() override
         {
-            if (m_uiRainOfFireTimer <= uiDiff)
+            if (m_pInstance)
             {
-                SetCombatMovement(false, true);
-                DoTeleportToPlatform();
-
-                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_RAIN_OF_FIRE : SPELL_RAIN_OF_FIRE_H, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
-                { m_uiRainOfFireTimer = 0; }
-
-                SetCombatMovement(true);
-
-                return;                                     // Nothing more todo after the players had been teleported
-            }
-            else
-            { m_uiRainOfFireTimer -= uiDiff; }
-        }
-
-        if (m_uiShadowBoltVolleyTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_BOLT_VOLLEY) == CAST_OK)
-            { m_uiShadowBoltVolleyTimer = urand(10000, 26000); }
-        }
-        else
-        { m_uiShadowBoltVolleyTimer -= uiDiff; }
-
-        if (m_uiDrawShadowsTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_DRAW_SHADOWS) == CAST_OK)
-            {
-                m_uiDrawShadowsTimer = urand(36000, 44000);
-                m_uiRainOfFireTimer  = 1000;
+                m_pInstance->SetData(TYPE_VORPIL, FAIL);
             }
         }
-        else
-        { m_uiDrawShadowsTimer -= uiDiff; }
 
-        if (m_uiVoidTravelerTimer < uiDiff)
+        void KilledUnit(Unit* /*pVictim*/) override
         {
-            if (DoCastSpellIfCan(m_creature, aTravelerSummonSpells[urand(0, 4)]) == CAST_OK)
+            DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_VOID_TRAVELER)
             {
-                DoScriptText(SAY_HELP, m_creature);
-                m_uiVoidTravelerTimer = urand(10000, 15000);
+                pSummoned->GetMotionMaster()->MoveFollow(m_creature, 0.0f, 0.0f);
+            }
+
+            if (pSummoned->GetEntry() == NPC_VOID_PORTAL)
+            {
+                pSummoned->CastSpell(pSummoned, SPELL_VOID_PORTAL_VISUAL, true);
             }
         }
-        else
-        { m_uiVoidTravelerTimer -= uiDiff; }
 
-        if (!m_bIsRegularMode)
+        void JustDied(Unit* /*pKiller*/) override
         {
-            if (m_uiBanishTimer < uiDiff)
+            DoScriptText(SAY_DEATH, m_creature);
+
+            if (m_pInstance)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+                m_pInstance->SetData(TYPE_VORPIL, DONE);
+            }
+        }
+
+        // Wrapper to teleport all players to the platform - Workaround for missing spell
+        void DoTeleportToPlatform()
+        {
+            m_creature->NearTeleportTo(aVorpilTeleportLoc[0], aVorpilTeleportLoc[1], aVorpilTeleportLoc[2], 0.0f);
+
+            float fX, fY, fZ;
+
+            GuidVector vGuids;
+            m_creature->FillGuidsListFromThreatList(vGuids);
+            for (GuidVector::const_iterator itr = vGuids.begin(); itr != vGuids.end(); ++itr)
+            {
+                Unit* pTarget = m_creature->GetMap()->GetUnit(*itr);
+
+                if (pTarget && pTarget->GetTypeId() == TYPEID_PLAYER)
                 {
-                    if (DoCastSpellIfCan(pTarget, SPELL_BANISH_H) == CAST_OK)
-                    { m_uiBanishTimer = urand(17000, 23000); }
+                    pTarget->GetRandomPoint(aVorpilTeleportLoc[0], aVorpilTeleportLoc[1], aVorpilTeleportLoc[2], 4.0f, fX, fY, fZ);
+                    DoTeleportPlayer(pTarget, fX, fY, fZ, m_creature->GetAngle(fX, fY));
+                }
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            // Return since we have no target
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_uiRainOfFireTimer)
+            {
+                if (m_uiRainOfFireTimer <= uiDiff)
+                {
+                    SetCombatMovement(false, true);
+                    DoTeleportToPlatform();
+
+                    if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_RAIN_OF_FIRE : SPELL_RAIN_OF_FIRE_H, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                    {
+                        m_uiRainOfFireTimer = 0;
+                    }
+
+                    SetCombatMovement(true);
+
+                    return;                                     // Nothing more todo after the players had been teleported
+                }
+                else
+                {
+                    m_uiRainOfFireTimer -= uiDiff;
+                }
+            }
+
+            if (m_uiShadowBoltVolleyTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_BOLT_VOLLEY) == CAST_OK)
+                {
+                    m_uiShadowBoltVolleyTimer = urand(10000, 26000);
                 }
             }
             else
-            { m_uiBanishTimer -= uiDiff; }
-        }
-
-        DoMeleeAttackIfReady();
-    }
-};
-
-CreatureAI* GetAI_boss_grandmaster_vorpil(Creature* pCreature)
-{
-    return new boss_grandmaster_vorpilAI(pCreature);
-}
-
-struct npc_void_travelerAI : public ScriptedAI
-{
-    npc_void_travelerAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    bool m_bIsRegularMode;
-    bool m_bHasExploded;
-
-    uint32 m_uiDeathTimer;
-
-    void Reset() override
-    {
-        m_uiDeathTimer = 0;
-        m_bHasExploded = false;
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (!m_bHasExploded && pWho->GetEntry() == NPC_VORPIL && pWho->IsWithinDistInMap(m_creature, 3.0f))
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_NOVA) == CAST_OK)
             {
-                m_bHasExploded = true;
-                m_uiDeathTimer = 1000;
+                m_uiShadowBoltVolleyTimer -= uiDiff;
             }
-        }
-    }
 
-    void AttackStart(Unit* /*pWho*/) override { }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiDeathTimer)
-        {
-            if (m_uiDeathTimer <= uiDiff)
+            if (m_uiDrawShadowsTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_EMPOWERING_SHADOWS : SPELL_EMPOWERING_SHADOWS_H, CAST_TRIGGERED) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature, SPELL_DRAW_SHADOWS) == CAST_OK)
                 {
-                    m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                    m_uiDeathTimer = 0;
+                    m_uiDrawShadowsTimer = urand(36000, 44000);
+                    m_uiRainOfFireTimer = 1000;
                 }
             }
             else
-            { m_uiDeathTimer -= uiDiff; }
+            {
+                m_uiDrawShadowsTimer -= uiDiff;
+            }
+
+            if (m_uiVoidTravelerTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, aTravelerSummonSpells[urand(0, 4)]) == CAST_OK)
+                {
+                    DoScriptText(SAY_HELP, m_creature);
+                    m_uiVoidTravelerTimer = urand(10000, 15000);
+                }
+            }
+            else
+            {
+                m_uiVoidTravelerTimer -= uiDiff;
+            }
+
+            if (!m_bIsRegularMode)
+            {
+                if (m_uiBanishTimer < uiDiff)
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+                    {
+                        if (DoCastSpellIfCan(pTarget, SPELL_BANISH_H) == CAST_OK)
+                        {
+                            m_uiBanishTimer = urand(17000, 23000);
+                        }
+                    }
+                }
+                else
+                {
+                    m_uiBanishTimer -= uiDiff;
+                }
+            }
+
+            DoMeleeAttackIfReady();
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_grandmaster_vorpilAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_npc_void_traveler(Creature* pCreature)
+struct npc_void_traveler : public CreatureScript
 {
-    return new npc_void_travelerAI(pCreature);
-}
+    npc_void_traveler() : CreatureScript("npc_void_traveler") {}
+
+    struct npc_void_travelerAI : public ScriptedAI
+    {
+        npc_void_travelerAI(Creature* pCreature) : ScriptedAI(pCreature)
+        {
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        }
+
+        bool m_bIsRegularMode;
+        bool m_bHasExploded;
+
+        uint32 m_uiDeathTimer;
+
+        void Reset() override
+        {
+            m_uiDeathTimer = 0;
+            m_bHasExploded = false;
+        }
+
+        void MoveInLineOfSight(Unit* pWho) override
+        {
+            if (!m_bHasExploded && pWho->GetEntry() == NPC_VORPIL && pWho->IsWithinDistInMap(m_creature, 3.0f))
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_NOVA) == CAST_OK)
+                {
+                    m_bHasExploded = true;
+                    m_uiDeathTimer = 1000;
+                }
+            }
+        }
+
+        void AttackStart(Unit* /*pWho*/) override { }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiDeathTimer)
+            {
+                if (m_uiDeathTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_EMPOWERING_SHADOWS : SPELL_EMPOWERING_SHADOWS_H, CAST_TRIGGERED) == CAST_OK)
+                    {
+                        m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                        m_uiDeathTimer = 0;
+                    }
+                }
+                else
+                {
+                    m_uiDeathTimer -= uiDiff;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_void_travelerAI(pCreature);
+    }
+};
 
 void AddSC_boss_grandmaster_vorpil()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_grandmaster_vorpil";
-    pNewScript->GetAI = &GetAI_boss_grandmaster_vorpil;
-    pNewScript->RegisterSelf();
+    s = new boss_grandmaster_vorpil();
+    s->RegisterSelf();
+    s = new npc_void_traveler();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_void_traveler";
-    pNewScript->GetAI = &GetAI_npc_void_traveler;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_grandmaster_vorpil";
+    //pNewScript->GetAI = &GetAI_boss_grandmaster_vorpil;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_void_traveler";
+    //pNewScript->GetAI = &GetAI_npc_void_traveler;
+    //pNewScript->RegisterSelf();
 }

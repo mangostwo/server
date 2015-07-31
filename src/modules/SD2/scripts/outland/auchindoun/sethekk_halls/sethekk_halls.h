@@ -56,28 +56,4 @@ enum
     ITEM_PILGRIMS_ATTIRE        = 46800,
 };
 
-class instance_sethekk_halls : public ScriptedInstance
-{
-    public:
-        instance_sethekk_halls(Map* pMap);
-        ~instance_sethekk_halls() {}
-
-        void Initialize() override;
-
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-        void Load(const char* chrIn) override;
-
-    private:
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string m_strInstData;
-};
-
 #endif

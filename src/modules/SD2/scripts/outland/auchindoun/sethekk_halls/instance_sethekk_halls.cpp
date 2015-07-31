@@ -33,114 +33,139 @@ EndScriptData */
 #include "precompiled.h"
 #include "sethekk_halls.h"
 
-instance_sethekk_halls::instance_sethekk_halls(Map* pMap) : ScriptedInstance(pMap)
+struct is_sethekk_halls : public InstanceScript
 {
-    Initialize();
-}
-void instance_sethekk_halls::Initialize()
-{
-    memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
-}
+    is_sethekk_halls() : InstanceScript("instance_sethekk_halls") {}
 
-void instance_sethekk_halls::OnCreatureCreate(Creature* pCreature)
-{
-    if (pCreature->GetEntry() == NPC_ANZU)
-    { m_mNpcEntryGuidStore[NPC_ANZU] = pCreature->GetObjectGuid(); }
-}
-
-void instance_sethekk_halls::OnObjectCreate(GameObject* pGo)
-{
-    switch (pGo->GetEntry())
+    class instance_sethekk_halls : public ScriptedInstance
     {
-        case GO_IKISS_DOOR:
-            if (m_auiEncounter[TYPE_IKISS] == DONE)
-            { pGo->SetGoState(GO_STATE_ACTIVE); }
-            break;
-        case GO_IKISS_CHEST:
-            if (m_auiEncounter[TYPE_IKISS] == DONE)
-            { pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT | GO_FLAG_INTERACT_COND); }
-            break;
-        case GO_RAVENS_CLAW:
-            break;
+    public:
+        instance_sethekk_halls(Map* pMap) : ScriptedInstance(pMap)
+        {
+            Initialize();
+        }
 
-        default:
-            return;
-    }
+        ~instance_sethekk_halls() {}
 
-    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
-}
+        void Initialize() override
+        {
+            memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+        }
 
-void instance_sethekk_halls::SetData(uint32 uiType, uint32 uiData)
-{
-    switch (uiType)
-    {
-        case TYPE_SYTH:
-            m_auiEncounter[uiType] = uiData;
-            break;
-        case TYPE_ANZU:
-            m_auiEncounter[uiType] = uiData;
-            // Respawn the Raven's Claw if event fails
-            if (uiData == FAIL)
+        void OnCreatureCreate(Creature* pCreature) override
+        {
+            if (pCreature->GetEntry() == NPC_ANZU)
             {
-                if (GameObject* pClaw = GetSingleGameObjectFromStorage(GO_RAVENS_CLAW))
-                { pClaw->Respawn(); }
+                m_mNpcEntryGuidStore[NPC_ANZU] = pCreature->GetObjectGuid();
             }
-            break;
-        case TYPE_IKISS:
+        }
+
+        void OnObjectCreate(GameObject* pGo) override
+        {
+            switch (pGo->GetEntry())
+            {
+            case GO_IKISS_DOOR:
+                if (m_auiEncounter[TYPE_IKISS] == DONE)
+                {
+                    pGo->SetGoState(GO_STATE_ACTIVE);
+                }
+                break;
+            case GO_IKISS_CHEST:
+                if (m_auiEncounter[TYPE_IKISS] == DONE)
+                {
+                    pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT | GO_FLAG_INTERACT_COND);
+                }
+                break;
+            case GO_RAVENS_CLAW:
+                break;
+
+            default:
+                return;
+            }
+
+            m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+        }
+
+        void SetData(uint32 uiType, uint32 uiData) override
+        {
+            switch (uiType)
+            {
+            case TYPE_SYTH:
+                m_auiEncounter[uiType] = uiData;
+                break;
+            case TYPE_ANZU:
+                m_auiEncounter[uiType] = uiData;
+                // Respawn the Raven's Claw if event fails
+                if (uiData == FAIL)
+                {
+                    if (GameObject* pClaw = GetSingleGameObjectFromStorage(GO_RAVENS_CLAW))
+                    {
+                        pClaw->Respawn();
+                    }
+                }
+                break;
+            case TYPE_IKISS:
+                if (uiData == DONE)
+                {
+                    DoUseDoorOrButton(GO_IKISS_DOOR, DAY);
+                    DoToggleGameObjectFlags(GO_IKISS_CHEST, GO_FLAG_NO_INTERACT | GO_FLAG_INTERACT_COND, false);
+                }
+                m_auiEncounter[uiType] = uiData;
+                break;
+            default:
+                return;
+            }
+
             if (uiData == DONE)
             {
-                DoUseDoorOrButton(GO_IKISS_DOOR, DAY);
-                DoToggleGameObjectFlags(GO_IKISS_CHEST, GO_FLAG_NO_INTERACT | GO_FLAG_INTERACT_COND, false);
+                OUT_SAVE_INST_DATA;
+
+                std::ostringstream saveStream;
+                saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2];
+
+                m_strInstData = saveStream.str();
+
+                SaveToDB();
+                OUT_SAVE_INST_DATA_COMPLETE;
             }
-            m_auiEncounter[uiType] = uiData;
-            break;
-        default:
-            return;
-    }
+        }
 
-    if (uiData == DONE)
-    {
-        OUT_SAVE_INST_DATA;
+        uint32 GetData(uint32 uiType) const override
+        {
+            if (uiType < MAX_ENCOUNTER)
+            {
+                return m_auiEncounter[uiType];
+            }
 
-        std::ostringstream saveStream;
-        saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2];
+            return 0;
+        }
 
-        m_strInstData = saveStream.str();
+        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
 
-        SaveToDB();
-        OUT_SAVE_INST_DATA_COMPLETE;
-    }
-}
+        const char* Save() const override { return m_strInstData.c_str(); }
+        void Load(const char* chrIn) override
+        {
+            if (!chrIn)
+            {
+                OUT_LOAD_INST_DATA_FAIL;
+                return;
+            }
 
-uint32 instance_sethekk_halls::GetData(uint32 uiType) const
-{
-    if (uiType < MAX_ENCOUNTER)
-    { return m_auiEncounter[uiType]; }
+            OUT_LOAD_INST_DATA(chrIn);
 
-    return 0;
-}
+            std::istringstream loadStream(chrIn);
+            loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2];
 
-void instance_sethekk_halls::Load(const char* chrIn)
-{
-    if (!chrIn)
-    {
-        OUT_LOAD_INST_DATA_FAIL;
-        return;
-    }
+            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+            {
+                if (m_auiEncounter[i] == IN_PROGRESS)
+                {
+                    m_auiEncounter[i] = NOT_STARTED;
+                }
+            }
 
-    OUT_LOAD_INST_DATA(chrIn);
-
-    std::istringstream loadStream(chrIn);
-    loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2];
-
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-    {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-        { m_auiEncounter[i] = NOT_STARTED; }
-    }
-
-    OUT_LOAD_INST_DATA_COMPLETE;
-}
+            OUT_LOAD_INST_DATA_COMPLETE;
+        }
 
 bool instance_sethekk_halls::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* /*pTarget*/, uint32 /*uiMiscValue1 = 0*/) const
 {
@@ -154,42 +179,62 @@ bool instance_sethekk_halls::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, P
             || pSource->HasItemOrGemWithIdEquipped(ITEM_PILGRIMS_ROBE, 1) || pSource->HasItemOrGemWithIdEquipped(ITEM_PILGRIMS_ATTIRE, 1));
 }
 
-InstanceData* GetInstanceData_instance_sethekk_halls(Map* pMap)
-{
-    return new instance_sethekk_halls(pMap);
-}
+    private:
+        uint32 m_auiEncounter[MAX_ENCOUNTER];
+        std::string m_strInstData;
+    };
 
-bool ProcessEventId_event_spell_summon_raven_god(uint32 /*uiEventId*/, Object* pSource, Object* /*pTarget*/, bool bIsStart)
-{
-    if (bIsStart && pSource->GetTypeId() == TYPEID_PLAYER)
+    InstanceData* GetInstanceData(Map* pMap) override
     {
-        if (instance_sethekk_halls* pInstance = (instance_sethekk_halls*)((Player*)pSource)->GetInstanceData())
-        {
-            // This should be checked by despawning the Raven Claw Go; However it's better to double check the condition
-            if (pInstance->GetData(TYPE_ANZU) == DONE || pInstance->GetData(TYPE_ANZU) == IN_PROGRESS)
-            { return true; }
-
-            // Don't summon him twice
-            if (pInstance->GetSingleCreatureFromStorage(NPC_ANZU, true))
-            { return true; }
-
-            // ToDo: add more code here to handle the summoning event. For the moment it's handled in DB because of the missing info
-        }
+        return new instance_sethekk_halls(pMap);
     }
-    return false;
-}
+};
+
+struct event_spell_summon_raven_god : public MapEventScript
+{
+    event_spell_summon_raven_god() : MapEventScript("event_spell_summon_raven_god") {}
+
+    bool OnReceived(uint32 /*uiEventId*/, Object* pSource, Object* /*pTarget*/, bool bIsStart) override
+    {
+        if (bIsStart && pSource->GetTypeId() == TYPEID_PLAYER)
+        {
+            if (ScriptedInstance* pInstance = (ScriptedInstance*)((Player*)pSource)->GetInstanceData())
+            {
+                // This should be checked by despawning the Raven Claw Go; However it's better to double check the condition
+                if (pInstance->GetData(TYPE_ANZU) == DONE || pInstance->GetData(TYPE_ANZU) == IN_PROGRESS)
+                {
+                    return true;
+                }
+
+                // Don't summon him twice
+                if (pInstance->GetSingleCreatureFromStorage(NPC_ANZU, true))
+                {
+                    return true;
+                }
+
+                // ToDo: add more code here to handle the summoning event. For the moment it's handled in DB because of the missing info
+            }
+        }
+        return false;
+    }
+};
 
 void AddSC_instance_sethekk_halls()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "instance_sethekk_halls";
-    pNewScript->GetInstanceData = &GetInstanceData_instance_sethekk_halls;
-    pNewScript->RegisterSelf();
+    s = new is_sethekk_halls();
+    s->RegisterSelf();
+    s = new event_spell_summon_raven_god();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "event_spell_summon_raven_god";
-    pNewScript->pProcessEventId = &ProcessEventId_event_spell_summon_raven_god;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "instance_sethekk_halls";
+    //pNewScript->GetInstanceData = &GetInstanceData_instance_sethekk_halls;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "event_spell_summon_raven_god";
+    //pNewScript->pProcessEventId = &ProcessEventId_event_spell_summon_raven_god;
+    //pNewScript->RegisterSelf();
 }
