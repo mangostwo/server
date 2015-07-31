@@ -136,7 +136,7 @@ void SystemMgr::LoadScriptWaypoints()
                 continue;
             }
 
-            if (!pCInfo->ScriptID)
+            if (!sScriptMgr.GetBoundScriptId(SCRIPTED_UNIT, pCInfo->Entry))
             {
                 error_db_log("SD2: DB table script_waypoint has waypoint for creature entry %u, but creature does not have ScriptName defined and then useless.", pTemp.uiCreatureEntry);
             }

@@ -73,6 +73,8 @@ public:
     static uint32 GetGODialogStatus(Player*, GameObject*);
     static bool GOUse(Player*, GameObject*);
     static bool ItemUse(Player*, Item*, SpellCastTargets const&);
+    static bool ItemEquip(Player*, Item*, bool);    //new TODO
+    static bool ItemDelete(Player*, Item*);         //new TODO
     static bool AreaTrigger(Player*, AreaTriggerEntry const*);
     static bool NpcSpellClick(Player* pPlayer, Creature* pClickedCreature, uint32 uiSpellId);
     static bool ProcessEvent(uint32, Object*, Object*, bool);
@@ -118,6 +120,19 @@ enum EscortFaction
 
 // *********************************************************
 // ************* Some structures used globally *************
+struct CreatureScript;
+struct GameObjectScript;
+struct ItemScript;
+struct AreaTriggerScript;
+struct MapEventScript;
+struct ZoneScript;
+struct OutdoorPvPScript;
+struct BattleGroundScript;
+struct InstanceScript;
+struct SpellScript;
+struct AuraScript;
+struct ConditionScript;
+struct AchievementScript;
 
 struct Script
 {
@@ -258,14 +273,5 @@ struct AchievementScript : public Script
 // Generic scripting text function
 void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget = NULL);
 void DoOrSimulateScriptTextForMap(int32 iTextEntry, uint32 uiCreatureEntry, Map* pMap, Creature* pCreatureSource = NULL, Unit* pTarget = NULL);
-
-// *********************************************************
-// **************** Internal hook mechanics ****************
-
-#if COMPILER == COMPILER_GNU || COMPILER == COMPILER_CLANG
-#define FUNC_PTR(name,callconvention,returntype,parameters)    typedef returntype(*name)parameters __attribute__ ((callconvention));
-#else
-#define FUNC_PTR(name, callconvention, returntype, parameters)    typedef returntype(callconvention *name)parameters;
-#endif
 
 #endif

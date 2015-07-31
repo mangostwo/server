@@ -64,7 +64,7 @@ struct npc_escortAI : public ScriptedAI
 
         virtual void Aggro(Unit*) override;
 
-        virtual void Reset() override = 0;
+        virtual void Reset() override {}
 
         // CreatureAI functions
         bool IsVisible(Unit*) const override;
