@@ -49,38 +49,38 @@
 
 enum
 {
-    BLUE_OGRE_BREW	= 32783,
-    RED_OGRE_BREW	= 32784,
-    TRANCHANTES		= 3522,
-    OGRE_BREW_MANA	= 41304,
-    OGRE_BREW_LIFE	= 41306
+    BLUE_OGRE_BREW  = 32783,
+    RED_OGRE_BREW   = 32784,
+    TRANCHANTES     = 3522,
+    OGRE_BREW_MANA  = 41304,
+    OGRE_BREW_LIFE  = 41306
 };
 
-bool ItemUse_item_ogre_brew(Player* pPlayer, Item* pItem, const SpellCastTargets&)
+struct item_ogre_brew : public ItemScript
 {
-    uint32 itemId	= pItem->GetEntry();
-    uint32 pZoneId	= pPlayer->GetZoneId();
-    
-    if (itemId == BLUE_OGRE_BREW || itemId == RED_OGRE_BREW)
+    item_ogre_brew() : ItemScript("item_ogre_brew") {}
+
+    bool OnUse(Player* pPlayer, Item* pItem, const SpellCastTargets&) override
+    {
+    uint32 itemId = pItem->GetEntry();
+    uint32 pZoneId = pPlayer->GetZoneId();
+
+    if (itemId == BLUE_OGRE_BREW || itemId == RED_OGRE_BREW)    //an excessive check of DB sanity, may be dropped
     {
         if (pZoneId == TRANCHANTES)
         {
-            return false;
+            return false;   // allowing cast, i.e. this script did not handle it
         }
+
         debug_log("SD2: Player attempt to use item %u, but did not meet zone requirement : %u", itemId,pZoneId);
-        if (itemId == BLUE_OGRE_BREW)
+        if (const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry(pItem->GetProto()->Spells[0].SpellId))
         {
-            const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry(OGRE_BREW_LIFE);
             Spell::SendCastResult(pPlayer, pSpellInfo, 1, SPELL_FAILED_NOT_HERE);
         }
-        if (itemId == RED_OGRE_BREW)
-        {
-            const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry(OGRE_BREW_MANA);
-            Spell::SendCastResult(pPlayer, pSpellInfo, 1, SPELL_FAILED_NOT_HERE);
-        }
-        return true;
     }
-}
+    return true;
+    }
+};
 
 /*#####
 # item_arcane_charges
@@ -91,39 +91,56 @@ enum
     SPELL_ARCANE_CHARGES    = 45072
 };
 
-bool ItemUse_item_arcane_charges(Player* pPlayer, Item* pItem, const SpellCastTargets& /*pTargets*/)
+struct item_arcane_charges : public ItemScript
 {
-    if (pPlayer->IsTaxiFlying())
-    { return false; }
+    item_arcane_charges() : ItemScript("item_arcane_charges") {}
 
-    pPlayer->SendEquipError(EQUIP_ERR_NONE, pItem, NULL);
+    bool OnUse(Player* pPlayer, Item* pItem, const SpellCastTargets& /*pTargets*/) override
+    {
+        if (pPlayer->IsTaxiFlying())
+        {
+            return false;
+        }
 
-    if (const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry(SPELL_ARCANE_CHARGES))
-    { Spell::SendCastResult(pPlayer, pSpellInfo, 1, SPELL_FAILED_ERROR); }
+        pPlayer->SendEquipError(EQUIP_ERR_NONE, pItem, NULL);
 
-    return true;
-}
+        if (const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry(SPELL_ARCANE_CHARGES))
+        {
+            Spell::SendCastResult(pPlayer, pSpellInfo, 1, SPELL_FAILED_ERROR);
+        }
+        return true;
+    }
+};
 
 /*#####
 # item_flying_machine
 #####*/
 
-bool ItemUse_item_flying_machine(Player* pPlayer, Item* pItem, const SpellCastTargets& /*pTargets*/)
+struct item_flying_machine : public ItemScript
 {
-    uint32 itemId = pItem->GetEntry();
+    item_flying_machine() : ItemScript("item_flying_machine") {}
 
-    if (itemId == 34060)
+    bool OnUse(Player* pPlayer, Item* pItem, const SpellCastTargets& /*pTargets*/) override
+    {
+        uint32 itemId = pItem->GetEntry();
+
+        if (itemId == 34060)
         if (pPlayer->GetBaseSkillValue(SKILL_RIDING) >= 225)
-        { return false; }
+        {
+            return false;
+        }
 
-    if (itemId == 34061)
+        if (itemId == 34061)
         if (pPlayer->GetBaseSkillValue(SKILL_RIDING) == 300)
-        { return false; }
+        {
+            return false;
+        }
 
-    debug_log("SD2: Player attempt to use item %u, but did not meet riding requirement", itemId);
-    pPlayer->SendEquipError(EQUIP_ERR_CANT_EQUIP_SKILL, pItem, NULL);
-    return true;
-}
+        debug_log("SD2: Player attempt to use item %u, but did not meet riding requirement", itemId);
+        pPlayer->SendEquipError(EQUIP_ERR_CANT_EQUIP_SKILL, pItem, NULL);
+        return true;
+    }
+};
 
 /*#####
 # item_gor_dreks_ointment
@@ -135,14 +152,49 @@ enum
     SPELL_GORDREKS_OINTMENT = 32578
 };
 
-bool ItemUse_item_gor_dreks_ointment(Player* pPlayer, Item* pItem, const SpellCastTargets& pTargets)
+struct item_gor_dreks_ointment : public ItemScript
 {
-    if (pTargets.getUnitTarget() && pTargets.getUnitTarget()->GetTypeId() == TYPEID_UNIT && pTargets.getUnitTarget()->HasAura(SPELL_GORDREKS_OINTMENT))
+    item_gor_dreks_ointment() : ItemScript("item_gor_dreks_ointment") {}
+
+    bool OnUse(Player* pPlayer, Item* pItem, const SpellCastTargets& pTargets) override
+    {
+        if (pTargets.getUnitTarget() && pTargets.getUnitTarget()->GetTypeId() == TYPEID_UNIT && pTargets.getUnitTarget()->HasAura(SPELL_GORDREKS_OINTMENT))
+        {
+            pPlayer->SendEquipError(EQUIP_ERR_NONE, pItem, NULL);
+
+            if (const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry(SPELL_GORDREKS_OINTMENT))
+            {
+                Spell::SendCastResult(pPlayer, pSpellInfo, 1, SPELL_FAILED_TARGET_AURASTATE);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+};
+/*#####
+# item_petrov_cluster_bombs
+#####*/
+
+enum
+{
+    SPELL_PETROV_BOMB           = 42406,
+    AREA_ID_SHATTERED_STRAITS   = 4064,
+    ZONE_ID_HOWLING             = 495
+};
+
+bool ItemUse_item_petrov_cluster_bombs(Player* pPlayer, Item* pItem, const SpellCastTargets& /*pTargets*/)
+{
+    if (pPlayer->GetZoneId() != ZONE_ID_HOWLING)
+        return false;
+
+    if (!pPlayer->GetTransport() || pPlayer->GetAreaId() != AREA_ID_SHATTERED_STRAITS)
     {
         pPlayer->SendEquipError(EQUIP_ERR_NONE, pItem, NULL);
 
-        if (const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry(SPELL_GORDREKS_OINTMENT))
-        { Spell::SendCastResult(pPlayer, pSpellInfo, 1, SPELL_FAILED_TARGET_AURASTATE); }
+        if (const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry(SPELL_PETROV_BOMB))
+            Spell::SendCastResult(pPlayer, pSpellInfo, 1, SPELL_FAILED_NOT_HERE);
 
         return true;
     }
@@ -152,25 +204,34 @@ bool ItemUse_item_gor_dreks_ointment(Player* pPlayer, Item* pItem, const SpellCa
 
 void AddSC_item_scripts()
 {
-    Script* pNewScript;
+    Script* s;
     
-    pNewScript = new Script;
-    pNewScript->Name = "item_ogre_brew";
-    pNewScript->pItemUse = &ItemUse_item_ogre_brew;
-    pNewScript->RegisterSelf(); 
+    s = new item_ogre_brew();
+    s->RegisterSelf();
+    s = new item_arcane_charges();
+    s->RegisterSelf();
+    s = new item_flying_machine();
+    s->RegisterSelf();
+    s = new item_gor_dreks_ointment();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "item_arcane_charges";
+    //pNewScript->pItemUse = &ItemUse_item_arcane_charges;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "item_flying_machine";
+    //pNewScript->pItemUse = &ItemUse_item_flying_machine;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "item_gor_dreks_ointment";
+    //pNewScript->pItemUse = &ItemUse_item_gor_dreks_ointment;
+    //pNewScript->RegisterSelf();
 
     pNewScript = new Script;
-    pNewScript->Name = "item_arcane_charges";
-    pNewScript->pItemUse = &ItemUse_item_arcane_charges;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "item_flying_machine";
-    pNewScript->pItemUse = &ItemUse_item_flying_machine;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "item_gor_dreks_ointment";
-    pNewScript->pItemUse = &ItemUse_item_gor_dreks_ointment;
+    pNewScript->Name = "item_petrov_cluster_bombs";
+    pNewScript->pItemUse = &ItemUse_item_petrov_cluster_bombs;
     pNewScript->RegisterSelf();
 }

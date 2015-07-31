@@ -110,92 +110,108 @@ SpawnAssociation m_aSpawnAssociations[] =
     {22126, 22122, SPAWNTYPE_ALARMBOT}                      // Air Force Trip Wire - Rooftop (Cenarion Expedition)
 };
 
-struct npc_air_force_botsAI : public ScriptedAI
+struct npc_air_force_bots : public CreatureScript
 {
-    npc_air_force_botsAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        m_pSpawnAssoc = NULL;
+    npc_air_force_bots() : CreatureScript("npc_air_force_bots") {}
 
-        // find the correct spawnhandling
-        for (uint8 i = 0; i < countof(m_aSpawnAssociations); ++i)
+    struct npc_air_force_botsAI : public ScriptedAI
+    {
+        npc_air_force_botsAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (m_aSpawnAssociations[i].m_uiThisCreatureEntry == pCreature->GetEntry())
+            m_pSpawnAssoc = NULL;
+
+            // find the correct spawnhandling
+            for (uint8 i = 0; i < countof(m_aSpawnAssociations); ++i)
             {
-                m_pSpawnAssoc = &m_aSpawnAssociations[i];
-                break;
+                if (m_aSpawnAssociations[i].m_uiThisCreatureEntry == pCreature->GetEntry())
+                {
+                    m_pSpawnAssoc = &m_aSpawnAssociations[i];
+                    break;
+                }
+            }
+
+            if (!m_pSpawnAssoc)
+            {
+                error_db_log("SD2: Creature template entry %u has ScriptName npc_air_force_bots, but it's not handled by that script", pCreature->GetEntry());
+            }
+            else
+            {
+                CreatureInfo const* spawnedTemplate = GetCreatureTemplateStore(m_pSpawnAssoc->m_uiSpawnedCreatureEntry);
+
+                if (!spawnedTemplate)
+                {
+                    error_db_log("SD2: Creature template entry %u does not exist in DB, which is required by npc_air_force_bots", m_pSpawnAssoc->m_uiSpawnedCreatureEntry);
+                    m_pSpawnAssoc = NULL;
+                    return;
+                }
             }
         }
 
-        if (!m_pSpawnAssoc)
-        { error_db_log("SD2: Creature template entry %u has ScriptName npc_air_force_bots, but it's not handled by that script", pCreature->GetEntry()); }
-        else
-        {
-            CreatureInfo const* spawnedTemplate = GetCreatureTemplateStore(m_pSpawnAssoc->m_uiSpawnedCreatureEntry);
+        SpawnAssociation* m_pSpawnAssoc;
+        ObjectGuid m_spawnedGuid;
 
-            if (!spawnedTemplate)
+        Creature* SummonGuard()
+        {
+            Creature* pSummoned = m_creature->SummonCreature(m_pSpawnAssoc->m_uiSpawnedCreatureEntry, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 300000);
+
+            if (pSummoned)
             {
-                error_db_log("SD2: Creature template entry %u does not exist in DB, which is required by npc_air_force_bots", m_pSpawnAssoc->m_uiSpawnedCreatureEntry);
+                m_spawnedGuid = pSummoned->GetObjectGuid();
+            }
+            else
+            {
+                error_db_log("SD2: npc_air_force_bots: wasn't able to spawn creature %u", m_pSpawnAssoc->m_uiSpawnedCreatureEntry);
                 m_pSpawnAssoc = NULL;
+            }
+
+            return pSummoned;
+        }
+
+        Creature* GetSummonedGuard()
+        {
+            Creature* pCreature = m_creature->GetMap()->GetCreature(m_spawnedGuid);
+
+            if (pCreature && pCreature->IsAlive())
+            {
+                return pCreature;
+            }
+
+            return NULL;
+        }
+
+        void MoveInLineOfSight(Unit* pWho) override
+        {
+            if (!m_pSpawnAssoc)
+            {
                 return;
             }
-        }
-    }
 
-    SpawnAssociation* m_pSpawnAssoc;
-    ObjectGuid m_spawnedGuid;
-
-    void Reset() override { }
-
-    Creature* SummonGuard()
-    {
-        Creature* pSummoned = m_creature->SummonCreature(m_pSpawnAssoc->m_uiSpawnedCreatureEntry, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 300000);
-
-        if (pSummoned)
-        { m_spawnedGuid = pSummoned->GetObjectGuid(); }
-        else
-        {
-            error_db_log("SD2: npc_air_force_bots: wasn't able to spawn creature %u", m_pSpawnAssoc->m_uiSpawnedCreatureEntry);
-            m_pSpawnAssoc = NULL;
-        }
-
-        return pSummoned;
-    }
-
-    Creature* GetSummonedGuard()
-    {
-        Creature* pCreature = m_creature->GetMap()->GetCreature(m_spawnedGuid);
-
-        if (pCreature && pCreature->IsAlive())
-        { return pCreature; }
-
-        return NULL;
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (!m_pSpawnAssoc)
-        { return; }
-
-        if (pWho->IsTargetableForAttack() && m_creature->IsHostileTo(pWho))
-        {
-            Player* pPlayerTarget = pWho->GetTypeId() == TYPEID_PLAYER ? (Player*)pWho : NULL;
-
-            // airforce guards only spawn for players
-            if (!pPlayerTarget)
-            { return; }
-
-            Creature* pLastSpawnedGuard = m_spawnedGuid ? GetSummonedGuard() : NULL;
-
-            // prevent calling GetCreature at next MoveInLineOfSight call - speedup
-            if (!pLastSpawnedGuard)
-            { m_spawnedGuid.Clear(); }
-
-            switch (m_pSpawnAssoc->m_SpawnType)
+            if (pWho->IsTargetableForAttack() && m_creature->IsHostileTo(pWho))
             {
+                Player* pPlayerTarget = pWho->GetTypeId() == TYPEID_PLAYER ? (Player*)pWho : NULL;
+
+                // airforce guards only spawn for players
+                if (!pPlayerTarget)
+                {
+                    return;
+                }
+
+                Creature* pLastSpawnedGuard = m_spawnedGuid ? GetSummonedGuard() : NULL;
+
+                // prevent calling GetCreature at next MoveInLineOfSight call - speedup
+                if (!pLastSpawnedGuard)
+                {
+                    m_spawnedGuid.Clear();
+                }
+
+                switch (m_pSpawnAssoc->m_SpawnType)
+                {
                 case SPAWNTYPE_ALARMBOT:
                 {
                     if (!pWho->IsWithinDistInMap(m_creature, RANGE_GUARDS_MARK))
-                    { return; }
+                    {
+                        return;
+                    }
 
                     Aura* pMarkAura = pWho->GetAura(SPELL_GUARDS_MARK, EFFECT_INDEX_0);
                     if (pMarkAura)
@@ -206,22 +222,30 @@ struct npc_air_force_botsAI : public ScriptedAI
                             pLastSpawnedGuard = SummonGuard();
 
                             if (!pLastSpawnedGuard)
-                            { return; }
+                            {
+                                return;
+                            }
                         }
 
                         if (pMarkAura->GetAuraDuration() < AURA_DURATION_TIME_LEFT)
                         {
                             if (!pLastSpawnedGuard->getVictim())
-                            { pLastSpawnedGuard->AI()->AttackStart(pWho); }
+                            {
+                                pLastSpawnedGuard->AI()->AttackStart(pWho);
+                            }
                         }
                     }
                     else
                     {
                         if (!pLastSpawnedGuard)
-                        { pLastSpawnedGuard = SummonGuard(); }
+                        {
+                            pLastSpawnedGuard = SummonGuard();
+                        }
 
                         if (!pLastSpawnedGuard)
-                        { return; }
+                        {
+                            return;
+                        }
 
                         pLastSpawnedGuard->CastSpell(pWho, SPELL_GUARDS_MARK, true);
                     }
@@ -230,31 +254,40 @@ struct npc_air_force_botsAI : public ScriptedAI
                 case SPAWNTYPE_TRIPWIRE_ROOFTOP:
                 {
                     if (!pWho->IsWithinDistInMap(m_creature, RANGE_TRIPWIRE))
-                    { return; }
+                    {
+                        return;
+                    }
 
                     if (!pLastSpawnedGuard)
-                    { pLastSpawnedGuard = SummonGuard(); }
+                    {
+                        pLastSpawnedGuard = SummonGuard();
+                    }
 
                     if (!pLastSpawnedGuard)
-                    { return; }
+                    {
+                        return;
+                    }
 
                     // ROOFTOP only triggers if the player is on the ground
                     if (!pPlayerTarget->IsFlying())
                     {
                         if (!pLastSpawnedGuard->getVictim())
-                        { pLastSpawnedGuard->AI()->AttackStart(pWho); }
+                        {
+                            pLastSpawnedGuard->AI()->AttackStart(pWho);
+                        }
                     }
                     break;
                 }
+                }
             }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_air_force_botsAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_air_force_bots(Creature* pCreature)
-{
-    return new npc_air_force_botsAI(pCreature);
-}
 
 /*########
 # npc_chicken_cluck
@@ -271,107 +304,111 @@ enum
     FACTION_CHICKEN         = 31
 };
 
-struct npc_chicken_cluckAI : public ScriptedAI
+struct npc_chicken_cluck : public CreatureScript
 {
-    npc_chicken_cluckAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
+    npc_chicken_cluck() : CreatureScript("npc_chicken_cluck") {}
 
-    uint32 m_uiResetFlagTimer;
-
-    void Reset() override
+    struct npc_chicken_cluckAI : public ScriptedAI
     {
-        m_uiResetFlagTimer = 120000;
+        npc_chicken_cluckAI(Creature* pCreature) : ScriptedAI(pCreature) {}
 
-        m_creature->setFaction(FACTION_CHICKEN);
-        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-    }
+        uint32 m_uiResetFlagTimer;
 
-    void ReceiveEmote(Player* pPlayer, uint32 uiEmote) override
-    {
-        if (uiEmote == TEXTEMOTE_CHICKEN)
+        void Reset() override
         {
-            if (!urand(0, 29))
+            m_uiResetFlagTimer = 120000;
+
+            m_creature->setFaction(FACTION_CHICKEN);
+            m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+        }
+
+        void ReceiveEmote(Player* pPlayer, uint32 uiEmote) override
+        {
+            if (uiEmote == TEXTEMOTE_CHICKEN)
             {
-                if (pPlayer->GetQuestStatus(QUEST_CLUCK) == QUEST_STATUS_NONE)
+                if (!urand(0, 29))
+                {
+                    if (pPlayer->GetQuestStatus(QUEST_CLUCK) == QUEST_STATUS_NONE)
+                    {
+                        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                        m_creature->setFaction(FACTION_FRIENDLY);
+
+                        DoScriptText(EMOTE_A_HELLO, m_creature);
+
+                        /* are there any difference in texts, after 3.x ?
+                        if (pPlayer->GetTeam() == HORDE)
+                        DoScriptText(EMOTE_H_HELLO, m_creature);
+                        else
+                        DoScriptText(EMOTE_A_HELLO, m_creature);
+                        */
+                    }
+                }
+            }
+
+            if (uiEmote == TEXTEMOTE_CHEER)
+            {
+                if (pPlayer->GetQuestStatus(QUEST_CLUCK) == QUEST_STATUS_COMPLETE)
                 {
                     m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
                     m_creature->setFaction(FACTION_FRIENDLY);
-
-                    DoScriptText(EMOTE_A_HELLO, m_creature);
-
-                    /* are there any difference in texts, after 3.x ?
-                    if (pPlayer->GetTeam() == HORDE)
-                        DoScriptText(EMOTE_H_HELLO, m_creature);
-                    else
-                        DoScriptText(EMOTE_A_HELLO, m_creature);
-                    */
+                    DoScriptText(EMOTE_CLUCK_TEXT2, m_creature);
                 }
             }
         }
 
-        if (uiEmote == TEXTEMOTE_CHEER)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (pPlayer->GetQuestStatus(QUEST_CLUCK) == QUEST_STATUS_COMPLETE)
+            // Reset flags after a certain time has passed so that the next player has to start the 'event' again
+            if (m_creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER))
             {
-                m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-                m_creature->setFaction(FACTION_FRIENDLY);
-                DoScriptText(EMOTE_CLUCK_TEXT2, m_creature);
+                if (m_uiResetFlagTimer < uiDiff)
+                {
+                    EnterEvadeMode();
+                }
+                else
+                {
+                    m_uiResetFlagTimer -= uiDiff;
+                }
+            }
+
+            if (m_creature->SelectHostileTarget() && m_creature->getVictim())
+            {
+                DoMeleeAttackIfReady();
             }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_chicken_cluckAI(pCreature);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    bool OnQuestAccept(Player* /*pPlayer*/, Creature* pCreature, const Quest* pQuest) override
     {
-        // Reset flags after a certain time has passed so that the next player has to start the 'event' again
-        if (m_creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER))
+        if (pQuest->GetQuestId() == QUEST_CLUCK)
         {
-            if (m_uiResetFlagTimer < uiDiff)
+            if (npc_chicken_cluckAI* pChickenAI = dynamic_cast<npc_chicken_cluckAI*>(pCreature->AI()))
             {
-                EnterEvadeMode();
-            }
-            else
-            {
-                m_uiResetFlagTimer -= uiDiff;
+                pChickenAI->Reset();
             }
         }
 
-        if (m_creature->SelectHostileTarget() && m_creature->getVictim())
+        return true;
+    }
+
+    bool OnQuestRewarded(Player* /*pPlayer*/, Creature* pCreature, const Quest* pQuest) override
+    {
+        if (pQuest->GetQuestId() == QUEST_CLUCK)
         {
-            DoMeleeAttackIfReady();
+            if (npc_chicken_cluckAI* pChickenAI = dynamic_cast<npc_chicken_cluckAI*>(pCreature->AI()))
+            {
+                pChickenAI->Reset();
+            }
         }
+
+        return true;
     }
 };
-
-CreatureAI* GetAI_npc_chicken_cluck(Creature* pCreature)
-{
-    return new npc_chicken_cluckAI(pCreature);
-}
-
-bool QuestAccept_npc_chicken_cluck(Player* /*pPlayer*/, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_CLUCK)
-    {
-        if (npc_chicken_cluckAI* pChickenAI = dynamic_cast<npc_chicken_cluckAI*>(pCreature->AI()))
-        {
-            pChickenAI->Reset();
-        }
-    }
-
-    return true;
-}
-
-bool QuestRewarded_npc_chicken_cluck(Player* /*pPlayer*/, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_CLUCK)
-    {
-        if (npc_chicken_cluckAI* pChickenAI = dynamic_cast<npc_chicken_cluckAI*>(pCreature->AI()))
-        {
-            pChickenAI->Reset();
-        }
-    }
-
-    return true;
-}
-
 /*######
 ## npc_dancing_flames
 ######*/
@@ -381,40 +418,45 @@ enum
     SPELL_FIERY_SEDUCTION = 47057
 };
 
-struct npc_dancing_flamesAI : public ScriptedAI
+struct npc_dancing_flames : public CreatureScript
 {
-    npc_dancing_flamesAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
+    npc_dancing_flames() : CreatureScript("npc_dancing_flames") {}
 
-    void Reset() override {}
-
-    void ReceiveEmote(Player* pPlayer, uint32 uiEmote) override
+    struct npc_dancing_flamesAI : public ScriptedAI
     {
-        m_creature->SetFacingToObject(pPlayer);
+        npc_dancing_flamesAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-        if (pPlayer->HasAura(SPELL_FIERY_SEDUCTION))
-        { pPlayer->RemoveAurasDueToSpell(SPELL_FIERY_SEDUCTION); }
-
-        if (pPlayer->IsMounted())
+        void ReceiveEmote(Player* pPlayer, uint32 uiEmote) override
         {
-            pPlayer->Unmount();                             // doesnt remove mount aura
-            pPlayer->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
-        }
+            m_creature->SetFacingToObject(pPlayer);
 
-        switch (uiEmote)
-        {
+            if (pPlayer->HasAura(SPELL_FIERY_SEDUCTION))
+            {
+                pPlayer->RemoveAurasDueToSpell(SPELL_FIERY_SEDUCTION);
+            }
+
+            if (pPlayer->IsMounted())
+            {
+                pPlayer->Unmount();                             // doesnt remove mount aura
+                pPlayer->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+            }
+
+            switch (uiEmote)
+            {
             case TEXTEMOTE_DANCE: DoCastSpellIfCan(pPlayer, SPELL_FIERY_SEDUCTION); break;// dance -> cast SPELL_FIERY_SEDUCTION
             case TEXTEMOTE_WAVE:  m_creature->HandleEmote(EMOTE_ONESHOT_WAVE);      break;// wave -> wave
             case TEXTEMOTE_JOKE:  m_creature->HandleEmote(EMOTE_STATE_LAUGH);       break;// silly -> laugh(with sound)
             case TEXTEMOTE_BOW:   m_creature->HandleEmote(EMOTE_ONESHOT_BOW);       break;// bow -> bow
             case TEXTEMOTE_KISS:  m_creature->HandleEmote(TEXTEMOTE_CURTSEY);       break;// kiss -> curtsey
+            }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_dancing_flamesAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_dancing_flames(Creature* pCreature)
-{
-    return new npc_dancing_flamesAI(pCreature);
-}
 
 /*######
 ## Triage quest
@@ -489,70 +531,265 @@ const uint32 HordeSoldierId[3] =
 ## npc_doctor (handles both Gustaf Vanhowzen and Gregory Victor)
 ######*/
 
-struct npc_doctorAI : public ScriptedAI
+struct npc_doctor : public CreatureScript
 {
-    npc_doctorAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
+    npc_doctor() : CreatureScript("npc_doctor") {}
 
-    ObjectGuid m_playerGuid;
-
-    uint32 m_uiSummonPatientTimer;
-    uint32 m_uiSummonPatientCount;
-    uint32 m_uiPatientDiedCount;
-    uint32 m_uiPatientSavedCount;
-
-    bool m_bIsEventInProgress;
-
-    GuidList m_lPatientGuids;
-    std::vector<Location*> m_vPatientSummonCoordinates;
-
-    void Reset() override
+    struct npc_doctorAI : public ScriptedAI
     {
-        m_playerGuid.Clear();
+        npc_doctorAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-        m_uiSummonPatientTimer = 10000;
-        m_uiSummonPatientCount = 0;
-        m_uiPatientDiedCount = 0;
-        m_uiPatientSavedCount = 0;
+        ObjectGuid m_playerGuid;
 
-        m_lPatientGuids.clear();
-        m_vPatientSummonCoordinates.clear();
+        uint32 m_uiSummonPatientTimer;
+        uint32 m_uiSummonPatientCount;
+        uint32 m_uiPatientDiedCount;
+        uint32 m_uiPatientSavedCount;
 
-        m_bIsEventInProgress = false;
+        bool m_bIsEventInProgress;
 
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        GuidList m_lPatientGuids;
+        std::vector<Location*> m_vPatientSummonCoordinates;
+
+        void Reset() override
+        {
+            m_playerGuid.Clear();
+
+            m_uiSummonPatientTimer = 10000;
+            m_uiSummonPatientCount = 0;
+            m_uiPatientDiedCount = 0;
+            m_uiPatientSavedCount = 0;
+
+            m_lPatientGuids.clear();
+            if (!m_vPatientSummonCoordinates.empty())
+            {
+                for (std::vector<Location*>::iterator itr = m_vPatientSummonCoordinates.begin(); itr != m_vPatientSummonCoordinates.end(); ++itr)
+                    delete (*itr);
+                m_vPatientSummonCoordinates.clear();
+            }
+
+            m_bIsEventInProgress = false;
+
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        }
+
+        void BeginEvent(Player* pPlayer)
+        {
+            m_playerGuid = pPlayer->GetObjectGuid();
+
+            m_uiSummonPatientTimer = 10000;
+            m_uiSummonPatientCount = 0;
+            m_uiPatientDiedCount = 0;
+            m_uiPatientSavedCount = 0;
+
+            switch (m_creature->GetEntry())
+            {
+            case DOCTOR_ALLIANCE:
+                for (uint8 i = 0; i < ALLIANCE_COORDS; ++i)
+                {
+                    m_vPatientSummonCoordinates.push_back(new Location(AllianceCoords[i]));
+                }
+                break;
+            case DOCTOR_HORDE:
+                for (uint8 i = 0; i < HORDE_COORDS; ++i)
+                {
+                    m_vPatientSummonCoordinates.push_back(new Location(HordeCoords[i]));
+                }
+                break;
+            }
+
+            m_bIsEventInProgress = true;
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        }
+
+        void PatientDied(Location* pPoint)
+        {
+            Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
+
+            if (pPlayer && (pPlayer->GetQuestStatus(6624) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(6622) == QUEST_STATUS_INCOMPLETE))
+            {
+                ++m_uiPatientDiedCount;
+
+                if (m_uiPatientDiedCount > 5 && m_bIsEventInProgress)
+                {
+                    if (pPlayer->GetQuestStatus(QUEST_TRIAGE_A) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        pPlayer->FailQuest(QUEST_TRIAGE_A);
+                    }
+                    else if (pPlayer->GetQuestStatus(QUEST_TRIAGE_H) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        pPlayer->FailQuest(QUEST_TRIAGE_H);
+                    }
+
+                    Reset();
+                    return;
+                }
+
+                m_vPatientSummonCoordinates.push_back(pPoint);
+            }
+            else
+                // If no player or player abandon quest in progress
+            {
+                Reset();
+            }
+        }
+
+        void PatientSaved(Creature* /*soldier*/, Player* pPlayer, Location* pPoint)
+        {
+            if (pPlayer && m_playerGuid == pPlayer->GetObjectGuid())
+            {
+                if (pPlayer->GetQuestStatus(QUEST_TRIAGE_A) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(QUEST_TRIAGE_H) == QUEST_STATUS_INCOMPLETE)
+                {
+                    ++m_uiPatientSavedCount;
+
+                    if (m_uiPatientSavedCount == 15)
+                    {
+                        for (GuidList::const_iterator itr = m_lPatientGuids.begin(); itr != m_lPatientGuids.end(); ++itr)
+                        {
+                            if (Creature* Patient = m_creature->GetMap()->GetCreature(*itr))
+                            {
+                                Patient->SetDeathState(JUST_DIED);
+                            }
+                        }
+
+                        if (pPlayer->GetQuestStatus(QUEST_TRIAGE_A) == QUEST_STATUS_INCOMPLETE)
+                        {
+                            pPlayer->GroupEventHappens(QUEST_TRIAGE_A, m_creature);
+                        }
+                        else if (pPlayer->GetQuestStatus(QUEST_TRIAGE_H) == QUEST_STATUS_INCOMPLETE)
+                        {
+                            pPlayer->GroupEventHappens(QUEST_TRIAGE_H, m_creature);
+                        }
+
+                        Reset();
+                        return;
+                    }
+
+                    m_vPatientSummonCoordinates.push_back(pPoint);
+                }
+            }
+        }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+        {
+            Location *loc = new Location();
+            loc->x = pSender->GetPositionX();
+            loc->y = pSender->GetPositionY();
+            loc->z = pSender->GetPositionZ();
+            loc->o = pSender->GetOrientation();
+            if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetTypeId() == TYPEID_PLAYER)
+            {
+                PatientSaved(pSender, pInvoker->ToPlayer(), loc);
+            }
+            else if (eventType == AI_EVENT_CUSTOM_B && pInvoker == pSender)
+            {
+                PatientDied(loc);
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_bIsEventInProgress && m_uiSummonPatientCount >= 20)
+            {
+                Reset();
+                return;
+            }
+
+            if (m_bIsEventInProgress && !m_vPatientSummonCoordinates.empty())
+            {
+                if (m_uiSummonPatientTimer < uiDiff)
+                {
+                    std::vector<Location*>::iterator itr = m_vPatientSummonCoordinates.begin() + urand(0, m_vPatientSummonCoordinates.size() - 1);
+                    uint32 patientEntry = 0;
+
+                    switch (m_creature->GetEntry())
+                    {
+                    case DOCTOR_ALLIANCE:
+                        patientEntry = AllianceSoldierId[urand(0, 2)];
+                        break;
+                    case DOCTOR_HORDE:
+                        patientEntry = HordeSoldierId[urand(0, 2)];
+                        break;
+                    default:
+                        script_error_log("Invalid entry for Triage doctor. Please check your database");
+                        return;
+                    }
+
+                    if (Creature* Patient = m_creature->SummonCreature(patientEntry, (*itr)->x, (*itr)->y, (*itr)->z, (*itr)->o, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000))
+                    {
+                // 303, this flag appear to be required for client side item->spell to work (TARGET_SINGLE_FRIEND)
+                Patient->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+
+                        m_lPatientGuids.push_back(Patient->GetObjectGuid());
+
+                        if (CreatureAI* pPatientAI = Patient->AI())
+                        {
+                            SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, Patient);
+                            //pPatientAI->m_doctorGuid = m_creature->GetObjectGuid();
+                            //pPatientAI->m_pCoord = *itr;
+                            delete (*itr);
+                            m_vPatientSummonCoordinates.erase(itr);
+                        }
+                    }
+                    m_uiSummonPatientTimer = 10000;
+                    ++m_uiSummonPatientCount;
+                }
+                else
+                {
+                    m_uiSummonPatientTimer -= uiDiff;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_doctorAI(pCreature);
     }
 
-    void BeginEvent(Player* pPlayer);
-    void PatientDied(Location* pPoint);
-    void PatientSaved(Creature* pSoldier, Player* pPlayer, Location* pPoint);
-    void UpdateAI(const uint32 uiDiff) override;
+    bool OnQuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest) override
+    {
+        if ((pQuest->GetQuestId() == QUEST_TRIAGE_A) || (pQuest->GetQuestId() == QUEST_TRIAGE_H))
+        {
+            if (npc_doctorAI* pDocAI = dynamic_cast<npc_doctorAI*>(pCreature->AI()))
+            {
+                pDocAI->BeginEvent(pPlayer);
+            }
+        }
+
+        return true;
+    }
 };
 
 /*#####
 ## npc_injured_patient (handles all the patients, no matter Horde or Alliance)
 #####*/
 
-struct npc_injured_patientAI : public ScriptedAI
+struct npc_injured_patient : public CreatureScript
 {
-    npc_injured_patientAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
+    npc_injured_patient() : CreatureScript("npc_injured_patient") {}
 
-    ObjectGuid m_doctorGuid;
-    Location* m_pCoord;
-
-    void Reset() override
+    struct npc_injured_patientAI : public ScriptedAI
     {
-        m_doctorGuid.Clear();
-        m_pCoord = NULL;
+        npc_injured_patientAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-        // no select
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        // no regen health
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
-        // to make them lay with face down
-        m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+        ObjectGuid m_doctorGuid;
+        Location* m_pCoord;
 
-        switch (m_creature->GetEntry())
+        void Reset() override
         {
+            m_doctorGuid.Clear();
+            m_pCoord = NULL;
+
+            // no select
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            // no regen health
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+            // to make them lay with face down
+            m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+
+            switch (m_creature->GetEntry())
+            {
                 // lower max health
             case 12923:
             case 12938:                                     // Injured Soldier
@@ -566,37 +803,38 @@ struct npc_injured_patientAI : public ScriptedAI
             case 12937:                                     // Critically injured Soldier
                 m_creature->SetHealth(uint32(m_creature->GetMaxHealth()*.25));
                 break;
+            }
         }
-    }
 
-    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
-    {
-        if (pCaster->GetTypeId() == TYPEID_PLAYER && m_creature->IsAlive() && pSpell->Id == 20804)
+        void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
         {
-            Player* pPlayer = static_cast<Player*>(pCaster);
-            if (pPlayer->GetQuestStatus(6624) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(6622) == QUEST_STATUS_INCOMPLETE)
+            if (pCaster->GetTypeId() == TYPEID_PLAYER && m_creature->IsAlive() && pSpell->Id == 20804)
             {
-                if (Creature* pDoctor = m_creature->GetMap()->GetCreature(m_doctorGuid))
+                Player* pPlayer = static_cast<Player*>(pCaster);
+                if (pPlayer->GetQuestStatus(6624) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(6622) == QUEST_STATUS_INCOMPLETE)
                 {
-                    if (npc_doctorAI* pDocAI = dynamic_cast<npc_doctorAI*>(pDoctor->AI()))
+                    if (Creature* pDoctor = m_creature->GetMap()->GetCreature(m_doctorGuid))
                     {
-                        pDocAI->PatientSaved(m_creature, pPlayer, m_pCoord);
+                        if (CreatureAI* pDocAI = pDoctor->AI())
+                        {
+                            SendAIEvent(AI_EVENT_CUSTOM_A, pPlayer, pDoctor);
+                            //pDocAI->PatientSaved(m_creature, pPlayer, m_pCoord);
+                        }
                     }
                 }
-            }		
-			
-            // quick boost to health to prevent death before next tick can occur
-            m_creature->SetHealth(uint32(m_creature->GetMaxHealth()*0.20));
-			
-            // make not selectable
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            // regen health
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
-            // stand up
-            m_creature->SetStandState(UNIT_STAND_STATE_STAND);
 
-            switch (urand(0, 2))
-            {
+                // quick boost to health to prevent death before next tick can occur
+                m_creature->SetHealth(uint32(m_creature->GetMaxHealth()*0.20));
+
+                // make not selectable
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                // regen health
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+                // stand up
+                m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+
+                switch (urand(0, 2))
+                {
                 case 0:
                     DoScriptText(SAY_DOC1, m_creature);
                     break;
@@ -606,12 +844,12 @@ struct npc_injured_patientAI : public ScriptedAI
                 case 2:
                     DoScriptText(SAY_DOC3, m_creature);
                     break;
-            }
+                }
 
-            m_creature->SetWalk(false);
+                m_creature->SetWalk(false);
 
-            switch (m_creature->GetEntry())
-            {
+                switch (m_creature->GetEntry())
+                {
                 case 12923:
                 case 12924:
                 case 12925:
@@ -622,212 +860,57 @@ struct npc_injured_patientAI : public ScriptedAI
                 case 12938:
                     m_creature->GetMotionMaster()->MovePoint(0, A_RUNTOX, A_RUNTOY, A_RUNTOZ);
                     break;
-            }
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        // lower HP on every world tick makes it a useful counter, not officlone though
-        uint32 uiHPLose = uint32(0.05f * uiDiff);
-        if (m_creature->IsAlive() && m_creature->GetHealth() > 1 + uiHPLose)
-        {
-            m_creature->SetHealth(m_creature->GetHealth() - uiHPLose);
-        }
-
-        if (m_creature->IsAlive() && m_creature->GetHealth() <= 1 + uiHPLose)
-        {
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            m_creature->SetDeathState(JUST_DIED);
-            m_creature->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
-
-            if (Creature* pDoctor = m_creature->GetMap()->GetCreature(m_doctorGuid))
-            {
-                if (npc_doctorAI* pDocAI = dynamic_cast<npc_doctorAI*>(pDoctor->AI()))
-                {
-                    pDocAI->PatientDied(m_pCoord);
                 }
             }
         }
-    }
-};
 
-CreatureAI* GetAI_npc_injured_patient(Creature* pCreature)
-{
-    return new npc_injured_patientAI(pCreature);
-}
-
-/*
-npc_doctor (continue)
-*/
-
-void npc_doctorAI::BeginEvent(Player* pPlayer)
-{
-    m_playerGuid = pPlayer->GetObjectGuid();
-
-    m_uiSummonPatientTimer = 10000;
-    m_uiSummonPatientCount = 0;
-    m_uiPatientDiedCount = 0;
-    m_uiPatientSavedCount = 0;
-
-    switch (m_creature->GetEntry())
-    {
-        case DOCTOR_ALLIANCE:
-            for (uint8 i = 0; i < ALLIANCE_COORDS; ++i)
-            {
-                m_vPatientSummonCoordinates.push_back(&AllianceCoords[i]);
-            }
-            break;
-        case DOCTOR_HORDE:
-            for (uint8 i = 0; i < HORDE_COORDS; ++i)
-            {
-                m_vPatientSummonCoordinates.push_back(&HordeCoords[i]);
-            }
-            break;
-    }
-
-    m_bIsEventInProgress = true;
-    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-}
-
-void npc_doctorAI::PatientDied(Location* pPoint)
-{
-    Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
-
-    if (pPlayer && (pPlayer->GetQuestStatus(6624) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(6622) == QUEST_STATUS_INCOMPLETE))
-    {
-        ++m_uiPatientDiedCount;
-
-        if (m_uiPatientDiedCount > 5 && m_bIsEventInProgress)
+        void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*uiMiscValue*/) override
         {
-            if (pPlayer->GetQuestStatus(QUEST_TRIAGE_A) == QUEST_STATUS_INCOMPLETE)
+            if (eventType == AI_EVENT_CUSTOM_A && (pSender->GetEntry() == DOCTOR_ALLIANCE || pSender->GetEntry() == DOCTOR_HORDE))
             {
-                pPlayer->FailQuest(QUEST_TRIAGE_A);
+                if (!m_pCoord)
+                    m_pCoord = new Location();
+                m_pCoord->x = m_creature->GetPositionX();
+                m_pCoord->y = m_creature->GetPositionY();
+                m_pCoord->z = m_creature->GetPositionZ();
+                m_pCoord->o = m_creature->GetOrientation();
+                m_doctorGuid = pSender->GetObjectGuid();
             }
-            else if (pPlayer->GetQuestStatus(QUEST_TRIAGE_H) == QUEST_STATUS_INCOMPLETE)
-            {
-                pPlayer->FailQuest(QUEST_TRIAGE_H);
-            }
-
-            Reset();
-            return;
         }
 
-        m_vPatientSummonCoordinates.push_back(pPoint);
-    }
-    else
-        // If no player or player abandon quest in progress
-    {
-        Reset();
-    }
-}
-
-void npc_doctorAI::PatientSaved(Creature* /*soldier*/, Player* pPlayer, Location* pPoint)
-{
-    if (pPlayer && m_playerGuid == pPlayer->GetObjectGuid())
-    {
-        if (pPlayer->GetQuestStatus(QUEST_TRIAGE_A) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(QUEST_TRIAGE_H) == QUEST_STATUS_INCOMPLETE)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            ++m_uiPatientSavedCount;
-
-            if (m_uiPatientSavedCount == 15)
+            // lower HP on every world tick makes it a useful counter, not officlone though
+            uint32 uiHPLose = uint32(0.03f * uiDiff);
+            if (m_creature->IsAlive() && m_creature->GetHealth() > 1 + uiHPLose)
             {
-                for (GuidList::const_iterator itr = m_lPatientGuids.begin(); itr != m_lPatientGuids.end(); ++itr)
+                m_creature->SetHealth(m_creature->GetHealth() - uiHPLose);
+            }
+
+            if (m_creature->IsAlive() && m_creature->GetHealth() <= 1 + uiHPLose)
+            {
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->SetDeathState(JUST_DIED);
+                m_creature->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
+
+                if (Creature* pDoctor = m_creature->GetMap()->GetCreature(m_doctorGuid))
                 {
-                    if (Creature* Patient = m_creature->GetMap()->GetCreature(*itr))
+                    if (CreatureAI* pDocAI = pDoctor->AI())
                     {
-                        Patient->SetDeathState(JUST_DIED);
+                        SendAIEvent(AI_EVENT_CUSTOM_B, m_creature, pDoctor);
+                        //pDocAI->PatientDied(m_pCoord);
                     }
                 }
-
-                if (pPlayer->GetQuestStatus(QUEST_TRIAGE_A) == QUEST_STATUS_INCOMPLETE)
-                {
-                    pPlayer->GroupEventHappens(QUEST_TRIAGE_A, m_creature);
-                }
-                else if (pPlayer->GetQuestStatus(QUEST_TRIAGE_H) == QUEST_STATUS_INCOMPLETE)
-                {
-                    pPlayer->GroupEventHappens(QUEST_TRIAGE_H, m_creature);
-                }
-
-                Reset();
-                return;
             }
-
-            m_vPatientSummonCoordinates.push_back(pPoint);
         }
-    }
-}
+    };
 
-void npc_doctorAI::UpdateAI(const uint32 uiDiff)
-{
-    if (m_bIsEventInProgress && m_uiSummonPatientCount >= 20)
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        Reset();
-        return;
+        return new npc_injured_patientAI(pCreature);
     }
-
-    if (m_bIsEventInProgress && !m_vPatientSummonCoordinates.empty())
-    {
-        if (m_uiSummonPatientTimer < uiDiff)
-        {
-            std::vector<Location*>::iterator itr = m_vPatientSummonCoordinates.begin() + urand(0, m_vPatientSummonCoordinates.size() - 1);
-            uint32 patientEntry = 0;
-
-            switch (m_creature->GetEntry())
-            {
-                case DOCTOR_ALLIANCE:
-                    patientEntry = AllianceSoldierId[urand(0, 2)];
-                    break;
-                case DOCTOR_HORDE:
-                    patientEntry = HordeSoldierId[urand(0, 2)];
-                    break;
-                default:
-                    script_error_log("Invalid entry for Triage doctor. Please check your database");
-                    return;
-            }
-
-            if (Creature* Patient = m_creature->SummonCreature(patientEntry, (*itr)->x, (*itr)->y, (*itr)->z, (*itr)->o, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000))
-            {
-                // 303, this flag appear to be required for client side item->spell to work (TARGET_SINGLE_FRIEND)
-                Patient->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
-
-                m_lPatientGuids.push_back(Patient->GetObjectGuid());
-
-                if (npc_injured_patientAI* pPatientAI = dynamic_cast<npc_injured_patientAI*>(Patient->AI()))
-                {
-                    pPatientAI->m_doctorGuid = m_creature->GetObjectGuid();
-                    pPatientAI->m_pCoord = *itr;
-                    m_vPatientSummonCoordinates.erase(itr);
-                }
-            }
-            m_uiSummonPatientTimer = 10000;
-            ++m_uiSummonPatientCount;
-        }
-        else
-        {
-            m_uiSummonPatientTimer -= uiDiff;
-        }
-    }
-}
-
-bool QuestAccept_npc_doctor(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    if ((pQuest->GetQuestId() == QUEST_TRIAGE_A) || (pQuest->GetQuestId() == QUEST_TRIAGE_H))
-    {
-        if (npc_doctorAI* pDocAI = dynamic_cast<npc_doctorAI*>(pCreature->AI()))
-        {
-            pDocAI->BeginEvent(pPlayer);
-        }
-    }
-
-    return true;
-}
-
-CreatureAI* GetAI_npc_doctor(Creature* pCreature)
-{
-    return new npc_doctorAI(pCreature);
-}
+};
 
 /*######
 ## npc_garments_of_quests
@@ -863,52 +946,56 @@ enum
     SAY_SHAYA_GOODBYE       = -1000263,
 };
 
-struct npc_garments_of_questsAI : public npc_escortAI
+struct npc_garments_of_quests : public CreatureScript
 {
-    npc_garments_of_questsAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+    npc_garments_of_quests() : CreatureScript("npc_garments_of_quests") {}
 
-    ObjectGuid m_playerGuid;
-
-    bool m_bIsHealed;
-    bool m_bCanRun;
-
-    uint32 m_uiRunAwayTimer;
-
-    void Reset() override
+    struct npc_garments_of_questsAI : public npc_escortAI
     {
-        m_playerGuid.Clear();
+        npc_garments_of_questsAI(Creature* pCreature) : npc_escortAI(pCreature) { }
 
-        m_bIsHealed = false;
-        m_bCanRun = false;
+        ObjectGuid m_playerGuid;
 
-        m_uiRunAwayTimer = 5000;
+        bool m_bIsHealed;
+        bool m_bCanRun;
 
-        m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
-        // expect database to have RegenHealth=0
-        m_creature->SetHealth(int(m_creature->GetMaxHealth() * 0.7));
-        m_creature->SetPvP(true);   // allow the mob to be healed by player
-    }
+        uint32 m_uiRunAwayTimer;
 
-    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
-    {
-        if (pSpell->Id == SPELL_LESSER_HEAL_R2 || pSpell->Id == SPELL_FORTITUDE_R1)
+        void Reset() override
         {
-            // not while in combat
-            if (m_creature->IsInCombat())
-            {
-                return;
-            }
+            m_playerGuid.Clear();
 
-            // nothing to be done now
-            if (m_bIsHealed && m_bCanRun)
-            {
-                return;
-            }
+            m_bIsHealed = false;
+            m_bCanRun = false;
 
-            if (pCaster->GetTypeId() == TYPEID_PLAYER)
+            m_uiRunAwayTimer = 5000;
+
+            m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
+            // expect database to have RegenHealth=0
+            m_creature->SetHealth(int(m_creature->GetMaxHealth() * 0.7));
+            m_creature->SetPvP(true);   // allow the mob to be healed by player
+        }
+
+        void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
+        {
+            if (pSpell->Id == SPELL_LESSER_HEAL_R2 || pSpell->Id == SPELL_FORTITUDE_R1)
             {
-                switch (m_creature->GetEntry())
+                // not while in combat
+                if (m_creature->IsInCombat())
                 {
+                    return;
+                }
+
+                // nothing to be done now
+                if (m_bIsHealed && m_bCanRun)
+                {
+                    return;
+                }
+
+                if (pCaster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    switch (m_creature->GetEntry())
+                    {
                     case ENTRY_SHAYA:
                         if (((Player*)pCaster)->GetQuestStatus(QUEST_MOON) == QUEST_STATUS_INCOMPLETE)
                         {
@@ -994,29 +1081,29 @@ struct npc_garments_of_questsAI : public npc_escortAI
                             }
                         }
                         break;
-                }
+                    }
 
-                // give quest credit, not expect any special quest objectives
-                if (m_bCanRun)
-                {
-                    ((Player*)pCaster)->TalkedToCreature(m_creature->GetEntry(), m_creature->GetObjectGuid());
+                    // give quest credit, not expect any special quest objectives
+                    if (m_bCanRun)
+                    {
+                        ((Player*)pCaster)->TalkedToCreature(m_creature->GetEntry(), m_creature->GetObjectGuid());
+                    }
                 }
             }
         }
-    }
 
-    void WaypointReached(uint32 /*uiPointId*/) override {}
+        void WaypointReached(uint32 /*uiPointId*/) override {}
 
-    void UpdateEscortAI(const uint32 uiDiff) override
-    {
-        if (m_bCanRun && !m_creature->IsInCombat())
+        void UpdateEscortAI(const uint32 uiDiff) override
         {
-            if (m_uiRunAwayTimer <= uiDiff)
+            if (m_bCanRun && !m_creature->IsInCombat())
             {
-                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                if (m_uiRunAwayTimer <= uiDiff)
                 {
-                    switch (m_creature->GetEntry())
+                    if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
                     {
+                        switch (m_creature->GetEntry())
+                        {
                         case ENTRY_SHAYA:
                             DoScriptText(SAY_SHAYA_GOODBYE, m_creature, pPlayer);
                             break;
@@ -1032,36 +1119,37 @@ struct npc_garments_of_questsAI : public npc_escortAI
                         case ENTRY_DG_KEL:
                             DoScriptText(SAY_DG_KEL_GOODBYE, m_creature, pPlayer);
                             break;
+                        }
+
+                        Start(true);
+                    }
+                    else
+                    {
+                        EnterEvadeMode();    // something went wrong
                     }
 
-                    Start(true);
+                    m_uiRunAwayTimer = 30000;
                 }
                 else
                 {
-                    EnterEvadeMode();    // something went wrong
+                    m_uiRunAwayTimer -= uiDiff;
                 }
-
-                m_uiRunAwayTimer = 30000;
             }
-            else
+
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             {
-                m_uiRunAwayTimer -= uiDiff;
+                return;
             }
-        }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        {
-            return;
+            DoMeleeAttackIfReady();
         }
+    };
 
-        DoMeleeAttackIfReady();
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_garments_of_questsAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_garments_of_quests(Creature* pCreature)
-{
-    return new npc_garments_of_questsAI(pCreature);
-}
 
 /*######
 ## npc_guardian
@@ -1069,33 +1157,38 @@ CreatureAI* GetAI_npc_garments_of_quests(Creature* pCreature)
 
 #define SPELL_DEATHTOUCH                5
 
-struct npc_guardianAI : public ScriptedAI
+struct npc_guardian : public CreatureScript
 {
-    npc_guardianAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
+    npc_guardian() : CreatureScript("npc_guardian") {}
 
-    void Reset() override
+    struct npc_guardianAI : public ScriptedAI
     {
-    }
+        npc_guardianAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
-    void UpdateAI(const uint32 /*diff*/) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        void Reset() override
         {
-            return;
         }
 
-        if (m_creature->isAttackReady())
+        void UpdateAI(const uint32 /*diff*/) override
         {
-            m_creature->CastSpell(m_creature->getVictim(), SPELL_DEATHTOUCH, true);
-            m_creature->resetAttackTimer();
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_creature->isAttackReady())
+            {
+                m_creature->CastSpell(m_creature->getVictim(), SPELL_DEATHTOUCH, true);
+                m_creature->resetAttackTimer();
+            }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_guardianAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_guardian(Creature* pCreature)
-{
-    return new npc_guardianAI(pCreature);
-}
 
 /*########
 # npc_innkeeper
@@ -1112,39 +1205,46 @@ enum
     SPELL_TRICK_OR_TREAT            = 24751,                // create item or random buff
     SPELL_TRICK_OR_TREATED          = 24755,                // buff player get when tricked or treated
 };
-
+//TODO prepare for localisation
 #define GOSSIP_ITEM_TRICK_OR_TREAT  "Trick or Treat!"
 #define GOSSIP_ITEM_WHAT_TO_DO      "What can I do at an Inn?"
 
-bool GossipHello_npc_innkeeper(Player* pPlayer, Creature* pCreature)
+struct npc_innkeeper : public CreatureScript
 {
-    pPlayer->PrepareGossipMenu(pCreature, pPlayer->GetDefaultGossipMenuForSource(pCreature));
+    npc_innkeeper() : CreatureScript("npc_innkeeper") {}
 
-    if (IsHolidayActive(HOLIDAY_HALLOWS_END) && !pPlayer->HasAura(SPELL_TRICK_OR_TREATED, EFFECT_INDEX_0))
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TRICK_OR_TREAT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-    }
+        pPlayer->PrepareGossipMenu(pCreature, pPlayer->GetDefaultGossipMenuForSource(pCreature));
 
-    // Should only apply to innkeeper close to start areas.
-    if (AreaTableEntry const* pAreaEntry = GetAreaEntryByAreaID(pCreature->GetAreaId()))
-    {
+        if (IsHolidayActive(HOLIDAY_HALLOWS_END) && !pPlayer->HasAura(SPELL_TRICK_OR_TREATED, EFFECT_INDEX_0))
+        {
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TRICK_OR_TREAT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+        }
+
+        // Should only apply to innkeeper close to start areas.
+        if (AreaTableEntry const* pAreaEntry = GetAreaEntryByAreaID(pCreature->GetAreaId()))
+        {
         if (pAreaEntry->flags & AREA_FLAG_LOWLEVEL)
-        { pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_WHAT_TO_DO, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1); }
+            {
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_WHAT_TO_DO, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            }
+        }
+
+        pPlayer->TalkedToCreature(pCreature->GetEntry(), pCreature->GetObjectGuid());
+        pPlayer->SendPreparedGossip(pCreature);
+        return true;
     }
 
-    pPlayer->TalkedToCreature(pCreature->GetEntry(), pCreature->GetObjectGuid());
-    pPlayer->SendPreparedGossip(pCreature);
-    return true;
-}
-
-bool GossipSelect_npc_innkeeper(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
-{
-    switch (uiAction)
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction) override
     {
-        case GOSSIP_ACTION_INFO_DEF+1:
+        pPlayer->PlayerTalkClass->ClearMenus();
+        switch (uiAction)
+        {
+        case GOSSIP_ACTION_INFO_DEF + 1:
             pPlayer->SEND_GOSSIP_MENU(TEXT_ID_WHAT_TO_DO, pCreature->GetObjectGuid());
             break;
-        case GOSSIP_ACTION_INFO_DEF+2:
+        case GOSSIP_ACTION_INFO_DEF + 2:
             pPlayer->CLOSE_GOSSIP_MENU();
             pCreature->CastSpell(pPlayer, SPELL_TRICK_OR_TREAT, true);
             break;
@@ -1155,10 +1255,11 @@ bool GossipSelect_npc_innkeeper(Player* pPlayer, Creature* pCreature, uint32 /*u
             pPlayer->CLOSE_GOSSIP_MENU();
             pPlayer->SetBindPoint(pCreature->GetObjectGuid());
             break;
-    }
+        }
 
-    return true;
-}
+        return true;
+    }
+};
 
 /*######
 ## npc_spring_rabbit
@@ -1180,7 +1281,7 @@ static const float DIST_START_EVENT = 15.0f;                // Guesswork
 
 struct  npc_spring_rabbitAI : public ScriptedPetAI
 {
-    npc_spring_rabbitAI(Creature* pCreature) : ScriptedPetAI(pCreature) { Reset(); }
+    npc_spring_rabbitAI(Creature* pCreature) : ScriptedPetAI(pCreature) { }
 
     ObjectGuid m_partnerGuid;
     uint32 m_uiStep;
@@ -1349,166 +1450,204 @@ enum
     SAY_HEAL                    = -1000187,
 
     SPELL_SYMBOL_OF_LIFE        = 8593,
-    SPELL_SHIMMERING_VESSEL     = 31225,
+    SPELL_SHIMMERING_VESSEL     = 31225,    //TODO [-Zero]? no such spell
     SPELL_REVIVE_SELF           = 32343,
 
     NPC_FURBOLG_SHAMAN          = 17542,        // draenei side
     NPC_BLOOD_KNIGHT            = 17768,        // blood elf side
 };
 
-struct npc_redemption_targetAI : public ScriptedAI
+struct npc_redemption_target : public CreatureScript
 {
-    npc_redemption_targetAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_redemption_target() : CreatureScript("npc_redemption_target") {}
 
-    uint32 m_uiEvadeTimer;
-    uint32 m_uiHealTimer;
-
-    ObjectGuid m_playerGuid;
-
-    void Reset() override
+    struct npc_redemption_targetAI : public ScriptedAI
     {
-        m_uiEvadeTimer = 0;
-        m_uiHealTimer  = 0;
+        npc_redemption_targetAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-        m_creature->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
-        m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
-    }
+        uint32 m_uiEvadeTimer;
+        uint32 m_uiHealTimer;
 
-    void DoReviveSelf(ObjectGuid m_guid)
-    {
-        // Wait until he resets again
-        if (m_uiEvadeTimer)
+        ObjectGuid m_playerGuid;
+
+        void Reset() override
         {
-            return;
+            m_uiEvadeTimer = 0;
+            m_uiHealTimer = 0;
+
+            m_creature->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
+            m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
         }
 
-        DoCastSpellIfCan(m_creature, SPELL_REVIVE_SELF);
-        m_creature->SetDeathState(JUST_ALIVED);
-        m_playerGuid = m_guid;
-        m_uiHealTimer = 2000;
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiHealTimer)
+        void DoReviveSelf(ObjectGuid m_guid)
         {
-            if (m_uiHealTimer <= uiDiff)
+            // Wait until he resets again
+            if (m_uiEvadeTimer)
             {
-                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                return;
+            }
+
+            DoCastSpellIfCan(m_creature, SPELL_REVIVE_SELF);
+            m_creature->SetDeathState(JUST_ALIVED);
+            m_playerGuid = m_guid;
+            m_uiHealTimer = 2000;
+        }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+        {
+            if (eventType == AI_EVENT_CUSTOM_A && pSender == m_creature)
+            {
+                DoReviveSelf(pInvoker->GetObjectGuid());
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiHealTimer)
+            {
+                if (m_uiHealTimer <= uiDiff)
                 {
-                    DoScriptText(SAY_HEAL, m_creature, pPlayer);
-
-                    // Quests 9600 and 9685 requires kill credit
-                    if (m_creature->GetEntry() == NPC_FURBOLG_SHAMAN || m_creature->GetEntry() == NPC_BLOOD_KNIGHT)
+                    if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
                     {
-                        pPlayer->KilledMonsterCredit(m_creature->GetEntry(), m_creature->GetObjectGuid());
+                        DoScriptText(SAY_HEAL, m_creature, pPlayer);
+
+                        // Quests 9600 and 9685 requires kill credit
+                        if (m_creature->GetEntry() == NPC_FURBOLG_SHAMAN || m_creature->GetEntry() == NPC_BLOOD_KNIGHT)
+                        {
+                            pPlayer->KilledMonsterCredit(m_creature->GetEntry(), m_creature->GetObjectGuid());
+                        }
                     }
+
+                    m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
+                    m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+                    m_uiHealTimer = 0;
+                    m_uiEvadeTimer = 2 * MINUTE * IN_MILLISECONDS;
                 }
-
-                m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
-                m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-                m_uiHealTimer = 0;
-                m_uiEvadeTimer = 2 * MINUTE * IN_MILLISECONDS;
+                else
+                {
+                    m_uiHealTimer -= uiDiff;
+                }
             }
-            else
-            {
-                m_uiHealTimer -= uiDiff;
-            }
-        }
 
-        if (m_uiEvadeTimer)
-        {
-            if (m_uiEvadeTimer <= uiDiff)
+            if (m_uiEvadeTimer)
             {
-                EnterEvadeMode();
+                if (m_uiEvadeTimer <= uiDiff)
+                {
+                    EnterEvadeMode();
                 m_uiEvadeTimer = 0;
-            }
-            else
-            {
-                m_uiEvadeTimer -= uiDiff;
+                }
+                else
+                {
+                    m_uiEvadeTimer -= uiDiff;
+                }
             }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_redemption_targetAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_npc_redemption_target(Creature* pCreature)
+struct spell_symbol_of_life : public SpellScript
 {
-    return new npc_redemption_targetAI(pCreature);
-}
+    spell_symbol_of_life() : SpellScript("spell_symbol_of_life") {}
 
-bool EffectDummyCreature_npc_redemption_target(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
-{
-    // always check spellid and effectindex
-    if ((uiSpellId == SPELL_SYMBOL_OF_LIFE || uiSpellId == SPELL_SHIMMERING_VESSEL) && uiEffIndex == EFFECT_INDEX_0)
+    bool EffectDummy(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Object* pTarget, ObjectGuid /*originalCasterGuid*/) override
     {
-        if (npc_redemption_targetAI* pTargetAI = dynamic_cast<npc_redemption_targetAI*>(pCreatureTarget->AI()))
+        // always check spellid and effectindex
+        if ((uiSpellId == SPELL_SYMBOL_OF_LIFE || uiSpellId == SPELL_SHIMMERING_VESSEL) && uiEffIndex == EFFECT_INDEX_0)
         {
-            pTargetAI->DoReviveSelf(pCaster->GetObjectGuid());
+            if (CreatureAI* pTargetAI = pTarget->ToCreature()->AI())
+            {
+                pTargetAI->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pTarget->ToCreature());//>DoReviveSelf(pCaster->GetObjectGuid());
+            }
+
+            // always return true when we are handling this spell and effect
+            return true;
         }
 
-        // always return true when we are handling this spell and effect
-        return true;
+        return false;
     }
-
-    return false;
-}
+};
 
 void AddSC_npcs_special()
 {
-    Script* pNewScript;
+    Script* s;
+    s = new npc_chicken_cluck();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_air_force_bots";
-    pNewScript->GetAI = &GetAI_npc_air_force_bots;
-    pNewScript->RegisterSelf();
+    s = new npc_air_force_bots();
+    s->RegisterSelf();
+    s = new npc_dancing_flames();
+    s->RegisterSelf();
+    s = new npc_doctor();
+    s->RegisterSelf();
+    s = new npc_injured_patient();
+    s->RegisterSelf();
+    s = new npc_garments_of_quests();
+    s->RegisterSelf();
+    s = new npc_guardian();
+    s->RegisterSelf();
+    s = new npc_innkeeper();
+    s->RegisterSelf(false);
+    s = new npc_redemption_target();
+    s->RegisterSelf();
+    s = new spell_symbol_of_life();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_chicken_cluck";
-    pNewScript->GetAI = &GetAI_npc_chicken_cluck;
-    pNewScript->pQuestAcceptNPC =   &QuestAccept_npc_chicken_cluck;
-    pNewScript->pQuestRewardedNPC = &QuestRewarded_npc_chicken_cluck;
-    pNewScript->RegisterSelf();
+    s = new npc_spring_rabbit();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_dancing_flames";
-    pNewScript->GetAI = &GetAI_npc_dancing_flames;
-    pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_injured_patient";
-    pNewScript->GetAI = &GetAI_npc_injured_patient;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_chicken_cluck";
+    //pNewScript->GetAI = &GetAI_npc_chicken_cluck;
+    //pNewScript->pQuestAcceptNPC =   &QuestAccept_npc_chicken_cluck;
+    //pNewScript->pQuestRewardedNPC = &QuestRewarded_npc_chicken_cluck;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_doctor";
-    pNewScript->GetAI = &GetAI_npc_doctor;
-    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_doctor;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_dancing_flames";
+    //pNewScript->GetAI = &GetAI_npc_dancing_flames;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_garments_of_quests";
-    pNewScript->GetAI = &GetAI_npc_garments_of_quests;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_injured_patient";
+    //pNewScript->GetAI = &GetAI_npc_injured_patient;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_guardian";
-    pNewScript->GetAI = &GetAI_npc_guardian;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_doctor";
+    //pNewScript->GetAI = &GetAI_npc_doctor;
+    //pNewScript->pQuestAcceptNPC = &QuestAccept_npc_doctor;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_innkeeper";
-    pNewScript->pGossipHello = &GossipHello_npc_innkeeper;
-    pNewScript->pGossipSelect = &GossipSelect_npc_innkeeper;
-    pNewScript->RegisterSelf(false);                        // script and error report disabled, but script can be used for custom needs, adding ScriptName
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_garments_of_quests";
+    //pNewScript->GetAI = &GetAI_npc_garments_of_quests;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_spring_rabbit";
-    pNewScript->GetAI = &GetAI_npc_spring_rabbit;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_guardian";
+    //pNewScript->GetAI = &GetAI_npc_guardian;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_redemption_target";
-    pNewScript->GetAI = &GetAI_npc_redemption_target;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_redemption_target;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_innkeeper";
+    //pNewScript->pGossipHello = &GossipHello_npc_innkeeper;
+    //pNewScript->pGossipSelect = &GossipSelect_npc_innkeeper;
+    //pNewScript->RegisterSelf(false);                        // script and error report disabled, but script can be used for custom needs, adding ScriptName
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_spring_rabbit";
+    //pNewScript->GetAI = &GetAI_npc_spring_rabbit;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_redemption_target";
+    //pNewScript->GetAI = &GetAI_npc_redemption_target;
+    //pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_redemption_target;
+    //pNewScript->RegisterSelf();
 }
