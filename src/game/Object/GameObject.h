@@ -406,7 +406,6 @@ struct GameObjectInfo
 
     uint32 MinMoneyLoot;
     uint32 MaxMoneyLoot;
-    uint32 ScriptId;
 
     // helpers
     bool IsDespawnAtAction() const
@@ -778,6 +777,8 @@ class  GameObject : public WorldObject
 
         void SetCapturePointSlider(float value, bool isLocked);
         float GetCapturePointSliderValue() const { return m_captureSlider; }
+
+        uint32 GetScriptId();
 
         GridReference<GameObject>& GetGridRef() { return m_gridRef; }
 

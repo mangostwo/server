@@ -91,88 +91,95 @@ static const DialogueEntry aIntroDialogue[] =
 
 static const float fRoomCenterCoords[3] = {445.8804f, -158.7055f, 43.06898f};
 
-struct npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
+struct npc_millhouse_manastorm : public CreatureScript
 {
-    npc_millhouse_manastormAI(Creature* pCreature) : ScriptedAI(pCreature),
+    npc_millhouse_manastorm() : CreatureScript("npc_millhouse_manastorm") {}
+
+    struct npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
+    {
+        npc_millhouse_manastormAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aIntroDialogue)
-    {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        InitializeDialogueHelper(m_pInstance);
-        Reset();
-        m_attackDistance = 25.0f;
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    bool m_bHasLowHp;
-    uint32 m_uiPyroblastTimer;
-    uint32 m_uiFireballTimer;
-    uint32 m_uiFrostBoltTimer;
-    uint32 m_uiFireBlastTimer;
-    uint32 m_uiConeColtTimer;
-    uint32 m_uiArcaneMissileTimer;
-
-    void Reset() override
-    {
-        m_bHasLowHp             = false;
-        m_uiPyroblastTimer      = urand(6000, 9000);
-        m_uiFireballTimer       = urand(2500, 4000);
-        m_uiFrostBoltTimer      = urand(3000, 5000);
-        m_uiFireBlastTimer      = urand(6000, 14000);
-        m_uiConeColtTimer       = urand(7000, 12000);
-        m_uiArcaneMissileTimer  = urand(5000, 8000);
-
-        StartNextDialogueText(NPC_MILLHOUSE);
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
         {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            HandleMovementOnAttackStart(pWho);
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            InitializeDialogueHelper(m_pInstance);
+            m_attackDistance = 25.0f;
         }
-    }
 
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_KILL_1 : SAY_KILL_2, m_creature);
-    }
+        ScriptedInstance* m_pInstance;
 
-    void JustDied(Unit* /*pVictim*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
+        bool m_bHasLowHp;
+        uint32 m_uiPyroblastTimer;
+        uint32 m_uiFireballTimer;
+        uint32 m_uiFrostBoltTimer;
+        uint32 m_uiFireBlastTimer;
+        uint32 m_uiConeColtTimer;
+        uint32 m_uiArcaneMissileTimer;
 
-        /*for questId 10886 (heroic mode only)
-        if (m_pInstance && m_pInstance->GetData(TYPE_HARBINGERSKYRISS) != DONE)
-            ->FailQuest();*/
-    }
-
-    void EnterEvadeMode() override
-    {
-        m_creature->RemoveAllAurasOnEvade();
-        m_creature->DeleteThreatList();
-        m_creature->CombatStop(true);
-        m_creature->LoadCreatureAddon(true);
-
-        // Boss should evade in the center of the room
-        if (m_creature->IsAlive())
-        { m_creature->GetMotionMaster()->MovePoint(1, fRoomCenterCoords[0], fRoomCenterCoords[1], fRoomCenterCoords[2]); }
-
-        m_creature->SetLootRecipient(NULL);
-
-        Reset();
-    }
-
-    void JustDidDialogueStep(int32 iEntry) override
-    {
-        switch (iEntry)
+        void Reset() override
         {
+            m_bHasLowHp = false;
+            m_uiPyroblastTimer = urand(6000, 9000);
+            m_uiFireballTimer = urand(2500, 4000);
+            m_uiFrostBoltTimer = urand(3000, 5000);
+            m_uiFireBlastTimer = urand(6000, 14000);
+            m_uiConeColtTimer = urand(7000, 12000);
+            m_uiArcaneMissileTimer = urand(5000, 8000);
+
+            StartNextDialogueText(NPC_MILLHOUSE);
+        }
+
+        void AttackStart(Unit* pWho) override
+        {
+            if (m_creature->Attack(pWho, true))
+            {
+                m_creature->AddThreat(pWho);
+                m_creature->SetInCombatWith(pWho);
+                pWho->SetInCombatWith(m_creature);
+                HandleMovementOnAttackStart(pWho);
+            }
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            DoScriptText(urand(0, 1) ? SAY_KILL_1 : SAY_KILL_2, m_creature);
+        }
+
+        void JustDied(Unit* /*pVictim*/) override
+        {
+            DoScriptText(SAY_DEATH, m_creature);
+
+            /*for questId 10886 (heroic mode only)
+            if (m_pInstance && m_pInstance->GetData(TYPE_HARBINGERSKYRISS) != DONE)
+            ->FailQuest();*/
+        }
+
+        void EnterEvadeMode() override
+        {
+            m_creature->RemoveAllAurasOnEvade();
+            m_creature->DeleteThreatList();
+            m_creature->CombatStop(true);
+            m_creature->LoadCreatureAddon(true);
+
+            // Boss should evade in the center of the room
+            if (m_creature->IsAlive())
+            {
+                m_creature->GetMotionMaster()->MovePoint(1, fRoomCenterCoords[0], fRoomCenterCoords[1], fRoomCenterCoords[2]);
+            }
+
+            m_creature->SetLootRecipient(NULL);
+
+            Reset();
+        }
+
+        void JustDidDialogueStep(int32 iEntry) override
+        {
+            switch (iEntry)
+            {
             case TYPE_WARDEN_2:
                 if (m_pInstance)
-                { m_pInstance->SetData(TYPE_WARDEN_2, DONE); }
+                {
+                    m_pInstance->SetData(TYPE_WARDEN_2, DONE);
+                }
                 break;
             case SAY_WATER:
                 DoCastSpellIfCan(m_creature, SPELL_CONJURE_WATER);
@@ -190,81 +197,106 @@ struct npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
                 m_creature->SetWalk(false);
                 m_creature->GetMotionMaster()->MovePoint(1, fRoomCenterCoords[0], fRoomCenterCoords[1], fRoomCenterCoords[2]);
                 break;
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        DialogueUpdate(uiDiff);
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (!m_bHasLowHp && m_creature->GetHealthPercent() < 20.0f)
-        {
-            DoScriptText(SAY_LOWHP, m_creature);
-            m_bHasLowHp = true;
-        }
-
-        if (m_uiPyroblastTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_PYROBLAST) == CAST_OK)
-            {
-                m_uiPyroblastTimer = 40000;
-                DoScriptText(SAY_PYRO, m_creature);
             }
         }
-        else
-        { m_uiPyroblastTimer -= uiDiff; }
 
-        if (m_uiFireballTimer < uiDiff)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FIREBALL) == CAST_OK)
-            { m_uiFireballTimer = 4000; }
-        }
-        else
-        { m_uiFireballTimer -= uiDiff; }
+            DialogueUpdate(uiDiff);
 
-        if (m_uiFrostBoltTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROSTBOLT) == CAST_OK)
-            { m_uiFrostBoltTimer = urand(4000, 6000); }
-        }
-        else
-        { m_uiFrostBoltTimer -= uiDiff; }
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
 
-        if (m_uiConeColtTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_CONE_OF_COLD) == CAST_OK)
-            { m_uiConeColtTimer = urand(7000, 12000); }
-        }
-        else
-        { m_uiConeColtTimer -= uiDiff; }
+            if (!m_bHasLowHp && m_creature->GetHealthPercent() < 20.0f)
+            {
+                DoScriptText(SAY_LOWHP, m_creature);
+                m_bHasLowHp = true;
+            }
 
-        if (m_uiFireBlastTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FIRE_BLAST) == CAST_OK)
-            { m_uiFireBlastTimer = urand(5000, 16000); }
-        }
-        else
-        { m_uiFireBlastTimer -= uiDiff; }
+            if (m_uiPyroblastTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_PYROBLAST) == CAST_OK)
+                {
+                    m_uiPyroblastTimer = 40000;
+                    DoScriptText(SAY_PYRO, m_creature);
+                }
+            }
+            else
+            {
+                m_uiPyroblastTimer -= uiDiff;
+            }
 
-        if (m_uiArcaneMissileTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARCANE_MISSILES) == CAST_OK)
-            { m_uiArcaneMissileTimer = urand(5000, 8000); }
-        }
-        else
-        { m_uiArcaneMissileTimer -= uiDiff; }
+            if (m_uiFireballTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FIREBALL) == CAST_OK)
+                {
+                    m_uiFireballTimer = 4000;
+                }
+            }
+            else
+            {
+                m_uiFireballTimer -= uiDiff;
+            }
 
-        DoMeleeAttackIfReady();
+            if (m_uiFrostBoltTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROSTBOLT) == CAST_OK)
+                {
+                    m_uiFrostBoltTimer = urand(4000, 6000);
+                }
+            }
+            else
+            {
+                m_uiFrostBoltTimer -= uiDiff;
+            }
+
+            if (m_uiConeColtTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_CONE_OF_COLD) == CAST_OK)
+                {
+                    m_uiConeColtTimer = urand(7000, 12000);
+                }
+            }
+            else
+            {
+                m_uiConeColtTimer -= uiDiff;
+            }
+
+            if (m_uiFireBlastTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FIRE_BLAST) == CAST_OK)
+                {
+                    m_uiFireBlastTimer = urand(5000, 16000);
+                }
+            }
+            else
+            {
+                m_uiFireBlastTimer -= uiDiff;
+            }
+
+            if (m_uiArcaneMissileTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARCANE_MISSILES) == CAST_OK)
+                {
+                    m_uiArcaneMissileTimer = urand(5000, 8000);
+                }
+            }
+            else
+            {
+                m_uiArcaneMissileTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_millhouse_manastormAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_millhouse_manastorm(Creature* pCreature)
-{
-    return new npc_millhouse_manastormAI(pCreature);
-}
 
 /*#####
 # npc_warden_mellichar
@@ -276,97 +308,114 @@ enum
     SPELL_SIMPLE_TELEPORT   = 12980,
 };
 
-struct npc_warden_mellicharAI : public ScriptedAI
+struct npc_warden_mellichar : public CreatureScript
 {
-    npc_warden_mellicharAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_warden_mellichar() : CreatureScript("npc_warden_mellichar") {}
+
+    struct npc_warden_mellicharAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiIntroTimer;
-    ObjectGuid m_targetPlayerGuid;
-
-    void Reset() override
-    {
-        m_uiIntroTimer = 5000;
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-    }
-
-    void AttackStart(Unit* /*pWho*/) override {}
-
-    void Aggro(Unit* pWho) override
-    {
-        m_creature->InterruptNonMeleeSpells(false);
-        m_creature->SetFacingToObject(pWho);
-        m_targetPlayerGuid = pWho->GetObjectGuid();
-
-        DoCastSpellIfCan(m_creature, SPELL_BUBBLE_VISUAL);
-
-        // In theory the Seal Sphere should protect the npc from being attacked, but because LoS isn't enabled for Gameobjects we have to use this workaround
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_HARBINGERSKYRISS, IN_PROGRESS); }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        pSummoned->CastSpell(pSummoned, SPELL_SIMPLE_TELEPORT, false);
-
-        if (pSummoned->GetEntry() != NPC_MILLHOUSE && pSummoned->GetEntry() != NPC_SKYRISS)
+        npc_warden_mellicharAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (Unit* pTarget = m_creature->GetMap()->GetUnit(m_targetPlayerGuid))
-            { pSummoned->AI()->AttackStart(pTarget); }
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         }
-    }
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
+        ScriptedInstance* m_pInstance;
+
+        uint32 m_uiIntroTimer;
+        ObjectGuid m_targetPlayerGuid;
+
+        void Reset() override
         {
-            if (Creature* pSkyriss = m_pInstance->GetSingleCreatureFromStorage(NPC_SKYRISS))
+            m_uiIntroTimer = 5000;
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
+
+        void AttackStart(Unit* /*pWho*/) override {}
+
+        void Aggro(Unit* pWho) override
+        {
+            m_creature->InterruptNonMeleeSpells(false);
+            m_creature->SetFacingToObject(pWho);
+            m_targetPlayerGuid = pWho->GetObjectGuid();
+
+            DoCastSpellIfCan(m_creature, SPELL_BUBBLE_VISUAL);
+
+            // In theory the Seal Sphere should protect the npc from being attacked, but because LoS isn't enabled for Gameobjects we have to use this workaround
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_HARBINGERSKYRISS, IN_PROGRESS);
+            }
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            pSummoned->CastSpell(pSummoned, SPELL_SIMPLE_TELEPORT, false);
+
+            if (pSummoned->GetEntry() != NPC_MILLHOUSE && pSummoned->GetEntry() != NPC_SKYRISS)
             {
                 if (Unit* pTarget = m_creature->GetMap()->GetUnit(m_targetPlayerGuid))
-                { pSkyriss->AI()->AttackStart(pTarget); }
+                {
+                    pSummoned->AI()->AttackStart(pTarget);
+                }
             }
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        // Set the visual intro on OOC timer
-        if (m_uiIntroTimer)
+        void JustDied(Unit* /*pKiller*/) override
         {
-            if (m_uiIntroTimer <= uiDiff)
+            if (m_pInstance)
             {
-                DoCastSpellIfCan(m_creature, SPELL_TARGET_OMEGA);
-                m_uiIntroTimer = 0;
+                if (Creature* pSkyriss = m_pInstance->GetSingleCreatureFromStorage(NPC_SKYRISS))
+                {
+                    if (Unit* pTarget = m_creature->GetMap()->GetUnit(m_targetPlayerGuid))
+                    {
+                        pSkyriss->AI()->AttackStart(pTarget);
+                    }
+                }
             }
-            else
-            { m_uiIntroTimer -= uiDiff; }
         }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            // Set the visual intro on OOC timer
+            if (m_uiIntroTimer)
+            {
+                if (m_uiIntroTimer <= uiDiff)
+                {
+                    DoCastSpellIfCan(m_creature, SPELL_TARGET_OMEGA);
+                    m_uiIntroTimer = 0;
+                }
+                else
+                {
+                    m_uiIntroTimer -= uiDiff;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_warden_mellicharAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_npc_warden_mellichar(Creature* pCreature)
-{
-    return new npc_warden_mellicharAI(pCreature);
-}
-
 void AddSC_arcatraz()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_millhouse_manastorm";
-    pNewScript->GetAI = &GetAI_npc_millhouse_manastorm;
-    pNewScript->RegisterSelf();
+    s = new npc_millhouse_manastorm();
+    s->RegisterSelf();
+    s = new npc_warden_mellichar();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_warden_mellichar";
-    pNewScript->GetAI = &GetAI_npc_warden_mellichar;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_millhouse_manastorm";
+    //pNewScript->GetAI = &GetAI_npc_millhouse_manastorm;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_warden_mellichar";
+    //pNewScript->GetAI = &GetAI_npc_warden_mellichar;
+    //pNewScript->RegisterSelf();
 }

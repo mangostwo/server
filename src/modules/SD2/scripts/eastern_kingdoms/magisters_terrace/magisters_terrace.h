@@ -63,33 +63,4 @@ enum
     GO_ESCAPE_QUEL_DANAS        = 188173,
 };
 
-static const int32 aDelrissaAddDeath[MAX_DELRISSA_ADDS] = { -1585013, -1585014, -1585015, -1585016};
-
-class instance_magisters_terrace : public ScriptedInstance
-{
-    public:
-        instance_magisters_terrace(Map* pMap);
-
-        void Initialize() override;
-
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-
-        void OnCreatureDeath(Creature* pCreature) override;
-
-        uint32 GetData(uint32 uiType) const override;
-        void SetData(uint32 uiType, uint32 uiData) override;
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-        void Load(const char* chrIn) override;
-
-    private:
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string m_strInstData;
-
-        uint32 m_uiDelrissaDeathCount;
-
-        GuidList m_lFelCrystalGuid;
-};
-
 #endif

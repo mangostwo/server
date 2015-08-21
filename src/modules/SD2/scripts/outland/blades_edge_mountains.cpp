@@ -68,89 +68,103 @@ enum
 
 static const uint32 aNetherDrakeEntries[MAX_ENTRIES] = {NPC_PROTO, NPC_ADOLESCENT, NPC_MATURE, NPC_NIHIL};
 
-struct mobs_nether_drakeAI : public ScriptedAI
+struct mobs_nether_drake : public CreatureScript
 {
-    mobs_nether_drakeAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    mobs_nether_drake() : CreatureScript("mobs_nether_drake") {}
 
-    bool m_bIsNihil;
-    uint32 m_uiNihilSpeechTimer;
-    uint32 m_uiNihilSpeechPhase;
-
-    uint32 m_uiArcaneBlastTimer;
-    uint32 m_uiManaBurnTimer;
-    uint32 m_uiIntangiblePresenceTimer;
-
-    void Reset() override
+    struct mobs_nether_drakeAI : public ScriptedAI
     {
-        m_bIsNihil                  = false;
-        m_uiNihilSpeechTimer        = 3000;
-        m_uiNihilSpeechPhase        = 0;
+        mobs_nether_drakeAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-        m_uiArcaneBlastTimer        = 7500;
-        m_uiManaBurnTimer           = 10000;
-        m_uiIntangiblePresenceTimer = 15000;
-    }
+        bool m_bIsNihil;
+        uint32 m_uiNihilSpeechTimer;
+        uint32 m_uiNihilSpeechPhase;
 
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-        { return; }
+        uint32 m_uiArcaneBlastTimer;
+        uint32 m_uiManaBurnTimer;
+        uint32 m_uiIntangiblePresenceTimer;
 
-        ScriptedAI::MoveInLineOfSight(pWho);
-    }
-
-    // in case creature was not summoned (not expected)
-    void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
-    {
-        if (uiMoveType != POINT_MOTION_TYPE)
-        { return; }
-
-        if (uiPointId)
-        { m_creature->ForcedDespawn(); }
-    }
-
-    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
-    {
-        if (pSpell->Id == SPELL_T_PHASE_MODULATOR && pCaster->GetTypeId() == TYPEID_PLAYER)
+        void Reset() override
         {
-            // we are nihil, so say before transform
-            if (m_creature->GetEntry() == NPC_NIHIL)
+            m_bIsNihil = false;
+            m_uiNihilSpeechTimer = 3000;
+            m_uiNihilSpeechPhase = 0;
+
+            m_uiArcaneBlastTimer = 7500;
+            m_uiManaBurnTimer = 10000;
+            m_uiIntangiblePresenceTimer = 15000;
+        }
+
+        void MoveInLineOfSight(Unit* pWho) override
+        {
+            if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
             {
-                DoScriptText(SAY_NIHIL_INTERRUPT, m_creature);
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                m_bIsNihil = false;
+                return;
             }
 
-            // choose a new entry
-            uint8 uiIndex = urand(0, MAX_ENTRIES - 1);
+            ScriptedAI::MoveInLineOfSight(pWho);
+        }
 
-            // If we choose the same entry, try again
-            while (aNetherDrakeEntries[uiIndex] == m_creature->GetEntry())
-            { uiIndex = urand(0, MAX_ENTRIES - 1); }
-
-            if (m_creature->UpdateEntry(aNetherDrakeEntries[uiIndex]))
+        // in case creature was not summoned (not expected)
+        void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
+        {
+            if (uiMoveType != POINT_MOTION_TYPE)
             {
-                // Nihil does only dialogue
-                if (aNetherDrakeEntries[uiIndex] == NPC_NIHIL)
-                {
-                    EnterEvadeMode();
-                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    m_bIsNihil = true;
-                }
-                else
-                { AttackStart(pCaster); }
+                return;
+            }
+
+            if (uiPointId)
+            {
+                m_creature->ForcedDespawn();
             }
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_bIsNihil)
+        void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
         {
-            if (m_uiNihilSpeechTimer < uiDiff)
+            if (pSpell->Id == SPELL_T_PHASE_MODULATOR && pCaster->GetTypeId() == TYPEID_PLAYER)
             {
-                switch (m_uiNihilSpeechPhase)
+                // we are nihil, so say before transform
+                if (m_creature->GetEntry() == NPC_NIHIL)
                 {
+                    DoScriptText(SAY_NIHIL_INTERRUPT, m_creature);
+                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    m_bIsNihil = false;
+                }
+
+                // choose a new entry
+                uint8 uiIndex = urand(0, MAX_ENTRIES - 1);
+
+                // If we choose the same entry, try again
+                while (aNetherDrakeEntries[uiIndex] == m_creature->GetEntry())
+                {
+                    uiIndex = urand(0, MAX_ENTRIES - 1);
+                }
+
+                if (m_creature->UpdateEntry(aNetherDrakeEntries[uiIndex]))
+                {
+                    // Nihil does only dialogue
+                    if (aNetherDrakeEntries[uiIndex] == NPC_NIHIL)
+                    {
+                        EnterEvadeMode();
+                        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        m_bIsNihil = true;
+                    }
+                    else
+                    {
+                        AttackStart(pCaster);
+                    }
+                }
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_bIsNihil)
+            {
+                if (m_uiNihilSpeechTimer < uiDiff)
+                {
+                    switch (m_uiNihilSpeechPhase)
+                    {
                     case 0:
                         DoScriptText(SAY_NIHIL_1, m_creature);
                         break;
@@ -170,55 +184,72 @@ struct mobs_nether_drakeAI : public ScriptedAI
                         m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
                         m_creature->GetMotionMaster()->MovePoint(1, m_creature->GetPositionX() + 50.0f, m_creature->GetPositionY(), m_creature->GetPositionZ() + 50.0f);
                         break;
+                    }
+                    ++m_uiNihilSpeechPhase;
+                    m_uiNihilSpeechTimer = 5000;
                 }
-                ++m_uiNihilSpeechPhase;
-                m_uiNihilSpeechTimer = 5000;
+                else
+                {
+                    m_uiNihilSpeechTimer -= uiDiff;
+                }
+
+                // anything below here is not interesting for Nihil, so skip it
+                return;
+            }
+
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_uiIntangiblePresenceTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_INTANGIBLE_PRESENCE) == CAST_OK)
+                {
+                    m_uiIntangiblePresenceTimer = urand(15000, 30000);
+                }
             }
             else
-            { m_uiNihilSpeechTimer -= uiDiff; }
-
-            // anything below here is not interesting for Nihil, so skip it
-            return;
-        }
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiIntangiblePresenceTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_INTANGIBLE_PRESENCE) == CAST_OK)
-            { m_uiIntangiblePresenceTimer = urand(15000, 30000); }
-        }
-        else
-        { m_uiIntangiblePresenceTimer -= uiDiff; }
-
-        if (m_uiManaBurnTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_MANA_BURN, SELECT_FLAG_POWER_MANA))
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_MANA_BURN) == CAST_OK)
-                { m_uiManaBurnTimer = urand(8000, 16000); }
+                m_uiIntangiblePresenceTimer -= uiDiff;
             }
-        }
-        else
-        { m_uiManaBurnTimer -= uiDiff; }
 
-        if (m_uiArcaneBlastTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARCANE_BLAST) == CAST_OK)
-            { m_uiArcaneBlastTimer = urand(2500, 7500); }
-        }
-        else
-        { m_uiArcaneBlastTimer -= uiDiff; }
+            if (m_uiManaBurnTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_MANA_BURN, SELECT_FLAG_POWER_MANA))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_MANA_BURN) == CAST_OK)
+                    {
+                        m_uiManaBurnTimer = urand(8000, 16000);
+                    }
+                }
+            }
+            else
+            {
+                m_uiManaBurnTimer -= uiDiff;
+            }
 
-        DoMeleeAttackIfReady();
+            if (m_uiArcaneBlastTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARCANE_BLAST) == CAST_OK)
+                {
+                    m_uiArcaneBlastTimer = urand(2500, 7500);
+                }
+            }
+            else
+            {
+                m_uiArcaneBlastTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new mobs_nether_drakeAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_mobs_nether_drake(Creature* pCreature)
-{
-    return new mobs_nether_drakeAI(pCreature);
-}
 
 /*######
 ## npc_daranelle
@@ -231,34 +262,37 @@ enum
     SPELL_LASHHAN_CHANNEL   = 36904
 };
 
-struct npc_daranelleAI : public ScriptedAI
+struct npc_daranelle : public CreatureScript
 {
-    npc_daranelleAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
+    npc_daranelle() : CreatureScript("npc_daranelle") {}
 
-    void Reset() override { }
-
-    void MoveInLineOfSight(Unit* pWho) override
+    struct npc_daranelleAI : public ScriptedAI
     {
-        if (pWho->GetTypeId() == TYPEID_PLAYER)
+        npc_daranelleAI(Creature* pCreature) : ScriptedAI(pCreature) { }
+
+        void MoveInLineOfSight(Unit* pWho) override
         {
-            if (pWho->HasAura(SPELL_LASHHAN_CHANNEL, EFFECT_INDEX_0) && m_creature->IsWithinDistInMap(pWho, 10.0f))
+            if (pWho->GetTypeId() == TYPEID_PLAYER)
             {
-                DoScriptText(SAY_SPELL_INFLUENCE, m_creature, pWho);
+                if (pWho->HasAura(SPELL_LASHHAN_CHANNEL, EFFECT_INDEX_0) && m_creature->IsWithinDistInMap(pWho, 10.0f))
+                {
+                    DoScriptText(SAY_SPELL_INFLUENCE, m_creature, pWho);
 
-                // TODO: Move the below to updateAI and run if this statement == true
-                ((Player*)pWho)->KilledMonsterCredit(NPC_KALIRI_AURA_DISPEL, m_creature->GetObjectGuid());
-                pWho->RemoveAurasDueToSpell(SPELL_LASHHAN_CHANNEL);
+                    // TODO: Move the below to updateAI and run if this statement == true
+                    ((Player*)pWho)->KilledMonsterCredit(NPC_KALIRI_AURA_DISPEL, m_creature->GetObjectGuid());
+                    pWho->RemoveAurasDueToSpell(SPELL_LASHHAN_CHANNEL);
+                }
             }
-        }
 
-        ScriptedAI::MoveInLineOfSight(pWho);
+            ScriptedAI::MoveInLineOfSight(pWho);
+        }
+    };
+
+    CreatureAI* GetAI_npc_daranelle(Creature* pCreature)
+    {
+        return new npc_daranelleAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_daranelle(Creature* pCreature)
-{
-    return new npc_daranelleAI(pCreature);
-}
 
 /*######
 ## npc_bloodmaul_stout_trigger
@@ -276,111 +310,123 @@ enum
 
 static const uint32 aOgreEntries[] = {19995, 19998, 20334, 20723, 20726, 20730, 20731, 20732, 21296};
 
-struct npc_bloodmaul_stout_triggerAI : public ScriptedAI
+struct npc_bloodmaul_stout_trigger : public CreatureScript
 {
-    npc_bloodmaul_stout_triggerAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_bloodmaul_stout_trigger() : CreatureScript("npc_bloodmaul_stout_trigger") {}
 
-    uint32 m_uiStartTimer;
-    bool m_bHasValidOgre;
-
-    ObjectGuid m_selectedOgreGuid;
-
-    void Reset() override
+    struct npc_bloodmaul_stout_triggerAI : public ScriptedAI
     {
-        m_uiStartTimer = 1000;
-        m_bHasValidOgre = false;
-    }
+        npc_bloodmaul_stout_triggerAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (m_bHasValidOgre && pWho->GetObjectGuid() == m_selectedOgreGuid && m_creature->IsWithinDistInMap(pWho, 3.5f))
+        uint32 m_uiStartTimer;
+        bool m_bHasValidOgre;
+
+        ObjectGuid m_selectedOgreGuid;
+
+        void Reset() override
         {
-            // This part it's not 100% accurate - most of it is guesswork
-            // Some animations or spells may be missing
-            pWho->CastSpell(pWho, SPELL_INTOXICATION_VISUAL, true);
-            pWho->CastSpell(pWho, SPELL_INTOXICATION, true);
-
-            // Handle evade after some time with EAI
-            m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_A, m_creature, (Creature*)pWho);
-
-            // Give kill credit to the summoner player
-            if (m_creature->IsTemporarySummon())
-            {
-                TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
-
-                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
-                { pSummoner->KilledMonsterCredit(m_creature->GetEntry(), m_creature->GetObjectGuid()); }
-            }
-
+            m_uiStartTimer = 1000;
             m_bHasValidOgre = false;
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiStartTimer)
+        void MoveInLineOfSight(Unit* pWho) override
         {
-            if (m_uiStartTimer <= uiDiff)
+            if (m_bHasValidOgre && pWho->GetObjectGuid() == m_selectedOgreGuid && m_creature->IsWithinDistInMap(pWho, 3.5f))
             {
-                // get all the ogres in range
-                std::list<Creature*> lOgreList;
-                for (uint8 i = 0; i < countof(aOgreEntries); ++i)
-                { GetCreatureListWithEntryInGrid(lOgreList, m_creature,  aOgreEntries[i], 30.0f); }
+                // This part it's not 100% accurate - most of it is guesswork
+                // Some animations or spells may be missing
+                pWho->CastSpell(pWho, SPELL_INTOXICATION_VISUAL, true);
+                pWho->CastSpell(pWho, SPELL_INTOXICATION, true);
 
-                if (lOgreList.empty())
+                // Handle evade after some time with EAI
+                m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_A, m_creature, (Creature*)pWho);
+
+                // Give kill credit to the summoner player
+                if (m_creature->IsTemporarySummon())
                 {
-                    m_uiStartTimer = 5000;
-                    return;
+                    TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
+
+                    if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
+                    {
+                        pSummoner->KilledMonsterCredit(m_creature->GetEntry(), m_creature->GetObjectGuid());
+                    }
                 }
 
-                // sort by distance and get only the closest
-                lOgreList.sort(ObjectDistanceOrder(m_creature));
+                m_bHasValidOgre = false;
+            }
+        }
 
-                std::list<Creature*>::const_iterator ogreItr = lOgreList.begin();
-                Creature* pOgre = NULL;
-
-                do
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiStartTimer)
+            {
+                if (m_uiStartTimer <= uiDiff)
                 {
-                    if ((*ogreItr)->IsAlive() && !(*ogreItr)->HasAura(SPELL_INTOXICATION))
-                    { pOgre = *ogreItr; }
+                    // get all the ogres in range
+                    std::list<Creature*> lOgreList;
+                    for (uint8 i = 0; i < countof(aOgreEntries); ++i)
+                    {
+                        GetCreatureListWithEntryInGrid(lOgreList, m_creature, aOgreEntries[i], 30.0f);
+                    }
 
-                    ++ogreItr;
-                }
-                while (!pOgre && ogreItr != lOgreList.end());
+                    if (lOgreList.empty())
+                    {
+                        m_uiStartTimer = 5000;
+                        return;
+                    }
 
-                if (!pOgre)
-                {
-                    m_uiStartTimer = 5000;
-                    return;
-                }
+                    // sort by distance and get only the closest
+                    lOgreList.sort(ObjectDistanceOrder(m_creature));
 
-                // Move ogre to the point
-                float fX, fY, fZ;
-                pOgre->GetMotionMaster()->MoveIdle();
-                m_creature->GetContactPoint(pOgre, fX, fY, fZ);
-                pOgre->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
+                    std::list<Creature*>::const_iterator ogreItr = lOgreList.begin();
+                    Creature* pOgre = NULL;
 
-                switch (urand(0, 2))
-                {
+                    do
+                    {
+                        if ((*ogreItr)->IsAlive() && !(*ogreItr)->HasAura(SPELL_INTOXICATION))
+                        {
+                            pOgre = *ogreItr;
+                        }
+
+                        ++ogreItr;
+                    } while (!pOgre && ogreItr != lOgreList.end());
+
+                    if (!pOgre)
+                    {
+                        m_uiStartTimer = 5000;
+                        return;
+                    }
+
+                    // Move ogre to the point
+                    float fX, fY, fZ;
+                    pOgre->GetMotionMaster()->MoveIdle();
+                    m_creature->GetContactPoint(pOgre, fX, fY, fZ);
+                    pOgre->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
+
+                    switch (urand(0, 2))
+                    {
                     case 0: DoScriptText(SAY_BREW_1, pOgre); break;
                     case 1: DoScriptText(SAY_BREW_2, pOgre); break;
                     case 2: DoScriptText(SAY_BREW_3, pOgre); break;
-                }
+                    }
 
-                m_selectedOgreGuid = pOgre->GetObjectGuid();
-                m_uiStartTimer = 0;
-                m_bHasValidOgre = true;
+                    m_selectedOgreGuid = pOgre->GetObjectGuid();
+                    m_uiStartTimer = 0;
+                    m_bHasValidOgre = true;
+                }
+                else
+                {
+                    m_uiStartTimer -= uiDiff;
+                }
             }
-            else
-            { m_uiStartTimer -= uiDiff; }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_bloodmaul_stout_triggerAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_bloodmaul_stout_trigger(Creature* pCreature)
-{
-    return new npc_bloodmaul_stout_triggerAI(pCreature);
-}
 
 /*######
 ## npc_simon_game_bunny
@@ -499,168 +545,194 @@ static const SimonGame aApexisGameData[4] =
     {COLOR_IDX_YELLOW,  SPELL_BUTTON_PUSH_YELLOW,   SPELL_INTROSPECTION_YELLOW, SOUND_ID_YELLOW}
 };
 
-struct npc_simon_game_bunnyAI : public ScriptedAI
+struct npc_simon_game_bunny : public CreatureScript
 {
-    npc_simon_game_bunnyAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_simon_game_bunny() : CreatureScript("npc_simon_game_bunny") {}
 
-    uint8 m_uiGamePhase;
-
-    uint32 m_uiLevelCount;
-    uint32 m_uiLevelStage;
-    uint32 m_uiPlayerStage;
-
-    std::vector<uint8> m_vColors;
-    bool m_bIsLargeEvent;
-    bool m_bIsEventStarted;
-
-    ObjectGuid m_masterPlayerGuid;
-
-    void Reset() override
+    struct npc_simon_game_bunnyAI : public ScriptedAI
     {
-        m_uiGamePhase  = PHASE_LEVEL_PREPARE;
-        m_bIsEventStarted = false;
+        npc_simon_game_bunnyAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-        m_uiLevelCount = 0;
-        m_uiLevelStage = 0;
-        m_uiPlayerStage = 0;
-    }
+        uint8 m_uiGamePhase;
 
-    void GetAIInformation(ChatHandler& reader) override
-    {
-        reader.PSendSysMessage("Simon Game Bunny, current game phase = %u, current level = %u", m_uiGamePhase, m_uiLevelCount);
-    }
+        uint32 m_uiLevelCount;
+        uint32 m_uiLevelStage;
+        uint32 m_uiPlayerStage;
 
-    // Prepare levels
-    void DoPrepareLevel()
-    {
-        // this visual is cast only after the first level
-        if (m_uiLevelCount)
-        { DoCastSpellIfCan(m_creature, SPELL_VISUAL_GAME_START, CAST_TRIGGERED); }
-        // this part is done only on the first tick
-        else
+        std::vector<uint8> m_vColors;
+        bool m_bIsLargeEvent;
+        bool m_bIsEventStarted;
+
+        ObjectGuid m_masterPlayerGuid;
+
+        void Reset() override
         {
-            // lock apexis
-            DoCastSpellIfCan(m_creature, SPELL_SWITCHED_ON, CAST_TRIGGERED);
-            DoCastSpellIfCan(m_creature, SPELL_PRE_EVENT_TIMER, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+            m_uiGamePhase = PHASE_LEVEL_PREPARE;
+            m_bIsEventStarted = false;
 
-            // Get original summoner
-            if (m_creature->IsTemporarySummon())
-            { m_masterPlayerGuid = ((TemporarySummon*)m_creature)->GetSummonerGuid(); }
-
-            // Get closest apexis
-            if (GameObject* pGo = GetClosestGameObjectWithEntry(m_creature, GO_APEXIS_RELIC, 5.0f))
-            { m_bIsLargeEvent = false; }
-            else if (GameObject* pGo = GetClosestGameObjectWithEntry(m_creature, GO_APEXIS_MONUMENT, 17.0f))
-            { m_bIsLargeEvent = true; }
+            m_uiLevelCount = 0;
+            m_uiLevelStage = 0;
+            m_uiPlayerStage = 0;
         }
 
-        // prepare the buttons and summon the visual auras
-        DoCastSpellIfCan(m_creature, m_bIsLargeEvent ? SPELL_PRE_GAME_BLUE_LARGE : SPELL_PRE_GAME_BLUE_AURA, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, m_bIsLargeEvent ? SPELL_PRE_GAME_GREEN_LARGE : SPELL_PRE_GAME_GREEN_AURA, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, m_bIsLargeEvent ? SPELL_PRE_GAME_RED_LARGE : SPELL_PRE_GAME_RED_AURA, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, m_bIsLargeEvent ? SPELL_PRE_GAME_YELLOW_LARGE : SPELL_PRE_GAME_YELLOW_AURA, CAST_TRIGGERED);
-
-        m_vColors.clear();
-        ++m_uiLevelCount;
-    }
-
-    // Setup the color sequence
-    void DoSetupLevel()
-    {
-        uint8 uiIndex = urand(COLOR_IDX_BLUE, COLOR_IDX_YELLOW);
-        m_vColors.push_back(uiIndex);
-
-        DoCastSpellIfCan(m_creature, aApexisGameData[uiIndex].m_uiVisual, CAST_TRIGGERED);
-        DoPlaySoundToSet(m_creature, aApexisGameData[uiIndex].m_uiSoundId);
-    }
-
-    // Setup the player level - called at the beginning at each player level
-    void DoSetupPlayerLevel()
-    {
-        // allow the buttons to be used and despawn the visual auras
-        DoCastSpellIfCan(m_creature, SPELL_GAME_START_RED, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_GAME_START_BLUE, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_GAME_START_GREEN, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_GAME_START_YELLOW, CAST_TRIGGERED);
-    }
-
-    // Complete level - called when one level is completed succesfully
-    void DoCompleteLevel()
-    {
-        // lock the buttons
-        DoCastSpellIfCan(m_creature, SPELL_GAME_END_RED, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_GAME_END_BLUE, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_GAME_END_GREEN, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_GAME_END_YELLOW, CAST_TRIGGERED);
-
-        // Complete game if all the levels
-        if (m_uiLevelCount == MAX_SIMON_LEVELS)
-        { DoCompleteGame(); }
-    }
-
-    // Complete event - called when the game has been completed succesfully
-    void DoCompleteGame()
-    {
-        // ToDo: not sure if the quest reward spells are implemented right. They all give the same buff but with a different duration
-        if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_masterPlayerGuid))
+        void GetAIInformation(ChatHandler& reader) override
         {
-            if (Group* pGroup = pPlayer->GetGroup())
-            {
-                for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != NULL; pRef = pRef->next())
-                {
-                    if (Player* pMember = pRef->getSource())
-                    {
-                        // distance check - they need to be close to the Apexis
-                        if (!pMember->IsWithinDistInMap(m_creature, 20.0f))
-                        { continue; }
+            reader.PSendSysMessage("Simon Game Bunny, current game phase = %u, current level = %u", m_uiGamePhase, m_uiLevelCount);
+        }
 
-                        // on group event cast Enlightment on daily quest and Emanations on normal quest
-                        if (pMember->GetQuestStatus(QUEST_AN_APEXIS_RELIC) == QUEST_STATUS_INCOMPLETE)
-                        { DoCastSpellIfCan(pMember, SPELL_APEXIS_EMANATIONS, CAST_TRIGGERED); }
-                        else if (pMember->GetQuestStatus(QUEST_RELICS_EMANATION) == QUEST_STATUS_INCOMPLETE)
-                        { DoCastSpellIfCan(pMember, SPELL_APEXIS_ENLIGHTENMENT, CAST_TRIGGERED); }
+        // Prepare levels
+        void DoPrepareLevel()
+        {
+            // this visual is cast only after the first level
+            if (m_uiLevelCount)
+            {
+                DoCastSpellIfCan(m_creature, SPELL_VISUAL_GAME_START, CAST_TRIGGERED);
+            }
+            // this part is done only on the first tick
+            else
+            {
+                // lock apexis
+                DoCastSpellIfCan(m_creature, SPELL_SWITCHED_ON, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_PRE_EVENT_TIMER, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+
+                // Get original summoner
+                if (m_creature->IsTemporarySummon())
+                {
+                    m_masterPlayerGuid = ((TemporarySummon*)m_creature)->GetSummonerGuid();
+                }
+
+                // Get closest apexis
+                if (GameObject* pGo = GetClosestGameObjectWithEntry(m_creature, GO_APEXIS_RELIC, 5.0f))
+                {
+                    m_bIsLargeEvent = false;
+                }
+                else if (GameObject* pGo = GetClosestGameObjectWithEntry(m_creature, GO_APEXIS_MONUMENT, 17.0f))
+                {
+                    m_bIsLargeEvent = true;
+                }
+            }
+
+            // prepare the buttons and summon the visual auras
+            DoCastSpellIfCan(m_creature, m_bIsLargeEvent ? SPELL_PRE_GAME_BLUE_LARGE : SPELL_PRE_GAME_BLUE_AURA, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, m_bIsLargeEvent ? SPELL_PRE_GAME_GREEN_LARGE : SPELL_PRE_GAME_GREEN_AURA, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, m_bIsLargeEvent ? SPELL_PRE_GAME_RED_LARGE : SPELL_PRE_GAME_RED_AURA, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, m_bIsLargeEvent ? SPELL_PRE_GAME_YELLOW_LARGE : SPELL_PRE_GAME_YELLOW_AURA, CAST_TRIGGERED);
+
+            m_vColors.clear();
+            ++m_uiLevelCount;
+        }
+
+        // Setup the color sequence
+        void DoSetupLevel()
+        {
+            uint8 uiIndex = urand(COLOR_IDX_BLUE, COLOR_IDX_YELLOW);
+            m_vColors.push_back(uiIndex);
+
+            DoCastSpellIfCan(m_creature, aApexisGameData[uiIndex].m_uiVisual, CAST_TRIGGERED);
+            DoPlaySoundToSet(m_creature, aApexisGameData[uiIndex].m_uiSoundId);
+        }
+
+        // Setup the player level - called at the beginning at each player level
+        void DoSetupPlayerLevel()
+        {
+            // allow the buttons to be used and despawn the visual auras
+            DoCastSpellIfCan(m_creature, SPELL_GAME_START_RED, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, SPELL_GAME_START_BLUE, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, SPELL_GAME_START_GREEN, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, SPELL_GAME_START_YELLOW, CAST_TRIGGERED);
+        }
+
+        // Complete level - called when one level is completed succesfully
+        void DoCompleteLevel()
+        {
+            // lock the buttons
+            DoCastSpellIfCan(m_creature, SPELL_GAME_END_RED, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, SPELL_GAME_END_BLUE, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, SPELL_GAME_END_GREEN, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, SPELL_GAME_END_YELLOW, CAST_TRIGGERED);
+
+            // Complete game if all the levels
+            if (m_uiLevelCount == MAX_SIMON_LEVELS)
+            {
+                DoCompleteGame();
+            }
+        }
+
+        // Complete event - called when the game has been completed succesfully
+        void DoCompleteGame()
+        {
+            // ToDo: not sure if the quest reward spells are implemented right. They all give the same buff but with a different duration
+            if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_masterPlayerGuid))
+            {
+                if (Group* pGroup = pPlayer->GetGroup())
+                {
+                    for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != NULL; pRef = pRef->next())
+                    {
+                        if (Player* pMember = pRef->getSource())
+                        {
+                            // distance check - they need to be close to the Apexis
+                            if (!pMember->IsWithinDistInMap(m_creature, 20.0f))
+                            {
+                                continue;
+                            }
+
+                            // on group event cast Enlightment on daily quest and Emanations on normal quest
+                            if (pMember->GetQuestStatus(QUEST_AN_APEXIS_RELIC) == QUEST_STATUS_INCOMPLETE)
+                            {
+                                DoCastSpellIfCan(pMember, SPELL_APEXIS_EMANATIONS, CAST_TRIGGERED);
+                            }
+                            else if (pMember->GetQuestStatus(QUEST_RELICS_EMANATION) == QUEST_STATUS_INCOMPLETE)
+                            {
+                                DoCastSpellIfCan(pMember, SPELL_APEXIS_ENLIGHTENMENT, CAST_TRIGGERED);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // solo event - cast Emanations on daily quest and vibrations on normal quest
+                    if (pPlayer->GetQuestStatus(QUEST_AN_APEXIS_RELIC) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        DoCastSpellIfCan(pPlayer, SPELL_APEXIS_VIBRATIONS, CAST_TRIGGERED);
+                    }
+                    else if (pPlayer->GetQuestStatus(QUEST_RELICS_EMANATION) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        DoCastSpellIfCan(pPlayer, SPELL_APEXIS_EMANATIONS, CAST_TRIGGERED);
                     }
                 }
             }
-            else
-            {
-                // solo event - cast Emanations on daily quest and vibrations on normal quest
-                if (pPlayer->GetQuestStatus(QUEST_AN_APEXIS_RELIC) == QUEST_STATUS_INCOMPLETE)
-                { DoCastSpellIfCan(pPlayer, SPELL_APEXIS_VIBRATIONS, CAST_TRIGGERED); }
-                else if (pPlayer->GetQuestStatus(QUEST_RELICS_EMANATION) == QUEST_STATUS_INCOMPLETE)
-                { DoCastSpellIfCan(pPlayer, SPELL_APEXIS_EMANATIONS, CAST_TRIGGERED); }
-            }
+
+            // cleanup event after quest is finished
+            DoCastSpellIfCan(m_creature, SPELL_SWITCHED_OFF, CAST_TRIGGERED);
+            DoPlaySoundToSet(m_creature, SOUND_ID_DISABLE_NODE);
+            m_creature->ForcedDespawn();
         }
 
-        // cleanup event after quest is finished
-        DoCastSpellIfCan(m_creature, SPELL_SWITCHED_OFF, CAST_TRIGGERED);
-        DoPlaySoundToSet(m_creature, SOUND_ID_DISABLE_NODE);
-        m_creature->ForcedDespawn();
-    }
-
-    // Cleanup event - called when event fails
-    void DoCleanupGame()
-    {
-        // lock the buttons
-        DoCastSpellIfCan(m_creature, SPELL_GAME_END_RED, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_GAME_END_BLUE, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_GAME_END_GREEN, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_GAME_END_YELLOW, CAST_TRIGGERED);
-
-        //  unlock apexis and despawn
-        DoCastSpellIfCan(m_creature, SPELL_SWITCHED_OFF, CAST_TRIGGERED);
-        DoPlaySoundToSet(m_creature, SOUND_ID_DISABLE_NODE);
-        m_creature->ForcedDespawn();
-    }
-
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
-    {
-        switch (m_uiGamePhase)
+        // Cleanup event - called when event fails
+        void DoCleanupGame()
         {
+            // lock the buttons
+            DoCastSpellIfCan(m_creature, SPELL_GAME_END_RED, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, SPELL_GAME_END_BLUE, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, SPELL_GAME_END_GREEN, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, SPELL_GAME_END_YELLOW, CAST_TRIGGERED);
+
+            //  unlock apexis and despawn
+            DoCastSpellIfCan(m_creature, SPELL_SWITCHED_OFF, CAST_TRIGGERED);
+            DoPlaySoundToSet(m_creature, SOUND_ID_DISABLE_NODE);
+            m_creature->ForcedDespawn();
+        }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+        {
+            switch (m_uiGamePhase)
+            {
             case PHASE_LEVEL_PREPARE:
                 // delay before each level - handled by big timer aura
                 if (eventType == AI_EVENT_CUSTOM_A)
-                { m_uiGamePhase = PHASE_AI_GAME; }
+                {
+                    m_uiGamePhase = PHASE_AI_GAME;
+                }
                 break;
             case PHASE_AI_GAME:
                 // AI game - handled by small timer aura
@@ -715,7 +787,9 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
                         }
                         // cast tick sound
                         else
-                        { DoCastSpellIfCan(pInvoker, m_bIsLargeEvent ? SPELL_VISUAL_GAME_TICK_LARGE : SPELL_VISUAL_GAME_TICK, CAST_TRIGGERED); }
+                        {
+                            DoCastSpellIfCan(pInvoker, m_bIsLargeEvent ? SPELL_VISUAL_GAME_TICK_LARGE : SPELL_VISUAL_GAME_TICK, CAST_TRIGGERED);
+                        }
                     }
                     // bad button pressed
                     else
@@ -748,84 +822,114 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
                     m_uiGamePhase = PHASE_LEVEL_PREPARE;
                 }
                 break;
+            }
         }
-    }
 
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
 
-    void UpdateAI(const uint32 /*uiDiff*/) override
-    {
-        // Start game on first update tick - don't wait for dummy auras
-        if (!m_bIsEventStarted)
+        void UpdateAI(const uint32 /*uiDiff*/) override
         {
-            DoPrepareLevel();
-            m_bIsEventStarted = true;
+            // Start game on first update tick - don't wait for dummy auras
+            if (!m_bIsEventStarted)
+            {
+                DoPrepareLevel();
+                m_bIsEventStarted = true;
+            }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_simon_game_bunnyAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_npc_simon_game_bunny(Creature* pCreature)
+struct spell_simon_game_start : public SpellScript
 {
-    return new npc_simon_game_bunnyAI(pCreature);
-}
+    spell_simon_game_start() : SpellScript("spell_simon_game_start") {}
 
-bool EffectDummyCreature_npc_simon_game_bunny(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+    bool EffectDummy(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Object* pTarget, ObjectGuid /*originalCasterGuid*/) override
+    {
+        if (uiEffIndex != EFFECT_INDEX_0 || pTarget->GetEntry() != NPC_SIMON_GAME_BUNNY)
+        {
+            return false;
+        }
+        Creature *pCreatureTarget = pTarget->ToCreature();
+        pCreatureTarget->AI()->SendAIEvent(uiSpellId == SPELL_SIMON_GAME_START ? AI_EVENT_CUSTOM_A : AI_EVENT_CUSTOM_B, pCaster, pCreatureTarget);
+
+        //if (uiSpellId == SPELL_SIMON_GAME_START && uiEffIndex == EFFECT_INDEX_0)
+        //{
+        //    pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
+        //    return true;
+        //}
+        //else if (uiSpellId == SPELL_PRE_EVENT_TIMER && uiEffIndex == EFFECT_INDEX_0)
+        //{
+        //    pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, pCaster, pCreatureTarget);
+        //    return true;
+        //}
+
+        return false;
+    }
+};
+
+struct spell_simon_game_move : public SpellScript
 {
-    if (pCreatureTarget->GetEntry() != NPC_SIMON_GAME_BUNNY)
-    { return false; }
+    spell_simon_game_move() : SpellScript("spell_simon_game_move") {}
 
-    if (uiSpellId == SPELL_SIMON_GAME_START && uiEffIndex == EFFECT_INDEX_0)
+    bool EffectScriptEffect(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid originalCasterGuid) override
     {
-        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
-        return true;
+        if ((uiSpellId == SPELL_INTROSPECTION_BLUE || uiSpellId == SPELL_INTROSPECTION_GREEN || uiSpellId == SPELL_INTROSPECTION_RED ||
+            uiSpellId == SPELL_INTROSPECTION_YELLOW) && uiEffIndex == EFFECT_INDEX_1)
+        {
+            if (pCreatureTarget->GetEntry() == NPC_SIMON_GAME_BUNNY && pCaster->GetTypeId() == TYPEID_PLAYER && originalCasterGuid.IsGameObject())
+            {
+                pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_C, pCaster, pCreatureTarget, uiSpellId);
+            }
+
+            return true;
+        }
+
+        return false;
     }
-    else if (uiSpellId == SPELL_PRE_EVENT_TIMER && uiEffIndex == EFFECT_INDEX_0)
-    {
-        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, pCaster, pCreatureTarget);
-        return true;
-    }
-
-    return false;
-}
-
-bool EffectScriptEffectCreature_npc_simon_game_bunny(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid originalCasterGuid)
-{
-    if ((uiSpellId == SPELL_INTROSPECTION_BLUE || uiSpellId == SPELL_INTROSPECTION_GREEN || uiSpellId == SPELL_INTROSPECTION_RED ||
-         uiSpellId == SPELL_INTROSPECTION_YELLOW) && uiEffIndex == EFFECT_INDEX_1)
-    {
-        if (pCreatureTarget->GetEntry() == NPC_SIMON_GAME_BUNNY && pCaster->GetTypeId() == TYPEID_PLAYER && originalCasterGuid.IsGameObject())
-        { pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_C, pCaster, pCreatureTarget, uiSpellId); }
-
-        return true;
-    }
-
-    return false;
-}
+};
 
 void AddSC_blades_edge_mountains()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "mobs_nether_drake";
-    pNewScript->GetAI = &GetAI_mobs_nether_drake;
-    pNewScript->RegisterSelf();
+    s = new mobs_nether_drake();
+    s->RegisterSelf();
+    s = new npc_daranelle();
+    s->RegisterSelf();
+    s = new npc_bloodmaul_stout_trigger();
+    s->RegisterSelf();
+    s = new npc_simon_game_bunny();
+    s->RegisterSelf();
+    s = new spell_simon_game_start();
+    s->RegisterSelf();
+    s = new spell_simon_game_move();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_daranelle";
-    pNewScript->GetAI = &GetAI_npc_daranelle;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "mobs_nether_drake";
+    //pNewScript->GetAI = &GetAI_mobs_nether_drake;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_bloodmaul_stout_trigger";
-    pNewScript->GetAI = &GetAI_npc_bloodmaul_stout_trigger;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_daranelle";
+    //pNewScript->GetAI = &GetAI_npc_daranelle;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_simon_game_bunny";
-    pNewScript->GetAI = &GetAI_npc_simon_game_bunny;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_simon_game_bunny;
-    pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_npc_simon_game_bunny;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_bloodmaul_stout_trigger";
+    //pNewScript->GetAI = &GetAI_npc_bloodmaul_stout_trigger;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_simon_game_bunny";
+    //pNewScript->GetAI = &GetAI_npc_simon_game_bunny;
+    //pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_simon_game_bunny;
+    //pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_npc_simon_game_bunny;
+    //pNewScript->RegisterSelf();
 }

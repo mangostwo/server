@@ -53,132 +53,162 @@ enum
     SPELL_MARK_OF_DEATH_AURA    = 37125,        // triggers 37131 on target if it has aura 37128
 };
 
-struct boss_doomwalkerAI : public ScriptedAI
+struct boss_doomwalker : public CreatureScript
 {
-    boss_doomwalkerAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    boss_doomwalker() : CreatureScript("boss_doomwalker") {}
 
-    uint32 m_uiChainTimer;
-    uint32 m_uiOverrunTimer;
-    uint32 m_uiQuakeTimer;
-    uint32 m_uiArmorTimer;
-
-    bool m_bHasEnrage;
-
-    void Reset() override
+    struct boss_doomwalkerAI : public ScriptedAI
     {
-        m_uiArmorTimer     = urand(5000, 13000);
-        m_uiChainTimer     = urand(10000, 30000);
-        m_uiQuakeTimer     = urand(25000, 35000);
-        m_uiOverrunTimer   = urand(30000, 45000);
+        boss_doomwalkerAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-        m_bHasEnrage       = false;
-    }
+        uint32 m_uiChainTimer;
+        uint32 m_uiOverrunTimer;
+        uint32 m_uiQuakeTimer;
+        uint32 m_uiArmorTimer;
 
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-        { return; }
+        bool m_bHasEnrage;
 
-        pVictim->CastSpell(pVictim, SPELL_MARK_OF_DEATH_PLAYER, true, NULL, NULL, m_creature->GetObjectGuid());
-
-        if (urand(0, 4))
-        { return; }
-
-        switch (urand(0, 2))
+        void Reset() override
         {
+            m_uiArmorTimer = urand(5000, 13000);
+            m_uiChainTimer = urand(10000, 30000);
+            m_uiQuakeTimer = urand(25000, 35000);
+            m_uiOverrunTimer = urand(30000, 45000);
+
+            m_bHasEnrage = false;
+        }
+
+        void KilledUnit(Unit* pVictim) override
+        {
+            if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            {
+                return;
+            }
+
+            pVictim->CastSpell(pVictim, SPELL_MARK_OF_DEATH_PLAYER, true, NULL, NULL, m_creature->GetObjectGuid());
+
+            if (urand(0, 4))
+            {
+                return;
+            }
+
+            switch (urand(0, 2))
+            {
             case 0: DoScriptText(SAY_SLAY_1, m_creature); break;
             case 1: DoScriptText(SAY_SLAY_2, m_creature); break;
             case 2: DoScriptText(SAY_SLAY_3, m_creature); break;
-        }
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoCastSpellIfCan(m_creature, SPELL_MARK_OF_DEATH_AURA, CAST_TRIGGERED);
-        DoScriptText(SAY_AGGRO, m_creature);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        // Spell Enrage, when hp <= 20% gain enrage
-        if (m_creature->GetHealthPercent() <= 20.0f && !m_bHasEnrage)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
-            { m_bHasEnrage = true; }
-        }
-
-        // Spell Overrun
-        if (m_uiOverrunTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_OVERRUN) == CAST_OK)
-            {
-                DoScriptText(urand(0, 1) ? SAY_OVERRUN_1 : SAY_OVERRUN_2, m_creature);
-                m_uiOverrunTimer = urand(25000, 40000);
             }
         }
-        else
-        { m_uiOverrunTimer -= uiDiff; }
 
-        // Spell Earthquake
-        if (m_uiQuakeTimer < uiDiff)
+        void JustDied(Unit* /*pKiller*/) override
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_EARTHQUAKE) == CAST_OK)
+            DoScriptText(SAY_DEATH, m_creature);
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoCastSpellIfCan(m_creature, SPELL_MARK_OF_DEATH_AURA, CAST_TRIGGERED);
+            DoScriptText(SAY_AGGRO, m_creature);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             {
-                DoScriptText(urand(0, 1) ? SAY_EARTHQUAKE_1 : SAY_EARTHQUAKE_2, m_creature);
-                m_uiQuakeTimer = urand(30000, 55000);
+                return;
             }
-        }
-        else
-        { m_uiQuakeTimer -= uiDiff; }
 
-        // Spell Chain Lightning
-        if (m_uiChainTimer < uiDiff)
-        {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
-            if (!pTarget)
-            { pTarget = m_creature->getVictim(); }
-
-            if (pTarget)
+            // Spell Enrage, when hp <= 20% gain enrage
+            if (m_creature->GetHealthPercent() <= 20.0f && !m_bHasEnrage)
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_LIGHTNING_WRATH) == CAST_OK)
-                { m_uiChainTimer = urand(7000, 27000); }
+                if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+                {
+                    m_bHasEnrage = true;
+                }
             }
-        }
-        else
-        { m_uiChainTimer -= uiDiff; }
 
-        // Spell Sunder Armor
-        if (m_uiArmorTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CRUSH_ARMOR) == CAST_OK)
-            { m_uiArmorTimer = urand(10000, 25000); }
-        }
-        else
-        { m_uiArmorTimer -= uiDiff; }
+            // Spell Overrun
+            if (m_uiOverrunTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_OVERRUN) == CAST_OK)
+                {
+                    DoScriptText(urand(0, 1) ? SAY_OVERRUN_1 : SAY_OVERRUN_2, m_creature);
+                    m_uiOverrunTimer = urand(25000, 40000);
+                }
+            }
+            else
+            {
+                m_uiOverrunTimer -= uiDiff;
+            }
 
-        DoMeleeAttackIfReady();
+            // Spell Earthquake
+            if (m_uiQuakeTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_EARTHQUAKE) == CAST_OK)
+                {
+                    DoScriptText(urand(0, 1) ? SAY_EARTHQUAKE_1 : SAY_EARTHQUAKE_2, m_creature);
+                    m_uiQuakeTimer = urand(30000, 55000);
+                }
+            }
+            else
+            {
+                m_uiQuakeTimer -= uiDiff;
+            }
+
+            // Spell Chain Lightning
+            if (m_uiChainTimer < uiDiff)
+            {
+                Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
+                if (!pTarget)
+                {
+                    pTarget = m_creature->getVictim();
+                }
+
+                if (pTarget)
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_LIGHTNING_WRATH) == CAST_OK)
+                    {
+                        m_uiChainTimer = urand(7000, 27000);
+                    }
+                }
+            }
+            else
+            {
+                m_uiChainTimer -= uiDiff;
+            }
+
+            // Spell Sunder Armor
+            if (m_uiArmorTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CRUSH_ARMOR) == CAST_OK)
+                {
+                    m_uiArmorTimer = urand(10000, 25000);
+                }
+            }
+            else
+            {
+                m_uiArmorTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_doomwalkerAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_doomwalker(Creature* pCreature)
-{
-    return new boss_doomwalkerAI(pCreature);
-}
-
 void AddSC_boss_doomwalker()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_doomwalker";
-    pNewScript->GetAI = &GetAI_boss_doomwalker;
-    pNewScript->RegisterSelf();
+    s = new boss_doomwalker();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_doomwalker";
+    //pNewScript->GetAI = &GetAI_boss_doomwalker;
+    //pNewScript->RegisterSelf();
 }

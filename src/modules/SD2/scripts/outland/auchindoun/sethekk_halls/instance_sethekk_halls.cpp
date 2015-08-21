@@ -140,8 +140,6 @@ struct is_sethekk_halls : public InstanceScript
             return 0;
         }
 
-        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
-
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override
         {
@@ -167,17 +165,17 @@ struct is_sethekk_halls : public InstanceScript
             OUT_LOAD_INST_DATA_COMPLETE;
         }
 
-bool instance_sethekk_halls::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* /*pTarget*/, uint32 /*uiMiscValue1 = 0*/) const
-{
-    if (uiCriteriaId != ACHIEV_CRITA_TURKEY_TIME)
-        return false;
+        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* /*pTarget*/, uint32 /*uiMiscValue1 = 0*/) const override
+        {
+            if (uiCriteriaId != ACHIEV_CRITA_TURKEY_TIME)
+                return false;
 
-    if (!pSource)
-        return false;
+            if (!pSource)
+                return false;
 
-    return pSource->HasItemOrGemWithIdEquipped(ITEM_PILGRIMS_HAT, 1) && (pSource->HasItemOrGemWithIdEquipped(ITEM_PILGRIMS_DRESS, 1)
-            || pSource->HasItemOrGemWithIdEquipped(ITEM_PILGRIMS_ROBE, 1) || pSource->HasItemOrGemWithIdEquipped(ITEM_PILGRIMS_ATTIRE, 1));
-}
+            return pSource->HasItemOrGemWithIdEquipped(ITEM_PILGRIMS_HAT, 1) && (pSource->HasItemOrGemWithIdEquipped(ITEM_PILGRIMS_DRESS, 1)
+                    || pSource->HasItemOrGemWithIdEquipped(ITEM_PILGRIMS_ROBE, 1) || pSource->HasItemOrGemWithIdEquipped(ITEM_PILGRIMS_ATTIRE, 1));
+        }
 
     private:
         uint32 m_auiEncounter[MAX_ENCOUNTER];

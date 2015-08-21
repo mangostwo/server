@@ -49,121 +49,149 @@ enum
     SPELL_HOLYGROUND        = 29512
 };
 
-struct boss_maiden_of_virtueAI : public ScriptedAI
+struct boss_maiden_of_virtue : public CreatureScript
 {
-    boss_maiden_of_virtueAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_maiden_of_virtue() : CreatureScript("boss_maiden_of_virtue") {}
+
+    struct boss_maiden_of_virtueAI : public ScriptedAI
     {
-        m_pInstance  = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiRepentanceTimer;
-    uint32 m_uiHolyfireTimer;
-    uint32 m_uiHolywrathTimer;
-    uint32 m_uiHolygroundTimer;
-
-    void Reset() override
-    {
-        m_uiRepentanceTimer    = urand(25000, 40000);
-        m_uiHolyfireTimer      = urand(8000, 25000);
-        m_uiHolywrathTimer     = urand(15000, 25000);
-        m_uiHolygroundTimer    = 3000;
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        switch (urand(0, 5))                                // 50% chance to say something out of 3 texts
+        boss_maiden_of_virtueAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        }
+
+        ScriptedInstance* m_pInstance;
+
+        uint32 m_uiRepentanceTimer;
+        uint32 m_uiHolyfireTimer;
+        uint32 m_uiHolywrathTimer;
+        uint32 m_uiHolygroundTimer;
+
+        void Reset() override
+        {
+            m_uiRepentanceTimer = urand(25000, 40000);
+            m_uiHolyfireTimer = urand(8000, 25000);
+            m_uiHolywrathTimer = urand(15000, 25000);
+            m_uiHolygroundTimer = 3000;
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            switch (urand(0, 5))                                // 50% chance to say something out of 3 texts
+            {
             case 0: DoScriptText(SAY_SLAY1, m_creature); break;
             case 1: DoScriptText(SAY_SLAY2, m_creature); break;
             case 2: DoScriptText(SAY_SLAY3, m_creature); break;
-        }
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_MAIDEN, DONE); }
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_MAIDEN, IN_PROGRESS); }
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_MAIDEN, FAIL); }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiHolygroundTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_HOLYGROUND, CAST_TRIGGERED) == CAST_OK)
-            { m_uiHolygroundTimer = 3000; }
-        }
-        else
-        { m_uiHolygroundTimer -= uiDiff; }
-
-        if (m_uiRepentanceTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_REPENTANCE) == CAST_OK)
-            {
-                DoScriptText(urand(0, 1) ? SAY_REPENTANCE1 : SAY_REPENTANCE2, m_creature);
-                m_uiRepentanceTimer = urand(25000, 35000);
             }
         }
-        else
-        { m_uiRepentanceTimer -= uiDiff; }
 
-        if (m_uiHolyfireTimer < uiDiff)
+        void JustDied(Unit* /*pKiller*/) override
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_HOLYFIRE, SELECT_FLAG_NOT_IN_MELEE_RANGE))
+            DoScriptText(SAY_DEATH, m_creature);
+
+            if (m_pInstance)
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_HOLYFIRE) == CAST_OK)
-                { m_uiHolyfireTimer = urand(8000, 23000); }
+                m_pInstance->SetData(TYPE_MAIDEN, DONE);
             }
         }
-        else
-        { m_uiHolyfireTimer -= uiDiff; }
 
-        if (m_uiHolywrathTimer < uiDiff)
+        void Aggro(Unit* /*pWho*/) override
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            { DoCastSpellIfCan(pTarget, SPELL_HOLYWRATH); }
+            DoScriptText(SAY_AGGRO, m_creature);
 
-            m_uiHolywrathTimer = urand(20000, 25000);
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_MAIDEN, IN_PROGRESS);
+            }
         }
-        else
-        { m_uiHolywrathTimer -= uiDiff; }
 
-        DoMeleeAttackIfReady();
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_MAIDEN, FAIL);
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_uiHolygroundTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_HOLYGROUND, CAST_TRIGGERED) == CAST_OK)
+                {
+                    m_uiHolygroundTimer = 3000;
+                }
+            }
+            else
+            {
+                m_uiHolygroundTimer -= uiDiff;
+            }
+
+            if (m_uiRepentanceTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_REPENTANCE) == CAST_OK)
+                {
+                    DoScriptText(urand(0, 1) ? SAY_REPENTANCE1 : SAY_REPENTANCE2, m_creature);
+                    m_uiRepentanceTimer = urand(25000, 35000);
+                }
+            }
+            else
+            {
+                m_uiRepentanceTimer -= uiDiff;
+            }
+
+            if (m_uiHolyfireTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_HOLYFIRE, SELECT_FLAG_NOT_IN_MELEE_RANGE))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_HOLYFIRE) == CAST_OK)
+                    {
+                        m_uiHolyfireTimer = urand(8000, 23000);
+                    }
+                }
+            }
+            else
+            {
+                m_uiHolyfireTimer -= uiDiff;
+            }
+
+            if (m_uiHolywrathTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    DoCastSpellIfCan(pTarget, SPELL_HOLYWRATH);
+                }
+
+                m_uiHolywrathTimer = urand(20000, 25000);
+            }
+            else
+            {
+                m_uiHolywrathTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_maiden_of_virtueAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_maiden_of_virtue(Creature* pCreature)
-{
-    return new boss_maiden_of_virtueAI(pCreature);
-}
-
 void AddSC_boss_maiden_of_virtue()
 {
-    Script* pNewScript;
+    Script* s;
+    s = new boss_maiden_of_virtue();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_maiden_of_virtue";
-    pNewScript->GetAI = &GetAI_boss_maiden_of_virtue;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_maiden_of_virtue";
+    //pNewScript->GetAI = &GetAI_boss_maiden_of_virtue;
+    //pNewScript->RegisterSelf();
 }

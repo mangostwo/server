@@ -34,7 +34,7 @@
 
 /**
  * ContentData
-* npc_rizzle_sprysprocket
+ * npc_rizzle_sprysprocket
  * npc_depth_charge
  * go_southfury_moonstone
  * mobs_spitelashes
@@ -79,89 +79,96 @@ enum
 
     SPELL_GIVE_MOONSTONE        = 39886
 };
-
+//TODO prepare localisation
 #define GOSSIP_ITEM_MOONSTONE   "Hand over the Southfury moonstone and I'll let you go."
 
-struct npc_rizzle_sprysprocketAI : public npc_escortAI
+struct npc_rizzle_sprysprocket : public CreatureScript
 {
-    npc_rizzle_sprysprocketAI(Creature* pCreature) : npc_escortAI(pCreature)
-    {
-        pCreature->SetActiveObjectState(true);
-        m_bIsIntro = true;
-        m_uiIntroPhase = 0;
-        m_uiIntroTimer = 0;
-        m_uiDepthChargeTimer = 10000;
-        Reset();
-    }
+    npc_rizzle_sprysprocket() : CreatureScript("npc_rizzle_sprysprocket") {}
 
-    bool m_bIsIntro;
-    uint8 m_uiIntroPhase;
-    uint32 m_uiIntroTimer;
-    uint32 m_uiDepthChargeTimer;
-
-    void MoveInLineOfSight(Unit* pUnit) override
+    struct npc_rizzle_sprysprocketAI : public npc_escortAI
     {
-        if (HasEscortState(STATE_ESCORT_ESCORTING) && pUnit->GetTypeId() == TYPEID_PLAYER)
+        npc_rizzle_sprysprocketAI(Creature* pCreature) : npc_escortAI(pCreature)
         {
-            if (!HasEscortState(STATE_ESCORT_PAUSED) && m_creature->IsWithinDistInMap(pUnit, INTERACTION_DISTANCE) && m_creature->IsWithinLOSInMap(pUnit))
-            {
-                if (((Player*)pUnit)->GetQuestStatus(QUEST_MOONSTONE) == QUEST_STATUS_INCOMPLETE)
-                { m_creature->CastSpell(m_creature, SPELL_SURRENDER, true); }
-            }
+            pCreature->SetActiveObjectState(true);
+            m_bIsIntro = true;
+            m_uiIntroPhase = 0;
+            m_uiIntroTimer = 0;
+            m_uiDepthChargeTimer = 10000;
         }
 
-        npc_escortAI::MoveInLineOfSight(pUnit);
-    }
+        bool m_bIsIntro;
+        uint8 m_uiIntroPhase;
+        uint32 m_uiIntroTimer;
+        uint32 m_uiDepthChargeTimer;
 
-    void WaypointReached(uint32 uiPointId) override
-    {
-        switch (uiPointId)
+        void MoveInLineOfSight(Unit* pUnit) override
         {
+            if (HasEscortState(STATE_ESCORT_ESCORTING) && pUnit->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (!HasEscortState(STATE_ESCORT_PAUSED) && m_creature->IsWithinDistInMap(pUnit, INTERACTION_DISTANCE) && m_creature->IsWithinLOSInMap(pUnit))
+                {
+                    if (((Player*)pUnit)->GetQuestStatus(QUEST_MOONSTONE) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        m_creature->CastSpell(m_creature, SPELL_SURRENDER, true);
+                    }
+                }
+            }
+
+            npc_escortAI::MoveInLineOfSight(pUnit);
+        }
+
+        void WaypointReached(uint32 uiPointId) override
+        {
+            switch (uiPointId)
+            {
             case 0:
                 m_creature->CastSpell(m_creature, SPELL_PERIODIC_CHECK, true);
                 break;
-        }
-    }
-
-    void Reset() override { }
-
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
-    {
-        if (pSpell->Id == SPELL_SURRENDER)
-        {
-            SetEscortPaused(true);
-            DoScriptText(SAY_END, m_creature);
-            m_creature->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-        }
-    }
-
-    // this may be wrong (and doesn't work)
-    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
-    {
-        if (pTarget->GetTypeId() == TYPEID_PLAYER && pSpell->Id == SPELL_FROST_GRENADE)
-        { DoScriptText(SAY_WHISPER_CHILL, m_creature, pTarget); }
-    }
-
-    // this may be wrong
-    void JustSummoned(Creature* /*pSummoned*/) override
-    {
-        // pSummoned->CastSpell(pSummoned,SPELL_PERIODIC_GRENADE,false,NULL,NULL,m_creature->GetObjectGuid());
-    }
-
-    void UpdateEscortAI(const uint32 uiDiff) override
-    {
-        if (m_bIsIntro)
-        {
-            if (m_uiIntroTimer < uiDiff)
-            { m_uiIntroTimer = 1500; }
-            else
-            {
-                m_uiIntroTimer -= uiDiff;
-                return;
             }
+        }
 
-            switch (m_uiIntroPhase)
+        void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
+        {
+            if (pSpell->Id == SPELL_SURRENDER)
             {
+                SetEscortPaused(true);
+                DoScriptText(SAY_END, m_creature);
+                m_creature->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            }
+        }
+
+        // this may be wrong (and doesn't work)
+        void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+        {
+            if (pTarget->GetTypeId() == TYPEID_PLAYER && pSpell->Id == SPELL_FROST_GRENADE)
+            {
+                DoScriptText(SAY_WHISPER_CHILL, m_creature, pTarget);
+            }
+        }
+
+        // this may be wrong
+        void JustSummoned(Creature* /*pSummoned*/) override
+        {
+            // pSummoned->CastSpell(pSummoned,SPELL_PERIODIC_GRENADE,false,NULL,NULL,m_creature->GetObjectGuid());
+        }
+
+        void UpdateEscortAI(const uint32 uiDiff) override
+        {
+            if (m_bIsIntro)
+            {
+                if (m_uiIntroTimer < uiDiff)
+                {
+                    m_uiIntroTimer = 1500;
+                }
+                else
+                {
+                    m_uiIntroTimer -= uiDiff;
+                    return;
+                }
+
+                switch (m_uiIntroPhase)
+                {
                 case 0:
                     DoScriptText(SAY_START, m_creature);
                     DoScriptText(EMOTE_START, m_creature);
@@ -175,84 +182,106 @@ struct npc_rizzle_sprysprocketAI : public npc_escortAI
                     m_bIsIntro = false;
                     Start(true);
                     break;
+                }
+
+                ++m_uiIntroPhase;
+                return;
             }
 
-            ++m_uiIntroPhase;
-            return;
-        }
+            if (m_uiDepthChargeTimer < uiDiff)
+            {
+                if (!HasEscortState(STATE_ESCORT_PAUSED))
+                {
+                    m_creature->CastSpell(m_creature, SPELL_SUMMON_DEPTH_CHARGE, false);
+                }
 
-        if (m_uiDepthChargeTimer < uiDiff)
+                m_uiDepthChargeTimer = urand(10000, 15000);
+            }
+            else
+            {
+                m_uiDepthChargeTimer -= uiDiff;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_rizzle_sprysprocketAI(pCreature);
+    }
+
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
+    {
+        if (pPlayer->GetQuestStatus(QUEST_MOONSTONE) == QUEST_STATUS_INCOMPLETE)
         {
-            if (!HasEscortState(STATE_ESCORT_PAUSED))
-            { m_creature->CastSpell(m_creature, SPELL_SUMMON_DEPTH_CHARGE, false); }
-
-            m_uiDepthChargeTimer = urand(10000, 15000);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_MOONSTONE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
         }
-        else
-        { m_uiDepthChargeTimer -= uiDiff; }
+
+        pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* pPlayer, Creature* /*pCreature*/, uint32 /*uiSender*/, uint32 uiAction) override
+    {
+        pPlayer->PlayerTalkClass->ClearMenus();
+        if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            pPlayer->CLOSE_GOSSIP_MENU();
+            pPlayer->CastSpell(pPlayer, SPELL_GIVE_MOONSTONE, false);
+        }
+
+        return true;
     }
 };
 
-CreatureAI* GetAI_npc_rizzle_sprysprocket(Creature* pCreature)
+struct npc_depth_charge : public CreatureScript
 {
-    return new npc_rizzle_sprysprocketAI(pCreature);
-}
+    npc_depth_charge() : CreatureScript("npc_depth_charge") {}
 
-bool GossipHello_npc_rizzle_sprysprocket(Player* pPlayer, Creature* pCreature)
-{
-    if (pPlayer->GetQuestStatus(QUEST_MOONSTONE) == QUEST_STATUS_INCOMPLETE)
-    { pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_MOONSTONE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1); }
-
-    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
-    return true;
-}
-
-bool GossipSelect_npc_rizzle_sprysprocket(Player* pPlayer, Creature* /*pCreature*/, uint32 /*uiSender*/, uint32 uiAction)
-{
-    if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+    struct npc_depth_chargeAI : public ScriptedAI
     {
-        pPlayer->CLOSE_GOSSIP_MENU();
-        pPlayer->CastSpell(pPlayer, SPELL_GIVE_MOONSTONE, false);
-    }
+        npc_depth_chargeAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
-    return true;
-}
+        void MoveInLineOfSight(Unit* pUnit) override
+        {
+            if (pUnit->GetTypeId() != TYPEID_PLAYER)
+            {
+                return;
+            }
 
-struct npc_depth_chargeAI : public ScriptedAI
-{
-    npc_depth_chargeAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+            if (m_creature->IsWithinDistInMap(pUnit, INTERACTION_DISTANCE) && m_creature->IsWithinLOSInMap(pUnit))
+            {
+                m_creature->CastSpell(pUnit, SPELL_TRAP, false);
+            }
+        }
+    };
 
-    void MoveInLineOfSight(Unit* pUnit) override
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        if (pUnit->GetTypeId() != TYPEID_PLAYER)
-        { return; }
-
-        if (m_creature->IsWithinDistInMap(pUnit, INTERACTION_DISTANCE) && m_creature->IsWithinLOSInMap(pUnit))
-        { m_creature->CastSpell(pUnit, SPELL_TRAP, false); }
+        return new npc_depth_chargeAI(pCreature);
     }
-
-    void Reset() override { }
 };
-
-CreatureAI* GetAI_npc_depth_charge(Creature* pCreature)
-{
-    return new npc_depth_chargeAI(pCreature);
-}
 
 /*######
 ## go_southfury_moonstone
 ######*/
 
-bool GOUse_go_southfury_moonstone(Player* pPlayer, GameObject* /*pGo*/)
+struct go_southfury_moonstone : public GameObjectScript
 {
-    // implicitTarget=48 not implemented as of writing this code, and manual summon may be just ok for our purpose
-    // pPlayer->CastSpell(pPlayer,SPELL_SUMMON_RIZZLE,false);
+    go_southfury_moonstone() : GameObjectScript("go_southfury_moonstone") {}
 
-    if (Creature* pCreature = pPlayer->SummonCreature(NPC_RIZZLE, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0))
-    { pCreature->CastSpell(pPlayer, SPELL_BLACKJACK, false); }
+    bool OnUse(Player* pPlayer, GameObject* /*pGo*/) override
+    {
+        // implicitTarget=48 not implemented as of writing this code, and manual summon may be just ok for our purpose
+        // pPlayer->CastSpell(pPlayer,SPELL_SUMMON_RIZZLE,false);
 
-    return false;
-}
+        if (Creature* pCreature = pPlayer->SummonCreature(NPC_RIZZLE, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0))
+        {
+            pCreature->CastSpell(pPlayer, SPELL_BLACKJACK, false);
+        }
+
+        return false;
+    }
+};
 
 /*######
 ## mobs_spitelashes
@@ -304,57 +333,60 @@ static SpitelashAbilityStruct m_aSpitelashAbility[8] =
     {NPC_SPITELASH_MYRMIDON,    SPELL_STRIKE,       TARGET_TYPE_VICTIM,     3000,  7000}
 };
 
-struct mobs_spitelashesAI : public ScriptedAI
+struct mobs_spitelashes : public CreatureScript
 {
-    mobs_spitelashesAI(Creature* pCreature) : ScriptedAI(pCreature)
+    mobs_spitelashes() : CreatureScript("mobs_spitelashes") {}
+
+    struct mobs_spitelashesAI : public ScriptedAI
     {
-        for (uint8 i = 0; i < countof(m_aSpitelashAbility); ++i)
+        mobs_spitelashesAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (m_aSpitelashAbility[i].m_uiCreatureEntry == m_creature->GetEntry())
+            for (uint8 i = 0; i < countof(m_aSpitelashAbility); ++i)    //TODO check, to Reset()?
             {
-                m_mSpellTimers[i] = m_aSpitelashAbility[i].m_uiInitialTimer;
+                if (m_aSpitelashAbility[i].m_uiCreatureEntry == m_creature->GetEntry())
+                {
+                    m_mSpellTimers[i] = m_aSpitelashAbility[i].m_uiInitialTimer;
+                }
+            }
+
+        }
+
+        uint32 m_uiMorphTimer;
+
+        UNORDERED_MAP<uint8, uint32> m_mSpellTimers;
+
+        void Reset() override
+        {
+            m_uiMorphTimer = 0;
+
+            for (UNORDERED_MAP<uint8, uint32>::iterator itr = m_mSpellTimers.begin(); itr != m_mSpellTimers.end(); ++itr)
+            {
+                itr->second = m_aSpitelashAbility[itr->first].m_uiInitialTimer;
             }
         }
 
-        Reset();
-    }
-
-    uint32 m_uiMorphTimer;
-
-    UNORDERED_MAP<uint8, uint32> m_mSpellTimers;
-
-    void Reset() override
-    {
-        m_uiMorphTimer = 0;
-
-        for (UNORDERED_MAP<uint8, uint32>::iterator itr = m_mSpellTimers.begin(); itr != m_mSpellTimers.end(); ++itr)
+        void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
         {
-            itr->second = m_aSpitelashAbility[itr->first].m_uiInitialTimer;
-        }
-    }
+            // If already hit by the polymorph return
+            if (m_uiMorphTimer)
+            {
+                return;
+            }
 
-    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
-    {
-        // If already hit by the polymorph return
-        if (m_uiMorphTimer)
-        {
-            return;
+            // Creature get polymorphed into a sheep and after 5 secs despawns
+            if (pCaster->GetTypeId() == TYPEID_PLAYER && ((Player*)pCaster)->GetQuestStatus(QUEST_FRAGMENTED_MAGIC) == QUEST_STATUS_INCOMPLETE &&
+                (pSpell->Id == 118 || pSpell->Id == 12824 || pSpell->Id == 12825 || pSpell->Id == 12826))
+            {
+                m_uiMorphTimer = 5000;
+            }
         }
 
-        // Creature get polymorphed into a sheep and after 5 secs despawns
-        if (pCaster->GetTypeId() == TYPEID_PLAYER && ((Player*)pCaster)->GetQuestStatus(QUEST_FRAGMENTED_MAGIC) == QUEST_STATUS_INCOMPLETE &&
-        (pSpell->Id == 118 || pSpell->Id == 12824 || pSpell->Id == 12825 || pSpell->Id == 12826))
+        bool CanUseSpecialAbility(uint32 uiIndex)
         {
-            m_uiMorphTimer = 5000;
-        }
-    }
+            Unit* pTarget = NULL;
 
-    bool CanUseSpecialAbility(uint32 uiIndex)
-    {
-        Unit* pTarget = NULL;
-
-        switch (m_aSpitelashAbility[uiIndex].m_uiTargetType)
-        {
+            switch (m_aSpitelashAbility[uiIndex].m_uiTargetType)
+            {
             case TARGET_TYPE_SELF:
                 pTarget = m_creature;
                 break;
@@ -367,159 +399,177 @@ struct mobs_spitelashesAI : public ScriptedAI
             case TARGET_TYPE_FRIENDLY:
                 pTarget = DoSelectLowestHpFriendly(10.0f);
                 break;
-        }
-
-        if (pTarget)
-        {
-            if (DoCastSpellIfCan(pTarget, m_aSpitelashAbility[uiIndex].m_uiSpellId) == CAST_OK)
-            {
-                return true;
             }
+
+            if (pTarget)
+            {
+                if (DoCastSpellIfCan(pTarget, m_aSpitelashAbility[uiIndex].m_uiSpellId) == CAST_OK)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
-        return false;
-    }
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
 
-    void UpdateAI(const uint32 uiDiff) override
+            if (m_uiMorphTimer)
+            {
+                if (m_uiMorphTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_POLYMORPH_BACKFIRE, CAST_TRIGGERED) == CAST_OK)
+                    {
+                        m_uiMorphTimer = 0;
+                        m_creature->ForcedDespawn();
+                    }
+                }
+                else
+                {
+                    m_uiMorphTimer -= uiDiff;
+                }
+            }
+
+            for (UNORDERED_MAP<uint8, uint32>::iterator itr = m_mSpellTimers.begin(); itr != m_mSpellTimers.end(); ++itr)
+            {
+                if (itr->second < uiDiff)
+                {
+                    if (CanUseSpecialAbility(itr->first))
+                    {
+                        itr->second = m_aSpitelashAbility[itr->first].m_uiCooldown;
+                        break;
+                    }
+                }
+                else
+                {
+                    itr->second -= uiDiff;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        {
-            return;
-        }
-
-        if (m_uiMorphTimer)
-        {
-            if (m_uiMorphTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_POLYMORPH_BACKFIRE, CAST_TRIGGERED) == CAST_OK)
-                {
-                    m_uiMorphTimer = 0;
-                    m_creature->ForcedDespawn();
-                }
-            }
-            else
-            {
-                m_uiMorphTimer -= uiDiff;
-            }
-        }
-
-        for (UNORDERED_MAP<uint8, uint32>::iterator itr = m_mSpellTimers.begin(); itr != m_mSpellTimers.end(); ++itr)
-        {
-            if (itr->second < uiDiff)
-            {
-                if (CanUseSpecialAbility(itr->first))
-                {
-                    itr->second = m_aSpitelashAbility[itr->first].m_uiCooldown;
-                    break;
-                }
-            }
-            else
-            {
-                itr->second -= uiDiff;
-            }
-        }
-
-        DoMeleeAttackIfReady();
+        return new mobs_spitelashesAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_mobs_spitelashes(Creature* pCreature)
-{
-    return new mobs_spitelashesAI(pCreature);
-}
 
 /*######
 ## npc_loramus_thalipedes
 ######*/
 
-bool GossipHello_npc_loramus_thalipedes(Player* pPlayer, Creature* pCreature)
+struct npc_loramus_thalipedes : public CreatureScript
 {
-    if (pCreature->IsQuestGiver())
+    npc_loramus_thalipedes() : CreatureScript("npc_loramus_thalipedes") {}
+
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
-        pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+        if (pCreature->IsQuestGiver())
+        {
+            pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+        }
+
+        if (pPlayer->GetQuestStatus(2744) == QUEST_STATUS_INCOMPLETE)
+        {
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Can you help me?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        }
+
+        if (pPlayer->GetQuestStatus(3141) == QUEST_STATUS_INCOMPLETE)
+        {
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Tell me your story", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+        }
+
+        pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
+
+        return true;
     }
 
-    if (pPlayer->GetQuestStatus(2744) == QUEST_STATUS_INCOMPLETE)
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction) override    //TODO localisation
     {
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Can you help me?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-    }
-
-    if (pPlayer->GetQuestStatus(3141) == QUEST_STATUS_INCOMPLETE)
-    {
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Tell me your story", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-    }
-
-    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
-
-    return true;
-}
-
-bool GossipSelect_npc_loramus_thalipedes(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
-{
-    switch (uiAction)
-    {
-        case GOSSIP_ACTION_INFO_DEF+1:
+        pPlayer->PlayerTalkClass->ClearMenus();
+        switch (uiAction)
+        {
+        case GOSSIP_ACTION_INFO_DEF + 1:
             pPlayer->CLOSE_GOSSIP_MENU();
             pPlayer->AreaExploredOrEventHappens(2744);
             break;
 
-        case GOSSIP_ACTION_INFO_DEF+2:
+        case GOSSIP_ACTION_INFO_DEF + 2:
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Please continue", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 21);
             pPlayer->SEND_GOSSIP_MENU(1813, pCreature->GetObjectGuid());
             break;
-        case GOSSIP_ACTION_INFO_DEF+21:
+        case GOSSIP_ACTION_INFO_DEF + 21:
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I do not understand", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 22);
             pPlayer->SEND_GOSSIP_MENU(1814, pCreature->GetObjectGuid());
             break;
-        case GOSSIP_ACTION_INFO_DEF+22:
+        case GOSSIP_ACTION_INFO_DEF + 22:
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Indeed", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 23);
             pPlayer->SEND_GOSSIP_MENU(1815, pCreature->GetObjectGuid());
             break;
-        case GOSSIP_ACTION_INFO_DEF+23:
+        case GOSSIP_ACTION_INFO_DEF + 23:
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I will do this with or your help, Loramus", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 24);
             pPlayer->SEND_GOSSIP_MENU(1816, pCreature->GetObjectGuid());
             break;
-        case GOSSIP_ACTION_INFO_DEF+24:
+        case GOSSIP_ACTION_INFO_DEF + 24:
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Yes", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 25);
             pPlayer->SEND_GOSSIP_MENU(1817, pCreature->GetObjectGuid());
             break;
-        case GOSSIP_ACTION_INFO_DEF+25:
+        case GOSSIP_ACTION_INFO_DEF + 25:
             pPlayer->CLOSE_GOSSIP_MENU();
             pPlayer->AreaExploredOrEventHappens(3141);
             break;
+        }
+        return true;
     }
-    return true;
-}
+};
 
 void AddSC_azshara()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_rizzle_sprysprocket";
-    pNewScript->GetAI = &GetAI_npc_rizzle_sprysprocket;
-    pNewScript->pGossipHello = &GossipHello_npc_rizzle_sprysprocket;
-    pNewScript->pGossipSelect = &GossipSelect_npc_rizzle_sprysprocket;
-    pNewScript->RegisterSelf();
+    s = new npc_rizzle_sprysprocket();
+    s->RegisterSelf();
+    s = new npc_depth_charge();
+    s->RegisterSelf();
+    s = new go_southfury_moonstone();
+    s->RegisterSelf();
+    s = new mobs_spitelashes();
+    s->RegisterSelf();
+    s = new npc_loramus_thalipedes();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_depth_charge";
-    pNewScript->GetAI = &GetAI_npc_depth_charge;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_rizzle_sprysprocket";
+    //pNewScript->GetAI = &GetAI_npc_rizzle_sprysprocket;
+    //pNewScript->pGossipHello = &GossipHello_npc_rizzle_sprysprocket;
+    //pNewScript->pGossipSelect = &GossipSelect_npc_rizzle_sprysprocket;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "go_southfury_moonstone";
-    pNewScript->pGOUse = &GOUse_go_southfury_moonstone;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_depth_charge";
+    //pNewScript->GetAI = &GetAI_npc_depth_charge;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "mobs_spitelashes";
-    pNewScript->GetAI = &GetAI_mobs_spitelashes;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "go_southfury_moonstone";
+    //pNewScript->pGOUse = &GOUse_go_southfury_moonstone;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_loramus_thalipedes";
-    pNewScript->pGossipHello =  &GossipHello_npc_loramus_thalipedes;
-    pNewScript->pGossipSelect = &GossipSelect_npc_loramus_thalipedes;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "mobs_spitelashes";
+    //pNewScript->GetAI = &GetAI_mobs_spitelashes;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_loramus_thalipedes";
+    //pNewScript->pGossipHello =  &GossipHello_npc_loramus_thalipedes;
+    //pNewScript->pGossipSelect = &GossipSelect_npc_loramus_thalipedes;
+    //pNewScript->RegisterSelf();
 }

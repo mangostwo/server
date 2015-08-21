@@ -49,18 +49,18 @@ class WorldObject;
 
 enum ScriptedObjectType
 {
-    SCRIPTED_UNIT = 0,    //CreatureScript
+    SCRIPTED_UNIT       = 0,    //CreatureScript
     SCRIPTED_GAMEOBJECT = 1,    //GameObjectScript
-    SCRIPTED_ITEM = 2,    //ItemScript
+    SCRIPTED_ITEM       = 2,    //ItemScript
     SCRIPTED_AREATRIGGER = 3,    //AreaTriggerScript
-    SCRIPTED_SPELL = 4,    //SpellScript
-    SCRIPTED_AURASPELL = 5,    //AuraScript
-    SCRIPTED_MAPEVENT = 6,    //MapEventScript
-    SCRIPTED_MAP = 7,    //ZoneScript
+    SCRIPTED_SPELL      = 4,    //SpellScript
+    SCRIPTED_AURASPELL  = 5,    //AuraScript
+    SCRIPTED_MAPEVENT   = 6,    //MapEventScript
+    SCRIPTED_MAP        = 7,    //ZoneScript
     SCRIPTED_BATTLEGROUND = 8,    //BattleGroundScript
-    SCRIPTED_PVP_ZONE = 9,    //OutdoorPvPScript
-    SCRIPTED_INSTANCE = 10,   //InstanceScript
-    SCRIPTED_CONDITION = 11,   //ConditionScript
+    SCRIPTED_PVP_ZONE   = 9,    //OutdoorPvPScript
+    SCRIPTED_INSTANCE   = 10,   //InstanceScript
+    SCRIPTED_CONDITION  = 11,   //ConditionScript
     SCRIPTED_ACHIEVEMENT = 12,   //AchievementScript
     SCRIPTED_MAX_TYPE
 };
@@ -539,11 +539,12 @@ class ScriptMgr
         void LoadDbScriptStrings();
 
         void LoadScriptNames();
-        void LoadAreaTriggerScripts();
-        void LoadEventIdScripts();
+        void LoadScriptBinding();
 
         uint32 GetAreaTriggerScriptId(uint32 triggerId) const;
         uint32 GetEventIdScriptId(uint32 eventId) const;
+
+        uint32 GetBoundScriptId(ScriptedObjectType entity, int32 entry);
 
         const char* GetScriptName(uint32 id) const
         {
@@ -616,11 +617,9 @@ class ScriptMgr
         void CheckScriptTexts(ScriptMapMapName const& scripts, std::set<int32>& ids);
 
         typedef std::vector<std::string> ScriptNameMap;
-        typedef UNORDERED_MAP<uint32, uint32> AreaTriggerScriptMap;
-        typedef UNORDERED_MAP<uint32, uint32> EventIdScriptMap;
+        typedef UNORDERED_MAP<int32, uint32> EntryToScriptIdMap;
 
-        AreaTriggerScriptMap    m_AreaTriggerScripts;
-        EventIdScriptMap        m_EventIdScripts;
+        EntryToScriptIdMap      m_scriptBind[SCRIPTED_MAX_TYPE];
 
         ScriptNameMap           m_scriptNames;
 
@@ -633,8 +632,6 @@ bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool
 
 #define sScriptMgr MaNGOS::Singleton<ScriptMgr>::Instance()
 
- uint32 GetAreaTriggerScriptId(uint32 triggerId);
- uint32 GetEventIdScriptId(uint32 eventId);
  uint32 GetScriptId(const char* name);
  char const* GetScriptName(uint32 id);
  uint32 GetScriptIdsCount();

@@ -184,23 +184,28 @@ enum
     ZONE_ID_HOWLING             = 495
 };
 
-bool ItemUse_item_petrov_cluster_bombs(Player* pPlayer, Item* pItem, const SpellCastTargets& /*pTargets*/)
+struct item_petrov_cluster_bombs : public ItemScript
 {
-    if (pPlayer->GetZoneId() != ZONE_ID_HOWLING)
-        return false;
+    item_petrov_cluster_bombs() : ItemScript("item_petrov_cluster_bombs") {}
 
-    if (!pPlayer->GetTransport() || pPlayer->GetAreaId() != AREA_ID_SHATTERED_STRAITS)
+    bool OnUse(Player* pPlayer, Item* pItem, const SpellCastTargets& /*pTargets*/) override
     {
-        pPlayer->SendEquipError(EQUIP_ERR_NONE, pItem, NULL);
+        if (pPlayer->GetZoneId() != ZONE_ID_HOWLING)
+            return false;
 
-        if (const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry(SPELL_PETROV_BOMB))
-            Spell::SendCastResult(pPlayer, pSpellInfo, 1, SPELL_FAILED_NOT_HERE);
+        if (!pPlayer->GetTransport() || pPlayer->GetAreaId() != AREA_ID_SHATTERED_STRAITS)
+        {
+            pPlayer->SendEquipError(EQUIP_ERR_NONE, pItem, NULL);
 
-        return true;
+            if (const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry(SPELL_PETROV_BOMB))
+                Spell::SendCastResult(pPlayer, pSpellInfo, 1, SPELL_FAILED_NOT_HERE);
+
+            return true;
+        }
+
+        return false;
     }
-
-    return false;
-}
+};
 
 void AddSC_item_scripts()
 {
@@ -213,6 +218,8 @@ void AddSC_item_scripts()
     s = new item_flying_machine();
     s->RegisterSelf();
     s = new item_gor_dreks_ointment();
+    s->RegisterSelf();
+    s = new item_petrov_cluster_bombs();
     s->RegisterSelf();
 
     //pNewScript = new Script;
@@ -230,8 +237,8 @@ void AddSC_item_scripts()
     //pNewScript->pItemUse = &ItemUse_item_gor_dreks_ointment;
     //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "item_petrov_cluster_bombs";
-    pNewScript->pItemUse = &ItemUse_item_petrov_cluster_bombs;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "item_petrov_cluster_bombs";
+    //pNewScript->pItemUse = &ItemUse_item_petrov_cluster_bombs;
+    //pNewScript->RegisterSelf();
 }

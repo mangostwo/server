@@ -102,197 +102,240 @@ static const DialogueEntry aIntroDialogue[] =
 ## boss_alythess
 ######*/
 
-struct boss_alythessAI : public ScriptedAI
+struct boss_alythess : public CreatureScript
 {
-    boss_alythessAI(Creature* pCreature) : ScriptedAI(pCreature),
+    boss_alythess() : CreatureScript("boss_alythess") {}
+
+    struct boss_alythessAI : public ScriptedAI
+    {
+        boss_alythessAI(Creature* pCreature) : ScriptedAI(pCreature),
         m_introDialogue(aIntroDialogue)
-    {
-        m_pInstance = ((instance_sunwell_plateau*)pCreature->GetInstanceData());
-        m_introDialogue.InitializeDialogueHelper(m_pInstance);
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-    DialogueHelper m_introDialogue;
-
-    uint32 m_uiEnrageTimer;
-    uint32 m_uiPyrogenicsTimer;
-    uint32 m_uiConflagrationTimer;
-    uint32 m_uiBlazeTimer;
-    uint32 m_uiFlameSearTimer;
-    bool m_bDidIntro;
-
-    void Reset() override
-    {
-        m_uiEnrageTimer = 6 * MINUTE * IN_MILLISECONDS;
-        m_uiPyrogenicsTimer     = 20000;
-        m_uiConflagrationTimer  = urand(25000, 30000);
-        m_uiBlazeTimer          = 1000;
-        m_uiFlameSearTimer      = 5000;
-        m_bDidIntro = false;
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
         {
-            if (m_pInstance->GetData(TYPE_EREDAR_TWINS) != FAIL)
-            { m_pInstance->SetData(TYPE_EREDAR_TWINS, FAIL); }
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_introDialogue.InitializeDialogueHelper(m_pInstance);
+        }
 
-            // Respawn dead sister
-            if (Creature* pSister = m_pInstance->GetSingleCreatureFromStorage(NPC_SACROLASH))
+        ScriptedInstance* m_pInstance;
+        DialogueHelper m_introDialogue;
+
+        uint32 m_uiEnrageTimer;
+        uint32 m_uiPyrogenicsTimer;
+        uint32 m_uiConflagrationTimer;
+        uint32 m_uiBlazeTimer;
+        uint32 m_uiFlameSearTimer;
+        bool m_bDidIntro;
+
+        void Reset() override
+        {
+            m_uiEnrageTimer = 6 * MINUTE * IN_MILLISECONDS;
+            m_uiPyrogenicsTimer = 20000;
+            m_uiConflagrationTimer = urand(25000, 30000);
+            m_uiBlazeTimer = 1000;
+            m_uiFlameSearTimer = 5000;
+            m_bDidIntro = false;
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
             {
-                if (!pSister->IsAlive())
-                { pSister->Respawn(); }
+                if (m_pInstance->GetData(TYPE_EREDAR_TWINS) != FAIL)
+                {
+                    m_pInstance->SetData(TYPE_EREDAR_TWINS, FAIL);
+                }
+
+                // Respawn dead sister
+                if (Creature* pSister = m_pInstance->GetSingleCreatureFromStorage(NPC_SACROLASH))
+                {
+                    if (!pSister->IsAlive())
+                    {
+                        pSister->Respawn();
+                    }
+                }
             }
         }
-    }
 
-    void Aggro(Unit* /*pWho*/) override
-    {
-        if (m_pInstance)
+        void Aggro(Unit* /*pWho*/) override
         {
-            if (m_pInstance->GetData(TYPE_EREDAR_TWINS) != IN_PROGRESS)
-            { m_pInstance->SetData(TYPE_EREDAR_TWINS, IN_PROGRESS); }
-        }
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, false))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-
-            // Only range attack
-            m_creature->GetMotionMaster()->MoveChase(pWho, 10.0f);
-        }
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_ALYTHESS_KILL_1 : SAY_ALYTHESS_KILL_2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-        {
-            if (Creature* pSacrolash = m_pInstance->GetSingleCreatureFromStorage(NPC_SACROLASH))
+            if (m_pInstance)
             {
-                if (!pSacrolash->IsAlive())
+                if (m_pInstance->GetData(TYPE_EREDAR_TWINS) != IN_PROGRESS)
                 {
-                    m_pInstance->SetData(TYPE_EREDAR_TWINS, DONE);
-                    DoScriptText(SAY_ALYTHESS_DEAD, m_creature);
+                    m_pInstance->SetData(TYPE_EREDAR_TWINS, IN_PROGRESS);
+                }
+            }
+        }
+
+        void AttackStart(Unit* pWho) override
+        {
+            if (m_creature->Attack(pWho, false))
+            {
+                m_creature->AddThreat(pWho);
+                m_creature->SetInCombatWith(pWho);
+                pWho->SetInCombatWith(m_creature);
+
+                // Only range attack
+                m_creature->GetMotionMaster()->MoveChase(pWho, 10.0f);
+            }
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            DoScriptText(urand(0, 1) ? SAY_ALYTHESS_KILL_1 : SAY_ALYTHESS_KILL_2, m_creature);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            if (m_pInstance)
+            {
+                if (Creature* pSacrolash = m_pInstance->GetSingleCreatureFromStorage(NPC_SACROLASH))
+                {
+                    if (!pSacrolash->IsAlive())
+                    {
+                        m_pInstance->SetData(TYPE_EREDAR_TWINS, DONE);
+                        DoScriptText(SAY_ALYTHESS_DEAD, m_creature);
+                    }
+                    else
+                    {
+                        // Remove loot flag and cast empower
+                        m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+                        DoScriptText(SAY_SACROLASH_EMPOWER, pSacrolash);
+                        pSacrolash->InterruptNonMeleeSpells(true);
+                        pSacrolash->CastSpell(pSacrolash, SPELL_EMPOWER, false);
+                    }
+                }
+            }
+        }
+
+        void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+        {
+            if (pTarget->HasAura(SPELL_DARK_FLAME))
+            {
+                return;
+            }
+
+            if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_FIRE)
+            {
+                if (pTarget->HasAura(SPELL_DARK_TOUCHED))
+                {
+                    pTarget->RemoveAurasDueToSpell(SPELL_DARK_TOUCHED);
+                    pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, true);
                 }
                 else
                 {
-                    // Remove loot flag and cast empower
-                    m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-                    DoScriptText(SAY_SACROLASH_EMPOWER, pSacrolash);
-                    pSacrolash->InterruptNonMeleeSpells(true);
-                    pSacrolash->CastSpell(pSacrolash, SPELL_EMPOWER, false);
+                    pTarget->CastSpell(pTarget, SPELL_FLAME_TOUCHED, true);
+                }
+            }
+            else if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_SHADOW)
+            {
+                if (pTarget->HasAura(SPELL_FLAME_TOUCHED))
+                {
+                    pTarget->RemoveAurasDueToSpell(SPELL_FLAME_TOUCHED);
+                    pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, true);
+                }
+                else
+                {
+                    pTarget->CastSpell(pTarget, SPELL_DARK_TOUCHED, true);
                 }
             }
         }
-    }
 
-    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
-    {
-        if (pTarget->HasAura(SPELL_DARK_FLAME))
-        { return; }
-
-        if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_FIRE)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (pTarget->HasAura(SPELL_DARK_TOUCHED))
+            if (m_pInstance && m_pInstance->GetData(TYPE_EREDAR_TWINS) == SPECIAL)
             {
-                pTarget->RemoveAurasDueToSpell(SPELL_DARK_TOUCHED);
-                pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, true);
+                if (!m_bDidIntro)
+                {
+                    m_introDialogue.StartNextDialogueText(SAY_INTRO_1);
+                    m_bDidIntro = true;
+                }
+                m_introDialogue.DialogueUpdate(uiDiff);
+            }
+
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_uiEnrageTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_TWINS_ENRAGE) == CAST_OK)
+                {
+                    DoScriptText(SAY_ALYTHESS_BERSERK, m_creature);
+                    m_uiEnrageTimer = 6 * MINUTE * IN_MILLISECONDS;
+                }
             }
             else
-            { pTarget->CastSpell(pTarget, SPELL_FLAME_TOUCHED, true); }
-        }
-        else if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_SHADOW)
-        {
-            if (pTarget->HasAura(SPELL_FLAME_TOUCHED))
             {
-                pTarget->RemoveAurasDueToSpell(SPELL_FLAME_TOUCHED);
-                pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, true);
+                m_uiEnrageTimer -= uiDiff;
+            }
+
+            if (m_uiPyrogenicsTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_PYROGENICS) == CAST_OK)
+                {
+                    m_uiPyrogenicsTimer = urand(25000, 30000);
+                }
             }
             else
-            { pTarget->CastSpell(pTarget, SPELL_DARK_TOUCHED, true); }
-        }
-    }
+            {
+                m_uiPyrogenicsTimer -= uiDiff;
+            }
 
-    void UpdateAI(const uint32 uiDiff) override
+            if (m_uiConflagrationTimer < uiDiff)
+            {
+                Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 3);
+                if (!pTarget)
+                {
+                    pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
+                }
+
+                // If sister is dead cast shadownova instead of conflagration
+                bool bSwitchSpell = m_creature->HasAura(SPELL_EMPOWER);
+                if (DoCastSpellIfCan(pTarget, bSwitchSpell ? SPELL_SHADOW_NOVA : SPELL_CONFLAGRATION) == CAST_OK)
+                {
+                    if (!bSwitchSpell)
+                    {
+                        DoScriptText(SAY_ALYTHESS_CANFLAGRATION, m_creature);
+                    }
+
+                    m_uiConflagrationTimer = urand(20000, 25000);
+                }
+            }
+            else
+            {
+                m_uiConflagrationTimer -= uiDiff;
+            }
+
+            if (m_uiFlameSearTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_FLAME_SEAR) == CAST_OK)
+                {
+                    m_uiFlameSearTimer = 10000;
+                }
+            }
+            else
+            {
+                m_uiFlameSearTimer -= uiDiff;
+            }
+
+            if (m_uiBlazeTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BLAZE) == CAST_OK)
+                {
+                    m_uiBlazeTimer = 3000;
+                }
+            }
+            else
+            {
+                m_uiBlazeTimer -= uiDiff;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        if (m_pInstance && m_pInstance->GetData(TYPE_EREDAR_TWINS) == SPECIAL)
-        {
-            if (!m_bDidIntro)
-            {
-                m_introDialogue.StartNextDialogueText(SAY_INTRO_1);
-                m_bDidIntro = true;
-            }
-            m_introDialogue.DialogueUpdate(uiDiff);
-        }
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiEnrageTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_TWINS_ENRAGE) == CAST_OK)
-            {
-                DoScriptText(SAY_ALYTHESS_BERSERK, m_creature);
-                m_uiEnrageTimer = 6 * MINUTE * IN_MILLISECONDS;
-            }
-        }
-        else
-        { m_uiEnrageTimer -= uiDiff; }
-
-        if (m_uiPyrogenicsTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_PYROGENICS) == CAST_OK)
-            { m_uiPyrogenicsTimer = urand(25000, 30000); }
-        }
-        else
-        { m_uiPyrogenicsTimer -= uiDiff; }
-
-        if (m_uiConflagrationTimer < uiDiff)
-        {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 3);
-            if (!pTarget)
-            { pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0); }
-
-            // If sister is dead cast shadownova instead of conflagration
-            bool bSwitchSpell = m_creature->HasAura(SPELL_EMPOWER);
-            if (DoCastSpellIfCan(pTarget, bSwitchSpell ? SPELL_SHADOW_NOVA : SPELL_CONFLAGRATION) == CAST_OK)
-            {
-                if (!bSwitchSpell)
-                { DoScriptText(SAY_ALYTHESS_CANFLAGRATION, m_creature); }
-
-                m_uiConflagrationTimer = urand(20000, 25000);
-            }
-        }
-        else
-        { m_uiConflagrationTimer -= uiDiff; }
-
-        if (m_uiFlameSearTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_FLAME_SEAR) == CAST_OK)
-            { m_uiFlameSearTimer = 10000; }
-        }
-        else
-        { m_uiFlameSearTimer -= uiDiff; }
-
-        if (m_uiBlazeTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BLAZE) == CAST_OK)
-            { m_uiBlazeTimer = 3000; }
-        }
-        else
-        { m_uiBlazeTimer -= uiDiff; }
+        return new boss_alythessAI(pCreature);
     }
 };
 
@@ -300,223 +343,274 @@ struct boss_alythessAI : public ScriptedAI
 ## boss_sacrolash
 ######*/
 
-struct boss_sacrolashAI : public ScriptedAI
+struct boss_sacrolash : public CreatureScript
 {
-    boss_sacrolashAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_sacrolash() : CreatureScript("boss_sacrolash") {}
+
+    struct boss_sacrolashAI : public ScriptedAI
     {
-        m_pInstance = ((instance_sunwell_plateau*)pCreature->GetInstanceData());
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiEnrageTimer;
-    uint32 m_uiShadowNovaTimer;
-    uint32 m_uiConfoundingBlowTimer;
-    uint32 m_uiShadowBladesTimer;
-    uint32 m_uiSummonShadowImage;
-
-    void Reset() override
-    {
-        m_uiEnrageTimer = 6 * MINUTE * IN_MILLISECONDS;
-        m_uiShadowNovaTimer      = 15000;
-        m_uiConfoundingBlowTimer = 30000;
-        m_uiShadowBladesTimer    = 15000;
-        m_uiSummonShadowImage    = 10000;
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
+        boss_sacrolashAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (m_pInstance->GetData(TYPE_EREDAR_TWINS) != FAIL)
-            { m_pInstance->SetData(TYPE_EREDAR_TWINS, FAIL); }
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        }
 
-            // Respawn dead sister
-            if (Creature* pSister = m_pInstance->GetSingleCreatureFromStorage(NPC_ALYTHESS))
+        ScriptedInstance* m_pInstance;
+
+        uint32 m_uiEnrageTimer;
+        uint32 m_uiShadowNovaTimer;
+        uint32 m_uiConfoundingBlowTimer;
+        uint32 m_uiShadowBladesTimer;
+        uint32 m_uiSummonShadowImage;
+
+        void Reset() override
+        {
+            m_uiEnrageTimer = 6 * MINUTE * IN_MILLISECONDS;
+            m_uiShadowNovaTimer = 15000;
+            m_uiConfoundingBlowTimer = 30000;
+            m_uiShadowBladesTimer = 15000;
+            m_uiSummonShadowImage = 10000;
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
             {
-                if (!pSister->IsAlive())
-                { pSister->Respawn(); }
+                if (m_pInstance->GetData(TYPE_EREDAR_TWINS) != FAIL)
+                {
+                    m_pInstance->SetData(TYPE_EREDAR_TWINS, FAIL);
+                }
+
+                // Respawn dead sister
+                if (Creature* pSister = m_pInstance->GetSingleCreatureFromStorage(NPC_ALYTHESS))
+                {
+                    if (!pSister->IsAlive())
+                    {
+                        pSister->Respawn();
+                    }
+                }
             }
         }
-    }
 
-    void Aggro(Unit* /*pWho*/) override
-    {
-        if (m_pInstance)
+        void Aggro(Unit* /*pWho*/) override
         {
-            if (m_pInstance->GetData(TYPE_EREDAR_TWINS) != IN_PROGRESS)
-            { m_pInstance->SetData(TYPE_EREDAR_TWINS, IN_PROGRESS); }
-        }
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SACROLASH_KILL_1 : SAY_SACROLASH_KILL_2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-        {
-            if (Creature* pAlythess = m_pInstance->GetSingleCreatureFromStorage(NPC_ALYTHESS))
+            if (m_pInstance)
             {
-                if (!pAlythess->IsAlive())
+                if (m_pInstance->GetData(TYPE_EREDAR_TWINS) != IN_PROGRESS)
                 {
-                    m_pInstance->SetData(TYPE_EREDAR_TWINS, DONE);
-                    DoScriptText(SAY_SACROLASH_DEAD, m_creature);
+                    m_pInstance->SetData(TYPE_EREDAR_TWINS, IN_PROGRESS);
+                }
+            }
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            DoScriptText(urand(0, 1) ? SAY_SACROLASH_KILL_1 : SAY_SACROLASH_KILL_2, m_creature);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            if (m_pInstance)
+            {
+                if (Creature* pAlythess = m_pInstance->GetSingleCreatureFromStorage(NPC_ALYTHESS))
+                {
+                    if (!pAlythess->IsAlive())
+                    {
+                        m_pInstance->SetData(TYPE_EREDAR_TWINS, DONE);
+                        DoScriptText(SAY_SACROLASH_DEAD, m_creature);
+                    }
+                    else
+                    {
+                        // Remove loot flag and cast empower
+                        m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+                        DoScriptText(SAY_ALYTHESS_EMPOWER, pAlythess);
+                        pAlythess->InterruptNonMeleeSpells(true);
+                        pAlythess->CastSpell(pAlythess, SPELL_EMPOWER, false);
+                    }
+                }
+            }
+        }
+
+        void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+        {
+            if (pTarget->HasAura(SPELL_DARK_FLAME))
+            {
+                return;
+            }
+
+            if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_FIRE)
+            {
+                if (pTarget->HasAura(SPELL_DARK_TOUCHED))
+                {
+                    pTarget->RemoveAurasDueToSpell(SPELL_DARK_TOUCHED);
+                    pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, true);
                 }
                 else
                 {
-                    // Remove loot flag and cast empower
-                    m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-                    DoScriptText(SAY_ALYTHESS_EMPOWER, pAlythess);
-                    pAlythess->InterruptNonMeleeSpells(true);
-                    pAlythess->CastSpell(pAlythess, SPELL_EMPOWER, false);
+                    pTarget->CastSpell(pTarget, SPELL_FLAME_TOUCHED, true);
+                }
+            }
+            else if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_SHADOW)
+            {
+                if (pTarget->HasAura(SPELL_FLAME_TOUCHED))
+                {
+                    pTarget->RemoveAurasDueToSpell(SPELL_FLAME_TOUCHED);
+                    pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, true);
+                }
+                else
+                {
+                    pTarget->CastSpell(pTarget, SPELL_DARK_TOUCHED, true);
                 }
             }
         }
-    }
 
-    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
-    {
-        if (pTarget->HasAura(SPELL_DARK_FLAME))
-        { return; }
-
-        if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_FIRE)
+        // Return a random target which it's not in range of 10 yards of boss
+        Unit* GetRandomTargetAtDist(float fDist)
         {
-            if (pTarget->HasAura(SPELL_DARK_TOUCHED))
+            std::vector<Unit*> m_vRangeTargets;
+
+            ThreatList const& tList = m_creature->GetThreatManager().getThreatList();
+            for (ThreatList::const_iterator iter = tList.begin(); iter != tList.end(); ++iter)
             {
-                pTarget->RemoveAurasDueToSpell(SPELL_DARK_TOUCHED);
-                pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, true);
+                if (Unit* pTempTarget = m_creature->GetMap()->GetUnit((*iter)->getUnitGuid()))
+                {
+                    if (!pTempTarget->IsWithinDistInMap(m_creature, fDist))
+                    {
+                        m_vRangeTargets.push_back(pTempTarget);
+                    }
+                }
+            }
+
+            if (!m_vRangeTargets.empty())
+            {
+                return m_vRangeTargets[urand(0, m_vRangeTargets.size() - 1)];
             }
             else
-            { pTarget->CastSpell(pTarget, SPELL_FLAME_TOUCHED, true); }
-        }
-        else if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_SHADOW)
-        {
-            if (pTarget->HasAura(SPELL_FLAME_TOUCHED))
             {
-                pTarget->RemoveAurasDueToSpell(SPELL_FLAME_TOUCHED);
-                pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, true);
+                return m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
+            }
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_SHADOW_IMAGE)
+            {
+                pSummoned->CastSpell(pSummoned, SPELL_IMAGE_VISUAL, false);
+                // Attack random range target
+                if (Unit* pTarget = GetRandomTargetAtDist(10.0f))
+                {
+                    pSummoned->AI()->AttackStart(pTarget);
+                }
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_uiEnrageTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_TWINS_ENRAGE) == CAST_OK)
+                {
+                    DoScriptText(SAY_SACROLASH_BERSERK, m_creature);
+                    m_uiEnrageTimer = 6 * MINUTE * IN_MILLISECONDS;
+                }
             }
             else
-            { pTarget->CastSpell(pTarget, SPELL_DARK_TOUCHED, true); }
-        }
-    }
+            {
+                m_uiEnrageTimer -= uiDiff;
+            }
 
-    // Return a random target which it's not in range of 10 yards of boss
-    Unit* GetRandomTargetAtDist(float fDist)
+            if (m_uiShadowBladesTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_BLADES) == CAST_OK)
+                {
+                    m_uiShadowBladesTimer = urand(13000, 15000);
+                }
+            }
+            else
+            {
+                m_uiShadowBladesTimer -= uiDiff;
+            }
+
+            if (m_uiShadowNovaTimer < uiDiff)
+            {
+                Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 2);
+                if (!pTarget)
+                {
+                    pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
+                }
+
+                // If sister is dead cast conflagration instead of shadownova
+                bool bSwitchSpell = m_creature->HasAura(SPELL_EMPOWER);
+                if (DoCastSpellIfCan(pTarget, bSwitchSpell ? SPELL_CONFLAGRATION : SPELL_SHADOW_NOVA) == CAST_OK)
+                {
+                    if (!bSwitchSpell)
+                    {
+                        DoScriptText(SAY_SACROLASH_SHADOW_NOVA, m_creature);
+                    }
+
+                    m_uiShadowNovaTimer = urand(30000, 35000);
+                }
+            }
+            else
+            {
+                m_uiShadowNovaTimer -= uiDiff;
+            }
+
+            if (m_uiConfoundingBlowTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CONFOUNDING_BLOW) == CAST_OK)
+                {
+                    // Reset threat
+                    if (m_creature->GetThreatManager().getThreat(m_creature->getVictim()))
+                    {
+                        m_creature->GetThreatManager().modifyThreatPercent(m_creature->getVictim(), -100);
+                    }
+
+                    m_uiConfoundingBlowTimer = urand(25000, 30000);
+                }
+            }
+            else
+            {
+                m_uiConfoundingBlowTimer -= uiDiff;
+            }
+
+            if (m_uiSummonShadowImage < uiDiff)
+            {
+                // Summon 3 shadow images at the boss position
+                for (uint8 i = 0; i < 3; ++i)
+                {
+                    m_creature->SummonCreature(NPC_SHADOW_IMAGE, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                }
+
+                m_uiSummonShadowImage = urand(10000, 12000);
+            }
+            else
+            {
+                m_uiSummonShadowImage -= uiDiff;
+            }
+
+            // Overwrite the melee attack in order to apply the dark strike
+            if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
+            {
+                // Make sure our attack is ready and we aren't currently casting
+                if (m_creature->isAttackReady() && !m_creature->IsNonMeleeSpellCasted(false))
+                {
+                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_DARK_STRIKE);
+
+                    m_creature->AttackerStateUpdate(m_creature->getVictim());
+                    m_creature->resetAttackTimer();
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        std::vector<Unit*> m_vRangeTargets;
-
-        ThreatList const& tList = m_creature->GetThreatManager().getThreatList();
-        for (ThreatList::const_iterator iter = tList.begin(); iter != tList.end(); ++iter)
-        {
-            if (Unit* pTempTarget = m_creature->GetMap()->GetUnit((*iter)->getUnitGuid()))
-            {
-                if (!pTempTarget->IsWithinDistInMap(m_creature, fDist))
-                { m_vRangeTargets.push_back(pTempTarget); }
-            }
-        }
-
-        if (!m_vRangeTargets.empty())
-        { return m_vRangeTargets[urand(0, m_vRangeTargets.size() - 1)]; }
-        else
-        { return m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1); }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_SHADOW_IMAGE)
-        {
-            pSummoned->CastSpell(pSummoned, SPELL_IMAGE_VISUAL, false);
-            // Attack random range target
-            if (Unit* pTarget = GetRandomTargetAtDist(10.0f))
-            { pSummoned->AI()->AttackStart(pTarget); }
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiEnrageTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_TWINS_ENRAGE) == CAST_OK)
-            {
-                DoScriptText(SAY_SACROLASH_BERSERK, m_creature);
-                m_uiEnrageTimer = 6 * MINUTE * IN_MILLISECONDS;
-            }
-        }
-        else
-        { m_uiEnrageTimer -= uiDiff; }
-
-        if (m_uiShadowBladesTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_BLADES) == CAST_OK)
-            { m_uiShadowBladesTimer = urand(13000, 15000); }
-        }
-        else
-        { m_uiShadowBladesTimer -= uiDiff; }
-
-        if (m_uiShadowNovaTimer < uiDiff)
-        {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 2);
-            if (!pTarget)
-            { pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0); }
-
-            // If sister is dead cast conflagration instead of shadownova
-            bool bSwitchSpell = m_creature->HasAura(SPELL_EMPOWER);
-            if (DoCastSpellIfCan(pTarget, bSwitchSpell ? SPELL_CONFLAGRATION : SPELL_SHADOW_NOVA) == CAST_OK)
-            {
-                if (!bSwitchSpell)
-                { DoScriptText(SAY_SACROLASH_SHADOW_NOVA, m_creature); }
-
-                m_uiShadowNovaTimer = urand(30000, 35000);
-            }
-        }
-        else
-        { m_uiShadowNovaTimer -= uiDiff; }
-
-        if (m_uiConfoundingBlowTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CONFOUNDING_BLOW) == CAST_OK)
-            {
-                // Reset threat
-                if (m_creature->GetThreatManager().getThreat(m_creature->getVictim()))
-                { m_creature->GetThreatManager().modifyThreatPercent(m_creature->getVictim(), -100); }
-
-                m_uiConfoundingBlowTimer = urand(25000, 30000);
-            }
-        }
-        else
-        { m_uiConfoundingBlowTimer -= uiDiff; }
-
-        if (m_uiSummonShadowImage < uiDiff)
-        {
-            // Summon 3 shadow images at the boss position
-            for (uint8 i = 0; i < 3; ++i)
-            { m_creature->SummonCreature(NPC_SHADOW_IMAGE, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000); }
-
-            m_uiSummonShadowImage = urand(10000, 12000);
-        }
-        else
-        { m_uiSummonShadowImage -= uiDiff; }
-
-        // Overwrite the melee attack in order to apply the dark strike
-        if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
-        {
-            // Make sure our attack is ready and we aren't currently casting
-            if (m_creature->isAttackReady() && !m_creature->IsNonMeleeSpellCasted(false))
-            {
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_DARK_STRIKE);
-
-                m_creature->AttackerStateUpdate(m_creature->getVictim());
-                m_creature->resetAttackTimer();
-            }
-        }
+        return new boss_sacrolashAI(pCreature);
     }
 };
 
@@ -524,56 +618,68 @@ struct boss_sacrolashAI : public ScriptedAI
 ## npc_shadow_image
 ######*/
 
-struct npc_shadow_imageAI : public ScriptedAI
+struct npc_shadow_image : public CreatureScript
 {
-    npc_shadow_imageAI(Creature* pCreature) : ScriptedAI(pCreature)  { Reset(); }
+    npc_shadow_image() : CreatureScript("npc_shadow_image") {}
 
-    uint32 m_uiChosenAbility;
-    uint32 m_uiSuicideTimer;
-    uint32 m_uiAbilityTimer;
-    uint8 m_uiDarkStrikes;
-
-    void Reset() override
+    struct npc_shadow_imageAI : public ScriptedAI
     {
-        // Choose only one spell for attack
-        m_uiChosenAbility = urand(0, 1) ? SPELL_DARK_STRIKE : SPELL_SHADOWFURY;
-        m_uiAbilityTimer = 500;
-        m_uiDarkStrikes = 0;
-        m_uiSuicideTimer = 0;
-    }
+        npc_shadow_imageAI(Creature* pCreature) : ScriptedAI(pCreature)  { }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
+        uint32 m_uiChosenAbility;
+        uint32 m_uiSuicideTimer;
+        uint32 m_uiAbilityTimer;
+        uint8 m_uiDarkStrikes;
 
-        // Suicide on timer; this is needed because of the cast time
-        if (m_uiSuicideTimer)
+        void Reset() override
         {
-            if (m_uiSuicideTimer <= uiDiff)
+            // Choose only one spell for attack
+            m_uiChosenAbility = urand(0, 1) ? SPELL_DARK_STRIKE : SPELL_SHADOWFURY;
+            m_uiAbilityTimer = 500;
+            m_uiDarkStrikes = 0;
+            m_uiSuicideTimer = 0;
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             {
-                m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                 return;
             }
-            else
-            { m_uiSuicideTimer -= uiDiff; }
-        }
-        else
-        {
-            // Do chosen ability
-            switch (m_uiChosenAbility)
+
+            // Suicide on timer; this is needed because of the cast time
+            if (m_uiSuicideTimer)
             {
+                if (m_uiSuicideTimer <= uiDiff)
+                {
+                    m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                    return;
+                }
+                else
+                {
+                    m_uiSuicideTimer -= uiDiff;
+                }
+            }
+            else
+            {
+                // Do chosen ability
+                switch (m_uiChosenAbility)
+                {
                 case SPELL_SHADOWFURY:
                     if (m_uiAbilityTimer < uiDiff)
                     {
                         if (m_creature->IsWithinDistInMap(m_creature->getVictim(), INTERACTION_DISTANCE))
                         {
                             if (DoCastSpellIfCan(m_creature, SPELL_SHADOWFURY) == CAST_OK)
-                            { m_uiSuicideTimer = 1000; }
+                            {
+                                m_uiSuicideTimer = 1000;
+                            }
                         }
                     }
                     else
-                    { m_uiAbilityTimer -= uiDiff; }
+                    {
+                        m_uiAbilityTimer -= uiDiff;
+                    }
                     break;
                 case SPELL_DARK_STRIKE:
                     if (m_uiAbilityTimer < uiDiff)
@@ -583,50 +689,54 @@ struct npc_shadow_imageAI : public ScriptedAI
                             ++m_uiDarkStrikes;
                             // kill itself after 2 strikes
                             if (m_uiDarkStrikes == 2)
-                            { m_uiSuicideTimer = 1000; }
+                            {
+                                m_uiSuicideTimer = 1000;
+                            }
                             else
-                            { m_uiAbilityTimer = 1000; }
+                            {
+                                m_uiAbilityTimer = 1000;
+                            }
                         }
                     }
                     else
-                    { m_uiAbilityTimer -= uiDiff; }
+                    {
+                        m_uiAbilityTimer -= uiDiff;
+                    }
                     break;
+                }
             }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_shadow_imageAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_alythess(Creature* pCreature)
-{
-    return new boss_alythessAI(pCreature);
-}
-
-CreatureAI* GetAI_boss_sacrolash(Creature* pCreature)
-{
-    return new boss_sacrolashAI(pCreature);
-}
-
-CreatureAI* GetAI_npc_shadow_image(Creature* pCreature)
-{
-    return new npc_shadow_imageAI(pCreature);
-}
-
 void AddSC_boss_eredar_twins()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_alythess";
-    pNewScript->GetAI = &GetAI_boss_alythess;
-    pNewScript->RegisterSelf();
+    s = new boss_alythess();
+    s->RegisterSelf();
+    s = new boss_sacrolash();
+    s->RegisterSelf();
+    s = new npc_shadow_image();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_sacrolash";
-    pNewScript->GetAI = &GetAI_boss_sacrolash;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_alythess";
+    //pNewScript->GetAI = &GetAI_boss_alythess;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_shadow_image";
-    pNewScript->GetAI = &GetAI_npc_shadow_image;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_sacrolash";
+    //pNewScript->GetAI = &GetAI_boss_sacrolash;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_shadow_image";
+    //pNewScript->GetAI = &GetAI_npc_shadow_image;
+    //pNewScript->RegisterSelf();
 }

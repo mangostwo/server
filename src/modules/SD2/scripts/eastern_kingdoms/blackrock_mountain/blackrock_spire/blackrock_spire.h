@@ -30,6 +30,10 @@ enum
 {
     MAX_ENCOUNTER               = 6,
     MAX_ROOMS                   = 7,
+    DO_ACTIVATE_RUNES           = 0,
+    DO_SORT_MOBS                = 1,
+    DO_EMBERSEER_EVENT          = 2,
+    DO_FLAMEWREATH_EVENT        = 3,
 
     TYPE_ROOM_EVENT             = 0,
     TYPE_EMBERSEER              = 1,
@@ -63,6 +67,15 @@ enum
     GO_DRAKKISATH_DOOR_1        = 175946,
     GO_DRAKKISATH_DOOR_2        = 175947,
 
+    // upper spire entrance
+    GO_DRAGONSPINE              = 164725,
+    GO_BRAZIER_1                = 175528,
+    GO_BRAZIER_2                = 175529,
+    GO_BRAZIER_3                = 175530,
+    GO_BRAZIER_4                = 175531,
+    GO_BRAZIER_5                = 175532,
+    GO_BRAZIER_6                = 175533,
+
     GO_ROOM_7_RUNE              = 175194,
     GO_ROOM_3_RUNE              = 175195,
     GO_ROOM_6_RUNE              = 175196,
@@ -81,10 +94,14 @@ enum
     GO_EMBERSEER_RUNE_6         = 175271,
     GO_EMBERSEER_RUNE_7         = 175272,
 
+    ITEM_SEAL_OF_ASCENSION      = 12344,
+
     MAX_STADIUM_WAVES           = 7,
     MAX_STADIUM_MOBS_PER_WAVE   = 5,
 
-    FACTION_BLACK_DRAGON        = 103
+    FACTION_BLACK_DRAGON        = 103,
+
+    SPELL_ENCAGE_EMBERSEER      = 15281,    // cast by Blackhand Incarcerator
 };
 
 struct SpawnLocation
@@ -95,12 +112,12 @@ struct SpawnLocation
 static const SpawnLocation aStadiumLocs[7] =
 {
     {210.00f, -420.30f, 110.94f, 3.14f},                    // dragons summon location
-    {210.14f, -397.54f, 111.1f,  0},                        // Gyth summon location
-    {163.62f, -420.33f, 110.47f, 0},                        // center of the stadium location (for movement)
+    {210.14f, -397.54f, 111.1f},                            // Gyth summon location
+    {163.62f, -420.33f, 110.47f},                           // center of the stadium location (for movement)
     {164.63f, -444.04f, 121.97f, 3.22f},                    // Lord Nefarius summon position
     {161.01f, -443.73f, 121.97f, 6.26f},                    // Rend summon position
     {164.64f, -443.30f, 121.97f, 1.61f},                    // Nefarius move position
-    {165.74f, -466.46f, 116.80f, 0},                        // Rend move position
+    {165.74f, -466.46f, 116.80f},                           // Rend move position
 };
 
 // Stadium event description
@@ -113,58 +130,6 @@ static const uint32 aStadiumEventNpcs[MAX_STADIUM_WAVES][5] =
     {NPC_CHROMATIC_WHELP, NPC_CHROMATIC_WHELP, NPC_CHROMATIC_WHELP, NPC_CHROMATIC_DRAGON, NPC_BLACKHAND_HANDLER},
     {NPC_CHROMATIC_WHELP, NPC_CHROMATIC_WHELP, NPC_CHROMATIC_DRAGON, NPC_CHROMATIC_DRAGON, NPC_BLACKHAND_HANDLER},
     {NPC_CHROMATIC_WHELP, NPC_CHROMATIC_WHELP, NPC_CHROMATIC_DRAGON, NPC_CHROMATIC_DRAGON, NPC_BLACKHAND_HANDLER},
-};
-
-class instance_blackrock_spire : public ScriptedInstance, private DialogueHelper
-{
-    public:
-        instance_blackrock_spire(Map* pMap);
-        ~instance_blackrock_spire() {}
-
-        void Initialize() override;
-
-        void OnObjectCreate(GameObject* pGo) override;
-        void OnCreatureCreate(Creature* pCreature) override;
-
-        void OnCreatureDeath(Creature* pCreature) override;
-        void OnCreatureEvade(Creature* pCreature);
-        void OnCreatureEnterCombat(Creature* pCreature) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-        void Load(const char* chrIn) override;
-
-        void DoUseEmberseerRunes(bool bReset = false);
-        void DoProcessEmberseerEvent();
-
-        void DoSortRoomEventMobs();
-        void GetIncarceratorGUIDList(GuidList& lList) { lList = m_lIncarceratorGUIDList; }
-
-        void StartflamewreathEventIfCan();
-
-        void Update(uint32 uiDiff) override;
-
-    private:
-        void JustDidDialogueStep(int32 iEntry) override;
-        void DoSendNextStadiumWave();
-        void DoSendNextFlamewreathWave();
-
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string m_strInstData;
-
-        uint32 m_uiFlamewreathEventTimer;
-        uint32 m_uiFlamewreathWaveCount;
-        uint32 m_uiStadiumEventTimer;
-        uint8 m_uiStadiumWaves;
-        uint8 m_uiStadiumMobsAlive;
-
-        ObjectGuid m_aRoomRuneGuid[MAX_ROOMS];
-        GuidList m_alRoomEventMobGUIDSorted[MAX_ROOMS];
-        GuidList m_lRoomEventMobGUIDList;
-        GuidList m_lIncarceratorGUIDList;
-        GuidList m_lEmberseerRunesGUIDList;
 };
 
 #endif

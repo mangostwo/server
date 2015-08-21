@@ -49,25 +49,26 @@ enum
     NPC_FOREST_FROG          = 24396
 };
 
-struct npc_forest_frogAI : public ScriptedAI
+struct npc_forest_frog : public CreatureScript
 {
-    npc_forest_frogAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_forest_frog() : CreatureScript("npc_forest_frog") {}
+
+    struct npc_forest_frogAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    void Reset() override { }
-
-    void DoSpawnRandom()
-    {
-        if (m_pInstance)
+        npc_forest_frogAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            uint32 cEntry = 0;
-            switch (urand(0, 10))
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        }
+
+        ScriptedInstance* m_pInstance;
+
+        void DoSpawnRandom()
+        {
+            if (m_pInstance)
             {
+                uint32 cEntry = 0;
+                switch (urand(0, 10))
+                {
                 case 0: cEntry = 24024; break;              // Kraz      // wrong here?
                 case 1: cEntry = 24397; break;              // Mannuth
                 case 2: cEntry = 24403; break;              // Deez
@@ -79,43 +80,58 @@ struct npc_forest_frogAI : public ScriptedAI
                 case 8: cEntry = 24448; break;              // Christian
                 case 9: cEntry = 24453; break;              // Brennan
                 case 10: cEntry = 24455; break;             // Hollee
+                }
+
+                if (!m_pInstance->GetData(TYPE_RAND_VENDOR_1))
+                if (!urand(0, 9))
+                {
+                    cEntry = 24408;
+                }                         // Gunter
+
+                if (!m_pInstance->GetData(TYPE_RAND_VENDOR_2))
+                if (!urand(0, 9))
+                {
+                    cEntry = 24409;
+                }                         // Kyren
+
+                if (cEntry)
+                {
+                    m_creature->UpdateEntry(cEntry);
+                }
+
+                if (cEntry == 24408)
+                {
+                    m_pInstance->SetData(TYPE_RAND_VENDOR_1, DONE);
+                }
+
+                if (cEntry == 24409)
+                {
+                    m_pInstance->SetData(TYPE_RAND_VENDOR_2, DONE);
+                }
             }
-
-            if (!m_pInstance->GetData(TYPE_RAND_VENDOR_1))
-                if (!urand(0, 9))
-                { cEntry = 24408; }                         // Gunter
-
-            if (!m_pInstance->GetData(TYPE_RAND_VENDOR_2))
-                if (!urand(0, 9))
-                { cEntry = 24409; }                         // Kyren
-
-            if (cEntry)
-            { m_creature->UpdateEntry(cEntry); }
-
-            if (cEntry == 24408)
-            { m_pInstance->SetData(TYPE_RAND_VENDOR_1, DONE); }
-
-            if (cEntry == 24409)
-            { m_pInstance->SetData(TYPE_RAND_VENDOR_2, DONE); }
         }
-    }
 
-    void SpellHit(Unit* caster, const SpellEntry* spell) override
-    {
-        if (spell->Id == SPELL_REMOVE_AMANI_CURSE && caster->GetTypeId() == TYPEID_PLAYER && m_creature->GetEntry() == NPC_FOREST_FROG)
+        void SpellHit(Unit* caster, const SpellEntry* spell) override
         {
-            // increase or decrease chance of mojo?
-            if (!urand(0, 49))
-            { DoCastSpellIfCan(caster, SPELL_PUSH_MOJO, CAST_TRIGGERED); }
-            else
-            { DoSpawnRandom(); }
+            if (spell->Id == SPELL_REMOVE_AMANI_CURSE && caster->GetTypeId() == TYPEID_PLAYER && m_creature->GetEntry() == NPC_FOREST_FROG)
+            {
+                // increase or decrease chance of mojo?
+                if (!urand(0, 49))
+                {
+                    DoCastSpellIfCan(caster, SPELL_PUSH_MOJO, CAST_TRIGGERED);
+                }
+                else
+                {
+                    DoSpawnRandom();
+                }
+            }
         }
+    };
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_forest_frogAI(pCreature);
     }
 };
-CreatureAI* GetAI_npc_forest_frog(Creature* pCreature)
-{
-    return new npc_forest_frogAI(pCreature);
-}
 
 /*######
 ## npc_harrison_jones_za
@@ -132,23 +148,28 @@ enum
     SPELL_BANGING_THE_GONG  = 45225
 };
 
-struct npc_harrison_jones_zaAI : public npc_escortAI
+struct npc_harrison_jones_za : public CreatureScript
 {
-    npc_harrison_jones_zaAI(Creature* pCreature) : npc_escortAI(pCreature)
+    npc_harrison_jones_za() : CreatureScript("npc_harrison_jones_za") {}
+
+    struct npc_harrison_jones_zaAI : public npc_escortAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    void WaypointReached(uint32 uiPointId) override
-    {
-        if (!m_pInstance)
-        { return; }
-
-        switch (uiPointId)
+        npc_harrison_jones_zaAI(Creature* pCreature) : npc_escortAI(pCreature)
         {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        }
+
+        ScriptedInstance* m_pInstance;
+
+        void WaypointReached(uint32 uiPointId) override
+        {
+            if (!m_pInstance)
+            {
+                return;
+            }
+
+            switch (uiPointId)
+            {
             case 1:
                 DoScriptText(SAY_AT_GONG, m_creature);
 
@@ -165,106 +186,135 @@ struct npc_harrison_jones_zaAI : public npc_escortAI
                 m_pInstance->SetData(TYPE_EVENT_RUN, IN_PROGRESS);
                 // TODO: Spawn group of Amani'shi Savage and make them run to entrance
                 break;
+            }
         }
+
+        void StartEvent()
+        {
+            DoScriptText(SAY_START, m_creature);
+            Start();
+        }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature *pSender, Unit *pInvoker, uint32 data) override
+        {
+            if (eventType == AI_EVENT_CUSTOM_A && pSender == m_creature)
+            {
+                SetEscortPaused(bool(data));
+
+                // Stop banging gong if still
+                if (m_pInstance && m_pInstance->GetData(TYPE_EVENT_RUN) == SPECIAL && m_creature->HasAura(SPELL_BANGING_THE_GONG))
+                {
+                    m_creature->RemoveAurasDueToSpell(SPELL_BANGING_THE_GONG);
+                }
+            }
+        }
+    };
+
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
+    {
+        ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+
+        if (pCreature->IsQuestGiver())
+        {
+            pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+        }
+
+        if (pInstance && pInstance->GetData(TYPE_EVENT_RUN) == NOT_STARTED)
+        {
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_BEGIN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        }
+
+        pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
+        return true;
     }
 
-    void Reset() override { }
-
-    void StartEvent()
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction) override
     {
-        DoScriptText(SAY_START, m_creature);
-        Start();
+        pPlayer->PlayerTalkClass->ClearMenus();
+        if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            if (npc_harrison_jones_zaAI* pHarrisonAI = dynamic_cast<npc_harrison_jones_zaAI*>(pCreature->AI()))
+            {
+                pHarrisonAI->StartEvent();
+            }
+
+            pPlayer->CLOSE_GOSSIP_MENU();
+        }
+        return true;
     }
 
-    void SetHoldState(bool bOnHold)
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        SetEscortPaused(bOnHold);
-
-        // Stop banging gong if still
-        if (m_pInstance && m_pInstance->GetData(TYPE_EVENT_RUN) == SPECIAL && m_creature->HasAura(SPELL_BANGING_THE_GONG))
-        { m_creature->RemoveAurasDueToSpell(SPELL_BANGING_THE_GONG); }
+        return new npc_harrison_jones_zaAI(pCreature);
     }
 };
-
-bool GossipHello_npc_harrison_jones_za(Player* pPlayer, Creature* pCreature)
-{
-    ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-
-    if (pCreature->IsQuestGiver())
-    { pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid()); }
-
-    if (pInstance && pInstance->GetData(TYPE_EVENT_RUN) == NOT_STARTED)
-    { pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_BEGIN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1); }
-
-    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
-    return true;
-}
-
-bool GossipSelect_npc_harrison_jones_za(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
-{
-    if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
-    {
-        if (npc_harrison_jones_zaAI* pHarrisonAI = dynamic_cast<npc_harrison_jones_zaAI*>(pCreature->AI()))
-        { pHarrisonAI->StartEvent(); }
-
-        pPlayer->CLOSE_GOSSIP_MENU();
-    }
-    return true;
-}
-
-CreatureAI* GetAI_npc_harrison_jones_za(Creature* pCreature)
-{
-    return new npc_harrison_jones_zaAI(pCreature);
-}
 
 /*######
 ## go_strange_gong
 ######*/
 
 // Unsure how this Gong must work. Here we always return false to allow Mangos always process further.
-bool GOUse_go_strange_gong(Player* /*pPlayer*/, GameObject* pGo)
+struct go_strange_gong : public GameObjectScript
 {
-    ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
+    go_strange_gong() : GameObjectScript("go_strange_gong") {}
 
-    if (!pInstance)
-    { return false; }
-
-    if (pInstance->GetData(TYPE_EVENT_RUN) == SPECIAL)
+    bool OnUse(Player* /*pPlayer*/, GameObject* pGo) override
     {
-        if (Creature* pCreature = pInstance->GetSingleCreatureFromStorage(NPC_HARRISON))
-        {
-            if (npc_harrison_jones_zaAI* pHarrisonAI = dynamic_cast<npc_harrison_jones_zaAI*>(pCreature->AI()))
-            { pHarrisonAI->SetHoldState(false); }
-        }
-        else
-        { script_error_log("Instance Zulaman: go_strange_gong failed"); }
+        ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
 
-        pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+        if (!pInstance)
+        {
+            return false;
+        }
+
+        if (pInstance->GetData(TYPE_EVENT_RUN) == SPECIAL)
+        {
+            if (Creature* pCreature = pInstance->GetSingleCreatureFromStorage(NPC_HARRISON))
+            {
+                if (CreatureAI* pHarrisonAI = pCreature->AI())
+                {
+                    pHarrisonAI->ReceiveAIEvent(AI_EVENT_CUSTOM_A, pCreature, pCreature, uint32(false));
+                }
+            }
+            else
+            {
+                script_error_log("Instance Zulaman: go_strange_gong failed, no NPC %u found.", NPC_HARRISON);
+            }
+
+            pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+            return false;
+        }
+
+        pInstance->SetData(TYPE_EVENT_RUN, SPECIAL);
         return false;
     }
-
-    pInstance->SetData(TYPE_EVENT_RUN, SPECIAL);
-    return false;
-}
+};
 
 void AddSC_zulaman()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_forest_frog";
-    pNewScript->GetAI = &GetAI_npc_forest_frog;
-    pNewScript->RegisterSelf();
+    s = new npc_forest_frog();
+    s->RegisterSelf();
+    s = new npc_harrison_jones_za();
+    s->RegisterSelf();
+    s = new go_strange_gong();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_harrison_jones_za";
-    pNewScript->GetAI = &GetAI_npc_harrison_jones_za;
-    pNewScript->pGossipHello =  &GossipHello_npc_harrison_jones_za;
-    pNewScript->pGossipSelect = &GossipSelect_npc_harrison_jones_za;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_forest_frog";
+    //pNewScript->GetAI = &GetAI_npc_forest_frog;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "go_strange_gong";
-    pNewScript->pGOUse = &GOUse_go_strange_gong;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_harrison_jones_za";
+    //pNewScript->GetAI = &GetAI_npc_harrison_jones_za;
+    //pNewScript->pGossipHello =  &GossipHello_npc_harrison_jones_za;
+    //pNewScript->pGossipSelect = &GossipSelect_npc_harrison_jones_za;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "go_strange_gong";
+    //pNewScript->pGOUse = &GOUse_go_strange_gong;
+    //pNewScript->RegisterSelf();
 }

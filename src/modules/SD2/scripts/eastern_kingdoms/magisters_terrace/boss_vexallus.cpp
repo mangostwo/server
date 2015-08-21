@@ -65,184 +65,224 @@ enum
     NPC_PURE_ENERGY                 = 24745,
 };
 
-struct boss_vexallusAI : public ScriptedAI
+struct boss_vexallus : public CreatureScript
 {
-    boss_vexallusAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_vexallus() : CreatureScript("boss_vexallus") {}
+
+    struct boss_vexallusAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiChainLightningTimer;
-    uint32 m_uiArcaneShockTimer;
-    uint32 m_uiOverloadTimer;
-    uint32 m_uiIntervalHealthAmount;
-    bool m_bEnraged;
-
-    void Reset() override
-    {
-        m_uiChainLightningTimer  = 8000;
-        m_uiArcaneShockTimer     = 5000;
-        m_uiOverloadTimer        = 1200;
-        m_uiIntervalHealthAmount = 1;
-        m_bEnraged               = false;
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(SAY_KILL, m_creature);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_VEXALLUS, FAIL); }
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_VEXALLUS, DONE); }
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_VEXALLUS, IN_PROGRESS); }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-        { pSummoned->GetMotionMaster()->MoveFollow(pTarget, 0.0f, 0.0f); }
-
-        pSummoned->CastSpell(pSummoned, SPELL_ENERGY_PASSIVE, true, NULL, NULL, m_creature->GetObjectGuid());
-        pSummoned->CastSpell(pSummoned, SPELL_ENERGY_BOLT, true, NULL, NULL, m_creature->GetObjectGuid());
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (!m_bEnraged)
+        boss_vexallusAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            // Enrage at 20% hp
-            if (m_creature->GetHealthPercent() < 20.0f)
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        }
+
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        uint32 m_uiChainLightningTimer;
+        uint32 m_uiArcaneShockTimer;
+        uint32 m_uiOverloadTimer;
+        uint32 m_uiIntervalHealthAmount;
+        bool m_bEnraged;
+
+        void Reset() override
+        {
+            m_uiChainLightningTimer = 8000;
+            m_uiArcaneShockTimer = 5000;
+            m_uiOverloadTimer = 1200;
+            m_uiIntervalHealthAmount = 1;
+            m_bEnraged = false;
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            DoScriptText(SAY_KILL, m_creature);
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
             {
-                m_bEnraged = true;
+                m_pInstance->SetData(TYPE_VEXALLUS, FAIL);
+            }
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_VEXALLUS, DONE);
+            }
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_VEXALLUS, IN_PROGRESS);
+            }
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            {
+                pSummoned->GetMotionMaster()->MoveFollow(pTarget, 0.0f, 0.0f);
+            }
+
+            pSummoned->CastSpell(pSummoned, SPELL_ENERGY_PASSIVE, true, NULL, NULL, m_creature->GetObjectGuid());
+            pSummoned->CastSpell(pSummoned, SPELL_ENERGY_BOLT, true, NULL, NULL, m_creature->GetObjectGuid());
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
             }
 
-            // used for check, when Vexallus cast adds 85%, 70%, 55%, 40%, 25%
-            if (m_creature->GetHealthPercent() <= float(100.0f - 15.0f * m_uiIntervalHealthAmount))
+            if (!m_bEnraged)
             {
-                DoScriptText(SAY_ENERGY, m_creature);
-                DoScriptText(EMOTE_DISCHARGE_ENERGY, m_creature);
-                ++m_uiIntervalHealthAmount;
+                // Enrage at 20% hp
+                if (m_creature->GetHealthPercent() < 20.0f)
+                {
+                    m_bEnraged = true;
+                    return;
+                }
 
-                if (m_bIsRegularMode)
-                { DoCastSpellIfCan(m_creature, SPELL_SUMMON_PURE_ENERGY); }
+                // used for check, when Vexallus cast adds 85%, 70%, 55%, 40%, 25%
+                if (m_creature->GetHealthPercent() <= float(100.0f - 15.0f * m_uiIntervalHealthAmount))
+                {
+                    DoScriptText(SAY_ENERGY, m_creature);
+                    DoScriptText(EMOTE_DISCHARGE_ENERGY, m_creature);
+                    ++m_uiIntervalHealthAmount;
+
+                    if (m_bIsRegularMode)
+                    {
+                        DoCastSpellIfCan(m_creature, SPELL_SUMMON_PURE_ENERGY);
+                    }
+                    else
+                    {
+                        DoCastSpellIfCan(m_creature, SPELL_SUMMON_PURE_ENERGY1_H, CAST_TRIGGERED);
+                        DoCastSpellIfCan(m_creature, SPELL_SUMMON_PURE_ENERGY2_H, CAST_TRIGGERED);
+                    }
+                }
+
+                if (m_uiChainLightningTimer < uiDiff)
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CHAIN_LIGHTNING : SPELL_CHAIN_LIGHTNING_H) == CAST_OK)
+                        {
+                            m_uiChainLightningTimer = 8000;
+                        }
+                    }
+                }
                 else
                 {
-                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_PURE_ENERGY1_H, CAST_TRIGGERED);
-                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_PURE_ENERGY2_H, CAST_TRIGGERED);
+                    m_uiChainLightningTimer -= uiDiff;
                 }
-            }
 
-            if (m_uiChainLightningTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (m_uiArcaneShockTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CHAIN_LIGHTNING : SPELL_CHAIN_LIGHTNING_H) == CAST_OK)
-                    { m_uiChainLightningTimer = 8000; }
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_ARCANE_SHOCK : SPELL_ARCANE_SHOCK_H) == CAST_OK)
+                        {
+                            m_uiArcaneShockTimer = 8000;
+                        }
+                    }
                 }
-            }
-            else
-            { m_uiChainLightningTimer -= uiDiff; }
-
-            if (m_uiArcaneShockTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                else
                 {
-                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_ARCANE_SHOCK : SPELL_ARCANE_SHOCK_H) == CAST_OK)
-                    { m_uiArcaneShockTimer = 8000; }
+                    m_uiArcaneShockTimer -= uiDiff;
                 }
             }
             else
-            { m_uiArcaneShockTimer -= uiDiff; }
-        }
-        else
-        {
-            if (m_uiOverloadTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_OVERLOAD) == CAST_OK)
-                { m_uiOverloadTimer = 2000; }
+                if (m_uiOverloadTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_OVERLOAD) == CAST_OK)
+                    {
+                        m_uiOverloadTimer = 2000;
+                    }
+                }
+                else
+                {
+                    m_uiOverloadTimer -= uiDiff;
+                }
             }
-            else
-            { m_uiOverloadTimer -= uiDiff; }
+
+            DoMeleeAttackIfReady();
         }
+    };
 
-        DoMeleeAttackIfReady();
-    }
-};
-
-CreatureAI* GetAI_boss_vexallus(Creature* pCreature)
-{
-    return new boss_vexallusAI(pCreature);
-};
-
-struct mob_pure_energyAI : public ScriptedAI
-{
-    mob_pure_energyAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
-
-    void Reset() override { }
-
-    void JustDied(Unit* pKiller) override
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        if (m_creature->IsTemporarySummon())
-        {
-            TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
-
-            if (pTemporary->GetSummonerGuid().IsCreature())
-            {
-                Creature* pVex = m_creature->GetMap()->GetCreature(pTemporary->GetSummonerGuid());
-
-                if (!pVex || !pVex->IsAlive())
-                { return; }
-
-                if (Player* pPlayer = pKiller->GetCharmerOrOwnerPlayerOrPlayerItself())
-                { pPlayer->CastSpell(pPlayer, SPELL_ENERGY_FEEDBACK, true, NULL, NULL, pVex->GetObjectGuid()); }
-            }
-        }
+        return new boss_vexallusAI(pCreature);
     }
-
-    void MoveInLineOfSight(Unit* /*pWho*/) override {}
-    void AttackStart(Unit* /*pWho*/) override {}
 };
 
-CreatureAI* GetAI_mob_pure_energy(Creature* pCreature)
+struct mob_pure_energy : public CreatureScript
 {
-    return new mob_pure_energyAI(pCreature);
+    mob_pure_energy() : CreatureScript("mob_pure_energy") {}
+
+    struct mob_pure_energyAI : public ScriptedAI
+    {
+        mob_pure_energyAI(Creature* pCreature) : ScriptedAI(pCreature) { }
+
+        void JustDied(Unit* pKiller) override
+        {
+            if (m_creature->IsTemporarySummon())
+            {
+                TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
+
+                if (pTemporary->GetSummonerGuid().IsCreature())
+                {
+                    Creature* pVex = m_creature->GetMap()->GetCreature(pTemporary->GetSummonerGuid());
+
+                    if (!pVex || !pVex->IsAlive())
+                    {
+                        return;
+                    }
+
+                    if (Player* pPlayer = pKiller->GetCharmerOrOwnerPlayerOrPlayerItself())
+                    {
+                        pPlayer->CastSpell(pPlayer, SPELL_ENERGY_FEEDBACK, true, NULL, NULL, pVex->GetObjectGuid());
+                    }
+                }
+            }
+        }
+
+        void MoveInLineOfSight(Unit* /*pWho*/) override {}
+        void AttackStart(Unit* /*pWho*/) override {}
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new mob_pure_energyAI(pCreature);
+    }
 };
 
 void AddSC_boss_vexallus()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_vexallus";
-    pNewScript->GetAI = &GetAI_boss_vexallus;
-    pNewScript->RegisterSelf();
+    s = new boss_vexallus();
+    s->RegisterSelf();
+    s = new mob_pure_energy();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "mob_pure_energy";
-    pNewScript->GetAI = &GetAI_mob_pure_energy;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_vexallus";
+    //pNewScript->GetAI = &GetAI_boss_vexallus;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "mob_pure_energy";
+    //pNewScript->GetAI = &GetAI_mob_pure_energy;
+    //pNewScript->RegisterSelf();
 }

@@ -894,8 +894,8 @@ struct spell_drake_turn_in : public SpellScript
             pRaelorasz->GetContactPoint(pCreatureTarget, fX, fY, fZ, CONTACT_DISTANCE);
             pCreatureTarget->GetMotionMaster()->Clear(true, true);
             pCreatureTarget->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
-            return true;
         }
+        return true;
     }
 };
 

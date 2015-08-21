@@ -53,40 +53,54 @@ enum
     ITEM_ENTRY_BOMBS                = 25853,
 };
 
-bool GossipHello_npc_erozion(Player* pPlayer, Creature* pCreature)
+struct npc_erozion : public CreatureScript
 {
-    if (pCreature->IsQuestGiver())
-    { pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid()); }
+    npc_erozion() : CreatureScript("npc_erozion") {}
 
-    ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-
-    if (pInstance && pInstance->GetData(TYPE_BARREL_DIVERSION) != DONE && !pPlayer->HasItemCount(ITEM_ENTRY_BOMBS, 1))
-    { pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NEED_BOMBS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1); }
-
-    // Need info, should have option to teleport or not
-    /*if (!pPlayer->GetQuestRewardStatus(QUEST_ENTRY_RETURN) && pPlayer->GetQuestStatus(QUEST_ENTRY_RETURN) == QUEST_STATUS_COMPLETE)
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "[PH] Teleport please, i'm tired.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);*/
-
-    pPlayer->SEND_GOSSIP_MENU(TEXT_ID_DEFAULT, pCreature->GetObjectGuid());
-
-    return true;
-}
-
-bool GossipSelect_npc_erozion(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
-{
-    if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
-        if (Item* pItem = pPlayer->StoreNewItemInInventorySlot(ITEM_ENTRY_BOMBS, 1))
-        { pPlayer->SendNewItem(pItem, 1, true, false); }
+        if (pCreature->IsQuestGiver())
+        {
+            pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+        }
 
-        pPlayer->SEND_GOSSIP_MENU(TEXT_ID_GOT_ITEM, pCreature->GetObjectGuid());
+        ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+
+        if (pInstance && pInstance->GetData(TYPE_BARREL_DIVERSION) != DONE && !pPlayer->HasItemCount(ITEM_ENTRY_BOMBS, 1))
+        {
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NEED_BOMBS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        }
+
+        // Need info, should have option to teleport or not
+        /*if (!pPlayer->GetQuestRewardStatus(QUEST_ENTRY_RETURN) && pPlayer->GetQuestStatus(QUEST_ENTRY_RETURN) == QUEST_STATUS_COMPLETE)
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "[PH] Teleport please, i'm tired.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);*/
+
+        pPlayer->SEND_GOSSIP_MENU(TEXT_ID_DEFAULT, pCreature->GetObjectGuid());
+
+        return true;
     }
 
-    if (uiAction == GOSSIP_ACTION_INFO_DEF + 2)
-    { pPlayer->CLOSE_GOSSIP_MENU(); }
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction) override
+    {
+        pPlayer->PlayerTalkClass->ClearMenus();
+        if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            if (Item* pItem = pPlayer->StoreNewItemInInventorySlot(ITEM_ENTRY_BOMBS, 1))
+            {
+                pPlayer->SendNewItem(pItem, 1, true, false);
+            }
 
-    return true;
-}
+            pPlayer->SEND_GOSSIP_MENU(TEXT_ID_GOT_ITEM, pCreature->GetObjectGuid());
+        }
+
+        if (uiAction == GOSSIP_ACTION_INFO_DEF + 2)
+        {
+            pPlayer->CLOSE_GOSSIP_MENU();
+        }
+
+        return true;
+    }
+};
 
 /*######
 ## npc_thrall_old_hillsbrad
@@ -240,211 +254,230 @@ static const DialogueEntry aThrallDialogue[] =
     {0, 0, 0},
 };
 
-struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
+struct npc_thrall_old_hillsbrad : public CreatureScript
 {
-    npc_thrall_old_hillsbradAI(Creature* pCreature) : npc_escortAI(pCreature),
+    npc_thrall_old_hillsbrad() : CreatureScript("npc_thrall_old_hillsbrad") {}
+
+    struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
+    {
+        npc_thrall_old_hillsbradAI(Creature* pCreature) : npc_escortAI(pCreature),
         DialogueHelper(aThrallDialogue)
-    {
-        m_pInstance = (instance_old_hillsbrad*)pCreature->GetInstanceData();
-        InitializeDialogueHelper(m_pInstance);
-        pCreature->SetActiveObjectState(true);              // required for proper relocation
-        m_bHadMount = false;
-        Reset();
-    }
-
-    instance_old_hillsbrad* m_pInstance;
-
-    bool m_bIsLowHp;
-    bool m_bHadMount;
-    bool m_bHasChurchYelled;
-    bool m_bHasInnYelled;
-    bool m_bHasEpochYelled;
-
-    uint8 m_uiEpochWaveId;
-
-    uint32 m_uiStrikeTimer;
-    uint32 m_uiShieldBlockTimer;
-    uint32 m_uiEpochAttackTimer;
-
-    ObjectGuid m_skarlocMountGuid;
-
-    GuidList m_lSkarlocAddsGuids;
-    GuidList m_lTarrenMillSoldiersGuids;
-
-    void Reset() override
-    {
-        m_bIsLowHp           = false;
-        m_uiStrikeTimer      = urand(3000, 7000);
-        m_uiShieldBlockTimer = urand(6000, 11000);
-
-        if (m_bHadMount)
-        { m_creature->Mount(MODEL_SKARLOC_MOUNT); }
-
-        if (!HasEscortState(STATE_ESCORT_ESCORTING))
         {
-            m_bHadMount         = false;
-            m_bHasChurchYelled  = false;
-            m_bHasEpochYelled   = false;
-
-            m_uiEpochWaveId     = 0;
-            m_uiEpochAttackTimer = 0;
-
-            m_creature->Unmount();
-            SetEquipmentSlots(true);
-            m_creature->SetDisplayId(MODEL_THRALL_UNEQUIPPED);
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            InitializeDialogueHelper(m_pInstance);
+            pCreature->SetActiveObjectState(true);              // required for proper relocation
+            m_bHadMount = false;
         }
-    }
 
-    void Aggro(Unit* /*pWho*/) override
-    {
-        switch (urand(0, 3))
+        ScriptedInstance* m_pInstance;
+
+        bool m_bIsLowHp;
+        bool m_bHadMount;
+        bool m_bHasChurchYelled;
+        bool m_bHasInnYelled;
+        bool m_bHasEpochYelled;
+
+        uint8 m_uiEpochWaveId;
+
+        uint32 m_uiStrikeTimer;
+        uint32 m_uiShieldBlockTimer;
+        uint32 m_uiEpochAttackTimer;
+
+        ObjectGuid m_skarlocMountGuid;
+
+        GuidList m_lSkarlocAddsGuids;
+        GuidList m_lTarrenMillSoldiersGuids;
+
+        void Reset() override
         {
+            m_bIsLowHp = false;
+            m_uiStrikeTimer = urand(3000, 7000);
+            m_uiShieldBlockTimer = urand(6000, 11000);
+
+            if (m_bHadMount)
+            {
+                m_creature->Mount(MODEL_SKARLOC_MOUNT);
+            }
+
+            if (!HasEscortState(STATE_ESCORT_ESCORTING))
+            {
+                m_bHadMount = false;
+                m_bHasChurchYelled = false;
+                m_bHasEpochYelled = false;
+
+                m_uiEpochWaveId = 0;
+                m_uiEpochAttackTimer = 0;
+
+                m_creature->Unmount();
+                SetEquipmentSlots(true);
+                m_creature->SetDisplayId(MODEL_THRALL_UNEQUIPPED);
+            }
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            switch (urand(0, 3))
+            {
             case 0: DoScriptText(SAY_TH_RANDOM_AGGRO1, m_creature); break;
             case 1: DoScriptText(SAY_TH_RANDOM_AGGRO2, m_creature); break;
             case 2: DoScriptText(SAY_TH_RANDOM_AGGRO3, m_creature); break;
             case 3: DoScriptText(SAY_TH_RANDOM_AGGRO4, m_creature); break;
-        }
-
-        if (m_creature->IsMounted())
-        {
-            m_creature->Unmount();
-            m_bHadMount = true;
-        }
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        switch (urand(0, 2))
-        {
-            case 0: DoScriptText(SAY_TH_RANDOM_KILL1, m_creature); break;
-            case 1: DoScriptText(SAY_TH_RANDOM_KILL2, m_creature); break;
-            case 2: DoScriptText(SAY_TH_RANDOM_KILL3, m_creature); break;
-        }
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        // fail, and relocation handled in instance script
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_THRALL_EVENT, FAIL); }
-
-        DoScriptText(urand(0, 1) ? SAY_TH_RANDOM_DIE1 : SAY_TH_RANDOM_DIE2, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_SUMMON_EROZION_IMAGE, CAST_TRIGGERED);
-
-        // despawn the summons which won't self despawn
-        for (GuidList::const_iterator itr = m_lSkarlocAddsGuids.begin(); itr != m_lSkarlocAddsGuids.end(); ++itr)
-        {
-            if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
-            { pTemp->ForcedDespawn(); }
-        }
-        for (GuidList::const_iterator itr = m_lTarrenMillSoldiersGuids.begin(); itr != m_lTarrenMillSoldiersGuids.end(); ++itr)
-        {
-            if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
-            { pTemp->ForcedDespawn(); }
-        }
-    }
-
-    void CorpseRemoved(uint32& uiRespawnDelay) override
-    {
-        uiRespawnDelay = 0;
-
-        // if we're done, just set some high so he never really respawn
-        if (m_pInstance && (m_pInstance->GetData(TYPE_THRALL_EVENT) == DONE || m_pInstance->GetData(TYPE_THRALL_EVENT) == FAIL))
-        { uiRespawnDelay = 12 * HOUR; }
-    }
-
-    void JustRespawned() override
-    {
-        npc_escortAI::JustRespawned();
-
-        if (!m_pInstance)
-        { return; }
-
-        if (m_pInstance->GetData(TYPE_THRALL_EVENT) == IN_PROGRESS)
-        {
-            Start(true);
-            SetEscortPaused(true);
-
-            m_bHadMount = false;
-            m_creature->Unmount();
-
-            m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-
-            // check current states before fail and set spesific for the part
-            if (m_pInstance->GetData(TYPE_SKARLOC) != DONE)
-            {
-                SetCurrentWaypoint(1);                      // basement
-
-                SetEquipmentSlots(true);
-                m_creature->SetDisplayId(MODEL_THRALL_UNEQUIPPED);
-                m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                m_lSkarlocAddsGuids.clear();
-
-                // reset prison door
-                m_pInstance->DoUseDoorOrButton(GO_PRISON_DOOR);
-                // respawn the Armorer
-                if (Creature* pArmorer = m_pInstance->GetSingleCreatureFromStorage(NPC_ARMORER))
-                { pArmorer->Respawn(); }
-                // despwn the horse
-                if (Creature* pHorse = m_creature->GetMap()->GetCreature(m_skarlocMountGuid))
-                { pHorse->ForcedDespawn(); }
             }
-            else if (m_pInstance->GetData(TYPE_ESCORT_BARN) != DONE)
+
+            if (m_creature->IsMounted())
             {
-                SetCurrentWaypoint(35);                     // keep
-
-                m_creature->SetDisplayId(MODEL_THRALL_EQUIPPED);
-                m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-
-                // resummon the mount
-                m_creature->SummonCreature(NPC_SKARLOC_MOUNT, 2047.775f, 253.4088f, 62.91183f, 5.37f, TEMPSUMMON_DEAD_DESPAWN, 0);
-            }
-            else if (m_pInstance->GetData(TYPE_ESCORT_INN) != DONE)
-            {
-                SetCurrentWaypoint(67);                     // barn
-                m_lTarrenMillSoldiersGuids.clear();
-
-                m_creature->SetDisplayId(MODEL_THRALL_EQUIPPED);
-                m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-            }
-            else if (m_pInstance->GetData(TYPE_EPOCH) != DONE)
-            {
-                SetCurrentWaypoint(108);                    // inn
-                m_creature->SetDisplayId(MODEL_THRALL_EQUIPPED);
-                m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                m_lTarrenMillSoldiersGuids.clear();
-                m_uiEpochWaveId = 0;
-
-                // Reset Taretha
-                if (Creature* pTaretha = m_pInstance->GetSingleCreatureFromStorage(NPC_TARETHA))
-                {
-                    pTaretha->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                    pTaretha->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    pTaretha->SetStandState(UNIT_STAND_STATE_STAND);
-                }
+                m_creature->Unmount();
+                m_bHadMount = true;
             }
         }
-    }
 
-    void EnterEvadeMode() override
-    {
-        if (HasEscortState(STATE_ESCORT_ESCORTING))
+        void KilledUnit(Unit* /*pVictim*/) override
         {
             switch (urand(0, 2))
             {
-                case 0: DoScriptText(SAY_TH_LEAVE_COMBAT1, m_creature); break;
-                case 1: DoScriptText(SAY_TH_LEAVE_COMBAT2, m_creature); break;
-                case 2: DoScriptText(SAY_TH_LEAVE_COMBAT3, m_creature); break;
+            case 0: DoScriptText(SAY_TH_RANDOM_KILL1, m_creature); break;
+            case 1: DoScriptText(SAY_TH_RANDOM_KILL2, m_creature); break;
+            case 2: DoScriptText(SAY_TH_RANDOM_KILL3, m_creature); break;
             }
         }
 
-        npc_escortAI::EnterEvadeMode();
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
+        void JustDied(Unit* /*pKiller*/) override
         {
+            // fail, and relocation handled in instance script
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_THRALL_EVENT, FAIL);
+            }
+
+            DoScriptText(urand(0, 1) ? SAY_TH_RANDOM_DIE1 : SAY_TH_RANDOM_DIE2, m_creature);
+            DoCastSpellIfCan(m_creature, SPELL_SUMMON_EROZION_IMAGE, CAST_TRIGGERED);
+
+            // despawn the summons which won't self despawn
+            for (GuidList::const_iterator itr = m_lSkarlocAddsGuids.begin(); itr != m_lSkarlocAddsGuids.end(); ++itr)
+            {
+                if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
+                {
+                    pTemp->ForcedDespawn();
+                }
+            }
+            for (GuidList::const_iterator itr = m_lTarrenMillSoldiersGuids.begin(); itr != m_lTarrenMillSoldiersGuids.end(); ++itr)
+            {
+                if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
+                {
+                    pTemp->ForcedDespawn();
+                }
+            }
+        }
+
+        void CorpseRemoved(uint32& uiRespawnDelay) override
+        {
+            uiRespawnDelay = 0;
+
+            // if we're done, just set some high so he never really respawn
+            if (m_pInstance && (m_pInstance->GetData(TYPE_THRALL_EVENT) == DONE || m_pInstance->GetData(TYPE_THRALL_EVENT) == FAIL))
+            {
+                uiRespawnDelay = 12 * HOUR;
+            }
+        }
+
+        void JustRespawned() override
+        {
+            npc_escortAI::JustRespawned();
+
+            if (!m_pInstance)
+            {
+                return;
+            }
+
+            if (m_pInstance->GetData(TYPE_THRALL_EVENT) == IN_PROGRESS)
+            {
+                Start(true);
+                SetEscortPaused(true);
+
+                m_bHadMount = false;
+                m_creature->Unmount();
+
+                m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+
+                // check current states before fail and set spesific for the part
+                if (m_pInstance->GetData(TYPE_SKARLOC) != DONE)
+                {
+                    SetCurrentWaypoint(1);                      // basement
+
+                    SetEquipmentSlots(true);
+                    m_creature->SetDisplayId(MODEL_THRALL_UNEQUIPPED);
+                    m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    m_lSkarlocAddsGuids.clear();
+
+                    // reset prison door
+                    m_pInstance->DoUseDoorOrButton(GO_PRISON_DOOR);
+                    // respawn the Armorer
+                    if (Creature* pArmorer = m_pInstance->GetSingleCreatureFromStorage(NPC_ARMORER))
+                    {
+                        pArmorer->Respawn();
+                    }
+                    // despwn the horse
+                    if (Creature* pHorse = m_creature->GetMap()->GetCreature(m_skarlocMountGuid))
+                    {
+                        pHorse->ForcedDespawn();
+                    }
+                }
+                else if (m_pInstance->GetData(TYPE_ESCORT_BARN) != DONE)
+                {
+                    SetCurrentWaypoint(35);                     // keep
+
+                    m_creature->SetDisplayId(MODEL_THRALL_EQUIPPED);
+                    m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+
+                    // resummon the mount
+                    m_creature->SummonCreature(NPC_SKARLOC_MOUNT, 2047.775f, 253.4088f, 62.91183f, 5.37f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                }
+                else if (m_pInstance->GetData(TYPE_ESCORT_INN) != DONE)
+                {
+                    SetCurrentWaypoint(67);                     // barn
+                    m_lTarrenMillSoldiersGuids.clear();
+
+                    m_creature->SetDisplayId(MODEL_THRALL_EQUIPPED);
+                    m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                }
+                else if (m_pInstance->GetData(TYPE_EPOCH) != DONE)
+                {
+                    SetCurrentWaypoint(108);                    // inn
+                    m_creature->SetDisplayId(MODEL_THRALL_EQUIPPED);
+                    m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    m_lTarrenMillSoldiersGuids.clear();
+                    m_uiEpochWaveId = 0;
+
+                    // Reset Taretha
+                    if (Creature* pTaretha = m_pInstance->GetSingleCreatureFromStorage(NPC_TARETHA))
+                    {
+                        pTaretha->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                        pTaretha->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        pTaretha->SetStandState(UNIT_STAND_STATE_STAND);
+                    }
+                }
+            }
+        }
+
+        void EnterEvadeMode() override
+        {
+            if (HasEscortState(STATE_ESCORT_ESCORTING))
+            {
+                switch (urand(0, 2))
+                {
+                case 0: DoScriptText(SAY_TH_LEAVE_COMBAT1, m_creature); break;
+                case 1: DoScriptText(SAY_TH_LEAVE_COMBAT2, m_creature); break;
+                case 2: DoScriptText(SAY_TH_LEAVE_COMBAT3, m_creature); break;
+                }
+            }
+
+            npc_escortAI::EnterEvadeMode();
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            switch (pSummoned->GetEntry())
+            {
                 // Barn soldiers - also used for the first wave of Epoch adds
             case NPC_TARREN_MILL_GUARDSMAN:
             case NPC_TARREN_MILL_PROTECTOR:
@@ -457,7 +490,9 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
 
                     // Transform on timer
                     if (!m_uiEpochAttackTimer)
-                    { m_uiEpochAttackTimer = 7000; }
+                    {
+                        m_uiEpochAttackTimer = 7000;
+                    }
                 }
                 break;
                 // Epoch wave spawns
@@ -470,10 +505,10 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 {
                     switch (urand(0, 3))
                     {
-                        case 0: DoScriptText(SAY_INFINITE_DRAGON_AGGRO_1, pSummoned); break;
-                        case 1: DoScriptText(SAY_INFINITE_DRAGON_AGGRO_2, pSummoned); break;
-                        case 2: DoScriptText(SAY_INFINITE_DRAGON_AGGRO_3, pSummoned); break;
-                        case 3: DoScriptText(SAY_INFINITE_DRAGON_AGGRO_4, pSummoned); break;
+                    case 0: DoScriptText(SAY_INFINITE_DRAGON_AGGRO_1, pSummoned); break;
+                    case 1: DoScriptText(SAY_INFINITE_DRAGON_AGGRO_2, pSummoned); break;
+                    case 2: DoScriptText(SAY_INFINITE_DRAGON_AGGRO_3, pSummoned); break;
+                    case 3: DoScriptText(SAY_INFINITE_DRAGON_AGGRO_4, pSummoned); break;
                     }
                     m_bHasEpochYelled = true;
                 }
@@ -502,7 +537,9 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 // Spawned when Thrall is dead
             case NPC_IMAGE_OF_ERONZION:
                 if (m_pInstance)
-                { DoScriptText(m_pInstance->GetThrallEventCount() < MAX_WIPE_COUNTER ? SAY_ERONZION_RESET_THRALL : SAY_ERONZION_RESET_LAST, pSummoned); }
+                {
+                    DoScriptText(m_pInstance->GetData(TYPE_THRALL_EVENT_COUNT) < MAX_WIPE_COUNTER ? SAY_ERONZION_RESET_THRALL : SAY_ERONZION_RESET_LAST, pSummoned);
+                }
                 pSummoned->CastSpell(pSummoned, SPELL_SPAWN_EROZION_IMAGE, false);
                 pSummoned->ForcedDespawn(30000);
                 break;
@@ -521,24 +558,28 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 {
                     // Allow these to follow Skarloc and attack only on command
                     if (Creature* pSkarloc = m_pInstance->GetSingleCreatureFromStorage(NPC_SKARLOC))
-                    { pSummoned->GetMotionMaster()->MoveFollow(pSkarloc, 5.0f, pSummoned->GetAngle(pSkarloc) + M_PI_F); }
+                    {
+                        pSummoned->GetMotionMaster()->MoveFollow(pSkarloc, 5.0f, pSummoned->GetAngle(pSkarloc) + M_PI_F);
+                    }
 
                     pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
                     m_lSkarlocAddsGuids.push_back(pSummoned->GetObjectGuid());
                 }
                 else
-                { pSummoned->AI()->AttackStart(m_creature); }
+                {
+                    pSummoned->AI()->AttackStart(m_creature);
+                }
                 break;
             default:
                 pSummoned->AI()->AttackStart(m_creature);
                 break;
+            }
         }
-    }
 
-    void SummonedCreatureJustDied(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
+        void SummonedCreatureJustDied(Creature* pSummoned) override
         {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_EPOCH:
                 DoHandleQuestCredit();
                 SetEscortPaused(false);
@@ -568,59 +609,61 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                     m_bHasEpochYelled = false;
                     switch (m_uiEpochWaveId)
                     {
-                        case 1:
-                            m_creature->SummonCreature(NPC_INFINITE_DEFILER,  2595.477f, 684.3738f, 55.95534f, 6.05f, TEMPSUMMON_DEAD_DESPAWN, 0);
-                            m_creature->SummonCreature(NPC_INFINITE_SABOTEOR, 2602.208f, 678.2955f, 56.34682f, 6.07f, TEMPSUMMON_DEAD_DESPAWN, 0);
-                            m_creature->SummonCreature(NPC_INFINITE_SLAYER,   2602.8f,   686.2845f, 55.79315f, 5.95f, TEMPSUMMON_DEAD_DESPAWN, 0);
-                            ++m_uiEpochWaveId;
-                            break;
-                        case 2:
-                            m_creature->SummonCreature(NPC_INFINITE_DEFILER,  2646.289f, 718.5257f, 57.90024f, 4.32f, TEMPSUMMON_DEAD_DESPAWN, 0);
-                            m_creature->SummonCreature(NPC_INFINITE_SABOTEOR, 2641.788f, 719.7106f, 57.4023f,  4.46f, TEMPSUMMON_DEAD_DESPAWN, 0);
-                            m_creature->SummonCreature(NPC_INFINITE_SLAYER,   2645.725f, 709.7153f, 56.69411f, 4.38f, TEMPSUMMON_DEAD_DESPAWN, 0);
-                            m_creature->SummonCreature(NPC_INFINITE_SLAYER,   2639.641f, 710.5246f, 56.23582f, 4.60f, TEMPSUMMON_DEAD_DESPAWN, 0);
-                            ++m_uiEpochWaveId;
-                            break;
-                        case 3:
-                            if (m_pInstance)
+                    case 1:
+                        m_creature->SummonCreature(NPC_INFINITE_DEFILER, 2595.477f, 684.3738f, 55.95534f, 6.05f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        m_creature->SummonCreature(NPC_INFINITE_SABOTEOR, 2602.208f, 678.2955f, 56.34682f, 6.07f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        m_creature->SummonCreature(NPC_INFINITE_SLAYER, 2602.8f, 686.2845f, 55.79315f, 5.95f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        ++m_uiEpochWaveId;
+                        break;
+                    case 2:
+                        m_creature->SummonCreature(NPC_INFINITE_DEFILER, 2646.289f, 718.5257f, 57.90024f, 4.32f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        m_creature->SummonCreature(NPC_INFINITE_SABOTEOR, 2641.788f, 719.7106f, 57.4023f, 4.46f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        m_creature->SummonCreature(NPC_INFINITE_SLAYER, 2645.725f, 709.7153f, 56.69411f, 4.38f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        m_creature->SummonCreature(NPC_INFINITE_SLAYER, 2639.641f, 710.5246f, 56.23582f, 4.60f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        ++m_uiEpochWaveId;
+                        break;
+                    case 3:
+                        if (m_pInstance)
+                        {
+                            if (Creature* pEpoch = m_pInstance->GetSingleCreatureFromStorage(NPC_EPOCH))
                             {
-                                if (Creature* pEpoch = m_pInstance->GetSingleCreatureFromStorage(NPC_EPOCH))
-                                {
-                                    pEpoch->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
-                                    pEpoch->AI()->AttackStart(m_creature);
-                                    AttackStart(pEpoch);
-                                }
+                                pEpoch->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                                pEpoch->AI()->AttackStart(m_creature);
+                                AttackStart(pEpoch);
                             }
-                            break;
+                        }
+                        break;
                     }
                 }
                 break;
+            }
         }
-    }
 
-    void SummonedMovementInform(Creature* pSummoned, uint32 uiType, uint32 uiPointId) override
-    {
-        if (uiType != POINT_MOTION_TYPE)
-        { return; }
-
-        switch (pSummoned->GetEntry())
+        void SummonedMovementInform(Creature* pSummoned, uint32 uiType, uint32 uiPointId) override
         {
+            if (uiType != POINT_MOTION_TYPE)
+            {
+                return;
+            }
+
+            switch (pSummoned->GetEntry())
+            {
                 // Handle Skarloc movement for the intro part
             case NPC_SKARLOC:
                 switch (uiPointId)
                 {
-                    case 1:
-                        // summon mount
-                        pSummoned->Unmount();
-                        m_creature->SummonCreature(NPC_SKARLOC_MOUNT, 2047.775f, 253.4088f, 62.91183f, 5.37f, TEMPSUMMON_DEAD_DESPAWN, 0);
-                        pSummoned->SetWalk(true);
-                        pSummoned->GetMotionMaster()->MovePoint(2, 2059.899f, 234.2593f, 64.10809f);
-                        break;
-                    case 2:
-                        // taunt Thrall
-                        DoScriptText(SAY_SKARLOC_ENTER, pSummoned);
-                        SetEscortPaused(false);
-                        break;
+                case 1:
+                    // summon mount
+                    pSummoned->Unmount();
+                    m_creature->SummonCreature(NPC_SKARLOC_MOUNT, 2047.775f, 253.4088f, 62.91183f, 5.37f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    pSummoned->SetWalk(true);
+                    pSummoned->GetMotionMaster()->MovePoint(2, 2059.899f, 234.2593f, 64.10809f);
+                    break;
+                case 2:
+                    // taunt Thrall
+                    DoScriptText(SAY_SKARLOC_ENTER, pSummoned);
+                    SetEscortPaused(false);
+                    break;
                 }
                 break;
                 // Handle infinite dragons transform on point reaches
@@ -645,22 +688,26 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                     pSummoned->UpdateEntry(NPC_INFINITE_DEFILER);
                 }
                 break;
+            }
         }
-    }
 
-    void JustDidDialogueStep(int32 iEntry) override
-    {
-        if (!m_pInstance)
-        { return; }
-
-        switch (iEntry)
+        void JustDidDialogueStep(int32 iEntry) override
         {
+            if (!m_pInstance)
+            {
+                return;
+            }
+
+            switch (iEntry)
+            {
             case NPC_YOUNG_BLANCHY:
                 // ToDo: deal with the horse animation!
                 break;
             case EMOTE_TH_CALM_HORSE:
                 if (Creature* pHorse = m_pInstance->GetSingleCreatureFromStorage(NPC_YOUNG_BLANCHY))
-                { m_creature->SetFacingToObject(pHorse); }
+                {
+                    m_creature->SetFacingToObject(pHorse);
+                }
                 break;
             case SAY_PROTECTOR_BARN_3:
                 // Move the soldiers inside
@@ -689,22 +736,26 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 break;
             case SAY_TH_EPOCH_KILL_TARETHA:
                 if (Creature* pTaretha = m_pInstance->GetSingleCreatureFromStorage(NPC_TARETHA))
-                { m_creature->SetFacingToObject(pTaretha); }
+                {
+                    m_creature->SetFacingToObject(pTaretha);
+                }
                 break;
             case NPC_THRALL:
                 SetRun();
                 SetEscortPaused(false);
                 break;
+            }
         }
-    }
 
-    void WaypointReached(uint32 uiPoint) override
-    {
-        if (!m_pInstance)
-        { return; }
-
-        switch (uiPoint)
+        void WaypointReached(uint32 uiPoint) override
         {
+            if (!m_pInstance)
+            {
+                return;
+            }
+
+            switch (uiPoint)
+            {
                 // *** Escort event - Part I - inside the keep ***
             case 0:
                 m_pInstance->DoUseDoorOrButton(GO_PRISON_DOOR);
@@ -721,7 +772,9 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 DoCastSpellIfCan(m_creature, SPELL_KNOCKOUT_ARMORER);
                 // also kill the armorer
                 if (Creature* pArmorer = m_pInstance->GetSingleCreatureFromStorage(NPC_ARMORER))
-                { pArmorer->DealDamage(pArmorer, pArmorer->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false); }
+                {
+                    pArmorer->DealDamage(pArmorer, pArmorer->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+                }
                 break;
             case 10:
                 DoScriptText(SAY_TH_ARMORY_1, m_creature);
@@ -734,31 +787,33 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 break;
             case 12:
                 if (Creature* pArmorer = m_pInstance->GetSingleCreatureFromStorage(NPC_ARMORER))
-                { m_creature->SetFacingToObject(pArmorer); }
+                {
+                    m_creature->SetFacingToObject(pArmorer);
+                }
                 DoScriptText(SAY_TH_ARMORY_2, m_creature);
                 break;
                 // *** Escort event - Part I - outside the keep ***
             case 17:
-                m_creature->SummonCreature(NPC_MAGE,    2186.909f, 139.8108f, 88.21628f, 5.75f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
-                m_creature->SummonCreature(NPC_WARDEN,  2187.943f, 141.6124f, 88.21628f, 5.73f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_MAGE, 2186.909f, 139.8108f, 88.21628f, 5.75f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_WARDEN, 2187.943f, 141.6124f, 88.21628f, 5.73f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
                 m_creature->SummonCreature(NPC_VETERAN, 2190.508f, 140.4597f, 88.21628f, 6.04f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
                 m_creature->SummonCreature(NPC_VETERAN, 2189.543f, 139.0996f, 88.23965f, 0.21f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
                 break;
             case 20:
-                m_creature->SummonCreature(NPC_MAGE,    2149.463f, 104.9756f, 73.63239f, 1.71f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
-                m_creature->SummonCreature(NPC_SENTRY,  2147.642f, 105.0251f, 73.99422f, 1.52f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_MAGE, 2149.463f, 104.9756f, 73.63239f, 1.71f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_SENTRY, 2147.642f, 105.0251f, 73.99422f, 1.52f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
                 m_creature->SummonCreature(NPC_VETERAN, 2149.212f, 107.2005f, 74.15676f, 1.71f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
-                m_creature->SummonCreature(NPC_WARDEN,  2147.328f, 106.7235f, 74.34447f, 1.69f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_WARDEN, 2147.328f, 106.7235f, 74.34447f, 1.69f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
                 break;
             case 23:
-                m_creature->SummonCreature(NPC_MAGE,    2142.363f, 172.4260f, 66.30494f, 2.54f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
-                m_creature->SummonCreature(NPC_SENTRY,  2138.177f, 168.6046f, 66.30494f, 2.47f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
-                m_creature->SummonCreature(NPC_SENTRY,  2142.372f, 174.2907f, 66.30494f, 2.56f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_MAGE, 2142.363f, 172.4260f, 66.30494f, 2.54f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_SENTRY, 2138.177f, 168.6046f, 66.30494f, 2.47f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_SENTRY, 2142.372f, 174.2907f, 66.30494f, 2.56f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
                 m_creature->SummonCreature(NPC_VETERAN, 2140.146f, 169.2364f, 66.30494f, 2.49f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
                 break;
             case 25:
-                m_creature->SummonCreature(NPC_MAGE,    2107.938f, 192.0753f, 66.30494f, 2.54f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
-                m_creature->SummonCreature(NPC_MAGE,    2109.852f, 195.1403f, 66.30493f, 2.42f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_MAGE, 2107.938f, 192.0753f, 66.30494f, 2.54f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_MAGE, 2109.852f, 195.1403f, 66.30493f, 2.42f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
                 m_creature->SummonCreature(NPC_VETERAN, 2108.486f, 189.9346f, 66.30494f, 2.68f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
                 m_creature->SummonCreature(NPC_VETERAN, 2112.387f, 195.4947f, 66.30494f, 2.39f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
                 break;
@@ -767,7 +822,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 m_pInstance->SetData(TYPE_SKARLOC, IN_PROGRESS);
                 m_creature->SummonCreature(NPC_SKARLOC, 2000.201f, 277.9190f, 66.4911f, 6.11f, TEMPSUMMON_DEAD_DESPAWN, 0);
                 m_creature->SummonCreature(NPC_VETERAN, 1997.969f, 274.4247f, 66.6181f, 5.67f, TEMPSUMMON_DEAD_DESPAWN, 0);
-                m_creature->SummonCreature(NPC_WARDEN,  2000.002f, 282.0754f, 66.2986f, 6.02f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_WARDEN, 2000.002f, 282.0754f, 66.2986f, 6.02f, TEMPSUMMON_DEAD_DESPAWN, 0);
                 DoScriptText(SAY_TH_SKARLOC_MEET, m_creature);
                 SetEscortPaused(true);
                 break;
@@ -791,7 +846,9 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
             case 34:
                 // wait for player input
                 if (Creature* pMount = m_creature->GetMap()->GetCreature(m_skarlocMountGuid))
-                { m_creature->SetFacingToObject(pMount); }
+                {
+                    m_creature->SetFacingToObject(pMount);
+                }
 
                 SetEscortPaused(true);
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
@@ -817,7 +874,9 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 break;
             case 65:
                 if (Creature* pMount = m_creature->GetMap()->GetCreature(m_skarlocMountGuid))
-                { m_creature->SetFacingToObject(pMount); }
+                {
+                    m_creature->SetFacingToObject(pMount);
+                }
                 DoScriptText(EMOTE_TH_STARTLE_HORSE, m_creature);
                 break;
             case 66:
@@ -838,7 +897,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 break;
             case 73:
                 m_creature->SummonCreature(NPC_TARREN_MILL_PROTECTOR, 2500.22f, 692.60f, 55.50f, 2.84f, TEMPSUMMON_DEAD_DESPAWN, 0);
-                m_creature->SummonCreature(NPC_TARREN_MILL_LOOKOUT,   2500.13f, 696.55f, 55.51f, 3.38f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_TARREN_MILL_LOOKOUT, 2500.13f, 696.55f, 55.51f, 3.38f, TEMPSUMMON_DEAD_DESPAWN, 0);
                 m_creature->SummonCreature(NPC_TARREN_MILL_GUARDSMAN, 2500.55f, 693.64f, 55.50f, 3.14f, TEMPSUMMON_DEAD_DESPAWN, 0);
                 m_creature->SummonCreature(NPC_TARREN_MILL_GUARDSMAN, 2500.94f, 695.81f, 55.50f, 3.14f, TEMPSUMMON_DEAD_DESPAWN, 0);
                 break;
@@ -857,8 +916,8 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 break;
             case 93:
                 m_creature->SummonCreature(NPC_CHURCH_PROTECTOR, 2627.88f, 657.63f, 55.98f, 4.28f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 5000);
-                m_creature->SummonCreature(NPC_CHURCH_LOOKOUT,   2627.27f, 655.17f, 56.03f, 4.50f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 5000);
-                m_creature->SummonCreature(NPC_CHURCH_LOOKOUT,   2629.21f, 654.81f, 56.04f, 4.38f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_CHURCH_LOOKOUT, 2627.27f, 655.17f, 56.03f, 4.50f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_CHURCH_LOOKOUT, 2629.21f, 654.81f, 56.04f, 4.38f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 5000);
                 m_creature->SummonCreature(NPC_CHURCH_GUARDSMAN, 2629.98f, 656.96f, 55.96f, 4.34f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 5000);
                 break;
             case 94:
@@ -867,15 +926,17 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 // *** Escort event - Part III - inside the inn ***
             case 105:
                 m_creature->SummonCreature(NPC_INN_PROTECTOR, 2652.71f, 660.31f, 61.93f, 1.67f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
-                m_creature->SummonCreature(NPC_INN_LOOKOUT,   2648.96f, 662.59f, 61.93f, 0.79f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
-                m_creature->SummonCreature(NPC_INN_LOOKOUT,   2657.36f, 662.34f, 61.93f, 2.68f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_INN_LOOKOUT, 2648.96f, 662.59f, 61.93f, 0.79f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_INN_LOOKOUT, 2657.36f, 662.34f, 61.93f, 2.68f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
                 m_creature->SummonCreature(NPC_INN_GUARDSMAN, 2656.39f, 659.77f, 61.93f, 2.61f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
                 SetRun(false);
                 break;
                 // *** Escort event - Part III - meet Taretha ***
             case 106:
                 if (Creature* pTaretha = m_pInstance->GetSingleCreatureFromStorage(NPC_TARETHA))
-                { DoScriptText(SAY_TA_ESCAPED, pTaretha, m_creature); }
+                {
+                    DoScriptText(SAY_TA_ESCAPED, pTaretha, m_creature);
+                }
                 break;
             case 107:
                 // wait for player input
@@ -883,7 +944,9 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 m_pInstance->SetData(TYPE_ESCORT_INN, DONE);
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 if (Creature* pTaretha = m_pInstance->GetSingleCreatureFromStorage(NPC_TARETHA))
-                { pTaretha->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP); }
+                {
+                    pTaretha->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                }
                 SetEscortPaused(true);
                 break;
                 // *** Escort event - Part IV - Epoch ***
@@ -904,7 +967,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 // begin fight
                 m_lTarrenMillSoldiersGuids.clear();
                 m_creature->SummonCreature(NPC_TARREN_MILL_GUARDSMAN, 2630.318f, 704.3388f, 56.33701f, 4.73f, TEMPSUMMON_DEAD_DESPAWN, 0);
-                m_creature->SummonCreature(NPC_TARREN_MILL_LOOKOUT,   2639.1f,   707.3839f, 56.14664f, 4.49f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_TARREN_MILL_LOOKOUT, 2639.1f, 707.3839f, 56.14664f, 4.49f, TEMPSUMMON_DEAD_DESPAWN, 0);
                 m_creature->SummonCreature(NPC_TARREN_MILL_PROTECTOR, 2653.135f, 698.6548f, 57.56876f, 3.17f, TEMPSUMMON_DEAD_DESPAWN, 0);
                 ++m_uiEpochWaveId;
                 SetEscortPaused(true);
@@ -917,207 +980,227 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
             case 120:
                 m_creature->SetActiveObjectState(false);
                 break;
-        }
-    }
-
-    // Wrapper to restart escort
-    void DoRestartEscortMovement()
-    {
-        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-        SetEscortPaused(false);
-    }
-
-    // Complete the quest for escorting
-    void DoHandleQuestCredit()
-    {
-        Map::PlayerList const& lPlayerList = m_pInstance->instance->GetPlayers();
-
-        if (!lPlayerList.isEmpty())
-        {
-            for (Map::PlayerList::const_iterator itr = lPlayerList.begin(); itr != lPlayerList.end(); ++itr)
-            {
-                if (Player* pPlayer = itr->getSource())
-                { pPlayer->KilledMonsterCredit(NPC_THRALL_QUEST_TRIGGER, m_creature->GetObjectGuid()); }
             }
         }
-    }
 
-    // Wrapper to make the dragons attack
-    void DoStartDragonsAttack()
-    {
-        for (GuidList::const_iterator itr = m_lTarrenMillSoldiersGuids.begin(); itr != m_lTarrenMillSoldiersGuids.end(); ++itr)
+        // Wrapper to restart escort
+        void DoRestartEscortMovement()
         {
-            if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
+            m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            SetEscortPaused(false);
+        }
+
+        // Complete the quest for escorting
+        void DoHandleQuestCredit()
+        {
+            Map::PlayerList const& lPlayerList = m_pInstance->instance->GetPlayers();
+
+            if (!lPlayerList.isEmpty())
             {
-                // Only one will yell aggro
-                if (!m_bHasEpochYelled)
+                for (Map::PlayerList::const_iterator itr = lPlayerList.begin(); itr != lPlayerList.end(); ++itr)
                 {
-                    switch (urand(0, 3))
+                    if (Player* pPlayer = itr->getSource())
                     {
+                        pPlayer->KilledMonsterCredit(NPC_THRALL_QUEST_TRIGGER, m_creature->GetObjectGuid());
+                    }
+                }
+            }
+        }
+
+        // Wrapper to make the dragons attack
+        void DoStartDragonsAttack()
+        {
+            for (GuidList::const_iterator itr = m_lTarrenMillSoldiersGuids.begin(); itr != m_lTarrenMillSoldiersGuids.end(); ++itr)
+            {
+                if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
+                {
+                    // Only one will yell aggro
+                    if (!m_bHasEpochYelled)
+                    {
+                        switch (urand(0, 3))
+                        {
                         case 0: DoScriptText(SAY_INFINITE_DRAGON_AGGRO_1, pTemp); break;
                         case 1: DoScriptText(SAY_INFINITE_DRAGON_AGGRO_2, pTemp); break;
                         case 2: DoScriptText(SAY_INFINITE_DRAGON_AGGRO_3, pTemp); break;
                         case 3: DoScriptText(SAY_INFINITE_DRAGON_AGGRO_4, pTemp); break;
+                        }
+                        m_bHasEpochYelled = true;
                     }
-                    m_bHasEpochYelled = true;
-                }
 
-                // Attack Thrall
-                pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
-                pTemp->AI()->AttackStart(m_creature);
+                    // Attack Thrall
+                    pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                    pTemp->AI()->AttackStart(m_creature);
+                }
             }
         }
-    }
 
-    void UpdateEscortAI(const uint32 uiDiff) override
-    {
-        DialogueUpdate(uiDiff);
-
-        // Handle soldiers tranform to Infinite dragons
-        if (m_uiEpochAttackTimer)
+        void UpdateEscortAI(const uint32 uiDiff) override
         {
-            if (m_uiEpochAttackTimer <= uiDiff)
+            DialogueUpdate(uiDiff);
+
+            // Handle soldiers tranform to Infinite dragons
+            if (m_uiEpochAttackTimer)
             {
-                DoStartDragonsAttack();
-                m_uiEpochAttackTimer = 0;
+                if (m_uiEpochAttackTimer <= uiDiff)
+                {
+                    DoStartDragonsAttack();
+                    m_uiEpochAttackTimer = 0;
+                }
+                else
+                {
+                    m_uiEpochAttackTimer -= uiDiff;
+                }
+            }
+
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_uiStrikeTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_STRIKE) == CAST_OK)
+                {
+                    m_uiStrikeTimer = urand(4000, 7000);
+                }
             }
             else
-            { m_uiEpochAttackTimer -= uiDiff; }
+            {
+                m_uiStrikeTimer -= uiDiff;
+            }
+
+            if (m_uiShieldBlockTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_SHIELD_BLOCK) == CAST_OK)
+                {
+                    m_uiShieldBlockTimer = urand(8000, 15000);
+                }
+            }
+            else
+            {
+                m_uiShieldBlockTimer -= uiDiff;
+            }
+
+            if (!m_bIsLowHp && m_creature->GetHealthPercent() < 20.0f)
+            {
+                DoScriptText(urand(0, 1) ? SAY_TH_RANDOM_LOW_HP1 : SAY_TH_RANDOM_LOW_HP2, m_creature);
+                m_bIsLowHp = true;
+            }
+
+            DoMeleeAttackIfReady();
         }
+    };
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiStrikeTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_STRIKE) == CAST_OK)
-            { m_uiStrikeTimer = urand(4000, 7000); }
-        }
-        else
-        { m_uiStrikeTimer -= uiDiff; }
-
-        if (m_uiShieldBlockTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SHIELD_BLOCK) == CAST_OK)
-            { m_uiShieldBlockTimer = urand(8000, 15000); }
-        }
-        else
-        { m_uiShieldBlockTimer -= uiDiff; }
-
-        if (!m_bIsLowHp && m_creature->GetHealthPercent() < 20.0f)
-        {
-            DoScriptText(urand(0, 1) ? SAY_TH_RANDOM_LOW_HP1 : SAY_TH_RANDOM_LOW_HP2, m_creature);
-            m_bIsLowHp = true;
-        }
-
-        DoMeleeAttackIfReady();
-    }
-};
-
-CreatureAI* GetAI_npc_thrall_old_hillsbrad(Creature* pCreature)
-{
-    return new npc_thrall_old_hillsbradAI(pCreature);
-}
-
-bool GossipHello_npc_thrall_old_hillsbrad(Player* pPlayer, Creature* pCreature)
-{
-    if (pCreature->IsQuestGiver())
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
-        pPlayer->SendPreparedQuest(pCreature->GetObjectGuid());
+        return new npc_thrall_old_hillsbradAI(pCreature);
     }
 
-    if (instance_old_hillsbrad* pInstance = (instance_old_hillsbrad*)pCreature->GetInstanceData())
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
-        // If the inn escort has started, skip the gossip
-        if (pInstance->GetData(TYPE_ESCORT_INN) == DONE)
-        { pPlayer->SEND_GOSSIP_MENU(TEXT_ID_INN, pCreature->GetObjectGuid()); }
-        // Escort - barn to inn
-        else if (pInstance->GetData(TYPE_ESCORT_BARN) == DONE)
+        if (pCreature->IsQuestGiver())
         {
-            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TARREN_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
-            pPlayer->SEND_GOSSIP_MENU(TEXT_ID_TARREN, pCreature->GetObjectGuid());
+            pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+            pPlayer->SendPreparedQuest(pCreature->GetObjectGuid());
         }
-        // Escort - after Skarloc is defeated
-        else if (pInstance->GetData(TYPE_SKARLOC) == DONE)
+
+        if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
         {
-            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_SKARLOC_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-            pPlayer->SEND_GOSSIP_MENU(TEXT_ID_SKARLOC_1, pCreature->GetObjectGuid());
+            // If the inn escort has started, skip the gossip
+            if (pInstance->GetData(TYPE_ESCORT_INN) == DONE)
+            {
+                pPlayer->SEND_GOSSIP_MENU(TEXT_ID_INN, pCreature->GetObjectGuid());
+            }
+            // Escort - barn to inn
+            else if (pInstance->GetData(TYPE_ESCORT_BARN) == DONE)
+            {
+                pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TARREN_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+                pPlayer->SEND_GOSSIP_MENU(TEXT_ID_TARREN, pCreature->GetObjectGuid());
+            }
+            // Escort - after Skarloc is defeated
+            else if (pInstance->GetData(TYPE_SKARLOC) == DONE)
+            {
+                pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_SKARLOC_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+                pPlayer->SEND_GOSSIP_MENU(TEXT_ID_SKARLOC_1, pCreature->GetObjectGuid());
+            }
+            // Event start - after Drake is defeated
+            else if (pInstance->GetData(TYPE_DRAKE) == DONE)
+            {
+                pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_START, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+                pPlayer->SEND_GOSSIP_MENU(TEXT_ID_START, pCreature->GetObjectGuid());
+            }
         }
-        // Event start - after Drake is defeated
-        else if (pInstance->GetData(TYPE_DRAKE) == DONE)
-        {
-            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_START, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-            pPlayer->SEND_GOSSIP_MENU(TEXT_ID_START, pCreature->GetObjectGuid());
-        }
+        return true;
     }
-    return true;
-}
 
-bool GossipSelect_npc_thrall_old_hillsbrad(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
-{
-    instance_old_hillsbrad* pInstance = (instance_old_hillsbrad*)pCreature->GetInstanceData();
-
-    switch (uiAction)
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction) override
     {
+        pPlayer->PlayerTalkClass->ClearMenus();
+        ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+
+        switch (uiAction)
+        {
             // Event start
-        case GOSSIP_ACTION_INFO_DEF+1:
-        {
+        case GOSSIP_ACTION_INFO_DEF + 1:
             pPlayer->CLOSE_GOSSIP_MENU();
 
             DoScriptText(SAY_TH_START_EVENT_PART_1, pCreature);
 
             if (pInstance)
-            { pInstance->SetData(TYPE_THRALL_EVENT, IN_PROGRESS); }
+            {
+                pInstance->SetData(TYPE_THRALL_EVENT, IN_PROGRESS);
+            }
 
             if (npc_thrall_old_hillsbradAI* pThrallAI = dynamic_cast<npc_thrall_old_hillsbradAI*>(pCreature->AI()))
-            { pThrallAI->Start(true, pPlayer); }
+            {
+                pThrallAI->Start(true, pPlayer);
+            }
 
             break;
-        }
-        // Escort - after Skarloc
-        case GOSSIP_ACTION_INFO_DEF+2:
-        {
+            // Escort - after Skarloc
+        case GOSSIP_ACTION_INFO_DEF + 2:
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_SKARLOC_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 20);
             pPlayer->SEND_GOSSIP_MENU(TEXT_ID_SKARLOC_2, pCreature->GetObjectGuid());
             break;
-        }
-        case GOSSIP_ACTION_INFO_DEF+20:
-        {
+        case GOSSIP_ACTION_INFO_DEF + 20:
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_SKARLOC_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 21);
             pPlayer->SEND_GOSSIP_MENU(TEXT_ID_SKARLOC_3, pCreature->GetObjectGuid());
             break;
-        }
-        case GOSSIP_ACTION_INFO_DEF+21:
-        {
+        case GOSSIP_ACTION_INFO_DEF + 21:
             pPlayer->CLOSE_GOSSIP_MENU();
 
             DoScriptText(SAY_TH_START_EVENT_PART2, pCreature);
 
             if (pInstance)
-            { pInstance->SetData(TYPE_ESCORT_BARN, IN_PROGRESS); }
+            {
+                pInstance->SetData(TYPE_ESCORT_BARN, IN_PROGRESS);
+            }
 
             if (npc_thrall_old_hillsbradAI* pThrallAI = dynamic_cast<npc_thrall_old_hillsbradAI*>(pCreature->AI()))
-            { pThrallAI->DoRestartEscortMovement(); }
+            {
+                pThrallAI->DoRestartEscortMovement();
+            }
 
             break;
-        }
-        // Escort - barn to inn
-        case GOSSIP_ACTION_INFO_DEF+3:
-        {
+            // Escort - barn to inn
+        case GOSSIP_ACTION_INFO_DEF + 3:
             pPlayer->CLOSE_GOSSIP_MENU();
 
             if (pInstance)
-            { pInstance->SetData(TYPE_ESCORT_INN, IN_PROGRESS); }
+            {
+                pInstance->SetData(TYPE_ESCORT_INN, IN_PROGRESS);
+            }
 
             if (npc_thrall_old_hillsbradAI* pThrallAI = dynamic_cast<npc_thrall_old_hillsbradAI*>(pCreature->AI()))
-            { pThrallAI->DoRestartEscortMovement(); }
+            {
+                pThrallAI->DoRestartEscortMovement();
+            }
 
             break;
         }
+        return true;
     }
-    return true;
-}
+};
 
 /*######
 ## npc_taretha
@@ -1165,184 +1248,215 @@ static const DialogueEntry aTarethaDialogue[] =
     {0, 0, 0},
 };
 
-struct npc_tarethaAI : public npc_escortAI, private DialogueHelper
+struct npc_taretha : public CreatureScript
 {
-    npc_tarethaAI(Creature* pCreature) : npc_escortAI(pCreature),
+    npc_taretha() : CreatureScript("npc_taretha") {}
+
+    struct npc_tarethaAI : public npc_escortAI, private DialogueHelper
+    {
+        npc_tarethaAI(Creature* pCreature) : npc_escortAI(pCreature),
         DialogueHelper(aTarethaDialogue)
-    {
-        m_pInstance = (instance_old_hillsbrad*)pCreature->GetInstanceData();
-        InitializeDialogueHelper(m_pInstance);
-        Reset();
-    }
-
-    instance_old_hillsbrad* m_pInstance;
-
-    bool m_bHasStartedEpilogue;
-
-    void Reset() override
-    {
-        m_bHasStartedEpilogue = false;
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        // Remove flags from the npc - the quest will be handled by the entrance version
-        if (pSummoned->GetEntry() == NPC_EROZION)
         {
-            DoScriptText(SAY_PRE_WIPE, pSummoned);
-            pSummoned->CastSpell(pSummoned, SPELL_TELEPORT, false);
-            pSummoned->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            InitializeDialogueHelper(m_pInstance);
         }
-    }
 
-    void WaypointReached(uint32 uiPoint) override
-    {
-        if (uiPoint == 7)
+        ScriptedInstance* m_pInstance;
+
+        bool m_bHasStartedEpilogue;
+
+        void Reset() override
         {
-            StartNextDialogueText(SAY_TA_FREE);
+            m_bHasStartedEpilogue = false;
+        }
 
-            if (m_pInstance)
+        void JustSummoned(Creature* pSummoned) override
+        {
+            // Remove flags from the npc - the quest will be handled by the entrance version
+            if (pSummoned->GetEntry() == NPC_EROZION)
             {
-                if (Creature* pThrall = m_pInstance->GetSingleCreatureFromStorage(NPC_THRALL))
-                { pThrall->SetFacingToObject(m_creature); }
+                DoScriptText(SAY_PRE_WIPE, pSummoned);
+                pSummoned->CastSpell(pSummoned, SPELL_TELEPORT, false);
+                pSummoned->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+            }
+        }
+
+        void WaypointReached(uint32 uiPoint) override
+        {
+            if (uiPoint == 7)
+            {
+                StartNextDialogueText(SAY_TA_FREE);
+
+                if (m_pInstance)
+                {
+                    if (Creature* pThrall = m_pInstance->GetSingleCreatureFromStorage(NPC_THRALL))
+                    {
+                        pThrall->SetFacingToObject(m_creature);
+                    }
+                }
+
+                m_creature->HandleEmote(EMOTE_ONESHOT_CHEER);
+                SetEscortPaused(true);
+                SetRun(false);
+            }
+        }
+
+        void JustDidDialogueStep(int32 iEntry) override
+        {
+            if (!m_pInstance)
+            {
+                return;
             }
 
-            m_creature->HandleEmote(EMOTE_ONESHOT_CHEER);
-            SetEscortPaused(true);
-            SetRun(false);
-        }
-    }
-
-    void JustDidDialogueStep(int32 iEntry) override
-    {
-        if (!m_pInstance)
-        { return; }
-
-        switch (iEntry)
-        {
+            switch (iEntry)
+            {
             case SAY_TR_THEN_WHO:
                 m_creature->SummonCreature(NPC_EROZION, 2646.47f, 680.416f, 55.38f, 4.16f, TEMPSUMMON_TIMED_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
                 break;
             case SPELL_MEMORY_WIPE:
                 if (Creature* pErozion = m_pInstance->GetSingleCreatureFromStorage(NPC_EROZION))
-                { pErozion->CastSpell(pErozion, SPELL_MEMORY_WIPE, false); }
+                {
+                    pErozion->CastSpell(pErozion, SPELL_MEMORY_WIPE, false);
+                }
                 break;
             case SAY_TH_EVENT_COMPLETE:
                 if (Creature* pErozion = m_pInstance->GetSingleCreatureFromStorage(NPC_EROZION))
-                { pErozion->CastSpell(pErozion, SPELL_MEMORY_WP_RESUME, false); }
+                {
+                    pErozion->CastSpell(pErozion, SPELL_MEMORY_WP_RESUME, false);
+                }
                 if (Creature* pThrall = m_pInstance->GetSingleCreatureFromStorage(NPC_THRALL))
-                { pThrall->RemoveAurasDueToSpell(SPELL_MEMORY_WIPE); }
+                {
+                    pThrall->RemoveAurasDueToSpell(SPELL_MEMORY_WIPE);
+                }
                 m_creature->RemoveAurasDueToSpell(SPELL_MEMORY_WIPE);
                 break;
             case NPC_THRALL:
                 if (Creature* pThrall = m_pInstance->GetSingleCreatureFromStorage(NPC_THRALL))
                 {
-                    if (npc_thrall_old_hillsbradAI* pThrallAI = dynamic_cast<npc_thrall_old_hillsbradAI*>(pThrall->AI()))
-                    { pThrallAI->SetEscortPaused(false); }
+                    if (npc_escortAI* pThrallAI = dynamic_cast<npc_escortAI*>(pThrall->AI()))
+                    {
+                        pThrallAI->SetEscortPaused(false);
+                    }
                 }
                 break;
             case SAY_TA_FAREWELL:
                 if (Creature* pThrall = m_pInstance->GetSingleCreatureFromStorage(NPC_THRALL))
-                { m_creature->SetFacingToObject(pThrall); }
+                {
+                    m_creature->SetFacingToObject(pThrall);
+                }
                 m_creature->HandleEmote(EMOTE_ONESHOT_WAVE);
                 break;
             case NPC_TARETHA:
                 if (Creature* pErozion = m_pInstance->GetSingleCreatureFromStorage(NPC_EROZION))
-                { pErozion->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER); }
+                {
+                    pErozion->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                }
                 m_pInstance->SetData(TYPE_THRALL_EVENT, DONE);
                 SetEscortPaused(false);
                 break;
-        }
-    }
-
-    void UpdateEscortAI(const uint32 uiDiff) override
-    {
-        DialogueUpdate(uiDiff);
-
-        if (!m_bHasStartedEpilogue && m_pInstance)
-        {
-            // Start epilogue
-            if (m_pInstance->GetData(TYPE_EPOCH) == DONE && m_pInstance->GetData(TYPE_THRALL_EVENT) != DONE)
-            {
-                m_creature->RemoveAurasDueToSpell(SPELL_SHADOW_PRISON);
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-
-                Start(true);
-                m_bHasStartedEpilogue = true;
             }
         }
+
+        void UpdateEscortAI(const uint32 uiDiff) override
+        {
+            DialogueUpdate(uiDiff);
+
+            if (!m_bHasStartedEpilogue && m_pInstance)
+            {
+                // Start epilogue
+                if (m_pInstance->GetData(TYPE_EPOCH) == DONE && m_pInstance->GetData(TYPE_THRALL_EVENT) != DONE)
+                {
+                    m_creature->RemoveAurasDueToSpell(SPELL_SHADOW_PRISON);
+                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+
+                    Start(true);
+                    m_bHasStartedEpilogue = true;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_tarethaAI(pCreature);
+    }
+
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
+    {
+        InstanceData* pInstance = pCreature->GetInstanceData();
+
+        if (pInstance && pInstance->GetData(TYPE_ESCORT_INN) == DONE && pInstance->GetData(TYPE_EPOCH) != DONE)
+        {
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_EPOCH_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            pPlayer->SEND_GOSSIP_MENU(TEXT_ID_EPOCH_1, pCreature->GetObjectGuid());
+        }
+
+        return true;
+    }
+
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction) override
+    {
+        pPlayer->PlayerTalkClass->ClearMenus();
+        ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+
+        if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_EPOCH_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+            pPlayer->SEND_GOSSIP_MENU(TEXT_ID_EPOCH_2, pCreature->GetObjectGuid());
+        }
+
+        if (uiAction == GOSSIP_ACTION_INFO_DEF + 2)
+        {
+            pPlayer->CLOSE_GOSSIP_MENU();
+
+            if (pInstance && pInstance->GetData(TYPE_THRALL_EVENT) == IN_PROGRESS)
+            {
+                pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+
+                if (Creature* pThrall = pInstance->GetSingleCreatureFromStorage(NPC_THRALL))
+                {
+                    if (npc_escortAI* pThrallAI = dynamic_cast<npc_escortAI*>(pThrall->AI()))
+                    {
+                        pThrall->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                        pThrallAI->SetEscortPaused(false);
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 };
 
-CreatureAI* GetAI_npc_taretha(Creature* pCreature)
-{
-    return new npc_tarethaAI(pCreature);
-}
-
-bool GossipHello_npc_taretha(Player* pPlayer, Creature* pCreature)
-{
-    instance_old_hillsbrad* pInstance = (instance_old_hillsbrad*)pCreature->GetInstanceData();
-
-    if (pInstance && pInstance->GetData(TYPE_ESCORT_INN) == DONE && pInstance->GetData(TYPE_EPOCH) != DONE)
-    {
-        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_EPOCH_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-        pPlayer->SEND_GOSSIP_MENU(TEXT_ID_EPOCH_1, pCreature->GetObjectGuid());
-    }
-
-    return true;
-}
-
-bool GossipSelect_npc_taretha(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
-{
-    instance_old_hillsbrad* pInstance = (instance_old_hillsbrad*)pCreature->GetInstanceData();
-
-    if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
-    {
-        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_EPOCH_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-        pPlayer->SEND_GOSSIP_MENU(TEXT_ID_EPOCH_2, pCreature->GetObjectGuid());
-    }
-
-    if (uiAction == GOSSIP_ACTION_INFO_DEF + 2)
-    {
-        pPlayer->CLOSE_GOSSIP_MENU();
-
-        if (pInstance && pInstance->GetData(TYPE_THRALL_EVENT) == IN_PROGRESS)
-        {
-            pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-
-            if (Creature* pThrall = pInstance->GetSingleCreatureFromStorage(NPC_THRALL))
-            {
-                if (npc_thrall_old_hillsbradAI* pThrallAI = dynamic_cast<npc_thrall_old_hillsbradAI*>(pThrall->AI()))
-                { pThrallAI->DoRestartEscortMovement(); }
-            }
-        }
-    }
-
-    return true;
-}
-
 void AddSC_old_hillsbrad()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_erozion";
-    pNewScript->pGossipHello = &GossipHello_npc_erozion;
-    pNewScript->pGossipSelect = &GossipSelect_npc_erozion;
-    pNewScript->RegisterSelf();
+    s = new npc_erozion();
+    s->RegisterSelf();
+    s = new npc_thrall_old_hillsbrad();
+    s->RegisterSelf();
+    s = new npc_taretha();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_thrall_old_hillsbrad";
-    pNewScript->GetAI = &GetAI_npc_thrall_old_hillsbrad;
-    pNewScript->pGossipHello = &GossipHello_npc_thrall_old_hillsbrad;
-    pNewScript->pGossipSelect = &GossipSelect_npc_thrall_old_hillsbrad;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_erozion";
+    //pNewScript->pGossipHello = &GossipHello_npc_erozion;
+    //pNewScript->pGossipSelect = &GossipSelect_npc_erozion;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_taretha";
-    pNewScript->GetAI = &GetAI_npc_taretha;
-    pNewScript->pGossipHello = &GossipHello_npc_taretha;
-    pNewScript->pGossipSelect = &GossipSelect_npc_taretha;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_thrall_old_hillsbrad";
+    //pNewScript->GetAI = &GetAI_npc_thrall_old_hillsbrad;
+    //pNewScript->pGossipHello = &GossipHello_npc_thrall_old_hillsbrad;
+    //pNewScript->pGossipSelect = &GossipSelect_npc_thrall_old_hillsbrad;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_taretha";
+    //pNewScript->GetAI = &GetAI_npc_taretha;
+    //pNewScript->pGossipHello = &GossipHello_npc_taretha;
+    //pNewScript->pGossipSelect = &GossipSelect_npc_taretha;
+    //pNewScript->RegisterSelf();
 }

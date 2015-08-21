@@ -98,127 +98,140 @@ static const uint32 aGravityLapseSpells[] = {44219, 44220, 44221, 44222, 44223};
 ## boss_felblood_kaelthas
 ######*/
 
-struct boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
+struct boss_felblood_kaelthas : public CreatureScript
 {
-    boss_felblood_kaelthasAI(Creature* pCreature) : ScriptedAI(pCreature),
+    boss_felblood_kaelthas() : CreatureScript("boss_felblood_kaelthas") {}
+
+    struct boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
+    {
+        boss_felblood_kaelthasAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aIntroDialogue)
-    {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        InitializeDialogueHelper(m_pInstance);
-        m_bHasTaunted = false;
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiFireballTimer;
-    uint32 m_uiPhoenixTimer;
-    uint32 m_uiFlameStrikeTimer;
-
-    // Heroic only
-    uint32 m_uiShockBarrierTimer;
-    uint32 m_uiPyroblastTimer;
-
-    uint32 m_uiGravityLapseTimer;
-    uint32 m_uiGravityLapseStage;
-    uint8 m_uiGravityIndex;
-
-    bool m_bIsFirstPhase;
-    bool m_bFirstGravityLapse;
-    bool m_bHasTaunted;
-
-    void Reset() override
-    {
-        m_uiFireballTimer       = 0;
-        m_uiPhoenixTimer        = 10000;
-        m_uiFlameStrikeTimer    = 25000;
-
-        m_uiPyroblastTimer      = 0;
-        m_uiShockBarrierTimer   = 60000;
-
-        m_uiGravityLapseTimer   = 1000;
-        m_uiGravityLapseStage   = 0;
-        m_uiGravityIndex        = 0;
-
-        m_bFirstGravityLapse    = true;
-        m_bIsFirstPhase         = true;
-
-        SetCombatMovement(true);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_KAELTHAS, DONE); }
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_KAELTHAS, IN_PROGRESS); }
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_KAELTHAS, FAIL); }
-    }
-
-    // Boss has an interesting speech before killed, so we need to fake death (without stand state) and allow him to finish his theatre
-    void DamageTaken(Unit* /*pKiller*/, uint32& uiDamage) override
-    {
-        if (uiDamage < m_creature->GetHealth())
-        { return; }
-
-        // Make sure it won't die by accident
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
         {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+            InitializeDialogueHelper(m_pInstance);
+            m_bHasTaunted = false;
+        }
+
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        uint32 m_uiFireballTimer;
+        uint32 m_uiPhoenixTimer;
+        uint32 m_uiFlameStrikeTimer;
+
+        // Heroic only
+        uint32 m_uiShockBarrierTimer;
+        uint32 m_uiPyroblastTimer;
+
+        uint32 m_uiGravityLapseTimer;
+        uint32 m_uiGravityLapseStage;
+        uint8 m_uiGravityIndex;
+
+        bool m_bIsFirstPhase;
+        bool m_bFirstGravityLapse;
+        bool m_bHasTaunted;
+
+        void Reset() override
+        {
+            m_uiFireballTimer = 0;
+            m_uiPhoenixTimer = 10000;
+            m_uiFlameStrikeTimer = 25000;
+
+            m_uiPyroblastTimer = 0;
+            m_uiShockBarrierTimer = 60000;
+
+            m_uiGravityLapseTimer = 1000;
+            m_uiGravityLapseStage = 0;
+            m_uiGravityIndex = 0;
+
+            m_bFirstGravityLapse = true;
+            m_bIsFirstPhase = true;
+
+            SetCombatMovement(true);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_KAELTHAS, DONE);
+            }
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_KAELTHAS, IN_PROGRESS);
+            }
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_KAELTHAS, FAIL);
+            }
+        }
+
+        // Boss has an interesting speech before killed, so we need to fake death (without stand state) and allow him to finish his theatre
+        void DamageTaken(Unit* /*pKiller*/, uint32& uiDamage) override
+        {
+            if (uiDamage < m_creature->GetHealth())
+            {
+                return;
+            }
+
+            // Make sure it won't die by accident
+            if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+            {
+                uiDamage = 0;
+                return;
+            }
+
             uiDamage = 0;
-            return;
-        }
-
-        uiDamage = 0;
-        RemoveGravityLapse();
-        StartNextDialogueText(SAY_DEATH);
-        m_creature->HandleEmote(EMOTE_STATE_TALK);
-
-        m_creature->InterruptNonMeleeSpells(true);
-        m_creature->SetHealth(1);
-        m_creature->StopMoving();
-        m_creature->ClearComboPointHolders();
-        m_creature->RemoveAllAurasOnDeath();
-        m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
-        m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        m_creature->ClearAllReactives();
-        m_creature->GetMotionMaster()->Clear();
-        m_creature->GetMotionMaster()->MoveIdle();
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (!m_bHasTaunted && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() &&
-            m_creature->IsWithinDistInMap(pWho, 40.0) && m_creature->IsWithinLOSInMap(pWho))
-        {
-            StartNextDialogueText(SAY_INTRO_1);
+            RemoveGravityLapse();
+            StartNextDialogueText(SAY_DEATH);
             m_creature->HandleEmote(EMOTE_STATE_TALK);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            m_bHasTaunted = true;
+
+            m_creature->InterruptNonMeleeSpells(true);
+            m_creature->SetHealth(1);
+            m_creature->StopMoving();
+            m_creature->ClearComboPointHolders();
+            m_creature->RemoveAllAurasOnDeath();
+            m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
+            m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->ClearAllReactives();
+            m_creature->GetMotionMaster()->Clear();
+            m_creature->GetMotionMaster()->MoveIdle();
         }
 
-        // Allow him to finish intro
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE))
-        { return; }
-
-        ScriptedAI::MoveInLineOfSight(pWho);
-    }
-
-    void JustDidDialogueStep(int32 iEntry) override
-    {
-        switch (iEntry)
+        void MoveInLineOfSight(Unit* pWho) override
         {
+            if (!m_bHasTaunted && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() &&
+                m_creature->IsWithinDistInMap(pWho, 40.0) && m_creature->IsWithinLOSInMap(pWho))
+            {
+                StartNextDialogueText(SAY_INTRO_1);
+                m_creature->HandleEmote(EMOTE_STATE_TALK);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                m_bHasTaunted = true;
+            }
+
+            // Allow him to finish intro
+            if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE))
+            {
+                return;
+            }
+
+            ScriptedAI::MoveInLineOfSight(pWho);
+        }
+
+        void JustDidDialogueStep(int32 iEntry) override
+        {
+            switch (iEntry)
+            {
             case EMOTE_ONESHOT_LAUGH:
                 m_creature->HandleEmote(EMOTE_ONESHOT_LAUGH);
                 break;
@@ -239,163 +252,187 @@ struct boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                 break;
-        }
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, 20.0f);
-        }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_FLAME_STRIKE_TRIGGER)
-        { pSummoned->CastSpell(pSummoned, SPELL_FLAME_STRIKE_DUMMY, false, NULL, NULL, m_creature->GetObjectGuid()); }
-        else
-        {
-            // Attack or follow target
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (pSummoned->GetEntry() == NPC_ARCANE_SPHERE)
-                { pSummoned->GetMotionMaster()->MoveFollow(pTarget, 0, 0); }
-                else
-                { pSummoned->AI()->AttackStart(pTarget); }
             }
         }
-    }
 
-    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
-    {
-        // Handle Gravity Lapse on targets
-        if (pSpell->Id == SPELL_GRAVITY_LAPSE && pTarget->GetTypeId() == TYPEID_PLAYER)
+        void AttackStart(Unit* pWho) override
         {
-            DoCastSpellIfCan(pTarget, aGravityLapseSpells[m_uiGravityIndex], CAST_TRIGGERED);
-            pTarget->CastSpell(pTarget, SPELL_GRAVITY_LAPSE_FLY, true, 0, 0, m_creature->GetObjectGuid());
-            pTarget->CastSpell(pTarget, SPELL_GRAVITY_LAPSE_DOT, true, 0, 0, m_creature->GetObjectGuid());
-            ++m_uiGravityIndex;
-        }
-    }
-
-    // Wrapper to remove Gravity Lapse - this should be removed on aura 44251 expires
-    void RemoveGravityLapse()
-    {
-        GuidVector vGuids;
-        m_creature->FillGuidsListFromThreatList(vGuids);
-
-        for (GuidVector::const_iterator itr = vGuids.begin(); itr != vGuids.end(); ++itr)
-        {
-            Unit* pUnit = m_creature->GetMap()->GetUnit(*itr);
-
-            if (pUnit && pUnit->GetTypeId() == TYPEID_PLAYER)
+            if (m_creature->Attack(pWho, true))
             {
-                pUnit->RemoveAurasDueToSpell(SPELL_GRAVITY_LAPSE_FLY);
-                pUnit->RemoveAurasDueToSpell(SPELL_GRAVITY_LAPSE_DOT);
+                m_creature->AddThreat(pWho);
+                m_creature->SetInCombatWith(pWho);
+                pWho->SetInCombatWith(m_creature);
+                DoStartMovement(pWho, 20.0f);
             }
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        DialogueUpdate(uiDiff);
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        // Don't use spells during the epilogue
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
-        { return; }
-
-        if (m_bIsFirstPhase)
+        void JustSummoned(Creature* pSummoned) override
         {
-            // *Heroic mode only:
-            if (!m_bIsRegularMode)
+            if (pSummoned->GetEntry() == NPC_FLAME_STRIKE_TRIGGER)
             {
-                if (m_uiShockBarrierTimer < uiDiff)
+                pSummoned->CastSpell(pSummoned, SPELL_FLAME_STRIKE_DUMMY, false, NULL, NULL, m_creature->GetObjectGuid());
+            }
+            else
+            {
+                // Attack or follow target
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_SHOCK_BARRIER) == CAST_OK)
+                    if (pSummoned->GetEntry() == NPC_ARCANE_SPHERE)
                     {
-                        m_uiPyroblastTimer = 1000;
-                        m_uiShockBarrierTimer = 60000;
-                    }
-                }
-                else
-                { m_uiShockBarrierTimer -= uiDiff; }
-
-                if (m_uiPyroblastTimer)
-                {
-                    if (m_uiPyroblastTimer <= uiDiff)
-                    {
-                        if (DoCastSpellIfCan(m_creature, SPELL_PYROBLAST) == CAST_OK)
-                        { m_uiPyroblastTimer = 0; }
+                        pSummoned->GetMotionMaster()->MoveFollow(pTarget, 0, 0);
                     }
                     else
-                    { m_uiPyroblastTimer -= uiDiff; }
-                }
-            }
-
-            if (m_uiFireballTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                {
-                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FIREBALL : SPELL_FIREBALL_H) == CAST_OK)
-                    { m_uiFireballTimer = urand(2000, 4000); }
-                }
-            }
-            else
-            { m_uiFireballTimer -= uiDiff; }
-
-            if (m_uiPhoenixTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_PHOENIX) == CAST_OK)
-                {
-                    DoScriptText(SAY_PHOENIX, m_creature);
-                    m_uiPhoenixTimer = 45000;
-                }
-            }
-            else
-            { m_uiPhoenixTimer -= uiDiff; }
-
-            if (m_uiFlameStrikeTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                {
-                    if (DoCastSpellIfCan(pTarget, SPELL_FLAME_STRIKE) == CAST_OK)
                     {
-                        DoScriptText(SAY_FLAMESTRIKE, m_creature);
-                        m_uiFlameStrikeTimer = urand(15000, 25000);
+                        pSummoned->AI()->AttackStart(pTarget);
                     }
                 }
             }
-            else
-            { m_uiFlameStrikeTimer -= uiDiff; }
+        }
 
-            // Below 50%
-            if (m_creature->GetHealthPercent() < 50.0f)
+        void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+        {
+            // Handle Gravity Lapse on targets
+            if (pSpell->Id == SPELL_GRAVITY_LAPSE && pTarget->GetTypeId() == TYPEID_PLAYER)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT_CENTER, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
-                {
-                    SetCombatMovement(false);
-                    m_creature->GetMotionMaster()->Clear();
-                    m_creature->GetMotionMaster()->MoveIdle();
+                DoCastSpellIfCan(pTarget, aGravityLapseSpells[m_uiGravityIndex], CAST_TRIGGERED);
+                pTarget->CastSpell(pTarget, SPELL_GRAVITY_LAPSE_FLY, true, 0, 0, m_creature->GetObjectGuid());
+                pTarget->CastSpell(pTarget, SPELL_GRAVITY_LAPSE_DOT, true, 0, 0, m_creature->GetObjectGuid());
+                ++m_uiGravityIndex;
+            }
+        }
 
-                    m_bIsFirstPhase = false;
+        // Wrapper to remove Gravity Lapse - this should be removed on aura 44251 expires
+        void RemoveGravityLapse()
+        {
+            GuidVector vGuids;
+            m_creature->FillGuidsListFromThreatList(vGuids);
+
+            for (GuidVector::const_iterator itr = vGuids.begin(); itr != vGuids.end(); ++itr)
+            {
+                Unit* pUnit = m_creature->GetMap()->GetUnit(*itr);
+
+                if (pUnit && pUnit->GetTypeId() == TYPEID_PLAYER)
+                {
+                    pUnit->RemoveAurasDueToSpell(SPELL_GRAVITY_LAPSE_FLY);
+                    pUnit->RemoveAurasDueToSpell(SPELL_GRAVITY_LAPSE_DOT);
                 }
             }
-
-            DoMeleeAttackIfReady();
         }
-        else
+
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (m_uiGravityLapseTimer < uiDiff)
+            DialogueUpdate(uiDiff);
+
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             {
-                switch (m_uiGravityLapseStage)
+                return;
+            }
+
+            // Don't use spells during the epilogue
+            if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+            {
+                return;
+            }
+
+            if (m_bIsFirstPhase)
+            {
+                // *Heroic mode only:
+                if (!m_bIsRegularMode)
                 {
+                    if (m_uiShockBarrierTimer < uiDiff)
+                    {
+                        if (DoCastSpellIfCan(m_creature, SPELL_SHOCK_BARRIER) == CAST_OK)
+                        {
+                            m_uiPyroblastTimer = 1000;
+                            m_uiShockBarrierTimer = 60000;
+                        }
+                    }
+                    else
+                    {
+                        m_uiShockBarrierTimer -= uiDiff;
+                    }
+
+                    if (m_uiPyroblastTimer)
+                    {
+                        if (m_uiPyroblastTimer <= uiDiff)
+                        {
+                            if (DoCastSpellIfCan(m_creature, SPELL_PYROBLAST) == CAST_OK)
+                            {
+                                m_uiPyroblastTimer = 0;
+                            }
+                        }
+                        else
+                        {
+                            m_uiPyroblastTimer -= uiDiff;
+                        }
+                    }
+                }
+
+                if (m_uiFireballTimer < uiDiff)
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FIREBALL : SPELL_FIREBALL_H) == CAST_OK)
+                        {
+                            m_uiFireballTimer = urand(2000, 4000);
+                        }
+                    }
+                }
+                else
+                {
+                    m_uiFireballTimer -= uiDiff;
+                }
+
+                if (m_uiPhoenixTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_PHOENIX) == CAST_OK)
+                    {
+                        DoScriptText(SAY_PHOENIX, m_creature);
+                        m_uiPhoenixTimer = 45000;
+                    }
+                }
+                else
+                {
+                    m_uiPhoenixTimer -= uiDiff;
+                }
+
+                if (m_uiFlameStrikeTimer < uiDiff)
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        if (DoCastSpellIfCan(pTarget, SPELL_FLAME_STRIKE) == CAST_OK)
+                        {
+                            DoScriptText(SAY_FLAMESTRIKE, m_creature);
+                            m_uiFlameStrikeTimer = urand(15000, 25000);
+                        }
+                    }
+                }
+                else
+                {
+                    m_uiFlameStrikeTimer -= uiDiff;
+                }
+
+                // Below 50%
+                if (m_creature->GetHealthPercent() < 50.0f)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT_CENTER, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                    {
+                        SetCombatMovement(false);
+                        m_creature->GetMotionMaster()->Clear();
+                        m_creature->GetMotionMaster()->MoveIdle();
+
+                        m_bIsFirstPhase = false;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+            else
+            {
+                if (m_uiGravityLapseTimer < uiDiff)
+                {
+                    switch (m_uiGravityLapseStage)
+                    {
                     case 0:
                         // Cast Gravity Lapse on Players
                         if (DoCastSpellIfCan(m_creature, SPELL_GRAVITY_LAPSE) == CAST_OK)
@@ -406,7 +443,9 @@ struct boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
                                 m_bFirstGravityLapse = false;
                             }
                             else
-                            { DoScriptText(SAY_RECAST_GRAVITY, m_creature); }
+                            {
+                                DoScriptText(SAY_RECAST_GRAVITY, m_creature);
+                            }
 
                             m_uiGravityLapseTimer = 2000;
                             m_uiGravityIndex = 0;
@@ -418,7 +457,9 @@ struct boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
                         if (DoCastSpellIfCan(m_creature, SPELL_GRAVITY_LAPSE_VISUAL) == CAST_OK)
                         {
                             for (uint8 i = 0; i < MAX_ARCANE_SPHERES; ++i)
-                            { DoCastSpellIfCan(m_creature, SPELL_ARCANE_SPHERE_SUMMON, CAST_TRIGGERED); }
+                            {
+                                DoCastSpellIfCan(m_creature, SPELL_ARCANE_SPHERE_SUMMON, CAST_TRIGGERED);
+                            }
 
                             m_uiGravityLapseTimer = 30000;
                             ++m_uiGravityLapseStage;
@@ -434,135 +475,168 @@ struct boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
                             m_uiGravityLapseStage = 0;
                         }
                         break;
+                    }
+                }
+                else
+                {
+                    m_uiGravityLapseTimer -= uiDiff;
                 }
             }
-            else
-            { m_uiGravityLapseTimer -= uiDiff; }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_felblood_kaelthasAI(pCreature);
     }
 };
 
 /*######
 ## mob_felkael_phoenix
 ######*/
-
-struct mob_felkael_phoenixAI : public ScriptedAI
+struct mob_felkael_phoenix : public CreatureScript
 {
-    mob_felkael_phoenixAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    mob_felkael_phoenix() : CreatureScript("mob_felkael_phoenix") {}
 
-    uint32 m_uiBurnTimer;
-
-    bool m_bFakeDeath;
-
-    void Reset() override
+    struct mob_felkael_phoenixAI : public ScriptedAI
     {
-        m_uiBurnTimer = 2000;
-        m_bFakeDeath = false;
-    }
+        mob_felkael_phoenixAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoCastSpellIfCan(m_creature, SPELL_PHOENIX_BURN);
-    }
+        uint32 m_uiBurnTimer;
 
-    void EnterEvadeMode() override
-    {
-        // Don't evade during ember blast
-        if (m_bFakeDeath)
-        { return; }
+        bool m_bFakeDeath;
 
-        ScriptedAI::EnterEvadeMode();
-    }
-
-    void DamageTaken(Unit* /*pKiller*/, uint32& uiDamage) override
-    {
-        if (uiDamage < m_creature->GetHealth())
-        { return; }
-
-        // Prevent glitch if in fake death
-        if (m_bFakeDeath)
+        void Reset() override
         {
-            uiDamage = 0;
-            return;
-        }
-
-        // prevent death
-        uiDamage = 0;
-        DoSetFakeDeath();
-    }
-
-    void DoSetFakeDeath()
-    {
-        m_bFakeDeath = true;
-
-        m_creature->InterruptNonMeleeSpells(false);
-        m_creature->SetHealth(1);
-        m_creature->StopMoving();
-        m_creature->ClearComboPointHolders();
-        m_creature->RemoveAllAurasOnDeath();
-        m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
-        m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        m_creature->ClearAllReactives();
-        m_creature->SetTargetGuid(ObjectGuid());
-        m_creature->GetMotionMaster()->Clear();
-        m_creature->GetMotionMaster()->MoveIdle();
-        m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
-
-        // Spawn egg and make invisible
-        DoCastSpellIfCan(m_creature, SPELL_EMBER_BLAST, CAST_TRIGGERED);
-        m_creature->SummonCreature(NPC_PHOENIX_EGG, 0, 0, 0, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 10000);
-    }
-
-    void SummonedCreatureDespawn(Creature* /*pSummoned*/) override
-    {
-        m_creature->RemoveAurasDueToSpell(SPELL_EMBER_BLAST);
-        m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-
-        // Remove fake death on egg despawn after 10 secs
-        if (DoCastSpellIfCan(m_creature, SPELL_REBIRTH_DMG) == CAST_OK)
-        {
-            m_creature->SetHealth(m_creature->GetMaxHealth());
-            m_creature->GetMotionMaster()->Clear();
-            DoStartMovement(m_creature->getVictim());
-            m_bFakeDeath = false;
-
-            DoCastSpellIfCan(m_creature, SPELL_PHOENIX_BURN, CAST_TRIGGERED);
-        }
-    }
-
-    void SummonedCreatureJustDied(Creature* /*pSummoned*/) override
-    {
-        // Self kill if the egg is killed
-        if (m_bFakeDeath)
-        { m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false); }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_bFakeDeath)
-        { return; }
-
-        // ToDo: research if this is correct and how can this be done by spell
-        if (m_uiBurnTimer < uiDiff)
-        {
-            // spell Burn should possible do this, but it doesn't, so do this for now.
-            uint32 uiDmg = urand(1650, 2050);
-            if (uiDmg > m_creature->GetHealth())
-            { DoSetFakeDeath(); }
-            else
-            { m_creature->DealDamage(m_creature, uiDmg, 0, DOT, SPELL_SCHOOL_MASK_FIRE, NULL, false); }
-
             m_uiBurnTimer = 2000;
+            m_bFakeDeath = false;
         }
-        else
-        { m_uiBurnTimer -= uiDiff; }
 
-        DoMeleeAttackIfReady();
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoCastSpellIfCan(m_creature, SPELL_PHOENIX_BURN);
+        }
+
+        void EnterEvadeMode() override
+        {
+            // Don't evade during ember blast
+            if (m_bFakeDeath)
+            {
+                return;
+            }
+
+            ScriptedAI::EnterEvadeMode();
+        }
+
+        void DamageTaken(Unit* /*pKiller*/, uint32& uiDamage) override
+        {
+            if (uiDamage < m_creature->GetHealth())
+            {
+                return;
+            }
+
+            // Prevent glitch if in fake death
+            if (m_bFakeDeath)
+            {
+                uiDamage = 0;
+                return;
+            }
+
+            // prevent death
+            uiDamage = 0;
+            DoSetFakeDeath();
+        }
+
+        void DoSetFakeDeath()
+        {
+            m_bFakeDeath = true;
+
+            m_creature->InterruptNonMeleeSpells(false);
+            m_creature->SetHealth(1);
+            m_creature->StopMoving();
+            m_creature->ClearComboPointHolders();
+            m_creature->RemoveAllAurasOnDeath();
+            m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
+            m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->ClearAllReactives();
+            m_creature->SetTargetGuid(ObjectGuid());
+            m_creature->GetMotionMaster()->Clear();
+            m_creature->GetMotionMaster()->MoveIdle();
+            m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+
+            // Spawn egg and make invisible
+            DoCastSpellIfCan(m_creature, SPELL_EMBER_BLAST, CAST_TRIGGERED);
+            m_creature->SummonCreature(NPC_PHOENIX_EGG, 0, 0, 0, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 10000);
+        }
+
+        void SummonedCreatureDespawn(Creature* /*pSummoned*/) override
+        {
+            m_creature->RemoveAurasDueToSpell(SPELL_EMBER_BLAST);
+            m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+            // Remove fake death on egg despawn after 10 secs
+            if (DoCastSpellIfCan(m_creature, SPELL_REBIRTH_DMG) == CAST_OK)
+            {
+                m_creature->SetHealth(m_creature->GetMaxHealth());
+                m_creature->GetMotionMaster()->Clear();
+                DoStartMovement(m_creature->getVictim());
+                m_bFakeDeath = false;
+
+                DoCastSpellIfCan(m_creature, SPELL_PHOENIX_BURN, CAST_TRIGGERED);
+            }
+        }
+
+        void SummonedCreatureJustDied(Creature* /*pSummoned*/) override
+        {
+            // Self kill if the egg is killed
+            if (m_bFakeDeath)
+            {
+                m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_bFakeDeath)
+            {
+                return;
+            }
+
+            // ToDo: research if this is correct and how can this be done by spell
+            if (m_uiBurnTimer < uiDiff)
+            {
+                // spell Burn should possible do this, but it doesn't, so do this for now.
+                uint32 uiDmg = urand(1650, 2050);
+                if (uiDmg > m_creature->GetHealth())
+                {
+                    DoSetFakeDeath();
+                }
+                else
+                {
+                    m_creature->DealDamage(m_creature, uiDmg, 0, DOT, SPELL_SCHOOL_MASK_FIRE, NULL, false);
+                }
+
+                m_uiBurnTimer = 2000;
+            }
+            else
+            {
+                m_uiBurnTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new mob_felkael_phoenixAI(pCreature);
     }
 };
 
@@ -571,115 +645,130 @@ struct mob_felkael_phoenixAI : public ScriptedAI
 ######*/
 
 // TODO Remove this 'script' when combat movement can be proper prevented from core-side
-struct mob_felkael_phoenix_eggAI : public Scripted_NoMovementAI
+struct mob_felkael_phoenix_egg : public CreatureScript
 {
-    mob_felkael_phoenix_eggAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    mob_felkael_phoenix_egg() : CreatureScript("mob_felkael_phoenix_egg") {}
 
-    void Reset() override {}
-    void MoveInLineOfSight(Unit* /*pWho*/) override {}
-    void AttackStart(Unit* /*pWho*/) override {}
-    void UpdateAI(const uint32 /*uiDiff*/) override {}
+    struct mob_felkael_phoenix_eggAI : public Scripted_NoMovementAI
+    {
+        mob_felkael_phoenix_eggAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+
+        void MoveInLineOfSight(Unit* /*pWho*/) override {}
+        void AttackStart(Unit* /*pWho*/) override {}
+        void UpdateAI(const uint32 /*uiDiff*/) override {}
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new mob_felkael_phoenix_eggAI(pCreature);
+    }
 };
 
 /*######
 ## mob_arcane_sphere
 ######*/
 
-struct mob_arcane_sphereAI : public ScriptedAI
+struct mob_arcane_sphere : public CreatureScript
 {
-    mob_arcane_sphereAI(Creature* pCreature) : ScriptedAI(pCreature)
+    mob_arcane_sphere() : CreatureScript("mob_arcane_sphere") {}
+
+    struct mob_arcane_sphereAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiDespawnTimer;
-    uint32 m_uiChangeTargetTimer;
-
-    void Reset() override
-    {
-        m_uiDespawnTimer      = 30000;
-        m_uiChangeTargetTimer = urand(6000, 12000);
-
-        DoCastSpellIfCan(m_creature, SPELL_ARCANE_SPHERE_PASSIVE);
-    }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        // Should despawn when aura 44251 expires
-        if (m_uiDespawnTimer < uiDiff)
+        mob_arcane_sphereAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-            m_uiDespawnTimer = 0;
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            Reset();
         }
-        else
-        { m_uiDespawnTimer -= uiDiff; }
 
-        if (m_uiChangeTargetTimer < uiDiff)
+        ScriptedInstance* m_pInstance;
+
+        uint32 m_uiDespawnTimer;
+        uint32 m_uiChangeTargetTimer;
+
+        void Reset() override
         {
-            if (!m_pInstance)
-            { return; }
+            m_uiDespawnTimer = 30000;
+            m_uiChangeTargetTimer = urand(6000, 12000);
 
-            // Follow the target - do not attack
-            if (Creature* pKael = m_pInstance->GetSingleCreatureFromStorage(NPC_KAELTHAS))
+            DoCastSpellIfCan(m_creature, SPELL_ARCANE_SPHERE_PASSIVE);
+        }
+
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            // Should despawn when aura 44251 expires
+            if (m_uiDespawnTimer < uiDiff)
             {
-                if (Unit* pTarget = pKael->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                { m_creature->GetMotionMaster()->MoveFollow(pTarget, 0, 0); }
+                m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                m_uiDespawnTimer = 0;
+            }
+            else
+            {
+                m_uiDespawnTimer -= uiDiff;
             }
 
-            m_uiChangeTargetTimer = urand(5000, 15000);
+            if (m_uiChangeTargetTimer < uiDiff)
+            {
+                if (!m_pInstance)
+                {
+                    return;
+                }
+
+                // Follow the target - do not attack
+                if (Creature* pKael = m_pInstance->GetSingleCreatureFromStorage(NPC_KAELTHAS))
+                {
+                    if (Unit* pTarget = pKael->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        m_creature->GetMotionMaster()->MoveFollow(pTarget, 0, 0);
+                    }
+                }
+
+                m_uiChangeTargetTimer = urand(5000, 15000);
+            }
+            else
+            {
+                m_uiChangeTargetTimer -= uiDiff;
+            }
         }
-        else
-        { m_uiChangeTargetTimer -= uiDiff; }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new mob_arcane_sphereAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_felblood_kaelthas(Creature* pCreature)
-{
-    return new boss_felblood_kaelthasAI(pCreature);
-}
-
-CreatureAI* GetAI_mob_arcane_sphere(Creature* pCreature)
-{
-    return new mob_arcane_sphereAI(pCreature);
-}
-
-CreatureAI* GetAI_mob_felkael_phoenix(Creature* pCreature)
-{
-    return new mob_felkael_phoenixAI(pCreature);
-}
-
-CreatureAI* GetAI_mob_felkael_phoenix_egg(Creature* pCreature)
-{
-    return new mob_felkael_phoenix_eggAI(pCreature);
-}
-
 void AddSC_boss_felblood_kaelthas()
 {
-    Script* pNewScript;
+    Script* s;
+    s = new boss_felblood_kaelthas();
+    s->RegisterSelf();
+    s = new mob_arcane_sphere();
+    s->RegisterSelf();
+    s = new mob_felkael_phoenix();
+    s->RegisterSelf();
+    s = new mob_felkael_phoenix_egg();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_felblood_kaelthas";
-    pNewScript->GetAI = &GetAI_boss_felblood_kaelthas;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_felblood_kaelthas";
+    //pNewScript->GetAI = &GetAI_boss_felblood_kaelthas;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "mob_arcane_sphere";
-    pNewScript->GetAI = &GetAI_mob_arcane_sphere;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "mob_arcane_sphere";
+    //pNewScript->GetAI = &GetAI_mob_arcane_sphere;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "mob_felkael_phoenix";
-    pNewScript->GetAI = &GetAI_mob_felkael_phoenix;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "mob_felkael_phoenix";
+    //pNewScript->GetAI = &GetAI_mob_felkael_phoenix;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "mob_felkael_phoenix_egg";
-    pNewScript->GetAI = &GetAI_mob_felkael_phoenix_egg;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "mob_felkael_phoenix_egg";
+    //pNewScript->GetAI = &GetAI_mob_felkael_phoenix_egg;
+    //pNewScript->RegisterSelf();
 }

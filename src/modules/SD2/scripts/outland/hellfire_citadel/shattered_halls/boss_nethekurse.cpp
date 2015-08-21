@@ -88,377 +88,471 @@ enum
     NPC_FEL_ORC_CONVERT    = 17083,
 };
 
-struct boss_grand_warlock_nethekurseAI : public ScriptedAI
+struct boss_grand_warlock_nethekurse : public CreatureScript
 {
-    boss_grand_warlock_nethekurseAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_grand_warlock_nethekurse() : CreatureScript("boss_grand_warlock_nethekurse") {}
+
+    struct boss_grand_warlock_nethekurseAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_bIntroOnce = false;
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
-
-    bool m_bIntroOnce;
-    bool m_bIsIntroEvent;
-    bool m_bIsMainEvent;
-    bool m_bSpinOnce;
-    // bool m_bHasTaunted;
-    bool m_bPhase;
-
-    uint32 m_uiPeonEngagedCount;
-    uint32 m_uiPeonKilledCount;
-
-    uint32 m_uiIntroEventTimer;
-    uint32 m_uiDeathCoilTimer;
-    uint32 m_uiShadowFissureTimer;
-    uint32 m_uiCleaveTimer;
-
-    ObjectGuid m_lastEventInvokerGuid;
-
-    void Reset() override
-    {
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-
-        m_bIsIntroEvent = false;
-        m_bIsMainEvent = false;
-        // m_bHasTaunted = false;
-        m_bSpinOnce = false;
-        m_bPhase = false;
-
-        m_uiPeonEngagedCount = 0;
-        m_uiPeonKilledCount = 0;
-
-        m_uiIntroEventTimer = 90000;                        // how long before getting bored and kills his minions?
-        m_uiDeathCoilTimer = 20000;
-        m_uiShadowFissureTimer = 8000;
-        m_uiCleaveTimer = 5000;
-
-        m_lastEventInvokerGuid.Clear();
-    }
-
-    void DoYellForPeonAggro(Unit* pWho)
-    {
-        if (m_uiPeonEngagedCount >= 4)
-        { return; }
-
-        DoScriptText(PeonAttacked[m_uiPeonEngagedCount].id, m_creature);
-        ++m_uiPeonEngagedCount;
-
-        if (pWho)
-        { m_lastEventInvokerGuid = pWho->GetObjectGuid(); }
-    }
-
-    void DoYellForPeonDeath(Unit* pKiller)
-    {
-        if (m_uiPeonKilledCount >= 4)
-        { return; }
-
-        DoScriptText(PeonDies[m_uiPeonKilledCount].id, m_creature);
-        ++m_uiPeonKilledCount;
-
-        if (m_uiPeonKilledCount == 4)
+        boss_grand_warlock_nethekurseAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            m_bIsIntroEvent = false;
-            m_bIsMainEvent = true;
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-
-            if (pKiller)
-            { AttackStart(pKiller); }
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+            m_bIntroOnce = false;
         }
-    }
 
-    void DoTauntPeons()
-    {
-        switch (urand(0, 2))
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        bool m_bIntroOnce;
+        bool m_bIsIntroEvent;
+        bool m_bIsMainEvent;
+        bool m_bSpinOnce;
+        // bool m_bHasTaunted;
+        bool m_bPhase;
+
+        uint32 m_uiPeonEngagedCount;
+        uint32 m_uiPeonKilledCount;
+
+        uint32 m_uiIntroEventTimer;
+        uint32 m_uiDeathCoilTimer;
+        uint32 m_uiShadowFissureTimer;
+        uint32 m_uiCleaveTimer;
+
+        ObjectGuid m_lastEventInvokerGuid;
+
+        void Reset() override
         {
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+
+            m_bIsIntroEvent = false;
+            m_bIsMainEvent = false;
+            // m_bHasTaunted = false;
+            m_bSpinOnce = false;
+            m_bPhase = false;
+
+            m_uiPeonEngagedCount = 0;
+            m_uiPeonKilledCount = 0;
+
+            m_uiIntroEventTimer = 90000;                        // how long before getting bored and kills his minions?
+            m_uiDeathCoilTimer = 20000;
+            m_uiShadowFissureTimer = 8000;
+            m_uiCleaveTimer = 5000;
+
+            m_lastEventInvokerGuid.Clear();
+        }
+
+        void DoYellForPeonAggro(Unit* pWho)
+        {
+            if (m_uiPeonEngagedCount >= 4)
+            {
+                return;
+            }
+
+            DoScriptText(PeonAttacked[m_uiPeonEngagedCount].id, m_creature);
+            ++m_uiPeonEngagedCount;
+
+            if (pWho)
+            {
+                m_lastEventInvokerGuid = pWho->GetObjectGuid();
+            }
+        }
+
+        void DoYellForPeonDeath(Unit* pKiller)
+        {
+            if (m_uiPeonKilledCount >= 4)
+            {
+                return;
+            }
+
+            DoScriptText(PeonDies[m_uiPeonKilledCount].id, m_creature);
+            ++m_uiPeonKilledCount;
+
+            if (m_uiPeonKilledCount == 4)
+            {
+                m_bIsIntroEvent = false;
+                m_bIsMainEvent = true;
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+
+                if (pKiller)
+                {
+                    AttackStart(pKiller);
+                }
+            }
+        }
+
+        void DoTauntPeons()
+        {
+            switch (urand(0, 2))
+            {
             case 0: DoScriptText(SAY_TAUNT_1, m_creature); break;
             case 1: DoScriptText(SAY_TAUNT_2, m_creature); break;
             case 2: DoScriptText(SAY_TAUNT_3, m_creature); break;
+            }
+
+            std::list<Creature*> lFelConverts;
+            GetCreatureListWithEntryInGrid(lFelConverts, m_creature, NPC_FEL_ORC_CONVERT, 40.0f);
+            for (std::list<Creature*>::iterator itr = lFelConverts.begin(); itr != lFelConverts.end(); ++itr)
+            {
+                (*itr)->DealDamage(*itr, (*itr)->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+            }
+
+            m_bIsIntroEvent = false;
+            m_uiPeonEngagedCount = 4;
+            m_uiPeonKilledCount = 4;
+            m_bIsMainEvent = true;
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+
+            if (Unit* pEnemy = m_creature->GetMap()->GetUnit(m_lastEventInvokerGuid))
+            {
+                AttackStart(pEnemy);
+            }
         }
 
-        std::list<Creature*> lFelConverts;
-        GetCreatureListWithEntryInGrid(lFelConverts, m_creature, NPC_FEL_ORC_CONVERT, 40.0f);
-        for (std::list<Creature*>::iterator itr = lFelConverts.begin(); itr != lFelConverts.end(); ++itr)
-        { (*itr)->DealDamage(*itr, (*itr)->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false); }
-
-        m_bIsIntroEvent = false;
-        m_uiPeonEngagedCount = 4;
-        m_uiPeonKilledCount = 4;
-        m_bIsMainEvent = true;
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-
-        if (Unit* pEnemy = m_creature->GetMap()->GetUnit(m_lastEventInvokerGuid))
-        { AttackStart(pEnemy); }
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_bIsIntroEvent || !m_bIsMainEvent)
-        { return; }
-
-        if (m_creature->Attack(pWho, true))
+        void AttackStart(Unit* pWho) override
         {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
+            if (m_bIsIntroEvent || !m_bIsMainEvent)
+            {
+                return;
+            }
 
-            if (m_bPhase)
-            { DoStartNoMovement(pWho); }
-            else
-            { DoStartMovement(pWho); }
-        }
-    }
+            if (m_creature->Attack(pWho, true))
+            {
+                m_creature->AddThreat(pWho);
+                m_creature->SetInCombatWith(pWho);
+                pWho->SetInCombatWith(m_creature);
 
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (!m_bIntroOnce && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() && m_creature->IsWithinDistInMap(pWho, 50.0f) && m_creature->IsWithinLOSInMap(pWho))
-        {
-            DoScriptText(SAY_INTRO, m_creature);
-            m_bIntroOnce = true;
-            m_bIsIntroEvent = true;
-
-            m_lastEventInvokerGuid = pWho->GetObjectGuid();
-
-            if (m_pInstance)
-            { m_pInstance->SetData(TYPE_NETHEKURSE, IN_PROGRESS); }
+                if (m_bPhase)
+                {
+                    DoStartNoMovement(pWho);
+                }
+                else
+                {
+                    DoStartMovement(pWho);
+                }
+            }
         }
 
-        if (m_bIsIntroEvent || !m_bIsMainEvent)
-        { return; }
-
-        ScriptedAI::MoveInLineOfSight(pWho);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        switch (urand(0, 2))
+        void MoveInLineOfSight(Unit* pWho) override
         {
+            if (!m_bIntroOnce && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() && m_creature->IsWithinDistInMap(pWho, 50.0f) && m_creature->IsWithinLOSInMap(pWho))
+            {
+                DoScriptText(SAY_INTRO, m_creature);
+                m_bIntroOnce = true;
+                m_bIsIntroEvent = true;
+
+                m_lastEventInvokerGuid = pWho->GetObjectGuid();
+
+                if (m_pInstance)
+                {
+                    m_pInstance->SetData(TYPE_NETHEKURSE, IN_PROGRESS);
+                }
+            }
+
+            if (m_bIsIntroEvent || !m_bIsMainEvent)
+            {
+                return;
+            }
+
+            ScriptedAI::MoveInLineOfSight(pWho);
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            switch (urand(0, 2))
+            {
             case 0: DoScriptText(SAY_AGGRO_1, m_creature); break;
             case 1: DoScriptText(SAY_AGGRO_2, m_creature); break;
             case 2: DoScriptText(SAY_AGGRO_3, m_creature); break;
+            }
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        // ToDo: this should be done in DB
-        pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-        pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-
-        pSummoned->CastSpell(pSummoned, SPELL_CONSUMPTION, false, NULL, NULL, m_creature->GetObjectGuid());
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DIE, m_creature);
-
-        if (!m_pInstance)
-        { return; }
-
-        m_pInstance->SetData(TYPE_NETHEKURSE, DONE);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_NETHEKURSE, FAIL); }
-
-        std::list<Creature*> lFelConverts;
-        GetCreatureListWithEntryInGrid(lFelConverts, m_creature, NPC_FEL_ORC_CONVERT, 40.0f);
-        for (std::list<Creature*>::iterator itr = lFelConverts.begin(); itr != lFelConverts.end(); ++itr)
+        void JustSummoned(Creature* pSummoned) override
         {
-            if (!(*itr)->IsAlive())
-            { (*itr)->Respawn(); }
+            // ToDo: this should be done in DB
+            pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+            pSummoned->CastSpell(pSummoned, SPELL_CONSUMPTION, false, NULL, NULL, m_creature->GetObjectGuid());
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_bIsIntroEvent)
+        void KilledUnit(Unit* /*pVictim*/) override
         {
+            DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(SAY_DIE, m_creature);
+
             if (!m_pInstance)
-            { return; }
-
-            if (m_pInstance->GetData(TYPE_NETHEKURSE) == IN_PROGRESS)
             {
-                if (m_uiIntroEventTimer < uiDiff)
-                { DoTauntPeons(); }
+                return;
+            }
+
+            m_pInstance->SetData(TYPE_NETHEKURSE, DONE);
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_NETHEKURSE, FAIL);
+            }
+
+            std::list<Creature*> lFelConverts;
+            GetCreatureListWithEntryInGrid(lFelConverts, m_creature, NPC_FEL_ORC_CONVERT, 40.0f);
+            for (std::list<Creature*>::iterator itr = lFelConverts.begin(); itr != lFelConverts.end(); ++itr)
+            {
+                if (!(*itr)->IsAlive())
+                {
+                    (*itr)->Respawn();
+                }
+            }
+        }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature *pSender, Unit *pInvoker, uint32 /*data*/) override
+        {
+            if (pSender->GetEntry() == NPC_FEL_ORC_CONVERT)
+            {
+                switch (eventType)
+                {
+                case AI_EVENT_CUSTOM_A:
+                    DoYellForPeonAggro(pInvoker);
+                    break;
+                case AI_EVENT_CUSTOM_B:
+                    DoYellForPeonDeath(pInvoker);
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_bIsIntroEvent)
+            {
+                if (!m_pInstance)
+                {
+                    return;
+                }
+
+                if (m_pInstance->GetData(TYPE_NETHEKURSE) == IN_PROGRESS)
+                {
+                    if (m_uiIntroEventTimer < uiDiff)
+                    {
+                        DoTauntPeons();
+                    }
+                    else
+                    {
+                        m_uiIntroEventTimer -= uiDiff;
+                    }
+                }
+            }
+
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (!m_bIsMainEvent)
+            {
+                return;
+            }
+
+            if (m_bPhase)
+            {
+                if (!m_bSpinOnce)
+                {
+                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_DARK_SPIN);
+                    m_bSpinOnce = true;
+                }
+
+                if (m_uiCleaveTimer < uiDiff)
+                {
+                    DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_SHADOW_CLEAVE : SPELL_SHADOW_SLAM_H);
+                    m_uiCleaveTimer = urand(6000, 8500);
+                }
                 else
-                { m_uiIntroEventTimer -= uiDiff; }
-            }
-        }
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (!m_bIsMainEvent)
-        { return; }
-
-        if (m_bPhase)
-        {
-            if (!m_bSpinOnce)
-            {
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_DARK_SPIN);
-                m_bSpinOnce = true;
-            }
-
-            if (m_uiCleaveTimer < uiDiff)
-            {
-                DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_SHADOW_CLEAVE : SPELL_SHADOW_SLAM_H);
-                m_uiCleaveTimer = urand(6000, 8500);
+                {
+                    m_uiCleaveTimer -= uiDiff;
+                }
             }
             else
-            { m_uiCleaveTimer -= uiDiff; }
-        }
-        else
-        {
-            if (m_uiShadowFissureTimer < uiDiff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                { DoCastSpellIfCan(pTarget, SPELL_SHADOW_FISSURE); }
-                m_uiShadowFissureTimer = urand(7500, 15000);
+                if (m_uiShadowFissureTimer < uiDiff)
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        DoCastSpellIfCan(pTarget, SPELL_SHADOW_FISSURE);
+                    }
+                    m_uiShadowFissureTimer = urand(7500, 15000);
+                }
+                else
+                {
+                    m_uiShadowFissureTimer -= uiDiff;
+                }
+
+                if (m_uiDeathCoilTimer < uiDiff)
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        DoCastSpellIfCan(pTarget, SPELL_DEATH_COIL);
+                    }
+                    m_uiDeathCoilTimer = urand(15000, 20000);
+                }
+                else
+                {
+                    m_uiDeathCoilTimer -= uiDiff;
+                }
+
+                if (m_creature->GetHealthPercent() <= 20.0f)
+                {
+                    m_bPhase = true;
+                }
+
+                DoMeleeAttackIfReady();
             }
-            else
-            { m_uiShadowFissureTimer -= uiDiff; }
-
-            if (m_uiDeathCoilTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                { DoCastSpellIfCan(pTarget, SPELL_DEATH_COIL); }
-                m_uiDeathCoilTimer = urand(15000, 20000);
-            }
-            else
-            { m_uiDeathCoilTimer -= uiDiff; }
-
-            if (m_creature->GetHealthPercent() <= 20.0f)
-            { m_bPhase = true; }
-
-            DoMeleeAttackIfReady();
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_grand_warlock_nethekurseAI(pCreature);
     }
 };
 
-struct mob_fel_orc_convertAI : public ScriptedAI
+struct mob_fel_orc_convert : public CreatureScript
 {
-    mob_fel_orc_convertAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
+    mob_fel_orc_convert() : CreatureScript("mob_fel_orc_convert") {}
 
-    ScriptedInstance* m_pInstance;
-    uint32 m_uiHemorrhageTimer;
-
-    void Reset() override
+    struct mob_fel_orc_convertAI : public ScriptedAI
     {
-        m_creature->SetNoCallAssistance(true);              // we don't want any assistance (WE R HEROZ!)
-        m_uiHemorrhageTimer = 3000;
-    }
-
-    void MoveInLineOfSight(Unit* /*pWho*/) override
-    {
-        return;
-    }
-
-    void Aggro(Unit* pWho) override
-    {
-        if (m_pInstance)
+        mob_fel_orc_convertAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            Creature* pKurse = m_pInstance->GetSingleCreatureFromStorage(NPC_NETHEKURSE);
-            if (pKurse && m_creature->IsWithinDist(pKurse, 45.0f))
-            {
-                if (boss_grand_warlock_nethekurseAI* pKurseAI = dynamic_cast<boss_grand_warlock_nethekurseAI*>(pKurse->AI()))
-                { pKurseAI->DoYellForPeonAggro(pWho); }
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        }
 
-                if (m_pInstance->GetData(TYPE_NETHEKURSE) == IN_PROGRESS)
-                { return; }
-                else
-                { m_pInstance->SetData(TYPE_NETHEKURSE, IN_PROGRESS); }
+        ScriptedInstance* m_pInstance;
+        uint32 m_uiHemorrhageTimer;
+
+        void Reset() override
+        {
+            m_creature->SetNoCallAssistance(true);              // we don't want any assistance (WE R HEROZ!)
+            m_uiHemorrhageTimer = 3000;
+        }
+
+        void MoveInLineOfSight(Unit* /*pWho*/) override
+        {
+            return;
+        }
+
+        void Aggro(Unit* pWho) override
+        {
+            if (m_pInstance)
+            {
+                Creature* pKurse = m_pInstance->GetSingleCreatureFromStorage(NPC_NETHEKURSE);
+                if (pKurse && m_creature->IsWithinDist(pKurse, 45.0f))
+                {
+                    SendAIEvent(AI_EVENT_CUSTOM_A, pWho, pKurse);
+
+                    if (m_pInstance->GetData(TYPE_NETHEKURSE) == IN_PROGRESS)
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        m_pInstance->SetData(TYPE_NETHEKURSE, IN_PROGRESS);
+                    }
+                }
             }
         }
-    }
 
-    void JustDied(Unit* pKiller) override
-    {
-        if (m_pInstance)
+        void JustDied(Unit* pKiller) override
         {
-            if (m_pInstance->GetData(TYPE_NETHEKURSE) != IN_PROGRESS)
-            { return; }
-
-            if (Creature* pKurse = m_pInstance->GetSingleCreatureFromStorage(NPC_NETHEKURSE))
+            if (m_pInstance)
             {
-                if (boss_grand_warlock_nethekurseAI* pKurseAI = dynamic_cast<boss_grand_warlock_nethekurseAI*>(pKurse->AI()))
-                { pKurseAI->DoYellForPeonDeath(pKiller); }
+                if (m_pInstance->GetData(TYPE_NETHEKURSE) != IN_PROGRESS)
+                {
+                    return;
+                }
+                if (Creature* pKurse = m_pInstance->GetSingleCreatureFromStorage(NPC_NETHEKURSE))
+                {
+                    SendAIEvent(AI_EVENT_CUSTOM_B, pKiller, pKurse);
+                }
             }
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiHemorrhageTimer < uiDiff)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_HEMORRHAGE);
-            m_uiHemorrhageTimer = 15000;
-        }
-        else
-        { m_uiHemorrhageTimer -= uiDiff; }
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
 
-        DoMeleeAttackIfReady();
+            if (m_uiHemorrhageTimer < uiDiff)
+            {
+                DoCastSpellIfCan(m_creature->getVictim(), SPELL_HEMORRHAGE);
+                m_uiHemorrhageTimer = 15000;
+            }
+            else
+            {
+                m_uiHemorrhageTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new mob_fel_orc_convertAI(pCreature);
     }
 };
 
 // NOTE: this creature are also summoned by other spells, for different creatures
-struct mob_lesser_shadow_fissureAI : public Scripted_NoMovementAI
+struct mob_lesser_shadow_fissure : public CreatureScript
 {
-    mob_lesser_shadow_fissureAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    mob_lesser_shadow_fissure() : CreatureScript("mob_lesser_shadow_fissure") {}
 
-    void Reset() override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void AttackStart(Unit* /*pWho*/) override { }
+    struct mob_lesser_shadow_fissureAI : public Scripted_NoMovementAI
+    {
+        mob_lesser_shadow_fissureAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { }
+
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        void AttackStart(Unit* /*pWho*/) override { }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new mob_lesser_shadow_fissureAI(pCreature);
+    }
 };
-
-CreatureAI* GetAI_boss_grand_warlock_nethekurse(Creature* pCreature)
-{
-    return new boss_grand_warlock_nethekurseAI(pCreature);
-}
-
-CreatureAI* GetAI_mob_fel_orc_convert(Creature* pCreature)
-{
-    return new mob_fel_orc_convertAI(pCreature);
-}
-
-CreatureAI* GetAI_mob_lesser_shadow_fissure(Creature* pCreature)
-{
-    return new mob_lesser_shadow_fissureAI(pCreature);
-}
 
 void AddSC_boss_grand_warlock_nethekurse()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_grand_warlock_nethekurse";
-    pNewScript->GetAI = &GetAI_boss_grand_warlock_nethekurse;
-    pNewScript->RegisterSelf();
+    s = new boss_grand_warlock_nethekurse();
+    s->RegisterSelf();
+    s = new mob_fel_orc_convert();
+    s->RegisterSelf();
+    s = new mob_lesser_shadow_fissure();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "mob_fel_orc_convert";
-    pNewScript->GetAI = &GetAI_mob_fel_orc_convert;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_grand_warlock_nethekurse";
+    //pNewScript->GetAI = &GetAI_boss_grand_warlock_nethekurse;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "mob_lesser_shadow_fissure";
-    pNewScript->GetAI = &GetAI_mob_lesser_shadow_fissure;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "mob_fel_orc_convert";
+    //pNewScript->GetAI = &GetAI_mob_fel_orc_convert;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "mob_lesser_shadow_fissure";
+    //pNewScript->GetAI = &GetAI_mob_lesser_shadow_fissure;
+    //pNewScript->RegisterSelf();
 }

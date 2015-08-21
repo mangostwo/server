@@ -55,172 +55,205 @@ enum
     SPELL_SHADOW_WAVE               = 39016,                // heroic spell only
 };
 
-struct boss_dalliahAI : public ScriptedAI
+struct boss_dalliah : public CreatureScript
 {
-    boss_dalliahAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_dalliah() : CreatureScript("boss_dalliah") {}
+
+    struct boss_dalliahAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiGiftDoomsayerTimer;
-    uint32 m_uiHealTimer;
-    uint32 m_uiWhirlwindTimer;
-    uint32 m_uiShadowWaveTimer;
-
-    bool m_bHasTaunted;
-
-    void Reset() override
-    {
-        m_uiGiftDoomsayerTimer  = urand(4000, 7000);
-        m_uiHealTimer           = 0;
-        m_uiWhirlwindTimer      = 15000;
-        m_uiShadowWaveTimer     = urand(9000, 13000);
-
-        m_bHasTaunted           = false;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_DALLIAH, IN_PROGRESS); }
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_KILL_1 : SAY_KILL_2, m_creature);
-    }
-
-    void JustDied(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_DALLIAH, DONE); }
-    }
-
-    void EnterEvadeMode() override
-    {
-        m_creature->RemoveAllAurasOnEvade();
-        m_creature->DeleteThreatList();
-        m_creature->CombatStop(true);
-        m_creature->LoadCreatureAddon(true);
-
-        // should evade to the attack position
-        if (m_creature->IsAlive())
-        { m_creature->GetMotionMaster()->MovePoint(1, aDalliahStartPos[0], aDalliahStartPos[1], aDalliahStartPos[2]); }
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_DALLIAH, FAIL); }
-
-        m_creature->SetLootRecipient(NULL);
-
-        Reset();
-    }
-
-    void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
-    {
-        if (uiMoveType != POINT_MOTION_TYPE)
-        { return; }
-
-        // Adjust orientation
-        if (uiPointId)
-        { m_creature->SetFacingTo(aDalliahStartPos[3]); }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiGiftDoomsayerTimer < uiDiff)
+        boss_dalliahAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_GIFT_DOOMSAYER : SPELL_GIFT_DOOMSAYER_H) == CAST_OK)
-            { m_uiGiftDoomsayerTimer = urand(14000, 19000); }
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         }
-        else
-        { m_uiGiftDoomsayerTimer -= uiDiff; }
 
-        if (m_uiWhirlwindTimer < uiDiff)
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        uint32 m_uiGiftDoomsayerTimer;
+        uint32 m_uiHealTimer;
+        uint32 m_uiWhirlwindTimer;
+        uint32 m_uiShadowWaveTimer;
+
+        bool m_bHasTaunted;
+
+        void Reset() override
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_WHIRLWIND) == CAST_OK)
+            m_uiGiftDoomsayerTimer = urand(4000, 7000);
+            m_uiHealTimer = 0;
+            m_uiWhirlwindTimer = 15000;
+            m_uiShadowWaveTimer = urand(9000, 13000);
+
+            m_bHasTaunted = false;
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
+
+            if (m_pInstance)
             {
-                DoScriptText(urand(0, 1) ? SAY_WHIRLWIND_1 : SAY_WHIRLWIND_2, m_creature);
-                m_uiWhirlwindTimer = urand(25000, 30000);
-                m_uiHealTimer      = urand(6000, 10000);
+                m_pInstance->SetData(TYPE_DALLIAH, IN_PROGRESS);
             }
         }
-        else
-        { m_uiWhirlwindTimer -= uiDiff; }
 
-        if (m_uiHealTimer)
+        void KilledUnit(Unit* /*pVictim*/) override
         {
-            if (m_uiHealTimer <= uiDiff)
+            DoScriptText(urand(0, 1) ? SAY_KILL_1 : SAY_KILL_2, m_creature);
+        }
+
+        void JustDied(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_DEATH, m_creature);
+
+            if (m_pInstance)
             {
-                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_HEAL : SPELL_HEAL_H) == CAST_OK)
+                m_pInstance->SetData(TYPE_DALLIAH, DONE);
+            }
+        }
+
+        void EnterEvadeMode() override
+        {
+            m_creature->RemoveAllAurasOnEvade();
+            m_creature->DeleteThreatList();
+            m_creature->CombatStop(true);
+            m_creature->LoadCreatureAddon(true);
+
+            // should evade to the attack position
+            if (m_creature->IsAlive())
+            {
+                m_creature->GetMotionMaster()->MovePoint(1, aDalliahStartPos[0], aDalliahStartPos[1], aDalliahStartPos[2]);
+            }
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_DALLIAH, FAIL);
+            }
+
+            m_creature->SetLootRecipient(NULL);
+
+            Reset();
+        }
+
+        void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
+        {
+            if (uiMoveType != POINT_MOTION_TYPE)
+            {
+                return;
+            }
+
+            // Adjust orientation
+            if (uiPointId)
+            {
+                m_creature->SetFacingTo(aDalliahStartPos[3]);
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_uiGiftDoomsayerTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_GIFT_DOOMSAYER : SPELL_GIFT_DOOMSAYER_H) == CAST_OK)
                 {
-                    DoScriptText(urand(0, 1) ? SAY_HEAL_1 : SAY_HEAL_2, m_creature);
-                    m_uiHealTimer = 0;
+                    m_uiGiftDoomsayerTimer = urand(14000, 19000);
                 }
             }
             else
-            { m_uiHealTimer -= uiDiff; }
-        }
-
-        if (!m_bIsRegularMode)
-        {
-            if (m_uiShadowWaveTimer < uiDiff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                m_uiGiftDoomsayerTimer -= uiDiff;
+            }
+
+            if (m_uiWhirlwindTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_WHIRLWIND) == CAST_OK)
                 {
-                    if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_WAVE) == CAST_OK)
-                    { m_uiShadowWaveTimer = urand(13000, 17000); }
+                    DoScriptText(urand(0, 1) ? SAY_WHIRLWIND_1 : SAY_WHIRLWIND_2, m_creature);
+                    m_uiWhirlwindTimer = urand(25000, 30000);
+                    m_uiHealTimer = urand(6000, 10000);
                 }
             }
             else
-            { m_uiShadowWaveTimer -= uiDiff; }
-        }
-
-        if (!m_bHasTaunted && m_creature->GetHealthPercent() < 25.0f)
-        {
-            // Taunt if Soccothares isn't dead yet
-            if (m_pInstance && m_pInstance->GetData(TYPE_SOCCOTHRATES) != DONE)
             {
-                if (Creature* pSoccothares = m_pInstance->GetSingleCreatureFromStorage(NPC_SOCCOTHRATES))
+                m_uiWhirlwindTimer -= uiDiff;
+            }
+
+            if (m_uiHealTimer)
+            {
+                if (m_uiHealTimer <= uiDiff)
                 {
-                    switch (urand(0, 2))
+                    if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_HEAL : SPELL_HEAL_H) == CAST_OK)
                     {
+                        DoScriptText(urand(0, 1) ? SAY_HEAL_1 : SAY_HEAL_2, m_creature);
+                        m_uiHealTimer = 0;
+                    }
+                }
+                else
+                {
+                    m_uiHealTimer -= uiDiff;
+                }
+            }
+
+            if (!m_bIsRegularMode)
+            {
+                if (m_uiShadowWaveTimer < uiDiff)
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_WAVE) == CAST_OK)
+                        {
+                            m_uiShadowWaveTimer = urand(13000, 17000);
+                        }
+                    }
+                }
+                else
+                {
+                    m_uiShadowWaveTimer -= uiDiff;
+                }
+            }
+
+            if (!m_bHasTaunted && m_creature->GetHealthPercent() < 25.0f)
+            {
+                // Taunt if Soccothares isn't dead yet
+                if (m_pInstance && m_pInstance->GetData(TYPE_SOCCOTHRATES) != DONE)
+                {
+                    if (Creature* pSoccothares = m_pInstance->GetSingleCreatureFromStorage(NPC_SOCCOTHRATES))
+                    {
+                        switch (urand(0, 2))
+                        {
                         case 0: DoScriptText(SAY_SOCCOTHRATES_TAUNT_1, pSoccothares); break;
                         case 1: DoScriptText(SAY_SOCCOTHRATES_TAUNT_2, pSoccothares); break;
                         case 2: DoScriptText(SAY_SOCCOTHRATES_TAUNT_3, pSoccothares); break;
+                        }
                     }
                 }
+
+                m_bHasTaunted = true;
             }
 
-            m_bHasTaunted = true;
+            DoMeleeAttackIfReady();
         }
+    };
 
-        DoMeleeAttackIfReady();
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_dalliahAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_dalliah(Creature* pCreature)
-{
-    return new boss_dalliahAI(pCreature);
-}
-
 void AddSC_boss_dalliah()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_dalliah";
-    pNewScript->GetAI = &GetAI_boss_dalliah;
-    pNewScript->RegisterSelf();
+    s = new boss_dalliah();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_dalliah";
+    //pNewScript->GetAI = &GetAI_boss_dalliah;
+    //pNewScript->RegisterSelf();
 }

@@ -218,7 +218,7 @@ struct at_spearborn_encampment : public AreaTriggerScript
 {
     at_spearborn_encampment() : AreaTriggerScript("at_spearborn_encampment") {}
 
-    bool OnTrigger(Player* pPlayer, AreaTriggerEntry const* /*pAt*/) override
+    bool OnTrigger(Player* pPlayer, AreaTriggerEntry const* pAt) override
     {
         if (pPlayer->GetQuestStatus(QUEST_MISTWHISPER_TREASURE) == QUEST_STATUS_INCOMPLETE &&
                 pPlayer->GetReqKillOrCastCurrentCount(QUEST_MISTWHISPER_TREASURE, NPC_TARTEK) == 0)
@@ -254,7 +254,7 @@ struct at_warsong_farms : public AreaTriggerScript
 {
     at_warsong_farms() : AreaTriggerScript("at_warsong_farms") {}
 
-    bool OnTrigger(Player* pPlayer, AreaTriggerEntry const* /*pAt*/) override
+    bool OnTrigger(Player* pPlayer, AreaTriggerEntry const* pAt) override
     {
         if (!pPlayer->IsDead() && pPlayer->GetQuestStatus(QUEST_THE_WARSONG_FARMS) == QUEST_STATUS_INCOMPLETE)
         {
@@ -288,7 +288,7 @@ struct at_waygate : public AreaTriggerScript
 {
     at_waygate() : AreaTriggerScript("at_waygate") {}
 
-    bool OnTrigger(Player* pPlayer, AreaTriggerEntry const* /*pAt*/) override
+    bool OnTrigger(Player* pPlayer, AreaTriggerEntry const* pAt) override
     {
         if (!pPlayer->IsDead() && pPlayer->GetQuestStatus(QUEST_THE_MARKERS_OVERLOOK) == QUEST_STATUS_COMPLETE && pPlayer->GetQuestStatus(QUEST_THE_MARKERS_PERCH) == QUEST_STATUS_COMPLETE)
         {

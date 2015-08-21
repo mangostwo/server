@@ -56,182 +56,208 @@ enum
     SPELL_BERSERK               = 26662
 };
 
-struct boss_curatorAI : public ScriptedAI
+struct boss_curator : public CreatureScript
 {
-    boss_curatorAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_curator() : CreatureScript("boss_curator") {}
+
+    struct boss_curatorAI : public ScriptedAI
     {
-        m_pInstance  = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiFlareTimer;
-    uint32 m_uiHatefulBoltTimer;
-    uint32 m_uiBerserkTimer;
-
-    bool m_bIsEnraged;
-
-    void Reset() override
-    {
-        m_uiFlareTimer       = 10000;
-        m_uiHatefulBoltTimer = 15000;                       // This time may be wrong
-        m_uiBerserkTimer     = 10 * MINUTE * IN_MILLISECONDS;
-        m_bIsEnraged         = false;
-
-        m_creature->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ARCANE, true);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_CURATOR, DONE); }
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_CURATOR, IN_PROGRESS); }
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_CURATOR, FAIL); }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_ASTRAL_FLARE)
+        boss_curatorAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            // Flare start with aggro on it's target, should be immune to arcane
-            pSummoned->CastSpell(pSummoned, SPELL_ASTRAL_FLARE_PASSIVE, true);
-            pSummoned->CastSpell(pSummoned, SPELL_ASTRAL_FLARE_VISUAL, true);
-            pSummoned->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ARCANE, true);
-
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            { pSummoned->AI()->AttackStart(pTarget); }
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
+        ScriptedInstance* m_pInstance;
 
-        // always decrease BerserkTimer
-        if (m_uiBerserkTimer)
+        uint32 m_uiFlareTimer;
+        uint32 m_uiHatefulBoltTimer;
+        uint32 m_uiBerserkTimer;
+
+        bool m_bIsEnraged;
+
+        void Reset() override
         {
-            if (m_uiBerserkTimer <= uiDiff)
+            m_uiFlareTimer = 10000;
+            m_uiHatefulBoltTimer = 15000;                       // This time may be wrong
+            m_uiBerserkTimer = 10 * MINUTE * IN_MILLISECONDS;
+            m_bIsEnraged = false;
+
+            m_creature->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ARCANE, true);
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(SAY_DEATH, m_creature);
+
+            if (m_pInstance)
             {
-                // Also interrupt evocation
-                m_creature->RemoveAurasDueToSpell(SPELL_EVOCATION);
+                m_pInstance->SetData(TYPE_CURATOR, DONE);
+            }
+        }
 
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_CURATOR, IN_PROGRESS);
+            }
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_CURATOR, FAIL);
+            }
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_ASTRAL_FLARE)
+            {
+                // Flare start with aggro on it's target, should be immune to arcane
+                pSummoned->CastSpell(pSummoned, SPELL_ASTRAL_FLARE_PASSIVE, true);
+                pSummoned->CastSpell(pSummoned, SPELL_ASTRAL_FLARE_VISUAL, true);
+                pSummoned->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ARCANE, true);
+
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
-                    // ScriptText needs confirmation
-                    DoScriptText(SAY_ENRAGE, m_creature);
-
-                    // don't know if he's supposed to do summon/evocate after hard enrage (probably not)
-                    m_uiBerserkTimer = 0;
+                    pSummoned->AI()->AttackStart(pTarget);
                 }
             }
-            else
-            { m_uiBerserkTimer -= uiDiff; }
         }
 
-        // not supposed to do anything while evocate
-        if (m_creature->HasAura(SPELL_EVOCATION))
-        { return; }
-
-        if (!m_bIsEnraged)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (m_uiFlareTimer < uiDiff)
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             {
-                m_uiFlareTimer = 10000;
+                return;
+            }
 
-                // summon Astral Flare
-                float fX, fY, fZ;
-                m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10.0f, fX, fY, fZ);
-                m_creature->SummonCreature(NPC_ASTRAL_FLARE, fX, fY, fZ, 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
-
-                // reduce mana by 10% of maximum
-                if (int32 iMana = m_creature->GetMaxPower(POWER_MANA))
+            // always decrease BerserkTimer
+            if (m_uiBerserkTimer)
+            {
+                if (m_uiBerserkTimer <= uiDiff)
                 {
-                    m_creature->ModifyPower(POWER_MANA, -(iMana / 10));
+                    // Also interrupt evocation
+                    m_creature->RemoveAurasDueToSpell(SPELL_EVOCATION);
 
-                    // if this get's us below 10%, then we evocate (the 10th should be summoned now
-                    if (m_creature->GetPower(POWER_MANA) * 10 < m_creature->GetMaxPower(POWER_MANA))
+                    if (DoCastSpellIfCan(m_creature, SPELL_BERSERK, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
                     {
-                        if (DoCastSpellIfCan(m_creature, SPELL_EVOCATION, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
-                        {
-                            DoScriptText(SAY_EVOCATE, m_creature);
-                            // this small delay should make first flare appear fast after evocate, and also prevent possible spawn flood
-                            m_uiFlareTimer = 1000;
-                        }
-                        return;
+                        // ScriptText needs confirmation
+                        DoScriptText(SAY_ENRAGE, m_creature);
+
+                        // don't know if he's supposed to do summon/evocate after hard enrage (probably not)
+                        m_uiBerserkTimer = 0;
                     }
-                    else
+                }
+                else
+                {
+                    m_uiBerserkTimer -= uiDiff;
+                }
+            }
+
+            // not supposed to do anything while evocate
+            if (m_creature->HasAura(SPELL_EVOCATION))
+            {
+                return;
+            }
+
+            if (!m_bIsEnraged)
+            {
+                if (m_uiFlareTimer < uiDiff)
+                {
+                    m_uiFlareTimer = 10000;
+
+                    // summon Astral Flare
+                    float fX, fY, fZ;
+                    m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10.0f, fX, fY, fZ);
+                    m_creature->SummonCreature(NPC_ASTRAL_FLARE, fX, fY, fZ, 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
+
+                    // reduce mana by 10% of maximum
+                    if (int32 iMana = m_creature->GetMaxPower(POWER_MANA))
                     {
-                        switch (urand(0, 3))
+                        m_creature->ModifyPower(POWER_MANA, -(iMana / 10));
+
+                        // if this get's us below 10%, then we evocate (the 10th should be summoned now
+                        if (m_creature->GetPower(POWER_MANA) * 10 < m_creature->GetMaxPower(POWER_MANA))
                         {
+                            if (DoCastSpellIfCan(m_creature, SPELL_EVOCATION, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                            {
+                                DoScriptText(SAY_EVOCATE, m_creature);
+                                // this small delay should make first flare appear fast after evocate, and also prevent possible spawn flood
+                                m_uiFlareTimer = 1000;
+                            }
+                            return;
+                        }
+                        else
+                        {
+                            switch (urand(0, 3))
+                            {
                             case 0: DoScriptText(SAY_SUMMON1, m_creature); break;
                             case 1: DoScriptText(SAY_SUMMON2, m_creature); break;
+                            }
                         }
+                    }
+                }
+                else
+                {
+                    m_uiFlareTimer -= uiDiff;
+                }
+
+                if (m_creature->GetHealthPercent() < 15.0f)
+                {
+                    // Also stop evocation
+                    m_creature->RemoveAurasDueToSpell(SPELL_EVOCATION);
+
+                    if (DoCastSpellIfCan(m_creature, SPELL_ARCANE_INFUSION, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                    {
+                        DoScriptText(SAY_ENRAGE, m_creature);
+                        m_bIsEnraged = true;
+                    }
+                }
+            }
+
+            if (m_uiHatefulBoltTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 1))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_HATEFUL_BOLT) == CAST_OK)
+                    {
+                        m_uiHatefulBoltTimer = m_bIsEnraged ? 7000 : 15000;
                     }
                 }
             }
             else
-            { m_uiFlareTimer -= uiDiff; }
-
-            if (m_creature->GetHealthPercent() < 15.0f)
             {
-                // Also stop evocation
-                m_creature->RemoveAurasDueToSpell(SPELL_EVOCATION);
-
-                if (DoCastSpellIfCan(m_creature, SPELL_ARCANE_INFUSION, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
-                {
-                    DoScriptText(SAY_ENRAGE, m_creature);
-                    m_bIsEnraged = true;
-                }
+                m_uiHatefulBoltTimer -= uiDiff;
             }
-        }
 
-        if (m_uiHatefulBoltTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 1))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_HATEFUL_BOLT) == CAST_OK)
-                { m_uiHatefulBoltTimer = m_bIsEnraged ? 7000 : 15000; }
-            }
+            DoMeleeAttackIfReady();
         }
-        else
-        { m_uiHatefulBoltTimer -= uiDiff; }
+    };
 
-        DoMeleeAttackIfReady();
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_curatorAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_curator(Creature* pCreature)
-{
-    return new boss_curatorAI(pCreature);
-}
-
 void AddSC_boss_curator()
 {
-    Script* pNewScript;
+    Script* s;
+    s = new boss_curator();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_curator";
-    pNewScript->GetAI = &GetAI_boss_curator;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_curator";
+    //pNewScript->GetAI = &GetAI_boss_curator;
+    //pNewScript->RegisterSelf();
 }

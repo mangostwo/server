@@ -33,135 +33,179 @@ EndScriptData */
 #include "precompiled.h"
 #include "hellfire_ramparts.h"
 
-instance_ramparts::instance_ramparts(Map* pMap) : ScriptedInstance(pMap),
-    m_uiSentryCounter(0)
+struct is_ramparts : public InstanceScript
 {
-    Initialize();
-}
+    is_ramparts() : InstanceScript("instance_ramparts") {}
 
-void instance_ramparts::Initialize()
-{
-    memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
-}
-
-void instance_ramparts::OnCreatureCreate(Creature* pCreature)
-{
-    switch (pCreature->GetEntry())
+    class instance_ramparts : public ScriptedInstance
     {
-        case NPC_VAZRUDEN_HERALD:
-        case NPC_VAZRUDEN:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
-            break;
-        case NPC_HELLFIRE_SENTRY:
-            m_lSentryGUIDs.push_back(pCreature->GetObjectGuid());
-            break;
-    }
-}
-
-void instance_ramparts::OnObjectCreate(GameObject* pGo)
-{
-    switch (pGo->GetEntry())
-    {
-        case GO_FEL_IRON_CHEST:
-        case GO_FEL_IRON_CHEST_H:
-            m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
-            break;
-    }
-}
-
-void instance_ramparts::SetData(uint32 uiType, uint32 uiData)
-{
-    debug_log("SD2: Instance Ramparts: SetData received for type %u with data %u", uiType, uiData);
-
-    switch (uiType)
-    {
-        case TYPE_VAZRUDEN:
-            if (m_auiEncounter[0] == uiData)
-            { return; }
-            if (uiData == DONE && m_auiEncounter[1] == DONE)
-            { DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_FEL_IRON_CHEST : GO_FEL_IRON_CHEST_H, HOUR); }
-            if (uiData == FAIL && m_auiEncounter[0] != FAIL)
-            { DoFailVazruden(); }
-            m_auiEncounter[0] = uiData;
-            break;
-        case TYPE_NAZAN:
-            if (m_auiEncounter[1] == uiData)
-            { return; }
-            if (uiData == SPECIAL)                          // SPECIAL set via ACID
-            {
-                ++m_uiSentryCounter;
-
-                if (m_uiSentryCounter == 2)
-                { m_auiEncounter[1] = uiData; }
-
-                return;
-            }
-            if (uiData == DONE && m_auiEncounter[0] == DONE)
-            {
-                DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_FEL_IRON_CHEST : GO_FEL_IRON_CHEST_H, HOUR);
-                DoToggleGameObjectFlags(instance->IsRegularDifficulty() ? GO_FEL_IRON_CHEST : GO_FEL_IRON_CHEST_H, GO_FLAG_NO_INTERACT, false);
-            }
-            if (uiData == FAIL && m_auiEncounter[1] != FAIL)
-            { DoFailVazruden(); }
-
-            m_auiEncounter[1] = uiData;
-            break;
-    }
-}
-
-uint32 instance_ramparts::GetData(uint32 uiType) const
-{
-    if (uiType == TYPE_VAZRUDEN)
-    { return m_auiEncounter[0]; }
-
-    if (uiType == TYPE_NAZAN)
-    { return m_auiEncounter[1]; }
-
-    return 0;
-}
-
-void instance_ramparts::DoFailVazruden()
-{
-    // Store FAIL for both types
-    m_auiEncounter[0] = FAIL;
-    m_auiEncounter[1] = FAIL;
-
-    // Restore Sentries (counter and respawn them)
-    m_uiSentryCounter = 0;
-    for (GuidList::const_iterator itr = m_lSentryGUIDs.begin(); itr != m_lSentryGUIDs.end(); ++itr)
-    {
-        if (Creature* pSentry = instance->GetCreature(*itr))
-        { pSentry->Respawn(); }
-    }
-
-    // Respawn or Reset Vazruden the herald
-    if (Creature* pVazruden = GetSingleCreatureFromStorage(NPC_VAZRUDEN_HERALD))
-    {
-        if (!pVazruden->IsAlive())
-        { pVazruden->Respawn(); }
-        else
+    public:
+        instance_ramparts(Map* pMap) : ScriptedInstance(pMap),
+            m_uiSentryCounter(0)
         {
-            if (ScriptedAI* pVazrudenAI = dynamic_cast<ScriptedAI*>(pVazruden->AI()))
-            { pVazrudenAI->EnterEvadeMode(); }
+            Initialize();
         }
+
+        void Initialize() override
+        {
+            memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+        }
+
+        void OnCreatureCreate(Creature* pCreature) override
+        {
+            switch (pCreature->GetEntry())
+            {
+            case NPC_VAZRUDEN_HERALD:
+            case NPC_VAZRUDEN:
+                m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+                break;
+            case NPC_HELLFIRE_SENTRY:
+                m_lSentryGUIDs.push_back(pCreature->GetObjectGuid());
+                break;
+            }
+        }
+
+        void OnObjectCreate(GameObject* pGo) override
+        {
+            switch (pGo->GetEntry())
+            {
+            case GO_FEL_IRON_CHEST:
+            case GO_FEL_IRON_CHEST_H:
+                m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+                break;
+            }
+        }
+
+        void SetData(uint32 uiType, uint32 uiData) override
+        {
+            debug_log("SD2: Instance Ramparts: SetData received for type %u with data %u", uiType, uiData);
+
+            switch (uiType)
+            {
+            case TYPE_VAZRUDEN:
+                if (m_auiEncounter[0] == uiData)
+                {
+                    return;
+                }
+                if (uiData == DONE && m_auiEncounter[1] == DONE)
+                {
+                    DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_FEL_IRON_CHEST : GO_FEL_IRON_CHEST_H, HOUR);
+                }
+                if (uiData == FAIL && m_auiEncounter[0] != FAIL)
+                {
+                    DoFailVazruden();
+                }
+                m_auiEncounter[0] = uiData;
+                break;
+            case TYPE_NAZAN:
+                if (m_auiEncounter[1] == uiData)
+                {
+                    return;
+                }
+                if (uiData == SPECIAL)                          // SPECIAL set via ACID
+                {
+                    ++m_uiSentryCounter;
+
+                    if (m_uiSentryCounter == 2)
+                    {
+                        m_auiEncounter[1] = uiData;
+                    }
+
+                    return;
+                }
+                if (uiData == DONE && m_auiEncounter[0] == DONE)
+                {
+                    DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_FEL_IRON_CHEST : GO_FEL_IRON_CHEST_H, HOUR);
+                    DoToggleGameObjectFlags(instance->IsRegularDifficulty() ? GO_FEL_IRON_CHEST : GO_FEL_IRON_CHEST_H, GO_FLAG_NO_INTERACT, false);
+                }
+                if (uiData == FAIL && m_auiEncounter[1] != FAIL)
+                {
+                    DoFailVazruden();
+                }
+
+                m_auiEncounter[1] = uiData;
+                break;
+            }
+        }
+
+        uint32 GetData(uint32 uiType) const override
+        {
+            if (uiType == TYPE_VAZRUDEN)
+            {
+                return m_auiEncounter[0];
+            }
+
+            if (uiType == TYPE_NAZAN)
+            {
+                return m_auiEncounter[1];
+            }
+
+            return 0;
+        }
+
+        // No need to save and load this instance (only one encounter needs special handling, no doors used)
+
+    private:
+        void DoFailVazruden()
+        {
+            // Store FAIL for both types
+            m_auiEncounter[0] = FAIL;
+            m_auiEncounter[1] = FAIL;
+
+            // Restore Sentries (counter and respawn them)
+            m_uiSentryCounter = 0;
+            for (GuidList::const_iterator itr = m_lSentryGUIDs.begin(); itr != m_lSentryGUIDs.end(); ++itr)
+            {
+                if (Creature* pSentry = instance->GetCreature(*itr))
+                {
+                    pSentry->Respawn();
+                }
+            }
+
+            // Respawn or Reset Vazruden the herald
+            if (Creature* pVazruden = GetSingleCreatureFromStorage(NPC_VAZRUDEN_HERALD))
+            {
+                if (!pVazruden->IsAlive())
+                {
+                    pVazruden->Respawn();
+                }
+                else
+                {
+                    if (ScriptedAI* pVazrudenAI = dynamic_cast<ScriptedAI*>(pVazruden->AI()))
+                    {
+                        pVazrudenAI->EnterEvadeMode();
+                    }
+                }
+            }
+
+            // Despawn Vazruden
+            if (Creature* pVazruden = GetSingleCreatureFromStorage(NPC_VAZRUDEN))
+            {
+                pVazruden->ForcedDespawn();
+            }
+        }
+
+        uint32 m_auiEncounter[MAX_ENCOUNTER];
+
+        uint32 m_uiSentryCounter;
+        GuidList m_lSentryGUIDs;
+    };
+
+    InstanceData* GetInstanceData(Map* pMap) override
+    {
+        return new instance_ramparts(pMap);
     }
-
-    // Despawn Vazruden
-    if (Creature* pVazruden = GetSingleCreatureFromStorage(NPC_VAZRUDEN))
-    { pVazruden->ForcedDespawn(); }
-}
-
-InstanceData* GetInstanceData_instance_ramparts(Map* pMap)
-{
-    return new instance_ramparts(pMap);
-}
+};
 
 void AddSC_instance_ramparts()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "instance_ramparts";
-    pNewScript->GetInstanceData = &GetInstanceData_instance_ramparts;
-    pNewScript->RegisterSelf();
+    s = new is_ramparts();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "instance_ramparts";
+    //pNewScript->GetInstanceData = &GetInstanceData_instance_ramparts;
+    //pNewScript->RegisterSelf();
 }

@@ -176,7 +176,7 @@ struct ScriptedAI : public CreatureAI
          * Called by default on creature evade and respawn
          * In most scripts also called in the constructor of the AI
          */
-        virtual void Reset() = 0;
+        virtual void Reset() {}
 
         /// Called at creature EnterCombat with an enemy
         /**

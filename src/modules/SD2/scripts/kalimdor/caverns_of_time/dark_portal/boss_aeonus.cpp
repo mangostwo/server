@@ -49,121 +49,146 @@ enum
     SPELL_SAND_BREATH_H     = 39049
 };
 
-struct boss_aeonusAI : public ScriptedAI
+struct boss_aeonus : public CreatureScript
 {
-    boss_aeonusAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_aeonus() : CreatureScript("boss_aeonus") {}
+
+    struct boss_aeonusAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiSandBreathTimer;
-    uint32 m_uiTimeStopTimer;
-    uint32 m_uiFrenzyTimer;
-    uint32 m_uiCleaveTimer;
-
-    void Reset() override
-    {
-        m_uiSandBreathTimer = urand(15000, 30000);
-        m_uiTimeStopTimer   = urand(10000, 15000);
-        m_uiFrenzyTimer     = urand(30000, 45000);
-        m_uiCleaveTimer     = urand(5000, 9000);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        // Despawn Time Keeper
-        if (pWho->GetTypeId() == TYPEID_UNIT && pWho->GetEntry() == NPC_TIME_KEEPER)
+        boss_aeonusAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (m_creature->IsWithinDistInMap(pWho, 20.0f))
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        }
+
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        uint32 m_uiSandBreathTimer;
+        uint32 m_uiTimeStopTimer;
+        uint32 m_uiFrenzyTimer;
+        uint32 m_uiCleaveTimer;
+
+        void Reset() override
+        {
+            m_uiSandBreathTimer = urand(15000, 30000);
+            m_uiTimeStopTimer = urand(10000, 15000);
+            m_uiFrenzyTimer = urand(30000, 45000);
+            m_uiCleaveTimer = urand(5000, 9000);
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
+        }
+
+        void MoveInLineOfSight(Unit* pWho) override
+        {
+            // Despawn Time Keeper
+            if (pWho->GetTypeId() == TYPEID_UNIT && pWho->GetEntry() == NPC_TIME_KEEPER)
             {
-                if (DoCastSpellIfCan(pWho, SPELL_BANISH_HELPER) == CAST_OK)
-                { DoScriptText(SAY_BANISH, m_creature); }
+                if (m_creature->IsWithinDistInMap(pWho, 20.0f))
+                {
+                    if (DoCastSpellIfCan(pWho, SPELL_BANISH_HELPER) == CAST_OK)
+                    {
+                        DoScriptText(SAY_BANISH, m_creature);
+                    }
+                }
             }
+
+            ScriptedAI::MoveInLineOfSight(pWho);
         }
 
-        ScriptedAI::MoveInLineOfSight(pWho);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        // Sand Breath
-        if (m_uiSandBreathTimer < uiDiff)
+        void JustDied(Unit* /*pKiller*/) override
         {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SAND_BREATH : SPELL_SAND_BREATH_H) == CAST_OK)
-            { m_uiSandBreathTimer = urand(15000, 25000); }
+            DoScriptText(SAY_DEATH, m_creature);
         }
-        else
-        { m_uiSandBreathTimer -= uiDiff; }
 
-        // Time Stop
-        if (m_uiTimeStopTimer < uiDiff)
+        void KilledUnit(Unit* /*pVictim*/) override
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_TIME_STOP) == CAST_OK)
-            { m_uiTimeStopTimer = urand(20000, 35000); }
+            DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
         }
-        else
-        { m_uiTimeStopTimer -= uiDiff; }
 
-        // Cleave
-        if (m_uiCleaveTimer < uiDiff)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
-            { m_uiCleaveTimer = urand(7000, 12000); }
-        }
-        else
-        { m_uiCleaveTimer -= uiDiff; }
-
-        // Frenzy
-        if (m_uiFrenzyTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+            // Return since we have no target
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             {
-                DoScriptText(EMOTE_GENERIC_FRENZY, m_creature);
-                m_uiFrenzyTimer = urand(20000, 35000);
+                return;
             }
-        }
-        else
-        { m_uiFrenzyTimer -= uiDiff; }
 
-        DoMeleeAttackIfReady();
+            // Sand Breath
+            if (m_uiSandBreathTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SAND_BREATH : SPELL_SAND_BREATH_H) == CAST_OK)
+                {
+                    m_uiSandBreathTimer = urand(15000, 25000);
+                }
+            }
+            else
+            {
+                m_uiSandBreathTimer -= uiDiff;
+            }
+
+            // Time Stop
+            if (m_uiTimeStopTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_TIME_STOP) == CAST_OK)
+                {
+                    m_uiTimeStopTimer = urand(20000, 35000);
+                }
+            }
+            else
+            {
+                m_uiTimeStopTimer -= uiDiff;
+            }
+
+            // Cleave
+            if (m_uiCleaveTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                {
+                    m_uiCleaveTimer = urand(7000, 12000);
+                }
+            }
+            else
+            {
+                m_uiCleaveTimer -= uiDiff;
+            }
+
+            // Frenzy
+            if (m_uiFrenzyTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_GENERIC_FRENZY, m_creature);
+                    m_uiFrenzyTimer = urand(20000, 35000);
+                }
+            }
+            else
+            {
+                m_uiFrenzyTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_aeonusAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_aeonus(Creature* pCreature)
-{
-    return new boss_aeonusAI(pCreature);
-}
-
 void AddSC_boss_aeonus()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_aeonus";
-    pNewScript->GetAI = &GetAI_boss_aeonus;
-    pNewScript->RegisterSelf();
+    s = new boss_aeonus();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_aeonus";
+    //pNewScript->GetAI = &GetAI_boss_aeonus;
+    //pNewScript->RegisterSelf();
 }

@@ -167,6 +167,8 @@ struct npc_air_force_bots : public CreatureScript
             return pSummoned;
         }
 
+        void Reset() override {}
+
         Creature* GetSummonedGuard()
         {
             Creature* pCreature = m_creature->GetMap()->GetCreature(m_spawnedGuid);
@@ -450,6 +452,8 @@ struct npc_dancing_flames : public CreatureScript
             case TEXTEMOTE_KISS:  m_creature->HandleEmote(TEXTEMOTE_CURTSEY);       break;// kiss -> curtsey
             }
         }
+
+        void Reset() override {}
     };
 
     CreatureAI* GetAI(Creature* pCreature) override
@@ -1279,126 +1283,130 @@ enum
 
 static const float DIST_START_EVENT = 15.0f;                // Guesswork
 
-struct  npc_spring_rabbitAI : public ScriptedPetAI
+struct npc_spring_rabbit : public CreatureScript
 {
-    npc_spring_rabbitAI(Creature* pCreature) : ScriptedPetAI(pCreature) { }
+    npc_spring_rabbit() : CreatureScript("npc_spring_rabbit") {}
 
-    ObjectGuid m_partnerGuid;
-    uint32 m_uiStep;
-    uint32 m_uiStepTimer;
-    float m_fMoveAngle;
-
-    void Reset() override
+    struct  npc_spring_rabbitAI : public ScriptedPetAI
     {
-        m_uiStep = 0;
-        m_uiStepTimer = 0;
-        m_partnerGuid.Clear();
-        m_fMoveAngle = 0.0f;
-    }
+        npc_spring_rabbitAI(Creature* pCreature) : ScriptedPetAI(pCreature) { }
 
-    bool CanStartWhatRabbitsDo() { return !m_partnerGuid && !m_uiStepTimer; }
+        ObjectGuid m_partnerGuid;
+        uint32 m_uiStep;
+        uint32 m_uiStepTimer;
+        float m_fMoveAngle;
 
-    void StartWhatRabbitsDo(Creature* pPartner)
-    {
-        m_partnerGuid = pPartner->GetObjectGuid();
-        m_uiStep = 1;
-        m_uiStepTimer = 30000;
-        // Calculate meeting position
-        float m_fMoveAngle = m_creature->GetAngle(pPartner);
-        float fDist = m_creature->GetDistance(pPartner);
-        float fX, fY, fZ;
-        m_creature->GetNearPoint(m_creature, fX, fY, fZ, m_creature->GetObjectBoundingRadius(), fDist * 0.5f, m_fMoveAngle);
-
-        m_creature->GetMotionMaster()->Clear();
-        m_creature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
-    }
-
-    // Helper to get the Other Bunnies AI
-    npc_spring_rabbitAI* GetPartnerAI(Creature* pBunny = NULL)
-    {
-        if (!pBunny)
-            pBunny = m_creature->GetMap()->GetAnyTypeCreature(m_partnerGuid);
-
-        if (!pBunny)
-            return NULL;
-
-        return dynamic_cast<npc_spring_rabbitAI*>(pBunny->AI());
-    }
-
-    // Event Starts when two rabbits see each other
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (m_creature->getVictim())
-            return;
-
-        if (pWho->GetTypeId() == TYPEID_UNIT && pWho->GetEntry() == NPC_SPRING_RABBIT && CanStartWhatRabbitsDo() && m_creature->IsFriendlyTo(pWho) && m_creature->IsWithinDistInMap(pWho, DIST_START_EVENT, true))
+        void Reset() override
         {
-            if (npc_spring_rabbitAI* pOtherBunnyAI = GetPartnerAI((Creature*)pWho))
+            m_uiStep = 0;
+            m_uiStepTimer = 0;
+            m_partnerGuid.Clear();
+            m_fMoveAngle = 0.0f;
+        }
+
+        bool CanStartWhatRabbitsDo() { return !m_partnerGuid && !m_uiStepTimer; }
+
+        void StartWhatRabbitsDo(Creature* pPartner)
+        {
+            m_partnerGuid = pPartner->GetObjectGuid();
+            m_uiStep = 1;
+            m_uiStepTimer = 30000;
+            // Calculate meeting position
+            float m_fMoveAngle = m_creature->GetAngle(pPartner);
+            float fDist = m_creature->GetDistance(pPartner);
+            float fX, fY, fZ;
+            m_creature->GetNearPoint(m_creature, fX, fY, fZ, m_creature->GetObjectBoundingRadius(), fDist * 0.5f, m_fMoveAngle);
+
+            m_creature->GetMotionMaster()->Clear();
+            m_creature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
+        }
+
+        // Helper to get the Other Bunnies AI
+        npc_spring_rabbitAI* GetPartnerAI(Creature* pBunny = NULL)
+        {
+            if (!pBunny)
+                pBunny = m_creature->GetMap()->GetAnyTypeCreature(m_partnerGuid);
+
+            if (!pBunny)
+                return NULL;
+
+            return dynamic_cast<npc_spring_rabbitAI*>(pBunny->AI());
+        }
+
+        // Event Starts when two rabbits see each other
+        void MoveInLineOfSight(Unit* pWho) override
+        {
+            if (m_creature->getVictim())
+                return;
+
+            if (pWho->GetTypeId() == TYPEID_UNIT && pWho->GetEntry() == NPC_SPRING_RABBIT && CanStartWhatRabbitsDo() && m_creature->IsFriendlyTo(pWho) && m_creature->IsWithinDistInMap(pWho, DIST_START_EVENT, true))
             {
-                if (pOtherBunnyAI->CanStartWhatRabbitsDo())
+                if (npc_spring_rabbitAI* pOtherBunnyAI = GetPartnerAI((Creature*)pWho))
                 {
-                    StartWhatRabbitsDo((Creature*)pWho);
-                    pOtherBunnyAI->StartWhatRabbitsDo(m_creature);
+                    if (pOtherBunnyAI->CanStartWhatRabbitsDo())
+                    {
+                        StartWhatRabbitsDo((Creature*)pWho);
+                        pOtherBunnyAI->StartWhatRabbitsDo(m_creature);
+                    }
                 }
+                return;
             }
-            return;
+
+            ScriptedPetAI::MoveInLineOfSight(pWho);
         }
 
-        ScriptedPetAI::MoveInLineOfSight(pWho);
-    }
-
-    bool ReachedMeetingPlace()
-    {
-        if (m_uiStep == 3)                                  // Already there
+        bool ReachedMeetingPlace()
         {
-            m_uiStepTimer = 3000;
-            m_uiStep = 2;
-            return true;
-        }
-        else
-            return false;
-    }
-
-    void MovementInform(uint32 uiMovementType, uint32 uiData) override
-    {
-        if (uiMovementType != POINT_MOTION_TYPE || uiData != 1)
-            return;
-
-        if (!m_partnerGuid)
-            return;
-
-        m_uiStep = 3;
-        if (npc_spring_rabbitAI* pOtherBunnyAI = GetPartnerAI())
-        {
-            if (pOtherBunnyAI->ReachedMeetingPlace())
+            if (m_uiStep == 3)                                  // Already there
             {
-                m_creature->SetFacingTo(pOtherBunnyAI->m_creature->GetOrientation());
                 m_uiStepTimer = 3000;
+                m_uiStep = 2;
+                return true;
             }
             else
-                m_creature->SetFacingTo(m_fMoveAngle + M_PI_F * 0.5f);
+                return false;
         }
 
-        // m_creature->GetMotionMaster()->MoveRandom(); // does not move around current position, hence not usefull right now
-        m_creature->GetMotionMaster()->MoveIdle();
-    }
-
-    // Overwrite ScriptedPetAI::UpdateAI, to prevent re-following while the event is active!
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_partnerGuid || !m_uiStepTimer)
+        void MovementInform(uint32 uiMovementType, uint32 uiData) override
         {
-            ScriptedPetAI::UpdateAI(uiDiff);
-            return;
-        }
+            if (uiMovementType != POINT_MOTION_TYPE || uiData != 1)
+                return;
 
-        if (m_uiStep == 6)
-            ScriptedPetAI::UpdateAI(uiDiff);                // Event nearly finished, do normal following
+            if (!m_partnerGuid)
+                return;
 
-        if (m_uiStepTimer <= uiDiff)
-        {
-            switch (m_uiStep)
+            m_uiStep = 3;
+            if (npc_spring_rabbitAI* pOtherBunnyAI = GetPartnerAI())
             {
+                if (pOtherBunnyAI->ReachedMeetingPlace())
+                {
+                    m_creature->SetFacingTo(pOtherBunnyAI->m_creature->GetOrientation());
+                    m_uiStepTimer = 3000;
+                }
+                else
+                    m_creature->SetFacingTo(m_fMoveAngle + M_PI_F * 0.5f);
+            }
+
+            // m_creature->GetMotionMaster()->MoveRandom(); // does not move around current position, hence not usefull right now
+            m_creature->GetMotionMaster()->MoveIdle();
+        }
+
+        // Overwrite ScriptedPetAI::UpdateAI, to prevent re-following while the event is active!
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_partnerGuid || !m_uiStepTimer)
+            {
+                ScriptedPetAI::UpdateAI(uiDiff);
+                return;
+            }
+
+            if (m_uiStep == 6)
+                ScriptedPetAI::UpdateAI(uiDiff);                // Event nearly finished, do normal following
+
+            if (m_uiStepTimer <= uiDiff)
+            {
+                switch (m_uiStep)
+                {
                 case 1:                                     // Timer expired, before reached meeting point. Reset.
                     Reset();
                     break;
@@ -1429,17 +1437,18 @@ struct  npc_spring_rabbitAI : public ScriptedPetAI
                     m_creature->RemoveAurasDueToSpell(SPELL_SPRING_RABBIT_IN_LOVE);
                     Reset();
                     break;
+                }
             }
+            else
+                m_uiStepTimer -= uiDiff;
         }
-        else
-            m_uiStepTimer -= uiDiff;
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_spring_rabbitAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_spring_rabbit(Creature* pCreature)
-{
-    return new npc_spring_rabbitAI(pCreature);
-}
 
 /*######
 ## npc_redemption_target

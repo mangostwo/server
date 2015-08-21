@@ -57,37 +57,40 @@ static const DialogueEntry aIntroDialogue[] =
     {0, 0, 0},
 };
 
-struct  npc_valentine_boss_managerAI : public ScriptedAI, private DialogueHelper
+struct npc_valentine_boss_manager : public CreatureScript
 {
-    npc_valentine_boss_managerAI(Creature* pCreature) : ScriptedAI(pCreature),
+    npc_valentine_boss_manager() : CreatureScript("npc_valentine_boss_manager") {}
+
+    struct  npc_valentine_boss_managerAI : public ScriptedAI, private DialogueHelper
+    {
+        npc_valentine_boss_managerAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aIntroDialogue)
-    {
-        m_pInstance = (instance_shadowfang_keep*)pCreature->GetInstanceData();
-        InitializeDialogueHelper(m_pInstance);
-        Reset();
-    }
-
-    instance_shadowfang_keep* m_pInstance;
-
-    uint32 m_uiCrazedApothecaryTimer;
-
-    ObjectGuid m_EventStarterGuid;
-
-    void Reset() override
-    {
-        m_uiCrazedApothecaryTimer = 30000;
-    }
-
-    void JustDidDialogueStep(int32 iEntry) override
-    {
-        if (!m_pInstance)
-            return;
-
-        switch (iEntry)
         {
-            case NPC_HUMMEL:
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            InitializeDialogueHelper(m_pInstance);
+        }
+
+        ScriptedInstance* m_pInstance;
+
+        uint32 m_uiCrazedApothecaryTimer;
+
+        ObjectGuid m_EventStarterGuid;
+
+        void Reset() override
+        {
+            m_uiCrazedApothecaryTimer = 30000;
+        }
+
+        void JustDidDialogueStep(int32 iEntry) override
+        {
+            if (!m_pInstance)
+                return;
+
+            Creature* pHummel = m_pInstance->GetSingleCreatureFromStorage(NPC_HUMMEL);
+            switch (iEntry)
             {
-                if (Creature* pHummel = m_pInstance->GetSingleCreatureFromStorage(NPC_HUMMEL))
+            case NPC_HUMMEL:
+                if (pHummel)
                 {
                     // WARNING: workaround -> faction should be set on event start
                     pHummel->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
@@ -99,10 +102,7 @@ struct  npc_valentine_boss_managerAI : public ScriptedAI, private DialogueHelper
 
                 m_pInstance->SetData(TYPE_APOTHECARY, IN_PROGRESS);
                 break;
-            }
             case NPC_BAXTER:
-            {
-                Creature* pHummel = m_pInstance->GetSingleCreatureFromStorage(NPC_HUMMEL);
                 if (!pHummel)
                     return;
 
@@ -115,12 +115,9 @@ struct  npc_valentine_boss_managerAI : public ScriptedAI, private DialogueHelper
                     pBaxter->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_NON_ATTACKABLE);
                     if (pHummel->getVictim())
                         pBaxter->AI()->AttackStart(pHummel->getVictim());
-                }
                 break;
             }
             case NPC_FRYE:
-            {
-                Creature* pHummel = m_pInstance->GetSingleCreatureFromStorage(NPC_HUMMEL);
                 if (!pHummel)
                     return;
 
@@ -137,140 +134,155 @@ struct  npc_valentine_boss_managerAI : public ScriptedAI, private DialogueHelper
                 break;
             }
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NCP_CRAZED_APOTHECARY)
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NCP_CRAZED_APOTHECARY)
+            {
+                if (!m_pInstance)
+                    return;
+
+                // Make it attack a random Target
+                Creature* pBoss = m_pInstance->GetSingleCreatureFromStorage(NPC_HUMMEL);
+                if (!pBoss || !pBoss->IsAlive())
+                    pBoss = m_pInstance->GetSingleCreatureFromStorage(NPC_BAXTER);
+                if (!pBoss || !pBoss->IsAlive())
+                    pBoss = m_pInstance->GetSingleCreatureFromStorage(NPC_FRYE);
+                if (!pBoss || !pBoss->IsAlive())
+                    return;
+
+                // Attack a random target
+                if (Unit* pTarget = pBoss->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    pSummoned->AI()->AttackStart(pTarget);
+            }
+        }
+
+        void ReceiveAIEvent(AIEventType type, Creature* sender, Unit* invoker, uint32 /*data*/)
+        {
+            if (type == AI_EVENT_CUSTOM_A && invoker && sender == m_creature)
+                DoStartValentineEvent(invoker->GetObjectGuid());
+        }
+
+        // Wrapper to get the event started
+        void DoStartValentineEvent(ObjectGuid starterGuid)
         {
             if (!m_pInstance)
                 return;
 
-            // Make it attack a random Target
-            Creature* pBoss = m_pInstance->GetSingleCreatureFromStorage(NPC_HUMMEL);
-            if (!pBoss || !pBoss->IsAlive())
-                pBoss = m_pInstance->GetSingleCreatureFromStorage(NPC_BAXTER);
-            if (!pBoss || !pBoss->IsAlive())
-                pBoss = m_pInstance->GetSingleCreatureFromStorage(NPC_FRYE);
-            if (!pBoss || !pBoss->IsAlive())
+            m_EventStarterGuid = starterGuid;
+
+            if (Creature* pHummel = m_pInstance->GetSingleCreatureFromStorage(NPC_HUMMEL))
+            {
+                // I'm not sure if this unit flag should be used, but it's clear that the NPC shouldn't be attacked until the dialogue is finished
+                pHummel->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                // WARNING: workaround -> faction should be set here - FIX THIS after the aura bug in core is fixed
+                // pHummel->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
+            }
+
+            StartNextDialogueText(QUEST_BEEN_SERVED);
+
+            // Move Baxter to position
+            if (Creature* pBaxter = m_pInstance->GetSingleCreatureFromStorage(NPC_BAXTER))
+            {
+                pBaxter->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                // WARNING: workaround -> faction should be set here - FIX THIS after the aura bug in core is fixed
+                // pBaxter->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
+
+                if (GameObject* pVials = m_pInstance->GetSingleGameObjectFromStorage(GO_APOTHECARE_VIALS))
+                {
+                    float fX, fY, fZ;
+                    pVials->GetContactPoint(pBaxter, fX, fY, fZ, CONTACT_DISTANCE);
+                    pBaxter->SetWalk(false);
+                    pBaxter->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
+                }
+                else
+                    script_error_log("Gameobject %u couldn't be found or something really bad happened.", GO_APOTHECARE_VIALS);
+            }
+
+            // Move Frye to position
+            if (Creature* pFrye = m_pInstance->GetSingleCreatureFromStorage(NPC_FRYE))
+            {
+                pFrye->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                // WARNING: workaround -> faction should be set here - FIX THIS after the aura bug in core is fixed
+                // pFrye->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
+
+                if (GameObject* pChemistry = m_pInstance->GetSingleGameObjectFromStorage(GO_CHEMISTRY_SET))
+                {
+                    float fX, fY, fZ;
+                    pChemistry->GetContactPoint(pFrye, fX, fY, fZ, CONTACT_DISTANCE);
+                    pFrye->SetWalk(false);
+                    pFrye->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
+                }
+                else
+                    script_error_log("Gameobject %u couldn't be found or something really bad happened.", GO_CHEMISTRY_SET);
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            DialogueUpdate(uiDiff);
+
+            if (!m_pInstance)
                 return;
 
-            // Attack a random target
-            if (Unit* pTarget = pBoss->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                pSummoned->AI()->AttackStart(pTarget);
-        }
-    }
+            if (m_pInstance->GetData(TYPE_APOTHECARY) != IN_PROGRESS)
+                return;
 
-    // Wrapper to get the event started
-    void DoStartValentineEvent(ObjectGuid starterGuid)
-    {
-        if (!m_pInstance)
-            return;
-
-        m_EventStarterGuid = starterGuid;
-
-        if (Creature* pHummel = m_pInstance->GetSingleCreatureFromStorage(NPC_HUMMEL))
-        {
-            // I'm not sure if this unit flag should be used, but it's clear that the NPC shouldn't be attacked until the dialogue is finished
-            pHummel->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            // WARNING: workaround -> faction should be set here - FIX THIS after the aura bug in core is fixed
-            // pHummel->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
-        }
-
-        StartNextDialogueText(QUEST_BEEN_SERVED);
-
-        // Move Baxter to position
-        if (Creature* pBaxter = m_pInstance->GetSingleCreatureFromStorage(NPC_BAXTER))
-        {
-            pBaxter->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            // WARNING: workaround -> faction should be set here - FIX THIS after the aura bug in core is fixed
-            // pBaxter->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
-
-            if (GameObject* pVials = m_pInstance->GetSingleGameObjectFromStorage(GO_APOTHECARE_VIALS))
+            if (m_uiCrazedApothecaryTimer < uiDiff)
             {
-                float fX, fY, fZ;
-                pVials->GetContactPoint(pBaxter, fX, fY, fZ, CONTACT_DISTANCE);
-                pBaxter->SetWalk(false);
-                pBaxter->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
+                if (Creature* pGenerator = m_pInstance->GetSingleCreatureFromStorage(NPC_APOTHECARY_GENERATOR))
+                    pGenerator->CastSpell(pGenerator, SPELL_SUMMON_VALENTINE_ADD, true, NULL, NULL, m_creature->GetObjectGuid());
+
+                m_uiCrazedApothecaryTimer = 30000;
             }
             else
-                script_error_log("Gameobject %u couldn't be found or something really bad happened.", GO_APOTHECARE_VIALS);
+                m_uiCrazedApothecaryTimer -= uiDiff;
         }
+    };
 
-        // Move Frye to position
-        if (Creature* pFrye = m_pInstance->GetSingleCreatureFromStorage(NPC_FRYE))
-        {
-            pFrye->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            // WARNING: workaround -> faction should be set here - FIX THIS after the aura bug in core is fixed
-            // pFrye->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
-
-            if (GameObject* pChemistry = m_pInstance->GetSingleGameObjectFromStorage(GO_CHEMISTRY_SET))
-            {
-                float fX, fY, fZ;
-                pChemistry->GetContactPoint(pFrye, fX, fY, fZ, CONTACT_DISTANCE);
-                pFrye->SetWalk(false);
-                pFrye->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
-            }
-            else
-                script_error_log("Gameobject %u couldn't be found or something really bad happened.", GO_CHEMISTRY_SET);
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        DialogueUpdate(uiDiff);
-
-        if (!m_pInstance)
-            return;
-
-        if (m_pInstance->GetData(TYPE_APOTHECARY) != IN_PROGRESS)
-            return;
-
-        if (m_uiCrazedApothecaryTimer < uiDiff)
-        {
-            if (Creature* pGenerator = m_pInstance->GetSingleCreatureFromStorage(NPC_APOTHECARY_GENERATOR))
-                pGenerator->CastSpell(pGenerator, SPELL_SUMMON_VALENTINE_ADD, true, NULL, NULL, m_creature->GetObjectGuid());
-
-            m_uiCrazedApothecaryTimer = 30000;
-        }
-        else
-            m_uiCrazedApothecaryTimer -= uiDiff;
+        return new npc_valentine_boss_managerAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_npc_valentine_boss_manager(Creature* pCreature)
+struct npc_apothecary_hummel : public CreatureScript
 {
-    return new npc_valentine_boss_managerAI(pCreature);
-}
+    npc_apothecary_hummel() : CreatureScript("npc_apothecary_hummel") {}
 
-bool QuestRewarded_npc_apothecary_hummel(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_BEEN_SERVED)
+    bool OnQuestRewarded(Player* pPlayer, Creature* pCreature, Quest const* pQuest) override
     {
-        if (instance_shadowfang_keep* pInstance = (instance_shadowfang_keep*)pCreature->GetInstanceData())
+        if (pQuest->GetQuestId() == QUEST_BEEN_SERVED)
         {
-            if (Creature* pValentineMgr = pInstance->GetSingleCreatureFromStorage(NPC_VALENTINE_BOSS_MGR))
+            if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
             {
-                if (npc_valentine_boss_managerAI* pManagerAI = dynamic_cast<npc_valentine_boss_managerAI*>(pValentineMgr->AI()))
-                    pManagerAI->DoStartValentineEvent(pPlayer->GetObjectGuid());
+                if (Creature* pValentineMgr = pInstance->GetSingleCreatureFromStorage(NPC_VALENTINE_BOSS_MGR))
+                {
+                    if (CreatureAI* pManagerAI = pValentineMgr->AI())
+                        pManagerAI->SendAIEvent(AI_EVENT_CUSTOM_A, pPlayer, pValentineMgr);
+                }
             }
         }
-    }
 
-    return true;
-}
+        return true;
+    }
+};
 
 void AddSC_boss_hummel()
 {
-    Script* pNewScript;
+    Script* s;
+    s = new npc_valentine_boss_manager();
+    s->RegisterSelf();
+    s = new npc_apothecary_hummel();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_valentine_boss_manager";
-    pNewScript->GetAI = GetAI_npc_valentine_boss_manager;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_valentine_boss_manager";
+    //pNewScript->GetAI = GetAI_npc_valentine_boss_manager;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_apothecary_hummel";
-    pNewScript->pQuestRewardedNPC = &QuestRewarded_npc_apothecary_hummel;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_apothecary_hummel";
+    //pNewScript->pQuestRewardedNPC = &QuestRewarded_npc_apothecary_hummel;
+    //pNewScript->RegisterSelf();
 }

@@ -36,6 +36,10 @@ enum
     TYPE_EREDAR_TWINS           = 3,
     TYPE_MURU                   = 4,
     TYPE_KILJAEDEN              = 5,
+    TYPE_FELMYST_TRIGGER_RIGHT  = MAX_ENCOUNTER,
+    TYPE_FELMYST_TRIGGER_LEFT   = MAX_ENCOUNTER+1,
+    TYPE_FELMYST_TRIGGER        = MAX_ENCOUNTER+2,
+    TYPE_KALECGOS_EJECT_SPECTRAL= MAX_ENCOUNTER+3,
 
     NPC_KALECGOS_DRAGON         = 24850,            // kalecgos blue dragon hostile
     NPC_KALECGOS_HUMAN          = 24891,            // kalecgos human form in spectral realm
@@ -65,11 +69,11 @@ enum
     GO_BOSS_COLLISION_2         = 188524,
     GO_ICE_BARRIER              = 188119,           // used to block the players path during the Brutallus intro event
     GO_FIRE_BARRIER             = 188075,           // door after felmyst
-    //GO_FIRST_GATE               = 187766,           // door between felmyst and eredar twins
-    //GO_SECOND_GATE              = 187764,           // door after eredar twins
+    GO_FIRST_GATE               = 187766,           // door between felmyst and eredar twins
+    GO_SECOND_GATE              = 187764,           // door after eredar twins
     GO_MURU_ENTER_GATE          = 187990,           // muru gates
     GO_MURU_EXIT_GATE           = 188118,
-    //GO_THIRD_GATE               = 187765,           // door after muru; why another?
+    GO_THIRD_GATE               = 187765,           // door after muru; why another?
 
     GO_ORB_BLUE_FLIGHT_1        = 188115,           // orbs used in the Kil'jaeden fight
     GO_ORB_BLUE_FLIGHT_2        = 188116,
@@ -110,67 +114,7 @@ struct EventLocations
 static const EventLocations aMadrigosaLoc[] =
 {
     {1463.82f, 661.212f, 19.79f, 4.88f},            // reload spawn loc - the place where to spawn Felmyst
-    {1463.82f, 661.212f, 39.234f, 0}                // fly loc during the cinematig
+    {1463.82f, 661.212f, 39.234f},                  // fly loc during the cinematig
 };
 
-static const EventLocations aKalecLoc[] =
-{
-    {1573.146f, 755.2025f, 99.524f, 3.59f},         // spawn loc
-    {1474.235f, 624.0703f, 29.325f, 0},             // first move
-    {1511.655f, 550.7028f, 25.510f, 0},             // open door
-    {1648.255f, 519.377f, 165.848f, 0},             // fly away
-};
-
-static const float afMuruSpawnLoc[4] = { 1816.25f, 625.484f, 69.603f, 5.624f };
-
-class instance_sunwell_plateau : public ScriptedInstance, private DialogueHelper
-{
-    public:
-        instance_sunwell_plateau(Map* pMap);
-        ~instance_sunwell_plateau() {}
-
-        void Initialize() override;
-        bool IsEncounterInProgress() const override;
-
-        void OnPlayerEnter(Player* pPlayer) override;
-        void OnObjectCreate(GameObject* pGo) override;
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnCreatureDeath(Creature* pCreature) override;
-        void OnCreatureEvade(Creature* pCreature);
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        void Update(uint32 uiDiff) override;
-
-        ObjectGuid SelectFelmystFlightTrigger(bool bLeftSide, uint8 uiIndex);
-
-        void AddToSpectralRealm(ObjectGuid playerGuid) { m_spectralRealmPlayers.insert(playerGuid); }
-        void RemoveFromSpectralRealm(ObjectGuid playerGuid) { m_spectralRealmPlayers.erase(playerGuid); }
-        void DoEjectSpectralPlayers();
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-        void Load(const char* chrIn) override;
-
-    protected:
-        void JustDidDialogueStep(int32 iEntry) override;
-        void DoSortFlightTriggers();
-
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string m_strInstData;
-
-        // Misc
-        uint8 m_uiDeceiversKilled;
-        uint32 m_uiSpectralRealmTimer;
-        uint32 m_uiKalecRespawnTimer;
-        uint32 m_uiMuruBerserkTimer;
-        uint32 m_uiKiljaedenYellTimer;
-
-        GuidSet m_spectralRealmPlayers;
-        GuidVector m_vRightFlightTriggersVect;
-        GuidVector m_vLeftFlightTriggersVect;
-        GuidList m_lAllFlightTriggersList;
-        GuidList m_lBackdoorTriggersList;
-        GuidList m_lDeceiversGuidList;
-};
 #endif

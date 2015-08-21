@@ -57,26 +57,4 @@ enum
 
 static const uint32 aAdvisors[MAX_ADVISORS] = {NPC_CAPERNIAN, NPC_SANGUINAR, NPC_TELONICUS, NPC_THALADRED};
 
-class instance_the_eye : public ScriptedInstance
-{
-    public:
-        instance_the_eye(Map* pMap);
-
-        void Initialize() override;
-        bool IsEncounterInProgress() const override;
-
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        // No Save or Load needed to current knowledge
-
-    private:
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-
-        uint32 m_uiKaelthasEventPhase;
-};
-
 #endif

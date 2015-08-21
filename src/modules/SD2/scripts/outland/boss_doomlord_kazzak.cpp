@@ -58,169 +58,211 @@ enum
     SPELL_BERSERK                   = 32965,        // triggers 32963
 };
 
-struct boss_doomlordkazzakAI : public ScriptedAI
+struct boss_doomlordkazzak : public CreatureScript
 {
-    boss_doomlordkazzakAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    boss_doomlordkazzak() : CreatureScript("boss_doomlord_kazzak") {}
 
-    uint32 m_uiShadowVolleyTimer;
-    uint32 m_uiCleaveTimer;
-    uint32 m_uiThunderClapTimer;
-    uint32 m_uiVoidBoltTimer;
-    uint32 m_uiMarkOfKazzakTimer;
-    uint32 m_uiEnrageTimer;
-    uint32 m_uiGreatEnrageTimer;
-    uint32 m_uiTwistedReflectionTimer;
-
-    void Reset() override
+    struct boss_doomlordkazzakAI : public ScriptedAI
     {
-        m_uiShadowVolleyTimer       = urand(6000, 10000);
-        m_uiCleaveTimer             = 7000;
-        m_uiThunderClapTimer        = urand(14000, 18000);
-        m_uiVoidBoltTimer           = 30000;
-        m_uiMarkOfKazzakTimer       = 25000;
-        m_uiEnrageTimer             = 60000;
-        m_uiGreatEnrageTimer        = 3 * MINUTE * IN_MILLISECONDS;
-        m_uiTwistedReflectionTimer  = 33000;                // Timer may be incorrect
-    }
+        boss_doomlordkazzakAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-    void JustRespawned() override
-    {
-        DoScriptText(SAY_INTRO, m_creature);
-    }
+        uint32 m_uiShadowVolleyTimer;
+        uint32 m_uiCleaveTimer;
+        uint32 m_uiThunderClapTimer;
+        uint32 m_uiVoidBoltTimer;
+        uint32 m_uiMarkOfKazzakTimer;
+        uint32 m_uiEnrageTimer;
+        uint32 m_uiGreatEnrageTimer;
+        uint32 m_uiTwistedReflectionTimer;
 
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_AGGRO1 : SAY_AGGRO2, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_CAPTURE_SOUL, CAST_TRIGGERED);
-    }
-
-    void KilledUnit(Unit* pVictim) override
-    {
-        // When Kazzak kills a player (not pets/totems), he regens some health
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-        { return; }
-
-        switch (urand(0, 2))
+        void Reset() override
         {
+            m_uiShadowVolleyTimer = urand(6000, 10000);
+            m_uiCleaveTimer = 7000;
+            m_uiThunderClapTimer = urand(14000, 18000);
+            m_uiVoidBoltTimer = 30000;
+            m_uiMarkOfKazzakTimer = 25000;
+            m_uiEnrageTimer = 60000;
+            m_uiGreatEnrageTimer = 3 * MINUTE * IN_MILLISECONDS;
+            m_uiTwistedReflectionTimer = 33000;                // Timer may be incorrect
+        }
+
+        void JustRespawned() override
+        {
+            DoScriptText(SAY_INTRO, m_creature);
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(urand(0, 1) ? SAY_AGGRO1 : SAY_AGGRO2, m_creature);
+            DoCastSpellIfCan(m_creature, SPELL_CAPTURE_SOUL, CAST_TRIGGERED);
+        }
+
+        void KilledUnit(Unit* pVictim) override
+        {
+            // When Kazzak kills a player (not pets/totems), he regens some health
+            if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            {
+                return;
+            }
+
+            switch (urand(0, 2))
+            {
             case 0: DoScriptText(SAY_KILL1, m_creature); break;
             case 1: DoScriptText(SAY_KILL2, m_creature); break;
             case 2: DoScriptText(SAY_KILL3, m_creature); break;
-        }
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        // ShadowVolley_Timer
-        if (m_uiShadowVolleyTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_VOLLEY) == CAST_OK)
-            { m_uiShadowVolleyTimer = urand(10000, 30000); }
-        }
-        else
-        { m_uiShadowVolleyTimer -= uiDiff; }
-
-        // Cleave_Timer
-        if (m_uiCleaveTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
-            { m_uiCleaveTimer = urand(8000, 12000); }
-        }
-        else
-        { m_uiCleaveTimer -= uiDiff; }
-
-        // ThunderClap_Timer
-        if (m_uiThunderClapTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_THUNDERCLAP) == CAST_OK)
-            { m_uiThunderClapTimer = urand(10000, 14000); }
-        }
-        else
-        { m_uiThunderClapTimer -= uiDiff; }
-
-        // VoidBolt_Timer
-        if (m_uiVoidBoltTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_VOID_BOLT) == CAST_OK)
-                { m_uiVoidBoltTimer = urand(15000, 18000); }
             }
         }
-        else
-        { m_uiVoidBoltTimer -= uiDiff; }
 
-        // MarkOfKazzak_Timer
-        if (m_uiMarkOfKazzakTimer < uiDiff)
+        void JustDied(Unit* /*pKiller*/) override
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_MARK_OF_KAZZAK, SELECT_FLAG_POWER_MANA))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_MARK_OF_KAZZAK) == CAST_OK)
-                { m_uiMarkOfKazzakTimer = 20000; }
-            }
+            DoScriptText(SAY_DEATH, m_creature);
         }
-        else
-        { m_uiMarkOfKazzakTimer -= uiDiff; }
 
-        // Enrage_Timer
-        if (m_uiEnrageTimer < uiDiff)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
+            // Return since we have no target
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             {
-                DoScriptText(EMOTE_GENERIC_FRENZY, m_creature);
-                m_uiEnrageTimer = 60000;
+                return;
             }
-        }
-        else
-        { m_uiEnrageTimer -= uiDiff; }
 
-        // Great_Enrage_Timer
-        if (m_uiGreatEnrageTimer)
-        {
-            if (m_uiGreatEnrageTimer <= uiDiff)
+            // ShadowVolley_Timer
+            if (m_uiShadowVolleyTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                { m_uiGreatEnrageTimer = 0; }
+                if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_VOLLEY) == CAST_OK)
+                {
+                    m_uiShadowVolleyTimer = urand(10000, 30000);
+                }
             }
             else
-            { m_uiGreatEnrageTimer -= uiDiff; }
-        }
-
-        // Twisted Reflection
-        if (m_uiTwistedReflectionTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_TWISTED_REFLECTION) == CAST_OK)
-                { m_uiTwistedReflectionTimer = 15000; }
+                m_uiShadowVolleyTimer -= uiDiff;
             }
-        }
-        else
-        { m_uiTwistedReflectionTimer -= uiDiff; }
 
-        DoMeleeAttackIfReady();
+            // Cleave_Timer
+            if (m_uiCleaveTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                {
+                    m_uiCleaveTimer = urand(8000, 12000);
+                }
+            }
+            else
+            {
+                m_uiCleaveTimer -= uiDiff;
+            }
+
+            // ThunderClap_Timer
+            if (m_uiThunderClapTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_THUNDERCLAP) == CAST_OK)
+                {
+                    m_uiThunderClapTimer = urand(10000, 14000);
+                }
+            }
+            else
+            {
+                m_uiThunderClapTimer -= uiDiff;
+            }
+
+            // VoidBolt_Timer
+            if (m_uiVoidBoltTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_VOID_BOLT) == CAST_OK)
+                    {
+                        m_uiVoidBoltTimer = urand(15000, 18000);
+                    }
+                }
+            }
+            else
+            {
+                m_uiVoidBoltTimer -= uiDiff;
+            }
+
+            // MarkOfKazzak_Timer
+            if (m_uiMarkOfKazzakTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_MARK_OF_KAZZAK, SELECT_FLAG_POWER_MANA))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_MARK_OF_KAZZAK) == CAST_OK)
+                    {
+                        m_uiMarkOfKazzakTimer = 20000;
+                    }
+                }
+            }
+            else
+            {
+                m_uiMarkOfKazzakTimer -= uiDiff;
+            }
+
+            // Enrage_Timer
+            if (m_uiEnrageTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_GENERIC_FRENZY, m_creature);
+                    m_uiEnrageTimer = 60000;
+                }
+            }
+            else
+            {
+                m_uiEnrageTimer -= uiDiff;
+            }
+
+            // Great_Enrage_Timer
+            if (m_uiGreatEnrageTimer)
+            {
+                if (m_uiGreatEnrageTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                    {
+                        m_uiGreatEnrageTimer = 0;
+                    }
+                }
+                else
+                {
+                    m_uiGreatEnrageTimer -= uiDiff;
+                }
+            }
+
+            // Twisted Reflection
+            if (m_uiTwistedReflectionTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_TWISTED_REFLECTION) == CAST_OK)
+                    {
+                        m_uiTwistedReflectionTimer = 15000;
+                    }
+                }
+            }
+            else
+            {
+                m_uiTwistedReflectionTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_doomlordkazzakAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_doomlordkazzak(Creature* pCreature)
-{
-    return new boss_doomlordkazzakAI(pCreature);
-}
-
 void AddSC_boss_doomlordkazzak()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_doomlord_kazzak";
-    pNewScript->GetAI = &GetAI_boss_doomlordkazzak;
-    pNewScript->RegisterSelf();
+    s = new boss_doomlordkazzak();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_doomlord_kazzak";
+    //pNewScript->GetAI = &GetAI_boss_doomlordkazzak;
+    //pNewScript->RegisterSelf();
 }

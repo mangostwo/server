@@ -73,6 +73,7 @@ enum
     GO_RUNE_THERI               = 176954,                   // Golemagg
     GO_RUNE_KORO                = 176951,                   // Sulfuron
 
+    MAX_MOLTEN_RUNES            = 7,
     MAX_MAJORDOMO_ADDS          = 8,
     FACTION_MAJORDOMO_FRIENDLY  = 1080,
     SAY_MAJORDOMO_SPAWN         = -1409004,
@@ -87,33 +88,7 @@ struct sSpawnLocation
 static sSpawnLocation m_aMajordomoLocations[2] =
 {
     {NPC_MAJORDOMO, 758.089f, -1176.71f, -118.640f, 3.12414f},  // Summon fight position
-    {NPC_MAJORDOMO, 847.103f, -816.153f, -229.775f, 4.344f}     // Summon and teleport location (near Ragnaros)
-};
-
-class instance_molten_core : public ScriptedInstance
-{
-    public:
-        instance_molten_core(Map* pMap);
-        ~instance_molten_core() {}
-
-        void Initialize() override;
-        bool IsEncounterInProgress() const override;
-
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-        void OnPlayerEnter(Player* pPlayer) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-        void Load(const char* chrIn) override;
-
-    protected:
-        void DoSpawnMajordomoIfCan(bool bByPlayerEnter);
-
-        std::string m_strInstData;
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
+    {NPC_MAJORDOMO, 847.103f, -816.153f, -229.775f, 4.344f} // Summon and teleport location (near Ragnaros)
 };
 
 #endif

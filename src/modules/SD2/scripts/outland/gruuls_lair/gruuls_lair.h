@@ -46,28 +46,4 @@ enum
     // NPC_OLM                       = 18834,
 };
 
-class instance_gruuls_lair : public ScriptedInstance
-{
-    public:
-        instance_gruuls_lair(Map* pMap);
-
-        void Initialize() override;
-        bool IsEncounterInProgress() const override;
-
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        const char* Save() const override { return m_strSaveData.c_str(); }
-        void Load(const char* chrIn) override;
-
-    private:
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string m_strSaveData;
-
-        uint8 m_uiCouncilMembersDied;
-};
-
 #endif

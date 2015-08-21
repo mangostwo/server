@@ -56,71 +56,85 @@ enum
     POINT_ID                = 1
 };
 
-struct npc_kyle_the_frenziedAI : public ScriptedAI
+struct npc_kyle_the_frenzied : public CreatureScript
 {
-    npc_kyle_the_frenziedAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
+    npc_kyle_the_frenzied() : CreatureScript("npc_kyle_the_frenzied") {}
 
-    bool m_bEvent;
-    bool m_bIsMovingToLunch;
-    ObjectGuid m_playerGuid;
-    uint32 m_uiEventTimer;
-    uint8 m_uiEventPhase;
-
-    void Reset() override
+    struct npc_kyle_the_frenziedAI : public ScriptedAI
     {
-        m_bEvent = false;
-        m_bIsMovingToLunch = false;
-        m_playerGuid.Clear();
-        m_uiEventTimer = 5000;
-        m_uiEventPhase = 0;
+        npc_kyle_the_frenziedAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-        if (m_creature->GetEntry() == NPC_KYLE_FRIENDLY)
-        { m_creature->UpdateEntry(NPC_KYLE_FRENZIED); }
-    }
+        bool m_bEvent;
+        bool m_bIsMovingToLunch;
+        ObjectGuid m_playerGuid;
+        uint32 m_uiEventTimer;
+        uint8 m_uiEventPhase;
 
-    void SpellHit(Unit* pCaster, SpellEntry const* pSpell) override
-    {
-        if (!m_creature->getVictim() && !m_bEvent && pSpell->Id == SPELL_LUNCH)
+        void Reset() override
         {
-            if (pCaster->GetTypeId() == TYPEID_PLAYER)
-            { m_playerGuid = pCaster->GetObjectGuid(); }
+            m_bEvent = false;
+            m_bIsMovingToLunch = false;
+            m_playerGuid.Clear();
+            m_uiEventTimer = 5000;
+            m_uiEventPhase = 0;
 
-            if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+            if (m_creature->GetEntry() == NPC_KYLE_FRIENDLY)
             {
-                m_creature->GetMotionMaster()->MovementExpired();
-                m_creature->GetMotionMaster()->MoveIdle();
-                m_creature->StopMoving();
+                m_creature->UpdateEntry(NPC_KYLE_FRENZIED);
+            }
+        }
+
+        void SpellHit(Unit* pCaster, SpellEntry const* pSpell) override
+        {
+            if (!m_creature->getVictim() && !m_bEvent && pSpell->Id == SPELL_LUNCH)
+            {
+                if (pCaster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    m_playerGuid = pCaster->GetObjectGuid();
+                }
+
+                if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+                {
+                    m_creature->GetMotionMaster()->MovementExpired();
+                    m_creature->GetMotionMaster()->MoveIdle();
+                    m_creature->StopMoving();
+                }
+
+                m_bEvent = true;
+                DoScriptText(EMOTE_SEE_LUNCH, m_creature);
+                m_creature->HandleEmote(EMOTE_ONESHOT_CREATURE_SPECIAL);
+            }
+        }
+
+        void MovementInform(uint32 uiType, uint32 uiPointId) override
+        {
+            if (uiType != POINT_MOTION_TYPE || !m_bEvent)
+            {
+                return;
             }
 
-            m_bEvent = true;
-            DoScriptText(EMOTE_SEE_LUNCH, m_creature);
-            m_creature->HandleEmote(EMOTE_ONESHOT_CREATURE_SPECIAL);
-        }
-    }
-
-    void MovementInform(uint32 uiType, uint32 uiPointId) override
-    {
-        if (uiType != POINT_MOTION_TYPE || !m_bEvent)
-        { return; }
-
-        if (uiPointId == POINT_ID)
-        { m_bIsMovingToLunch = false; }
-    }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        if (m_bEvent)
-        {
-            if (m_bIsMovingToLunch)
-            { return; }
-
-            if (m_uiEventTimer < diff)
+            if (uiPointId == POINT_ID)
             {
-                m_uiEventTimer = 5000;
-                ++m_uiEventPhase;
+                m_bIsMovingToLunch = false;
+            }
+        }
 
-                switch (m_uiEventPhase)
+        void UpdateAI(const uint32 diff) override
+        {
+            if (m_bEvent)
+            {
+                if (m_bIsMovingToLunch)
                 {
+                    return;
+                }
+
+                if (m_uiEventTimer < diff)
+                {
+                    m_uiEventTimer = 5000;
+                    ++m_uiEventPhase;
+
+                    switch (m_uiEventPhase)
+                    {
                     case 1:
                         if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
                         {
@@ -153,7 +167,9 @@ struct npc_kyle_the_frenziedAI : public ScriptedAI
                         break;
                     case 3:
                         if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
-                        { pPlayer->TalkedToCreature(m_creature->GetEntry(), m_creature->GetObjectGuid()); }
+                        {
+                            pPlayer->TalkedToCreature(m_creature->GetEntry(), m_creature->GetObjectGuid());
+                        }
 
                         m_creature->UpdateEntry(NPC_KYLE_FRIENDLY);
                         break;
@@ -167,25 +183,31 @@ struct npc_kyle_the_frenziedAI : public ScriptedAI
                         Reset();
                         m_creature->GetMotionMaster()->Clear();
                         break;
+                    }
+                }
+                else
+                {
+                    m_uiEventTimer -= diff;
                 }
             }
-            else
-            { m_uiEventTimer -= diff; }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_kyle_the_frenziedAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_npc_kyle_the_frenzied(Creature* pCreature)
-{
-    return new npc_kyle_the_frenziedAI(pCreature);
-}
-
 void AddSC_mulgore()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_kyle_the_frenzied";
-    pNewScript->GetAI = &GetAI_npc_kyle_the_frenzied;
-    pNewScript->RegisterSelf();
+    s = new npc_kyle_the_frenzied();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_kyle_the_frenzied";
+    //pNewScript->GetAI = &GetAI_npc_kyle_the_frenzied;
+    //pNewScript->RegisterSelf();
 }

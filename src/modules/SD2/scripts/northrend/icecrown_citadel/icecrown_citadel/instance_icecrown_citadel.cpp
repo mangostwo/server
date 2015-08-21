@@ -59,10 +59,19 @@ static const DialogueEntry aCitadelDialogue[] =
     {0, 0, 0},
 };
 
-static bool sortFromNorthToSouth(Creature* pFirst, Creature* pSecond)
+struct sortFromNorthToSouth
 {
-    return pFirst && pSecond && pFirst->GetPositionX() < pSecond->GetPositionX();
-}
+    sortFromNorthToSouth(Map *pMap) : _map(pMap) {}
+
+    bool operator()(ObjectGuid uiLeft, ObjectGuid uiRight)
+    {
+        Unit *pFirst = _map->GetUnit(uiLeft);
+        Unit *pSecond = _map->GetUnit(uiRight);
+        return pFirst && pSecond && pFirst->GetPositionX() < pSecond->GetPositionX();
+    }
+private:
+    Map *_map;
+};
 
 static const uint32 aLeftSummonedCultists[3] = { NPC_CULT_ADHERENT, NPC_CULT_FANATIC, NPC_CULT_ADHERENT };
 static const uint32 aRightSummonedCultists[3] = { NPC_CULT_FANATIC, NPC_CULT_ADHERENT, NPC_CULT_FANATIC };
@@ -294,8 +303,8 @@ struct is_icecrown_citadel : public InstanceScript
                 DoUseDoorOrButton(GO_ORATORY_DOOR);
                 if (uiData == IN_PROGRESS)
                 {
-                    m_lRightStalkers.sort(sortFromNorthToSouth);
-                    m_lLeftStalkers.sort(sortFromNorthToSouth);
+                    m_lRightStalkers.sort(sortFromNorthToSouth(instance));
+                    m_lLeftStalkers.sort(sortFromNorthToSouth(instance));
                 }
                 // ToDo: set the elevateor in motion when TYPE_LADY_DEATHWHISPER == DONE
                 break;

@@ -629,42 +629,78 @@ struct spell_melodious_rapture : public SpellScript
         return true;
     }
 };
-        case SPELL_THROW_ICE:
+
+struct spell_throw_ice : public SpellScript
+{
+    spell_throw_ice() : SpellScript("spell_throw_ice") {}
+
+    bool EffectDummy(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Object* pTarget, ObjectGuid /*originalCasterGuid*/) override
+    {
+        if (uiEffIndex == EFFECT_INDEX_0)
         {
-            if (uiEffIndex == EFFECT_INDEX_0)
+            Creature *pCreatureTarget = pTarget->ToCreature();
+            if (pCreatureTarget->GetEntry() != NPC_SMOLDERING_SCRAP_BUNNY)
+                return true;
+
+            if (GameObject* pScrap = GetClosestGameObjectWithEntry(pCreatureTarget, GO_SMOLDERING_SCRAP, 5.0f))
             {
-                if (pCreatureTarget->GetEntry() != NPC_SMOLDERING_SCRAP_BUNNY)
+                if (pScrap->GetRespawnTime() != 0)
                     return true;
 
-                if (GameObject* pScrap = GetClosestGameObjectWithEntry(pCreatureTarget, GO_SMOLDERING_SCRAP, 5.0f))
-                {
-                    if (pScrap->GetRespawnTime() != 0)
-                        return true;
-
-                    pCreatureTarget->CastSpell(pCreatureTarget, SPELL_FROZEN_IRON_SCRAP, true);
-                    pScrap->SetLootState(GO_JUST_DEACTIVATED);
-                    pCreatureTarget->ForcedDespawn(1000);
-                }
+                pCreatureTarget->CastSpell(pCreatureTarget, SPELL_FROZEN_IRON_SCRAP, true);
+                pScrap->SetLootState(GO_JUST_DEACTIVATED);
+                pCreatureTarget->ForcedDespawn(1000);
             }
-            return true;
         }
+        return true;
     }
+};
 
-    return false;
-}
 
 void AddSC_spell_scripts()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "spell_dummy_go";
-    pNewScript->pEffectDummyGO = &EffectDummyGameObj_spell_dummy_go;
-    pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "spell_dummy_npc";
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_dummy_npc;
-    pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_npc;
-    pNewScript->RegisterSelf();
+    s = new spell_cast_fishing_net();
+    s->RegisterSelf();
+    s = new aura_spirit_particles();
+    s->RegisterSelf();
+    s = new aura_healing_salve();
+    s->RegisterSelf();
+    s = new aura_healing_salve_dummy();
+    s->RegisterSelf();
+    s = new aura_recharging_battery();
+    s->RegisterSelf();
+    s = new aura_tag_murloc();
+    s->RegisterSelf();
+    s = new aura_enrage_45111();
+    s->RegisterSelf();
+    s = new aura_photovoltaic_magneto_collector();
+    s->RegisterSelf();
+    s = new spell_apply_salve();
+    s->RegisterSelf();
+    s = new spell_sacred_cleansing();
+    s->RegisterSelf();
+    s = new spell_melodious_rapture();
+    s->RegisterSelf();
+    s = new spell_throw_ice();
+    s->RegisterSelf();
+
+    //s = new spell_administer_antidote();
+    //s->RegisterSelf();
+    //s = new spell_inoculate_owlkin();
+    //s->RegisterSelf();
+    //s = new spell_fel_siphon_dummy();
+    //s->RegisterSelf();
+    //s = new spell_tag_murloc_proc();
+    //s->RegisterSelf();
+    //s = new spell_orb_of_murloc_control();
+    //s->RegisterSelf();
+    //s = new spell_fumping();
+    //s->RegisterSelf();
+    //s = new spell_throw_gordawg_boulder();
+    //s->RegisterSelf();
+    //s = new spell_expose_rathorthorn_root();
+    //s->RegisterSelf();
 }

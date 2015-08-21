@@ -41,28 +41,4 @@ enum
     GO_FEL_IRON_CHEST_H         = 185169,
 };
 
-class instance_ramparts : public ScriptedInstance
-{
-    public:
-        instance_ramparts(Map* pMap);
-
-        void Initialize() override;
-
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        // No need to save and load this instance (only one encounter needs special handling, no doors used)
-
-    private:
-        void DoFailVazruden();
-
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-
-        uint32 m_uiSentryCounter;
-        GuidList m_lSentryGUIDs;
-};
-
 #endif

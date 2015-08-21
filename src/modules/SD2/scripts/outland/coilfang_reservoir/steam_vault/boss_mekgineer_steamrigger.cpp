@@ -76,225 +76,274 @@ static const SummonLocation aSteamriggerSpawnLocs[] =
     { -331.161f, -112.212f, -7.66f},
 };
 
-struct boss_mekgineer_steamriggerAI : public ScriptedAI
+struct boss_mekgineer_steamrigger : public CreatureScript
 {
-    boss_mekgineer_steamriggerAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_mekgineer_steamrigger() : CreatureScript("boss_mekgineer_steamrigger") {}
+
+    struct boss_mekgineer_steamriggerAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiShrinkTimer;
-    uint32 m_uiSawBladeTimer;
-    uint32 m_uiElectrifiedNetTimer;
-    uint32 m_uiMechanicTimer;
-    uint8 m_uiMechanicPhaseCount;
-
-    void Reset() override
-    {
-        m_uiShrinkTimer         = 20000;
-        m_uiSawBladeTimer       = 15000;
-        m_uiElectrifiedNetTimer = 10000;
-        m_uiMechanicTimer       = 20000;
-        m_uiMechanicPhaseCount  = 1;
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_MEKGINEER_STEAMRIGGER, FAIL); }
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_MEKGINEER_STEAMRIGGER, DONE); }
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        switch (urand(0, 2))
+        boss_mekgineer_steamriggerAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        }
+
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        uint32 m_uiShrinkTimer;
+        uint32 m_uiSawBladeTimer;
+        uint32 m_uiElectrifiedNetTimer;
+        uint32 m_uiMechanicTimer;
+        uint8 m_uiMechanicPhaseCount;
+
+        void Reset() override
+        {
+            m_uiShrinkTimer = 20000;
+            m_uiSawBladeTimer = 15000;
+            m_uiElectrifiedNetTimer = 10000;
+            m_uiMechanicTimer = 20000;
+            m_uiMechanicPhaseCount = 1;
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_MEKGINEER_STEAMRIGGER, FAIL);
+            }
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(SAY_DEATH, m_creature);
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_MEKGINEER_STEAMRIGGER, DONE);
+            }
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            switch (urand(0, 2))
+            {
             case 0: DoScriptText(SAY_SLAY_1, m_creature); break;
             case 1: DoScriptText(SAY_SLAY_2, m_creature); break;
             case 2: DoScriptText(SAY_SLAY_3, m_creature); break;
+            }
         }
-    }
 
-    void Aggro(Unit* /*pWho*/) override
-    {
-        switch (urand(0, 2))
+        void Aggro(Unit* /*pWho*/) override
         {
+            switch (urand(0, 2))
+            {
             case 0: DoScriptText(SAY_AGGRO_1, m_creature); break;
             case 1: DoScriptText(SAY_AGGRO_2, m_creature); break;
             case 2: DoScriptText(SAY_AGGRO_3, m_creature); break;
-        }
+            }
 
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_MEKGINEER_STEAMRIGGER, IN_PROGRESS); }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_STEAMRIGGER_MECHANIC)
-        { pSummoned->GetMotionMaster()->MoveFollow(m_creature, 0, 0); }
-    }
-
-    // Wrapper to summon three Mechanics
-    void SummonMechanichs()
-    {
-        DoScriptText(SAY_MECHANICS, m_creature);
-
-        for (uint8 i = 0; i < 3; ++i)
-        { m_creature->SummonCreature(NPC_STEAMRIGGER_MECHANIC, aSteamriggerSpawnLocs[i].m_fX, aSteamriggerSpawnLocs[i].m_fY, aSteamriggerSpawnLocs[i].m_fZ, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 240000); }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiShrinkTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SUPER_SHRINK_RAY) == CAST_OK)
-            { m_uiShrinkTimer = 20000; }
-        }
-        else
-        { m_uiShrinkTimer -= uiDiff; }
-
-        if (m_uiSawBladeTimer < uiDiff)
-        {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
-            if (!pTarget)
-            { pTarget = m_creature->getVictim(); }
-
-            if (pTarget)
+            if (m_pInstance)
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_SAW_BLADE) == CAST_OK)
-                { m_uiSawBladeTimer = 15000; }
+                m_pInstance->SetData(TYPE_MEKGINEER_STEAMRIGGER, IN_PROGRESS);
             }
         }
-        else
-        { m_uiSawBladeTimer -= uiDiff; }
 
-        if (m_uiElectrifiedNetTimer < uiDiff)
+        void JustSummoned(Creature* pSummoned) override
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (pSummoned->GetEntry() == NPC_STEAMRIGGER_MECHANIC)
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_ELECTRIFIED_NET) == CAST_OK)
-                { m_uiElectrifiedNetTimer = 10000; }
+                pSummoned->GetMotionMaster()->MoveFollow(m_creature, 0, 0);
             }
         }
-        else
-        { m_uiElectrifiedNetTimer -= uiDiff; }
 
-        // On Heroic mode summon a mechanic at each 20 secs
-        if (!m_bIsRegularMode)
+        // Wrapper to summon three Mechanics
+        void SummonMechanichs()
         {
-            if (m_uiMechanicTimer < uiDiff)
+            DoScriptText(SAY_MECHANICS, m_creature);
+
+            for (uint8 i = 0; i < 3; ++i)
             {
-                m_creature->SummonCreature(NPC_STEAMRIGGER_MECHANIC, aSteamriggerSpawnLocs[2].m_fX, aSteamriggerSpawnLocs[2].m_fY, aSteamriggerSpawnLocs[2].m_fZ, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 240000);
-                m_uiMechanicTimer = 20000;
+                m_creature->SummonCreature(NPC_STEAMRIGGER_MECHANIC, aSteamriggerSpawnLocs[i].m_fX, aSteamriggerSpawnLocs[i].m_fY, aSteamriggerSpawnLocs[i].m_fZ, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 240000);
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_uiShrinkTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_SUPER_SHRINK_RAY) == CAST_OK)
+                {
+                    m_uiShrinkTimer = 20000;
+                }
             }
             else
-            { m_uiMechanicTimer -= uiDiff; }
-        }
+            {
+                m_uiShrinkTimer -= uiDiff;
+            }
 
-        if (m_creature->GetHealthPercent() < (100 - 25 * m_uiMechanicPhaseCount))
-        {
-            SummonMechanichs();
-            ++m_uiMechanicPhaseCount;
-        }
+            if (m_uiSawBladeTimer < uiDiff)
+            {
+                Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
+                if (!pTarget)
+                {
+                    pTarget = m_creature->getVictim();
+                }
 
-        DoMeleeAttackIfReady();
+                if (pTarget)
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_SAW_BLADE) == CAST_OK)
+                    {
+                        m_uiSawBladeTimer = 15000;
+                    }
+                }
+            }
+            else
+            {
+                m_uiSawBladeTimer -= uiDiff;
+            }
+
+            if (m_uiElectrifiedNetTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_ELECTRIFIED_NET) == CAST_OK)
+                    {
+                        m_uiElectrifiedNetTimer = 10000;
+                    }
+                }
+            }
+            else
+            {
+                m_uiElectrifiedNetTimer -= uiDiff;
+            }
+
+            // On Heroic mode summon a mechanic at each 20 secs
+            if (!m_bIsRegularMode)
+            {
+                if (m_uiMechanicTimer < uiDiff)
+                {
+                    m_creature->SummonCreature(NPC_STEAMRIGGER_MECHANIC, aSteamriggerSpawnLocs[2].m_fX, aSteamriggerSpawnLocs[2].m_fY, aSteamriggerSpawnLocs[2].m_fZ, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 240000);
+                    m_uiMechanicTimer = 20000;
+                }
+                else
+                {
+                    m_uiMechanicTimer -= uiDiff;
+                }
+            }
+
+            if (m_creature->GetHealthPercent() < (100 - 25 * m_uiMechanicPhaseCount))
+            {
+                SummonMechanichs();
+                ++m_uiMechanicPhaseCount;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_mekgineer_steamriggerAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_mekgineer_steamrigger(Creature* pCreature)
+struct mob_steamrigger_mechanic : public CreatureScript
 {
-    return new boss_mekgineer_steamriggerAI(pCreature);
-}
+    mob_steamrigger_mechanic() : CreatureScript("mob_steamrigger_mechanic") {}
 
-struct mob_steamrigger_mechanicAI : public ScriptedAI
-{
-    mob_steamrigger_mechanicAI(Creature* pCreature) : ScriptedAI(pCreature)
+    struct mob_steamrigger_mechanicAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
-
-    bool m_bCanStartAttack;
-
-    void Reset() override
-    {
-        m_bCanStartAttack = false;
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        // Trigger attack only for players
-        if (pWho->GetTypeId() != TYPEID_PLAYER)
-        { return; }
-
-        m_creature->InterruptNonMeleeSpells(false);
-        ScriptedAI::AttackStart(pWho);
-        m_bCanStartAttack = true;
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        // Return if already in combat
-        if (m_bCanStartAttack)
-        { return; }
-
-        // Don't attack players unless attacked
-        if (pWho->GetEntry() == NPC_STEAMRIGGER)
+        mob_steamrigger_mechanicAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (m_pInstance->GetData(TYPE_MEKGINEER_STEAMRIGGER) == IN_PROGRESS)
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        }
+
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        bool m_bCanStartAttack;
+
+        void Reset() override
+        {
+            m_bCanStartAttack = false;
+        }
+
+        void AttackStart(Unit* pWho) override
+        {
+            // Trigger attack only for players
+            if (pWho->GetTypeId() != TYPEID_PLAYER)
             {
-                // Channel the repair spell on Steamrigger
-                // This will also stop creature movement and will allow them to continue to follow the boss after channeling is finished or the boss is out of range
-                if (m_creature->IsWithinDistInMap(pWho, 2 * INTERACTION_DISTANCE))
-                { DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_REPAIR : SPELL_REPAIR_H); }
+                return;
+            }
+
+            m_creature->InterruptNonMeleeSpells(false);
+            ScriptedAI::AttackStart(pWho);
+            m_bCanStartAttack = true;
+        }
+
+        void MoveInLineOfSight(Unit* pWho) override
+        {
+            // Return if already in combat
+            if (m_bCanStartAttack)
+            {
+                return;
+            }
+
+            // Don't attack players unless attacked
+            if (pWho->GetEntry() == NPC_STEAMRIGGER)
+            {
+                if (m_pInstance->GetData(TYPE_MEKGINEER_STEAMRIGGER) == IN_PROGRESS)
+                {
+                    // Channel the repair spell on Steamrigger
+                    // This will also stop creature movement and will allow them to continue to follow the boss after channeling is finished or the boss is out of range
+                    if (m_creature->IsWithinDistInMap(pWho, 2 * INTERACTION_DISTANCE))
+                    {
+                        DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_REPAIR : SPELL_REPAIR_H);
+                    }
+                }
             }
         }
-    }
 
-    void UpdateAI(const uint32 /*uiDiff*/) override
+        void UpdateAI(const uint32 /*uiDiff*/) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        DoMeleeAttackIfReady();
+        return new mob_steamrigger_mechanicAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_mob_steamrigger_mechanic(Creature* pCreature)
-{
-    return new mob_steamrigger_mechanicAI(pCreature);
-}
 
 void AddSC_boss_mekgineer_steamrigger()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_mekgineer_steamrigger";
-    pNewScript->GetAI = &GetAI_boss_mekgineer_steamrigger;
-    pNewScript->RegisterSelf();
+    s = new boss_mekgineer_steamrigger();
+    s->RegisterSelf();
+    s = new mob_steamrigger_mechanic();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "mob_steamrigger_mechanic";
-    pNewScript->GetAI = &GetAI_mob_steamrigger_mechanic;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_mekgineer_steamrigger";
+    //pNewScript->GetAI = &GetAI_boss_mekgineer_steamrigger;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "mob_steamrigger_mechanic";
+    //pNewScript->GetAI = &GetAI_mob_steamrigger_mechanic;
+    //pNewScript->RegisterSelf();
 }

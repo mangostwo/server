@@ -72,190 +72,225 @@ static const DialogueEntry aIntroDialogue[] =
     {0, 0, 0},
 };
 
-struct boss_soccothratesAI : public ScriptedAI, private DialogueHelper
+struct boss_soccothrates : public CreatureScript
 {
-    boss_soccothratesAI(Creature* pCreature) : ScriptedAI(pCreature),
+    boss_soccothrates() : CreatureScript("boss_soccothrates") {}
+
+    struct boss_soccothratesAI : public ScriptedAI, private DialogueHelper
+    {
+        boss_soccothratesAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aIntroDialogue)
-    {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        InitializeDialogueHelper(m_pInstance);
-        m_bHasYelledIntro = false;
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiKnockAwayTimer;
-    uint32 m_uiFelfireShockTimer;
-    uint32 m_uiFelfireLineupTimer;
-    uint32 m_uiChargeTimer;
-
-    bool m_bHasYelledIntro;
-
-    void Reset() override
-    {
-        m_uiFelfireShockTimer   = urand(10000, 13000);
-        m_uiKnockAwayTimer      = urand(22000, 25000);
-        m_uiFelfireLineupTimer  = 0;
-        m_uiChargeTimer         = 0;
-
-        DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_IMMOLATION : SPELL_IMMOLATION_H);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_SOCCOTHRATES, IN_PROGRESS); }
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (!m_bHasYelledIntro && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 75.0f) && m_creature->IsWithinLOSInMap(pWho))
         {
-            StartNextDialogueText(SAY_SOCCOTHRATES_INTRO_1);
-            m_bHasYelledIntro = true;
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+            InitializeDialogueHelper(m_pInstance);
+            m_bHasYelledIntro = false;
         }
 
-        ScriptedAI::MoveInLineOfSight(pWho);
-    }
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
 
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(SAY_KILL, m_creature);
-    }
+        uint32 m_uiKnockAwayTimer;
+        uint32 m_uiFelfireShockTimer;
+        uint32 m_uiFelfireLineupTimer;
+        uint32 m_uiChargeTimer;
 
-    void JustDied(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
+        bool m_bHasYelledIntro;
 
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_SOCCOTHRATES, DONE); }
-    }
-
-    void EnterEvadeMode() override
-    {
-        m_creature->RemoveAllAurasOnEvade();
-        m_creature->DeleteThreatList();
-        m_creature->CombatStop(true);
-        m_creature->LoadCreatureAddon(true);
-
-        // should evade to the attack position
-        if (m_creature->IsAlive())
-        { m_creature->GetMotionMaster()->MovePoint(1, aSoccotharesStartPos[0], aSoccotharesStartPos[1], aSoccotharesStartPos[2]); }
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_SOCCOTHRATES, FAIL); }
-
-        m_creature->SetLootRecipient(NULL);
-
-        Reset();
-    }
-
-    void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
-    {
-        if (uiMoveType != POINT_MOTION_TYPE)
-        { return; }
-
-        // Adjust orientation
-        if (uiPointId)
-        { m_creature->SetFacingTo(aSoccotharesStartPos[3]); }
-    }
-
-    void JustDidDialogueStep(int32 iEntry) override
-    {
-        // Move each of them to their places
-        if (iEntry == SAY_SOCCOTHRATES_INTRO_7)
+        void Reset() override
         {
-            m_creature->GetMotionMaster()->MovePoint(1, aSoccotharesStartPos[0], aSoccotharesStartPos[1], aSoccotharesStartPos[2]);
+            m_uiFelfireShockTimer = urand(10000, 13000);
+            m_uiKnockAwayTimer = urand(22000, 25000);
+            m_uiFelfireLineupTimer = 0;
+            m_uiChargeTimer = 0;
+
+            DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_IMMOLATION : SPELL_IMMOLATION_H);
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
 
             if (m_pInstance)
             {
-                if (Creature* pDalliah = m_pInstance->GetSingleCreatureFromStorage(NPC_DALLIAH))
-                { pDalliah->GetMotionMaster()->MovePoint(1, aDalliahStartPos[0], aDalliahStartPos[1], aDalliahStartPos[2]); }
+                m_pInstance->SetData(TYPE_SOCCOTHRATES, IN_PROGRESS);
             }
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        DialogueUpdate(uiDiff);
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiFelfireShockTimer < uiDiff)
+        void MoveInLineOfSight(Unit* pWho) override
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FELFIRE_SHOCK : SPELL_FELFIRE_SHOCK_H) == CAST_OK)
-            { m_uiFelfireShockTimer = urand(35000, 45000); }
-        }
-        else
-        { m_uiFelfireShockTimer -= uiDiff; }
-
-        if (m_uiKnockAwayTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_KNOCK_AWAY) == CAST_OK)
+            if (!m_bHasYelledIntro && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 75.0f) && m_creature->IsWithinLOSInMap(pWho))
             {
-                m_uiKnockAwayTimer = urand(30000, 35000);
-                m_uiFelfireLineupTimer = 3000;
+                StartNextDialogueText(SAY_SOCCOTHRATES_INTRO_1);
+                m_bHasYelledIntro = true;
+            }
+
+            ScriptedAI::MoveInLineOfSight(pWho);
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            DoScriptText(SAY_KILL, m_creature);
+        }
+
+        void JustDied(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_DEATH, m_creature);
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_SOCCOTHRATES, DONE);
             }
         }
-        else
-        { m_uiKnockAwayTimer -= uiDiff; }
 
-        // Prepare the boss for charging
-        if (m_uiFelfireLineupTimer)
+        void EnterEvadeMode() override
         {
-            if (m_uiFelfireLineupTimer <= uiDiff)
+            m_creature->RemoveAllAurasOnEvade();
+            m_creature->DeleteThreatList();
+            m_creature->CombatStop(true);
+            m_creature->LoadCreatureAddon(true);
+
+            // should evade to the attack position
+            if (m_creature->IsAlive())
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                m_creature->GetMotionMaster()->MovePoint(1, aSoccotharesStartPos[0], aSoccotharesStartPos[1], aSoccotharesStartPos[2]);
+            }
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_SOCCOTHRATES, FAIL);
+            }
+
+            m_creature->SetLootRecipient(NULL);
+
+            Reset();
+        }
+
+        void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
+        {
+            if (uiMoveType != POINT_MOTION_TYPE)
+            {
+                return;
+            }
+
+            // Adjust orientation
+            if (uiPointId)
+            {
+                m_creature->SetFacingTo(aSoccotharesStartPos[3]);
+            }
+        }
+
+        void JustDidDialogueStep(int32 iEntry) override
+        {
+            // Move each of them to their places
+            if (iEntry == SAY_SOCCOTHRATES_INTRO_7)
+            {
+                m_creature->GetMotionMaster()->MovePoint(1, aSoccotharesStartPos[0], aSoccotharesStartPos[1], aSoccotharesStartPos[2]);
+
+                if (m_pInstance)
                 {
-                    if (DoCastSpellIfCan(pTarget, SPELL_CHARGE_TARGETING) == CAST_OK)
+                    if (Creature* pDalliah = m_pInstance->GetSingleCreatureFromStorage(NPC_DALLIAH))
                     {
-                        // ToDo: the Wrath-Scryer's Felfire npcs should be summoned at this point and aligned to the chosen target!
-                        DoCastSpellIfCan(m_creature, SPELL_FELFIRE_LINE_UP, CAST_TRIGGERED);
-                        DoScriptText(urand(0, 1) ? SAY_CHARGE_1 : SAY_CHARGE_2, m_creature);
-
-                        m_uiChargeTimer        = 1500;
-                        m_uiFelfireLineupTimer = 0;
+                        pDalliah->GetMotionMaster()->MovePoint(1, aDalliahStartPos[0], aDalliahStartPos[1], aDalliahStartPos[2]);
                     }
                 }
             }
-            else
-            { m_uiFelfireLineupTimer -= uiDiff; }
         }
 
-        // Charge the target
-        if (m_uiChargeTimer)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (m_uiChargeTimer <= uiDiff)
+            DialogueUpdate(uiDiff);
+
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             {
-                // Note: this spell will also light up the Wrath-Scryer's Felfire npcs
-                if (DoCastSpellIfCan(m_creature, SPELL_CHARGE) == CAST_OK)
-                { m_uiChargeTimer = 0; }
+                return;
+            }
+
+            if (m_uiFelfireShockTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FELFIRE_SHOCK : SPELL_FELFIRE_SHOCK_H) == CAST_OK)
+                {
+                    m_uiFelfireShockTimer = urand(35000, 45000);
+                }
             }
             else
-            { m_uiChargeTimer -= uiDiff; }
-        }
+            {
+                m_uiFelfireShockTimer -= uiDiff;
+            }
 
-        DoMeleeAttackIfReady();
+            if (m_uiKnockAwayTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_KNOCK_AWAY) == CAST_OK)
+                {
+                    m_uiKnockAwayTimer = urand(30000, 35000);
+                    m_uiFelfireLineupTimer = 3000;
+                }
+            }
+            else
+            {
+                m_uiKnockAwayTimer -= uiDiff;
+            }
+
+            // Prepare the boss for charging
+            if (m_uiFelfireLineupTimer)
+            {
+                if (m_uiFelfireLineupTimer <= uiDiff)
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        if (DoCastSpellIfCan(pTarget, SPELL_CHARGE_TARGETING) == CAST_OK)
+                        {
+                            // ToDo: the Wrath-Scryer's Felfire npcs should be summoned at this point and aligned to the chosen target!
+                            DoCastSpellIfCan(m_creature, SPELL_FELFIRE_LINE_UP, CAST_TRIGGERED);
+                            DoScriptText(urand(0, 1) ? SAY_CHARGE_1 : SAY_CHARGE_2, m_creature);
+
+                            m_uiChargeTimer = 1500;
+                            m_uiFelfireLineupTimer = 0;
+                        }
+                    }
+                }
+                else
+                {
+                    m_uiFelfireLineupTimer -= uiDiff;
+                }
+            }
+
+            // Charge the target
+            if (m_uiChargeTimer)
+            {
+                if (m_uiChargeTimer <= uiDiff)
+                {
+                    // Note: this spell will also light up the Wrath-Scryer's Felfire npcs
+                    if (DoCastSpellIfCan(m_creature, SPELL_CHARGE) == CAST_OK)
+                    {
+                        m_uiChargeTimer = 0;
+                    }
+                }
+                else
+                {
+                    m_uiChargeTimer -= uiDiff;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_soccothratesAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_soccothrates(Creature* pCreature)
-{
-    return new boss_soccothratesAI(pCreature);
-}
-
 void AddSC_boss_soccothrates()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_soccothrates";
-    pNewScript->GetAI = &GetAI_boss_soccothrates;
-    pNewScript->RegisterSelf();
+    s = new boss_soccothrates();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_soccothrates";
+    //pNewScript->GetAI = &GetAI_boss_soccothrates;
+    //pNewScript->RegisterSelf();
 }

@@ -491,10 +491,10 @@ bool SD2::NpcSpellClick(Player* pPlayer, Creature* pClickedCreature, uint32 uiSp
 {
     Script* pTempScript = m_scripts[pClickedCreature->GetScriptId()];
     
-    if (!pTempScript || !pTempScript->pNpcSpellClick)
+    if (!pTempScript || !pTempScript->ToCreatureScript())
         return false;
     
-    return pTempScript->pNpcSpellClick(pPlayer, pClickedCreature, uiSpellId);
+    return pTempScript->ToCreatureScript()->OnSpellClick(pPlayer, pClickedCreature, uiSpellId);
 }
 
 bool SD2::ProcessEvent(uint32 uiEventId, Object* pSource, Object* pTarget, bool bIsStart)

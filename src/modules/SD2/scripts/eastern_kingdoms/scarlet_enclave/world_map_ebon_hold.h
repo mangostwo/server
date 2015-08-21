@@ -8,6 +8,13 @@
 enum
 {
     TYPE_BATTLE                         = 0,
+    TYPE_GOTHIK_YELL                    = 1,
+    TYPE_DO_ACTION                      = 2,
+    // also 3 worldstates, above 3500
+
+    DATA_ACTION_ENABLE_TRAPS            = 0,
+    DATA_ACTION_MOVE                    = 1,
+    DATA_ACTION_DESPAWN                 = 2,
 
     // npcs
     // death knights
@@ -87,15 +94,6 @@ static sSpawnLocation aLightArmySpawnLoc[MAX_LIGHT_CHAMPIONS] =
     {2282.47f, -5319.84f, 88.83f, 1.74f, NPC_RIMBLAT_EARTHSHATTER}
 };
 
-// four guards spawned for the outro
-static sSpawnLocation aGuardsSpawnLoc[MAX_LIGHT_GUARDS] =
-{
-    {2287.581f, -5284.991f, 82.535f, 2.60f, 0},
-    {2287.856f, -5281.127f, 82.225f, 3.44f, 0},
-    {2275.964f, -5282.389f, 82.301f, 5.80f, 0},
-    {2275.471f, -5277.668f, 82.058f, 5.79f, 0}
-};
-
 // Tirion is spawned at the edge of the battle and runs toward the chapel
 // When he reach the chapel he cast some powerfull light spell and the battle ends
 static sSpawnLocation aEventLocations[] =
@@ -111,43 +109,6 @@ static sSpawnLocation aEventLocations[] =
     {2280.304f, -5257.205f, 80.09f, 4.62f, 0},       // 8 Lich King spawn
     {2281.523f, -5261.058f, 80.87f, 0.0f,  0},       // 9 Lich King move
     {2273.071f, -5293.428f, 83.06f, 0.0f,  0},       // 10 Tirion final point
-};
-
-class  world_map_ebon_hold : public ScriptedInstance
-{
-    public:
-        world_map_ebon_hold(Map* pMap);
-
-        void Initialize() override;
-
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnCreatureDeath(Creature* pCreature) override;
-        void OnCreatureEvade(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        void Update(uint32 uiDiff) override;
-
-        bool CanAndToggleGothikYell();
-
-        void DoUpdateBattleWorldState(uint32 uiStateId, uint32 uiStateData);
-
-        void DoEnableHolyTraps();
-
-        // Move the behemots and abominations and make them attack
-        void DoMoveArmy();
-        void DoDespawnArmy();
-
-    protected:
-        void DoResetBattle();
-
-        uint32 m_uiGothikYellTimer;                         // Timer to check if Gothik can yell (related q 12698)
-        uint32 m_uiBattleEncounter;                         // Store state of the battle around  "The Light of Dawn"
-
-        GuidList m_lArmyGuids;
-        GuidList m_lLightTrapsGuids;
 };
 
 #endif

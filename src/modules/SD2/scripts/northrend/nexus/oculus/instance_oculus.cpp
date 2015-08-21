@@ -201,7 +201,7 @@ struct is_oculus : public InstanceScript
 
             // Note: this is handled in Acid. The purpose is check which Centrifuge Construct is alive, in case of server reset
             // The function is triggered by eventAI on generic timer
-            if (uiData == DATA_CONSTRUCTS_EVENT)
+            if (uiType == DATA_CONSTRUCTS_EVENT)
             {
                 m_sConstructsAliveGUIDSet.insert(ObjectGuid(uiGuid));
 
@@ -235,7 +235,7 @@ struct is_oculus : public InstanceScript
         }
 
         // Check Varos' shield
-        bool IsShieldBroken() { return ; }
+        //bool IsShieldBroken() { return ; }
 
     protected:
         void DoSpawnNextBossIfCan()

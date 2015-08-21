@@ -79,54 +79,63 @@ static SilverHandAbilityStruct m_aSilverHandAbility[8] =
     {NPC_VICAR_HYERONIMUS,      SPELL_BLESSING,         TARGET_TYPE_FRIENDLY,   2000,  13000},
     {NPC_VICAR_HYERONIMUS,      SPELL_HOLY_LIGHT,       TARGET_TYPE_FRIENDLY,   5000,  9000},
 };
-struct boss_silver_hand_bossesAI : public ScriptedAI
+struct boss_silver_hand_bosses : public CreatureScript
 {
-    boss_silver_hand_bossesAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_silver_hand_bosses() : CreatureScript("boss_silver_hand_bosses") {}
+
+    struct boss_silver_hand_bossesAI : public ScriptedAI
     {
-        m_pInstance = (instance_stratholme*)pCreature->GetInstanceData();
-        for (uint8 i = 0; i < countof(m_aSilverHandAbility); ++i)
+        boss_silver_hand_bossesAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (m_aSilverHandAbility[i].m_uiCreatureEntry == m_creature->GetEntry())
-            { m_mSpellTimers[i] = m_aSilverHandAbility[i].m_uiInitialTimer; }
-        }
-        Reset();
-    }
-
-    instance_stratholme* m_pInstance;
-
-    UNORDERED_MAP<uint8, uint32> m_mSpellTimers;
-
-    void Reset() override
-    {
-        for (UNORDERED_MAP<uint8, uint32>::iterator itr = m_mSpellTimers.begin(); itr != m_mSpellTimers.end(); ++itr)
-        { itr->second = m_aSilverHandAbility[itr->first].m_uiInitialTimer; }
-    }
-
-    void JustDied(Unit* pKiller) override
-    {
-        if (m_pInstance)
-        {
-            // Set data to special when each paladin dies
-            m_pInstance->SetData(TYPE_TRUE_MASTERS, SPECIAL);
-
-            // For the last one which dies, give the quest credit
-            if (m_pInstance->GetData(TYPE_TRUE_MASTERS) == DONE)
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            for (uint8 i = 0; i < countof(m_aSilverHandAbility); ++i)
             {
-                if (pKiller->GetTypeId() == TYPEID_PLAYER)
+                if (m_aSilverHandAbility[i].m_uiCreatureEntry == m_creature->GetEntry())
                 {
-                    if (Creature* pCredit = m_pInstance->GetSingleCreatureFromStorage(NPC_PALADIN_QUEST_CREDIT))
-                    { ((Player*)pKiller)->KilledMonsterCredit(NPC_PALADIN_QUEST_CREDIT, pCredit->GetObjectGuid()); }
+                    m_mSpellTimers[i] = m_aSilverHandAbility[i].m_uiInitialTimer;
                 }
             }
         }
-    }
 
-    bool CanUseSpecialAbility(uint32 uiIndex)
-    {
-        Unit* pTarget = NULL;
+        ScriptedInstance* m_pInstance;
 
-        switch (m_aSilverHandAbility[uiIndex].m_uiTargetType)
+        UNORDERED_MAP<uint8, uint32> m_mSpellTimers;
+
+        void Reset() override
         {
+            for (UNORDERED_MAP<uint8, uint32>::iterator itr = m_mSpellTimers.begin(); itr != m_mSpellTimers.end(); ++itr)
+            {
+                itr->second = m_aSilverHandAbility[itr->first].m_uiInitialTimer;
+            }
+        }
+
+        void JustDied(Unit* pKiller) override
+        {
+            if (m_pInstance)
+            {
+                // Set data to special when each paladin dies
+                m_pInstance->SetData(TYPE_TRUE_MASTERS, SPECIAL);
+
+                // For the last one which dies, give the quest credit
+                if (m_pInstance->GetData(TYPE_TRUE_MASTERS) == DONE)
+                {
+                    if (pKiller->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (Creature* pCredit = m_pInstance->GetSingleCreatureFromStorage(NPC_PALADIN_QUEST_CREDIT))
+                        {
+                            ((Player*)pKiller)->KilledMonsterCredit(NPC_PALADIN_QUEST_CREDIT, pCredit->GetObjectGuid());
+                        }
+                    }
+                }
+            }
+        }
+
+        bool CanUseSpecialAbility(uint32 uiIndex)
+        {
+            Unit* pTarget = NULL;
+
+            switch (m_aSilverHandAbility[uiIndex].m_uiTargetType)
+            {
             case TARGET_TYPE_SELF:
                 pTarget = m_creature;
                 break;
@@ -139,52 +148,61 @@ struct boss_silver_hand_bossesAI : public ScriptedAI
             case TARGET_TYPE_FRIENDLY:
                 pTarget = DoSelectLowestHpFriendly(10.0f);
                 break;
-        }
+            }
 
-        if (pTarget)
-        {
-            if (DoCastSpellIfCan(pTarget, m_aSilverHandAbility[uiIndex].m_uiSpellId) == CAST_OK)
-            { return true; }
-        }
-
-        return false;
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        for (UNORDERED_MAP<uint8, uint32>::iterator itr = m_mSpellTimers.begin(); itr != m_mSpellTimers.end(); ++itr)
-        {
-            if (itr->second < uiDiff)
+            if (pTarget)
             {
-                if (CanUseSpecialAbility(itr->first))
+                if (DoCastSpellIfCan(pTarget, m_aSilverHandAbility[uiIndex].m_uiSpellId) == CAST_OK)
                 {
-                    itr->second = m_aSilverHandAbility[itr->first].m_uiCooldown;
-                    break;
+                    return true;
                 }
             }
-            else
-            { itr->second -= uiDiff; }
+
+            return false;
         }
 
-        DoMeleeAttackIfReady();
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            // Return since we have no target
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            for (UNORDERED_MAP<uint8, uint32>::iterator itr = m_mSpellTimers.begin(); itr != m_mSpellTimers.end(); ++itr)
+            {
+                if (itr->second < uiDiff)
+                {
+                    if (CanUseSpecialAbility(itr->first))
+                    {
+                        itr->second = m_aSilverHandAbility[itr->first].m_uiCooldown;
+                        break;
+                    }
+                }
+                else
+                {
+                    itr->second -= uiDiff;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_silver_hand_bossesAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_silver_hand_bossesAI(Creature* pCreature)
-{
-    return new boss_silver_hand_bossesAI(pCreature);
-}
-
 void AddSC_boss_order_of_silver_hand()
 {
-    Script* pNewScript;
+    Script* s;
+    s = new boss_silver_hand_bosses();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_silver_hand_bosses";
-    pNewScript->GetAI = &GetAI_boss_silver_hand_bossesAI;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_silver_hand_bosses";
+    //pNewScript->GetAI = &GetAI_boss_silver_hand_bossesAI;
+    //pNewScript->RegisterSelf();
 }

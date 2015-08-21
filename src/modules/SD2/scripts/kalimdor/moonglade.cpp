@@ -65,20 +65,26 @@ enum
     NPC_ASPECT_OF_RAVEN     = 22915,
 };
 
-struct npc_clintar_dw_spiritAI : public npc_escortAI
+struct npc_clintar_dw_spirit : public CreatureScript
 {
-    npc_clintar_dw_spiritAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+    npc_clintar_dw_spirit() : CreatureScript("npc_clintar_dw_spirit") {}
 
-    void WaypointReached(uint32 i) override
+    struct npc_clintar_dw_spiritAI : public npc_escortAI
     {
-        Player* pPlayer = GetPlayerForEscort();
+        npc_clintar_dw_spiritAI(Creature* pCreature) : npc_escortAI(pCreature) { }
 
-        if (!pPlayer)
-        { return; }
-
-        // visual details here probably need refinement
-        switch (i)
+        void WaypointReached(uint32 i) override
         {
+            Player* pPlayer = GetPlayerForEscort();
+
+            if (!pPlayer)
+            {
+                return;
+            }
+
+            // visual details here probably need refinement
+            switch (i)
+            {
             case 0:
                 DoScriptText(SAY_START, m_creature, pPlayer);
                 break;
@@ -107,79 +113,91 @@ struct npc_clintar_dw_spiritAI : public npc_escortAI
                 DoScriptText(SAY_END, m_creature, pPlayer);
                 pPlayer->TalkedToCreature(m_creature->GetEntry(), m_creature->GetObjectGuid());
                 break;
+            }
         }
-    }
 
-    void Aggro(Unit* /*who*/) override
+        void Aggro(Unit* /*who*/) override
+        {
+            DoScriptText(urand(0, 1) ? SAY_AGGRO_1 : SAY_AGGRO_2, m_creature);
+        }
+
+        void Reset() override
+        {
+            if (HasEscortState(STATE_ESCORT_ESCORTING))
+            {
+                return;
+            }
+
+            // m_creature are expected to always be spawned, but not visible for player
+            // spell casted from quest_template.SrcSpell require this to be this way
+            // we handle the triggered spell to get a "hook" to our guy so he can be escorted on quest accept
+
+            if (CreatureInfo const* pTemp = GetCreatureTemplateStore(m_creature->GetEntry()))
+            {
+                m_creature->SetDisplayId(Creature::ChooseDisplayId(pTemp));
+            }
+
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetVisibility(VISIBILITY_OFF);
+        }
+
+        void JustSummoned(Creature* summoned) override
+        {
+            summoned->AI()->AttackStart(m_creature);
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        DoScriptText(urand(0, 1) ? SAY_AGGRO_1 : SAY_AGGRO_2, m_creature);
-    }
-
-    void Reset() override
-    {
-        if (HasEscortState(STATE_ESCORT_ESCORTING))
-        { return; }
-
-        // m_creature are expected to always be spawned, but not visible for player
-        // spell casted from quest_template.SrcSpell require this to be this way
-        // we handle the triggered spell to get a "hook" to our guy so he can be escorted on quest accept
-
-        if (CreatureInfo const* pTemp = GetCreatureTemplateStore(m_creature->GetEntry()))
-        { m_creature->SetDisplayId(Creature::ChooseDisplayId(pTemp)); }
-
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        m_creature->SetVisibility(VISIBILITY_OFF);
-    }
-
-    // called only from EffectDummy
-    void DoStart(Unit* pStarter)
-    {
-        // not the best way, maybe check in DummyEffect if this creature are "free" and not in escort.
-        if (HasEscortState(STATE_ESCORT_ESCORTING))
-        { return; }
-
-        m_creature->SetVisibility(VISIBILITY_ON);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        Start(false, pStarter && pStarter->GetTypeId() == TYPEID_PLAYER ? (Player*)pStarter : NULL);
-    }
-
-    void JustSummoned(Creature* summoned) override
-    {
-        summoned->AI()->AttackStart(m_creature);
+        return new npc_clintar_dw_spiritAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_npc_clintar_dw_spirit(Creature* pCreature)
-{
-    return new npc_clintar_dw_spiritAI(pCreature);
-}
-
 // we expect this spell to be triggered from spell casted at questAccept
-bool EffectDummyCreature_npc_clintar_dw_spirit(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+struct spell_emerald_dream : public SpellScript
 {
-    // always check spellid and effectindex
-    if (spellId == SPELL_EMERALD_DREAM && effIndex == EFFECT_INDEX_0)
+    spell_emerald_dream() : SpellScript("spell_emerald_dream") {}
+
+    bool EffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Object* pTarget, ObjectGuid /*originalCasterGuid*/) override
     {
-        if (pCaster->GetTypeId() != TYPEID_PLAYER || pCaster->HasAura(SPELL_EMERALD_DREAM))
-        { return true; }
+        // always check spellid and effectindex
+        if (spellId == SPELL_EMERALD_DREAM && effIndex == EFFECT_INDEX_0)
+        {
+            Creature *pCreatureTarget = pTarget->ToCreature();
+            if (pCaster->GetTypeId() != TYPEID_PLAYER || pCaster->HasAura(SPELL_EMERALD_DREAM))
+            {
+                return true;
+            }
 
-        if (pCreatureTarget->GetEntry() != NPC_CLINTAR_DW_SPIRIT)
-        { return true; }
+            if (pCreatureTarget->GetEntry() != NPC_CLINTAR_DW_SPIRIT)
+            {
+                return true;
+            }
 
-        if (CreatureInfo const* pTemp = GetCreatureTemplateStore(NPC_CLINTAR_SPIRIT))
-        { pCreatureTarget->SetDisplayId(Creature::ChooseDisplayId(pTemp)); }
-        else
-        { return true; }
+            if (CreatureInfo const* pTemp = GetCreatureTemplateStore(NPC_CLINTAR_SPIRIT))
+            {
+                pCreatureTarget->SetDisplayId(Creature::ChooseDisplayId(pTemp));
+            }
+            else
+            {
+                return true;
+            }
 
-        // done here, escort can start
-        if (npc_clintar_dw_spiritAI* pSpiritAI = dynamic_cast<npc_clintar_dw_spiritAI*>(pCreatureTarget->AI()))
-        { pSpiritAI->DoStart(pCaster); }
+            // done here, escort can start
+            npc_escortAI *pSpiritAI = (npc_escortAI*)pCreatureTarget->AI();
+            if (!pSpiritAI->HasEscortState(STATE_ESCORT_ESCORTING))
+            {
+                pCreatureTarget->SetVisibility(VISIBILITY_ON);
+                pCreatureTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                pSpiritAI->Start(false, pCaster && pCaster->GetTypeId() == TYPEID_PLAYER ? (Player*)pCaster : NULL);
+            }
 
-        // always return true when we are handling this spell and effect
+            // always return true when we are handling this spell and effect
+            return true;
+        }
         return true;
     }
-    return true;
-}
+};
 
 /*######
 ## npc_keeper_remulos
@@ -286,78 +304,81 @@ struct EventLocations
 static EventLocations aEranikusLocations[] =
 {
     {7881.72f, -2651.23f, 493.29f, 0.40f},          // eranikus spawn loc
-    {7929.86f, -2574.88f, 505.35f, 0},              // eranikus flight move loc
-    {7912.98f, -2568.99f, 488.71f, 0},              // eranikus combat move loc
-    {7906.57f, -2565.63f, 488.39f, 0},              // eranikus redeemed loc
+    {7929.86f, -2574.88f, 505.35f},                 // eranikus flight move loc
+    {7912.98f, -2568.99f, 488.71f},                 // eranikus combat move loc
+    {7906.57f, -2565.63f, 488.39f},                 // eranikus redeemed loc
 };
 
 static EventLocations aTyrandeLocations[] =
 {
     // Tyrande should appear along the pathway, but because of the missing pathfinding we'll summon here closer to Eranikus
     {7948.89f, -2575.58f, 490.05f, 3.03f},          // tyrande spawn loc
-    {7888.32f, -2566.25f, 487.02f, 0},              // tyrande heal loc
-    {7901.83f, -2565.24f, 488.04f, 0},              // tyrande eranikus loc
+    {7888.32f, -2566.25f, 487.02f},                 // tyrande heal loc
+    {7901.83f, -2565.24f, 488.04f},                 // tyrande eranikus loc
 };
 
 static EventLocations aShadowsLocations[] =
 {
     // Inside the house shades - first wave only
-    {7832.78f, -2604.57f, 489.29f, 0},
-    {7826.68f, -2538.46f, 489.30f, 0},
-    {7811.48f, -2573.20f, 488.49f, 0},
+    {7832.78f, -2604.57f, 489.29f},
+    {7826.68f, -2538.46f, 489.30f},
+    {7811.48f, -2573.20f, 488.49f},
     // Outside shade points - basically only the first set of coords is used for the summoning; there is no solid proof of using the other coords
-    {7888.32f, -2566.25f, 487.02f, 0},
-    {7946.12f, -2577.10f, 489.97f, 0},
-    {7963.00f, -2492.03f, 487.84f, 0}
+    {7888.32f, -2566.25f, 487.02f},
+    {7946.12f, -2577.10f, 489.97f},
+    {7963.00f, -2492.03f, 487.84f}
 };
 
-struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
+struct npc_keeper_remulos : public CreatureScript
 {
-    npc_keeper_remulosAI(Creature* pCreature) : npc_escortAI(pCreature),
+    npc_keeper_remulos() : CreatureScript("npc_keeper_remulos") {}
+
+    struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
+    {
+        npc_keeper_remulosAI(Creature* pCreature) : npc_escortAI(pCreature),
         DialogueHelper(aIntroDialogue)
-    {
-        Reset();
-    }
-
-    uint32 m_uiHealTimer;
-    uint32 m_uiStarfireTimer;
-    uint32 m_uiShadesummonTimer;
-    uint32 m_uiOutroTimer;
-
-    ObjectGuid m_eranikusGuid;
-
-    uint8 m_uiOutroPhase;
-    uint8 m_uiSummonCount;
-
-    bool m_bIsFirstWave;
-
-    void Reset() override
-    {
-        if (!HasEscortState(STATE_ESCORT_ESCORTING))
         {
-            m_uiOutroTimer          = 0;
-            m_uiOutroPhase          = 0;
-            m_uiSummonCount         = 0;
-
-            m_eranikusGuid.Clear();
-
-            m_uiShadesummonTimer    = 0;
-            m_uiHealTimer           = 10000;
-            m_uiStarfireTimer       = 25000;
-
-            m_bIsFirstWave          = true;
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
+        uint32 m_uiHealTimer;
+        uint32 m_uiStarfireTimer;
+        uint32 m_uiShadesummonTimer;
+        uint32 m_uiOutroTimer;
+
+        ObjectGuid m_eranikusGuid;
+
+        uint8 m_uiOutroPhase;
+        uint8 m_uiSummonCount;
+
+        bool m_bIsFirstWave;
+
+        void Reset() override
         {
+            if (!HasEscortState(STATE_ESCORT_ESCORTING))
+            {
+                m_uiOutroTimer = 0;
+                m_uiOutroPhase = 0;
+                m_uiSummonCount = 0;
+
+                m_eranikusGuid.Clear();
+
+                m_uiShadesummonTimer = 0;
+                m_uiHealTimer = 10000;
+                m_uiStarfireTimer = 25000;
+
+                m_bIsFirstWave = true;
+            }
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_ERANIKUS_TYRANT:
                 m_eranikusGuid = pSummoned->GetObjectGuid();
                 // Make Eranikus unattackable first
                 // ToDo: uncomment the fly effect when it will be possible to cancel it properly
-                // pSummoned->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
+                // pSummoned->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_UNK_2);
                 pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 pSummoned->SetLevitate(true);
                 break;
@@ -366,18 +387,18 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
                 pSummoned->setFaction(14);
                 pSummoned->AI()->AttackStart(m_creature);
                 break;
-        }
-    }
-
-    void SummonedMovementInform(Creature* pSummoned, uint32 uiType, uint32 uiPointId) override
-    {
-        if (uiType != POINT_MOTION_TYPE || pSummoned->GetEntry() != NPC_ERANIKUS_TYRANT)
-        {
-            return;
+            }
         }
 
-        switch (uiPointId)
+        void SummonedMovementInform(Creature* pSummoned, uint32 uiType, uint32 uiPointId) override
         {
+            if (uiType != POINT_MOTION_TYPE || pSummoned->GetEntry() != NPC_ERANIKUS_TYRANT)
+            {
+                return;
+            }
+
+            switch (uiPointId)
+            {
             case POINT_ID_ERANIKUS_FLIGHT:
                 // Set Eranikus to face Remulos
                 pSummoned->SetFacingToObject(m_creature);
@@ -388,24 +409,24 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
                 pSummoned->AI()->AttackStart(m_creature);
                 DoScriptText(SAY_ERANIKUS_ATTACK_2, pSummoned);
                 break;
-        }
-    }
-
-    void JustDied(Unit* pKiller) override
-    {
-        // Make Eranikus evade in order to despawn all the summons
-        if (Creature* pEranikus = m_creature->GetMap()->GetCreature(m_eranikusGuid))
-        {
-            pEranikus->AI()->EnterEvadeMode();
+            }
         }
 
-        npc_escortAI::JustDied(pKiller);
-    }
-
-    void WaypointReached(uint32 uiPointId) override
-    {
-        switch (uiPointId)
+        void JustDied(Unit* pKiller) override
         {
+            // Make Eranikus evade in order to despawn all the summons
+            if (Creature* pEranikus = m_creature->GetMap()->GetCreature(m_eranikusGuid))
+            {
+                pEranikus->AI()->EnterEvadeMode();
+            }
+
+            npc_escortAI::JustDied(pKiller);
+        }
+
+        void WaypointReached(uint32 uiPointId) override
+        {
+            switch (uiPointId)
+            {
             case 0:
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
@@ -426,13 +447,19 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
             case 18:
                 SetEscortPaused(true);
                 break;
+            }
         }
-    }
 
-    Creature* GetSpeakerByEntry(uint32 uiEntry) override
-    {
-        switch (uiEntry)
+        void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*uiMiscValue*/) override
         {
+            if (eventType == AI_EVENT_CUSTOM_A && pSender == m_creature)
+                DoHandleOutro(pInvoker->ToCreature());
+        }
+
+        Creature* GetSpeakerByEntry(uint32 uiEntry) override
+        {
+            switch (uiEntry)
+            {
             case NPC_REMULOS:
                 return m_creature;
             case NPC_ERANIKUS_TYRANT:
@@ -440,13 +467,13 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
 
             default:
                 return NULL;
+            }
         }
-    }
 
-    void JustDidDialogueStep(int32 iEntry) override
-    {
-        switch (iEntry)
+        void JustDidDialogueStep(int32 iEntry) override
         {
+            switch (iEntry)
+            {
             case NPC_REMULOS:
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
@@ -481,29 +508,29 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
                 SetEscortPaused(true);
                 m_uiShadesummonTimer = 5000;
                 break;
-        }
-    }
-
-    void DoHandleOutro(Creature* pTarget)
-    {
-        if (Player* pPlayer = GetPlayerForEscort())
-        {
-            pPlayer->GroupEventHappens(QUEST_NIGHTMARE_MANIFESTS, pTarget);
+            }
         }
 
-        m_uiOutroTimer = 3000;
-    }
-
-    void UpdateEscortAI(const uint32 uiDiff) override
-    {
-        DialogueUpdate(uiDiff);
-
-        if (m_uiOutroTimer)
+        void DoHandleOutro(Creature* pTarget)
         {
-            if (m_uiOutroTimer <= uiDiff)
+            if (Player* pPlayer = GetPlayerForEscort())
             {
-                switch (m_uiOutroPhase)
+                pPlayer->GroupEventHappens(QUEST_NIGHTMARE_MANIFESTS, pTarget);
+            }
+
+            m_uiOutroTimer = 3000;
+        }
+
+        void UpdateEscortAI(const uint32 uiDiff) override
+        {
+            DialogueUpdate(uiDiff);
+
+            if (m_uiOutroTimer)
+            {
+                if (m_uiOutroTimer <= uiDiff)
                 {
+                    switch (m_uiOutroPhase)
+                    {
                     case 0:
                         DoScriptText(SAY_REMULOS_OUTRO_1, m_creature);
                         m_uiOutroTimer = 3000;
@@ -515,91 +542,91 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
                         m_creature->ForcedDespawn(3000);
                         m_uiOutroTimer = 0;
                         break;
+                    }
+                    ++m_uiOutroPhase;
                 }
-                ++m_uiOutroPhase;
+                else
+                {
+                    m_uiOutroTimer -= uiDiff;
+                }
             }
-            else
+
+            // during the battle
+            if (m_uiShadesummonTimer)
             {
-                m_uiOutroTimer -= uiDiff;
-            }
-        }
-
-        // during the battle
-        if (m_uiShadesummonTimer)
-        {
-            if (m_uiShadesummonTimer <= uiDiff)
-            {
-                // do this yell only first time
-                if (m_bIsFirstWave)
+                if (m_uiShadesummonTimer <= uiDiff)
                 {
-                    // summon 3 shades inside the house
-                    for (uint8 i = 0; i < MAX_SHADOWS; ++i)
+                    // do this yell only first time
+                    if (m_bIsFirstWave)
                     {
-                        m_creature->SummonCreature(NPC_NIGHTMARE_PHANTASM, aShadowsLocations[i].m_fX, aShadowsLocations[i].m_fY, aShadowsLocations[i].m_fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        // summon 3 shades inside the house
+                        for (uint8 i = 0; i < MAX_SHADOWS; ++i)
+                        {
+                            m_creature->SummonCreature(NPC_NIGHTMARE_PHANTASM, aShadowsLocations[i].m_fX, aShadowsLocations[i].m_fY, aShadowsLocations[i].m_fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        }
+
+                        if (Creature* pEranikus = m_creature->GetMap()->GetCreature(m_eranikusGuid))
+                        {
+                            DoScriptText(SAY_ERANIKUS_ATTACK_1, pEranikus);
+                        }
+
+                        ++m_uiSummonCount;
+                        SetEscortPaused(false);
+                        m_bIsFirstWave = false;
                     }
 
-                    if (Creature* pEranikus = m_creature->GetMap()->GetCreature(m_eranikusGuid))
+                    // Summon 3 shades per turn until the maximum summon turns are reached
+                    float fX, fY, fZ;
+                    // Randomize the summon point
+                    uint8 uiSummonPoint = roll_chance_i(70) ? uint32(MAX_SHADOWS) : urand(MAX_SHADOWS + 1, MAX_SHADOWS + 2);
+
+                    if (m_uiSummonCount < MAX_SUMMON_TURNS)
                     {
-                        DoScriptText(SAY_ERANIKUS_ATTACK_1, pEranikus);
+                        for (uint8 i = 0; i < MAX_SHADOWS; ++i)
+                        {
+                            m_creature->GetRandomPoint(aShadowsLocations[uiSummonPoint].m_fX, aShadowsLocations[uiSummonPoint].m_fY, aShadowsLocations[uiSummonPoint].m_fZ, 10.0f, fX, fY, fZ);
+                            m_creature->SummonCreature(NPC_NIGHTMARE_PHANTASM, fX, fY, fZ, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        }
+
+                        ++m_uiSummonCount;
                     }
 
-                    ++m_uiSummonCount;
-                    SetEscortPaused(false);
-                    m_bIsFirstWave = false;
-                }
-
-                // Summon 3 shades per turn until the maximum summon turns are reached
-                float fX, fY, fZ;
-                // Randomize the summon point
-                uint8 uiSummonPoint = roll_chance_i(70) ? uint32(MAX_SHADOWS) : urand(MAX_SHADOWS + 1, MAX_SHADOWS + 2);
-
-                if (m_uiSummonCount < MAX_SUMMON_TURNS)
-                {
-                    for (uint8 i = 0; i < MAX_SHADOWS; ++i)
+                    // If all the shades were summoned then set Eranikus in combat
+                    // We don't count the dead shades, because the boss is usually set in combat before all shades are dead
+                    if (m_uiSummonCount == MAX_SUMMON_TURNS)
                     {
-                        m_creature->GetRandomPoint(aShadowsLocations[uiSummonPoint].m_fX, aShadowsLocations[uiSummonPoint].m_fY, aShadowsLocations[uiSummonPoint].m_fZ, 10.0f, fX, fY, fZ);
-                        m_creature->SummonCreature(NPC_NIGHTMARE_PHANTASM, fX, fY, fZ, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        m_uiShadesummonTimer = 0;
+
+                        if (Creature* pEranikus = m_creature->GetMap()->GetCreature(m_eranikusGuid))
+                        {
+                            pEranikus->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0);
+                            pEranikus->SetLevitate(false);
+                            pEranikus->GetMotionMaster()->MovePoint(POINT_ID_ERANIKUS_COMBAT, aEranikusLocations[2].m_fX, aEranikusLocations[2].m_fY, aEranikusLocations[2].m_fZ);
+                        }
                     }
-
-                    ++m_uiSummonCount;
-                }
-
-                // If all the shades were summoned then set Eranikus in combat
-                // We don't count the dead shades, because the boss is usually set in combat before all shades are dead
-                if (m_uiSummonCount == MAX_SUMMON_TURNS)
-                {
-                    m_uiShadesummonTimer = 0;
-
-                    if (Creature* pEranikus = m_creature->GetMap()->GetCreature(m_eranikusGuid))
+                    else
                     {
-                        pEranikus->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0);
-                        pEranikus->SetLevitate(false);
-                        pEranikus->GetMotionMaster()->MovePoint(POINT_ID_ERANIKUS_COMBAT, aEranikusLocations[2].m_fX, aEranikusLocations[2].m_fY, aEranikusLocations[2].m_fZ);
+                        m_uiShadesummonTimer = urand(20000, 30000);
                     }
                 }
                 else
                 {
-                    m_uiShadesummonTimer = urand(20000, 30000);
+                    m_uiShadesummonTimer -= uiDiff;
                 }
             }
-            else
+
+            // Combat spells
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             {
-                m_uiShadesummonTimer -= uiDiff;
+                return;
             }
-        }
 
-        // Combat spells
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        {
-            return;
-        }
-
-        if (m_uiHealTimer < uiDiff)
-        {
-            if (Unit* pTarget = DoSelectLowestHpFriendly(DEFAULT_VISIBILITY_DISTANCE))
+            if (m_uiHealTimer < uiDiff)
             {
-                switch (urand(0, 2))
+                if (Unit* pTarget = DoSelectLowestHpFriendly(DEFAULT_VISIBILITY_DISTANCE))
                 {
+                    switch (urand(0, 2))
+                    {
                     case 0:
                         DoCastSpellIfCan(pTarget, SPELL_HEALING_TOUCH);
                         break;
@@ -609,64 +636,74 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
                     case 2:
                         DoCastSpellIfCan(pTarget, SPELL_REGROWTH);
                         break;
+                    }
                 }
+                m_uiHealTimer = 10000;
             }
-            m_uiHealTimer = 10000;
-        }
-        else
-            { m_uiHealTimer -= uiDiff; }
-
-        if (m_uiStarfireTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            else
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_STARFIRE) == CAST_OK)
+                m_uiHealTimer -= uiDiff;
+            }
+
+            if (m_uiStarfireTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
-                    m_uiStarfireTimer = 20000;
+                    if (DoCastSpellIfCan(pTarget, SPELL_STARFIRE) == CAST_OK)
+                    {
+                        m_uiStarfireTimer = 20000;
+                    }
                 }
             }
-        }
-        else
-            { m_uiStarfireTimer -= uiDiff; }
+            else
+            {
+                m_uiStarfireTimer -= uiDiff;
+            }
 
-        DoMeleeAttackIfReady();
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_keeper_remulosAI(pCreature);
+    }
+
+    bool OnQuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest) override
+    {
+        if (pQuest->GetQuestId() == QUEST_NIGHTMARE_MANIFESTS)
+        {
+            if (npc_keeper_remulosAI* pEscortAI = dynamic_cast<npc_keeper_remulosAI*>(pCreature->AI()))
+            {
+                pEscortAI->Start(true, pPlayer, pQuest);
+            }
+
+            return true;
+        }
+
+        // Return false for other quests in order to handle DB scripts. Example: quest 8447
+        return false;
     }
 };
 
-CreatureAI* GetAI_npc_keeper_remulos(Creature* pCreature)
+struct spell_conjure_rift : public SpellScript
 {
-    return new npc_keeper_remulosAI(pCreature);
-}
+    spell_conjure_rift() : SpellScript("spell_conjure_rift") {}
 
-bool QuestAccept_npc_keeper_remulos(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_NIGHTMARE_MANIFESTS)
+    bool EffectDummy(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Object* /*pCreatureTarget*/, ObjectGuid /*originalCasterGuid*/) override
     {
-        if (npc_keeper_remulosAI* pEscortAI = dynamic_cast<npc_keeper_remulosAI*>(pCreature->AI()))
+        // always check spellid and effectindex
+        if (uiSpellId == SPELL_CONJURE_RIFT && uiEffIndex == EFFECT_INDEX_0)
         {
-            pEscortAI->Start(true, pPlayer, pQuest);
+            pCaster->SummonCreature(NPC_ERANIKUS_TYRANT, aEranikusLocations[0].m_fX, aEranikusLocations[0].m_fY, aEranikusLocations[0].m_fZ, aEranikusLocations[0].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+
+            // always return true when we are handling this spell and effect
+            return true;
         }
 
-        return true;
+        return false;
     }
-
-    // Return false for other quests in order to handle DB scripts. Example: quest 8447
-    return false;
-}
-
-bool EffectDummyCreature_conjure_rift(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* /*pCreatureTarget*/, ObjectGuid /*originalCasterGuid*/)
-{
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_CONJURE_RIFT && uiEffIndex == EFFECT_INDEX_0)
-    {
-        pCaster->SummonCreature(NPC_ERANIKUS_TYRANT, aEranikusLocations[0].m_fX, aEranikusLocations[0].m_fY, aEranikusLocations[0].m_fZ, aEranikusLocations[0].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
-
-        // always return true when we are handling this spell and effect
-        return true;
-    }
-
-    return false;
-}
+};
 
 /*######
 ## boss_eranikus
@@ -688,105 +725,109 @@ enum
     POINT_ID_TYRANDE_ABSOLUTION = 1,
 };
 
-struct boss_eranikusAI : public ScriptedAI
+struct boss_eranikus : public CreatureScript
 {
-    boss_eranikusAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    boss_eranikus() : CreatureScript("boss_eranikus") {}
 
-    uint32 m_uiAcidBreathTimer;
-    uint32 m_uiNoxiousBreathTimer;
-    uint32 m_uiShadowboltVolleyTimer;
-    uint32 m_uiEventTimer;
-    uint32 m_uiTyrandeMoveTimer;
-
-    uint8 m_uiEventPhase;
-    uint8 m_uiTyrandeMovePoint;
-    uint8 m_uiHealthCheck;
-
-    ObjectGuid m_remulosGuid;
-    ObjectGuid m_tyrandeGuid;
-    GuidList m_lPriestessList;
-
-    void Reset() override
+    struct boss_eranikusAI : public ScriptedAI
     {
-        m_uiAcidBreathTimer         = 10000;
-        m_uiNoxiousBreathTimer      = 3000;
-        m_uiShadowboltVolleyTimer   = 5000;
-        m_uiTyrandeMoveTimer        = 0;
+        boss_eranikusAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-        m_remulosGuid.Clear();
-        m_tyrandeGuid.Clear();
+        uint32 m_uiAcidBreathTimer;
+        uint32 m_uiNoxiousBreathTimer;
+        uint32 m_uiShadowboltVolleyTimer;
+        uint32 m_uiEventTimer;
+        uint32 m_uiTyrandeMoveTimer;
 
-        m_uiHealthCheck             = 85;
-        m_uiEventPhase              = 0;
-        m_uiEventTimer              = 0;
+        uint8 m_uiEventPhase;
+        uint8 m_uiTyrandeMovePoint;
+        uint8 m_uiHealthCheck;
 
-        // For some reason the boss doesn't move in combat
-        SetCombatMovement(false);
-    }
+        ObjectGuid m_remulosGuid;
+        ObjectGuid m_tyrandeGuid;
+        GuidList m_lPriestessList;
 
-    void EnterEvadeMode() override
-    {
-        if (m_creature->GetHealthPercent() < 20.0f)
+        void Reset() override
         {
-            m_creature->RemoveAllAurasOnEvade();
-            m_creature->DeleteThreatList();
-            m_creature->CombatStop(true);
-            m_creature->LoadCreatureAddon(true);
+            m_uiAcidBreathTimer = 10000;
+            m_uiNoxiousBreathTimer = 3000;
+            m_uiShadowboltVolleyTimer = 5000;
+            m_uiTyrandeMoveTimer = 0;
 
-            m_creature->SetLootRecipient(NULL);
+            m_remulosGuid.Clear();
+            m_tyrandeGuid.Clear();
 
-            // Get Remulos guid and make him stop summoning shades
-            if (Creature* pRemulos = GetClosestCreatureWithEntry(m_creature, NPC_REMULOS, 50.0f))
+            m_uiHealthCheck = 85;
+            m_uiEventPhase = 0;
+            m_uiEventTimer = 0;
+
+            // For some reason the boss doesn't move in combat
+            SetCombatMovement(false);
+        }
+
+        void EnterEvadeMode() override
+        {
+            if (m_creature->GetHealthPercent() < 20.0f)
             {
-                m_remulosGuid = pRemulos->GetObjectGuid();
-                pRemulos->AI()->EnterEvadeMode();
+                m_creature->RemoveAllAurasOnEvade();
+                m_creature->DeleteThreatList();
+                m_creature->CombatStop(true);
+                m_creature->LoadCreatureAddon(true);
+
+                m_creature->SetLootRecipient(NULL);
+
+                // Get Remulos guid and make him stop summoning shades
+                if (Creature* pRemulos = GetClosestCreatureWithEntry(m_creature, NPC_REMULOS, 50.0f))
+                {
+                    m_remulosGuid = pRemulos->GetObjectGuid();
+                    pRemulos->AI()->EnterEvadeMode();
+                }
+
+                // Despawn the priestess
+                DoDespawnSummoned();
+
+                // redeem eranikus
+                m_uiEventTimer = 5000;
+                m_creature->setFaction(FACTION_FRIENDLY);
+            }
+            else
+            {
+                // There may be a core issue related to the reached home function for summoned creatures so we are cleaning things up here
+                // if the creature evades while the event is in progress then we despawn all the summoned, including himself
+                m_creature->ForcedDespawn();
+                DoDespawnSummoned();
+
+                if (Creature* pTyrande = m_creature->GetMap()->GetCreature(m_tyrandeGuid))
+                {
+                    pTyrande->ForcedDespawn();
+                }
+            }
+        }
+
+        void KilledUnit(Unit* pVictim) override
+        {
+            if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            {
+                return;
             }
 
-            // Despawn the priestess
-            DoDespawnSummoned();
-
-            // redeem eranikus
-            m_uiEventTimer = 5000;
-            m_creature->setFaction(FACTION_FRIENDLY);
+            DoScriptText(SAY_ERANIKUS_KILL, m_creature);
         }
-        else
-        {
-            // There may be a core issue related to the reached home function for summoned creatures so we are cleaning things up here
-            // if the creature evades while the event is in progress then we despawn all the summoned, including himself
-            m_creature->ForcedDespawn();
-            DoDespawnSummoned();
 
-            if (Creature* pTyrande = m_creature->GetMap()->GetCreature(m_tyrandeGuid))
+        void DoSummonHealers()
+        {
+            float fX, fY, fZ;
+            for (uint8 j = 0; j < MAX_PRIESTESS; ++j)
             {
-                pTyrande->ForcedDespawn();
+                m_creature->GetRandomPoint(aTyrandeLocations[0].m_fX, aTyrandeLocations[0].m_fY, aTyrandeLocations[0].m_fZ, 10.0f, fX, fY, fZ);
+                m_creature->SummonCreature(NPC_ELUNE_PRIESTESS, fX, fY, fZ, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
             }
         }
-    }
 
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
+        void JustSummoned(Creature* pSummoned) override
         {
-            return;
-        }
-
-        DoScriptText(SAY_ERANIKUS_KILL, m_creature);
-    }
-
-    void DoSummonHealers()
-    {
-        float fX, fY, fZ;
-        for (uint8 j = 0; j < MAX_PRIESTESS; ++j)
-        {
-            m_creature->GetRandomPoint(aTyrandeLocations[0].m_fX, aTyrandeLocations[0].m_fY, aTyrandeLocations[0].m_fZ, 10.0f, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_ELUNE_PRIESTESS, fX, fY, fZ, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
-        }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
-        {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_TYRANDE_WHISPERWIND:
                 m_tyrandeGuid = pSummoned->GetObjectGuid();
                 pSummoned->SetWalk(false);
@@ -799,29 +840,29 @@ struct boss_eranikusAI : public ScriptedAI
                 m_creature->GetRandomPoint(aTyrandeLocations[1].m_fX, aTyrandeLocations[1].m_fY, aTyrandeLocations[1].m_fZ, 10.0f, fX, fY, fZ);
                 pSummoned->GetMotionMaster()->MovePoint(POINT_ID_TYRANDE_HEAL, fX, fY, fZ);
                 break;
-        }
-    }
-
-    void DoDespawnSummoned()
-    {
-        for (GuidList::const_iterator itr = m_lPriestessList.begin(); itr != m_lPriestessList.end(); ++itr)
-        {
-            if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
-            {
-                pTemp->ForcedDespawn();
             }
         }
-    }
 
-    void SummonedMovementInform(Creature* pSummoned, uint32 uiType, uint32 uiPointId) override
-    {
-        if (uiType != POINT_MOTION_TYPE)
+        void DoDespawnSummoned()
         {
-            return;
+            for (GuidList::const_iterator itr = m_lPriestessList.begin(); itr != m_lPriestessList.end(); ++itr)
+            {
+                if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
+                {
+                    pTemp->ForcedDespawn();
+                }
+            }
         }
 
-        switch (uiPointId)
+        void SummonedMovementInform(Creature* pSummoned, uint32 uiType, uint32 uiPointId) override
         {
+            if (uiType != POINT_MOTION_TYPE)
+            {
+                return;
+            }
+
+            switch (uiPointId)
+            {
             case POINT_ID_TYRANDE_HEAL:
                 if (pSummoned->GetEntry() == NPC_TYRANDE_WHISPERWIND)
                 {
@@ -843,28 +884,28 @@ struct boss_eranikusAI : public ScriptedAI
                     DoScriptText(SAY_TYRANDE_FORGIVEN_1, pSummoned);
                 }
                 break;
-        }
-    }
-
-    void MovementInform(uint32 uiType, uint32 uiPointId) override
-    {
-        if (uiType != POINT_MOTION_TYPE || uiPointId != POINT_ID_ERANIKUS_REDEEMED)
-        {
-            return;
+            }
         }
 
-        DoScriptText(SAY_REDEEMED_1, m_creature);
-        m_uiEventTimer = 11000;
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiEventTimer)
+        void MovementInform(uint32 uiType, uint32 uiPointId) override
         {
-            if (m_uiEventTimer <= uiDiff)
+            if (uiType != POINT_MOTION_TYPE || uiPointId != POINT_ID_ERANIKUS_REDEEMED)
             {
-                switch (m_uiEventPhase)
+                return;
+            }
+
+            DoScriptText(SAY_REDEEMED_1, m_creature);
+            m_uiEventTimer = 11000;
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiEventTimer)
+            {
+                if (m_uiEventTimer <= uiDiff)
                 {
+                    switch (m_uiEventPhase)
+                    {
                     case 0:
                         // Eranikus is redeemed - make Tyrande kneel and stop casting
                         if (Creature* pTyrande = m_creature->GetMap()->GetCreature(m_tyrandeGuid))
@@ -923,48 +964,48 @@ struct boss_eranikusAI : public ScriptedAI
                         }
                         if (Creature* pRemulos = m_creature->GetMap()->GetCreature(m_remulosGuid))
                         {
-                            ((npc_keeper_remulosAI*)pRemulos->AI())->DoHandleOutro(m_creature);
+                            pRemulos->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pRemulos);//->DoHandleOutro(m_creature);
                         }
                         m_creature->HandleEmote(EMOTE_ONESHOT_BOW);
                         m_creature->ForcedDespawn(2000);
                         break;
+                    }
+                    ++m_uiEventPhase;
                 }
-                ++m_uiEventPhase;
-            }
-            else
-            {
-                m_uiEventTimer -= uiDiff;
-            }
-        }
-
-        // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        {
-            return;
-        }
-
-        // Move Tyrande after she is summoned
-        if (m_uiTyrandeMoveTimer)
-        {
-            if (m_uiTyrandeMoveTimer <= uiDiff)
-            {
-                if (Creature* pTyrande = m_creature->GetMap()->GetCreature(m_tyrandeGuid))
+                else
                 {
-                    pTyrande->GetMotionMaster()->MovePoint(POINT_ID_TYRANDE_ABSOLUTION, aTyrandeLocations[2].m_fX, aTyrandeLocations[2].m_fY, aTyrandeLocations[2].m_fZ);
+                    m_uiEventTimer -= uiDiff;
                 }
-                m_uiTyrandeMoveTimer = 0;
             }
-            else
-            {
-                m_uiTyrandeMoveTimer -= uiDiff;
-            }
-        }
 
-        // Not sure if this should be handled by health percent, but this is the only reasonable way
-        if (m_creature->GetHealthPercent() < m_uiHealthCheck)
-        {
-            switch (m_uiHealthCheck)
+            // Return since we have no target
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             {
+                return;
+            }
+
+            // Move Tyrande after she is summoned
+            if (m_uiTyrandeMoveTimer)
+            {
+                if (m_uiTyrandeMoveTimer <= uiDiff)
+                {
+                    if (Creature* pTyrande = m_creature->GetMap()->GetCreature(m_tyrandeGuid))
+                    {
+                        pTyrande->GetMotionMaster()->MovePoint(POINT_ID_TYRANDE_ABSOLUTION, aTyrandeLocations[2].m_fX, aTyrandeLocations[2].m_fY, aTyrandeLocations[2].m_fZ);
+                    }
+                    m_uiTyrandeMoveTimer = 0;
+                }
+                else
+                {
+                    m_uiTyrandeMoveTimer -= uiDiff;
+                }
+            }
+
+            // Not sure if this should be handled by health percent, but this is the only reasonable way
+            if (m_creature->GetHealthPercent() < m_uiHealthCheck)
+            {
+                switch (m_uiHealthCheck)
+                {
                 case 85:
                     DoScriptText(SAY_ERANIKUS_ATTACK_3, m_creature);
                     // Here Tyrande only yells but she doesn't appear anywhere - we summon here for 1 second just to handle the yell
@@ -1014,68 +1055,79 @@ struct boss_eranikusAI : public ScriptedAI
                     m_creature->AI()->EnterEvadeMode();
                     m_uiHealthCheck = 0;
                     break;
+                }
             }
-        }
 
-        // Combat spells
-        if (m_uiAcidBreathTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_ACID_BREATH) == CAST_OK)
+            // Combat spells
+            if (m_uiAcidBreathTimer < uiDiff)
             {
-                m_uiAcidBreathTimer = 15000;
+                if (DoCastSpellIfCan(m_creature, SPELL_ACID_BREATH) == CAST_OK)
+                {
+                    m_uiAcidBreathTimer = 15000;
+                }
             }
-        }
-        else
-            { m_uiAcidBreathTimer -= uiDiff; }
-
-        if (m_uiNoxiousBreathTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_NOXIOUS_BREATH) == CAST_OK)
+            else
             {
-                m_uiNoxiousBreathTimer = 30000;
+                m_uiAcidBreathTimer -= uiDiff;
             }
-        }
-        else
-            { m_uiNoxiousBreathTimer -= uiDiff; }
 
-        if (m_uiShadowboltVolleyTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SHADOWBOLT_VOLLEY) == CAST_OK)
+            if (m_uiNoxiousBreathTimer < uiDiff)
             {
-                m_uiShadowboltVolleyTimer = 25000;
+                if (DoCastSpellIfCan(m_creature, SPELL_NOXIOUS_BREATH) == CAST_OK)
+                {
+                    m_uiNoxiousBreathTimer = 30000;
+                }
             }
-        }
-        else
-            { m_uiShadowboltVolleyTimer -= uiDiff; }
+            else
+            {
+                m_uiNoxiousBreathTimer -= uiDiff;
+            }
 
-        DoMeleeAttackIfReady();
+            if (m_uiShadowboltVolleyTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_SHADOWBOLT_VOLLEY) == CAST_OK)
+                {
+                    m_uiShadowboltVolleyTimer = 25000;
+                }
+            }
+            else
+            {
+                m_uiShadowboltVolleyTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_eranikusAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_eranikus(Creature* pCreature)
-{
-    return new boss_eranikusAI(pCreature);
-}
-
 void AddSC_moonglade()
 {
-    Script* pNewScript;
+    Script* s;
+    s = new npc_clintar_dw_spirit();
+    s->RegisterSelf();
+    s = new spell_emerald_dream();
+    s->RegisterSelf();
+    s = new npc_keeper_remulos();
+    s->RegisterSelf();
+    s = new boss_eranikus();
+    s->RegisterSelf();
+    s = new spell_conjure_rift();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_clintar_dw_spirit";
-    pNewScript->GetAI = &GetAI_npc_clintar_dw_spirit;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_clintar_dw_spirit;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_keeper_remulos";
+    //pNewScript->GetAI = &GetAI_npc_keeper_remulos;
+    //pNewScript->pQuestAcceptNPC = &QuestAccept_npc_keeper_remulos;
+    //pNewScript->pEffectDummyNPC = &EffectDummyCreature_conjure_rift;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_keeper_remulos";
-    pNewScript->GetAI = &GetAI_npc_keeper_remulos;
-    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_keeper_remulos;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_conjure_rift;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "boss_eranikus";
-    pNewScript->GetAI = &GetAI_boss_eranikus;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_eranikus";
+    //pNewScript->GetAI = &GetAI_boss_eranikus;
+    //pNewScript->RegisterSelf();
 }

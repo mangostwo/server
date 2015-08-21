@@ -21,6 +21,11 @@ enum
     TYPE_MALGANIS_EVENT             = 7,                    // Malganis
     TYPE_INFINITE_CORRUPTER_TIME    = 8,                    // Time for 25min Timer
     TYPE_INFINITE_CORRUPTER         = 9,                    // Infinite corruptor event
+    TYPE_DO_AREATRIGGER             = 10,
+    TYPE_DATA64_PLAYER_BOTH         = 11,
+    TYPE_DATA64_PLAYER_ARTHAS       = 12,
+    TYPE_DATA64_AD_TARGET           = 13,
+    TYPE_DATA64_SPAWNING            = 14,
 
     // Main Encounter NPCs
     NPC_CHROMIE_INN                 = 26527,
@@ -141,110 +146,12 @@ enum
     ACHIEV_CRIT_ZOMBIEFEST          = 7180,                 // achiev 1872
 };
 
-enum eInstancePosition
+enum CoSArcaneDisruption
 {
-    POS_ARTHAS_INTRO        = 1,
-    POS_ARTHAS_WAVES        = 2,
-    POS_ARTHAS_TOWNHALL     = 3,
-    POS_ARTHAS_ESCORTING    = 4,
-    POS_ARTHAS_MALGANIS     = 5,
-    POS_INSTANCE_FINISHED   = 6
-};
+    SAY_SOLDIERS_REPORT = -1595000,
 
-enum eScourgeLocation
-{
-    POS_FESTIVAL_LANE       = 0,
-    POS_KINGS_SQUARE        = 1,
-    POS_MARKET_ROW          = 2,
-    POS_TOWN_HALL           = 3,
-    POS_ELDERS_SQUARE       = 4,
-};
-
-enum eScourgeType
-{
-    SCOURGE_TYPE_GHOUL          = 1,
-    SCOURGE_TYPE_NECROMANCER    = 2,
-    SCOURGE_TYPE_FIEND          = 3,
-    SCOURGE_TYPE_GOLEM          = 4,
-    SCOURGE_TYPE_ACOLYTES       = 5,
-    SCOURGE_TYPE_BOSS           = 6,
-};
-
-static const uint32 uiScourgeWaveDef[MAX_SCOURGE_WAVES][MAX_SCOURGE_TYPE_PER_WAVE] =
-{
-    // first half of scourge waves
-    {SCOURGE_TYPE_GHOUL,       SCOURGE_TYPE_GHOUL,       SCOURGE_TYPE_GHOUL,       0},
-    {SCOURGE_TYPE_NECROMANCER, SCOURGE_TYPE_GHOUL,       SCOURGE_TYPE_GHOUL,       0},
-    {SCOURGE_TYPE_FIEND,       SCOURGE_TYPE_NECROMANCER, SCOURGE_TYPE_GHOUL,       SCOURGE_TYPE_GHOUL},
-    {SCOURGE_TYPE_FIEND,       SCOURGE_TYPE_NECROMANCER, SCOURGE_TYPE_ACOLYTES,    0},
-    {SCOURGE_TYPE_BOSS,        0,                        0,                        0},
-    // second half of scourge waves
-    {SCOURGE_TYPE_FIEND,       SCOURGE_TYPE_FIEND,       SCOURGE_TYPE_NECROMANCER, SCOURGE_TYPE_GHOUL},
-    {SCOURGE_TYPE_GOLEM,       SCOURGE_TYPE_GHOUL,       SCOURGE_TYPE_GHOUL,       SCOURGE_TYPE_GHOUL},
-    {SCOURGE_TYPE_GOLEM,       SCOURGE_TYPE_NECROMANCER, SCOURGE_TYPE_GHOUL,       SCOURGE_TYPE_GHOUL},
-    {SCOURGE_TYPE_GOLEM,       SCOURGE_TYPE_FIEND,       SCOURGE_TYPE_NECROMANCER, SCOURGE_TYPE_GHOUL},
-    {SCOURGE_TYPE_BOSS,        0,                        0,                        0}
-};
-
-class  instance_culling_of_stratholme : public ScriptedInstance
-{
-    public:
-        instance_culling_of_stratholme(Map* pMap);
-        ~instance_culling_of_stratholme() {}
-
-        void Initialize() override;
-
-        void OnPlayerEnter(Player* pPlayer) override;
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-        void OnCreatureDeath(Creature* pCreature) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-        void Load(const char* chrIn) override;
-
-        void Update(uint32 uiDiff) override;
-
-        void GetCratesBunnyOrderedList(std::list<Creature*>& lList);
-
-        void DoSpawnChromieIfNeeded(Unit* pSummoner);
-        void DoSpawnArthasIfNeeded(Unit* pSummoner);
-        bool CanGrainEventProgress(Creature* pCrate);
-        void DoSpawnBurningCityUndead(Unit* pSummoner);
-
-        void DoEventAtTriggerIfCan(uint32 uiTriggerId);
-
-    protected:
-        void DoSetupEntranceSoldiers(Unit* pSummoner);
-        void DoSpawnCorruptorIfNeeded(Unit* pSummoner);
-        void DoChromieWhisper(int32 iEntry);
-        void DoUpdateZombieResidents();
-        void DoSpawnNextScourgeWave();
-        uint32 GetRandomMobOfType(uint8 uiType);
-        uint8 GetInstancePosition();
-
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string m_strInstData;
-
-        bool m_bStartedInnEvent;
-
-        uint8 m_uiGrainCrateCount;
-        uint32 m_uiRemoveCrateStateTimer;
-        uint32 m_uiArthasRespawnTimer;
-        
-        uint32 m_uiScourgeWaveTimer;
-        uint32 m_uiScourgeWaveCount;
-        uint8 m_uiCurrentUndeadPos;
-
-        GuidList m_luiCratesBunnyGUIDs;
-        GuidList m_luiResidentGUIDs;
-        GuidList m_luiGateSoldiersGUIDs;
-        
-        GuidList m_luiCurrentScourgeWaveGUIDs;
-
-        GuidSet m_sGrainCratesGuidSet;
+    SPELL_ARCANE_DISRUPTION = 49590,
+    SPELL_CRATES_KILL_CREDIT = 58109,
 };
 
 #endif

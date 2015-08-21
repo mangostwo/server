@@ -34,11 +34,73 @@
 
 /**
  * ContentData
+ * go_molten_core_rune
  * EndContentData
  */
 
 #include "precompiled.h"
+#include "molten_core.h"
+
+struct sRuneEncounters
+{
+    uint32 m_uiRuneEntry, m_uiType;
+};
+
+static const sRuneEncounters m_aMoltenCoreRunes[MAX_MOLTEN_RUNES] =
+{
+    { GO_RUNE_KRESS, TYPE_MAGMADAR },
+    { GO_RUNE_MOHN, TYPE_GEHENNAS },
+    { GO_RUNE_BLAZ, TYPE_GARR },
+    { GO_RUNE_MAZJ, TYPE_SHAZZRAH },
+    { GO_RUNE_ZETH, TYPE_GEDDON },
+    { GO_RUNE_THERI, TYPE_GOLEMAGG },
+    { GO_RUNE_KORO, TYPE_SULFURON }
+};
+
+/*######
+## go_molten_core_rune
+######*/
+
+struct go_molten_core_rune : public GameObjectScript
+{
+    go_molten_core_rune() : GameObjectScript("go_molten_core_rune") {}
+
+    bool OnUse(Player* /*pPlayer*/, GameObject* pGo) override
+    {
+        ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
+
+        if (!pInstance)
+        {
+            return true;
+        }
+
+        for (uint8 i = 0; i < MAX_MOLTEN_RUNES; ++i)
+        {
+            if (pGo->GetEntry() == m_aMoltenCoreRunes[i].m_uiRuneEntry)
+            {
+                // check if boss is already dead - if not return true
+                if (pInstance->GetData(m_aMoltenCoreRunes[i].m_uiType) != DONE)
+                {
+                    return true;
+                }
+
+                pInstance->SetData(m_aMoltenCoreRunes[i].m_uiType, SPECIAL);
+                return false;
+            }
+        }
+
+        return true;
+    }
+};
 
 void AddSC_molten_core()
 {
+    Script* s;
+    s = new go_molten_core_rune();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "go_molten_core_rune";
+    //pNewScript->pGOUse = &GOUse_go_molten_core_rune;
+    //pNewScript->RegisterSelf();
 }
