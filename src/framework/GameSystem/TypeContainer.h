@@ -369,7 +369,7 @@ template<class OBJECT_TYPES>
  * objects of different types.
  *
  */
-class MANGOS_DLL_DECL TypeMapContainer
+class TypeMapContainer
 {
     public:
 

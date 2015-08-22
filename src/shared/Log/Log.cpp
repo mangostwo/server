@@ -73,8 +73,12 @@ enum LogType
 const int LogType_count = int(LogError) + 1;
 
 Log::Log() :
-    raLogfile(NULL), logfile(NULL), gmLogfile(NULL), charLogfile(NULL),
-    dberLogfile(NULL), elunaErrLogfile(NULL), eventAiErLogfile(NULL), scriptErrLogFile(NULL), worldLogfile(NULL), wardenLogfile(NULL), m_colored(false), m_includeTime(false), m_gmlog_per_account(false), m_scriptLibName(NULL)
+    raLogfile(NULL), logfile(NULL), gmLogfile(NULL), charLogfile(NULL), dberLogfile(NULL), 
+#ifdef ENABLE_ELUNA
+    elunaErrLogfile(NULL), 
+#endif /* ENABLE_ELUNA */
+    eventAiErLogfile(NULL), scriptErrLogFile(NULL), worldLogfile(NULL), wardenLogfile(NULL), m_colored(false),
+    m_includeTime(false), m_gmlog_per_account(false), m_scriptLibName(NULL)
 {
     Initialize();
 }
@@ -270,7 +274,9 @@ void Log::Initialize()
 
     charLogfile = openLogFile("CharLogFile", "CharLogTimestamp", "a");
     dberLogfile = openLogFile("DBErrorLogFile", NULL, "a");
+#ifdef ENABLE_ELUNA
     elunaErrLogfile = openLogFile("ElunaErrorLogFile", NULL, "a");
+#endif /* ENABLE_ELUNA */
     eventAiErLogfile = openLogFile("EventAIErrorLogFile", NULL, "a");
     raLogfile = openLogFile("RaLogFile", NULL, "a");
     worldLogfile = openLogFile("WorldLogFile", "WorldLogTimestamp", "a");
@@ -525,6 +531,7 @@ void Log::outErrorDb(const char* err, ...)
     fflush(stderr);
 }
 
+#ifdef ENABLE_ELUNA
 void Log::outErrorEluna()
 {
     if (m_includeTime)
@@ -548,7 +555,12 @@ void Log::outErrorEluna()
 
     fflush(stderr);
 }
+#else
+/* This is made to not fiddle with the eluna code in LuaEngine/ at all */
+void Log::outErrorEluna() {}
+#endif /* ENABLE_ELUNA */
 
+#ifdef ENABLE_ELUNA
 void Log::outErrorEluna(const char* err, ...)
 {
     if (!err)
@@ -599,6 +611,10 @@ void Log::outErrorEluna(const char* err, ...)
 
     fflush(stderr);
 }
+#else
+/* This is made to not fiddle with the eluna code in LuaEngine/ at all */
+void Log::outErrorEluna(const char* err, ...) {}
+#endif /* ENABLE_ELUNA */
 
 void Log::outErrorEventAI()
 {

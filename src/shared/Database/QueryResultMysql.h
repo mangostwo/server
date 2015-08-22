@@ -28,13 +28,12 @@
 #define QUERYRESULTMYSQL_H
 
 #include "Common/Common.h"
-#include <mysql.h>
 
 #ifdef WIN32
 #include <winsock2.h>
-#else
-
 #endif
+
+#include <mysql.h>
 
 /**
  * @brief

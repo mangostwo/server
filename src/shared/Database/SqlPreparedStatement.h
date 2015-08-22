@@ -26,6 +26,7 @@
 #define SQLPREPAREDSTATEMENTS_H
 
 #include "Common/Common.h"
+#include "Utilities/Errors.h"
 #include <ace/TSS_T.h>
 #include <vector>
 #include <stdexcept>
@@ -78,7 +79,7 @@ enum SqlStmtFieldType
  * @brief templates might be the best choice here
  *
  */
-class  SqlStmtFieldData
+class SqlStmtFieldData
 {
     public:
         /**
@@ -307,7 +308,7 @@ class SqlStatement;
  * @brief
  *
  */
-class  SqlStmtParameters
+class SqlStmtParameters
 {
     public:
         /**
@@ -428,7 +429,7 @@ class SqlStatementID
  * @brief statement index
  *
  */
-class  SqlStatement
+class SqlStatement
 {
     public:
         /**
@@ -694,7 +695,7 @@ class  SqlStatement
  * @brief base prepared statement class
  *
  */
-class  SqlPreparedStatement
+class SqlPreparedStatement
 {
     public:
         /**
@@ -775,7 +776,7 @@ class  SqlPreparedStatement
  * @brief prepared statements via plain SQL string requests
  *
  */
-class  SqlPlainPreparedStatement : public SqlPreparedStatement
+class SqlPlainPreparedStatement : public SqlPreparedStatement
 {
     public:
         /**

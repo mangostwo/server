@@ -139,7 +139,7 @@ typedef std::vector<uint32> AutoSpellList;
 
 class Player;
 
-class  Pet : public Creature
+class Pet : public Creature
 {
     public:
         explicit Pet(PetType type = MAX_PET_TYPE);

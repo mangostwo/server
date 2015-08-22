@@ -934,7 +934,6 @@ bool Object::PrintEntryError(char const* descr) const
     return false;
 }
 
-
 void Object::BuildUpdateDataForPlayer(Player* pl, UpdateDataMapType& update_players)
 {
     UpdateDataMapType::iterator iter = update_players.find(pl);

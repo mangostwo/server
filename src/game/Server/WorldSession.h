@@ -202,7 +202,7 @@ class WorldSessionFilter : public PacketFilter
 };
 
 /// Player session in the World
-class  WorldSession
+class WorldSession
 {
         friend class CharacterHandler;
 

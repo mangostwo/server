@@ -82,10 +82,10 @@ void SQLStorageBase::Free()
     {
         switch (m_dst_format[x])
         {
-            case FT_LOGIC:
+            case DBC_FF_LOGIC:
                 offset += sizeof(bool);
                 break;
-            case FT_STRING:
+            case DBC_FF_STRING:
             {
                 for (uint32 recordItr = 0; recordItr < m_recordCount; ++recordItr)
                     { delete[] *(char**)((char*)(m_data + (recordItr * m_recordSize)) + offset); }
@@ -93,24 +93,24 @@ void SQLStorageBase::Free()
                 offset += sizeof(char*);
                 break;
             }
-            case FT_NA:
-            case FT_INT:
+            case DBC_FF_NA:
+            case DBC_FF_INT:
                 offset += sizeof(uint32);
                 break;
-            case FT_BYTE:
-            case FT_NA_BYTE:
+            case DBC_FF_BYTE:
+            case DBC_FF_NA_BYTE:
                 offset += sizeof(char);
                 break;
-            case FT_FLOAT:
-            case FT_NA_FLOAT:
+            case DBC_FF_FLOAT:
+            case DBC_FF_NA_FLOAT:
                 offset += sizeof(float);
                 break;
-            case FT_NA_POINTER:
+            case DBC_FF_NA_POINTER:
                 // TODO- possible (and small) memleak here possible
                 offset += sizeof(char*);
                 break;
-            case FT_IND:
-            case FT_SORT:
+            case DBC_FF_IND:
+            case DBC_FF_SORT:
                 assert(false && "SQL storage not have sort field types");
                 break;
             default:

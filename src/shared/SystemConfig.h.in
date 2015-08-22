@@ -93,6 +93,7 @@
 # endif
 #endif
 
+
 // The path to config files, only the prepared sln's have PREPARED_SLN defined
 // as cmake replaces the CONF_xxx during the build process
 #ifndef SYSCONFDIR

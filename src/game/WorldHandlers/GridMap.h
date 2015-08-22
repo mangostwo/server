@@ -115,6 +115,9 @@ enum GridMapLiquidStatus
 #define MAP_LIQUID_TYPE_DARK_WATER  0x10
 #define MAP_LIQUID_TYPE_WMO_WATER   0x20
 
+static uint16 holetab_h[4] = { 0x1111, 0x2222, 0x4444, 0x8888 };
+static uint16 holetab_v[4] = { 0x000F, 0x00F0, 0x0F00, 0xF000 };
+
 struct GridMapLiquidData
 {
     uint32 type_flags;
@@ -127,6 +130,7 @@ class GridMap
 {
     private:
 
+        uint16 m_holes[16][16];
         uint32 m_flags;
 
         // Area data
@@ -163,6 +167,8 @@ class GridMap
         bool loadAreaData(FILE* in, uint32 offset, uint32 size);
         bool loadHeightData(FILE* in, uint32 offset, uint32 size);
         bool loadGridMapLiquidData(FILE* in, uint32 offset, uint32 size);
+        bool loadHolesData(FILE* in, uint32 offset, uint32 size);
+        bool IsHole(int row, int col) const;
 
         // Get height functions and pointers
         typedef float(GridMap::*pGetHeightPtr)(float x, float y) const;
@@ -191,7 +197,7 @@ class GridMap
 };
 
 template<typename Countable>
-class  Referencable
+class Referencable
 {
     public:
         Referencable() { m_count = 0; }
@@ -217,7 +223,7 @@ typedef ACE_Atomic_Op<ACE_Thread_Mutex, long> AtomicLong;
 #define DEFAULT_WATER_SEARCH      50.0f                     // default search distance to case detection water level
 
 // class for sharing and managin GridMap objects
-class  TerrainInfo : public Referencable<AtomicLong>
+class TerrainInfo : public Referencable<AtomicLong>
 {
     public:
         TerrainInfo(uint32 mapid);
@@ -244,7 +250,6 @@ class  TerrainInfo : public Referencable<AtomicLong>
 
         bool GetAreaInfo(float x, float y, float z, uint32& mogpflags, int32& adtId, int32& rootId, int32& groupId) const;
         bool IsOutdoors(float x, float y, float z) const;
-
 
         // this method should be used only by TerrainManager
         // to cleanup unreferenced GridMap objects - they are too heavy
@@ -283,7 +288,7 @@ class  TerrainInfo : public Referencable<AtomicLong>
 };
 
 // class for managing TerrainData object and all sort of geometry querying operations
-class MANGOS_DLL_DECL TerrainManager : public MaNGOS::Singleton<TerrainManager, MaNGOS::ClassLevelLockable<TerrainManager, ACE_Thread_Mutex> >
+class TerrainManager : public MaNGOS::Singleton<TerrainManager, MaNGOS::ClassLevelLockable<TerrainManager, ACE_Thread_Mutex> >
 {
         typedef UNORDERED_MAP<uint32,  TerrainInfo*> TerrainDataMap;
         friend class MaNGOS::OperatorNew<TerrainManager>;

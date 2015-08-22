@@ -27,6 +27,7 @@
 
 #include "Common/Common.h"
 #include "Utilities/ByteConverter.h"
+#include "Utilities/Errors.h"
 
 /**
  * @brief
