@@ -37,7 +37,7 @@
 
 struct is_onyxias_lair : public InstanceScript
 {
-    is_onyxias_lair() : InstanceScript("_onyxias_lair") {}
+    is_onyxias_lair() : InstanceScript("instance_onyxias_lair") {}
 
     struct instance_onyxias_lair : public ScriptedInstance
     {

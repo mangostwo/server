@@ -1208,25 +1208,22 @@ void Map::RemoveFromActive(WorldObject* obj)
 void Map::CreateInstanceData(bool load)
 {
     if (i_data != NULL)
-        { return; }
+    {
+        return;
+    }
 
-    if (Instanceable())
-    {
-        if (InstanceTemplate const* mInstance = ObjectMgr::GetInstanceTemplate(GetId()))
-            { i_script_id = mInstance->script_id; }
-    }
-    else
-    {
-        if (WorldTemplate const* mInstance = ObjectMgr::GetWorldTemplate(GetId()))
-            { i_script_id = mInstance->script_id; }
-    }
+    uint32 i_script_id = GetScriptId();
 
     if (!i_script_id)
-        { return; }
+    {
+        return;
+    }
 
     i_data = sScriptMgr.CreateInstanceData(this);
     if (!i_data)
-        { return; }
+    {
+        return;
+    }
 
     if (load)
     {
@@ -1234,9 +1231,13 @@ void Map::CreateInstanceData(bool load)
         QueryResult* result;
 
         if (Instanceable())
-            { result = CharacterDatabase.PQuery("SELECT data FROM instance WHERE id = '%u'", i_InstanceId); }
+        {
+            result = CharacterDatabase.PQuery("SELECT data FROM instance WHERE id = '%u'", i_InstanceId);
+        }
         else
-            { result = CharacterDatabase.PQuery("SELECT data FROM world WHERE map = '%u'", GetId()); }
+        {
+            result = CharacterDatabase.PQuery("SELECT data FROM world WHERE map = '%u'", GetId());
+        }
 
         if (result)
         {
@@ -1253,7 +1254,9 @@ void Map::CreateInstanceData(bool load)
         {
             // for non-instanceable map always add data to table if not found, later code expected that for map in `word` exist always after load
             if (!Instanceable())
-                { CharacterDatabase.PExecute("INSERT INTO world VALUES ('%u', '')", GetId()); }
+            {
+                CharacterDatabase.PExecute("INSERT INTO world VALUES ('%u', '')", GetId());
+            }
         }
     }
     else
