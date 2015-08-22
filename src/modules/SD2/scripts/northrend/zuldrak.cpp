@@ -303,6 +303,8 @@ void AddSC_zuldrak()
     s->RegisterSelf();
     s = new npc_decaying_ghoul();
     s->RegisterSelf();
+    s = new npc_ghoul_feeding_bunny();
+    s->RegisterSelf();
 
     s = new spell_attract_ghoul();
     s->RegisterSelf();

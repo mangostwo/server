@@ -427,26 +427,31 @@ static const HotOnTrailData aHotOnTrailValues[6] =
     {5716, 24851, 38342, 71758},                    // Orgrimmar Barber Shop
 };
 
-bool AreaTrigger_at_hot_on_the_trail(Player* pPlayer, AreaTriggerEntry const* pAt)
+struct at_hot_on_the_trail : public AreaTriggerScript
 {
-    if (pPlayer->isGameMaster() || !pPlayer->IsAlive())
-        return false;
+    at_hot_on_the_trail() : AreaTriggerScript("at_hot_on_the_trail") {}
 
-    for (uint8 i = 0; i < 6; ++i)
+    bool OnTrigger(Player* pPlayer, AreaTriggerEntry const* pAt) override
     {
-        if (pAt->id == aHotOnTrailValues[i].uiAtEntry)
+        if (pPlayer->isGameMaster() || !pPlayer->IsAlive())
+            return false;
+
+        for (uint8 i = 0; i < 6; ++i)
         {
-            if (pPlayer->GetQuestStatus(aHotOnTrailValues[i].uiQuestEntry) == QUEST_STATUS_INCOMPLETE &&
-                    pPlayer->GetReqKillOrCastCurrentCount(aHotOnTrailValues[i].uiQuestEntry, aHotOnTrailValues[i].uiCreditEntry) == 0)
+            if (pAt->id == aHotOnTrailValues[i].uiAtEntry)
             {
-                pPlayer->CastSpell(pPlayer, aHotOnTrailValues[i].uiSpellEntry, true);
-                return true;
+                if (pPlayer->GetQuestStatus(aHotOnTrailValues[i].uiQuestEntry) == QUEST_STATUS_INCOMPLETE &&
+                    pPlayer->GetReqKillOrCastCurrentCount(aHotOnTrailValues[i].uiQuestEntry, aHotOnTrailValues[i].uiCreditEntry) == 0)
+                {
+                    pPlayer->CastSpell(pPlayer, aHotOnTrailValues[i].uiSpellEntry, true);
+                    return true;
+                }
             }
         }
-    }
 
-    return false;
-}
+        return false;
+    }
+};
 
 /*######
 ## at_ancient_leaf
@@ -476,24 +481,29 @@ static const AncientSpawn afSpawnLocations[MAX_ANCIENTS] =
     { NPC_HASTAT,  6193.449219f, -1137.834106f, 366.260529f, 5.77332f },    // Hastat the Ancient
 };
 
-bool AreaTrigger_at_ancient_leaf(Player* pPlayer, AreaTriggerEntry const* pAt)
+struct at_ancient_leaf : public AreaTriggerScript
 {
-    if (pPlayer->isGameMaster() || !pPlayer->IsAlive())
-        return false;
+    at_ancient_leaf() : AreaTriggerScript("at_ancient_leaf") {}
 
-    // Handle Call Ancients event start - The area trigger summons 3 ancients
-    if (pPlayer->GetQuestStatus(QUEST_ANCIENT_LEAF) == QUEST_STATUS_COMPLETE)
+    bool OnTrigger(Player* pPlayer, AreaTriggerEntry const* pAt) override
     {
-        // If ancients are already spawned, skip the rest
-        if (GetClosestCreatureWithEntry(pPlayer, NPC_VARTRUS, 50.0f) || GetClosestCreatureWithEntry(pPlayer, NPC_STOMA, 50.0f) || GetClosestCreatureWithEntry(pPlayer, NPC_HASTAT, 50.0f))
-            return true;
+        if (pPlayer->isGameMaster() || !pPlayer->IsAlive())
+            return false;
 
-        for (uint8 i = 0; i < MAX_ANCIENTS; ++i)
-            pPlayer->SummonCreature(afSpawnLocations[i].uiEntry, afSpawnLocations[i].fX, afSpawnLocations[i].fY, afSpawnLocations[i].fZ, afSpawnLocations[i].fO, TEMPSUMMON_TIMED_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
+        // Handle Call Ancients event start - The area trigger summons 3 ancients
+        if (pPlayer->GetQuestStatus(QUEST_ANCIENT_LEAF) == QUEST_STATUS_COMPLETE)
+        {
+            // If ancients are already spawned, skip the rest
+            if (GetClosestCreatureWithEntry(pPlayer, NPC_VARTRUS, 50.0f) || GetClosestCreatureWithEntry(pPlayer, NPC_STOMA, 50.0f) || GetClosestCreatureWithEntry(pPlayer, NPC_HASTAT, 50.0f))
+                return true;
+
+            for (uint8 i = 0; i < MAX_ANCIENTS; ++i)
+                pPlayer->SummonCreature(afSpawnLocations[i].uiEntry, afSpawnLocations[i].fX, afSpawnLocations[i].fY, afSpawnLocations[i].fZ, afSpawnLocations[i].fO, TEMPSUMMON_TIMED_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
+        }
+
+        return false;
     }
-
-    return false;
-}
+};
 
 void AddSC_areatrigger_scripts()
 {
@@ -530,6 +540,10 @@ void AddSC_areatrigger_scripts()
     s->RegisterSelf();
 
     s = new at_legion_teleporter();
+    s->RegisterSelf();
+    s = new at_ancient_leaf();
+    s->RegisterSelf();
+    s = new at_hot_on_the_trail();
     s->RegisterSelf();
 
     //pNewScript = new Script;

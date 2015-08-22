@@ -2091,6 +2091,8 @@ void AddSC_boss_mimiron()
     s->RegisterSelf();
     s = new npc_computer();
     s->RegisterSelf();
+    s = new npc_bot_trigger();
+    s->RegisterSelf();
 
     s = new go_big_red_button();
     s->RegisterSelf();

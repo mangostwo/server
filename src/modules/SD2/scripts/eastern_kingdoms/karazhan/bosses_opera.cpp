@@ -1548,6 +1548,9 @@ void AddSC_bosses_opera()
     s = new spell_drink_poison();
     s->RegisterSelf();
 
+    s = new boss_bigbadwolf();
+    s->RegisterSelf();
+
     //// Oz
     //pNewScript = new Script;
     //pNewScript->Name = "boss_dorothee";

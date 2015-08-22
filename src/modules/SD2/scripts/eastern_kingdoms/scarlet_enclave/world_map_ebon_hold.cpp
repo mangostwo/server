@@ -27,46 +27,9 @@ EndScriptData */
 #include "precompiled.h"
 #include "world_map_ebon_hold.h"
 
-//class  map_ebon_hold::world_map_ebon_hold : public ScriptedInstance
-//{
-//public:
-//    world_map_ebon_hold(Map* pMap);
-//
-//    void Initialize() override;
-//
-//    void OnCreatureCreate(Creature* pCreature) override;
-//    void OnCreatureDeath(Creature* pCreature) override;
-//    void OnCreatureEvade(Creature* pCreature) override;
-//    void OnObjectCreate(GameObject* pGo) override;
-//
-//    void SetData(uint32 uiType, uint32 uiData) override;
-//    uint32 GetData(uint32 uiType) const override;
-//
-//    void Update(uint32 uiDiff) override;
-//
-//    bool CanAndToggleGothikYell();
-//
-//    void DoUpdateBattleWorldState(uint32 uiStateId, uint32 uiStateData);
-//
-//    void DoEnableHolyTraps();
-//
-//    // Move the behemots and abominations and make them attack
-//    void DoMoveArmy();
-//    void DoDespawnArmy();
-//
-//protected:
-//    void DoResetBattle();
-//
-//    uint32 m_uiGothikYellTimer;                         // Timer to check if Gothik can yell (related q 12698)
-//    uint32 m_uiBattleEncounter;                         // Store state of the battle around  "The Light of Dawn"
-//
-//    GuidList m_lArmyGuids;
-//    GuidList m_lLightTrapsGuids;
-//};
-
 struct map_ebon_hold : public ZoneScript
 {
-    map_ebon_hold() : ZoneScript("map_ebon_hold") {}
+    map_ebon_hold() : ZoneScript("world_map_ebon_hold") {}
 
     struct world_map_ebon_hold : public ScriptedMap
     {

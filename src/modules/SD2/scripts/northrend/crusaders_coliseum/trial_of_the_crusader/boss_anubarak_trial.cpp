@@ -412,7 +412,7 @@ struct boss_anubarak_trial : public CreatureScript
 
 struct npc_anubarak_trial_spike : public CreatureScript
 {
-    npc_anubarak_trial_spike() : CreatureScript("npc_anubarak_trial_spike") {}
+    npc_anubarak_trial_spike() : CreatureScript("npc_anubarak_spike") {}
 
     struct npc_anubarak_trial_spikeAI : public ScriptedAI
     {
@@ -558,7 +558,7 @@ struct spell_permafrost_dummy : public SpellScript
 
 struct npc_anubarak_trial_frostsphere : public CreatureScript
 {
-    npc_anubarak_trial_frostsphere() : CreatureScript("npc_frostsphere") {}
+    npc_anubarak_trial_frostsphere() : CreatureScript("npc_frost_sphere") {}
 
     struct npc_anubarak_trial_frostsphereAI : public Scripted_NoMovementAI
     {
@@ -656,6 +656,8 @@ void AddSC_boss_anubarak_trial()
     Script* s;
 
     s = new boss_anubarak_trial();
+    s->RegisterSelf();
+    s = new npc_anubarak_trial_spike();
     s->RegisterSelf();
     s = new npc_anubarak_trial_frostsphere();
     s->RegisterSelf();

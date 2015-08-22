@@ -1740,6 +1740,13 @@ void AddSC_chess_event()
     s = new npc_orc_necrolyte();
     s->RegisterSelf();
 
+    s = new spell_action_melee();
+    s->RegisterSelf();
+    s = new spell_face_square();
+    s->RegisterSelf();
+    s = new spell_move_to_square();
+    s->RegisterSelf();
+
     //pNewScript = new Script;
     //pNewScript->Name = "npc_echo_of_medivh";
     //pNewScript->GetAI = GetAI_npc_echo_of_medivh;

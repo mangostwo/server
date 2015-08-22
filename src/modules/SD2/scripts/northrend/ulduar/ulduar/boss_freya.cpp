@@ -658,9 +658,9 @@ struct boss_freya : public CreatureScript
     }
 };
 
-struct spell_summon_allies : public SpellScript
+struct spell_ulduar_summon_allies : public SpellScript
 {
-    spell_summon_allies() : SpellScript("spell_summon_allies") {}
+    spell_ulduar_summon_allies() : SpellScript("spell_ulduar_summon_allies") {}
 
     bool EffectScriptEffect(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/) override
     {
@@ -1072,7 +1072,7 @@ void AddSC_boss_freya()
     s = new npc_healthy_spore();
     s->RegisterSelf();
 
-    s = new spell_summon_allies();
+    s = new spell_ulduar_summon_allies();
     s->RegisterSelf();
 
     //pNewScript = new Script;

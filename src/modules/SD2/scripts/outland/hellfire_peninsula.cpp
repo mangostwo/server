@@ -1110,6 +1110,9 @@ void AddSC_hellfire_peninsula()
     s = new npc_caretaker_dilandrus();
     s->RegisterSelf();
 
+    s = new spell_inform_dog();
+    s->RegisterSelf();
+
     //pNewScript = new Script;
     //pNewScript->Name = "npc_aeranas";
     //pNewScript->GetAI = &GetAI_npc_aeranas;

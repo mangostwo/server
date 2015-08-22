@@ -2113,6 +2113,8 @@ void AddSC_shadowmoon_valley()
     s->RegisterSelf();
     s = new spell_totem_of_spirits();
     s->RegisterSelf();
+    s = new aura_elemental_sieve();
+    s->RegisterSelf();
 
     //pNewScript = new Script;
     //pNewScript->Name = "mob_mature_netherwing_drake";
