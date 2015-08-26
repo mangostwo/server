@@ -168,12 +168,12 @@ struct npc_sinclari : public CreatureScript
         }
     };
 
-    CreatureAI* GetAI_npc_sinclari(Creature* pCreature)
+    CreatureAI* GetAI(Creature* pCreature) override
     {
         return new npc_sinclariAI(pCreature);
     }
 
-    bool GossipHello_npc_sinclari(Player* pPlayer, Creature* pCreature)
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
         if (InstanceData* pInstance = pCreature->GetInstanceData())
         {
@@ -187,7 +187,7 @@ struct npc_sinclari : public CreatureScript
         return true;
     }
 
-    bool GossipSelect_npc_sinclari(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction) override
     {
         if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
         {

@@ -352,7 +352,7 @@ struct boss_dreadscale : public CreatureScript
         }
     };
 
-    CreatureAI* GetAI_boss_dreadscale(Creature* pCreature)
+    CreatureAI* GetAI(Creature* pCreature) override
     {
         return new boss_dreadscaleAI(pCreature);
     }
@@ -399,7 +399,7 @@ struct boss_icehowl : public CreatureScript
         }
     };
 
-    CreatureAI* GetAI_boss_icehowl(Creature* pCreature)
+    CreatureAI* GetAI(Creature* pCreature) override
     {
         return new boss_icehowlAI(pCreature);
     }

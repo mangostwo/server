@@ -734,7 +734,7 @@ struct boss_yogg_saron : public CreatureScript
         }
     };
 
-    CreatureAI* GetAI_boss_yogg_saron(Creature* pCreature)
+    CreatureAI* GetAI(Creature* pCreature) override
     {
         return new boss_yogg_saronAI(pCreature);
     }
@@ -1384,7 +1384,7 @@ struct npc_immortal_guardian : public CreatureScript
         }
     };
 
-    CreatureAI* GetAI_npc_immortal_guardian(Creature* pCreature)
+    CreatureAI* GetAI(Creature* pCreature) override
     {
         return new npc_immortal_guardianAI(pCreature);
     }

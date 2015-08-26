@@ -288,7 +288,7 @@ struct npc_daranelle : public CreatureScript
         }
     };
 
-    CreatureAI* GetAI_npc_daranelle(Creature* pCreature)
+    CreatureAI* GetAI(Creature* pCreature) override
     {
         return new npc_daranelleAI(pCreature);
     }

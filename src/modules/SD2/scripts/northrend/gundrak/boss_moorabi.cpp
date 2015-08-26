@@ -181,7 +181,7 @@ struct boss_moorabi : public CreatureScript
         }
     };
 
-    CreatureAI* GetAI_boss_moorabi(Creature* pCreature)
+    CreatureAI* GetAI(Creature* pCreature) override
     {
         return new boss_moorabiAI(pCreature);
     }

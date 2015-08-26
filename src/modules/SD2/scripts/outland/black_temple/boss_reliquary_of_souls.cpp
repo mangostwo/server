@@ -354,7 +354,7 @@ struct boss_reliquary_of_souls : public CreatureScript
         }
     };
 
-    CreatureAI* GetAI_boss_reliquary_of_souls(Creature* pCreature)
+    CreatureAI* GetAI(Creature* pCreature) override
     {
         return new boss_reliquary_of_soulsAI(pCreature);
     }
