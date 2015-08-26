@@ -626,10 +626,10 @@ InstanceData* SD2::CreateInstanceData(Map* pMap)
 {
     Script* pTempScript = m_scripts[pMap->GetScriptId()];
 
-    if (!pTempScript || !pTempScript->ToInstanceScript())
+    if (!pTempScript || !pTempScript->ToZoneScript())
     {
         return NULL;
     }
 
-    return pTempScript->ToInstanceScript()->GetInstanceData(pMap);
+    return pTempScript->ToZoneScript()->GetInstanceData(pMap);
 }
