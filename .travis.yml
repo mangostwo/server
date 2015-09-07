@@ -11,7 +11,7 @@ notifications:
 # only run travis on the master branch
 branches:
   only:
-    - master
+    - release20
     - develop21
 
 # build on both Linux and OSX
