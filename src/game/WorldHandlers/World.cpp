@@ -957,9 +957,6 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Script Names...");
     sScriptMgr.LoadScriptNames();
 
-    sLog.outString("Loading WorldTemplate...");
-    sObjectMgr.LoadWorldTemplate();
-
     sLog.outString("Loading InstanceTemplate...");
     sObjectMgr.LoadInstanceTemplate();
 
@@ -1152,11 +1149,10 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Tavern Area Triggers...");
     sObjectMgr.LoadTavernAreaTriggers();
 
-    sLog.outString("Loading AreaTrigger script names...");
-    sScriptMgr.LoadAreaTriggerScripts();
-
-    sLog.outString("Loading event id script names...");
-    sScriptMgr.LoadEventIdScripts();
+#ifdef ENABLE_SD2
+    sLog.outString("Loading all script bindings...");
+    sScriptMgr.LoadScriptBinding();
+#endif /* ENABLE_SD2 */
 
     sLog.outString("Loading Graveyard-zone links...");
     sObjectMgr.LoadGraveyardZones();

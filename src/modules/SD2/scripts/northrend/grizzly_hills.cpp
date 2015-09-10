@@ -48,57 +48,67 @@ enum
     SPELL_GOLEM_CHARGE_CREDIT   = 47797,
 };
 
-struct  npc_depleted_war_golemAI : public ScriptedPetAI
+struct npc_depleted_war_golem : public CreatureScript
 {
-    npc_depleted_war_golemAI(Creature* pCreature) : ScriptedPetAI(pCreature) { Reset(); }
+    npc_depleted_war_golem() : CreatureScript("npc_depleted_war_golem") {}
 
-    void Reset() override { }
-
-    void OwnerKilledUnit(Unit* pVictim) override
+    struct  npc_depleted_war_golemAI : public ScriptedPetAI
     {
-        if (pVictim->GetTypeId() == TYPEID_UNIT && pVictim->GetEntry() == NPC_LIGHTNING_SENTRY)
+        npc_depleted_war_golemAI(Creature* pCreature) : ScriptedPetAI(pCreature) { }
+
+        void Reset() override { }
+
+        void OwnerKilledUnit(Unit* pVictim) override
         {
-            // Is distance expected?
-            if (m_creature->IsWithinDistInMap(pVictim, 10.0f))
-                m_creature->CastSpell(m_creature, SPELL_CHARGE_GOLEM, true);
+            if (pVictim->GetTypeId() == TYPEID_UNIT && pVictim->GetEntry() == NPC_LIGHTNING_SENTRY)
+            {
+                // Is distance expected?
+                if (m_creature->IsWithinDistInMap(pVictim, 10.0f))
+                    m_creature->CastSpell(m_creature, SPELL_CHARGE_GOLEM, true);
+            }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_depleted_war_golemAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_npc_depleted_war_golem(Creature* pCreature)
+struct aura_charge_golem : public AuraScript
 {
-    return new npc_depleted_war_golemAI(pCreature);
-}
+    aura_charge_golem() : AuraScript("aura_charge_golem") {}
 
-bool EffectAuraDummy_npc_depleted_war_golem(const Aura* pAura, bool bApply)
-{
-    if (pAura->GetId() != SPELL_CHARGE_GOLEM)
-        return true;
-
-    Creature* pCreature = (Creature*)pAura->GetTarget();
-
-    if (!pCreature)
-        return true;
-
-    if (pAura->GetEffIndex() == EFFECT_INDEX_0)
+    bool OnDummyApply(const Aura* pAura, bool bApply) override
     {
-        if (bApply)
-        {
-            DoScriptText(SAY_GOLEM_CHARGE, pCreature);
-            pCreature->addUnitState(UNIT_STAT_STUNNED);
-        }
-        else
-        {
-            DoScriptText(SAY_GOLEM_COMPLETE, pCreature);
-            pCreature->clearUnitState(UNIT_STAT_STUNNED);
+        if (pAura->GetId() != SPELL_CHARGE_GOLEM)
+            return true;
 
-            // targets master
-            pCreature->CastSpell(pCreature, SPELL_GOLEM_CHARGE_CREDIT, true);
+        Creature* pCreature = (Creature*)pAura->GetTarget();
+
+        if (!pCreature)
+            return true;
+
+        if (pAura->GetEffIndex() == EFFECT_INDEX_0)
+        {
+            if (bApply)
+            {
+                DoScriptText(SAY_GOLEM_CHARGE, pCreature);
+                pCreature->addUnitState(UNIT_STAT_STUNNED);
+            }
+            else
+            {
+                DoScriptText(SAY_GOLEM_COMPLETE, pCreature);
+                pCreature->clearUnitState(UNIT_STAT_STUNNED);
+
+                // targets master
+                pCreature->CastSpell(pCreature, SPELL_GOLEM_CHARGE_CREDIT, true);
+            }
         }
+
+        return true;
     }
-
-    return true;
-}
+};
 
 /*######
 ## npc_harrison_jones
@@ -140,90 +150,93 @@ enum
     GO_FIRE_DOOR                        = 188480,
 };
 
-struct  npc_harrison_jonesAI : public npc_escortAI
+struct npc_harrison_jones : public CreatureScript
 {
-    npc_harrison_jonesAI(Creature* pCreature) : npc_escortAI(pCreature)
+    npc_harrison_jones() : CreatureScript("npc_harrison_jones") {}
+
+    struct npc_harrison_jonesAI : public npc_escortAI
     {
-        m_uiActivateMummiesTimer = 0;
-        Reset();
-    }
-
-    ObjectGuid m_tecahunaGuid;
-    ObjectGuid m_adarrahGuid;
-
-    uint32 m_uiActivateMummiesTimer;
-
-    GuidList m_lImmolationBunnyGuids;
-
-    void Reset() override { }
-
-    void JustDied(Unit* pKiller) override
-    {
-        DoCleanChamberRoom();
-
-        npc_escortAI::JustDied(pKiller);
-    }
-
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
-    {
-        if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
+        npc_harrison_jonesAI(Creature* pCreature) : npc_escortAI(pCreature)
         {
-            DoScriptText(SAY_HARRISON_ESCORT_START, m_creature);
-            Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue));
-
-            if (GameObject* pCage = GetClosestGameObjectWithEntry(m_creature, GO_HARRISON_CAGE, 5.0f))
-                pCage->Use(m_creature);
+            m_uiActivateMummiesTimer = 0;
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_TECAHUNA)
+        ObjectGuid m_tecahunaGuid;
+        ObjectGuid m_adarrahGuid;
+
+        uint32 m_uiActivateMummiesTimer;
+
+        GuidList m_lImmolationBunnyGuids;
+
+        void Reset() override { }
+
+        void JustDied(Unit* pKiller) override
         {
-            m_tecahunaGuid = pSummoned->GetObjectGuid();
+            DoCleanChamberRoom();
 
-            // sort the mummies based on the distance
+            npc_escortAI::JustDied(pKiller);
+        }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+        {
+            if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
+            {
+                DoScriptText(SAY_HARRISON_ESCORT_START, m_creature);
+                Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue));
+
+                if (GameObject* pCage = GetClosestGameObjectWithEntry(m_creature, GO_HARRISON_CAGE, 5.0f))
+                    pCage->Use(m_creature);
+            }
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_TECAHUNA)
+            {
+                m_tecahunaGuid = pSummoned->GetObjectGuid();
+
+                // sort the mummies based on the distance
+                std::list<Creature*> lBunniesInRange;
+                GetCreatureListWithEntryInGrid(lBunniesInRange, m_creature, NPC_MUMMY_EFFECT_BUNNY, 50.0f);
+
+                lBunniesInRange.sort(ObjectDistanceOrder(pSummoned));
+
+                for (std::list<Creature*>::const_iterator itr = lBunniesInRange.begin(); itr != lBunniesInRange.end(); ++itr)
+                    m_lImmolationBunnyGuids.push_back((*itr)->GetObjectGuid());
+            }
+            else if (pSummoned->GetEntry() == NPC_ANCIENT_DRAKKARI_KING)
+                pSummoned->AI()->AttackStart(m_creature);
+        }
+
+        void SummonedCreatureJustDied(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_TECAHUNA)
+            {
+                SetEscortPaused(false);
+                DoCleanChamberRoom();
+            }
+        }
+
+        void DoCleanChamberRoom()
+        {
+            // open door
+            if (GameObject* pDoor = GetClosestGameObjectWithEntry(m_creature, GO_FIRE_DOOR, 50.0f))
+                pDoor->ResetDoorOrButton();
+
+            // clear auras
             std::list<Creature*> lBunniesInRange;
             GetCreatureListWithEntryInGrid(lBunniesInRange, m_creature, NPC_MUMMY_EFFECT_BUNNY, 50.0f);
 
-            lBunniesInRange.sort(ObjectDistanceOrder(pSummoned));
-
             for (std::list<Creature*>::const_iterator itr = lBunniesInRange.begin(); itr != lBunniesInRange.end(); ++itr)
-                m_lImmolationBunnyGuids.push_back((*itr)->GetObjectGuid());
+                (*itr)->RemoveAurasDueToSpell(SPELL_BUNNY_IMMOLATION);
+
+            m_uiActivateMummiesTimer = 0;
         }
-        else if (pSummoned->GetEntry() == NPC_ANCIENT_DRAKKARI_KING)
-            pSummoned->AI()->AttackStart(m_creature);
-    }
 
-    void SummonedCreatureJustDied(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_TECAHUNA)
+        void WaypointReached(uint32 uiPointId) override
         {
-            SetEscortPaused(false);
-            DoCleanChamberRoom();
-        }
-    }
-
-    void DoCleanChamberRoom()
-    {
-        // open door
-        if (GameObject* pDoor = GetClosestGameObjectWithEntry(m_creature, GO_FIRE_DOOR, 50.0f))
-            pDoor->ResetDoorOrButton();
-
-        // clear auras
-        std::list<Creature*> lBunniesInRange;
-        GetCreatureListWithEntryInGrid(lBunniesInRange, m_creature, NPC_MUMMY_EFFECT_BUNNY, 50.0f);
-
-        for (std::list<Creature*>::const_iterator itr = lBunniesInRange.begin(); itr != lBunniesInRange.end(); ++itr)
-            (*itr)->RemoveAurasDueToSpell(SPELL_BUNNY_IMMOLATION);
-
-        m_uiActivateMummiesTimer = 0;
-    }
-
-    void WaypointReached(uint32 uiPointId) override
-    {
-        switch (uiPointId)
-        {
+            switch (uiPointId)
+            {
             case 7:
                 DoScriptText(SAY_HARRISON_CHAMBER_1, m_creature);
                 break;
@@ -259,16 +272,16 @@ struct  npc_harrison_jonesAI : public npc_escortAI
                 break;
             case 16:
             {
-                // set mummies in fire
-                std::list<Creature*> lBunniesInRange;
-                GetCreatureListWithEntryInGrid(lBunniesInRange, m_creature, NPC_MUMMY_EFFECT_BUNNY, 50.0f);
+                       // set mummies in fire
+                       std::list<Creature*> lBunniesInRange;
+                       GetCreatureListWithEntryInGrid(lBunniesInRange, m_creature, NPC_MUMMY_EFFECT_BUNNY, 50.0f);
 
-                for (std::list<Creature*>::const_iterator itr = lBunniesInRange.begin(); itr != lBunniesInRange.end(); ++itr)
-                    (*itr)->CastSpell((*itr), SPELL_BUNNY_IMMOLATION, true);
+                       for (std::list<Creature*>::const_iterator itr = lBunniesInRange.begin(); itr != lBunniesInRange.end(); ++itr)
+                           (*itr)->CastSpell((*itr), SPELL_BUNNY_IMMOLATION, true);
 
-                m_creature->SetFacingTo(5.0f);
-                DoCastSpellIfCan(m_creature, SPELL_GONG_EFFECT);
-                break;
+                       m_creature->SetFacingTo(5.0f);
+                       DoCastSpellIfCan(m_creature, SPELL_GONG_EFFECT);
+                       break;
             }
             case 17:
                 DoScriptText(SAY_HARRISON_CHAMBER_3, m_creature);
@@ -308,63 +321,64 @@ struct  npc_harrison_jonesAI : public npc_escortAI
                     m_creature->SetFacingToObject(pPlayer);
                 }
                 break;
+            }
         }
-    }
 
-    void UpdateEscortAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // special script for snake fight
-        if (m_uiActivateMummiesTimer)
+        void UpdateEscortAI(const uint32 uiDiff) override
         {
-            if (m_uiActivateMummiesTimer <= uiDiff)
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            // special script for snake fight
+            if (m_uiActivateMummiesTimer)
             {
-                if (Creature* pTecahuna = m_creature->GetMap()->GetCreature(m_tecahunaGuid))
+                if (m_uiActivateMummiesTimer <= uiDiff)
                 {
-                    // activate 2 mummies at each turn
-                    for (uint8 i = 0; i < 2; ++i)
+                    if (Creature* pTecahuna = m_creature->GetMap()->GetCreature(m_tecahunaGuid))
                     {
-                        if (Creature* pBunny = m_creature->GetMap()->GetCreature(m_lImmolationBunnyGuids.front()))
+                        // activate 2 mummies at each turn
+                        for (uint8 i = 0; i < 2; ++i)
                         {
-                            pTecahuna->CastSpell(pBunny, SPELL_TECAHUNA_SPIRIT_BEAM, true);
-                            pBunny->CastSpell(pBunny, SPELL_SUMMON_DRAKKARI_KING, true, NULL, NULL, m_creature->GetObjectGuid());
-                            pBunny->RemoveAurasDueToSpell(SPELL_BUNNY_IMMOLATION);
-                            m_lImmolationBunnyGuids.remove(m_lImmolationBunnyGuids.front());
+                            if (Creature* pBunny = m_creature->GetMap()->GetCreature(m_lImmolationBunnyGuids.front()))
+                            {
+                                pTecahuna->CastSpell(pBunny, SPELL_TECAHUNA_SPIRIT_BEAM, true);
+                                pBunny->CastSpell(pBunny, SPELL_SUMMON_DRAKKARI_KING, true, NULL, NULL, m_creature->GetObjectGuid());
+                                pBunny->RemoveAurasDueToSpell(SPELL_BUNNY_IMMOLATION);
+                                m_lImmolationBunnyGuids.remove(m_lImmolationBunnyGuids.front());
+                            }
                         }
                     }
-                }
 
-                // set timer based on the remaining mummies
-                if (m_lImmolationBunnyGuids.empty())
-                    m_uiActivateMummiesTimer = 0;
+                    // set timer based on the remaining mummies
+                    if (m_lImmolationBunnyGuids.empty())
+                        m_uiActivateMummiesTimer = 0;
+                    else
+                        m_uiActivateMummiesTimer = urand(5000, 10000);
+                }
                 else
-                    m_uiActivateMummiesTimer = urand(5000, 10000);
+                    m_uiActivateMummiesTimer -= uiDiff;
             }
-            else
-                m_uiActivateMummiesTimer -= uiDiff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_harrison_jonesAI(pCreature);
+    }
+
+    bool OnQuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest) override
+    {
+        if (pQuest->GetQuestId() == QUEST_ID_DUN_DA_DUN_TAH)
+        {
+            pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
+            return true;
         }
 
-        DoMeleeAttackIfReady();
+        return false;
     }
 };
-
-CreatureAI* GetAI_npc_harrison_jones(Creature* pCreature)
-{
-    return new npc_harrison_jonesAI(pCreature);
-}
-
-bool QuestAccept_npc_harrison_jones(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_ID_DUN_DA_DUN_TAH)
-    {
-        pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
-        return true;
-    }
-
-    return false;
-}
 
 /*######
 ## npc_emily
@@ -393,38 +407,42 @@ enum
     QUEST_ID_MR_FLOPPY_ADVENTURE        = 12027,
 };
 
-struct  npc_emilyAI : public npc_escortAI
+struct npc_emily : public CreatureScript
 {
-    npc_emilyAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+    npc_emily() : CreatureScript("npc_emily") {}
 
-    ObjectGuid m_floppyGuid;
-
-    void Reset() override { }
-
-    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 uiMiscValue) override
+    struct npc_emilyAI : public npc_escortAI
     {
-        if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
-        {
-            Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue));
+        npc_emilyAI(Creature* pCreature) : npc_escortAI(pCreature) { }
 
-            if (Creature* pFloppy = GetClosestCreatureWithEntry(m_creature, NPC_MR_FLOPPY, 10.0f))
-                m_floppyGuid = pFloppy->GetObjectGuid();
-        }
-        else if (eventType == AI_EVENT_JUST_DIED && pSender->GetEntry() == NPC_MR_FLOPPY)
-        {
-            npc_escortAI::JustDied(m_creature);
-            m_creature->ForcedDespawn();
-        }
-        else if (eventType == AI_EVENT_CRITICAL_HEALTH && pSender->GetEntry() == NPC_MR_FLOPPY)
-            DoScriptText(SAY_FLOPPY_ALMOST_DEAD, m_creature);
-        else if (eventType == AI_EVENT_LOST_SOME_HEALTH && pSender->GetEntry() == NPC_MR_FLOPPY)
-            DoScriptText(urand(0, 1) ? SAY_HELP_FLOPPY_1 : SAY_HELP_FLOPPY_2, m_creature);
-    }
+        ObjectGuid m_floppyGuid;
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
+        void Reset() override { }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 uiMiscValue) override
         {
+            if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
+            {
+                Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue));
+
+                if (Creature* pFloppy = GetClosestCreatureWithEntry(m_creature, NPC_MR_FLOPPY, 10.0f))
+                    m_floppyGuid = pFloppy->GetObjectGuid();
+            }
+            else if (eventType == AI_EVENT_JUST_DIED && pSender->GetEntry() == NPC_MR_FLOPPY)
+            {
+                npc_escortAI::JustDied(m_creature);
+                m_creature->ForcedDespawn();
+            }
+            else if (eventType == AI_EVENT_CRITICAL_HEALTH && pSender->GetEntry() == NPC_MR_FLOPPY)
+                DoScriptText(SAY_FLOPPY_ALMOST_DEAD, m_creature);
+            else if (eventType == AI_EVENT_LOST_SOME_HEALTH && pSender->GetEntry() == NPC_MR_FLOPPY)
+                DoScriptText(urand(0, 1) ? SAY_HELP_FLOPPY_1 : SAY_HELP_FLOPPY_2, m_creature);
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_RAVENOUS_WORG:
             case NPC_HUNGRY_WORG:
                 if (Creature* pFloppy = m_creature->GetMap()->GetCreature(m_floppyGuid))
@@ -435,13 +453,13 @@ struct  npc_emilyAI : public npc_escortAI
                     pSummoned->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
                 }
                 break;
+            }
         }
-    }
 
-    void SummonedCreatureJustDied(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
+        void SummonedCreatureJustDied(Creature* pSummoned) override
         {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_RAVENOUS_WORG:
                 DoScriptText(SAY_SECOND_WOLF_DEFEAT, m_creature);
                 SetEscortPaused(false);
@@ -453,16 +471,16 @@ struct  npc_emilyAI : public npc_escortAI
                 DoScriptText(SAY_FIRST_WOLF_DEFEAT, m_creature);
                 SetEscortPaused(false);
                 break;
+            }
         }
-    }
 
-    void SummonedMovementInform(Creature* pSummoned, uint32 uiType, uint32 uiPointId) override
-    {
-        if (uiType != POINT_MOTION_TYPE || !uiPointId)
-            return;
-
-        switch (pSummoned->GetEntry())
+        void SummonedMovementInform(Creature* pSummoned, uint32 uiType, uint32 uiPointId) override
         {
+            if (uiType != POINT_MOTION_TYPE || !uiPointId)
+                return;
+
+            switch (pSummoned->GetEntry())
+            {
             case NPC_RAVENOUS_WORG:
                 // board the ravenous worg vehicle
                 if (Creature* pFloppy = m_creature->GetMap()->GetCreature(m_floppyGuid))
@@ -472,13 +490,13 @@ struct  npc_emilyAI : public npc_escortAI
                 if (Creature* pFloppy = m_creature->GetMap()->GetCreature(m_floppyGuid))
                     pSummoned->AI()->AttackStart(pFloppy);
                 break;
+            }
         }
-    }
 
-    void WaypointReached(uint32 uiPointId) override
-    {
-        switch (uiPointId)
+        void WaypointReached(uint32 uiPointId) override
         {
+            switch (uiPointId)
+            {
             case 0:
                 DoScriptText(SAY_ESCORT_START, m_creature);
                 break;
@@ -508,45 +526,56 @@ struct  npc_emilyAI : public npc_escortAI
                 if (Creature* pFloppy = m_creature->GetMap()->GetCreature(m_floppyGuid))
                     pFloppy->ForcedDespawn();
                 break;
+            }
         }
-    }  
-};
+    };
 
-CreatureAI* GetAI_npc_emily(Creature* pCreature)
-{
-    return new npc_emilyAI(pCreature);
-}
-
-bool QuestAccept_npc_emily(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_ID_MR_FLOPPY_ADVENTURE)
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
-        return true;
+        return new npc_emilyAI(pCreature);
     }
 
-    return false;
-}
+    bool OnQuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest) override
+    {
+        if (pQuest->GetQuestId() == QUEST_ID_MR_FLOPPY_ADVENTURE)
+        {
+            pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
+            return true;
+        }
+
+        return false;
+    }
+};
 
 void AddSC_grizzly_hills()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_depleted_war_golem";
-    pNewScript->GetAI = &GetAI_npc_depleted_war_golem;
-    pNewScript->pEffectAuraDummy = &EffectAuraDummy_npc_depleted_war_golem;
-    pNewScript->RegisterSelf();
-    
-    pNewScript = new Script;
-    pNewScript->Name = "npc_harrison_jones";
-    pNewScript->GetAI = &GetAI_npc_harrison_jones;
-    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_harrison_jones;
-    pNewScript->RegisterSelf();
-    
-    pNewScript = new Script;
-    pNewScript->Name = "npc_emily";
-    pNewScript->GetAI = &GetAI_npc_emily;
-    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_emily;
-    pNewScript->RegisterSelf();
+    s = new npc_depleted_war_golem();
+    s->RegisterSelf();
+    s = new npc_harrison_jones();
+    s->RegisterSelf();
+    s = new npc_emily();
+    s->RegisterSelf();
+
+    s = new aura_charge_golem();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_depleted_war_golem";
+    //pNewScript->GetAI = &GetAI_npc_depleted_war_golem;
+    //pNewScript->pEffectAuraDummy = &EffectAuraDummy_npc_depleted_war_golem;
+    //pNewScript->RegisterSelf();
+    //
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_harrison_jones";
+    //pNewScript->GetAI = &GetAI_npc_harrison_jones;
+    //pNewScript->pQuestAcceptNPC = &QuestAccept_npc_harrison_jones;
+    //pNewScript->RegisterSelf();
+    //
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_emily";
+    //pNewScript->GetAI = &GetAI_npc_emily;
+    //pNewScript->pQuestAcceptNPC = &QuestAccept_npc_emily;
+    //pNewScript->RegisterSelf();
 }

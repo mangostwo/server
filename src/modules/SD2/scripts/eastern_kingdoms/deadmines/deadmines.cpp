@@ -35,30 +35,37 @@
 #include "precompiled.h"
 #include "deadmines.h"
 
-bool GOUse_go_defias_cannon(Player* /*pPlayer*/, GameObject* pGo)
+struct go_defias_cannon : public GameObjectScript
 {
-    ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
+    go_defias_cannon() : GameObjectScript("go_defias_cannon") {}
 
-    if (!pInstance)
+    bool OnUse(Player* /*pPlayer*/, GameObject* pGo) override
     {
-        return false;
-    }
+        ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
 
-    if (pInstance->GetData(TYPE_IRON_CLAD_DOOR) == DONE)
-    {
-        return false;
-    }
+        if (!pInstance)
+        {
+            return false;
+        }
 
-    pInstance->SetData(TYPE_IRON_CLAD_DOOR, DONE);
-    return false;
-}
+        if (pInstance->GetData(TYPE_IRON_CLAD_DOOR) == DONE)
+        {
+            return false;
+        }
+
+        pInstance->SetData(TYPE_IRON_CLAD_DOOR, DONE);
+        return false;   //TODO check it; true?
+    }
+};
 
 void AddSC_deadmines()
 {
-    Script* pNewScript;
+    Script *s;
+    s = new go_defias_cannon();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "go_defias_cannon";
-    pNewScript->pGOUse = &GOUse_go_defias_cannon;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "go_defias_cannon";
+    //pNewScript->pGOUse = &GOUse_go_defias_cannon;
+    //pNewScript->RegisterSelf();
 }

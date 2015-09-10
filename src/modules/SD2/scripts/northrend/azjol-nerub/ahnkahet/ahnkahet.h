@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+﻿/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
@@ -21,6 +21,9 @@ enum
     TYPE_JEDOGA                 = 2,
     TYPE_VOLAZJ                 = 3,
     TYPE_AMANITAR               = 4,
+    TYPE_DO_JEDOGA              = MAX_ENCOUNTER,
+    TYPE_DO_NADOX               = MAX_ENCOUNTER + 1,
+    TYPE_DO_TALDARAM            = MAX_ENCOUNTER + 2,
 
     DATA_INSANITY_PLAYER        = 1,
 
@@ -62,58 +65,5 @@ enum
 
 static const float aTaldaramLandingLoc[4] = {528.734f, -845.998f, 11.54f, 0.68f};
 static const float aJedogaLandingLoc[4] = {375.4977f, -707.3635f, -16.094f, 5.42f};
-
-class instance_ahnkahet : public ScriptedInstance
-{
-    public:
-        instance_ahnkahet(Map* pMap);
-
-        void Initialize() override;
-
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-
-        void OnCreatureEvade(Creature* pCreature) override;
-        void OnCreatureDeath(Creature* pCreature) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        void SetData64(uint32 uiType, uint64 uiGuid) override;
-
-        ObjectGuid SelectRandomGuardianEggGuid();
-        ObjectGuid SelectRandomSwarmerEggGuid();
-        ObjectGuid SelectJedogaSacrificeControllerGuid() { return m_jedogaSacrificeController; }
-
-        void GetJedogaControllersList(GuidList& lList) { lList = m_lJedogaControllersGuidList; }
-        void GetJedogaEventControllersList(GuidList& lList) {lList = m_lJedogaEventControllersGuidList; }
-
-        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-        void Load(const char* chrIn) override;
-
-    private:
-        void HandleInsanityClear();
-        void HandleInsanitySwitch(Player* pPlayer);
-
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string m_strInstData;
-
-        bool m_bRespectElders;
-        bool m_bVolunteerWork;
-
-        uint8 m_uiDevicesActivated;
-        uint8 m_uiInitiatesKilled;
-        uint8 m_uiTwistedVisageCount;
-
-        ObjectGuid m_jedogaSacrificeController;
-
-        GuidList m_GuardianEggList;
-        GuidList m_SwarmerEggList;
-        GuidList m_lJedogaControllersGuidList;
-        GuidList m_lJedogaEventControllersGuidList;
-        GuidList m_lInsanityPlayersGuidList;
-};
 
 #endif

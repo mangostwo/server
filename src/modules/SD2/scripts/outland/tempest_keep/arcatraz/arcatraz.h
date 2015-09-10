@@ -79,57 +79,7 @@ enum
     SPELL_TARGET_OMEGA              = 36852,                // Visual spell used by Mellichar
 };
 
-struct SpawnLocation
-{
-    float m_fX, m_fY, m_fZ, m_fO;
-};
-
-static const SpawnLocation aSummonPosition[5] =
-{
-    {478.326f, -148.505f, 42.56f, 3.19f},                   // Trickster or Phase Hunter
-    {413.292f, -148.378f, 42.56f, 6.27f},                   // Millhouse
-    {420.179f, -174.396f, 42.58f, 0.02f},                   // Akkiris or Sulfuron
-    {471.795f, -174.58f,  42.58f, 3.06f},                   // Twilight or Blackwing Drakonaar
-    {445.763f, -191.639f, 44.64f, 1.60f}                    // Skyriss
-};
-
 static const float aDalliahStartPos[4] = {118.6038f, 96.84682f, 22.44115f, 1.012f};
 static const float aSoccotharesStartPos[4] = {122.1035f, 192.7203f, 22.44115f, 5.235f};
-
-static const float aEntranceMoveLoc[3] = {82.020f, 0.306f, -11.026f};
-static const float aEntranceSpawnLoc[4] = {173.471f, -0.138f, -10.101f, 3.123f};
-
-class instance_arcatraz : public ScriptedInstance, private DialogueHelper
-{
-    public:
-        instance_arcatraz(Map* pMap);
-
-        void Initialize() override;
-
-        void OnPlayerEnter(Player* pPlayer) override;
-        void OnObjectCreate(GameObject* pGo) override;
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnCreatureDeath(Creature* pCreature) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-        void Load(const char* chrIn) override;
-
-        void Update(uint32 uiDiff) override;
-
-    private:
-        void JustDidDialogueStep(int32 iEntry) override;
-
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string m_strInstData;
-
-        uint32 m_uiResetDelayTimer;
-        uint32 m_uiEntranceEventTimer;
-        uint8 m_uiKilledWardens;
-
-        GuidList m_lSkyrissEventMobsGuidList;
-};
 
 #endif

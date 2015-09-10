@@ -57,138 +57,145 @@ enum
 ## boss_moorabi
 ######*/
 
-struct  boss_moorabiAI : public ScriptedAI
+struct boss_moorabi : public CreatureScript
 {
-    boss_moorabiAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_moorabi() : CreatureScript("boss_moorabi") {}
+
+    struct boss_moorabiAI : public ScriptedAI
     {
-        m_pInstance = (instance_gundrak*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    instance_gundrak* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiStabTimer;                                   // used for stab and gore
-    uint32 m_uiQuakeTimer;                                  // used for quake and ground tremor
-    uint32 m_uiRoarTimer;                                   // both roars on it
-    uint32 m_uiTransformationTimer;
-    uint32 m_uiPreviousTimer;
-
-    bool m_bMammothPhase;
-
-    void Reset() override
-    {
-        m_bMammothPhase = false;
-
-        m_uiStabTimer           = 8000;
-        m_uiQuakeTimer          = 1000;
-        m_uiRoarTimer           = 7000;
-        m_uiTransformationTimer = 10000;
-        m_uiPreviousTimer       = 10000;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_MOJO_FRENZY);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MOORABI, IN_PROGRESS);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        switch (urand(0, 2))
+        boss_moorabiAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        }
+
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        uint32 m_uiStabTimer;                                   // used for stab and gore
+        uint32 m_uiQuakeTimer;                                  // used for quake and ground tremor
+        uint32 m_uiRoarTimer;                                   // both roars on it
+        uint32 m_uiTransformationTimer;
+        uint32 m_uiPreviousTimer;
+
+        bool m_bMammothPhase;
+
+        void Reset() override
+        {
+            m_bMammothPhase = false;
+
+            m_uiStabTimer = 8000;
+            m_uiQuakeTimer = 1000;
+            m_uiRoarTimer = 7000;
+            m_uiTransformationTimer = 10000;
+            m_uiPreviousTimer = 10000;
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
+            DoCastSpellIfCan(m_creature, SPELL_MOJO_FRENZY);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_MOORABI, IN_PROGRESS);
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            switch (urand(0, 2))
+            {
             case 0: DoScriptText(SAY_SLAY_1, m_creature); break;
             case 1: DoScriptText(SAY_SLAY_2, m_creature); break;
             case 2: DoScriptText(SAY_SLAY_3, m_creature); break;
+            }
         }
-    }
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MOORABI, DONE);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_creature->HasAura(SPELL_TRANSFORMATION) && !m_bMammothPhase)
+        void JustDied(Unit* /*pKiller*/) override
         {
-            DoScriptText(EMOTE_TRANSFORMED, m_creature);
-            m_bMammothPhase = true;
+            DoScriptText(SAY_DEATH, m_creature);
 
-            // Set the achievement to failed
             if (m_pInstance)
-                m_pInstance->SetLessRabiAchievementCriteria(false);
+                m_pInstance->SetData(TYPE_MOORABI, DONE);
         }
 
-        if (m_uiRoarTimer < uiDiff)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            DoCastSpellIfCan(m_creature->getVictim(), m_bMammothPhase ? SPELL_NUMBING_ROAR : SPELL_NUMBING_SHOUT);
-            m_uiRoarTimer = 20000;
-        }
-        else
-            m_uiRoarTimer -= uiDiff;
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
 
-        if (m_uiQuakeTimer < uiDiff)
-        {
-            DoScriptText(SAY_QUAKE, m_creature);
-            DoCastSpellIfCan(m_creature->getVictim(), m_bMammothPhase ? SPELL_QUAKE : SPELL_GROUND_TREMOR);
-            m_uiQuakeTimer = m_bMammothPhase ? 13000 : 18000;
-        }
-        else
-            m_uiQuakeTimer -= uiDiff;
-
-        if (m_uiStabTimer < uiDiff)
-        {
-            if (m_bMammothPhase)
-                DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_DETERMINED_GORE : SPELL_DETERMINED_GORE_H);
-            else
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_DETERMINED_STAB);
-
-            m_uiStabTimer = 7000;
-        }
-        else
-            m_uiStabTimer -= uiDiff;
-
-        // check only in troll phase
-        if (!m_bMammothPhase)
-        {
-            if (m_uiTransformationTimer < uiDiff)
+            if (m_creature->HasAura(SPELL_TRANSFORMATION) && !m_bMammothPhase)
             {
-                DoScriptText(SAY_TRANSFORM, m_creature);
-                DoScriptText(EMOTE_TRANSFORM, m_creature);
-                DoCastSpellIfCan(m_creature, SPELL_TRANSFORMATION);
-                m_uiPreviousTimer *= 0.8;
-                m_uiTransformationTimer = m_uiPreviousTimer;
+                DoScriptText(EMOTE_TRANSFORMED, m_creature);
+                m_bMammothPhase = true;
+
+                // Set the achievement to failed
+                if (m_pInstance)
+                    m_pInstance->SetData(TYPE_ACHIEV_LESS_RABI, uint32(false));
+            }
+
+            if (m_uiRoarTimer < uiDiff)
+            {
+                DoCastSpellIfCan(m_creature->getVictim(), m_bMammothPhase ? SPELL_NUMBING_ROAR : SPELL_NUMBING_SHOUT);
+                m_uiRoarTimer = 20000;
             }
             else
-                m_uiTransformationTimer -= uiDiff;
-        }
+                m_uiRoarTimer -= uiDiff;
 
-        DoMeleeAttackIfReady();
+            if (m_uiQuakeTimer < uiDiff)
+            {
+                DoScriptText(SAY_QUAKE, m_creature);
+                DoCastSpellIfCan(m_creature->getVictim(), m_bMammothPhase ? SPELL_QUAKE : SPELL_GROUND_TREMOR);
+                m_uiQuakeTimer = m_bMammothPhase ? 13000 : 18000;
+            }
+            else
+                m_uiQuakeTimer -= uiDiff;
+
+            if (m_uiStabTimer < uiDiff)
+            {
+                if (m_bMammothPhase)
+                    DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_DETERMINED_GORE : SPELL_DETERMINED_GORE_H);
+                else
+                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_DETERMINED_STAB);
+
+                m_uiStabTimer = 7000;
+            }
+            else
+                m_uiStabTimer -= uiDiff;
+
+            // check only in troll phase
+            if (!m_bMammothPhase)
+            {
+                if (m_uiTransformationTimer < uiDiff)
+                {
+                    DoScriptText(SAY_TRANSFORM, m_creature);
+                    DoScriptText(EMOTE_TRANSFORM, m_creature);
+                    DoCastSpellIfCan(m_creature, SPELL_TRANSFORMATION);
+                    m_uiPreviousTimer *= 0.8;
+                    m_uiTransformationTimer = m_uiPreviousTimer;
+                }
+                else
+                    m_uiTransformationTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_moorabiAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_moorabi(Creature* pCreature)
-{
-    return new boss_moorabiAI(pCreature);
-}
-
 void AddSC_boss_moorabi()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_moorabi";
-    pNewScript->GetAI = &GetAI_boss_moorabi;
-    pNewScript->RegisterSelf();
+    s = new boss_moorabi();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_moorabi";
+    //pNewScript->GetAI = &GetAI_boss_moorabi;
+    //pNewScript->RegisterSelf();
 }

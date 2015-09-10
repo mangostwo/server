@@ -617,7 +617,6 @@ struct ItemPrototype
     uint32 Duration;
     uint32 ItemLimitCategory;                               // id from ItemLimitCategory.dbc
     uint32 HolidayId;                                       // id from Holidays.dbc
-    uint32 ScriptId;
     uint32 DisenchantID;
     uint32 FoodType;
     uint32 MinMoneyLoot;

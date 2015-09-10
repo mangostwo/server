@@ -84,226 +84,268 @@ enum HalazziPhase
     PHASE_FINAL         = 2
 };
 
-struct boss_halazziAI : public ScriptedAI
+struct boss_halazzi : public CreatureScript
 {
-    boss_halazziAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_halazzi() : CreatureScript("boss_halazzi") {}
+
+    struct boss_halazziAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    HalazziPhase m_uiPhase;
-
-    uint32 m_uiPhaseCounter;
-    uint32 m_uiFrenzyTimer;
-    uint32 m_uiSaberLashTimer;
-    uint32 m_uiShockTimer;
-    uint32 m_uiTotemTimer;
-    uint32 m_uiBerserkTimer;
-
-    bool m_bHasTransformed;
-
-    ObjectGuid m_spiritLynxGuid;
-
-    void Reset() override
-    {
-        m_uiPhase           = PHASE_SINGLE;
-        m_uiPhaseCounter    = 3;
-
-        m_uiFrenzyTimer     = 16000;
-        m_uiSaberLashTimer  = 20000;
-        m_uiShockTimer      = 10000;
-        m_uiTotemTimer      = 12000;
-        m_uiBerserkTimer    = 10 * MINUTE * IN_MILLISECONDS;
-
-        m_bHasTransformed   = false;
-    }
-
-    void EnterEvadeMode() override
-    {
-        // Transform back on evade
-        if (DoCastSpellIfCan(m_creature, SPELL_TRANSFORM_TO_ORIGINAL) == CAST_OK)
-        { m_creature->UpdateEntry(NPC_HALAZZI); }
-
-        ScriptedAI::EnterEvadeMode();
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_HALAZZI, FAIL); }
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_HALAZZI, IN_PROGRESS); }
-    }
-
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-        { return; }
-
-        DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_HALAZZI, DONE); }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_SPIRIT_LYNX)
+        boss_halazziAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            m_spiritLynxGuid = pSummoned->GetObjectGuid();
-            pSummoned->SetInCombatWithZone();
-            pSummoned->CastSpell(m_creature, SPELL_HALAZZI_TRANSFORM_DUMMY, true);
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         }
-    }
 
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
-    {
-        if (pSpell->Id == SPELL_TRANSFIGURE_TRANSFORM)
+        ScriptedInstance* m_pInstance;
+
+        HalazziPhase m_uiPhase;
+
+        uint32 m_uiPhaseCounter;
+        uint32 m_uiFrenzyTimer;
+        uint32 m_uiSaberLashTimer;
+        uint32 m_uiShockTimer;
+        uint32 m_uiTotemTimer;
+        uint32 m_uiBerserkTimer;
+
+        bool m_bHasTransformed;
+
+        ObjectGuid m_spiritLynxGuid;
+
+        void Reset() override
         {
-            DoCastSpellIfCan(m_creature, SPELL_HALAZZI_TRANSFORM_SUMMON, CAST_TRIGGERED);
-            m_creature->UpdateEntry(NPC_HALAZZI_TROLL);
+            m_uiPhase = PHASE_SINGLE;
+            m_uiPhaseCounter = 3;
 
-            m_uiPhase      = PHASE_TOTEM;
+            m_uiFrenzyTimer = 16000;
+            m_uiSaberLashTimer = 20000;
             m_uiShockTimer = 10000;
             m_uiTotemTimer = 12000;
+            m_uiBerserkTimer = 10 * MINUTE * IN_MILLISECONDS;
+
+            m_bHasTransformed = false;
         }
-    }
 
-    // Wrapper to handle the phase transform
-    void DoReuniteSpirits()
-    {
-        uint32 uiSpellId = 0;
-
-        // Each health level has it's own spell - but they all do the same thing
-        switch (m_uiPhaseCounter)
+        void EnterEvadeMode() override
         {
+            // Transform back on evade
+            if (DoCastSpellIfCan(m_creature, SPELL_TRANSFORM_TO_ORIGINAL) == CAST_OK)
+            {
+                m_creature->UpdateEntry(NPC_HALAZZI);
+            }
+
+            ScriptedAI::EnterEvadeMode();
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_HALAZZI, FAIL);
+            }
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_HALAZZI, IN_PROGRESS);
+            }
+        }
+
+        void KilledUnit(Unit* pVictim) override
+        {
+            if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            {
+                return;
+            }
+
+            DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(SAY_DEATH, m_creature);
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_HALAZZI, DONE);
+            }
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_SPIRIT_LYNX)
+            {
+                m_spiritLynxGuid = pSummoned->GetObjectGuid();
+                pSummoned->SetInCombatWithZone();
+                pSummoned->CastSpell(m_creature, SPELL_HALAZZI_TRANSFORM_DUMMY, true);
+            }
+        }
+
+        void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
+        {
+            if (pSpell->Id == SPELL_TRANSFIGURE_TRANSFORM)
+            {
+                DoCastSpellIfCan(m_creature, SPELL_HALAZZI_TRANSFORM_SUMMON, CAST_TRIGGERED);
+                m_creature->UpdateEntry(NPC_HALAZZI_TROLL);
+
+                m_uiPhase = PHASE_TOTEM;
+                m_uiShockTimer = 10000;
+                m_uiTotemTimer = 12000;
+            }
+        }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*data*/) override
+        {
+            if (eventType == AI_EVENT_CUSTOM_A && pSender->GetEntry() == NPC_SPIRIT_LYNX)
+                DoReuniteSpirits();
+        }
+
+        // Wrapper to handle the phase transform
+        void DoReuniteSpirits()
+        {
+            uint32 uiSpellId = 0;
+
+            // Each health level has it's own spell - but they all do the same thing
+            switch (m_uiPhaseCounter)
+            {
             case 3: uiSpellId = SPELL_TRANSFORM_TO_LYNX_75; break;
             case 2: uiSpellId = SPELL_TRANSFORM_TO_LYNX_50; break;
             case 1: uiSpellId = SPELL_TRANSFORM_TO_LYNX_25; break;
+            }
+
+            if (DoCastSpellIfCan(m_creature, uiSpellId) == CAST_OK)
+            {
+                DoScriptText(SAY_MERGE, m_creature);
+                // Update stats back to the original Halazzi
+                m_creature->UpdateEntry(NPC_HALAZZI);
+
+                // Despawn the Lynx
+                if (Creature* pLynx = m_creature->GetMap()->GetCreature(m_spiritLynxGuid))
+                {
+                    pLynx->ForcedDespawn();
+                }
+
+                // Set the proper health level - workaround for missing server side spell 43538
+                m_creature->SetHealth(m_creature->GetMaxHealth() / 4 * m_uiPhaseCounter);
+                --m_uiPhaseCounter;
+
+                m_uiPhase = m_uiPhaseCounter > 0 ? PHASE_SINGLE : PHASE_FINAL;
+                m_uiFrenzyTimer = 16000;
+                m_uiSaberLashTimer = 20000;
+                m_bHasTransformed = false;
+            }
         }
 
-        if (DoCastSpellIfCan(m_creature, uiSpellId) == CAST_OK)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            DoScriptText(SAY_MERGE, m_creature);
-            // Update stats back to the original Halazzi
-            m_creature->UpdateEntry(NPC_HALAZZI);
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
 
-            // Despawn the Lynx
-            if (Creature* pLynx = m_creature->GetMap()->GetCreature(m_spiritLynxGuid))
-            { pLynx->ForcedDespawn(); }
+            if (m_uiBerserkTimer)
+            {
+                if (m_uiBerserkTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                    {
+                        DoScriptText(SAY_BERSERK, m_creature);
+                        m_uiBerserkTimer = 0;
+                    }
+                }
+                else
+                {
+                    m_uiBerserkTimer -= uiDiff;
+                }
+            }
 
-            // Set the proper health level - workaround for missing server side spell 43538
-            m_creature->SetHealth(m_creature->GetMaxHealth() / 4 * m_uiPhaseCounter);
-            --m_uiPhaseCounter;
+            // Abilities used only in the single or final phase
+            if (m_uiPhase == PHASE_SINGLE || m_uiPhase == PHASE_FINAL)
+            {
+                // Split boss at 75%, 50% and 25%
+                if (!m_bHasTransformed && m_creature->GetHealthPercent() <= float(25 * m_uiPhaseCounter))
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_TRANSFIGURE_TO_TROLL) == CAST_OK)
+                    {
+                        DoScriptText(SAY_SPLIT, m_creature);
+                        m_bHasTransformed = true;
+                    }
+                }
 
-            m_uiPhase           = m_uiPhaseCounter > 0 ? PHASE_SINGLE : PHASE_FINAL;
-            m_uiFrenzyTimer     = 16000;
-            m_uiSaberLashTimer  = 20000;
-            m_bHasTransformed   = false;
+                if (m_uiFrenzyTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
+                    {
+                        m_uiFrenzyTimer = 16000;
+                    }
+                }
+                else
+                {
+                    m_uiFrenzyTimer -= uiDiff;
+                }
+
+                if (m_uiSaberLashTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SABER_LASH) == CAST_OK)
+                    {
+                        DoScriptText(urand(0, 1) ? SAY_SABERLASH1 : SAY_SABERLASH2, m_creature);
+                        m_uiSaberLashTimer = 20000;
+                    }
+                }
+                else
+                {
+                    m_uiSaberLashTimer -= uiDiff;
+                }
+            }
+
+            // Abilities used during the split phase or when the boss is below 25% health
+            if (m_uiPhase == PHASE_TOTEM || m_uiPhase == PHASE_FINAL)
+            {
+                if (m_uiTotemTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_LIGHTNING_TOTEM) == CAST_OK)
+                    {
+                        m_uiTotemTimer = 20000;
+                    }
+                }
+                else
+                {
+                    m_uiTotemTimer -= uiDiff;
+                }
+
+                if (m_uiShockTimer < uiDiff)
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        if (DoCastSpellIfCan(pTarget, urand(0, 1) ? SPELL_EARTHSHOCK : SPELL_FLAMESHOCK) == CAST_OK)
+                        {
+                            m_uiShockTimer = urand(10000, 14000);
+                        }
+                    }
+                }
+                else
+                {
+                    m_uiShockTimer -= uiDiff;
+                }
+            }
+
+            // Transform back from Totem phase
+            if (m_uiPhase == PHASE_TOTEM && m_creature->GetHealthPercent() < 20.0f)
+            {
+                DoReuniteSpirits();
+            }
+
+            DoMeleeAttackIfReady();
         }
-    }
+    };
 
-    void UpdateAI(const uint32 uiDiff) override
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiBerserkTimer)
-        {
-            if (m_uiBerserkTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                {
-                    DoScriptText(SAY_BERSERK, m_creature);
-                    m_uiBerserkTimer = 0;
-                }
-            }
-            else
-            { m_uiBerserkTimer -= uiDiff; }
-        }
-
-        // Abilities used only in the single or final phase
-        if (m_uiPhase == PHASE_SINGLE || m_uiPhase == PHASE_FINAL)
-        {
-            // Split boss at 75%, 50% and 25%
-            if (!m_bHasTransformed && m_creature->GetHealthPercent() <= float(25 * m_uiPhaseCounter))
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_TRANSFIGURE_TO_TROLL) == CAST_OK)
-                {
-                    DoScriptText(SAY_SPLIT, m_creature);
-                    m_bHasTransformed = true;
-                }
-            }
-
-            if (m_uiFrenzyTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
-                { m_uiFrenzyTimer = 16000; }
-            }
-            else
-            { m_uiFrenzyTimer -= uiDiff; }
-
-            if (m_uiSaberLashTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SABER_LASH) == CAST_OK)
-                {
-                    DoScriptText(urand(0, 1) ? SAY_SABERLASH1 : SAY_SABERLASH2, m_creature);
-                    m_uiSaberLashTimer = 20000;
-                }
-            }
-            else
-            { m_uiSaberLashTimer -= uiDiff; }
-        }
-
-        // Abilities used during the split phase or when the boss is below 25% health
-        if (m_uiPhase == PHASE_TOTEM || m_uiPhase == PHASE_FINAL)
-        {
-            if (m_uiTotemTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_LIGHTNING_TOTEM) == CAST_OK)
-                { m_uiTotemTimer = 20000; }
-            }
-            else
-            { m_uiTotemTimer -= uiDiff; }
-
-            if (m_uiShockTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                {
-                    if (DoCastSpellIfCan(pTarget, urand(0, 1) ? SPELL_EARTHSHOCK : SPELL_FLAMESHOCK) == CAST_OK)
-                    { m_uiShockTimer = urand(10000, 14000); }
-                }
-            }
-            else
-            { m_uiShockTimer -= uiDiff; }
-        }
-
-        // Transform back from Totem phase
-        if (m_uiPhase == PHASE_TOTEM && m_creature->GetHealthPercent() < 20.0f)
-        { DoReuniteSpirits(); }
-
-        DoMeleeAttackIfReady();
+        return new boss_halazziAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_halazzi(Creature* pCreature)
-{
-    return new boss_halazziAI(pCreature);
-}
 
 enum
 {
@@ -311,89 +353,108 @@ enum
     SPELL_SHRED_ARMOR       = 43243
 };
 
-struct boss_spirit_lynxAI : public ScriptedAI
+//* boss_spirit_lynx
+struct boss_spirit_lynx : public CreatureScript
 {
-    boss_spirit_lynxAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_spirit_lynx() : CreatureScript("boss_spirit_lynx") {}
+
+    struct boss_spirit_lynxAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiFrenzyTimer;
-    uint32 m_uiShredArmorTimer;
-    bool m_bHasUnited;
-
-    void Reset() override
-    {
-        m_uiFrenzyTimer     = urand(10000, 20000);          // first frenzy after 10-20 seconds
-        m_uiShredArmorTimer = 4000;
-        m_bHasUnited        = false;
-    }
-
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (!m_pInstance)
-        { return; }
-
-        if (Creature* pHalazzi = m_pInstance->GetSingleCreatureFromStorage(NPC_HALAZZI))
-        { pHalazzi->AI()->KilledUnit(pVictim); }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiFrenzyTimer < uiDiff)
+        boss_spirit_lynxAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            DoCastSpellIfCan(m_creature, SPELL_LYNX_FRENZY);
-            m_uiFrenzyTimer = urand(20000, 30000);          // subsequent frenzys casted every 20-30 seconds
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         }
-        else
-        { m_uiFrenzyTimer -= uiDiff; }
 
-        if (m_uiShredArmorTimer < uiDiff)
+        ScriptedInstance* m_pInstance;
+
+        uint32 m_uiFrenzyTimer;
+        uint32 m_uiShredArmorTimer;
+        bool m_bHasUnited;
+
+        void Reset() override
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHRED_ARMOR);
+            m_uiFrenzyTimer = urand(10000, 20000);          // first frenzy after 10-20 seconds
             m_uiShredArmorTimer = 4000;
+            m_bHasUnited = false;
         }
-        else
-        { m_uiShredArmorTimer -= uiDiff; }
 
-        // Unite spirits at 10% health
-        // Note: maybe there is some spell related to this - needs research
-        if (!m_bHasUnited && m_creature->GetHealthPercent() < 10.0f && m_pInstance)
+        void KilledUnit(Unit* pVictim) override
         {
+            if (!m_pInstance)
+            {
+                return;
+            }
+
             if (Creature* pHalazzi = m_pInstance->GetSingleCreatureFromStorage(NPC_HALAZZI))
             {
-                if (boss_halazziAI* pBossAI = dynamic_cast<boss_halazziAI*>(pHalazzi->AI()))
-                { pBossAI->DoReuniteSpirits(); }
+                pHalazzi->AI()->KilledUnit(pVictim);
             }
-            m_bHasUnited = true;
         }
 
-        DoMeleeAttackIfReady();
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_uiFrenzyTimer < uiDiff)
+            {
+                DoCastSpellIfCan(m_creature, SPELL_LYNX_FRENZY);
+                m_uiFrenzyTimer = urand(20000, 30000);          // subsequent frenzys casted every 20-30 seconds
+            }
+            else
+            {
+                m_uiFrenzyTimer -= uiDiff;
+            }
+
+            if (m_uiShredArmorTimer < uiDiff)
+            {
+                DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHRED_ARMOR);
+                m_uiShredArmorTimer = 4000;
+            }
+            else
+            {
+                m_uiShredArmorTimer -= uiDiff;
+            }
+
+            // Unite spirits at 10% health
+            // Note: maybe there is some spell related to this - needs research
+            if (!m_bHasUnited && m_creature->GetHealthPercent() < 10.0f && m_pInstance)
+            {
+                if (Creature* pHalazzi = m_pInstance->GetSingleCreatureFromStorage(NPC_HALAZZI))
+                {
+                    SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pHalazzi);
+                }
+                m_bHasUnited = true;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_spirit_lynxAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_spirit_lynx(Creature* pCreature)
-{
-    return new boss_spirit_lynxAI(pCreature);
-}
-
 void AddSC_boss_halazzi()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_halazzi";
-    pNewScript->GetAI = &GetAI_boss_halazzi;
-    pNewScript->RegisterSelf();
+    s = new boss_halazzi();
+    s->RegisterSelf();
+    s = new boss_spirit_lynx();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_spirit_lynx";
-    pNewScript->GetAI = &GetAI_boss_spirit_lynx;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_halazzi";
+    //pNewScript->GetAI = &GetAI_boss_halazzi;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_spirit_lynx";
+    //pNewScript->GetAI = &GetAI_boss_spirit_lynx;
+    //pNewScript->RegisterSelf();
 }

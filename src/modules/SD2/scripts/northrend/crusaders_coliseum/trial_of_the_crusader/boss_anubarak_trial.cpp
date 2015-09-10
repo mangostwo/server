@@ -123,127 +123,130 @@ static const float aBurrowSpawnPositions[MAX_BURROWS][4] =
 ## boss_anubarak_trial
 ######*/
 
-struct  boss_anubarak_trialAI : public ScriptedAI
+struct boss_anubarak_trial : public CreatureScript
 {
-    boss_anubarak_trialAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_anubarak_trial() : CreatureScript("boss_anubarak_trial") {}
+
+    struct boss_anubarak_trialAI : public ScriptedAI
     {
-        m_pInstance = (instance_trial_of_the_crusader*)pCreature->GetInstanceData();
-        m_bDidIntroYell = false;
-        Reset();
-    }
+        boss_anubarak_trialAI(Creature* pCreature) : ScriptedAI(pCreature)
+        {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bDidIntroYell = false;
+        }
 
-    instance_trial_of_the_crusader* m_pInstance;
+        ScriptedInstance* m_pInstance;
 
-    Phases m_Phase;
+        Phases m_Phase;
 
-    uint32 m_PhaseSwitchTimer;
-    uint32 m_uiFreezingSlashTimer;
-    uint32 m_uiPenetratingColdTimer;
-    uint32 m_uiBurrowerSummonTimer;
-    uint32 m_uiBerserkTimer;
-    bool m_bDidIntroYell;
+        uint32 m_PhaseSwitchTimer;
+        uint32 m_uiFreezingSlashTimer;
+        uint32 m_uiPenetratingColdTimer;
+        uint32 m_uiBurrowerSummonTimer;
+        uint32 m_uiBerserkTimer;
+        bool m_bDidIntroYell;
 
-    ObjectGuid m_PursuingSpikesGuid;
-    GuidVector m_vSpheresGuidVector;
+        ObjectGuid m_PursuingSpikesGuid;
+        GuidVector m_vSpheresGuidVector;
 
-    void Reset() override
-    {
-        m_Phase                  = PHASE_GROUND;
-        m_PhaseSwitchTimer       = 80000;
-        m_uiFreezingSlashTimer   = 20000;
-        m_uiPenetratingColdTimer = urand(15000, 25000);
-        m_uiBurrowerSummonTimer  = 10000;
-        m_uiBerserkTimer         = 10 * MINUTE * IN_MILLISECONDS;
+        void Reset() override
+        {
+            m_Phase = PHASE_GROUND;
+            m_PhaseSwitchTimer = 80000;
+            m_uiFreezingSlashTimer = 20000;
+            m_uiPenetratingColdTimer = urand(15000, 25000);
+            m_uiBurrowerSummonTimer = 10000;
+            m_uiBerserkTimer = 10 * MINUTE * IN_MILLISECONDS;
 
-        m_vSpheresGuidVector.clear();
-        m_vSpheresGuidVector.resize(MAX_FROSTSPHERES, ObjectGuid());
-    }
+            m_vSpheresGuidVector.clear();
+            m_vSpheresGuidVector.resize(MAX_FROSTSPHERES, ObjectGuid());
+        }
 
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_ANUBARAK, FAIL);
-    }
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_ANUBARAK, FAIL);
+        }
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_ANUBARAK, DONE);
-    }
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_ANUBARAK, DONE);
+        }
 
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (!m_bDidIntroYell && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() &&
+        void MoveInLineOfSight(Unit* pWho) override
+        {
+            if (!m_bDidIntroYell && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() &&
                 !m_creature->IsInEvadeMode() && pWho->IsWithinDistInMap(m_creature, 100) && pWho->IsWithinLOSInMap(m_creature))
-        {
-            DoScriptText(SAY_INTRO, m_creature);
+            {
+                DoScriptText(SAY_INTRO, m_creature);
 
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-            m_creature->RemoveAurasDueToSpell(SPELL_SUBMERGE);
-            DoCastSpellIfCan(m_creature, SPELL_EMERGE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->RemoveAurasDueToSpell(SPELL_SUBMERGE);
+                DoCastSpellIfCan(m_creature, SPELL_EMERGE);
 
-            m_bDidIntroYell = true;
-            return;
+                m_bDidIntroYell = true;
+                return;
+            }
+
+            ScriptedAI::MoveInLineOfSight(pWho);
         }
 
-        ScriptedAI::MoveInLineOfSight(pWho);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        // Summon the spheres on random points
-        for (uint8 i = 0; i < MAX_FROSTSPHERES; ++i)
+        void Aggro(Unit* /*pWho*/) override
         {
-            if (Creature* pTemp = m_creature->SummonCreature(NPC_FROSTSPHERE, aFrostSphereSpawnPositions[i][0], aFrostSphereSpawnPositions[i][1], aFrostSphereSpawnPositions[i][2], 0, TEMPSUMMON_DEAD_DESPAWN, 0))
-                m_vSpheresGuidVector[i] = pTemp->GetObjectGuid();
+            DoScriptText(SAY_AGGRO, m_creature);
+
+            // Summon the spheres on random points
+            for (uint8 i = 0; i < MAX_FROSTSPHERES; ++i)
+            {
+                if (Creature* pTemp = m_creature->SummonCreature(NPC_FROSTSPHERE, aFrostSphereSpawnPositions[i][0], aFrostSphereSpawnPositions[i][1], aFrostSphereSpawnPositions[i][2], 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+                    m_vSpheresGuidVector[i] = pTemp->GetObjectGuid();
+            }
+
+            // It's not clear if these should be spawned by DB or summoned
+            for (uint8 i = 0; i < MAX_BURROWS; ++i)
+                m_creature->SummonCreature(NPC_BURROW, aBurrowSpawnPositions[i][0], aBurrowSpawnPositions[i][1], aBurrowSpawnPositions[i][2], aBurrowSpawnPositions[i][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_ANUBARAK, IN_PROGRESS);
         }
 
-        // It's not clear if these should be spawned by DB or summoned
-        for (uint8 i = 0; i < MAX_BURROWS; ++i)
-            m_creature->SummonCreature(NPC_BURROW, aBurrowSpawnPositions[i][0], aBurrowSpawnPositions[i][1], aBurrowSpawnPositions[i][2], aBurrowSpawnPositions[i][3], TEMPSUMMON_DEAD_DESPAWN, 0);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_ANUBARAK, IN_PROGRESS);
-    }
-
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        DoScriptText((urand(0, 1)) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
-
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
-    {
-        if (pSpell->Id == SPELL_SUBMERGE)
+        void KilledUnit(Unit* pVictim) override
         {
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-
-            // Extra check here, because AnubArak must be submerged by default
-            if (m_Phase != PHASE_SUBMERGING)
+            if (pVictim->GetTypeId() != TYPEID_PLAYER)
                 return;
 
-            m_Phase = PHASE_UNDERGROUND;
-
-            // Refresh spheres only on normal difficulty
-            if (m_pInstance && !m_pInstance->IsHeroicDifficulty())
-                DoRefreshSpheres();
-
-            DoCastSpellIfCan(m_creature, SPELL_CLEAR_ALL_DEBUFFS, CAST_TRIGGERED);
-            DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPIKES, CAST_TRIGGERED);
-            DoCastSpellIfCan(m_creature, SPELL_SUMMON_SCARAB, CAST_TRIGGERED);
+            DoScriptText((urand(0, 1)) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
+        void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
         {
+            if (pSpell->Id == SPELL_SUBMERGE)
+            {
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+                // Extra check here, because AnubArak must be submerged by default
+                if (m_Phase != PHASE_SUBMERGING)
+                    return;
+
+                m_Phase = PHASE_UNDERGROUND;
+
+                // Refresh spheres only on normal difficulty
+                if (m_pInstance && !m_pInstance->GetData(TYPE_DATA_IS_HEROIC))
+                    DoRefreshSpheres();
+
+                DoCastSpellIfCan(m_creature, SPELL_CLEAR_ALL_DEBUFFS, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPIKES, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_SUMMON_SCARAB, CAST_TRIGGERED);
+            }
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_ANUBARAK_SPIKE:
                 m_PursuingSpikesGuid = pSummoned->GetObjectGuid();
                 // no break here
@@ -251,41 +254,41 @@ struct  boss_anubarak_trialAI : public ScriptedAI
             case NPC_SCARAB:
                 pSummoned->AI()->AttackStart(m_creature->getVictim());
                 break;
+            }
         }
-    }
 
-    // Wrapper to refresh frost spheres - it's not very clear how ofter should this happen
-    void DoRefreshSpheres()
-    {
-        for (uint8 i = 0; i < MAX_FROSTSPHERES; ++i)
+        // Wrapper to refresh frost spheres - it's not very clear how ofter should this happen
+        void DoRefreshSpheres()
         {
-            // If the sphere is alive and hasn't transfomed to permafrost yet summon a new one
-            Creature* pTemp = m_creature->GetMap()->GetCreature(m_vSpheresGuidVector[i]);
-            if (pTemp && !pTemp->HasAura(SPELL_PERMAFROST_TRANSFORM))
-                continue;
+            for (uint8 i = 0; i < MAX_FROSTSPHERES; ++i)
+            {
+                // If the sphere is alive and hasn't transfomed to permafrost yet summon a new one
+                Creature* pTemp = m_creature->GetMap()->GetCreature(m_vSpheresGuidVector[i]);
+                if (pTemp && !pTemp->HasAura(SPELL_PERMAFROST_TRANSFORM))
+                    continue;
 
-            // Summon a new frost sphere instead of the killed one
-            if (Creature* pTemp = m_creature->SummonCreature(NPC_FROSTSPHERE, aFrostSphereSpawnPositions[i][0], aFrostSphereSpawnPositions[i][1], aFrostSphereSpawnPositions[i][2], 0, TEMPSUMMON_DEAD_DESPAWN, 0))
-                m_vSpheresGuidVector[i] = pTemp->GetObjectGuid();
+                // Summon a new frost sphere instead of the killed one
+                if (Creature* pTemp = m_creature->SummonCreature(NPC_FROSTSPHERE, aFrostSphereSpawnPositions[i][0], aFrostSphereSpawnPositions[i][1], aFrostSphereSpawnPositions[i][2], 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+                    m_vSpheresGuidVector[i] = pTemp->GetObjectGuid();
+            }
         }
-    }
 
-    // Wrapper to despawn the Spikes
-    void DoDespawnPursuingSpikes()
-    {
-        if (Creature* pPursuingSpikes = m_creature->GetMap()->GetCreature(m_PursuingSpikesGuid))
-            pPursuingSpikes->ForcedDespawn();
-
-        m_PursuingSpikesGuid.Clear();
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        switch (m_Phase)
+        // Wrapper to despawn the Spikes
+        void DoDespawnPursuingSpikes()
         {
+            if (Creature* pPursuingSpikes = m_creature->GetMap()->GetCreature(m_PursuingSpikesGuid))
+                pPursuingSpikes->ForcedDespawn();
+
+            m_PursuingSpikesGuid.Clear();
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            switch (m_Phase)
+            {
             case PHASE_GROUND:
 
                 // Switch to underground phase on timer
@@ -334,7 +337,7 @@ struct  boss_anubarak_trialAI : public ScriptedAI
                     m_uiPenetratingColdTimer -= uiDiff;
 
                 // The Borrowers are summoned in Ground phase only on normal mode or during Ground and Swarm phase on heroic mode
-                if (m_Phase == PHASE_GROUND || (m_pInstance && m_pInstance->IsHeroicDifficulty()))
+                if (m_Phase == PHASE_GROUND || (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC)))
                 {
                     if (m_uiBurrowerSummonTimer < uiDiff)
                     {
@@ -364,7 +367,7 @@ struct  boss_anubarak_trialAI : public ScriptedAI
                     m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
                     // Refresh spheres only on normal difficulty
-                    if (m_pInstance && !m_pInstance->IsHeroicDifficulty())
+                    if (m_pInstance && !m_pInstance->GetData(TYPE_DATA_IS_HEROIC))
                         DoRefreshSpheres();
 
                     m_PhaseSwitchTimer = 80000;
@@ -376,71 +379,79 @@ struct  boss_anubarak_trialAI : public ScriptedAI
                 break;
             case PHASE_SUBMERGING:                          // Do nothing, but continue berserk timer
                 break;
-        }
+            }
 
-        if (m_uiBerserkTimer)
-        {
-            if (m_uiBerserkTimer <= uiDiff)
+            if (m_uiBerserkTimer)
             {
-                if (m_Phase != PHASE_UNDERGROUND)
+                if (m_uiBerserkTimer <= uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                    if (m_Phase != PHASE_UNDERGROUND)
                     {
-                        DoScriptText(SAY_BERSERK, m_creature);
-                        m_uiBerserkTimer = 0;
+                        if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                        {
+                            DoScriptText(SAY_BERSERK, m_creature);
+                            m_uiBerserkTimer = 0;
+                        }
                     }
                 }
+                else
+                    m_uiBerserkTimer -= uiDiff;
             }
-            else
-                m_uiBerserkTimer -= uiDiff;
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_anubarak_trialAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_anubarak_trial(Creature* pCreature)
-{
-    return new boss_anubarak_trialAI(pCreature);
-}
 
 /*######
 ## npc_anubarak_trial_spike
 ######*/
 
-struct  npc_anubarak_trial_spikeAI : public ScriptedAI
+struct npc_anubarak_trial_spike : public CreatureScript
 {
-    npc_anubarak_trial_spikeAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_anubarak_trial_spike() : CreatureScript("npc_anubarak_spike") {}
 
-    PursuingSpikesPhases m_Phase;
-    uint32 m_PhaseSwitchTimer;
-
-    void Reset() override
+    struct npc_anubarak_trial_spikeAI : public ScriptedAI
     {
-        m_Phase = PHASE_NO_MOVEMENT;
-        m_PhaseSwitchTimer = 5000;
+        npc_anubarak_trial_spikeAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-        SetCombatMovement(false);
-    }
+        PursuingSpikesPhases m_Phase;
+        uint32 m_PhaseSwitchTimer;
 
-    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
-    {
-        if (pSpell->Id == SPELL_PURSUING_SPIKES_DUMMY && pTarget->GetTypeId() == TYPEID_PLAYER)
+        void Reset() override
         {
-            DoScriptText(EMOTE_PURSUE, m_creature, pTarget);
-            DoCastSpellIfCan(pTarget, SPELL_MARK, CAST_TRIGGERED);
-            DoStartMovement(pTarget);
+            m_Phase = PHASE_NO_MOVEMENT;
+            m_PhaseSwitchTimer = 5000;
+
+            SetCombatMovement(false);
         }
-    }
 
-    // Handle permafrost hit from dummy spell
-    void PermafrostHit(Creature* pPermafrost)
-    {
-        // To prevent more than one call
-        if (m_Phase == PHASE_NO_MOVEMENT)
-            return;
-
-        // Remove the speed auras
-        switch (m_Phase)
+        void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
         {
+            if (pSpell->Id == SPELL_PURSUING_SPIKES_DUMMY && pTarget->GetTypeId() == TYPEID_PLAYER)
+            {
+                DoScriptText(EMOTE_PURSUE, m_creature, pTarget);
+                DoCastSpellIfCan(pTarget, SPELL_MARK, CAST_TRIGGERED);
+                DoStartMovement(pTarget);
+            }
+        }
+
+        // Handle permafrost hit from dummy spell
+        void ReceiveAIEvent(AIEventType eventType, Creature*, Unit* pPermafrost, uint32 /**/) override
+        {
+            if (eventType != AI_EVENT_CUSTOM_A)
+                return;
+
+            // To prevent more than one call
+            if (m_Phase == PHASE_NO_MOVEMENT)
+                return;
+
+            // Remove the speed auras
+            switch (m_Phase)
+            {
             case PHASE_IMPALE_NORMAL:
                 m_creature->RemoveAurasDueToSpell(SPELL_PURSUING_SPIKES_SPEED1);
                 break;
@@ -452,35 +463,35 @@ struct  npc_anubarak_trial_spikeAI : public ScriptedAI
                 break;
             default:
                 break;
+            }
+
+            // Set Spike fail animation and despawn
+            DoCastSpellIfCan(m_creature, SPELL_PURSUING_SPIKES_FAIL, CAST_TRIGGERED);
+
+            if (pPermafrost)
+                pPermafrost->ToCreature()->ForcedDespawn(2000);
+
+            // After the spikes hit the icy surface they can't move for about ~5 seconds
+            m_Phase = PHASE_NO_MOVEMENT;
+            m_PhaseSwitchTimer = 5000;
+            DoResetThreat();
+
+            SetCombatMovement(false);
+            m_creature->GetMotionMaster()->Clear();
+            m_creature->GetMotionMaster()->MoveIdle();
         }
 
-        // Set Spike fail animation and despawn
-        DoCastSpellIfCan(m_creature, SPELL_PURSUING_SPIKES_FAIL, CAST_TRIGGERED);
-
-        if (pPermafrost)
-            pPermafrost->ForcedDespawn(2000);
-
-        // After the spikes hit the icy surface they can't move for about ~5 seconds
-        m_Phase = PHASE_NO_MOVEMENT;
-        m_PhaseSwitchTimer = 5000;
-        DoResetThreat();
-
-        SetCombatMovement(false);
-        m_creature->GetMotionMaster()->Clear();
-        m_creature->GetMotionMaster()->MoveIdle();
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_PhaseSwitchTimer)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (m_PhaseSwitchTimer <= uiDiff)
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            if (m_PhaseSwitchTimer)
             {
-                switch (m_Phase)
+                if (m_PhaseSwitchTimer <= uiDiff)
                 {
+                    switch (m_Phase)
+                    {
                     case PHASE_NO_MOVEMENT:
                         if (DoCastSpellIfCan(m_creature, SPELL_PURSUING_SPIKES_SPEED1) == CAST_OK)
                         {
@@ -506,145 +517,174 @@ struct  npc_anubarak_trial_spikeAI : public ScriptedAI
                         break;
                     default:
                         break;
+                    }
                 }
+                else
+                    m_PhaseSwitchTimer -= uiDiff;
             }
-            else
-                m_PhaseSwitchTimer -= uiDiff;
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_anubarak_trial_spikeAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_npc_anubarak_trial_spike(Creature* pCreature)
+struct spell_permafrost_dummy : public SpellScript
 {
-    return new npc_anubarak_trial_spikeAI(pCreature);
-}
+    spell_permafrost_dummy() : SpellScript("spell_permafrost_dummy") {}
 
-bool EffectDummyCreature_spell_dummy_permafrost(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
-{
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_PERMAFROST_DUMMY && uiEffIndex == EFFECT_INDEX_0)
+    bool EffectDummy(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Object* pTarget, ObjectGuid /*originalCasterGuid*/) override
     {
-        if (npc_anubarak_trial_spikeAI* pSpikeAI = dynamic_cast<npc_anubarak_trial_spikeAI*>(pCreatureTarget->AI()))
-            pSpikeAI->PermafrostHit((Creature*)pCaster);
+        // always check spellid and effectindex
+        if (uiSpellId == SPELL_PERMAFROST_DUMMY && uiEffIndex == EFFECT_INDEX_0)
+        {
+            Creature* pCreatureTarget = pTarget->ToCreature();
+            if (CreatureAI* pSpikeAI = pCreatureTarget->AI())
+                pSpikeAI->ReceiveAIEvent(AI_EVENT_CUSTOM_A, pCreatureTarget, pCaster, 0);
 
-        // always return true when we are handling this spell and effect
-        return true;
+            // always return true when we are handling this spell and effect
+            return true;
+        }
+
+        return false;
     }
-
-    return false;
-}
+};
 
 /*######
 ## npc_anubarak_trial_frostsphere
 ######*/
 
-struct  npc_anubarak_trial_frostsphereAI : public Scripted_NoMovementAI
+struct npc_anubarak_trial_frostsphere : public CreatureScript
 {
-    npc_anubarak_trial_frostsphereAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    npc_anubarak_trial_frostsphere() : CreatureScript("npc_frost_sphere") {}
 
-    bool m_bPermafrost;
-
-    void Reset() override
+    struct npc_anubarak_trial_frostsphereAI : public Scripted_NoMovementAI
     {
-        m_bPermafrost = false;
+        npc_anubarak_trial_frostsphereAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { }
 
-        m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 15.0f);
-    }
+        bool m_bPermafrost;
 
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void AttackStart(Unit* /*pWho*/) override { }
+        void Reset() override
+        {
+            m_bPermafrost = false;
 
-    void DamageTaken(Unit* pDoneBy, uint32& uiDamage) override
+            m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 15.0f);
+        }
+
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        void AttackStart(Unit* /*pWho*/) override { }
+
+        void DamageTaken(Unit* pDoneBy, uint32& uiDamage) override
+        {
+            if (uiDamage < m_creature->GetHealth())
+                return;
+
+            // Set fake death in order to apply permafrost
+            uiDamage = 0;
+
+            if (m_bPermafrost)
+                return;
+
+            m_creature->InterruptNonMeleeSpells(false);
+            m_creature->SetHealth(0);
+            m_creature->StopMoving();
+            m_creature->ClearComboPointHolders();
+            m_creature->RemoveAllAurasOnDeath();
+            m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
+            m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->ClearAllReactives();
+            m_creature->SetTargetGuid(ObjectGuid());
+
+            // Set proper Z position
+            m_creature->SetWalk(false);
+            float fZ = pDoneBy->GetPositionZ();
+            MaNGOS::NormalizeMapCoord(fZ);
+
+            // Note: This should be fall movement
+            m_creature->GetMotionMaster()->Clear();
+            m_creature->GetMotionMaster()->MovePoint(1, m_creature->GetPositionX(), m_creature->GetPositionY(), fZ);
+            m_bPermafrost = true;
+        }
+
+        void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
+        {
+            if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
+                return;
+
+            DoCastSpellIfCan(m_creature, SPELL_PERMAFROST_VISUAL, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, SPELL_PERMAFROST_TRANSFORM, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, SPELL_PERMAFROST_SLOW, CAST_TRIGGERED);
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        if (uiDamage < m_creature->GetHealth())
-            return;
-
-        // Set fake death in order to apply permafrost
-        uiDamage = 0;
-
-        if (m_bPermafrost)
-            return;
-
-        m_creature->InterruptNonMeleeSpells(false);
-        m_creature->SetHealth(0);
-        m_creature->StopMoving();
-        m_creature->ClearComboPointHolders();
-        m_creature->RemoveAllAurasOnDeath();
-        m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
-        m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        m_creature->ClearAllReactives();
-        m_creature->SetTargetGuid(ObjectGuid());
-
-        // Set proper Z position
-        m_creature->SetWalk(false);
-        float fZ = pDoneBy->GetPositionZ();
-        MaNGOS::NormalizeMapCoord(fZ);
-
-        // Note: This should be fall movement
-        m_creature->GetMotionMaster()->Clear();
-        m_creature->GetMotionMaster()->MovePoint(1, m_creature->GetPositionX(), m_creature->GetPositionY(), fZ);
-        m_bPermafrost = true;
-    }
-
-    void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
-    {
-        if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
-            return;
-
-        DoCastSpellIfCan(m_creature, SPELL_PERMAFROST_VISUAL, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_PERMAFROST_TRANSFORM, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_PERMAFROST_SLOW, CAST_TRIGGERED);
+        return new npc_anubarak_trial_frostsphereAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_anubarak_trial_frostsphere(Creature* pCreature)
-{
-    return new npc_anubarak_trial_frostsphereAI(pCreature);
-}
 
 /*######
 ## npc_nerubian_borrow
 ######*/
 
 // TODO Remove this 'script' when combat movement can be proper prevented from core-side
-struct  npc_nerubian_borrowAI : public Scripted_NoMovementAI
+struct npc_nerubian_borrow : public CreatureScript
 {
-    npc_nerubian_borrowAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    npc_nerubian_borrow() : CreatureScript("npc_nerubian_borrow") {}
 
-    void Reset() override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
+    struct npc_nerubian_borrowAI : public Scripted_NoMovementAI
+    {
+        npc_nerubian_borrowAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+
+        void Reset() override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        void AttackStart(Unit* /*pWho*/) override { }
+        void UpdateAI(const uint32 /*uiDiff*/) override { }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_nerubian_borrowAI(pCreature);
+    }
 };
-
-CreatureAI* GetAI_npc_nerubian_borrow(Creature* pCreature)
-{
-    return new npc_nerubian_borrowAI(pCreature);
-}
 
 void AddSC_boss_anubarak_trial()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_anubarak_trial";
-    pNewScript->GetAI = &GetAI_boss_anubarak_trial;
-    pNewScript->RegisterSelf();
+    s = new boss_anubarak_trial();
+    s->RegisterSelf();
+    s = new npc_anubarak_trial_spike();
+    s->RegisterSelf();
+    s = new npc_anubarak_trial_frostsphere();
+    s->RegisterSelf();
+    s = new npc_nerubian_borrow();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_anubarak_spike";
-    pNewScript->GetAI = &GetAI_npc_anubarak_trial_spike;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_dummy_permafrost;
-    pNewScript->RegisterSelf();
+    s = new spell_permafrost_dummy();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_frost_sphere";
-    pNewScript->GetAI = &GetAI_npc_anubarak_trial_frostsphere;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_anubarak_trial";
+    //pNewScript->GetAI = &GetAI_boss_anubarak_trial;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_nerubian_borrow";
-    pNewScript->GetAI = &GetAI_npc_nerubian_borrow;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_anubarak_spike";
+    //pNewScript->GetAI = &GetAI_npc_anubarak_trial_spike;
+    //pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_dummy_permafrost;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_frost_sphere";
+    //pNewScript->GetAI = &GetAI_npc_anubarak_trial_frostsphere;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_nerubian_borrow";
+    //pNewScript->GetAI = &GetAI_npc_nerubian_borrow;
+    //pNewScript->RegisterSelf();
 }

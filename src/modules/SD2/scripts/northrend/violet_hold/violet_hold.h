@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+﻿/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
@@ -20,6 +20,16 @@ enum
     TYPE_XEVOZZ                 = 7,
     TYPE_ZURAMAT                = 8,
     TYPE_CYANIGOSA              = 9,
+    TYPE_DO_SINCLARI_BEGIN      = MAX_ENCOUNTER,
+    TYPE_DATA_PORTAL_NUMBER     = MAX_ENCOUNTER + 1,
+    TYPE_DO_RELEASE_BOSS        = MAX_ENCOUNTER + 2,
+    TYPE_DATA_PORTAL_ELITE      = MAX_ENCOUNTER + 3,
+    TYPE_DATA_IS_TRASH_PORTAL   = MAX_ENCOUNTER + 4,
+    TYPE_DATA_GET_MOB_NORMAL    = MAX_ENCOUNTER + 5,
+
+    DATA64_CRYSTAL_ACTIVATOR    = 0,
+    DATA64_CRYSTAL_ACTIVATOR_INT= 1,
+    DATA64_SABOTEUR             = 2,
 
     WORLD_STATE_ID              = 3816,
     WORLD_STATE_SEAL            = 3815,
@@ -131,14 +141,7 @@ enum
     ACHIEV_CRIT_VOID_DANCE      = 7587,                     // Zuramat achiev - 2153
 };
 
-static const float fDefenseSystemLoc[4] = {1888.146f, 803.382f, 58.604f, 3.072f};
-static const float fGuardExitLoc[3] = {1806.955f, 803.851f, 44.36f};
 static const float fSealAttackLoc[3] = {1858.027f, 804.11f, 44.008f};
-
-static const uint32 aRandomPortalNpcs[5] = {NPC_AZURE_INVADER, NPC_MAGE_HUNTER, NPC_AZURE_SPELLBREAKER, NPC_AZURE_BINDER, NPC_AZURE_MAGE_SLAYER};
-static const uint32 aRandomIntroNpcs[4] = {NPC_AZURE_BINDER_INTRO, NPC_AZURE_INVADER_INTRO, NPC_AZURE_SPELLBREAKER_INTRO, NPC_AZURE_MAGE_SLAYER_INTRO};
-
-static const int32 aSealWeakYell[3] = {SAY_SEAL_75, SAY_SEAL_50, SAY_SEAL_5};
 
 enum ePortalType
 {
@@ -165,136 +168,4 @@ static const PortalData afPortalLocation[] =
     {PORTAL_TYPE_NORM, 1857.30f, 764.145f, 38.6543f, 0.8339f},  // lavanthor
     {PORTAL_TYPE_BOSS, 1890.73f, 803.309f, 38.4001f, 2.4139f},  // center
 };
-
-struct BossInformation
-{
-    uint32 uiType, uiEntry, uiGhostEntry, uiWayPointId;
-    float fX, fY, fZ;                                       // Waypoint for Saboteur
-    int32 iSayEntry;
-};
-
-struct BossSpawn
-{
-    uint32 uiEntry;
-    float fX, fY, fZ, fO;
-};
-
-static const BossInformation aBossInformation[] =
-{
-    {TYPE_EREKEM,    NPC_EREKEM,    NPC_ARAKKOA,    1, 1877.03f, 853.84f, 43.33f, SAY_RELEASE_EREKEM},
-    {TYPE_ZURAMAT,   NPC_ZURAMAT,   NPC_VOID_LORD,  1, 1922.41f, 847.95f, 47.15f, SAY_RELEASE_ZURAMAT},
-    {TYPE_XEVOZZ,    NPC_XEVOZZ,    NPC_ETHERAL,    1, 1903.61f, 838.46f, 38.72f, SAY_RELEASE_XEVOZZ},
-    {TYPE_ICHORON,   NPC_ICHORON,   NPC_SWIRLING,   1, 1915.52f, 779.13f, 35.94f, SAY_RELEASE_ICHORON},
-    {TYPE_LAVANTHOR, NPC_LAVANTHOR, NPC_LAVA_HOUND, 1, 1855.28f, 760.85f, 38.65f, 0},
-    {TYPE_MORAGG,    NPC_MORAGG,    NPC_WATCHER,    1, 1890.51f, 752.85f, 47.66f, 0}
-};
-
-class instance_violet_hold : public ScriptedInstance
-{
-    public:
-        instance_violet_hold(Map* pMap);
-        ~instance_violet_hold();                            // Destructor used to free m_vRandomBosses
-
-        void Initialize() override;
-
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-
-        void UpdateCellForBoss(uint32 uiBossEntry, bool bForceClosing = false);
-
-        void SetIntroPortals(bool bDeactivate);
-
-        void CallGuards(bool bRespawn);
-
-        uint32 GetRandomPortalEliteEntry() { return (urand(0, 1) ? NPC_PORTAL_GUARDIAN : NPC_PORTAL_KEEPER); }
-        uint32 GetRandomMobForNormalPortal() { return aRandomPortalNpcs[urand(0, 4)]; }
-        uint32 GetRandomMobForIntroPortal() { return aRandomIntroNpcs[urand(0, 3)]; }
-
-        uint32 GetCurrentPortalNumber() { return m_uiWorldStatePortalCount; }
-
-        BossInformation const* GetBossInformation(uint32 uiEntry = 0);
-
-        bool IsCurrentPortalForTrash()
-        {
-            if (m_uiWorldStatePortalCount % MAX_MINIBOSSES)
-                return true;
-
-            return false;
-        }
-
-        void ProcessActivationCrystal(Unit* pUser, bool bIsIntro = false);
-
-        void GetErekemGuardList(GuidList& lGuardList) { lGuardList = GetData(TYPE_EREKEM) != DONE ? m_lErekemGuardList : m_lArakkoaGuardList; }
-        void GetIchoronTriggerList(GuidList& lList) { lList = m_lIchoronTargetsList; }
-
-        void OnPlayerEnter(Player* pPlayer) override;
-
-        void OnCreatureEnterCombat(Creature* pCreature) override;
-        void OnCreatureEvade(Creature* pCreature);
-        void OnCreatureDeath(Creature* pCreature) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-        void Load(const char* chrIn) override;
-
-        void Update(uint32 uiDiff) override;
-
-        typedef std::multimap<uint32, ObjectGuid> BossToCellMap;
-
-    protected:
-        PortalData const* GetPortalData() { return &afPortalLocation[m_uiPortalId]; }
-
-        void UpdateWorldState(bool bEnable = true);
-
-        void SetRandomBosses();
-
-        void SpawnPortal();
-        void SetPortalId();
-
-        void ResetAll();
-        void ResetVariables();
-
-        bool IsNextPortalForTrash()
-        {
-            if ((m_uiWorldStatePortalCount + 1) % MAX_MINIBOSSES)
-                return true;
-
-            return false;
-        }
-
-        BossSpawn* CreateBossSpawnByEntry(uint32 uiEntry);
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string m_strInstData;
-
-        uint32 m_uiWorldState;
-        uint32 m_uiWorldStateSealCount;
-        uint32 m_uiWorldStatePortalCount;
-
-        uint8 m_uiPortalId;
-        uint32 m_uiPortalTimer;
-        uint32 m_uiMaxCountPortalLoc;
-
-        uint32 m_uiSealYellCount;
-        uint32 m_uiEventResetTimer;
-
-        bool m_bIsVoidDance;
-        bool m_bIsDefenseless;
-        bool m_bIsDehydratation;
-
-        BossToCellMap m_mBossToCellMap;
-
-        GuidList m_lIntroPortalList;
-        GuidList m_lGuardsList;
-        GuidList m_lErekemGuardList;
-        GuidList m_lArakkoaGuardList;
-        GuidList m_lIchoronTargetsList;
-        std::vector<uint32> m_vRandomBossList;
-
-        std::vector<BossSpawn*> m_vRandomBosses;
-};
-
 #endif

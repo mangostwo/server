@@ -43,35 +43,48 @@ EndContentData */
 
 #define SPELL_TELEPORT      41566                           // s41566 - Teleport to Ashtongue NPC's
 #define GOSSIP_OLUM1        "Teleport me to the other Ashtongue Deathsworn"
-
-bool GossipHello_npc_spirit_of_olum(Player* pPlayer, Creature* pCreature)
+//TODO prepare localisation
+struct npc_spirit_of_olum : public CreatureScript
 {
-    ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+    npc_spirit_of_olum() : CreatureScript("npc_spirit_of_olum") {}
 
-    if (pInstance && (pInstance->GetData(TYPE_SUPREMUS) >= DONE) && (pInstance->GetData(TYPE_NAJENTUS) >= DONE))
-    { pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_OLUM1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1); }
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
+    {
+        ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
 
-    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
-    return true;
-}
+        if (pInstance && (pInstance->GetData(TYPE_SUPREMUS) >= DONE) && (pInstance->GetData(TYPE_NAJENTUS) >= DONE))
+        {
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_OLUM1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        }
 
-bool GossipSelect_npc_spirit_of_olum(Player* pPlayer, Creature* /*pCreature*/, uint32 /*uiSender*/, uint32 uiAction)
-{
-    if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
-    { pPlayer->CLOSE_GOSSIP_MENU(); }
+        pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
+        return true;
+    }
 
-    pPlayer->InterruptNonMeleeSpells(false);
-    pPlayer->CastSpell(pPlayer, SPELL_TELEPORT, false);
-    return true;
-}
+    bool OnGossipSelect(Player* pPlayer, Creature* /*pCreature*/, uint32 /*uiSender*/, uint32 uiAction) override
+    {
+        pPlayer->PlayerTalkClass->ClearMenus();
+        if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            pPlayer->CLOSE_GOSSIP_MENU();
+        }
+
+        pPlayer->InterruptNonMeleeSpells(false);
+        pPlayer->CastSpell(pPlayer, SPELL_TELEPORT, false);
+        return true;
+    }
+};
 
 void AddSC_black_temple()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_spirit_of_olum";
-    pNewScript->pGossipHello = &GossipHello_npc_spirit_of_olum;
-    pNewScript->pGossipSelect = &GossipSelect_npc_spirit_of_olum;
-    pNewScript->RegisterSelf();
+    s = new npc_spirit_of_olum();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_spirit_of_olum";
+    //pNewScript->pGossipHello = &GossipHello_npc_spirit_of_olum;
+    //pNewScript->pGossipSelect = &GossipSelect_npc_spirit_of_olum;
+    //pNewScript->RegisterSelf();
 }

@@ -268,81 +268,84 @@ static const float afCenterMovePos[3] = {2744.61f, 2569.38f, 364.3136f};
 ## boss_mimiron
 ######*/
 
-struct  boss_mimironAI : public ScriptedAI, private DialogueHelper
+struct boss_mimiron : public CreatureScript
 {
-    boss_mimironAI(Creature* pCreature) : ScriptedAI(pCreature),
+    boss_mimiron() : CreatureScript("boss_mimiron") {}
+
+    struct boss_mimironAI : public ScriptedAI, private DialogueHelper
+    {
+        boss_mimironAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aMimironDialogue)
-    {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
-        InitializeDialogueHelper(m_pInstance);
-        m_bHasDoneIntro = false;
-        Reset();
-    }
-
-    instance_ulduar* m_pInstance;
-
-    uint8 m_uiPhase;
-    uint8 m_uiDestructStage;
-    uint32 m_uiDestructTimer;
-
-    uint32 m_uiWeldTimer;
-    uint32 m_uiAnimationTimer;
-    uint32 m_uiCurrentSeatAura;
-
-    uint32 m_uiWakeUpTimer;
-    uint32 m_uiFlamesTimer;
-    uint32 m_uiBerserkTimer;
-
-    bool m_bHasDoneIntro;
-
-    void Reset() override
-    {
-        m_uiPhase           = PHASE_INTRO;
-        m_uiDestructStage   = 0;
-        m_uiDestructTimer   = 0;
-        m_uiWakeUpTimer     = 0;
-        m_uiWeldTimer       = 1000;
-        m_uiAnimationTimer  = 10000;
-        m_uiFlamesTimer     = 0;
-        m_uiBerserkTimer    = 0;
-        m_uiCurrentSeatAura = SPELL_RIDE_VEHICLE_MIMIRON_0;
-
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
-    }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (!m_bHasDoneIntro && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 70.0f))
         {
-            DoScriptText(SAY_INTRO, m_creature);
-            m_bHasDoneIntro = true;
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            InitializeDialogueHelper(m_pInstance);
+            m_bHasDoneIntro = false;
         }
-    }
 
-    void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage) override
-    {
-        // start encounter on first damage
-        if (m_uiPhase == PHASE_INTRO && uiDamage)
+        ScriptedInstance* m_pInstance;
+
+        uint8 m_uiPhase;
+        uint8 m_uiDestructStage;
+        uint32 m_uiDestructTimer;
+
+        uint32 m_uiWeldTimer;
+        uint32 m_uiAnimationTimer;
+        uint32 m_uiCurrentSeatAura;
+
+        uint32 m_uiWakeUpTimer;
+        uint32 m_uiFlamesTimer;
+        uint32 m_uiBerserkTimer;
+
+        bool m_bHasDoneIntro;
+
+        void Reset() override
         {
-            m_uiPhase = PHASE_LEVIATHAN;
+            m_uiPhase = PHASE_INTRO;
+            m_uiDestructStage = 0;
+            m_uiDestructTimer = 0;
+            m_uiWakeUpTimer = 0;
+            m_uiWeldTimer = 1000;
+            m_uiAnimationTimer = 10000;
+            m_uiFlamesTimer = 0;
+            m_uiBerserkTimer = 0;
+            m_uiCurrentSeatAura = SPELL_RIDE_VEHICLE_MIMIRON_0;
 
-            if (m_pInstance)
-                m_pInstance->SetData(TYPE_MIMIRON, IN_PROGRESS);
-
-            StartNextDialogueText(NPC_MIMIRON);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
         }
-    }
 
-    void JustDidDialogueStep(int32 iEntry) override
-    {
-        if (!m_pInstance)
-            return;
+        void AttackStart(Unit* /*pWho*/) override { }
 
-        switch (iEntry)
+        void MoveInLineOfSight(Unit* pWho) override
         {
-            // Encounter intro (normal and hard mode)
+            if (!m_bHasDoneIntro && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 70.0f))
+            {
+                DoScriptText(SAY_INTRO, m_creature);
+                m_bHasDoneIntro = true;
+            }
+        }
+
+        void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage) override
+        {
+            // start encounter on first damage
+            if (m_uiPhase == PHASE_INTRO && uiDamage)
+            {
+                m_uiPhase = PHASE_LEVIATHAN;
+
+                if (m_pInstance)
+                    m_pInstance->SetData(TYPE_MIMIRON, IN_PROGRESS);
+
+                StartNextDialogueText(NPC_MIMIRON);
+            }
+        }
+
+        void JustDidDialogueStep(int32 iEntry) override
+        {
+            if (!m_pInstance)
+                return;
+
+            switch (iEntry)
+            {
+                // Encounter intro (normal and hard mode)
             case NPC_MIMIRON:
             case NPC_LEVIATHAN_MK_TURRET:
                 // jump on the top of the robot for intro / phase end text
@@ -383,7 +386,7 @@ struct  boss_mimironAI : public ScriptedAI, private DialogueHelper
                 m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
                 break;
 
-            // Start phase 2 transition
+                // Start phase 2 transition
             case GO_MIMIRON_ELEVATOR:
                 m_pInstance->DoUseDoorOrButton(GO_MIMIRON_ELEVATOR);
                 break;
@@ -427,7 +430,7 @@ struct  boss_mimironAI : public ScriptedAI, private DialogueHelper
                 }
                 break;
 
-            // Start phase 3 transition
+                // Start phase 3 transition
             case NPC_ROCKET_STRIKE:
                 // mount on the top of the robot for phase end text
                 if (Creature* pVx001 = m_pInstance->GetSingleCreatureFromStorage(NPC_VX001))
@@ -466,7 +469,7 @@ struct  boss_mimironAI : public ScriptedAI, private DialogueHelper
                 }
                 break;
 
-            // Start phase 4 transition
+                // Start phase 4 transition
             case NPC_COMPUTER:
                 // get the tank into combat position
                 if (Creature* pLeviathan = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK))
@@ -529,7 +532,7 @@ struct  boss_mimironAI : public ScriptedAI, private DialogueHelper
                 }
                 break;
 
-            // Start encounter epilogue
+                // Start encounter epilogue
             case SPELL_SLEEP_VISUAL:
                 DoCastSpellIfCan(m_creature, SPELL_SLEEP_VISUAL);
                 if (m_pInstance->GetData(TYPE_MIMIRON_HARD) == DONE)
@@ -550,20 +553,20 @@ struct  boss_mimironAI : public ScriptedAI, private DialogueHelper
                 if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT_VISUAL) == CAST_OK)
                     m_creature->ForcedDespawn(2000);
                 break;
+            }
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_AERIAL_UNIT)
-            pSummoned->GetMotionMaster()->MovePoint(1, afAerialMovePos[0], afAerialMovePos[1], afAerialMovePos[2]);
-    }
-
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
-    {
-        switch (eventType)
+        void JustSummoned(Creature* pSummoned) override
         {
-            // Red button pressed
+            if (pSummoned->GetEntry() == NPC_AERIAL_UNIT)
+                pSummoned->GetMotionMaster()->MovePoint(1, afAerialMovePos[0], afAerialMovePos[1], afAerialMovePos[2]);
+        }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+        {
+            switch (eventType)
+            {
+                // Red button pressed
             case AI_EVENT_CUSTOM_A:
                 StartNextDialogueText(SAY_SELF_DESTRUCT);
                 m_uiPhase = PHASE_LEVIATHAN;
@@ -573,184 +576,184 @@ struct  boss_mimironAI : public ScriptedAI, private DialogueHelper
                 m_uiDestructTimer = MINUTE * IN_MILLISECONDS;
                 m_uiFlamesTimer = 7000;
                 break;
-            // Leviathan phase finished
+                // Leviathan phase finished
             case AI_EVENT_CUSTOM_B:
                 StartNextDialogueText(NPC_LEVIATHAN_MK_TURRET);
                 break;
-            // VX001 phase finished
+                // VX001 phase finished
             case AI_EVENT_CUSTOM_C:
                 StartNextDialogueText(SPELL_TORSO_DISABLED);
                 break;
-            // Aerial unit phase finished
+                // Aerial unit phase finished
             case AI_EVENT_CUSTOM_D:
                 StartNextDialogueText(NPC_COMPUTER);
                 break;
-            // Robot piece destroyed
+                // Robot piece destroyed
             case AI_EVENT_CUSTOM_E:
                 if (!m_uiWakeUpTimer)
                     m_uiWakeUpTimer = 10000;
                 break;
             default:
                 break;
-        }
-    }
-
-    // function to switch to another seat on the Leviathan
-    void DoFlyToNextRandomSeat()
-    {
-        if (!m_pInstance)
-            return;
-
-        Creature* pLeviathan = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK);
-        if (!pLeviathan)
-            return;
-
-        m_creature->RemoveAurasDueToSpell(SPELL_WELD);
-        pLeviathan->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, m_creature->GetObjectGuid());
-
-        uint32 uiNextAuraId = aRandomAnimationSpells[urand(0, countof(aRandomAnimationSpells) - 1)];
-
-        while (uiNextAuraId == m_uiCurrentSeatAura)
-            uiNextAuraId = aRandomAnimationSpells[urand(0, countof(aRandomAnimationSpells) - 1)];
-
-        m_uiCurrentSeatAura = uiNextAuraId;
-        DoCastSpellIfCan(pLeviathan, m_uiCurrentSeatAura, CAST_TRIGGERED);
-    }
-
-    // function to trigger the flames explosion for hard mode
-    void DoSpawnFlamesInitial()
-    {
-        if (!m_pInstance)
-            return;
-
-        Creature* pLeviathan = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK);
-        Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_WORLD_TRIGGER_FLAMES);
-        if (!pLeviathan || !pTrigger)
-            return;
-
-        for (uint8 i = 0; i < 3; ++i)
-        {
-            // Select targets based on Leviathan threat list; if the Leviathan is not in combat select them using instance
-            Unit* pTarget = NULL;
-            if (pLeviathan->getVictim())
-                pTarget = pLeviathan->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SUMMON_FLAMES_INITIAL, SELECT_FLAG_PLAYER);
-            else
-                pTarget = m_pInstance->GetPlayerInMap(true, false);
-
-            if (pTarget)
-                pTrigger->CastSpell(pTarget, SPELL_SUMMON_FLAMES_INITIAL, true);
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_pInstance)
-        {
-            script_error_log("Instance Ulduar: ERROR Failed to load instance data for this instace.");
-            return;
-        }
-
-        DialogueUpdate(uiDiff);
-
-        if (m_uiPhase == PHASE_INTRO)
-        {
-            // in idle mode Mimiron jumps around the Leviathan
-            if (m_uiAnimationTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_JET_PACK) == CAST_OK)
-                {
-                    DoFlyToNextRandomSeat();
-                    m_uiWeldTimer = 2000;
-                    m_uiAnimationTimer = urand(12000, 15000);
-                }
             }
-            else
-                m_uiAnimationTimer -= uiDiff;
+        }
 
-            if (m_uiWeldTimer)
+        // function to switch to another seat on the Leviathan
+        void DoFlyToNextRandomSeat()
+        {
+            if (!m_pInstance)
+                return;
+
+            Creature* pLeviathan = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK);
+            if (!pLeviathan)
+                return;
+
+            m_creature->RemoveAurasDueToSpell(SPELL_WELD);
+            pLeviathan->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, m_creature->GetObjectGuid());
+
+            uint32 uiNextAuraId = aRandomAnimationSpells[urand(0, countof(aRandomAnimationSpells) - 1)];
+
+            while (uiNextAuraId == m_uiCurrentSeatAura)
+                uiNextAuraId = aRandomAnimationSpells[urand(0, countof(aRandomAnimationSpells) - 1)];
+
+            m_uiCurrentSeatAura = uiNextAuraId;
+            DoCastSpellIfCan(pLeviathan, m_uiCurrentSeatAura, CAST_TRIGGERED);
+        }
+
+        // function to trigger the flames explosion for hard mode
+        void DoSpawnFlamesInitial()
+        {
+            if (!m_pInstance)
+                return;
+
+            Creature* pLeviathan = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK);
+            Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_WORLD_TRIGGER_FLAMES);
+            if (!pLeviathan || !pTrigger)
+                return;
+
+            for (uint8 i = 0; i < 3; ++i)
             {
-                if (m_uiWeldTimer <= uiDiff)
+                // Select targets based on Leviathan threat list; if the Leviathan is not in combat select them using instance
+                Unit* pTarget = NULL;
+                if (pLeviathan->getVictim())
+                    pTarget = pLeviathan->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SUMMON_FLAMES_INITIAL, SELECT_FLAG_PLAYER);
+                else
+                    pTarget = m_pInstance->GetPlayerInMap(true, false);
+
+                if (pTarget)
+                    pTrigger->CastSpell(pTarget, SPELL_SUMMON_FLAMES_INITIAL, true);
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_pInstance)
+            {
+                script_error_log("Instance Ulduar: ERROR Failed to load instance data for this instace.");
+                return;
+            }
+
+            DialogueUpdate(uiDiff);
+
+            if (m_uiPhase == PHASE_INTRO)
+            {
+                // in idle mode Mimiron jumps around the Leviathan
+                if (m_uiAnimationTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_WELD) == CAST_OK)
-                        m_uiWeldTimer = 0;
+                    if (DoCastSpellIfCan(m_creature, SPELL_JET_PACK) == CAST_OK)
+                    {
+                        DoFlyToNextRandomSeat();
+                        m_uiWeldTimer = 2000;
+                        m_uiAnimationTimer = urand(12000, 15000);
+                    }
                 }
                 else
-                    m_uiWeldTimer -= uiDiff;
-            }
-        }
+                    m_uiAnimationTimer -= uiDiff;
 
-        if (m_uiWakeUpTimer)
-        {
-            // check if all robot pieces are damaged
-            if (m_uiWakeUpTimer <= uiDiff)
-            {
-                Creature* pLeviathan = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK);
-                Creature* pVx001 = m_pInstance->GetSingleCreatureFromStorage(NPC_VX001);
-                Creature* pAerial = m_pInstance->GetSingleCreatureFromStorage(NPC_AERIAL_UNIT);
-                if (!pAerial || !pVx001 || !pLeviathan)
-                    return;
-
-                // if all robot pieces are damaged finish the encounter
-                if (pLeviathan->HasAura(SPELL_FREEZE_ANIM) && pVx001->getStandState() == UNIT_STAND_STATE_DEAD && pAerial->getStandState() == UNIT_STAND_STATE_DEAD)
+                if (m_uiWeldTimer)
                 {
-                    // eject from the robot and start dialogue
-                    pVx001->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, m_creature->GetObjectGuid());
-                    StartNextDialogueText(SPELL_SLEEP_VISUAL);
-
-                    // kill the robot parts
-                    m_creature->DealDamage(pLeviathan, pLeviathan->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
-                    m_creature->DealDamage(pVx001, pVx001->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
-                    m_creature->DealDamage(pAerial, pAerial->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+                    if (m_uiWeldTimer <= uiDiff)
+                    {
+                        if (DoCastSpellIfCan(m_creature, SPELL_WELD) == CAST_OK)
+                            m_uiWeldTimer = 0;
+                    }
+                    else
+                        m_uiWeldTimer -= uiDiff;
                 }
-                m_uiWakeUpTimer = 0;
             }
-            else
-                m_uiWakeUpTimer -= uiDiff;
-        }
 
-        if (m_uiBerserkTimer)
-        {
-            if (m_uiBerserkTimer <= uiDiff)
+            if (m_uiWakeUpTimer)
             {
-                if (Creature* pLeviathan = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK))
-                    pLeviathan->CastSpell(pLeviathan, SPELL_BERSERK, true);
-                if (Creature* pVx001 = m_pInstance->GetSingleCreatureFromStorage(NPC_VX001, true))
-                    pVx001->CastSpell(pVx001, SPELL_BERSERK, true);
-                if (Creature* pAerial = m_pInstance->GetSingleCreatureFromStorage(NPC_AERIAL_UNIT, true))
-                    pAerial->CastSpell(pAerial, SPELL_BERSERK, true);
-
-                DoScriptText(SAY_BERSERK, m_creature);
-                m_uiBerserkTimer = 0;
-            }
-            else
-                m_uiBerserkTimer -= uiDiff;
-        }
-
-        if (m_uiFlamesTimer)
-        {
-            if (m_uiFlamesTimer <= uiDiff)
-            {
-                DoSpawnFlamesInitial();
-                m_uiFlamesTimer = urand(25000, 30000);
-            }
-            else
-                 m_uiFlamesTimer -= uiDiff;
-        }
-
-        if (m_uiDestructTimer)
-        {
-            // handle the platform destruction for hard mode
-            if (m_uiDestructTimer <= uiDiff)
-            {
-                Creature* pComputer = m_pInstance->GetSingleCreatureFromStorage(NPC_COMPUTER);
-                if (!pComputer)
-                    return;
-
-                ++m_uiDestructStage;
-                m_uiDestructTimer = MINUTE * IN_MILLISECONDS;
-
-                switch (m_uiDestructStage)
+                // check if all robot pieces are damaged
+                if (m_uiWakeUpTimer <= uiDiff)
                 {
+                    Creature* pLeviathan = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK);
+                    Creature* pVx001 = m_pInstance->GetSingleCreatureFromStorage(NPC_VX001);
+                    Creature* pAerial = m_pInstance->GetSingleCreatureFromStorage(NPC_AERIAL_UNIT);
+                    if (!pAerial || !pVx001 || !pLeviathan)
+                        return;
+
+                    // if all robot pieces are damaged finish the encounter
+                    if (pLeviathan->HasAura(SPELL_FREEZE_ANIM) && pVx001->getStandState() == UNIT_STAND_STATE_DEAD && pAerial->getStandState() == UNIT_STAND_STATE_DEAD)
+                    {
+                        // eject from the robot and start dialogue
+                        pVx001->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, m_creature->GetObjectGuid());
+                        StartNextDialogueText(SPELL_SLEEP_VISUAL);
+
+                        // kill the robot parts
+                        m_creature->DealDamage(pLeviathan, pLeviathan->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+                        m_creature->DealDamage(pVx001, pVx001->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+                        m_creature->DealDamage(pAerial, pAerial->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+                    }
+                    m_uiWakeUpTimer = 0;
+                }
+                else
+                    m_uiWakeUpTimer -= uiDiff;
+            }
+
+            if (m_uiBerserkTimer)
+            {
+                if (m_uiBerserkTimer <= uiDiff)
+                {
+                    if (Creature* pLeviathan = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK))
+                        pLeviathan->CastSpell(pLeviathan, SPELL_BERSERK, true);
+                    if (Creature* pVx001 = m_pInstance->GetSingleCreatureFromStorage(NPC_VX001, true))
+                        pVx001->CastSpell(pVx001, SPELL_BERSERK, true);
+                    if (Creature* pAerial = m_pInstance->GetSingleCreatureFromStorage(NPC_AERIAL_UNIT, true))
+                        pAerial->CastSpell(pAerial, SPELL_BERSERK, true);
+
+                    DoScriptText(SAY_BERSERK, m_creature);
+                    m_uiBerserkTimer = 0;
+                }
+                else
+                    m_uiBerserkTimer -= uiDiff;
+            }
+
+            if (m_uiFlamesTimer)
+            {
+                if (m_uiFlamesTimer <= uiDiff)
+                {
+                    DoSpawnFlamesInitial();
+                    m_uiFlamesTimer = urand(25000, 30000);
+                }
+                else
+                    m_uiFlamesTimer -= uiDiff;
+            }
+
+            if (m_uiDestructTimer)
+            {
+                // handle the platform destruction for hard mode
+                if (m_uiDestructTimer <= uiDiff)
+                {
+                    Creature* pComputer = m_pInstance->GetSingleCreatureFromStorage(NPC_COMPUTER);
+                    if (!pComputer)
+                        return;
+
+                    ++m_uiDestructStage;
+                    m_uiDestructTimer = MINUTE * IN_MILLISECONDS;
+
+                    switch (m_uiDestructStage)
+                    {
                     case 1: DoScriptText(SAY_DESTRUCT_9_MIN, pComputer); break;
                     case 2: DoScriptText(SAY_DESTRUCT_8_MIN, pComputer); break;
                     case 3: DoScriptText(SAY_DESTRUCT_7_MIN, pComputer); break;
@@ -766,454 +769,462 @@ struct  boss_mimironAI : public ScriptedAI, private DialogueHelper
                         pComputer->CastSpell(pComputer, SPELL_SELF_DESTRUCTION_DAMAGE, true);
                         m_uiDestructTimer = 0;
                         break;
+                    }
                 }
+                else
+                    m_uiDestructTimer -= uiDiff;
             }
-            else
-                m_uiDestructTimer -= uiDiff;
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_mimironAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_mimiron(Creature* pCreature)
-{
-    return new boss_mimironAI(pCreature);
-}
 
 /*######
 ## boss_leviathan_mk2
 ######*/
 
-struct  boss_leviathan_mk2AI : public ScriptedAI
+struct boss_leviathan_mk2 : public CreatureScript
 {
-    boss_leviathan_mk2AI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_leviathan_mk2() : CreatureScript("boss_leviathan_mk2") {}
+
+    struct boss_leviathan_mk2AI : public ScriptedAI
     {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-
-        DoCastSpellIfCan(m_creature, SPELL_FREEZE_ANIM, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-        m_uiPhase = PHASE_INTRO;
-        m_uiMountTimer = 1000;
-        Reset();
-    }
-
-    instance_ulduar* m_pInstance;
-    bool m_bIsRegularMode;
-    uint8 m_uiPhase;
-
-    uint32 m_uiMountTimer;
-
-    uint32 m_uiMinesTimer;
-    uint32 m_uiNapalmTimer;
-    uint32 m_uiPlasmaBlastTimer;
-    uint32 m_uiShockBlastTimer;
-    uint32 m_uiFlameSuppressTimer;
-
-    void Reset() override
-    {
-        m_uiMinesTimer          = 1000;
-        m_uiNapalmTimer         = 20000;
-        m_uiPlasmaBlastTimer    = 10000;
-        m_uiShockBlastTimer     = 30000;
-        m_uiFlameSuppressTimer  = 0;
-
-        SetCombatMovement(true);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        m_uiPhase = PHASE_LEVIATHAN;
-
-        if (m_pInstance && m_pInstance->GetData(TYPE_MIMIRON_HARD) == DONE)
-            m_uiFlameSuppressTimer = 50000;
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MIMIRON, DONE);
-    }
-
-    void DamageTaken(Unit* pDoneBy, uint32& uiDamage) override
-    {
-        if (pDoneBy->GetEntry() == NPC_MIMIRON && m_uiPhase == PHASE_DAMAGED)
-            return;
-
-        if (uiDamage >= m_creature->GetHealth())
+        boss_leviathan_mk2AI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            uiDamage = 0;
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
 
-            if (m_uiPhase == PHASE_LEVIATHAN)
+            DoCastSpellIfCan(m_creature, SPELL_FREEZE_ANIM, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+            m_uiPhase = PHASE_INTRO;
+            m_uiMountTimer = 1000;
+        }
+
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+        uint8 m_uiPhase;
+
+        uint32 m_uiMountTimer;
+
+        uint32 m_uiMinesTimer;
+        uint32 m_uiNapalmTimer;
+        uint32 m_uiPlasmaBlastTimer;
+        uint32 m_uiShockBlastTimer;
+        uint32 m_uiFlameSuppressTimer;
+
+        void Reset() override
+        {
+            m_uiMinesTimer = 1000;
+            m_uiNapalmTimer = 20000;
+            m_uiPlasmaBlastTimer = 10000;
+            m_uiShockBlastTimer = 30000;
+            m_uiFlameSuppressTimer = 0;
+
+            SetCombatMovement(true);
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            m_uiPhase = PHASE_LEVIATHAN;
+
+            if (m_pInstance && m_pInstance->GetData(TYPE_MIMIRON_HARD) == DONE)
+                m_uiFlameSuppressTimer = 50000;
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_MIMIRON, DONE);
+        }
+
+        void DamageTaken(Unit* pDoneBy, uint32& uiDamage) override
+        {
+            if (pDoneBy->GetEntry() == NPC_MIMIRON && m_uiPhase == PHASE_DAMAGED)
+                return;
+
+            if (uiDamage >= m_creature->GetHealth())
             {
-                // unmount and destroy the turret
-                if (m_pInstance)
+                uiDamage = 0;
+
+                if (m_uiPhase == PHASE_LEVIATHAN)
                 {
-                    if (Creature* pTurret = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK_TURRET))
+                    // unmount and destroy the turret
+                    if (m_pInstance)
                     {
-                        m_creature->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, pTurret->GetObjectGuid());
-                        m_creature->DealDamage(pTurret, pTurret->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+                        if (Creature* pTurret = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK_TURRET))
+                        {
+                            m_creature->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, pTurret->GetObjectGuid());
+                            m_creature->DealDamage(pTurret, pTurret->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+                        }
+                    }
+
+                    // move to parking position
+                    SetCombatMovement(false);
+                    m_uiPhase = PHASE_TRANSITION;
+                    m_creature->GetMotionMaster()->MovePoint(POINT_ID_PARK, afTankEvadePos[0], afTankEvadePos[1], afTankEvadePos[2]);
+                }
+                else if (m_uiPhase == PHASE_FULL_ROBOT)
+                {
+                    // start self repair
+                    if (DoCastSpellIfCan(m_creature, SPELL_SELF_REPAIR, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                    {
+                        DoCastSpellIfCan(m_creature, SPELL_VEHICLE_DAMAGED, CAST_TRIGGERED);
+                        DoCastSpellIfCan(m_creature, SPELL_FREEZE_ANIM, CAST_TRIGGERED);
+
+                        // inform Mimiron about the damaged state
+                        if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
+                            SendAIEvent(AI_EVENT_CUSTOM_E, m_creature, pMimiron);
+
+                        SetCombatMovement(false);
+                        m_creature->GetMotionMaster()->MoveIdle();
+                        m_uiPhase = PHASE_DAMAGED;
                     }
                 }
-
-                // move to parking position
-                SetCombatMovement(false);
-                m_uiPhase = PHASE_TRANSITION;
-                m_creature->GetMotionMaster()->MovePoint(POINT_ID_PARK, afTankEvadePos[0], afTankEvadePos[1], afTankEvadePos[2]);
-            }
-            else if (m_uiPhase == PHASE_FULL_ROBOT)
-            {
-                // start self repair
-                if (DoCastSpellIfCan(m_creature, SPELL_SELF_REPAIR, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
-                {
-                    DoCastSpellIfCan(m_creature, SPELL_VEHICLE_DAMAGED, CAST_TRIGGERED);
-                    DoCastSpellIfCan(m_creature, SPELL_FREEZE_ANIM, CAST_TRIGGERED);
-
-                    // inform Mimiron about the damaged state
-                    if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
-                        SendAIEvent(AI_EVENT_CUSTOM_E, m_creature, pMimiron);
-
-                    SetCombatMovement(false);
-                    m_creature->GetMotionMaster()->MoveIdle();
-                    m_uiPhase = PHASE_DAMAGED;
-                }
-            }
-        }
-    }
-
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
-    {
-        // self repair succesfull; resume fight
-        if (pSpell->Id == SPELL_SELF_REPAIR)
-        {
-            m_creature->RemoveAurasDueToSpell(SPELL_FREEZE_ANIM);
-            SetCombatMovement(true);
-            m_creature->GetMotionMaster()->Clear();
-            DoStartMovement(m_creature->getVictim());
-            m_uiPhase = PHASE_FULL_ROBOT;
-        }
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-        {
-            m_pInstance->SetData(TYPE_MIMIRON, FAIL);
-
-            // respawn the turret if necessary
-            if (Creature* pTurret = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK_TURRET))
-            {
-                if (!pTurret->IsAlive())
-                    pTurret->Respawn();
             }
         }
 
-        DoCastSpellIfCan(m_creature, SPELL_FREEZE_ANIM);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-
-        // reset all the vehicle accessories
-        m_uiMountTimer = 1000;
-    }
-
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER || !m_pInstance)
-            return;
-
-        if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
+        void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
         {
-            if (m_uiPhase == PHASE_FULL_ROBOT)
-                DoScriptText(urand(0, 1) ? SAY_ROBOT_SLAY_1 : SAY_ROBOT_SLAY_2, pMimiron);
-            else
-                DoScriptText(urand(0, 1) ? SAY_TANK_SLAY_1 : SAY_TANK_SLAY_2, pMimiron);
-        }
-    }
-
-    void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
-    {
-        if (uiMoveType != POINT_MOTION_TYPE || !m_pInstance)
-            return;
-
-        if (uiPointId == POINT_ID_PARK)
-        {
-            // start transition phase
-            if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
-                SendAIEvent(AI_EVENT_CUSTOM_B, m_creature, pMimiron);
-
-            // park the Leviathan
-            DoCastSpellIfCan(m_creature, SPELL_CLEAR_DEBUFFS, CAST_TRIGGERED);
-            DoCastSpellIfCan(m_creature, SPELL_HALF_HEAL, CAST_TRIGGERED);
-            DoCastSpellIfCan(m_creature, SPELL_FREEZE_ANIM_DEFEATED, CAST_TRIGGERED);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            m_creature->SetFacingTo(afTankEvadePos[3]);
-        }
-    }
-
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
-    {
-        // switch to full robot abilities
-        if (eventType == AI_EVENT_CUSTOM_A)
-        {
-            SetCombatMovement(true);
-            DoStartMovement(m_creature->getVictim());
-            m_uiPhase = PHASE_FULL_ROBOT;
-        }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_PROXIMITY_MINE)
-            pSummoned->CastSpell(pSummoned, SPELL_PROXIMITY_MINE, true);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_pInstance)
-        {
-            script_error_log("Instance Ulduar: ERROR Failed to load instance data for this instace.");
-            return;
-        }
-
-        // Mount Mimiron and the Turret manually
-        if (m_uiMountTimer)
-        {
-            if (m_uiMountTimer <= uiDiff)
+            // self repair succesfull; resume fight
+            if (pSpell->Id == SPELL_SELF_REPAIR)
             {
-                m_creature->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
+                m_creature->RemoveAurasDueToSpell(SPELL_FREEZE_ANIM);
+                SetCombatMovement(true);
+                m_creature->GetMotionMaster()->Clear();
+                DoStartMovement(m_creature->getVictim());
+                m_uiPhase = PHASE_FULL_ROBOT;
+            }
+        }
 
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_MIMIRON, FAIL);
+
+                // respawn the turret if necessary
                 if (Creature* pTurret = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK_TURRET))
                 {
-                    int32 iSeat = (int32)SEAT_ID_TURRET;
-                    pTurret->CastCustomSpell(m_creature, SPELL_RIDE_VEHICLE_HARDCODED, &iSeat, NULL, NULL, true);
+                    if (!pTurret->IsAlive())
+                        pTurret->Respawn();
                 }
-
-                if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
-                    pMimiron->CastSpell(m_creature, SPELL_RIDE_VEHICLE_MIMIRON_0, true);
-
-                m_uiMountTimer = 0;
             }
-            else
-                m_uiMountTimer -= uiDiff;
+
+            DoCastSpellIfCan(m_creature, SPELL_FREEZE_ANIM);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+            // reset all the vehicle accessories
+            m_uiMountTimer = 1000;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // no combat during transition or when damaged
-        if (m_uiPhase == PHASE_TRANSITION || m_uiPhase == PHASE_DAMAGED)
-            return;
-
-        // Leviathan phase spells
-        if (m_uiPhase == PHASE_LEVIATHAN)
+        void KilledUnit(Unit* pVictim) override
         {
-            if (m_uiPlasmaBlastTimer < uiDiff)
+            if (pVictim->GetTypeId() != TYPEID_PLAYER || !m_pInstance)
+                return;
+
+            if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (m_uiPhase == PHASE_FULL_ROBOT)
+                    DoScriptText(urand(0, 1) ? SAY_ROBOT_SLAY_1 : SAY_ROBOT_SLAY_2, pMimiron);
+                else
+                    DoScriptText(urand(0, 1) ? SAY_TANK_SLAY_1 : SAY_TANK_SLAY_2, pMimiron);
+            }
+        }
+
+        void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
+        {
+            if (uiMoveType != POINT_MOTION_TYPE || !m_pInstance)
+                return;
+
+            if (uiPointId == POINT_ID_PARK)
+            {
+                // start transition phase
+                if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
+                    SendAIEvent(AI_EVENT_CUSTOM_B, m_creature, pMimiron);
+
+                // park the Leviathan
+                DoCastSpellIfCan(m_creature, SPELL_CLEAR_DEBUFFS, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_HALF_HEAL, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_FREEZE_ANIM_DEFEATED, CAST_TRIGGERED);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->SetFacingTo(afTankEvadePos[3]);
+            }
+        }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+        {
+            // switch to full robot abilities
+            if (eventType == AI_EVENT_CUSTOM_A)
+            {
+                SetCombatMovement(true);
+                DoStartMovement(m_creature->getVictim());
+                m_uiPhase = PHASE_FULL_ROBOT;
+            }
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_PROXIMITY_MINE)
+                pSummoned->CastSpell(pSummoned, SPELL_PROXIMITY_MINE, true);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_pInstance)
+            {
+                script_error_log("Instance Ulduar: ERROR Failed to load instance data for this instace.");
+                return;
+            }
+
+            // Mount Mimiron and the Turret manually
+            if (m_uiMountTimer)
+            {
+                if (m_uiMountTimer <= uiDiff)
                 {
+                    m_creature->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
+
                     if (Creature* pTurret = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK_TURRET))
-                        pTurret->CastSpell(pTarget, m_bIsRegularMode ? SPELL_PLASMA_BLAST : SPELL_PLASMA_BLAST_H, false);
+                    {
+                        int32 iSeat = (int32)SEAT_ID_TURRET;
+                        pTurret->CastCustomSpell(m_creature, SPELL_RIDE_VEHICLE_HARDCODED, &iSeat, NULL, NULL, true);
+                    }
 
-                    DoScriptText(EMOTE_PLASMA_BLAST, m_creature);
-                    m_uiPlasmaBlastTimer = 30000;
-                }
-            }
-            else
-                m_uiPlasmaBlastTimer -= uiDiff;
+                    if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
+                        pMimiron->CastSpell(m_creature, SPELL_RIDE_VEHICLE_MIMIRON_0, true);
 
-            if (m_uiNapalmTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_NAPALM_SHELL) == CAST_OK)
-                    m_uiNapalmTimer = 7000;
-            }
-            else
-                m_uiNapalmTimer -= uiDiff;
-
-            if (m_uiFlameSuppressTimer)
-            {
-                if (m_uiFlameSuppressTimer <= uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_FLAME_SUPPRESSANT) == CAST_OK)
-                        m_uiFlameSuppressTimer = 60000;
+                    m_uiMountTimer = 0;
                 }
                 else
-                     m_uiFlameSuppressTimer -= uiDiff;
+                    m_uiMountTimer -= uiDiff;
             }
-        }
 
-        if (m_uiMinesTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_PROXIMITY_MINES) == CAST_OK)
-                m_uiMinesTimer = 35000;
-        }
-        else
-            m_uiMinesTimer -= uiDiff;
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
 
-        if (m_uiShockBlastTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SHOCK_BLAST) == CAST_OK)
-                m_uiShockBlastTimer = 34000;
-        }
-        else
-            m_uiShockBlastTimer -= uiDiff;
+            // no combat during transition or when damaged
+            if (m_uiPhase == PHASE_TRANSITION || m_uiPhase == PHASE_DAMAGED)
+                return;
 
-        DoMeleeAttackIfReady();
+            // Leviathan phase spells
+            if (m_uiPhase == PHASE_LEVIATHAN)
+            {
+                if (m_uiPlasmaBlastTimer < uiDiff)
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        if (Creature* pTurret = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK_TURRET))
+                            pTurret->CastSpell(pTarget, m_bIsRegularMode ? SPELL_PLASMA_BLAST : SPELL_PLASMA_BLAST_H, false);
+
+                        DoScriptText(EMOTE_PLASMA_BLAST, m_creature);
+                        m_uiPlasmaBlastTimer = 30000;
+                    }
+                }
+                else
+                    m_uiPlasmaBlastTimer -= uiDiff;
+
+                if (m_uiNapalmTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_NAPALM_SHELL) == CAST_OK)
+                        m_uiNapalmTimer = 7000;
+                }
+                else
+                    m_uiNapalmTimer -= uiDiff;
+
+                if (m_uiFlameSuppressTimer)
+                {
+                    if (m_uiFlameSuppressTimer <= uiDiff)
+                    {
+                        if (DoCastSpellIfCan(m_creature, SPELL_FLAME_SUPPRESSANT) == CAST_OK)
+                            m_uiFlameSuppressTimer = 60000;
+                    }
+                    else
+                        m_uiFlameSuppressTimer -= uiDiff;
+                }
+            }
+
+            if (m_uiMinesTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_PROXIMITY_MINES) == CAST_OK)
+                    m_uiMinesTimer = 35000;
+            }
+            else
+                m_uiMinesTimer -= uiDiff;
+
+            if (m_uiShockBlastTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_SHOCK_BLAST) == CAST_OK)
+                    m_uiShockBlastTimer = 34000;
+            }
+            else
+                m_uiShockBlastTimer -= uiDiff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_leviathan_mk2AI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_leviathan_mk2(Creature* pCreature)
-{
-    return new boss_leviathan_mk2AI(pCreature);
-}
 
 /*######
 ## boss_vx001
 ######*/
 
-struct  boss_vx001AI : public ScriptedAI
+struct boss_vx001 : public CreatureScript
 {
-    boss_vx001AI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_vx001() : CreatureScript("boss_vx001") {}
+
+    struct boss_vx001AI : public ScriptedAI
     {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-
-        DoCastSpellIfCan(m_creature, SPELL_FREEZE_ANIM, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-        m_uiPhase = PHASE_INTRO;
-        SetCombatMovement(false);
-        Reset();
-    }
-
-    instance_ulduar* m_pInstance;
-    bool m_bIsRegularMode;
-    uint8 m_uiPhase;
-
-    uint32 m_uiRocketStrikeTimer;
-    uint32 m_uiRapidBurstTimer;
-    uint32 m_uLaserBarrageTimer;
-    uint32 m_uiHandPulseTimer;
-    uint32 m_uiBurstEndTimer;
-    uint32 m_uiLaserEndTimer;
-    uint32 m_uiFlameSuppressTimer;
-    uint32 m_uiFrostBombTimer;
-
-    void Reset() override
-    {
-        m_uiBurstEndTimer       = 0;
-        m_uiLaserEndTimer       = 0;
-        m_uiRapidBurstTimer     = 1000;
-        m_uiHandPulseTimer      = 1000;
-        m_uiRocketStrikeTimer   = 20000;
-        m_uLaserBarrageTimer    = urand(30000, 60000);
-        m_uiFlameSuppressTimer  = 0;
-        m_uiFrostBombTimer      = 0;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        if (m_uiPhase == PHASE_INTRO)
+        boss_vx001AI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            m_uiPhase = PHASE_VX001;
-            DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_HEAT_WAVE : SPELL_HEAT_WAVE_H, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
 
-            // Set levitate for animation purpose
-            m_creature->SetLevitate(true);
+            DoCastSpellIfCan(m_creature, SPELL_FREEZE_ANIM, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+            m_uiPhase = PHASE_INTRO;
+            SetCombatMovement(false);
         }
 
-        if (m_pInstance && m_pInstance->GetData(TYPE_MIMIRON_HARD) == DONE)
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+        uint8 m_uiPhase;
+
+        uint32 m_uiRocketStrikeTimer;
+        uint32 m_uiRapidBurstTimer;
+        uint32 m_uLaserBarrageTimer;
+        uint32 m_uiHandPulseTimer;
+        uint32 m_uiBurstEndTimer;
+        uint32 m_uiLaserEndTimer;
+        uint32 m_uiFlameSuppressTimer;
+        uint32 m_uiFrostBombTimer;
+
+        void Reset() override
         {
-            m_uiFrostBombTimer     = 1000;
-            m_uiFlameSuppressTimer = 5000;
+            m_uiBurstEndTimer = 0;
+            m_uiLaserEndTimer = 0;
+            m_uiRapidBurstTimer = 1000;
+            m_uiHandPulseTimer = 1000;
+            m_uiRocketStrikeTimer = 20000;
+            m_uLaserBarrageTimer = urand(30000, 60000);
+            m_uiFlameSuppressTimer = 0;
+            m_uiFrostBombTimer = 0;
         }
-    }
 
-    void DamageTaken(Unit* pDoneBy, uint32& uiDamage) override
-    {
-        if (pDoneBy->GetEntry() == NPC_MIMIRON && m_uiPhase == PHASE_DAMAGED)
-            return;
-
-        if (uiDamage >= m_creature->GetHealth())
+        void Aggro(Unit* /*pWho*/) override
         {
-            uiDamage = 0;
-
-            if (m_uiPhase == PHASE_VX001)
+            if (m_uiPhase == PHASE_INTRO)
             {
-                // shut down the VX001
-                if (DoCastSpellIfCan(m_creature, SPELL_TORSO_DISABLED, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
-                {
-                    Reset();
-                    m_uiPhase = PHASE_TRANSITION;
+                m_uiPhase = PHASE_VX001;
+                DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_HEAT_WAVE : SPELL_HEAT_WAVE_H, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
 
-                    // start transition phase
-                    if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
-                        SendAIEvent(AI_EVENT_CUSTOM_C, m_creature, pMimiron);
-
-                    DoCastSpellIfCan(m_creature, SPELL_CLEAR_DEBUFFS, CAST_TRIGGERED);
-                    DoCastSpellIfCan(m_creature, SPELL_HALF_HEAL, CAST_TRIGGERED);
-
-                    // custom evade in order to properly handle the animations
-                    // Note: we won't remove all auras because of the hard mode; Debuffs should be removed by the spell above
-                    // m_creature->RemoveAllAurasOnEvade();
-                    m_creature->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_HEAT_WAVE : SPELL_HEAT_WAVE_H);
-                    m_creature->DeleteThreatList();
-                    m_creature->CombatStop();
-                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                }
+                // Set levitate for animation purpose
+                m_creature->SetLevitate(true);
             }
-            else if (m_uiPhase == PHASE_FULL_ROBOT)
-            {
-                // start self repair
-                if (DoCastSpellIfCan(m_creature, SPELL_SELF_REPAIR, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
-                {
-                    // inform Mimiron about the damaged state
-                    if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
-                        SendAIEvent(AI_EVENT_CUSTOM_E, m_creature, pMimiron);
 
-                    m_uiPhase = PHASE_DAMAGED;
-                    m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
-                }
+            if (m_pInstance && m_pInstance->GetData(TYPE_MIMIRON_HARD) == DONE)
+            {
+                m_uiFrostBombTimer = 1000;
+                m_uiFlameSuppressTimer = 5000;
             }
         }
-    }
 
-    void EnterEvadeMode() override {}
-
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
-    {
-        // self repair succesfull; resume fight
-        if (pSpell->Id == SPELL_SELF_REPAIR)
+        void DamageTaken(Unit* pDoneBy, uint32& uiDamage) override
         {
-            m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-            m_uiPhase = PHASE_FULL_ROBOT;
+            if (pDoneBy->GetEntry() == NPC_MIMIRON && m_uiPhase == PHASE_DAMAGED)
+                return;
+
+            if (uiDamage >= m_creature->GetHealth())
+            {
+                uiDamage = 0;
+
+                if (m_uiPhase == PHASE_VX001)
+                {
+                    // shut down the VX001
+                    if (DoCastSpellIfCan(m_creature, SPELL_TORSO_DISABLED, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                    {
+                        Reset();
+                        m_uiPhase = PHASE_TRANSITION;
+
+                        // start transition phase
+                        if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
+                            SendAIEvent(AI_EVENT_CUSTOM_C, m_creature, pMimiron);
+
+                        DoCastSpellIfCan(m_creature, SPELL_CLEAR_DEBUFFS, CAST_TRIGGERED);
+                        DoCastSpellIfCan(m_creature, SPELL_HALF_HEAL, CAST_TRIGGERED);
+
+                        // custom evade in order to properly handle the animations
+                        // Note: we won't remove all auras because of the hard mode; Debuffs should be removed by the spell above
+                        // m_creature->RemoveAllAurasOnEvade();
+                        m_creature->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_HEAT_WAVE : SPELL_HEAT_WAVE_H);
+                        m_creature->DeleteThreatList();
+                        m_creature->CombatStop();
+                        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    }
+                }
+                else if (m_uiPhase == PHASE_FULL_ROBOT)
+                {
+                    // start self repair
+                    if (DoCastSpellIfCan(m_creature, SPELL_SELF_REPAIR, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                    {
+                        // inform Mimiron about the damaged state
+                        if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
+                            SendAIEvent(AI_EVENT_CUSTOM_E, m_creature, pMimiron);
+
+                        m_uiPhase = PHASE_DAMAGED;
+                        m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+                    }
+                }
+            }
         }
-    }
 
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER || !m_pInstance)
-            return;
+        void EnterEvadeMode() override {}
 
-        if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
+        void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
         {
-            if (m_uiPhase == PHASE_FULL_ROBOT)
-                DoScriptText(urand(0, 1) ? SAY_ROBOT_SLAY_1 : SAY_ROBOT_SLAY_2, pMimiron);
-            else
-                DoScriptText(urand(0, 1) ? SAY_TORSO_SLAY_1 : SAY_TORSO_SLAY_2, pMimiron);
+            // self repair succesfull; resume fight
+            if (pSpell->Id == SPELL_SELF_REPAIR)
+            {
+                m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+                m_uiPhase = PHASE_FULL_ROBOT;
+            }
         }
-    }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
-    {
-        // switch to full robot abilities
-        if (eventType == AI_EVENT_CUSTOM_A)
+        void KilledUnit(Unit* pVictim) override
         {
-            m_uiPhase = PHASE_FULL_ROBOT;
+            if (pVictim->GetTypeId() != TYPEID_PLAYER || !m_pInstance)
+                return;
 
-            // Set levitate for animation purpose
-            m_creature->SetLevitate(true);
+            if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
+            {
+                if (m_uiPhase == PHASE_FULL_ROBOT)
+                    DoScriptText(urand(0, 1) ? SAY_ROBOT_SLAY_1 : SAY_ROBOT_SLAY_2, pMimiron);
+                else
+                    DoScriptText(urand(0, 1) ? SAY_TORSO_SLAY_1 : SAY_TORSO_SLAY_2, pMimiron);
+            }
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
+        void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
         {
+            // switch to full robot abilities
+            if (eventType == AI_EVENT_CUSTOM_A)
+            {
+                m_uiPhase = PHASE_FULL_ROBOT;
+
+                // Set levitate for animation purpose
+                m_creature->SetLevitate(true);
+            }
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_BURST_TARGET:
                 pSummoned->CastSpell(m_creature, SPELL_RAPID_BURST_EFFECT, true);
                 m_uiBurstEndTimer = 3000;
@@ -1225,528 +1236,547 @@ struct  boss_vx001AI : public ScriptedAI
             case NPC_FROST_BOMB:
                 pSummoned->CastSpell(pSummoned, SPELL_FROST_BOMB_VISUAL, true);
                 break;
+            }
         }
-    }
 
-    // Custom threat management
-    bool SelectCustomHostileTarget()
-    {
-        Unit* pTarget = NULL;
-        Unit* pOldTarget = m_creature->getVictim();
-
-        if (!m_creature->GetThreatManager().isThreatListEmpty())
-            pTarget = m_creature->GetThreatManager().getHostileTarget();
-
-        if (pTarget)
+        // Custom threat management
+        bool SelectCustomHostileTarget()
         {
-            if (pOldTarget != pTarget && !m_uiBurstEndTimer && !m_uiLaserEndTimer)
-                AttackStart(pTarget);
+            Unit* pTarget = NULL;
+            Unit* pOldTarget = m_creature->getVictim();
 
-            // Set victim to old target (if not while Burst or Laser)
-            if (pOldTarget && pOldTarget->IsAlive() && !m_uiBurstEndTimer && !m_uiLaserEndTimer)
+            if (!m_creature->GetThreatManager().isThreatListEmpty())
+                pTarget = m_creature->GetThreatManager().getHostileTarget();
+
+            if (pTarget)
             {
-                m_creature->SetTargetGuid(pOldTarget->GetObjectGuid());
-                m_creature->SetInFront(pOldTarget);
+                if (pOldTarget != pTarget && !m_uiBurstEndTimer && !m_uiLaserEndTimer)
+                    AttackStart(pTarget);
+
+                // Set victim to old target (if not while Burst or Laser)
+                if (pOldTarget && pOldTarget->IsAlive() && !m_uiBurstEndTimer && !m_uiLaserEndTimer)
+                {
+                    m_creature->SetTargetGuid(pOldTarget->GetObjectGuid());
+                    m_creature->SetInFront(pOldTarget);
+                }
+
+                return true;
             }
 
-            return true;
+            // Will call EnterEvadeMode if fit
+            return m_creature->SelectHostileTarget() && m_creature->getVictim();
         }
 
-        // Will call EnterEvadeMode if fit
-        return m_creature->SelectHostileTarget() && m_creature->getVictim();
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!SelectCustomHostileTarget())
-            return;
-
-        // no combat during transition or when damaged
-        if (m_uiPhase == PHASE_TRANSITION || m_uiPhase == PHASE_DAMAGED)
-            return;
-
-        // count the burst or laser expire timer for target reset
-        if (m_uiBurstEndTimer)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (m_uiBurstEndTimer <= uiDiff)
-                m_uiBurstEndTimer = 0;
-            else
-                m_uiBurstEndTimer -= uiDiff;
-        }
+            if (!SelectCustomHostileTarget())
+                return;
 
-        if (m_uiLaserEndTimer)
-        {
-            if (m_uiLaserEndTimer <= uiDiff)
-                m_uiLaserEndTimer = 0;
-            else
-                 m_uiLaserEndTimer -= uiDiff;
+            // no combat during transition or when damaged
+            if (m_uiPhase == PHASE_TRANSITION || m_uiPhase == PHASE_DAMAGED)
+                return;
 
-            // no other abilities during Laser
-            return;
-        }
-
-        if (m_uiPhase == PHASE_VX001)
-        {
-            if (m_uiRapidBurstTimer < uiDiff)
+            // count the burst or laser expire timer for target reset
+            if (m_uiBurstEndTimer)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_RAPID_BURST_SUMMON, SELECT_FLAG_PLAYER))
+                if (m_uiBurstEndTimer <= uiDiff)
+                    m_uiBurstEndTimer = 0;
+                else
+                    m_uiBurstEndTimer -= uiDiff;
+            }
+
+            if (m_uiLaserEndTimer)
+            {
+                if (m_uiLaserEndTimer <= uiDiff)
+                    m_uiLaserEndTimer = 0;
+                else
+                    m_uiLaserEndTimer -= uiDiff;
+
+                // no other abilities during Laser
+                return;
+            }
+
+            if (m_uiPhase == PHASE_VX001)
+            {
+                if (m_uiRapidBurstTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(pTarget, SPELL_RAPID_BURST_SUMMON) == CAST_OK)
-                        m_uiRapidBurstTimer = 4000;
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_RAPID_BURST_SUMMON, SELECT_FLAG_PLAYER))
+                    {
+                        if (DoCastSpellIfCan(pTarget, SPELL_RAPID_BURST_SUMMON) == CAST_OK)
+                            m_uiRapidBurstTimer = 4000;
+                    }
+                }
+                else
+                    m_uiRapidBurstTimer -= uiDiff;
+
+                if (m_uiFlameSuppressTimer)
+                {
+                    if (m_uiFlameSuppressTimer <= uiDiff)
+                    {
+                        if (DoCastSpellIfCan(m_creature, SPELL_FLAME_SUPPRESSANT_CLOSE) == CAST_OK)
+                            m_uiFlameSuppressTimer = 10000;
+                    }
+                    else
+                        m_uiFlameSuppressTimer -= uiDiff;
+                }
+            }
+            else if (m_uiPhase == PHASE_FULL_ROBOT)
+            {
+                if (m_uiHandPulseTimer < uiDiff)
+                {
+                    CanCastResult uiResult;
+                    if (urand(0, 1))
+                        uiResult = DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_HAND_PULSE_LEFT : SPELL_HAND_PULSE_LEFT_H);
+                    else
+                        uiResult = DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_HAND_PULSE_RIGHT : SPELL_HAND_PULSE_RIGHT_H);
+
+                    if (uiResult == CAST_OK)
+                        m_uiHandPulseTimer = urand(1000, 2000);
+                }
+                else
+                    m_uiHandPulseTimer -= uiDiff;
+            }
+
+            if (m_uiRocketStrikeTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_ROCKET_STRIKE) == CAST_OK)
+                    m_uiRocketStrikeTimer = 20000;
+            }
+            else
+                m_uiRocketStrikeTimer -= uiDiff;
+
+            if (m_uLaserBarrageTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_SPINNING_UP) == CAST_OK)
+                {
+                    m_uiLaserEndTimer = 14000;
+                    m_uLaserBarrageTimer = 40000;
                 }
             }
             else
-                m_uiRapidBurstTimer -= uiDiff;
+                m_uLaserBarrageTimer -= uiDiff;
 
-            if (m_uiFlameSuppressTimer)
+            if (m_uiFrostBombTimer)
             {
-                if (m_uiFlameSuppressTimer <= uiDiff)
+                if (m_uiFrostBombTimer <= uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_FLAME_SUPPRESSANT_CLOSE) == CAST_OK)
-                        m_uiFlameSuppressTimer = 10000;
+                    if (DoCastSpellIfCan(m_creature, SPELL_FROST_BOMB_SUMMON) == CAST_OK)
+                        m_uiFrostBombTimer = 30000;
                 }
                 else
-                     m_uiFlameSuppressTimer -= uiDiff;
+                    m_uiFrostBombTimer -= uiDiff;
             }
         }
-        else if (m_uiPhase == PHASE_FULL_ROBOT)
-        {
-            if (m_uiHandPulseTimer < uiDiff)
-            {
-                CanCastResult uiResult;
-                if (urand(0, 1))
-                    uiResult = DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_HAND_PULSE_LEFT : SPELL_HAND_PULSE_LEFT_H);
-                else
-                    uiResult = DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_HAND_PULSE_RIGHT : SPELL_HAND_PULSE_RIGHT_H);
+    };
 
-                if (uiResult == CAST_OK)
-                    m_uiHandPulseTimer = urand(1000, 2000);
-            }
-            else
-                 m_uiHandPulseTimer -= uiDiff;
-        }
-
-        if (m_uiRocketStrikeTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_ROCKET_STRIKE) == CAST_OK)
-                m_uiRocketStrikeTimer = 20000;
-        }
-        else
-             m_uiRocketStrikeTimer -= uiDiff;
-
-        if (m_uLaserBarrageTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SPINNING_UP) == CAST_OK)
-            {
-                m_uiLaserEndTimer = 14000;
-                m_uLaserBarrageTimer = 40000;
-            }
-        }
-        else
-            m_uLaserBarrageTimer -= uiDiff;
-
-        if (m_uiFrostBombTimer)
-        {
-            if (m_uiFrostBombTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_FROST_BOMB_SUMMON) == CAST_OK)
-                    m_uiFrostBombTimer = 30000;
-            }
-            else
-                m_uiFrostBombTimer -= uiDiff;
-        }
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_vx001AI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_vx001(Creature* pCreature)
-{
-    return new boss_vx001AI(pCreature);
-}
 
 /*######
 ## boss_aerial_unit
 ######*/
 
-struct  boss_aerial_unitAI : public ScriptedAI
+struct boss_aerial_unit : public CreatureScript
 {
-    boss_aerial_unitAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_aerial_unit() : CreatureScript("boss_aerial_unit") {}
+
+    struct boss_aerial_unitAI : public ScriptedAI
     {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_creature->SetLevitate(true);
-        m_uiPhase = PHASE_TRANSITION;
-        SetCombatMovement(false);
-        Reset();
-    }
-
-    instance_ulduar* m_pInstance;
-    bool m_bIsRegularMode;
-    uint8 m_uiPhase;
-
-    uint32 m_uiCombatMoveTimer;
-    uint32 m_uiPlasmaBallTimer;
-    uint32 m_uiBombBotTimer;
-    uint32 m_uiAssaultBotTimer;
-    uint32 m_uiScrapBotTimer;
-    uint32 m_uiFireBotTimer;
-    uint32 m_uiMagneticTimer;
-
-    void Reset() override
-    {
-        m_uiCombatMoveTimer = 2000;
-        m_uiPlasmaBallTimer = 2000;
-        m_uiAssaultBotTimer = 5000;
-        m_uiBombBotTimer    = 15000;
-        m_uiScrapBotTimer   = 10000;
-        m_uiMagneticTimer   = 0;
-        m_uiFireBotTimer    = 0;
-
-        SetCombatMovement(false);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        m_uiPhase = PHASE_AERIAL_UNIT;
-        m_creature->SetWalk(false);
-
-        // init hard mode spells
-        if (m_pInstance && m_pInstance->GetData(TYPE_MIMIRON_HARD) == DONE)
+        boss_aerial_unitAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            DoCastSpellIfCan(m_creature, SPELL_SUMMON_FIRE_BOT_TRIGGER);
-            m_uiFireBotTimer = 45000;
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+            m_creature->SetLevitate(true);
+            m_uiPhase = PHASE_TRANSITION;
+            SetCombatMovement(false);
         }
-    }
 
-    void DamageTaken(Unit* pDoneBy, uint32& uiDamage) override
-    {
-        if (pDoneBy->GetEntry() == NPC_MIMIRON && m_uiPhase == PHASE_DAMAGED)
-            return;
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+        uint8 m_uiPhase;
 
-        if (uiDamage >= m_creature->GetHealth())
+        uint32 m_uiCombatMoveTimer;
+        uint32 m_uiPlasmaBallTimer;
+        uint32 m_uiBombBotTimer;
+        uint32 m_uiAssaultBotTimer;
+        uint32 m_uiScrapBotTimer;
+        uint32 m_uiFireBotTimer;
+        uint32 m_uiMagneticTimer;
+
+        void Reset() override
         {
-            uiDamage = 0;
+            m_uiCombatMoveTimer = 2000;
+            m_uiPlasmaBallTimer = 2000;
+            m_uiAssaultBotTimer = 5000;
+            m_uiBombBotTimer = 15000;
+            m_uiScrapBotTimer = 10000;
+            m_uiMagneticTimer = 0;
+            m_uiFireBotTimer = 0;
 
-            if (m_uiPhase == PHASE_AERIAL_UNIT)
+            SetCombatMovement(false);
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            m_uiPhase = PHASE_AERIAL_UNIT;
+            m_creature->SetWalk(false);
+
+            // init hard mode spells
+            if (m_pInstance && m_pInstance->GetData(TYPE_MIMIRON_HARD) == DONE)
             {
-                // start transition phase
-                if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
-                    SendAIEvent(AI_EVENT_CUSTOM_D, m_creature, pMimiron);
-
-                // shut down the aerial unit and prepare for the final phase
-                DoCastSpellIfCan(m_creature, SPELL_CLEAR_DEBUFFS, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_HALF_HEAL, CAST_TRIGGERED);
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-
-                m_creature->GetMotionMaster()->Clear();
-                m_creature->GetMotionMaster()->MovePoint(0, afAerialMovePos[0], afAerialMovePos[1], afAerialMovePos[2]);
-                m_uiPhase = PHASE_TRANSITION;
+                DoCastSpellIfCan(m_creature, SPELL_SUMMON_FIRE_BOT_TRIGGER);
+                m_uiFireBotTimer = 45000;
             }
-            else if (m_uiPhase == PHASE_FULL_ROBOT)
+        }
+
+        void DamageTaken(Unit* pDoneBy, uint32& uiDamage) override
+        {
+            if (pDoneBy->GetEntry() == NPC_MIMIRON && m_uiPhase == PHASE_DAMAGED)
+                return;
+
+            if (uiDamage >= m_creature->GetHealth())
             {
-                // start self repair
-                if (DoCastSpellIfCan(m_creature, SPELL_SELF_REPAIR, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                uiDamage = 0;
+
+                if (m_uiPhase == PHASE_AERIAL_UNIT)
                 {
-                    // inform Mimiron about the damaged state
+                    // start transition phase
                     if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
-                        SendAIEvent(AI_EVENT_CUSTOM_E, m_creature, pMimiron);
+                        SendAIEvent(AI_EVENT_CUSTOM_D, m_creature, pMimiron);
 
-                    m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
-                    m_uiPhase = PHASE_DAMAGED;
-                }
-            }
-        }
-    }
-
-    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
-    {
-        // self repair succesfull; resume fight
-        if (pSpell->Id == SPELL_SELF_REPAIR)
-        {
-            m_uiPhase = PHASE_FULL_ROBOT;
-            m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-        }
-        else if (pSpell->Id == SPELL_MAGNETIC_CORE_PULL && pCaster->GetEntry() == NPC_MAGNETIC_CORE)
-        {
-            DoCastSpellIfCan(m_creature, SPELL_MAGNETIC_CORE_VISUAL, CAST_INTERRUPT_PREVIOUS);
-            m_uiMagneticTimer = 20000;
-
-            m_creature->GetMotionMaster()->Clear();
-            m_creature->GetMotionMaster()->MovePoint(0, pCaster->GetPositionX(), pCaster->GetPositionY(), pCaster->GetPositionZ());
-        }
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MIMIRON, FAIL);
-    }
-
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER || !m_pInstance)
-            return;
-
-        if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
-        {
-            if (m_uiPhase == PHASE_FULL_ROBOT)
-                DoScriptText(urand(0, 1) ? SAY_ROBOT_SLAY_1 : SAY_ROBOT_SLAY_2, pMimiron);
-            else
-                DoScriptText(urand(0, 1) ? SAY_HEAD_SLAY_1 : SAY_HEAD_SLAY_2, pMimiron);
-        }
-    }
-
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
-    {
-        // switch to full robot abilities
-        if (eventType == AI_EVENT_CUSTOM_A)
-            m_uiPhase = PHASE_FULL_ROBOT;
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (m_pInstance && m_pInstance->GetData(TYPE_MIMIRON_HARD) == DONE)
-            pSummoned->CastSpell(pSummoned, SPELL_EMERGENCY_MODE, true);
-
-        pSummoned->AI()->AttackStart(m_creature->getVictim());
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiMagneticTimer)
-        {
-            if (m_uiMagneticTimer <= uiDiff)
-            {
-                m_creature->GetMotionMaster()->Clear();
-                m_creature->GetMotionMaster()->MovePoint(0, m_creature->GetPositionX(), m_creature->GetPositionY(), afAerialMovePos[2]);
-
-                m_creature->RemoveAurasDueToSpell(SPELL_MAGNETIC_CORE_VISUAL);
-                m_uiMagneticTimer = 0;
-            }
-            else
-                 m_uiMagneticTimer -= uiDiff;
-
-            // no other abilities during the magnetic pull
-            return;
-        }
-
-        // no combat during transition or when damaged
-        if (m_uiPhase == PHASE_TRANSITION || m_uiPhase == PHASE_DAMAGED)
-            return;
-
-        // aerial phase spells
-        if (m_uiPhase == PHASE_AERIAL_UNIT)
-        {
-            // move to a closer point to target
-            if (m_uiCombatMoveTimer < uiDiff)
-            {
-                if (m_creature->GetDistance(m_creature->getVictim()) > 30.0f)
-                {
-                    float fX, fY, fZ;
-                    m_creature->getVictim()->GetContactPoint(m_creature, fX, fY, fZ, 3 * ATTACK_DISTANCE);
+                    // shut down the aerial unit and prepare for the final phase
+                    DoCastSpellIfCan(m_creature, SPELL_CLEAR_DEBUFFS, CAST_TRIGGERED);
+                    DoCastSpellIfCan(m_creature, SPELL_HALF_HEAL, CAST_TRIGGERED);
+                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
                     m_creature->GetMotionMaster()->Clear();
-                    m_creature->GetMotionMaster()->MovePoint(0, fX, fY, m_creature->GetPositionZ());
+                    m_creature->GetMotionMaster()->MovePoint(0, afAerialMovePos[0], afAerialMovePos[1], afAerialMovePos[2]);
+                    m_uiPhase = PHASE_TRANSITION;
                 }
-                m_uiCombatMoveTimer = 2000;
-            }
-            else
-                m_uiCombatMoveTimer -= uiDiff;
-
-            if (m_uiPlasmaBallTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_PLASMA_BALL_FLY : SPELL_PLASMA_BALL_FLY_H) == CAST_OK)
-                    m_uiPlasmaBallTimer = urand(2000, 3000);
-            }
-            else
-                m_uiPlasmaBallTimer -= uiDiff;
-
-            if (m_uiAssaultBotTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_ASSAULT_BOT_TRIGGER) == CAST_OK)
-                    m_uiAssaultBotTimer = 30000;
-            }
-            else
-                m_uiAssaultBotTimer -= uiDiff;
-
-            if (m_uiBombBotTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_BOMB_BOT_SUMMON) == CAST_OK)
-                    m_uiBombBotTimer = 15000;
-            }
-            else
-                m_uiBombBotTimer -= uiDiff;
-
-            if (m_uiScrapBotTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SCRAP_BOT_TRIGGER) == CAST_OK)
-                    m_uiScrapBotTimer = 10000;
-            }
-            else
-                 m_uiScrapBotTimer -= uiDiff;
-
-            if (m_uiFireBotTimer)
-            {
-                if (m_uiFireBotTimer <= uiDiff)
+                else if (m_uiPhase == PHASE_FULL_ROBOT)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_FIRE_BOT_TRIGGER) == CAST_OK)
-                        m_uiFireBotTimer = 45000;
+                    // start self repair
+                    if (DoCastSpellIfCan(m_creature, SPELL_SELF_REPAIR, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                    {
+                        // inform Mimiron about the damaged state
+                        if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
+                            SendAIEvent(AI_EVENT_CUSTOM_E, m_creature, pMimiron);
+
+                        m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+                        m_uiPhase = PHASE_DAMAGED;
+                    }
+                }
+            }
+        }
+
+        void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
+        {
+            // self repair succesfull; resume fight
+            if (pSpell->Id == SPELL_SELF_REPAIR)
+            {
+                m_uiPhase = PHASE_FULL_ROBOT;
+                m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+            }
+            else if (pSpell->Id == SPELL_MAGNETIC_CORE_PULL && pCaster->GetEntry() == NPC_MAGNETIC_CORE)
+            {
+                DoCastSpellIfCan(m_creature, SPELL_MAGNETIC_CORE_VISUAL, CAST_INTERRUPT_PREVIOUS);
+                m_uiMagneticTimer = 20000;
+
+                m_creature->GetMotionMaster()->Clear();
+                m_creature->GetMotionMaster()->MovePoint(0, pCaster->GetPositionX(), pCaster->GetPositionY(), pCaster->GetPositionZ());
+            }
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_MIMIRON, FAIL);
+        }
+
+        void KilledUnit(Unit* pVictim) override
+        {
+            if (pVictim->GetTypeId() != TYPEID_PLAYER || !m_pInstance)
+                return;
+
+            if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
+            {
+                if (m_uiPhase == PHASE_FULL_ROBOT)
+                    DoScriptText(urand(0, 1) ? SAY_ROBOT_SLAY_1 : SAY_ROBOT_SLAY_2, pMimiron);
+                else
+                    DoScriptText(urand(0, 1) ? SAY_HEAD_SLAY_1 : SAY_HEAD_SLAY_2, pMimiron);
+            }
+        }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+        {
+            // switch to full robot abilities
+            if (eventType == AI_EVENT_CUSTOM_A)
+                m_uiPhase = PHASE_FULL_ROBOT;
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (m_pInstance && m_pInstance->GetData(TYPE_MIMIRON_HARD) == DONE)
+                pSummoned->CastSpell(pSummoned, SPELL_EMERGENCY_MODE, true);
+
+            pSummoned->AI()->AttackStart(m_creature->getVictim());
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            if (m_uiMagneticTimer)
+            {
+                if (m_uiMagneticTimer <= uiDiff)
+                {
+                    m_creature->GetMotionMaster()->Clear();
+                    m_creature->GetMotionMaster()->MovePoint(0, m_creature->GetPositionX(), m_creature->GetPositionY(), afAerialMovePos[2]);
+
+                    m_creature->RemoveAurasDueToSpell(SPELL_MAGNETIC_CORE_VISUAL);
+                    m_uiMagneticTimer = 0;
                 }
                 else
-                    m_uiFireBotTimer -= uiDiff;
+                    m_uiMagneticTimer -= uiDiff;
+
+                // no other abilities during the magnetic pull
+                return;
             }
-        }
-        // full robot abilities
-        else if (m_uiPhase == PHASE_FULL_ROBOT)
-        {
-            if (m_uiPlasmaBallTimer < uiDiff)
+
+            // no combat during transition or when damaged
+            if (m_uiPhase == PHASE_TRANSITION || m_uiPhase == PHASE_DAMAGED)
+                return;
+
+            // aerial phase spells
+            if (m_uiPhase == PHASE_AERIAL_UNIT)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_PLASMA_BALL : SPELL_PLASMA_BALL_H) == CAST_OK)
-                    m_uiPlasmaBallTimer = 2000;
+                // move to a closer point to target
+                if (m_uiCombatMoveTimer < uiDiff)
+                {
+                    if (m_creature->GetDistance(m_creature->getVictim()) > 30.0f)
+                    {
+                        float fX, fY, fZ;
+                        m_creature->getVictim()->GetContactPoint(m_creature, fX, fY, fZ, 3 * ATTACK_DISTANCE);
+
+                        m_creature->GetMotionMaster()->Clear();
+                        m_creature->GetMotionMaster()->MovePoint(0, fX, fY, m_creature->GetPositionZ());
+                    }
+                    m_uiCombatMoveTimer = 2000;
+                }
+                else
+                    m_uiCombatMoveTimer -= uiDiff;
+
+                if (m_uiPlasmaBallTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_PLASMA_BALL_FLY : SPELL_PLASMA_BALL_FLY_H) == CAST_OK)
+                        m_uiPlasmaBallTimer = urand(2000, 3000);
+                }
+                else
+                    m_uiPlasmaBallTimer -= uiDiff;
+
+                if (m_uiAssaultBotTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_ASSAULT_BOT_TRIGGER) == CAST_OK)
+                        m_uiAssaultBotTimer = 30000;
+                }
+                else
+                    m_uiAssaultBotTimer -= uiDiff;
+
+                if (m_uiBombBotTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_BOMB_BOT_SUMMON) == CAST_OK)
+                        m_uiBombBotTimer = 15000;
+                }
+                else
+                    m_uiBombBotTimer -= uiDiff;
+
+                if (m_uiScrapBotTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SCRAP_BOT_TRIGGER) == CAST_OK)
+                        m_uiScrapBotTimer = 10000;
+                }
+                else
+                    m_uiScrapBotTimer -= uiDiff;
+
+                if (m_uiFireBotTimer)
+                {
+                    if (m_uiFireBotTimer <= uiDiff)
+                    {
+                        if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_FIRE_BOT_TRIGGER) == CAST_OK)
+                            m_uiFireBotTimer = 45000;
+                    }
+                    else
+                        m_uiFireBotTimer -= uiDiff;
+                }
             }
-            else
-                m_uiPlasmaBallTimer -= uiDiff;
+            // full robot abilities
+            else if (m_uiPhase == PHASE_FULL_ROBOT)
+            {
+                if (m_uiPlasmaBallTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_PLASMA_BALL : SPELL_PLASMA_BALL_H) == CAST_OK)
+                        m_uiPlasmaBallTimer = 2000;
+                }
+                else
+                    m_uiPlasmaBallTimer -= uiDiff;
+            }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_aerial_unitAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_aerial_unit(Creature* pCreature)
-{
-    return new boss_aerial_unitAI(pCreature);
-}
 
 /*######
 ## npc_proximity_mine
 ######*/
 
-struct  npc_proximity_mineAI : public Scripted_NoMovementAI
+struct npc_proximity_mine : public CreatureScript
 {
-    npc_proximity_mineAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    npc_proximity_mine() : CreatureScript("npc_proximity_mine") {}
 
-    uint32 m_uiExplodeTimer;
-
-    void Reset() override
+    struct npc_proximity_mineAI : public Scripted_NoMovementAI
     {
-        m_uiExplodeTimer = 35000;
-    }
+        npc_proximity_mineAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { }
 
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        uint32 m_uiExplodeTimer;
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiExplodeTimer)
+        void Reset() override
         {
-            if (m_uiExplodeTimer <= uiDiff)
+            m_uiExplodeTimer = 35000;
+        }
+
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiExplodeTimer)
             {
-                // just despawn if already exploded
-                if (!m_creature->HasAura(SPELL_PROXIMITY_MINE))
-                    m_creature->ForcedDespawn();
-                else
+                if (m_uiExplodeTimer <= uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_EXPLOSION_H) == CAST_OK)
+                    // just despawn if already exploded
+                    if (!m_creature->HasAura(SPELL_PROXIMITY_MINE))
+                        m_creature->ForcedDespawn();
+                    else
                     {
-                        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                        m_creature->RemoveAurasDueToSpell(SPELL_PROXIMITY_MINE);
-                        m_creature->ForcedDespawn(2000);
-                        m_uiExplodeTimer = 0;
+                        if (DoCastSpellIfCan(m_creature, SPELL_EXPLOSION_H) == CAST_OK)
+                        {
+                            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            m_creature->RemoveAurasDueToSpell(SPELL_PROXIMITY_MINE);
+                            m_creature->ForcedDespawn(2000);
+                            m_uiExplodeTimer = 0;
+                        }
                     }
                 }
+                else
+                    m_uiExplodeTimer -= uiDiff;
             }
-            else
-                 m_uiExplodeTimer -= uiDiff;
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_proximity_mineAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_proximity_mine(Creature* pCreature)
-{
-    return new npc_proximity_mineAI(pCreature);
-}
 
 /*######
 ## npc_bot_trigger
 ######*/
 
-struct  npc_bot_triggerAI : public Scripted_NoMovementAI
+struct npc_bot_trigger : public CreatureScript
 {
-    npc_bot_triggerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    npc_bot_trigger() : CreatureScript("npc_bot_trigger") {}
+
+    struct npc_bot_triggerAI : public Scripted_NoMovementAI
     {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    instance_ulduar* m_pInstance;
-
-    uint32 m_uiSummonTimer;
-    uint32 m_uiSummonSpell;
-
-    void Reset() override
-    {
-        m_uiSummonTimer = 0;
-        m_uiSummonSpell = 0;
-    }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 uiMiscValue) override
-    {
-        if (eventType == AI_EVENT_CUSTOM_A)
+        npc_bot_triggerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
         {
-            m_uiSummonTimer = 6000;
-            m_uiSummonSpell = uiMiscValue;
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiSummonTimer)
+        ScriptedInstance* m_pInstance;
+
+        uint32 m_uiSummonTimer;
+        uint32 m_uiSummonSpell;
+
+        void Reset() override
         {
-            if (m_uiSummonTimer <= uiDiff)
+            m_uiSummonTimer = 0;
+            m_uiSummonSpell = 0;
+        }
+
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 uiMiscValue) override
+        {
+            if (eventType == AI_EVENT_CUSTOM_A)
             {
-                if (m_pInstance)
-                {
-                    if (Creature* pAerial = m_pInstance->GetSingleCreatureFromStorage(NPC_AERIAL_UNIT))
-                    {
-                        if (DoCastSpellIfCan(m_creature, m_uiSummonSpell, CAST_TRIGGERED, pAerial->GetObjectGuid()) == CAST_OK)
-                            m_uiSummonTimer = 0;
-                    }
-                }
-
-                // search for a nearby teleporter and disable the visual
-                for (uint8 i = 0; i < countof(aMimironTeleporters); ++i)
-                {
-                    if (GameObject* pTeleporter = GetClosestGameObjectWithEntry(m_creature, aMimironTeleporters[i], 2.0f))
-                    {
-                        pTeleporter->ResetDoorOrButton();
-                        break;
-                    }
-                }
+                m_uiSummonTimer = 6000;
+                m_uiSummonSpell = uiMiscValue;
             }
-            else
-                m_uiSummonTimer -= uiDiff;
         }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiSummonTimer)
+            {
+                if (m_uiSummonTimer <= uiDiff)
+                {
+                    if (m_pInstance)
+                    {
+                        if (Creature* pAerial = m_pInstance->GetSingleCreatureFromStorage(NPC_AERIAL_UNIT))
+                        {
+                            if (DoCastSpellIfCan(m_creature, m_uiSummonSpell, CAST_TRIGGERED, pAerial->GetObjectGuid()) == CAST_OK)
+                                m_uiSummonTimer = 0;
+                        }
+                    }
+
+                    // search for a nearby teleporter and disable the visual
+                    for (uint8 i = 0; i < countof(aMimironTeleporters); ++i)
+                    {
+                        if (GameObject* pTeleporter = GetClosestGameObjectWithEntry(m_creature, aMimironTeleporters[i], 2.0f))
+                        {
+                            pTeleporter->ResetDoorOrButton();
+                            break;
+                        }
+                    }
+                }
+                else
+                    m_uiSummonTimer -= uiDiff;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_bot_triggerAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_npc_bot_trigger(Creature* pCreature)
+struct spell_summon_any_bot_trigger : public SpellScript
 {
-    return new npc_bot_triggerAI(pCreature);
-}
+    spell_summon_any_bot_trigger() : SpellScript("spell_summon_any_bot_trigger") {}
 
-bool EffectDummyCreature_npc_bot_trigger(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
-{
-    // always check spellid and effectindex
-    if ((uiSpellId == SPELL_SUMMON_ASSAULT_BOT_TRIGGER || uiSpellId == SPELL_SUMMON_SCRAP_BOT_TRIGGER || uiSpellId == SPELL_SUMMON_FIRE_BOT_TRIGGER) && uiEffIndex == EFFECT_INDEX_0)
+    bool EffectDummy(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Object* pTarget, ObjectGuid /*originalCasterGuid*/) override
     {
-        uint32 uiVisualSpell = 0;
-        uint32 uiSummonSpell = 0;
-
-        switch (uiSpellId)
+        // always check spellid and effectindex
+        if ((uiSpellId == SPELL_SUMMON_ASSAULT_BOT_TRIGGER || uiSpellId == SPELL_SUMMON_SCRAP_BOT_TRIGGER || uiSpellId == SPELL_SUMMON_FIRE_BOT_TRIGGER) && uiEffIndex == EFFECT_INDEX_0)
         {
+            Creature* pCreatureTarget = pTarget->ToCreature();
+            uint32 uiVisualSpell = 0;
+            uint32 uiSummonSpell = 0;
+
+            switch (uiSpellId)
+            {
             case SPELL_SUMMON_SCRAP_BOT_TRIGGER:
                 uiVisualSpell = SPELL_SUMMON_ASSAULT_BOT_VISUAL;
                 uiSummonSpell = SPELL_SUMMON_ASSAULT_BOT;
@@ -1759,316 +1789,375 @@ bool EffectDummyCreature_npc_bot_trigger(Unit* pCaster, uint32 uiSpellId, SpellE
                 uiVisualSpell = SPELL_SUMMON_FIRE_BOT_VISUAL;
                 uiSummonSpell = SPELL_SUMMON_FIRE_BOT;
                 break;
-        }
-
-        pCreatureTarget->CastSpell(pCreatureTarget, uiVisualSpell, true);
-        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget, uiSummonSpell);
-
-        // search for a nearby teleporter and enable the visual
-        for (uint8 i = 0; i < countof(aMimironTeleporters); ++i)
-        {
-            if (GameObject* pTeleporter = GetClosestGameObjectWithEntry(pCreatureTarget, aMimironTeleporters[i], 2.0f))
-            {
-                pTeleporter->UseDoorOrButton();
-                break;
             }
+
+            pCreatureTarget->CastSpell(pCreatureTarget, uiVisualSpell, true);
+            pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget, uiSummonSpell);
+
+            // search for a nearby teleporter and enable the visual
+            for (uint8 i = 0; i < countof(aMimironTeleporters); ++i)
+            {
+                if (GameObject* pTeleporter = GetClosestGameObjectWithEntry(pCreatureTarget, aMimironTeleporters[i], 2.0f))
+                {
+                    pTeleporter->UseDoorOrButton();
+                    break;
+                }
+            }
+
+            // always return true when we are handling this spell and effect
+            return true;
         }
 
-        // always return true when we are handling this spell and effect
-        return true;
+        return false;
     }
-
-    return false;
-}
+};
 
 /*######
 ## npc_mimiron_flames
 ######*/
 
-struct  npc_mimiron_flamesAI : public Scripted_NoMovementAI
+struct npc_mimiron_flames : public CreatureScript
 {
-    npc_mimiron_flamesAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    npc_mimiron_flames() : CreatureScript("npc_mimiron_flames") {}
+
+    struct npc_mimiron_flamesAI : public Scripted_NoMovementAI
     {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    instance_ulduar* m_pInstance;
-    uint32 m_uiSpreadTimer;
-
-    void Reset() override
-    {
-        DoCastSpellIfCan(m_creature, SPELL_FLAMES, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-        m_uiSpreadTimer = 4000;
-    }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-
-    // function to select the closest player to spread the fire
-    Unit* SelectClosestSpreadTarget()
-    {
-        if (!m_pInstance)
-            return NULL;
-
-        Creature* pLeviathan = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK);
-        if (!pLeviathan)
-            return NULL;
-
-        std::list<Unit*> lTargets;
-        ThreatList const& threatList = pLeviathan->GetThreatManager().getThreatList();
-
-        for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+        npc_mimiron_flamesAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
         {
-            if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        }
+
+        ScriptedInstance* m_pInstance;
+        uint32 m_uiSpreadTimer;
+
+        void Reset() override
+        {
+            DoCastSpellIfCan(m_creature, SPELL_FLAMES, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+            m_uiSpreadTimer = 4000;
+        }
+
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+        // function to select the closest player to spread the fire
+        Unit* SelectClosestSpreadTarget()
+        {
+            if (!m_pInstance)
+                return NULL;
+
+            Creature* pLeviathan = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK);
+            if (!pLeviathan)
+                return NULL;
+
+            std::list<Unit*> lTargets;
+            ThreatList const& threatList = pLeviathan->GetThreatManager().getThreatList();
+
+            for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
             {
-                if (pTarget->GetTypeId() == TYPEID_PLAYER)
-                    lTargets.push_back(pTarget);
+                if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+                {
+                    if (pTarget->GetTypeId() == TYPEID_PLAYER)
+                        lTargets.push_back(pTarget);
+                }
             }
-        }
 
-        // return the closest target to the caster
-        if (!lTargets.empty())
-        {
-            lTargets.sort(ObjectDistanceOrder(m_creature));
-            return lTargets.front();
-        }
-
-        return NULL;
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiSpreadTimer < uiDiff)
-        {
-            if (Unit* pTarget = SelectClosestSpreadTarget())
+            // return the closest target to the caster
+            if (!lTargets.empty())
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_SUMMON_FLAMES_SPREAD) == CAST_OK)
-                    m_uiSpreadTimer = 4000;
+                lTargets.sort(ObjectDistanceOrder(m_creature));
+                return lTargets.front();
             }
+
+            return NULL;
         }
-        else
-             m_uiSpreadTimer -= uiDiff;
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiSpreadTimer < uiDiff)
+            {
+                if (Unit* pTarget = SelectClosestSpreadTarget())
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_SUMMON_FLAMES_SPREAD) == CAST_OK)
+                        m_uiSpreadTimer = 4000;
+                }
+            }
+            else
+                m_uiSpreadTimer -= uiDiff;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_mimiron_flamesAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_mimiron_flames(Creature* pCreature)
-{
-    return new npc_mimiron_flamesAI(pCreature);
-}
 
 /*######
 ## npc_frost_bomb
 ######*/
 
 // TODO Move this 'script' to EventAI when combat can be proper prevented from core-side
-struct  npc_frost_bombAI : public Scripted_NoMovementAI
+struct npc_frost_bomb : public CreatureScript
 {
-    npc_frost_bombAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    npc_frost_bomb() : CreatureScript("npc_frost_bomb") {}
 
-    uint32 m_uiExplosionTimer;
-    uint32 m_uiFireClearTimer;
-
-    void Reset() override
+    struct npc_frost_bombAI : public Scripted_NoMovementAI
     {
-        m_uiExplosionTimer = 10000;
-        m_uiFireClearTimer = 12000;
-    }
+        npc_frost_bombAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { }
 
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        uint32 m_uiExplosionTimer;
+        uint32 m_uiFireClearTimer;
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiExplosionTimer)
+        void Reset() override
         {
-            if (m_uiExplosionTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_EXPLOSION_FROST) == CAST_OK)
-                {
-                    m_creature->RemoveAurasDueToSpell(SPELL_FROST_BOMB_VISUAL);
-                    m_uiExplosionTimer = 0;
-                }
-            }
-            else
-                m_uiExplosionTimer -= uiDiff;
+            m_uiExplosionTimer = 10000;
+            m_uiFireClearTimer = 12000;
         }
 
-        if (m_uiFireClearTimer)
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (m_uiFireClearTimer <= uiDiff)
+            if (m_uiExplosionTimer)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_CLEAR_FIRES) == CAST_OK)
+                if (m_uiExplosionTimer <= uiDiff)
                 {
-                    m_creature->ForcedDespawn(2000);
-                    m_uiFireClearTimer = 0;
+                    if (DoCastSpellIfCan(m_creature, SPELL_EXPLOSION_FROST) == CAST_OK)
+                    {
+                        m_creature->RemoveAurasDueToSpell(SPELL_FROST_BOMB_VISUAL);
+                        m_uiExplosionTimer = 0;
+                    }
                 }
+                else
+                    m_uiExplosionTimer -= uiDiff;
             }
-            else
-                m_uiFireClearTimer -= uiDiff;
+
+            if (m_uiFireClearTimer)
+            {
+                if (m_uiFireClearTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_CLEAR_FIRES) == CAST_OK)
+                    {
+                        m_creature->ForcedDespawn(2000);
+                        m_uiFireClearTimer = 0;
+                    }
+                }
+                else
+                    m_uiFireClearTimer -= uiDiff;
+            }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_frost_bombAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_frost_bomb(Creature* pCreature)
-{
-    return new npc_frost_bombAI(pCreature);
-}
 
 /*######
 ## npc_rocket_strike
 ######*/
 
-struct  npc_rocket_strikeAI : public Scripted_NoMovementAI
+struct npc_rocket_strike : public CreatureScript
 {
-    npc_rocket_strikeAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    npc_rocket_strike() : CreatureScript("npc_rocket_strike") {}
 
-    void Reset() override
+    struct npc_rocket_strikeAI : public Scripted_NoMovementAI
     {
-        DoCastSpellIfCan(m_creature, SPELL_ROCKET_STRIKE_DAMAGE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-        m_creature->ForcedDespawn(7000);
-    }
+        npc_rocket_strikeAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { }
 
-    void KilledUnit(Unit* pVictim) override
+        void Reset() override
+        {
+            DoCastSpellIfCan(m_creature, SPELL_ROCKET_STRIKE_DAMAGE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+            m_creature->ForcedDespawn(7000);
+        }
+
+        void KilledUnit(Unit* pVictim) override
+        {
+            if (pVictim->GetEntry() == NPC_ASSALT_BOT)
+                DoCastSpellIfCan(m_creature, SPELL_NOT_FRIENDLY_FIRE, CAST_TRIGGERED);
+        }
+
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        void UpdateAI(const uint32 /*uiDiff*/) override { }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        if (pVictim->GetEntry() == NPC_ASSALT_BOT)
-            DoCastSpellIfCan(m_creature, SPELL_NOT_FRIENDLY_FIRE, CAST_TRIGGERED);
+        return new npc_rocket_strikeAI(pCreature);
     }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
-
-CreatureAI* GetAI_npc_rocket_strike(Creature* pCreature)
-{
-    return new npc_rocket_strikeAI(pCreature);
-}
 
 /*######
 ## boss_leviathan_mk2_turret
 ######*/
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct  boss_leviathan_mk2_turretAI : public Scripted_NoMovementAI
+struct boss_leviathan_mk2_turret : public CreatureScript
 {
-    boss_leviathan_mk2_turretAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    boss_leviathan_mk2_turret() : CreatureScript("boss_leviathan_mk2_turret") {}
 
-    void Reset() override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
+    struct boss_leviathan_mk2_turretAI : public Scripted_NoMovementAI
+    {
+        boss_leviathan_mk2_turretAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+
+        void Reset() override { }
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        void UpdateAI(const uint32 /*uiDiff*/) override { }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_leviathan_mk2_turretAI(pCreature);
+    }
 };
-
-CreatureAI* GetAI_boss_leviathan_mk2_turret(Creature* pCreature)
-{
-    return new boss_leviathan_mk2_turretAI(pCreature);
-}
 
 /*######
 ## npc_computer
 ######*/
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct  npc_computerAI : public Scripted_NoMovementAI
+struct npc_computer : public CreatureScript
 {
-    npc_computerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    npc_computer() : CreatureScript("npc_computer") {}
 
-    void Reset() override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
+    struct npc_computerAI : public Scripted_NoMovementAI
+    {
+        npc_computerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+
+        void Reset() override { }
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        void UpdateAI(const uint32 /*uiDiff*/) override { }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_computerAI(pCreature);
+    }
 };
-
-CreatureAI* GetAI_npc_computer(Creature* pCreature)
-{
-    return new npc_computerAI(pCreature);
-}
 
 /*######
 ## go_big_red_button
 ######*/
 
-bool GOUse_go_big_red_button(Player* pPlayer, GameObject* pGo)
+struct go_big_red_button : public GameObjectScript
 {
-    ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
-    if (!pInstance)
-        return true;
+    go_big_red_button() : GameObjectScript("go_big_red_button") {}
 
-    if (pInstance->GetData(TYPE_MIMIRON) == IN_PROGRESS || pInstance->GetData(TYPE_MIMIRON) == DONE)
-        return true;
+    bool OnUse(Player* pPlayer, GameObject* pGo) override
+    {
+        ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
+        if (!pInstance)
+            return true;
 
-    // Inform Mimiron about the button being pressed
-    if (Creature* pMimiron = pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
-        pMimiron->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pPlayer, pMimiron);
+        if (pInstance->GetData(TYPE_MIMIRON) == IN_PROGRESS || pInstance->GetData(TYPE_MIMIRON) == DONE)
+            return true;
 
-    // Set instance data and allow Mimiron script to continue the event
-    pInstance->SetData(TYPE_MIMIRON_HARD, DONE);
-    return false;
-}
+        // Inform Mimiron about the button being pressed
+        if (Creature* pMimiron = pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
+            pMimiron->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pPlayer, pMimiron);
+
+        // Set instance data and allow Mimiron script to continue the event
+        pInstance->SetData(TYPE_MIMIRON_HARD, DONE);
+        return false;
+    }
+};
 
 void AddSC_boss_mimiron()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_mimiron";
-    pNewScript->GetAI = GetAI_boss_mimiron;
-    pNewScript->RegisterSelf();
+    s = new boss_mimiron();
+    s->RegisterSelf();
+    s = new boss_leviathan_mk2();
+    s->RegisterSelf();
+    s = new boss_vx001();
+    s->RegisterSelf();
+    s = new boss_aerial_unit();
+    s->RegisterSelf();
+    s = new npc_proximity_mine();
+    s->RegisterSelf();
+    s = new npc_mimiron_flames();
+    s->RegisterSelf();
+    s = new npc_frost_bomb();
+    s->RegisterSelf();
+    s = new npc_rocket_strike();
+    s->RegisterSelf();
+    s = new boss_leviathan_mk2_turret();
+    s->RegisterSelf();
+    s = new npc_computer();
+    s->RegisterSelf();
+    s = new npc_bot_trigger();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_leviathan_mk2";
-    pNewScript->GetAI = GetAI_boss_leviathan_mk2;
-    pNewScript->RegisterSelf();
+    s = new go_big_red_button();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_vx001";
-    pNewScript->GetAI = GetAI_boss_vx001;
-    pNewScript->RegisterSelf();
+    s = new spell_summon_any_bot_trigger();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_aerial_unit";
-    pNewScript->GetAI = GetAI_boss_aerial_unit;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_mimiron";
+    //pNewScript->GetAI = GetAI_boss_mimiron;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_proximity_mine";
-    pNewScript->GetAI = GetAI_npc_proximity_mine;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_leviathan_mk2";
+    //pNewScript->GetAI = GetAI_boss_leviathan_mk2;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_bot_trigger";
-    pNewScript->GetAI = GetAI_npc_bot_trigger;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_bot_trigger;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_vx001";
+    //pNewScript->GetAI = GetAI_boss_vx001;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_mimiron_flames";
-    pNewScript->GetAI = GetAI_npc_mimiron_flames;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_aerial_unit";
+    //pNewScript->GetAI = GetAI_boss_aerial_unit;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_frost_bomb";
-    pNewScript->GetAI = GetAI_npc_frost_bomb;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_proximity_mine";
+    //pNewScript->GetAI = GetAI_npc_proximity_mine;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_rocket_strike";
-    pNewScript->GetAI = GetAI_npc_rocket_strike;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_bot_trigger";
+    //pNewScript->GetAI = GetAI_npc_bot_trigger;
+    //pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_bot_trigger;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_leviathan_mk2_turret";
-    pNewScript->GetAI = GetAI_boss_leviathan_mk2_turret;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_mimiron_flames";
+    //pNewScript->GetAI = GetAI_npc_mimiron_flames;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_computer";
-    pNewScript->GetAI = GetAI_npc_computer;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_frost_bomb";
+    //pNewScript->GetAI = GetAI_npc_frost_bomb;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "go_big_red_button";
-    pNewScript->pGOUse = &GOUse_go_big_red_button;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_rocket_strike";
+    //pNewScript->GetAI = GetAI_npc_rocket_strike;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_leviathan_mk2_turret";
+    //pNewScript->GetAI = GetAI_boss_leviathan_mk2_turret;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_computer";
+    //pNewScript->GetAI = GetAI_npc_computer;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "go_big_red_button";
+    //pNewScript->pGOUse = &GOUse_go_big_red_button;
+    //pNewScript->RegisterSelf();
 }

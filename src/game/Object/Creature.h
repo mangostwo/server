@@ -149,7 +149,6 @@ struct CreatureInfo
     uint32  VehicleTemplateId;
     uint32  GossipMenuId;
     char const* AIName;
-    uint32  ScriptID;
 
     // helpers
     HighGuid GetHighGuid() const

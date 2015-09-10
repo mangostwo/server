@@ -53,125 +53,132 @@ enum
 ## boss_maiden_of_grief
 ######*/
 
-struct  boss_maiden_of_griefAI : public ScriptedAI
+struct boss_maiden_of_grief : public CreatureScript
 {
-    boss_maiden_of_griefAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_maiden_of_grief() : CreatureScript("boss_maiden_of_grief") {}
+
+    struct boss_maiden_of_griefAI : public ScriptedAI
     {
-        m_pInstance = (instance_halls_of_stone*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    instance_halls_of_stone* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiStormTimer;
-    uint32 m_uiShockTimer;
-    uint32 m_uiPillarTimer;
-    uint32 m_uiPartingSorrowTimer;
-
-    void Reset() override
-    {
-        m_uiStormTimer = 5000;
-        m_uiShockTimer = 10000;
-        m_uiPillarTimer = 15000;
-        m_uiPartingSorrowTimer = 12000;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MAIDEN, IN_PROGRESS);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MAIDEN, FAIL);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        switch (urand(0, 3))
+        boss_maiden_of_griefAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        }
+
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        uint32 m_uiStormTimer;
+        uint32 m_uiShockTimer;
+        uint32 m_uiPillarTimer;
+        uint32 m_uiPartingSorrowTimer;
+
+        void Reset() override
+        {
+            m_uiStormTimer = 5000;
+            m_uiShockTimer = 10000;
+            m_uiPillarTimer = 15000;
+            m_uiPartingSorrowTimer = 12000;
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_MAIDEN, IN_PROGRESS);
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_MAIDEN, FAIL);
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            switch (urand(0, 3))
+            {
             case 0: DoScriptText(SAY_SLAY_1, m_creature); break;
             case 1: DoScriptText(SAY_SLAY_2, m_creature); break;
             case 2: DoScriptText(SAY_SLAY_3, m_creature); break;
             case 3: DoScriptText(SAY_SLAY_4, m_creature); break;
+            }
         }
-    }
 
-    void JustDied(Unit* /*pKiller*/) override
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(SAY_DEATH, m_creature);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_MAIDEN, DONE);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            if (m_uiPartingSorrowTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_PARTING_SORROW, SELECT_FLAG_PLAYER | SELECT_FLAG_POWER_MANA))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_PARTING_SORROW) == CAST_OK)
+                        m_uiPartingSorrowTimer = 12000 + rand() % 5000;
+                }
+            }
+            else
+                m_uiPartingSorrowTimer -= uiDiff;
+
+            if (m_uiStormTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_STORM_OF_GRIEF : SPELL_STORM_OF_GRIEF_H) == CAST_OK)
+                    m_uiStormTimer = 20000;
+            }
+            else
+                m_uiStormTimer -= uiDiff;
+
+            if (m_uiPillarTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, m_bIsRegularMode ? SPELL_PILLAR_OF_WOE_H : SPELL_PILLAR_OF_WOE, SELECT_FLAG_PLAYER))
+                {
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_PILLAR_OF_WOE : SPELL_PILLAR_OF_WOE_H) == CAST_OK)
+                        m_uiPillarTimer = 10000;
+                }
+            }
+            else
+                m_uiPillarTimer -= uiDiff;
+
+            if (m_uiShockTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SHOCK_OF_SORROW : SPELL_SHOCK_OF_SORROW_H) == CAST_OK)
+                {
+                    DoScriptText(SAY_STUN, m_creature);
+                    m_uiShockTimer = 35000;
+                }
+            }
+            else
+                m_uiShockTimer -= uiDiff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MAIDEN, DONE);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiPartingSorrowTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_PARTING_SORROW, SELECT_FLAG_PLAYER | SELECT_FLAG_POWER_MANA))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_PARTING_SORROW) == CAST_OK)
-                    m_uiPartingSorrowTimer = 12000 + rand() % 5000;
-            }
-        }
-        else
-            m_uiPartingSorrowTimer -= uiDiff;
-
-        if (m_uiStormTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_STORM_OF_GRIEF : SPELL_STORM_OF_GRIEF_H) == CAST_OK)
-                m_uiStormTimer = 20000;
-        }
-        else
-            m_uiStormTimer -= uiDiff;
-
-        if (m_uiPillarTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, m_bIsRegularMode ? SPELL_PILLAR_OF_WOE_H : SPELL_PILLAR_OF_WOE, SELECT_FLAG_PLAYER))
-            {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_PILLAR_OF_WOE : SPELL_PILLAR_OF_WOE_H) == CAST_OK)
-                    m_uiPillarTimer = 10000;
-            }
-        }
-        else
-            m_uiPillarTimer -= uiDiff;
-
-        if (m_uiShockTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SHOCK_OF_SORROW : SPELL_SHOCK_OF_SORROW_H) == CAST_OK)
-            {
-                DoScriptText(SAY_STUN, m_creature);
-                m_uiShockTimer = 35000;
-            }
-        }
-        else
-            m_uiShockTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+        return new boss_maiden_of_griefAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_maiden_of_grief(Creature* pCreature)
-{
-    return new boss_maiden_of_griefAI(pCreature);
-}
-
 void AddSC_boss_maiden_of_grief()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_maiden_of_grief";
-    pNewScript->GetAI = &GetAI_boss_maiden_of_grief;
-    pNewScript->RegisterSelf();
+    s = new boss_maiden_of_grief();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_maiden_of_grief";
+    //pNewScript->GetAI = &GetAI_boss_maiden_of_grief;
+    //pNewScript->RegisterSelf();
 }

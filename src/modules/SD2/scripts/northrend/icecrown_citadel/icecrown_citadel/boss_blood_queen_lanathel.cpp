@@ -79,144 +79,146 @@ static const float aQueenPosition[2][3] =
     {4595.90f, 2769.31f, 421.83f},
 };
 
-struct  boss_blood_queen_lanathelAI : public ScriptedAI
+struct boss_blood_queen_lanathel : public CreatureScript
 {
-    boss_blood_queen_lanathelAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_blood_queen_lanathel() : CreatureScript("boss_blood_queen_lanathel") {}
+
+    struct boss_blood_queen_lanathelAI : public ScriptedAI
     {
-        m_pInstance = (instance_icecrown_citadel*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    instance_icecrown_citadel* m_pInstance;
-
-    uint8 m_uiPhase;
-    uint32 m_uiPhaseTimer;
-
-    uint32 m_uiBloodMirrorTimer;
-    uint32 m_uiEnrageTimer;
-    uint32 m_uiVampiricBiteTimer;
-    uint32 m_uiBloodboltTimer;
-    uint32 m_uiPactDarkfallenTimer;
-    uint32 m_uiSwarmingShadowsTimer;
-    uint32 m_uiDeliriousSlashTimer;
-
-    void Reset() override
-    {
-        m_uiPhase                = PHASE_GROUND;
-        m_uiPhaseTimer           = 120000;                  // 2 min
-
-        m_uiEnrageTimer          = 330000;                  // 5 min and 30 secs
-        m_uiBloodMirrorTimer     = 0;
-        m_uiDeliriousSlashTimer  = 20000;
-        m_uiVampiricBiteTimer    = 15000;
-        m_uiBloodboltTimer       = urand(15000, 20000);
-        m_uiPactDarkfallenTimer  = 15000;
-        m_uiSwarmingShadowsTimer = 30000;
-
-        m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_QUEEN_LANATHEL, FAIL);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_SHROUD_OF_SORROW, CAST_TRIGGERED);
-
-        if (m_pInstance)
+        boss_blood_queen_lanathelAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            m_pInstance->SetData(TYPE_QUEEN_LANATHEL, IN_PROGRESS);
-
-            if (m_pInstance->IsHeroicDifficulty())
-                DoCastSpellIfCan(m_creature, SPELL_PRESENCE_OF_DARKFALLEN, CAST_TRIGGERED);
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         }
-    }
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
+        ScriptedInstance* m_pInstance;
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_QUEEN_LANATHEL, DONE);
-    }
+        uint8 m_uiPhase;
+        uint32 m_uiPhaseTimer;
 
-    void MovementInform(uint32 uiMovementType, uint32 uiPointId) override
-    {
-        if (uiMovementType != POINT_MOTION_TYPE)
-            return;
+        uint32 m_uiBloodMirrorTimer;
+        uint32 m_uiEnrageTimer;
+        uint32 m_uiVampiricBiteTimer;
+        uint32 m_uiBloodboltTimer;
+        uint32 m_uiPactDarkfallenTimer;
+        uint32 m_uiSwarmingShadowsTimer;
+        uint32 m_uiDeliriousSlashTimer;
 
-        if (uiPointId == POINT_CENTER_GROUND)
+        void Reset() override
         {
-            if (m_uiPhase == PHASE_RUNNING)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_INCITE_TERROR) == CAST_OK)
-                {
-                    m_uiPhase = PHASE_FLYING;
+            m_uiPhase = PHASE_GROUND;
+            m_uiPhaseTimer = 120000;                  // 2 min
 
-                    m_creature->SetLevitate(true);
-                    m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
+            m_uiEnrageTimer = 330000;                  // 5 min and 30 secs
+            m_uiBloodMirrorTimer = 0;
+            m_uiDeliriousSlashTimer = 20000;
+            m_uiVampiricBiteTimer = 15000;
+            m_uiBloodboltTimer = urand(15000, 20000);
+            m_uiPactDarkfallenTimer = 15000;
+            m_uiSwarmingShadowsTimer = 30000;
+
+            m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_QUEEN_LANATHEL, FAIL);
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
+            DoCastSpellIfCan(m_creature, SPELL_SHROUD_OF_SORROW, CAST_TRIGGERED);
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_QUEEN_LANATHEL, IN_PROGRESS);
+
+                if (m_pInstance->GetData(TYPE_DATA_IS_HEROIC))
+                    DoCastSpellIfCan(m_creature, SPELL_PRESENCE_OF_DARKFALLEN, CAST_TRIGGERED);
+            }
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(SAY_DEATH, m_creature);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_QUEEN_LANATHEL, DONE);
+        }
+
+        void MovementInform(uint32 uiMovementType, uint32 uiPointId) override
+        {
+            if (uiMovementType != POINT_MOTION_TYPE)
+                return;
+
+            if (uiPointId == POINT_CENTER_GROUND)
+            {
+                if (m_uiPhase == PHASE_RUNNING)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_INCITE_TERROR) == CAST_OK)
+                    {
+                        m_uiPhase = PHASE_FLYING;
+
+                        m_creature->SetLevitate(true);
+                        m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
+
+                        m_creature->GetMotionMaster()->Clear();
+                        m_creature->GetMotionMaster()->MovePoint(POINT_CENTER_AIR, aQueenPosition[1][0], aQueenPosition[1][1], aQueenPosition[1][2], false);
+                    }
+                }
+                else if (m_uiPhase == PHASE_FLYING)
+                {
+                    m_uiPhase = PHASE_GROUND;
+                    m_uiPhaseTimer = 120000;
+                    SetCombatMovement(true);
+
+                    m_creature->SetLevitate(false);
+                    m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
 
                     m_creature->GetMotionMaster()->Clear();
-                    m_creature->GetMotionMaster()->MovePoint(POINT_CENTER_AIR, aQueenPosition[1][0], aQueenPosition[1][1], aQueenPosition[1][2], false);
+                    if (m_creature->getVictim())
+                        m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
                 }
             }
-            else if (m_uiPhase == PHASE_FLYING)
+            else if (uiPointId == POINT_CENTER_AIR)
             {
-                m_uiPhase      = PHASE_GROUND;
-                m_uiPhaseTimer = 120000;
-                SetCombatMovement(true);
-
-                m_creature->SetLevitate(false);
-                m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_FLY_ANIM);
-
-                m_creature->GetMotionMaster()->Clear();
-                if (m_creature->getVictim())
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
-            }
-        }
-        else if (uiPointId == POINT_CENTER_AIR)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_BLOODBOLT_WHIRL) == CAST_OK)
-            {
-                DoScriptText(SAY_AIR_PHASE, m_creature);
-                m_uiPhase      = PHASE_AIR;
-                m_uiPhaseTimer = 7000;
-            }
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiEnrageTimer)
-        {
-            if (m_uiEnrageTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature, SPELL_BLOODBOLT_WHIRL) == CAST_OK)
                 {
-                    DoScriptText(SAY_BERSERK, m_creature);
-                    m_uiEnrageTimer = 0;
+                    DoScriptText(SAY_AIR_PHASE, m_creature);
+                    m_uiPhase = PHASE_AIR;
+                    m_uiPhaseTimer = 7000;
                 }
             }
-            else
-                m_uiEnrageTimer -= uiDiff;
         }
 
-        switch (m_uiPhase)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            case PHASE_GROUND:
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            if (m_uiEnrageTimer)
             {
+                if (m_uiEnrageTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                    {
+                        DoScriptText(SAY_BERSERK, m_creature);
+                        m_uiEnrageTimer = 0;
+                    }
+                }
+                else
+                    m_uiEnrageTimer -= uiDiff;
+            }
+
+            switch (m_uiPhase)
+            {
+            case PHASE_GROUND:
                 // Air phase change timer
                 if (m_uiPhaseTimer < uiDiff)
                 {
@@ -224,7 +226,7 @@ struct  boss_blood_queen_lanathelAI : public ScriptedAI
                     m_creature->GetMotionMaster()->Clear();
                     m_creature->GetMotionMaster()->MovePoint(POINT_CENTER_GROUND, aQueenPosition[0][0], aQueenPosition[0][1], aQueenPosition[0][2]);
 
-                    m_uiPhase      = PHASE_RUNNING;
+                    m_uiPhase = PHASE_RUNNING;
                     m_uiPhaseTimer = 0;
                 }
                 else
@@ -284,7 +286,7 @@ struct  boss_blood_queen_lanathelAI : public ScriptedAI
                     m_uiSwarmingShadowsTimer -= uiDiff;
 
                 // Heroic spells
-                if (m_pInstance && m_pInstance->IsHeroicDifficulty())
+                if (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC))
                 {
                     if (m_uiDeliriousSlashTimer < uiDiff)
                     {
@@ -298,18 +300,14 @@ struct  boss_blood_queen_lanathelAI : public ScriptedAI
                 DoMeleeAttackIfReady();
 
                 break;
-            }
             case PHASE_RUNNING:
             case PHASE_FLYING:
-            {
                 // Nothing here. Wait for arriving at the point
                 break;
-            }
             case PHASE_AIR:
-            {
                 if (m_uiPhaseTimer < uiDiff)
                 {
-                    m_uiPhase      = PHASE_FLYING;
+                    m_uiPhase = PHASE_FLYING;
                     m_uiPhaseTimer = 0;
 
                     m_creature->GetMotionMaster()->Clear();
@@ -321,20 +319,23 @@ struct  boss_blood_queen_lanathelAI : public ScriptedAI
                 break;
             }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_blood_queen_lanathelAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_blood_queen_lanathel(Creature* pCreature)
-{
-    return new boss_blood_queen_lanathelAI(pCreature);
-}
-
 void AddSC_boss_blood_queen_lanathel()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_blood_queen_lanathel";
-    pNewScript->GetAI = &GetAI_boss_blood_queen_lanathel;
-    pNewScript->RegisterSelf();
+    s = new boss_blood_queen_lanathel();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_blood_queen_lanathel";
+    //pNewScript->GetAI = &GetAI_boss_blood_queen_lanathel;
+    //pNewScript->RegisterSelf();
 }

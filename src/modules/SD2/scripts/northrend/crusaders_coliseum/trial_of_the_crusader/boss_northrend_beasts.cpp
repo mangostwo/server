@@ -43,67 +43,70 @@ enum
     PHASE_ICEHOWL                       = 2,
 };
 
-struct  npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
+struct npc_beast_combat_stalker : public CreatureScript
 {
-    npc_beast_combat_stalkerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    npc_beast_combat_stalker() : CreatureScript("npc_beast_combat_stalker") {}
+
+    struct npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-        m_creature->SetInCombatWithZone();
-    }
-
-    ScriptedInstance* m_pInstance;
-    ObjectGuid m_aSummonedBossGuid[4];
-    bool m_bFirstWormDied;
-    uint32 m_uiBerserkTimer;
-    uint32 m_uiAttackDelayTimer;
-    uint32 m_uiNextBeastTimer;
-    uint32 m_uiPhase;
-
-    void Reset() override
-    {
-        m_uiAttackDelayTimer = 0;
-        m_uiNextBeastTimer = 0;
-        m_bFirstWormDied = false;
-        m_uiPhase = PHASE_GORMOK;
-
-        if (m_creature->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL || m_creature->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
-            m_uiBerserkTimer    = 15 * MINUTE * IN_MILLISECONDS;
-        else
-            m_uiBerserkTimer    = 9 * MINUTE * IN_MILLISECONDS;
-    }
-
-    void MoveInLineOfSight(Unit* /*pWho*/) override {}
-
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage) override
-    {
-        uiDamage = 0;
-    }
-
-    void EnterEvadeMode() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_NORTHREND_BEASTS, FAIL);
-
-        for (uint8 i = 0; i < 4; ++i)
+        npc_beast_combat_stalkerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
         {
-            if (Creature* pBoss = m_creature->GetMap()->GetCreature(m_aSummonedBossGuid[i]))
-                pBoss->ForcedDespawn();
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_creature->SetInCombatWithZone();
         }
 
-        m_creature->ForcedDespawn();
-    }
+        ScriptedInstance* m_pInstance;
+        ObjectGuid m_aSummonedBossGuid[4];
+        bool m_bFirstWormDied;
+        uint32 m_uiBerserkTimer;
+        uint32 m_uiAttackDelayTimer;
+        uint32 m_uiNextBeastTimer;
+        uint32 m_uiPhase;
 
-    void Aggro(Unit* /*pWho*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_NORTHREND_BEASTS, IN_PROGRESS);
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
+        void Reset() override
         {
+            m_uiAttackDelayTimer = 0;
+            m_uiNextBeastTimer = 0;
+            m_bFirstWormDied = false;
+            m_uiPhase = PHASE_GORMOK;
+
+            if (m_creature->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL || m_creature->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
+                m_uiBerserkTimer = 15 * MINUTE * IN_MILLISECONDS;
+            else
+                m_uiBerserkTimer = 9 * MINUTE * IN_MILLISECONDS;
+        }
+
+        void MoveInLineOfSight(Unit* /*pWho*/) override {}
+
+        void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage) override
+        {
+            uiDamage = 0;
+        }
+
+        void EnterEvadeMode() override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_NORTHREND_BEASTS, FAIL);
+
+            for (uint8 i = 0; i < 4; ++i)
+            {
+                if (Creature* pBoss = m_creature->GetMap()->GetCreature(m_aSummonedBossGuid[i]))
+                    pBoss->ForcedDespawn();
+            }
+
+            m_creature->ForcedDespawn();
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_NORTHREND_BEASTS, IN_PROGRESS);
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_GORMOK:     m_uiPhase = PHASE_GORMOK;  break;
             case NPC_DREADSCALE: m_uiPhase = PHASE_WORMS;   break;
             case NPC_ICEHOWL:    m_uiPhase = PHASE_ICEHOWL; break;
@@ -112,45 +115,45 @@ struct  npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
                 pSummoned->SetInCombatWithZone();
                 m_aSummonedBossGuid[3] = pSummoned->GetObjectGuid();
                 return;
+            }
+
+            m_aSummonedBossGuid[m_uiPhase] = pSummoned->GetObjectGuid();
+
+            pSummoned->GetMotionMaster()->MovePoint(m_uiPhase, aMovePositions[m_uiPhase][0], aMovePositions[m_uiPhase][1], aMovePositions[m_uiPhase][2]);
+
+            // Next beasts are summoned only for heroic modes
+            if (m_creature->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || m_creature->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+                m_uiNextBeastTimer = 150 * IN_MILLISECONDS;     // 2 min 30
+
+            m_uiAttackDelayTimer = 15000;                       // TODO, must be checked.
         }
 
-        m_aSummonedBossGuid[m_uiPhase] = pSummoned->GetObjectGuid();
-
-        pSummoned->GetMotionMaster()->MovePoint(m_uiPhase, aMovePositions[m_uiPhase][0], aMovePositions[m_uiPhase][1], aMovePositions[m_uiPhase][2]);
-
-        // Next beasts are summoned only for heroic modes
-        if (m_creature->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || m_creature->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
-            m_uiNextBeastTimer = 150 * IN_MILLISECONDS;     // 2 min 30
-
-        m_uiAttackDelayTimer = 15000;                       // TODO, must be checked.
-    }
-
-    // Only for Dreadscale and Icehowl
-    void DoSummonNextBeast(uint32 uiBeastEntry)
-    {
-        if (uiBeastEntry == NPC_DREADSCALE)
+        // Only for Dreadscale and Icehowl
+        void DoSummonNextBeast(uint32 uiBeastEntry)
         {
-            if (Creature* pTirion = m_pInstance->GetSingleCreatureFromStorage(NPC_TIRION_A))
-                DoScriptText(SAY_TIRION_BEAST_2, pTirion);
+            if (uiBeastEntry == NPC_DREADSCALE)
+            {
+                if (Creature* pTirion = m_pInstance->GetSingleCreatureFromStorage(NPC_TIRION_A))
+                    DoScriptText(SAY_TIRION_BEAST_2, pTirion);
 
-            m_creature->SummonCreature(NPC_DREADSCALE, aSpawnPositions[2][0], aSpawnPositions[2][1], aSpawnPositions[2][2], aSpawnPositions[2][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_DREADSCALE, aSpawnPositions[2][0], aSpawnPositions[2][1], aSpawnPositions[2][2], aSpawnPositions[2][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+            }
+            else
+            {
+                if (Creature* pTirion = m_pInstance->GetSingleCreatureFromStorage(NPC_TIRION_A))
+                    DoScriptText(SAY_TIRION_BEAST_3, pTirion);
+
+                m_creature->SummonCreature(NPC_ICEHOWL, aSpawnPositions[4][0], aSpawnPositions[4][1], aSpawnPositions[4][2], aSpawnPositions[4][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+            }
         }
-        else
+
+        void SummonedCreatureJustDied(Creature* pSummoned) override
         {
-            if (Creature* pTirion = m_pInstance->GetSingleCreatureFromStorage(NPC_TIRION_A))
-                DoScriptText(SAY_TIRION_BEAST_3, pTirion);
+            if (!m_pInstance)
+                return;
 
-            m_creature->SummonCreature(NPC_ICEHOWL, aSpawnPositions[4][0], aSpawnPositions[4][1], aSpawnPositions[4][2], aSpawnPositions[4][3], TEMPSUMMON_DEAD_DESPAWN, 0);
-        }
-    }
-
-    void SummonedCreatureJustDied(Creature* pSummoned) override
-    {
-        if (!m_pInstance)
-            return;
-
-        switch (pSummoned->GetEntry())
-        {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_GORMOK:
                 if (m_uiPhase == PHASE_GORMOK)
                     DoSummonNextBeast(NPC_DREADSCALE);
@@ -168,179 +171,192 @@ struct  npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
                 m_pInstance->SetData(TYPE_NORTHREND_BEASTS, DONE);
                 m_creature->ForcedDespawn();
                 break;
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiNextBeastTimer)
-        {
-            if (m_uiNextBeastTimer <= uiDiff)
-            {
-                if (m_uiPhase == PHASE_GORMOK)
-                    DoSummonNextBeast(NPC_DREADSCALE);
-                else if (m_uiPhase == PHASE_WORMS)
-                    DoSummonNextBeast(NPC_ICEHOWL);
-
-                m_uiNextBeastTimer = 0;
             }
-            else
-                m_uiNextBeastTimer -= uiDiff;
         }
 
-        if (m_uiAttackDelayTimer)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (m_uiAttackDelayTimer <= uiDiff)
+            if (m_uiNextBeastTimer)
             {
-                if (m_uiPhase == PHASE_WORMS)
-                    m_creature->SummonCreature(NPC_ACIDMAW, aSpawnPositions[3][0], aSpawnPositions[3][1], aSpawnPositions[3][2], aSpawnPositions[3][3], TEMPSUMMON_DEAD_DESPAWN, 0);
-
-                if (Creature* pBeast = m_creature->GetMap()->GetCreature(m_aSummonedBossGuid[m_uiPhase]))
-                    pBeast->SetInCombatWithZone();
-
-                m_uiAttackDelayTimer = 0;
-            }
-            else
-                m_uiAttackDelayTimer -= uiDiff;
-        }
-
-        if (m_uiBerserkTimer)
-        {
-            if (m_uiBerserkTimer < uiDiff)
-            {
-                for (uint8 i = 0; i < 4; ++i)
+                if (m_uiNextBeastTimer <= uiDiff)
                 {
-                    Creature* pBoss = m_creature->GetMap()->GetCreature(m_aSummonedBossGuid[i]);
-                    if (pBoss && pBoss->IsAlive())
-                        pBoss->CastSpell(pBoss, SPELL_BERSERK, true);
-                }
-            }
-            else
-                m_uiBerserkTimer -= uiDiff;
-        }
+                    if (m_uiPhase == PHASE_GORMOK)
+                        DoSummonNextBeast(NPC_DREADSCALE);
+                    else if (m_uiPhase == PHASE_WORMS)
+                        DoSummonNextBeast(NPC_ICEHOWL);
 
-        m_creature->SelectHostileTarget();
+                    m_uiNextBeastTimer = 0;
+                }
+                else
+                    m_uiNextBeastTimer -= uiDiff;
+            }
+
+            if (m_uiAttackDelayTimer)
+            {
+                if (m_uiAttackDelayTimer <= uiDiff)
+                {
+                    if (m_uiPhase == PHASE_WORMS)
+                        m_creature->SummonCreature(NPC_ACIDMAW, aSpawnPositions[3][0], aSpawnPositions[3][1], aSpawnPositions[3][2], aSpawnPositions[3][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+
+                    if (Creature* pBeast = m_creature->GetMap()->GetCreature(m_aSummonedBossGuid[m_uiPhase]))
+                        pBeast->SetInCombatWithZone();
+
+                    m_uiAttackDelayTimer = 0;
+                }
+                else
+                    m_uiAttackDelayTimer -= uiDiff;
+            }
+
+            if (m_uiBerserkTimer)
+            {
+                if (m_uiBerserkTimer < uiDiff)
+                {
+                    for (uint8 i = 0; i < 4; ++i)
+                    {
+                        Creature* pBoss = m_creature->GetMap()->GetCreature(m_aSummonedBossGuid[i]);
+                        if (pBoss && pBoss->IsAlive())
+                            pBoss->CastSpell(pBoss, SPELL_BERSERK, true);
+                    }
+                }
+                else
+                    m_uiBerserkTimer -= uiDiff;
+            }
+
+            m_creature->SelectHostileTarget();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_beast_combat_stalkerAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_beast_combat_stalker(Creature* pCreature)
-{
-    return new npc_beast_combat_stalkerAI(pCreature);
-}
 
 /*######
 ## boss_gormok, vehicle driven by 34800 (multiple times)
 ######*/
 
-struct  boss_gormokAI : public ScriptedAI
+struct boss_gormok : public CreatureScript
 {
-    boss_gormokAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_gormok() : CreatureScript("boss_gormok") {}
+
+    struct boss_gormokAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
+        boss_gormokAI(Creature* pCreature) : ScriptedAI(pCreature)
+        {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        }
 
-    ScriptedInstance* m_pInstance;
+        ScriptedInstance* m_pInstance;
 
-    void Reset() override {}
+        void Reset() override {}
 
-    void JustReachedHome() override
+        void JustReachedHome() override
+        {
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+        }
+
+        void UpdateAI(const uint32 /*uiDiff*/) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-    }
-
-    void UpdateAI(const uint32 /*uiDiff*/) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        DoMeleeAttackIfReady();
+        return new boss_gormokAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_gormok(Creature* pCreature)
-{
-    return new boss_gormokAI(pCreature);
-}
 
 /*######
 ## boss_acidmaw
 ######*/
 
-struct  boss_acidmawAI : public ScriptedAI
+struct boss_acidmaw : public CreatureScript
 {
-    boss_acidmawAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_acidmaw() : CreatureScript("boss_acidmaw") {}
+
+    struct boss_acidmawAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
+        boss_acidmawAI(Creature* pCreature) : ScriptedAI(pCreature)
+        {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        }
 
-    ScriptedInstance* m_pInstance;
+        ScriptedInstance* m_pInstance;
 
-    void Reset() override {}
+        void Reset() override {}
 
-    void JustReachedHome() override
+        void JustReachedHome() override
+        {
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+        }
+
+        void UpdateAI(const uint32 /*uiDiff*/) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-    }
-
-    void UpdateAI(const uint32 /*uiDiff*/) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        DoMeleeAttackIfReady();
+        return new boss_acidmawAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_acidmaw(Creature* pCreature)
-{
-    return new boss_acidmawAI(pCreature);
-}
 
 /*######
 ## boss_dreadscale
 ######*/
 
-struct  boss_dreadscaleAI : public ScriptedAI
+struct boss_dreadscale : public CreatureScript
 {
-    boss_dreadscaleAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_dreadscale() : CreatureScript("boss_dreadscale") {}
+
+    struct boss_dreadscaleAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
+        boss_dreadscaleAI(Creature* pCreature) : ScriptedAI(pCreature)
+        {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        }
 
-    ScriptedInstance* m_pInstance;
+        ScriptedInstance* m_pInstance;
 
-    void Reset() override {}
+        void Reset() override {}
 
-    void JustReachedHome() override
+        void JustReachedHome() override
+        {
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+        }
+
+        void UpdateAI(const uint32 /*uiDiff*/) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-    }
-
-    void UpdateAI(const uint32 /*uiDiff*/) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        DoMeleeAttackIfReady();
+        return new boss_dreadscaleAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_dreadscale(Creature* pCreature)
-{
-    return new boss_dreadscaleAI(pCreature);
-}
 
 /*######
 ## boss_icehowl
@@ -351,66 +367,81 @@ enum
     EMOTE_MASSIVE_CRASH                 = -1649039,
 };
 
-struct  boss_icehowlAI : public ScriptedAI
+struct boss_icehowl : public CreatureScript
 {
-    boss_icehowlAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_icehowl() : CreatureScript("boss_icehowl") {}
+
+    struct boss_icehowlAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
+        boss_icehowlAI(Creature* pCreature) : ScriptedAI(pCreature)
+        {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        }
 
-    ScriptedInstance* m_pInstance;
+        ScriptedInstance* m_pInstance;
 
-    void Reset() override {}
+        void Reset() override {}
 
-    void JustReachedHome() override
+        void JustReachedHome() override
+        {
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+        }
+
+        void UpdateAI(const uint32 /*uiDiff*/) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-    }
-
-    void UpdateAI(const uint32 /*uiDiff*/) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        DoMeleeAttackIfReady();
+        return new boss_icehowlAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_icehowl(Creature* pCreature)
-{
-    return new boss_icehowlAI(pCreature);
-}
-
 void AddSC_northrend_beasts()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_beast_combat_stalker";
-    pNewScript->GetAI = &GetAI_npc_beast_combat_stalker;
-    pNewScript->RegisterSelf();
+    s = new npc_beast_combat_stalker();
+    s->RegisterSelf();
+    s = new boss_gormok();
+    s->RegisterSelf();
+    s = new boss_acidmaw();
+    s->RegisterSelf();
+    s = new boss_dreadscale();
+    s->RegisterSelf();
+    s = new boss_icehowl();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_gormok";
-    pNewScript->GetAI = &GetAI_boss_gormok;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_beast_combat_stalker";
+    //pNewScript->GetAI = &GetAI_npc_beast_combat_stalker;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_acidmaw";
-    pNewScript->GetAI = &GetAI_boss_acidmaw;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_gormok";
+    //pNewScript->GetAI = &GetAI_boss_gormok;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_dreadscale";
-    pNewScript->GetAI = &GetAI_boss_dreadscale;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_acidmaw";
+    //pNewScript->GetAI = &GetAI_boss_acidmaw;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_icehowl";
-    pNewScript->GetAI = &GetAI_boss_icehowl;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_dreadscale";
+    //pNewScript->GetAI = &GetAI_boss_dreadscale;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_icehowl";
+    //pNewScript->GetAI = &GetAI_boss_icehowl;
+    //pNewScript->RegisterSelf();
 }

@@ -68,226 +68,290 @@ static const float aLackeyLocations[MAX_DELRISSA_ADDS][4] =
 ## boss_priestess_delrissa
 ######*/
 
-struct boss_priestess_delrissaAI : public ScriptedAI
+struct boss_priestess_delrissa : public CreatureScript
 {
-    boss_priestess_delrissaAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_priestess_delrissa() : CreatureScript("boss_priestess_delrissa") {}
+
+    struct boss_priestess_delrissaAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
-
-    std::vector<uint32> m_vuiLackeyEnties;
-
-    uint32 m_uiHealTimer;
-    uint32 m_uiRenewTimer;
-    uint32 m_uiShieldTimer;
-    uint32 m_uiSWPainTimer;
-    uint32 m_uiDispelTimer;
-    uint32 m_uiScreamTimer;
-    uint32 m_uiMedallionTimer;
-    uint8 m_uiPlayersKilled;
-
-    void Reset() override
-    {
-        m_uiHealTimer       = 15000;
-        m_uiRenewTimer      = 10000;
-        m_uiShieldTimer     = 2000;
-        m_uiSWPainTimer     = 5000;
-        m_uiDispelTimer     = 7500;
-        m_uiScreamTimer     = 9000;
-        m_uiPlayersKilled   = 0;
-        m_uiMedallionTimer  = urand(1000, 2000);
-
-        DoInitializeCompanions();
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_DELRISSA, FAIL); }
-    }
-
-    void Aggro(Unit* pWho) override
-    {
-        if (pWho->GetTypeId() != TYPEID_PLAYER)
-        { return; }
-
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_DELRISSA, IN_PROGRESS); }
-    }
-
-    // Summon four random adds to help during the fight
-    void DoInitializeCompanions()
-    {
-        // can be called if creature are dead, so avoid
-        if (!m_creature->IsAlive())
-        { return; }
-
-        // it's empty, so first time
-        if (m_vuiLackeyEnties.empty())
+        boss_priestess_delrissaAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            // pre-allocate size for speed
-            m_vuiLackeyEnties.resize(MAX_COMPANIONS);
-
-            // fill vector array with entries from creature array
-            for (uint8 i = 0; i < MAX_COMPANIONS; ++i)
-            { m_vuiLackeyEnties[i] = aDelrissaLackeys[i]; }
-
-            std::random_shuffle(m_vuiLackeyEnties.begin(), m_vuiLackeyEnties.end());
-
-            // Summon the 4 entries
-            for (uint8 i = 0; i < MAX_DELRISSA_ADDS; ++i)
-            { m_creature->SummonCreature(m_vuiLackeyEnties[i], aLackeyLocations[i][0], aLackeyLocations[i][1], aLackeyLocations[i][2], aLackeyLocations[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0); }
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         }
-        // Resummon the killed adds
-        else
+
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        std::vector<uint32> m_vuiLackeyEnties;
+
+        uint32 m_uiHealTimer;
+        uint32 m_uiRenewTimer;
+        uint32 m_uiShieldTimer;
+        uint32 m_uiSWPainTimer;
+        uint32 m_uiDispelTimer;
+        uint32 m_uiScreamTimer;
+        uint32 m_uiMedallionTimer;
+        uint8 m_uiPlayersKilled;
+
+        void Reset() override
         {
-            if (!m_pInstance)
-            { return; }
+            m_uiHealTimer = 15000;
+            m_uiRenewTimer = 10000;
+            m_uiShieldTimer = 2000;
+            m_uiSWPainTimer = 5000;
+            m_uiDispelTimer = 7500;
+            m_uiScreamTimer = 9000;
+            m_uiPlayersKilled = 0;
+            m_uiMedallionTimer = urand(1000, 2000);
 
-            for (uint8 i = 0; i < MAX_DELRISSA_ADDS; ++i)
+            DoInitializeCompanions();
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
             {
-                // If we already have the creature on the map, then don't summon it
-                if (m_pInstance->GetSingleCreatureFromStorage(m_vuiLackeyEnties[i], true))
-                { continue; }
-
-                m_creature->SummonCreature(m_vuiLackeyEnties[i], aLackeyLocations[i][0], aLackeyLocations[i][1], aLackeyLocations[i][2], aLackeyLocations[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
+                m_pInstance->SetData(TYPE_DELRISSA, FAIL);
             }
         }
-    }
 
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-        { return; }
-
-        DoScriptText(aPlayerDeath[m_uiPlayersKilled], m_creature);
-        ++m_uiPlayersKilled;
-
-        // reset counter
-        if (m_uiPlayersKilled == 5)
-        { m_uiPlayersKilled = 0; }
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (!m_pInstance)
-        { return; }
-
-        // Remove lootable flag if the lackeys are not killed
-        if (m_pInstance->GetData(TYPE_DELRISSA) == SPECIAL)
-        { m_pInstance->SetData(TYPE_DELRISSA, DONE); }
-        else
-        { m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE); }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiHealTimer < uiDiff)
+        void Aggro(Unit* pWho) override
         {
-            if (Unit* pTarget = DoSelectLowestHpFriendly(50.0f))
+            if (pWho->GetTypeId() != TYPEID_PLAYER)
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_FLASH_HEAL) == CAST_OK)
-                { m_uiHealTimer = urand(15000, 20000); }
+                return;
+            }
+
+            DoScriptText(SAY_AGGRO, m_creature);
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_DELRISSA, IN_PROGRESS);
             }
         }
-        else
-        { m_uiHealTimer -= uiDiff; }
 
-        if (m_uiRenewTimer < uiDiff)
+        // Summon four random adds to help during the fight
+        void DoInitializeCompanions()
         {
-            if (Unit* pTarget = DoSelectLowestHpFriendly(50.0f))
+            // can be called if creature are dead, so avoid
+            if (!m_creature->IsAlive())
             {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_RENEW : SPELL_RENEW_H) == CAST_OK)
-                { m_uiRenewTimer = urand(5000, 10000); }
+                return;
             }
-        }
-        else
-        { m_uiRenewTimer -= uiDiff; }
 
-        if (m_uiShieldTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SHIELD : SPELL_SHIELD_H) == CAST_OK)
-            { m_uiShieldTimer = urand(30000, 35000); }
-        }
-        else
-        { m_uiShieldTimer -= uiDiff; }
-
-        if (m_uiDispelTimer < uiDiff)
-        {
-            Unit* pTarget = NULL;
-            std::list<Creature*> lTempList = DoFindFriendlyCC(50.0f);
-
-            if (!lTempList.empty())
-            { pTarget = *(lTempList.begin()); }
-            else
-            { pTarget = DoSelectLowestHpFriendly(50.0f); }
-
-            if (pTarget)
+            // it's empty, so first time
+            if (m_vuiLackeyEnties.empty())
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_DISPEL_MAGIC) == CAST_OK)
-                { m_uiDispelTimer = urand(12000, 15000); }
-            }
-        }
-        else
-        { m_uiDispelTimer -= uiDiff; }
+                // pre-allocate size for speed
+                m_vuiLackeyEnties.resize(MAX_COMPANIONS);
 
-        // Use the Medallion if CC - only on heroic. Not sure how many times they are allowed to use it.
-        if (!m_bIsRegularMode && m_uiMedallionTimer)
-        {
-            if (m_creature->IsFrozen() || m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
-            {
-                if (m_uiMedallionTimer <= uiDiff)
+                // fill vector array with entries from creature array
+                for (uint8 i = 0; i < MAX_COMPANIONS; ++i)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_MEDALLION, CAST_TRIGGERED) == CAST_OK)
-                    { m_uiMedallionTimer = 0; }
+                    m_vuiLackeyEnties[i] = aDelrissaLackeys[i];
+                }
+
+                std::random_shuffle(m_vuiLackeyEnties.begin(), m_vuiLackeyEnties.end());
+
+                // Summon the 4 entries
+                for (uint8 i = 0; i < MAX_DELRISSA_ADDS; ++i)
+                {
+                    m_creature->SummonCreature(m_vuiLackeyEnties[i], aLackeyLocations[i][0], aLackeyLocations[i][1], aLackeyLocations[i][2], aLackeyLocations[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
+                }
+            }
+            // Resummon the killed adds
+            else
+            {
+                if (!m_pInstance)
+                {
+                    return;
+                }
+
+                for (uint8 i = 0; i < MAX_DELRISSA_ADDS; ++i)
+                {
+                    // If we already have the creature on the map, then don't summon it
+                    if (m_pInstance->GetSingleCreatureFromStorage(m_vuiLackeyEnties[i], true))
+                    {
+                        continue;
+                    }
+
+                    m_creature->SummonCreature(m_vuiLackeyEnties[i], aLackeyLocations[i][0], aLackeyLocations[i][1], aLackeyLocations[i][2], aLackeyLocations[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
+                }
+            }
+        }
+
+        void KilledUnit(Unit* pVictim) override
+        {
+            if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            {
+                return;
+            }
+
+            DoScriptText(aPlayerDeath[m_uiPlayersKilled], m_creature);
+            ++m_uiPlayersKilled;
+
+            // reset counter
+            if (m_uiPlayersKilled == 5)
+            {
+                m_uiPlayersKilled = 0;
+            }
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(SAY_DEATH, m_creature);
+
+            if (!m_pInstance)
+            {
+                return;
+            }
+
+            // Remove lootable flag if the lackeys are not killed
+            if (m_pInstance->GetData(TYPE_DELRISSA) == SPECIAL)
+            {
+                m_pInstance->SetData(TYPE_DELRISSA, DONE);
+            }
+            else
+            {
+                m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_uiHealTimer < uiDiff)
+            {
+                if (Unit* pTarget = DoSelectLowestHpFriendly(50.0f))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_FLASH_HEAL) == CAST_OK)
+                    {
+                        m_uiHealTimer = urand(15000, 20000);
+                    }
+                }
+            }
+            else
+            {
+                m_uiHealTimer -= uiDiff;
+            }
+
+            if (m_uiRenewTimer < uiDiff)
+            {
+                if (Unit* pTarget = DoSelectLowestHpFriendly(50.0f))
+                {
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_RENEW : SPELL_RENEW_H) == CAST_OK)
+                    {
+                        m_uiRenewTimer = urand(5000, 10000);
+                    }
+                }
+            }
+            else
+            {
+                m_uiRenewTimer -= uiDiff;
+            }
+
+            if (m_uiShieldTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SHIELD : SPELL_SHIELD_H) == CAST_OK)
+                {
+                    m_uiShieldTimer = urand(30000, 35000);
+                }
+            }
+            else
+            {
+                m_uiShieldTimer -= uiDiff;
+            }
+
+            if (m_uiDispelTimer < uiDiff)
+            {
+                Unit* pTarget = NULL;
+                std::list<Creature*> lTempList = DoFindFriendlyCC(50.0f);
+
+                if (!lTempList.empty())
+                {
+                    pTarget = *(lTempList.begin());
                 }
                 else
-                { m_uiMedallionTimer -= uiDiff; }
-            }
-        }
+                {
+                    pTarget = DoSelectLowestHpFriendly(50.0f);
+                }
 
-        if (m_uiSWPainTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (pTarget)
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_DISPEL_MAGIC) == CAST_OK)
+                    {
+                        m_uiDispelTimer = urand(12000, 15000);
+                    }
+                }
+            }
+            else
             {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOW_WORD_PAIN : SPELL_SHADOW_WORD_PAIN_H) == CAST_OK)
-                { m_uiSWPainTimer = 10000; }
+                m_uiDispelTimer -= uiDiff;
             }
-        }
-        else
-        { m_uiSWPainTimer -= uiDiff; }
 
-        if (m_uiScreamTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SCREAM) == CAST_OK)
-            { m_uiScreamTimer = urand(15000, 20000); }
-        }
-        else
-        { m_uiScreamTimer -= uiDiff; }
+            // Use the Medallion if CC - only on heroic. Not sure how many times they are allowed to use it.
+            if (!m_bIsRegularMode && m_uiMedallionTimer)
+            {
+                if (m_creature->IsFrozen() || m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
+                {
+                    if (m_uiMedallionTimer <= uiDiff)
+                    {
+                        if (DoCastSpellIfCan(m_creature, SPELL_MEDALLION, CAST_TRIGGERED) == CAST_OK)
+                        {
+                            m_uiMedallionTimer = 0;
+                        }
+                    }
+                    else
+                    {
+                        m_uiMedallionTimer -= uiDiff;
+                    }
+                }
+            }
 
-        DoMeleeAttackIfReady();
+            if (m_uiSWPainTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOW_WORD_PAIN : SPELL_SHADOW_WORD_PAIN_H) == CAST_OK)
+                    {
+                        m_uiSWPainTimer = 10000;
+                    }
+                }
+            }
+            else
+            {
+                m_uiSWPainTimer -= uiDiff;
+            }
+
+            if (m_uiScreamTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_SCREAM) == CAST_OK)
+                {
+                    m_uiScreamTimer = urand(15000, 20000);
+                }
+            }
+            else
+            {
+                m_uiScreamTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_priestess_delrissaAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_priestess_delrissa(Creature* pCreature)
-{
-    return new boss_priestess_delrissaAI(pCreature);
-}
-
 /*######
-## priestess_companion_common
+## priestess_companion_common : common AI part
 ######*/
 
 struct priestess_companion_commonAI : public ScriptedAI
@@ -296,7 +360,6 @@ struct priestess_companion_commonAI : public ScriptedAI
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
     }
 
     ScriptedInstance* m_pInstance;
@@ -394,101 +457,124 @@ enum
 ## npc_kagani_nightstrike - Rogue
 ######*/
 
-struct npc_kagani_nightstrikeAI : public priestess_companion_commonAI
+struct npc_kagani_nightstrike : public CreatureScript
 {
-    npc_kagani_nightstrikeAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
+    npc_kagani_nightstrike() : CreatureScript("npc_kagani_nightstrike") {}
 
-    uint32 m_uiGougeTimer;
-    uint32 m_uiKickTimer;
-    uint32 m_uiVanishTimer;
-    uint32 m_uiEviscerateTimer;
-    uint32 m_uiVanishEndTimer;
-
-    void Reset() override
+    struct npc_kagani_nightstrikeAI : public priestess_companion_commonAI
     {
-        m_uiGougeTimer      = 5500;
-        m_uiKickTimer       = 7000;
-        m_uiVanishTimer     = 2000;
-        m_uiEviscerateTimer = 6000;
-        m_uiVanishEndTimer  = 0;
+        npc_kagani_nightstrikeAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { }
 
-        priestess_companion_commonAI::Reset();
-    }
+        uint32 m_uiGougeTimer;
+        uint32 m_uiKickTimer;
+        uint32 m_uiVanishTimer;
+        uint32 m_uiEviscerateTimer;
+        uint32 m_uiVanishEndTimer;
 
-    void EnterEvadeMode() override
-    {
-        if (m_uiVanishEndTimer)
-        { return; }
-
-        ScriptedAI::EnterEvadeMode();
-    }
-
-    bool UpdateCompanionAI(const uint32 uiDiff)
-    {
-        if (m_uiVanishEndTimer)
+        void Reset() override
         {
-            if (m_uiVanishEndTimer <= uiDiff)
-            {
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_BACKSTAB, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_KIDNEY_SHOT, CAST_TRIGGERED);
-                m_uiVanishEndTimer = 0;
-            }
-            else
-            { m_uiVanishEndTimer -= uiDiff; }
+            m_uiGougeTimer = 5500;
+            m_uiKickTimer = 7000;
+            m_uiVanishTimer = 2000;
+            m_uiEviscerateTimer = 6000;
+            m_uiVanishEndTimer = 0;
 
-            return false;
+            priestess_companion_commonAI::Reset();
         }
 
-        if (m_uiVanishTimer < uiDiff)
+        void EnterEvadeMode() override
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_VANISH) == CAST_OK)
+            if (m_uiVanishEndTimer)
             {
-                // Prefer targets with mana
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_POWER_MANA))
+                return;
+            }
+
+            ScriptedAI::EnterEvadeMode();
+        }
+
+        bool UpdateCompanionAI(const uint32 uiDiff)
+        {
+            if (m_uiVanishEndTimer)
+            {
+                if (m_uiVanishEndTimer <= uiDiff)
                 {
-                    DoResetThreat();
-                    AttackStart(pTarget);
+                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_BACKSTAB, CAST_TRIGGERED);
+                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_KIDNEY_SHOT, CAST_TRIGGERED);
+                    m_uiVanishEndTimer = 0;
+                }
+                else
+                {
+                    m_uiVanishEndTimer -= uiDiff;
                 }
 
-                m_uiVanishTimer    = 30000;
-                m_uiVanishEndTimer = 10000;
+                return false;
             }
-        }
-        else
-        { m_uiVanishTimer -= uiDiff; }
 
-        if (m_uiGougeTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_GOUGE) == CAST_OK)
-            { m_uiGougeTimer = 5500; }
-        }
-        else
-        { m_uiGougeTimer -= uiDiff; }
+            if (m_uiVanishTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_VANISH) == CAST_OK)
+                {
+                    // Prefer targets with mana
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_POWER_MANA))
+                    {
+                        DoResetThreat();
+                        AttackStart(pTarget);
+                    }
 
-        if (m_uiKickTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KICK) == CAST_OK)
-            { m_uiKickTimer = 7000; }
-        }
-        else
-        { m_uiKickTimer -= uiDiff; }
+                    m_uiVanishTimer = 30000;
+                    m_uiVanishEndTimer = 10000;
+                }
+            }
+            else
+            {
+                m_uiVanishTimer -= uiDiff;
+            }
 
-        if (m_uiEviscerateTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_EVISCERATE : SPELL_EVISCERATE_H) == CAST_OK)
-            { m_uiEviscerateTimer = 4000; }
-        }
-        else
-        { m_uiEviscerateTimer -= uiDiff; }
+            if (m_uiGougeTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_GOUGE) == CAST_OK)
+                {
+                    m_uiGougeTimer = 5500;
+                }
+            }
+            else
+            {
+                m_uiGougeTimer -= uiDiff;
+            }
 
-        return true;
+            if (m_uiKickTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KICK) == CAST_OK)
+                {
+                    m_uiKickTimer = 7000;
+                }
+            }
+            else
+            {
+                m_uiKickTimer -= uiDiff;
+            }
+
+            if (m_uiEviscerateTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_EVISCERATE : SPELL_EVISCERATE_H) == CAST_OK)
+                {
+                    m_uiEviscerateTimer = 4000;
+                }
+            }
+            else
+            {
+                m_uiEviscerateTimer -= uiDiff;
+            }
+
+            return true;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_kagani_nightstrikeAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_kagani_nightstrike(Creature* pCreature)
-{
-    return new npc_kagani_nightstrikeAI(pCreature);
-}
 
 enum
 {
@@ -510,120 +596,151 @@ enum
 ## npc_ellris_duskhallow - Warlock
 ######*/
 
-struct npc_ellris_duskhallowAI : public priestess_companion_commonAI
+struct npc_ellris_duskhallow : public CreatureScript
 {
-    npc_ellris_duskhallowAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
+    npc_ellris_duskhallow() : CreatureScript("npc_ellris_duskhallow") {}
 
-    uint32 m_uiImmolateTimer;
-    uint32 m_uiShadowBoltTimer;
-    uint32 m_uiSeedCorruptionTimer;
-    uint32 m_uiCurseAgonyTimer;
-    uint32 m_uiFearTimer;
-    uint32 m_uiDeathCoilTimer;
-
-    void Reset() override
+    struct npc_ellris_duskhallowAI : public priestess_companion_commonAI
     {
-        m_uiImmolateTimer       = 6000;
-        m_uiShadowBoltTimer     = 3000;
-        m_uiSeedCorruptionTimer = 2000;
-        m_uiCurseAgonyTimer     = 1000;
-        m_uiFearTimer           = 10000;
-        m_uiDeathCoilTimer      = 8000;
+        npc_ellris_duskhallowAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
 
-        priestess_companion_commonAI::Reset();
+        uint32 m_uiImmolateTimer;
+        uint32 m_uiShadowBoltTimer;
+        uint32 m_uiSeedCorruptionTimer;
+        uint32 m_uiCurseAgonyTimer;
+        uint32 m_uiFearTimer;
+        uint32 m_uiDeathCoilTimer;
 
-        // Check if we already have an imp summoned
-        if (!GetClosestCreatureWithEntry(m_creature, NPC_FIZZLE, 50.0f))
-        { DoCastSpellIfCan(m_creature, SPELL_SUMMON_IMP); }
-    }
+        void Reset() override
+        {
+            m_uiImmolateTimer = 6000;
+            m_uiShadowBoltTimer = 3000;
+            m_uiSeedCorruptionTimer = 2000;
+            m_uiCurseAgonyTimer = 1000;
+            m_uiFearTimer = 10000;
+            m_uiDeathCoilTimer = 8000;
 
-    void AttackStart(Unit* pWho) override
+            priestess_companion_commonAI::Reset();
+
+            // Check if we already have an imp summoned
+            if (!GetClosestCreatureWithEntry(m_creature, NPC_FIZZLE, 50.0f))
+            {
+                DoCastSpellIfCan(m_creature, SPELL_SUMMON_IMP);
+            }
+        }
+
+        void AttackStart(Unit* pWho) override
+        {
+            if (m_creature->Attack(pWho, true))
+            {
+                m_creature->AddThreat(pWho);
+                m_creature->SetInCombatWith(pWho);
+                pWho->SetInCombatWith(m_creature);
+                DoStartMovement(pWho, 20.0f);
+            }
+        }
+
+        bool UpdateCompanionAI(const uint32 uiDiff)
+        {
+            if (m_uiImmolateTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_IMMOLATE : SPELL_IMMOLATE_H) == CAST_OK)
+                    {
+                        m_uiImmolateTimer = 6000;
+                    }
+                }
+            }
+            else
+            {
+                m_uiImmolateTimer -= uiDiff;
+            }
+
+            if (m_uiShadowBoltTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H) == CAST_OK)
+                    {
+                        m_uiShadowBoltTimer = 5000;
+                    }
+                }
+            }
+            else
+            {
+                m_uiShadowBoltTimer -= uiDiff;
+            }
+
+            if (m_uiSeedCorruptionTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_SEED_OF_CORRUPTION) == CAST_OK)
+                    {
+                        m_uiSeedCorruptionTimer = 10000;
+                    }
+                }
+            }
+            else
+            {
+                m_uiSeedCorruptionTimer -= uiDiff;
+            }
+
+            if (m_uiCurseAgonyTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CURSE_OF_AGONY : SPELL_CURSE_OF_AGONY_H) == CAST_OK)
+                    {
+                        m_uiCurseAgonyTimer = 13000;
+                    }
+                }
+            }
+            else
+            {
+                m_uiCurseAgonyTimer -= uiDiff;
+            }
+
+            if (m_uiFearTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_FEAR) == CAST_OK)
+                    {
+                        m_uiFearTimer = 10000;
+                    }
+                }
+            }
+            else
+            {
+                m_uiFearTimer -= uiDiff;
+            }
+
+            if (m_uiDeathCoilTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_DEATH_COIL) == CAST_OK)
+                    {
+                        m_uiDeathCoilTimer = urand(8000, 13000);
+                    }
+                }
+            }
+            else
+            {
+                m_uiDeathCoilTimer -= uiDiff;
+            }
+
+            return true;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, 20.0f);
-        }
-    }
-
-    bool UpdateCompanionAI(const uint32 uiDiff)
-    {
-        if (m_uiImmolateTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ?  SPELL_IMMOLATE : SPELL_IMMOLATE_H) == CAST_OK)
-                { m_uiImmolateTimer = 6000; }
-            }
-        }
-        else
-        { m_uiImmolateTimer -= uiDiff; }
-
-        if (m_uiShadowBoltTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H) == CAST_OK)
-                { m_uiShadowBoltTimer = 5000; }
-            }
-        }
-        else
-        { m_uiShadowBoltTimer -= uiDiff; }
-
-        if (m_uiSeedCorruptionTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_SEED_OF_CORRUPTION) == CAST_OK)
-                { m_uiSeedCorruptionTimer = 10000; }
-            }
-        }
-        else
-        { m_uiSeedCorruptionTimer -= uiDiff; }
-
-        if (m_uiCurseAgonyTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CURSE_OF_AGONY : SPELL_CURSE_OF_AGONY_H) == CAST_OK)
-                { m_uiCurseAgonyTimer = 13000; }
-            }
-        }
-        else
-        { m_uiCurseAgonyTimer -= uiDiff; }
-
-        if (m_uiFearTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_FEAR) == CAST_OK)
-                { m_uiFearTimer = 10000; }
-            }
-        }
-        else
-        { m_uiFearTimer -= uiDiff; }
-
-        if (m_uiDeathCoilTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_DEATH_COIL) == CAST_OK)
-                { m_uiDeathCoilTimer = urand(8000, 13000); }
-            }
-        }
-        else
-        { m_uiDeathCoilTimer -= uiDiff; }
-
-        return true;
+        return new npc_ellris_duskhallowAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_ellris_duskhallow(Creature* pCreature)
-{
-    return new npc_ellris_duskhallowAI(pCreature);
-}
 
 enum
 {
@@ -636,47 +753,60 @@ enum
 ## npc_eramas_brightblaze - Monk
 ######*/
 
-struct npc_eramas_brightblazeAI : public priestess_companion_commonAI
+struct npc_eramas_brightblaze : public CreatureScript
 {
-    npc_eramas_brightblazeAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
+    npc_eramas_brightblaze() : CreatureScript("npc_eramas_brightblaze") {}
 
-    uint32 m_uiKnockdownTimer;
-    uint32 m_uiSnapKickTimer;
-
-    void Reset() override
+    struct npc_eramas_brightblazeAI : public priestess_companion_commonAI
     {
-        m_uiKnockdownTimer = 6000;
-        m_uiSnapKickTimer  = 4500;
+        npc_eramas_brightblazeAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { }
 
-        priestess_companion_commonAI::Reset();
-    }
+        uint32 m_uiKnockdownTimer;
+        uint32 m_uiSnapKickTimer;
 
-    bool UpdateCompanionAI(const uint32 uiDiff)
+        void Reset() override
+        {
+            m_uiKnockdownTimer = 6000;
+            m_uiSnapKickTimer = 4500;
+
+            priestess_companion_commonAI::Reset();
+        }
+
+        bool UpdateCompanionAI(const uint32 uiDiff)
+        {
+            if (m_uiKnockdownTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_KNOCKDOWN : SPELL_KNOCKDOWN_H) == CAST_OK)
+                {
+                    m_uiKnockdownTimer = 6000;
+                }
+            }
+            else
+            {
+                m_uiKnockdownTimer -= uiDiff;
+            }
+
+            if (m_uiSnapKickTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SNAP_KICK) == CAST_OK)
+                {
+                    m_uiSnapKickTimer = 4500;
+                }
+            }
+            else
+            {
+                m_uiSnapKickTimer -= uiDiff;
+            }
+
+            return true;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        if (m_uiKnockdownTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_KNOCKDOWN : SPELL_KNOCKDOWN_H) == CAST_OK)
-            { m_uiKnockdownTimer = 6000; }
-        }
-        else
-        { m_uiKnockdownTimer -= uiDiff; }
-
-        if (m_uiSnapKickTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SNAP_KICK) == CAST_OK)
-            { m_uiSnapKickTimer  = 4500; }
-        }
-        else
-        { m_uiSnapKickTimer -= uiDiff; }
-
-        return true;
+        return new npc_eramas_brightblazeAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_eramas_brightblaze(Creature* pCreature)
-{
-    return new npc_eramas_brightblazeAI(pCreature);
-}
 
 enum
 {
@@ -697,130 +827,163 @@ enum
 ## npc_yazzai - Mage
 ######*/
 
-struct npc_yazzaiAI : public priestess_companion_commonAI
+struct npc_yazzai : public CreatureScript
 {
-    npc_yazzaiAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
+    npc_yazzai() : CreatureScript("npc_yazzai") {}
 
-    bool m_bHasIceBlocked;
-
-    uint32 m_uiPolymorphTimer;
-    uint32 m_uiIceBlockTimer;
-    uint32 m_uiWait_Timer;
-    uint32 m_uiBlizzardTimer;
-    uint32 m_uiIceLanceTimer;
-    uint32 m_uiConeColdTimer;
-    uint32 m_uiFrostboltTimer;
-    uint32 m_uiBlinkTimer;
-
-    void Reset() override
+    struct npc_yazzaiAI : public priestess_companion_commonAI
     {
-        m_bHasIceBlocked    = false;
+        npc_yazzaiAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { }
 
-        m_uiPolymorphTimer  = 1000;
-        m_uiIceBlockTimer   = 20000;
-        m_uiWait_Timer      = 10000;
-        m_uiBlizzardTimer   = 8000;
-        m_uiIceLanceTimer   = 12000;
-        m_uiConeColdTimer   = 10000;
-        m_uiFrostboltTimer  = 3000;
-        m_uiBlinkTimer      = 8000;
+        bool m_bHasIceBlocked;
 
-        priestess_companion_commonAI::Reset();
-    }
+        uint32 m_uiPolymorphTimer;
+        uint32 m_uiIceBlockTimer;
+        uint32 m_uiWait_Timer;
+        uint32 m_uiBlizzardTimer;
+        uint32 m_uiIceLanceTimer;
+        uint32 m_uiConeColdTimer;
+        uint32 m_uiFrostboltTimer;
+        uint32 m_uiBlinkTimer;
 
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
+        void Reset() override
         {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, 20.0f);
+            m_bHasIceBlocked = false;
+
+            m_uiPolymorphTimer = 1000;
+            m_uiIceBlockTimer = 20000;
+            m_uiWait_Timer = 10000;
+            m_uiBlizzardTimer = 8000;
+            m_uiIceLanceTimer = 12000;
+            m_uiConeColdTimer = 10000;
+            m_uiFrostboltTimer = 3000;
+            m_uiBlinkTimer = 8000;
+
+            priestess_companion_commonAI::Reset();
         }
-    }
 
-    bool UpdateCompanionAI(const uint32 uiDiff)
-    {
-        if (m_uiPolymorphTimer < uiDiff)
+        void AttackStart(Unit* pWho) override
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (m_creature->Attack(pWho, true))
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_POLYMORPH) == CAST_OK)
-                { m_uiPolymorphTimer = 20000; }
+                m_creature->AddThreat(pWho);
+                m_creature->SetInCombatWith(pWho);
+                pWho->SetInCombatWith(m_creature);
+                DoStartMovement(pWho, 20.0f);
             }
         }
-        else
-        { m_uiPolymorphTimer -= uiDiff; }
 
-        if (m_creature->GetHealthPercent() < 35.0f && !m_bHasIceBlocked)
+        bool UpdateCompanionAI(const uint32 uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_ICE_BLOCK) == CAST_OK)
-            { m_bHasIceBlocked = true; }
-        }
-
-        if (m_uiBlizzardTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (m_uiPolymorphTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_BLIZZARD : SPELL_BLIZZARD_H) == CAST_OK)
-                { m_uiBlizzardTimer = urand(8000, 15000); }
-            }
-        }
-        else
-        { m_uiBlizzardTimer -= uiDiff; }
-
-        if (m_uiIceLanceTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_ICE_LANCE : SPELL_ICE_LANCE_H) == CAST_OK)
-                { m_uiIceLanceTimer = 12000; }
-            }
-        }
-        else
-        { m_uiIceLanceTimer -= uiDiff; }
-
-        if (m_uiConeColdTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_CONE_OF_COLD : SPELL_CONE_OF_COLD_H) == CAST_OK)
-            { m_uiConeColdTimer = 10000; }
-        }
-        else
-        { m_uiConeColdTimer -= uiDiff; }
-
-        if (m_uiFrostboltTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FROSTBOLT : SPELL_FROSTBOLT_H) == CAST_OK)
-                { m_uiFrostboltTimer = 8000; }
-            }
-        }
-        else
-        { m_uiFrostboltTimer -= uiDiff; }
-
-        if (m_uiBlinkTimer < uiDiff)
-        {
-            // if anybody is in melee range than escape by blink
-            if (m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_IN_MELEE_RANGE))
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_BLINK) == CAST_OK)
-                { m_uiBlinkTimer = 8000; }
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_POLYMORPH) == CAST_OK)
+                    {
+                        m_uiPolymorphTimer = 20000;
+                    }
+                }
             }
             else
-            { m_uiBlinkTimer = 2000; }
-        }
-        else
-        { m_uiBlinkTimer -= uiDiff; }
+            {
+                m_uiPolymorphTimer -= uiDiff;
+            }
 
-        return true;
+            if (m_creature->GetHealthPercent() < 35.0f && !m_bHasIceBlocked)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_ICE_BLOCK) == CAST_OK)
+                {
+                    m_bHasIceBlocked = true;
+                }
+            }
+
+            if (m_uiBlizzardTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_BLIZZARD : SPELL_BLIZZARD_H) == CAST_OK)
+                    {
+                        m_uiBlizzardTimer = urand(8000, 15000);
+                    }
+                }
+            }
+            else
+            {
+                m_uiBlizzardTimer -= uiDiff;
+            }
+
+            if (m_uiIceLanceTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_ICE_LANCE : SPELL_ICE_LANCE_H) == CAST_OK)
+                    {
+                        m_uiIceLanceTimer = 12000;
+                    }
+                }
+            }
+            else
+            {
+                m_uiIceLanceTimer -= uiDiff;
+            }
+
+            if (m_uiConeColdTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_CONE_OF_COLD : SPELL_CONE_OF_COLD_H) == CAST_OK)
+                {
+                    m_uiConeColdTimer = 10000;
+                }
+            }
+            else
+            {
+                m_uiConeColdTimer -= uiDiff;
+            }
+
+            if (m_uiFrostboltTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FROSTBOLT : SPELL_FROSTBOLT_H) == CAST_OK)
+                    {
+                        m_uiFrostboltTimer = 8000;
+                    }
+                }
+            }
+            else
+            {
+                m_uiFrostboltTimer -= uiDiff;
+            }
+
+            if (m_uiBlinkTimer < uiDiff)
+            {
+                // if anybody is in melee range than escape by blink
+                if (m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_IN_MELEE_RANGE))
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_BLINK) == CAST_OK)
+                    {
+                        m_uiBlinkTimer = 8000;
+                    }
+                }
+                else
+                {
+                    m_uiBlinkTimer = 2000;
+                }
+            }
+            else
+            {
+                m_uiBlinkTimer -= uiDiff;
+            }
+
+            return true;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_yazzaiAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_yazzai(Creature* pCreature)
-{
-    return new npc_yazzaiAI(pCreature);
-}
 
 enum
 {
@@ -837,101 +1000,132 @@ enum
 ## npc_warlord_salaris - Warrior
 ######*/
 
-struct npc_warlord_salarisAI : public priestess_companion_commonAI
+struct npc_warlord_salaris : public CreatureScript
 {
-    npc_warlord_salarisAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
+    npc_warlord_salaris() : CreatureScript("npc_warlord_salaris") {}
 
-    uint32 m_uiInterceptStunTimer;
-    uint32 m_uiDisarmTimer;
-    uint32 m_uiPiercingHowlTimer;
-    uint32 m_uiFrighteningShoutTimer;
-    uint32 m_uiHamstringTimer;
-    uint32 m_uiMortalStrikeTimer;
-
-    void Reset() override
+    struct npc_warlord_salarisAI : public priestess_companion_commonAI
     {
-        m_uiInterceptStunTimer      = 500;
-        m_uiDisarmTimer             = 6000;
-        m_uiPiercingHowlTimer       = 10000;
-        m_uiFrighteningShoutTimer   = 18000;
-        m_uiHamstringTimer          = 4500;
-        m_uiMortalStrikeTimer       = 8000;
+        npc_warlord_salarisAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { }
 
-        priestess_companion_commonAI::Reset();
-    }
+        uint32 m_uiInterceptStunTimer;
+        uint32 m_uiDisarmTimer;
+        uint32 m_uiPiercingHowlTimer;
+        uint32 m_uiFrighteningShoutTimer;
+        uint32 m_uiHamstringTimer;
+        uint32 m_uiMortalStrikeTimer;
 
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoCastSpellIfCan(m_creature, SPELL_BATTLE_SHOUT);
-    }
-
-    bool UpdateCompanionAI(const uint32 uiDiff)
-    {
-        if (m_uiInterceptStunTimer < uiDiff)
+        void Reset() override
         {
-            // if nobody is in melee range than try to use Intercept
-            if (!m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_IN_MELEE_RANGE))
+            m_uiInterceptStunTimer = 500;
+            m_uiDisarmTimer = 6000;
+            m_uiPiercingHowlTimer = 10000;
+            m_uiFrighteningShoutTimer = 18000;
+            m_uiHamstringTimer = 4500;
+            m_uiMortalStrikeTimer = 8000;
+
+            priestess_companion_commonAI::Reset();
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoCastSpellIfCan(m_creature, SPELL_BATTLE_SHOUT);
+        }
+
+        bool UpdateCompanionAI(const uint32 uiDiff)
+        {
+            if (m_uiInterceptStunTimer < uiDiff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_INTERCEPT_STUN, SELECT_FLAG_NOT_IN_MELEE_RANGE | SELECT_FLAG_IN_LOS))
+                // if nobody is in melee range than try to use Intercept
+                if (!m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_IN_MELEE_RANGE))
                 {
-                    if (DoCastSpellIfCan(pTarget, SPELL_INTERCEPT_STUN) == CAST_OK)
-                    { m_uiInterceptStunTimer = 10000; }
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_INTERCEPT_STUN, SELECT_FLAG_NOT_IN_MELEE_RANGE | SELECT_FLAG_IN_LOS))
+                    {
+                        if (DoCastSpellIfCan(pTarget, SPELL_INTERCEPT_STUN) == CAST_OK)
+                        {
+                            m_uiInterceptStunTimer = 10000;
+                        }
+                    }
+                }
+                else
+                {
+                    m_uiInterceptStunTimer = 2000;
                 }
             }
             else
-            { m_uiInterceptStunTimer = 2000; }
-        }
-        else
-        { m_uiInterceptStunTimer -= uiDiff; }
+            {
+                m_uiInterceptStunTimer -= uiDiff;
+            }
 
-        if (m_uiDisarmTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DISARM) == CAST_OK)
-            { m_uiDisarmTimer = 6000; }
-        }
-        else
-        { m_uiDisarmTimer -= uiDiff; }
+            if (m_uiDisarmTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DISARM) == CAST_OK)
+                {
+                    m_uiDisarmTimer = 6000;
+                }
+            }
+            else
+            {
+                m_uiDisarmTimer -= uiDiff;
+            }
 
-        if (m_uiHamstringTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HAMSTRING) == CAST_OK)
-            { m_uiHamstringTimer = 4500; }
-        }
-        else
-        { m_uiHamstringTimer -= uiDiff; }
+            if (m_uiHamstringTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HAMSTRING) == CAST_OK)
+                {
+                    m_uiHamstringTimer = 4500;
+                }
+            }
+            else
+            {
+                m_uiHamstringTimer -= uiDiff;
+            }
 
-        if (m_uiMortalStrikeTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTAL_STRIKE) == CAST_OK)
-            { m_uiMortalStrikeTimer = 4500; }
-        }
-        else
-        { m_uiMortalStrikeTimer -= uiDiff; }
+            if (m_uiMortalStrikeTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTAL_STRIKE) == CAST_OK)
+                {
+                    m_uiMortalStrikeTimer = 4500;
+                }
+            }
+            else
+            {
+                m_uiMortalStrikeTimer -= uiDiff;
+            }
 
-        if (m_uiPiercingHowlTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_PIERCING_HOWL) == CAST_OK)
-            { m_uiPiercingHowlTimer = 10000; }
-        }
-        else
-        { m_uiPiercingHowlTimer -= uiDiff; }
+            if (m_uiPiercingHowlTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_PIERCING_HOWL) == CAST_OK)
+                {
+                    m_uiPiercingHowlTimer = 10000;
+                }
+            }
+            else
+            {
+                m_uiPiercingHowlTimer -= uiDiff;
+            }
 
-        if (m_uiFrighteningShoutTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FRIGHTENING_SHOUT) == CAST_OK)
-            { m_uiFrighteningShoutTimer = 18000; }
-        }
-        else
-        { m_uiFrighteningShoutTimer -= uiDiff; }
+            if (m_uiFrighteningShoutTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FRIGHTENING_SHOUT) == CAST_OK)
+                {
+                    m_uiFrighteningShoutTimer = 18000;
+                }
+            }
+            else
+            {
+                m_uiFrighteningShoutTimer -= uiDiff;
+            }
 
-        return true;
+            return true;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_warlord_salarisAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_warlord_salaris(Creature* pCreature)
-{
-    return new npc_warlord_salarisAI(pCreature);
-}
 
 enum
 {
@@ -951,119 +1145,150 @@ enum
 ## npc_garaxxas - Hunter
 ######*/
 
-struct npc_garaxxasAI : public priestess_companion_commonAI
+struct npc_garaxxas : public CreatureScript
 {
-    npc_garaxxasAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
+    npc_garaxxas() : CreatureScript("npc_garaxxas") {}
 
-    uint32 m_uiAimedShotTimer;
-    uint32 m_uiShootTimer;
-    uint32 m_uiConcussiveShotTimer;
-    uint32 m_uiMultiShotTimer;
-    uint32 m_uiWingClipTimer;
-    uint32 m_uiFreezingTrapTimer;
-
-    void Reset() override
+    struct npc_garaxxasAI : public priestess_companion_commonAI
     {
-        m_uiAimedShotTimer      = 6000;
-        m_uiShootTimer          = 2500;
-        m_uiConcussiveShotTimer = 8000;
-        m_uiMultiShotTimer      = 10000;
-        m_uiWingClipTimer       = 4000;
-        m_uiFreezingTrapTimer   = 15000;
+        npc_garaxxasAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { }
 
-        priestess_companion_commonAI::Reset();
+        uint32 m_uiAimedShotTimer;
+        uint32 m_uiShootTimer;
+        uint32 m_uiConcussiveShotTimer;
+        uint32 m_uiMultiShotTimer;
+        uint32 m_uiWingClipTimer;
+        uint32 m_uiFreezingTrapTimer;
 
-        // Check if the pet was killed
-        if (!GetClosestCreatureWithEntry(m_creature, NPC_SLIVER, 50.0f))
-        { m_creature->SummonCreature(NPC_SLIVER, 0, 0, 0, 0, TEMPSUMMON_CORPSE_DESPAWN, 0); }
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
+        void Reset() override
         {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, 20.0f);
-        }
-    }
+            m_uiAimedShotTimer = 6000;
+            m_uiShootTimer = 2500;
+            m_uiConcussiveShotTimer = 8000;
+            m_uiMultiShotTimer = 10000;
+            m_uiWingClipTimer = 4000;
+            m_uiFreezingTrapTimer = 15000;
 
-    bool UpdateCompanionAI(const uint32 uiDiff)
-    {
-        if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
-        {
-            if (m_uiWingClipTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_WING_CLIP) == CAST_OK)
-                { m_uiWingClipTimer = 4000; }
-            }
-            else
-            { m_uiWingClipTimer -= uiDiff; }
+            priestess_companion_commonAI::Reset();
 
-            if (m_uiFreezingTrapTimer < uiDiff)
+            // Check if the pet was killed
+            if (!GetClosestCreatureWithEntry(m_creature, NPC_SLIVER, 50.0f))
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_FREEZING_TRAP) == CAST_OK)
-                { m_uiFreezingTrapTimer = urand(15000, 30000); }
+                m_creature->SummonCreature(NPC_SLIVER, 0, 0, 0, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
             }
-            else
-            { m_uiFreezingTrapTimer -= uiDiff; }
-        }
-        else
-        {
-            if (m_uiConcussiveShotTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                {
-                    if (DoCastSpellIfCan(pTarget, SPELL_CONCUSSIVE_SHOT) == CAST_OK)
-                    { m_uiConcussiveShotTimer = 8000; }
-                }
-            }
-            else
-            { m_uiConcussiveShotTimer -= uiDiff; }
-
-            if (m_uiMultiShotTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                {
-                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_MULTI_SHOT : SPELL_MULTI_SHOT_H) == CAST_OK)
-                    { m_uiMultiShotTimer = 10000; }
-                }
-            }
-            else
-            { m_uiMultiShotTimer -= uiDiff; }
-
-            if (m_uiAimedShotTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                {
-                    if (DoCastSpellIfCan(pTarget, SPELL_AIMED_SHOT) == CAST_OK)
-                    { m_uiAimedShotTimer = 6000; }
-                }
-            }
-            else
-            { m_uiAimedShotTimer -= uiDiff; }
-
-            if (m_uiShootTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                {
-                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHOOT : SPELL_SHOOT_H) == CAST_OK)
-                    { m_uiShootTimer = 2500; }
-                }
-            }
-            else
-            { m_uiShootTimer -= uiDiff; }
         }
 
-        return true;
+        void AttackStart(Unit* pWho) override
+        {
+            if (m_creature->Attack(pWho, true))
+            {
+                m_creature->AddThreat(pWho);
+                m_creature->SetInCombatWith(pWho);
+                pWho->SetInCombatWith(m_creature);
+                DoStartMovement(pWho, 20.0f);
+            }
+        }
+
+        bool UpdateCompanionAI(const uint32 uiDiff)
+        {
+            if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
+            {
+                if (m_uiWingClipTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_WING_CLIP) == CAST_OK)
+                    {
+                        m_uiWingClipTimer = 4000;
+                    }
+                }
+                else
+                {
+                    m_uiWingClipTimer -= uiDiff;
+                }
+
+                if (m_uiFreezingTrapTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_FREEZING_TRAP) == CAST_OK)
+                    {
+                        m_uiFreezingTrapTimer = urand(15000, 30000);
+                    }
+                }
+                else
+                {
+                    m_uiFreezingTrapTimer -= uiDiff;
+                }
+            }
+            else
+            {
+                if (m_uiConcussiveShotTimer < uiDiff)
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        if (DoCastSpellIfCan(pTarget, SPELL_CONCUSSIVE_SHOT) == CAST_OK)
+                        {
+                            m_uiConcussiveShotTimer = 8000;
+                        }
+                    }
+                }
+                else
+                {
+                    m_uiConcussiveShotTimer -= uiDiff;
+                }
+
+                if (m_uiMultiShotTimer < uiDiff)
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_MULTI_SHOT : SPELL_MULTI_SHOT_H) == CAST_OK)
+                        {
+                            m_uiMultiShotTimer = 10000;
+                        }
+                    }
+                }
+                else
+                {
+                    m_uiMultiShotTimer -= uiDiff;
+                }
+
+                if (m_uiAimedShotTimer < uiDiff)
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        if (DoCastSpellIfCan(pTarget, SPELL_AIMED_SHOT) == CAST_OK)
+                        {
+                            m_uiAimedShotTimer = 6000;
+                        }
+                    }
+                }
+                else
+                {
+                    m_uiAimedShotTimer -= uiDiff;
+                }
+
+                if (m_uiShootTimer < uiDiff)
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHOOT : SPELL_SHOOT_H) == CAST_OK)
+                        {
+                            m_uiShootTimer = 2500;
+                        }
+                    }
+                }
+                else
+                {
+                    m_uiShootTimer -= uiDiff;
+                }
+            }
+
+            return true;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_garaxxasAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_garaxxas(Creature* pCreature)
-{
-    return new npc_garaxxasAI(pCreature);
-}
 
 enum
 {
@@ -1082,89 +1307,112 @@ enum
 ## npc_apoko - Shaman
 ######*/
 
-struct npc_apokoAI : public priestess_companion_commonAI
+struct npc_apoko : public CreatureScript
 {
-    npc_apokoAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
+    npc_apoko() : CreatureScript("npc_apoko") {}
 
-    uint32 m_uiTotemTimer;
-    uint32 m_uiWarStompTimer;
-    uint32 m_uiPurgeTimer;
-    uint32 m_uiHealingWaveTimer;
-    uint32 m_uiFrostShockTimer;
-
-    void Reset() override
+    struct npc_apokoAI : public priestess_companion_commonAI
     {
-        m_uiTotemTimer       = 0;
-        m_uiWarStompTimer    = 10000;
-        m_uiPurgeTimer       = 8000;
-        m_uiHealingWaveTimer = 5000;
-        m_uiFrostShockTimer  = 7000;
+        npc_apokoAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { }
 
-        priestess_companion_commonAI::Reset();
-    }
+        uint32 m_uiTotemTimer;
+        uint32 m_uiWarStompTimer;
+        uint32 m_uiPurgeTimer;
+        uint32 m_uiHealingWaveTimer;
+        uint32 m_uiFrostShockTimer;
 
-    bool UpdateCompanionAI(const uint32 uiDiff)
-    {
-        if (m_uiTotemTimer < uiDiff)
+        void Reset() override
         {
-            // It's not very clear how exactly these spells should be cast
-            switch (urand(0, 2))
+            m_uiTotemTimer = 0;
+            m_uiWarStompTimer = 10000;
+            m_uiPurgeTimer = 8000;
+            m_uiHealingWaveTimer = 5000;
+            m_uiFrostShockTimer = 7000;
+
+            priestess_companion_commonAI::Reset();
+        }
+
+        bool UpdateCompanionAI(const uint32 uiDiff)
+        {
+            if (m_uiTotemTimer < uiDiff)
             {
+                // It's not very clear how exactly these spells should be cast
+                switch (urand(0, 2))
+                {
                 case 0: DoCastSpellIfCan(m_creature, SPELL_WINDFURY_TOTEM);  break;
                 case 1: DoCastSpellIfCan(m_creature, SPELL_FIRE_NOVA_TOTEM); break;
                 case 2: DoCastSpellIfCan(m_creature, SPELL_EARTHBIND_TOTEM); break;
+                }
+                m_uiTotemTimer = urand(2000, 6000);
             }
-            m_uiTotemTimer = urand(2000, 6000);
-        }
-        else
-        { m_uiTotemTimer -= uiDiff; }
-
-        if (m_uiWarStompTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_WAR_STOMP) == CAST_OK)
-            { m_uiWarStompTimer = 10000; }
-        }
-        else
-        { m_uiWarStompTimer -= uiDiff; }
-
-        if (m_uiPurgeTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            else
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_PURGE) == CAST_OK)
-                { m_uiPurgeTimer = 15000; }
+                m_uiTotemTimer -= uiDiff;
             }
-        }
-        else
-        { m_uiPurgeTimer -= uiDiff; }
 
-        if (m_uiFrostShockTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FROST_SHOCK : SPELL_FROST_SHOCK_H) == CAST_OK)
-            { m_uiFrostShockTimer = 7000; }
-        }
-        else
-        { m_uiFrostShockTimer -= uiDiff; }
-
-        if (m_uiHealingWaveTimer < uiDiff)
-        {
-            if (Unit* pTarget = DoSelectLowestHpFriendly(50.0f))
+            if (m_uiWarStompTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_LESSER_HEALING_WAVE : SPELL_LESSER_HEALING_WAVE_H) == CAST_OK)
-                { m_uiHealingWaveTimer = 5000; }
+                if (DoCastSpellIfCan(m_creature, SPELL_WAR_STOMP) == CAST_OK)
+                {
+                    m_uiWarStompTimer = 10000;
+                }
             }
-        }
-        else
-        { m_uiHealingWaveTimer -= uiDiff; }
+            else
+            {
+                m_uiWarStompTimer -= uiDiff;
+            }
 
-        return true;
+            if (m_uiPurgeTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_PURGE) == CAST_OK)
+                    {
+                        m_uiPurgeTimer = 15000;
+                    }
+                }
+            }
+            else
+            {
+                m_uiPurgeTimer -= uiDiff;
+            }
+
+            if (m_uiFrostShockTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FROST_SHOCK : SPELL_FROST_SHOCK_H) == CAST_OK)
+                {
+                    m_uiFrostShockTimer = 7000;
+                }
+            }
+            else
+            {
+                m_uiFrostShockTimer -= uiDiff;
+            }
+
+            if (m_uiHealingWaveTimer < uiDiff)
+            {
+                if (Unit* pTarget = DoSelectLowestHpFriendly(50.0f))
+                {
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_LESSER_HEALING_WAVE : SPELL_LESSER_HEALING_WAVE_H) == CAST_OK)
+                    {
+                        m_uiHealingWaveTimer = 5000;
+                    }
+                }
+            }
+            else
+            {
+                m_uiHealingWaveTimer -= uiDiff;
+            }
+
+            return true;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_apokoAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_apoko(Creature* pCreature)
-{
-    return new npc_apokoAI(pCreature);
-}
 
 enum
 {
@@ -1182,148 +1430,197 @@ enum
 ## npc_zelfan - Engineer
 ######*/
 
-struct npc_zelfanAI : public priestess_companion_commonAI
+struct npc_zelfan : public CreatureScript
 {
-    npc_zelfanAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { Reset(); }
+    npc_zelfan() : CreatureScript("npc_zelfan") {}
 
-    uint32 m_uiGoblinDragonGunTimer;
-    uint32 m_uiRocketLaunchTimer;
-    uint32 m_uiRecombobulateTimer;
-    uint32 m_uiHighExplosiveSheepTimer;
-    uint32 m_uiFelIronBombTimer;
-
-    void Reset() override
+    struct npc_zelfanAI : public priestess_companion_commonAI
     {
-        m_uiGoblinDragonGunTimer    = 20000;
-        m_uiRocketLaunchTimer       = 7000;
-        m_uiRecombobulateTimer      = 4000;
-        m_uiHighExplosiveSheepTimer = 10000;
-        m_uiFelIronBombTimer        = 15000;
+        npc_zelfanAI(Creature* pCreature) : priestess_companion_commonAI(pCreature) { }
 
-        priestess_companion_commonAI::Reset();
-    }
+        uint32 m_uiGoblinDragonGunTimer;
+        uint32 m_uiRocketLaunchTimer;
+        uint32 m_uiRecombobulateTimer;
+        uint32 m_uiHighExplosiveSheepTimer;
+        uint32 m_uiFelIronBombTimer;
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (m_creature->getVictim())
-        { pSummoned->AI()->AttackStart(m_creature->getVictim()); }
-    }
-
-    bool UpdateCompanionAI(const uint32 uiDiff)
-    {
-        if (m_uiGoblinDragonGunTimer < uiDiff)
+        void Reset() override
         {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_GOBLIN_DRAGON_GUN : SPELL_GOBLIN_DRAGON_GUN_H) == CAST_OK)
-            { m_uiGoblinDragonGunTimer = urand(10000, 20000); }
+            m_uiGoblinDragonGunTimer = 20000;
+            m_uiRocketLaunchTimer = 7000;
+            m_uiRecombobulateTimer = 4000;
+            m_uiHighExplosiveSheepTimer = 10000;
+            m_uiFelIronBombTimer = 15000;
+
+            priestess_companion_commonAI::Reset();
         }
-        else
-        { m_uiGoblinDragonGunTimer -= uiDiff; }
 
-        if (m_uiRocketLaunchTimer < uiDiff)
+        void JustSummoned(Creature* pSummoned) override
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (m_creature->getVictim())
             {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_ROCKET_LAUNCH : SPELL_ROCKET_LAUNCH_H) == CAST_OK)
-                { m_uiRocketLaunchTimer = 9000; }
+                pSummoned->AI()->AttackStart(m_creature->getVictim());
             }
         }
-        else
-        { m_uiRocketLaunchTimer -= uiDiff; }
 
-        if (m_uiFelIronBombTimer < uiDiff)
+        bool UpdateCompanionAI(const uint32 uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (m_uiGoblinDragonGunTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FEL_IRON_BOMB : SPELL_FEL_IRON_BOMB_H) == CAST_OK)
-                { m_uiFelIronBombTimer = 15000; }
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_GOBLIN_DRAGON_GUN : SPELL_GOBLIN_DRAGON_GUN_H) == CAST_OK)
+                {
+                    m_uiGoblinDragonGunTimer = urand(10000, 20000);
+                }
             }
-        }
-        else
-        { m_uiFelIronBombTimer -= uiDiff; }
-
-        if (m_uiRecombobulateTimer < uiDiff)
-        {
-            // Note: this should be casted only on Polyformed targets
-            Unit* pTarget = NULL;
-            std::list<Creature*> lTempList = DoFindFriendlyCC(50.0f);
-
-            if (!lTempList.empty())
-            { pTarget = *(lTempList.begin()); }
             else
-            { pTarget = DoSelectLowestHpFriendly(50.0f); }
-
-            if (pTarget)
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_RECOMBOBULATE) == CAST_OK)
-                { m_uiRecombobulateTimer = 2000; }
+                m_uiGoblinDragonGunTimer -= uiDiff;
             }
-        }
-        else
-        { m_uiRecombobulateTimer -= uiDiff; }
 
-        if (m_uiHighExplosiveSheepTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_HIGH_EXPLOSIVE_SHEEP) == CAST_OK)
-            { m_uiHighExplosiveSheepTimer = 65000; }
-        }
-        else
-        { m_uiHighExplosiveSheepTimer -= uiDiff; }
+            if (m_uiRocketLaunchTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_ROCKET_LAUNCH : SPELL_ROCKET_LAUNCH_H) == CAST_OK)
+                    {
+                        m_uiRocketLaunchTimer = 9000;
+                    }
+                }
+            }
+            else
+            {
+                m_uiRocketLaunchTimer -= uiDiff;
+            }
 
-        return true;
+            if (m_uiFelIronBombTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FEL_IRON_BOMB : SPELL_FEL_IRON_BOMB_H) == CAST_OK)
+                    {
+                        m_uiFelIronBombTimer = 15000;
+                    }
+                }
+            }
+            else
+            {
+                m_uiFelIronBombTimer -= uiDiff;
+            }
+
+            if (m_uiRecombobulateTimer < uiDiff)
+            {
+                // Note: this should be casted only on Polyformed targets
+                Unit* pTarget = NULL;
+                std::list<Creature*> lTempList = DoFindFriendlyCC(50.0f);
+
+                if (!lTempList.empty())
+                {
+                    pTarget = *(lTempList.begin());
+                }
+                else
+                {
+                    pTarget = DoSelectLowestHpFriendly(50.0f);
+                }
+
+                if (pTarget)
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_RECOMBOBULATE) == CAST_OK)
+                    {
+                        m_uiRecombobulateTimer = 2000;
+                    }
+                }
+            }
+            else
+            {
+                m_uiRecombobulateTimer -= uiDiff;
+            }
+
+            if (m_uiHighExplosiveSheepTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_HIGH_EXPLOSIVE_SHEEP) == CAST_OK)
+                {
+                    m_uiHighExplosiveSheepTimer = 65000;
+                }
+            }
+            else
+            {
+                m_uiHighExplosiveSheepTimer -= uiDiff;
+            }
+
+            return true;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_zelfanAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_npc_zelfan(Creature* pCreature)
-{
-    return new npc_zelfanAI(pCreature);
-}
-
 void AddSC_boss_priestess_delrissa()
 {
-    Script* pNewScript;
+    Script* s;
+    s = new boss_priestess_delrissa();
+    s->RegisterSelf();
+    s = new npc_kagani_nightstrike();
+    s->RegisterSelf();
+    s = new npc_ellris_duskhallow();
+    s->RegisterSelf();
+    s = new npc_eramas_brightblaze();
+    s->RegisterSelf();
+    s = new npc_yazzai();
+    s->RegisterSelf();
+    s = new npc_warlord_salaris();
+    s->RegisterSelf();
+    s = new npc_garaxxas();
+    s->RegisterSelf();
+    s = new npc_apoko();
+    s->RegisterSelf();
+    s = new npc_zelfan();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_priestess_delrissa";
-    pNewScript->GetAI = &GetAI_boss_priestess_delrissa;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_priestess_delrissa";
+    //pNewScript->GetAI = &GetAI_boss_priestess_delrissa;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_kagani_nightstrike";
-    pNewScript->GetAI = &GetAI_npc_kagani_nightstrike;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_kagani_nightstrike";
+    //pNewScript->GetAI = &GetAI_npc_kagani_nightstrike;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_ellris_duskhallow";
-    pNewScript->GetAI = &GetAI_npc_ellris_duskhallow;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_ellris_duskhallow";
+    //pNewScript->GetAI = &GetAI_npc_ellris_duskhallow;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_eramas_brightblaze";
-    pNewScript->GetAI = &GetAI_npc_eramas_brightblaze;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_eramas_brightblaze";
+    //pNewScript->GetAI = &GetAI_npc_eramas_brightblaze;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_yazzai";
-    pNewScript->GetAI = &GetAI_npc_yazzai;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_yazzai";
+    //pNewScript->GetAI = &GetAI_npc_yazzai;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_warlord_salaris";
-    pNewScript->GetAI = &GetAI_npc_warlord_salaris;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_warlord_salaris";
+    //pNewScript->GetAI = &GetAI_npc_warlord_salaris;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_garaxxas";
-    pNewScript->GetAI = &GetAI_npc_garaxxas;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_garaxxas";
+    //pNewScript->GetAI = &GetAI_npc_garaxxas;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_apoko";
-    pNewScript->GetAI = &GetAI_npc_apoko;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_apoko";
+    //pNewScript->GetAI = &GetAI_npc_apoko;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_zelfan";
-    pNewScript->GetAI = &GetAI_npc_zelfan;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_zelfan";
+    //pNewScript->GetAI = &GetAI_npc_zelfan;
+    //pNewScript->RegisterSelf();
 }

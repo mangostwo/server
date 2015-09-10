@@ -85,308 +85,344 @@ static const CaptainData aVarosCaptainData[4] =
 ## boss_varos
 ######*/
 
-struct  boss_varosAI : public ScriptedAI
+struct boss_varos : public CreatureScript
 {
-    boss_varosAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_varos() : CreatureScript("boss_varos") {}
+
+    struct boss_varosAI : public ScriptedAI
     {
-        m_pInstance = (instance_oculus*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    instance_oculus* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiShieldTimer;
-    uint32 m_uiAmplifyMagicTimer;
-    uint32 m_uiEnergizeCoresTimer;
-    uint32 m_uiCallCaptainTimer;
-
-    void Reset() override
-    {
-        m_uiShieldTimer         = 2000;
-        m_uiAmplifyMagicTimer   = urand(8000, 15000);
-        m_uiEnergizeCoresTimer  = urand(5000, 7000);
-        m_uiCallCaptainTimer    = urand(10000, 15000);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_VAROS, IN_PROGRESS);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_KILL_1 : SAY_KILL_2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_DEATH_SPELL, CAST_TRIGGERED);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_VAROS, DONE);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_VAROS, FAIL);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiShieldTimer)
+        boss_varosAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (m_uiShieldTimer <= uiDiff)
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        }
+
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        uint32 m_uiShieldTimer;
+        uint32 m_uiAmplifyMagicTimer;
+        uint32 m_uiEnergizeCoresTimer;
+        uint32 m_uiCallCaptainTimer;
+
+        void Reset() override
+        {
+            m_uiShieldTimer = 2000;
+            m_uiAmplifyMagicTimer = urand(8000, 15000);
+            m_uiEnergizeCoresTimer = urand(5000, 7000);
+            m_uiCallCaptainTimer = urand(10000, 15000);
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_VAROS, IN_PROGRESS);
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            DoScriptText(urand(0, 1) ? SAY_KILL_1 : SAY_KILL_2, m_creature);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(SAY_DEATH, m_creature);
+            DoCastSpellIfCan(m_creature, SPELL_DEATH_SPELL, CAST_TRIGGERED);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_VAROS, DONE);
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_VAROS, FAIL);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiShieldTimer)
             {
-                if (!m_pInstance)
-                    return;
-
-                // Check for shield first
-                if (m_pInstance->IsShieldBroken())
+                if (m_uiShieldTimer <= uiDiff)
                 {
-                    m_uiShieldTimer = 0;
-                    return;
+                    if (!m_pInstance)
+                        return;
+
+                    // Check for shield first
+                    if (bool(m_pInstance->GetData(TYPE_DATA_SHIELD_BROKEN)))
+                    {
+                        m_uiShieldTimer = 0;
+                        return;
+                    }
+
+                    if (DoCastSpellIfCan(m_creature, SPELL_CENTRIFUGE_SHIELD) == CAST_OK)
+                    {
+                        m_creature->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
+                        m_uiShieldTimer = 0;
+                    }
                 }
+                else
+                    m_uiShieldTimer -= uiDiff;
+            }
 
-                if (DoCastSpellIfCan(m_creature, SPELL_CENTRIFUGE_SHIELD) == CAST_OK)
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            if (m_uiAmplifyMagicTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
-                    m_creature->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
-                    m_uiShieldTimer = 0;
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_AMPLIFY_MAGIC : SPELL_AMPLIFY_MAGIC_H) == CAST_OK)
+                        m_uiAmplifyMagicTimer = urand(15000, 20000);
                 }
             }
             else
-                m_uiShieldTimer -= uiDiff;
-        }
+                m_uiAmplifyMagicTimer -= uiDiff;
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiAmplifyMagicTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (m_uiEnergizeCoresTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_AMPLIFY_MAGIC : SPELL_AMPLIFY_MAGIC_H) == CAST_OK)
-                    m_uiAmplifyMagicTimer = urand(15000, 20000);
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ENERGIZE_CORES : SPELL_ENERGIZE_CORES_H) == CAST_OK)
+                    m_uiEnergizeCoresTimer = urand(5000, 7000);
             }
-        }
-        else
-            m_uiAmplifyMagicTimer -= uiDiff;
+            else
+                m_uiEnergizeCoresTimer -= uiDiff;
 
-        if (m_uiEnergizeCoresTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ENERGIZE_CORES : SPELL_ENERGIZE_CORES_H) == CAST_OK)
-                m_uiEnergizeCoresTimer = urand(5000, 7000);
-        }
-        else
-            m_uiEnergizeCoresTimer -= uiDiff;
-
-        if (m_uiCallCaptainTimer < uiDiff)
-        {
-            // choose a random captain spell
-            uint32 uiSpellId = 0;
-            switch (urand(0, 3))
+            if (m_uiCallCaptainTimer < uiDiff)
             {
+                // choose a random captain spell
+                uint32 uiSpellId = 0;
+                switch (urand(0, 3))
+                {
                 case 0: uiSpellId = SPELL_CALL_CAPTAIN_1; break;
                 case 1: uiSpellId = SPELL_CALL_CAPTAIN_2; break;
                 case 2: uiSpellId = SPELL_CALL_CAPTAIN_3; break;
                 case 3: uiSpellId = SPELL_CALL_CAPTAIN_4; break;
-            }
+                }
 
-            if (DoCastSpellIfCan(m_creature, uiSpellId) == CAST_OK)
-            {
-                switch (urand(0, 2))
+                if (DoCastSpellIfCan(m_creature, uiSpellId) == CAST_OK)
                 {
+                    switch (urand(0, 2))
+                    {
                     case 0: DoScriptText(SAY_CALL_CAPTAIN_1, m_creature); break;
                     case 1: DoScriptText(SAY_CALL_CAPTAIN_2, m_creature); break;
                     case 2: DoScriptText(SAY_CALL_CAPTAIN_3, m_creature); break;
+                    }
+
+                    DoScriptText(EMOTE_CAPTAIN, m_creature);
+                    m_uiCallCaptainTimer = urand(13000, 23000);
                 }
-
-                DoScriptText(EMOTE_CAPTAIN, m_creature);
-                m_uiCallCaptainTimer = urand(13000, 23000);
             }
-        }
-        else
-            m_uiCallCaptainTimer -= uiDiff;
+            else
+                m_uiCallCaptainTimer -= uiDiff;
 
-        DoMeleeAttackIfReady();
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_varosAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_varos(Creature* pCreature)
-{
-    return new boss_varosAI(pCreature);
-}
 
 /*######
 ## event_spell_call_captain
 ######*/
 
-bool ProcessEventId_event_spell_call_captain(uint32 uiEventId, Object* pSource, Object* /*pTarget*/, bool bIsStart)
+struct event_spell_call_captain : public MapEventScript
 {
-    if (bIsStart && pSource->GetTypeId() == TYPEID_UNIT)
+    event_spell_call_captain() : MapEventScript("event_spell_call_captain") {}
+
+    bool OnReceived(uint32 uiEventId, Object* pSource, Object* /*pTarget*/, bool bIsStart) override
     {
-        Creature* pVaros = (Creature*)pSource;
-        if (!pVaros)
-            return false;
-
-        // each guardian has it's own spawn position
-        for (uint8 i = 0; i < MAX_CAPTAIN_EVENTS; ++i)
+        if (bIsStart && pSource->GetTypeId() == TYPEID_UNIT)
         {
-            if (uiEventId == aVarosCaptainData[i].uiEventId)
-            {
-                if (Creature* pGuardian = pVaros->SummonCreature(NPC_AZURE_RING_CAPTAIN, aVarosCaptainData[i].fX, aVarosCaptainData[i].fY, aVarosCaptainData[i].fZ, aVarosCaptainData[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0))
-                {
-                    pGuardian->SetWalk(false);
-                    pGuardian->GetMotionMaster()->MovePoint(1, aVarosCaptainData[i].fDestX, aVarosCaptainData[i].fDestY, aVarosCaptainData[i].fDestZ);
-                }
+            Creature* pVaros = (Creature*)pSource;
+            if (!pVaros)
+                return false;
 
-                return true;
+            // each guardian has it's own spawn position
+            for (uint8 i = 0; i < MAX_CAPTAIN_EVENTS; ++i)
+            {
+                if (uiEventId == aVarosCaptainData[i].uiEventId)
+                {
+                    if (Creature* pGuardian = pVaros->SummonCreature(NPC_AZURE_RING_CAPTAIN, aVarosCaptainData[i].fX, aVarosCaptainData[i].fY, aVarosCaptainData[i].fZ, aVarosCaptainData[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+                    {
+                        pGuardian->SetWalk(false);
+                        pGuardian->GetMotionMaster()->MovePoint(1, aVarosCaptainData[i].fDestX, aVarosCaptainData[i].fDestY, aVarosCaptainData[i].fDestZ);
+                    }
+
+                    return true;
+                }
             }
         }
-    }
 
-    return false;
-}
+        return false;
+    }
+};
 
 /*######
 ## npc_azure_ring_captain
 ######*/
 
-struct  npc_azure_ring_captainAI : public ScriptedAI
+struct npc_azure_ring_captain : public CreatureScript
 {
-    npc_azure_ring_captainAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_azure_ring_captain() : CreatureScript("npc_azure_ring_captain") {}
+
+    struct npc_azure_ring_captainAI : public ScriptedAI
     {
-        SetCombatMovement(false);
-        Reset();
-    }
-
-    ObjectGuid m_arcaneBeamGuid;
-
-    void Reset() override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_ARCANE_BEAM)
+        npc_azure_ring_captainAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_ARCANE_BEAM_PERIODIC, true);
-            pSummoned->CastSpell(pSummoned, SPELL_ARCANE_BEAM_SPAWN, true);
-            m_arcaneBeamGuid = pSummoned->GetObjectGuid();
+            SetCombatMovement(false);
         }
-    }
 
-    void JustDied(Unit* /*pKiller*/) override
+        ObjectGuid m_arcaneBeamGuid;
+
+        void Reset() override { }
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_ARCANE_BEAM)
+            {
+                pSummoned->CastSpell(pSummoned, SPELL_ARCANE_BEAM_PERIODIC, true);
+                pSummoned->CastSpell(pSummoned, SPELL_ARCANE_BEAM_SPAWN, true);
+                m_arcaneBeamGuid = pSummoned->GetObjectGuid();
+            }
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            // Despawn the arcane beam in case of getting killed
+            if (Creature* pTemp = m_creature->GetMap()->GetCreature(m_arcaneBeamGuid))
+                pTemp->ForcedDespawn();
+        }
+
+        void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
+        {
+            if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
+                return;
+
+            // Spawn arcane beam when the position is reached. Also prepare to despawn after the beam event is finished
+            if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_ARCANE_BEAM) == CAST_OK)
+                m_creature->ForcedDespawn(11000);
+        }
+
+        void UpdateAI(const uint32 /*uiDiff*/) override { }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        // Despawn the arcane beam in case of getting killed
-        if (Creature* pTemp = m_creature->GetMap()->GetCreature(m_arcaneBeamGuid))
-            pTemp->ForcedDespawn();
+        return new npc_azure_ring_captainAI(pCreature);
     }
-
-    void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
-    {
-        if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
-            return;
-
-        // Spawn arcane beam when the position is reached. Also prepare to despawn after the beam event is finished
-        if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_ARCANE_BEAM) == CAST_OK)
-            m_creature->ForcedDespawn(11000);
-    }
-
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
-
-CreatureAI* GetAI_npc_azure_ring_captain(Creature* pCreature)
-{
-    return new npc_azure_ring_captainAI(pCreature);
-}
 
 /*######
 ## npc_arcane_beam
 ######*/
 
-struct  npc_arcane_beamAI : public ScriptedAI
+struct npc_arcane_beam : public CreatureScript
 {
-    npc_arcane_beamAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_arcane_beam() : CreatureScript("npc_arcane_beam") {}
 
-    void Reset() override
+    struct npc_arcane_beamAI : public ScriptedAI
     {
-        // Start following the summoner (player)
-        if (m_creature->IsTemporarySummon())
-        {
-            TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
+        npc_arcane_beamAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
-                m_creature->GetMotionMaster()->MoveFollow(pSummoner, 0, 0);
+        void Reset() override
+        {
+            // Start following the summoner (player)
+            if (m_creature->IsTemporarySummon())
+            {
+                TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
+
+                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
+                    m_creature->GetMotionMaster()->MoveFollow(pSummoner, 0, 0);
+            }
+
+            // despawn manually because of combat bug
+            m_creature->ForcedDespawn(10000);
         }
 
-        // despawn manually because of combat bug
-        m_creature->ForcedDespawn(10000);
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        void UpdateAI(const uint32 /*uiDiff*/) override { }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_arcane_beamAI(pCreature);
     }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
-
-CreatureAI* GetAI_npc_arcane_beam(Creature* pCreature)
-{
-    return new npc_arcane_beamAI(pCreature);
-}
 
 /*######
 ## npc_centrifuge_core
 ######*/
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct  npc_centrifuge_coreAI : public Scripted_NoMovementAI
+struct npc_centrifuge_core : public CreatureScript
 {
-    npc_centrifuge_coreAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    npc_centrifuge_core() : CreatureScript("npc_centrifuge_core") {}
 
-    // Note: visual already handled in creature_template_addon
-    void Reset() override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
+    struct npc_centrifuge_coreAI : public Scripted_NoMovementAI
+    {
+        npc_centrifuge_coreAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { }
+
+        // Note: visual already handled in creature_template_addon
+        void Reset() override { }
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        void UpdateAI(const uint32 /*uiDiff*/) override { }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_centrifuge_coreAI(pCreature);
+    }
 };
-
-CreatureAI* GetAI_npc_centrifuge_core(Creature* pCreature)
-{
-    return new npc_centrifuge_coreAI(pCreature);
-}
 
 void AddSC_boss_varos()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_varos";
-    pNewScript->GetAI = &GetAI_boss_varos;
-    pNewScript->RegisterSelf();
+    s = new boss_varos();
+    s->RegisterSelf();
+    s = new npc_azure_ring_captain();
+    s->RegisterSelf();
+    s = new npc_arcane_beam();
+    s->RegisterSelf();
+    s = new npc_centrifuge_core();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "event_spell_call_captain";
-    pNewScript->pProcessEventId = &ProcessEventId_event_spell_call_captain;
-    pNewScript->RegisterSelf();
+    s = new event_spell_call_captain();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_azure_ring_captain";
-    pNewScript->GetAI = &GetAI_npc_azure_ring_captain;
-    pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_arcane_beam";
-    pNewScript->GetAI = &GetAI_npc_arcane_beam;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_varos";
+    //pNewScript->GetAI = &GetAI_boss_varos;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_centrifuge_core";
-    pNewScript->GetAI = &GetAI_npc_centrifuge_core;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "event_spell_call_captain";
+    //pNewScript->pProcessEventId = &ProcessEventId_event_spell_call_captain;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_azure_ring_captain";
+    //pNewScript->GetAI = &GetAI_npc_azure_ring_captain;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_arcane_beam";
+    //pNewScript->GetAI = &GetAI_npc_arcane_beam;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_centrifuge_core";
+    //pNewScript->GetAI = &GetAI_npc_centrifuge_core;
+    //pNewScript->RegisterSelf();
 }

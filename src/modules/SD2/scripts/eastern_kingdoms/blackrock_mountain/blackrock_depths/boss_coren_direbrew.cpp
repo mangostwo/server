@@ -65,126 +65,150 @@ enum
 
     MAX_DIREBREW_MINIONS            = 3,
 };
-
-struct boss_coren_direbrewAI : public ScriptedAI
+struct boss_coren_direbrew : public CreatureScript
 {
-    boss_coren_direbrewAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    boss_coren_direbrew() : CreatureScript("boss_coren_direbrew") {}
 
-    uint32 m_uiDisarmTimer;
-    uint32 m_uiChargeTimer;
-    uint32 m_uiSummonTimer;
-    uint8 m_uiPhase;
-
-    void Reset() override
+    struct boss_coren_direbrewAI : public ScriptedAI
     {
-        m_uiDisarmTimer     = 10000;
-        m_uiChargeTimer     = 5000;
-        m_uiSummonTimer     = 15000;
-        m_uiPhase           = 0;
-    }
+        boss_coren_direbrewAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
-    void Aggro(Unit* /*pWho*/) override
-    {
-        // Spawn 3 minions on aggro
-        for (uint8 i = 0; i < MAX_DIREBREW_MINIONS; ++i)
-        { DoCastSpellIfCan(m_creature, SPELL_SUMMON_DIREBREW_MINION, CAST_TRIGGERED); }
-    }
+        uint32 m_uiDisarmTimer;
+        uint32 m_uiChargeTimer;
+        uint32 m_uiSummonTimer;
+        uint8 m_uiPhase;
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
+        void Reset() override
         {
+            m_uiDisarmTimer = 10000;
+            m_uiChargeTimer = 5000;
+            m_uiSummonTimer = 15000;
+            m_uiPhase = 0;
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            // Spawn 3 minions on aggro
+            for (uint8 i = 0; i < MAX_DIREBREW_MINIONS; ++i)
+            {
+                DoCastSpellIfCan(m_creature, SPELL_SUMMON_DIREBREW_MINION, CAST_TRIGGERED);
+            }
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_ILSA_DIREBREW:
             case NPC_URSULA_DIREBREW:
                 pSummoned->CastSpell(m_creature, SPELL_PORT_TO_COREN, true);
                 break;
-        }
+            }
 
-        if (m_creature->getVictim())
-        { pSummoned->AI()->AttackStart(m_creature->getVictim()); }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        // Spawn Ilsa
-        if (m_creature->GetHealthPercent() < 66.0f && m_uiPhase == 0)
-        {
-            float fX, fY, fZ;
-            m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_ILSA_DIREBREW, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
-            m_uiPhase = 1;
-        }
-
-        // Spawn Ursula
-        if (m_creature->GetHealthPercent() < 33.0f && m_uiPhase == 1)
-        {
-            float fX, fY, fZ;
-            m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_URSULA_DIREBREW, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
-            m_uiPhase = 2;
-        }
-
-        if (m_uiDisarmTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_DIREBREW_DISARM) == CAST_OK)
-            { m_uiDisarmTimer = 15000; }
-        }
-        else
-        { m_uiDisarmTimer -= uiDiff; }
-
-        if (m_uiChargeTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_DIREBREW_CHARGE, SELECT_FLAG_NOT_IN_MELEE_RANGE))
+            if (m_creature->getVictim())
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_DIREBREW_CHARGE) == CAST_OK)
-                { m_uiChargeTimer = urand(5000, 10000); }
+                pSummoned->AI()->AttackStart(m_creature->getVictim());
             }
         }
-        else
-        { m_uiChargeTimer -= uiDiff; }
 
-        if (m_uiSummonTimer < uiDiff)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            for (uint8 i = 0; i < MAX_DIREBREW_MINIONS; ++i)
-            { DoCastSpellIfCan(m_creature, SPELL_SUMMON_DIREBREW_MINION, CAST_TRIGGERED); }
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
 
-            m_uiSummonTimer = 15000;
+            // Spawn Ilsa
+            if (m_creature->GetHealthPercent() < 66.0f && m_uiPhase == 0)
+            {
+                float fX, fY, fZ;
+                m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10, fX, fY, fZ);
+                m_creature->SummonCreature(NPC_ILSA_DIREBREW, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_uiPhase = 1;
+            }
+
+            // Spawn Ursula
+            if (m_creature->GetHealthPercent() < 33.0f && m_uiPhase == 1)
+            {
+                float fX, fY, fZ;
+                m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10, fX, fY, fZ);
+                m_creature->SummonCreature(NPC_URSULA_DIREBREW, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_uiPhase = 2;
+            }
+
+            if (m_uiDisarmTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_DIREBREW_DISARM) == CAST_OK)
+                {
+                    m_uiDisarmTimer = 15000;
+                }
+            }
+            else
+            {
+                m_uiDisarmTimer -= uiDiff;
+            }
+
+            if (m_uiChargeTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_DIREBREW_CHARGE, SELECT_FLAG_NOT_IN_MELEE_RANGE))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_DIREBREW_CHARGE) == CAST_OK)
+                    {
+                        m_uiChargeTimer = urand(5000, 10000);
+                    }
+                }
+            }
+            else
+            {
+                m_uiChargeTimer -= uiDiff;
+            }
+
+            if (m_uiSummonTimer < uiDiff)
+            {
+                for (uint8 i = 0; i < MAX_DIREBREW_MINIONS; ++i)
+                {
+                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_DIREBREW_MINION, CAST_TRIGGERED);
+                }
+
+                m_uiSummonTimer = 15000;
+            }
+            else
+            {
+                m_uiSummonTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
         }
-        else
-        { m_uiSummonTimer -= uiDiff; }
+    };
 
-        DoMeleeAttackIfReady();
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_coren_direbrewAI(pCreature);
+    }
+
+    bool OnQuestRewarded(Player* pPlayer, Creature* pCreature, Quest const* pQuest) override
+    {
+        if (pQuest->GetQuestId() == QUEST_INSULT_COREN)
+        {
+            DoScriptText(SAY_AGGRO, pCreature, pPlayer);
+
+            pCreature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
+            pCreature->AI()->AttackStart(pPlayer);
+        }
+
+        return true;
     }
 };
 
-CreatureAI* GetAI_boss_coren_direbrew(Creature* pCreature)
-{
-    return new boss_coren_direbrewAI(pCreature);
-}
-
-bool QuestRewarded_npc_coren_direbrew(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_INSULT_COREN)
-    {
-        DoScriptText(SAY_AGGRO, pCreature, pPlayer);
-
-        pCreature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
-        pCreature->AI()->AttackStart(pPlayer);
-    }
-
-    return true;
-}
-
 void AddSC_boss_coren_direbrew()
 {
-    Script* pNewScript;
+    Script* s;
+    s = new boss_coren_direbrew();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_coren_direbrew";
-    pNewScript->GetAI = &GetAI_boss_coren_direbrew;
-    pNewScript->pQuestRewardedNPC = &QuestRewarded_npc_coren_direbrew;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_coren_direbrew";
+    //pNewScript->GetAI = &GetAI_boss_coren_direbrew;
+    //pNewScript->pQuestRewardedNPC = &QuestRewarded_npc_coren_direbrew;
+    //pNewScript->RegisterSelf();
 }

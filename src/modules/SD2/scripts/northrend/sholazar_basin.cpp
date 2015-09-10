@@ -56,73 +56,76 @@ enum
     SPELL_DETONATE_EXPLOSIVES_2         = 52371,            // second "barrel"
 };
 
-struct  npc_heliceAI : public npc_escortAI
+struct npc_helice : public CreatureScript
 {
-    npc_heliceAI(Creature* pCreature) : npc_escortAI(pCreature)
-    {
-        m_uiExplodeTimer = 5000;
-        m_uiExplodePhase = 0;
-        m_bFirstBarrel = true;
-        Reset();
-    }
+    npc_helice() : CreatureScript("npc_helice") {}
 
-    uint32 m_uiExplodeTimer;
-    uint32 m_uiExplodePhase;
-    bool m_bFirstBarrel;
-
-    void Reset() override
+    struct npc_heliceAI : public npc_escortAI
     {
-    }
-
-    void WaypointReached(uint32 uiPointId) override
-    {
-        switch (uiPointId)
+        npc_heliceAI(Creature* pCreature) : npc_escortAI(pCreature)
         {
+            m_uiExplodeTimer = 5000;
+            m_uiExplodePhase = 0;
+            m_bFirstBarrel = true;
+        }
+
+        uint32 m_uiExplodeTimer;
+        uint32 m_uiExplodePhase;
+        bool m_bFirstBarrel;
+
+        void Reset() override
+        {
+        }
+
+        void WaypointReached(uint32 uiPointId) override
+        {
+            switch (uiPointId)
+            {
             case 2:
             {
-                if (Player* pPlayer = GetPlayerForEscort())
-                {
-                    DoScriptText(SAY_HELICE_EXPLOSIVES_1, m_creature, pPlayer);
-                    SetEscortPaused(true);
-                }
-                break;
+                      if (Player* pPlayer = GetPlayerForEscort())
+                      {
+                          DoScriptText(SAY_HELICE_EXPLOSIVES_1, m_creature, pPlayer);
+                          SetEscortPaused(true);
+                      }
+                      break;
             }
             case 13:
             {
-                if (Player* pPlayer = GetPlayerForEscort())
-                {
-                    DoScriptText(SAY_HELICE_EXPLOSIVES_2, m_creature, pPlayer);
-                    SetEscortPaused(true);
-                }
-                break;
+                       if (Player* pPlayer = GetPlayerForEscort())
+                       {
+                           DoScriptText(SAY_HELICE_EXPLOSIVES_2, m_creature, pPlayer);
+                           SetEscortPaused(true);
+                       }
+                       break;
             }
             case 22:
             {
-                if (Player* pPlayer = GetPlayerForEscort())
-                {
-                    DoScriptText(SAY_HELICE_COMPLETE, m_creature, pPlayer);
-                    pPlayer->GroupEventHappens(QUEST_ENGINEERING_DISASTER, m_creature);
-                }
-                break;
+                       if (Player* pPlayer = GetPlayerForEscort())
+                       {
+                           DoScriptText(SAY_HELICE_COMPLETE, m_creature, pPlayer);
+                           pPlayer->GroupEventHappens(QUEST_ENGINEERING_DISASTER, m_creature);
+                       }
+                       break;
+            }
             }
         }
-    }
 
-    void UpdateEscortAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        void UpdateEscortAI(const uint32 uiDiff) override
         {
-            if (!HasEscortState(STATE_ESCORT_ESCORTING))
-                return;
-
-            if (HasEscortState(STATE_ESCORT_PAUSED))
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             {
-                if (m_uiExplodeTimer < uiDiff)
+                if (!HasEscortState(STATE_ESCORT_ESCORTING))
+                    return;
+
+                if (HasEscortState(STATE_ESCORT_PAUSED))
                 {
-                    if (m_bFirstBarrel)
+                    if (m_uiExplodeTimer < uiDiff)
                     {
-                        switch (m_uiExplodePhase)
+                        if (m_bFirstBarrel)
                         {
+                            switch (m_uiExplodePhase)
+                            {
                             case 0:
                                 DoCastSpellIfCan(m_creature, SPELL_DETONATE_EXPLOSIVES_1);
 
@@ -145,12 +148,12 @@ struct  npc_heliceAI : public npc_escortAI
                                 m_uiExplodeTimer = 5000;
                                 m_bFirstBarrel = false;
                                 break;
+                            }
                         }
-                    }
-                    else
-                    {
-                        switch (m_uiExplodePhase)
+                        else
                         {
+                            switch (m_uiExplodePhase)
+                            {
                             case 0:
                                 DoCastSpellIfCan(m_creature, SPELL_DETONATE_EXPLOSIVES_2);
 
@@ -166,40 +169,41 @@ struct  npc_heliceAI : public npc_escortAI
                                 m_uiExplodeTimer = 5000;
                                 m_bFirstBarrel = true;
                                 break;
+                            }
                         }
                     }
+                    else
+                        m_uiExplodeTimer -= uiDiff;
                 }
-                else
-                    m_uiExplodeTimer -= uiDiff;
+
+                return;
             }
 
-            return;
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_heliceAI(pCreature);
+    }
+
+    bool OnQuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest) override
+    {
+        if (pQuest->GetQuestId() == QUEST_ENGINEERING_DISASTER)
+        {
+            DoScriptText(SAY_HELICE_ACCEPT, pCreature, pPlayer);
+
+            if (npc_heliceAI* pEscortAI = dynamic_cast<npc_heliceAI*>(pCreature->AI()))
+            {
+                pEscortAI->Start(false, pPlayer, pQuest);
+                pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
+            }
         }
 
-        DoMeleeAttackIfReady();
+        return false;
     }
 };
-
-CreatureAI* GetAI_npc_helice(Creature* pCreature)
-{
-    return new npc_heliceAI(pCreature);
-}
-
-bool QuestAccept_npc_helice(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_ENGINEERING_DISASTER)
-    {
-        DoScriptText(SAY_HELICE_ACCEPT, pCreature, pPlayer);
-
-        if (npc_heliceAI* pEscortAI = dynamic_cast<npc_heliceAI*>(pCreature->AI()))
-        {
-            pEscortAI->Start(false, pPlayer, pQuest);
-            pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
-        }
-    }
-
-    return false;
-}
 
 /*######
 ## npc_injured_rainspeaker
@@ -224,82 +228,87 @@ enum
     SPELL_ORACLE_INTRO                  = 51448,
 };
 
-struct  npc_injured_rainspeakerAI : public npc_escortAI
+struct npc_injured_rainspeaker : public CreatureScript
 {
-    npc_injured_rainspeakerAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+    npc_injured_rainspeaker() : CreatureScript("npc_injured_rainspeaker") {}
 
-    void Reset() override { }
-
-    void JustStartedEscort() override
+    struct npc_injured_rainspeakerAI : public npc_escortAI
     {
-        if (Player* pPlayer = GetPlayerForEscort())
+        npc_injured_rainspeakerAI(Creature* pCreature) : npc_escortAI(pCreature) { }
+
+        void Reset() override { }
+
+        void JustStartedEscort() override
         {
-            DoScriptText(SAY_START, m_creature, pPlayer);
-            DoCastSpellIfCan(m_creature, SPELL_ORACLE_ESCORT_START);
+            if (Player* pPlayer = GetPlayerForEscort())
+            {
+                DoScriptText(SAY_START, m_creature, pPlayer);
+                DoCastSpellIfCan(m_creature, SPELL_ORACLE_ESCORT_START);
+            }
         }
-    }
 
-    void WaypointReached(uint32 uiPointId) override
-    {
-        switch (uiPointId)
+        void WaypointReached(uint32 uiPointId) override
         {
+            switch (uiPointId)
+            {
             case 22:
             {
-                if (Player* pPlayer = GetPlayerForEscort())
-                {
-                    DoScriptText(SAY_END_1, m_creature, pPlayer);
-                    DoCastSpellIfCan(m_creature, SPELL_ORACLE_INTRO);
-                }
-                break;
+                       if (Player* pPlayer = GetPlayerForEscort())
+                       {
+                           DoScriptText(SAY_END_1, m_creature, pPlayer);
+                           DoCastSpellIfCan(m_creature, SPELL_ORACLE_INTRO);
+                       }
+                       break;
             }
             case 23:
             {
-                DoScriptText(SAY_END_2, m_creature);
+                       DoScriptText(SAY_END_2, m_creature);
 
-                // location behind
-                float fAngle = m_creature->GetOrientation();
-                fAngle += M_PI_F;
+                       // location behind
+                       float fAngle = m_creature->GetOrientation();
+                       fAngle += M_PI_F;
 
-                float fX, fY, fZ;
-                m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0.0f, 15.0f, fAngle);
+                       float fX, fY, fZ;
+                       m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0.0f, 15.0f, fAngle);
 
-                m_creature->SummonCreature(NPC_FRENZYHEART_TRACKER, fX, fY, fZ, m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 30000);
-                break;
+                       m_creature->SummonCreature(NPC_FRENZYHEART_TRACKER, fX, fY, fZ, m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 30000);
+                       break;
+            }
             }
         }
+
+        void UpdateEscortAI(const uint32 /*uiDiff*/) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_injured_rainspeakerAI(pCreature);
     }
 
-    void UpdateEscortAI(const uint32 /*uiDiff*/) override
+    bool OnQuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        if (pQuest->GetQuestId() == QUEST_FORTUNATE_MISUNDERSTAND)
+        {
+            pCreature->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
+            DoScriptText(SAY_ACCEPT, pCreature, pPlayer);
 
-        DoMeleeAttackIfReady();
+            // Workaround, GossipHello/GossipSelect doesn't work well when object already has gossip from database
+            if (npc_injured_rainspeakerAI* pEscortAI = dynamic_cast<npc_injured_rainspeakerAI*>(pCreature->AI()))
+            {
+                pEscortAI->Start(true, pPlayer, pQuest);
+                pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
+            }
+        }
+
+        return false;
     }
 };
-
-CreatureAI* GetAI_npc_injured_rainspeaker(Creature* pCreature)
-{
-    return new npc_injured_rainspeakerAI(pCreature);
-}
-
-bool QuestAccept_npc_injured_rainspeaker(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_FORTUNATE_MISUNDERSTAND)
-    {
-        pCreature->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
-        DoScriptText(SAY_ACCEPT, pCreature, pPlayer);
-
-        // Workaround, GossipHello/GossipSelect doesn't work well when object already has gossip from database
-        if (npc_injured_rainspeakerAI* pEscortAI = dynamic_cast<npc_injured_rainspeakerAI*>(pCreature->AI()))
-        {
-            pEscortAI->Start(true, pPlayer, pQuest);
-            pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
-        }
-    }
-
-    return false;
-}
 
 /*
 bool GossipHello_npc_injured_rainspeaker(Player* pPlayer, Creature* pCreature)
@@ -356,63 +365,68 @@ enum
     SAY_DIE_6                       = -1000620,
 };
 
-bool GossipHello_npc_mosswalker_victim(Player* pPlayer, Creature* pCreature)
+struct npc_mosswalker_victim : public CreatureScript
 {
-    if (pPlayer->GetQuestStatus(QUEST_MOSSWALKER_SAVIOR) == QUEST_STATUS_INCOMPLETE)
-    {
-        // doesn't appear they always emote
-        if (urand(0, 3) == 0)
-            DoScriptText(EMOTE_PAIN, pCreature);
+    npc_mosswalker_victim() : CreatureScript("npc_mosswalker_victim") {}
 
-        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_PULSE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
+    {
+        if (pPlayer->GetQuestStatus(QUEST_MOSSWALKER_SAVIOR) == QUEST_STATUS_INCOMPLETE)
+        {
+            // doesn't appear they always emote
+            if (urand(0, 3) == 0)
+                DoScriptText(EMOTE_PAIN, pCreature);
+
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_PULSE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+        }
+
+        pPlayer->SEND_GOSSIP_MENU(TEXT_ID_INJURED, pCreature->GetObjectGuid());
+        return true;
     }
 
-    pPlayer->SEND_GOSSIP_MENU(TEXT_ID_INJURED, pCreature->GetObjectGuid());
-    return true;
-}
-
-bool GossipSelect_npc_mosswalker_victim(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
-{
-    if (uiAction == GOSSIP_ACTION_INFO_DEF)
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction) override
     {
-        pPlayer->CLOSE_GOSSIP_MENU();
-
-        // just to prevent double credit
-        if (pCreature->GetLootRecipient())
-            return true;
-        else
-            pCreature->SetLootRecipient(pPlayer);
-
-        if (urand(0, 2))                                    // die
+        if (uiAction == GOSSIP_ACTION_INFO_DEF)
         {
-            switch (urand(0, 5))
+            pPlayer->CLOSE_GOSSIP_MENU();
+
+            // just to prevent double credit
+            if (pCreature->GetLootRecipient())
+                return true;
+            else
+                pCreature->SetLootRecipient(pPlayer);
+
+            if (urand(0, 2))                                    // die
             {
+                switch (urand(0, 5))
+                {
                 case 0: DoScriptText(SAY_DIE_1, pCreature, pPlayer); break;
                 case 1: DoScriptText(SAY_DIE_2, pCreature, pPlayer); break;
                 case 2: DoScriptText(SAY_DIE_3, pCreature, pPlayer); break;
                 case 3: DoScriptText(SAY_DIE_4, pCreature, pPlayer); break;
                 case 4: DoScriptText(SAY_DIE_5, pCreature, pPlayer); break;
                 case 5: DoScriptText(SAY_DIE_6, pCreature, pPlayer); break;
+                }
             }
-        }
-        else                                                // survive
-        {
-            switch (urand(0, 3))
+            else                                                // survive
             {
+                switch (urand(0, 3))
+                {
                 case 0: DoScriptText(SAY_RESCUE_1, pCreature, pPlayer); break;
                 case 1: DoScriptText(SAY_RESCUE_2, pCreature, pPlayer); break;
                 case 2: DoScriptText(SAY_RESCUE_3, pCreature, pPlayer); break;
                 case 3: DoScriptText(SAY_RESCUE_4, pCreature, pPlayer); break;
+                }
+
+                pCreature->CastSpell(pPlayer, SPELL_MOSSWALKER_QUEST_CREDIT, true);
             }
 
-            pCreature->CastSpell(pPlayer, SPELL_MOSSWALKER_QUEST_CREDIT, true);
+            // more details may apply, instead of just despawn
+            pCreature->ForcedDespawn(5000);
         }
-
-        // more details may apply, instead of just despawn
-        pCreature->ForcedDespawn(5000);
+        return true;
     }
-    return true;
-}
+};
 
 /*######
 ## npc_tipsy_mcmanus
@@ -472,120 +486,124 @@ static const StillAtItData aStillAtItMachines[2] =
     {SAY_OPEN_VALVE,     GO_PRESSURE_VALVE},
 };
 
-struct  npc_tipsy_mcmanusAI : public ScriptedAI
+struct npc_tipsy_mcmanus : public CreatureScript
 {
-    npc_tipsy_mcmanusAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_tipsy_mcmanus() : CreatureScript("npc_tipsy_mcmanus") {}
 
-    uint8 m_uiTaskIndex;
-    uint32 m_uiTaskOwnerEntry;
-    uint32 m_uiTaskTimer;
-    uint32 m_uiActionTimer;
-
-    void Reset() override
+    struct npc_tipsy_mcmanusAI : public ScriptedAI
     {
-        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        npc_tipsy_mcmanusAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-        m_uiTaskIndex       = 0;
-        m_uiTaskOwnerEntry  = 0;
-        m_uiTaskTimer       = 0;
-        m_uiActionTimer     = 0;
-    }
+        uint8 m_uiTaskIndex;
+        uint32 m_uiTaskOwnerEntry;
+        uint32 m_uiTaskTimer;
+        uint32 m_uiActionTimer;
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
-    {
-        if (pInvoker->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        // start event
-        if (eventType == AI_EVENT_START_EVENT)
+        void Reset() override
         {
-            m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-            DoScriptText(SAY_DISTILLATION_START, m_creature);
-            m_uiTaskTimer = 5000;
+            m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+
+            m_uiTaskIndex = 0;
+            m_uiTaskOwnerEntry = 0;
+            m_uiTaskTimer = 0;
+            m_uiActionTimer = 0;
         }
-        // check fruit tasks
-        else if (eventType == AI_EVENT_CUSTOM_A)
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
         {
-            for (uint8 i = 0; i < 3; ++i)
+            if (pInvoker->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            // start event
+            if (eventType == AI_EVENT_START_EVENT)
             {
-                if (aStillAtItFruits[i].uiOwnerEntry == uiMiscValue)
-                    DoCheckDistillationTask(uiMiscValue);
+                m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                DoScriptText(SAY_DISTILLATION_START, m_creature);
+                m_uiTaskTimer = 5000;
+            }
+            // check fruit tasks
+            else if (eventType == AI_EVENT_CUSTOM_A)
+            {
+                for (uint8 i = 0; i < 3; ++i)
+                {
+                    if (aStillAtItFruits[i].uiOwnerEntry == uiMiscValue)
+                        DoCheckDistillationTask(uiMiscValue);
+                }
+            }
+            // check machine tasks
+            else if (eventType == AI_EVENT_CUSTOM_B)
+            {
+                for (uint8 i = 0; i < 2; ++i)
+                {
+                    if (aStillAtItMachines[i].uiOwnerEntry == uiMiscValue)
+                        DoCheckDistillationTask(uiMiscValue);
+                }
             }
         }
-        // check machine tasks
-        else if (eventType == AI_EVENT_CUSTOM_B)
-        {
-            for (uint8 i = 0; i < 2; ++i)
-            {
-                if (aStillAtItMachines[i].uiOwnerEntry == uiMiscValue)
-                    DoCheckDistillationTask(uiMiscValue);
-            }
-        }
-    }
 
-    // wrapper to complete a distillation task
-    void DoCheckDistillationTask(uint32 uiOwnerEntry)
-    {
-        // check if the given entry matches the expected one
-        if (uiOwnerEntry == m_uiTaskOwnerEntry)
+        // wrapper to complete a distillation task
+        void DoCheckDistillationTask(uint32 uiOwnerEntry)
         {
-            switch (urand(0, 3))
+            // check if the given entry matches the expected one
+            if (uiOwnerEntry == m_uiTaskOwnerEntry)
             {
+                switch (urand(0, 3))
+                {
                 case 0: DoScriptText(SAY_ACTION_COMPLETE_1, m_creature); break;
                 case 1: DoScriptText(SAY_ACTION_COMPLETE_2, m_creature); break;
                 case 2: DoScriptText(SAY_ACTION_COMPLETE_3, m_creature); break;
                 case 3: DoScriptText(SAY_ACTION_COMPLETE_4, m_creature); break;
+                }
+
+                m_uiTaskTimer = 6000;
+                m_uiActionTimer = 0;
             }
-
-            m_uiTaskTimer = 6000;
-            m_uiActionTimer = 0;
-        }
-        // reset if failed
-        else
-        {
-            DoScriptText(SAY_DISTILLATION_FAIL, m_creature);
-            EnterEvadeMode();
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiTaskTimer)
-        {
-            if (m_uiTaskTimer <= uiDiff)
+            // reset if failed
+            else
             {
-                switch (m_uiTaskIndex)
+                DoScriptText(SAY_DISTILLATION_FAIL, m_creature);
+                EnterEvadeMode();
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiTaskTimer)
+            {
+                if (m_uiTaskTimer <= uiDiff)
                 {
-                    // fruit tasks
+                    switch (m_uiTaskIndex)
+                    {
+                        // fruit tasks
                     case 0:
                     case 1:
                     case 3:
                     case 6:
                     case 7:
                     {
-                        uint8 uiIndex = urand(0, 2);
-                        DoScriptText(aStillAtItFruits[uiIndex].iText, m_creature);
-                        m_uiTaskOwnerEntry = aStillAtItFruits[uiIndex].uiOwnerEntry;
+                              uint8 uiIndex = urand(0, 2);
+                              DoScriptText(aStillAtItFruits[uiIndex].iText, m_creature);
+                              m_uiTaskOwnerEntry = aStillAtItFruits[uiIndex].uiOwnerEntry;
 
-                        m_uiTaskTimer = 0;
-                        m_uiActionTimer = 5000;
-                        break;
+                              m_uiTaskTimer = 0;
+                              m_uiActionTimer = 5000;
+                              break;
                     }
-                    // valve or fire task
+                        // valve or fire task
                     case 2:
                     case 4:
                     case 5:
                     case 8:
                     {
-                        uint8 uiIndex = urand(0, 1);
-                        DoScriptText(aStillAtItMachines[uiIndex].iText, m_creature);
-                        m_uiTaskOwnerEntry = aStillAtItMachines[uiIndex].uiOwnerEntry;
+                              uint8 uiIndex = urand(0, 1);
+                              DoScriptText(aStillAtItMachines[uiIndex].iText, m_creature);
+                              m_uiTaskOwnerEntry = aStillAtItMachines[uiIndex].uiOwnerEntry;
 
-                        m_uiTaskTimer = 0;
-                        m_uiActionTimer = 5000;
-                        break;
+                              m_uiTaskTimer = 0;
+                              m_uiActionTimer = 5000;
+                              break;
                     }
-                    // complete event
+                        // complete event
                     case 9:
                         DoScriptText(SAY_DISTILLATION_COMPLETE, m_creature);
                         if (GameObject* pPunch = GetClosestGameObjectWithEntry(m_creature, GO_THUNDERBREW_JUNGLE_PUNCH, 10.0f))
@@ -599,130 +617,157 @@ struct  npc_tipsy_mcmanusAI : public ScriptedAI
                         EnterEvadeMode();
                         m_uiTaskTimer = 0;
                         break;
+                    }
+                    ++m_uiTaskIndex;
                 }
-                ++m_uiTaskIndex;
+                else
+                    m_uiTaskTimer -= uiDiff;
             }
-            else
-                m_uiTaskTimer -= uiDiff;
-        }
 
-        // timer delay to allow player to complete the task
-        if (m_uiActionTimer)
-        {
-            if (m_uiActionTimer <= uiDiff)
+            // timer delay to allow player to complete the task
+            if (m_uiActionTimer)
             {
-                DoScriptText(SAY_DISTILLATION_FAIL, m_creature);
-                EnterEvadeMode();
-                m_uiActionTimer = 0;
+                if (m_uiActionTimer <= uiDiff)
+                {
+                    DoScriptText(SAY_DISTILLATION_FAIL, m_creature);
+                    EnterEvadeMode();
+                    m_uiActionTimer = 0;
+                }
+                else
+                    m_uiActionTimer -= uiDiff;
             }
-            else
-                m_uiActionTimer -= uiDiff;
+
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            DoMeleeAttackIfReady();
         }
+    };
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_tipsy_mcmanusAI(pCreature);
+    }
 
-        DoMeleeAttackIfReady();
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
+    {
+        if (pPlayer->GetQuestStatus(QUEST_ID_STILL_AT_IT) == QUEST_STATUS_INCOMPLETE)
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TIPSY_MCMANUS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+
+        pPlayer->SEND_GOSSIP_MENU(TEXT_ID_READY, pCreature->GetObjectGuid());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction) override
+    {
+        if (uiAction != GOSSIP_ACTION_INFO_DEF + 1)
+            return false;
+
+        pPlayer->CLOSE_GOSSIP_MENU();
+        pCreature->AI()->SendAIEvent(AI_EVENT_START_EVENT, pPlayer, pCreature);
+        return true;
     }
 };
-
-CreatureAI* GetAI_npc_tipsy_mcmanus(Creature* pCreature)
-{
-    return new npc_tipsy_mcmanusAI(pCreature);
-}
-
-bool GossipHello_npc_tipsy_mcmanus(Player* pPlayer, Creature* pCreature)
-{
-    if (pPlayer->GetQuestStatus(QUEST_ID_STILL_AT_IT) == QUEST_STATUS_INCOMPLETE)
-        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TIPSY_MCMANUS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-
-    pPlayer->SEND_GOSSIP_MENU(TEXT_ID_READY, pCreature->GetObjectGuid());
-    return true;
-}
-
-bool GossipSelect_npc_tipsy_mcmanus(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
-{
-    if (uiAction != GOSSIP_ACTION_INFO_DEF + 1)
-        return false;
-
-    pPlayer->CLOSE_GOSSIP_MENU();
-    pCreature->AI()->SendAIEvent(AI_EVENT_START_EVENT, pPlayer, pCreature);
-    return true;
-}
 
 /*######
 ## npc_wants_fruit_credit
 ######*/
 
-bool EffectDummyCreature_npc_wants_fruit_credit(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+struct spell_toss_fruit : public SpellScript
 {
-    if ((uiSpellId == SPELL_TOSS_ORANGE || uiSpellId == SPELL_TOSS_BANANA || uiSpellId == SPELL_TOSS_PAPAYA) && uiEffIndex == EFFECT_INDEX_0)
+    spell_toss_fruit() : SpellScript("spell_toss_fruit") {}
+
+    bool EffectDummy(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Object* pTarget, ObjectGuid /*originalCasterGuid*/) override
     {
-        if (pCaster->GetTypeId() == TYPEID_PLAYER && ((Player*)pCaster)->GetQuestStatus(QUEST_ID_STILL_AT_IT) == QUEST_STATUS_INCOMPLETE)
+        if ((uiSpellId == SPELL_TOSS_ORANGE || uiSpellId == SPELL_TOSS_BANANA || uiSpellId == SPELL_TOSS_PAPAYA) && uiEffIndex == EFFECT_INDEX_0)
         {
-            if (Creature* pTipsyMcmanus = GetClosestCreatureWithEntry(pCaster, NPC_TIPSY_MCMANUS, 2 * INTERACTION_DISTANCE))
+            Creature* pCreatureTarget = pTarget->ToCreature();
+            if (pCaster->GetTypeId() == TYPEID_PLAYER && ((Player*)pCaster)->GetQuestStatus(QUEST_ID_STILL_AT_IT) == QUEST_STATUS_INCOMPLETE)
             {
-                pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pTipsyMcmanus, pCreatureTarget->GetEntry());
-                return true;
+                if (Creature* pTipsyMcmanus = GetClosestCreatureWithEntry(pCaster, NPC_TIPSY_MCMANUS, 2 * INTERACTION_DISTANCE))
+                {
+                    pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pTipsyMcmanus, pCreatureTarget->GetEntry());
+                    return true;
+                }
             }
         }
+        return false;
     }
-    return false;
-}
+};
 
 /*######
 ## go_quest_still_at_it_credit
 ######*/
 
-bool GOUse_go_quest_still_at_it_credit(Player* pPlayer, GameObject* pGo)
+struct go_quest_still_at_it_credit : public GameObjectScript
 {
-    if (pPlayer->GetQuestStatus(QUEST_ID_STILL_AT_IT) != QUEST_STATUS_INCOMPLETE)
-        return true;
+    go_quest_still_at_it_credit() : GameObjectScript("go_quest_still_at_it_credit") {}
 
-    if (Creature* pTipsyMcmanus = GetClosestCreatureWithEntry(pPlayer, NPC_TIPSY_MCMANUS, 2 * INTERACTION_DISTANCE))
-        pTipsyMcmanus->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, pPlayer, pTipsyMcmanus, pGo->GetEntry());
+    bool OnUse(Player* pPlayer, GameObject* pGo) override
+    {
+        if (pPlayer->GetQuestStatus(QUEST_ID_STILL_AT_IT) != QUEST_STATUS_INCOMPLETE)
+            return true;
 
-    return false;
-}
+        if (Creature* pTipsyMcmanus = GetClosestCreatureWithEntry(pPlayer, NPC_TIPSY_MCMANUS, 2 * INTERACTION_DISTANCE))
+            pTipsyMcmanus->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, pPlayer, pTipsyMcmanus, pGo->GetEntry());
+
+        return false;
+    }
+};
 
 void AddSC_sholazar_basin()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_helice";
-    pNewScript->GetAI = &GetAI_npc_helice;
-    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_helice;
-    pNewScript->RegisterSelf();
+    s = new npc_helice();
+    s->RegisterSelf();
+    s = new npc_injured_rainspeaker();
+    s->RegisterSelf();
+    s = new npc_mosswalker_victim();
+    s->RegisterSelf();
+    s = new npc_tipsy_mcmanus();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_injured_rainspeaker";
-    pNewScript->GetAI = &GetAI_npc_injured_rainspeaker;
-    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_injured_rainspeaker;
-    // pNewScript->pGossipHello = &GossipHello_npc_injured_rainspeaker;
-    // pNewScript->pGossipSelect = &GossipSelect_npc_injured_rainspeaker;
-    pNewScript->RegisterSelf();
+    s = new go_quest_still_at_it_credit();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_mosswalker_victim";
-    pNewScript->pGossipHello = &GossipHello_npc_mosswalker_victim;
-    pNewScript->pGossipSelect = &GossipSelect_npc_mosswalker_victim;
-    pNewScript->RegisterSelf();
-    
-    pNewScript = new Script;
-    pNewScript->Name = "npc_tipsy_mcmanus";
-    pNewScript->GetAI = &GetAI_npc_tipsy_mcmanus;
-    pNewScript->pGossipHello = &GossipHello_npc_tipsy_mcmanus;
-    pNewScript->pGossipSelect = &GossipSelect_npc_tipsy_mcmanus;
-    pNewScript->RegisterSelf();
+    s = new spell_toss_fruit();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_wants_fruit_credit";
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_wants_fruit_credit;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_helice";
+    //pNewScript->GetAI = &GetAI_npc_helice;
+    //pNewScript->pQuestAcceptNPC = &QuestAccept_npc_helice;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "go_quest_still_at_it_credit";
-    pNewScript->pGOUse = &GOUse_go_quest_still_at_it_credit;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_injured_rainspeaker";
+    //pNewScript->GetAI = &GetAI_npc_injured_rainspeaker;
+    //pNewScript->pQuestAcceptNPC = &QuestAccept_npc_injured_rainspeaker;
+    //// pNewScript->pGossipHello = &GossipHello_npc_injured_rainspeaker;
+    //// pNewScript->pGossipSelect = &GossipSelect_npc_injured_rainspeaker;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_mosswalker_victim";
+    //pNewScript->pGossipHello = &GossipHello_npc_mosswalker_victim;
+    //pNewScript->pGossipSelect = &GossipSelect_npc_mosswalker_victim;
+    //pNewScript->RegisterSelf();
+    //
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_tipsy_mcmanus";
+    //pNewScript->GetAI = &GetAI_npc_tipsy_mcmanus;
+    //pNewScript->pGossipHello = &GossipHello_npc_tipsy_mcmanus;
+    //pNewScript->pGossipSelect = &GossipSelect_npc_tipsy_mcmanus;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_wants_fruit_credit";
+    //pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_wants_fruit_credit;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "go_quest_still_at_it_credit";
+    //pNewScript->pGOUse = &GOUse_go_quest_still_at_it_credit;
+    //pNewScript->RegisterSelf();
 }

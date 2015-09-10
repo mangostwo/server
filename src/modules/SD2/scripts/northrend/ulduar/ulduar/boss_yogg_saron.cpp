@@ -301,149 +301,143 @@ static const uint32 aMadnessChamberDoors[MAX_ILLUSIONS] = { GO_BRAIN_DOOR_STORMW
 ## boss_sara
 ######*/
 
-struct  boss_saraAI : public Scripted_NoMovementAI, private DialogueHelper
+struct boss_sara : public CreatureScript
 {
-    boss_saraAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature),
+    boss_sara() : CreatureScript("boss_sara") {}
+
+    struct boss_saraAI : public Scripted_NoMovementAI, private DialogueHelper
+    {
+        boss_saraAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature),
         DialogueHelper(aYoggSaronDialog)
-    {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        InitializeDialogueHelper(m_pInstance);
-        Reset();
-    }
-
-    instance_ulduar* m_pInstance;
-    bool m_bIsRegularMode;
-    
-    bool m_bIsHostile;
-
-    uint8 m_uiPhase;
-    uint32 m_uiSarasSpellTimer;
-    
-    uint32 m_uiPsychosisTimer;
-    uint32 m_uiMaladyTimer;
-    uint32 m_uiBrainLinkTimer;
-    uint32 m_uiDeathRayTimer;
-
-    void Reset() override
-    {
-        m_uiPhase                       = PHASE_INTRO;
-        m_uiSarasSpellTimer             = 15000;
-        m_bIsHostile                    = false;
-        
-        m_uiPsychosisTimer              = 2000;
-        m_uiMaladyTimer                 = 15000;
-        m_uiBrainLinkTimer              = 25000;
-        m_uiDeathRayTimer               = 20000;
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_uiPhase == PHASE_SARA)
-            return;
-
-        ScriptedAI::AttackStart(pWho);
-    }
-    
-    void EnterEvadeMode() override
-    {
-        if (!m_bIsHostile)
-            return;
-        
-        ScriptedAI::EnterEvadeMode();
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        // start the encounter on range check
-        // ToDo: research if there is any intro available before the actual encounter starts
-        if (m_uiPhase == PHASE_INTRO && pWho->GetTypeId() == TYPEID_PLAYER && pWho->IsAlive() && !((Player*)pWho)->isGameMaster() &&
-            m_creature->IsWithinDistInMap(pWho, 70.0f) && pWho->IsWithinLOSInMap(m_creature))
         {
-            m_uiPhase = PHASE_SARA;
-            DoScriptText(SAY_SARA_AGGRO, m_creature);
-
-            if (m_pInstance)
-            {
-                m_pInstance->SetData(TYPE_YOGGSARON, IN_PROGRESS);
-                
-                // inform the voice controller over event start
-                if (Creature* pVoice = m_pInstance->GetSingleCreatureFromStorage(NPC_VOICE_OF_YOGG))
-                    SendAIEvent(AI_EVENT_START_EVENT, m_creature, pVoice);
-            }
-            
-            DoInitialiseKeepers();
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+            InitializeDialogueHelper(m_pInstance);
         }
 
-        ScriptedAI::MoveInLineOfSight(pWho);
-    }
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
 
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
+        bool m_bIsHostile;
 
-        DoScriptText(urand(0, 1) ? SAY_SARA_SLAY_1 : SAY_SARA_SLAY_2, m_creature);
-    }
-    
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage) override
-    {
-        if (uiDamage >= m_creature->GetHealth())
+        uint8 m_uiPhase;
+        uint32 m_uiSarasSpellTimer;
+
+        uint32 m_uiPsychosisTimer;
+        uint32 m_uiMaladyTimer;
+        uint32 m_uiBrainLinkTimer;
+        uint32 m_uiDeathRayTimer;
+
+        void Reset() override
         {
-            uiDamage = 0;
+            m_uiPhase = PHASE_INTRO;
+            m_uiSarasSpellTimer = 15000;
+            m_bIsHostile = false;
 
-            // start transition to the second phase when all the health has been drained
+            m_uiPsychosisTimer = 2000;
+            m_uiMaladyTimer = 15000;
+            m_uiBrainLinkTimer = 25000;
+            m_uiDeathRayTimer = 20000;
+        }
+
+        void AttackStart(Unit* pWho) override
+        {
             if (m_uiPhase == PHASE_SARA)
+                return;
+
+            ScriptedAI::AttackStart(pWho);
+        }
+
+        void EnterEvadeMode() override
+        {
+            if (!m_bIsHostile)
+                return;
+
+            ScriptedAI::EnterEvadeMode();
+        }
+
+        void MoveInLineOfSight(Unit* pWho) override
+        {
+            // start the encounter on range check
+            // ToDo: research if there is any intro available before the actual encounter starts
+            if (m_uiPhase == PHASE_INTRO && pWho->GetTypeId() == TYPEID_PLAYER && pWho->IsAlive() && !((Player*)pWho)->isGameMaster() &&
+                m_creature->IsWithinDistInMap(pWho, 70.0f) && pWho->IsWithinLOSInMap(m_creature))
             {
-                m_uiPhase = PHASE_TRANSITION;
-                StartNextDialogueText(SAY_PHASE_2_INTRO_1);
+                m_uiPhase = PHASE_SARA;
+                DoScriptText(SAY_SARA_AGGRO, m_creature);
 
-                // despawn all clouds for phase 2
-                if (!m_pInstance)
-                    return;
-
-                GuidList m_lCloudGuids;
-                m_pInstance->GetOminousCloudGuids(m_lCloudGuids);
-
-                for (GuidList::const_iterator itr = m_lCloudGuids.begin(); itr != m_lCloudGuids.end(); ++itr)
+                if (m_pInstance)
                 {
-                    if (Creature* pCloud = m_creature->GetMap()->GetCreature(*itr))
-                        pCloud->ForcedDespawn();
+                    m_pInstance->SetData(TYPE_YOGGSARON, IN_PROGRESS);
+
+                    // inform the voice controller over event start
+                    if (Creature* pVoice = m_pInstance->GetSingleCreatureFromStorage(NPC_VOICE_OF_YOGG))
+                        SendAIEvent(AI_EVENT_START_EVENT, m_creature, pVoice);
+                }
+
+                DoInitialiseKeepers();
+            }
+
+            ScriptedAI::MoveInLineOfSight(pWho);
+        }
+
+        void KilledUnit(Unit* pVictim) override
+        {
+            if (pVictim->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            DoScriptText(urand(0, 1) ? SAY_SARA_SLAY_1 : SAY_SARA_SLAY_2, m_creature);
+        }
+
+        void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage) override
+        {
+            if (uiDamage >= m_creature->GetHealth())
+            {
+                uiDamage = 0;
+
+                // start transition to the second phase when all the health has been drained
+                if (m_uiPhase == PHASE_SARA)
+                {
+                    m_uiPhase = PHASE_TRANSITION;
+                    StartNextDialogueText(SAY_PHASE_2_INTRO_1);
+
+                    // despawn all clouds for phase 2
+                    if (m_pInstance)
+                        m_pInstance->SetData(TYPE_DO_YOGG_DESPAWN_CLOUDS, 0);
                 }
             }
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_YOGGSARON)
+        void JustSummoned(Creature* pSummoned) override
         {
-            pSummoned->CastSpell(pSummoned, SPELL_SHADOWY_BARRIER_YOGG, true);
-            pSummoned->CastSpell(pSummoned, SPELL_KNOCK_AWAY, true);
-            pSummoned->SetInCombatWithZone();
-        }
-        else if (pSummoned->GetEntry() == NPC_DEATH_ORB)
-        {
-            // the death orb is linked to 4 death rays that are randomly moving on the ground
-            float fX, fY, fZ;
-            for (uint8 i = 0; i < 4; ++i)
+            if (pSummoned->GetEntry() == NPC_YOGGSARON)
             {
-                float fDist = frand(30.0f, 45.0f);
-                float fAng = frand(0, 2 * M_PI_F);
-                m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, fDist, fAng);
-                m_creature->SummonCreature(NPC_DEATH_RAY, fX, fY, fZ, 0, TEMPSUMMON_TIMED_DESPAWN, 20000);
+                pSummoned->CastSpell(pSummoned, SPELL_SHADOWY_BARRIER_YOGG, true);
+                pSummoned->CastSpell(pSummoned, SPELL_KNOCK_AWAY, true);
+                pSummoned->SetInCombatWithZone();
             }
-            
-            pSummoned->CastSpell(pSummoned, SPELL_DEATH_RAY_VISUAL_ORIGIN, true);
+            else if (pSummoned->GetEntry() == NPC_DEATH_ORB)
+            {
+                // the death orb is linked to 4 death rays that are randomly moving on the ground
+                float fX, fY, fZ;
+                for (uint8 i = 0; i < 4; ++i)
+                {
+                    float fDist = frand(30.0f, 45.0f);
+                    float fAng = frand(0, 2 * M_PI_F);
+                    m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, fDist, fAng);
+                    m_creature->SummonCreature(NPC_DEATH_RAY, fX, fY, fZ, 0, TEMPSUMMON_TIMED_DESPAWN, 20000);
+                }
+
+                pSummoned->CastSpell(pSummoned, SPELL_DEATH_RAY_VISUAL_ORIGIN, true);
+            }
+            else if (pSummoned->GetEntry() == NPC_DEATH_RAY)
+                pSummoned->CastSpell(pSummoned, SPELL_DEATH_RAY_VISUAL_WARN, false);
         }
-        else if (pSummoned->GetEntry() == NPC_DEATH_RAY)
-            pSummoned->CastSpell(pSummoned, SPELL_DEATH_RAY_VISUAL_WARN, false);
-    }
-    
-    void JustDidDialogueStep(int32 iEntry) override
-    {
-        switch (iEntry)
+
+        void JustDidDialogueStep(int32 iEntry) override
         {
+            switch (iEntry)
+            {
             case SAY_PHASE_2_INTRO_4:
                 // make trasition - set hostile and summon Yogg
                 DoCastSpellIfCan(m_creature, SPELL_FULL_HEAL, CAST_TRIGGERED);
@@ -466,345 +460,352 @@ struct  boss_saraAI : public Scripted_NoMovementAI, private DialogueHelper
                     m_uiPhase = PHASE_VISIONS;
                 }
                 break;
-        }
-    }
-    
-    // wrapper to initialise keeper helpers
-    void DoInitialiseKeepers()
-    {
-        if (!m_pInstance)
-            return;
-        
-        uint8 uiKeeperCount = 0;
-        
-        if (m_pInstance->GetData(TYPE_KEEPER_FREYA) == DONE)
-        {
-            if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_FREYA_HELPER))
-            {
-                pHelper->CastSpell(pHelper, SPELL_SUMMON_SANITY_WELL, false);
-                pHelper->CastSpell(pHelper, SPELL_RESILIENCE_OF_NATURE, true);
-                ++uiKeeperCount;
             }
         }
-        
-        if (m_pInstance->GetData(TYPE_KEEPER_HODIR) == DONE)
-        {
-            if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_HODIR_HELPER))
-            {
-                pHelper->CastSpell(pHelper, SPELL_HODIRS_PROTECTIVE_GAZE, false);
-                pHelper->CastSpell(pHelper, SPELL_FORTITUDE_OF_FROST, true);
-                ++uiKeeperCount;
-            }
-        }
-        
-        if (m_pInstance->GetData(TYPE_KEEPER_MIMIRON) == DONE)
-        {
-            if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON_HELPER))
-            {
-                pHelper->CastSpell(pHelper, SPELL_SPEED_OF_INVENTION, true);
-                SendAIEvent(AI_EVENT_START_EVENT, m_creature, pHelper);
-                ++uiKeeperCount;
-            }
-        }
-        
-        if (m_pInstance->GetData(TYPE_KEEPER_THORIM) == DONE)
-        {
-            if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_THORIM_HELPER))
-            {
-                pHelper->CastSpell(pHelper, SPELL_TITANIC_STORM, false);
-                pHelper->CastSpell(pHelper, SPELL_FURY_OF_THE_STORM, true);
-                ++uiKeeperCount;
-            }
-        }
-        
-        // set hard mode data
-        m_pInstance->SetData(TYPE_YOGGSARON_HARD, uiKeeperCount);
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        DialogueUpdate(uiDiff);
-
-        if (m_uiPhase == PHASE_SARA)
+        // wrapper to initialise keeper helpers
+        void DoInitialiseKeepers()
         {
-            if (m_uiSarasSpellTimer < uiDiff)
+            if (!m_pInstance)
+                return;
+
+            uint8 uiKeeperCount = 0;
+
+            if (m_pInstance->GetData(TYPE_KEEPER_FREYA) == DONE)
             {
-                CanCastResult castResult = CAST_OK;
-                switch (urand(0, 2))
+                if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_FREYA_HELPER))
                 {
+                    pHelper->CastSpell(pHelper, SPELL_SUMMON_SANITY_WELL, false);
+                    pHelper->CastSpell(pHelper, SPELL_RESILIENCE_OF_NATURE, true);
+                    ++uiKeeperCount;
+                }
+            }
+
+            if (m_pInstance->GetData(TYPE_KEEPER_HODIR) == DONE)
+            {
+                if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_HODIR_HELPER))
+                {
+                    pHelper->CastSpell(pHelper, SPELL_HODIRS_PROTECTIVE_GAZE, false);
+                    pHelper->CastSpell(pHelper, SPELL_FORTITUDE_OF_FROST, true);
+                    ++uiKeeperCount;
+                }
+            }
+
+            if (m_pInstance->GetData(TYPE_KEEPER_MIMIRON) == DONE)
+            {
+                if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON_HELPER))
+                {
+                    pHelper->CastSpell(pHelper, SPELL_SPEED_OF_INVENTION, true);
+                    SendAIEvent(AI_EVENT_START_EVENT, m_creature, pHelper);
+                    ++uiKeeperCount;
+                }
+            }
+
+            if (m_pInstance->GetData(TYPE_KEEPER_THORIM) == DONE)
+            {
+                if (Creature* pHelper = m_pInstance->GetSingleCreatureFromStorage(NPC_THORIM_HELPER))
+                {
+                    pHelper->CastSpell(pHelper, SPELL_TITANIC_STORM, false);
+                    pHelper->CastSpell(pHelper, SPELL_FURY_OF_THE_STORM, true);
+                    ++uiKeeperCount;
+                }
+            }
+
+            // set hard mode data
+            m_pInstance->SetData(TYPE_YOGGSARON_HARD, uiKeeperCount);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            DialogueUpdate(uiDiff);
+
+            if (m_uiPhase == PHASE_SARA)
+            {
+                if (m_uiSarasSpellTimer < uiDiff)
+                {
+                    CanCastResult castResult = CAST_OK;
+                    switch (urand(0, 2))
+                    {
                     case 0: castResult = DoCastSpellIfCan(m_creature, SPELL_SARAS_FERVOR);   break;
                     case 1: castResult = DoCastSpellIfCan(m_creature, SPELL_SARAS_BLESSING); break;
                     case 2: castResult = DoCastSpellIfCan(m_creature, SPELL_SARAS_ANGER);    break;
-                }
+                    }
 
-                if (castResult == CAST_OK)
+                    if (castResult == CAST_OK)
+                    {
+                        if (roll_chance_i(30))
+                            DoScriptText(urand(0, 1) ? SAY_SARA_HELP_1 : SAY_SARA_HELP_2, m_creature);
+
+                        m_uiSarasSpellTimer = 5000;
+                    }
+                }
+                else
+                    m_uiSarasSpellTimer -= uiDiff;
+            }
+
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            if (m_uiPhase == PHASE_VISIONS)
+            {
+                if (m_uiPsychosisTimer < uiDiff)
                 {
-                    if (roll_chance_i(30))
-                        DoScriptText(urand(0, 1) ? SAY_SARA_HELP_1 : SAY_SARA_HELP_2, m_creature);
+                    if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_PHYCHOSIS : SPELL_PHYCHOSIS_H) == CAST_OK)
+                    {
+                        if (roll_chance_i(10))
+                            DoScriptText(SAY_SARA_PHYCHOSIS, m_creature);
 
-                    m_uiSarasSpellTimer = 5000;
+                        m_uiPsychosisTimer = urand(3000, 4000);
+                    }
                 }
-            }
-            else
-                m_uiSarasSpellTimer -= uiDiff;
-        }
+                else
+                    m_uiPsychosisTimer -= uiDiff;
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-        
-        if (m_uiPhase == PHASE_VISIONS)
-        {
-            if (m_uiPsychosisTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_PHYCHOSIS : SPELL_PHYCHOSIS_H) == CAST_OK)
+                if (m_uiMaladyTimer < uiDiff)
                 {
-                    if (roll_chance_i(10))
-                        DoScriptText(SAY_SARA_PHYCHOSIS, m_creature);
-                    
-                    m_uiPsychosisTimer = urand(3000, 4000);
+                    if (DoCastSpellIfCan(m_creature, SPELL_MALADY_OF_THE_MIND) == CAST_OK)
+                        m_uiMaladyTimer = 15000;
                 }
-            }
-            else
-                m_uiPsychosisTimer -= uiDiff;
+                else
+                    m_uiMaladyTimer -= uiDiff;
 
-            if (m_uiMaladyTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_MALADY_OF_THE_MIND) == CAST_OK)
-                    m_uiMaladyTimer = 15000;
-            }
-            else
-                m_uiMaladyTimer -= uiDiff;
+                if (m_uiBrainLinkTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_BRAIN_LINK) == CAST_OK)
+                        m_uiBrainLinkTimer = 25000;
+                }
+                else
+                    m_uiBrainLinkTimer -= uiDiff;
 
-            if (m_uiBrainLinkTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_BRAIN_LINK) == CAST_OK)
-                    m_uiBrainLinkTimer = 25000;
-            }
-            else
-                m_uiBrainLinkTimer -= uiDiff;
+                if (m_uiDeathRayTimer < uiDiff)
+                {
+                    if (urand(0, 1))
+                        DoScriptText(SAY_SARA_DEATH_RAY, m_creature);
 
-            if (m_uiDeathRayTimer < uiDiff)
-            {
-                if (urand(0, 1))
-                    DoScriptText(SAY_SARA_DEATH_RAY, m_creature);
-                
-                // spawn death orb at predefined location
-                m_creature->CastSpell(1980.43f, -25.7708f, 351.5418f, SPELL_DEATH_RAY_SUMMON, true);
-                m_uiDeathRayTimer = 20000;
+                    // spawn death orb at predefined location
+                    m_creature->CastSpell(1980.43f, -25.7708f, 351.5418f, SPELL_DEATH_RAY_SUMMON, true);
+                    m_uiDeathRayTimer = 20000;
+                }
+                else
+                    m_uiDeathRayTimer -= uiDiff;
             }
-            else
-                m_uiDeathRayTimer -= uiDiff;
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_saraAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_sara(Creature* pCreature)
-{
-    return new boss_saraAI(pCreature);
-}
 
 /*######
 ## boss_yogg_saron
 ######*/
 
-struct  boss_yogg_saronAI : public Scripted_NoMovementAI
+struct boss_yogg_saron : public CreatureScript
 {
-    boss_yogg_saronAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    boss_yogg_saron() : CreatureScript("boss_yogg_saron") {}
+
+    struct boss_yogg_saronAI : public Scripted_NoMovementAI
     {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    instance_ulduar* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint8 m_uiPhase;
-    
-    uint32 m_uiLunaticGazeTimer;
-    uint32 m_uiDeafeningRoarTimer;
-    uint32 m_uiShadowBeaconTimer;
-
-    void Reset() override
-    {
-        m_uiPhase = PHASE_VISIONS;
-        m_uiLunaticGazeTimer = 15000;
-        m_uiShadowBeaconTimer = 45000;
-        
-        // deafening roar only available in 25man mode with 3 keepers or less active
-        if (m_pInstance)
-            m_uiDeafeningRoarTimer = (!m_bIsRegularMode && m_pInstance->GetData(TYPE_YOGGSARON_HARD) <= 3) ? 20000 : 0;
-    }
-
-    void JustReachedHome() override
-    {
-        // unboard passengers first to avoid issues
-        m_creature->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
-
-        if (m_pInstance)
+        boss_yogg_saronAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
         {
-            if (m_pInstance->GetData(TYPE_YOGGSARON) != FAIL)
-                m_pInstance->SetData(TYPE_YOGGSARON, FAIL);
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         }
 
-        m_creature->ForcedDespawn();
-    }
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
-    {
-        // AI event received at 30% health
-        if (eventType == AI_EVENT_START_EVENT && pInvoker->GetEntry() == NPC_YOGG_BRAIN && m_uiPhase == PHASE_VISIONS)
+        uint8 m_uiPhase;
+
+        uint32 m_uiLunaticGazeTimer;
+        uint32 m_uiDeafeningRoarTimer;
+        uint32 m_uiShadowBeaconTimer;
+
+        void Reset() override
         {
-            DoScriptText(SAY_PHASE_3, m_creature);
-            m_uiPhase = PHASE_OLD_GOD;
-            m_creature->RemoveAurasDueToSpell(SPELL_KNOCK_AWAY);
-            m_creature->RemoveAurasDueToSpell(SPELL_SHADOWY_BARRIER_YOGG);
-            
-            // despawn Sara and inform the voice controller of phase switch
+            m_uiPhase = PHASE_VISIONS;
+            m_uiLunaticGazeTimer = 15000;
+            m_uiShadowBeaconTimer = 45000;
+
+            // deafening roar only available in 25man mode with 3 keepers or less active
+            if (m_pInstance)
+                m_uiDeafeningRoarTimer = (!m_bIsRegularMode && m_pInstance->GetData(TYPE_YOGGSARON_HARD) <= 3) ? 20000 : 0;
+        }
+
+        void JustReachedHome() override
+        {
+            // unboard passengers first to avoid issues
+            m_creature->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
+
             if (m_pInstance)
             {
-                if (Creature* pSara = m_pInstance->GetSingleCreatureFromStorage(NPC_SARA))
-                    pSara->ForcedDespawn();
-                if (Creature* pVoice = m_pInstance->GetSingleCreatureFromStorage(NPC_VOICE_OF_YOGG))
-                    SendAIEvent(AI_EVENT_START_EVENT_B, m_creature, pVoice);
+                if (m_pInstance->GetData(TYPE_YOGGSARON) != FAIL)
+                    m_pInstance->SetData(TYPE_YOGGSARON, FAIL);
+            }
+
+            m_creature->ForcedDespawn();
+        }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+        {
+            // AI event received at 30% health
+            if (eventType == AI_EVENT_START_EVENT && pInvoker->GetEntry() == NPC_YOGG_BRAIN && m_uiPhase == PHASE_VISIONS)
+            {
+                DoScriptText(SAY_PHASE_3, m_creature);
+                m_uiPhase = PHASE_OLD_GOD;
+                m_creature->RemoveAurasDueToSpell(SPELL_KNOCK_AWAY);
+                m_creature->RemoveAurasDueToSpell(SPELL_SHADOWY_BARRIER_YOGG);
+
+                // despawn Sara and inform the voice controller of phase switch
+                if (m_pInstance)
+                {
+                    if (Creature* pSara = m_pInstance->GetSingleCreatureFromStorage(NPC_SARA))
+                        pSara->ForcedDespawn();
+                    if (Creature* pVoice = m_pInstance->GetSingleCreatureFromStorage(NPC_VOICE_OF_YOGG))
+                        SendAIEvent(AI_EVENT_START_EVENT_B, m_creature, pVoice);
+                }
             }
         }
-    }
-    
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
-        
-        DoScriptText(SAY_SLAY, m_creature);
-    }
-    
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_YOGGSARON, DONE);
-        
-        DoScriptText(SAY_DEATH, m_creature);
-    }
-    
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-        
-        // last phase spells
-        if (m_uiPhase == PHASE_OLD_GOD)
+
+        void KilledUnit(Unit* pVictim) override
         {
-            if (m_uiLunaticGazeTimer < uiDiff)
+            if (pVictim->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            DoScriptText(SAY_SLAY, m_creature);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_YOGGSARON, DONE);
+
+            DoScriptText(SAY_DEATH, m_creature);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            // last phase spells
+            if (m_uiPhase == PHASE_OLD_GOD)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_LUNATIC_GAZE_YOGG) == CAST_OK)
+                if (m_uiLunaticGazeTimer < uiDiff)
                 {
-                    if (urand(0, 1))
-                        DoPlaySoundToSet(m_creature, SOUND_ID_LUNATIC_GAZE);
-                    
-                    m_uiLunaticGazeTimer = 12000;
-                }
-            }
-            else
-                m_uiLunaticGazeTimer -= uiDiff;
-            
-            if (m_uiShadowBeaconTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_BEACON) == CAST_OK)
-                {
-                    DoScriptText(EMOTE_EMPOWERING_SHADOWS, m_creature);
-                    m_uiShadowBeaconTimer = 45000;
-                }
-            }
-            else
-                m_uiShadowBeaconTimer -= uiDiff;
-            
-            if (m_uiDeafeningRoarTimer)
-            {
-                if (m_uiDeafeningRoarTimer <= uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_DEAFENING_ROAR) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature, SPELL_LUNATIC_GAZE_YOGG) == CAST_OK)
                     {
-                        DoScriptText(EMOTE_DEAFENING_ROAR, m_creature);
-                        m_uiDeafeningRoarTimer = 20000;
+                        if (urand(0, 1))
+                            DoPlaySoundToSet(m_creature, SOUND_ID_LUNATIC_GAZE);
+
+                        m_uiLunaticGazeTimer = 12000;
                     }
                 }
                 else
-                    m_uiDeafeningRoarTimer -= uiDiff;
+                    m_uiLunaticGazeTimer -= uiDiff;
+
+                if (m_uiShadowBeaconTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_BEACON) == CAST_OK)
+                    {
+                        DoScriptText(EMOTE_EMPOWERING_SHADOWS, m_creature);
+                        m_uiShadowBeaconTimer = 45000;
+                    }
+                }
+                else
+                    m_uiShadowBeaconTimer -= uiDiff;
+
+                if (m_uiDeafeningRoarTimer)
+                {
+                    if (m_uiDeafeningRoarTimer <= uiDiff)
+                    {
+                        if (DoCastSpellIfCan(m_creature, SPELL_DEAFENING_ROAR) == CAST_OK)
+                        {
+                            DoScriptText(EMOTE_DEAFENING_ROAR, m_creature);
+                            m_uiDeafeningRoarTimer = 20000;
+                        }
+                    }
+                    else
+                        m_uiDeafeningRoarTimer -= uiDiff;
+                }
             }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_yogg_saronAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_yogg_saron(Creature* pCreature)
-{
-    return new boss_yogg_saronAI(pCreature);
-}
 
 /*######
 ## npc_voice_yogg_saron
 ######*/
 
-struct  npc_voice_yogg_saronAI : public Scripted_NoMovementAI
+struct npc_voice_yogg_saron : public CreatureScript
 {
-    npc_voice_yogg_saronAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    npc_voice_yogg_saron() : CreatureScript("npc_voice_yogg_saron") {}
+
+    struct npc_voice_yogg_saronAI : public Scripted_NoMovementAI
     {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        
-        for (uint8 i = 0; i < MAX_ILLUSIONS; ++i)
-            m_vuiMadnessPhases.push_back(i);
-        
-        Reset();
-    }
-
-    instance_ulduar* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint8 m_uiPhase;
-    uint8 m_uiMaxPortals;
-    uint8 m_uiPortalsCount;
-
-    uint32 m_uiBerserkTimer;
-    uint32 m_uiSanityCheckTimer;
-    uint32 m_uiSummonGuardianTimer;
-    uint32 m_uiCrusherTentacleTimer;
-    uint32 m_uiCorruptorTentacleTimer;
-    uint32 m_uiConstrictorTentacleTimer;
-    uint32 m_uiMadnessTimer;
-    uint32 m_uiGuardianTimer;
-    
-    std::vector<uint8> m_vuiMadnessPhases;
-
-    void Reset() override
-    {
-        m_uiPhase                       = PHASE_INTRO;
-        m_uiBerserkTimer                = 0;
-        m_uiSanityCheckTimer            = 0;
-        m_uiSummonGuardianTimer         = 1000;
-        m_uiCrusherTentacleTimer        = 1000;
-        m_uiCorruptorTentacleTimer      = 1000;
-        m_uiConstrictorTentacleTimer    = 1000;
-        m_uiMadnessTimer                = 60000;
-        m_uiGuardianTimer               = 1000;
-
-        m_uiPortalsCount                = 0;
-        m_uiMaxPortals                  = m_bIsRegularMode ? 4 : 10;
-        
-        std::random_shuffle(m_vuiMadnessPhases.begin(), m_vuiMadnessPhases.end());
-    }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
-    {
-        switch (eventType)
+        npc_voice_yogg_saronAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
         {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+
+            for (uint8 i = 0; i < MAX_ILLUSIONS; ++i)
+                m_vuiMadnessPhases.push_back(i);
+        }
+
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        uint8 m_uiPhase;
+        uint8 m_uiMaxPortals;
+        uint8 m_uiPortalsCount;
+
+        uint32 m_uiBerserkTimer;
+        uint32 m_uiSanityCheckTimer;
+        uint32 m_uiSummonGuardianTimer;
+        uint32 m_uiCrusherTentacleTimer;
+        uint32 m_uiCorruptorTentacleTimer;
+        uint32 m_uiConstrictorTentacleTimer;
+        uint32 m_uiMadnessTimer;
+        uint32 m_uiGuardianTimer;
+
+        std::vector<uint8> m_vuiMadnessPhases;
+
+        void Reset() override
+        {
+            m_uiPhase = PHASE_INTRO;
+            m_uiBerserkTimer = 0;
+            m_uiSanityCheckTimer = 0;
+            m_uiSummonGuardianTimer = 1000;
+            m_uiCrusherTentacleTimer = 1000;
+            m_uiCorruptorTentacleTimer = 1000;
+            m_uiConstrictorTentacleTimer = 1000;
+            m_uiMadnessTimer = 60000;
+            m_uiGuardianTimer = 1000;
+
+            m_uiPortalsCount = 0;
+            m_uiMaxPortals = m_bIsRegularMode ? 4 : 10;
+
+            std::random_shuffle(m_vuiMadnessPhases.begin(), m_vuiMadnessPhases.end());
+        }
+
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+        {
+            switch (eventType)
+            {
             case AI_EVENT_START_EVENT:
                 m_uiPhase = PHASE_SARA;
                 m_uiBerserkTimer = 15 * MINUTE * IN_MILLISECONDS;
-                
+
                 // start sanity
                 m_uiSanityCheckTimer = 15000;
                 DoCastSpellIfCan(m_creature, SPELL_SANITY);
@@ -815,13 +816,13 @@ struct  npc_voice_yogg_saronAI : public Scripted_NoMovementAI
             case AI_EVENT_START_EVENT_B:
                 m_uiPhase = PHASE_OLD_GOD;
                 break;
+            }
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
+        void JustSummoned(Creature* pSummoned) override
         {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_DESCEND_INTO_MADNESS:
                 SendAIEvent(AI_EVENT_START_EVENT, m_creature, pSummoned, aMadnessTeleportSpells[m_uiPortalsCount]);
                 pSummoned->CastSpell(pSummoned, SPELL_TELEPORT_PORTAL_VISUAL, true);
@@ -852,188 +853,192 @@ struct  npc_voice_yogg_saronAI : public Scripted_NoMovementAI
                 pSummoned->CastSpell(pSummoned, SPELL_SIMPLE_TELEPORT, true);
                 pSummoned->SetInCombatWithZone();
                 break;
-        }
-    }
-    
-    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
-    {
-        if (pSpell->Id == SPELL_INSANE && pTarget->GetTypeId() == TYPEID_PLAYER && m_pInstance)
-        {
-            if (Creature* pYogg = m_pInstance->GetSingleCreatureFromStorage(NPC_YOGGSARON))
-                DoScriptText(urand(0, 1) ? SAY_TO_INSANE_1 : SAY_TO_INSANE_2, pYogg, pTarget);
-            
-            m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_DRIVE_CRAZY, false);
-        }
-    }
-    
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiBerserkTimer)
-        {
-            if (m_uiBerserkTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_EXTINGUISH_LIFE) == CAST_OK)
-                    m_uiBerserkTimer = 0;
             }
-            else
-                m_uiBerserkTimer -= uiDiff;
         }
-        
-        if (m_uiSanityCheckTimer)
-        {
-            if (m_uiSanityCheckTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_INSANE_PERIODIC) == CAST_OK)
-                    m_uiSanityCheckTimer = 0;
-            }
-            else
-                m_uiSanityCheckTimer -= uiDiff;
-        }
-        
-        if (m_uiPhase == PHASE_SARA)
-        {
-            if (m_uiSummonGuardianTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_GUARDIAN_YOGG) == CAST_OK)
-                    m_uiSummonGuardianTimer = 20000;
-            }
-            else
-                m_uiSummonGuardianTimer -= uiDiff;
-        }
-        else if (m_uiPhase == PHASE_VISIONS)
-        {
-            if (m_uiCorruptorTentacleTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_CORRUPTOR_TENTACLE) == CAST_OK)
-                    m_uiCorruptorTentacleTimer = 30000;
-            }
-            else
-                m_uiCorruptorTentacleTimer -= uiDiff;
 
-            if (m_uiCrusherTentacleTimer < uiDiff)
+        void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+        {
+            if (pSpell->Id == SPELL_INSANE && pTarget->GetTypeId() == TYPEID_PLAYER && m_pInstance)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_CRUSHER_TENTACLE) == CAST_OK)
-                    m_uiCrusherTentacleTimer = 60000;
-            }
-            else
-                m_uiCrusherTentacleTimer -= uiDiff;
-
-            if (m_uiConstrictorTentacleTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_CONSTRICTOR_TENTACLE) == CAST_OK)
-                    m_uiConstrictorTentacleTimer = 25000;
-            }
-            else
-                m_uiConstrictorTentacleTimer -= uiDiff;
-
-            if (m_uiMadnessTimer < uiDiff)
-            {
-                // no more portals if we already had 3
-                if (m_uiPortalsCount == MAX_ILLUSIONS)
-                {
-                    m_uiMadnessTimer = m_uiBerserkTimer * 2;
-                    return;
-                }
-                
-                if (!m_pInstance)
-                    return;
-                
-                // inform the brain about the current illusion
-                if (Creature* pBrain = m_pInstance->GetSingleCreatureFromStorage(NPC_YOGG_BRAIN))
-                    SendAIEvent(AI_EVENT_START_EVENT, m_creature, pBrain, m_uiPortalsCount);
-                
                 if (Creature* pYogg = m_pInstance->GetSingleCreatureFromStorage(NPC_YOGGSARON))
-                    DoScriptText(SAY_MADNESS, pYogg);
-                
-                float fX, fY, fZ, fAng;
-                for (uint8 i = 0; i < m_uiMaxPortals; ++i)
-                {
-                    fAng = (2 * M_PI_F / m_uiMaxPortals) * i;
-                    m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, 22.0f, fAng);
-                    m_creature->SummonCreature(NPC_DESCEND_INTO_MADNESS, fX, fY, fZ, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
-                }
-                
-                DoScriptText(EMOTE_VISION_BLAST, m_creature);
-                ++m_uiPortalsCount;
-                m_uiMadnessTimer = 90000;
+                    DoScriptText(urand(0, 1) ? SAY_TO_INSANE_1 : SAY_TO_INSANE_2, pYogg, pTarget);
+
+                m_pInstance->SetData(TYPE_ACHIEV_DRIVE_CRAZY, uint32(false));
             }
-            else
-                m_uiMadnessTimer -= uiDiff;
         }
-        else if (m_uiPhase == PHASE_OLD_GOD)
+
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (m_uiGuardianTimer < uiDiff)
+            if (m_uiBerserkTimer)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_IMMORTAL_GUARDIAN) == CAST_OK)
-                    m_uiGuardianTimer = 15000;
+                if (m_uiBerserkTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_EXTINGUISH_LIFE) == CAST_OK)
+                        m_uiBerserkTimer = 0;
+                }
+                else
+                    m_uiBerserkTimer -= uiDiff;
             }
-            else
-                m_uiGuardianTimer -= uiDiff;
+
+            if (m_uiSanityCheckTimer)
+            {
+                if (m_uiSanityCheckTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_INSANE_PERIODIC) == CAST_OK)
+                        m_uiSanityCheckTimer = 0;
+                }
+                else
+                    m_uiSanityCheckTimer -= uiDiff;
+            }
+
+            if (m_uiPhase == PHASE_SARA)
+            {
+                if (m_uiSummonGuardianTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_GUARDIAN_YOGG) == CAST_OK)
+                        m_uiSummonGuardianTimer = 20000;
+                }
+                else
+                    m_uiSummonGuardianTimer -= uiDiff;
+            }
+            else if (m_uiPhase == PHASE_VISIONS)
+            {
+                if (m_uiCorruptorTentacleTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_CORRUPTOR_TENTACLE) == CAST_OK)
+                        m_uiCorruptorTentacleTimer = 30000;
+                }
+                else
+                    m_uiCorruptorTentacleTimer -= uiDiff;
+
+                if (m_uiCrusherTentacleTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_CRUSHER_TENTACLE) == CAST_OK)
+                        m_uiCrusherTentacleTimer = 60000;
+                }
+                else
+                    m_uiCrusherTentacleTimer -= uiDiff;
+
+                if (m_uiConstrictorTentacleTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_CONSTRICTOR_TENTACLE) == CAST_OK)
+                        m_uiConstrictorTentacleTimer = 25000;
+                }
+                else
+                    m_uiConstrictorTentacleTimer -= uiDiff;
+
+                if (m_uiMadnessTimer < uiDiff)
+                {
+                    // no more portals if we already had 3
+                    if (m_uiPortalsCount == MAX_ILLUSIONS)
+                    {
+                        m_uiMadnessTimer = m_uiBerserkTimer * 2;
+                        return;
+                    }
+
+                    if (!m_pInstance)
+                        return;
+
+                    // inform the brain about the current illusion
+                    if (Creature* pBrain = m_pInstance->GetSingleCreatureFromStorage(NPC_YOGG_BRAIN))
+                        SendAIEvent(AI_EVENT_START_EVENT, m_creature, pBrain, m_uiPortalsCount);
+
+                    if (Creature* pYogg = m_pInstance->GetSingleCreatureFromStorage(NPC_YOGGSARON))
+                        DoScriptText(SAY_MADNESS, pYogg);
+
+                    float fX, fY, fZ, fAng;
+                    for (uint8 i = 0; i < m_uiMaxPortals; ++i)
+                    {
+                        fAng = (2 * M_PI_F / m_uiMaxPortals) * i;
+                        m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, 22.0f, fAng);
+                        m_creature->SummonCreature(NPC_DESCEND_INTO_MADNESS, fX, fY, fZ, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                    }
+
+                    DoScriptText(EMOTE_VISION_BLAST, m_creature);
+                    ++m_uiPortalsCount;
+                    m_uiMadnessTimer = 90000;
+                }
+                else
+                    m_uiMadnessTimer -= uiDiff;
+            }
+            else if (m_uiPhase == PHASE_OLD_GOD)
+            {
+                if (m_uiGuardianTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_IMMORTAL_GUARDIAN) == CAST_OK)
+                        m_uiGuardianTimer = 15000;
+                }
+                else
+                    m_uiGuardianTimer -= uiDiff;
+            }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_voice_yogg_saronAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_voice_yogg_saron(Creature* pCreature)
-{
-    return new npc_voice_yogg_saronAI(pCreature);
-}
 
 /*######
 ## npc_brain_yogg_saron
 ######*/
 
-struct  npc_brain_yogg_saronAI : public Scripted_NoMovementAI, private DialogueHelper
+struct npc_brain_yogg_saron : public CreatureScript
 {
-    npc_brain_yogg_saronAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature),
+    npc_brain_yogg_saron() : CreatureScript("npc_brain_yogg_saron") {}
+
+    struct npc_brain_yogg_saronAI : public Scripted_NoMovementAI, private DialogueHelper
+    {
+        npc_brain_yogg_saronAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature),
         DialogueHelper(aYoggIllusionsDialog)
-    {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
-        InitializeDialogueHelper(m_pInstance);
-        Reset();
-    }
-
-    instance_ulduar* m_pInstance;
-
-    uint8 m_uiIllusionIndex;
-    uint32 m_uiIllusionTimer;
-    
-    bool m_bBrainDefeated;
-
-    GuidList m_lTentaclesGuids;
-
-    void Reset() override
-    {
-        m_uiIllusionTimer = 0;
-        m_uiIllusionIndex = 0;
-
-        m_bBrainDefeated = false;
-        
-        DoCastSpellIfCan(m_creature, SPELL_MATCH_HEALTH);
-        
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
-    }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
-    {
-        // start illusion when informed by the voice controller
-        if (eventType == AI_EVENT_START_EVENT && pInvoker->GetEntry() == NPC_VOICE_OF_YOGG)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_INDUCE_MADNESS) == CAST_OK)
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            InitializeDialogueHelper(m_pInstance);
+        }
+
+        ScriptedInstance* m_pInstance;
+
+        uint8 m_uiIllusionIndex;
+        uint32 m_uiIllusionTimer;
+
+        bool m_bBrainDefeated;
+
+        GuidList m_lTentaclesGuids;
+
+        void Reset() override
+        {
+            m_uiIllusionTimer = 0;
+            m_uiIllusionIndex = 0;
+
+            m_bBrainDefeated = false;
+
+            DoCastSpellIfCan(m_creature, SPELL_MATCH_HEALTH);
+
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+        }
+
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+        {
+            // start illusion when informed by the voice controller
+            if (eventType == AI_EVENT_START_EVENT && pInvoker->GetEntry() == NPC_VOICE_OF_YOGG)
             {
-                m_lTentaclesGuids.clear();
-                DoPrepareIllusion(uiMiscValue);
-                m_uiIllusionIndex = uiMiscValue;
+                if (DoCastSpellIfCan(m_creature, SPELL_INDUCE_MADNESS) == CAST_OK)
+                {
+                    m_lTentaclesGuids.clear();
+                    DoPrepareIllusion(uiMiscValue);
+                    m_uiIllusionIndex = uiMiscValue;
+                }
             }
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
+        void JustSummoned(Creature* pSummoned) override
         {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_LAUGHING_SKULL:
                 pSummoned->CastSpell(pSummoned, SPELL_LUNATIC_GAZE_SKULL, false);
                 break;
@@ -1051,42 +1056,42 @@ struct  npc_brain_yogg_saronAI : public Scripted_NoMovementAI, private DialogueH
                 pSummoned->CastSpell(pSummoned, SPELL_GRIM_REPRISAL, true);
                 m_lTentaclesGuids.push_back(pSummoned->GetObjectGuid());
                 break;
+            }
         }
-    }
 
-    void SummonedCreatureJustDied(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_INFLUENCE_TENTACLE)
-            m_lTentaclesGuids.remove(pSummoned->GetObjectGuid());
-
-        // open door and stun all tentacles
-        if (m_lTentaclesGuids.empty())
+        void SummonedCreatureJustDied(Creature* pSummoned) override
         {
-            DoScriptText(EMOTE_SHATTER_BLAST, m_creature);
-            DoCastSpellIfCan(m_creature, SPELL_SHATTERED_ILLUSION, CAST_TRIGGERED);
-            m_uiIllusionTimer = 30000;
+            if (pSummoned->GetEntry() == NPC_INFLUENCE_TENTACLE)
+                m_lTentaclesGuids.remove(pSummoned->GetObjectGuid());
 
+            // open door and stun all tentacles
+            if (m_lTentaclesGuids.empty())
+            {
+                DoScriptText(EMOTE_SHATTER_BLAST, m_creature);
+                DoCastSpellIfCan(m_creature, SPELL_SHATTERED_ILLUSION, CAST_TRIGGERED);
+                m_uiIllusionTimer = 30000;
+
+                if (!m_pInstance)
+                    return;
+
+                m_pInstance->DoUseDoorOrButton(aMadnessChamberDoors[m_uiIllusionIndex]);
+
+                // respawn all nearby portals
+                std::list<GameObject*> lFleePortals;
+                GetGameObjectListWithEntryInGrid(lFleePortals, m_creature, GO_FLEE_TO_SURFACE, 40.0f);
+
+                for (std::list<GameObject*>::const_iterator itr = lFleePortals.begin(); itr != lFleePortals.end(); ++itr)
+                    m_pInstance->DoRespawnGameObject((*itr)->GetObjectGuid(), 30);
+            }
+        }
+
+        void JustDidDialogueStep(int32 iEntry) override
+        {
             if (!m_pInstance)
                 return;
 
-            m_pInstance->DoUseDoorOrButton(aMadnessChamberDoors[m_uiIllusionIndex]);
-
-            // respawn all nearby portals
-            std::list<GameObject*> lFleePortals;
-            GetGameObjectListWithEntryInGrid(lFleePortals, m_creature, GO_FLEE_TO_SURFACE, 40.0f);
-
-            for (std::list<GameObject*>::const_iterator itr = lFleePortals.begin(); itr != lFleePortals.end(); ++itr)
-                m_pInstance->DoRespawnGameObject((*itr)->GetObjectGuid(), 30);
-        }
-    }
-    
-    void JustDidDialogueStep(int32 iEntry) override
-    {
-        if (!m_pInstance)
-            return;
-        
-        switch (iEntry)
-        {
+            switch (iEntry)
+            {
             case SPELL_ASSASSINATE:
                 if (Creature* pGarona = m_pInstance->GetSingleCreatureFromStorage(NPC_GARONA))
                     pGarona->CastSpell(pGarona, SPELL_ASSASSINATE, true);
@@ -1095,15 +1100,15 @@ struct  npc_brain_yogg_saronAI : public Scripted_NoMovementAI, private DialogueH
                 if (Creature* pLichKing = m_pInstance->GetSingleCreatureFromStorage(NPC_LICH_KING))
                     pLichKing->CastSpell(pLichKing, SPELL_DEATHGRASP, false);
                 break;
+            }
         }
-    }
 
-    // Wrapper that prepars the illusions
-    void DoPrepareIllusion(uint8 uiIndex)
-    {
-        switch (uiIndex)
+        // Wrapper that prepars the illusions
+        void DoPrepareIllusion(uint8 uiIndex)
         {
-            // stormwind
+            switch (uiIndex)
+            {
+                // stormwind
             case 0:
                 m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1955.173f, 85.26153f, 239.7496f, 4.049f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1893.146f, 44.24343f, 239.7496f, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
@@ -1120,11 +1125,11 @@ struct  npc_brain_yogg_saronAI : public Scripted_NoMovementAI, private DialogueH
                 m_creature->SummonCreature(NPC_GARONA, 1931.348f, 61.0330f, 241.7094f, 2.008f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 m_creature->SummonCreature(NPC_KING_LLANE, 1930.465f, 62.6740f, 242.3763f, 5.196f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 m_creature->SummonCreature(NPC_YOGGSARON_ILLUSION, 1927.326f, 68.120f, 242.376f, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                
+
                 // start dialogue
                 StartNextDialogueText(NPC_KING_LLANE);
                 break;
-            // chamber
+                // chamber
             case 1:
                 m_creature->SummonCreature(NPC_LAUGHING_SKULL, 2063.156f, 27.95839f, 244.2707f, 5.288f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 m_creature->SummonCreature(NPC_LAUGHING_SKULL, 2061.257f, -53.8788f, 239.8633f, 2.478f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
@@ -1139,16 +1144,16 @@ struct  npc_brain_yogg_saronAI : public Scripted_NoMovementAI, private DialogueH
                 m_creature->SummonCreature(NPC_AZURE_CONSORT, 2112.182f, -65.787f, 239.721f, 1.651f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 m_creature->SummonCreature(NPC_EMERALD_CONSORT, 2110.621f, 15.579f, 239.758f, 4.644f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 m_creature->SummonCreature(NPC_EMERALD_CONSORT, 2137.336f, 5.452f, 239.717f, 3.866f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_NELTHARION, 2117.588f, -25.318f,  242.646f, 3.15f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_NELTHARION, 2117.588f, -25.318f, 242.646f, 3.15f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 m_creature->SummonCreature(NPC_ALEXSTRASZA, 2091.679f, -25.289f, 242.646f, 6.282f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 m_creature->SummonCreature(NPC_YSERA, 2114.504f, -16.118f, 242.646f, 3.91f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 m_creature->SummonCreature(NPC_MALYGOS, 2113.388f, -34.381f, 242.646f, 2.26f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 m_creature->SummonCreature(NPC_YOGGSARON_ILLUSION, 2104.555f, -25.635f, 242.646f, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                
+
                 // start dialogue
                 StartNextDialogueText(NPC_NELTHARION);
                 break;
-            // icecrown
+                // icecrown
             case 2:
                 m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1948.668f, -152.4481f, 240.073f, 1.919f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 m_creature->SummonCreature(NPC_LAUGHING_SKULL, 1879.845f, -72.91819f, 240.073f, 5.689f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
@@ -1165,579 +1170,657 @@ struct  npc_brain_yogg_saronAI : public Scripted_NoMovementAI, private DialogueH
                 m_creature->SummonCreature(NPC_DEATHSWORM_ZEALOT, 1897.345f, -106.6076f, 240.1444f, 4.939f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 m_creature->SummonCreature(NPC_LICH_KING, 1908.557f, -152.4427f, 240.0719f, 4.238f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 // the following is guesswork
-                m_creature->SummonCreature(NPC_IMMOLATED_CHAMPION, 1915.371f,-139.9342f,239.9896f, 4.159f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                m_creature->SummonCreature(NPC_YOGGSARON_ILLUSION, 1915.371f,-139.9342f,239.9896f, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
-                
+                m_creature->SummonCreature(NPC_IMMOLATED_CHAMPION, 1915.371f, -139.9342f, 239.9896f, 4.159f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+                m_creature->SummonCreature(NPC_YOGGSARON_ILLUSION, 1915.371f, -139.9342f, 239.9896f, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
+
                 // start dialogue
                 StartNextDialogueText(NPC_LICH_KING);
                 break;
+            }
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            DialogueUpdate(uiDiff);
+
+            // remove stun from tentacles after 30 sec
+            if (m_uiIllusionTimer)
+            {
+                if (m_uiIllusionTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_SHATTERED_ILLUSION_REMOVE) == CAST_OK)
+                        m_uiIllusionTimer = 0;
+                }
+                else
+                    m_uiIllusionTimer -= uiDiff;
+            }
+
+            // inform Yogg that health has dropped
+            if (!m_bBrainDefeated && m_creature->GetHealthPercent() < 30.0f)
+            {
+                m_uiIllusionTimer = 0;
+                m_bBrainDefeated = true;
+                DoCastSpellIfCan(m_creature, SPELL_BRAIN_HURT_VISUAL, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_SHATTERED_ILLUSION_REMOVE, CAST_TRIGGERED);
+                m_creature->RemoveAurasDueToSpell(SPELL_MATCH_HEALTH);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+
+                if (m_pInstance)
+                {
+                    if (Creature* pYogg = m_pInstance->GetSingleCreatureFromStorage(NPC_YOGGSARON))
+                        SendAIEvent(AI_EVENT_START_EVENT, m_creature, pYogg);
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        DialogueUpdate(uiDiff);
-        
-        // remove stun from tentacles after 30 sec
-        if (m_uiIllusionTimer)
-        {
-            if (m_uiIllusionTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_SHATTERED_ILLUSION_REMOVE) == CAST_OK)
-                    m_uiIllusionTimer = 0;
-            }
-            else
-                m_uiIllusionTimer -= uiDiff;
-        }
-        
-        // inform Yogg that health has dropped
-        if (!m_bBrainDefeated && m_creature->GetHealthPercent() < 30.0f)
-        {
-            m_uiIllusionTimer = 0;
-            m_bBrainDefeated = true;
-            DoCastSpellIfCan(m_creature, SPELL_BRAIN_HURT_VISUAL, CAST_TRIGGERED);
-            DoCastSpellIfCan(m_creature, SPELL_SHATTERED_ILLUSION_REMOVE, CAST_TRIGGERED);
-            m_creature->RemoveAurasDueToSpell(SPELL_MATCH_HEALTH);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
-            
-            if (m_pInstance)
-            {
-                if (Creature* pYogg = m_pInstance->GetSingleCreatureFromStorage(NPC_YOGGSARON))
-                    SendAIEvent(AI_EVENT_START_EVENT, m_creature, pYogg);
-            }
-        }
+        return new npc_brain_yogg_saronAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_brain_yogg_saron(Creature* pCreature)
-{
-    return new npc_brain_yogg_saronAI(pCreature);
-}
 
 /*######
 ## npc_guardian_of_yogg
 ######*/
 
-struct  npc_guardian_of_yoggAI : public ScriptedAI
+struct npc_guardian_of_yogg : public CreatureScript
 {
-    npc_guardian_of_yoggAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_guardian_of_yogg() : CreatureScript("npc_guardian_of_yogg") {}
+
+    struct npc_guardian_of_yoggAI : public ScriptedAI
     {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    instance_ulduar* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiDarkVolleyTimer;
-    uint32 m_uiDominateMindTimer;
-
-    void Reset() override
-    {
-        m_uiDarkVolleyTimer = 10000;
-        m_uiDominateMindTimer = 25000;
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (pWho->GetEntry() == NPC_SARA)
-            return;
-
-        ScriptedAI::AttackStart(pWho);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SHADOW_NOVA : SPELL_SHADOW_NOVA_H, CAST_TRIGGERED);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
+        npc_guardian_of_yoggAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (m_pInstance->GetData(TYPE_YOGGSARON) != FAIL)
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        }
+
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        uint32 m_uiDarkVolleyTimer;
+        uint32 m_uiDominateMindTimer;
+
+        void Reset() override
+        {
+            m_uiDarkVolleyTimer = 10000;
+            m_uiDominateMindTimer = 25000;
+        }
+
+        void AttackStart(Unit* pWho) override
+        {
+            if (pWho->GetEntry() == NPC_SARA)
+                return;
+
+            ScriptedAI::AttackStart(pWho);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SHADOW_NOVA : SPELL_SHADOW_NOVA_H, CAST_TRIGGERED);
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
             {
-                if (Creature* pVoice = m_pInstance->GetSingleCreatureFromStorage(NPC_VOICE_OF_YOGG))
+                if (m_pInstance->GetData(TYPE_YOGGSARON) != FAIL)
                 {
-                    Map::PlayerList const& lPlayers = m_pInstance->instance->GetPlayers();
-                    
-                    if (lPlayers.isEmpty())
-                        return;
-                    
-                    // whisper to all players
-                    for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+                    if (Creature* pVoice = m_pInstance->GetSingleCreatureFromStorage(NPC_VOICE_OF_YOGG))
                     {
-                        if (Player* pPlayer = itr->getSource())
-                            DoScriptText(SAY_WIPE_PHASE_1, pVoice, pPlayer);
+                        Map::PlayerList const& lPlayers = m_pInstance->instance->GetPlayers();
+
+                        if (lPlayers.isEmpty())
+                            return;
+
+                        // whisper to all players
+                        for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+                        {
+                            if (Player* pPlayer = itr->getSource())
+                                DoScriptText(SAY_WIPE_PHASE_1, pVoice, pPlayer);
+                        }
                     }
+
+                    m_pInstance->SetData(TYPE_YOGGSARON, FAIL);
                 }
-                
-                m_pInstance->SetData(TYPE_YOGGSARON, FAIL);
             }
+
+            m_creature->ForcedDespawn();
         }
 
-        m_creature->ForcedDespawn();
-    }
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
 
-    void UpdateAI(const uint32 uiDiff) override
+            if (m_uiDarkVolleyTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_DARK_VOLLEY) == CAST_OK)
+                    m_uiDarkVolleyTimer = urand(10000, 25000);
+            }
+            else
+                m_uiDarkVolleyTimer -= uiDiff;
+
+            if (m_uiDominateMindTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_DOMINATE_MIND) == CAST_OK)
+                    m_uiDominateMindTimer = urand(30000, 40000);
+            }
+            else
+                m_uiDominateMindTimer -= uiDiff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiDarkVolleyTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_DARK_VOLLEY) == CAST_OK)
-                m_uiDarkVolleyTimer = urand(10000, 25000);
-        }
-        else
-            m_uiDarkVolleyTimer -= uiDiff;
-
-        if (m_uiDominateMindTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_DOMINATE_MIND) == CAST_OK)
-                m_uiDominateMindTimer = urand(30000, 40000);
-        }
-        else
-            m_uiDominateMindTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+        return new npc_guardian_of_yoggAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_guardian_of_yogg(Creature* pCreature)
-{
-    return new npc_guardian_of_yoggAI(pCreature);
-}
 
 /*######
 ## npc_immortal_guardian
 ######*/
 
-struct  npc_immortal_guardianAI : public ScriptedAI
+struct npc_immortal_guardian : public CreatureScript
 {
-    npc_immortal_guardianAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_immortal_guardian() : CreatureScript("npc_immortal_guardian") {}
+
+    struct npc_immortal_guardianAI : public ScriptedAI
     {
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    bool m_bIsRegularMode;
-    bool m_bWeakened;
-
-    uint32 m_uiDrainLifeTimer;
-
-    void Reset() override
-    {
-        m_uiDrainLifeTimer = 10000;
-        m_bWeakened = false;
-    }
-
-    void DamageTaken(Unit* pDealer, uint32& uiDamage) override
-    {
-        if (pDealer->GetEntry() == NPC_THORIM_HELPER)
-            return;
-
-        if (uiDamage >= m_creature->GetHealth())
+        npc_immortal_guardianAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            uiDamage = 0;
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        }
 
-            // mark as weakened for Thorim
-            if (!m_bWeakened)
+        bool m_bIsRegularMode;
+        bool m_bWeakened;
+
+        uint32 m_uiDrainLifeTimer;
+
+        void Reset() override
+        {
+            m_uiDrainLifeTimer = 10000;
+            m_bWeakened = false;
+        }
+
+        void DamageTaken(Unit* pDealer, uint32& uiDamage) override
+        {
+            if (pDealer->GetEntry() == NPC_THORIM_HELPER)
+                return;
+
+            if (uiDamage >= m_creature->GetHealth())
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_WEAKENED) == CAST_OK)
-                    m_bWeakened = true;
+                uiDamage = 0;
+
+                // mark as weakened for Thorim
+                if (!m_bWeakened)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_WEAKENED) == CAST_OK)
+                        m_bWeakened = true;
+                }
             }
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiDrainLifeTimer < uiDiff)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_DRAIN_LIFE : SPELL_DRAIN_LIFE_H) == CAST_OK)
-                    m_uiDrainLifeTimer = urand(10000, 15000);
-            }
-        }
-        else
-            m_uiDrainLifeTimer -= uiDiff;
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
 
-        DoMeleeAttackIfReady();
+            if (m_uiDrainLifeTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_DRAIN_LIFE : SPELL_DRAIN_LIFE_H) == CAST_OK)
+                        m_uiDrainLifeTimer = urand(10000, 15000);
+                }
+            }
+            else
+                m_uiDrainLifeTimer -= uiDiff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_immortal_guardianAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_npc_immortal_guardian(Creature* pCreature)
+struct spell_yogg_empowered : public SpellScript
 {
-    return new npc_immortal_guardianAI(pCreature);
-}
+    spell_yogg_empowered() : SpellScript("spell_yogg_empowered") {}
 
-bool EffectDummyCreature_npc_immortal_guardian(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
-{
-    // NOTE: this may not be 100% correct and may require additional research
-    if (uiSpellId == SPELL_EMPOWERED && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_IMMORTAL_GUARDIAN)
+    bool EffectDummy(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Object* pTarget, ObjectGuid /*originalCasterGuid*/)
     {
-        uint8 uiProjectedStacks = pCreatureTarget->GetHealthPercent() * 0.1 - 1;
-        uint8 uiCurrentStacks = 0;
-
-        if (SpellAuraHolder* pEmpowerAura = pCreatureTarget->GetSpellAuraHolder(SPELL_EMPOWERED_MOD))
-            uiCurrentStacks = pEmpowerAura->GetStackAmount();
-
-        // if creature already has the required stacks, ignore
-        if (uiProjectedStacks == uiCurrentStacks)
-            return true;
-
-        if (uiCurrentStacks > uiProjectedStacks)
-            pCreatureTarget->RemoveAuraHolderFromStack(SPELL_EMPOWERED_MOD, uiCurrentStacks - uiProjectedStacks);
-        else
+        Creature* pCreatureTarget = pTarget->ToCreature();
+        // NOTE: this may not be 100% correct and may require additional research
+        if (uiSpellId == SPELL_EMPOWERED && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_IMMORTAL_GUARDIAN)
         {
-            for (uint8 i = 0; i < uiProjectedStacks - uiCurrentStacks; ++i)
-                pCreatureTarget->CastSpell(pCreatureTarget, SPELL_EMPOWERED_MOD, true);
+            uint8 uiProjectedStacks = pCreatureTarget->GetHealthPercent() * 0.1 - 1;
+            uint8 uiCurrentStacks = 0;
+
+            if (SpellAuraHolder* pEmpowerAura = pCreatureTarget->GetSpellAuraHolder(SPELL_EMPOWERED_MOD))
+                uiCurrentStacks = pEmpowerAura->GetStackAmount();
+
+            // if creature already has the required stacks, ignore
+            if (uiProjectedStacks == uiCurrentStacks)
+                return true;
+
+            if (uiCurrentStacks > uiProjectedStacks)
+                pCreatureTarget->RemoveAuraHolderFromStack(SPELL_EMPOWERED_MOD, uiCurrentStacks - uiProjectedStacks);
+            else
+            {
+                for (uint8 i = 0; i < uiProjectedStacks - uiCurrentStacks; ++i)
+                    pCreatureTarget->CastSpell(pCreatureTarget, SPELL_EMPOWERED_MOD, true);
+            }
+
+            if (uiCurrentStacks == 0 && uiCurrentStacks < uiProjectedStacks)
+                pCreatureTarget->RemoveAurasDueToSpell(SPELL_WEAKENED);
+
+            return true;
         }
 
-        if (uiCurrentStacks == 0 && uiCurrentStacks < uiProjectedStacks)
-            pCreatureTarget->RemoveAurasDueToSpell(SPELL_WEAKENED);
-
-        return true;
+        return false;
     }
-
-    return false;
-}
+};
 
 /*######
 ## npc_constrictor_tentacle
 ######*/
 
-struct  npc_constrictor_tentacleAI : public Scripted_NoMovementAI
+struct npc_constrictor_tentacle : public CreatureScript
 {
-    npc_constrictor_tentacleAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    npc_constrictor_tentacle() : CreatureScript("npc_constrictor_tentacle") {}
+
+    struct npc_constrictor_tentacleAI : public Scripted_NoMovementAI
     {
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
+        npc_constrictor_tentacleAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+        {
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        }
 
-    bool m_bIsRegularMode;
+        bool m_bIsRegularMode;
 
-    void Reset() override { }
+        void Reset() override { }
 
-    void JustDied(Unit* /*pKiller*/) override
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(((TemporarySummon*)m_creature)->GetSummonerGuid()))
+                pSummoner->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_SQUEEZE : SPELL_SQUEEZE_H);
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        if (Player* pSummoner = m_creature->GetMap()->GetPlayer(((TemporarySummon*)m_creature)->GetSummonerGuid()))
-            pSummoner->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_SQUEEZE : SPELL_SQUEEZE_H);
+        return new npc_constrictor_tentacleAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_constrictor_tentacle(Creature* pCreature)
-{
-    return new npc_constrictor_tentacleAI(pCreature);
-}
 
 /*######
 ## npc_ominous_cloud
 ######*/
 
-struct  npc_ominous_cloudAI : public Scripted_NoMovementAI
+struct npc_ominous_cloud : public CreatureScript
 {
-    npc_ominous_cloudAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    npc_ominous_cloud() : CreatureScript("npc_ominous_cloud") {}
 
-    uint32 m_uiDelayTimer;
-
-    void Reset() override
+    struct npc_ominous_cloudAI : public Scripted_NoMovementAI
     {
-        m_uiDelayTimer = 0;
-    }
+        npc_ominous_cloudAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { }
 
-    void AttackStart(Unit* /*pWho*/) override { }
+        uint32 m_uiDelayTimer;
 
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (!m_uiDelayTimer && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() && m_creature->IsWithinDistInMap(pWho, 7.0f))
+        void Reset() override
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_BOIL_OMNIOUSLY) == CAST_OK)
+            m_uiDelayTimer = 0;
+        }
+
+        void AttackStart(Unit* /*pWho*/) override { }
+
+        void MoveInLineOfSight(Unit* pWho) override
+        {
+            if (!m_uiDelayTimer && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() && m_creature->IsWithinDistInMap(pWho, 7.0f))
             {
-                DoScriptText(EMOTE_CLOUD_BOIL, m_creature, pWho);
-                m_uiDelayTimer = 10000;
+                if (DoCastSpellIfCan(m_creature, SPELL_BOIL_OMNIOUSLY) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_CLOUD_BOIL, m_creature, pWho);
+                    m_uiDelayTimer = 10000;
+                }
             }
         }
-    }
 
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
-    {
-        if (pSpell->Id == SPELL_SUMMON_GUARDIAN_YOGG)
-            m_uiDelayTimer = 10000;
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_GUARDIAN_OF_YOGG)
-            pSummoned->SetInCombatWithZone();
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiDelayTimer)
+        void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
         {
-            if (m_uiDelayTimer <= uiDiff)
-                m_uiDelayTimer = 0;
-            else
-                m_uiDelayTimer -= uiDiff;
+            if (pSpell->Id == SPELL_SUMMON_GUARDIAN_YOGG)
+                m_uiDelayTimer = 10000;
         }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_GUARDIAN_OF_YOGG)
+                pSummoned->SetInCombatWithZone();
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiDelayTimer)
+            {
+                if (m_uiDelayTimer <= uiDiff)
+                    m_uiDelayTimer = 0;
+                else
+                    m_uiDelayTimer -= uiDiff;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_ominous_cloudAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_ominous_cloud(Creature* pCreature)
-{
-    return new npc_ominous_cloudAI(pCreature);
-}
 
 /*######
 ## npc_death_ray
 ######*/
 
-struct  npc_death_rayAI : public ScriptedAI
+struct npc_death_ray : public CreatureScript
 {
-    npc_death_rayAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_death_ray() : CreatureScript("npc_death_ray") {}
 
-    uint32 m_uiDeathRayTimer;
-
-    void Reset() override
+    struct npc_death_rayAI : public ScriptedAI
     {
-        m_uiDeathRayTimer = 5000;
-    }
+        npc_death_rayAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* pWho) override { }
+        uint32 m_uiDeathRayTimer;
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiDeathRayTimer)
+        void Reset() override
         {
-            if (m_uiDeathRayTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_DEATH_RAY_VISUAL_DAMAGE, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
-                {
-                    DoCastSpellIfCan(m_creature, SPELL_DEATH_RAY_TRIGG, CAST_TRIGGERED);
-                    m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10.0f);
-                    m_uiDeathRayTimer = 0;
-                }
-            }
-            else
-                m_uiDeathRayTimer -= uiDiff;
+            m_uiDeathRayTimer = 5000;
         }
+
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* pWho) override { }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiDeathRayTimer)
+            {
+                if (m_uiDeathRayTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_DEATH_RAY_VISUAL_DAMAGE, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                    {
+                        DoCastSpellIfCan(m_creature, SPELL_DEATH_RAY_TRIGG, CAST_TRIGGERED);
+                        m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10.0f);
+                        m_uiDeathRayTimer = 0;
+                    }
+                }
+                else
+                    m_uiDeathRayTimer -= uiDiff;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_death_rayAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_death_ray(Creature* pCreature)
-{
-    return new npc_death_rayAI(pCreature);
-}
 
 /*######
 ## npc_descent_madness
 ######*/
 
-struct  npc_descent_madnessAI : public Scripted_NoMovementAI
+struct npc_descent_madness : public CreatureScript
 {
-    npc_descent_madnessAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    npc_descent_madness() : CreatureScript("npc_descent_madness") {}
+
+    struct npc_descent_madnessAI : public Scripted_NoMovementAI
     {
-        m_uiCurentSpell = 0;
-        Reset();
+        npc_descent_madnessAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+        {
+            m_uiCurentSpell = 0;
+        }
+
+        uint32 m_uiCurentSpell;
+
+        void Reset() override { }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 uiMiscValue) override
+        {
+            if (eventType == AI_EVENT_START_EVENT)
+                m_uiCurentSpell = uiMiscValue;
+        }
+
+        uint32 GetCurrentSpell() { return m_uiCurentSpell; }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_descent_madnessAI(pCreature);
     }
 
-    uint32 m_uiCurentSpell;
-
-    void Reset() override { }
-
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 uiMiscValue) override
+    bool OnSpellClick(Player* pPlayer, Creature* pClickedCreature, uint32 /*uiSpellId*/) override
     {
-        if (eventType == AI_EVENT_START_EVENT)
-            m_uiCurentSpell = uiMiscValue;
-    }
+        if (pClickedCreature->GetEntry() == NPC_DESCEND_INTO_MADNESS)
+        {
+            uint32 uiClickSpell = 0;
+            if (npc_descent_madnessAI* pDescentAI = dynamic_cast<npc_descent_madnessAI*>(pClickedCreature->AI()))
+                uiClickSpell = pDescentAI->GetCurrentSpell();
 
-    uint32 GetCurrentSpell() { return m_uiCurentSpell; }
-};
+            if (!uiClickSpell)
+                return true;
 
-CreatureAI* GetAI_npc_descent_madness(Creature* pCreature)
-{
-    return new npc_descent_madnessAI(pCreature);
-}
-
-bool NpcSpellClick_npc_descent_madness(Player* pPlayer, Creature* pClickedCreature, uint32 /*uiSpellId*/)
-{
-    if (pClickedCreature->GetEntry() == NPC_DESCEND_INTO_MADNESS)
-    {
-        uint32 uiClickSpell = 0;
-        if (npc_descent_madnessAI* pDescentAI = dynamic_cast<npc_descent_madnessAI*>(pClickedCreature->AI()))
-            uiClickSpell = pDescentAI->GetCurrentSpell();
-
-        if (!uiClickSpell)
+            pPlayer->CastSpell(pPlayer, uiClickSpell, true);
+            pClickedCreature->ForcedDespawn();
             return true;
+        }
 
-        pPlayer->CastSpell(pPlayer, uiClickSpell, true);
-        pClickedCreature->ForcedDespawn();
         return true;
     }
-
-    return true;
-}
+};
 
 /*######
 ## npc_laughing_skull
 ######*/
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct  npc_laughing_skullAI : public Scripted_NoMovementAI
+struct npc_laughing_skull : public CreatureScript
 {
-    npc_laughing_skullAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    npc_laughing_skull() : CreatureScript("npc_laughing_skull") {}
 
-    void Reset() override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
+    struct npc_laughing_skullAI : public Scripted_NoMovementAI
+    {
+        npc_laughing_skullAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { }
+
+        void Reset() override { }
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        void UpdateAI(const uint32 /*uiDiff*/) override { }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_laughing_skullAI(pCreature);
+    }
 };
-
-CreatureAI* GetAI_npc_laughing_skull(Creature* pCreature)
-{
-    return new npc_laughing_skullAI(pCreature);
-}
 
 /*######
 ## npc_keeper_mimiron
 ######*/
 
-struct  npc_keeper_mimironAI : public Scripted_NoMovementAI
+struct npc_keeper_mimiron : public CreatureScript
 {
-    npc_keeper_mimironAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    npc_keeper_mimiron() : CreatureScript("npc_keeper_mimiron") {}
 
-    uint32 m_uiMatrixTimer;
-
-    void Reset() override
+    struct npc_keeper_mimironAI : public Scripted_NoMovementAI
     {
-        m_uiMatrixTimer = 0;
-    }
+        npc_keeper_mimironAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { }
 
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        uint32 m_uiMatrixTimer;
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
-    {
-        if (eventType == AI_EVENT_START_EVENT && pInvoker->GetEntry() == NPC_SARA)
-            m_uiMatrixTimer = 30000;
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiMatrixTimer)
+        void Reset() override
         {
-            if (m_uiMatrixTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_DESTABILIZATION_MATRIX) == CAST_OK)
-                    m_uiMatrixTimer = 30000;
-            }
-            else
-                m_uiMatrixTimer -= uiDiff;
+            m_uiMatrixTimer = 0;
         }
+
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+        {
+            if (eventType == AI_EVENT_START_EVENT && pInvoker->GetEntry() == NPC_SARA)
+                m_uiMatrixTimer = 30000;
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiMatrixTimer)
+            {
+                if (m_uiMatrixTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_DESTABILIZATION_MATRIX) == CAST_OK)
+                        m_uiMatrixTimer = 30000;
+                }
+                else
+                    m_uiMatrixTimer -= uiDiff;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_keeper_mimironAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_keeper_mimiron(Creature* pCreature)
-{
-    return new npc_keeper_mimironAI(pCreature);
-}
 
 /*######
 ## npc_keeper_thorim
 ######*/
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct  npc_keeper_thorimAI : public Scripted_NoMovementAI
+struct npc_keeper_thorim : public CreatureScript
 {
-    npc_keeper_thorimAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    npc_keeper_thorim() : CreatureScript("npc_keeper_thorim") {}
 
-    void Reset() override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
+    struct npc_keeper_thorimAI : public Scripted_NoMovementAI
+    {
+        npc_keeper_thorimAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { }
+
+        void Reset() override { }
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        void UpdateAI(const uint32 /*uiDiff*/) override { }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_keeper_thorimAI(pCreature);
+    }
 };
-
-CreatureAI* GetAI_npc_keeper_thorim(Creature* pCreature)
-{
-    return new npc_keeper_thorimAI(pCreature);
-}
 
 
 void AddSC_boss_yogg_saron()
 {
-    Script* pNewScript;
-    
-    pNewScript = new Script;
-    pNewScript->Name = "boss_yogg_saron";
-    pNewScript->GetAI = &GetAI_boss_yogg_saron;
-    pNewScript->RegisterSelf();
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_sara";
-    pNewScript->GetAI = &GetAI_boss_sara;
-    pNewScript->RegisterSelf();
+    s = new boss_yogg_saron();
+    s->RegisterSelf();
+    s = new boss_sara();
+    s->RegisterSelf();
+    s = new npc_voice_yogg_saron();
+    s->RegisterSelf();
+    s = new npc_brain_yogg_saron();
+    s->RegisterSelf();
+    s = new npc_guardian_of_yogg();
+    s->RegisterSelf();
+    s = new npc_immortal_guardian();
+    s->RegisterSelf();
+    s = new npc_constrictor_tentacle();
+    s->RegisterSelf();
+    s = new npc_ominous_cloud();
+    s->RegisterSelf();
+    s = new npc_death_ray();
+    s->RegisterSelf();
+    s = new npc_descent_madness();
+    s->RegisterSelf();
+    s = new npc_laughing_skull();
+    s->RegisterSelf();
+    s = new npc_keeper_mimiron();
+    s->RegisterSelf();
+    s = new npc_keeper_thorim();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_voice_yogg_saron";
-    pNewScript->GetAI = &GetAI_npc_voice_yogg_saron;
-    pNewScript->RegisterSelf();
+    s = new spell_yogg_empowered();
+    s->RegisterSelf();
     
-    pNewScript = new Script;
-    pNewScript->Name = "npc_brain_yogg_saron";
-    pNewScript->GetAI = &GetAI_npc_brain_yogg_saron;
-    pNewScript->RegisterSelf();
-    
-    pNewScript = new Script;
-    pNewScript->Name = "npc_guardian_of_yogg";
-    pNewScript->GetAI = &GetAI_npc_guardian_of_yogg;
-    pNewScript->RegisterSelf();
-    
-    pNewScript = new Script;
-    pNewScript->Name = "npc_immortal_guardian";
-    pNewScript->GetAI = &GetAI_npc_immortal_guardian;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_immortal_guardian;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_yogg_saron";
+    //pNewScript->GetAI = &GetAI_boss_yogg_saron;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_constrictor_tentacle";
-    pNewScript->GetAI = &GetAI_npc_constrictor_tentacle;
-    pNewScript->RegisterSelf();
-    
-    pNewScript = new Script;
-    pNewScript->Name = "npc_ominous_cloud";
-    pNewScript->GetAI = &GetAI_npc_ominous_cloud;
-    pNewScript->RegisterSelf();
-    
-    pNewScript = new Script;
-    pNewScript->Name = "npc_death_ray";
-    pNewScript->GetAI = &GetAI_npc_death_ray;
-    pNewScript->RegisterSelf();
-    
-    pNewScript = new Script;
-    pNewScript->Name = "npc_descent_madness";
-    pNewScript->GetAI = &GetAI_npc_descent_madness;
-    pNewScript->pNpcSpellClick = &NpcSpellClick_npc_descent_madness;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_sara";
+    //pNewScript->GetAI = &GetAI_boss_sara;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_laughing_skull";
-    pNewScript->GetAI = &GetAI_npc_laughing_skull;
-    pNewScript->RegisterSelf();
-    
-    pNewScript = new Script;
-    pNewScript->Name = "npc_keeper_mimiron";
-    pNewScript->GetAI = &GetAI_npc_keeper_mimiron;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_voice_yogg_saron";
+    //pNewScript->GetAI = &GetAI_npc_voice_yogg_saron;
+    //pNewScript->RegisterSelf();
+    //
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_brain_yogg_saron";
+    //pNewScript->GetAI = &GetAI_npc_brain_yogg_saron;
+    //pNewScript->RegisterSelf();
+    //
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_guardian_of_yogg";
+    //pNewScript->GetAI = &GetAI_npc_guardian_of_yogg;
+    //pNewScript->RegisterSelf();
+    //
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_immortal_guardian";
+    //pNewScript->GetAI = &GetAI_npc_immortal_guardian;
+    //pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_immortal_guardian;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_keeper_thorim";
-    pNewScript->GetAI = &GetAI_npc_keeper_thorim;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_constrictor_tentacle";
+    //pNewScript->GetAI = &GetAI_npc_constrictor_tentacle;
+    //pNewScript->RegisterSelf();
+    //
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_ominous_cloud";
+    //pNewScript->GetAI = &GetAI_npc_ominous_cloud;
+    //pNewScript->RegisterSelf();
+    //
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_death_ray";
+    //pNewScript->GetAI = &GetAI_npc_death_ray;
+    //pNewScript->RegisterSelf();
+    //
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_descent_madness";
+    //pNewScript->GetAI = &GetAI_npc_descent_madness;
+    //pNewScript->pNpcSpellClick = &NpcSpellClick_npc_descent_madness;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_laughing_skull";
+    //pNewScript->GetAI = &GetAI_npc_laughing_skull;
+    //pNewScript->RegisterSelf();
+    //
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_keeper_mimiron";
+    //pNewScript->GetAI = &GetAI_npc_keeper_mimiron;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_keeper_thorim";
+    //pNewScript->GetAI = &GetAI_npc_keeper_thorim;
+    //pNewScript->RegisterSelf();
 }

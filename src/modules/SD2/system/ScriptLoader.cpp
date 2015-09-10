@@ -232,7 +232,7 @@ void AddEasternKingdomsScripts()
     AddSC_boss_jandicebarov();
     AddSC_instance_scholomance();
     AddSC_boss_hummel();                                    // shadowfang_keep
-    AddSC_shadowfang_keep();
+    AddSC_shadowfang_keep();                                // shadowfang_keep
     AddSC_instance_shadowfang_keep();
     AddSC_boss_maleki_the_pallid();                         // stratholme
     AddSC_boss_cannon_master_willey();
@@ -303,6 +303,7 @@ void AddEasternKingdomsScripts()
 
 // kalimdor
 void AddSC_instance_blackfathom_deeps();             // blackfathom_deeps
+void AddSC_blackfathom_deeps();
 void AddSC_boss_aeonus();                            // COT, dark_portal
 void AddSC_boss_chrono_lord_deja();
 void AddSC_boss_temporus();
@@ -320,7 +321,8 @@ void AddSC_instance_dire_maul();
 void AddSC_boss_noxxion();                           // maraudon
 void AddSC_boss_onyxia();                            // onyxias_lair
 void AddSC_instance_onyxias_lair();
-void AddSC_razorfen_downs();                         // razorfen_downs
+void AddSC_instance_razorfen_downs();                // razorfen_downs
+void AddSC_razorfen_downs();
 void AddSC_instance_razorfen_kraul();                // razorfen_kraul
 void AddSC_razorfen_kraul();
 void AddSC_boss_ayamiss();                           // ruins_of_ahnqiraj
@@ -374,6 +376,7 @@ void AddSC_winterspring();
 void AddKalimdorScripts()
 {
     AddSC_instance_blackfathom_deeps();                     // blackfathom deeps
+    AddSC_blackfathom_deeps();
     AddSC_boss_aeonus();                                    // CoT, dark_portal
     AddSC_boss_chrono_lord_deja();
     AddSC_boss_temporus();
@@ -391,7 +394,8 @@ void AddKalimdorScripts()
     AddSC_boss_noxxion();                                   // maraudon
     AddSC_boss_onyxia();                                    // onyxias_lair
     AddSC_instance_onyxias_lair();
-    AddSC_razorfen_downs();                                 // razorfen_downs
+    AddSC_instance_razorfen_downs();                        // razorfen_downs
+    AddSC_razorfen_downs();
     AddSC_instance_razorfen_kraul();                        // razorfen_kraul
     AddSC_razorfen_kraul();
     AddSC_boss_ayamiss();                                   // ruins_of_ahnqiraj

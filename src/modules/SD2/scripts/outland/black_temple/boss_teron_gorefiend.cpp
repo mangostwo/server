@@ -70,167 +70,202 @@ enum
     // NPC_VENGEFUL_SPIRIT       = 23109,                   // npc controlled by the dead player
 };
 
-struct boss_teron_gorefiendAI : public ScriptedAI
+struct boss_teron_gorefiend : public CreatureScript
 {
-    boss_teron_gorefiendAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_teron_gorefiend() : CreatureScript("boss_teron_gorefiend") {}
+
+    struct boss_teron_gorefiendAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIntroDone = false;
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiIncinerateTimer;
-    uint32 m_uiSummonDoomBlossomTimer;
-    uint32 m_uiBerserkTimer;
-    uint32 m_uiCrushingShadowsTimer;
-    uint32 m_uiShadowOfDeathTimer;
-
-    bool m_bIntroDone;
-
-    void Reset() override
-    {
-        m_uiIncinerateTimer         = urand(20000, 30000);
-        m_uiSummonDoomBlossomTimer  = urand(5000, 10000);
-        m_uiShadowOfDeathTimer      = 10000;
-        m_uiCrushingShadowsTimer    = 22000;
-        m_uiBerserkTimer            = 10 * MINUTE * IN_MILLISECONDS;
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_GOREFIEND, FAIL); }
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_GOREFIEND, IN_PROGRESS); }
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (!m_bIntroDone && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 60.0f))
+        boss_teron_gorefiendAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            DoScriptText(SAY_INTRO, m_creature);
-            m_bIntroDone = true;
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIntroDone = false;
         }
 
-        ScriptedAI::MoveInLineOfSight(pWho);
-    }
+        ScriptedInstance* m_pInstance;
 
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-        { return; }
+        uint32 m_uiIncinerateTimer;
+        uint32 m_uiSummonDoomBlossomTimer;
+        uint32 m_uiBerserkTimer;
+        uint32 m_uiCrushingShadowsTimer;
+        uint32 m_uiShadowOfDeathTimer;
 
-        DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
-    }
+        bool m_bIntroDone;
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_GOREFIEND, DONE); }
-
-        DoScriptText(SAY_DEATH, m_creature);
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_SHADOWY_CONSTRUCT)
-        { pSummoned->CastSpell(pSummoned, SPELL_SHADOWY_CONSTRUCT, true); }
-
-        pSummoned->SetInCombatWithZone();
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiSummonDoomBlossomTimer < uiDiff)
+        void Reset() override
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_DOOM_BLOSSOM) == CAST_OK)
-            {
-                if (urand(0, 1))
-                { DoScriptText(urand(0, 1) ? SAY_SPELL1 : SAY_SPELL2, m_creature); }
+            m_uiIncinerateTimer = urand(20000, 30000);
+            m_uiSummonDoomBlossomTimer = urand(5000, 10000);
+            m_uiShadowOfDeathTimer = 10000;
+            m_uiCrushingShadowsTimer = 22000;
+            m_uiBerserkTimer = 10 * MINUTE * IN_MILLISECONDS;
+        }
 
-                m_uiSummonDoomBlossomTimer = 35000;
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_GOREFIEND, FAIL);
             }
         }
-        else
-        { m_uiSummonDoomBlossomTimer -= uiDiff; }
 
-        if (m_uiIncinerateTimer < uiDiff)
+        void Aggro(Unit* /*pWho*/) override
         {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
+            DoScriptText(SAY_AGGRO, m_creature);
 
-            if (DoCastSpellIfCan(pTarget ? pTarget : m_creature->getVictim(), SPELL_INCINERATE) == CAST_OK)
-            { m_uiIncinerateTimer = urand(20000, 50000); }
-        }
-        else
-        { m_uiIncinerateTimer -= uiDiff; }
-
-        if (m_uiCrushingShadowsTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_CRUSHING_SHADOWS) == CAST_OK)
+            if (m_pInstance)
             {
-                if (urand(0, 1))
-                { DoScriptText(urand(0, 1) ? SAY_SPECIAL1 : SAY_SPECIAL2, m_creature); }
-
-                m_uiCrushingShadowsTimer = urand(10000, 26000);
+                m_pInstance->SetData(TYPE_GOREFIEND, IN_PROGRESS);
             }
         }
-        else
-        { m_uiCrushingShadowsTimer -= uiDiff; }
 
-        if (m_uiShadowOfDeathTimer < uiDiff)
+        void MoveInLineOfSight(Unit* pWho) override
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_SHADOW_OF_DEATH, SELECT_FLAG_PLAYER))
+            if (!m_bIntroDone && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 60.0f))
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_OF_DEATH) == CAST_OK)
+                DoScriptText(SAY_INTRO, m_creature);
+                m_bIntroDone = true;
+            }
+
+            ScriptedAI::MoveInLineOfSight(pWho);
+        }
+
+        void KilledUnit(Unit* pVictim) override
+        {
+            if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            {
+                return;
+            }
+
+            DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_GOREFIEND, DONE);
+            }
+
+            DoScriptText(SAY_DEATH, m_creature);
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_SHADOWY_CONSTRUCT)
+            {
+                pSummoned->CastSpell(pSummoned, SPELL_SHADOWY_CONSTRUCT, true);
+            }
+
+            pSummoned->SetInCombatWithZone();
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_uiSummonDoomBlossomTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_DOOM_BLOSSOM) == CAST_OK)
                 {
-                    DoScriptText(urand(0, 1) ? SAY_SPECIAL1 : SAY_SPECIAL2, m_creature);
-                    m_uiShadowOfDeathTimer = 30000;
-                }
-            }
-        }
-        else
-        { m_uiShadowOfDeathTimer -= uiDiff; }
+                    if (urand(0, 1))
+                    {
+                        DoScriptText(urand(0, 1) ? SAY_SPELL1 : SAY_SPELL2, m_creature);
+                    }
 
-        if (m_uiBerserkTimer)
-        {
-            if (m_uiBerserkTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                {
-                    DoScriptText(SAY_ENRAGE, m_creature);
-                    m_uiBerserkTimer = 0;
+                    m_uiSummonDoomBlossomTimer = 35000;
                 }
             }
             else
-            { m_uiBerserkTimer -= uiDiff; }
-        }
+            {
+                m_uiSummonDoomBlossomTimer -= uiDiff;
+            }
 
-        DoMeleeAttackIfReady();
+            if (m_uiIncinerateTimer < uiDiff)
+            {
+                Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
+
+                if (DoCastSpellIfCan(pTarget ? pTarget : m_creature->getVictim(), SPELL_INCINERATE) == CAST_OK)
+                {
+                    m_uiIncinerateTimer = urand(20000, 50000);
+                }
+            }
+            else
+            {
+                m_uiIncinerateTimer -= uiDiff;
+            }
+
+            if (m_uiCrushingShadowsTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_CRUSHING_SHADOWS) == CAST_OK)
+                {
+                    if (urand(0, 1))
+                    {
+                        DoScriptText(urand(0, 1) ? SAY_SPECIAL1 : SAY_SPECIAL2, m_creature);
+                    }
+
+                    m_uiCrushingShadowsTimer = urand(10000, 26000);
+                }
+            }
+            else
+            {
+                m_uiCrushingShadowsTimer -= uiDiff;
+            }
+
+            if (m_uiShadowOfDeathTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_SHADOW_OF_DEATH, SELECT_FLAG_PLAYER))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_OF_DEATH) == CAST_OK)
+                    {
+                        DoScriptText(urand(0, 1) ? SAY_SPECIAL1 : SAY_SPECIAL2, m_creature);
+                        m_uiShadowOfDeathTimer = 30000;
+                    }
+                }
+            }
+            else
+            {
+                m_uiShadowOfDeathTimer -= uiDiff;
+            }
+
+            if (m_uiBerserkTimer)
+            {
+                if (m_uiBerserkTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                    {
+                        DoScriptText(SAY_ENRAGE, m_creature);
+                        m_uiBerserkTimer = 0;
+                    }
+                }
+                else
+                {
+                    m_uiBerserkTimer -= uiDiff;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_teron_gorefiendAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_teron_gorefiend(Creature* pCreature)
-{
-    return new boss_teron_gorefiendAI(pCreature);
-}
-
 void AddSC_boss_teron_gorefiend()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_teron_gorefiend";
-    pNewScript->GetAI = &GetAI_boss_teron_gorefiend;
-    pNewScript->RegisterSelf();
+    s = new boss_teron_gorefiend();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_teron_gorefiend";
+    //pNewScript->GetAI = &GetAI_boss_teron_gorefiend;
+    //pNewScript->RegisterSelf();
 }

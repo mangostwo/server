@@ -87,335 +87,406 @@ enum
 ## boss_ahune
 ######*/
 
-struct boss_ahuneAI : public Scripted_NoMovementAI
+struct boss_ahune : public CreatureScript
 {
-    boss_ahuneAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    boss_ahune() : CreatureScript("boss_ahune") {}
+
+    struct boss_ahuneAI : public Scripted_NoMovementAI
     {
-        m_bHasCombatStarted = false;
-        Reset();
-    }
-
-    bool m_bHasCombatStarted;
-
-    uint8 m_uiPhase;
-    uint8 m_uiPhaseChangeCount;
-    uint32 m_uiPhaseChangeTimer;
-
-    uint32 m_uiHailstoneTimer;
-    uint32 m_uiColdwaveTimer;
-    uint32 m_uiFrostwindTimer;
-
-    ObjectGuid m_frozenCoreGuid;
-
-    void Reset() override
-    {
-        m_uiPhase               = PHASE_GROUND;
-        m_uiPhaseChangeTimer    = 90000;
-        m_uiPhaseChangeCount    = 0;
-
-        m_uiHailstoneTimer      = 1000;
-        m_uiColdwaveTimer       = urand(5000, 10000);
-        m_uiFrostwindTimer      = urand(20000, 25000);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoCastSpellIfCan(m_creature, SPELL_BIRTH);
-        DoCastSpellIfCan(m_creature, SPELL_AHUNES_SHIELD, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-        DoCastSpellIfCan(m_creature, SPELL_SPANKY_HANDS, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoCastSpellIfCan(m_creature, SPELL_AHUNE_DIES_ACHIEV, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, m_creature->GetMap()->IsRegularDifficulty() ? SPELL_AHUNE_LOOT : SPELL_AHUNE_LOOT_H, CAST_TRIGGERED);
-    }
-
-    void JustReachedHome() override
-    {
-        // Cleanup on evade is done by creature_linking
-        m_creature->ForcedDespawn();
-    }
-
-    void DamageTaken(Unit* /* pDoneBy */, uint32& uiDamage) override
-    {
-        // it's not clear whether this should work like this or should be handled by the proc aura
-        if (Creature* pCore = m_creature->GetMap()->GetCreature(m_frozenCoreGuid))
-        { DoCastSpellIfCan(pCore, SPELL_SYNCH_HEALTH, CAST_TRIGGERED); }
-    }
-
-    void SpellHit(Unit* /*pSource*/, const SpellEntry* pSpell) override
-    {
-        if (pSpell->Id == SPELL_SUBMERGE)
+        boss_ahuneAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
         {
-            // Note: the following spell breaks the visual. Needs to be fixed!
-            // DoCastSpellIfCan(m_creature, SPELL_AHUNE_SELF_STUN, CAST_TRIGGERED);
-
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-
-            if (Creature* pCore = m_creature->GetMap()->GetCreature(m_frozenCoreGuid))
-            { pCore->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE); }
+            m_bHasCombatStarted = false;
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
+        bool m_bHasCombatStarted;
+
+        uint8 m_uiPhase;
+        uint8 m_uiPhaseChangeCount;
+        uint32 m_uiPhaseChangeTimer;
+
+        uint32 m_uiHailstoneTimer;
+        uint32 m_uiColdwaveTimer;
+        uint32 m_uiFrostwindTimer;
+
+        ObjectGuid m_frozenCoreGuid;
+
+        void Reset() override
         {
+            m_uiPhase = PHASE_GROUND;
+            m_uiPhaseChangeTimer = 90000;
+            m_uiPhaseChangeCount = 0;
+
+            m_uiHailstoneTimer = 1000;
+            m_uiColdwaveTimer = urand(5000, 10000);
+            m_uiFrostwindTimer = urand(20000, 25000);
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoCastSpellIfCan(m_creature, SPELL_BIRTH);
+            DoCastSpellIfCan(m_creature, SPELL_AHUNES_SHIELD, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+            DoCastSpellIfCan(m_creature, SPELL_SPANKY_HANDS, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoCastSpellIfCan(m_creature, SPELL_AHUNE_DIES_ACHIEV, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, m_creature->GetMap()->IsRegularDifficulty() ? SPELL_AHUNE_LOOT : SPELL_AHUNE_LOOT_H, CAST_TRIGGERED);
+        }
+
+        void JustReachedHome() override
+        {
+            // Cleanup on evade is done by creature_linking
+            m_creature->ForcedDespawn();
+        }
+
+        void DamageTaken(Unit* pDoneBy, uint32& uiDamage) override
+        {
+            // it's not clear whether this should work like this or should be handled by the proc aura
+            if (Creature* pCore = m_creature->GetMap()->GetCreature(m_frozenCoreGuid))
+            {
+                DoCastSpellIfCan(pCore, SPELL_SYNCH_HEALTH, CAST_TRIGGERED);
+            }
+        }
+
+        void SpellHit(Unit* /*pSource*/, const SpellEntry* pSpell) override
+        {
+            if (pSpell->Id == SPELL_SUBMERGE)
+            {
+                // Note: the following spell breaks the visual. Needs to be fixed!
+                // DoCastSpellIfCan(m_creature, SPELL_AHUNE_SELF_STUN, CAST_TRIGGERED);
+
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+                if (Creature* pCore = m_creature->GetMap()->GetCreature(m_frozenCoreGuid))
+                {
+                    pCore->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                }
+            }
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_AHUNITE_HAILSTONE:
             case NPC_AHUNITE_COLDWAVE:
             case NPC_AHUNITE_FROSTWIND:
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                { pSummoned->AI()->AttackStart(pTarget); }
+                {
+                    pSummoned->AI()->AttackStart(pTarget);
+                }
                 break;
             case NPC_FROZEN_CORE:
                 m_frozenCoreGuid = pSummoned->GetObjectGuid();
                 break;
+            }
         }
-    }
 
-    void SummonedCreatureJustDied(Creature* pSummoned) override
-    {
-        // When the core dies, commit suicide
-        if (pSummoned->GetEntry() == NPC_FROZEN_CORE)
-        { DoCastSpellIfCan(m_creature, SPELL_SUICIDE, CAST_TRIGGERED); }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        // Attack on first update tick, in order to properly handle the spawn animation
-        if (!m_bHasCombatStarted)
+        void SummonedCreatureJustDied(Creature* pSummoned) override
         {
-            if (m_creature->IsTemporarySummon())
+            // When the core dies, commit suicide
+            if (pSummoned->GetEntry() == NPC_FROZEN_CORE)
             {
-                TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
+                DoCastSpellIfCan(m_creature, SPELL_SUICIDE, CAST_TRIGGERED);
+            }
+        }
 
-                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
-                { AttackStart(pSummoner); }
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            // Attack on first update tick, in order to properly handle the spawn animation
+            if (!m_bHasCombatStarted)
+            {
+                if (m_creature->IsTemporarySummon())
+                {
+                    TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
+
+                    if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
+                    {
+                        AttackStart(pSummoner);
+                    }
+                }
+
+                m_bHasCombatStarted = true;
             }
 
-            m_bHasCombatStarted = true;
-        }
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiPhase == PHASE_GROUND)
-        {
-            // only once at the beginning of the phase
-            if (m_uiHailstoneTimer)
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             {
-                if (m_uiHailstoneTimer <= uiDiff)
+                return;
+            }
+
+            if (m_uiPhase == PHASE_GROUND)
+            {
+                // only once at the beginning of the phase
+                if (m_uiHailstoneTimer)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_HAILSTONE) == CAST_OK)
-                    { m_uiHailstoneTimer = 0; }
+                    if (m_uiHailstoneTimer <= uiDiff)
+                    {
+                        if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_HAILSTONE) == CAST_OK)
+                        {
+                            m_uiHailstoneTimer = 0;
+                        }
+                    }
+                    else
+                    {
+                        m_uiHailstoneTimer -= uiDiff;
+                    }
+                }
+
+                if (m_uiColdwaveTimer < uiDiff)
+                {
+                    for (uint8 i = 0; i < 2; ++i)
+                    {
+                        DoCastSpellIfCan(m_creature, SPELL_SUMMON_COLDWAVE);
+                    }
+
+                    m_uiColdwaveTimer = urand(5000, 10000);
                 }
                 else
-                { m_uiHailstoneTimer -= uiDiff; }
-            }
-
-            if (m_uiColdwaveTimer < uiDiff)
-            {
-                for (uint8 i = 0; i < 2; ++i)
-                { DoCastSpellIfCan(m_creature, SPELL_SUMMON_COLDWAVE); }
-
-                m_uiColdwaveTimer = urand(5000, 10000);
-            }
-            else
-            { m_uiColdwaveTimer -= uiDiff; }
-
-            // starts only after the first phase change
-            if (m_uiPhaseChangeCount)
-            {
-                if (m_uiFrostwindTimer < uiDiff)
                 {
-                    for (uint8 i = 0; i < m_uiPhaseChangeCount; ++i)
-                    { DoCastSpellIfCan(m_creature, SPELL_SUMMON_FROSTWIND); }
+                    m_uiColdwaveTimer -= uiDiff;
+                }
 
-                    m_uiFrostwindTimer = urand(5000, 10000);
+                // starts only after the first phase change
+                if (m_uiPhaseChangeCount)
+                {
+                    if (m_uiFrostwindTimer < uiDiff)
+                    {
+                        for (uint8 i = 0; i < m_uiPhaseChangeCount; ++i)
+                        {
+                            DoCastSpellIfCan(m_creature, SPELL_SUMMON_FROSTWIND);
+                        }
+
+                        m_uiFrostwindTimer = urand(5000, 10000);
+                    }
+                    else
+                    {
+                        m_uiFrostwindTimer -= uiDiff;
+                    }
+                }
+
+                if (m_uiPhaseChangeTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_SUBMERGE) == CAST_OK)
+                    {
+                        m_uiPhaseChangeTimer = 40000;
+                        m_uiPhase = PHASE_SUBMERGED;
+                        ++m_uiPhaseChangeCount;
+                    }
                 }
                 else
-                { m_uiFrostwindTimer -= uiDiff; }
-            }
-
-            if (m_uiPhaseChangeTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_SUBMERGE) == CAST_OK)
                 {
-                    m_uiPhaseChangeTimer = 40000;
-                    m_uiPhase = PHASE_SUBMERGED;
-                    ++m_uiPhaseChangeCount;
+                    m_uiPhaseChangeTimer -= uiDiff;
+                }
+
+                DoMeleeAttackIfReady();
+            }
+            else if (m_uiPhase == PHASE_SUBMERGED)
+            {
+                if (m_uiPhaseChangeTimer < uiDiff)
+                {
+                    m_creature->RemoveAurasDueToSpell(SPELL_SUBMERGE);
+                    m_creature->RemoveAurasDueToSpell(SPELL_AHUNE_SELF_STUN);
+                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+                    DoCastSpellIfCan(m_creature, SPELL_BIRTH);
+
+                    if (Creature* pCore = m_creature->GetMap()->GetCreature(m_frozenCoreGuid))
+                    {
+                        pCore->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                    }
+
+                    m_uiPhase = PHASE_GROUND;
+                    m_uiHailstoneTimer = 1000;
+                    m_uiPhaseChangeTimer = 90000;
+                }
+                else
+                {
+                    m_uiPhaseChangeTimer -= uiDiff;
                 }
             }
-            else
-            { m_uiPhaseChangeTimer -= uiDiff; }
-
-            DoMeleeAttackIfReady();
         }
-        else if (m_uiPhase == PHASE_SUBMERGED)
-        {
-            if (m_uiPhaseChangeTimer < uiDiff)
-            {
-                m_creature->RemoveAurasDueToSpell(SPELL_SUBMERGE);
-                m_creature->RemoveAurasDueToSpell(SPELL_AHUNE_SELF_STUN);
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+    };
 
-                DoCastSpellIfCan(m_creature, SPELL_BIRTH);
-
-                if (Creature* pCore = m_creature->GetMap()->GetCreature(m_frozenCoreGuid))
-                { pCore->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE); }
-
-                m_uiPhase = PHASE_GROUND;
-                m_uiHailstoneTimer   = 1000;
-                m_uiPhaseChangeTimer = 90000;
-            }
-            else
-            { m_uiPhaseChangeTimer -= uiDiff; }
-        }
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_ahuneAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_ahune(Creature* pCreature)
-{
-    return new boss_ahuneAI(pCreature);
-}
 
 /*######
 ## npc_frozen_core
 ######*/
 
-struct npc_frozen_coreAI : public Scripted_NoMovementAI
+struct npc_frozen_core : public CreatureScript
 {
-    npc_frozen_coreAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    npc_frozen_core() : CreatureScript("npc_frozen_core") {}
 
-    ObjectGuid m_ahuheGuid;
-
-    void Reset() override
+    struct npc_frozen_coreAI : public Scripted_NoMovementAI
     {
-        if (m_creature->IsTemporarySummon())
-        { m_ahuheGuid = ((TemporarySummon*)m_creature)->GetSummonerGuid(); }
+        npc_frozen_coreAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { }
 
-        DoCastSpellIfCan(m_creature, SPELL_FROZEN_CORE_HIT, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-        DoCastSpellIfCan(m_creature, SPELL_ICE_SPEAR_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-    }
+        ObjectGuid m_ahuheGuid;
 
-    void DamageTaken(Unit* /* pDoneBy */, uint32& uiDamage) override
-    {
-        // it's not clear whether this should work like this or should be handled by the proc aura
-        if (Creature* pAhune = m_creature->GetMap()->GetCreature(m_ahuheGuid))
-        { DoCastSpellIfCan(pAhune, SPELL_SYNCH_HEALTH, CAST_TRIGGERED); }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_ICE_SPEAR_BUNNY)
+        void Reset() override
         {
-            pSummoned->CastSpell(pSummoned, SPELL_ICE_SPEAR_VISUAL, true);
-            pSummoned->CastSpell(pSummoned, SPELL_SUMMON_ICE_SPEAR_GO, true);
-            pSummoned->CastSpell(pSummoned, SPELL_ICE_SPEAR_DELAY, true);
+            if (m_creature->IsTemporarySummon())
+            {
+                m_ahuheGuid = ((TemporarySummon*)m_creature)->GetSummonerGuid();
+            }
+
+            DoCastSpellIfCan(m_creature, SPELL_FROZEN_CORE_HIT, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+            DoCastSpellIfCan(m_creature, SPELL_ICE_SPEAR_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         }
+
+        void DamageTaken(Unit* pDoneBy, uint32& uiDamage) override
+        {
+            // it's not clear whether this should work like this or should be handled by the proc aura
+            if (Creature* pAhune = m_creature->GetMap()->GetCreature(m_ahuheGuid))
+            {
+                DoCastSpellIfCan(pAhune, SPELL_SYNCH_HEALTH, CAST_TRIGGERED);
+            }
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_ICE_SPEAR_BUNNY)
+            {
+                pSummoned->CastSpell(pSummoned, SPELL_ICE_SPEAR_VISUAL, true);
+                pSummoned->CastSpell(pSummoned, SPELL_SUMMON_ICE_SPEAR_GO, true);
+                pSummoned->CastSpell(pSummoned, SPELL_ICE_SPEAR_DELAY, true);
+            }
+        }
+
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        void UpdateAI(const uint32 /*uiDiff*/) override { }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_frozen_coreAI(pCreature);
     }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
-
-CreatureAI* GetAI_npc_frozen_core(Creature* pCreature)
-{
-    return new npc_frozen_coreAI(pCreature);
-}
 
 /*######
 ## npc_ice_spear_bunny
 ######*/
 
-struct npc_ice_spear_bunnyAI : public Scripted_NoMovementAI
+struct npc_ice_spear_bunny : public CreatureScript
 {
-    npc_ice_spear_bunnyAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    npc_ice_spear_bunny() : CreatureScript("npc_ice_spear_bunny") {}
 
-    ObjectGuid m_iceSpearGuid;
-
-    uint8 m_uiEventCount;
-
-    void Reset() override
+    struct npc_ice_spear_bunnyAI : public Scripted_NoMovementAI
     {
-        m_uiEventCount = 0;
-    }
+        npc_ice_spear_bunnyAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
 
-    void JustSummoned(GameObject* pGo) override
-    {
-        if (pGo->GetEntry() == GO_ICE_SPEAR)
-        { m_iceSpearGuid = pGo->GetObjectGuid(); }
-    }
+        ObjectGuid m_iceSpearGuid;
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
-    {
-        if (eventType == AI_EVENT_CUSTOM_A)
+        uint8 m_uiEventCount;
+
+        void Reset() override
         {
-            ++m_uiEventCount;
+            m_uiEventCount = 0;
+        }
 
-            // Knockback at 4 aura stacks (2 seconds)
-            if (m_uiEventCount == 4)
+        void JustSummoned(GameObject* pGo) override
+        {
+            if (pGo->GetEntry() == GO_ICE_SPEAR)
             {
-                DoCastSpellIfCan(m_creature, SPELL_ICE_SPEAR_KNOCKBACK);
-
-                if (GameObject* pSpear = m_creature->GetMap()->GetGameObject(m_iceSpearGuid))
-                { pSpear->Use(m_creature); }
-            }
-            // Cleanup at 10 aura stacks (5 seconds)
-            else if (m_uiEventCount == 10)
-            {
-                if (GameObject* pSpear = m_creature->GetMap()->GetGameObject(m_iceSpearGuid))
-                { pSpear->SetLootState(GO_JUST_DEACTIVATED); }
-
-                m_creature->ForcedDespawn();
+                m_iceSpearGuid = pGo->GetObjectGuid();
             }
         }
-    }
 
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
+        void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+        {
+            if (eventType == AI_EVENT_CUSTOM_A)
+            {
+                ++m_uiEventCount;
+
+                // Knockback at 4 aura stacks (2 seconds)
+                if (m_uiEventCount == 4)
+                {
+                    DoCastSpellIfCan(m_creature, SPELL_ICE_SPEAR_KNOCKBACK);
+
+                    if (GameObject* pSpear = m_creature->GetMap()->GetGameObject(m_iceSpearGuid))
+                    {
+                        pSpear->Use(m_creature);
+                    }
+                }
+                // Cleanup at 10 aura stacks (5 seconds)
+                else if (m_uiEventCount == 10)
+                {
+                    if (GameObject* pSpear = m_creature->GetMap()->GetGameObject(m_iceSpearGuid))
+                    {
+                        pSpear->SetLootState(GO_JUST_DEACTIVATED);
+                    }
+
+                    m_creature->ForcedDespawn();
+                }
+            }
+        }
+
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        void UpdateAI(const uint32 /*uiDiff*/) override { }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_ice_spear_bunnyAI(pCreature);
+    }
 };
 
-CreatureAI* GetAI_npc_ice_spear_bunny(Creature* pCreature)
+struct spell_ice_spear_delay : public SpellScript
 {
-    return new npc_ice_spear_bunnyAI(pCreature);
-}
+    spell_ice_spear_delay() : SpellScript("spell_ice_spear_delay") {}
 
-bool EffectDummyCreature_npc_ice_spear_bunny(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
-{
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_ICE_SPEAR_DELAY && uiEffIndex == EFFECT_INDEX_0)
+    bool EffectDummy(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Object* pTarget, ObjectGuid /*originalCasterGuid*/) override
     {
-        if (pCreatureTarget->GetEntry() == NPC_ICE_SPEAR_BUNNY)
-        { pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget); }
+        // always check spellid and effectindex
+        if (uiSpellId == SPELL_ICE_SPEAR_DELAY && uiEffIndex == EFFECT_INDEX_0)
+        {
+            Creature *pCreatureTarget = pTarget->ToCreature();
+            if (pCreatureTarget->GetEntry() == NPC_ICE_SPEAR_BUNNY)
+            {
+                pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
+            }
 
-        // always return true when we are handling this spell and effect
-        return true;
+            // always return true when we are handling this spell and effect
+            return true;
+        }
+
+        return false;
     }
-
-    return false;
-}
+};
 
 void AddSC_boss_ahune()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_ahune";
-    pNewScript->GetAI = &GetAI_boss_ahune;
-    pNewScript->RegisterSelf();
+    s = new boss_ahune();
+    s->RegisterSelf();
+    s = new npc_frozen_core();
+    s->RegisterSelf();
+    s = new npc_ice_spear_bunny();
+    s->RegisterSelf();
+    s = new spell_ice_spear_delay();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_frozen_core";
-    pNewScript->GetAI = &GetAI_npc_frozen_core;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_ahune";
+    //pNewScript->GetAI = &GetAI_boss_ahune;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_ice_spear_bunny";
-    pNewScript->GetAI = &GetAI_npc_ice_spear_bunny;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_ice_spear_bunny;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_frozen_core";
+    //pNewScript->GetAI = &GetAI_npc_frozen_core;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_ice_spear_bunny";
+    //pNewScript->GetAI = &GetAI_npc_ice_spear_bunny;
+    //pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_ice_spear_bunny;
+    //pNewScript->RegisterSelf();
 }

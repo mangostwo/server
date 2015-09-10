@@ -222,143 +222,164 @@ static PlayerAbilityStruct m_aMalacrassStolenAbility[][4] =
     }
 };
 
-struct boss_malacrassAI : public ScriptedAI
+struct boss_malacrass : public CreatureScript
 {
-    boss_malacrassAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_malacrass() : CreatureScript("boss_malacrass") {}
+
+    struct boss_malacrassAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiSpiritBoltsTimer;
-    uint32 m_uiDrainPowerTimer;
-    uint32 m_uiSiphonSoulTimer;
-    uint32 m_uiPlayerAbilityTimer;
-    uint8 m_uiPlayerClass;
-
-    bool m_bCanUsePlayerSpell;
-
-    std::vector<uint32> m_vAddsEntryList;
-    std::vector<uint32> m_vPlayerSpellTimer;
-
-    void Reset() override
-    {
-        m_uiSpiritBoltsTimer    = 30000;
-        m_uiDrainPowerTimer     = 0;
-        m_uiSiphonSoulTimer     = 40000;
-        m_uiPlayerAbilityTimer  = 10000;
-        m_uiPlayerClass         = 0;
-
-        m_bCanUsePlayerSpell    = false;
-
-        DoInitializeAdds();
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_MALACRASS, FAIL); }
-    }
-
-    void DoInitializeAdds()
-    {
-        // not if m_creature are dead, so avoid
-        if (!m_creature->IsAlive())
-        { return; }
-
-        // it's empty, so first time
-        if (m_vAddsEntryList.empty())
+        boss_malacrassAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            m_vAddsEntryList.resize(MAX_ACTIVE_ADDS);
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        }
 
-            for (uint8 i = 0; i < MAX_ACTIVE_ADDS; ++i)
+        ScriptedInstance* m_pInstance;
+
+        uint32 m_uiSpiritBoltsTimer;
+        uint32 m_uiDrainPowerTimer;
+        uint32 m_uiSiphonSoulTimer;
+        uint32 m_uiPlayerAbilityTimer;
+        uint8 m_uiPlayerClass;
+
+        bool m_bCanUsePlayerSpell;
+
+        std::vector<uint32> m_vAddsEntryList;
+        std::vector<uint32> m_vPlayerSpellTimer;
+
+        void Reset() override
+        {
+            m_uiSpiritBoltsTimer = 30000;
+            m_uiDrainPowerTimer = 0;
+            m_uiSiphonSoulTimer = 40000;
+            m_uiPlayerAbilityTimer = 10000;
+            m_uiPlayerClass = 0;
+
+            m_bCanUsePlayerSpell = false;
+
+            DoInitializeAdds();
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
             {
-                uint8 uiAddVersion = urand(0, 1);
-                m_vAddsEntryList[i] = aSpawnEntries[i][uiAddVersion];
-                m_creature->SummonCreature(aSpawnEntries[i][uiAddVersion], m_aAddPositions[i][0], m_aAddPositions[i][1], m_aAddPositions[i][2], m_aAddPositions[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
+                m_pInstance->SetData(TYPE_MALACRASS, FAIL);
             }
         }
-        // Resummon the killed adds
-        else
+
+        void DoInitializeAdds()
         {
-            if (!m_pInstance)
-            { return; }
-
-            for (uint8 i = 0; i < MAX_ACTIVE_ADDS; ++i)
+            // not if m_creature are dead, so avoid
+            if (!m_creature->IsAlive())
             {
-                // If we already have the creature on the map, then don't summon it
-                if (m_pInstance->GetSingleCreatureFromStorage(m_vAddsEntryList[i], true))
-                { continue; }
+                return;
+            }
 
-                m_creature->SummonCreature(m_vAddsEntryList[i], m_aAddPositions[i][0], m_aAddPositions[i][1], m_aAddPositions[i][2], m_aAddPositions[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
+            // it's empty, so first time
+            if (m_vAddsEntryList.empty())
+            {
+                m_vAddsEntryList.resize(MAX_ACTIVE_ADDS);
+
+                for (uint8 i = 0; i < MAX_ACTIVE_ADDS; ++i)
+                {
+                    uint8 uiAddVersion = urand(0, 1);
+                    m_vAddsEntryList[i] = aSpawnEntries[i][uiAddVersion];
+                    m_creature->SummonCreature(aSpawnEntries[i][uiAddVersion], m_aAddPositions[i][0], m_aAddPositions[i][1], m_aAddPositions[i][2], m_aAddPositions[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
+                }
+            }
+            // Resummon the killed adds
+            else
+            {
+                if (!m_pInstance)
+                {
+                    return;
+                }
+
+                for (uint8 i = 0; i < MAX_ACTIVE_ADDS; ++i)
+                {
+                    // If we already have the creature on the map, then don't summon it
+                    if (m_pInstance->GetSingleCreatureFromStorage(m_vAddsEntryList[i], true))
+                    {
+                        continue;
+                    }
+
+                    m_creature->SummonCreature(m_vAddsEntryList[i], m_aAddPositions[i][0], m_aAddPositions[i][1], m_aAddPositions[i][2], m_aAddPositions[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
+                }
             }
         }
-    }
 
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_MALACRASS, IN_PROGRESS); }
-    }
-
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-        { return; }
-
-        DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_MALACRASS, DONE); }
-    }
-
-    void SummonedCreatureJustDied(Creature* /*pSummoned*/) override
-    {
-        switch (urand(0, 2))
+        void Aggro(Unit* /*pWho*/) override
         {
+            DoScriptText(SAY_AGGRO, m_creature);
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_MALACRASS, IN_PROGRESS);
+            }
+        }
+
+        void KilledUnit(Unit* pVictim) override
+        {
+            if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            {
+                return;
+            }
+
+            DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(SAY_DEATH, m_creature);
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_MALACRASS, DONE);
+            }
+        }
+
+        void SummonedCreatureJustDied(Creature* /*pSummoned*/) override
+        {
+            switch (urand(0, 2))
+            {
             case 0: DoScriptText(SAY_ADD_DIED1, m_creature); break;
             case 1: DoScriptText(SAY_ADD_DIED2, m_creature); break;
             case 2: DoScriptText(SAY_ADD_DIED3, m_creature); break;
+            }
         }
-    }
 
-    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
-    {
-        // Set the player's class when hit with soul siphon
-        if (pTarget->GetTypeId() == TYPEID_PLAYER && pSpell->Id == SPELL_SIPHON_SOUL)
+        void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
         {
-            m_uiPlayerClass = ((Player*)pTarget)->getClass();
-            m_bCanUsePlayerSpell = true;
+            // Set the player's class when hit with soul siphon
+            if (pTarget->GetTypeId() == TYPEID_PLAYER && pSpell->Id == SPELL_SIPHON_SOUL)
+            {
+                m_uiPlayerClass = ((Player*)pTarget)->getClass();
+                m_bCanUsePlayerSpell = true;
 
-            // In case the player it's priest we can choose either a holy priest or a shadow priest
-            if (m_uiPlayerClass == CLASS_PRIEST)
-            { m_uiPlayerClass = urand(0, 1) ? CLASS_PRIEST : 0; }
+                // In case the player it's priest we can choose either a holy priest or a shadow priest
+                if (m_uiPlayerClass == CLASS_PRIEST)
+                {
+                    m_uiPlayerClass = urand(0, 1) ? CLASS_PRIEST : 0;
+                }
 
-            // Init the spell timers
-            uint8 m_uiMaxSpells = m_uiPlayerClass == CLASS_MAGE ? 4 : 3;
+                // Init the spell timers
+                uint8 m_uiMaxSpells = m_uiPlayerClass == CLASS_MAGE ? 4 : 3;
 
-            m_vPlayerSpellTimer.clear();
-            m_vPlayerSpellTimer.reserve(m_uiMaxSpells);
-            for (uint8 i = 0; i < m_uiMaxSpells; ++i)
-            { m_vPlayerSpellTimer.push_back(m_aMalacrassStolenAbility[m_uiPlayerClass][i].m_uiInitialTimer); }
+                m_vPlayerSpellTimer.clear();
+                m_vPlayerSpellTimer.reserve(m_uiMaxSpells);
+                for (uint8 i = 0; i < m_uiMaxSpells; ++i)
+                {
+                    m_vPlayerSpellTimer.push_back(m_aMalacrassStolenAbility[m_uiPlayerClass][i].m_uiInitialTimer);
+                }
+            }
         }
-    }
 
-    bool CanUseSpecialAbility(uint32 uiSpellIndex)
-    {
-        Unit* pTarget = NULL;
-
-        switch (m_aMalacrassStolenAbility[m_uiPlayerClass][uiSpellIndex].m_uiTargetType)
+        bool CanUseSpecialAbility(uint32 uiSpellIndex)
         {
+            Unit* pTarget = NULL;
+
+            switch (m_aMalacrassStolenAbility[m_uiPlayerClass][uiSpellIndex].m_uiTargetType)
+            {
             case TARGET_TYPE_SELF:
                 pTarget = m_creature;
                 break;
@@ -371,91 +392,109 @@ struct boss_malacrassAI : public ScriptedAI
             case TARGET_TYPE_FRIENDLY:
                 pTarget = DoSelectLowestHpFriendly(50.0f);
                 break;
-        }
+            }
 
-        if (pTarget)
-        {
-            if (DoCastSpellIfCan(pTarget, m_aMalacrassStolenAbility[m_uiPlayerClass][uiSpellIndex].m_uiSpellId, CAST_TRIGGERED) == CAST_OK)
-            { return true; }
-        }
-
-        return false;
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        // Acts as an enrage timer
-        if (m_creature->GetHealthPercent() < 80.0f)
-        {
-            if (m_uiDrainPowerTimer < uiDiff)
+            if (pTarget)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_DRAIN_POWER) == CAST_OK)
+                if (DoCastSpellIfCan(pTarget, m_aMalacrassStolenAbility[m_uiPlayerClass][uiSpellIndex].m_uiSpellId, CAST_TRIGGERED) == CAST_OK)
                 {
-                    DoScriptText(SAY_DRAIN_POWER, m_creature);
-                    m_uiDrainPowerTimer = 30000;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            // Acts as an enrage timer
+            if (m_creature->GetHealthPercent() < 80.0f)
+            {
+                if (m_uiDrainPowerTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_DRAIN_POWER) == CAST_OK)
+                    {
+                        DoScriptText(SAY_DRAIN_POWER, m_creature);
+                        m_uiDrainPowerTimer = 30000;
+                    }
+                }
+                else
+                {
+                    m_uiDrainPowerTimer -= uiDiff;
+                }
+            }
+
+            if (m_uiSpiritBoltsTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_SPIRIT_BOLTS) == CAST_OK)
+                {
+                    DoScriptText(SAY_SPIRIT_BOLTS, m_creature);
+                    m_bCanUsePlayerSpell = false;
+                    m_uiSpiritBoltsTimer = 40000;
                 }
             }
             else
-            { m_uiDrainPowerTimer -= uiDiff; }
-        }
-
-        if (m_uiSpiritBoltsTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SPIRIT_BOLTS) == CAST_OK)
             {
-                DoScriptText(SAY_SPIRIT_BOLTS, m_creature);
-                m_bCanUsePlayerSpell = false;
-                m_uiSpiritBoltsTimer = 40000;
+                m_uiSpiritBoltsTimer -= uiDiff;
             }
-        }
-        else
-        { m_uiSpiritBoltsTimer -= uiDiff; }
 
-        if (m_uiSiphonSoulTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SIPHON_SOUL_DUMMY) == CAST_OK)
+            if (m_uiSiphonSoulTimer < uiDiff)
             {
-                DoScriptText(SAY_SOUL_SIPHON, m_creature);
-                m_uiSiphonSoulTimer = 40000;
-            }
-        }
-        else
-        { m_uiSiphonSoulTimer -= uiDiff; }
-
-        // Use abilities only during the siphon soul phases
-        if (m_bCanUsePlayerSpell)
-        {
-            // Loop through all abilities
-            for (uint8 i = 0; i < m_vPlayerSpellTimer.size(); ++i)
-            {
-                if (m_vPlayerSpellTimer[i] < uiDiff)
+                if (DoCastSpellIfCan(m_creature, SPELL_SIPHON_SOUL_DUMMY) == CAST_OK)
                 {
-                    if (CanUseSpecialAbility(i))
-                    { m_vPlayerSpellTimer[i] = m_aMalacrassStolenAbility[m_uiPlayerClass][i].m_uiCooldown; }
+                    DoScriptText(SAY_SOUL_SIPHON, m_creature);
+                    m_uiSiphonSoulTimer = 40000;
                 }
-                else
-                { m_vPlayerSpellTimer[i] -= uiDiff; }
             }
-        }
+            else
+            {
+                m_uiSiphonSoulTimer -= uiDiff;
+            }
 
-        DoMeleeAttackIfReady();
+            // Use abilities only during the siphon soul phases
+            if (m_bCanUsePlayerSpell)
+            {
+                // Loop through all abilities
+                for (uint8 i = 0; i < m_vPlayerSpellTimer.size(); ++i)
+                {
+                    if (m_vPlayerSpellTimer[i] < uiDiff)
+                    {
+                        if (CanUseSpecialAbility(i))
+                        {
+                            m_vPlayerSpellTimer[i] = m_aMalacrassStolenAbility[m_uiPlayerClass][i].m_uiCooldown;
+                        }
+                    }
+                    else
+                    {
+                        m_vPlayerSpellTimer[i] -= uiDiff;
+                    }
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_malacrassAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_malacrass(Creature* pCreature)
-{
-    return new boss_malacrassAI(pCreature);
-}
-
 void AddSC_boss_malacrass()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_malacrass";
-    pNewScript->GetAI = &GetAI_boss_malacrass;
-    pNewScript->RegisterSelf();
+    s = new boss_malacrass();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_malacrass";
+    //pNewScript->GetAI = &GetAI_boss_malacrass;
+    //pNewScript->RegisterSelf();
 }

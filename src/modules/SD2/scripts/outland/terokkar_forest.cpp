@@ -64,85 +64,100 @@ enum
     SPELL_QUID9889              = 32174,
 };
 
-struct mob_unkor_the_ruthlessAI : public ScriptedAI
+struct mob_unkor_the_ruthless : public CreatureScript
 {
-    mob_unkor_the_ruthlessAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    mob_unkor_the_ruthless() : CreatureScript("mob_unkor_the_ruthless") {}
 
-    bool m_bCanDoQuest;
-    uint32 m_uiUnfriendlyTimer;
-    uint32 m_uiPulverizeTimer;
-    uint32 m_uiFriendlyTimer;
-
-    void Reset() override
+    struct mob_unkor_the_ruthlessAI : public ScriptedAI
     {
-        m_bCanDoQuest       = false;
-        m_uiUnfriendlyTimer = 0;
-        m_uiFriendlyTimer   = 0;
-        m_uiPulverizeTimer  = 3000;
-        m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-    }
+        mob_unkor_the_ruthlessAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-    void DoNice()
-    {
-        DoScriptText(SAY_SUBMIT, m_creature);
-        m_creature->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_REACH_HOME);
-        m_creature->SetStandState(UNIT_STAND_STATE_SIT);
-        m_creature->RemoveAllAuras();
-        m_creature->DeleteThreatList();
-        m_creature->CombatStop(true);
-        m_uiUnfriendlyTimer = 60000;
-    }
+        bool m_bCanDoQuest;
+        uint32 m_uiUnfriendlyTimer;
+        uint32 m_uiPulverizeTimer;
+        uint32 m_uiFriendlyTimer;
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        // Reset npc on timer
-        if (m_uiUnfriendlyTimer)
+        void Reset() override
         {
-            if (m_uiUnfriendlyTimer <= uiDiff)
-            { EnterEvadeMode(); }
-            else
-            { m_uiUnfriendlyTimer -= uiDiff; }
+            m_bCanDoQuest = false;
+            m_uiUnfriendlyTimer = 0;
+            m_uiFriendlyTimer = 0;
+            m_uiPulverizeTimer = 3000;
+            m_creature->SetStandState(UNIT_STAND_STATE_STAND);
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        // Do quest kill credit at 30%
-        if (!m_bCanDoQuest && m_creature->GetHealthPercent() < 30.0f)
+        void DoNice()
         {
-            DoCastSpellIfCan(m_creature, SPELL_QUID9889, CAST_TRIGGERED);
-            m_uiFriendlyTimer = 1000;
-            m_bCanDoQuest = true;
+            DoScriptText(SAY_SUBMIT, m_creature);
+            m_creature->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_REACH_HOME);
+            m_creature->SetStandState(UNIT_STAND_STATE_SIT);
+            m_creature->RemoveAllAuras();
+            m_creature->DeleteThreatList();
+            m_creature->CombatStop(true);
+            m_uiUnfriendlyTimer = 60000;
         }
 
-        // Set faction right after the spell is casted, in order to avoid any issues
-        if (m_uiFriendlyTimer)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (m_uiFriendlyTimer <= uiDiff)
+            // Reset npc on timer
+            if (m_uiUnfriendlyTimer)
             {
-                DoNice();
-                m_uiFriendlyTimer = 0;
+                if (m_uiUnfriendlyTimer <= uiDiff)
+                {
+                    EnterEvadeMode();
+                }
+                else
+                {
+                    m_uiUnfriendlyTimer -= uiDiff;
+                }
+            }
+
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            // Do quest kill credit at 30%
+            if (!m_bCanDoQuest && m_creature->GetHealthPercent() < 30.0f)
+            {
+                DoCastSpellIfCan(m_creature, SPELL_QUID9889, CAST_TRIGGERED);
+                m_uiFriendlyTimer = 1000;
+                m_bCanDoQuest = true;
+            }
+
+            // Set faction right after the spell is casted, in order to avoid any issues
+            if (m_uiFriendlyTimer)
+            {
+                if (m_uiFriendlyTimer <= uiDiff)
+                {
+                    DoNice();
+                    m_uiFriendlyTimer = 0;
+                }
+                else
+                {
+                    m_uiFriendlyTimer -= uiDiff;
+                }
+            }
+
+            if (m_uiPulverizeTimer < uiDiff)
+            {
+                DoCastSpellIfCan(m_creature, SPELL_PULVERIZE);
+                m_uiPulverizeTimer = 9000;
             }
             else
-            { m_uiFriendlyTimer -= uiDiff; }
-        }
+            {
+                m_uiPulverizeTimer -= uiDiff;
+            }
 
-        if (m_uiPulverizeTimer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature, SPELL_PULVERIZE);
-            m_uiPulverizeTimer = 9000;
+            DoMeleeAttackIfReady();
         }
-        else
-        { m_uiPulverizeTimer -= uiDiff; }
+    };
 
-        DoMeleeAttackIfReady();
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new mob_unkor_the_ruthlessAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_mob_unkor_the_ruthless(Creature* pCreature)
-{
-    return new mob_unkor_the_ruthlessAI(pCreature);
-}
 
 /*######
 ## mob_netherweb_victim
@@ -160,39 +175,44 @@ const uint32 netherwebVictims[6] =
     18470, 16805, 21242, 18452, 22482, 21285
 };
 
-struct mob_netherweb_victimAI : public ScriptedAI
+struct mob_netherweb_victim : public CreatureScript
 {
-    mob_netherweb_victimAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        SetCombatMovement(false);
-        Reset();
-    }
+    mob_netherweb_victim() : CreatureScript("mob_netherweb_victim") {}
 
-    void Reset() override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-
-    void JustDied(Unit* pKiller) override
+    struct mob_netherweb_victimAI : public ScriptedAI
     {
-        if (Player* pPlayer = pKiller->GetCharmerOrOwnerPlayerOrPlayerItself())
+        mob_netherweb_victimAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (pPlayer->GetQuestStatus(QUEST_TAKEN_IN_NIGHT) == QUEST_STATUS_INCOMPLETE)
+            SetCombatMovement(false);
+        }
+
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+        void JustDied(Unit* pKiller) override
+        {
+            if (Player* pPlayer = pKiller->GetCharmerOrOwnerPlayerOrPlayerItself())
             {
-                if (!urand(0, 3))
+                if (pPlayer->GetQuestStatus(QUEST_TAKEN_IN_NIGHT) == QUEST_STATUS_INCOMPLETE)
                 {
-                    m_creature->SummonCreature(NPC_FREED_WARRIOR, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 60000);
-                    pPlayer->KilledMonsterCredit(NPC_FREED_WARRIOR, m_creature->GetObjectGuid());
+                    if (!urand(0, 3))
+                    {
+                        m_creature->SummonCreature(NPC_FREED_WARRIOR, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 60000);
+                        pPlayer->KilledMonsterCredit(NPC_FREED_WARRIOR, m_creature->GetObjectGuid());
+                    }
+                    else
+                    {
+                        m_creature->SummonCreature(netherwebVictims[urand(0, 5)], 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 60000);
+                    }
                 }
-                else
-                { m_creature->SummonCreature(netherwebVictims[urand(0, 5)], 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 60000); }
             }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new mob_netherweb_victimAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_mob_netherweb_victim(Creature* pCreature)
-{
-    return new mob_netherweb_victimAI(pCreature);
-}
 
 /*#####
 ## npc_akuno
@@ -215,21 +235,25 @@ enum
 static float m_afAmbushB1[] = { -2895.525879f, 5336.431641f, -11.800f};
 static float m_afAmbushB2[] = { -2890.604980f, 5331.938965f, -11.282f};
 
-struct npc_akunoAI : public npc_escortAI
+struct npc_akuno : public CreatureScript
 {
-    npc_akunoAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+    npc_akuno() : CreatureScript("npc_akuno") {}
 
-    uint32 m_uiChainLightningTimer;
-
-    void Reset() override
+    struct npc_akunoAI : public npc_escortAI
     {
-        m_uiChainLightningTimer = 1000;
-    }
+        npc_akunoAI(Creature* pCreature) : npc_escortAI(pCreature) { }
 
-    void WaypointReached(uint32 uiPointId) override
-    {
-        switch (uiPointId)
+        uint32 m_uiChainLightningTimer;
+
+        void Reset() override
         {
+            m_uiChainLightningTimer = 1000;
+        }
+
+        void WaypointReached(uint32 uiPointId) override
+        {
+            switch (uiPointId)
+            {
             case 5:
                 DoScriptText(SAY_AKU_AMBUSH_A, m_creature);
                 m_creature->SummonCreature(NPC_CABAL_SKIRMISHER, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
@@ -238,7 +262,9 @@ struct npc_akunoAI : public npc_escortAI
                 DoScriptText(SAY_AKU_AMBUSH_B, m_creature);
 
                 if (Creature* pTemp = m_creature->SummonCreature(NPC_CABAL_SKIRMISHER, m_afAmbushB1[0], m_afAmbushB1[1], m_afAmbushB1[2], 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000))
-                { DoScriptText(SAY_AKU_AMBUSH_B_REPLY, pTemp); }
+                {
+                    DoScriptText(SAY_AKU_AMBUSH_B_REPLY, pTemp);
+                }
 
                 m_creature->SummonCreature(NPC_CABAL_SKIRMISHER, m_afAmbushB2[0], m_afAmbushB2[1], m_afAmbushB2[2], 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
                 break;
@@ -249,54 +275,61 @@ struct npc_akunoAI : public npc_escortAI
                 DoScriptText(SAY_AKU_COMPLETE, m_creature);
 
                 if (Player* pPlayer = GetPlayerForEscort())
-                { pPlayer->GroupEventHappens(QUEST_ESCAPING_TOMB, m_creature); }
+                {
+                    pPlayer->GroupEventHappens(QUEST_ESCAPING_TOMB, m_creature);
+                }
 
                 break;
+            }
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        pSummoned->AI()->AttackStart(m_creature);
-    }
-
-    void UpdateEscortAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiChainLightningTimer < uiDiff)
+        void JustSummoned(Creature* pSummoned) override
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHAIN_LIGHTNING);
-            m_uiChainLightningTimer = urand(7000, 14000);
+            pSummoned->AI()->AttackStart(m_creature);
         }
-        else
-        { m_uiChainLightningTimer -= uiDiff; }
 
-        DoMeleeAttackIfReady();
+        void UpdateEscortAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_uiChainLightningTimer < uiDiff)
+            {
+                DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHAIN_LIGHTNING);
+                m_uiChainLightningTimer = urand(7000, 14000);
+            }
+            else
+            {
+                m_uiChainLightningTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    bool OnQuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest) override
+    {
+        if (pQuest->GetQuestId() == QUEST_ESCAPING_TOMB)
+        {
+            if (npc_akunoAI* pEscortAI = dynamic_cast<npc_akunoAI*>(pCreature->AI()))
+            {
+                pCreature->SetStandState(UNIT_STAND_STATE_STAND);
+                pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
+
+                DoScriptText(SAY_AKU_START, pCreature);
+                pEscortAI->Start(false, pPlayer, pQuest);
+            }
+        }
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_akunoAI(pCreature);
     }
 };
-
-bool QuestAccept_npc_akuno(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_ESCAPING_TOMB)
-    {
-        if (npc_akunoAI* pEscortAI = dynamic_cast<npc_akunoAI*>(pCreature->AI()))
-        {
-            pCreature->SetStandState(UNIT_STAND_STATE_STAND);
-            pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
-
-            DoScriptText(SAY_AKU_START, pCreature);
-            pEscortAI->Start(false, pPlayer, pQuest);
-        }
-    }
-    return true;
-}
-
-CreatureAI* GetAI_npc_akuno(Creature* pCreature)
-{
-    return new npc_akunoAI(pCreature);
-}
 
 /*######
 ## npc_hungry_nether_ray
@@ -309,30 +342,33 @@ enum
     SPELL_FEED_CREDIT           = 41427,                    // credit for quest 11093
 };
 
-struct npc_hungry_nether_rayAI : public ScriptedPetAI
+struct npc_hungry_nether_ray : public CreatureScript
 {
-    npc_hungry_nether_rayAI(Creature* pCreature) : ScriptedPetAI(pCreature) { Reset(); }
+    npc_hungry_nether_ray() : CreatureScript("npc_hungry_nether_ray") {}
 
-    void Reset() override { }
-
-    void OwnerKilledUnit(Unit* pVictim) override
+    struct npc_hungry_nether_rayAI : public ScriptedPetAI
     {
-        if (pVictim->GetTypeId() == TYPEID_UNIT && pVictim->GetEntry() == NPC_BLACK_WARP_CHASER)
+        npc_hungry_nether_rayAI(Creature* pCreature) : ScriptedPetAI(pCreature) { }
+
+        void OwnerKilledUnit(Unit* pVictim) override
         {
-            // Distance expected?
-            if (m_creature->IsWithinDistInMap(pVictim, 10.0f))
+            if (pVictim->GetTypeId() == TYPEID_UNIT && pVictim->GetEntry() == NPC_BLACK_WARP_CHASER)
             {
-                DoScriptText(EMOTE_FEED, m_creature);
-                m_creature->CastSpell(m_creature, SPELL_FEED_CREDIT, true);
+                // Distance expected?
+                if (m_creature->IsWithinDistInMap(pVictim, 10.0f))
+                {
+                    DoScriptText(EMOTE_FEED, m_creature);
+                    m_creature->CastSpell(m_creature, SPELL_FEED_CREDIT, true);
+                }
             }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_hungry_nether_rayAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_hungry_nether_ray(Creature* pCreature)
-{
-    return new npc_hungry_nether_rayAI(pCreature);
-}
 
 /*######
 ## npc_letoll
@@ -371,80 +407,89 @@ enum
 };
 
 // Some details still missing from here, and will also have issues if followers evade for any reason.
-struct npc_letollAI : public npc_escortAI
+struct npc_letoll : public CreatureScript
 {
-    npc_letollAI(Creature* pCreature) : npc_escortAI(pCreature)
+    npc_letoll() : CreatureScript("npc_letoll") {}
+
+    struct npc_letollAI : public npc_escortAI
     {
-        m_uiEventTimer = 5000;
-        m_uiEventCount = 0;
-        Reset();
-    }
-
-    std::list<Creature*> m_lResearchersList;
-
-    uint32 m_uiEventTimer;
-    uint32 m_uiEventCount;
-
-    void Reset() override {}
-
-    // will make them follow, but will only work until they enter combat with any unit
-    void SetFormation()
-    {
-        uint32 uiCount = 0;
-
-        for (std::list<Creature*>::iterator itr = m_lResearchersList.begin(); itr != m_lResearchersList.end(); ++itr)
+        npc_letollAI(Creature* pCreature) : npc_escortAI(pCreature)
         {
-            float fAngle = uiCount < MAX_RESEARCHER ? M_PI / MAX_RESEARCHER - (uiCount * 2 * M_PI / MAX_RESEARCHER) : 0.0f;
-
-            if ((*itr)->IsAlive() && !(*itr)->IsInCombat())
-            { (*itr)->GetMotionMaster()->MoveFollow(m_creature, 2.5f, fAngle); }
-
-            ++uiCount;
+            m_uiEventTimer = 5000;
+            m_uiEventCount = 0;
         }
-    }
 
-    Creature* GetAvailableResearcher(uint8 uiListNum)
-    {
-        if (!m_lResearchersList.empty())
+        std::list<Creature*> m_lResearchersList;
+
+        uint32 m_uiEventTimer;
+        uint32 m_uiEventCount;
+
+        // will make them follow, but will only work until they enter combat with any unit
+        void SetFormation()
         {
-            uint8 uiNum = 1;
+            uint32 uiCount = 0;
 
             for (std::list<Creature*>::iterator itr = m_lResearchersList.begin(); itr != m_lResearchersList.end(); ++itr)
             {
-                if (uiListNum && uiListNum != uiNum)
+                float fAngle = uiCount < MAX_RESEARCHER ? M_PI / MAX_RESEARCHER - (uiCount * 2 * M_PI / MAX_RESEARCHER) : 0.0f;
+
+                if ((*itr)->IsAlive() && !(*itr)->IsInCombat())
                 {
-                    ++uiNum;
-                    continue;
+                    (*itr)->GetMotionMaster()->MoveFollow(m_creature, 2.5f, fAngle);
                 }
 
-                if ((*itr)->IsAlive() && (*itr)->IsWithinDistInMap(m_creature, 20.0f))
-                { return (*itr); }
+                ++uiCount;
             }
         }
 
-        return NULL;
-    }
-
-    void JustStartedEscort() override
-    {
-        m_uiEventTimer = 5000;
-        m_uiEventCount = 0;
-
-        m_lResearchersList.clear();
-
-        GetCreatureListWithEntryInGrid(m_lResearchersList, m_creature, NPC_RESEARCHER, 25.0f);
-
-        if (!m_lResearchersList.empty())
-        { SetFormation(); }
-    }
-
-    void WaypointReached(uint32 uiPointId) override
-    {
-        switch (uiPointId)
+        Creature* GetAvailableResearcher(uint8 uiListNum)
         {
+            if (!m_lResearchersList.empty())
+            {
+                uint8 uiNum = 1;
+
+                for (std::list<Creature*>::iterator itr = m_lResearchersList.begin(); itr != m_lResearchersList.end(); ++itr)
+                {
+                    if (uiListNum && uiListNum != uiNum)
+                    {
+                        ++uiNum;
+                        continue;
+                    }
+
+                    if ((*itr)->IsAlive() && (*itr)->IsWithinDistInMap(m_creature, 20.0f))
+                    {
+                        return (*itr);
+                    }
+                }
+            }
+
+            return NULL;
+        }
+
+        void JustStartedEscort() override
+        {
+            m_uiEventTimer = 5000;
+            m_uiEventCount = 0;
+
+            m_lResearchersList.clear();
+
+            GetCreatureListWithEntryInGrid(m_lResearchersList, m_creature, NPC_RESEARCHER, 25.0f);
+
+            if (!m_lResearchersList.empty())
+            {
+                SetFormation();
+            }
+        }
+
+        void WaypointReached(uint32 uiPointId) override
+        {
+            switch (uiPointId)
+            {
             case 0:
                 if (Player* pPlayer = GetPlayerForEscort())
-                { DoScriptText(SAY_LE_KEEP_SAFE, m_creature, pPlayer); }
+                {
+                    DoScriptText(SAY_LE_KEEP_SAFE, m_creature, pPlayer);
+                }
                 break;
             case 1:
                 DoScriptText(SAY_LE_NORTH, m_creature);
@@ -459,37 +504,43 @@ struct npc_letollAI : public npc_escortAI
             case 13:
                 SetRun();
                 break;
+            }
         }
-    }
 
-    void Aggro(Unit* pWho) override
-    {
-        if (pWho->IsInCombat() && pWho->GetTypeId() == TYPEID_UNIT && pWho->GetEntry() == NPC_BONE_SIFTER)
-        { DoScriptText(SAY_LE_HELP_HIM, m_creature); }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        Player* pPlayer = GetPlayerForEscort();
-
-        if (pPlayer && pPlayer->IsAlive())
-        { pSummoned->AI()->AttackStart(pPlayer); }
-        else
-        { pSummoned->AI()->AttackStart(m_creature); }
-    }
-
-    void UpdateEscortAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        void Aggro(Unit* pWho) override
         {
-            if (HasEscortState(STATE_ESCORT_PAUSED))
+            if (pWho->IsInCombat() && pWho->GetTypeId() == TYPEID_UNIT && pWho->GetEntry() == NPC_BONE_SIFTER)
             {
-                if (m_uiEventTimer < uiDiff)
-                {
-                    m_uiEventTimer = 7000;
+                DoScriptText(SAY_LE_HELP_HIM, m_creature);
+            }
+        }
 
-                    switch (m_uiEventCount)
+        void JustSummoned(Creature* pSummoned) override
+        {
+            Player* pPlayer = GetPlayerForEscort();
+
+            if (pPlayer && pPlayer->IsAlive())
+            {
+                pSummoned->AI()->AttackStart(pPlayer);
+            }
+            else
+            {
+                pSummoned->AI()->AttackStart(m_creature);
+            }
+        }
+
+        void UpdateEscortAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                if (HasEscortState(STATE_ESCORT_PAUSED))
+                {
+                    if (m_uiEventTimer < uiDiff)
                     {
+                        m_uiEventTimer = 7000;
+
+                        switch (m_uiEventCount)
+                        {
                         case 0:
                             DoScriptText(SAY_LE_ALMOST, m_creature);
                             break;
@@ -498,40 +549,54 @@ struct npc_letollAI : public npc_escortAI
                             break;
                         case 2:
                             if (Creature* pResearcher = GetAvailableResearcher(0))
-                            { DoScriptText(SAY_LE_DRUM_REPLY, pResearcher); }
+                            {
+                                DoScriptText(SAY_LE_DRUM_REPLY, pResearcher);
+                            }
                             break;
                         case 3:
                             DoScriptText(SAY_LE_DISCOVERY, m_creature);
                             break;
                         case 4:
                             if (Creature* pResearcher = GetAvailableResearcher(0))
-                            { DoScriptText(SAY_LE_DISCOVERY_REPLY, pResearcher); }
+                            {
+                                DoScriptText(SAY_LE_DISCOVERY_REPLY, pResearcher);
+                            }
                             break;
                         case 5:
                             DoScriptText(SAY_LE_NO_LEAVE, m_creature);
                             break;
                         case 6:
                             if (Creature* pResearcher = GetAvailableResearcher(1))
-                            { DoScriptText(SAY_LE_NO_LEAVE_REPLY1, pResearcher); }
+                            {
+                                DoScriptText(SAY_LE_NO_LEAVE_REPLY1, pResearcher);
+                            }
                             break;
                         case 7:
                             if (Creature* pResearcher = GetAvailableResearcher(2))
-                            { DoScriptText(SAY_LE_NO_LEAVE_REPLY2, pResearcher); }
+                            {
+                                DoScriptText(SAY_LE_NO_LEAVE_REPLY2, pResearcher);
+                            }
                             break;
                         case 8:
                             if (Creature* pResearcher = GetAvailableResearcher(3))
-                            { DoScriptText(SAY_LE_NO_LEAVE_REPLY3, pResearcher); }
+                            {
+                                DoScriptText(SAY_LE_NO_LEAVE_REPLY3, pResearcher);
+                            }
                             break;
                         case 9:
                             if (Creature* pResearcher = GetAvailableResearcher(4))
-                            { DoScriptText(SAY_LE_NO_LEAVE_REPLY4, pResearcher); }
+                            {
+                                DoScriptText(SAY_LE_NO_LEAVE_REPLY4, pResearcher);
+                            }
                             break;
                         case 10:
                             DoScriptText(SAY_LE_SHUT, m_creature);
                             break;
                         case 11:
                             if (Creature* pResearcher = GetAvailableResearcher(0))
-                            { DoScriptText(SAY_LE_REPLY_HEAR, pResearcher); }
+                            {
+                                DoScriptText(SAY_LE_REPLY_HEAR, pResearcher);
+                            }
                             break;
                         case 12:
                             DoScriptText(SAY_LE_IN_YOUR_FACE, m_creature);
@@ -548,41 +613,44 @@ struct npc_letollAI : public npc_escortAI
 
                             SetEscortPaused(false);
                             break;
-                    }
+                        }
 
-                    ++m_uiEventCount;
+                        ++m_uiEventCount;
+                    }
+                    else
+                    {
+                        m_uiEventTimer -= uiDiff;
+                    }
                 }
-                else
-                { m_uiEventTimer -= uiDiff; }
+
+                return;
             }
 
-            return;
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_letollAI(pCreature);
+    }
+
+    bool OnQuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest) override
+    {
+        if (pQuest->GetQuestId() == QUEST_DIGGING_BONES)
+        {
+            if (npc_letollAI* pEscortAI = dynamic_cast<npc_letollAI*>(pCreature->AI()))
+            {
+                DoScriptText(SAY_LE_START, pCreature);
+                pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
+
+                pEscortAI->Start(false, pPlayer, pQuest, true);
+            }
         }
 
-        DoMeleeAttackIfReady();
+        return true;
     }
 };
-
-CreatureAI* GetAI_npc_letoll(Creature* pCreature)
-{
-    return new npc_letollAI(pCreature);
-}
-
-bool QuestAccept_npc_letoll(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_DIGGING_BONES)
-    {
-        if (npc_letollAI* pEscortAI = dynamic_cast<npc_letollAI*>(pCreature->AI()))
-        {
-            DoScriptText(SAY_LE_START, pCreature);
-            pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
-
-            pEscortAI->Start(false, pPlayer, pQuest, true);
-        }
-    }
-
-    return true;
-}
 
 /*######
 ## npc_mana_bomb_exp_trigger
@@ -603,53 +671,72 @@ enum
     NPC_MANA_BOMB_KILL_TRIGGER  = 21039
 };
 
-struct npc_mana_bomb_exp_triggerAI : public ScriptedAI
+struct npc_mana_bomb_exp_trigger : public CreatureScript
 {
-    npc_mana_bomb_exp_triggerAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_mana_bomb_exp_trigger() : CreatureScript("npc_mana_bomb_exp_trigger") {}
 
-    GameObject* pManaBomb;
-
-    bool m_bIsActivated;
-    uint32 m_uiEventTimer;
-    uint32 m_uiEventCounter;
-
-    void Reset() override
+    struct npc_mana_bomb_exp_triggerAI : public ScriptedAI
     {
-        pManaBomb = NULL;
-        m_bIsActivated = false;
-        m_uiEventTimer = 1000;
-        m_uiEventCounter = 0;
-    }
+        npc_mana_bomb_exp_triggerAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-    void DoTrigger(Player* pPlayer, GameObject* pGo)
-    {
-        if (m_bIsActivated)
-        { return; }
+        GameObject* pManaBomb;
 
-        m_bIsActivated = true;
+        bool m_bIsActivated;
+        uint32 m_uiEventTimer;
+        uint32 m_uiEventCounter;
 
-        pPlayer->KilledMonsterCredit(NPC_MANA_BOMB_KILL_TRIGGER);
-
-        pManaBomb = pGo;
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_bIsActivated)
-        { return; }
-
-        if (m_uiEventTimer < uiDiff)
+        void Reset() override
         {
+            pManaBomb = NULL;
+            m_bIsActivated = false;
             m_uiEventTimer = 1000;
+            m_uiEventCounter = 0;
+        }
 
-            if (m_uiEventCounter < 10)
-            { m_creature->CastSpell(m_creature, SPELL_MANA_BOMB_LIGHTNING, false); }
+        void JustSummoned(GameObject* pGo)
+        {
+            //fictive use for GO guid transfer
+            pManaBomb = pGo;
+        }
 
-            switch (m_uiEventCounter)
+        void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*data*/) override
+        {
+            if (eventType == AI_EVENT_CUSTOM_A && pSender == m_creature && pInvoker->GetTypeId() == TYPEID_PLAYER)
             {
+                if (m_bIsActivated)
+                {
+                    return;
+                }
+
+                m_bIsActivated = true;
+
+                ((Player*)pInvoker)->KilledMonsterCredit(NPC_MANA_BOMB_KILL_TRIGGER);
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_bIsActivated)
+            {
+                return;
+            }
+
+            if (m_uiEventTimer < uiDiff)
+            {
+                m_uiEventTimer = 1000;
+
+                if (m_uiEventCounter < 10)
+                {
+                    m_creature->CastSpell(m_creature, SPELL_MANA_BOMB_LIGHTNING, false);
+                }
+
+                switch (m_uiEventCounter)
+                {
                 case 5:
                     if (pManaBomb)
-                    { pManaBomb->SetGoState(GO_STATE_ACTIVE); }
+                    {
+                        pManaBomb->SetGoState(GO_STATE_ACTIVE);
+                    }
 
                     DoScriptText(SAY_COUNT_1, m_creature);
                     break;
@@ -670,38 +757,51 @@ struct npc_mana_bomb_exp_triggerAI : public ScriptedAI
                     break;
                 case 30:
                     if (pManaBomb)
-                    { pManaBomb->SetGoState(GO_STATE_READY); }
+                    {
+                        pManaBomb->SetGoState(GO_STATE_READY);
+                    }
 
                     Reset();
                     break;
-            }
+                }
 
-            ++m_uiEventCounter;
+                ++m_uiEventCounter;
+            }
+            else
+            {
+                m_uiEventTimer -= uiDiff;
+            }
         }
-        else
-        { m_uiEventTimer -= uiDiff; }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_mana_bomb_exp_triggerAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_mana_bomb_exp_trigger(Creature* pCreature)
-{
-    return new npc_mana_bomb_exp_triggerAI(pCreature);
-}
 
 /*######
 ## go_mana_bomb
 ######*/
 
-bool GOUse_go_mana_bomb(Player* pPlayer, GameObject* pGo)
+struct go_mana_bomb : public GameObjectScript
 {
-    if (Creature* pCreature = GetClosestCreatureWithEntry(pGo, NPC_MANA_BOMB_EXPL_TRIGGER, INTERACTION_DISTANCE))
-    {
-        if (npc_mana_bomb_exp_triggerAI* pBombAI = dynamic_cast<npc_mana_bomb_exp_triggerAI*>(pCreature->AI()))
-        { pBombAI->DoTrigger(pPlayer, pGo); }
-    }
+    go_mana_bomb() : GameObjectScript("go_mana_bomb") {}
 
-    return true;
-}
+    bool OnUse(Player* pPlayer, GameObject* pGo) override
+    {
+        if (Creature* pCreature = GetClosestCreatureWithEntry(pGo, NPC_MANA_BOMB_EXPL_TRIGGER, INTERACTION_DISTANCE))
+        {
+            if (CreatureAI* pBombAI = pCreature->AI())
+            {
+                pBombAI->JustSummoned(pGo);
+                pBombAI->ReceiveAIEvent(AI_EVENT_CUSTOM_A, pCreature, pPlayer, 0);
+            }
+        }
+
+        return true;
+    }
+};
 
 /*######
 ## go_veil_skith_cage & npc_captive_child
@@ -717,47 +817,57 @@ enum
     SAY_THANKS_4              = -1000593
 };
 
-bool GOUse_go_veil_skith_cage(Player* pPlayer, GameObject* pGo)
+struct go_veil_skith_cage : public GameObjectScript
 {
-    if (pPlayer->GetQuestStatus(QUEST_MISSING_FRIENDS) == QUEST_STATUS_INCOMPLETE)
+    go_veil_skith_cage() : GameObjectScript("go_veil_skith_cage") {}
+
+    bool OnUse(Player* pPlayer, GameObject* pGo) override
     {
-        std::list<Creature*> lChildrenList;
-        GetCreatureListWithEntryInGrid(lChildrenList, pGo, NPC_CAPTIVE_CHILD, INTERACTION_DISTANCE);
-        for (std::list<Creature*>::const_iterator itr = lChildrenList.begin(); itr != lChildrenList.end(); ++itr)
+        if (pPlayer->GetQuestStatus(QUEST_MISSING_FRIENDS) == QUEST_STATUS_INCOMPLETE)
         {
-            pPlayer->KilledMonsterCredit(NPC_CAPTIVE_CHILD, (*itr)->GetObjectGuid());
-            switch (urand(0, 3))
+            std::list<Creature*> lChildrenList;
+            GetCreatureListWithEntryInGrid(lChildrenList, pGo, NPC_CAPTIVE_CHILD, INTERACTION_DISTANCE);
+            for (std::list<Creature*>::const_iterator itr = lChildrenList.begin(); itr != lChildrenList.end(); ++itr)
             {
+                pPlayer->KilledMonsterCredit(NPC_CAPTIVE_CHILD, (*itr)->GetObjectGuid());
+                switch (urand(0, 3))
+                {
                 case 0: DoScriptText(SAY_THANKS_1, *itr); break;
                 case 1: DoScriptText(SAY_THANKS_2, *itr); break;
                 case 2: DoScriptText(SAY_THANKS_3, *itr); break;
                 case 3: DoScriptText(SAY_THANKS_4, *itr); break;
+                }
+
+                (*itr)->GetMotionMaster()->Clear();
+                (*itr)->GetMotionMaster()->MovePoint(0, -2648.049f, 5274.573f, 1.691529f);
             }
-
-            (*itr)->GetMotionMaster()->Clear();
-            (*itr)->GetMotionMaster()->MovePoint(0, -2648.049f, 5274.573f, 1.691529f);
         }
+        return false;
     }
-    return false;
 };
 
-struct npc_captive_child : public ScriptedAI
+struct npc_captive_child : public CreatureScript
 {
-    npc_captive_child(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_captive_child() : CreatureScript("npc_captive_child") {}
 
-    void Reset() override {}
-
-    void MovementInform(uint32 uiMotionType, uint32 /*uiPointId*/) override
+    struct npc_captive_childAI : public ScriptedAI
     {
-        if (uiMotionType == POINT_MOTION_TYPE)
-        { m_creature->ForcedDespawn(); }                    // we only have one waypoint
+        npc_captive_childAI(Creature* pCreature) : ScriptedAI(pCreature) { }
+
+        void MovementInform(uint32 uiMotionType, uint32 /*uiPointId*/) override
+        {
+            if (uiMotionType == POINT_MOTION_TYPE)
+            {
+                m_creature->ForcedDespawn();
+            }                    // we only have one waypoint
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_captive_childAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_captive_child(Creature* pCreature)
-{
-    return new npc_captive_child(pCreature);
-}
 
 /*#####
 ## npc_isla_starmane
@@ -785,131 +895,159 @@ enum
     SPELL_TRAVELFORM                    = 32447             // guesswork
 };
 
-struct npc_isla_starmaneAI : public npc_escortAI
+struct npc_isla_starmane : public CreatureScript
 {
-    npc_isla_starmaneAI(Creature* pCreature) : npc_escortAI(pCreature)
+    npc_isla_starmane() : CreatureScript("npc_isla_starmane") {}
+
+    struct npc_isla_starmaneAI : public npc_escortAI
     {
-        Reset();
-    }
-
-    uint32 m_uiPeriodicTalkTimer;
-    uint32 m_uiEntanglingRootsTimer;
-    uint32 m_uiMoonfireTimer;
-    uint32 m_uiWrathTimer;
-
-    void Reset() override
-    {
-        m_uiPeriodicTalkTimer = urand(20000, 40000);
-        m_uiEntanglingRootsTimer = 100;
-        m_uiMoonfireTimer = 1600;
-        m_uiWrathTimer = 2000;
-
-        if (!HasEscortState(STATE_ESCORT_ESCORTING))
-        { m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE); }
-    }
-
-    void JustStartedEscort() override
-    {
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
-        DoScriptText(SAY_ISLA_START, m_creature);
-        if (GameObject* pCage = GetClosestGameObjectWithEntry(m_creature, GO_CAGE, 2 * INTERACTION_DISTANCE))
-        { pCage->Use(m_creature); }
-    }
-
-    void WaypointStart(uint32 uiPointId) override
-    {
-        switch (uiPointId)
+        npc_isla_starmaneAI(Creature* pCreature) : npc_escortAI(pCreature)
         {
+        }
+
+        uint32 m_uiPeriodicTalkTimer;
+        uint32 m_uiEntanglingRootsTimer;
+        uint32 m_uiMoonfireTimer;
+        uint32 m_uiWrathTimer;
+
+        void Reset() override
+        {
+            m_uiPeriodicTalkTimer = urand(20000, 40000);
+            m_uiEntanglingRootsTimer = 100;
+            m_uiMoonfireTimer = 1600;
+            m_uiWrathTimer = 2000;
+
+            if (!HasEscortState(STATE_ESCORT_ESCORTING))
+            {
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+            }
+        }
+
+        void JustStartedEscort() override
+        {
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+            DoScriptText(SAY_ISLA_START, m_creature);
+            if (GameObject* pCage = GetClosestGameObjectWithEntry(m_creature, GO_CAGE, 2 * INTERACTION_DISTANCE))
+            {
+                pCage->Use(m_creature);
+            }
+        }
+
+        void WaypointStart(uint32 uiPointId) override
+        {
+            switch (uiPointId)
+            {
             case 7:  DoScriptText(SAY_ISLA_LEAVE_BUILDING, m_creature); break;
             case 68: DoCastSpellIfCan(m_creature, SPELL_TRAVELFORM);    break;
+            }
         }
-    }
 
-    void WaypointReached(uint32 uiPointId) override
-    {
-        switch (uiPointId)
+        void WaypointReached(uint32 uiPointId) override
         {
+            switch (uiPointId)
+            {
             case 6:
                 DoScriptText(SAY_ISLA_WAITING, m_creature);
                 break;
             case 61:
                 if (Player* pPlayer = GetPlayerForEscort())
-                { pPlayer->GroupEventHappens(pPlayer->GetTeam() == ALLIANCE ? QUEST_ESCAPE_FROM_FIREWING_POINT_A : QUEST_ESCAPE_FROM_FIREWING_POINT_H, m_creature); }
+                {
+                    pPlayer->GroupEventHappens(pPlayer->GetTeam() == ALLIANCE ? QUEST_ESCAPE_FROM_FIREWING_POINT_A : QUEST_ESCAPE_FROM_FIREWING_POINT_H, m_creature);
+                }
                 break;
             case 67:
                 if (Player* pPlayer = GetPlayerForEscort())
-                { m_creature->SetFacingToObject(pPlayer); }
+                {
+                    m_creature->SetFacingToObject(pPlayer);
+                }
                 m_creature->HandleEmote(EMOTE_ONESHOT_WAVE);
                 break;
+            }
         }
-    }
 
-    void UpdateEscortAI(const uint32 uiDiff) override
-    {
-        if (!HasEscortState(STATE_ESCORT_ESCORTING))
+        void UpdateEscortAI(const uint32 uiDiff) override
         {
-            if (m_uiPeriodicTalkTimer < uiDiff)
+            if (!HasEscortState(STATE_ESCORT_ESCORTING))
             {
-                m_uiPeriodicTalkTimer = urand(30000, 60000);
-                switch (urand(0, 2))
+                if (m_uiPeriodicTalkTimer < uiDiff)
                 {
+                    m_uiPeriodicTalkTimer = urand(30000, 60000);
+                    switch (urand(0, 2))
+                    {
                     case 0: DoScriptText(SAY_ISLA_PERIODIC_1, m_creature); break;
                     case 1: DoScriptText(SAY_ISLA_PERIODIC_2, m_creature); break;
                     case 2: DoScriptText(SAY_ISLA_PERIODIC_3, m_creature); break;
+                    }
+                }
+                else
+                {
+                    m_uiPeriodicTalkTimer -= uiDiff;
+                }
+            }
+
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_uiEntanglingRootsTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ENTANGLING_ROOTS) == CAST_OK)
+                {
+                    m_uiEntanglingRootsTimer = urand(8000, 16000);
                 }
             }
             else
-            { m_uiPeriodicTalkTimer -= uiDiff; }
+            {
+                m_uiEntanglingRootsTimer -= uiDiff;
+            }
+
+            if (m_uiMoonfireTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MOONFIRE) == CAST_OK)
+                {
+                    m_uiMoonfireTimer = urand(6000, 12000);
+                }
+            }
+            else
+            {
+                m_uiMoonfireTimer -= uiDiff;
+            }
+
+            if (m_uiWrathTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_WRATH) == CAST_OK)
+                {
+                    m_uiWrathTimer = 2000;
+                }
+            }
+            else
+            {
+                m_uiWrathTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
         }
+    };
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiEntanglingRootsTimer < uiDiff)
+    bool OnQuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest) override
+    {
+        if (pQuest->GetQuestId() == QUEST_ESCAPE_FROM_FIREWING_POINT_A || pQuest->GetQuestId() == QUEST_ESCAPE_FROM_FIREWING_POINT_H)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ENTANGLING_ROOTS) == CAST_OK)
-            { m_uiEntanglingRootsTimer = urand(8000, 16000); }
+            if (npc_isla_starmaneAI* pEscortAI = dynamic_cast<npc_isla_starmaneAI*>(pCreature->AI()))
+            {
+                pCreature->SetFactionTemporary(pPlayer->GetTeam() == ALLIANCE ? FACTION_ESCORT_A_NEUTRAL_ACTIVE : FACTION_ESCORT_H_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
+                pEscortAI->Start(false, pPlayer, pQuest);
+            }
         }
-        else
-        { m_uiEntanglingRootsTimer -= uiDiff; }
+        return true;
+    }
 
-        if (m_uiMoonfireTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MOONFIRE) == CAST_OK)
-            { m_uiMoonfireTimer = urand(6000, 12000); }
-        }
-        else
-        { m_uiMoonfireTimer -= uiDiff; }
-
-        if (m_uiWrathTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_WRATH) == CAST_OK)
-            { m_uiWrathTimer = 2000; }
-        }
-        else
-        { m_uiWrathTimer -= uiDiff; }
-
-        DoMeleeAttackIfReady();
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_isla_starmaneAI(pCreature);
     }
 };
-
-bool QuestAccept_npc_isla_starmane(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_ESCAPE_FROM_FIREWING_POINT_A || pQuest->GetQuestId() == QUEST_ESCAPE_FROM_FIREWING_POINT_H)
-    {
-        if (npc_isla_starmaneAI* pEscortAI = dynamic_cast<npc_isla_starmaneAI*>(pCreature->AI()))
-        {
-            pCreature->SetFactionTemporary(pPlayer->GetTeam() == ALLIANCE ? FACTION_ESCORT_A_NEUTRAL_ACTIVE : FACTION_ESCORT_H_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
-            pEscortAI->Start(false, pPlayer, pQuest);
-        }
-    }
-    return true;
-}
-
-CreatureAI* GetAI_npc_isla_starmane(Creature* pCreature)
-{
-    return new npc_isla_starmaneAI(pCreature);
-}
 
 /*######
 ## npc_skywing
@@ -934,28 +1072,32 @@ enum
 
 static const float aLuangaSpawnCoords[3] = { -3507.203f, 4084.619f, 92.947f};
 
-struct npc_skywingAI : public npc_escortAI
+struct npc_skywing : public CreatureScript
 {
-    npc_skywingAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+    npc_skywing() : CreatureScript("npc_skywing") {}
 
-    uint32 m_uiCycloneTimer;
-    uint8 m_uiCycloneCounter;
-
-    void Reset() override
+    struct npc_skywingAI : public npc_escortAI
     {
-        if (!HasEscortState(STATE_ESCORT_ESCORTING))
+        npc_skywingAI(Creature* pCreature) : npc_escortAI(pCreature) { }
+
+        uint32 m_uiCycloneTimer;
+        uint8 m_uiCycloneCounter;
+
+        void Reset() override
         {
-            m_uiCycloneTimer = 0;
-            m_uiCycloneCounter = 0;
+            if (!HasEscortState(STATE_ESCORT_ESCORTING))
+            {
+                m_uiCycloneTimer = 0;
+                m_uiCycloneCounter = 0;
+            }
         }
-    }
 
-    void WaypointReached(uint32 uiPointId) override
-    {
-        switch (uiPointId)
+        void WaypointReached(uint32 uiPointId) override
         {
+            switch (uiPointId)
+            {
             case 6:
-                DoScriptText(SAY_SKYWING_TREE_DOWN , m_creature);
+                DoScriptText(SAY_SKYWING_TREE_DOWN, m_creature);
                 break;
             case 36:
                 DoScriptText(SAY_SKYWING_TREE_UP, m_creature);
@@ -979,63 +1121,76 @@ struct npc_skywingAI : public npc_escortAI
                 DoScriptText(SAY_SKYWING_END, m_creature);
 
                 if (Player* pPlayer = GetPlayerForEscort())
-                { pPlayer->GroupEventHappens(QUEST_SKYWING, m_creature); }
-        }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        pSummoned->AI()->AttackStart(m_creature);
-    }
-
-    void UpdateEscortAI(const uint32 uiDiff) override
-    {
-        if (m_uiCycloneTimer)
-        {
-            if (m_uiCycloneTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_FEATHERY_CYCLONE_BURST) == CAST_OK)
                 {
-                    ++m_uiCycloneCounter;
-
-                    if (m_uiCycloneCounter == 30)
-                    { DoCastSpellIfCan(m_creature, SPELL_RILAK_THE_REDEEMED, CAST_TRIGGERED); }
-
-                    // Only cast this spell 50 times
-                    if (m_uiCycloneCounter == 50)
-                    { m_uiCycloneTimer = 0; }
-                    else
-                    { m_uiCycloneTimer = 100; }
+                    pPlayer->GroupEventHappens(QUEST_SKYWING, m_creature);
                 }
             }
-            else
-            { m_uiCycloneTimer -= uiDiff; }
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
+        void JustSummoned(Creature* pSummoned) override
+        {
+            pSummoned->AI()->AttackStart(m_creature);
+        }
+
+        void UpdateEscortAI(const uint32 uiDiff) override
+        {
+            if (m_uiCycloneTimer)
+            {
+                if (m_uiCycloneTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_FEATHERY_CYCLONE_BURST) == CAST_OK)
+                    {
+                        ++m_uiCycloneCounter;
+
+                        if (m_uiCycloneCounter == 30)
+                        {
+                            DoCastSpellIfCan(m_creature, SPELL_RILAK_THE_REDEEMED, CAST_TRIGGERED);
+                        }
+
+                        // Only cast this spell 50 times
+                        if (m_uiCycloneCounter == 50)
+                        {
+                            m_uiCycloneTimer = 0;
+                        }
+                        else
+                        {
+                            m_uiCycloneTimer = 100;
+                        }
+                    }
+                }
+                else
+                {
+                    m_uiCycloneTimer -= uiDiff;
+                }
+            }
+
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+        }
+    };
+
+    bool OnQuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest) override
+    {
+        if (pQuest->GetQuestId() == QUEST_SKYWING)
+        {
+            if (npc_skywingAI* pEscortAI = dynamic_cast<npc_skywingAI*>(pCreature->AI()))
+            {
+                pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
+                DoScriptText(SAY_SKYWING_START, pCreature);
+
+                pEscortAI->Start(false, pPlayer, pQuest);
+            }
+        }
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_skywingAI(pCreature);
     }
 };
-
-bool QuestAccept_npc_skywing(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_SKYWING)
-    {
-        if (npc_skywingAI* pEscortAI = dynamic_cast<npc_skywingAI*>(pCreature->AI()))
-        {
-            pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
-            DoScriptText(SAY_SKYWING_START, pCreature);
-
-            pEscortAI->Start(false, pPlayer, pQuest);
-        }
-    }
-    return true;
-}
-
-CreatureAI* GetAI_npc_skywing(Creature* pCreature)
-{
-    return new npc_skywingAI(pCreature);
-}
 
 /*######
 ## npc_cenarion_sparrowhawk
@@ -1051,82 +1206,87 @@ enum
     GO_RAVEN_STONE              = 185541,
 };
 
-struct npc_cenarion_sparrowhawkAI : public ScriptedAI
+struct npc_cenarion_sparrowhawk : public CreatureScript
 {
-    npc_cenarion_sparrowhawkAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_cenarion_sparrowhawk() : CreatureScript("npc_cenarion_sparrowhawk") {}
 
-    uint32 m_uiSurveyTimer;
-    bool m_bFirstTimer;
-
-    ObjectGuid m_currentStone;
-
-    void Reset() override
+    struct npc_cenarion_sparrowhawkAI : public ScriptedAI
     {
-        m_uiSurveyTimer = 3000;
-        m_bFirstTimer   = true;
-        DoScriptText(EMOTE_FOLLOW, m_creature);
-    }
+        npc_cenarion_sparrowhawkAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-    void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
-    {
-        if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
-            return;
+        uint32 m_uiSurveyTimer;
+        bool m_bFirstTimer;
 
-        // despawn the trigger and spawn the nearby stone
-        if (Creature* pStoneTrigger = m_creature->GetMap()->GetCreature(m_currentStone))
-            pStoneTrigger->ForcedDespawn();
+        ObjectGuid m_currentStone;
 
-        if (GameObject* pStone = GetClosestGameObjectWithEntry(m_creature, GO_RAVEN_STONE, 5.0f))
+        void Reset() override
         {
-            pStone->SetRespawnTime(pStone->GetRespawnDelay());
-            pStone->Refresh();
+            m_uiSurveyTimer = 3000;
+            m_bFirstTimer = true;
+            DoScriptText(EMOTE_FOLLOW, m_creature);
         }
-        DoScriptText(EMOTE_LOCATE, m_creature);
 
-        // check if we still have other stones in range
-        m_uiSurveyTimer = 5000;
-    }
-
-    void DoFindNearbyStones()
-    {
-        float fX, fY, fZ;
-        if (Creature* pStoneTrigger = GetClosestCreatureWithEntry(m_creature, NPC_SKETTIS_RAVEN_STONE, 80.0f))
+        void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
         {
-            m_currentStone = pStoneTrigger->GetObjectGuid();
-            pStoneTrigger->GetContactPoint(m_creature, fX, fY, fZ);
+            if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
+                return;
 
-            m_creature->SetWalk(false);
-            m_creature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
-        }
-        else
-            m_creature->ForcedDespawn(10000);
-    }
+            // despawn the trigger and spawn the nearby stone
+            if (Creature* pStoneTrigger = m_creature->GetMap()->GetCreature(m_currentStone))
+                pStoneTrigger->ForcedDespawn();
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiSurveyTimer)
-        {
-            if (m_uiSurveyTimer <= uiDiff)
+            if (GameObject* pStone = GetClosestGameObjectWithEntry(m_creature, GO_RAVEN_STONE, 5.0f))
             {
-                if (m_bFirstTimer)
-                {
-                    DoScriptText(EMOTE_SURVEY, m_creature);
-                    m_bFirstTimer = false;
-                }
+                pStone->SetRespawnTime(pStone->GetRespawnDelay());
+                pStone->Refresh();
+            }
+            DoScriptText(EMOTE_LOCATE, m_creature);
 
-                DoFindNearbyStones();
-                m_uiSurveyTimer = 0;
+            // check if we still have other stones in range
+            m_uiSurveyTimer = 5000;
+        }
+
+        void DoFindNearbyStones()
+        {
+            float fX, fY, fZ;
+            if (Creature* pStoneTrigger = GetClosestCreatureWithEntry(m_creature, NPC_SKETTIS_RAVEN_STONE, 80.0f))
+            {
+                m_currentStone = pStoneTrigger->GetObjectGuid();
+                pStoneTrigger->GetContactPoint(m_creature, fX, fY, fZ);
+
+                m_creature->SetWalk(false);
+                m_creature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
             }
             else
-                m_uiSurveyTimer -= uiDiff;
+                m_creature->ForcedDespawn(10000);
         }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiSurveyTimer)
+            {
+                if (m_uiSurveyTimer <= uiDiff)
+                {
+                    if (m_bFirstTimer)
+                    {
+                        DoScriptText(EMOTE_SURVEY, m_creature);
+                        m_bFirstTimer = false;
+                    }
+
+                    DoFindNearbyStones();
+                    m_uiSurveyTimer = 0;
+                }
+                else
+                    m_uiSurveyTimer -= uiDiff;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_cenarion_sparrowhawkAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_cenarion_sparrowhawk(Creature* pCreature)
-{
-    return new npc_cenarion_sparrowhawkAI(pCreature);
-}
 
 /*#####
 ## npc_skyguard_prisoner
@@ -1148,62 +1308,64 @@ enum
     QUEST_ID_ESCAPE_SKETTIS     = 11085,
 };
 
-struct npc_skyguard_prisonerAI : public npc_escortAI
+struct npc_skyguard_prisoner : public CreatureScript
 {
-    npc_skyguard_prisonerAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+    npc_skyguard_prisoner() : CreatureScript("npc_skyguard_prisoner") {}
 
-    void Reset() override { }
-
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    struct npc_skyguard_prisonerAI : public npc_escortAI
     {
-        if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
+        npc_skyguard_prisonerAI(Creature* pCreature) : npc_escortAI(pCreature) { }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
         {
-            m_creature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
-            Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue));
-
-            // ToDo: add additional WP when DB will support it
-            if (m_creature->GetPositionZ() < 310.0f)
+            if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
             {
-                SetEscortPaused(true);
-                //SetCurrentWaypoint(WP_ID_SPAWN_1);
-                //SetEscortPaused(false);
-                script_error_log("NPC entry %u, location %f, %f, %f does not have waypoints implemented for current spawn location. Please contact customer support!", m_creature->GetEntry(), m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
-            }
-            else if (m_creature->GetPositionZ() < 330.0f)
-            {
-                SetEscortPaused(true);
-                //SetCurrentWaypoint(WP_ID_SPAWN_2);
-                //SetEscortPaused(false);
-                script_error_log("NPC entry %u, location %f, %f, %f does not have waypoints implemented for current spawn location. Please contact customer support!", m_creature->GetEntry(), m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
-            }
-            // else just use standard WP
+                m_creature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
+                Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue));
 
-            // open cage
-            if (GameObject* pCage = GetClosestGameObjectWithEntry(m_creature, GO_PRISONER_CAGE, 10.0f))
-                pCage->Use(m_creature);
+                // ToDo: add additional WP when DB will support it
+                if (m_creature->GetPositionZ() < 310.0f)
+                {
+                    SetEscortPaused(true);
+                    //SetCurrentWaypoint(WP_ID_SPAWN_1);
+                    //SetEscortPaused(false);
+                    script_error_log("NPC entry %u, location %f, %f, %f does not have waypoints implemented for current spawn location. Please contact customer support!", m_creature->GetEntry(), m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
+                }
+                else if (m_creature->GetPositionZ() < 330.0f)
+                {
+                    SetEscortPaused(true);
+                    //SetCurrentWaypoint(WP_ID_SPAWN_2);
+                    //SetEscortPaused(false);
+                    script_error_log("NPC entry %u, location %f, %f, %f does not have waypoints implemented for current spawn location. Please contact customer support!", m_creature->GetEntry(), m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
+                }
+                // else just use standard WP
+
+                // open cage
+                if (GameObject* pCage = GetClosestGameObjectWithEntry(m_creature, GO_PRISONER_CAGE, 10.0f))
+                    pCage->Use(m_creature);
+            }
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_WING_GUARD)
+        void JustSummoned(Creature* pSummoned) override
         {
-            pSummoned->AI()->AttackStart(m_creature);
-
-            switch (urand(0, 3))
+            if (pSummoned->GetEntry() == NPC_WING_GUARD)
             {
+                pSummoned->AI()->AttackStart(m_creature);
+
+                switch (urand(0, 3))
+                {
                 case 0: DoScriptText(SAY_AMBUSH_1, pSummoned); break;
                 case 1: DoScriptText(SAY_AMBUSH_2, pSummoned); break;
                 case 2: DoScriptText(SAY_AMBUSH_3, pSummoned); break;
                 case 3: DoScriptText(SAY_AMBUSH_4, pSummoned); break;
+                }
             }
         }
-    }
 
-    void WaypointReached(uint32 uiPointId) override
-    {
-        switch (uiPointId)
+        void WaypointReached(uint32 uiPointId) override
         {
+            switch (uiPointId)
+            {
             case 0:
                 DoScriptText(SAY_ESCORT_START, m_creature);
                 break;
@@ -1221,97 +1383,125 @@ struct npc_skyguard_prisonerAI : public npc_escortAI
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->GroupEventHappens(QUEST_ID_ESCAPE_SKETTIS, m_creature);
                 break;
+            }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_skyguard_prisonerAI(pCreature);
+    }
+
+    bool OnQuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest) override
+    {
+        if (pQuest->GetQuestId() == QUEST_ID_ESCAPE_SKETTIS)
+        {
+            pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
+            return true;
+        }
+
+        return false;
     }
 };
 
-CreatureAI* GetAI_npc_skyguard_prisoner(Creature* pCreature)
-{
-    return new npc_skyguard_prisonerAI(pCreature);
-}
-
-bool QuestAccept_npc_skyguard_prisoner(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_ID_ESCAPE_SKETTIS)
-    {
-        pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
-        return true;
-    }
-
-    return false;
-}
-
 void AddSC_terokkar_forest()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "mob_unkor_the_ruthless";
-    pNewScript->GetAI = &GetAI_mob_unkor_the_ruthless;
-    pNewScript->RegisterSelf();
+    s = new mob_unkor_the_ruthless();
+    s->RegisterSelf();
+    s = new mob_netherweb_victim();
+    s->RegisterSelf();
+    s = new npc_akuno();
+    s->RegisterSelf();
+    s = new npc_hungry_nether_ray();
+    s->RegisterSelf();
+    s = new npc_letoll();
+    s->RegisterSelf();
+    s = new npc_mana_bomb_exp_trigger();
+    s->RegisterSelf();
+    s = new go_mana_bomb();
+    s->RegisterSelf();
+    s = new go_veil_skith_cage();
+    s->RegisterSelf();
+    s = new npc_captive_child();
+    s->RegisterSelf();
+    s = new npc_isla_starmane();
+    s->RegisterSelf();
+    s = new npc_skywing();
+    s->RegisterSelf();
+    s = new npc_cenarion_sparrowhawk();
+    s->RegisterSelf();
+    s = new npc_skyguard_prisoner();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "mob_netherweb_victim";
-    pNewScript->GetAI = &GetAI_mob_netherweb_victim;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "mob_unkor_the_ruthless";
+    //pNewScript->GetAI = &GetAI_mob_unkor_the_ruthless;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_akuno";
-    pNewScript->GetAI = &GetAI_npc_akuno;
-    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_akuno;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "mob_netherweb_victim";
+    //pNewScript->GetAI = &GetAI_mob_netherweb_victim;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_hungry_nether_ray";
-    pNewScript->GetAI = &GetAI_npc_hungry_nether_ray;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_akuno";
+    //pNewScript->GetAI = &GetAI_npc_akuno;
+    //pNewScript->pQuestAcceptNPC = &QuestAccept_npc_akuno;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_letoll";
-    pNewScript->GetAI = &GetAI_npc_letoll;
-    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_letoll;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_hungry_nether_ray";
+    //pNewScript->GetAI = &GetAI_npc_hungry_nether_ray;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_mana_bomb_exp_trigger";
-    pNewScript->GetAI = &GetAI_npc_mana_bomb_exp_trigger;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_letoll";
+    //pNewScript->GetAI = &GetAI_npc_letoll;
+    //pNewScript->pQuestAcceptNPC = &QuestAccept_npc_letoll;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "go_mana_bomb";
-    pNewScript->pGOUse = &GOUse_go_mana_bomb;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_mana_bomb_exp_trigger";
+    //pNewScript->GetAI = &GetAI_npc_mana_bomb_exp_trigger;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "go_veil_skith_cage";
-    pNewScript->pGOUse = &GOUse_go_veil_skith_cage;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "go_mana_bomb";
+    //pNewScript->pGOUse = &GOUse_go_mana_bomb;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_captive_child";
-    pNewScript->GetAI = &GetAI_npc_captive_child;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "go_veil_skith_cage";
+    //pNewScript->pGOUse = &GOUse_go_veil_skith_cage;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_isla_starmane";
-    pNewScript->GetAI = &GetAI_npc_isla_starmane;
-    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_isla_starmane;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_captive_child";
+    //pNewScript->GetAI = &GetAI_npc_captive_child;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_skywing";
-    pNewScript->GetAI = &GetAI_npc_skywing;
-    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_skywing;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_isla_starmane";
+    //pNewScript->GetAI = &GetAI_npc_isla_starmane;
+    //pNewScript->pQuestAcceptNPC = &QuestAccept_npc_isla_starmane;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_cenarion_sparrowhawk";
-    pNewScript->GetAI = &GetAI_npc_cenarion_sparrowhawk;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_skywing";
+    //pNewScript->GetAI = &GetAI_npc_skywing;
+    //pNewScript->pQuestAcceptNPC = &QuestAccept_npc_skywing;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_skyguard_prisoner";
-    pNewScript->GetAI = &GetAI_npc_skyguard_prisoner;
-    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_skyguard_prisoner;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_cenarion_sparrowhawk";
+    //pNewScript->GetAI = &GetAI_npc_cenarion_sparrowhawk;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_skyguard_prisoner";
+    //pNewScript->GetAI = &GetAI_npc_skyguard_prisoner;
+    //pNewScript->pQuestAcceptNPC = &QuestAccept_npc_skyguard_prisoner;
+    //pNewScript->RegisterSelf();
 }

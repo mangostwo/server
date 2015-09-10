@@ -56,146 +56,180 @@ enum
 // Summon Saplings spells (too many to declare them above)
 static const uint32 aSaplingsSummonSpells[10] = {34727, 34730, 34731, 34732, 34733, 34734, 34735, 34736, 34737, 34739};
 
-struct boss_warp_splinterAI : public ScriptedAI
+struct boss_warp_splinter : public CreatureScript
 {
-    boss_warp_splinterAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_warp_splinter() : CreatureScript("boss_warp_splinter") {}
+
+    struct boss_warp_splinterAI : public ScriptedAI
     {
-        // Add the summon spells to a vector for better handling
-        for (uint8 i = 0; i < 10; ++i)
-        { m_vSummonSpells.push_back(aSaplingsSummonSpells[i]); }
-
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    bool m_bIsRegularMode;
-
-    uint32 m_uiWarStompTimer;
-    uint32 m_uiSummonTreantsTimer;
-    uint32 m_uiArcaneVolleyTimer;
-
-    std::vector<uint32> m_vSummonSpells;
-
-    void Reset() override
-    {
-        m_uiWarStompTimer       = urand(6000, 7000);
-        m_uiSummonTreantsTimer  = urand(25000, 35000);
-        m_uiArcaneVolleyTimer   = urand(12000, 14500);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_SAPLING)
-        { pSummoned->GetMotionMaster()->MoveFollow(m_creature, 0, 0); }
-    }
-
-    // Wrapper to summon all Saplings
-    void SummonTreants()
-    {
-        // Choose 6 random spells out of 10
-        std::random_shuffle(m_vSummonSpells.begin(), m_vSummonSpells.end());
-        for (uint8 i = 0; i < 6; ++i)
-        { DoCastSpellIfCan(m_creature, m_vSummonSpells[i], CAST_TRIGGERED); }
-
-        DoCastSpellIfCan(m_creature, SPELL_SUMMON_SAPLINGS, CAST_TRIGGERED);
-        DoScriptText(urand(0, 1) ? SAY_SUMMON_1 : SAY_SUMMON_2, m_creature);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        // War Stomp
-        if (m_uiWarStompTimer < uiDiff)
+        boss_warp_splinterAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_WAR_STOMP) == CAST_OK)
-            { m_uiWarStompTimer = urand(17000, 38000); }
-        }
-        else
-        { m_uiWarStompTimer -= uiDiff; }
+            // Add the summon spells to a vector for better handling
+            for (uint8 i = 0; i < 10; ++i)
+            {
+                m_vSummonSpells.push_back(aSaplingsSummonSpells[i]);
+            }
 
-        // Arcane Volley
-        if (m_uiArcaneVolleyTimer < uiDiff)
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        }
+
+        bool m_bIsRegularMode;
+
+        uint32 m_uiWarStompTimer;
+        uint32 m_uiSummonTreantsTimer;
+        uint32 m_uiArcaneVolleyTimer;
+
+        std::vector<uint32> m_vSummonSpells;
+
+        void Reset() override
         {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ARCANE_VOLLEY : SPELL_ARCANE_VOLLEY_H) == CAST_OK)
-            { m_uiArcaneVolleyTimer = urand(16000, 38000); }
+            m_uiWarStompTimer = urand(6000, 7000);
+            m_uiSummonTreantsTimer = urand(25000, 35000);
+            m_uiArcaneVolleyTimer = urand(12000, 14500);
         }
-        else
-        { m_uiArcaneVolleyTimer -= uiDiff; }
 
-        // Summon Treants
-        if (m_uiSummonTreantsTimer < uiDiff)
+        void Aggro(Unit* /*pWho*/) override
         {
-            SummonTreants();
-            m_uiSummonTreantsTimer = urand(37000, 55000);
+            DoScriptText(SAY_AGGRO, m_creature);
         }
-        else
-        { m_uiSummonTreantsTimer -= uiDiff; }
 
-        DoMeleeAttackIfReady();
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(SAY_DEATH, m_creature);
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_SAPLING)
+            {
+                pSummoned->GetMotionMaster()->MoveFollow(m_creature, 0, 0);
+            }
+        }
+
+        // Wrapper to summon all Saplings
+        void SummonTreants()
+        {
+            // Choose 6 random spells out of 10
+            std::random_shuffle(m_vSummonSpells.begin(), m_vSummonSpells.end());
+            for (uint8 i = 0; i < 6; ++i)
+            {
+                DoCastSpellIfCan(m_creature, m_vSummonSpells[i], CAST_TRIGGERED);
+            }
+
+            DoCastSpellIfCan(m_creature, SPELL_SUMMON_SAPLINGS, CAST_TRIGGERED);
+            DoScriptText(urand(0, 1) ? SAY_SUMMON_1 : SAY_SUMMON_2, m_creature);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            // War Stomp
+            if (m_uiWarStompTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_WAR_STOMP) == CAST_OK)
+                {
+                    m_uiWarStompTimer = urand(17000, 38000);
+                }
+            }
+            else
+            {
+                m_uiWarStompTimer -= uiDiff;
+            }
+
+            // Arcane Volley
+            if (m_uiArcaneVolleyTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ARCANE_VOLLEY : SPELL_ARCANE_VOLLEY_H) == CAST_OK)
+                {
+                    m_uiArcaneVolleyTimer = urand(16000, 38000);
+                }
+            }
+            else
+            {
+                m_uiArcaneVolleyTimer -= uiDiff;
+            }
+
+            // Summon Treants
+            if (m_uiSummonTreantsTimer < uiDiff)
+            {
+                SummonTreants();
+                m_uiSummonTreantsTimer = urand(37000, 55000);
+            }
+            else
+            {
+                m_uiSummonTreantsTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_warp_splinterAI(pCreature);
     }
 };
 
 /*#####
 # mob_treant (Sapling)
 #####*/
-struct npc_saplingAI  : public ScriptedAI
+struct npc_sapling : public CreatureScript
 {
-    npc_saplingAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_sapling() : CreatureScript("mob_warp_splinter_treant") {}
 
-    void Reset() override
+    struct npc_saplingAI : public ScriptedAI
     {
-        // ToDo: This one may need further reserch
-        // m_creature->SetSpeedRate(MOVE_RUN, 0.5f);
-    }
+        npc_saplingAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override
+        void Reset() override
+        {
+            // ToDo: This one may need further reserch
+            // m_creature->SetSpeedRate(MOVE_RUN, 0.5f);
+        }
+
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        void UpdateAI(const uint32 /*uiDiff*/) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        DoMeleeAttackIfReady();
+        return new npc_saplingAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_warp_splinter(Creature* pCreature)
-{
-    return new boss_warp_splinterAI(pCreature);
-}
-
-CreatureAI* GetAI_npc_sapling(Creature* pCreature)
-{
-    return new npc_saplingAI(pCreature);
-}
-
 void AddSC_boss_warp_splinter()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_warp_splinter";
-    pNewScript->GetAI = &GetAI_boss_warp_splinter;
-    pNewScript->RegisterSelf();
+    s = new boss_warp_splinter();
+    s->RegisterSelf();
+    s = new npc_sapling();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "mob_warp_splinter_treant";
-    pNewScript->GetAI = &GetAI_npc_sapling;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_warp_splinter";
+    //pNewScript->GetAI = &GetAI_boss_warp_splinter;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "mob_warp_splinter_treant";
+    //pNewScript->GetAI = &GetAI_npc_sapling;
+    //pNewScript->RegisterSelf();
 }

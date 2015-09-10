@@ -43,73 +43,88 @@ enum
 ## boss_fjola
 ######*/
 
-struct  boss_fjolaAI : public ScriptedAI
+struct boss_fjola : CreatureScript
 {
-    boss_fjolaAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
+    boss_fjola() : CreatureScript("boss_fjola") {}
 
-    ScriptedInstance* m_pInstance;
-
-    void Reset() override {}
-
-    void Aggro(Unit* /*pWho*/) override
+    struct boss_fjolaAI : public ScriptedAI
     {
-        m_creature->SetInCombatWithZone();
-    }
+        boss_fjolaAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
-    void UpdateAI(const uint32 /*uiDiff*/) override
+        ScriptedInstance* m_pInstance;
+
+        void Reset() override {}
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            m_creature->SetInCombatWithZone();
+        }
+
+        void UpdateAI(const uint32 /*uiDiff*/) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        DoMeleeAttackIfReady();
+        return new boss_fjolaAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_fjola(Creature* pCreature)
-{
-    return new boss_fjolaAI(pCreature);
-}
 
 /*######
 ## boss_eydis
 ######*/
 
-struct  boss_eydisAI : public ScriptedAI
+struct boss_eydis : public CreatureScript
 {
-    boss_eydisAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
+    boss_eydis() : CreatureScript("boss_eydis") {}
 
-    void Reset() override {}
-
-    void Aggro(Unit* /*pWho*/) override
+    struct boss_eydisAI : public ScriptedAI
     {
-        m_creature->SetInCombatWithZone();
-    }
+        boss_eydisAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
-    void UpdateAI(const uint32 /*uiDiff*/) override
+        void Reset() override {}
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            m_creature->SetInCombatWithZone();
+        }
+
+        void UpdateAI(const uint32 /*uiDiff*/) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        DoMeleeAttackIfReady();
+        return new boss_eydisAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_eydis(Creature* pCreature)
-{
-    return new boss_eydisAI(pCreature);
-}
-
 void AddSC_twin_valkyr()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_fjola";
-    pNewScript->GetAI = &GetAI_boss_fjola;
-    pNewScript->RegisterSelf();
+    s = new boss_fjola();
+    s->RegisterSelf();
+    s = new boss_eydis();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_eydis";
-    pNewScript->GetAI = &GetAI_boss_fjola;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_fjola";
+    //pNewScript->GetAI = &GetAI_boss_fjola;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_eydis";
+    //pNewScript->GetAI = &GetAI_boss_fjola;
+    //pNewScript->RegisterSelf();
 }

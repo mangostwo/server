@@ -79,152 +79,159 @@ enum
     SAY_FESTERGUT_DEATH         = -1631091,
 };
 
-struct  boss_festergutAI : public ScriptedAI
+struct boss_festergut : public CreatureScript
 {
-    boss_festergutAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_festergut() : CreatureScript("boss_festergut") {}
+
+    struct boss_festergutAI : public ScriptedAI
     {
-        m_pInstance = (instance_icecrown_citadel*)pCreature->GetMap()->GetInstanceData();
-        Reset();
-    }
-
-    instance_icecrown_citadel* m_pInstance;
-
-    uint32 m_uiBerserkTimer;
-    uint32 m_uiGastricBloatTimer;
-    uint32 m_uiInhaleBlightTimer;
-    uint32 m_uiGasSporeTimer;
-    uint32 m_uiVileGasTimer;
-
-    void Reset() override
-    {
-        m_uiBerserkTimer = 5 * MINUTE * IN_MILLISECONDS;
-        m_uiGastricBloatTimer = 10000;
-        m_uiInhaleBlightTimer = 30000;
-        m_uiGasSporeTimer = 20000;
-        m_uiVileGasTimer = 10000;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        DoCastSpellIfCan(m_creature, SPELL_GASTRIC_BLOAT, CAST_TRIGGERED); // not working as intended currently
-        DoCastSpellIfCan(m_creature, SPELL_GASEOUS_BLIGHT_1, CAST_TRIGGERED); // DoT aura
-        DoCastSpellIfCan(m_creature, SPELL_GASEUS_BLIGHT_DUMMY, CAST_TRIGGERED); // visual cast on dummy npc
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_FESTERGUT, IN_PROGRESS);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_FESTERGUT, FAIL);
-
-        DoCastSpellIfCan(m_creature, SPELL_REMOVE_INOCULENT, CAST_TRIGGERED);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_FESTERGUT, DONE);
-
-        DoScriptText(SAY_DEATH, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_REMOVE_INOCULENT, CAST_TRIGGERED);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Berserk
-        if (m_uiBerserkTimer <= uiDiff)
+        boss_festergutAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-            {
-                DoScriptText(SAY_BERSERK, m_creature);
-                m_uiBerserkTimer = 5 * MINUTE * IN_MILLISECONDS;
-            }
+            m_pInstance = (ScriptedInstance*)pCreature->GetMap()->GetInstanceData();
         }
-        else
-            m_uiBerserkTimer -= uiDiff;
 
-        // Inhale Blight and Pungent Blight
-        if (m_uiInhaleBlightTimer <= uiDiff)
+        ScriptedInstance* m_pInstance;
+
+        uint32 m_uiBerserkTimer;
+        uint32 m_uiGastricBloatTimer;
+        uint32 m_uiInhaleBlightTimer;
+        uint32 m_uiGasSporeTimer;
+        uint32 m_uiVileGasTimer;
+
+        void Reset() override
         {
-            SpellAuraHolder* holder = m_creature->GetSpellAuraHolder(SPELL_INHALED_BLIGHT_10);
+            m_uiBerserkTimer = 5 * MINUTE * IN_MILLISECONDS;
+            m_uiGastricBloatTimer = 10000;
+            m_uiInhaleBlightTimer = 30000;
+            m_uiGasSporeTimer = 20000;
+            m_uiVileGasTimer = 10000;
+        }
 
-            if (!holder)
-                holder = m_creature->GetSpellAuraHolder(SPELL_INHALED_BLIGHT_25);
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
 
-            // inhale the gas or if already have 3 stacks - release it
-            if (holder && holder->GetStackAmount() >= 3)
+            DoCastSpellIfCan(m_creature, SPELL_GASTRIC_BLOAT, CAST_TRIGGERED); // not working as intended currently
+            DoCastSpellIfCan(m_creature, SPELL_GASEOUS_BLIGHT_1, CAST_TRIGGERED); // DoT aura
+            DoCastSpellIfCan(m_creature, SPELL_GASEUS_BLIGHT_DUMMY, CAST_TRIGGERED); // visual cast on dummy npc
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_FESTERGUT, IN_PROGRESS);
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_FESTERGUT, FAIL);
+
+            DoCastSpellIfCan(m_creature, SPELL_REMOVE_INOCULENT, CAST_TRIGGERED);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_FESTERGUT, DONE);
+
+            DoScriptText(SAY_DEATH, m_creature);
+            DoCastSpellIfCan(m_creature, SPELL_REMOVE_INOCULENT, CAST_TRIGGERED);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            // Berserk
+            if (m_uiBerserkTimer <= uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_PUNGENT_BLIGHT) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
                 {
-                    DoScriptText(SAY_PUNGUENT_BLIGHT_EMOTE, m_creature);
-                    DoScriptText(SAY_PUNGUENT_BLIGHT, m_creature);
-                    m_uiInhaleBlightTimer = 35000;
+                    DoScriptText(SAY_BERSERK, m_creature);
+                    m_uiBerserkTimer = 5 * MINUTE * IN_MILLISECONDS;
                 }
             }
-            else if (DoCastSpellIfCan(m_creature, SPELL_INHALE_BLIGHT) == CAST_OK)
+            else
+                m_uiBerserkTimer -= uiDiff;
+
+            // Inhale Blight and Pungent Blight
+            if (m_uiInhaleBlightTimer <= uiDiff)
             {
-                if (m_pInstance)
+                SpellAuraHolder* holder = m_creature->GetSpellAuraHolder(SPELL_INHALED_BLIGHT_10);
+
+                if (!holder)
+                    holder = m_creature->GetSpellAuraHolder(SPELL_INHALED_BLIGHT_25);
+
+                // inhale the gas or if already have 3 stacks - release it
+                if (holder && holder->GetStackAmount() >= 3)
                 {
-                    if (Creature* pProfessor = m_pInstance->GetSingleCreatureFromStorage(NPC_PROFESSOR_PUTRICIDE))
-                        DoScriptText(SAY_BLIGHT, pProfessor);
+                    if (DoCastSpellIfCan(m_creature, SPELL_PUNGENT_BLIGHT) == CAST_OK)
+                    {
+                        DoScriptText(SAY_PUNGUENT_BLIGHT_EMOTE, m_creature);
+                        DoScriptText(SAY_PUNGUENT_BLIGHT, m_creature);
+                        m_uiInhaleBlightTimer = 35000;
+                    }
                 }
-                m_uiInhaleBlightTimer = 30000;
+                else if (DoCastSpellIfCan(m_creature, SPELL_INHALE_BLIGHT) == CAST_OK)
+                {
+                    if (m_pInstance)
+                    {
+                        if (Creature* pProfessor = m_pInstance->GetSingleCreatureFromStorage(NPC_PROFESSOR_PUTRICIDE))
+                            DoScriptText(SAY_BLIGHT, pProfessor);
+                    }
+                    m_uiInhaleBlightTimer = 30000;
+                }
             }
-        }
-        else
-            m_uiInhaleBlightTimer -= uiDiff;
+            else
+                m_uiInhaleBlightTimer -= uiDiff;
 
-        // Gas Spore
-        if (m_uiGasSporeTimer <= uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_GAS_SPORE) == CAST_OK)
+            // Gas Spore
+            if (m_uiGasSporeTimer <= uiDiff)
             {
-                DoScriptText(SAY_SPORE, m_creature);
-                m_uiGasSporeTimer = 40000;
+                if (DoCastSpellIfCan(m_creature, SPELL_GAS_SPORE) == CAST_OK)
+                {
+                    DoScriptText(SAY_SPORE, m_creature);
+                    m_uiGasSporeTimer = 40000;
+                }
             }
-        }
-        else
-            m_uiGasSporeTimer -= uiDiff;
+            else
+                m_uiGasSporeTimer -= uiDiff;
 
-        // Vile Gas
-        if (m_uiVileGasTimer <= uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_VILE_GAS_SUMMON, CAST_TRIGGERED) == CAST_OK)
+            // Vile Gas
+            if (m_uiVileGasTimer <= uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_VILE_GAS) == CAST_OK)
-                    m_uiVileGasTimer = 30000;
+                if (DoCastSpellIfCan(m_creature, SPELL_VILE_GAS_SUMMON, CAST_TRIGGERED) == CAST_OK)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_VILE_GAS) == CAST_OK)
+                        m_uiVileGasTimer = 30000;
+                }
             }
-        }
-        else
-            m_uiVileGasTimer -= uiDiff;
+            else
+                m_uiVileGasTimer -= uiDiff;
 
-        DoMeleeAttackIfReady();
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_festergutAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_festergut(Creature* pCreature)
-{
-    return new boss_festergutAI(pCreature);
-}
-
 void AddSC_boss_festergut()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_festergut";
-    pNewScript->GetAI = &GetAI_boss_festergut;
-    pNewScript->RegisterSelf();
+    s = new boss_festergut();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_festergut";
+    //pNewScript->GetAI = &GetAI_boss_festergut;
+    //pNewScript->RegisterSelf();
 }

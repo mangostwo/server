@@ -52,114 +52,139 @@ enum
     NPC_RAGING_FLAMES               = 20481,
 };
 
-struct boss_nethermancer_sepethreaAI : public ScriptedAI
+struct boss_nethermancer_sepethrea : public CreatureScript
 {
-    boss_nethermancer_sepethreaAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_nethermancer_sepethrea() : CreatureScript("boss_nethermancer_sepethrea") {}
+
+    struct boss_nethermancer_sepethreaAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiFrostAttackTimer;
-    uint32 m_uiArcaneBlastTimer;
-    uint32 m_uiDragonsBreathTimer;
-
-    void Reset() override
-    {
-        m_uiFrostAttackTimer    = urand(8000, 17000);
-        m_uiArcaneBlastTimer    = urand(14000, 25000);
-        m_uiDragonsBreathTimer  = urand(20000, 26000);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-        DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SUMMON_RAGING_FLAMES : SPELL_SUMMON_RAGING_FLAMES_H);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_SEPETHREA, DONE); }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_RAGING_FLAMES)
+        boss_nethermancer_sepethreaAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            pSummoned->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_MAGIC, true);
-            pSummoned->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, true);
-
-            // ToDo: need to fixate target and make them walk!
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            { pSummoned->GetMotionMaster()->MoveChase(pTarget); }
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
 
-        // Frost Attack
-        if (m_uiFrostAttackTimer < uiDiff)
+        uint32 m_uiFrostAttackTimer;
+        uint32 m_uiArcaneBlastTimer;
+        uint32 m_uiDragonsBreathTimer;
+
+        void Reset() override
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_ATTACK) == CAST_OK)
-            { m_uiFrostAttackTimer = urand(5000, 17000); }
+            m_uiFrostAttackTimer = urand(8000, 17000);
+            m_uiArcaneBlastTimer = urand(14000, 25000);
+            m_uiDragonsBreathTimer = urand(20000, 26000);
         }
-        else
-        { m_uiFrostAttackTimer -= uiDiff; }
 
-        // Arcane Blast
-        if (m_uiArcaneBlastTimer < uiDiff)
+        void Aggro(Unit* /*pWho*/) override
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARCANE_BLAST) == CAST_OK)
-            { m_uiArcaneBlastTimer = urand(15000, 30000); }
+            DoScriptText(SAY_AGGRO, m_creature);
+            DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SUMMON_RAGING_FLAMES : SPELL_SUMMON_RAGING_FLAMES_H);
         }
-        else
-        { m_uiArcaneBlastTimer -= uiDiff; }
 
-        // Dragons Breath
-        if (m_uiDragonsBreathTimer < uiDiff)
+        void KilledUnit(Unit* /*pVictim*/) override
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_DRAGONS_BREATH) == CAST_OK)
+            DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(SAY_DEATH, m_creature);
+
+            if (m_pInstance)
             {
-                if (urand(0, 1))
-                { DoScriptText(urand(0, 1) ? SAY_DRAGONS_BREATH_1 : SAY_DRAGONS_BREATH_2, m_creature); }
-
-                m_uiDragonsBreathTimer = urand(20000, 35000);
+                m_pInstance->SetData(TYPE_SEPETHREA, DONE);
             }
         }
-        else
-        { m_uiDragonsBreathTimer -= uiDiff; }
 
-        DoMeleeAttackIfReady();
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_RAGING_FLAMES)
+            {
+                pSummoned->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_MAGIC, true);
+                pSummoned->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, true);
+
+                // ToDo: need to fixate target and make them walk!
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    pSummoned->GetMotionMaster()->MoveChase(pTarget);
+                }
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            // Return since we have no target
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            // Frost Attack
+            if (m_uiFrostAttackTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_ATTACK) == CAST_OK)
+                {
+                    m_uiFrostAttackTimer = urand(5000, 17000);
+                }
+            }
+            else
+            {
+                m_uiFrostAttackTimer -= uiDiff;
+            }
+
+            // Arcane Blast
+            if (m_uiArcaneBlastTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARCANE_BLAST) == CAST_OK)
+                {
+                    m_uiArcaneBlastTimer = urand(15000, 30000);
+                }
+            }
+            else
+            {
+                m_uiArcaneBlastTimer -= uiDiff;
+            }
+
+            // Dragons Breath
+            if (m_uiDragonsBreathTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_DRAGONS_BREATH) == CAST_OK)
+                {
+                    if (urand(0, 1))
+                    {
+                        DoScriptText(urand(0, 1) ? SAY_DRAGONS_BREATH_1 : SAY_DRAGONS_BREATH_2, m_creature);
+                    }
+
+                    m_uiDragonsBreathTimer = urand(20000, 35000);
+                }
+            }
+            else
+            {
+                m_uiDragonsBreathTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_nethermancer_sepethreaAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_nethermancer_sepethrea(Creature* pCreature)
-{
-    return new boss_nethermancer_sepethreaAI(pCreature);
-}
-
 void AddSC_boss_nethermancer_sepethrea()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_nethermancer_sepethrea";
-    pNewScript->GetAI = &GetAI_boss_nethermancer_sepethrea;
-    pNewScript->RegisterSelf();
+    s = new boss_nethermancer_sepethrea();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_nethermancer_sepethrea";
+    //pNewScript->GetAI = &GetAI_boss_nethermancer_sepethrea;
+    //pNewScript->RegisterSelf();
 }

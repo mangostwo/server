@@ -66,32 +66,4 @@ enum
 
     MAX_APOTHECARY          = 3,
 };
-
-class instance_shadowfang_keep : public ScriptedInstance
-{
-    public:
-        instance_shadowfang_keep(Map* pMap);
-
-        void Initialize() override;
-
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-        void DoSpeech();
-
-        void OnCreatureDeath(Creature* pCreature) override;
-        void OnCreatureEvade(Creature* pCreature);
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-        void Load(const char* chrIn) override;
-
-    private:
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string m_strInstData;
-
-        uint8 m_uiApothecaryDead;
-};
-
 #endif

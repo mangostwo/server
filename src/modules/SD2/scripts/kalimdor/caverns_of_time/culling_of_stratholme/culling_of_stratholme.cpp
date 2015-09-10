@@ -63,15 +63,19 @@ enum
     SPELL_TELEPORT_COT_P4       = 53435,                    // triggers 53436
 };
 
-bool GossipHello_npc_chromie(Player* pPlayer, Creature* pCreature)
+struct npc_chromie : public CreatureScript
 {
-    if (pCreature->IsQuestGiver())
-        pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+    npc_chromie() : CreatureScript("npc_chromie") {}
 
-    if (instance_culling_of_stratholme* m_pInstance = (instance_culling_of_stratholme*)pCreature->GetInstanceData())
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
-        switch (pCreature->GetEntry())
+        if (pCreature->IsQuestGiver())
+            pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+
+        if (InstanceData* m_pInstance = pCreature->GetInstanceData())
         {
+            switch (pCreature->GetEntry())
+            {
             case NPC_CHROMIE_INN:
                 if (m_pInstance->GetData(TYPE_GRAIN_EVENT) != DONE)
                 {
@@ -87,209 +91,141 @@ bool GossipHello_npc_chromie(Player* pPlayer, Creature* pCreature)
                     pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ENTRANCE_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
                 pPlayer->SEND_GOSSIP_MENU(TEXT_ID_ENTRANCE_1, pCreature->GetObjectGuid());
                 break;
+            }
         }
+        return true;
     }
-    return true;
-}
 
-bool GossipSelect_npc_chromie(Player* pPlayer, Creature* pCreature, uint32 /*sender*/, uint32 uiAction)
-{
-    switch (pCreature->GetEntry())
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*sender*/, uint32 uiAction) override
     {
+        switch (pCreature->GetEntry())
+        {
         case NPC_CHROMIE_INN:
             switch (uiAction)
             {
-                case GOSSIP_ACTION_INFO_DEF+1:
-                    pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_INN_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-                    pPlayer->SEND_GOSSIP_MENU(TEXT_ID_INN_2, pCreature->GetObjectGuid());
-                    break;
-                case GOSSIP_ACTION_INFO_DEF+2:
-                    pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_INN_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
-                    pPlayer->SEND_GOSSIP_MENU(TEXT_ID_INN_3, pCreature->GetObjectGuid());
-                    break;
-                case GOSSIP_ACTION_INFO_DEF+3:
-                    pPlayer->SEND_GOSSIP_MENU(TEXT_ID_INN_4, pCreature->GetObjectGuid());
-                    if (!pPlayer->HasItemCount(ITEM_ARCANE_DISRUPTOR, 1))
+            case GOSSIP_ACTION_INFO_DEF + 1:
+                pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_INN_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+                pPlayer->SEND_GOSSIP_MENU(TEXT_ID_INN_2, pCreature->GetObjectGuid());
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 2:
+                pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_INN_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+                pPlayer->SEND_GOSSIP_MENU(TEXT_ID_INN_3, pCreature->GetObjectGuid());
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 3:
+                pPlayer->SEND_GOSSIP_MENU(TEXT_ID_INN_4, pCreature->GetObjectGuid());
+                if (!pPlayer->HasItemCount(ITEM_ARCANE_DISRUPTOR, 1))
+                {
+                    if (Item* pItem = pPlayer->StoreNewItemInInventorySlot(ITEM_ARCANE_DISRUPTOR, 1))
                     {
-                        if (Item* pItem = pPlayer->StoreNewItemInInventorySlot(ITEM_ARCANE_DISRUPTOR, 1))
+                        pPlayer->SendNewItem(pItem, 1, true, false);
+                        if (InstanceData* pInstance = pCreature->GetInstanceData())
                         {
-                            pPlayer->SendNewItem(pItem, 1, true, false);
-                            if (instance_culling_of_stratholme* pInstance = (instance_culling_of_stratholme*)pCreature->GetInstanceData())
-                            {
-                                if (pInstance->GetData(TYPE_GRAIN_EVENT) == NOT_STARTED)
-                                    pInstance->SetData(TYPE_GRAIN_EVENT, SPECIAL);
-                            }
+                            if (pInstance->GetData(TYPE_GRAIN_EVENT) == NOT_STARTED)
+                                pInstance->SetData(TYPE_GRAIN_EVENT, SPECIAL);
                         }
                     }
-                    break;
-                case GOSSIP_ACTION_INFO_DEF+4:
-                    pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_INN_TELEPORT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
-                    pPlayer->SEND_GOSSIP_MENU(TEXT_ID_INN_TELEPORT, pCreature->GetObjectGuid());
-                    break;
-                case GOSSIP_ACTION_INFO_DEF+5:
-                    pCreature->CastSpell(pPlayer, SPELL_TELEPORT_COT_P4, true);
-                    if (instance_culling_of_stratholme* pInstance = (instance_culling_of_stratholme*)pCreature->GetInstanceData())
+                }
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 4:
+                pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_INN_TELEPORT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
+                pPlayer->SEND_GOSSIP_MENU(TEXT_ID_INN_TELEPORT, pCreature->GetObjectGuid());
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 5:
+                pCreature->CastSpell(pPlayer, SPELL_TELEPORT_COT_P4, true);
+                if (InstanceData* pInstance = pCreature->GetInstanceData())
+                {
+                    // only skip intro if not already started;
+                    if (pInstance->GetData(TYPE_ARTHAS_INTRO_EVENT) == NOT_STARTED && pInstance->GetData(TYPE_GRAIN_EVENT) == NOT_STARTED)
                     {
-                        // only skip intro if not already started;
-                        if (pInstance->GetData(TYPE_ARTHAS_INTRO_EVENT) == NOT_STARTED && pInstance->GetData(TYPE_GRAIN_EVENT) == NOT_STARTED)
-                        {
-                            pInstance->SetData(TYPE_ARTHAS_INTRO_EVENT, DONE);
-                            pInstance->SetData(TYPE_GRAIN_EVENT, DONE);
-                            
-                            // spawn Arthas and Chromie
-                            pInstance->DoSpawnChromieIfNeeded(pPlayer);
-                            pInstance->DoSpawnArthasIfNeeded(pPlayer);
-                        }
+                        pInstance->SetData(TYPE_ARTHAS_INTRO_EVENT, DONE);
+                        pInstance->SetData(TYPE_GRAIN_EVENT, DONE);
+
+                        // spawn Arthas and Chromie
+                        pInstance->SetData64(TYPE_DATA64_PLAYER_BOTH, pPlayer->GetObjectGuid().GetRawValue());
                     }
-                    pPlayer->CLOSE_GOSSIP_MENU();
-                    break;
+                }
+                pPlayer->CLOSE_GOSSIP_MENU();
+                break;
             }
             break;
         case NPC_CHROMIE_ENTRANCE:
             switch (uiAction)
             {
-                case GOSSIP_ACTION_INFO_DEF+1:
-                    pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ENTRANCE_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-                    pPlayer->SEND_GOSSIP_MENU(TEXT_ID_ENTRANCE_2, pCreature->GetObjectGuid());
-                    break;
-                case GOSSIP_ACTION_INFO_DEF+2:
-                    pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ENTRANCE_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
-                    pPlayer->SEND_GOSSIP_MENU(TEXT_ID_ENTRANCE_3, pCreature->GetObjectGuid());
-                    break;
-                case GOSSIP_ACTION_INFO_DEF+3:
-                    pPlayer->SEND_GOSSIP_MENU(TEXT_ID_ENTRANCE_4, pCreature->GetObjectGuid());
-                    if (instance_culling_of_stratholme* pInstance = (instance_culling_of_stratholme*)pCreature->GetInstanceData())
+            case GOSSIP_ACTION_INFO_DEF + 1:
+                pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ENTRANCE_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+                pPlayer->SEND_GOSSIP_MENU(TEXT_ID_ENTRANCE_2, pCreature->GetObjectGuid());
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 2:
+                pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ENTRANCE_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+                pPlayer->SEND_GOSSIP_MENU(TEXT_ID_ENTRANCE_3, pCreature->GetObjectGuid());
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 3:
+                pPlayer->SEND_GOSSIP_MENU(TEXT_ID_ENTRANCE_4, pCreature->GetObjectGuid());
+                if (InstanceData* pInstance = pCreature->GetInstanceData())
+                {
+                    if (pInstance->GetData(TYPE_ARTHAS_INTRO_EVENT) == NOT_STARTED)
                     {
-                        if (pInstance->GetData(TYPE_ARTHAS_INTRO_EVENT) == NOT_STARTED)
-                        {
-                            pInstance->SetData(TYPE_ARTHAS_INTRO_EVENT, IN_PROGRESS);
-                            pInstance->DoSpawnArthasIfNeeded(pPlayer);
-                        }
+                        pInstance->SetData(TYPE_ARTHAS_INTRO_EVENT, IN_PROGRESS);
+                        pInstance->SetData64(TYPE_DATA64_PLAYER_ARTHAS, pPlayer->GetObjectGuid().GetRawValue());
                     }
-                    break;
+                }
+                break;
             }
             break;
+        }
+        return true;
     }
-    return true;
-}
 
-bool QuestAccept_npc_chromie(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    switch (pQuest->GetQuestId())
+    bool OnQuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest) override
     {
+        switch (pQuest->GetQuestId())
+        {
         case QUEST_DISPELLING_ILLUSIONS:
-            if (instance_culling_of_stratholme* pInstance = (instance_culling_of_stratholme*)pCreature->GetInstanceData())
+            if (InstanceData* pInstance = pCreature->GetInstanceData())
             {
                 if (pInstance->GetData(TYPE_GRAIN_EVENT) == NOT_STARTED)
                     pInstance->SetData(TYPE_GRAIN_EVENT, SPECIAL);
             }
             break;
         case QUEST_A_ROYAL_ESCORT:
-            if (instance_culling_of_stratholme* pInstance = (instance_culling_of_stratholme*)pCreature->GetInstanceData())
+            if (InstanceData* pInstance = pCreature->GetInstanceData())
             {
                 if (pInstance->GetData(TYPE_ARTHAS_INTRO_EVENT) == NOT_STARTED)
                 {
                     pInstance->SetData(TYPE_ARTHAS_INTRO_EVENT, IN_PROGRESS);
-                    pInstance->DoSpawnArthasIfNeeded(pPlayer);
+                    pInstance->SetData64(TYPE_DATA64_PLAYER_ARTHAS, pPlayer->GetObjectGuid().GetRawValue());
                 }
             }
             break;
+        }
+        return true;
     }
-    return true;
-}
+};
 
 /* *************
 ** npc_crates_bunny (spell aura effect dummy)
 ************* */
 
-enum
+struct aura_cos_arcane_disruption : public AuraScript
 {
-    SAY_SOLDIERS_REPORT         = -1595000,
+    aura_cos_arcane_disruption() : AuraScript("aura_cos_arcane_disruption") {}
 
-    SPELL_ARCANE_DISRUPTION     = 49590,
-    SPELL_CRATES_KILL_CREDIT    = 58109,
-};
-
-bool EffectAuraDummy_spell_aura_dummy_npc_crates_dummy(const Aura* pAura, bool bApply)
-{
-    if (pAura->GetId() == SPELL_ARCANE_DISRUPTION && pAura->GetEffIndex() == EFFECT_INDEX_0 && bApply)
+    bool OnDummyApply(const Aura* pAura, bool bApply) override
     {
-        if (Creature* pTarget = (Creature*)pAura->GetTarget())
+        if (pAura->GetId() == SPELL_ARCANE_DISRUPTION && pAura->GetEffIndex() == EFFECT_INDEX_0 && bApply)
         {
-            if (pTarget->GetEntry() != NPC_GRAIN_CRATE_HELPER)
-                return true;
-
-            std::list<Creature*> lCrateBunnyList;
-            if (instance_culling_of_stratholme* pInstance = (instance_culling_of_stratholme*)pTarget->GetInstanceData())
+            if (Creature* pTarget = (Creature*)pAura->GetTarget())
             {
-                pInstance->GetCratesBunnyOrderedList(lCrateBunnyList);
-                uint8 i = 0;
-                for (std::list<Creature*>::const_iterator itr = lCrateBunnyList.begin(); itr != lCrateBunnyList.end(); ++itr)
-                {
-                    ++i;
-                    if (*itr == pTarget)
-                    {
-                        // check if the event can proceed
-                        if (!pInstance->CanGrainEventProgress(pTarget))
-                            return true;
+                if (pTarget->GetEntry() != NPC_GRAIN_CRATE_HELPER)
+                    return true;
 
-                        break;
-                    }
-                }
-
-                switch (i)
-                {
-                    case 1:
-                        // Start NPC_ROGER_OWENS Event
-                        if (Creature* pRoger = pInstance->GetSingleCreatureFromStorage(NPC_ROGER_OWENS))
-                        {
-                            pRoger->SetStandState(UNIT_STAND_STATE_STAND);
-                            pRoger->GetMotionMaster()->MoveWaypoint();
-                        }
-                        break;
-                    case 2:
-                        // Start NPC_SERGEANT_MORIGAN  Event
-                        if (Creature* pMorigan = pInstance->GetSingleCreatureFromStorage(NPC_SERGEANT_MORIGAN))
-                            pMorigan->GetMotionMaster()->MoveWaypoint();
-                        break;
-                    case 3:
-                        // Start NPC_JENA_ANDERSON Event
-                        if (Creature* pJena = pInstance->GetSingleCreatureFromStorage(NPC_JENA_ANDERSON))
-                            pJena->GetMotionMaster()->MoveWaypoint();
-                        break;
-                    case 4:
-                        // Start NPC_MALCOM_MOORE Event
-                        pTarget->SummonCreature(NPC_MALCOM_MOORE, 1605.452f, 804.9279f, 122.961f, 5.19f, TEMPSUMMON_DEAD_DESPAWN, 0);
-                        break;
-                    case 5:
-                        // Start NPC_BARTLEBY_BATTSON Event
-                        if (Creature* pBartleby = pInstance->GetSingleCreatureFromStorage(NPC_BARTLEBY_BATTSON))
-                            pBartleby->GetMotionMaster()->MoveWaypoint();
-                        break;
-                }
-
-                // Finished event, give killcredit
-                if (pInstance->GetData(TYPE_GRAIN_EVENT) == DONE)
-                {
-                    pTarget->CastSpell(pTarget, SPELL_CRATES_KILL_CREDIT, true);
-                    pInstance->DoOrSimulateScriptTextForThisInstance(SAY_SOLDIERS_REPORT, NPC_LORDAERON_CRIER);
-                }
-
-                // despawn the GO visuals and spanw the plague crate
-                if (GameObject* pCrate = GetClosestGameObjectWithEntry(pTarget, GO_SUSPICIOUS_GRAIN_CRATE, 5.0f))
-                    pCrate->SetLootState(GO_JUST_DEACTIVATED);
-                if (GameObject* pHighlight = GetClosestGameObjectWithEntry(pTarget, GO_CRATE_HIGHLIGHT, 5.0f))
-                    pHighlight->SetLootState(GO_JUST_DEACTIVATED);
-                if (GameObject* pCrate = GetClosestGameObjectWithEntry(pTarget, GO_PLAGUE_GRAIN_CRATE, 5.0f))
-                {
-                    pCrate->SetRespawnTime(6 * HOUR * IN_MILLISECONDS);
-                    pCrate->Refresh();
-                }
+                if (InstanceData* pInstance = pTarget->GetInstanceData())
+                    pInstance->SetData64(TYPE_DATA64_AD_TARGET, pTarget->GetObjectGuid().GetRawValue());
             }
         }
+        return true;
     }
-    return true;
-}
+};
 
 /* *************
 ** npc_arthas
@@ -409,139 +345,144 @@ static const DialogueEntry aArthasDialogue[] =
     {0, 0, 0},
 };
 
-struct  npc_arthasAI : public npc_escortAI, private DialogueHelper
+struct npc_arthas : public CreatureScript
 {
-    npc_arthasAI(Creature* pCreature) : npc_escortAI(pCreature),
+    npc_arthas() : CreatureScript("npc_arthas") {}
+
+    struct  npc_arthasAI : public npc_escortAI, private DialogueHelper
+    {
+        npc_arthasAI(Creature* pCreature) : npc_escortAI(pCreature),
         DialogueHelper(aArthasDialogue)
-    {
-        m_pInstance = (instance_culling_of_stratholme*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        InitializeDialogueHelper(m_pInstance);
-        Reset();
-    }
-
-    instance_culling_of_stratholme* m_pInstance;
-
-    bool m_bIsRegularMode;
-    
-    bool m_bYell50Pct;
-    bool m_bYell20Pct;
-
-    uint32 m_uiHolyLightTimer;
-    uint32 m_uiExorcismTimer;
-
-    ObjectGuid m_firstCitizenGuid;
-    ObjectGuid m_secondCitizenGuid;
-    ObjectGuid m_thirdCitizenGuid;
-
-    GuidList m_lSummonedGuidsList;
-
-    void Reset() override
-    {
-        m_uiExorcismTimer   = urand(5000, 10000);
-        m_uiHolyLightTimer  = urand(5000, 10000);
-        m_bYell50Pct        = false;
-        m_bYell20Pct        = false;
-    }
-    
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoCastSpellIfCan(m_creature, SPELL_DEVOTION_AURA);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        switch (urand(0, 2))
         {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+            InitializeDialogueHelper(m_pInstance);
+        }
+
+        ScriptedInstance* m_pInstance;
+
+        bool m_bIsRegularMode;
+
+        bool m_bYell50Pct;
+        bool m_bYell20Pct;
+
+        uint32 m_uiHolyLightTimer;
+        uint32 m_uiExorcismTimer;
+
+        ObjectGuid m_firstCitizenGuid;
+        ObjectGuid m_secondCitizenGuid;
+        ObjectGuid m_thirdCitizenGuid;
+
+        GuidList m_lSummonedGuidsList;
+
+        void Reset() override
+        {
+            m_uiExorcismTimer = urand(5000, 10000);
+            m_uiHolyLightTimer = urand(5000, 10000);
+            m_bYell50Pct = false;
+            m_bYell20Pct = false;
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoCastSpellIfCan(m_creature, SPELL_DEVOTION_AURA);
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            switch (urand(0, 2))
+            {
             case 0: DoScriptText(SAY_ARTHAS_SLAY_1, m_creature); break;
             case 1: DoScriptText(SAY_ARTHAS_SLAY_2, m_creature); break;
             case 2: DoScriptText(SAY_ARTHAS_SLAY_3, m_creature); break;
-        }
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_ARTHAS_DEATH, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_ARTHAS_ESCORT_EVENT, FAIL);
-    }
-    
-    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 uiMiscValue) override
-    {
-        // on Malganis encounter finished -> evade
-        if (pSender->GetEntry() == NPC_MALGANIS && eventType == AI_EVENT_CUSTOM_EVENTAI_B)
-        {
-            EnterEvadeMode();
-            SetEscortPaused(false);
-            return;
+            }
         }
 
-        if (pInvoker->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        if (eventType == AI_EVENT_START_ESCORT)
+        void JustDied(Unit* /*pKiller*/) override
         {
-            DoScriptText(SAY_ARTHAS_FOLLOW, m_creature);
-            Start(true, (Player*)pInvoker);
-        }
-        else if (eventType == AI_EVENT_CUSTOM_A)
-        {
-            DoScriptText(SAY_ARTHAS_QUICK_PATH, m_creature);
-            SetEscortPaused(false);
-        }
-        else if (eventType == AI_EVENT_START_ESCORT_B)
-        {
-            // start and set WP
-            Start(true, (Player*)pInvoker);
-            SetEscortPaused(true);
-            SetCurrentWaypoint(POINT_ID_ESCORT_CITY);
-            SetEscortPaused(false);
-
-            DoScriptText(SAY_ARTHAS_MOVE_QUICKLY, m_creature);
-            m_creature->SetFactionTemporary(FACTION_ARTHAS_2, TEMPFACTION_RESTORE_REACH_HOME);
+            DoScriptText(SAY_ARTHAS_DEATH, m_creature);
 
             if (m_pInstance)
-                { m_pInstance->DoSpawnBurningCityUndead(m_creature); }
+                m_pInstance->SetData(TYPE_ARTHAS_ESCORT_EVENT, FAIL);
         }
-        else if (eventType == AI_EVENT_CUSTOM_B)
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 uiMiscValue) override
         {
-            // resume escort or start on point if start from reset
-            if (HasEscortState(STATE_ESCORT_PAUSED))
-                SetEscortPaused(false);
-            else
+            // on Malganis encounter finished -> evade
+            if (pSender->GetEntry() == NPC_MALGANIS && eventType == AI_EVENT_CUSTOM_EVENTAI_B)
             {
-                Start(true, (Player*)pInvoker);
-                SetEscortPaused(true);
-                SetCurrentWaypoint(POINT_ID_MARKET_ROW);
+                EnterEvadeMode();
                 SetEscortPaused(false);
+                return;
             }
 
-            DoScriptText(SAY_ARTHAS_JUSTICE_DONE, m_creature);
-            m_creature->SetFactionTemporary(FACTION_ARTHAS_2, TEMPFACTION_RESTORE_REACH_HOME);
+            if (pInvoker->GetTypeId() != TYPEID_PLAYER)
+                return;
 
-            // spawn Malganis if required
-            if (m_pInstance && !m_pInstance->GetSingleCreatureFromStorage(NPC_MALGANIS, true))
-                m_creature->SummonCreature(NPC_MALGANIS, 2296.862F, 1501.015F, 128.445F, 5.13f, TEMPSUMMON_DEAD_DESPAWN, 0);
-        }
-    }
+            if (eventType == AI_EVENT_START_ESCORT)
+            {
+                DoScriptText(SAY_ARTHAS_FOLLOW, m_creature);
+                Start(true, (Player*)pInvoker);
+            }
+            else if (eventType == AI_EVENT_CUSTOM_A)
+            {
+                DoScriptText(SAY_ARTHAS_QUICK_PATH, m_creature);
+                SetEscortPaused(false);
+            }
+            else if (eventType == AI_EVENT_START_ESCORT_B)
+            {
+                // start and set WP
+                Start(true, (Player*)pInvoker);
+                SetEscortPaused(true);
+                SetCurrentWaypoint(POINT_ID_ESCORT_CITY);
+                SetEscortPaused(false);
 
-    void MovementInform(uint32 uiType, uint32 uiPointId) override
-    {
-        if (uiType == WAYPOINT_MOTION_TYPE)
-        {
-            // set the intro event as done and start the undead waves
-            if (uiPointId == POINT_ID_INTRO_COMPLETE && m_pInstance)
-                m_pInstance->SetData(TYPE_ARTHAS_INTRO_EVENT, DONE);
+                DoScriptText(SAY_ARTHAS_MOVE_QUICKLY, m_creature);
+                m_creature->SetFactionTemporary(FACTION_ARTHAS_2, TEMPFACTION_RESTORE_REACH_HOME);
+
+                if (m_pInstance)
+                {
+                    m_pInstance->SetData64(TYPE_DATA64_SPAWNING, m_creature->GetObjectGuid().GetRawValue());
+                }
+            }
+            else if (eventType == AI_EVENT_CUSTOM_B)
+            {
+                // resume escort or start on point if start from reset
+                if (HasEscortState(STATE_ESCORT_PAUSED))
+                    SetEscortPaused(false);
+                else
+                {
+                    Start(true, (Player*)pInvoker);
+                    SetEscortPaused(true);
+                    SetCurrentWaypoint(POINT_ID_MARKET_ROW);
+                    SetEscortPaused(false);
+                }
+
+                DoScriptText(SAY_ARTHAS_JUSTICE_DONE, m_creature);
+                m_creature->SetFactionTemporary(FACTION_ARTHAS_2, TEMPFACTION_RESTORE_REACH_HOME);
+
+                // spawn Malganis if required
+                if (m_pInstance && !m_pInstance->GetSingleCreatureFromStorage(NPC_MALGANIS, true))
+                    m_creature->SummonCreature(NPC_MALGANIS, 2296.862F, 1501.015F, 128.445F, 5.13f, TEMPSUMMON_DEAD_DESPAWN, 0);
+            }
         }
-        else
-            npc_escortAI::MovementInform(uiType, uiPointId);
-    }
-    
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
+
+        void MovementInform(uint32 uiType, uint32 uiPointId) override
         {
+            if (uiType == WAYPOINT_MOTION_TYPE)
+            {
+                // set the intro event as done and start the undead waves
+                if (uiPointId == POINT_ID_INTRO_COMPLETE && m_pInstance)
+                    m_pInstance->SetData(TYPE_ARTHAS_INTRO_EVENT, DONE);
+            }
+            else
+                npc_escortAI::MovementInform(uiType, uiPointId);
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_INFINITE_ADVERSARY:
             case NPC_INFINITE_AGENT:
             case NPC_INFINITE_HUNTER:
@@ -554,13 +495,13 @@ struct  npc_arthasAI : public npc_escortAI, private DialogueHelper
             case NPC_LORD_EPOCH:
                 pSummoned->GetMotionMaster()->MovePoint(0, 2450.874f, 1113.122f, 149.008f);
                 break;
+            }
         }
-    }
 
-    void SummonedCreatureJustDied(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
+        void SummonedCreatureJustDied(Creature* pSummoned) override
         {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_INFINITE_ADVERSARY:
             case NPC_INFINITE_AGENT:
             case NPC_INFINITE_HUNTER:
@@ -572,13 +513,13 @@ struct  npc_arthasAI : public npc_escortAI, private DialogueHelper
             case NPC_LORD_EPOCH:
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 break;
+            }
         }
-    }
 
-    void WaypointReached(uint32 uiPointId) override
-    {
-        switch (uiPointId)
+        void WaypointReached(uint32 uiPointId) override
         {
+            switch (uiPointId)
+            {
                 // spawn citizens - ground floor
             case 1:
                 if (Creature* pCitizen = m_creature->SummonCreature(NPC_TOWNHALL_CITIZEN, 2401.265f, 1202.789f, 134.103f, 1.466f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000))
@@ -709,13 +650,13 @@ struct  npc_arthasAI : public npc_escortAI, private DialogueHelper
             case 76:
                 SetRun(false);
                 break;
+            }
         }
-    }
-    
-    void JustDidDialogueStep(int32 iEntry) override
-    {
-        switch (iEntry)
+
+        void JustDidDialogueStep(int32 iEntry) override
         {
+            switch (iEntry)
+            {
                 // townhall entrance dialogue
             case NPC_TOWNHALL_CITIZEN:
                 if (Creature* pCitizen = m_creature->GetMap()->GetCreature(m_firstCitizenGuid))
@@ -736,7 +677,7 @@ struct  npc_arthasAI : public npc_escortAI, private DialogueHelper
             case NPC_TOWNHALL_RESIDENT:
                 if (Creature* pCitizen = m_creature->GetMap()->GetCreature(m_thirdCitizenGuid))
                     pCitizen->HandleEmote(EMOTE_ONESHOT_LAUGH);
-                 break;
+                break;
             case TEXT_ID_TOWN_HALL_2:
                 if (Creature* pCitizen = m_creature->GetMap()->GetCreature(m_thirdCitizenGuid))
                     DoScriptText(SAY_CITIZEN_NO_UNDERSTAD, pCitizen);
@@ -829,175 +770,188 @@ struct  npc_arthasAI : public npc_escortAI, private DialogueHelper
                 if (m_pInstance)
                     m_pInstance->SetData(TYPE_MALGANIS_EVENT, DONE);
                 break;
-        }
-    }
-
-    void UpdateEscortAI(const uint32 uiDiff) override
-    {
-        DialogueUpdate(uiDiff);
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiExorcismTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_EXORCISM : SPELL_EXORCISM_H) == CAST_OK)
-                m_uiExorcismTimer = urand(9000, 13000);
-        }
-        else
-            m_uiExorcismTimer -= uiDiff;
-
-        if (m_uiHolyLightTimer < uiDiff)
-        {
-            if (Unit* pTarget = DoSelectLowestHpFriendly(40.0f))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_HOLY_LIGHT) == CAST_OK)
-                    m_uiHolyLightTimer = urand(18000, 25000);
             }
         }
-        else
-            m_uiHolyLightTimer -= uiDiff;
 
-        if (!m_bYell50Pct && m_creature->GetHealthPercent() < 50.0f)
+        void UpdateEscortAI(const uint32 uiDiff) override
         {
-            DoScriptText(SAY_ARTHAS_HALF_HP, m_creature);
-            m_bYell50Pct = true;
+            DialogueUpdate(uiDiff);
+
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            if (m_uiExorcismTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_EXORCISM : SPELL_EXORCISM_H) == CAST_OK)
+                    m_uiExorcismTimer = urand(9000, 13000);
+            }
+            else
+                m_uiExorcismTimer -= uiDiff;
+
+            if (m_uiHolyLightTimer < uiDiff)
+            {
+                if (Unit* pTarget = DoSelectLowestHpFriendly(40.0f))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_HOLY_LIGHT) == CAST_OK)
+                        m_uiHolyLightTimer = urand(18000, 25000);
+                }
+            }
+            else
+                m_uiHolyLightTimer -= uiDiff;
+
+            if (!m_bYell50Pct && m_creature->GetHealthPercent() < 50.0f)
+            {
+                DoScriptText(SAY_ARTHAS_HALF_HP, m_creature);
+                m_bYell50Pct = true;
+            }
+
+            if (!m_bYell20Pct && m_creature->GetHealthPercent() < 20.0f)
+            {
+                DoScriptText(SAY_ARTHAS_LOW_HP, m_creature);
+                m_bYell20Pct = true;
+            }
+
+            DoMeleeAttackIfReady();
         }
+    };
 
-        if (!m_bYell20Pct && m_creature->GetHealthPercent() < 20.0f)
-        {
-            DoScriptText(SAY_ARTHAS_LOW_HP, m_creature);
-            m_bYell20Pct = true;
-        }
-
-        DoMeleeAttackIfReady();
-    }
-};
-
-CreatureAI* GetAI_npc_arthas(Creature* pCreature)
-{
-    return new npc_arthasAI(pCreature);
-}
-
-bool GossipHello_npc_arthas(Player* pPlayer, Creature* pCreature)
-{
-    if (instance_culling_of_stratholme* pInstance = (instance_culling_of_stratholme*)pCreature->GetInstanceData())
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        // city gate gossip
-        if (pInstance->GetData(TYPE_ARTHAS_INTRO_EVENT) == IN_PROGRESS)
-        {
-            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_CITY_GATES, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-            pPlayer->SEND_GOSSIP_MENU(TEXT_ID_CITY_GATES, pCreature->GetObjectGuid());
-        }
-        // town hall entrance gossip
-        else if (pInstance->GetData(TYPE_SALRAMM_EVENT) == DONE && pInstance->GetData(TYPE_EPOCH_EVENT) != DONE)
-        {
-            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TOWN_HALL_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-            pPlayer->SEND_GOSSIP_MENU(TEXT_ID_TOWN_HALL_1, pCreature->GetObjectGuid());
-        }
-        // town hall epoch gossip
-        else if (pInstance->GetData(TYPE_EPOCH_EVENT) == DONE && pInstance->GetData(TYPE_ARTHAS_TOWNHALL_EVENT) != DONE)
-        {
-            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_EPOCH, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
-            pPlayer->SEND_GOSSIP_MENU(TEXT_ID_EPOCH, pCreature->GetObjectGuid());
-        }
-        // burning city gossip
-        else if (pInstance->GetData(TYPE_ARTHAS_TOWNHALL_EVENT) == DONE && pInstance->GetData(TYPE_ARTHAS_ESCORT_EVENT) != DONE)
-        {
-            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ESCORT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
-            pPlayer->SEND_GOSSIP_MENU(TEXT_ID_ESCORT, pCreature->GetObjectGuid());
-        }
-        // crusader square gossip
-        else if (pInstance->GetData(TYPE_ARTHAS_ESCORT_EVENT) == DONE && pInstance->GetData(TYPE_MALGANIS_EVENT) != DONE)
-        {
-            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_DREADLORD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
-            pPlayer->SEND_GOSSIP_MENU(TEXT_ID_DREADLORD, pCreature->GetObjectGuid());
-        }
+        return new npc_arthasAI(pCreature);
     }
-    return true;
-}
 
-bool GossipSelect_npc_arthas(Player* pPlayer, Creature* pCreature, uint32 /*sender*/, uint32 uiAction)
-{
-    switch (uiAction)
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
-        case GOSSIP_ACTION_INFO_DEF+1:                      // resume WP movement - rest is handled by DB
+        if (InstanceData* pInstance = pCreature->GetInstanceData())
+        {
+            // city gate gossip
+            if (pInstance->GetData(TYPE_ARTHAS_INTRO_EVENT) == IN_PROGRESS)
+            {
+                pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_CITY_GATES, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+                pPlayer->SEND_GOSSIP_MENU(TEXT_ID_CITY_GATES, pCreature->GetObjectGuid());
+            }
+            // town hall entrance gossip
+            else if (pInstance->GetData(TYPE_SALRAMM_EVENT) == DONE && pInstance->GetData(TYPE_EPOCH_EVENT) != DONE)
+            {
+                pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TOWN_HALL_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+                pPlayer->SEND_GOSSIP_MENU(TEXT_ID_TOWN_HALL_1, pCreature->GetObjectGuid());
+            }
+            // town hall epoch gossip
+            else if (pInstance->GetData(TYPE_EPOCH_EVENT) == DONE && pInstance->GetData(TYPE_ARTHAS_TOWNHALL_EVENT) != DONE)
+            {
+                pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_EPOCH, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+                pPlayer->SEND_GOSSIP_MENU(TEXT_ID_EPOCH, pCreature->GetObjectGuid());
+            }
+            // burning city gossip
+            else if (pInstance->GetData(TYPE_ARTHAS_TOWNHALL_EVENT) == DONE && pInstance->GetData(TYPE_ARTHAS_ESCORT_EVENT) != DONE)
+            {
+                pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ESCORT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
+                pPlayer->SEND_GOSSIP_MENU(TEXT_ID_ESCORT, pCreature->GetObjectGuid());
+            }
+            // crusader square gossip
+            else if (pInstance->GetData(TYPE_ARTHAS_ESCORT_EVENT) == DONE && pInstance->GetData(TYPE_MALGANIS_EVENT) != DONE)
+            {
+                pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_DREADLORD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
+                pPlayer->SEND_GOSSIP_MENU(TEXT_ID_DREADLORD, pCreature->GetObjectGuid());
+            }
+        }
+        return true;
+    }
+
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*sender*/, uint32 uiAction) override
+    {
+        switch (uiAction)
+        {
+        case GOSSIP_ACTION_INFO_DEF + 1:                      // resume WP movement - rest is handled by DB
             pCreature->clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
-            pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-            pPlayer->CLOSE_GOSSIP_MENU();
             break;
-        case GOSSIP_ACTION_INFO_DEF+2:
+        case GOSSIP_ACTION_INFO_DEF + 2:
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TOWN_HALL_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
             pPlayer->SEND_GOSSIP_MENU(TEXT_ID_TOWN_HALL_2, pCreature->GetObjectGuid());
             break;
-        case GOSSIP_ACTION_INFO_DEF+3:                      // start initial town hall escort event
+        case GOSSIP_ACTION_INFO_DEF + 3:                      // start initial town hall escort event
             pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature);
-            pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-            pPlayer->CLOSE_GOSSIP_MENU();
             break;
-        case GOSSIP_ACTION_INFO_DEF+4:                      // continue escort after Epoch
+        case GOSSIP_ACTION_INFO_DEF + 4:                      // continue escort after Epoch
             pCreature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pPlayer, pCreature);
-            pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-            pPlayer->CLOSE_GOSSIP_MENU();
             break;
-        case GOSSIP_ACTION_INFO_DEF+5:                      // start burning city event
+        case GOSSIP_ACTION_INFO_DEF + 5:                      // start burning city event
             pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT_B, pPlayer, pCreature);
-            pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-            pPlayer->CLOSE_GOSSIP_MENU();
             break;
-        case GOSSIP_ACTION_INFO_DEF+6:                      // start Malganis event
+        case GOSSIP_ACTION_INFO_DEF + 6:                      // start Malganis event
             pCreature->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, pPlayer, pCreature);
+            break;
+        }
+
+        if (uiAction != GOSSIP_ACTION_INFO_DEF + 2)
+        {
             pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             pPlayer->CLOSE_GOSSIP_MENU();
-            break;
+        }
+        return true;
     }
-    return true;
-}
+};
 
 /* *************
 ** npc_spell_dummy_crusader_strike
 ************* */
 
-bool EffectDummyCreature_npc_spell_dummy_crusader_strike(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+struct spell_cos_crusader_strike : public SpellScript
 {
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_CRUSADER_STRIKE && uiEffIndex == EFFECT_INDEX_0)
-    {
-        // only apply this for certain citizens
-        if (pCreatureTarget->GetEntry() == NPC_STRATHOLME_RESIDENT || pCreatureTarget->GetEntry() == NPC_STRATHOLME_CITIZEN)
-            pCreatureTarget->DealDamage(pCreatureTarget, pCreatureTarget->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
-        // always return true when we are handling this spell and effect
-        return true;
-    }
+    spell_cos_crusader_strike() : SpellScript("spell_cos_crusader_strike") {}
 
-    return false;
-}
+    bool EffectDummy(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Object* pTarget, ObjectGuid /*originalCasterGuid*/) override
+    {
+        // always check spellid and effectindex
+        if (uiSpellId == SPELL_CRUSADER_STRIKE && uiEffIndex == EFFECT_INDEX_0)
+        {
+            Creature* pCreatureTarget = pTarget->ToCreature();
+            // only apply this for certain citizens
+            if (pCreatureTarget->GetEntry() == NPC_STRATHOLME_RESIDENT || pCreatureTarget->GetEntry() == NPC_STRATHOLME_CITIZEN)
+                pCreatureTarget->DealDamage(pCreatureTarget, pCreatureTarget->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+            // always return true when we are handling this spell and effect
+            return true;
+        }
+
+        return false;
+    }
+};
 
 void AddSC_culling_of_stratholme()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_chromie";
-    pNewScript->pGossipHello = &GossipHello_npc_chromie;
-    pNewScript->pGossipSelect = &GossipSelect_npc_chromie;
-    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_chromie;
-    pNewScript->RegisterSelf();
+    s = new npc_chromie();
+    s->RegisterSelf();
+    s = new npc_arthas();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "spell_dummy_npc_crates_bunny";
-    pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_npc_crates_dummy;
-    pNewScript->RegisterSelf();
-    
-    pNewScript = new Script;
-    pNewScript->Name = "npc_arthas";
-    pNewScript->GetAI = &GetAI_npc_arthas;
-    pNewScript->pGossipHello = &GossipHello_npc_arthas;
-    pNewScript->pGossipSelect = &GossipSelect_npc_arthas;
-    pNewScript->RegisterSelf();
-    
-    pNewScript = new Script;
-    pNewScript->Name = "npc_spell_dummy_crusader_strike";
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_spell_dummy_crusader_strike;
-    pNewScript->RegisterSelf();
+    s = new aura_cos_arcane_disruption();
+    s->RegisterSelf();
+    s = new spell_cos_crusader_strike();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_chromie";
+    //pNewScript->pGossipHello = &GossipHello_npc_chromie;
+    //pNewScript->pGossipSelect = &GossipSelect_npc_chromie;
+    //pNewScript->pQuestAcceptNPC = &QuestAccept_npc_chromie;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "spell_dummy_npc_crates_bunny";
+    //pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_npc_crates_dummy;
+    //pNewScript->RegisterSelf();
+    //
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_arthas";
+    //pNewScript->GetAI = &GetAI_npc_arthas;
+    //pNewScript->pGossipHello = &GossipHello_npc_arthas;
+    //pNewScript->pGossipSelect = &GossipSelect_npc_arthas;
+    //pNewScript->RegisterSelf();
+    //
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_spell_dummy_crusader_strike";
+    //pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_spell_dummy_crusader_strike;
+    //pNewScript->RegisterSelf();
 }

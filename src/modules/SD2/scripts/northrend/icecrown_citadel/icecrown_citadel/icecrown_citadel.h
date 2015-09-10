@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+﻿/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
@@ -21,6 +21,12 @@ enum
     TYPE_VALITHRIA                  = 9,
     TYPE_SINDRAGOSA                 = 10,
     TYPE_LICH_KING                  = 11,
+
+    TYPE_DATA_AREATRIGGERS          = MAX_ENCOUNTER,
+    TYPE_DO_PREPARE_PROF_DOOR       = MAX_ENCOUNTER + 1,
+    TYPE_DATA_IS_HEROIC             = MAX_ENCOUNTER + 2,
+    TYPE_DATA_IS_25MAN              = MAX_ENCOUNTER + 3,
+    TYPE_DO_SUMMON_CULTIST_WAVE     = MAX_ENCOUNTER + 4,
 
     // NPC entries
     NPC_LORD_MARROWGAR              = 36612,
@@ -59,6 +65,8 @@ enum
     NPC_PUDDLE_STALKER              = 37013,        // related to Festergut and Rotface
     NPC_RIMEFANG                    = 37533,
     NPC_SPINESTALKER                = 37534,
+    NPC_CULT_ADHERENT               = 37949,
+    NPC_CULT_FANATIC                = 37890,
 
     // GameObjects entries
     GO_ICEWALL_1                    = 201911,
@@ -200,56 +208,6 @@ enum
     ACHIEV_CRIT_WAITING_A_LONG_TIME_25N    = 13244,
     ACHIEV_CRIT_WAITING_A_LONG_TIME_10H    = 13247,
     ACHIEV_CRIT_WAITING_A_LONG_TIME_25H    = 13245,
-};
-
-class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelper
-{
-    public:
-        instance_icecrown_citadel(Map* pMap);
-
-        void Initialize() override;
-        bool IsEncounterInProgress() const override;
-
-        void OnPlayerEnter(Player* pPlayer) override;
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-
-        void OnCreatureDeath(Creature* pCreature) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-        void Load(const char* strIn) override;
-
-        void DoHandleCitadelAreaTrigger(uint32 uiTriggerId, Player* pPlayer);
-
-        // Difficulty wrappers
-        bool IsHeroicDifficulty() { return instance->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC; }
-        bool Is25ManDifficulty() { return instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC; }
-
-        void GetDeathwhisperStalkersList(GuidList& lList) { lList = m_lDeathwhisperStalkersGuids; }
-
-        // Open Putricide door in a few seconds
-        void DoPreparePutricideDoor() { m_uiPutricideValveTimer = 15000; }
-
-        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget = NULL, uint32 uiMiscvalue1 = 0) const override;
-
-        void Update(uint32 uiDiff) override;
-
-    private:
-        std::string m_strInstData;
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-
-        uint32 m_uiTeam;                                    // Team of first entered player, used on the Gunship event
-        uint32 m_uiPutricideValveTimer;
-
-        bool m_bHasMarrowgarIntroYelled;
-        bool m_bHasDeathwhisperIntroYelled;
-        bool m_bHasRimefangLanded;
-        bool m_bHasSpinestalkerLanded;
-
-        GuidList m_lDeathwhisperStalkersGuids;
 };
 
 #endif

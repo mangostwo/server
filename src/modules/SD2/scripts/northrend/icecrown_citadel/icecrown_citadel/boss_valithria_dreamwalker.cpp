@@ -105,57 +105,64 @@ enum
     SUMMON_TYPES_NUMBER             = 4
 };
 
-struct  boss_valithria_dreamwalkerAI : public ScriptedAI
+struct boss_valithria_dreamwalker : public CreatureScript
 {
-    boss_valithria_dreamwalkerAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_valithria_dreamwalker() : CreatureScript("boss_valithria_dreamwalker") {}
+
+    struct boss_valithria_dreamwalkerAI : public ScriptedAI
     {
-        m_pInstance = (instance_icecrown_citadel*)pCreature->GetInstanceData();
-        Reset();
-    }
+        boss_valithria_dreamwalkerAI(Creature* pCreature) : ScriptedAI(pCreature)
+        {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        }
 
-    instance_icecrown_citadel* m_pInstance;
+        ScriptedInstance* m_pInstance;
 
-    void Reset() override
+        void Reset() override
+        {
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_VALITHRIA, FAIL);
+        }
+
+        // actually, when summoned creature kills a player
+        void KilledUnit(Unit* pVictim) override
+        {
+            if (pVictim->GetTypeId() == TYPEID_PLAYER)
+                DoScriptText(SAY_PLAYER_DIES, m_creature, pVictim);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(SAY_0_HEALTH, m_creature);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_VALITHRIA, FAIL);
+        }
+
+        void UpdateAI(const uint32 /*uiDiff*/) override
+        {
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
+        return new boss_valithria_dreamwalkerAI(pCreature);
     }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_VALITHRIA, FAIL);
-    }
-
-    // actually, when summoned creature kills a player
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() == TYPEID_PLAYER)
-            DoScriptText(SAY_PLAYER_DIES, m_creature, pVictim);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_0_HEALTH, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_VALITHRIA, FAIL);
-    }
-
-    void UpdateAI(const uint32 /*uiDiff*/) override
-    {
-    }
-};
-
-CreatureAI* GetAI_boss_valithria_dreamwalker(Creature* pCreature)
-{
-    return new boss_valithria_dreamwalkerAI(pCreature);
 };
 
 void AddSC_boss_valithria_dreamwalker()
 {
-    Script* pNewscript;
+    Script* s;
 
-    pNewscript = new Script;
-    pNewscript->Name = "boss_valithria_dreamwalker";
-    pNewscript->GetAI = &GetAI_boss_valithria_dreamwalker;
-    pNewscript->RegisterSelf();
+    s = new boss_valithria_dreamwalker();
+    s->RegisterSelf();
+
+    //pNewscript = new Script;
+    //pNewscript->Name = "boss_valithria_dreamwalker";
+    //pNewscript->GetAI = &GetAI_boss_valithria_dreamwalker;
+    //pNewscript->RegisterSelf();
 }

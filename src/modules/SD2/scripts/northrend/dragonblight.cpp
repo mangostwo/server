@@ -59,50 +59,53 @@ enum
 // Probably caused by either a change in a patch (bugfix?) or the powerup has a condition (some
 // sources suggest this, but without any explanation about what this might be)
 
-struct  npc_destructive_wardAI : public Scripted_NoMovementAI
+struct npc_destructive_ward : public CreatureScript
 {
-    npc_destructive_wardAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    npc_destructive_ward() : CreatureScript("npc_destructive_ward") {}
+
+    struct npc_destructive_wardAI : public Scripted_NoMovementAI
     {
-        m_uiPowerTimer = 30000;
-        m_uiStack = 0;
-        m_uiSummonTimer = 2000;
-        m_bCanPulse = false;
-        m_bFirst = true;
-        Reset();
-    }
-
-    uint32 m_uiPowerTimer;
-    uint32 m_uiStack;
-    uint32 m_uiSummonTimer;
-    bool m_bFirst;
-    bool m_bCanPulse;
-
-    void Reset() override { }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        pSummoned->AI()->AttackStart(m_creature);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_bCanPulse)
+        npc_destructive_wardAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
         {
-            if (DoCastSpellIfCan(m_creature, m_uiStack > MAX_STACK ? SPELL_DESTRUCTIVE_BARRAGE : SPELL_DESTRUCTIVE_PULSE) == CAST_OK)
-                m_bCanPulse = false;
+            m_uiPowerTimer = 30000;
+            m_uiStack = 0;
+            m_uiSummonTimer = 2000;
+            m_bCanPulse = false;
+            m_bFirst = true;
         }
 
-        if (m_uiSummonTimer)
-        {
-            if (m_uiSummonTimer <= uiDiff)
-            {
-                if (m_bFirst)
-                    m_uiSummonTimer = 25000;
-                else
-                    m_uiSummonTimer = 0;
+        uint32 m_uiPowerTimer;
+        uint32 m_uiStack;
+        uint32 m_uiSummonTimer;
+        bool m_bFirst;
+        bool m_bCanPulse;
 
-                switch (m_uiStack)
+        void Reset() override { }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            pSummoned->AI()->AttackStart(m_creature);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_bCanPulse)
+            {
+                if (DoCastSpellIfCan(m_creature, m_uiStack > MAX_STACK ? SPELL_DESTRUCTIVE_BARRAGE : SPELL_DESTRUCTIVE_PULSE) == CAST_OK)
+                    m_bCanPulse = false;
+            }
+
+            if (m_uiSummonTimer)
+            {
+                if (m_uiSummonTimer <= uiDiff)
                 {
+                    if (m_bFirst)
+                        m_uiSummonTimer = 25000;
+                    else
+                        m_uiSummonTimer = 0;
+
+                    switch (m_uiStack)
+                    {
                     case 0:
                         DoCastSpellIfCan(m_creature, SPELL_SUMMON_SMOLDERING_SKELETON, CAST_TRIGGERED);
                         break;
@@ -122,51 +125,52 @@ struct  npc_destructive_wardAI : public Scripted_NoMovementAI
                         DoCastSpellIfCan(m_creature, SPELL_SUMMON_SMOLDERING_SKELETON, CAST_TRIGGERED);
                         DoCastSpellIfCan(m_creature, SPELL_SUMMON_SMOLDERING_CONSTRUCT, CAST_TRIGGERED);
                         break;
-                }
+                    }
 
-                m_bFirst = !m_bFirst;
+                    m_bFirst = !m_bFirst;
+                }
+                else
+                    m_uiSummonTimer -= uiDiff;
+            }
+
+            if (!m_uiPowerTimer)
+                return;
+
+            if (m_uiPowerTimer <= uiDiff)
+            {
+                if (m_uiStack > MAX_STACK)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_DESTRUCTIVE_WARD_KILL_CREDIT) == CAST_OK)
+                    {
+                        DoScriptText(SAY_WARD_CHARGED, m_creature, m_creature->GetOwner());
+                        m_uiPowerTimer = 0;
+                        m_uiSummonTimer = 0;
+                        m_bCanPulse = true;
+                    }
+                }
+                else if (DoCastSpellIfCan(m_creature, SPELL_DESTRUCTIVE_WARD_POWERUP) == CAST_OK)
+                {
+                    DoScriptText(SAY_WARD_POWERUP, m_creature, m_creature->GetOwner());
+
+                    m_uiPowerTimer = 30000;
+                    m_uiSummonTimer = 2000;
+
+                    m_bFirst = true;
+                    m_bCanPulse = true;                         // pulse right after each charge
+
+                    ++m_uiStack;
+                }
             }
             else
-                m_uiSummonTimer -= uiDiff;
+                m_uiPowerTimer -= uiDiff;
         }
+    };
 
-        if (!m_uiPowerTimer)
-            return;
-
-        if (m_uiPowerTimer <= uiDiff)
-        {
-            if (m_uiStack > MAX_STACK)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_DESTRUCTIVE_WARD_KILL_CREDIT) == CAST_OK)
-                {
-                    DoScriptText(SAY_WARD_CHARGED, m_creature, m_creature->GetOwner());
-                    m_uiPowerTimer = 0;
-                    m_uiSummonTimer = 0;
-                    m_bCanPulse = true;
-                }
-            }
-            else if (DoCastSpellIfCan(m_creature, SPELL_DESTRUCTIVE_WARD_POWERUP) == CAST_OK)
-            {
-                DoScriptText(SAY_WARD_POWERUP, m_creature, m_creature->GetOwner());
-
-                m_uiPowerTimer = 30000;
-                m_uiSummonTimer = 2000;
-
-                m_bFirst = true;
-                m_bCanPulse = true;                         // pulse right after each charge
-
-                ++m_uiStack;
-            }
-        }
-        else
-            m_uiPowerTimer -= uiDiff;
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_destructive_wardAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_destructive_ward(Creature* pCreature)
-{
-    return new npc_destructive_wardAI(pCreature);
-}
 
 /*######
 ## npc_crystalline_ice_giant
@@ -179,34 +183,44 @@ enum
     NPC_CRYSTALLINE_GIANT           = 26809,
 };
 
-bool NpcSpellClick_npc_crystalline_ice_giant(Player* pPlayer, Creature* pClickedCreature, uint32 /*uiSpellId*/)
+struct npc_crystalline_ice_giant : public CreatureScript
 {
-    if (pClickedCreature->GetEntry() == NPC_CRYSTALLINE_GIANT && pClickedCreature->HasAura(SPELL_FEIGN_DEATH_PERMANENT))
+    npc_crystalline_ice_giant() : CreatureScript("npc_crystalline_ice_giant") {}
+
+    bool OnSpellClick(Player* pPlayer, Creature* pClickedCreature, uint32 /*uiSpellId*/) override
     {
-        if (Item* pItem = pPlayer->StoreNewItemInInventorySlot(ITEM_ID_SAMPLE_ROCKFLESH, 1))
+        if (pClickedCreature->GetEntry() == NPC_CRYSTALLINE_GIANT && pClickedCreature->HasAura(SPELL_FEIGN_DEATH_PERMANENT))
         {
-            pPlayer->SendNewItem(pItem, 1, true, false);
-            pClickedCreature->ForcedDespawn();
+            if (Item* pItem = pPlayer->StoreNewItemInInventorySlot(ITEM_ID_SAMPLE_ROCKFLESH, 1))
+            {
+                pPlayer->SendNewItem(pItem, 1, true, false);
+                pClickedCreature->ForcedDespawn();
 
-            // always return true when handled special npc spell click
-            return true;
+                // always return true when handled special npc spell click
+                return true;
+            }
         }
-    }
 
-    return true;
-}
+        return true;
+    }
+};
 
 void AddSC_dragonblight()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_destructive_ward";
-    pNewScript->GetAI = &GetAI_npc_destructive_ward;
-    pNewScript->RegisterSelf();
-    
-    pNewScript = new Script;
-    pNewScript->Name = "npc_crystalline_ice_giant";
-    pNewScript->pNpcSpellClick = &NpcSpellClick_npc_crystalline_ice_giant;
-    pNewScript->RegisterSelf();
+    s = new npc_destructive_ward();
+    s->RegisterSelf();
+    s = new npc_crystalline_ice_giant();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_destructive_ward";
+    //pNewScript->GetAI = &GetAI_npc_destructive_ward;
+    //pNewScript->RegisterSelf();
+    //
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_crystalline_ice_giant";
+    //pNewScript->pNpcSpellClick = &NpcSpellClick_npc_crystalline_ice_giant;
+    //pNewScript->RegisterSelf();
 }

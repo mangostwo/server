@@ -60,75 +60,88 @@ enum
     SPELL_SHOCK                     = 12553,
 };
 
-struct npc_aeranasAI : public ScriptedAI
+struct npc_aeranas : public CreatureScript
 {
-    npc_aeranasAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_aeranas() : CreatureScript("npc_aeranas") {}
 
-    uint32 m_uiFactionTimer;
-    uint32 m_uiEnvelopingWindsTimer;
-    uint32 m_uiShockTimer;
-
-    void Reset() override
+    struct npc_aeranasAI : public ScriptedAI
     {
-        m_uiFactionTimer         = 8000;
-        m_uiEnvelopingWindsTimer = 9000;
-        m_uiShockTimer           = 5000;
+        npc_aeranasAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+        uint32 m_uiFactionTimer;
+        uint32 m_uiEnvelopingWindsTimer;
+        uint32 m_uiShockTimer;
 
-        DoScriptText(SAY_SUMMON, m_creature);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiFactionTimer)
+        void Reset() override
         {
-            if (m_uiFactionTimer <= uiDiff)
+            m_uiFactionTimer = 8000;
+            m_uiEnvelopingWindsTimer = 9000;
+            m_uiShockTimer = 5000;
+
+            m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+
+            DoScriptText(SAY_SUMMON, m_creature);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiFactionTimer)
             {
-                m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_COMBAT_STOP);
-                m_uiFactionTimer = 0;
+                if (m_uiFactionTimer <= uiDiff)
+                {
+                    m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_COMBAT_STOP);
+                    m_uiFactionTimer = 0;
+                }
+                else
+                {
+                    m_uiFactionTimer -= uiDiff;
+                }
+            }
+
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_creature->GetHealthPercent() < 30.0f)
+            {
+                m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                m_creature->RemoveAllAuras();
+                m_creature->DeleteThreatList();
+                m_creature->CombatStop(true);
+                DoScriptText(SAY_FREE, m_creature);
+                return;
+            }
+
+            if (m_uiShockTimer < uiDiff)
+            {
+                DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHOCK);
+                m_uiShockTimer = 10000;
             }
             else
-            { m_uiFactionTimer -= uiDiff; }
+            {
+                m_uiShockTimer -= uiDiff;
+            }
+
+            if (m_uiEnvelopingWindsTimer < uiDiff)
+            {
+                DoCastSpellIfCan(m_creature->getVictim(), SPELL_ENVELOPING_WINDS);
+                m_uiEnvelopingWindsTimer = 25000;
+            }
+            else
+            {
+                m_uiEnvelopingWindsTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
         }
+    };
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_creature->GetHealthPercent() < 30.0f)
-        {
-            m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-            m_creature->RemoveAllAuras();
-            m_creature->DeleteThreatList();
-            m_creature->CombatStop(true);
-            DoScriptText(SAY_FREE, m_creature);
-            return;
-        }
-
-        if (m_uiShockTimer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHOCK);
-            m_uiShockTimer = 10000;
-        }
-        else
-        { m_uiShockTimer -= uiDiff; }
-
-        if (m_uiEnvelopingWindsTimer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_ENVELOPING_WINDS);
-            m_uiEnvelopingWindsTimer = 25000;
-        }
-        else
-        { m_uiEnvelopingWindsTimer -= uiDiff; }
-
-        DoMeleeAttackIfReady();
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_aeranasAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_aeranas(Creature* pCreature)
-{
-    return new npc_aeranasAI(pCreature);
-}
 
 /*######
 ## npc_ancestral_wolf
@@ -145,27 +158,33 @@ enum
     NPC_RYGA                        = 17123
 };
 
-struct npc_ancestral_wolfAI : public npc_escortAI
+struct npc_ancestral_wolf : public CreatureScript
 {
-    npc_ancestral_wolfAI(Creature* pCreature) : npc_escortAI(pCreature)
-    {
-        if (pCreature->GetOwner() && pCreature->GetOwner()->GetTypeId() == TYPEID_PLAYER)
-        { Start(false, (Player*)pCreature->GetOwner()); }
-        else
-        { script_error_log("npc_ancestral_wolf can not obtain owner or owner is not a player."); }
+    npc_ancestral_wolf() : CreatureScript("npc_ancestral_wolf") {}
 
-        Reset();
-    }
-
-    void Reset() override
+    struct npc_ancestral_wolfAI : public npc_escortAI
     {
-        m_creature->CastSpell(m_creature, SPELL_ANCESTRAL_WOLF_BUFF, true);
-    }
-
-    void WaypointReached(uint32 uiPointId) override
-    {
-        switch (uiPointId)
+        npc_ancestral_wolfAI(Creature* pCreature) : npc_escortAI(pCreature)
         {
+            if (pCreature->GetOwner() && pCreature->GetOwner()->GetTypeId() == TYPEID_PLAYER)
+            {
+                Start(false, (Player*)pCreature->GetOwner());
+            }
+            else
+            {
+                script_error_log("npc_ancestral_wolf can not obtain owner or owner is not a player.");
+            }
+        }
+
+        void Reset() override
+        {
+            m_creature->CastSpell(m_creature, SPELL_ANCESTRAL_WOLF_BUFF, true);
+        }
+
+        void WaypointReached(uint32 uiPointId) override
+        {
+            switch (uiPointId)
+            {
             case 0:
                 DoScriptText(EMOTE_WOLF_LIFT_HEAD, m_creature);
                 break;
@@ -175,21 +194,24 @@ struct npc_ancestral_wolfAI : public npc_escortAI
             case 50:
                 Creature* pRyga = GetClosestCreatureWithEntry(m_creature, NPC_RYGA, 30.0f);
                 if (pRyga && pRyga->IsAlive() && !pRyga->IsInCombat())
-                { DoScriptText(SAY_WOLF_WELCOME, pRyga); }
+                {
+                    DoScriptText(SAY_WOLF_WELCOME, pRyga);
+                }
                 break;
+            }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_ancestral_wolfAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_ancestral_wolf(Creature* pCreature)
-{
-    return new npc_ancestral_wolfAI(pCreature);
-}
 
 /*######
 ## npc_demoniac_scryer
 ######*/
-
+//TODO prepare localisation
 #define GOSSIP_ITEM_ATTUNE          "Yes, Scryer. You may possess me."
 
 enum
@@ -214,151 +236,164 @@ enum
 };
 
 // script is basic support, details like end event are not implemented
-struct npc_demoniac_scryerAI : public ScriptedAI
+struct npc_demoniac_scryer : public CreatureScript
 {
-    npc_demoniac_scryerAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_demoniac_scryer() : CreatureScript("npc_demoniac_scryer") {}
+
+    struct npc_demoniac_scryerAI : public ScriptedAI
     {
-        m_bIsComplete = false;
-        m_uiSpawnDemonTimer = 15000;
-        m_uiSpawnButtressTimer = 45000;
-        m_uiButtressCount = 0;
-        Reset();
-    }
-
-    bool m_bIsComplete;
-
-    uint32 m_uiSpawnDemonTimer;
-    uint32 m_uiSpawnButtressTimer;
-    uint32 m_uiButtressCount;
-
-    void Reset() override {}
-
-    // we don't want anything to happen when attacked
-    void AttackedBy(Unit* /*pEnemy*/) override {}
-    void AttackStart(Unit* /*pEnemy*/) override {}
-
-    void DoSpawnButtress()
-    {
-        ++m_uiButtressCount;
-
-        float fAngle = 0.0f;
-
-        switch (m_uiButtressCount)
+        npc_demoniac_scryerAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
+            m_bIsComplete = false;
+            m_uiSpawnDemonTimer = 15000;
+            m_uiSpawnButtressTimer = 45000;
+            m_uiButtressCount = 0;
+        }
+
+        bool m_bIsComplete;
+
+        uint32 m_uiSpawnDemonTimer;
+        uint32 m_uiSpawnButtressTimer;
+        uint32 m_uiButtressCount;
+
+        // we don't want anything to happen when attacked
+        void AttackedBy(Unit* /*pEnemy*/) override {}
+        void AttackStart(Unit* /*pEnemy*/) override {}
+
+        void DoSpawnButtress()
+        {
+            ++m_uiButtressCount;
+
+            float fAngle = 0.0f;
+
+            switch (m_uiButtressCount)
+            {
             case 1: fAngle = 0.0f; break;
             case 2: fAngle = M_PI_F + M_PI_F / 2; break;
             case 3: fAngle = M_PI_F / 2; break;
             case 4: fAngle = M_PI_F; break;
+            }
+
+            float fX, fY, fZ;
+            m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0.0f, 5.0f, fAngle);
+
+            uint32 uiTime = TIME_TOTAL - (m_uiSpawnButtressTimer * m_uiButtressCount);
+            m_creature->SummonCreature(NPC_BUTTRESS, fX, fY, fZ, m_creature->GetAngle(fX, fY), TEMPSUMMON_TIMED_DESPAWN, uiTime);
         }
 
-        float fX, fY, fZ;
-        m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0.0f, 5.0f, fAngle);
-
-        uint32 uiTime = TIME_TOTAL - (m_uiSpawnButtressTimer * m_uiButtressCount);
-        m_creature->SummonCreature(NPC_BUTTRESS, fX, fY, fZ, m_creature->GetAngle(fX, fY), TEMPSUMMON_TIMED_DESPAWN, uiTime);
-    }
-
-    void DoSpawnDemon()
-    {
-        float fX, fY, fZ;
-        m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 20.0f, fX, fY, fZ);
-
-        m_creature->SummonCreature(NPC_HELLFIRE_WARDLING, fX, fY, fZ, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_HELLFIRE_WARDLING)
+        void DoSpawnDemon()
         {
-            pSummoned->CastSpell(pSummoned, SPELL_SUMMONED_DEMON, false);
-            pSummoned->AI()->AttackStart(m_creature);
+            float fX, fY, fZ;
+            m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 20.0f, fX, fY, fZ);
+
+            m_creature->SummonCreature(NPC_HELLFIRE_WARDLING, fX, fY, fZ, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
         }
-        else
+
+        void JustSummoned(Creature* pSummoned) override
         {
-            if (pSummoned->GetEntry() == NPC_BUTTRESS)
+            if (pSummoned->GetEntry() == NPC_HELLFIRE_WARDLING)
             {
-                pSummoned->CastSpell(pSummoned, SPELL_BUTTRESS_APPERANCE, false);
-                pSummoned->CastSpell(m_creature, SPELL_SUCKER_CHANNEL, true);
+                pSummoned->CastSpell(pSummoned, SPELL_SUMMONED_DEMON, false);
+                pSummoned->AI()->AttackStart(m_creature);
+            }
+            else
+            {
+                if (pSummoned->GetEntry() == NPC_BUTTRESS)
+                {
+                    pSummoned->CastSpell(pSummoned, SPELL_BUTTRESS_APPERANCE, false);
+                    pSummoned->CastSpell(m_creature, SPELL_SUCKER_CHANNEL, true);
+                }
             }
         }
-    }
 
-    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
-    {
-        if (pTarget->GetEntry() == NPC_HELLFIRE_WARDLING && pSpell->Id == SPELL_SUCKER_DESPAWN_MOB)
-        { ((Creature*)pTarget)->ForcedDespawn(); }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_bIsComplete || !m_creature->IsAlive())
-        { return; }
-
-        if (m_uiSpawnButtressTimer <= uiDiff)
+        void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
         {
-            if (m_uiButtressCount >= MAX_BUTTRESS)
+            if (pTarget->GetEntry() == NPC_HELLFIRE_WARDLING && pSpell->Id == SPELL_SUCKER_DESPAWN_MOB)
             {
-                m_creature->CastSpell(m_creature, SPELL_SUCKER_DESPAWN_MOB, false);
+                ((Creature*)pTarget)->ForcedDespawn();
+            }
+        }
 
-                if (m_creature->IsInCombat())
-                {
-                    m_creature->DeleteThreatList();
-                    m_creature->CombatStop();
-                }
-
-                m_bIsComplete = true;
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_bIsComplete || !m_creature->IsAlive())
+            {
                 return;
             }
 
-            m_uiSpawnButtressTimer = 45000;
-            DoSpawnButtress();
-        }
-        else
-        { m_uiSpawnButtressTimer -= uiDiff; }
+            if (m_uiSpawnButtressTimer <= uiDiff)
+            {
+                if (m_uiButtressCount >= MAX_BUTTRESS)
+                {
+                    m_creature->CastSpell(m_creature, SPELL_SUCKER_DESPAWN_MOB, false);
 
-        if (m_uiSpawnDemonTimer <= uiDiff)
-        {
-            DoSpawnDemon();
-            m_uiSpawnDemonTimer = 15000;
+                    if (m_creature->IsInCombat())
+                    {
+                        m_creature->DeleteThreatList();
+                        m_creature->CombatStop();
+                    }
+
+                    m_bIsComplete = true;
+                    return;
+                }
+
+                m_uiSpawnButtressTimer = 45000;
+                DoSpawnButtress();
+            }
+            else
+            {
+                m_uiSpawnButtressTimer -= uiDiff;
+            }
+
+            if (m_uiSpawnDemonTimer <= uiDiff)
+            {
+                DoSpawnDemon();
+                m_uiSpawnDemonTimer = 15000;
+            }
+            else
+            {
+                m_uiSpawnDemonTimer -= uiDiff;
+            }
         }
-        else
-        { m_uiSpawnDemonTimer -= uiDiff; }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_demoniac_scryerAI(pCreature);
+    }
+
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
+    {
+        if (npc_demoniac_scryerAI* pScryerAI = dynamic_cast<npc_demoniac_scryerAI*>(pCreature->AI()))
+        {
+            if (pScryerAI->m_bIsComplete)
+            {
+                if (pPlayer->GetQuestStatus(QUEST_DEMONIAC) == QUEST_STATUS_INCOMPLETE)
+                {
+                    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ATTUNE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+                }
+
+                pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_ATTUNED, pCreature->GetObjectGuid());
+                return true;
+            }
+        }
+
+        pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_PROTECT, pCreature->GetObjectGuid());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction) override
+    {
+        pPlayer->PlayerTalkClass->ClearMenus();
+        if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            pPlayer->CLOSE_GOSSIP_MENU();
+            pCreature->CastSpell(pPlayer, SPELL_DEMONIAC_VISITATION, false);
+        }
+
+        return true;
     }
 };
-
-CreatureAI* GetAI_npc_demoniac_scryer(Creature* pCreature)
-{
-    return new npc_demoniac_scryerAI(pCreature);
-}
-
-bool GossipHello_npc_demoniac_scryer(Player* pPlayer, Creature* pCreature)
-{
-    if (npc_demoniac_scryerAI* pScryerAI = dynamic_cast<npc_demoniac_scryerAI*>(pCreature->AI()))
-    {
-        if (pScryerAI->m_bIsComplete)
-        {
-            if (pPlayer->GetQuestStatus(QUEST_DEMONIAC) == QUEST_STATUS_INCOMPLETE)
-            { pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ATTUNE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1); }
-
-            pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_ATTUNED, pCreature->GetObjectGuid());
-            return true;
-        }
-    }
-
-    pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_PROTECT, pCreature->GetObjectGuid());
-    return true;
-}
-
-bool GossipSelect_npc_demoniac_scryer(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
-{
-    if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
-    {
-        pPlayer->CLOSE_GOSSIP_MENU();
-        pCreature->CastSpell(pPlayer, SPELL_DEMONIAC_VISITATION, false);
-    }
-
-    return true;
-}
 
 /*######
 ## npc_wounded_blood_elf
@@ -379,19 +414,25 @@ enum
     QUEST_ROAD_TO_FALCON_WATCH  = 9375,
 };
 
-struct npc_wounded_blood_elfAI : public npc_escortAI
+struct npc_wounded_blood_elf : public CreatureScript
 {
-    npc_wounded_blood_elfAI(Creature* pCreature) : npc_escortAI(pCreature) {Reset();}
+    npc_wounded_blood_elf() : CreatureScript("npc_wounded_blood_elf") {}
 
-    void WaypointReached(uint32 uiPointId) override
+    struct npc_wounded_blood_elfAI : public npc_escortAI
     {
-        Player* pPlayer = GetPlayerForEscort();
+        npc_wounded_blood_elfAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
-        if (!pPlayer)
-        { return; }
-
-        switch (uiPointId)
+        void WaypointReached(uint32 uiPointId) override
         {
+            Player* pPlayer = GetPlayerForEscort();
+
+            if (!pPlayer)
+            {
+                return;
+            }
+
+            switch (uiPointId)
+            {
             case 0:
                 DoScriptText(SAY_ELF_START, m_creature, pPlayer);
                 break;
@@ -415,41 +456,44 @@ struct npc_wounded_blood_elfAI : public npc_escortAI
                 // Award quest credit
                 pPlayer->GroupEventHappens(QUEST_ROAD_TO_FALCON_WATCH, m_creature);
                 break;
+            }
         }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            if (HasEscortState(STATE_ESCORT_ESCORTING))
+            {
+                DoScriptText(SAY_ELF_AGGRO, m_creature);
+            }
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            pSummoned->AI()->AttackStart(m_creature);
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_wounded_blood_elfAI(pCreature);
     }
 
-    void Reset() override { }
-
-    void Aggro(Unit* /*pWho*/) override
+    bool OnQuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest) override
     {
-        if (HasEscortState(STATE_ESCORT_ESCORTING))
-        { DoScriptText(SAY_ELF_AGGRO, m_creature); }
-    }
+        if (pQuest->GetQuestId() == QUEST_ROAD_TO_FALCON_WATCH)
+        {
+            // Change faction so mobs attack
+            pCreature->SetFactionTemporary(FACTION_ESCORT_H_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        pSummoned->AI()->AttackStart(m_creature);
+            if (npc_wounded_blood_elfAI* pEscortAI = dynamic_cast<npc_wounded_blood_elfAI*>(pCreature->AI()))
+            {
+                pEscortAI->Start(false, pPlayer, pQuest);
+            }
+        }
+
+        return true;
     }
 };
-
-CreatureAI* GetAI_npc_wounded_blood_elf(Creature* pCreature)
-{
-    return new npc_wounded_blood_elfAI(pCreature);
-}
-
-bool QuestAccept_npc_wounded_blood_elf(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_ROAD_TO_FALCON_WATCH)
-    {
-        // Change faction so mobs attack
-        pCreature->SetFactionTemporary(FACTION_ESCORT_H_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
-
-        if (npc_wounded_blood_elfAI* pEscortAI = dynamic_cast<npc_wounded_blood_elfAI*>(pCreature->AI()))
-        { pEscortAI->Start(false, pPlayer, pQuest); }
-    }
-
-    return true;
-}
 
 /*######
 ## npc_fel_guard_hound
@@ -464,82 +508,108 @@ enum
     NPC_DERANGED_HELBOAR        = 16863,
 };
 
-struct npc_fel_guard_houndAI : public ScriptedPetAI
+struct npc_fel_guard_hound : public CreatureScript
 {
-    npc_fel_guard_houndAI(Creature* pCreature) : ScriptedPetAI(pCreature) { Reset(); }
+    npc_fel_guard_hound() : CreatureScript("npc_fel_guard_hound") {}
 
-    uint32 m_uiPoodadTimer;
-
-    bool m_bIsPooActive;
-
-    void Reset() override
+    struct npc_fel_guard_houndAI : public ScriptedPetAI
     {
-        m_uiPoodadTimer = 0;
-        m_bIsPooActive  = false;
-    }
+        npc_fel_guard_houndAI(Creature* pCreature) : ScriptedPetAI(pCreature) { }
 
-    void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
-    {
-        if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
-        { return; }
+        uint32 m_uiPoodadTimer;
 
-        if (DoCastSpellIfCan(m_creature, SPELL_FAKE_DOG_SPART) == CAST_OK)
-        { m_uiPoodadTimer = 2000; }
-    }
+        bool m_bIsPooActive;
 
-    // Function to allow the boar to move to target
-    void DoMoveToCorpse(Unit* pBoar)
-    {
-        if (!pBoar)
-        { return; }
-
-        m_bIsPooActive = true;
-        m_creature->GetMotionMaster()->MovePoint(1, pBoar->GetPositionX(), pBoar->GetPositionY(), pBoar->GetPositionZ());
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiPoodadTimer)
+        void Reset() override
         {
-            if (m_uiPoodadTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_CREATE_POODAD) == CAST_OK)
-                {
-                    m_uiPoodadTimer = 0;
-                    m_bIsPooActive = false;
-                }
-            }
-            else
-            { m_uiPoodadTimer -= uiDiff; }
+            m_uiPoodadTimer = 0;
+            m_bIsPooActive = false;
         }
 
-        if (!m_bIsPooActive)
-        { ScriptedPetAI::UpdateAI(uiDiff); }
+        void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
+        {
+            if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
+            {
+                return;
+            }
+
+            if (DoCastSpellIfCan(m_creature, SPELL_FAKE_DOG_SPART) == CAST_OK)
+            {
+                m_uiPoodadTimer = 2000;
+            }
+        }
+
+        // Function to allow the boar to move to target
+        void ReceiveAIEvent(AIEventType eventType, Creature *pSender, Unit *pInvoker, uint32 /*data*/) override //DoMoveToCorpse(Unit* pBoar)
+        {
+            if (eventType == AI_EVENT_CUSTOM_A && pSender == m_creature)
+            {
+                if (!pInvoker)
+                {
+                    return;
+                }
+
+                m_bIsPooActive = true;
+                m_creature->GetMotionMaster()->MovePoint(1, pInvoker->GetPositionX(), pInvoker->GetPositionY(), pInvoker->GetPositionZ());
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiPoodadTimer)
+            {
+                if (m_uiPoodadTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_CREATE_POODAD) == CAST_OK)
+                    {
+                        m_uiPoodadTimer = 0;
+                        m_bIsPooActive = false;
+                    }
+                }
+                else
+                {
+                    m_uiPoodadTimer -= uiDiff;
+                }
+            }
+
+            if (!m_bIsPooActive)
+            {
+                ScriptedPetAI::UpdateAI(uiDiff);
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_fel_guard_houndAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_npc_fel_guard_hound(Creature* pCreature)
+struct spell_inform_dog : public SpellScript
 {
-    return new npc_fel_guard_houndAI(pCreature);
-}
+    spell_inform_dog() : SpellScript("spell_inform_dog") {}
 
-bool EffectDummyCreature_npc_fel_guard_hound(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
-{
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_INFORM_DOG && uiEffIndex == EFFECT_INDEX_0)
+    bool EffectDummy(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Object* pTarget, ObjectGuid /*originalCasterGuid*/) override
     {
-        if (pCaster->GetEntry() == NPC_DERANGED_HELBOAR)
+        // always check spellid and effectindex
+        if (uiSpellId == SPELL_INFORM_DOG && uiEffIndex == EFFECT_INDEX_0)
         {
-            if (npc_fel_guard_houndAI* pHoundAI = dynamic_cast<npc_fel_guard_houndAI*>(pCreatureTarget->AI()))
-            { pHoundAI->DoMoveToCorpse(pCaster); }
+            Creature *pCreatureTarget = pTarget->ToCreature();
+            if (pCaster->GetEntry() == NPC_DERANGED_HELBOAR)
+            {
+                if (CreatureAI* pHoundAI = pCreatureTarget->AI())
+                {
+                    pHoundAI->ReceiveAIEvent(AI_EVENT_CUSTOM_A, pCreatureTarget, pCaster, 0);
+                }
+            }
+
+            // always return true when we are handling this spell and effect
+            return true;
         }
 
-        // always return true when we are handling this spell and effect
-        return true;
+        return false;
     }
-
-    return false;
-}
+};
 
 /*######
 ## npc_anchorite_barada
@@ -609,67 +679,90 @@ static const int32 aAnchoriteTexts[3] = { -1000987, -1000988, -1000989 };
 static const int32 aColonelTexts[3] = { -1000990, -1000991, -1000992 };
 
 // Note: script is highly dependent on DBscript implementation
-struct npc_anchorite_baradaAI : public ScriptedAI, private DialogueHelper
+struct npc_anchorite_barada : public CreatureScript
 {
-    npc_anchorite_baradaAI(Creature* pCreature) : ScriptedAI(pCreature),
+    npc_anchorite_barada() : CreatureScript("npc_anchorite_barada") {}
+
+    struct npc_anchorite_baradaAI : public ScriptedAI, private DialogueHelper
+    {
+        npc_anchorite_baradaAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aExorcismDialogue)
-    {
-        Reset();
-    }
-
-    bool m_bEventComplete;
-    bool m_bEventInProgress;
-
-    ObjectGuid m_colonelGuid;
-
-    void Reset() override
-    {
-        m_bEventComplete = false;
-        m_bEventInProgress = false;
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        // no attack during the exorcism
-        if (m_bEventInProgress)
-            return;
-
-        ScriptedAI::AttackStart(pWho);
-    }
-
-    void EnterEvadeMode() override
-    {
-        // no evade during the exorcism
-        if (m_bEventInProgress)
-            return;
-
-        ScriptedAI::EnterEvadeMode();
-    }
-
-    bool IsExorcismComplete() { return m_bEventComplete; }
-
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
-    {
-        if (eventType == AI_EVENT_START_EVENT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
-            // start the actuall exorcism
-            if (Creature* pColoner = GetClosestCreatureWithEntry(m_creature, NPC_COLONEL_JULES, 15.0f))
-                m_colonelGuid = pColoner->GetObjectGuid();
-
-            m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-            m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-
-            StartNextDialogueText(SAY_EXORCISM_1);
         }
-    }
 
-    void MovementInform(uint32 uiType, uint32 uiPointId) override
-    {
-        if (uiType != WAYPOINT_MOTION_TYPE)
-            return;
+        bool m_bEventComplete;
+        bool m_bEventInProgress;
 
-        switch (uiPointId)
+        ObjectGuid m_colonelGuid;
+
+        void Reset() override
         {
+            m_bEventComplete = false;
+            m_bEventInProgress = false;
+        }
+
+        void AttackStart(Unit* pWho) override
+        {
+            // no attack during the exorcism
+            if (m_bEventInProgress)
+                return;
+
+            ScriptedAI::AttackStart(pWho);
+        }
+
+        void EnterEvadeMode() override
+        {
+            // no evade during the exorcism
+            if (m_bEventInProgress)
+                return;
+
+            ScriptedAI::EnterEvadeMode();
+        }
+
+        bool IsExorcismComplete() { return m_bEventComplete; }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+        {
+            if (pInvoker->GetTypeId() == TYPEID_PLAYER)
+            {
+                switch (eventType)
+                {
+                case AI_EVENT_START_EVENT:  // start the actuall exorcism
+                    if (Creature* pColonel = GetClosestCreatureWithEntry(m_creature, NPC_COLONEL_JULES, 15.0f))
+                        m_colonelGuid = pColonel->GetObjectGuid();
+
+                    m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+                    m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+
+                    StartNextDialogueText(SAY_EXORCISM_1);
+                    break;
+                case AI_EVENT_CUSTOM_A: // event complete - give credit and reset, TODO rethink code distribution between this and the caller
+                    if (IsExorcismComplete())
+                    {
+                        // kill credit
+                        ((Player*)pInvoker)->RewardPlayerAndGroupAtEvent(pSender->GetEntry(), pSender);
+
+                        // reset Anchorite and Colonel
+                        pSender->AI()->EnterEvadeMode();
+
+                        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                        ((Player*)pInvoker)->SEND_GOSSIP_MENU(TEXT_ID_CLEANSED, pSender->GetObjectGuid());
+                        EnterEvadeMode();
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+
+        void MovementInform(uint32 uiType, uint32 uiPointId) override
+        {
+            if (uiType != WAYPOINT_MOTION_TYPE)
+                return;
+
+            switch (uiPointId)
+            {
             case 3:
                 // pause wp and resume dialogue
                 m_creature->addUnitState(UNIT_STAT_WAYPOINT_PAUSED);
@@ -692,13 +785,13 @@ struct npc_anchorite_baradaAI : public ScriptedAI, private DialogueHelper
                 m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
                 m_bEventComplete = true;
                 break;
+            }
         }
-    }
 
-    void JustDidDialogueStep(int32 iEntry) override
-    {
-        switch (iEntry)
+        void JustDidDialogueStep(int32 iEntry) override
         {
+            switch (iEntry)
+            {
             case QUEST_ID_EXORCISM:
                 m_creature->GetMotionMaster()->MoveWaypoint();
                 break;
@@ -764,294 +857,301 @@ struct npc_anchorite_baradaAI : public ScriptedAI, private DialogueHelper
                 m_creature->clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
                 m_creature->SetStandState(UNIT_STAND_STATE_STAND);
                 break;
+            }
         }
-    }
 
-    Creature* GetSpeakerByEntry(uint32 uiEntry) override
-    {
-        switch (uiEntry)
+        Creature* GetSpeakerByEntry(uint32 uiEntry) override
         {
+            switch (uiEntry)
+            {
             case NPC_ANCHORITE_BARADA:      return m_creature;
             case NPC_COLONEL_JULES:         return m_creature->GetMap()->GetCreature(m_colonelGuid);
 
             default:
                 return NULL;
+            }
         }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            DialogueUpdate(uiDiff);
+
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_anchorite_baradaAI(pCreature);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
-        DialogueUpdate(uiDiff);
+        // check if quest is active but not completed
+        if (pPlayer->IsCurrentQuest(QUEST_ID_EXORCISM, 1))
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_EXORCISM, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        pPlayer->SEND_GOSSIP_MENU(TEXT_ID_ANCHORITE, pCreature->GetObjectGuid());
+        return true;
+    }
 
-        DoMeleeAttackIfReady();
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction) override
+    {
+        pPlayer->PlayerTalkClass->ClearMenus();
+        if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            pCreature->AI()->SendAIEvent(AI_EVENT_START_EVENT, pPlayer, pCreature);
+            pPlayer->CLOSE_GOSSIP_MENU();
+        }
+
+        return true;
     }
 };
-
-CreatureAI* GetAI_npc_anchorite_barada(Creature* pCreature)
-{
-    return new npc_anchorite_baradaAI(pCreature);
-}
-
-bool GossipHello_npc_anchorite_barada(Player* pPlayer, Creature* pCreature)
-{
-    // check if quest is active but not completed
-    if (pPlayer->IsCurrentQuest(QUEST_ID_EXORCISM, 1))
-        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_EXORCISM, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-
-    pPlayer->SEND_GOSSIP_MENU(TEXT_ID_ANCHORITE, pCreature->GetObjectGuid());
-    return true;
-}
-
-bool GossipSelect_npc_anchorite_barada(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
-{
-    if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
-    {
-        pCreature->AI()->SendAIEvent(AI_EVENT_START_EVENT, pPlayer, pCreature);
-        pPlayer->CLOSE_GOSSIP_MENU();
-    }
-
-    return true;
-}
 
 /*######
 ## npc_colonel_jules
 ######*/
 
-bool GossipHello_npc_colonel_jules(Player* pPlayer, Creature* pCreature)
+struct npc_colonel_jules : public CreatureScript
 {
-    // quest already completed
-    if (pPlayer->GetQuestStatus(QUEST_ID_EXORCISM) == QUEST_STATUS_COMPLETE)
-    {
-        pPlayer->SEND_GOSSIP_MENU(TEXT_ID_CLEANSED, pCreature->GetObjectGuid());
-        return true;
-    }
-    // quest active but not complete
-    else if (pPlayer->IsCurrentQuest(QUEST_ID_EXORCISM, 1))
-    {
-        Creature* pAnchorite = GetClosestCreatureWithEntry(pCreature, NPC_ANCHORITE_BARADA, 15.0f);
-        if (!pAnchorite)
-            return true;
+    npc_colonel_jules() : CreatureScript("npc_colonel_jules") {}
 
-        if (npc_anchorite_baradaAI* pAnchoriteAI = dynamic_cast<npc_anchorite_baradaAI*>(pAnchorite->AI()))
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
+    {
+        // quest already completed
+        if (pPlayer->GetQuestStatus(QUEST_ID_EXORCISM) == QUEST_STATUS_COMPLETE)
         {
-            // event complete - give credit and reset
-            if (pAnchoriteAI->IsExorcismComplete())
-            {
-                // kill credit
-                pPlayer->RewardPlayerAndGroupAtEvent(pCreature->GetEntry(), pCreature);
-
-                // reset Anchorite and Colonel
-                pAnchorite->AI()->EnterEvadeMode();
-                pCreature->AI()->EnterEvadeMode();
-
-                pAnchorite->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                pPlayer->SEND_GOSSIP_MENU(TEXT_ID_CLEANSED, pCreature->GetObjectGuid());
-                return true;
-            }
+            pPlayer->SEND_GOSSIP_MENU(TEXT_ID_CLEANSED, pCreature->GetObjectGuid());
+            return true;
         }
-    }
+        // quest active but not complete
+        else if (pPlayer->IsCurrentQuest(QUEST_ID_EXORCISM, 1))
+        {
+            Creature* pAnchorite = GetClosestCreatureWithEntry(pCreature, NPC_ANCHORITE_BARADA, 15.0f);
+            if (!pAnchorite)
+                return true;
 
-    pPlayer->SEND_GOSSIP_MENU(TEXT_ID_POSSESSED, pCreature->GetObjectGuid());
-    return true;
-}
+            pCreature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pPlayer, pAnchorite);
+            return true;
+        }
 
-bool EffectDummyCreature_npc_colonel_jules(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
-{
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_JULES_RELEASE_DARKNESS && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_COLONEL_JULES)
-    {
-        Creature* pAnchorite = GetClosestCreatureWithEntry(pCreatureTarget, NPC_ANCHORITE_BARADA, 15.0f);
-        if (!pAnchorite)
-            return false;
-
-        // get random point around the Anchorite
-        float fX, fY, fZ;
-        pCreatureTarget->GetNearPoint(pCreatureTarget, fX, fY, fZ, 5.0f, 10.0f, frand(0, M_PI_F / 2));
-
-        // spawn a Darkness Released npc and move around the room
-        if (Creature* pDarkness = pCreatureTarget->SummonCreature(NPC_DARKNESS_RELEASED, 0, 0, 0, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 20000))
-            pDarkness->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
-
-        // always return true when we are handling this spell and effect
+        pPlayer->SEND_GOSSIP_MENU(TEXT_ID_POSSESSED, pCreature->GetObjectGuid());
         return true;
     }
+};
 
-    return false;
-}
+struct spell_just_release_darkness : public SpellScript
+{
+    spell_just_release_darkness() : SpellScript("spell_just_release_darkness") {}
+
+    bool EffectDummy(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Object* pTarget, ObjectGuid /*originalCasterGuid*/) override
+    {
+        // always check spellid and effectindex
+        if (uiSpellId == SPELL_JULES_RELEASE_DARKNESS && uiEffIndex == EFFECT_INDEX_0 && pTarget->GetEntry() == NPC_COLONEL_JULES)
+        {
+            Creature *pCreatureTarget = pTarget->ToCreature();
+            Creature* pAnchorite = GetClosestCreatureWithEntry(pCreatureTarget, NPC_ANCHORITE_BARADA, 15.0f);
+            if (!pAnchorite)
+                return false;
+
+            // get random point around the Anchorite
+            float fX, fY, fZ;
+            pCreatureTarget->GetNearPoint(pCreatureTarget, fX, fY, fZ, 5.0f, 10.0f, frand(0, M_PI_F / 2));
+
+            // spawn a Darkness Released npc and move around the room
+            if (Creature* pDarkness = pCreatureTarget->SummonCreature(NPC_DARKNESS_RELEASED, 0, 0, 0, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 20000))
+                pDarkness->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
+
+            // always return true when we are handling this spell and effect
+            return true;
+        }
+
+        return false;
+    }
+};
 
 /*######
-## npc_magister_aledis
+## npc_caretaker_dilandrus
 ######*/
 
-enum
+static const float aGraveYardLocation[11][4] =
 {
-    SAY_ALEDIS_DEFEAT               = -1001172,
-
-    SPELL_PYROBLAST                 = 33975,
-    SPELL_FROST_NOVA                = 11831,
-    SPELL_FIREBALL                  = 20823,
+    {-807.52f, 2694.01f, 105.149f, 2.58f},     // spawn point
+    {-807.922f, 2692.816f, 104.837f, 2.76f},   // grave location
+    {-805.451f, 2696.972f, 105.671f, 2.42f},   // grave location
+    {-802.575f, 2702.187f, 106.645f, 2.64f},   // grave location
+    {-811.831f, 2699.465f, 106.544f, 2.84f},   // grave location
+    {-806.366f, 2708.088f, 108.162f, 2.79f},   // grave location
+    {-820.038f, 2701.316f, 107.491f, 2.82f},   // grave location
+    {-818.042f, 2705.911f, 108.371f, 2.69f},   // grave location
+    {-815.989f, 2709.199f, 108.973f, 2.59f},   // grave location
+    {-814.213f, 2712.847f, 109.612f, 2.26f},   // grave location
+    {-810.533f, 2718.717f, 110.509f, 2.78f}    // grave location
 };
 
-struct  npc_magister_aledisAI : public ScriptedAI
-{
-    npc_magister_aledisAI(Creature* pCreature) : ScriptedAI(pCreature)
+struct npc_caretaker_dilandrus : public CreatureScript
+{        
+	   npc_caretaker_dilandrus() : CreatureScript("npc_caretaker_dilandrus") {}
+
+    struct npc_caretaker_dilandrusAI : public ScriptedAI
     {
-        m_bIsDefeated = false;
-        Reset();
-    }
-
-    uint32 m_uiPyroblastTimer;
-    uint32 m_uiFrostNovaTimer;
-    uint32 m_uiFireballTimer;
-
-    bool m_bIsDefeated;
-
-    void Reset() override
-    {
-        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-
-        m_uiPyroblastTimer      = urand(10000, 14000);
-        m_uiFrostNovaTimer      = 0;
-        m_uiFireballTimer       = 1000;
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, false))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, 10.0f);
+        npc_caretaker_dilandrusAI(Creature* pCreature) : ScriptedAI(pCreature) 
+        { 
+            Reset(); 
         }
-    }
+        
+        uint32 uVisitGraveTimer, uCurrentStage, uLastGraveVisited;
 
-    void EnterEvadeMode() override
-    {
-        m_creature->RemoveAllAurasOnEvade();
-        m_creature->DeleteThreatList();
-        m_creature->CombatStop(true);
-
-        if (!m_bIsDefeated)
-            m_creature->LoadCreatureAddon(true);
-
-        if (m_creature->IsAlive())
+        void Reset() override 
         {
-            if (!m_bIsDefeated)
+            uVisitGraveTimer = 0; 
+            uCurrentStage = 1;    
+            uLastGraveVisited = 0;
+        }
+
+        void UpdateAI(const uint32 uiDiff)
+        {
+            if (uVisitGraveTimer <= uiDiff)
             {
-                m_creature->SetWalk(true);
-                m_creature->GetMotionMaster()->MoveWaypoint();
+                uint32 uGraveNumber = 0;
+                if (uCurrentStage == 1) // walk to grave
+                {
+                    // time to visit grave
+                    uGraveNumber = rand() % 9 + 1;
+                    m_creature->GetMotionMaster()->MovePoint(0, aGraveYardLocation[uGraveNumber][0], aGraveYardLocation[uGraveNumber][1], aGraveYardLocation[uGraveNumber][2]);
+                    uLastGraveVisited = uGraveNumber;
+                    uCurrentStage = 2;
+                    uVisitGraveTimer = 10000;
+                }
+                else if (uCurrentStage == 2) // face gravestone
+                {
+                    m_creature->SetFacingTo(aGraveYardLocation[uGraveNumber][3]);
+                    uCurrentStage = 3;
+                    uVisitGraveTimer = 3000;
+                }
+                else if (uCurrentStage == 3) // kneel for a few second
+                {
+                    if (rand() % 3 == 0)
+                    {
+                        m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
+                        uVisitGraveTimer = 5000;
+                    }
+                    else uVisitGraveTimer = 0;
+                    uCurrentStage = 4;
+                }
+                else if (uCurrentStage == 4)
+                {
+                    // lay wreath - spawn it
+
+                    m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+                    uCurrentStage = 5;
+                    uVisitGraveTimer = 5000;
+                }
+                else if (uCurrentStage == 5)
+                {
+                    if (rand() % 3 == 0)
+                    {
+                        m_creature->HandleEmote(EMOTE_ONESHOT_SALUTE);
+                    }
+                    else if (rand() % 6 == 0)
+                    {
+                        m_creature->HandleEmote(EMOTE_ONESHOT_CRY);
+                    }
+                    else uVisitGraveTimer = 5000;
+                    uCurrentStage = 6;
+                }
+                else if (uCurrentStage == 6) // go back to start
+                {
+                    m_creature->GetMotionMaster()->MovePoint(0, aGraveYardLocation[0][0], aGraveYardLocation[0][1], aGraveYardLocation[0][2]);
+                    m_creature->SetFacingTo(aGraveYardLocation[0][3]);
+                    uVisitGraveTimer = 900000; // visit a grave every 15 minutes
+                    uCurrentStage = 1;
+                }
+
             }
             else
-                m_creature->GetMotionMaster()->MoveIdle();
+            {
+                uVisitGraveTimer -= uiDiff;
+            }
+
         }
 
-        m_creature->SetLootRecipient(NULL);
-
-        Reset();
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
+    };
+		
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (!m_bIsDefeated && m_creature->GetHealthPercent() < 25.0f)
-        {
-            // evade when defeated; faction is reset automatically
-            m_bIsDefeated = true;
-            EnterEvadeMode();
-
-            m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-            DoScriptText(SAY_ALEDIS_DEFEAT, m_creature);
-            m_creature->ForcedDespawn(60000);
-            return;
-        }
-
-        if (m_uiPyroblastTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_PYROBLAST) == CAST_OK)
-                m_uiPyroblastTimer = urand(18000, 21000);
-        }
-        else
-            m_uiPyroblastTimer -= uiDiff;
-
-        if (m_uiFireballTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FIREBALL) == CAST_OK)
-                m_uiFireballTimer = urand(3000, 4000);
-        }
-        else
-            m_uiFireballTimer -= uiDiff;
-
-        if (m_uiFrostNovaTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_FROST_NOVA) == CAST_OK)
-                m_uiFrostNovaTimer = urand(12000, 16000);
-        }
-        else
-            m_uiFrostNovaTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
-    }  
+        return new npc_caretaker_dilandrusAI(pCreature);
+    }
 };
-
-CreatureAI* GetAI_npc_magister_aledis(Creature* pCreature)
-{
-    return new npc_magister_aledisAI(pCreature);
-}
 
 void AddSC_hellfire_peninsula()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_aeranas";
-    pNewScript->GetAI = &GetAI_npc_aeranas;
-    pNewScript->RegisterSelf();
+    s = new npc_aeranas();
+    s->RegisterSelf();
+    s = new npc_ancestral_wolf();
+    s->RegisterSelf();
+    s = new npc_demoniac_scryer();
+    s->RegisterSelf();
+    s = new npc_wounded_blood_elf();
+    s->RegisterSelf();
+    s = new npc_fel_guard_hound();
+    s->RegisterSelf();
+    s = new npc_anchorite_barada();
+    s->RegisterSelf();
+    s = new npc_colonel_jules();
+    s->RegisterSelf();
+    s = new spell_just_release_darkness();
+    s->RegisterSelf();
+    s = new npc_caretaker_dilandrus();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_ancestral_wolf";
-    pNewScript->GetAI = &GetAI_npc_ancestral_wolf;
-    pNewScript->RegisterSelf();
+    s = new spell_inform_dog();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_demoniac_scryer";
-    pNewScript->GetAI = &GetAI_npc_demoniac_scryer;
-    pNewScript->pGossipHello = &GossipHello_npc_demoniac_scryer;
-    pNewScript->pGossipSelect = &GossipSelect_npc_demoniac_scryer;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_aeranas";
+    //pNewScript->GetAI = &GetAI_npc_aeranas;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_wounded_blood_elf";
-    pNewScript->GetAI = &GetAI_npc_wounded_blood_elf;
-    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_wounded_blood_elf;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_ancestral_wolf";
+    //pNewScript->GetAI = &GetAI_npc_ancestral_wolf;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_fel_guard_hound";
-    pNewScript->GetAI = &GetAI_npc_fel_guard_hound;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_fel_guard_hound;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_demoniac_scryer";
+    //pNewScript->GetAI = &GetAI_npc_demoniac_scryer;
+    //pNewScript->pGossipHello = &GossipHello_npc_demoniac_scryer;
+    //pNewScript->pGossipSelect = &GossipSelect_npc_demoniac_scryer;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_anchorite_barada";
-    pNewScript->GetAI = &GetAI_npc_anchorite_barada;
-    pNewScript->pGossipHello = &GossipHello_npc_anchorite_barada;
-    pNewScript->pGossipSelect = &GossipSelect_npc_anchorite_barada;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_wounded_blood_elf";
+    //pNewScript->GetAI = &GetAI_npc_wounded_blood_elf;
+    //pNewScript->pQuestAcceptNPC = &QuestAccept_npc_wounded_blood_elf;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_colonel_jules";
-    pNewScript->pGossipHello = &GossipHello_npc_colonel_jules;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_colonel_jules;
-    pNewScript->RegisterSelf();
-    
-    pNewScript = new Script;
-    pNewScript->Name = "npc_magister_aledis";
-    pNewScript->GetAI = &GetAI_npc_magister_aledis;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_fel_guard_hound";
+    //pNewScript->GetAI = &GetAI_npc_fel_guard_hound;
+    //pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_fel_guard_hound;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_anchorite_barada";
+    //pNewScript->GetAI = &GetAI_npc_anchorite_barada;
+    //pNewScript->pGossipHello = &GossipHello_npc_anchorite_barada;
+    //pNewScript->pGossipSelect = &GossipSelect_npc_anchorite_barada;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_colonel_jules";
+    //pNewScript->pGossipHello = &GossipHello_npc_colonel_jules;
+    //pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_colonel_jules;
+    //pNewScript->RegisterSelf();
 }

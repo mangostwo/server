@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+﻿/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
@@ -12,6 +12,12 @@ enum
     TYPE_KRIKTHIR               = 0,
     TYPE_HADRONOX               = 1,
     TYPE_ANUBARAK               = 2,
+    TYPE_DO_HADRONOX            = MAX_ENCOUNTER,
+
+    DATA64_ANUB_TRIGGER         = 0,
+    DATA64_ANUB_ASSASIN         = 1,
+    DATA64_ANUB_GUARDIAN        = 2,
+    DATA64_ANUB_DARTER          = 3,
 
     NPC_KRIKTHIR                = 28684,
     NPC_HADRONOX                = 28921,
@@ -43,69 +49,4 @@ enum
     ACHIEV_CRITERIA_DENIED      = 4244,         // Hadronox, achiev 1297
 };
 
-static const uint32 aWatchers[] = {NPC_GASHRA, NPC_NARJIL, NPC_SILTHIK};
-
-// Used to sort the summont triggers
-static const int aSortDistance[4] = { -90, 10, 20, 30};
-
-class instance_azjol_nerub : public ScriptedInstance
-{
-    public:
-        instance_azjol_nerub(Map* pMap);
-
-        void Initialize() override;
-
-        void OnObjectCreate(GameObject* pGo) override;
-        void OnCreatureCreate(Creature* pCreature) override;
-
-        void OnCreatureEnterCombat(Creature* pCreature) override;
-        void OnCreatureEvade(Creature* pCreature);
-        void OnCreatureDeath(Creature* pCreature) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
-
-        ObjectGuid GetRandomAssassinTrigger();
-        ObjectGuid GetGuardianTrigger() { return m_guardianSummonTarget; }
-        ObjectGuid GetDarterTrigger() { return m_darterSummonTarget; }
-        ObjectGuid GetAnubTrigger() { return m_anubSummonTarget; }
-
-        void GetHadronoxTriggerList(GuidList& lList) { lList = m_lSpiderTriggersGuids; }
-        void ResetHadronoxTriggers();
-
-        void SetHadronoxDeniedAchievCriteria(bool bIsMet) { m_bHadronoxDenied = bIsMet; }
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-        void Load(const char* chrIn) override;
-
-        void Update(uint32 uiDiff) override;
-
-    private:
-        void DoSendWatcherOrKrikthir();
-        void DoSortWorldTriggers();
-
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string m_strInstData;
-
-        ObjectGuid m_playerGuid;
-
-        // Hadronox triggers
-        GuidList m_lSpiderTriggersGuids;
-
-        // Anub triggers
-        ObjectGuid m_darterSummonTarget;
-        ObjectGuid m_guardianSummonTarget;
-        ObjectGuid m_anubSummonTarget;
-        GuidVector m_vAssassinSummonTargetsVect;
-        GuidList m_lTriggerGuids;
-
-        uint32 m_uiWatcherTimer;
-        uint32 m_uiGauntletEndTimer;
-
-        bool m_bWatchHimDie;
-        bool m_bHadronoxDenied;
-        bool m_bGauntletStarted;
-};
 #endif

@@ -62,103 +62,109 @@ enum
 
 static const uint32 aWaterGlobuleSpells[5] = {SPELL_WATER_GLOBULE_SPAWN_1, SPELL_WATER_GLOBULE_SPAWN_2, SPELL_WATER_GLOBULE_SPAWN_3, SPELL_WATER_GLOBULE_SPAWN_4, SPELL_WATER_GLOBULE_SPAWN_5};
 
-struct  boss_ichoronAI : public ScriptedAI
+struct boss_ichoron : public CreatureScript
 {
-    boss_ichoronAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_ichoron() : CreatureScript("boss_ichoron") {}
+
+    struct boss_ichoronAI : public ScriptedAI
     {
-        m_pInstance = (instance_violet_hold*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-
-        Reset();
-    }
-
-    instance_violet_hold* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiWaterBoltVolleyTimer;
-    uint32 m_uiWaterBlastTimer;
-    bool m_bIsFrenzy;
-
-    void Reset() override
-    {
-        m_uiWaterBoltVolleyTimer = urand(10000, 12000);
-        m_uiWaterBlastTimer      = 10000;
-        m_bIsFrenzy              = false;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        DoCastSpellIfCan(m_creature, SPELL_PROTECTIVE_BUBBLE);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-    }
-
-    void KilledUnit(Unit* pWho) override
-    {
-        if (pWho->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        switch (urand(0, 2))
+        boss_ichoronAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        }
+
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        uint32 m_uiWaterBoltVolleyTimer;
+        uint32 m_uiWaterBlastTimer;
+        bool m_bIsFrenzy;
+
+        void Reset() override
+        {
+            m_uiWaterBoltVolleyTimer = urand(10000, 12000);
+            m_uiWaterBlastTimer = 10000;
+            m_bIsFrenzy = false;
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
+
+            DoCastSpellIfCan(m_creature, SPELL_PROTECTIVE_BUBBLE);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(SAY_DEATH, m_creature);
+        }
+
+        void KilledUnit(Unit* pWho) override
+        {
+            if (pWho->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            switch (urand(0, 2))
+            {
             case 0: DoScriptText(SAY_SLAY_1, m_creature); break;
             case 1: DoScriptText(SAY_SLAY_2, m_creature); break;
             case 2: DoScriptText(SAY_SLAY_3, m_creature); break;
+            }
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            if (m_uiWaterBlastTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_WATER_BLAST : SPELL_WATER_BLAST_H) == CAST_OK)
+                        m_uiWaterBlastTimer = urand(8000, 14000);
+                }
+            }
+            else
+                m_uiWaterBlastTimer -= uiDiff;
+
+            if (m_uiWaterBoltVolleyTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_WATER_BOLT_VOLLEY : SPELL_WATER_BOLT_VOLLEY_H) == CAST_OK)
+                    m_uiWaterBoltVolleyTimer = urand(7000, 12000);
+            }
+            else
+                m_uiWaterBoltVolleyTimer -= uiDiff;
+
+            if (!m_bIsFrenzy && m_creature->GetHealthPercent() < 25.0f)
+            {
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FRENZY : SPELL_FRENZY_H) == CAST_OK)
+                {
+                    DoScriptText(SAY_ENRAGE, m_creature);
+                    m_bIsFrenzy = true;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature)
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiWaterBlastTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_WATER_BLAST : SPELL_WATER_BLAST_H) == CAST_OK)
-                    m_uiWaterBlastTimer = urand(8000, 14000);
-            }
-        }
-        else
-            m_uiWaterBlastTimer -= uiDiff;
-
-        if (m_uiWaterBoltVolleyTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_WATER_BOLT_VOLLEY : SPELL_WATER_BOLT_VOLLEY_H) == CAST_OK)
-                m_uiWaterBoltVolleyTimer = urand(7000, 12000);
-        }
-        else
-            m_uiWaterBoltVolleyTimer -= uiDiff;
-
-        if (!m_bIsFrenzy && m_creature->GetHealthPercent() < 25.0f)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FRENZY : SPELL_FRENZY_H) == CAST_OK)
-            {
-                DoScriptText(SAY_ENRAGE, m_creature);
-                m_bIsFrenzy = true;
-            }
-        }
-
-        DoMeleeAttackIfReady();
+        return new boss_ichoronAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_ichoron(Creature* pCreature)
-{
-    return new boss_ichoronAI(pCreature);
-}
-
 void AddSC_boss_ichoron()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_ichoron";
-    pNewScript->GetAI = &GetAI_boss_ichoron;
-    pNewScript->RegisterSelf();
+    s = new boss_ichoron();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_ichoron";
+    //pNewScript->GetAI = &GetAI_boss_ichoron;
+    //pNewScript->RegisterSelf();
 }

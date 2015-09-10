@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+﻿/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
@@ -13,6 +13,12 @@ enum
     // internal used types for achievement
     TYPE_ALIVE_DRAGONS          = 2,
     TYPE_VOLCANO_BLOW_FAILED    = 3,
+
+    TYPE_DATA_PORTAL_ON         = 4,
+    TYPE_DATA_PORTAL_OFF        = 5,
+    TYPE_DATA_PORTAL_STATUS     = 6,
+
+    DATA64_FIRE_CYCLONE         = 0,
 
     MAX_TWILIGHT_DRAGONS        = 3,
 
@@ -38,48 +44,6 @@ enum
     ACHIEV_DRAGONS_ALIVE_2_H    = 7332,
     ACHIEV_DRAGONS_ALIVE_3_N    = 7330,                     // achievs 2051, 2054 (The Twilight Zone)
     ACHIEV_DRAGONS_ALIVE_3_H    = 7333,
-};
-
-class instance_obsidian_sanctum : public ScriptedInstance
-{
-    public:
-        instance_obsidian_sanctum(Map* pMap);
-
-        void Initialize() override;
-
-        void OnCreatureCreate(Creature* pCreature) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        ObjectGuid SelectRandomFireCycloneGuid();
-
-        bool IsActivePortal()
-        {
-            for (uint8 i = 0; i < MAX_TWILIGHT_DRAGONS; ++i)
-            {
-                if (m_bPortalActive[i])
-                    return true;
-            }
-
-            return false;
-        }
-
-        void SetPortalStatus(uint8 uiType, bool bStatus) { m_bPortalActive[uiType] = bStatus; }
-        bool GetPortaStatus(uint8 uiType) { return m_bPortalActive[uiType]; }
-
-        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
-        bool CheckConditionCriteriaMeet(Player const* pPlayer, uint32 uiInstanceConditionId, WorldObject const* pConditionSource, uint32 conditionSourceType) const override;
-
-    private:
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        bool m_bPortalActive[MAX_TWILIGHT_DRAGONS];
-
-        uint8 m_uiAliveDragons;
-
-        std::set<uint32> m_sVolcanoBlowFailPlayers;
-
-        GuidList m_lFireCycloneGuidList;
 };
 
 #endif

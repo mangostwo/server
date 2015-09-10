@@ -127,131 +127,142 @@ static const float fZuljinMoveLoc[3] = {120.148811f, 703.713684f, 45.111477f};
 ## boss_zuljin
 ######*/
 
-struct boss_zuljinAI : public ScriptedAI
+struct boss_zuljin : public CreatureScript
 {
-    boss_zuljinAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_zuljin() : CreatureScript("boss_zuljin") {}
+
+    struct boss_zuljinAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bHasTaunted = false;
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    uint8 m_uiPhase;
-    uint8 m_uiHealthCheck;
-
-    uint32 m_uiWhirlwindTimer;
-    uint32 m_uiGrievousThrowTimer;
-
-    uint32 m_uiParalysisTimer;
-    uint32 m_uiOverpowerTimer;
-
-    uint32 m_uiClawRageTimer;
-    uint32 m_uiLynxRushTimer;
-    uint8 m_uiLynxRushCount;
-
-    uint32 m_uiFlameWhirlTimer;
-    uint32 m_uiFlameBreathTimer;
-    uint32 m_uiPillarOfFireTimer;
-
-    bool m_bHasTaunted;
-    bool m_bIsInTransition;
-    uint32 m_uiTransformTimer;
-
-    GuidList m_lSummonsList;
-
-    void Reset() override
-    {
-        m_uiHealthCheck         = 80;
-        m_uiPhase               = PHASE_TROLL;
-
-        m_uiWhirlwindTimer      = 7000;
-        m_uiGrievousThrowTimer  = 8000;
-
-        m_uiParalysisTimer      = 7000;
-        m_uiOverpowerTimer      = 5000;
-
-        m_uiClawRageTimer       = 5000;
-        m_uiLynxRushTimer       = 15000;
-        m_uiLynxRushCount       = 0;
-
-        m_uiFlameWhirlTimer     = 7000;
-        m_uiFlameBreathTimer    = 15000;
-        m_uiPillarOfFireTimer   = 7000;
-
-        m_bIsInTransition       = false;
-
-        SetCombatMovement(true);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_ZULJIN, IN_PROGRESS); }
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_ZULJIN, FAIL); }
-
-        // Despawn all feather vortexes
-        DoDespawnVortexes();
-
-        // Reset all spirits
-        for (uint8 i = 0; i < MAX_VORTEXES; ++i)
+        boss_zuljinAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (Creature* pSpirit = m_pInstance->GetSingleCreatureFromStorage(aZuljinPhases[i].uiSpiritId))
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bHasTaunted = false;
+        }
+
+        ScriptedInstance* m_pInstance;
+
+        uint8 m_uiPhase;
+        uint8 m_uiHealthCheck;
+
+        uint32 m_uiWhirlwindTimer;
+        uint32 m_uiGrievousThrowTimer;
+
+        uint32 m_uiParalysisTimer;
+        uint32 m_uiOverpowerTimer;
+
+        uint32 m_uiClawRageTimer;
+        uint32 m_uiLynxRushTimer;
+        uint8 m_uiLynxRushCount;
+
+        uint32 m_uiFlameWhirlTimer;
+        uint32 m_uiFlameBreathTimer;
+        uint32 m_uiPillarOfFireTimer;
+
+        bool m_bHasTaunted;
+        bool m_bIsInTransition;
+        uint32 m_uiTransformTimer;
+
+        GuidList m_lSummonsList;
+
+        void Reset() override
+        {
+            m_uiHealthCheck = 80;
+            m_uiPhase = PHASE_TROLL;
+
+            m_uiWhirlwindTimer = 7000;
+            m_uiGrievousThrowTimer = 8000;
+
+            m_uiParalysisTimer = 7000;
+            m_uiOverpowerTimer = 5000;
+
+            m_uiClawRageTimer = 5000;
+            m_uiLynxRushTimer = 15000;
+            m_uiLynxRushCount = 0;
+
+            m_uiFlameWhirlTimer = 7000;
+            m_uiFlameBreathTimer = 15000;
+            m_uiPillarOfFireTimer = 7000;
+
+            m_bIsInTransition = false;
+
+            SetCombatMovement(true);
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
+
+            if (m_pInstance)
             {
-                pSpirit->SetStandState(UNIT_STAND_STATE_STAND);
-                pSpirit->AI()->EnterEvadeMode();
+                m_pInstance->SetData(TYPE_ZULJIN, IN_PROGRESS);
             }
         }
-    }
 
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (!m_pInstance)
-        { return; }
-
-        m_pInstance->SetData(TYPE_ZULJIN, DONE);
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (!m_bHasTaunted && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 60.0f))
+        void JustReachedHome() override
         {
-            DoScriptText(SAY_INTRO, m_creature);
-            m_bHasTaunted = true;
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_ZULJIN, FAIL);
+            }
+
+            // Despawn all feather vortexes
+            DoDespawnVortexes();
+
+            // Reset all spirits
+            for (uint8 i = 0; i < MAX_VORTEXES; ++i)
+            {
+                if (Creature* pSpirit = m_pInstance->GetSingleCreatureFromStorage(aZuljinPhases[i].uiSpiritId))
+                {
+                    pSpirit->SetStandState(UNIT_STAND_STATE_STAND);
+                    pSpirit->AI()->EnterEvadeMode();
+                }
+            }
         }
 
-        ScriptedAI::MoveInLineOfSight(pWho);
-    }
-
-    // Function to handle the Feather Vortexes despawn on phase change
-    void DoDespawnVortexes()
-    {
-        for (GuidList::const_iterator itr = m_lSummonsList.begin(); itr != m_lSummonsList.end(); ++itr)
+        void KilledUnit(Unit* /*pVictim*/) override
         {
-            if (Creature* pVortex = m_creature->GetMap()->GetCreature(*itr))
-            { pVortex->ForcedDespawn(); }
+            DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
+        void JustDied(Unit* /*pKiller*/) override
         {
+            DoScriptText(SAY_DEATH, m_creature);
+
+            if (!m_pInstance)
+            {
+                return;
+            }
+
+            m_pInstance->SetData(TYPE_ZULJIN, DONE);
+        }
+
+        void MoveInLineOfSight(Unit* pWho) override
+        {
+            if (!m_bHasTaunted && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 60.0f))
+            {
+                DoScriptText(SAY_INTRO, m_creature);
+                m_bHasTaunted = true;
+            }
+
+            ScriptedAI::MoveInLineOfSight(pWho);
+        }
+
+        // Function to handle the Feather Vortexes despawn on phase change
+        void DoDespawnVortexes()
+        {
+            for (GuidList::const_iterator itr = m_lSummonsList.begin(); itr != m_lSummonsList.end(); ++itr)
+            {
+                if (Creature* pVortex = m_creature->GetMap()->GetCreature(*itr))
+                {
+                    pVortex->ForcedDespawn();
+                }
+            }
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_FEATHER_VORTEX:
                 pSummoned->CastSpell(pSummoned, SPELL_CYCLONE_VISUAL, true);
                 pSummoned->CastSpell(pSummoned, SPELL_CYCLONE_PASSIVE, true);
@@ -259,131 +270,153 @@ struct boss_zuljinAI : public ScriptedAI
 
                 // Attack random target
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                { pSummoned->GetMotionMaster()->MoveFollow(pTarget, 0, 0); }
+                {
+                    pSummoned->GetMotionMaster()->MoveFollow(pTarget, 0, 0);
+                }
                 break;
             case NPC_COLUMN_OF_FIRE:
                 pSummoned->CastSpell(pSummoned, SPELL_PILLAR_TRIGGER, true);
                 break;
-        }
-    }
-
-    void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
-    {
-        if (uiMotionType != POINT_MOTION_TYPE || uiPointId != POINT_ID_CENTER)
-        { return; }
-
-        // increment phase
-        if (m_uiPhase == PHASE_TROLL)
-        { m_uiPhase = PHASE_BEAR; }
-        else
-        { ++m_uiPhase; }
-
-        // drain the spirit
-        if (Creature* pSpirit = m_pInstance->GetSingleCreatureFromStorage(aZuljinPhases[m_uiPhase].uiSpiritId))
-        { pSpirit->CastSpell(m_creature, SPELL_SPIRIT_DRAIN, false); }
-    }
-
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
-    {
-        if (pSpell->Id == SPELL_SPIRIT_DRAIN)
-        {
-            DoCastSpellIfCan(m_creature, aZuljinPhases[m_uiPhase].uiSpiritSpellId, CAST_INTERRUPT_PREVIOUS);
-            DoScriptText(aZuljinPhases[m_uiPhase].iYellId, m_creature);
-            DoScriptText(aZuljinPhases[m_uiPhase].iEmoteId, m_creature);
-
-            // in eagle phase we don't move
-            if (m_uiPhase != PHASE_EAGLE)
-            {
-                SetCombatMovement(true);
-                if (m_creature->getVictim())
-                {
-                    m_creature->GetMotionMaster()->Clear();
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
-                }
             }
-            // In Eagle phase we just cast Energy storm and summon 4 Feather cyclones; Boss doesn't move in this phase
+        }
+
+        void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
+        {
+            if (uiMotionType != POINT_MOTION_TYPE || uiPointId != POINT_ID_CENTER)
+            {
+                return;
+            }
+
+            // increment phase
+            if (m_uiPhase == PHASE_TROLL)
+            {
+                m_uiPhase = PHASE_BEAR;
+            }
             else
             {
-                DoCastSpellIfCan(m_creature, SPELL_ENERGY_STORM, CAST_TRIGGERED);
-
-                // summon 4 vortexes
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_CYCLONE, CAST_TRIGGERED);
+                ++m_uiPhase;
             }
 
-            m_bIsInTransition = false;
-        }
-    }
-
-    void SpellHitTarget(Unit* pTarget, SpellEntry const* pSpellEntry) override
-    {
-        if (pSpellEntry->Id == SPELL_CLAW_RAGE && pTarget->GetTypeId() == TYPEID_PLAYER)
-        {
-            DoCastSpellIfCan(m_creature, SPELL_CLAW_RAGE_TRIGGER, CAST_TRIGGERED);
-            m_uiLynxRushTimer += 8000;
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim() || m_bIsInTransition)
-        { return; }
-
-        if (m_creature->GetHealthPercent() < m_uiHealthCheck)
-        {
-            m_uiHealthCheck -= 20;
-            m_bIsInTransition = true;
-
-            SetCombatMovement(false);
-            m_creature->GetMotionMaster()->MovePoint(POINT_ID_CENTER, fZuljinMoveLoc[0], fZuljinMoveLoc[1], fZuljinMoveLoc[2]);
-
-            // Despawn vortexes and remvoe the energy storm after eagle phase is complete
-            if (m_uiPhase == PHASE_EAGLE)
+            // drain the spirit
+            if (Creature* pSpirit = m_pInstance->GetSingleCreatureFromStorage(aZuljinPhases[m_uiPhase].uiSpiritId))
             {
-                m_creature->RemoveAurasDueToSpell(SPELL_ENERGY_STORM);
-                DoDespawnVortexes();
+                pSpirit->CastSpell(m_creature, SPELL_SPIRIT_DRAIN, false);
             }
+        }
 
-            // Reset threat
-            DoResetThreat();
-
-            // don't do this after troll phase
-            if (m_uiPhase != PHASE_TROLL)
+        void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
+        {
+            if (pSpell->Id == SPELL_SPIRIT_DRAIN)
             {
-                if (m_creature->HasAura(aZuljinPhases[m_uiPhase].uiSpiritSpellId))
-                { m_creature->RemoveAurasDueToSpell(aZuljinPhases[m_uiPhase].uiSpiritSpellId); }
+                DoCastSpellIfCan(m_creature, aZuljinPhases[m_uiPhase].uiSpiritSpellId, CAST_INTERRUPT_PREVIOUS);
+                DoScriptText(aZuljinPhases[m_uiPhase].iYellId, m_creature);
+                DoScriptText(aZuljinPhases[m_uiPhase].iEmoteId, m_creature);
 
-                // drain spirit
-                if (Creature* pSpirit = m_pInstance->GetSingleCreatureFromStorage(aZuljinPhases[m_uiPhase].uiSpiritId))
+                // in eagle phase we don't move
+                if (m_uiPhase != PHASE_EAGLE)
                 {
-                    pSpirit->InterruptNonMeleeSpells(false);
-                    pSpirit->CastSpell(m_creature, SPELL_SPIRIT_DRAINED, false);
-                    pSpirit->SetStandState(UNIT_STAND_STATE_DEAD);
+                    SetCombatMovement(true);
+                    if (m_creature->getVictim())
+                    {
+                        m_creature->GetMotionMaster()->Clear();
+                        m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                    }
+                }
+                // In Eagle phase we just cast Energy storm and summon 4 Feather cyclones; Boss doesn't move in this phase
+                else
+                {
+                    DoCastSpellIfCan(m_creature, SPELL_ENERGY_STORM, CAST_TRIGGERED);
+
+                    // summon 4 vortexes
+                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_CYCLONE, CAST_TRIGGERED);
+                }
+
+                m_bIsInTransition = false;
+            }
+        }
+
+        void SpellHitTarget(Unit* pTarget, SpellEntry const* pSpellEntry) override
+        {
+            if (pSpellEntry->Id == SPELL_CLAW_RAGE && pTarget->GetTypeId() == TYPEID_PLAYER)
+            {
+                DoCastSpellIfCan(m_creature, SPELL_CLAW_RAGE_TRIGGER, CAST_TRIGGERED);
+                m_uiLynxRushTimer += 8000;
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim() || m_bIsInTransition)
+            {
+                return;
+            }
+
+            if (m_creature->GetHealthPercent() < m_uiHealthCheck)
+            {
+                m_uiHealthCheck -= 20;
+                m_bIsInTransition = true;
+
+                SetCombatMovement(false);
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_CENTER, fZuljinMoveLoc[0], fZuljinMoveLoc[1], fZuljinMoveLoc[2]);
+
+                // Despawn vortexes and remvoe the energy storm after eagle phase is complete
+                if (m_uiPhase == PHASE_EAGLE)
+                {
+                    m_creature->RemoveAurasDueToSpell(SPELL_ENERGY_STORM);
+                    DoDespawnVortexes();
+                }
+
+                // Reset threat
+                DoResetThreat();
+
+                // don't do this after troll phase
+                if (m_uiPhase != PHASE_TROLL)
+                {
+                    if (m_creature->HasAura(aZuljinPhases[m_uiPhase].uiSpiritSpellId))
+                    {
+                        m_creature->RemoveAurasDueToSpell(aZuljinPhases[m_uiPhase].uiSpiritSpellId);
+                    }
+
+                    // drain spirit
+                    if (Creature* pSpirit = m_pInstance->GetSingleCreatureFromStorage(aZuljinPhases[m_uiPhase].uiSpiritId))
+                    {
+                        pSpirit->InterruptNonMeleeSpells(false);
+                        pSpirit->CastSpell(m_creature, SPELL_SPIRIT_DRAINED, false);
+                        pSpirit->SetStandState(UNIT_STAND_STATE_DEAD);
+                    }
                 }
             }
-        }
 
-        switch (m_uiPhase)
-        {
+            switch (m_uiPhase)
+            {
             case PHASE_TROLL:
 
                 if (m_uiWhirlwindTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_WHIRLWIND) == CAST_OK)
-                    { m_uiWhirlwindTimer = urand(15000, 20000); }
+                    {
+                        m_uiWhirlwindTimer = urand(15000, 20000);
+                    }
                 }
                 else
-                { m_uiWhirlwindTimer -= uiDiff; }
+                {
+                    m_uiWhirlwindTimer -= uiDiff;
+                }
 
                 if (m_uiGrievousThrowTimer < uiDiff)
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_GRIEVOUS_THROW) == CAST_OK)
-                        { m_uiGrievousThrowTimer = 10000; }
+                        {
+                            m_uiGrievousThrowTimer = 10000;
+                        }
                     }
                 }
                 else
-                { m_uiGrievousThrowTimer -= uiDiff; }
+                {
+                    m_uiGrievousThrowTimer -= uiDiff;
+                }
 
                 break;
             case PHASE_BEAR:
@@ -391,18 +424,26 @@ struct boss_zuljinAI : public ScriptedAI
                 if (m_uiParalysisTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_CREEPING_PARALYSIS) == CAST_OK)
-                    { m_uiParalysisTimer = 27000; }
+                    {
+                        m_uiParalysisTimer = 27000;
+                    }
                 }
                 else
-                { m_uiParalysisTimer -= uiDiff; }
+                {
+                    m_uiParalysisTimer -= uiDiff;
+                }
 
                 if (m_uiOverpowerTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_OVERPOWER) == CAST_OK)
-                    { m_uiOverpowerTimer = urand(12000, 16000); }
+                    {
+                        m_uiOverpowerTimer = urand(12000, 16000);
+                    }
                 }
                 else
-                { m_uiOverpowerTimer -= uiDiff; }
+                {
+                    m_uiOverpowerTimer -= uiDiff;
+                }
 
                 break;
             case PHASE_EAGLE:
@@ -418,21 +459,29 @@ struct boss_zuljinAI : public ScriptedAI
                         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_CLAW_RAGE, SELECT_FLAG_PLAYER))
                         {
                             if (DoCastSpellIfCan(pTarget, SPELL_CLAW_RAGE) == CAST_OK)
-                            { m_uiClawRageTimer = urand(15000, 20000); }
+                            {
+                                m_uiClawRageTimer = urand(15000, 20000);
+                            }
                         }
                     }
                     else
-                    { m_uiClawRageTimer -= uiDiff; }
+                    {
+                        m_uiClawRageTimer -= uiDiff;
+                    }
                 }
 
                 if (m_uiLynxRushTimer < uiDiff)
                 {
                     if (!m_uiLynxRushCount)
-                    { DoCastSpellIfCan(m_creature, SPELL_LYNX_RUSH); }
+                    {
+                        DoCastSpellIfCan(m_creature, SPELL_LYNX_RUSH);
+                    }
                     else
                     {
                         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                        { DoCastSpellIfCan(pTarget, SPELL_LYNX_RUSH_CHARGE); }
+                        {
+                            DoCastSpellIfCan(pTarget, SPELL_LYNX_RUSH_CHARGE);
+                        }
                     }
 
                     ++m_uiLynxRushCount;
@@ -443,10 +492,14 @@ struct boss_zuljinAI : public ScriptedAI
                         m_uiLynxRushCount = 0;
                     }
                     else
-                    { m_uiLynxRushTimer = 400; }
+                    {
+                        m_uiLynxRushTimer = 400;
+                    }
                 }
                 else
-                { m_uiLynxRushTimer -= uiDiff; }
+                {
+                    m_uiLynxRushTimer -= uiDiff;
+                }
 
                 break;
             case PHASE_DRAGONHAWK:
@@ -454,89 +507,111 @@ struct boss_zuljinAI : public ScriptedAI
                 if (m_uiFlameWhirlTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_FLAME_WHIRL) == CAST_OK)
-                    { m_uiFlameWhirlTimer = 15000; }
+                    {
+                        m_uiFlameWhirlTimer = 15000;
+                    }
                 }
                 else
-                { m_uiFlameWhirlTimer -= uiDiff; }
+                {
+                    m_uiFlameWhirlTimer -= uiDiff;
+                }
 
                 if (m_uiPillarOfFireTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_PILLAR) == CAST_OK)
-                    { m_uiPillarOfFireTimer = urand(17000, 22000); }
+                    {
+                        m_uiPillarOfFireTimer = urand(17000, 22000);
+                    }
                 }
                 else
-                { m_uiPillarOfFireTimer -= uiDiff; }
+                {
+                    m_uiPillarOfFireTimer -= uiDiff;
+                }
 
                 if (m_uiFlameBreathTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_FLAME_BREATH) == CAST_OK)
-                    { m_uiFlameBreathTimer = 15000; }
+                    {
+                        m_uiFlameBreathTimer = 15000;
+                    }
                 }
                 else
-                { m_uiFlameBreathTimer -= uiDiff; }
+                {
+                    m_uiFlameBreathTimer -= uiDiff;
+                }
 
                 break;
-        }
+            }
 
-        DoMeleeAttackIfReady();
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_zuljinAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_zuljin(Creature* pCreature)
-{
-    return new boss_zuljinAI(pCreature);
-}
 
 /*######
 ## npc_feather_vortex
 ######*/
 
-struct npc_feather_vortexAI : public ScriptedAI
+struct npc_feather_vortex : public CreatureScript
 {
-    npc_feather_vortexAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_feather_vortex() : CreatureScript("npc_feather_vortex") {}
+
+    struct npc_feather_vortexAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    void Reset() override { }
-
-    void SpellHitTarget(Unit* pTarget, SpellEntry const* pSpellEntry) override
-    {
-        if (pSpellEntry->Id == SPELL_CYCLONE && pTarget->GetTypeId() == TYPEID_PLAYER && m_pInstance)
+        npc_feather_vortexAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (Creature* pZuljin = m_pInstance->GetSingleCreatureFromStorage(NPC_ZULJIN))
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        }
+
+        ScriptedInstance* m_pInstance;
+
+        void SpellHitTarget(Unit* pTarget, SpellEntry const* pSpellEntry) override
+        {
+            if (pSpellEntry->Id == SPELL_CYCLONE && pTarget->GetTypeId() == TYPEID_PLAYER && m_pInstance)
             {
-                // Change target on player hit
-                if (Unit* pTarget = pZuljin->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                { m_creature->GetMotionMaster()->MoveFollow(pTarget, 0, 0); }
+                if (Creature* pZuljin = m_pInstance->GetSingleCreatureFromStorage(NPC_ZULJIN))
+                {
+                    // Change target on player hit
+                    if (Unit* pTarget = pZuljin->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        m_creature->GetMotionMaster()->MoveFollow(pTarget, 0, 0);
+                    }
+                }
             }
         }
+
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        void UpdateAI(const uint32 /*uiDiff*/) override { }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_feather_vortexAI(pCreature);
     }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
-
-CreatureAI* GetAI_npc_feather_vortex(Creature* pCreature)
-{
-    return new npc_feather_vortexAI(pCreature);
-}
 
 void AddSC_boss_zuljin()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_zuljin";
-    pNewScript->GetAI = &GetAI_boss_zuljin;
-    pNewScript->RegisterSelf();
+    s = new boss_zuljin();
+    s->RegisterSelf();
+    s = new npc_feather_vortex();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_feather_vortex";
-    pNewScript->GetAI = &GetAI_npc_feather_vortex;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_zuljin";
+    //pNewScript->GetAI = &GetAI_boss_zuljin;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_feather_vortex";
+    //pNewScript->GetAI = &GetAI_npc_feather_vortex;
+    //pNewScript->RegisterSelf();
 }

@@ -61,276 +61,290 @@ static const float afRimefangExitPos[3] = {1248.29f, 145.924f, 733.914f};
 ## boss_tyrannus
 ######*/
 
-struct  boss_tyrannusAI : public ScriptedAI
+struct boss_tyrannus : public CreatureScript
 {
-    boss_tyrannusAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_tyrannus() : CreatureScript("boss_tyrannus") {}
+
+    struct boss_tyrannusAI : public ScriptedAI
     {
-        m_pInstance = (instance_pit_of_saron*)pCreature->GetInstanceData();
-        pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        Reset();
-    }
-
-    instance_pit_of_saron* m_pInstance;
-
-    uint32 m_uiForcefulSmashTimer;
-    uint32 m_uiOverlordsBrandTimer;
-    uint32 m_uiUnholyPowerTimer;
-    uint32 m_uiMarkOfRimefangTimer;
-
-    void Reset() override
-    {
-        m_uiForcefulSmashTimer  = 10000;
-        m_uiOverlordsBrandTimer = 9000;
-        m_uiUnholyPowerTimer    = urand(30000, 35000);
-        m_uiMarkOfRimefangTimer = 20000;
-    }
-
-    void Aggro(Unit* pWho) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_pInstance)
+        boss_tyrannusAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            m_pInstance->SetData(TYPE_TYRANNUS, IN_PROGRESS);
-
-            // Set Rimefang in combat - ToDo: research if it has some wp movement during combat
-            if (Creature* pRimefang = m_pInstance->GetSingleCreatureFromStorage(NPC_RIMEFANG))
-                pRimefang->AI()->AttackStart(pWho);
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         }
-    }
 
-    void KilledUnit(Unit* /*pVictim*/)
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
+        ScriptedInstance* m_pInstance;
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
+        uint32 m_uiForcefulSmashTimer;
+        uint32 m_uiOverlordsBrandTimer;
+        uint32 m_uiUnholyPowerTimer;
+        uint32 m_uiMarkOfRimefangTimer;
 
-        if (m_pInstance)
+        void Reset() override
         {
-            m_pInstance->SetData(TYPE_TYRANNUS, DONE);
+            m_uiForcefulSmashTimer = 10000;
+            m_uiOverlordsBrandTimer = 9000;
+            m_uiUnholyPowerTimer = urand(30000, 35000);
+            m_uiMarkOfRimefangTimer = 20000;
+        }
 
-            // Move Rimefang out of the area
-            if (Creature* pRimefang = m_pInstance->GetSingleCreatureFromStorage(NPC_RIMEFANG))
-            {
-                pRimefang->AI()->EnterEvadeMode();
-                pRimefang->SetWalk(false);
-                pRimefang->ForcedDespawn(25000);
-                pRimefang->GetMotionMaster()->MovePoint(0, afRimefangExitPos[0], afRimefangExitPos[1], afRimefangExitPos[2]);
-            }
+        void Aggro(Unit* pWho) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
 
-            // Move the general near the boss - ToDo: move the other freed slaves as well
-            if (Creature* pGeneral = m_pInstance->GetSingleCreatureFromStorage(m_pInstance->GetPlayerTeam() == HORDE ? NPC_IRONSKULL_PART2 : NPC_VICTUS_PART2))
+            if (m_pInstance)
             {
-                float fX, fY, fZ;
-                pGeneral->SetWalk(false);
-                m_creature->GetContactPoint(pGeneral, fX, fY, fZ, INTERACTION_DISTANCE);
-                pGeneral->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
+                m_pInstance->SetData(TYPE_TYRANNUS, IN_PROGRESS);
+
+                // Set Rimefang in combat - ToDo: research if it has some wp movement during combat
+                if (Creature* pRimefang = m_pInstance->GetSingleCreatureFromStorage(NPC_RIMEFANG))
+                    pRimefang->AI()->AttackStart(pWho);
             }
         }
-    }
 
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_TYRANNUS, FAIL);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiForcefulSmashTimer < uiDiff)
+        void KilledUnit(Unit* /*pVictim*/)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FORCEFUL_SMASH) == CAST_OK)
-                m_uiForcefulSmashTimer = 50000;
+            DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
         }
-        else
-            m_uiForcefulSmashTimer -= uiDiff;
 
-        if (m_uiOverlordsBrandTimer < uiDiff)
+        void JustDied(Unit* /*pKiller*/) override
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_OVERLORDS_BRAND) == CAST_OK)
-                    m_uiOverlordsBrandTimer = urand(10000, 13000);
-            }
-        }
-        else
-            m_uiOverlordsBrandTimer -= uiDiff;
+            DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_uiUnholyPowerTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_UNHOLY_POWER) == CAST_OK)
+            if (m_pInstance)
             {
-                DoScriptText(SAY_SMASH, m_creature);
-                DoScriptText(EMOTE_SMASH, m_creature);
-                m_uiUnholyPowerTimer = 60000;
-            }
-        }
-        else
-            m_uiUnholyPowerTimer -= uiDiff;
+                m_pInstance->SetData(TYPE_TYRANNUS, DONE);
 
-        if (m_uiMarkOfRimefangTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_MARK_OF_RIMEFANG) == CAST_OK)
+                // Move Rimefang out of the area
+                if (Creature* pRimefang = m_pInstance->GetSingleCreatureFromStorage(NPC_RIMEFANG))
                 {
-                    DoScriptText(SAY_MARK, m_creature);
-                    if (m_pInstance)
-                    {
-                        if (Creature* pRimefang = m_pInstance->GetSingleCreatureFromStorage(NPC_RIMEFANG))
-                        {
-                            pRimefang->InterruptNonMeleeSpells(true);
-                            pRimefang->CastSpell(pTarget, SPELL_HOARFROST, false);
-                            DoScriptText(EMOTE_RIMEFANG_ICEBOLT, pRimefang, pTarget);
-                        }
-                    }
-                    m_uiMarkOfRimefangTimer = urand(20000, 25000);
+                    pRimefang->AI()->EnterEvadeMode();
+                    pRimefang->SetWalk(false);
+                    pRimefang->ForcedDespawn(25000);
+                    pRimefang->GetMotionMaster()->MovePoint(0, afRimefangExitPos[0], afRimefangExitPos[1], afRimefangExitPos[2]);
+                }
+
+                // Move the general near the boss - ToDo: move the other freed slaves as well
+                if (Creature* pGeneral = m_pInstance->GetSingleCreatureFromStorage(m_pInstance->GetData(TYPE_DATA_PLAYER_TEAM) == HORDE ? NPC_IRONSKULL_PART2 : NPC_VICTUS_PART2))
+                {
+                    float fX, fY, fZ;
+                    pGeneral->SetWalk(false);
+                    m_creature->GetContactPoint(pGeneral, fX, fY, fZ, INTERACTION_DISTANCE);
+                    pGeneral->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
                 }
             }
         }
-        else
-            m_uiMarkOfRimefangTimer -= uiDiff;
 
-        DoMeleeAttackIfReady();
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_TYRANNUS, FAIL);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            if (m_uiForcefulSmashTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FORCEFUL_SMASH) == CAST_OK)
+                    m_uiForcefulSmashTimer = 50000;
+            }
+            else
+                m_uiForcefulSmashTimer -= uiDiff;
+
+            if (m_uiOverlordsBrandTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_OVERLORDS_BRAND) == CAST_OK)
+                        m_uiOverlordsBrandTimer = urand(10000, 13000);
+                }
+            }
+            else
+                m_uiOverlordsBrandTimer -= uiDiff;
+
+            if (m_uiUnholyPowerTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_UNHOLY_POWER) == CAST_OK)
+                {
+                    DoScriptText(SAY_SMASH, m_creature);
+                    DoScriptText(EMOTE_SMASH, m_creature);
+                    m_uiUnholyPowerTimer = 60000;
+                }
+            }
+            else
+                m_uiUnholyPowerTimer -= uiDiff;
+
+            if (m_uiMarkOfRimefangTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_MARK_OF_RIMEFANG) == CAST_OK)
+                    {
+                        DoScriptText(SAY_MARK, m_creature);
+                        if (m_pInstance)
+                        {
+                            if (Creature* pRimefang = m_pInstance->GetSingleCreatureFromStorage(NPC_RIMEFANG))
+                            {
+                                pRimefang->InterruptNonMeleeSpells(true);
+                                pRimefang->CastSpell(pTarget, SPELL_HOARFROST, false);
+                                DoScriptText(EMOTE_RIMEFANG_ICEBOLT, pRimefang, pTarget);
+                            }
+                        }
+                        m_uiMarkOfRimefangTimer = urand(20000, 25000);
+                    }
+                }
+            }
+            else
+                m_uiMarkOfRimefangTimer -= uiDiff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_tyrannusAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_tyrannus(Creature* pCreature)
-{
-    return new boss_tyrannusAI(pCreature);
-}
 
 /*######
 ## boss_rimefang_pos
 ######*/
 
-struct  boss_rimefang_posAI : public ScriptedAI
+struct boss_rimefang_pos : public CreatureScript
 {
-    boss_rimefang_posAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_rimefang_pos() : CreatureScript("boss_rimefang_pos") {}
+
+    struct boss_rimefang_posAI : public ScriptedAI
     {
-        m_pInstance = (instance_pit_of_saron*)pCreature->GetInstanceData();
-        SetCombatMovement(false);
-        m_bHasDoneIntro = false;
-        m_uiMountTimer = 1000;
-        Reset();
-    }
-
-    instance_pit_of_saron* m_pInstance;
-    uint32 m_uiMountTimer;
-
-    uint32 m_uiIcyBlastTimer;
-    bool m_bHasDoneIntro;
-
-    void Reset() override
-    {
-        m_uiIcyBlastTimer = 8000;
-    }
-
-    void EnterEvadeMode() override
-    {
-        m_creature->RemoveAllAurasOnEvade();
-        m_creature->DeleteThreatList();
-        m_creature->CombatStop(true);
-        m_creature->LoadCreatureAddon(true);
-
-        m_creature->SetLootRecipient(NULL);
-
-        Reset();
-
-        // Don't handle movement.
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        // Don't attack unless Tyrannus is in combat or Ambush is completed
-        if (m_pInstance && (m_pInstance->GetData(TYPE_AMBUSH) != DONE || m_pInstance->GetData(TYPE_TYRANNUS) != IN_PROGRESS))
-            return;
-
-        ScriptedAI::AttackStart(pWho);
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (!m_pInstance)
-            return;
-
-        // Check if ambush is done
-        if (m_pInstance->GetData(TYPE_AMBUSH) != DONE)
-            return;
-
-        // Start the intro when possible
-        if (!m_bHasDoneIntro && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 85.0f) && m_creature->IsWithinLOSInMap(pWho))
+        boss_rimefang_posAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            m_pInstance->SetData(TYPE_TYRANNUS, SPECIAL);
-            m_bHasDoneIntro = true;
-            return;
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            SetCombatMovement(false);
+            m_bHasDoneIntro = false;
+            m_uiMountTimer = 1000;
+            Reset();
         }
 
-        // Check for out of range players - ToDo: confirm the distance
-        if (m_pInstance->GetData(TYPE_TYRANNUS) == IN_PROGRESS && pWho->GetTypeId() == TYPEID_PLAYER && !m_creature->IsWithinDistInMap(pWho, DEFAULT_VISIBILITY_INSTANCE))
-            DoCastSpellIfCan(pWho, SPELL_KILLING_ICE);
-    }
+        ScriptedInstance* m_pInstance;
+        uint32 m_uiMountTimer;
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_pInstance)
-            return;
+        uint32 m_uiIcyBlastTimer;
+        bool m_bHasDoneIntro;
 
-        // He needs to be mounted manually, not by vehicle_accessories
-        if (m_uiMountTimer)
+        void Reset() override
         {
-            if (m_uiMountTimer <= uiDiff)
-            {
-                if (Creature* pTyrannus = m_pInstance->GetSingleCreatureFromStorage(NPC_TYRANNUS))
-                    pTyrannus->CastSpell(m_creature, SPELL_RIDE_VEHICLE_HARDCODED, true);
+            m_uiIcyBlastTimer = 8000;
+        }
 
-                m_uiMountTimer = 0;
+        void EnterEvadeMode() override
+        {
+            m_creature->RemoveAllAurasOnEvade();
+            m_creature->DeleteThreatList();
+            m_creature->CombatStop(true);
+            m_creature->LoadCreatureAddon(true);
+
+            m_creature->SetLootRecipient(NULL);
+
+            Reset();
+
+            // Don't handle movement.
+        }
+
+        void AttackStart(Unit* pWho) override
+        {
+            // Don't attack unless Tyrannus is in combat or Ambush is completed
+            if (m_pInstance && (m_pInstance->GetData(TYPE_AMBUSH) != DONE || m_pInstance->GetData(TYPE_TYRANNUS) != IN_PROGRESS))
+                return;
+
+            ScriptedAI::AttackStart(pWho);
+        }
+
+        void MoveInLineOfSight(Unit* pWho) override
+        {
+            if (!m_pInstance)
+                return;
+
+            // Check if ambush is done
+            if (m_pInstance->GetData(TYPE_AMBUSH) != DONE)
+                return;
+
+            // Start the intro when possible
+            if (!m_bHasDoneIntro && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 85.0f) && m_creature->IsWithinLOSInMap(pWho))
+            {
+                m_pInstance->SetData(TYPE_TYRANNUS, SPECIAL);
+                m_bHasDoneIntro = true;
+                return;
             }
-            else
-                m_uiMountTimer -= uiDiff;
+
+            // Check for out of range players - ToDo: confirm the distance
+            if (m_pInstance->GetData(TYPE_TYRANNUS) == IN_PROGRESS && pWho->GetTypeId() == TYPEID_PLAYER && !m_creature->IsWithinDistInMap(pWho, DEFAULT_VISIBILITY_INSTANCE))
+                DoCastSpellIfCan(pWho, SPELL_KILLING_ICE);
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiIcyBlastTimer < uiDiff)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (!m_pInstance)
+                return;
+
+            // He needs to be mounted manually, not by vehicle_accessories
+            if (m_uiMountTimer)
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_ICY_BLAST) == CAST_OK)
+                if (m_uiMountTimer <= uiDiff)
                 {
-                    m_creature->SummonCreature(NPC_ICY_BLAST, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 90000);
-                    m_uiIcyBlastTimer = 8000;
+                    if (Creature* pTyrannus = m_pInstance->GetSingleCreatureFromStorage(NPC_TYRANNUS))
+                        pTyrannus->CastSpell(m_creature, SPELL_RIDE_VEHICLE_HARDCODED, true);
+
+                    m_uiMountTimer = 0;
+                }
+                else
+                    m_uiMountTimer -= uiDiff;
+            }
+
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            if (m_uiIcyBlastTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_ICY_BLAST) == CAST_OK)
+                    {
+                        m_creature->SummonCreature(NPC_ICY_BLAST, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 90000);
+                        m_uiIcyBlastTimer = 8000;
+                    }
                 }
             }
+            else
+                m_uiIcyBlastTimer -= uiDiff;
         }
-        else
-            m_uiIcyBlastTimer -= uiDiff;
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_rimefang_posAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_rimefang_pos(Creature* pCreature)
-{
-    return new boss_rimefang_posAI(pCreature);
-}
-
 void AddSC_boss_tyrannus()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_tyrannus";
-    pNewScript->GetAI = &GetAI_boss_tyrannus;
-    pNewScript->RegisterSelf();
+    s = new boss_tyrannus();
+    s->RegisterSelf();
+    s = new boss_rimefang_pos();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_rimefang_pos";
-    pNewScript->GetAI = &GetAI_boss_rimefang_pos;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_tyrannus";
+    //pNewScript->GetAI = &GetAI_boss_tyrannus;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_rimefang_pos";
+    //pNewScript->GetAI = &GetAI_boss_rimefang_pos;
+    //pNewScript->RegisterSelf();
 }

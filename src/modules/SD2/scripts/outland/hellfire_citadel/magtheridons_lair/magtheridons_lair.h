@@ -50,35 +50,4 @@ enum
     EMOTE_NEARLY_FREE           = -1544016,
 };
 
-static const int32 aRandomTaunt[] = { -1544000, -1544001, -1544002, -1544003, -1544004, -1544005};
-
-class instance_magtheridons_lair : public ScriptedInstance
-{
-    public:
-        instance_magtheridons_lair(Map* pMap);
-
-        void Initialize() override;
-
-        bool IsEncounterInProgress() const override;
-
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        void Update(uint32 uiDiff) override;
-
-    private:
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-
-        GuidList m_lChannelerGuidList;
-        GuidList m_lColumnGuidList;
-        GuidList m_lCubeGuidList;
-
-        uint32 m_uiRandYellTimer;
-        uint32 m_uiCageBreakTimer;
-        uint8 m_uiCageBreakStage;
-};
-
 #endif

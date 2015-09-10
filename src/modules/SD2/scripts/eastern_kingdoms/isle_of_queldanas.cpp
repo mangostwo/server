@@ -49,48 +49,58 @@ enum
     TIME_PET_DURATION           = 7500
 };
 
-struct npc_converted_sentryAI : public ScriptedAI
+struct npc_converted_sentry : public CreatureScript
 {
-    npc_converted_sentryAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_converted_sentry() : CreatureScript("npc_converted_sentry") {}
 
-    uint32 m_uiCreditTimer;
-
-    void Reset() override
+    struct npc_converted_sentryAI : public ScriptedAI
     {
-        m_uiCreditTimer = 2500;
-    }
+        npc_converted_sentryAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-    void MoveInLineOfSight(Unit* /*pWho*/) override {}
+        uint32 m_uiCreditTimer;
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiCreditTimer)
+        void Reset() override
         {
-            if (m_uiCreditTimer <= uiDiff)
-            {
-                DoScriptText(urand(0, 1) ? SAY_CONVERTED_1 : SAY_CONVERTED_2, m_creature);
-
-                DoCastSpellIfCan(m_creature, SPELL_CONVERT_CREDIT);
-                ((Pet*)m_creature)->SetDuration(TIME_PET_DURATION);
-                m_uiCreditTimer = 0;
-            }
-            else
-            { m_uiCreditTimer -= uiDiff; }
+            m_uiCreditTimer = 2500;
         }
+
+        void MoveInLineOfSight(Unit* /*pWho*/) override {}
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiCreditTimer)
+            {
+                if (m_uiCreditTimer <= uiDiff)
+                {
+                    DoScriptText(urand(0, 1) ? SAY_CONVERTED_1 : SAY_CONVERTED_2, m_creature);
+
+                    DoCastSpellIfCan(m_creature, SPELL_CONVERT_CREDIT);
+                    ((Pet*)m_creature)->SetDuration(TIME_PET_DURATION);
+                    m_uiCreditTimer = 0;
+                }
+                else
+                {
+                    m_uiCreditTimer -= uiDiff;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_converted_sentryAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_npc_converted_sentry(Creature* pCreature)
-{
-    return new npc_converted_sentryAI(pCreature);
-}
-
 void AddSC_isle_of_queldanas()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_converted_sentry";
-    pNewScript->GetAI = &GetAI_npc_converted_sentry;
-    pNewScript->RegisterSelf();
+    s = new npc_converted_sentry();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_converted_sentry";
+    //pNewScript->GetAI = &GetAI_npc_converted_sentry;
+    //pNewScript->RegisterSelf();
 }

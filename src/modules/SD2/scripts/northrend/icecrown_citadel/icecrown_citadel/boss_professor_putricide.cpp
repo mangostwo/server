@@ -127,136 +127,138 @@ static const float fPutricidePosition[1][3] =
     {4356.78f, 3263.51f, 389.40f}   // 0 Putricide spawn point
 };
 
-struct  boss_professor_putricideAI : public ScriptedAI
+struct boss_professor_putricide : public CreatureScript
 {
-    boss_professor_putricideAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_professor_putricide() : CreatureScript("boss_professor_putricide") {}
+
+    struct boss_professor_putricideAI : public ScriptedAI
     {
-        m_pInstance = (instance_icecrown_citadel*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    instance_icecrown_citadel* m_pInstance;
-
-    uint32 m_uiPhase;
-
-    uint32 m_uiHealthCheckTimer;
-    uint32 m_uiTransitionTimer;
-    uint32 m_uiEnrageTimer;
-    uint32 m_uiPuddleTimer;
-    uint32 m_uiUnstableExperimentTimer;
-    uint32 m_uiUnboundPlagueTimer;
-    uint32 m_uiChokingGasBombTimer;
-
-    void Reset() override
-    {
-        m_uiPhase                   = PHASE_ONE;
-        m_uiHealthCheckTimer        = 1000;
-        m_uiEnrageTimer             = 10 * MINUTE * IN_MILLISECONDS;
-        m_uiPuddleTimer             = 10000;
-        m_uiUnstableExperimentTimer = 20000;
-        m_uiUnboundPlagueTimer      = 10000;
-        m_uiChokingGasBombTimer     = urand(10000, 15000);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_PROFESSOR_PUTRICIDE, IN_PROGRESS);
-
-        DoScriptText(SAY_AGGRO, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_PROFESSOR_PUTRICIDE, DONE);
-
-        DoScriptText(SAY_DEATH, m_creature);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_PROFESSOR_PUTRICIDE, FAIL);
-    }
-
-    void MovementInform(uint32 uiMovementType, uint32 uiData) override
-    {
-        if (uiMovementType != POINT_MOTION_TYPE)
-            return;
-
-        if (uiData == POINT_PUTRICIDE_SPAWN)
+        boss_professor_putricideAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (m_uiPhase == PHASE_RUNNING_ONE)
-            {
-                if (m_pInstance && m_pInstance->IsHeroicDifficulty())
-                {
-                    DoScriptText(SAY_PHASE_CHANGE, m_creature);
-                    m_uiTransitionTimer = 30000;
-                }
-                else
-                {
-                    DoCastSpellIfCan(m_creature, SPELL_CREATE_CONCOCTION);
-                    DoScriptText(SAY_TRANSFORM_1, m_creature);
-                    m_uiTransitionTimer = 15000;
-                }
-
-                m_uiPhase = PHASE_TRANSITION_ONE;           // waiting for entering phase 2
-            }
-            else if (m_uiPhase == PHASE_RUNNING_TWO)
-            {
-                if (m_pInstance && m_pInstance->IsHeroicDifficulty())
-                {
-                    DoScriptText(SAY_PHASE_CHANGE, m_creature);
-                    m_uiTransitionTimer = 30000;
-                }
-                else
-                {
-                    DoCastSpellIfCan(m_creature, SPELL_GUZZLE_POTIONS);
-                    DoScriptText(SAY_TRANSFORM_2, m_creature);
-                    m_uiTransitionTimer = 15000;
-                }
-
-                m_uiPhase = PHASE_TRANSITION_TWO;           // waiting for entering phase 3
-            }
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Enrage
-        if (m_uiEnrageTimer)
-        {
-            if (m_uiEnrageTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                {
-                    DoScriptText(SAY_BERSERK, m_creature);
-                    m_uiEnrageTimer = 0;
-                }
-            }
-            else
-                m_uiEnrageTimer -= uiDiff;
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         }
 
-        switch (m_uiPhase)
+        ScriptedInstance* m_pInstance;
+
+        uint32 m_uiPhase;
+
+        uint32 m_uiHealthCheckTimer;
+        uint32 m_uiTransitionTimer;
+        uint32 m_uiEnrageTimer;
+        uint32 m_uiPuddleTimer;
+        uint32 m_uiUnstableExperimentTimer;
+        uint32 m_uiUnboundPlagueTimer;
+        uint32 m_uiChokingGasBombTimer;
+
+        void Reset() override
         {
+            m_uiPhase = PHASE_ONE;
+            m_uiHealthCheckTimer = 1000;
+            m_uiEnrageTimer = 10 * MINUTE * IN_MILLISECONDS;
+            m_uiPuddleTimer = 10000;
+            m_uiUnstableExperimentTimer = 20000;
+            m_uiUnboundPlagueTimer = 10000;
+            m_uiChokingGasBombTimer = urand(10000, 15000);
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_PROFESSOR_PUTRICIDE, IN_PROGRESS);
+
+            DoScriptText(SAY_AGGRO, m_creature);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_PROFESSOR_PUTRICIDE, DONE);
+
+            DoScriptText(SAY_DEATH, m_creature);
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_PROFESSOR_PUTRICIDE, FAIL);
+        }
+
+        void MovementInform(uint32 uiMovementType, uint32 uiData) override
+        {
+            if (uiMovementType != POINT_MOTION_TYPE)
+                return;
+
+            if (uiData == POINT_PUTRICIDE_SPAWN)
+            {
+                if (m_uiPhase == PHASE_RUNNING_ONE)
+                {
+                    if (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC))
+                    {
+                        DoScriptText(SAY_PHASE_CHANGE, m_creature);
+                        m_uiTransitionTimer = 30000;
+                    }
+                    else
+                    {
+                        DoCastSpellIfCan(m_creature, SPELL_CREATE_CONCOCTION);
+                        DoScriptText(SAY_TRANSFORM_1, m_creature);
+                        m_uiTransitionTimer = 15000;
+                    }
+
+                    m_uiPhase = PHASE_TRANSITION_ONE;           // waiting for entering phase 2
+                }
+                else if (m_uiPhase == PHASE_RUNNING_TWO)
+                {
+                    if (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC))
+                    {
+                        DoScriptText(SAY_PHASE_CHANGE, m_creature);
+                        m_uiTransitionTimer = 30000;
+                    }
+                    else
+                    {
+                        DoCastSpellIfCan(m_creature, SPELL_GUZZLE_POTIONS);
+                        DoScriptText(SAY_TRANSFORM_2, m_creature);
+                        m_uiTransitionTimer = 15000;
+                    }
+
+                    m_uiPhase = PHASE_TRANSITION_TWO;           // waiting for entering phase 3
+                }
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            // Enrage
+            if (m_uiEnrageTimer)
+            {
+                if (m_uiEnrageTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                    {
+                        DoScriptText(SAY_BERSERK, m_creature);
+                        m_uiEnrageTimer = 0;
+                    }
+                }
+                else
+                    m_uiEnrageTimer -= uiDiff;
+            }
+
+            switch (m_uiPhase)
+            {
             case PHASE_ONE:
-            {
                 // health check
                 if (m_uiHealthCheckTimer <= uiDiff)
                 {
                     if (m_creature->GetHealthPercent() <= 80.0f)
                     {
-                        uint32 spellId = (m_pInstance && m_pInstance->IsHeroicDifficulty() ? SPELL_VOLATILE_EXPERIMENT : SPELL_TEAR_GAS);
+                        uint32 spellId = (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC) ? SPELL_VOLATILE_EXPERIMENT : SPELL_TEAR_GAS);
 
                         if (DoCastSpellIfCan(m_creature, spellId) == CAST_OK)
                         {
@@ -273,7 +275,7 @@ struct  boss_professor_putricideAI : public ScriptedAI
                     m_uiHealthCheckTimer -= uiDiff;
 
                 // Unbound Plague
-                if (m_pInstance && m_pInstance->IsHeroicDifficulty())
+                if (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC))
                 {
                     if (m_uiUnboundPlagueTimer <= uiDiff)
                     {
@@ -310,9 +312,7 @@ struct  boss_professor_putricideAI : public ScriptedAI
                     m_uiUnstableExperimentTimer -= uiDiff;
 
                 break;
-            }
             case PHASE_TRANSITION_ONE:
-            {
                 if (m_uiTransitionTimer <= uiDiff)
                 {
                     m_creature->GetMotionMaster()->Clear();
@@ -320,7 +320,7 @@ struct  boss_professor_putricideAI : public ScriptedAI
                     m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
                     m_uiPhase = PHASE_TWO;
 
-                    if (m_pInstance && m_pInstance->IsHeroicDifficulty())
+                    if (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC))
                     {
                         DoCastSpellIfCan(m_creature, SPELL_CREATE_CONCOCTION);
                         DoScriptText(SAY_TRANSFORM_1, m_creature);
@@ -332,15 +332,13 @@ struct  boss_professor_putricideAI : public ScriptedAI
                     m_uiTransitionTimer -= uiDiff;
 
                 return;
-            }
             case PHASE_TWO:
-            {
                 // health check
                 if (m_uiHealthCheckTimer <= uiDiff)
                 {
                     if (m_creature->GetHealthPercent() <= 35.0f)
                     {
-                        uint32 spellId = (m_pInstance && m_pInstance->IsHeroicDifficulty() ? SPELL_VOLATILE_EXPERIMENT : SPELL_TEAR_GAS);
+                        uint32 spellId = (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC) ? SPELL_VOLATILE_EXPERIMENT : SPELL_TEAR_GAS);
 
                         if (DoCastSpellIfCan(m_creature, spellId) == CAST_OK)
                         {
@@ -360,7 +358,7 @@ struct  boss_professor_putricideAI : public ScriptedAI
                     m_uiHealthCheckTimer -= uiDiff;
 
                 // Unbound Plague
-                if (m_pInstance && m_pInstance->IsHeroicDifficulty())
+                if (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC))
                 {
                     if (m_uiUnboundPlagueTimer <= uiDiff)
                     {
@@ -409,9 +407,7 @@ struct  boss_professor_putricideAI : public ScriptedAI
                 // TODO: Malleable Goo
 
                 break;
-            }
             case PHASE_TRANSITION_TWO:
-            {
                 if (m_uiTransitionTimer <= uiDiff)
                 {
                     m_creature->GetMotionMaster()->Clear();
@@ -419,7 +415,7 @@ struct  boss_professor_putricideAI : public ScriptedAI
                     m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
                     m_uiPhase = PHASE_THREE;
 
-                    if (m_pInstance && m_pInstance->IsHeroicDifficulty())
+                    if (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC))
                     {
                         DoCastSpellIfCan(m_creature, SPELL_GUZZLE_POTIONS);
                         DoScriptText(SAY_TRANSFORM_2, m_creature);
@@ -431,11 +427,9 @@ struct  boss_professor_putricideAI : public ScriptedAI
                     m_uiTransitionTimer -= uiDiff;
 
                 return;
-            }
             case PHASE_THREE:
-            {
                 // Unbound Plague
-                if (m_pInstance && m_pInstance->IsHeroicDifficulty())
+                if (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC))
                 {
                     if (m_uiUnboundPlagueTimer <= uiDiff)
                     {
@@ -474,30 +468,31 @@ struct  boss_professor_putricideAI : public ScriptedAI
                 // TODO: Malleable Goo
 
                 break;
-            }
             case PHASE_RUNNING_ONE:
             case PHASE_RUNNING_TWO:
-            {
                 // wait for arriving at the table (during phase transition)
                 break;
             }
-        }
 
-        DoMeleeAttackIfReady();
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_professor_putricideAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_professor_putricide(Creature* pCreature)
-{
-    return new boss_professor_putricideAI(pCreature);
-}
-
 void AddSC_boss_professor_putricide()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_professor_putricide";
-    pNewScript->GetAI = &GetAI_boss_professor_putricide;
-    pNewScript->RegisterSelf();
+    s = new boss_professor_putricide();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_professor_putricide";
+    //pNewScript->GetAI = &GetAI_boss_professor_putricide;
+    //pNewScript->RegisterSelf();
 }

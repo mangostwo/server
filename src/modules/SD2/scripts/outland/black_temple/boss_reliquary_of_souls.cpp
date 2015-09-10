@@ -114,80 +114,89 @@ enum
 ## boss_reliquary_of_souls
 ######*/
 
-struct boss_reliquary_of_soulsAI : public Scripted_NoMovementAI
+struct boss_reliquary_of_souls : public CreatureScript
 {
-    boss_reliquary_of_soulsAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    boss_reliquary_of_souls() : CreatureScript("boss_reliquary_of_souls") {}
+
+    struct boss_reliquary_of_soulsAI : public Scripted_NoMovementAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    uint8 m_uiPhase;
-    uint8 m_uiSoulSummonedCount;
-    uint8 m_uiSoulDeathCount;
-
-    uint32 m_uiSummonEssenceTimer;
-    uint32 m_uiSummonSoulTimer;
-    uint32 m_uiAnimationTimer;
-    uint32 m_uiAnimResetTimer;
-
-    void Reset() override
-    {
-        m_uiPhase               = PHASE_0_NOT_BEGUN;
-        m_uiSoulDeathCount      = 0;
-        m_uiSoulSummonedCount   = 0;
-
-        m_uiSummonSoulTimer     = 1000;
-        m_uiAnimationTimer      = 0;
-        m_uiAnimResetTimer      = 0;
-        m_uiSummonEssenceTimer  = 0;
-
-        // Reset animation
-        m_creature->HandleEmote(EMOTE_STATE_NONE);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_RELIQUIARY, DONE); }
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_RELIQUIARY, FAIL); }
-    }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (m_uiPhase == PHASE_0_NOT_BEGUN && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() &&
-            m_creature->IsWithinDistInMap(pWho, m_creature->GetAttackDistance(pWho)) && m_creature->IsWithinLOSInMap(pWho))
+        boss_reliquary_of_soulsAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
         {
-            // Start phase 1
-            m_uiPhase = PHASE_1_SUFFERING;
-            m_uiSummonEssenceTimer = 7000;
-            m_uiAnimationTimer = 4000;
-
-            // Set the player in combat with the boss
-            pWho->SetInCombatWith(m_creature);
-            m_creature->AddThreat(pWho);
-
-            // Start animation
-            m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-
-            if (m_pInstance)
-            { m_pInstance->SetData(TYPE_RELIQUIARY, IN_PROGRESS); }
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
+        ScriptedInstance* m_pInstance;
+
+        uint8 m_uiPhase;
+        uint8 m_uiSoulSummonedCount;
+        uint8 m_uiSoulDeathCount;
+
+        uint32 m_uiSummonEssenceTimer;
+        uint32 m_uiSummonSoulTimer;
+        uint32 m_uiAnimationTimer;
+        uint32 m_uiAnimResetTimer;
+
+        void Reset() override
         {
+            m_uiPhase = PHASE_0_NOT_BEGUN;
+            m_uiSoulDeathCount = 0;
+            m_uiSoulSummonedCount = 0;
+
+            m_uiSummonSoulTimer = 1000;
+            m_uiAnimationTimer = 0;
+            m_uiAnimResetTimer = 0;
+            m_uiSummonEssenceTimer = 0;
+
+            // Reset animation
+            m_creature->HandleEmote(EMOTE_STATE_NONE);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_RELIQUIARY, DONE);
+            }
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_RELIQUIARY, FAIL);
+            }
+        }
+
+        void AttackStart(Unit* /*pWho*/) override { }
+
+        void MoveInLineOfSight(Unit* pWho) override
+        {
+            if (m_uiPhase == PHASE_0_NOT_BEGUN && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() &&
+                m_creature->IsWithinDistInMap(pWho, m_creature->GetAttackDistance(pWho)) && m_creature->IsWithinLOSInMap(pWho))
+            {
+                // Start phase 1
+                m_uiPhase = PHASE_1_SUFFERING;
+                m_uiSummonEssenceTimer = 7000;
+                m_uiAnimationTimer = 4000;
+
+                // Set the player in combat with the boss
+                pWho->SetInCombatWith(m_creature);
+                m_creature->AddThreat(pWho);
+
+                // Start animation
+                m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+
+                if (m_pInstance)
+                {
+                    m_pInstance->SetData(TYPE_RELIQUIARY, IN_PROGRESS);
+                }
+            }
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_ESSENCE_SUFFERING:
                 DoScriptText(SUFF_SAY_FREED, pSummoned);
                 break;
@@ -197,27 +206,31 @@ struct boss_reliquary_of_soulsAI : public Scripted_NoMovementAI
             case NPC_ESSENCE_ANGER:
                 DoScriptText(ANGER_SAY_FREED, pSummoned);
                 break;
+            }
+
+            // All summons are set in combat
+            pSummoned->SetInCombatWithZone();
         }
 
-        // All summons are set in combat
-        pSummoned->SetInCombatWithZone();
-    }
-
-    void SummonedCreatureJustDied(Creature* pSummoned) override
-    {
-        // Self kill when the Essence of Anger is killed
-        if (pSummoned->GetEntry() == NPC_ESSENCE_ANGER)
-        { m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false); }
-    }
-
-    void SummonedMovementInform(Creature* pSummoned, uint32 uiMoveType, uint32 uiPointId) override
-    {
-        if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
-        { return; }
-
-        // Switch to next phase when the essence gets back
-        switch (pSummoned->GetEntry())
+        void SummonedCreatureJustDied(Creature* pSummoned) override
         {
+            // Self kill when the Essence of Anger is killed
+            if (pSummoned->GetEntry() == NPC_ESSENCE_ANGER)
+            {
+                m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+            }
+        }
+
+        void SummonedMovementInform(Creature* pSummoned, uint32 uiMoveType, uint32 uiPointId) override
+        {
+            if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
+            {
+                return;
+            }
+
+            // Switch to next phase when the essence gets back
+            switch (pSummoned->GetEntry())
+            {
             case NPC_ESSENCE_SUFFERING:
                 DoScriptText(SUFF_SAY_AFTER, pSummoned);
                 m_uiPhase = PHASE_2_DESIRE;;
@@ -226,84 +239,97 @@ struct boss_reliquary_of_soulsAI : public Scripted_NoMovementAI
                 DoScriptText(DESI_SAY_AFTER, pSummoned);
                 m_uiPhase = PHASE_3_ANGER;
                 break;
-        }
+            }
 
-        // Despawn and set animation
-        pSummoned->ForcedDespawn();
+            // Despawn and set animation
+            pSummoned->ForcedDespawn();
 
-        m_uiSoulDeathCount = 0;
-        m_uiSoulSummonedCount = 0;
-        m_uiAnimResetTimer = 2000;
+            m_uiSoulDeathCount = 0;
+            m_uiSoulSummonedCount = 0;
+            m_uiAnimResetTimer = 2000;
         // Reset animation
         m_creature->HandleEmote(EMOTE_ONESHOT_EMERGE);
-    }
-
-    // Wrapper to count the dead spirits
-    void DoNotifySouldDead()
-    {
-        ++m_uiSoulDeathCount;
-
-        // Prepare to summon the essence
-        if (m_uiSoulDeathCount == MAX_ENSLAVED_SOULS)
-        {
-            m_uiSummonEssenceTimer = 7000;
-            m_uiAnimationTimer     = 4000;
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        // Animation for opening the Reliquary
-        if (m_uiAnimationTimer)
-        {
-            if (m_uiAnimationTimer <= uiDiff)
-            {
-                m_creature->HandleEmote(EMOTE_ONESHOT_SUBMERGE);
-                { m_uiAnimationTimer = 0; }
-            }
-            else
-            { m_uiAnimationTimer -= uiDiff; }
         }
 
-        // Animation for reset Reliquary
-        if (m_uiAnimResetTimer)
+        // Wrapper to count the dead spirits
+        void DoNotifySouldDead()
         {
-            if (m_uiAnimResetTimer <= uiDiff)
-            {
-                // Reset animation
-                m_creature->HandleEmote(EMOTE_STATE_NONE);
-                m_uiAnimResetTimer = 0;
-            }
-            else
-            { m_uiAnimResetTimer -= uiDiff; }
         }
 
-        // Summon the Essence on timer
-        if (m_uiSummonEssenceTimer)
+        void ReceiveAIEvent(AIEventType eventType, Creature *pSender, Unit *pInvoker, uint32 /*data*/) override
         {
-            if (m_uiSummonEssenceTimer <= uiDiff)
+            if (eventType == AI_EVENT_CUSTOM_A && pSender->GetEntry() == NPC_ENSLAVED_SOUL)
             {
-                uint32 uiSpellId = 0;
-                switch (m_uiPhase)
+                ++m_uiSoulDeathCount;
+
+                // Prepare to summon the essence
+                if (m_uiSoulDeathCount == MAX_ENSLAVED_SOULS)
                 {
+                    m_uiSummonEssenceTimer = 7000;
+                    m_uiAnimationTimer = 4000;
+                }
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            // Animation for opening the Reliquary
+            if (m_uiAnimationTimer)
+            {
+                if (m_uiAnimationTimer <= uiDiff)
+                {
+                m_creature->HandleEmote(EMOTE_ONESHOT_SUBMERGE);
+                        m_uiAnimationTimer = 0;
+                }
+                else
+                {
+                    m_uiAnimationTimer -= uiDiff;
+                }
+            }
+
+            // Animation for reset Reliquary
+            if (m_uiAnimResetTimer)
+            {
+                if (m_uiAnimResetTimer <= uiDiff)
+                {
+                    // Reset animation
+                    m_creature->HandleEmote(EMOTE_STATE_NONE);
+                    m_uiAnimResetTimer = 0;
+                }
+                else
+                {
+                    m_uiAnimResetTimer -= uiDiff;
+                }
+            }
+
+            // Summon the Essence on timer
+            if (m_uiSummonEssenceTimer)
+            {
+                if (m_uiSummonEssenceTimer <= uiDiff)
+                {
+                    uint32 uiSpellId = 0;
+                    switch (m_uiPhase)
+                    {
                     case PHASE_1_SUFFERING: uiSpellId = SPELL_SUMMON_ESSENCE_SUFFERING; break;
                     case PHASE_2_DESIRE:    uiSpellId = SPELL_SUMMON_ESSENCE_DESIRE;    break;
                     case PHASE_3_ANGER:     uiSpellId = SPELL_SUMMON_ESSENCE_ANGER;     break;
-                }
+                    }
 
-                if (DoCastSpellIfCan(m_creature, uiSpellId) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature, uiSpellId) == CAST_OK)
+                    {
+                        m_creature->HandleEmote(EMOTE_STATE_SUBMERGED);
+                        m_uiSummonEssenceTimer = 0;
+                    }
+                }
+                else
                 {
-                    m_creature->HandleEmote(EMOTE_STATE_SUBMERGED);
-                    m_uiSummonEssenceTimer = 0;
+                    m_uiSummonEssenceTimer -= uiDiff;
                 }
             }
-            else
-            { m_uiSummonEssenceTimer -= uiDiff; }
-        }
 
-        // Summon Enslaved souls between the essence
-        switch (m_uiPhase)
-        {
+            // Summon Enslaved souls between the essence
+            switch (m_uiPhase)
+            {
             case PHASE_2_DESIRE:
             case PHASE_3_ANGER:
 
@@ -318,11 +344,19 @@ struct boss_reliquary_of_soulsAI : public Scripted_NoMovementAI
                         }
                     }
                     else
-                    { m_uiSummonSoulTimer -= uiDiff; }
+                    {
+                        m_uiSummonSoulTimer -= uiDiff;
+                    }
                 }
 
                 break;
+            }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_reliquary_of_soulsAI(pCreature);
     }
 };
 
@@ -398,58 +432,76 @@ struct essence_base_AI : public ScriptedAI
 ## boss_essence_of_suffering
 ######*/
 
-struct boss_essence_of_sufferingAI : public essence_base_AI
+struct boss_essence_of_suffering : public CreatureScript
 {
-    boss_essence_of_sufferingAI(Creature* pCreature) : essence_base_AI(pCreature) { Reset(); }
+    boss_essence_of_suffering() : CreatureScript("boss_essence_of_suffering") {}
 
-    uint32 m_uiEnrageTimer;
-    uint32 m_uiSoulDrainTimer;
-
-    void Reset() override
+    struct boss_essence_of_sufferingAI : public essence_base_AI
     {
-        DoCastSpellIfCan(m_creature, SPELL_AURA_OF_SUFFERING, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_SUFFERING_PASSIVE, CAST_TRIGGERED);
+        boss_essence_of_sufferingAI(Creature* pCreature) : essence_base_AI(pCreature) { }
 
-        m_uiEnrageTimer     = 45000;
-        m_uiSoulDrainTimer  = 20000;
-    }
+        uint32 m_uiEnrageTimer;
+        uint32 m_uiSoulDrainTimer;
 
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SUFF_SAY_SLAY1 : SUFF_SAY_SLAY2, m_creature);
-    }
-
-    void OnPhaseFinished()
-    {
-        DoScriptText(SUFF_SAY_RECAP, m_creature);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiEnrageTimer < uiDiff)
+        void Reset() override
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
+            DoCastSpellIfCan(m_creature, SPELL_AURA_OF_SUFFERING, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, SPELL_SUFFERING_PASSIVE, CAST_TRIGGERED);
+
+            m_uiEnrageTimer = 45000;
+            m_uiSoulDrainTimer = 20000;
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            DoScriptText(urand(0, 1) ? SUFF_SAY_SLAY1 : SUFF_SAY_SLAY2, m_creature);
+        }
+
+        void OnPhaseFinished()
+        {
+            DoScriptText(SUFF_SAY_RECAP, m_creature);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             {
-                DoScriptText(EMOTE_BOSS_GENERIC_ENRAGED, m_creature);
-                DoScriptText(SUFF_SAY_FRENZY, m_creature);
-                m_uiEnrageTimer = 45000;
+                return;
             }
-        }
-        else
-        { m_uiEnrageTimer -= uiDiff; }
 
-        if (m_uiSoulDrainTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SOUL_DRAIN) == CAST_OK)
-            { m_uiSoulDrainTimer = urand(45000, 60000); }
-        }
-        else
-        { m_uiSoulDrainTimer -= uiDiff; }
+            if (m_uiEnrageTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_BOSS_GENERIC_ENRAGED, m_creature);
+                    DoScriptText(SUFF_SAY_FRENZY, m_creature);
+                    m_uiEnrageTimer = 45000;
+                }
+            }
+            else
+            {
+                m_uiEnrageTimer -= uiDiff;
+            }
 
-        DoMeleeAttackIfReady();
+            if (m_uiSoulDrainTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_SOUL_DRAIN) == CAST_OK)
+                {
+                    m_uiSoulDrainTimer = urand(45000, 60000);
+                }
+            }
+            else
+            {
+                m_uiSoulDrainTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_essence_of_sufferingAI(pCreature);
     }
 };
 
@@ -457,71 +509,93 @@ struct boss_essence_of_sufferingAI : public essence_base_AI
 ## boss_essence_of_desire
 ######*/
 
-struct boss_essence_of_desireAI : public essence_base_AI
+struct boss_essence_of_desire : public CreatureScript
 {
-    boss_essence_of_desireAI(Creature* pCreature) : essence_base_AI(pCreature) { Reset(); }
+    boss_essence_of_desire() : CreatureScript("boss_essence_of_desire") {}
 
-    uint32 m_uiRuneShieldTimer;
-    uint32 m_uiDeadenTimer;
-    uint32 m_uiSoulShockTimer;
-
-    void Reset() override
+    struct boss_essence_of_desireAI : public essence_base_AI
     {
-        m_uiRuneShieldTimer = urand(10000, 15000);
-        m_uiDeadenTimer     = 15000;
-        m_uiSoulShockTimer  = urand(5000, 10000);
+        boss_essence_of_desireAI(Creature* pCreature) : essence_base_AI(pCreature) { }
 
-        DoCastSpellIfCan(m_creature, SPELL_AURA_OF_DESIRE);
-    }
+        uint32 m_uiRuneShieldTimer;
+        uint32 m_uiDeadenTimer;
+        uint32 m_uiSoulShockTimer;
 
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        switch (urand(0, 2))
+        void Reset() override
         {
+            m_uiRuneShieldTimer = urand(10000, 15000);
+            m_uiDeadenTimer = 15000;
+            m_uiSoulShockTimer = urand(5000, 10000);
+
+            DoCastSpellIfCan(m_creature, SPELL_AURA_OF_DESIRE);
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            switch (urand(0, 2))
+            {
             case 0: DoScriptText(DESI_SAY_SLAY1, m_creature); break;
             case 1: DoScriptText(DESI_SAY_SLAY2, m_creature); break;
             case 2: DoScriptText(DESI_SAY_SLAY3, m_creature); break;
-        }
-    }
-
-    void OnPhaseFinished()
-    {
-        DoScriptText(DESI_SAY_RECAP, m_creature);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiRuneShieldTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_RUNE_SHIELD) == CAST_OK)
-            { m_uiRuneShieldTimer = 15000; }
-        }
-        else
-        { m_uiRuneShieldTimer -= uiDiff; }
-
-        if (m_uiDeadenTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DEADEN) == CAST_OK)
-            {
-                DoScriptText(DESI_SAY_SPEC, m_creature);
-                m_uiDeadenTimer = 30000;
             }
         }
-        else
-        { m_uiDeadenTimer -= uiDiff; }
 
-        if (m_uiSoulShockTimer < uiDiff)
+        void OnPhaseFinished()
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SPIRIT_SHOCK) == CAST_OK)
-            { m_uiSoulShockTimer = urand(5000, 10000); }
+            DoScriptText(DESI_SAY_RECAP, m_creature);
         }
-        else
-        { m_uiSoulShockTimer -= uiDiff; }
 
-        DoMeleeAttackIfReady();
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_uiRuneShieldTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_RUNE_SHIELD) == CAST_OK)
+                {
+                    m_uiRuneShieldTimer = 15000;
+                }
+            }
+            else
+            {
+                m_uiRuneShieldTimer -= uiDiff;
+            }
+
+            if (m_uiDeadenTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DEADEN) == CAST_OK)
+                {
+                    DoScriptText(DESI_SAY_SPEC, m_creature);
+                    m_uiDeadenTimer = 30000;
+                }
+            }
+            else
+            {
+                m_uiDeadenTimer -= uiDiff;
+            }
+
+            if (m_uiSoulShockTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SPIRIT_SHOCK) == CAST_OK)
+                {
+                    m_uiSoulShockTimer = urand(5000, 10000);
+                }
+            }
+            else
+            {
+                m_uiSoulShockTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_essence_of_desireAI(pCreature);
     }
 };
 
@@ -529,84 +603,107 @@ struct boss_essence_of_desireAI : public essence_base_AI
 ## boss_essence_of_anger
 ######*/
 
-struct boss_essence_of_angerAI : public ScriptedAI
+struct boss_essence_of_anger : public CreatureScript
 {
-    boss_essence_of_angerAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_essence_of_anger() : CreatureScript("boss_essence_of_anger") {}
+
+    struct boss_essence_of_angerAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiSeetheTimer;
-    uint32 m_uiSoulScreamTimer;
-    uint32 m_uiSpiteTimer;
-
-    void Reset() override
-    {
-        m_uiSeetheTimer      = 5000;
-        m_uiSoulScreamTimer  = 10000;
-        m_uiSpiteTimer       = 20000;
-
-        DoCastSpellIfCan(m_creature, SPELL_AURA_OF_ANGER);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? ANGER_SAY_SLAY1 : ANGER_SAY_SLAY2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(ANGER_SAY_DEATH, m_creature);
-    }
-
-    void JustReachedHome() override
-    {
-        // Reset encounter and despawn Essence
-        if (m_pInstance)
+        boss_essence_of_angerAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (Creature* pReliquary = m_pInstance->GetSingleCreatureFromStorage(NPC_RELIQUARY_OF_SOULS))
-            { pReliquary->AI()->EnterEvadeMode(); }
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         }
 
-        m_creature->ForcedDespawn();
-    }
+        ScriptedInstance* m_pInstance;
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
+        uint32 m_uiSeetheTimer;
+        uint32 m_uiSoulScreamTimer;
+        uint32 m_uiSpiteTimer;
 
-        if (m_uiSeetheTimer < uiDiff)
+        void Reset() override
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_SEETHE) == CAST_OK)
-            { m_uiSeetheTimer = urand(20000, 30000); }
+            m_uiSeetheTimer = 5000;
+            m_uiSoulScreamTimer = 10000;
+            m_uiSpiteTimer = 20000;
+
+            DoCastSpellIfCan(m_creature, SPELL_AURA_OF_ANGER);
         }
-        else
-        { m_uiSeetheTimer -= uiDiff; }
 
-        if (m_uiSoulScreamTimer < uiDiff)
+        void KilledUnit(Unit* /*pVictim*/) override
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_SOUL_SCREAM) == CAST_OK)
-            { m_uiSoulScreamTimer = 10000; }
+            DoScriptText(urand(0, 1) ? ANGER_SAY_SLAY1 : ANGER_SAY_SLAY2, m_creature);
         }
-        else
-        { m_uiSoulScreamTimer -= uiDiff; }
 
-        if (m_uiSpiteTimer < uiDiff)
+        void JustDied(Unit* /*pKiller*/) override
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_SPITE) == CAST_OK)
+            DoScriptText(ANGER_SAY_DEATH, m_creature);
+        }
+
+        void JustReachedHome() override
+        {
+            // Reset encounter and despawn Essence
+            if (m_pInstance)
             {
-                DoScriptText(ANGER_SAY_BEFORE, m_creature);
-                m_uiSpiteTimer = 20000;
+                if (Creature* pReliquary = m_pInstance->GetSingleCreatureFromStorage(NPC_RELIQUARY_OF_SOULS))
+                {
+                    pReliquary->AI()->EnterEvadeMode();
+                }
             }
-        }
-        else
-        { m_uiSpiteTimer -= uiDiff; }
 
-        DoMeleeAttackIfReady();
+            m_creature->ForcedDespawn();
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_uiSeetheTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_SEETHE) == CAST_OK)
+                {
+                    m_uiSeetheTimer = urand(20000, 30000);
+                }
+            }
+            else
+            {
+                m_uiSeetheTimer -= uiDiff;
+            }
+
+            if (m_uiSoulScreamTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_SOUL_SCREAM) == CAST_OK)
+                {
+                    m_uiSoulScreamTimer = 10000;
+                }
+            }
+            else
+            {
+                m_uiSoulScreamTimer -= uiDiff;
+            }
+
+            if (m_uiSpiteTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_SPITE) == CAST_OK)
+                {
+                    DoScriptText(ANGER_SAY_BEFORE, m_creature);
+                    m_uiSpiteTimer = 20000;
+                }
+            }
+            else
+            {
+                m_uiSpiteTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_essence_of_angerAI(pCreature);
     }
 };
 
@@ -614,108 +711,106 @@ struct boss_essence_of_angerAI : public ScriptedAI
 ## npc_enslaved_soul
 ######*/
 
-struct npc_enslaved_soulAI : public ScriptedAI
+struct npc_enslaved_soul : public CreatureScript
 {
-    npc_enslaved_soulAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_enslaved_soul() : CreatureScript("npc_enslaved_soul") {}
+
+    struct npc_enslaved_soulAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    void Reset() override
-    {
-        DoCastSpellIfCan(m_creature, SPELL_ENSLAVED_SOUL_PASSIVE);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoCastSpellIfCan(m_creature, SPELL_SOUL_RELEASE, CAST_TRIGGERED);
-
-        // Notify the main boss about the spirit death. Needs to be done here, because the spirit is summoned with triggered spell
-        if (m_pInstance)
+        npc_enslaved_soulAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (Creature* pReliquary = m_pInstance->GetSingleCreatureFromStorage(NPC_RELIQUARY_OF_SOULS))
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        }
+
+        ScriptedInstance* m_pInstance;
+
+        void Reset() override
+        {
+            DoCastSpellIfCan(m_creature, SPELL_ENSLAVED_SOUL_PASSIVE);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoCastSpellIfCan(m_creature, SPELL_SOUL_RELEASE, CAST_TRIGGERED);
+
+            // Notify the main boss about the spirit death. Needs to be done here, because the spirit is summoned with triggered spell
+            if (m_pInstance)
             {
-                if (boss_reliquary_of_soulsAI* pBossAI = dynamic_cast<boss_reliquary_of_soulsAI*>(pReliquary->AI()))
-                { pBossAI->DoNotifySouldDead(); }
+                if (Creature* pReliquary = m_pInstance->GetSingleCreatureFromStorage(NPC_RELIQUARY_OF_SOULS))
+                {
+                    SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pReliquary);
+                }
             }
         }
-    }
 
-    void JustReachedHome() override
-    {
-        // Reset encounter and despawn the spirit
-        if (m_pInstance)
+        void JustReachedHome() override
         {
-            if (Creature* pReliquary = m_pInstance->GetSingleCreatureFromStorage(NPC_RELIQUARY_OF_SOULS))
-            { pReliquary->AI()->EnterEvadeMode(); }
+            // Reset encounter and despawn the spirit
+            if (m_pInstance)
+            {
+                if (Creature* pReliquary = m_pInstance->GetSingleCreatureFromStorage(NPC_RELIQUARY_OF_SOULS))
+                {
+                    pReliquary->AI()->EnterEvadeMode();
+                }
+            }
+
+            m_creature->ForcedDespawn();
         }
 
-        m_creature->ForcedDespawn();
-    }
+        void UpdateAI(const uint32 /*uiDiff*/) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
 
-    void UpdateAI(const uint32 /*uiDiff*/) override
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        DoMeleeAttackIfReady();
+        return new npc_enslaved_soulAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_reliquary_of_souls(Creature* pCreature)
-{
-    return new boss_reliquary_of_soulsAI(pCreature);
-}
-
-CreatureAI* GetAI_boss_essence_of_suffering(Creature* pCreature)
-{
-    return new boss_essence_of_sufferingAI(pCreature);
-}
-
-CreatureAI* GetAI_boss_essence_of_desire(Creature* pCreature)
-{
-    return new boss_essence_of_desireAI(pCreature);
-}
-
-CreatureAI* GetAI_boss_essence_of_anger(Creature* pCreature)
-{
-    return new boss_essence_of_angerAI(pCreature);
-}
-
-CreatureAI* GetAI_npc_enslaved_soul(Creature* pCreature)
-{
-    return new npc_enslaved_soulAI(pCreature);
-}
-
 void AddSC_boss_reliquary_of_souls()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_reliquary_of_souls";
-    pNewScript->GetAI = &GetAI_boss_reliquary_of_souls;
-    pNewScript->RegisterSelf();
+    s = new boss_reliquary_of_souls();
+    s->RegisterSelf();
+    s = new boss_essence_of_suffering();
+    s->RegisterSelf();
+    s = new boss_essence_of_desire();
+    s->RegisterSelf();
+    s = new boss_essence_of_anger();
+    s->RegisterSelf();
+    s = new npc_enslaved_soul();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_essence_of_suffering";
-    pNewScript->GetAI = &GetAI_boss_essence_of_suffering;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_reliquary_of_souls";
+    //pNewScript->GetAI = &GetAI_boss_reliquary_of_souls;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_essence_of_desire";
-    pNewScript->GetAI = &GetAI_boss_essence_of_desire;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_essence_of_suffering";
+    //pNewScript->GetAI = &GetAI_boss_essence_of_suffering;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_essence_of_anger";
-    pNewScript->GetAI = &GetAI_boss_essence_of_anger;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_essence_of_desire";
+    //pNewScript->GetAI = &GetAI_boss_essence_of_desire;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_enslaved_soul";
-    pNewScript->GetAI = &GetAI_npc_enslaved_soul;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_essence_of_anger";
+    //pNewScript->GetAI = &GetAI_boss_essence_of_anger;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_enslaved_soul";
+    //pNewScript->GetAI = &GetAI_npc_enslaved_soul;
+    //pNewScript->RegisterSelf();
 }

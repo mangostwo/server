@@ -51,156 +51,191 @@ enum
     NPC_ARCANE_ORB_TARGET       = 19577,
 };
 
-struct boss_void_reaverAI : public ScriptedAI
+struct boss_void_reaver : public CreatureScript
 {
-    boss_void_reaverAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_void_reaver() : CreatureScript("boss_void_reaver") {}
+
+    struct boss_void_reaverAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiPoundingTimer;
-    uint32 m_uiArcaneOrbTimer;
-    uint32 m_uiKnockAwayTimer;
-    uint32 m_uiBerserkTimer;
-
-    void Reset() override
-    {
-        m_uiPoundingTimer   = 13000;
-        m_uiArcaneOrbTimer  = 3000;
-        m_uiKnockAwayTimer  = 30000;
-        m_uiBerserkTimer    = 10 * MINUTE * IN_MILLISECONDS;
-    }
-
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-        { return; }
-
-        switch (urand(0, 2))
+        boss_void_reaverAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        }
+
+        ScriptedInstance* m_pInstance;
+
+        uint32 m_uiPoundingTimer;
+        uint32 m_uiArcaneOrbTimer;
+        uint32 m_uiKnockAwayTimer;
+        uint32 m_uiBerserkTimer;
+
+        void Reset() override
+        {
+            m_uiPoundingTimer = 13000;
+            m_uiArcaneOrbTimer = 3000;
+            m_uiKnockAwayTimer = 30000;
+            m_uiBerserkTimer = 10 * MINUTE * IN_MILLISECONDS;
+        }
+
+        void KilledUnit(Unit* pVictim) override
+        {
+            if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            {
+                return;
+            }
+
+            switch (urand(0, 2))
+            {
             case 0: DoScriptText(SAY_SLAY1, m_creature); break;
             case 1: DoScriptText(SAY_SLAY2, m_creature); break;
             case 2: DoScriptText(SAY_SLAY3, m_creature); break;
-        }
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_VOIDREAVER, DONE); }
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_VOIDREAVER, IN_PROGRESS); }
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_VOIDREAVER, NOT_STARTED); }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        // Cast the Arcane Orb missile on the npc, not on player
-        DoCastSpellIfCan(pSummoned, SPELL_ARCANE_ORB_MISSILE, CAST_TRIGGERED);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        // Pounding
-        if (m_uiPoundingTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_POUNDING) == CAST_OK)
-            {
-                DoScriptText(urand(0, 1) ? SAY_POUNDING1 : SAY_POUNDING2, m_creature);
-                m_uiPoundingTimer = 14000;
             }
         }
-        else
-        { m_uiPoundingTimer -= uiDiff; }
 
-        // Arcane Orb
-        if (m_uiArcaneOrbTimer < uiDiff)
+        void JustDied(Unit* /*pKiller*/) override
         {
-            // Search only for players which are not within 18 yards of the boss
-            std::vector<Unit*> suitableTargets;
-            ThreatList const& threatList = m_creature->GetThreatManager().getThreatList();
+            DoScriptText(SAY_DEATH, m_creature);
 
-            for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+            if (m_pInstance)
             {
-                if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+                m_pInstance->SetData(TYPE_VOIDREAVER, DONE);
+            }
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_VOIDREAVER, IN_PROGRESS);
+            }
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_VOIDREAVER, NOT_STARTED);
+            }
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            // Cast the Arcane Orb missile on the npc, not on player
+            DoCastSpellIfCan(pSummoned, SPELL_ARCANE_ORB_MISSILE, CAST_TRIGGERED);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            // Pounding
+            if (m_uiPoundingTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_POUNDING) == CAST_OK)
                 {
-                    if (pTarget->GetTypeId() == TYPEID_PLAYER && !pTarget->IsWithinDist(m_creature, 18.0f))
-                    { suitableTargets.push_back(pTarget); }
+                    DoScriptText(urand(0, 1) ? SAY_POUNDING1 : SAY_POUNDING2, m_creature);
+                    m_uiPoundingTimer = 14000;
+                }
+            }
+            else
+            {
+                m_uiPoundingTimer -= uiDiff;
+            }
+
+            // Arcane Orb
+            if (m_uiArcaneOrbTimer < uiDiff)
+            {
+                // Search only for players which are not within 18 yards of the boss
+                std::vector<Unit*> suitableTargets;
+                ThreatList const& threatList = m_creature->GetThreatManager().getThreatList();
+
+                for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+                {
+                    if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+                    {
+                        if (pTarget->GetTypeId() == TYPEID_PLAYER && !pTarget->IsWithinDist(m_creature, 18.0f))
+                        {
+                            suitableTargets.push_back(pTarget);
+                        }
+                    }
+                }
+
+                if (suitableTargets.empty())
+                {
+                    m_uiArcaneOrbTimer = 3000;
+                }
+                else
+                {
+                    Unit* pTarget = suitableTargets[urand(0, suitableTargets.size() - 1)];
+
+                    if (pTarget)
+                    {
+                        m_creature->SummonCreature(NPC_ARCANE_ORB_TARGET, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    }
+
+                    m_uiArcaneOrbTimer = 3000;
+                }
+            }
+            else
+            {
+                m_uiArcaneOrbTimer -= uiDiff;
+            }
+
+            // Single Target knock back, reduces aggro
+            if (m_uiKnockAwayTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
+                {
+                    m_uiKnockAwayTimer = 30000;
+                }
+            }
+            else
+            {
+                m_uiKnockAwayTimer -= uiDiff;
+            }
+
+            // Berserk
+            if (m_uiBerserkTimer)
+            {
+                if (m_uiBerserkTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                    {
+                        m_uiBerserkTimer = 0;
+                    }
+                }
+                else
+                {
+                    m_uiBerserkTimer -= uiDiff;
                 }
             }
 
-            if (suitableTargets.empty())
-            { m_uiArcaneOrbTimer = 3000; }
-            else
-            {
-                Unit* pTarget = suitableTargets[urand(0, suitableTargets.size() - 1)];
+            DoMeleeAttackIfReady();
 
-                if (pTarget)
-                { m_creature->SummonCreature(NPC_ARCANE_ORB_TARGET, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 0); }
-
-                m_uiArcaneOrbTimer = 3000;
-            }
+            EnterEvadeIfOutOfCombatArea(uiDiff);
         }
-        else
-        { m_uiArcaneOrbTimer -= uiDiff; }
+    };
 
-        // Single Target knock back, reduces aggro
-        if (m_uiKnockAwayTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
-            { m_uiKnockAwayTimer = 30000; }
-        }
-        else
-        { m_uiKnockAwayTimer -= uiDiff; }
-
-        // Berserk
-        if (m_uiBerserkTimer)
-        {
-            if (m_uiBerserkTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                { m_uiBerserkTimer = 0; }
-            }
-            else
-            { m_uiBerserkTimer -= uiDiff; }
-        }
-
-        DoMeleeAttackIfReady();
-
-        EnterEvadeIfOutOfCombatArea(uiDiff);
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_void_reaverAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_void_reaver(Creature* pCreature)
-{
-    return new boss_void_reaverAI(pCreature);
-}
-
 void AddSC_boss_void_reaver()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_void_reaver";
-    pNewScript->GetAI = &GetAI_boss_void_reaver;
-    pNewScript->RegisterSelf();
+    s = new boss_void_reaver();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_void_reaver";
+    //pNewScript->GetAI = &GetAI_boss_void_reaver;
+    //pNewScript->RegisterSelf();
 }

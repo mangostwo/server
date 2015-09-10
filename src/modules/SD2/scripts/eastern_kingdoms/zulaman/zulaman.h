@@ -66,6 +66,7 @@ enum InstanceZA
 
     TYPE_RAND_VENDOR_1      = 8,
     TYPE_RAND_VENDOR_2      = 9,
+    TYPE_BEAR_PHASE         = 10,
 
     NPC_AKILZON             = 23574,
     NPC_NALORAKK            = 23576,
@@ -123,31 +124,6 @@ enum InstanceZA
     GO_HARKORS_SATCHEL      = 187021,
 };
 
-enum BossToChestIndex
-{
-    INDEX_NALORAKK          = 0,
-    INDEX_JANALAI           = 1,
-    INDEX_HALAZZI           = 2,
-    INDEX_AKILZON           = 3
-};
-
-enum RunEventSteps
-{
-    RUN_START               = 1,
-    RUN_FAIL                = 2,
-    RUN_DONE                = 3,
-    RUN_PROGRESS            = 4,
-    RUN_FAIL_SOON           = 5
-};
-
-struct TimeEventNpcInfo
-{
-    TimeEventNpcInfo() : uiSavePosition(0) {}
-
-    uint8 uiSavePosition;                                   // stores in what order this npc was saved (0 means unsaved)
-    ObjectGuid npGuid;
-};
-
 struct NalorakkBearEventInfo
 {
     int iYellId;
@@ -160,58 +136,6 @@ static const NalorakkBearEventInfo aBearEventInfo[MAX_BEAR_WAVES] =
     {SAY_WAVE2_STAIR1,   -54.948f, 1419.772f, 27.303f, 0.03f, 37.0f},
     {SAY_WAVE3_STAIR2,   -80.303f, 1372.622f, 40.764f, 1.67f, 35.0f},
     {SAY_WAVE4_PLATFORM, -77.495f, 1294.760f, 48.487f, 1.66f, 60.0f}
-};
-
-struct NalorakkTrashInfo
-{
-    GuidSet sBearTrashGuidSet;
-    uint8 uiTrashKilled;
-};
-
-class instance_zulaman : public ScriptedInstance
-{
-    public:
-        instance_zulaman(Map* pMap);
-
-        void Initialize() override;
-        bool IsEncounterInProgress() const override;
-
-        void OnPlayerEnter(Player* pPlayer) override;
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-        void OnCreatureDeath(Creature* pCreature) override;
-        void OnCreatureEvade(Creature* pCreature);
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-        void Load(const char* chrIn) override;
-
-        bool IsBearPhaseInProgress() { return m_bIsBearPhaseInProgress; }
-        void SetBearEventProgress(bool bIsInProgress) { m_bIsBearPhaseInProgress = bIsInProgress; }
-        void SendNextBearWave(Unit* pTarget);
-
-        bool CheckConditionCriteriaMeet(Player const* pPlayer, uint32 uiInstanceConditionId, WorldObject const* pConditionSource, uint32 conditionSourceType) const override;
-
-        void Update(uint32 uiDiff) override;
-
-    private:
-        uint8 GetKilledPreBosses();
-        void DoTimeRunSay(RunEventSteps uiData);
-        void DoChestEvent(BossToChestIndex uiIndex);
-
-        std::string m_strInstData;
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        uint32 m_auiRandVendor[MAX_VENDOR];
-        TimeEventNpcInfo m_aEventNpcInfo[MAX_CHESTS];
-
-        uint32 m_uiEventTimer;
-        uint32 m_uiGongCount;
-
-        NalorakkTrashInfo m_aNalorakkEvent[MAX_BEAR_WAVES];
-        uint8 m_uiBearEventPhase;
-        bool m_bIsBearPhaseInProgress;
 };
 
 #endif

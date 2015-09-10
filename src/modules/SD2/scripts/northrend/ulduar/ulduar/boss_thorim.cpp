@@ -101,7 +101,6 @@ enum
     // Colossus runic smash spells
     SPELL_RUNIC_SMASH_L                     = 62058,                    // triggers missing spell 62406
     SPELL_RUNIC_SMASH_R                     = 62057,                    // triggers missing spell 62403
-    SPELL_RUNIC_SMASH                       = 62465,                    // cast by npcs 33140 and 33141
     MAX_RUNIC_SMASH                         = 10,                       // defines the max rows of runic smash
 
     // Colossus combat spells
@@ -117,7 +116,6 @@ enum
     NPC_DARK_RUNE_CHAMPION                  = 32876,                    // arena npcs
     NPC_DARK_RUNE_WARBRINGER                = 32877,
     NPC_DARK_RUNE_EVOKER                    = 32878,
-    NPC_DARK_RUNE_COMMONER                  = 32904,
     // NPC_IRON_RING_GUARD                  = 32874,                    // hallway npcs
     // NPC_DARK_RUNE_ACOLYTE_HALLWAY        = 33110,
     // NPC_IRON_HONOR_GUARD                 = 32875,                    // stairs npcs
@@ -158,210 +156,205 @@ static const float afArenaCenterLoc[3] = {2134.8f, -263.056f, 419.983f};
 ## boss_thorim
 ######*/
 
-struct  boss_thorimAI : public ScriptedAI, private DialogueHelper
+struct boss_thorim : public CreatureScript
 {
-    boss_thorimAI(Creature* pCreature) : ScriptedAI(pCreature),
+    boss_thorim() : CreatureScript("boss_thorim") {}
+
+    struct boss_thorimAI : public ScriptedAI, private DialogueHelper
+    {
+        boss_thorimAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aThorimDialogue)
-    {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        InitializeDialogueHelper(m_pInstance);
-        m_bEventFinished = false;
-        Reset();
-    }
-
-    instance_ulduar* m_pInstance;
-    bool m_bIsRegularMode;
-    bool m_bEventFinished;
-    bool m_bArenaSpawned;
-
-    uint32 m_uiBerserkTimer;
-    uint8 m_uiPhase;
-    uint8 m_uiDwarfIndex;
-
-    uint32 m_uiStormHammerTimer;
-    uint32 m_uiChargeOrbTimer;
-    uint32 m_uiArenaDwarfTimer;
-    uint32 m_uiAttackTimer;
-    uint32 m_uiChainLightningTimer;
-    uint32 m_uiUnbalancingStrikeTimer;
-
-    GuidList m_lUpperOrbsGuids;
-    GuidList m_lUpperBunniesGuids;
-    GuidList m_lLowerBunniesGuids;
-
-    void Reset() override
-    {
-        m_uiPhase                   = PHASE_ARENA;
-        m_uiBerserkTimer            = 5 * MINUTE * IN_MILLISECONDS;
-
-        m_uiStormHammerTimer        = 45000;
-        m_uiChargeOrbTimer          = 35000;
-        m_uiArenaDwarfTimer         = 20000;
-        m_uiChainLightningTimer     = urand(10000, 15000);
-        m_uiUnbalancingStrikeTimer  = 20000;
-        m_uiAttackTimer             = 0;
-        m_uiDwarfIndex              = urand(0, 2);
-
-        m_bArenaSpawned             = false;
-
-        SetCombatMovement(false);
-    }
-
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
-
-    void EnterEvadeMode() override
-    {
-        m_creature->RemoveAllAurasOnEvade();
-        m_creature->DeleteThreatList();
-        m_creature->CombatStop(true);
-
-        if (m_creature->IsAlive() && !m_bEventFinished)
-            m_creature->GetMotionMaster()->MoveTargetedHome();
-
-        m_creature->SetLootRecipient(NULL);
-
-        Reset();
-    }
-
-    void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage) override
-    {
-        // switch to phase 2 as soon as it's hit by any damage
-        if (m_uiPhase == PHASE_ARENA && uiDamage > 0)
         {
-            StartNextDialogueText(SAY_JUMP);
-            m_uiPhase = PHASE_TRANSITION;
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+            InitializeDialogueHelper(m_pInstance);
+            m_bEventFinished = false;
+        }
 
-            // prepare the hard mode if necessary
-            if (m_pInstance && m_pInstance->GetData(TYPE_THORIM_HARD) != FAIL)
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+        bool m_bEventFinished;
+        bool m_bArenaSpawned;
+
+        uint32 m_uiBerserkTimer;
+        uint8 m_uiPhase;
+        uint8 m_uiDwarfIndex;
+
+        uint32 m_uiStormHammerTimer;
+        uint32 m_uiChargeOrbTimer;
+        uint32 m_uiArenaDwarfTimer;
+        uint32 m_uiAttackTimer;
+        uint32 m_uiChainLightningTimer;
+        uint32 m_uiUnbalancingStrikeTimer;
+
+        void Reset() override
+        {
+            m_uiPhase = PHASE_ARENA;
+            m_uiBerserkTimer = 5 * MINUTE * IN_MILLISECONDS;
+
+            m_uiStormHammerTimer = 45000;
+            m_uiChargeOrbTimer = 35000;
+            m_uiArenaDwarfTimer = 20000;
+            m_uiChainLightningTimer = urand(10000, 15000);
+            m_uiUnbalancingStrikeTimer = 20000;
+            m_uiAttackTimer = 0;
+            m_uiDwarfIndex = urand(0, 2);
+
+            m_bArenaSpawned = false;
+
+            SetCombatMovement(false);
+        }
+
+        void KilledUnit(Unit* pVictim) override
+        {
+            if (pVictim->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+        }
+
+        void EnterEvadeMode() override
+        {
+            m_creature->RemoveAllAurasOnEvade();
+            m_creature->DeleteThreatList();
+            m_creature->CombatStop(true);
+
+            if (m_creature->IsAlive() && !m_bEventFinished)
+                m_creature->GetMotionMaster()->MoveTargetedHome();
+
+            m_creature->SetLootRecipient(NULL);
+
+            Reset();
+        }
+
+        void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage) override
+        {
+            // switch to phase 2 as soon as it's hit by any damage
+            if (m_uiPhase == PHASE_ARENA && uiDamage > 0)
+            {
+                StartNextDialogueText(SAY_JUMP);
+                m_uiPhase = PHASE_TRANSITION;
+
+                // prepare the hard mode if necessary
+                if (m_pInstance && m_pInstance->GetData(TYPE_THORIM_HARD) != FAIL)
+                {
+                    if (Creature* pSif = m_pInstance->GetSingleCreatureFromStorage(NPC_SIF))
+                        pSif->InterruptNonMeleeSpells(false);
+
+                    m_pInstance->SetData(TYPE_THORIM_HARD, DONE);
+                }
+                return;
+            }
+
+            // handle outro
+            if (uiDamage >= m_creature->GetHealth())
+            {
+                uiDamage = 0;
+
+                if (!m_bEventFinished)
+                {
+                    if (m_pInstance)
+                    {
+                        m_pInstance->SetData(TYPE_THORIM, DONE);
+
+                        // start a different outro version for hard mode
+                        if (m_pInstance->GetData(TYPE_THORIM_HARD) == DONE)
+                            StartNextDialogueText(SPELL_STORMHAMMER_OUTRO);
+                        else
+                            StartNextDialogueText(SAY_DEFEATED);
+                    }
+
+                    m_creature->CastSpell(m_creature, SPELL_THORIM_CREDIT, true);
+                    m_creature->setFaction(FACTION_ID_FRIENDLY);
+                    m_bEventFinished = true;
+                    EnterEvadeMode();
+                }
+            }
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_THORIM, IN_PROGRESS);
+                m_pInstance->SetData(TYPE_THORIM_HARD, NOT_STARTED);
+            }
+
+            StartNextDialogueText(SAY_AGGRO_1);
+        }
+
+        void AttackStart(Unit* pWho) override
+        {
+            // don't attack again after being defeated
+            if (m_bEventFinished)
+                return;
+
+            ScriptedAI::AttackStart(pWho);
+        }
+
+        void MoveInLineOfSight(Unit* pWho) override
+        {
+            // spawn the arena npcs only when players are close to Thorim in order to avoid the possible bugs
+            if (!m_bArenaSpawned && pWho->GetTypeId() == TYPEID_PLAYER && pWho->IsAlive() && !((Player*)pWho)->isGameMaster() && m_creature->IsWithinDistInMap(pWho, DEFAULT_VISIBILITY_INSTANCE))
+            {
+                if (m_pInstance && m_pInstance->GetData(TYPE_THORIM) != DONE)
+                    m_pInstance->SetData64(DATA64_THORIM_TRIGGERED_BY, pWho->GetObjectGuid().GetRawValue());
+
+                m_bArenaSpawned = true;
+            }
+
+            ScriptedAI::MoveInLineOfSight(pWho);
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_THORIM, FAIL);
+        }
+
+        void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
+        {
+            if (uiMotionType != EFFECT_MOTION_TYPE || !uiPointId)
+                return;
+
+            m_uiPhase = PHASE_SOLO;
+            m_uiAttackTimer = 1000;
+            m_uiChargeOrbTimer = 20000;
+            m_uiBerserkTimer = 5 * MINUTE * IN_MILLISECONDS;
+            m_creature->RemoveAurasDueToSpell(SPELL_SHEAT_OF_LIGHTNING);
+
+            // make Sif attack too if hard mode is active
+            if (m_pInstance && m_pInstance->GetData(TYPE_THORIM_HARD) == DONE)
             {
                 if (Creature* pSif = m_pInstance->GetSingleCreatureFromStorage(NPC_SIF))
-                    pSif->InterruptNonMeleeSpells(false);
-
-                m_pInstance->SetData(TYPE_THORIM_HARD, DONE);
-            }
-            return;
-        }
-
-        // handle outro
-        if (uiDamage >= m_creature->GetHealth())
-        {
-            uiDamage = 0;
-
-            if (!m_bEventFinished)
-            {
-                if (m_pInstance)
                 {
-                    m_pInstance->SetData(TYPE_THORIM, DONE);
-
-                    // start a different outro version for hard mode
-                    if (m_pInstance->GetData(TYPE_THORIM_HARD) == DONE)
-                        StartNextDialogueText(SPELL_STORMHAMMER_OUTRO);
-                    else
-                        StartNextDialogueText(SAY_DEFEATED);
+                    DoScriptText(SAY_SIF_EVENT, pSif);
+                    SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pSif);
+                    pSif->AI()->AttackStart(m_creature->getVictim());
                 }
-
-                m_creature->CastSpell(m_creature, SPELL_THORIM_CREDIT, true);
-                m_creature->setFaction(FACTION_ID_FRIENDLY);
-                m_bEventFinished = true;
-                EnterEvadeMode();
             }
         }
-    }
 
-    void Aggro(Unit* /*pWho*/) override
-    {
-        if (m_pInstance)
+        void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
         {
-            m_pInstance->SetData(TYPE_THORIM, IN_PROGRESS);
-            m_pInstance->SetData(TYPE_THORIM_HARD, NOT_STARTED);
-
-            m_pInstance->GetThunderOrbsGuids(m_lUpperOrbsGuids);
-            m_pInstance->GetThorimBunniesGuids(m_lUpperBunniesGuids, true);
-            m_pInstance->GetThorimBunniesGuids(m_lLowerBunniesGuids, false);
-        }
-
-        StartNextDialogueText(SAY_AGGRO_1);
-    }
-    
-    void AttackStart(Unit* pWho) override
-    {
-        // don't attack again after being defeated
-        if (m_bEventFinished)
-            return;
-        
-        ScriptedAI::AttackStart(pWho);
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        // spawn the arena npcs only when players are close to Thorim in order to avoid the possible bugs
-        if (!m_bArenaSpawned && pWho->GetTypeId() == TYPEID_PLAYER && pWho->IsAlive() && !((Player*)pWho)->isGameMaster() && m_creature->IsWithinDistInMap(pWho, DEFAULT_VISIBILITY_INSTANCE))
-        {
-            if (m_pInstance && m_pInstance->GetData(TYPE_THORIM) != DONE)
-                m_pInstance->DoSpawnThorimNpcs((Player*)pWho);
-
-            m_bArenaSpawned = true;
-        }
-
-        ScriptedAI::MoveInLineOfSight(pWho);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_THORIM, FAIL);
-    }
-
-    void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
-    {
-        if (uiMotionType != EFFECT_MOTION_TYPE || !uiPointId)
-            return;
-
-        m_uiPhase = PHASE_SOLO;
-        m_uiAttackTimer = 1000;
-        m_uiChargeOrbTimer = 20000;
-        m_uiBerserkTimer = 5 * MINUTE * IN_MILLISECONDS;
-        m_creature->RemoveAurasDueToSpell(SPELL_SHEAT_OF_LIGHTNING);
-
-        // make Sif attack too if hard mode is active
-        if (m_pInstance && m_pInstance->GetData(TYPE_THORIM_HARD) == DONE)
-        {
-            if (Creature* pSif = m_pInstance->GetSingleCreatureFromStorage(NPC_SIF))
+            // hard mode is failed; despawn Sif
+            if (pSpell->Id == SPELL_TOUCH_OF_DOMINION_AURA && m_pInstance)
             {
-                DoScriptText(SAY_SIF_EVENT, pSif);
-                SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pSif);
-                pSif->AI()->AttackStart(m_creature->getVictim());
+                m_pInstance->SetData(TYPE_THORIM_HARD, FAIL);
+
+                if (Creature* pSif = m_pInstance->GetSingleCreatureFromStorage(NPC_SIF))
+                {
+                    DoScriptText(SAY_SIF_DESPAWN, pSif);
+                    pSif->ForcedDespawn(5000);
+                }
             }
         }
-    }
 
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
-    {
-        // hard mode is failed; despawn Sif
-        if (pSpell->Id == SPELL_TOUCH_OF_DOMINION_AURA && m_pInstance)
+        void JustSummoned(Creature* pSummoned) override
         {
-            m_pInstance->SetData(TYPE_THORIM_HARD, FAIL);
-
-            if (Creature* pSif = m_pInstance->GetSingleCreatureFromStorage(NPC_SIF))
+            switch (pSummoned->GetEntry())
             {
-                DoScriptText(SAY_SIF_DESPAWN, pSif);
-                pSif->ForcedDespawn(5000);
-            }
-        }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
-        {
-            // the lightning orb should clean out the whole hallway on arena berserk
+                // the lightning orb should clean out the whole hallway on arena berserk
             case NPC_LIGHTNING_ORB:
                 pSummoned->CastSpell(pSummoned, SPELL_LIGHTNING_DESTRUCTION, true);
                 break;
@@ -374,16 +367,16 @@ struct  boss_thorimAI : public ScriptedAI, private DialogueHelper
                     pSummoned->CastSpell(pTarget, SPELL_LEAP, true);
                 pSummoned->SetInCombatWithZone();
                 break;
+            }
         }
-    }
 
-    void JustDidDialogueStep(int32 iEntry) override
-    {
-        if (!m_pInstance)
-            return;
-
-        switch (iEntry)
+        void JustDidDialogueStep(int32 iEntry) override
         {
+            if (!m_pInstance)
+                return;
+
+            switch (iEntry)
+            {
             case NPC_SIF:
                 DoCastSpellIfCan(m_creature, SPELL_SHEAT_OF_LIGHTNING, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
                 if (Creature* pSif = m_creature->SummonCreature(NPC_SIF, afSifSpawnLoc[0], afSifSpawnLoc[1], afSifSpawnLoc[2], afSifSpawnLoc[3], TEMPSUMMON_CORPSE_DESPAWN, 0))
@@ -410,115 +403,87 @@ struct  boss_thorimAI : public ScriptedAI, private DialogueHelper
                 if (Creature* pSif = m_pInstance->GetSingleCreatureFromStorage(NPC_SIF))
                     pSif->ForcedDespawn();
                 break;
+            }
         }
-    }
 
-    void SpellHitTarget(Unit* pTarget, SpellEntry const* pSpellEntry) override
-    {
-        if (pSpellEntry->Id == SPELL_LIGHTNING_CHARGE_DAMAGE && pTarget->GetTypeId() == TYPEID_PLAYER)
+        void SpellHitTarget(Unit* pTarget, SpellEntry const* pSpellEntry) override
+        {
+            if (pSpellEntry->Id == SPELL_LIGHTNING_CHARGE_DAMAGE && pTarget->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (m_pInstance)
+                    m_pInstance->SetData(TYPE_ACHIEV_LIGHTNING, uint32(false));
+            }
+        }
+
+        // function to return a random arena Thunder Orb
+        ObjectGuid SelectRandomOrbGuid()
         {
             if (m_pInstance)
-                m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_LIGHTNING, false);
-        }
-    }
+                return ObjectGuid(m_pInstance->GetData64(DATA64_THORIM_RANDOM_ORB));
 
-    // function to return a random arena Thunder Orb
-    ObjectGuid SelectRandomOrbGuid()
-    {
-        if (m_lUpperOrbsGuids.empty())
             return ObjectGuid();
-
-        GuidList::iterator iter = m_lUpperOrbsGuids.begin();
-        advance(iter, urand(0, m_lUpperOrbsGuids.size() - 1));
-
-        return *iter;
-    }
-
-    // function to return a random arena upper Bunny
-    Creature* SelectRandomUpperBunny()
-    {
-        if (m_lUpperBunniesGuids.empty())
-            return NULL;
-
-        GuidList::iterator iter = m_lUpperBunniesGuids.begin();
-        advance(iter, urand(0, m_lUpperBunniesGuids.size() - 1));
-
-        return m_creature->GetMap()->GetCreature(*iter);
-    }
-
-    // function to return the closest ground Bunny
-    Creature* GetClosestLowerBunny(Creature* pSource)
-    {
-        if (m_lLowerBunniesGuids.empty())
-            return NULL;
-
-        std::list<Creature*> lBunnies;
-        for (GuidList::const_iterator itr = m_lLowerBunniesGuids.begin(); itr != m_lLowerBunniesGuids.end(); ++itr)
-        {
-            if (Creature* pBunny = m_creature->GetMap()->GetCreature(*itr))
-                lBunnies.push_back(pBunny);
         }
 
-        lBunnies.sort(ObjectDistanceOrder(pSource));
-        return lBunnies.front();
-    }
-
-    // function to return a random player from the arena
-    Unit* GetRandomArenaPlayer()
-    {
-        if (!m_pInstance)
-            return NULL;
-
-        Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_THORIM_COMBAT_TRIGGER);
-        if (!pTrigger)
-            return NULL;
-
-        std::vector<Unit*> suitableTargets;
-        ThreatList const& threatList = m_creature->GetThreatManager().getThreatList();
-
-        for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+        // function to return a random arena upper Bunny
+        Creature* SelectRandomUpperBunny()
         {
-            if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+            if (m_pInstance)
+                return m_pInstance->instance->GetCreature(ObjectGuid(m_pInstance->GetData64(DATA64_RANDOM_UPPER_BUNNY)));
+
+            return NULL;
+        }
+
+        // function to return the closest ground Bunny
+        Creature* GetClosestLowerBunny(Creature* pSource)
+        {
+            if (m_pInstance)
+                return m_pInstance->instance->GetCreature(ObjectGuid(m_pInstance->GetData64(DATA64_THORIM_BUNNY)));
+
+            return NULL;
+        }
+
+        // function to return a random player from the arena
+        Unit* GetRandomArenaPlayer()
+        {
+            if (!m_pInstance)
+                return NULL;
+
+            Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_THORIM_COMBAT_TRIGGER);
+            if (!pTrigger)
+                return NULL;
+
+            std::vector<Unit*> suitableTargets;
+            ThreatList const& threatList = m_creature->GetThreatManager().getThreatList();
+
+            for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
             {
-                if (pTarget->GetTypeId() == TYPEID_PLAYER && pTarget->IsWithinDistInMap(pTrigger, 50.0f) && pTarget->IsWithinLOSInMap(pTrigger))
-                    suitableTargets.push_back(pTarget);
-            }
-        }
-
-        // if no player in the arena was found trigger berserk automatically
-        if (suitableTargets.empty())
-        {
-            m_uiBerserkTimer = 1000;
-            m_uiStormHammerTimer = 60000;
-            return NULL;
-        }
-        else
-            return suitableTargets[urand(0, suitableTargets.size() - 1)];
-    }
-
-    // function to spawn a random pack of dwarfes
-    void DoSpawnArenaDwarf()
-    {
-        switch (m_uiDwarfIndex)
-        {
-            case 0:                     // commoners (always in groups of 6-7)
-            {
-                std::vector<Creature*> vBunnies;
-                for (GuidList::const_iterator itr = m_lUpperBunniesGuids.begin(); itr != m_lUpperBunniesGuids.end(); ++itr)
+                if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
                 {
-                    if (Creature* pBunny = m_creature->GetMap()->GetCreature(*itr))
-                        vBunnies.push_back(pBunny);
+                    if (pTarget->GetTypeId() == TYPEID_PLAYER && pTarget->IsWithinDistInMap(pTrigger, 50.0f) && pTarget->IsWithinLOSInMap(pTrigger))
+                        suitableTargets.push_back(pTarget);
                 }
-                std::random_shuffle(vBunnies.begin(), vBunnies.end());
-
-                uint8 uiMaxCommoners = urand(6, 7);
-                if (uiMaxCommoners > vBunnies.size() - 1)
-                    uiMaxCommoners = vBunnies.size();
-
-                for (uint8 i = 0; i < uiMaxCommoners; ++i)
-                    m_creature->SummonCreature(NPC_DARK_RUNE_COMMONER, vBunnies[i]->GetPositionX(), vBunnies[i]->GetPositionY(), vBunnies[i]->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
-                break;
             }
+
+            // if no player in the arena was found trigger berserk automatically
+            if (suitableTargets.empty())
+            {
+                m_uiBerserkTimer = 1000;
+                m_uiStormHammerTimer = 60000;
+                return NULL;
+            }
+            else
+                return suitableTargets[urand(0, suitableTargets.size() - 1)];
+        }
+
+        // function to spawn a random pack of dwarfes
+        void DoSpawnArenaDwarf()
+        {
+            switch (m_uiDwarfIndex)
+            {
+            case 0:                     // commoners (always in groups of 6-7)
+                if (m_pInstance)
+                    m_pInstance->SetData(TYPE_DO_THORIM_SPAWN_PACK, 0);
+                break;
             case 1:                     // warbringers (along with champions or evokers)
                 if (Creature* pBunny = SelectRandomUpperBunny())
                     m_creature->SummonCreature(NPC_DARK_RUNE_WARBRINGER, pBunny->GetPositionX(), pBunny->GetPositionY(), pBunny->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
@@ -533,23 +498,23 @@ struct  boss_thorimAI : public ScriptedAI, private DialogueHelper
                 if (Creature* pBunny = SelectRandomUpperBunny())
                     m_creature->SummonCreature(NPC_DARK_RUNE_EVOKER, pBunny->GetPositionX(), pBunny->GetPositionY(), pBunny->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
                 break;
+            }
+
+            // get a new index which will be different from the first one
+            uint8 uiNewIndex = (m_uiDwarfIndex + urand(1, 2)) % 3;
+            m_uiDwarfIndex = uiNewIndex;
         }
 
-        // get a new index which will be different from the first one
-        uint8 uiNewIndex = (m_uiDwarfIndex + urand(1, 2)) % 3;
-        m_uiDwarfIndex = uiNewIndex;
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        DialogueUpdate(uiDiff);
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        switch (m_uiPhase)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            // arena phase abilities
+            DialogueUpdate(uiDiff);
+
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            switch (m_uiPhase)
+            {
+                // arena phase abilities
             case PHASE_ARENA:
 
                 if (m_uiBerserkTimer)
@@ -671,412 +636,426 @@ struct  boss_thorimAI : public ScriptedAI, private DialogueHelper
                 // transition phase; nothing here, wait for transition to finish
             case PHASE_TRANSITION:
                 break;
+            }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_thorimAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_thorim(Creature* pCreature)
-{
-    return new boss_thorimAI(pCreature);
-}
 
 /*######
 ## boss_sif
 ######*/
 
-struct  boss_sifAI : public ScriptedAI
+struct boss_sif : public CreatureScript
 {
-    boss_sifAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_sif() : CreatureScript("boss_sif") {}
+
+    struct boss_sifAI : public ScriptedAI
     {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    instance_ulduar* m_pInstance;
-    bool m_bIsRegularMode;
-    bool m_bAttackReady;
-
-    uint32 m_uiFrostBoltTimer;
-    uint32 m_uiVolleyTimer;
-    uint32 m_uiFrostNovaTimer;
-    uint32 m_uiBlizzardTimer;
-    uint32 m_uiBlinkTimer;
-
-    GuidList m_lBunniesGuids;
-
-    void Reset() override
-    {
-        m_bAttackReady = false;
-
-        m_uiFrostBoltTimer  = urand(2000, 3000);
-        m_uiVolleyTimer     = urand(7000, 10000);
-        m_uiFrostNovaTimer  = urand(30000, 35000);
-        m_uiBlizzardTimer   = urand(20000, 30000);
-        m_uiBlinkTimer      = urand(20000, 25000);
-
-        SetCombatMovement(false);
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        // custom attack; only in hard mode
-        if (!m_bAttackReady)
-            return;
-
-        ScriptedAI::AttackStart(pWho);
-    }
-
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-
-    void EnterEvadeMode() override
-    {
-        // custom evade; Sif doesn't need to move to home position
-        if (!m_bAttackReady)
-            return;
-
-        m_creature->RemoveAllAurasOnEvade();
-        m_creature->DeleteThreatList();
-        m_creature->CombatStop(true);
-        m_creature->SetLootRecipient(NULL);
-
-        Reset();
-    }
-
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
-    {
-        // activate attack on hard mode
-        if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetEntry() == NPC_THORIM)
+        boss_sifAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            m_bAttackReady = true;
-
-            if (m_pInstance)
-                m_pInstance->GetThorimBunniesGuids(m_lBunniesGuids, false);
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         }
-    }
 
-    // function to return a random arena bunny for Blizzard spell
-    ObjectGuid SelectRandomBunnyGuid()
-    {
-        if (m_lBunniesGuids.empty())
-            return ObjectGuid();
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+        bool m_bAttackReady;
 
-        GuidList::iterator iter = m_lBunniesGuids.begin();
-        advance(iter, urand(0, m_lBunniesGuids.size() - 1));
+        uint32 m_uiFrostBoltTimer;
+        uint32 m_uiVolleyTimer;
+        uint32 m_uiFrostNovaTimer;
+        uint32 m_uiBlizzardTimer;
+        uint32 m_uiBlinkTimer;
 
-        return *iter;
-    }
+        GuidList m_lBunniesGuids;
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiFrostBoltTimer < uiDiff)
+        void Reset() override
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            m_bAttackReady = false;
+
+            m_uiFrostBoltTimer = urand(2000, 3000);
+            m_uiVolleyTimer = urand(7000, 10000);
+            m_uiFrostNovaTimer = urand(30000, 35000);
+            m_uiBlizzardTimer = urand(20000, 30000);
+            m_uiBlinkTimer = urand(20000, 25000);
+
+            SetCombatMovement(false);
+        }
+
+        void AttackStart(Unit* pWho) override
+        {
+            // custom attack; only in hard mode
+            if (!m_bAttackReady)
+                return;
+
+            ScriptedAI::AttackStart(pWho);
+        }
+
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+        void EnterEvadeMode() override
+        {
+            // custom evade; Sif doesn't need to move to home position
+            if (!m_bAttackReady)
+                return;
+
+            m_creature->RemoveAllAurasOnEvade();
+            m_creature->DeleteThreatList();
+            m_creature->CombatStop(true);
+            m_creature->SetLootRecipient(NULL);
+
+            Reset();
+        }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+        {
+            // activate attack on hard mode
+            if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetEntry() == NPC_THORIM)
             {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FROSTBOLT : SPELL_FROSTBOLT_H) == CAST_OK)
-                    m_uiFrostBoltTimer = urand(2000, 3000);
+                m_bAttackReady = true;
             }
         }
-        else
-            m_uiFrostBoltTimer -= uiDiff;
 
-        if (m_uiVolleyTimer < uiDiff)
+        // function to return a random arena bunny for Blizzard spell
+        ObjectGuid SelectRandomBunnyGuid()
         {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FROSTBOLT_VOLLEY : SPELL_FROSTBOLT_VOLLEY_H) == CAST_OK)
-                m_uiVolleyTimer = urand(15000, 18000);
+            if (m_lBunniesGuids.empty())
+                return ObjectGuid();
+
+            GuidList::iterator iter = m_lBunniesGuids.begin();
+            advance(iter, urand(0, m_lBunniesGuids.size() - 1));
+
+            return *iter;
         }
-        else
-            m_uiVolleyTimer -= uiDiff;
 
-        if (m_uiFrostNovaTimer < uiDiff)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FROST_NOVA : SPELL_FROST_NOVA_H) == CAST_OK)
-                m_uiFrostNovaTimer = urand(20000, 25000);
-        }
-        else
-            m_uiFrostNovaTimer -= uiDiff;
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
 
-        if (m_uiBlizzardTimer < uiDiff)
-        {
-            // this spell has AoE target, but we need to be very specific with the selected targets
-            if (Unit* pTarget = m_creature->GetMap()->GetUnit(SelectRandomBunnyGuid()))
+            if (m_uiFrostBoltTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_BLIZZARD : SPELL_BLIZZARD_H) == CAST_OK)
-                    m_uiBlizzardTimer = 40000;
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FROSTBOLT : SPELL_FROSTBOLT_H) == CAST_OK)
+                        m_uiFrostBoltTimer = urand(2000, 3000);
+                }
             }
-        }
-        else
-            m_uiBlizzardTimer -= uiDiff;
+            else
+                m_uiFrostBoltTimer -= uiDiff;
 
-        if (m_uiBlinkTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (m_uiVolleyTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_BLINK) == CAST_OK)
-                    m_uiBlinkTimer = urand(20000, 25000);
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FROSTBOLT_VOLLEY : SPELL_FROSTBOLT_VOLLEY_H) == CAST_OK)
+                    m_uiVolleyTimer = urand(15000, 18000);
             }
+            else
+                m_uiVolleyTimer -= uiDiff;
+
+            if (m_uiFrostNovaTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FROST_NOVA : SPELL_FROST_NOVA_H) == CAST_OK)
+                    m_uiFrostNovaTimer = urand(20000, 25000);
+            }
+            else
+                m_uiFrostNovaTimer -= uiDiff;
+
+            if (m_uiBlizzardTimer < uiDiff)
+            {
+                // this spell has AoE target, but we need to be very specific with the selected targets
+                if (Unit* pTarget = m_creature->GetMap()->GetUnit(SelectRandomBunnyGuid()))
+                {
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_BLIZZARD : SPELL_BLIZZARD_H) == CAST_OK)
+                        m_uiBlizzardTimer = 40000;
+                }
+            }
+            else
+                m_uiBlizzardTimer -= uiDiff;
+
+            if (m_uiBlinkTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_BLINK) == CAST_OK)
+                        m_uiBlinkTimer = urand(20000, 25000);
+                }
+            }
+            else
+                m_uiBlinkTimer -= uiDiff;
         }
-        else
-            m_uiBlinkTimer -= uiDiff;
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_sifAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_sif(Creature* pCreature)
-{
-    return new boss_sifAI(pCreature);
-}
 
 /*######
 ## npc_runic_colossus
 ######*/
 
-struct  npc_runic_colossusAI : public ScriptedAI
+struct npc_runic_colossus : public CreatureScript
 {
-    npc_runic_colossusAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_runic_colossus() : CreatureScript("npc_runic_colossus") {}
+
+    struct npc_runic_colossusAI : public ScriptedAI
     {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
+        npc_runic_colossusAI(Creature* pCreature) : ScriptedAI(pCreature)
+        {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        }
 
-    instance_ulduar* m_pInstance;
-    bool m_bIsRegularMode;
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
 
-    uint32 m_uiChargeTimer;
-    uint32 m_uiBarrierTimer;
-    uint32 m_uiSmashTimer;
+        uint32 m_uiChargeTimer;
+        uint32 m_uiBarrierTimer;
+        uint32 m_uiSmashTimer;
 
-    uint32 m_uiRunicSmashTimer;
-    uint32 m_uiSmashUpdateTimer;
-    uint8 m_uiSmashIndex;
+        uint32 m_uiRunicSmashTimer;
+        uint32 m_uiSmashUpdateTimer;
+        uint8 m_uiSmashIndex;
 
-    bool m_bSmashStarted;
-    bool m_bSmashActive;
+        bool m_bSmashStarted;
+        bool m_bSmashActive;
 
-    GuidList m_lCurrentSmashBunnies;
+        //GuidList m_lCurrentSmashBunnies;
 
-    void Reset() override
-    {
-        m_uiChargeTimer      = 1000;
-        m_uiBarrierTimer     = 15000;
-        m_uiSmashTimer       = 0;
-        m_uiRunicSmashTimer  = 0;
-        m_uiSmashUpdateTimer = 250;
-        m_uiSmashIndex       = 1;
-        m_bSmashStarted      = false;
-        m_bSmashActive       = false;
-    }
+        void Reset() override
+        {
+            m_uiChargeTimer = 1000;
+            m_uiBarrierTimer = 15000;
+            m_uiSmashTimer = 0;
+            m_uiRunicSmashTimer = 0;
+            m_uiSmashUpdateTimer = 250;
+            m_uiSmashIndex = 1;
+            m_bSmashStarted = false;
+            m_bSmashActive = false;
+        }
 
-    void Aggro(Unit* /*pWho*/) override
-    {
-        m_creature->InterruptNonMeleeSpells(false);
-        m_uiRunicSmashTimer = 0;
-    }
+        void Aggro(Unit* /*pWho*/) override
+        {
+            m_creature->InterruptNonMeleeSpells(false);
+            m_uiRunicSmashTimer = 0;
+        }
 
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (!m_bSmashStarted && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() &&
+        void MoveInLineOfSight(Unit* pWho) override
+        {
+            if (!m_bSmashStarted && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() &&
                 m_creature->IsWithinDistInMap(pWho, 80.0f) && m_creature->IsWithinLOSInMap(pWho))
-        {
-            m_uiRunicSmashTimer = 1000;
-            m_bSmashStarted = true;
-        }
-
-        ScriptedAI::MoveInLineOfSight(pWho);
-    }
-
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
-    {
-        // start runic smash event
-        if (pSpell->Id == SPELL_RUNIC_SMASH_L && m_pInstance)
-        {
-            m_lCurrentSmashBunnies.clear();
-            m_pInstance->GetSmashTargetsGuids(m_lCurrentSmashBunnies, true);
-            m_bSmashActive = true;
-        }
-        else if (pSpell->Id == SPELL_RUNIC_SMASH_R && m_pInstance)
-        {
-            m_lCurrentSmashBunnies.clear();
-            m_pInstance->GetSmashTargetsGuids(m_lCurrentSmashBunnies, false);
-            m_bSmashActive = true;
-        }
-    }
-
-    void SpellHitTarget(Unit* pTarget, SpellEntry const* pSpellEntry) override
-    {
-        if ((pSpellEntry->Id == SPELL_CHARGE || pSpellEntry->Id == SPELL_CHARGE_H) && pTarget->GetTypeId() == TYPEID_PLAYER)
-            m_uiSmashTimer = 1000;
-    }
-
-    // Wrapper to keep Runic Smash in a distinct function
-    void UpdateRunicSmash(const uint32 uiDiff)
-    {
-        if (!m_bSmashActive)
-            return;
-
-        if (m_uiSmashUpdateTimer < uiDiff)
-        {
-            // check all the targets which are in a certain distance from the colossus
-            for (GuidList::const_iterator itr = m_lCurrentSmashBunnies.begin(); itr != m_lCurrentSmashBunnies.end(); ++itr)
             {
-                if (Creature* pBunny = m_creature->GetMap()->GetCreature(*itr))
+                m_uiRunicSmashTimer = 1000;
+                m_bSmashStarted = true;
+            }
+
+            ScriptedAI::MoveInLineOfSight(pWho);
+        }
+
+        void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
+        {
+            // start runic smash event
+            if (pSpell->Id == SPELL_RUNIC_SMASH_L && m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_DATA_THORIM_SMASH_SIDE, uint32(true));
+                m_bSmashActive = true;
+            }
+            else if (pSpell->Id == SPELL_RUNIC_SMASH_R && m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_DATA_THORIM_SMASH_SIDE, uint32(false));
+                m_bSmashActive = true;
+            }
+        }
+
+        void SpellHitTarget(Unit* pTarget, SpellEntry const* pSpellEntry) override
+        {
+            if ((pSpellEntry->Id == SPELL_CHARGE || pSpellEntry->Id == SPELL_CHARGE_H) && pTarget->GetTypeId() == TYPEID_PLAYER)
+                m_uiSmashTimer = 1000;
+        }
+
+        // Wrapper to keep Runic Smash in a distinct function
+        void UpdateRunicSmash(const uint32 uiDiff)
+        {
+            if (!m_bSmashActive)
+                return;
+
+            if (m_uiSmashUpdateTimer < uiDiff)
+            {
+                // check all the targets which are in a certain distance from the colossus
+
+                if (m_pInstance)
                 {
-                    // use 12 and 16 as multipliers in order to get the perfect combination
-                    if (pBunny->GetPositionY() > m_creature->GetPositionY() + 12 * m_uiSmashIndex &&
-                            pBunny->GetPositionY() < m_creature->GetPositionY() + 16 * m_uiSmashIndex)
-                        pBunny->CastSpell(pBunny, SPELL_RUNIC_SMASH, false);
+                    m_pInstance->SetData(TYPE_DATA_THORIM_SMASHINDEX, m_uiSmashIndex);
+                    m_pInstance->SetData64(DATA64_THORIM_SMASH_CASTER, m_creature->GetObjectGuid().GetRawValue());
+                }
+
+                ++m_uiSmashIndex;
+                if (m_uiSmashIndex == MAX_RUNIC_SMASH + 1)
+                {
+                    m_bSmashActive = false;
+                    m_uiSmashIndex = 1;
+                }
+
+                m_uiSmashUpdateTimer = 250;
+            }
+            else
+                m_uiSmashUpdateTimer -= uiDiff;
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiRunicSmashTimer)
+            {
+                if (m_uiRunicSmashTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, urand(0, 1) ? SPELL_RUNIC_SMASH_L : SPELL_RUNIC_SMASH_R) == CAST_OK)
+                        m_uiRunicSmashTimer = 7000;
+                }
+                else
+                    m_uiRunicSmashTimer -= uiDiff;
+
+                UpdateRunicSmash(uiDiff);
+            }
+
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            if (m_uiChargeTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, m_bIsRegularMode ? SPELL_CHARGE : SPELL_CHARGE_H, SELECT_FLAG_NOT_IN_MELEE_RANGE))
+                {
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CHARGE : SPELL_CHARGE_H) == CAST_OK)
+                        m_uiChargeTimer = urand(10000, 15000);
                 }
             }
+            else
+                m_uiChargeTimer -= uiDiff;
 
-            ++m_uiSmashIndex;
-            if (m_uiSmashIndex == MAX_RUNIC_SMASH + 1)
+            // smash is cast right after charge
+            if (m_uiSmashTimer)
             {
-                m_bSmashActive = false;
-                m_uiSmashIndex = 1;
+                if (m_uiSmashTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_SMASH) == CAST_OK)
+                        m_uiSmashTimer = 0;
+                }
+                else
+                    m_uiSmashTimer -= uiDiff;
             }
 
-            m_uiSmashUpdateTimer = 250;
-        }
-        else
-            m_uiSmashUpdateTimer -= uiDiff;
-    }
+            if (m_uiBarrierTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_RUNIC_BARRIER) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_RUNIC_BARRIER, m_creature);
+                    m_uiBarrierTimer = urand(30000, 35000);
+                }
+            }
+            else
+                m_uiBarrierTimer -= uiDiff;
 
-    void UpdateAI(const uint32 uiDiff) override
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        if (m_uiRunicSmashTimer)
-        {
-            if (m_uiRunicSmashTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, urand(0, 1) ? SPELL_RUNIC_SMASH_L : SPELL_RUNIC_SMASH_R) == CAST_OK)
-                    m_uiRunicSmashTimer = 7000;
-            }
-            else
-                m_uiRunicSmashTimer -= uiDiff;
-
-            UpdateRunicSmash(uiDiff);
-        }
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiChargeTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, m_bIsRegularMode ? SPELL_CHARGE : SPELL_CHARGE_H, SELECT_FLAG_NOT_IN_MELEE_RANGE))
-            {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CHARGE : SPELL_CHARGE_H) == CAST_OK)
-                    m_uiChargeTimer = urand(10000, 15000);
-            }
-        }
-        else
-            m_uiChargeTimer -= uiDiff;
-
-        // smash is cast right after charge
-        if (m_uiSmashTimer)
-        {
-            if (m_uiSmashTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_SMASH) == CAST_OK)
-                    m_uiSmashTimer = 0;
-            }
-            else
-                m_uiSmashTimer -= uiDiff;
-        }
-
-        if (m_uiBarrierTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_RUNIC_BARRIER) == CAST_OK)
-            {
-                DoScriptText(EMOTE_RUNIC_BARRIER, m_creature);
-                m_uiBarrierTimer = urand(30000, 35000);
-            }
-        }
-        else
-            m_uiBarrierTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+        return new npc_runic_colossusAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_npc_runic_colossus(Creature* pCreature)
-{
-    return new npc_runic_colossusAI(pCreature);
-}
 
 /*######
 ## npc_thunder_orb
 ######*/
 
-struct  npc_thunder_orbAI : public Scripted_NoMovementAI
+struct npc_thunder_orb : public CreatureScript
 {
-    npc_thunder_orbAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    npc_thunder_orb() : CreatureScript("npc_thunder_orb") {}
 
-    uint32 m_uiTriggerTimer;
-
-    void Reset() override
+    struct npc_thunder_orbAI : public Scripted_NoMovementAI
     {
-        m_uiTriggerTimer = 0;
-    }
+        npc_thunder_orbAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { }
 
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        uint32 m_uiTriggerTimer;
 
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
-    {
-        // cast visual on the lower Orb
-        if (pSpell->Id == SPELL_CHARGE_ORB)
+        void Reset() override
         {
-            if (Creature* pOrb = GetClosestCreatureWithEntry(m_creature, NPC_THUNDER_ORB, 25.0f, true, false, true))
-                pOrb->CastSpell(pOrb, SPELL_LIGHTNING_PILLAR_ORB, false);
+            m_uiTriggerTimer = 0;
         }
-        // SPECIAL NOTE: this aura has a duration lower than the trigger period for the next spell; so we need to force this by timer
-        else if (pSpell->Id == SPELL_LIGHTNING_ORG_CHARGED)
-            m_uiTriggerTimer = 8000;
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiTriggerTimer)
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+        void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
         {
-            if (m_uiTriggerTimer <= uiDiff)
+            // cast visual on the lower Orb
+            if (pSpell->Id == SPELL_CHARGE_ORB)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_LIGHTNING_ORB_TRIGGER) == CAST_OK)
-                    m_uiTriggerTimer = 0;
+                if (Creature* pOrb = GetClosestCreatureWithEntry(m_creature, NPC_THUNDER_ORB, 25.0f, true, false, true))
+                    pOrb->CastSpell(pOrb, SPELL_LIGHTNING_PILLAR_ORB, false);
             }
-            else
-                m_uiTriggerTimer -= uiDiff;
+            // SPECIAL NOTE: this aura has a duration lower than the trigger period for the next spell; so we need to force this by timer
+            else if (pSpell->Id == SPELL_LIGHTNING_ORG_CHARGED)
+                m_uiTriggerTimer = 8000;
         }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (m_uiTriggerTimer)
+            {
+                if (m_uiTriggerTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_LIGHTNING_ORB_TRIGGER) == CAST_OK)
+                        m_uiTriggerTimer = 0;
+                }
+                else
+                    m_uiTriggerTimer -= uiDiff;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_thunder_orbAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_npc_thunder_orb(Creature* pCreature)
-{
-    return new npc_thunder_orbAI(pCreature);
-}
-
 void AddSC_boss_thorim()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_thorim";
-    pNewScript->GetAI = GetAI_boss_thorim;
-    pNewScript->RegisterSelf();
+    s = new boss_thorim();
+    s->RegisterSelf();
+    s = new boss_sif();
+    s->RegisterSelf();
+    s = new npc_runic_colossus();
+    s->RegisterSelf();
+    s = new npc_thunder_orb();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_sif";
-    pNewScript->GetAI = GetAI_boss_sif;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_thorim";
+    //pNewScript->GetAI = GetAI_boss_thorim;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_runic_colossus";
-    pNewScript->GetAI = GetAI_npc_runic_colossus;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_sif";
+    //pNewScript->GetAI = GetAI_boss_sif;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_thunder_orb";
-    pNewScript->GetAI = GetAI_npc_thunder_orb;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_runic_colossus";
+    //pNewScript->GetAI = GetAI_npc_runic_colossus;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_thunder_orb";
+    //pNewScript->GetAI = GetAI_npc_thunder_orb;
+    //pNewScript->RegisterSelf();
 }

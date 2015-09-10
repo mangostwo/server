@@ -71,40 +71,4 @@ enum
     GO_ANCIENT_GEM              = 185557,
 };
 
-static const float aArchimondeSpawnLoc[4] = {5581.49f, -3445.63f, 1575.1f, 3.905f};
-
-class instance_mount_hyjal : public ScriptedInstance
-{
-    public:
-        instance_mount_hyjal(Map* pMap);
-
-        void Initialize() override;
-        bool IsEncounterInProgress() const override;
-
-        void OnPlayerEnter(Player* pPlayer) override;
-
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-
-        void OnCreatureEnterCombat(Creature* pCreature) override;
-        void OnCreatureEvade(Creature* pCreature);
-        void OnCreatureDeath(Creature* pCreature) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        const char* Save() const override { return m_strSaveData.c_str(); }
-        void Load(const char* chrIn) override;
-
-    private:
-        void DoSpawnArchimonde();
-
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string m_strSaveData;
-
-        GuidList lAncientGemGUIDList;
-
-        uint32 m_uiTrashCount;
-};
-
 #endif

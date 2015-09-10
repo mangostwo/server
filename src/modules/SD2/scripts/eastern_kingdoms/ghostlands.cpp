@@ -57,36 +57,44 @@ enum
     FACTION_SMOON_E     = 1603,
 };
 
-struct npc_ranger_lilathaAI : public npc_escortAI
+struct npc_ranger_lilatha : public CreatureScript
 {
-    npc_ranger_lilathaAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+    npc_ranger_lilatha() : CreatureScript("npc_ranger_lilatha") {}
 
-    ObjectGuid m_goCageGuid;
-    ObjectGuid m_heliosGuid;
-
-    void MoveInLineOfSight(Unit* pUnit) override
+    struct npc_ranger_lilathaAI : public npc_escortAI
     {
-        if (HasEscortState(STATE_ESCORT_ESCORTING))
+        npc_ranger_lilathaAI(Creature* pCreature) : npc_escortAI(pCreature) { }
+
+        ObjectGuid m_goCageGuid;
+        ObjectGuid m_heliosGuid;
+
+        void MoveInLineOfSight(Unit* pUnit) override
         {
-            if (!m_heliosGuid && pUnit->GetEntry() == NPC_CAPTAIN_HELIOS)
+            if (HasEscortState(STATE_ESCORT_ESCORTING))
             {
-                if (m_creature->IsWithinDistInMap(pUnit, 30.0f))
-                { m_heliosGuid = pUnit->GetObjectGuid(); }
+                if (!m_heliosGuid && pUnit->GetEntry() == NPC_CAPTAIN_HELIOS)
+                {
+                    if (m_creature->IsWithinDistInMap(pUnit, 30.0f))
+                    {
+                        m_heliosGuid = pUnit->GetObjectGuid();
+                    }
+                }
             }
+
+            npc_escortAI::MoveInLineOfSight(pUnit);
         }
 
-        npc_escortAI::MoveInLineOfSight(pUnit);
-    }
-
-    void WaypointReached(uint32 i) override
-    {
-        Player* pPlayer = GetPlayerForEscort();
-
-        if (!pPlayer)
-        { return; }
-
-        switch (i)
+        void WaypointReached(uint32 i) override
         {
+            Player* pPlayer = GetPlayerForEscort();
+
+            if (!pPlayer)
+            {
+                return;
+            }
+
+            switch (i)
+            {
             case 0:
                 if (GameObject* pGoTemp = GetClosestGameObjectWithEntry(m_creature, GO_CAGE, 10.0f))
                 {
@@ -100,7 +108,9 @@ struct npc_ranger_lilathaAI : public npc_escortAI
                 break;
             case 1:
                 if (GameObject* pGo = m_creature->GetMap()->GetGameObject(m_goCageGuid))
-                { pGo->SetGoState(GO_STATE_READY); }
+                {
+                    pGo->SetGoState(GO_STATE_READY);
+                }
                 break;
             case 5:
                 DoScriptText(SAY_PROGRESS1, m_creature, pPlayer);
@@ -111,9 +121,13 @@ struct npc_ranger_lilathaAI : public npc_escortAI
             case 18:
                 DoScriptText(SAY_PROGRESS3, m_creature, pPlayer);
                 if (Creature* pSum1 = m_creature->SummonCreature(16342, 7627.083984f, -7532.538086f, 152.128616f, 1.082733f, TEMPSUMMON_DEAD_DESPAWN, 0))
-                { pSum1->AI()->AttackStart(m_creature); }
+                {
+                    pSum1->AI()->AttackStart(m_creature);
+                }
                 if (Creature* pSum2 = m_creature->SummonCreature(16343, 7620.432129f, -7532.550293f, 152.454865f, 0.827478f, TEMPSUMMON_DEAD_DESPAWN, 0))
-                { pSum2->AI()->AttackStart(pPlayer); }
+                {
+                    pSum2->AI()->AttackStart(pPlayer);
+                }
                 break;
             case 19:
                 SetRun();
@@ -130,45 +144,53 @@ struct npc_ranger_lilathaAI : public npc_escortAI
             case 33:
                 DoScriptText(SAY_END2, m_creature, pPlayer);
                 if (Creature* pHelios = m_creature->GetMap()->GetCreature(m_heliosGuid))
-                { DoScriptText(CAPTAIN_ANSWER, pHelios, m_creature); }
+                {
+                    DoScriptText(CAPTAIN_ANSWER, pHelios, m_creature);
+                }
                 break;
+            }
         }
+
+        void Reset() override
+        {
+            if (!HasEscortState(STATE_ESCORT_ESCORTING))
+            {
+                m_goCageGuid.Clear();
+                m_heliosGuid.Clear();
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_ranger_lilathaAI(pCreature);
     }
 
-    void Reset() override
+    bool OnQuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest) override
     {
-        if (!HasEscortState(STATE_ESCORT_ESCORTING))
+        if (pQuest->GetQuestId() == QUEST_CATACOMBS)
         {
-            m_goCageGuid.Clear();
-            m_heliosGuid.Clear();
+            pCreature->SetFactionTemporary(FACTION_SMOON_E, TEMPFACTION_RESTORE_RESPAWN);
+
+            if (npc_ranger_lilathaAI* pEscortAI = dynamic_cast<npc_ranger_lilathaAI*>(pCreature->AI()))
+            {
+                pEscortAI->Start(false, pPlayer, pQuest);
+            }
         }
+        return true;
     }
 };
 
-CreatureAI* GetAI_npc_ranger_lilathaAI(Creature* pCreature)
-{
-    return new npc_ranger_lilathaAI(pCreature);
-}
-
-bool QuestAccept_npc_ranger_lilatha(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_CATACOMBS)
-    {
-        pCreature->SetFactionTemporary(FACTION_SMOON_E, TEMPFACTION_RESTORE_RESPAWN);
-
-        if (npc_ranger_lilathaAI* pEscortAI = dynamic_cast<npc_ranger_lilathaAI*>(pCreature->AI()))
-        { pEscortAI->Start(false, pPlayer, pQuest); }
-    }
-    return true;
-}
-
 void AddSC_ghostlands()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_ranger_lilatha";
-    pNewScript->GetAI = &GetAI_npc_ranger_lilathaAI;
-    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_ranger_lilatha;
-    pNewScript->RegisterSelf();
+    s = new npc_ranger_lilatha();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_ranger_lilatha";
+    //pNewScript->GetAI = &GetAI_npc_ranger_lilathaAI;
+    //pNewScript->pQuestAcceptNPC = &QuestAccept_npc_ranger_lilatha;
+    //pNewScript->RegisterSelf();
 }

@@ -57,140 +57,171 @@ enum
     // SPELL_ETHEREAL_BEACON_VISUAL  = 32368,               // included in creature_template_addon
 };
 
-struct boss_nexusprince_shaffarAI : public ScriptedAI
+struct boss_nexusprince_shaffar : public CreatureScript
 {
-    boss_nexusprince_shaffarAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_nexusprince_shaffar() : CreatureScript("boss_nexusprince_shaffar") {}
+
+    struct boss_nexusprince_shaffarAI : public ScriptedAI
     {
-        m_bHasTaunted = false;
-        Reset();
-    }
-
-    uint32 m_uiBlinkTimer;
-    uint32 m_uiBeaconTimer;
-    uint32 m_uiFireBallTimer;
-    uint32 m_uiFrostboltTimer;
-    uint32 m_uiFrostNovaTimer;
-
-    bool m_bHasTaunted;
-
-    void Reset() override
-    {
-        m_uiBlinkTimer      = 30000;
-        m_uiBeaconTimer     = urand(12000, 15000);
-        m_uiFireBallTimer   = urand(2000, 12000);
-        m_uiFrostboltTimer  = urand(1000, 14000);
-        m_uiFrostNovaTimer  = urand(18000, 25000);
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (!m_bHasTaunted && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 100.0f) && m_creature->IsWithinLOSInMap(pWho))
+        boss_nexusprince_shaffarAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            DoScriptText(SAY_INTRO, m_creature);
-            m_bHasTaunted = true;
+            m_bHasTaunted = false;
         }
 
-        ScriptedAI::MoveInLineOfSight(pWho);
-    }
+        uint32 m_uiBlinkTimer;
+        uint32 m_uiBeaconTimer;
+        uint32 m_uiFireBallTimer;
+        uint32 m_uiFrostboltTimer;
+        uint32 m_uiFrostNovaTimer;
 
-    void Aggro(Unit* /*pWho*/) override
-    {
-        switch (urand(0, 2))
+        bool m_bHasTaunted;
+
+        void Reset() override
         {
+            m_uiBlinkTimer = 30000;
+            m_uiBeaconTimer = urand(12000, 15000);
+            m_uiFireBallTimer = urand(2000, 12000);
+            m_uiFrostboltTimer = urand(1000, 14000);
+            m_uiFrostNovaTimer = urand(18000, 25000);
+        }
+
+        void MoveInLineOfSight(Unit* pWho) override
+        {
+            if (!m_bHasTaunted && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 100.0f) && m_creature->IsWithinLOSInMap(pWho))
+            {
+                DoScriptText(SAY_INTRO, m_creature);
+                m_bHasTaunted = true;
+            }
+
+            ScriptedAI::MoveInLineOfSight(pWho);
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            switch (urand(0, 2))
+            {
             case 0: DoScriptText(SAY_AGGRO_1, m_creature); break;
             case 1: DoScriptText(SAY_AGGRO_2, m_creature); break;
             case 2: DoScriptText(SAY_AGGRO_3, m_creature); break;
-        }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-        { pSummoned->AI()->AttackStart(pTarget); }
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEAD, m_creature);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiFrostNovaTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_FROSTNOVA) == CAST_OK)
-            { m_uiFrostNovaTimer = urand(10000, 20000); }
-        }
-        else
-        { m_uiFrostNovaTimer -= uiDiff; }
-
-        if (m_uiFrostboltTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROSTBOLT) == CAST_OK)
-            { m_uiFrostboltTimer = urand(3000, 8000); }
-        }
-        else
-        { m_uiFrostboltTimer -= uiDiff; }
-
-        if (m_uiFireBallTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FIREBALL) == CAST_OK)
-            { m_uiFireBallTimer = urand(3000, 8000); }
-        }
-        else
-        { m_uiFireBallTimer -= uiDiff; }
-
-        if (m_uiBlinkTimer <= uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_BLINK) == CAST_OK)
-            {
-                // expire movement, will prevent from running right back to victim after cast
-                //(but should MoveChase be used again at a certain time or should he not move?)
-                if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
-                { m_creature->GetMotionMaster()->MovementExpired(); }
-
-                m_uiBlinkTimer = urand(25000, 30000);
             }
         }
-        else
-        { m_uiBlinkTimer -= uiDiff; }
 
-        if (m_uiBeaconTimer < uiDiff)
+        void JustSummoned(Creature* pSummoned) override
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_ETHEREAL_BEACON) == CAST_OK)
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
-                if (!urand(0, 3))
-                { DoScriptText(SAY_SUMMON, m_creature); }
-
-                m_uiBeaconTimer = urand(45000, 75000);
+                pSummoned->AI()->AttackStart(pTarget);
             }
         }
-        else
-        { m_uiBeaconTimer -= uiDiff; }
 
-        DoMeleeAttackIfReady();
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(SAY_DEAD, m_creature);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_uiFrostNovaTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_FROSTNOVA) == CAST_OK)
+                {
+                    m_uiFrostNovaTimer = urand(10000, 20000);
+                }
+            }
+            else
+            {
+                m_uiFrostNovaTimer -= uiDiff;
+            }
+
+            if (m_uiFrostboltTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROSTBOLT) == CAST_OK)
+                {
+                    m_uiFrostboltTimer = urand(3000, 8000);
+                }
+            }
+            else
+            {
+                m_uiFrostboltTimer -= uiDiff;
+            }
+
+            if (m_uiFireBallTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FIREBALL) == CAST_OK)
+                {
+                    m_uiFireBallTimer = urand(3000, 8000);
+                }
+            }
+            else
+            {
+                m_uiFireBallTimer -= uiDiff;
+            }
+
+            if (m_uiBlinkTimer <= uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_BLINK) == CAST_OK)
+                {
+                    // expire movement, will prevent from running right back to victim after cast
+                    //(but should MoveChase be used again at a certain time or should he not move?)
+                    if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
+                    {
+                        m_creature->GetMotionMaster()->MovementExpired();
+                    }
+
+                    m_uiBlinkTimer = urand(25000, 30000);
+                }
+            }
+            else
+            {
+                m_uiBlinkTimer -= uiDiff;
+            }
+
+            if (m_uiBeaconTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_ETHEREAL_BEACON) == CAST_OK)
+                {
+                    if (!urand(0, 3))
+                    {
+                        DoScriptText(SAY_SUMMON, m_creature);
+                    }
+
+                    m_uiBeaconTimer = urand(45000, 75000);
+                }
+            }
+            else
+            {
+                m_uiBeaconTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_nexusprince_shaffarAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_nexusprince_shaffar(Creature* pCreature)
-{
-    return new boss_nexusprince_shaffarAI(pCreature);
-}
-
 void AddSC_boss_nexusprince_shaffar()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_nexusprince_shaffar";
-    pNewScript->GetAI = &GetAI_boss_nexusprince_shaffar;
-    pNewScript->RegisterSelf();
+    s = new boss_nexusprince_shaffar();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_nexusprince_shaffar";
+    //pNewScript->GetAI = &GetAI_boss_nexusprince_shaffar;
+    //pNewScript->RegisterSelf();
 }

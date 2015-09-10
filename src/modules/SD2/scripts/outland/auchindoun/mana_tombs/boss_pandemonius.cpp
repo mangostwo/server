@@ -50,103 +50,118 @@ enum
     MAX_VOID_BLASTS                 = 5,
 };
 
-struct boss_pandemoniusAI : public ScriptedAI
+struct boss_pandemonius : public CreatureScript
 {
-    boss_pandemoniusAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_pandemonius() : CreatureScript("boss_pandemonius") {}
+
+    struct boss_pandemoniusAI : public ScriptedAI
     {
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    bool m_bIsRegularMode;
-
-    uint32 m_uiVoidBlastTimer;
-    uint32 m_uiDarkShellTimer;
-    uint8 m_uiVoidBlastCounter;
-
-    void Reset() override
-    {
-        m_uiVoidBlastTimer   = urand(15000, 20000);
-        m_uiDarkShellTimer   = 15000;
-        m_uiVoidBlastCounter = 0;
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_KILL_1 : SAY_KILL_2, m_creature);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        switch (urand(0, 2))
+        boss_pandemoniusAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        }
+
+        bool m_bIsRegularMode;
+
+        uint32 m_uiVoidBlastTimer;
+        uint32 m_uiDarkShellTimer;
+        uint8 m_uiVoidBlastCounter;
+
+        void Reset() override
+        {
+            m_uiVoidBlastTimer = urand(15000, 20000);
+            m_uiDarkShellTimer = 15000;
+            m_uiVoidBlastCounter = 0;
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(SAY_DEATH, m_creature);
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            DoScriptText(urand(0, 1) ? SAY_KILL_1 : SAY_KILL_2, m_creature);
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            switch (urand(0, 2))
+            {
             case 0: DoScriptText(SAY_AGGRO_1, m_creature); break;
             case 1: DoScriptText(SAY_AGGRO_2, m_creature); break;
             case 2: DoScriptText(SAY_AGGRO_3, m_creature); break;
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiVoidBlastTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            { DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_VOID_BLAST : SPELL_VOID_BLAST_H); }
-
-            // reset timer and counter when counter has reached the max limit
-            if (m_uiVoidBlastCounter == MAX_VOID_BLASTS)
-            {
-                m_uiVoidBlastTimer = urand(25000, 30000);
-                m_uiVoidBlastCounter = 0;
-            }
-            // cast the void blasts in a row until we reach the max limit
-            else
-            {
-                m_uiVoidBlastTimer = 500;
-                ++m_uiVoidBlastCounter;
             }
         }
-        else
-        { m_uiVoidBlastTimer -= uiDiff; }
 
-        // use the darkshell only when the boss isn't casting the void blasts
-        if (!m_uiVoidBlastCounter)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            if (m_uiDarkShellTimer < uiDiff)
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             {
-                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DARK_SHELL : SPELL_DARK_SHELL_H) == CAST_OK)
+                return;
+            }
+
+            if (m_uiVoidBlastTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
-                    DoScriptText(EMOTE_DARK_SHELL, m_creature);
-                    m_uiDarkShellTimer = urand(25000, 30000);
+                    DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_VOID_BLAST : SPELL_VOID_BLAST_H);
+                }
+
+                // reset timer and counter when counter has reached the max limit
+                if (m_uiVoidBlastCounter == MAX_VOID_BLASTS)
+                {
+                    m_uiVoidBlastTimer = urand(25000, 30000);
+                    m_uiVoidBlastCounter = 0;
+                }
+                // cast the void blasts in a row until we reach the max limit
+                else
+                {
+                    m_uiVoidBlastTimer = 500;
+                    ++m_uiVoidBlastCounter;
                 }
             }
             else
-            { m_uiDarkShellTimer -= uiDiff; }
-        }
+            {
+                m_uiVoidBlastTimer -= uiDiff;
+            }
 
-        DoMeleeAttackIfReady();
+            // use the darkshell only when the boss isn't casting the void blasts
+            if (!m_uiVoidBlastCounter)
+            {
+                if (m_uiDarkShellTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DARK_SHELL : SPELL_DARK_SHELL_H) == CAST_OK)
+                    {
+                        DoScriptText(EMOTE_DARK_SHELL, m_creature);
+                        m_uiDarkShellTimer = urand(25000, 30000);
+                    }
+                }
+                else
+                {
+                    m_uiDarkShellTimer -= uiDiff;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_pandemoniusAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_pandemonius(Creature* pCreature)
-{
-    return new boss_pandemoniusAI(pCreature);
-}
-
 void AddSC_boss_pandemonius()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_pandemonius";
-    pNewScript->GetAI = &GetAI_boss_pandemonius;
-    pNewScript->RegisterSelf();
+    s = new boss_pandemonius();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_pandemonius";
+    //pNewScript->GetAI = &GetAI_boss_pandemonius;
+    //pNewScript->RegisterSelf();
 }

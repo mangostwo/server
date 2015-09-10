@@ -105,252 +105,254 @@ static const BoatSpirits aYmironBoatsSpirits[MAX_BOATS] =
 ## boss_ymiron
 ######*/
 
-struct  boss_ymironAI : public ScriptedAI
+struct boss_ymiron : public CreatureScript
 {
-    boss_ymironAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_ymiron() : CreatureScript("boss_ymiron") {}
+
+    struct boss_ymironAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-
-        for (uint8 i = 0; i < MAX_BOATS; ++i)
-            m_vuiBoatPhases.push_back(i);
-
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiFetidRotTimer;
-    uint32 m_uiBaneTimer;
-    uint32 m_uiDarkSlashTimer;
-    uint32 m_uiSpiritTransformTimer;
-    uint32 m_uiCombatResumeTimer;
-    uint8 m_uiPhase;
-    uint8 m_uiBoats;
-    float m_fHealthCheck;
-
-    uint32 m_uiSpiritBurstTimer;
-    uint32 m_uiSpiritStrikeTimer;
-    uint32 m_uiSpiritFountTimer;
-    uint32 m_uiAvengingSpiritsTimer;
-
-    bool m_bIsChannelingSpirit;
-
-    ObjectGuid m_uiCurrentSpiritGuid;
-
-    std::vector<uint8> m_vuiBoatPhases;
-
-    void Reset() override
-    {
-        m_uiFetidRotTimer           = urand(8000, 13000);
-        m_uiBaneTimer               = urand(18000, 23000);
-        m_uiDarkSlashTimer          = urand(28000, 33000);
-        m_uiSpiritTransformTimer    = 0;
-        m_uiCombatResumeTimer       = 0;
-        m_uiPhase                   = PHASE_NO_BOAT;
-        m_uiBoats                   = 0;
-        m_fHealthCheck              = m_bIsRegularMode ? 33.3f : 20.0f;
-
-        m_uiSpiritBurstTimer        = 10000;
-        m_uiSpiritStrikeTimer       = 10000;
-        m_uiSpiritFountTimer        = 10000;
-        m_uiAvengingSpiritsTimer    = 10000;
-
-        m_bIsChannelingSpirit       = false;
-
-        m_uiCurrentSpiritGuid.Clear();
-
-        // Randomize spirit order
-        std::random_shuffle(m_vuiBoatPhases.begin(), m_vuiBoatPhases.end());
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_YMIRON, IN_PROGRESS);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        switch (urand(0, 3))
+        boss_ymironAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+
+            for (uint8 i = 0; i < MAX_BOATS; ++i)
+                m_vuiBoatPhases.push_back(i);
+        }
+
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        uint32 m_uiFetidRotTimer;
+        uint32 m_uiBaneTimer;
+        uint32 m_uiDarkSlashTimer;
+        uint32 m_uiSpiritTransformTimer;
+        uint32 m_uiCombatResumeTimer;
+        uint8 m_uiPhase;
+        uint8 m_uiBoats;
+        float m_fHealthCheck;
+
+        uint32 m_uiSpiritBurstTimer;
+        uint32 m_uiSpiritStrikeTimer;
+        uint32 m_uiSpiritFountTimer;
+        uint32 m_uiAvengingSpiritsTimer;
+
+        bool m_bIsChannelingSpirit;
+
+        ObjectGuid m_uiCurrentSpiritGuid;
+
+        std::vector<uint8> m_vuiBoatPhases;
+
+        void Reset() override
+        {
+            m_uiFetidRotTimer = urand(8000, 13000);
+            m_uiBaneTimer = urand(18000, 23000);
+            m_uiDarkSlashTimer = urand(28000, 33000);
+            m_uiSpiritTransformTimer = 0;
+            m_uiCombatResumeTimer = 0;
+            m_uiPhase = PHASE_NO_BOAT;
+            m_uiBoats = 0;
+            m_fHealthCheck = m_bIsRegularMode ? 33.3f : 20.0f;
+
+            m_uiSpiritBurstTimer = 10000;
+            m_uiSpiritStrikeTimer = 10000;
+            m_uiSpiritFountTimer = 10000;
+            m_uiAvengingSpiritsTimer = 10000;
+
+            m_bIsChannelingSpirit = false;
+
+            m_uiCurrentSpiritGuid.Clear();
+
+            // Randomize spirit order
+            std::random_shuffle(m_vuiBoatPhases.begin(), m_vuiBoatPhases.end());
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_YMIRON, IN_PROGRESS);
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            switch (urand(0, 3))
+            {
             case 0: DoScriptText(SAY_SLAY_1, m_creature); break;
             case 1: DoScriptText(SAY_SLAY_2, m_creature); break;
             case 2: DoScriptText(SAY_SLAY_3, m_creature); break;
             case 3: DoScriptText(SAY_SLAY_4, m_creature); break;
-        }
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        // Burn the last spirit
-        if (Creature* pSpirit = m_creature->GetMap()->GetCreature(m_uiCurrentSpiritGuid))
-        {
-            pSpirit->InterruptNonMeleeSpells(false);
-            pSpirit->CastSpell(pSpirit, SPELL_SPIRIT_DIES, false);
-        }
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_YMIRON, DONE);
-    }
-
-    void JustReachedHome() override
-    {
-        DoResetSpirits();
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_YMIRON, FAIL);
-    }
-
-    // Wrapper which handles the spirits reset
-    void DoResetSpirits()
-    {
-        if (!m_pInstance)
-            return;
-
-        for (uint8 i = 0; i < MAX_BOATS; ++i)
-        {
-            if (Creature* pSpirit = m_pInstance->GetSingleCreatureFromStorage(aYmironBoatsSpirits[i].uiSpiritTarget))
-                pSpirit->AI()->EnterEvadeMode();
-        }
-    }
-
-    void DoChannelSpiritYmiron()
-    {
-        if (Creature* pSpirit = m_creature->GetMap()->GetCreature(m_uiCurrentSpiritGuid))
-            pSpirit->CastSpell(m_creature, SPELL_CHANNEL_SPIRIT_YMIRON, false);
-
-        // Channeling is finished - resume combat
-        if (m_creature->getVictim())
-        {
-            m_creature->GetMotionMaster()->Clear();
-            m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
-        }
-
-        SetCombatMovement(true);
-        m_bIsChannelingSpirit = false;
-
-        m_uiPhase = aYmironBoatsSpirits[m_vuiBoatPhases[m_uiBoats]].uiBoatPhase;
-        ++m_uiBoats;
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_SPIRIT_FOUNT)
-            DoCastSpellIfCan(pSummoned, SPELL_SPIRIT_FOUNT_BEAM, CAST_INTERRUPT_PREVIOUS);
-    }
-
-    void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
-    {
-        if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
-            return;
-
-        if (Creature* pSpirit = m_creature->GetMap()->GetCreature(m_uiCurrentSpiritGuid))
-        {
-            DoCastSpellIfCan(pSpirit, SPELL_CHANNEL_YMIRON_SPIRIT);
-            DoScriptText(aYmironBoatsSpirits[m_vuiBoatPhases[m_uiBoats]].iYellId, m_creature);
-            m_uiSpiritTransformTimer = 3000;
-            m_uiCombatResumeTimer    = 6000;
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiSpiritTransformTimer)
-        {
-            if (m_uiSpiritTransformTimer <= uiDiff)
-            {
-                if (Creature* pSpirit = m_creature->GetMap()->GetCreature(m_uiCurrentSpiritGuid))
-                {
-                    pSpirit->CastSpell(pSpirit, aYmironBoatsSpirits[m_vuiBoatPhases[m_uiBoats]].uiSpiritSpell, true);
-                    pSpirit->CastSpell(pSpirit, SPELL_EMERGE_STATE, true);
-                }
-                m_uiSpiritTransformTimer = 0;
             }
-            else
-                m_uiSpiritTransformTimer -= uiDiff;
         }
 
-        if (m_uiCombatResumeTimer)
+        void JustDied(Unit* /*pKiller*/) override
         {
-            // This should be done on aura 48307 remove, but because of lack of core support, we'll handle it on normal timer
-            if (m_uiCombatResumeTimer <= uiDiff)
-            {
-                DoChannelSpiritYmiron();
-                m_uiCombatResumeTimer = 0;
-            }
-            else
-                m_uiCombatResumeTimer -= uiDiff;
-        }
+            DoScriptText(SAY_DEATH, m_creature);
 
-        // Don't attack while channeling on the boats
-        if (m_bIsChannelingSpirit)
-            return;
-
-        if (m_uiBaneTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_BANE : SPELL_BANE_H) == CAST_OK)
-                m_uiBaneTimer = urand(20000, 25000);
-        }
-        else
-            m_uiBaneTimer -= uiDiff;
-
-        if (m_uiFetidRotTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FETID_ROT : SPELL_FETID_ROT_H) == CAST_OK)
-                m_uiFetidRotTimer = urand(10000, 15000);
-        }
-        else
-            m_uiFetidRotTimer -= uiDiff;
-
-        if (m_uiDarkSlashTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DARK_SLASH) == CAST_OK)
-                m_uiDarkSlashTimer = urand(30000, 35000);
-        }
-        else
-            m_uiDarkSlashTimer -= uiDiff;
-
-        // Check the spirit phases (also don't allow him to change phase if below 1%)
-        if (m_creature->GetHealthPercent() < 100 - m_fHealthCheck && m_creature->GetHealthPercent() > 1.0f)
-        {
-            // change phase
-            DoCastSpellIfCan(m_creature, SPELL_SCREAMS_OF_THE_DEAD, CAST_INTERRUPT_PREVIOUS);
-
-            // make the current spirit die (burn)
+            // Burn the last spirit
             if (Creature* pSpirit = m_creature->GetMap()->GetCreature(m_uiCurrentSpiritGuid))
             {
                 pSpirit->InterruptNonMeleeSpells(false);
                 pSpirit->CastSpell(pSpirit, SPELL_SPIRIT_DIES, false);
             }
 
-            // Get a close point to the spirits and move near them
             if (m_pInstance)
-            {
-                if (Creature* pSpirit = m_pInstance->GetSingleCreatureFromStorage(aYmironBoatsSpirits[m_vuiBoatPhases[m_uiBoats]].uiSpiritTarget))
-                {
-                    float fX, fY, fZ;
-                    m_uiCurrentSpiritGuid = pSpirit->GetObjectGuid();
-                    pSpirit->GetContactPoint(m_creature, fX, fY, fZ, INTERACTION_DISTANCE);
-                    m_creature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
-                }
-            }
-
-            SetCombatMovement(false);
-            m_bIsChannelingSpirit = true;
-            m_fHealthCheck += m_bIsRegularMode ? 33.3f : 20.0f;
+                m_pInstance->SetData(TYPE_YMIRON, DONE);
         }
 
-        switch (m_uiPhase)
+        void JustReachedHome() override
         {
+            DoResetSpirits();
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_YMIRON, FAIL);
+        }
+
+        // Wrapper which handles the spirits reset
+        void DoResetSpirits()
+        {
+            if (!m_pInstance)
+                return;
+
+            for (uint8 i = 0; i < MAX_BOATS; ++i)
+            {
+                if (Creature* pSpirit = m_pInstance->GetSingleCreatureFromStorage(aYmironBoatsSpirits[i].uiSpiritTarget))
+                    pSpirit->AI()->EnterEvadeMode();
+            }
+        }
+
+        void DoChannelSpiritYmiron()
+        {
+            if (Creature* pSpirit = m_creature->GetMap()->GetCreature(m_uiCurrentSpiritGuid))
+                pSpirit->CastSpell(m_creature, SPELL_CHANNEL_SPIRIT_YMIRON, false);
+
+            // Channeling is finished - resume combat
+            if (m_creature->getVictim())
+            {
+                m_creature->GetMotionMaster()->Clear();
+                m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+            }
+
+            SetCombatMovement(true);
+            m_bIsChannelingSpirit = false;
+
+            m_uiPhase = aYmironBoatsSpirits[m_vuiBoatPhases[m_uiBoats]].uiBoatPhase;
+            ++m_uiBoats;
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_SPIRIT_FOUNT)
+                DoCastSpellIfCan(pSummoned, SPELL_SPIRIT_FOUNT_BEAM, CAST_INTERRUPT_PREVIOUS);
+        }
+
+        void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
+        {
+            if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
+                return;
+
+            if (Creature* pSpirit = m_creature->GetMap()->GetCreature(m_uiCurrentSpiritGuid))
+            {
+                DoCastSpellIfCan(pSpirit, SPELL_CHANNEL_YMIRON_SPIRIT);
+                DoScriptText(aYmironBoatsSpirits[m_vuiBoatPhases[m_uiBoats]].iYellId, m_creature);
+                m_uiSpiritTransformTimer = 3000;
+                m_uiCombatResumeTimer = 6000;
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            if (m_uiSpiritTransformTimer)
+            {
+                if (m_uiSpiritTransformTimer <= uiDiff)
+                {
+                    if (Creature* pSpirit = m_creature->GetMap()->GetCreature(m_uiCurrentSpiritGuid))
+                    {
+                        pSpirit->CastSpell(pSpirit, aYmironBoatsSpirits[m_vuiBoatPhases[m_uiBoats]].uiSpiritSpell, true);
+                        pSpirit->CastSpell(pSpirit, SPELL_EMERGE_STATE, true);
+                    }
+                    m_uiSpiritTransformTimer = 0;
+                }
+                else
+                    m_uiSpiritTransformTimer -= uiDiff;
+            }
+
+            if (m_uiCombatResumeTimer)
+            {
+                // This should be done on aura 48307 remove, but because of lack of core support, we'll handle it on normal timer
+                if (m_uiCombatResumeTimer <= uiDiff)
+                {
+                    DoChannelSpiritYmiron();
+                    m_uiCombatResumeTimer = 0;
+                }
+                else
+                    m_uiCombatResumeTimer -= uiDiff;
+            }
+
+            // Don't attack while channeling on the boats
+            if (m_bIsChannelingSpirit)
+                return;
+
+            if (m_uiBaneTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_BANE : SPELL_BANE_H) == CAST_OK)
+                    m_uiBaneTimer = urand(20000, 25000);
+            }
+            else
+                m_uiBaneTimer -= uiDiff;
+
+            if (m_uiFetidRotTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FETID_ROT : SPELL_FETID_ROT_H) == CAST_OK)
+                    m_uiFetidRotTimer = urand(10000, 15000);
+            }
+            else
+                m_uiFetidRotTimer -= uiDiff;
+
+            if (m_uiDarkSlashTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DARK_SLASH) == CAST_OK)
+                    m_uiDarkSlashTimer = urand(30000, 35000);
+            }
+            else
+                m_uiDarkSlashTimer -= uiDiff;
+
+            // Check the spirit phases (also don't allow him to change phase if below 1%)
+            if (m_creature->GetHealthPercent() < 100 - m_fHealthCheck && m_creature->GetHealthPercent() > 1.0f)
+            {
+                // change phase
+                DoCastSpellIfCan(m_creature, SPELL_SCREAMS_OF_THE_DEAD, CAST_INTERRUPT_PREVIOUS);
+
+                // make the current spirit die (burn)
+                if (Creature* pSpirit = m_creature->GetMap()->GetCreature(m_uiCurrentSpiritGuid))
+                {
+                    pSpirit->InterruptNonMeleeSpells(false);
+                    pSpirit->CastSpell(pSpirit, SPELL_SPIRIT_DIES, false);
+                }
+
+                // Get a close point to the spirits and move near them
+                if (m_pInstance)
+                {
+                    if (Creature* pSpirit = m_pInstance->GetSingleCreatureFromStorage(aYmironBoatsSpirits[m_vuiBoatPhases[m_uiBoats]].uiSpiritTarget))
+                    {
+                        float fX, fY, fZ;
+                        m_uiCurrentSpiritGuid = pSpirit->GetObjectGuid();
+                        pSpirit->GetContactPoint(m_creature, fX, fY, fZ, INTERACTION_DISTANCE);
+                        m_creature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
+                    }
+                }
+
+                SetCombatMovement(false);
+                m_bIsChannelingSpirit = true;
+                m_fHealthCheck += m_bIsRegularMode ? 33.3f : 20.0f;
+            }
+
+            switch (m_uiPhase)
+            {
             case PHASE_BJORN:
 
                 if (m_uiSpiritFountTimer)
@@ -398,41 +400,53 @@ struct  boss_ymironAI : public ScriptedAI
                     m_uiAvengingSpiritsTimer -= uiDiff;
 
                 break;
-        }
+            }
 
-        DoMeleeAttackIfReady();
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_ymironAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_ymiron(Creature* pCreature)
+struct event_achiev_kings_bane : public MapEventScript
 {
-    return new boss_ymironAI(pCreature);
-}
+    event_achiev_kings_bane() : MapEventScript("event_achiev_kings_bane") {}
 
-bool ProcessEventId_event_achiev_kings_bane(uint32 /*uiEventId*/, Object* pSource, Object* /*pTarget*/, bool /*bIsStart*/)
-{
-    if (instance_pinnacle* pInstance = (instance_pinnacle*)((Creature*)pSource)->GetInstanceData())
+    bool OnReceived(uint32 /*uiEventId*/, Object* pSource, Object* /*pTarget*/, bool /*bIsStart*/) override
     {
-        if (pInstance->GetData(TYPE_YMIRON) != IN_PROGRESS)
-            return false;
+        if (InstanceData* pInstance = ((Creature*)pSource)->GetInstanceData())
+        {
+            if (pInstance->GetData(TYPE_YMIRON) != IN_PROGRESS)
+                return false;
 
-        pInstance->SetData(TYPE_YMIRON, SPECIAL);
-        return true;
+            pInstance->SetData(TYPE_YMIRON, SPECIAL);
+            return true;
+        }
+        return false;
     }
-    return false;
-}
+};
 
 void AddSC_boss_ymiron()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_ymiron";
-    pNewScript->GetAI = &GetAI_boss_ymiron;
-    pNewScript->RegisterSelf();
+    s = new boss_ymiron();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "event_achiev_kings_bane";
-    pNewScript->pProcessEventId = &ProcessEventId_event_achiev_kings_bane;
-    pNewScript->RegisterSelf();
+    s = new event_achiev_kings_bane();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_ymiron";
+    //pNewScript->GetAI = &GetAI_boss_ymiron;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "event_achiev_kings_bane";
+    //pNewScript->pProcessEventId = &ProcessEventId_event_achiev_kings_bane;
+    //pNewScript->RegisterSelf();
 }

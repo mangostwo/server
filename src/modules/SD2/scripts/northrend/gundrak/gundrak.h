@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+﻿/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
@@ -25,6 +25,7 @@ enum
     // Used to handle achievements
     TYPE_ACHIEV_WHY_SNAKES = 5,
     TYPE_ACHIEV_SHARE_LOVE = 6,
+    TYPE_ACHIEV_LESS_RABI  = 7,
 
     NPC_SLADRAN            = 29304,
     NPC_MOORABI            = 29305,
@@ -65,56 +66,6 @@ enum
     ACHIEV_CRIT_LESS_RABI  = 7319,              // Moorabi achiev 2040
     ACHIEV_CRIT_WHY_SNAKES = 7363,              // Sladran achiev 2058
     ACHIEV_CRIT_SHARE_LOVE = 7583,              // Galdarah achiev 2152
-};
-
-typedef std::map<uint8, uint32>  TypeTimerMap;
-typedef std::pair<uint8, uint32> TypeTimerPair;
-
-class instance_gundrak : public ScriptedInstance
-{
-    public:
-        instance_gundrak(Map* pMap);
-        ~instance_gundrak() {}
-
-        void Initialize() override;
-
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-
-        void OnCreatureEnterCombat(Creature* pCreature) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-        void Load(const char* chrIn) override;
-
-        ObjectGuid SelectRandomSladranTargetGuid();
-
-        void SetLessRabiAchievementCriteria(bool bIsMet) { m_bLessRabi = bIsMet; }
-        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
-
-        void Update(uint32 uiDiff) override;
-
-    protected:
-        void DoAltarVisualEffect(uint8 uiType);
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string m_strInstData;
-
-        TypeTimerMap m_mAltarInProgress;
-        TypeTimerMap m_mBeamInProgress;
-        TypeTimerMap m_mKeyInProgress;
-
-        GuidList m_luiStalkerGUIDs;
-        GuidList m_lSummonTargetsGuids;
-        GuidVector m_vStalkerCasterGuids;
-        GuidVector m_vStalkerTargetGuids;
-        GuidSet m_sColossusMojosGuids;
-
-        bool m_bLessRabi;
-
-        std::set<uint32> m_uisShareLoveAchievPlayers;
-        std::set<uint32> m_uisWhySnakesAchievPlayers;
 };
 
 #endif

@@ -110,181 +110,216 @@ static const DialogueEntry aIntroDialogue[] =
 ## boss_brutallus
 ######*/
 
-struct boss_brutallusAI : public ScriptedAI, private DialogueHelper
+struct boss_brutallus : public CreatureScript
 {
-    boss_brutallusAI(Creature* pCreature) : ScriptedAI(pCreature),
+    boss_brutallus() : CreatureScript("boss_brutallus") {}
+
+    struct boss_brutallusAI : public ScriptedAI, private DialogueHelper
+    {
+        boss_brutallusAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aIntroDialogue)
-    {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        InitializeDialogueHelper(m_pInstance);
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiSlashTimer;
-    uint32 m_uiBurnTimer;
-    uint32 m_uiStompTimer;
-    uint32 m_uiBerserkTimer;
-    uint32 m_uiLoveTimer;
-
-    uint32 m_uiMadrigosaSpellTimer;
-
-    bool m_bCanDoMeleeAttack;
-    bool m_bIsIntroInProgress;
-
-    void Reset() override
-    {
-        m_uiSlashTimer      = 11000;
-        m_uiStompTimer      = 30000;
-        m_uiBurnTimer       = 20000;
-        m_uiBerserkTimer    = 6 * MINUTE * IN_MILLISECONDS;
-        m_uiLoveTimer       = urand(10000, 17000);
-
-        m_uiMadrigosaSpellTimer = 0;
-
-        m_bCanDoMeleeAttack = true;
-        m_bIsIntroInProgress = false;
-    }
-
-    void Aggro(Unit* pWho) override
-    {
-        // Don't aggro when attacking Madrigosa
-        if (pWho->GetEntry() == NPC_MADRIGOSA)
-        { return; }
-
-        DoScriptText(YELL_AGGRO, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_BRUTALLUS, IN_PROGRESS); }
-    }
-
-    void KilledUnit(Unit* pVictim) override
-    {
-        // Don't yell for Madrigosa
-        if (pVictim->GetEntry() == NPC_MADRIGOSA)
-        { return; }
-
-        switch (urand(0, 2))
         {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            InitializeDialogueHelper(m_pInstance);
+        }
+
+        ScriptedInstance* m_pInstance;
+
+        uint32 m_uiSlashTimer;
+        uint32 m_uiBurnTimer;
+        uint32 m_uiStompTimer;
+        uint32 m_uiBerserkTimer;
+        uint32 m_uiLoveTimer;
+
+        uint32 m_uiMadrigosaSpellTimer;
+
+        bool m_bCanDoMeleeAttack;
+        bool m_bIsIntroInProgress;
+
+        void Reset() override
+        {
+            m_uiSlashTimer = 11000;
+            m_uiStompTimer = 30000;
+            m_uiBurnTimer = 20000;
+            m_uiBerserkTimer = 6 * MINUTE * IN_MILLISECONDS;
+            m_uiLoveTimer = urand(10000, 17000);
+
+            m_uiMadrigosaSpellTimer = 0;
+
+            m_bCanDoMeleeAttack = true;
+            m_bIsIntroInProgress = false;
+        }
+
+        void Aggro(Unit* pWho) override
+        {
+            // Don't aggro when attacking Madrigosa
+            if (pWho->GetEntry() == NPC_MADRIGOSA)
+            {
+                return;
+            }
+
+            DoScriptText(YELL_AGGRO, m_creature);
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_BRUTALLUS, IN_PROGRESS);
+            }
+        }
+
+        void KilledUnit(Unit* pVictim) override
+        {
+            // Don't yell for Madrigosa
+            if (pVictim->GetEntry() == NPC_MADRIGOSA)
+            {
+                return;
+            }
+
+            switch (urand(0, 2))
+            {
             case 0: DoScriptText(YELL_KILL1, m_creature); break;
             case 1: DoScriptText(YELL_KILL2, m_creature); break;
             case 2: DoScriptText(YELL_KILL3, m_creature); break;
-        }
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(YELL_DEATH, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_SUMMON_DEATH_CLOUD, CAST_TRIGGERED);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_BRUTALLUS, DONE); }
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-        {
-            // When evade from the fight with Madrigosa skip this
-            if (m_pInstance->GetData(TYPE_BRUTALLUS) == SPECIAL)
-            { return; }
-
-            m_pInstance->SetData(TYPE_BRUTALLUS, FAIL);
-        }
-    }
-
-    void GetAIInformation(ChatHandler& reader) override
-    {
-        if (m_pInstance)
-        {
-            if (m_pInstance->GetData(TYPE_BRUTALLUS) == SPECIAL)
-            { reader.PSendSysMessage("Brutallus intro event is currently %s", m_bIsIntroInProgress ? "in progress" : "completed"); }
-            else
-            { reader.PSendSysMessage("Brutallus intro event is currently %s", m_pInstance->GetData(TYPE_BRUTALLUS) == NOT_STARTED ? "not started" : "completed"); }
-
-            if (m_pInstance->GetData(TYPE_BRUTALLUS) != NOT_STARTED)
-            {
-                if (Creature* pMadrigosa = m_pInstance->GetSingleCreatureFromStorage(NPC_MADRIGOSA, true))
-                { reader.PSendSysMessage("Madrigosa guid is %s and has %u health.", pMadrigosa->GetObjectGuid().GetString().c_str(), pMadrigosa->GetHealth()); }
             }
         }
-    }
 
-    void SummonedCreatureJustDied(Creature* pSummoned) override
-    {
-        // Error log if Madrigosa dies
-        if (pSummoned->GetEntry() == NPC_MADRIGOSA)
-        { script_error_log("Npc %u, %s, died unexpectedly. Felmyst won't be summoned anymore.", pSummoned->GetEntry(), pSummoned->GetName()); }
-    }
-
-    void SummonedCreatureDespawn(Creature* pSummoned) override
-    {
-        // Yell of Madrigosa on death
-        if (pSummoned->GetEntry() == NPC_MADRIGOSA)
-        { pSummoned->CastSpell(pSummoned, SPELL_SUMMON_FELBLAZE, true); }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_MADRIGOSA)
+        void JustDied(Unit* /*pKiller*/) override
         {
-            pSummoned->SetWalk(false);
-            pSummoned->SetLevitate(true);
-            pSummoned->GetMotionMaster()->MovePoint(0, aMadrigosaLoc[1].m_fX, aMadrigosaLoc[1].m_fY, aMadrigosaLoc[1].m_fZ, false);
+            DoScriptText(YELL_DEATH, m_creature);
+            DoCastSpellIfCan(m_creature, SPELL_SUMMON_DEATH_CLOUD, CAST_TRIGGERED);
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_BRUTALLUS, DONE);
+            }
         }
-        else if (pSummoned->GetEntry() == NPC_BRUTALLUS_DEATH_CLOUD)
-        { pSummoned->CastSpell(pSummoned, SPELL_BRUTALLUS_DEATH_CLOUD, true); }
-    }
 
-    void SummonedMovementInform(Creature* pSummoned, uint32 uiType, uint32 uiPointId) override
-    {
-        if (uiType != POINT_MOTION_TYPE || pSummoned->GetEntry() != NPC_MADRIGOSA)
-        { return; }
-
-        if (uiPointId == POINT_MOVE_GROUND)
-        { pSummoned->SetLevitate(false); }
-    }
-
-    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
-    {
-        // Fake death Madrigosa when charged
-        if (pTarget->GetEntry() == NPC_MADRIGOSA && pSpell->Id == SPELL_CHARGE)
+        void JustReachedHome() override
         {
-            DoScriptText(YELL_MADR_DEATH, pTarget);
-            pTarget->InterruptNonMeleeSpells(true);
-            pTarget->SetHealth(0);
-            pTarget->StopMoving();
-            pTarget->ClearComboPointHolders();
-            pTarget->RemoveAllAurasOnDeath();
-            pTarget->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
-            pTarget->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
-            pTarget->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            pTarget->ClearAllReactives();
-            pTarget->GetMotionMaster()->Clear();
-            pTarget->GetMotionMaster()->MoveIdle();
-            pTarget->SetStandState(UNIT_STAND_STATE_DEAD);
+            if (m_pInstance)
+            {
+                // When evade from the fight with Madrigosa skip this
+                if (m_pInstance->GetData(TYPE_BRUTALLUS) == SPECIAL)
+                {
+                    return;
+                }
 
-            // Brutallus evades
-            EnterEvadeMode();
+                m_pInstance->SetData(TYPE_BRUTALLUS, FAIL);
+            }
         }
-    }
 
-    void JustDidDialogueStep(int32 iEntry) override
-    {
-        if (!m_pInstance)
-        { return; }
-
-        switch (iEntry)
+        void GetAIInformation(ChatHandler& reader) override
         {
+            if (m_pInstance)
+            {
+                if (m_pInstance->GetData(TYPE_BRUTALLUS) == SPECIAL)
+                {
+                    reader.PSendSysMessage("Brutallus intro event is currently %s", m_bIsIntroInProgress ? "in progress" : "completed");
+                }
+                else
+                {
+                    reader.PSendSysMessage("Brutallus intro event is currently %s", m_pInstance->GetData(TYPE_BRUTALLUS) == NOT_STARTED ? "not started" : "completed");
+                }
+
+                if (m_pInstance->GetData(TYPE_BRUTALLUS) != NOT_STARTED)
+                {
+                    if (Creature* pMadrigosa = m_pInstance->GetSingleCreatureFromStorage(NPC_MADRIGOSA, true))
+                    {
+                        reader.PSendSysMessage("Madrigosa guid is %s and has %u health.", pMadrigosa->GetObjectGuid().GetString().c_str(), pMadrigosa->GetHealth());
+                    }
+                }
+            }
+        }
+
+        void SummonedCreatureJustDied(Creature* pSummoned) override
+        {
+            // Error log if Madrigosa dies
+            if (pSummoned->GetEntry() == NPC_MADRIGOSA)
+            {
+                script_error_log("Npc %u, %s, died unexpectedly. Felmyst won't be summoned anymore.", pSummoned->GetEntry(), pSummoned->GetName());
+            }
+        }
+
+        void SummonedCreatureDespawn(Creature* pSummoned) override
+        {
+            // Yell of Madrigosa on death
+            if (pSummoned->GetEntry() == NPC_MADRIGOSA)
+            {
+                pSummoned->CastSpell(pSummoned, SPELL_SUMMON_FELBLAZE, true);
+            }
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_MADRIGOSA)
+            {
+                pSummoned->SetWalk(false);
+                pSummoned->SetLevitate(true);
+                pSummoned->GetMotionMaster()->MovePoint(0, aMadrigosaLoc[1].m_fX, aMadrigosaLoc[1].m_fY, aMadrigosaLoc[1].m_fZ, false);
+            }
+            else if (pSummoned->GetEntry() == NPC_BRUTALLUS_DEATH_CLOUD)
+            {
+                pSummoned->CastSpell(pSummoned, SPELL_BRUTALLUS_DEATH_CLOUD, true);
+            }
+        }
+
+        void SummonedMovementInform(Creature* pSummoned, uint32 uiType, uint32 uiPointId) override
+        {
+            if (uiType != POINT_MOTION_TYPE || pSummoned->GetEntry() != NPC_MADRIGOSA)
+            {
+                return;
+            }
+
+            if (uiPointId == POINT_MOVE_GROUND)
+            {
+                pSummoned->SetLevitate(false);
+            }
+        }
+
+        void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+        {
+            // Fake death Madrigosa when charged
+            if (pTarget->GetEntry() == NPC_MADRIGOSA && pSpell->Id == SPELL_CHARGE)
+            {
+                DoScriptText(YELL_MADR_DEATH, pTarget);
+                pTarget->InterruptNonMeleeSpells(true);
+                pTarget->SetHealth(0);
+                pTarget->StopMoving();
+                pTarget->ClearComboPointHolders();
+                pTarget->RemoveAllAurasOnDeath();
+                pTarget->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
+                pTarget->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
+                pTarget->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                pTarget->ClearAllReactives();
+                pTarget->GetMotionMaster()->Clear();
+                pTarget->GetMotionMaster()->MoveIdle();
+                pTarget->SetStandState(UNIT_STAND_STATE_DEAD);
+
+                // Brutallus evades
+                EnterEvadeMode();
+            }
+        }
+
+        void JustDidDialogueStep(int32 iEntry) override
+        {
+            if (!m_pInstance)
+            {
+                return;
+            }
+
+            switch (iEntry)
+            {
             case NPC_MADRIGOSA:
                 if (Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_FLIGHT_TRIGGER_LEFT))
-                { m_creature->SummonCreature(NPC_MADRIGOSA, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0); }
+                {
+                    m_creature->SummonCreature(NPC_MADRIGOSA, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                }
                 m_bIsIntroInProgress = true;
                 break;
             case YELL_MADR_ICE_BARRIER:
                 if (Creature* pMadrigosa = m_pInstance->GetSingleCreatureFromStorage(NPC_MADRIGOSA))
-                    { pMadrigosa->CastSpell(pMadrigosa, SPELL_FREEZE, false); }
+                {
+                    pMadrigosa->CastSpell(pMadrigosa, SPELL_FREEZE, true);
+                }
                 break;
             case YELL_MADR_INTRO:
                 if (Creature* pMadrigosa = m_pInstance->GetSingleCreatureFromStorage(NPC_MADRIGOSA))
@@ -292,12 +327,14 @@ struct boss_brutallusAI : public ScriptedAI, private DialogueHelper
                 break;
             case YELL_INTRO:
                 if (Creature* pMadrigosa = m_pInstance->GetSingleCreatureFromStorage(NPC_MADRIGOSA))
-                { m_creature->AI()->AttackStart(pMadrigosa); }
+                {
+                    m_creature->AI()->AttackStart(pMadrigosa);
+                }
                 break;
             case SPELL_FROST_BREATH:
                 if (Creature* pMadrigosa = m_pInstance->GetSingleCreatureFromStorage(NPC_MADRIGOSA))
                 {
-                    { pMadrigosa->CastSpell(m_creature, SPELL_FROST_BREATH, false); }
+                    pMadrigosa->CastSpell(m_creature, SPELL_FROST_BREATH, true);
                     pMadrigosa->GetMotionMaster()->MoveIdle();
                 }
                 break;
@@ -314,7 +351,9 @@ struct boss_brutallusAI : public ScriptedAI, private DialogueHelper
                 break;
             case YELL_MADR_ICE_BLOCK:
                 if (Creature* pMadrigosa = m_pInstance->GetSingleCreatureFromStorage(NPC_MADRIGOSA))
-                { pMadrigosa->CastSpell(m_creature, SPELL_FROST_BLAST, true); }
+                {
+                    pMadrigosa->CastSpell(m_creature, SPELL_FROST_BLAST, true);
+                }
                 m_uiMadrigosaSpellTimer = 2000;
                 break;
             case SPELL_FLAME_RING:
@@ -344,197 +383,248 @@ struct boss_brutallusAI : public ScriptedAI, private DialogueHelper
             case YELL_INTRO_CHARGE:
                 m_bCanDoMeleeAttack = true;
                 if (m_creature->getVictim())
-                { m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim()); }
+                {
+                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                }
                 DoCastSpellIfCan(m_creature, SPELL_CHARGE);
                 break;
             case YELL_INTRO_KILL_MADRIGOSA:
                 // Face the players
                 if (GameObject* pIceWall = m_pInstance->GetSingleGameObjectFromStorage(GO_ICE_BARRIER))
-                { m_creature->SetFacingToObject(pIceWall); }
+                {
+                    m_creature->SetFacingToObject(pIceWall);
+                }
                 break;
             case YELL_INTRO_TAUNT:
                 DoCastSpellIfCan(m_creature, SPELL_BREAK_ICE);
                 m_bIsIntroInProgress = false;
                 break;
-        }
-    }
-
-    // Wrapper to start the dialogue text
-    void DoStartIntro()
-    {
-        StartNextDialogueText(NPC_MADRIGOSA);
-    }
-
-    // Wrapper to keep all the intro event stuff together
-    void UpdateIntroEvent(const uint32 uiDiff)
-    {
-        // Dialogue updates outside of combat too
-        DialogueUpdate(uiDiff);
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiMadrigosaSpellTimer)
-        {
-            if (m_uiMadrigosaSpellTimer <= uiDiff)
-            {
-                if (Creature* pMadrigosa = m_pInstance->GetSingleCreatureFromStorage(NPC_MADRIGOSA))
-                { pMadrigosa->CastSpell(m_creature, SPELL_FROSTBOLT, true); }
-                m_uiMadrigosaSpellTimer = urand(1000, 2000);
             }
-            else
-            { m_uiMadrigosaSpellTimer -= uiDiff; }
         }
 
-        // We need to limit the melee attacks for the intro event
-        if (m_bCanDoMeleeAttack)
-        { DoMeleeAttackIfReady(); }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        // Update only the intro related stuff
-        if (m_pInstance && m_pInstance->GetData(TYPE_BRUTALLUS) == SPECIAL)
+        // Wrapper to start the dialogue text
+        void ReceiveAIEvent(AIEventType eventType, Creature *pSender, Unit* /*pInvoker*/, uint32 /*data*/) override
         {
-            UpdateIntroEvent(uiDiff);
-            return;
+            if (eventType == AI_EVENT_CUSTOM_A && pSender == m_creature)
+                StartNextDialogueText(NPC_MADRIGOSA);
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiLoveTimer < uiDiff)
+        // Wrapper to keep all the intro event stuff together
+        void UpdateIntroEvent(const uint32 uiDiff)
         {
-            switch (urand(0, 2))
+            // Dialogue updates outside of combat too
+            DialogueUpdate(uiDiff);
+
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             {
+                return;
+            }
+
+            if (m_uiMadrigosaSpellTimer)
+            {
+                if (m_uiMadrigosaSpellTimer <= uiDiff)
+                {
+                    if (Creature* pMadrigosa = m_pInstance->GetSingleCreatureFromStorage(NPC_MADRIGOSA))
+                    {
+                        pMadrigosa->CastSpell(m_creature, SPELL_FROSTBOLT, true);
+                    }
+                    m_uiMadrigosaSpellTimer = urand(1000, 2000);
+                }
+                else
+                {
+                    m_uiMadrigosaSpellTimer -= uiDiff;
+                }
+            }
+
+            // We need to limit the melee attacks for the intro event
+            if (m_bCanDoMeleeAttack)
+            {
+                DoMeleeAttackIfReady();
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            // Update only the intro related stuff
+            if (m_pInstance && m_pInstance->GetData(TYPE_BRUTALLUS) == SPECIAL)
+            {
+                UpdateIntroEvent(uiDiff);
+                return;
+            }
+
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_uiLoveTimer < uiDiff)
+            {
+                switch (urand(0, 2))
+                {
                 case 0: DoScriptText(YELL_LOVE1, m_creature); break;
                 case 1: DoScriptText(YELL_LOVE2, m_creature); break;
                 case 2: DoScriptText(YELL_LOVE3, m_creature); break;
+                }
+                m_uiLoveTimer = urand(15000, 23000);
             }
-            m_uiLoveTimer = urand(15000, 23000);
-        }
-        else
-        { m_uiLoveTimer -= uiDiff; }
-
-        if (m_uiSlashTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_METEOR_SLASH) == CAST_OK)
-            { m_uiSlashTimer = 11000; }
-        }
-        else
-        { m_uiSlashTimer -= uiDiff; }
-
-        if (m_uiStompTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_STOMP) == CAST_OK)
-            { m_uiStompTimer = 30000; }
-        }
-        else
-        { m_uiStompTimer -= uiDiff; }
-
-        if (m_uiBurnTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_BURN, SELECT_FLAG_PLAYER))
+            else
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_BURN) == CAST_OK)
-                { m_uiBurnTimer = 20000; }
+                m_uiLoveTimer -= uiDiff;
             }
-        }
-        else
-        { m_uiBurnTimer -= uiDiff; }
 
-        if (m_uiBerserkTimer)
-        {
-            if (m_uiBerserkTimer <= uiDiff)
+            if (m_uiSlashTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_METEOR_SLASH) == CAST_OK)
                 {
-                    DoScriptText(YELL_BERSERK, m_creature);
-                    m_uiBerserkTimer = 0;
+                    m_uiSlashTimer = 11000;
                 }
             }
             else
-            { m_uiBerserkTimer -= uiDiff; }
-        }
+            {
+                m_uiSlashTimer -= uiDiff;
+            }
 
-        DoMeleeAttackIfReady();
+            if (m_uiStompTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_STOMP) == CAST_OK)
+                {
+                    m_uiStompTimer = 30000;
+                }
+            }
+            else
+            {
+                m_uiStompTimer -= uiDiff;
+            }
+
+            if (m_uiBurnTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_BURN, SELECT_FLAG_PLAYER))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_BURN) == CAST_OK)
+                    {
+                        m_uiBurnTimer = 20000;
+                    }
+                }
+            }
+            else
+            {
+                m_uiBurnTimer -= uiDiff;
+            }
+
+            if (m_uiBerserkTimer)
+            {
+                if (m_uiBerserkTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                    {
+                        DoScriptText(YELL_BERSERK, m_creature);
+                        m_uiBerserkTimer = 0;
+                    }
+                }
+                else
+                {
+                    m_uiBerserkTimer -= uiDiff;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_brutallusAI(pCreature);
     }
 };
-
-CreatureAI* GetAI_boss_brutallus(Creature* pCreature)
-{
-    return new boss_brutallusAI(pCreature);
-}
 
 /*######
 ## spell_aura_dummy_npc_brutallus_cloud
 ######*/
 
-bool EffectAuraDummy_spell_aura_dummy_npc_brutallus_cloud(const Aura* pAura, bool bApply)
+struct aura_dummy_npc_brutallus_cloud : public AuraScript
 {
-    // On Aura removal start Felmyst summon visuals
-    if (pAura->GetId() == SPELL_BRUTALLUS_DEATH_CLOUD && pAura->GetEffIndex() == EFFECT_INDEX_0 && !bApply)
-    {
-        if (Creature* pTarget = (Creature*)pAura->GetTarget())
-        {
-            if (ScriptedInstance* pInstance = (ScriptedInstance*)pTarget->GetInstanceData())
-            {
-                if (Creature* pMadrigosa = pInstance->GetSingleCreatureFromStorage(NPC_MADRIGOSA))
-                {
-                    // Set respawn pos to current pos
-                    pMadrigosa->SetRespawnCoord(pMadrigosa->GetPositionX(), pMadrigosa->GetPositionY(), pMadrigosa->GetPositionZ(), pMadrigosa->GetOrientation());
+    aura_dummy_npc_brutallus_cloud() : AuraScript("aura_dummy_npc_brutallus_cloud") {}
 
-                    pMadrigosa->CastSpell(pMadrigosa, SPELL_FELBLAZE_PREVIZUAL, true);
-                    pMadrigosa->ForcedDespawn(10000);
+    bool OnDummyApply(const Aura* pAura, bool bApply) override
+    {
+        // On Aura removal start Felmyst summon visuals
+        if (pAura->GetId() == SPELL_BRUTALLUS_DEATH_CLOUD && pAura->GetEffIndex() == EFFECT_INDEX_0 && !bApply)
+        {
+            if (Creature* pTarget = (Creature*)pAura->GetTarget())
+            {
+                if (ScriptedInstance* pInstance = (ScriptedInstance*)pTarget->GetInstanceData())
+                {
+                    if (Creature* pMadrigosa = pInstance->GetSingleCreatureFromStorage(NPC_MADRIGOSA))
+                    {
+                        // Set respawn pos to current pos
+                        pMadrigosa->SetRespawnCoord(pMadrigosa->GetPositionX(), pMadrigosa->GetPositionY(), pMadrigosa->GetPositionZ(), pMadrigosa->GetOrientation());
+
+                        pMadrigosa->CastSpell(pMadrigosa, SPELL_FELBLAZE_PREVIZUAL, true);
+                        pMadrigosa->ForcedDespawn(10000);
+                    }
                 }
             }
         }
+        return true;
     }
-    return true;
-}
+};
 
 /*######
 ## at_madrigosa
 ######*/
 
-bool AreaTrigger_at_madrigosa(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
+struct at_madrigosa : public AreaTriggerScript
 {
-    if (ScriptedInstance* pInstance = (ScriptedInstance*)pPlayer->GetInstanceData())
-    {
-        // this simply set encounter state, and trigger ice barrier become active
-        // bosses can start pre-event based on this new state
-        if (pInstance->GetData(TYPE_BRUTALLUS) == NOT_STARTED)
-        {
-            pInstance->SetData(TYPE_BRUTALLUS, SPECIAL);
+    at_madrigosa() : AreaTriggerScript("at_madrigosa") {}
 
-            // Start the intro event
-            if (Creature* pBrutallus = pInstance->GetSingleCreatureFromStorage(NPC_BRUTALLUS))
+    bool OnTrigger(Player* pPlayer, AreaTriggerEntry const* /*pAt*/) override
+    {
+        if (ScriptedInstance* pInstance = (ScriptedInstance*)pPlayer->GetInstanceData())
+        {
+            // this simply set encounter state, and trigger ice barrier become active
+            // bosses can start pre-event based on this new state
+            if (pInstance->GetData(TYPE_BRUTALLUS) == NOT_STARTED)
             {
-                if (boss_brutallusAI* pBossAI = dynamic_cast<boss_brutallusAI*>(pBrutallus->AI()))
-                { pBossAI->DoStartIntro(); }
+                pInstance->SetData(TYPE_BRUTALLUS, SPECIAL);
+
+                // Start the intro event
+                if (Creature* pBrutallus = pInstance->GetSingleCreatureFromStorage(NPC_BRUTALLUS))
+                {
+                    if (CreatureAI* pBossAI = pBrutallus->AI())
+                    {
+                        pBossAI->ReceiveAIEvent(AI_EVENT_CUSTOM_A, pBrutallus, pBrutallus, 0);
+                    }
+                }
             }
         }
-    }
 
-    return false;
-}
+        return false;
+    }
+};
 
 void AddSC_boss_brutallus()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_brutallus";
-    pNewScript->GetAI = &GetAI_boss_brutallus;
-    pNewScript->RegisterSelf();
+    s = new boss_brutallus();
+    s->RegisterSelf();
+    s = new aura_dummy_npc_brutallus_cloud();
+    s->RegisterSelf();
+    s = new at_madrigosa();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "spell_dummy_npc_brutallus_cloud";
-    pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_npc_brutallus_cloud;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_brutallus";
+    //pNewScript->GetAI = &GetAI_boss_brutallus;
+    //pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "at_madrigosa";
-    pNewScript->pAreaTrigger = &AreaTrigger_at_madrigosa;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "spell_dummy_npc_brutallus_cloud";
+    //pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_npc_brutallus_cloud;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "at_madrigosa";
+    //pNewScript->pAreaTrigger = &AreaTrigger_at_madrigosa;
+    //pNewScript->RegisterSelf();
 }

@@ -50,71 +50,74 @@ enum
 
 static const float aAirPositions[3] = {3155.51f, 683.844f, 90.50f};
 
-struct  boss_savianaAI : public ScriptedAI
+struct boss_saviana : public CreatureScript
 {
-    boss_savianaAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_saviana() : CreatureScript("boss_saviana") {}
+
+    struct boss_savianaAI : public ScriptedAI
     {
-        m_pInstance = (instance_ruby_sanctum*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    instance_ruby_sanctum* m_pInstance;
-
-    uint8 m_uiPhase;
-    uint32 m_uiPhaseSwitchTimer;
-    uint32 m_uiFlameBreathTimer;
-    uint32 m_uiEnrageTimer;
-
-    void Reset() override
-    {
-        m_uiPhase                   = PHASE_GROUND;
-        m_uiPhaseSwitchTimer        = 28000;
-        m_uiEnrageTimer             = urand(10000, 15000);
-        m_uiFlameBreathTimer        = 10000;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SAVIANA, IN_PROGRESS);
-    }
-
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        if (urand(0, 1))
-            DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoPlaySoundToSet(m_creature, SOUND_DEATH);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SAVIANA, DONE);
-    }
-
-    void JustReachedHome() override
-    {
-        SetCombatMovement(true);
-        m_creature->SetLevitate(false);
-        m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SAVIANA, FAIL);
-    }
-
-    void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
-    {
-        if (uiMoveType != POINT_MOTION_TYPE)
-            return;
-
-        switch (uiPointId)
+        boss_savianaAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        }
+
+        ScriptedInstance* m_pInstance;
+
+        uint8 m_uiPhase;
+        uint32 m_uiPhaseSwitchTimer;
+        uint32 m_uiFlameBreathTimer;
+        uint32 m_uiEnrageTimer;
+
+        void Reset() override
+        {
+            m_uiPhase = PHASE_GROUND;
+            m_uiPhaseSwitchTimer = 28000;
+            m_uiEnrageTimer = urand(10000, 15000);
+            m_uiFlameBreathTimer = 10000;
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_SAVIANA, IN_PROGRESS);
+        }
+
+        void KilledUnit(Unit* pVictim) override
+        {
+            if (pVictim->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            if (urand(0, 1))
+                DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoPlaySoundToSet(m_creature, SOUND_DEATH);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_SAVIANA, DONE);
+        }
+
+        void JustReachedHome() override
+        {
+            SetCombatMovement(true);
+            m_creature->SetLevitate(false);
+            m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_SAVIANA, FAIL);
+        }
+
+        void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
+        {
+            if (uiMoveType != POINT_MOTION_TYPE)
+                return;
+
+            switch (uiPointId)
+            {
             case POINT_AIR:
                 if (DoCastSpellIfCan(m_creature, SPELL_CONFLAGRATION) == CAST_OK)
                 {
@@ -136,16 +139,16 @@ struct  boss_savianaAI : public ScriptedAI
                     m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
 
                 break;
+            }
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        switch (m_uiPhase)
+        void UpdateAI(const uint32 uiDiff) override
         {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            switch (m_uiPhase)
+            {
             case PHASE_GROUND:
 
                 if (m_uiFlameBreathTimer < uiDiff)
@@ -205,21 +208,25 @@ struct  boss_savianaAI : public ScriptedAI
             case PHASE_TRANSITION:
                 // nothing here
                 break;
+            }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_savianaAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_saviana(Creature* pCreature)
-{
-    return new boss_savianaAI(pCreature);
-}
-
 void AddSC_boss_saviana()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_saviana";
-    pNewScript->GetAI = &GetAI_boss_saviana;
-    pNewScript->RegisterSelf();
+    s = new boss_saviana();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_saviana";
+    //pNewScript->GetAI = &GetAI_boss_saviana;
+    //pNewScript->RegisterSelf();
 }

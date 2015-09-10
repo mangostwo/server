@@ -75,239 +75,290 @@ enum
     MAX_BLOODBOILS              = 5,
 };
 
-struct boss_gurtogg_bloodboilAI : public ScriptedAI
+struct boss_gurtogg_bloodboil : public CreatureScript
 {
-    boss_gurtogg_bloodboilAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_gurtogg_bloodboil() : CreatureScript("boss_gurtogg_bloodboil") {}
+
+    struct boss_gurtogg_bloodboilAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiBloodboilTimer;
-    uint32 m_uiAcidGeyserTimer;
-    uint32 m_uiAcidicWoundTimer;
-    uint32 m_uiArcingSmashTimer;
-    uint32 m_uiFelAcidTimer;
-    uint32 m_uiEjectTimer;
-    uint32 m_uiStrikeTimer;
-    uint32 m_uiPhaseChangeTimer;
-    uint32 m_uiBerserkTimer;
-    uint8 m_uiBloodboilCount;
-
-    bool m_bIsPhase1;
-
-    void Reset() override
-    {
-        m_uiBloodboilTimer      = 10000;
-        m_uiBloodboilCount      = 0;
-        m_uiAcidGeyserTimer     = 1000;
-        m_uiAcidicWoundTimer    = 6000;
-        m_uiArcingSmashTimer    = 19000;
-        m_uiFelAcidTimer        = 25000;
-        m_uiEjectTimer          = 10000;
-        m_uiStrikeTimer         = 15000;
-        m_uiPhaseChangeTimer    = MINUTE * IN_MILLISECONDS;
-        m_uiBerserkTimer        = 10 * MINUTE * IN_MILLISECONDS;
-
-        m_bIsPhase1             = true;
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_BLOODBOIL, FAIL); }
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_BLOODBOIL, IN_PROGRESS); }
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_BLOODBOIL, DONE); }
-
-        DoScriptText(SAY_DEATH, m_creature);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        if (m_uiArcingSmashTimer < uiDiff)
+        boss_gurtogg_bloodboilAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (DoCastSpellIfCan(m_creature, m_bIsPhase1 ? SPELL_ARCING_SMASH_1 : SPELL_ARCING_SMASH_2) == CAST_OK)
-            { m_uiArcingSmashTimer = 10000; }
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         }
-        else
-        { m_uiArcingSmashTimer -= uiDiff; }
 
-        if (m_uiFelAcidTimer < uiDiff)
+        ScriptedInstance* m_pInstance;
+
+        uint32 m_uiBloodboilTimer;
+        uint32 m_uiAcidGeyserTimer;
+        uint32 m_uiAcidicWoundTimer;
+        uint32 m_uiArcingSmashTimer;
+        uint32 m_uiFelAcidTimer;
+        uint32 m_uiEjectTimer;
+        uint32 m_uiStrikeTimer;
+        uint32 m_uiPhaseChangeTimer;
+        uint32 m_uiBerserkTimer;
+        uint8 m_uiBloodboilCount;
+
+        bool m_bIsPhase1;
+
+        void Reset() override
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsPhase1 ? SPELL_FEL_ACID_1 : SPELL_FEL_ACID_2) == CAST_OK)
-            { m_uiFelAcidTimer = 25000; }
+            m_uiBloodboilTimer = 10000;
+            m_uiBloodboilCount = 0;
+            m_uiAcidGeyserTimer = 1000;
+            m_uiAcidicWoundTimer = 6000;
+            m_uiArcingSmashTimer = 19000;
+            m_uiFelAcidTimer = 25000;
+            m_uiEjectTimer = 10000;
+            m_uiStrikeTimer = 15000;
+            m_uiPhaseChangeTimer = MINUTE * IN_MILLISECONDS;
+            m_uiBerserkTimer = 10 * MINUTE * IN_MILLISECONDS;
+
+            m_bIsPhase1 = true;
         }
-        else
-        { m_uiFelAcidTimer -= uiDiff; }
 
-        // Phase 1 spells
-        if (m_bIsPhase1)
+        void JustReachedHome() override
         {
-            if (m_uiStrikeTimer < uiDiff)
+            if (m_pInstance)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BEWILDERING_STRIKE) == CAST_OK)
-                { m_uiStrikeTimer = 20000; }
+                m_pInstance->SetData(TYPE_BLOODBOIL, FAIL);
             }
-            else
-            { m_uiStrikeTimer -= uiDiff; }
+        }
 
-            if (m_uiEjectTimer < uiDiff)
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
+
+            if (m_pInstance)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_EJECT_1) == CAST_OK)
+                m_pInstance->SetData(TYPE_BLOODBOIL, IN_PROGRESS);
+            }
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_BLOODBOIL, DONE);
+            }
+
+            DoScriptText(SAY_DEATH, m_creature);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_uiArcingSmashTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, m_bIsPhase1 ? SPELL_ARCING_SMASH_1 : SPELL_ARCING_SMASH_2) == CAST_OK)
                 {
-                    // Script effect: reduce threat on main target
-                    m_creature->GetThreatManager().modifyThreatPercent(m_creature->getVictim(), -40);
-                    m_uiEjectTimer = 15000;
+                    m_uiArcingSmashTimer = 10000;
                 }
             }
             else
-            { m_uiEjectTimer -= uiDiff; }
-
-            if (m_uiAcidicWoundTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ACIDIC_WOUND) == CAST_OK)
-                { m_uiAcidicWoundTimer = 10000; }
+                m_uiArcingSmashTimer -= uiDiff;
+            }
+
+            if (m_uiFelAcidTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsPhase1 ? SPELL_FEL_ACID_1 : SPELL_FEL_ACID_2) == CAST_OK)
+                {
+                    m_uiFelAcidTimer = 25000;
+                }
             }
             else
-            { m_uiAcidicWoundTimer -= uiDiff; }
-
-            if (m_uiBloodboilTimer)
             {
-                if (m_uiBloodboilTimer <= uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_BLOODBOIL) == CAST_OK)
-                    {
-                        ++m_uiBloodboilCount;
-
-                        // Allow only 5 Bloodboils per phase.
-                        if (m_uiBloodboilCount == MAX_BLOODBOILS)
-                        { m_uiBloodboilTimer = 0; }
-                        else
-                        { m_uiBloodboilTimer = 10000; }
-                    }
-                }
-                else
-                { m_uiBloodboilTimer -= uiDiff; }
-            }
-        }
-        // Phase 2 spells
-        else
-        {
-            if (m_uiAcidGeyserTimer)
-            {
-                if (m_uiAcidGeyserTimer <= uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_ACID_GEYSER) == CAST_OK)
-                    { m_uiAcidGeyserTimer = 0; }
-                }
-                else
-                { m_uiAcidGeyserTimer -= uiDiff; }
+                m_uiFelAcidTimer -= uiDiff;
             }
 
-            if (m_uiEjectTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_EJECT_2) == CAST_OK)
-                { m_uiEjectTimer = 15000; }
-            }
-            else
-            { m_uiEjectTimer -= uiDiff; }
-        }
-
-        if (m_uiPhaseChangeTimer < uiDiff)
-        {
+            // Phase 1 spells
             if (m_bIsPhase1)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (m_uiStrikeTimer < uiDiff)
                 {
-                    // Buff self
-                    if (DoCastSpellIfCan(m_creature, SPELL_FEL_RAGE) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BEWILDERING_STRIKE) == CAST_OK)
                     {
-                        DoScriptText(urand(0, 1) ? SAY_SPECIAL1 : SAY_SPECIAL2, m_creature);
+                        m_uiStrikeTimer = 20000;
+                    }
+                }
+                else
+                {
+                    m_uiStrikeTimer -= uiDiff;
+                }
 
-                        // Debuff player
-                        DoCastSpellIfCan(pTarget, SPELL_FEL_RAGE_PLAYER_1, CAST_TRIGGERED);
-                        DoCastSpellIfCan(pTarget, SPELL_FEL_RAGE_PLAYER_2, CAST_TRIGGERED);
-                        DoCastSpellIfCan(pTarget, SPELL_FEL_RAGE_PLAYER_3, CAST_TRIGGERED);
-                        // Allow player to taunt Gurtogg
-                        pTarget->CastSpell(m_creature, SPELL_TAUNT_GURTOGG, true);
+                if (m_uiEjectTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_EJECT_1) == CAST_OK)
+                    {
+                        // Script effect: reduce threat on main target
+                        m_creature->GetThreatManager().modifyThreatPercent(m_creature->getVictim(), -40);
+                        m_uiEjectTimer = 15000;
+                    }
+                }
+                else
+                {
+                    m_uiEjectTimer -= uiDiff;
+                }
 
-                        // Don't allow others to generate threat
-                        DoCastSpellIfCan(m_creature, SPELL_INSIGNIFIGANCE, CAST_TRIGGERED);
+                if (m_uiAcidicWoundTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ACIDIC_WOUND) == CAST_OK)
+                    {
+                        m_uiAcidicWoundTimer = 10000;
+                    }
+                }
+                else
+                {
+                    m_uiAcidicWoundTimer -= uiDiff;
+                }
 
-                        // Reset timers
-                        m_bIsPhase1          = false;
-                        m_uiAcidGeyserTimer  = 1000;
-                        m_uiPhaseChangeTimer = 30000;
+                if (m_uiBloodboilTimer)
+                {
+                    if (m_uiBloodboilTimer <= uiDiff)
+                    {
+                        if (DoCastSpellIfCan(m_creature, SPELL_BLOODBOIL) == CAST_OK)
+                        {
+                            ++m_uiBloodboilCount;
+
+                            // Allow only 5 Bloodboils per phase.
+                            if (m_uiBloodboilCount == MAX_BLOODBOILS)
+                            {
+                                m_uiBloodboilTimer = 0;
+                            }
+                            else
+                            {
+                                m_uiBloodboilTimer = 10000;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        m_uiBloodboilTimer -= uiDiff;
                     }
                 }
             }
+            // Phase 2 spells
             else
             {
-                // Reset timers
-                m_bIsPhase1          = true;
-                m_uiBloodboilTimer   = 10000;
-                m_uiBloodboilCount   = 0;
-                m_uiAcidicWoundTimer += 2000;
-                m_uiArcingSmashTimer += 2000;
-                m_uiFelAcidTimer     += 2000;
-                m_uiEjectTimer       += 2000;
-                m_uiPhaseChangeTimer = 60000;
-            }
-        }
-        else
-        { m_uiPhaseChangeTimer -= uiDiff; }
-
-        if (m_uiBerserkTimer)
-        {
-            if (m_uiBerserkTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                if (m_uiAcidGeyserTimer)
                 {
-                    DoScriptText(urand(0, 1) ? SAY_ENRAGE1 : SAY_ENRAGE2, m_creature);
-                    m_uiBerserkTimer = 0;
+                    if (m_uiAcidGeyserTimer <= uiDiff)
+                    {
+                        if (DoCastSpellIfCan(m_creature, SPELL_ACID_GEYSER) == CAST_OK)
+                        {
+                            m_uiAcidGeyserTimer = 0;
+                        }
+                    }
+                    else
+                    {
+                        m_uiAcidGeyserTimer -= uiDiff;
+                    }
+                }
+
+                if (m_uiEjectTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_EJECT_2) == CAST_OK)
+                    {
+                        m_uiEjectTimer = 15000;
+                    }
+                }
+                else
+                {
+                    m_uiEjectTimer -= uiDiff;
+                }
+            }
+
+            if (m_uiPhaseChangeTimer < uiDiff)
+            {
+                if (m_bIsPhase1)
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        // Buff self
+                        if (DoCastSpellIfCan(m_creature, SPELL_FEL_RAGE) == CAST_OK)
+                        {
+                            DoScriptText(urand(0, 1) ? SAY_SPECIAL1 : SAY_SPECIAL2, m_creature);
+
+                            // Debuff player
+                            DoCastSpellIfCan(pTarget, SPELL_FEL_RAGE_PLAYER_1, CAST_TRIGGERED);
+                            DoCastSpellIfCan(pTarget, SPELL_FEL_RAGE_PLAYER_2, CAST_TRIGGERED);
+                            DoCastSpellIfCan(pTarget, SPELL_FEL_RAGE_PLAYER_3, CAST_TRIGGERED);
+                            // Allow player to taunt Gurtogg
+                            pTarget->CastSpell(m_creature, SPELL_TAUNT_GURTOGG, true);
+
+                            // Don't allow others to generate threat
+                            DoCastSpellIfCan(m_creature, SPELL_INSIGNIFIGANCE, CAST_TRIGGERED);
+
+                            // Reset timers
+                            m_bIsPhase1 = false;
+                            m_uiAcidGeyserTimer = 1000;
+                            m_uiPhaseChangeTimer = 30000;
+                        }
+                    }
+                }
+                else
+                {
+                    // Reset timers
+                    m_bIsPhase1 = true;
+                    m_uiBloodboilTimer = 10000;
+                    m_uiBloodboilCount = 0;
+                    m_uiAcidicWoundTimer += 2000;
+                    m_uiArcingSmashTimer += 2000;
+                    m_uiFelAcidTimer += 2000;
+                    m_uiEjectTimer += 2000;
+                    m_uiPhaseChangeTimer = 60000;
                 }
             }
             else
-            { m_uiBerserkTimer -= uiDiff; }
-        }
+            {
+                m_uiPhaseChangeTimer -= uiDiff;
+            }
 
-        DoMeleeAttackIfReady();
+            if (m_uiBerserkTimer)
+            {
+                if (m_uiBerserkTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                    {
+                        DoScriptText(urand(0, 1) ? SAY_ENRAGE1 : SAY_ENRAGE2, m_creature);
+                        m_uiBerserkTimer = 0;
+                    }
+                }
+                else
+                {
+                    m_uiBerserkTimer -= uiDiff;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_gurtogg_bloodboilAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_gurtogg_bloodboil(Creature* pCreature)
-{
-    return new boss_gurtogg_bloodboilAI(pCreature);
-}
-
 void AddSC_boss_gurtogg_bloodboil()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_gurtogg_bloodboil";
-    pNewScript->GetAI = &GetAI_boss_gurtogg_bloodboil;
-    pNewScript->RegisterSelf();
+    s = new boss_gurtogg_bloodboil();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_gurtogg_bloodboil";
+    //pNewScript->GetAI = &GetAI_boss_gurtogg_bloodboil;
+    //pNewScript->RegisterSelf();
 }

@@ -35,14 +35,14 @@ EndScriptData */
 
 enum
 {
-    // horseman yells
-    SAY_REJOINED                = -1189023,
-    SAY_BODY_DEFEAT             = -1189024,
-    SAY_LOST_HEAD               = -1189025,
-    SAY_CONFLAGRATION           = -1189026,
-    SAY_SPROUTING_PUMPKINS      = -1189027,
-    SAY_SLAY                    = -1189028,
-    SAY_DEATH                   = -1189029,
+    SAY_ENTRANCE           = -1189022,
+    SAY_REJOINED           = -1189023,
+    SAY_BODY_DEFEAT        = -1189024,
+    SAY_LOST_HEAD          = -1189025,
+    SAY_CONFLAGRATION      = -1189026,
+    SAY_SPROUTING_PUMPKINS = -1189027,
+    SAY_SLAY               = -1189028,
+    SAY_DEATH              = -1189029,
 
     // event start yells - handled by dbscripts
     // SAY_ENTRANCE             = -1189022,
@@ -119,179 +119,184 @@ enum HorsemanPhase
     PHASE_HEAD_TOSS             = 4,
 };
 
-struct boss_headless_horsemanAI : public ScriptedAI
+struct boss_headless_horseman : public CreatureScript
 {
-    boss_headless_horsemanAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_headless_horseman() : CreatureScript("boss_headless_horseman") {}
+
+    struct boss_headless_horsemanAI : public ScriptedAI
     {
-        m_creature->SetWalk(false);
-        m_creature->SetLevitate(true);
-
-        m_bHorsemanLanded = false;
-        Reset();
-    }
-
-    bool m_bHorsemanLanded;
-    bool m_bHeadRequested;
-
-    HorsemanPhase m_fightPhase;
-
-    ObjectGuid m_headGuid;
-
-    uint32 m_uiCleaveTimer;
-    uint32 m_uiConflagrationTimer;
-    uint32 m_uiPumpkinTimer;
-
-    void Reset() override
-    {
-        DoCastSpellIfCan(m_creature, SPELL_BODY_STAGE_1, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-        DoCastSpellIfCan(m_creature, SPELL_BODY_HEAD_VISUAL, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-
-        m_fightPhase            = PHASE_HORSEMAN;
-        m_uiCleaveTimer         = 3000;
-        m_uiConflagrationTimer  = urand(20000, 25000);
-        m_uiPumpkinTimer        = urand(35000, 40000);
-        m_bHeadRequested        = false;
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (m_bHorsemanLanded)
-            ScriptedAI::MoveInLineOfSight(pWho);
-    }
-
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() == TYPEID_PLAYER)
+        boss_headless_horsemanAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            DoCastSpellIfCan(pVictim, SPELL_JACK_LANTERNED, CAST_TRIGGERED);
-            DoScriptText(SAY_SLAY, m_creature);
-        }
-    }
+            m_creature->SetWalk(false);
+            m_creature->SetLevitate(true);
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_HEAD_OF_HORSEMAN)
-            m_headGuid = pSummoned->GetObjectGuid();
-        else if (pSummoned->GetEntry() == NPC_PULSING_PUMPKIN)
-        {
-            pSummoned->CastSpell(pSummoned, SPELL_SPROUTING, false);
-            pSummoned->CastSpell(pSummoned, SPELL_PUMPKIN_AURA, true);
-            pSummoned->CastSpell(pSummoned, SPELL_PUMPKIN_LIFE_CYCLE, true);
-            pSummoned->AI()->AttackStart(m_creature->getVictim());
-        }
-    }
-
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage) override
-    {
-        if (m_fightPhase != PHASE_HEAD_TOSS && uiDamage >= m_creature->GetHealth())
-        {
-            uiDamage = 0;
-            DoTossHead();
-        }
-    }
-
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
-    {
-        if (pSpell->Id == SPELL_HORSEMAN_SUMMON)
-            DoScriptText(SAY_SPROUTING_PUMPKINS, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-    }
-
-    void JustReachedHome() override
-    {
-        // cleanup
-        m_creature->ForcedDespawn();
-    }
-
-    void MovementInform(uint32 uiType, uint32 uiPointId) override
-    {
-        // allow attacking
-        if (uiType == WAYPOINT_MOTION_TYPE && uiPointId == 15)
-        {
-            m_bHorsemanLanded = true;
-            m_creature->SetLevitate(false);
-        }
-    }
-
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
-    {
-        // rejoin head on request
-        if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetEntry() == NPC_HEAD_OF_HORSEMAN)
-        {
-            DoRejoinHead();
-            pInvoker->CastSpell(m_creature, SPELL_SEND_HEAD, true);
-        }
-    }
-
-    // function to handle toss head phase
-    void DoTossHead()
-    {
-        // in the first transition; spawn the head
-        if (m_creature->HasAura(SPELL_BODY_STAGE_1))
-        {
-            float fX, fY, fZ;
-            m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 15.0f, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_HEAD_OF_HORSEMAN, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+            m_bHorsemanLanded = false;
         }
 
-        // make head available
-        if (Creature* pHead = m_creature->GetMap()->GetCreature(m_headGuid))
-            DoCastSpellIfCan(pHead, SPELL_SEND_HEAD, CAST_TRIGGERED);
+        bool m_bHorsemanLanded;
+        bool m_bHeadRequested;
 
-        // only from second transition we start whirlwind
-        if (m_creature->HasAura(SPELL_BODY_STAGE_2) || m_creature->HasAura(SPELL_BODY_STAGE_3))
-            DoCastSpellIfCan(m_creature, SPELL_WHIRLWIND, CAST_TRIGGERED);
+        HorsemanPhase m_fightPhase;
 
-        // remove head visual and set transition phase auras
-        m_creature->RemoveAurasDueToSpell(SPELL_HEAD_VISUAL);
-        DoCastSpellIfCan(m_creature, SPELL_BODY_REGEN_PROC, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_BODY_REGEN, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_BODY_REGEN_CONFUSE, CAST_TRIGGERED);
+        ObjectGuid m_headGuid;
 
-        m_fightPhase = PHASE_HEAD_TOSS;
-        m_bHeadRequested = false;
-    }
+        uint32 m_uiCleaveTimer;
+        uint32 m_uiConflagrationTimer;
+        uint32 m_uiPumpkinTimer;
 
-    // function to handle the head rejoin
-    void DoRejoinHead()
-    {
-        // remove transition auras and set the head visual
-        m_creature->RemoveAurasDueToSpell(SPELL_BODY_REGEN_CONFUSE);
-        m_creature->RemoveAurasDueToSpell(SPELL_BODY_REGEN);
-        m_creature->RemoveAurasDueToSpell(SPELL_BODY_REGEN_PROC);
-        m_creature->RemoveAurasDueToSpell(SPELL_WHIRLWIND);
-
-        DoScriptText(SAY_REJOINED, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_BODY_HEAD_VISUAL, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-
-        // switch from phase 1 to phase 2
-        if (m_creature->HasAura(SPELL_BODY_STAGE_1))
+        void Reset() override
         {
-            m_fightPhase = PHASE_CONFLAGRATION;
-            m_creature->RemoveAurasDueToSpell(SPELL_BODY_STAGE_1);
-            DoCastSpellIfCan(m_creature, SPELL_BODY_STAGE_2, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+            DoCastSpellIfCan(m_creature, SPELL_BODY_STAGE_1, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+            DoCastSpellIfCan(m_creature, SPELL_BODY_HEAD_VISUAL, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+
+            m_fightPhase = PHASE_HORSEMAN;
+            m_uiCleaveTimer = 3000;
+            m_uiConflagrationTimer = urand(20000, 25000);
+            m_uiPumpkinTimer = urand(35000, 40000);
+            m_bHeadRequested = false;
         }
-        // switch from phase 2 to phase 3 or repeat phase 3
-        else if (m_creature->HasAura(SPELL_BODY_STAGE_2) || m_creature->HasAura(SPELL_BODY_STAGE_3))
+
+        void MoveInLineOfSight(Unit* pWho) override
         {
-            m_fightPhase = PHASE_PUMPKINS;
-            m_creature->RemoveAurasDueToSpell(SPELL_BODY_STAGE_2);
-            DoCastSpellIfCan(m_creature, SPELL_BODY_STAGE_3, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-            DoCastSpellIfCan(m_creature, SPELL_SUMMON_PUMPKIN, CAST_TRIGGERED);
+            if (m_bHorsemanLanded)
+                ScriptedAI::MoveInLineOfSight(pWho);
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        switch (m_fightPhase)
+        void KilledUnit(Unit* pVictim) override
         {
+            if (pVictim->GetTypeId() == TYPEID_PLAYER)
+            {
+                DoCastSpellIfCan(pVictim, SPELL_JACK_LANTERNED, CAST_TRIGGERED);
+                DoScriptText(SAY_SLAY, m_creature);
+            }
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_HEAD_OF_HORSEMAN)
+                m_headGuid = pSummoned->GetObjectGuid();
+            else if (pSummoned->GetEntry() == NPC_PULSING_PUMPKIN)
+            {
+                pSummoned->CastSpell(pSummoned, SPELL_SPROUTING, false);
+                pSummoned->CastSpell(pSummoned, SPELL_PUMPKIN_AURA, true);
+                pSummoned->CastSpell(pSummoned, SPELL_PUMPKIN_LIFE_CYCLE, true);
+                pSummoned->AI()->AttackStart(m_creature->getVictim());
+            }
+        }
+
+        void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage) override
+        {
+            if (m_fightPhase != PHASE_HEAD_TOSS && uiDamage >= m_creature->GetHealth())
+            {
+                uiDamage = 0;
+                DoTossHead();
+            }
+        }
+
+        void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
+        {
+            if (pSpell->Id == SPELL_HORSEMAN_SUMMON)
+                DoScriptText(SAY_SPROUTING_PUMPKINS, m_creature);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(SAY_DEATH, m_creature);
+        }
+
+        void JustReachedHome() override
+        {
+            // cleanup
+            m_creature->ForcedDespawn();
+        }
+
+        void MovementInform(uint32 uiType, uint32 uiPointId) override
+        {
+            // allow attacking
+            if (uiType == WAYPOINT_MOTION_TYPE && uiPointId == 15)
+            {
+                m_bHorsemanLanded = true;
+                m_creature->SetLevitate(false);
+            }
+        }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+        {
+            // rejoin head on request
+            if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetEntry() == NPC_HEAD_OF_HORSEMAN)
+            {
+                DoRejoinHead();
+                pInvoker->CastSpell(m_creature, SPELL_SEND_HEAD, true);
+            }
+        }
+
+        // function to handle toss head phase
+        void DoTossHead()
+        {
+            // in the first transition; spawn the head
+            if (m_creature->HasAura(SPELL_BODY_STAGE_1))
+            {
+                float fX, fY, fZ;
+                m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 15.0f, fX, fY, fZ);
+                m_creature->SummonCreature(NPC_HEAD_OF_HORSEMAN, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+            }
+
+            // make head available
+            if (Creature* pHead = m_creature->GetMap()->GetCreature(m_headGuid))
+                DoCastSpellIfCan(pHead, SPELL_SEND_HEAD, CAST_TRIGGERED);
+
+            // only from second transition we start whirlwind
+            if (m_creature->HasAura(SPELL_BODY_STAGE_2) || m_creature->HasAura(SPELL_BODY_STAGE_3))
+                DoCastSpellIfCan(m_creature, SPELL_WHIRLWIND, CAST_TRIGGERED);
+
+            // remove head visual and set transition phase auras
+            m_creature->RemoveAurasDueToSpell(SPELL_HEAD_VISUAL);
+            DoCastSpellIfCan(m_creature, SPELL_BODY_REGEN_PROC, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, SPELL_BODY_REGEN, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, SPELL_BODY_REGEN_CONFUSE, CAST_TRIGGERED);
+
+            m_fightPhase = PHASE_HEAD_TOSS;
+            m_bHeadRequested = false;
+        }
+
+        // function to handle the head rejoin
+        void DoRejoinHead()
+        {
+            // remove transition auras and set the head visual
+            m_creature->RemoveAurasDueToSpell(SPELL_BODY_REGEN_CONFUSE);
+            m_creature->RemoveAurasDueToSpell(SPELL_BODY_REGEN);
+            m_creature->RemoveAurasDueToSpell(SPELL_BODY_REGEN_PROC);
+            m_creature->RemoveAurasDueToSpell(SPELL_WHIRLWIND);
+
+            DoScriptText(SAY_REJOINED, m_creature);
+            DoCastSpellIfCan(m_creature, SPELL_BODY_HEAD_VISUAL, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+
+            // switch from phase 1 to phase 2
+            if (m_creature->HasAura(SPELL_BODY_STAGE_1))
+            {
+                m_fightPhase = PHASE_CONFLAGRATION;
+                m_creature->RemoveAurasDueToSpell(SPELL_BODY_STAGE_1);
+                DoCastSpellIfCan(m_creature, SPELL_BODY_STAGE_2, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+            }
+            // switch from phase 2 to phase 3 or repeat phase 3
+            else if (m_creature->HasAura(SPELL_BODY_STAGE_2) || m_creature->HasAura(SPELL_BODY_STAGE_3))
+            {
+                m_fightPhase = PHASE_PUMPKINS;
+                m_creature->RemoveAurasDueToSpell(SPELL_BODY_STAGE_2);
+                DoCastSpellIfCan(m_creature, SPELL_BODY_STAGE_3, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+                DoCastSpellIfCan(m_creature, SPELL_SUMMON_PUMPKIN, CAST_TRIGGERED);
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            switch (m_fightPhase)
+            {
             case PHASE_PUMPKINS:
 
                 if (m_uiPumpkinTimer < uiDiff)
@@ -347,147 +352,168 @@ struct boss_headless_horsemanAI : public ScriptedAI
                     m_bHeadRequested = true;
                 }
                 break;
-        }
-    }
-};
-
-CreatureAI* GetAI_boss_headless_horseman(Creature* pCreature)
-{
-    return new boss_headless_horsemanAI(pCreature);
-}
-
-bool EffectScriptEffectCreature_boss_headless_horseman(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
-{
-    if (uiSpellId == SPELL_REQUEST_BODY && uiEffIndex == EFFECT_INDEX_0)
-    {
-        if (pCreatureTarget->GetEntry() == NPC_HEADLESS_HORSEMAN)
-            pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
-
-        return true;
-    }
-
-    return false;
-}
-
-struct boss_head_of_horsemanAI : public ScriptedAI
-{
-    boss_head_of_horsemanAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        m_uiHeadPhase = 1;
-        Reset();
-    }
-
-    uint8 m_uiHeadPhase;
-
-    void Reset() override { }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoCastSpellIfCan(m_creature, SPELL_HEAD_IS_DEAD, CAST_TRIGGERED);
-
-        // end the event
-        if (m_creature->IsTemporarySummon())
-        {
-            TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
-
-            if (Unit* pHorseman = m_creature->GetMap()->GetUnit(pTemporary->GetSummonerGuid()))
-            {
-                pHorseman->CastSpell(pHorseman, SPELL_BODY_LEAVE_COMBAT, true);
-                pHorseman->CastSpell(pHorseman, SPELL_BODY_DEAD, true);
             }
         }
-    }
+    };
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& /*uiDamage*/) override
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        // allow him to die the last phase
-        if (m_uiHeadPhase >= 3)
-            return;
-
-        // rejoin and switch to next phase
-        if (m_creature->GetHealthPercent() < float(100 - m_uiHeadPhase * 33.3f))
-        {
-            DoRejoinHead(false);
-            ++m_uiHeadPhase;
-        }
+        return new boss_headless_horsemanAI(pCreature);
     }
-
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
-    {
-        if (pInvoker->GetEntry() != NPC_HEADLESS_HORSEMAN)
-            return;
-
-        // toss head
-        if (eventType == AI_EVENT_CUSTOM_A)
-        {
-            // make visible
-            DoScriptText(SAY_LOST_HEAD, m_creature);
-            DoCastSpellIfCan(m_creature, SPELL_HORSEMAN_HEAD_LANDS, CAST_TRIGGERED);
-            DoCastSpellIfCan(m_creature, SPELL_HEAD_VISUAL, CAST_TRIGGERED);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-
-            // run around the graveyard
-            m_creature->SetWalk(false);
-            m_creature->GetMotionMaster()->MoveRandomAroundPoint(pInvoker->GetPositionX(), pInvoker->GetPositionY(), pInvoker->GetPositionZ(), 40.0f);
-        }
-        // rejoin head by force - body healed
-        else if (eventType == AI_EVENT_CUSTOM_B)
-            DoRejoinHead(true);
-    }
-
-    // rejoin the head with the body
-    void DoRejoinHead(bool bForced)
-    {
-        // script targets on body
-        m_creature->RemoveAllAurasOnEvade();
-        m_creature->GetMotionMaster()->Clear();
-        m_creature->GetMotionMaster()->MoveIdle();
-
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        DoCastSpellIfCan(m_creature, SPELL_REQUEST_BODY, CAST_TRIGGERED);
-
-        // heal body only if head is not requested by force (Horseman healed)
-        if (!bForced)
-            DoCastSpellIfCan(m_creature, SPELL_HEAL_BODY, CAST_TRIGGERED);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override { }
 };
 
-CreatureAI* GetAI_boss_head_of_horseman(Creature* pCreature)
+struct spell_request_body : public SpellScript
 {
-    return new boss_head_of_horsemanAI(pCreature);
-}
+    spell_request_body() : SpellScript("spell_request_body") {}
 
-bool EffectScriptEffectCreature_boss_head_of_horseman(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
-{
-    if (uiSpellId == SPELL_SEND_HEAD && uiEffIndex == EFFECT_INDEX_0)
+    bool EffectScriptEffect(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/) override
     {
-        if (pCreatureTarget->GetEntry() == NPC_HEAD_OF_HORSEMAN)
-            pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
+        if (uiSpellId == SPELL_REQUEST_BODY && uiEffIndex == EFFECT_INDEX_0)
+        {
+            if (pCreatureTarget->GetEntry() == NPC_HEADLESS_HORSEMAN)
+                pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
 
-        return true;
+            return true;
+        }
+
+        return false;
     }
+};
 
-    return false;
-}
+struct boss_head_of_horseman : public CreatureScript
+{
+    boss_head_of_horseman() : CreatureScript("boss_head_of_horseman") {}
+
+    struct boss_head_of_horsemanAI : public ScriptedAI
+    {
+        boss_head_of_horsemanAI(Creature* pCreature) : ScriptedAI(pCreature)
+        {
+            m_uiHeadPhase = 1;
+        }
+
+        uint8 m_uiHeadPhase;
+
+        void AttackStart(Unit* /*pWho*/) override { }
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoCastSpellIfCan(m_creature, SPELL_HEAD_IS_DEAD, CAST_TRIGGERED);
+
+            // end the event
+            if (m_creature->IsTemporarySummon())
+            {
+                TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
+
+                if (Unit* pHorseman = m_creature->GetMap()->GetUnit(pTemporary->GetSummonerGuid()))
+                {
+                    pHorseman->CastSpell(pHorseman, SPELL_BODY_LEAVE_COMBAT, true);
+                    pHorseman->CastSpell(pHorseman, SPELL_BODY_DEAD, true);
+                }
+            }
+        }
+
+        void DamageTaken(Unit* /*pDealer*/, uint32& /*uiDamage*/) override
+        {
+            // allow him to die the last phase
+            if (m_uiHeadPhase >= 3)
+                return;
+
+            // rejoin and switch to next phase
+            if (m_creature->GetHealthPercent() < float(100 - m_uiHeadPhase * 33.3f))
+            {
+                DoRejoinHead(false);
+                ++m_uiHeadPhase;
+            }
+        }
+
+        void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+        {
+            if (pInvoker->GetEntry() != NPC_HEADLESS_HORSEMAN)
+                return;
+
+            // toss head
+            if (eventType == AI_EVENT_CUSTOM_A)
+            {
+                // make visible
+                DoScriptText(SAY_LOST_HEAD, m_creature);
+                DoCastSpellIfCan(m_creature, SPELL_HORSEMAN_HEAD_LANDS, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_HEAD_VISUAL, CAST_TRIGGERED);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+                // run around the graveyard
+                m_creature->SetWalk(false);
+                m_creature->GetMotionMaster()->MoveRandomAroundPoint(pInvoker->GetPositionX(), pInvoker->GetPositionY(), pInvoker->GetPositionZ(), 40.0f);
+            }
+            // rejoin head by force - body healed
+            else if (eventType == AI_EVENT_CUSTOM_B)
+                DoRejoinHead(true);
+        }
+
+        // rejoin the head with the body
+        void DoRejoinHead(bool bForced)
+        {
+            // script targets on body
+            m_creature->RemoveAllAurasOnEvade();
+            m_creature->GetMotionMaster()->Clear();
+            m_creature->GetMotionMaster()->MoveIdle();
+
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            DoCastSpellIfCan(m_creature, SPELL_REQUEST_BODY, CAST_TRIGGERED);
+
+            // heal body only if head is not requested by force (Horseman healed)
+            if (!bForced)
+                DoCastSpellIfCan(m_creature, SPELL_HEAL_BODY, CAST_TRIGGERED);
+        }
+
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_head_of_horsemanAI(pCreature);
+    }
+};
+
+struct spell_send_head : public SpellScript
+{
+    spell_send_head() : SpellScript("spell_send_head") {}
+
+    bool EffectScriptEffect(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/) override
+    {
+        if (uiSpellId == SPELL_SEND_HEAD && uiEffIndex == EFFECT_INDEX_0)
+        {
+            if (pCreatureTarget->GetEntry() == NPC_HEAD_OF_HORSEMAN)
+                pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
+
+            return true;
+        }
+
+        return false;
+    }
+};
 
 void AddSC_boss_headless_horseman()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_headless_horseman";
-    pNewScript->GetAI = GetAI_boss_headless_horseman;
-    pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_boss_headless_horseman;
-    pNewScript->RegisterSelf();
+    s = new boss_headless_horseman();
+    s->RegisterSelf();
+    s = new boss_head_of_horseman();
+    s->RegisterSelf();
+    s = new spell_request_body();
+    s->RegisterSelf();
+    s = new spell_send_head();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_head_of_horseman";
-    pNewScript->GetAI = GetAI_boss_head_of_horseman;
-    pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_boss_head_of_horseman;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_headless_horseman";
+    //pNewScript->GetAI = GetAI_boss_headless_horseman;
+    //pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_boss_headless_horseman;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_head_of_horseman";
+    //pNewScript->GetAI = GetAI_boss_head_of_horseman;
+    //pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_boss_head_of_horseman;
+    //pNewScript->RegisterSelf();
 }

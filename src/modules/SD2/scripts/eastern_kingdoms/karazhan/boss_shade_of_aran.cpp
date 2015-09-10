@@ -98,149 +98,164 @@ enum SuperSpells
     SUPER_ARCANE_EXPL   = 2,
 };
 
-struct boss_aranAI : public ScriptedAI
+struct boss_shade_of_aran : public CreatureScript
 {
-    boss_aranAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_shade_of_aran() : CreatureScript("boss_shade_of_aran") {}
+
+    struct boss_aranAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiSecondarySpellTimer;
-    uint32 m_uiNormalCastTimer;
-    uint32 m_uiSuperCastTimer;
-    uint32 m_uiBerserkTimer;
-
-    uint8 m_uiLastSuperSpell;
-    uint8 m_uiLastNormalSpell;
-
-    uint32 m_uiManaRecoveryTimer;
-    uint8 m_uiManaRecoveryStage;
-
-    bool m_bElementalsSpawned;
-    bool m_bIsDrinking;
-    bool m_bDrinkInturrupted;
-
-    void Reset() override
-    {
-        m_uiLastSuperSpell      = urand(SUPER_FLAME_WREATH, SUPER_ARCANE_EXPL);
-        m_uiLastNormalSpell     = urand(0, 2);
-
-        m_uiSecondarySpellTimer = 5000;
-        m_uiNormalCastTimer     = 0;
-        m_uiSuperCastTimer      = 35000;
-        m_uiManaRecoveryTimer   = 0;
-        m_uiManaRecoveryStage   = 0;
-        m_uiBerserkTimer        = 12 * MINUTE * IN_MILLISECONDS;
-
-        m_bElementalsSpawned    = false;
-        m_bIsDrinking           = false;
-        m_bDrinkInturrupted     = false;
-
-        SetCombatMovement(true);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
-    }
-
-    void JustDied(Unit* /*pVictim*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        // Remove the summoned elementals - which are considered guardians
-        m_creature->RemoveGuardians();
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_ARAN, DONE); }
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        switch (urand(0, 2))
+        boss_aranAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        }
+
+        ScriptedInstance* m_pInstance;
+
+        uint32 m_uiSecondarySpellTimer;
+        uint32 m_uiNormalCastTimer;
+        uint32 m_uiSuperCastTimer;
+        uint32 m_uiBerserkTimer;
+
+        uint8 m_uiLastSuperSpell;
+        uint8 m_uiLastNormalSpell;
+
+        uint32 m_uiManaRecoveryTimer;
+        uint8 m_uiManaRecoveryStage;
+
+        bool m_bElementalsSpawned;
+        bool m_bIsDrinking;
+        bool m_bDrinkInturrupted;
+
+        void Reset() override
+        {
+            m_uiLastSuperSpell = urand(SUPER_FLAME_WREATH, SUPER_ARCANE_EXPL);
+            m_uiLastNormalSpell = urand(0, 2);
+
+            m_uiSecondarySpellTimer = 5000;
+            m_uiNormalCastTimer = 0;
+            m_uiSuperCastTimer = 35000;
+            m_uiManaRecoveryTimer = 0;
+            m_uiManaRecoveryStage = 0;
+            m_uiBerserkTimer = 12 * MINUTE * IN_MILLISECONDS;
+
+            m_bElementalsSpawned = false;
+            m_bIsDrinking = false;
+            m_bDrinkInturrupted = false;
+
+            SetCombatMovement(true);
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
+        }
+
+        void JustDied(Unit* /*pVictim*/) override
+        {
+            DoScriptText(SAY_DEATH, m_creature);
+
+            // Remove the summoned elementals - which are considered guardians
+            m_creature->RemoveGuardians();
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_ARAN, DONE);
+            }
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            switch (urand(0, 2))
+            {
             case 0: DoScriptText(SAY_AGGRO1, m_creature); break;
             case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
             case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
-        }
+            }
 
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_ARAN, IN_PROGRESS); }
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_ARAN, FAIL); }
-
-        // Remove the summoned elementals - which are considered guardians
-        m_creature->RemoveGuardians();
-    }
-
-    void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage) override
-    {
-        if (!m_bDrinkInturrupted && m_bIsDrinking && uiDamage > 0)
-        {
-            if (!m_creature->HasAura(SPELL_DRINK))
-            { return; }
-
-            if (DoCastSpellIfCan(m_creature, SPELL_MANA_POTION) == CAST_OK)
+            if (m_pInstance)
             {
-                m_creature->RemoveAurasDueToSpell(SPELL_DRINK);
-                m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-                m_uiManaRecoveryTimer = 1000;
-                m_uiManaRecoveryStage = 2;
-                m_bDrinkInturrupted = true;
+                m_pInstance->SetData(TYPE_ARAN, IN_PROGRESS);
             }
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
+        void JustReachedHome() override
         {
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_ARAN, FAIL);
+            }
+
+            // Remove the summoned elementals - which are considered guardians
+            m_creature->RemoveGuardians();
+        }
+
+        void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage) override
+        {
+            if (!m_bDrinkInturrupted && m_bIsDrinking && uiDamage > 0)
+            {
+                if (!m_creature->HasAura(SPELL_DRINK))
+                {
+                    return;
+                }
+
+                if (DoCastSpellIfCan(m_creature, SPELL_MANA_POTION) == CAST_OK)
+                {
+                    m_creature->RemoveAurasDueToSpell(SPELL_DRINK);
+                    m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+                    m_uiManaRecoveryTimer = 1000;
+                    m_uiManaRecoveryStage = 2;
+                    m_bDrinkInturrupted = true;
+                }
+            }
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            switch (pSummoned->GetEntry())
+            {
             case NPC_WATER_ELEMENTAL:
             case NPC_SHADOW_OF_ARAN:
                 pSummoned->SetInCombatWithZone();
                 break;
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        // Start drinking when below 20% mana
-        if (!m_bIsDrinking && m_creature->GetPowerType() == POWER_MANA && (m_creature->GetPower(POWER_MANA) * 100 / m_creature->GetMaxPower(POWER_MANA)) < 20)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_MASS_POLYMORPH) == CAST_OK)
-            {
-                DoScriptText(SAY_DRINK, m_creature);
-                SetCombatMovement(false);
-                m_creature->GetMotionMaster()->MoveIdle();
-
-                m_uiManaRecoveryStage = 0;
-                m_uiManaRecoveryTimer = 2000;
-                m_bDrinkInturrupted   = false;
-                m_bIsDrinking = true;
-                return;
             }
         }
 
-        if (m_bIsDrinking)
+        void UpdateAI(const uint32 uiDiff) override
         {
-            // Do the mana recovery process
-            if (m_uiManaRecoveryTimer < uiDiff)
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             {
-                switch (m_uiManaRecoveryStage)
+                return;
+            }
+
+            // Start drinking when below 20% mana
+            if (!m_bIsDrinking && m_creature->GetPowerType() == POWER_MANA && (m_creature->GetPower(POWER_MANA) * 100 / m_creature->GetMaxPower(POWER_MANA)) < 20)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_MASS_POLYMORPH) == CAST_OK)
                 {
+                    DoScriptText(SAY_DRINK, m_creature);
+                    SetCombatMovement(false);
+                    m_creature->GetMotionMaster()->MoveIdle();
+
+                    m_uiManaRecoveryStage = 0;
+                    m_uiManaRecoveryTimer = 2000;
+                    m_bDrinkInturrupted = false;
+                    m_bIsDrinking = true;
+                    return;
+                }
+            }
+
+            if (m_bIsDrinking)
+            {
+                // Do the mana recovery process
+                if (m_uiManaRecoveryTimer < uiDiff)
+                {
+                    switch (m_uiManaRecoveryStage)
+                    {
                     case 0:
                         if (DoCastSpellIfCan(m_creature, SPELL_CONJURE_WATER) == CAST_OK)
-                        { m_uiManaRecoveryTimer = 2000; }
+                        {
+                            m_uiManaRecoveryTimer = 2000;
+                        }
                         break;
                     case 1:
                         if (DoCastSpellIfCan(m_creature, SPELL_DRINK) == CAST_OK)
@@ -260,36 +275,42 @@ struct boss_aranAI : public ScriptedAI
                             m_bIsDrinking = false;
                         }
                         break;
+                    }
+                    ++m_uiManaRecoveryStage;
                 }
-                ++m_uiManaRecoveryStage;
-            }
-            else
-            { m_uiManaRecoveryTimer -= uiDiff; }
-
-            // no other spells during mana recovery
-            return;
-        }
-
-        // Normal spell casts
-        if (m_uiNormalCastTimer < uiDiff)
-        {
-            if (!m_creature->IsNonMeleeSpellCasted(false))
-            {
-                Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
-                if (!pTarget)
-                { return; }
-
-                uint8 uiCurrentSpell = urand(0, 2);
-                uint32 uiCurrentSpellId = 0;
-
-                // randomize so it won't be the same spell twice in a row
-                while (uiCurrentSpell == m_uiLastNormalSpell)
-                { uiCurrentSpell = urand(0, 2); }
-
-                m_uiLastNormalSpell = uiCurrentSpell;
-
-                switch (uiCurrentSpell)
+                else
                 {
+                    m_uiManaRecoveryTimer -= uiDiff;
+                }
+
+                // no other spells during mana recovery
+                return;
+            }
+
+            // Normal spell casts
+            if (m_uiNormalCastTimer < uiDiff)
+            {
+                if (!m_creature->IsNonMeleeSpellCasted(false))
+                {
+                    Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
+                    if (!pTarget)
+                    {
+                        return;
+                    }
+
+                    uint8 uiCurrentSpell = urand(0, 2);
+                    uint32 uiCurrentSpellId = 0;
+
+                    // randomize so it won't be the same spell twice in a row
+                    while (uiCurrentSpell == m_uiLastNormalSpell)
+                    {
+                        uiCurrentSpell = urand(0, 2);
+                    }
+
+                    m_uiLastNormalSpell = uiCurrentSpell;
+
+                    switch (uiCurrentSpell)
+                    {
                     case 0:
                         uiCurrentSpellId = SPELL_ARCANE_MISSILES;
                         m_uiNormalCastTimer = urand(6000, 7000);
@@ -302,50 +323,62 @@ struct boss_aranAI : public ScriptedAI
                         uiCurrentSpellId = SPELL_FROSTBOLT;
                         m_uiNormalCastTimer = urand(2000, 3000);
                         break;
+                    }
+
+                    if (uiCurrentSpellId)
+                    {
+                        DoCastSpellIfCan(pTarget, uiCurrentSpellId);
+                    }
                 }
-
-                if (uiCurrentSpellId)
-                { DoCastSpellIfCan(pTarget, uiCurrentSpellId); }
             }
-        }
-        else
-        { m_uiNormalCastTimer -= uiDiff; }
-
-        // Secondary spells
-        if (m_uiSecondarySpellTimer < uiDiff)
-        {
-            CanCastResult spellResult = CAST_OK;
-
-            switch (urand(0, 1))
+            else
             {
+                m_uiNormalCastTimer -= uiDiff;
+            }
+
+            // Secondary spells
+            if (m_uiSecondarySpellTimer < uiDiff)
+            {
+                CanCastResult spellResult = CAST_OK;
+
+                switch (urand(0, 1))
+                {
                 case 0:
                     spellResult = DoCastSpellIfCan(m_creature, SPELL_COUNTERSPELL);
                     break;
                 case 1:
                     if (Unit* pUnit = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                    { spellResult = DoCastSpellIfCan(pUnit, SPELL_CHAINS_OF_ICE); }
+                    {
+                        spellResult = DoCastSpellIfCan(pUnit, SPELL_CHAINS_OF_ICE);
+                    }
                     break;
-            }
-            if (spellResult == CAST_OK)
-            { m_uiSecondarySpellTimer = urand(5000, 20000); }
-        }
-        else
-        { m_uiSecondarySpellTimer -= uiDiff; }
-
-        if (m_uiSuperCastTimer < uiDiff)
-        {
-            if (!m_creature->IsNonMeleeSpellCasted(false))
-            {
-                uint8 uiAvailableSpell = urand(SUPER_FLAME_WREATH, SUPER_ARCANE_EXPL);
-
-                // randomize so it won't be the same spell twice in a row
-                while (uiAvailableSpell == m_uiLastSuperSpell)
-                { uiAvailableSpell = urand(SUPER_FLAME_WREATH, SUPER_ARCANE_EXPL); }
-
-                m_uiLastSuperSpell = uiAvailableSpell;
-
-                switch (m_uiLastSuperSpell)
+                }
+                if (spellResult == CAST_OK)
                 {
+                    m_uiSecondarySpellTimer = urand(5000, 20000);
+                }
+            }
+            else
+            {
+                m_uiSecondarySpellTimer -= uiDiff;
+            }
+
+            if (m_uiSuperCastTimer < uiDiff)
+            {
+                if (!m_creature->IsNonMeleeSpellCasted(false))
+                {
+                    uint8 uiAvailableSpell = urand(SUPER_FLAME_WREATH, SUPER_ARCANE_EXPL);
+
+                    // randomize so it won't be the same spell twice in a row
+                    while (uiAvailableSpell == m_uiLastSuperSpell)
+                    {
+                        uiAvailableSpell = urand(SUPER_FLAME_WREATH, SUPER_ARCANE_EXPL);
+                    }
+
+                    m_uiLastSuperSpell = uiAvailableSpell;
+
+                    switch (m_uiLastSuperSpell)
+                    {
                     case SUPER_ARCANE_EXPL:
                         if (DoCastSpellIfCan(m_creature, SPELL_ARCANE_EXPLOSION) == CAST_OK)
                         {
@@ -358,82 +391,102 @@ struct boss_aranAI : public ScriptedAI
                         break;
                     case SUPER_FLAME_WREATH:
                         if (DoCastSpellIfCan(m_creature, SPELL_FLAME_WREATH) == CAST_OK)
-                        { DoScriptText(urand(0, 1) ? SAY_FLAMEWREATH1 : SAY_FLAMEWREATH2, m_creature); }
+                        {
+                            DoScriptText(urand(0, 1) ? SAY_FLAMEWREATH1 : SAY_FLAMEWREATH2, m_creature);
+                        }
                         break;
                     case SUPER_BLIZZARD:
                         if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_BLIZZARD) == CAST_OK)
-                        { DoScriptText(urand(0, 1) ? SAY_BLIZZARD1 : SAY_BLIZZARD2, m_creature); }
+                        {
+                            DoScriptText(urand(0, 1) ? SAY_BLIZZARD1 : SAY_BLIZZARD2, m_creature);
+                        }
                         break;
+                    }
+                    m_uiSuperCastTimer = 30000;
                 }
-                m_uiSuperCastTimer = 30000;
-            }
-        }
-        else
-        { m_uiSuperCastTimer -= uiDiff; }
-
-        if (!m_bElementalsSpawned && m_creature->GetHealthPercent() < 40.0f)
-        {
-            DoCastSpellIfCan(m_creature, SPELL_SUMMON_WATER_ELEM_1, CAST_TRIGGERED);
-            DoCastSpellIfCan(m_creature, SPELL_SUMMON_WATER_ELEM_2, CAST_TRIGGERED);
-            DoCastSpellIfCan(m_creature, SPELL_SUMMON_WATER_ELEM_3, CAST_TRIGGERED);
-            DoCastSpellIfCan(m_creature, SPELL_SUMMON_WATER_ELEM_4, CAST_TRIGGERED);
-
-            DoScriptText(SAY_ELEMENTALS, m_creature);
-
-            m_bElementalsSpawned = true;
-        }
-
-        // Berserk timer - the summons position is guesswork
-        if (m_uiBerserkTimer)
-        {
-            if (m_uiBerserkTimer <= uiDiff)
-            {
-                for (uint8 i = 0; i < MAX_SHADOWS_OF_ARAN; ++i)
-                { DoSpawnCreature(NPC_SHADOW_OF_ARAN, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000); }
-
-                DoScriptText(SAY_TIMEOVER, m_creature);
-                m_uiBerserkTimer = 0;
             }
             else
-            { m_uiBerserkTimer -= uiDiff; }
-        }
+            {
+                m_uiSuperCastTimer -= uiDiff;
+            }
 
-        DoMeleeAttackIfReady();
+            if (!m_bElementalsSpawned && m_creature->GetHealthPercent() < 40.0f)
+            {
+                DoCastSpellIfCan(m_creature, SPELL_SUMMON_WATER_ELEM_1, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_SUMMON_WATER_ELEM_2, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_SUMMON_WATER_ELEM_3, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_SUMMON_WATER_ELEM_4, CAST_TRIGGERED);
+
+                DoScriptText(SAY_ELEMENTALS, m_creature);
+
+                m_bElementalsSpawned = true;
+            }
+
+            // Berserk timer - the summons position is guesswork
+            if (m_uiBerserkTimer)
+            {
+                if (m_uiBerserkTimer <= uiDiff)
+                {
+                    for (uint8 i = 0; i < MAX_SHADOWS_OF_ARAN; ++i)
+                    {
+                        DoSpawnCreature(NPC_SHADOW_OF_ARAN, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
+                    }
+
+                    DoScriptText(SAY_TIMEOVER, m_creature);
+                    m_uiBerserkTimer = 0;
+                }
+                else
+                {
+                    m_uiBerserkTimer -= uiDiff;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_aranAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_aran(Creature* pCreature)
-{
-    return new boss_aranAI(pCreature);
-}
-
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct npc_shade_of_aran_blizzardAI : public ScriptedAI
+struct npc_shade_of_aran_blizzard : public CreatureScript
 {
-    npc_shade_of_aran_blizzardAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_shade_of_aran_blizzard() : CreatureScript("npc_shade_of_aran_blizzard") {}
 
-    void Reset() override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
+    struct npc_shade_of_aran_blizzardAI : public ScriptedAI
+    {
+        npc_shade_of_aran_blizzardAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        void AttackStart(Unit* /*pWho*/) override { }
+        void UpdateAI(const uint32 /*uiDiff*/) override { }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_shade_of_aran_blizzardAI(pCreature);
+    }
 };
-
-CreatureAI* GetAI_npc_shade_of_aran_blizzard(Creature* pCreature)
-{
-    return new npc_shade_of_aran_blizzardAI(pCreature);
-}
 
 void AddSC_boss_shade_of_aran()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_shade_of_aran";
-    pNewScript->GetAI = &GetAI_boss_aran;
-    pNewScript->RegisterSelf();
+    s = new boss_shade_of_aran();
+    s->RegisterSelf();
+    s = new npc_shade_of_aran_blizzard();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_shade_of_aran_blizzard";
-    pNewScript->GetAI = &GetAI_npc_shade_of_aran_blizzard;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_shade_of_aran";
+    //pNewScript->GetAI = &GetAI_boss_aran;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_shade_of_aran_blizzard";
+    //pNewScript->GetAI = &GetAI_npc_shade_of_aran_blizzard;
+    //pNewScript->RegisterSelf();
 }

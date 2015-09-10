@@ -77,58 +77,61 @@ static const uint32 aSpawnVisageSpells[MAX_INSANITY_SPELLS] = {SPELL_SUMMON_VISA
 ## boss_volazj
 ######*/
 
-struct  boss_volazjAI : public ScriptedAI
+struct boss_volazj : public CreatureScript
 {
-    boss_volazjAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_volazj() : CreatureScript("boss_volazj") {}
+
+    struct boss_volazjAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint8 m_uiCombatPhase;
-    uint32 m_uiMindFlayTimer;
-    uint32 m_uiShadowBoltTimer;
-    uint32 m_uiShiverTimer;
-
-    uint8 m_uiInsanityIndex;
-    bool m_bIsInsanityInProgress;
-
-    void Reset() override
-    {
-        m_uiCombatPhase         = 1;
-        m_uiMindFlayTimer       = 10000;
-        m_uiShadowBoltTimer     = 5000;
-        m_uiShiverTimer         = 18000;
-
-        m_uiInsanityIndex       = 0;
-        m_bIsInsanityInProgress = false;
-
-        SetCombatMovement(true);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_WHISPER_AGGRO);
-
-        if (m_pInstance)
+        boss_volazjAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            m_pInstance->SetData(TYPE_VOLAZJ, IN_PROGRESS);
-
-            // Start achievement only on first aggro
-            m_pInstance->DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_VOLAZJ_ID);
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         }
-    }
 
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        switch (urand(0, 2))
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
+
+        uint8 m_uiCombatPhase;
+        uint32 m_uiMindFlayTimer;
+        uint32 m_uiShadowBoltTimer;
+        uint32 m_uiShiverTimer;
+
+        uint8 m_uiInsanityIndex;
+        bool m_bIsInsanityInProgress;
+
+        void Reset() override
         {
+            m_uiCombatPhase = 1;
+            m_uiMindFlayTimer = 10000;
+            m_uiShadowBoltTimer = 5000;
+            m_uiShiverTimer = 18000;
+
+            m_uiInsanityIndex = 0;
+            m_bIsInsanityInProgress = false;
+
+            SetCombatMovement(true);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
+            DoCastSpellIfCan(m_creature, SPELL_WHISPER_AGGRO);
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_VOLAZJ, IN_PROGRESS);
+
+                // Start achievement only on first aggro
+                m_pInstance->DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_VOLAZJ_ID);
+            }
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            switch (urand(0, 2))
+            {
             case 0:
                 DoScriptText(SAY_SLAY_1, m_creature);
                 DoCastSpellIfCan(m_creature, SPELL_WHISPER_SLAY_1);
@@ -141,160 +144,164 @@ struct  boss_volazjAI : public ScriptedAI
                 DoScriptText(SAY_SLAY_3, m_creature);
                 DoCastSpellIfCan(m_creature, SPELL_WHISPER_SLAY_3);
                 break;
-        }
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (urand(0, 1))
-        {
-            DoScriptText(SAY_DEATH_1, m_creature);
-            DoCastSpellIfCan(m_creature, SPELL_WHISPER_DEATH_1, CAST_TRIGGERED);
-        }
-        else
-        {
-            DoScriptText(SAY_DEATH_2, m_creature);
-            DoCastSpellIfCan(m_creature, SPELL_WHISPER_DEATH_2, CAST_TRIGGERED);
-        }
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_VOLAZJ, DONE);
-    }
-
-    void EnterEvadeMode() override
-    {
-        if (m_pInstance && m_pInstance->GetData(TYPE_VOLAZJ) == SPECIAL)
-            return;
-
-        ScriptedAI::EnterEvadeMode();
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_VOLAZJ, FAIL);
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        pSummoned->CastSpell(pSummoned, SPELL_TWISTED_VISAGE_PASSIVE, true);
-
-        if (pSummoned->IsTemporarySummon())
-        {
-            TemporarySummon* pTemporary = (TemporarySummon*)pSummoned;
-
-            if (Player* pPlayer = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
-            {
-                pPlayer->CastSpell(pSummoned, SPELL_TWISTED_VISAGE_EFFECT, true);
-                pSummoned->CastSpell(pPlayer, m_bIsRegularMode ? SPELL_TWISTED_VISAGE_SPAWN : SPELL_TWISTED_VISAGE_SPAWN_H, true);
-
-                pSummoned->AI()->AttackStart(pPlayer);
             }
         }
-    }
 
-    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
-    {
-        if (pSpell->Id == SPELL_INSANITY && pTarget->GetTypeId() == TYPEID_PLAYER)
+        void JustDied(Unit* /*pKiller*/) override
         {
-            // Apply this only for the first target hit
-            if (!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+            if (urand(0, 1))
             {
-                DoCastSpellIfCan(m_creature, SPELL_INSANITY_VISUAL, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_WHISPER_INSANITY, CAST_TRIGGERED);
-
-                DoScriptText(SAY_INSANITY, m_creature);
-
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                SetCombatMovement(false);
-
-                if (m_pInstance)
-                    m_pInstance->SetData(TYPE_VOLAZJ, SPECIAL);
-
-                m_bIsInsanityInProgress = true;
+                DoScriptText(SAY_DEATH_1, m_creature);
+                DoCastSpellIfCan(m_creature, SPELL_WHISPER_DEATH_1, CAST_TRIGGERED);
+            }
+            else
+            {
+                DoScriptText(SAY_DEATH_2, m_creature);
+                DoCastSpellIfCan(m_creature, SPELL_WHISPER_DEATH_2, CAST_TRIGGERED);
             }
 
-            // Store the players in the instance, in order to better handle phasing
             if (m_pInstance)
-                m_pInstance->SetData64(DATA_INSANITY_PLAYER, pTarget->GetObjectGuid());
-
-            // Phase and summon a Visage for each player
-            pTarget->CastSpell(pTarget, aInsanityPhaseSpells[m_uiInsanityIndex], true, 0, 0, m_creature->GetObjectGuid());
-            pTarget->CastSpell(pTarget, aSpawnVisageSpells[m_uiInsanityIndex], true, 0, 0, m_creature->GetObjectGuid());
-            ++m_uiInsanityIndex;
+                m_pInstance->SetData(TYPE_VOLAZJ, DONE);
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
+        void EnterEvadeMode() override
+        {
+            if (m_pInstance && m_pInstance->GetData(TYPE_VOLAZJ) == SPECIAL)
+                return;
+
+            ScriptedAI::EnterEvadeMode();
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_VOLAZJ, FAIL);
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            pSummoned->CastSpell(pSummoned, SPELL_TWISTED_VISAGE_PASSIVE, true);
+
+            if (pSummoned->IsTemporarySummon())
+            {
+                TemporarySummon* pTemporary = (TemporarySummon*)pSummoned;
+
+                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
+                {
+                    pPlayer->CastSpell(pSummoned, SPELL_TWISTED_VISAGE_EFFECT, true);
+                    pSummoned->CastSpell(pPlayer, m_bIsRegularMode ? SPELL_TWISTED_VISAGE_SPAWN : SPELL_TWISTED_VISAGE_SPAWN_H, true);
+
+                    pSummoned->AI()->AttackStart(pPlayer);
+                }
+            }
+        }
+
+        void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+        {
+            if (pSpell->Id == SPELL_INSANITY && pTarget->GetTypeId() == TYPEID_PLAYER)
+            {
+                // Apply this only for the first target hit
+                if (!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                {
+                    DoCastSpellIfCan(m_creature, SPELL_INSANITY_VISUAL, CAST_TRIGGERED);
+                    DoCastSpellIfCan(m_creature, SPELL_WHISPER_INSANITY, CAST_TRIGGERED);
+
+                    DoScriptText(SAY_INSANITY, m_creature);
+
+                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    SetCombatMovement(false);
+
+                    if (m_pInstance)
+                        m_pInstance->SetData(TYPE_VOLAZJ, SPECIAL);
+
+                    m_bIsInsanityInProgress = true;
+                }
+
+                // Store the players in the instance, in order to better handle phasing
+                if (m_pInstance)
+                    m_pInstance->SetData64(DATA_INSANITY_PLAYER, pTarget->GetObjectGuid());
+
+                // Phase and summon a Visage for each player
+                pTarget->CastSpell(pTarget, aInsanityPhaseSpells[m_uiInsanityIndex], true, 0, 0, m_creature->GetObjectGuid());
+                pTarget->CastSpell(pTarget, aSpawnVisageSpells[m_uiInsanityIndex], true, 0, 0, m_creature->GetObjectGuid());
+                ++m_uiInsanityIndex;
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            // Check for Insanity
+            if (m_bIsInsanityInProgress)
+            {
+                if (!m_creature->HasAura(SPELL_INSANITY_VISUAL))
+                {
+                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    SetCombatMovement(true);
+                    m_bIsInsanityInProgress = false;
+                }
+
+                // No other actions during insanity
+                return;
+            }
+
+            if (m_creature->GetHealthPercent() < 100.0f - (float)m_uiCombatPhase * 33.4f)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_INSANITY) == CAST_OK)
+                {
+                    m_uiInsanityIndex = 0;
+                    ++m_uiCombatPhase;
+                }
+            }
+
+            if (m_uiMindFlayTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_MIND_FLAY : SPELL_MIND_FLAY_H) == CAST_OK)
+                    m_uiMindFlayTimer = urand(10000, 20000);
+            }
+            else
+                m_uiMindFlayTimer -= uiDiff;
+
+            if (m_uiShadowBoltTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H) == CAST_OK)
+                    m_uiShadowBoltTimer = urand(8000, 13000);
+            }
+            else
+                m_uiShadowBoltTimer -= uiDiff;
+
+            if (m_uiShiverTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHIVER : SPELL_SHIVER_H) == CAST_OK)
+                        m_uiShiverTimer = 30000;
+                }
+            }
+            else
+                m_uiShiverTimer -= uiDiff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Check for Insanity
-        if (m_bIsInsanityInProgress)
-        {
-            if (!m_creature->HasAura(SPELL_INSANITY_VISUAL))
-            {
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                SetCombatMovement(true);
-                m_bIsInsanityInProgress = false;
-            }
-
-            // No other actions during insanity
-            return;
-        }
-
-        if (m_creature->GetHealthPercent() < 100.0f - (float)m_uiCombatPhase * 33.4f)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_INSANITY) == CAST_OK)
-            {
-                m_uiInsanityIndex = 0;
-                ++m_uiCombatPhase;
-            }
-        }
-
-        if (m_uiMindFlayTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_MIND_FLAY : SPELL_MIND_FLAY_H) == CAST_OK)
-                m_uiMindFlayTimer = urand(10000, 20000);
-        }
-        else
-            m_uiMindFlayTimer -= uiDiff;
-
-        if (m_uiShadowBoltTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H) == CAST_OK)
-                m_uiShadowBoltTimer = urand(8000, 13000);
-        }
-        else
-            m_uiShadowBoltTimer -= uiDiff;
-
-        if (m_uiShiverTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHIVER : SPELL_SHIVER_H) == CAST_OK)
-                    m_uiShiverTimer = 30000;
-            }
-        }
-        else
-            m_uiShiverTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+        return new boss_volazjAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_volazj(Creature* pCreature)
-{
-    return new boss_volazjAI(pCreature);
-}
-
 void AddSC_boss_volazj()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_volazj";
-    pNewScript->GetAI = &GetAI_boss_volazj;
-    pNewScript->RegisterSelf();
+    s = new boss_volazj();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_volazj";
+    //pNewScript->GetAI = &GetAI_boss_volazj;
+    //pNewScript->RegisterSelf();
 }

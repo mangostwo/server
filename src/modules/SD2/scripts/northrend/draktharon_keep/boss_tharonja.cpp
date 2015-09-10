@@ -76,89 +76,92 @@ enum Phases
 ## boss_tharonja
 ######*/
 
-struct  boss_tharonjaAI : public ScriptedAI
+struct boss_tharonja : public CreatureScript
 {
-    boss_tharonjaAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_tharonja() : CreatureScript("boss_tharonja") {}
+
+    struct boss_tharonjaAI : public ScriptedAI
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
-
-    Phases m_uiPhase;
-
-    uint32 m_uiCurseLifeTimer;
-    uint32 m_uiRainFireTimer;
-    uint32 m_uiShadowVolleyTimer;
-    uint32 m_uiLightningBreathTimer;
-    uint32 m_uiEyeBeamTimer;
-    uint32 m_uiPoisonCloudTimer;
-    uint32 m_uiReturnFleshTimer;
-
-    void Reset() override
-    {
-        m_uiPhase = PHASE_SKELETAL;
-
-        m_uiCurseLifeTimer = urand(15000, 20000);
-        m_uiRainFireTimer = urand(16000, 23000);            // This timer is not very accurate
-        m_uiShadowVolleyTimer = urand(8000, 10000);
-        m_uiLightningBreathTimer = urand(3000, 4000);
-        m_uiEyeBeamTimer = urand(15000, 18000);             // This timer is not very accurate
-        m_uiPoisonCloudTimer = urand(9000, 11000);          // This timer is not very accurate
-        m_uiReturnFleshTimer = 26000;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_THARONJA, IN_PROGRESS);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_KILL_1 : SAY_KILL_2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        DoCastSpellIfCan(m_creature, SPELL_ACHIEVEMENT_CHECK, CAST_TRIGGERED | CAST_FORCE_CAST);
-
-        // TODO check if this spell casting is infact also needed on phase-switch or only here (possible that there is also some sort of hp% dependency
-        if (m_uiPhase == PHASE_FLESH)
-            DoCastSpellIfCan(m_creature, SPELL_CLEAR_GIFT_OF_THARONJA, CAST_TRIGGERED | CAST_FORCE_CAST);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_THARONJA, DONE);
-    }
-
-    void JustReachedHome() override
-    {
-        // Reset Display ID
-        if (CreatureInfo const* pCreatureInfo = GetCreatureTemplateStore(NPC_THARONJA_SKELETAL))
+        boss_tharonjaAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            uint32 uiDisplayId = Creature::ChooseDisplayId(pCreatureInfo);
-            if (m_creature->GetDisplayId() != uiDisplayId)
-                m_creature->SetDisplayId(uiDisplayId);
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         }
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_THARONJA, FAIL);
-    }
+        ScriptedInstance* m_pInstance;
+        bool m_bIsRegularMode;
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        Phases m_uiPhase;
 
-        switch (m_uiPhase)
+        uint32 m_uiCurseLifeTimer;
+        uint32 m_uiRainFireTimer;
+        uint32 m_uiShadowVolleyTimer;
+        uint32 m_uiLightningBreathTimer;
+        uint32 m_uiEyeBeamTimer;
+        uint32 m_uiPoisonCloudTimer;
+        uint32 m_uiReturnFleshTimer;
+
+        void Reset() override
         {
+            m_uiPhase = PHASE_SKELETAL;
+
+            m_uiCurseLifeTimer = urand(15000, 20000);
+            m_uiRainFireTimer = urand(16000, 23000);            // This timer is not very accurate
+            m_uiShadowVolleyTimer = urand(8000, 10000);
+            m_uiLightningBreathTimer = urand(3000, 4000);
+            m_uiEyeBeamTimer = urand(15000, 18000);             // This timer is not very accurate
+            m_uiPoisonCloudTimer = urand(9000, 11000);          // This timer is not very accurate
+            m_uiReturnFleshTimer = 26000;
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_THARONJA, IN_PROGRESS);
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            DoScriptText(urand(0, 1) ? SAY_KILL_1 : SAY_KILL_2, m_creature);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(SAY_DEATH, m_creature);
+
+            DoCastSpellIfCan(m_creature, SPELL_ACHIEVEMENT_CHECK, CAST_TRIGGERED | CAST_FORCE_CAST);
+
+            // TODO check if this spell casting is infact also needed on phase-switch or only here (possible that there is also some sort of hp% dependency
+            if (m_uiPhase == PHASE_FLESH)
+                DoCastSpellIfCan(m_creature, SPELL_CLEAR_GIFT_OF_THARONJA, CAST_TRIGGERED | CAST_FORCE_CAST);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_THARONJA, DONE);
+        }
+
+        void JustReachedHome() override
+        {
+            // Reset Display ID
+            if (CreatureInfo const* pCreatureInfo = GetCreatureTemplateStore(NPC_THARONJA_SKELETAL))
+            {
+                uint32 uiDisplayId = Creature::ChooseDisplayId(pCreatureInfo);
+                if (m_creature->GetDisplayId() != uiDisplayId)
+                    m_creature->SetDisplayId(uiDisplayId);
+            }
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_THARONJA, FAIL);
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            switch (m_uiPhase)
+            {
             case PHASE_SKELETAL:
                 // Phase switching at 50% (was in older patch versions multiple times, but from 335 on only once)
                 if (m_creature->GetHealthPercent() < 50)
@@ -177,8 +180,8 @@ struct  boss_tharonjaAI : public ScriptedAI
                 if (m_uiCurseLifeTimer < uiDiff)
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                        if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CURSE_OF_LIFE : SPELL_CURSE_OF_LIFE_H) == CAST_OK)
-                            m_uiCurseLifeTimer = urand(12000, 18000);
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CURSE_OF_LIFE : SPELL_CURSE_OF_LIFE_H) == CAST_OK)
+                        m_uiCurseLifeTimer = urand(12000, 18000);
                 }
                 else
                     m_uiCurseLifeTimer -= uiDiff;
@@ -186,8 +189,8 @@ struct  boss_tharonjaAI : public ScriptedAI
                 if (m_uiRainFireTimer < uiDiff)
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                        if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_RAIN_OF_FIRE : SPELL_RAIN_OF_FIRE_H) == CAST_OK)
-                            m_uiRainFireTimer = urand(22000, 29000);
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_RAIN_OF_FIRE : SPELL_RAIN_OF_FIRE_H) == CAST_OK)
+                        m_uiRainFireTimer = urand(22000, 29000);
                 }
                 else
                     m_uiRainFireTimer -= uiDiff;
@@ -222,8 +225,8 @@ struct  boss_tharonjaAI : public ScriptedAI
                 if (m_uiPoisonCloudTimer < uiDiff)
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                        if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_POISON_CLOUD : SPELL_POISON_CLOUD_H) == CAST_OK)
-                            m_uiPoisonCloudTimer = urand(7000, 12000);
+                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_POISON_CLOUD : SPELL_POISON_CLOUD_H) == CAST_OK)
+                        m_uiPoisonCloudTimer = urand(7000, 12000);
                 }
                 else
                     m_uiPoisonCloudTimer -= uiDiff;
@@ -276,21 +279,25 @@ struct  boss_tharonjaAI : public ScriptedAI
                     m_uiPhase = PHASE_SKELETAL_END;
                 }
                 break;
+            }
         }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_tharonjaAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_tharonja(Creature* pCreature)
-{
-    return new boss_tharonjaAI(pCreature);
-}
-
 void AddSC_boss_tharonja()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_tharonja";
-    pNewScript->GetAI = &GetAI_boss_tharonja;
-    pNewScript->RegisterSelf();
+    s = new boss_tharonja();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_tharonja";
+    //pNewScript->GetAI = &GetAI_boss_tharonja;
+    //pNewScript->RegisterSelf();
 }

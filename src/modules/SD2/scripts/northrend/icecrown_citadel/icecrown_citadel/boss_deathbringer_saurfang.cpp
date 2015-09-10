@@ -116,291 +116,298 @@ enum
 
 static const float fIntroPosition[4] = { -491.30f, 2211.35f, 541.11f, 3.16f};
 
-struct  boss_deathbringer_saurfangAI : public ScriptedAI
+struct boss_deathbringer_saurfang : public CreatureScript
 {
-    boss_deathbringer_saurfangAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_deathbringer_saurfang() : CreatureScript("boss_deathbringer_saurfang") {}
+
+    struct boss_deathbringer_saurfangAI : public ScriptedAI
     {
-        m_pInstance = (instance_icecrown_citadel*)pCreature->GetInstanceData();
-        m_powerBloodPower = m_creature->GetPowerType();
-        m_bIsIntroDone = false;
-        Reset();
-    }
-
-    instance_icecrown_citadel* m_pInstance;
-
-    uint32 m_uiRuneOfBloodTimer;
-    uint32 m_uiBoilingBloodTimer;
-    uint32 m_uiBloodNovaTimer;
-    uint32 m_uiBloodBeastsTimer;
-    uint32 m_uiScentOfBloodTimer;
-    uint32 m_uiBerserkTimer;
-
-    bool m_bIsFrenzied;
-    bool m_bIsIntroDone;
-
-    Powers m_powerBloodPower;
-
-    void Reset() override
-    {
-        m_uiRuneOfBloodTimer    = 25000;
-        m_uiBoilingBloodTimer   = 19000;
-        m_uiBloodNovaTimer      = 20000;
-        m_uiBloodBeastsTimer    = 40000;
-        m_uiScentOfBloodTimer   = 47000;
-        m_uiBerserkTimer        = 8 * MINUTE * IN_MILLISECONDS;
-
-        if (m_pInstance && m_pInstance->IsHeroicDifficulty())
-            m_uiBerserkTimer    = 6 * MINUTE * IN_MILLISECONDS;
-
-        m_bIsFrenzied           = false;
-
-        m_creature->SetPower(m_powerBloodPower, 0);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_BLOOD_POWER, CAST_TRIGGERED);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_DEATHBRINGER_SAURFANG, IN_PROGRESS);
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (!m_bIsIntroDone && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() && m_creature->GetDistance2d(pWho) < 50.0f)
+        boss_deathbringer_saurfangAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            m_creature->GetMotionMaster()->MovePoint(POINT_ID_INTRO, fIntroPosition[0], fIntroPosition[1], fIntroPosition[2]);
-            if (m_pInstance)
-                m_pInstance->DoUseDoorOrButton(GO_SAURFANG_DOOR);
-            m_bIsIntroDone = true;
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_powerBloodPower = m_creature->GetPowerType();
+            m_bIsIntroDone = false;
         }
 
-        ScriptedAI::MoveInLineOfSight(pWho);
-    }
+        ScriptedInstance* m_pInstance;
 
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
+        uint32 m_uiRuneOfBloodTimer;
+        uint32 m_uiBoilingBloodTimer;
+        uint32 m_uiBloodNovaTimer;
+        uint32 m_uiBloodBeastsTimer;
+        uint32 m_uiScentOfBloodTimer;
+        uint32 m_uiBerserkTimer;
 
-        if (urand(0, 1))
-            DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
+        bool m_bIsFrenzied;
+        bool m_bIsIntroDone;
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_REMOVE_MARKS, CAST_TRIGGERED);
+        Powers m_powerBloodPower;
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_DEATHBRINGER_SAURFANG, DONE);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_DEATHBRINGER_SAURFANG, FAIL);
-    }
-
-    void EnterEvadeMode() override
-    {
-        m_creature->RemoveAllAurasOnEvade();
-        m_creature->DeleteThreatList();
-        m_creature->CombatStop(true);
-
-        // Boss needs to evade to the point in front of the door
-        if (m_creature->IsAlive())
-            m_creature->GetMotionMaster()->MovePoint(POINT_ID_EVADE, fIntroPosition[0], fIntroPosition[1], fIntroPosition[2]);
-
-        m_creature->SetLootRecipient(NULL);
-
-        Reset();
-    }
-
-    void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
-    {
-        if (uiMoveType != POINT_MOTION_TYPE)
-            return;
-
-        if (uiPointId == POINT_ID_EVADE)
+        void Reset() override
         {
-            m_creature->SetFacingTo(fIntroPosition[3]);
+            m_uiRuneOfBloodTimer = 25000;
+            m_uiBoilingBloodTimer = 19000;
+            m_uiBloodNovaTimer = 20000;
+            m_uiBloodBeastsTimer = 40000;
+            m_uiScentOfBloodTimer = 47000;
+            m_uiBerserkTimer = 8 * MINUTE * IN_MILLISECONDS;
 
+            if (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC))
+                m_uiBerserkTimer = 6 * MINUTE * IN_MILLISECONDS;
+
+            m_bIsFrenzied = false;
+
+            m_creature->SetPower(m_powerBloodPower, 0);
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
+            DoCastSpellIfCan(m_creature, SPELL_BLOOD_POWER, CAST_TRIGGERED);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_DEATHBRINGER_SAURFANG, IN_PROGRESS);
+        }
+
+        void MoveInLineOfSight(Unit* pWho) override
+        {
+            if (!m_bIsIntroDone && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() && m_creature->GetDistance2d(pWho) < 50.0f)
+            {
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_INTRO, fIntroPosition[0], fIntroPosition[1], fIntroPosition[2]);
+                if (m_pInstance)
+                    m_pInstance->DoUseDoorOrButton(GO_SAURFANG_DOOR);
+                m_bIsIntroDone = true;
+            }
+
+            ScriptedAI::MoveInLineOfSight(pWho);
+        }
+
+        void KilledUnit(Unit* pVictim) override
+        {
+            if (pVictim->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            if (urand(0, 1))
+                DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            DoScriptText(SAY_DEATH, m_creature);
+            DoCastSpellIfCan(m_creature, SPELL_REMOVE_MARKS, CAST_TRIGGERED);
+
+            if (m_pInstance)
+                m_pInstance->SetData(TYPE_DEATHBRINGER_SAURFANG, DONE);
+        }
+
+        void JustReachedHome() override
+        {
             if (m_pInstance)
                 m_pInstance->SetData(TYPE_DEATHBRINGER_SAURFANG, FAIL);
         }
-        else if (uiPointId == POINT_ID_INTRO)
-        {
-            if (m_pInstance)
-                m_pInstance->DoUseDoorOrButton(GO_SAURFANG_DOOR);
 
-            // Note: this should be done only after the intro event is finished
-            // ToDo: move this to the proper place after the intro will be implemented
-            // Also the faction needs to be checked if it should be handled in database
-            m_creature->setFaction(FACTION_ID_UNDEAD);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PASSIVE);
-            m_creature->SetInCombatWithZone();
+        void EnterEvadeMode() override
+        {
+            m_creature->RemoveAllAurasOnEvade();
+            m_creature->DeleteThreatList();
+            m_creature->CombatStop(true);
+
+            // Boss needs to evade to the point in front of the door
+            if (m_creature->IsAlive())
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_EVADE, fIntroPosition[0], fIntroPosition[1], fIntroPosition[2]);
+
+            m_creature->SetLootRecipient(NULL);
+
+            Reset();
         }
-    }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        pSummoned->CastSpell(pSummoned, SPELL_RESISTANT_SKIN, true);
-        pSummoned->CastSpell(pSummoned, SPELL_BLOOD_LINK_BEAST, true);
-
-        // Note: the summoned should be activated only after 2-3 seconds after summon - can be done in eventAI
-        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            pSummoned->AI()->AttackStart(pTarget);
-    }
-
-    // Wrapper to help get a random player for the Mark of the Fallen Champion
-    Unit* SelectRandomPlayerForMark()
-    {
-        // Search only for players which are not within 18 yards of the boss
-        std::vector<Unit*> suitableTargets;
-        ThreatList const& threatList = m_creature->GetThreatManager().getThreatList();
-
-        for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+        void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
         {
-            if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+            if (uiMoveType != POINT_MOTION_TYPE)
+                return;
+
+            if (uiPointId == POINT_ID_EVADE)
             {
-                if (pTarget->GetTypeId() == TYPEID_PLAYER && pTarget != m_creature->getVictim() && !pTarget->HasAura(SPELL_MARK_FALLEN_CHAMPION))
-                    suitableTargets.push_back(pTarget);
+                m_creature->SetFacingTo(fIntroPosition[3]);
+
+                if (m_pInstance)
+                    m_pInstance->SetData(TYPE_DEATHBRINGER_SAURFANG, FAIL);
+            }
+            else if (uiPointId == POINT_ID_INTRO)
+            {
+                if (m_pInstance)
+                    m_pInstance->DoUseDoorOrButton(GO_SAURFANG_DOOR);
+
+                // Note: this should be done only after the intro event is finished
+                // ToDo: move this to the proper place after the intro will be implemented
+                // Also the faction needs to be checked if it should be handled in database
+                m_creature->setFaction(FACTION_ID_UNDEAD);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PASSIVE);
+                m_creature->SetInCombatWithZone();
             }
         }
 
-        if (suitableTargets.empty())
-            return m_creature->getVictim();
-        else
-            return suitableTargets[urand(0, suitableTargets.size() - 1)];
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Mark of the Fallen Champion
-        // ToDo: enable this when blood power is fully supported by the core
-        /*if (m_creature->GetPower(m_powerBloodPower) >= 100)
+        void JustSummoned(Creature* pSummoned) override
         {
+            pSummoned->CastSpell(pSummoned, SPELL_RESISTANT_SKIN, true);
+            pSummoned->CastSpell(pSummoned, SPELL_BLOOD_LINK_BEAST, true);
+
+            // Note: the summoned should be activated only after 2-3 seconds after summon - can be done in eventAI
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                pSummoned->AI()->AttackStart(pTarget);
+        }
+
+        // Wrapper to help get a random player for the Mark of the Fallen Champion
+        Unit* SelectRandomPlayerForMark()
+        {
+            // Search only for players which are not within 18 yards of the boss
+            std::vector<Unit*> suitableTargets;
+            ThreatList const& threatList = m_creature->GetThreatManager().getThreatList();
+
+            for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+            {
+                if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+                {
+                    if (pTarget->GetTypeId() == TYPEID_PLAYER && pTarget != m_creature->getVictim() && !pTarget->HasAura(SPELL_MARK_FALLEN_CHAMPION))
+                        suitableTargets.push_back(pTarget);
+                }
+            }
+
+            if (suitableTargets.empty())
+                return m_creature->getVictim();
+            else
+                return suitableTargets[urand(0, suitableTargets.size() - 1)];
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            // Mark of the Fallen Champion
+            // ToDo: enable this when blood power is fully supported by the core
+            /*if (m_creature->GetPower(m_powerBloodPower) >= 100)
+            {
             if (Unit* pTarget = SelectRandomPlayerForMark())
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_MARK_FALLEN_CHAMPION) == CAST_OK)
+            if (DoCastSpellIfCan(pTarget, SPELL_MARK_FALLEN_CHAMPION) == CAST_OK)
+            {
+            DoScriptText(SAY_FALLENCHAMPION, m_creature);
+            m_creature->SetPower(m_powerBloodPower, 0);
+            }
+            }
+            }*/
+
+            // Frenzy (soft enrage)
+            if (!m_bIsFrenzied)
+            {
+                if (m_creature->GetHealthPercent() <= 30.0f)
                 {
-                    DoScriptText(SAY_FALLENCHAMPION, m_creature);
-                    m_creature->SetPower(m_powerBloodPower, 0);
+                    if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
+                    {
+                        DoScriptText(EMOTE_FRENZY, m_creature);
+                        m_bIsFrenzied = true;
+                    }
                 }
             }
-        }*/
 
-        // Frenzy (soft enrage)
-        if (!m_bIsFrenzied)
-        {
-            if (m_creature->GetHealthPercent() <= 30.0f)
+            // Berserk (hard enrage)
+            if (m_uiBerserkTimer)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
+                if (m_uiBerserkTimer < uiDiff)
                 {
-                    DoScriptText(EMOTE_FRENZY, m_creature);
-                    m_bIsFrenzied = true;
+                    if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                    {
+                        DoScriptText(SAY_BERSERK, m_creature);
+                        m_uiBerserkTimer = 0;
+                    }
                 }
+                else
+                    m_uiBerserkTimer -= uiDiff;
             }
-        }
 
-        // Berserk (hard enrage)
-        if (m_uiBerserkTimer)
-        {
-            if (m_uiBerserkTimer < uiDiff)
+            // Rune of Blood
+            if (m_uiRuneOfBloodTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                {
-                    DoScriptText(SAY_BERSERK, m_creature);
-                    m_uiBerserkTimer = 0;
-                }
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_RUNE_OF_BLOOD) == CAST_OK)
+                    m_uiRuneOfBloodTimer = 25000;
             }
             else
-                m_uiBerserkTimer -= uiDiff;
-        }
+                m_uiRuneOfBloodTimer -= uiDiff;
 
-        // Rune of Blood
-        if (m_uiRuneOfBloodTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_RUNE_OF_BLOOD) == CAST_OK)
-                m_uiRuneOfBloodTimer = 25000;
-        }
-        else
-            m_uiRuneOfBloodTimer -= uiDiff;
-
-        // Boiling Blood
-        if (m_uiBoilingBloodTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_BOILING_BLOOD) == CAST_OK)
-                m_uiBoilingBloodTimer = 15000;
-        }
-        else
-            m_uiBoilingBloodTimer -= uiDiff;
-
-        // Blood Nova
-        if (m_uiBloodNovaTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_BLOOD_NOVA) == CAST_OK)
-                m_uiBloodNovaTimer = 20000;
-        }
-        else
-            m_uiBloodNovaTimer -= uiDiff;
-
-        // Call Blood Beasts
-        if (m_uiBloodBeastsTimer < uiDiff)
-        {
-            DoScriptText(SAY_BLOODBEASTS, m_creature);
-
-            DoCastSpellIfCan(m_creature, SPELL_CALL_BLOOD_BEAST_1, CAST_TRIGGERED);
-            DoCastSpellIfCan(m_creature, SPELL_CALL_BLOOD_BEAST_2, CAST_TRIGGERED);
-
-            if (m_pInstance && m_pInstance->Is25ManDifficulty())
+            // Boiling Blood
+            if (m_uiBoilingBloodTimer < uiDiff)
             {
-                DoCastSpellIfCan(m_creature, SPELL_CALL_BLOOD_BEAST_3, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_CALL_BLOOD_BEAST_4, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_CALL_BLOOD_BEAST_5, CAST_TRIGGERED);
-            }
-
-            m_uiBloodBeastsTimer = 40000;
-            m_uiScentOfBloodTimer = 7000;
-        }
-        else
-            m_uiBloodBeastsTimer -= uiDiff;
-
-        // Scent of Blood
-        if (m_pInstance && m_pInstance->IsHeroicDifficulty())
-        {
-            if (m_uiScentOfBloodTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_SCENT_OF_BLOOD) == CAST_OK)
-                {
-                    DoScriptText(EMOTE_SCENT, m_creature);
-                    m_uiScentOfBloodTimer = 40000;
-                }
+                if (DoCastSpellIfCan(m_creature, SPELL_BOILING_BLOOD) == CAST_OK)
+                    m_uiBoilingBloodTimer = 15000;
             }
             else
-                m_uiScentOfBloodTimer -= uiDiff;
-        }
+                m_uiBoilingBloodTimer -= uiDiff;
 
-        DoMeleeAttackIfReady();
+            // Blood Nova
+            if (m_uiBloodNovaTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_BLOOD_NOVA) == CAST_OK)
+                    m_uiBloodNovaTimer = 20000;
+            }
+            else
+                m_uiBloodNovaTimer -= uiDiff;
+
+            // Call Blood Beasts
+            if (m_uiBloodBeastsTimer < uiDiff)
+            {
+                DoScriptText(SAY_BLOODBEASTS, m_creature);
+
+                DoCastSpellIfCan(m_creature, SPELL_CALL_BLOOD_BEAST_1, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_CALL_BLOOD_BEAST_2, CAST_TRIGGERED);
+
+                if (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_25MAN))
+                {
+                    DoCastSpellIfCan(m_creature, SPELL_CALL_BLOOD_BEAST_3, CAST_TRIGGERED);
+                    DoCastSpellIfCan(m_creature, SPELL_CALL_BLOOD_BEAST_4, CAST_TRIGGERED);
+                    DoCastSpellIfCan(m_creature, SPELL_CALL_BLOOD_BEAST_5, CAST_TRIGGERED);
+                }
+
+                m_uiBloodBeastsTimer = 40000;
+                m_uiScentOfBloodTimer = 7000;
+            }
+            else
+                m_uiBloodBeastsTimer -= uiDiff;
+
+            // Scent of Blood
+            if (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC))
+            {
+                if (m_uiScentOfBloodTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_SCENT_OF_BLOOD) == CAST_OK)
+                    {
+                        DoScriptText(EMOTE_SCENT, m_creature);
+                        m_uiScentOfBloodTimer = 40000;
+                    }
+                }
+                else
+                    m_uiScentOfBloodTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_deathbringer_saurfangAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_deathbringer_saurfang(Creature* pCreature)
-{
-    return new boss_deathbringer_saurfangAI(pCreature);
-}
-
 void AddSC_boss_deathbringer_saurfang()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_deathbringer_saurfang";
-    pNewScript->GetAI = &GetAI_boss_deathbringer_saurfang;
-    pNewScript->RegisterSelf();
+    s = new boss_deathbringer_saurfang();
+    s->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_deathbringer_saurfang";
+    //pNewScript->GetAI = &GetAI_boss_deathbringer_saurfang;
+    //pNewScript->RegisterSelf();
 }

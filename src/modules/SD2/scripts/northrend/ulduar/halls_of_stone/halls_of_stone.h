@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+﻿/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
@@ -13,8 +13,16 @@ enum
     TYPE_MAIDEN             = 1,
     TYPE_KRYSTALLUS         = 2,
     TYPE_SJONNIR            = 3,
+    TYPE_ACHIEV_BRANN_SPANKIN   = MAX_ENCOUNTER,
+    TYPE_DO_SPAWN_DWARF         = MAX_ENCOUNTER + 1,
+    TYPE_DO_MARNAK_SPEAK        = MAX_ENCOUNTER + 2,    //order should be met in ScriptedInstance
+    TYPE_DO_ABEDNEUM_SPEAK      = MAX_ENCOUNTER + 3,
+    TYPE_DO_KADDRAK_SPEAK       = MAX_ENCOUNTER + 4,
+    TYPE_DO_MARNAK_ACTIVATE     = MAX_ENCOUNTER + 5,    //order: here too
+    TYPE_DO_ABEDNEUM_ACTIVATE   = MAX_ENCOUNTER + 6,
+    TYPE_DO_KADDRAK_ACTIVATE    = MAX_ENCOUNTER + 7,
 
-    // NPC_BRANN            = 28070,
+    NPC_BRANN_HOS           = 28070,
 
     NPC_KADDRAK             = 30898,
     NPC_ABEDNEUM            = 30899,
@@ -25,6 +33,10 @@ enum
     NPC_LIGHTNING_STALKER   = 28130,                        // used by the Tribunal event as spawn point for the dwarfs
     NPC_IRON_SLUDGE         = 28165,                        // checked in the Sjonnir achiev
     NPC_SJONNIR             = 27978,
+
+    NPC_DARK_RUNE_PROTECTOR     = 27983,
+    NPC_DARK_RUNE_STORMCALLER   = 27984,
+    NPC_IRON_GOLEM_CUSTODIAN    = 27985,
 
     GO_DOOR_MAIDEN          = 191292,
     GO_DOOR_TRIBUNAL        = 191294,                       // possibly closed during event?
@@ -57,68 +69,4 @@ enum
     ACHIEV_CRIT_BRANN       = 7590,                         // Brann, achiev 2154
     ACHIEV_CRIT_ABUSE_OOZE  = 7593,                         // Snonnir, achiev 2155
 };
-
-struct Face
-{
-    Face() : m_bIsActive(false), m_uiTimer(1000) {}
-
-    ObjectGuid m_leftEyeGuid;
-    ObjectGuid m_rightEyeGuid;
-    ObjectGuid m_goFaceGuid;
-    ObjectGuid m_speakerGuid;
-    bool m_bIsActive;
-    uint32 m_uiTimer;
-};
-
-class instance_halls_of_stone : public ScriptedInstance
-{
-    public:
-        instance_halls_of_stone(Map* pMap);
-        void Initialize() override;
-
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-
-        void OnCreatureDeath(Creature* pCreature) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-        void Load(const char* chrIn) override;
-
-        void Update(uint32 uiDiff) override;
-
-        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
-
-        void ActivateFace(uint8 uiFace, bool bAfterEvent);
-        void DoFaceSpeak(uint8 uiFace, int32 iTextId);
-        void SetBrannSpankin(bool bIsMet) { m_bIsBrannSpankin = bIsMet; }
-
-        ObjectGuid GetProtectorStalkerGuid() { return m_protectorStalkerGuid; }
-        ObjectGuid GeStormcallerStalkerGuid() { return m_stormcallerStalkerGuid; }
-        ObjectGuid GetCustodianStalkerGuid() { return m_custodianStalkerGuid; }
-
-    private:
-        void SortFaces();
-        void ProcessFace(uint8 uiFace);
-
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        Face m_aFaces[MAX_FACES];
-        std::string m_strInstData;
-
-        uint8 m_uiIronSludgeKilled;
-        bool m_bIsBrannSpankin;
-
-        ObjectGuid m_protectorStalkerGuid;
-        ObjectGuid m_stormcallerStalkerGuid;
-        ObjectGuid m_custodianStalkerGuid;
-
-        GuidList m_lKaddrakGUIDs;
-        GuidList m_lAbedneumGUIDs;
-        GuidList m_lMarnakGUIDs;
-        GuidList m_lTribunalGUIDs;
-        GuidList m_lWorldtriggerGUIDs;
-};
-
 #endif

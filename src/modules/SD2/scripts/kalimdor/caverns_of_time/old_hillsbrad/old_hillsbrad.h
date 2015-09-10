@@ -39,6 +39,7 @@ enum
     TYPE_ESCORT_INN                 = 4,                    // barn to inn
     TYPE_EPOCH                      = 5,                    // inn event
     TYPE_THRALL_EVENT               = 6,                    // global event
+    TYPE_THRALL_EVENT_COUNT         = MAX_ENCOUNTER,
 
     // event npcs
     NPC_THRALL                      = 17876,
@@ -67,56 +68,6 @@ enum
     QUEST_ENTRY_RETURN              = 10285,
 
     WORLD_STATE_OH                  = 2436,
-};
-
-static const float afInstanceLoc[][4] =
-{
-    {2104.51f, 91.96f, 53.14f, 0},                  // right orcs outside loc
-    {2192.58f, 238.44f, 52.44f, 0},                 // left orcs outside loc
-};
-
-static const float aDrakeSummonLoc[4] = {2128.43f, 71.01f, 64.42f, 1.74f};
-
-class instance_old_hillsbrad : public ScriptedInstance
-{
-    public:
-        instance_old_hillsbrad(Map* pMap);
-        ~instance_old_hillsbrad() {}
-
-        void Initialize() override;
-
-        void OnPlayerEnter(Player* pPlayer) override;
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-
-        void OnCreatureEnterCombat(Creature* pCreature) override;
-        void OnCreatureEvade(Creature* pCreature);
-        void OnCreatureDeath(Creature* pCreature) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        uint32 GetThrallEventCount() { return m_uiThrallEventCount; }
-
-        const char* Save() const override { return m_strInstData.c_str(); }
-        void Load(const char* chrIn) override;
-
-        void Update(uint32 uiDiff) override;
-
-    protected:
-        void HandleThrallRelocation();
-        void UpdateLodgeQuestCredit();
-
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string m_strInstData;
-
-        uint32 m_uiBarrelCount;
-        uint32 m_uiThrallEventCount;
-        uint32 m_uiThrallResetTimer;
-
-        GuidList m_lRoaringFlamesList;
-        GuidList m_lLeftPrisonersList;
-        GuidList m_lRightPrisonersList;
 };
 
 #endif

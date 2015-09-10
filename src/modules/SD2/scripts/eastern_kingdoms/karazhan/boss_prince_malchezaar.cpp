@@ -70,304 +70,353 @@ enum
 
     EQUIP_ID_AXE                = 23996,                    // Axes info
 
-    ATTACK_TIMER_DEFAULT        = 2000,                     // note: for TBC it was 2400
-    ATTACK_TIMER_AXES           = 1333,                     // note: for TBC it was 1600
+    ATTACK_TIMER_DEFAULT        = 2400,                     // note: for WotLK it is 2000
+    ATTACK_TIMER_AXES           = 1600,                     // note: for WotLK it is 1333
 
     MAX_ENFEEBLE_TARGETS        = 5,
 };
 
-struct boss_malchezaarAI : public ScriptedAI
+struct boss_malchezaar : public CreatureScript
 {
-    boss_malchezaarAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_malchezaar() : CreatureScript("boss_malchezaar") {}
+
+    struct boss_malchezaarAI : public ScriptedAI
     {
-        m_pInstance  = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    uint8 m_uiEnfeebleIndex;
-    uint32 m_uiEnfeebleTimer;
-    uint32 m_uiEnfeebleResetTimer;
-    uint32 m_uiShadowNovaTimer;
-    uint32 m_uiSWPainTimer;
-    uint32 m_uiSunderArmorTimer;
-    uint32 m_uiAmplifyDamageTimer;
-    uint32 m_uiInfernalTimer;
-
-    ObjectGuid m_aEnfeebleTargetGuid[MAX_ENFEEBLE_TARGETS];
-    uint32 m_auiEnfeebleHealth[MAX_ENFEEBLE_TARGETS];
-
-    uint8 m_uiPhase;
-
-    void Reset() override
-    {
-        for (uint8 i = 0; i < MAX_ENFEEBLE_TARGETS; ++i)
+        boss_malchezaarAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            m_aEnfeebleTargetGuid[i].Clear();
-            m_auiEnfeebleHealth[i] = 0;
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         }
 
-        m_uiEnfeebleIndex           = 0;
-        m_uiEnfeebleTimer           = 30000;
-        m_uiEnfeebleResetTimer      = 0;
-        m_uiShadowNovaTimer         = 35500;
-        m_uiSWPainTimer             = 20000;
-        m_uiAmplifyDamageTimer      = 5000;
-        m_uiInfernalTimer           = 40000;
-        m_uiSunderArmorTimer        = urand(5000, 10000);
+        ScriptedInstance* m_pInstance;
 
-        m_uiPhase                   = 1;
+        uint8 m_uiEnfeebleIndex;
+        uint32 m_uiEnfeebleTimer;
+        uint32 m_uiEnfeebleResetTimer;
+        uint32 m_uiShadowNovaTimer;
+        uint32 m_uiSWPainTimer;
+        uint32 m_uiSunderArmorTimer;
+        uint32 m_uiAmplifyDamageTimer;
+        uint32 m_uiInfernalTimer;
 
-        // Reset equipment and attack
-        SetEquipmentSlots(false, EQUIP_UNEQUIP, EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
-        m_creature->SetAttackTime(BASE_ATTACK, ATTACK_TIMER_DEFAULT);
-    }
+        ObjectGuid m_aEnfeebleTargetGuid[MAX_ENFEEBLE_TARGETS];
+        uint32 m_auiEnfeebleHealth[MAX_ENFEEBLE_TARGETS];
 
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        switch (urand(0, 2))
+        uint8 m_uiPhase;
+
+        void Reset() override
         {
+            for (uint8 i = 0; i < MAX_ENFEEBLE_TARGETS; ++i)
+            {
+                m_aEnfeebleTargetGuid[i].Clear();
+                m_auiEnfeebleHealth[i] = 0;
+            }
+
+            m_uiEnfeebleIndex = 0;
+            m_uiEnfeebleTimer = 30000;
+            m_uiEnfeebleResetTimer = 0;
+            m_uiShadowNovaTimer = 35500;
+            m_uiSWPainTimer = 20000;
+            m_uiAmplifyDamageTimer = 5000;
+            m_uiInfernalTimer = 40000;
+            m_uiSunderArmorTimer = urand(5000, 10000);
+
+            m_uiPhase = 1;
+
+            // Reset equipment and attack
+            SetEquipmentSlots(false, EQUIP_UNEQUIP, EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
+            m_creature->SetAttackTime(BASE_ATTACK, ATTACK_TIMER_DEFAULT);
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            switch (urand(0, 2))
+            {
             case 0: DoScriptText(SAY_SLAY1, m_creature); break;
             case 1: DoScriptText(SAY_SLAY2, m_creature); break;
             case 2: DoScriptText(SAY_SLAY3, m_creature); break;
-        }
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        // Remove the summoned axe - which is considered a guardian
-        m_creature->RemoveGuardians();
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_MALCHEZZAR, DONE); }
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_MALCHEZZAR, IN_PROGRESS); }
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_MALCHEZZAR, FAIL); }
-
-        // Remove the summoned axe - which is considered a guardian
-        m_creature->RemoveGuardians();
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_NETHERSPITE_INFERNAL)
-        { pSummoned->CastSpell(pSummoned, SPELL_HELLFIRE, false); }
-        else if (pSummoned->GetEntry() == NPC_MALCHEZARS_AXE)
-        { pSummoned->SetInCombatWithZone(); }
-    }
-
-    void SpellHitTarget(Unit* pTarget, SpellEntry const* pSpellEntry) override
-    {
-        // Target selection is already handled properly in core (doesn't affect tank)
-        if (pSpellEntry->Id == SPELL_ENFEEBLE && pTarget->GetTypeId() == TYPEID_PLAYER)
-        {
-            // Workaround to handle health set to 1
-            m_aEnfeebleTargetGuid[m_uiEnfeebleIndex] = pTarget->GetObjectGuid();
-            m_auiEnfeebleHealth[m_uiEnfeebleIndex] = pTarget->GetHealth();
-            pTarget->SetHealth(1);
-            ++m_uiEnfeebleIndex;
-        }
-    }
-
-    // Wrapper to reset health of the Enfeebled targets
-    void DoHandleEnfeebleHealthReset()
-    {
-        for (int i = 0; i < m_uiEnfeebleIndex; ++i)
-        {
-            Player* pTarget = m_creature->GetMap()->GetPlayer(m_aEnfeebleTargetGuid[i]);
-
-            if (pTarget && pTarget->IsAlive())
-            { pTarget->SetHealth(m_auiEnfeebleHealth[i]); }
-
-            m_aEnfeebleTargetGuid[i].Clear();
-            m_auiEnfeebleHealth[i] = 0;
-        }
-
-        m_uiEnfeebleIndex = 0;
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        // Phase 1 - over 60% HP
-        if (m_uiPhase == 1)
-        {
-            // transition to phase 2
-            if (m_creature->GetHealthPercent() < 60.0f)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_EQUIP_AXES, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
-                {
-                    DoCastSpellIfCan(m_creature, SPELL_THRASH_AURA, CAST_TRIGGERED);
-                    DoScriptText(SAY_AXE_TOSS1, m_creature);
-
-                    SetEquipmentSlots(false, EQUIP_ID_AXE, EQUIP_ID_AXE, EQUIP_NO_CHANGE);
-                    m_creature->SetAttackTime(BASE_ATTACK, ATTACK_TIMER_AXES);
-                    m_uiPhase = 2;
-                }
             }
         }
-        // Phase 2 - over 30% HP
-        else if (m_uiPhase == 2)
+
+        void JustDied(Unit* /*pKiller*/) override
         {
-            // transition to phase 3
-            if (m_creature->GetHealthPercent() < 30.0f)
+            DoScriptText(SAY_DEATH, m_creature);
+
+            // Remove the summoned axe - which is considered a guardian
+            m_creature->RemoveGuardians();
+
+            if (m_pInstance)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_AXES) == CAST_OK)
+                m_pInstance->SetData(TYPE_MALCHEZZAR, DONE);
+            }
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_MALCHEZZAR, IN_PROGRESS);
+            }
+        }
+
+        void JustReachedHome() override
+        {
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_MALCHEZZAR, FAIL);
+            }
+
+            // Remove the summoned axe - which is considered a guardian
+            m_creature->RemoveGuardians();
+        }
+
+        void JustSummoned(Creature* pSummoned) override
+        {
+            if (pSummoned->GetEntry() == NPC_NETHERSPITE_INFERNAL)
+            {
+                pSummoned->CastSpell(pSummoned, SPELL_HELLFIRE, false);
+            }
+            else if (pSummoned->GetEntry() == NPC_MALCHEZARS_AXE)
+            {
+                pSummoned->SetInCombatWithZone();
+            }
+        }
+
+        void SpellHitTarget(Unit* pTarget, SpellEntry const* pSpellEntry) override
+        {
+            // Target selection is already handled properly in core (doesn't affect tank)
+            if (pSpellEntry->Id == SPELL_ENFEEBLE && pTarget->GetTypeId() == TYPEID_PLAYER)
+            {
+                // Workaround to handle health set to 1
+                m_aEnfeebleTargetGuid[m_uiEnfeebleIndex] = pTarget->GetObjectGuid();
+                m_auiEnfeebleHealth[m_uiEnfeebleIndex] = pTarget->GetHealth();
+                pTarget->SetHealth(1);
+                ++m_uiEnfeebleIndex;
+            }
+        }
+
+        // Wrapper to reset health of the Enfeebled targets
+        void DoHandleEnfeebleHealthReset()
+        {
+            for (int i = 0; i < m_uiEnfeebleIndex; ++i)
+            {
+                Player* pTarget = m_creature->GetMap()->GetPlayer(m_aEnfeebleTargetGuid[i]);
+
+                if (pTarget && pTarget->IsAlive())
                 {
-                    DoCastSpellIfCan(m_creature, SPELL_ENFEEBLE_EFFECT, CAST_TRIGGERED);
-                    DoScriptText(SAY_SPECIAL3, m_creature);
+                    pTarget->SetHealth(m_auiEnfeebleHealth[i]);
+                }
 
-                    SetEquipmentSlots(false, EQUIP_UNEQUIP, EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
-                    m_creature->SetAttackTime(BASE_ATTACK, ATTACK_TIMER_DEFAULT);
+                m_aEnfeebleTargetGuid[i].Clear();
+                m_auiEnfeebleHealth[i] = 0;
+            }
 
-                    // Reset Enfeebled targets if necessary
+            m_uiEnfeebleIndex = 0;
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            // Phase 1 - over 60% HP
+            if (m_uiPhase == 1)
+            {
+                // transition to phase 2
+                if (m_creature->GetHealthPercent() < 60.0f)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_EQUIP_AXES, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                    {
+                        DoCastSpellIfCan(m_creature, SPELL_THRASH_AURA, CAST_TRIGGERED);
+                        DoScriptText(SAY_AXE_TOSS1, m_creature);
+
+                        SetEquipmentSlots(false, EQUIP_ID_AXE, EQUIP_ID_AXE, EQUIP_NO_CHANGE);
+                        m_creature->SetAttackTime(BASE_ATTACK, ATTACK_TIMER_AXES);
+                        m_uiPhase = 2;
+                    }
+                }
+            }
+            // Phase 2 - over 30% HP
+            else if (m_uiPhase == 2)
+            {
+                // transition to phase 3
+                if (m_creature->GetHealthPercent() < 30.0f)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_AXES) == CAST_OK)
+                    {
+                        DoCastSpellIfCan(m_creature, SPELL_ENFEEBLE_EFFECT, CAST_TRIGGERED);
+                        DoScriptText(SAY_SPECIAL3, m_creature);
+
+                        SetEquipmentSlots(false, EQUIP_UNEQUIP, EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
+                        m_creature->SetAttackTime(BASE_ATTACK, ATTACK_TIMER_DEFAULT);
+
+                        // Reset Enfeebled targets if necessary
+                        DoHandleEnfeebleHealthReset();
+                        m_uiEnfeebleResetTimer = 0;
+
+                        m_creature->RemoveAurasDueToSpell(SPELL_THRASH_AURA);
+                        m_uiShadowNovaTimer = m_uiEnfeebleTimer + 5000;
+                        m_uiInfernalTimer = 15000;
+                        m_uiPhase = 3;
+
+                        return;
+                    }
+                }
+
+                if (m_uiSunderArmorTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SUNDER_ARMOR) == CAST_OK)
+                    {
+                        m_uiSunderArmorTimer = urand(10000, 18000);
+                    }
+                }
+                else
+                {
+                    m_uiSunderArmorTimer -= uiDiff;
+                }
+            }
+            // Phase 3
+            else
+            {
+                if (m_uiAmplifyDamageTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_AMPLIFY_DAMAGE) == CAST_OK)
+                    {
+                        m_uiAmplifyDamageTimer = urand(20000, 30000);
+                    }
+                }
+                else
+                {
+                    m_uiAmplifyDamageTimer -= uiDiff;
+                }
+            }
+
+            // Summon an infernal on timer
+            if (m_uiInfernalTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_INFERNAL_RELAY_SUMMON) == CAST_OK)
+                {
+                    DoScriptText(urand(0, 1) ? SAY_SUMMON1 : SAY_SUMMON2, m_creature);
+                    m_uiInfernalTimer = m_uiPhase == 3 ? 17000 : 45000;
+                }
+            }
+            else
+            {
+                m_uiInfernalTimer -= uiDiff;
+            }
+
+            // Cast shadow nova - on timer during phase 3, or after Enfeeble during phases 1 and 2
+            if (m_uiShadowNovaTimer)
+            {
+                if (m_uiShadowNovaTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_NOVA) == CAST_OK)
+                    {
+                        m_uiShadowNovaTimer = m_uiPhase == 3 ? 30000 : 0;
+                    }
+                }
+                else
+                {
+                    m_uiShadowNovaTimer -= uiDiff;
+                }
+            }
+
+            // Cast SW pain during phase 1 and 3
+            if (m_uiPhase != 2)
+            {
+                if (m_uiSWPainTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_uiPhase == 1 ? m_creature->getVictim() : m_creature, m_uiPhase == 1 ? SPELL_SW_PAIN_PHASE1 : SPELL_SW_PAIN_PHASE3) == CAST_OK)
+                    {
+                        m_uiSWPainTimer = 20000;
+                    }
+                }
+                else
+                {
+                    m_uiSWPainTimer -= uiDiff;
+                }
+            }
+
+            // Cast Enfeeble during phase 1 and 2
+            if (m_uiPhase != 3)
+            {
+                if (m_uiEnfeebleTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_ENFEEBLE) == CAST_OK)
+                    {
+                        m_uiEnfeebleTimer = 30000;
+                        m_uiShadowNovaTimer = 5000;
+                        m_uiEnfeebleResetTimer = 9000;
+                    }
+                }
+                else
+                {
+                    m_uiEnfeebleTimer -= uiDiff;
+                }
+            }
+
+            if (m_uiEnfeebleResetTimer)
+            {
+                if (m_uiEnfeebleResetTimer <= uiDiff)
+                {
                     DoHandleEnfeebleHealthReset();
                     m_uiEnfeebleResetTimer = 0;
-
-                    m_creature->RemoveAurasDueToSpell(SPELL_THRASH_AURA);
-                    m_uiShadowNovaTimer = m_uiEnfeebleTimer + 5000;
-                    m_uiInfernalTimer = 15000;
-                    m_uiPhase = 3;
-
-                    return;
                 }
-            }
-
-            if (m_uiSunderArmorTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SUNDER_ARMOR) == CAST_OK)
-                { m_uiSunderArmorTimer = urand(10000, 18000); }
-            }
-            else
-            { m_uiSunderArmorTimer -= uiDiff; }
-        }
-        // Phase 3
-        else
-        {
-            if (m_uiAmplifyDamageTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_AMPLIFY_DAMAGE) == CAST_OK)
-                { m_uiAmplifyDamageTimer = urand(20000, 30000); }
-            }
-            else
-            { m_uiAmplifyDamageTimer -= uiDiff; }
-        }
-
-        // Summon an infernal on timer
-        if (m_uiInfernalTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_INFERNAL_RELAY_SUMMON) == CAST_OK)
-            {
-                DoScriptText(urand(0, 1) ? SAY_SUMMON1 : SAY_SUMMON2, m_creature);
-                m_uiInfernalTimer =  m_uiPhase == 3 ? 17000 : 45000;
-            }
-        }
-        else
-        { m_uiInfernalTimer -= uiDiff; }
-
-        // Cast shadow nova - on timer during phase 3, or after Enfeeble during phases 1 and 2
-        if (m_uiShadowNovaTimer)
-        {
-            if (m_uiShadowNovaTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_NOVA) == CAST_OK)
-                { m_uiShadowNovaTimer = m_uiPhase == 3 ? 30000 : 0; }
-            }
-            else
-            { m_uiShadowNovaTimer -= uiDiff; }
-        }
-
-        // Cast SW pain during phase 1 and 3
-        if (m_uiPhase != 2)
-        {
-            if (m_uiSWPainTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_uiPhase == 1 ? m_creature->getVictim() : m_creature, m_uiPhase == 1 ? SPELL_SW_PAIN_PHASE1 : SPELL_SW_PAIN_PHASE3) == CAST_OK)
-                { m_uiSWPainTimer = 20000; }
-            }
-            else
-            { m_uiSWPainTimer -= uiDiff; }
-        }
-
-        // Cast Enfeeble during phase 1 and 2
-        if (m_uiPhase != 3)
-        {
-            if (m_uiEnfeebleTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_ENFEEBLE) == CAST_OK)
+                else
                 {
-                    m_uiEnfeebleTimer       = 30000;
-                    m_uiShadowNovaTimer     = 5000;
-                    m_uiEnfeebleResetTimer  = 9000;
+                    m_uiEnfeebleResetTimer -= uiDiff;
                 }
             }
-            else
-            { m_uiEnfeebleTimer -= uiDiff; }
-        }
 
-        if (m_uiEnfeebleResetTimer)
-        {
-            if (m_uiEnfeebleResetTimer <= uiDiff)
-            {
-                DoHandleEnfeebleHealthReset();
-                m_uiEnfeebleResetTimer = 0;
-            }
-            else
-            { m_uiEnfeebleResetTimer -= uiDiff; }
+            DoMeleeAttackIfReady();
         }
+    };
 
-        DoMeleeAttackIfReady();
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_malchezaarAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_malchezaar(Creature* pCreature)
-{
-    return new boss_malchezaarAI(pCreature);
-}
-
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct npc_infernal_targetAI : public Scripted_NoMovementAI
+struct npc_infernal_target : public CreatureScript
 {
-    npc_infernal_targetAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    npc_infernal_target() : CreatureScript("npc_infernal_target") {}
 
-    void Reset() override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
+    struct npc_infernal_targetAI : public Scripted_NoMovementAI
+    {
+        npc_infernal_targetAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) {}
+
+        void MoveInLineOfSight(Unit* /*pWho*/) override { }
+        void AttackStart(Unit* /*pWho*/) override { }
+        void UpdateAI(const uint32 /*uiDiff*/) override { }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_infernal_targetAI(pCreature);
+    }
 };
-
-CreatureAI* GetAI_npc_infernal_target(Creature* pCreature)
-{
-    return new npc_infernal_targetAI(pCreature);
-}
 
 void AddSC_boss_prince_malchezaar()
 {
-    Script* pNewScript;
+    Script* s;
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_malchezaar";
-    pNewScript->GetAI = &GetAI_boss_malchezaar;
-    pNewScript->RegisterSelf();
+    s = new boss_malchezaar();
+    s->RegisterSelf();
+    s = new npc_infernal_target();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_infernal_target";
-    pNewScript->GetAI = &GetAI_npc_infernal_target;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_malchezaar";
+    //pNewScript->GetAI = &GetAI_boss_malchezaar;
+    //pNewScript->RegisterSelf();
+
+    //pNewScript = new Script;
+    //pNewScript->Name = "npc_infernal_target";
+    //pNewScript->GetAI = &GetAI_npc_infernal_target;
+    //pNewScript->RegisterSelf();
 }

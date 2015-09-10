@@ -43,6 +43,15 @@ enum
     TYPE_MALCHEZZAR                 = 9,
     TYPE_NIGHTBANE                  = 10,
     TYPE_OPERA_PERFORMANCE          = 11,               // no regular encounter - just store one random opera event
+    TYPE_NIGHTBANE_TRIGGER_GROUND   = MAX_ENCOUNTER+1,
+    TYPE_NIGHTBANE_TRIGGER_AIR      = MAX_ENCOUNTER+2,
+    TYPE_PLAYER_TEAM                = MAX_ENCOUNTER+3,
+    TYPE_CHESS_TARGET               = MAX_ENCOUNTER+4,
+    TYPE_CHESS_RANGE                = MAX_ENCOUNTER+5,
+    TYPE_CHESS_ARC_PART             = MAX_ENCOUNTER+6,
+    TYPE_CHESS_MOVEMENT_SQUARE      = MAX_ENCOUNTER+7,
+    TYPE_CHESS_MOVE_TO_SIDES        = MAX_ENCOUNTER+8,
+    TYPE_CHESS_GAME_READY           = MAX_ENCOUNTER+9,
 
     NPC_ATTUMEN                     = 15550,
     NPC_MIDNIGHT                    = 16151,
@@ -131,6 +140,9 @@ enum
 
     FACTION_ID_CHESS_HORDE          = 1689,
     FACTION_ID_CHESS_ALLIANCE       = 1690,
+
+    TARGET_TYPE_RANDOM = 1,
+    TARGET_TYPE_FRIENDLY = 2,
 };
 
 enum OperaEvents
@@ -138,89 +150,6 @@ enum OperaEvents
     OPERA_EVENT_WIZARD_OZ           = 1,
     OPERA_EVENT_RED_RIDING_HOOD     = 2,
     OPERA_EVENT_ROMULO_AND_JUL      = 3
-};
-
-struct OperaSpawns
-{
-    uint32 uiEntry;
-    float fX, fY, fZ, fO;
-};
-
-static const OperaSpawns aOperaLocOz[MAX_OZ_OPERA_MOBS] =
-{
-    {NPC_DOROTHEE,  -10896.65f, -1757.62f, 90.55f, 4.86f},
-    {NPC_ROAR,      -10889.53f, -1758.10f, 90.55f, 4.57f},
-    {NPC_TINHEAD,   -10883.84f, -1758.85f, 90.55f, 4.53f},
-    {NPC_STRAWMAN,  -10902.11f, -1756.45f, 90.55f, 4.66f},
-};
-
-static const OperaSpawns aOperaLocWolf = {NPC_GRANDMOTHER, -10892.01f, -1758.01f, 90.55f, 4.73f};
-static const OperaSpawns aOperaLocJul  = {NPC_JULIANNE,    -10893.56f, -1760.43f, 90.55f, 4.55f};
-
-static const float afChroneSpawnLoc[4] = { -10893.11f, -1757.85f, 90.55f, 4.60f};
-
-class instance_karazhan : public ScriptedInstance
-{
-    public:
-        instance_karazhan(Map* pMap);
-        ~instance_karazhan() {}
-
-        void Initialize() override;
-        bool IsEncounterInProgress() const override;
-
-        void OnPlayerEnter(Player* pPlayer) override;
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-
-        void OnCreatureDeath(Creature* pCreature) override;
-
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
-
-        void DoPrepareOperaStage(Creature* pOrganizer);
-
-        uint32 GetPlayerTeam() { return m_uiTeam; }
-        bool IsFriendlyGameReady() { return m_bFriendlyGame; }
-        void DoMoveChessPieceToSides(uint32 uiSpellId, uint32 uiFaction, bool bGameEnd = false);
-        void GetChessPiecesByFaction(GuidList& lList, uint32 uiFaction) { lList = uiFaction == FACTION_ID_CHESS_ALLIANCE ? m_lChessPiecesAlliance : m_lChessPiecesHorde; }
-
-        void GetNightbaneTriggers(GuidList& lList, bool bGround) { lList = bGround ? m_lNightbaneGroundTriggers : m_lNightbaneAirTriggers; }
-
-        void Load(const char* chrIn) override;
-        const char* Save() const override { return m_strInstData.c_str(); }
-
-        void Update(uint32 uiDiff) override;
-
-    private:
-        void DoPrepareChessEvent();
-
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        std::string m_strInstData;
-
-        uint32 m_uiOperaEvent;
-        uint32 m_uiOzDeathCount;
-        uint32 m_uiTeam;                                    // Team of first entered player, used for the Chess event
-        uint32 m_uiChessResetTimer;
-
-        uint8 m_uiAllianceStalkerCount;
-        uint8 m_uiHordeStalkerCount;
-
-        bool m_bFriendlyGame;
-
-        ObjectGuid m_HordeStatusGuid;
-        ObjectGuid m_AllianceStatusGuid;
-
-        GuidList m_lOperaTreeGuidList;
-        GuidList m_lOperaHayGuidList;
-        GuidList m_lNightbaneGroundTriggers;
-        GuidList m_lNightbaneAirTriggers;
-
-        GuidList m_lChessHordeStalkerList;
-        GuidList m_lChessAllianceStalkerList;
-        GuidList m_lChessPiecesAlliance;
-        GuidList m_lChessPiecesHorde;
-        GuidVector m_vHordeStalkers;
-        GuidVector m_vAllianceStalkers;
 };
 
 #endif

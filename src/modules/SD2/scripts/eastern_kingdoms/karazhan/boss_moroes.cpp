@@ -71,223 +71,267 @@ static const uint32 auiGuests[MAX_GUESTS] =
     NPC_LORD_ROBIN_DARIS
 };
 
-struct boss_moroesAI : public ScriptedAI
+struct boss_moroes : public CreatureScript
 {
-    boss_moroesAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_moroes() : CreatureScript("boss_moroes") {}
+
+    struct boss_moroesAI : public ScriptedAI
     {
-        m_pInstance  = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-
-    std::vector<uint32> m_vGuestsEntryList;
-
-    uint32 m_uiVanishTimer;
-    uint32 m_uiBlindTimer;
-    uint32 m_uiGougeTimer;
-    uint32 m_uiWaitTimer;
-
-    bool m_bEnrage;
-
-    void Reset() override
-    {
-        m_uiVanishTimer     = 30000;
-        m_uiBlindTimer      = 35000;
-        m_uiGougeTimer      = 23000;
-        m_uiWaitTimer       = 0;
-
-        m_bEnrage           = false;
-
-        DoSpawnGuests();
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_MOROES, IN_PROGRESS); }
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        switch (urand(0, 2))
+        boss_moroesAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
+            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        }
+
+        ScriptedInstance* m_pInstance;
+
+        std::vector<uint32> m_vGuestsEntryList;
+
+        uint32 m_uiVanishTimer;
+        uint32 m_uiBlindTimer;
+        uint32 m_uiGougeTimer;
+        uint32 m_uiWaitTimer;
+
+        bool m_bEnrage;
+
+        void Reset() override
+        {
+            m_uiVanishTimer = 30000;
+            m_uiBlindTimer = 35000;
+            m_uiGougeTimer = 23000;
+            m_uiWaitTimer = 0;
+
+            m_bEnrage = false;
+
+            DoSpawnGuests();
+        }
+
+        void Aggro(Unit* /*pWho*/) override
+        {
+            DoScriptText(SAY_AGGRO, m_creature);
+
+            if (m_pInstance)
+            {
+                m_pInstance->SetData(TYPE_MOROES, IN_PROGRESS);
+            }
+        }
+
+        void KilledUnit(Unit* /*pVictim*/) override
+        {
+            switch (urand(0, 2))
+            {
             case 0: DoScriptText(SAY_KILL_1, m_creature); break;
             case 1: DoScriptText(SAY_KILL_2, m_creature); break;
             case 2: DoScriptText(SAY_KILL_3, m_creature); break;
-        }
-    }
-
-    void JustReachedHome() override
-    {
-        DoRemoveGarroteAura();
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_MOROES, FAIL); }
-    }
-
-    void JustDied(Unit* /*pVictim*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-        DoRemoveGarroteAura();
-
-        if (m_pInstance)
-        { m_pInstance->SetData(TYPE_MOROES, DONE); }
-    }
-
-    void EnterEvadeMode() override
-    {
-        // Don't evade during vanish phase
-        if (m_uiWaitTimer)
-        { return; }
-
-        ScriptedAI::EnterEvadeMode();
-    }
-
-    void DoSpawnGuests()
-    {
-        // not if m_creature are dead, so avoid
-        if (!m_creature->IsAlive())
-        { return; }
-
-        // it's empty, so first time
-        if (m_vGuestsEntryList.empty())
-        {
-            // pre-allocate size for speed
-            m_vGuestsEntryList.resize(MAX_GUESTS);
-
-            // fill vector array with entries from creature array
-            for (uint8 i = 0; i < MAX_GUESTS; ++i)
-            { m_vGuestsEntryList[i] = auiGuests[i]; }
-
-            std::random_shuffle(m_vGuestsEntryList.begin(), m_vGuestsEntryList.end());
-
-            // Summon the 4 entries
-            for (uint8 i = 0; i < MAX_ACTIVE_GUESTS; ++i)
-            { m_creature->SummonCreature(m_vGuestsEntryList[i], afLocations[i][0], afLocations[i][1], afLocations[i][2], afLocations[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0); }
-        }
-        // Resummon the killed adds
-        else
-        {
-            if (!m_pInstance)
-            { return; }
-
-            for (uint8 i = 0; i < MAX_ACTIVE_GUESTS; ++i)
-            {
-                // If we already have the creature on the map, then don't summon it
-                if (m_pInstance->GetSingleCreatureFromStorage(m_vGuestsEntryList[i], true))
-                { continue; }
-
-                m_creature->SummonCreature(m_vGuestsEntryList[i], afLocations[i][0], afLocations[i][1], afLocations[i][2], afLocations[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
             }
         }
-    }
 
-    // Wrapper to remove the Garrote aura on death and on evade - ToDo: maybe find a better way for this!
-    void DoRemoveGarroteAura()
-    {
-        // remove aura from spell Garrote when Moroes dies
-        Map* pMap = m_creature->GetMap();
-        if (pMap->IsDungeon())
+        void JustReachedHome() override
         {
-            Map::PlayerList const& PlayerList = pMap->GetPlayers();
+            DoRemoveGarroteAura();
 
-            if (PlayerList.isEmpty())
-            { return; }
-
-            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+            if (m_pInstance)
             {
-                if (i->getSource()->IsAlive() && i->getSource()->HasAura(SPELL_GARROTE))
-                { i->getSource()->RemoveAurasDueToSpell(SPELL_GARROTE); }
+                m_pInstance->SetData(TYPE_MOROES, FAIL);
             }
         }
-    }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
-
-        // Note: because the Vanish spell adds invisibility effect on the target, the timers won't be decreased during the vanish phase
-        if (m_uiWaitTimer)
+        void JustDied(Unit* /*pVictim*/) override
         {
-            if (m_uiWaitTimer <= uiDiff)
+            DoScriptText(SAY_DEATH, m_creature);
+            DoRemoveGarroteAura();
+
+            if (m_pInstance)
             {
-                // It's not very clear how to handle this spell
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                m_pInstance->SetData(TYPE_MOROES, DONE);
+            }
+        }
+
+        void EnterEvadeMode() override
+        {
+            // Don't evade during vanish phase
+            if (m_uiWaitTimer)
+            {
+                return;
+            }
+
+            ScriptedAI::EnterEvadeMode();
+        }
+
+        void DoSpawnGuests()
+        {
+            // not if m_creature are dead, so avoid
+            if (!m_creature->IsAlive())
+            {
+                return;
+            }
+
+            // it's empty, so first time
+            if (m_vGuestsEntryList.empty())
+            {
+                // pre-allocate size for speed
+                m_vGuestsEntryList.resize(MAX_GUESTS);
+
+                // fill vector array with entries from creature array
+                for (uint8 i = 0; i < MAX_GUESTS; ++i)
                 {
-                    DoScriptText(urand(0, 1) ? SAY_SPECIAL_1 : SAY_SPECIAL_2, m_creature);
-                    DoResetThreat();
-                    AttackStart(pTarget);
-                    pTarget->CastSpell(pTarget, SPELL_GARROTE, true);
+                    m_vGuestsEntryList[i] = auiGuests[i];
                 }
-                m_uiWaitTimer = 0;
-            }
-            else
-            { m_uiWaitTimer -= uiDiff; }
 
-            // Don't user other abilities in vanish
-            return;
-        }
+                std::random_shuffle(m_vGuestsEntryList.begin(), m_vGuestsEntryList.end());
 
-        if (!m_bEnrage && m_creature->GetHealthPercent() < 30.0f)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
-            { m_bEnrage = true; }
-        }
-
-        // No other spells are cast after enrage
-        if (!m_bEnrage)
-        {
-            if (m_uiVanishTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_VANISH) == CAST_OK)
+                // Summon the 4 entries
+                for (uint8 i = 0; i < MAX_ACTIVE_GUESTS; ++i)
                 {
-                    m_uiVanishTimer = 30000;
-                    m_uiWaitTimer   = 1000;
+                    m_creature->SummonCreature(m_vGuestsEntryList[i], afLocations[i][0], afLocations[i][1], afLocations[i][2], afLocations[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
                 }
             }
+            // Resummon the killed adds
             else
-            { m_uiVanishTimer -= uiDiff; }
-
-            // Gouge highest aggro, and attack second highest
-            if (m_uiGougeTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_GOUGE) == CAST_OK)
-                { m_uiGougeTimer = 40000; }
-            }
-            else
-            { m_uiGougeTimer -= uiDiff; }
-
-            if (m_uiBlindTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_BLIND, SELECT_FLAG_PLAYER))
+                if (!m_pInstance)
                 {
-                    if (DoCastSpellIfCan(pTarget, SPELL_BLIND) == CAST_OK)
-                    { m_uiBlindTimer = 40000; }
+                    return;
+                }
+
+                for (uint8 i = 0; i < MAX_ACTIVE_GUESTS; ++i)
+                {
+                    // If we already have the creature on the map, then don't summon it
+                    if (m_pInstance->GetSingleCreatureFromStorage(m_vGuestsEntryList[i], true))
+                    {
+                        continue;
+                    }
+
+                    m_creature->SummonCreature(m_vGuestsEntryList[i], afLocations[i][0], afLocations[i][1], afLocations[i][2], afLocations[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
                 }
             }
-            else
-            { m_uiBlindTimer -= uiDiff; }
         }
 
-        DoMeleeAttackIfReady();
+        // Wrapper to remove the Garrote aura on death and on evade - ToDo: maybe find a better way for this!
+        void DoRemoveGarroteAura()
+        {
+            // remove aura from spell Garrote when Moroes dies
+            Map* pMap = m_creature->GetMap();
+            if (pMap->IsDungeon())
+            {
+                Map::PlayerList const& PlayerList = pMap->GetPlayers();
+
+                if (PlayerList.isEmpty())
+                {
+                    return;
+                }
+
+                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                {
+                    if (i->getSource()->IsAlive() && i->getSource()->HasAura(SPELL_GARROTE))
+                    {
+                        i->getSource()->RemoveAurasDueToSpell(SPELL_GARROTE);
+                    }
+                }
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            // Note: because the Vanish spell adds invisibility effect on the target, the timers won't be decreased during the vanish phase
+            if (m_uiWaitTimer)
+            {
+                if (m_uiWaitTimer <= uiDiff)
+                {
+                    // It's not very clear how to handle this spell
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        DoScriptText(urand(0, 1) ? SAY_SPECIAL_1 : SAY_SPECIAL_2, m_creature);
+                        DoResetThreat();
+                        AttackStart(pTarget);
+                        pTarget->CastSpell(pTarget, SPELL_GARROTE, true);
+                    }
+                    m_uiWaitTimer = 0;
+                }
+                else
+                {
+                    m_uiWaitTimer -= uiDiff;
+                }
+
+                // Don't user other abilities in vanish
+                return;
+            }
+
+            if (!m_bEnrage && m_creature->GetHealthPercent() < 30.0f)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
+                {
+                    m_bEnrage = true;
+                }
+            }
+
+            // No other spells are cast after enrage
+            if (!m_bEnrage)
+            {
+                if (m_uiVanishTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_VANISH) == CAST_OK)
+                    {
+                        m_uiVanishTimer = 30000;
+                        m_uiWaitTimer = 1000;
+                    }
+                }
+                else
+                {
+                    m_uiVanishTimer -= uiDiff;
+                }
+
+                // Gouge highest aggro, and attack second highest
+                if (m_uiGougeTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_GOUGE) == CAST_OK)
+                    {
+                        m_uiGougeTimer = 40000;
+                    }
+                }
+                else
+                {
+                    m_uiGougeTimer -= uiDiff;
+                }
+
+                if (m_uiBlindTimer < uiDiff)
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_BLIND, SELECT_FLAG_PLAYER))
+                    {
+                        if (DoCastSpellIfCan(pTarget, SPELL_BLIND) == CAST_OK)
+                        {
+                            m_uiBlindTimer = 40000;
+                        }
+                    }
+                }
+                else
+                {
+                    m_uiBlindTimer -= uiDiff;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new boss_moroesAI(pCreature);
     }
 };
 
-CreatureAI* GetAI_boss_moroes(Creature* pCreature)
-{
-    return new boss_moroesAI(pCreature);
-}
-
 void AddSC_boss_moroes()
 {
-    Script* pNewScript;
+    Script* s;
+    s = new boss_moroes();
+    s->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "boss_moroes";
-    pNewScript->GetAI = &GetAI_boss_moroes;
-    pNewScript->RegisterSelf();
+    //pNewScript = new Script;
+    //pNewScript->Name = "boss_moroes";
+    //pNewScript->GetAI = &GetAI_boss_moroes;
+    //pNewScript->RegisterSelf();
 }
