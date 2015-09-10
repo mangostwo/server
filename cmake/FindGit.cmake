@@ -35,6 +35,8 @@ endif()
 
 find_program(GIT_EXECUTABLE
   NAMES ${git_names}
+  HINTS
+    ENV PATH
   DOC "git command line client"
   )
 mark_as_advanced(GIT_EXECUTABLE)
