@@ -32,7 +32,7 @@
 
 #include <string>
 #include <vector>
-
+#include <errno.h>
 #include "Platform/Define.h"
 
 #ifndef WIN32
