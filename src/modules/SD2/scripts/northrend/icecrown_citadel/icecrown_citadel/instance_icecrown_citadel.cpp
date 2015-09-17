@@ -533,7 +533,7 @@ struct is_icecrown_citadel : public InstanceScript
                 }
                 else
                 {
-                    GuidList::const_iterator cit = m_bIsLeftSideSummon ? m_lLeftStalkers.cbegin() : m_lRightStalkers.cbegin();
+                    GuidList::const_iterator cit = m_bIsLeftSideSummon ? m_lLeftStalkers.begin() : m_lRightStalkers.begin();
                     for (uint8 i = 0; i < 3; ++i, ++cit)
                     {
                         if (Creature* pStalker = instance->GetCreature(*cit))
