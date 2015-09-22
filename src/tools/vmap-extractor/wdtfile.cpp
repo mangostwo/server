@@ -22,23 +22,13 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <cstdio>
 #include "vmapexport.h"
 #include "wdtfile.h"
-#include "adtfile.h"
-#include <cstdio>
-
-char* wdtGetPlainName(char* FileName)
-{
-    char* szTemp;
-
-    if ((szTemp = strrchr(FileName, '\\')) != NULL)
-        { FileName = szTemp + 1; }
-    return FileName;
-}
 
 WDTFile::WDTFile(char* file_name, char* file_name1): WDT(file_name)
 {
-    filename.append(file_name1, strlen(file_name1));
+    filename.assign(file_name1);
 }
 
 bool WDTFile::init(char* map_id, unsigned int mapID)
@@ -87,10 +77,8 @@ bool WDTFile::init(char* map_id, unsigned int mapID)
                 while (p < buf + size)
                 {
                     string path(p);
-                    char* s = wdtGetPlainName(p);
-                    fixnamen(s, strlen(s));
+                    gWmoInstansName[q++] = GetUniformName(path);
                     p = p + strlen(p) + 1;
-                    gWmoInstansName[q++] = s;
                 }
                 delete[] buf;
             }
@@ -110,7 +98,7 @@ bool WDTFile::init(char* map_id, unsigned int mapID)
                 {
                     int id;
                     WDT.read(&id, 4);
-                    WMOInstance inst(WDT, gWmoInstansName[id].c_str(), mapID, 65, 65, dirfile);
+                    WMOInstance inst(WDT, gWmoInstansName[id], mapID, 65, 65, dirfile);
                 }
                 delete[] gWmoInstansName;
             }
@@ -118,7 +106,6 @@ bool WDTFile::init(char* map_id, unsigned int mapID)
         WDT.seek((int)nextpos);
     }
 
-    WDT.close();
     fclose(dirfile);
     return true;
 }

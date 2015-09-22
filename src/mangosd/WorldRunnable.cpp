@@ -50,19 +50,14 @@ extern int m_ServiceStatus;
 /// Heartbeat for the World
 void WorldRunnable::run()
 {
-    ///- Used by Eluna
 #ifdef ENABLE_ELUNA
     sEluna->OnStartup();
 #endif /* ENABLE_ELUNA */
 
-    ///- Init new SQL thread for the world database
-    WorldDatabase.ThreadStart();                            // let thread do safe mySQL requests (one connection call enough)
-    sWorld.InitResultQueue();
-
     uint32 realCurrTime = 0;
     uint32 realPrevTime = WorldTimer::tick();
 
-    uint32 prevSleepTime = 0;                               // used for balanced full tick time length near WORLD_SLEEP_CONST
+    uint32 prevSleepTime = 0;  // used for balanced full tick time length near WORLD_SLEEP_CONST
 
     ///- While we have not World::m_stopEvent, update the world
     while (!World::IsStopped())
@@ -100,17 +95,20 @@ void WorldRunnable::run()
 #endif
     }
 
-    ///- Used by Eluna
 #ifdef ENABLE_ELUNA
     sEluna->OnShutdown();
 #endif /* ENABLE_ELUNA */
 
-    sWorld.CleanupsBeforeStop();
+    sWorld.KickAll();                                       // save and kick all players
+    sWorld.UpdateSessions(1);                               // real players unload required UpdateSessions call
 
     sWorldSocketMgr->StopNetwork();
 
-    MapManager::Instance().UnloadAll();                     // unload all grids (including locked in memory)
+    sMapMgr.UnloadAll();                                    // unload all grids (including locked in memory)
 
-    ///- End the database thread
-    WorldDatabase.ThreadEnd();                              // free mySQL thread resources
+#ifdef ENABLE_ELUNA
+    // Eluna must be unloaded after Maps, since ~Map calls sEluna->OnDestroy,
+    //   and must be unloaded before the DB, since it can access the DB.
+    Eluna::Uninitialize();
+#endif /* ENABLE_ELUNA */
 }

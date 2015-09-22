@@ -7176,7 +7176,7 @@ void ObjectMgr::LoadNPCSpellClickSpells()
     sLog.outString(">> Loaded %u spellclick definitions", count);
 }
 
-static char* SERVER_SIDE_SPELL      = "MaNGOS server-side spell";
+static char SERVER_SIDE_SPELL[] = "MaNGOS server-side spell";
 
 struct SQLSpellLoader : public SQLStorageLoaderBase<SQLSpellLoader, SQLHashStorage>
 {

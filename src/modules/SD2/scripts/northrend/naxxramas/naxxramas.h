@@ -61,7 +61,7 @@ enum
 
     TYPE_UNDYING_FAILED         = 15,                       // Achievements Undying and Immortal, needs to be saved to database
 
-    MAX_SPECIAL_ACHIEV_CRITS    = 6,
+    MAX_SPECIAL_ACHIEV_CRITS    = 22,
 
     TYPE_ACHIEV_SAFETY_DANCE    = MAX_ENCOUNTER + 0,
     TYPE_ACHIEV_KNOCK_YOU_OUT   = MAX_ENCOUNTER + 1,
