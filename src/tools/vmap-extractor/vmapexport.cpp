@@ -50,10 +50,9 @@
 #include "wdtfile.h"
 #include "dbcfile.h"
 #include "wmo.h"
-#include "ml/mpq.h"
-
+#include <ml/mpq.h>
 #include "vmapexport.h"
-
+#include "Auth/md5.h"
 //------------------------------------------------------------------------------
 // Defines
 
@@ -85,6 +84,8 @@ const char* szRawVMAPMagic = "VMAP005";
 
 // Local testing functions
 
+// Local testing functions
+
 bool FileExists(const char* file)
 {
     if (FILE* n = fopen(file, "rb"))
@@ -95,13 +96,55 @@ bool FileExists(const char* file)
     return false;
 }
 
-void strToLower(char* str)
+void compute_md5(const char* value, char* result)
 {
-    while (*str)
+    md5_byte_t digest[16];
+    md5_state_t ctx;
+
+    md5_init(&ctx);
+    md5_append(&ctx, (const unsigned char*)value, strlen(value));
+    md5_finish(&ctx, digest);
+
+    for(int i=0;i<16;i++)
+        sprintf(result+2*i,"%02x",digest[i]);
+    result[32]='\0';
+}
+
+std::string GetUniformName(std::string& path)
+{
+    std::transform(path.begin(),path.end(),path.begin(),::tolower);
+
+    string tempPath;
+    string file;
+    char digest[33];
+
+    std::size_t found = path.find_last_of("/\\");
+    if (found != string::npos)
     {
-        *str = tolower(*str);
-        ++str;
+      file = path.substr(found+1);
+      tempPath = path.substr(0,found);
     }
+    else { file = tempPath = path; }
+
+    if(!tempPath.empty())
+        compute_md5(tempPath.c_str(),digest);
+    else
+        compute_md5("\\",digest);
+
+    string result;
+    result = result.assign(digest) + "-" + file;
+
+    return result;
+}
+
+std::string GetExtension(std::string& path)
+{
+    string ext;
+    size_t foundExt = path.find_last_of(".");
+    if (foundExt != std::string::npos) { ext=path.substr(foundExt+1);}
+    else {ext.clear();}
+    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+    return ext;
 }
 
 // copied from contrib/extractor/System.cpp
@@ -128,109 +171,6 @@ void ReadLiquidTypeTableDBC()
     printf("Success! (%u LiqTypes loaded)\n", (unsigned int)LiqType_count);
 }
 
-bool ExtractWmo()
-{
-    bool success = true;
-
-    for (ArchiveSet::const_iterator ar_itr = gOpenArchives.begin(); ar_itr != gOpenArchives.end() && success; ++ar_itr)
-    {
-        vector<string> filelist;
-
-        (*ar_itr)->GetFileListTo(filelist);
-        for (vector<string>::iterator fname = filelist.begin(); fname != filelist.end() && success; ++fname)
-        {
-            if (fname->find(".wmo") != string::npos)
-                { success = ExtractSingleWmo(*fname); }
-        }
-    }
-
-    if (success)
-        { printf("\nExtract wmo complete (No (fatal) errors)\n"); }
-
-    return success;
-}
-
-bool ExtractSingleWmo(std::string& fname)
-{
-    // Copy files from archive
-
-    char szLocalFile[1024];
-    const char* plain_name = GetPlainName(fname.c_str());
-    sprintf(szLocalFile, "%s/%s", szWorkDirWmo, plain_name);
-    fixnamen(szLocalFile, strlen(szLocalFile));
-
-    if (FileExists(szLocalFile))
-        { return true; }
-
-    int p = 0;
-    //Select root wmo files
-    const char* rchr = strrchr(plain_name, '_');
-    if (rchr != NULL)
-    {
-        char cpy[4];
-        strncpy((char*)cpy, rchr, 4);
-        for (int i = 0; i < 4; ++i)
-        {
-            int m = cpy[i];
-            if (isdigit(m))
-                { p++; }
-        }
-    }
-
-    if (p == 3)
-        { return true; }
-
-    bool file_ok = true;
-    std::cout << "Extracting " << fname << std::endl;
-    WMORoot froot(fname);
-    if (!froot.open())
-    {
-        printf("Couldn't open RootWmo!!!\n");
-        return true;
-    }
-    FILE* output = fopen(szLocalFile, "wb");
-    if (!output)
-    {
-        printf("couldn't open %s for writing!\n", szLocalFile);
-        return false;
-    }
-    froot.ConvertToVMAPRootWmo(output);
-    int Wmo_nVertices = 0;
-    //printf("root has %d groups\n", froot->nGroups);
-    if (froot.nGroups != 0)
-    {
-        for (uint32 i = 0; i < froot.nGroups; ++i)
-        {
-            char temp[1024];
-            strcpy(temp, fname.c_str());
-            temp[fname.length() - 4] = 0;
-            char groupFileName[1024];
-            sprintf(groupFileName, "%s_%03d.wmo", temp, i);
-            //printf("Trying to open groupfile %s\n",groupFileName);
-
-            string s = groupFileName;
-            WMOGroup fgroup(s);
-            if (!fgroup.open())
-            {
-                printf("Could not open all Group file for: %s\n", plain_name);
-                file_ok = false;
-                break;
-            }
-
-            Wmo_nVertices += fgroup.ConvertToVMAPGroupWmo(output, &froot, preciseVectorData);
-        }
-    }
-
-    fseek(output, 8, SEEK_SET); // store the correct no of vertices
-    fwrite(&Wmo_nVertices, sizeof(int), 1, output);
-    fclose(output);
-
-    // Delete the extracted file in the case of an error
-    if (!file_ok)
-        { remove(szLocalFile); }
-    return true;
-}
-
 void ParsMapFiles()
 {
     char fn[512];
@@ -244,7 +184,7 @@ void ParsMapFiles()
         WDTFile WDT(fn, map_ids[i].name);
         if (WDT.init(id, map_ids[i].id))
         {
-            printf("Processing Map %u\n[", map_ids[i].id);
+            printf("Processing Map %u (%s)\n[", map_ids[i].id, map_ids[i].name);
             for (int x = 0; x < 64; ++x)
             {
                 for (int y = 0; y < 64; ++y)
@@ -541,7 +481,7 @@ int main(int argc, char** argv)
         {
             map_ids[x].id = dbc->getRecord(x).getUInt(0);
             strcpy(map_ids[x].name, dbc->getRecord(x).getString(1));
-            printf("Map - %s\n", map_ids[x].name);
+            printf("Map %d - %s\n", map_ids[x].id, map_ids[x].name);
         }
 
 
