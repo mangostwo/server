@@ -959,7 +959,8 @@ bool GameObject::IsCollisionEnabled() const
         case GAMEOBJECT_TYPE_DOOR:
         case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
             return GetGoState() != GO_STATE_ACTIVE && GetGoState() != GO_STATE_ACTIVE_ALTERNATIVE;
-
+        case GAMEOBJECT_TYPE_TRAP:
+            return false;
         default:
             return true;
     }
@@ -1103,8 +1104,8 @@ void GameObject::Use(Unit* user)
             bool IsBattleGroundTrap = radius == 0.0f && goInfo->trap.cooldown == 3 && m_respawnTime == 0;
 
             // FIXME: when GO casting will be implemented trap must cast spell to target
-            if (spellId == goInfo->trap.spellId)
-            { caster->CastSpell(user, spellId, true, NULL, NULL, GetObjectGuid()); }
+            if (goInfo->trap.spellId)
+            { caster->CastSpell(user, goInfo->trap.spellId, true, NULL, NULL, GetObjectGuid()); }
             // use template cooldown if provided
             m_cooldownTime = time(NULL) + (goInfo->trap.cooldown ? goInfo->trap.cooldown : uint32(4));
 
