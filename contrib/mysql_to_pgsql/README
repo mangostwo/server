@@ -1,6 +1,6 @@
 MySQL to PostgreSQL converter
 =============================
-*mangos-zero* supports both MySQL and PostgreSQL as database backends. As we
+*mangos* supports both MySQL and PostgreSQL as database backends. As we
 provide the database structure and content only in MySQL format, this helper
 application will allow you to export your database from a local MySQL server
 to a local PostgreSQL server.

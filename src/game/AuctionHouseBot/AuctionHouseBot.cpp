@@ -396,7 +396,7 @@ bool AuctionBotConfig::Initialize()
 {
     if (!m_AhBotCfg.SetSource(m_configFileName.c_str()))
     {
-        sLog.outString("AHBOT is Disabled. Unable to open configuration file(%s). ", m_configFileName.c_str());
+        sLog.outString("AHBOT is Disabled. Unable to open configuration file %s. ", m_configFileName.c_str());
         setConfig(CONFIG_UINT32_AHBOT_ALLIANCE_ITEM_AMOUNT_RATIO, 0);
         setConfig(CONFIG_UINT32_AHBOT_HORDE_ITEM_AMOUNT_RATIO, 0);
         setConfig(CONFIG_UINT32_AHBOT_NEUTRAL_ITEM_AMOUNT_RATIO, 0);
@@ -888,7 +888,7 @@ void AuctionBotBuyer::PlaceBidToEntry(AuctionEntry* auction, uint32 bidPrice)
 
 void AuctionBotBuyer::BuyEntry(AuctionEntry* auction)
 {
-    DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: Entry %u buyed at %.2fg", auction->Id, float(auction->buyout) / 10000.0f);
+    DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: Entry %u bought at %.2fg", auction->Id, float(auction->buyout) / 10000.0f);
     auction->UpdateBid(auction->buyout);
 }
 

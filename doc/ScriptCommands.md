@@ -1,6 +1,6 @@
 Database script processing
 ==========================
-In addition to *EventAI*, *mangos-zero* provides script processing for various
+In addition to *EventAI*, *mangos* provides script processing for various
 types of game content. These scripts can be executed when creatures move or die,
 when events are executed, and game object spawns/templates are used, on gossip
 menu selections, when starting and completing quests, and when casting spells.
@@ -61,9 +61,10 @@ Value | Name                            | Notes
 -----------------
 4 multipurpose fields, storing raw data as signed integer values.
 
-*Note*: currently used only for text ids for the commands `SCRIPT_COMMAND_TALK`,
-for emote ids in `SCRIPT_COMMAND_EMOTE`, for spell ids in `SCRIPT_COMMAND_CAST_SPELL`,
-and as waittime with the command `SCRIPT_COMMAND_TERMINATE_SCRIPT`.
+*Note*: used for text ids SCRIPT_COMMAND_TALK (0),
+      for emote ids in SCRIPT_COMMAND_EMOTE (1),
+      for spell ids in SCRIPT_COMMAND_CAST_SPELL (15)
+      and as waittime with SCRIPT_COMMAND_TERMINATE_SCRIPT (31)
 
 `x`, `y`, `z` and `o` columns
 -----------------------------
@@ -145,8 +146,8 @@ ID | Name                                   | Parameters
 12 | SCRIPT_COMMAND_CLOSE_DOOR              | source = any. `datalong` = db_guid (can be skipped for buddy), `datalong2` = reset_delay
 13 | SCRIPT_COMMAND_ACTIVATE_OBJECT         | source = unit, target=GO.
 14 | SCRIPT_COMMAND_REMOVE_AURA             | resultingSource = Unit. `datalong` = spell_id
-15 | SCRIPT_COMMAND_CAST_SPELL              | resultingSource = Unit, cast spell at resultingTarget = Unit. `datalong` = spell id, `dataint1-dataint4` (optional) = spell ids. If some of these are set to a spell id, a random spell out of datalong, datint1, ..,dataintX is cast. `data_flags` & SCRIPT_FLAG_COMMAND_ADDITIONAL: cast triggered
-16 | SCRIPT_COMMAND_PLAY_SOUND              | source = any object, target=any/player. `datalong` = sound_id, `datalong2` (bit mask: 0/1=target-player, 0/2=with distance dependent, 0/4=map wide, 0/8=zone wide; so 1|2 = 3 is target with distance dependent), `data_flags` & SCRIPT_FLAG_COMMAND_ADDITIONAL: play music instead of sound
+15 | SCRIPT_COMMAND_CAST_SPELL              | resultingSource = Unit, cast spell at resultingTarget = Unit. `datalong` = spell id, `dataint1`-`dataint4` optional. If some of these are set to a spell id, a random spell out of datalong, datint1, ..,dataintX is cast., `data_flags` & SCRIPT_FLAG_COMMAND_ADDITIONAL: cast triggered
+16 | SCRIPT_COMMAND_PLAY_SOUND              | source = any object, target=any/player. `datalong` = sound_id, `datalong2` (bit mask: 0/1=target-player, 0/2=with distance dependent, 0/4=map wide, 0/8=zone wide; so 1|2 = 3 is target with distance dependent)
 17 | SCRIPT_COMMAND_CREATE_ITEM             | source or target must be player. `datalong` = item entry, `datalong2` = amount
 18 | SCRIPT_COMMAND_DESPAWN_SELF            | resultingSource = Creature. `datalong` = despawn delay
 19 | SCRIPT_COMMAND_PLAY_MOVIE              | target can only be a player. `datalong` = movie id
@@ -172,11 +173,18 @@ ID | Name                                   | Parameters
                                             |   In this case resultingTarget MUST be Creature/ Player
                                             | * datalong != 0 Reset TargetGuid, Reset orientation
 
-37 | SCRIPT_COMMAND_MOVE_DYNAMIC            |  Move resultingSource to a random point around resultingTarget or to resultingTarget
+37 | SCRIPT_COMMAND_MOVE_DYNAMIC            | Move resultingSource to a random point around resultingTarget or to resultingTarget
                                             | * resultingSource = Creature, resultingTarget Worldobject.
                                             | * datalong = 0:  Move resultingSource towards resultingTarget
                                             | * datalong != 0: Move resultingSource to a random point between datalong2..datalong around resultingTarget.
                                             |   orientation != 0: Obtain a random point around resultingTarget in direction of orientation
+                                            | * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL Obtain a point in direction of resTarget->GetOrientation + orientation
+                                            |   for resTarget == resSource and orientation == 0 this will mean resSource moving forward
+38 | SCRIPT_COMMAND_SEND_MAIL               | Send a mail from resSource  to resTarget
+                                            | * resultingSource = Creature OR NULL, resTarget must be Player
+                                            | * datalong = mailTemplateId
+                                            | * datalong2: AlternativeSenderEntry. Use as sender-Entry of the sent mail
+                                            | * dataint1: Delay (>= 0) in Seconds
 
 TemporaryFactionFlags
 ---------------------
@@ -185,10 +193,10 @@ TemporaryFactionFlags
 * `TEMPFACTION_RESTORE_COMBAT_STOP`: 0x02, ... at CombatStop() (happens at creature death, at evade or custom script among others)
 * `TEMPFACTION_RESTORE_REACH_HOME`: 0x04, ... at reaching home in home movement (evade), if not already done at CombatStop()
 
-The next three allow to remove unit_flags combined with a faction change (also these flags will be reapplied when the faction is changed back)
+The next flags allow to remove unit_flags combined with a faction change (also these flags will be reapplied when the faction is changed back)
 
 * `TEMPFACTION_TOGGLE_NON_ATTACKABLE`: 0x08, remove UNIT_FLAG_NON_ATTACKABLE(0x02) when faction is changed (reapply when temp-faction is removed)
 * `TEMPFACTION_TOGGLE_OOC_NOT_ATTACK`: 0x10, remove UNIT_FLAG_OOC_NOT_ATTACKABLE(0x100) when faction is changed (reapply when temp-faction is removed)
-* `TEMPFACTION_TOGGLE_PASSIVE`: 0x20, remove UNIT_FLAG_PASSIVE(0x200) when faction is changed (reapply when temp-faction is removed)
-* `TEMPFACTION_TOGGLE_PACIFIED` : 0x40, Remove UNIT_FLAG_PACIFIED(0x20000) when faction is changed (reapply when temp-faction is removed)
-* `TEMPFACTION_TOGGLE_NOT_SELECTABLE` : 0x80, Remove UNIT_FLAG_NOT_SELECTABLE(0x2000000) when faction is changed (reapply when temp-faction is removed)
+* `TEMPFACTION_TOGGLE_PASSIVE`       : 0x20, remove UNIT_FLAG_PASSIVE(0x200) when faction is changed (reapply when temp-faction is removed)
+* `TEMPFACTION_TOGGLE_PACIFIED`      : 0x40, remove UNIT_FLAG_PACIFIED(0x20000) when faction is changed (reapply when temp-faction is removed)
+* `TEMPFACTION_TOGGLE_NOT_SELECTABLE`: 0x80, remove UNIT_FLAG_NOT_SELECTABLE(0x2000000) when faction is changed (reapply when temp-faction is removed)

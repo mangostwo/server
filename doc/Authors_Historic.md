@@ -1,6 +1,7 @@
-Authors
+Historic Authors
 =======
-The **mangos server project** is the work of many awesome people, and contributors
+
+The **mangos** server is the work of many awesome people, and contributors
 from all over the world, and is the result of quite a few predecessors.
 
 This files contains all the projects and people involved in the project and its'
@@ -12,7 +13,7 @@ The roots of *mangos* date back to 2004, many developers were anxious to get
 a working server for the [World of Warcraft][1] beta running at that time.
 
 Various projects such as *TeamPython*, *Wow Python* and *WoWd* produced GPL'd
-server code, and furthered the development of a few [World of Warcraft][1] servers
+server code, and furthered the development of a few [World of Warcraft][1] server
 for the community.
 
 * **2004**: *TeamPython*, *Wow Python* and *WoWd* develop the predecessors for
@@ -25,10 +26,11 @@ for the community.
 * **2008**: the *MaNGOS project* grew in terms of users and developers,
   and relocated to [github][3]. With the move, the project website changed
   to [getmangos.eu][4].
-* **2013**: the *MaNGOS project* now is also available on [getmangos.eu][5].
 
 Authors
 -------
+Prior to Release 0.20, the following helped get Mangos to where it was.
+
 * *TeamPython*, *Wow Python* and *WoWd* teams
 * 123qwe
 * a1ien
@@ -466,4 +468,3 @@ Authors
 [2]: http://sourceforge.net/p/mangos/ "mangos on SourceForge"
 [3]: https://github.com/mangos/ "mangos on github"
 [4]: http://getmangos.eu/ "mangos project"
-[5]: http://getmangos.eu/ "mangos project"

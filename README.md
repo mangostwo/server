@@ -13,8 +13,8 @@ WRATH OF THE LICH KING BRANCH
 ----
 *Mangos* is open source project, built in [C++][7], it's fast, runs on multiple
 platforms, can store game data in [MySQL][40] and [PostgreSQL][42]. It also has
-optional support for SOAP, and aims to be 100% compatible with [World of Warcraft][2] in its
-WotLK version, namely [patch 3.3.5a][5].
+optional support for SOAP, and aims to be 100% compatible with [World of Warcraft][2]
+in its WotLK version, namely [patch 3.3.5a][5].
 
 If you liked the third incarnation of [World of Warcraft][2] and still want to play
 [WoTLK WoW][4], this is the branch for you. We provide an authentication
