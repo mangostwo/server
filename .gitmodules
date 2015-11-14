@@ -11,3 +11,6 @@
 [submodule "src/modules/Eluna"]
 	path = src/modules/Eluna
 	url = https://github.com/ElunaLuaEngine/Eluna.git
+[submodule "src/modules/SD3"]
+	path = src/modules/SD3
+	url = https://github.com/mangos/ScriptDev3

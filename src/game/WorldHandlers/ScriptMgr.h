@@ -562,7 +562,7 @@ class ScriptMgr
         void UnloadScriptLibrary();
         bool IsScriptLibraryLoaded() const
         {
-#ifdef ENABLE_SD2
+#ifdef ENABLE_SD3
             return true;
 #else
             return false;

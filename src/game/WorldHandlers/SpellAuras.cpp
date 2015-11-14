@@ -1781,7 +1781,7 @@ void Aura::TriggerSpell()
 //                    case 70017: break;
 //                    // Ice Tomb
 //                    case 70157: break;
-//                    // Mana Barrier                       // HANDLED IN SD2!
+//                    // Mana Barrier                       // HANDLED IN SD3!
 //                    case 70842: break;
 //                    // Summon Timer: Suppresser
 //                    case 70912: break;

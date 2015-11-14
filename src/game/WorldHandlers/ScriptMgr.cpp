@@ -41,7 +41,7 @@
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
-#ifdef ENABLE_SD2
+#ifdef ENABLE_SD3
 #include "system/ScriptDevMgr.h"
 #endif
 
@@ -1892,7 +1892,7 @@ bool ScriptAction::HandleScriptStep()
 
 void ScriptMgr::LoadScriptBinding()
 {
-#ifdef ENABLE_SD2
+#ifdef ENABLE_SD3
     for (int i = 0; i < SCRIPTED_MAX_TYPE; ++i)
         m_scriptBind[i].clear();
 
@@ -2005,7 +2005,7 @@ void ScriptMgr::LoadScriptBinding()
     sLog.outString("Thus, %u script binds are found bad.", count);
 
     sLog.outString();
-#endif /* ENABLE_SD2 */
+#endif /* ENABLE_SD3 */
     return;
 }
 
@@ -2058,8 +2058,8 @@ uint32 ScriptMgr::GetScriptId(const char* name) const
 
 char const* ScriptMgr::GetScriptLibraryVersion() const
 {
-#ifdef ENABLE_SD2
-    return SD2::GetScriptLibraryVersion();
+#ifdef ENABLE_SD3
+    return SD3::GetScriptLibraryVersion();
 #else
     return NULL;
 #endif
@@ -2088,8 +2088,8 @@ CreatureAI* ScriptMgr::GetCreatureAI(Creature* pCreature)
         return luaAI;
 #endif /* ENABLE_ELUNA */
 
-#ifdef ENABLE_SD2
-    return SD2::GetCreatureAI(pCreature);
+#ifdef ENABLE_SD3
+    return SD3::GetCreatureAI(pCreature);
 #else
     return NULL;
 #endif
@@ -2097,8 +2097,8 @@ CreatureAI* ScriptMgr::GetCreatureAI(Creature* pCreature)
 
 InstanceData* ScriptMgr::CreateInstanceData(Map* pMap)
 {
-#ifdef ENABLE_SD2
-    return SD2::CreateInstanceData(pMap);
+#ifdef ENABLE_SD3
+    return SD3::CreateInstanceData(pMap);
 #else
     return NULL;
 #endif
@@ -2112,8 +2112,8 @@ bool ScriptMgr::OnGossipHello(Player* pPlayer, Creature* pCreature)
         return true;
 #endif /* ENABLE_ELUNA */
 
-#ifdef ENABLE_SD2
-    return SD2::GossipHello(pPlayer, pCreature);
+#ifdef ENABLE_SD3
+    return SD3::GossipHello(pPlayer, pCreature);
 #else
     return false;
 #endif
@@ -2127,8 +2127,8 @@ bool ScriptMgr::OnGossipHello(Player* pPlayer, GameObject* pGameObject)
         return true;
 #endif /* ENABLE_ELUNA */
 
-#ifdef ENABLE_SD2
-    return SD2::GOGossipHello(pPlayer, pGameObject);
+#ifdef ENABLE_SD3
+    return SD3::GOGossipHello(pPlayer, pGameObject);
 #else
     return false;
 #endif
@@ -2151,11 +2151,11 @@ bool ScriptMgr::OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 send
     }
 #endif /* ENABLE_ELUNA */
 
-#ifdef ENABLE_SD2
+#ifdef ENABLE_SD3
     if (code)
-        { return SD2::GossipSelectWithCode(pPlayer, pCreature, sender, action, code); }
+        { return SD3::GossipSelectWithCode(pPlayer, pCreature, sender, action, code); }
     else
-        { return SD2::GossipSelect(pPlayer, pCreature, sender, action); }
+        { return SD3::GossipSelect(pPlayer, pCreature, sender, action); }
 #else
     return false;
 #endif
@@ -2177,11 +2177,11 @@ bool ScriptMgr::OnGossipSelect(Player* pPlayer, GameObject* pGameObject, uint32 
     }
 #endif /* ENABLE_ELUNA */
 
-#ifdef ENABLE_SD2
+#ifdef ENABLE_SD3
     if (code)
-        { return SD2::GOGossipSelectWithCode(pPlayer, pGameObject, sender, action, code); }
+        { return SD3::GOGossipSelectWithCode(pPlayer, pGameObject, sender, action, code); }
     else
-        { return SD2::GOGossipSelect(pPlayer, pGameObject, sender, action); }
+        { return SD3::GOGossipSelect(pPlayer, pGameObject, sender, action); }
 #else
     return false;
 #endif
@@ -2195,8 +2195,8 @@ bool ScriptMgr::OnQuestAccept(Player* pPlayer, Creature* pCreature, Quest const*
         return true;
 #endif /* ENABLE_ELUNA */
 
-#ifdef ENABLE_SD2
-    return SD2::QuestAccept(pPlayer, pCreature, pQuest);
+#ifdef ENABLE_SD3
+    return SD3::QuestAccept(pPlayer, pCreature, pQuest);
 #else
     return false;
 #endif
@@ -2210,8 +2210,8 @@ bool ScriptMgr::OnQuestAccept(Player* pPlayer, GameObject* pGameObject, Quest co
         return true;
 #endif /* ENABLE_ELUNA */
 
-#ifdef ENABLE_SD2
-    return SD2::GOQuestAccept(pPlayer, pGameObject, pQuest);
+#ifdef ENABLE_SD3
+    return SD3::GOQuestAccept(pPlayer, pGameObject, pQuest);
 #else
     return false;
 #endif
@@ -2225,8 +2225,8 @@ bool ScriptMgr::OnQuestAccept(Player* pPlayer, Item* pItem, Quest const* pQuest)
         return true;
 #endif /* ENABLE_ELUNA */
 
-#ifdef ENABLE_SD2
-    return SD2::ItemQuestAccept(pPlayer, pItem, pQuest);
+#ifdef ENABLE_SD3
+    return SD3::ItemQuestAccept(pPlayer, pItem, pQuest);
 #else
     return false;
 #endif
@@ -2240,8 +2240,8 @@ bool ScriptMgr::OnQuestRewarded(Player* pPlayer, Creature* pCreature, Quest cons
         return true;
 #endif /* ENABLE_ELUNA */
 
-#ifdef ENABLE_SD2
-    return SD2::QuestRewarded(pPlayer, pCreature, pQuest);
+#ifdef ENABLE_SD3
+    return SD3::QuestRewarded(pPlayer, pCreature, pQuest);
 #else
     return false;
 #endif
@@ -2255,8 +2255,8 @@ bool ScriptMgr::OnQuestRewarded(Player* pPlayer, GameObject* pGameObject, Quest 
     return true;
 #endif /* ENABLE_ELUNA */
 
-#ifdef ENABLE_SD2
-    return SD2::GOQuestRewarded(pPlayer, pGameObject, pQuest);
+#ifdef ENABLE_SD3
+    return SD3::GOQuestRewarded(pPlayer, pGameObject, pQuest);
 #else
     return false;
 #endif
@@ -2270,8 +2270,8 @@ uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, Creature* pCreature)
         return dialogId;
 #endif /* ENABLE_ELUNA */
 
-#ifdef ENABLE_SD2
-    return SD2::GetNPCDialogStatus(pPlayer, pCreature);
+#ifdef ENABLE_SD3
+    return SD3::GetNPCDialogStatus(pPlayer, pCreature);
 #else
     return DIALOG_STATUS_UNDEFINED;
 #endif
@@ -2285,8 +2285,8 @@ uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, GameObject* pGameObject)
         return dialogId;
 #endif /* ENABLE_ELUNA */
 
-#ifdef ENABLE_SD2
-    return SD2::GetGODialogStatus(pPlayer, pGameObject);
+#ifdef ENABLE_SD3
+    return SD3::GetGODialogStatus(pPlayer, pGameObject);
 #else
     return DIALOG_STATUS_UNDEFINED;
 #endif
@@ -2299,8 +2299,8 @@ bool ScriptMgr::OnGameObjectUse(Player* pPlayer, GameObject* pGameObject)
         return true;
 #endif /* ENABLE_ELUNA */
 
-#ifdef ENABLE_SD2
-    return SD2::GOUse(pPlayer, pGameObject);
+#ifdef ENABLE_SD3
+    return SD3::GOUse(pPlayer, pGameObject);
 #else
     return false;
 #endif
@@ -2314,8 +2314,8 @@ bool ScriptMgr::OnItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& 
         return true;
 #endif /* ENABLE_ELUNA */
 
-#ifdef ENABLE_SD2
-    return SD2::ItemUse(pPlayer, pItem, targets);
+#ifdef ENABLE_SD3
+    return SD3::ItemUse(pPlayer, pItem, targets);
 #else
     return false;
 #endif
@@ -2329,8 +2329,8 @@ bool ScriptMgr::OnAreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry)
         return true;
 #endif /* ENABLE_ELUNA */
 
-#ifdef ENABLE_SD2
-    return SD2::AreaTrigger(pPlayer, atEntry);
+#ifdef ENABLE_SD3
+    return SD3::AreaTrigger(pPlayer, atEntry);
 #else
     return false;
 #endif
@@ -2338,8 +2338,8 @@ bool ScriptMgr::OnAreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry)
 
 bool ScriptMgr::OnNpcSpellClick(Player* pPlayer, Creature* pClickedCreature, uint32 spellId)
 {
-#ifdef ENABLE_SD2
-    return SD2::NpcSpellClick(pPlayer, pClickedCreature, spellId);
+#ifdef ENABLE_SD3
+    return SD3::NpcSpellClick(pPlayer, pClickedCreature, spellId);
 #else
     return false;
 #endif
@@ -2347,8 +2347,8 @@ bool ScriptMgr::OnNpcSpellClick(Player* pPlayer, Creature* pClickedCreature, uin
 
 bool ScriptMgr::OnProcessEvent(uint32 eventId, Object* pSource, Object* pTarget, bool isStart)
 {
-#ifdef ENABLE_SD2
-    return SD2::ProcessEvent(eventId, pSource, pTarget, isStart);
+#ifdef ENABLE_SD3
+    return SD3::ProcessEvent(eventId, pSource, pTarget, isStart);
 #else
     return false;
 #endif
@@ -2362,8 +2362,8 @@ bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex ef
         return true;
 #endif /* ENABLE_ELUNA */
 
-#ifdef ENABLE_SD2
-    return SD2::EffectDummyCreature(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
+#ifdef ENABLE_SD3
+    return SD3::EffectDummyCreature(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 #else
     return false;
 #endif
@@ -2377,8 +2377,8 @@ bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex ef
         return true;
 #endif /* ENABLE_ELUNA */
 
-#ifdef ENABLE_SD2
-    return SD2::EffectDummyGameObject(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
+#ifdef ENABLE_SD3
+    return SD3::EffectDummyGameObject(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 #else
     return false;
 #endif
@@ -2392,8 +2392,8 @@ bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex ef
         return true;
 #endif /* ENABLE_ELUNA */
 
-#ifdef ENABLE_SD2
-    return SD2::EffectDummyItem(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
+#ifdef ENABLE_SD3
+    return SD3::EffectDummyItem(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 #else
     return false;
 #endif   
@@ -2401,8 +2401,8 @@ bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex ef
 
 bool ScriptMgr::OnEffectScriptEffect(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid)
 {
-#ifdef ENABLE_SD2
-    return SD2::EffectScriptEffectCreature(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
+#ifdef ENABLE_SD3
+    return SD3::EffectScriptEffectCreature(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 #else
     return false;
 #endif
@@ -2410,8 +2410,8 @@ bool ScriptMgr::OnEffectScriptEffect(Unit* pCaster, uint32 spellId, SpellEffectI
 
 bool ScriptMgr::OnAuraDummy(Aura const* pAura, bool apply)
 {
-#ifdef ENABLE_SD2
-    return SD2::AuraDummy(pAura, apply);
+#ifdef ENABLE_SD3
+    return SD3::AuraDummy(pAura, apply);
 #else
     return false;
 #endif
@@ -2419,11 +2419,11 @@ bool ScriptMgr::OnAuraDummy(Aura const* pAura, bool apply)
 
 ScriptLoadResult ScriptMgr::LoadScriptLibrary(const char* libName)
 {
-#ifdef ENABLE_SD2
+#ifdef ENABLE_SD3
     if (std::strcmp(libName, MANGOS_SCRIPT_NAME) == 0)
     {
-        SD2::FreeScriptLibrary();
-        SD2::InitScriptLibrary();
+        SD3::FreeScriptLibrary();
+        SD3::InitScriptLibrary();
         return SCRIPT_LOAD_OK;
     }
 #endif
@@ -2432,8 +2432,8 @@ ScriptLoadResult ScriptMgr::LoadScriptLibrary(const char* libName)
 
 void ScriptMgr::UnloadScriptLibrary()
 {
-#ifdef ENABLE_SD2
-    SD2::FreeScriptLibrary();
+#ifdef ENABLE_SD3
+    SD3::FreeScriptLibrary();
 #else
     return;
 #endif
@@ -2514,7 +2514,7 @@ bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool
 {
     MANGOS_ASSERT(source);
 
-    // Handle SD2 script
+    // Handle SD3 script
     if (sScriptMgr.OnProcessEvent(id, source, target, isStart))
         { return true; }
 
