@@ -51,8 +51,6 @@ struct ModelHeader
     uint32 ofsAnimations; /**< TODO */
     uint32 nAnimationLookup; /**< TODO */
     uint32 ofsAnimationLookup; /**< TODO */
-    uint32 nD; /**< TODO */
-    uint32 ofsD; /**< TODO */
     uint32 nBones; /**< TODO */
     uint32 ofsBones; /**< TODO */
     uint32 nKeyBoneLookup; /**< TODO */
@@ -60,15 +58,12 @@ struct ModelHeader
     uint32 nVertices; /**< TODO */
     uint32 ofsVertices; /**< TODO */
     uint32 nViews; /**< TODO */
-    uint32 ofsViews; /**< TODO */
     uint32 nColors; /**< TODO */
     uint32 ofsColors; /**< TODO */
     uint32 nTextures; /**< TODO */
     uint32 ofsTextures; /**< TODO */
     uint32 nTransparency; /**< TODO */
     uint32 ofsTransparency; /**< TODO */
-    uint32 nI; /**< TODO */
-    uint32 ofsI; /**< TODO */
     uint32 nTextureanimations; /**< TODO */
     uint32 ofsTextureanimations; /**< TODO */
     uint32 nTexReplace; /**< TODO */
