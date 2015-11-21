@@ -955,7 +955,6 @@ bool AuctionEntry::BuildAuctionInfo(WorldPacket& data) const
         sLog.outError("auction to item, that doesn't exist !!!!");
         return false;
     }
-    sLog.outError("AH: item %d preparing", pItem->GetEntry());
     data << uint32(Id);
     data << uint32(pItem->GetEntry());
 
@@ -969,7 +968,7 @@ bool AuctionEntry::BuildAuctionInfo(WorldPacket& data) const
     data << uint32(pItem->GetItemRandomPropertyId());       // random item property id
     data << uint32(pItem->GetItemSuffixFactor());           // SuffixFactor
     data << uint32(pItem->GetCount());                      // item->count
-    data << uint32(pItem->GetSpellCharges(0,false));        // 0xFFFFFFFF - item->charge + 1
+    data << uint32(pItem->GetSpellCharges(0, false));       // 0xFFFFFFFF - item->charge + 1
     data << uint32(0);                                      // item flags (dynamic?) (0x04 no lockId?)
     data << ObjectGuid(HIGHGUID_PLAYER, owner);             // Auction->owner
     data << uint32(startbid);                               // Auction->startbid (not sure if useful)
