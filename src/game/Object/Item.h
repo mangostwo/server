@@ -362,8 +362,8 @@ class Item : public Object
         void UpdateDuration(Player* owner, uint32 diff);
 
         // spell charges (signed but stored as unsigned)
-        int32 GetSpellCharges(uint8 index/*0..5*/ = 0) const { return GetInt32Value(ITEM_FIELD_SPELL_CHARGES + index); }
-        void SetSpellCharges(uint8 index/*0..5*/, int32 value) { SetInt32Value(ITEM_FIELD_SPELL_CHARGES + index, value); }
+        int32 GetSpellCharges(uint8 index = 0, bool normal = true) const;
+        void SetSpellCharges(uint8 index, int32 value);
         bool HasMaxCharges() const;
         void RestoreCharges();
 

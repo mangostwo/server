@@ -1301,3 +1301,19 @@ uint32 Item::GetScriptId() const
 {
     return sScriptMgr.GetBoundScriptId(SCRIPTED_ITEM, GetEntry());
 }
+
+int32 Item::GetSpellCharges(uint8 index, bool normal) const
+{
+    int32 val = GetInt32Value(ITEM_FIELD_SPELL_CHARGES + index);
+    if (normal)
+    {
+        val = (val < -1) ? -val : val;
+    }
+    return val;
+}
+
+void Item::SetSpellCharges(uint8 index, int32 value)
+{
+    SetInt32Value(ITEM_FIELD_SPELL_CHARGES + index, (value > 0) ? -value : value);
+}
+ 
