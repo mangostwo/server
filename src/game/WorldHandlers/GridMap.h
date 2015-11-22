@@ -168,7 +168,7 @@ class GridMap
         bool loadHeightData(FILE* in, uint32 offset, uint32 size);
         bool loadGridMapLiquidData(FILE* in, uint32 offset, uint32 size);
         bool loadHolesData(FILE* in, uint32 offset, uint32 size);
-        bool IsHole(int row, int col) const;
+        bool isHole(int row, int col) const;
 
         // Get height functions and pointers
         typedef float(GridMap::*pGetHeightPtr)(float x, float y) const;
@@ -251,6 +251,7 @@ class TerrainInfo : public Referencable<AtomicLong>
         bool GetAreaInfo(float x, float y, float z, uint32& mogpflags, int32& adtId, int32& rootId, int32& groupId) const;
         bool IsOutdoors(float x, float y, float z) const;
 
+
         // this method should be used only by TerrainManager
         // to cleanup unreferenced GridMap objects - they are too heavy
         // to destroy them dynamically, especially on highly populated servers
@@ -288,7 +289,7 @@ class TerrainInfo : public Referencable<AtomicLong>
 };
 
 // class for managing TerrainData object and all sort of geometry querying operations
-class TerrainManager : public MaNGOS::Singleton<TerrainManager, MaNGOS::ClassLevelLockable<TerrainManager, ACE_Thread_Mutex> >
+class TerrainManager : public MaNGOS::Singleton<TerrainManager>, MaNGOS::ClassLevelLockable<TerrainManager, ACE_Thread_Mutex>
 {
         typedef UNORDERED_MAP<uint32,  TerrainInfo*> TerrainDataMap;
         friend class MaNGOS::OperatorNew<TerrainManager>;

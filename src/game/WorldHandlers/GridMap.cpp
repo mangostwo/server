@@ -271,7 +271,7 @@ float GridMap::getHeightFromFlat(float /*x*/, float /*y*/) const
     return m_gridHeight;
 }
 
-bool GridMap::IsHole(int row, int col) const
+bool GridMap::isHole(int row, int col) const
 {
     int cellRow = row / 8;     // 8 squares per cell
     int cellCol = col / 8;
@@ -298,7 +298,7 @@ float GridMap::getHeightFromFloat(float x, float y) const
     x_int &= (MAP_RESOLUTION - 1);
     y_int &= (MAP_RESOLUTION - 1);
 
-    if (IsHole(x_int, y_int))
+    if (isHole(x_int, y_int))
         return INVALID_HEIGHT_VALUE;
 
     // Height stored as: h5 - its v8 grid, h1-h4 - its v9 grid

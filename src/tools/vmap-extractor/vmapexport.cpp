@@ -54,11 +54,11 @@
 #include <ml/mpq.h>
 #include "vmapexport.h"
 #include "Auth/md5.h"
+
 //------------------------------------------------------------------------------
 // Defines
 
 #define MPQ_BLOCK_SIZE 0x1000
-
 //-----------------------------------------------------------------------------
 
 extern ArchiveSet gOpenArchives;
@@ -82,8 +82,6 @@ bool preciseVectorData = true;
 //static const char * szWorkDirMaps = ".\\Maps";
 const char* szWorkDirWmo = "./Buildings";
 const char* szRawVMAPMagic = "VMAP005";
-
-// Local testing functions
 
 // Local testing functions
 

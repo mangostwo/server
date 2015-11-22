@@ -40,7 +40,7 @@
 #include "Player.h"
 #include "Chat.h"
 
-void utf8print(void* arg, const char* str)
+void utf8print(void* /*arg*/, const char* str)
 {
 #if PLATFORM == PLATFORM_WINDOWS
     wchar_t wtemp_buf[6000];
@@ -56,7 +56,7 @@ void utf8print(void* arg, const char* str)
 #endif
 }
 
-void commandFinished(void*, bool sucess)
+void commandFinished(void*, bool /*sucess*/)
 {
     printf("mangos>");
     fflush(stdout);
@@ -580,7 +580,7 @@ bool ChatHandler::HandleServerLogLevelCommand(char* args)
 
 /// @}
 
-#ifndef WIN32
+#if (PLATFORM == PLATFORM_APPLE) || (PLATFORM == PLATFORM_UNIX)
 // Non-blocking keypress detector, when return pressed, return 1, else always return 0
 int kb_hit_return()
 {
@@ -617,7 +617,7 @@ void CliRunnable::run()
     while (!World::IsStopped())
     {
         fflush(stdout);
-#ifndef WIN32
+#if (PLATFORM == PLATFORM_APPLE) || (PLATFORM == PLATFORM_UNIX)
         while (!kb_hit_return() && !World::IsStopped())
             // With this, we limit CLI to 10commands/second
             { usleep(100); }

@@ -46,20 +46,20 @@ namespace MMAP
         string name("meshes/%03u%02i%02i.");
 
 #define DEBUG_WRITE(fileExtension,data) \
-    do { \
-        sprintf(fileName, (name + fileExtension).c_str(), mapID, tileY, tileX); \
-        FILE* file = fopen(fileName, "wb"); \
-        if (!file) \
-        { \
-            char message[1024]; \
-            sprintf(message, "%sFailed to open %s for writing!\n",  tileString, fileName); \
-            perror(message); \
-        } \
-        else \
-            debugWrite(file, data); \
-        if(file) fclose(file); \
-        printf("%sWriting debug output...                       \r", tileString); \
-    } while (false)
+        do { \
+            sprintf(fileName, (name + fileExtension).c_str(), mapID, tileY, tileX); \
+            FILE* file = fopen(fileName, "wb"); \
+            if (!file) \
+            { \
+                char message[1024]; \
+                sprintf(message, "%sFailed to open %s for writing!\n",  tileString, fileName); \
+                perror(message); \
+            } \
+            else \
+                debugWrite(file, data); \
+            if(file) fclose(file); \
+            printf("%sWriting debug output...                       \r", tileString); \
+        } while (false)
 
         if (heightfield)
             { DEBUG_WRITE("hf", heightfield); }

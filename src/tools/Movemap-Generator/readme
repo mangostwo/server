@@ -1,7 +1,7 @@
 mmap generator
 ==============
 The *movement map generator* will extract pathfinding information from the
-game client in order to enable the *mangos-zero server* to let creatures walk
+game client in order to enable the *mangos* server to let creatures walk
 on the terrain as naturally as possible.
 
 Please note that due to the complex nature of the process, the extraction and

@@ -19,13 +19,13 @@ for the community.
   *mangos*.
 * **2005**: the *MaNGOS project* - an abbreviation for *Massive Network Game
   Object Server* - was founded. The first project website was located at
-  http://www.mangosproject.org/ and is defunct now. Source code was released
+  http://www.mangosproject.org/ and a couple of other addresses, which are all defunct now. <br />
+  The Source code was released
   on [SourceForge][2] using Subversion, and old versions are kept there for
-  archival to this day.
+  archival to this day. More recent versions of the older server code are archived at [Mangos Archives][5].
 * **2008**: the *MaNGOS project* grew in terms of users and developers,
   and relocated to [github][3]. With the move, the project website changed
   to [getmangos.eu][4].
-* **2013**: the *MaNGOS project* now is also available on [getmangos.eu][5].
 
 Authors
 -------
