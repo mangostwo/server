@@ -1677,7 +1677,7 @@ void Creature::SetDeathState(DeathState s)
         SetMeleeDamageSchool(SpellSchools(GetCreatureInfo()->DamageSchool));
 
         // Dynamic flags must be set on Tapped by default.
-		SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
+        SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
         LoadCreatureAddon(true);
 
         // Flags after LoadCreatureAddon. Any spell in *addon

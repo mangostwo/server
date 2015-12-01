@@ -849,7 +849,7 @@ void Group::EndRoll()
 void Group::CountTheRoll(Rolls::iterator& rollI)
 {
     Roll* roll = *rollI;
-	
+    
 
     if (!roll->isValid())                                   // is loot already deleted ?
     {

@@ -641,58 +641,58 @@ class Creature : public Unit
         virtual void DeleteFromDB();                        // overwrited in Pet
         static void DeleteFromDB(uint32 lowguid, CreatureData const* data);
 
-		/// Represent the loots available on the creature.
+        /// Represent the loots available on the creature.
         Loot loot;
 
-		/// Indicates whether the creature has has been pickpocked.
+        /// Indicates whether the creature has has been pickpocked.
         bool lootForPickPocketed;
 
-		/// Indicates whether the creature has been checked.
+        /// Indicates whether the creature has been checked.
         bool lootForBody;
 
-		/// Indicates whether the creature has been skinned.
+        /// Indicates whether the creature has been skinned.
         bool lootForSkin;
 
-		/**
-		* Method preparing the creature for the loot state. Based on the previous loot state, the loot ID provided in the database and the creature's type,
-		* this method updates the state of the creature for loots.
-		*
-		* At the end of this method, the creature loot state may be:
-		* Lootable: UNIT_DYNFLAG_LOOTABLE
-		* Skinnable: UNIT_FLAG_SKINNABLE
-		* Not lootable: No flag
-		*/
+        /**
+        * Method preparing the creature for the loot state. Based on the previous loot state, the loot ID provided in the database and the creature's type,
+        * this method updates the state of the creature for loots.
+        *
+        * At the end of this method, the creature loot state may be:
+        * Lootable: UNIT_DYNFLAG_LOOTABLE
+        * Skinnable: UNIT_FLAG_SKINNABLE
+        * Not lootable: No flag
+        */
         void PrepareBodyLootState();
 
-		/**
-		* function returning the GUID of the loot recipient (a player GUID).
-		*
-		* \return ObjectGuid Player GUID.
-		*/
+        /**
+        * function returning the GUID of the loot recipient (a player GUID).
+        *
+        * \return ObjectGuid Player GUID.
+        */
         ObjectGuid GetLootRecipientGuid() const { return m_lootRecipientGuid; }
 
-		/**
-		* function returning the group recipient ID.
-		*
-		* \return uint32 Group ID.
-		*/
+        /**
+        * function returning the group recipient ID.
+        *
+        * \return uint32 Group ID.
+        */
         uint32 GetLootGroupRecipientId() const { return m_lootGroupRecipientId; }
         Player* GetLootRecipient() const;                   // use group cases as prefered
         Group* GetGroupLootRecipient() const;
         bool IsTappedBy(Player const* player) const;
 
-		/**
-		* function indicating whether the whether the creature has a looter recipient defined (either a group ID, either a player GUID).
-		*
-		* \return boolean true if the creature has a recipient defined, false otherwise.
-		*/
-		bool HasLootRecipient() const { return m_lootGroupRecipientId || m_lootRecipientGuid; }
+        /**
+        * function indicating whether the whether the creature has a looter recipient defined (either a group ID, either a player GUID).
+        *
+        * \return boolean true if the creature has a recipient defined, false otherwise.
+        */
+        bool HasLootRecipient() const { return m_lootGroupRecipientId || m_lootRecipientGuid; }
 
-		/**
-		* function indicating whether the recipient is a group.
-		* 
-		* \return boolean true if the creature's recipient is a group, false otherwise.
-		*/
+        /**
+        * function indicating whether the recipient is a group.
+        * 
+        * \return boolean true if the creature's recipient is a group, false otherwise.
+        */
         bool IsGroupLootRecipient() const { return m_lootGroupRecipientId; }
         void SetLootRecipient(Unit* unit);
         void AllLootRemovedFromCorpse();

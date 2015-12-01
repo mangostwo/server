@@ -200,19 +200,19 @@ struct InstanceGroupBind
 class Group
 {
     public:
-		/**
-		* Struct MemberSlot
-		* Represent a member of a group with some of its caracteristics
-		*/
+        /**
+        * Struct MemberSlot
+        * Represent a member of a group with some of its caracteristics
+        */
         struct MemberSlot
         {
-			/* GUID of the player. */
+            /* GUID of the player. */
             ObjectGuid  guid;
-			/* Name of the player. */
+            /* Name of the player. */
             std::string name;
-			/* Group of the player. */
+            /* Group of the player. */
             uint8       group;
-			/* Indicates whether the player is assistant. */
+            /* Indicates whether the player is assistant. */
             bool        assistant;
             uint32      lastMap;
         };
