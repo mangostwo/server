@@ -126,7 +126,7 @@ namespace VMAP
     StaticMapTree::StaticMapTree(uint32 mapID, const std::string& basePath):
         iMapID(mapID), iTreeValues(0), iBasePath(basePath)
     {
-        if (iBasePath.length() > 0 && (iBasePath[iBasePath.length() - 1] != '/' && iBasePath[iBasePath.length() - 1] != '\\'))
+        if (iBasePath.length() > 0 && (iBasePath[iBasePath.length() - 1] != '/' || iBasePath[iBasePath.length() - 1] != '\\'))
         {
             iBasePath.append("/");
         }
@@ -159,6 +159,11 @@ namespace VMAP
     bool StaticMapTree::isInLineOfSight(const Vector3& pos1, const Vector3& pos2) const
     {
         float maxDist = (pos2 - pos1).magnitude();
+        // return false if distance is over max float, in case of cheater teleporting to the end of the universe
+        if (maxDist == std::numeric_limits<float>::max() ||
+            maxDist == std::numeric_limits<float>::infinity())
+            { return false; }
+
         // valid map coords should *never ever* produce float overflow, but this would produce NaNs too:
         MANGOS_ASSERT(maxDist < std::numeric_limits<float>::max());
         // prevent NaN values which can cause BIH intersection to enter infinite loop
@@ -240,7 +245,7 @@ namespace VMAP
     bool StaticMapTree::CanLoadMap(const std::string& vmapPath, uint32 mapID, uint32 tileX, uint32 tileY)
     {
         std::string basePath = vmapPath;
-        if (basePath.length() > 0 && (basePath[basePath.length() - 1] != '/' && basePath[basePath.length() - 1] != '\\'))
+        if (basePath.length() > 0 && (basePath[basePath.length() - 1] != '/' || basePath[basePath.length() - 1] != '\\'))
             { basePath.append("/"); }
         std::string fullname = basePath + VMapManager2::getMapFileName(mapID);
         bool success = true;
@@ -287,7 +292,7 @@ namespace VMAP
             char chunk[8];
             // general info
             if (!readChunk(rf, chunk, VMAP_MAGIC, 8)) { success = false; }
-            char tiled;
+            char tiled=0;
             if (success && fread(&tiled, sizeof(char), 1, rf) != 1) { success = false; }
             iIsTiled = bool(tiled);
             // Nodes
@@ -308,7 +313,7 @@ namespace VMAP
 #endif
             if (!iIsTiled && ModelSpawn::readFromFile(rf, spawn))
             {
-                WorldModel* model = vm->acquireModelInstance(iBasePath, spawn.name);
+                WorldModel* model = vm->acquireModelInstance(iBasePath, spawn.name, spawn.flags);
                 DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "StaticMapTree::InitMap(): loading %s", spawn.name.c_str());
                 if (model)
                 {
@@ -367,7 +372,7 @@ namespace VMAP
             char chunk[8];
             if (!readChunk(tf, chunk, VMAP_MAGIC, 8))
                 { result = false; }
-            uint32 numSpawns;
+            uint32 numSpawns = 0;
             if (result && fread(&numSpawns, sizeof(uint32), 1, tf) != 1)
                 { result = false; }
             for (uint32 i = 0; i < numSpawns && result; ++i)
@@ -378,15 +383,15 @@ namespace VMAP
                 if (result)
                 {
                     // acquire model instance
-                    WorldModel* model = vm->acquireModelInstance(iBasePath, spawn.name);
+                    WorldModel* model = vm->acquireModelInstance(iBasePath, spawn.name, spawn.flags);
                     if (!model)
                         { ERROR_LOG("StaticMapTree::LoadMapTile() could not acquire WorldModel pointer for '%s'!", spawn.name.c_str()); }
 
                     // update tree
                     uint32 referencedVal;
 
-                    fread(&referencedVal, sizeof(uint32), 1, tf);
-                    if (!iLoadedSpawns.count(referencedVal))
+                    size_t fileRead = fread(&referencedVal, sizeof(uint32), 1, tf);
+                    if (!iLoadedSpawns.count(referencedVal) || fileRead <= 0)
                     {
 #ifdef VMAP_DEBUG
                         if (referencedVal > iNTreeValues)
@@ -455,8 +460,8 @@ namespace VMAP
                         // update tree
                         uint32 referencedNode;
 
-                        fread(&referencedNode, sizeof(uint32), 1, tf);
-                        if (!iLoadedSpawns.count(referencedNode))
+                        size_t fileRead = fread(&referencedNode, sizeof(uint32), 1, tf);
+                        if (!iLoadedSpawns.count(referencedNode) || fileRead <= 0)
                         {
                             ERROR_LOG("Trying to unload non-referenced model '%s' (ID:%u)", spawn.name.c_str(), spawn.ID);
                         }

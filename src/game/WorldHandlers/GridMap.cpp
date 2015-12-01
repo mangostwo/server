@@ -42,6 +42,9 @@ char const* MAP_AREA_MAGIC    = "AREA";
 char const* MAP_HEIGHT_MAGIC  = "MHGT";
 char const* MAP_LIQUID_MAGIC  = "MLIQ";
 
+static uint16 holetab_h[4] = { 0x1111, 0x2222, 0x4444, 0x8888 };
+static uint16 holetab_v[4] = { 0x000F, 0x00F0, 0x0F00, 0xF000 };
+
 GridMap::GridMap()
 {
     m_flags = 0;
@@ -153,7 +156,9 @@ bool GridMap::loadAreaData(FILE* in, uint32 offset, uint32 /*size*/)
 {
     GridMapAreaHeader header;
     fseek(in, offset, SEEK_SET);
-    fread(&header, sizeof(header), 1, in);
+    size_t file_read = fread(&header, sizeof(header), 1, in);
+    if (file_read <= 0)
+        return false;
     if (header.fourcc != *((uint32 const*)(MAP_AREA_MAGIC)))
         return false;
 
@@ -161,7 +166,9 @@ bool GridMap::loadAreaData(FILE* in, uint32 offset, uint32 /*size*/)
     if (!(header.flags & MAP_AREA_NO_AREA))
     {
         m_area_map = new uint16 [16 * 16];
-        fread(m_area_map, sizeof(uint16), 16 * 16, in);
+        file_read = fread(m_area_map, sizeof(uint16), 16 * 16, in);
+        if (file_read <= 0)
+            return false;
     }
 
     return true;
@@ -171,7 +178,9 @@ bool GridMap::loadHeightData(FILE* in, uint32 offset, uint32 /*size*/)
 {
     GridMapHeightHeader header;
     fseek(in, offset, SEEK_SET);
-    fread(&header, sizeof(header), 1, in);
+    size_t file_read = fread(&header, sizeof(header), 1, in);
+    if (file_read <= 0)
+        return false;
     if (header.fourcc != *((uint32 const*)(MAP_HEIGHT_MAGIC)))
         return false;
 
@@ -182,8 +191,12 @@ bool GridMap::loadHeightData(FILE* in, uint32 offset, uint32 /*size*/)
         {
             m_uint16_V9 = new uint16 [129 * 129];
             m_uint16_V8 = new uint16 [128 * 128];
-            fread(m_uint16_V9, sizeof(uint16), 129 * 129, in);
-            fread(m_uint16_V8, sizeof(uint16), 128 * 128, in);
+            file_read = fread(m_uint16_V9, sizeof(uint16), 129 * 129, in);
+            if (file_read <= 0)
+                return false;
+            file_read = fread(m_uint16_V8, sizeof(uint16), 128 * 128, in);
+            if (file_read <= 0)
+                return false;
             m_gridIntHeightMultiplier = (header.gridMaxHeight - header.gridHeight) / 65535;
             m_gridGetHeight = &GridMap::getHeightFromUint16;
         }
@@ -191,8 +204,12 @@ bool GridMap::loadHeightData(FILE* in, uint32 offset, uint32 /*size*/)
         {
             m_uint8_V9 = new uint8 [129 * 129];
             m_uint8_V8 = new uint8 [128 * 128];
-            fread(m_uint8_V9, sizeof(uint8), 129 * 129, in);
-            fread(m_uint8_V8, sizeof(uint8), 128 * 128, in);
+            file_read = fread(m_uint8_V9, sizeof(uint8), 129 * 129, in);
+            if (file_read <= 0)
+                return false;
+            file_read = fread(m_uint8_V8, sizeof(uint8), 128 * 128, in);
+            if (file_read <= 0)
+                return false;
             m_gridIntHeightMultiplier = (header.gridMaxHeight - header.gridHeight) / 255;
             m_gridGetHeight = &GridMap::getHeightFromUint8;
         }
@@ -200,13 +217,17 @@ bool GridMap::loadHeightData(FILE* in, uint32 offset, uint32 /*size*/)
         {
             m_V9 = new float [129 * 129];
             m_V8 = new float [128 * 128];
-            fread(m_V9, sizeof(float), 129 * 129, in);
-            fread(m_V8, sizeof(float), 128 * 128, in);
+            file_read = fread(m_V9, sizeof(float), 129 * 129, in);
+            if (file_read <= 0)
+                return false;
+            file_read = fread(m_V8, sizeof(float), 128 * 128, in);
+            if (file_read <= 0)
+                return false;
             m_gridGetHeight = &GridMap::getHeightFromFloat;
         }
     }
     else
-        m_gridGetHeight = &GridMap::getHeightFromFlat;
+        { m_gridGetHeight = &GridMap::getHeightFromFlat; }
 
     return true;
 }
@@ -225,7 +246,9 @@ bool GridMap::loadGridMapLiquidData(FILE* in, uint32 offset, uint32 /*size*/)
 {
     GridMapLiquidHeader header;
     fseek(in, offset, SEEK_SET);
-    fread(&header, sizeof(header), 1, in);
+    size_t file_read = fread(&header, sizeof(header), 1, in);
+    if (file_read <= 0)
+        return false;
     if (header.fourcc != *((uint32 const*)(MAP_LIQUID_MAGIC)))
         return false;
 
@@ -239,16 +262,22 @@ bool GridMap::loadGridMapLiquidData(FILE* in, uint32 offset, uint32 /*size*/)
     if (!(header.flags & MAP_LIQUID_NO_TYPE))
     {
         m_liquidEntry = new uint16[16 * 16];
-        fread(m_liquidEntry, sizeof(uint16), 16 * 16, in);
+        file_read = fread(m_liquidEntry, sizeof(uint16), 16 * 16, in);
+        if (file_read <= 0)
+            return false;
 
         m_liquidFlags = new uint8[16 * 16];
-        fread(m_liquidFlags, sizeof(uint8), 16 * 16, in);
+        file_read = fread(m_liquidFlags, sizeof(uint8), 16 * 16, in);
+        if (file_read <= 0)
+            return false;
     }
 
     if (!(header.flags & MAP_LIQUID_NO_HEIGHT))
     {
         m_liquid_map = new float [m_liquid_width * m_liquid_height];
-        fread(m_liquid_map, sizeof(float), m_liquid_width * m_liquid_height, in);
+        file_read = fread(m_liquid_map, sizeof(float), m_liquid_width * m_liquid_height, in);
+        if (file_read <= 0)
+            return false;
     }
 
     return true;
@@ -649,13 +678,20 @@ bool GridMap::ExistMap(uint32 mapid, int gx, int gy)
 
     if (!pf)
     {
-        sLog.outError("Check existing of map file '%s': not exist!", tmp);
+        sLog.outError("Please check for the existence of map file '%s'", tmp);
         delete[] tmp;
         return false;
     }
 
     GridMapFileHeader header;
-    fread(&header, sizeof(header), 1, pf);
+    size_t file_read = fread(&header, sizeof(header), 1, pf);
+    if (file_read <= 0)
+    {
+        sLog.outError("Map file '%s' could not be read.", tmp);
+        delete[] tmp;
+        fclose(pf);                                         // close file before return
+        return false;
+    }
     if (header.mapMagic     != *((uint32 const*)(MAP_MAGIC)) ||
             header.versionMagic != *((uint32 const*)(MAP_VERSION_MAGIC)) ||
             !IsAcceptableClientBuild(header.buildMagic))

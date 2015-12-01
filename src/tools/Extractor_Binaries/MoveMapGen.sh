@@ -21,7 +21,7 @@ PARAMS="--silent"
 ## Already a few map extracted, and don't care anymore
 EXCLUDE_MAPS=""
 #EXCLUDE_MAPS="0 1 530 571" # example to exclude the continents
-#EXCLUDE_MAPS="13 25 29 35 37 42 44 169 451" # example to exclude 'junk' maps
+#EXCLUDE_MAPS="13 25 29 35 37 42 44 169 451 598" # example to exclude 'junk' maps
 
 ## Exclude file
 EXCLUDE_MAPS_FILE="mmap_excluded.txt"
