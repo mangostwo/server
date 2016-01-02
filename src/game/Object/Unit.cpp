@@ -10227,7 +10227,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
         procTriggered.push_back(ProcTriggeredData(spellProcEvent, itr->second));
     }
 
-    if (procTriggered.empty())
+    if (!procTriggered.empty())
     {
         for (ProcTriggeredList::const_iterator itr = procTriggered.begin(); itr != procTriggered.end(); ++itr)
         {
