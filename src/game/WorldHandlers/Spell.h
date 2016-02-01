@@ -502,6 +502,9 @@ class Spell
 
         typedef std::list<Unit*> UnitList;
 
+        void SetSelfContainer(Spell** pCurrentContainer) { m_selfContainer = pCurrentContainer; }
+        Spell** GetSelfContainer() { return m_selfContainer; }
+
     protected:
         bool HasGlobalCooldown();
         void TriggerGlobalCooldown();
