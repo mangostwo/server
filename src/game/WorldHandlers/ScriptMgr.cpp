@@ -37,6 +37,7 @@
 #include "BattleGround/BattleGround.h"
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "WaypointMovementGenerator.h"
+#include "Mail.h"
 
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
@@ -86,6 +87,10 @@ uint8 GetSpellStartDBScriptPriority(SpellEntry const* spellinfo, SpellEffectInde
     if (spellinfo->Effect[effIdx] == SPELL_EFFECT_TRIGGER_SPELL && !sSpellStore.LookupEntry(spellinfo->EffectTriggerSpell[effIdx]))
         { return 5; }
 
+    // NonExisting trigger missile spells can also start DB-Spell-Scripts
+    if (spellinfo->Effect[effIdx] == SPELL_EFFECT_TRIGGER_MISSILE && !sSpellStore.LookupEntry(spellinfo->EffectTriggerSpell[effIdx]))
+        { return 4; }
+
     // Can not start script
     return 0;
 }
@@ -116,8 +121,6 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
     if (IsScriptScheduled())                                // function don't must be called in time scripts use.
         { return; }
 
-    sLog.outString("%s :", tablename);
-
     scripts.first = tablename;
     scripts.second.clear();                                 // need for reload support
 
@@ -130,9 +133,8 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
     {
         BarGoLink bar(1);
         bar.step();
-
+        sLog.outString(">> Loaded %u script definitions from table %s", count, tablename);
         sLog.outString();
-        sLog.outString(">> Loaded %u script definitions", count);
         return;
     }
 
@@ -463,12 +465,12 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                     if (tmp.textId[i] && !sSpellStore.LookupEntry(uint32(tmp.textId[i])))
                     {
                         sLog.outErrorDb("Table `%s` using nonexistent spell (id: %u) in SCRIPT_COMMAND_CAST_SPELL for script id %u, dataint%u",
-                                        tablename, uint32(tmp.textId[i]), tmp.id, i + 1);
+                            tablename, uint32(tmp.textId[i]), tmp.id, i + 1);
                         hasErrored = true;
                     }
-                    if (hasErrored)
-                        { continue; }
                 }
+                if (hasErrored)
+                    { continue; }
                 break;
             }
             case SCRIPT_COMMAND_PLAY_SOUND:                 // 16
@@ -680,15 +682,41 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 }
                 break;
             }
-            case SCRIPT_COMMAND_SET_FACING:                 // 36
+            case SCRIPT_COMMAND_TURN_TO:                    // 36
                 break;
             case SCRIPT_COMMAND_MOVE_DYNAMIC:               // 37
+            {
                 if (tmp.moveDynamic.maxDist < tmp.moveDynamic.minDist)
                 {
                     sLog.outErrorDb("Table `%s` has invalid min-dist (datalong2 = %u) less than max-dist (datalon = %u) in SCRIPT_COMMAND_MOVE_DYNAMIC for script id %u", tablename, tmp.moveDynamic.minDist, tmp.moveDynamic.maxDist, tmp.id);
                     continue;
                 }
                 break;
+            }
+            case SCRIPT_COMMAND_SEND_MAIL:                  // 38
+            {
+                if (!sMailTemplateStore.LookupEntry(tmp.sendMail.mailTemplateId))
+                {
+                    sLog.outErrorDb("Table `%s` has invalid mailTemplateId (datalong = %u) in SCRIPT_COMMAND_SEND_MAIL for script id %u", tablename, tmp.sendMail.mailTemplateId, tmp.id);
+                    continue;
+                }
+                if (tmp.sendMail.altSender && !ObjectMgr::GetCreatureTemplate(tmp.sendMail.altSender))
+                {
+                    sLog.outErrorDb("Table `%s` has invalid alternativeSender (datalong2 = %u) in SCRIPT_COMMAND_SEND_MAIL for script id %u", tablename, tmp.sendMail.altSender, tmp.id);
+                    continue;
+                }
+                break;
+            }
+            case SCRIPT_COMMAND_CHANGE_ENTRY:              // 39
+            {
+                if (tmp.changeEntry.creatureEntry && !ObjectMgr::GetCreatureTemplate(tmp.changeEntry.creatureEntry))
+                    {
+                        sLog.outErrorDb("Table `%s` has datalong = %u in SCRIPT_COMMAND_CHANGE_ENTRY for script id %u, but this creature_template does not exist.", tablename, tmp.changeEntry.creatureEntry, tmp.id);
+                        continue;
+                    }
+                break;
+            }
+
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
@@ -709,8 +737,8 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
 
     delete result;
 
+    sLog.outString(">> Loaded %u script definitions from table %s", count, tablename);
     sLog.outString();
-    sLog.outString(">> Loaded %u script definitions", count);
 }
 
 void ScriptMgr::LoadGameObjectScripts()
@@ -1002,6 +1030,13 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject
                     { Cell::VisitGridObjects(pSearcher, searcher, m_script->searchRadiusOrGuid); }
 
                 pBuddy = pCreatureBuddy;
+
+                // TODO: Remove this extra check output after a while - it might have false effects
+                if (!pBuddy && pSearcher->GetEntry() == m_script->buddyEntry)
+                {
+                    sLog.outErrorDb(" DB-SCRIPTS: WARNING: Process table `%s` id %u, command %u has no OTHER buddy %u found - maybe you need to update the script?", m_table, m_script->id, m_script->command, m_script->buddyEntry);
+                    pBuddy = pSearcher;
+                }
             }
             else
             {
@@ -1066,6 +1101,15 @@ bool ScriptAction::LogIfNotGameObject(WorldObject* pWorldObject)
     if (!pWorldObject || pWorldObject->GetTypeId() != TYPEID_GAMEOBJECT)
     {
         sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u call for non-gameobject, skipping.", m_table, m_script->id, m_script->command);
+        return true;
+    }
+    return false;
+}
+bool ScriptAction::LogIfNotPlayer(WorldObject* pWorldObject)
+{
+    if (!pWorldObject || pWorldObject->GetTypeId() != TYPEID_PLAYER)
+    {
+        sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u call for non-player, skipping.", m_table, m_script->id, m_script->command);
         return true;
     }
     return false;
@@ -1442,24 +1486,21 @@ bool ScriptAction::HandleScriptStep()
         {
             if (LogIfNotUnit(pTarget))                      // TODO - Change when support for casting without victim will be supported
                 { break; }
-                
+
             // Select Spell
             uint32 spell = m_script->castSpell.spellId;
-            uint32 i = 0;
-            while (i < MAX_TEXT_ID && m_script->textId[i]) // Count which dataint fields are filled
-                ++i;
-                
-            if (i > 0)
-            {
-                if (uint32 rnd = urand(0, i)) // Random selection resulted in one of the dataint fields
-                    { spell = m_script->textId[rnd - 1]; }
-            }
+            uint32 filledCount = 0;
+            while (filledCount < MAX_TEXT_ID && m_script->textId[filledCount])  // Count which dataint fields are filled
+                ++filledCount;
+            if (filledCount > 0)
+                if (uint32 randomField = urand(0, filledCount))               // Random selection resulted in one of the dataint fields
+                    spell = m_script->textId[randomField - 1];
 
             // TODO: when GO cast implemented, code below must be updated accordingly to also allow GO spell cast
             if (pSource && pSource->GetTypeId() == TYPEID_GAMEOBJECT)
             {
                 ((Unit*)pTarget)->CastSpell(((Unit*)pTarget), spell, true, NULL, NULL, pSource->GetObjectGuid());
-                break;
+                { break; }
             }
 
             if (LogIfNotUnit(pSource))
@@ -1485,13 +1526,17 @@ bool ScriptAction::HandleScriptStep()
                     { break; }
             }
 
-            if (m_script->playSound.flags & 2)
-                { pSource->PlayDistanceSound(m_script->playSound.soundId, pSoundTarget); }
-            else if (m_script->playSound.flags & (4 | 8))
-                { m_map->PlayDirectSoundToMap(m_script->playSound.soundId, m_script->playSound.flags & 8 ? pSource->GetZoneId() : 0); }
+            if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
+                pSource->PlayMusic(m_script->playSound.soundId, pSoundTarget);
             else
-                { pSource->PlayDirectSound(m_script->playSound.soundId, pSoundTarget); }
-
+            {
+                if (m_script->playSound.flags & 2)
+                    { pSource->PlayDistanceSound(m_script->playSound.soundId, pSoundTarget); }
+                else if (m_script->playSound.flags & (4 | 8))
+                    { m_map->PlayDirectSoundToMap(m_script->playSound.soundId, m_script->playSound.flags & 8 ? pSource->GetZoneId() : 0); }
+                else
+                    { pSource->PlayDirectSound(m_script->playSound.soundId, pSoundTarget); }
+            }
             break;
         }
         case SCRIPT_COMMAND_CREATE_ITEM:                    // 17
@@ -1830,32 +1875,12 @@ bool ScriptAction::HandleScriptStep()
             ((Creature*)pSource)->AI()->SendAIEventAround(AIEventType(m_script->sendAIEvent.eventType), (Unit*)pTarget, 0, float(m_script->sendAIEvent.radius));
             break;
         }
-        case SCRIPT_COMMAND_SET_FACING:                     // 36
+        case SCRIPT_COMMAND_TURN_TO:                 // 36
         {
-            if (LogIfNotCreature(pSource))
-                return false;
-            Creature* pCSource = static_cast<Creature*>(pSource);
-            if (!pTarget)
-            {
-                sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command _SET_FACING (%u): No target found.", m_table, m_script->id, m_script->command);
-                return false;
-            }
-            if (m_script->setFacing.resetFacing)
-            {
-                float x,y,z,o;
-                if (pCSource->GetMotionMaster()->empty() || !pCSource->GetMotionMaster()->top()->GetResetPosition(*pCSource, x, y, z, o))
-                    pCSource->GetRespawnCoord(x, y, z, &o);
-                pCSource->SetFacingTo(o);
+            if (LogIfNotUnit(pSource))
+                { break; }
 
-                if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL && !pCSource->IsInCombat())
-                    pCSource->SetTargetGuid(ObjectGuid());
-            }
-            else
-            {
-                pCSource->SetFacingToObject(pTarget);
-                if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL && !LogIfNotUnit(pTarget) && !pCSource->IsInCombat())
-                    pCSource->SetTargetGuid(pTarget->GetObjectGuid());
-            }
+            ((Unit*)pSource)->SetFacingTo(pSource->GetAngle(pTarget));
             break;
         }
         case SCRIPT_COMMAND_MOVE_DYNAMIC:                   // 37
@@ -1865,17 +1890,55 @@ bool ScriptAction::HandleScriptStep()
             if (LogIfNotUnit(pTarget))
                 return false;
 
-            float x,y,z;
+            float x, y, z;
             if (m_script->moveDynamic.maxDist == 0)         // Move to pTarget
+            {
+                if (pTarget == pSource)
+                {
+                    sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, _MOVE_DYNAMIC called with maxDist == 0, but resultingSource == resultingTarget (== %s)", m_table, m_script->id, pSource->GetGuidStr().c_str());
+                    break;
+                }
                 pTarget->GetContactPoint(pSource, x, y, z);
+            }
             else                                            // Calculate position
             {
+                float orientation;
+                if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
+                    orientation = pSource->GetOrientation() + m_script->o + 2 * M_PI_F;
+                else
+                    orientation = m_script->o;
+
                 pSource->GetRandomPoint(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), m_script->moveDynamic.maxDist, x, y, z,
-                                        m_script->moveDynamic.minDist, (m_script->o == 0.0f ? NULL : &m_script->o));
+                                        m_script->moveDynamic.minDist, (orientation == 0.0f ? NULL : &orientation));
                 z = std::max(z, pTarget->GetPositionZ());
                 pSource->UpdateAllowedPositionZ(x, y, z);
             }
             ((Creature*)pSource)->GetMotionMaster()->MovePoint(1, x, y, z);
+            break;
+        }
+        case SCRIPT_COMMAND_SEND_MAIL:                      // 38
+        {
+            if (LogIfNotPlayer(pTarget))
+                return false;
+            if (!m_script->sendMail.altSender && LogIfNotCreature(pSource))
+                return false;
+
+            MailSender sender;
+            if (m_script->sendMail.altSender)
+                sender = MailSender(MAIL_CREATURE, m_script->sendMail.altSender);
+            else
+                sender = MailSender(pSource);
+            uint32 deliverDelay = m_script->textId[0] > 0 ? (uint32)m_script->textId[0] : 0;
+
+            MailDraft(m_script->sendMail.mailTemplateId).SendMailTo(static_cast<Player*>(pTarget), sender, MAIL_CHECK_MASK_HAS_BODY, deliverDelay);
+            break;
+        }
+        case SCRIPT_COMMAND_CHANGE_ENTRY:                   // 39
+        {
+            if (LogIfNotCreature(pSource))
+                { break; }
+
+            ((Creature*)pSource)->UpdateEntry(m_script->changeEntry.creatureEntry);
             break;
         }
         default:
@@ -1889,7 +1952,6 @@ bool ScriptAction::HandleScriptStep()
 // /////////////////////////////////////////////////////////
 //              Scripting Library Hooks
 // /////////////////////////////////////////////////////////
-
 void ScriptMgr::LoadScriptBinding()
 {
 #ifdef ENABLE_SD3
@@ -1990,7 +2052,8 @@ void ScriptMgr::LoadScriptBinding()
             id |= uint32(data) << 24;   //incorporate spell effect number into the key
 
         m_scriptBind[type][id] = scriptId;
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 
     delete result;
     sLog.outString("Of the total %u script bindings, loaded succesfully:", count);
@@ -2007,6 +2070,18 @@ void ScriptMgr::LoadScriptBinding()
     sLog.outString();
 #endif /* ENABLE_SD3 */
     return;
+}
+
+bool ScriptMgr::ReloadScriptBinding()
+{
+#ifdef _DEBUG
+    m_bindMutex.acquire_write();
+    LoadScriptBinding();
+    m_bindMutex.release();
+    return true;
+#else
+    return false;
+#endif /* _DEBUG */
 }
 
 void ScriptMgr::LoadScriptNames()
@@ -2031,7 +2106,8 @@ void ScriptMgr::LoadScriptNames()
         bar.step();
         m_scriptNames.push_back((*result)[0].GetString());
         ++count;
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
     delete result;
 
     std::sort(m_scriptNames.begin(), m_scriptNames.end());
@@ -2056,6 +2132,26 @@ uint32 ScriptMgr::GetScriptId(const char* name) const
     return uint32(itr - m_scriptNames.begin());
 }
 
+uint32 ScriptMgr::GetBoundScriptId(ScriptedObjectType entity, int32 entry)
+{
+#ifdef _DEBUG
+    m_bindMutex.acquire_read();
+#endif /* _DEBUG */
+    uint32 id = 0;
+    if (entity < SCRIPTED_MAX_TYPE)
+    {
+        EntryToScriptIdMap::iterator it = m_scriptBind[entity].find(entry);
+        if (it != m_scriptBind[entity].end())
+            id = it->second;
+    }
+    else
+        sLog.outErrorScriptLib("asking a script for non-existing entity type %u!", entity);
+#ifdef _DEBUG
+    m_bindMutex.release();
+#endif /* _DEBUG */
+    return id;
+}
+
 char const* ScriptMgr::GetScriptLibraryVersion() const
 {
 #ifdef ENABLE_SD3
@@ -2063,21 +2159,6 @@ char const* ScriptMgr::GetScriptLibraryVersion() const
 #else
     return NULL;
 #endif
-}
-
-uint32 ScriptMgr::GetBoundScriptId(ScriptedObjectType entity, int32 entry)
-{
-    uint32 id = 0;
-    if (entity < SCRIPTED_MAX_TYPE)
-    {
-        EntryToScriptIdMap::const_iterator it = m_scriptBind[entity].find(entry);
-        if (it != m_scriptBind[entity].end())
-            id = it->second;
-    }
-    else
-        sLog.outErrorScriptLib("asking a script for non-existing entity type %u!", entity);
-
-    return id;
 }
 
 CreatureAI* ScriptMgr::GetCreatureAI(Creature* pCreature)
@@ -2252,7 +2333,7 @@ bool ScriptMgr::OnQuestRewarded(Player* pPlayer, GameObject* pGameObject, Quest 
     // Used by Eluna
 #ifdef ENABLE_ELUNA
     if (sEluna->OnQuestReward(pPlayer, pGameObject, pQuest, reward))
-    return true;
+        return true;
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2354,16 +2435,17 @@ bool ScriptMgr::OnProcessEvent(uint32 eventId, Object* pSource, Object* pTarget,
 #endif
 }
 
-bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid)
+bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Unit* pTarget, ObjectGuid originalCasterGuid)
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget))
-        return true;
+    if (pTarget->ToCreature())
+        if (sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget->ToCreature()))
+            return true;
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
-    return SD3::EffectDummyCreature(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
+    return SD3::EffectDummyUnit(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 #else
     return false;
 #endif
@@ -2396,13 +2478,13 @@ bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex ef
     return SD3::EffectDummyItem(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 #else
     return false;
-#endif   
+#endif
 }
 
-bool ScriptMgr::OnEffectScriptEffect(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid)
+bool ScriptMgr::OnEffectScriptEffect(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Unit* pTarget, ObjectGuid originalCasterGuid)
 {
 #ifdef ENABLE_SD3
-    return SD3::EffectScriptEffectCreature(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
+    return SD3::EffectScriptEffectUnit(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 #else
     return false;
 #endif
@@ -2427,6 +2509,7 @@ ScriptLoadResult ScriptMgr::LoadScriptLibrary(const char* libName)
         return SCRIPT_LOAD_OK;
     }
 #endif
+
     return SCRIPT_LOAD_ERR_NOT_FOUND;
 }
 
@@ -2492,7 +2575,7 @@ void ScriptMgr::CollectPossibleEventIds(std::set<uint32>& eventIds)
             }
         }
     }
-
+#if defined(TBC) || defined (WOTLK)
     // Load all possible event entries from taxi path nodes
     for (size_t path_idx = 0; path_idx < sTaxiPathNodesByPath.size(); ++path_idx)
     {
@@ -2507,6 +2590,7 @@ void ScriptMgr::CollectPossibleEventIds(std::set<uint32>& eventIds)
                 eventIds.insert(node.departureEventID);
         }
     }
+#endif
 }
 
 // Starters for events
@@ -2531,7 +2615,11 @@ bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool
         }
         else
         {
+#if defined(CLASSIC)
+            if (map->IsBattleGround())
+#else
             if (map->IsBattleGroundOrArena())
+#endif
                 { bg = ((BattleGroundMap*)map)->GetBG(); }
             else                                            // Use the go, because GOs don't move
                 { opvp = sOutdoorPvPMgr.GetScript(((GameObject*)source)->GetZoneId()); }
