@@ -51,7 +51,7 @@ class WorldPacket : public ByteBuffer
          * @param opcode
          * @param res
          */
-        explicit WorldPacket(Opcodes opcode, size_t res = 200) : ByteBuffer(res), m_opcode(opcode) { }
+        explicit WorldPacket(uint16 opcode, size_t res = 200) : ByteBuffer(res), m_opcode(opcode) { }
         /**
          * @brief copy constructor
          *
@@ -67,7 +67,7 @@ class WorldPacket : public ByteBuffer
          * @param opcode
          * @param newres
          */
-        void Initialize(Opcodes opcode, size_t newres = 200)
+        void Initialize(uint16 opcode, size_t newres = 200)
         {
             clear();
             _storage.reserve(newres);
@@ -79,7 +79,7 @@ class WorldPacket : public ByteBuffer
          *
          * @return uint16
          */
-        Opcodes GetOpcode() const { return m_opcode; }
+        uint16 GetOpcode() const { return m_opcode; }
         /**
          * @brief
          *
@@ -93,7 +93,7 @@ class WorldPacket : public ByteBuffer
          */
         inline const char* GetOpcodeName() const { return LookupOpcodeName(m_opcode); }
 
-    protected:
-        Opcodes m_opcode;
+protected:
+    uint16 m_opcode; /**< TODO */
 };
 #endif
