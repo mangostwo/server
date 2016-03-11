@@ -31,6 +31,7 @@
 #include <ace/Recursive_Thread_Mutex.h>
 #include "Map.h"
 #include "GridStates.h"
+#include "MapUpdater.h"
 
 class Transport;
 class BattleGround;
@@ -57,10 +58,6 @@ struct MapID
 class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockable<MapManager, ACE_Recursive_Thread_Mutex> >
 {
         friend class MaNGOS::OperatorNew<MapManager>;
-
-        typedef ACE_Recursive_Thread_Mutex LOCK_TYPE;
-        typedef ACE_Guard<LOCK_TYPE> LOCK_TYPE_GUARD;
-        typedef MaNGOS::ClassLevelLockable<MapManager, ACE_Recursive_Thread_Mutex>::Lock Guard;
 
     public:
         typedef std::map<MapID, Map* > MapMapType;
@@ -182,6 +179,11 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         uint32 i_gridCleanUpDelay;
         MapMapType i_maps;
         IntervalTimer i_timer;
+        MapUpdater m_updater;
+        uint32 i_MaxInstanceId;
+
+        typedef ACE_Recursive_Thread_Mutex LOCK_TYPE;
+        mutable LOCK_TYPE m_lock;
 };
 
 template<typename Do>
