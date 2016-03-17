@@ -727,7 +727,7 @@ class Creature : public Unit
 
         bool IsVisibleInGridForPlayer(Player* pl) const override;
 
-        void RemoveCorpse();
+        void RemoveCorpse(bool inPlace = false);
         bool IsDeadByDefault() const { return m_IsDeadByDefault; };
 
         void ForcedDespawn(uint32 timeMSToDespawn = 0);
