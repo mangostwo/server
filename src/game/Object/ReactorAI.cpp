@@ -48,7 +48,7 @@ ReactorAI::MoveInLineOfSight(Unit*)
 void
 ReactorAI::AttackStart(Unit* p)
 {
-    if (!p || !m_creature->CanAttackByItself())
+    if (!p || !m_creature->CanInitiateAttack())
         { return; }
 
     if (m_creature->Attack(p, true))

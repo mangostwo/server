@@ -6049,7 +6049,7 @@ bool Unit::isAttackingPlayer() const
     return CheckAllControlledUnits(IsAttackingPlayerHelper(), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 }
 
-bool Unit::CanAttackByItself() const
+bool Unit::CanInitiateAttack() const
 {
     if (!IsVehicle())
         return true;
