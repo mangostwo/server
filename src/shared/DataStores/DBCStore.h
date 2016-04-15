@@ -53,7 +53,6 @@ class DBCStorage
         ~DBCStorage() { Clear(); }
 
         /**
-        /**
          * @brief
          *
          * @return uint32

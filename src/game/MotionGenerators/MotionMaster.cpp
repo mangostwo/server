@@ -535,6 +535,11 @@ void MotionMaster::MoveJump(float x, float y, float z, float horizontalSpeed, fl
     Mutate(new EffectMovementGenerator(id));
 }
 
+void MotionMaster::MoveJump(Position& pos, float horizontalSpeed, float max_height, uint32 id)
+{
+    MoveJump(pos.x, pos.y, pos.z, horizontalSpeed, max_height, id);
+}
+
 void MotionMaster::MoveFall()
 {
     // use larger distance for vmap height search than in most other cases
