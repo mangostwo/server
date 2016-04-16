@@ -1971,7 +1971,7 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
     return true;
 }
 
-bool Creature::CanInitiateAttack()
+bool Creature::CanInitiateAttack() const
 {
     if (hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_DIED))
         { return false; }
@@ -1985,7 +1985,7 @@ bool Creature::CanInitiateAttack()
     if (m_aggroDelay != 0)
         return false;
 
-    if (!CanInitiateAttack())
+    if (!Unit::CanInitiateAttack())
         return false;
 
     return true;

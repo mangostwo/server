@@ -1512,7 +1512,7 @@ class Unit : public WorldObject
          * Checks if a vehicle is allowed to attack other units by itself.
          * @return true if a vehicle can attack other units by itself (without any controller)
          */
-        bool CanInitiateAttack() const;
+        virtual bool CanInitiateAttack() const;
         /** 
          * @return The victim that you are currently attacking
          */
