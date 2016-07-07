@@ -22,7 +22,7 @@ install:
         }
 
 # Clone to the specified folder below, and only clone the latest commit without history.
-clone_folder: c:\mzero\server
+clone_folder: c:\mtwo\server
 
 clone_depth: 1
 
@@ -36,6 +36,6 @@ before_build:
  
 # Build core.
 build_script:
-  - cd c:\mzero\server
-  - cmake -DCMAKE_INSTALL_PREFIX="c:\mzero\build\bin" -DCMAKE_SIZEOF_VOID_P=8
+  - cd c:\mtwo\server
+  - cmake -DCMAKE_INSTALL_PREFIX="c:\mtwo\build\bin" -DCMAKE_SIZEOF_VOID_P=8
   - msbuild /m MaNGOS.sln
