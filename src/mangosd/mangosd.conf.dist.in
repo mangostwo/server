@@ -592,6 +592,11 @@ SD3ErrorLogFile              = "scriptdev3-errors.log"
 #        Default: 0 (true)
 #                 1 (false)
 #
+#    InstantFlightPaths
+#        Flight paths will take players to their destination instantly, instead of making them wait to fly there.
+#        Default: 0 (false)
+#                 1 (true)
+#
 #    AlwaysMaxSkillForLevel
 #        Players will automatically gain max level dependent (weapon/defense) skill when logging in, leveling up etc.
 #        Default: 0 (false)
@@ -831,6 +836,7 @@ StartArenaPoints                          = 0
 InstantLogout                             = 1
 DisableWaterBreath                        = 4
 AllFlightPaths                            = 0
+InstantFlightPaths                        = 0
 AlwaysMaxSkillForLevel                    = 0
 ActivateWeather                           = 1
 CastUnstuck                               = 1
