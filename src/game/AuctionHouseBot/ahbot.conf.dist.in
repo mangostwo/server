@@ -8,6 +8,11 @@ ConfVersion=2010102201
 ################################################################################
 # AUCTION HOUSE BOT SETTINGS
 #
+#    AuctionHouseBot.CharacterName
+#        The name of the character that the bot will use to auction
+#        items in the Alliance, Horde and neutral auction houses.
+#    Default "" (No owner)
+#
 #    AuctionHouseBot.Seller.Enabled
 #        Enable or disable sales functionality
 #    Default 0 (Disabled)
@@ -102,7 +107,8 @@ ConfVersion=2010102201
 #    AuctionHouseBot.Items.Amount.*
 #        Defines the amount of auctions to be created for each item quality
 #        Values will be adjusted using faction specific settings (if specified)
-#    Default 0, 2000, 2500, 1500, 1000, 0, 0 (grey, white, green, blue, purple, orange, yellow)
+#    Default 0, 2000, 2500, 1500, 1000, 0, 0
+#            (grey, white, green, blue, purple, orange, yellow)
 #
 #    AuctionHouseBot.Class.*
 #        Defines which item classes can be put up for auction. See pre-defined
@@ -153,6 +159,7 @@ ConfVersion=2010102201
 #    Default ""
 #
 ################################################################################
+AuctionHouseBot.CharacterName  = ""
 AuctionHouseBot.Seller.Enabled = 0
 AuctionHouseBot.DEBUG.Seller   = 0
 
@@ -215,10 +222,10 @@ AuctionHouseBot.Class.Misc.Mount.ReqLevel.Min = 0
 AuctionHouseBot.Class.Misc.Mount.ReqLevel.Max = 0
 AuctionHouseBot.Class.Misc.Mount.ReqSkill.Min = 0
 AuctionHouseBot.Class.Misc.Mount.ReqSkill.Max = 0
-AuctionHouseBot.Class.Glyph.ReqLevel.Min = 0
-AuctionHouseBot.Class.Glyph.ReqLevel.Max = 0
-AuctionHouseBot.Class.Glyph.ItemLevel.Min = 0
-AuctionHouseBot.Class.Glyph.ItemLevel.Max = 0
+AuctionHouseBot.Class.Glyph.ReqLevel.Min      = 0
+AuctionHouseBot.Class.Glyph.ReqLevel.Max      = 0
+AuctionHouseBot.Class.Glyph.ItemLevel.Min     = 0
+AuctionHouseBot.Class.Glyph.ItemLevel.Max     = 0
 AuctionHouseBot.Class.TradeGood.ItemLevel.Min = 0
 AuctionHouseBot.Class.TradeGood.ItemLevel.Max = 0
 AuctionHouseBot.Class.Container.ItemLevel.Min = 0
