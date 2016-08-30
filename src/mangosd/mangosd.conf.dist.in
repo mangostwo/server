@@ -37,14 +37,14 @@ ConfVersion=2016070701
 #                    hostname;port;username;password;database
 #                    .;/path/to/unix_socket/DIRECTORY or . for default path;username;password;database - use Unix sockets at Unix/Linux
 #
-#	LoginDatabaseConnections
-#	WorldDatabaseConnections
-#	CharacterDatabaseConnections
-#		 Amount of connections to database which will be used for SELECT queries. Maximum 16 connections per database.
-#		 Please, note, for data consistency only one connection for each database is used for transactions and async SELECTs.
-#		 So formula to find out how many connections will be established:
+#    LoginDatabaseConnections
+#    WorldDatabaseConnections
+#    CharacterDatabaseConnections
+#        Amount of connections to database which will be used for SELECT queries. Maximum 16 connections per database.
+#        Please, note, for data consistency only one connection for each database is used for transactions and async SELECTs.
+#        So formula to find out how many connections will be established:
 #                X = LoginDatabaseConnections + WorldDatabaseConnections + CharacterDatabaseConnections + 1
-#		 Default: 1 connection for SELECT statements
+#        Default: 1 connection for SELECT statements
 #
 #    MaxPingTime
 #        Settings for maximum database-ping interval (minutes between pings)
@@ -63,9 +63,9 @@ ConfVersion=2016070701
 RealmID                      = 1
 DataDir                      = "."
 LogsDir                      = ""
-LoginDatabaseInfo            = "127.0.0.1;3306;mangos;mangos;realmd"
-WorldDatabaseInfo            = "127.0.0.1;3306;mangos;mangos;mangos"
-CharacterDatabaseInfo        = "127.0.0.1;3306;mangos;mangos;characters"
+LoginDatabaseInfo            = "127.0.0.1;3306;root;mangos;realmd"
+WorldDatabaseInfo            = "127.0.0.1;3306;root;mangos;mangos2"
+CharacterDatabaseInfo        = "127.0.0.1;3306;root;mangos;character2"
 LoginDatabaseConnections     = 1
 WorldDatabaseConnections     = 1
 CharacterDatabaseConnections = 1
@@ -122,7 +122,7 @@ BindIP                       = "0.0.0.0"
 #        Default: 100
 #
 #    MapUpdateThreads
-#        Number or map update threads
+#        Number of map update threads to run
 #        Default: 2
 #
 #    ChangeWeatherInterval
@@ -159,7 +159,6 @@ BindIP                       = "0.0.0.0"
 #        Requires VMaps enabled to work.
 #        Default: 1 (Enabled)
 #                 0 (Disabled)
-#
 #
 #    DetectPosCollision
 #        Check final move position, summon position, etc for visible collision with other objects or
@@ -378,9 +377,9 @@ LogTime                      = 0
 LogFile                      = "world-server.log"
 LogTimestamp                 = 0
 LogFileLevel                 = 0
+LogFilter_AchievementUpdates = 1
 LogFilter_TransportMoves     = 1
 LogFilter_CreatureMoves      = 1
-LogFilter_AchievementUpdates = 1
 LogFilter_VisibilityChanges  = 1
 LogFilter_Weather            = 1
 LogFilter_DbStrictedCheck    = 1
@@ -457,6 +456,8 @@ SD3ErrorLogFile              = "scriptdev3-errors.log"
 #
 #    Expansion
 #        Allow server use content from expansion
+#                 3 - check expansion 3 maps existence, and if client support expansion 3 and account have
+#                     expansion 3 setting then allow visit expansion 3 maps, allow create new race and class character)
 #        Default: 2 - check expansion 2 maps existence, and if client support expansion 2 and account have
 #                     expansion 2 setting then allow visit expansion 2 maps, allow create new class character)
 #                 1 - check expansion 1 maps existence, and if client support expansion 1 and account have
@@ -749,7 +750,7 @@ SD3ErrorLogFile              = "scriptdev3-errors.log"
 #        Default: 10
 #
 #    SkillChance.Prospecting
-#        For prospecting skillup not possible by default, but can be allowed as custom setting
+#        For prospecting skillup impossible by default, but can be allowed as custom setting
 #        Default: 0 - no skilups
 #                 1 - skilups possible
 #
@@ -880,7 +881,7 @@ ShowProgressBars                          = 1
 WaitAtStartupError                        = 10
 Raid.MinLevel                             = 10
 PlayerCommands                            = 0
-Motd                                      = "Welcome to Mangos Two."
+Motd                                      = "Welcome to Mangos Two"
 
 ################################################################################
 # PLAYER INTERACTION
@@ -897,8 +898,8 @@ Motd                                      = "Welcome to Mangos Two."
 #    AllowTwoSide.Interaction.Auction
 #    AllowTwoSide.Interaction.Mail
 #    AllowTwoSide.Interaction.Calendar
-#        Allow or not common :chat(say,yell);channel(chat)group(join)guild(join);trade with different team,
-#        merge all auction houses for players from different teams, send mail to different team, calendar(invite player from different team)
+#        Allow or not common :chat(say,yell); channel(chat); group(join); guild(join); merge all auction houses for players from
+#        different teams; send mail to different team; calendar(invite player from different team)
 #        Default: 0 (Not allowed)
 #                 1 (Allowed)
 #
@@ -920,17 +921,17 @@ Motd                                      = "Welcome to Mangos Two."
 #
 ################################################################################
 
-AllowTwoSide.Accounts              = 0
-AllowTwoSide.Interaction.Chat      = 0
-AllowTwoSide.Interaction.Channel   = 0
-AllowTwoSide.Interaction.Group     = 0
-AllowTwoSide.Interaction.Guild     = 0
-AllowTwoSide.Interaction.Auction   = 0
-AllowTwoSide.Interaction.Mail      = 0
-AllowTwoSide.Interaction.Calendar  = 0
-AllowTwoSide.WhoList               = 0
-AllowTwoSide.AddFriend             = 0
-TalentsInspecting                  = 1
+AllowTwoSide.Accounts             = 0
+AllowTwoSide.Interaction.Chat     = 0
+AllowTwoSide.Interaction.Channel  = 0
+AllowTwoSide.Interaction.Group    = 0
+AllowTwoSide.Interaction.Guild    = 0
+AllowTwoSide.Interaction.Auction  = 0
+AllowTwoSide.Interaction.Mail     = 0
+AllowTwoSide.Interaction.Calendar = 0
+AllowTwoSide.WhoList              = 0
+AllowTwoSide.AddFriend            = 0
+TalentsInspecting                 = 1
 
 ################################################################################
 # CREATURE AND GAMEOBJECT SETTINGS
@@ -1577,7 +1578,7 @@ BattleGround.Random.ResetHour         = 6
 #                 1 (enable)
 #
 #    Arena.ArenaSeason.ID
-#        Current area season id show in client
+#        Current area season id, used for selection some rated arena settings.
 #        Default: 1
 #
 #    Arena.ArenaSeasonPrevious.ID
