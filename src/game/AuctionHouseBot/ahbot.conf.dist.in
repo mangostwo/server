@@ -130,11 +130,11 @@ ConfVersion=2010102201
 #    Default 0
 #
 #    AuctionHouseBot.Class.Glyph.ReqLevel.*
-#        Prevent seller from listing glyphs below/above this required level
+#        Enable or disable listing glyphs below/above this required level
 #    Default 0
 #
 #    AuctionHouseBot.Class.Glyph.ItemLevel.*
-#        Prevent seller from listing glyphs below/above this item level
+#        Enable or disable listing glyphs below/above this item level
 #    Default 0
 #
 #    AuctionHouseBot.Class.TradeGood.ItemLevel.*
