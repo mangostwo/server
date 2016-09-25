@@ -980,17 +980,21 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
             }
             else                                            // not exist in DB, use some default fake data
             {
-                sLog.outErrorDb("Summoned pet (Entry: %u) not have pet stats data in DB", cinfo->Entry);
 
                 // remove elite bonuses included in DB values
                 SetCreateHealth(uint32(((float(cinfo->MaxLevelHealth) / cinfo->MaxLevel) / (1 + 2 * cinfo->Rank)) * petlevel));
                 SetCreateMana(uint32(((float(cinfo->MaxLevelMana)   / cinfo->MaxLevel) / (1 + 2 * cinfo->Rank)) * petlevel));
 
-                SetCreateStat(STAT_STRENGTH, 22);
-                SetCreateStat(STAT_AGILITY, 22);
-                SetCreateStat(STAT_STAMINA, 25);
-                SetCreateStat(STAT_INTELLECT, 28);
-                SetCreateStat(STAT_SPIRIT, 27);
+                if (owner->GetTypeId() == TYPEID_PLAYER)
+                {
+                    sLog.outErrorDb("Summoned pet (entry: %u, summoner: %s) does not have pet stats data in DB", cinfo->Entry, owner->GetGuidStr().c_str());
+
+                    SetCreateStat(STAT_STRENGTH, 22);
+                    SetCreateStat(STAT_AGILITY, 22);
+                    SetCreateStat(STAT_STAMINA, 25);
+                    SetCreateStat(STAT_INTELLECT, 28);
+                    SetCreateStat(STAT_SPIRIT, 27);
+                }
             }
             break;
         }
