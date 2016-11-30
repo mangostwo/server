@@ -11030,7 +11030,8 @@ Item* Player::StoreNewItem(ItemPosCountVec const& dest, uint32 item, bool update
     {
         ItemAddedQuestCheck(item, count);
         GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_RECEIVE_EPIC_ITEM, item, count);
-        pItem = StoreItem(dest, pItem, update);
+		GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_OWN_ITEM, item, count);
+		pItem = StoreItem(dest, pItem, update);
     }
     return pItem;
 }
@@ -11059,7 +11060,6 @@ Item* Player::StoreItem(ItemPosCountVec const& dest, Item* pItem, bool update)
         lastItem = _StoreItem(pos, pItem, count, true, update);
     }
 
-    GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_OWN_ITEM, entry);
     return lastItem;
 }
 
