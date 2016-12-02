@@ -12169,16 +12169,19 @@ void Player::SwapItem(uint16 src, uint16 dst)
     if (pSrcItem->IsBag() && pDstItem->IsBag())
     {
         Bag* pSrcBag = reinterpret_cast<Bag*>(pSrcItem);
+        Bag* pDstBag = reinterpret_cast<Bag*>(pDstItem);
+
         Bag* emptyBag = NULL;
         Bag* fullBag = NULL;
+
         if (pSrcBag->IsEmpty() && !IsBagPos(src))
         {
             emptyBag = pSrcBag;
-            fullBag  = pSrcBag;
+            fullBag  = pDstBag;
         }
-        else if (pSrcBag->IsEmpty() && !IsBagPos(dst))
+        else if (pDstBag->IsEmpty() && !IsBagPos(dst))
         {
-            emptyBag = pSrcBag;
+            emptyBag = pDstBag;
             fullBag  = pSrcBag;
         }
 
