@@ -137,7 +137,7 @@ namespace VMAP
              * @param wf
              * @return bool
              */
-            bool writeToFile(FILE* wf);
+            bool WriteToFile(FILE* wf);
             /**
              * @brief
              *
@@ -145,7 +145,7 @@ namespace VMAP
              * @param liquid
              * @return bool
              */
-            static bool readFromFile(FILE* rf, WmoLiquid*& liquid);
+            static bool ReadFromFile(FILE* rf, WmoLiquid*& liquid);
         private:
             /**
              * @brief
@@ -203,7 +203,7 @@ namespace VMAP
              * @param vert
              * @param tri
              */
-            void setMeshData(std::vector<Vector3>& vert, std::vector<MeshTriangle>& tri);
+            void SetMeshData(std::vector<Vector3>& vert, std::vector<MeshTriangle>& tri);
             /**
              * @brief
              *
@@ -248,14 +248,14 @@ namespace VMAP
              * @param wf
              * @return bool
              */
-            bool writeToFile(FILE* wf);
+            bool WriteToFile(FILE* wf);
             /**
              * @brief
              *
              * @param rf
              * @return bool
              */
-            bool readFromFile(FILE* rf);
+            bool ReadFromFile(FILE* rf);
             /**
              * @brief
              *
@@ -306,13 +306,13 @@ namespace VMAP
              *
              * @param models
              */
-            void setGroupModels(std::vector<GroupModel>& models);
+            void SetGroupModels(std::vector<GroupModel>& models);
             /**
              * @brief
              *
              * @param id
              */
-            void setRootWmoID(uint32 id) { RootWMOID = id; }
+            void SetRootWmoID(uint32 id) { RootWMOID = id; }
             /**
              * @brief
              *
@@ -331,7 +331,7 @@ namespace VMAP
              * @param info
              * @return bool
              */
-            bool IntersectPoint(const G3D::Vector3& p, const G3D::Vector3& down, float& dist, AreaInfo& info) const;
+            bool GetAreaInfo(const G3D::Vector3& p, const G3D::Vector3& down, float& dist, AreaInfo& info) const;
             /**
              * @brief
              *

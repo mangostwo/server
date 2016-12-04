@@ -89,7 +89,7 @@ namespace VMAP
              * @param spawn
              * @return bool
              */
-            static bool readFromFile(FILE* rf, ModelSpawn& spawn);
+            static bool ReadFromFile(FILE* rf, ModelSpawn& spawn);
             /**
              * @brief
              *
@@ -97,7 +97,7 @@ namespace VMAP
              * @param spawn
              * @return bool
              */
-            static bool writeToFile(FILE* rw, const ModelSpawn& spawn);
+            static bool WriteToFile(FILE* rw, const ModelSpawn& spawn);
     };
 
     /**

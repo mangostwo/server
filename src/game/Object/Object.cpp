@@ -973,7 +973,7 @@ WorldObject::WorldObject() :
     m_transportInfo(NULL),
     m_currMap(NULL),
     m_mapId(0), m_InstanceId(0), m_phaseMask(PHASEMASK_NORMAL),
-    m_isActiveObject(false)
+    m_IsActiveObject(false)
 {
 }
 
@@ -1294,12 +1294,12 @@ bool WorldObject::HasInArc(const float arcangle, const WorldObject* obj) const
     return ((angle >= lborder) && (angle <= rborder));
 }
 
-bool WorldObject::isInFrontInMap(WorldObject const* target, float distance,  float arc) const
+bool WorldObject::IsInFrontInMap(WorldObject const* target, float distance,  float arc) const
 {
     return IsWithinDistInMap(target, distance) && HasInArc(arc, target);
 }
 
-bool WorldObject::isInBackInMap(WorldObject const* target, float distance, float arc) const
+bool WorldObject::IsInBackInMap(WorldObject const* target, float distance, float arc) const
 {
     return IsWithinDistInMap(target, distance) && !HasInArc(2 * M_PI_F - arc, target);
 }
@@ -1309,7 +1309,7 @@ bool WorldObject::isInFront(WorldObject const* target, float distance,  float ar
     return IsWithinDist(target, distance) && HasInArc(arc, target);
 }
 
-bool WorldObject::isInBack(WorldObject const* target, float distance, float arc) const
+bool WorldObject::IsInBack(WorldObject const* target, float distance, float arc) const
 {
     return IsWithinDist(target, distance) && !HasInArc(2 * M_PI_F - arc, target);
 }
@@ -2020,17 +2020,17 @@ bool WorldObject::PrintCoordinatesError(float x, float y, float z, char const* d
 
 void WorldObject::SetActiveObjectState(bool active)
 {
-    if (m_isActiveObject == active || (isType(TYPEMASK_PLAYER) && !active))  // player shouldn't became inactive, never
+    if (m_IsActiveObject == active || (isType(TYPEMASK_PLAYER) && !active))  // player shouldn't became inactive, never
         { return; }
 
     if (IsInWorld() && !isType(TYPEMASK_PLAYER))
         // player's update implemented in a different from other active worldobject's way
         // it's considired to use generic way in future
     {
-        if (isActiveObject() && !active)
+        if (IsActiveObject() && !active)
             { GetMap()->RemoveFromActive(this); }
-        else if (!isActiveObject() && active)
+        else if (!IsActiveObject() && active)
             { GetMap()->AddToActive(this); }
     }
-    m_isActiveObject = active;
+    m_IsActiveObject = active;
 }

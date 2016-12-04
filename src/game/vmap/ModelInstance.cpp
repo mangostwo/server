@@ -87,7 +87,7 @@ namespace VMAP
         Vector3 pModel = iInvRot * (p - iPos) * iInvScale;
         Vector3 zDirModel = iInvRot * Vector3(0.f, 0.f, -1.f);
         float zDist;
-        if (iModel->IntersectPoint(pModel, zDirModel, zDist, info))
+        if (iModel->GetAreaInfo(pModel, zDirModel, zDist, info))
         {
             Vector3 modelGround = pModel + zDist * zDirModel;
             // Transform back to world space. Note that:
@@ -156,7 +156,7 @@ namespace VMAP
         return false;
     }
 
-    bool ModelSpawn::readFromFile(FILE* rf, ModelSpawn& spawn)
+    bool ModelSpawn::ReadFromFile(FILE* rf, ModelSpawn& spawn)
     {
         uint32 check = 0, nameLen;
         check += fread(&spawn.flags, sizeof(uint32), 1, rf);
@@ -202,7 +202,7 @@ namespace VMAP
         return true;
     }
 
-    bool ModelSpawn::writeToFile(FILE* wf, const ModelSpawn& spawn)
+    bool ModelSpawn::WriteToFile(FILE* wf, const ModelSpawn& spawn)
     {
         uint32 check = 0;
         check += fwrite(&spawn.flags, sizeof(uint32), 1, wf);

@@ -133,13 +133,13 @@ namespace VMAP
             if (success && fwrite(&isTiled, sizeof(char), 1, mapfile) != 1) { success = false; }
             // Nodes
             if (success && fwrite("NODE", 4, 1, mapfile) != 1) { success = false; }
-            if (success) { success = pTree.writeToFile(mapfile); }
+            if (success) { success = pTree.WriteToFile(mapfile); }
             // global map spawns (WDT), if any (most instances)
             if (success && fwrite("GOBJ", 4, 1, mapfile) != 1) { success = false; }
 
             for (TileMap::iterator glob = globalRange.first; glob != globalRange.second && success; ++glob)
             {
-                success = ModelSpawn::writeToFile(mapfile, map_iter->second->UniqueEntries[glob->second]);
+                success = ModelSpawn::WriteToFile(mapfile, map_iter->second->UniqueEntries[glob->second]);
             }
 
             fclose(mapfile);
@@ -172,7 +172,7 @@ namespace VMAP
                     if (s && tile != tileEntries.end())
                         { ++tile; }
                     const ModelSpawn& spawn2 = map_iter->second->UniqueEntries[tile->second];
-                    success = success && ModelSpawn::writeToFile(tilefile, spawn2);
+                    success = success && ModelSpawn::WriteToFile(tilefile, spawn2);
                     // MapTree nodes to update when loading tile:
                     std::map<uint32, uint32>::iterator nIdx = modelNodeIdx.find(spawn2.ID);
                     if (success && fwrite(&nIdx->second, sizeof(uint32), 1, tilefile) != 1) { success = false; }
@@ -228,7 +228,7 @@ namespace VMAP
                 { break; }
             check += fread(&tileX, sizeof(uint32), 1, dirf);
             check += fread(&tileY, sizeof(uint32), 1, dirf);
-            if (!ModelSpawn::readFromFile(dirf, spawn))
+            if (!ModelSpawn::ReadFromFile(dirf, spawn))
                 { break; }
 
             MapSpawns* current;
@@ -313,7 +313,7 @@ namespace VMAP
 
         // write WorldModel
         WorldModel model;
-        model.setRootWmoID(raw_model.RootWMOID);
+        model.SetRootWmoID(raw_model.RootWMOID);
         if (raw_model.groupsArray.size())
         {
             std::vector<GroupModel> groupsArray;
@@ -323,11 +323,11 @@ namespace VMAP
             {
                 GroupModel_Raw& raw_group = raw_model.groupsArray[g];
                 groupsArray.push_back(GroupModel(raw_group.mogpflags, raw_group.GroupWMOID, raw_group.bounds));
-                groupsArray.back().setMeshData(raw_group.vertexArray, raw_group.triangles);
+                groupsArray.back().SetMeshData(raw_group.vertexArray, raw_group.triangles);
                 groupsArray.back().setLiquidData(raw_group.liquid);
             }
 
-            model.setGroupModels(groupsArray);
+            model.SetGroupModels(groupsArray);
         }
 
         success = model.writeFile(iDestDir + "/" + pModelFilename + ".vmo");

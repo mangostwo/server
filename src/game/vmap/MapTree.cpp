@@ -297,7 +297,7 @@ namespace VMAP
             iIsTiled = bool(tiled);
             // Nodes
             if (success && !readChunk(rf, chunk, "NODE", 4)) { success = false; }
-            if (success) { success = iTree.readFromFile(rf); }
+            if (success) { success = iTree.ReadFromFile(rf); }
             if (success)
             {
                 iNTreeValues = iTree.primCount();
@@ -311,7 +311,7 @@ namespace VMAP
 #ifdef VMAP_DEBUG
             DEBUG_LOG("Map isTiled: %u", static_cast<uint32>(iIsTiled));
 #endif
-            if (!iIsTiled && ModelSpawn::readFromFile(rf, spawn))
+            if (!iIsTiled && ModelSpawn::ReadFromFile(rf, spawn))
             {
                 WorldModel* model = vm->acquireModelInstance(iBasePath, spawn.name, spawn.flags);
                 DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "StaticMapTree::InitMap(): loading %s", spawn.name.c_str());
@@ -379,7 +379,7 @@ namespace VMAP
             {
                 // read model spawns
                 ModelSpawn spawn;
-                result = ModelSpawn::readFromFile(tf, spawn);
+                result = ModelSpawn::ReadFromFile(tf, spawn);
                 if (result)
                 {
                     // acquire model instance
@@ -451,7 +451,7 @@ namespace VMAP
                 {
                     // read model spawns
                     ModelSpawn spawn;
-                    result = ModelSpawn::readFromFile(tf, spawn);
+                    result = ModelSpawn::ReadFromFile(tf, spawn);
                     if (result)
                     {
                         // release model instance

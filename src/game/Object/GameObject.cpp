@@ -749,7 +749,7 @@ void GameObject::SaveRespawnTime()
         { GetMap()->GetPersistentState()->SaveGORespawnTime(GetGUIDLow(), m_respawnTime); }
 }
 
-bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const
+bool GameObject::IsVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const
 {
     // Not in world
     if (!IsInWorld() || !u->IsInWorld())
