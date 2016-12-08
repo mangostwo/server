@@ -1087,7 +1087,7 @@ uint32 LFGMgr::GetDungeonEntry(uint32 ID)
 void LFGMgr::PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles)
 {
     ObjectGuid groupGuid = pGroup->GetObjectGuid();
-    ObjectGuid plrGuid = pPlayer->GetObjectGuid();
+    ObjectGuid plrGuid = pPlayer? pPlayer->GetObjectGuid() : ObjectGuid();
     
     roleCheckMap::iterator it = m_roleCheckMap.find(groupGuid);
     if (it == m_roleCheckMap.end())
