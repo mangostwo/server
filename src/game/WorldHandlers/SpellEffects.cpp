@@ -5547,14 +5547,14 @@ bool Spell::DoSummonWild(CreatureSummonPositions& list, SummonPropertiesEntry co
             // summon->SetCreatorGuid(m_caster->GetObjectGuid());
 
             // Notify original caster if not done already
-			if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
-			{
-				((Creature*)m_originalCaster)->AI()->JustSummoned(summon);
+            if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
+            {
+                ((Creature*)m_originalCaster)->AI()->JustSummoned(summon);
 #ifdef ENABLE_ELUNA
-				if (Unit* summoner = m_originalCaster->ToUnit())
-					sEluna->OnSummoned(summon, summoner);
+                if (Unit* summoner = m_originalCaster->ToUnit())
+                sEluna->OnSummoned(summon, summoner);
 #endif
-			}
+            }
         }
         else
             return false;
@@ -5844,17 +5844,17 @@ bool Spell::DoSummonPossessed(CreatureSummonPositions& list, SummonPropertiesEnt
     }
 
     // Notify Summoner
-	if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
-	{
-		((Creature*)m_originalCaster)->AI()->JustSummoned(spawnCreature);
+    if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
+    {
+        ((Creature*)m_originalCaster)->AI()->JustSummoned(spawnCreature);
 
 #ifdef ENABLE_ELUNA
-		if (Unit* summoner = m_originalCaster->ToUnit())
-			sEluna->OnSummoned(spawnCreature, summoner);
+        if (Unit* summoner = m_originalCaster->ToUnit())
+            sEluna->OnSummoned(spawnCreature, summoner);
 #endif
-	}
-		return true;
-	
+    }
+        return true;
+    
 }
 
 bool Spell::DoSummonPet(SpellEffectIndex eff_idx)
@@ -6691,7 +6691,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
     NewSummon->SetRespawnCoord(pos);
 
-	uint32 petlevel = std::max(m_caster->getLevel() + m_spellInfo->EffectMultipleValue[eff_idx], 1.0f);
+    uint32 petlevel = std::max(m_caster->getLevel() + m_spellInfo->EffectMultipleValue[eff_idx], 1.0f);
     NewSummon->setPetType(SUMMON_PET);
 
     uint32 faction = m_caster->getFaction();
