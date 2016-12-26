@@ -63,7 +63,7 @@ AggressorAI::MoveInLineOfSight(Unit* u)
             if (!m_creature->getVictim())
             {
                 AttackStart(u);
-                            }
+            }
             else if (sMapStore.LookupEntry(m_creature->GetMapId())->IsDungeon())
             {
                 m_creature->AddThreat(u);
