@@ -1178,7 +1178,9 @@ void Map::RemoveFromActive(WorldObject* obj)
         ActiveNonPlayers::iterator itr = m_activeNonPlayers.find(obj);
         if (itr == m_activeNonPlayersIter)
             { ++m_activeNonPlayersIter; }
-        m_activeNonPlayers.erase(itr);
+
+        if (itr != m_activeNonPlayers.end())
+            { m_activeNonPlayers.erase(itr); }
     }
     else
         { m_activeNonPlayers.erase(obj); }
