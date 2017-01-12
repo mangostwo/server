@@ -1577,6 +1577,31 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 42485:                                 // End of Ooze Channel
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    unitTarget->CastSpell(m_caster, 42486, true);
+
+                    // There is no known spell to kill the target
+                    unitTarget->DealDamage(unitTarget, unitTarget->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                    return;
+                }
+                case 42489:                                 // Cast Ooze Zap When Energized
+                {
+                    // only process first effect
+                    // the logic is described by spell 42488 - Caster Spell 1 Only if Aura 2 Is On Caster (not used here)
+                    if (eff_idx != EFFECT_INDEX_0)
+                        return;
+
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || !m_caster->HasAura(m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_1)))
+                        return;
+
+                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    ((Creature*)unitTarget)->AI()->AttackStart(m_caster);
+                    return;
+                }
                  case 42628:                                 // Fire Bomb (throw)
                 {
                     if (!unitTarget)
@@ -2917,6 +2942,38 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, m_caster->GetMap()->IsRegularDifficulty() ? 66351 : 63009, true);
                     m_caster->RemoveAurasDueToSpell(65345);
                     m_caster->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    return;
+                }
+                case 66312:                                 // Light Ball Passive
+                {
+                    if (!unitTarget || m_caster->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (unitTarget->HasAuraOfDifficulty(65686))
+                            unitTarget->CastSpell(unitTarget, 67590, true);
+                        else
+                            m_caster->CastSpell(m_caster, 65795, true);
+
+                        ((Creature*)m_caster)->ForcedDespawn();
+                    }
+                    return;
+                }
+                case 66314:                                 // Dark Ball Passive
+                {
+                    if (!unitTarget || m_caster->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (unitTarget->HasAuraOfDifficulty(65684))
+                            unitTarget->CastSpell(unitTarget, 67590, true);
+                        else
+                            m_caster->CastSpell(m_caster, 65808, true);
+
+                        ((Creature*)m_caster)->ForcedDespawn();
+                    }
                     return;
                 }
                 case 66390:                                 // Read Last Rites
@@ -7808,6 +7865,18 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 42291, true);
                     return;
                 }
+                case 42492:                                 // Cast Energized
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    uint32 questId = m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_1);
+                    if (!questId || !GetQuestTemplateStore(questId) || !((Player*)unitTarget)->IsCurrentQuest(questId))
+                        return;
+
+                    m_caster->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    return;
+                }
                 case 42578:                                 // Cannon Blast
                 {
                     if (!unitTarget)
@@ -9359,6 +9428,15 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     for (uint8 i = 0; i < 11; ++i)
                         unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
 
+                    return;
+                }
+                case 68084:                                 // Clear Val'kyr Touch of Light/Dark
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(66001);
+                    unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
                     return;
                 }
                 case 68861:                                 // Consume Soul (ICC FoS: Bronjahm)
