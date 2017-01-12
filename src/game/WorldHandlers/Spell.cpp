@@ -371,7 +371,7 @@ Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid or
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         { m_currentBasePoints[i] = m_spellInfo->CalculateSimpleValue(SpellEffectIndex(i)); }
 
-    m_spellState = SPELL_STATE_PREPARING;
+    m_spellState = SPELL_STATE_CREATED;
 
     m_castPositionX = m_castPositionY = m_castPositionZ = 0;
     m_TriggerSpells.clear();
@@ -2957,8 +2957,6 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
 {
     m_targets = *targets;
 
-    m_spellState = SPELL_STATE_PREPARING;
-
     m_castPositionX = m_caster->GetPositionX();
     m_castPositionY = m_caster->GetPositionY();
     m_castPositionZ = m_caster->GetPositionZ();
@@ -2994,6 +2992,8 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
         finish(false);
         return;
     }
+
+    m_spellState = SPELL_STATE_PREPARING;
 
     // Prepare data for triggers
     prepareDataForTriggerSystem();
@@ -3159,6 +3159,9 @@ void Spell::cast(bool skipCheck)
             // Chaos Bane strength buff
             else if (m_spellInfo->Id == 71904)
                 AddTriggeredSpell(73422);
+            // Weak Alcohol
+            else if (m_spellInfo->SpellIconID == 1306 && m_spellInfo->SpellVisual[0] == 11359)
+                AddTriggeredSpell(51655);                   // BOTM - Create Empty Brew Bottle
             break;
         }
         case SPELLFAMILY_MAGE:
@@ -5693,7 +5696,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                 // chance for fail at orange mining/herb/LockPicking gathering attempt
                 // second check prevent fail at rechecks
-                if (skillId != SKILL_NONE && (!m_selfContainer || ((*m_selfContainer) != this)))
+                if (m_spellState != SPELL_STATE_CREATED && skillId != SKILL_NONE && skillId != SKILL_HERBALISM && skillId != SKILL_MINING)
                 {
                     bool canFailAtMax = skillId != SKILL_HERBALISM && skillId != SKILL_MINING;
 
