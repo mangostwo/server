@@ -207,6 +207,8 @@ enum eConfigUInt32Values
     CONFIG_UINT32_WARDEN_NUM_MEM_CHECKS,
     CONFIG_UINT32_WARDEN_NUM_OTHER_CHECKS,
     CONFIG_UINT32_WARDEN_DB_LOGLEVEL,
+
+    CONFIG_UINT32_AUTOBROADCAST_INTERVAL,
     CONFIG_UINT32_VALUE_COUNT
 };
 
@@ -337,7 +339,7 @@ enum eConfigBoolValues
     CONFIG_BOOL_DEATH_BONES_WORLD,
     CONFIG_BOOL_DEATH_BONES_BG_OR_ARENA,
     CONFIG_BOOL_ALL_TAXI_PATHS,
-	CONFIG_BOOL_INSTANT_TAXI,
+    CONFIG_BOOL_INSTANT_TAXI,
     CONFIG_BOOL_DECLINED_NAMES_USED,
     CONFIG_BOOL_SKILL_MILLING,
     CONFIG_BOOL_SKILL_FAIL_LOOT_FISHING,
@@ -386,12 +388,12 @@ enum BillingPlanFlags
 /// Type of server, this is values from second column of Cfg_Configs.dbc (1.12.1 have another numeration)
 enum RealmType
 {
-    REALM_TYPE_NORMAL = 0,
-    REALM_TYPE_PVP = 1,
-    REALM_TYPE_NORMAL2 = 4,
-    REALM_TYPE_RP = 6,
-    REALM_TYPE_RPPVP = 8,
-    REALM_TYPE_FFA_PVP = 16                                 // custom, free for all pvp mode like arena PvP in all zones except rest activated places and sanctuaries
+    REALM_TYPE_NORMAL   = 0,
+    REALM_TYPE_PVP      = 1,
+    REALM_TYPE_NORMAL2  = 4,
+    REALM_TYPE_RP       = 6,
+    REALM_TYPE_RPPVP    = 8,
+    REALM_TYPE_FFA_PVP  = 16                                // custom, free for all pvp mode like arena PvP in all zones except rest activated places and sanctuaries
     // replaced by REALM_PVP in realm list
 };
 
@@ -615,7 +617,8 @@ class World
         void LoadDBVersion();
         char const* GetDBVersion() { return m_DBVersion.c_str(); }
 
-        
+        void LoadBroadcastStrings();
+
         /**
         * \brief: force all client to request player data
         * \param: ObjectGuid guid : guid of the specified player
@@ -623,7 +626,7 @@ class World
         *
         * Description: InvalidatePlayerDataToAllClient force all connected clients to clear specified player cache
         * FullName: World::InvalidatePlayerDataToAllClient
-        * Access: public 
+        * Access: public
         **/
         void InvalidatePlayerDataToAllClient(ObjectGuid guid);
 
@@ -658,6 +661,18 @@ class World
         bool configNoReload(bool reload, eConfigFloatValues index, char const* fieldname, float defvalue);
         bool configNoReload(bool reload, eConfigBoolValues index, char const* fieldname, bool defvalue);
 
+        // AutoBroadcast system
+        void AutoBroadcast();
+        struct BroadcastString
+        {
+            uint32 freq;
+            std::string text;
+        };
+        std::vector<BroadcastString> m_broadcastList;
+        uint32 m_broadcastWeight;
+        bool m_broadcastEnable;
+        IntervalTimer m_broadcastTimer;
+
         static volatile bool m_stopEvent;
         static uint8 m_ExitCode;
         uint32 m_ShutdownTimer;
@@ -669,7 +684,6 @@ class World
         uint32 mail_timer;
         uint32 mail_timer_expires;
 
-        //typedef UNORDERED_MAP<uint32, WorldSession*> SessionMap;
         SessionMap m_sessions;
         uint32 m_maxActiveSessionCount;
         uint32 m_maxQueuedSessionCount;

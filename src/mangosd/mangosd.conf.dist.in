@@ -3,7 +3,7 @@
 ################################################################################
 
 [MangosdConf]
-ConfVersion=2017021100
+ConfVersion=2017021400
 
 ################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -69,7 +69,7 @@ CharacterDatabaseInfo        = "127.0.0.1;3306;root;mangos;character2"
 LoginDatabaseConnections     = 1
 WorldDatabaseConnections     = 1
 CharacterDatabaseConnections = 1
-MaxPingTime                  = 30
+MaxPingTime                  = 5
 WorldServerPort              = 8085
 BindIP                       = "0.0.0.0"
 
@@ -807,6 +807,11 @@ SD3ErrorLogFile              = "scriptdev3-errors.log"
 #    Motd
 #        Message of the Day. Displayed at worldlogin for every user ('@' for a newline).
 #
+#    AutoBroadcast
+#        Timer interval (in seconds) for automatic server announcements (autobroadcasts). Zero value means AB is disabled
+#                   0 (AB is disabled)
+#        Default: 600 (AB every 10 minutes)
+#                   N (>0, AB every N seconds)
 ################################################################################
 
 GameType                                  = 1
@@ -882,6 +887,7 @@ WaitAtStartupError                        = 10
 Raid.MinLevel                             = 10
 PlayerCommands                            = 0
 Motd                                      = "Welcome to Mangos Two"
+AutoBroadcast                             = 600
 
 ################################################################################
 # PLAYER INTERACTION
