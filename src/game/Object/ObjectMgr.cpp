@@ -312,8 +312,8 @@ void ObjectMgr::LoadCreatureLocales()
 
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded " SIZEFMTD " creature locale strings", mCreatureLocaleMap.size());
+    sLog.outString();
 }
 
 void ObjectMgr::LoadGossipMenuItemsLocales()
@@ -403,8 +403,8 @@ void ObjectMgr::LoadGossipMenuItemsLocales()
 
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded " SIZEFMTD " gossip_menu_option locale strings", mGossipMenuItemsLocaleMap.size());
+    sLog.outString();
 }
 
 void ObjectMgr::LoadPointOfInterestLocales()
@@ -416,10 +416,7 @@ void ObjectMgr::LoadPointOfInterestLocales()
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
-
-        sLog.outString();
         sLog.outString(">> Loaded 0 points_of_interest locale strings. DB table `locales_points_of_interest` is empty.");
         return;
     }
@@ -461,8 +458,8 @@ void ObjectMgr::LoadPointOfInterestLocales()
 
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded " SIZEFMTD " points_of_interest locale strings", mPointOfInterestLocaleMap.size());
+    sLog.outString();
 }
 
 struct SQLCreatureLoader : public SQLStorageLoaderBase<SQLCreatureLoader, SQLStorage>
@@ -6751,8 +6748,8 @@ void ObjectMgr::LoadReputationSpilloverTemplate()
 
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded %u reputation_spillover_template", count);
+    sLog.outString();
 }
 
 void ObjectMgr::LoadPointsOfInterest()
@@ -6767,11 +6764,9 @@ void ObjectMgr::LoadPointsOfInterest()
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
-
-        sLog.outString();
         sLog.outErrorDb(">> Loaded 0 Points of Interest definitions. DB table `points_of_interest` is empty.");
+        sLog.outString();
         return;
     }
 
@@ -6806,7 +6801,6 @@ void ObjectMgr::LoadPointsOfInterest()
 
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded %u Points of Interest definitions", count);
 }
 
@@ -7189,7 +7183,7 @@ struct SQLSpellLoader : public SQLStorageLoaderBase<SQLSpellLoader, SQLHashStora
             dst = D(src);
     }
 
-    void default_fill_to_str(uint32 field_pos, char const* /*src*/, char * & dst)
+    void default_fill_to_str(uint32 field_pos, char const* /*src*/, char*& dst)
     {
         if (field_pos == LOADED_SPELLDBC_FIELD_POS_SPELLNAME_0)
         {
@@ -7378,9 +7372,8 @@ void ObjectMgr::LoadReservedPlayersNames()
     {
         BarGoLink bar(1);
         bar.step();
-
-        sLog.outString();
         sLog.outString(">> Loaded %u reserved player names", count);
+        sLog.outString();
         return;
     }
 
@@ -7409,8 +7402,8 @@ void ObjectMgr::LoadReservedPlayersNames()
 
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded %u reserved player names", count);
+    sLog.outString();
 }
 
 bool ObjectMgr::IsReservedName(const std::string& name) const
@@ -7596,8 +7589,8 @@ void ObjectMgr::LoadGameObjectForQuests()
     {
         BarGoLink bar(1);
         bar.step();
-        sLog.outString();
         sLog.outString(">> Loaded 0 GameObjects for quests");
+        sLog.outString();
         return;
     }
 
@@ -7666,8 +7659,8 @@ void ObjectMgr::LoadGameObjectForQuests()
         }
     }
 
-    sLog.outString();
     sLog.outString(">> Loaded %u GameObjects for quests", count);
+    sLog.outString();
 }
 
 inline void _DoStringError(int32 entry, char const* text, ...)
@@ -7873,11 +7866,9 @@ void ObjectMgr::LoadFishingBaseSkillLevel()
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
-
-        sLog.outString();
         sLog.outErrorDb(">> Loaded `skill_fishing_base_level`, table is empty!");
+        sLog.outString();
         return;
     }
 
@@ -7905,8 +7896,8 @@ void ObjectMgr::LoadFishingBaseSkillLevel()
 
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded %u areas for fishing base skill level", count);
+    sLog.outString();
 }
 
 // Check if a player meets condition conditionId
@@ -7932,6 +7923,8 @@ bool ObjectMgr::CheckDeclinedNames(std::wstring mainpart, DeclinedName const& na
     return true;
 }
 
+// Attention: make sure to keep this list in sync with ConditionSource to avoid array
+//            out of bounds access! It is accessed with ConditionSource as index!
 char const* conditionSourceToStr[] =
 {
     "loot system",
@@ -7942,7 +7935,7 @@ char const* conditionSourceToStr[] =
     "hardcoded",
     "vendor's item check",
     "spell_area check",
-    "npc_spellclick_spells check",
+    "npc_spellclick_spells check", // Unused. For 3.x and later.
     "DBScript engine"
 };
 
@@ -8266,11 +8259,13 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
         {
             GameObject* pGo = NULL;
 
-            MaNGOS::NearestGameObjectEntryInObjectRangeCheck go_check(*source, m_value1, m_value2);
-            MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck> searcher(pGo, go_check);
+            if (source)
+            {
+                MaNGOS::NearestGameObjectEntryInObjectRangeCheck go_check(*source, m_value1, m_value2);
+                MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck> searcher(pGo, go_check);
 
-            Cell::VisitGridObjects(source, searcher, m_value2);
-
+                Cell::VisitGridObjects(source, searcher, m_value2);
+            }
             return pGo;
         }
         default:
@@ -8839,11 +8834,9 @@ void ObjectMgr::LoadGameTele()
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
-
-        sLog.outString();
         sLog.outErrorDb(">> Loaded `game_tele`, table is empty!");
+        sLog.outString();
         return;
     }
 
@@ -8887,8 +8880,8 @@ void ObjectMgr::LoadGameTele()
     while (result->NextRow());
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded %u GameTeleports", count);
+    sLog.outString();
 }
 
 GameTele const* ObjectMgr::GetGameTele(const std::string& name) const
@@ -9044,11 +9037,9 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
-
-        sLog.outString();
         sLog.outString(">> Loaded `%s`, table is empty!", tableName);
+        sLog.outString();
         return;
     }
 
@@ -9180,13 +9171,12 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
         }
 
         ++count;
-
     }
     while (result->NextRow());
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded %d trainer %sspells", count, isTemplates ? "template " : "");
+    sLog.outString();
 }
 
 void ObjectMgr::LoadTrainerTemplates()
@@ -9235,8 +9225,8 @@ void ObjectMgr::LoadVendors(char const* tableName, bool isTemplates)
 
         bar.step();
 
-        sLog.outString();
         sLog.outString(">> Loaded `%s`, table is empty!", tableName);
+        sLog.outString();
         return;
     }
 
@@ -9266,8 +9256,8 @@ void ObjectMgr::LoadVendors(char const* tableName, bool isTemplates)
     while (result->NextRow());
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded %u vendor %sitems", count, isTemplates ? "template " : "");
+    sLog.outString();
 }
 
 
@@ -9308,11 +9298,9 @@ void ObjectMgr::LoadNpcGossips()
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
-
+        sLog.outString(">> Loaded `npc_gossip`, table is empty!");
         sLog.outString();
-        sLog.outErrorDb(">> Loaded `npc_gossip`, table is empty!");
         return;
     }
 
@@ -9346,8 +9334,8 @@ void ObjectMgr::LoadNpcGossips()
     while (result->NextRow());
     delete result;
 
+    sLog.outString(">> Loaded %d NpcTextId", count);
     sLog.outString();
-    sLog.outString(">> Loaded %d NpcTextId ", count);
 }
 
 void ObjectMgr::LoadGossipMenu(std::set<uint32>& gossipScriptSet)
@@ -9361,11 +9349,9 @@ void ObjectMgr::LoadGossipMenu(std::set<uint32>& gossipScriptSet)
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
-
-        sLog.outString();
         sLog.outErrorDb(">> Loaded gossip_menu, table is empty!");
+        sLog.outString();
         return;
     }
 
@@ -9396,9 +9382,13 @@ void ObjectMgr::LoadGossipMenu(std::set<uint32>& gossipScriptSet)
         // Check script-id
         if (gMenu.script_id)
         {
-            if (sGossipScripts.second.find(gMenu.script_id) == sGossipScripts.second.end())
+            ScriptChainMap const* scm = sScriptMgr.GetScriptChainMap(DBS_ON_GOSSIP);
+            if (!scm)
+                continue;
+
+            if (scm->find(gMenu.script_id) == scm->end())
             {
-                sLog.outErrorDb("Table gossip_menu for menu %u, text-id %u have script_id %u that does not exist in `dbscripts_on_gossip`, ignoring", gMenu.entry, gMenu.text_id, gMenu.script_id);
+                sLog.outErrorDb("Table gossip_menu for menu %u, text-id %u have script_id %u that does not exist in `db_scripts [type = %d]`, ignoring", gMenu.entry, gMenu.text_id, gMenu.script_id, DBS_ON_GOSSIP);
                 continue;
             }
 
@@ -9424,9 +9414,6 @@ void ObjectMgr::LoadGossipMenu(std::set<uint32>& gossipScriptSet)
 
     delete result;
 
-    sLog.outString();
-    sLog.outString(">> Loaded %u gossip_menu entries", count);
-
     // post loading tests
     for (uint32 i = 1; i < sCreatureStorage.GetMaxEntry(); ++i)
         if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
@@ -9438,6 +9425,9 @@ void ObjectMgr::LoadGossipMenu(std::set<uint32>& gossipScriptSet)
         if (uint32 menuid = itr->GetGossipMenuId())
             if (m_mGossipMenusMap.find(menuid) == m_mGossipMenusMap.end())
                 { ERROR_DB_STRICT_LOG("Gameobject (Entry: %u) has gossip_menu_id = %u for nonexistent menu", itr->id, menuid); }
+
+    sLog.outString(">> Loaded %u gossip_menu entries", count);
+    sLog.outString();
 }
 
 void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
@@ -9453,11 +9443,9 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
-
-        sLog.outString();
         sLog.outErrorDb(">> Loaded gossip_menu_option, table is empty!");
+        sLog.outString();
         return;
     }
 
@@ -9574,9 +9562,13 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
 
         if (gMenuItem.action_script_id)
         {
-            if (sGossipScripts.second.find(gMenuItem.action_script_id) == sGossipScripts.second.end())
+            ScriptChainMap const* scm = sScriptMgr.GetScriptChainMap(DBS_ON_GOSSIP);
+            if (!scm)
+                continue;
+
+            if (scm->find(gMenuItem.action_script_id) == scm->end())
             {
-                sLog.outErrorDb("Table gossip_menu_option for menu %u, id %u have action_script_id %u that does not exist in `dbscripts_on_gossip`, ignoring", gMenuItem.menu_id, gMenuItem.id, gMenuItem.action_script_id);
+                sLog.outErrorDb("Table gossip_menu_option for menu %u, id %u have action_script_id %u that does not exist in `db_scripts [type = %d]`, ignoring", gMenuItem.menu_id, gMenuItem.id, gMenuItem.action_script_id, DBS_ON_GOSSIP);
                 continue;
             }
 
@@ -9608,15 +9600,19 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
             { sLog.outErrorDb("Table `gossip_menu` contain unused (in creature or GO or menu options) menu id %u.", *itr); }
     }
 
-    sLog.outString();
     sLog.outString(">> Loaded %u gossip_menu_option entries", count);
+    sLog.outString();
 }
 
 void ObjectMgr::LoadGossipMenus()
 {
-    // Check which script-ids in dbscripts_on_gossip are not used
+    ScriptChainMap const* scm = sScriptMgr.GetScriptChainMap(DBS_ON_GOSSIP);
+    if (!scm)
+        return;
+
+    // Check which script-ids in db_scripts type DBS_ON_GOSSIP are not used
     std::set<uint32> gossipScriptSet;
-    for (ScriptMapMap::const_iterator itr = sGossipScripts.second.begin(); itr != sGossipScripts.second.end(); ++itr)
+    for (ScriptChainMap::const_iterator itr = scm->begin(); itr != scm->end(); ++itr)
         { gossipScriptSet.insert(itr->first); }
 
     // Load gossip_menu and gossip_menu_option data
@@ -9626,7 +9622,7 @@ void ObjectMgr::LoadGossipMenus()
     LoadGossipMenuItems(gossipScriptSet);
 
     for (std::set<uint32>::const_iterator itr = gossipScriptSet.begin(); itr != gossipScriptSet.end(); ++itr)
-        { sLog.outErrorDb("Table `dbscripts_on_gossip` contains unused script, id %u.", *itr); }
+        { sLog.outErrorDb("Table `db_scripts [type = %d]` contains unused script, id %u.", DBS_ON_GOSSIP, *itr); }
 }
 
 void ObjectMgr::AddVendorItem(uint32 entry, uint32 item, uint32 maxcount, uint32 incrtime, uint32 extendedcost)
@@ -9896,9 +9892,6 @@ void ObjectMgr::LoadCreatureTemplateSpells()
 {
     sCreatureTemplateSpellsStorage.Load();
 
-    sLog.outString(">> Loaded %u creature_template_spells definitions", sCreatureTemplateSpellsStorage.GetRecordCount());
-    sLog.outString();
-
     for (SQLStorageBase::SQLSIterator<CreatureTemplateSpells> itr = sCreatureTemplateSpellsStorage.getDataBegin<CreatureTemplateSpells>(); itr < sCreatureTemplateSpellsStorage.getDataEnd<CreatureTemplateSpells>(); ++itr)
     {
         if (!sCreatureStorage.LookupEntry<CreatureInfo>(itr->entry))
@@ -9915,6 +9908,9 @@ void ObjectMgr::LoadCreatureTemplateSpells()
             }
         }
     }
+
+    sLog.outString(">> Loaded %u creature_template_spells definitions", sCreatureTemplateSpellsStorage.GetRecordCount());
+    sLog.outString();
 }
 
 CreatureInfo const* GetCreatureTemplateStore(uint32 entry)
@@ -10071,7 +10067,7 @@ bool DoDisplayText(WorldObject* source, int32 entry, Unit const* target /*=NULL*
 
     if ((data->Type == CHAT_TYPE_WHISPER || data->Type == CHAT_TYPE_BOSS_WHISPER) && (!target || target->GetTypeId() != TYPEID_PLAYER))
     {
-        _DoStringError(entry, "DoDisplayText entry %i cannot whisper without target unit (TYPEID_PLAYER).", entry);
+        _DoStringError(entry, "DoDisplayText entry %i can not whisper without target unit (TYPEID_PLAYER).", entry);
         return false;
     }
 

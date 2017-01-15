@@ -718,6 +718,16 @@ bool ChatHandler::HandleReloadSkillExtraItemTemplateCommand(char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleReloadScriptBindingCommand(char* /*args*/)
+{
+    sLog.outString("Trying to re-load `script_binding` Table!");
+    if (sScriptMgr.ReloadScriptBinding())
+        SendGlobalSysMessage("DB table `script_binding` reloaded.");
+    else
+        SendSysMessage("DENIED: DB table `script_binding` is reloadable only in Debug build.");
+    return true;
+}
+
 bool ChatHandler::HandleReloadSkillFishingBaseLevelCommand(char* /*args*/)
 {
     sLog.outString("Re-Loading Skill Fishing base level requirements...");
@@ -856,7 +866,6 @@ bool ChatHandler::HandleReloadBattleEventCommand(char* /*args*/)
 
 bool ChatHandler::HandleReloadEventAITextsCommand(char* /*args*/)
 {
-
     sLog.outString("Re-Loading Texts from `creature_ai_texts`...");
     sEventAIMgr.LoadCreatureEventAI_Texts(true);
     SendGlobalSysMessage("DB table `creature_ai_texts` reloaded.");
@@ -897,12 +906,12 @@ bool ChatHandler::HandleReloadDBScriptsOnGossipCommand(char* args)
     }
 
     if (*args != 'a')
-        { sLog.outString("Re-Loading Scripts from `dbscripts_on_gossip`..."); }
+        { sLog.outString("Re-Loading Scripts from `db_scripts [type = DBS_ON_GOSSIP]`..."); }
 
-    sScriptMgr.LoadGossipScripts();
+    sScriptMgr.LoadDbScripts(DBS_ON_GOSSIP);
 
     if (*args != 'a')
-        { SendGlobalSysMessage("DB table `dbscripts_on_gossip` reloaded."); }
+        SendGlobalSysMessage("DB table `db_scripts [type = DBS_ON_GOSSIP]` reloaded.");
 
     return true;
 }
@@ -917,12 +926,12 @@ bool ChatHandler::HandleReloadDBScriptsOnSpellCommand(char* args)
     }
 
     if (*args != 'a')
-        { sLog.outString("Re-Loading Scripts from `dbscripts_on_spell`..."); }
+        { sLog.outString("Re-Loading Scripts from `db_scripts [type = DBS_ON_SPELL]`..."); }
 
-    sScriptMgr.LoadSpellScripts();
+    sScriptMgr.LoadDbScripts(DBS_ON_SPELL);
 
     if (*args != 'a')
-        { SendGlobalSysMessage("DB table `dbscripts_on_spell` reloaded."); }
+        SendGlobalSysMessage("DB table `db_scripts [type = DBS_ON_SPELL]` reloaded.");
 
     return true;
 }
@@ -937,12 +946,12 @@ bool ChatHandler::HandleReloadDBScriptsOnQuestStartCommand(char* args)
     }
 
     if (*args != 'a')
-        { sLog.outString("Re-Loading Scripts from `dbscripts_on_quest_start`..."); }
+        { sLog.outString("Re-Loading Scripts from `db_scripts [type = DBS_ON_QUEST_START]`..."); }
 
-    sScriptMgr.LoadQuestStartScripts();
+    sScriptMgr.LoadDbScripts(DBS_ON_QUEST_START);
 
     if (*args != 'a')
-        { SendGlobalSysMessage("DB table `dbscripts_on_quest_start` reloaded."); }
+        SendGlobalSysMessage("DB table `db_scripts [type = DBS_ON_QUEST_START]` reloaded.");
 
     return true;
 }
@@ -957,12 +966,12 @@ bool ChatHandler::HandleReloadDBScriptsOnQuestEndCommand(char* args)
     }
 
     if (*args != 'a')
-        { sLog.outString("Re-Loading Scripts from `dbscripts_on_quest_end`..."); }
+        { sLog.outString("Re-Loading Scripts from `db_scripts [type = DBS_ON_QUEST_END]`..."); }
 
-    sScriptMgr.LoadQuestEndScripts();
+    sScriptMgr.LoadDbScripts(DBS_ON_QUEST_END);
 
     if (*args != 'a')
-        { SendGlobalSysMessage("DB table `dbscripts_on_quest_end` reloaded."); }
+        SendGlobalSysMessage("DB table `db_scripts [type = DBS_ON_QUEST_END]` reloaded.");
 
     return true;
 }
@@ -977,12 +986,12 @@ bool ChatHandler::HandleReloadDBScriptsOnEventCommand(char* args)
     }
 
     if (*args != 'a')
-        { sLog.outString("Re-Loading Scripts from `dbscripts_on_event`..."); }
+        { sLog.outString("Re-Loading Scripts from `db_scripts [type = DBS_ON_EVENT]`..."); }
 
-    sScriptMgr.LoadEventScripts();
+    sScriptMgr.LoadDbScripts(DBS_ON_EVENT);
 
     if (*args != 'a')
-        { SendGlobalSysMessage("DB table `dbscripts_on_event` reloaded."); }
+        SendGlobalSysMessage("DB table `db_scripts [type = DBS_ON_EVENT]` reloaded.");
 
     return true;
 }
@@ -997,13 +1006,13 @@ bool ChatHandler::HandleReloadDBScriptsOnGoUseCommand(char* args)
     }
 
     if (*args != 'a')
-        { sLog.outString("Re-Loading Scripts from `dbscripts_on_go[_template]_use`..."); }
+        { sLog.outString("Re-Loading Scripts from `db_scripts [type = DBS_ON_GO[_TEMPLATE]_USE]`..."); }
 
-    sScriptMgr.LoadGameObjectScripts();
-    sScriptMgr.LoadGameObjectTemplateScripts();
+    sScriptMgr.LoadDbScripts(DBS_ON_GO_USE);
+    sScriptMgr.LoadDbScripts(DBS_ON_GOT_USE);
 
     if (*args != 'a')
-        { SendGlobalSysMessage("DB table `dbscripts_on_go[_template]_use` reloaded."); }
+        SendGlobalSysMessage("DB table `db_scripts [type = DBS_ON_GO[_TEMPLATE]_USE]` reloaded.");
 
     return true;
 }
@@ -1018,12 +1027,12 @@ bool ChatHandler::HandleReloadDBScriptsOnCreatureDeathCommand(char* args)
     }
 
     if (*args != 'a')
-        { sLog.outString("Re-Loading Scripts from `dbscripts_on_creature_death`..."); }
+        { sLog.outString("Re-Loading Scripts from `db_scripts [type = DBS_ON_CREATURE_DEATH]`..."); }
 
-    sScriptMgr.LoadCreatureDeathScripts();
+    sScriptMgr.LoadDbScripts(DBS_ON_CREATURE_DEATH);
 
     if (*args != 'a')
-        { SendGlobalSysMessage("DB table `dbscripts_on_creature_death` reloaded."); }
+        SendGlobalSysMessage("DB table `db_scripts [type = DBS_ON_CREATURE_DEATH]` reloaded.");
 
     return true;
 }
@@ -2535,10 +2544,10 @@ bool ChatHandler::HandleLearnAllMyPetTalentsCommand(char* /*args*/)
 bool ChatHandler::HandleLearnAllLangCommand(char* /*args*/)
 {
     Player* player = m_session->GetPlayer();
-    
+
     // skipping UNIVERSAL language (0)
     for (int i = 1; i < LANGUAGES_COUNT; ++i)
-        player->learnSpell(lang_description[i].spell_id, false);
+        { player->learnSpell(lang_description[i].spell_id, false); }
 
     SendSysMessage(LANG_COMMAND_LEARN_ALL_LANG);
     return true;
@@ -3895,8 +3904,9 @@ bool ChatHandler::HandleDamageCommand(char* args)
         { return false; }
 
     Unit* target = getSelectedUnit();
+    Player* player = m_session->GetPlayer();
 
-    if (!target || !m_session->GetPlayer()->GetSelectionGuid())
+    if (!target || !player->GetSelectionGuid())
     {
         SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
         SetSentErrorMessage(true);
@@ -3915,12 +3925,12 @@ bool ChatHandler::HandleDamageCommand(char* args)
 
     uint32 damage = damage_int;
 
-    // flat melee damage without resistence/etc reduction
+    // flat melee damage without resistance/etc reduction
     if (!*args)
     {
-        m_session->GetPlayer()->DealDamage(target, damage, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-        if (target != m_session->GetPlayer())
-            { m_session->GetPlayer()->SendAttackStateUpdate(HITINFO_NORMALSWING2, target, SPELL_SCHOOL_MASK_NORMAL, damage, 0, 0, VICTIMSTATE_NORMAL, 0); }
+        player->DealDamage(target, damage, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+        if (target != player)
+            { player->SendAttackStateUpdate(HITINFO_NORMALSWING2, target, SPELL_SCHOOL_MASK_NORMAL, damage, 0, 0, VICTIMSTATE_NORMAL, 0); }
         return true;
     }
 
@@ -3934,7 +3944,7 @@ bool ChatHandler::HandleDamageCommand(char* args)
     SpellSchoolMask schoolmask = SpellSchoolMask(1 << school);
 
     if (schoolmask & SPELL_SCHOOL_MASK_NORMAL)
-        { damage = m_session->GetPlayer()->CalcArmorReducedDamage(target, damage); }
+        { damage = player->CalcArmorReducedDamage(target, damage); }
 
     // melee damage by specific school
     if (!*args)
@@ -3942,16 +3952,16 @@ bool ChatHandler::HandleDamageCommand(char* args)
         uint32 absorb = 0;
         uint32 resist = 0;
 
-        target->CalculateDamageAbsorbAndResist(m_session->GetPlayer(), schoolmask, SPELL_DIRECT_DAMAGE, damage, &absorb, &resist);
+        target->CalculateDamageAbsorbAndResist(player, schoolmask, SPELL_DIRECT_DAMAGE, damage, &absorb, &resist);
 
         if (damage <= absorb + resist)
             { return true; }
 
         damage -= absorb + resist;
 
-        m_session->GetPlayer()->DealDamageMods(target, damage, &absorb);
-        m_session->GetPlayer()->DealDamage(target, damage, NULL, DIRECT_DAMAGE, schoolmask, NULL, false);
-        m_session->GetPlayer()->SendAttackStateUpdate(HITINFO_NORMALSWING2, target, schoolmask, damage, absorb, resist, VICTIMSTATE_NORMAL, 0);
+        player->DealDamageMods(target, damage, &absorb);
+        player->DealDamage(target, damage, NULL, DIRECT_DAMAGE, schoolmask, NULL, false);
+        player->SendAttackStateUpdate(HITINFO_NORMALSWING2, target, schoolmask, damage, absorb, resist, VICTIMSTATE_NORMAL, 0);
         return true;
     }
 
@@ -3962,7 +3972,7 @@ bool ChatHandler::HandleDamageCommand(char* args)
     if (!spellid || !sSpellStore.LookupEntry(spellid))
         { return false; }
 
-    m_session->GetPlayer()->SpellNonMeleeDamageLog(target, spellid, damage);
+    player->SpellNonMeleeDamageLog(target, spellid, damage);
     return true;
 }
 
@@ -4772,7 +4782,6 @@ bool ChatHandler::HandleChangeWeatherCommand(char* args)
         SendSysMessage(LANG_NO_WEATHER);
         SetSentErrorMessage(true);
     }
-
     player->GetMap()->SetWeather(zoneId, (WeatherType)type, grade, false);
 
     return true;
@@ -7017,8 +7026,10 @@ bool ChatHandler::HandleSendMessageCommand(char* args)
     if (!*args)
         { return false; }
 
+    WorldSession* rPlayerSession = rPlayer->GetSession();
+
     ///- Check that he is not logging out.
-    if (rPlayer->GetSession()->isLogingOut())
+    if (rPlayerSession->isLogingOut())
     {
         SendSysMessage(LANG_PLAYER_NOT_FOUND);
         SetSentErrorMessage(true);
@@ -7027,8 +7038,8 @@ bool ChatHandler::HandleSendMessageCommand(char* args)
 
     ///- Send the message
     // Use SendAreaTriggerMessage for fastest delivery.
-    rPlayer->GetSession()->SendAreaTriggerMessage("%s", args);
-    rPlayer->GetSession()->SendAreaTriggerMessage("|cffff0000[Message from administrator]:|r");
+    rPlayerSession->SendAreaTriggerMessage("%s", args);
+    rPlayerSession->SendAreaTriggerMessage("|cffff0000[Message from administrator]:|r");
 
     // Confirmation message
     std::string nameLink = GetNameLink(rPlayer);
@@ -7095,7 +7106,7 @@ bool ChatHandler::HandleModifyGenderCommand(char* args)
 
     char const* gender_full = gender ? "female" : "male";
 
-    PSendSysMessage(LANG_YOU_CHANGE_GENDER, GetNameLink(player).c_str(), gender_full);
+    PSendSysMessage(LANG_YOU_CHANGE_GENDER, player->GetName(), gender_full);
 
     if (needReportToTarget(player))
         { ChatHandler(player).PSendSysMessage(LANG_YOUR_GENDER_CHANGED, gender_full, GetNameLink().c_str()); }
