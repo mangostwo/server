@@ -2319,9 +2319,9 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     switch (m_spellInfo->Id)
                     {
-                        case 50546: unitTarget->CastSpell(m_originalCaster, 47390, true); break;
-                        case 50547: unitTarget->CastSpell(m_originalCaster, 47472, true); break;
-                        case 50548: unitTarget->CastSpell(m_originalCaster, 47635, true); break;
+                     case 50546: m_originalCaster->CastSpell(m_originalCaster, 47390, false); break;
+                     case 50547: m_originalCaster->CastSpell(m_originalCaster, 47472, false); break;
+                     case 50548: m_originalCaster->CastSpell(m_originalCaster, 47635, false); break;
                     }
 
                     return;
