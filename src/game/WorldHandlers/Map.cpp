@@ -2276,13 +2276,13 @@ bool Map::GetReachableRandomPosition(Unit* unit, float& x, float& y, float& z, f
             isSwimming = static_cast<Creature*>(unit)->IsSwimming();
             break;
         default:
-            sLog.outError("Map::GetReachableRandomPosition> Unsupported unit type is passed!");
+            sLog.outError("Map::GetReachableRandomPosition> Unsupported unit (%s) is passed!", unit->GetGuidStr().c_str());
             return false;
     }
 
     if (radius < 0.1f)
     {
-        sLog.outError("Map::GetReachableRandomPosition> Unsupported unit type is passed!");
+        sLog.outError("Map::GetReachableRandomPosition> Invalid radius (%f) for %s", radius, unit->GetGuidStr().c_str());
         return false;
     }
 
