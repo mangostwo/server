@@ -50,7 +50,7 @@ option(BUILD_MANGOSD        "Build the main server"                         ON)
 option(BUILD_REALMD         "Build the login server"                        ON)
 option(BUILD_TOOLS          "Build the map/vmap/mmap extractors"            ON)
 option(SCRIPT_LIB_ELUNA     "Compile with support for Eluna scripts"        ON)
-option(SCRIPT_LIB_SD3       "Compile with support for ScriptDev2 scripts"   ON)
+option(SCRIPT_LIB_SD3       "Compile with support for ScriptDev3 scripts"   ON)
 #option(PLAYERBOTS           "Enable Player Bots"                            OFF)
 option(SOAP                 "Enable remote access via SOAP"                 OFF)
 # Hidden option to enable/disable PCH. DEV ONLY!
@@ -72,7 +72,7 @@ message(
     SOAP                    Enable remote access via SOAP
    Scripting engines:
     SCRIPT_LIB_ELUNA        Compile with support for Eluna scripts
-    SCRIPT_LIB_SD3          Compile with support for ScriptDev2 scripts
+    SCRIPT_LIB_SD3          Compile with support for ScriptDev3 scripts
 #   Modules:
 #    PLAYERBOTS              Enable Player Bots
   To set an option simply type -D<OPTION>=<VALUE> after 'cmake <srcs>'.
@@ -128,30 +128,8 @@ endif()
 #Include platform/compiler-specific definitions
 include(${CMAKE_SOURCE_DIR}/cmake/SetDefinitions.cmake)
 
-# Generate revision-extractor
-set(GENREV_SRC src/tools/genrevision/genrevision.cpp)
-add_executable(genrev ${GENREV_SRC})
-
-# Find core revision
-if(GIT_EXECUTABLE)
-    execute_process(
-        COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
-        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-        OUTPUT_VARIABLE GIT_REVISION
-        RESULT_VARIABLE GIT_RESULT
-        ERROR_QUIET
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-    if(GIT_RESULT)
-        set(GIT_REVISION "Git repository not found")
-    endif()
-else()
-    set(GIT_REVISION "Git not found")
-endif()
-
 set(DEFINITIONS ${DEFINITIONS} WOTLK)
 
-message(STATUS "MaNGOS-Core revision  : ${GIT_REVISION}")
 message(STATUS "Install server to     : ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "Install configs to    : ${CONF_INSTALL_DIR}")
 if("${CONF_DIR}" STREQUAL "")
