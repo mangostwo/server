@@ -1294,7 +1294,7 @@ bool WorldObject::HasInArc(const float arcangle, const WorldObject* obj) const
     return ((angle >= lborder) && (angle <= rborder));
 }
 
-bool WorldObject::IsInFrontInMap(WorldObject const* target, float distance,  float arc) const
+bool WorldObject::isInFrontInMap(WorldObject const* target, float distance,  float arc) const
 {
     return IsWithinDistInMap(target, distance) && HasInArc(arc, target);
 }
@@ -2027,9 +2027,9 @@ void WorldObject::SetActiveObjectState(bool active)
         // player's update implemented in a different from other active worldobject's way
         // it's considired to use generic way in future
     {
-        if (IsActiveObject() && !active)
+        if (isActiveObject() && !active)
             { GetMap()->RemoveFromActive(this); }
-        else if (!IsActiveObject() && active)
+        else if (!isActiveObject() && active)
             { GetMap()->AddToActive(this); }
     }
     m_IsActiveObject = active;

@@ -589,7 +589,7 @@ class WorldObject : public Object
         float GetAngle(const WorldObject* obj) const;
         float GetAngle(const float x, const float y) const;
         bool HasInArc(const float arcangle, const WorldObject* obj) const;
-        bool IsInFrontInMap(WorldObject const* target, float distance, float arc = M_PI) const;
+        bool isInFrontInMap(WorldObject const* target, float distance, float arc = M_PI) const;
         bool IsInBackInMap(WorldObject const* target, float distance, float arc = M_PI) const;
         bool isInFront(WorldObject const* target, float distance, float arc = M_PI) const;
         bool IsInBack(WorldObject const* target, float distance, float arc = M_PI) const;
@@ -644,7 +644,7 @@ class WorldObject : public Object
         Creature* SummonCreature(uint32 id, float x, float y, float z, float ang, TempSummonType spwtype, uint32 despwtime, bool asActiveObject = false);
         GameObject* SummonGameObject(uint32 id, float x, float y, float z, float angle, uint32 despwtime);
 
-        bool IsActiveObject() const { return m_IsActiveObject || m_viewPoint.hasViewers(); }
+        bool isActiveObject() const { return m_IsActiveObject || m_viewPoint.hasViewers(); }
         void SetActiveObjectState(bool active);
 
         ViewPoint& GetViewPoint() { return m_viewPoint; }
