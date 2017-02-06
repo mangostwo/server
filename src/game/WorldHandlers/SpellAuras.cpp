@@ -10027,8 +10027,8 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     if (!m_target || m_target->getDeathState() != JUST_DIED)
                         return;
                     
-                    // todo: 2 runic power per 5 sec in combat
-                    if(GetId() == 48979) // rank 1
+                    //todo: 2 runic power per 5 sec in combat (ranks 1 and 2)
+                    if(GetId() == 48979) // rank 1, 10 runic power.
                         m_target->ModifyPower(POWER_RUNIC_POWER, (int32)10);
                     else if(GetId() == 49483) // rank 2
                         m_target->ModifyPower(POWER_RUNIC_POWER, (int32)20);
