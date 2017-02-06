@@ -8,7 +8,7 @@
 <br />Build Status: <br/>Linux 
 <a href='https://travis-ci.org/mangostwo/server/builds' target='MangosTwo'><img src='https://travis-ci.org/mangostwo/server.png' border=0></a>
  Windows 
-<a href='https://ci.appveyor.com/project/MaNGOS/server-80qcn/history' target='MangosTwo'><img src='https://ci.appveyor.com/api/projects/status/github/mangostwo/server?branch=develop21&svg=true' border=0></a>
+<a href='https://ci.appveyor.com/project/MaNGOS/server-80qcn/history' target='MangosTwo'><img src='https://ci.appveyor.com/api/projects/status/github/mangostwo/server?branch=master&svg=true' border=0></a>
 </td></tr></table>
 
 WRATH OF THE LICH KING BRANCH
