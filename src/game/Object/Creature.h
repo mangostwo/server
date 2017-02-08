@@ -426,6 +426,7 @@ struct TrainerSpellData
 };
 
 typedef std::map<uint32, time_t> CreatureSpellCooldowns;
+typedef std::map<SpellSchoolMask, time_t> CreatureSchoolProhibition;
 
 // max different by z coordinate for creature aggro reaction
 #define CREATURE_Z_ATTACK_RANGE 3
@@ -588,10 +589,13 @@ class Creature : public Unit
 
         void _AddCreatureSpellCooldown(uint32 spell_id, time_t end_time);
         void _AddCreatureCategoryCooldown(uint32 category, time_t apply_time);
+        void _ProhibitSpellSchool(SpellSchoolMask idSchoolMask, time_t end_time);
         void AddCreatureSpellCooldown(uint32 spellid);
         bool HasSpellCooldown(uint32 spell_id) const;
         bool HasCategoryCooldown(uint32 spell_id) const;
+        bool HasSchoolProhibition(SpellSchoolMask idSchoolMask) const;
         uint32 GetCreatureSpellCooldownDelay(uint32 spellId) const;
+        void ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs) override;
 
         bool HasSpell(uint32 spellID) const override;
 
@@ -704,6 +708,7 @@ class Creature : public Unit
         uint32 m_spells[CREATURE_MAX_SPELLS];
         CreatureSpellCooldowns m_CreatureSpellCooldowns;
         CreatureSpellCooldowns m_CreatureCategoryCooldowns;
+        CreatureSchoolProhibition m_CreatureSchoolProhibition;
 
         float GetAttackDistance(Unit const* pl) const;
 
