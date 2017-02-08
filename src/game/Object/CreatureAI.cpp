@@ -47,6 +47,14 @@ CanCastResult CreatureAI::CanCastSpell(Unit* pTarget, const SpellEntry* pSpell, 
     // If not triggered, we check
     if (!isTriggered)
     {
+        // Spell is on cooldown
+        if (m_creature->HasSpellCooldown(pSpell->Id))
+            { return CAST_FAIL_STATE; }
+
+        // School is prohibited
+        if (m_creature->HasSchoolProhibition(SpellSchoolMask(pSpell->SchoolMask)))
+            { return CAST_FAIL_STATE; }
+
         // State does not allow
         if (m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL))
             { return CAST_FAIL_STATE; }
@@ -113,7 +121,7 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32
             }
 
             // Interrupt any previous spell
-            if (uiCastFlags & CAST_INTERRUPT_PREVIOUS && pCaster->IsNonMeleeSpellCasted(false))
+            if ((uiCastFlags & CAST_INTERRUPT_PREVIOUS) && pCaster->IsNonMeleeSpellCasted(false))
                 { pCaster->InterruptNonMeleeSpells(false); }
 
             pCaster->CastSpell(pTarget, pSpell, uiCastFlags & CAST_TRIGGERED, NULL, NULL, uiOriginalCasterGUID);

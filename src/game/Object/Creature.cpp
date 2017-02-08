@@ -162,6 +162,7 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
 
     m_CreatureSpellCooldowns.clear();
     m_CreatureCategoryCooldowns.clear();
+    m_CreatureSchoolProhibition.clear();
     DisableReputationGain = false;
 
     SetWalk(true, true);
@@ -421,7 +422,7 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
     SetModifierValue(UNIT_MOD_RESISTANCE_FIRE,   BASE_VALUE, float(GetCreatureInfo()->ResistanceFire));
     SetModifierValue(UNIT_MOD_RESISTANCE_NATURE, BASE_VALUE, float(GetCreatureInfo()->ResistanceNature));
     SetModifierValue(UNIT_MOD_RESISTANCE_FROST,  BASE_VALUE, float(GetCreatureInfo()->ResistanceFrost));
-    SetModifierValue(UNIT_MOD_RESISTANCE_SHADOW, BASE_VALUE, float(GetCreatureInfo()->ResistanceArcane));
+    SetModifierValue(UNIT_MOD_RESISTANCE_SHADOW, BASE_VALUE, float(GetCreatureInfo()->ResistanceShadow));
     SetModifierValue(UNIT_MOD_RESISTANCE_ARCANE, BASE_VALUE, float(GetCreatureInfo()->ResistanceArcane));
 
     SetCanModifyStats(true);
@@ -2272,6 +2273,11 @@ void Creature::_AddCreatureCategoryCooldown(uint32 category, time_t apply_time)
     m_CreatureCategoryCooldowns[category] = apply_time;
 }
 
+void Creature::_ProhibitSpellSchool(SpellSchoolMask idSchoolMask, time_t end_time)
+{
+    m_CreatureSchoolProhibition[idSchoolMask] = end_time;
+}
+
 void Creature::AddCreatureSpellCooldown(uint32 spellid)
 {
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellid);
@@ -2307,6 +2313,41 @@ bool Creature::HasSpellCooldown(uint32 spell_id) const
 {
     CreatureSpellCooldowns::const_iterator itr = m_CreatureSpellCooldowns.find(spell_id);
     return (itr != m_CreatureSpellCooldowns.end() && itr->second > time(NULL)) || HasCategoryCooldown(spell_id);
+}
+
+bool Creature::HasSchoolProhibition(SpellSchoolMask idSchoolMask) const
+{
+    time_t curTime = time(NULL);
+    for (CreatureSchoolProhibition::const_iterator itr = m_CreatureSchoolProhibition.begin(); itr != m_CreatureSchoolProhibition.end(); ++itr)
+    {
+        if ((idSchoolMask & itr->first) && itr->second > curTime)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+void Creature::ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs)
+{
+    time_t curTime = time(NULL);
+
+    // Blanket school prohibition for spells cast via event logic
+    _ProhibitSpellSchool(idSchoolMask, curTime + (unTimeMs / IN_MILLISECONDS));
+
+    // Individual spell cooldowns for spells in the creature spell table
+    for (uint32 i = 0; i < CREATURE_MAX_SPELLS; ++i)
+    {
+        if (!m_spells[i])
+            { continue; }
+
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(m_spells[i]);
+        if (!spellInfo)
+            { continue; }
+
+        if ((idSchoolMask & GetSpellSchoolMask(spellInfo)) && GetCreatureSpellCooldownDelay(m_spells[i]) < unTimeMs)
+            { _AddCreatureSpellCooldown(m_spells[i], curTime + (unTimeMs / IN_MILLISECONDS)); }
+    }
 }
 
 uint8 Creature::getRace() const
