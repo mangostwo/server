@@ -31,7 +31,7 @@
 #include <ace/INET_Addr.h>
 
 typedef ACE_TSS<MTRand> MTRandTSS;
-static MTRandTSS mtRand;
+static MTRandTSS *mtRand;
 
 static ACE_Time_Value g_SystemTickTime = ACE_OS::gettimeofday();
 
@@ -74,44 +74,54 @@ uint32 WorldTimer::getMSTime_internal()
 }
 
 //////////////////////////////////////////////////////////////////////////
+void initMTRandTSS()
+{
+    mtRand = new ACE_TSS<MTRand>();
+}
+
+void deleteMTRandTSS()
+{
+    delete mtRand;
+}
+
 int32 irand(int32 min, int32 max)
 {
-    return int32(mtRand->randInt(max - min)) + min;
+    return int32((*mtRand)->randInt(max - min)) + min;
 }
 
 uint32 urand(uint32 min, uint32 max)
 {
-    return mtRand->randInt(max - min) + min;
+    return (*mtRand)->randInt(max - min) + min;
 }
 
 float frand(float min, float max)
 {
-    return mtRand->randExc(max - min) + min;
+    return (*mtRand)->randExc(max - min) + min;
 }
 
 int32 rand32()
 {
-    return mtRand->randInt();
+    return (*mtRand)->randInt();
 }
 
 double rand_norm(void)
 {
-    return mtRand->randExc();
+    return (*mtRand)->randExc();
 }
 
 float rand_norm_f(void)
 {
-    return (float)mtRand->randExc();
+    return (float)(*mtRand)->randExc();
 }
 
 double rand_chance(void)
 {
-    return mtRand->randExc(100.0);
+    return (*mtRand)->randExc(100.0);
 }
 
 float rand_chance_f(void)
 {
-    return (float)mtRand->randExc(100.0);
+    return (float)(*mtRand)->randExc(100.0);
 }
 
 Tokens StrSplit(const std::string& src, const std::string& sep)
@@ -528,14 +538,6 @@ bool Utf8FitTo(const std::string& str, std::wstring search)
     return true;
 }
 
-void utf8printf(FILE* out, const char* str, ...)
-{
-    va_list ap;
-    va_start(ap, str);
-    vutf8printf(stdout, str, &ap);
-    va_end(ap);
-}
-
 void vutf8printf(FILE* out, const char* str, va_list* ap)
 {
 #if PLATFORM == PLATFORM_WINDOWS
@@ -621,3 +623,28 @@ void HexStrToByteArray(std::string const& str, uint8* out, bool reverse /*= fals
         out[j++] = strtoul(buffer, NULL, 16);
     }
 }
+
+void utf8print(void* /*arg*/, const char* str)
+{
+#if PLATFORM == PLATFORM_WINDOWS
+    wchar_t wtemp_buf[6000];
+    size_t wtemp_len = 6000 - 1;
+    if (!Utf8toWStr(str, strlen(str), wtemp_buf, wtemp_len))
+        { return; }
+
+    char temp_buf[6000];
+    CharToOemBuffW(&wtemp_buf[0], &temp_buf[0], wtemp_len + 1);
+    printf("%s", temp_buf);
+#else
+    printf("%s", str);
+#endif
+}
+
+void utf8printf(FILE* out, const char* str, ...)
+{
+    va_list ap;
+    va_start(ap, str);
+    vutf8printf(out, str, &ap);
+    va_end(ap);
+}
+

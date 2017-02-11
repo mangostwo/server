@@ -108,6 +108,20 @@ inline uint32 secsToTimeBitFields(time_t secs)
 }
 
 /**
+ * @brief Initializes the TSS for MersenneTwister
+ *
+ *
+ */
+void initMTRandTSS();
+
+/**
+ * @brief Cleanups the TSS for MersenneTwister
+ *
+ *
+ */
+void deleteMTRandTSS();
+
+/**
  * @brief Return a random number in the range min..max; (max-min) must be smaller than 32768.
  *
  * @param min
@@ -689,6 +703,12 @@ bool Utf8FitTo(const std::string& str, std::wstring search);
  * @param str...
  */
 void utf8printf(FILE* out, const char* str, ...);
+/**
+ * @brief
+ *
+ * @param str
+ */
+void utf8print(void* /*arg*/, const char* str);
 /**
  * @brief
  *
