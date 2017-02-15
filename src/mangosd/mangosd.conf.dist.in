@@ -887,7 +887,7 @@ WaitAtStartupError                        = 10
 Raid.MinLevel                             = 10
 PlayerCommands                            = 0
 Motd                                      = "Welcome to Mangos Two"
-AutoBroadcast                             = 600
+AutoBroadcast                             = 0
 
 ################################################################################
 # PLAYER INTERACTION
