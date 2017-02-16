@@ -1625,10 +1625,10 @@ void ObjectMgr::LoadGameObjects()
         data.posY           = fields[ 4].GetFloat();
         data.posZ           = fields[ 5].GetFloat();
         data.orientation    = fields[ 6].GetFloat();
-        data.rotation.x     = fields[ 7].GetFloat();
-        data.rotation.y     = fields[ 8].GetFloat();
-        data.rotation.z     = fields[ 9].GetFloat();
-        data.rotation.w     = fields[10].GetFloat();
+        data.rotx           = fields[ 7].GetFloat();
+        data.roty           = fields[ 8].GetFloat();
+        data.rotz           = fields[ 9].GetFloat();
+        data.rotw           = fields[10].GetFloat();
         data.spawntimesecs  = fields[11].GetInt32();
         data.animprogress   = fields[12].GetUInt32();
         uint32 go_state     = fields[13].GetUInt32();
@@ -1660,27 +1660,27 @@ void ObjectMgr::LoadGameObjects()
         }
         data.go_state       = GOState(go_state);
 
-        if (data.rotation.x < -1.0f || data.rotation.x > 1.0f)
+        if (data.rotx < -1.0f || data.rotx > 1.0f)
         {
-            sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with invalid rotation.x (%f) value, skip", guid, data.id, data.rotation.x);
+            sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with invalid rotation.x (%f) value, skip", guid, data.id, data.rotx);
             continue;
         }
 
-        if (data.rotation.y < -1.0f || data.rotation.y > 1.0f)
+        if (data.roty < -1.0f || data.roty > 1.0f)
         {
-            sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with invalid rotation.y (%f) value, skip", guid, data.id, data.rotation.y);
+            sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with invalid rotation.y (%f) value, skip", guid, data.id, data.roty);
             continue;
         }
 
-        if (data.rotation.z < -1.0f || data.rotation.z > 1.0f)
+        if (data.rotz < -1.0f || data.rotz > 1.0f)
         {
-            sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with invalid rotation.z (%f) value, skip", guid, data.id, data.rotation.z);
+            sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with invalid rotation.z (%f) value, skip", guid, data.id, data.rotz);
             continue;
         }
 
-        if (data.rotation.w < -1.0f || data.rotation.w > 1.0f)
+        if (data.rotw < -1.0f || data.rotw > 1.0f)
         {
-            sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with invalid rotation.w (%f) value, skip", guid, data.id, data.rotation.w);
+            sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with invalid rotation.w (%f) value, skip", guid, data.id, data.rotw);
             continue;
         }
 
@@ -1711,33 +1711,6 @@ void ObjectMgr::LoadGameObjects()
 
     sLog.outString();
     sLog.outString(">> Loaded " SIZEFMTD " gameobjects", mGameObjectDataMap.size());
-}
-
-void ObjectMgr::LoadGameObjectAddon()
-{
-    sGameObjectDataAddonStorage.Load();
-
-    sLog.outString(">> Loaded %u gameobject addons", sGameObjectDataAddonStorage.GetRecordCount());
-    sLog.outString();
-
-    for (uint32 i = 1; i < sGameObjectDataAddonStorage.GetMaxEntry(); ++i)
-    {
-        GameObjectDataAddon const* addon = sGameObjectDataAddonStorage.LookupEntry<GameObjectDataAddon>(i);
-        if (!addon)
-            continue;
-
-        if (!GetGODataPair(addon->guid))
-        {
-            sLog.outErrorDb("Gameobject (GUID: %u) does not exist but has a record in `gameobject_addon`", addon->guid);
-            continue;
-        }
-
-        if (!addon->path_rotation.isUnit())
-        {
-            sLog.outErrorDb("Gameobject (GUID: %u) has invalid path rotation", addon->guid);
-            const_cast<GameObjectDataAddon*>(addon)->path_rotation = QuaternionData(0.f, 0.f, 0.f, 1.f);
-        }
-    }
 }
 
 void ObjectMgr::AddGameobjectToGrid(uint32 guid, GameObjectData const* data)

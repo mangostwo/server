@@ -51,7 +51,6 @@
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
-#include <G3D/Quat.h>
 
 GameObject::GameObject() : WorldObject(),
     loot(this),
@@ -74,7 +73,6 @@ GameObject::GameObject() : WorldObject(),
 
     m_captureTimer = 0;
 
-    m_packedRotation = 0;
     m_groupLootTimer = 0;
     m_groupLootId = 0;
     m_lootGroupRecipientId = 0;
@@ -144,10 +142,40 @@ void GameObject::CleanupsBeforeDelete()
     WorldObject::CleanupsBeforeDelete();
 }
 
-bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang, QuaternionData rotation, uint8 animprogress, GOState go_state)
+bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask,
+                        float x, float y, float z, float ang,
+                        float rx, float ry, float rz, float rw, uint8 animprogress, GOState go_state)
 {
-    MANGOS_ASSERT(map);
-    Relocate(x, y, z, ang);
+    if(map == NULL)
+      return false;
+
+    GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(name_id);
+    if (!goinfo)
+    {
+        sLog.outErrorDb("Gameobject (GUID: %u) not created: Entry %u does not exist in `gameobject_template`. Map: %u  (X: %f Y: %f Z: %f) ang: %f", guidlow, name_id, map->GetId(), x, y, z, ang);
+        return false;
+    }
+
+    if (goinfo->type >= MAX_GAMEOBJECT_TYPE)
+    {
+        sLog.outErrorDb("Gameobject (GUID: %u) not created: Entry %u has invalid type %u in `gameobject_template`. It may crash client if created.", guidlow, name_id, goinfo->type);
+        return false;
+    }
+
+    Object::_Create(guidlow, goinfo->id, HIGHGUID_GAMEOBJECT);
+
+    // let's make sure we don't send the client invalid quaternion
+    if (rx == 0.0f && ry == 0.0f && rz == 0.0f)
+    {
+        ry = sin(ang/2);
+        rz = cos(ang/2);
+    }
+
+    G3D::Quat q(rx, ry, rz, rw);
+    q.unitize();
+
+    float o = GetOrientationFromQuat(q);
+    Relocate(x, y, z, o);
     SetMap(map);
     SetPhaseMask(phaseMask, false);
 
@@ -157,46 +185,20 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
         return false;
     }
 
-    GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(name_id);
-    if (!goinfo)
-    {
-        sLog.outErrorDb("Gameobject (GUID: %u) not created: Entry %u does not exist in `gameobject_template`. Map: %u  (X: %f Y: %f Z: %f) ang: %f", guidlow, name_id, map->GetId(), x, y, z, ang);
-        return false;
-    }
-
-    Object::_Create(guidlow, goinfo->id, HIGHGUID_GAMEOBJECT);
-
-    m_goInfo = goinfo;
-
-    if (goinfo->type >= MAX_GAMEOBJECT_TYPE)
-    {
-        sLog.outErrorDb("Gameobject (GUID: %u) not created: Entry %u has invalid type %u in `gameobject_template`. It may crash client if created.", guidlow, name_id, goinfo->type);
-        return false;
-    }
-
-    SetObjectScale(goinfo->size);
-
-    SetWorldRotation(rotation.x, rotation.y, rotation.z, rotation.w);
-    // For most of gameobjects is (0, 0, 0, 1) quaternion, only some transports has not standart rotation
-    if (const GameObjectDataAddon* addon = sGameObjectDataAddonStorage.LookupEntry<GameObjectDataAddon>(guidlow))
-        SetTransportPathRotation(addon->path_rotation);
-    else
-        SetTransportPathRotation(QuaternionData(0, 0, 0, 1));
-
-    SetUInt32Value(GAMEOBJECT_FACTION, goinfo->faction);
-    SetUInt32Value(GAMEOBJECT_FLAGS, goinfo->flags);
+    SetQuaternion(q);
+    SetGOInfo(goinfo);
+    SetObjectScale(m_goInfo->size);
+    SetUInt32Value(GAMEOBJECT_FACTION, m_goInfo->faction);
+    SetUInt32Value(GAMEOBJECT_FLAGS, m_goInfo->flags);
+    SetEntry(m_goInfo->id);
+    SetDisplayId(m_goInfo->displayId);
+    SetGoState(go_state);
+    SetGoType(GameobjectTypes(m_goInfo->type));
+    SetGoArtKit(0);                                         // unknown what this is
+    SetGoAnimProgress(animprogress);
 
     if (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT)
         { SetFlag(GAMEOBJECT_FLAGS, (GO_FLAG_TRANSPORT | GO_FLAG_NODESPAWN)); }
-
-    SetEntry(goinfo->id);
-    SetDisplayId(goinfo->displayId);
-
-    // GAMEOBJECT_BYTES_1, index at 0, 1, 2 and 3
-    SetGoState(go_state);
-    SetGoType(GameobjectTypes(goinfo->type));
-    SetGoArtKit(0);                                         // unknown what this is
-    SetGoAnimProgress(animprogress);
 
     switch (GetGoType())
     {
@@ -569,6 +571,9 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
     // update in loaded data (changing data only in this place)
     GameObjectData& data = sObjectMgr.NewGOData(GetGUIDLow());
 
+    G3D::Quat q;
+    GetQuaternion(q);
+
     // data->guid = guid don't must be update at save
     data.id = GetEntry();
     data.mapid = mapid;
@@ -577,10 +582,10 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
     data.posY = GetPositionY();
     data.posZ = GetPositionZ();
     data.orientation = GetOrientation();
-    data.rotation.x = m_worldRotation.x;
-    data.rotation.y = m_worldRotation.y;
-    data.rotation.z = m_worldRotation.z;
-    data.rotation.w = m_worldRotation.w;
+    data.rotx = q.x;
+    data.roty = q.y;
+    data.rotz = q.z;
+    data.rotw = q.w;
     data.spawntimesecs = m_spawnedByDefault ? (int32)m_respawnDelayTime : -(int32)m_respawnDelayTime;
     data.animprogress = GetGoAnimProgress();
     data.go_state = GetGoState();
@@ -598,10 +603,10 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
        << GetPositionY() << ", "
        << GetPositionZ() << ", "
        << GetOrientation() << ", "
-       << m_worldRotation.x << ", "
-       << m_worldRotation.y << ", "
-       << m_worldRotation.z << ", "
-       << m_worldRotation.w << ", "
+       << q.x << ", "
+       << q.y << ", "
+       << q.z << ", "
+       << q.w << ", "
        << m_respawnDelayTime << ", "
        << uint32(GetGoAnimProgress()) << ", "
        << uint32(GetGoState()) << ")";
@@ -633,7 +638,7 @@ bool GameObject::LoadFromDB(uint32 guid, Map* map)
     uint8 animprogress = data->animprogress;
     GOState go_state = data->go_state;
 
-    if (!Create(guid, entry, map, phaseMask, x, y, z, ang, data->rotation, animprogress, go_state))
+    if (!Create(guid, entry, map, phaseMask, x, y, z, ang, data->rotx, data->roty, data->rotz, data->rotw, animprogress, go_state))
         { return false; }
 
     if (!GetGOInfo()->GetDespawnPossibility() && !GetGOInfo()->IsDespawnAtAction() && data->spawntimesecs >= 0)
@@ -698,11 +703,6 @@ void GameObject::DeleteFromDB()
     WorldDatabase.PExecuteLog("DELETE FROM gameobject WHERE guid = '%u'", GetGUIDLow());
     WorldDatabase.PExecuteLog("DELETE FROM game_event_gameobject WHERE guid = '%u'", GetGUIDLow());
     WorldDatabase.PExecuteLog("DELETE FROM gameobject_battleground WHERE guid = '%u'", GetGUIDLow());
-}
-
-GameObjectInfo const* GameObject::GetGOInfo() const
-{
-    return m_goInfo;
 }
 
 /*********************************************************/
@@ -1674,70 +1674,48 @@ const char* GameObject::GetNameForLocaleIdx(int32 loc_idx) const
     return GetName();
 }
 
-using G3D::Quat;
-struct QuaternionCompressed
+void GameObject::SetQuaternion(G3D::Quat const& q)
 {
-    QuaternionCompressed() : m_raw(0) {}
-    QuaternionCompressed(int64 val) : m_raw(val) {}
-    QuaternionCompressed(const Quat& quat) { Set(quat); }
+    SetFloatValue(GAMEOBJECT_ROTATION + 0, q.x);
+    SetFloatValue(GAMEOBJECT_ROTATION + 1, q.y);
+    SetFloatValue(GAMEOBJECT_ROTATION + 2, q.z);
+    SetFloatValue(GAMEOBJECT_ROTATION + 3, q.w);
 
-    enum
+    if (m_model)
+      { m_model->UpdateRotation(q); }
+}
+
+void GameObject::GetQuaternion(G3D::Quat& q) const
+{
+    q.x = GetFloatValue(GAMEOBJECT_ROTATION + 0);
+    q.y = GetFloatValue(GAMEOBJECT_ROTATION + 1);
+    q.z = GetFloatValue(GAMEOBJECT_ROTATION + 2);
+    q.w = GetFloatValue(GAMEOBJECT_ROTATION + 3);
+}
+
+float GameObject::GetOrientationFromQuat(G3D::Quat const& q)
+{
+    double t1 = +2.0f * (q.w * q.z + q.x * q.y);
+    double t2 = +1.0f - 2.0f * (q.y * q.y + q.z * q.z);
+    return MapManager::NormalizeOrientation(std::atan2(t1, t2));
+}
+
+int64 GameObject::GetPackedRotation()
+{
+   enum
     {
         PACK_COEFF_YZ = 1 << 20,
         PACK_COEFF_X = 1 << 21,
     };
 
-    void Set(const Quat& quat)
-    {
-        int8 w_sign = (quat.w >= 0 ? 1 : -1);
-        int64 X = int32(quat.x * PACK_COEFF_X) * w_sign & ((1 << 22) - 1);
-        int64 Y = int32(quat.y * PACK_COEFF_YZ) * w_sign & ((1 << 21) - 1);
-        int64 Z = int32(quat.z * PACK_COEFF_YZ) * w_sign & ((1 << 21) - 1);
-        m_raw = Z | (Y << 21) | (X << 42);
-    }
+    G3D::Quat quat;
+    GetQuaternion(quat);
 
-    Quat Unpack() const
-    {
-        double x = (double)(m_raw >> 42) / (double)PACK_COEFF_X;
-        double y = (double)(m_raw << 22 >> 43) / (double)PACK_COEFF_YZ;
-        double z = (double)(m_raw << 43 >> 43) / (double)PACK_COEFF_YZ;
-        double w = 1 - (x * x + y * y + z * z);
-        MANGOS_ASSERT(w >= 0);
-        w = sqrt(w);
-
-        return Quat(x, y, z, w);
-    }
-
-    int64 m_raw;
-};
-
-void GameObject::SetWorldRotation(float qx, float qy, float qz, float qw)
-{
-    Quat rotation(qx, qy, qz, qw);
-    // Temporary solution for gameobjects that has no rotation data in DB:
-    if (qz == 0.f && qw == 0.f)
-        rotation = Quat::fromAxisAngleRotation(G3D::Vector3::unitZ(), GetOrientation());
-
-    rotation.unitize();
-    m_packedRotation = QuaternionCompressed(rotation).m_raw;
-    m_worldRotation.x = rotation.x;
-    m_worldRotation.y = rotation.y;
-    m_worldRotation.z = rotation.z;
-    m_worldRotation.w = rotation.w;
-}
-
-void GameObject::SetTransportPathRotation(QuaternionData rotation)
-{
-    SetFloatValue(GAMEOBJECT_PARENTROTATION + 0, rotation.x);
-    SetFloatValue(GAMEOBJECT_PARENTROTATION + 1, rotation.y);
-    SetFloatValue(GAMEOBJECT_PARENTROTATION + 2, rotation.z);
-    SetFloatValue(GAMEOBJECT_PARENTROTATION + 3, rotation.w);
-}
-
-void GameObject::SetWorldRotationAngles(float z_rot, float y_rot, float x_rot)
-{
-    Quat quat(G3D::Matrix3::fromEulerAnglesZYX(z_rot, y_rot, x_rot));
-    SetWorldRotation(quat.x, quat.y, quat.z, quat.w);
+    int8 w_sign = (quat.w >= 0 ? 1 : -1);
+    int64 X = int32(quat.x * PACK_COEFF_X) * w_sign & ((1 << 22) - 1);
+    int64 Y = int32(quat.y * PACK_COEFF_YZ) * w_sign & ((1 << 21) - 1);
+    int64 Z = int32(quat.z * PACK_COEFF_YZ) * w_sign & ((1 << 21) - 1);
+    return Z | (Y << 21) | (X << 42);
 }
 
 bool GameObject::IsHostileTo(Unit const* unit) const
@@ -1862,7 +1840,8 @@ void GameObject::UpdateCollisionState() const
     if (!m_model || !IsInWorld())
         { return; }
 
-    m_model->enable(IsCollisionEnabled() ? GetPhaseMask() : 0);
+    m_model->SetCollidable(IsCollisionEnabled());
+    m_model->SetPhaseMask(IsCollisionEnabled() ? GetPhaseMask() : 0);
 }
 
 void GameObject::UpdateModel()
@@ -1871,7 +1850,7 @@ void GameObject::UpdateModel()
         { GetMap()->RemoveGameObjectModel(*m_model); }
     delete m_model;
 
-    m_model = GameObjectModel::construct(this);
+    m_model = GameObjectModel::Create(this);
     if (m_model)
         { GetMap()->InsertGameObjectModel(*m_model); }
 }

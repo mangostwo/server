@@ -25,14 +25,16 @@
 #ifndef MANGOSSERVER_GAMEOBJECTMODEL_H
 #define MANGOSSERVER_GAMEOBJECTMODEL_H
 
+#include "Platform/Define.h"
+
 #include <G3D/Matrix3.h>
 #include <G3D/Vector3.h>
 #include <G3D/AABox.h>
 #include <G3D/Ray.h>
+#include <G3D/Quat.h>
 #include "DBCStructure.h"
 #include "GameObject.h"
 
-#include "Platform/Define.h"
 
 namespace VMAP
 {
@@ -45,81 +47,39 @@ namespace VMAP
  */
 class GameObjectModel
 {
-        uint32 phasemask;
-        G3D::AABox iBound; /**< TODO */
-        G3D::Matrix3 iInvRot; /**< TODO */
-        G3D::Vector3 iPos; /**< TODO */
-        //G3D::Vector3 iRot;
-        float iInvScale; /**< TODO */
-        float iScale; /**< TODO */
-        VMAP::WorldModel* iModel; /**< TODO */
+    private:
+        bool          isCollidable;
+        uint32        iPhaseMask;
+        std::string   iName;
+        G3D::AABox    iBound;
+        G3D::AABox    iModelBound;
+        G3D::Vector3  iPos;
+        G3D::Quat     iQuat;  //Note: this must be a unit quaternion!!!
 
-        /**
-         * @brief
-         *
-         */
-        GameObjectModel() : phasemask(0), iModel(NULL) {}
-        /**
-         * @brief
-         *
-         * @param pGo
-         * @param info
-         * @return bool
-         */
+        float         iScale;
+        float         iInvScale;
+
+        VMAP::WorldModel* iModel;
+        GameObject const* iOwner;
+
+        GameObjectModel() : isCollidable(false), iPhaseMask(0), iModel(NULL), iOwner(NULL) {}
         bool initialize(const GameObject* const pGo, const GameObjectDisplayInfoEntry* info);
 
     public:
-        std::string name; /**< TODO */
+        const G3D::AABox& GetBounds() const { return iBound; }
+        const std::string& GetName() const { return iName; }
 
-        /**
-         * @brief
-         *
-         * @return const G3D::AABox
-         */
-        const G3D::AABox& getBounds() const { return iBound; }
-
-        /**
-         * @brief
-         *
-         */
         ~GameObjectModel();
 
-        /**
-         * @brief
-         *
-         * @return const G3D::Vector3
-         */
-        const G3D::Vector3& getPosition() const { return iPos;}
+        const G3D::Vector3& GetPosition() const { return iPos;}
+        void UpdateRotation(G3D::Quat const& q);
+        const GameObject* GetOwner() const { return iOwner; }
 
-        /** Enables\disables collision. */
-        /**
-         * @brief
-         *
-         */
-        void disable() { phasemask = 0;}
-        /**
-         * @brief
-         *
-         * @param enabled
-         */
-        void enable(uint32 ph_mask) { phasemask = ph_mask;}
+        void SetCollidable(bool enabled) { isCollidable = enabled; }
+        void SetPhaseMask(uint32 phaseMask = 0) { iPhaseMask = phaseMask;}
 
-        /**
-         * @brief
-         *
-         * @param Ray
-         * @param MaxDist
-         * @param StopAtFirstHit
-         * @return bool
-         */
-        bool intersectRay(const G3D::Ray& Ray, float& MaxDist, bool StopAtFirstHit, uint32 ph_mask) const;
+        bool IntersectRay(const G3D::Ray& Ray, float& MaxDist, bool StopAtFirstHit, uint32 phaseMask) const;
 
-        /**
-         * @brief
-         *
-         * @param pGo
-         * @return GameObjectModel
-         */
-        static GameObjectModel* construct(const GameObject* const pGo);
+        static GameObjectModel* Create(const GameObject* const pGo);
 };
 #endif
