@@ -54,14 +54,15 @@
 #include "WaypointMovementGenerator.h"
 #include <cctype>
 #include <iostream>
-#include <fstream>
-#include <map>
-#include <typeinfo>
-
+#include "G3D/Quat.h"                                       // for turning GO's
 #include "TargetedMovementGenerator.h"                      // for HandleNpcUnFollowCommand
 #include "MoveMap.h"                                        // for mmap manager
 #include "PathFinder.h"                                     // for mmap commands
 #include "movement/MoveSplineInit.h"
+
+#include <fstream>
+#include <map>
+#include <typeinfo>
 
 static uint32 ReputationRankStrIndex[MAX_REPUTATION_RANK] =
 {
@@ -181,6 +182,7 @@ void ChatHandler::ShowTriggerTargetListHelper(uint32 id, AreaTrigger const* at, 
 
 void ChatHandler::ShowTriggerListHelper(AreaTriggerEntry const* atEntry)
 {
+
     char const* tavern = sObjectMgr.IsTavernAreaTrigger(atEntry->id) ? GetMangosString(LANG_TRIGGER_TAVERN) : "";
     char const* quest = sObjectMgr.GetQuestForAreaTrigger(atEntry->id) ? GetMangosString(LANG_TRIGGER_QUEST) : "";
 
@@ -2534,11 +2536,12 @@ bool ChatHandler::HandlePInfoCommand(char* args)
     }
 
     std::string username = GetMangosString(LANG_ERROR);
+    std::string email = GetMangosString(LANG_ERROR);
     std::string last_ip = GetMangosString(LANG_ERROR);
     AccountTypes security = SEC_PLAYER;
     std::string last_login = GetMangosString(LANG_ERROR);
 
-    QueryResult* result = LoginDatabase.PQuery("SELECT username,gmlevel,last_ip,last_login FROM account WHERE id = '%u'", accId);
+    QueryResult* result = LoginDatabase.PQuery("SELECT username,gmlevel,email,last_ip,last_login FROM account WHERE id = '%u'", accId);
     if (result)
     {
         Field* fields = result->Fetch();
@@ -2547,11 +2550,13 @@ bool ChatHandler::HandlePInfoCommand(char* args)
 
         if (GetAccessLevel() >= security)
         {
-            last_ip = fields[2].GetCppString();
-            last_login = fields[3].GetCppString();
+            email = fields[2].GetCppString();
+            last_ip = fields[3].GetCppString();
+            last_login = fields[4].GetCppString();
         }
         else
         {
+            email = "-";
             last_ip = "-";
             last_login = "-";
         }
@@ -2561,7 +2566,7 @@ bool ChatHandler::HandlePInfoCommand(char* args)
 
     std::string nameLink = playerLink(target_name);
 
-    PSendSysMessage(LANG_PINFO_ACCOUNT, (target ? "" : GetMangosString(LANG_OFFLINE)), nameLink.c_str(), target_guid.GetCounter(), username.c_str(), accId, security, last_ip.c_str(), last_login.c_str(), latency);
+    PSendSysMessage(LANG_PINFO_ACCOUNT, (target ? "" : GetMangosString(LANG_OFFLINE)), nameLink.c_str(), target_guid.GetCounter(), username.c_str(), accId, security, email.c_str(), last_ip.c_str(), last_login.c_str(), latency);
 
     std::string timeStr = secsToTimeString(total_player_time, true, true);
     uint32 gold = money / GOLD;
@@ -2819,7 +2824,7 @@ inline Creature* Helper_CreateWaypointFor(Creature* wpOwner, WaypointPathOrigin 
 
     wpCreature->SetActiveObjectState(true);
 
-    wpCreature->Summon(TEMPSUMMON_TIMED_DESPAWN, 5*MINUTE*IN_MILLISECONDS);// Also initializes the AI and MMGen
+    wpCreature->Summon(TEMPSUMMON_TIMED_DESPAWN, 5 * MINUTE * IN_MILLISECONDS); // Also initializes the AI and MMGen
     return wpCreature;
 }
 inline void UnsummonVisualWaypoints(Player const* player, ObjectGuid ownerGuid)
@@ -2975,7 +2980,7 @@ bool ChatHandler::HandleWpAddCommand(char* args)
     // All arguments parsed
     // wpOwner will get a new waypoint inserted into wpPath = GetPathFromOrigin(wpOwner, wpDestination, wpPathId) at wpPointId
 
-    float x, y,z;
+    float x, y, z;
     m_session->GetPlayer()->GetPosition(x, y, z);
     if (!sWaypointMgr.AddNode(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), wpPointId, wpDestination, x, y, z))
     {
@@ -3059,7 +3064,9 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
     // Check
     // Remember: "show" must also be the name of a column!
     if ((subCmd != "waittime") && (subCmd != "scriptid") && (subCmd != "orientation") && (subCmd != "del") && (subCmd != "move"))
+    {
         return false;
+    }
 
     // Next arg is: <GUID> <WPNUM> <ARGUMENT>
 
@@ -3199,7 +3206,7 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
     }
     else if (subCmd == "move")                              // Move to player position, no additional command required
     {
-        float x,y,z;
+        float x, y, z;
         m_session->GetPlayer()->GetPosition(x, y, z);
 
         // Move visual waypoint
@@ -3748,7 +3755,7 @@ bool ChatHandler::HandleHonorAddKillCommand(char* /*args*/)
 
     // check online security
     if (target->GetTypeId() == TYPEID_PLAYER && HasLowerSecurity((Player*)target))
-        return false;
+        { return false; }
 
     m_session->GetPlayer()->RewardHonor(target, 1);
     return true;
@@ -4036,7 +4043,7 @@ bool ChatHandler::HandleLearnAllCraftsCommand(char* /*args*/)
     {
         SkillLineEntry const* skillInfo = sSkillLineStore.LookupEntry(i);
         if (!skillInfo)
-            { continue; }
+        { continue; }
 
         if ((skillInfo->categoryId == SKILL_CATEGORY_PROFESSION || skillInfo->categoryId == SKILL_CATEGORY_SECONDARY) &&
                 skillInfo->canLink)                         // only prof. with recipes have
@@ -5058,7 +5065,7 @@ bool ChatHandler::HandleMmapPathCommand(char* args)
     path.calculate(x, y, z);
 
     PointsArray pointPath = path.getPath();
-    PSendSysMessage("%s's path to %s:", target->GetName(), player->GetName());
+    PSendSysMessage("%s's path to %s:", originUnit->GetName(), destinationUnit->GetName());
     PSendSysMessage("Building %s", useStraightPath ? "StraightPath" : "SmoothPath");
     PSendSysMessage("length " SIZEFMTD " type %u", pointPath.size(), path.getPathType());
 

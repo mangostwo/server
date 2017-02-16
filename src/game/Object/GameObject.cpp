@@ -23,6 +23,7 @@
  */
 
 #include "GameObject.h"
+#include "G3D/Quat.h"
 #include "QuestDef.h"
 #include "ObjectMgr.h"
 #include "PoolManager.h"
@@ -51,7 +52,6 @@
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
-#include <G3D/Quat.h>
 
 GameObject::GameObject() : WorldObject(),
     loot(this),
@@ -88,8 +88,7 @@ GameObject::~GameObject()
 void GameObject::AddToWorld()
 {
 #ifdef ENABLE_ELUNA
-    if (!IsInWorld())
-        sEluna->OnAddToWorld(this);
+    bool inWorld = IsInWorld();
 #endif /* ENABLE_ELUNA */
 
     ///- Register the gameobject for guid lookup
@@ -103,6 +102,11 @@ void GameObject::AddToWorld()
 
     // After Object::AddToWorld so that for initial state the GO is added to the world (and hence handled correctly)
     UpdateCollisionState();
+
+#ifdef ENABLE_ELUNA
+    if (!inWorld)
+        sEluna->OnAddToWorld(this);
+#endif /* ENABLE_ELUNA */
 }
 
 void GameObject::RemoveFromWorld()

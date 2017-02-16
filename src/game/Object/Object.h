@@ -91,7 +91,7 @@ typedef UNORDERED_MAP<Player*, UpdateData> UpdateDataMapType;
 struct Position
 {
     Position() : x(0.0f), y(0.0f), z(0.0f), o(0.0f) {}
-    Position(float _x, float _y, float _z, float _o = 0.0f) : x(_x), y(_y), z(_z), o(_o) {}
+    Position(float _x, float _y, float _z, float _o) : x(_x), y(_y), z(_z), o(_o) {}
     float x, y, z, o;
 };
 
@@ -589,9 +589,9 @@ class WorldObject : public Object
         float GetAngle(const WorldObject* obj) const;
         float GetAngle(const float x, const float y) const;
         bool HasInArc(const float arcangle, const WorldObject* obj) const;
-        bool isInFrontInMap(WorldObject const* target, float distance, float arc = M_PI) const;
+        bool IsInFrontInMap(WorldObject const* target, float distance, float arc = M_PI) const;
         bool IsInBackInMap(WorldObject const* target, float distance, float arc = M_PI) const;
-        bool isInFront(WorldObject const* target, float distance, float arc = M_PI) const;
+        bool IsInFront(WorldObject const* target, float distance, float arc = M_PI) const;
         bool IsInBack(WorldObject const* target, float distance, float arc = M_PI) const;
 
         virtual void CleanupsBeforeDelete();                // used in destructor or explicitly before mass creature delete to remove cross-references to already deleted units
@@ -644,7 +644,9 @@ class WorldObject : public Object
         Creature* SummonCreature(uint32 id, float x, float y, float z, float ang, TempSummonType spwtype, uint32 despwtime, bool asActiveObject = false);
         GameObject* SummonGameObject(uint32 id, float x, float y, float z, float angle, uint32 despwtime);
 
-        bool isActiveObject() const { return m_IsActiveObject || m_viewPoint.hasViewers(); }
+        bool IsActiveObject() const { return m_isActiveObject || m_viewPoint.hasViewers(); }
+        bool isActiveObject() const { return IsActiveObject(); } // This is for Eluna to build. Should be removed in the future!
+
         void SetActiveObjectState(bool active);
 
         ViewPoint& GetViewPoint() { return m_viewPoint; }
@@ -653,6 +655,7 @@ class WorldObject : public Object
         bool PrintCoordinatesError(float x, float y, float z, char const* descr) const;
 
         virtual void StartGroupLoot(Group* /*group*/, uint32 /*timer*/) { }
+
 #ifdef ENABLE_ELUNA
         ElunaEventProcessor* elunaEvents;
 #endif /* ENABLE_ELUNA */
@@ -682,7 +685,7 @@ class WorldObject : public Object
         Position m_position;
         ViewPoint m_viewPoint;
         WorldUpdateCounter m_updateTracker;
-        bool m_IsActiveObject;
+        bool m_isActiveObject;
 };
 
 #endif

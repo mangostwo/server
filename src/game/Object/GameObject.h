@@ -557,7 +557,7 @@ struct QuaternionData
 // from `gameobject`
 struct GameObjectData
 {
-    uint32 id;                                              // entry in gamobject_template
+    uint32 id;                                              // entry in gameobject_template
     uint16 mapid;
     uint16 phaseMask;
     float posX;
