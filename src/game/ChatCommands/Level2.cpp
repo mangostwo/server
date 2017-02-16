@@ -1015,7 +1015,7 @@ bool ChatHandler::HandleGameObjectTurnCommand(char* args)
         { return false; } // mising components, abort
 
         float s = sin(o/2);
-        float c = cos(0/2);
+        float c = cos(o/2);
         final_rot = G3D::Quat(s*rx, s*ry, s*rz, c);
     }
 
