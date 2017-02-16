@@ -31,7 +31,6 @@
 #include "World.h"
 #include "GameObjectModel.h"
 #include "DBCStores.h"
-#include "Creature.h"
 
 struct GameobjectModelData
 {
@@ -78,13 +77,13 @@ void LoadGameObjectModelList()
             break;
         }
 
-        Vector3 v1, v2;
-        if (fread(&v1, sizeof(Vector3), 1, model_list_file) <= 0)
+        G3D::Vector3 v1, v2;
+        if (fread(&v1, sizeof(G3D::Vector3), 1, model_list_file) <= 0)
         {
             sLog.outDebug("File %s seems to be corrupted", VMAP::GAMEOBJECT_MODELS);
             break;
         }
-        if (fread(&v2, sizeof(Vector3), 1, model_list_file) <= 0)
+        if (fread(&v2, sizeof(G3D::Vector3), 1, model_list_file) <= 0)
         {
             sLog.outDebug("File %s seems to be corrupted", VMAP::GAMEOBJECT_MODELS);
             break;
@@ -98,7 +97,7 @@ void LoadGameObjectModelList()
 GameObjectModel::~GameObjectModel()
 {
     if (iModel)
-        { ((VMAP::VMapManager2*)VMAP::VMapFactory::createOrGetVMapManager())->releaseModelInstance(name); }
+        { ((VMAP::VMapManager2*)VMAP::VMapFactory::createOrGetVMapManager())->releaseModelInstance(iName); }
 }
 
 bool GameObjectModel::initialize(const GameObject* const pGo, const GameObjectDisplayInfoEntry* const pDisplayInfo)
@@ -107,9 +106,9 @@ bool GameObjectModel::initialize(const GameObject* const pGo, const GameObjectDi
     if (it == model_list.end())
         { return false; }
 
-    G3D::AABox mdl_box(it->second.bound);
+    iModelBound = it->second.bound;
     // ignore models with no bounds
-    if (mdl_box == G3D::AABox::zero())
+    if (iModelBound == G3D::AABox::zero())
     {
         sLog.outDebug("Model %s has zero bounds, loading skipped", it->second.name.c_str());
         return false;
@@ -120,39 +119,38 @@ bool GameObjectModel::initialize(const GameObject* const pGo, const GameObjectDi
     if (!iModel)
         { return false; }
 
-    name = it->second.name;
+    iOwner = pGo;
+    iName = it->second.name;
+    iPhaseMask = pGo->GetPhaseMask();
     iPos = Vector3(pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ());
-    phasemask = pGo->GetPhaseMask();
     iScale = pGo->GetObjectScale();
     iInvScale = 1.f / iScale;
 
-    G3D::Matrix3 iRotation = G3D::Matrix3::fromEulerAnglesZYX(pGo->GetOrientation(), 0, 0);
-    iInvRot = iRotation.inverse();
-    // transform bounding box:
-    mdl_box = AABox(mdl_box.low() * iScale, mdl_box.high() * iScale);
-    AABox rotated_bounds;
-    for (int i = 0; i < 8; ++i)
-        { rotated_bounds.merge(iRotation * mdl_box.corner(i)); }
-
-    this->iBound = rotated_bounds + iPos;
-
-#ifdef SPAWN_CORNERS
-    // test:
-    for (int i = 0; i < 8; ++i)
-    {
-        Vector3 pos(iBound.corner(i));
-        if (Creature* c = const_cast<GameObject*>(pGo)->SummonCreature(24440, pos.x, pos.y, pos.z, 0, TEMPSUMMON_MANUAL_DESPAWN, 0))
-        {
-            c->setFaction(35);
-            c->SetObjectScale(0.1f);
-        }
-    }
-#endif
+    G3D::Quat q;
+    pGo->GetQuaternion(q);
+    UpdateRotation(q);
 
     return true;
 }
 
-GameObjectModel* GameObjectModel::construct(const GameObject* const pGo)
+void GameObjectModel::UpdateRotation(G3D::Quat const& q)
+{
+    iQuat = q;
+
+    G3D::AABox mdl_box(iModelBound);
+
+    // transform bounding box:
+    mdl_box = AABox(mdl_box.low() * iScale, mdl_box.high() * iScale);
+
+    G3D::AABox rotated_bounds;
+
+    for (int i = 0; i < 8; ++i)
+        { rotated_bounds.merge((iQuat * G3D::Quat(mdl_box.corner(i)) * iQuat.conj()).imag()); }
+
+    iBound = rotated_bounds + iPos;
+}
+
+GameObjectModel* GameObjectModel::Create(const GameObject* const pGo)
 {
     const GameObjectDisplayInfoEntry* info = sGameObjectDisplayInfoStore.LookupEntry(pGo->GetDisplayId());
     if (!info)
@@ -168,9 +166,12 @@ GameObjectModel* GameObjectModel::construct(const GameObject* const pGo)
     return mdl;
 }
 
-bool GameObjectModel::intersectRay(const G3D::Ray& ray, float& MaxDist, bool StopAtFirstHit, uint32 ph_mask) const
+bool GameObjectModel::IntersectRay(const G3D::Ray& ray, float& MaxDist, bool StopAtFirstHit, uint32 phaseMask) const
 {
-    if (!(phasemask & ph_mask))
+    if (!isCollidable)
+        { return false; }
+
+    if (!(iPhaseMask & phaseMask))
         { return false; }
 
     float time = ray.intersectionTime(iBound);
@@ -178,8 +179,8 @@ bool GameObjectModel::intersectRay(const G3D::Ray& ray, float& MaxDist, bool Sto
         { return false; }
 
     // child bounds are defined in object space:
-    Vector3 p = iInvRot * (ray.origin() - iPos) * iInvScale;
-    Ray modRay(p, iInvRot * ray.direction());
+    Vector3 p = (iQuat.conj() * G3D::Quat((ray.origin() - iPos) * iInvScale) * iQuat).imag();
+    Ray modRay(p, (iQuat.conj() * G3D::Quat(ray.direction()) * iQuat).imag());
     float distance = MaxDist * iInvScale;
     bool hit = iModel->IntersectRay(modRay, distance, StopAtFirstHit);
     if (hit)
@@ -189,3 +190,4 @@ bool GameObjectModel::intersectRay(const G3D::Ray& ray, float& MaxDist, bool Sto
     }
     return hit;
 }
+

@@ -54,15 +54,16 @@
 #include "WaypointMovementGenerator.h"
 #include <cctype>
 #include <iostream>
+#include <fstream>
+#include <map>
+#include <typeinfo>
 #include "G3D/Quat.h"                                       // for turning GO's
+
 #include "TargetedMovementGenerator.h"                      // for HandleNpcUnFollowCommand
 #include "MoveMap.h"                                        // for mmap manager
 #include "PathFinder.h"                                     // for mmap commands
 #include "movement/MoveSplineInit.h"
 
-#include <fstream>
-#include <map>
-#include <typeinfo>
 
 static uint32 ReputationRankStrIndex[MAX_REPUTATION_RANK] =
 {
@@ -979,14 +980,60 @@ bool ChatHandler::HandleGameObjectTurnCommand(char* args)
         SetSentErrorMessage(true);
         return false;
     }
+    // we expect the command to have 4 parameters, describing a rotation quaternion
+    // the first param is the scalar component, i.e. the rotation angle
+    // the next params are the vector component, i.e. the rotation direction
+    // if the first param is not specified, it is considered a rotation to match
+    // the player's current orientation
 
-    float z_rot, y_rot, x_rot;
-    if (!ExtractFloat(&args, z_rot) || !ExtractOptFloat(&args, y_rot, 0) || !ExtractOptFloat(&args, x_rot, 0))
-        { return false; }
+    float rx, ry, rz, o;
+    G3D::Quat final_rot;
 
-    obj->SetWorldRotationAngles(z_rot, y_rot, x_rot);
+    if (!ExtractFloat(&args, o))  // if rotation angle is not specified or invalid
+    {
+         // let's obtain the player's orientation
+        if (!ExtractOptFloat(&args, o, m_session->GetPlayer()->GetOrientation()))
+            return false; //something is very wrong
+
+        // ok, let's rotate the GO.
+        // we first get the original rotation quaternion
+        // then we'll create a rotation quat describing the rotation around Z
+        G3D::Quat original_rot;
+        obj->GetQuaternion(original_rot);
+
+        // the rotation amount around Z-axis
+        float deltaO = o - obj->GetOrientationFromQuat(original_rot);
+
+        // multiplying 2 quaternions gives the final rotation
+        // quaternion multiplication is not commutative!
+        // quaternion multiplication gives a non-unit quat.
+        final_rot = G3D::Quat(0.0f, 0.0f, sin(deltaO/2), cos(deltaO/2)) * original_rot;
+
+    }
+    else // we have a valid rotation angle and we expect the description of rotation axis via 3 floats
+    {
+        if (!ExtractOptFloat(&args, rx, 0) || !ExtractOptFloat(&args, ry, 0) || !ExtractOptFloat(&args, rz, 0))
+        { return false; } // mising components, abort
+
+        float s = sin(o/2);
+        float c = cos(o/2);
+        final_rot = G3D::Quat(s*rx, s*ry, s*rz, c);
+    }
+
+    final_rot.unitize();
+    Map* map = obj->GetMap();
+    map->Remove(obj, false); //mandatory to remove GO model from m_dyn_tree
+
+    obj->SetQuaternion(final_rot); // this will update internal model rotation matrices
+    obj->Relocate(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientationFromQuat(final_rot));
+
+    map->Add(obj);
+
     obj->SaveToDB();
+    obj->Refresh();
+
     PSendSysMessage(LANG_COMMAND_TURNOBJMESSAGE, obj->GetGUIDLow(), obj->GetGOInfo()->name, obj->GetGUIDLow());
+
     return true;
 }
 

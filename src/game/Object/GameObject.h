@@ -544,16 +544,6 @@ enum GOState
 
 #define MAX_GO_STATE              3
 
-struct QuaternionData
-{
-    float x, y, z, w;
-
-    QuaternionData() : x(0.f), y(0.f), z(0.f), w(0.f) {}
-    QuaternionData(float X, float Y, float Z, float W) : x(X), y(Y), z(Z), w(W) {}
-
-    bool isUnit() const { return fabs(x * x + y * y + z * z + w * w - 1.f) < 1e-5;}
-};
-
 // from `gameobject`
 struct GameObjectData
 {
@@ -564,18 +554,14 @@ struct GameObjectData
     float posY;
     float posZ;
     float orientation;
-    QuaternionData rotation;
+    float rotx;
+    float roty;
+    float rotz;
+    float rotw;
     int32  spawntimesecs;
     uint32 animprogress;
     GOState go_state;
     uint8 spawnMask;
-};
-
-// from `gameobject_addon`
-struct GameObjectDataAddon
-{
-    uint32 guid;
-    QuaternionData path_rotation;
 };
 
 // For containers:  [GO_NOT_READY]->GO_READY (close)->GO_ACTIVATED (open) ->GO_JUST_DEACTIVATED->GO_READY        -> ...
@@ -610,6 +596,10 @@ enum CapturePointSliderValue
 
 class Unit;
 class GameObjectModel;
+namespace G3D
+{
+    class Quat;
+};
 struct GameObjectDisplayInfoEntry;
 
 // 5 sec for bobber catch
@@ -625,23 +615,18 @@ class GameObject : public WorldObject
 
         void AddToWorld() override;
         void RemoveFromWorld() override;
-        
         void CleanupsBeforeDelete() override;
 
         bool Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang,
-                    QuaternionData rotation = QuaternionData(), uint8 animprogress = GO_ANIMPROGRESS_DEFAULT, GOState go_state = GO_STATE_READY);
+                    float rx =0.0f , float ry = 0.0f , float rz = 0.0f , float rw = 0.0f, uint8 animprogress = GO_ANIMPROGRESS_DEFAULT, GOState go_state = GO_STATE_READY);
         void Update(uint32 update_diff, uint32 p_time) override;
-        GameObjectInfo const* GetGOInfo() const;
+
+        const GameObjectInfo* GetGOInfo() const { return m_goInfo; }
+        void SetGOInfo(const GameObjectInfo* goInfo_) { m_goInfo = goInfo_; }
 
         bool IsTransport() const;
 
         bool HasStaticDBSpawnData() const;                  // listed in `gameobject` table and have fixed in DB guid
-
-        // z_rot, y_rot, x_rot - rotation angles around z, y and x axes
-        void SetWorldRotationAngles(float z_rot, float y_rot, float x_rot);
-        void SetWorldRotation(float qx, float qy, float qz, float qw);
-        void SetTransportPathRotation(QuaternionData rotation);      // transforms(rotates) transport's path
-        int64 GetPackedWorldRotation() const { return m_packedRotation; }
 
         // overwrite WorldObject function for proper name localization
         const char* GetNameForLocaleIdx(int32 locale_idx) const override;
@@ -650,6 +635,12 @@ class GameObject : public WorldObject
         void SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask);
         bool LoadFromDB(uint32 guid, Map* map);
         void DeleteFromDB();
+
+        // rotation methods
+        void GetQuaternion(G3D::Quat& q) const;
+        void SetQuaternion(G3D::Quat const& q);
+        float GetOrientationFromQuat(G3D::Quat const& q);
+        int64 GetPackedRotation();
 
         void SetOwnerGuid(ObjectGuid ownerGuid)
         {
@@ -783,7 +774,7 @@ class GameObject : public WorldObject
         GridReference<GameObject>& GetGridRef() { return m_gridRef; }
 
         GameObjectModel* m_model;
-        
+
         // Event Handler
         EventProcessor m_Events;
 
@@ -811,7 +802,6 @@ class GameObject : public WorldObject
         GameObjectInfo const* m_goInfo;
         GameObjectDisplayInfoEntry const* m_displayInfo;
         int64 m_packedRotation;
-        QuaternionData m_worldRotation;
 
         // Loot System
         uint32 m_groupLootTimer;                            // (msecs)timer used for group loot

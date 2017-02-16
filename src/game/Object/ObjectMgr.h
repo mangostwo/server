@@ -364,7 +364,7 @@ struct DungeonFinderRewards
 {
     uint32 baseXPReward;
     int32  baseMonetaryReward;
-    
+
     DungeonFinderRewards() : baseXPReward(0), baseMonetaryReward(0) {}
     DungeonFinderRewards(uint32 BaseXPReward, int32 BaseMonetaryReward) : baseXPReward(BaseXPReward), baseMonetaryReward(BaseMonetaryReward) {}
 };
@@ -710,7 +710,7 @@ class ObjectMgr
                 return &itr->second;
             return NULL;
         }
-        
+
         DungeonFinderRequirements const* GetDungeonFinderRequirements(uint32 mapId, uint32 difficulty) const
         {
             DungeonFinderRequirementsMap::const_iterator itr = mDungeonFinderRequirementsMap.find(MAKE_PAIR32(mapId, difficulty));
@@ -718,7 +718,7 @@ class ObjectMgr
                 return &itr->second;
             return NULL;
         }
-        
+
         DungeonFinderRewards const* GetDungeonFinderRewards(uint32 level) const
         {
             DungeonFinderRewardsMap::const_iterator itr = mDungeonFinderRewardsMap.find(level);
@@ -726,7 +726,7 @@ class ObjectMgr
                 { return &itr->second; }
             return NULL;
         }
-        
+
         DungeonFinderRequirementsMap const& GetDungeonFinderRequirementsMap() const { return mDungeonFinderRequirementsMap; }
         DungeonFinderRewardsMap const& GetDungeonFinderRewardsMap() const { return mDungeonFinderRewardsMap; }
         DungeonFinderItemsMap const& GetDungeonFinderItemsMap() const { return mDungeonFinderItemsMap; }
@@ -774,7 +774,6 @@ class ObjectMgr
         void LoadEquipmentTemplates();
         void LoadGameObjectLocales();
         void LoadGameObjects();
-        void LoadGameObjectAddon();
         void LoadItemPrototypes();
         void LoadItemConverts();
         void LoadItemExpireConverts();
@@ -814,7 +813,7 @@ class ObjectMgr
 
         void LoadPointsOfInterest();
         void LoadQuestPOI();
-        
+
         void LoadDungeonFinderRequirements();
         void LoadDungeonFinderRewards();
         void LoadDungeonFinderItems();
@@ -1309,7 +1308,7 @@ class ObjectMgr
         PointOfInterestMap  mPointsOfInterest;
 
         QuestPOIMap         mQuestPOIMap;
-        
+
         DungeonFinderRequirementsMap mDungeonFinderRequirementsMap;
         DungeonFinderRewardsMap mDungeonFinderRewardsMap;
         DungeonFinderItemsMap mDungeonFinderItemsMap;

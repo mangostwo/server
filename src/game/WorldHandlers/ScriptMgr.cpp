@@ -508,8 +508,8 @@ void ScriptMgr::LoadScripts(DBScriptType type)
             {
                 if (!sMovieStore.LookupEntry(tmp.playMovie.movieId))
                 {
-                    sLog.outErrorDb("Table `%s` use non-existing movie_id (id: %u) in SCRIPT_COMMAND_PLAY_MOVIE for script id %u",
-                                tmp.playMovie.movieId, tmp.id);
+                    sLog.outErrorDb("Table `db_scripts [type = %d]` use non-existing movie_id (id: %u) in SCRIPT_COMMAND_PLAY_MOVIE for script id %u",
+                                type, tmp.playMovie.movieId, tmp.id);
                     continue;
                 }
                 break;
