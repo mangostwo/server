@@ -1448,7 +1448,7 @@ bool Creature::LoadFromDB(uint32 guidlow, Map* map)
         m_deathState = DEAD;
         if (CanFly())
         {
-            float tz = GetTerrain()->GetHeightStatic(data->posX, data->posY, data->posZ, false);
+            float tz = GetMap()->GetTerrain()->GetHeightStatic(data->posX, data->posY, data->posZ, false);
             if (data->posZ - tz > 0.1)
                 { Relocate(data->posX, data->posY, tz); }
         }
@@ -1478,7 +1478,7 @@ bool Creature::LoadFromDB(uint32 guidlow, Map* map)
             // Just set to dead, so need to relocate like above
             if (CanFly())
             {
-                float tz = GetTerrain()->GetHeightStatic(data->posX, data->posY, data->posZ, false);
+                float tz = GetMap()->GetTerrain()->GetHeightStatic(data->posX, data->posY, data->posZ, false);
                 if (data->posZ - tz > 0.1)
                     { Relocate(data->posX, data->posY, tz); }
             }
@@ -1492,6 +1492,8 @@ bool Creature::LoadFromDB(uint32 guidlow, Map* map)
 
     // checked at creature_template loading
     m_defaultMovementType = MovementGeneratorType(data->movementType);
+
+    map->Add(this);
 
     AIM_Initialize();
 
@@ -2703,14 +2705,9 @@ struct SpawnCreatureInMapsWorker
         if (map->IsLoaded(i_data->posX, i_data->posY))
         {
             Creature* pCreature = new Creature;
-            // DEBUG_LOG("Spawning creature %u",*itr);
             if (!pCreature->LoadFromDB(i_guid, map))
             {
                 delete pCreature;
-            }
-            else
-            {
-                map->Add(pCreature);
             }
         }
     }
