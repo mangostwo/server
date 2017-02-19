@@ -8494,6 +8494,12 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
                         }
 
                         permission = OWNER_PERMISSION;
+
+                        // Inform Instance Data, may be scripts related to OnSkinning like The Beast in UBRS
+                        if (InstanceData* mapInstance = creature->GetInstanceData())
+                        {
+                            mapInstance->OnCreatureLooted(creature, LOOT_SKINNING);
+                        }
                     }
                 }
                 // set group rights only for loot_type != LOOT_SKINNING
