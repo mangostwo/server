@@ -2691,6 +2691,13 @@ void Player::SetGameMaster(bool on)
         GetHostileRefManager().setOnlineOfflineState(false);
         CombatStopWithPets();
 
+        if (Pet* pet = GetPet())
+        {
+            if (m_ExtraFlags |= PLAYER_EXTRA_GM_ON)
+                pet->setFaction(35);
+            pet->GetHostileRefManager().setOnlineOfflineState(false);
+        }
+
         SetPhaseMask(PHASEMASK_ANYWHERE, false);            // see and visible in all phases
     }
     else
@@ -2703,6 +2710,12 @@ void Player::SetGameMaster(bool on)
         // restore phase
         AuraList const& phases = GetAurasByType(SPELL_AURA_PHASE);
         SetPhaseMask(!phases.empty() ? phases.front()->GetMiscValue() : uint32(PHASEMASK_NORMAL), false);
+
+        if (Pet* pet = GetPet())
+        {
+            pet->setFaction(getFaction());
+            pet->GetHostileRefManager().setOnlineOfflineState(true);
+        }
 
         CallForAllControlledUnits(SetGameMasterOffHelper(getFaction()), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 
