@@ -3101,7 +3101,7 @@ enum TrackedAuraType
 // will only support WoW, WoW:TBC and WoW:WotLK 3.3.5a client build 12340...
 
 #define EXPECTED_MANGOSD_CLIENT_BUILD        {12340, 0}
-#define EXPECTED_MANGOSD_CLIENT_VERSION      {"3.3.5a"}
+#define EXPECTED_MANGOSD_CLIENT_VERSION      "3.3.5a"
 
 // max supported expansion level in mangosd
 // NOTE: not set it more that supported by targeted client version with all expansions installed

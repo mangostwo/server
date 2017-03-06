@@ -528,7 +528,7 @@ struct PoolMapChecker
 
     explicit PoolMapChecker(PoolManager::PoolTemplateDataMap& poolTemplates) : m_poolTemplates(poolTemplates) {}
 
-    bool CheckAndRemember(uint32 mapid, uint32 pool_id, char const* tableName, char const* elementName)
+    bool CheckAndRemember(uint32 mapid, uint32 pool_id, char const* tableName, char const* elementName, uint32 guid)
     {
         MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
         if (!mapEntry)
@@ -550,16 +550,16 @@ struct PoolMapChecker
         // pool spawns must be at single instanceable map
         if (mapEntry->Instanceable())
         {
-            sLog.outErrorDb("`%s` has %s spawned at instanceable map %u when one or several other spawned at different map %u in pool id %i, skipped.",
-                            tableName, elementName, mapid, poolMapEntry->MapID, pool_id);
+            sLog.outErrorDb("`%s` has %s (%u) spawned at instanceable map %u when one or several other spawned at different map %u in pool id %i, skipped.",
+                            tableName, elementName, guid, mapid, poolMapEntry->MapID, pool_id);
             return false;
         }
 
         // pool spawns must be at single instanceable map
         if (poolMapEntry->Instanceable())
         {
-            sLog.outErrorDb("`%s` has %s spawned at map %u when one or several other spawned at different instanceable map %u in pool id %i, skipped.",
-                            tableName, elementName, mapid, poolMapEntry->MapID, pool_id);
+            sLog.outErrorDb("`%s` has %s (%u) spawned at map %u when one or several other spawned at different instanceable map %u in pool id %i, skipped.",
+                            tableName, elementName, guid, mapid, poolMapEntry->MapID, pool_id);
             return false;
         }
 
@@ -666,7 +666,7 @@ void PoolManager::LoadFromDB()
                 continue;
             }
 
-            if (!mapChecker.CheckAndRemember(data->mapid, pool_id, "pool_creature", "creature guid"))
+            if (!mapChecker.CheckAndRemember(data->mapid, pool_id, "pool_creature", "creature guid", guid))
                 { continue; }
 
             PoolTemplateData* pPoolTemplate = &mPoolTemplate[pool_id];
@@ -738,7 +738,7 @@ void PoolManager::LoadFromDB()
                 continue;
             }
 
-            if (!mapChecker.CheckAndRemember(data->mapid, pool_id, "pool_creature_template", "creature guid"))
+            if (!mapChecker.CheckAndRemember(data->mapid, pool_id, "pool_creature_template", "creature guid", guid))
                 { continue; }
 
             PoolTemplateData* pPoolTemplate = &mPoolTemplate[pool_id];
@@ -813,7 +813,7 @@ void PoolManager::LoadFromDB()
                 continue;
             }
 
-            if (!mapChecker.CheckAndRemember(data->mapid, pool_id, "pool_gameobject", "gameobject guid"))
+            if (!mapChecker.CheckAndRemember(data->mapid, pool_id, "pool_gameobject", "gameobject guid", guid))
                 { continue; }
 
             PoolTemplateData* pPoolTemplate = &mPoolTemplate[pool_id];
@@ -895,7 +895,7 @@ void PoolManager::LoadFromDB()
                 continue;
             }
 
-            if (!mapChecker.CheckAndRemember(data->mapid, pool_id, "pool_gameobject_template", "gameobject guid"))
+            if (!mapChecker.CheckAndRemember(data->mapid, pool_id, "pool_gameobject_template", "gameobject guid", guid))
                 { continue; }
 
             PoolTemplateData* pPoolTemplate = &mPoolTemplate[pool_id];
@@ -988,7 +988,7 @@ void PoolManager::LoadFromDB()
                 // if child pool not have map data then it empty or have not checked child then will checked and all line later
                 if (MapEntry const* childMapEntry = mPoolTemplate[poolItr->first].mapEntry)
                 {
-                    if (!mapChecker.CheckAndRemember(childMapEntry->MapID, poolItr->second, "pool_pool", "pool with creature/gameobject"))
+                    if (!mapChecker.CheckAndRemember(childMapEntry->MapID, poolItr->second, "pool_pool", "pool with creature/gameobject", poolItr->first))
                     {
                         mPoolPoolGroups[poolItr->second].RemoveOneRelation(poolItr->first);
                         mPoolSearchMap.erase(poolItr);
