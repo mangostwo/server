@@ -744,6 +744,14 @@ SD3ErrorLogFile              = "scriptdev3-errors.log"
 #        Mail delivery delay time for item sending
 #        Default: 3600 sec (1 hour)
 #
+#    MailWithCodExpiryDays
+#        Mail expiry delay time in days for mails with cost of delivery
+#        Default: 3 days
+#
+#    MailWithoutCodExpiryDays
+#        Mail expiry delay time in days for mails with no cost of delivery
+#        Default: 30 days
+#
 #    MassMailer.SendPerTick
 #        Max amount mail send each tick from mails list scheduled for mass mailer proccesing.
 #        More mails increase server load but speedup mass mail proccess. Normal tick length: 50 msecs, so 20 ticks in sec and 200 mails in sec by default.
@@ -874,6 +882,8 @@ TradeSkill.GMIgnore.Skill                 = 4
 MinPetitionSigns                          = 9
 MaxGroupXPDistance                        = 74
 MailDeliveryDelay                         = 3600
+MailWithCodExpiryDelay                    = 3
+MailWithoutCodExpiryDelay                 = 30
 MassMailer.SendPerTick                    = 10
 SkillChance.Prospecting                   = 0
 SkillChance.Milling                       = 0
