@@ -319,7 +319,7 @@ void WorldSession::HandleSendMail(WorldPacket& recv_data)
         }
     }
 
-    // If theres is an item, there is a one hour delivery delay if sent to another account's character.
+    // If theres is an item, there is a (config default = one hour) delivery delay if sent to another account's character.
     uint32 deliver_delay = needItemDelay ? sWorld.getConfig(CONFIG_UINT32_MAIL_DELIVERY_DELAY) : 0;
 
     // will delete item or place to receiver mail list
