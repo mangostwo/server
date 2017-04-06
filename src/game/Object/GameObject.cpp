@@ -172,8 +172,8 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     // let's make sure we don't send the client invalid quaternion
     if (rx == 0.0f && ry == 0.0f && rz == 0.0f)
     {
-        ry = sin(ang/2);
-        rz = cos(ang/2);
+        rz = sin(ang/2);
+        rw = cos(ang/2);
     }
 
     G3D::Quat q(rx, ry, rz, rw);
