@@ -13,6 +13,9 @@
 
 WRATH OF THE LICH KING BRANCH
 ===
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f63a9a4c192445849394e49a1c09d504)](https://www.codacy.com/app/billy1arm/MangosTwo?utm_source=github.com&utm_medium=referral&utm_content=mangostwo/server&utm_campaign=badger)
+
 ### A World of Warcraft server for Wrath of the Lich King
 ----
 *Mangos* is open source project, built in [C++][7], it's fast, runs on multiple
