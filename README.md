@@ -9,6 +9,7 @@
 <a href='https://travis-ci.org/mangostwo/server/builds' target='MangosTwo'><img src='https://travis-ci.org/mangostwo/server.png' border=0></a>
  Windows 
 <a href='https://ci.appveyor.com/project/MaNGOS/server-80qcn/history' target='MangosTwo'><img src='https://ci.appveyor.com/api/projects/status/github/mangostwo/server?branch=master&svg=true' border=0></a>
+  Codacy Status <a href="https://www.codacy.com/app/MaNGOS/MangosTwo?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mangostwo/server&amp;utm_campaign=Badge_Grade"><img src="https://api.codacy.com/project/badge/Grade/f63a9a4c192445849394e49a1c09d504"/></a>
 </td></tr></table>
 
 WRATH OF THE LICH KING BRANCH
