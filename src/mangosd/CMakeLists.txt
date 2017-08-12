@@ -47,7 +47,7 @@ generate_product_version(
 	COMPANY_NAME "getmangos.eu"
 # Do not alter, remove or prevent COMPANY_COPYRIGHT from displaying
 	COMPANY_COPYRIGHT
-	FILE_DESCRIPTION "Mangos Zero Server Daemon"
+	FILE_DESCRIPTION "Mangos Two Server Daemon"
 )
 endif()
 
