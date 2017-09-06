@@ -24,7 +24,7 @@
 
 #ifndef MANGOS_H_REVISION
 #define MANGOS_H_REVISION
-    #define REVISION_NR "2106047"
+    #define REVISION_NR "2106073"
 
     #define REALMD_DB_VERSION_NR 21
     #define REALMD_DB_STRUCTURE_NR 1
@@ -38,6 +38,6 @@
 
     #define WORLD_DB_VERSION_NR 21
     #define WORLD_DB_STRUCTURE_NR 6
-    #define WORLD_DB_CONTENT_NR 47
-    #define WORLD_DB_UPDATE_DESCRIPTION "q9294_Healing_the_Lake"
+    #define WORLD_DB_CONTENT_NR 73
+    #define WORLD_DB_UPDATE_DESCRIPTION "Lazy_peon_script_text"
 #endif // __REVISION_H__
