@@ -7527,7 +7527,7 @@ void Aura::PeriodicTick()
                 return;
 
             // Don't heal target if it is already at max health
-            if (target->GetHealth() == target->GetMaxHealth())
+            if (target->GetHealth() != target->GetMaxHealth())
                 return;
 
             // heal for caster damage (must be alive)
@@ -7619,6 +7619,18 @@ void Aura::PeriodicTick()
             // ignore item heals
 //            if(procSpell && !haveCastItem)
 //                pCaster->ProcDamageAndSpell(target, procAttacker, procVictim, PROC_EX_NORMAL_HIT, pdamage, BASE_ATTACK, spellProto);
+            if (spellProto->Id == 24869 && GetAuraTicks() == 10)
+                pCaster->CastSpell(pCaster, 24870, true); // crude hack for Apple Bobber, Bread of the Dead and Winter Veil Cookie well fed buff
+            if (spellProto->Id == 61874 && GetAuraTicks() == 10)
+                pCaster->CastSpell(pCaster, 24870, true); // crude hack for Noblegarden Chocolate well fed buff
+            if (spellProto->Id == 71068 && GetAuraTicks() == 10)
+                pCaster->CastSpell(pCaster, 24870, true); // crude hack for Sweet Surprise well fed buff
+            if (spellProto->Id == 71071 && GetAuraTicks() == 10)
+                pCaster->CastSpell(pCaster, 24870, true); // crude hack for Very Berry Cream well fed buff
+            if (spellProto->Id == 71073 && GetAuraTicks() == 10)
+                pCaster->CastSpell(pCaster, 24870, true); // crude hack for Dark Desire well fed buff
+            if (spellProto->Id == 71074 && GetAuraTicks() == 10)
+                pCaster->CastSpell(pCaster, 24870, true); // crude hack for Buttermilk Delight well fed buff
             break;
         }
         case SPELL_AURA_PERIODIC_MANA_LEECH:
