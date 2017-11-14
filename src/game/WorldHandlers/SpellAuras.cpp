@@ -7528,109 +7528,109 @@ void Aura::PeriodicTick()
 
             // Don't heal target if it is already at max health
             if (target->GetHealth() != target->GetMaxHealth())
-                return;
-
-            // heal for caster damage (must be alive)
-            if (target != pCaster && spellProto->SpellVisual[0] == 163 && !pCaster->IsAlive())
-                { return; }
-
-            // ignore non positive values (can be result apply spellmods to aura damage
-            uint32 amount = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
-
-            uint32 pdamage;
-
-            if (m_modifier.m_auraname == SPELL_AURA_OBS_MOD_HEALTH)
-                { pdamage = uint32(target->GetMaxHealth() * amount / 100); }
-            else
             {
-                pdamage = amount;
 
-                // Wild Growth (1/7 - 6 + 2*ramainTicks) %
-                if (spellProto->SpellFamilyName == SPELLFAMILY_DRUID && spellProto->SpellIconID == 2864)
-                {
-                    int32 ticks = GetAuraMaxTicks();
-                    int32 remainingTicks = ticks - GetAuraTicks();
-                    int32 addition = int32(amount) * ticks * (-6 + 2 * remainingTicks) / 100;
+                // heal for caster damage (must be alive)
+                if (target != pCaster && spellProto->SpellVisual[0] == 163 && !pCaster->IsAlive())
+                    { return; }
 
-                    if (GetAuraTicks() != 1)
-                        // Item - Druid T10 Restoration 2P Bonus
-                        if (Aura* aura = pCaster->GetAura(70658, EFFECT_INDEX_0))
-                            addition += abs(int32((addition * aura->GetModifier()->m_amount) / ((ticks - 1) * 100)));
+                // ignore non positive values (can be result apply spellmods to aura damage
+                uint32 amount = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
 
-                    pdamage = int32(pdamage) + addition;
-                }
-            }
+                uint32 pdamage;
 
-            pdamage = target->SpellHealingBonusTaken(pCaster, spellProto, pdamage, DOT, GetStackAmount());
-
-            // This method can modify pdamage
-            bool isCrit = IsCritFromAbilityAura(pCaster, pdamage);
-
-            uint32 absorbHeal = 0;
-            pCaster->CalculateHealAbsorb(pdamage, &absorbHeal);
-            pdamage -= absorbHeal;
-
-            DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s heal of %s for %u health  (absorbed %u) inflicted by %u",
-                              GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, absorbHeal, GetId());
-
-            int32 gain = target->ModifyHealth(pdamage);
-            SpellPeriodicAuraLogInfo pInfo(this, pdamage, (pdamage - uint32(gain)), absorbHeal, 0, 0.0f, isCrit);
-            target->SendPeriodicAuraLog(&pInfo);
-
-            // Set trigger flag
-            uint32 procAttacker = PROC_FLAG_ON_DO_PERIODIC;
-            uint32 procVictim   = PROC_FLAG_ON_TAKE_PERIODIC;
-            uint32 procEx = PROC_EX_PERIODIC_POSITIVE | (isCrit ? PROC_EX_CRITICAL_HIT : PROC_EX_NORMAL_HIT);
-            pCaster->ProcDamageAndSpell(target, procAttacker, procVictim, procEx, gain, BASE_ATTACK, spellProto);
-
-            // add HoTs to amount healed in bgs
-            if (pCaster->GetTypeId() == TYPEID_PLAYER)
-                if (BattleGround* bg = ((Player*)pCaster)->GetBattleGround())
-                    bg->UpdatePlayerScore(((Player*)pCaster), SCORE_HEALING_DONE, gain);
-
-            target->GetHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
-
-            // heal for caster damage
-            if (target != pCaster && spellProto->SpellVisual[0] == 163)
-            {
-                uint32 dmg = spellProto->manaPerSecond;
-                if (pCaster->GetHealth() <= dmg && pCaster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    pCaster->RemoveAurasDueToSpell(GetId());
-
-                    // finish current generic/channeling spells, don't affect autorepeat
-                    pCaster->FinishSpell(CURRENT_GENERIC_SPELL);
-                    pCaster->FinishSpell(CURRENT_CHANNELED_SPELL);
-                }
+                if (m_modifier.m_auraname == SPELL_AURA_OBS_MOD_HEALTH)
+                    { pdamage = uint32(target->GetMaxHealth() * amount / 100); }
                 else
                 {
-                    uint32 damage = gain;
-                    uint32 absorb = 0;
-                    pCaster->DealDamageMods(pCaster, damage, &absorb);
-                    pCaster->SendSpellNonMeleeDamageLog(pCaster, GetId(), damage, GetSpellSchoolMask(spellProto), absorb, 0, false, 0, false);
+                    pdamage = amount;
 
-                    CleanDamage cleanDamage =  CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL);
-                    pCaster->DealDamage(pCaster, damage, &cleanDamage, NODAMAGE, GetSpellSchoolMask(spellProto), spellProto, true);
+                    // Wild Growth (1/7 - 6 + 2*ramainTicks) %
+                    if (spellProto->SpellFamilyName == SPELLFAMILY_DRUID && spellProto->SpellIconID == 2864)
+                    {
+                        int32 ticks = GetAuraMaxTicks();
+                        int32 remainingTicks = ticks - GetAuraTicks();
+                        int32 addition = int32(amount) * ticks * (-6 + 2 * remainingTicks) / 100;
+
+                        if (GetAuraTicks() != 1)
+                            // Item - Druid T10 Restoration 2P Bonus
+                            if (Aura* aura = pCaster->GetAura(70658, EFFECT_INDEX_0))
+                                addition += abs(int32((addition * aura->GetModifier()->m_amount) / ((ticks - 1) * 100)));
+
+                        pdamage = int32(pdamage) + addition;
+                    }
+                }
+
+                pdamage = target->SpellHealingBonusTaken(pCaster, spellProto, pdamage, DOT, GetStackAmount());
+
+                // This method can modify pdamage
+                bool isCrit = IsCritFromAbilityAura(pCaster, pdamage);
+
+                uint32 absorbHeal = 0;
+                pCaster->CalculateHealAbsorb(pdamage, &absorbHeal);
+                pdamage -= absorbHeal;
+
+                DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s heal of %s for %u health  (absorbed %u) inflicted by %u",
+                                  GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, absorbHeal, GetId());
+
+                int32 gain = target->ModifyHealth(pdamage);
+                SpellPeriodicAuraLogInfo pInfo(this, pdamage, (pdamage - uint32(gain)), absorbHeal, 0, 0.0f, isCrit);
+                target->SendPeriodicAuraLog(&pInfo);
+
+                // Set trigger flag
+                uint32 procAttacker = PROC_FLAG_ON_DO_PERIODIC;
+                uint32 procVictim   = PROC_FLAG_ON_TAKE_PERIODIC;
+                uint32 procEx = PROC_EX_PERIODIC_POSITIVE | (isCrit ? PROC_EX_CRITICAL_HIT : PROC_EX_NORMAL_HIT);
+                pCaster->ProcDamageAndSpell(target, procAttacker, procVictim, procEx, gain, BASE_ATTACK, spellProto);
+
+                // add HoTs to amount healed in bgs
+                if (pCaster->GetTypeId() == TYPEID_PLAYER)
+                    if (BattleGround* bg = ((Player*)pCaster)->GetBattleGround())
+                        bg->UpdatePlayerScore(((Player*)pCaster), SCORE_HEALING_DONE, gain);
+
+                target->GetHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
+
+                // heal for caster damage
+                if (target != pCaster && spellProto->SpellVisual[0] == 163)
+                {
+                    uint32 dmg = spellProto->manaPerSecond;
+                    if (pCaster->GetHealth() <= dmg && pCaster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        pCaster->RemoveAurasDueToSpell(GetId());
+
+                        // finish current generic/channeling spells, don't affect autorepeat
+                        pCaster->FinishSpell(CURRENT_GENERIC_SPELL);
+                        pCaster->FinishSpell(CURRENT_CHANNELED_SPELL);
+                    }
+                    else
+                    {
+                        uint32 damage = gain;
+                        uint32 absorb = 0;
+                        pCaster->DealDamageMods(pCaster, damage, &absorb);
+                        pCaster->SendSpellNonMeleeDamageLog(pCaster, GetId(), damage, GetSpellSchoolMask(spellProto), absorb, 0, false, 0, false);
+
+                        CleanDamage cleanDamage =  CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL);
+                        pCaster->DealDamage(pCaster, damage, &cleanDamage, NODAMAGE, GetSpellSchoolMask(spellProto), spellProto, true);
+                    }
                 }
             }
-
-//            uint32 procAttacker = PROC_FLAG_ON_DO_PERIODIC;//   | PROC_FLAG_SUCCESSFUL_HEAL;
-//            uint32 procVictim   = 0;// ROC_FLAG_ON_TAKE_PERIODIC | PROC_FLAG_TAKEN_HEAL;
-            // ignore item heals
-//            if(procSpell && !haveCastItem)
-//                pCaster->ProcDamageAndSpell(target, procAttacker, procVictim, PROC_EX_NORMAL_HIT, pdamage, BASE_ATTACK, spellProto);
-            if (spellProto->Id == 24869 && GetAuraTicks() == 10)
-                pCaster->CastSpell(pCaster, 24870, true); // crude hack for Apple Bobber, Bread of the Dead and Winter Veil Cookie well fed buff
-            if (spellProto->Id == 61874 && GetAuraTicks() == 10)
-                pCaster->CastSpell(pCaster, 24870, true); // crude hack for Noblegarden Chocolate well fed buff
-            if (spellProto->Id == 71068 && GetAuraTicks() == 10)
-                pCaster->CastSpell(pCaster, 24870, true); // crude hack for Sweet Surprise well fed buff
-            if (spellProto->Id == 71071 && GetAuraTicks() == 10)
-                pCaster->CastSpell(pCaster, 24870, true); // crude hack for Very Berry Cream well fed buff
-            if (spellProto->Id == 71073 && GetAuraTicks() == 10)
-                pCaster->CastSpell(pCaster, 24870, true); // crude hack for Dark Desire well fed buff
-            if (spellProto->Id == 71074 && GetAuraTicks() == 10)
-                pCaster->CastSpell(pCaster, 24870, true); // crude hack for Buttermilk Delight well fed buff
+            // Apply Well Fed buffs from non-standard spells
+            if GetAuraTicks() == 10)
+            {
+                switch spellProto->Id)
+                {
+                    case 24869: // Apple Bobber
+                    case 61874: // Noblegarden Chocolate
+                    case 71068: // Sweet Surprise
+                    case 71071: // Very Berry Cream
+                    case 71073: // Dark Desire
+                    case 71074: // Buttermilk Delight
+                        pCaster->CastSpell(pCaster, 24870, true);
+                        break;
+                    default:
+                        break;
+                }
+            }
             break;
         }
         case SPELL_AURA_PERIODIC_MANA_LEECH:
