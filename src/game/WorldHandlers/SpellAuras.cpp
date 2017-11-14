@@ -7617,7 +7617,7 @@ void Aura::PeriodicTick()
             // Apply Well Fed buffs from non-standard spells
             if (GetAuraTicks() == 10)
             {
-                switch spellProto->Id)
+                switch (spellProto->Id)
                 {
                     case 24869: // Apple Bobber
                     case 61874: // Noblegarden Chocolate
