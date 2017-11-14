@@ -7615,7 +7615,7 @@ void Aura::PeriodicTick()
                 }
             }
             // Apply Well Fed buffs from non-standard spells
-            if GetAuraTicks() == 10)
+            if (GetAuraTicks() == 10)
             {
                 switch spellProto->Id)
                 {
