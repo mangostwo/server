@@ -3013,8 +3013,8 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
         m_caster->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
     }
 
-    // add non-triggered (with cast time and without)
-    if (!m_IsTriggeredSpell)
+    // add non-triggered (with cast time and without) or triggered channeled
+    if (!m_IsTriggeredSpell || IsChanneledSpell(m_spellInfo))
     {
         // add to cast type slot
         m_caster->SetCurrentCastedSpell(this);
@@ -6134,12 +6134,8 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
 
         Unit* _target = m_targets.getUnitTarget();
 
-        // for target dead/target not valid
-        if (_target && m_targets.m_targetMask & TARGET_FLAG_UNIT)
+        if (_target)                                            // for target dead/target not valid
         {
-            if (!_target->IsTargetableForAttack())
-                { return SPELL_FAILED_BAD_TARGETS; }            // guessed error
-
             if (IsPositiveSpell(m_spellInfo->Id))
             {
                 if (m_caster->IsHostileTo(_target))
@@ -6147,6 +6143,9 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
             }
             else
             {
+                if (!_target->IsTargetableForAttack())
+                { return SPELL_FAILED_BAD_TARGETS; }            // guessed error
+
                 bool duelvsplayertar = false;
                 for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
                 {
