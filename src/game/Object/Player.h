@@ -1141,8 +1141,8 @@ class Player : public Unit
         void SetGMVisible(bool on);
         void SetPvPDeath(bool on)
         {
-            if (on) { m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH; } 
-            else { m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH; } 
+            if (on) { m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH; }
+            else { m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH; }
         }
 
         // 0 = own auction, -1 = enemy auction, 1 = goblin auction
@@ -1442,7 +1442,7 @@ class Player : public Unit
         bool CanRewardQuest(Quest const* pQuest, bool msg) const;
         bool CanRewardQuest(Quest const* pQuest, uint32 reward, bool msg) const;
         void AddQuest(Quest const* pQuest, Object* questGiver);
-        void CompleteQuest(uint32 quest_id);
+        void CompleteQuest(uint32 quest_id, QuestStatus status = QUEST_STATUS_FORCE_COMPLETE);
         void IncompleteQuest(uint32 quest_id);
         void RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver, bool announce = true);
 
