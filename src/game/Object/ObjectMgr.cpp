@@ -9262,55 +9262,6 @@ void ObjectMgr::LoadVendorTemplates()
         { sLog.outErrorDb("Table `npc_vendor_template` has vendor template %u not used by any vendors ", *vItr); }
 }
 
-void ObjectMgr::LoadNpcGossips()
-{
-
-    m_mCacheNpcTextIdMap.clear();
-
-    QueryResult* result = WorldDatabase.Query("SELECT npc_guid, textid FROM npc_gossip");
-    if (!result)
-    {
-        BarGoLink bar(1);
-        bar.step();
-        sLog.outString(">> Loaded `npc_gossip`, table is empty!");
-        sLog.outString();
-        return;
-    }
-
-    BarGoLink bar(result->GetRowCount());
-
-    uint32 count = 0;
-    uint32 guid, textid;
-    do
-    {
-        bar.step();
-
-        Field* fields = result->Fetch();
-
-        guid   = fields[0].GetUInt32();
-        textid = fields[1].GetUInt32();
-
-        if (!GetCreatureData(guid))
-        {
-            sLog.outErrorDb("Table `npc_gossip` have nonexistent creature (GUID: %u) entry, ignore. ", guid);
-            continue;
-        }
-        if (!GetGossipText(textid))
-        {
-            sLog.outErrorDb("Table `npc_gossip` for creature (GUID: %u) have wrong Textid (%u), ignore. ", guid, textid);
-            continue;
-        }
-
-        m_mCacheNpcTextIdMap[guid] = textid ;
-        ++count;
-    }
-    while (result->NextRow());
-    delete result;
-
-    sLog.outString(">> Loaded %d NpcTextId", count);
-    sLog.outString();
-}
-
 void ObjectMgr::LoadGossipMenu(std::set<uint32>& gossipScriptSet)
 {
     m_mGossipMenusMap.clear();

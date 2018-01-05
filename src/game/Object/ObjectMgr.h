@@ -824,8 +824,6 @@ class ObjectMgr
 
         void LoadGameTele();
 
-        void LoadNpcGossips();
-
         void LoadGossipMenus();
 
         void LoadVendorTemplates();
@@ -869,13 +867,13 @@ class ObjectMgr
         uint32 GenerateStaticCreatureLowGuid()
         {
             if (m_StaticCreatureGuids.GetNextAfterMaxUsed() >= m_FirstTemporaryCreatureGuid)
-            { return 0; } 
+            { return 0; }
             return m_StaticCreatureGuids.Generate();
         }
         uint32 GenerateStaticGameObjectLowGuid()
         {
             if (m_StaticGameObjectGuids.GetNextAfterMaxUsed() >= m_FirstTemporaryGameObjectGuid)
-            { return 0; } 
+            { return 0; }
             return m_StaticGameObjectGuids.Generate();
         }
 

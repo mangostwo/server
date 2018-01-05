@@ -1292,9 +1292,6 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Instance encounters data...");  // must be after Creature loading
     sObjectMgr.LoadInstanceEncounters();
 
-    sLog.outString("Loading Npc Text Id...");
-    sObjectMgr.LoadNpcGossips();                            // must be after load Creature and LoadGossipText
-
     sLog.outString("Loading Gossip scripts...");
     sScriptMgr.LoadDbScripts(DBS_ON_GOSSIP);                 // must be before gossip menu options
 
@@ -2160,7 +2157,10 @@ void World::ShutdownServ(uint32 time, uint32 options, uint8 exitcode)
     if (time == 0)
     {
         if (!(options & SHUTDOWN_MASK_IDLE) || GetActiveAndQueuedSessionCount() == 0)
-            m_stopEvent = true;                             // exist code already set
+        {
+                sObjectAccessor.SaveAllPlayers();        // save all players.
+                m_stopEvent = true;                                // exist code already set
+        }
         else
         {
             m_ShutdownTimer = 1;
