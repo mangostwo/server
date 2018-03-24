@@ -255,7 +255,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
 
             // Used by Eluna
 #ifdef ENABLE_ELUNA
-            sEluna->OnChat(GetPlayer(), type, lang, msg, player);
+            if (!sEluna->OnChat(GetPlayer(), type, lang, msg, player))
+                return;
 #endif /* ENABLE_ELUNA */
             GetPlayer()->Whisper(msg, lang, player->GetObjectGuid());
         } break;
