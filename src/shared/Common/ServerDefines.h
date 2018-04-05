@@ -22,42 +22,38 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#ifndef MANGOSSERVER_SERVERDEFINES_H
+#define MANGOSSERVER_SERVERDEFINES_H
 
-char const* localeNames[MAX_LOCALE] =
+/**
+ * @brief
+ *
+ */
+enum AccountTypes
 {
-    "enUS",                                                 // also enGB
-    "koKR",
-    "frFR",
-    "deDE",
-    "zhCN",
-    "zhTW",
-    "esES",
-    "esMX",
-    "ruRU"
+    SEC_PLAYER         = 0,
+    SEC_MODERATOR      = 1,
+    SEC_GAMEMASTER     = 2,
+    SEC_ADMINISTRATOR  = 3,
+    SEC_CONSOLE        = 4                                  // must be always last in list, accounts must have less security level always also
 };
 
-// used for search by name or iterate all names
-LocaleNameStr const fullLocaleNameList[] =
+/**
+ * @brief Used in mangosd/realmd
+ *
+ */
+enum RealmFlags
 {
-    { "enUS", LOCALE_enUS },
-    { "enGB", LOCALE_enUS },
-    { "koKR", LOCALE_koKR },
-    { "frFR", LOCALE_frFR },
-    { "deDE", LOCALE_deDE },
-    { "zhCN", LOCALE_zhCN },
-    { "zhTW", LOCALE_zhTW },
-    { "esES", LOCALE_esES },
-    { "esMX", LOCALE_esMX },
-    { "ruRU", LOCALE_ruRU },
-    { NULL,   LOCALE_enUS }
+    REALM_FLAG_NONE         = 0x00,
+    REALM_FLAG_INVALID      = 0x01,
+    REALM_FLAG_OFFLINE      = 0x02,
+    REALM_FLAG_SPECIFYBUILD = 0x04,                         // client will show realm version in RealmList screen in form "RealmName (major.minor.revision.build)"
+    REALM_FLAG_UNK1         = 0x08,
+    REALM_FLAG_UNK2         = 0x10,
+    REALM_FLAG_NEW_PLAYERS  = 0x20,
+    REALM_FLAG_RECOMMENDED  = 0x40,
+    REALM_FLAG_FULL         = 0x80
 };
 
-LocaleConstant GetLocaleByName(const std::string& name)
-{
-    for (LocaleNameStr const* itr = &fullLocaleNameList[0]; itr->name; ++itr)
-        if (name == itr->name)
-            { return itr->locale; }
 
-    return LOCALE_enUS;                                     // including enGB case
-}
+#endif

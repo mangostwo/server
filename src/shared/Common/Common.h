@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2017  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2018  MaNGOS project <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,6 +76,7 @@
 #include <errno.h>
 #include <signal.h>
 #include <assert.h>
+#include "ServerDefines.h"
 
 #if defined(__sun__)
 #include <ieeefp.h> // finite() on Solaris
@@ -200,36 +201,6 @@ enum TimeConstants
     MONTH  = DAY * 30,
     YEAR   = MONTH * 12,
     IN_MILLISECONDS = 1000
-};
-
-/**
- * @brief
- *
- */
-enum AccountTypes
-{
-    SEC_PLAYER         = 0,
-    SEC_MODERATOR      = 1,
-    SEC_GAMEMASTER     = 2,
-    SEC_ADMINISTRATOR  = 3,
-    SEC_CONSOLE        = 4                                  // must be always last in list, accounts must have less security level always also
-};
-
-/**
- * @brief Used in mangosd/realmd
- *
- */
-enum RealmFlags
-{
-    REALM_FLAG_NONE         = 0x00,
-    REALM_FLAG_INVALID      = 0x01,
-    REALM_FLAG_OFFLINE      = 0x02,
-    REALM_FLAG_SPECIFYBUILD = 0x04,                         // client will show realm version in RealmList screen in form "RealmName (major.minor.revision.build)"
-    REALM_FLAG_UNK1         = 0x08,
-    REALM_FLAG_UNK2         = 0x10,
-    REALM_FLAG_NEW_PLAYERS  = 0x20,
-    REALM_FLAG_RECOMMENDED  = 0x40,
-    REALM_FLAG_FULL         = 0x80
 };
 
 /**
