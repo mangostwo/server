@@ -3,7 +3,7 @@
 # MaNGOS Build Automation Script                                              #
 # Written By: Ryan Ashley                                                     #
 # Updated By: Cedric Servais                                                  #
-# Copyright (c) 2014-2016 MaNGOS Project                                      #
+# Copyright (c) 2014-2018 MaNGOS Project                                      #
 # https://getmangos.eu/                                                       #
 #                                                                             #
 # This program is free software; you can redistribute it and/or modify        #
@@ -815,9 +815,9 @@ function GetBuildOptions()
   fi
 
   if [[ $OPTIONS == *9* ]]; then
-    P_PBOTS="1"
+    P_BOTS="1"
   else
-    P_PBOTS="0"
+    P_BOTS="0"
   fi 
 
   # Verify that at least one scripting library is enabled
