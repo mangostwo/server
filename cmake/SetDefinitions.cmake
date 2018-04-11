@@ -43,6 +43,7 @@ if(WIN32)
     set(LIBS_DIR ${CMAKE_INSTALL_PREFIX}/)
 
     if(MSVC)
+    set(CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD 1)
         if(PLATFORM EQUAL 64)
             # This definition is necessary to work around a bug with Intellisense described
             # here: http://tinyurl.com/2cb428.  Syntax highlighting is important for proper
@@ -108,7 +109,7 @@ elseif(UNIX)
     )
 
     if(CMAKE_C_COMPILER MATCHES "gcc" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
         if(PLATFORM EQUAL 32)
             set(SSE_FLAGS "-msse2 -mfpmath=sse")

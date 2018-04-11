@@ -105,13 +105,6 @@ endif()
 
 add_executable(${EXECUTABLE_NAME} ${EXECUTABLE_SRCS})
 
-if(NOT ACE_USE_EXTERNAL)
-    add_dependencies(${EXECUTABLE_NAME} ace)
-    target_link_libraries(${EXECUTABLE_NAME} ace)
-else()
-    target_link_libraries(${EXECUTABLE_NAME} ACE)
-endif()
-
 target_link_libraries(${EXECUTABLE_NAME}
     game
     shared
@@ -119,6 +112,13 @@ target_link_libraries(${EXECUTABLE_NAME}
     g3dlite
     ${OPENSSL_LIBRARIES}
 )
+
+if(NOT ACE_USE_EXTERNAL)
+    add_dependencies(${EXECUTABLE_NAME} ace)
+    target_link_libraries(${EXECUTABLE_NAME} ace)
+else()
+    target_link_libraries(${EXECUTABLE_NAME} ACE)
+endif()
 
 if(POSTGRESQL)
     include_directories(${PostgreSQL_INCLUDE_DIR})
@@ -166,23 +166,5 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/mangosd.conf.dist.in ${CMAKE_CURRENT_
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/mangosd.conf.dist DESTINATION ${CONF_INSTALL_DIR})
 
 if(WIN32 AND MSVC)
-    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/\${BUILD_TYPE}/${EXECUTABLE_NAME}.pdb" DESTINATION "${BIN_DIR}" CONFIGURATIONS Debug)
-    add_custom_command(TARGET ${EXECUTABLE_NAME}
-        POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/mangosd.conf.dist" "${CONF_COPY_DIR}"
-    )
-endif()
-
-#Copy dlls to build dir
-if(WIN32)
-    if(MSVC)
-        add_custom_command(TARGET ${EXECUTABLE_NAME}
-            POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy "${MYSQL_LIBRARY}" "${CMAKE_BINARY_DIR}/bin/$(Configuration)/"
-        )
-    elseif(XCODE)
-        add_custom_command(TARGET ${EXECUTABLE_NAME}
-            POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy "${MYSQL_LIBRARY}" "${CMAKE_BINARY_DIR}/bin/"
-        )
-    endif()
+    install(FILES $<TARGET_PDB_FILE:${EXECUTABLE_NAME}> DESTINATION ${BIN_DIR} OPTIONAL)
 endif()
