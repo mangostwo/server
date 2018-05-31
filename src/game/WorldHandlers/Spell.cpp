@@ -6134,7 +6134,7 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
 
         Unit* _target = m_targets.getUnitTarget();
 
-        if (_target)                                            // for target dead/target not valid
+        if (_target && m_targets.m_targetMask & TARGET_FLAG_UNIT)            // for target dead/target not valid
         {
             if (IsPositiveSpell(m_spellInfo->Id))
             {
