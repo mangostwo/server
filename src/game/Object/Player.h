@@ -2540,6 +2540,12 @@ class Player : public Unit
         void SetTitle(CharTitlesEntry const* title, bool lost = false);
 
         bool canSeeSpellClickOn(Creature const* creature) const;
+
+		// Retrieves a player's security group
+		uint32 GetSecurityGroup();
+		// Sets a player's security group to specified argument
+		void SetSecurityGroup(uint32 securitygroup);
+
     protected:
 
         uint32 m_contestedPvPTimer;
@@ -2859,6 +2865,9 @@ class Player : public Unit
         uint32 m_timeSyncServer;
 
         uint32 m_cachedGS;
+
+		// Character-wide security group variable
+		uint32 m_securityGroup;
 };
 
 void AddItemsSetItem(Player* player, Item* item);
