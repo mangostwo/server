@@ -927,6 +927,11 @@ class WorldSession
         void HandleLfgTeleportRequest(WorldPacket& recv_data);
         void HandleLfgBootVote(WorldPacket& recv_data);
 
+		/***	Client commands		***/
+
+		void BootMeHandler(WorldPacket &msg);
+		void GmSetSecurityGroupHandler(WorldPacket &msg);
+
     private:
         // private trade methods
         void moveItems(Item* myItems[], Item* hisItems[]);

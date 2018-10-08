@@ -33,7 +33,7 @@
 OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
 {
     /*0x000*/ { "MSG_NULL_ACTION",                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x001*/ { "CMSG_BOOTME",                                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
+    /*0x001*/ { "CMSG_BOOTME",                                  STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::BootMeHandler                   },
     /*0x002*/ { "CMSG_DBLOOKUP",                                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x003*/ { "SMSG_DBLOOKUP",                                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x004*/ { "CMSG_QUERY_OBJECT_POSITION",                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
@@ -537,7 +537,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x1F6*/ { "SMSG_COMPRESSED_UPDATE_OBJECT",                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x1F7*/ { "SMSG_PLAY_SPELL_IMPACT",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x1F8*/ { "SMSG_EXPLORATION_EXPERIENCE",                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1F9*/ { "CMSG_GM_SET_SECURITY_GROUP",                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
+    /*0x1F9*/ { "CMSG_GM_SET_SECURITY_GROUP",                   STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::GmSetSecurityGroupHandler       },
     /*0x1FA*/ { "CMSG_GM_NUKE",                                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x1FB*/ { "MSG_RANDOM_ROLL",                              STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleRandomRollOpcode          },
     /*0x1FC*/ { "SMSG_ENVIRONMENTALDAMAGELOG",                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
