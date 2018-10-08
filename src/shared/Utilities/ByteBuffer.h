@@ -430,6 +430,25 @@ class ByteBuffer
             return *this;
         }
 
+		/**
+		 * @brief
+		 *
+		 * @param value
+		 * @return ByteBuffer &operator >>
+		 */
+		ByteBuffer& operator>>(char *pval)
+		{
+			while (rpos() < size())                         // prevent crash at wrong string format in packet
+			{
+				char c = read<char>();
+
+				*pval++ = c;
+				if (c == 0)
+					break;
+			}
+			return *this;
+		}
+
         template<class T>
         /**
          * @brief
