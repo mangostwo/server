@@ -1130,44 +1130,6 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
     SendPacket(&data);
 }
 
-void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
-{
-    DEBUG_LOG("WORLD: Received opcode CMSG_WORLD_TELEPORT from %s", GetPlayer()->GetGuidStr().c_str());
-
-    // write in client console: worldport 469 452 6454 2536 180 or /console worldport 469 452 6454 2536 180
-    // Received opcode CMSG_WORLD_TELEPORT
-    // Time is ***, map=469, x=452.000000, y=6454.000000, z=2536.000000, orient=3.141593
-
-    uint32 time;
-    uint32 mapid;
-    float PositionX;
-    float PositionY;
-    float PositionZ;
-    float Orientation;
-
-    recv_data >> time;                                      // time in m.sec.
-    recv_data >> mapid;
-    recv_data >> PositionX;
-    recv_data >> PositionY;
-    recv_data >> PositionZ;
-    recv_data >> Orientation;                               // o (3.141593 = 180 degrees)
-
-    // DEBUG_LOG("Received opcode CMSG_WORLD_TELEPORT");
-
-    if (GetPlayer()->IsTaxiFlying())
-    {
-        DEBUG_LOG("Player '%s' (GUID: %u) in flight, ignore worldport command.", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow());
-        return;
-    }
-
-    DEBUG_LOG("Time %u sec, map=%u, x=%f, y=%f, z=%f, orient=%f", time / 1000, mapid, PositionX, PositionY, PositionZ, Orientation);
-
-    if (GetSecurity() >= SEC_ADMINISTRATOR)
-        { GetPlayer()->TeleportTo(mapid, PositionX, PositionY, PositionZ, Orientation); }
-    else
-        { SendNotification(LANG_YOU_NOT_HAVE_PERMISSION); }
-}
-
 void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_WHOIS");

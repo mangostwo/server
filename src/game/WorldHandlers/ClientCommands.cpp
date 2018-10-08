@@ -79,3 +79,91 @@ void WorldSession::GmSetSecurityGroupHandler(WorldPacket &msg)
 			SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
 	}
 }
+
+void WorldSession::GodmodeHandler(WorldPacket &msg)
+{
+	unsigned int enable;
+
+	if (GetPlayer()->GetSecurityGroup() > 1)
+	{
+		WorldPacket outbound(SMSG_GODMODE, 4);
+
+		msg >> enable;
+		GetPlayer()->SetGodmode(enable);
+		outbound << enable;
+		SendPacket(&outbound);
+	}
+	else
+		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+}
+
+void WorldSession::BeastmasterHandler(WorldPacket &msg)
+{
+	unsigned int enable;
+
+	if (GetPlayer()->GetSecurityGroup() > 1)
+	{
+		msg >> enable;
+		GetPlayer()->SetBeastmaster(enable);
+		SendConsoleMessage(enable ? "Beastmaster enabled" : "Beastmaster disabled");
+	}
+	else
+		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+}
+
+void WorldSession::WorldportHandler(WorldPacket &msg)
+{
+	if (GetPlayer()->GetSecurityGroup())
+	{
+		if (GetPlayer()->IsTaxiFlying())
+		{
+			SendConsoleMessage("Cannot teleport while flying");
+			return;
+		}
+		Position position;
+		uint32 time;
+		uint32 worldID;
+		uint64 mapDBPtr;
+
+		msg >> time;
+		msg >> worldID;
+		msg >> mapDBPtr;
+		msg >> position.x;
+		msg >> position.y;
+		msg >> position.z;
+		msg >> position.o;
+		GetPlayer()->TeleportTo(worldID, position.x, position.y, position.z, position.o, TELE_TO_GM_MODE, 0);
+	}
+	else
+		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+}
+
+void WorldSession::GMTeachHandler(WorldPacket &msg)
+{
+	Player *player;
+	ObjectGuid guid;
+	int32 spell;
+
+	msg >> guid;
+	msg >> spell;
+	if (GetPlayer()->GetSecurityGroup() > 2)
+	{
+		if ((player = sObjectAccessor.FindPlayer(guid, true)))
+			player->learnSpell(spell, false);
+		else
+			SendPlayerNotFoundFailure();
+	}
+	else
+		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+}
+
+void WorldSession::LearnSpellHandler(WorldPacket &msg)
+{
+	int32 spell;
+
+	msg >> spell;
+	if (GetPlayer()->GetSecurityGroup() > 2)
+		GetPlayer()->learnSpell(spell, false);
+	else
+		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+}

@@ -1039,3 +1039,18 @@ void WorldSession::InitWarden(BigNumber* k, std::string const& os)
         _warden->Init(this, k);
     }
 }
+
+// Console
+int32 WorldSession::SendConsoleMessage(const char *message)
+{
+	WorldPacket msg(SMSG_WHOIS, strlen(message) + 1);
+	msg << message;
+	SendPacket(&msg);
+	return 1;
+}
+
+int32 WorldSession::SendPlayerNotFoundFailure()
+{
+	SendConsoleMessage("Player not found"); // TODO: custom opcode?
+	return 1;
+}

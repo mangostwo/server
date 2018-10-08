@@ -23536,3 +23536,28 @@ void Player::SetSecurityGroup(uint32 securitygroup)
 {
 	m_securityGroup = securitygroup;
 }
+
+void Player::SetGodmode(bool on)
+{
+	if (on)
+	{
+		m_ExtraFlags |= PLAYER_EXTRA_GM_ON;
+		SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
+	}
+	else
+	{
+		m_ExtraFlags &= ~PLAYER_EXTRA_GM_ON;
+		RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
+	}
+	m_camera.UpdateVisibilityForOwner();
+	UpdateObjectVisibility();
+	// Need to update visibility for dynamic quest objects?
+}
+
+void Player::SetBeastmaster(bool on)
+{
+	if (on)
+		SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+	else
+		RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+}

@@ -927,10 +927,20 @@ class WorldSession
         void HandleLfgTeleportRequest(WorldPacket& recv_data);
         void HandleLfgBootVote(WorldPacket& recv_data);
 
+		/*** Console ***/
+		int32 SendConsoleMessage(const char *message);
+		int32 SendPlayerNotFoundFailure();
+
+
 		/***	Client commands		***/
 
 		void BootMeHandler(WorldPacket &msg);
 		void GmSetSecurityGroupHandler(WorldPacket &msg);
+		void GodmodeHandler(WorldPacket &msg);
+		void BeastmasterHandler(WorldPacket &msg);
+		void WorldportHandler(WorldPacket &msg);
+		void GMTeachHandler(WorldPacket &msg);
+		void LearnSpellHandler(WorldPacket &msg);
 
     private:
         // private trade methods

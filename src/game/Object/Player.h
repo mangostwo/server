@@ -2546,6 +2546,12 @@ class Player : public Unit
 		// Sets a player's security group to specified argument
 		void SetSecurityGroup(uint32 securitygroup);
 
+		// Beastmaster cheat: enable/disable hostile reaction for players
+		void SetBeastmaster(bool on);
+
+		// Godmode cheat
+		void SetGodmode(bool on);
+
     protected:
 
         uint32 m_contestedPvPTimer;
