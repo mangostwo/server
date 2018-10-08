@@ -432,7 +432,7 @@ class ByteBuffer
 
 		ByteBuffer &GetString(char *pval, size_t maxchar)
 		{
-			while (rpos() < size() || maxchar)	// prevent crash at wrong string format in packet
+			while (rpos() < size() && maxchar)	// prevent crash at wrong string format in packet
 			{
 				char c = read<char>();
 
