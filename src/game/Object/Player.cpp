@@ -943,8 +943,8 @@ void Player::StopMirrorTimer(MirrorTimerType Type)
 
 uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
 {
-    if (!IsAlive() || isGameMaster())
-        { return 0; }
+    if ( !IsAlive() || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKILLABLE) )
+		return 0;
 
     // Absorb, resist some environmental damage type
     uint32 absorb = 0;
@@ -2781,7 +2781,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
     // cleanup unit flags (will be re-applied if need at aura load).
     RemoveFlag(UNIT_FIELD_FLAGS,
-               UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_ATTACKABLE_1 |
+               UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_BEASTMASTER |
                UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_PASSIVE  | UNIT_FLAG_LOOTING          |
                UNIT_FLAG_PET_IN_COMBAT  | UNIT_FLAG_SILENCED     | UNIT_FLAG_PACIFIED         |
                UNIT_FLAG_STUNNED        | UNIT_FLAG_IN_COMBAT    | UNIT_FLAG_DISARMED         |
@@ -23540,24 +23540,22 @@ void Player::SetSecurityGroup(uint32 securitygroup)
 void Player::SetGodmode(bool on)
 {
 	if (on)
-	{
-		m_ExtraFlags |= PLAYER_EXTRA_GM_ON;
-		SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
-	}
+		SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKILLABLE);
 	else
-	{
-		m_ExtraFlags &= ~PLAYER_EXTRA_GM_ON;
-		RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
-	}
+		RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKILLABLE);
+
+	// Use this for GM vision
+#if 0
 	m_camera.UpdateVisibilityForOwner();
 	UpdateObjectVisibility();
-	// Need to update visibility for dynamic quest objects?
+#endif // 0
+
 }
 
 void Player::SetBeastmaster(bool on)
 {
 	if (on)
-		SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+		SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER);
 	else
-		RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+		RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER);
 }

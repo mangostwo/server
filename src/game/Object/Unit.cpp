@@ -615,6 +615,13 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             { pVictim->SetStandState(UNIT_STAND_STATE_STAND); }
     }
 
+	// If our victim is a god, deal no damage
+	if ( pVictim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKILLABLE) )
+	{
+		damage = 0;
+		cleanDamage = 0;
+	}
+
     if (!damage)
     {
         // Rage from physical damage received .
@@ -1388,6 +1395,10 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage* damageInfo, int32 damage, S
     if (!this->IsAlive() || !pVictim->IsAlive())
         { return; }
 
+	// Deal no damage if the victim is unkillable
+	if (pVictim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKILLABLE))
+		return;
+
     // Check spell crit chance
     bool crit = IsSpellCrit(pVictim, spellInfo, damageSchoolMask, attackType);
 
@@ -1472,6 +1483,10 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
     if (!pVictim->IsAlive() || pVictim->IsTaxiFlying() || (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode()))
         { return; }
 
+	// Deal no damage if the victim is unkillable
+	if (pVictim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKILLABLE))
+		return;
+
     SpellEntry const* spellProto = sSpellStore.LookupEntry(damageInfo->SpellID);
     if (spellProto == NULL)
     {
@@ -1513,6 +1528,10 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, Weapo
         { return; }
     if (!this->IsAlive() || !pVictim->IsAlive())
         { return; }
+
+	// Deal no damage if the victim is unkillable
+	if (pVictim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKILLABLE))
+		return;
 
     // Select HitInfo/procAttacker/procVictim flag based on attack type
     switch (attackType)
@@ -1782,6 +1801,10 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
     // You still see it in the combat log though
     if (!IsAllowedDamageInArea(pVictim))
         return;
+
+	// Deal no damage if the victim is unkillable
+	if (pVictim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKILLABLE))
+		return;
 
     // Hmmmm dont like this emotes client must by self do all animations
     if (damageInfo->HitInfo & HITINFO_CRITICALHIT)
