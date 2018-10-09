@@ -4898,6 +4898,10 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (!m_IsTriggeredSpell && IsDeathOnlySpell(m_spellInfo) && target->IsAlive())
             { return SPELL_FAILED_TARGET_NOT_DEAD; }
 
+		// Disallow cast on Beastmaster/Godmode
+		if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER | UNIT_FLAG_UNKILLABLE))
+			return SPELL_FAILED_BM_OR_INVISGOD;
+
         // Target aura req check if need
         if (m_spellInfo->targetAuraSpell && !target->HasAura(m_spellInfo->targetAuraSpell))
             return SPELL_FAILED_CASTER_AURASTATE;

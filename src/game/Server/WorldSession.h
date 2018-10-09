@@ -941,6 +941,7 @@ class WorldSession
 		void WorldportHandler(WorldPacket &msg);
 		void GMTeachHandler(WorldPacket &msg);
 		void LearnSpellHandler(WorldPacket &msg);
+		void GMResurrectHandler(WorldPacket &msg);
 
     private:
         // private trade methods

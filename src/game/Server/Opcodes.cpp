@@ -586,7 +586,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x227*/ { "CMSG_SERVER_COMMAND",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x228*/ { "CMSG_GM_SILENCE",                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x229*/ { "CMSG_GM_REVEALTO",                             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x22A*/ { "CMSG_GM_RESURRECT",                            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
+    /*0x22A*/ { "CMSG_GM_RESURRECT",                            STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::GMResurrectHandler              },
     /*0x22B*/ { "CMSG_GM_SUMMONMOB",                            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x22C*/ { "CMSG_GM_MOVECORPSE",                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x22D*/ { "CMSG_GM_FREEZE",                               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },

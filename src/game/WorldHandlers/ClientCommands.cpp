@@ -72,7 +72,13 @@ void WorldSession::GmSetSecurityGroupHandler(WorldPacket &msg)
 			if (ValidateCharacterName(playerName))
 			{
 				if (Player *target = sObjectAccessor.FindPlayerByName(playerName))
+				{
 					target->SetSecurityGroup(securityGroup);
+					if (securityGroup)
+						target->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_CHEAT_SPELLS);
+					else
+						target->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_CHEAT_SPELLS);
+				}
 			}
 		}
 		else
@@ -164,6 +170,41 @@ void WorldSession::LearnSpellHandler(WorldPacket &msg)
 	msg >> spell;
 	if (GetPlayer()->GetSecurityGroup() > 2)
 		GetPlayer()->learnSpell(spell, false);
+	else
+		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+}
+
+void WorldSession::GMResurrectHandler(WorldPacket &msg)
+{
+	char name[13];
+	uint32 success;
+
+	success = 0;
+	if (GetPlayer()->GetSecurityGroup())
+	{
+		msg.GetString(name, 13);
+		if (ValidateCharacterName(name))
+		{
+			Player *player = sObjectMgr.GetPlayer(name);
+			if (!player)
+				goto PLAYER_NOT_FOUND;
+
+			if (player->IsDead())
+			{
+				player->ResurrectPlayer(100.0f, false);
+				success = 1;
+				// TODO: Send SMSG_GM_RESURRECT with result. For now we just write to console
+				char buf[128];
+				sprintf(buf, "Player %s resurrected", name);
+				SendConsoleMessage(buf);
+			}
+		}
+		else
+		{
+		PLAYER_NOT_FOUND:
+			SendPlayerNotFoundFailure();
+		}
+	}
 	else
 		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
 }
