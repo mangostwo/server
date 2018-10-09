@@ -23555,7 +23555,10 @@ void Player::SetGodmode(bool on)
 void Player::SetBeastmaster(bool on)
 {
 	if (on)
+	{
 		SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER);
+		ClearInCombat();
+	}
 	else
 		RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER);
 }

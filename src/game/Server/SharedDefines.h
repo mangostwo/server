@@ -522,7 +522,7 @@ enum SpellAttributesEx7
     SPELL_ATTR_EX7_UNK0                        = 0x00000001,// 0
     SPELL_ATTR_EX7_UNK1                        = 0x00000002,// 1
     SPELL_ATTR_EX7_PALADIN_AURA                = 0x00000004,// 2
-    SPELL_ATTR_EX7_UNK3                        = 0x00000008,// 3
+	SPELL_ATTR_EX7_CHEAT                       = 0x00000008,// 3 GM and QAE(?) spells.
     SPELL_ATTR_EX7_UNK4                        = 0x00000010,// 4
     SPELL_ATTR_EX7_TOTEM_SPELL                 = 0x00000020,// 5  shaman summon totem spells
     SPELL_ATTR_EX7_UNK6                        = 0x00000040,// 6

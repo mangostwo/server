@@ -4799,6 +4799,9 @@ SpellCastResult Spell::CheckCast(bool strict)
             { return SPELL_FAILED_NOT_READY; }
     }
 
+	if (m_spellInfo->HasAttribute(SPELL_ATTR_EX7_CHEAT) && !m_caster->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_CHEAT_SPELLS))
+		return SPELL_FAILED_SPELL_UNAVAILABLE; // Might not be the correct error message.
+
     // check global cooldown
     if (strict && !m_IsTriggeredSpell && HasGlobalCooldown())
         { return SPELL_FAILED_NOT_READY; }

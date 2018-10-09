@@ -8238,18 +8238,22 @@ void Unit::ClearInCombat()
 bool Unit::IsTargetableForAttack(bool inverseAlive /*=false*/) const
 {
     if (GetTypeId() == TYPEID_PLAYER && ((Player*)this)->isGameMaster())
-        { return false; }
+	    return false;
+
+	// Can't attack BM
+	if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER))
+		return false;
 
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE))
-        { return false; }
+        return false;
 
     // to be removed if unit by any reason enter combat
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE))
-        { return false; }
+        return false;
 
     // inversealive is needed for some spells which need to be casted at dead targets (aoe)
     if (IsAlive() == inverseAlive)
-        { return false; }
+        return false;
 
     return IsInWorld() && !hasUnitState(UNIT_STAT_DIED) && !IsTaxiFlying();
 }

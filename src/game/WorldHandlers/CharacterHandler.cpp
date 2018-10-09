@@ -921,6 +921,10 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     if (!pCurrChar->IsStandState() && !pCurrChar->hasUnitState(UNIT_STAT_STUNNED))
         { pCurrChar->SetStandState(UNIT_STAND_STATE_STAND); }
 
+	// Allow casting of GM spells
+	if (GetPlayer()->GetSecurityGroup())
+		GetPlayer()->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_CHEAT_SPELLS);
+
     m_playerLoading = false;
 
     // Used by Eluna
