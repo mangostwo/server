@@ -176,13 +176,13 @@ void WorldSession::LearnSpellHandler(WorldPacket &msg)
 
 void WorldSession::GMResurrectHandler(WorldPacket &msg)
 {
-	char name[13];
+	char name[49];
 	uint32 success;
 
 	success = 0;
 	if (GetPlayer()->GetSecurityGroup())
 	{
-		msg.GetString(name, 13);
+		msg.GetString(name, 49);
 		if (ValidateCharacterName(name))
 		{
 			Player *player = sObjectMgr.GetPlayer(name);
@@ -204,6 +204,42 @@ void WorldSession::GMResurrectHandler(WorldPacket &msg)
 		PLAYER_NOT_FOUND:
 			SendPlayerNotFoundFailure();
 		}
+	}
+	else
+		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+}
+
+void WorldSession::HandlePlayerLogout(WorldPacket &msg)
+{
+	if (GetPlayer()->GetSecurityGroup())
+		LogoutPlayer(true);
+	else
+	{
+		WorldPacket outbound(SMSG_LOGOUT_RESPONSE, 5);
+		int error = 1;
+		char isInstant = 0;
+
+		// Send the logout response away!
+		outbound << error;
+		outbound << isInstant;
+		SendPacket(&outbound);
+	}
+		
+}
+
+void WorldSession::RechargeHandler(WorldPacket &msg)
+{
+	if (GetPlayer()->GetSecurityGroup())
+		GetPlayer()->SetHealthPercent(100.0f);
+	else
+		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+}
+
+void WorldSession::DechargeHandler(WorldPacket &msg)
+{
+	if (GetPlayer()->GetSecurityGroup())
+	{
+		GetPlayer()->SetHealth(1);
 	}
 	else
 		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);

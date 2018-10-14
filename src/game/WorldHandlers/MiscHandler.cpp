@@ -278,55 +278,57 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
     DEBUG_LOG("WORLD: Send SMSG_WHO Message");
 }
 
-void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recv_data*/)
+void WorldSession::HandleLogoutRequest(WorldPacket& /*recv_data*/)
 {
-    DEBUG_LOG("WORLD: Received opcode CMSG_LOGOUT_REQUEST, security %u", GetSecurity());
+	uint32 error = 0;
+	// Whether the logout is instant or timed
+	uint8 isInstant = 0;
+	// Setting our logout timer
+	time_t logoutTimer = time(0);
+
+    DEBUG_LOG("WORLD: Received opcode CMSG_LOGOUT_REQUEST");
 
     if (ObjectGuid lootGuid = GetPlayer()->GetLootGuid())
-        { DoLootRelease(lootGuid); }
+        DoLootRelease(lootGuid);
 
-    // Can not logout if...
-    if (GetPlayer()->IsInCombat() ||                        //...is in combat
-            //...is jumping ...is falling
-            GetPlayer()->m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_FALLING | MOVEFLAG_FALLINGFAR)))
+	// Instant logout while rested or on taxi
+	if (GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) || GetPlayer()->IsTaxiFlying())
+	{
+		logoutTimer - 20;
+		isInstant = 1;
+	}
+    // Cannot log out if in combat or moving
+    else if (
+		GetPlayer()->IsInCombat()
+		|| GetPlayer()->m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_FALLING | MOVEFLAG_FALLINGFAR))
+		)
     {
-        WorldPacket data(SMSG_LOGOUT_RESPONSE, 5);
-        data << uint32(1);
-        data << uint8(0);
-        SendPacket(&data);
-        LogoutRequest(0);
-        return;
+		error = 1;
+		logoutTimer = 0;
     }
+	// Force the player to sit if need be and prevent it from moving
+	else if (GetPlayer()->CanFreeMove())
+	{
+		float height = GetPlayer()->GetMap()->GetHeight(
+			GetPlayer()->GetPhaseMask(), GetPlayer()->GetPositionX(), GetPlayer()->GetPositionY(), GetPlayer()->GetPositionZ()
+		);
 
-    // instant logout in taverns/cities or on taxi or for admins, gm's, mod's if its enabled in mangosd.conf
-    if (GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) || GetPlayer()->IsTaxiFlying() ||
-        GetSecurity() >= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_INSTANT_LOGOUT))
-    {
-        LogoutPlayer(true);
-        return;
-    }
+		// If we can sit without looking retarded, then force it upon the player
+		if ((GetPlayer()->GetPositionZ() < height + 0.1f) && !(GetPlayer()->IsInWater()))
+			GetPlayer()->SetStandState(UNIT_STAND_STATE_SIT);
 
-    // not set flags if player can't free move to prevent lost state at logout cancel
-    if (GetPlayer()->CanFreeMove())
-    {
-        float height = GetPlayer()->GetMap()->GetHeight(GetPlayer()->GetPhaseMask(), GetPlayer()->GetPositionX(), GetPlayer()->GetPositionY(), GetPlayer()->GetPositionZ());
-        if ((GetPlayer()->GetPositionZ() < height + 0.1f) && !(GetPlayer()->IsInWater()))
-            { GetPlayer()->SetStandState(UNIT_STAND_STATE_SIT); }
+		GetPlayer()->SetRoot(true);
+		GetPlayer()->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+	}
 
-        GetPlayer()->SetRoot(true);
-        GetPlayer()->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
-    }
+	// Send the logout response away!
+    WorldPacket outbound(SMSG_LOGOUT_RESPONSE, 5);
+	outbound << error;
+    outbound << isInstant;
+	SendPacket(&outbound);
 
-    WorldPacket data(SMSG_LOGOUT_RESPONSE, 5);
-    data << uint32(0);
-    data << uint8(0);
-    SendPacket(&data);
-    LogoutRequest(time(NULL));
-}
-
-void WorldSession::HandlePlayerLogoutOpcode(WorldPacket& /*recv_data*/)
-{
-    DEBUG_LOG("WORLD: Received opcode CMSG_PLAYER_LOGOUT Message");
+	// Set our respawn time
+	LogoutRequest(logoutTimer);
 }
 
 void WorldSession::HandleLogoutCancelOpcode(WorldPacket& /*recv_data*/)

@@ -503,8 +503,7 @@ class WorldSession
         void HandleLootReleaseOpcode(WorldPacket& recvPacket);
         void HandleLootMasterGiveOpcode(WorldPacket& recvPacket);
         void HandleWhoOpcode(WorldPacket& recvPacket);
-        void HandleLogoutRequestOpcode(WorldPacket& recvPacket);
-        void HandlePlayerLogoutOpcode(WorldPacket& recvPacket);
+        void HandleLogoutRequest(WorldPacket& recvPacket);
         void HandleLogoutCancelOpcode(WorldPacket& recvPacket);
         
         void HandleGMTicketGetTicketOpcode(WorldPacket& recvPacket);
@@ -933,7 +932,6 @@ class WorldSession
 
 
 		/***	Client commands		***/
-
 		void BootMeHandler(WorldPacket &msg);
 		void GmSetSecurityGroupHandler(WorldPacket &msg);
 		void GodmodeHandler(WorldPacket &msg);
@@ -942,6 +940,9 @@ class WorldSession
 		void GMTeachHandler(WorldPacket &msg);
 		void LearnSpellHandler(WorldPacket &msg);
 		void GMResurrectHandler(WorldPacket &msg);
+		void HandlePlayerLogout(WorldPacket &msg);
+		void DechargeHandler(WorldPacket &msg);
+		void RechargeHandler(WorldPacket &msg);
 
     private:
         // private trade methods
