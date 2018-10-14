@@ -279,6 +279,16 @@ class ByteBuffer
             return *this;
         }
 
+        void PutString(const char *pval)
+        {
+            int size = strlen(pval) + 1;
+
+            this->_storage.resize(size + this->_storage.size());
+            this->_storage.reserve(size + this->_storage.size());
+            memcpy(&this->_storage[this->_wpos], pval, size);
+            this->_wpos += size;
+        }
+
         /**
          * @brief
          *
@@ -766,6 +776,7 @@ class ByteBuffer
          *
          */
         void hexlike() const;
+
 
     private:
         /**

@@ -88,16 +88,12 @@ void WorldSession::GmSetSecurityGroupHandler(WorldPacket &msg)
 
 void WorldSession::GodmodeHandler(WorldPacket &msg)
 {
-	unsigned int enable;
-
 	if (GetPlayer()->GetSecurityGroup() > 1)
 	{
-		WorldPacket outbound(SMSG_GODMODE, 4);
+        unsigned int enable;
 
 		msg >> enable;
 		GetPlayer()->SetGodmode(enable);
-		outbound << enable;
-		SendPacket(&outbound);
 	}
 	else
 		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
@@ -105,13 +101,12 @@ void WorldSession::GodmodeHandler(WorldPacket &msg)
 
 void WorldSession::BeastmasterHandler(WorldPacket &msg)
 {
-	unsigned int enable;
-
 	if (GetPlayer()->GetSecurityGroup() > 1)
 	{
+        unsigned int enable;
+
 		msg >> enable;
 		GetPlayer()->SetBeastmaster(enable);
-		SendConsoleMessage(enable ? "Beastmaster enabled" : "Beastmaster disabled");
 	}
 	else
 		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);

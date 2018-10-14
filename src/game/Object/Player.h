@@ -2552,6 +2552,8 @@ class Player : public Unit
 		// Godmode cheat
 		void SetGodmode(bool on);
 
+		void SendAddOnMessage(const char *message, uint8 channel, uint64 recipient);
+
     protected:
 
         uint32 m_contestedPvPTimer;

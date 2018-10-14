@@ -23539,10 +23539,24 @@ void Player::SetSecurityGroup(uint32 securitygroup)
 
 void Player::SetGodmode(bool on)
 {
-	if (on)
-		SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKILLABLE);
-	else
-		RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKILLABLE);
+    char message[256];
+    WorldPacket outbound;
+
+    if (on)
+    {
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKILLABLE);
+        sprintf(message, "DESIGNERMENU\tGodModeON");
+    }
+    else
+    {
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKILLABLE);
+        sprintf(message, "DESIGNERMENU\tGodModeOFF");
+    }
+
+    outbound.SetOpcode(SMSG_GODMODE);
+    outbound << on;
+    GetSession()->SendPacket(&outbound);
+    SendAddOnMessage(message, CHAT_MSG_WHISPER, GetObjectGuid());
 
 	// Use this for GM vision
 #if 0
@@ -23554,11 +23568,37 @@ void Player::SetGodmode(bool on)
 
 void Player::SetBeastmaster(bool on)
 {
+    char message[256];
+
 	if (on)
 	{
 		SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER);
 		ClearInCombat();
+        sprintf(message, "DESIGNERMENU\tBeastmasterON");
 	}
-	else
-		RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER);
+    else
+    {
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER);
+        sprintf(message, "DESIGNERMENU\tBeastmasterOFF");
+    }
+    SendAddOnMessage(message, CHAT_MSG_WHISPER, GetObjectGuid());
+    GetSession()->SendConsoleMessage(on ? "Beastmaster enabled" : "Beastmaster disabled");
+}
+
+void Player::SendAddOnMessage(const char *message, uint8 channel, uint64 recipient)
+{
+	WorldPacket outbound(SMSG_MESSAGECHAT);
+	uint32 specialFlag = 0;
+	uint32 language = LANG_UNIVERSAL;
+	uint8 chatTag = 0;
+
+	outbound << channel;
+	outbound << LANG_ADDON;
+	outbound << GetObjectGuid();
+	outbound << specialFlag;
+	outbound << recipient;
+	outbound << strlen(message) + 1;
+	outbound.PutString(message);
+	outbound << chatTag;
+	GetSession()->SendPacket(&outbound);
 }
