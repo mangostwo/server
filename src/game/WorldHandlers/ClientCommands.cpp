@@ -210,20 +210,10 @@ void WorldSession::GMResurrectHandler(WorldPacket &msg)
 
 void WorldSession::HandlePlayerLogout(WorldPacket &msg)
 {
-	if (GetPlayer()->GetSecurityGroup())
-		LogoutPlayer(true);
-	else
-	{
-		WorldPacket outbound(SMSG_LOGOUT_RESPONSE, 5);
-		int error = 1;
-		char isInstant = 0;
-
-		// Send the logout response away!
-		outbound << error;
-		outbound << isInstant;
-		SendPacket(&outbound);
-	}
-		
+    if (GetPlayer()->GetSecurityGroup())
+        LogoutPlayer(true);
+    else
+        SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);		
 }
 
 void WorldSession::RechargeHandler(WorldPacket &msg)
