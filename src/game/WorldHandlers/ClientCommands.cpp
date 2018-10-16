@@ -390,6 +390,26 @@ void WorldSession::MoveSwimSpeedCheatHandler(WorldPacket &msg)
 		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
 }
 
+void WorldSession::MoveFlightSpeedCheatHandler(WorldPacket &msg)
+{
+	Player *pPlayer = GetPlayer();
+
+	if (pPlayer->GetSecurityGroup())
+	{
+		float speed;
+
+		msg >> speed;
+		if (speed < 0.1f || speed > 100.0f)
+			speed = 0.0f;
+		else
+			speed /= 7.0f;
+
+		pPlayer->SetSpeedRate(MOVE_FLIGHT, speed, true);
+	}
+	else
+		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+}
+
 void WorldSession::SetMoneyCheatHandler(WorldPacket &msg)
 {
 	if (GetPlayer()->GetSecurityGroup() > 1)

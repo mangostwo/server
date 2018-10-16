@@ -948,6 +948,7 @@ class WorldSession
 		void DestroyMonsterHandler(WorldPacket &msg);
 		void MoveRunSpeedCheatHandler(WorldPacket &msg);
 		void MoveSwimSpeedCheatHandler(WorldPacket &msg);
+		void MoveFlightSpeedCheatHandler(WorldPacket &msg);
 		void SetMoneyCheatHandler(WorldPacket &msg);
 
     private:

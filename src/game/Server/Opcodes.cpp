@@ -925,7 +925,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x37A*/ { "SMSG_FORCED_DEATH_UPDATE",                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x37B*/ { "CMSG_CHEAT_SET_HONOR_CURRENCY",                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x37C*/ { "CMSG_CHEAT_SET_ARENA_CURRENCY",                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x37D*/ { "MSG_MOVE_SET_FLIGHT_SPEED_CHEAT",              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
+    /*0x37D*/ { "MSG_MOVE_SET_FLIGHT_SPEED_CHEAT",              STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::MoveFlightSpeedCheatHandler     },
     /*0x37E*/ { "MSG_MOVE_SET_FLIGHT_SPEED",                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x37F*/ { "MSG_MOVE_SET_FLIGHT_BACK_SPEED_CHEAT",         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x380*/ { "MSG_MOVE_SET_FLIGHT_BACK_SPEED",               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
