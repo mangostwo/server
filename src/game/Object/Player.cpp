@@ -23591,13 +23591,14 @@ void Player::SendAddOnMessage(const char *message, uint8 channel, uint64 recipie
 	uint32 specialFlag = 0;
 	uint32 language = LANG_UNIVERSAL;
 	uint8 chatTag = 0;
+	uint32 messageLength = strlen(message) + 1;
 
 	outbound << channel;
 	outbound << LANG_ADDON;
 	outbound << GetObjectGuid();
 	outbound << specialFlag;
 	outbound << recipient;
-	outbound << strlen(message) + 1;
+	outbound << messageLength;
 	outbound.PutString(message);
 	outbound << chatTag;
 	GetSession()->SendPacket(&outbound);
