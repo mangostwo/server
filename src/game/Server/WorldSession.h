@@ -943,6 +943,12 @@ class WorldSession
 		void HandlePlayerLogout(WorldPacket &msg);
 		void DechargeHandler(WorldPacket &msg);
 		void RechargeHandler(WorldPacket &msg);
+		void LevelCheatHandler(WorldPacket &msg);
+		void CreateMonsterHandler(WorldPacket &msg);
+		void DestroyMonsterHandler(WorldPacket &msg);
+		void MoveRunSpeedCheatHandler(WorldPacket &msg);
+		void MoveSwimSpeedCheatHandler(WorldPacket &msg);
+		void SetMoneyCheatHandler(WorldPacket &msg);
 
     private:
         // private trade methods
