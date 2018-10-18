@@ -28,6 +28,7 @@
 
 #include "Weather.h"
 #include "Player.h"
+#include "ProgressBar.h"
 #include "Map.h"
 #include "World.h"
 #include "WorldPacket.h"
