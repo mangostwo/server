@@ -31,6 +31,7 @@
 
 class MovementGenerator;
 class Unit;
+struct Position;
 
 // Creature Entry ID used for waypoints show, visible only for GMs
 #define VISUAL_WAYPOINT 1

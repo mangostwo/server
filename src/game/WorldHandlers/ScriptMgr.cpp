@@ -2287,8 +2287,7 @@ uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, Creature* pCreature)
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (uint32 dialogId = sEluna->GetDialogStatus(pPlayer, pCreature))
-        return dialogId;
+    sEluna->GetDialogStatus(pPlayer, pCreature);
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2302,8 +2301,7 @@ uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, GameObject* pGameObject)
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (uint32 dialogId = sEluna->GetDialogStatus(pPlayer, pGameObject))
-        return dialogId;
+    sEluna->GetDialogStatus(pPlayer, pGameObject);
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
