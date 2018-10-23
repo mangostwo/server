@@ -83,6 +83,8 @@ void WorldSession::GmSetSecurityGroupHandler(WorldPacket &msg)
 					else
 						target->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_CHEAT_SPELLS);
 				}
+                else
+                    CharacterDatabase.PExecute("UPDATE characters SET securitygroup='%d' WHERE name='%s'", securityGroup, playerName);
 			}
 		}
 		else
