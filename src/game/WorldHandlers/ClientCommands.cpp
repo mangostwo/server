@@ -156,7 +156,12 @@ void WorldSession::GMTeachHandler(WorldPacket &msg)
 	if (GetPlayer()->GetSecurityGroup() > 2)
 	{
 		if ((player = sObjectAccessor.FindPlayer(guid, true)))
-			player->learnSpell(spell, false);
+		{
+			if (msg.GetOpcode() == CMSG_GM_TEACH)
+				player->learnSpell(spell, false);
+			else if (msg.GetOpcode() == CMSG_GM_UNTEACH)
+				player->removeSpell(spell);
+		}
 		else
 			SendPlayerNotFoundFailure();
 	}
@@ -220,8 +225,14 @@ void WorldSession::HandlePlayerLogout(WorldPacket &msg)
 
 void WorldSession::RechargeHandler(WorldPacket &msg)
 {
-	if (GetPlayer()->GetSecurityGroup())
-		GetPlayer()->SetHealthPercent(100.0f);
+	Player *pPlayer;
+
+	pPlayer = GetPlayer();
+	if (pPlayer->GetSecurityGroup())
+	{
+		pPlayer->SetHealthPercent(100.0f);
+		pPlayer->SetPowerPercent(pPlayer->GetPowerType(), 100.0f);
+	}
 	else
 		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
 }
@@ -231,6 +242,7 @@ void WorldSession::DechargeHandler(WorldPacket &msg)
 	if (GetPlayer()->GetSecurityGroup())
 	{
 		GetPlayer()->SetHealth(1);
+		GetPlayer()->SetPower(GetPlayer()->GetPowerType(), 1);
 	}
 	else
 		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);

@@ -1768,6 +1768,13 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         void SetPower(Powers power, uint32 val);
         void SetMaxPower(Powers power, uint32 val);
         int32 ModifyPower(Powers power, int32 val);
+
+		/**
+		* Sets the given power to a certain percentage
+		* @param percent the new percent to change it to, ie: 50.0f, not 0.5f for 50%
+		*/
+		void SetPowerPercent(Powers power, float percent);
+
         /**
          * Mods a power by increasing or decreasing it's value
          * @param power which power to mod

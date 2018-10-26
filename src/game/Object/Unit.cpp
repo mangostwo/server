@@ -9706,6 +9706,12 @@ void Unit::SetHealthPercent(float percent)
     SetHealth(newHealth);
 }
 
+void Unit::SetPowerPercent(Powers power, float percent)
+{
+	uint32 newPower = GetMaxPower(power) * percent / 100.f;
+	SetPower(power, newPower);
+}
+
 void Unit::SetPower(Powers power, uint32 val)
 {
     if (GetPower(power) == val)
