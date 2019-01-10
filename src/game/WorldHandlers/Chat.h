@@ -242,6 +242,7 @@ class ChatHandler
         bool HandleDebugPlayMovieCommand(char* args);
         bool HandleDebugPlaySoundCommand(char* args);
 
+        bool HandleDebugRecvOpcodeCommand(char* args);
         bool HandleDebugSendBuyErrorCommand(char* args);
         bool HandleDebugSendChannelNotifyCommand(char* args);
         bool HandleDebugSendChatMsgCommand(char* args);
