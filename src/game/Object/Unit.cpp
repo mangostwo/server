@@ -8364,12 +8364,12 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
         if (u->GetTypeId() != TYPEID_PLAYER || !((Player*)u)->isGameMaster())
             { return false; }
 
-	    // Death Knights in starting zones with Undying Resolve buff or
-		    // in Acherus with Dominion Over Acherus buff - won't see opposite faction
-		if (u->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER && !((Player*)u)->isGameMaster() &&
-		  ((Player*)u)->GetTeam() != ((Player*)this)->GetTeam() && (u->HasAura(51915) || u->HasAura(51721)))
-		 return false;
-	
+        // Death Knights in starting zones with Undying Resolve buff or
+            // in Acherus with Dominion Over Acherus buff - won't see opposite faction
+        if (u->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER && !((Player*)u)->isGameMaster() &&
+          ((Player*)u)->GetTeam() != ((Player*)this)->GetTeam() && (u->HasAura(51915) || u->HasAura(51721)))
+         return false;
+    
     // Visible units, always are visible for all units, except for units under invisibility and phases
     if (m_Visibility == VISIBILITY_ON && u->m_invisibilityMask == 0)
         { return true; }

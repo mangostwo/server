@@ -3001,7 +3001,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                     // When your health drops below 35% ....
                     int32 health35 = int32(GetMaxHealth() * 35 / 100);
                     if (GetHealth() - damage > health35)
-						return SPELL_AURA_PROC_FAILED;
+                        return SPELL_AURA_PROC_FAILED;
 
                     trigger_spell_id = 64569;
 

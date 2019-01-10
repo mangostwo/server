@@ -9182,10 +9182,10 @@ void SpellAuraHolder::_AddSpellAuraHolder()
     // Faerie Fire (druid versions)
     if (m_spellProto->IsFitToFamily(SPELLFAMILY_DRUID, UI64LIT(0x0000000000000400)))
         m_target->ModifyAuraState(AURA_STATE_FAERIE_FIRE, true);
-	
+    
       // Sting (hunter's pet ability)
-		 if (m_spellProto->Category == 1133)
-		 m_target->ModifyAuraState(AURA_STATE_FAERIE_FIRE, true);
+         if (m_spellProto->Category == 1133)
+         m_target->ModifyAuraState(AURA_STATE_FAERIE_FIRE, true);
 
         // Victorious
         if (m_spellProto->IsFitToFamily(SPELLFAMILY_WARRIOR, UI64LIT(0x0004000000000000)))
