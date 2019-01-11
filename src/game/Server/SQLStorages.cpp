@@ -57,8 +57,8 @@ const char ItemPrototypedstfmt[] = "iiiisiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
 const char PageTextfmt[] = "isi";
 const char InstanceTemplatesrcfmt[] = "iiii";
 const char InstanceTemplatedstfmt[] = "iiii";
-const char ConditionsSrcFmt[] = "iiii";
-const char ConditionsDstFmt[] = "iiii";
+const char ConditionsSrcFmt[] = "iiiix";
+const char ConditionsDstFmt[] = "iiiix";
 const char SpellTemplatesrcfmt[] = "iiiiiiiiiiiiiiiix";
 //                                  0         10        20        30        40        50        60        70        80        90        100       110       120       130       140       150       160     170       180  185
 const char SpellTemplatedstfmt[] = "ixxxiiiixxxxxxxxxxxxxxxxxxxxxxxxiixxxxixxxxxxFxxxxxxxxxxxxxxxxxxxxxxixxxxxFFFxxxxxxixxixxixxixxxxxFFFxxxxxxixxixxixxFFFxxxxxxxxxxxxxppppppppppppppppppppppppppppppppxxxxxxxxxxxFFFxxxxxx";
