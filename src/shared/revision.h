@@ -38,6 +38,6 @@
 
     #define WORLD_DB_VERSION_NR 21
     #define WORLD_DB_STRUCTURE_NR 10
-    #define WORLD_DB_CONTENT_NR 002
-    #define WORLD_DB_UPDATE_DESCRIPTION "Add_Field_Comments_pt2"
+    #define WORLD_DB_CONTENT_NR 031
+    #define WORLD_DB_UPDATE_DESCRIPTION "gossip_option_condition"
 #endif // __REVISION_H__
