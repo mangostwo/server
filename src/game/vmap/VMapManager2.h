@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2018  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -101,6 +101,14 @@ namespace VMAP
      *
      */
     typedef UNORDERED_MAP<std::string, ManagedModel> ModelFileMap;
+
+    enum DisableTypes
+    {
+        VMAP_DISABLE_AREAFLAG     = 0x1,
+        VMAP_DISABLE_HEIGHT       = 0x2,
+        VMAP_DISABLE_LOS          = 0x4,
+        VMAP_DISABLE_LIQUIDSTATUS = 0x8
+    };
 
     /**
      * @brief
@@ -301,6 +309,9 @@ namespace VMAP
              * @return bool
              */
             bool existsMap(const char* pBasePath, unsigned int pMapId, int x, int y) override;
+
+            typedef bool(*IsVMAPDisabledForFn)(uint32 entry, uint8 flags);
+            IsVMAPDisabledForFn IsVMAPDisabledForPtr;
 
 #ifdef MMAP_GENERATOR
         public:

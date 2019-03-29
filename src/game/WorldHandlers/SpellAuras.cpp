@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2018  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -9182,10 +9182,10 @@ void SpellAuraHolder::_AddSpellAuraHolder()
     // Faerie Fire (druid versions)
     if (m_spellProto->IsFitToFamily(SPELLFAMILY_DRUID, UI64LIT(0x0000000000000400)))
         m_target->ModifyAuraState(AURA_STATE_FAERIE_FIRE, true);
-	
+    
       // Sting (hunter's pet ability)
-		 if (m_spellProto->Category == 1133)
-		 m_target->ModifyAuraState(AURA_STATE_FAERIE_FIRE, true);
+         if (m_spellProto->Category == 1133)
+         m_target->ModifyAuraState(AURA_STATE_FAERIE_FIRE, true);
 
         // Victorious
         if (m_spellProto->IsFitToFamily(SPELLFAMILY_WARRIOR, UI64LIT(0x0004000000000000)))

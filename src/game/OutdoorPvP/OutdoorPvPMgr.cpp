@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2018  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
 #include "OutdoorPvPSI.h"
 #include "OutdoorPvPTF.h"
 #include "OutdoorPvPZM.h"
+#include "DisableMgr.h"
 
 INSTANTIATE_SINGLETON_1(OutdoorPvPMgr);
 
@@ -50,7 +51,7 @@ OutdoorPvPMgr::~OutdoorPvPMgr()
 }
 
 #define LOAD_OPVP_ZONE(a)                                           \
-    if (sWorld.getConfig(CONFIG_BOOL_OUTDOORPVP_##a##_ENABLED))     \
+if (sWorld.getConfig(CONFIG_BOOL_OUTDOORPVP_##a##_ENABLED) && !DisableMgr::IsDisabledFor(DISABLE_TYPE_OUTDOORPVP, OPVP_ID_##a))     \
     {                                                               \
         m_scripts[OPVP_ID_##a] = new OutdoorPvP##a();               \
         ++counter;                                                  \

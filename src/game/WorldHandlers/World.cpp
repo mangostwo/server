@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2018  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,6 +61,7 @@
 #include "MoveMap.h"
 #include "GameEventMgr.h"
 #include "PoolManager.h"
+#include "ProgressBar.h"
 #include "Database/DatabaseImpl.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
@@ -76,6 +77,7 @@
 #include "LFGMgr.h"
 #include "revision.h"
 #include "Language.h"
+#include "DisableMgr.h"
 
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
@@ -987,6 +989,13 @@ void World::SetInitialWorldSettings()
     ///- Initialize config settings
     LoadConfigSettings();
 
+    ///- Initialize VMapManager function pointers (to untangle game/collision circular deps)
+    if (VMAP::VMapManager2* vmmgr2 = dynamic_cast<VMAP::VMapManager2*>(VMAP::VMapFactory::createOrGetVMapManager()))
+    {
+        //vmmgr2->GetLiquidFlagsPtr = &GetLiquidFlags;
+        vmmgr2->IsVMAPDisabledForPtr = &DisableMgr::IsVMAPDisabledFor;
+    }
+
     ///- Check the existence of the map files for all races start areas.
     if (!MapManager::ExistMapAndVMap(0, -6240.32f, 331.033f) ||                     // Dwarf/ Gnome
         !MapManager::ExistMapAndVMap(0, -8949.95f, -132.493f) ||                // Human
@@ -1105,6 +1114,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Item Random Enchantments Table...");
     LoadRandomEnchantmentsTable();
 
+    sLog.outString("Loading Disables...");                  // must be before loading quests and items
+    DisableMgr::LoadDisables();
+
     sLog.outString("Loading Item Templates...");            // must be after LoadRandomEnchantmentsTable and LoadPageTexts
     sObjectMgr.LoadItemPrototypes();
 
@@ -1189,6 +1201,9 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadQuestRelations();                        // must be after quest load
     sLog.outString(">>> Quests Relations loaded");
     sLog.outString();
+
+    sLog.outString("Checking Quest Disables...");
+    DisableMgr::CheckQuestDisables();                       // must be after loading quests
 
     sLog.outString("Loading Game Event Data...");           // must be after sPoolMgr.LoadFromDB and quests to properly load pool events and quests for events
     sGameEventMgr.LoadFromDB();

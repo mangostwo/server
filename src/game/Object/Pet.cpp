@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2018  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -2190,19 +2190,19 @@ void Pet::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
         return;
     }
 
-	// Get owner current speed
-	float ownerSpeed = owner->GetSpeedRate(mtype);
-	int32 slow = owner->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_DECREASE_SPEED);
+    // Get owner current speed
+    float ownerSpeed = owner->GetSpeedRate(mtype);
+    int32 slow = owner->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_DECREASE_SPEED);
 
-	// If owner is affected by speed reduction effects, do not take them into account
-	// (a dazed hunter does not affect pet's speed)
-		if (slow)
-		{ ownerSpeed *= 100.0f / (100.0f + slow); }
-	
-		float speed = std::max(non_stack_bonus, stack_bonus) * ownerSpeed;
-	
-	    if (main_speed_mod)
-		speed = speed * (100.0f + main_speed_mod) / 100.0f;
+    // If owner is affected by speed reduction effects, do not take them into account
+    // (a dazed hunter does not affect pet's speed)
+        if (slow)
+        { ownerSpeed *= 100.0f / (100.0f + slow); }
+    
+        float speed = std::max(non_stack_bonus, stack_bonus) * ownerSpeed;
+    
+        if (main_speed_mod)
+        speed = speed * (100.0f + main_speed_mod) / 100.0f;
 
     switch (mtype)
     {
@@ -2227,7 +2227,7 @@ void Pet::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
     }
 
     // Apply strongest slow aura mod to speed
-	slow = GetMaxNegativeAuraModifier(SPELL_AURA_MOD_DECREASE_SPEED);
+    slow = GetMaxNegativeAuraModifier(SPELL_AURA_MOD_DECREASE_SPEED);
     if (slow)
     {
         speed *= (100.0f + slow) / 100.0f;

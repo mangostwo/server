@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2018  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1291,18 +1291,18 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 break;
             }
             case ACHIEVEMENT_CRITERIA_TYPE_OWN_ITEM:
-			{
-				// speedup for non-login case
-				if (miscvalue1 && achievementCriteria->own_item.itemID != miscvalue1)
-					continue;
-				// check item count
-				if(!miscvalue2)
-					continue;
+            {
+                // speedup for non-login case
+                if (miscvalue1 && achievementCriteria->own_item.itemID != miscvalue1)
+                    continue;
+                // check item count
+                if(!miscvalue2)
+                    continue;
 
-				change = miscvalue2;
-				progressType = PROGRESS_ACCUMULATE;
-				break;
-			}
+                change = miscvalue2;
+                progressType = PROGRESS_ACCUMULATE;
+                break;
+            }
             case ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA:
                 // miscvalue1 contains the personal rating
                 if (!miscvalue1)                            // no update at login

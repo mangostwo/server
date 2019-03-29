@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2018  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -714,7 +714,7 @@ enum MangosStrings
     LANG_BG_QUEUE_ANNOUNCE_SELF         = 711,
     LANG_BG_QUEUE_ANNOUNCE_WORLD        = 712,
     LANG_YOUR_ARENA_LEVEL_REQ_ERROR     = 713,
-    //                                  = 714, not used
+    LANG_BG_IS_DISABLED                 = 714,
     LANG_YOUR_BG_LEVEL_REQ_ERROR        = 715,
     //                                  = 716, not used
     LANG_BG_STARTED_ANNOUNCE_WORLD      = 717,
@@ -749,7 +749,7 @@ enum MangosStrings
     LANG_DIST_ARENA_POINTS_TEAM_START   = 744,
     LANG_DIST_ARENA_POINTS_TEAM_END     = 745,
     LANG_DIST_ARENA_POINTS_END          = 746,
-    //                                  = 747, not used
+    LANG_MAP_IS_DISABLED                = 747,
     //                                  = 748, not used
     //                                  = 749, not used
     LANG_BATTLEGROUND_PREMATURE_FINISH_WARNING      = 750,  // "Not enough players. This game will close in %u mins."
