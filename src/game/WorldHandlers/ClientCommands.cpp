@@ -14,6 +14,7 @@
 
 // For accessing world objects
 #include "ObjectAccessor.h"
+#include "ObjectMgr.h"
 
 // For generic strings: Is this really necessary?
 #include "Language.h"
