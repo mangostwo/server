@@ -950,6 +950,7 @@ class WorldSession
 		void MoveSwimSpeedCheatHandler(WorldPacket &msg);
 		void MoveFlightSpeedCheatHandler(WorldPacket &msg);
 		void SetMoneyCheatHandler(WorldPacket &msg);
+        void CreateItemHandler(WorldPacket &msg);
 
     private:
         // private trade methods

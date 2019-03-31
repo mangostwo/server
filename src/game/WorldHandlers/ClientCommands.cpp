@@ -437,3 +437,40 @@ void WorldSession::SetMoneyCheatHandler(WorldPacket &msg)
 	else
 		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
 }
+
+void WorldSession::CreateItemHandler(WorldPacket &msg)
+{
+	if (GetPlayer()->GetSecurityGroup() > 1)
+	{
+		uint32 id = 0;
+		uint32 quantity = 1;
+
+		msg >> id;
+		msg >> quantity;
+		
+		// Number of items we can currently store
+		uint32 quantityLimit = 0;
+
+		// Declare our item stack size and verify if we can store it
+		ItemPosCountVec stackSize;
+		InventoryResult result = GetPlayer()->CanStoreNewItem(NULL_BAG, NULL_SLOT, stackSize, id, quantity, &quantityLimit);
+
+		// Adjust quantity value to match available inventory slots/stacks
+		if (result != EQUIP_ERR_OK)
+			quantity -= quantityLimit;
+
+		// No room; send result down to client
+		if (quantity == 0 || stackSize.empty())
+		{
+			GetPlayer()->SendEquipError(result, 0, 0, id);
+			return;
+		}
+
+		// Everything checks out: Create the item(s) and notify the player
+		Item *item = GetPlayer()->StoreNewItem(stackSize, id, true, Item::GenerateItemRandomPropertyId(id));
+		if (item)
+			GetPlayer()->SendNewItem(item, quantity, false, true);
+	}
+	else
+		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+}
