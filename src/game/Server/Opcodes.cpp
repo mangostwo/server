@@ -527,7 +527,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x1EC*/ { "SMSG_AUTH_CHALLENGE",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x1ED*/ { "CMSG_AUTH_SESSION",                            STATUS_NEVER,    PROCESS_THREADUNSAFE, &WorldSession::Handle_EarlyProccess            },
     /*0x1EE*/ { "SMSG_AUTH_RESPONSE",                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1EF*/ { "MSG_GM_SHOWLABEL",                             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
+    /*0x1EF*/ { "MSG_GM_SHOWLABEL",                             STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::GmShowLabelHandler              },
     /*0x1F0*/ { "CMSG_PET_CAST_SPELL",                          STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandlePetCastSpellOpcode        },
     /*0x1F1*/ { "MSG_SAVE_GUILD_EMBLEM",                        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleSaveGuildEmblemOpcode     },
     /*0x1F2*/ { "MSG_TABARDVENDOR_ACTIVATE",                    STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleTabardVendorActivateOpcode},

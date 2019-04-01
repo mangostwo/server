@@ -474,3 +474,17 @@ void WorldSession::CreateItemHandler(WorldPacket &msg)
 	else
 		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
 }
+
+void WorldSession::GmShowLabelHandler(WorldPacket &msg)
+{
+	if (GetPlayer()->GetSecurityGroup())
+	{
+		int enable = 1;
+		msg >> enable;
+
+		GetPlayer()->OnGmShowLabel((bool)enable);
+		SendConsoleMessage(enable? "Showing GM label to users":"Not showing GM label to users");
+	}
+	else
+		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+}

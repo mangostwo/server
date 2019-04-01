@@ -1139,6 +1139,9 @@ class Player : public Unit
         void SetTaxiCheater(bool on) { if (on) { m_ExtraFlags |= PLAYER_EXTRA_TAXICHEAT; } else { m_ExtraFlags &= ~PLAYER_EXTRA_TAXICHEAT; } }
         bool isGMVisible() const { return !(m_ExtraFlags & PLAYER_EXTRA_GM_INVISIBLE); }
         void SetGMVisible(bool on);
+        // GM methods
+        void OnGmShowLabel(bool enable);
+
         void SetPvPDeath(bool on)
         {
             if (on) { m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH; }

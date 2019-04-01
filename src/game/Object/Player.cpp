@@ -1658,7 +1658,7 @@ ChatTagFlags Player::GetChatTag() const
         tag |= CHAT_TAG_AFK;
     if (isDND())
         tag |= CHAT_TAG_DND;
-    if (isGMChat())
+    if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM))
         tag |= CHAT_TAG_GM;
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_COMMENTATOR))
         tag |= CHAT_TAG_COM;
@@ -2403,6 +2403,14 @@ void Player::SetGMVisible(bool on)
 
         SetVisibility(VISIBILITY_OFF);
     }
+}
+
+void Player::OnGmShowLabel(bool enable)
+{
+    if (enable)
+        SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
+    else
+        RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
 }
 
 bool Player::IsGroupVisibleFor(Player* p) const
@@ -16027,10 +16035,10 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
         {
             default:
             case 0:                  break;                 // disable
-            case 1: SetGMChat(true); break;                 // enable
+            case 1: OnGmShowLabel(true); break;             // enable
             case 2:                                         // save state
-                if (extraflags & PLAYER_EXTRA_GM_CHAT)
-                    { SetGMChat(true); }
+                if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM))
+                    SetGMChat(true);
                 break;
         }
 

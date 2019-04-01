@@ -166,15 +166,17 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
     {
         Player* pl = itr->second;
 
-        if (security == SEC_PLAYER)
+        // Non-GM case (regular player):
+        if (!GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM))
         {
-            // player can see member of other team only if CONFIG_BOOL_ALLOW_TWO_SIDE_WHO_LIST
-            if (pl->GetTeam() != team && !allowTwoSideWhoList)
-                { continue; }
-
-            // player can see MODERATOR, GAME MASTER, ADMINISTRATOR only if CONFIG_GM_IN_WHO_LIST
-            if (pl->GetSession()->GetSecurity() > gmLevelInWhoList)
-                { continue; }
+            // Return no result for the listed player if:
+            // * The player is not on our team
+            // * The player is (GM) invis 
+            if (
+                (pl->GetTeam() != team && !allowTwoSideWhoList) ||
+                (pl->m_ExtraFlags &PLAYER_EXTRA_GM_INVISIBLE)
+               )
+                continue;
         }
 
         // do not process players which are not in world
@@ -218,6 +220,15 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
             { continue; }
 
         std::string pname = pl->GetName();
+
+        // <GM> label case
+        if (pl->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM))
+            pname = "<GM>" + pname;
+
+        // The <Dev> label takes precedence on the GM one
+        if (pl->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DEVELOPER))
+            pname = "<Dev>" + pname;
+
         std::wstring wpname;
         if (!Utf8toWStr(pname, wpname))
             { continue; }

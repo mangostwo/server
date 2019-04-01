@@ -119,9 +119,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
     // LANG_ADDON should not be changed nor be affected by flood control
     else
     {
-        // send in universal language if player in .gmon mode (ignore spell effects)
-        if (_player->isGameMaster())
-            { lang = LANG_UNIVERSAL; }
+        // <GM> label case
+        if (_player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM))
+            lang = LANG_UNIVERSAL;
         else
         {
             // send in universal language in two side iteration allowed mode
