@@ -2380,7 +2380,7 @@ void Player::SetGameMaster(bool on)
     UpdateForQuestWorldObjects();
 }
 
-void Player::SetGMVisible(bool on)
+void Player::SetGMVisible_DEPRECATED(bool on)
 {
     if (on)
     {
@@ -16012,11 +16012,11 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
         switch (sWorld.getConfig(CONFIG_UINT32_GM_VISIBLE_STATE))
         {
             default:
-            case 0: SetGMVisible(false); break;             // invisible
+            case 0: SetGMVisible_DEPRECATED(false); break;             // invisible
             case 1:                      break;             // visible
             case 2:                                         // save state
                 if (extraflags & PLAYER_EXTRA_GM_INVISIBLE)
-                    { SetGMVisible(false); }
+                    { SetGMVisible_DEPRECATED(false); }
                 break;
         }
 
@@ -16038,7 +16038,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
             case 1: OnGmShowLabel(true); break;             // enable
             case 2:                                         // save state
                 if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM))
-                    SetGMChat(true);
+                    SetGMChat_DEPRECATED(true);
                 break;
         }
 

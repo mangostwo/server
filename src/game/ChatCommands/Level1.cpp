@@ -196,7 +196,7 @@ bool ChatHandler::HandleGMChatCommand(char* args)
 {
     if (!*args)
     {
-        if (m_session->GetPlayer()->isGMChat())
+        if (m_session->GetPlayer()->isGMChat_DEPRECATED())
             { m_session->SendNotification(LANG_GM_CHAT_ON); }
         else
             { m_session->SendNotification(LANG_GM_CHAT_OFF); }
@@ -213,12 +213,12 @@ bool ChatHandler::HandleGMChatCommand(char* args)
 
     if (value)
     {
-        m_session->GetPlayer()->SetGMChat(true);
+        m_session->GetPlayer()->SetGMChat_DEPRECATED(true);
         m_session->SendNotification(LANG_GM_CHAT_ON);
     }
     else
     {
-        m_session->GetPlayer()->SetGMChat(false);
+        m_session->GetPlayer()->SetGMChat_DEPRECATED(false);
         m_session->SendNotification(LANG_GM_CHAT_OFF);
     }
 
@@ -249,7 +249,7 @@ bool ChatHandler::HandleGMVisibleCommand(char* args)
 
     if (value)
     {
-        player->SetGMVisible(true);
+        player->SetGMVisible_DEPRECATED(true);
         m_session->SendNotification(LANG_INVISIBLE_VISIBLE);
         if (invisibleAuraInfo)
             { player->RemoveAurasDueToSpell(invisibleAuraInfo->Id); }
@@ -257,7 +257,7 @@ bool ChatHandler::HandleGMVisibleCommand(char* args)
     else
     {
         m_session->SendNotification(LANG_INVISIBLE_INVISIBLE);
-        player->SetGMVisible(false);
+        player->SetGMVisible_DEPRECATED(false);
         if (invisibleAuraInfo)
             { player->CastSpell(player, invisibleAuraInfo, true); }
     }
