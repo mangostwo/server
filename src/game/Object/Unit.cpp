@@ -8328,12 +8328,14 @@ int32 Unit::ModifyPower(Powers power, int32 dVal)
 
 bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList, bool is3dDistance) const
 {
-    if (!u || !IsInMap(u))
-        { return false; }
+    if (!u)
+        return false;
 
-    // Always can see self
+    if (!IsInMap(u))
+        return false;
+
     if (u == this)
-        { return true; }
+        return true;
 
     // player visible for other player if not logout and at same transport
     // including case when player is out of world
@@ -8352,16 +8354,16 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
         { return false; }
 
     Map& _map = *u->GetMap();
-    // Grid dead/alive checks
+
+    // Generic PLAYER target visibility check
     if (u->GetTypeId() == TYPEID_PLAYER)
     {
-        // non visible at grid for any stealth state
-        if (!IsVisibleInGridForPlayer((Player*)u))
-            { return false; }
+        if (!IsVisibleInGridForPlayer((Player *)u))
+            return false;
 
-        // if player is dead then he can't detect anyone in any cases
+        // If our target is dead, it can't detect anything, but may still see some units.
         if (!u->IsAlive())
-            { detect = false; }
+            detect = false;
     }
     else
     {
@@ -8405,18 +8407,9 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     if (m_Visibility == VISIBILITY_ON && u->m_invisibilityMask == 0)
         { return true; }
 
-    // GMs see any players, not higher GMs and all units in any phase
-    if (u->GetTypeId() == TYPEID_PLAYER && ((Player*)u)->isGameMaster())
-    {
-        if (GetTypeId() == TYPEID_PLAYER)
-            { return ((Player*)this)->GetSession()->GetSecurity() <= ((Player*)u)->GetSession()->GetSecurity(); }
-        else
-            { return true; }
-    }
-
-    // non faction visibility non-breakable for non-GMs
-    if (m_Visibility == VISIBILITY_OFF)
-        { return false; }
+    // GM Invis and Uber Invis are ALWAYS invisible to monsters
+    if (m_Visibility == VISIBILITY_OFF || m_Visibility == VISIBILITY_UBER_INVIS)
+        return false;
 
     // raw invisibility
     bool invisible = (m_invisibilityMask != 0 || u->m_invisibilityMask != 0);

@@ -951,6 +951,7 @@ class WorldSession
 		void MoveFlightSpeedCheatHandler(WorldPacket &msg);
 		void SetMoneyCheatHandler(WorldPacket &msg);
         void CreateItemHandler(WorldPacket &msg);
+        void GmInvisHandler(WorldPacket &msg);
         void GmShowLabelHandler(WorldPacket &msg);
 
     private:

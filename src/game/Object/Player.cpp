@@ -2405,6 +2405,22 @@ void Player::SetGMVisible_DEPRECATED(bool on)
     }
 }
 
+void Player::OnGmInvis(bool enable)
+{
+    if (enable)
+        SetVisibility(VISIBILITY_OFF);
+    else
+    {
+        // Re-apply existing invisibility value from active auras, if needed
+        if (HasAuraType(SPELL_AURA_MOD_STEALTH))
+            SetVisibility(VISIBILITY_GROUP_STEALTH);
+        else if (HasAuraType(SPELL_AURA_MOD_INVISIBILITY))
+            SetVisibility(VISIBILITY_GROUP_INVISIBILITY);
+        else
+            SetVisibility(VISIBILITY_ON);
+    }
+}
+
 void Player::OnGmShowLabel(bool enable)
 {
     if (enable)
@@ -19934,61 +19950,70 @@ void Player::ReportedAfkBy(Player* reporter)
     }
 }
 
+// TODO: Implement GM Vision functionality for this method
 bool Player::IsVisibleInGridForPlayer(Player* pl) const
 {
-    // gamemaster in GM mode see all, including ghosts
-    if (pl->isGameMaster() && GetSession()->GetSecurity() <= pl->GetSession()->GetSecurity())
-        { return true; }
+    // Should probably raise an assertion, but whatever...
+    if (!pl)
+        return false;
 
-    // player see dead player/ghost from own group/raid
-    if (IsInSameRaidWith(pl))
-        { return true; }
+    // Obviously...
+    if (pl == this)
+        return true;
 
-    // Live player see live player or dead player with not realized corpse
-    if (pl->IsAlive() || pl->m_deathTimer > 0)
-        { return IsAlive() || m_deathTimer > 0; }
+    // GM UBER Invis is ALWAYS invisible
+    if (GetVisibility() == VISIBILITY_UBER_INVIS)
+        return false;
 
-    // Ghost see other friendly ghosts, that's for sure
-    if (!(IsAlive() || m_deathTimer > 0) && IsFriendlyTo(pl))
-        { return true; }
+    // GM Vision can reveal all other visibility values
+    if (GetVisibility() == VISIBILITY_OFF /*&& !pl->HasGmVision()*/)
+        return false;
+    //else
+    //    return true;
 
-    // Dead player see live players near own corpse
+    // Party members should always be visible on the grid for eachother
+    if (IsInSameRaidWith(pl) || IsInSameGroupWith(pl))
+        return true;
+
+    // Friendly ghosts can see eachother
+    if ( (IsDead() && pl->IsDead()) && IsFriendlyTo(pl) )
+        return true;
+
+    // Ghosts can see nearby alive players
     if (IsAlive())
     {
-        if (Corpse* corpse = pl->GetCorpse())
+        if (Corpse *corpse = pl->GetCorpse())
         {
             // 20 - aggro distance for same level, 25 - max additional distance if player level less that creature level
             if (corpse->IsWithinDistInMap(this, (20 + 25) * sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO)))
-                { return true; }
+                return true;
         }
     }
 
-    // and not see any other
-    return false;
+    // Default state:
+    // If something is wrong with visibility cases, this is likely the culprit (add a check above!)
+    return true;
 }
 
-bool Player::IsVisibleGloballyFor(Player* u) const
+// TODO: Implement GM Vision functionality in this method
+bool Player::IsVisibleGloballyFor(Player *u) const
 {
     if (!u)
-        { return false; }
+        return false;
 
-    // Always can see self
+    // Obviously...
     if (u == this)
-        { return true; }
+        return true;
 
-    // Visible units, always are visible for all players
-    if (GetVisibility() == VISIBILITY_ON)
-        { return true; }
+    // GM UBER Invis is ALWAYS invisible
+    if (GetVisibility() == VISIBILITY_UBER_INVIS)
+        return false;
 
-    // GMs are visible for higher gms (or players are visible for gms)
-    if (u->GetSession()->GetSecurity() > SEC_PLAYER)
-        { return GetSession()->GetSecurity() <= u->GetSession()->GetSecurity(); }
+    // Standard undetectable invisibility state (GMVision can still reveal you)
+    if (GetVisibility() == VISIBILITY_OFF /*&& !u->HasGmVision()*/)
+        return false;
 
-    // non faction visibility non-breakable for non-GMs
-    if (GetVisibility() == VISIBILITY_OFF)
-        { return false; }
-
-    // non-gm stealth/invisibility not hide from global player lists
+    // Default state
     return true;
 }
 

@@ -475,6 +475,19 @@ void WorldSession::CreateItemHandler(WorldPacket &msg)
 		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
 }
 
+void WorldSession::GmInvisHandler(WorldPacket &msg)
+{
+	if (GetPlayer()->GetSecurityGroup() > 1)
+	{
+		int enable = 1;
+		msg >> enable;
+
+		GetPlayer()->OnGmInvis((bool)enable);
+	}
+	else
+		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+}
+
 void WorldSession::GmShowLabelHandler(WorldPacket &msg)
 {
 	if (GetPlayer()->GetSecurityGroup())

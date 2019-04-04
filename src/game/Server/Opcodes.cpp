@@ -518,7 +518,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x1E3*/ { "CMSG_QUEST_POI_QUERY",                         STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleQuestPOIQueryOpcode       },
     /*0x1E4*/ { "SMSG_QUEST_POI_QUERY_RESPONSE",                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x1E5*/ { "CMSG_GHOST",                                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x1E6*/ { "CMSG_GM_INVIS",                                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
+    /*0x1E6*/ { "CMSG_GM_INVIS",                                STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::GmInvisHandler                  },
     /*0x1E7*/ { "SMSG_INVALID_PROMOTION_CODE",                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x1E8*/ { "MSG_GM_BIND_OTHER",                            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x1E9*/ { "MSG_GM_SUMMON",                                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },

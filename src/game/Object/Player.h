@@ -1148,6 +1148,7 @@ class Player : public Unit
         void SetGMVisible_DEPRECATED(bool on);
 
         // GM methods
+        void OnGmInvis(bool enable);
         void OnGmShowLabel(bool enable);
 
         void SetPvPDeath(bool on)

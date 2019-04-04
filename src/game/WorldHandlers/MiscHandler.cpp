@@ -169,13 +169,8 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
         // Non-GM case (regular player):
         if (!GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM))
         {
-            // Return no result for the listed player if:
-            // * The player is not on our team
-            // * The player is (GM) invis 
-            if (
-                (pl->GetTeam() != team && !allowTwoSideWhoList) ||
-                (pl->m_ExtraFlags &PLAYER_EXTRA_GM_INVISIBLE)
-               )
+            // Return no result for the listed player if that player is not on our team
+            if ((pl->GetTeam() != team && !allowTwoSideWhoList))
                 continue;
         }
 
