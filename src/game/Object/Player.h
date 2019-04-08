@@ -1136,7 +1136,7 @@ class Player : public Unit
         void SetAcceptTicket(bool on) { if (on) { m_ExtraFlags |= PLAYER_EXTRA_GM_ACCEPT_TICKETS; } else { m_ExtraFlags &= ~PLAYER_EXTRA_GM_ACCEPT_TICKETS; } }
         bool isAcceptWhispers() const { return m_ExtraFlags & PLAYER_EXTRA_ACCEPT_WHISPERS; }
         void SetAcceptWhispers(bool on) { if (on) { m_ExtraFlags |= PLAYER_EXTRA_ACCEPT_WHISPERS; } else { m_ExtraFlags &= ~PLAYER_EXTRA_ACCEPT_WHISPERS; } }
-        bool isGameMaster() const { return m_ExtraFlags & PLAYER_EXTRA_GM_ON; }
+        bool isGameMaster() const { return m_ExtraFlags & PLAYER_EXTRA_GM_ON_DEPRECATED; }
         void SetGameMaster(bool on);
 
         // This function is deprecated: Please remove references from the code, thank you.

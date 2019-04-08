@@ -2339,7 +2339,7 @@ void Player::SetGameMaster(bool on)
 {
     if (on)
     {
-        m_ExtraFlags |= PLAYER_EXTRA_GM_ON;
+        m_ExtraFlags |= PLAYER_EXTRA_GM_ON_DEPRECATED;
         setFaction(35);
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
 
@@ -2355,7 +2355,7 @@ void Player::SetGameMaster(bool on)
     }
     else
     {
-        m_ExtraFlags &= ~ PLAYER_EXTRA_GM_ON;
+        m_ExtraFlags &= ~ PLAYER_EXTRA_GM_ON_DEPRECATED;
         setFactionForRace(getRace());
         RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
 
@@ -16041,7 +16041,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
             case 0:                      break;             // disable
             case 1: SetGameMaster(true); break;             // enable
             case 2:                                         // save state
-                if (extraflags & PLAYER_EXTRA_GM_ON)
+                if (extraflags & PLAYER_EXTRA_GM_ON_DEPRECATED)
                     { SetGameMaster(true); }
                 break;
         }
