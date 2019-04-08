@@ -2869,7 +2869,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                 // Dalaran restricted flight zone (recheck before apply unmount)
                 if (area && target->GetTypeId() == TYPEID_PLAYER && (area->flags & AREA_FLAG_CANNOT_FLY) &&
-                        ((Player*)target)->IsFreeFlying() && !((Player*)target)->isGameMaster())
+                        ((Player*)target)->IsFreeFlying())
                 {
                     target->CastSpell(target, 58601, true); // Remove Flight Auras (also triggered Parachute (45472))
                 }

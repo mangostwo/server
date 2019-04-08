@@ -4824,9 +4824,11 @@ SpellCastResult Spell::CheckCast(bool strict)
             m_caster->IsInCombat() && !m_caster->IsIgnoreUnitState(m_spellInfo, IGNORE_UNIT_COMBAT_STATE))
         { return SPELL_FAILED_AFFECTING_COMBAT; }
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && !((Player*)m_caster)->isGameMaster() &&
+    if (
+        m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER) &&
         sWorld.getConfig(CONFIG_BOOL_VMAP_INDOOR_CHECK) &&
-        VMAP::VMapFactory::createOrGetVMapManager()->isLineOfSightCalcEnabled())
+        VMAP::VMapFactory::createOrGetVMapManager()->isLineOfSightCalcEnabled()
+        )
     {
         if (m_spellInfo->HasAttribute(SPELL_ATTR_OUTDOORS_ONLY) &&
             !m_caster->GetTerrain()->IsOutdoors(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ()))

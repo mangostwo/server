@@ -141,11 +141,13 @@ void HostileReference::updateOnlineStatus()
     }
     // only check for online status if
     // ref is valid
-    // target is no player or not gamemaster
+    // target is not player or not beastmaster
     // target is not in flight
-    if (isValid() &&
-        ((getTarget()->GetTypeId() != TYPEID_PLAYER || !((Player*)getTarget())->isGameMaster()) ||
-         !getTarget()->IsTaxiFlying()))
+    if (
+        isValid() &&
+        ((getTarget()->GetTypeId() != TYPEID_PLAYER || !getTarget()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER)) ||
+        !getTarget()->IsTaxiFlying())
+        )
     {
         Creature* creature = (Creature*) getSourceUnit();
         online = getTarget()->isInAccessablePlaceFor(creature);
@@ -416,13 +418,16 @@ void ThreatManager::addThreat(Unit* pVictim, float pThreat, bool crit, SpellScho
     // players and pets have only InHateListOf
     // HateOfflineList is used co contain unattackable victims (in-flight, in-water, GM etc.)
 
-    // not to self
-    if (pVictim == getOwner())
-        { return; }
+    if (!pVictim)
+        return;
 
-    // not to GM
-    if (!pVictim || (pVictim->GetTypeId() == TYPEID_PLAYER && ((Player*)pVictim)->isGameMaster()))
-        { return; }
+    // Don't add thread to ourselves
+    if (pVictim == getOwner())
+        return;
+
+    // Beastmaster case: Do not add threat
+    if (pVictim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER))
+        return;
 
     // not to dead and not for dead
     if (!pVictim->IsAlive() || !getOwner()->IsAlive())
@@ -468,8 +473,10 @@ void ThreatManager::addThreatDirectly(Unit* pVictim, float threat)
         iThreatContainer.addReference(hostileReference);
         hostileReference->addThreat(threat);                // now we add the real threat
         iUpdateNeed = true;
-        if (pVictim->GetTypeId() == TYPEID_PLAYER && ((Player*)pVictim)->isGameMaster())
-            { hostileReference->setOnlineOfflineState(false); } // GM is always offline
+
+        // Beastmaster case: Don't add threat
+        if (pVictim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER))
+            hostileReference->setOnlineOfflineState(false);
     }
 }
 

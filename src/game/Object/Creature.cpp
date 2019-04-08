@@ -2153,8 +2153,9 @@ void Creature::SetInCombatWithZone()
     {
         if (Player* pPlayer = i->getSource())
         {
-            if (pPlayer->isGameMaster())
-                { continue; }
+            // Beastmaster case
+            if (pPlayer->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER))
+                continue;
 
             if (pPlayer->IsAlive() && !IsFriendlyTo(pPlayer))
             {

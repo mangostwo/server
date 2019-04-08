@@ -1717,9 +1717,10 @@ int64 GameObject::GetPackedRotation()
 
 bool GameObject::IsHostileTo(Unit const* unit) const
 {
-    // always non-hostile to GM in GM mode
-    if (unit->GetTypeId() == TYPEID_PLAYER && ((Player const*)unit)->isGameMaster())
-        { return false; }
+    // Beastmaster case: 
+    // Force friendly reaction
+    if ( unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER) )
+        return false;
 
     // test owner instead if have
     if (Unit const* owner = GetOwner())
@@ -1760,9 +1761,10 @@ bool GameObject::IsHostileTo(Unit const* unit) const
 
 bool GameObject::IsFriendlyTo(Unit const* unit) const
 {
-    // always friendly to GM in GM mode
-    if (unit->GetTypeId() == TYPEID_PLAYER && ((Player const*)unit)->isGameMaster())
-        { return true; }
+    // Beastmaster case: 
+    // Force friendly reaction
+    if ( unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER) )
+        return true;
 
     // test owner instead if have
     if (Unit const* owner = GetOwner())

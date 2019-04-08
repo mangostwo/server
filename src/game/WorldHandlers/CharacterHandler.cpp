@@ -849,11 +849,13 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     // Load pet if any (if player not alive and in taxi flight or another then pet will remember as temporary unsummoned)
     pCurrChar->LoadPet();
 
-    /* If we're running an FFA PvP realm and the player isn't a GM, mark them as PvP flagged */
-    if (sWorld.IsFFAPvPRealm() && !pCurrChar->isGameMaster() && !pCurrChar->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
-    {
-        pCurrChar->SetFFAPvP(true);
-    }
+    /* If we're running an FFA PvP realm and the player isn't doesn't have the BM (Beastmaster) flag, mark them as PvP flagged */
+    if (
+        sWorld.IsFFAPvPRealm() &&
+        !pCurrChar->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER)
+        && !pCurrChar->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING)
+        )
+            pCurrChar->SetFFAPvP(true);
 
     if (pCurrChar->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP))
     {

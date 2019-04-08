@@ -6941,14 +6941,14 @@ void Player::UpdateArea(uint32 newArea)
     // so apply them accordingly
     if (area && (area->flags & AREA_FLAG_ARENA))
     {
-        if (!isGameMaster())
+        if (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER))
             SetFFAPvP(true);
     }
     else
     {
         // remove ffa flag only if not ffapvp realm
         // removal in sanctuaries and capitals is handled in zone update
-        if (IsFFAPvP() && !sWorld.IsFFAPvPRealm())
+        if (IsFFAPvP() && !sWorld.IsFFAPvPRealm() || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER))
             SetFFAPvP(false);
     }
 

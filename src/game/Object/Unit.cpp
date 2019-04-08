@@ -5653,9 +5653,10 @@ bool Unit::IsHostileTo(Unit const* unit) const
     if (unit == this)
         { return false; }
 
-    // always non-hostile to GM in GM mode
-    if (unit->GetTypeId() == TYPEID_PLAYER && ((Player const*)unit)->isGameMaster())
-        { return false; }
+    // Beastmaster case: 
+    // Force friendly reaction
+    if ( unit->GetTypeId() == TYPEID_PLAYER && unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER) )
+        return false;
 
     // always hostile to enemy
     if (getVictim() == unit || unit->getVictim() == this)
@@ -5765,9 +5766,10 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
     if (unit == this)
         { return true; }
 
-    // always friendly to GM in GM mode
-    if (unit->GetTypeId() == TYPEID_PLAYER && ((Player const*)unit)->isGameMaster())
-        { return true; }
+    // Beastmaster case: 
+    // Force friendly reaction
+    if ( unit->GetTypeId() == TYPEID_PLAYER && unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER) )
+        return true;
 
     // always non-friendly to enemy
     if (getVictim() == unit || unit->getVictim() == this)
@@ -5914,17 +5916,11 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
 	if (victim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER))
 		return false;
 
-    // nobody can attack GM in GM-mode
-    if (victim->GetTypeId() == TYPEID_PLAYER)
-    {
-        if (((Player*)victim)->isGameMaster())
-            { return false; }
-    }
-    else
-    {
-        if (((Creature*)victim)->IsInEvadeMode())
-            { return false; }
-    }
+    // Beastmaster case: Forcing friendly reaction
+    if (victim->GetTypeId() == TYPEID_PLAYER && victim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER))
+        return false;
+    else if ( ((Creature*)victim)->IsInEvadeMode() )
+        return false;
 
     // remove SPELL_AURA_MOD_UNATTACKABLE at attack (in case non-interruptible spells stun aura applied also that not let attack)
     if (HasAuraType(SPELL_AURA_MOD_UNATTACKABLE))
@@ -8241,9 +8237,6 @@ void Unit::ClearInCombat()
 
 bool Unit::IsTargetableForAttack(bool inverseAlive /*=false*/) const
 {
-    if (GetTypeId() == TYPEID_PLAYER && ((Player*)this)->isGameMaster())
-	    return false;
-
 	// Can't attack BM
 	if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER))
 		return false;
@@ -8930,11 +8923,12 @@ void Unit::TauntApply(Unit* taunter)
 {
     MANGOS_ASSERT(GetTypeId() == TYPEID_UNIT);
 
-    if (!taunter || (taunter->GetTypeId() == TYPEID_PLAYER && ((Player*)taunter)->isGameMaster()))
-        { return; }
+    if (!taunter || !CanHaveThreatList())
+        return;
 
-    if (!CanHaveThreatList())
-        { return; }
+    // Beastmaster case: Do not apply taunt
+    if ( taunter->GetTypeId() == TYPEID_PLAYER && taunter->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER) )
+        return;
 
     Unit* target = getVictim();
 
@@ -8960,11 +8954,12 @@ void Unit::TauntFadeOut(Unit* taunter)
 {
     MANGOS_ASSERT(GetTypeId() == TYPEID_UNIT);
 
-    if (!taunter || (taunter->GetTypeId() == TYPEID_PLAYER && ((Player*)taunter)->isGameMaster()))
-        { return; }
+    if (!taunter || !CanHaveThreatList())
+        return;
 
-    if (!CanHaveThreatList())
-        { return; }
+    // Beastmaster case: Do not apply taunt
+    if (taunter->GetTypeId() == TYPEID_PLAYER && taunter->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER))
+        return;
 
     Unit* target = getVictim();
 
