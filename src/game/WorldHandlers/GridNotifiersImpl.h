@@ -122,6 +122,9 @@ inline void MaNGOS::CreatureRelocationNotifier::Visit(CreatureMapType& m)
 
 inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
 {
+    if (!target)
+        return;
+
     if (!target->IsAlive() || target->IsTaxiFlying())
         { return; }
 
@@ -139,9 +142,16 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
     if (target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->IsInEvadeMode())
         { return; }
 
-    // Check player targets and remove if in GM mode or GM invisibility (for not self casting case)
-    if (target->GetTypeId() == TYPEID_PLAYER && target != i_check && (((Player*)target)->isGameMaster() || ((Player*)target)->GetVisibility() == VISIBILITY_OFF))
-        { return; }
+    // Check player targets and remove if in BM (Beastmaster) mode or GM Invis / Uber Invis
+    if 
+    (
+        (target->GetTypeId() == TYPEID_PLAYER && target != i_check) &&
+        (
+            target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER) || 
+            (target->GetVisibility() == VISIBILITY_OFF || target->GetVisibility() == VISIBILITY_UBER_INVIS)
+        )
+    )
+        return;
 
     // for player casts use less strict negative and more stricted positive targeting
     if (i_check->GetTypeId() == TYPEID_PLAYER)

@@ -1073,12 +1073,14 @@ void Map::RemoveAllObjectsInRemoveList()
     // DEBUG_LOG("Object remover 2 check.");
 }
 
+// Returns a list of VISIBLE players
+// TODO: Implement UBER Invis behavior
 uint32 Map::GetPlayersCountExceptGMs() const
 {
     uint32 count = 0;
     for (MapRefManager::const_iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
-        if (!itr->getSource()->isGameMaster())
-            { ++count; }
+        if (!itr->getSource()->IsGmInvisActive() /*&& !itr->getSource()->IsGmUberInvis()*/)
+            ++count;
     return count;
 }
 

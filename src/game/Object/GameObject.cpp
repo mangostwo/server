@@ -756,35 +756,27 @@ void GameObject::SaveRespawnTime()
 
 bool GameObject::IsVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const
 {
-    // Not in world
+    // Player or object not in world
     if (!IsInWorld() || !u->IsInWorld())
-        { return false; }
+        return false;
 
-    // invisible at client always
-    if (!GetGOInfo()->displayId)
+    // GM Vision ALWAYS reveals server-onlys
+    if (u->m_ExtraFlags &GM_VISION)
+        return true;
+
+    // Despawned game objects are not visible to players
+    if (!isSpawned())
+        return false;
+
+    // Not sure if this is right, so commenting out for now... \
+    if (!GetGOInfo()->displayId)    \
         return false;
 
     // Transport always visible at this step implementation
     if (IsTransport() && IsInMap(u))
-        { return true; }
+        return true;
 
-    // quick check visibility false cases for non-GM-mode
-    if (!u->isGameMaster())
-    {
-        // despawned and then not visible for non-GM in GM-mode
-        if (!isSpawned())
-            { return false; }
-
-        // special invisibility cases
-        /* TODO: implement trap stealth, take look at spell 2836
-        if(GetGOInfo()->type == GAMEOBJECT_TYPE_TRAP && GetGOInfo()->trap.stealthed && u->IsHostileTo(GetOwner()))
-        {
-            if(check stuff here)
-                return false;
-        }*/
-    }
-
-    // check distance
+    // Check against render distance setting
     return IsWithinDistInMap(viewPoint, GetMap()->GetVisibilityDistance() +
                              (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false);
 }

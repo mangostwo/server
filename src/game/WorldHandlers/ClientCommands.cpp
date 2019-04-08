@@ -501,3 +501,16 @@ void WorldSession::GmShowLabelHandler(WorldPacket &msg)
 	else
 		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
 }
+
+void WorldSession::GmVisionHandler(WorldPacket &msg)
+{
+	if (GetPlayer()->GetSecurityGroup())
+	{
+		int enable = 0;
+
+		msg >> enable;
+		GetPlayer()->OnGmVision(enable);
+	}
+	else
+		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+}

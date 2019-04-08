@@ -7164,6 +7164,17 @@ CurrentSpellTypes Spell::GetCurrentContainer()
 
 bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
 {
+    if (!target)
+        return false;
+
+    // GM Invis/Uber Invis and Beastmaster units cannot be targeted by spells
+    if (
+        target->GetVisibility() == VISIBILITY_OFF ||
+        target->GetVisibility() == VISIBILITY_UBER_INVIS ||
+        target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_BEASTMASTER)
+       )
+        return false;
+
     // Check targets for creature type mask and remove not appropriate (skip explicit self target case, maybe need other explicit targets)
     if (m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SELF)
     {
@@ -7201,16 +7212,6 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
                 m_spellInfo->EffectImplicitTargetB[eff] != TARGET_NARROW_FRONTAL_CONE &&
                 m_spellInfo->EffectImplicitTargetA[eff] != TARGET_NARROW_FRONTAL_CONE_2 &&
                 m_spellInfo->EffectImplicitTargetB[eff] != TARGET_NARROW_FRONTAL_CONE_2)
-            { return false; }
-    }
-
-    // Check player targets and remove if in GM mode or GM invisibility (for not self casting case)
-    if (target != m_caster && target->GetTypeId() == TYPEID_PLAYER)
-    {
-        if (((Player*)target)->GetVisibility() == VISIBILITY_OFF)
-            { return false; }
-
-        if (((Player*)target)->isGameMaster() && !IsPositiveSpell(m_spellInfo->Id))
             { return false; }
     }
 

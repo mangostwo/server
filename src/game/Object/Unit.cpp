@@ -8326,6 +8326,9 @@ int32 Unit::ModifyPower(Powers power, int32 dVal)
     return gain;
 }
 
+/*
+ * This method checks if the unit passed in the parameter can see the current unit (in the 'this' pointer).
+ */
 bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList, bool is3dDistance) const
 {
     if (!u)
@@ -8337,29 +8340,43 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     if (u == this)
         return true;
 
-    // player visible for other player if not logout and at same transport
-    // including case when player is out of world
-    bool at_same_transport =
+    /*** TRANSPORT CASE START ***/
+    
+    bool isOnSameTransport =
         GetTypeId() == TYPEID_PLAYER &&  u->GetTypeId() == TYPEID_PLAYER &&
         !((Player*)this)->GetSession()->PlayerLogout() && !((Player*)u)->GetSession()->PlayerLogout() &&
         !((Player*)this)->GetSession()->PlayerLoading() && !((Player*)u)->GetSession()->PlayerLoading() &&
         ((Player*)this)->GetTransport() && ((Player*)this)->GetTransport() == ((Player*)u)->GetTransport();
 
-    // not in world
-    if (!at_same_transport && (!IsInWorld() || !u->IsInWorld()))
-        { return false; }
+    /*** TRANSPORT CASE END ***/
 
-    // forbidden to seen (while Removing corpse)
-    if (m_Visibility == VISIBILITY_REMOVE_CORPSE)
-        { return false; }
+    // different visible distance checks
+    if (u->IsTaxiFlying())                                  // what see player in flight
+    {
+        // use object grey distance for all (only see objects any way)
+        if (!IsWithinDistInMap(viewPoint, World::GetMaxVisibleDistanceInFlight() + (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), is3dDistance))
+            return false;
+    }
+    else if (!isOnSameTransport)                            // distance for show player/pet/creature (no transport case)
+    {
+        // Any units far than max visible distance for viewer or not in our map are not visible too
+        if (!IsWithinDistInMap(viewPoint, u->GetMap()->GetVisibilityDistance() + (inVisibleList ? World::GetVisibleUnitGreyDistance() : 0.0f), is3dDistance))
+            return false;
+    }
 
-    Map& _map = *u->GetMap();
+    // Unit can ALWAYS see its owner
+    if (GetCharmerOrOwnerGuid() == u->GetObjectGuid())
+        return true;
 
     // Generic PLAYER target visibility check
     if (u->GetTypeId() == TYPEID_PLAYER)
     {
-        if (!IsVisibleInGridForPlayer((Player *)u))
+        // HACK: DO NOT MOVE OR REMOVE
+        // GM Vision reveals all server-onlys, except for GM UBER Invis
+        if ( !IsVisibleInGridForPlayer((Player *)u) )
             return false;
+        else if ( ((Player *)u)->IsGmVisionActive() )
+            return true;
 
         // If our target is dead, it can't detect anything, but may still see some units.
         if (!u->IsAlive())
@@ -8367,49 +8384,31 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     }
     else
     {
+        // WTF?
+        if (m_Visibility == VISIBILITY_REMOVE_CORPSE)
+            return false;
+
         // all dead creatures/players not visible for any creatures
         if (!u->IsAlive() || !IsAlive())
-            { return false; }
+            return false;
     }
-
-    // different visible distance checks
-    if (u->IsTaxiFlying())                                  // what see player in flight
-    {
-        // use object grey distance for all (only see objects any way)
-        if (!IsWithinDistInMap(viewPoint, World::GetMaxVisibleDistanceInFlight() + (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), is3dDistance))
-            { return false; }
-    }
-    else if (!at_same_transport)                            // distance for show player/pet/creature (no transport case)
-    {
-        // Any units far than max visible distance for viewer or not in our map are not visible too
-        if (!IsWithinDistInMap(viewPoint, _map.GetVisibilityDistance() + (inVisibleList ? World::GetVisibleUnitGreyDistance() : 0.0f), is3dDistance))
-            { return false; }
-    }
-
-    // always seen by owner
-    if (GetCharmerOrOwnerGuid() == u->GetObjectGuid())
-        { return true; }
 
     // IsInvisibleForAlive() those units can only be seen by dead or if other
     // unit is also invisible for alive.. if an isinvisibleforalive unit dies we
     // should be able to see it too
     if (u->IsAlive() && IsAlive() && isInvisibleForAlive() != u->isInvisibleForAlive())
-        if (u->GetTypeId() != TYPEID_PLAYER || !((Player*)u)->isGameMaster())
-            { return false; }
+        if (u->GetTypeId() != TYPEID_PLAYER || !((Player*)u)->IsGmVisionActive())
+            return false;
 
-        // Death Knights in starting zones with Undying Resolve buff or
-            // in Acherus with Dominion Over Acherus buff - won't see opposite faction
-        if (u->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER && !((Player*)u)->isGameMaster() &&
-          ((Player*)u)->GetTeam() != ((Player*)this)->GetTeam() && (u->HasAura(51915) || u->HasAura(51721)))
-         return false;
+    // Death Knights in starting zones with Undying Resolve buff or
+    // in Acherus with Dominion Over Acherus buff - won't see opposite faction
+    if (u->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER && !((Player*)u)->IsGmVisionActive() &&
+        ((Player*)u)->GetTeam() != ((Player*)this)->GetTeam() && (u->HasAura(51915) || u->HasAura(51721)))
+        return false;
     
     // Visible units, always are visible for all units, except for units under invisibility and phases
     if (m_Visibility == VISIBILITY_ON && u->m_invisibilityMask == 0)
-        { return true; }
-
-    // GM Invis and Uber Invis are ALWAYS invisible to monsters
-    if (m_Visibility == VISIBILITY_OFF || m_Visibility == VISIBILITY_UBER_INVIS)
-        return false;
+        return true;
 
     // raw invisibility
     bool invisible = (m_invisibilityMask != 0 || u->m_invisibilityMask != 0);

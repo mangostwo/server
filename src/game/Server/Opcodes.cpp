@@ -582,7 +582,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x223*/ { "CMSG_CHARACTER_POINT_CHEAT",                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x224*/ { "SMSG_GOSSIP_POI",                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x225*/ { "CMSG_CHAT_IGNORED",                            STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleChatIgnoredOpcode         },
-    /*0x226*/ { "CMSG_GM_VISION",                               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
+    /*0x226*/ { "CMSG_GM_VISION",                               STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::GmVisionHandler                 },
     /*0x227*/ { "CMSG_SERVER_COMMAND",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x228*/ { "CMSG_GM_SILENCE",                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x229*/ { "CMSG_GM_REVEALTO",                             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },

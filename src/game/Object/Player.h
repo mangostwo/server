@@ -523,8 +523,13 @@ enum MirrorTimerType
 // 2^n values
 enum PlayerExtraFlags
 {
+    // DEPRECATED
+    PLAYER_EXTRA_GM_ON_DEPRECATED = 0x200,
+
+    // Allows a character to see server-onlys
+    GM_VISION = 0x1,
+
     // gm abilities
-    PLAYER_EXTRA_GM_ON              = 0x0001,
     PLAYER_EXTRA_GM_ACCEPT_TICKETS  = 0x0002,
     PLAYER_EXTRA_ACCEPT_WHISPERS    = 0x0004,
     PLAYER_EXTRA_TAXICHEAT          = 0x0008,
@@ -1150,6 +1155,9 @@ class Player : public Unit
         // GM methods
         void OnGmInvis(bool enable);
         void OnGmShowLabel(bool enable);
+        void OnGmVision(bool enable);
+        bool IsGmVisionActive();
+        bool IsGmInvisActive();
 
         void SetPvPDeath(bool on)
         {
@@ -2439,7 +2447,7 @@ class Player : public Unit
 
         bool HaveAtClient(WorldObject const* u) { return u == this || m_clientGUIDs.find(u->GetObjectGuid()) != m_clientGUIDs.end(); }
 
-        bool IsVisibleInGridForPlayer(Player* pl) const override;
+        bool IsVisibleInGridForPlayer(Player* targetPlayer) const override;
         bool IsVisibleGloballyFor(Player* pl) const;
 
         void UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* target);
@@ -2564,6 +2572,8 @@ class Player : public Unit
 		// Godmode cheat
 		void SetGodmode(bool on);
 
+        uint32 m_ExtraFlags;
+
 		void SendAddOnMessage(const char *message, uint8 channel, uint64 recipient);
 
     protected:
@@ -2684,7 +2694,6 @@ class Player : public Unit
         std::vector<Item*> m_itemUpdateQueue;
         bool m_itemUpdateQueueBlocked;
 
-        uint32 m_ExtraFlags;
         ObjectGuid m_curSelectionGuid;
 
         ObjectGuid m_comboTargetGuid;

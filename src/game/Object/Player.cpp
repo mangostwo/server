@@ -2429,6 +2429,27 @@ void Player::OnGmShowLabel(bool enable)
         RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
 }
 
+void Player::OnGmVision(bool enable)
+{
+    if (enable)
+        m_ExtraFlags |= GM_VISION;
+    else
+        m_ExtraFlags &= ~GM_VISION;
+    
+    m_camera.UpdateVisibilityForOwner();
+	UpdateObjectVisibility();
+}
+
+bool Player::IsGmVisionActive()
+{
+    return m_ExtraFlags &GM_VISION;
+}
+
+bool Player::IsGmInvisActive()
+{
+    return GetVisibility() == VISIBILITY_OFF;
+}
+
 bool Player::IsGroupVisibleFor(Player* p) const
 {
     switch (sWorld.getConfig(CONFIG_UINT32_GROUP_VISIBILITY))
@@ -19950,15 +19971,15 @@ void Player::ReportedAfkBy(Player* reporter)
     }
 }
 
-// TODO: Implement GM Vision functionality for this method
-bool Player::IsVisibleInGridForPlayer(Player* pl) const
+/**
+ * This function checks if targetPlayer can see current player.
+ */
+bool Player::IsVisibleInGridForPlayer(Player* targetPlayer) const
 {
-    // Should probably raise an assertion, but whatever...
-    if (!pl)
-        return false;
+    MANGOS_ASSERT(targetPlayer);
 
     // Obviously...
-    if (pl == this)
+    if (targetPlayer == this)
         return true;
 
     // GM UBER Invis is ALWAYS invisible
@@ -19966,23 +19987,21 @@ bool Player::IsVisibleInGridForPlayer(Player* pl) const
         return false;
 
     // GM Vision can reveal all other visibility values
-    if (GetVisibility() == VISIBILITY_OFF /*&& !pl->HasGmVision()*/)
-        return false;
-    //else
-    //    return true;
+    if (targetPlayer->IsGmVisionActive())
+        return true;
 
     // Party members should always be visible on the grid for eachother
-    if (IsInSameRaidWith(pl) || IsInSameGroupWith(pl))
+    if (IsInSameRaidWith(targetPlayer) || IsInSameGroupWith(targetPlayer))
         return true;
 
     // Friendly ghosts can see eachother
-    if ( (IsDead() && pl->IsDead()) && IsFriendlyTo(pl) )
+    if ( (IsDead() && targetPlayer->IsDead()) && IsFriendlyTo(targetPlayer) )
         return true;
 
     // Ghosts can see nearby alive players
     if (IsAlive())
     {
-        if (Corpse *corpse = pl->GetCorpse())
+        if (Corpse *corpse = targetPlayer->GetCorpse())
         {
             // 20 - aggro distance for same level, 25 - max additional distance if player level less that creature level
             if (corpse->IsWithinDistInMap(this, (20 + 25) * sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO)))
@@ -19995,7 +20014,6 @@ bool Player::IsVisibleInGridForPlayer(Player* pl) const
     return true;
 }
 
-// TODO: Implement GM Vision functionality in this method
 bool Player::IsVisibleGloballyFor(Player *u) const
 {
     if (!u)
@@ -20010,8 +20028,8 @@ bool Player::IsVisibleGloballyFor(Player *u) const
         return false;
 
     // Standard undetectable invisibility state (GMVision can still reveal you)
-    if (GetVisibility() == VISIBILITY_OFF /*&& !u->HasGmVision()*/)
-        return false;
+    if (u->IsGmVisionActive())
+        return true;
 
     // Default state
     return true;
@@ -23599,13 +23617,6 @@ void Player::SetGodmode(bool on)
     outbound << on;
     GetSession()->SendPacket(&outbound);
     SendAddOnMessage(message, CHAT_MSG_WHISPER, GetObjectGuid());
-
-	// Use this for GM vision
-#if 0
-	m_camera.UpdateVisibilityForOwner();
-	UpdateObjectVisibility();
-#endif // 0
-
 }
 
 void Player::SetBeastmaster(bool on)

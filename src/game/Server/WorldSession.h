@@ -953,6 +953,7 @@ class WorldSession
         void CreateItemHandler(WorldPacket &msg);
         void GmInvisHandler(WorldPacket &msg);
         void GmShowLabelHandler(WorldPacket &msg);
+        void GmVisionHandler(WorldPacket &msg);
 
     private:
         // private trade methods

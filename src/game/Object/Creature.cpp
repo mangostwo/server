@@ -1869,8 +1869,7 @@ SpellEntry const* Creature::ReachWithSpellCure(Unit* pVictim)
 
 bool Creature::IsVisibleInGridForPlayer(Player* pl) const
 {
-    // TODO: Implement GM Vision functionality here...
-    if (pl->isGameMaster())
+    if (pl->IsGmVisionActive())
         return true;
 
     if (GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_INVISIBLE)
