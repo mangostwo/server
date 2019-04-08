@@ -1,7 +1,7 @@
 [submodule "src/game/LuaEngine"]
 	path = src/game/LuaEngine
 
-	url = https://github.com/ElunaLuaEngine/Eluna.git
+	url = https://github.com/openwow-org/Eluna
 [submodule "src/realmd"]
 	path = src/realmd
 	url = https://github.com/mangos/realmd.git
@@ -10,7 +10,7 @@
 	url = https://github.com/mangos/mangosDeps.git
 [submodule "src/modules/Eluna"]
 	path = src/modules/Eluna
-	url = https://github.com/ElunaLuaEngine/Eluna.git
+	url = https://github.com/openwow-org/Eluna
 [submodule "src/modules/SD3"]
 	path = src/modules/SD3
 	url = https://github.com/mangos/ScriptDev3
