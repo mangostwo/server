@@ -65,7 +65,7 @@ void Camera::SetView(WorldObject* obj, bool update_far_sight_field /*= true*/)
     if (m_source == obj)
         { return; }
 
-    if (!m_owner.IsInMap(obj))
+    if (!m_owner.IsInSameMapAs(obj))
     {
         sLog.outError("Camera::SetView, viewpoint is not in map with camera's owner");
         return;

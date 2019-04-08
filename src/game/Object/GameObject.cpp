@@ -773,7 +773,7 @@ bool GameObject::IsVisibleForInState(Player const* u, WorldObject const* viewPoi
         return false;
 
     // Transport always visible at this step implementation
-    if (IsTransport() && IsInMap(u))
+    if (IsTransport() && IsInSameMapAs(u))
         return true;
 
     // Check against render distance setting

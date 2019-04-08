@@ -1020,7 +1020,7 @@ void Aura::ReapplyAffectedPassiveAuras()
     if (Group* group = ((Player*)GetTarget())->GetGroup())
         for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
             if (Player* member = itr->getSource())
-                if (member != GetTarget() && member->IsInMap(GetTarget()))
+                if (member != GetTarget() && member->IsInSameMapAs(GetTarget()))
                     ReapplyAffectedPassiveAuras(member, false);
 }
 

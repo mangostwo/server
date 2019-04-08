@@ -813,7 +813,7 @@ namespace MaNGOS
                 // they are no AOE and don't have such a nice SPELL_ATTR flag
                 if ((i_TargetType != SPELL_TARGETS_ALL && !itr->getSource()->IsTargetableForAttack(i_spell.m_spellInfo->HasAttribute(SPELL_ATTR_EX3_CAST_ON_DEAD)))
                     // mostly phase check
-                    || !itr->getSource()->IsInMap(i_originalCaster))
+                    || !itr->getSource()->IsInSameMapAs(i_originalCaster))
                     { continue; }
 
                 switch (i_TargetType)

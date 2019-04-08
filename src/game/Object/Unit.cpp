@@ -8327,7 +8327,7 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     if (!u)
         return false;
 
-    if (!IsInMap(u))
+    if (!IsInSameMapAs(u))
         return false;
 
     if (u == this)
@@ -9062,7 +9062,7 @@ bool Unit::SelectHostileTarget()
         // Auras are pushed_back, last caster will be on the end
         for (AuraList::const_reverse_iterator aura = tauntAuras.rbegin(); aura != tauntAuras.rend(); ++aura)
         {
-            if ((caster = (*aura)->GetCaster()) && caster->IsInMap(this) &&
+            if ((caster = (*aura)->GetCaster()) && caster->IsInSameMapAs(this) &&
                 caster->IsTargetableForAttack() && caster->isInAccessablePlaceFor((Creature*)this) &&
                 !IsSecondChoiceTarget(caster, true))
             {
@@ -9125,7 +9125,7 @@ bool Unit::SelectHostileTarget()
     {
         for (AttackerSet::const_iterator itr = m_attackers.begin(); itr != m_attackers.end(); ++itr)
         {
-            if ((*itr)->IsInMap(this) && (*itr)->IsTargetableForAttack() && (*itr)->isInAccessablePlaceFor((Creature*)this))
+            if ((*itr)->IsInSameMapAs(this) && (*itr)->IsTargetableForAttack() && (*itr)->isInAccessablePlaceFor((Creature*)this))
                 { return false; }
         }
     }

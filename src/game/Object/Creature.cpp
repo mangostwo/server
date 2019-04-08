@@ -2014,7 +2014,7 @@ bool Creature::IsOutOfThreatArea(Unit* pVictim) const
     if (!pVictim)
         { return true; }
 
-    if (!pVictim->IsInMap(this))
+    if (!pVictim->IsInSameMapAs(this))
         { return true; }
 
     if (!pVictim->IsTargetableForAttack())

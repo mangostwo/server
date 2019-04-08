@@ -8192,7 +8192,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     // We can assume 45705-45712 are transform auras, used instead of hard coded models in the below code.
 
                     // not in map yet OR no npc flags yet (restored after LoadCreatureAddon for respawn cases)
-                    if (!m_caster->IsInMap(m_caster) || m_caster->GetUInt32Value(UNIT_NPC_FLAGS) == UNIT_NPC_FLAG_NONE)
+                    if (!m_caster->IsInSameMapAs(m_caster) || m_caster->GetUInt32Value(UNIT_NPC_FLAGS) == UNIT_NPC_FLAG_NONE)
                     {
                         display_id = Creature::ChooseDisplayId(cTemplate);
                         ((Creature*)m_caster)->LoadEquipment(((Creature*)m_caster)->GetEquipmentId());

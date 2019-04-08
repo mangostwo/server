@@ -561,7 +561,7 @@ class WorldObject : public Object
         float GetDistance2d(const WorldObject* obj) const;
         float GetDistance2d(float x, float y) const;
         float GetDistanceZ(const WorldObject* obj) const;
-        bool IsInMap(const WorldObject* obj) const
+        bool IsInSameMapAs(const WorldObject* obj) const
         {
             return IsInWorld() && obj->IsInWorld() && (GetMap() == obj->GetMap()) && InSamePhase(obj);
         }
@@ -577,7 +577,7 @@ class WorldObject : public Object
 
         bool IsWithinDistInMap(WorldObject const* obj, float dist2compare, bool is3D = true) const
         {
-            return obj && IsInMap(obj) && _IsWithinDist(obj, dist2compare, is3D);
+            return obj && IsInSameMapAs(obj) && _IsWithinDist(obj, dist2compare, is3D);
         }
         bool IsWithinLOS(float x, float y, float z) const;
         bool IsWithinLOSInMap(const WorldObject* obj) const;
