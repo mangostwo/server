@@ -19983,7 +19983,7 @@ bool Player::IsVisibleInGridForPlayer(Player* targetPlayer) const
         return true;
 
     // GM UBER Invis is ALWAYS invisible
-    if (GetVisibility() == VISIBILITY_UBER_INVIS)
+    if (GetVisibility() == VISIBILITY_UBER_INVIS || (!targetPlayer->IsGmVisionActive() && GetVisibility() == VISIBILITY_OFF))
         return false;
 
     // GM Vision can reveal all other visibility values
@@ -20024,7 +20024,7 @@ bool Player::IsVisibleGloballyFor(Player *u) const
         return true;
 
     // GM UBER Invis is ALWAYS invisible
-    if (GetVisibility() == VISIBILITY_UBER_INVIS)
+    if (GetVisibility() == VISIBILITY_UBER_INVIS || (!u->IsGmVisionActive() && GetVisibility() == VISIBILITY_OFF))
         return false;
 
     // Standard undetectable invisibility state (GMVision can still reveal you)
