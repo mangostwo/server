@@ -443,6 +443,7 @@ class Spell
         uint8 m_cast_count;
         uint32 m_glyphIndex;
         SpellCastTargets m_targets;
+        Unit *m_caster;
 
         int32 GetCastTime() const { return m_casttime; }
         uint32 GetCastedTime() { return m_timer; }
@@ -514,8 +515,6 @@ class Spell
         void SendLoot(ObjectGuid guid, LootType loottype, LockType lockType);
         bool IgnoreItemRequirements() const;                // some item use spells have unexpected reagent data
         void UpdateOriginalCasterPointer();
-
-        Unit* m_caster;
 
         ObjectGuid m_originalCasterGUID;                    // real source of cast (aura caster/etc), used for spell targets selection
         // e.g. damage around area spell trigered by victim aura and da,age emeies of aura caster
