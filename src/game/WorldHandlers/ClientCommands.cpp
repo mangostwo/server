@@ -514,3 +514,21 @@ void WorldSession::GmVisionHandler(WorldPacket &msg)
 	else
 		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
 }
+
+void WorldSession::OnFlagQuestCheat(WorldPacket& msg)
+{
+    if (_player)
+    {
+        if (_player->GetSecurityGroup() > 1)
+        {
+            int id = msg.read<int>();
+            const Quest* quest = sObjectMgr.GetQuestTemplate(id);
+            if (quest && _player->CanAddQuest(quest, true))
+            {
+                _player->AddQuest(quest, nullptr);
+            }
+        }
+        else
+            SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+    }
+}

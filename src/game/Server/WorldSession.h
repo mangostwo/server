@@ -954,6 +954,7 @@ class WorldSession
         void GmInvisHandler(WorldPacket &msg);
         void GmShowLabelHandler(WorldPacket &msg);
         void GmVisionHandler(WorldPacket &msg);
+        void OnFlagQuestCheat(WorldPacket& msg);
 
     private:
         // private trade methods

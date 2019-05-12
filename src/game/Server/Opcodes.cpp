@@ -74,7 +74,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x027*/ { "CMSG_SET_WORLDSTATE",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x028*/ { "CMSG_COOLDOWN_CHEAT",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x029*/ { "CMSG_USE_SKILL_CHEAT",                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x02A*/ { "CMSG_FLAG_QUEST",                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
+    /*0x02A*/ { "CMSG_FLAG_QUEST",                              STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::OnFlagQuestCheat                },
     /*0x02B*/ { "CMSG_FLAG_QUEST_FINISH",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x02C*/ { "CMSG_CLEAR_QUEST",                             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x02D*/ { "CMSG_SEND_EVENT",                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
