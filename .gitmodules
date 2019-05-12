@@ -20,3 +20,6 @@
 [submodule "win"]
 	path = win
 	url = https://github.com/mangostools/EasyBuild
+[submodule "db2"]
+	path = db2
+	url = https://github.com/openwow-org/db2
