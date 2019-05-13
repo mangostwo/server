@@ -532,3 +532,20 @@ void WorldSession::OnFlagQuestCheat(WorldPacket& msg)
             SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
     }
 }
+
+void WorldSession::OnClearQuestCheat(WorldPacket& msg)
+{
+    if (_player)
+    {
+        if (_player->GetSecurityGroup() > 1)
+        {
+            int id = msg.read<int>();
+            _player->SetQuestStatus(id, QUEST_STATUS_NONE);
+            uint16 slot = _player->FindQuestSlot(id);
+            if (slot < MAX_QUEST_LOG_SIZE)
+                _player->SetQuestSlot(slot, NULL);
+        }
+        else
+            SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+    }
+}
