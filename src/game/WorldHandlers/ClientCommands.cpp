@@ -22,6 +22,7 @@
 // Class declarations
 #include "TemporarySummon.h"
 #include "Totem.h"
+#include "LuaEngine.h"
 
 inline int ValidateCharacterName(const char *name)
 {
@@ -277,14 +278,22 @@ void WorldSession::CreateMonsterHandler(WorldPacket &msg)
 
 	if (pPlayer->GetSecurityGroup() > 2)
 	{
-		uint32 monsterId = 0;
+		int32 monsterId = 0;
 		const char *strMsg = "Created unit";
 		Map *pMap = NULL;
 		uint32 monsterGuid = 0;
 		Creature *pCreature = new Creature;
 		CreatureCreatePos createPos(pPlayer, pPlayer->GetOrientation());
+        bool createPet = false;
 
 		msg >> monsterId;
+        // if the value is negative, then spawn the monster as the player's pet
+        if (monsterId < 0)
+        {
+            createPet = true;
+            monsterId = abs(monsterId);
+        }
+
 		CreatureInfo const *cinfo = ObjectMgr::GetCreatureTemplate(monsterId);
 		if (!cinfo)
 		{
@@ -292,29 +301,76 @@ void WorldSession::CreateMonsterHandler(WorldPacket &msg)
 		}
 		else
 		{
-			pMap = pPlayer->GetMap();
-			monsterGuid = sObjectMgr.GenerateStaticCreatureLowGuid();
-			if (!monsterGuid)
-			{
-				delete pCreature;
-				SendNotification(LANG_NO_FREE_STATIC_GUID_FOR_SPAWN);
-				SendConsoleMessage("No free GUID is available for this unit. Server is shuting down...");
-				return;
-			}
+            if (createPet)
+            {
+                uint32 level = pPlayer->getLevel();
+                Pet *pet = new Pet(SUMMON_PET);
 
-			if (!pCreature->Create(monsterGuid, createPos, cinfo))
-			{
-				delete pCreature;
-				strMsg = "Unit not found";
-			}
-			else
-			{
-				pCreature->SaveToDB(pMap->GetId(), (1 << pMap->GetSpawnMode()), pPlayer->GetPhaseMaskForSpawn());
-				monsterGuid = pCreature->GetGUIDLow(); // TODO: Is this needed? Can GetGUIDLow return a different value to what we have? Used in mangos chat commands.
-				pCreature->LoadFromDB(monsterGuid, pMap); // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
-				pMap->Add(pCreature);
-				sObjectMgr.AddCreatureToGrid(monsterGuid, sObjectMgr.GetCreatureData(monsterGuid));
-			}
+                // The position to create the pet to
+                CreatureCreatePos pos(pPlayer, pPlayer->GetOrientation());
+
+                Map *map = pPlayer->GetMap();
+                uint32 pet_number = sObjectMgr.GeneratePetNumber();
+                if (!pet->Create(map->GenerateLocalLowGuid(HIGHGUID_PET), pos, cinfo, pet_number))
+                {
+                    delete pet;
+                    SendNotification("L%d %s: Error creating pet", __LINE__, __FUNCTION__);
+                    return;
+                }
+
+                pet->SetRespawnCoord(pos);
+                pet->SetOwnerGuid(pPlayer->GetObjectGuid());
+                pet->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
+                pet->SetPowerType(POWER_MANA);
+                pet->setFaction(pPlayer->getFaction());
+                pet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, 0);
+                pet->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
+                pet->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, 1000);
+                pet->SetCreatorGuid(pPlayer->GetObjectGuid());
+                pet->InitStatsForLevel(level, pPlayer);
+                pet->GetCharmInfo()->SetPetNumber(pet_number, false);
+                pet->AIM_Initialize();
+                pet->InitPetCreateSpells();
+                pet->InitLevelupSpellsForLevel();
+                pet->SetHealth(pet->GetMaxHealth());
+                pet->SetPower(POWER_MANA, pet->GetMaxPower(POWER_MANA));
+                map->Add((Creature*)pet);
+                pPlayer->SetPet(pet);
+                pet->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
+                pet->SavePetToDB(PET_SAVE_AS_CURRENT);
+                pPlayer->PetSpellInitialize();
+
+                #ifdef ENABLE_ELUNA
+                if (Unit *summoner = pPlayer->ToUnit())
+                    sEluna->OnSummoned(pet, summoner);
+                #endif
+            }
+            else
+            {
+                pMap = pPlayer->GetMap();
+                monsterGuid = sObjectMgr.GenerateStaticCreatureLowGuid();
+                if (!monsterGuid)
+                {
+                    delete pCreature;
+                    SendNotification(LANG_NO_FREE_STATIC_GUID_FOR_SPAWN);
+                    return;
+                }
+
+                if (!pCreature->Create(monsterGuid, createPos, cinfo))
+                {
+                    delete pCreature;
+                    SendNotification("L%d %s: Error creating pet", __LINE__, __FUNCTION__);
+                    return;
+                }
+                else
+                {
+                    pCreature->SaveToDB(pMap->GetId(), (1 << pMap->GetSpawnMode()), pPlayer->GetPhaseMaskForSpawn());
+                    monsterGuid = pCreature->GetGUIDLow(); // TODO: Is this needed? Can GetGUIDLow return a different value to what we have? Used in mangos chat commands.
+                    pCreature->LoadFromDB(monsterGuid, pMap); // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
+                    pMap->Add(pCreature);
+                    sObjectMgr.AddCreatureToGrid(monsterGuid, sObjectMgr.GetCreatureData(monsterGuid));
+                }
+            }
 		}
 		SendConsoleMessage(strMsg);
 	}
