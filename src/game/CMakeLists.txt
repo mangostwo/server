@@ -78,9 +78,8 @@ file(GLOB SRC_GRP_WORLD_HANDLERS WorldHandlers/*.cpp WorldHandlers/*.h)
 source_group("World\\Handlers" FILES ${SRC_GRP_WORLD_HANDLERS})
 
 # Build the Eluna library if enabled
-# temporary use a patched version until man repo gets updated
 if(SCRIPT_LIB_ELUNA)
-    file(GLOB SRC_GRP_ELUNA ${CMAKE_SOURCE_DIR}/src/modules/ElunaPatch/*.cpp ${CMAKE_SOURCE_DIR}/src/modules/ElunaPatch/*.h)
+    file(GLOB SRC_GRP_ELUNA ${CMAKE_SOURCE_DIR}/src/modules/Eluna/*.cpp ${CMAKE_SOURCE_DIR}/src/modules/Eluna/*.h)
     source_group("Eluna" FILES ${SRC_GRP_ELUNA})
 endif()
 
@@ -161,7 +160,7 @@ target_include_directories(game
         Warden
         Warden/Modules
         WorldHandlers
-        $<$<BOOL:${SCRIPT_LIB_ELUNA}>:${CMAKE_SOURCE_DIR}/src/modules/ElunaPatch>
+        $<$<BOOL:${SCRIPT_LIB_ELUNA}>:${CMAKE_SOURCE_DIR}/src/modules/Eluna>
 )
 
 target_compile_definitions(game
@@ -193,7 +192,7 @@ install(
 
 if(SCRIPT_LIB_ELUNA)
 install(
-    DIRECTORY ${CMAKE_SOURCE_DIR}/src/modules/ElunaPatch/extensions
+    DIRECTORY ${CMAKE_SOURCE_DIR}/src/modules/Eluna/extensions
     DESTINATION ${BIN_DIR}/lua_scripts
 )
 endif()
