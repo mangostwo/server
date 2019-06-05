@@ -132,7 +132,7 @@ typedef off_t ACE_OFF_T;
 
 #  define I32FMT "%08I32X"
 #  define I64FMT "%016I64X"
-#  define snprintf _snprintf
+#
 #  define vsnprintf _vsnprintf
 #  define finite(X) _finite(X)
 
@@ -216,11 +216,10 @@ enum LocaleConstant
     LOCALE_zhCN = 4,
     LOCALE_zhTW = 5,
     LOCALE_esES = 6,
-    LOCALE_esMX = 7,
-    LOCALE_ruRU = 8
+    LOCALE_esMX = 7
 };
 
-#define MAX_LOCALE 9
+#define MAX_LOCALE 8
 #define DEFAULT_LOCALE LOCALE_enUS
 
 /**

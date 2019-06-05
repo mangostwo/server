@@ -878,7 +878,7 @@ bool ScriptAction::GetScriptCommandObject(const ObjectGuid guid, bool includeIte
             resultObject = m_map->GetGameObject(guid);
             break;
         case HIGHGUID_CORPSE:
-            resultObject = HashMapHolder<Corpse>::Find(guid);
+            resultObject = sObjectAccessor.FindCorpse(guid);
             break;
         case HIGHGUID_ITEM:
             // case HIGHGUID_CONTAINER: ==HIGHGUID_ITEM
@@ -2440,7 +2440,7 @@ bool ScriptMgr::OnAuraDummy(Aura const* pAura, bool apply)
 ScriptLoadResult ScriptMgr::LoadScriptLibrary(const char* libName)
 {
 #ifdef ENABLE_SD3
-    if (std::strcmp(libName, MANGOS_SCRIPT_NAME) == 0)
+    if (std::strcmp(libName, "mangosscript") == 0)
     {
         SD3::FreeScriptLibrary();
         SD3::InitScriptLibrary();

@@ -53,12 +53,12 @@ class DBCStorage
         ~DBCStorage() { Clear(); }
 
         /**
-         * @brief
-         *
-         * @return uint32
-         */
+        * @brief
+        *
+        * @return uint32
+        */
         //uint32  GetNumRows() const { return nCount; }
-        uint32 GetNumRows() const { return loaded ? data.size() : nCount; }
+        uint32  GetNumRows() const { return loaded ? data.size() : nCount; }
         /**
          * @brief
          *

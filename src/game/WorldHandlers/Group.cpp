@@ -1564,7 +1564,7 @@ void Group::UpdateLooterGuid(WorldObject* pSource, bool ifneed)
         if (ifneed)
         {
             // not update if only update if need and ok
-            Player* looter = ObjectAccessor::FindPlayer(guid_itr->guid);
+            Player* looter = sObjectAccessor.FindPlayer(guid_itr->guid);
             if (looter && looter->IsWithinDist(pSource, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE), false))
                 { return; }
         }
@@ -1576,7 +1576,7 @@ void Group::UpdateLooterGuid(WorldObject* pSource, bool ifneed)
     {
         for (member_citerator itr = guid_itr; itr != m_memberSlots.end(); ++itr)
         {
-            if (Player* pl = ObjectAccessor::FindPlayer(itr->guid))
+            if (Player* pl = sObjectAccessor.FindPlayer(itr->guid))
             {
                 if (pl->IsWithinDist(pSource, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE), false))
                 {
@@ -1597,7 +1597,7 @@ void Group::UpdateLooterGuid(WorldObject* pSource, bool ifneed)
     // search from start
     for (member_citerator itr = m_memberSlots.begin(); itr != guid_itr; ++itr)
     {
-        if (Player* pl = ObjectAccessor::FindPlayer(itr->guid))
+        if (Player* pl = sObjectAccessor.FindPlayer(itr->guid))
         {
             if (pl->IsWithinDist(pSource, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE), false))
             {
@@ -1758,7 +1758,7 @@ void Group::ResetInstances(InstanceResetMethod method, bool isRaid, Player* Send
         // Store maps in which are offline members for instance reset check.
         for (member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
         {
-            if (!ObjectAccessor::FindPlayer(itr->guid))
+            if (!sObjectAccessor.FindPlayer(itr->guid))
                 mapsWithOfflinePlayer.insert(itr->lastMap); // add last map from offline player
         }
     }

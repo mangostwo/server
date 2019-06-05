@@ -598,7 +598,7 @@ void Loot::NotifyItemRemoved(uint8 lootIndex)
     {
         i_next = i;
         ++i_next;
-        if (Player* pl = ObjectAccessor::FindPlayer(*i))
+        if (Player* pl = sObjectAccessor.FindPlayer(*i))
             { pl->SendNotifyLootItemRemoved(lootIndex); }
         else
             { m_playersLooting.erase(i); }
@@ -613,7 +613,7 @@ void Loot::NotifyMoneyRemoved()
     {
         i_next = i;
         ++i_next;
-        if (Player* pl = ObjectAccessor::FindPlayer(*i))
+        if (Player* pl = sObjectAccessor.FindPlayer(*i))
             { pl->SendNotifyLootMoneyRemoved(); }
         else
             { m_playersLooting.erase(i); }
@@ -632,7 +632,7 @@ void Loot::NotifyQuestItemRemoved(uint8 questIndex)
     {
         i_next = i;
         ++i_next;
-        if (Player* pl = ObjectAccessor::FindPlayer(*i))
+        if (Player* pl = sObjectAccessor.FindPlayer(*i))
         {
             QuestItemMap::const_iterator pq = m_playerQuestItems.find(pl->GetGUIDLow());
             if (pq != m_playerQuestItems.end() && pq->second)

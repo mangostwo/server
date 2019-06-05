@@ -6156,14 +6156,14 @@ void Unit::ModifyAuraState(AuraState flag, bool apply)
 Unit* Unit::GetOwner() const
 {
     if (ObjectGuid ownerid = GetOwnerGuid())
-        { return ObjectAccessor::GetUnit(*this, ownerid); }
+        { return sObjectAccessor.GetUnit(*this, ownerid); }
     return NULL;
 }
 
 Unit* Unit::GetCharmer() const
 {
     if (ObjectGuid charmerid = GetCharmerGuid())
-        { return ObjectAccessor::GetUnit(*this, charmerid); }
+        { return sObjectAccessor.GetUnit(*this, charmerid); }
     return NULL;
 }
 
@@ -6179,7 +6179,7 @@ Player* Unit::GetCharmerOrOwnerPlayerOrPlayerItself()
 {
     ObjectGuid guid = GetCharmerOrOwnerGuid();
     if (guid.IsPlayer())
-        { return ObjectAccessor::FindPlayer(guid); }
+        { return sObjectAccessor.FindPlayer(guid); }
 
     return GetTypeId() == TYPEID_PLAYER ? (Player*)this : NULL;
 }
@@ -6188,7 +6188,7 @@ Player const* Unit::GetCharmerOrOwnerPlayerOrPlayerItself() const
 {
     ObjectGuid guid = GetCharmerOrOwnerGuid();
     if (guid.IsPlayer())
-        { return ObjectAccessor::FindPlayer(guid); }
+        { return sObjectAccessor.FindPlayer(guid); }
 
     return GetTypeId() == TYPEID_PLAYER ? (Player const*)this : NULL;
 }
@@ -6232,7 +6232,7 @@ Unit* Unit::GetCharm() const
 {
     if (ObjectGuid charm_guid = GetCharmGuid())
     {
-        if (Unit* pet = ObjectAccessor::GetUnit(*this, charm_guid))
+        if (Unit* pet = sObjectAccessor.GetUnit(*this, charm_guid))
             { return pet; }
 
         sLog.outError("Unit::GetCharm: Charmed %s not exist.", charm_guid.GetString().c_str());

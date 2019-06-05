@@ -20102,7 +20102,7 @@ void Player::InitPrimaryProfessions()
 
 void Player::SendComboPoints()
 {
-    Unit* combotarget = ObjectAccessor::GetUnit(*this, m_comboTargetGuid);
+    Unit* combotarget = sObjectAccessor.GetUnit(*this, m_comboTargetGuid);
     if (combotarget)
     {
         WorldPacket data(SMSG_UPDATE_COMBO_POINTS, combotarget->GetPackGUID().size() + 1);
@@ -20134,7 +20134,7 @@ void Player::AddComboPoints(Unit* target, int8 count)
     else
     {
         if (m_comboTargetGuid)
-            if (Unit* target2 = ObjectAccessor::GetUnit(*this, m_comboTargetGuid))
+            if (Unit* target2 = sObjectAccessor.GetUnit(*this, m_comboTargetGuid))
                 { target2->RemoveComboPointHolder(GetGUIDLow()); }
 
         m_comboTargetGuid = target->GetObjectGuid();
@@ -20161,7 +20161,7 @@ void Player::ClearComboPoints()
 
     SendComboPoints();
 
-    if (Unit* target = ObjectAccessor::GetUnit(*this, m_comboTargetGuid))
+    if (Unit* target = sObjectAccessor.GetUnit(*this, m_comboTargetGuid))
         { target->RemoveComboPointHolder(GetGUIDLow()); }
 
     m_comboTargetGuid.Clear();
@@ -20306,7 +20306,7 @@ void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaLockS
         case AREA_LOCKSTATUS_QUEST_NOT_COMPLETED:
             if (mapEntry->MapID == 269)                     // Exception for Black Morass
             {
-                GetSession()->SendAreaTriggerMessage(GetSession()->GetMangosString(LANG_TELEREQ_QUEST_BLACK_MORASS));
+                GetSession()->SendAreaTriggerMessage("%s", GetSession()->GetMangosString(LANG_TELEREQ_QUEST_BLACK_MORASS));
                 break;
             }
             else if (mapEntry->IsContinent())               // do not report anything for quest areatrigge
@@ -23083,7 +23083,7 @@ Object* Player::GetObjectByTypeMask(ObjectGuid guid, TypeMask typemask)
             if (GetObjectGuid() == guid)
                 return this;
             if ((typemask & TYPEMASK_PLAYER) && IsInWorld())
-                return ObjectAccessor::FindPlayer(guid);
+                return sObjectAccessor.FindPlayer(guid);
             break;
         case HIGHGUID_GAMEOBJECT:
             if ((typemask & TYPEMASK_GAMEOBJECT) && IsInWorld())

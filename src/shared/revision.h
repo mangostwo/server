@@ -24,7 +24,7 @@
 
 #ifndef MANGOS_H_REVISION
 #define MANGOS_H_REVISION
-    #define REVISION_NR "2110002"
+    #define REVISION_NR "2116012"
 
     #define REALMD_DB_VERSION_NR 21
     #define REALMD_DB_STRUCTURE_NR 2
@@ -32,12 +32,12 @@
     #define REALMD_DB_UPDATE_DESCRIPTION "Add_Field_Comments"
 
     #define CHAR_DB_VERSION_NR 21
-    #define CHAR_DB_STRUCTURE_NR 3
+    #define CHAR_DB_STRUCTURE_NR 6
     #define CHAR_DB_CONTENT_NR 001
     #define CHAR_DB_UPDATE_DESCRIPTION "Add_Field_Comments"
 
     #define WORLD_DB_VERSION_NR 21
-    #define WORLD_DB_STRUCTURE_NR 10
-    #define WORLD_DB_CONTENT_NR 031
-    #define WORLD_DB_UPDATE_DESCRIPTION "gossip_option_condition"
+    #define WORLD_DB_STRUCTURE_NR 16
+    #define WORLD_DB_CONTENT_NR 012
+    #define WORLD_DB_UPDATE_DESCRIPTION "quest_8332_text_update"
 #endif // __REVISION_H__

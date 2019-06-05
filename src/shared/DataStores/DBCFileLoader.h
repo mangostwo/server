@@ -45,7 +45,7 @@ enum FieldFormat
     DBC_FF_BYTE = 'b',                                      // uint8
     DBC_FF_SORT = 'd',                                      // sorted by this field, field is not included
     DBC_FF_IND = 'n',                                       // the same,but parsed to data
-    DBC_FF_LOGIC = 'l'                                      // Logical (boolean)
+    DBC_FF_LOGIC = 'l'                                          // Logical (boolean)
 };
 
 /**

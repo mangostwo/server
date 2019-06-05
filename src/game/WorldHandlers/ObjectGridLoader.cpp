@@ -244,7 +244,7 @@ void ObjectGridLoader::LoadN(void)
         for (unsigned int y = 0; y < MAX_NUMBER_OF_CELLS; ++y)
         {
             i_cell.data.Part.cell_y = y;
-            GridLoader<Player, AllWorldObjectTypes, AllGridObjectTypes> loader;
+            GridLoader<Player, WorldTypeMapContainer, GridTypeMapContainer> loader;
             loader.Load(i_grid(x, y), *this);
         }
     }

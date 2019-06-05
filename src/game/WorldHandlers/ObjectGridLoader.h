@@ -73,7 +73,7 @@ class ObjectGridUnloader
             {
                 for (unsigned int y = 0; y < MAX_NUMBER_OF_CELLS; ++y)
                 {
-                    GridLoader<Player, AllWorldObjectTypes, AllGridObjectTypes> loader;
+                    GridLoader<Player, WorldTypeMapContainer, GridTypeMapContainer> loader;
                     loader.Unload(i_grid(x, y), *this);
                 }
             }
@@ -97,7 +97,7 @@ class ObjectGridStoper
             {
                 for (unsigned int y = 0; y < MAX_NUMBER_OF_CELLS; ++y)
                 {
-                    GridLoader<Player, AllWorldObjectTypes, AllGridObjectTypes> loader;
+                    GridLoader<Player, WorldTypeMapContainer, GridTypeMapContainer> loader;
                     loader.Stop(i_grid(x, y), *this);
                 }
             }
@@ -111,6 +111,6 @@ class ObjectGridStoper
         NGridType& i_grid;
 };
 
-typedef GridLoader<Player, AllWorldObjectTypes, AllGridObjectTypes> GridLoaderType;
+typedef GridLoader<Player, WorldTypeMapContainer, GridTypeMapContainer> GridLoaderType;
 
 #endif

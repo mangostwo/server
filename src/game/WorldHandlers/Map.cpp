@@ -1775,7 +1775,7 @@ void Map::ScriptsProcess()
  */
 Player* Map::GetPlayer(ObjectGuid guid)
 {
-    Player* plr = ObjectAccessor::FindPlayer(guid);         // return only in world players
+    Player* plr = sObjectAccessor.FindPlayer(guid);         // return only in world players
     return plr && plr->GetMap() == this ? plr : NULL;
 }
 
@@ -1808,7 +1808,7 @@ Pet* Map::GetPet(ObjectGuid guid)
  */
 Corpse* Map::GetCorpse(ObjectGuid guid)
 {
-    Corpse* ret = ObjectAccessor::GetCorpseInMap(guid, GetId());
+    Corpse* ret = sObjectAccessor.GetCorpseInMap(guid, GetId());
     return ret && ret->GetInstanceId() == GetInstanceId() ? ret : NULL;
 }
 
