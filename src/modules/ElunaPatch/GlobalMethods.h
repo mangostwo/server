@@ -168,7 +168,7 @@ namespace LuaGlobalFunctions
         uint32 i = 0;
 
 #if defined(MANGOS)
-        eObjectAccessor()DoForAllPlayers([team, onlyGM](Player* player){
+        eObjectAccessor()DoForAllPlayers([&](Player* player){
             if(player->IsInWorld())
             {
                 if ((team == TEAM_NEUTRAL || player->GetTeamId() == team) && (!onlyGM || player->isGameMaster()))

@@ -26,7 +26,7 @@ namespace LuaGuild
         uint32 i = 0;
 
 #if defined(MANGOS)
-        eObjectAccessor()DoForAllPlayers([guild](Player* player)
+        eObjectAccessor()DoForAllPlayers([&](Player* player)
         {
             if (player->IsInWorld() && player->GetGuildId() == guild->GetId())
             {
