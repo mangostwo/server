@@ -32,12 +32,12 @@
     #define REALMD_DB_UPDATE_DESCRIPTION "Add_Field_Comments"
 
     #define CHAR_DB_VERSION_NR 21
-    #define CHAR_DB_STRUCTURE_NR 6
+    #define CHAR_DB_STRUCTURE_NR 3
     #define CHAR_DB_CONTENT_NR 001
     #define CHAR_DB_UPDATE_DESCRIPTION "Add_Field_Comments"
 
     #define WORLD_DB_VERSION_NR 21
-    #define WORLD_DB_STRUCTURE_NR 16
-    #define WORLD_DB_CONTENT_NR 012
-    #define WORLD_DB_UPDATE_DESCRIPTION "quest_8332_text_update"
+    #define WORLD_DB_STRUCTURE_NR 10
+    #define WORLD_DB_CONTENT_NR 070
+    #define WORLD_DB_UPDATE_DESCRIPTION "random_object_removed"
 #endif // __REVISION_H__
