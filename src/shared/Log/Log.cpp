@@ -779,6 +779,7 @@ void Log::outDetail(const char* str, ...)
 
 void Log::outDebug(const char* str, ...)
 {
+#ifdef MANGOS_DEBUG
     if (!str)
         { return; }
 
@@ -815,6 +816,7 @@ void Log::outDebug(const char* str, ...)
     }
 
     fflush(stdout);
+#endif
 }
 
 void Log::outCommand(uint32 account, const char* str, ...)

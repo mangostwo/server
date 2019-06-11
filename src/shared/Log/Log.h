@@ -493,17 +493,22 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ACE_Th
             sLog.outDetail(__VA_ARGS__);                \
     } while(0)
 
-#define DEBUG_LOG(...)                                  \
+#ifdef MANGOS_DEBUG
+ #define DEBUG_LOG(...)                                  \
     do {                                                \
         if (sLog.HasLogLevelOrHigher(LOG_LVL_DEBUG))    \
             sLog.outDebug(__VA_ARGS__);                 \
     } while(0)
 
-#define DEBUG_FILTER_LOG(F,...)                         \
+ #define DEBUG_FILTER_LOG(F,...)                         \
     do {                                                \
         if (sLog.HasLogLevelOrHigher(LOG_LVL_DEBUG) && !sLog.HasLogFilter(F)) \
             sLog.outDebug(__VA_ARGS__);                 \
     } while(0)
+#else
+ #define DEBUG_LOG(...)                                  \
+ #define DEBUG_FILTER_LOG(F,...)                         \
+#endif
 
 #define ERROR_DB_FILTER_LOG(F,...)                      \
     do {                                                \
