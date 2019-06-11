@@ -31,11 +31,14 @@
 Unit*
 ObjectAccessor::GetUnit(WorldObject const& u, ObjectGuid guid)
 {
-    if (!guid || !u.IsInWorld())
+    if (!guid)
         { return nullptr; }
 
     if (guid.IsPlayer())
         { return FindPlayer(guid); }
+
+    if (!u.IsInWorld())
+        { return nullptr; }
 
     return u.GetMap()->GetAnyTypeCreature(guid);
 }
