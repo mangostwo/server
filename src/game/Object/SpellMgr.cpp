@@ -1953,6 +1953,15 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             {
                 case SPELLFAMILY_GENERIC:                   // same family case
                 {
+                    // Enchanted Tiki Warrior Visual 01, Visual 02, Visual 03 Stack and Enchanted Tiki Warrior Glow Visual
+                    if ((spellInfo_1->Id == 52619 && spellInfo_2->Id == 52617) ||
+                        (spellInfo_1->Id == 52619 && spellInfo_2->Id == 52618) ||
+                        (spellInfo_1->Id == 52619 && spellInfo_2->Id == 52614) || //now reverse order
+                        (spellInfo_1->Id == 52617 && spellInfo_2->Id == 52619) ||
+                        (spellInfo_1->Id == 52618 && spellInfo_2->Id == 52619) ||
+                        (spellInfo_1->Id == 52614 && spellInfo_2->Id == 52619))
+                        { return false; }
+
                     // Thunderfury
                     if ((spellInfo_1->Id == 21992 && spellInfo_2->Id == 27648) ||
                         (spellInfo_2->Id == 21992 && spellInfo_1->Id == 27648))
