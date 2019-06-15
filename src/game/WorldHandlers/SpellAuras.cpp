@@ -5369,6 +5369,10 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
     {
         switch (GetId())
         {
+            case 51165:
+                if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
+                    target->CastSpell(target, 51173, true, NULL, this);
+                return;
             case 66:                                        // Invisibility
                 if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
                     target->CastSpell(target, 32612, true, NULL, this);
