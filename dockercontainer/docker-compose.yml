@@ -1,0 +1,14 @@
+version: "2.4"
+services:
+  mangosd:
+    build:
+      context: ..
+      dockerfile: Dockerfile-mangosd
+  realmd:
+    build:
+      context: ..
+      dockerfile: Dockerfile-realmd
+  mysql:
+    build:
+      context: ..
+      dockerfile: Dockerfile-mysql

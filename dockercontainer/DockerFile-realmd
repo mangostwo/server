@@ -1,0 +1,27 @@
+#Build image
+FROM ubuntu:18.04 as build-step
+
+RUN apt-get -y update
+RUN apt-get -y install curl autoconf automake cmake libbz2-dev libace-dev libssl-dev libmysqlclient-dev libtool build-essential
+
+COPY . /mangoserver
+RUN mkdir /mangoserver/build
+WORKDIR /mangoserver/build
+
+#Install mangos
+RUN cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/bin/mangos -DBUILD_MANGOSD=0 -DBUILD_REALMD=1 -DBUILD_TOOLS=0
+RUN make
+RUN make install
+
+#Run time image
+FROM ubuntu:18.04
+
+RUN apt-get -y update
+
+COPY --from=build-step /usr/local/bin/mangos /usr/local/bin/mangos
+WORKDIR /usr/local/bin/mangos
+RUN cat realmd.conf.dist
+RUN cp realmd.conf.dist realmd.conf
+
+EXPOSE 111
+ENTRYPOINT [ "realmd" ]
