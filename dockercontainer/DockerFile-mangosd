@@ -10,7 +10,7 @@ WORKDIR /mangoserver/build
 
 #Install mangos
 RUN cmake .. -DCMAKE_INSTALL_PREFIX=/mangos -DBUILD_MANGOSD=1 -DBUILD_REALMD=0 -DBUILD_TOOLS=0
-RUN make
+RUN make -j4
 RUN make install
 
 #Runtime image
