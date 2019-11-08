@@ -1,14 +1,43 @@
+#To start the server from this docker-compose file you can run the command "docker-compose up"
+#Configure the location of the configuration file and the data folder
+#The connection to mysql should match the name of the service in this case "mysqldb"
 version: "2.4"
 services:
   mangosd:
     build:
       context: ..
       dockerfile: Dockerfile-mangosd
+    depends_on:
+      - mysqldb
+    restart: always
+    ports:
+      - "8085:8085"
+    volumes:
+#      - ./your/location/config:/config
+      - ../../etc/mangosd.conf:/mongos/etc/mangosd.conf
+      - ../../data/:/mongos/data/
   realmd:
     build:
       context: ..
       dockerfile: Dockerfile-realmd
-  mysql:
+    depends_on:
+      - mysqldb
+    restart: always
+    ports:
+      - "3724:3724"
+    volumes:
+#      - ./your/location/config:/config
+      - ../../etc/realmd.conf:/mongos/etc/realmd.conf
+  mysqldb:
     build:
-      context: ..
       dockerfile: Dockerfile-mysql
+    restart: always
+    environment:
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=mongos
+      - MYSQL_ROOT_PASSWORD=mongos
+      - MYSQL_ROOT_HOST=%
+    ports:
+      - "3306:3306"
+    volumes:
+      - ../../dbdata:/var/lib/mysql

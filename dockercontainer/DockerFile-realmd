@@ -9,19 +9,16 @@ RUN mkdir /mangoserver/build
 WORKDIR /mangoserver/build
 
 #Install mangos
-RUN cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/bin/mangos -DBUILD_MANGOSD=0 -DBUILD_REALMD=1 -DBUILD_TOOLS=0
-RUN make
+RUN cmake .. -DCMAKE_INSTALL_PREFIX=/mangos -DBUILD_MANGOSD=0 -DBUILD_REALMD=1 -DBUILD_TOOLS=0
+RUN make -j2
 RUN make install
 
-#Run time image
-FROM ubuntu:18.04
+#Runtime image
+FROM alpine:3.10
 
-RUN apt-get -y update
+COPY --from=build-step /mangos /mangos
+WORKDIR /mangos/bin
+RUN cp ./etc/realmd.conf.dist ./etc/realmd.conf
 
-COPY --from=build-step /usr/local/bin/mangos /usr/local/bin/mangos
-WORKDIR /usr/local/bin/mangos
-RUN cat realmd.conf.dist
-RUN cp realmd.conf.dist realmd.conf
-
-EXPOSE 111
-ENTRYPOINT [ "realmd" ]
+EXPOSE 3724
+ENTRYPOINT [ "realmd", "-c", "./etc/realmd.conf" ]
