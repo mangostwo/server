@@ -8,6 +8,6 @@ WORKDIR /mangodb
 
 RUN git clone https://github.com/mangostwo/database.git --recursive --depth 1
 
-RUN chmod -R +x *.sh
+#RUN chmod -R +x *.sh
 
-ENTRYPOINT "./InstallDatabases.sh && ./make_full_WorldDB.sh && mysql"
+#ENTRYPOINT "./InstallDatabases.sh && ./make_full_WorldDB.sh && mysql"

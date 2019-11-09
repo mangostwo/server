@@ -6,7 +6,7 @@ services:
   mangosd:
     build:
       context: ..
-      dockerfile: Dockerfile-mangosd
+      dockerfile: dockercontainer/Dockerfile-mangosd
     depends_on:
       - mysqldb
     restart: always
@@ -14,12 +14,13 @@ services:
       - "8085:8085"
     volumes:
 #      - ./your/location/config:/config
-      - ../../etc/mangosd.conf:/mongos/etc/mangosd.conf
-      - ../../data/:/mongos/data/
+      - ../../etc:/mangos/etc
+      - ../../data:/mangos/data
+
   realmd:
     build:
       context: ..
-      dockerfile: Dockerfile-realmd
+      dockerfile: dockercontainer/Dockerfile-realmd
     depends_on:
       - mysqldb
     restart: always
@@ -27,15 +28,17 @@ services:
       - "3724:3724"
     volumes:
 #      - ./your/location/config:/config
-      - ../../etc/realmd.conf:/mongos/etc/realmd.conf
+      - ../../etc:/mangos/etc
+
   mysqldb:
     build:
+      context: .
       dockerfile: Dockerfile-mysql
     restart: always
     environment:
-      - MYSQL_USER=root
-      - MYSQL_PASSWORD=mongos
-      - MYSQL_ROOT_PASSWORD=mongos
+      - MYSQL_USER=mangos
+      - MYSQL_PASSWORD=mangos
+      - MYSQL_ROOT_PASSWORD=mangos
       - MYSQL_ROOT_HOST=%
     ports:
       - "3306:3306"

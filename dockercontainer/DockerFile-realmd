@@ -14,11 +14,15 @@ RUN make -j4
 RUN make install
 
 #Runtime image
-FROM alpine:3.10
+FROM ubuntu:18.04 as runtime
+
+RUN apt-get -y update && apt-get -y upgrade
+RUN apt-get -y install libmysqlclient20 openssl
 
 COPY --from=build-step /mangos /mangos
 WORKDIR /mangos/bin
-RUN cp ./etc/realmd.conf.dist ./etc/realmd.conf
+RUN cp ../etc/realmd.conf.dist ../etc/realmd.conf
+RUN chmod +x realmd
 
 EXPOSE 3724
-ENTRYPOINT [ "realmd", "-c", "./etc/realmd.conf" ]
+ENTRYPOINT [ "./realmd" ]
