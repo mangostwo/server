@@ -13,7 +13,8 @@ services:
     ports:
       - "8085:8085"
     volumes:
-#      - ./your/location/config:/config
+#      - ./local/path/to/etc:/mangos/etc
+#      - ./local/path/to/data:/mangos/data
       - ../../etc:/mangos/etc
       - ../../data:/mangos/data
 
@@ -27,7 +28,7 @@ services:
     ports:
       - "3724:3724"
     volumes:
-#      - ./your/location/config:/config
+#      - ./local/path/to/etc:/mangos/etc
       - ../../etc:/mangos/etc
 
   mysqldb:
@@ -41,4 +42,5 @@ services:
     ports:
       - "3306:3306"
     volumes:
+#      - ./local/path/to/mysqldatabase:/var/lib/mysql
       - ../../dbdata:/var/lib/mysql
