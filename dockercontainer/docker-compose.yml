@@ -12,6 +12,8 @@ services:
     restart: always
     ports:
       - "8085:8085"
+    stdin_open: true
+    tty: true
     volumes:
 #      - ./local/path/to/etc:/mangos/etc
 #      - ./local/path/to/data:/mangos/data
