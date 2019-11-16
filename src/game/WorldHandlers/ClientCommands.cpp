@@ -605,3 +605,55 @@ void WorldSession::OnClearQuestCheat(WorldPacket& msg)
             SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
     }
 }
+
+void WorldSession::TeleportCheatHandler(WorldPacket& msg)
+{
+    if (_player)
+    {
+        if (msg.GetOpcode() == CMSG_TELEPORT_TO_UNIT)
+        {
+            if (_player->GetSecurityGroup() > 1)
+            {
+                char name[49] = { 0 };
+                msg.GetString(name, sizeof(name));
+                if (*name)
+                {
+                    ValidateCharacterName(name);
+                    Unit* unit = sObjectAccessor.FindPlayerByName(name);
+                    if (!unit)
+                        unit = _player->GetMap()->GetUnitByName(name);
+
+                    if (unit)
+                    {
+                        const int x = unit->GetPositionX();
+                        const int y = unit->GetPositionY();
+                        const int z = unit->GetPositionZ();
+                        int worldId = unit->GetMapId();
+                        float facing = unit->GetOrientation();
+                        _player->TeleportTo(worldId, x, y, z, facing, TELE_TO_GM_MODE, 0);
+                        return;
+                    }
+                }
+                SendPlayerNotFoundFailure();
+                return;
+            }
+        }
+        else
+        {
+            if (_player->GetSecurityGroup() > 1)
+            {
+                Position position;
+                uint32 worldID;
+
+                worldID = _player->GetMapId();
+                msg >> position.x;
+                msg >> position.y;
+                msg >> position.z;
+                msg >> position.o;
+                GetPlayer()->TeleportTo(worldID, position.x, position.y, position.z, position.o, TELE_TO_GM_MODE, 0);
+                return;
+            }
+        }
+        SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+    }
+}

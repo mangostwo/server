@@ -956,6 +956,7 @@ class WorldSession
         void GmVisionHandler(WorldPacket &msg);
         void OnFlagQuestCheat(WorldPacket& msg);
         void OnClearQuestCheat(WorldPacket& msg);
+        void TeleportCheatHandler(WorldPacket& msg);
 
     private:
         // private trade methods
