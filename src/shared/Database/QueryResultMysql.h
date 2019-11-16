@@ -71,7 +71,7 @@ class QueryResultMysql : public QueryResult
          * @param type
          * @return Field::SimpleDataTypes
          */
-        enum Field::DataTypes ConvertNativeType(enum_field_types mysqlType) const;
+        static Field::SimpleDataTypes GetSimpleType(enum_field_types type);
 
     private:
         /**

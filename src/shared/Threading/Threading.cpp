@@ -131,7 +131,6 @@ Thread::~Thread()
 }
 
 // initialize Thread's class static member
-Thread::ThreadStorage Thread::m_ThreadStorage;
 ThreadPriority Thread::m_TpEnum;
 
 bool Thread::start()
@@ -193,42 +192,13 @@ ACE_THR_FUNC_RETURN Thread::ThreadTask(void* param)
 {
     Runnable* _task = static_cast<Runnable*>(param);
     _task->incReference();
-    
+
     _task->run();
 
     // task execution complete, free referecne added at
     _task->decReference();
 
     return (ACE_THR_FUNC_RETURN)0;
-}
-
-ACE_thread_t Thread::currentId()
-{
-    return ACE_Thread::self();
-}
-
-ACE_hthread_t Thread::currentHandle()
-{
-    ACE_hthread_t _handle;
-    ACE_Thread::self(_handle);
-
-    return _handle;
-}
-
-Thread* Thread::current()
-{
-    Thread* _thread = m_ThreadStorage.ts_object();
-    if (!_thread)
-    {
-        _thread = new Thread();
-        _thread->m_iThreadId = Thread::currentId();
-        _thread->m_hThreadHandle = Thread::currentHandle();
-
-        Thread* _oldValue = m_ThreadStorage.ts_object(_thread);
-        delete _oldValue;
-    }
-
-    return _thread;
 }
 
 void Thread::setPriority(Priority type)

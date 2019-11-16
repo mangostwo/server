@@ -85,7 +85,7 @@ class WorldPacket : public ByteBuffer
          *
          * @param opcode
          */
-        void SetOpcode(Opcodes opcode) { m_opcode = opcode; }
+        void SetOpcode(uint16 opcode) { m_opcode = opcode; }
         /**
          * @brief
          *
@@ -93,7 +93,7 @@ class WorldPacket : public ByteBuffer
          */
         inline const char* GetOpcodeName() const { return LookupOpcodeName(m_opcode); }
 
-protected:
-    uint16 m_opcode; /**< TODO */
+    protected:
+        uint16 m_opcode; /**< TODO */
 };
 #endif

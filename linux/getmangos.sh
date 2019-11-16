@@ -1415,7 +1415,7 @@ function ExtractResources
         cp "$INSTPATH/bin/tools/MoveMapGen.sh" "$GAMEPATH"
         cp "$INSTPATH/bin/tools/offmesh.txt" "$GAMEPATH"
         cp "$INSTPATH/bin/tools/mmap_excluded.txt" "$GAMEPATH"
-        cp "$INSTPATH/bin/tools/movemap-generator" "$GAMEPATH"
+        cp "$INSTPATH/bin/tools/mmap-extractor" "$GAMEPATH"
 
         CPU=$($DLGAPP --backtitle "MaNGOS Linux Build Configuration" --title "Please provide the number of CPU to be used to generate MMaps (1-4)" \
          --inputbox "Default: 1" 8 80 3>&2 2>&1 1>&3)
@@ -1449,7 +1449,7 @@ function ExtractResources
           rm -rf "$GAMEPATH/MoveMapGen.sh"
           rm -rf "$GAMEPATH/offmesh.txt"
           rm -rf "$GAMEPATH/mmap_excluded.txt"
-          rm -rf "$GAMEPATH/movemap-generator"
+          rm -rf "$GAMEPATH/mmap-extractor"
           Log "Changing ownership of the extracted directories"
           chown -R $USER:$USER "$INSTPATH"
         else
@@ -1458,7 +1458,7 @@ function ExtractResources
           rm -rf "$GAMEPATH/mmaps"
           rm -rf "$GAMEPATH/offmesh.txt"
           rm -rf "$GAMEPATH/mmap_excluded.txt"
-          rm -rf "$GAMEPATH/movemap-generator"
+          rm -rf "$GAMEPATH/mmap-extractor"
           exit 1
         fi
       else
@@ -1471,7 +1471,7 @@ function ExtractResources
         cp "$INSTPATH/bin/tools/MoveMapGen.sh" "$GAMEPATH"
         cp "$INSTPATH/bin/tools/offmesh.txt" "$GAMEPATH"
         cp "$INSTPATH/bin/tools/mmap_excluded.txt" "$GAMEPATH"
-        cp "$INSTPATH/bin/tools/movemap-generator" "$GAMEPATH"
+        cp "$INSTPATH/bin/tools/mmap-extractor" "$GAMEPATH"
 	CPU=$($DLGAPP --backtitle "MaNGOS Linux Build Configuration" --title "Please provide the number of CPU to be used to generate MMaps (1-4)" \
          --inputbox "Default: 1" 8 80 3>&2 2>&1 1>&3)
 
@@ -1504,7 +1504,7 @@ function ExtractResources
           rm -rf "$GAMEPATH/MoveMapGen.sh"
           rm -rf "$GAMEPATH/offmesh.txt"
           rm -rf "$GAMEPATH/mmap_excluded.txt"
-          rm -rf "$GAMEPATH/movemap-generator"
+          rm -rf "$GAMEPATH/mmap-extractor"
           Log "Changing ownership of the extracted directories"
           chown -R $USER:$USER "$INSTPATH"
         else
@@ -1513,7 +1513,7 @@ function ExtractResources
           rm -rf "$GAMEPATH/mmaps"
           rm -rf "$GAMEPATH/offmesh.txt"
           rm -rf "$GAMEPATH/mmap_excluded.txt"
-          rm -rf "$GAMEPATH/movemap-generator"
+          rm -rf "$GAMEPATH/mmap-extractor"
           exit 1
         fi
     fi

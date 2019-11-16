@@ -194,6 +194,7 @@ void Database::InitDelayThread()
 
     // New delay thread for delay execute
     m_threadBody = CreateDelayThread();              // will deleted at m_delayThread delete
+    m_TransStorage = new ACE_TSS<Database::TransHelper>();
     m_delayThread = new ACE_Based::Thread(m_threadBody);
 }
 
@@ -203,9 +204,11 @@ void Database::HaltDelayThread()
 
     m_threadBody->Stop();                                   // Stop event
     m_delayThread->wait();                                  // Wait for flush to DB
+    delete m_TransStorage;
     delete m_delayThread;                                   // This also deletes m_threadBody
     m_delayThread = NULL;
     m_threadBody = NULL;
+    m_TransStorage=NULL;
 }
 
 void Database::ThreadStart()
@@ -349,7 +352,7 @@ bool Database::Execute(const char* sql)
     if (!m_pAsyncConn)
         { return false; }
 
-    SqlTransaction* pTrans = m_TransStorage->get();
+    SqlTransaction* pTrans = (*m_TransStorage)->get();
     if (pTrans)
     {
         // add SQL request to trans queue
@@ -415,7 +418,7 @@ bool Database::BeginTransaction()
 
     // initiate transaction on current thread
     // currently we do not support queued transactions
-    m_TransStorage->init();
+    (*m_TransStorage)->init();
     return true;
 }
 
@@ -425,7 +428,7 @@ bool Database::CommitTransaction()
         { return false; }
 
     // check if we have pending transaction
-    if (!m_TransStorage->get())
+    if (!(*m_TransStorage)->get())
         { return false; }
 
     // if async execution is not available
@@ -433,7 +436,7 @@ bool Database::CommitTransaction()
         { return CommitTransactionDirect(); }
 
     // add SqlTransaction to the async queue
-    m_threadBody->Delay(m_TransStorage->detach());
+    m_threadBody->Delay((*m_TransStorage)->detach());
     return true;
 }
 
@@ -443,11 +446,11 @@ bool Database::CommitTransactionDirect()
         { return false; }
 
     // check if we have pending transaction
-    if (!m_TransStorage->get())
+    if (!(*m_TransStorage)->get())
         { return false; }
 
     // directly execute SqlTransaction
-    SqlTransaction* pTrans = m_TransStorage->detach();
+    SqlTransaction* pTrans = (*m_TransStorage)->detach();
     pTrans->Execute(m_pAsyncConn);
     delete pTrans;
 
@@ -459,11 +462,11 @@ bool Database::RollbackTransaction()
     if (!m_pAsyncConn)
         { return false; }
 
-    if (!m_TransStorage->get())
+    if (!(*m_TransStorage)->get())
         { return false; }
 
     // remove scheduled transaction
-    m_TransStorage->reset();
+    (*m_TransStorage)->reset();
 
     return true;
 }
@@ -553,7 +556,7 @@ bool Database::ExecuteStmt(const SqlStatementID& id, SqlStmtParameters* params)
     if (!m_pAsyncConn)
         { return false; }
 
-    SqlTransaction* pTrans = m_TransStorage->get();
+    SqlTransaction* pTrans = (*m_TransStorage)->get();
     if (pTrans)
     {
         // add SQL request to trans queue
@@ -593,6 +596,7 @@ SqlStatement Database::CreateStatement(SqlStatementID& index, const char* fmt)
         int nParams = std::count(szFmt.begin(), szFmt.end(), '?');
         // find existing or add a new record in registry
         LOCK_GUARD _guard(m_stmtGuard);
+        MANGOS_ASSERT(_guard.locked());
         PreparedStmtRegistry::const_iterator iter = m_stmtRegistry.find(szFmt);
         if (iter == m_stmtRegistry.end())
         {
@@ -611,18 +615,19 @@ SqlStatement Database::CreateStatement(SqlStatementID& index, const char* fmt)
 
 std::string Database::GetStmtString(const int stmtId) const
 {
-    LOCK_GUARD _guard(m_stmtGuard);
-
     if (stmtId == -1 || stmtId > m_iStmtIndex)
         { return std::string(); }
 
-    PreparedStmtRegistry::const_iterator iter_last = m_stmtRegistry.end();
-    for (PreparedStmtRegistry::const_iterator iter = m_stmtRegistry.begin(); iter != iter_last; ++iter)
+    LOCK_GUARD _guard(m_stmtGuard);
+    if (_guard.locked())
     {
-        if (iter->second == stmtId)
-            { return iter->first; }
+        PreparedStmtRegistry::const_iterator iter_last = m_stmtRegistry.end();
+        for (PreparedStmtRegistry::const_iterator iter = m_stmtRegistry.begin(); iter != iter_last; ++iter)
+        {
+            if (iter->second == stmtId)
+                { return iter->first; }
+        }
     }
-
     return std::string();
 }
 

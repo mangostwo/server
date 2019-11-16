@@ -24,7 +24,7 @@
 
 #ifndef MANGOS_H_REVISION
 #define MANGOS_H_REVISION
-    #define REVISION_NR "2110002"
+    #define REVISION_NR "2116012"
 
     #define REALMD_DB_VERSION_NR 21
     #define REALMD_DB_STRUCTURE_NR 2
@@ -38,6 +38,6 @@
 
     #define WORLD_DB_VERSION_NR 21
     #define WORLD_DB_STRUCTURE_NR 10
-    #define WORLD_DB_CONTENT_NR 031
-    #define WORLD_DB_UPDATE_DESCRIPTION "gossip_option_condition"
+    #define WORLD_DB_CONTENT_NR 074
+    #define WORLD_DB_UPDATE_DESCRIPTION "NPC_28882_rework."
 #endif // __REVISION_H__

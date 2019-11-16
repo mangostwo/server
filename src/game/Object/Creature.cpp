@@ -1046,7 +1046,7 @@ void Creature::PrepareBodyLootState()
  */
 Player* Creature::GetOriginalLootRecipient() const
 {
-    return m_lootRecipientGuid ? ObjectAccessor::FindPlayer(m_lootRecipientGuid) : NULL;
+    return m_lootRecipientGuid ? sObjectAccessor.FindPlayer(m_lootRecipientGuid) : NULL;
 }
 
 /**

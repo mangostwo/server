@@ -833,7 +833,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                             target = getVictim();
                             if (!target)
                             {
-                                target = ObjectAccessor::GetUnit(*this, ((Player*)this)->GetSelectionGuid());
+                                target = sObjectAccessor.GetUnit(*this, ((Player*)this)->GetSelectionGuid());
                                 if (!target)
                                     return SPELL_AURA_PROC_FAILED;
                             }

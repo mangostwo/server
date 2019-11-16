@@ -37,6 +37,8 @@
 #include "revision.h"
 #include "Util.h"
 
+#include <forward_list>
+
 bool ChatHandler::HandleHelpCommand(char* args)
 {
     if (!*args)
@@ -169,19 +171,14 @@ bool ChatHandler::HandleSaveCommand(char* /*args*/)
 
 bool ChatHandler::HandleGMListIngameCommand(char* /*args*/)
 {
-    std::list< std::pair<std::string, bool> > names;
-
+    std::forward_list<std::pair<std::string, bool>> names;
+    sObjectAccessor.DoForAllPlayers([this, &names](Player* plr)->void
     {
-        ACE_READ_GUARD_RETURN(HashMapHolder<Player>::LockType, g, HashMapHolder<Player>::GetLock(), true)
-        HashMapHolder<Player>::MapType& m = sObjectAccessor.GetPlayers();
-        for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
-        {
-            AccountTypes itr_sec = itr->second->GetSession()->GetSecurity();
-            if ((itr->second->isGameMaster() || (itr_sec > SEC_PLAYER && itr_sec <= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_IN_GM_LIST))) &&
-                (!m_session || itr->second->IsVisibleGloballyFor(m_session->GetPlayer())))
-                { names.push_back(std::make_pair<std::string, bool>(GetNameLink(itr->second), itr->second->isAcceptWhispers())); }
-        }
-    }
+        AccountTypes itr_sec = plr->GetSession()->GetSecurity();
+        if ((plr->isGameMaster() || (itr_sec > SEC_PLAYER && itr_sec <= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_IN_GM_LIST))) &&
+            (!m_session || plr->IsVisibleGloballyFor(m_session->GetPlayer())))
+            { names.emplace_front(std::make_pair<std::string, bool>(GetNameLink(plr),plr->isAcceptWhispers())); }
+    });
 
     if (!names.empty())
     {
@@ -189,8 +186,8 @@ bool ChatHandler::HandleGMListIngameCommand(char* /*args*/)
 
         char const* accepts = GetMangosString(LANG_GM_ACCEPTS_WHISPER);
         char const* not_accept = GetMangosString(LANG_GM_NO_WHISPER);
-        for (std::list<std::pair< std::string, bool> >::const_iterator iter = names.begin(); iter != names.end(); ++iter)
-            { PSendSysMessage("%s - %s", iter->first.c_str(), iter->second ? accepts : not_accept); }
+        for (const auto iter : names)
+            { PSendSysMessage("%s - %s", iter.first.c_str(), iter.second ? accepts : not_accept); }
     }
     else
         { SendSysMessage(LANG_GMS_NOT_LOGGED); }

@@ -567,7 +567,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    Player* pOther = ObjectAccessor::FindPlayer(otherGuid);
+    Player* pOther = sObjectAccessor.FindPlayer(otherGuid);
 
     if (!pOther)
     {

@@ -357,82 +357,83 @@ void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
         }
     }
 
-    // TODO: Guard Player map
-    HashMapHolder<Player>::MapType const& players = sObjectAccessor.GetPlayers();
-    uint32 playersSize = players.size();
-    data << uint32(playersSize);                            // players count
-    data << uint32(playersSize);                            // players count (total?)
+    size_t pl_count_pos = data.wpos();
+    data << uint32(0);                            // players count
 
-    for (HashMapHolder<Player>::MapType::const_iterator iter = players.begin(); iter != players.end(); ++iter)
+    size_t tpl_count_pos = data.wpos();
+    data << uint32(0);                            // players count (total?)
+
+    uint32 playerCount = 0;
+
+    sObjectAccessor.DoForAllPlayers([this, &playerCount, &data](Player* plr)->void
     {
-        Player* plr = iter->second;
-
-        if (!plr || plr->GetTeam() != _player->GetTeam())
-            continue;
-
-        if (!plr->IsInWorld())
-            continue;
-
-        data << plr->GetObjectGuid();                       // guid
-
-        uint32 flags = 0xFF;
-        data << uint32(flags);                              // flags
-
-        if (flags & 0x1)
+        ++playerCount;
+        if (plr && (plr->GetTeam() == _player->GetTeam()) && plr->IsInWorld())
         {
-            data << uint8(plr->getLevel());
-            data << uint8(plr->getClass());
-            data << uint8(plr->getRace());
+            data << plr->GetObjectGuid();                       // guid
 
-            for (uint32 i = 0; i < 3; ++i)
-                data << uint8(0);                           // talent spec x/x/x
+            uint32 flags = 0xFF;
+            data << uint32(flags);                              // flags
 
-            data << uint32(0);                              // armor
-            data << uint32(0);                              // spd/heal
-            data << uint32(0);                              // spd/heal
-            data << uint32(0);                              // HasteMelee
-            data << uint32(0);                              // HasteRanged
-            data << uint32(0);                              // HasteSpell
-            data << float(0);                               // MP5
-            data << float(0);                               // MP5 Combat
-            data << uint32(0);                              // AttackPower
-            data << uint32(0);                              // Agility
-            data << uint32(0);                              // Health
-            data << uint32(0);                              // Mana
-            data << uint32(0);                              // Unk1
-            data << float(0);                               // Unk2
-            data << uint32(0);                              // Defence
-            data << uint32(0);                              // Dodge
-            data << uint32(0);                              // Block
-            data << uint32(0);                              // Parry
-            data << uint32(0);                              // Crit
-            data << uint32(0);                              // Expertise
+            if (flags & 0x1)
+            {
+                data << uint8(plr->getLevel());
+                data << uint8(plr->getClass());
+                data << uint8(plr->getRace());
+
+                for (uint32 i = 0; i < 3; ++i)
+                    data << uint8(0);                           // talent spec x/x/x
+
+                data << uint32(0);                              // armor
+                data << uint32(0);                              // spd/heal
+                data << uint32(0);                              // spd/heal
+                data << uint32(0);                              // HasteMelee
+                data << uint32(0);                              // HasteRanged
+                data << uint32(0);                              // HasteSpell
+                data << float(0);                               // MP5
+                data << float(0);                               // MP5 Combat
+                data << uint32(0);                              // AttackPower
+                data << uint32(0);                              // Agility
+                data << uint32(0);                              // Health
+                data << uint32(0);                              // Mana
+                data << uint32(0);                              // Unk1
+                data << float(0);                               // Unk2
+                data << uint32(0);                              // Defence
+                data << uint32(0);                              // Dodge
+                data << uint32(0);                              // Block
+                data << uint32(0);                              // Parry
+                data << uint32(0);                              // Crit
+                data << uint32(0);                              // Expertise
+            }
+
+            if (flags & 0x2)
+                data << "";                                     // comment
+
+            if (flags & 0x4)
+                data << uint8(0);                               // group leader
+
+            if (flags & 0x8)
+                data << uint64(1);                              // group guid
+
+            if (flags & 0x10)
+                data << uint8(0);                               // roles
+
+            if (flags & 0x20)
+                data << uint32(plr->GetZoneId());               // areaid
+
+            if (flags & 0x40)
+                data << uint8(0);                               // status
+
+            if (flags & 0x80)
+            {
+                data << uint64(0);                              // instance guid
+                data << uint32(0);                              // completed encounters
+            }
         }
+    });
 
-        if (flags & 0x2)
-            data << "";                                     // comment
-
-        if (flags & 0x4)
-            data << uint8(0);                               // group leader
-
-        if (flags & 0x8)
-            data << uint64(1);                              // group guid
-
-        if (flags & 0x10)
-            data << uint8(0);                               // roles
-
-        if (flags & 0x20)
-            data << uint32(plr->GetZoneId());               // areaid
-
-        if (flags & 0x40)
-            data << uint8(0);                               // status
-
-        if (flags & 0x80)
-        {
-            data << uint64(0);                              // instance guid
-            data << uint32(0);                              // completed encounters
-        }
-    }
+    data.put(pl_count_pos, playerCount);
+    data.put(tpl_count_pos, playerCount);
 
     SendPacket(&data);
 }
@@ -561,7 +562,7 @@ void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
     {
         ObjectGuid leaderGuid = ObjectGuid(roleCheck.leaderGuidRaw);
         uint8 leaderRoles     = roleCheck.currentRoles.find(leaderGuid)->second;
-        Player* pLeader       = ObjectAccessor::FindPlayer(leaderGuid);
+        Player* pLeader       = sObjectAccessor.FindPlayer(leaderGuid);
         
         data << uint64(leaderGuid.GetRawValue());
         data << uint8(leaderRoles > 0);
@@ -575,7 +576,7 @@ void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
             
             ObjectGuid plrGuid = rItr->first;
             
-            Player* pPlayer = ObjectAccessor::FindPlayer(plrGuid);
+            Player* pPlayer = sObjectAccessor.FindPlayer(plrGuid);
             
             data << uint64(plrGuid.GetRawValue());
             data << uint8(rItr->second > 0);

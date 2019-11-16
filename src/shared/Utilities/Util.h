@@ -31,6 +31,8 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <cctype>
 
 /**
  * @brief
@@ -93,7 +95,10 @@ uint32 TimeStringToSecs(const std::string& timestring);
  * @return std::string
  */
 std::string TimeToTimestampStr(time_t t);
+
+
 time_t timeBitFieldsToSecs(uint32 packedDate);
+
 
 /**
  * @brief
@@ -107,19 +112,6 @@ inline uint32 secsToTimeBitFields(time_t secs)
     return (lt->tm_year - 100) << 24 | lt->tm_mon  << 20 | (lt->tm_mday - 1) << 14 | lt->tm_wday << 11 | lt->tm_hour << 6 | lt->tm_min;
 }
 
-/**
- * @brief Initializes the TSS for MersenneTwister
- *
- *
- */
-void initMTRandTSS();
-
-/**
- * @brief Cleanups the TSS for MersenneTwister
- *
- *
- */
-void deleteMTRandTSS();
 
 /**
  * @brief Return a random number in the range min..max; (max-min) must be smaller than 32768.
@@ -156,7 +148,7 @@ void deleteMTRandTSS();
  *
  * @return int32
  */
- int32 rand32();
+uint32 rand32();
 
 /**
  * @brief Return a random double from 0.0 to 1.0 (exclusive).
@@ -568,7 +560,7 @@ inline bool isEastAsianString(const std::wstring &wstr, bool numericOrSpace)
  */
 inline void strToUpper(std::string& str)
 {
-    std::transform(str.begin(), str.end(), str.begin(), toupper);
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return toupper(c); });
 }
 
 /**
@@ -578,7 +570,7 @@ inline void strToUpper(std::string& str)
  */
 inline void strToLower(std::string& str)
 {
-    std::transform(str.begin(), str.end(), str.begin(), tolower);
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return tolower(c); });
 }
 
 /**
@@ -657,7 +649,7 @@ inline wchar_t wcharToLower(wchar_t wchar)
  */
 inline void wstrToUpper(std::wstring& str)
 {
-    std::transform(str.begin(), str.end(), str.begin(), wcharToUpper);
+    std::transform(str.begin(), str.end(), str.begin(), [](wchar_t w) {return wcharToUpper(w); });
 }
 
 /**
@@ -667,10 +659,12 @@ inline void wstrToUpper(std::wstring& str)
  */
 inline void wstrToLower(std::wstring& str)
 {
-    std::transform(str.begin(), str.end(), str.begin(), wcharToLower);
+    std::transform(str.begin(), str.end(), str.begin(), [](wchar_t w) {return wcharToLower(w); });
 }
 
+
 std::wstring GetMainPartOfName(std::wstring wname, uint32 declension);
+
 
 /**
  * @brief

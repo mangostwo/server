@@ -50,9 +50,10 @@
 #include "movement/packet_builder.h"
 #include "CreatureLinkingMgr.h"
 #include "Chat.h"
+
 #ifdef ENABLE_ELUNA
-#include "LuaEngine.h"
-#include "ElunaEventMgr.h"
+# include "LuaEngine.h"
+# include "ElunaEventMgr.h"
 #endif /* ENABLE_ELUNA */
 
 Object::Object()

@@ -17,48 +17,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-set(LIBRARY_NAME game)
-
-add_definitions(-DDT_POLYREF64)
-
-include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/AuctionHouseBot
-    ${CMAKE_CURRENT_SOURCE_DIR}/BattleGround
-    ${CMAKE_CURRENT_SOURCE_DIR}/ChatCommands
-    ${CMAKE_CURRENT_SOURCE_DIR}/Maps
-    ${CMAKE_CURRENT_SOURCE_DIR}/MotionGenerators
-    ${CMAKE_CURRENT_SOURCE_DIR}/Object
-    ${CMAKE_CURRENT_SOURCE_DIR}/OutdoorPvP
-    ${CMAKE_CURRENT_SOURCE_DIR}/References
-    ${CMAKE_CURRENT_SOURCE_DIR}/Server
-    ${CMAKE_CURRENT_SOURCE_DIR}/Tools
-    ${CMAKE_CURRENT_SOURCE_DIR}/vmap
-    ${CMAKE_CURRENT_SOURCE_DIR}/Warden
-    ${CMAKE_CURRENT_SOURCE_DIR}/Warden/Modules
-    ${CMAKE_CURRENT_SOURCE_DIR}/WorldHandlers
-    ${CMAKE_SOURCE_DIR}/dep/g3dlite
-    ${CMAKE_SOURCE_DIR}/dep/zlib
-    ${CMAKE_SOURCE_DIR}/dep/recastnavigation/Detour/Include
-    ${CMAKE_SOURCE_DIR}/dep/recastnavigation/Detour
-    ${CMAKE_SOURCE_DIR}/dep/recastnavigation
-    ${CMAKE_SOURCE_DIR}/dep/include
-    ${CMAKE_SOURCE_DIR}/src/shared
-    ${CMAKE_SOURCE_DIR}/src/shared/Auth
-    ${CMAKE_SOURCE_DIR}/src/shared/Config
-    ${CMAKE_SOURCE_DIR}/src/shared/Common
-    ${CMAKE_SOURCE_DIR}/src/shared/Database
-    ${CMAKE_SOURCE_DIR}/src/shared/DataStores
-    ${CMAKE_SOURCE_DIR}/src/shared/Utilities
-    ${CMAKE_SOURCE_DIR}/src/shared/Log
-    ${CMAKE_SOURCE_DIR}/src/shared/Threading
-    ${CMAKE_SOURCE_DIR}/src/framework
-    ${CMAKE_BINARY_DIR}/src/shared
-    ${MYSQL_INCLUDE_DIR}
-    ${OPENSSL_INCLUDE_DIR}
-    ${ACE_INCLUDE_DIR}
-)
-
 #AH Bot group
 file(GLOB SRC_GRP_AHBOT AuctionHouseBot/*.cpp AuctionHouseBot/*.h)
 source_group("AhBot" FILES ${SRC_GRP_AHBOT})
@@ -117,9 +75,52 @@ source_group("Warden\\Modules" FILES ${SRC_GRP_WARDEN_MODULES})
 
 #World and Handlers group
 file(GLOB SRC_GRP_WORLD_HANDLERS WorldHandlers/*.cpp WorldHandlers/*.h)
-source_group("World/Handlers" FILES ${SRC_GRP_WORLD_HANDLERS})
+source_group("World\\Handlers" FILES ${SRC_GRP_WORLD_HANDLERS})
 
-set(LIBRARY_SRCS
+# Build the Eluna library if enabled
+if(SCRIPT_LIB_ELUNA)
+    file(GLOB SRC_GRP_ELUNA ${CMAKE_SOURCE_DIR}/src/modules/Eluna/*.cpp ${CMAKE_SOURCE_DIR}/src/modules/Eluna/*.h)
+    source_group("Eluna" FILES ${SRC_GRP_ELUNA})
+endif()
+
+configure_file(AuctionHouseBot/ahbot.conf.dist.in ${CMAKE_CURRENT_BINARY_DIR}/AuctionHouseBot/ahbot.conf.dist)
+
+if(BUILD_TOOLS)
+add_library(vmap2 STATIC
+    vmap/BIH.cpp
+    vmap/VMapManager2.cpp
+    vmap/MapTree.cpp
+    vmap/TileAssembler.cpp
+    vmap/WorldModel.cpp
+    vmap/ModelInstance.cpp
+    vmap/BIH.h
+    vmap/VMapManager2.h
+    vmap/MapTree.h
+    vmap/TileAssembler.h
+    vmap/WorldModel.h
+    vmap/ModelInstance.h
+)
+
+target_include_directories(vmap2
+    PUBLIC
+        vmap
+        WorldHandlers
+)
+
+target_compile_definitions(vmap2
+    PUBLIC
+        MMAP_GENERATOR
+        NO_CORE_FUNCS
+)
+target_link_libraries(vmap2
+    PUBLIC
+        shared
+        g3dlite
+        RecastNavigation::Detour
+)
+endif()
+
+add_library(game STATIC
     ${SRC_GRP_AHBOT}
     ${SRC_GRP_BATTLEGROUND}
     ${SRC_GRP_CHAT_COMMANDS}
@@ -135,67 +136,63 @@ set(LIBRARY_SRCS
     ${SRC_GRP_WARDEN}
     ${SRC_GRP_WARDEN_MODULES}
     ${SRC_GRP_WORLD_HANDLERS}
-    pchdef.cpp
-    pchdef.h
+    $<$<BOOL:${SCRIPT_LIB_ELUNA}>:${SRC_GRP_ELUNA}>
+    $<$<BOOL:${PCH}>:
+        pchdef.h
+        pchdef.cpp
+    >
 )
 
-if(PCH)
-    include_directories(${CMAKE_CURRENT_BINARY_DIR})
-endif()
+target_include_directories(game
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        AuctionHouseBot
+        BattleGround
+        ChatCommands
+        Maps
+        MotionGenerators
+        Object
+        OutdoorPvP
+        References
+        Server
+        Tools
+        vmap
+        Warden
+        Warden/Modules
+        WorldHandlers
+        $<$<BOOL:${SCRIPT_LIB_ELUNA}>:${CMAKE_SOURCE_DIR}/src/modules/Eluna>
+)
 
-add_library(${LIBRARY_NAME} STATIC ${LIBRARY_SRCS})
+target_compile_definitions(game
+    PUBLIC
+        $<$<BOOL:${SOAP}>:ENABLE_SOAP>
+        $<$<BOOL:${SCRIPT_LIB_SD3}>:ENABLE_SD3>
+        $<$<BOOL:${SCRIPT_LIB_ELUNA}>:ENABLE_ELUNA>
+)
 
-target_link_libraries(${LIBRARY_NAME} shared detour)
-
-if(UNIX)
-    # Both systems don't have libdl and don't need them
-    if (NOT (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR CMAKE_SYSTEM_NAME STREQUAL "NetBSD"))
-        target_link_libraries(${LIBRARY_NAME} dl)
-    endif()
-endif()
-
-if(NOT ACE_USE_EXTERNAL)
-    add_dependencies(${LIBRARY_NAME} ace)
-endif()
+target_link_libraries(game
+    PUBLIC
+        shared
+        RecastNavigation::Detour
+        ZLIB::ZLIB
+        g3dlite
+        $<$<BOOL:${SCRIPT_LIB_SD3}>:mangosscript>
+        $<$<BOOL:${SCRIPT_LIB_ELUNA}>:lualib>
+)
 
 # Generate precompiled header
 if(PCH)
-    ADD_CXX_PCH(${LIBRARY_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/pchdef.h ${CMAKE_CURRENT_SOURCE_DIR}/pchdef.cpp)
+    ADD_CXX_PCH(game ${CMAKE_CURRENT_SOURCE_DIR}/pchdef.h ${CMAKE_CURRENT_SOURCE_DIR}/pchdef.cpp)
 endif()
 
-#if(PLAYERBOTS)
-#    include_directories(
-#        ${CMAKE_SOURCE_DIR}/src/modules/Bots/playerbot
-#        ${CMAKE_SOURCE_DIR}/src/modules/Bots/ahbot
-#    )
-#    target_link_libraries(${LIBRARY_NAME} Bots)
-#    add_dependencies(${LIBRARY_NAME} Bots)
-#endif()
-
-if(SCRIPT_LIB_SD3)
-    include_directories(${CMAKE_SOURCE_DIR}/src/modules/SD3)
-    target_link_libraries(${LIBRARY_NAME} mangosscript)
-    add_dependencies(${LIBRARY_NAME} mangosscript)
-endif()
+install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/AuctionHouseBot/ahbot.conf.dist
+    DESTINATION ${CONF_INSTALL_DIR}
+)
 
 if(SCRIPT_LIB_ELUNA)
-    include_directories(
-        ${CMAKE_SOURCE_DIR}/dep/lualib
-        ${CMAKE_SOURCE_DIR}/src/modules/Eluna
-    )
-    list(APPEND LIBRARY_SRCS ${SRC_GRP_LUAENGINE})
-    target_link_libraries(${LIBRARY_NAME} LuaEngine)
-    target_link_libraries(${LIBRARY_NAME} lualib)
-    add_dependencies(${LIBRARY_NAME} LuaEngine)
-    add_dependencies(${LIBRARY_NAME} lualib)
-endif()
-
-#AH Bot Config
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/AuctionHouseBot/ahbot.conf.dist.in" "${CMAKE_CURRENT_BINARY_DIR}/AuctionHouseBot/ahbot.conf.dist")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/AuctionHouseBot/ahbot.conf.dist" DESTINATION "${CONF_INSTALL_DIR}")
-
-if(WIN32 AND MSVC)
-    add_custom_command(TARGET ${LIBRARY_NAME}
-        POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/AuctionHouseBot/ahbot.conf.dist" "${CONF_COPY_DIR}"
-    )
+install(
+    DIRECTORY ${CMAKE_SOURCE_DIR}/src/modules/Eluna/extensions
+    DESTINATION ${BIN_DIR}/lua_scripts
+)
 endif()

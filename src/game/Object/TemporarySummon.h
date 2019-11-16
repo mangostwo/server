@@ -39,7 +39,7 @@ class TemporarySummon : public Creature
         void  UnSummon();
         void SaveToDB();
         ObjectGuid const& GetSummonerGuid() const { return m_summoner ; }
-        Unit* GetSummoner() const { return ObjectAccessor::GetUnit(*this, m_summoner); }
+        Unit* GetSummoner() const { return sObjectAccessor.GetUnit(*this, m_summoner); }
     private:
         void SaveToDB(uint32, uint8, uint32) override       // overwrited of Creature::SaveToDB     - don't must be called
         {

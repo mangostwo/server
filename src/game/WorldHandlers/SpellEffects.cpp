@@ -5379,7 +5379,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
     uint32 amount = damage > 0 ? damage : 1;
 
     // basepoints of SUMMON_PROP_GROUP_VEHICLE is often a spellId, set amount to 1
-    if (summon_prop->Group == SUMMON_PROP_GROUP_VEHICLE)
+    if ((summon_prop->Group == SUMMON_PROP_GROUP_VEHICLE) || (prop_id == 1961))
         amount = 1;
 
     // Expected Level                                       (Totem, Pet and Critter may not use this)

@@ -140,12 +140,11 @@ void WorldSession::HandleGMTicketCreateOpcode(WorldPacket& recv_data)
     SendPacket(&data);
 
     // TODO: Guard player map
-    HashMapHolder<Player>::MapType& m = sObjectAccessor.GetPlayers();
-    for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
+    sObjectAccessor.DoForAllPlayers([this](Player* p)->void
     {
-        if (itr->second->GetSession()->GetSecurity() >= SEC_GAMEMASTER && itr->second->isAcceptTickets())
-            { ChatHandler(itr->second).PSendSysMessage(LANG_COMMAND_TICKETNEW, GetPlayer()->GetName()); }
-    }
+        if (p->GetSession()->GetSecurity() >= SEC_GAMEMASTER && p->isAcceptTickets())
+            { ChatHandler(p).PSendSysMessage(LANG_COMMAND_TICKETNEW, GetPlayer()->GetName()); }
+    });
 }
 
 void WorldSession::HandleGMTicketSystemStatusOpcode(WorldPacket& /*recv_data*/)

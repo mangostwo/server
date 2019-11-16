@@ -733,7 +733,7 @@ class ObjectMgr
 
         // Static wrappers for various accessors
         static GameObjectInfo const* GetGameObjectInfo(uint32 id);                  ///< Wrapper for sGOStorage.LookupEntry
-        static Player* GetPlayer(const char* name);         ///< Wrapper for ObjectAccessor::FindPlayerByName
+        static Player* GetPlayer(const char* name);                                 ///< Wrapper for ObjectAccessor::FindPlayerByName
         static Player* GetPlayer(ObjectGuid guid, bool inWorld = true);             ///< Wrapper for ObjectAccessor::FindPlayer
         static CreatureInfo const* GetCreatureTemplate(uint32 id);                  ///< Wrapper for sCreatureStorage.LookupEntry
         static CreatureModelInfo const* GetCreatureModelInfo(uint32 modelid);       ///< Wrapper for sCreatureModelStorage.LookupEntry
