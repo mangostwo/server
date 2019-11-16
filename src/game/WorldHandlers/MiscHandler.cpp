@@ -300,7 +300,7 @@ void WorldSession::HandleLogoutRequest(WorldPacket& /*recv_data*/)
 	// Instant logout while rested or on taxi
 	if (GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) || GetPlayer()->IsTaxiFlying())
 	{
-		logoutTimer - 20;
+		logoutTimer =- 20;
 		isInstant = 1;
 	}
     // Cannot log out if in combat or moving
