@@ -1791,6 +1791,23 @@ Creature* Map::GetCreature(ObjectGuid guid)
     return m_objectsStore.find<Creature>(guid, (Creature*)NULL);
 }
 
+Unit* Map::GetUnitByName(const char* name)
+{
+    Unit* result = NULL;
+
+    ACE_READ_GUARD_RETURN(HashMapHolder<Unit>::LockType, guard, HashMapHolder<Unit>::GetLock(), NULL)
+        HashMapHolder<Unit>::MapType& m = sObjectAccessor.GetUnits();
+    for (HashMapHolder<Unit>::MapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    {
+        if (iter->second->IsInWorld() && (::strcmpi(name, iter->second->GetName()) == 0) && iter->second->GetMap() == this)
+        {
+            result = iter->second;
+            break;
+        }
+    }
+    return result;
+}
+
 /**
  * Function return pet that in world at CURRENT map
  *

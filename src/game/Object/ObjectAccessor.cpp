@@ -104,6 +104,18 @@ Player* ObjectAccessor::FindPlayerByName(const char* name)
     return NULL;
 }
 
+Unit *ObjectAccessor::FindUnitByName(const char *name)
+{
+    ACE_READ_GUARD_RETURN(HashMapHolder<Unit>::LockType, guard, HashMapHolder<Unit>::GetLock(), NULL)
+        HashMapHolder<Unit>::MapType& m = sObjectAccessor.GetUnits();
+    for (HashMapHolder<Unit>::MapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+        if (iter->second->IsInWorld() && (::strcmp(name, iter->second->GetName()) == 0))
+        {
+            return iter->second;
+        }
+    return NULL;
+}
+
 void
 ObjectAccessor::SaveAllPlayers()
 {

@@ -9840,6 +9840,7 @@ void Unit::AddToWorld()
 {
     Object::AddToWorld();
     ScheduleAINotify(0);
+    sObjectAccessor.AddObject(this);
 }
 
 void Unit::RemoveFromWorld()
@@ -9859,6 +9860,7 @@ void Unit::RemoveFromWorld()
     }
 
     Object::RemoveFromWorld();
+    //sObjectAccessor.RemoveObject(this);
 }
 
 void Unit::CleanupsBeforeDelete()

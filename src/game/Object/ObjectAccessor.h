@@ -106,11 +106,17 @@ class ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, MaNGOS::ClassLev
         // Player access
         static Player* FindPlayer(ObjectGuid guid, bool inWorld = true);// if need player at specific map better use Map::GetPlayer
         static Player* FindPlayerByName(const char* name);
+        static Unit *FindUnitByName(const char* name);
         static void KickPlayer(ObjectGuid guid);
 
         HashMapHolder<Player>::MapType& GetPlayers()
         {
             return HashMapHolder<Player>::GetContainer();
+        }
+
+        HashMapHolder<Unit>::MapType& GetUnits()
+        {
+            return HashMapHolder<Unit>::GetContainer();
         }
 
         void SaveAllPlayers();
@@ -124,11 +130,13 @@ class ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, MaNGOS::ClassLev
         Corpse* ConvertCorpseForPlayer(ObjectGuid player_guid, bool insignia = false);
         void RemoveOldCorpses();
 
-        // For call from Player/Corpse AddToWorld/RemoveFromWorld only
+        // For call from Player/Corpse/Unit AddToWorld/RemoveFromWorld only
         void AddObject(Corpse* object) { HashMapHolder<Corpse>::Insert(object); }
         void AddObject(Player* object) { HashMapHolder<Player>::Insert(object); }
+        void AddObject(Unit* object) { HashMapHolder<Unit>::Insert(object); }
         void RemoveObject(Corpse* object) { HashMapHolder<Corpse>::Remove(object); }
         void RemoveObject(Player* object) { HashMapHolder<Player>::Remove(object); }
+        void RemoveObject(Unit* object) { HashMapHolder<Unit>::Remove(object); }
 
     private:
 
