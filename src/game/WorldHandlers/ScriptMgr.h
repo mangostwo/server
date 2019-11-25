@@ -164,6 +164,7 @@ enum DBScriptCommand                                        // resSource, resTar
                                                             // dataint1: Delay (>= 0) in Seconds
     SCRIPT_COMMAND_CHANGE_ENTRY             = 39,           // resSource = Creature, datalong=creature entry
                                                             // dataint1 = entry
+    SCRIPT_COMMAND_RESET_GO                 = 43,           // resTarget = GameObject
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK, SCRIPT_COMMAND_EMOTE, SCRIPT_COMMAND_CAST_SPELL, SCRIPT_COMMAND_TERMINATE_SCRIPT
@@ -421,6 +422,7 @@ struct ScriptInfo
         {
             uint32 data[2];
         } raw;
+        // datalong unused                                  // SCRIPT_COMMAND_RESET_GO (43)
     };
 
     // Buddy system (entry can be npc or go entry, depending on command)
@@ -459,6 +461,7 @@ struct ScriptInfo
             case SCRIPT_COMMAND_CLOSE_DOOR:
             case SCRIPT_COMMAND_ACTIVATE_OBJECT:
             case SCRIPT_COMMAND_GO_LOCK_STATE:
+            case SCRIPT_COMMAND_RESET_GO:
                 return false;
             default:
                 return true;

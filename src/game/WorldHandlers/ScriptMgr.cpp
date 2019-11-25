@@ -717,6 +717,8 @@ void ScriptMgr::LoadScripts(DBScriptType type)
                 sLog.outErrorDb("Table `db_scripts [type = %d]` unknown command %u, skipping.", type, tmp.command);
                 continue;
             }
+            case SCRIPT_COMMAND_RESET_GO:                     // 43
+                break;
         }
 
         if (m_dbScripts[type].find(tmp.id) == m_dbScripts[type].end())
@@ -1884,6 +1886,27 @@ bool ScriptAction::HandleScriptStep()
         default:
             sLog.outErrorDb(" DB-SCRIPTS: Process table `db_scripts [type = %d]` id %u, command %u unknown command used.", m_type, m_script->id, m_script->command);
             break;
+        case SCRIPT_COMMAND_RESET_GO:                       // 43
+        {
+            if (LogIfNotGameObject(pTarget))
+            {
+                break;
+            }
+
+            GameObject* pGoTarget = static_cast<GameObject*>(pTarget);
+
+            switch (pGoTarget->GetGoType())
+            {
+            case GAMEOBJECT_TYPE_DOOR:
+            case GAMEOBJECT_TYPE_BUTTON:
+                pGoTarget->ResetDoorOrButton();
+                break;
+            default:
+                sLog.outErrorDb(" DB-SCRIPTS: Process table `db_scripts [type = %d]` id %u, command %u failed: GO(buddyEntry) %u is not a door or button", m_type, m_script->id, m_script->command, m_script->buddyEntry);
+                break;
+            }
+            break;
+        }
     }
 
     return false;
