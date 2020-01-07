@@ -1271,7 +1271,7 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth /*= 10
         mana = minmana + uint32(rellevel * (maxmana - minmana));
     }
 
-    health *= _GetHealthMod(rank); // Apply custom config settting
+    health *= _GetHealthMod(rank); // Apply custom config setting
     if (health < 1)
         health = 1;
 
@@ -2696,8 +2696,7 @@ void Creature::AddToRemoveListInMaps(uint32 db_guid, CreatureData const* data)
 
 struct SpawnCreatureInMapsWorker
 {
-    SpawnCreatureInMapsWorker(uint32 guid, CreatureData const* data)
-        : i_guid(guid), i_data(data) {}
+    SpawnCreatureInMapsWorker(uint32 guid, CreatureData const* data) : i_guid(guid), i_data(data) {}
 
     void operator()(Map* map)
     {

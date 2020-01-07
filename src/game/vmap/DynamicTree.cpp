@@ -45,13 +45,6 @@ template<> struct BoundsTrait< GameObjectModel>
     static void getBounds2(const GameObjectModel* g, G3D::AABox& out) { out = g->GetBounds();}
 };
 
-/*
-static bool operator == (const GameObjectModel& mdl, const GameObjectModel& mdl2){
-    return &mdl == &mdl2;
-}
-*/
-
-// int valuesPerNode = 5, numMeanSplits = 3;
 
 //int UNBALANCED_TIMES_LIMIT = 5;
 int CHECK_TREE_PERIOD = 200;
