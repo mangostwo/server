@@ -1,6 +1,5 @@
 message("===================================================")
 message("Build type            : ${CMAKE_BUILD_TYPE}")
-message("Revision              : ${MANGOS_HASH}")
 message("Install server(s) to  : ${BIN_DIR}")
 message("Install configs to    : ${CONF_INSTALL_DIR}")
 

@@ -1,7 +1,7 @@
 # MaNGOS is a full featured server for World of Warcraft, supporting
 # the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
 #
-# Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+# Copyright (C) 2005-2020  MaNGOS project <https://getmangos.eu>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,9 +35,6 @@ set_property(GLOBAL
     PROPERTY USE_FOLDERS ON
 )
 
-
-project(MaNGOS VERSION 0.22.0)
-
 #==================================================================================
 # Define available cmake options below
 option(BUILD_MANGOSD        "Build the main server"                         ON)
@@ -46,6 +43,7 @@ option(BUILD_TOOLS          "Build the map/vmap/mmap extractors"            ON)
 option(USE_STORMLIB         "Use StormLib for reading MPQs"                 OFF)
 option(SCRIPT_LIB_ELUNA     "Compile with support for Eluna scripts"        ON)
 option(SCRIPT_LIB_SD3       "Compile with support for ScriptDev3 scripts"   ON)
+option(PLAYERBOTS           "Enable Player Bots"                            OFF)
 option(SOAP                 "Enable remote access via SOAP"                 OFF)
 option(PCH                  "Enable precompiled headers"                    ON)
 option(DEBUG                "Enable debug build (only on non IDEs)"         OFF)
@@ -66,6 +64,8 @@ message(
    Scripting engines:
     SCRIPT_LIB_ELUNA        Compile with support for Eluna scripts
     SCRIPT_LIB_SD3          Compile with support for ScriptDev3 scripts
+   Modules:
+    PLAYERBOTS              Enable Player Bots
 
   To set an option simply type -D<OPTION>=<VALUE> after 'cmake <srcs>'.
   Also, you can specify the generator with -G. See 'cmake --help' for more details
@@ -73,6 +73,8 @@ message(
 )
 message("")
 #==================================================================================#
+
+project(MaNGOS VERSION 0.22.0)
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install CACHE PATH "Default install directory" FORCE)
@@ -85,12 +87,17 @@ else()
 endif()
 
 if(UNIX)
-    set(BIN_DIR          ${CMAKE_INSTALL_PREFIX}/bin)
-    set(CONF_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/etc)
+    set(BIN_DIR ${CMAKE_INSTALL_PREFIX}/bin)
+    if (NOT CONF_INSTALL_DIR)
+        set(CONF_INSTALL_DIR ../etc)
+    endif()
 else()
-    set(BIN_DIR          ${CMAKE_INSTALL_PREFIX})
-    set(CONF_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
+    set(BIN_DIR ${CMAKE_INSTALL_PREFIX})
+    if (NOT CONF_INSTALL_DIR)
+        set(CONF_INSTALL_DIR .)
+    endif()
 endif()
+
 
 find_package(Threads REQUIRED)
 find_package(MySQL   REQUIRED)
@@ -111,4 +118,3 @@ add_subdirectory(dep)
 add_subdirectory(src)
 
 include(${CMAKE_SOURCE_DIR}/cmake/StatusInfo.cmake)
-

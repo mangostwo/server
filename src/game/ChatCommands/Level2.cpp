@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020  MaNGOS project <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,16 +54,15 @@
 #include "WaypointMovementGenerator.h"
 #include <cctype>
 #include <iostream>
-#include <fstream>
-#include <map>
-#include <typeinfo>
 #include "G3D/Quat.h"                                       // for turning GO's
-
 #include "TargetedMovementGenerator.h"                      // for HandleNpcUnFollowCommand
 #include "MoveMap.h"                                        // for mmap manager
 #include "PathFinder.h"                                     // for mmap commands
 #include "movement/MoveSplineInit.h"
 
+#include <fstream>
+#include <map>
+#include <typeinfo>
 
 static uint32 ReputationRankStrIndex[MAX_REPUTATION_RANK] =
 {
@@ -1187,7 +1186,7 @@ bool ChatHandler::HandleGameObjectAddCommand(char* args)
     return true;
 }
 
-// set pahsemask for selected object
+// set phasemask for selected object
 bool ChatHandler::HandleGameObjectPhaseCommand(char* args)
 {
     // number or [name] Shift-click form |color|Hgameobject:go_id|h[name]|h|r
@@ -1895,7 +1894,6 @@ bool ChatHandler::HandleNpcMoveCommand(char* args)
     Player* player = m_session->GetPlayer();
 
     Creature* pCreature = getSelectedCreature();
-
     if (!pCreature)
     {
         // number or [name] Shift-click form |color|Hcreature:creature_guid|h[name]|h|r
@@ -2597,7 +2595,14 @@ bool ChatHandler::HandlePInfoCommand(char* args)
 
         if (GetAccessLevel() >= security)
         {
-            email = fields[2].GetCppString();
+            if (security == SEC_ADMINISTRATOR)
+            {
+                email = fields[2].GetCppString();
+            }
+            else
+            {
+                email = "*hidden*";
+            }
             last_ip = fields[3].GetCppString();
             last_login = fields[4].GetCppString();
         }
@@ -2624,7 +2629,7 @@ bool ChatHandler::HandlePInfoCommand(char* args)
     return true;
 }
 
-// show tickets
+// show ticket (helper)
 void ChatHandler::ShowTicket(GMTicket const* ticket)
 {
     std::string lastupdated = TimeToTimestampStr(ticket->GetLastUpdate());

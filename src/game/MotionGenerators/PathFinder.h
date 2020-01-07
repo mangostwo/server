@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020  MaNGOS project <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,8 +25,8 @@
 #ifndef MANGOS_PATH_FINDER_H
 #define MANGOS_PATH_FINDER_H
 
-#include "../recastnavigation/Detour/Include/DetourNavMesh.h"
-#include "../recastnavigation/Detour/Include/DetourNavMeshQuery.h"
+#include "DetourNavMesh.h"
+#include "DetourNavMeshQuery.h"
 
 #include "MoveMapSharedDefines.h"
 #include "movement/MoveSplineInitArgs.h"
@@ -102,9 +102,9 @@ class PathFinder
 
         dtQueryFilter m_filter;                     // use single filter for all movements, update it when needed
 
-        void setStartPosition(Vector3 point) { m_startPosition = point; }
-        void setEndPosition(Vector3 point) { m_actualEndPosition = point; m_endPosition = point; }
-        void setActualEndPosition(Vector3 point) { m_actualEndPosition = point; }
+        void setStartPosition(const Vector3 &point) { m_startPosition = point; }
+        void setEndPosition(const Vector3 &point) { m_actualEndPosition = point; m_endPosition = point; }
+        void setActualEndPosition(const Vector3 &point) { m_actualEndPosition = point; }
 
         void clear()
         {

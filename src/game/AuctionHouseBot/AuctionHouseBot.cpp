@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2019  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2020  MaNGOS project <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,18 +29,12 @@
 #include "AuctionHouseMgr.h"
 #include "SystemConfig.h"
 #include "SQLStorages.h"
+#include "World.h"
 
 /** \addtogroup auctionbot
  * @{
  * \file
  */
-
-
-/**
- * Format is YYYYMMDDRR where RR is the change in the conf file
- * for that day.
- */
-#define AUCTIONHOUSEBOT_CONF_VERSION    2010102201
 
 #include "Policies/Singleton.h"
 
@@ -487,7 +481,7 @@ void AuctionBotConfig::setConfig(AuctionBotConfigBoolValues index, char const* f
 void AuctionBotConfig::GetConfigFromFile()
 {
     // Check config file version
-    if (m_AhBotCfg.GetIntDefault("ConfVersion", 0) != AUCTIONHOUSEBOT_CONF_VERSION)
+    if (m_AhBotCfg.GetIntDefault("ConfVersion", 0) != AHBOT_CONFIG_VERSION)
         { sLog.outError("AHBot: Configuration file version doesn't match expected version. Some config variables may be wrong or missing."); }
 
     setConfigMax(CONFIG_UINT32_AHBOT_ALLIANCE_ITEM_AMOUNT_RATIO , "AuctionHouseBot.Alliance.Items.Amount.Ratio" , 100, 10000);
@@ -720,20 +714,21 @@ uint32 AuctionBotBuyer::GetBuyableEntry(AHB_Buyer_Config& config)
             ItemPrototype const* prototype = item->GetProto();
             if (prototype)
             {
-                ++config.SameItemInfo[item->GetEntry()].ItemCount;    // Structure constructor will make sure Element are correctly initialised if entry is created here.
-                config.SameItemInfo[item->GetEntry()].BuyPrice = config.SameItemInfo[item->GetEntry()].BuyPrice + (itr->second->buyout / item->GetCount());
-                config.SameItemInfo[item->GetEntry()].BidPrice = config.SameItemInfo[item->GetEntry()].BidPrice + (itr->second->startbid / item->GetCount());
-                if (itr->second->buyout != 0)
+                BuyerItemInfo& buyerItem = config.SameItemInfo[item->GetEntry()];    // Structure constructor will make sure Element are correctly initialised if entry is created here.
+                ++buyerItem.ItemCount;
+                buyerItem.BuyPrice = buyerItem.BuyPrice + (Aentry->buyout / item->GetCount());
+                buyerItem.BidPrice = buyerItem.BidPrice + (Aentry->startbid / item->GetCount());
+                if (Aentry->buyout != 0)
                 {
-                    if (itr->second->buyout / item->GetCount() < config.SameItemInfo[item->GetEntry()].MinBuyPrice)
-                        { config.SameItemInfo[item->GetEntry()].MinBuyPrice = itr->second->buyout / item->GetCount(); }
-                    else if (config.SameItemInfo[item->GetEntry()].MinBuyPrice == 0)
-                        { config.SameItemInfo[item->GetEntry()].MinBuyPrice = itr->second->buyout / item->GetCount(); }
+                    if (Aentry->buyout / item->GetCount() < buyerItem.MinBuyPrice)
+                        { buyerItem.MinBuyPrice = Aentry->buyout / item->GetCount(); }
+                    else if (buyerItem.MinBuyPrice == 0)
+                        { buyerItem.MinBuyPrice = Aentry->buyout / item->GetCount(); }
                 }
-                if (itr->second->startbid / item->GetCount() < config.SameItemInfo[item->GetEntry()].MinBidPrice)
-                    { config.SameItemInfo[item->GetEntry()].MinBidPrice = itr->second->startbid / item->GetCount(); }
-                else if (config.SameItemInfo[item->GetEntry()].MinBidPrice == 0)
-                    { config.SameItemInfo[item->GetEntry()].MinBidPrice = itr->second->startbid / item->GetCount(); }
+                if (Aentry->startbid / item->GetCount() < buyerItem.MinBidPrice)
+                    { buyerItem.MinBidPrice = Aentry->startbid / item->GetCount(); }
+                else if (buyerItem.MinBidPrice == 0)
+                    { buyerItem.MinBidPrice = Aentry->startbid / item->GetCount(); }
 
                 if (Aentry->owner == sAuctionBotConfig.GetAHBotId())
                 {
@@ -799,7 +794,7 @@ bool AuctionBotBuyer::IsBuyableEntry(uint32 buyoutPrice, double InGame_BuyPrice,
         {
             if ((buyoutPrice > 0) && (MaxBuyablePrice > 0))
             {
-                ratio = buyoutPrice / MaxBuyablePrice;
+                double ratio = buyoutPrice / MaxBuyablePrice;
                 if (ratio < 10)
                     { Chance = MaxChance - (ratio * (MaxChance / 10)); }
                 else { Chance = 1; }
@@ -814,7 +809,7 @@ bool AuctionBotBuyer::IsBuyableEntry(uint32 buyoutPrice, double InGame_BuyPrice,
         {
             if ((buyoutPrice > 0) && (MaxBuyablePrice > 0))
             {
-                ratio = buyoutPrice / MaxBuyablePrice;
+                double ratio = buyoutPrice / MaxBuyablePrice;
                 if (ratio < 10)
                     { Chance = (MaxChance / 5) - (ratio * (MaxChance / 50)); }
                 else { Chance = 1; }
@@ -827,7 +822,7 @@ bool AuctionBotBuyer::IsBuyableEntry(uint32 buyoutPrice, double InGame_BuyPrice,
     {
         if ((buyoutPrice > 0) && (MaxBuyablePrice > 0))
         {
-            ratio = buyoutPrice / MaxBuyablePrice;
+            double ratio = buyoutPrice / MaxBuyablePrice;
             if (ratio < 10)
                 { Chance = (MaxChance / 5) - (ratio * (MaxChance / 50)); }
             else { Chance = 0; }
@@ -840,16 +835,13 @@ bool AuctionBotBuyer::IsBuyableEntry(uint32 buyoutPrice, double InGame_BuyPrice,
         DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: WIN BUY! Chance = %u, num = %u.", Chance, RandNum);
         return true;
     }
-    else
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot:LOOSE BUY! Chance = %u, num = %u.", Chance, RandNum);
-        return false;
-    }
+
+    DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot:LOOSE BUY! Chance = %u, num = %u.", Chance, RandNum);
+    return false;
 }
 
 bool AuctionBotBuyer::IsBidableEntry(uint32 bidPrice, double InGame_BuyPrice, double MaxBidablePrice, uint32 MinBidPrice, uint32 MaxChance, uint32 ChanceRatio)
 {
-    double ratio = 0;
     uint32 Chance = 0;
 
     if (bidPrice <= MinBidPrice)
@@ -860,7 +852,7 @@ bool AuctionBotBuyer::IsBidableEntry(uint32 bidPrice, double InGame_BuyPrice, do
         {
             if (bidPrice < MaxBidablePrice)
             {
-                ratio = MaxBidablePrice / bidPrice;
+                double ratio = MaxBidablePrice / bidPrice;
                 if (ratio < 3)
                     { Chance = ((MaxChance / 500) * ratio); }
                 else
@@ -874,7 +866,7 @@ bool AuctionBotBuyer::IsBidableEntry(uint32 bidPrice, double InGame_BuyPrice, do
     {
         if (bidPrice < MaxBidablePrice)
         {
-            ratio = MaxBidablePrice / bidPrice;
+            double ratio = MaxBidablePrice / bidPrice;
             if (ratio < 4)
                 { Chance = ((MaxChance / 1000) * ratio); }
             else
@@ -924,17 +916,18 @@ void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config)
 
     for (CheckEntryMap::iterator itr = config.CheckedEntry.begin(); itr != config.CheckedEntry.end();)
     {
-        AuctionEntry* auction = auctionHouse->GetAuction(itr->second.AuctionId);
+        BuyerAuctionEval& auctionEval = itr->second;
+        AuctionEntry* auction = auctionHouse->GetAuction(auctionEval.AuctionId);
         if (!auction || auction->moneyDeliveryTime)         // is auction not active now
         {
             DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: Entry %u on ah %u doesn't exists, perhaps bought already?",
-                             itr->second.AuctionId, auction->GetHouseId());
+                             auctionEval.AuctionId, auction->GetHouseId());
 
             config.CheckedEntry.erase(itr++);
             continue;
         }
 
-        if ((itr->second.LastChecked != 0) && ((Now - itr->second.LastChecked) <= m_CheckInterval))
+        if ((auctionEval.LastChecked != 0) && ((Now - auctionEval.LastChecked) <= m_CheckInterval))
         {
             DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: In time interval wait for entry %u!", auction->Id);
             ++itr;
@@ -964,8 +957,6 @@ void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config)
 
         uint32 bidPrice;
         uint32 bidPriceByItem;
-        uint32 minBidPrice;
-        uint32 minBuyPrice;
         if (auction->bid >= auction->startbid)
         {
             bidPrice = auction->GetAuctionOutBid();
@@ -979,6 +970,8 @@ void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config)
 
         double InGame_BuyPrice;
         double InGame_BidPrice;
+        uint32 minBidPrice;
+        uint32 minBuyPrice;
         if (sameitem_itr == config.SameItemInfo.end())
         {
             InGame_BuyPrice = 0;
@@ -988,17 +981,22 @@ void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config)
         }
         else
         {
-            if (sameitem_itr->second.ItemCount == 1) { MaxBuyablePrice = MaxBuyablePrice * 5; } // if only one item exist can be buyed if the price is high too.
-            InGame_BuyPrice = sameitem_itr->second.BuyPrice / sameitem_itr->second.ItemCount;
-            InGame_BidPrice = sameitem_itr->second.BidPrice / sameitem_itr->second.ItemCount;
-            minBidPrice = sameitem_itr->second.MinBidPrice;
-            minBuyPrice = sameitem_itr->second.MinBuyPrice;
+            const BuyerItemInfo& sameBuyerItem = sameitem_itr->second;
+
+            if (sameBuyerItem.ItemCount == 1)
+                {
+                    MaxBuyablePrice = MaxBuyablePrice * 5;
+                } // if only one item exist can be buyed if the price is high too.
+            InGame_BuyPrice = sameBuyerItem.BuyPrice / sameBuyerItem.ItemCount;
+            InGame_BidPrice = sameBuyerItem.BidPrice / sameBuyerItem.ItemCount;
+            minBidPrice = sameBuyerItem.MinBidPrice;
+            minBuyPrice = sameBuyerItem.MinBuyPrice;
         }
 
         double MaxBidablePrice = MaxBuyablePrice - (MaxBuyablePrice / 30);  // Max Bidable price defined to 70% of max buyable price
 
         DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: Auction added with data:");
-        DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: MaxPrice of Entry %u is %.1fg.", itr->second.AuctionId, MaxBuyablePrice / 10000);
+        DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: MaxPrice of Entry %u is %.1fg.", auctionEval.AuctionId, MaxBuyablePrice / 10000);
         DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: GamePrice buy=%.1fg, bid=%.1fg.", InGame_BuyPrice / 10000, InGame_BidPrice / 10000);
         DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: Minimal price see in AH Buy=%ug, Bid=%ug.",
                          minBuyPrice / 10000, minBidPrice / 10000);
@@ -1028,7 +1026,7 @@ void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config)
             if (IsBidableEntry(bidPriceByItem, InGame_BuyPrice, MaxBidablePrice, minBidPrice, MaxChance, config.FactionChance))
                 { PlaceBidToEntry(auction, bidPrice); }
 
-        itr->second.LastChecked = Now;
+        auctionEval.LastChecked = Now;
         --BuyCycles;
 
         ++itr;
@@ -1270,23 +1268,35 @@ bool AuctionBotSeller::Initialize()
             case ITEM_CLASS_WEAPON:
             {
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ITEM_MIN_ITEM_LEVEL))
+                {
                     if (prototype->ItemLevel < value)
                         { continue; }
+                }
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ITEM_MAX_ITEM_LEVEL))
+                {
                     if (prototype->ItemLevel > value)
                         { continue; }
+                }
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ITEM_MIN_REQ_LEVEL))
+                {
                     if (prototype->RequiredLevel < value)
                         { continue; }
+                }
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ITEM_MAX_REQ_LEVEL))
+                {
                     if (prototype->RequiredLevel > value)
                         { continue; }
+                }
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ITEM_MIN_SKILL_RANK))
+                {
                     if (prototype->RequiredSkillRank < value)
                         { continue; }
+                }
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ITEM_MAX_SKILL_RANK))
+                {
                     if (prototype->RequiredSkillRank > value)
                         { continue; }
+                }
                 break;
             }
             case ITEM_CLASS_RECIPE:
@@ -1294,17 +1304,25 @@ bool AuctionBotSeller::Initialize()
             case ITEM_CLASS_PROJECTILE:
             {
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ITEM_MIN_REQ_LEVEL))
+                {
                     if (prototype->RequiredLevel < value)
                         { continue; }
+                }
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ITEM_MAX_REQ_LEVEL))
+                {
                     if (prototype->RequiredLevel > value)
                         { continue; }
+                }
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ITEM_MIN_SKILL_RANK))
+                {
                     if (prototype->RequiredSkillRank < value)
                         { continue; }
+                }
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ITEM_MAX_SKILL_RANK))
+                {
                     if (prototype->RequiredSkillRank > value)
                         { continue; }
+                }
                 break;
             }
             case ITEM_CLASS_MISC:
@@ -1372,6 +1390,9 @@ bool AuctionBotSeller::Initialize()
                         { continue; }
                 break;
             }
+
+            default:
+                continue;
         }
 
         m_ItemPool[prototype->Quality][prototype->Class].push_back(itemID);

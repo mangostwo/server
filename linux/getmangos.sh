@@ -3,7 +3,7 @@
 # MaNGOS Build Automation Script                                              #
 # Written By: Ryan Ashley                                                     #
 # Updated By: Cedric Servais                                                  #
-# Copyright (c) 2014-2019 MaNGOS Project                                      #
+# Copyright (c) 2014-2020 MaNGOS Project                                      #
 # https://getmangos.eu/                                                       #
 #                                                                             #
 # This program is free software; you can redistribute it and/or modify        #
@@ -255,6 +255,10 @@ function GetPrerequisites()
 	  # Ubuntu 17.10
 	  su -c "apt-get -y install curl autoconf automake cmake libbz2-dev libace-dev libssl-dev libmysqlclient-dev libtool" root
 	  ;;
+        "bionic")
+	  # Ubuntu 18.04
+	  su -c "apt-get -y install curl autoconf automake cmake libbz2-dev libace-dev libssl-dev libmysqlclient-dev libtool" root
+	  ;;
         *)
           OS_VER=0
           ;;
@@ -403,7 +407,7 @@ function GetRelease()
       ;;
     5)
       SRCPATH="$ROOTPATH/five/src"
-      INSTPATH="$ROOTPATH/fice"
+      INSTPATH="$ROOTPATH/five"
       DB_PREFIX="five"
       ;;
     *)
