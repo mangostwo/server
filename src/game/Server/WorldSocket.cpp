@@ -50,7 +50,7 @@
 #include "DBCStores.h"
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
-#endif /*ENABLE_ELUNA*/
+#endif /* ENABLE_ELUNA */
 
 #if defined( __GNUC__ )
 #pragma pack(1)
@@ -143,21 +143,15 @@ bool WorldSocket::IsClosed(void) const
 
 void WorldSocket::CloseSocket(void)
 {
-    {
-        ACE_GUARD(LockType, Guard, m_OutBufferLock);
+    ACE_GUARD(LockType, Guard, m_OutBufferLock);
 
-        if (closing_)
-            { return; }
+    if (closing_)
+      { return; }
 
-        closing_ = true;
-        peer().close_writer();
-    }
+    closing_ = true;
+    peer().close_writer();
 
-    {
-        ACE_GUARD(LockType, Guard, m_SessionLock);
-
-        m_Session = NULL;
-    }
+    m_Session = NULL;
 }
 
 const std::string& WorldSocket::GetRemoteAddress(void) const
@@ -181,7 +175,7 @@ int WorldSocket::SendPacket(const WorldPacket& pkt)
     if (!sEluna->OnPacketSend(m_Session, pct))
         return 0;
 #endif
-    
+
     ServerPktHeader header(pct.size() + 2, pct.GetOpcode());
     m_Crypt.EncryptSend((uint8*)header.header, header.getHeaderLength());
 
@@ -706,13 +700,14 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
 #ifdef ENABLE_ELUNA
                 if (!sEluna->OnPacketReceive(m_Session, *new_pct))
                     return 0;
-#endif
+#endif /* ENABLE_ELUNA */
                 return HandleAuthSession(*new_pct);
             case CMSG_KEEP_ALIVE:
                 DEBUG_LOG("CMSG_KEEP_ALIVE ,size: " SIZEFMTD " ", new_pct->size());
+
 #ifdef ENABLE_ELUNA
                 sEluna->OnPacketReceive(m_Session, *new_pct);
-#endif
+#endif /* ENABLE_ELUNA */
                 return 0;
             default:
             {
@@ -764,7 +759,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     // NOTE: ATM the socket is singlethread, have this in mind ...
     uint8 digest[20];
     uint32 clientSeed, id, security;
-    uint32 ClientBuild;
+    uint32 BuiltNumberClient;
     uint8 expansion = 0;
     LocaleConstant locale;
     std::string account;
@@ -775,7 +770,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     bool wardenActive = (sWorld.getConfig(CONFIG_BOOL_WARDEN_WIN_ENABLED) || sWorld.getConfig(CONFIG_BOOL_WARDEN_OSX_ENABLED));
 
     // Read the content of the packet
-    recvPacket >> ClientBuild;
+    recvPacket >> BuiltNumberClient;
     recvPacket.read_skip<uint32>();
     recvPacket >> account;
     recvPacket.read_skip<uint32>();
@@ -787,12 +782,12 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     recvPacket.read(digest, 20);
 
     DEBUG_LOG("WorldSocket::HandleAuthSession: client build %u, account %s, clientseed %X",
-              ClientBuild,
+              BuiltNumberClient,
               account.c_str(),
               clientSeed);
 
     // Check the version of client trying to connect
-    if (!IsAcceptableClientBuild(ClientBuild))
+    if (!IsAcceptableClientBuild(BuiltNumberClient))
     {
         packet.Initialize(SMSG_AUTH_RESPONSE, 1);
         packet << uint8(AUTH_VERSION_MISMATCH);
@@ -986,7 +981,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     // Warden: Initialize Warden system only if it is enabled by config
     if (wardenActive)
-        m_Session->InitWarden(&K, os);
+        m_Session->InitWarden(uint16(BuiltNumberClient), &K, os);
 
     sWorld.AddSession(m_Session);
 

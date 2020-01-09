@@ -39,6 +39,7 @@
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "World.h"
+#include "ObjectAccessor.h"
 #include "BattleGround/BattleGroundMgr.h"
 #include "MapManager.h"
 #include "SocialMgr.h"
@@ -1026,8 +1027,10 @@ void WorldSession::SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit)
     SendPacket(&data);
 }
 
-void WorldSession::InitWarden(BigNumber* k, std::string const& os)
+void WorldSession::InitWarden(uint16 build, BigNumber* k, std::string const& os)
 {
+    _build = build;
+
     if (os == "Win" && sWorld.getConfig(CONFIG_BOOL_WARDEN_WIN_ENABLED))
     {
         _warden = new WardenWin();

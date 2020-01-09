@@ -33,6 +33,9 @@
 #include "WardenCheckMgr.h"
 #include "Database/DatabaseEnv.h"
 
+// the default client version with info in warden_checks; for other version checks, see warden_build_specific
+#define DEFAULT_CLIENT_BUILD  12340
+
 enum WardenOpcodes
 {
     // Client->Server
@@ -92,6 +95,42 @@ struct WardenHashRequest
     uint8 Seed[16];
 };
 
+namespace WardenState
+{
+    enum Value
+    {
+        STATE_INITIAL,
+        STATE_REQUESTED_MODULE,
+        STATE_SENT_MODULE,
+        STATE_REQUESTED_HASH,
+        STATE_INITIALIZE_MODULE,
+        STATE_REQUESTED_DATA,
+        STATE_RESTING
+    };
+
+    inline const char* to_string(WardenState::Value value)
+    {
+        switch (value)
+        {
+            case WardenState::STATE_INITIAL:
+                return "STATE_INITIAL";
+            case WardenState::STATE_REQUESTED_MODULE:
+                return "STATE_REQUESTED_MODULE";
+            case WardenState::STATE_SENT_MODULE:
+                return "STATE_SENT_MODULE";
+            case WardenState::STATE_REQUESTED_HASH:
+                return "STATE_REQUESTED_HASH";
+            case WardenState::STATE_INITIALIZE_MODULE:
+                return "STATE_INITIALIZE_MODULE";
+            case WardenState::STATE_REQUESTED_DATA:
+                return "STATE_REQUESTED_DATA";
+            case WardenState::STATE_RESTING:
+                return "STATE_RESTING";
+        }
+        return "UNDEFINED STATE";
+    }
+};
+
 #if defined(__GNUC__)
 #pragma pack()
 #else
@@ -116,10 +155,10 @@ class Warden
 
         virtual void Init(WorldSession* session, BigNumber* k) = 0;
         virtual ClientWardenModule* GetModuleForClient() = 0;
-        virtual void InitializeModule() = 0;
+        virtual void InitializeModule();
         virtual void RequestHash();
         virtual void HandleHashResult(ByteBuffer &buff) = 0;
-        virtual void RequestData() = 0;
+        virtual void RequestData();
         virtual void HandleData(ByteBuffer &buff);
 
         void SendModuleToClient();
@@ -127,6 +166,8 @@ class Warden
         void Update();
         void DecryptData(uint8* buffer, uint32 length);
         void EncryptData(uint8* buffer, uint32 length);
+
+    void SetNewState(WardenState::Value state);
 
         static bool IsValidCheckSum(uint32 checksum, const uint8 *data, const uint16 length);
         static uint32 BuildChecksum(const uint8 *data, uint32 length);
@@ -145,10 +186,9 @@ class Warden
         ARC4 _outputCrypto;
         uint32 _checkTimer;                          // Timer for sending check requests
         uint32 _clientResponseTimer;                 // Timer for client response delay
-        bool _dataSent;
         uint32 _previousTimestamp;
         ClientWardenModule* _module;
-        bool _initialized;
+        WardenState::Value _state;
 };
 
 #endif

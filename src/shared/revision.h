@@ -24,7 +24,7 @@
 
 #ifndef MANGOS_H_REVISION
 #define MANGOS_H_REVISION
-    #define REVISION_NR "2116012"
+    #define REVISION_NR "2111001"
 
     #define REALMD_DB_VERSION_NR 21
     #define REALMD_DB_STRUCTURE_NR 2
@@ -37,7 +37,7 @@
     #define CHAR_DB_UPDATE_DESCRIPTION "Add_Field_Comments"
 
     #define WORLD_DB_VERSION_NR 21
-    #define WORLD_DB_STRUCTURE_NR 10
-    #define WORLD_DB_CONTENT_NR 074
-    #define WORLD_DB_UPDATE_DESCRIPTION "NPC_28882_rework."
+    #define WORLD_DB_STRUCTURE_NR 11
+    #define WORLD_DB_CONTENT_NR 001
+    #define WORLD_DB_UPDATE_DESCRIPTION "warden_refactor"
 #endif // __REVISION_H__

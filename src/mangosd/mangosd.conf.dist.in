@@ -61,7 +61,7 @@ ConfVersion=@MANGOS_WORLD_VER@
 ################################################################################
 
 RealmID                      = 1
-DataDir                      = "."
+DataDir                      = "@CONF_INSTALL_DIR@"
 LogsDir                      = ""
 LoginDatabaseInfo            = "127.0.0.1;3306;root;mangos;realmd"
 WorldDatabaseInfo            = "127.0.0.1;3306;root;mangos;mangos2"

@@ -61,7 +61,7 @@ void WardenMac::Init(WorldSession* pClient, BigNumber* K)
 
     _inputCrypto.Init(_inputKey);
     _outputCrypto.Init(_outputKey);
-    sLog.outWarden("Server side warden for client %u initializing...", pClient->GetAccountId());
+    sLog.outWarden("Server side Mac warden for client %u (build %u) initializing...", pClient->GetAccountId(), _session->GetClientBuild());
     sLog.outWarden("C->S Key: %s", ByteArrayToHexStr(_inputKey, 16).c_str());
     sLog.outWarden("S->C Key: %s", ByteArrayToHexStr(_outputKey, 16).c_str());
     sLog.outWarden("  Seed: %s", ByteArrayToHexStr(_seed, 16).c_str());
@@ -98,6 +98,7 @@ ClientWardenModule* WardenMac::GetModuleForClient()
 void WardenMac::InitializeModule()
 {
     sLog.outWarden("Initialize module");
+    Warden::InitializeModule();
 }
 
 struct keyData {
@@ -174,8 +175,6 @@ void WardenMac::HandleHashResult(ByteBuffer &buff)
     _inputCrypto.Init(_inputKey);
     _outputCrypto.Init(_outputKey);
 
-    _initialized = true;
-
     _previousTimestamp = WorldTimer::getMSTime();
 }
 
@@ -200,15 +199,12 @@ void WardenMac::RequestData()
     pkt.append(buff);
     _session->SendPacket(&pkt);
 
-    _dataSent = true;
+    Warden::RequestData();
 }
 
 void WardenMac::HandleData(ByteBuffer &buff)
 {
     sLog.outWarden("Handle data");
-
-    _dataSent = false;
-    _clientResponseTimer = 0;
 
     //uint16 Length;
     //buff >> Length;

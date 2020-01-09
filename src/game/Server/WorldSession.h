@@ -277,7 +277,7 @@ class WorldSession
         uint8 Expansion() const { return m_expansion; }
 
         // Warden
-        void InitWarden(BigNumber* k, std::string const& os);
+        void InitWarden(uint16 build, BigNumber* k, std::string const& os);
 
         /// Session in auth.queue currently
         void SetInQueue(bool state)
@@ -872,6 +872,13 @@ class WorldSession
         void HandleSetActiveVoiceChannel(WorldPacket& recv_data);
         void HandleSetTaxiBenchmarkOpcode(WorldPacket& recv_data);
 
+#ifdef ENABLE_PLAYERBOTS
+        void HandleBotPackets();
+#endif
+
+        // for Warden
+        uint16 GetClientBuild() const { return _build; }
+
         // Guild Bank
         void HandleGuildPermissions(WorldPacket& recv_data);
         void HandleGuildBankMoneyWithdrawn(WorldPacket& recv_data);
@@ -950,6 +957,7 @@ class WorldSession
 
         // Warden
         Warden* _warden;                                    // Remains NULL if Warden system is not enabled by config
+        uint16 _build;                                      // connected client build
 
         time_t _logoutTime;
         bool m_inQueue;                                     // session wait in auth.queue

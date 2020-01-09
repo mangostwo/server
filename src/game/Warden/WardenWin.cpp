@@ -56,7 +56,7 @@ void WardenWin::Init(WorldSession* session, BigNumber* k)
 
     _inputCrypto.Init(_inputKey);
     _outputCrypto.Init(_outputKey);
-    sLog.outWarden("Server side warden for client %u initializing...", session->GetAccountId());
+    sLog.outWarden("Server side warden for client %u (build %u) initializing...", session->GetAccountId(), _session->GetClientBuild());
     sLog.outWarden("C->S Key: %s", ByteArrayToHexStr(_inputKey, 16).c_str());
     sLog.outWarden("S->C Key: %s", ByteArrayToHexStr(_outputKey, 16).c_str());
     sLog.outWarden("  Seed: %s", ByteArrayToHexStr(_seed, 16).c_str());
@@ -132,6 +132,8 @@ void WardenWin::InitializeModule()
     WorldPacket pkt(SMSG_WARDEN_DATA, sizeof(WardenInitModuleRequest));
     pkt.append((uint8*)&Request, sizeof(WardenInitModuleRequest));
     _session->SendPacket(&pkt);
+
+    Warden::InitializeModule();
 }
 
 void WardenWin::HandleHashResult(ByteBuffer &buff)
@@ -154,8 +156,6 @@ void WardenWin::HandleHashResult(ByteBuffer &buff)
     _inputCrypto.Init(_inputKey);
     _outputCrypto.Init(_outputKey);
 
-    _initialized = true;
-
     _previousTimestamp = WorldTimer::getMSTime();
 }
 
@@ -163,18 +163,20 @@ void WardenWin::RequestData()
 {
     sLog.outWarden("Request data");
 
+    uint16 build = _session->GetClientBuild();
+    uint16 id = 0;
+    uint8 type = 0;
+    WardenCheck* wd = NULL;
+
     // If all checks were done, fill the todo list again
     if (_memChecksTodo.empty())
-        _memChecksTodo.assign(sWardenCheckMgr->MemChecksIdPool.begin(), sWardenCheckMgr->MemChecksIdPool.end());
+        sWardenCheckMgr->GetWardenCheckIds(true, build, _memChecksTodo);
 
     if (_otherChecksTodo.empty())
-        _otherChecksTodo.assign(sWardenCheckMgr->OtherChecksIdPool.begin(), sWardenCheckMgr->OtherChecksIdPool.end());
+        sWardenCheckMgr->GetWardenCheckIds(false, build, _otherChecksTodo);
 
     _serverTicks = WorldTimer::getMSTime();
 
-    uint16 id;
-    uint8 type;
-    WardenCheck* wd;
     _currentChecks.clear();
 
     // Build check request
@@ -195,8 +197,6 @@ void WardenWin::RequestData()
     ByteBuffer buff;
     buff << uint8(WARDEN_SMSG_CHEAT_CHECKS_REQUEST);
 
-    ACE_READ_GUARD(ACE_RW_Mutex, g, sWardenCheckMgr->_checkStoreLock);
-
     for (uint16 i = 0; i < sWorld.getConfig(CONFIG_UINT32_WARDEN_NUM_OTHER_CHECKS); ++i)
     {
         // If todo list is done break loop (will be filled on next Update() run)
@@ -210,18 +210,22 @@ void WardenWin::RequestData()
         // Add the id to the list sent in this cycle
         _currentChecks.push_back(id);
 
-        wd = sWardenCheckMgr->GetWardenDataById(id);
-
-        switch (wd->Type)
+        // if we are here, the function is guaranteed to not return NULL
+        // but ... who knows
+        wd = sWardenCheckMgr->GetWardenDataById(build, id);
+        if (wd)
         {
-            case MPQ_CHECK:
-            case LUA_STR_CHECK:
-            case DRIVER_CHECK:
-                buff << uint8(wd->Str.size());
-                buff.append(wd->Str.c_str(), wd->Str.size());
-                break;
-            default:
-                break;
+            switch (wd->Type)
+            {
+                case MPQ_CHECK:
+                case LUA_STR_CHECK:
+                case DRIVER_CHECK:
+                    buff << uint8(wd->Str.size());
+                    buff.append(wd->Str.c_str(), wd->Str.size());
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -235,7 +239,7 @@ void WardenWin::RequestData()
 
     for (std::list<uint16>::iterator itr = _currentChecks.begin(); itr != _currentChecks.end(); ++itr)
     {
-        wd = sWardenCheckMgr->GetWardenDataById(*itr);
+        wd = sWardenCheckMgr->GetWardenDataById(build, *itr);
 
         type = wd->Type;
         buff << uint8(type ^ xorByte);
@@ -301,22 +305,19 @@ void WardenWin::RequestData()
     pkt.append(buff);
     _session->SendPacket(&pkt);
 
-    _dataSent = true;
-
     std::stringstream stream;
     stream << "Sent check id's: ";
     for (std::list<uint16>::iterator itr = _currentChecks.begin(); itr != _currentChecks.end(); ++itr)
         stream << *itr << " ";
 
     sLog.outWarden("%s", stream.str().c_str());
+
+    Warden::RequestData();
 }
 
 void WardenWin::HandleData(ByteBuffer &buff)
 {
     sLog.outWarden("Handle data");
-
-    _dataSent = false;
-    _clientResponseTimer = 0;
 
     uint16 Length;
     buff >> Length;
@@ -347,8 +348,9 @@ void WardenWin::HandleData(ByteBuffer &buff)
         uint32 ticksNow = WorldTimer::getMSTime();
         uint32 ourTicks = newClientTicks + (ticksNow - _serverTicks);
 
-        sLog.outWarden("ServerTicks %u, RequestTicks %u, CLientTicks %u", ticksNow, _serverTicks, newClientTicks);  // Now, At request, At response
+        sLog.outWarden("ServerTicks %u, RequestTicks %u, ClientTicks %u", ticksNow, _serverTicks, newClientTicks);  // Now, At request, At response
         sLog.outWarden("Waittime %u", ourTicks - newClientTicks);
+
     }
 
     WardenCheckResult* rs;
@@ -356,12 +358,10 @@ void WardenWin::HandleData(ByteBuffer &buff)
     uint8 type;
     uint16 checkFailed = 0;
 
-    ACE_READ_GUARD(ACE_RW_Mutex, g, sWardenCheckMgr->_checkStoreLock);
-
     for (std::list<uint16>::iterator itr = _currentChecks.begin(); itr != _currentChecks.end(); ++itr)
     {
-        rd = sWardenCheckMgr->GetWardenDataById(*itr);
-        rs = sWardenCheckMgr->GetWardenResultById(*itr);
+        rd = sWardenCheckMgr->GetWardenDataById(_session->GetClientBuild(), *itr);
+        rs = sWardenCheckMgr->GetWardenResultById(_session->GetClientBuild(), *itr);
 
         type = rd->Type;
         switch (type)
@@ -475,7 +475,7 @@ void WardenWin::HandleData(ByteBuffer &buff)
 
     if (checkFailed > 0)
     {
-        WardenCheck* check = sWardenCheckMgr->GetWardenDataById(checkFailed);   //note it IS NOT NULL here
+        WardenCheck* check = sWardenCheckMgr->GetWardenDataById(_session->GetClientBuild(), checkFailed);   //note it IS NOT NULL here
         sLog.outWarden("%s failed Warden check %u. Action: %s", _session->GetPlayerName(), checkFailed, Penalty(check).c_str());
         LogPositiveToDB(check);
     }

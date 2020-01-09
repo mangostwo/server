@@ -37,11 +37,12 @@
 #include "AccountMgr.h"
 
 Warden::Warden() : _session(NULL), _inputCrypto(16), _outputCrypto(16), _checkTimer(10000/*10 sec*/), _clientResponseTimer(0),
-                   _dataSent(false), _previousTimestamp(0), _module(NULL), _initialized(false)
+                   _module(NULL), _state(WardenState::STATE_INITIAL)
 {
     memset(_inputKey, 0, sizeof(_inputKey));
     memset(_outputKey, 0, sizeof(_outputKey));
     memset(_seed, 0, sizeof(_seed));
+    _previousTimestamp = WorldTimer::getMSTime();
 }
 
 Warden::~Warden()
@@ -49,7 +50,11 @@ Warden::~Warden()
     delete[] _module->CompressedData;
     delete _module;
     _module = NULL;
-    _initialized = false;
+}
+
+void Warden::InitializeModule()
+{
+    SetNewState(WardenState::STATE_INITIALIZE_MODULE);
 }
 
 void Warden::RequestHash()
@@ -67,6 +72,8 @@ void Warden::RequestHash()
     WorldPacket pkt(SMSG_WARDEN_DATA, sizeof(WardenHashRequest));
     pkt.append((uint8*)&Request, sizeof(WardenHashRequest));
     _session->SendPacket(&pkt);
+
+    SetNewState(WardenState::STATE_REQUESTED_HASH);
 }
 
 void Warden::SendModuleToClient()
@@ -93,6 +100,8 @@ void Warden::SendModuleToClient()
         pkt1.append((uint8*)&packet, burstSize + 3);
         _session->SendPacket(&pkt1);
     }
+
+    SetNewState(WardenState::STATE_SENT_MODULE);
 }
 
 void Warden::RequestModule()
@@ -113,17 +122,24 @@ void Warden::RequestModule()
     WorldPacket pkt(SMSG_WARDEN_DATA, sizeof(WardenModuleUse));
     pkt.append((uint8*)&request, sizeof(WardenModuleUse));
     _session->SendPacket(&pkt);
+
+    SetNewState(WardenState::STATE_REQUESTED_MODULE);
 }
 
 void Warden::Update()
 {
-    if (_initialized)
-    {
-        uint32 currentTimestamp = WorldTimer::getMSTime();
-        uint32 diff = currentTimestamp - _previousTimestamp;
-        _previousTimestamp = currentTimestamp;
+    uint32 currentTimestamp = WorldTimer::getMSTime();
+    uint32 diff = currentTimestamp - _previousTimestamp;
+    _previousTimestamp = currentTimestamp;
 
-        if (_dataSent)
+    switch (_state)
+    {
+        case WardenState::STATE_INITIAL:
+            break;
+        case WardenState::STATE_REQUESTED_MODULE:
+        case WardenState::STATE_SENT_MODULE:
+        case WardenState::STATE_REQUESTED_HASH:
+        case WardenState::STATE_REQUESTED_DATA:
         {
             uint32 maxClientResponseDelay = sWorld.getConfig(CONFIG_UINT32_WARDEN_CLIENT_RESPONSE_DELAY);
 
@@ -132,23 +148,34 @@ void Warden::Update()
                 // Kick player if client response delays more than set in config
                 if (_clientResponseTimer > maxClientResponseDelay * IN_MILLISECONDS)
                 {
-                    sLog.outWarden("%s (latency: %u, IP: %s) exceeded Warden module response delay for more than %s - disconnecting client",
-                        _session->GetPlayerName(), _session->GetLatency(), _session->GetRemoteAddress().c_str(), secsToTimeString(maxClientResponseDelay, true).c_str());
+                    sLog.outWarden("%s (latency: %u, IP: %s) exceeded Warden module response delay on state %s for more than %s - disconnecting client",
+                                   _session->GetPlayerName(), _session->GetLatency(), _session->GetRemoteAddress().c_str(), WardenState::to_string(_state), secsToTimeString(maxClientResponseDelay, true).c_str());
                     _session->KickPlayer();
                 }
                 else
+                {
                     _clientResponseTimer += diff;
+                }
+
             }
         }
-        else
+        break;
+        case WardenState::STATE_INITIALIZE_MODULE:
+        case WardenState::STATE_RESTING:
         {
             if (diff >= _checkTimer)
             {
                 RequestData();
             }
             else
+            {
                 _checkTimer -= diff;
+            }
         }
+        break;
+        default:
+            sLog.outWarden("Unimplemented warden state!");
+            break;
     }
 }
 
@@ -160,6 +187,28 @@ void Warden::DecryptData(uint8* buffer, uint32 length)
 void Warden::EncryptData(uint8* buffer, uint32 length)
 {
     _outputCrypto.UpdateData(length, buffer);
+}
+
+void Warden::SetNewState(WardenState::Value state)
+{
+    //if we pass all initial checks, allow change
+    if (state < WardenState::STATE_REQUESTED_DATA)
+    {
+        if (state < _state)
+        {
+            sLog.outWarden("Warden Error: jump from %s to %s which is lower by initialization routine", WardenState::to_string(_state), WardenState::to_string(state));
+            return;
+        }
+    }
+
+    _state = state;
+
+    //Reset timers
+    // Set hold off timer, minimum timer should at least be 1 second
+    uint32 holdOff = sWorld.getConfig(CONFIG_UINT32_WARDEN_CLIENT_CHECK_HOLDOFF);
+    _checkTimer = (holdOff < 1 ? 1 : holdOff) * IN_MILLISECONDS;
+
+    _clientResponseTimer = 0;
 }
 
 bool Warden::IsValidCheckSum(uint32 checksum, const uint8* data, const uint16 length)
@@ -231,7 +280,7 @@ std::string Warden::Penalty(WardenCheck* check /*= NULL*/)
             banReason << "Warden Anticheat Violation";
             // Check can be NULL, for example if the client sent a wrong signature in the warden packet (CHECKSUM FAIL)
             if (check)
-                banReason << ": " << check->Comment << " (CheckId: " << check->CheckId << ")";
+                banReason << ": " << (check->Comment.empty() ? std::string("Undocumented Check") : check->Comment) << " (CheckId: " << check->CheckId << ")";
 
             sWorld.BanAccount(BAN_ACCOUNT, accountName, sWorld.getConfig(CONFIG_UINT32_WARDEN_CLIENT_BAN_DURATION), banReason.str(), "Warden");
 
@@ -281,11 +330,14 @@ void WorldSession::HandleWardenDataOpcode(WorldPacket& recvData)
     }
 }
 
+void Warden::RequestData()
+{
+    SetNewState(WardenState::STATE_REQUESTED_DATA);
+}
+
 void Warden::HandleData(ByteBuffer& /*buff*/)
 {
-    // Set hold off timer, minimum timer should at least be 1 second
-    uint32 holdOff = sWorld.getConfig(CONFIG_UINT32_WARDEN_CLIENT_CHECK_HOLDOFF);
-    _checkTimer = (holdOff < 1 ? 1 : holdOff) * IN_MILLISECONDS;
+    SetNewState(WardenState::STATE_RESTING);
 }
 
 void Warden::LogPositiveToDB(WardenCheck* check)
