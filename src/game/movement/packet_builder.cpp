@@ -136,7 +136,9 @@ namespace Movement
         if (splineflags & MoveSplineFlag::Mask_CatmullRom)
         {
             if (splineflags.cyclic)
-                { WriteCatmullRomCyclicPath(spline, data); }
+            {
+                WriteCatmullRomCyclicPath(spline, data);
+            }
             else
                 { WriteCatmullRomPath(spline, data); }
         }

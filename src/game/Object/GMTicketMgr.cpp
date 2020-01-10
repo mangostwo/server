@@ -63,7 +63,9 @@ void GMTicketMgr::LoadGMTickets()
         
         uint32 guidlow = fields[0].GetUInt32();
         if (!guidlow)
-            { continue; }
+        {
+            continue;
+        }
 
         ObjectGuid guid = ObjectGuid(HIGHGUID_PLAYER, guidlow);
         GMTicket& ticket = m_GMTicketMap[guid];
@@ -89,7 +91,9 @@ void GMTicketMgr::DeleteAll()
     for (GMTicketMap::const_iterator itr = m_GMTicketMap.begin(); itr != m_GMTicketMap.end(); ++itr)
     {
         if (Player* owner = sObjectMgr.GetPlayer(itr->first))
-            { owner->GetSession()->SendGMTicketGetTicket(0x0A); }
+        {
+            owner->GetSession()->SendGMTicketGetTicket(0x0A);
+        }
     }
     CharacterDatabase.Execute("DELETE FROM character_ticket");
     m_GMTicketListByCreatingOrder.clear();

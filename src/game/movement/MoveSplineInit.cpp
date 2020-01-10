@@ -42,7 +42,9 @@ namespace Movement
         else if (moveFlags & MOVEFLAG_SWIMMING)
         {
             if (moveFlags & MOVEFLAG_BACKWARD /*&& speed_obj.swim >= speed_obj.swim_back*/)
-                { return MOVE_SWIM_BACK; }
+            {
+                return MOVE_SWIM_BACK;
+            }
             else
                 { return MOVE_SWIM; }
         }
@@ -71,7 +73,9 @@ namespace Movement
         // there is a big chance that current position is unknown if current state is not finalized, need compute it
         // this also allows calculate spline position and update map position in much greater intervals
         if (!move_spline.Finalized() && !transportInfo)
-            { real_position = move_spline.ComputePosition(); }
+        {
+            real_position = move_spline.ComputePosition();
+        }
 
         if (args.path.empty())
         {
@@ -92,10 +96,14 @@ namespace Movement
         moveFlags |= (MOVEFLAG_SPLINE_ENABLED | MOVEFLAG_FORWARD);
 
         if (args.velocity == 0.f)
-            { args.velocity = unit.GetSpeed(SelectSpeedType(moveFlags)); }
+        {
+            args.velocity = unit.GetSpeed(SelectSpeedType(moveFlags));
+        }
 
         if (!args.Validate(&unit))
-            { return 0; }
+        {
+            return 0;
+        }
 
         unit.m_movementInfo.SetMovementFlags((MovementFlags)moveFlags);
         move_spline.Initialize(args);

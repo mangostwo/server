@@ -38,7 +38,9 @@
 bool Player::UpdateStats(Stats stat)
 {
     if (stat > STAT_SPIRIT)
-        { return false; }
+    {
+        return false;
+    }
 
     // value = ((base_value * base_pct) + total_value) * total_pct
     float value  = GetTotalStatValue(stat);
@@ -396,7 +398,9 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
     {
         UpdateDamagePhysical(BASE_ATTACK);
         if (CanDualWield() && haveOffhandWeapon())          // allow update offhand damage only if player knows DualWield Spec and has equipped offhand weapon
-            { UpdateDamagePhysical(OFF_ATTACK); }
+        {
+            UpdateDamagePhysical(OFF_ATTACK);
+        }
     }
 }
 
@@ -441,7 +445,9 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, fl
     {
         uint32 lvl = getLevel();
         if (lvl > 60)
-            { lvl = 60; }
+        {
+            lvl = 60;
+        }
 
         weapon_mindamage = lvl * 0.85f * att_speed;
         weapon_maxdamage = lvl * 1.25f * att_speed;
@@ -782,7 +788,9 @@ void Player::UpdateManaRegen()
     // Set regen rate in cast state apply only on spirit based regen
     int32 modManaRegenInterrupt = GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN_INTERRUPT);
     if (modManaRegenInterrupt > 100)
-        { modManaRegenInterrupt = 100; }
+    {
+        modManaRegenInterrupt = 100;
+    }
 
     SetStatFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER, power_regen_mp5 + power_regen * modManaRegenInterrupt / 100.0f);
 
@@ -893,7 +901,9 @@ void Creature::UpdateAttackPowerAndDamage(bool ranged)
     SetFloatValue(index_mult, attPowerMultiplier);          // UNIT_FIELD_(RANGED)_ATTACK_POWER_MULTIPLIER field
 
     if (ranged)
-        { return; }
+    {
+        return;
+    }
 
     // automatically update weapon damage after attack power modification
     UpdateDamagePhysical(BASE_ATTACK);
@@ -903,7 +913,9 @@ void Creature::UpdateAttackPowerAndDamage(bool ranged)
 void Creature::UpdateDamagePhysical(WeaponAttackType attType)
 {
     if (attType > OFF_ATTACK)
-        { return; }
+    {
+        return;
+    }
 
     UnitMods unitMod = (attType == BASE_ATTACK ? UNIT_MOD_DAMAGE_MAINHAND : UNIT_MOD_DAMAGE_OFFHAND);
 
@@ -934,7 +946,9 @@ void Creature::UpdateDamagePhysical(WeaponAttackType attType)
 bool Pet::UpdateStats(Stats stat)
 {
     if (stat > STAT_SPIRIT)
-        { return false; }
+    {
+        return false;
+    }
 
     // value = ((base_value * base_pct) + total_value) * total_pct
     float value  = GetTotalStatValue(stat);
@@ -1049,14 +1063,18 @@ void Pet::UpdateMaxPower(Powers power)
 void Pet::UpdateAttackPowerAndDamage(bool ranged)
 {
     if (ranged)
-        { return; }
+    {
+        return;
+    }
 
     float val = 0.0f;
     float bonusAP = 0.0f;
     UnitMods unitMod = UNIT_MOD_ATTACK_POWER;
 
     if (GetEntry() == 416)                                  // imp's attack power
-        { val = GetStat(STAT_STRENGTH) - 10.0f; }
+    {
+        val = GetStat(STAT_STRENGTH) - 10.0f;
+    }
     else
         { val = 2 * GetStat(STAT_STRENGTH) - 20.0f; }
 
@@ -1109,7 +1127,9 @@ void Pet::UpdateAttackPowerAndDamage(bool ranged)
 void Pet::UpdateDamagePhysical(WeaponAttackType attType)
 {
     if (attType > BASE_ATTACK)
-        { return; }
+    {
+        return;
+    }
 
     UnitMods unitMod = UNIT_MOD_DAMAGE_MAINHAND;
 

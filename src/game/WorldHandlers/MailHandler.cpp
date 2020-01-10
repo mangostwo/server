@@ -152,16 +152,22 @@ void WorldSession::HandleSendMail(WorldPacket& recv_data)
     // packet read complete, now do check
 
     if (!CheckMailBox(mailboxGuid))
-        { return; }
+    {
+        return;
+    }
 
     if (receiver.empty())
-        { return; }
+    {
+        return;
+    }
 
     Player* pl = _player;
 
     ObjectGuid rc;
     if (normalizePlayerName(receiver))
-        { rc = sObjectMgr.GetPlayerGuidByName(receiver); }
+    {
+        rc = sObjectMgr.GetPlayerGuidByName(receiver);
+    }
 
     if (!rc)
     {
@@ -352,14 +358,18 @@ void WorldSession::HandleMailMarkAsRead(WorldPacket& recv_data)
     recv_data >> mailId;
 
     if (!CheckMailBox(mailboxGuid))
-        { return; }
+    {
+        return;
+    }
 
     Player* pl = _player;
 
     if (Mail* m = pl->GetMail(mailId))
     {
         if (pl->unReadMails)
-            { --pl->unReadMails; }
+        {
+            --pl->unReadMails;
+        }
         m->checked = m->checked | MAIL_CHECK_MASK_READ;
         pl->m_mailsUpdated = true;
         m->state = MAIL_STATE_CHANGED;
@@ -383,7 +393,9 @@ void WorldSession::HandleMailDelete(WorldPacket& recv_data)
     recv_data.read_skip<uint32>();                          // mailTemplateId
 
     if (!CheckMailBox(mailboxGuid))
-        { return; }
+    {
+        return;
+    }
 
     Player* pl = _player;
     pl->m_mailsUpdated = true;
@@ -419,7 +431,9 @@ void WorldSession::HandleMailReturnToSender(WorldPacket& recv_data)
     recv_data.read_skip<uint64>();                          // original sender GUID for return to, not used
 
     if (!CheckMailBox(mailboxGuid))
-        { return; }
+    {
+        return;
+    }
 
     Player* pl = _player;
     Mail* m = pl->GetMail(mailId);
@@ -452,7 +466,9 @@ void WorldSession::HandleMailReturnToSender(WorldPacket& recv_data)
             for (MailItemInfoVec::iterator itr2 = m->items.begin(); itr2 != m->items.end(); ++itr2)
             {
                 if (Item* item = pl->GetMItem(itr2->item_guid))
-                    { draft.AddItem(item); }
+                {
+                    draft.AddItem(item);
+                }
 
                 pl->RemoveMItem(itr2->item_guid);
             }
@@ -478,7 +494,9 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recv_data)
     recv_data >> itemId;                                    // item guid low
 
     if (!CheckMailBox(mailboxGuid))
-        { return; }
+    {
+        return;
+    }
 
     Player* pl = _player;
 
@@ -526,7 +544,9 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recv_data)
                     sender_accId = sObjectMgr.GetPlayerAccountIdByGUID(sender_guid);
 
                     if (!sObjectMgr.GetPlayerNameByGUID(sender_guid, sender_name))
-                        { sender_name = sObjectMgr.GetMangosStringForDBCLocale(LANG_UNKNOWN); }
+                    {
+                        sender_name = sObjectMgr.GetMangosStringForDBCLocale(LANG_UNKNOWN);
+                    }
                 }
                 sLog.outCommand(GetAccountId(), "GM %s (Account: %u) receive mail item: %s (Entry: %u Count: %u) and send COD money: %u to player: %s (Account: %u)",
                                 GetPlayerName(), GetAccountId(), it->GetProto()->Name1, it->GetEntry(), it->GetCount(), m->COD, sender_name.c_str(), sender_accId);
@@ -573,7 +593,9 @@ void WorldSession::HandleMailTakeMoney(WorldPacket& recv_data)
     recv_data >> mailId;
 
     if (!CheckMailBox(mailboxGuid))
-        { return; }
+    {
+        return;
+    }
 
     Player* pl = _player;
 
@@ -608,7 +630,9 @@ void WorldSession::HandleGetMailList(WorldPacket& recv_data)
     recv_data >> mailboxGuid;
 
     if (!CheckMailBox(mailboxGuid))
-        { return; }
+    {
+        return;
+    }
 
     // client can't work with packets > max int16 value
     const uint32 maxPacketSize = 32767;
@@ -632,7 +656,9 @@ void WorldSession::HandleGetMailList(WorldPacket& recv_data)
 
         // skip deleted or not delivered (deliver delay not expired) mails
         if ((*itr)->state == MAIL_STATE_DELETED || cur_time < (*itr)->deliver_time)
-            { continue; }
+        {
+            continue;
+        }
 
         uint8 item_count = (*itr)->items.size();            // max count is MAX_MAIL_ITEMS (12)
 
@@ -737,7 +763,9 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket& recv_data)
     recv_data >> mailId;
 
     if (!CheckMailBox(mailboxGuid))
-        { return; }
+    {
+        return;
+    }
 
     Player* pl = _player;
 
@@ -812,11 +840,15 @@ void WorldSession::HandleQueryNextMailTime(WorldPacket& /**recv_data*/)
             Mail* m = (*itr);
             // must be not checked yet
             if (m->checked & MAIL_CHECK_MASK_READ)
-                { continue; }
+            {
+                continue;
+            }
 
             // and already delivered
             if (now < m->deliver_time)
-                { continue; }
+            {
+                continue;
+            }
 
             data << ObjectGuid(HIGHGUID_PLAYER, m->sender); // sender guid
 
@@ -837,7 +869,9 @@ void WorldSession::HandleQueryNextMailTime(WorldPacket& /**recv_data*/)
 
             ++count;
             if (count == 2)                                 // do not display more than 2 mails
-                { break; }
+            {
+                break;
+            }
         }
         data.put<uint32>(4, count);
     }

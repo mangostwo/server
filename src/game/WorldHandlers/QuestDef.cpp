@@ -154,25 +154,33 @@ Quest::Quest(Field* questRecord)
     for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
     {
         if (ReqItemId[i])
-            { ++m_reqitemscount; }
+        {
+            ++m_reqitemscount;
+        }
     }
 
     for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
     {
         if (ReqCreatureOrGOId[i])
-            { ++m_reqCreatureOrGOcount; }
+        {
+            ++m_reqCreatureOrGOcount;
+        }
     }
 
     for (int i = 0; i < QUEST_REWARDS_COUNT; ++i)
     {
         if (RewItemId[i])
-            { ++m_rewitemscount; }
+        {
+            ++m_rewitemscount;
+        }
     }
 
     for (int i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
     {
         if (RewChoiceItemId[i])
-            { ++m_rewchoiceitemscount; }
+        {
+            ++m_rewchoiceitemscount;
+        }
     }
 }
 
@@ -266,7 +274,9 @@ uint32 Quest::XPValue(Player* pPlayer) const
 int32  Quest::GetRewOrReqMoney() const
 {
     if (RewOrReqMoney <= 0)
-        { return RewOrReqMoney; }
+    {
+        return RewOrReqMoney;
+    }
 
     return int32(RewOrReqMoney * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY));
 }
@@ -274,7 +284,9 @@ int32  Quest::GetRewOrReqMoney() const
 bool Quest::IsAllowedInRaid() const
 {
     if (Type == QUEST_TYPE_RAID || Type == QUEST_TYPE_RAID_10 || Type == QUEST_TYPE_RAID_25)
-        { return true; }
+    {
+        return true;
+    }
 
     return sWorld.getConfig(CONFIG_BOOL_QUEST_IGNORE_RAID);
 }

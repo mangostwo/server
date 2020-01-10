@@ -65,7 +65,9 @@ bool Weather::Update(uint32 diff, Map const* _map)
         {
             ///- Weather will be removed if not updated (no players in zone anymore)
             if (!SendWeatherForPlayersInZone(_map))
-                { return false; }
+            {
+                return false;
+            }
         }
     }
     return true;
@@ -97,7 +99,9 @@ bool Weather::ReGenerate()
     uint32 u = urand(0, 99);
 
     if (u < 30)
-        { return false; }
+    {
+        return false;
+    }
 
     // 78 days between January 1st and March 20nd; 365/4=91 days by season
     // season source http://aa.usno.navy.mil/data/docs/EarthSeasons.html
@@ -163,7 +167,9 @@ bool Weather::ReGenerate()
 
     uint32 rnd = urand(0, 99);
     if (rnd <= chance1)
-        { m_type = WEATHER_TYPE_RAIN; }
+    {
+        m_type = WEATHER_TYPE_RAIN;
+    }
     else if (rnd <= chance2)
         { m_type = WEATHER_TYPE_SNOW; }
     else if (rnd <= chance3)
@@ -190,7 +196,9 @@ bool Weather::ReGenerate()
         // Severe change, but how severe?
         rnd = urand(0, 99);
         if (rnd < 50)
-            { m_grade = rand_norm_f() * 0.3333f + 0.3334f; }
+        {
+            m_grade = rand_norm_f() * 0.3333f + 0.3334f;
+        }
         else
             { m_grade = rand_norm_f() * 0.3333f + 0.6667f; }
     }

@@ -66,7 +66,9 @@ int WorldSocketMgr::svc()
     {
         ACE_Time_Value interval(0, 10000);
         if (reactor_->run_reactor_event_loop(interval) == -1)
-          { break; }
+        {
+            break;
+        }
 
         for (i = sockets_->begin(); i != sockets_->end();)
         {

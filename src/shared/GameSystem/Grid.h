@@ -86,7 +86,9 @@ class Grid
         bool AddGridObject(SPECIFIC_OBJECT* obj)
         {
             if (obj->IsActiveObject())
-                { m_activeGridObjects.insert(obj); }
+            {
+                m_activeGridObjects.insert(obj);
+            }
 
             return i_gridContainer.template insert<SPECIFIC_OBJECT>(obj);
         }
@@ -101,7 +103,9 @@ class Grid
         bool RemoveGridObject(SPECIFIC_OBJECT* obj)
         {
             if (obj->IsActiveObject())
-                { m_activeGridObjects.erase(obj); }
+            {
+                m_activeGridObjects.erase(obj);
+            }
 
             return i_gridContainer.template remove<SPECIFIC_OBJECT>(obj);
         }

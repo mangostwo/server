@@ -137,7 +137,9 @@ bool UpdateData::BuildPacket(WorldPacket* packet)
         packet->put<uint32>(0, pSize);
         Compress(const_cast<uint8*>(packet->contents()) + sizeof(uint32), &destsize, (void*)buf.contents(), pSize);
         if (destsize == 0)
-            { return false; }
+        {
+            return false;
+        }
 
         packet->resize(destsize + sizeof(uint32));
         packet->SetOpcode(SMSG_COMPRESSED_UPDATE_OBJECT);

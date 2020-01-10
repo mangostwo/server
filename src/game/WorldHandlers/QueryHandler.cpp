@@ -43,7 +43,9 @@
 void WorldSession::SendNameQueryOpcode(Player* p)
 {
     if (!p)
-        { return; }
+    {
+        return;
+    }
 
     // guess size
     WorldPacket data(SMSG_NAME_QUERY_RESPONSE, (8 + 1 + 1 + 1 + 1 + 1 + 10));
@@ -87,7 +89,9 @@ void WorldSession::SendNameQueryOpcodeFromDB(ObjectGuid guid)
 void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult* result, uint32 accountId)
 {
     if (!result)
-        { return; }
+    {
+        return;
+    }
 
     WorldSession* session = sWorld.FindSession(accountId);
     if (!session)
@@ -101,7 +105,9 @@ void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult* result, uint32
     std::string name = fields[1].GetCppString();
     uint8 pRace = 0, pGender = 0, pClass = 0;
     if (name.empty())
-        { name         = session->GetMangosString(LANG_NON_EXIST_CHARACTER); }
+    {
+        name         = session->GetMangosString(LANG_NON_EXIST_CHARACTER);
+    }
     else
     {
         pRace        = fields[2].GetUInt8();
@@ -142,7 +148,9 @@ void WorldSession::HandleNameQueryOpcode(WorldPacket& recv_data)
     Player* pChar = sObjectMgr.GetPlayer(guid);
 
     if (pChar)
-        { SendNameQueryOpcode(pChar); }
+    {
+        SendNameQueryOpcode(pChar);
+    }
     else
         { SendNameQueryOpcodeFromDB(guid); }
 }
@@ -368,12 +376,16 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recv_data)
             data << pGossip->Options[i].Probability;
 
             if (Text_0[i].empty())
-                { data << Text_1[i]; }
+            {
+                data << Text_1[i];
+            }
             else
                 { data << Text_0[i]; }
 
             if (Text_1[i].empty())
-                { data << Text_0[i]; }
+            {
+                data << Text_0[i];
+            }
             else
                 { data << Text_1[i]; }
 
@@ -425,7 +437,9 @@ void WorldSession::HandlePageTextQueryOpcode(WorldPacket& recv_data)
                 if (pl)
                 {
                     if (pl->Text.size() > size_t(loc_idx) && !pl->Text[loc_idx].empty())
-                        { Text = pl->Text[loc_idx]; }
+                    {
+                        Text = pl->Text[loc_idx];
+                    }
                 }
             }
 

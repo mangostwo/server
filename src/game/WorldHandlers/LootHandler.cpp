@@ -135,7 +135,9 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
     }
 
     if (pItem)
-        { pItem->SetLootState(ITEM_LOOT_CHANGED); }
+    {
+        pItem->SetLootState(ITEM_LOOT_CHANGED);
+    }
 
     ItemPosCountVec dest;
     InventoryResult msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, item->itemid, item->count);
@@ -148,7 +150,9 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
             qitem->is_looted = true;
             // freeforall is 1 if everyone's supposed to get the quest item.
             if (item->freeforall || loot->GetPlayerQuestItems().size() == 1)
-                { player->SendNotifyLootItemRemoved(lootSlot); }
+            {
+                player->SendNotifyLootItemRemoved(lootSlot);
+            }
             else
                 { loot->NotifyQuestItemRemoved(qitem->index); }
         }
@@ -164,14 +168,18 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
             {
                 // not freeforall, notify everyone
                 if (conditem)
-                    { conditem->is_looted = true; }
+                {
+                    conditem->is_looted = true;
+                }
                 loot->NotifyItemRemoved(lootSlot);
             }
         }
 
         // if only one person is supposed to loot the item, then set it to looted
         if (!item->freeforall)
-            { item->is_looted = true; }
+        {
+            item->is_looted = true;
+        }
 
         --loot->unlootedCount;
 
@@ -191,7 +199,9 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
     Player* player = GetPlayer();
     ObjectGuid guid = player->GetLootGuid();
     if (!guid)
-        { return; }
+    {
+        return;
+    }
 
     Loot* pLoot = NULL;
     Item* pItem = NULL;
@@ -204,7 +214,9 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
 
             // not check distance for GO in case owned GO (fishing bobber case, for example)
             if (pGameObject && (pGameObject->GetOwnerGuid() == _player->GetObjectGuid() || pGameObject->IsWithinDistInMap(_player, INTERACTION_DISTANCE)))
-                { pLoot = &pGameObject->loot; }
+            {
+                pLoot = &pGameObject->loot;
+            }
 
             break;
         }
@@ -213,7 +225,9 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
             Corpse* bones = _player->GetMap()->GetCorpse(guid);
 
             if (bones && bones->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
-                { pLoot = &bones->loot; }
+            {
+                pLoot = &bones->loot;
+            }
 
             break;
         }
@@ -221,7 +235,9 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
         {
             pItem = GetPlayer()->GetItemByGuid(guid);
             if (!pItem || !pItem->HasGeneratedLoot())
-                { return; }
+            {
+                return;
+            }
 
             pLoot = &pItem->loot;
             break;
@@ -234,7 +250,9 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
             bool ok_loot = pCreature && pCreature->IsAlive() == (player->getClass() == CLASS_ROGUE && pCreature->lootForPickPocketed);
 
             if (ok_loot && pCreature->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
-                { pLoot = &pCreature->loot ; }
+            {
+                pLoot = &pCreature->loot ;
+            }
 
             break;
         }
@@ -255,9 +273,13 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
             {
                 Player* playerGroup = itr->getSource();
                 if (!playerGroup)
-                    { continue; }
+                {
+                    continue;
+                }
                 if (player->IsWithinDistInMap(playerGroup, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE), false))
-                    { playersNear.push_back(playerGroup); }
+                {
+                    playersNear.push_back(playerGroup);
+                }
             }
 
             uint32 money_per_player = uint32((pLoot->gold) / (playersNear.size()));
@@ -293,7 +315,9 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
         pLoot->gold = 0;
 
         if (pItem)
-            { pItem->SetLootState(ITEM_LOOT_CHANGED); }
+        {
+            pItem->SetLootState(ITEM_LOOT_CHANGED);
+        }
     }
 }
 
@@ -322,7 +346,9 @@ void WorldSession::HandleLootReleaseOpcode(WorldPacket& recv_data)
     recv_data.read_skip<uint64>();                          // guid;
 
     if (ObjectGuid lootGuid = GetPlayer()->GetLootGuid())
-        { DoLootRelease(lootGuid); }
+    {
+        DoLootRelease(lootGuid);
+    }
 }
 
 void WorldSession::DoLootRelease(ObjectGuid lguid)
@@ -336,7 +362,9 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
     player->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_LOOTING);
 
     if (!player->IsInWorld())
-        { return; }
+    {
+        return;
+    }
 
     switch (lguid.GetHigh())
     {
@@ -346,7 +374,9 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
 
             // not check distance for GO in case owned GO (fishing bobber case, for example) or Fishing hole GO
             if (!go || ((go->GetOwnerGuid() != _player->GetObjectGuid() && go->GetGoType() != GAMEOBJECT_TYPE_FISHINGHOLE) && !go->IsWithinDistInMap(_player, INTERACTION_DISTANCE)))
-                { return; }
+            {
+                return;
+            }
 
             loot = &go->loot;
 
@@ -382,7 +412,9 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
                                 int32 ReqValue = 175;
                                 LockEntry const* lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->chest.lockId);
                                 if (lockInfo)
-                                    { ReqValue = lockInfo->Skill[0]; }
+                                {
+                                    ReqValue = lockInfo->Skill[0];
+                                }
                                 float skill = float(player->GetSkillValue(SKILL_MINING)) / (ReqValue + 25);
                                 double chance = pow(0.8 * chance_rate, 4 * (1 / double(max_amount)) * double(uses));
                                 if (roll_chance_f(float(100.0f * chance + skill)))
@@ -449,7 +481,9 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
         {
             Item* pItem = player->GetItemByGuid(lguid);
             if (!pItem)
-                { return; }
+            {
+                return;
+            }
 
             switch (pItem->loot.loot_type)
             {
@@ -502,7 +536,9 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
 
             bool ok_loot = pCreature && pCreature->IsAlive() == (player->getClass() == CLASS_ROGUE && pCreature->lootForPickPocketed);
             if (!ok_loot || !pCreature->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
-                { return; }
+            {
+                return;
+            }
 
             /* Copy creature loot to loot variable */
             loot = &pCreature->loot;
@@ -548,12 +584,16 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
 
     Player* target = sObjectAccessor.FindPlayer(target_playerguid);
     if (!target)
-        { return; }
+    {
+        return;
+    }
 
     DEBUG_LOG("WorldSession::HandleLootMasterGiveOpcode (CMSG_LOOT_MASTER_GIVE, 0x02A3) Target = %s [%s].", target_playerguid.GetString().c_str(), target->GetName());
 
     if (_player->GetLootGuid() != lootguid)
-        { return; }
+    {
+        return;
+    }
 
     Loot* pLoot = NULL;
 
@@ -561,7 +601,9 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
     {
         Creature* pCreature = GetPlayer()->GetMap()->GetCreature(lootguid);
         if (!pCreature)
-            { return; }
+        {
+            return;
+        }
 
         pLoot = &pCreature->loot;
     }
@@ -569,7 +611,9 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
     {
         GameObject* pGO = GetPlayer()->GetMap()->GetGameObject(lootguid);
         if (!pGO)
-            { return; }
+        {
+            return;
+        }
 
         pLoot = &pGO->loot;
     }

@@ -73,7 +73,9 @@ class UpdateMask
         void Clear()
         {
             if (mUpdateMask)
-                { memset(mUpdateMask, 0, mBlocks << 2); }
+            {
+                memset(mUpdateMask, 0, mBlocks << 2);
+            }
         }
 
         UpdateMask& operator = (const UpdateMask& mask)

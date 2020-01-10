@@ -59,7 +59,9 @@ namespace MMAP
                 { dtFreeNavMeshQuery(i->second); }
 
             if (navMesh)
-                { dtFreeNavMesh(navMesh); }
+            {
+                dtFreeNavMesh(navMesh);
+            }
         }
 
         dtNavMesh* navMesh;

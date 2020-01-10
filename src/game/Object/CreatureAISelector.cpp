@@ -41,7 +41,9 @@ namespace FactorySelector
         // Allow scripting AI for normal creatures and not controlled pets (guardians and mini-pets)
         if ((!creature->IsPet() || !((Pet*)creature)->isControlled()) && !creature->IsCharmed())
             if (CreatureAI* scriptedAI = sScriptMgr.GetCreatureAI(creature))
-                { return scriptedAI; }
+            {
+                return scriptedAI;
+            }
 
         CreatureAIRegistry& ai_registry(CreatureAIRepository::Instance());
 
@@ -60,10 +62,14 @@ namespace FactorySelector
 
         // select by script name
         if (!ai_factory && !ainame.empty())
-            { ai_factory = ai_registry.GetRegistryItem(ainame.c_str()); }
+        {
+            ai_factory = ai_registry.GetRegistryItem(ainame.c_str());
+        }
 
         if (!ai_factory && creature->IsGuard())
-            { ai_factory = ai_registry.GetRegistryItem("GuardAI"); }
+        {
+            ai_factory = ai_registry.GetRegistryItem("GuardAI");
+        }
 
         // select by permit check
         if (!ai_factory)

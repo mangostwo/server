@@ -45,7 +45,9 @@ namespace MaNGOS
         inline uint32 GetGrayLevel(uint32 pl_level)
         {
             if (pl_level <= 5)
-                { return 0; }
+            {
+                return 0;
+            }
             else if (pl_level <= 39)
                 { return pl_level - 5 - pl_level / 10; }
             else if (pl_level <= 59)
@@ -57,7 +59,9 @@ namespace MaNGOS
         inline XPColorChar GetColorCode(uint32 pl_level, uint32 mob_level)
         {
             if (mob_level >= pl_level + 5)
-                { return RED; }
+            {
+                return RED;
+            }
             else if (mob_level >= pl_level + 3)
                 { return ORANGE; }
             else if (mob_level >= pl_level - 2)
@@ -101,7 +105,9 @@ namespace MaNGOS
             {
                 uint32 nLevelDiff = mob_level - pl_level;
                 if (nLevelDiff > 4)
-                    { nLevelDiff = 4; }
+                {
+                    nLevelDiff = 4;
+                }
                 return ((pl_level * 5 + nBaseExp) * (20 + nLevelDiff) / 10 + 1) / 2;
             }
             else
@@ -125,10 +131,14 @@ namespace MaNGOS
 
             uint32 xp_gain = BaseGain(pl->getLevel(), u->getLevel(), GetContentLevelsForMapAndZone(pl->GetMapId(), pl->GetZoneId()));
             if (xp_gain == 0)
-                { return 0; }
+            {
+                return 0;
+            }
 
             if (u->GetTypeId() == TYPEID_UNIT && ((Creature*)u)->IsElite())
-                { xp_gain *= 2; }
+            {
+                xp_gain *= 2;
+            }
 
             return (uint32)(xp_gain * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_KILL));
         }

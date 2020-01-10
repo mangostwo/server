@@ -210,7 +210,9 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
 
     // ignore for remote control state
     if (!pUser->IsSelfMover())
-        { return; }
+    {
+        return;
+    }
 
     Item* pItem = pUser->GetItemByPos(bagIndex, slot);
     if (!pItem)
@@ -288,11 +290,15 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
 
     // ignore for remote control state
     if (!_player->IsSelfMover())
-        { return; }
+    {
+        return;
+    }
 
     GameObject* obj = GetPlayer()->GetMap()->GetGameObject(guid);
     if (!obj)
-        { return; }
+    {
+        return;
+    }
 
     // Additional check preventing exploits (ie loot despawned chests)
     if (!obj->isSpawned())
@@ -420,7 +426,9 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     {
         // if rank not found then function return NULL but in explicit cast case original spell can be casted and later failed with appropriate error message
         if (SpellEntry const* actualSpellInfo = sSpellMgr.SelectAuraRankForLevel(spellInfo, target->getLevel()))
-            { spellInfo = actualSpellInfo; }
+        {
+            spellInfo = actualSpellInfo;
+        }
     }
 
     Spell* spell = new Spell(mover, spellInfo, triggeredByAura ? true : false, mover->GetObjectGuid(), triggeredByAura ? triggeredByAura->GetSpellProto() : NULL);
@@ -438,7 +446,9 @@ void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
     // ignore for remote control state (for player case)
     Unit* mover = _player->GetMover();
     if (mover != _player && mover->GetTypeId() == TYPEID_PLAYER)
-        { return; }
+    {
+        return;
+    }
 
     // FIXME: hack, ignore unexpected client cancel Deadly Throw cast
     if (spellId == 26679)
@@ -455,13 +465,19 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
 
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo)
-        { return; }
+    {
+        return;
+    }
 
     if (spellInfo->HasAttribute(SPELL_ATTR_CANT_CANCEL))
-        { return; }
+    {
+        return;
+    }
 
     if (IsPassiveSpell(spellInfo))
-        { return; }
+    {
+        return;
+    }
 
     if (!IsPositiveSpell(spellId))
     {
@@ -482,7 +498,9 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
 
             // this also include case when aura not found
             if (!allow)
-                { return; }
+            {
+                return;
+            }
         }
         else
             { return; }
@@ -493,7 +511,9 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
     {
         if (Spell* curSpell = _player->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
             if (curSpell->m_spellInfo->Id == spellId)
-                { _player->InterruptSpell(CURRENT_CHANNELED_SPELL); }
+            {
+                _player->InterruptSpell(CURRENT_CHANNELED_SPELL);
+            }
         return;
     }
 
@@ -501,7 +521,9 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
 
     // not own area auras can't be cancelled (note: maybe need to check for aura on holder and not general on spell)
     if (holder && holder->GetCasterGuid() != _player->GetObjectGuid() && HasAreaAuraEffect(holder->GetSpellProto()))
-        { return; }
+    {
+        return;
+    }
 
     // non channeled case
     _player->RemoveAurasDueToSpellByCancel(spellId);
@@ -517,7 +539,9 @@ void WorldSession::HandlePetCancelAuraOpcode(WorldPacket& recvPacket)
 
     // ignore for remote control state
     if (!_player->IsSelfMover())
-        { return; }
+    {
+        return;
+    }
 
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo)
@@ -570,7 +594,9 @@ void WorldSession::HandleCancelChanneling(WorldPacket& recv_data)
     // ignore for remote control state (for player case)
     Unit* mover = _player->GetMover();
     if (mover != _player && mover->GetTypeId() == TYPEID_PLAYER)
-        { return; }
+    {
+        return;
+    }
 
     mover->InterruptSpell(CURRENT_CHANNELED_SPELL);
 }
@@ -583,13 +609,19 @@ void WorldSession::HandleTotemDestroyed(WorldPacket& recvPacket)
 
     // ignore for remote control state
     if (!_player->IsSelfMover())
-        { return; }
+    {
+        return;
+    }
 
     if (int(slotId) >= MAX_TOTEM_SLOT)
-        { return; }
+    {
+        return;
+    }
 
     if (Totem* totem = GetPlayer()->GetTotem(TotemSlot(slotId)))
-        { totem->UnSummon(); }
+    {
+        totem->UnSummon();
+    }
 }
 
 void WorldSession::HandleSelfResOpcode(WorldPacket& /*recv_data*/)
@@ -603,7 +635,9 @@ void WorldSession::HandleSelfResOpcode(WorldPacket& /*recv_data*/)
     {
         SpellEntry const* spellInfo = sSpellStore.LookupEntry(_player->GetUInt32Value(PLAYER_SELF_RES_SPELL));
         if (spellInfo)
-            { _player->CastSpell(_player, spellInfo, false); }
+        {
+            _player->CastSpell(_player, spellInfo, false);
+        }
 
         _player->SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
     }

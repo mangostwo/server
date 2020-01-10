@@ -40,7 +40,9 @@ namespace Movement
         float u = 1.f;
         int32 seg_time = spline.length(point_Idx, point_Idx + 1);
         if (seg_time > 0)
-            { u = (time_passed - spline.length(point_Idx)) / (float)seg_time; }
+        {
+            u = (time_passed - spline.length(point_Idx)) / (float)seg_time;
+        }
         Location c;
         c.orientation = initialOrientation;
         spline.evaluate_percent(point_Idx, u, c);
@@ -55,7 +57,9 @@ namespace Movement
         if (splineflags.done && splineflags.isFacing())
         {
             if (splineflags.final_angle)
-                { c.orientation = facing.angle; }
+            {
+                c.orientation = facing.angle;
+            }
             else if (splineflags.final_point)
                 { c.orientation = atan2(facing.f.y - c.y, facing.f.x - c.x); }
             // nothing to do for MoveSplineFlag::Final_Target flag
@@ -93,7 +97,9 @@ namespace Movement
         float z_now = spline.getPoint(spline.first()).z - Movement::computeFallElevation(MSToSec(time_passed));
         float final_z = FinalDestination().z;
         if (z_now < final_z)
-            { el = final_z; }
+        {
+            el = final_z;
+        }
         else
             { el = z_now; }
     }
@@ -301,7 +307,9 @@ namespace Movement
         str << "spline Id: " << GetId() << std::endl;
         str << "flags: " << splineflags.ToString() << std::endl;
         if (splineflags.final_angle)
-            { str << "facing  angle: " << facing.angle; }
+        {
+            str << "facing  angle: " << facing.angle;
+        }
         else if (splineflags.final_target)
             { str << "facing target: " << facing.target; }
         else if (splineflags.final_point)
@@ -326,7 +334,9 @@ namespace Movement
     {
         int32 point = point_Idx_offset + point_Idx - spline.first() + (int)Finalized();
         if (isCyclic())
-            { point = point % (spline.last() - spline.first()); }
+        {
+            point = point % (spline.last() - spline.first());
+        }
         return point;
     }
 }

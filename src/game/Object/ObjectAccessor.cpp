@@ -32,13 +32,19 @@ Unit*
 ObjectAccessor::GetUnit(WorldObject const& u, ObjectGuid guid)
 {
     if (!guid)
-        { return nullptr; }
+    {
+        return nullptr;
+    }
 
     if (guid.IsPlayer())
-        { return FindPlayer(guid); }
+    {
+        return FindPlayer(guid);
+    }
 
     if (!u.IsInWorld())
-        { return nullptr; }
+    {
+        return nullptr;
+    }
 
     return u.GetMap()->GetAnyTypeCreature(guid);
 }
@@ -47,7 +53,9 @@ Player*
 ObjectAccessor::FindPlayer(ObjectGuid guid, bool inWorld /*= true*/)
 {
     if (!guid)
-        { return nullptr;}
+    {
+        return nullptr;
+    }
 
     return m_playersMap.FindWith([&guid, &inWorld](const ObjectGuid& g, Player* plr)->bool
     {
@@ -100,9 +108,13 @@ ObjectAccessor::GetCorpseInMap(ObjectGuid guid, uint32 mapid)
 {
     Corpse* ret = m_corpsesMap.Find(guid);
     if (!ret)
-        { return nullptr; }
+    {
+        return nullptr;
+    }
     if (ret->GetMapId() != mapid)
-        { return nullptr; }
+    {
+        return nullptr;
+    }
     return ret;
 }
 
@@ -112,7 +124,9 @@ ObjectAccessor::GetCorpseForPlayerGUID(ObjectGuid guid)
     Corpse* c = m_player2corpse.Find(guid);
 
     if (!c)
-        { return nullptr; }
+    {
+        return nullptr;
+    }
 
     MANGOS_ASSERT(c->GetType() != CORPSE_BONES);
     return c;
@@ -205,7 +219,9 @@ ObjectAccessor::ConvertCorpseForPlayer(ObjectGuid player_guid, bool insignia)
     // do not load the map if it's not loaded
     Map* map = sMapMgr.FindMap(corpse->GetMapId(), corpse->GetInstanceId());
     if (map)
-        { map->Remove(corpse, false); }
+    {
+        map->Remove(corpse, false);
+    }
 
     // remove corpse from DB
     corpse->DeleteFromDB();
@@ -233,7 +249,9 @@ ObjectAccessor::ConvertCorpseForPlayer(ObjectGuid player_guid, bool insignia)
         for (int i = 0; i < EQUIPMENT_SLOT_END; ++i)
         {
             if (corpse->GetUInt32Value(CORPSE_FIELD_ITEM + i))
-                { bones->SetUInt32Value(CORPSE_FIELD_ITEM + i, 0); }
+            {
+                bones->SetUInt32Value(CORPSE_FIELD_ITEM + i, 0);
+            }
         }
 
         // add bones in grid store if grid loaded where corpse placed

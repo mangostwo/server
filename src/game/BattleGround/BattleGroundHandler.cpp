@@ -52,10 +52,14 @@ void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket& recv_data)
     Creature* pCreature = GetPlayer()->GetMap()->GetCreature(guid);
 
     if (!pCreature)
-        { return; }
+    {
+        return;
+    }
 
     if (!pCreature->IsBattleMaster())                       // it's not battlemaster
-        { return; }
+    {
+        return;
+    }
 
     // Stop the npc if moving
     pCreature->StopMoving();
@@ -63,7 +67,9 @@ void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket& recv_data)
     BattleGroundTypeId bgTypeId = sBattleGroundMgr.GetBattleMasterBG(pCreature->GetEntry());
 
     if (bgTypeId == BATTLEGROUND_TYPE_NONE)
-        { return; }
+    {
+        return;
+    }
 
     if (!_player->GetBGAccessByLevel(bgTypeId))
     {
@@ -118,12 +124,16 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
 
     // ignore if player is already in BG
     if (_player->InBattleGround())
-        { return; }
+    {
+        return;
+    }
 
     // get bg instance or bg template if instance not found
     BattleGround* bg = NULL;
     if (instanceId)
-        { bg = sBattleGroundMgr.GetBattleGroundThroughClientInstance(instanceId, bgTypeId); }
+    {
+        bg = sBattleGroundMgr.GetBattleGroundThroughClientInstance(instanceId, bgTypeId);
+    }
 
     if (!bg && !(bg = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId)))
     {
@@ -186,9 +196,13 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
         grp = _player->GetGroup();
         // no group found, error
         if (!grp)
-            { return; }
+        {
+            return;
+        }
         if (grp->GetLeaderGuid() != _player->GetObjectGuid())
-            { return; }
+        {
+            return;
+        }
         err = grp->CanJoinBattleGroundQueue(bg, bgQueueTypeId, 0, bg->GetMaxPlayersPerTeam(), false, 0);
         isPremade = sWorld.getConfig(CONFIG_UINT32_BATTLEGROUND_PREMADE_GROUP_WAIT_FOR_MATCH) &&
                     (grp->GetMembersCount() >= bg->GetMinPlayersPerTeam());
@@ -258,7 +272,9 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode(WorldPacket & /*recv_
 
     BattleGround* bg = _player->GetBattleGround();
     if (!bg)                                                // can't be received if player not in battleground
-        { return; }
+    {
+        return;
+    }
 
     switch (bg->GetTypeID(true))
     {
@@ -268,11 +284,15 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode(WorldPacket & /*recv_
 
             Player* flagCarrierAlliance = sObjectMgr.GetPlayer(((BattleGroundWS*)bg)->GetAllianceFlagCarrierGuid());
             if (flagCarrierAlliance)
-                { ++flagCarrierCount; }
+            {
+                ++flagCarrierCount;
+            }
 
             Player* flagCarrierHorde = sObjectMgr.GetPlayer(((BattleGroundWS*)bg)->GetHordeFlagCarrierGuid());
             if (flagCarrierHorde)
-                { ++flagCarrierCount; }
+            {
+                ++flagCarrierCount;
+            }
 
             WorldPacket data(MSG_BATTLEGROUND_PLAYER_POSITIONS, 4 + 4 + 16 * flagCarrierCount);
             data << uint32(0);
@@ -428,7 +448,9 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket& recv_data)
 
     // bg template might and must be used in case of leaving queue, when instance is not created yet
     if (!bg && action == 0)
-        { bg = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId); }
+    {
+        bg = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId);
+    }
     if (!bg)
     {
         sLog.outError("BattlegroundHandler: bg_template not found for type id %u.", bgTypeId);
@@ -492,7 +514,9 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket& recv_data)
             // this is still needed here if battleground "jumping" shouldn't add deserter debuff
             // also this is required to prevent stuck at old battleground after SetBattleGroundId set to new
             if (BattleGround* currentBg = _player->GetBattleGround())
-                { currentBg->RemovePlayerAtLeave(_player->GetObjectGuid(), false, true); }
+            {
+                currentBg->RemovePlayerAtLeave(_player->GetObjectGuid(), false, true);
+            }
 
             // set the destination instance id
             _player->SetBattleGroundId(bg->GetInstanceID(), bgTypeId);
@@ -547,7 +571,9 @@ void WorldSession::HandleLeaveBattlefieldOpcode(WorldPacket& recv_data)
     if (_player->IsInCombat())
         if (BattleGround* bg = _player->GetBattleGround())
             if (bg->GetStatus() != STATUS_WAIT_LEAVE)
-                { return; }
+            {
+                return;
+            }
 
     _player->LeaveBattleground();
 }
@@ -564,7 +590,9 @@ void WorldSession::HandleBattlefieldStatusOpcode(WorldPacket & /*recv_data*/)
     {
         BattleGroundQueueTypeId bgQueueTypeId = _player->GetBattleGroundQueueTypeId(i);
         if (!bgQueueTypeId)
-            { continue; }
+        {
+            continue;
+        }
 
         BattleGroundTypeId bgTypeId = BattleGroundMgr::BGTemplateId(bgQueueTypeId);
         ArenaType arenaType = BattleGroundMgr::BGArenaType(bgQueueTypeId);
@@ -588,12 +616,16 @@ void WorldSession::HandleBattlefieldStatusOpcode(WorldPacket & /*recv_data*/)
         BattleGroundQueue& bgQueue = sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId];
         GroupQueueInfo ginfo;
         if (!bgQueue.GetPlayerGroupInfoData(_player->GetObjectGuid(), &ginfo))
-            { continue; }
+        {
+            continue;
+        }
         if (ginfo.IsInvitedToBGInstanceGUID)
         {
             bg = sBattleGroundMgr.GetBattleGround(ginfo.IsInvitedToBGInstanceGUID, bgTypeId);
             if (!bg)
-                { continue; }
+            {
+                continue;
+            }
             uint32 remainingTime = WorldTimer::getMSTimeDiff(WorldTimer::getMSTime(), ginfo.RemoveInviteTime);
             // send status invited to BattleGround
             sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, i, STATUS_WAIT_JOIN, remainingTime, 0, arenaType, _player->GetBGTeam());
@@ -603,7 +635,9 @@ void WorldSession::HandleBattlefieldStatusOpcode(WorldPacket & /*recv_data*/)
         {
             bg = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId);
             if (!bg)
-                { continue; }
+            {
+                continue;
+            }
 
             // expected bracket entry
             PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(), _player->getLevel());
@@ -624,17 +658,23 @@ void WorldSession::HandleAreaSpiritHealerQueryOpcode(WorldPacket& recv_data)
 
     BattleGround* bg = _player->GetBattleGround();
     if (!bg)
-        { return; }
+    {
+        return;
+    }
 
     ObjectGuid guid;
     recv_data >> guid;
 
     Creature* unit = GetPlayer()->GetMap()->GetCreature(guid);
     if (!unit)
-        { return; }
+    {
+        return;
+    }
 
     if (!unit->IsSpiritService())                           // it's not spirit service
-        { return; }
+    {
+        return;
+    }
 
     unit->SendAreaSpiritHealerQueryOpcode(GetPlayer());
 }
@@ -645,17 +685,23 @@ void WorldSession::HandleAreaSpiritHealerQueueOpcode(WorldPacket& recv_data)
 
     BattleGround* bg = _player->GetBattleGround();
     if (!bg)
-        { return; }
+    {
+        return;
+    }
 
     ObjectGuid guid;
     recv_data >> guid;
 
     Creature* unit = GetPlayer()->GetMap()->GetCreature(guid);
     if (!unit)
-        { return; }
+    {
+        return;
+    }
 
     if (!unit->IsSpiritService())                           // it's not spirit service
-        { return; }
+    {
+        return;
+    }
 
     sScriptMgr.OnGossipHello(GetPlayer(), unit);
 }

@@ -367,7 +367,9 @@ class WorldSession
             {
                 m_Tutorials[intId] = value;
                 if (m_tutorialState == TUTORIALDATA_UNCHANGED)
-                    { m_tutorialState = TUTORIALDATA_CHANGED; }
+                {
+                    m_tutorialState = TUTORIALDATA_CHANGED;
+                }
             }
         }
         // used with item_page table

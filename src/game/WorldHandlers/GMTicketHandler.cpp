@@ -86,7 +86,9 @@ void WorldSession::HandleGMTicketUpdateTextOpcode(WorldPacket& recv_data)
     recv_data >> ticketText;
 
     if (GMTicket* ticket = sTicketMgr.GetGMTicket(GetPlayer()->GetObjectGuid()))
-        { ticket->SetText(ticketText.c_str()); }
+    {
+        ticket->SetText(ticketText.c_str());
+    }
     else
         { sLog.outError("Ticket update: Player %s (GUID: %u) doesn't have active ticket", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow()); }
     
@@ -143,7 +145,9 @@ void WorldSession::HandleGMTicketCreateOpcode(WorldPacket& recv_data)
     sObjectAccessor.DoForAllPlayers([this](Player* p)->void
     {
         if (p->GetSession()->GetSecurity() >= SEC_GAMEMASTER && p->isAcceptTickets())
-            { ChatHandler(p).PSendSysMessage(LANG_COMMAND_TICKETNEW, GetPlayer()->GetName()); }
+        {
+            ChatHandler(p).PSendSysMessage(LANG_COMMAND_TICKETNEW, GetPlayer()->GetName());
+        }
     });
 }
 

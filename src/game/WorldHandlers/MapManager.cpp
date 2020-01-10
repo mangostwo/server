@@ -60,7 +60,9 @@ MapManager::Initialize()
 {
     int num_threads(sWorld.getConfig(CONFIG_UINT32_NUMTHREADS));
     if (num_threads > 0 && m_updater.activate(num_threads) == -1)
-      { abort(); }
+    {
+        abort();
+    }
 
     InitStateMachine();
 }
@@ -104,14 +106,18 @@ Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
 
     const MapEntry* entry = sMapStore.LookupEntry(id);
     if (!entry)
-        { return NULL; }
+    {
+        return NULL;
+    }
 
     if (entry->Instanceable())
     {
         MANGOS_ASSERT(obj->GetTypeId() == TYPEID_PLAYER);
         // create DungeonMap object
         if (obj->GetTypeId() == TYPEID_PLAYER)
-            { m = CreateInstance(id, (Player*)obj); }
+        {
+            m = CreateInstance(id, (Player*)obj);
+        }
     }
     else
     {
@@ -145,7 +151,9 @@ Map* MapManager::FindMap(uint32 mapid, uint32 instanceId) const
 
     MapMapType::const_iterator iter = i_maps.find(MapID(mapid, instanceId));
     if (iter == i_maps.end())
-        { return NULL; }
+    {
+        return NULL;
+    }
 
     // this is a small workaround for transports
     if (instanceId == 0 && iter->second->Instanceable())
@@ -179,18 +187,24 @@ void MapManager::Update(uint32 diff)
 {
     i_timer.Update(diff);
     if (!i_timer.Passed())
-        { return; }
+    {
+        return;
+    }
 
     for (MapMapType::iterator iter = i_maps.begin(); iter != i_maps.end(); ++iter)
     {
         if (m_updater.activated())
-          { m_updater.schedule_update(*iter->second, (uint32)i_timer.GetCurrent()); }
+        {
+            m_updater.schedule_update(*iter->second, (uint32)i_timer.GetCurrent());
+        }
         else
           { iter->second->Update((uint32)i_timer.GetCurrent()); }
     }
 
     if (m_updater.activated())
-      { m_updater.wait(); }
+    {
+        m_updater.wait();
+    }
 
     for (TransportSet::iterator iter = m_Transports.begin(); iter != m_Transports.end(); ++iter)
     {
@@ -255,7 +269,9 @@ void MapManager::UnloadAll()
     TerrainManager::Instance().UnloadAll();
 
     if (m_updater.activated())
-      { m_updater.deactivate(); }
+    {
+        m_updater.deactivate();
+    }
 }
 
 uint32 MapManager::GetNumInstances()
@@ -310,7 +326,9 @@ Map* MapManager::CreateInstance(uint32 id, Player* player)
         map = FindMap(id, NewInstanceId);
         // it is possible that the save exists but the map doesn't
         if (!map)
-            { pNewMap = CreateDungeonMap(id, NewInstanceId, pSave->GetDifficulty(), pSave); }
+        {
+            pNewMap = CreateDungeonMap(id, NewInstanceId, pSave->GetDifficulty(), pSave);
+        }
     }
     else
     {

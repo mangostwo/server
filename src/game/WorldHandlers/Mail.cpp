@@ -127,7 +127,9 @@ MailDraft& MailDraft::AddItem(Item* item)
 bool MailDraft::prepareItems(Player* receiver)
 {
     if (!m_mailTemplateId || !m_mailTemplateItemsNeed)
-        { return false; }
+    {
+        return false;
+    }
 
     m_mailTemplateItemsNeed = false;
 
@@ -163,7 +165,9 @@ void MailDraft::deleteIncludedItems(bool inDB /**= false*/)
         Item* item = mailItemIter->second;
 
         if (inDB)
-            { CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid='%u'", item->GetGUIDLow()); }
+        {
+            CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid='%u'", item->GetGUIDLow());
+        }
 
         delete item;
     }
@@ -209,7 +213,9 @@ void MailDraft::SendReturnToSender(uint32 sender_acc, ObjectGuid sender_guid, Ob
 
     uint32 rc_account = 0;
     if (!receiver)
-        { rc_account = sObjectMgr.GetPlayerAccountIdByGUID(receiver_guid); }
+    {
+        rc_account = sObjectMgr.GetPlayerAccountIdByGUID(receiver_guid);
+    }
 
     if (!receiver && !rc_account)                           // sender not exist
     {
@@ -257,7 +263,9 @@ void MailDraft::SendMailTo(MailReceiver const& receiver, MailSender const& sende
 
     uint32 pReceiverAccount = 0;
     if (!pReceiver)
-        { pReceiverAccount = sObjectMgr.GetPlayerAccountIdByGUID(receiver.GetPlayerGuid()); }
+    {
+        pReceiverAccount = sObjectMgr.GetPlayerAccountIdByGUID(receiver.GetPlayerGuid());
+    }
 
     if (!pReceiver && !pReceiverAccount)                    // receiver not exist
     {
@@ -271,7 +279,9 @@ void MailDraft::SendMailTo(MailReceiver const& receiver, MailSender const& sende
     if (pReceiver)
     {
         if (prepareItems(pReceiver))
-            { has_items = true; }
+        {
+            has_items = true;
+        }
     }
 
     uint32 mailId = sObjectMgr.GenerateMailID();
@@ -364,7 +374,9 @@ void MailDraft::SendMailTo(MailReceiver const& receiver, MailSender const& sende
 void Mail::prepareTemplateItems(Player* receiver)
 {
     if (!mailTemplateId || !items.empty())
-        { return; }
+    {
+        return;
+    }
 
     has_items = true;
 

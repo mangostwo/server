@@ -1384,7 +1384,9 @@ class Unit : public WorldObject
         bool CanUseEquippedWeapon(WeaponAttackType attackType) const
         {
             if (IsInFeralForm())
-                { return false; }
+            {
+                return false;
+            }
 
             switch (attackType)
             {
@@ -1437,7 +1439,9 @@ class Unit : public WorldObject
         {
             AttackerSet::const_iterator itr = m_attackers.find(pAttacker);
             if (itr == m_attackers.end())
-                { m_attackers.insert(pAttacker); }
+            {
+                m_attackers.insert(pAttacker);
+            }
         }
         /**
          * Internal function, must only be called from Unit::AttackStop()
@@ -1455,10 +1459,14 @@ class Unit : public WorldObject
         Unit* getAttackerForHelper()                        // If someone wants to help, who to give them
         {
             if (getVictim() != NULL)
-                { return getVictim(); }
+            {
+                return getVictim();
+            }
 
             if (!m_attackers.empty())
-                { return *(m_attackers.begin()); }
+            {
+                return *(m_attackers.begin());
+            }
 
             return NULL;
         }
@@ -1887,7 +1895,9 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         bool IsContestedGuard() const
         {
             if (FactionTemplateEntry const* entry = getFactionTemplateEntry())
-                { return entry->IsContestedGuardFaction(); }
+            {
+                return entry->IsContestedGuardFaction();
+            }
 
             return false;
         }
@@ -3158,7 +3168,9 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         ObjectGuid const& GetCharmerOrOwnerOrOwnGuid() const
         {
             if (ObjectGuid const& guid = GetCharmerOrOwnerGuid())
-                { return guid; }
+            {
+                return guid;
+            }
             return GetObjectGuid();
         }
         /** 
@@ -3218,7 +3230,9 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         Unit* GetCharmerOrOwnerOrSelf()
         {
             if (Unit* u = GetCharmerOrOwner())
-                { return u; }
+            {
+                return u;
+            }
 
             return this;
         }
@@ -4015,29 +4029,39 @@ void Unit::CallForAllControlledUnits(Func const& func, uint32 controlledMask)
 {
     if (controlledMask & CONTROLLED_PET)
         if (Pet* pet = GetPet())
-            { func(pet); }
+        {
+            func(pet);
+        }
 
     if (controlledMask & CONTROLLED_MINIPET)
         if (Pet* mini = GetMiniPet())
-            { func(mini); }
+        {
+            func(mini);
+        }
 
     if (controlledMask & CONTROLLED_GUARDIANS)
     {
         for (GuidSet::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end();)
             if (Pet* guardian = _GetPet(*(itr++)))
-                { func(guardian); }
+            {
+                func(guardian);
+            }
     }
 
     if (controlledMask & CONTROLLED_TOTEMS)
     {
         for (int i = 0; i < MAX_TOTEM_SLOT; ++i)
             if (Unit* totem = _GetTotem(TotemSlot(i)))
-                { func(totem); }
+            {
+                func(totem);
+            }
     }
 
     if (controlledMask & CONTROLLED_CHARM)
         if (Unit* charm = GetCharm())
-            { func(charm); }
+        {
+            func(charm);
+        }
 }
 
 
@@ -4047,19 +4071,25 @@ bool Unit::CheckAllControlledUnits(Func const& func, uint32 controlledMask) cons
     if (controlledMask & CONTROLLED_PET)
         if (Pet const* pet = GetPet())
             if (func(pet))
-                { return true; }
+            {
+                return true;
+            }
 
     if (controlledMask & CONTROLLED_MINIPET)
         if (Pet const* mini = GetMiniPet())
             if (func(mini))
-                { return true; }
+            {
+                return true;
+            }
 
     if (controlledMask & CONTROLLED_GUARDIANS)
     {
         for (GuidSet::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end();)
             if (Pet const* guardian = _GetPet(*(itr++)))
                 if (func(guardian))
-                    { return true; }
+                {
+                    return true;
+                }
     }
 
     if (controlledMask & CONTROLLED_TOTEMS)
@@ -4067,13 +4097,17 @@ bool Unit::CheckAllControlledUnits(Func const& func, uint32 controlledMask) cons
         for (int i = 0; i < MAX_TOTEM_SLOT; ++i)
             if (Unit const* totem = _GetTotem(TotemSlot(i)))
                 if (func(totem))
-                    { return true; }
+                {
+                    return true;
+                }
     }
 
     if (controlledMask & CONTROLLED_CHARM)
         if (Unit const* charm = GetCharm())
             if (func(charm))
-                { return true; }
+            {
+                return true;
+            }
 
     return false;
 }

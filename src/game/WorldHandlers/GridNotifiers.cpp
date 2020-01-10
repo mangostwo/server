@@ -84,10 +84,14 @@ void VisibleNotifier::Notify()
         for (GuidSet::const_iterator iter = oor.begin(); iter != oor.end(); ++iter)
         {
             if (!iter->IsPlayer())
-                { continue; }
+            {
+                continue;
+            }
 
             if (Player* plr = sObjectAccessor.FindPlayer(*iter))
-                { plr->UpdateVisibilityOf(plr->GetCamera().GetBody(), &player); }
+            {
+                plr->UpdateVisibilityOf(plr->GetCamera().GetBody(), &player);
+            }
         }
     }
 
@@ -114,7 +118,9 @@ void MessageDeliverer::Visit(CameraMapType& m)
                 continue;
 
             if (WorldSession* session = owner->GetSession())
-                { session->SendPacket(i_message); }
+            {
+                session->SendPacket(i_message);
+            }
         }
     }
 }
@@ -126,10 +132,14 @@ void MessageDelivererExcept::Visit(CameraMapType& m)
         Player* owner = iter->getSource()->GetOwner();
 
         if (!owner->InSamePhase(i_phaseMask) || owner == i_skipped_receiver)
-            { continue; }
+        {
+            continue;
+        }
 
         if (WorldSession* session = owner->GetSession())
-            { session->SendPacket(i_message); }
+        {
+            session->SendPacket(i_message);
+        }
     }
 }
 
@@ -141,7 +151,9 @@ void ObjectMessageDeliverer::Visit(CameraMapType& m)
             continue;
 
         if (WorldSession* session = iter->getSource()->GetOwner()->GetSession())
-            { session->SendPacket(i_message); }
+        {
+            session->SendPacket(i_message);
+        }
     }
 }
 
@@ -159,7 +171,9 @@ void MessageDistDeliverer::Visit(CameraMapType& m)
                 continue;
 
             if (WorldSession* session = owner->GetSession())
-                { session->SendPacket(i_message); }
+            {
+                session->SendPacket(i_message);
+            }
         }
     }
 }
@@ -174,7 +188,9 @@ void ObjectMessageDistDeliverer::Visit(CameraMapType& m)
                 continue;
 
             if (WorldSession* session = iter->getSource()->GetOwner()->GetSession())
-                { session->SendPacket(i_message); }
+            {
+                session->SendPacket(i_message);
+            }
         }
     }
 }
@@ -193,15 +209,21 @@ bool CannibalizeObjectCheck::operator()(Corpse* u)
 {
     // ignore bones
     if (u->GetType() == CORPSE_BONES)
-        { return false; }
+    {
+        return false;
+    }
 
     Player* owner = sObjectAccessor.FindPlayer(u->GetOwnerGuid());
 
     if (!owner || i_fobj->IsFriendlyTo(owner))
-        { return false; }
+    {
+        return false;
+    }
 
     if (i_fobj->IsWithinDistInMap(u, i_range))
-        { return true; }
+    {
+        return true;
+    }
 
     return false;
 }
@@ -214,7 +236,9 @@ void MaNGOS::RespawnDo::operator()(Creature* u) const
     {
         BattleGroundEventIdx eventId = sBattleGroundMgr.GetCreatureEventIndex(u->GetGUIDLow());
         if (!((BattleGroundMap*)map)->GetBG()->IsActiveEvent(eventId.event1, eventId.event2))
-            { return; }
+        {
+            return;
+        }
     }
 
     u->Respawn();
@@ -228,7 +252,9 @@ void MaNGOS::RespawnDo::operator()(GameObject* u) const
     {
         BattleGroundEventIdx eventId = sBattleGroundMgr.GetGameObjectEventIndex(u->GetGUIDLow());
         if (!((BattleGroundMap*)map)->GetBG()->IsActiveEvent(eventId.event1, eventId.event2))
-            { return; }
+        {
+            return;
+        }
     }
 
     u->Respawn();
@@ -237,38 +263,56 @@ void MaNGOS::RespawnDo::operator()(GameObject* u) const
 void MaNGOS::CallOfHelpCreatureInRangeDo::operator()(Creature* u)
 {
     if (u == i_funit)
-        { return; }
+    {
+        return;
+    }
 
     if (!u->CanAssistTo(i_funit, i_enemy, false))
-        { return; }
+    {
+        return;
+    }
 
     // too far
     if (!i_funit->IsWithinDistInMap(u, i_range))
-        { return; }
+    {
+        return;
+    }
 
     // only if see assisted creature
     if (!i_funit->IsWithinLOSInMap(u))
-        { return; }
+    {
+        return;
+    }
 
     if (u->AI())
-        { u->AI()->AttackStart(i_enemy); }
+    {
+        u->AI()->AttackStart(i_enemy);
+    }
 }
 
 bool MaNGOS::AnyAssistCreatureInRangeCheck::operator()(Creature* u)
 {
     if (u == i_funit)
-        { return false; }
+    {
+        return false;
+    }
 
     if (!u->CanAssistTo(i_funit, i_enemy))
-        { return false; }
+    {
+        return false;
+    }
 
     // too far
     if (!i_funit->IsWithinDistInMap(u, i_range))
-        { return false; }
+    {
+        return false;
+    }
 
     // only if see assisted creature
     if (!i_funit->IsWithinLOSInMap(u))
-        { return false; }
+    {
+        return false;
+    }
 
     return true;
 }
