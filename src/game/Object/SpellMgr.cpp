@@ -182,8 +182,14 @@ uint32 GetSpellCastTimeForBonus(SpellEntry const* spellProto, DamageEffectType d
 {
     uint32 CastingTime = !IsChanneledSpell(spellProto) ? GetSpellCastTime(spellProto) : GetSpellDuration(spellProto);
 
-    if (CastingTime > 7000) { CastingTime = 7000; }
-    if (CastingTime < 1500) { CastingTime = 1500; }
+    if (CastingTime > 7000)
+    {
+        CastingTime = 7000;
+    }
+    if (CastingTime < 1500)
+    {
+        CastingTime = 1500;
+    }
 
     if (damagetype == DOT && !IsChanneledSpell(spellProto))
     {
@@ -251,8 +257,14 @@ uint32 GetSpellCastTimeForBonus(SpellEntry const* spellProto, DamageEffectType d
     {
         // mainly for DoTs which are 3500 here otherwise
         uint32 OriginalCastTime = GetSpellCastTime(spellProto);
-        if (OriginalCastTime > 7000) { OriginalCastTime = 7000; }
-        if (OriginalCastTime < 1500) { OriginalCastTime = 1500; }
+        if (OriginalCastTime > 7000)
+        {
+            OriginalCastTime = 7000;
+        }
+        if (OriginalCastTime < 1500)
+        {
+            OriginalCastTime = 1500;
+        }
         // Portion to Over Time
         float PtOT = (overTime / 15000.0f) / ((overTime / 15000.0f) + (OriginalCastTime / 3500.0f));
 
@@ -408,8 +420,14 @@ bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 spellId_2)
 {
     SpellEntry const* spellInfo_1 = sSpellStore.LookupEntry(spellId_1);
     SpellEntry const* spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
-    if (!spellInfo_1 || !spellInfo_2) { return false; }
-    if (spellInfo_1->Id == spellId_2) { return false; }
+    if (!spellInfo_1 || !spellInfo_2)
+    {
+        return false;
+    }
+    if (spellInfo_1->Id == spellId_2)
+    {
+        return false;
+    }
 
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
@@ -432,8 +450,14 @@ int32 CompareAuraRanks(uint32 spellId_1, uint32 spellId_2)
 {
     SpellEntry const* spellInfo_1 = sSpellStore.LookupEntry(spellId_1);
     SpellEntry const* spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
-    if (!spellInfo_1 || !spellInfo_2) { return 0; }
-    if (spellId_1 == spellId_2) { return 0; }
+    if (!spellInfo_1 || !spellInfo_2)
+    {
+        return 0;
+    }
+    if (spellId_1 == spellId_2)
+    {
+        return 0;
+    }
 
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
@@ -444,7 +468,10 @@ int32 CompareAuraRanks(uint32 spellId_1, uint32 spellId_2)
             {
                 return -diff;
             }
-            else { return diff; }
+            else
+            {
+                return diff;
+            }
         }
     }
     return 0;
@@ -2054,8 +2081,14 @@ void SpellMgr::LoadSpellThreats()
 bool SpellMgr::IsRankSpellDueToSpell(SpellEntry const* spellInfo_1, uint32 spellId_2) const
 {
     SpellEntry const* spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
-    if (!spellInfo_1 || !spellInfo_2) { return false; }
-    if (spellInfo_1->Id == spellId_2) { return false; }
+    if (!spellInfo_1 || !spellInfo_2)
+    {
+        return false;
+    }
+    if (spellInfo_1->Id == spellId_2)
+    {
+        return false;
+    }
 
     return GetFirstSpellInChain(spellInfo_1->Id) == GetFirstSpellInChain(spellId_2);
 }
@@ -2339,17 +2372,17 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     if ((spellInfo_1->Id == 62559 && spellInfo_2->Id == 62538) ||
                             (spellInfo_2->Id == 62559 && spellInfo_1->Id == 62538))
                         return false;
-                    
+
                     // Phase 2 Transform and Shadowy Barrier
                     if ((spellInfo_1->Id == 65157 && spellInfo_2->Id == 64775) ||
                         (spellInfo_2->Id == 65157 && spellInfo_1->Id == 64775))
                         return false;
-                    
+
                     // Empowered (dummy) and Empowered
                     if ((spellInfo_1->Id == 64161 && spellInfo_2->Id == 65294) ||
                         (spellInfo_2->Id == 64161 && spellInfo_1->Id == 65294))
                         return false;
-                    
+
                     // Spectral Realm (reaction) and Spectral Realm (invisibility)
                     if ((spellInfo_1->Id == 44852 && spellInfo_2->Id == 46021) ||
                         (spellInfo_2->Id == 44852 && spellInfo_1->Id == 46021))

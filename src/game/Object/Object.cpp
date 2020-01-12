@@ -546,7 +546,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                 else if (index == UNIT_DYNAMIC_FLAGS)
                 {
                     uint32 dynflagsValue = m_uint32Values[index];
-                    
+
                     // Checking SPELL_AURA_EMPATHY and caster
                     if (dynflagsValue & UNIT_DYNFLAG_SPECIALINFO && ((Unit*)this)->IsAlive())
                     {
@@ -556,11 +556,11 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                         for (Unit::AuraList::const_iterator itr = mAuraEmpathy.begin(); !bIsCaster && itr != mAuraEmpathy.end(); ++itr)
                         {
                             bIsEmpathy = true;        // Empathy by aura set
-                            
+
                             if ((*itr)->GetCasterGuid() == target->GetObjectGuid())
                                 { bIsCaster = true; } // target is the caster of an empathy aura
                         }
-                        
+
                         if (bIsEmpathy && !bIsCaster) // Empathy by aura, but target is not the caster
                         {
                             dynflagsValue &= ~UNIT_DYNFLAG_SPECIALINFO;
@@ -673,7 +673,10 @@ void Object::ClearUpdateMask(bool remove)
 
 bool Object::LoadValues(const char* data)
 {
-    if (!m_uint32Values) { _InitValues(); }
+    if (!m_uint32Values)
+    {
+        _InitValues();
+    }
 
     Tokens tokens = StrSplit(data, " ");
 
@@ -1191,7 +1194,10 @@ bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool
 
 bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
 {
-    if (!IsInMap(obj)) { return false; }
+    if (!IsInMap(obj))
+    {
+        return false;
+    }
     float ox, oy, oz;
     obj->GetPosition(ox, oy, oz);
     return(IsWithinLOS(ox, oy, oz));

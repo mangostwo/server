@@ -1381,7 +1381,7 @@ struct PowerDisplayEntry
     // uint32 unk1                                          // 2
     // float unk2                                           // 3
     // float unk3                                           // 4
-    // float unk4                                           // 5  
+    // float unk4                                           // 5
 };
 
 struct PvPDifficultyEntry

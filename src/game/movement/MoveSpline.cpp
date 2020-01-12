@@ -184,7 +184,7 @@ namespace Movement
         time_passed = 0;
         vertical_acceleration = 0.f;
         effect_start_time = 0;
-        
+
         // detect Stop command
         if (splineflags.done)
         {

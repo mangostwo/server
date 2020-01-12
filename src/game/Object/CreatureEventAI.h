@@ -128,7 +128,7 @@ enum EventAI_ActionType
     ACTION_T_CHANGE_MOVEMENT            = 48,               // MovementType, WanderDistance, unused
     ACTION_T_SUMMON_UNIQUE              = 49,               // CreatureId, Target, SpawnId
     ACTION_T_EMOTE_TARGET               = 50,               // EmoteId, TargetGuid
-    
+
     ACTION_T_END,
 };
 

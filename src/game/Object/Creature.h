@@ -362,7 +362,10 @@ struct VendorItemData
 
     VendorItem* GetItem(uint32 slot) const
     {
-        if (slot >= m_items.size()) { return NULL; }
+        if (slot >= m_items.size())
+        {
+            return NULL;
+        }
         return m_items[slot];
     }
     bool Empty() const { return m_items.empty(); }
@@ -700,7 +703,7 @@ class Creature : public Unit
 
         /**
         * function indicating whether the recipient is a group.
-        * 
+        *
         * \return boolean true if the creature's recipient is a group, false otherwise.
         */
         bool IsGroupLootRecipient() const { return m_lootGroupRecipientId; }

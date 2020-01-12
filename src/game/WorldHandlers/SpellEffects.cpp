@@ -2086,9 +2086,9 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
-                    
+
                     uint32 spellId = 0;
-                    
+
                     switch (urand(0,7))
                     {
                         case 0: spellId = 46293; break; // Corrosive Poison
@@ -2100,7 +2100,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         case 6: spellId = 46299; break; // Wavering Will
                         case 7: spellId = 46300; break; // Withered Touch
                     }
-                    
+
                     m_caster->CastSpell(unitTarget, spellId, true);
                     return;
                 }
@@ -2907,7 +2907,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
-                    
+
                     m_caster->CastSpell(unitTarget, 63031, true);
                     return;
                 }
@@ -2931,7 +2931,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);                
+                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                     return;
                 }
                 case 63744:                                 // Sara's Anger
@@ -2940,7 +2940,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 {
                     if (!unitTarget)
                         return;
-                    
+
                     m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                     return;
                 }
@@ -2948,7 +2948,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 {
                     if (!unitTarget || !unitTarget->HasAura(m_spellInfo->CalculateSimpleValue(eff_idx)))
                         return;
-                    
+
                     // There is no known spell to kill the target
                     m_caster->DealDamage(unitTarget, unitTarget->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                     return;
@@ -2987,7 +2987,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->HasAura(63050) || unitTarget->HasAura(m_spellInfo->CalculateSimpleValue(eff_idx)))
                         return;
-                    
+
                     m_caster->CastSpell(unitTarget, 64464, true);
                     m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                     return;
@@ -3018,7 +3018,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 {
                     if (!unitTarget)
                         return;
-                    
+
                     m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                     return;
                 }
@@ -3970,7 +3970,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
             // Death Strike
             else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000000010))
             {
-                
+
                 // Death Rune Mastery talents
                 if ((Player*)m_caster->HasSpell(49467))
                 {
@@ -3990,8 +3990,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 {
                     for(uint8 i = 2; i <= 5; i++)
                             ((Player*)m_caster)->ConvertRune(i, RUNE_DEATH);
-                }      
-                
+                }
+
                 uint32 count = 0;
                 Unit::SpellAuraHolderMap const& auras = unitTarget->GetSpellAuraHolderMap();
                 for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
@@ -4046,7 +4046,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
             // Obliterate
             else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0002000000000000))
             {
-                
+
                 // Death Rune Mastery talents
                 if ((Player*)m_caster->HasSpell(49467))
                 {
@@ -4066,8 +4066,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 {
                     for(uint8 i = 2; i <= 5; i++)
                         ((Player*)m_caster)->ConvertRune(i, RUNE_DEATH);
-                }      
-                
+                }
+
                 // search for Annihilation
                 Unit::AuraList const& dummyList = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
                 for (Unit::AuraList::const_iterator itr = dummyList.begin(); itr != dummyList.end(); ++itr)
@@ -4213,7 +4213,7 @@ void Spell::EffectForceCast(SpellEffectIndex eff_idx)
     }
 
     int32 basePoints = damage;
-    
+
     // forced cast spells by vehicle on master always unboard the master
     if (m_caster->IsVehicle() && m_caster->GetVehicleInfo()->HasOnBoard(unitTarget) &&
         m_spellInfo->EffectImplicitTargetA[eff_idx] == TARGET_MASTER)
@@ -4223,7 +4223,7 @@ void Spell::EffectForceCast(SpellEffectIndex eff_idx)
             m_caster->RemoveAurasDueToSpell(basePoints);
         }
     }
-    
+
     // spell effect 141 needs to be cast as custom with basePoints
     if (m_spellInfo->Effect[eff_idx] == SPELL_EFFECT_FORCE_CAST_WITH_VALUE)
         unitTarget->CastCustomSpell(unitTarget, spellInfo, &basePoints, &basePoints, &basePoints, true, NULL , NULL, m_originalCasterGUID, m_spellInfo);
@@ -5816,7 +5816,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
                 ((Creature*)m_caster)->AI()->JustSummoned(itr->creature);
             if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
                 ((Creature*)m_originalCaster)->AI()->JustSummoned(itr->creature);
-        
+
             // used by eluna
 #ifdef ENABLE_ELUNA
             if (Unit* summoner = m_caster->ToUnit())
@@ -6162,7 +6162,7 @@ bool Spell::DoSummonPossessed(CreatureSummonPositions& list, SummonPropertiesEnt
 #endif
     }
         return true;
-    
+
 }
 
 bool Spell::DoSummonPet(SpellEffectIndex eff_idx)
@@ -6275,7 +6275,7 @@ bool Spell::DoSummonPet(SpellEffectIndex eff_idx)
         if (Unit* summoner = m_originalCaster->ToUnit())
             sEluna->OnSummoned(spawnCreature, summoner);
 #endif
-        
+
     return false;
 }
 
@@ -6330,7 +6330,7 @@ bool Spell::DoSummonVehicle(CreatureSummonPositions& list, SummonPropertiesEntry
         if (Unit* summoner = m_originalCaster->ToUnit())
             sEluna->OnSummoned(spawnCreature, summoner);
 #endif
-        
+
     return true;
 }
 
@@ -8279,7 +8279,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 {
                     if (!unitTarget)
                         return;
-                    
+
                     m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                     return;
                 }
@@ -9643,7 +9643,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
-                    
+
                     unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
                     return;
                 }
@@ -9677,7 +9677,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->HasAura(m_spellInfo->CalculateSimpleValue(eff_idx)))
                         return;
-                    
+
                     unitTarget->RemoveAuraHolderFromStack(63050, 12);
                     return;
                 }
@@ -9687,7 +9687,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
-                    
+
                     uint8 removedAmount = 0;
                     switch (m_spellInfo->Id)
                     {
@@ -9695,7 +9695,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         case 64164: removedAmount = 4; break;
                         case 64168: removedAmount = 2; break;
                     }
-                    
+
                     unitTarget->RemoveAuraHolderFromStack(63050, removedAmount);
                     return;
                 }
@@ -9703,7 +9703,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
-                    
+
                     unitTarget->CastSpell(unitTarget, 63992, true);
                     unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
                     return;
@@ -9712,7 +9712,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || !unitTarget->HasAura(m_spellInfo->CalculateSimpleValue(eff_idx)))
                         return;
-                    
+
                     unitTarget->RemoveAurasDueToSpell(63050);
                     return;
                 }
@@ -9720,7 +9720,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 {
                     if (!unitTarget)
                         return;
-                    
+
                     unitTarget->SetHealthPercent(m_caster->GetHealthPercent());
                     return;
                 }
@@ -9728,7 +9728,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
-                    
+
                     unitTarget->CastSpell(unitTarget, unitTarget->GetMap()->IsRegularDifficulty() ? 64125 : 64126, true);
                     return;
                 }
@@ -9736,7 +9736,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
-                    
+
                     unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                     return;
                 }
@@ -9753,7 +9753,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 {
                     if (!unitTarget)
                         return;
-                    
+
                     unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                     return;
                 }
@@ -9761,7 +9761,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 {
                     if (!unitTarget)
                         return;
-                    
+
                     unitTarget->CastSpell(unitTarget, m_caster->GetMap()->IsRegularDifficulty() ? 64468 : 64486, true);
                     return;
                 }
@@ -9808,7 +9808,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 {
                     if (!unitTarget)
                         return;
-                    
+
                     unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
                     return;
                 }
@@ -10387,14 +10387,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 {
                     if (!unitTarget || m_caster->GetTypeId() != TYPEID_PLAYER)
                         return;
-                    
+
                     // If DK has spell 52143, summon pet from dummy effect
                     // otherwise summon guardian
                     uint32 triggered_spell_id = m_spellInfo->CalculateSimpleValue(SpellEffectIndex(m_caster->HasSpell(52143) ? EFFECT_INDEX_2 : EFFECT_INDEX_1));
-                
+
                     float x,y,z;
                     m_caster->GetClosePoint(x, y, z, m_caster->GetObjectBoundingRadius(), PET_FOLLOW_DIST);
-                
+
                     if (unitTarget != (Unit*)m_caster)
                         m_caster->CastSpell(unitTarget->GetPositionX(),unitTarget->GetPositionY(),unitTarget->GetPositionZ(),triggered_spell_id, true, NULL, NULL, m_caster->GetObjectGuid(), m_spellInfo);
                     else if (m_caster->HasAura(60200))
@@ -10422,7 +10422,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
                         return;
-                    
+
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->IsAlive())
                     {
                         SendCastResult(SPELL_FAILED_TARGET_NOT_DEAD);
@@ -10430,7 +10430,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         CancelGlobalCooldown();
                         return;
                     }
-                    
+
                     // hacky remove death
                     unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_0), true);
                     CancelGlobalCooldown();
@@ -11999,7 +11999,7 @@ void Spell::EffectWMODamage(SpellEffectIndex effIdx)
 
     if (!gameObjTarget)
         return;
-    
+
     if (gameObjTarget->GetGoType() != GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
     {
         sLog.outError("Spell::EffectWMODamage called without valid targets. Spell Id %u", m_spellInfo->Id);
@@ -12020,7 +12020,7 @@ void Spell::EffectWMODamage(SpellEffectIndex effIdx)
 void Spell::EffectWMORepair(SpellEffectIndex effIdx)
 {
     DEBUG_LOG("Effect: WMORepair");
-    
+
     if (!gameObjTarget)
         return;
 
@@ -12041,7 +12041,7 @@ void Spell::EffectWMORepair(SpellEffectIndex effIdx)
 void Spell::EffectWMOChange(SpellEffectIndex effIdx)
 {
     DEBUG_LOG("Effect: WMOChange");
-    
+
     if (!gameObjTarget)
         return;
 
@@ -12353,15 +12353,15 @@ void Spell::EffectGravityPull(SpellEffectIndex eff_idx)
 {
     if (!unitTarget)
         return;
-    
+
     float x, y, z;
     if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
         m_targets.getDestination(x, y, z);
     else
         m_caster->GetPosition(x, y, z);
-    
+
     float speed = float(m_spellInfo->EffectMiscValue[eff_idx]) * 0.15f;
     float height = float(unitTarget->GetDistance(x, y, z) * 0.2f);
-    
+
     unitTarget->GetMotionMaster()->MoveJump(x, y, z, speed, height);
 }

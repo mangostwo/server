@@ -506,14 +506,14 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
             {
                 return false;
             }
-                
+
             uint32 perc = (m_creature->GetPower(POWER_ENERGY) * 100) / m_creature->GetMaxPower(POWER_ENERGY);
-            
+
             if (perc > event.percent_range.percentMax || perc < event.percent_range.percentMin)
             {
                 return false;
             }
-                
+
             LOG_PROCESS_EVENT;
             // Repeat Timers
             pHolder.UpdateRepeatTimer(m_creature, event.percent_range.repeatMin, event.percent_range.repeatMax);
@@ -1541,7 +1541,10 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
                     // Skip processing of events that have time remaining
                     continue;
                 }
-                else { (*i).Time = 0; }
+                else
+                {
+                    (*i).Time = 0;
+                }
             }
 
             // Events that are updated every EVENT_UPDATE_TIME

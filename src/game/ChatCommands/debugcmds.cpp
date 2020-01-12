@@ -445,7 +445,10 @@ bool ChatHandler::HandleDebugGetItemStateCommand(char* args)
         { return false; }
 
     Player* player = getSelectedPlayer();
-    if (!player) { player = m_session->GetPlayer(); }
+    if (!player)
+    {
+        player = m_session->GetPlayer();
+    }
 
     if (!list_queue && !check_all)
     {
@@ -459,7 +462,10 @@ bool ChatHandler::HandleDebugGetItemStateCommand(char* args)
             }
 
             Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
-            if (!item) { continue; }
+            if (!item)
+            {
+                continue;
+            }
             if (!item->IsBag())
             {
                 if (item->GetState() == state)
@@ -487,7 +493,10 @@ bool ChatHandler::HandleDebugGetItemStateCommand(char* args)
         for (size_t i = 0; i < updateQueue.size(); ++i)
         {
             Item* item = updateQueue[i];
-            if (!item) { continue; }
+            if (!item)
+            {
+                continue;
+            }
 
             Bag* container = item->GetContainer();
             uint8 bag_slot = container ? container->GetSlot() : uint8(INVENTORY_SLOT_BAG_0);
@@ -522,7 +531,10 @@ bool ChatHandler::HandleDebugGetItemStateCommand(char* args)
             }
 
             Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
-            if (!item) { continue; }
+            if (!item)
+            {
+                continue;
+            }
 
             if (item->GetSlot() != i)
             {
@@ -585,7 +597,10 @@ bool ChatHandler::HandleDebugGetItemStateCommand(char* args)
                 for (uint8 j = 0; j < bag->GetBagSize(); ++j)
                 {
                     Item* item2 = bag->GetItemByPos(j);
-                    if (!item2) { continue; }
+                    if (!item2)
+                    {
+                        continue;
+                    }
 
                     if (item2->GetSlot() != j)
                     {
@@ -656,7 +671,10 @@ bool ChatHandler::HandleDebugGetItemStateCommand(char* args)
         for (size_t i = 0; i < updateQueue.size(); ++i)
         {
             Item* item = updateQueue[i];
-            if (!item) { continue; }
+            if (!item)
+            {
+                continue;
+            }
 
             if (item->GetOwnerGuid() != player->GetObjectGuid())
             {
@@ -673,7 +691,10 @@ bool ChatHandler::HandleDebugGetItemStateCommand(char* args)
                 error = true; continue;
             }
 
-            if (item->GetState() == ITEM_REMOVED) { continue; }
+            if (item->GetState() == ITEM_REMOVED)
+            {
+                continue;
+            }
             Item* test = player->GetItemByPos(item->GetBagSlot(), item->GetSlot());
 
             if (test == NULL)

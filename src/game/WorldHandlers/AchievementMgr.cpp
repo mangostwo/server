@@ -1922,10 +1922,10 @@ void AchievementMgr::CompletedCriteriaFor(AchievementEntry const* achievement)
     // counter can never complete
     if (achievement->flags & ACHIEVEMENT_FLAG_COUNTER)
         return;
- 
+
     bool hasCompleted = IsCompletedAchievement(achievement);
     uint32 categoryId = achievement->categoryId;
-       
+
     // Dungeon Finder reward hook (note: apply to mangos three & four)
     if (hasCompleted)
     {
@@ -1934,7 +1934,7 @@ void AchievementMgr::CompletedCriteriaFor(AchievementEntry const* achievement)
             || categoryId == 14721)
             sLFGMgr.HandleBossKilled(GetPlayer());
     }
-                
+
 
     // already completed and stored
     if (m_completedAchievements.find(achievement->ID) != m_completedAchievements.end())

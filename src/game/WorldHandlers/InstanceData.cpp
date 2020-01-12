@@ -71,14 +71,14 @@ void InstanceData::SendEncounterFrame(uint32 type, ObjectGuid sourceGuid /*= NUL
     // size of this packet is at most 15 (usually less)
     WorldPacket data(SMSG_INSTANCE_ENCOUNTER, 15);
     data << uint32(type);
-    
+
     switch (type)
     {
         case ENCOUNTER_FRAME_ENGAGE:
         case ENCOUNTER_FRAME_DISENGAGE:
         case ENCOUNTER_FRAME_UPDATE_PRIORITY:
             MANGOS_ASSERT(sourceGuid);
-            
+
             data << sourceGuid.WriteAsPacked();
             data << uint8(param1);
             break;
@@ -95,6 +95,6 @@ void InstanceData::SendEncounterFrame(uint32 type, ObjectGuid sourceGuid /*= NUL
         default:
             break;
     }
-    
+
     instance->SendToPlayers(&data);
 }

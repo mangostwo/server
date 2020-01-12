@@ -1693,7 +1693,7 @@ uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, bool IsA
 
     // add bg to update list
     AddBattleGround(bg->GetInstanceID(), bg->GetTypeID(), bg);
-    
+
 #ifdef ENABLE_ELUNA
     sEluna->OnBGCreate(bg, bgTypeId, bg->GetInstanceID());
 #endif /* ENABLE_ELUNA */

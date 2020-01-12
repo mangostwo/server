@@ -938,7 +938,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
         else
             *data << uint64(0);
     }
-    
+
     if (mask & GROUP_UPDATE_FLAG_VEHICLE_SEAT)
     {
         if (player->GetTransportInfo())
@@ -1059,7 +1059,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
         data << uint8(0);                                   // GROUP_UPDATE_FLAG_PET_NAME
         data << uint64(0);                                  // GROUP_UPDATE_FLAG_PET_AURAS
     }
-    
+
     if (player->GetTransportInfo())                         // GROUP_UPDATE_FLAG_VEHICLE_SEAT
         data << uint32(((Unit*)player->GetTransportInfo()->GetTransport())->GetVehicleInfo()->GetVehicleEntry()->m_seatID[player->GetTransportInfo()->GetTransportSeat()]);
 

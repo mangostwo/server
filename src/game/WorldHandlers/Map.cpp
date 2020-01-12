@@ -1639,7 +1639,7 @@ void DungeonMap::PermBindAllPlayers(Player* player)
 void DungeonMap::UnloadAll(bool pForce)
 {
     TeleportAllPlayersTo(TELEPORT_LOCATION_HOMEBIND);
-    
+
     if (m_resetAfterUnload == true)
     {
         GetPersistanceState()->DeleteRespawnTimes();

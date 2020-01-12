@@ -714,7 +714,7 @@ void AreaAura::Update(uint32 diff)
             {
                 // flag for selection is need apply aura to current iteration target
                 bool apply = true;
-                
+
                 SpellEntry const* actualSpellInfo;
                 if (GetCasterGuid() == (*tIter)->GetObjectGuid()) // if caster is same as target then no need to change rank of the spell
                 {
@@ -722,13 +722,13 @@ void AreaAura::Update(uint32 diff)
                 }
                 else                                              // use spell id according level of the target
                     { actualSpellInfo = sSpellMgr.SelectAuraRankForLevel(GetSpellProto(), (*tIter)->getLevel()); }
-                
+
                 if (!actualSpellInfo)
                 {
                     continue;
                 }
 
-                Unit::SpellAuraHolderBounds spair = (*tIter)->GetSpellAuraHolderBounds(actualSpellInfo->Id); 
+                Unit::SpellAuraHolderBounds spair = (*tIter)->GetSpellAuraHolderBounds(actualSpellInfo->Id);
 
                 // we need ignore present caster self applied are auras sometime
                 // in cases if this only auras applied for spell effect
@@ -785,7 +785,7 @@ void AreaAura::Update(uint32 diff)
                 {
                     actualBasePoints = actualSpellInfo->CalculateSimpleValue(m_effIndex);
                 }
-                
+
                 SpellAuraHolder* holder = (*tIter)->GetSpellAuraHolder(actualSpellInfo->Id, GetCasterGuid());
 
                 bool addedToExisting = true;
@@ -3598,7 +3598,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
     uint32 modelid = 0;
     Unit* target = GetTarget();
-    
+
     // remove SPELL_AURA_EMPATHY
     target->RemoveSpellsCausingAura(SPELL_AURA_EMPATHY);
 
@@ -7223,8 +7223,14 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             const PlayerSpellMap& sp_list = ((Player*)target)->GetSpellMap();
             for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
             {
-                if (itr->second.state == PLAYERSPELL_REMOVED) { continue; }
-                if (itr->first == spellId1 || itr->first == spellId2) { continue; }
+                if (itr->second.state == PLAYERSPELL_REMOVED)
+                {
+                    continue;
+                }
+                if (itr->first == spellId1 || itr->first == spellId2)
+                {
+                    continue;
+                }
                 SpellEntry const* spellInfo = sSpellStore.LookupEntry(itr->first);
                 if (!spellInfo || !IsNeedCastSpellAtFormApply(spellInfo, form))
                 {
@@ -9357,13 +9363,13 @@ void Aura::HandleMirrorName(bool apply, bool Real)
 {
     if (!Real)
         return;
-    
+
     Unit* caster = GetCaster();
     Unit* target = GetTarget();
-    
+
     if (!target || !caster || target->GetTypeId() != TYPEID_UNIT)
         return;
-    
+
     if (apply)
         target->SetName(caster->GetName());
     else
@@ -9371,7 +9377,7 @@ void Aura::HandleMirrorName(bool apply, bool Real)
         CreatureInfo const* cinfo = ((Creature*)target)->GetCreatureInfo();
         if (!cinfo)
             return;
-        
+
         target->SetName(cinfo->Name);
     }
 }
@@ -9518,11 +9524,11 @@ void Aura::HandlePreventResurrection(bool apply, bool Real)
 {
     if (!Real)
         return;
-    
+
     Unit* target = GetTarget();
     if (!target || target->GetTypeId() != TYPEID_PLAYER)
         return;
-    
+
     if (apply)
         target->RemoveByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER);
     else if (!target->GetMap()->Instanceable())
@@ -9533,11 +9539,11 @@ void Aura::HandleFactionOverride(bool apply, bool Real)
 {
     if (!Real)
         return;
-    
+
     Unit* target = GetTarget();
     if (!target || !sFactionTemplateStore.LookupEntry(GetMiscValue()))
         return;
-    
+
     if (apply)
         target->setFaction(GetMiscValue());
     else
@@ -9548,7 +9554,7 @@ void Aura::HandleTriggerLinkedAura(bool apply, bool Real)
 {
     if (!Real)
         return;
-    
+
     uint32 linkedSpell = GetSpellProto()->EffectTriggerSpell[m_effIndex];
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(linkedSpell);
     if (!spellInfo)
@@ -9556,9 +9562,9 @@ void Aura::HandleTriggerLinkedAura(bool apply, bool Real)
         sLog.outError("Aura::HandleTriggerLinkedAura for spell %u effect %u triggering unknown spell id %u", GetSpellProto()->Id, m_effIndex, linkedSpell);
         return;
     }
-    
+
     Unit* target = GetTarget();
-    
+
     if (apply)
     {
         // ToDo: handle various cases where base points need to be applied!
@@ -9772,7 +9778,7 @@ void SpellAuraHolder::_AddSpellAuraHolder()
     // Faerie Fire (druid versions)
     if (m_spellProto->IsFitToFamily(SPELLFAMILY_DRUID, UI64LIT(0x0000000000000400)))
         m_target->ModifyAuraState(AURA_STATE_FAERIE_FIRE, true);
-    
+
       // Sting (hunter's pet ability)
          if (m_spellProto->Category == 1133)
          m_target->ModifyAuraState(AURA_STATE_FAERIE_FIRE, true);
@@ -10656,7 +10662,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     Player* m_player = (Player*)m_target;
                     if (apply)
                     {
-                       // turn player into ghoul 
+                       // turn player into ghoul
                         m_player->SetDeathState(GHOULED);
                         m_player->SetHealth(1);
                         m_player->SetRoot(true);
@@ -10674,13 +10680,13 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 {
                     if (!m_target || m_target->getDeathState() != JUST_DIED)
                         return;
-                    
+
                     //todo: 2 runic power per 5 sec in combat (ranks 1 and 2)
                     if(GetId() == 48979) // rank 1, 10 runic power.
                         m_target->ModifyPower(POWER_RUNIC_POWER, (int32)10);
                     else if(GetId() == 49483) // rank 2
                         m_target->ModifyPower(POWER_RUNIC_POWER, (int32)20);
-                    
+
                     break;
                 }
                 case 48263:                                 // Frost Presence

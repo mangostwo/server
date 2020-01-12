@@ -137,7 +137,10 @@ class CharacterHandler
         }
         void HandlePlayerLoginCallback(QueryResult * /*dummy*/, SqlQueryHolder* holder)
         {
-            if (!holder) { return; }
+            if (!holder)
+            {
+                return;
+            }
             WorldSession* session = sWorld.FindSession(((LoginQueryHolder*)holder)->GetAccountId());
             if (!session)
             {
@@ -1077,7 +1080,10 @@ void WorldSession::HandleChangePlayerNameOpcodeCallBack(QueryResult* result, uin
     WorldSession* session = sWorld.FindSession(accountId);
     if (!session)
     {
-        if (result) { delete result; }
+        if (result)
+        {
+            delete result;
+        }
         return;
     }
 
@@ -1364,7 +1370,7 @@ void WorldSession::HandleCharCustomizeOpcode(WorldPacket& recv_data)
     data << uint8(hairColor);
     data << uint8(facialHair);
     SendPacket(&data);
-    
+
     sWorld.InvalidatePlayerDataToAllClient(guid);
 }
 

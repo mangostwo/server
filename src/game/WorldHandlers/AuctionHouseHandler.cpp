@@ -395,7 +395,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recv_data)
         SendAuctionCommandResult(AH, AUCTION_STARTED, AUCTION_OK);
 
         GetPlayer()->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CREATE_AUCTION, 1);
-    
+
     // Used by Eluna
 #ifdef ENABLE_ELUNA
     sEluna->OnAdd(auctionHouse, AH);

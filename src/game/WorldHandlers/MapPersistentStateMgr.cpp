@@ -622,13 +622,13 @@ void DungeonResetScheduler::ResetAllRaid()
     time_t now = time(NULL);
     ResetTimeQueue rTQ;
     rTQ.clear();
-    
+
     time_t timeleft = resetEventTypeDelay[RESET_EVENT_FORCED_INFORM_1];
-    
+
     for (ResetTimeQueue::iterator itr = m_resetTimeQueue.begin(); itr != m_resetTimeQueue.end(); ++itr)
     {
         DungeonResetEvent& event = itr->second;
-        
+
         // we only reset raid dungeon
         if (event.type == RESET_EVENT_NORMAL_DUNGEON)
         {
@@ -943,12 +943,12 @@ struct MapPersistantStateWarnWorker
 {
     MapPersistantStateWarnWorker(time_t _timeLeft) : timeLeft(_timeLeft)
     {};
-    
+
     void operator()(Map* map)
     {
         ((DungeonMap*)map)->SendResetWarnings(timeLeft);
     }
-    
+
     time_t timeLeft;
 };
 
@@ -976,7 +976,7 @@ void MapPersistentStateManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficu
         for (PersistentStateMap::iterator itr = m_instanceSaveByInstanceId.begin(); itr != m_instanceSaveByInstanceId.end(); ++itr)
             if (itr->second->GetMapId() == mapid && itr->second->GetDifficulty() == difficulty)
                 ((DungeonPersistentState*)(itr->second))->UnbindThisState();
-            
+
         // reset maps, teleport player automaticaly to their homebinds and unload maps
         MapPersistantStateResetWorker worker;
         sMapMgr.DoForAllMapsWithMapId(mapid, worker);

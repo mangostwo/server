@@ -344,7 +344,7 @@ void Item::UpdateDuration(Player* owner, uint32 diff)
 #ifdef ENABLE_ELUNA
         sEluna->OnExpire(owner, GetProto());
 #endif /* ENABLE_ELUNA */
-        
+
         if (uint32 newItemId = sObjectMgr.GetItemExpireConvert(GetEntry()))
             owner->ConvertItem(this, newItemId);
         else
@@ -834,7 +834,10 @@ void Item::SetState(ItemUpdateState state, Player* forplayer)
     if (state != ITEM_UNCHANGED)
     {
         // new items must stay in new state until saved
-        if (uState != ITEM_NEW) { uState = state; }
+        if (uState != ITEM_NEW)
+        {
+            uState = state;
+        }
 
         if (forplayer || GetOwnerGuid())
         {
@@ -1452,4 +1455,4 @@ void Item::SetSpellCharges(uint8 index, int32 value)
 {
     SetInt32Value(ITEM_FIELD_SPELL_CHARGES + index, (value > 0) ? -value : value);
 }
- 
+

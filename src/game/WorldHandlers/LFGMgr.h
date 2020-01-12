@@ -178,7 +178,7 @@ enum LFGRoleCheckState
     LFG_ROLECHECK_NO_ROLE                        = 6       // Someone didn't select a role
 };
 
-/// Role types 
+/// Role types
 enum LFGRoles
 {
     PLAYER_ROLE_NONE                             = 0x00,
@@ -260,7 +260,7 @@ struct ItemRewards
 {
     uint32 itemId;
     uint32 itemAmount;
-    
+
     ItemRewards() : itemId(0), itemAmount(0) {}
     ItemRewards(uint32 ItemId, uint32 ItemAmount) : itemId(ItemId), itemAmount(ItemAmount) {}
 };
@@ -273,12 +273,12 @@ struct LFGPlayers //TODO: rename to LFGQueueData
     roleMap currentRoles;                   // tank, dps, healer, etc..
     std::string comments;
     bool isGroup;
-    
+
     time_t joinedTime;
     uint8 neededTanks;
     uint8 neededHealers;
     uint8 neededDps;
-    
+
     LFGPlayers() : currentState(LFG_STATE_NONE), currentRoles(0), isGroup(false) {}
     LFGPlayers(LFGState state, std::set<uint32> dungeonSelection, roleMap CurrentRoles, std::string comment, bool IsGroup, time_t JoinedTime,
         uint8 NeededTanks, uint8 NeededHealers, uint8 NeededDps) : currentState(state), dungeonList(dungeonSelection),
@@ -290,7 +290,7 @@ struct LFGRoleCheck
 {
     LFGRoleCheckState state;      // current status of the role check
     roleMap currentRoles;         // map of players to roles
-    std::set<uint32> dungeonList; // The dungeons this player or group are queued for 
+    std::set<uint32> dungeonList; // The dungeons this player or group are queued for
     uint32 randomDungeonID;       // The random dungeon ID
     uint64 leaderGuidRaw;         // ObjectGuid(raw) of leader
     time_t waitForRoleTime;       // How long we'll wait for the players to confirm their roles
@@ -302,7 +302,7 @@ struct LFGWait
     int32 previousTime;           // how long it took for the last person to go from queue to instance
     uint32 playerCount;           // amount of players in x queue for calculations [not sure if needed when finished implementing system]
     bool doAverage;               // tells the lfgmgr during a world update whether or not to recalculate waiting time
-    
+
     LFGWait() : time(-1), previousTime(-1), playerCount(0), doAverage(false) {}
     LFGWait(int32 currentTime, int32 lastTime, uint32 currentPlayerCount, bool shouldRecalculate)
         : time(currentTime), previousTime(lastTime), playerCount(currentPlayerCount), doAverage(shouldRecalculate) {}
@@ -330,7 +330,7 @@ struct LFGPlayerStatus
     LfgUpdateType updateType;
     std::set<uint32> dungeonList;
     std::string comment;
-    
+
     LFGPlayerStatus() { }
     LFGPlayerStatus(LFGState State, LfgUpdateType UpdateType, std::set<uint32> DungeonList, std::string Comment)
         : state(State), updateType(UpdateType), dungeonList(DungeonList), comment(Comment) { }
@@ -343,7 +343,7 @@ struct LFGGroupStatus //todo: check for this in joinlfg function, not lfgplayers
     uint32 dungeonID;      // ID of the dungeon the group should be in
     roleMap playerRoles;   // Container holding each player's objectguid and their roles
     ObjectGuid leaderGuid; // The group leader's object guid
-    
+
     LFGGroupStatus() { }
     LFGGroupStatus(LFGState State, uint32 DungeonID, roleMap PlayerRoles, ObjectGuid LeaderGuid)
         : state(State), dungeonID(DungeonID), playerRoles(PlayerRoles), leaderGuid(LeaderGuid) { }
@@ -375,7 +375,7 @@ struct LFGRewards
     uint32 expReward;           // Amount of experience rewarded
     uint32 itemID;              // ID of item reward
     uint32 itemAmount;          // How many of x item is rewarded
-    
+
     LFGRewards() { }
     LFGRewards(uint32 RandomDungeonEntry, uint32 GroupDungeonEntry, bool HasDoneDaily,
         uint32 MoneyReward, uint32 ExpReward, uint32 ItemID, uint32 ItemAmount) :
@@ -392,7 +392,7 @@ struct LFGBoot
     std::string reason;        // Reason stated for the vote
     proposalAnswerMap answers; // Player's votes
     time_t startTime;          // When the vote started
-    
+
     LFGBoot() { }
     LFGBoot(bool InProgress, ObjectGuid PlayerVotedOn, std::string Reason, proposalAnswerMap Answers, time_t StartTime)
         : inProgress(InProgress), playerVotedOn(PlayerVotedOn), reason(Reason), answers(Answers), startTime(StartTime) { }
@@ -405,291 +405,291 @@ class LFGMgr
 public:
     LFGMgr();
     ~LFGMgr();
-    
+
     /// Update queue information and such
     void Update();
-    
+
     /**
      * @brief Attempt to join the dungeon finder queue, as long as the player(s)
      *        fit the criteria.
-     * 
+     *
      * @param roles Roles selected in lfg window
      * @param dungeons List of dungeon(s) selected
      * @param comments Comments made by the player
      * @param plr Pointer to the player sending the packet
      */
     void JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string comments, Player* plr);
-    
+
     /**
      * @brief Leave the lfg/dungeon finder system.
-     * 
+     *
      * @param plr The pointer to the player sending the request
      * @param isGroup Whether or not they are the leader of a group / in a group
      */
     void LeaveLFG(Player* plr, bool isGroup);
-    
+
     /**
      * @brief Go through a number of checks to see if the player/group can join
      *        the LFG queue
-     * 
+     *
      * @param plr The pointer to the player
      */
     LfgJoinResult GetJoinResult(Player* plr);
-    
+
     /**
      * @brief Fetch the playerstatus struct of a player on request, if existant
-     * 
+     *
      * @param guid the player's objectguid
      */
     LFGPlayerStatus GetPlayerStatus(ObjectGuid guid);
-    
+
     /**
      * @brief Set the player's comment string
-     * 
+     *
      * @param guid The player's objectguid
      * @param comment Their comments
      */
     void SetPlayerComment(ObjectGuid guid, std::string comment);
-    
+
     /**
      * @brief Set the player's LFG state
-     * 
+     *
      * @param guid The player's objectguid
      * @param state the LFGState value
      */
     void SetPlayerState(ObjectGuid guid, LFGState state);
-    
+
     /**
      * @brief Set the player's LFG update type
-     * 
+     *
      * @param guid The player's objectguid
      * @param updateType The LfgUpdateType value
      */
     void SetPlayerUpdateType(ObjectGuid guid, LfgUpdateType updateType);
-    
+
     /**
      * @brief Used to fetch the item rewards of a dungeon from the database
-     * 
+     *
      * @param dungeonId the dungeon ID used in the DBCs
      * @param type the type of dungeon
      */
     ItemRewards GetDungeonItemRewards(uint32 dungeonId, DungeonTypes type);
-    
+
     /**
      * @brief Used to determine the type of dungeon for ease of use.
-     * 
+     *
      * @param dungeonId the dungeon ID used in the DBCs
      */
     DungeonTypes GetDungeonType(uint32 dungeonId);
-    
+
     /**
      * @brief Used to record the first time a player has entered x type of dungeon in the day.
-     * 
+     *
      * @param guidLow the player's guidLow
      * @param dungeon the specific type/expansion of dungeon
      */
     void RegisterPlayerDaily(uint32 guidLow, DungeonTypes dungeon);
-    
+
     /**
      * @brief Used to find whether or not the player has done x type of dungeon today.
-     * 
+     *
      * @param guidLow the player's guidLow
      * @param dungeon the specific type/expansion of dungeon
      */
     bool HasPlayerDoneDaily(uint32 guidLow, DungeonTypes dungeon);
-    
+
     /// Reset accounts of players completing a/any dungeon for the day for new rewards
     void ResetDailyRecords();
 
     /**
-     * @brief Find out whether or not a special dungeon is available for that season 
-     * 
+     * @brief Find out whether or not a special dungeon is available for that season
+     *
      * @param dungeonId the ID of the dungeon in question
      */
     bool IsSeasonActive(uint32 dungeonId);
-    
+
     /**
-     * @brief Find the random dungeons applicable for a player 
-     * 
+     * @brief Find the random dungeons applicable for a player
+     *
      * @param level The level of said player
      * @param expansion The player's expansion
      */
     dungeonEntries FindRandomDungeonsForPlayer(uint32 level, uint8 expansion);
-    
+
     /**
      * @brief Find the random dungeons not applicable for a player
-     * 
+     *
      * @param level The level of said player
      * @param expansion The player's expansion
      */
     dungeonForbidden FindRandomDungeonsNotForPlayer(Player* plr);
-    
+
     /// Given the ID of a dungeon, spit out its entry
     uint32 GetDungeonEntry(uint32 ID);
-    
+
     /// Teleports a player out of a dungeon (called by CMSG_LFG_TELEPORT)
     void TeleportPlayer(Player* pPlayer, bool out);
-    
+
     /// Queue Functions Below
-    
+
     /**
      * Find the player's or group's information and update the system with
      *     the amount of each role they need to find.
-     * 
+     *
      * @param guid The guid assigned to the structure
      * @param information The LFGPlayers structure containing their information
      */
     void UpdateNeededRoles(ObjectGuid guid, LFGPlayers* information);
-    
+
     /**
      * @brief Add the player or group to the Dungeon Finder queue
-     * 
+     *
      * @param guid the player/group's ObjectGuid
      */
     void AddToQueue(ObjectGuid guid);
-    
+
     /**
      * @brief Remove the player or group from the Dungeon Finder queue
-     * 
+     *
      * @param guid the player/group's ObjectGuid
      */
     void RemoveFromQueue(ObjectGuid guid);
-    
+
     /// Search the queue for compatible matches
     void FindQueueMatches();
-    
+
     /**
      * @brief Search the queue for matches based off of one's guid
-     * 
+     *
      * @param guid The player or group's guid
      */
     void FindSpecificQueueMatches(ObjectGuid guid);
-    
+
     /// Send a periodic status update for queued players
     void SendQueueStatus();
-    
+
     /// Role-Related Functions
-    
+
     /**
      * @brief Set and/or confirm roles for a group.
-     * 
+     *
      * @param pPlayer The pointer to the player issuing the request
      * @param pGroup The pointer to that player's group
      * @param roles The group leader's role(s)
      */
     void PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles);
-    
+
     /// Make sure role selections are okay
     bool ValidateGroupRoles(roleMap groupMap);
-    
+
     /// Proposal-Related Functions
-    
+
     void ProposalUpdate(uint32 proposalID, ObjectGuid plrGuid, bool accepted);
-    
+
     /// Handles reward hooks -- called by achievement manager
     void HandleBossKilled(Player* pPlayer);
-    
+
     /// Group kick hook
     void AttemptToKickPlayer(Group* pGroup, ObjectGuid guid, ObjectGuid kicker, std::string reason);
-    
+
     // Called when a player votes yes or no on a boot vote
     void CastVote(Player* pPlayer, bool vote);
-    
+
 protected:
     bool IsSeasonal(uint32 dbcFlags) { return ((dbcFlags & LFG_FLAG_SEASONAL) != 0) ? true : false; }
-    
+
     /// Check if player/party is already in the system, return that data
     LFGPlayers* GetPlayerOrPartyData(ObjectGuid guid);
-    
+
     /// Get a proposal structure given its id
     LFGProposal* GetProposalData(uint32 proposalID);
-    
+
     /// Get information on a group currently in a dungeon
     LFGGroupStatus* GetGroupStatus(ObjectGuid guid);
-    
+
     /// Add the player to their respective waiting map for their dungeon
     void AddToWaitMap(uint8 role, std::set<uint32> dungeons);
-    
+
     /// Checks if any players have the leader flag for their roles
     bool HasLeaderFlag(roleMap const& roles);
-    
+
     /// Compares two groups/players to see if their role combinations are compatible
     bool RoleMapsAreCompatible(LFGPlayers* groupOne, LFGPlayers* groupTwo);
-    
+
     /// Checks whether or not two combinations of players/groups are on the same team (alliance/horde)
     bool MatchesAreOfSameTeam(LFGPlayers* groupOne, LFGPlayers* groupTwo);
-    
+
     /// Are the players in a proposal already grouped up?
     bool IsProposalSameGroup(LFGProposal const& proposal);
-    
+
     /// Update a proposal after a player refused to join
     void ProposalDeclined(ObjectGuid guid, LFGProposal* proposal);
-    
+
     /// Updates a wait map with the amount of time it took the last player to join
     void UpdateWaitMap(LFGRoles role, uint32 dungeonID, time_t waitTime);
-    
+
     /// Creates a group so they can enter a dungeon together
     void CreateDungeonGroup(LFGProposal* proposal);
-    
+
     /// Sends a group to the dungeon assigned to them
     void TeleportToDungeon(uint32 dungeonID, Group* pGroup);
-    
+
     /**
      * @brief Merges two players/groups/etc into one for dungeon assignment.
-     * 
+     *
      * @param guidOne The guid assigned to the first group in m_playerData
      * @param guidTwo The guid assigned to the second group in m_playerData
      * @param compatibleDungeons The dungeons that both players or groups agreed to doing
      */
     void MergeGroups(ObjectGuid guidOne, ObjectGuid guidTwo, std::set<uint32> compatibleDungeons);
-    
+
     /// Send a proposal to each member of a group
     void SendDungeonProposal(LFGPlayers* lfgGroup);
-    
+
     /// Tell a group member that someone else just confirmed their role
     void SendRoleChosen(ObjectGuid plrGuid, ObjectGuid confirmedGuid, uint8 roles);
-    
+
     /// Send SMSG_LFG_ROLE_CHECK_UPDATE to a specific player
     void SendRoleCheckUpdate(ObjectGuid plrGuid, LFGRoleCheck const& roleCheck);
-    
+
     /// Send SMSG_LFG_UPDATE_PARTY or SMSG_LFG_UPDATE_PLAYER
     void SendLfgUpdate(ObjectGuid plrGuid, LFGPlayerStatus status, bool isGroup);
-    
+
     /// Send SMSG_LFG_JOIN_RESULT
     void SendLfgJoinResult(ObjectGuid plrGuid, LfgJoinResult result, LFGState state, partyForbidden const& lockedDungeons);
-    
+
     /// Get rid of expired role checks
     void RemoveOldRoleChecks();
-    
+
 private:
     /// Daily occurences of a player doing X type dungeon
     dailyEntries m_dailyAny;
     dailyEntries m_dailyTBCHeroic;
     dailyEntries m_dailyLKNormal;
     dailyEntries m_dailyLKHeroic;
-    
+
     /// General info related to joining / leaving the dungeon finder
     playerData m_playerData;
     queueSet   m_queueSet;
-    
+
     /// Dungeon Finder Status for players
     playerStatusMap m_playerStatusMap;
-    
+
     groupSet m_groupSet;
     groupStatusMap m_groupStatusMap;
-    
+
     /// Role check information
     roleCheckMap m_roleCheckMap;
-    
+
     /// Boot vote information
     bootStatusMap m_bootStatusMap;
-    
+
     /// Wait times for the queue
     waitTimeMap m_tankWaitTime;
     waitTimeMap m_healerWaitTime;
     waitTimeMap m_dpsWaitTime;
     waitTimeMap m_avgWaitTime;
-    
+
     /// Proposal information
     uint32 m_proposalId;
     proposalMap m_proposalMap;

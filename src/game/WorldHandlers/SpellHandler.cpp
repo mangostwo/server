@@ -627,7 +627,7 @@ void WorldSession::HandleTotemDestroyed(WorldPacket& recvPacket)
 void WorldSession::HandleSelfResOpcode(WorldPacket& /*recv_data*/)
 {
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: CMSG_SELF_RES");                  // empty opcode
-    
+
     if (_player->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
         return;
 
@@ -663,7 +663,7 @@ void WorldSession::HandleSpellClick(WorldPacket& recv_data)
         {
             if (sScriptMgr.OnNpcSpellClick(_player, unit, itr->second.spellId))
                 return;
-            
+
             Unit* caster = (itr->second.castFlags & 0x1) ? (Unit*)_player : (Unit*)unit;
             Unit* target = (itr->second.castFlags & 0x2) ? (Unit*)_player : (Unit*)unit;
 

@@ -145,7 +145,7 @@ void PetAI::UpdateAI(const uint32 diff)
     }
 
     Unit* owner = m_creature->GetCharmerOrOwner();
-    
+
     // Despawn minion/pet if owner dies
     if (owner->IsDead())
     {

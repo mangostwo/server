@@ -1413,7 +1413,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         if (!m_regenTimer)
             RegenerateAll();
     }
-    
+
     if(!IsAlive() && !HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST) && getDeathState() != GHOULED)
         SetHealth(0);
 
@@ -1428,7 +1428,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
 #ifdef ENABLE_ELUNA
             sEluna->OnSave(this);
 #endif
-            
+
             SaveToDB();
             DETAIL_LOG("Player '%s' (GUID: %u) saved", GetName(), GetGUIDLow());
         }
@@ -2547,7 +2547,7 @@ void Player::GiveXP(uint32 xp, Unit* victim)
         return;
 
     uint32 level = getLevel();
-    
+
 #ifdef ENABLE_ELUNA
     sEluna->OnGiveXP(this, xp, victim);
 #endif
@@ -2599,7 +2599,7 @@ void Player::GiveXP(uint32 xp, Unit* victim)
 void Player::GiveLevel(uint32 level)
 {
     uint8 oldLevel = getLevel();
-    
+
     if (level == getLevel())
         return;
 
@@ -3064,7 +3064,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
     {
         uint32 next_active_spell_id = 0;
         bool dependent_set = false;
-        
+
         // fix activate state for non-stackable low rank (and find next spell for !active case)
         if (sSpellMgr.IsRankedSpellNonStackableInSpellBook(spellInfo))
         {
@@ -3827,7 +3827,7 @@ bool Player::resetTalents(bool no_cost, bool all_specs)
 #ifdef ENABLE_ELUNA
     sEluna->OnTalentsReset(this, no_cost);
 #endif
-    
+
     // not need after this call
     if (HasAtLoginFlag(AT_LOGIN_RESET_TALENTS) && all_specs)
         RemoveAtLoginFlag(AT_LOGIN_RESET_TALENTS, true);
@@ -4666,7 +4666,7 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
     m_camera.UpdateVisibilityForOwner();
     // update visibility of player for nearby cameras
     UpdateObjectVisibility();
-    
+
 #ifdef ENABLE_ELUNA
     sEluna->OnResurrect(this);
 #endif
@@ -6540,9 +6540,9 @@ void Player::RewardReputation(Unit* pVictim, float rate)
 {
     if (!pVictim || pVictim->GetTypeId() == TYPEID_PLAYER)
         return;
-        
+
     Creature* pVictimAsCreature = reinterpret_cast<Creature*>(pVictim);
-    
+
     if (pVictimAsCreature->IsReputationGainDisabled())
         return;
 
@@ -7013,7 +7013,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
 #ifdef ENABLE_ELUNA
     sEluna->OnUpdateZone(this, newZone, newArea);
 #endif
-    
+
     m_zoneUpdateId    = newZone;
     m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
 
@@ -7145,7 +7145,7 @@ void Player::DuelComplete(DuelCompleteType type)
         data << GetName();
         SendMessageToSet(&data, true);
     }
-    
+
 #ifdef ENABLE_ELUNA
     sEluna->OnDuelEnd(duel->opponent, this, type);
 #endif
@@ -11349,7 +11349,7 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
         pItem2->SetState(ITEM_CHANGED, this);
 
         ApplyEquipCooldown(pItem2);
-        
+
 #ifdef ENABLE_ELUNA
         sEluna->OnEquip(this, pItem2, bag, slot);
 #endif
@@ -11367,7 +11367,7 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
 #ifdef ENABLE_ELUNA
     sEluna->OnEquip(this, pItem, bag, slot);
 #endif
-    
+
     return pItem;
 }
 
@@ -14934,7 +14934,10 @@ void Player::AdjustQuestReqItemCount(Quest const* pQuest, QuestStatusData& quest
                 uint32 curitemcount = GetItemCount(pQuest->ReqItemId[i], true);
 
                 questStatusData.m_itemcount[i] = std::min(curitemcount, reqitemcount);
-                if (questStatusData.uState != QUEST_NEW) { questStatusData.uState = QUEST_CHANGED; }
+                if (questStatusData.uState != QUEST_NEW)
+                {
+                    questStatusData.uState = QUEST_CHANGED;
+                }
             }
         }
     }
@@ -15092,7 +15095,10 @@ void Player::ItemRemovedQuestCheck(uint32 entry, uint32 count)
                 {
                     uint32 remitemcount = (curitemcount <= reqitemcount ? count : count + reqitemcount - curitemcount);
                     q_status.m_itemcount[j] = curitemcount - remitemcount;
-                    if (q_status.uState != QUEST_NEW) { q_status.uState = QUEST_CHANGED; }
+                    if (q_status.uState != QUEST_NEW)
+                    {
+                        q_status.uState = QUEST_CHANGED;
+                    }
 
                     IncompleteQuest(questid);
                 }
@@ -15323,7 +15329,10 @@ void Player::TalkedToCreature(uint32 entry, ObjectGuid guid)
                         if (curTalkCount < reqTalkCount)
                         {
                             q_status.m_creatureOrGOcount[j] = curTalkCount + addTalkCount;
-                            if (q_status.uState != QUEST_NEW) { q_status.uState = QUEST_CHANGED; }
+                            if (q_status.uState != QUEST_NEW)
+                            {
+                                q_status.uState = QUEST_CHANGED;
+                            }
 
                             SendQuestUpdateAddCreatureOrGo(qInfo, guid, j, q_status.m_creatureOrGOcount[j]);
                         }
@@ -17370,7 +17379,10 @@ void Player::_LoadBoundInstances(QueryResult* result)
 
             // since non permanent binds are always solo bind, they can always be reset
             DungeonPersistentState* state = reinterpret_cast<DungeonPersistentState*>(sMapPersistentStateMgr.AddPersistentState(mapEntry, instanceId, Difficulty(difficulty), resetTime, !perm, true));
-            if (state) { BindToInstance(state, perm, true); }
+            if (state)
+            {
+                BindToInstance(state, perm, true);
+            }
         }
         while (result->NextRow());
         delete result;
@@ -17453,7 +17465,7 @@ InstancePlayerBind* Player::BindToInstance(DungeonPersistentState* state, bool p
         if (!load)
             DEBUG_LOG("Player::BindToInstance: %s(%d) is now bound to map %d, instance %d, difficulty %d",
                       GetName(), GetGUIDLow(), state->GetMapId(), state->GetInstanceId(), state->GetDifficulty());
-        
+
         // Used by Eluna
 #ifdef ENABLE_ELUNA
         sEluna->OnBindToInstance(this, state->GetDifficulty(), state->GetMapId(), permanent);
@@ -18089,7 +18101,10 @@ void Player::_SaveInventory()
     for (uint8 i = BUYBACK_SLOT_START; i < BUYBACK_SLOT_END; ++i)
     {
         Item* item = m_items[i];
-        if (!item || item->GetState() == ITEM_NEW) { continue; }
+        if (!item || item->GetState() == ITEM_NEW)
+        {
+            continue;
+        }
 
         static SqlStatementID delInv ;
         static SqlStatementID delItemInst ;
@@ -18110,14 +18125,20 @@ void Player::_SaveInventory()
     }
 
     // if no changes
-    if (m_itemUpdateQueue.empty()) { return; }
+    if (m_itemUpdateQueue.empty())
+    {
+        return;
+    }
 
     // do not save if the update queue is corrupt
     bool error = false;
     for (size_t i = 0; i < m_itemUpdateQueue.size(); ++i)
     {
         Item* item = m_itemUpdateQueue[i];
-        if (!item || item->GetState() == ITEM_REMOVED) { continue; }
+        if (!item || item->GetState() == ITEM_REMOVED)
+        {
+            continue;
+        }
         Item* test = GetItemByPos(item->GetBagSlot(), item->GetSlot());
 
         if (test == NULL)
@@ -18146,7 +18167,10 @@ void Player::_SaveInventory()
     for (size_t i = 0; i < m_itemUpdateQueue.size(); ++i)
     {
         Item* item = m_itemUpdateQueue[i];
-        if (!item) { continue; }
+        if (!item)
+        {
+            continue;
+        }
 
         Bag* container = item->GetContainer();
         uint32 bag_guid = container ? container->GetGUIDLow() : 0;
@@ -18842,7 +18866,7 @@ void Player::UpdateDuelFlag(time_t currTime)
     {
         return;
     }
-    
+
     // Used by Eluna
 #ifdef ENABLE_ELUNA
     sEluna->OnDuelStart(this, duel->opponent);
@@ -19749,7 +19773,10 @@ void Player::TakeExtendedCost(uint32 extendedCostId, uint32 count)
 bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot)
 {
     // cheating attempt
-    if (count < 1) { count = 1; }
+    if (count < 1)
+    {
+        count = 1;
+    }
 
     if (!IsAlive())
     {
@@ -20707,8 +20734,14 @@ void Player::AddComboPoints(Unit* target, int8 count)
         target->AddComboPointHolder(GetGUIDLow());
     }
 
-    if (m_comboPoints > 5) { m_comboPoints = 5; }
-    if (m_comboPoints < 0) { m_comboPoints = 0; }
+    if (m_comboPoints > 5)
+    {
+        m_comboPoints = 5;
+    }
+    if (m_comboPoints < 0)
+    {
+        m_comboPoints = 0;
+    }
 
     SendComboPoints();
 }
@@ -23760,14 +23793,14 @@ void Player::ModifyMoney(int32 d)
 #ifdef ENABLE_ELUNA
     sEluna->OnMoneyChanged(this, d);
 #endif
-    
+
     if (d < 0)
     {
         SetMoney(GetMoney() > uint32(-d) ? GetMoney() + d : 0);
     }
     else
         { SetMoney(GetMoney() < uint32(MAX_MONEY_AMOUNT - d) ? GetMoney() + d : MAX_MONEY_AMOUNT); }
-    
+
     // "At Gold Limit"
     if (GetMoney() >= MAX_MONEY_AMOUNT)
         SendEquipError(EQUIP_ERR_TOO_MUCH_GOLD, NULL, NULL);
@@ -24279,20 +24312,20 @@ float Player::GetCollisionHeight(bool mounted) const
         {
             return GetCollisionHeight(false);
         }
-        
+
         CreatureModelDataEntry const* mountModelData = sCreatureModelDataStore.LookupEntry(mountDisplayInfo->ModelId);
         if (!mountModelData)
         {
             return GetCollisionHeight(false);
         }
-        
-        CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(GetNativeDisplayId());  
+
+        CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(GetNativeDisplayId());
         if (!displayInfo)
         {
             sLog.outError("GetCollisionHeight::Unable to find CreatureDisplayInfoEntry for %u", GetNativeDisplayId());
-            return 0;        
+            return 0;
         }
-        
+
         CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
         if(!modelData)
         {
@@ -24302,7 +24335,7 @@ float Player::GetCollisionHeight(bool mounted) const
 
         float scaleMod = GetObjectScale(); // 99% sure about this
 
-        return scaleMod * mountModelData->MountHeight + modelData->CollisionHeight * 0.5f;        
+        return scaleMod * mountModelData->MountHeight + modelData->CollisionHeight * 0.5f;
     }
     else
     {
@@ -24321,7 +24354,7 @@ float Player::GetCollisionHeight(bool mounted) const
             return 0;
         }
 
-        return modelData->CollisionHeight;        
+        return modelData->CollisionHeight;
     }
 }
 

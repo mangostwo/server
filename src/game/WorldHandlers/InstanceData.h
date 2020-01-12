@@ -65,7 +65,7 @@ enum EncounterFrameTypes                                    // only raid UI spec
     ENCOUNTER_FRAME_ENABLE_OBJECTIVE  = 4,
     ENCOUNTER_FRAME_UPDATE_OBJECTIVE  = 5,
     ENCOUNTER_FRAME_DISABLE_OBJECTIVE = 6,
-    ENCOUNTER_FRAME_UNK7              = 7                   // sorting encounter units  
+    ENCOUNTER_FRAME_UNK7              = 7                   // sorting encounter units
 };
 
 class InstanceData

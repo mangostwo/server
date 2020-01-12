@@ -5335,7 +5335,10 @@ bool ChatHandler::HandleListAurasCommand(char* /*args*/)
     for (int i = 0; i < TOTAL_AURAS; ++i)
     {
         Unit::AuraList const& uAuraList = unit->GetAurasByType(AuraType(i));
-        if (uAuraList.empty()) { continue; }
+        if (uAuraList.empty())
+        {
+            continue;
+        }
         PSendSysMessage(LANG_COMMAND_TARGET_LISTAURATYPE, uAuraList.size(), i);
         for (Unit::AuraList::const_iterator itr = uAuraList.begin(); itr != uAuraList.end(); ++itr)
         {
@@ -7075,7 +7078,10 @@ bool ChatHandler::HandleCastSelfCommand(char* args)
 bool ChatHandler::HandleInstanceListBindsCommand(char* /*args*/)
 {
     Player* player = getSelectedPlayer();
-    if (!player) { player = m_session->GetPlayer(); }
+    if (!player)
+    {
+        player = m_session->GetPlayer();
+    }
     uint32 counter = 0;
     for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
     {

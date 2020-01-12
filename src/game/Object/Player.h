@@ -1143,8 +1143,14 @@ class Player : public Unit
         void SetGMVisible(bool on);
         void SetPvPDeath(bool on)
         {
-            if (on) { m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH; }
-            else { m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH; }
+            if (on)
+            {
+                m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH;
+            }
+            else
+            {
+                m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH;
+            }
         }
 
         // 0 = own auction, -1 = enemy auction, 1 = goblin auction
@@ -1193,7 +1199,7 @@ class Player : public Unit
             return m_rest_bonus;
         }
         void SetRestBonus(float rest_bonus_new);
-        
+
         /**
          * \brief: compute rest bonus
          * \param: time_t timePassed > time from last check
@@ -1549,7 +1555,7 @@ class Player : public Unit
 
         void AddTimedQuest(uint32 quest_id) { m_timedquests.insert(quest_id); }
         void RemoveTimedQuest(uint32 quest_id) { m_timedquests.erase(quest_id); }
-        
+
         /// Return collision height sent to client
         float GetCollisionHeight(bool mounted) const;
 
@@ -1722,7 +1728,7 @@ class Player : public Unit
         void LearnTalent(uint32 talentId, uint32 talentRank);
         void LearnPetTalent(ObjectGuid petGuid, uint32 talentId, uint32 talentRank);
         bool HasTalent(uint32 spell_id, uint8 spec) const;
-        
+
         uint32 CalculateTalentsPoints() const;
 
         // Dual Spec

@@ -45,22 +45,22 @@ void GMTicketMgr::LoadGMTickets()
     if (!result)
     {
         BarGoLink bar(1);
-        
+
         bar.step();
-        
+
         sLog.outString();
         sLog.outString(">> Loaded `character_ticket`, table is empty.");
         return;
     }
-    
+
     BarGoLink bar(result->GetRowCount());
-    
+
     do
     {
         bar.step();
-        
+
         Field* fields = result->Fetch();
-        
+
         uint32 guidlow = fields[0].GetUInt32();
         if (!guidlow)
         {
@@ -81,7 +81,7 @@ void GMTicketMgr::LoadGMTickets()
     }
     while (result->NextRow());
     delete result;
-    
+
     sLog.outString();
     sLog.outString(">> Loaded " SIZEFMTD " GM tickets", GetTicketCount());
 }

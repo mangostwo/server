@@ -67,7 +67,7 @@ void WorldSession::HandleRequestVehicleExit(WorldPacket& recvPacket)
         return;
 
     Unit* vehicle = (Unit*)transportInfo->GetTransport();
-    
+
     // Check for exit flag
     if (VehicleSeatEntry const* seatEntry = vehicle->GetVehicleInfo()->GetSeatEntry(transportInfo->GetTransportSeat()))
         if (seatEntry->m_flags & SEAT_FLAG_CAN_EXIT)
@@ -175,11 +175,11 @@ void WorldSession::HandleEjectPassenger(WorldPacket& recvPacket)
 
     if (!passenger || !passenger->IsBoarded())
         return;
-    
+
     // _player is not a vehicle
     if (!_player->IsVehicle())
         return;
-    
+
     VehicleInfo* vehicleInfo = _player->GetVehicleInfo();
 
     // _player must be transporting passenger

@@ -1955,7 +1955,10 @@ SpellEntry const* Creature::ReachWithSpellAttack(Unit* pVictim)
                 break;
             }
         }
-        if (bcontinue) { continue; }
+        if (bcontinue)
+        {
+            continue;
+        }
 
         if (spellInfo->manaCost > GetPower(POWER_MANA))
         {

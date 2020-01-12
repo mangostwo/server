@@ -1708,8 +1708,14 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, Weapo
     // Disable parry or dodge for ranged attack
     if (damageInfo->attackType == RANGED_ATTACK)
     {
-        if (damageInfo->hitOutCome == MELEE_HIT_PARRY) { damageInfo->hitOutCome = MELEE_HIT_NORMAL; }
-        if (damageInfo->hitOutCome == MELEE_HIT_DODGE) { damageInfo->hitOutCome = MELEE_HIT_MISS; }
+        if (damageInfo->hitOutCome == MELEE_HIT_PARRY)
+        {
+            damageInfo->hitOutCome = MELEE_HIT_NORMAL;
+        }
+        if (damageInfo->hitOutCome == MELEE_HIT_DODGE)
+        {
+            damageInfo->hitOutCome = MELEE_HIT_MISS;
+        }
     }
 
     switch (damageInfo->hitOutCome)
@@ -1927,7 +1933,10 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, Weapo
 
 void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
 {
-    if (damageInfo == 0) { return; }
+    if (damageInfo == 0)
+    {
+        return;
+    }
     Unit* pVictim = damageInfo->target;
 
     if (!this || !pVictim)
@@ -2709,7 +2718,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
 
             CleanDamage cleanDamage = CleanDamage(splitted, BASE_ATTACK, MELEE_HIT_NORMAL);
             pCaster->DealDamage(caster, splitted, &cleanDamage, DIRECT_DAMAGE, schoolMask, (*i)->GetSpellProto(), false);
-            
+
             // Break 'fear' and such
             pCaster->ProcDamageAndSpellFor(true, this, PROC_FLAG_TAKEN_NEGATIVE_SPELL_HIT, PROC_EX_NORMAL_HIT, BASE_ATTACK, (*i)->GetSpellProto(), splitted);
         }
@@ -3545,7 +3554,10 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell)
     if (pVictim->GetTypeId() == TYPEID_PLAYER)
         HitChance -= int32(((Player*)pVictim)->GetRatingBonusValue(CR_HIT_TAKEN_SPELL) * 100.0f);
 
-    if (HitChance <  100) { HitChance =  100; }
+    if (HitChance <  100)
+    {
+        HitChance =  100;
+    }
     if (HitChance > 10000) HitChance = 10000;
 
     int32 tmp = spell->HasAttribute(SPELL_ATTR_EX3_CANT_MISS) ? 0 : (10000 - HitChance);
@@ -4040,7 +4052,10 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
 
     CurrentSpellTypes CSpellType = pSpell->GetCurrentContainer();
 
-    if (pSpell == m_currentSpells[CSpellType]) { return; }      // avoid breaking self
+    if (pSpell == m_currentSpells[CSpellType])
+    {
+        return;       // avoid breaking self
+    }
 
     // break same type spell if it is not delayed
     InterruptSpell(CSpellType, false);
@@ -4106,7 +4121,7 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
     m_currentSpells[CSpellType] = pSpell;
     pSpell->SetReferencedFromCurrent(true);
 
-    pSpell->SetSelfContainer(&(m_currentSpells[pSpell->GetCurrentContainer()])); 
+    pSpell->SetSelfContainer(&(m_currentSpells[pSpell->GetCurrentContainer()]));
     // previous and faulty version of the following code. If the above proves to work, then delete this instruction
     //   pSpell->m_selfContainer = &(m_currentSpells[pSpell->GetCurrentContainer()]);
 }
@@ -4782,7 +4797,10 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
     {
         next = i;
         ++next;
-        if (!(*i).second) { continue; }
+        if (!(*i).second)
+        {
+            continue;
+        }
 
         SpellEntry const* i_spellProto = (*i).second->GetSpellProto();
 
@@ -4809,7 +4827,10 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
             }
         }
 
-        if (i_spellId == spellId) { continue; }
+        if (i_spellId == spellId)
+        {
+            continue;
+        }
 
         bool is_triggered_by_spell = false;
         // prevent triggering aura of removing aura that triggered it
@@ -6081,14 +6102,14 @@ void Unit::SetPowerType(Powers new_powertype)
                 curValue = 0;
                 break;
         }
-        
-        // set power (except for mana) 
-        if (new_powertype != POWER_MANA) 
-        { 
-            SetMaxPower(new_powertype, maxValue); 
-            SetPower(new_powertype, curValue); 
-        } 
-        
+
+        // set power (except for mana)
+        if (new_powertype != POWER_MANA)
+        {
+            SetMaxPower(new_powertype, maxValue);
+            SetPower(new_powertype, curValue);
+        }
+
         // send power type update to client
         WorldPacket data(SMSG_POWER_UPDATE);
         data << GetPackGUID();
@@ -6663,7 +6684,7 @@ bool Unit::CanInitiateAttack() const
 {
     if (!IsVehicle())
         return true;
-    
+
     for (uint8 i = 0; i < MAX_VEHICLE_SEAT; ++i)
     {
         if (uint32 seatId = m_vehicleInfo->GetVehicleEntry()->m_seatID[i])
@@ -6675,7 +6696,7 @@ bool Unit::CanInitiateAttack() const
             }
         }
     }
-    
+
     return true;
 }
 
@@ -6729,9 +6750,15 @@ void Unit::ModifyAuraState(AuraState flag, bool apply)
                 const PlayerSpellMap& sp_list = ((Player*)this)->GetSpellMap();
                 for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
                 {
-                    if (itr->second.state == PLAYERSPELL_REMOVED) { continue; }
+                    if (itr->second.state == PLAYERSPELL_REMOVED)
+                    {
+                        continue;
+                    }
                     SpellEntry const* spellInfo = sSpellStore.LookupEntry(itr->first);
-                    if (!spellInfo || !IsPassiveSpell(spellInfo)) { continue; }
+                    if (!spellInfo || !IsPassiveSpell(spellInfo))
+                    {
+                        continue;
+                    }
                     if (AuraState(spellInfo->CasterAuraState) == flag)
                     {
                         CastSpell(this, itr->first, true, NULL);
@@ -7946,7 +7973,10 @@ uint32 Unit::SpellHealingBonusDone(Unit* pVictim, SpellEntry const* spellProto, 
 
     // done scripted mod (take it from owner)
     Unit* owner = GetOwner();
-    if (!owner) { owner = this; }
+    if (!owner)
+    {
+        owner = this;
+    }
     AuraList const& mOverrideClassScript = owner->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
     for (AuraList::const_iterator i = mOverrideClassScript.begin(); i != mOverrideClassScript.end(); ++i)
     {
@@ -8757,7 +8787,7 @@ void Unit::Mount(uint32 mount, uint32 spellId)
                 else
                     { pet->ApplyModeFlags(PET_MODE_DISABLE_ACTIONS, true); }
             }
-            
+
             float height = ((Player*)this)->GetCollisionHeight(true);
             if (height)
             {
@@ -8798,7 +8828,7 @@ void Unit::Unmount(bool from_aura)
         }
         else
             { ((Player*)this)->ResummonPetTemporaryUnSummonedIfAny(); }
-            
+
         float height = ((Player*)this)->GetCollisionHeight(false);
         if (height)
         {
@@ -9175,7 +9205,7 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
         if (u->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER && !((Player*)u)->isGameMaster() &&
           ((Player*)u)->GetTeam() != ((Player*)this)->GetTeam() && (u->HasAura(51915) || u->HasAura(51721)))
          return false;
-    
+
     // Visible units, always are visible for all units, except for units under invisibility and phases
     if (m_Visibility == VISIBILITY_ON && u->m_invisibilityMask == 0)
     {
@@ -9669,7 +9699,7 @@ void Unit::SetDeathState(DeathState s)
         // Unsummon vehicle accessories
         if (IsVehicle())
             m_vehicleInfo->RemoveAccessoriesFromMap();
-        
+
         // Unboard from transport
         if (GetTransportInfo() && ((Unit*)GetTransportInfo()->GetTransport())->IsVehicle())
             ((Unit*)GetTransportInfo()->GetTransport())->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, GetObjectGuid());
@@ -11249,7 +11279,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
         if (!IsTriggeredAtSpellProcEvent(pTarget, itr->second, procSpell, procFlag, procExtra, attType, isVictim, spellProcEvent))
         {
             // spell seem not managed by proc system, although some case need to be handled
-            
+
             // only process damage case on victim
             if (!isVictim || !(procFlag & PROC_FLAG_TAKEN_ANY_DAMAGE))
                 continue;
@@ -12143,7 +12173,7 @@ void Unit::RestoreOriginalFaction()
     else
     {
         Creature* creature = (Creature*)this;
-        
+
         if (creature->IsPet() || creature->IsTotem())
         {
             if (Unit* owner = GetOwner())

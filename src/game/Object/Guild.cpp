@@ -646,11 +646,11 @@ void Guild::BroadcastToGuild(WorldSession* session, const std::string& msg, uint
 {
     if (!session)
         return;
-    
+
     Player* player = session->GetPlayer();
     if (!player || !HasRankRight(player->GetRank(), GR_RIGHT_GCHATSPEAK))
         return;
-    
+
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, CHAT_MSG_GUILD, msg.c_str(), Language(language), session->GetPlayer()->GetChatTag(), session->GetPlayer()->GetObjectGuid(), session->GetPlayer()->GetName());
 
@@ -667,11 +667,11 @@ void Guild::BroadcastToOfficers(WorldSession* session, const std::string& msg, u
 {
     if (!session)
         return;
-    
+
     Player* player = session->GetPlayer();
     if (!player || !HasRankRight(player->GetRank(), GR_RIGHT_OFFCHATSPEAK))
         return;
-    
+
     for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
     {
         WorldPacket data;
@@ -1396,12 +1396,12 @@ bool Guild::MemberMoneyWithdraw(uint32 amount, uint32 LowGuid)
         CharacterDatabase.PExecute("UPDATE guild_member SET BankRemMoney='%u' WHERE guildid='%u' AND guid='%u'",
                                    itr->second.BankRemMoney, m_Id, LowGuid);
     }
-    
+
 #ifdef ENABLE_ELUNA
     Player* player = sObjectMgr.GetPlayer(ObjectGuid(HIGHGUID_PLAYER, LowGuid));
     sEluna->OnMemberWitdrawMoney(this, player, amount, false); // IsRepair not a part of Mangos, implement?
 #endif
-    
+
     return true;
 }
 
@@ -1790,7 +1790,7 @@ void Guild::LogBankEvent(uint8 EventType, uint8 TabId, uint32 PlayerGuidLow, uin
 
         m_GuildBankEventLog_Item[TabId].push_back(NewEvent);
     }
-    
+
 #ifdef ENABLE_ELUNA
     sEluna->OnBankEvent(this, EventType, TabId, PlayerGuidLow, ItemOrMoney, ItemStackCount, DestTabId);
 #endif

@@ -32,7 +32,7 @@ namespace Movement
 {
     /**
      * @brief
-     * 
+     *
      */
     enum MonsterMoveType
     {
@@ -42,7 +42,7 @@ namespace Movement
         MonsterMoveFacingTarget = 3,
         MonsterMoveFacingAngle = 4
     };
-    
+
     /**
      * @brief
      *

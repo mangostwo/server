@@ -370,7 +370,7 @@ void MaNGOS::WorldObjectLastSearcher<Check>::Visit(GameObjectMapType& m)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
             continue;
-        
+
         if (i_check(itr->getSource()))
         {
             i_object = itr->getSource();
@@ -386,7 +386,7 @@ void MaNGOS::WorldObjectLastSearcher<Check>::Visit(PlayerMapType& m)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
             continue;
-        
+
         if (i_check(itr->getSource()))
         {
             i_object = itr->getSource();
@@ -402,7 +402,7 @@ void MaNGOS::WorldObjectLastSearcher<Check>::Visit(CreatureMapType& m)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
             continue;
-        
+
         if (i_check(itr->getSource()))
         {
             i_object = itr->getSource();
@@ -418,7 +418,7 @@ void MaNGOS::WorldObjectLastSearcher<Check>::Visit(CorpseMapType& m)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
             continue;
-        
+
         if (i_check(itr->getSource()))
         {
             i_object = itr->getSource();
@@ -434,7 +434,7 @@ void MaNGOS::WorldObjectLastSearcher<Check>::Visit(DynamicObjectMapType& m)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
             continue;
-        
+
         if (i_check(itr->getSource()))
         {
             i_object = itr->getSource();

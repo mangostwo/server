@@ -62,7 +62,7 @@ void WorldSession::HandleRepopRequestOpcode(WorldPacket& recv_data)
     {
         return;
     }
-    
+
     if (GetPlayer()->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
         return;
 
@@ -537,7 +537,7 @@ void WorldSession::HandleAddFriendOpcodeCallBack(QueryResult* result, uint32 acc
     WorldSession* session = sWorld.FindSession(accountId);
     if (!session)
         return;
-    
+
     Player* player = session->GetPlayer();
     if (!player)
     {
@@ -631,7 +631,7 @@ void WorldSession::HandleAddIgnoreOpcodeCallBack(QueryResult* result, uint32 acc
     WorldSession* session = sWorld.FindSession(accountId);
     if (!session)
         return;
-    
+
     Player* player = session->GetPlayer();
     if (!player)
         return;

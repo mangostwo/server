@@ -1017,7 +1017,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                             caster->CastSpell(caster, 64017, true);
                         }
                     }
-                    
+
                     triggered_spell_id = 64039;
                     basepoints[EFFECT_INDEX_0] = damage;
                     break;
@@ -3028,13 +3028,25 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                 {
                     float stat = 0.0f;
                     // strength
-                    if (GetStat(STAT_STRENGTH) > stat) { trigger_spell_id = 60229; stat = GetStat(STAT_STRENGTH); }
+                    if (GetStat(STAT_STRENGTH) > stat)
+                    {
+                        trigger_spell_id = 60229; stat = GetStat(STAT_STRENGTH);
+                    }
                     // agility
-                    if (GetStat(STAT_AGILITY)  > stat) { trigger_spell_id = 60233; stat = GetStat(STAT_AGILITY);  }
+                    if (GetStat(STAT_AGILITY)  > stat)
+                    {
+                        trigger_spell_id = 60233; stat = GetStat(STAT_AGILITY);
+                    }
                     // intellect
-                    if (GetStat(STAT_INTELLECT) > stat) { trigger_spell_id = 60234; stat = GetStat(STAT_INTELLECT);}
+                    if (GetStat(STAT_INTELLECT) > stat)
+                    {
+                        trigger_spell_id = 60234; stat = GetStat(STAT_INTELLECT);
+                    }
                     // spirit
-                    if (GetStat(STAT_SPIRIT)   > stat) { trigger_spell_id = 60235;                               }
+                    if (GetStat(STAT_SPIRIT)   > stat)
+                    {
+                        trigger_spell_id = 60235;
+                    }
                     break;
                 }
                 // case 55580: break:                       // Mana Link
@@ -3087,18 +3099,30 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                 {
                     float stat = 0.0f;
                     // strength
-                    if (GetStat(STAT_STRENGTH) > stat) { trigger_spell_id = 67708; stat = GetStat(STAT_STRENGTH); }
+                    if (GetStat(STAT_STRENGTH) > stat)
+                    {
+                        trigger_spell_id = 67708; stat = GetStat(STAT_STRENGTH);
+                    }
                     // agility
-                    if (GetStat(STAT_AGILITY)  > stat) { trigger_spell_id = 67703;                               }
+                    if (GetStat(STAT_AGILITY)  > stat)
+                    {
+                        trigger_spell_id = 67703;
+                    }
                     break;
                 }
                 case 67771:                                 // Death's Choice (heroic), Item - Coliseum 25 Heroic Melee Trinket
                 {
                     float stat = 0.0f;
                     // strength
-                    if (GetStat(STAT_STRENGTH) > stat) { trigger_spell_id = 67773; stat = GetStat(STAT_STRENGTH); }
+                    if (GetStat(STAT_STRENGTH) > stat)
+                    {
+                        trigger_spell_id = 67773; stat = GetStat(STAT_STRENGTH);
+                    }
                     // agility
-                    if (GetStat(STAT_AGILITY)  > stat) { trigger_spell_id = 67772;                               }
+                    if (GetStat(STAT_AGILITY)  > stat)
+                    {
+                        trigger_spell_id = 67772;
+                    }
                     break;
                 }
                 case 69023:                                 // Mirrored Soul
@@ -3200,7 +3224,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
         {
             // Drain Soul
             if (auraSpellInfo->IsFitToFamilyMask(UI64LIT(0x0000000000004000)))
-            {                    
+            {
                 // search for "Improved Drain Soul" dummy aura
                 Unit::AuraList const& mDummyAura = GetAurasByType(SPELL_AURA_DUMMY);
                 for (Unit::AuraList::const_iterator i = mDummyAura.begin(); i != mDummyAura.end(); ++i)
@@ -3276,7 +3300,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                // {
                 //if (!procSpell)
                 //   return SPELL_AURA_PROC_FAILED;
-                   
+
                 trigger_spell_id = auraSpellInfo->EffectTriggerSpell[EFFECT_INDEX_0];
                 target = this;
                 //}

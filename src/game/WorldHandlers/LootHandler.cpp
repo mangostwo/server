@@ -306,7 +306,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
             data << uint8(1);                               // 1 is "you loot..."
             player->GetSession()->SendPacket(&data);
         }
-        
+
         // Used by Eluna
 #ifdef ENABLE_ELUNA
         sEluna->OnLootMoney(player, pLoot->gold);
@@ -451,8 +451,8 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
             }
             else
                 // not fully looted object
-            { 
-                go->SetLootState(GO_ACTIVATED); 
+            {
+                go->SetLootState(GO_ACTIVATED);
             }
             break;
         }
@@ -650,7 +650,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
 #ifdef ENABLE_ELUNA
     sEluna->OnLootItem(target, newitem, item.count, lootguid);
 #endif /* ENABLE_ELUNA */
-    
+
     // mark as looted
     item.count = 0;
     item.is_looted = true;

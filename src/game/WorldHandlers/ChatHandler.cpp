@@ -330,7 +330,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
 
             if ((type == CHAT_MSG_PARTY_LEADER) && !group->IsLeader(_player->GetObjectGuid()))
                 return;
-            
+
             // Used by Eluna
 #ifdef ENABLE_ELUNA
             if (!sEluna->OnChat(GetPlayer(), type, lang, msg, group))
@@ -638,7 +638,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                         return;
 #endif /* ENABLE_ELUNA */
 
-                    chn->Say(_player, msg.c_str(), lang); 
+                    chn->Say(_player, msg.c_str(), lang);
                 }
             }
         } break;

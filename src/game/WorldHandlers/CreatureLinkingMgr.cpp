@@ -251,14 +251,14 @@ bool CreatureLinkingMgr::IsLinkingEntryValid(uint32 slaveEntry, CreatureLinkingI
                 sLog.outErrorDb("`creature_linking_template` has FLAG_FOLLOW, but no master, (entry: %u, map: %u, master: %u)", slaveEntry, pTmp->mapId, pTmp->masterId);
                 return false;
             }
-            
+
             if (result->GetRowCount() > 1)
             {
                 sLog.outErrorDb("`creature_linking_template` has FLAG_FOLLOW, but non unique master, (entry: %u, map: %u, master: %u)", slaveEntry, pTmp->mapId, pTmp->masterId);
                 delete result;
                 return false;
             }
-            
+
             Field* fields = result->Fetch();
             pTmp->masterDBGuid = fields[0].GetUInt32();
             delete result;
@@ -733,23 +733,23 @@ bool CreatureLinkingHolder::CanSpawn(uint32 lowGuid, Map* _map, CreatureLinkingI
         {
             return true;
         }
-            
+
         pInfo = sCreatureLinkingMgr.GetLinkedTriggerInformation(data->id, lowGuid, data->mapid);
         if (!pInfo)
         {
             return true;
         }
-            
+
         // Has lowGuid npc actually spawning linked?
         if (!sCreatureLinkingMgr.IsSpawnedByLinkedMob(pInfo))
         {
             return true;
         }
-            
+
         sx = data->posX;                                    // Fill position data
         sy = data->posY;
     }
-    
+
     if (pInfo->searchRange == 0)                            // Map wide case
     {
         if (!pInfo->masterDBGuid)

@@ -2376,9 +2376,9 @@ void Pet::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
         {
             ownerSpeed *= 100.0f / (100.0f + slow);
         }
-    
+
         float speed = std::max(non_stack_bonus, stack_bonus) * ownerSpeed;
-    
+
         if (main_speed_mod)
         speed = speed * (100.0f + main_speed_mod) / 100.0f;
 

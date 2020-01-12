@@ -97,7 +97,7 @@ class GMTicket
             m_lastUpdate = update;
         }
 
-        /** 
+        /**
          * Gets the \ref Player s \ref ObjectGuid which asked the question and created the ticket
          * @return the \ref ObjectGuid for the \ref Player that asked the question
          */
@@ -121,7 +121,7 @@ class GMTicket
             return m_lastUpdate;
         }
 
-        /** 
+        /**
          * Changes the tickets question text.
          * @param text the text to change the question to
          */
@@ -192,7 +192,7 @@ class GMTicketMgr
             }
             return &(itr->second);
         }
-        
+
         size_t GetTicketCount() const
         {
             return m_GMTicketMap.size();
@@ -214,7 +214,7 @@ class GMTicketMgr
             return *itr;
         }
 
-        /** 
+        /**
          * This will delete a \ref GMTicket from this manager of tickets so that we don't
          * need to handle it anymore, this should be used in conjunction with setting
          * resolved = 1 in the character_ticket table.
@@ -236,7 +236,7 @@ class GMTicketMgr
 
         void DeleteAll();
 
-        /** 
+        /**
          * This will create a new \ref GMTicket and fill it with the given question so that
          * a GM can find it and answer it. Should only be called if we've already checked
          * that there are no open tickets already, as this function will close any other

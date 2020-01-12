@@ -152,11 +152,11 @@ void VehicleInfo::Initialize()
 #endif
         }
     }
-    
+
     // Initialize movement limitations
     uint32 vehicleFlags = GetVehicleEntry()->m_flags;
     Unit* pVehicle = (Unit*)m_owner;
-    
+
     if (vehicleFlags & VEHICLE_FLAG_NO_STRAFE)
         pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_NO_STRAFE);
     if (vehicleFlags & VEHICLE_FLAG_NO_JUMPING)
@@ -167,16 +167,16 @@ void VehicleInfo::Initialize()
         pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_ALLOW_PITCHING);
     if (vehicleFlags & VEHICLE_FLAG_FULLSPEEDPITCHING)
         pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_FULLSPEEDPITCHING);
-    
+
     // Initialize power type based on DBC values (creatures only)
     if (pVehicle->GetTypeId() == TYPEID_UNIT)
     {
         if (PowerDisplayEntry const* powerEntry = sPowerDisplayStore.LookupEntry(GetVehicleEntry()->m_powerDisplayID))
             pVehicle->SetPowerType(Powers(powerEntry->power));
     }
-    
+
     m_isInitialized = true;
-    
+
 #ifdef ENABLE_ELUNA
     sEluna->OnInstall(this);
 #endif
@@ -251,7 +251,7 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
 
     // Apply passenger modifications
     ApplySeatMods(passenger, seatEntry->m_flags);
-    
+
 #ifdef ENABLE_ELUNA
     sEluna->OnAddPassenger(this, passenger, seat);
 #endif
@@ -369,7 +369,7 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
 
     // Remove passenger modifications
     RemoveSeatMods(passenger, seatEntry->m_flags);
-    
+
 #ifdef ENABLE_ELUNA
     sEluna->OnRemovePassenger(this, passenger);
 #endif
@@ -533,11 +533,11 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
 
     if (seatFlags & SEAT_FLAG_NOT_SELECTABLE)
         passenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            
+
     if (passenger->GetTypeId() == TYPEID_PLAYER)
     {
         Player* pPlayer = (Player*)passenger;
-        
+
         // group update
         if (pPlayer->GetGroup())
             pPlayer->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_VEHICLE_SEAT);
@@ -597,14 +597,14 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
 void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
 {
     Unit* pVehicle = (Unit*)m_owner;
-    
+
     if (seatFlags & SEAT_FLAG_NOT_SELECTABLE)
         passenger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
     if (passenger->GetTypeId() == TYPEID_PLAYER)
     {
         Player* pPlayer = (Player*)passenger;
-        
+
         // group update
         if (pPlayer->GetGroup())
             pPlayer->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_VEHICLE_SEAT);
@@ -634,7 +634,7 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
             passenger->SetCharm(NULL);
             pVehicle->SetCharmerGuid(ObjectGuid());
         }
-        
+
         // Reinitialize movement
         ((Creature*)passenger)->AI()->SetCombatMovement(true, true);
         if (!passenger->getVictim())

@@ -1921,7 +1921,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         case TARGET_PET:
         {
             Pet* tmpUnit = m_caster->GetPet();
-            if (!tmpUnit) { break; }
+            if (!tmpUnit)
+            {
+                break;
+            }
             targetUnitMap.push_back(tmpUnit);
             break;
         }
@@ -2500,30 +2503,30 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             SpellTargets targetB = SPELL_TARGETS_AOE_DAMAGE;
             if (m_spellInfo->Effect[effIndex] == SPELL_EFFECT_SCRIPT_EFFECT)
                 targetB = SPELL_TARGETS_ALL;
-            
+
             UnitList tempTargetUnitMap;
             SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(m_spellInfo->Id);
-            
+
             // fill real target list if no spell script target defined
             FillAreaTargets(bounds.first != bounds.second ? tempTargetUnitMap : targetUnitMap,
                             radius, PUSH_IN_FRONT_15, bounds.first != bounds.second ? SPELL_TARGETS_ALL : targetB);
-            
+
             if (!tempTargetUnitMap.empty())
             {
                 for (UnitList::const_iterator iter = tempTargetUnitMap.begin(); iter != tempTargetUnitMap.end(); ++iter)
                 {
                     if ((*iter)->GetTypeId() != TYPEID_UNIT)
                         continue;
-                    
+
                     for (SQLMultiStorage::SQLMultiSIterator<SpellTargetEntry> i_spellST = bounds.first; i_spellST != bounds.second; ++i_spellST)
                     {
                         if (i_spellST->CanNotHitWithSpellEffect(effIndex))
                             continue;
-                        
+
                         // only creature entries supported for this target type
                         if (i_spellST->type == SPELL_TARGET_TYPE_GAMEOBJECT)
                             continue;
-                        
+
                         if ((*iter)->GetEntry() == i_spellST->targetEntry)
                         {
                             if (i_spellST->type == SPELL_TARGET_TYPE_DEAD && ((Creature*)(*iter))->IsCorpse())
@@ -3149,7 +3152,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         {
             next = itr;
             ++next;
-            if (!*itr) { continue; }
+            if (!*itr)
+            {
+                continue;
+            }
             if ((*itr) == m_targets.getUnitTarget())
             {
                 targetUnitMap.erase(itr);
@@ -3163,7 +3169,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             uint32 poz = urand(0, targetUnitMap.size() - 1);
             for (UnitList::iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end(); ++itr, --poz)
             {
-                if (!*itr) { continue; }
+                if (!*itr)
+                {
+                    continue;
+                }
 
                 if (!poz)
                 {
@@ -3188,7 +3197,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             {
                 next = itr;
                 ++next;
-                if (!*itr) { continue; }
+                if (!*itr)
+                {
+                    continue;
+                }
                 if ((*itr) == m_targets.getGOTarget())
                 {
                     tempTargetGOList.erase(itr);
@@ -3202,7 +3214,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 uint32 poz = urand(0, tempTargetGOList.size() - 1);
                 for (std::list<GameObject*>::iterator itr = tempTargetGOList.begin(); itr != tempTargetGOList.end(); ++itr, --poz)
                 {
-                    if (!*itr) { continue; }
+                    if (!*itr)
+                    {
+                        continue;
+                    }
 
                     if (!poz)
                     {
@@ -3628,7 +3643,7 @@ void Spell::cast(bool skipCheck)
             ((Player*)m_caster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_USE_ITEM, m_CastItem->GetEntry());
 
         ((Player*)m_caster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL, m_spellInfo->Id);
-    
+
 #ifdef ENABLE_ELUNA
         sEluna->OnSpellCast(m_caster->ToPlayer(), this, skipCheck);
 #endif
@@ -4298,7 +4313,7 @@ void Spell::SendSpellGo()
         castFlags |= CAST_FLAG_PREDICTED_POWER;             // makes cooldowns visible
         castFlags |= CAST_FLAG_PREDICTED_RUNES;             // rune cooldowns list
     }
-    
+
     if (m_powerCost)
         castFlags |= CAST_FLAG_PREDICTED_POWER;             // all powerCost spells have this
 
@@ -7665,7 +7680,10 @@ SpellCastResult Spell::CheckItems()
             case SPELL_EFFECT_WEAPON_DAMAGE:
             case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
             {
-                if (m_caster->GetTypeId() != TYPEID_PLAYER) { return SPELL_FAILED_TARGET_NOT_PLAYER; }
+                if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                {
+                    return SPELL_FAILED_TARGET_NOT_PLAYER;
+                }
                 if (m_attackType != RANGED_ATTACK)
                 {
                     break;

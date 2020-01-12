@@ -976,7 +976,7 @@ void WorldSession::HandleGuildBankDepositMoney(WorldPacket& recv_data)
 #ifdef ENABLE_ELUNA
     sEluna->OnMemberDepositMoney(pGuild, GetPlayer(), money);
 #endif
-    
+
     pGuild->DisplayGuildBankTabsInfo(this);
     pGuild->DisplayGuildBankContent(this, 0);
     pGuild->DisplayGuildBankMoneyUpdate(this);

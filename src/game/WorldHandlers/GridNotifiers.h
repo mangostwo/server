@@ -232,7 +232,7 @@ namespace MaNGOS
 
         WorldObjectLastSearcher(WorldObject* & result, Check& check)
         : i_phaseMask(check.GetFocusObject().GetPhaseMask()), i_object(result), i_check(check) {}
-        
+
         void Visit(PlayerMapType& m);
         void Visit(CreatureMapType& m);
         void Visit(CorpseMapType& m);

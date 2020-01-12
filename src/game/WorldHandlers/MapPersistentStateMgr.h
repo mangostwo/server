@@ -330,7 +330,7 @@ class DungeonResetScheduler
         void ScheduleReset(bool add, time_t time, DungeonResetEvent event);
 
         void Update();
-        
+
         void ResetAllRaid();
 
     private:                                                // fields
