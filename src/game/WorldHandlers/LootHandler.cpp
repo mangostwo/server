@@ -154,7 +154,9 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
                 player->SendNotifyLootItemRemoved(lootSlot);
             }
             else
-                { loot->NotifyQuestItemRemoved(qitem->index); }
+            {
+                loot->NotifyQuestItemRemoved(qitem->index);
+            }
         }
         else
         {
@@ -189,7 +191,9 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
         player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_EPIC_ITEM, item->itemid, item->count);
     }
     else
-        { player->SendEquipError(msg, NULL, NULL, item->itemid); }
+    {
+        player->SendEquipError(msg, NULL, NULL, item->itemid);
+    }
 }
 
 void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
@@ -422,16 +426,24 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
                                     go->SetLootState(GO_READY);
                                 }
                                 else                        // not have more uses
-                                    { go->SetLootState(GO_JUST_DEACTIVATED); }
+                                {
+                                    go->SetLootState(GO_JUST_DEACTIVATED);
+                                }
                             }
                             else                            // 100% chance until min uses
-                                { go->SetLootState(GO_READY); }
+                            {
+                                go->SetLootState(GO_READY);
+                            }
                         }
                         else                                // max uses already
-                            { go->SetLootState(GO_JUST_DEACTIVATED); }
+                        {
+                            go->SetLootState(GO_JUST_DEACTIVATED);
+                        }
                     }
                     else                                    // not vein
-                        { go->SetLootState(GO_JUST_DEACTIVATED); }
+                    {
+                        go->SetLootState(GO_JUST_DEACTIVATED);
+                    }
                 }
                 else if (go->GetGoType() == GAMEOBJECT_TYPE_FISHINGHOLE)
                 {
@@ -442,10 +454,14 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
                         go->SetLootState(GO_JUST_DEACTIVATED);
                     }
                     else
-                        { go->SetLootState(GO_READY); }
+                    {
+                        go->SetLootState(GO_READY);
+                    }
                 }
                 else // not chest (or vein/herb/etc)
-                    { go->SetLootState(GO_JUST_DEACTIVATED); }
+                {
+                    go->SetLootState(GO_JUST_DEACTIVATED);
+                }
 
                 loot->clear();
             }
@@ -618,7 +634,9 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
         pLoot = &pGO->loot;
     }
     else
-        { return; }
+    {
+        return;
+    }
 
     if (slotid > pLoot->items.size())
     {

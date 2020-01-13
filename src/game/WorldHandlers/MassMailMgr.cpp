@@ -50,7 +50,9 @@ void MassMailMgr::AddMassMailTask(MailDraft* mailProto, MailSender sender, uint3
         AddMassMailTask(mailProto, sender, ss.str().c_str());
     }
     else
-        { AddMassMailTask(mailProto, sender, "SELECT guid FROM characters WHERE deleteDate IS NULL"); }
+    {
+        AddMassMailTask(mailProto, sender, "SELECT guid FROM characters WHERE deleteDate IS NULL");
+    }
 }
 
 struct MassMailerQueryHandler

@@ -161,7 +161,9 @@ bool changenth(std::string& str, int n, const char* with, bool insert = false, b
         str.replace(s, e - s, with);
     }
     else
-        { str.insert(s, with); }
+    {
+        str.insert(s, with);
+    }
 
     return true;
 }
@@ -191,7 +193,9 @@ bool changetoknth(std::string& str, int n, const char* with, bool insert = false
         str.replace(s, e - s, with);
     }
     else
-        { str.insert(s, with); }
+    {
+        str.insert(s, with);
+    }
 
     return true;
 }
@@ -359,7 +363,9 @@ void PlayerDumpWriter::DumpTableContent(std::string& dump, uint32 guid, char con
             wherestr = GenerateWhereStr(fieldname, *guids, guids_itr);
         }
         else                                                // not set case, get single guid string
-            { wherestr = GenerateWhereStr(fieldname, guid); }
+        {
+            wherestr = GenerateWhereStr(fieldname, guid);
+        }
 
         QueryResult* result = CharacterDatabase.PQuery("SELECT * FROM %s WHERE %s", tableFrom, wherestr.c_str());
         if (!result)
@@ -421,12 +427,16 @@ std::string PlayerDumpWriter::GetDump(uint32 guid)
             dump += "UPDATE character_db_version SET " + reqName + " = 1 WHERE FALSE;\n\n";
         }
         else
-            { sLog.outError("Table 'character_db_version' not have revision guard field, revision guard query not added to pdump."); }
+        {
+            sLog.outError("Table 'character_db_version' not have revision guard field, revision guard query not added to pdump.");
+        }
 
         delete result;
     }
     else
-        { sLog.outError("Character DB not have 'character_db_version' table, revision guard query not added to pdump."); }
+    {
+        sLog.outError("Character DB not have 'character_db_version' table, revision guard query not added to pdump.");
+    }
 
     for (DumpTable* itr = &dumpTables[0]; itr->isValid(); ++itr)
         { DumpTableContent(dump, guid, itr->name, itr->name, itr->type); }
@@ -491,7 +501,9 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
         }
     }
     else
-        { guid = sObjectMgr.m_CharGuids.GetNextAfterMaxUsed(); }
+    {
+        guid = sObjectMgr.m_CharGuids.GetNextAfterMaxUsed();
+    }
 
     // normalize the name if specified and check if it exists
     if (!normalizePlayerName(name))

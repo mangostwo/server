@@ -101,7 +101,9 @@ void Totem::Update(uint32 update_diff, uint32 time)
         return;
     }
     else
-        { m_duration -= update_diff; }
+    {
+        m_duration -= update_diff;
+    }
 
     Creature::Update(update_diff, time);
 }
@@ -221,7 +223,9 @@ bool Totem::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex 
     // Mana Spring, Healing stream, Mana tide
     // Flags : 0x00000002000 | 0x00000004000 | 0x00004000000 -> 0x00004006000
     if (spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN && spellInfo->IsFitToFamilyMask(UI64LIT(0x00004006000)))
+    {
         return false;
+    }
 
     switch (spellInfo->Effect[index])
     {

@@ -181,7 +181,9 @@ void stripLineInvisibleChars(std::string& str)
                 str[wpos++] = str[pos];
             }
             else
-                { ++wpos; }
+            {
+                ++wpos;
+            }
             space = false;
         }
     }
@@ -308,7 +310,9 @@ bool IsIPAddrInNetwork(ACE_INET_Addr const& net, ACE_INET_Addr const& addr, ACE_
 {
     uint32 mask = subnetMask.get_ip_address();
     if ((net.get_ip_address() & mask) == (addr.get_ip_address() & mask))
+    {
         return true;
+    }
     return false;
 }
 
@@ -601,7 +605,9 @@ void hexEncodeByteArray(uint8* bytes, uint32 arrayLen, std::string& result)
                 encodedNibble = '0' + nibble;
             }
             else
-                { encodedNibble = 'A' + nibble - 0x0A; }
+            {
+                encodedNibble = 'A' + nibble - 0x0A;
+            }
             ss << encodedNibble;
         }
     }
@@ -636,7 +642,9 @@ void HexStrToByteArray(std::string const& str, uint8* out, bool reverse /*= fals
 {
     // string must have even number of characters
     if (str.length() & 1)
+    {
         return;
+    }
 
     int32 init = 0;
     int32 end = str.length();

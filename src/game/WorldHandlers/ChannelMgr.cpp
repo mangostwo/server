@@ -90,7 +90,9 @@ Channel* ChannelMgr::GetChannel(std::string name, Player* p, bool pkt)
         return NULL;
     }
     else
-        { return i->second; }
+    {
+        return i->second;
+    }
 }
 
 void ChannelMgr::LeftChannel(std::string name)

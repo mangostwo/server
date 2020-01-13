@@ -141,7 +141,9 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction)
             if (auction_owner)
                 owner_name = auction_owner->GetName();
             else if (ownerGuid && !sObjectMgr.GetPlayerNameByGUID(ownerGuid, owner_name))
-                { owner_name = sObjectMgr.GetMangosStringForDBCLocale(LANG_UNKNOWN); }
+            {
+                owner_name = sObjectMgr.GetMangosStringForDBCLocale(LANG_UNKNOWN);
+            }
 
             uint32 owner_accid = sObjectMgr.GetPlayerAccountIdByGUID(ownerGuid);
 
@@ -150,7 +152,9 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction)
         }
     }
     else if (!bidder)
-        { bidder_accId = sObjectMgr.GetPlayerAccountIdByGUID(bidder_guid); }
+    {
+        bidder_accId = sObjectMgr.GetPlayerAccountIdByGUID(bidder_guid);
+    }
 
     if (auction_owner)
         auction_owner->GetSession()->SendAuctionOwnerNotification(auction);
@@ -680,11 +684,17 @@ int AuctionEntry::CompareAuctionEntry(uint32 column, const AuctionEntry* auc, Pl
             ItemPrototype const* itemProto1 = ObjectMgr::GetItemPrototype(itemTemplate);
             ItemPrototype const* itemProto2 = ObjectMgr::GetItemPrototype(auc->itemTemplate);
             if (!itemProto2 || !itemProto1)
+            {
                 return 0;
+            }
             if (itemProto1->RequiredLevel < itemProto2->RequiredLevel)
+            {
                 return -1;
+            }
             else if (itemProto1->RequiredLevel > itemProto2->RequiredLevel)
+            {
                 return +1;
+            }
             break;
         }
         case 1:                                             // quality = 1
@@ -692,47 +702,71 @@ int AuctionEntry::CompareAuctionEntry(uint32 column, const AuctionEntry* auc, Pl
             ItemPrototype const* itemProto1 = ObjectMgr::GetItemPrototype(itemTemplate);
             ItemPrototype const* itemProto2 = ObjectMgr::GetItemPrototype(auc->itemTemplate);
             if (!itemProto2 || !itemProto1)
+            {
                 return 0;
+            }
             if (itemProto1->Quality < itemProto2->Quality)
+            {
                 return -1;
+            }
             else if (itemProto1->Quality > itemProto2->Quality)
+            {
                 return +1;
+            }
             break;
         }
         case 2:                                             // buyoutthenbid = 2
             if (buyout != auc->buyout)
             {
                 if (buyout < auc->buyout)
+                {
                     return -1;
+                }
                 else if (buyout > auc->buyout)
+                {
                     return +1;
+                }
             }
             else
             {
                 if (bid < auc->bid)
+                {
                     return -1;
+                }
                 else if (bid > auc->bid)
+                {
                     return +1;
+                }
             }
             break;
         case 3:                                             // duration = 3
             if (expireTime < auc->expireTime)
+            {
                 return -1;
+            }
             else if (expireTime > auc->expireTime)
+            {
                 return +1;
+            }
             break;
         case 4:                                             // status = 4
             if (bidder < auc->bidder)
+            {
                 return -1;
+            }
             else if (bidder > auc->bidder)
+            {
                 return +1;
+            }
             break;
         case 5:                                             // name = 5
         {
             ItemPrototype const* itemProto1 = ObjectMgr::GetItemPrototype(itemTemplate);
             ItemPrototype const* itemProto2 = ObjectMgr::GetItemPrototype(auc->itemTemplate);
             if (!itemProto2 || !itemProto1)
+            {
                 return 0;
+            }
 
             int32 loc_idx = viewPlayer->GetSession()->GetSessionDbLocaleIndex();
 
@@ -755,16 +789,24 @@ int AuctionEntry::CompareAuctionEntry(uint32 column, const AuctionEntry* auc, Pl
             if (bid1 != bid2)
             {
                 if (bid1 < bid2)
+                {
                     return -1;
+                }
                 else if (bid1 > bid2)
+                {
                     return +1;
+                }
             }
             else
             {
                 if (buyout < auc->buyout)
+                {
                     return -1;
+                }
                 else if (buyout > auc->buyout)
+                {
                     return +1;
+                }
             }
 
             break;
@@ -777,24 +819,36 @@ int AuctionEntry::CompareAuctionEntry(uint32 column, const AuctionEntry* auc, Pl
             uint32 bid2 = auc->bid ? auc->bid : auc->startbid;
 
             if (bid1 < bid2)
+            {
                 return -1;
+            }
             else if (bid1 > bid2)
+            {
                 return +1;
+            }
             break;
         }
         case 9:                                             // quantity = 9
         {
             if (itemCount < auc->itemCount)
+            {
                 return -1;
+            }
             else if (itemCount > auc->itemCount)
+            {
                 return +1;
+            }
             break;
         }
         case 10:                                            // buyout = 10
             if (buyout < auc->buyout)
+            {
                 return -1;
+            }
             else if (buyout > auc->buyout)
+            {
                 return +1;
+            }
             break;
         case 11:                                            // unused = 11
         default:
@@ -807,12 +861,16 @@ int AuctionEntry::CompareAuctionEntry(uint32 column, const AuctionEntry* auc, Pl
 bool AuctionSorter::operator()(const AuctionEntry* auc1, const AuctionEntry* auc2) const
 {
     if (m_sort[0] == MAX_AUCTION_SORT)                      // not sorted
+    {
         return false;
+    }
 
     for (uint32 i = 0; i < MAX_AUCTION_SORT; ++i)
     {
         if (m_sort[i] == MAX_AUCTION_SORT)                  // end of sort
+        {
             return false;
+        }
 
         int res = auc1->CompareAuctionEntry(m_sort[i] & ~AUCTION_SORT_REVERSED, auc2, m_viewPlayer);
         // "equal" by used column

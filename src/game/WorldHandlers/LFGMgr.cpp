@@ -446,18 +446,26 @@ LFGPlayers* LFGMgr::GetPlayerOrPartyData(ObjectGuid guid)
 {
     playerData::iterator it = m_playerData.find(guid);
     if (it != m_playerData.end())
+    {
         return &(it->second);
+    }
     else
+    {
         return NULL;
+    }
 }
 
 LFGProposal* LFGMgr::GetProposalData(uint32 proposalID)
 {
     proposalMap::iterator it = m_proposalMap.find(proposalID);
     if (it != m_proposalMap.end())
+    {
         return &(it->second);
+    }
     else
+    {
         return NULL;
+    }
 }
 
 LfgJoinResult LFGMgr::GetJoinResult(Player* plr)
@@ -597,16 +605,24 @@ DungeonTypes LFGMgr::GetDungeonType(uint32 dungeonId)
             case 1:
             {
                 if (dungeon->difficulty == DUNGEON_DIFFICULTY_NORMAL)
+                {
                     return DUNGEON_TBC;
+                }
                 else if (dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC)
+                {
                     return DUNGEON_TBC_HEROIC;
+                }
             }
             case 2:
             {
                 if (dungeon->difficulty == DUNGEON_DIFFICULTY_NORMAL)
+                {
                     return DUNGEON_WOTLK;
+                }
                 else if (dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC)
+                {
                     return DUNGEON_WOTLK_HEROIC;
+                }
             }
             default:
                 return DUNGEON_UNKNOWN;
@@ -797,7 +813,9 @@ void LFGMgr::AddToQueue(ObjectGuid guid)
 {
     LFGPlayers* information = GetPlayerOrPartyData(guid);
     if (!information)
+    {
         return;
+    }
 
     // This will be necessary for finding matches in the queue
     UpdateNeededRoles(guid, information);
@@ -951,16 +969,24 @@ bool LFGMgr::RoleMapsAreCompatible(LFGPlayers* groupOne, LFGPlayers* groupTwo)
     // When this is called we already know that the dungeons match, so just focus on roles
     // compare: neededX(role) from each struct and the amount of people per role in the roleMap
     if ((groupOne->currentRoles.size() + groupTwo->currentRoles.size()) > NORMAL_TOTAL_ROLE_COUNT)
+    {
         return false;
+    }
     else
     {
         // make sure we don't have too many players of a certain role here
         if (((NORMAL_DAMAGE_COUNT - groupOne->neededDps) + (NORMAL_DAMAGE_COUNT - groupTwo->neededDps)) > NORMAL_DAMAGE_COUNT)
+        {
             return false;
+        }
         else if (((NORMAL_TANK_OR_HEALER_COUNT - groupOne->neededHealers) + (NORMAL_TANK_OR_HEALER_COUNT - groupTwo->neededHealers)) > NORMAL_TANK_OR_HEALER_COUNT)
+        {
             return false;
+        }
         else if (((NORMAL_TANK_OR_HEALER_COUNT - groupOne->neededTanks) + (NORMAL_TANK_OR_HEALER_COUNT - groupTwo->neededTanks)) > NORMAL_TANK_OR_HEALER_COUNT)
+        {
             return false;
+        }
         else
             return true; // the player/role counts line up!
     }
@@ -980,7 +1006,9 @@ bool LFGMgr::MatchesAreOfSameTeam(LFGPlayers* groupOne, LFGPlayers* groupTwo)
 
     // todo: disable this if a config option is set
     if (pPlayer1->GetTeamId() == pPlayer2->GetTeamId())
+    {
         return true;
+    }
 
     return false;
 }
@@ -993,7 +1021,9 @@ void LFGMgr::MergeGroups(ObjectGuid guidOne, ObjectGuid guidTwo, std::set<uint32
     LFGPlayers* bufferGroup = GetPlayerOrPartyData(guidTwo);
 
     if (!mainGroup || !bufferGroup)
+    {
         return;
+    }
 
     // update the dungeon selection with the compatible ones
     mainGroup->dungeonList.clear();
@@ -1078,9 +1108,13 @@ uint32 LFGMgr::GetDungeonEntry(uint32 ID)
 {
     LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(ID);
     if (dungeon)
+    {
         return dungeon->Entry();
+    }
     else
+    {
         return 0;
+    }
 }
 
 // called each time a player selects their role
@@ -1184,7 +1218,9 @@ void LFGMgr::PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles)
 bool LFGMgr::ValidateGroupRoles(roleMap groupMap)
 {
     if (groupMap.empty()) // sanity check
+    {
         return false;
+    }
 
     uint8 tankCount = 0, dpsCount = 0, healCount = 0;
 
@@ -1320,7 +1356,9 @@ void LFGMgr::ProposalUpdate(uint32 proposalID, ObjectGuid plrGuid, bool accepted
     LFGProposal* proposal = GetProposalData(proposalID);
 
     if (!proposal)
+    {
         return;
+    }
 
     bool allOkay = true; // true if everyone answered LFG_ANSWER_AGREE
 
@@ -1407,7 +1445,9 @@ bool LFGMgr::HasLeaderFlag(roleMap const& roles)
     for (roleMap::const_iterator it = roles.begin(); it != roles.end(); ++it)
     {
         if (it->second & PLAYER_ROLE_LEADER)
+        {
             return true;
+        }
     }
     return false;
 }
@@ -1415,7 +1455,9 @@ bool LFGMgr::HasLeaderFlag(roleMap const& roles)
 void LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
 {
     if (!proposal)
+    {
         return;
+    }
 
     Group* pGroup;
 
@@ -1478,7 +1520,9 @@ void LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
     // set dungeon difficulty for group
     LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(proposal->dungeonID);
     if (!dungeon)
+    {
         return;
+    }
 
     pGroup->SetDungeonDifficulty(Difficulty(dungeon->difficulty)); //todo: check for raids and if so call setraiddifficulty
 
@@ -1499,7 +1543,9 @@ void LFGMgr::TeleportToDungeon(uint32 dungeonID, Group* pGroup)
     // if nobody is in the dungeon, teleport all to beginning of dungeon (sObjectMgr.GetMapEntranceTrigger(mapid [not dungeonid]))
     LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(dungeonID);
     if (!dungeon || !pGroup)
+    {
         return;
+    }
 
     uint32 mapID = (uint32)dungeon->mapID;
     float x, y, z, o;
@@ -1591,9 +1637,13 @@ LFGGroupStatus* LFGMgr::GetGroupStatus(ObjectGuid guid)
 {
     groupStatusMap::iterator it = m_groupStatusMap.find(guid);
     if (it != m_groupStatusMap.end())
+    {
         return &(it->second);
+    }
     else
+    {
         return NULL;
+    }
 }
 
 void LFGMgr::ProposalDeclined(ObjectGuid guid, LFGProposal* proposal)
@@ -1601,7 +1651,9 @@ void LFGMgr::ProposalDeclined(ObjectGuid guid, LFGProposal* proposal)
     Player* pPlayer = sObjectAccessor.FindPlayer(guid);
 
     if (!pPlayer)
+    {
         return;
+    }
 
     bool leaveGroupLFG = false;
 
@@ -1650,7 +1702,9 @@ void LFGMgr::ProposalDeclined(ObjectGuid guid, LFGProposal* proposal)
 void LFGMgr::UpdateWaitMap(LFGRoles role, uint32 dungeonID, time_t waitTime)
 {
     if (!role || !dungeonID || !waitTime)
+    {
         return;
+    }
 
     switch (role)
     {
@@ -1726,7 +1780,9 @@ void LFGMgr::HandleBossKilled(Player* pPlayer)
     LFGGroupStatus* status = GetGroupStatus(groupGuid);
 
     if (!pGroup || !status)
+    {
         return;
+    }
 
     // set each player's lfgstate to LFG_STATE_FINISHED_DUNGEON
     // fetch reward info, and if it's the first dungeon of the day (per player),
@@ -1792,7 +1848,9 @@ void LFGMgr::AttemptToKickPlayer(Group* pGroup, ObjectGuid guid, ObjectGuid kick
 
     bootStatusMap::iterator bIt = m_bootStatusMap.find(groupGuid);
     if (!status)
+    {
         return;
+    }
 
     status->state = LFG_STATE_BOOT;
     m_groupStatusMap[groupGuid] = *status;
@@ -1832,7 +1890,9 @@ void LFGMgr::AttemptToKickPlayer(Group* pGroup, ObjectGuid guid, ObjectGuid kick
 void LFGMgr::CastVote(Player* pPlayer, bool vote)
 {
     if (!pPlayer)
+    {
         return;
+    }
 
     Group* pGroup = pPlayer->GetGroup();
     ObjectGuid groupGuid = pGroup->GetObjectGuid();
@@ -1840,11 +1900,15 @@ void LFGMgr::CastVote(Player* pPlayer, bool vote)
     LFGGroupStatus* status = GetGroupStatus(groupGuid);
 
     if (!status || status->state != LFG_STATE_BOOT)
+    {
         return;
+    }
 
     bootStatusMap::iterator it = m_bootStatusMap.find(groupGuid);
     if (it == m_bootStatusMap.end())
+    {
         return;
+    }
 
     LFGBoot boot = it->second;
     boot.answers[pPlayer->GetObjectGuid()] = LFGProposalAnswer(vote);

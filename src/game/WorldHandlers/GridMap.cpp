@@ -160,9 +160,13 @@ bool GridMap::loadAreaData(FILE* in, uint32 offset, uint32 /*size*/)
     fseek(in, offset, SEEK_SET);
     size_t file_read = fread(&header, sizeof(header), 1, in);
     if (file_read <= 0)
+    {
         return false;
+    }
     if (header.fourcc != *((uint32 const*)(MAP_AREA_MAGIC)))
+    {
         return false;
+    }
 
     m_gridArea = header.gridArea;
     if (!(header.flags & MAP_AREA_NO_AREA))
@@ -170,7 +174,9 @@ bool GridMap::loadAreaData(FILE* in, uint32 offset, uint32 /*size*/)
         m_area_map = new uint16 [16 * 16];
         file_read = fread(m_area_map, sizeof(uint16), 16 * 16, in);
         if (file_read <= 0)
+        {
             return false;
+        }
     }
 
     return true;
@@ -182,9 +188,13 @@ bool GridMap::loadHeightData(FILE* in, uint32 offset, uint32 /*size*/)
     fseek(in, offset, SEEK_SET);
     size_t file_read = fread(&header, sizeof(header), 1, in);
     if (file_read <= 0)
+    {
         return false;
+    }
     if (header.fourcc != *((uint32 const*)(MAP_HEIGHT_MAGIC)))
+    {
         return false;
+    }
 
     m_gridHeight = header.gridHeight;
     if (!(header.flags & MAP_HEIGHT_NO_HEIGHT))
@@ -195,10 +205,14 @@ bool GridMap::loadHeightData(FILE* in, uint32 offset, uint32 /*size*/)
             m_uint16_V8 = new uint16 [128 * 128];
             file_read = fread(m_uint16_V9, sizeof(uint16), 129 * 129, in);
             if (file_read <= 0)
+            {
                 return false;
+            }
             file_read = fread(m_uint16_V8, sizeof(uint16), 128 * 128, in);
             if (file_read <= 0)
+            {
                 return false;
+            }
             m_gridIntHeightMultiplier = (header.gridMaxHeight - header.gridHeight) / 65535;
             m_gridGetHeight = &GridMap::getHeightFromUint16;
         }
@@ -208,10 +222,14 @@ bool GridMap::loadHeightData(FILE* in, uint32 offset, uint32 /*size*/)
             m_uint8_V8 = new uint8 [128 * 128];
             file_read = fread(m_uint8_V9, sizeof(uint8), 129 * 129, in);
             if (file_read <= 0)
+            {
                 return false;
+            }
             file_read = fread(m_uint8_V8, sizeof(uint8), 128 * 128, in);
             if (file_read <= 0)
+            {
                 return false;
+            }
             m_gridIntHeightMultiplier = (header.gridMaxHeight - header.gridHeight) / 255;
             m_gridGetHeight = &GridMap::getHeightFromUint8;
         }
@@ -221,15 +239,21 @@ bool GridMap::loadHeightData(FILE* in, uint32 offset, uint32 /*size*/)
             m_V8 = new float [128 * 128];
             file_read = fread(m_V9, sizeof(float), 129 * 129, in);
             if (file_read <= 0)
+            {
                 return false;
+            }
             file_read = fread(m_V8, sizeof(float), 128 * 128, in);
             if (file_read <= 0)
+            {
                 return false;
+            }
             m_gridGetHeight = &GridMap::getHeightFromFloat;
         }
     }
     else
-        { m_gridGetHeight = &GridMap::getHeightFromFlat; }
+    {
+        m_gridGetHeight = &GridMap::getHeightFromFlat;
+    }
 
     return true;
 }
@@ -237,10 +261,14 @@ bool GridMap::loadHeightData(FILE* in, uint32 offset, uint32 /*size*/)
 bool GridMap::loadHolesData(FILE* in, uint32 offset, uint32 size)
 {
     if (fseek(in, offset, SEEK_SET) != 0)
+    {
         return false;
+    }
 
     if (fread(&m_holes, sizeof(m_holes), 1, in) != 1)
+    {
         return false;
+    }
     return true;
 }
 
@@ -250,9 +278,13 @@ bool GridMap::loadGridMapLiquidData(FILE* in, uint32 offset, uint32 /*size*/)
     fseek(in, offset, SEEK_SET);
     size_t file_read = fread(&header, sizeof(header), 1, in);
     if (file_read <= 0)
+    {
         return false;
+    }
     if (header.fourcc != *((uint32 const*)(MAP_LIQUID_MAGIC)))
+    {
         return false;
+    }
 
     m_liquidType    = header.liquidType;
     m_liquid_offX   = header.offsetX;
@@ -266,12 +298,16 @@ bool GridMap::loadGridMapLiquidData(FILE* in, uint32 offset, uint32 /*size*/)
         m_liquidEntry = new uint16[16 * 16];
         file_read = fread(m_liquidEntry, sizeof(uint16), 16 * 16, in);
         if (file_read <= 0)
+        {
             return false;
+        }
 
         m_liquidFlags = new uint8[16 * 16];
         file_read = fread(m_liquidFlags, sizeof(uint8), 16 * 16, in);
         if (file_read <= 0)
+        {
             return false;
+        }
     }
 
     if (!(header.flags & MAP_LIQUID_NO_HEIGHT))
@@ -279,7 +315,9 @@ bool GridMap::loadGridMapLiquidData(FILE* in, uint32 offset, uint32 /*size*/)
         m_liquid_map = new float [m_liquid_width * m_liquid_height];
         file_read = fread(m_liquid_map, sizeof(float), m_liquid_width * m_liquid_height, in);
         if (file_read <= 0)
+        {
             return false;
+        }
     }
 
     return true;
@@ -334,7 +372,9 @@ float GridMap::getHeightFromFloat(float x, float y) const
     y_int &= (MAP_RESOLUTION - 1);
 
     if (isHole(x_int, y_int))
+    {
         return INVALID_HEIGHT_VALUE;
+    }
 
     // Height stored as: h5 - its v8 grid, h1-h4 - its v9 grid
     // +--------------> X
@@ -960,9 +1000,13 @@ inline bool IsOutdoorWMO(uint32 mogpFlags, WMOAreaTableEntry const* wmoEntry, Ar
     if (wmoEntry && atEntry)
     {
         if (atEntry->flags & AREA_FLAG_OUTSIDE)
+        {
             return true;
+        }
         if (atEntry->flags & AREA_FLAG_INSIDE)
+        {
             return false;
+        }
     }
 
     outdoor = mogpFlags & 0x8;
@@ -970,7 +1014,9 @@ inline bool IsOutdoorWMO(uint32 mogpFlags, WMOAreaTableEntry const* wmoEntry, Ar
     if (wmoEntry)
     {
         if (wmoEntry->Flags & 4)
+        {
             return true;
+        }
 
         if ((wmoEntry->Flags & 2) != 0)
             outdoor = false;
@@ -1053,7 +1099,9 @@ uint16 TerrainInfo::GetAreaFlag(float x, float y, float z, bool* isOutdoors) con
         }
         // this used while not all *.map files generated (instances)
         else
-            { areaflag = GetAreaFlagByMapId(GetMapId()); }
+        {
+            areaflag = GetAreaFlagByMapId(GetMapId());
+        }
     }
 
     if (isOutdoors)
@@ -1061,7 +1109,9 @@ uint16 TerrainInfo::GetAreaFlag(float x, float y, float z, bool* isOutdoors) con
         if (haveAreaInfo)
             *isOutdoors = IsOutdoorWMO(mogpFlags, wmoEntry, atEntry);
         else
-            { *isOutdoors = true; }
+        {
+            *isOutdoors = true;
+        }
     }
     return areaflag;
 }
@@ -1073,7 +1123,9 @@ uint8 TerrainInfo::GetTerrainType(float x, float y) const
         return gmap->getTerrainType(x, y);
     }
     else
-        { return 0; }
+    {
+        return 0;
+    }
 }
 
 uint32 TerrainInfo::GetAreaId(float x, float y, float z) const
@@ -1363,7 +1415,9 @@ TerrainInfo* TerrainManager::LoadTerrain(const uint32 mapId)
         i_TerrainMap[mapId] = ptr;
     }
     else
-        { ptr = (*iter).second; }
+    {
+        ptr = (*iter).second;
+    }
 
     return ptr;
 }
@@ -1414,7 +1468,9 @@ uint32 TerrainManager::GetAreaIdByAreaFlag(uint16 areaflag, uint32 map_id)
         return entry->ID;
     }
     else
-        { return 0; }
+    {
+        return 0;
+    }
 }
 
 uint32 TerrainManager::GetZoneIdByAreaFlag(uint16 areaflag, uint32 map_id)
@@ -1426,7 +1482,9 @@ uint32 TerrainManager::GetZoneIdByAreaFlag(uint16 areaflag, uint32 map_id)
         return (entry->zone != 0) ? entry->zone : entry->ID;
     }
     else
-        { return 0; }
+    {
+        return 0;
+    }
 }
 
 void TerrainManager::GetZoneAndAreaIdByAreaFlag(uint32& zoneid, uint32& areaid, uint16 areaflag, uint32 map_id)

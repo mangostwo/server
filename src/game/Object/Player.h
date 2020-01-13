@@ -220,7 +220,9 @@ struct Glyph
     void SetId(uint32 newId)
     {
         if (newId == id)
+        {
             return;
+        }
 
         if (id == 0 && uState == GLYPH_UNCHANGED)           // not exist yet in db and already saved
         {
@@ -897,7 +899,9 @@ class PlayerTaxi
                 return true;
             }
             else
-                { return false; }
+            {
+                return false;
+            }
         }
         void AppendTaximaskTo(ByteBuffer& data, bool all);
 
@@ -1167,7 +1171,9 @@ class Player : public Unit
                 m_ExtraFlags |= PLAYER_EXTRA_AUCTION_ENEMY;
             }
             else if (state > 0)
-                { m_ExtraFlags |= PLAYER_EXTRA_AUCTION_NEUTRAL; }
+            {
+                m_ExtraFlags |= PLAYER_EXTRA_AUCTION_NEUTRAL;
+            }
         }
 
 

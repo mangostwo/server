@@ -3677,7 +3677,9 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         {
             VisibleAuraMap::const_iterator itr = m_visibleAuras.find(slot);
             if (itr != m_visibleAuras.end())
+            {
                 return itr->second;
+            }
             return 0;
         }
         void SetVisibleAura(uint8 slot, uint32 spellid)

@@ -107,7 +107,9 @@ CanCastResult CreatureAI::CanCastSpell(Unit* pTarget, const SpellEntry* pSpell, 
         return CAST_OK;
     }
     else
-        { return CAST_FAIL_OTHER; }
+    {
+        return CAST_FAIL_OTHER;
+    }
 }
 
 CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32 uiCastFlags, ObjectGuid uiOriginalCasterGUID)
@@ -160,7 +162,9 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32
         }
     }
     else
-        { return CAST_FAIL_IS_CASTING; }
+    {
+        return CAST_FAIL_IS_CASTING;
+    }
 }
 
 bool CreatureAI::DoMeleeAttackIfReady()
@@ -177,7 +181,9 @@ void CreatureAI::SetCombatMovement(bool enable, bool stopOrStartMovement /*=fals
         m_creature->clearUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT);
     }
     else
-        { m_creature->addUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT); }
+    {
+        m_creature->addUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT);
+    }
 
     if (stopOrStartMovement && m_creature->getVictim())     // Only change current movement while in combat
     {
@@ -186,7 +192,9 @@ void CreatureAI::SetCombatMovement(bool enable, bool stopOrStartMovement /*=fals
             m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), m_attackDistance, m_attackAngle);
         }
         else if (!enable && m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
-            { m_creature->StopMoving(); }
+        {
+            m_creature->StopMoving();
+        }
     }
 }
 

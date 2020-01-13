@@ -79,7 +79,9 @@ namespace MaNGOS
                     ChatHandler::BuildChatPacket(data, i_msgtype, &str[0], LANG_UNIVERSAL, CHAT_TAG_NONE, sourceGuid, sourceName.c_str());
                 }
                 else
-                    { ChatHandler::BuildChatPacket(data, i_msgtype, text, LANG_UNIVERSAL, CHAT_TAG_NONE, sourceGuid, sourceName.c_str(), sourceGuid, sourceName.c_str()); }
+                {
+                    ChatHandler::BuildChatPacket(data, i_msgtype, text, LANG_UNIVERSAL, CHAT_TAG_NONE, sourceGuid, sourceName.c_str(), sourceGuid, sourceName.c_str());
+                }
             }
         private:
             ChatMsg i_msgtype;
@@ -117,7 +119,9 @@ namespace MaNGOS
                     ChatHandler::BuildChatPacket(data, CHAT_MSG_MONSTER_YELL, &str[0], i_language, CHAT_TAG_NONE, i_source->GetObjectGuid(), i_source->GetName());
                 }
                 else
-                    { ChatHandler::BuildChatPacket(data, CHAT_MSG_MONSTER_YELL, text, i_language, CHAT_TAG_NONE, i_source->GetObjectGuid(), i_source->GetName()); }
+                {
+                    ChatHandler::BuildChatPacket(data, CHAT_MSG_MONSTER_YELL, text, i_language, CHAT_TAG_NONE, i_source->GetObjectGuid(), i_source->GetName());
+                }
             }
         private:
             Language i_language;
@@ -377,7 +381,9 @@ void BattleGround::Update(uint32 diff)
                 winner = ALLIANCE;
             }
             else if (GetPlayersCountByTeam(HORDE) >= GetMinPlayersPerTeam())
-                { winner = HORDE; }
+            {
+                winner = HORDE;
+            }
 
             EndBattleGround(winner);
             m_PrematureCountDown = false;
@@ -405,7 +411,9 @@ void BattleGround::Update(uint32 diff)
         }
     }
     else if (m_PrematureCountDown)
-        { m_PrematureCountDown = false; }
+    {
+        m_PrematureCountDown = false;
+    }
 
     /*********************************************************/
     /***           ARENA BUFF OBJECT SPAWNING              ***/
@@ -552,7 +560,9 @@ void BattleGround::SendPacketToAll(WorldPacket* packet)
             plr->GetSession()->SendPacket(packet);
         }
         else
-            { sLog.outError("BattleGround:SendPacketToAll: %s not found!", itr->first.GetString().c_str()); }
+        {
+            sLog.outError("BattleGround:SendPacketToAll: %s not found!", itr->first.GetString().c_str());
+        }
     }
 }
 
@@ -1015,7 +1025,9 @@ void BattleGround::RewardMark(Player* plr, uint32 count)
                 RewardSpellCast(plr, SPELL_AV_MARK_WINNER);
             }
             else
-                { RewardSpellCast(plr, SPELL_AV_MARK_LOSER); }
+            {
+                RewardSpellCast(plr, SPELL_AV_MARK_LOSER);
+            }
             break;
         case BATTLEGROUND_WS:
             if (count == ITEM_WINNER_COUNT)
@@ -1023,7 +1035,9 @@ void BattleGround::RewardMark(Player* plr, uint32 count)
                 RewardSpellCast(plr, SPELL_WS_MARK_WINNER);
             }
             else
-                { RewardSpellCast(plr, SPELL_WS_MARK_LOSER); }
+            {
+                RewardSpellCast(plr, SPELL_WS_MARK_LOSER);
+            }
             break;
         case BATTLEGROUND_AB:
             if (count == ITEM_WINNER_COUNT)
@@ -1031,7 +1045,9 @@ void BattleGround::RewardMark(Player* plr, uint32 count)
                 RewardSpellCast(plr, SPELL_AB_MARK_WINNER);
             }
             else
-                { RewardSpellCast(plr, SPELL_AB_MARK_LOSER); }
+            {
+                RewardSpellCast(plr, SPELL_AB_MARK_LOSER);
+            }
             break;
         case BATTLEGROUND_EY:                               // no rewards
         default:
@@ -1048,7 +1064,9 @@ void BattleGround::RewardSpellCast(Player* plr, uint32 spell_id)
 {
     // 'Inactive' this aura prevents the player from gaining honor points and battleground tokens
     if (plr->GetDummyAura(SPELL_AURA_PLAYER_INACTIVE))
+    {
         return;
+    }
 
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);
     if (!spellInfo)
@@ -1070,7 +1088,9 @@ void BattleGround::RewardItem(Player* plr, uint32 item_id, uint32 count)
 {
     // 'Inactive' this aura prevents the player from gaining honor points and battleground tokens
     if (plr->GetDummyAura(SPELL_AURA_PLAYER_INACTIVE))
+    {
         return;
+    }
 
     ItemPosCountVec dest;
     uint32 no_space_count = 0;
@@ -1666,7 +1686,9 @@ void BattleGround::DoorClose(ObjectGuid guid)
         }
     }
     else
-        { sLog.outError("BattleGround: Door %s not found (can not close doors)", guid.GetString().c_str()); }
+    {
+        sLog.outError("BattleGround: Door %s not found (can not close doors)", guid.GetString().c_str());
+    }
 }
 
 /// <summary>
@@ -1683,7 +1705,9 @@ void BattleGround::DoorOpen(ObjectGuid guid)
         obj->UseDoorOrButton(RESPAWN_ONE_DAY);
     }
     else
-        { sLog.outError("BattleGround: Door %s not found! - doors will be closed.", guid.GetString().c_str()); }
+    {
+        sLog.outError("BattleGround: Door %s not found! - doors will be closed.", guid.GetString().c_str());
+    }
 }
 
 /// <summary>

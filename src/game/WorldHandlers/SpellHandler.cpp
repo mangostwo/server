@@ -277,7 +277,9 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
         stmt.PExecute(pItem->GetGUIDLow());
     }
     else
-        { pUser->SendLoot(pItem->GetObjectGuid(), LOOT_CORPSE); }
+    {
+        pUser->SendLoot(pItem->GetObjectGuid(), LOOT_CORPSE);
+    }
 }
 
 void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
@@ -333,14 +335,20 @@ void WorldSession::HandleGameobjectReportUse(WorldPacket& recvPacket)
 
     // ignore for remote control state
     if (!_player->IsSelfMover())
+    {
         return;
+    }
 
     GameObject* go = GetPlayer()->GetMap()->GetGameObject(guid);
     if (!go)
+    {
         return;
+    }
 
     if (!go->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
+    {
         return;
+    }
 
     _player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_USE_GAMEOBJECT, go->GetEntry());
 }
@@ -452,7 +460,9 @@ void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
 
     // FIXME: hack, ignore unexpected client cancel Deadly Throw cast
     if (spellId == 26679)
+    {
         return;
+    }
 
     if (mover->IsNonMeleeSpellCasted(false))
         mover->InterruptNonMeleeSpells(false, spellId);
@@ -503,7 +513,9 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
             }
         }
         else
-            { return; }
+        {
+            return;
+        }
     }
 
     // channeled spell case (it currently casted then)
@@ -629,7 +641,9 @@ void WorldSession::HandleSelfResOpcode(WorldPacket& /*recv_data*/)
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: CMSG_SELF_RES");                  // empty opcode
 
     if (_player->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
+    {
         return;
+    }
 
     if (_player->GetUInt32Value(PLAYER_SELF_RES_SPELL))
     {
@@ -650,11 +664,15 @@ void WorldSession::HandleSpellClick(WorldPacket& recv_data)
 
     // client prevent click and set different icon at combat state; however combat state is allowed for dungeons
     if (_player->IsInCombat() && !_player->GetMap()->IsDungeon())
+    {
         return;
+    }
 
     Creature* unit = _player->GetMap()->GetAnyTypeCreature(guid);
     if (!unit || unit->IsInCombat())                        // client prevent click and set different icon at combat state
+    {
         return;
+    }
 
     SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(unit->GetEntry());
     for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
@@ -662,7 +680,9 @@ void WorldSession::HandleSpellClick(WorldPacket& recv_data)
         if (itr->second.IsFitToRequirements(_player, unit))
         {
             if (sScriptMgr.OnNpcSpellClick(_player, unit, itr->second.spellId))
+            {
                 return;
+            }
 
             Unit* caster = (itr->second.castFlags & 0x1) ? (Unit*)_player : (Unit*)unit;
             Unit* target = (itr->second.castFlags & 0x2) ? (Unit*)_player : (Unit*)unit;
@@ -685,12 +705,16 @@ void WorldSession::HandleGetMirrorimageData(WorldPacket& recv_data)
     Creature* pCreature = _player->GetMap()->GetAnyTypeCreature(guid);
 
     if (!pCreature)
+    {
         return;
+    }
 
     Unit::AuraList const& images = pCreature->GetAurasByType(SPELL_AURA_MIRROR_IMAGE);
 
     if (images.empty())
+    {
         return;
+    }
 
     Unit* pCaster = images.front()->GetCaster();
 

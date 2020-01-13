@@ -144,7 +144,9 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
     // expected bracket entry
     PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(), _player->getLevel());
     if (!bracketEntry)
+    {
         return;
+    }
 
     GroupJoinBattlegroundResult err;
 
@@ -358,11 +360,15 @@ void WorldSession::HandlePVPLogDataOpcode(WorldPacket & /*recv_data*/)
 
     BattleGround* bg = _player->GetBattleGround();
     if (!bg)
+    {
         return;
+    }
 
     // arena finish version will send in BattleGround::EndBattleGround directly
     if (bg->isArena())
+    {
         return;
+    }
 
     WorldPacket data;
     sBattleGroundMgr.BuildPvpLogDataPacket(&data, bg);
@@ -460,7 +466,9 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket& recv_data)
     // expected bracket entry
     PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(), _player->getLevel());
     if (!bracketEntry)
+    {
         return;
+    }
 
     // some checks if player isn't cheating - it is not exactly cheating, but we can not allow it
     if (action == 1 && ginfo.arenaType == ARENA_TYPE_NONE)
@@ -720,14 +728,20 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recv_data)
 
     // ignore if we already in BG or BG queue
     if (_player->InBattleGround())
+    {
         return;
+    }
 
     Creature* unit = GetPlayer()->GetMap()->GetCreature(guid);
     if (!unit)
+    {
         return;
+    }
 
     if (!unit->IsBattleMaster())                            // it's not battle master
+    {
         return;
+    }
 
     ArenaType arenatype;
     uint32 arenaRating = 0;
@@ -760,7 +774,9 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recv_data)
     BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(bgTypeId, arenatype);
     PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(), _player->getLevel());
     if (!bracketEntry)
+    {
         return;
+    }
 
     GroupJoinBattlegroundResult err;
 
@@ -771,7 +787,9 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recv_data)
     {
         // you can't join in this way by client
         if (isRated)
+        {
             return;
+        }
 
         // check if already in queue
         if (_player->GetBattleGroundQueueIndex(bgQueueTypeId) < PLAYER_MAX_BATTLEGROUND_QUEUES)
@@ -779,16 +797,22 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recv_data)
             return;
         // check if has free queue slots
         if (!_player->HasFreeBattleGroundQueueId())
+        {
             return;
+        }
     }
     else
     {
         grp = _player->GetGroup();
         // no group found, error
         if (!grp)
+        {
             return;
+        }
         if (grp->GetLeaderGuid() != _player->GetObjectGuid())
+        {
             return;
+        }
         // may be Group::CanJoinBattleGroundQueue should be moved to player class...
         err = grp->CanJoinBattleGroundQueue(bg, bgQueueTypeId, arenatype, arenatype, (bool)isRated, arenaslot);
     }
@@ -815,7 +839,9 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recv_data)
         {
             ArenaTeamMember const* at_member = at->GetMember(citr->guid);
             if (!at_member)                                 // group member joining to arena must be in leader arena team
+            {
                 return;
+            }
 
             // calc avg personal rating
             avg_pers_rating += at_member->personal_rating;

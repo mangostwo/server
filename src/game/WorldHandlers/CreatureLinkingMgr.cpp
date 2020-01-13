@@ -511,7 +511,9 @@ void CreatureLinkingHolder::DoCreatureLinkingEvent(CreatureLinkingEvent eventTyp
                             pMaster->SetInCombatWith(pEnemy);
                         }
                         else
-                            { pMaster->AI()->AttackStart(pEnemy); }
+                        {
+                            pMaster->AI()->AttackStart(pEnemy);
+                        }
                         break;
                     case LINKING_EVENT_EVADE:
                         if (!pMaster->IsAlive())
@@ -586,7 +588,9 @@ void CreatureLinkingHolder::ProcessSlave(CreatureLinkingEvent eventType, Creatur
                     pSlave->SetInCombatWith(pEnemy);
                 }
                 else
-                    { pSlave->AI()->AttackStart(pEnemy); }
+                {
+                    pSlave->AI()->AttackStart(pEnemy);
+                }
             }
             break;
         case LINKING_EVENT_EVADE:
@@ -623,7 +627,9 @@ void CreatureLinkingHolder::ProcessSlave(CreatureLinkingEvent eventType, Creatur
                 }
             }
             else if (flag & FLAG_DESPAWN_ON_RESPAWN && pSlave->IsAlive())
-                { pSlave->ForcedDespawn(); }
+            {
+                pSlave->ForcedDespawn();
+            }
 
             if (flag & FLAG_FOLLOW && pSlave->IsAlive() && !pSlave->IsInCombat())
             {
@@ -760,9 +766,13 @@ bool CreatureLinkingHolder::CanSpawn(uint32 lowGuid, Map* _map, CreatureLinkingI
             return IsRespawnReady(pInfo->masterDBGuid, _map);
         }
         else if (pInfo->linkingFlag & FLAG_CANT_SPAWN_IF_BOSS_ALIVE)
-            { return !IsRespawnReady(pInfo->masterDBGuid, _map); }
+        {
+            return !IsRespawnReady(pInfo->masterDBGuid, _map);
+        }
         else
-            { return true; }
+        {
+            return true;
+        }
     }
 
     // Search for nearby master
@@ -777,9 +787,13 @@ bool CreatureLinkingHolder::CanSpawn(uint32 lowGuid, Map* _map, CreatureLinkingI
                 return pMaster->IsAlive();
             }
             else if (pInfo->linkingFlag & FLAG_CANT_SPAWN_IF_BOSS_ALIVE)
-                { return !pMaster->IsAlive(); }
+            {
+                return !pMaster->IsAlive();
+            }
             else
-                { return true; }
+            {
+                return true;
+            }
         }
     }
 

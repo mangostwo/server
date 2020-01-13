@@ -196,12 +196,16 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
 
     // This check is also called in Spell::CheckCast()
     if (!CanBoard(passenger))
+    {
         return;
+    }
 
     // Use the planned seat only if the seat is valid, possible to choose and empty
     if (!IsSeatAvailableFor(passenger, seat))
         if (!GetUsableSeatFor(passenger, seat))
+        {
             return;
+        }
 
     VehicleSeatEntry const* seatEntry = GetSeatEntry(seat);
     MANGOS_ASSERT(seatEntry);
@@ -271,25 +275,33 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
 
     // Switching seats is not possible
     if (m_vehicleEntry->m_flags & VEHICLE_FLAG_DISABLE_SWITCH)
+    {
         return;
+    }
 
     PassengerMap::const_iterator itr = m_passengers.find(passenger);
     MANGOS_ASSERT(itr != m_passengers.end());
 
     // We are already boarded to this seat
     if (itr->second->GetTransportSeat() == seat)
+    {
         return;
+    }
 
     // Check if it's a valid seat
     if (!IsSeatAvailableFor(passenger, seat))
+    {
         return;
+    }
 
     VehicleSeatEntry const* seatEntry = GetSeatEntry(itr->second->GetTransportSeat());
     MANGOS_ASSERT(seatEntry);
 
     // Switching seats is only allowed if this flag is set
     if (~seatEntry->m_flags & SEAT_FLAG_CAN_SWITCH)
+    {
         return;
+    }
 
     // Remove passenger modifications of the old seat
     RemoveSeatMods(passenger, seatEntry->m_flags);
@@ -396,31 +408,45 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
 bool VehicleInfo::CanBoard(Unit* passenger) const
 {
     if (!passenger)
+    {
         return false;
+    }
 
     // Passenger is this vehicle
     if (passenger == m_owner)
+    {
         return false;
+    }
 
     // Passenger is already on this vehicle (in this case switching seats is required)
     if (passenger->IsBoarded() && passenger->GetTransportInfo()->GetTransport() == m_owner)
+    {
         return false;
+    }
 
     // Prevent circular boarding: passenger (could only be vehicle) must not have m_owner on board
     if (passenger->IsVehicle() && passenger->GetVehicleInfo()->HasOnBoard(m_owner))
+    {
         return false;
+    }
 
     // Check if we have at least one empty seat
     if (!GetEmptySeats())
+    {
         return false;
+    }
 
     // Passenger is already boarded
     if (m_passengers.find(passenger) != m_passengers.end())
+    {
         return false;
+    }
 
     // Check for empty player seats
     if (passenger->GetTypeId() == TYPEID_PLAYER)
+    {
         return GetEmptySeatsMask() & m_playerSeats;
+    }
 
     // Check for empty creature seats
     return GetEmptySeatsMask() & m_creatureSeats;
@@ -430,7 +456,9 @@ Unit* VehicleInfo::GetPassenger(uint8 seat) const
 {
     for (PassengerMap::const_iterator itr = m_passengers.begin(); itr != m_passengers.end(); ++itr)
         if (itr->second->GetTransportSeat() == seat)
+        {
             return (Unit*)itr->first;
+        }
 
     return NULL;
 }
@@ -485,14 +513,18 @@ bool VehicleInfo::GetUsableSeatFor(Unit* passenger, uint8& seat) const
 
     // No usable seats available
     if (!possibleSeats)
+    {
         return false;
+    }
 
     // Start with 0
     seat = 0;
 
     for (uint8 i = 1; seat < MAX_VEHICLE_SEAT; i <<= 1, ++seat)
         if (possibleSeats & i)
+        {
             return true;
+        }
 
     return false;
 }

@@ -198,7 +198,9 @@ void WorldSession::HandleLfgGetPartyInfo(WorldPacket& recv_data)
 
     Group* pGroup = pPlayer->GetGroup();
     if (!pGroup)
+    {
         return;
+    }
 
     partyForbidden groupMap;
     for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
@@ -267,7 +269,9 @@ void WorldSession::HandleLfgSetRoles(WorldPacket& recv_data)
 
     Group* pGroup = pPlayer->GetGroup();
     if (!pGroup)                                           // role check/set is only done in groups
+    {
         return;
+    }
 
     uint8 roles;
     recv_data >> roles;

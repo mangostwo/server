@@ -219,7 +219,9 @@ bool ChatHandler::HandleGMChatCommand(char* args)
             m_session->SendNotification(LANG_GM_CHAT_ON);
         }
         else
-            { m_session->SendNotification(LANG_GM_CHAT_OFF); }
+        {
+            m_session->SendNotification(LANG_GM_CHAT_OFF);
+        }
         return true;
     }
 
@@ -359,7 +361,9 @@ bool ChatHandler::HandleGPSCommand(char* args)
             PSendSysMessage("You are OUTdoor");
         }
         else
-            { PSendSysMessage("You are INdoor"); }
+        {
+            PSendSysMessage("You are INdoor");
+        }
     }
     else
     {
@@ -510,7 +514,9 @@ bool ChatHandler::HandleNamegoCommand(char* args)
         }
         // save only in non-flight case
         else
-            { target->SaveRecallPosition(); }
+        {
+            target->SaveRecallPosition();
+        }
 
         // before GM
         float x, y, z;
@@ -642,7 +648,9 @@ bool ChatHandler::HandleGonameCommand(char* args)
                         group->BindToInstance(save, !save->CanReset());
                     }
                     else
-                        { _player->BindToInstance(save, !save->CanReset()); }
+                    {
+                        _player->BindToInstance(save, !save->CanReset());
+                    }
                 }
             }
 
@@ -666,7 +674,9 @@ bool ChatHandler::HandleGonameCommand(char* args)
         }
         // save only in non-flight case
         else
-            { _player->SaveRecallPosition(); }
+        {
+            _player->SaveRecallPosition();
+        }
 
         // to point to see at target with same orientation
         float x, y, z;
@@ -908,7 +918,9 @@ bool ChatHandler::HandleModifyRageCommand(char* args)
 bool ChatHandler::HandleModifyRunicPowerCommand(char* args)
 {
     if (!*args)
+    {
         return false;
+    }
 
     int32 rune = atoi(args) * 10;
     int32 runem = atoi(args) * 10;
@@ -1036,7 +1048,9 @@ bool ChatHandler::HandleModifyTalentCommand(char* args)
     {
         // check online security
         if (HasLowerSecurity((Player*)target))
+        {
             return false;
+        }
 
         ((Player*)target)->SetFreeTalentPoints(tp);
         ((Player*)target)->SendTalentsInfoData(false);
@@ -1049,7 +1063,9 @@ bool ChatHandler::HandleModifyTalentCommand(char* args)
         {
             // check online security
             if (HasLowerSecurity((Player*)owner))
+            {
                 return false;
+            }
 
             ((Pet*)target)->SetFreeTalentPoints(tp);
             ((Player*)owner)->SendTalentsInfoData(true);
@@ -1080,7 +1096,9 @@ bool ChatHandler::HandleTaxiCheatCommand(char* args)
     }
     // check online security
     else if (HasLowerSecurity(chr))
-        { return false; }
+    {
+        return false;
+    }
 
     if (value)
     {
@@ -1315,7 +1333,9 @@ bool ChatHandler::HandleModifyBWalkCommand(char* args)
 bool ChatHandler::HandleModifyFlyCommand(char* args)
 {
     if (!*args)
+    {
         return false;
+    }
 
     float modSpeed = (float)atof(args);
 
@@ -1336,7 +1356,9 @@ bool ChatHandler::HandleModifyFlyCommand(char* args)
 
     // check online security
     if (HasLowerSecurity(chr))
+    {
         return false;
+    }
 
     PSendSysMessage(LANG_YOU_CHANGE_FLY_SPEED, modSpeed, GetNameLink(chr).c_str());
     if (needReportToTarget(chr))
@@ -1726,7 +1748,9 @@ bool ChatHandler::HandleModifyMoneyCommand(char* args)
             chr->SetMoney(MAX_MONEY_AMOUNT);
         }
         else
-            { chr->ModifyMoney(addmoney); }
+        {
+            chr->ModifyMoney(addmoney);
+        }
     }
 
     DETAIL_LOG(GetMangosString(LANG_NEW_MONEY), moneyuser, addmoney, chr->GetMoney());
@@ -1737,7 +1761,9 @@ bool ChatHandler::HandleModifyMoneyCommand(char* args)
 bool ChatHandler::HandleModifyHonorCommand(char* args)
 {
     if (!*args)
+    {
         return false;
+    }
 
     Player* target = getSelectedPlayer();
     if (!target)
@@ -1749,7 +1775,9 @@ bool ChatHandler::HandleModifyHonorCommand(char* args)
 
     // check online security
     if (HasLowerSecurity(target))
+    {
         return false;
+    }
 
     int32 amount = (int32)atoi(args);
 
@@ -1847,7 +1875,9 @@ bool ChatHandler::HandleLookupAreaCommand(char* args)
                     ss << areaEntry->ID << " - |cffffffff|Harea:" << areaEntry->ID << "|h[" << name << " " << localeNames[loc] << "]|h|r";
                 }
                 else
-                    { ss << areaEntry->ID << " - " << name << " " << localeNames[loc]; }
+                {
+                    ss << areaEntry->ID << " - " << name << " " << localeNames[loc];
+                }
 
                 SendSysMessage(ss.str().c_str());
 
@@ -1902,7 +1932,9 @@ bool ChatHandler::HandleLookupTeleCommand(char* args)
             reply << "  |cffffffff|Htele:" << itr->first << "|h[" << tele->name << "]|h|r\n";
         }
         else
-            { reply << "  " << itr->first << " " << tele->name << "\n"; }
+        {
+            reply << "  " << itr->first << " " << tele->name << "\n";
+        }
     }
 
     if (reply.str().empty())
@@ -1910,7 +1942,9 @@ bool ChatHandler::HandleLookupTeleCommand(char* args)
         SendSysMessage(LANG_COMMAND_TELE_NOLOCATION);
     }
     else
-        { PSendSysMessage(LANG_COMMAND_TELE_LOCATION, reply.str().c_str()); }
+    {
+        PSendSysMessage(LANG_COMMAND_TELE_LOCATION, reply.str().c_str());
+    }
 
     return true;
 }
@@ -2130,7 +2164,9 @@ bool ChatHandler::HandleTeleGroupCommand(char* args)
         }
         // save only in non-flight case
         else
-            { pl->SaveRecallPosition(); }
+        {
+            pl->SaveRecallPosition();
+        }
 
         pl->TeleportTo(tele->mapId, tele->position_x, tele->position_y, tele->position_z, tele->orientation);
     }
@@ -2230,7 +2266,9 @@ bool ChatHandler::HandleGroupgoCommand(char* args)
         }
         // save only in non-flight case
         else
-            { pl->SaveRecallPosition(); }
+        {
+            pl->SaveRecallPosition();
+        }
 
         // before GM
         float x, y, z;
@@ -2285,7 +2323,9 @@ bool ChatHandler::HandleGoHelper(Player* player, uint32 mapid, float x, float y,
     }
     // save only in non-flight case
     else
-        { player->SaveRecallPosition(); }
+    {
+        player->SaveRecallPosition();
+    }
 
     player->TeleportTo(mapid, x, y, z, ort);
 
@@ -2352,7 +2392,9 @@ bool ChatHandler::HandleGoCommand(char* args)
     }
     // link case
     else if (!ExtractLocationFromLink(&args, mapid, x, y, z))
-        { return false; }
+    {
+        return false;
+    }
 
     return HandleGoHelper(_player, mapid, x, y, &z);
 }
@@ -2443,7 +2485,9 @@ bool ChatHandler::HandleGoZoneXYCommand(char* args)
         }
     }
     else
-        { areaid = _player->GetZoneId(); }
+    {
+        areaid = _player->GetZoneId();
+    }
 
     AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(areaid);
 

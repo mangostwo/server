@@ -80,7 +80,9 @@ void AddItemsSetItem(Player* player, Item* item)
             player->ItemSetEff[x] = eff;
         }
         else
-            { player->ItemSetEff.push_back(eff); }
+        {
+            player->ItemSetEff.push_back(eff);
+        }
     }
 
     ++eff->item_count;
@@ -228,7 +230,9 @@ bool ItemCanGoIntoBag(ItemPrototype const* pProto, ItemPrototype const* pBagProt
                     return true;
                 case ITEM_SUBCLASS_MINING_CONTAINER:
                     if (!(pProto->BagFamily & BAG_FAMILY_MASK_MINING_SUPP))
+                    {
                         return false;
+                    }
                     return true;
                 case ITEM_SUBCLASS_ENGINEERING_CONTAINER:
                     if (!(pProto->BagFamily & BAG_FAMILY_MASK_ENGINEERING_SUPP))
@@ -238,15 +242,21 @@ bool ItemCanGoIntoBag(ItemPrototype const* pProto, ItemPrototype const* pBagProt
                     return true;
                 case ITEM_SUBCLASS_GEM_CONTAINER:
                     if (!(pProto->BagFamily & BAG_FAMILY_MASK_GEMS))
+                    {
                         return false;
+                    }
                     return true;
                 case ITEM_SUBCLASS_LEATHERWORKING_CONTAINER:
                     if (!(pProto->BagFamily & BAG_FAMILY_MASK_LEATHERWORKING_SUPP))
+                    {
                         return false;
+                    }
                     return true;
                 case ITEM_SUBCLASS_INSCRIPTION_CONTAINER:
                     if (!(pProto->BagFamily & BAG_FAMILY_MASK_INSCRIPTION_SUPP))
+                    {
                         return false;
+                    }
                     return true;
                 default:
                     return false;
@@ -325,7 +335,9 @@ bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
 bool Item::IsNotEmptyBag() const
 {
     if (Bag const* bag = ToBag())
+    {
         return !bag->IsEmpty();
+    }
     return false;
 }
 
@@ -673,7 +685,9 @@ uint32 Item::GetSkill()
                 return 0;
             }
             else
-                { return item_weapon_skills[proto->SubClass]; }
+            {
+                return item_weapon_skills[proto->SubClass];
+            }
 
         case ITEM_CLASS_ARMOR:
             if (proto->SubClass >= MAX_ITEM_SUBCLASS_ARMOR)
@@ -681,7 +695,9 @@ uint32 Item::GetSkill()
                 return 0;
             }
             else
-                { return item_armor_skills[proto->SubClass]; }
+            {
+                return item_armor_skills[proto->SubClass];
+            }
 
         default:
             return 0;
@@ -739,7 +755,9 @@ int32 Item::GenerateItemRandomPropertyId(uint32 item_id)
 
     // item must have one from this field values not null if it can have random enchantments
     if ((!itemProto->RandomProperty) && (!itemProto->RandomSuffix))
+    {
         return 0;
+    }
 
     // Random Property case
     if (itemProto->RandomProperty)
@@ -813,7 +831,9 @@ bool Item::UpdateItemSuffixFactor()
 {
     uint32 suffixFactor = GenerateEnchSuffixFactor(GetEntry());
     if (GetItemSuffixFactor() == suffixFactor)
+    {
         return false;
+    }
     SetUInt32Value(ITEM_FIELD_PROPERTY_SEED, suffixFactor);
     return true;
 }
@@ -1001,7 +1021,9 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
     {
         // EffectItemType[0] is the associated scroll itemID, if a scroll can be made
         if (spellInfo->EffectItemType[EFFECT_INDEX_0] == 0)
+        {
             return false;
+        }
         // Other checks do not apply to vellum enchants, so return final result
         return ((proto->SubClass == ITEM_SUBCLASS_WEAPON_ENCHANTMENT && spellInfo->EquippedItemClass == ITEM_CLASS_WEAPON) ||
                 (proto->SubClass == ITEM_SUBCLASS_ARMOR_ENCHANTMENT && spellInfo->EquippedItemClass == ITEM_CLASS_ARMOR));
@@ -1233,7 +1255,9 @@ Item* Item::CreateItem(uint32 item, uint32 count, Player const* player, uint32 r
             return pItem;
         }
         else
-            { delete pItem; }
+        {
+            delete pItem;
+        }
     }
     return NULL;
 }
@@ -1275,7 +1299,9 @@ bool Item::IsBindedNotWith(Player const* player) const
 
     // not BOA item case
     if (!IsBoundAccountWide())
+    {
         return true;
+    }
 
     // online
     if (Player* owner = GetOwner())
@@ -1367,7 +1393,9 @@ bool Item::HasMaxCharges() const
 
     for (int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
         if (GetSpellCharges(i) != itemProto->Spells[i].SpellCharges)
+        {
             return false;
+        }
 
     return true;
 }
@@ -1416,7 +1444,9 @@ void Item::SetLootState(ItemLootUpdateState state)
             }
             // temporary must stay until remove (ignore any changes)
             else if (m_lootState != ITEM_LOOT_TEMPORARY)
-                { m_lootState = ITEM_LOOT_UNCHANGED; }
+            {
+                m_lootState = ITEM_LOOT_UNCHANGED;
+            }
             break;
         case ITEM_LOOT_REMOVED:
             // if loot not saved then it existence in past can be just ignored

@@ -133,7 +133,9 @@ void PlayerSocial::SetFriendNote(ObjectGuid friend_guid, std::string note)
 {
     PlayerSocialMap::const_iterator itr = m_playerSocialMap.find(friend_guid.GetCounter());
     if (itr == m_playerSocialMap.end())                     // not exist
+    {
         return;
+    }
 
     utf8truncate(note, 48);                                 // DB and client size limitation
 
@@ -147,7 +149,9 @@ void PlayerSocial::SendSocialList()
 {
     Player* plr = sObjectMgr.GetPlayer(ObjectGuid(HIGHGUID_PLAYER, m_playerLowGuid));
     if (!plr)
+    {
         return;
+    }
 
     uint32 size = m_playerSocialMap.size();
 
@@ -297,7 +301,9 @@ void SocialMgr::SendFriendStatus(Player* player, FriendsResult result, ObjectGui
         BroadcastToFriendListers(player, &data);
     }
     else
-        { player->GetSession()->SendPacket(&data); }
+    {
+        player->GetSession()->SendPacket(&data);
+    }
 }
 
 void SocialMgr::BroadcastToFriendListers(Player* player, WorldPacket* packet)
@@ -374,7 +380,9 @@ PlayerSocial* SocialMgr::LoadFromDB(QueryResult* result, ObjectGuid guid)
             ++ignoreCounter;
         }
         else
-            { ++friendCounter; }
+        {
+            ++friendCounter;
+        }
     }
     while (result->NextRow());
     delete result;

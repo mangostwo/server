@@ -243,7 +243,9 @@ void WorldSession::HandleGroupAcceptOpcode(WorldPacket& recv_data)
             sObjectMgr.AddGroup(group);
         }
         else
-            { return; }
+        {
+            return;
+        }
     }
 
     // everything is fine, do it, PLAYER'S GROUP IS SET IN ADDMEMBER!!!
@@ -466,7 +468,9 @@ void WorldSession::HandleLootRoll(WorldPacket& recv_data)
 
     // everything is fine, do it, if false then some cheating problem found (result not used in pre-3.0)
     if (!group->CountRollVote(GetPlayer(), lootedTarget, itemSlot, RollVote(rollType)))
+    {
         return;
+    }
 
     switch (rollType)
     {
@@ -532,7 +536,9 @@ void WorldSession::HandleRandomRollOpcode(WorldPacket& recv_data)
         GetPlayer()->GetGroup()->BroadcastPacket(&data, false);
     }
     else
-        { SendPacket(&data); }
+    {
+        SendPacket(&data);
+    }
 }
 
 void WorldSession::HandleRaidTargetUpdateOpcode(WorldPacket& recv_data)
@@ -860,7 +866,9 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
             *data << pet->GetName();
         }
         else
-            { *data << uint8(0); }
+        {
+            *data << uint8(0);
+        }
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_MODEL_ID)
@@ -870,7 +878,9 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
             *data << uint16(pet->GetDisplayId());
         }
         else
-            { *data << uint16(0); }
+        {
+            *data << uint16(0);
+        }
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_CUR_HP)
@@ -896,7 +906,9 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
             *data << uint8(pet->GetPowerType());
         }
         else
-            { *data << uint8(0); }
+        {
+            *data << uint8(0);
+        }
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_CUR_POWER)
@@ -906,7 +918,9 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
             *data << uint16(pet->GetPower(pet->GetPowerType()));
         }
         else
-            { *data << uint16(0); }
+        {
+            *data << uint16(0);
+        }
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_MAX_POWER)
@@ -916,7 +930,9 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
             *data << uint16(pet->GetMaxPower(pet->GetPowerType()));
         }
         else
-            { *data << uint16(0); }
+        {
+            *data << uint16(0);
+        }
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_AURAS)

@@ -138,7 +138,9 @@ void OutdoorPvPNA::HandleCreatureCreate(Creature* creature)
         case NPC_ALLIANCE_HANAANI_GUARD:
             // prevent updating guard counter on owner take over
             if (m_guardsLeft == MAX_NA_GUARDS)
+            {
                 return;
+            }
 
             if (m_guardsLeft == 0)
             {
@@ -159,7 +161,9 @@ void OutdoorPvPNA::HandleCreatureCreate(Creature* creature)
 void OutdoorPvPNA::HandleCreatureDeath(Creature* creature)
 {
     if (creature->GetEntry() != NPC_HORDE_HALAANI_GUARD && creature->GetEntry() != NPC_ALLIANCE_HANAANI_GUARD)
+    {
         return;
+    }
 
     // get the location of the dead guard for future respawn
     float x, y, z, o;
@@ -303,7 +307,9 @@ bool OutdoorPvPNA::HandleEvent(uint32 eventId, GameObject* go)
 {
     // If we are not using the Halaa banner return
     if (go->GetEntry() != GO_HALAA_BANNER)
+    {
         return false;
+    }
 
     bool eventHandled = true;
 

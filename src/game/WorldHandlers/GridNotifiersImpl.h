@@ -729,7 +729,9 @@ void MaNGOS::LocalizedPacketDo<Builder>::operator()(Player* p)
         i_data_cache[cache_idx] = data;
     }
     else
-        { data = i_data_cache[cache_idx]; }
+    {
+        data = i_data_cache[cache_idx];
+    }
 
     p->SendDirectMessage(data);
 }
@@ -754,7 +756,9 @@ void MaNGOS::LocalizedPacketListDo<Builder>::operator()(Player* p)
         i_builder(*data_list, loc_idx);
     }
     else
-        { data_list = &i_data_cache[cache_idx]; }
+    {
+        data_list = &i_data_cache[cache_idx];
+    }
 
     for (size_t i = 0; i < data_list->size(); ++i)
         { p->SendDirectMessage((*data_list)[i]); }

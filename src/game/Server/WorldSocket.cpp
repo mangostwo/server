@@ -179,7 +179,9 @@ int WorldSocket::SendPacket(const WorldPacket& pkt)
 
 #ifdef ENABLE_ELUNA
     if (!sEluna->OnPacketSend(m_Session, pct))
+    {
         return 0;
+    }
 #endif
 
     ServerPktHeader header(pct.size() + 2, pct.GetOpcode());
@@ -354,7 +356,9 @@ int WorldSocket::handle_output(ACE_HANDLE)
     const size_t send_len = m_OutBuffer->length();
 
     if (send_len == 0)
+    {
         return handle_output_queue(Guard);
+    }
 
 #ifdef MSG_NOSIGNAL
     ssize_t n = peer().send(m_OutBuffer->rd_ptr(), send_len, MSG_NOSIGNAL);
@@ -397,7 +401,9 @@ int WorldSocket::handle_output(ACE_HANDLE)
 int WorldSocket::handle_output_queue(GuardType& g)
 {
     if (msg_queue()->is_empty())
+    {
         return cancel_wakeup_output(g);
+    }
 
     ACE_Message_Block* mblk;
 
@@ -735,7 +741,9 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
                 }
 #ifdef ENABLE_ELUNA
                 if (!sEluna->OnPacketReceive(m_Session, *new_pct))
+                {
                     return 0;
+                }
 #endif /* ENABLE_ELUNA */
                 return HandleAuthSession(*new_pct);
             case CMSG_KEEP_ALIVE:
@@ -784,7 +792,9 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
             return -1;
         }
         else
-            { return 0; }
+        {
+            return 0;
+        }
     }
 
     ACE_NOTREACHED(return 0);
@@ -1067,7 +1077,9 @@ int WorldSocket::HandlePing(WorldPacket& recvPacket)
             }
         }
         else
-            { m_OverSpeedPings = 0; }
+        {
+            m_OverSpeedPings = 0;
+        }
     }
 
     // critical section

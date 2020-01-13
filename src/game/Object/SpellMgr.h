@@ -92,13 +92,17 @@ float CalculateDefaultCoefficient(SpellEntry const* spellProto, DamageEffectType
 inline float GetSpellMinRange(SpellRangeEntry const* range, bool friendly = false)
 {
     if (!range)
+    {
         return 0;
+    }
     return (friendly ? range->minRangeFriendly : range->minRange);
 }
 inline float GetSpellMaxRange(SpellRangeEntry const* range, bool friendly = false)
 {
     if (!range)
+    {
         return 0;
+    }
     return (friendly ? range->maxRangeFriendly : range->maxRange);
 }
 inline uint32 GetSpellRecoveryTime(SpellEntry const* spellInfo) { return spellInfo->RecoveryTime > spellInfo->CategoryRecoveryTime ? spellInfo->RecoveryTime : spellInfo->CategoryRecoveryTime; }
@@ -614,7 +618,9 @@ inline uint32 GetDispellMask(DispelType dispel)
         return DISPEL_ALL_MASK;
     }
     else
-        { return (1 << dispel); }
+    {
+        return (1 << dispel);
+    }
 }
 
 // Diminishing Returns interaction with spells
@@ -832,7 +838,9 @@ class PetAura
                     return itr2->second;
                 }
                 else
-                    { return 0; }
+                {
+                    return 0;
+                }
             }
         }
 
@@ -988,13 +996,21 @@ class SpellMgr
                 return SPELL_FLASK_ELIXIR;
             }
             else if (mask & ELIXIR_BATTLE_MASK)
+            {
                 return SPELL_BATTLE_ELIXIR;
+            }
             else if (mask & ELIXIR_GUARDIAN_MASK)
+            {
                 return SPELL_GUARDIAN_ELIXIR;
+            }
             else if (mask & ELIXIR_WELL_FED)
-                { return SPELL_WELL_FED; }
+            {
+                return SPELL_WELL_FED;
+            }
             else
-                { return SPELL_NORMAL; }
+            {
+                return SPELL_NORMAL;
+            }
         }
 
         SpellThreatEntry const* GetSpellThreatEntry(uint32 spellid) const
@@ -1170,7 +1186,9 @@ class SpellMgr
                 return &itr->second;
             }
             else
-                { return NULL; }
+            {
+                return NULL;
+            }
         }
 
         bool IsSpellLearnSpell(uint32 spell_id) const
@@ -1223,16 +1241,22 @@ class SpellMgr
                 return &itr->second;
             }
             else
-                { return NULL; }
+            {
+                return NULL;
+            }
         }
 
         PetLevelupSpellSet const* GetPetLevelupSpellList(uint32 petFamily) const
         {
             PetLevelupSpellMap::const_iterator itr = mPetLevelupSpellMap.find(petFamily);
             if (itr != mPetLevelupSpellMap.end())
+            {
                 return &itr->second;
+            }
             else
+            {
                 return NULL;
+            }
         }
 
         // < 0 for petspelldata id, > 0 for creature_id
@@ -1240,7 +1264,9 @@ class SpellMgr
         {
             PetDefaultSpellsMap::const_iterator itr = mPetDefaultSpellsMap.find(id);
             if (itr != mPetDefaultSpellsMap.end())
+            {
                 return &itr->second;
+            }
             return NULL;
         }
 

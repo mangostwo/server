@@ -34,7 +34,9 @@ void OutdoorPvPGH::HandleCreatureCreate(Creature* creature)
 {
     // only handle summoned creatures
     if (!creature->IsTemporarySummon())
+    {
         return;
+    }
 
     switch (creature->GetEntry())
     {
@@ -80,7 +82,9 @@ bool OutdoorPvPGH::HandleEvent(uint32 eventId, GameObject* go)
 {
     // If we are not using the lighthouse return
     if (go->GetEntry() != GO_VENTURE_BAY_LIGHTHOUSE)
+    {
         return false;
+    }
 
     bool eventHandled = true;
 
@@ -89,7 +93,9 @@ bool OutdoorPvPGH::HandleEvent(uint32 eventId, GameObject* go)
         case EVENT_LIGHTHOUSE_WIN_ALLIANCE:
             // Ignore the event if the zone is already in alliance control
             if (m_zoneOwner == ALLIANCE)
+            {
                 return true;
+            }
 
             // Spawn the npcs only when the tower is fully controlled. Also allow the event to handle summons in DB.
             m_zoneOwner = ALLIANCE;
@@ -100,7 +106,9 @@ bool OutdoorPvPGH::HandleEvent(uint32 eventId, GameObject* go)
         case EVENT_LIGHTHOUSE_WIN_HORDE:
             // Ignore the event if the zone is already in horde control
             if (m_zoneOwner == HORDE)
+            {
                 return true;
+            }
 
             // Spawn the npcs only when the tower is fully controlled. Also allow the event to handle summons in DB.
             m_zoneOwner = HORDE;

@@ -282,11 +282,15 @@ bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags
 {
     MANGOS_ASSERT(type < MAX_DISABLE_TYPES);
     if (m_DisableMap[type].empty())
+    {
         return false;
+    }
 
     DisableTypeMap::iterator itr = m_DisableMap[type].find(entry);
     if (itr == m_DisableMap[type].end())    // not disabled
+    {
         return false;
+    }
 
     switch (type)
     {
@@ -324,9 +328,13 @@ bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags
                 return false;
             }
             else if (spellFlags & SPELL_DISABLE_DEPRECATED_SPELL)    // call not from spellcast
+            {
                 return true;
+            }
             else if (flags & SPELL_DISABLE_LOS)
+            {
                 return (spellFlags & SPELL_DISABLE_LOS) != 0;
+            }
 
             break;
         }
@@ -358,9 +366,13 @@ bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags
             return false;
         case DISABLE_TYPE_QUEST:
             if (!unit)
+            {
                 return true;
+            }
             if (Player const* player = unit->ToPlayer())
+            {
                 return !player->isGameMaster();
+            }
             return true;
         case DISABLE_TYPE_BATTLEGROUND:
         case DISABLE_TYPE_OUTDOORPVP:

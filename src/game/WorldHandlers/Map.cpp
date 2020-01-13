@@ -277,7 +277,9 @@ Map::EnsureGridLoadedAtEnter(const Cell& cell, Player* player)
         grid->SetGridState(GRID_STATE_ACTIVE);
     }
     else
-        { grid = getNGrid(cell.GridX(), cell.GridY()); }
+    {
+        grid = getNGrid(cell.GridX(), cell.GridY());
+    }
 
     if (player)
     {
@@ -372,7 +374,9 @@ Map::Add(T* obj)
         EnsureGridLoadedAtEnter(cell);
     }
     else
-        { EnsureGridCreated(GridPair(cell.GridX(), cell.GridY())); }
+    {
+        EnsureGridCreated(GridPair(cell.GridX(), cell.GridY()));
+    }
 
     NGridType* grid = getNGrid(cell.GridX(), cell.GridY());
     MANGOS_ASSERT(grid != NULL);
@@ -653,7 +657,9 @@ void Map::Remove(Player* player, bool remove)
         player->CleanupsBeforeDelete();
     }
     else
-        { player->RemoveFromWorld(); }
+    {
+        player->RemoveFromWorld();
+    }
 
     // this may be called during Map::Update
     // after decrement+unlink, ++m_mapRefIter will continue correctly
@@ -734,7 +740,9 @@ Map::Remove(T* obj, bool remove)
         obj->CleanupsBeforeDelete();
     }
     else
-        { obj->RemoveFromWorld(); }
+    {
+        obj->RemoveFromWorld();
+    }
 
     UpdateObjectVisibility(obj, cell, p);                   // i think will be better to call this function while object still in grid, this changes nothing but logically is better(as for me)
     RemoveFromGrid(obj, grid, cell);
@@ -778,7 +786,9 @@ Map::PlayerRelocation(Player* player, float x, float y, float z, float orientati
             AddToGrid(player, oldGrid, new_cell);
         }
         else
-            { EnsureGridLoadedAtEnter(new_cell, player); }
+        {
+            EnsureGridLoadedAtEnter(new_cell, player);
+        }
 
         NGridType* newGrid = getNGrid(new_cell.GridX(), new_cell.GridY());
         player->GetViewPoint().Event_GridChanged(&(*newGrid)(new_cell.CellX(), new_cell.CellY()));
@@ -866,7 +876,9 @@ bool Map::CreatureRespawnRelocation(Creature* c)
         return true;
     }
     else
-        { return false; }
+    {
+        return false;
+    }
 }
 
 bool Map::UnloadGrid(const uint32& x, const uint32& y, bool pForce)
@@ -933,7 +945,9 @@ uint32 Map::GetMaxPlayers() const
     if (MapDifficultyEntry const* mapDiff = GetMapDifficulty())
     {
         if (mapDiff->maxPlayers || IsRegularDifficulty())   // Normal case (expect that regular difficulty always have correct maxplayers)
+        {
             return mapDiff->maxPlayers;
+        }
         else                                                // DBC have 0 maxplayers for heroic instances with expansion < 2
         {
             // The heroic entry exists, so we don't have to check anything, simply return normal max players
@@ -942,7 +956,9 @@ uint32 Map::GetMaxPlayers() const
         }
     }
     else                                                    // I'd rather ASSERT(false);
+    {
         return 0;
+    }
 }
 
 uint32 Map::GetMaxResetDelay() const
@@ -1121,7 +1137,9 @@ void Map::RemoveAllObjectsInRemoveList()
                     sLog.outError("Try delete corpse/bones %u that not in map", obj->GetGUIDLow());
                 }
                 else
-                    { Remove(corpse, true); }
+                {
+                    Remove(corpse, true);
+                }
                 break;
             }
             case TYPEID_DYNAMICOBJECT:
@@ -1259,7 +1277,9 @@ void Map::RemoveFromActive(WorldObject* obj)
         }
     }
     else
-        { m_activeNonPlayers.erase(obj); }
+    {
+        m_activeNonPlayers.erase(obj);
+    }
 
     // also allow unloading spawn grid
     if (obj->GetTypeId() == TYPEID_UNIT)
@@ -1503,7 +1523,9 @@ bool DungeonMap::Add(Player* player)
                         sLog.outError("GroupBind save players: %d, group count: %d", groupBind->state->GetPlayerCount(), groupBind->state->GetGroupCount());
                     }
                     else
-                        { sLog.outError("GroupBind save NULL"); }
+                    {
+                        sLog.outError("GroupBind save NULL");
+                    }
                     MANGOS_ASSERT(false);
                 }
                 // if the group/leader is permanently bound to the instance
@@ -1856,7 +1878,9 @@ void Map::ScriptsProcess()
                     sScriptMgr.DecreaseScheduledScriptCount();
                 }
                 else
-                    { ++rmItr; }
+                {
+                    ++rmItr;
+                }
             }
         }
         else
@@ -2227,7 +2251,9 @@ bool Map::GetHeightInRange(uint32 phasemask, float x, float y, float& z, float m
             height = mapHeight;
         }
         else
+        {
             return false;
+        }
     }
 
     z = std::max<float>(height, m_dyn_tree.getHeight(x, y, height + 1.0f, maxSearchDist, phasemask));
@@ -2280,7 +2306,9 @@ bool Map::GetRandomPointUnderWater(uint32 phaseMask, float& x, float& y, float& 
 
         // if not enough space to fit the creature better is to return from here
         if (min_z > liquidLevel)
+        {
             return false;
+        }
 
         float max_z = std::max(z + 0.7f * radius, min_z);
         max_z = std::min(max_z, liquidLevel);
@@ -2332,7 +2360,9 @@ bool Map::GetReachableRandomPointOnGround(uint32 phaseMask, float& x, float& y, 
     GetHitPosition(x, y, z + 1.0f, i_x, i_y, i_z, phaseMask, -0.5f);
     i_z = z; // reset i_z to z value to avoid too much difference from original point before GetHeightInRange
     if (!GetHeightInRange(phaseMask, i_x, i_y, i_z)) // GetHeight can fail
+    {
         return false;
+    }
 
     // here we have a valid position but the point can have a big Z in some case
     // next code will check angle from 2 points

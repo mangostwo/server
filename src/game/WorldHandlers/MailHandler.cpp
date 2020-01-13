@@ -88,7 +88,9 @@ bool WorldSession::CheckMailBox(ObjectGuid guid)
         }
     }
     else
+    {
         return false;
+    }
 
     return true;
 }
@@ -552,7 +554,9 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recv_data)
                                 GetPlayerName(), GetAccountId(), it->GetProto()->Name1, it->GetEntry(), it->GetCount(), m->COD, sender_name.c_str(), sender_accId);
             }
             else if (!sender)
-                { sender_accId = sObjectMgr.GetPlayerAccountIdByGUID(sender_guid); }
+            {
+                sender_accId = sObjectMgr.GetPlayerAccountIdByGUID(sender_guid);
+            }
 
             // check player existence
             if (sender || sender_accId)
@@ -580,7 +584,9 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recv_data)
         pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_OK, 0, itemId, count);
     }
     else
-        { pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_ERR_EQUIP_ERROR, msg); }
+    {
+        pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_ERR_EQUIP_ERROR, msg);
+    }
 }
 /**
  * Handles the packet sent by the client when taking money from the mail.

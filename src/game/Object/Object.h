@@ -282,7 +282,9 @@ class Object
                 RemoveFlag(index, flag);
             }
             else
-                { SetFlag(index, flag); }
+            {
+                SetFlag(index, flag);
+            }
         }
 
         /**
@@ -306,7 +308,9 @@ class Object
                 SetFlag(index, flag);
             }
             else
-                { RemoveFlag(index, flag); }
+            {
+                RemoveFlag(index, flag);
+            }
         }
 
         void SetByteFlag(uint16 index, uint8 offset, uint8 newFlag);
@@ -319,7 +323,9 @@ class Object
                 RemoveByteFlag(index, offset, flag);
             }
             else
-                { SetByteFlag(index, offset, flag); }
+            {
+                SetByteFlag(index, offset, flag);
+            }
         }
 
         bool HasByteFlag(uint16 index, uint8 offset, uint8 flag) const
@@ -336,7 +342,9 @@ class Object
                 SetByteFlag(index, offset, flag);
             }
             else
-                { RemoveByteFlag(index, offset, flag); }
+            {
+                RemoveByteFlag(index, offset, flag);
+            }
         }
 
         void SetShortFlag(uint16 index, bool highpart, uint16 newFlag);
@@ -349,7 +357,9 @@ class Object
                 RemoveShortFlag(index, highpart, flag);
             }
             else
-                { SetShortFlag(index, highpart, flag); }
+            {
+                SetShortFlag(index, highpart, flag);
+            }
         }
 
         bool HasShortFlag(uint16 index, bool highpart, uint8 flag) const
@@ -365,7 +375,9 @@ class Object
                 SetShortFlag(index, highpart, flag);
             }
             else
-                { RemoveShortFlag(index, highpart, flag); }
+            {
+                RemoveShortFlag(index, highpart, flag);
+            }
         }
 
         void SetFlag64(uint16 index, uint64 newFlag)
@@ -389,7 +401,9 @@ class Object
                 RemoveFlag64(index, flag);
             }
             else
-                { SetFlag64(index, flag); }
+            {
+                SetFlag64(index, flag);
+            }
         }
 
         bool HasFlag64(uint16 index, uint64 flag) const
@@ -405,7 +419,9 @@ class Object
                 SetFlag64(index, flag);
             }
             else
-                { RemoveFlag64(index, flag); }
+            {
+                RemoveFlag64(index, flag);
+            }
         }
 
         void ClearUpdateMask(bool remove);

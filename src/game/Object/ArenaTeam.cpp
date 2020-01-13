@@ -74,11 +74,17 @@ ArenaTeam::~ArenaTeam()
 bool ArenaTeam::Create(ObjectGuid captainGuid, ArenaType type, std::string arenaTeamName)
 {
     if (!IsArenaTypeValid(type))
+    {
         return false;
+    }
     if (!sObjectMgr.GetPlayer(captainGuid))                 // player not exist
+    {
         return false;
+    }
     if (sObjectMgr.GetArenaTeamByName(arenaTeamName))       // arena team with this name already exist
+    {
         return false;
+    }
 
     DEBUG_LOG("GUILD: creating arena team %s to leader: %s", arenaTeamName.c_str(), captainGuid.GetString().c_str());
 
@@ -113,7 +119,9 @@ bool ArenaTeam::AddMember(ObjectGuid playerGuid)
 
     // arena team is full (can't have more than type * 2 players!)
     if (GetMembersSize() >= GetMaxMembersSize())
+    {
         return false;
+    }
 
     Player* pl = sObjectMgr.GetPlayer(playerGuid);
     if (pl)
@@ -132,7 +140,9 @@ bool ArenaTeam::AddMember(ObjectGuid playerGuid)
         //                                                     0     1
         QueryResult* result = CharacterDatabase.PQuery("SELECT name, class FROM characters WHERE guid='%u'", playerGuid.GetCounter());
         if (!result)
+        {
             return false;
+        }
 
         plName = (*result)[0].GetCppString();
         plClass = (*result)[1].GetUInt8();
@@ -197,7 +207,9 @@ bool ArenaTeam::AddMember(ObjectGuid playerGuid)
 bool ArenaTeam::LoadArenaTeamFromDB(QueryResult* arenaTeamDataResult)
 {
     if (!arenaTeamDataResult)
+    {
         return false;
+    }
 
     Field* fields = arenaTeamDataResult->Fetch();
 
@@ -207,7 +219,9 @@ bool ArenaTeam::LoadArenaTeamFromDB(QueryResult* arenaTeamDataResult)
     m_Type               = ArenaType(fields[3].GetUInt32());
 
     if (!IsArenaTypeValid(m_Type))
+    {
         return false;
+    }
 
     m_BackgroundColor    = fields[4].GetUInt32();
     m_EmblemStyle        = fields[5].GetUInt32();
@@ -228,7 +242,9 @@ bool ArenaTeam::LoadArenaTeamFromDB(QueryResult* arenaTeamDataResult)
 bool ArenaTeam::LoadMembersFromDB(QueryResult* arenaTeamMembersResult)
 {
     if (!arenaTeamMembersResult)
+    {
         return false;
+    }
 
     bool captainPresentInTeam = false;
 
@@ -271,7 +287,9 @@ bool ArenaTeam::LoadMembersFromDB(QueryResult* arenaTeamMembersResult)
 
         // arena team can't be > 2 * arenatype (2 for 2x2, 3 for 3x3, 5 for 5x5)
         if (GetMembersSize() >= GetMaxMembersSize())
+        {
             return false;
+        }
 
         if (newmember.guid == GetCaptainGuid())
             captainPresentInTeam = true;
@@ -433,7 +451,9 @@ void ArenaTeam::InspectStats(WorldSession* session, ObjectGuid guid)
 {
     ArenaTeamMember* member = GetMember(guid);
     if (!member)
+    {
         return;
+    }
 
     WorldPacket data(MSG_INSPECT_ARENA_TEAMS, 8 + 1 + 4 * 6);
     data << guid;                                           // player guid
@@ -550,7 +570,9 @@ bool ArenaTeam::HaveMember(ObjectGuid guid) const
 {
     for (MemberList::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
         if (itr->guid == guid)
+        {
             return true;
+        }
 
     return false;
 }
@@ -724,7 +746,9 @@ void ArenaTeam::UpdateArenaPointsHelper(std::map<uint32, uint32>& PlayerPoints)
     // helper function for arena point distribution (this way, when distributing, no actual calculation is required, just a few comparisons)
     // 10 played games per week is a minimum
     if (m_stats.games_week < 10)
+    {
         return;
+    }
     // to get points, a player has to participate in at least 30% of the matches
     uint32 min_plays = (uint32) ceil(m_stats.games_week * 0.3);
     for (MemberList::const_iterator itr = m_members.begin(); itr !=  m_members.end(); ++itr)
@@ -778,7 +802,9 @@ bool ArenaTeam::IsFighting() const
         if (Player* p = sObjectMgr.GetPlayer(itr->guid))
         {
             if (p->GetMap()->IsBattleArena())
+            {
                 return true;
+            }
         }
     }
     return false;

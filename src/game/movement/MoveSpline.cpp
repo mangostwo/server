@@ -52,7 +52,9 @@ namespace Movement
         else if (splineflags.parabolic)
             computeParabolicElevation(c.z);
         else if (splineflags.falling)
-            { computeFallElevation(c.z); }
+        {
+            computeFallElevation(c.z);
+        }
 
         if (splineflags.done && splineflags.isFacing())
         {
@@ -61,7 +63,9 @@ namespace Movement
                 c.orientation = facing.angle;
             }
             else if (splineflags.final_point)
-                { c.orientation = atan2(facing.f.y - c.y, facing.f.x - c.x); }
+            {
+                c.orientation = atan2(facing.f.y - c.y, facing.f.x - c.x);
+            }
             // nothing to do for MoveSplineFlag::Final_Target flag
         }
         else
@@ -101,7 +105,9 @@ namespace Movement
             el = final_z;
         }
         else
-            { el = z_now; }
+        {
+            el = z_now;
+        }
     }
 
     inline uint32 computeDuration(float length, float velocity)
@@ -311,9 +317,13 @@ namespace Movement
             str << "facing  angle: " << facing.angle;
         }
         else if (splineflags.final_target)
-            { str << "facing target: " << facing.target; }
+        {
+            str << "facing target: " << facing.target;
+        }
         else if (splineflags.final_point)
-            { str << "facing  point: " << facing.f.x << " " << facing.f.y << " " << facing.f.z; }
+        {
+            str << "facing  point: " << facing.f.x << " " << facing.f.y << " " << facing.f.z;
+        }
         str << std::endl;
         str << "time passed: " << time_passed << std::endl;
         str << "total  time: " << Duration() << std::endl;

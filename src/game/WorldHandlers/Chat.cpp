@@ -914,7 +914,9 @@ bool ChatHandler::HasLowerSecurity(Player* target, ObjectGuid guid, bool strong)
         target_session = target->GetSession();
     }
     else
-        { target_account = sObjectMgr.GetPlayerAccountIdByGUID(guid); }
+    {
+        target_account = sObjectMgr.GetPlayerAccountIdByGUID(guid);
+    }
 
     if (!target_session && !target_account)
     {
@@ -941,7 +943,9 @@ bool ChatHandler::HasLowerSecurityAccount(WorldSession* target, uint32 target_ac
         target_sec = target->GetSecurity();
     }
     else if (target_account)
-        { target_sec = sAccountMgr.GetSecurity(target_account); }
+    {
+        target_sec = sAccountMgr.GetSecurity(target_account);
+    }
     else
         { return true; }                                        // caller must report error for (target==NULL && target_account==0)
 
@@ -973,9 +977,13 @@ bool ChatHandler::hasStringAbbr(const char* name, const char* part)
                 return true;
             }
             else if (!*name)
-                { return false; }
+            {
+                return false;
+            }
             else if (tolower(*name) != tolower(*part))
-                { return false; }
+            {
+                return false;
+            }
             ++name; ++part;
         }
     }
@@ -1303,7 +1311,9 @@ void ChatHandler::ExecuteCommand(const char* text)
                     SendSysMessage(command->Help.c_str());
                 }
                 else
-                    { SendSysMessage(LANG_CMD_SYNTAX); }
+                {
+                    SendSysMessage(LANG_CMD_SYNTAX);
+                }
 
                 if (ChatCommand* showCommand = (strlen(command->Name) == 0 && parentCommand ? parentCommand : command))
                     if (ChatCommand* childs = showCommand->ChildCommands)
@@ -1319,7 +1329,9 @@ void ChatHandler::ExecuteCommand(const char* text)
         {
 #ifdef ENABLE_ELUNA
             if (!sEluna->OnCommand(m_session ? m_session->GetPlayer() : NULL, fullcmd.c_str()))
+            {
                 return;
+            }
 #endif /* ENABLE_ELUNA */
             SendSysMessage(LANG_NO_SUBCMD);
             ShowHelpForCommand(command->ChildCommands, text);
@@ -1330,7 +1342,9 @@ void ChatHandler::ExecuteCommand(const char* text)
         {
 #ifdef ENABLE_ELUNA
             if (!sEluna->OnCommand(m_session ? m_session->GetPlayer() : NULL, fullcmd.c_str()))
+            {
                 return;
+            }
 #endif /* ENABLE_ELUNA */
             SendSysMessage(LANG_NO_CMD);
             SetSentErrorMessage(true);
@@ -1380,7 +1394,9 @@ bool ChatHandler::SetDataForCommandInTable(ChatCommand* commandTable, const char
                 sLog.outErrorDb("Table `command` have command '%s' that only used with some subcommand selection, it can't have help or overwritten access level, skip.", cmdName.c_str());
             }
             else
-                { sLog.outErrorDb("Table `command` have unexpected subcommand '%s' in command '%s', skip.", cmdName.c_str(), fullcommand.c_str()); }
+            {
+                sLog.outErrorDb("Table `command` have unexpected subcommand '%s' in command '%s', skip.", cmdName.c_str(), fullcommand.c_str());
+            }
             return false;
         }
         case CHAT_COMMAND_UNKNOWN:
@@ -1451,7 +1467,9 @@ bool ChatHandler::ShowHelpForSubCommands(ChatCommand* table, char const* cmd)
             list += "\n    ";
         }
         else
-            { list += "\n\r    "; }
+        {
+            list += "\n\r    ";
+        }
 
         list += table[i].Name;
 
@@ -1501,7 +1519,9 @@ bool ChatHandler::ShowHelpForCommand(ChatCommand* table, const char* cmd)
                 cmd = "";
             }
             else
-                { showCommand = command; }
+            {
+                showCommand = command;
+            }
 
             childCommands = showCommand->ChildCommands;
             break;
@@ -1594,10 +1614,14 @@ bool ChatHandler::isValidChatMessage(const char* message)
                         validSequenceIterator = validSequence;
                     }
                     else
-                        { ++validSequenceIterator; }
+                    {
+                        ++validSequenceIterator;
+                    }
                 }
                 else if (commandChar != '|')
-                    { return false; }
+                {
+                    return false;
+                }
             }
         }
         return true;
@@ -1660,7 +1684,9 @@ bool ChatHandler::isValidChatMessage(const char* message)
                     validSequenceIterator = validSequence;
                 }
                 else
-                    { ++validSequenceIterator; }
+                {
+                    ++validSequenceIterator;
+                }
             }
             else
             {
@@ -1757,9 +1783,13 @@ bool ChatHandler::isValidChatMessage(const char* message)
                                 propertyId += c - '0';
                             }
                             else if (c == '-')
-                                { negativeNumber = true; }
+                            {
+                                negativeNumber = true;
+                            }
                             else
-                                { return false; }
+                            {
+                                return false;
+                            }
                         }
                     }
                     if (negativeNumber)
@@ -1779,7 +1809,9 @@ bool ChatHandler::isValidChatMessage(const char* message)
                     {
                         itemSuffix = sItemRandomSuffixStore.LookupEntry(-propertyId);
                         if (!itemSuffix)
+                        {
                             return false;
+                        }
                     }
 
                     // ignore other integers
@@ -1844,16 +1876,22 @@ bool ChatHandler::isValidChatMessage(const char* message)
                 else if (strcmp(buffer, "trade") == 0)
                 {
                     if (color != CHAT_LINK_COLOR_TRADE)
+                    {
                         return false;
+                    }
 
                     // read spell entry
                     reader.getline(buffer, 256, ':');
                     if (reader.eof())                       // : must be
+                    {
                         return false;
+                    }
 
                     linkedSpell = sSpellStore.LookupEntry(atoi(buffer));
                     if (!linkedSpell)
+                    {
                         return false;
+                    }
 
                     char c = reader.peek();
                     // base64 encoded stuff
@@ -1947,17 +1985,23 @@ bool ChatHandler::isValidChatMessage(const char* message)
                 else if (strcmp(buffer, "achievement") == 0)
                 {
                     if (color != CHAT_LINK_COLOR_ACHIEVEMENT)
+                    {
                         return false;
+                    }
 
                     reader.getline(buffer, 256, ':');
                     if (reader.eof())                       // : must be
+                    {
                         return false;
+                    }
 
                     uint32 achievementId = atoi(buffer);
                     linkedAchievement = sAchievementStore.LookupEntry(achievementId);
 
                     if (!linkedAchievement)
+                    {
                         return false;
+                    }
 
                     char c = reader.peek();
                     // skip progress
@@ -1970,12 +2014,16 @@ bool ChatHandler::isValidChatMessage(const char* message)
                 else if (strcmp(buffer, "glyph") == 0)
                 {
                     if (color != CHAT_LINK_COLOR_GLYPH)
+                    {
                         return false;
+                    }
 
                     // first id is slot, drop it
                     reader.getline(buffer, 256, ':');
                     if (reader.eof())                       // : must be
+                    {
                         return false;
+                    }
 
                     uint32 glyphId = 0;
                     char c = reader.peek();
@@ -1988,12 +2036,16 @@ bool ChatHandler::isValidChatMessage(const char* message)
                     }
                     GlyphPropertiesEntry const* glyph = sGlyphPropertiesStore.LookupEntry(glyphId);
                     if (!glyph)
+                    {
                         return false;
+                    }
 
                     linkedSpell = sSpellStore.LookupEntry(glyph->SpellId);
 
                     if (!linkedSpell)
+                    {
                         return false;
+                    }
                 }
                 else
                 {
@@ -2120,7 +2172,9 @@ bool ChatHandler::isValidChatMessage(const char* message)
                                     // using strange database/client combinations can lead to this case
                                     { expectedName = linkedItem->Name1; }
                                 else
-                                    { expectedName = il->Name[dbIndex]; }
+                                {
+                                    expectedName = il->Name[dbIndex];
+                                }
                                 if (suffix)
                                 {
                                     expectedName += " ";
@@ -2151,12 +2205,16 @@ bool ChatHandler::isValidChatMessage(const char* message)
                             }
                         }
                         if (!foundName)
+                        {
                             return false;
+                        }
                     }
                     // that place should never be reached - if nothing linked has been set in |H
                     // it will return false before
                     else
-                        { return false; }
+                    {
+                        return false;
+                    }
                 }
                 break;
             case 'r':
@@ -2476,7 +2534,9 @@ char* ChatHandler::ExtractLiteralArg(char** args, char const* lit /*= NULL*/)
             *args = head;
         }
         else
-            { *args = head + l; }
+        {
+            *args = head + l;
+        }
 
         SkipWhiteSpaces(args);
         return arg;
@@ -2591,9 +2651,13 @@ bool  ChatHandler::ExtractOnOff(char** args, bool& value)
         value = true;
     }
     else if (strncmp(arg, "off", 4) == 0)
-        { value = false; }
+    {
+        value = false;
+    }
     else
-        { return false; }
+    {
+        return false;
+    }
 
     return true;
 }
@@ -3051,7 +3115,9 @@ uint32 ChatHandler::ExtractSpellIdFromLink(char** text)
             uint32 glyph_prop_id;
 
             if (!ExtractUInt32(&param1_str, glyph_prop_id))
+            {
                 return 0;
+            }
 
             GlyphPropertiesEntry const* glyphPropEntry = sGlyphPropertiesStore.LookupEntry(glyph_prop_id);
             return glyphPropEntry ? glyphPropEntry->SpellId : 0;
@@ -3078,7 +3144,9 @@ GameTele const* ChatHandler::ExtractGameTeleFromLink(char** text)
         return sObjectMgr.GetGameTele(id);
     }
     else
-        { return sObjectMgr.GetGameTele(cId); }
+    {
+        return sObjectMgr.GetGameTele(cId);
+    }
 }
 
 enum GuidLinkType
@@ -3141,7 +3209,9 @@ ObjectGuid ChatHandler::ExtractGuidFromLink(char** text)
                 return data->GetObjectGuid(lowguid);
             }
             else
-                { return ObjectGuid(); }
+            {
+                return ObjectGuid();
+            }
         }
         case GUID_LINK_GAMEOBJECT:
         {
@@ -3156,7 +3226,9 @@ ObjectGuid ChatHandler::ExtractGuidFromLink(char** text)
                 return ObjectGuid(HIGHGUID_GAMEOBJECT, data->id, lowguid);
             }
             else
-                { return ObjectGuid(); }
+            {
+                return ObjectGuid();
+            }
         }
     }
 
@@ -3296,7 +3368,9 @@ bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, 
                 return true;
             }
             else
-                { return false; }
+            {
+                return false;
+            }
         }
         case LOCATION_LINK_GAMEOBJECT:
         {
@@ -3315,7 +3389,9 @@ bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, 
                 return true;
             }
             else
-                { return false; }
+            {
+                return false;
+            }
         }
         case LOCATION_LINK_CREATURE_ENTRY:
         {
@@ -3340,10 +3416,14 @@ bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, 
                     return true;
                 }
                 else
-                    { return false; }
+                {
+                    return false;
+                }
             }
             else
-                { return false; }
+            {
+                return false;
+            }
         }
         case LOCATION_LINK_GAMEOBJECT_ENTRY:
         {
@@ -3368,10 +3448,14 @@ bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, 
                     return true;
                 }
                 else
-                    { return false; }
+                {
+                    return false;
+                }
             }
             else
-                { return false; }
+            {
+                return false;
+            }
         }
         case LOCATION_LINK_AREATRIGGER:
         {
@@ -3754,7 +3838,9 @@ void ChatHandler::ShowNpcOrGoSpawnInformation(uint32 guid)
             PSendSysMessage(LANG_NPC_GO_INFO_POOL, pool_id);
         }
         else
-            { PSendSysMessage(LANG_NPC_GO_INFO_TOP_POOL, pool_id, top_pool_id); }
+        {
+            PSendSysMessage(LANG_NPC_GO_INFO_TOP_POOL, pool_id, top_pool_id);
+        }
 
         if (int16 event_id = sGameEventMgr.GetGameEventId<Pool>(top_pool_id))
         {
@@ -3766,7 +3852,9 @@ void ChatHandler::ShowNpcOrGoSpawnInformation(uint32 guid)
                 PSendSysMessage(LANG_NPC_GO_INFO_POOL_GAME_EVENT_S, top_pool_id, std::abs(event_id), eventData.description.c_str());
             }
             else
-                { PSendSysMessage(LANG_NPC_GO_INFO_POOL_GAME_EVENT_D, top_pool_id, std::abs(event_id), eventData.description.c_str()); }
+            {
+                PSendSysMessage(LANG_NPC_GO_INFO_POOL_GAME_EVENT_D, top_pool_id, std::abs(event_id), eventData.description.c_str());
+            }
         }
     }
     else if (int16 event_id = sGameEventMgr.GetGameEventId<T>(guid))
@@ -3779,7 +3867,9 @@ void ChatHandler::ShowNpcOrGoSpawnInformation(uint32 guid)
             PSendSysMessage(LANG_NPC_GO_INFO_GAME_EVENT_S, std::abs(event_id), eventData.description.c_str());
         }
         else
-            { PSendSysMessage(LANG_NPC_GO_INFO_GAME_EVENT_D, std::abs(event_id), eventData.description.c_str()); }
+        {
+            PSendSysMessage(LANG_NPC_GO_INFO_GAME_EVENT_D, std::abs(event_id), eventData.description.c_str());
+        }
     }
 }
 

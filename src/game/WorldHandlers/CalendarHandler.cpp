@@ -749,7 +749,9 @@ void CalendarMgr::SendCalendarEventInviteAlert(CalendarInvite const* invite)
 
     CalendarEvent const* event = invite->GetCalendarEvent();
     if (!event)
+    {
         return;
+    }
 
     WorldPacket data(SMSG_CALENDAR_EVENT_INVITE_ALERT);
     data << uint64(event->EventId);
@@ -821,7 +823,9 @@ void CalendarMgr::SendCalendarEventInvite(CalendarInvite const* invite)
 void CalendarMgr::SendCalendarCommandResult(Player* player, CalendarError err, char const* param /*= NULL*/)
 {
     if (!player)
+    {
         return;
+    }
 
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SMSG_CALENDAR_COMMAND_RESULT (%u)", err);
     WorldPacket data(SMSG_CALENDAR_COMMAND_RESULT, 0);
@@ -858,7 +862,9 @@ void CalendarMgr::SendCalendarEventRemovedAlert(CalendarEvent const* event)
 void CalendarMgr::SendCalendarEvent(Player* player, CalendarEvent const* event, uint32 sendType)
 {
     if (!player || !event)
+    {
         return;
+    }
 
     std::string timeStr = TimeToTimestampStr(event->EventTime);
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SendCalendarEvent> sendType[%u], CreatorGuid[%s], EventId[" UI64FMTD "], Type[%u], Flags[%u], Title[%s]",
@@ -1017,7 +1023,9 @@ void CalendarMgr::SendPacketToAllEventRelatives(WorldPacket packet, CalendarEven
 void CalendarMgr::SendCalendarRaidLockoutRemove(Player* player, DungeonPersistentState const* save)
 {
     if (!save || !player)
+    {
         return;
+    }
 
     DEBUG_LOG("SMSG_CALENDAR_RAID_LOCKOUT_REMOVED [%s]", player->GetObjectGuid().GetString().c_str());
     time_t currTime = time(NULL);
@@ -1034,7 +1042,9 @@ void CalendarMgr::SendCalendarRaidLockoutRemove(Player* player, DungeonPersisten
 void CalendarMgr::SendCalendarRaidLockoutAdd(Player* player, DungeonPersistentState const* save)
 {
     if (!save || !player)
+    {
         return;
+    }
 
     DEBUG_LOG("SMSG_CALENDAR_RAID_LOCKOUT_ADDED [%s]", player->GetObjectGuid().GetString().c_str());
     time_t currTime = time(NULL);

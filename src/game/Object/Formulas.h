@@ -49,11 +49,17 @@ namespace MaNGOS
                 return 0;
             }
             else if (pl_level <= 39)
-                { return pl_level - 5 - pl_level / 10; }
+            {
+                return pl_level - 5 - pl_level / 10;
+            }
             else if (pl_level <= 59)
+            {
                 return pl_level - 1 - pl_level / 5;
+            }
             else
+            {
                 return pl_level - 9;
+            }
         }
 
         inline XPColorChar GetColorCode(uint32 pl_level, uint32 mob_level)
@@ -63,13 +69,21 @@ namespace MaNGOS
                 return RED;
             }
             else if (mob_level >= pl_level + 3)
-                { return ORANGE; }
+            {
+                return ORANGE;
+            }
             else if (mob_level >= pl_level - 2)
-                { return YELLOW; }
+            {
+                return YELLOW;
+            }
             else if (mob_level > GetGrayLevel(pl_level))
-                { return GREEN; }
+            {
+                return GREEN;
+            }
             else
-                { return GRAY; }
+            {
+                return GRAY;
+            }
         }
 
         inline uint32 GetZeroDifference(uint32 pl_level)

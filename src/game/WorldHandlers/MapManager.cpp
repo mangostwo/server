@@ -198,7 +198,9 @@ void MapManager::Update(uint32 diff)
             m_updater.schedule_update(*iter->second, (uint32)i_timer.GetCurrent());
         }
         else
-          { iter->second->Update((uint32)i_timer.GetCurrent()); }
+        {
+            iter->second->Update((uint32)i_timer.GetCurrent());
+        }
     }
 
     if (m_updater.activated())
@@ -226,7 +228,9 @@ void MapManager::Update(uint32 diff)
             i_maps.erase(iter++);
         }
         else
-            { ++iter; }
+        {
+            ++iter;
+        }
     }
 
     i_timer.SetCurrent(0);

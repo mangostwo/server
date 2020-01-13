@@ -92,7 +92,9 @@ void CharacterDatabaseCleaner::CheckUnique(const char* column, const char* table
                 found = true;
             }
             else
-                { ss << ","; }
+            {
+                ss << ",";
+            }
             ss << id;
         }
     }
@@ -140,7 +142,9 @@ bool CharacterDatabaseCleaner::TalentCheck(uint32 talent_id)
 {
     TalentEntry const* talentInfo = sTalentStore.LookupEntry(talent_id);
     if (!talentInfo)
+    {
         return false;
+    }
 
     return sTalentTabStore.LookupEntry(talentInfo->TalentTab);
 }

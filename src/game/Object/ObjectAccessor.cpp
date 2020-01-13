@@ -138,7 +138,9 @@ void Player2Corpse::Remove(Corpse* corpse)
     ACE_WRITE_GUARD(LockType, guard, i_lock)
 
     if( m_objectMap.end() == m_objectMap.find(corpse->GetOwnerGuid()))
+    {
         return;
+    }
 
     // build mapid*cellid -> guid_set map
     CellPair cell_pair = MaNGOS::ComputeCellPair(corpse->GetPositionX(), corpse->GetPositionY());

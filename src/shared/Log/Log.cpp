@@ -211,7 +211,9 @@ void Log::SetLogLevel(char* level)
         newLevel = LOG_LVL_MINIMAL;
     }
     else if (newLevel > LOG_LVL_DEBUG)
-        { newLevel = LOG_LVL_DEBUG; }
+    {
+        newLevel = LOG_LVL_DEBUG;
+    }
 
     m_logLevel = LogLevel(newLevel);
 
@@ -227,7 +229,9 @@ void Log::SetLogFileLevel(char* level)
         newLevel = LOG_LVL_MINIMAL;
     }
     else if (newLevel > LOG_LVL_DEBUG)
-        { newLevel = LOG_LVL_DEBUG; }
+    {
+        newLevel = LOG_LVL_DEBUG;
+    }
 
     m_logFileLevel = LogLevel(newLevel);
 
@@ -332,7 +336,9 @@ FILE* Log::openLogFile(char const* configFileName, char const* configTimeStampFl
             logfn.insert(dot_pos, m_logsTimestamp);
         }
         else
-            { logfn += m_logsTimestamp; }
+        {
+            logfn += m_logsTimestamp;
+        }
     }
 
     return fopen((m_logsDir + logfn).c_str(), mode);
@@ -616,7 +622,9 @@ void Log::outErrorEluna() {}
 void Log::outErrorEluna(const char* err, ...)
 {
     if (!err)
+    {
         return;
+    }
 
     if (m_colored)
         SetColor(false, m_colors[LogError]);
@@ -1066,7 +1074,9 @@ void Log::outErrorScriptLib()
             fprintf(logfile, "<%s ERROR:> ", m_scriptLibName);
         }
         else
-            { fprintf(logfile, "<Scripting Library ERROR>: "); }
+        {
+            fprintf(logfile, "<Scripting Library ERROR>: ");
+        }
         fflush(logfile);
     }
 
@@ -1118,7 +1128,9 @@ void Log::outErrorScriptLib(const char* err, ...)
             fprintf(logfile, "<%s ERROR>: ", m_scriptLibName);
         }
         else
-            { fprintf(logfile, "<Scripting Library ERROR>: "); }
+        {
+            fprintf(logfile, "<Scripting Library ERROR>: ");
+        }
 
         va_start(ap, err);
         vfprintf(logfile, err, ap);

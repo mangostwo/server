@@ -204,7 +204,9 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
                     _player->MoveItemToInventory(playerDst, myItems[i], true, true);
                 }
                 else
-                    { sLog.outError("player can't take item back: %s", myItems[i]->GetGuidStr().c_str()); }
+                {
+                    sLog.outError("player can't take item back: %s", myItems[i]->GetGuidStr().c_str());
+                }
             }
             // return the already removed items to the original owner
             if (hisItems[i])
@@ -218,7 +220,9 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
                     trader->MoveItemToInventory(traderDst, hisItems[i], true, true);
                 }
                 else
-                    { sLog.outError("trader can't take item back: %s", hisItems[i]->GetGuidStr().c_str()); }
+                {
+                    sLog.outError("trader can't take item back: %s", hisItems[i]->GetGuidStr().c_str());
+                }
             }
         }
     }

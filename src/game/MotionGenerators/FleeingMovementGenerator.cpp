@@ -82,7 +82,9 @@ bool FleeingMovementGenerator<T>::_getPoint(T& owner, float& x, float& y, float&
             angle_to_caster = fright->GetAngle(&owner);
         }
         else
-            { angle_to_caster = frand(0, 2 * M_PI_F); }
+        {
+            angle_to_caster = frand(0, 2 * M_PI_F);
+        }
     }
     else
     {
@@ -116,7 +118,9 @@ bool FleeingMovementGenerator<T>::_getPoint(T& owner, float& x, float& y, float&
 
     // try to fix z
     if (!owner.GetMap()->GetHeightInRange(owner.GetPhaseMask(), x, y, z))
+    {
         return false;
+    }
 
     if (owner.GetTypeId() == TYPEID_PLAYER)
     {
@@ -126,7 +130,9 @@ bool FleeingMovementGenerator<T>::_getPoint(T& owner, float& x, float& y, float&
         {
             z = testZ;
             if (!owner.GetMap()->GetHeightInRange(owner.GetPhaseMask(), x, y, z))
+            {
                 return false;
+            }
         }
     }
 

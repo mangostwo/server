@@ -176,7 +176,9 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                             { p->SetDeathState(CORPSE); }
                     }
                     else                                    // charmed
-                        { _player->Uncharm(); }
+                    {
+                        _player->Uncharm();
+                    }
                     break;
                 default:
                     sLog.outError("WORLD: unknown PET flag Action %i and spellid %i.", uint32(flag), spellid);
@@ -510,7 +512,9 @@ void WorldSession::HandlePetSetAction(WorldPacket& recv_data)
                     charmInfo->ToggleCreatureAutocast(spell_id, true);
                 }
                 else
-                    { ((Pet*)pet)->ToggleAutocast(spell_id, true); }
+                {
+                    ((Pet*)pet)->ToggleAutocast(spell_id, true);
+                }
             }
             // sign for no/turn off autocast
             else if (act_state == ACT_DISABLED && spell_id)
@@ -520,7 +524,9 @@ void WorldSession::HandlePetSetAction(WorldPacket& recv_data)
                     charmInfo->ToggleCreatureAutocast(spell_id, false);
                 }
                 else
-                    { ((Pet*)pet)->ToggleAutocast(spell_id, false); }
+                {
+                    ((Pet*)pet)->ToggleAutocast(spell_id, false);
+                }
             }
 
             charmInfo->SetActionBar(position[i], spell_id, ActiveStates(act_state));
@@ -698,7 +704,9 @@ void WorldSession::HandlePetSpellAutocastOpcode(WorldPacket& recvPacket)
         // state can be used as boolean
         { pet->GetCharmInfo()->ToggleCreatureAutocast(spellid, state); }
     else
-        { ((Pet*)pet)->ToggleAutocast(spellid, state); }
+    {
+        ((Pet*)pet)->ToggleAutocast(spellid, state);
+    }
 
     charmInfo->SetSpellAutocast(spellid, state);
 }
@@ -767,7 +775,9 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
                 pet->SendPetTalk((uint32)PET_TALK_SPECIAL_SPELL);
             }
             else
-                { pet->SendPetAIReaction(); }
+            {
+                pet->SendPetAIReaction();
+            }
         }
 
         spell->prepare(&(spell->m_targets), triggeredByAura);

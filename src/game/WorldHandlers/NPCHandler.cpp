@@ -746,7 +746,9 @@ void WorldSession::HandleStablePet(WorldPacket& recv_data)
         SendStableResult(STABLE_SUCCESS_STABLE);
     }
     else
-        { SendStableResult(STABLE_ERR_STABLE); }
+    {
+        SendStableResult(STABLE_ERR_STABLE);
+    }
 }
 
 void WorldSession::HandleUnstablePet(WorldPacket& recv_data)
@@ -853,10 +855,14 @@ void WorldSession::HandleBuyStableSlot(WorldPacket& recv_data)
             SendStableResult(STABLE_SUCCESS_BUY_SLOT);
         }
         else
-            { SendStableResult(STABLE_ERR_MONEY); }
+        {
+            SendStableResult(STABLE_ERR_MONEY);
+        }
     }
     else
-        { SendStableResult(STABLE_ERR_STABLE); }
+    {
+        SendStableResult(STABLE_ERR_STABLE);
+    }
 }
 
 void WorldSession::HandleStableRevivePet(WorldPacket& /* recv_data */)
@@ -936,7 +942,9 @@ void WorldSession::HandleStableSwapPet(WorldPacket& recv_data)
         SendStableResult(STABLE_ERR_STABLE);
     }
     else
-        { SendStableResult(STABLE_SUCCESS_UNSTABLE); }
+    {
+        SendStableResult(STABLE_SUCCESS_UNSTABLE);
+    }
 }
 
 void WorldSession::HandleRepairItemOpcode(WorldPacket& recv_data)
@@ -985,10 +993,14 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket& recv_data)
     {
         uint32 GuildId = _player->GetGuildId();
         if (!GuildId)
+        {
             return;
+        }
         Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
         if (!pGuild)
+        {
             return;
+        }
         pGuild->LogBankEvent(GUILD_BANK_LOG_REPAIR_MONEY, 0, _player->GetGUIDLow(), TotalCost);
         pGuild->SendMoneyInfo(this, _player->GetGUIDLow());
     }

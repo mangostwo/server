@@ -165,7 +165,9 @@ bool WorldSession::SendLearnNewTaxiNode(Creature* unit)
         return true;
     }
     else
-        { return false; }
+    {
+        return false;
+    }
 }
 
 void WorldSession::SendActivateTaxiReply(ActivateTaxiReply reply)

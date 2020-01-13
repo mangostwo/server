@@ -81,7 +81,9 @@ int WorldSocketMgr::svc()
                 sockets_->erase(t);
             }
             else
-              { ++i; }
+            {
+                ++i;
+            }
         }
     }
 
@@ -126,7 +128,9 @@ int WorldSocketMgr::StartNetwork(ACE_INET_Addr& addr)
     }
 
     if (activate(THR_NEW_LWP | THR_JOINABLE, num_threads) == -1)
-      return -1;
+    {
+        return -1;
+    }
 
     sLog.outString("Max allowed socket connections: %d", ACE::max_handles());
     return 0;

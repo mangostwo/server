@@ -153,7 +153,9 @@ bool TransportBase::HasOnBoard(WorldObject const* passenger) const
     {
         // pasenger is boarded onto this
         if (passenger->GetTransportInfo()->GetTransport() == m_owner)
+        {
             return true;
+        }
         else
             passenger = passenger->GetTransportInfo()->GetTransport();
     }
@@ -177,7 +179,9 @@ void TransportBase::UnBoardPassenger(WorldObject* passenger)
     PassengerMap::iterator itr = m_passengers.find(passenger);
 
     if (itr == m_passengers.end())
+    {
         return;
+    }
 
     // Set passengers transportInfo to NULL
     passenger->SetTransportInfo(NULL);

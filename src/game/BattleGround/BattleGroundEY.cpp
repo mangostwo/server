@@ -47,7 +47,9 @@ void BattleGroundEY::Update(uint32 diff)
     BattleGround::Update(diff);
 
     if (GetStatus() != STATUS_IN_PROGRESS)
+    {
         return;
+    }
 
     // resource counter
     if (m_resourceUpdateTimer < diff)
@@ -279,10 +281,14 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* /*go*/, uint32 towerId, Tea
 void BattleGroundEY::HandleAreaTrigger(Player* source, uint32 trigger)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
+    {
         return;
+    }
 
     if (!source->IsAlive())                                 // hack code, must be removed later
+    {
         return;
+    }
 
     switch (trigger)
     {
@@ -370,7 +376,9 @@ void BattleGroundEY::RespawnDroppedFlag()
 void BattleGroundEY::HandleKillPlayer(Player* player, Player* killer)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
+    {
         return;
+    }
 
     BattleGround::HandleKillPlayer(player, killer);
     EventPlayerDroppedFlag(player);
@@ -391,10 +399,14 @@ void BattleGroundEY::EventPlayerDroppedFlag(Player* source)
     }
 
     if (!IsFlagPickedUp())
+    {
         return;
+    }
 
     if (GetFlagCarrierGuid() != source->GetObjectGuid())
+    {
         return;
+    }
 
     ClearFlagCarrier();
     source->RemoveAurasDueToSpell(EY_NETHERSTORM_FLAG_SPELL);
@@ -418,7 +430,9 @@ void BattleGroundEY::EventPlayerDroppedFlag(Player* source)
 void BattleGroundEY::EventPlayerClickedOnFlag(Player* source, GameObject* target_obj)
 {
     if (GetStatus() != STATUS_IN_PROGRESS || IsFlagPickedUp() || !source->IsWithinDistInMap(target_obj, 10))
+    {
         return;
+    }
 
     if (m_flagState == EY_FLAG_STATE_ON_BASE)
         UpdateWorldState(WORLD_STATE_EY_NETHERSTORM_FLAG_READY, WORLD_STATE_REMOVE);
@@ -455,7 +469,9 @@ void BattleGroundEY::EventPlayerClickedOnFlag(Player* source, GameObject* target
 void BattleGroundEY::EventPlayerCapturedFlag(Player* source, EYNodes node)
 {
     if (GetStatus() != STATUS_IN_PROGRESS || GetFlagCarrierGuid() != source->GetObjectGuid())
+    {
         return;
+    }
 
     ClearFlagCarrier();
 
@@ -493,7 +509,9 @@ void BattleGroundEY::UpdatePlayerScore(Player* source, uint32 type, uint32 value
 {
     BattleGroundScoreMap::iterator itr = m_PlayerScores.find(source->GetObjectGuid());
     if (itr == m_PlayerScores.end())                        // player not found
+    {
         return;
+    }
 
     switch (type)
     {
@@ -598,7 +616,9 @@ bool BattleGroundEY::IsAllNodesControlledByTeam(Team team) const
 {
     for (uint8 i = 0; i < EY_NODES_MAX; ++i)
         if (m_towerOwner[i] != team)
+        {
             return false;
+        }
 
     return true;
 }

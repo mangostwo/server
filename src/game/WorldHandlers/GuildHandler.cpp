@@ -884,7 +884,9 @@ void WorldSession::HandleGuildBankerActivate(WorldPacket& recv_data)
     recv_data >> goGuid >> unk;
 
     if (!GetPlayer()->GetGameObjectIfCanInteractWith(goGuid, GAMEOBJECT_TYPE_GUILD_BANK))
+    {
         return;
+    }
 
     if (uint32 GuildId = GetPlayer()->GetGuildId())
     {
@@ -908,18 +910,26 @@ void WorldSession::HandleGuildBankQueryTab(WorldPacket& recv_data)
     recv_data >> goGuid >> TabId >> unk1;
 
     if (!GetPlayer()->GetGameObjectIfCanInteractWith(goGuid, GAMEOBJECT_TYPE_GUILD_BANK))
+    {
         return;
+    }
 
     uint32 GuildId = GetPlayer()->GetGuildId();
     if (!GuildId)
+    {
         return;
+    }
 
     Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
     if (!pGuild)
+    {
         return;
+    }
 
     if (TabId >= pGuild->GetPurchasedTabs())
+    {
         return;
+    }
 
     // Let's update the amount of gold the player can withdraw before displaying the content
     // This is useful if money withdraw right has changed
@@ -936,24 +946,36 @@ void WorldSession::HandleGuildBankDepositMoney(WorldPacket& recv_data)
     recv_data >> goGuid >> money;
 
     if (!money)
+    {
         return;
+    }
 
     if (!GetPlayer()->GetGameObjectIfCanInteractWith(goGuid, GAMEOBJECT_TYPE_GUILD_BANK))
+    {
         return;
+    }
 
     if (GetPlayer()->GetMoney() < money)
+    {
         return;
+    }
 
     uint32 GuildId = GetPlayer()->GetGuildId();
     if (!GuildId)
+    {
         return;
+    }
 
     Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
     if (!pGuild)
+    {
         return;
+    }
 
     if (!pGuild->GetPurchasedTabs())
+    {
         return;
+    }
 
     CharacterDatabase.BeginTransaction();
 
@@ -991,27 +1013,41 @@ void WorldSession::HandleGuildBankWithdrawMoney(WorldPacket& recv_data)
     recv_data >> goGuid >> money;
 
     if (!money)
+    {
         return;
+    }
 
     if (!GetPlayer()->GetGameObjectIfCanInteractWith(goGuid, GAMEOBJECT_TYPE_GUILD_BANK))
+    {
         return;
+    }
 
     uint32 GuildId = GetPlayer()->GetGuildId();
     if (GuildId == 0)
+    {
         return;
+    }
 
     Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
     if (!pGuild)
+    {
         return;
+    }
 
     if (!pGuild->GetPurchasedTabs())
+    {
         return;
+    }
 
     if (pGuild->GetGuildBankMoney() < money)                // not enough money in bank
+    {
         return;
+    }
 
     if (!pGuild->HasRankRight(GetPlayer()->GetRank(), GR_RIGHT_WITHDRAW_GOLD))
+    {
         return;
+    }
 
     CharacterDatabase.BeginTransaction();
 
@@ -1116,7 +1152,9 @@ void WorldSession::HandleGuildBankSwapItems(WorldPacket& recv_data)
     }
 
     if (!GetPlayer()->GetGameObjectIfCanInteractWith(goGuid, GAMEOBJECT_TYPE_GUILD_BANK))
+    {
         return;
+    }
 
     // Bank <-> Bank
     if (BankToBank)
@@ -1152,26 +1190,38 @@ void WorldSession::HandleGuildBankBuyTab(WorldPacket& recv_data)
     recv_data >> TabId;
 
     if (!GetPlayer()->GetGameObjectIfCanInteractWith(goGuid, GAMEOBJECT_TYPE_GUILD_BANK))
+    {
         return;
+    }
 
     uint32 GuildId = GetPlayer()->GetGuildId();
     if (!GuildId)
+    {
         return;
+    }
 
     Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
     if (!pGuild)
+    {
         return;
+    }
 
     // m_PurchasedTabs = 0 when buying Tab 0, that is why this check can be made
     if (TabId != pGuild->GetPurchasedTabs())
+    {
         return;
+    }
 
     uint32 TabCost = GetGuildBankTabPrice(TabId) * GOLD;
     if (!TabCost)
+    {
         return;
+    }
 
     if (GetPlayer()->GetMoney() < TabCost)                  // Should not happen, this is checked by client
+    {
         return;
+    }
 
     // Go on with creating tab
     pGuild->CreateNewBankTab();
@@ -1196,24 +1246,36 @@ void WorldSession::HandleGuildBankUpdateTab(WorldPacket& recv_data)
     recv_data >> IconIndex;
 
     if (Name.empty())
+    {
         return;
+    }
 
     if (IconIndex.empty())
+    {
         return;
+    }
 
     if (!GetPlayer()->GetGameObjectIfCanInteractWith(goGuid, GAMEOBJECT_TYPE_GUILD_BANK))
+    {
         return;
+    }
 
     uint32 GuildId = GetPlayer()->GetGuildId();
     if (!GuildId)
+    {
         return;
+    }
 
     Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
     if (!pGuild)
+    {
         return;
+    }
 
     if (TabId >= pGuild->GetPurchasedTabs())
+    {
         return;
+    }
 
     pGuild->SetGuildBankTabInfo(TabId, Name, IconIndex);
     pGuild->DisplayGuildBankTabsInfo(this);
@@ -1229,15 +1291,21 @@ void WorldSession::HandleGuildBankLogQuery(WorldPacket& recv_data)
 
     uint32 GuildId = GetPlayer()->GetGuildId();
     if (!GuildId)
+    {
         return;
+    }
 
     Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
     if (!pGuild)
+    {
         return;
+    }
 
     // GUILD_BANK_MAX_TABS send by client for money log
     if (TabId >= pGuild->GetPurchasedTabs() && TabId != GUILD_BANK_MAX_TABS)
+    {
         return;
+    }
 
     pGuild->DisplayGuildBankLogs(this, TabId);
 }
@@ -1251,14 +1319,20 @@ void WorldSession::HandleQueryGuildBankTabText(WorldPacket& recv_data)
 
     uint32 GuildId = GetPlayer()->GetGuildId();
     if (!GuildId)
+    {
         return;
+    }
 
     Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
     if (!pGuild)
+    {
         return;
+    }
 
     if (TabId >= pGuild->GetPurchasedTabs())
+    {
         return;
+    }
 
     pGuild->SendGuildBankTabText(this, TabId);
 }
@@ -1274,14 +1348,20 @@ void WorldSession::HandleSetGuildBankTabText(WorldPacket& recv_data)
 
     uint32 GuildId = GetPlayer()->GetGuildId();
     if (!GuildId)
+    {
         return;
+    }
 
     Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
     if (!pGuild)
+    {
         return;
+    }
 
     if (TabId >= pGuild->GetPurchasedTabs())
+    {
         return;
+    }
 
     pGuild->SetGuildBankTabText(TabId, Text);
 }

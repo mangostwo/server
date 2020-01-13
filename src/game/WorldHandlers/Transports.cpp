@@ -297,7 +297,9 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
             tmpDist = 0;
         }
         else
-            { tmpDist += keyFrames[j].distFromPrev; }
+        {
+            tmpDist += keyFrames[j].distFromPrev;
+        }
         keyFrames[j].distSinceStop = tmpDist;
     }
 
@@ -319,14 +321,18 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
             keyFrames[i].tFrom = sqrt(2 * keyFrames[i].distSinceStop);
         }
         else
-            { keyFrames[i].tFrom = ((keyFrames[i].distSinceStop - (30 * 30 * 0.5f)) / 30) + 30; }
+        {
+            keyFrames[i].tFrom = ((keyFrames[i].distSinceStop - (30 * 30 * 0.5f)) / 30) + 30;
+        }
 
         if (keyFrames[i].distUntilStop < (30 * 30 * 0.5f))
         {
             keyFrames[i].tTo = sqrt(2 * keyFrames[i].distUntilStop);
         }
         else
-            { keyFrames[i].tTo = ((keyFrames[i].distUntilStop - (30 * 30 * 0.5f)) / 30) + 30; }
+        {
+            keyFrames[i].tTo = ((keyFrames[i].distUntilStop - (30 * 30 * 0.5f)) / 30) + 30;
+        }
 
         keyFrames[i].tFrom *= 1000;
         keyFrames[i].tTo *= 1000;
@@ -421,7 +427,9 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
             t += 100 - ((long)keyFrames[i + 1].tTo % 100);
         }
         else
-            { t += (long)keyFrames[i + 1].tTo % 100; }
+        {
+            t += (long)keyFrames[i + 1].tTo % 100;
+        }
 
         bool teleport = false;
         if ((keyFrames[i + 1].node->actionFlag == 1) || (keyFrames[i + 1].node->mapid != keyFrames[i].node->mapid))

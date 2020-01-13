@@ -45,13 +45,17 @@ void WorldSession::HandleDismissControlledVehicle(WorldPacket& recvPacket)
 
     TransportInfo* transportInfo = _player->GetTransportInfo();
     if (!transportInfo || !transportInfo->IsOnVehicle())
+    {
         return;
+    }
 
     Unit* vehicle = (Unit*)transportInfo->GetTransport();
 
     // Something went wrong
     if (vehicleGuid != vehicle->GetObjectGuid())
+    {
         return;
+    }
 
     // Remove Vehicle Control Aura
     vehicle->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, _player->GetObjectGuid());
@@ -64,7 +68,9 @@ void WorldSession::HandleRequestVehicleExit(WorldPacket& recvPacket)
 
     TransportInfo* transportInfo = _player->GetTransportInfo();
     if (!transportInfo || !transportInfo->IsOnVehicle())
+    {
         return;
+    }
 
     Unit* vehicle = (Unit*)transportInfo->GetTransport();
 
@@ -87,13 +93,17 @@ void WorldSession::HandleRequestVehicleSwitchSeat(WorldPacket& recvPacket)
 
     TransportInfo* transportInfo = _player->GetTransportInfo();
     if (!transportInfo || !transportInfo->IsOnVehicle())
+    {
         return;
+    }
 
     Unit* vehicle = (Unit*)transportInfo->GetTransport();
 
     // Something went wrong
     if (vehicleGuid != vehicle->GetObjectGuid())
+    {
         return;
+    }
 
     vehicle->GetVehicleInfo()->SwitchSeat(_player, seat);
 }
@@ -115,24 +125,32 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket& recvPacket)
 
     TransportInfo* transportInfo = _player->GetTransportInfo();
     if (!transportInfo || !transportInfo->IsOnVehicle())
+    {
         return;
+    }
 
     Unit* srcVehicle = (Unit*)transportInfo->GetTransport();
 
     // Something went wrong
     if (srcVehicleGuid != srcVehicle->GetObjectGuid())
+    {
         return;
+    }
 
     if (srcVehicleGuid != destVehicleGuid)
     {
         Unit* destVehicle = _player->GetMap()->GetUnit(destVehicleGuid);
 
         if (!destVehicle || !destVehicle->IsVehicle())
+        {
             return;
+        }
 
         // Change vehicle is not possible
         if (destVehicle->GetVehicleInfo()->GetVehicleEntry()->m_flags & VEHICLE_FLAG_DISABLE_SWITCH)
+        {
             return;
+        }
 
         SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(destVehicle->GetEntry());
         for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
@@ -154,11 +172,15 @@ void WorldSession::HandleRideVehicleInteract(WorldPacket& recvPacket)
     Player* vehicle = _player->GetMap()->GetPlayer(playerGuid);
 
     if (!vehicle || !vehicle->IsVehicle())
+    {
         return;
+    }
 
     // Only allowed if in same raid
     if (!vehicle->IsInSameRaidWith(_player))
+    {
         return;
+    }
 
     _player->CastSpell(vehicle, SPELL_RIDE_VEHICLE_HARDCODED, true);
 }
@@ -174,17 +196,23 @@ void WorldSession::HandleEjectPassenger(WorldPacket& recvPacket)
     Unit* passenger = _player->GetMap()->GetUnit(passengerGuid);
 
     if (!passenger || !passenger->IsBoarded())
+    {
         return;
+    }
 
     // _player is not a vehicle
     if (!_player->IsVehicle())
+    {
         return;
+    }
 
     VehicleInfo* vehicleInfo = _player->GetVehicleInfo();
 
     // _player must be transporting passenger
     if (!vehicleInfo->HasOnBoard(passenger))
+    {
         return;
+    }
 
     // Check for eject flag
     if (VehicleSeatEntry const* seatEntry = vehicleInfo->GetSeatEntry(passenger->GetTransportInfo()->GetTransportSeat()))

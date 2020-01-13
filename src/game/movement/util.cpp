@@ -53,7 +53,9 @@ namespace Movement
                 time = (path_length - terminal_savefall_length) / terminalSavefallVelocity + terminalSavefallVelocity / gravity;
             }
             else
-                { time = sqrtf(2.f * path_length / gravity); }
+            {
+                time = sqrtf(2.f * path_length / gravity);
+            }
         }
         else
         {
@@ -62,7 +64,9 @@ namespace Movement
                 time = (path_length - terminal_length) / terminalVelocity + terminalFallTime;
             }
             else
-                { time = sqrtf(2.f * path_length / gravity); }
+            {
+                time = sqrtf(2.f * path_length / gravity);
+            }
         }
 
         return time;
@@ -78,7 +82,9 @@ namespace Movement
             termVel = terminalSavefallVelocity;
         }
         else
-            { termVel = terminalVelocity; }
+        {
+            termVel = terminalVelocity;
+        }
 
         if (start_velocity > termVel)
         {
@@ -93,7 +99,9 @@ namespace Movement
                      start_velocity * terminal_time + gravity * terminal_time * terminal_time * 0.5f;
         }
         else
-            { result = t_passed * (start_velocity + t_passed * gravity * 0.5f); }
+        {
+            result = t_passed * (start_velocity + t_passed * gravity * 0.5f);
+        }
 
         return result;
     }
@@ -109,7 +117,9 @@ namespace Movement
             result = terminalVelocity * (t_passed - terminalFallTime) + terminal_length;
         }
         else
-            { result = t_passed * t_passed * gravity * 0.5f; }
+        {
+            result = t_passed * t_passed * gravity * 0.5f;
+        }
 
         return result;
     }

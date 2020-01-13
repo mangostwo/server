@@ -294,7 +294,9 @@ void BattleGroundAV::Update(uint32 diff)
                 m_Mine_Reclaim_Timer[mine] -= diff;
             }
             else
-                { ChangeMineOwner(mine, BG_AV_TEAM_NEUTRAL); }
+            {
+                ChangeMineOwner(mine, BG_AV_TEAM_NEUTRAL);
+            }
         }
     }
 
@@ -308,7 +310,9 @@ void BattleGroundAV::Update(uint32 diff)
                 m_Nodes[i].Timer -= diff;
             }
             else
-                { EventPlayerDestroyedPoint(i); }
+            {
+                EventPlayerDestroyedPoint(i);
+            }
         }
     }
 }
@@ -412,7 +416,9 @@ void BattleGroundAV::HandleAreaTrigger(Player* source, uint32 trigger)
                 source->GetSession()->SendNotification(LANG_BATTLEGROUND_ONLY_ALLIANCE_USE);
             }
             else
-                { source->LeaveBattleground(); }
+            {
+                source->LeaveBattleground();
+            }
             break;
         case 2606:
             if (source->GetTeam() != HORDE)
@@ -420,7 +426,9 @@ void BattleGroundAV::HandleAreaTrigger(Player* source, uint32 trigger)
                 source->GetSession()->SendNotification(LANG_BATTLEGROUND_ONLY_HORDE_USE);
             }
             else
-                { source->LeaveBattleground(); }
+            {
+                source->LeaveBattleground();
+            }
             break;
         case 3326:
         case 3327:
@@ -554,18 +562,26 @@ void BattleGroundAV::PopulateNode(BG_AV_Nodes node)
             graveDefenderType = 0;
         }
         else if (m_Team_QuestStatus[teamIdx][0] < 1000)
-            { graveDefenderType = 1; }
+        {
+            graveDefenderType = 1;
+        }
         else if (m_Team_QuestStatus[teamIdx][0] < 1500)
-            { graveDefenderType = 2; }
+        {
+            graveDefenderType = 2;
+        }
         else
-            { graveDefenderType = 3; }
+        {
+            graveDefenderType = 3;
+        }
 
         if (m_Nodes[node].State == POINT_CONTROLLED) // we can spawn the current owner event
         {
             SpawnEvent(BG_AV_NODES_MAX + node, teamIdx * BG_AV_MAX_GRAVETYPES + graveDefenderType, true);
         }
         else // we despawn the event from the prevowner
-            { SpawnEvent(BG_AV_NODES_MAX + node, m_Nodes[node].PrevOwner * BG_AV_MAX_GRAVETYPES + graveDefenderType, false); }
+        {
+            SpawnEvent(BG_AV_NODES_MAX + node, m_Nodes[node].PrevOwner * BG_AV_MAX_GRAVETYPES + graveDefenderType, false);
+        }
     }
     SpawnEvent(node, (teamIdx * BG_AV_MAX_STATES) + m_Nodes[node].State, true);
 }
@@ -733,7 +749,9 @@ void BattleGroundAV::UpdateNodeWorldState(BG_AV_Nodes node)
         UpdateWorldState(AV_SNOWFALL_N, WORLD_STATE_REMOVE);
     }
     else
-        { UpdateWorldState(BG_AV_NodeWorldStates[node][GetWorldStateType(m_Nodes[node].PrevState, m_Nodes[node].PrevOwner)], WORLD_STATE_REMOVE); }
+    {
+        UpdateWorldState(BG_AV_NodeWorldStates[node][GetWorldStateType(m_Nodes[node].PrevState, m_Nodes[node].PrevOwner)], WORLD_STATE_REMOVE);
+    }
 }
 
 void BattleGroundAV::SendMineWorldStates(uint32 mine)

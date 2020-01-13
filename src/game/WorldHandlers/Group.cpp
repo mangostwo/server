@@ -74,9 +74,13 @@ RollVoteMask Roll::GetVoteMaskFor(Player* player) const
 
     // In NEED_BEFORE_GREED need disabled for non-usable item for player
     if (m_method != NEED_BEFORE_GREED || player->CanUseItem(itemProto) == EQUIP_ERR_OK)
+    {
         return m_commonVoteMask;
+    }
     else
+    {
         return RollVoteMask(m_commonVoteMask & ~ROLL_VOTE_MASK_NEED);
+    }
 }
 
 //===================================================
@@ -100,9 +104,13 @@ Group::~Group()
             m_bgGroup->SetBgRaid(ALLIANCE, NULL);
         }
         else if (m_bgGroup->GetBgRaid(HORDE) == this)
-            { m_bgGroup->SetBgRaid(HORDE, NULL); }
+        {
+            m_bgGroup->SetBgRaid(HORDE, NULL);
+        }
         else
-            { sLog.outError("Group::~Group: battleground group is not linked to the correct battleground."); }
+        {
+            sLog.outError("Group::~Group: battleground group is not linked to the correct battleground.");
+        }
     }
     Rolls::iterator itr;
     while (!RollId.empty())
@@ -451,7 +459,9 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 method)
     }
     // if group before remove <= 2 disband it
     else
-        { Disband(true); }
+    {
+        Disband(true);
+    }
 
     // Used by Eluna
 #ifdef ENABLE_ELUNA
@@ -508,7 +518,9 @@ void Group::Disband(bool hideDestroy)
                 player->SetOriginalGroup(NULL);
             }
             else
-                { player->SetGroup(NULL); }
+            {
+                player->SetGroup(NULL);
+            }
         }
 
         // quest related GO state dependent from raid membership
@@ -705,7 +717,9 @@ void Group::GroupLoot(WorldObject* pSource, Loot* loot)
         if (itemProto->Quality >= uint32(m_lootThreshold) && !lootItem.freeforall)
             StartLootRoll(pSource, GROUP_LOOT, loot, itemSlot, maxEnchantingSkill);
         else
-            { lootItem.is_underthreshold = 1; }
+        {
+            lootItem.is_underthreshold = 1;
+        }
     }
 }
 
@@ -727,7 +741,9 @@ void Group::NeedBeforeGreed(WorldObject* pSource, Loot* loot)
         if (itemProto->Quality >= uint32(m_lootThreshold) && !lootItem.freeforall)
             StartLootRoll(pSource, NEED_BEFORE_GREED, loot, itemSlot, maxEnchantingSkill);
         else
-            { lootItem.is_underthreshold = 1; }
+        {
+            lootItem.is_underthreshold = 1;
+        }
     }
 }
 
@@ -795,7 +811,9 @@ bool Group::CountRollVote(Player* player, ObjectGuid const& lootedTarget, uint32
     // possible cheating
     RollVoteMask voteMask = (*rollI)->GetVoteMaskFor(player);
     if ((voteMask & (1 << vote)) == 0)
+    {
         return false;
+    }
 
     CountRollVote(player->GetObjectGuid(), rollI, vote);    // result not related this function result meaning, ignore
     return true;
@@ -914,7 +932,9 @@ void Group::StartLootRoll(WorldObject* lootTarget, LootMethod method, Loot* loot
         RollId.push_back(r);
     }
     else                                            // no looters??
-        { delete r; }
+    {
+        delete r;
+    }
 }
 
 // called when roll timer expires
@@ -1357,10 +1377,14 @@ bool Group::_addMember(ObjectGuid guid, const char* name, bool isAssistant, uint
         }
         // if player is in bg raid and we are adding him to normal group, then call SetOriginalGroup()
         else if (player->GetGroup())
-            { player->SetOriginalGroup(this, group); }
+        {
+            player->SetOriginalGroup(this, group);
+        }
         // if player is not in group, then call set group
         else
-            { player->SetGroup(this, group); }
+        {
+            player->SetGroup(this, group);
+        }
 
         if (player->IsInWorld())
         {
@@ -1407,7 +1431,9 @@ bool Group::_removeMember(ObjectGuid guid)
                 player->SetOriginalGroup(NULL);
             }
             else
-                { player->SetGroup(NULL); }
+            {
+                player->SetGroup(NULL);
+            }
         }
     }
 
@@ -1648,7 +1674,9 @@ bool Group::SameSubGroup(Player const* member1, Player const* member2) const
         return false;
     }
     else
-        { return member1->GetSubGroup() == member2->GetSubGroup(); }
+    {
+        return member1->GetSubGroup() == member2->GetSubGroup();
+    }
 }
 
 // allows setting subgroup for offline members
@@ -1820,7 +1848,9 @@ GroupJoinBattlegroundResult Group::CanJoinBattleGroundQueue(BattleGround const* 
 
     // only check for MinPlayerCount since MinPlayerCount == MaxPlayerCount for arenas...
     if (bgOrTemplate->isArena() && memberscount != MinPlayerCount)
+    {
         return ERR_ARENA_TEAM_PARTY_SIZE;
+    }
 
     if (memberscount > bgEntry->maxGroupSize)               // no MinPlayerCount for battlegrounds
         return ERR_BATTLEGROUND_NONE;                       // ERR_GROUP_JOIN_BATTLEGROUND_TOO_MANY handled on client side
@@ -1829,11 +1859,15 @@ GroupJoinBattlegroundResult Group::CanJoinBattleGroundQueue(BattleGround const* 
     Player* reference = GetFirstMember()->getSource();
     // no reference found, can't join this way
     if (!reference)
+    {
         return ERR_BATTLEGROUND_JOIN_FAILED;
+    }
 
     PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bgOrTemplate->GetMapId(), reference->getLevel());
     if (!bracketEntry)
+    {
         return ERR_BATTLEGROUND_JOIN_FAILED;
+    }
 
     uint32 arenaTeamId = reference->GetArenaTeamId(arenaSlot);
     Team team = reference->GetTeam();
@@ -1846,29 +1880,43 @@ GroupJoinBattlegroundResult Group::CanJoinBattleGroundQueue(BattleGround const* 
         Player* member = itr->getSource();
         // offline member? don't let join
         if (!member)
+        {
             return ERR_BATTLEGROUND_JOIN_FAILED;
+        }
         // don't allow cross-faction join as group
         if (member->GetTeam() != team)
+        {
             return ERR_BATTLEGROUND_JOIN_TIMED_OUT;
+        }
         // not in the same battleground level bracket, don't let join
         PvPDifficultyEntry const* memberBracketEntry = GetBattlegroundBracketByLevel(bracketEntry->mapId, member->getLevel());
         if (memberBracketEntry != bracketEntry)
+        {
             return ERR_BATTLEGROUND_JOIN_RANGE_INDEX;
+        }
         // don't let join rated matches if the arena team id doesn't match
         if (isRated && member->GetArenaTeamId(arenaSlot) != arenaTeamId)
+        {
             return ERR_BATTLEGROUND_JOIN_FAILED;
+        }
         // don't let join if someone from the group is already in that bg queue
         if (member->InBattleGroundQueueForBattleGroundQueueType(bgQueueTypeId))
             return ERR_BATTLEGROUND_JOIN_FAILED;            // not blizz-like
         // don't let join if someone from the group is in bg queue random
         if (member->InBattleGroundQueueForBattleGroundQueueType(bgQueueTypeIdRandom))
+        {
             return ERR_IN_RANDOM_BG;
+        }
         // don't let join to bg queue random if someone from the group is already in bg queue
         if (bgOrTemplate->GetTypeID() == BATTLEGROUND_RB && member->InBattleGroundQueue())
+        {
             return ERR_IN_NON_RANDOM_BG;
+        }
         // check for deserter debuff in case not arena queue
         if (bgOrTemplate->GetTypeID() != BATTLEGROUND_AA && !member->CanJoinToBattleground())
+        {
             return ERR_GROUP_JOIN_BATTLEGROUND_DESERTERS;
+        }
         // check if member can join any more battleground queues
         if (!member->HasFreeBattleGroundQueueId())
             return ERR_BATTLEGROUND_TOO_MANY_QUEUES;        // not blizz-like
@@ -1997,7 +2045,9 @@ void Group::ResetInstances(InstanceResetMethod method, bool isRaid, Player* Send
                 SendMsgTo->SendResetInstanceSuccess(state->GetMapId());
             }
             else
-                { SendMsgTo->SendResetInstanceFailed(0, state->GetMapId()); }
+            {
+                SendMsgTo->SendResetInstanceFailed(0, state->GetMapId());
+            }
         }
 
         // TODO - Adapt here when clear how difficulty changes must be handled
@@ -2009,7 +2059,9 @@ void Group::ResetInstances(InstanceResetMethod method, bool isRaid, Player* Send
                 state->DeleteFromDB();
             }
             else
-                { CharacterDatabase.PExecute("DELETE FROM group_instance WHERE instance = '%u'", state->GetInstanceId()); }
+            {
+                CharacterDatabase.PExecute("DELETE FROM group_instance WHERE instance = '%u'", state->GetInstanceId());
+            }
             // i don't know for sure if hash_map iterators
             m_boundInstances[diff].erase(itr);
             itr = m_boundInstances[diff].begin();
@@ -2018,7 +2070,9 @@ void Group::ResetInstances(InstanceResetMethod method, bool isRaid, Player* Send
             state->RemoveGroup(this);
         }
         else
-            { ++itr; }
+        {
+            ++itr;
+        }
     }
 }
 
@@ -2043,7 +2097,9 @@ InstanceGroupBind* Group::GetBoundInstance(uint32 mapid, Player* player)
         return &itr->second;
     }
     else
-        { return NULL; }
+    {
+        return NULL;
+    }
 }
 
 InstanceGroupBind* Group::GetBoundInstance(Map* aMap, Difficulty difficulty)
@@ -2051,13 +2107,19 @@ InstanceGroupBind* Group::GetBoundInstance(Map* aMap, Difficulty difficulty)
     // some instances only have one difficulty
     MapDifficultyEntry const* mapDiff = GetMapDifficultyData(aMap->GetId(), difficulty);
     if (!mapDiff)
+    {
         return NULL;
+    }
 
     BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(aMap->GetId());
     if (itr != m_boundInstances[difficulty].end())
+    {
         return &itr->second;
+    }
     else
+    {
         return NULL;
+    }
 }
 
 InstanceGroupBind* Group::BindToInstance(DungeonPersistentState* state, bool permanent, bool load)
@@ -2094,7 +2156,9 @@ InstanceGroupBind* Group::BindToInstance(DungeonPersistentState* state, bool per
         return &bind;
     }
     else
-        { return NULL; }
+    {
+        return NULL;
+    }
 }
 
 void Group::UnbindInstance(uint32 mapid, uint8 difficulty, bool unload)

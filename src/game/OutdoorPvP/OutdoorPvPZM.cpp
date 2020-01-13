@@ -307,11 +307,15 @@ bool OutdoorPvPZM::HandleGameObjectUse(Player* player, GameObject* go)
             break;
         case GO_ZANGA_BANNER_CENTER_ALLIANCE:
             if (team == ALLIANCE || !player->HasAura(SPELL_BATTLE_STANDARD_HORDE))
+            {
                 return false;
+            }
             break;
         case GO_ZANGA_BANNER_CENTER_HORDE:
             if (team == HORDE || !player->HasAura(SPELL_BATTLE_STANDARD_ALLIANCE))
+            {
                 return false;
+            }
             break;
         default:
             return false;

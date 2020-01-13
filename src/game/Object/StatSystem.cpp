@@ -164,7 +164,9 @@ void Player::UpdateResistances(uint32 school)
             pet->UpdateResistances(school);
     }
     else
-        { UpdateArmor(); }
+    {
+        UpdateArmor();
+    }
 }
 
 void Player::UpdateArmor()
@@ -705,7 +707,9 @@ void Player::UpdateAllSpellCritChances()
 void Player::UpdateExpertise(WeaponAttackType attack)
 {
     if (attack == RANGED_ATTACK)
+    {
         return;
+    }
 
     int32 expertise = int32(GetRatingBonusValue(CR_EXPERTISE));
 
@@ -854,7 +858,9 @@ void Creature::UpdateResistances(uint32 school)
         SetResistance(SpellSchools(school), int32(value));
     }
     else
-        { UpdateArmor(); }
+    {
+        UpdateArmor();
+    }
 }
 
 void Creature::UpdateArmor()
@@ -1010,7 +1016,9 @@ void Pet::UpdateResistances(uint32 school)
         SetResistance(SpellSchools(school), int32(value));
     }
     else
-        { UpdateArmor(); }
+    {
+        UpdateArmor();
+    }
 }
 
 void Pet::UpdateArmor()
@@ -1076,7 +1084,9 @@ void Pet::UpdateAttackPowerAndDamage(bool ranged)
         val = GetStat(STAT_STRENGTH) - 10.0f;
     }
     else
-        { val = 2 * GetStat(STAT_STRENGTH) - 20.0f; }
+    {
+        val = 2 * GetStat(STAT_STRENGTH) - 20.0f;
+    }
 
     Unit* owner = GetOwner();
     if (owner && owner->GetTypeId() == TYPEID_PLAYER)

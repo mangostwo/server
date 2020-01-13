@@ -236,7 +236,9 @@ static bool ReadDBCBuildFileText(const std::string& dbc_path, char const* locale
         return true;
     }
     else
+    {
         return false;
+    }
 }
 
 static uint32 ReadDBCBuild(const std::string& dbc_path, LocaleNameStr const* localeNameStr = NULL)
@@ -258,19 +260,25 @@ static uint32 ReadDBCBuild(const std::string& dbc_path, LocaleNameStr const* loc
         ReadDBCBuildFileText(dbc_path, localeNameStr->name, text);
 
     if (text.empty())
+    {
         return 0;
+    }
 
     size_t pos = text.find("version=\"");
     size_t pos1 = pos + strlen("version=\"");
     size_t pos2 = text.find("\"", pos1);
     if (pos == text.npos || pos2 == text.npos || pos1 >= pos2)
+    {
         return 0;
+    }
 
     std::string build_str = text.substr(pos1, pos2 - pos1);
 
     int build = atoi(build_str.c_str());
     if (build <= 0)
+    {
         return 0;
+    }
 
     return build;
 }
@@ -719,17 +727,23 @@ SimpleFactionsList const* GetFactionTeamList(uint32 faction)
 {
     FactionTeamMap::const_iterator itr = sFactionTeamMap.find(faction);
     if (itr == sFactionTeamMap.end())
+    {
         return NULL;
+    }
     return &itr->second;
 }
 
 char const* GetPetName(uint32 petfamily, uint32 dbclang)
 {
     if (!petfamily)
+    {
         return NULL;
+    }
     CreatureFamilyEntry const* pet_family = sCreatureFamilyStore.LookupEntry(petfamily);
     if (!pet_family)
+    {
         return NULL;
+    }
     return pet_family->Name[dbclang] ? pet_family->Name[dbclang] : NULL;
 }
 
@@ -737,7 +751,9 @@ TalentSpellPos const* GetTalentSpellPos(uint32 spellId)
 {
     TalentSpellPosMap::const_iterator itr = sTalentSpellPosMap.find(spellId);
     if (itr == sTalentSpellPosMap.end())
+    {
         return NULL;
+    }
 
     return &itr->second;
 }
@@ -745,7 +761,9 @@ TalentSpellPos const* GetTalentSpellPos(uint32 spellId)
 uint32 GetTalentSpellCost(TalentSpellPos const* pos)
 {
     if (pos)
+    {
         return pos->rank + 1;
+    }
 
     return 0;
 }
@@ -759,7 +777,9 @@ int32 GetAreaFlagByAreaID(uint32 area_id)
 {
     AreaFlagByAreaID::iterator i = sAreaFlagByAreaID.find(area_id);
     if (i == sAreaFlagByAreaID.end())
+    {
         return -1;
+    }
 
     return i->second;
 }
@@ -768,7 +788,9 @@ WMOAreaTableEntry const* GetWMOAreaTableEntryByTripple(int32 rootid, int32 adtid
 {
     WMOAreaInfoByTripple::iterator i = sWMOAreaInfoByTripple.find(WMOAreaTableTripple(rootid, adtid, groupid));
     if (i == sWMOAreaInfoByTripple.end())
+    {
         return NULL;
+    }
     return i->second;
 }
 
@@ -776,7 +798,9 @@ AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id)
 {
     int32 areaflag = GetAreaFlagByAreaID(area_id);
     if (areaflag < 0)
+    {
         return NULL;
+    }
 
     return sAreaStore.LookupEntry(areaflag);
 }
@@ -784,10 +808,14 @@ AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id)
 AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag, uint32 map_id)
 {
     if (area_flag)
+    {
         return sAreaStore.LookupEntry(area_flag);
+    }
 
     if (MapEntry const* mapEntry = sMapStore.LookupEntry(map_id))
+    {
         return GetAreaEntryByAreaID(mapEntry->linked_zone);
+    }
 
     return NULL;
 }
@@ -796,18 +824,26 @@ uint32 GetAreaFlagByMapId(uint32 mapid)
 {
     AreaFlagByMapID::iterator i = sAreaFlagByMapID.find(mapid);
     if (i == sAreaFlagByMapID.end())
+    {
         return 0;
+    }
     else
+    {
         return i->second;
+    }
 }
 
 uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId)
 {
     if (mapid != 530 && mapid != 571)                       // speed for most cases
+    {
         return mapid;
+    }
 
     if (WorldMapAreaEntry const* wma = sWorldMapAreaStore.LookupEntry(zoneId))
+    {
         return wma->virtual_map_id >= 0 ? wma->virtual_map_id : wma->map_id;
+    }
 
     return mapid;
 }
@@ -816,11 +852,15 @@ ContentLevels GetContentLevelsForMapAndZone(uint32 mapid, uint32 zoneId)
 {
     mapid = GetVirtualMapForMapAndZone(mapid, zoneId);
     if (mapid < 2)
+    {
         return CONTENT_1_60;
+    }
 
     MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
     if (!mapEntry)
+    {
         return CONTENT_1_60;
+    }
 
     switch (mapEntry->Expansion())
     {
@@ -837,7 +877,9 @@ ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)
     {
         ChatChannelsEntry const* ch = sChatChannelsStore.LookupEntry(i);
         if (ch && ch->ChannelID == channel_id)
+        {
             return ch;
+        }
     }
     return NULL;
 }
@@ -860,7 +902,9 @@ ChatChannelsEntry const* GetChannelEntryFor(const std::string& name)
                 entryName.replace(removeString, 2, "");
 
             if (name.find(entryName) != std::string::npos)
+            {
                 return ch;
+            }
         }
     }
 
@@ -876,7 +920,9 @@ ChatChannelsEntry const* GetChannelEntryFor(const std::string& name)
     }
 
     if (compare)
+    {
         return &worldCh;
+    }
 
     return NULL;
 }
@@ -884,19 +930,29 @@ ChatChannelsEntry const* GetChannelEntryFor(const std::string& name)
 bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredTotemCategoryId)
 {
     if (requiredTotemCategoryId == 0)
+    {
         return true;
+    }
     if (itemTotemCategoryId == 0)
+    {
         return false;
+    }
 
     TotemCategoryEntry const* itemEntry = sTotemCategoryStore.LookupEntry(itemTotemCategoryId);
     if (!itemEntry)
+    {
         return false;
+    }
     TotemCategoryEntry const* reqEntry = sTotemCategoryStore.LookupEntry(requiredTotemCategoryId);
     if (!reqEntry)
+    {
         return false;
+    }
 
     if (itemEntry->categoryType != reqEntry->categoryType)
+    {
         return false;
+    }
 
     return (itemEntry->categoryMask & reqEntry->categoryMask) == reqEntry->categoryMask;
 }
@@ -907,7 +963,9 @@ bool Zone2MapCoordinates(float& x, float& y, uint32 zone)
 
     // if not listed then map coordinates (instance)
     if (!maEntry || maEntry->x2 == maEntry->x1 || maEntry->y2 == maEntry->y1)
+    {
         return false;
+    }
 
     std::swap(x, y);                                        // at client map coords swapped
     x = x * ((maEntry->x2 - maEntry->x1) / 100) + maEntry->x1;
@@ -922,7 +980,9 @@ bool Map2ZoneCoordinates(float& x, float& y, uint32 zone)
 
     // if not listed then map coordinates (instance)
     if (!maEntry || maEntry->x2 == maEntry->x1 || maEntry->y2 == maEntry->y1)
+    {
         return false;
+    }
 
     x = (x - maEntry->x1) / ((maEntry->x2 - maEntry->x1) / 100);
     y = (y - maEntry->y1) / ((maEntry->y2 - maEntry->y1) / 100); // client y coord from top to down
@@ -950,7 +1010,9 @@ PvPDifficultyEntry const* GetBattlegroundBracketByLevel(uint32 mapid, uint32 lev
 
             // exactly fit
             if (entry->maxLevel >= level)
+            {
                 return entry;
+            }
 
             // remember for possible out-of-range case (search higher from existed)
             if (!maxEntry || maxEntry->maxLevel < entry->maxLevel)
@@ -966,7 +1028,9 @@ PvPDifficultyEntry const* GetBattlegroundBracketById(uint32 mapid, BattleGroundB
     for (uint32 i = 0; i < sPvPDifficultyStore.GetNumRows(); ++i)
         if (PvPDifficultyEntry const* entry = sPvPDifficultyStore.LookupEntry(i))
             if (entry->mapId == mapid && entry->GetBracketId() == id)
+            {
                 return entry;
+            }
 
     return NULL;
 }
@@ -979,14 +1043,18 @@ uint32 const* GetTalentTabPages(uint32 cls)
 bool IsPointInAreaTriggerZone(AreaTriggerEntry const* atEntry, uint32 mapid, float x, float y, float z, float delta)
 {
     if (mapid != atEntry->mapid)
+    {
         return false;
+    }
 
     if (atEntry->radius > 0)
     {
         // if we have radius check it
         float dist2 = (x - atEntry->x) * (x - atEntry->x) + (y - atEntry->y) * (y - atEntry->y) + (z - atEntry->z) * (z - atEntry->z);
         if (dist2 > (atEntry->radius + delta) * (atEntry->radius + delta))
+        {
             return false;
+        }
     }
     else
     {
@@ -1025,7 +1093,9 @@ uint32 GetCreatureModelRace(uint32 model_id)
 {
     CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(model_id);
     if (!displayEntry)
+    {
         return 0;
+    }
     CreatureDisplayInfoExtraEntry const* extraEntry = sCreatureDisplayInfoExtraStore.LookupEntry(displayEntry->ExtendedDisplayInfoID);
     return extraEntry ? extraEntry->Race : 0;
 }

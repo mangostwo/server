@@ -110,7 +110,9 @@ void ReputationMgr::ApplyForceReaction(uint32 faction_id, ReputationRank rank, b
         m_forcedReactions[faction_id] = rank;
     }
     else
-        { m_forcedReactions.erase(faction_id); }
+    {
+        m_forcedReactions.erase(faction_id);
+    }
 }
 
 uint32 ReputationMgr::GetDefaultStateFlags(FactionEntry const* factionEntry) const
@@ -349,7 +351,9 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
             standing = Reputation_Cap;
         }
         else if (standing < Reputation_Bottom)
-            { standing = Reputation_Bottom; }
+        {
+            standing = Reputation_Bottom;
+        }
 
         ReputationRank old_rank = ReputationToRank(itr->second.Standing + BaseRep);
         ReputationRank new_rank = ReputationToRank(standing);
@@ -375,7 +379,9 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
         m_player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GAIN_HONORED_REPUTATION, factionEntry->ID);
 
         if (new_rank > old_rank)
+        {
             return true;
+        }
     }
     return false;
 }
@@ -468,7 +474,9 @@ void ReputationMgr::SetAtWar(FactionState* faction, bool atWar)
         faction->Flags |= FACTION_FLAG_AT_WAR;
     }
     else
-        { faction->Flags &= ~FACTION_FLAG_AT_WAR; }
+    {
+        faction->Flags &= ~FACTION_FLAG_AT_WAR;
+    }
 
     faction->needSend = true;
     faction->needSave = true;
@@ -504,7 +512,9 @@ void ReputationMgr::SetInactive(FactionState* faction, bool inactive)
         faction->Flags |= FACTION_FLAG_INACTIVE;
     }
     else
-        { faction->Flags &= ~FACTION_FLAG_INACTIVE; }
+    {
+        faction->Flags &= ~FACTION_FLAG_INACTIVE;
+    }
 
     faction->needSend = true;
     faction->needSave = true;
@@ -564,7 +574,9 @@ void ReputationMgr::LoadFromDB(QueryResult* result)
                     }
                 }
                 else if (GetRank(factionEntry) <= REP_HOSTILE)
-                    { SetAtWar(faction, true); }
+                {
+                    SetAtWar(faction, true);
+                }
 
                 // reset changed flag if values similar to saved in DB
                 if (faction->Flags == dbFactionFlags)

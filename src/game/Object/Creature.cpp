@@ -128,7 +128,9 @@ void CreatureCreatePos::SelectFinalPoint(Creature* cr)
             m_pos.z = m_closeObject->GetPositionZ();
         }
         else
-            { m_closeObject->GetClosePoint(m_pos.x, m_pos.y, m_pos.z, cr->GetObjectBoundingRadius(), m_dist, m_angle); }
+        {
+            m_closeObject->GetClosePoint(m_pos.x, m_pos.y, m_pos.z, cr->GetObjectBoundingRadius(), m_dist, m_angle);
+        }
     }
 }
 
@@ -424,7 +426,9 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
         setFaction(GetCreatureInfo()->FactionHorde);
     }
     else
-        { setFaction(GetCreatureInfo()->FactionAlliance); }
+    {
+        setFaction(GetCreatureInfo()->FactionAlliance);
+    }
 
     SetUInt32Value(UNIT_NPC_FLAGS, GetCreatureInfo()->NpcFlags);
 
@@ -467,7 +471,9 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
             SetPvP(true);
         }
         else
-            { SetPvP(false); }
+        {
+            SetPvP(false);
+        }
     }
 
     // Try difficulty dependend version before falling back to base entry
@@ -599,7 +605,9 @@ void Creature::Update(uint32 update_diff, uint32 diff)
                     LoadCreatureAddon(true);
                 }
                 else
-                    { SetDeathState(JUST_ALIVED); }
+                {
+                    SetDeathState(JUST_ALIVED);
+                }
 
                 // Call AI respawn virtual function
                 if (AI())
@@ -640,7 +648,9 @@ void Creature::Update(uint32 update_diff, uint32 diff)
                     StopGroupLoot();
                 }
                 else
-                    { m_groupLootTimer -= update_diff; }
+                {
+                    m_groupLootTimer -= update_diff;
+                }
             }
 
             break;
@@ -728,7 +738,9 @@ void Creature::RegenerateAll(uint32 update_diff)
             m_regenTimer = 0;
         }
         else
-            { m_regenTimer -= update_diff; }
+        {
+            m_regenTimer -= update_diff;
+        }
     }
     if (m_regenTimer != 0)
     {
@@ -748,7 +760,9 @@ void Creature::RegenerateAll(uint32 update_diff)
 void Creature::RegeneratePower()
 {
     if (!IsRegeneratingPower())
+    {
         return;
+    }
 
     Powers powerType = GetPowerType();
     uint32 curValue = GetPower(powerType);
@@ -831,10 +845,14 @@ void Creature::RegenerateHealth()
             addvalue = uint32(Spirit * 0.25 * HealthIncreaseRate);
         }
         else
-            { addvalue = uint32(Spirit * 0.80 * HealthIncreaseRate); }
+        {
+            addvalue = uint32(Spirit * 0.80 * HealthIncreaseRate);
+        }
     }
     else
-        { addvalue = maxValue / 3; }
+    {
+        addvalue = maxValue / 3;
+    }
 
     ModifyHealth(addvalue);
 }
@@ -1246,7 +1264,9 @@ void Creature::SaveToDB()
 bool Creature::IsTappedBy(Player const* player) const
 {
     if (player == GetOriginalLootRecipient())
+    {
         return true;
+    }
 
     Group const* playerGroup = player->GetGroup();
     if (!playerGroup || playerGroup != GetGroupLootRecipient()) // if we dont have a group we arent the recipient
@@ -1278,7 +1298,9 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
                         }
         }
         else
-            { displayId = 0; }
+        {
+            displayId = 0;
+        }
     }
 
     // data->guid = guid don't must be update at save
@@ -1394,7 +1416,9 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth /*= 10
         SetHealth(health);
     }
     else
-        { SetHealthPercent(percentHealth); }
+    {
+        SetHealthPercent(percentHealth);
+    }
 
     SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, float(health));
 
@@ -1654,7 +1678,9 @@ void Creature::LoadEquipment(uint32 equip_entry, bool force)
 
     EquipmentInfo const* einfo = sObjectMgr.GetEquipmentInfo(equip_entry);
     if (!einfo)
+    {
         return;
+    }
 
     m_equipmentId = equip_entry;
     for (uint8 i = 0; i < MAX_VIRTUAL_ITEM_SLOT; ++i)
@@ -1916,7 +1942,9 @@ bool Creature::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectInd
         }
         // Spell effect taunt check
         else if (spellInfo->Effect[index] == SPELL_EFFECT_ATTACK_ME)
-            { return true; }
+        {
+            return true;
+        }
     }
 
     return Unit::IsImmuneToSpellEffect(spellInfo, index, castOnSelf);
@@ -2115,7 +2143,9 @@ void Creature::CallAssistance()
         SetNoCallAssistance(true);
 
         if (GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_NO_CALL_ASSIST)
+        {
             return;
+        }
 
         AI()->SendAIEventAround(AI_EVENT_CALL_ASSISTANCE, getVictim(), sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_ASSISTANCE_DELAY), sWorld.getConfig(CONFIG_FLOAT_CREATURE_FAMILY_ASSISTANCE_RADIUS));
     }
@@ -2208,10 +2238,14 @@ bool Creature::CanInitiateAttack() const
     }
 
     if (m_aggroDelay != 0)
+    {
         return false;
+    }
 
     if (!Unit::CanInitiateAttack())
+    {
         return false;
+    }
 
     return true;
 }
@@ -2283,7 +2317,9 @@ CreatureDataAddon const* Creature::GetCreatureAddon() const
     {
         // If CreatureTemplateAddon for difficulty_entry_N exist, it's there for a reason
         if (CreatureDataAddon const* addon =  ObjectMgr::GetCreatureTemplateAddon(GetCreatureInfo()->Entry))
+        {
             return addon;
+        }
     }
 
     // Return CreatureTemplateAddon when nothing else exist
@@ -2425,11 +2461,17 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
         return false;
     }
     else if (selectFlags & SELECT_FLAG_POWER_RAGE && pTarget->GetPowerType() != POWER_RAGE)
-        { return false; }
+    {
+        return false;
+    }
     else if (selectFlags & SELECT_FLAG_POWER_ENERGY && pTarget->GetPowerType() != POWER_ENERGY)
-        { return false; }
+    {
+        return false;
+    }
     else if (selectFlags & SELECT_FLAG_POWER_RUNIC && pTarget->GetPowerType() != POWER_RUNIC_POWER)
-        { return false; }
+    {
+        return false;
+    }
 
     if (selectFlags & SELECT_FLAG_IN_MELEE_RANGE && !CanReachWithMeleeAttack(pTarget))
     {
@@ -2668,9 +2710,13 @@ time_t Creature::GetRespawnTimeEx() const
         return m_respawnTime;
     }
     else if (m_corpseDecayTimer > 0)                        // dead (corpse)
+    {
         return now + m_respawnDelay + m_corpseDecayTimer / IN_MILLISECONDS;
+    }
     else
-        { return now; }
+    {
+        return now;
+    }
 }
 
 void Creature::GetRespawnCoord(float& x, float& y, float& z, float* ori, float* dist) const
@@ -2875,7 +2921,9 @@ uint32 Creature::UpdateVendorItemCurrentCount(VendorItem const* vItem, uint32 us
             vCount->count += diff * pProto->BuyCount;
         }
         else
-            { vCount->count = vItem->maxcount; }
+        {
+            vCount->count = vItem->maxcount;
+        }
     }
 
     vCount->count = vCount->count > used_count ? vCount->count - used_count : 0;
@@ -3076,7 +3124,9 @@ void Creature::SetWalk(bool enable, bool asDefault)
             clearUnitState(UNIT_STAT_RUNNING);
         }
         else
-            { addUnitState(UNIT_STAT_RUNNING); }
+        {
+            addUnitState(UNIT_STAT_RUNNING);
+        }
     }
 
     // Nothing changed?
@@ -3090,7 +3140,9 @@ void Creature::SetWalk(bool enable, bool asDefault)
         m_movementInfo.AddMovementFlag(MOVEFLAG_WALK_MODE);
     }
     else
-        { m_movementInfo.RemoveMovementFlag(MOVEFLAG_WALK_MODE); }
+    {
+        m_movementInfo.RemoveMovementFlag(MOVEFLAG_WALK_MODE);
+    }
 
     WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_WALK_MODE : SMSG_SPLINE_MOVE_SET_RUN_MODE, 9);
     data << GetPackGUID();
@@ -3104,7 +3156,9 @@ void Creature::SetLevitate(bool enable)
         m_movementInfo.AddMovementFlag(MOVEFLAG_LEVITATING);
     }
     else
-        { m_movementInfo.RemoveMovementFlag(MOVEFLAG_LEVITATING); }
+    {
+        m_movementInfo.RemoveMovementFlag(MOVEFLAG_LEVITATING);
+    }
 
     WorldPacket data(enable ? SMSG_SPLINE_MOVE_GRAVITY_DISABLE : SMSG_SPLINE_MOVE_GRAVITY_ENABLE, 9);
     data << GetPackGUID();
@@ -3166,7 +3220,9 @@ void Creature::SetRoot(bool enable)
         m_movementInfo.AddMovementFlag(MOVEFLAG_ROOT);
     }
     else
-        { m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT); }
+    {
+        m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT);
+    }
 
     WorldPacket data(enable ? SMSG_SPLINE_MOVE_ROOT : SMSG_SPLINE_MOVE_UNROOT, 9);
     data << GetPackGUID();

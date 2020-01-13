@@ -100,7 +100,9 @@ struct CoordPair
             x_coord -= val;
         }
         else
-            { x_coord = 0; }
+        {
+            x_coord = 0;
+        }
     }
 
     void operator>>(const uint32 val)
@@ -110,7 +112,9 @@ struct CoordPair
             x_coord += val;
         }
         else
-            { x_coord = LIMIT - 1; }
+        {
+            x_coord = LIMIT - 1;
+        }
     }
 
     void operator-=(const uint32 val)
@@ -120,7 +124,9 @@ struct CoordPair
             y_coord -= val;
         }
         else
-            { y_coord = 0; }
+        {
+            y_coord = 0;
+        }
     }
 
     void operator+=(const uint32 val)
@@ -130,7 +136,9 @@ struct CoordPair
             y_coord += val;
         }
         else
-            { y_coord = LIMIT - 1; }
+        {
+            y_coord = LIMIT - 1;
+        }
     }
 
     CoordPair& normalize()
@@ -178,7 +186,9 @@ namespace MaNGOS
             c = MAP_HALFSIZE - 0.5;
         }
         else if (c < -(MAP_HALFSIZE - 0.5))
-            { c = -(MAP_HALFSIZE - 0.5); }
+        {
+            c = -(MAP_HALFSIZE - 0.5);
+        }
     }
 
     inline bool IsValidMapCoord(float c)

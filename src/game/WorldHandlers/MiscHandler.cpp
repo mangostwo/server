@@ -64,7 +64,9 @@ void WorldSession::HandleRepopRequestOpcode(WorldPacket& recv_data)
     }
 
     if (GetPlayer()->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
+    {
         return;
+    }
 
     // the world update order is sessions, players, creatures
     // the netcode runs in parallel with all of these
@@ -536,7 +538,9 @@ void WorldSession::HandleAddFriendOpcodeCallBack(QueryResult* result, uint32 acc
 
     WorldSession* session = sWorld.FindSession(accountId);
     if (!session)
+    {
         return;
+    }
 
     Player* player = session->GetPlayer();
     if (!player)
@@ -552,9 +556,13 @@ void WorldSession::HandleAddFriendOpcodeCallBack(QueryResult* result, uint32 acc
             friendResult = FRIEND_SELF;
         }
         else if (player->GetTeam() != team && !sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_ADD_FRIEND) && session->GetSecurity() < SEC_MODERATOR)
-            { friendResult = FRIEND_ENEMY; }
+        {
+            friendResult = FRIEND_ENEMY;
+        }
         else if (player->GetSocial()->HasFriend(friendGuid))
-            { friendResult = FRIEND_ALREADY; }
+        {
+            friendResult = FRIEND_ALREADY;
+        }
         else
         {
             Player* pFriend = sObjectAccessor.FindPlayer(friendGuid);
@@ -563,7 +571,9 @@ void WorldSession::HandleAddFriendOpcodeCallBack(QueryResult* result, uint32 acc
                 friendResult = FRIEND_ADDED_ONLINE;
             }
             else
-                { friendResult = FRIEND_ADDED_OFFLINE; }
+            {
+                friendResult = FRIEND_ADDED_OFFLINE;
+            }
 
             if (!player->GetSocial()->AddToSocialList(friendGuid, false))
             {
@@ -630,11 +640,15 @@ void WorldSession::HandleAddIgnoreOpcodeCallBack(QueryResult* result, uint32 acc
 
     WorldSession* session = sWorld.FindSession(accountId);
     if (!session)
+    {
         return;
+    }
 
     Player* player = session->GetPlayer();
     if (!player)
+    {
         return;
+    }
 
     FriendsResult ignoreResult = FRIEND_IGNORE_NOT_FOUND;
     if (ignoreGuid)
@@ -644,7 +658,9 @@ void WorldSession::HandleAddIgnoreOpcodeCallBack(QueryResult* result, uint32 acc
             ignoreResult = FRIEND_IGNORE_SELF;
         }
         else if (player->GetSocial()->HasIgnore(ignoreGuid))
-            { ignoreResult = FRIEND_IGNORE_ALREADY; }
+        {
+            ignoreResult = FRIEND_IGNORE_ALREADY;
+        }
         else
         {
             ignoreResult = FRIEND_IGNORE_ADDED;
@@ -700,7 +716,9 @@ void WorldSession::HandleBugOpcode(WorldPacket& recv_data)
         DEBUG_LOG("WORLD: Received opcode CMSG_BUG [Bug Report]");
     }
     else
-        { DEBUG_LOG("WORLD: Received opcode CMSG_BUG [Suggestion]"); }
+    {
+        DEBUG_LOG("WORLD: Received opcode CMSG_BUG [Suggestion]");
+    }
 
     DEBUG_LOG("%s", type.c_str());
     DEBUG_LOG("%s", content.c_str());
@@ -724,7 +742,9 @@ void WorldSession::HandleReclaimCorpseOpcode(WorldPacket& recv_data)
 
     // do not allow corpse reclaim in arena
     if (GetPlayer()->InArena())
+    {
         return;
+    }
 
     // body not released yet
     if (!GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
@@ -938,7 +958,9 @@ void WorldSession::HandleUpdateAccountData(WorldPacket& recv_data)
     DEBUG_LOG("UAD: type %u, time %u, decompressedSize %u", type, timestamp, decompressedSize);
 
     if (type > NUM_ACCOUNT_DATA_TYPES)
+    {
         return;
+    }
 
     if (decompressedSize == 0)                              // erase
     {
@@ -993,7 +1015,9 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recv_data)
     DEBUG_LOG("RAD: type %u", type);
 
     if (type > NUM_ACCOUNT_DATA_TYPES)
+    {
         return;
+    }
 
     AccountData* adata = GetAccountData(AccountDataType(type));
 
@@ -1274,7 +1298,9 @@ void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
         GetPlayer()->TeleportTo(mapid, PositionX, PositionY, PositionZ, Orientation);
     }
     else
-        { SendNotification(LANG_YOU_NOT_HAVE_PERMISSION); }
+    {
+        SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+    }
 }
 
 void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
@@ -1439,7 +1465,9 @@ void WorldSession::HandleSetTitleOpcode(WorldPacket& recv_data)
     if (title > 0 && title < MAX_TITLE_INDEX)
     {
         if (!GetPlayer()->HasTitle(title))
+        {
             return;
+        }
     }
     else
         title = 0;
@@ -1492,7 +1520,9 @@ void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPacket& recv_data)
     }
 
     if (Difficulty(mode) == _player->GetDungeonDifficulty())
+    {
         return;
+    }
 
     // cannot reset while in an instance
     Map* map = _player->GetMap();
@@ -1504,7 +1534,9 @@ void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPacket& recv_data)
 
     // Exception to set mode to normal for low-level players
     if (_player->getLevel() < LEVELREQUIREMENT_HEROIC && mode > REGULAR_DIFFICULTY)
+    {
         return;
+    }
 
     if (Group* pGroup = _player->GetGroup())
     {
@@ -1537,7 +1569,9 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket& recv_data)
     }
 
     if (Difficulty(mode) == _player->GetRaidDifficulty())
+    {
         return;
+    }
 
     // cannot reset while in an instance
     Map* map = _player->GetMap();
@@ -1549,7 +1583,9 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket& recv_data)
 
     // Exception to set mode to normal for low-level players
     if (_player->getLevel() < LEVELREQUIREMENT_HEROIC && mode > REGULAR_DIFFICULTY)
+    {
         return;
+    }
 
     if (Group* pGroup = _player->GetGroup())
     {
@@ -1663,11 +1699,15 @@ void WorldSession::HandleHearthandResurrect(WorldPacket& /*recv_data*/)
 
     AreaTableEntry const* atEntry = sAreaStore.LookupEntry(_player->GetAreaId());
     if (!atEntry || !(atEntry->flags & AREA_FLAG_CAN_HEARTH_AND_RES))
+    {
         return;
+    }
 
     // Can't use in flight
     if (_player->IsTaxiFlying())
+    {
         return;
+    }
 
     // Send Everytime
     _player->BuildPlayerRepop();

@@ -169,7 +169,9 @@ void HostileReference::updateOnlineStatus()
                 { online = true; }                              // not accessable but stays online
         }
         else
-            { accessible = true; }
+        {
+            accessible = true;
+        }
     }
     setAccessibleState(accessible);
     setOnlineOfflineState(online);
@@ -280,7 +282,9 @@ void ThreatContainer::modifyThreatPercent(Unit* pVictim, int32 pPercent)
             delete ref;
         }
         else
-            { ref->addThreatPercent(pPercent); }
+        {
+            ref->addThreatPercent(pPercent);
+        }
     }
 }
 
@@ -571,7 +575,9 @@ void ThreatManager::setCurrentVictim(HostileReference* pHostileReference)
 {
     // including NULL==NULL case
     if (pHostileReference == iCurrentVictim)
+    {
         return;
+    }
 
     if (pHostileReference)
         iOwner->SendHighestThreatUpdate(pHostileReference);
@@ -634,7 +640,9 @@ void ThreatManager::processThreatEvent(ThreatRefStatusChangeEvent* threatRefStat
                 iUpdateNeed = true;
             }
             else
-                { iThreatOfflineContainer.remove(hostileReference); }
+            {
+                iThreatOfflineContainer.remove(hostileReference);
+            }
             break;
     }
 }
@@ -642,7 +650,9 @@ void ThreatManager::processThreatEvent(ThreatRefStatusChangeEvent* threatRefStat
 void ThreatManager::UpdateForClient(uint32 diff)
 {
     if (!iUpdateNeed || isThreatListEmpty())
+    {
         return;
+    }
 
     iUpdateTimer.Update(diff);
     if (iUpdateTimer.Passed())
