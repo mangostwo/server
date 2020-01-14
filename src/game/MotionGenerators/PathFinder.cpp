@@ -462,7 +462,9 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
 
     m_pathPoints.resize(pointCount);
     for (uint32 i = 0; i < pointCount; ++i)
-        { m_pathPoints[i] = Vector3(pathPoints[i * VERTEX_SIZE + 2], pathPoints[i * VERTEX_SIZE], pathPoints[i * VERTEX_SIZE + 1]); }
+    {
+        m_pathPoints[i] = Vector3(pathPoints[i * VERTEX_SIZE + 2], pathPoints[i * VERTEX_SIZE], pathPoints[i * VERTEX_SIZE + 1]);
+    }
 
     // first point is always our current location - we need the next one
     setActualEndPosition(m_pathPoints[pointCount - 1]);
@@ -625,7 +627,9 @@ uint32 PathFinder::fixupCorridor(dtPolyRef* path, uint32 npath, uint32 maxPath,
 
     // Store visited
     for (uint32 i = 0; i < req; ++i)
-        { path[i] = visited[(nvisited - 1) - i]; }
+    {
+        path[i] = visited[(nvisited - 1) - i];
+    }
 
     return req + size;
 }
@@ -771,7 +775,9 @@ dtStatus PathFinder::findSmoothPath(const float* startPos, const float* endPos,
             }
 
             for (uint32 i = npos; i < npolys; ++i)
-                { polys[i - npos] = polys[i]; }
+            {
+                polys[i - npos] = polys[i];
+            }
 
             npolys -= npos;
 

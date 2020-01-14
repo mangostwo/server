@@ -989,13 +989,17 @@ void WorldSession::HandleTutorialFlagOpcode(WorldPacket& recv_data)
 void WorldSession::HandleTutorialClearOpcode(WorldPacket & /*recv_data*/)
 {
     for (int i = 0; i < 8; ++i)
-        { SetTutorialInt(i, 0xFFFFFFFF); }
+    {
+        SetTutorialInt(i, 0xFFFFFFFF);
+    }
 }
 
 void WorldSession::HandleTutorialResetOpcode(WorldPacket & /*recv_data*/)
 {
     for (int i = 0; i < 8; ++i)
-        { SetTutorialInt(i, 0x00000000); }
+    {
+        SetTutorialInt(i, 0x00000000);
+    }
 }
 
 void WorldSession::HandleSetWatchedFactionOpcode(WorldPacket& recv_data)

@@ -272,7 +272,10 @@ struct PlayerLevelInfo
 {
     PlayerLevelInfo()
     {
-        for (int i = 0; i < MAX_STATS; ++i) { stats[i] = 0; }
+        for (int i = 0; i < MAX_STATS; ++i)
+        {
+            stats[i] = 0;
+        }
     }
 
     uint8 stats[MAX_STATS];

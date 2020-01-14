@@ -47,10 +47,14 @@ MapManager::MapManager()
 MapManager::~MapManager()
 {
     for (MapMapType::iterator iter = i_maps.begin(); iter != i_maps.end(); ++iter)
-        { delete iter->second; }
+    {
+        delete iter->second;
+    }
 
     for (TransportSet::iterator i = m_Transports.begin(); i != m_Transports.end(); ++i)
-        { delete *i; }
+    {
+        delete *i;
+    }
 
     DeleteStateMachine();
 }
@@ -95,7 +99,9 @@ void MapManager::UpdateGridState(grid_state_t state, Map& map, NGridType& ngrid,
 void MapManager::InitializeVisibilityDistanceInfo()
 {
     for (MapMapType::iterator iter = i_maps.begin(); iter != i_maps.end(); ++iter)
-        { (*iter).second->InitVisibilityDistance(); }
+    {
+        (*iter).second->InitVisibilityDistance();
+    }
 }
 
 Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
@@ -239,7 +245,9 @@ void MapManager::Update(uint32 diff)
 void MapManager::RemoveAllObjectsInRemoveList()
 {
     for (MapMapType::iterator iter = i_maps.begin(); iter != i_maps.end(); ++iter)
-        { iter->second->RemoveAllObjectsInRemoveList(); }
+    {
+        iter->second->RemoveAllObjectsInRemoveList();
+    }
 }
 
 bool MapManager::ExistMapAndVMap(uint32 mapid, float x, float y)
@@ -262,7 +270,9 @@ bool MapManager::IsValidMAP(uint32 mapid)
 void MapManager::UnloadAll()
 {
     for (MapMapType::iterator iter = i_maps.begin(); iter != i_maps.end(); ++iter)
-        { iter->second->UnloadAll(true); }
+    {
+        iter->second->UnloadAll(true);
+    }
 
     while (!i_maps.empty())
     {

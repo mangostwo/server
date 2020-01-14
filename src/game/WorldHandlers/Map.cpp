@@ -1173,7 +1173,9 @@ uint32 Map::GetPlayersCountExceptGMs() const
 void Map::SendToPlayers(WorldPacket const* data) const
 {
     for (MapRefManager::const_iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
-        { itr->getSource()->GetSession()->SendPacket(data); }
+    {
+        itr->getSource()->GetSession()->SendPacket(data);
+    }
 }
 
 bool Map::SendToPlayersInZone(WorldPacket const* data, uint32 zoneId) const
@@ -1604,7 +1606,9 @@ bool DungeonMap::Reset(InstanceResetMethod method)
         {
             // notify the players to leave the instance so it can be reset
             for (MapRefManager::iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
-                { itr->getSource()->SendResetFailedNotify(GetId()); }
+            {
+                itr->getSource()->SendResetFailedNotify(GetId());
+            }
         }
         else
         {
@@ -1612,7 +1616,9 @@ bool DungeonMap::Reset(InstanceResetMethod method)
             {
                 // set the homebind timer for players inside (1 minute)
                 for (MapRefManager::iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
-                    { itr->getSource()->m_InstanceValid = false; }
+                {
+                    itr->getSource()->m_InstanceValid = false;
+                }
             }
 
             // the unload timer is not started
@@ -2146,7 +2152,9 @@ void Map::MonsterYellToMap(CreatureInfo const* cinfo, int32 textId, Language lan
 
     Map::PlayerList const& pList = GetPlayers();
     for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
-        { say_do(itr->getSource()); }
+    {
+        say_do(itr->getSource());
+    }
 }
 
 /**

@@ -277,7 +277,9 @@ std::string PlayerTaxi::SaveTaxiDestinationsToString()
     std::ostringstream ss;
 
     for (size_t i = 0; i < m_TaxiDestinations.size(); ++i)
-        { ss << m_TaxiDestinations[i] << " "; }
+    {
+        ss << m_TaxiDestinations[i] << " ";
+    }
 
     return ss.str();
 }
@@ -300,7 +302,9 @@ uint32 PlayerTaxi::GetCurrentTaxiPath() const
 std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi)
 {
     for (int i = 0; i < TaxiMaskSize; ++i)
-        { ss << taxi.m_taximask[i] << " "; }
+    {
+        ss << taxi.m_taximask[i] << " ";
+    }
     return ss;
 }
 //== TradeData =================================================
@@ -508,7 +512,9 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
     m_lastLiquid = NULL;
 
     for (int i = 0; i < MAX_TIMERS; ++i)
-        { m_MirrorTimer[i] = DISABLED_MIRROR_TIMER; }
+    {
+        m_MirrorTimer[i] = DISABLED_MIRROR_TIMER;
+    }
 
     m_MirrorTimerFlags = UNDERWATER_NONE;
     m_MirrorTimerFlagsLast = UNDERWATER_NONE;
@@ -557,7 +563,9 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
     m_itemUpdateQueueBlocked = false;
 
     for (int i = 0; i < MAX_MOVE_TYPE; ++i)
-        { m_forced_speed_changes[i] = 0; }
+    {
+        m_forced_speed_changes[i] = 0;
+    }
 
     m_stableSlots = 0;
 
@@ -629,7 +637,9 @@ Player::~Player()
 
     // all mailed items should be deleted, also all mail should be deallocated
     for (PlayerMails::const_iterator itr =  m_mail.begin(); itr != m_mail.end(); ++itr)
-        { delete *itr; }
+    {
+        delete *itr;
+    }
 
     for (ItemMap::const_iterator iter = mMitems.begin(); iter != mMitems.end(); ++iter)
         { delete iter->second; }                                // if item is duplicated... then server may crash ... but that item should be deallocated
@@ -642,7 +652,9 @@ Player::~Player()
     }
 
     for (size_t x = 0; x < ItemSetEff.size(); ++x)
-        { delete ItemSetEff[x]; }
+    {
+        delete ItemSetEff[x];
+    }
 
     // clean up player-instance binds, may unload some instance saves
     for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
@@ -699,7 +711,9 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
     }
 
     for (int i = 0; i < PLAYER_SLOTS_COUNT; ++i)
-        { m_items[i] = NULL; }
+    {
+        m_items[i] = NULL;
+    }
 
     SetLocationMapId(info->mapId);
     Relocate(info->positionX, info->positionY, info->positionZ, info->orientation);
@@ -864,7 +878,9 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
     }
 
     for (PlayerCreateInfoItems::const_iterator item_id_itr = info->item.begin(); item_id_itr != info->item.end(); ++item_id_itr)
-        { StoreNewItemInBestSlots(item_id_itr->item_id, item_id_itr->item_amount); }
+    {
+        StoreNewItemInBestSlots(item_id_itr->item_id, item_id_itr->item_amount);
+    }
 
     // bags and main-hand weapon must equipped at this moment
     // now second pass for not equipped (offhand weapon/shield if it attempt equipped before main-hand weapon)
@@ -1061,7 +1077,9 @@ int32 Player::getMaxTimer(MirrorTimerType timer)
             int32 UnderWaterTime = sWorld.getConfig(CONFIG_UINT32_TIMERBAR_BREATH_MAX) * IN_MILLISECONDS;
             AuraList const& mModWaterBreathing = GetAurasByType(SPELL_AURA_MOD_WATER_BREATHING);
             for (AuraList::const_iterator i = mModWaterBreathing.begin(); i != mModWaterBreathing.end(); ++i)
-                { UnderWaterTime = uint32(UnderWaterTime * (100.0f + (*i)->GetModifier()->m_amount) / 100.0f); }
+            {
+                UnderWaterTime = uint32(UnderWaterTime * (100.0f + (*i)->GetModifier()->m_amount) / 100.0f);
+            }
             return UnderWaterTime;
         }
         case FIRE_TIMER:
@@ -14786,13 +14804,17 @@ void Player::AddQuest(Quest const* pQuest, Object* questGiver)
     if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAG_DELIVER))
     {
         for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
-            { questStatusData.m_itemcount[i] = 0; }
+        {
+            questStatusData.m_itemcount[i] = 0;
+        }
     }
 
     if (pQuest->HasSpecialFlag(QuestSpecialFlags(QUEST_SPECIAL_FLAG_KILL_OR_CAST | QUEST_SPECIAL_FLAG_SPEAKTO)))
     {
         for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
-            { questStatusData.m_creatureOrGOcount[i] = 0; }
+        {
+            questStatusData.m_creatureOrGOcount[i] = 0;
+        }
     }
 
     if (pQuest->GetRepObjectiveFaction())
@@ -14887,16 +14909,22 @@ void Player::AddQuest(Quest const* pQuest, Object* questGiver)
     GetZoneAndAreaId(zone, area);
     SpellAreaForAreaMapBounds saBounds = sSpellMgr.GetSpellAreaForAreaMapBounds(zone);
     for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
-        { itr->second->ApplyOrRemoveSpellIfCan(this, zone, area, true); }
+    {
+        itr->second->ApplyOrRemoveSpellIfCan(this, zone, area, true);
+    }
     if (area != zone)
     {
         saBounds = sSpellMgr.GetSpellAreaForAreaMapBounds(area);
         for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
-            { itr->second->ApplyOrRemoveSpellIfCan(this, zone, area, true); }
+        {
+            itr->second->ApplyOrRemoveSpellIfCan(this, zone, area, true);
+        }
     }
     saBounds = sSpellMgr.GetSpellAreaForAreaMapBounds(0);
     for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
-        { itr->second->ApplyOrRemoveSpellIfCan(this, zone, area, true); }
+    {
+        itr->second->ApplyOrRemoveSpellIfCan(this, zone, area, true);
+    }
 
     UpdateForQuestWorldObjects();
 }
@@ -15129,16 +15157,22 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     GetZoneAndAreaId(zone, area);
     SpellAreaForAreaMapBounds saBounds = sSpellMgr.GetSpellAreaForAreaMapBounds(zone);
     for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
-        { itr->second->ApplyOrRemoveSpellIfCan(this, zone, area, false); }
+    {
+        itr->second->ApplyOrRemoveSpellIfCan(this, zone, area, false);
+    }
     if (area != zone)
     {
         saBounds = sSpellMgr.GetSpellAreaForAreaMapBounds(area);
         for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
-            { itr->second->ApplyOrRemoveSpellIfCan(this, zone, area, false); }
+        {
+            itr->second->ApplyOrRemoveSpellIfCan(this, zone, area, false);
+        }
     }
     saBounds = sSpellMgr.GetSpellAreaForAreaMapBounds(0);
     for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
-        { itr->second->ApplyOrRemoveSpellIfCan(this, zone, area, false); }
+    {
+        itr->second->ApplyOrRemoveSpellIfCan(this, zone, area, false);
+    }
 }
 
 void Player::FailQuest(uint32 questId)
@@ -15647,7 +15681,9 @@ void Player::GiveQuestSourceItemIfNeed(Quest const* pQuest)
     {
         uint32 count = 0;
         for (ItemPosCountVec::const_iterator c_itr = dest.begin(); c_itr != dest.end(); ++c_itr)
-            { count += c_itr->count; }
+        {
+            count += c_itr->count;
+        }
 
         Item* item = StoreNewItem(dest, pQuest->GetSrcItemId(), true);
         SendNewItem(item, count, true, false);
@@ -17990,7 +18026,9 @@ void Player::_LoadQuestStatus(QueryResult* result)
 
     // clear quest log tail
     for (uint16 i = slot; i < MAX_QUEST_LOG_SIZE; ++i)
-        { SetQuestSlot(i, 0); }
+    {
+        SetQuestSlot(i, 0);
+    }
 }
 
 void Player::_LoadDailyQuestStatus(QueryResult* result)
@@ -18751,7 +18789,9 @@ void Player::SaveToDB()
     uberInsert.addUInt32(GetHealth());
 
     for (uint32 i = 0; i < MAX_POWERS; ++i)
-        { uberInsert.addUInt32(GetPower(Powers(i))); }
+    {
+        uberInsert.addUInt32(GetPower(Powers(i)));
+    }
 
     uberInsert.addUInt32(uint32(m_specsCount));
     uberInsert.addUInt32(uint32(m_activeSpec));
@@ -18955,10 +18995,14 @@ void Player::_SaveAuras()
             stmt.addUInt8(holder->GetAuraCharges());
 
             for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-                { stmt.addInt32(damage[i]); }
+            {
+                stmt.addInt32(damage[i]);
+            }
 
             for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-                { stmt.addUInt32(periodicTime[i]); }
+            {
+                stmt.addUInt32(periodicTime[i]);
+            }
 
             stmt.addInt32(holder->GetAuraMaxDuration());
             stmt.addInt32(holder->GetAuraDuration());
@@ -19155,7 +19199,9 @@ void Player::_SaveMail()
                 stmt = CharacterDatabase.CreateStatement(deleteMailItems, "DELETE FROM mail_items WHERE item_guid = ?");
 
                 for (std::vector<uint32>::const_iterator itr2 = m->removedItems.begin(); itr2 != m->removedItems.end(); ++itr2)
-                    { stmt.PExecute(*itr2); }
+                {
+                    stmt.PExecute(*itr2);
+                }
 
                 m->removedItems.clear();
             }
@@ -19167,7 +19213,9 @@ void Player::_SaveMail()
             {
                 SqlStatement stmt = CharacterDatabase.CreateStatement(deleteItem, "DELETE FROM item_instance WHERE guid = ?");
                 for (MailItemInfoVec::const_iterator itr2 = m->items.begin(); itr2 != m->items.end(); ++itr2)
-                    { stmt.PExecute(itr2->item_guid); }
+                {
+                    stmt.PExecute(itr2->item_guid);
+                }
             }
 
             SqlStatement stmt = CharacterDatabase.CreateStatement(deleteMain, "DELETE FROM mail WHERE id = ?");
@@ -19221,9 +19269,13 @@ void Player::_SaveQuestStatus()
                 stmt.addUInt8(questStatus.m_explored);
                 stmt.addUInt64(uint64(questStatus.m_timer / IN_MILLISECONDS + sWorld.GetGameTime()));
                 for (int k = 0; k < QUEST_OBJECTIVES_COUNT; ++k)
-                    { stmt.addUInt32(questStatus.m_creatureOrGOcount[k]); }
+                {
+                    stmt.addUInt32(questStatus.m_creatureOrGOcount[k]);
+                }
                 for (int k = 0; k < QUEST_ITEM_OBJECTIVES_COUNT; ++k)
-                    { stmt.addUInt32(questStatus.m_itemcount[k]); }
+                {
+                    stmt.addUInt32(questStatus.m_itemcount[k]);
+                }
                 stmt.Execute();
             }
             break;
@@ -19237,9 +19289,13 @@ void Player::_SaveQuestStatus()
                 stmt.addUInt8(questStatus.m_explored);
                 stmt.addUInt64(uint64(questStatus.m_timer / IN_MILLISECONDS + sWorld.GetGameTime()));
                 for (int k = 0; k < QUEST_OBJECTIVES_COUNT; ++k)
-                    { stmt.addUInt32(questStatus.m_creatureOrGOcount[k]); }
+                {
+                    stmt.addUInt32(questStatus.m_creatureOrGOcount[k]);
+                }
                 for (int k = 0; k < QUEST_ITEM_OBJECTIVES_COUNT; ++k)
-                    { stmt.addUInt32(questStatus.m_itemcount[k]); }
+                {
+                    stmt.addUInt32(questStatus.m_itemcount[k]);
+                }
                 stmt.addUInt32(GetGUIDLow());
                 stmt.addUInt32(i->first);
                 stmt.Execute();
@@ -19469,12 +19525,18 @@ void Player::_SaveStats()
     stmt.addUInt32(GetGUIDLow());
     stmt.addUInt32(GetMaxHealth());
     for (int i = 0; i < MAX_POWERS; ++i)
-        { stmt.addUInt32(GetMaxPower(Powers(i))); }
+    {
+        stmt.addUInt32(GetMaxPower(Powers(i)));
+    }
     for (int i = 0; i < MAX_STATS; ++i)
-        { stmt.addFloat(GetStat(Stats(i))); }
+    {
+        stmt.addFloat(GetStat(Stats(i)));
+    }
     // armor + school resistances
     for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)
-        { stmt.addUInt32(GetResistance(SpellSchools(i))); }
+    {
+        stmt.addUInt32(GetResistance(SpellSchools(i)));
+    }
     stmt.addFloat(GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
     stmt.addFloat(GetFloatValue(PLAYER_DODGE_PERCENTAGE));
     stmt.addFloat(GetFloatValue(PLAYER_PARRY_PERCENTAGE));
@@ -22909,7 +22971,9 @@ void Player::UpdateZoneDependentAuras()
     // Some spells applied at enter into zone (with subzones), aura removed in UpdateAreaDependentAuras that called always at zone->area update
     SpellAreaForAreaMapBounds saBounds = sSpellMgr.GetSpellAreaForAreaMapBounds(m_zoneUpdateId);
     for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
-        { itr->second->ApplyOrRemoveSpellIfCan(this, m_zoneUpdateId, 0, true); }
+    {
+        itr->second->ApplyOrRemoveSpellIfCan(this, m_zoneUpdateId, 0, true);
+    }
 }
 
 void Player::UpdateAreaDependentAuras()
@@ -22932,7 +22996,9 @@ void Player::UpdateAreaDependentAuras()
     // some auras applied at subzone enter
     SpellAreaForAreaMapBounds saBounds = sSpellMgr.GetSpellAreaForAreaMapBounds(m_areaUpdateId);
     for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
-        { itr->second->ApplyOrRemoveSpellIfCan(this, m_zoneUpdateId, m_areaUpdateId, true); }
+    {
+        itr->second->ApplyOrRemoveSpellIfCan(this, m_zoneUpdateId, m_areaUpdateId, true);
+    }
 }
 
 struct UpdateZoneDependentPetsHelper

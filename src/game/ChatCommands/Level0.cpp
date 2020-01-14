@@ -198,7 +198,9 @@ bool ChatHandler::HandleGMListIngameCommand(char* /*args*/)
         char const* accepts = GetMangosString(LANG_GM_ACCEPTS_WHISPER);
         char const* not_accept = GetMangosString(LANG_GM_NO_WHISPER);
         for (const auto iter : names)
-            { PSendSysMessage("%s - %s", iter.first.c_str(), iter.second ? accepts : not_accept); }
+        {
+            PSendSysMessage("%s - %s", iter.first.c_str(), iter.second ? accepts : not_accept);
+        }
     }
     else
     {

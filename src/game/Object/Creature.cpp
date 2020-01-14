@@ -164,7 +164,9 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_valuesCount = UNIT_END;
 
     for (int i = 0; i < CREATURE_MAX_SPELLS; ++i)
-        { m_spells[i] = 0; }
+    {
+        m_spells[i] = 0;
+    }
 
     m_CreatureSpellCooldowns.clear();
     m_CreatureCategoryCooldowns.clear();
@@ -484,7 +486,9 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
     }
     if (templateSpells)
         for (int i = 0; i < CREATURE_MAX_SPELLS; ++i)
-            { m_spells[i] = templateSpells->spells[i]; }
+        {
+            m_spells[i] = templateSpells->spells[i];
+        }
 
     SetVehicleId(GetCreatureInfo()->VehicleTemplateId, 0);
 
@@ -1670,7 +1674,9 @@ void Creature::LoadEquipment(uint32 equip_entry, bool force)
         if (force)
         {
             for (uint8 i = 0; i < MAX_VIRTUAL_ITEM_SLOT; ++i)
-                { SetVirtualItem(VirtualItemSlot(i), 0); }
+            {
+                SetVirtualItem(VirtualItemSlot(i), 0);
+            }
             m_equipmentId = 0;
         }
         return;
@@ -3061,7 +3067,9 @@ void Creature::FillGuidsListFromThreatList(GuidVector& guids, uint32 maxamount /
     guids.reserve(guids.size() + maxamount);
 
     for (ThreatList::const_iterator itr = threats.begin(); maxamount && itr != threats.end(); ++itr, --maxamount)
-        { guids.push_back((*itr)->getUnitGuid()); }
+    {
+        guids.push_back((*itr)->getUnitGuid());
+    }
 }
 
 struct AddCreatureToRemoveListInMapsWorker

@@ -301,7 +301,9 @@ uint32 GetSpellCastTimeForBonus(SpellEntry const* spellProto, DamageEffectType d
 
     // -5% of total per any additional effect (multiplicative)
     for (int i = 0; i < effects; ++i)
-        { CastingTime *= 0.95f; }
+    {
+        CastingTime *= 0.95f;
+    }
 
     return CastingTime;
 }

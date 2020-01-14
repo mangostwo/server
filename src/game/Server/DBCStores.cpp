@@ -218,7 +218,9 @@ std::string AcceptableClientBuildsListStr()
     std::ostringstream data;
     int accepted_versions[] = EXPECTED_MANGOSD_CLIENT_BUILD;
     for (int i = 0; accepted_versions[i]; ++i)
-        { data << accepted_versions[i] << " "; }
+    {
+        data << accepted_versions[i] << " ";
+    }
     return data.str();
 }
 
@@ -586,7 +588,10 @@ void LoadDBCStores(const std::string& dataPath)
 
             // store class talent tab pages
             uint32 cls = 1;
-            for (uint32 m = 1; !(m & talentTabInfo->ClassMask) && cls < MAX_CLASSES; m <<= 1, ++cls) {}
+            for (uint32 m = 1; !(m & talentTabInfo->ClassMask) && cls < MAX_CLASSES; m <<= 1, ++cls)
+            {
+                
+            }
 
             sTalentTabPages[cls][talentTabInfo->tabpage] = talentTabId;
         }

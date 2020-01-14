@@ -56,7 +56,9 @@ namespace MMAP
         ~MMapData()
         {
             for (NavMeshQuerySet::iterator i = navMeshQueries.begin(); i != navMeshQueries.end(); ++i)
-                { dtFreeNavMeshQuery(i->second); }
+            {
+                dtFreeNavMeshQuery(i->second);
+            }
 
             if (navMesh)
             {

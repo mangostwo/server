@@ -130,7 +130,9 @@ void WorldSession::SendUpdateTrade(bool trader_state /*= true*/)
         else
         {
             for (uint8 j = 0; j < 18; ++j)
-                { data << uint32(0); }
+            {
+                data << uint32(0);
+            }
         }
     }
 
