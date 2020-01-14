@@ -5026,7 +5026,9 @@ SpellCastResult Spell::CheckOrTakeRunePower(bool take)
 
         // init cost data and apply mods
         for (uint32 i = 0; i < RUNE_DEATH; ++i)
+        {
             runeCost[i] = runeCostMod > 0 ? src->RuneCost[i] : 0;
+        }
 
         runeCost[RUNE_DEATH] = 0;                           // calculated later
 

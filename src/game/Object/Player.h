@@ -683,7 +683,9 @@ struct EquipmentSet
     EquipmentSet() : Guid(0), IgnoreMask(0), state(EQUIPMENT_SET_NEW)
     {
         for (int i = 0; i < EQUIPMENT_SLOT_END; ++i)
+        {
             Items[i] = 0;
+        }
     }
 
     uint64 Guid;

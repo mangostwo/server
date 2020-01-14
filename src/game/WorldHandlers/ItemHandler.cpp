@@ -1295,7 +1295,9 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
     }
 
     for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
+    {
         recv_data >> gemGuids[i];
+    }
 
     // cheat -> tried to socket same gem multiple times
     for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
@@ -1333,7 +1335,9 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
 
     Item* Gems[MAX_GEM_SOCKETS];
     for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
+    {
         Gems[i] = gemGuids[i] ? _player->GetItemByGuid(gemGuids[i]) : NULL;
+    }
 
     GemPropertiesEntry const* GemProps[MAX_GEM_SOCKETS];
     for (int i = 0; i < MAX_GEM_SOCKETS; ++i)               // get geminfo from dbc storage
@@ -1483,7 +1487,9 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
 
     // remove ALL enchants
     for (uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT + MAX_GEM_SOCKETS; ++enchant_slot)
+    {
         _player->ApplyEnchantment(itemTarget, EnchantmentSlot(enchant_slot), false);
+    }
 
     for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
     {
@@ -1496,7 +1502,9 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
     }
 
     for (uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT + MAX_GEM_SOCKETS; ++enchant_slot)
+    {
         _player->ApplyEnchantment(itemTarget, EnchantmentSlot(enchant_slot), true);
+    }
 
     bool SocketBonusToBeActivated = itemTarget->GemsFitSockets();// current socketbonus state
     if (SocketBonusActivated != SocketBonusToBeActivated)   // if there was a change...

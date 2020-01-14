@@ -822,7 +822,9 @@ void LFGMgr::AddToQueue(ObjectGuid guid)
 
     // put info into wait time maps for starters
     for (roleMap::iterator it = information->currentRoles.begin(); it != information->currentRoles.end(); ++it)
+    {
         AddToWaitMap(it->second, information->dungeonList);
+    }
 
     // just in case someone's already been in the queue.
     queueSet::iterator qItr = m_queueSet.find(guid);
@@ -918,7 +920,9 @@ void LFGMgr::FindQueueMatches()
 {
     // Fetch information on all the queued players/groups
     for (queueSet::iterator itr = m_queueSet.begin(); itr != m_queueSet.end(); ++itr)
+    {
         FindSpecificQueueMatches(*itr);
+    }
 }
 
 void LFGMgr::FindSpecificQueueMatches(ObjectGuid guid)
@@ -1031,7 +1035,9 @@ void LFGMgr::MergeGroups(ObjectGuid guidOne, ObjectGuid guidTwo, std::set<uint32
 
     // move players / roles into a single roleMap
     for (roleMap::iterator it = bufferGroup->currentRoles.begin(); it != bufferGroup->currentRoles.end(); ++it)
+    {
         mainGroup->currentRoles[it->first] = it->second;
+    }
 
     // update the role count / needed role info
     UpdateNeededRoles(guidOne, mainGroup);

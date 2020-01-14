@@ -728,7 +728,9 @@ void WorldSession::HandleAuctionListItems(WorldPacket& recv_data)
     auctions.reserve(aucs.size());
 
     for (AuctionHouseObject::AuctionEntryMap::const_iterator itr = aucs.begin(); itr != aucs.end(); ++itr)
+    {
         auctions.push_back(itr->second);
+    }
 
     AuctionSorter sorter(Sort, GetPlayer());
     std::sort(auctions.begin(), auctions.end(), sorter);
@@ -786,7 +788,9 @@ void WorldSession::HandleAuctionListPendingSales(WorldPacket& recv_data)
 
     // pending list include all auction house entries for character
     for (int i = 0; i < MAX_AUCTION_HOUSE_TYPE; ++i)
+    {
         sAuctionMgr.GetAuctionsMap(AuctionHouseType(i))->BuildListPendingSales(data, _player, count);
+    }
 
     data.put<uint32>(0, count);
     SendPacket(&data);

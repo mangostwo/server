@@ -199,7 +199,9 @@ ObjectMgr::~ObjectMgr()
         { delete itr->second; }
 
     for (ArenaTeamMap::iterator itr = mArenaTeamMap.begin(); itr != mArenaTeamMap.end(); ++itr)
+    {
         delete itr->second;
+    }
 
     for (CacheVendorItemMap::iterator itr = m_mCacheVendorTemplateItemMap.begin(); itr != m_mCacheVendorTemplateItemMap.end(); ++itr)
         { itr->second.Clear(); }

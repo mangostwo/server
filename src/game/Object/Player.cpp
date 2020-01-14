@@ -161,7 +161,9 @@ void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint32 leve
         case CLASS_DEATH_KNIGHT:
         {
             for (int i = 0; i < TaxiMaskSize; ++i)
+            {
                 m_taximask[i] |= sOldContinentsNodesMask[i];
+            }
             break;
         }
     }
@@ -578,7 +580,9 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
     }
 
     for (int i = 0; i < MAX_COMBAT_RATING; ++i)
+    {
         m_baseRatingValue[i] = 0;
+    }
 
     m_baseSpellPower = 0;
     m_baseFeralAP = 0;
@@ -643,7 +647,9 @@ Player::~Player()
     // clean up player-instance binds, may unload some instance saves
     for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
         for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
+        {
             itr->second.state->RemovePlayer(this);
+        }
 
     delete m_declinedname;
     delete m_runes;
@@ -796,7 +802,9 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
 
     // original action bar
     for (PlayerCreateInfoActions::const_iterator action_itr = info->action.begin(); action_itr != info->action.end(); ++action_itr)
+    {
         addActionButton(0, action_itr->button, action_itr->action, action_itr->type);
+    }
 
     // original items
     uint32 raceClassGender = GetUInt32Value(UNIT_FIELD_BYTES_0) & 0x00FFFFFF;
@@ -2272,7 +2280,9 @@ void Player::RegenerateHealth(uint32 diff)
         {
             AuraList const& mModHealthRegenPct = GetAurasByType(SPELL_AURA_MOD_HEALTH_REGEN_PERCENT);
             for (AuraList::const_iterator i = mModHealthRegenPct.begin(); i != mModHealthRegenPct.end(); ++i)
+            {
                 addvalue *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
+            }
         }
         else if (HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT))
             addvalue *= GetTotalAuraModifier(SPELL_AURA_MOD_REGEN_DURING_COMBAT) / 100.0f;
@@ -2631,14 +2641,18 @@ void Player::GiveXP(uint32 xp, Unit* victim)
         // handle SPELL_AURA_MOD_KILL_XP_PCT auras
         Unit::AuraList const& ModXPPctAuras = GetAurasByType(SPELL_AURA_MOD_KILL_XP_PCT);
         for (Unit::AuraList::const_iterator i = ModXPPctAuras.begin(); i != ModXPPctAuras.end(); ++i)
+        {
             xp = uint32(xp * (1.0f + (*i)->GetModifier()->m_amount / 100.0f));
+        }
     }
     else
     {
         // handle SPELL_AURA_MOD_QUEST_XP_PCT auras
         Unit::AuraList const& ModXPPctAuras = GetAurasByType(SPELL_AURA_MOD_QUEST_XP_PCT);
         for (Unit::AuraList::const_iterator i = ModXPPctAuras.begin(); i != ModXPPctAuras.end(); ++i)
+        {
             xp = uint32(xp * (1.0f + (*i)->GetModifier()->m_amount / 100.0f));
+        }
     }
 
     // XP resting bonus for kill
@@ -2695,7 +2709,9 @@ void Player::GiveLevel(uint32 level)
     data << uint32(0);
     // end for
     for (int i = STAT_STRENGTH; i < MAX_STATS; ++i)         // Stats loop (0-4)
+    {
         data << uint32(int32(info.stats[i]) - GetCreateStat(Stats(i)));
+    }
 
     GetSession()->SendPacket(&data);
 
@@ -2712,7 +2728,9 @@ void Player::GiveLevel(uint32 level)
 
     // save base values (bonuses already included in stored stats
     for (int i = STAT_STRENGTH; i < MAX_STATS; ++i)
+    {
         SetCreateStat(Stats(i), info.stats[i]);
+    }
 
     SetCreateHealth(classInfo.basehealth);
     SetCreateMana(classInfo.basemana);
@@ -2821,10 +2839,14 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
     // save base values (bonuses already included in stored stats
     for (int i = STAT_STRENGTH; i < MAX_STATS; ++i)
+    {
         SetCreateStat(Stats(i), info.stats[i]);
+    }
 
     for (int i = STAT_STRENGTH; i < MAX_STATS; ++i)
+    {
         SetStat(Stats(i), info.stats[i]);
+    }
 
     SetCreateHealth(classInfo.basehealth);
 
@@ -2837,7 +2859,9 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
     // reset rating fields values
     for (uint16 index = PLAYER_FIELD_COMBAT_RATING_1; index < PLAYER_FIELD_COMBAT_RATING_1 + MAX_COMBAT_RATING; ++index)
+    {
         SetUInt32Value(index, 0);
+    }
 
     SetUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS, 0);
     for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)
@@ -2873,7 +2897,9 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
     // Init spell schools (will be recalculated in UpdateAllStats() at loading and in _ApplyAllStatBonuses() at reset
     for (uint8 i = 0; i < MAX_SPELL_SCHOOL; ++i)
+    {
         SetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + i, 0.0f);
+    }
 
     SetFloatValue(PLAYER_PARRY_PERCENTAGE, 0.0f);
     SetFloatValue(PLAYER_BLOCK_PERCENTAGE, 0.0f);
@@ -2903,13 +2929,17 @@ void Player::InitStatsForLevel(bool reapplyMods)
     }
     // Reset no reagent cost field
     for (int i = 0; i < 3; ++i)
+    {
         SetUInt32Value(PLAYER_NO_REAGENT_COST_1 + i, 0);
+    }
     // Init data for form but skip reapply item mods for form
     InitDataForForm(reapplyMods);
 
     // save new stats
     for (int i = POWER_MANA; i < MAX_POWERS; ++i)
+    {
         SetMaxPower(Powers(i),  GetCreatePowers(Powers(i)));
+    }
 
     SetMaxHealth(classInfo.basehealth);                     // stamina bonus will applied later
 
@@ -3675,7 +3705,9 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank, bo
     SpellLearnSpellMapBounds spell_bounds = sSpellMgr.GetSpellLearnSpellMapBounds(spell_id);
 
     for (SpellLearnSpellMap::const_iterator itr2 = spell_bounds.first; itr2 != spell_bounds.second; ++itr2)
+    {
         removeSpell(itr2->second.spell, disabled);
+    }
 
     // activate lesser rank in spellbook/action bar, and cast it if need
     bool prev_activate = false;
@@ -3802,7 +3834,9 @@ void Player::RemoveAllSpellCooldown()
     if (!m_spellCooldowns.empty())
     {
         for (SpellCooldowns::const_iterator itr = m_spellCooldowns.begin(); itr != m_spellCooldowns.end(); ++itr)
+        {
             SendClearCooldown(itr->first, this);
+        }
 
         m_spellCooldowns.clear();
     }
@@ -4146,7 +4180,9 @@ void Player::InitVisibleBits()
 
     // PLAYER_QUEST_LOG_x also visible bit on official (but only on party/raid)...
     for (uint16 i = PLAYER_QUEST_LOG_1_1; i < PLAYER_QUEST_LOG_25_2; i += MAX_QUEST_OFFSET)
+    {
         updateVisualBits.SetBit(i);
+    }
 
     // Players visible items are not inventory stuff
     for (uint16 i = 0; i < EQUIPMENT_SLOT_END; ++i)
@@ -5026,14 +5062,18 @@ uint32 Player::DurabilityRepairAll(bool cost, float discountMod, bool guildBank)
     uint32 TotalCost = 0;
     // equipped, backpack, bags itself
     for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
         TotalCost += DurabilityRepair(((INVENTORY_SLOT_BAG_0 << 8) | i), cost, discountMod, guildBank);
+    }
 
     // bank, buyback and keys not repaired
 
     // items in inventory bags
     for (int j = INVENTORY_SLOT_BAG_START; j < INVENTORY_SLOT_BAG_END; ++j)
         for (int i = 0; i < MAX_BAG_SIZE; ++i)
+        {
             TotalCost += DurabilityRepair(((j << 8) | i), cost, discountMod, guildBank);
+        }
     return TotalCost;
 }
 
@@ -5653,7 +5693,9 @@ void Player::UpdateRating(CombatRating cr)
 void Player::UpdateAllRatings()
 {
     for (int cr = 0; cr < MAX_COMBAT_RATING; ++cr)
+    {
         UpdateRating(CombatRating(cr));
+    }
 }
 
 void Player::SetRegularAttackTime()
@@ -7441,7 +7483,9 @@ void Player::DuelComplete(DuelCompleteType type)
     }
 
     for (size_t i = 0; i < auras2remove.size(); ++i)
+    {
         duel->opponent->RemoveAurasDueToSpell(auras2remove[i]);
+    }
 
     auras2remove.clear();
     SpellAuraHolderMap const& auras = GetSpellAuraHolderMap();
@@ -7451,7 +7495,9 @@ void Player::DuelComplete(DuelCompleteType type)
             auras2remove.push_back(i->second->GetId());
     }
     for (size_t i = 0; i < auras2remove.size(); ++i)
+    {
         RemoveAurasDueToSpell(auras2remove[i]);
+    }
 
     // cleanup combo points
     if (GetComboTargetGuid() == duel->opponent->GetObjectGuid())
@@ -7846,15 +7892,21 @@ void Player::_ApplyWeaponDependentAuraMods(Item* item, WeaponAttackType attackTy
 {
     AuraList const& auraCritList = GetAurasByType(SPELL_AURA_MOD_CRIT_PERCENT);
     for (AuraList::const_iterator itr = auraCritList.begin(); itr != auraCritList.end(); ++itr)
+    {
         _ApplyWeaponDependentAuraCritMod(item, attackType, *itr, apply);
+    }
 
     AuraList const& auraDamageFlatList = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
     for (AuraList::const_iterator itr = auraDamageFlatList.begin(); itr != auraDamageFlatList.end(); ++itr)
+    {
         _ApplyWeaponDependentAuraDamageMod(item, attackType, *itr, apply);
+    }
 
     AuraList const& auraDamagePCTList = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
     for (AuraList::const_iterator itr = auraDamagePCTList.begin(); itr != auraDamagePCTList.end(); ++itr)
+    {
         _ApplyWeaponDependentAuraDamageMod(item, attackType, *itr, apply);
+    }
 }
 
 void Player::_ApplyWeaponDependentAuraCritMod(Item* item, WeaponAttackType attackType, Aura* aura, bool apply)
@@ -11795,7 +11847,9 @@ Item* Player::StoreNewItem(ItemPosCountVec const& dest, uint32 item, bool update
 {
     uint32 count = 0;
     for (ItemPosCountVec::const_iterator itr = dest.begin(); itr != dest.end(); ++itr)
+    {
         count += itr->count;
+    }
 
     Item* pItem = Item::CreateItem(item, count, this, randomPropertyId);
     if (pItem)
@@ -12281,7 +12335,9 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
         if (pItem->IsBag() && pItem->IsEquipped())          // this also prevent infinity loop if empty bag stored in bag==slot
         {
             for (int i = 0; i < MAX_BAG_SIZE; ++i)
+            {
                 DestroyItem(slot, i, update);
+            }
         }
 
         if (pItem->HasFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_WRAPPED))
@@ -13372,7 +13428,9 @@ void Player::AddEnchantmentDuration(Item* item, EnchantmentSlot slot, uint32 dur
 void Player::ApplyEnchantment(Item* item, bool apply)
 {
     for (uint32 slot = 0; slot < MAX_ENCHANTMENT_SLOT; ++slot)
+    {
         ApplyEnchantment(item, EnchantmentSlot(slot), apply);
+    }
 }
 
 void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool apply_dur, bool ignore_condition)
@@ -16431,7 +16489,9 @@ void Player::_LoadDeclinedNames(QueryResult* result)
 
     Field* fields = result->Fetch();
     for (int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+    {
         m_declinedname->name[i] = fields[i].GetCppString();
+    }
 
     delete result;
 }
@@ -16498,7 +16558,9 @@ void Player::_LoadEquipmentSets(QueryResult* result)
         eqSet.state         = EQUIPMENT_SET_UNCHANGED;
 
         for (uint32 i = 0; i < EQUIPMENT_SLOT_END; ++i)
+        {
             eqSet.Items[i] = fields[5 + i].GetUInt32();
+        }
 
         m_EquipmentSets[index] = eqSet;
 
@@ -16729,7 +16791,9 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 
         // arena team not exist or not member, cleanup fields
         for (int j = 0; j < ARENA_TEAM_END; ++j)
+        {
             SetArenaTeamInfoField(arena_slot, ArenaTeamInfoType(j), 0);
+        }
     }
 
     SetHonorPoints(fields[40].GetUInt32());
@@ -17061,7 +17125,9 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     {
         m_taxi.ClearTaxiDestinations();
         for (int i = 0; i < 2; ++i)
+        {
             m_taxi.AddTaxiDestination(m_bgData.taxiPath[i]);
+        }
     }
     else if (!m_taxi.LoadTaxiDestinationsFromString(taxi_nodes, GetTeam()))
     {
@@ -17249,7 +17315,9 @@ bool Player::isAllowedToLoot(Creature* creature)
 void Player::_LoadActions(QueryResult* result)
 {
     for (int i = 0; i < MAX_TALENT_SPEC_COUNT; ++i)
+    {
         m_actionButtons[i].clear();
+    }
 
     // QueryResult *result = CharacterDatabase.PQuery("SELECT spec, button,action,type FROM character_action WHERE guid = '%u' ORDER BY button",GetGUIDLow());
 
@@ -17928,7 +17996,9 @@ void Player::_LoadQuestStatus(QueryResult* result)
 void Player::_LoadDailyQuestStatus(QueryResult* result)
 {
     for (uint32 quest_daily_idx = 0; quest_daily_idx < PLAYER_MAX_DAILY_QUESTS; ++quest_daily_idx)
+    {
         SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + quest_daily_idx, 0);
+    }
 
     // QueryResult *result = CharacterDatabase.PQuery("SELECT quest FROM character_queststatus_daily WHERE guid = '%u'", GetGUIDLow());
 
@@ -18155,7 +18225,9 @@ void Player::_LoadGroup(QueryResult* result)
 void Player::_LoadBoundInstances(QueryResult* result)
 {
     for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
+    {
         m_boundInstances[i].clear();
+    }
 
     Group* group = GetGroup();
 
@@ -22103,7 +22175,9 @@ void Player::SendAurasForTarget(Unit* target)
     {
         SpellAuraHolderConstBounds bounds = target->GetSpellAuraHolderBounds(itr->second);
         for (SpellAuraHolderMap::const_iterator iter = bounds.first; iter != bounds.second; ++iter)
+        {
             iter->second->BuildUpdatePacket(data);
+        }
     }
 
     GetSession()->SendPacket(&data);
@@ -22137,7 +22211,9 @@ void Player::SetMonthlyQuestStatus(uint32 quest_id)
 void Player::ResetDailyQuestStatus()
 {
     for (uint32 quest_daily_idx = 0; quest_daily_idx < PLAYER_MAX_DAILY_QUESTS; ++quest_daily_idx)
+    {
         SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + quest_daily_idx, 0);
+    }
 
     // DB data deleted in caller
     m_DailyQuestChanged = false;
@@ -23312,7 +23388,9 @@ void Player::ApplyGlyph(uint8 slot, bool apply)
 void Player::ApplyGlyphs(bool apply)
 {
     for (uint8 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
+    {
         ApplyGlyph(i, apply);
+    }
 }
 
 bool Player::isTotalImmune()
@@ -23448,7 +23526,9 @@ void Player::InitRunes()
     }
 
     for (uint32 i = 0; i < NUM_RUNE_TYPES; ++i)
+    {
         SetFloatValue(PLAYER_RUNE_REGEN_1 + i, 0.1f);
+    }
 }
 
 bool Player::IsBaseRuneSlotsOnCooldown(RuneType runeType) const
@@ -24299,7 +24379,9 @@ void Player::BuildPlayerTalentsInfoData(WorldPacket* data)
 
             // GlyphProperties.dbc
             for (uint8 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
+            {
                 *data << uint16(m_glyphs[specIdx][i].GetId());
+            }
         }
     }
 }
@@ -24532,7 +24614,9 @@ void Player::_SaveEquipmentSets()
                 stmt.addUInt32(eqset.IgnoreMask);
 
                 for (int i = 0; i < EQUIPMENT_SLOT_END; ++i)
+                {
                     stmt.addUInt32(eqset.Items[i]);
+                }
 
                 stmt.addUInt32(GetGUIDLow());
                 stmt.addUInt64(eqset.Guid);
@@ -24555,7 +24639,9 @@ void Player::_SaveEquipmentSets()
                 stmt.addUInt32(eqset.IgnoreMask);
 
                 for (int i = 0; i < EQUIPMENT_SLOT_END; ++i)
+                {
                     stmt.addUInt32(eqset.Items[i]);
+                }
 
                 stmt.Execute();
 
@@ -24779,7 +24865,9 @@ void Player::UpdateSpecCount(uint8 count)
             if (itr->second.uState != ACTIONBUTTON_DELETED)
             {
                 for (uint8 spec = curCount; spec < count; ++spec)
+                {
                     addActionButton(spec, itr->first, itr->second.GetAction(), itr->second.GetType());
+                }
             }
         }
     }
@@ -24791,7 +24879,9 @@ void Player::UpdateSpecCount(uint8 count)
         {
             // delete action buttons for removed spec
             for (uint8 button = 0; button < MAX_ACTION_BUTTONS; ++button)
+            {
                 removeActionButton(spec, button);
+            }
         }
     }
 

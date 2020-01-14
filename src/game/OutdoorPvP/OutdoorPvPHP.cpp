@@ -39,7 +39,9 @@ OutdoorPvPHP::OutdoorPvPHP() : OutdoorPvP(),
     m_towerWorldState[2] = WORLD_STATE_HP_BROKEN_HILL_NEUTRAL;
 
     for (uint8 i = 0; i < MAX_HP_TOWERS; ++i)
+    {
         m_towerOwner[i] = TEAM_NONE;
+    }
 }
 
 void OutdoorPvPHP::FillInitialWorldStates(WorldPacket& data, uint32& count)
@@ -50,7 +52,9 @@ void OutdoorPvPHP::FillInitialWorldStates(WorldPacket& data, uint32& count)
     FillInitialWorldState(data, count, WORLD_STATE_HP_TOWER_DISPLAY_H, WORLD_STATE_ADD);
 
     for (uint8 i = 0; i < MAX_HP_TOWERS; ++i)
+    {
         FillInitialWorldState(data, count, m_towerWorldState[i], WORLD_STATE_ADD);
+    }
 }
 
 void OutdoorPvPHP::SendRemoveWorldStates(Player* player)
@@ -59,7 +63,9 @@ void OutdoorPvPHP::SendRemoveWorldStates(Player* player)
     player->SendUpdateWorldState(WORLD_STATE_HP_TOWER_DISPLAY_H, WORLD_STATE_REMOVE);
 
     for (uint8 i = 0; i < MAX_HP_TOWERS; ++i)
+    {
         player->SendUpdateWorldState(m_towerWorldState[i], WORLD_STATE_REMOVE);
+    }
 }
 
 void OutdoorPvPHP::HandlePlayerEnterZone(Player* player, bool isMainZone)

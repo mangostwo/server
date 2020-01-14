@@ -1684,7 +1684,9 @@ void Creature::LoadEquipment(uint32 equip_entry, bool force)
 
     m_equipmentId = equip_entry;
     for (uint8 i = 0; i < MAX_VIRTUAL_ITEM_SLOT; ++i)
+    {
         SetVirtualItem(VirtualItemSlot(i), einfo->equipentry[i]);
+    }
 }
 
 bool Creature::HasQuest(uint32 quest_id) const

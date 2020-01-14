@@ -564,7 +564,9 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
         data << uint32(pQuest->RewRepFaction[i]);
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // columnid in QuestFactionReward.dbc (if negative, from second row)
+    {
         data << int32(pQuest->RewRepValueId[i]);
+    }
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // reward reputation override. No bonus is expected given
         data << int32(0);
@@ -697,7 +699,9 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* pQuest)
         data << uint32(pQuest->RewRepFaction[i]);
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // columnid in QuestFactionReward.dbc (if negative, from second row)
+    {
         data << int32(pQuest->RewRepValueId[i]);
+    }
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // reward reputation override. No bonus is expected given
         data << int32(0);
@@ -855,7 +859,9 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
         data << uint32(pQuest->RewRepFaction[i]);
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // columnid in QuestFactionReward.dbc (if negative, from second row)
+    {
         data << int32(pQuest->RewRepValueId[i]);
+    }
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // reward reputation override. No diplomacy bonus is expected given, reward also does not display in chat window
         data << int32(0);

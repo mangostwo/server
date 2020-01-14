@@ -80,7 +80,9 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recv_data)
     recv_data.read_skip<uint32>();                          // 0
 
     for (int i = 0; i < 10; ++i)
+    {
         recv_data.read_skip<std::string>();
+    }
 
     recv_data >> clientIndex;                               // index
     recv_data.read_skip<uint32>();                          // 0

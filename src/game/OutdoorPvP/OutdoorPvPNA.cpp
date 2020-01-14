@@ -51,7 +51,9 @@ void OutdoorPvPNA::FillInitialWorldStates(WorldPacket& data, uint32& count)
 
         // map states
         for (uint8 i = 0; i < MAX_NA_ROOSTS; ++i)
+        {
             FillInitialWorldState(data, count, m_roostWorldState[i], WORLD_STATE_ADD);
+        }
     }
 
     FillInitialWorldState(data, count, m_zoneMapState, WORLD_STATE_ADD);
@@ -65,7 +67,9 @@ void OutdoorPvPNA::SendRemoveWorldStates(Player* player)
     player->SendUpdateWorldState(m_zoneMapState, WORLD_STATE_REMOVE);
 
     for (uint8 i = 0; i < MAX_NA_ROOSTS; ++i)
+    {
         player->SendUpdateWorldState(m_roostWorldState[i], WORLD_STATE_REMOVE);
+    }
 }
 
 void OutdoorPvPNA::HandlePlayerEnterZone(Player* player, bool isMainZone)
@@ -299,7 +303,9 @@ void OutdoorPvPNA::UpdateWorldState(uint32 value)
 void OutdoorPvPNA::UpdateWyvernsWorldState(uint32 value)
 {
     for (uint8 i = 0; i < MAX_NA_ROOSTS; ++i)
+    {
         SendUpdateWorldState(m_roostWorldState[i], value);
+    }
 }
 
 // process the capture events

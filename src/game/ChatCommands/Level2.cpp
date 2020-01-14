@@ -1480,7 +1480,9 @@ void ChatHandler::ShowAchievementListHelper(AchievementEntry const* achEntry, Lo
                                 criteriaMask[((*itr)->showOrder - 1) / 32] |= (1 << (((*itr)->showOrder - 1) % 32));
 
                 for (int i = 0; i < 4; ++i)
+                {
                     ss << criteriaMask[i] << ":";
+                }
             }
             else
                 ss << "0:0:0:0:";
@@ -3835,7 +3837,9 @@ bool ChatHandler::HandleWpShowCommand(char* args)
             PSendSysMessage(" Emote: %u", behaviour->emote);
             PSendSysMessage(" Spell: %u", behaviour->spell);
             for (int i = 0;  i < MAX_WAYPOINT_TEXT; ++i)
+            {
                 PSendSysMessage(" TextId%i: %i \'%s\'", i + 1, behaviour->textid[i], (behaviour->textid[i] ? GetMangosString(behaviour->textid[i]) : ""));
+            }
         }
 
         return true;
@@ -5692,7 +5696,9 @@ bool ChatHandler::HandleMmapPathCommand(char* args)
     static const uint32 WAYPOINT_NPC_ENTRY = 1;
     Creature* wp = NULL;
     for (uint32 i = 0; i < pointPath.size(); ++i)
+    {
         wp = player->SummonCreature(WAYPOINT_NPC_ENTRY, pointPath[i].x, pointPath[i].y, pointPath[i].z, 0, TEMPSUMMON_TIMED_DESPAWN, 9000);
+    }
 
     if (followPath)
     {

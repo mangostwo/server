@@ -342,7 +342,9 @@ void ArenaTeam::DelMember(ObjectGuid guid)
         player->GetSession()->SendArenaTeamCommandResult(ERR_ARENA_TEAM_QUIT_S, GetName(), "", 0);
         // delete all info regarding this team
         for (int i = 0; i < ARENA_TEAM_END; ++i)
+        {
             player->SetArenaTeamInfoField(GetSlot(), ArenaTeamInfoType(i), 0);
+        }
     }
 
     CharacterDatabase.PExecute("DELETE FROM arena_team_member WHERE arenateamid = '%u' AND guid = '%u'", GetId(), guid.GetCounter());

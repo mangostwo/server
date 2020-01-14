@@ -1403,7 +1403,9 @@ bool ChatHandler::HandleAchievementCommand(char* args)
     {
         SendSysMessage(LANG_COMMAND_ACHIEVEMENT_CRITERIA);
         for (AchievementCriteriaEntryList::const_iterator itr = criteriaList->begin(); itr != criteriaList->end(); ++itr)
+        {
             ShowAchievementCriteriaListHelper(*itr, achEntry, loc, target);
+        }
     }
 
     return true;
@@ -1483,7 +1485,9 @@ bool ChatHandler::HandleAchievementRemoveCommand(char* args)
 
     if (AchievementCriteriaEntryList const* criteriaList = sAchievementMgr.GetAchievementCriteriaByAchievement(achEntry->ID))
         for (AchievementCriteriaEntryList::const_iterator itr = criteriaList->begin(); itr != criteriaList->end(); ++itr)
+        {
             mgr.SetCriteriaProgress(*itr, achEntry, 0, AchievementMgr::PROGRESS_SET);
+        }
 
     LocaleConstant loc = GetSessionDbcLocale();
     CompletedAchievementData const* completed = target ? target->GetAchievementMgr().GetCompleteData(achId) : NULL;

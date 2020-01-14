@@ -397,7 +397,9 @@ WeatherSystem::~WeatherSystem()
 {
     ///- Empty the WeatherMap
     for (WeatherMap::const_iterator itr = m_weathers.begin(); itr != m_weathers.end(); ++itr)
+    {
         delete itr->second;
+    }
 
     m_weathers.clear();
 }

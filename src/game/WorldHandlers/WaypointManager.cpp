@@ -413,7 +413,9 @@ void WaypointManager::Unload()
     m_pathTemplateMap.clear();
 
     for (WaypointPathMap::iterator itr = m_externalPathTemplateMap.begin(); itr != m_externalPathTemplateMap.end(); ++itr)
+    {
         _clearPath(itr->second);
+    }
     m_externalPathTemplateMap.clear();
 
 }

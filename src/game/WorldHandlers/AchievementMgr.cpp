@@ -709,7 +709,9 @@ void AchievementMgr::CheckAllAchievementCriteria()
 {
     // suppress sending packets
     for (uint32 i = 0; i < ACHIEVEMENT_CRITERIA_TYPE_TOTAL; ++i)
+    {
         UpdateAchievementCriteria(AchievementCriteriaTypes(i));
+    }
 }
 
 static const uint32 achievIdByArenaSlot[MAX_ARENA_SLOT] = { 1057, 1107, 1108 };

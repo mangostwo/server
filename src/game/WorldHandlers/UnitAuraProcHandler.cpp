@@ -2541,7 +2541,9 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
 
                     // Attack Twice
                     for (uint32 i = 0; i < 2; ++i)
+                    {
                         CastCustomSpell(pVictim, triggered_spell_id, &basepoints[0], NULL, NULL, true, castItem, triggeredByAura);
+                    }
 
                     return SPELL_AURA_PROC_OK;
                 }

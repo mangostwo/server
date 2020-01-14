@@ -1673,7 +1673,9 @@ void DungeonMap::UnloadAll(bool pForce)
 void DungeonMap::SendResetWarnings(uint32 timeLeft) const
 {
     for (MapRefManager::const_iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
+    {
         itr->getSource()->SendInstanceResetWarning(GetId(), itr->getSource()->GetDifficulty(IsRaid()), timeLeft);
+    }
 }
 
 void DungeonMap::SetResetSchedule(bool on)

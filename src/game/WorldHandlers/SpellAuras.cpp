@@ -1262,7 +1262,9 @@ void Aura::TriggerSpell()
                         Cell::VisitWorldObjects(GetTarget(), checker, 100.0f);
 
                         for (std::list<Player*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
                             (*itr)->CastSpell((*itr), debuffSpellId, true, NULL, NULL, casterGUID);
+                        }
 
                         return;
                     }
@@ -1561,9 +1563,13 @@ void Aura::TriggerSpell()
                     {
                         // cast 24 spells 34269-34289, 34314-34316
                         for (uint32 spell_id = 34269; spell_id != 34290; ++spell_id)
+                        {
                             triggerTarget->CastSpell(triggerTarget, spell_id, true, NULL, this, casterGUID);
+                        }
                         for (uint32 spell_id = 34314; spell_id != 34317; ++spell_id)
+                        {
                             triggerTarget->CastSpell(triggerTarget, spell_id, true, NULL, this, casterGUID);
+                        }
                         return;
                     }
 //                    // Gravity Lapse
@@ -7271,7 +7277,9 @@ void Aura::HandleNoReagentUseAura(bool /*Apply*/, bool Real)
     ClassFamilyMask mask;
     Unit::AuraList const& noReagent = target->GetAurasByType(SPELL_AURA_NO_REAGENT_USE);
     for (Unit::AuraList::const_iterator i = noReagent.begin(); i !=  noReagent.end(); ++i)
+    {
         mask |= (*i)->GetAuraSpellClassMask();
+    }
 
     target->SetUInt64Value(PLAYER_NO_REAGENT_COST_1 + 0, mask.Flags);
     target->SetUInt32Value(PLAYER_NO_REAGENT_COST_1 + 2, mask.Flags2);
@@ -9702,7 +9710,9 @@ void Aura::HandlePhase(bool apply, bool Real)
             target->GetZoneAndAreaId(zone, area);
 
             for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
+            {
                 itr->second->ApplyOrRemoveSpellIfCan((Player*)target, zone, area, false);
+            }
         }
     }
 }

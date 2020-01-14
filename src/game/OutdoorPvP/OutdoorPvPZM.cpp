@@ -46,7 +46,9 @@ OutdoorPvPZM::OutdoorPvPZM() : OutdoorPvP(),
     m_towerMapState[1] = WORLD_STATE_ZM_BEACON_WEST_NEUTRAL;
 
     for (uint8 i = 0; i < MAX_ZM_TOWERS; ++i)
+    {
         m_towerOwner[i] = TEAM_NONE;
+    }
 
     // initially set graveyard owner to neither faction
     sObjectMgr.SetGraveYardLinkTeam(GRAVEYARD_ID_TWIN_SPIRE, GRAVEYARD_ZONE_TWIN_SPIRE, TEAM_INVALID);

@@ -805,7 +805,9 @@ void Item::SetItemRandomProperties(int32 randomPropId)
                 SetState(ITEM_CHANGED);
             }
             for (uint32 i = PROP_ENCHANTMENT_SLOT_2; i < PROP_ENCHANTMENT_SLOT_2 + 3; ++i)
+            {
                 SetEnchantment(EnchantmentSlot(i), item_rand->enchant_id[i - PROP_ENCHANTMENT_SLOT_2], 0, 0);
+            }
         }
     }
     else
@@ -1120,7 +1122,9 @@ void Item::ClearEnchantment(EnchantmentSlot slot)
     }
 
     for (uint8 x = 0; x < 3; ++x)
+    {
         SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot * MAX_ENCHANTMENT_OFFSET + x, 0);
+    }
     SetState(ITEM_CHANGED);
 }
 

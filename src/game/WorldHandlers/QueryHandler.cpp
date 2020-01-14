@@ -60,7 +60,9 @@ void WorldSession::SendNameQueryOpcode(Player* p)
     {
         data << uint8(1);                                   // is declined
         for (int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+        {
             data << names->name[i];
+        }
     }
     else
         data << uint8(0);                                   // is not declined
@@ -130,7 +132,9 @@ void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult* result, uint32
     {
         data << uint8(1);                                   // is declined
         for (int i = 5; i < MAX_DECLINED_NAME_CASES + 5; ++i)
+        {
             data << fields[i].GetCppString();
+        }
     }
     else
         data << uint8(0);                                   // is not declined
@@ -195,7 +199,9 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recv_data)
         data << uint32(ci->KillCredit[1]);                  // new in 3.1, kill credit
 
         for (int i = 0; i < MAX_CREATURE_MODEL; ++i)
+        {
             data << uint32(ci->ModelId[i]);
+        }
 
         data << float(ci->HealthMultiplier);                // health modifier
         data << float(ci->PowerMultiplier);                  // power modifier

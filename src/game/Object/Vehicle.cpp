@@ -544,7 +544,9 @@ uint8 VehicleInfo::GetTakenSeatsMask() const
     uint8 takenSeatsMask = 0;
 
     for (PassengerMap::const_iterator itr = m_passengers.begin(); itr != m_passengers.end(); ++itr)
+    {
         takenSeatsMask |= 1 << itr->second->GetTransportSeat();
+    }
 
     return takenSeatsMask;
 }

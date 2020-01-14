@@ -614,7 +614,9 @@ void LoadDBCStores(const std::string& dataPath)
     // Set path length
     sTaxiPathNodesByPath.resize(pathCount);                 // 0 and some other indexes not used
     for (uint32 i = 1; i < sTaxiPathNodesByPath.size(); ++i)
+    {
         sTaxiPathNodesByPath[i].resize(pathLength[i]);
+    }
     // fill data (pointers to sTaxiPathNodeStore elements
     for (uint32 i = 1; i < sTaxiPathNodeStore.GetNumRows(); ++i)
         if (TaxiPathNodeEntry const* entry = sTaxiPathNodeStore.LookupEntry(i))
@@ -698,7 +700,9 @@ void LoadDBCStores(const std::string& dataPath)
     {
         std::string str;
         for (std::list<std::string>::iterator i = bad_dbc_files.begin(); i != bad_dbc_files.end(); ++i)
+        {
             str += *i + "\n";
+        }
 
         sLog.outError("\nSome required *.dbc files (%u from %d) not found or not compatible:\n%s", (uint32)bad_dbc_files.size(), DBCFilesCount, str.c_str());
         Log::WaitBeforeContinueIfNeed();

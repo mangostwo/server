@@ -651,10 +651,14 @@ struct ItemPrototype
     float getDPS() const
     {
         if (Delay == 0)
+        {
             return 0;
+        }
         float temp = 0;
         for (int i = 0; i < MAX_ITEM_PROTO_DAMAGES; ++i)
+        {
             temp += Damage[i].DamageMin + Damage[i].DamageMax;
+        }
         return temp * 500 / Delay;
     }
 
@@ -665,7 +669,9 @@ struct ItemPrototype
         {
             int32 bonus = int32((extraDPS + getDPS()) * 14.0f) - 767;
             if (bonus < 0)
+            {
                 return 0;
+            }
             return bonus;
         }
         return 0;

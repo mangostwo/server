@@ -1190,7 +1190,9 @@ void WorldSession::HandleSetPlayerDeclinedNamesOpcode(WorldPacket& recv_data)
     }
 
     for (int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+    {
         CharacterDatabase.escape_string(declinedname.name[i]);
+    }
 
     CharacterDatabase.BeginTransaction();
     CharacterDatabase.PExecute("DELETE FROM character_declinedname WHERE guid = '%u'", guid.GetCounter());

@@ -113,7 +113,9 @@ void WorldSession::SendUpdateTrade(bool trader_state /*= true*/)
 
             data << uint32(item->GetEnchantmentId(PERM_ENCHANTMENT_SLOT));
             for (uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT + MAX_GEM_SOCKETS; ++enchant_slot)
+            {
                 data << uint32(item->GetEnchantmentId(EnchantmentSlot(enchant_slot)));
+            }
             // creator
             data << item->GetGuidValue(ITEM_FIELD_CREATOR);
             data << uint32(item->GetSpellCharges());        // charges
