@@ -248,7 +248,7 @@ class BattleGroundAB : public BattleGround
          * @param source
          * @param trigger
          */
-        void HandleAreaTrigger(Player* source, uint32 trigger) override;
+        bool HandleAreaTrigger(Player* source, uint32 trigger) override;
         /**
          * @brief
          *
@@ -298,6 +298,14 @@ class BattleGroundAB : public BattleGround
         /* achievement req. */
         bool IsAllNodesControlledByTeam(Team team) const override;
         bool IsTeamScores500Disadvantage(Team team) const { return m_TeamScores500Disadvantage[GetTeamIndexByTeamId(team)]; }
+
+        /* Premature finish */
+        /**
+         * @brief
+         *
+         */
+        virtual Team GetPrematureWinner() override;
+
     private:
         /* Gameobject spawning/despawning */
         /**

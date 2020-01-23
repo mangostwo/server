@@ -131,7 +131,7 @@ enum BattleGroundTimeIntervals
 {
     RESURRECTION_INTERVAL           = 30000,                // ms
     INVITATION_REMIND_TIME          = 20000,                // ms
-    INVITE_ACCEPT_WAIT_TIME         = 40000,                // ms
+    INVITE_ACCEPT_WAIT_TIME         = 60000,                // ms
     TIME_TO_AUTOREMOVE              = 120000,               // ms
     MAX_OFFLINE_TIME                = 300,                  // secs
     RESPAWN_ONE_DAY                 = 86400,                // secs
@@ -504,6 +504,11 @@ class BattleGround
          */
         int32 GetStartDelayTime() const     { return m_StartDelayTime; }
         ArenaType GetArenaType() const          { return m_ArenaType; }
+        /**
+         * @brief
+         *
+         * @return Team
+         */
         Team GetWinner() const              { return m_Winner; }
         /**
          * @brief
@@ -587,6 +592,11 @@ class BattleGround
         void SetRated(bool state)           { m_IsRated = state; }
         void SetArenaType(ArenaType type)   { m_ArenaType = type; }
         void SetArenaorBGType(bool _isArena) { m_IsArena = _isArena; }
+        /**
+         * @brief
+         *
+         * @param winner
+         */
         void SetWinner(Team winner)         { m_Winner = winner; }
 
         /**
@@ -674,6 +684,10 @@ class BattleGround
         bool isBattleGround() const { return !m_IsArena; }
         bool isRated() const        { return m_IsRated; }
 
+        /**
+         * @brief
+         *
+         */
         typedef std::map<ObjectGuid, BattleGroundPlayer> BattleGroundPlayerMap;
         /**
          * @brief
@@ -1038,7 +1052,7 @@ class BattleGround
          * @param
          * @param uint32
          */
-        virtual void HandleAreaTrigger(Player* /*Source*/, uint32 /*Trigger*/) {}
+        virtual bool HandleAreaTrigger(Player* /*Source*/, uint32 /*Trigger*/) { return false;  }
         // must be implemented in BG subclass if need AND call base class generic code
         /**
          * @brief
@@ -1099,7 +1113,7 @@ class BattleGround
          * @param player
          * @param plr_guid
          */
-        void EventPlayerLoggedIn(Player* player, ObjectGuid plr_guid);
+        void EventPlayerLoggedIn(Player* player);
         /**
          * @brief
          *
@@ -1240,6 +1254,8 @@ class BattleGround
          * @param guid
          */
         void DoorClose(ObjectGuid guid);
+
+        virtual Team GetPrematureWinner();
 
         /**
          * @brief

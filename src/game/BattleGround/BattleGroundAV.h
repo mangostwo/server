@@ -421,7 +421,7 @@ class BattleGroundAV : public BattleGround
          * @param source
          * @param trigger
          */
-        void HandleAreaTrigger(Player* source, uint32 trigger) override;
+        bool HandleAreaTrigger(Player* source, uint32 trigger) override;
         /**
          * @brief
          *
@@ -497,6 +497,13 @@ class BattleGroundAV : public BattleGround
          * @return const WorldSafeLocsEntry
          */
         virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* plr) override;
+
+        /**
+         * @brief
+         *
+         * @return Team
+         */
+        virtual Team GetPrematureWinner() override;
 
         /**
          * @brief

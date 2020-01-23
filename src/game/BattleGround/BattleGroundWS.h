@@ -272,7 +272,7 @@ class BattleGroundWS : public BattleGround
          * @param source
          * @param trigger
          */
-        void HandleAreaTrigger(Player* source, uint32 trigger) override;
+        bool HandleAreaTrigger(Player* source, uint32 trigger) override;
         /**
          * @brief
          *
@@ -348,6 +348,11 @@ class BattleGroundWS : public BattleGround
          * @param count
          */
         virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+        /**
+         * @brief
+         *
+         */
+        virtual Team GetPrematureWinner() override;
 
     private:
         ObjectGuid m_flagCarrierAlliance; /**< TODO */

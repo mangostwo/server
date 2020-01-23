@@ -640,6 +640,14 @@ enum Team
     HORDE               = 67,
     ALLIANCE            = 469,
 };
+enum PvpTeamIndex
+{
+    TEAM_INDEX_ALLIANCE = 0,
+    TEAM_INDEX_HORDE    = 1,
+
+};
+
+#define PVP_TEAM_COUNT    2
 
 /**
  * This are the different things that a spell can have as it's spell effect, see

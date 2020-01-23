@@ -278,16 +278,16 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* /*go*/, uint32 towerId, Tea
     m_towerOwner[towerId] = team;
 }
 
-void BattleGroundEY::HandleAreaTrigger(Player* source, uint32 trigger)
+bool BattleGroundEY::HandleAreaTrigger(Player* source, uint32 trigger)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
     {
-        return;
+        return false;
     }
 
     if (!source->IsAlive())                                 // hack code, must be removed later
     {
-        return;
+        return false;
     }
 
     switch (trigger)
@@ -308,7 +308,10 @@ void BattleGroundEY::HandleAreaTrigger(Player* source, uint32 trigger)
             if (m_towerOwner[NODE_DRAENEI_RUINS] == source->GetTeam())
                 EventPlayerCapturedFlag(source, NODE_DRAENEI_RUINS);
             break;
+        default:
+            return false;
     }
+    return true;
 }
 
 void BattleGroundEY::Reset()
@@ -621,4 +624,22 @@ bool BattleGroundEY::IsAllNodesControlledByTeam(Team team) const
         }
 
     return true;
+}
+
+Team BattleGroundEY::GetPrematureWinner()
+{
+    int32 hordeScore = m_TeamScores[TEAM_INDEX_HORDE];
+    int32 allianceScore = m_TeamScores[TEAM_INDEX_ALLIANCE];
+
+    if (hordeScore > allianceScore)
+    {
+        return HORDE;
+    }
+    if (allianceScore > hordeScore)
+    {
+        return ALLIANCE;
+    }
+
+    // If the values are equal, fall back to number of players on each team
+    return BattleGround::GetPrematureWinner();
 }

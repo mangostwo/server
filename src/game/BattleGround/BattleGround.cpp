@@ -376,18 +376,7 @@ void BattleGround::Update(uint32 diff)
         }
         else if (m_PrematureCountDownTimer < diff)
         {
-            // time's up!
-            Team winner = TEAM_NONE;
-            if (GetPlayersCountByTeam(ALLIANCE) >= GetMinPlayersPerTeam())
-            {
-                winner = ALLIANCE;
-            }
-            else if (GetPlayersCountByTeam(HORDE) >= GetMinPlayersPerTeam())
-            {
-                winner = HORDE;
-            }
-
-            EndBattleGround(winner);
+            EndBattleGround(GetPrematureWinner());
             m_PrematureCountDown = false;
         }
         else if (!sBattleGroundMgr.isTesting())
@@ -1528,19 +1517,20 @@ void BattleGround::AddOrSetPlayerToCorrectBgGroup(Player* plr, ObjectGuid plr_gu
 /// This method should be called when player logs into running battleground
 /// </summary>
 /// <param name="player">The player.</param>
-/// <param name="plr_guid">The plr_guid.</param>
-void BattleGround::EventPlayerLoggedIn(Player* player, ObjectGuid plr_guid)
+void BattleGround::EventPlayerLoggedIn(Player* player)
 {
+    ObjectGuid playerGuid = player->GetObjectGuid();
+
     // player is correct pointer
     for (OfflineQueue::iterator itr = m_OfflineQueue.begin(); itr != m_OfflineQueue.end(); ++itr)
     {
-        if (*itr == plr_guid)
+        if (*itr == playerGuid)
         {
             m_OfflineQueue.erase(itr);
             break;
         }
     }
-    m_Players[plr_guid].OfflineRemoveTime = 0;
+    m_Players[playerGuid].OfflineRemoveTime = 0;
     PlayerAddedToBGCheckIfBGIsRunning(player);
     // if battleground is starting, then add preparation aura
     // we don't have to do that, because preparation aura isn't removed when player logs out
@@ -2192,4 +2182,27 @@ void BattleGround::SetBracket(PvPDifficultyEntry const* bracketEntry)
 {
     m_BracketId  = bracketEntry->GetBracketId();
     SetLevelRange(bracketEntry->minLevel, bracketEntry->maxLevel);
+}
+
+/// <summary>
+/// Gets the winner in case of premature finish of the BG.
+/// Different BG's may have different criteria for choosing the winner besides simple player accounting
+/// </summary>
+/// <returns>The winner team</returns>
+Team BattleGround::GetPrematureWinner()
+{
+    uint32 hordePlayers = GetPlayersCountByTeam(HORDE);
+    uint32 alliancePlayers = GetPlayersCountByTeam(ALLIANCE);
+
+    if (alliancePlayers > hordePlayers)
+    {
+        return ALLIANCE;
+    }
+
+    if (hordePlayers > alliancePlayers)
+    {
+        return HORDE;
+    }
+
+    return TEAM_NONE;
 }
