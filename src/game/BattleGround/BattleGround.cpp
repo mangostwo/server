@@ -244,32 +244,32 @@ BattleGround::BattleGround()
     m_MapId             = 0;
     m_Map               = NULL;
 
-    m_TeamStartLocX[BG_TEAM_ALLIANCE]   = 0;
-    m_TeamStartLocX[BG_TEAM_HORDE]      = 0;
+    m_TeamStartLocX[TEAM_INDEX_ALLIANCE]   = 0;
+    m_TeamStartLocX[TEAM_INDEX_HORDE]      = 0;
 
-    m_TeamStartLocY[BG_TEAM_ALLIANCE]   = 0;
-    m_TeamStartLocY[BG_TEAM_HORDE]      = 0;
+    m_TeamStartLocY[TEAM_INDEX_ALLIANCE]   = 0;
+    m_TeamStartLocY[TEAM_INDEX_HORDE]      = 0;
 
-    m_TeamStartLocZ[BG_TEAM_ALLIANCE]   = 0;
-    m_TeamStartLocZ[BG_TEAM_HORDE]      = 0;
+    m_TeamStartLocZ[TEAM_INDEX_ALLIANCE]   = 0;
+    m_TeamStartLocZ[TEAM_INDEX_HORDE]      = 0;
 
-    m_TeamStartLocO[BG_TEAM_ALLIANCE]   = 0;
-    m_TeamStartLocO[BG_TEAM_HORDE]      = 0;
+    m_TeamStartLocO[TEAM_INDEX_ALLIANCE]   = 0;
+    m_TeamStartLocO[TEAM_INDEX_HORDE]      = 0;
 
-    m_ArenaTeamIds[BG_TEAM_ALLIANCE]   = 0;
-    m_ArenaTeamIds[BG_TEAM_HORDE]      = 0;
+    m_ArenaTeamIds[TEAM_INDEX_ALLIANCE]   = 0;
+    m_ArenaTeamIds[TEAM_INDEX_HORDE]      = 0;
 
-    m_ArenaTeamRatingChanges[BG_TEAM_ALLIANCE]   = 0;
-    m_ArenaTeamRatingChanges[BG_TEAM_HORDE]      = 0;
+    m_ArenaTeamRatingChanges[TEAM_INDEX_ALLIANCE]   = 0;
+    m_ArenaTeamRatingChanges[TEAM_INDEX_HORDE]      = 0;
 
-    m_BgRaids[BG_TEAM_ALLIANCE]         = NULL;
-    m_BgRaids[BG_TEAM_HORDE]            = NULL;
+    m_BgRaids[TEAM_INDEX_ALLIANCE]         = NULL;
+    m_BgRaids[TEAM_INDEX_HORDE]            = NULL;
 
-    m_PlayersCount[BG_TEAM_ALLIANCE]    = 0;
-    m_PlayersCount[BG_TEAM_HORDE]       = 0;
+    m_PlayersCount[TEAM_INDEX_ALLIANCE]    = 0;
+    m_PlayersCount[TEAM_INDEX_HORDE]       = 0;
 
-    m_TeamScores[BG_TEAM_ALLIANCE]      = 0;
-    m_TeamScores[BG_TEAM_HORDE]         = 0;
+    m_TeamScores[TEAM_INDEX_ALLIANCE]      = 0;
+    m_TeamScores[TEAM_INDEX_HORDE]         = 0;
 
     m_PrematureCountDown = false;
     m_PrematureCountDownTimer = 0;
@@ -468,7 +468,9 @@ void BattleGround::Update(uint32 diff)
                 for (BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
                 {
                     if (Player* player = sObjectMgr.GetPlayer(itr->first))
+                    {
                         player->RemoveAurasDueToSpell(SPELL_ARENA_PREPARATION);
+                    }
                 }
 
                 CheckArenaWinConditions();
@@ -478,8 +480,12 @@ void BattleGround::Update(uint32 diff)
                 PlaySoundToAll(SOUND_BG_START);
 
                 for (BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+                {
                     if (Player* plr = sObjectMgr.GetPlayer(itr->first))
+                    {
                         plr->RemoveAurasDueToSpell(SPELL_PREPARATION);
+                    }
+                }
                 // Announce BG starting
                 if (sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_QUEUE_ANNOUNCER_START))
                 {
@@ -526,7 +532,7 @@ void BattleGround::Update(uint32 diff)
 /// <param name="O">The O.</param>
 void BattleGround::SetTeamStartLoc(Team team, float X, float Y, float Z, float O)
 {
-    BattleGroundTeamIndex teamIdx = GetTeamIndexByTeamId(team);
+    PvpTeamIndex teamIdx = GetTeamIndexByTeamId(team);
     m_TeamStartLocX[teamIdx] = X;
     m_TeamStartLocY[teamIdx] = Y;
     m_TeamStartLocZ[teamIdx] = Z;
@@ -1441,24 +1447,33 @@ void BattleGround::AddPlayer(Player* plr)
         if (team == ALLIANCE)                               // gold
         {
             if (plr->GetTeam() == HORDE)
+            {
                 plr->CastSpell(plr, SPELL_HORDE_GOLD_FLAG, true);
+            }
             else
+            {
                 plr->CastSpell(plr, SPELL_ALLIANCE_GOLD_FLAG, true);
+            }
         }
         else                                                // green
         {
             if (plr->GetTeam() == HORDE)
+            {
                 plr->CastSpell(plr, SPELL_HORDE_GREEN_FLAG, true);
+            }
             else
+            {
                 plr->CastSpell(plr, SPELL_ALLIANCE_GREEN_FLAG, true);
+            }
         }
 
         plr->DestroyConjuredItems(true);
         plr->UnsummonPetTemporaryIfAny();
 
         if (GetStatus() == STATUS_WAIT_JOIN)                // not started yet
+        {
             plr->CastSpell(plr, SPELL_ARENA_PREPARATION, true);
-
+        }
         plr->CastSpell(plr, SPELL_ARENA_DAMPENING, true);
     }
     else
@@ -1645,7 +1660,9 @@ void BattleGround::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
             {
                 // reward honor instantly
                 if (Source->RewardHonor(NULL, 1, (float)value))
+                {
                     itr->second->BonusHonor += value;
+                }
             }
             break;
             // used only in EY, but in MSG_PVP_LOG_DATA opcode
@@ -1820,7 +1837,9 @@ void BattleGround::SpawnEvent(uint8 event1, uint8 event2, bool spawn)
     // or despawn something which was already despawned
     if (event2 == BG_EVENT_NONE || (spawn && m_ActiveEvents[event1] == event2)
         || (!spawn && m_ActiveEvents[event1] != event2))
-        { return; }
+    {
+        return;
+    }
 
     if (spawn)
     {
@@ -1829,13 +1848,16 @@ void BattleGround::SpawnEvent(uint8 event1, uint8 event2, bool spawn)
         m_ActiveEvents[event1] = event2;                    // set this event to active
     }
     else
-        { m_ActiveEvents[event1] = BG_EVENT_NONE; }             // no event active if event2 gets despawned
+    {
+        m_ActiveEvents[event1] = BG_EVENT_NONE;             // no event active if event2 gets despawned
+    }
 
     GuidVector::const_iterator itr = m_EventObjects[MAKE_PAIR32(event1, event2)].creatures.begin();
     for (; itr != m_EventObjects[MAKE_PAIR32(event1, event2)].creatures.end(); ++itr)
     {
         SpawnBGCreature(*itr, (spawn) ? RESPAWN_IMMEDIATELY : RESPAWN_ONE_DAY);
     }
+
     GuidVector::const_iterator itr2 = m_EventObjects[MAKE_PAIR32(event1, event2)].gameobjects.begin();
     for (; itr2 != m_EventObjects[MAKE_PAIR32(event1, event2)].gameobjects.end(); ++itr2)
     {
@@ -1857,6 +1879,7 @@ void BattleGround::SpawnBGObject(ObjectGuid guid, uint32 respawntime)
     {
         return;
     }
+
     if (respawntime == 0)
     {
         // we need to change state from GO_JUST_DEACTIVATED to GO_READY in case battleground is starting again
@@ -1889,6 +1912,7 @@ void BattleGround::SpawnBGCreature(ObjectGuid guid, uint32 respawntime)
     {
         return;
     }
+
     if (respawntime == 0)
     {
         obj->Respawn();
@@ -2052,7 +2076,9 @@ void BattleGround::HandleKillPlayer(Player* player, Player* killer)
 
     // to be able to remove insignia -- ONLY IN BattleGrounds
     if (!isArena())
+    {
         player->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+    }
 }
 
 /// <summary>
@@ -2134,9 +2160,13 @@ uint32 BattleGround::GetAlivePlayersCountByTeam(Team team) const
 void BattleGround::CheckArenaWinConditions()
 {
     if (!GetAlivePlayersCountByTeam(ALLIANCE) && GetPlayersCountByTeam(HORDE))
+    {
         EndBattleGround(HORDE);
+    }
     else if (GetPlayersCountByTeam(ALLIANCE) && !GetAlivePlayersCountByTeam(HORDE))
+    {
         EndBattleGround(ALLIANCE);
+    }
 }
 
 /// <summary>
@@ -2173,7 +2203,7 @@ WorldSafeLocsEntry const* BattleGround::GetClosestGraveYard(Player* player)
 
 bool BattleGround::IsTeamScoreInRange(Team team, uint32 minScore, uint32 maxScore) const
 {
-    BattleGroundTeamIndex team_idx = GetTeamIndexByTeamId(team);
+    PvpTeamIndex team_idx = GetTeamIndexByTeamId(team);
     uint32 score = (m_TeamScores[team_idx] < 0) ? 0 : uint32(m_TeamScores[team_idx]);
     return score >= minScore && score <= maxScore;
 }

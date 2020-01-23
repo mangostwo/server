@@ -246,9 +246,9 @@ enum BG_AV_WorldStates
  */
 enum BattleGroundAVTeamIndex
 {
-    BG_AV_TEAM_ALLIANCE        = BG_TEAM_ALLIANCE,
-    BG_AV_TEAM_HORDE           = BG_TEAM_HORDE,
-    BG_AV_TEAM_NEUTRAL         = 2                          // this is the neutral owner of snowfall
+    BG_AV_TEAM_ALLIANCE        = TEAM_INDEX_ALLIANCE,
+    BG_AV_TEAM_HORDE           = TEAM_INDEX_HORDE,
+    BG_AV_TEAM_NEUTRAL         = TEAM_INDEX_NEUTRAL,                         // this is the neutral owner of snowfall
 };
 
 #define BG_AV_TEAMS_COUNT 3
@@ -435,7 +435,7 @@ class BattleGroundAV : public BattleGround
          * @param teamIdx
          * @param points
          */
-        void UpdateScore(BattleGroundTeamIndex teamIdx, int32 points);
+        void UpdateScore(PvpTeamIndex teamIdx, int32 points);
         /**
          * @brief
          *
@@ -541,7 +541,7 @@ class BattleGroundAV : public BattleGround
          * @param node
          * @param teamIdx
          */
-        void AssaultNode(BG_AV_Nodes node, BattleGroundTeamIndex teamIdx);
+        void AssaultNode(BG_AV_Nodes node, PvpTeamIndex teamIdx);
         /**
          * @brief
          *
@@ -562,7 +562,7 @@ class BattleGroundAV : public BattleGround
          * @param node
          * @param teamIdx
          */
-        void DefendNode(BG_AV_Nodes node, BattleGroundTeamIndex teamIdx);
+        void DefendNode(BG_AV_Nodes node, PvpTeamIndex teamIdx);
 
         /**
          * @brief
@@ -625,7 +625,7 @@ class BattleGroundAV : public BattleGround
         void UpdateNodeWorldState(BG_AV_Nodes node);
 
         /*variables */
-        uint32 m_Team_QuestStatus[BG_TEAMS_COUNT][9];       /**< [x][y] x=team y=questcounter */
+        uint32 m_Team_QuestStatus[PVP_TEAM_COUNT][9];       /**< [x][y] x=team y=questcounter */
 
         BG_AV_NodeInfo m_Nodes[BG_AV_NODES_MAX]; /**< TODO */
 
@@ -635,7 +635,7 @@ class BattleGroundAV : public BattleGround
         int32 m_Mine_Timer[BG_AV_MAX_MINES]; /**< TODO */
         uint32 m_Mine_Reclaim_Timer[BG_AV_MAX_MINES]; /**< TODO */
 
-        bool m_IsInformedNearLose[BG_TEAMS_COUNT]; /**< TODO */
+        bool m_IsInformedNearLose[PVP_TEAM_COUNT]; /**< TODO */
 
         uint32 m_HonorMapComplete; /**< TODO */
         uint32 m_RepTowerDestruction; /**< TODO */

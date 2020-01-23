@@ -159,8 +159,30 @@ class BattleGroundQueue
          * @return bool
          */
         bool CheckPremadeMatch(BattleGroundBracketId bracket_id, uint32 MinPlayersPerTeam, uint32 MaxPlayersPerTeam);
+        /**
+         * @brief
+         *
+         * @param bg_template
+         * @param bracket_id
+         * @param minPlayers
+         * @param maxPlayers
+         * @return bool
+         */
         bool CheckNormalMatch(BattleGround* bg_template, BattleGroundBracketId bracket_id, uint32 minPlayers, uint32 maxPlayers);
         bool CheckSkirmishForSameFaction(BattleGroundBracketId bracket_id, uint32 minPlayersPerTeam);
+        /**
+         * @brief
+         *
+         * @param leader
+         * @param group
+         * @param bgTypeId
+         * @param bracketId
+         * @return arenaType
+         * @return isRated
+         * @param isPremade
+         * @return ArenaRating
+         * @return ArenaTeam
+         */
         GroupQueueInfo* AddGroup(Player* leader, Group* group, BattleGroundTypeId bgTypeId, PvPDifficultyEntry const*  bracketEntry, ArenaType arenaType, bool isRated, bool isPremade, uint32 ArenaRating, uint32 ArenaTeamId = 0);
         /**
          * @brief
@@ -268,7 +290,7 @@ class BattleGroundQueue
                 uint32 PlayerCount; /**< TODO */
         };
 
-        SelectionPool m_SelectionPools[BG_TEAMS_COUNT]; /**< one selection pool for horde, other one for alliance */
+        SelectionPool m_SelectionPools[PVP_TEAM_COUNT]; /**< one selection pool for horde, other one for alliance */
 
         /**
          * @brief
@@ -279,9 +301,9 @@ class BattleGroundQueue
          * @return bool
          */
         bool InviteGroupToBG(GroupQueueInfo* ginfo, BattleGround* bg, Team side);
-        uint32 m_WaitTimes[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS][COUNT_OF_PLAYERS_TO_AVERAGE_WAIT_TIME]; /**< TODO */
-        uint32 m_WaitTimeLastPlayer[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS]; /**< TODO */
-        uint32 m_SumOfWaitTimes[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS]; /**< TODO */
+        uint32 m_WaitTimes[PVP_TEAM_COUNT][MAX_BATTLEGROUND_BRACKETS][COUNT_OF_PLAYERS_TO_AVERAGE_WAIT_TIME]; /**< TODO */
+        uint32 m_WaitTimeLastPlayer[PVP_TEAM_COUNT][MAX_BATTLEGROUND_BRACKETS]; /**< TODO */
+        uint32 m_SumOfWaitTimes[PVP_TEAM_COUNT][MAX_BATTLEGROUND_BRACKETS]; /**< TODO */
 };
 
 /**
@@ -291,6 +313,15 @@ class BattleGroundQueue
 class BGQueueInviteEvent : public BasicEvent
 {
     public:
+        /**
+         * @brief
+         *
+         * @param pl_guid
+         * @param BgInstanceGUID
+         * @param BgTypeId
+         * @param arenaType
+         * @param removeTime
+         */
         BGQueueInviteEvent(ObjectGuid pl_guid, uint32 BgInstanceGUID, BattleGroundTypeId BgTypeId, ArenaType arenaType, uint32 removeTime) :
             m_PlayerGuid(pl_guid), m_BgInstanceGUID(BgInstanceGUID), m_BgTypeId(BgTypeId), m_ArenaType(arenaType), m_RemoveTime(removeTime)
         {
@@ -444,6 +475,18 @@ class BattleGroundMgr
          * @param bg
          */
         void BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg);
+        /**
+         * @brief
+         *
+         * @param data
+         * @param bg
+         * @param QueueSlot
+         * @param StatusID
+         * @param Time1
+         * @param Time2
+         * @param arenaType
+         * @param arenaTeam
+         */
         void BuildBattleGroundStatusPacket(WorldPacket* data, BattleGround* bg, uint8 QueueSlot, uint8 StatusID, uint32 Time1, uint32 Time2, ArenaType arenatype, Team arenaTeam);
         /**
          * @brief
@@ -478,8 +521,38 @@ class BattleGroundMgr
          * @return BattleGround
          */
         BattleGround* GetBattleGroundTemplate(BattleGroundTypeId bgTypeId);
+        /**
+         * @brief
+         *
+         * @param bgTypeId
+         * @param bracket_id
+         * @return BattleGround
+         * @param arenaType
+         * @param isRated
+         */
         BattleGround* CreateNewBattleGround(BattleGroundTypeId bgTypeId, PvPDifficultyEntry const* bracketEntry, ArenaType arenaType, bool isRated);
 
+        /**
+         * @brief
+         *
+         * @param bgTypeId
+         * @param IsArena
+         * @param MinPlayersPerTeam
+         * @param MaxPlayersPerTeam
+         * @param LevelMin
+         * @param LevelMax
+         * @param BattleGroundName
+         * @param MapID
+         * @param Team1StartLocX
+         * @param Team1StartLocY
+         * @param Team1StartLocZ
+         * @param Team1StartLocO
+         * @param Team2StartLocX
+         * @param Team2StartLocY
+         * @param Team2StartLocZ
+         * @param Team2StartLocO
+         * @return uint32
+         */
         uint32 CreateBattleGround(BattleGroundTypeId bgTypeId, bool IsArena, uint32 MinPlayersPerTeam, uint32 MaxPlayersPerTeam, uint32 LevelMin, uint32 LevelMax, char const* BattleGroundName, uint32 MapID, float Team1StartLocX, float Team1StartLocY, float Team1StartLocZ, float Team1StartLocO, float Team2StartLocX, float Team2StartLocY, float Team2StartLocZ, float Team2StartLocO);
 
         /**
@@ -546,6 +619,8 @@ class BattleGroundMgr
         /**
          * @brief
          *
+         * @param arenaRating
+         * @param arenaType
          * @param bgQueueTypeId
          * @param bgTypeId
          * @param bracket_id
@@ -553,11 +628,22 @@ class BattleGroundMgr
         void ScheduleQueueUpdate(uint32 arenaRating, ArenaType arenaType, BattleGroundQueueTypeId bgQueueTypeId, BattleGroundTypeId bgTypeId, BattleGroundBracketId bracket_id);
         uint32 GetMaxRatingDifference() const;
         uint32 GetRatingDiscardTimer()  const;
+
+        /**
+         * @brief
+         *
+         * @return uint32
+         */
         uint32 GetPrematureFinishTime() const;
 
         void InitAutomaticArenaPointDistribution();
         void DistributeArenaPoints();
         void ToggleArenaTesting();
+
+        /**
+         * @brief
+         *
+         */
         void ToggleTesting();
 
         /**
@@ -618,10 +704,24 @@ class BattleGroundMgr
         }
 
         bool isArenaTesting() const { return m_ArenaTesting; }
+
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool isTesting() const { return m_Testing; }
 
         static bool IsArenaType(BattleGroundTypeId bgTypeId);
         static bool IsBattleGroundType(BattleGroundTypeId bgTypeId) { return !IsArenaType(bgTypeId); }
+
+        /**
+         * @brief
+         *
+         * @param bgTypeId
+         * @param arenaType
+         * @return BattleGroundQueueTypeId
+         */
         static BattleGroundQueueTypeId BGQueueTypeId(BattleGroundTypeId bgTypeId, ArenaType arenaType);
         /**
          * @brief

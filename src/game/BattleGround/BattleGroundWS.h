@@ -358,10 +358,10 @@ class BattleGroundWS : public BattleGround
         ObjectGuid m_flagCarrierAlliance; /**< TODO */
         ObjectGuid m_flagCarrierHorde; /**< TODO */
 
-        ObjectGuid m_DroppedFlagGuid[BG_TEAMS_COUNT]; /**< TODO */
-        uint8 m_FlagState[BG_TEAMS_COUNT]; /**< TODO */
-        int32 m_FlagsTimer[BG_TEAMS_COUNT]; /**< TODO */
-        int32 m_FlagsDropTimer[BG_TEAMS_COUNT]; /**< TODO */
+        ObjectGuid m_DroppedFlagGuid[PVP_TEAM_COUNT]; /**< TODO */
+        uint8 m_FlagState[PVP_TEAM_COUNT]; /**< TODO */
+        int32 m_FlagsTimer[PVP_TEAM_COUNT]; /**< TODO */
+        int32 m_FlagsDropTimer[PVP_TEAM_COUNT]; /**< TODO */
 
         uint32 m_ReputationCapture; /**< TODO */
         uint32 m_HonorWinKills; /**< TODO */
