@@ -590,7 +590,7 @@ void LoadDBCStores(const std::string& dataPath)
             uint32 cls = 1;
             for (uint32 m = 1; !(m & talentTabInfo->ClassMask) && cls < MAX_CLASSES; m <<= 1, ++cls)
             {
-                
+
             }
 
             sTalentTabPages[cls][talentTabInfo->tabpage] = talentTabId;
@@ -1098,17 +1098,26 @@ bool IsPointInAreaTriggerZone(AreaTriggerEntry const* atEntry, uint32 mapid, flo
     return true;
 }
 
-uint32 GetCreatureModelRace(uint32 model_id)
+uint32 GetCreatureModelRace(uint32 modelId)
 {
-    CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(model_id);
-    if (!displayEntry)
+    if (CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(modelId))
     {
-        return 0;
+        if (CreatureDisplayInfoExtraEntry const* extraEntry = sCreatureDisplayInfoExtraStore.LookupEntry(displayEntry->ExtendedDisplayInfoID))
+            return extraEntry->Race;
     }
-    CreatureDisplayInfoExtraEntry const* extraEntry = sCreatureDisplayInfoExtraStore.LookupEntry(displayEntry->ExtendedDisplayInfoID);
-    return extraEntry ? extraEntry->Race : 0;
+    return 0;
 }
 
+// for creatures - mid point, for mounts - spine, for characters - waist line
+float GetModelMidpoint(uint32 modelId)
+{
+    if (CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(modelId))
+    {
+        if (CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId))
+            return modelData->MountHeight;
+    }
+    return 0.0f;
+}
 // script support functions
  DBCStorage <SoundEntriesEntry>  const* GetSoundEntriesStore()   { return &sSoundEntriesStore;   }
  DBCStorage <SpellEntry>         const* GetSpellStore()          { return &sSpellStore;          }
