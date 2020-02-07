@@ -416,7 +416,7 @@ bool ChatHandler::HandleGPSCommand(char* args)
 }
 
 // Summon Player
-bool ChatHandler::HandleNamegoCommand(char* args)
+bool ChatHandler::HandleSummonCommand(char* args)
 {
     Player* target;
     ObjectGuid target_guid;
@@ -548,7 +548,7 @@ bool ChatHandler::HandleNamegoCommand(char* args)
 }
 
 // Teleport to Player
-bool ChatHandler::HandleGonameCommand(char* args)
+bool ChatHandler::HandleAppearCommand(char* args)
 {
     Player* target;
     ObjectGuid target_guid;
