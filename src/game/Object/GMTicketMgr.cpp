@@ -39,8 +39,10 @@ void GMTicketMgr::LoadGMTickets()
     m_GMTicketMap.clear();                                  // For reload case
 
     QueryResult* result = CharacterDatabase.Query(
-                              //      0     1            2              3                                  4
-                              "SELECT guid, ticket_text, response_text, UNIX_TIMESTAMP(ticket_lastchange), ticket_id FROM character_ticket ORDER BY ticket_id ASC");
+    //       0       1              2                3                                    4
+    "SELECT `guid`, `ticket_text`, `response_text`, UNIX_TIMESTAMP(`ticket_lastchange`), `ticket_id` "
+    "FROM `character_ticket` "
+    "ORDER BY `ticket_id` ASC");
 
     if (!result)
     {
@@ -95,7 +97,7 @@ void GMTicketMgr::DeleteAll()
             owner->GetSession()->SendGMTicketGetTicket(0x0A);
         }
     }
-    CharacterDatabase.Execute("DELETE FROM character_ticket");
+    CharacterDatabase.Execute("DELETE FROM `character_ticket`");
     m_GMTicketListByCreatingOrder.clear();
     m_GMTicketMap.clear();
 }

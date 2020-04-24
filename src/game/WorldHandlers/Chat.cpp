@@ -849,7 +849,7 @@ ChatCommand* ChatHandler::getCommandTable()
         // check hardcoded part integrity
         CheckIntegrity(commandTable, NULL);
 
-        QueryResult* result = WorldDatabase.Query("SELECT name,security,help FROM command");
+        QueryResult* result = WorldDatabase.Query("SELECT `name`,`security`,`help` FROM `command`");
         if (result)
         {
             do

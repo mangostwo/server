@@ -1183,7 +1183,7 @@ bool AuctionBotSeller::Initialize()
     sLog.outString();
 
     sLog.outString("Loading npc vendor items for filter..");
-    if (QueryResult* result = WorldDatabase.Query("SELECT DISTINCT item FROM npc_vendor"))
+    if (QueryResult* result = WorldDatabase.Query("SELECT DISTINCT `item` FROM `npc_vendor`"))
     {
         BarGoLink bar(result->GetRowCount());
         do
@@ -1205,16 +1205,16 @@ bool AuctionBotSeller::Initialize()
 
     sLog.outString("Loading loot items for filter..");
     if (QueryResult* result = WorldDatabase.PQuery(
-                                  "SELECT item FROM creature_loot_template UNION "
-                                  "SELECT item FROM disenchant_loot_template UNION "
-                                  "SELECT item FROM fishing_loot_template UNION "
-                                  "SELECT item FROM gameobject_loot_template UNION "
-                                  "SELECT item FROM item_loot_template UNION "
-                                  "SELECT item FROM milling_loot_template UNION "
-                                  "SELECT item FROM pickpocketing_loot_template UNION "
-                                  "SELECT item FROM prospecting_loot_template UNION "
-                                  "SELECT item FROM skinning_loot_template UNION "
-                                  "SELECT item FROM spell_loot_template"))
+                                  "SELECT `item` FROM `creature_loot_template` UNION "
+                                  "SELECT `item` FROM `disenchant_loot_template` UNION "
+                                  "SELECT `item` FROM `fishing_loot_template` UNION "
+                                  "SELECT `item` FROM `gameobject_loot_template` UNION "
+                                  "SELECT `item` FROM `item_loot_template` UNION "
+                                  "SELECT `item` FROM `milling_loot_template` UNION "
+                                  "SELECT `item` FROM `pickpocketing_loot_template` UNION "
+                                  "SELECT `item` FROM `prospecting_loot_template` UNION "
+                                  "SELECT `item` FROM `skinning_loot_template` UNION "
+                                  "SELECT `item` FROM `spell_loot_template`"))
     {
         BarGoLink bar(result->GetRowCount());
         do

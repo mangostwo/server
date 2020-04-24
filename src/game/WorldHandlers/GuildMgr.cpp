@@ -104,10 +104,10 @@ void GuildMgr::LoadGuilds()
     uint32 count = 0;
 
     //                                                    0             1          2          3           4           5           6
-    QueryResult* result = CharacterDatabase.Query("SELECT guild.guildid,guild.name,leaderguid,EmblemStyle,EmblemColor,BorderStyle,BorderColor,"
-                          //   7               8    9    10         11        12
-                          "BackgroundColor,info,motd,createdate,BankMoney,(SELECT COUNT(guild_bank_tab.guildid) FROM guild_bank_tab WHERE guild_bank_tab.guildid = guild.guildid) "
-                          "FROM guild ORDER BY guildid ASC");
+    QueryResult* result = CharacterDatabase.Query("SELECT `guild`.`guildid`,`guild`.`name`,`leaderguid`,`EmblemStyle`,`EmblemColor`,`BorderStyle`,`BorderColor`,"
+                          //   7               8     9      10           11          12
+                          "`BackgroundColor`,`info`,`motd`,`createdate`,`BankMoney`,(SELECT COUNT(`guild_bank_tab.guildid`) FROM `guild_bank_tab` WHERE `guild_bank_tab`.`guildid` = `guild`.`guildid`) "
+                          "FROM `guild` ORDER BY `guildid` ASC");
 
     if (!result)
     {
@@ -121,16 +121,16 @@ void GuildMgr::LoadGuilds()
     }
 
     // load guild ranks
-    //                                                                0       1   2     3      4
-    QueryResult* guildRanksResult   = CharacterDatabase.Query("SELECT guildid,rid,rname,rights,BankMoneyPerDay FROM guild_rank ORDER BY guildid ASC, rid ASC");
+    //                                                                 0         1     2       3        4
+    QueryResult* guildRanksResult   = CharacterDatabase.Query("SELECT `guildid`,`rid`,`rname`,`rights`,`BankMoneyPerDay` FROM `guild_rank` ORDER BY `guildid` ASC, `rid` ASC");
 
     // load guild members
-    //                                                                0       1                 2    3     4       5                  6
-    QueryResult* guildMembersResult = CharacterDatabase.Query("SELECT guildid,guild_member.guid,rank,pnote,offnote,BankResetTimeMoney,BankRemMoney,"
-                                      //   7                 8                9                 10               11                12
-                                      "BankResetTimeTab0,BankRemSlotsTab0,BankResetTimeTab1,BankRemSlotsTab1,BankResetTimeTab2,BankRemSlotsTab2,"
-                                      //   13                14               15                16               17                18
-                                      "BankResetTimeTab3,BankRemSlotsTab3,BankResetTimeTab4,BankRemSlotsTab4,BankResetTimeTab5,BankRemSlotsTab5,"
+    //                                                                 0                        1      2      3       4         5                    6
+    QueryResult* guildMembersResult = CharacterDatabase.Query("SELECT `guildid`,`guild_member`.`guid`,`rank`,`pnote`,`offnote`,`BankResetTimeMoney`,`BankRemMoney`,"
+                                      //   7                 8                 9                   10                 11                  12
+                                      "`BankResetTimeTab0`,`BankRemSlotsTab0`,`BankResetTimeTab1`,`BankRemSlotsTab1`,`BankResetTimeTab2`,`BankRemSlotsTab2`,"
+                                      //   13                14                15                  16                 17                  18
+                                      "`BankResetTimeTab3`,`BankRemSlotsTab3`,`BankResetTimeTab4`,`BankRemSlotsTab4`,`BankResetTimeTab5`,`BankRemSlotsTab5`,"
                                       //   19               20                21                22               23                      24
                                       "characters.name, characters.level, characters.class, characters.zone, characters.logout_time, characters.account "
                                       "FROM guild_member LEFT JOIN characters ON characters.guid = guild_member.guid ORDER BY guildid ASC");
@@ -174,8 +174,8 @@ void GuildMgr::LoadGuilds()
 
     // delete unused LogGuid records in guild_eventlog and guild_bank_eventlog table
     // you can comment these lines if you don't plan to change CONFIG_UINT32_GUILD_EVENT_LOG_COUNT and CONFIG_UINT32_GUILD_BANK_EVENT_LOG_COUNT
-    CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE LogGuid > '%u'", sWorld.getConfig(CONFIG_UINT32_GUILD_EVENT_LOG_COUNT));
-    CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE LogGuid > '%u'", sWorld.getConfig(CONFIG_UINT32_GUILD_BANK_EVENT_LOG_COUNT));
+    CharacterDatabase.PExecute("DELETE FROM `guild_eventlog` WHERE `LogGuid` > '%u'", sWorld.getConfig(CONFIG_UINT32_GUILD_EVENT_LOG_COUNT));
+    CharacterDatabase.PExecute("DELETE FROM `guild_bank_eventlog` WHERE `LogGuid` > '%u'", sWorld.getConfig(CONFIG_UINT32_GUILD_BANK_EVENT_LOG_COUNT));
 
     sLog.outString();
     sLog.outString(">> Loaded %u guild definitions", count);

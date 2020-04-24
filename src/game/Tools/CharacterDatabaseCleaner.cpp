@@ -40,7 +40,7 @@ void CharacterDatabaseCleaner::CleanDatabase()
     sLog.outString("Cleaning character database...");
 
     // check flags which clean ups are necessary
-    QueryResult* result = CharacterDatabase.PQuery("SELECT cleaning_flags FROM saved_variables");
+    QueryResult* result = CharacterDatabase.PQuery("SELECT `cleaning_flags` FROM `saved_variables`");
     if (!result)
     {
         return;
@@ -60,13 +60,15 @@ void CharacterDatabaseCleaner::CleanDatabase()
         CleanCharacterSpell();
     }
     if (flags & CLEANING_FLAG_TALENTS)
+    {
         CleanCharacterTalent();
-    CharacterDatabase.Execute("UPDATE saved_variables SET cleaning_flags = 0");
+    }
+    CharacterDatabase.Execute("UPDATE `saved_variables` SET `cleaning_flags` = 0");
 }
 
 void CharacterDatabaseCleaner::CheckUnique(const char* column, const char* table, bool (*check)(uint32))
 {
-    QueryResult* result = CharacterDatabase.PQuery("SELECT DISTINCT %s FROM %s", column, table);
+    QueryResult* result = CharacterDatabase.PQuery("SELECT DISTINCT `%s` FROM `%s`", column, table);
     if (!result)
     {
         sLog.outString("Table %s is empty.", table);
@@ -88,7 +90,7 @@ void CharacterDatabaseCleaner::CheckUnique(const char* column, const char* table
         {
             if (!found)
             {
-                ss << "DELETE FROM " << table << " WHERE " << column << " IN (";
+                ss << "DELETE FROM `" << table << "` WHERE `" << column << "` IN (";
                 found = true;
             }
             else
