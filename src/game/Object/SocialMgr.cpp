@@ -141,7 +141,7 @@ void PlayerSocial::SetFriendNote(ObjectGuid friend_guid, std::string note)
 
     std::string safe_note = note;
     CharacterDatabase.escape_string(safe_note);
-    CharacterDatabase.PExecute("UPDATE character_social SET note = '%s' WHERE guid = '%u' AND friend = '%u'", safe_note.c_str(), m_playerLowGuid, friend_guid.GetCounter());
+    CharacterDatabase.PExecute("UPDATE `character_social` SET `note` = '%s' WHERE `guid` = '%u' AND `friend` = '%u'", safe_note.c_str(), m_playerLowGuid, friend_guid.GetCounter());
     m_playerSocialMap[friend_guid.GetCounter()].Note = note;
 }
 

@@ -1335,7 +1335,7 @@ void ObjectMgr::LoadCreatureModelRace()
 {
     m_mCreatureModelRaceMap.clear();                        // can be used for reload
 
-    QueryResult* result = WorldDatabase.Query("SELECT modelid, racemask, creature_entry, modelid_racial FROM creature_model_race");
+    QueryResult* result = WorldDatabase.Query("SELECT `modelid`, `racemask`, `creature_entry`, `modelid_racial` FROM `creature_model_race`");
 
     if (!result)
     {
@@ -3779,11 +3779,11 @@ void ObjectMgr::LoadArenaTeams()
 {
     uint32 count = 0;
 
-    //                                                     0                      1    2           3    4               5
-    QueryResult* result = CharacterDatabase.Query("SELECT arena_team.arenateamid,name,captainguid,type,BackgroundColor,EmblemStyle,"
-                          //   6           7           8            9      10         11        12           13          14
-                          "EmblemColor,BorderStyle,BorderColor, rating,games_week,wins_week,games_season,wins_season,rank "
-                          "FROM arena_team LEFT JOIN arena_team_stats ON arena_team.arenateamid = arena_team_stats.arenateamid ORDER BY arena_team.arenateamid ASC");
+    //                                                     0                          1      2             3      4                 5
+    QueryResult* result = CharacterDatabase.Query("SELECT `arena_team`.`arenateamid`,`name`,`captainguid`,`type`,`BackgroundColor`,`EmblemStyle`,"
+                          //   6          7             8              9        10           11          12             13            14
+                          "`EmblemColor`,`BorderStyle`,`BorderColor`, `rating`,`games_week`,`wins_week`,`games_season`,`wins_season`,`rank` "
+                          "FROM `arena_team` LEFT JOIN `arena_team_stats` ON `arena_team`.`arenateamid` = `arena_team_stats`.`arenateamid` ORDER BY `arena_team`.`arenateamid` ASC");
 
     if (!result)
     {
@@ -3798,9 +3798,9 @@ void ObjectMgr::LoadArenaTeams()
 
     // load arena_team members
     QueryResult* arenaTeamMembersResult = CharacterDatabase.Query(
-            //          0           1           2           3         4             5           6               7    8
-            "SELECT arenateamid,member.guid,played_week,wons_week,played_season,wons_season,personal_rating,name,class "
-            "FROM arena_team_member member LEFT JOIN characters chars on member.guid = chars.guid ORDER BY member.arenateamid ASC");
+            //          0                   1      2             3           4               5             6                 7      8
+            "SELECT `arenateamid`,`member`.`guid`,`played_week`,`wons_week`,`played_season`,`wons_season`,`personal_rating`,`name`,`class` "
+            "FROM `arena_team_member` member LEFT JOIN `characters` chars on member.`guid` = chars.`guid` ORDER BY member.`arenateamid` ASC");
 
     BarGoLink bar(result->GetRowCount());
 

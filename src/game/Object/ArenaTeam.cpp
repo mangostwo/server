@@ -98,12 +98,12 @@ bool ArenaTeam::Create(ObjectGuid captainGuid, ArenaType type, std::string arena
     CharacterDatabase.escape_string(arenaTeamName);
 
     CharacterDatabase.BeginTransaction();
-    // CharacterDatabase.PExecute("DELETE FROM arena_team WHERE arenateamid='%u'", m_TeamId); - MAX(arenateam)+1 not exist
-    CharacterDatabase.PExecute("DELETE FROM arena_team_member WHERE arenateamid='%u'", m_TeamId);
-    CharacterDatabase.PExecute("INSERT INTO arena_team (arenateamid,name,captainguid,type,BackgroundColor,EmblemStyle,EmblemColor,BorderStyle,BorderColor) "
+    // CharacterDatabase.PExecute("DELETE FROM `arena_team` WHERE `arenateamid`='%u'", m_TeamId); - MAX(arenateam)+1 not exist
+    CharacterDatabase.PExecute("DELETE FROM `arena_team_member` WHERE `arenateamid`='%u'", m_TeamId);
+    CharacterDatabase.PExecute("INSERT INTO `arena_team` (`arenateamid`,`name`,`captainguid`,`type`,`BackgroundColor`,`EmblemStyle`,`EmblemColor`,`BorderStyle`,`BorderColor`) "
                                "VALUES('%u','%s','%u','%u','%u','%u','%u','%u','%u')",
                                m_TeamId, arenaTeamName.c_str(), m_CaptainGuid.GetCounter(), m_Type, m_BackgroundColor, m_EmblemStyle, m_EmblemColor, m_BorderStyle, m_BorderColor);
-    CharacterDatabase.PExecute("INSERT INTO arena_team_stats (arenateamid, rating, games_week, wins_week, games_season, wins_season, rank) VALUES "
+    CharacterDatabase.PExecute("INSERT INTO `arena_team_stats` (`arenateamid`, `rating`, `games_week`, `wins_week`, `games_season`, `wins_season`, `rank`) VALUES "
                                "('%u', '%u', '%u', '%u', '%u', '%u', '%u')", m_TeamId, m_stats.rating, m_stats.games_week, m_stats.wins_week, m_stats.games_season, m_stats.wins_season, m_stats.rank);
 
     CharacterDatabase.CommitTransaction();
@@ -137,8 +137,8 @@ bool ArenaTeam::AddMember(ObjectGuid playerGuid)
     }
     else
     {
-        //                                                     0     1
-        QueryResult* result = CharacterDatabase.PQuery("SELECT name, class FROM characters WHERE guid='%u'", playerGuid.GetCounter());
+        //                                                      0       1
+        QueryResult* result = CharacterDatabase.PQuery("SELECT `name`, `class` FROM `characters` WHERE `guid`='%u'", playerGuid.GetCounter());
         if (!result)
         {
             return false;
@@ -189,7 +189,7 @@ bool ArenaTeam::AddMember(ObjectGuid playerGuid)
 
     m_members.push_back(newmember);
 
-    CharacterDatabase.PExecute("INSERT INTO arena_team_member (arenateamid, guid, personal_rating) VALUES ('%u', '%u', '%u')", m_TeamId, newmember.guid.GetCounter(), newmember.personal_rating);
+    CharacterDatabase.PExecute("INSERT INTO `arena_team_member` (`arenateamid`, `guid`, `personal_rating`) VALUES ('%u', '%u', '%u')", m_TeamId, newmember.guid.GetCounter(), newmember.personal_rating);
 
     if (pl)
     {
@@ -259,7 +259,7 @@ bool ArenaTeam::LoadMembersFromDB(QueryResult* arenaTeamMembersResult)
         {
             // there is in table arena_team_member record which doesn't have arenateamid in arena_team table, report error
             sLog.outErrorDb("ArenaTeam %u does not exist but it has record in arena_team_member table, deleting it!", arenaTeamId);
-            CharacterDatabase.PExecute("DELETE FROM arena_team_member WHERE arenateamid = '%u'", arenaTeamId);
+            CharacterDatabase.PExecute("DELETE FROM `arena_team_member` WHERE `arenateamid` = '%u'", arenaTeamId);
             continue;
         }
 
@@ -319,7 +319,7 @@ void ArenaTeam::SetCaptain(ObjectGuid guid)
     m_CaptainGuid = guid;
 
     // update database
-    CharacterDatabase.PExecute("UPDATE arena_team SET captainguid = '%u' WHERE arenateamid = '%u'", guid.GetCounter(), m_TeamId);
+    CharacterDatabase.PExecute("UPDATE `arena_team` SET `captainguid` = '%u' WHERE `arenateamid` = '%u'", guid.GetCounter(), m_TeamId);
 
     // enable remove/promote buttons
     if (Player* newcaptain = sObjectMgr.GetPlayer(guid))
@@ -347,7 +347,7 @@ void ArenaTeam::DelMember(ObjectGuid guid)
         }
     }
 
-    CharacterDatabase.PExecute("DELETE FROM arena_team_member WHERE arenateamid = '%u' AND guid = '%u'", GetId(), guid.GetCounter());
+    CharacterDatabase.PExecute("DELETE FROM `arena_team_member` WHERE `arenateamid` = '%u' AND `guid` = '%u'", GetId(), guid.GetCounter());
 }
 
 void ArenaTeam::Disband(WorldSession* session)
@@ -366,9 +366,9 @@ void ArenaTeam::Disband(WorldSession* session)
     }
 
     CharacterDatabase.BeginTransaction();
-    CharacterDatabase.PExecute("DELETE FROM arena_team WHERE arenateamid = '%u'", m_TeamId);
-    CharacterDatabase.PExecute("DELETE FROM arena_team_member WHERE arenateamid = '%u'", m_TeamId); //< this should be already done by calling DelMember(memberGuids[j]); for each member
-    CharacterDatabase.PExecute("DELETE FROM arena_team_stats WHERE arenateamid = '%u'", m_TeamId);
+    CharacterDatabase.PExecute("DELETE FROM `arena_team` WHERE `arenateamid` = '%u'", m_TeamId);
+    CharacterDatabase.PExecute("DELETE FROM `arena_team_member` WHERE `arenateamid` = '%u'", m_TeamId); //< this should be already done by calling DelMember(memberGuids[j]); for each member
+    CharacterDatabase.PExecute("DELETE FROM `arena_team_stats` WHERE `arenateamid` = '%u'", m_TeamId);
     CharacterDatabase.CommitTransaction();
     sObjectMgr.RemoveArenaTeam(m_TeamId);
 }
@@ -477,7 +477,7 @@ void ArenaTeam::SetEmblem(uint32 backgroundColor, uint32 emblemStyle, uint32 emb
     m_BorderStyle = borderStyle;
     m_BorderColor = borderColor;
 
-    CharacterDatabase.PExecute("UPDATE arena_team SET BackgroundColor='%u', EmblemStyle='%u', EmblemColor='%u', BorderStyle='%u', BorderColor='%u' WHERE arenateamid='%u'", m_BackgroundColor, m_EmblemStyle, m_EmblemColor, m_BorderStyle, m_BorderColor, m_TeamId);
+    CharacterDatabase.PExecute("UPDATE `arena_team` SET `BackgroundColor`='%u', `EmblemStyle`='%u', `EmblemColor`='%u', `BorderStyle`='%u', `BorderColor`='%u' WHERE `arenateamid`='%u'", m_BackgroundColor, m_EmblemStyle, m_EmblemColor, m_BorderStyle, m_BorderColor, m_TeamId);
 }
 
 void ArenaTeam::SetStats(uint32 stat_type, uint32 value)
@@ -486,27 +486,27 @@ void ArenaTeam::SetStats(uint32 stat_type, uint32 value)
     {
         case STAT_TYPE_RATING:
             m_stats.rating = value;
-            CharacterDatabase.PExecute("UPDATE arena_team_stats SET rating = '%u' WHERE arenateamid = '%u'", value, GetId());
+            CharacterDatabase.PExecute("UPDATE `arena_team_stats` SET `rating` = '%u' WHERE `arenateamid` = '%u'", value, GetId());
             break;
         case STAT_TYPE_GAMES_WEEK:
             m_stats.games_week = value;
-            CharacterDatabase.PExecute("UPDATE arena_team_stats SET games_week = '%u' WHERE arenateamid = '%u'", value, GetId());
+            CharacterDatabase.PExecute("UPDATE `arena_team_stats` SET `games_week` = '%u' WHERE `arenateamid` = '%u'", value, GetId());
             break;
         case STAT_TYPE_WINS_WEEK:
             m_stats.wins_week = value;
-            CharacterDatabase.PExecute("UPDATE arena_team_stats SET wins_week = '%u' WHERE arenateamid = '%u'", value, GetId());
+            CharacterDatabase.PExecute("UPDATE `arena_team_stats` SET `wins_week` = '%u' WHERE `arenateamid` = '%u'", value, GetId());
             break;
         case STAT_TYPE_GAMES_SEASON:
             m_stats.games_season = value;
-            CharacterDatabase.PExecute("UPDATE arena_team_stats SET games_season = '%u' WHERE arenateamid = '%u'", value, GetId());
+            CharacterDatabase.PExecute("UPDATE `arena_team_stats` SET `games_season` = '%u' WHERE `arenateamid` = '%u'", value, GetId());
             break;
         case STAT_TYPE_WINS_SEASON:
             m_stats.wins_season = value;
-            CharacterDatabase.PExecute("UPDATE arena_team_stats SET wins_season = '%u' WHERE arenateamid = '%u'", value, GetId());
+            CharacterDatabase.PExecute("UPDATE `arena_team_stats` SET `wins_season` = '%u' WHERE `arenateamid` = '%u'", value, GetId());
             break;
         case STAT_TYPE_RANK:
             m_stats.rank = value;
-            CharacterDatabase.PExecute("UPDATE arena_team_stats SET rank = '%u' WHERE arenateamid = '%u'", value, GetId());
+            CharacterDatabase.PExecute("UPDATE `arena_team_stats` SET `rank` = '%u' WHERE `arenateamid` = '%u'", value, GetId());
             break;
         default:
             DEBUG_LOG("unknown stat type in ArenaTeam::SetStats() %u", stat_type);
@@ -778,10 +778,10 @@ void ArenaTeam::SaveToDB()
     // save team and member stats to db
     // called after a match has ended, or when calculating arena_points
     CharacterDatabase.BeginTransaction();
-    CharacterDatabase.PExecute("UPDATE arena_team_stats SET rating = '%u',games_week = '%u',games_season = '%u',rank = '%u',wins_week = '%u',wins_season = '%u' WHERE arenateamid = '%u'", m_stats.rating, m_stats.games_week, m_stats.games_season, m_stats.rank, m_stats.wins_week, m_stats.wins_season, GetId());
+    CharacterDatabase.PExecute("UPDATE `arena_team_stats` SET `rating` = '%u',`games_week` = '%u',`games_season` = '%u',`rank` = '%u',`wins_week` = '%u',`wins_season` = '%u' WHERE `arenateamid` = '%u'", m_stats.rating, m_stats.games_week, m_stats.games_season, m_stats.rank, m_stats.wins_week, m_stats.wins_season, GetId());
     for (MemberList::const_iterator itr = m_members.begin(); itr !=  m_members.end(); ++itr)
     {
-        CharacterDatabase.PExecute("UPDATE arena_team_member SET played_week = '%u', wons_week = '%u', played_season = '%u', wons_season = '%u', personal_rating = '%u' WHERE arenateamid = '%u' AND guid = '%u'", itr->games_week, itr->wins_week, itr->games_season, itr->wins_season, itr->personal_rating, m_TeamId, itr->guid.GetCounter());
+        CharacterDatabase.PExecute("UPDATE `arena_team_member` SET `played_week` = '%u', `wons_week` = '%u', `played_season` = '%u', `wons_season` = '%u', `personal_rating` = '%u' WHERE `arenateamid` = '%u' AND `guid` = '%u'", itr->games_week, itr->wins_week, itr->games_season, itr->wins_season, itr->personal_rating, m_TeamId, itr->guid.GetCounter());
     }
     CharacterDatabase.CommitTransaction();
 }
