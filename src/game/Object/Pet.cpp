@@ -331,7 +331,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
 
     if (owner->GetTypeId() == TYPEID_PLAYER && getPetType() == HUNTER_PET)
     {
-        result = CharacterDatabase.PQuery("SELECT genitive, dative, accusative, instrumental, prepositional FROM character_pet_declinedname WHERE owner = '%u' AND id = '%u'", owner->GetGUIDLow(), GetCharmInfo()->GetPetNumber());
+        result = CharacterDatabase.PQuery("SELECT `genitive`, `dative`, `accusative`, `instrumental`, `prepositional` FROM `character_pet_declinedname` WHERE `owner` = '%u' AND `id` = '%u'", owner->GetGUIDLow(), GetCharmInfo()->GetPetNumber());
 
         if (result)
         {
@@ -1968,7 +1968,7 @@ void Pet::resetTalentsForAllPetsOf(Player* owner, Pet* online_pet /*= NULL*/)
     uint32 except_petnumber = online_pet ? online_pet->GetCharmInfo()->GetPetNumber() : 0;
 
     QueryResult* resultPets = CharacterDatabase.PQuery(
-                                  "SELECT id FROM character_pet WHERE owner = '%u' AND id <> '%u'",
+                                  "SELECT `id` FROM `character_pet` WHERE `owner` = '%u' AND `id` <> '%u'",
                                   owner->GetGUIDLow(), except_petnumber);
 
     // no offline pets
@@ -1978,8 +1978,8 @@ void Pet::resetTalentsForAllPetsOf(Player* owner, Pet* online_pet /*= NULL*/)
     }
 
     QueryResult* result = CharacterDatabase.PQuery(
-                              "SELECT DISTINCT pet_spell.spell FROM pet_spell, character_pet "
-                              "WHERE character_pet.owner = '%u' AND character_pet.id = pet_spell.guid AND character_pet.id <> %u",
+                              "SELECT DISTINCT `pet_spell`.`spell` FROM `pet_spell`, `character_pet` "
+                              "WHERE `character_pet`.`owner` = '%u' AND `character_pet`.`id` = `pet_spell`.`guid` AND `character_pet`.`id` <> %u",
                               owner->GetGUIDLow(), except_petnumber);
 
     if (!result)
@@ -1990,7 +1990,7 @@ void Pet::resetTalentsForAllPetsOf(Player* owner, Pet* online_pet /*= NULL*/)
 
     bool need_comma = false;
     std::ostringstream ss;
-    ss << "DELETE FROM pet_spell WHERE guid IN (";
+    ss << "DELETE FROM `pet_spell` WHERE `guid` IN (";
 
     do
     {
@@ -2009,7 +2009,7 @@ void Pet::resetTalentsForAllPetsOf(Player* owner, Pet* online_pet /*= NULL*/)
 
     delete resultPets;
 
-    ss << ") AND spell IN (";
+    ss << ") AND `spell` IN (";
 
     bool need_execute = false;
     do

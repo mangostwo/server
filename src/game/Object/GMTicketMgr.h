@@ -132,7 +132,7 @@ class GMTicket
 
             std::string escapedString = m_text;
             CharacterDatabase.escape_string(escapedString);
-            CharacterDatabase.PExecute("UPDATE character_ticket SET ticket_text = '%s' WHERE guid = '%u'", escapedString.c_str(), m_guid.GetCounter());
+            CharacterDatabase.PExecute("UPDATE `character_ticket` SET `ticket_text` = '%s' WHERE `guid` = '%u'", escapedString.c_str(), m_guid.GetCounter());
         }
 
         void SetResponseText(const char* text)
@@ -142,14 +142,14 @@ class GMTicket
 
             std::string escapedString = m_responseText;
             CharacterDatabase.escape_string(escapedString);
-            CharacterDatabase.PExecute("UPDATE character_ticket SET response_text = '%s' WHERE guid = '%u'", escapedString.c_str(), m_guid.GetCounter());
+            CharacterDatabase.PExecute("UPDATE `character_ticket` SET `response_text` = '%s' WHERE `guid` = '%u'", escapedString.c_str(), m_guid.GetCounter());
         }
 
         bool HasResponse() { return !m_responseText.empty(); }
 
         void DeleteFromDB() const
         {
-            CharacterDatabase.PExecute("DELETE FROM character_ticket WHERE guid = '%u' LIMIT 1", m_guid.GetCounter());
+            CharacterDatabase.PExecute("DELETE FROM `character_ticket` WHERE `guid` = '%u' LIMIT 1", m_guid.GetCounter());
         }
 
         void SaveToDB() const
@@ -163,7 +163,7 @@ class GMTicket
             std::string escapedString2 = m_responseText;
             CharacterDatabase.escape_string(escapedString2);
 
-            CharacterDatabase.PExecute("INSERT INTO character_ticket (guid, ticket_text, response_text) VALUES ('%u', '%s', '%s')", m_guid.GetCounter(), escapedString.c_str(), escapedString2.c_str());
+            CharacterDatabase.PExecute("INSERT INTO `character_ticket` (`guid`, `ticket_text`, `response_text`) VALUES ('%u', '%s', '%s')", m_guid.GetCounter(), escapedString.c_str(), escapedString2.c_str());
             CharacterDatabase.CommitTransaction();
         }
     private:

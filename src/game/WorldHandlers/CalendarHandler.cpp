@@ -371,9 +371,9 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recv_data)
         // query construction
         CharacterDatabase.escape_string(title);
         CharacterDatabase.escape_string(description);
-        CharacterDatabase.PExecute("UPDATE calendar_events SET "
-                                   "type=%hu, flags=%u, dungeonId=%d, eventTime=%lu, title='%s', description='%s'"
-                                   "WHERE eventid=" UI64FMTD,
+        CharacterDatabase.PExecute("UPDATE `calendar_events` SET "
+                                   "`type`=%hu, `flags`=%u, `dungeonId`=%d, `eventTime`=%lu, `title`='%s', `description`='%s'"
+                                   "WHERE `eventid` = " UI64FMTD,
                                    type, flags, dungeonId, event->EventTime, title.c_str(), description.c_str(), eventId);
     }
     else
@@ -445,7 +445,7 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)
     {
         // Invitee offline, get data from database
         CharacterDatabase.escape_string(name);
-        QueryResult* result = CharacterDatabase.PQuery("SELECT guid,race FROM characters WHERE name ='%s'", name.c_str());
+        QueryResult* result = CharacterDatabase.PQuery("SELECT `guid`,`race` FROM `characters` WHERE `name` = '%s'", name.c_str());
         if (result)
         {
             Field* fields = result->Fetch();
@@ -454,7 +454,7 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)
             inviteeGuildId = Player::GetGuildIdFromDB(inviteeGuid);
             delete result;
 
-            result = CharacterDatabase.PQuery("SELECT flags FROM character_social WHERE guid = %u AND friend = %u", inviteeGuid.GetCounter(), playerGuid.GetCounter());
+            result = CharacterDatabase.PQuery("SELECT `flags` FROM `character_social` WHERE `guid` = %u AND `friend` = %u", inviteeGuid.GetCounter(), playerGuid.GetCounter());
             if (result)
             {
                 Field* fields = result->Fetch();
@@ -563,7 +563,7 @@ void WorldSession::HandleCalendarEventRsvp(WorldPacket& recv_data)
             invite->Status = CalendarInviteStatus(status);
             invite->LastUpdateTime = time(NULL);
 
-            CharacterDatabase.PExecute("UPDATE calendar_invites SET status=%u, lastUpdateTime=%u WHERE inviteId = " UI64FMTD , status, uint32(invite->LastUpdateTime), invite->InviteId);
+            CharacterDatabase.PExecute("UPDATE `calendar_invites` SET `status`=%`u, `lastUpdateTime`=%u WHERE `inviteId` = " UI64FMTD , status, uint32(invite->LastUpdateTime), invite->InviteId);
             sCalendarMgr.SendCalendarEventStatus(invite);
             sCalendarMgr.SendCalendarClearPendingAction(_player);
         }
@@ -636,7 +636,7 @@ void WorldSession::HandleCalendarEventStatus(WorldPacket& recv_data)
             invite->Status = (CalendarInviteStatus)status;
             invite->LastUpdateTime = time(NULL);            // not sure if we should set response time when moderator changes invite status
 
-            CharacterDatabase.PExecute("UPDATE calendar_invites SET status=%u, lastUpdateTime=%u WHERE inviteId=" UI64FMTD, status, uint32(invite->LastUpdateTime), invite->InviteId);
+            CharacterDatabase.PExecute("UPDATE `calendar_invites` SET `status`=%u, `lastUpdateTime`=%u WHERE `inviteId`=" UI64FMTD, status, uint32(invite->LastUpdateTime), invite->InviteId);
             sCalendarMgr.SendCalendarEventStatus(invite);
             sCalendarMgr.SendCalendarClearPendingAction(sObjectMgr.GetPlayer(invitee));
         }
@@ -690,7 +690,7 @@ void WorldSession::HandleCalendarEventModeratorStatus(WorldPacket& recv_data)
                 return;
             }
 
-            CharacterDatabase.PExecute("UPDATE calendar_invites SET rank = %u WHERE inviteId=" UI64FMTD, rank, invite->InviteId);
+            CharacterDatabase.PExecute("UPDATE `calendar_invites` SET `rank` = %u WHERE `inviteId` = " UI64FMTD, rank, invite->InviteId);
             invite->Rank = CalendarModerationRank(rank);
             sCalendarMgr.SendCalendarEventModeratorStatusAlert(invite);
         }

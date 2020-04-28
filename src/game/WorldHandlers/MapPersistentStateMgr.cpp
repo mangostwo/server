@@ -323,7 +323,7 @@ void DungeonPersistentState::UpdateEncounterState(EncounterCreditType type, uint
         {
             m_completedEncountersMask |= 1 << dbcEntry->encounterIndex;
 
-            CharacterDatabase.PExecute("UPDATE instance SET encountersMask = '%u' WHERE id = '%u'", m_completedEncountersMask, GetInstanceId());
+            CharacterDatabase.PExecute("UPDATE `instance` SET `encountersMask` = '%u' WHERE `id` = '%u'", m_completedEncountersMask, GetInstanceId());
 
             DEBUG_LOG("DungeonPersistentState: Dungeon %s (Id %u) completed encounter %s", GetMap()->GetMapName(), GetInstanceId(), dbcEntry->encounterName[sWorld.GetDefaultDbcLocale()]);
             if (/*uint32 dungeonId =*/ iter->second->lastEncounterDungeon)
@@ -807,7 +807,7 @@ void MapPersistentStateManager::_DelHelper(DatabaseType& db, const char* fields,
     vsnprintf(szQueryTail, MAX_QUERY_LEN, queryTail, ap);
     va_end(ap);
 
-    QueryResult* result = db.PQuery("SELECT %s FROM %s %s", fields, table, szQueryTail);
+    QueryResult* result = db.PQuery("SELECT %s FROM `%s` %s", fields, table, szQueryTail);
     if (result)
     {
         do

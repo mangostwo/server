@@ -497,8 +497,8 @@ void AchievementMgr::DeleteFromDB(ObjectGuid guid)
 {
     uint32 lowguid = guid.GetCounter();
     CharacterDatabase.BeginTransaction();
-    CharacterDatabase.PExecute("DELETE FROM character_achievement WHERE guid = %u", lowguid);
-    CharacterDatabase.PExecute("DELETE FROM character_achievement_progress WHERE guid = %u", lowguid);
+    CharacterDatabase.PExecute("DELETE FROM `character_achievement` WHERE `guid` = %u", lowguid);
+    CharacterDatabase.PExecute("DELETE FROM `character_achievement_progress` WHERE `guid` = %u", lowguid);
     CharacterDatabase.CommitTransaction();
 }
 
@@ -520,10 +520,10 @@ void AchievementMgr::SaveToDB()
             /// mark as saved in db
             iter->second.changed = false;
 
-            SqlStatement stmt = CharacterDatabase.CreateStatement(delComplAchievements, "DELETE FROM character_achievement WHERE guid = ? AND achievement = ?");
+            SqlStatement stmt = CharacterDatabase.CreateStatement(delComplAchievements, "DELETE FROM `character_achievement` WHERE `guid` = ? AND `achievement` = ?");
             stmt.PExecute(GetPlayer()->GetGUIDLow(), iter->first);
 
-            stmt = CharacterDatabase.CreateStatement(insComplAchievements, "INSERT INTO character_achievement (guid, achievement, date) VALUES (?, ?, ?)");
+            stmt = CharacterDatabase.CreateStatement(insComplAchievements, "INSERT INTO `character_achievement` (`guid`, `achievement`, `date`) VALUES (?, ?, ?)");
             stmt.PExecute(GetPlayer()->GetGUIDLow(), iter->first, uint64(iter->second.date));
         }
     }
@@ -540,7 +540,7 @@ void AchievementMgr::SaveToDB()
             iter->second.changed = false;
 
             // new/changed record data
-            SqlStatement stmt = CharacterDatabase.CreateStatement(delProgress, "DELETE FROM character_achievement_progress WHERE guid = ? AND criteria = ?");
+            SqlStatement stmt = CharacterDatabase.CreateStatement(delProgress, "DELETE FROM `character_achievement_progress` WHERE `guid` = ? AND `criteria` = ?");
             stmt.PExecute(GetPlayer()->GetGUIDLow(), iter->first);
 
             bool needSave = iter->second.counter != 0;
@@ -552,7 +552,7 @@ void AchievementMgr::SaveToDB()
 
             if (needSave)
             {
-                stmt = CharacterDatabase.CreateStatement(insProgress, "INSERT INTO character_achievement_progress (guid, criteria, counter, date) VALUES (?, ?, ?, ?)");
+                stmt = CharacterDatabase.CreateStatement(insProgress, "INSERT INTO `character_achievement_progress` (`guid`, `criteria`, `counter`, `date`) VALUES (?, ?, ?, ?)");
                 stmt.PExecute(GetPlayer()->GetGUIDLow(), iter->first, iter->second.counter, uint64(iter->second.date));
             }
         }
@@ -599,7 +599,7 @@ void AchievementMgr::LoadFromDB(QueryResult* achievementResult, QueryResult* cri
             {
                 // we will remove nonexistent criteria for all characters
                 sLog.outError("Nonexistent achievement criteria %u data removed from table `character_achievement_progress`.", id);
-                CharacterDatabase.PExecute("DELETE FROM character_achievement_progress WHERE criteria = %u", id);
+                CharacterDatabase.PExecute("DELETE FROM `character_achievement_progress` WHERE `criteria` = %u", id);
                 continue;
             }
 
@@ -2279,7 +2279,7 @@ void AchievementMgr::IncompletedAchievement(AchievementEntry const* achievement)
     m_player->SendDirectMessage(&data);
 
     if (!itr->second.changed)                               // complete state saved
-        CharacterDatabase.PExecute("DELETE FROM character_achievement WHERE guid = %u AND achievement = %u",
+        CharacterDatabase.PExecute("DELETE FROM `character_achievement` WHERE `guid` = %u AND `achievement` = %u",
                                    GetPlayer()->GetGUIDLow(), achievement->ID);
 
     m_completedAchievements.erase(achievement->ID);
@@ -2490,7 +2490,7 @@ void AchievementGlobalMgr::LoadAchievementCriteriaRequirements()
 {
     m_criteriaRequirementMap.clear();                       // need for reload case
 
-    QueryResult* result = WorldDatabase.Query("SELECT criteria_id, type, value1, value2 FROM achievement_criteria_requirement");
+    QueryResult* result = WorldDatabase.Query("SELECT `criteria_id`, `type`, `value1`, `value2` FROM `achievement_criteria_requirement`");
 
     if (!result)
     {
@@ -2619,7 +2619,7 @@ void AchievementGlobalMgr::LoadAchievementCriteriaRequirements()
 
 void AchievementGlobalMgr::LoadCompletedAchievements()
 {
-    QueryResult* result = CharacterDatabase.Query("SELECT achievement FROM character_achievement GROUP BY achievement");
+    QueryResult* result = CharacterDatabase.Query("SELECT `achievement` FROM `character_achievement` GROUP BY `achievement`");
 
     if (!result)
     {
@@ -2642,7 +2642,7 @@ void AchievementGlobalMgr::LoadCompletedAchievements()
         {
             // we will remove nonexistent achievement for all characters
             sLog.outError("Nonexistent achievement %u data removed from table `character_achievement`.", achievement_id);
-            CharacterDatabase.PExecute("DELETE FROM character_achievement WHERE achievement = %u", achievement_id);
+            CharacterDatabase.PExecute("DELETE FROM `character_achievement` WHERE `achievement` = %u", achievement_id);
             continue;
         }
 
@@ -2660,8 +2660,8 @@ void AchievementGlobalMgr::LoadRewards()
 {
     m_achievementRewards.clear();                           // need for reload case
 
-    //                                                0      1       2        3        4     5       6        7
-    QueryResult* result = WorldDatabase.Query("SELECT entry, gender, title_A, title_H, item, sender, subject, text FROM achievement_reward");
+    //                                                 0        1         2          3          4       5         6          7
+    QueryResult* result = WorldDatabase.Query("SELECT `entry`, `gender`, `title_A`, `title_H`, `item`, `sender`, `subject`, `text` FROM `achievement_reward`");
 
     if (!result)
     {
@@ -2792,7 +2792,7 @@ void AchievementGlobalMgr::LoadRewardLocales()
 {
     m_achievementRewardLocales.clear();                     // need for reload case
 
-    QueryResult* result = WorldDatabase.Query("SELECT entry,gender,subject_loc1,text_loc1,subject_loc2,text_loc2,subject_loc3,text_loc3,subject_loc4,text_loc4,subject_loc5,text_loc5,subject_loc6,text_loc6,subject_loc7,text_loc7,subject_loc8,text_loc8 FROM locales_achievement_reward");
+    QueryResult* result = WorldDatabase.Query("SELECT `entry`,`gender`,`subject_loc1`,`text_loc1`,`subject_loc2`,`text_loc2`,`subject_loc3`,`text_loc3`,`subject_loc4`,`text_loc4`,`subject_loc5`,`text_loc5`,`subject_loc6`,`text_loc6`,`subject_loc7`,`text_loc7`,`subject_loc8`,`text_loc8` FROM `locales_achievement_reward`");
 
     if (!result)
     {

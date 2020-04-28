@@ -2764,7 +2764,7 @@ void ObjectMgr::LoadItemExpireConverts()
 
     uint32 count = 0;
 
-    QueryResult* result = WorldDatabase.Query("SELECT entry,item FROM item_expire_convert");
+    QueryResult* result = WorldDatabase.Query("SELECT `entry`,`item` FROM `item_expire_convert`");
 
     if (!result)
     {
@@ -2826,7 +2826,7 @@ void ObjectMgr::LoadItemRequiredTarget()
 
     uint32 count = 0;
 
-    QueryResult* result = WorldDatabase.Query("SELECT entry,type,targetEntry FROM item_required_target");
+    QueryResult* result = WorldDatabase.Query("SELECT `entry`,`type`,`targetEntry` FROM `item_required_target`");
 
     if (!result)
     {
@@ -4929,7 +4929,7 @@ void ObjectMgr::LoadPageTextLocales()
 {
     mPageTextLocaleMap.clear();                             // need for reload case
 
-    QueryResult* result = WorldDatabase.Query("SELECT entry,text_loc1,text_loc2,text_loc3,text_loc4,text_loc5,text_loc6,text_loc7,text_loc8 FROM locales_page_text");
+    QueryResult* result = WorldDatabase.Query("SELECT `entry`,`text_loc1`,`text_loc2`,`text_loc3`,`text_loc4`,`text_loc5`,`text_loc6`,`text_loc7`,`text_loc8` FROM `locales_page_text`");
 
     if (!result)
     {
@@ -6209,7 +6209,7 @@ void ObjectMgr::SetHighestGuids()
         delete result;
     }
 
-    result = CharacterDatabase.Query("SELECT MAX(id) FROM instance");
+    result = CharacterDatabase.Query("SELECT MAX(`id`) FROM `instance`");
     if (result)
     {
         m_InstanceGuids.Set((*result)[0].GetUInt32() + 1);
@@ -7122,7 +7122,7 @@ void ObjectMgr::LoadPointsOfInterest()
     uint32 count = 0;
 
     //                                                0      1  2  3      4     5
-    QueryResult* result = WorldDatabase.Query("SELECT entry, x, y, icon, flags, data, icon_name FROM points_of_interest");
+    QueryResult* result = WorldDatabase.Query("SELECT `entry`, `x`, `y`, `icon`, `flags`, `data`, `icon_name` FROM `points_of_interest`");
 
     if (!result)
     {
@@ -7174,7 +7174,7 @@ void ObjectMgr::LoadQuestPOI()
     uint32 count = 0;
 
     //                                                0        1      2         3      4          5        6     7
-    QueryResult* result = WorldDatabase.Query("SELECT questId, poiId, objIndex, mapId, mapAreaId, floorId, unk3, unk4 FROM quest_poi");
+    QueryResult* result = WorldDatabase.Query("SELECT `questId`, `poiId`, `objIndex`, `mapId`, `mapAreaId`, `floorId`, `unk3`, `unk4` FROM `quest_poi`");
 
     if (!result)
     {
@@ -7213,7 +7213,7 @@ void ObjectMgr::LoadQuestPOI()
 
     delete result;
 
-    QueryResult* points = WorldDatabase.Query("SELECT questId, poiId, x, y FROM quest_poi_points");
+    QueryResult* points = WorldDatabase.Query("SELECT `questId`, `poiId`, `x`, `y` FROM `quest_poi_points`");
 
     if (points)
     {
@@ -7253,7 +7253,7 @@ void ObjectMgr::LoadDungeonFinderRequirements()
     mDungeonFinderRequirementsMap.clear();    // in case of a reload
 
     //                                                0      1           2               3     4       5               6            7            8
-    QueryResult* result = WorldDatabase.Query("SELECT mapId, difficulty, min_item_level, item, item_2, alliance_quest, horde_quest, achievement, quest_incomplete_text FROM dungeonfinder_requirements");
+    QueryResult* result = WorldDatabase.Query("SELECT `mapId`, `difficulty`, `min_item_level`, `item`, `item_2`, `alliance_quest`, `horde_quest`, `achievement`, `quest_incomplete_text` FROM `dungeonfinder_requirements`");
 
     if (!result)
     {
@@ -7360,7 +7360,7 @@ void ObjectMgr::LoadDungeonFinderRewards()
     mDungeonFinderRewardsMap.clear();    // in case of a reload
 
     //                                                0   1      2               3
-    QueryResult* result = WorldDatabase.Query("SELECT id, level, base_xp_reward, base_monetary_reward FROM dungeonfinder_rewards");
+    QueryResult* result = WorldDatabase.Query("SELECT `id`, `level`, `base_xp_reward`, `base_monetary_reward` FROM `dungeonfinder_rewards`");
 
     if (!result)
     {
@@ -7403,7 +7403,7 @@ void ObjectMgr::LoadDungeonFinderItems()
     mDungeonFinderItemsMap.clear(); // in case of reload
 
     //                                                0   1          2          3            4            5
-    QueryResult* result = WorldDatabase.Query("SELECT id, min_level, max_level, item_reward, item_amount, dungeon_type FROM dungeonfinder_item_rewards");
+    QueryResult* result = WorldDatabase.Query("SELECT `id`, `min_level`, `max_level`, `item_reward`, `item_amount`, `dungeon_type` FROM `dungeonfinder_item_rewards`");
 
     if (!result)
     {
@@ -9507,7 +9507,7 @@ void ObjectMgr::LoadMailLevelRewards()
     m_mailLevelRewardMap.clear();                           // for reload case
 
     uint32 count = 0;
-    QueryResult* result = WorldDatabase.Query("SELECT level, raceMask, mailTemplateId, senderEntry FROM mail_level_reward");
+    QueryResult* result = WorldDatabase.Query("SELECT `level`, `raceMask`, `mailTemplateId`, `senderEntry` FROM `mail_level_reward`");
 
     if (!result)
     {

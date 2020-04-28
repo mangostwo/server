@@ -1954,7 +1954,7 @@ void Group::SetRaidDifficulty(Difficulty difficulty)
 {
     m_raidDifficulty = difficulty;
     if (!isBGGroup())
-        CharacterDatabase.PExecute("UPDATE groups SET raiddifficulty = %u WHERE groupId='%u'", m_raidDifficulty, m_Id);
+        CharacterDatabase.PExecute("UPDATE `groups` SET `raiddifficulty` = %u WHERE `groupId` = '%u'", m_raidDifficulty, m_Id);
 
     for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {

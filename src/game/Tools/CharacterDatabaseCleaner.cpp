@@ -153,7 +153,7 @@ bool CharacterDatabaseCleaner::TalentCheck(uint32 talent_id)
 
 void CharacterDatabaseCleaner::CleanCharacterTalent()
 {
-    CharacterDatabase.DirectPExecute("DELETE FROM character_talent WHERE spec > %u OR current_rank > %u", MAX_TALENT_SPEC_COUNT, MAX_TALENT_RANK);
+    CharacterDatabase.DirectPExecute("DELETE FROM `character_talent` WHERE `spec` > %u OR `current_rank` > %u", MAX_TALENT_SPEC_COUNT, MAX_TALENT_RANK);
 
     CheckUnique("talent_id", "character_talent", &TalentCheck);
 }

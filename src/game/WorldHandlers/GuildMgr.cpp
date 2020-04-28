@@ -137,7 +137,7 @@ void GuildMgr::LoadGuilds()
 
     // load guild bank tab rights
     //                                                                      0       1     2   3       4
-    QueryResult* guildBankTabRightsResult = CharacterDatabase.Query("SELECT guildid,TabId,rid,gbright,SlotPerDay FROM guild_bank_right ORDER BY guildid ASC, TabId ASC");
+    QueryResult* guildBankTabRightsResult = CharacterDatabase.Query("SELECT `guildid`,`TabId`,`rid`,`gbright`,`SlotPerDay` FROM `guild_bank_right` ORDER BY `guildid` ASC, `TabId` ASC");
 
     BarGoLink bar(result->GetRowCount());
 
