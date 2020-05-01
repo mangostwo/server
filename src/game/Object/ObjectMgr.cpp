@@ -1682,12 +1682,16 @@ void ObjectMgr::LoadGameObjects()
 {
     uint32 count = 0;
 
-    //                                                              0                    1                  2                   3                          4                          5                          6
-    QueryResult* result = WorldDatabase.Query("SELECT `gameobject`.`guid`, `gameobject`.`id`, `gameobject`.`map`, `gameobject`.`position_x`, `gameobject`.`position_y`, `gameobject`.`position_z`, `gameobject`.`orientation`, "
-                          //             7                         8                         9                         10                        11                            12                           13                    14                        15
-                          "`gameobject`.`rotation0`, `gameobject`.`rotation1`, `gameobject`.`rotation2`, `gameobject`.`rotation3`, `gameobject`.`spawntimesecs`, `gameobject`.`animprogress`, `gameobject`.`state`, `gameobject`.`spawnMask`, `gameobject`.`phaseMask`, "
-                          //             16                         17                                       18
-                          "`gameobject`.`event`, `pool_gameobject`.`pool_entry`, `pool_gameobject_template`.`pool_entry` "
+    //                                                              0                    1                  2                   3
+    QueryResult* result = WorldDatabase.Query("SELECT `gameobject`.`guid`, `gameobject`.`id`, `gameobject`.`map`, `gameobject`.`position_x`, "
+    //                                   4                          5                          6                           7
+                          "`gameobject`.`position_y`, `gameobject`.`position_z`, `gameobject`.`orientation`, `gameobject`.`rotation0`, "
+    //                                   8                         9                         10                        11
+                          "`gameobject`.`rotation1`, `gameobject`.`rotation2`, `gameobject`.`rotation3`, `gameobject`.`spawntimesecs`, "
+    //                                   12                           13                    14                        15
+                          "`gameobject`.`animprogress`, `gameobject`.`state`, `gameobject`.`spawnMask`, `gameobject`.`phaseMask`, "
+    //                                        16                                       17
+                          "`pool_gameobject`.`pool_entry`, `pool_gameobject_template`.`pool_entry` "
                           "FROM `gameobject` "
                           "LEFT OUTER JOIN `game_event_gameobject` ON `gameobject`.`guid` = `game_event_gameobject`.`guid` "
                           "LEFT OUTER JOIN `pool_gameobject` ON `gameobject`.`guid` = `pool_gameobject`.`guid` "
@@ -1771,9 +1775,8 @@ void ObjectMgr::LoadGameObjects()
         uint32 go_state     = fields[13].GetUInt32();
         data.spawnMask      = fields[14].GetUInt8();
         data.phaseMask      = fields[15].GetUInt16();
-        int16 gameEvent     = fields[16].GetInt16();
-        int16 GuidPoolId    = fields[17].GetInt16();
-        int16 EntryPoolId   = fields[18].GetInt16();
+        int16 GuidPoolId    = fields[16].GetInt16();
+        int16 EntryPoolId   = fields[17].GetInt16();
 
         MapEntry const* mapEntry = sMapStore.LookupEntry(data.mapid);
         if (!mapEntry)
@@ -1833,7 +1836,7 @@ void ObjectMgr::LoadGameObjects()
             data.phaseMask = 1;
         }
 
-        if (gameEvent == 0 && GuidPoolId == 0 && EntryPoolId == 0) // if not this is to be managed by GameEvent System or Pool system
+        if (GuidPoolId == 0 && EntryPoolId == 0) // if not this is to be managed by GameEvent System or Pool system
         {
             AddGameobjectToGrid(guid, &data);
         }
