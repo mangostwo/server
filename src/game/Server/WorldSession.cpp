@@ -700,7 +700,7 @@ void WorldSession::SendAuthWaitQue(uint32 position)
 void WorldSession::LoadGlobalAccountData()
 {
     LoadAccountData(
-        CharacterDatabase.PQuery("SELECT type, time, data FROM account_data WHERE account='%u'", GetAccountId()),
+        CharacterDatabase.PQuery("SELECT `type`, `time`, `data` FROM `account_data` WHERE `account` = '%u'", GetAccountId()),
         GLOBAL_CACHE_MASK
     );
 }
@@ -754,10 +754,10 @@ void WorldSession::SetAccountData(AccountDataType type, time_t time_, std::strin
 
         CharacterDatabase.BeginTransaction();
 
-        SqlStatement stmt = CharacterDatabase.CreateStatement(delId, "DELETE FROM account_data WHERE account=? AND type=?");
+        SqlStatement stmt = CharacterDatabase.CreateStatement(delId, "DELETE FROM `account_data` WHERE `account` = ? AND `type` = ?");
         stmt.PExecute(acc, uint32(type));
 
-        stmt = CharacterDatabase.CreateStatement(insId, "INSERT INTO account_data VALUES (?,?,?,?)");
+        stmt = CharacterDatabase.CreateStatement(insId, "INSERT INTO `account_data` VALUES (?,?,?,?)");
         stmt.PExecute(acc, uint32(type), uint64(time_), data.c_str());
 
         CharacterDatabase.CommitTransaction();
@@ -775,10 +775,10 @@ void WorldSession::SetAccountData(AccountDataType type, time_t time_, std::strin
 
         CharacterDatabase.BeginTransaction();
 
-        SqlStatement stmt = CharacterDatabase.CreateStatement(delId, "DELETE FROM character_account_data WHERE guid=? AND type=?");
+        SqlStatement stmt = CharacterDatabase.CreateStatement(delId, "DELETE FROM `character_account_data` WHERE `guid` = ? AND `type` = ?");
         stmt.PExecute(m_GUIDLow, uint32(type));
 
-        stmt = CharacterDatabase.CreateStatement(insId, "INSERT INTO character_account_data VALUES (?,?,?,?)");
+        stmt = CharacterDatabase.CreateStatement(insId, "INSERT INTO `character_account_data` VALUES (?,?,?,?)");
         stmt.PExecute(m_GUIDLow, uint32(type), uint64(time_), data.c_str());
 
         CharacterDatabase.CommitTransaction();

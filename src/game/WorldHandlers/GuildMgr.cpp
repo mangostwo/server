@@ -106,7 +106,7 @@ void GuildMgr::LoadGuilds()
     //                                                    0             1          2          3           4           5           6
     QueryResult* result = CharacterDatabase.Query("SELECT `guild`.`guildid`,`guild`.`name`,`leaderguid`,`EmblemStyle`,`EmblemColor`,`BorderStyle`,`BorderColor`,"
                           //   7               8     9      10           11          12
-                          "`BackgroundColor`,`info`,`motd`,`createdate`,`BankMoney`,(SELECT COUNT(`guild_bank_tab.guildid`) FROM `guild_bank_tab` WHERE `guild_bank_tab`.`guildid` = `guild`.`guildid`) "
+                          "`BackgroundColor`,`info`,`motd`,`createdate`,`BankMoney`,(SELECT COUNT(`guild_bank_tab`.`guildid`) FROM `guild_bank_tab` WHERE `guild_bank_tab`.`guildid` = `guild`.`guildid`) "
                           "FROM `guild` ORDER BY `guildid` ASC");
 
     if (!result)
@@ -137,7 +137,7 @@ void GuildMgr::LoadGuilds()
 
     // load guild bank tab rights
     //                                                                      0       1     2   3       4
-    QueryResult* guildBankTabRightsResult = CharacterDatabase.Query("SELECT guildid,TabId,rid,gbright,SlotPerDay FROM guild_bank_right ORDER BY guildid ASC, TabId ASC");
+    QueryResult* guildBankTabRightsResult = CharacterDatabase.Query("SELECT `guildid`,`TabId`,`rid`,`gbright`,`SlotPerDay` FROM `guild_bank_right` ORDER BY `guildid` ASC, `TabId` ASC");
 
     BarGoLink bar(result->GetRowCount());
 

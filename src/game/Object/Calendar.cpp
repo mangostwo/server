@@ -85,7 +85,7 @@ void CalendarEvent::RemoveInviteByItr(CalendarInviteMap::iterator inviteItr)
 
     sCalendarMgr.SendCalendarEventInviteRemove(inviteItr->second, Flags);
 
-    CharacterDatabase.PExecute("DELETE FROM calendar_invites WHERE inviteId=" UI64FMTD, inviteItr->second->InviteId);
+    CharacterDatabase.PExecute("DELETE FROM `calendar_invites` WHERE `inviteId` = " UI64FMTD, inviteItr->second->InviteId);
 
     delete inviteItr->second;
     m_Invitee.erase(inviteItr);
@@ -318,7 +318,7 @@ CalendarEvent* CalendarMgr::AddEvent(ObjectGuid const& guid, std::string title, 
 
     CharacterDatabase.escape_string(title);
     CharacterDatabase.escape_string(description);
-    CharacterDatabase.PExecute("INSERT INTO calendar_events VALUES (" UI64FMTD ", %u, %u, %u, %u, %d, %u, '%s', '%s')",
+    CharacterDatabase.PExecute("INSERT INTO `calendar_events` VALUES (" UI64FMTD ", %u, %u, %u, %u, %d, %u, '%s', '%s')",
                                nId,
                                guid.GetCounter(),
                                guildId,
@@ -351,7 +351,7 @@ void CalendarMgr::RemoveEvent(uint64 eventId, Player* remover)
 
     SendCalendarEventRemovedAlert(&citr->second);
 
-    CharacterDatabase.PExecute("DELETE FROM calendar_events WHERE eventId=" UI64FMTD, eventId);
+    CharacterDatabase.PExecute("DELETE FROM `calendar_events` WHERE `eventId` = " UI64FMTD, eventId);
 
     // explicitly remove all invite and send mail to all invitee
     citr->second.RemoveAllInvite(remover->GetObjectGuid());
@@ -414,7 +414,7 @@ CalendarInvite* CalendarMgr::AddInvite(CalendarEvent* event, ObjectGuid const& s
         return NULL;
     }
 
-    CharacterDatabase.PExecute("INSERT INTO calendar_invites VALUES (" UI64FMTD ", " UI64FMTD ", %u, %u, %u, %u, %u)",
+    CharacterDatabase.PExecute("INSERT INTO `calendar_invites` VALUES (" UI64FMTD ", " UI64FMTD ", %u, %u, %u, %u, %u)",
                                invite->InviteId,
                                event->EventId,
                                inviteeGuid.GetCounter(),
@@ -584,7 +584,7 @@ void CalendarMgr::LoadCalendarsFromDB()
     sLog.outString("Loading Calendar Events...");
 
     //                                                          0        1            2        3     4      5          6          7      8
-    QueryResult* eventsQuery = CharacterDatabase.Query("SELECT eventId, creatorGuid, guildId, type, flags, dungeonId, eventTime, title, description FROM calendar_events ORDER BY eventId");
+    QueryResult* eventsQuery = CharacterDatabase.Query("SELECT `eventId`, `creatorGuid`, `guildId`, `type`, `flags`, `dungeonId`, `eventTime`, `title`, `description` FROM `calendar_events` ORDER BY `eventId`");
     if (!eventsQuery)
     {
         BarGoLink bar(1);
@@ -625,7 +625,7 @@ void CalendarMgr::LoadCalendarsFromDB()
 
     sLog.outString("Loading Calendar invites...");
     //                                                           0         1        2            3           4       5               6
-    QueryResult* invitesQuery = CharacterDatabase.Query("SELECT inviteId, eventId, inviteeGuid, senderGuid, status, lastUpdateTime, rank FROM calendar_invites ORDER BY inviteId");
+    QueryResult* invitesQuery = CharacterDatabase.Query("SELECT `inviteId`, `eventId`, `inviteeGuid`, `senderGuid`, `status`, `lastUpdateTime`, `rank` FROM `calendar_invites` ORDER BY `inviteId`");
     if (!invitesQuery)
     {
         BarGoLink bar(1);
@@ -667,7 +667,7 @@ void CalendarMgr::LoadCalendarsFromDB()
                 if (!event)
                 {
                     // delete invite
-                    CharacterDatabase.PExecute("DELETE FROM calendar_invites WHERE inviteId =" UI64FMTD, field[0].GetUInt64());
+                    CharacterDatabase.PExecute("DELETE FROM `calendar_invites` WHERE `inviteId` = " UI64FMTD, field[0].GetUInt64());
                     ++deletedInvites;
                     continue;
                 }

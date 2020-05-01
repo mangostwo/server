@@ -3147,7 +3147,7 @@ bool ChatHandler::HandleListItemCommand(char* args)
 
     // guild bank case
     uint32 guild_count = 0;
-    result = CharacterDatabase.PQuery("SELECT COUNT(item_entry) FROM guild_bank_item WHERE item_entry='%u'", item_id);
+    result = CharacterDatabase.PQuery("SELECT COUNT(`item_entry`) FROM `guild_bank_item` WHERE `item_entry`='%u'", item_id);
     if (result)
     {
         guild_count = (*result)[0].GetUInt32();
