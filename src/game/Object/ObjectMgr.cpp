@@ -1836,10 +1836,12 @@ void ObjectMgr::LoadGameObjects()
             data.phaseMask = 1;
         }
 
-        if (GuidPoolId == 0 && EntryPoolId == 0) // if not this is to be managed by GameEvent System or Pool system
-        {
-            AddGameobjectToGrid(guid, &data);
-        }
+        // TODO: Need to investigate whether this needs to be implemented another way ?
+        //if (GuidPoolId == 0 && EntryPoolId == 0) // if not this is to be managed by GameEvent System or Pool system
+        //{
+        //    AddGameobjectToGrid(guid, &data);
+        //}
+
 
         //uint32 zoneId, areaId;
         //sTerrainMgr.LoadTerrain(data.mapid)->GetZoneAndAreaId(zoneId, areaId, data.posX, data.posY, data.posZ);
