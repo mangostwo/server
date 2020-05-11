@@ -563,7 +563,7 @@ void WorldSession::HandleCalendarEventRsvp(WorldPacket& recv_data)
             invite->Status = CalendarInviteStatus(status);
             invite->LastUpdateTime = time(NULL);
 
-            CharacterDatabase.PExecute("UPDATE `calendar_invites` SET `status`=%`u, `lastUpdateTime`=%u WHERE `inviteId` = " UI64FMTD , status, uint32(invite->LastUpdateTime), invite->InviteId);
+            CharacterDatabase.PExecute("UPDATE `calendar_invites` SET `status`=%u, `lastUpdateTime`=%u WHERE `inviteId` = " UI64FMTD , status, uint32(invite->LastUpdateTime), invite->InviteId);
             sCalendarMgr.SendCalendarEventStatus(invite);
             sCalendarMgr.SendCalendarClearPendingAction(_player);
         }
