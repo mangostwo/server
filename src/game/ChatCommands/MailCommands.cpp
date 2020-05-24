@@ -40,6 +40,11 @@ bool ChatHandler::HandleMailBoxCommand(char* /*args*/)
 // Send mail by command
 bool ChatHandler::HandleSendMailCommand(char* args)
 {
+    if (!*args)
+    {
+        return false;
+    }
+
     // format: name "subject text" "mail text"
     Player* target;
     ObjectGuid target_guid;
@@ -51,10 +56,18 @@ bool ChatHandler::HandleSendMailCommand(char* args)
 
     MailDraft draft;
 
-    // fill draft
-    if (!HandleSendMailHelper(draft, args))
+    // Subject and content should not be empty :
+    if (!*args)
     {
         return false;
+    }
+    else
+    {
+        // fill draft
+        if (!HandleSendMailHelper(draft, args))
+        {
+            return false;
+        }
     }
 
     // from console show nonexistent sender
@@ -70,14 +83,14 @@ bool ChatHandler::HandleSendMailCommand(char* args)
 bool ChatHandler::HandleSendMailHelper(MailDraft& draft, char* args)
 {
     // format: "subject text" "mail text"
-    std::string msgSubject = ExtractQuotedArg(&args);
-    if (msgSubject.empty())
+    char* msgSubject = ExtractQuotedArg(&args);
+    if (!msgSubject)
     {
         return false;
     }
 
-    std::string msgText = ExtractQuotedArg(&args);
-    if (msgText.empty())
+    char* msgText = ExtractQuotedArg(&args);
+    if (!msgText)
     {
         return false;
     }
@@ -109,8 +122,8 @@ bool ChatHandler::HandleSendMassMailCommand(char* args)
         return false;
     }
 
-    // from console show nonexistent sender
-    MailSender sender(MAIL_NORMAL, m_session ? m_session->GetPlayer()->GetObjectGuid().GetCounter() : 0, MAIL_STATIONERY_GM);
+    // GM mail
+    MailSender sender(MAIL_NORMAL, (uint32)0, MAIL_STATIONERY_GM);
 
     sMassMailMgr.AddMassMailTask(draft, sender, raceMask);
 
@@ -121,14 +134,14 @@ bool ChatHandler::HandleSendMassMailCommand(char* args)
 bool ChatHandler::HandleSendItemsHelper(MailDraft& draft, char* args)
 {
     // format: "subject text" "mail text" item1[:count1] item2[:count2] ... item12[:count12]
-    std::string msgSubject = ExtractQuotedArg(&args);
-    if (msgSubject.empty())
+    char* msgSubject = ExtractQuotedArg(&args);
+    if (!msgSubject)
     {
         return false;
     }
 
-    std::string msgText = ExtractQuotedArg(&args);
-    if (msgText.empty())
+    char* msgText = ExtractQuotedArg(&args);
+    if (!msgText)
     {
         return false;
     }
@@ -269,8 +282,8 @@ bool ChatHandler::HandleSendMoneyHelper(MailDraft& draft, char* args)
 {
     /// format: "subject text" "mail text" money
 
-    std::string  msgSubject = ExtractQuotedArg(&args);
-    if (msgSubject.empty())
+    char* msgSubject = ExtractQuotedArg(&args);
+    if (!msgSubject)
     {
         return false;
     }
