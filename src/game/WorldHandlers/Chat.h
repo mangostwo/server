@@ -28,7 +28,6 @@
 #include "Common.h"
 #include "SharedDefines.h"
 #include "ObjectGuid.h"
-#include "Language.h"
 
 struct AchievementEntry;
 struct AchievementCriteriaEntry;
@@ -79,12 +78,6 @@ enum PlayerChatTag
     CHAT_TAG_DEV                = 0x10,                     // Developer
 };
 typedef uint32 ChatTagFlags;
-
-static uint32 ReputationRankStrIndex[MAX_REPUTATION_RANK] =
-{
-    LANG_REP_HATED,    LANG_REP_HOSTILE, LANG_REP_UNFRIENDLY, LANG_REP_NEUTRAL,
-    LANG_REP_FRIENDLY, LANG_REP_HONORED, LANG_REP_REVERED,    LANG_REP_EXALTED
-};
 
 class ChatHandler
 {
