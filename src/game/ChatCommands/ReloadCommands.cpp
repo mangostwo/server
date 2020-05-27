@@ -955,7 +955,8 @@ bool ChatHandler::HandleReloadLocalesCommandHelpCommand(char* /*args*/)
 {
     sLog.outString("Re-Loading Locales Command Help ... ");
     sCommandMgr.LoadCommandHelpLocale();
-    SendGlobalSysMessage("DB table `locales_command` reloaded.", SEC_MODERATOR);
+    //SendGlobalSysMessage("DB table `locales_command` reloaded.", SEC_MODERATOR);
+    SendGlobalSysMessage("DB table `locales_command` reloaded.");
     return true;
 }
 
