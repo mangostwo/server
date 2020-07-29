@@ -55,6 +55,7 @@
 #include "CellImpl.h"
 #include "movement/MoveSplineInit.h"
 #include "CreatureLinkingMgr.h"
+#include "DisableMgr.h"
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
@@ -201,7 +202,9 @@ void Creature::AddToWorld()
     Unit::AddToWorld();
 #ifdef ENABLE_ELUNA
     if (!inWorld)
+    {
         sEluna->OnAddToWorld(this);
+    }
 #endif /* ENABLE_ELUNA */
 }
 
@@ -209,7 +212,9 @@ void Creature::RemoveFromWorld()
 {
 #ifdef ENABLE_ELUNA
     if (IsInWorld())
+    {
         sEluna->OnRemoveFromWorld(this);
+    }
 #endif /* ENABLE_ELUNA */
 
     ///- Remove the creature from the accessor
@@ -259,7 +264,9 @@ void Creature::RemoveCorpse(bool inPlace)
     }
 
     if (m_isCreatureLinkingTrigger)
+    {
         GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_DESPAWN, this);
+    }
 
     if (InstanceData* mapInstance = GetInstanceData())
     {
@@ -379,7 +386,9 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=NULL*/, GameE
     else if (!data || data->equipmentId == 0)
     {
         if (cinfo->EquipmentTemplateId== 0)
+        {
             LoadEquipment(normalInfo->EquipmentTemplateId); // use default from normal template if diff does not have any
+        }
         else
             LoadEquipment(cinfo->EquipmentTemplateId);      // else use from diff template
     }
@@ -662,9 +671,13 @@ void Creature::Update(uint32 update_diff, uint32 diff)
         case ALIVE:
         {
             if (m_aggroDelay <= update_diff)
+            {
                 m_aggroDelay = 0;
+            }
             else
+            {
                 m_aggroDelay -= update_diff;
+            }
 
             if (m_IsDeadByDefault)
             {
@@ -794,7 +807,9 @@ void Creature::RegeneratePower()
                 }
             }
             else
+            {
                 addValue = maxValue / 3.0f;
+            }
             break;
         case POWER_ENERGY:
             // ToDo: for vehicle this is different - NEEDS TO BE FIXED!
@@ -842,8 +857,7 @@ void Creature::RegenerateHealth()
     if (GetCharmerOrOwnerGuid())
     {
         float HealthIncreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_HEALTH);
-        float Spirit = GetStat(STAT_SPIRIT);
-
+        float Spirit = GetStat(STAT_SPIRIT); //for charmed creatures, spirit = 0!
         if (GetPower(POWER_MANA) > 0)
         {
             addvalue = uint32(Spirit * 0.25 * HealthIncreaseRate);
@@ -1113,7 +1127,9 @@ bool Creature::CanInteractWithBattleMaster(Player* pPlayer, bool msg) const
             case BATTLEGROUND_RL:
             case BATTLEGROUND_SA:
             case BATTLEGROUND_DS:
-            case BATTLEGROUND_RV: pPlayer->PlayerTalkClass->SendGossipMenu(10024, GetObjectGuid()); break;
+            case BATTLEGROUND_RV:
+                pPlayer->PlayerTalkClass->SendGossipMenu(10024, GetObjectGuid());
+                break;
             default: break;
         }
         return false;
@@ -1135,12 +1151,12 @@ void Creature::PrepareBodyLootState()
     // if have normal loot then prepare it access
     if (!lootForBody)
     {
-      // have normal loot
-      if (GetCreatureInfo()->MaxLootGold > 0 || GetCreatureInfo()->LootId || (GetCreatureType() != CREATURE_TYPE_CRITTER && (GetCreatureInfo()->SkinningLootId && sWorld.getConfig(CONFIG_BOOL_CORPSE_EMPTY_LOOT_SHOW))))
-      {
-           SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-           return;
-      }
+        // have normal loot
+        if (GetCreatureInfo()->MaxLootGold > 0 || GetCreatureInfo()->LootId || (GetCreatureType() != CREATURE_TYPE_CRITTER && (GetCreatureInfo()->SkinningLootId && sWorld.getConfig(CONFIG_BOOL_CORPSE_EMPTY_LOOT_SHOW))))
+        {
+            SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+            return;
+        }
     }
 
     lootForBody = true; // pass this loot mode
@@ -1274,7 +1290,9 @@ bool Creature::IsTappedBy(Player const* player) const
 
     Group const* playerGroup = player->GetGroup();
     if (!playerGroup || playerGroup != GetGroupLootRecipient()) // if we dont have a group we arent the recipient
+    {
         return false;                                           // if creature doesnt have group bound it means it was solo killed by someone else
+    }
 
     return true;
 }
@@ -1290,16 +1308,24 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
     CreatureInfo const* cinfo = GetCreatureInfo();
     if (cinfo)
     {
+        // The following if-else assumes that there are 4 model fields and needs updating if this is changed.
+
         if (displayId != cinfo->ModelId[0] && displayId != cinfo->ModelId[1] &&
             displayId != cinfo->ModelId[2] && displayId != cinfo->ModelId[3])
         {
             for (int i = 0; i < MAX_CREATURE_MODEL && displayId; ++i)
+            {
                 if (cinfo->ModelId[i])
+                {
                     if (CreatureModelInfo const* minfo = sObjectMgr.GetCreatureModelInfo(cinfo->ModelId[i]))
+                    {
                         if (displayId == minfo->modelid_other_gender)
                         {
                             displayId = 0;
                         }
+                    }
+                }
+            }
         }
         else
         {
@@ -1405,7 +1431,9 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth /*= 10
 
     health *= _GetHealthMod(rank); // Apply custom config setting
     if (health < 1)
+    {
         health = 1;
+    }
 
     //////////////////////////////////////////////////////////////////////////
     // Set values
@@ -1440,17 +1468,22 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth /*= 10
             case POWER_HAPPINESS:   maxValue = POWER_HAPPINESS_DEFAULT; break;
             case POWER_RUNE:        maxValue = 0; break;
             case POWER_RUNIC_POWER: maxValue = 0; break;
+            default:                break; // make compilers happy
         }
 
         uint32 value = maxValue;
 
         // For non regenerating powers set 0
         if ((i == POWER_ENERGY || i == POWER_MANA) && !IsRegeneratingPower())
+        {
             value = 0;
+        }
 
         // Mana requires an extra field to be set
         if (i == POWER_MANA)
+        {
             SetCreateMana(value);
+        }
 
         SetMaxPower(Powers(i), maxValue);
         SetPower(Powers(i), value);
@@ -2370,7 +2403,9 @@ bool Creature::LoadCreatureAddon(bool reload)
     SetByteValue(UNIT_FIELD_BYTES_2, 0, cainfo->sheath_state);
 
     if (cainfo->pvp_state != 0)
+    {
         SetByteValue(UNIT_FIELD_BYTES_2, 1, cainfo->pvp_state);
+    }
 
     // SetByteValue(UNIT_FIELD_BYTES_2, 2, 0);
     // SetByteValue(UNIT_FIELD_BYTES_2, 3, 0);
@@ -2849,8 +2884,8 @@ VendorItemData const* Creature::GetVendorItems() const
 
 VendorItemData const* Creature::GetVendorTemplateItems() const
 {
-    uint32 vendorId = GetCreatureInfo()->VendorTemplateId;
-    return vendorId ? sObjectMgr.GetNpcVendorTemplateItemList(vendorId) : NULL;
+    uint32 VendorTemplateId = GetCreatureInfo()->VendorTemplateId;
+    return VendorTemplateId ? sObjectMgr.GetNpcVendorTemplateItemList(VendorTemplateId) : NULL;
 }
 
 uint32 Creature::GetVendorItemCurrentCount(VendorItem const* vItem)
@@ -2941,8 +2976,8 @@ uint32 Creature::UpdateVendorItemCurrentCount(VendorItem const* vItem, uint32 us
 
 TrainerSpellData const* Creature::GetTrainerTemplateSpells() const
 {
-    uint32 trainerId = GetCreatureInfo()->TrainerTemplateId;
-    return trainerId ? sObjectMgr.GetNpcTrainerTemplateSpells(trainerId) : NULL;
+    uint32 TrainerTemplateId = GetCreatureInfo()->TrainerTemplateId;
+    return TrainerTemplateId ? sObjectMgr.GetNpcTrainerTemplateSpells(TrainerTemplateId) : NULL;
 }
 
 TrainerSpellData const* Creature::GetTrainerSpells() const
@@ -3178,9 +3213,13 @@ void Creature::SetLevitate(bool enable)
 void Creature::SetSwim(bool enable)
 {
     if (enable)
+    {
         m_movementInfo.AddMovementFlag(MOVEFLAG_SWIMMING);
+    }
     else
+    {
         m_movementInfo.RemoveMovementFlag(MOVEFLAG_SWIMMING);
+    }
 
     WorldPacket data(enable ? SMSG_SPLINE_MOVE_START_SWIM : SMSG_SPLINE_MOVE_STOP_SWIM);
     data << GetPackGUID();
@@ -3190,9 +3229,13 @@ void Creature::SetSwim(bool enable)
 void Creature::SetCanFly(bool enable)
 {
     if (enable)
+    {
         m_movementInfo.AddMovementFlag(MOVEFLAG_CAN_FLY);
+    }
     else
+    {
         m_movementInfo.RemoveMovementFlag(MOVEFLAG_CAN_FLY);
+    }
 
     WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_FLYING : SMSG_SPLINE_MOVE_UNSET_FLYING, 9);
     data << GetPackGUID();
@@ -3202,9 +3245,13 @@ void Creature::SetCanFly(bool enable)
 void Creature::SetFeatherFall(bool enable)
 {
     if (enable)
+    {
         m_movementInfo.AddMovementFlag(MOVEFLAG_SAFE_FALL);
+    }
     else
+    {
         m_movementInfo.RemoveMovementFlag(MOVEFLAG_SAFE_FALL);
+    }
 
     WorldPacket data(enable ? SMSG_SPLINE_MOVE_FEATHER_FALL : SMSG_SPLINE_MOVE_NORMAL_FALL);
     data << GetPackGUID();
@@ -3214,9 +3261,13 @@ void Creature::SetFeatherFall(bool enable)
 void Creature::SetHover(bool enable)
 {
     if (enable)
+    {
         m_movementInfo.AddMovementFlag(MOVEFLAG_HOVER);
+    }
     else
+    {
         m_movementInfo.RemoveMovementFlag(MOVEFLAG_HOVER);
+    }
 
     WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_HOVER : SMSG_SPLINE_MOVE_UNSET_HOVER, 9);
     data << GetPackGUID();
