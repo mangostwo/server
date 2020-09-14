@@ -92,7 +92,9 @@ bool VendorItemData::RemoveItem(uint32 item_id)
             found = true;
         }
         else
+        {
             ++i;
+        }
     }
 
     return found;
@@ -319,7 +321,9 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=NULL*/, GameE
         {
             cinfo = ObjectMgr::GetCreatureTemplate(normalInfo->DifficultyEntry[diff - 1]);
             if (cinfo)
+            {
                 break;                                      // template found
+            }
 
             // check and reported at startup, so just ignore (restore normalInfo)
             cinfo = normalInfo;
@@ -390,7 +394,9 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=NULL*/, GameE
             LoadEquipment(normalInfo->EquipmentTemplateId); // use default from normal template if diff does not have any
         }
         else
+        {
             LoadEquipment(cinfo->EquipmentTemplateId);      // else use from diff template
+        }
     }
     else if (data && data->equipmentId != -1)
     {
@@ -652,7 +658,9 @@ void Creature::Update(uint32 update_diff, uint32 diff)
                 break;
             }
             else
+            {
                 m_corpseDecayTimer -= update_diff;
+            }
 
             if (m_groupLootId)                              // Loot is stopped already if corpse got removed.
             {
@@ -687,7 +695,9 @@ void Creature::Update(uint32 update_diff, uint32 diff)
                     break;
                 }
                 else
+                {
                     m_corpseDecayTimer -= update_diff;
+                }
             }
 
             Unit::Update(update_diff, diff);
@@ -826,12 +836,16 @@ void Creature::RegeneratePower()
     AuraList const& ModPowerRegenAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN);
     for(AuraList::const_iterator i = ModPowerRegenAuras.begin(); i != ModPowerRegenAuras.end(); ++i)
         if ((*i)->GetModifier()->m_miscvalue == int32(powerType))
+        {
             addValue += (*i)->GetModifier()->m_amount;
+        }
 
     AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
     for(AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
         if ((*i)->GetModifier()->m_miscvalue == int32(powerType))
+        {
             addValue *= ((*i)->GetModifier()->m_amount + 100) / 100.0f;
+        }
 
     ModifyPower(powerType, int32(addValue));
 }
@@ -2303,7 +2317,9 @@ void Creature::SaveRespawnTime()
         GetMap()->GetPersistentState()->SaveCreatureRespawnTime(GetGUIDLow(), m_respawnTime);
     }
     else if (m_corpseDecayTimer > 0)                        // dead (corpse)
+    {
         GetMap()->GetPersistentState()->SaveCreatureRespawnTime(GetGUIDLow(), time(NULL) + m_respawnDelay + m_corpseDecayTimer / IN_MILLISECONDS);
+    }
 }
 
 bool Creature::IsOutOfThreatArea(Unit* pVictim) const
@@ -2416,7 +2432,9 @@ bool Creature::LoadCreatureAddon(bool reload)
     }
 
     if (cainfo->splineFlags & SPLINEFLAG_FLYING)
+    {
         SetLevitate(true);
+    }
 
     if (cainfo->auras)
     {
@@ -2437,7 +2455,9 @@ bool Creature::LoadCreatureAddon(bool reload)
             // Get Difficulty mode for initial case (npc not yet added to world)
             if (spellInfo->SpellDifficultyId && !reload && GetMap()->IsDungeon())
                 if (SpellEntry const* spellEntry = GetSpellEntryByDifficulty(spellInfo->SpellDifficultyId, GetMap()->GetDifficulty(), GetMap()->IsRaid()))
+                {
                     spellInfo = spellEntry;
+                }
 
             CastSpell(this, spellInfo, true);
         }
@@ -2805,12 +2825,18 @@ void Creature::AllLootRemovedFromCorpse()
             // spawntimesecs=3min:  corpse decay after 1min
             // spawntimesecs=4hour: corpse decay after 1hour 20min
             if (sWorld.getConfig(CONFIG_FLOAT_RATE_CORPSE_DECAY_LOOTED) > 0.0f)
+            {
                 corpseLootedDelay = (uint32)((m_corpseDelay * IN_MILLISECONDS) * sWorld.getConfig(CONFIG_FLOAT_RATE_CORPSE_DECAY_LOOTED));
+            }
             else
+            {
                 corpseLootedDelay = (m_respawnDelay * IN_MILLISECONDS) / 3;
+            }
         }
         else                                                // corpse was skinned, corpse will despawn next update
+        {
             corpseLootedDelay = 0;
+        }
 
         // if m_respawnTime is not expired already
         if (m_respawnTime >= time(NULL))
@@ -2824,7 +2850,9 @@ void Creature::AllLootRemovedFromCorpse()
             {
                 // if m_respawnDelay is relatively short and corpseDecayTimer is larger than corpseLootedDelay
                 if (m_corpseDecayTimer > corpseLootedDelay)
+                {
                     m_corpseDecayTimer = corpseLootedDelay;
+                }
             }
         }
         else

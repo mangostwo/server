@@ -70,7 +70,9 @@ void TransportBase::Update(uint32 diff)
         m_updatePositionsTimer = 500;
     }
     else
+    {
         m_updatePositionsTimer -= diff;
+    }
 }
 
 // Update the global positions of all passengers
@@ -107,11 +109,15 @@ void TransportBase::UpdateGlobalPositionOf(WorldObject* passenger, float lx, flo
             m_owner->GetMap()->PlayerRelocation((Player*)passenger, gx, gy, gz, go);
         }
         else
+        {
             m_owner->GetMap()->CreatureRelocation((Creature*)passenger, gx, gy, gz, go);
+        }
 
         // If passenger is vehicle
         if (((Unit*)passenger)->IsVehicle())
+        {
             ((Unit*)passenger)->GetVehicleInfo()->UpdateGlobalPositions();
+        }
     }
     // ToDo: Add gameobject relocation
     // ToDo: Add passenger relocation for MO transports
@@ -157,7 +163,9 @@ bool TransportBase::HasOnBoard(WorldObject const* passenger) const
             return true;
         }
         else
+        {
             passenger = passenger->GetTransportInfo()->GetTransport();
+        }
     }
 
     return false;

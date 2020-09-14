@@ -51,7 +51,9 @@ bool Player::UpdateStats(Stats stat)
     {
         Pet* pet = GetPet();
         if (pet)
+        {
             pet->UpdateStats(stat);
+        }
     }
 
     switch (stat)
@@ -89,12 +91,16 @@ bool Player::UpdateStats(Stats stat)
     AuraList const& modRatingFromStat = GetAurasByType(SPELL_AURA_MOD_RATING_FROM_STAT);
     for (AuraList::const_iterator i = modRatingFromStat.begin(); i != modRatingFromStat.end(); ++i)
         if (Stats((*i)->GetMiscBValue()) == stat)
+        {
             mask |= (*i)->GetMiscValue();
+        }
     if (mask)
     {
         for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
             if (mask & (1 << rating))
+            {
                 ApplyRatingMod(CombatRating(rating), 0, true);
+            }
     }
     return true;
 }
@@ -169,7 +175,9 @@ void Player::UpdateResistances(uint32 school)
 
         Pet* pet = GetPet();
         if (pet)
+        {
             pet->UpdateResistances(school);
+        }
     }
     else
     {
@@ -193,7 +201,9 @@ void Player::UpdateArmor()
     {
         Modifier* mod = (*i)->GetModifier();
         if (mod->m_miscvalue & SPELL_SCHOOL_MASK_NORMAL)
+        {
             value += int32(GetStat(Stats((*i)->GetMiscBValue())) * mod->m_amount / 100.0f);
+        }
     }
 
     value *= GetModifierValue(unitMod, TOTAL_PCT);
@@ -202,7 +212,9 @@ void Player::UpdateArmor()
 
     Pet* pet = GetPet();
     if (pet)
+    {
         pet->UpdateArmor();
+    }
 
     UpdateAttackPowerAndDamage();                           // armor dependent auras update for SPELL_AURA_MOD_ATTACK_POWER_OF_ARMOR
 }
@@ -325,17 +337,25 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
                         for (Unit::AuraList::const_iterator itr = mDummy.begin(); itr != mDummy.end(); ++itr)
                         {
                             if ((*itr)->GetSpellProto()->SpellIconID != 1563)
+                            {
                                 continue;
+                            }
 
                             // Predatory Strikes (effect 0)
                             if ((*itr)->GetEffIndex() == EFFECT_INDEX_0 && IsInFeralForm())
+                            {
                                 mLevelBonus = getLevel() * (*itr)->GetModifier()->m_amount / 100.0f;
+                            }
                             // Predatory Strikes (effect 1)
                             else if ((*itr)->GetEffIndex() == EFFECT_INDEX_1)
+                            {
                                 mBonusWeaponAtt = (*itr)->GetModifier()->m_amount * m_baseFeralAP / 100.0f;
+                            }
 
                             if (mLevelBonus != 0.0f && mBonusWeaponAtt != 0.0f)
+                            {
                                 break;
+                            }
                         }
                         break;
                     }
@@ -406,7 +426,9 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
 
         Pet* pet = GetPet();                                // update pet's AP
         if (pet)
+        {
             pet->UpdateAttackPowerAndDamage();
+        }
     }
     else
     {
@@ -734,14 +756,20 @@ void Player::UpdateExpertise(WeaponAttackType attack)
     {
         // item neutral spell
         if ((*itr)->GetSpellProto()->EquippedItemClass == -1)
+        {
             expertise += (*itr)->GetModifier()->m_amount;
+        }
         // item dependent spell
         else if (weapon && weapon->IsFitToSpellRequirements((*itr)->GetSpellProto()))
+        {
             expertise += (*itr)->GetModifier()->m_amount;
+        }
     }
 
     if (expertise < 0)
+    {
         expertise = 0;
+    }
 
     switch (attack)
     {
@@ -981,13 +1009,17 @@ bool Pet::UpdateStats(Stats stat)
     if (stat == STAT_STAMINA)
     {
         if (owner)
+        {
             value += float(owner->GetStat(stat)) * 0.3f;
+        }
     }
     // warlock's and mage's pets gain 30% of owner's intellect
     else if (stat == STAT_INTELLECT && getPetType() == SUMMON_PET)
     {
         if (owner && (owner->getClass() == CLASS_WARLOCK || owner->getClass() == CLASS_MAGE))
+        {
             value += float(owner->GetStat(stat)) * 0.3f;
+        }
     }
 
     SetStat(stat, int32(value));
@@ -1035,7 +1067,9 @@ void Pet::UpdateResistances(uint32 school)
         Unit* owner = GetOwner();
         // hunter and warlock pets gain 40% of owner's resistance
         if (owner && (getPetType() == HUNTER_PET || (getPetType() == SUMMON_PET && owner->getClass() == CLASS_WARLOCK)))
+        {
             value += float(owner->GetResistance(SpellSchools(school))) * 0.4f;
+        }
 
         SetResistance(SpellSchools(school), int32(value));
     }
@@ -1054,7 +1088,9 @@ void Pet::UpdateArmor()
     Unit* owner = GetOwner();
     // hunter and warlock pets gain 35% of owner's armor value
     if (owner && (getPetType() == HUNTER_PET || (getPetType() == SUMMON_PET && owner->getClass() == CLASS_WARLOCK)))
+    {
         bonus_armor = 0.35f * float(owner->GetArmor());
+    }
 
     value  = GetModifierValue(unitMod, BASE_VALUE);
     value *= GetModifierValue(unitMod, BASE_PCT);
@@ -1127,7 +1163,9 @@ void Pet::UpdateAttackPowerAndDamage(bool ranged)
             int32 shadow = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_SHADOW);
             int32 maximum  = (fire > shadow) ? fire : shadow;
             if (maximum < 0)
+            {
                 maximum = 0;
+            }
             SetBonusDamage(int32(maximum * 0.15f));
             bonusAP = maximum * 0.57f;
         }
@@ -1136,7 +1174,9 @@ void Pet::UpdateAttackPowerAndDamage(bool ranged)
         {
             int32 frost = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FROST)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FROST);
             if (frost < 0)
+            {
                 frost = 0;
+            }
             SetBonusDamage(int32(frost * 0.4f));
         }
     }

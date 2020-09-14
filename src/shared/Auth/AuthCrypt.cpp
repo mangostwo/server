@@ -71,7 +71,9 @@ void AuthCrypt::Init(BigNumber* K)
 void AuthCrypt::DecryptRecv(uint8* data, size_t len)
 {
     if (!_initialized)
+    {
         return;
+    }
 
     _clientDecrypt.UpdateData(len, data);
 }
@@ -79,7 +81,9 @@ void AuthCrypt::DecryptRecv(uint8* data, size_t len)
 void AuthCrypt::EncryptSend(uint8* data, size_t len)
 {
     if (!_initialized)
+    {
         return;
+    }
 
     _serverEncrypt.UpdateData(len, data);
 }

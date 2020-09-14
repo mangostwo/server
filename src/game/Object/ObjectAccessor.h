@@ -63,7 +63,9 @@ class HashMapHolder
             for(auto const& itr : m_objectMap)
             {
                 if(std::forward<F>(pred)(itr.first, itr.second))
-                return itr.second;
+                {
+                    return itr.second;
+                }
             }
             return nullptr;
         }

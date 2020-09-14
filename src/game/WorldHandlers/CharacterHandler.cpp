@@ -394,7 +394,9 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
                 if (acc_class == CLASS_DEATH_KNIGHT)
                 {
                     if (heroic_free_slots > 0)
+                    {
                         --heroic_free_slots;
+                    }
 
                     if (heroic_free_slots == 0)
                     {
@@ -409,7 +411,9 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
                 {
                     uint32 acc_level = field[0].GetUInt32();
                     if (acc_level >= req_level_for_heroic)
+                    {
                         have_req_level_for_heroic = true;
+                    }
                 }
             }
 
@@ -439,7 +443,9 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
                 acc_race = field[1].GetUInt32();
 
                 if (!have_same_race)
+                {
                     have_same_race = race_ == acc_race;
+                }
 
                 if (GetSecurity() == SEC_PLAYER && class_ == CLASS_DEATH_KNIGHT)
                 {
@@ -447,7 +453,9 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
                     if (acc_class == CLASS_DEATH_KNIGHT)
                     {
                         if (heroic_free_slots > 0)
+                        {
                             --heroic_free_slots;
+                        }
 
                         if (heroic_free_slots == 0)
                         {
@@ -462,7 +470,9 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
                     {
                         uint32 acc_level = field[0].GetUInt32();
                         if (acc_level >= req_level_for_heroic)
+                        {
                             have_req_level_for_heroic = true;
+                        }
                     }
                 }
             }
@@ -490,7 +500,9 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
     }
 
     if ((have_same_race && skipCinematics == CINEMATICS_SKIP_SAME_RACE) || skipCinematics == CINEMATICS_SKIP_ALL)
-        { pNewChar->setCinematic(1); }                          // not show intro
+    {
+        pNewChar->setCinematic(1);                           // not show intro
+    }
 
     pNewChar->SetAtLoginFlag(AT_LOGIN_FIRST);               // First login
 
@@ -768,9 +780,13 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         if (ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(pCurrChar->getClass()))
         {
             if (cEntry->CinematicSequence)
+            {
                 pCurrChar->SendCinematicStart(cEntry->CinematicSequence);
+            }
             else if (ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(pCurrChar->getRace()))
+            {
                 pCurrChar->SendCinematicStart(rEntry->CinematicSequence);
+            }
         }
     }
 
@@ -789,7 +805,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
             lockStatus = AREA_LOCKSTATUS_UNKNOWN_ERROR;
         }
         else if (pCurrChar->GetSession()->Expansion() < mapEntry->Expansion())
+        {
             lockStatus = AREA_LOCKSTATUS_INSUFFICIENT_EXPANSION;
+        }
     }
 
     /* This code is run if we can not add the player to the map for some reason */
@@ -861,7 +879,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     // reset for all pets before pet loading
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_RESET_PET_TALENTS))
+    {
         Pet::resetTalentsForAllPetsOf(pCurrChar);
+    }
 
     // Load pet if any (if player not alive and in taxi flight or another then pet will remember as temporary unsummoned)
     pCurrChar->LoadPet();
@@ -894,7 +914,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     // Used by Eluna
 #ifdef ENABLE_ELUNA
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_FIRST))
+    {
         sEluna->OnFirstLogin(pCurrChar);
+    }
 #endif /* ENABLE_ELUNA */
 
 
@@ -1270,7 +1292,9 @@ void WorldSession::HandleAlterAppearanceOpcode(WorldPacket& recv_data)
     _player->SetByteValue(PLAYER_BYTES, 3, uint8(Color));
     _player->SetByteValue(PLAYER_BYTES_2, 0, uint8(bs_facialHair->hair_id));
     if (_player->getRace() == RACE_TAUREN)
+    {
         _player->SetByteValue(PLAYER_BYTES, 0, uint8(skinTone_id));
+    }
 
     _player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_VISIT_BARBER_SHOP, 1);
 
@@ -1474,7 +1498,9 @@ void WorldSession::HandleEquipmentSetUseOpcode(WorldPacket& recv_data)
 
         // check if item slot is set to "ignored" (raw value == 1), must not be unequipped then
         if (itemGuid.GetRawValue() == 1)
+        {
             continue;
+        }
 
         Item* item = _player->GetItemByGuid(itemGuid);
 
@@ -1484,7 +1510,9 @@ void WorldSession::HandleEquipmentSetUseOpcode(WorldPacket& recv_data)
         {
             Item* uItem = _player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
             if (!uItem)
+            {
                 continue;
+            }
 
             ItemPosCountVec sDest;
             InventoryResult msg = _player->CanStoreItem(NULL_BAG, NULL_SLOT, sDest, uItem, false);
@@ -1494,13 +1522,17 @@ void WorldSession::HandleEquipmentSetUseOpcode(WorldPacket& recv_data)
                 _player->StoreItem(sDest, uItem, true);
             }
             else
+            {
                 _player->SendEquipError(msg, uItem, NULL);
+            }
 
             continue;
         }
 
         if (item->GetPos() == dstpos)
+        {
             continue;
+        }
 
         _player->SwapItem(item->GetPos(), dstpos);
     }

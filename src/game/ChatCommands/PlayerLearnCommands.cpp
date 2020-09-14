@@ -795,15 +795,21 @@ bool ChatHandler::HandleLearnAllMyPetTalentsCommand(char* /*args*/)
     {
         TalentEntry const* talentInfo = sTalentStore.LookupEntry(i);
         if (!talentInfo)
+        {
             continue;
+        }
 
         TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(talentInfo->TalentTab);
         if (!talentTabInfo)
+        {
             continue;
+        }
 
         // prevent learn talent for different family (cheating)
         if (((1 << pet_family->petTalentType) & talentTabInfo->petTalentMask) == 0)
+        {
             continue;
+        }
 
         // search highest talent rank
         uint32 spellid = 0;
@@ -818,11 +824,15 @@ bool ChatHandler::HandleLearnAllMyPetTalentsCommand(char* /*args*/)
         }
 
         if (!spellid)                                       // ??? none spells in talent
+        {
             continue;
+        }
 
         SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellid);
         if (!spellInfo || !SpellMgr::IsSpellValid(spellInfo, player, false))
+        {
             continue;
+        }
 
         // learn highest rank of talent and learn all non-talent spell ranks (recursive by tree)
         pet->learnSpellHighRank(spellid);

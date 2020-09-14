@@ -80,7 +80,9 @@ ObjectAccessor::SaveAllPlayers()
         if (Player* player = iter.second->GetPlayer())
         {
             if (player->IsInWorld())
+            {
                 player->SaveToDB();
+            }
         }
     }
 }
@@ -277,7 +279,9 @@ ObjectAccessor::RemoveOldCorpses()
     m_player2corpse.Do([&now, &expired_corpses](Corpse* c)->void
     {
         if (c->IsExpired(now))
+        {
             expired_corpses.emplace_front(c->GetOwnerGuid());
+        }
     });
 
     for (auto g : expired_corpses)

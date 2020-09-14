@@ -832,7 +832,9 @@ namespace MaNGOS
                 if ((i_TargetType != SPELL_TARGETS_ALL && !itr->getSource()->IsTargetableForAttack(i_spell.m_spellInfo->HasAttribute(SPELL_ATTR_EX3_CAST_ON_DEAD)))
                     // mostly phase check
                     || !itr->getSource()->IsInMap(i_originalCaster))
-                    { continue; }
+                    {
+                        continue;
+                    }
 
                 switch (i_TargetType)
                 {
@@ -905,7 +907,9 @@ namespace MaNGOS
                         break;
                     case PUSH_IN_FRONT_30:
                         if (i_castingObject->IsInFront((Unit*)(itr->getSource()), i_radius, M_PI_F / 6))
+                        {
                             i_data->push_back(itr->getSource());
+                        }
                         break;
                     case PUSH_IN_FRONT_15:
                         if (i_castingObject->IsInFront((Unit*)(itr->getSource()), i_radius, M_PI_F / 12))

@@ -50,7 +50,9 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature& owner)
     float x, y, z, o;
     // at apply we can select more nice return points base at current movegen
     if (owner.GetMotionMaster()->empty() || !owner.GetMotionMaster()->top()->GetResetPosition(owner, x, y, z, o))
+    {
         owner.GetRespawnCoord(x, y, z, &o);
+    }
 
     init.SetFacing(o);
     init.MoveTo(x, y, z, true);

@@ -158,7 +158,9 @@ bool ChatHandler::HandleTicketCommand(char* args)
         ticket->SetResponseText(args);
 
         if (Player* pl = sObjectMgr.GetPlayer(ticket->GetPlayerGuid()))
+        {
             pl->GetSession()->SendGMResponse(ticket);
+        }
 
         return true;
     }

@@ -150,21 +150,29 @@ void LoadSkillDiscoveryTable()
     sLog.outString();
     sLog.outString(">> Loaded %u skill discovery definitions", count);
     if (!ssNonDiscoverableEntries.str().empty())
+    {
         sLog.outErrorDb("Some items can't be successfully discovered: have in chance field value < 0.000001 in `skill_discovery_template` DB table . List:\n%s", ssNonDiscoverableEntries.str().c_str());
+    }
 
     // report about empty data for explicit discovery spells
     for (uint32 spell_id = 1; spell_id < sSpellStore.GetNumRows(); ++spell_id)
     {
         SpellEntry const* spellEntry = sSpellStore.LookupEntry(spell_id);
         if (!spellEntry)
+        {
             continue;
+        }
 
         // skip not explicit discovery spells
         if (!IsExplicitDiscoverySpell(spellEntry))
+        {
             continue;
+        }
 
         if (SkillDiscoveryStore.find(spell_id) == SkillDiscoveryStore.end())
+        {
             sLog.outErrorDb("Spell (ID: %u) is 100%% chance random discovery ability but not have data in `skill_discovery_template` table", spell_id);
+        }
     }
 }
 
@@ -185,7 +193,9 @@ uint32 GetExplicitDiscoverySpell(uint32 spellId, Player* player)
     for (SkillDiscoveryList::const_iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
         if (item_iter->reqSkillValue <= skillvalue)
             if (!player->HasSpell(item_iter->spellId))
+            {
                 full_chance += item_iter->chance;
+            }
 
     float rate = full_chance / 100.0f;
     float roll = rand_chance_f() * rate;                    // roll now in range 0..full_chance
@@ -193,10 +203,14 @@ uint32 GetExplicitDiscoverySpell(uint32 spellId, Player* player)
     for (SkillDiscoveryList::const_iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
     {
         if (item_iter->reqSkillValue > skillvalue)
+        {
             continue;
+        }
 
         if (player->HasSpell(item_iter->spellId))
+        {
             continue;
+        }
 
         if (item_iter->chance > roll)
         {

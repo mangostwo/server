@@ -268,7 +268,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             if (!normalizePlayerName(to))
             {
                 SendPlayerNotFoundNotice(to);
-                { break; }
+                {
+                    break;
+                }
             }
 
             Player* player = sObjectMgr.GetPlayer(to.c_str());
@@ -552,7 +554,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             Group* group = GetPlayer()->GetGroup();
             if (!group || !group->isRaidGroup() ||
                 !(group->IsLeader(GetPlayer()->GetObjectGuid()) || group->IsAssistant(GetPlayer()->GetObjectGuid())))
-                { return; }
+                {
+                    return;
+                }
 
             // Used by Eluna
 #ifdef ENABLE_ELUNA
@@ -681,9 +685,13 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                 if (_player->isAFK())                       // Already AFK
                 {
                     if (msg.empty())
-                        { _player->ToggleAFK(); }               // Remove AFK
+                    {
+                        _player->ToggleAFK();                // Remove AFK
+                    }
                     else
-                        { _player->autoReplyMsg = msg; }        // Update message
+                    {
+                        _player->autoReplyMsg = msg;         // Update message
+                    }
                 }
                 else                                        // New AFK mode
                 {
@@ -714,9 +722,13 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             if (_player->isDND())                           // Already DND
             {
                 if (msg.empty())
-                    { _player->ToggleDND(); }                   // Remove DND
+                {
+                    _player->ToggleDND();                    // Remove DND
+                }
                 else
-                    { _player->autoReplyMsg = msg; }            // Update message
+                {
+                    _player->autoReplyMsg = msg;             // Update message
+                }
             }
             else                                            // New DND mode
             {

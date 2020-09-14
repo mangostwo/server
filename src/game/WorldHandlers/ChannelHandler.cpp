@@ -45,7 +45,9 @@ void WorldSession::HandleJoinChannelOpcode(WorldPacket& recvPacket)
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         //the channel id needs to be checkd for lfg (explanation?)
         if (Channel* chn = cMgr->GetJoinChannel(channelName, channel_id))
+        {
             chn->Join(_player, pass.c_str());
+        }
 }
 
 void WorldSession::HandleLeaveChannelOpcode(WorldPacket& recvPacket)
@@ -65,7 +67,9 @@ void WorldSession::HandleLeaveChannelOpcode(WorldPacket& recvPacket)
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
     {
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
+        {
             chn->Leave(_player, true);
+        }
         cMgr->LeftChannel(channelname);
     }
 }
@@ -370,5 +374,7 @@ void WorldSession::HandleSetChannelWatchOpcode(WorldPacket& recvPacket)
     recvPacket >> channelname;
     /*if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname, _player))
-            chn->JoinNotify(_player->GetGUID());*/
+        {
+            chn->JoinNotify(_player->GetGUID());
+        }*/
 }

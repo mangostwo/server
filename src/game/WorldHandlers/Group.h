@@ -540,11 +540,17 @@ class Group
         {
             uint8 flags = 0;
             if (slot.assistant)
+            {
                 flags |= GROUP_ASSISTANT;
+            }
             if (slot.guid == m_mainAssistantGuid)
+            {
                 flags |= GROUP_MAIN_ASSISTANT;
+            }
             if (slot.guid == m_mainTankGuid)
+            {
                 flags |= GROUP_MAIN_TANK;
+            }
             return GroupFlagMask(flags);
         }
 

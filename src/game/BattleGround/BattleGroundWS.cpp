@@ -92,9 +92,13 @@ void BattleGroundWS::Update(uint32 diff)
         if (m_EndTimer <= diff)
         {
             if (m_TeamScores[TEAM_INDEX_ALLIANCE] > m_TeamScores[TEAM_INDEX_HORDE])
+            {
                 EndBattleGround(ALLIANCE);
+            }
             else if (m_TeamScores[TEAM_INDEX_ALLIANCE] < m_TeamScores[TEAM_INDEX_HORDE])
+            {
                 EndBattleGround(HORDE);
+            }
             else
             {
                 // if 0 => tie
@@ -108,7 +112,9 @@ void BattleGroundWS::Update(uint32 diff)
             uint32 minutesLeft = GetRemainingTimeInMinutes();
 
             if (minutesLeft != minutesLeftPrev)
+            {
                 UpdateWorldState(BG_WS_TIME_REMAINING, minutesLeft);
+            }
         }
     }
 }
@@ -598,9 +604,13 @@ void BattleGroundWS::EndBattleGround(Team winner)
 {
     // win reward
     if (winner == ALLIANCE)
+    {
         RewardHonorToTeam(GetBonusHonorFromKill(m_HonorWinKills), ALLIANCE);
+    }
     if (winner == HORDE)
+    {
         RewardHonorToTeam(GetBonusHonorFromKill(m_HonorWinKills), HORDE);
+    }
     // complete map_end rewards (even if no team wins)
     RewardHonorToTeam(GetBonusHonorFromKill(m_HonorEndKills), ALLIANCE);
     RewardHonorToTeam(GetBonusHonorFromKill(m_HonorEndKills), HORDE);

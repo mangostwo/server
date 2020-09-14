@@ -52,7 +52,9 @@ Pet::Pet(PetType type) :
         charmInfo->SetReactState(REACT_PASSIVE);
     }
     else if (type == PROTECTOR_PET)                         // always defensive
+    {
         charmInfo->SetReactState(REACT_DEFENSIVE);
+    }
     else if (type == GUARDIAN_PET)                          // always aggressive
     {
         charmInfo->SetReactState(REACT_AGGRESSIVE);
@@ -228,7 +230,9 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     }
 
     if (owner->IsFFAPvP())
+    {
         SetFFAPvP(true);
+    }
 
     SetCanModifyStats(true);
     InitStatsForLevel(petlevel);
@@ -265,7 +269,9 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
 
     // load action bar, if data broken will fill later by default spells.
     if (!is_temporary_summoned)
+    {
         m_charmInfo->LoadPetActionBar(fields[13].GetCppString());
+    }
 
     // since last save (in seconds)
     uint32 timediff = uint32(time(NULL) - fields[14].GetUInt64());
@@ -753,7 +759,9 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= NULL*/)
             // not save secondary permanent pet as current
             if (mode == PET_SAVE_AS_CURRENT && p_owner->GetTemporaryUnsummonedPetNumber() &&
                 p_owner->GetTemporaryUnsummonedPetNumber() != GetCharmInfo()->GetPetNumber())
-                { mode = PET_SAVE_NOT_IN_SLOT; }
+                {
+                    mode = PET_SAVE_NOT_IN_SLOT;
+                }
 
             if (mode == PET_SAVE_REAGENTS)
             {
@@ -798,7 +806,9 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= NULL*/)
         {
             case MINI_PET:
                 if (p_owner)
+                {
                     p_owner->SetMiniPet(NULL);
+                }
                 break;
             case PROTECTOR_PET:
             case GUARDIAN_PET:
@@ -1218,7 +1228,9 @@ uint32 Pet::GetCurrentFoodBenefitLevel(uint32 itemlevel)
     }
     // -15 or less
     else
-        { return 0; }                                           // food too low level
+    {
+        return 0;                                            // food too low level
+    }
 }
 
 void Pet::_LoadSpellCooldowns()
@@ -1644,11 +1656,15 @@ bool Pet::addSpell(uint32 spell_id, ActiveStates active /*= ACT_DECIDE*/, PetSpe
                 // skip learning spell and no rank spell case
                 uint32 rankSpellId = talentInfo->RankID[i];
                 if (!rankSpellId || rankSpellId == spell_id)
+                {
                     continue;
+                }
 
                 // skip unknown ranks
                 if (!HasSpell(rankSpellId))
+                {
                     continue;
+                }
                 removeSpell(rankSpellId, false, false);
             }
         }
@@ -1658,7 +1674,9 @@ bool Pet::addSpell(uint32 spell_id, ActiveStates active /*= ACT_DECIDE*/, PetSpe
         for (PetSpellMap::const_iterator itr2 = m_spells.begin(); itr2 != m_spells.end(); ++itr2)
         {
             if (itr2->second.state == PETSPELL_REMOVED)
+            {
                 continue;
+            }
 
             if (sSpellMgr.IsRankSpellDueToSpell(spellInfo, itr2->first))
             {
@@ -1668,7 +1686,9 @@ bool Pet::addSpell(uint32 spell_id, ActiveStates active /*= ACT_DECIDE*/, PetSpe
                     newspell.active = itr2->second.active;
 
                     if (newspell.active == ACT_ENABLED)
+                    {
                         ToggleAutocast(itr2->first, false);
+                    }
 
                     oldspell_id = itr2->first;
                     unlearnSpell(itr2->first, false, false);
@@ -1725,7 +1745,9 @@ bool Pet::learnSpell(uint32 spell_id)
             data << uint32(spell_id);
             ((Player*)owner)->GetSession()->SendPacket(&data);
 
-            { ((Player*)owner)->PetSpellInitialize(); }
+            {
+                ((Player*)owner)->PetSpellInitialize();
+            }
         }
     }
     return true;
@@ -1742,10 +1764,14 @@ void Pet::InitLevelupSpellsForLevel()
         {
             // will called first if level down
             if (itr->first > level)
+            {
                 unlearnSpell(itr->second, true);            // will learn prev rank if any
+            }
             // will called if level up
             else
+            {
                 learnSpell(itr->second);                    // will unlearn prev rank if any
+            }
         }
     }
 
@@ -1758,14 +1784,20 @@ void Pet::InitLevelupSpellsForLevel()
         {
             SpellEntry const* spellEntry = sSpellStore.LookupEntry(defSpells->spellid[i]);
             if (!spellEntry)
+            {
                 continue;
+            }
 
             // will called first if level down
             if (spellEntry->spellLevel > level)
+            {
                 unlearnSpell(spellEntry->Id, true);
+            }
             // will called if level up
             else
+            {
                 learnSpell(spellEntry->Id);
+            }
         }
     }
 }
@@ -1786,7 +1818,9 @@ bool Pet::unlearnSpell(uint32 spell_id, bool learn_prev, bool clear_ab)
                 }
             }
         }
-        { return true; }
+        {
+            return true;
+        }
     }
     return false;
 }
@@ -1819,9 +1853,13 @@ bool Pet::removeSpell(uint32 spell_id, bool learn_prev, bool clear_ab)
     if (talentCost > 0)
     {
         if (m_usedTalentCount > talentCost)
+        {
             m_usedTalentCount -= talentCost;
+        }
         else
+        {
             m_usedTalentCount = 0;
+        }
 
         UpdateFreeTalentPoints(false);
     }
@@ -1886,7 +1924,9 @@ bool Pet::resetTalents(bool no_cost)
 
     // not need after this call
     if (((Player*)owner)->HasAtLoginFlag(AT_LOGIN_RESET_PET_TALENTS))
+    {
         ((Player*)owner)->RemoveAtLoginFlag(AT_LOGIN_RESET_PET_TALENTS, true);
+    }
 
     CreatureInfo const* ci = GetCreatureInfo();
     if (!ci)
@@ -1930,15 +1970,21 @@ bool Pet::resetTalents(bool no_cost)
         TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(talentInfo->TalentTab);
 
         if (!talentTabInfo)
+        {
             continue;
+        }
 
         // unlearn only talents for pets family talent type
         if (!((1 << pet_family->petTalentType) & talentTabInfo->petTalentMask))
+        {
             continue;
+        }
 
         for (int j = 0; j < MAX_TALENT_RANK; ++j)
             if (talentInfo->RankID[j])
+            {
                 removeSpell(talentInfo->RankID[j], !IsPassiveSpell(talentInfo->RankID[j]), false);
+            }
     }
 
     UpdateFreeTalentPoints(false);
@@ -1958,11 +2004,15 @@ void Pet::resetTalentsForAllPetsOf(Player* owner, Pet* online_pet /*= NULL*/)
 {
     // not need after this call
     if (((Player*)owner)->HasAtLoginFlag(AT_LOGIN_RESET_PET_TALENTS))
+    {
         ((Player*)owner)->RemoveAtLoginFlag(AT_LOGIN_RESET_PET_TALENTS, true);
+    }
 
     // reset for online
     if (online_pet)
+    {
         online_pet->resetTalents(true);
+    }
 
     // now need only reset for offline pets (all pets except online case)
     uint32 except_petnumber = online_pet ? online_pet->GetCharmInfo()->GetPetNumber() : 0;
@@ -1999,7 +2049,9 @@ void Pet::resetTalentsForAllPetsOf(Player* owner, Pet* online_pet /*= NULL*/)
         uint32 id = fields[0].GetUInt32();
 
         if (need_comma)
+        {
             ss << ",";
+        }
 
         ss << id;
 
@@ -2019,10 +2071,14 @@ void Pet::resetTalentsForAllPetsOf(Player* owner, Pet* online_pet /*= NULL*/)
         uint32 spell = fields[0].GetUInt32();
 
         if (!GetTalentSpellCost(spell))
+        {
             continue;
+        }
 
         if (need_execute)
+        {
             ss << ",";
+        }
 
         ss << spell;
 
@@ -2054,15 +2110,23 @@ void Pet::UpdateFreeTalentPoints(bool resetIfNeed)
         {
             Unit* owner = GetOwner();
             if (!owner || owner->GetTypeId() != TYPEID_PLAYER || ((Player*)owner)->GetSession()->GetSecurity() < SEC_ADMINISTRATOR)
+            {
                 resetTalents(true);
+            }
             else
+            {
                 SetFreeTalentPoints(0);
+            }
         }
         else
+        {
             SetFreeTalentPoints(0);
+        }
     }
     else
+    {
         SetFreeTalentPoints(talentPointsForLevel - m_usedTalentCount);
+    }
 }
 
 void Pet::InitTalentForLevel()
@@ -2076,7 +2140,9 @@ void Pet::InitTalentForLevel()
     }
 
     if (!m_loading)
+    {
         ((Player*)owner)->SendTalentsInfoData(true);
+    }
 }
 
 uint32 Pet::resetTalentsCost() const
@@ -2110,7 +2176,9 @@ uint8 Pet::GetMaxTalentPointsForLevel(uint32 level)
     uint8 points = (level >= 20) ? ((level - 16) / 4) : 0;
     // Mod points from owner SPELL_AURA_MOD_PET_TALENT_POINTS
     if (Unit* owner = GetOwner())
+    {
         points += owner->GetTotalAuraModifier(SPELL_AURA_MOD_PET_TALENT_POINTS);
+    }
     return points;
 }
 
@@ -2129,7 +2197,9 @@ void Pet::ToggleAutocast(uint32 spellid, bool apply)
     if (apply)
     {
         for (i = 0; i < m_autospells.size() && m_autospells[i] != spellid; ++i)
-            { ; }                                               // just search
+        {
+            ;                                                // just search
+        }
 
         if (i == m_autospells.size())
         {
@@ -2149,7 +2219,9 @@ void Pet::ToggleAutocast(uint32 spellid, bool apply)
     {
         AutoSpellList::iterator itr2 = m_autospells.begin();
         for (i = 0; i < m_autospells.size() && m_autospells[i] != spellid; ++i, ++itr2)
-            { ; }                                               // just search
+        {
+            ;                                                // just search
+        }
 
         if (i < m_autospells.size())
         {
@@ -2289,11 +2361,17 @@ void Pet::CastOwnerTalentAuras()
     {
         // clear any existing Ferocious Inspiration auras
         if (HasAura(75593))
+        {
             RemoveAurasDueToSpell(75593);
+        }
         if (HasAura(75446))
+        {
             RemoveAurasDueToSpell(75446);
+        }
         if (HasAura(75447))
+        {
             RemoveAurasDueToSpell(75447);
+        }
 
         if (IsAlive())
         {
@@ -2373,7 +2451,9 @@ void Pet::SynchronizeLevelWithOwner()
                 GivePetLevel(owner->getLevel());
             }
             else if (getLevel() + 5 < owner->getLevel())
+            {
                 GivePetLevel(owner->getLevel() - 5);
+            }
             break;
         default:
             break;
@@ -2408,7 +2488,9 @@ void Pet::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
     Unit* unitOwner = GetOwner();
     Player *owner = unitOwner ? unitOwner->ToPlayer() : NULL;
     if (!owner)
+    {
         return Unit::UpdateSpeed(mtype, forced, ratio);         // NPC pets are usual creatures
+    }
 
     int32 main_speed_mod = 0;
     float stack_bonus = 1.0f;
@@ -2424,10 +2506,14 @@ void Pet::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
             AuraList const& auras = GetAurasByType(SPELL_AURA_MOD_INCREASE_SPEED);
             for (AuraList::const_iterator it = auras.begin(); it != auras.end(); ++it)
                 if ((*it)->GetId() != 19582)                        // exclude the aura influenced by Bestial Swiftness
+                {
                     main_speed_mod = std::max((*it)->GetBasePoints(), main_speed_mod);
+                }
         }
         else
+        {
             main_speed_mod = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_SPEED);
+        }
 
         stack_bonus = GetTotalAuraMultiplier(SPELL_AURA_MOD_SPEED_ALWAYS);
         non_stack_bonus = (100.0f + GetMaxPositiveAuraModifier(SPELL_AURA_MOD_SPEED_NOT_STACK)) / 100.0f;
@@ -2460,7 +2546,9 @@ void Pet::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
         float speed = std::max(non_stack_bonus, stack_bonus) * ownerSpeed;
 
         if (main_speed_mod)
-        speed = speed * (100.0f + main_speed_mod) / 100.0f;
+        {
+            speed = speed * (100.0f + main_speed_mod) / 100.0f;
+        }
 
     switch (mtype)
     {

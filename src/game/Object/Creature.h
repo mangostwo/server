@@ -173,7 +173,9 @@ struct CreatureInfo
             return SKILL_ENGINEERING;
         }
         else
-            { return SKILL_SKINNING; }                          // normal case
+        {
+            return SKILL_SKINNING;                           // normal case
+        }
     }
 
     bool IsExotic() const

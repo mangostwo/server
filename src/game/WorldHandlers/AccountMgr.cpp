@@ -44,18 +44,24 @@ AccountMgr::~AccountMgr()
 AccountOpResult AccountMgr::CreateAccount(std::string username, std::string password)
 {
     if (utf8length(username) > MAX_ACCOUNT_STR)
-        { return AOR_NAME_TOO_LONG; }                           // username's too long
+    {
+        return AOR_NAME_TOO_LONG;                            // username's too long
+    }
 
     normalizeString(username);
     normalizeString(password);
 
     if (GetId(username))
     {
-        { return AOR_NAME_ALREADY_EXIST; }                       // username does already exist
+        {
+            return AOR_NAME_ALREADY_EXIST;                        // username does already exist
+        }
     }
 
     if (!LoginDatabase.PExecute("INSERT INTO `account` (`username`,`sha_pass_hash`,`joindate`) VALUES ('%s','%s',NOW())", username.c_str(), CalculateShaPassHash(username, password).c_str()))
-        { return AOR_DB_INTERNAL_ERROR; }                       // unexpected error
+    {
+        return AOR_DB_INTERNAL_ERROR;                        // unexpected error
+    }
     LoginDatabase.Execute("INSERT INTO `realmcharacters` (`realmid`, `acctid`, `numchars`) SELECT `realmlist`.`id`, `account`.`id`, 0 FROM `realmlist`,`account` LEFT JOIN `realmcharacters` ON `acctid`=`account`.`id` WHERE `acctid` IS NULL");
 
     return AOR_OK;                                          // everything's fine
@@ -64,7 +70,9 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
 AccountOpResult AccountMgr::CreateAccount(std::string username, std::string password, uint32 expansion)
 {
     if (utf8length(username) > MAX_ACCOUNT_STR)
+    {
         return AOR_NAME_TOO_LONG;                           // username's too long
+    }
 
     normalizeString(username);
     normalizeString(password);
@@ -75,7 +83,9 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
     }
 
     if (!LoginDatabase.PExecute("INSERT INTO `account`(`username`,`sha_pass_hash`,`joindate`,`expansion`) VALUES('%s','%s',NOW(),'%u')", username.c_str(), CalculateShaPassHash(username, password).c_str(), expansion))
+    {
         return AOR_DB_INTERNAL_ERROR;                       // unexpected error
+    }
     LoginDatabase.Execute("INSERT INTO `realmcharacters` (`realmid`, `acctid`, `numchars`) SELECT `realmlist`.`id`, `account`.`id`, 0 FROM `realmlist`,`account` LEFT JOIN `realmcharacters` ON `acctid`=`account`.`id` WHERE `acctid` IS NULL");
 
     return AOR_OK;                                          // everything's fine
@@ -85,7 +95,9 @@ AccountOpResult AccountMgr::DeleteAccount(uint32 accid)
 {
     QueryResult* result = LoginDatabase.PQuery("SELECT 1 FROM `account` WHERE `id`='%u'", accid);
     if (!result)
-        { return AOR_NAME_NOT_EXIST; }                          // account doesn't exist
+    {
+        return AOR_NAME_NOT_EXIST;                           // account doesn't exist
+    }
     delete result;
 
     // existing characters list
@@ -119,7 +131,9 @@ AccountOpResult AccountMgr::DeleteAccount(uint32 accid)
     LoginDatabase.CommitTransaction();
 
     if (!res)
-        { return AOR_DB_INTERNAL_ERROR; }                       // unexpected error;
+    {
+        return AOR_DB_INTERNAL_ERROR;                        // unexpected error;
+    }
 
     return AOR_OK;
 }
@@ -128,7 +142,9 @@ AccountOpResult AccountMgr::ChangeUsername(uint32 accid, std::string new_uname, 
 {
     QueryResult* result = LoginDatabase.PQuery("SELECT 1 FROM `account` WHERE `id`='%u'", accid);
     if (!result)
-        { return AOR_NAME_NOT_EXIST; }                          // account doesn't exist
+    {
+        return AOR_NAME_NOT_EXIST;                           // account doesn't exist
+    }
     delete result;
 
     if (utf8length(new_uname) > MAX_ACCOUNT_STR)
@@ -149,7 +165,9 @@ AccountOpResult AccountMgr::ChangeUsername(uint32 accid, std::string new_uname, 
 
     if (!LoginDatabase.PExecute("UPDATE `account` SET `v`='0',`s`='0',`username`='%s',`sha_pass_hash`='%s' WHERE `id`='%u'", safe_new_uname.c_str(),
                                 CalculateShaPassHash(new_uname, new_passwd).c_str(), accid))
-        { return AOR_DB_INTERNAL_ERROR; }                       // unexpected error
+                                {
+                                    return AOR_DB_INTERNAL_ERROR;                        // unexpected error
+                                }
 
     return AOR_OK;
 }
@@ -159,7 +177,9 @@ AccountOpResult AccountMgr::ChangePassword(uint32 accid, std::string new_passwd)
     std::string username;
 
     if (!GetName(accid, username))
-        { return AOR_NAME_NOT_EXIST; }                          // account doesn't exist
+    {
+        return AOR_NAME_NOT_EXIST;                           // account doesn't exist
+    }
 
     if (utf8length(new_passwd) > MAX_ACCOUNT_STR)
     {
@@ -172,7 +192,9 @@ AccountOpResult AccountMgr::ChangePassword(uint32 accid, std::string new_passwd)
     // also reset s and v to force update at next realmd login
     if (!LoginDatabase.PExecute("UPDATE `account` SET `v`='0', `s`='0', `sha_pass_hash`='%s' WHERE `id`='%u'",
                                 CalculateShaPassHash(username, new_passwd).c_str(), accid))
-        { return AOR_DB_INTERNAL_ERROR; }                       // unexpected error
+                                {
+                                    return AOR_DB_INTERNAL_ERROR;                        // unexpected error
+                                }
 
     return AOR_OK;
 }

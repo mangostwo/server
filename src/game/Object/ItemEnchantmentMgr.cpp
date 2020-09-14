@@ -141,13 +141,19 @@ uint32 GenerateEnchSuffixFactor(uint32 item_id)
     ItemPrototype const* itemProto = ObjectMgr::GetItemPrototype(item_id);
 
     if (!itemProto)
+    {
         return 0;
+    }
     if (!itemProto->RandomSuffix)
+    {
         return 0;
+    }
 
     RandomPropertiesPointsEntry const* randomProperty = sRandomPropertiesPointsStore.LookupEntry(itemProto->ItemLevel);
     if (!randomProperty)
+    {
         return 0;
+    }
 
     uint32 suffixFactor;
     switch (itemProto->InventoryType)

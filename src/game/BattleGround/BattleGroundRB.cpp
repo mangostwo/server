@@ -50,7 +50,9 @@ void BattleGroundRB::UpdatePlayerScore(Player* source, uint32 type, uint32 value
     BattleGroundScoreMap::iterator itr = m_PlayerScores.find(source->GetObjectGuid());
 
     if (itr == m_PlayerScores.end())                        // player not found...
+    {
         return;
+    }
 
     BattleGround::UpdatePlayerScore(source, type, value);
 }

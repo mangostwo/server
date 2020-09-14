@@ -135,12 +135,16 @@ WorldSession::~WorldSession()
 
     // Warden
     if (_warden)
+    {
         delete _warden;
+    }
 
     ///- empty incoming packet queue
     WorldPacket* packet = NULL;
     while (_recvQueue.next(packet))
-        { delete packet; }
+    {
+        delete packet;
+    }
 }
 
 void WorldSession::SizeError(WorldPacket const& packet, uint32 size) const
@@ -271,7 +275,9 @@ bool WorldSession::Update(PacketFilter& updater)
                     }
                     else
                         // not expected _player or must checked in packet hanlder
-                        { ExecuteOpcode(opHandle, packet); }
+                    {
+                        ExecuteOpcode(opHandle, packet);
+                    }
                     break;
                 case STATUS_TRANSFER:
                     if (!_player)
@@ -298,7 +304,9 @@ bool WorldSession::Update(PacketFilter& updater)
                     // single from authed time opcodes send in to after logout time
                     // and before other STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT opcodes.
                     if (packet->GetOpcode() != CMSG_SET_ACTIVE_VOICE_CHANNEL)
+                    {
                         m_playerRecentlyLogout = false;
+                    }
 
                     ExecuteOpcode(opHandle, packet);
                     break;
@@ -350,7 +358,9 @@ bool WorldSession::Update(PacketFilter& updater)
 
     // Warden
     if (m_Socket && !m_Socket->IsClosed() && _warden)
+    {
         _warden->Update();
+    }
 
     // check if we are safe to proceed with logout
     // logout procedure should happen only in World::UpdateSessions() method!!!
@@ -365,10 +375,14 @@ bool WorldSession::Update(PacketFilter& updater)
 
         // Warden
         if (m_Socket && GetPlayer() && _warden)
+        {
             _warden->Update();
+        }
 
         if (!m_Socket)
-            { return false; }                                   // Will remove this session from the world session map
+        {
+            return false;                                    // Will remove this session from the world session map
+        }
     }
 
     return true;
@@ -379,7 +393,9 @@ void WorldSession::LogoutPlayer(bool Save)
 {
     // finish pending transfers before starting the logout
     while (_player && _player->IsBeingTeleportedFar())
-        { HandleMoveWorldportAckOpcode(); }
+    {
+        HandleMoveWorldportAckOpcode();
+    }
 
     m_playerLogout = true;
     m_playerSave = Save;
@@ -470,7 +486,9 @@ void WorldSession::LogoutPlayer(bool Save)
         // FG: finish pending transfers after starting the logout
         // this should fix players beeing able to logout and login back with full hp at death position
         while (_player->IsBeingTeleportedFar())
-            { HandleMoveWorldportAckOpcode(); }
+        {
+            HandleMoveWorldportAckOpcode();
+        }
 
         for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
         {
@@ -709,7 +727,9 @@ void WorldSession::LoadAccountData(QueryResult* result, uint32 mask)
 {
     for (uint32 i = 0; i < NUM_ACCOUNT_DATA_TYPES; ++i)
         if (mask & (1 << i))
+        {
             m_accountData[i] = AccountData();
+        }
 
     if (!result)
     {
@@ -796,7 +816,9 @@ void WorldSession::SendAccountDataTimes(uint32 mask)
     data << uint32(mask);                                   // type mask
     for (uint32 i = 0; i < NUM_ACCOUNT_DATA_TYPES; ++i)
         if (mask & (1 << i))
+        {
             data << uint32(GetAccountData(AccountDataType(i))->Time);// also unix time
+        }
     SendPacket(&data);
 }
 
@@ -955,10 +977,14 @@ void WorldSession::ReadAddonsInfo(WorldPacket& data)
         addonInfo >> unk2;
 
         if (addonInfo.rpos() != addonInfo.size())
+        {
             DEBUG_LOG("packet under read!");
+        }
     }
     else
+    {
         sLog.outError("Addon packet uncompress error!");
+    }
 }
 
 void WorldSession::SendAddonsInfo()
@@ -997,7 +1023,9 @@ void WorldSession::SendAddonsInfo()
             uint8 unk2 = (itr->CRC != 0x4c1c776d);          // If addon is Standard addon CRC
             data << uint8(unk2);                            // if 1, than add addon public signature
             if (unk2)                                       // if CRC is wrong, add public key (client need it)
+            {
                 data.append(tdata, sizeof(tdata));
+            }
 
             data << uint32(0);
         }
@@ -1034,7 +1062,9 @@ void WorldSession::SetPlayer(Player* plr)
 
     // set m_GUID that can be used while player loggined and later until m_playerRecentlyLogout not reset
     if (_player)
+    {
         m_GUIDLow = _player->GetGUIDLow();
+    }
 }
 
 void WorldSession::SendRedirectClient(std::string& ip, uint16 port)

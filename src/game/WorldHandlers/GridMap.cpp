@@ -661,7 +661,9 @@ GridMapLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 Re
                     {
                         area = GetAreaEntryByAreaID(area->zone);
                         if (area)
+                        {
                             overrideLiquid = area->LiquidTypeOverride[liquidEntry->Type];
+                        }
                     }
 
                     if (LiquidTypeEntry const* liq = sLiquidTypeStore.LookupEntry(overrideLiquid))
@@ -953,7 +955,9 @@ float TerrainInfo::GetHeightStatic(float x, float y, float z, bool useVmaps/*=tr
             // this prevent case when original Z "too high above ground and vmap height search fail"
             // this will not affect most normal cases (no map in instance, or stay at ground at continent)
             if (mapHeight > INVALID_HEIGHT && z2 - mapHeight > maxSearchDist)
-                { maxSearchDist = z2 - mapHeight + 1.0f; }      // 1.0 make sure that we not fail for case when map height near but above for vamp height
+            {
+                maxSearchDist = z2 - mapHeight + 1.0f;       // 1.0 make sure that we not fail for case when map height near but above for vamp height
+            }
 
             // look from a bit higher pos to find the floor
             vmapHeight = vmgr->getHeight(GetMapId(), x, y, z2, maxSearchDist);
@@ -986,10 +990,14 @@ float TerrainInfo::GetHeightStatic(float x, float y, float z, bool useVmaps/*=tr
                 return vmapHeight;
             }
             else
-                { return mapHeight; }                           // better use .map surface height
+            {
+                return mapHeight;                            // better use .map surface height
+            }
         }
         else
-            { return vmapHeight; }                              // we have only vmapHeight (if have)
+        {
+            return vmapHeight;                               // we have only vmapHeight (if have)
+        }
     }
 
     return mapHeight;
@@ -1021,7 +1029,9 @@ inline bool IsOutdoorWMO(uint32 mogpFlags, WMOAreaTableEntry const* wmoEntry, Ar
         }
 
         if ((wmoEntry->Flags & 2) != 0)
+        {
             outdoor = false;
+        }
     }
     return outdoor;
 }
@@ -1109,7 +1119,9 @@ uint16 TerrainInfo::GetAreaFlag(float x, float y, float z, bool* isOutdoors) con
     if (isOutdoors)
     {
         if (haveAreaInfo)
+        {
             *isOutdoors = IsOutdoorWMO(mogpFlags, wmoEntry, atEntry);
+        }
         else
         {
             *isOutdoors = true;
@@ -1164,11 +1176,15 @@ GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint
             {
                 // hardcoded in client like this
                 if (GetMapId() == 530 && liquid_type == 2)
+                {
                     liquid_type = 15;
+                }
 
                 uint32 liquidFlagType = 0;
                 if (LiquidTypeEntry const* liq = sLiquidTypeStore.LookupEntry(liquid_type))
+                {
                     liquidFlagType = liq->Type;
+                }
 
                 if (liquid_type && liquid_type < 21)
                 {
@@ -1179,7 +1195,9 @@ GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint
                         {
                             area = GetAreaEntryByAreaID(area->zone);
                             if (area)
+                            {
                                 overrideLiquid = area->LiquidTypeOverride[liquidFlagType];
+                            }
                         }
 
                         if (LiquidTypeEntry const* liq = sLiquidTypeStore.LookupEntry(overrideLiquid))
@@ -1227,7 +1245,9 @@ GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint
             {
                 // hardcoded in client like this
                 if (GetMapId() == 530 && map_data.entry == 2)
+                {
                     map_data.entry = 15;
+                }
                 *data = map_data;
             }
             return map_result;

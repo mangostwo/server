@@ -459,9 +459,13 @@ void WorldSession::HandleMailReturnToSender(WorldPacket& recv_data)
     {
         MailDraft draft;
         if (m->mailTemplateId)
-            { draft.SetMailTemplate(m->mailTemplateId, false); }// items already included
+        {
+            draft.SetMailTemplate(m->mailTemplateId, false); // items already included
+        }
         else
+        {
             draft.SetSubjectAndBody(m->subject, m->body);
+        }
 
         if (m->HasItems())
         {
@@ -802,7 +806,9 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket& recv_data)
         bodyItem->SetText(mailTemplateEntry->content[GetSessionDbcLocale()]);
     }
     else
+    {
         bodyItem->SetText(m->body);
+    }
 
     bodyItem->SetGuidValue(ITEM_FIELD_CREATOR, ObjectGuid(HIGHGUID_PLAYER, m->sender));
     bodyItem->SetFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_READABLE | ITEM_DYNFLAG_UNK15 | ITEM_DYNFLAG_UNK16);

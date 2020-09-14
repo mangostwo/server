@@ -64,7 +64,9 @@ void BattleGroundNA::AddPlayer(Player* plr)
 void BattleGroundNA::RemovePlayer(Player* /*plr*/, ObjectGuid /*guid*/)
 {
     if (GetStatus() == STATUS_WAIT_LEAVE)
+    {
         return;
+    }
 
     UpdateWorldState(0xa0f, GetAlivePlayersCountByTeam(ALLIANCE));
     UpdateWorldState(0xa10, GetAlivePlayersCountByTeam(HORDE));
@@ -75,7 +77,9 @@ void BattleGroundNA::RemovePlayer(Player* /*plr*/, ObjectGuid /*guid*/)
 void BattleGroundNA::HandleKillPlayer(Player* player, Player* killer)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
+    {
         return;
+    }
 
     if (!killer)
     {

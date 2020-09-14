@@ -372,7 +372,9 @@ bool ChatHandler::HandleAppearCommand(char* args)
             }
 
             if (cMap->IsRaid())
+            {
                 _player->SetRaidDifficulty(target->GetRaidDifficulty());
+            }
             else
             {
                 _player->SetDungeonDifficulty(target->GetDungeonDifficulty());

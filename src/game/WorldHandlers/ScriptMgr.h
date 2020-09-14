@@ -581,7 +581,9 @@ class ScriptMgr
         ScriptChainMap const* GetScriptChainMap(DBScriptType type)
         {
             if ((type != DBS_INTERNAL) && type < DBS_END)
+            {
                 return &m_dbScripts[type];
+            }
 
             return NULL;
         }

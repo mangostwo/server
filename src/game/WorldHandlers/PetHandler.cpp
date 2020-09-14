@@ -173,7 +173,9 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                         }
                         else
                             // dismissing a summoned pet is like killing them (this prevents returning a soulshard...)
-                            { p->SetDeathState(CORPSE); }
+                        {
+                            p->SetDeathState(CORPSE);
+                        }
                     }
                     else                                    // charmed
                     {
@@ -303,12 +305,16 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
             else
             {
                 if (pet->HasAuraType(SPELL_AURA_MOD_POSSESS))
+                {
                     Spell::SendCastResult(GetPlayer(), spellInfo, 0, result);
+                }
                 else
                 {
                     Unit* owner = pet->GetCharmerOrOwner();
                     if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+                    {
                         Spell::SendCastResult((Player*)owner, spellInfo, 0, result, true);
+                    }
                 }
 
                 if (!((Creature*)pet)->HasSpellCooldown(spellid))
@@ -378,7 +384,9 @@ void WorldSession::SendPetNameQuery(ObjectGuid petguid, uint32 petnumber)
         data << uint32(0);
         data << uint8(0);
         _player->GetSession()->SendPacket(&data);
-        { return; }
+        {
+            return;
+        }
     }
 
     char const* name = pet->GetName();
@@ -404,7 +412,9 @@ void WorldSession::SendPetNameQuery(ObjectGuid petguid, uint32 petnumber)
         }
     }
     else
+    {
         data << uint8(0);
+    }
 
     _player->GetSession()->SendPacket(&data);
 }
@@ -482,7 +492,9 @@ void WorldSession::HandlePetSetAction(WorldPacket& recv_data)
             UnitActionBarEntry const* actionEntry_1 = charmInfo->GetActionBarEntry(position[1]);
             if (!actionEntry_1 || spell_id_0 != actionEntry_1->GetAction() ||
                 act_state_0 != actionEntry_1->GetType())
-                { return; }
+                {
+                    return;
+                }
         }
 
         uint8 act_state_1 = UNIT_ACTION_BUTTON_TYPE(data[1]);
@@ -492,7 +504,9 @@ void WorldSession::HandlePetSetAction(WorldPacket& recv_data)
             UnitActionBarEntry const* actionEntry_0 = charmInfo->GetActionBarEntry(position[0]);
             if (!actionEntry_0 || spell_id_1 != actionEntry_0->GetAction() ||
                 act_state_1 != actionEntry_0->GetType())
-                { return; }
+                {
+                    return;
+                }
         }
     }
 
@@ -555,7 +569,9 @@ void WorldSession::HandlePetRename(WorldPacket& recv_data)
     if (!pet || pet->getPetType() != HUNTER_PET ||
         !pet->HasByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED) ||
         pet->GetOwnerGuid() != _player->GetObjectGuid() || !pet->GetCharmInfo())
-        { return; }
+        {
+            return;
+        }
 
     PetNameInvalidReason res = ObjectMgr::CheckPetName(name);
     if (res != PET_NAME_SUCCESS)
@@ -706,7 +722,9 @@ void WorldSession::HandlePetSpellAutocastOpcode(WorldPacket& recvPacket)
 
     if (pet->IsCharmed())
         // state can be used as boolean
-        { pet->GetCharmInfo()->ToggleCreatureAutocast(spellid, state); }
+    {
+        pet->GetCharmInfo()->ToggleCreatureAutocast(spellid, state);
+    }
     else
     {
         ((Pet*)pet)->ToggleAutocast(spellid, state);
@@ -790,7 +808,9 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     {
         Unit* owner = pet->GetCharmerOrOwner();
         if (owner && owner->GetTypeId() == TYPEID_PLAYER && !triggeredByAura)
+        {
             Spell::SendCastResult((Player*)owner, spellInfo, 0, result, true);
+        }
 
         if (!pet->HasSpellCooldown(spellid) && !triggeredByAura)
         {
@@ -816,7 +836,9 @@ void WorldSession::SendPetNameInvalid(uint32 error, const std::string& name, Dec
         }
     }
     else
+    {
         data << uint8(0);
+    }
     SendPacket(&data);
 }
 

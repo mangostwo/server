@@ -65,7 +65,9 @@ void WorldSession::SendNameQueryOpcode(Player* p)
         }
     }
     else
+    {
         data << uint8(0);                                   // is not declined
+    }
 
     SendPacket(&data);
 }
@@ -137,7 +139,9 @@ void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult* result, uint32
         }
     }
     else
+    {
         data << uint8(0);                                   // is not declined
+    }
 
     session->SendPacket(&data);
     delete result;
@@ -207,7 +211,9 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recv_data)
         data << float(ci->PowerMultiplier);                  // power modifier
         data << uint8(ci->RacialLeader);
         for (uint32 i = 0; i < 6; ++i)
+        {
             data << uint32(ci->QuestItems[i]);              // itemId[6], quest drop
+        }
         data << uint32(ci->MovementTemplateId);             // CreatureMovementInfo.dbc
         SendPacket(&data);
         DEBUG_LOG("WORLD: Sent SMSG_CREATURE_QUERY_RESPONSE");
@@ -249,9 +255,13 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recv_data)
             if (gl)
             {
                 if (gl->Name.size() > size_t(loc_idx) && !gl->Name[loc_idx].empty())
+                {
                     Name = gl->Name[loc_idx];
+                }
                 if (gl->CastBarCaption.size() > size_t(loc_idx) && !gl->CastBarCaption[loc_idx].empty())
+                {
                     CastBarCaption = gl->CastBarCaption[loc_idx];
+                }
             }
         }
         DETAIL_LOG("WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u. ", info->name, entryID);
@@ -267,7 +277,9 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recv_data)
         data.append(info->raw.data, 24);
         data << float(info->size);                          // go size
         for (uint32 i = 0; i < 6; ++i)
+        {
             data << uint32(info->questItems[i]);            // itemId[6], quest drop
+        }
         SendPacket(&data);
         DEBUG_LOG("WORLD: Sent SMSG_GAMEOBJECT_QUERY_RESPONSE");
     }
@@ -523,7 +535,9 @@ void WorldSession::HandleQuestPOIQueryOpcode(WorldPacket& recv_data)
         uint16 questSlot = _player->FindQuestSlot(questId);
 
         if (questSlot != MAX_QUEST_LOG_SIZE)
+        {
             questOk = _player->GetQuestSlotQuestId(questSlot) == questId;
+        }
 
         if (questOk)
         {

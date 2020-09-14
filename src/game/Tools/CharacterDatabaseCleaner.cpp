@@ -50,7 +50,9 @@ void CharacterDatabaseCleaner::CleanDatabase()
 
     // clean up
     if (flags & CLEANING_FLAG_ACHIEVEMENT_PROGRESS)
+    {
         CleanCharacterAchievementProgress();
+    }
     if (flags & CLEANING_FLAG_SKILLS)
     {
         CleanCharacterSkills();

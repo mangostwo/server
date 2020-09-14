@@ -131,11 +131,15 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
                 }
             }
             else if (IsEventFlagsFitForNormalMap(i->event_flags))
+            {
                 ++events_count;
+            }
         }
         // EventMap had events but they were not added because they must be for instance
         if (events_count == 0)
+        {
             sLog.outErrorEventAI("Creature %u has events but no events added to list because of instance flags (spawned in map %u, difficulty %u).", m_creature->GetEntry(), m_creature->GetMapId(), m_creature->GetMap()->GetDifficulty());
+        }
         else
         {
             m_CreatureEventAIList.reserve(events_count);
@@ -157,7 +161,9 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
                     }
                 }
                 else if (IsEventFlagsFitForNormalMap(i->event_flags))
+                {
                     m_CreatureEventAIList.push_back(CreatureEventAIHolder(*i));
+                }
             }
         }
     }
@@ -1451,7 +1457,9 @@ void CreatureEventAI::ReceiveAIEvent(AIEventType eventType, Creature* pSender, U
     {
         if (itr->Event.event_type == EVENT_T_RECEIVE_AI_EVENT &&
             itr->Event.receiveAIEvent.eventType == eventType && (!itr->Event.receiveAIEvent.senderEntry || itr->Event.receiveAIEvent.senderEntry == pSender->GetEntry()))
-            { ProcessEvent(*itr, pInvoker, pSender); }
+            {
+                ProcessEvent(*itr, pInvoker, pSender);
+            }
     }
 }
 
@@ -1526,7 +1534,9 @@ void CreatureEventAI::MoveInLineOfSight(Unit* who)
                     // if friendly event&&who is not hostile OR hostile event&&who is hostile
                     if (((*itr).Event.ooc_los.noHostile && !m_creature->IsHostileTo(who)) ||
                         ((!(*itr).Event.ooc_los.noHostile) && m_creature->IsHostileTo(who)))
-                        { ProcessEvent(*itr, who); }
+                    {
+                        ProcessEvent(*itr, who);
+                    }
                 }
             }
         }
@@ -1845,7 +1855,9 @@ void CreatureEventAI::DamageTaken(Unit* dealer, uint32& damage)
         AIEventType sendEvent[HEALTH_STEPS] = { AI_EVENT_LOST_SOME_HEALTH, AI_EVENT_LOST_HEALTH, AI_EVENT_CRITICAL_HEALTH };
 
         if (newHealthPercent > healthSteps[step])
-            { return; }                                         // Not reached the next mark
+        {
+            return;                                          // Not reached the next mark
+        }
 
         // search for highest reached mark (with actual event attached)
         for (uint32 i = HEALTH_STEPS - 1; i > step; --i)

@@ -47,7 +47,9 @@ void WorldSession::HandleInspectArenaTeamsOpcode(WorldPacket& recv_data)
             if (uint32 a_id = plr->GetArenaTeamId(i))
             {
                 if (ArenaTeam* at = sObjectMgr.GetArenaTeamById(a_id))
+                {
                     at->InspectStats(this, plr->GetObjectGuid());
+                }
             }
         }
     }
@@ -75,7 +77,9 @@ void WorldSession::HandleArenaTeamRosterOpcode(WorldPacket& recv_data)
     recv_data >> ArenaTeamId;
 
     if (ArenaTeam* arenateam = sObjectMgr.GetArenaTeamById(ArenaTeamId))
+    {
         arenateam->Roster(this);
+    }
 }
 
 void WorldSession::HandleArenaTeamInviteOpcode(WorldPacket& recv_data)

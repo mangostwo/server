@@ -380,14 +380,20 @@ void WorldSession::SendPetitionQueryOpcode(ObjectGuid petitionguid)
     data << uint32(0);                                      // 13 count of next strings?
 
     for (int i = 0; i < 10; ++i)
+    {
         data << uint8(0);                                   // some string
+    }
 
     data << uint32(0);                                      // 14
 
     if (type == 9)
+    {
         data << uint32(0);                                  // 15 0 - guild, 1 - arena team
+    }
     else
+    {
         data << uint32(1);
+    }
 
     SendPacket(&data);
 }
@@ -507,9 +513,13 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket& recv_data)
         GetPlayer()->GetTeam() != sObjectMgr.GetPlayerTeamByGUID(ownerGuid))
     {
         if (type != 9)
+        {
             SendArenaTeamCommandResult(ERR_ARENA_TEAM_INVITE_SS, "", "", ERR_ARENA_TEAM_NOT_ALLIED);
+        }
         else
+        {
             SendGuildCommandResult(GUILD_CREATE_S, "", ERR_GUILD_NOT_ALLIED);
+        }
         return;
     }
 
@@ -677,9 +687,13 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket& recv_data)
     if (!sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GUILD) && GetPlayer()->GetTeam() != player->GetTeam())
     {
         if (type != 9)
+        {
             SendArenaTeamCommandResult(ERR_ARENA_TEAM_INVITE_SS, "", "", ERR_ARENA_TEAM_NOT_ALLIED);
+        }
         else
+        {
             SendGuildCommandResult(GUILD_CREATE_S, "", ERR_GUILD_NOT_ALLIED);
+        }
         return;
     }
 
@@ -898,7 +912,9 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket& recv_data)
 
             ObjectGuid signGuid = ObjectGuid(HIGHGUID_PLAYER, fields[0].GetUInt32());
             if (!signGuid)
+            {
                 continue;
+            }
 
             guild->AddMember(signGuid, guild->GetLowestRank());
             result->NextRow();
@@ -930,7 +946,9 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket& recv_data)
             Field* fields = result->Fetch();
             ObjectGuid memberGUID = ObjectGuid(HIGHGUID_PLAYER, fields[0].GetUInt32());
             if (!memberGUID)
+            {
                 continue;
+            }
 
             DEBUG_LOG("PetitionsHandler: adding arena member %s", memberGUID.GetString().c_str());
             at->AddMember(memberGUID);
@@ -981,9 +999,13 @@ void WorldSession::SendPetitionShowList(ObjectGuid guid)
 
     uint8 count = 0;
     if (pCreature->IsTabardDesigner())
+    {
         count = 1;
+    }
     else
+    {
         count = 3;
+    }
 
     WorldPacket data(SMSG_PETITION_SHOWLIST, 8 + 1 + 4 * 6);
     data << ObjectGuid(guid);                               // npc guid

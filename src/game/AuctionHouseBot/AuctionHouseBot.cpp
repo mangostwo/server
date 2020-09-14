@@ -1169,14 +1169,18 @@ bool AuctionBotSeller::Initialize()
         std::stringstream includeStream(sAuctionBotConfig.GetAHBotIncludes());
         std::string temp;
         while (getline(includeStream, temp, ','))
-            { includeItems.push_back(atoi(temp.c_str())); }
+        {
+            includeItems.push_back(atoi(temp.c_str()));
+        }
     }
 
     {
         std::stringstream excludeStream(sAuctionBotConfig.GetAHBotExcludes());
         std::string temp;
         while (getline(excludeStream, temp, ','))
-            { excludeItems.push_back(atoi(temp.c_str())); }
+        {
+            excludeItems.push_back(atoi(temp.c_str()));
+        }
     }
     sLog.outString("Forced Inclusion " SIZEFMTD " items", includeItems.size());
     sLog.outString("Forced Exclusion " SIZEFMTD " items", excludeItems.size());
@@ -1487,16 +1491,24 @@ bool AuctionBotSeller::Initialize()
                 {
                     if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_MISC_MOUNT_MIN_REQ_LEVEL))
                         if (prototype->RequiredLevel < value)
+                        {
                             continue;
+                        }
                     if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_MISC_MOUNT_MAX_REQ_LEVEL))
                         if (prototype->RequiredLevel > value)
+                        {
                             continue;
+                        }
                     if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_MISC_MOUNT_MIN_SKILL_RANK))
                         if (prototype->RequiredSkillRank < value)
+                        {
                             continue;
+                        }
                     if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_MISC_MOUNT_MAX_SKILL_RANK))
                         if (prototype->RequiredSkillRank > value)
+                        {
                             continue;
+                        }
                 }
 
                 if (prototype->Flags & ITEM_FLAG_LOOTABLE)
@@ -1518,16 +1530,24 @@ bool AuctionBotSeller::Initialize()
             {
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_GLYPH_MIN_REQ_LEVEL))
                     if (prototype->RequiredLevel < value)
+                    {
                         continue;
+                    }
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_GLYPH_MAX_REQ_LEVEL))
                     if (prototype->RequiredLevel > value)
+                    {
                         continue;
+                    }
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_GLYPH_MIN_ITEM_LEVEL))
                     if (prototype->RequiredLevel < value)
+                    {
                         continue;
+                    }
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_CLASS_GLYPH_MAX_ITEM_LEVEL))
                     if (prototype->RequiredLevel > value)
+                    {
                         continue;
+                    }
                 break;
             }
             case ITEM_CLASS_TRADE_GOODS:
@@ -2180,7 +2200,9 @@ void AuctionHouseBot::Rebuild(bool all)
             AuctionEntry* entry = itr->second;
             if (entry->owner == sAuctionBotConfig.GetAHBotId())                                    // ahbot auction
                 if (all || entry->bid == 0)                                                        // expire auction now if no bid or forced
+                {
                     entry->expireTime = sWorld.GetGameTime();
+                }
         }
     }
 }

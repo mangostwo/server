@@ -73,19 +73,27 @@ void ChatHandler::ShowAchievementCriteriaListHelper(AchievementCriteriaEntry con
         ss << criEntry->ID << " - |cffffffff|Hachievement_criteria:" << criEntry->ID << "|h[" << criEntry->name[loc] << " " << localeNames[loc] << "]|h|r";
     }
     else
+    {
         ss << criEntry->ID << " - " << criEntry->name[loc] << " " << localeNames[loc];
+    }
 
     if (target)
+    {
         ss << " = " << target->GetAchievementMgr().GetCriteriaProgressCounter(criEntry);
+    }
 
     if (achEntry->flags & ACHIEVEMENT_FLAG_COUNTER)
+    {
         ss << GetMangosString(LANG_COUNTER);
+    }
     else
     {
         ss << " [" << AchievementMgr::GetCriteriaProgressMaxCounter(criEntry, achEntry) << "]";
 
         if (target && target->GetAchievementMgr().IsCompletedCriteria(criEntry, achEntry))
+        {
             ss << GetMangosString(LANG_COMPLETE);
+        }
     }
 
     SendSysMessage(ss.str().c_str());
@@ -105,7 +113,9 @@ bool ChatHandler::HandleAchievementCommand(char* args)
         }
     }
     else
+    {
         target = getSelectedPlayer();
+    }
 
     uint32 achId;
     if (!ExtractUint32KeyFromLink(&args, "Hachievement", achId))
@@ -170,7 +180,9 @@ bool ChatHandler::HandleAchievementAddCommand(char* args)
         for (AchievementCriteriaEntryList::const_iterator itr = criteriaList->begin(); itr != criteriaList->end(); ++itr)
         {
             if (mgr.IsCompletedCriteria(*itr, achEntry))
+            {
                 continue;
+            }
 
             uint32 maxValue = AchievementMgr::GetCriteriaProgressMaxCounter(*itr, achEntry);
             if (maxValue == std::numeric_limits<uint32>::max())
@@ -243,7 +255,9 @@ bool ChatHandler::HandleAchievementCriteriaAddCommand(char* args)
         }
     }
     else
+    {
         target = getSelectedPlayer();
+    }
 
     AchievementCriteriaEntry const* criEntry = sAchievementCriteriaStore.LookupEntry(criId);
     if (!criEntry)
@@ -285,7 +299,9 @@ bool ChatHandler::HandleAchievementCriteriaAddCommand(char* args)
     uint32 new_val;
 
     if (maxValue)
+    {
         new_val = progress < maxValue && maxValue - progress > val ? progress + val : maxValue;
+    }
     else
     {
         uint32 max_int = std::numeric_limits<uint32>::max();
@@ -318,7 +334,9 @@ bool ChatHandler::HandleAchievementCriteriaRemoveCommand(char* args)
         }
     }
     else
+    {
         target = getSelectedPlayer();
+    }
 
     AchievementCriteriaEntry const* criEntry = sAchievementCriteriaStore.LookupEntry(criId);
     if (!criEntry)
@@ -375,9 +393,13 @@ bool ChatHandler::HandleResetAchievementsCommand(char* args)
     }
 
     if (target)
+    {
         target->GetAchievementMgr().Reset();
+    }
     else
+    {
         AchievementMgr::DeleteFromDB(target_guid);
+    }
 
     return true;
 }

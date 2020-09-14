@@ -112,7 +112,9 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
     recv_data >> zones_count;                               // zones count, client limit=10 (2.0.10)
 
     if (zones_count > 10)
-        { return; }                                             // can't be received from real client or broken packet
+    {
+        return;                                              // can't be received from real client or broken packet
+    }
 
     for (uint32 i = 0; i < zones_count; ++i)
     {
@@ -125,7 +127,9 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
     recv_data >> str_count;                                 // user entered strings count, client limit=4 (checked on 2.0.10)
 
     if (str_count > 4)
-        { return; }                                             // can't be received from real client or broken packet
+    {
+        return;                                              // can't be received from real client or broken packet
+    }
 
     DEBUG_LOG("Minlvl %u, maxlvl %u, name %s, guild %s, racemask %u, classmask %u, zones %u, strings %u", level_min, level_max, player_name.c_str(), guild_name.c_str(), racemask, classmask, zones_count, str_count);
 
@@ -423,7 +427,9 @@ void WorldSession::HandleTogglePvP(WorldPacket& recv_data)
     else
     {
         if (!GetPlayer()->pvpInfo.inHostileArea && GetPlayer()->IsPvP())
-            { GetPlayer()->pvpInfo.endTimer = time(NULL); }     // start toggle-off
+        {
+            GetPlayer()->pvpInfo.endTimer = time(NULL);      // start toggle-off
+        }
     }
 }
 
@@ -1119,7 +1125,9 @@ void WorldSession::HandleMoveTimeSkippedOpcode(WorldPacket& recv_data)
     must be need use in mangos
     We substract server Lags to move time ( AntiLags )
     for exmaple
-    GetPlayer()->ModifyLastMoveTime( -int32(time_skipped) );
+    {
+        GetPlayer()->ModifyLastMoveTime( -int32(time_skipped) );
+    }
     */
 }
 
@@ -1227,7 +1235,9 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     data << plr->GetPackGUID();
 
     if (sWorld.getConfig(CONFIG_BOOL_TALENTS_INSPECTING) || _player->isGameMaster())
+    {
         plr->BuildPlayerTalentsInfoData(&data);
+    }
     else
     {
         data << uint32(0);                                  // unspentTalentPoints
@@ -1472,7 +1482,9 @@ void WorldSession::HandleSetTitleOpcode(WorldPacket& recv_data)
         }
     }
     else
+    {
         title = 0;
+    }
 
     GetPlayer()->SetUInt32Value(PLAYER_CHOSEN_TITLE, title);
 }
@@ -1485,7 +1497,9 @@ void WorldSession::HandleTimeSyncResp(WorldPacket& recv_data)
     DEBUG_LOG("WORLD: Received opcode CMSG_TIME_SYNC_RESP: counter %u, client ticks %u, time since last sync %u", counter, clientTicks, clientTicks - _player->m_timeSyncClient);
 
     if (counter != _player->m_timeSyncCounter - 1)
+    {
         DEBUG_LOG(" WORLD: Opcode CMSG_TIME_SYNC_RESP -- Wrong time sync counter from %s (cheater?)", _player->GetGuidStr().c_str());
+    }
 
     uint32 ourTicks = clientTicks + (WorldTimer::getMSTime() - _player->m_timeSyncServer);
 
@@ -1502,10 +1516,14 @@ void WorldSession::HandleResetInstancesOpcode(WorldPacket& /*recv_data*/)
     if (Group* pGroup = _player->GetGroup())
     {
         if (pGroup->IsLeader(_player->GetObjectGuid()))
+        {
             pGroup->ResetInstances(INSTANCE_RESET_ALL, false, _player);
+        }
     }
     else
+    {
         _player->ResetInstances(INSTANCE_RESET_ALL, false);
+    }
 }
 
 void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPacket& recv_data)
@@ -1674,7 +1692,9 @@ void WorldSession::HandleQueryInspectAchievementsOpcode(WorldPacket& recv_data)
     recv_data >> guid.ReadAsPacked();
 
     if (Player* player = sObjectMgr.GetPlayer(guid))
+    {
         player->GetAchievementMgr().SendRespondInspectAchievements(_player);
+    }
 }
 
 void WorldSession::HandleUITimeRequestOpcode(WorldPacket& /*recv_data*/)

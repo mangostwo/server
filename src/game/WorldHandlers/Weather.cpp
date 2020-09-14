@@ -332,9 +332,13 @@ WeatherState Weather::GetWeatherState() const
 void Weather::NormalizeGrade()
 {
     if (m_grade >= 1)
+    {
         m_grade = 0.9999f;
+    }
     else if (m_grade < 0)
+    {
         m_grade = 0.0001f;
+    }
 }
 
 // Helper to log recent state
@@ -434,7 +438,9 @@ void WeatherSystem::UpdateWeathers(uint32 diff)
             m_weathers.erase(itr++);
         }
         else
+        {
             ++itr;
+        }
     }
 }
 

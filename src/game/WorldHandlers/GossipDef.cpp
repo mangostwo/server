@@ -501,7 +501,9 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
         for (uint32 i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
         {
             if (!pQuest->RewChoiceItemId[i])
+            {
                 continue;
+            }
 
             data << uint32(pQuest->RewChoiceItemId[i]);
             data << uint32(pQuest->RewChoiceItemCount[i]);
@@ -523,7 +525,9 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
         for (uint32 i = 0; i < QUEST_REWARDS_COUNT; ++i)
         {
             if (!pQuest->RewItemId[i])
+            {
                 continue;
+            }
 
             data << uint32(pQuest->RewItemId[i]);
             data << uint32(pQuest->RewItemCount[i]);
@@ -542,9 +546,13 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
 
         // send rewMoneyMaxLevel explicit for max player level, else send RewOrReqMoney
         if (GetMenuSession()->GetPlayer()->getLevel() >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+        {
             data << uint32(pQuest->GetRewMoneyMaxLevel());
+        }
         else
+        {
             data << uint32(pQuest->GetRewOrReqMoney());
+        }
 
         data << uint32(pQuest->XPValue(GetMenuSession()->GetPlayer()));
     }
@@ -561,7 +569,9 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
     data << uint32(0);                                      // rep reward show mask?
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // reward factions ids
+    {
         data << uint32(pQuest->RewRepFaction[i]);
+    }
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // columnid in QuestFactionReward.dbc (if negative, from second row)
     {
@@ -569,7 +579,9 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
     }
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // reward reputation override. No bonus is expected given
+    {
         data << int32(0);
+    }
     // data << int32(pQuest->RewRepValue[i]);            // current field for store of rep value, can be reused to implement "override value"
 
     data << uint32(QUEST_EMOTE_COUNT);
@@ -623,7 +635,9 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* pQuest)
                 EndText = ql->EndText[loc_idx];
             }
             if (ql->CompletedText.size() > (size_t)loc_idx && !ql->CompletedText[loc_idx].empty())
+            {
                 CompletedText = ql->CompletedText[loc_idx];
+            }
 
             for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
                 if (ql->ObjectiveText[i].size() > (size_t)loc_idx && !ql->ObjectiveText[i][loc_idx].empty())
@@ -654,9 +668,13 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* pQuest)
     data << uint32(pQuest->GetRewXPId());                   // column index in QuestXP.dbc (row based on quest level)
 
     if (pQuest->HasQuestFlag(QUEST_FLAGS_HIDDEN_REWARDS))
-        { data << uint32(0); }                                  // Hide money rewarded
+    {
+        data << uint32(0);                                   // Hide money rewarded
+    }
     else
-        { data << uint32(pQuest->GetRewOrReqMoney()); }     // reward money (below max lvl)
+    {
+        data << uint32(pQuest->GetRewOrReqMoney());      // reward money (below max lvl)
+    }
 
     data << uint32(pQuest->GetRewMoneyMaxLevel());          // used in XP calculation at client
     data << uint32(pQuest->GetRewSpell());                  // reward spell, this spell will display (icon) (casted if RewSpellCast==0)
@@ -702,7 +720,9 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* pQuest)
     }
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // reward factions ids
+    {
         data << uint32(pQuest->RewRepFaction[i]);
+    }
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // columnid in QuestFactionReward.dbc (if negative, from second row)
     {
@@ -710,7 +730,9 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* pQuest)
     }
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // reward reputation override. No bonus is expected given
+    {
         data << int32(0);
+    }
     // data << int32(pQuest->RewRepValue[i]);            // current field for store of rep value, can be reused to implement "override value"
 
     data << pQuest->GetPointMapId();
@@ -844,9 +866,13 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
 
     // send rewMoneyMaxLevel explicit for max player level, else send RewOrReqMoney
     if (GetMenuSession()->GetPlayer()->getLevel() >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+    {
         data << uint32(pQuest->GetRewMoneyMaxLevel());
+    }
     else
+    {
         data << uint32(pQuest->GetRewOrReqMoney());
+    }
 
     // xp
     data << uint32(pQuest->XPValue(GetMenuSession()->GetPlayer()));
@@ -864,7 +890,9 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
     data << uint32(0);                                      // rew rep show mask?
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // reward factions ids
+    {
         data << uint32(pQuest->RewRepFaction[i]);
+    }
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // columnid in QuestFactionReward.dbc (if negative, from second row)
     {
@@ -872,7 +900,9 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
     }
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // reward reputation override. No diplomacy bonus is expected given, reward also does not display in chat window
+    {
         data << int32(0);
+    }
     // data << int32(pQuest->RewRepValue[i]);
 
     GetMenuSession()->SendPacket(&data);
@@ -918,7 +948,9 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcG
     data << uint32(0x00);                                   // emote delay
 
     if (Completable)
-        { data << pQuest->GetCompleteEmote(); }                 // emote id
+    {
+        data << pQuest->GetCompleteEmote();                  // emote id
+    }
     else
     {
         data << pQuest->GetIncompleteEmote();
@@ -926,7 +958,9 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcG
 
     // Close Window after cancel
     if (CloseOnCancel)
-        { data << uint32(0x01); }                               // auto finish
+    {
+        data << uint32(0x01);                                // auto finish
+    }
     else
     {
         data << uint32(0x00);
@@ -961,7 +995,9 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcG
     }
 
     if (!Completable)                                       // Completable = flags1 && flags2 && flags3 && flags4
-        { data << uint32(0x00); }                               // flags1
+    {
+        data << uint32(0x00);                                // flags1
+    }
     else
     {
         data << uint32(0x03);

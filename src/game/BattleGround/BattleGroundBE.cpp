@@ -63,7 +63,9 @@ void BattleGroundBE::AddPlayer(Player* plr)
 void BattleGroundBE::RemovePlayer(Player* /*plr*/, ObjectGuid /*guid*/)
 {
     if (GetStatus() == STATUS_WAIT_LEAVE)
+    {
         return;
+    }
 
     UpdateWorldState(0x9f1, GetAlivePlayersCountByTeam(ALLIANCE));
     UpdateWorldState(0x9f0, GetAlivePlayersCountByTeam(HORDE));
@@ -74,7 +76,9 @@ void BattleGroundBE::RemovePlayer(Player* /*plr*/, ObjectGuid /*guid*/)
 void BattleGroundBE::HandleKillPlayer(Player* player, Player* killer)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
+    {
         return;
+    }
 
     if (!killer)
     {
@@ -107,7 +111,9 @@ void BattleGroundBE::UpdatePlayerScore(Player* source, uint32 type, uint32 value
 {
     BattleGroundScoreMap::iterator itr = m_PlayerScores.find(source->GetObjectGuid());
     if (itr == m_PlayerScores.end())                        // player not found...
+    {
         return;
+    }
 
     // there is nothing special in this score
     BattleGround::UpdatePlayerScore(source, type, value);

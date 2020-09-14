@@ -51,7 +51,9 @@ void WorldSession::HandleSplitItemOpcode(WorldPacket& recv_data)
     }
 
     if (count == 0)
-        { return; }                                             // check count - if zero it's fake packet
+    {
+        return;                                              // check count - if zero it's fake packet
+    }
 
     if (!_player->IsValidPos(srcbag, srcslot, true))
     {
@@ -165,7 +167,9 @@ void WorldSession::HandleAutoEquipItemOpcode(WorldPacket& recv_data)
 
     Item* pSrcItem  = _player->GetItemByPos(srcbag, srcslot);
     if (!pSrcItem)
-        { return; }                                             // only at cheat
+    {
+        return;                                              // only at cheat
+    }
 
     uint16 dest;
     InventoryResult msg = _player->CanEquipItem(NULL_SLOT, dest, pSrcItem, !pSrcItem->IsBag());
@@ -498,7 +502,9 @@ void WorldSession::HandleReadItemOpcode(WorldPacket& recv_data)
         SendPacket(&data);
     }
     else
+    {
         _player->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL);
+    }
 }
 
 void WorldSession::HandlePageQuerySkippedOpcode(WorldPacket& recv_data)
@@ -702,9 +708,13 @@ void WorldSession::HandleBuyItemInSlotOpcode(WorldPacket& recv_data)
 
     // client side expected counting from 1, and we send to client vendorslot+1 already
     if (slot > 0)
+    {
         --slot;
+    }
     else
+    {
         return;                                             // cheating
+    }
 
     uint8 bag = NULL_BAG;                                   // init for case invalid bagGUID
 
@@ -748,9 +758,13 @@ void WorldSession::HandleBuyItemOpcode(WorldPacket& recv_data)
 
     // client side expected counting from 1, and we send to client vendorslot+1 already
     if (slot > 0)
+    {
         --slot;
+    }
     else
+    {
         return;                                             // cheating
+    }
 
     GetPlayer()->BuyItemFromVendorSlot(vendorGuid, slot, item, count, NULL_BAG, NULL_SLOT);
 }
@@ -839,10 +853,14 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
 
                     // race wrong item skip always
                     if ((pProto->Flags2 & ITEM_FLAG2_HORDE_ONLY) && _player->GetTeam() != HORDE)
+                    {
                         continue;
+                    }
 
                     if ((pProto->Flags2 & ITEM_FLAG2_ALLIANCE_ONLY) && _player->GetTeam() != ALLIANCE)
+                    {
                         continue;
+                    }
 
                     if ((pProto->AllowableRace & _player->getRaceMask()) == 0)
                     {
@@ -863,7 +881,9 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
                     {
                         // checked at convert data loading as existed
                         if (uint32 newItemId = sObjectMgr.GetItemConvert(itemId, _player->getRaceMask()))
+                        {
                             pProto = ObjectMgr::GetItemPrototype(newItemId);
+                        }
                     }
                 }
 
@@ -1304,7 +1324,9 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
     {
         ObjectGuid gemGuid = gemGuids[i];
         if (!gemGuid)
+        {
             continue;
+        }
 
         if (!gemGuid.IsItem())
         {
@@ -1341,12 +1363,16 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
 
     GemPropertiesEntry const* GemProps[MAX_GEM_SOCKETS];
     for (int i = 0; i < MAX_GEM_SOCKETS; ++i)               // get geminfo from dbc storage
+    {
         GemProps[i] = (Gems[i]) ? sGemPropertiesStore.LookupEntry(Gems[i]->GetProto()->GemProperties) : NULL;
+    }
 
     for (int i = 0; i < MAX_GEM_SOCKETS; ++i)               // check for hack maybe
     {
         if (!GemProps[i])
+        {
             continue;
+        }
 
         // tried to put gem in socket where no socket exists (take care about prismatic sockets)
         if (!itemProto->Socket[i].Color)
@@ -1391,7 +1417,9 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
     for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
     {
         if (!Gems[i])
+        {
             continue;
+        }
 
         // continue check for case when attempt add 2 similar unique equipped gems in one item.
         ItemPrototype const* iGemProto = Gems[i]->GetProto();
@@ -1402,7 +1430,9 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
             for (int j = 0; j < MAX_GEM_SOCKETS; ++j)
             {
                 if (i == j)                                 // skip self
+                {
                     continue;
+                }
 
                 if (Gems[j])
                 {
@@ -1444,12 +1474,16 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
                             if (SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(OldEnchants[j]))
                                 if (ItemPrototype const* jProto = ObjectMgr::GetItemPrototype(enchantEntry->GemID))
                                     if (iGemProto->ItemLimitCategory == jProto->ItemLimitCategory)
+                                    {
                                         --limit_newcount;
+                                    }
                         }
 
                         // new gem
                         if (iGemProto->ItemLimitCategory == Gems[j]->GetProto()->ItemLimitCategory)
+                        {
                             ++limit_newcount;
+                        }
                     }
                     // existing gem
                     else if (OldEnchants[j])
@@ -1457,7 +1491,9 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
                         if (SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(OldEnchants[j]))
                             if (ItemPrototype const* jProto = ObjectMgr::GetItemPrototype(enchantEntry->GemID))
                                 if (iGemProto->ItemLimitCategory == jProto->ItemLimitCategory)
+                                {
                                     ++limit_newcount;
+                                }
                     }
                 }
 
@@ -1497,7 +1533,9 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
         {
             itemTarget->SetEnchantment(EnchantmentSlot(SOCK_ENCHANTMENT_SLOT + i), GemEnchants[i], 0, 0);
             if (Item* guidItem = gemGuids[i] ? _player->GetItemByGuid(gemGuids[i]) : NULL)
+            {
                 _player->DestroyItem(guidItem->GetBagSlot(), guidItem->GetSlot(), true);
+            }
         }
     }
 

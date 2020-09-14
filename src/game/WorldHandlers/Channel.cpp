@@ -235,7 +235,9 @@ void Channel::KickOrBan(Player* player, const char* targetName, bool ban)
         MakePlayerBanned(&data, targetGuid, guid);
     }
     else
+    {
         MakePlayerKicked(&data, targetGuid, guid);
+    }
 
     SendToAll(&data);
     m_players.erase(targetGuid);
@@ -386,9 +388,13 @@ void Channel::SetMode(Player* player, const char* targetName, bool moderator, bo
 
     // set channel moderator
     if (moderator)
+    {
         SetModerator(targetGuid, set);
+    }
     else
+    {
         SetMute(targetGuid, set);
+    }
 }
 
 void Channel::SetOwner(Player* player, const char* targetName)
@@ -609,7 +615,9 @@ void Channel::Say(Player* player, const char* text, uint32 lang)
 
     // send channel message
     if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
+    {
         lang = LANG_UNIVERSAL;
+    }
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, CHAT_MSG_CHANNEL, text, Language(lang), player->GetChatTag(), guid, player->GetName(), ObjectGuid(), "", m_name.c_str());
     SendToAll(&data, !m_players[guid].IsModerator() ? guid : ObjectGuid());
@@ -1002,9 +1010,13 @@ void Channel::JoinNotify(ObjectGuid guid)
     WorldPacket data;
 
     if (IsConstant())
+    {
         data.Initialize(SMSG_USERLIST_ADD, 8 + 1 + 1 + 4 + GetName().size() + 1);
+    }
     else
+    {
         data.Initialize(SMSG_USERLIST_UPDATE, 8 + 1 + 1 + 4 + GetName().size() + 1);
+    }
 
     data << ObjectGuid(guid);
     data << uint8(GetPlayerFlags(guid));

@@ -152,7 +152,9 @@ BOOL WheatyExceptionReport::_GetProcessorName(TCHAR* sProcessorName, DWORD maxco
     // Skip spaces
     TCHAR* psz = szTmp;
     while (iswspace(*psz))
-        { ++psz; }
+    {
+        ++psz;
+    }
     _tcsncpy(sProcessorName, psz, maxcount);
     return TRUE;
 }
@@ -515,7 +517,9 @@ BOOL WheatyExceptionReport::GetLogicalAddress(
     // Iterate through the section table, looking for the one that encompasses
     // the linear address.
     for (unsigned i = 0;
-         i < pNtHdr->FileHeader.NumberOfSections;
+    {
+        i < pNtHdr->FileHeader.NumberOfSections;
+    }
          ++i, ++pSection)
     {
         DWORD_PTR sectionStart = pSection->VirtualAddress;
@@ -600,9 +604,13 @@ void WheatyExceptionReport::WriteStackDetails(
                           SymFunctionTableAccess64,
                           SymGetModuleBase64,
                           0))
-            { break; }
+                          {
+                              break;
+                          }
         if (0 == sf.AddrFrame.Offset)                       // Basic sanity check to make sure
-            { break; }                                          // the frame is OK.  Bail if not.
+        {
+            break;                                           // the frame is OK.  Bail if not.
+        }
 #ifdef _M_IX86
         _tprintf(_T("%08X  %08X  "), sf.AddrPC.Offset, sf.AddrFrame.Offset);
 #endif
@@ -682,7 +690,9 @@ WheatyExceptionReport::EnumerateSymbolsCallback(
     {
         if (FormatSymbolValue(pSymInfo, (STACKFRAME*)UserContext,
         szBuffer, sizeof(szBuffer)))
-            { _tprintf(_T("\t%s\r\n"), szBuffer); }
+        {
+            _tprintf(_T("\t%s\r\n"), szBuffer);
+        }
     }
     __except(1)
     {

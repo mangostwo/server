@@ -104,7 +104,9 @@ bool ChatHandler::HandleResetSpecsCommand(char* args)
         Pet* pet = target->GetPet();
         Pet::resetTalentsForAllPetsOf(target, pet);
         if (pet)
+        {
             target->SendTalentsInfoData(true);
+        }
         return true;
     }
     else if (target_guid)
@@ -270,7 +272,9 @@ bool ChatHandler::HandleResetTalentsCommand(char* args)
 
                 ChatHandler((Player*)owner).SendSysMessage(LANG_RESET_PET_TALENTS);
                 if (!m_session || m_session->GetPlayer() != ((Player*)owner))
+                {
                     PSendSysMessage(LANG_RESET_PET_TALENTS_ONLINE, GetNameLink((Player*)owner).c_str());
+                }
             }
             return true;
         }
@@ -286,12 +290,16 @@ bool ChatHandler::HandleResetTalentsCommand(char* args)
         target->SendTalentsInfoData(false);
         ChatHandler(target).SendSysMessage(LANG_RESET_TALENTS);
         if (!m_session || m_session->GetPlayer() != target)
+        {
             PSendSysMessage(LANG_RESET_TALENTS_ONLINE, GetNameLink(target).c_str());
+        }
 
         Pet* pet = target->GetPet();
         Pet::resetTalentsForAllPetsOf(target, pet);
         if (pet)
+        {
             target->SendTalentsInfoData(true);
+        }
         return true;
     }
 

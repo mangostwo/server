@@ -72,7 +72,9 @@ void WorldSession::HandleGMTicketGetTicketOpcode(WorldPacket& /*recv_data*/)
     if (ticket)
     {
         if (ticket->HasResponse())
+        {
             SendGMResponse(ticket);
+        }
         else
         {
             SendGMTicketGetTicket(0x06, ticket);
@@ -137,7 +139,9 @@ void WorldSession::HandleGMTicketCreateOpcode(WorldPacket& recv_data)
     }
 
     if (isFollowup)
+    {
         sTicketMgr.Delete(_player->GetObjectGuid());
+    }
 
     sTicketMgr.Create(_player->GetObjectGuid(), ticketText.c_str());
 
@@ -179,7 +183,9 @@ void WorldSession::HandleGMSurveySubmitOpcode(WorldPacket& recv_data)
         uint32 questionID;
         recv_data >> questionID;                            // GMSurveyQuestions.dbc
         if (!questionID)
+        {
             break;
+        }
 
         uint8 value;
         std::string unk_text;

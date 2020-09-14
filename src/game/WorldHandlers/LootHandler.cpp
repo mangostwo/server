@@ -511,7 +511,9 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
 
                     // >=5 checked in spell code, but will work for cheating cases also with removing from another stacks.
                     if (count > 5)
+                    {
                         count = 5;
+                    }
 
                     // reset loot for allow repeat looting if stack > 5
                     pItem->loot.clear();
@@ -524,7 +526,9 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
                 case LOOT_DISENCHANTING:
                 {
                     if (!pItem->loot.isLooted())
-                        { player->AutoStoreLoot(pItem->loot); } // can be lost if no space
+                    {
+                        player->AutoStoreLoot(pItem->loot);  // can be lost if no space
+                    }
                     pItem->loot.clear();
                     pItem->SetLootState(ITEM_LOOT_REMOVED);
                     player->DestroyItem(pItem->GetBagSlot(), pItem->GetSlot(), true);
@@ -562,7 +566,9 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
             // update next looter
             if (Group* group = pCreature->GetGroupLootRecipient())
                 if (group->GetLooterGuid() == player->GetObjectGuid())
+                {
                     group->UpdateLooterGuid(pCreature);
+                }
 
             /* We've completely looted the creature, mark it as available for skinning */
             if (loot->isLooted() && !pCreature->IsAlive())

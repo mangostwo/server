@@ -337,9 +337,13 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recv_data)
     // learn explicitly or cast explicitly
     // TODO - Are these spells really cast correctly this way?
     if (trainer_spell->IsCastable())
+    {
         _player->CastSpell(_player, trainer_spell->spell, true);
+    }
     else
+    {
         _player->learnSpell(spellId, false);
+    }
 
     data.Initialize(SMSG_TRAINER_BUY_SUCCEEDED, 12);
     data << ObjectGuid(guid);
@@ -418,7 +422,9 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recv_data)
         }
 
         if (!sScriptMgr.OnGossipSelect(_player, pCreature, sender, action, code.empty() ? NULL : code.c_str()))
+        {
             _player->OnGossipSelect(pCreature, gossipListId, menuId);
+        }
     }
     else if (guid.IsGameObject())
     {
@@ -431,7 +437,9 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recv_data)
         }
 
         if (!sScriptMgr.OnGossipSelect(_player, pGo, sender, action, code.empty() ? NULL : code.c_str()))
+        {
             _player->OnGossipSelect(pGo, gossipListId, menuId);
+        }
     }
     else if (guid.IsItem())
     {
@@ -795,9 +803,13 @@ void WorldSession::HandleUnstablePet(WorldPacket& recv_data)
     {
         // if problem in exotic pet
         if (creatureInfo && creatureInfo->isTameable(true))
+        {
             SendStableResult(STABLE_ERR_EXOTIC);
+        }
         else
+        {
             SendStableResult(STABLE_ERR_STABLE);
+        }
         return;
     }
 
@@ -925,9 +937,13 @@ void WorldSession::HandleStableSwapPet(WorldPacket& recv_data)
     {
         // if problem in exotic pet
         if (creatureInfo && creatureInfo->isTameable(true))
+        {
             SendStableResult(STABLE_ERR_EXOTIC);
+        }
         else
+        {
             SendStableResult(STABLE_ERR_STABLE);
+        }
         return;
     }
 
@@ -981,7 +997,9 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket& recv_data)
         Item* item = _player->GetItemByGuid(itemGuid);
 
         if (item)
+        {
             TotalCost = _player->DurabilityRepair(item->GetPos(), true, discountMod, (guildBank > 0));
+        }
     }
     else
     {

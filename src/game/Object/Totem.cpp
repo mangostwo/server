@@ -57,7 +57,9 @@ bool Totem::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* 
     if (owner->GetTypeId() == TYPEID_PLAYER)
     {
         if (uint32 modelid_race = sObjectMgr.GetModelForRace(GetNativeDisplayId(), owner->getRaceMask()))
+        {
             SetDisplayId(modelid_race);
+        }
     }
 
     cPos.SelectFinalPoint(this);
@@ -214,7 +216,9 @@ void Totem::SetTypeBySummonSpell(SpellEntry const* spellProto)
         }
     }
     if (spellProto->SpellIconID == 2056)
-        { m_type = TOTEM_STATUE; }                              // Jewelery statue
+    {
+        m_type = TOTEM_STATUE;                               // Jewelery statue
+    }
 }
 
 bool Totem::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const

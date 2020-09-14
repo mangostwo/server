@@ -195,12 +195,16 @@ bool ChatHandler::HandleLookupAchievementCommand(char* args)
     {
         AchievementEntry const* achEntry = sAchievementStore.LookupEntry(id);
         if (!achEntry)
+        {
             continue;
+        }
 
         int loc = GetSessionDbcLocale();
         std::string name = achEntry->name[loc];
         if (name.empty())
+        {
             continue;
+        }
 
         if (!Utf8FitTo(name, wnamepart))
         {
@@ -208,14 +212,20 @@ bool ChatHandler::HandleLookupAchievementCommand(char* args)
             for (; loc < MAX_LOCALE; ++loc)
             {
                 if (loc == GetSessionDbcLocale())
+                {
                     continue;
+                }
 
                 name = achEntry->name[loc];
                 if (name.empty())
+                {
                     continue;
+                }
 
                 if (Utf8FitTo(name, wnamepart))
+                {
                     break;
+                }
             }
         }
 
@@ -228,7 +238,9 @@ bool ChatHandler::HandleLookupAchievementCommand(char* args)
     }
 
     if (counter == 0)                                       // if counter == 0 then we found nth
+    {
         SendSysMessage(LANG_COMMAND_ACHIEVEMENT_NOTFOUND);
+    }
     return true;
 }
 

@@ -3685,9 +3685,13 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         void SetVisibleAura(uint8 slot, uint32 spellid)
         {
             if (spellid == 0)
+            {
                 m_visibleAuras.erase(slot);
+            }
             else
+            {
                 m_visibleAuras[slot] = spellid;
+            }
         }
         VisibleAuraMap const& GetVisibleAuras() const { return m_visibleAuras; }
         uint8 GetVisibleAurasCount() const { return m_visibleAuras.size(); }
@@ -3819,7 +3823,9 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         void SetLastManaUse()
         {
             if (GetTypeId() == TYPEID_PLAYER && !IsUnderLastManaUseEffect())
+            {
                 RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER);
+            }
 
             m_lastManaUseTimer = 5000;
         }

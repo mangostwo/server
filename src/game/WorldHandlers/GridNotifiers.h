@@ -189,10 +189,14 @@ namespace MaNGOS
             for(CreatureMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
             {
                 if (!itr->getSource()->InSamePhase(i_phaseMask))
+                {
                     continue;
+                }
 
                 if (!i_check(itr->getSource()))
+                {
                     continue;
+                }
 
                 ..some code for update result and possible stop search
             }
@@ -274,34 +278,44 @@ namespace MaNGOS
         {
             for (GameObjectMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
                 if (itr->getSource()->InSamePhase(i_phaseMask))
+                {
                     i_do(itr->getSource());
+                }
         }
 
         void Visit(PlayerMapType& m)
         {
             for (PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
                 if (itr->getSource()->InSamePhase(i_phaseMask))
+                {
                     i_do(itr->getSource());
+                }
         }
         void Visit(CreatureMapType& m)
         {
             for (CreatureMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
                 if (itr->getSource()->InSamePhase(i_phaseMask))
+                {
                     i_do(itr->getSource());
+                }
         }
 
         void Visit(CorpseMapType& m)
         {
             for (CorpseMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
                 if (itr->getSource()->InSamePhase(i_phaseMask))
+                {
                     i_do(itr->getSource());
+                }
         }
 
         void Visit(DynamicObjectMapType& m)
         {
             for (DynamicObjectMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
                 if (itr->getSource()->InSamePhase(i_phaseMask))
+                {
                     i_do(itr->getSource());
+                }
         }
 
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
@@ -469,7 +483,9 @@ namespace MaNGOS
         {
             for (CreatureMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
                 if (itr->getSource()->InSamePhase(i_phaseMask))
+                {
                     i_do(itr->getSource());
+                }
         }
 
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
@@ -520,7 +536,9 @@ namespace MaNGOS
         {
             for (PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
                 if (itr->getSource()->InSamePhase(i_phaseMask))
+                {
                     i_do(itr->getSource());
+                }
         }
 
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
@@ -540,7 +558,9 @@ namespace MaNGOS
         {
             for (CameraMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
                 if (itr->getSource()->GetBody()->InSamePhase(i_searcher) && itr->getSource()->GetBody()->IsWithinDist(i_searcher, i_dist))
+                {
                     i_do(itr->getSource()->GetOwner());
+                }
         }
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
     };
@@ -633,7 +653,9 @@ namespace MaNGOS
             {
                 if (i_fobj->IsFriendlyTo(u) || u->IsAlive() || u->IsTaxiFlying() ||
                     (u->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD) == 0)
-                    { return false; }
+                {
+                    return false;
+                }
 
                 return i_fobj->IsWithinDistInMap(u, i_range);
             }
@@ -901,7 +923,9 @@ namespace MaNGOS
             {
                 if (u->IsAlive() && (i_controlledByPlayer ? !i_obj->IsFriendlyTo(u) : i_obj->IsHostileTo(u))
                     && i_obj->IsWithinDistInMap(u, i_range))
-                    { return true; }
+                {
+                    return true;
+                }
                 else
                 {
                     return false;

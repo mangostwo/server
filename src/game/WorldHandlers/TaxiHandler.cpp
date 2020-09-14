@@ -134,7 +134,9 @@ void WorldSession::SendDoFlight(uint32 mountDisplayId, uint32 path, uint32 pathN
     }
 
     while (GetPlayer()->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE)
-        { GetPlayer()->GetMotionMaster()->MovementExpired(false); }
+    {
+        GetPlayer()->GetMotionMaster()->MovementExpired(false);
+    }
 
     if (mountDisplayId)
     {
@@ -150,7 +152,9 @@ bool WorldSession::SendLearnNewTaxiNode(Creature* unit)
     uint32 curloc = sObjectMgr.GetNearestTaxiNode(unit->GetPositionX(), unit->GetPositionY(), unit->GetPositionZ(), unit->GetMapId(), GetPlayer()->GetTeam());
 
     if (curloc == 0)
-        { return true; }                                        // `true` send to avoid WorldSession::SendTaxiMenu call with one more curlock seartch with same false result.
+    {
+        return true;                                         // `true` send to avoid WorldSession::SendTaxiMenu call with one more curlock seartch with same false result.
+    }
 
     if (GetPlayer()->m_taxi.SetTaximaskNode(curloc))
     {
@@ -280,12 +284,18 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
         sObjectMgr.GetTaxiPath(sourcenode, destinationnode, path, cost);
 
         if (path && mountDisplayId)
-            { SendDoFlight(mountDisplayId, path, 1); }          // skip start fly node
+        {
+            SendDoFlight(mountDisplayId, path, 1);           // skip start fly node
+        }
         else
-            { GetPlayer()->m_taxi.ClearTaxiDestinations(); }    // clear problematic path and next
+        {
+            GetPlayer()->m_taxi.ClearTaxiDestinations();     // clear problematic path and next
+        }
     }
     else
-        { GetPlayer()->m_taxi.ClearTaxiDestinations(); }        // not destinations, clear source node
+    {
+        GetPlayer()->m_taxi.ClearTaxiDestinations();         // not destinations, clear source node
+    }
 }
 
 void WorldSession::HandleActivateTaxiOpcode(WorldPacket& recv_data)

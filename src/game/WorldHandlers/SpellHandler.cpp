@@ -177,7 +177,9 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
                 Spell::SendCastResult(_player, spellInfo, cast_count, SPELL_FAILED_NO_VALID_TARGETS);
             // for explicit target spells
             else
+            {
                 Spell::SendCastResult(_player, spellInfo, cast_count, SPELL_FAILED_BAD_TARGETS);
+            }
         }
         return;
     }
@@ -465,7 +467,9 @@ void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
     }
 
     if (mover->IsNonMeleeSpellCasted(false))
+    {
         mover->InterruptNonMeleeSpells(false, spellId);
+    }
 }
 
 void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
@@ -688,9 +692,13 @@ void WorldSession::HandleSpellClick(WorldPacket& recv_data)
             Unit* target = (itr->second.castFlags & 0x2) ? (Unit*)_player : (Unit*)unit;
 
             if (itr->second.spellId)
+            {
                 caster->CastSpell(target, itr->second.spellId, true);
+            }
             else
+            {
                 sLog.outError("WorldSession::HandleSpellClick: npc_spell_click with entry %u has 0 in spell_id. Not handled custom case?", unit->GetEntry());
+            }
         }
     }
 }
@@ -744,9 +752,13 @@ void WorldSession::HandleGetMirrorimageData(WorldPacket& recv_data)
         data << (uint32)pPlayer->GetGuildId();
 
         if (pPlayer->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM))
+        {
             data << (uint32)0;
+        }
         else
+        {
             data << (uint32)pPlayer->GetItemDisplayIdInSlot(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_HEAD);
+        }
 
         data << (uint32)pPlayer->GetItemDisplayIdInSlot(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_SHOULDERS);
         data << (uint32)pPlayer->GetItemDisplayIdInSlot(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_BODY);
@@ -758,9 +770,13 @@ void WorldSession::HandleGetMirrorimageData(WorldPacket& recv_data)
         data << (uint32)pPlayer->GetItemDisplayIdInSlot(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_HANDS);
 
         if (pPlayer->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK))
+        {
             data << (uint32)0;
+        }
         else
+        {
             data << (uint32)pPlayer->GetItemDisplayIdInSlot(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_BACK);
+        }
 
         data << (uint32)pPlayer->GetItemDisplayIdInSlot(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_TABARD);
     }

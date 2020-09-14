@@ -386,7 +386,9 @@ DungeonMap* MapManager::CreateDungeonMap(uint32 id, uint32 InstanceId, Difficult
 
     // some instances only have one difficulty
     if (!GetMapDifficultyData(id, difficulty))
+    {
         difficulty = DUNGEON_DIFFICULTY_NORMAL;
+    }
 
     DEBUG_LOG("MapInstanced::CreateDungeonMap: %s map instance %d for %d created with difficulty %d", save ? "" : "new ", InstanceId, id, difficulty);
 

@@ -66,7 +66,9 @@ void ChatHandler::ShowAchievementListHelper(AchievementEntry const* achEntry, Lo
                     if (AchievementCriteriaEntryList const* criteriaList = sAchievementMgr.GetAchievementCriteriaByAchievement(achEntry->ID))
                         for (AchievementCriteriaEntryList::const_iterator itr = criteriaList->begin(); itr != criteriaList->end(); ++itr)
                             if (mgr->IsCompletedCriteria(*itr, achEntry))
+                            {
                                 criteriaMask[((*itr)->showOrder - 1) / 32] |= (1 << (((*itr)->showOrder - 1) % 32));
+                            }
 
                 for (int i = 0; i < 4; ++i)
                 {
@@ -74,16 +76,22 @@ void ChatHandler::ShowAchievementListHelper(AchievementEntry const* achEntry, Lo
                 }
             }
             else
+            {
                 ss << "0:0:0:0:";
+            }
         }
 
         ss << "|h[" << name << " " << localeNames[loc] << "]|h|r";
     }
     else
+    {
         ss << achEntry->ID << " - " << name << " " << localeNames[loc];
+    }
 
     if (target && date)
+    {
         ss << " [" << TimeToTimestampStr(*date) << "]";
+    }
 
     SendSysMessage(ss.str().c_str());
 }
@@ -182,7 +190,9 @@ bool ChatHandler::HandleGameObjectTurnCommand(char* args)
     {
          // let's obtain the player's orientation
         if (!ExtractOptFloat(&args, o, m_session->GetPlayer()->GetOrientation()))
+        {
             return false; //something is very wrong
+        }
 
         // ok, let's rotate the GO.
         // we first get the original rotation quaternion
@@ -202,7 +212,9 @@ bool ChatHandler::HandleGameObjectTurnCommand(char* args)
     else // we have a valid rotation angle and we expect the description of rotation axis via 3 floats
     {
         if (!ExtractOptFloat(&args, rx, 0) || !ExtractOptFloat(&args, ry, 0) || !ExtractOptFloat(&args, rz, 0))
-        { return false; } // mising components, abort
+        {
+            return false;  // mising components, abort
+        }
 
         float s = sin(o/2);
         float c = cos(o/2);
@@ -605,7 +617,9 @@ bool ChatHandler::HandleGameObjectPhaseCommand(char* args)
 
     // by DB guid
     if (GameObjectData const* go_data = sObjectMgr.GetGOData(lowguid))
+    {
         obj = GetGameObjectWithGuid(lowguid, go_data->id);
+    }
 
     if (!obj)
     {

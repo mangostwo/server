@@ -141,7 +141,9 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction)
         {
             std::string owner_name;
             if (auction_owner)
+            {
                 owner_name = auction_owner->GetName();
+            }
             else if (ownerGuid && !sObjectMgr.GetPlayerNameByGUID(ownerGuid, owner_name))
             {
                 owner_name = sObjectMgr.GetMangosStringForDBCLocale(LANG_UNKNOWN);
@@ -159,7 +161,9 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction)
     }
 
     if (auction_owner)
+    {
         auction_owner->GetSession()->SendAuctionOwnerNotification(auction);
+    }
 
     // receiver exist
     if (bidder || bidder_accId)
@@ -272,7 +276,9 @@ void AuctionHouseMgr::SendAuctionExpiredMail(AuctionEntry* auction)
         subject << auction->itemTemplate << ":" << auction->itemRandomPropertyId << ":" << AUCTION_EXPIRED << ":" << auction->Id << ":" << auction->itemCount;
 
         if (owner)
+        {
             owner->GetSession()->SendAuctionOwnerNotification(auction);
+        }
 
         RemoveAItem(auction->itemGuidLow);                  // we have to remove the item, before we delete it !!
         auction->itemGuidLow = 0;
@@ -408,7 +414,9 @@ void AuctionHouseMgr::LoadAuctions()
             {
                 std::string plName;
                 if (!sObjectMgr.GetPlayerNameByGUID(ObjectGuid(HIGHGUID_PLAYER, auction->owner), plName))
+                {
                     plName = sObjectMgr.GetMangosStringForDBCLocale(LANG_UNKNOWN);
+                }
 
                 Utf8toWStr(plName, plWName);
             }
@@ -426,7 +434,9 @@ void AuctionHouseMgr::LoadAuctions()
         auction->auctionHouseEntry = NULL;                  // init later
 
         if (auction->moneyDeliveryTime)
+        {
             auction->itemGuidLow = 0;                       // must be 0 if auction delivery pending
+        }
         else
         {
         // check if sold item exists for guid
@@ -567,13 +577,21 @@ AuctionHouseEntry const* AuctionHouseMgr::GetAuctionHouseEntry(Unit* unit)
                 {
                     FactionTemplateEntry const* u_entry = sFactionTemplateStore.LookupEntry(factionTemplateId);
                     if (!u_entry)
-                        { houseid = 7; }                        // goblin auction house
+                    {
+                        houseid = 7;                         // goblin auction house
+                    }
                     else if (u_entry->ourMask & FACTION_MASK_ALLIANCE)
-                        { houseid = 1; }                        // human auction house
+                    {
+                        houseid = 1;                         // human auction house
+                    }
                     else if (u_entry->ourMask & FACTION_MASK_HORDE)
-                        { houseid = 6; }                        // orc auction house
+                    {
+                        houseid = 6;                         // orc auction house
+                    }
                     else
-                        { houseid = 7; }                        // goblin auction house
+                    {
+                        houseid = 7;                         // goblin auction house
+                    }
                     break;
                 }
             }
@@ -625,7 +643,9 @@ void AuctionHouseObject::Update()
             {
                 ///- perform the transaction if there was bidder
                 if (itr->second->bid)
+                {
                     itr->second->AuctionBidWinning();
+                }
                 ///- cancel the auction if there was no bidder and clear the auction
                 else
                 {
@@ -649,7 +669,9 @@ void AuctionHouseObject::BuildListBidderItems(WorldPacket& data, Player* player,
     {
         AuctionEntry* Aentry = itr->second;
         if (Aentry->moneyDeliveryTime)                      // skip pending sell auctions
+        {
             continue;
+        }
         if (Aentry->bidder == player->GetGUIDLow())
         {
             if (itr->second->BuildAuctionInfo(data))
@@ -667,7 +689,9 @@ void AuctionHouseObject::BuildListOwnerItems(WorldPacket& data, Player* player, 
     {
         AuctionEntry* Aentry = itr->second;
         if (Aentry->moneyDeliveryTime)                      // skip pending sell auctions
+        {
             continue;
+        }
         if (Aentry->owner == player->GetGUIDLow())
         {
             if (Aentry->BuildAuctionInfo(data))
@@ -879,7 +903,9 @@ bool AuctionSorter::operator()(const AuctionEntry* auc1, const AuctionEntry* auc
         int res = auc1->CompareAuctionEntry(m_sort[i] & ~AUCTION_SORT_REVERSED, auc2, m_viewPlayer);
         // "equal" by used column
         if (res == 0)
+        {
             continue;
+        }
         // less/greater and normal/reversed ordered
         return (res < 0) == ((m_sort[i] & AUCTION_SORT_REVERSED) == 0);
     }
@@ -896,7 +922,9 @@ void WorldSession::BuildListAuctionItems(std::vector<AuctionEntry*> const& aucti
     {
         AuctionEntry* Aentry = *itr;
         if (Aentry->moneyDeliveryTime)
+        {
             continue;
+        }
         Item* item = sAuctionMgr.GetAItem(Aentry->itemGuidLow);
         if (!item)
         {
@@ -940,14 +968,18 @@ void WorldSession::BuildListAuctionItems(std::vector<AuctionEntry*> const& aucti
             if (usable != 0x00)
             {
                 if (_player->CanUseItem(item) != EQUIP_ERR_OK)
+                {
                     continue;
+                }
 
                 if (proto->Class == ITEM_CLASS_RECIPE)
                 {
                     if (SpellEntry const* spell = sSpellStore.LookupEntry(proto->Spells[0].SpellId))
                     {
                         if (_player->HasSpell(spell->EffectTriggerSpell[EFFECT_INDEX_0]))
+                        {
                             continue;
+                        }
                     }
                 }
             }
@@ -977,7 +1009,9 @@ void AuctionHouseObject::BuildListPendingSales(WorldPacket& data, Player* player
     {
         AuctionEntry* Aentry = itr->second;
         if (!Aentry->moneyDeliveryTime)                     // skip not pending auctions
+        {
             continue;
+        }
         if (Aentry->owner == player->GetGUIDLow())
         {
             std::ostringstream str1;
@@ -1012,7 +1046,9 @@ AuctionEntry* AuctionHouseObject::AddAuction(AuctionHouseEntry const* auctionHou
     AH->owner = pl ? pl->GetGUIDLow() : 0;
 
     if (pl)
+    {
         Utf8toWStr(pl->GetName(), AH->ownerName);
+    }
 
     AH->startbid = bid;
     AH->bidder = 0;

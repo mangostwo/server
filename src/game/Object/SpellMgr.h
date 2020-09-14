@@ -444,7 +444,9 @@ inline bool IsAreaAuraEffect(uint32 effect)
             effect == SPELL_EFFECT_APPLY_AREA_AURA_ENEMY    ||
             effect == SPELL_EFFECT_APPLY_AREA_AURA_PET      ||
             effect == SPELL_EFFECT_APPLY_AREA_AURA_OWNER)
-        { return true; }
+            {
+                return true;
+            }
     return false;
 }
 

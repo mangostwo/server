@@ -140,7 +140,9 @@ void OutdoorPvPGH::DespawnVendors(const WorldObject* objRef)
     for (GuidList::const_iterator itr = m_teamVendors.begin(); itr != m_teamVendors.end(); ++itr)
     {
         if (Creature* vendor = objRef->GetMap()->GetCreature(*itr))
+        {
             vendor->ForcedDespawn();
+        }
     }
     m_teamVendors.clear();
 }
@@ -149,7 +151,9 @@ void OutdoorPvPGH::DespawnVendors(const WorldObject* objRef)
 void OutdoorPvPGH::LockLighthouse(const WorldObject* objRef)
 {
     if (GameObject* go = objRef->GetMap()->GetGameObject(m_capturePoint))
+    {
         go->SetLootState(GO_JUST_DEACTIVATED);
+    }
     else
     {
         // if grid is unloaded, changing the saved slider value is enough
@@ -162,7 +166,9 @@ void OutdoorPvPGH::LockLighthouse(const WorldObject* objRef)
 void OutdoorPvPGH::UnlockLighthouse(const WorldObject* objRef)
 {
     if (GameObject* go = objRef->GetMap()->GetGameObject(m_capturePoint))
+    {
         go->SetLootState(GO_ACTIVATED);
+    }
     else
     {
         // if grid is unloaded, changing the saved slider value is enough

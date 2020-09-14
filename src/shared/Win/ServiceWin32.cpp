@@ -207,10 +207,14 @@ void WINAPI ServiceControlHandler(DWORD controlCode)
         default:
             if (controlCode >= 128 && controlCode <= 255)
                 // user defined control code
-                { break; }
+            {
+                break;
+            }
             else
                 // unrecognized control code
-                { break; }
+            {
+                break;
+            }
     }
 
     SetServiceStatus(serviceStatusHandle, &serviceStatus);

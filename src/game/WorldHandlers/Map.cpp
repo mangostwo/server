@@ -64,7 +64,9 @@ Map::~Map()
     }
 
     if (m_persistentState)
-        { m_persistentState->SetUsedByMapState(NULL); }         // field pointer can be deleted after this
+    {
+        m_persistentState->SetUsedByMapState(NULL);          // field pointer can be deleted after this
+    }
 
     delete i_data;
     i_data = NULL;
@@ -1102,9 +1104,13 @@ void Map::AddObjectToRemoveList(WorldObject* obj)
 
 #ifdef ENABLE_ELUNA
     if (Creature* creature = obj->ToCreature())
+    {
         sEluna->OnRemove(creature);
+    }
     else if (GameObject* gameobject = obj->ToGameObject())
+    {
         sEluna->OnRemove(gameobject);
+    }
 #endif /* ENABLE_ELUNA */
 
     obj->CleanupsBeforeDelete();                            // remove or simplify at least cross referenced links
@@ -1216,7 +1222,9 @@ bool Map::ActiveObjectsNearGrid(uint32 x, uint32 y) const
         CellPair p = MaNGOS::ComputeCellPair(plr->GetPositionX(), plr->GetPositionY());
         if ((cell_min.x_coord <= p.x_coord && p.x_coord <= cell_max.x_coord) &&
             (cell_min.y_coord <= p.y_coord && p.y_coord <= cell_max.y_coord))
-            { return true; }
+        {
+            return true;
+        }
     }
 
     for (ActiveNonPlayers::const_iterator iter = m_activeNonPlayers.begin(); iter != m_activeNonPlayers.end(); ++iter)
@@ -1226,7 +1234,9 @@ bool Map::ActiveObjectsNearGrid(uint32 x, uint32 y) const
         CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
         if ((cell_min.x_coord <= p.x_coord && p.x_coord <= cell_max.x_coord) &&
             (cell_min.y_coord <= p.y_coord && p.y_coord <= cell_max.y_coord))
-            { return true; }
+        {
+            return true;
+        }
     }
 
     return false;
@@ -1551,7 +1561,9 @@ bool DungeonMap::Add(Player* player)
             }
             else
                 // can not jump to a different instance without resetting it
-                { MANGOS_ASSERT(playerBind->state == GetPersistentState()); }
+            {
+                MANGOS_ASSERT(playerBind->state == GetPersistentState());
+            }
         }
     }
 
@@ -1690,7 +1702,9 @@ void DungeonMap::SetResetSchedule(bool on)
     // the reset time is only scheduled when there are no payers inside
     // it is assumed that the reset time will rarely (if ever) change while the reset is scheduled
     if (!HavePlayers() && !IsRaidOrHeroicDungeon())
+    {
         sMapPersistentStateMgr.GetScheduler().ScheduleReset(on, GetPersistanceState()->GetResetTime(), DungeonResetEvent(RESET_EVENT_NORMAL_DUNGEON, GetId(), Difficulty(GetSpawnMode()), GetInstanceId()));
+    }
 }
 
 DungeonPersistentState* DungeonMap::GetPersistanceState() const
@@ -2221,7 +2235,9 @@ bool Map::GetHeightInRange(uint32 phasemask, float x, float y, float& z, float m
 
     VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
     if (!vmgr->isLineOfSightCalcEnabled())
+    {
         vmgr = NULL;
+    }
 
     if (vmgr)
     {
@@ -2231,7 +2247,9 @@ bool Map::GetHeightInRange(uint32 phasemask, float x, float y, float& z, float m
 
     // find raw height from .map file on X,Y coordinates
     if (GridMap* gmap = const_cast<TerrainInfo*>(m_TerrainData)->GetGrid(x, y)) // TODO:: find a way to remove that const_cast
+    {
         mapHeight = gmap->getHeight(x, y);
+    }
 
     float diffMaps = fabs(fabs(z) - fabs(mapHeight));
     float diffVmaps = fabs(fabs(z) - fabs(vmapHeight));
@@ -2241,9 +2259,13 @@ bool Map::GetHeightInRange(uint32 phasemask, float x, float y, float& z, float m
         {
             // well we simply have to take the highest as normally there we cannot be on top of cavern is maxSearchDist is not too big
             if (vmapHeight > mapHeight)
+            {
                 height = vmapHeight;
+            }
             else
+            {
                 height = mapHeight;
+            }
 
             //sLog.outString("vmap %5.4f, map %5.4f, height %5.4f", vmapHeight, mapHeight, height);
         }
@@ -2310,7 +2332,9 @@ bool Map::GetRandomPointUnderWater(uint32 phaseMask, float& x, float& y, float& 
     {
         float min_z = z - 0.7f * radius; // 0.7 to have a bit a "flat" cylinder, TODO which value looks nicest
         if (min_z < ground)
+        {
             min_z = ground + 0.5f; // Get some space to prevent under map
+        }
 
         float liquidLevel = liquid_status.level - 2.0f; // just to make the generated point is in water and not on surface or a bit above
 
@@ -2346,7 +2370,9 @@ bool Map::GetRandomPointInTheAir(uint32 phaseMask, float& x, float& y, float& z,
     {
         float min_z = z - 0.7f * radius; // 0.7 to have a bit a "flat" cylinder, TODO which value looks nicest
         if (min_z < ground)
+        {
             min_z = ground + 2.5f; // Get some space to prevent landing
+        }
         float max_z = std::max(z + 0.7f * radius, min_z);
         x = i_x;
         y = i_y;

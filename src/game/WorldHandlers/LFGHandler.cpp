@@ -57,7 +57,9 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recv_data)
     recv_data >> counter2;                                  // const count = 3, lua: GetLFGInfoLocal
 
     for (uint8 i = 0; i < counter2; ++i)
+    {
         recv_data >> Unused<uint8>();                       // lua: GetLFGInfoLocal
+    }
 
     recv_data >> comment;                                   // lfg comment
 
@@ -75,9 +77,13 @@ void WorldSession::HandleLfgLeaveOpcode(WorldPacket& /*recv_data*/)
 
     // If it's just one player they can leave, otherwise just the group leader
     if (!pGroup)
+    {
         sLFGMgr.LeaveLFG(pPlayer, false);
+    }
     else if (pGroup && pGroup->IsLeader(guid))
+    {
         sLFGMgr.LeaveLFG(pPlayer, true);
+    }
 
     // SendLfgUpdate(false, LFG_UPDATE_LEAVE, 0);
 }
@@ -162,7 +168,9 @@ void WorldSession::HandleLfgGetPlayerInfo(WorldPacket& recv_data)
                 data << uint32(itemRewards.itemAmount);          // amount of item reward
             }
             else
+            {
                 data << uint8(0);                                // couldn't find the item reward
+            }
         }
         else if (hasDoneToday && (type == DUNGEON_WOTLK_HEROIC)) // special case
         {
@@ -174,10 +182,14 @@ void WorldSession::HandleLfgGetPlayerInfo(WorldPacket& recv_data)
                 data << uint32(WOTLK_SPECIAL_HEROIC_AMNT);
             }
             else
+            {
                 data << uint8(0);
+            }
         }
         else
+        {
             data << uint8(0);
+        }
     }
 
     data << uint32(lockedDungeons.size());
@@ -207,11 +219,15 @@ void WorldSession::HandleLfgGetPartyInfo(WorldPacket& recv_data)
     {
         Player* pGroupPlayer = itr->getSource();
         if (!pGroupPlayer)
+        {
             continue;
+        }
 
         ObjectGuid pPlayerGuid = pGroupPlayer->GetObjectGuid();
         if (pPlayerGuid.GetRawValue() != guid)
+        {
             groupMap[pPlayerGuid] = sLFGMgr.FindRandomDungeonsNotForPlayer(pGroupPlayer);
+        }
     }
 
     uint32 packetSize = 0;
@@ -353,7 +369,9 @@ void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
         if (flags & 0x10)
         {
             for (uint32 j = 0; j < 3; ++j)
+            {
                 data << uint8(0);                           // roles
+            }
         }
 
         if (flags & 0x80)
@@ -388,7 +406,9 @@ void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
                 data << uint8(plr->getRace());
 
                 for (uint32 i = 0; i < 3; ++i)
+                {
                     data << uint8(0);                           // talent spec x/x/x
+                }
 
                 data << uint32(0);                              // armor
                 data << uint32(0);                              // spd/heal
@@ -413,22 +433,34 @@ void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
             }
 
             if (flags & 0x2)
+            {
                 data << "";                                     // comment
+            }
 
             if (flags & 0x4)
+            {
                 data << uint8(0);                               // group leader
+            }
 
             if (flags & 0x8)
+            {
                 data << uint64(1);                              // group guid
+            }
 
             if (flags & 0x10)
+            {
                 data << uint8(0);                               // roles
+            }
 
             if (flags & 0x20)
+            {
                 data << uint32(plr->GetZoneId());               // areaid
+            }
 
             if (flags & 0x40)
+            {
                 data << uint8(0);                               // status
+            }
 
             if (flags & 0x80)
             {
@@ -489,13 +521,17 @@ void WorldSession::SendLfgUpdate(bool isGroup, LFGPlayerStatus status)
             isQueued = true;
         case LFG_UPDATE_PROPOSAL_BEGIN:
             if (isGroup)
+            {
                 joinLFG = true;
+            }
             break;
         case LFG_UPDATE_STATUS:
             isQueued = (status.state == LFG_STATE_QUEUED);
 
             if (isGroup)
+            {
                 joinLFG = (status.state != LFG_STATE_ROLECHECK) && (status.state != LFG_STATE_NONE);
+            }
             break;
         default:
             break;
@@ -509,7 +545,9 @@ void WorldSession::SendLfgUpdate(bool isGroup, LFGPlayerStatus status)
     if (dungeonSize)
     {
         if (isGroup)
+        {
             data << uint8(joinLFG);
+        }
         data << uint8(isQueued);
         data << uint8(0);
         data << uint8(0);
@@ -560,9 +598,13 @@ void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
 
     std::set<uint32> dungeons;
     if (roleCheck.randomDungeonID)
+    {
         dungeons.insert(roleCheck.randomDungeonID);
+    }
     else
+    {
         dungeons = roleCheck.dungeonList;
+    }
 
     data << uint8(dungeons.size());
     if (!dungeons.empty())
@@ -586,7 +628,9 @@ void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
         for (roleMap::const_iterator rItr = roleCheck.currentRoles.begin(); rItr != roleCheck.currentRoles.end(); ++rItr)
         {
             if (rItr->first == leaderGuid)
+            {
                 continue; // exclude the leader
+            }
 
             ObjectGuid plrGuid = rItr->first;
 
@@ -688,7 +732,9 @@ void WorldSession::SendLfgRewards(LFGRewards const& rewards)
         }
     }
     else
+    {
         data << uint8(0);
+    }
     SendPacket(&data);
 }
 
@@ -706,7 +752,9 @@ void WorldSession::SendLfgBootUpdate(LFGBoot const& boot)
         {
             ++voteCount;
             if (it->second == LFG_ANSWER_AGREE)
+            {
                 ++yayCount;
+            }
         }
     }
 

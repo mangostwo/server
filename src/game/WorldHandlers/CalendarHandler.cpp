@@ -133,16 +133,22 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
 
         // skip mapDiff without global reset time
         if (!mapDiff->resetTime)
+        {
             continue;
+        }
 
         // skip non raid map
         MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
         if (!mapEntry || !mapEntry->IsRaid())
+        {
             continue;
+        }
 
         // skip already sent map (not same difficulty?)
         if (sentMaps.find(mapId) != sentMaps.end())
+        {
             continue;
+        }
 
         uint32 resetTime = sMapPersistentStateMgr.GetScheduler().GetMaxResetTimeFor(mapDiff);
 
@@ -173,13 +179,19 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
         data << uint32(holiday->CalendarFilterType);        // m_calendarFilterType
 
         for (uint8 j = 0; j < MAX_HOLIDAY_DATES; ++j)
+        {
             data << uint32(holiday->Date[j]);               // 26 * m_date -- WritePackedTime ?
+        }
 
         for (uint8 j = 0; j < MAX_HOLIDAY_DURATIONS; ++j)
+        {
             data << uint32(holiday->Duration[j]);           // 10 * m_duration
+        }
 
         for (uint8 j = 0; j < MAX_HOLIDAY_FLAGS; ++j)
+        {
             data << uint32(holiday->CalendarFlags[j]);      // 10 * m_calendarFlags
+        }
 
         data << holiday->TextureFilename;                   // m_textureFilename (holiday name)
     }*/
@@ -196,9 +208,13 @@ void WorldSession::HandleCalendarGetEvent(WorldPacket& recv_data)
     recv_data >> eventId;
 
     if (CalendarEvent* event = sCalendarMgr.GetEventById(eventId))
+    {
         sCalendarMgr.SendCalendarEvent(_player, event, CALENDAR_SENDTYPE_GET);
+    }
     else
+    {
         sCalendarMgr.SendCalendarCommandResult(_player, CALENDAR_ERROR_EVENT_INVALID);
+    }
 }
 
 void WorldSession::HandleCalendarGuildFilter(WorldPacket& recv_data)
@@ -212,7 +228,9 @@ void WorldSession::HandleCalendarGuildFilter(WorldPacket& recv_data)
     recv_data >> minLevel >> maxLevel >> minRank;
 
     if (Guild* guild = sGuildMgr.GetGuildById(_player->GetGuildId()))
+    {
         guild->MassInviteToEvent(this, minLevel, maxLevel, minRank);
+    }
 
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Min level [%u], Max level [%u], Min rank [%u]", minLevel, maxLevel, minRank);
 }
@@ -242,7 +260,9 @@ void WorldSession::HandleCalendarEventSignup(WorldPacket& recv_data)
         sCalendarMgr.SendCalendarClearPendingAction(_player);
     }
     else
+    {
         sCalendarMgr.SendCalendarCommandResult(_player, CALENDAR_ERROR_EVENT_INVALID);
+    }
 }
 
 void WorldSession::HandleCalendarArenaTeam(WorldPacket& recv_data)
@@ -252,7 +272,9 @@ void WorldSession::HandleCalendarArenaTeam(WorldPacket& recv_data)
     recv_data >> areanTeamId;
 
     if (ArenaTeam* team = sObjectMgr.GetArenaTeamById(areanTeamId))
+    {
         team->MassInviteToEvent(this);
+    }
 }
 
 void WorldSession::HandleCalendarAddEvent(WorldPacket& recv_data)
@@ -377,7 +399,9 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recv_data)
                                    type, flags, dungeonId, event->EventTime, title.c_str(), description.c_str(), eventId);
     }
     else
+    {
         sCalendarMgr.SendCalendarCommandResult(_player, CALENDAR_ERROR_EVENT_INVALID);
+    }
 }
 
 void WorldSession::HandleCalendarRemoveEvent(WorldPacket& recv_data)
@@ -439,7 +463,9 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)
         inviteeTeam = player->GetTeam();
         inviteeGuildId = player->GetGuildId();
         if (player->GetSocial()->HasIgnore(playerGuid))
+        {
             isIgnored = true;
+        }
     }
     else
     {
@@ -459,7 +485,9 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)
             {
                 Field* fields = result->Fetch();
                 if (fields[0].GetUInt8() & SOCIAL_FLAG_IGNORED)
+                {
                     isIgnored = true;
+                }
                 delete result;
             }
         }
@@ -497,7 +525,9 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)
             sCalendarMgr.AddInvite(event, playerGuid, inviteeGuid, CALENDAR_STATUS_INVITED, CALENDAR_RANK_PLAYER, "", time(NULL));
         }
         else
+        {
             sCalendarMgr.SendCalendarCommandResult(_player, CALENDAR_ERROR_EVENT_INVALID);
+        }
     }
     else
     {
@@ -568,10 +598,14 @@ void WorldSession::HandleCalendarEventRsvp(WorldPacket& recv_data)
             sCalendarMgr.SendCalendarClearPendingAction(_player);
         }
         else
+        {
             sCalendarMgr.SendCalendarCommandResult(_player, CALENDAR_ERROR_NO_INVITE); // correct?
+        }
     }
     else
+    {
         sCalendarMgr.SendCalendarCommandResult(_player, CALENDAR_ERROR_EVENT_INVALID);
+    }
 }
 
 void WorldSession::HandleCalendarEventRemoveInvite(WorldPacket& recv_data)
@@ -591,9 +625,13 @@ void WorldSession::HandleCalendarEventRemoveInvite(WorldPacket& recv_data)
                      eventId, ownerInviteId, invitee.GetString().c_str(), inviteId);
 
     if (CalendarEvent* event = sCalendarMgr.GetEventById(eventId))
+    {
         sCalendarMgr.RemoveInvite(eventId, inviteId, guid);
+    }
     else
+    {
         sCalendarMgr.SendCalendarCommandResult(_player, CALENDAR_ERROR_EVENT_INVALID);
+    }
 }
 
 void WorldSession::HandleCalendarEventStatus(WorldPacket& recv_data)
@@ -641,10 +679,14 @@ void WorldSession::HandleCalendarEventStatus(WorldPacket& recv_data)
             sCalendarMgr.SendCalendarClearPendingAction(sObjectMgr.GetPlayer(invitee));
         }
         else
+        {
             sCalendarMgr.SendCalendarCommandResult(_player, CALENDAR_ERROR_NO_INVITE);
+        }
     }
     else
+    {
         sCalendarMgr.SendCalendarCommandResult(_player, CALENDAR_ERROR_EVENT_INVALID);
+    }
 }
 
 void WorldSession::HandleCalendarEventModeratorStatus(WorldPacket& recv_data)
@@ -695,10 +737,14 @@ void WorldSession::HandleCalendarEventModeratorStatus(WorldPacket& recv_data)
             sCalendarMgr.SendCalendarEventModeratorStatusAlert(invite);
         }
         else
+        {
             sCalendarMgr.SendCalendarCommandResult(_player, CALENDAR_ERROR_NO_INVITE);
+        }
     }
     else
+    {
         sCalendarMgr.SendCalendarCommandResult(_player, CALENDAR_ERROR_EVENT_INVALID);
+    }
 }
 
 void WorldSession::HandleCalendarComplain(WorldPacket& recv_data)
@@ -773,10 +819,14 @@ void CalendarMgr::SendCalendarEventInviteAlert(CalendarInvite const* invite)
     if (event->IsGuildEvent() || event->IsGuildAnnouncement())
     {
         if (Guild* guild = sGuildMgr.GetGuildById(event->GuildId))
+        {
             guild->BroadcastPacket(&data);
+        }
     }
     else if (Player* player = sObjectMgr.GetPlayer(invite->InviteeGuid))
+    {
         player->SendDirectMessage(&data);
+    }
 }
 
 void CalendarMgr::SendCalendarEventInvite(CalendarInvite const* invite)
@@ -804,7 +854,9 @@ void CalendarMgr::SendCalendarEventInvite(CalendarInvite const* invite)
     data << uint8(invite->Status);
     data << uint8(!preInvite);
     if (!preInvite)
+    {
         data << secsToTimeBitFields(statusTime);
+    }
     data << uint8(invite->SenderGuid != invite->InviteeGuid); // false only if the invite is sign-up (invitee create himself his invite)
 
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SendCalendarInvit> %s senderGuid[%s], inviteeGuid[%s], EventId[" UI64FMTD "], Status[%u], InviteId[" UI64FMTD "]",
@@ -814,10 +866,14 @@ void CalendarMgr::SendCalendarEventInvite(CalendarInvite const* invite)
     if (preInvite)
     {
         if (Player* sender = sObjectMgr.GetPlayer(invite->SenderGuid))
+        {
             sender->SendDirectMessage(&data);
+        }
     }
     else
+    {
         SendPacketToAllEventRelatives(data, event);
+    }
 }
 
 void CalendarMgr::SendCalendarCommandResult(Player* player, CalendarError err, char const* param /*= NULL*/)
@@ -1010,14 +1066,18 @@ void CalendarMgr::SendPacketToAllEventRelatives(WorldPacket packet, CalendarEven
     // Send packet to all guild members
     if (event->IsGuildEvent() || event->IsGuildAnnouncement())
         if (Guild* guild = sGuildMgr.GetGuildById(event->GuildId))
+        {
             guild->BroadcastPacket(&packet);
+        }
 
     // Send packet to all invitees if event is non-guild, in other case only to non-guild invitees (packet was broadcasted for them)
     CalendarInviteMap const* cInvMap = event->GetInviteMap();
     for (CalendarInviteMap::const_iterator itr = cInvMap->begin(); itr != cInvMap->end(); ++itr)
         if (Player* player = sObjectMgr.GetPlayer(itr->second->InviteeGuid))
             if (!event->IsGuildEvent() || (event->IsGuildEvent() && player->GetGuildId() != event->GuildId))
+            {
                 player->SendDirectMessage(&packet);
+            }
 }
 
 void CalendarMgr::SendCalendarRaidLockoutRemove(Player* player, DungeonPersistentState const* save)

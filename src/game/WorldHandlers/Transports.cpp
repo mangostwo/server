@@ -628,6 +628,8 @@ void Transport::DoEventIfAny(WayPointMap::value_type const& node, bool departure
         DEBUG_FILTER_LOG(LOG_FILTER_TRANSPORT_MOVES, "Taxi %s event %u of node %u of %s \"%s\") path", departure ? "departure" : "arrival", eventid, node.first, GetGuidStr().c_str(), GetName());
 
         if (!sScriptMgr.OnProcessEvent(eventid, this, this, departure))
+        {
             GetMap()->ScriptsStart(DBS_ON_EVENT, eventid, this, this);
+        }
     }
 }

@@ -859,9 +859,13 @@ void BattleGround::EndBattleGround(Team winner)
             if (isArena() && isRated() && winner_arena_team && loser_arena_team)
             {
                 if (team == winner)
+                {
                     winner_arena_team->OfflineMemberLost(itr->first, loser_rating);
+                }
                 else
+                {
                     loser_arena_team->OfflineMemberLost(itr->first, winner_rating);
+                }
             }
             continue;
         }
@@ -902,7 +906,9 @@ void BattleGround::EndBattleGround(Team winner)
                 // update achievement BEFORE personal rating update
                 ArenaTeamMember* member = winner_arena_team->GetMember(plr->GetObjectGuid());
                 if (member)
+                {
                     plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, member->personal_rating);
+                }
 
                 winner_arena_team->MemberWon(plr, loser_rating);
 
@@ -935,7 +941,9 @@ void BattleGround::EndBattleGround(Team winner)
                 UpdatePlayerScore(plr, SCORE_BONUS_HONOR, GetBonusHonorFromKill(win_kills*4));
                 plr->ModifyArenaPoints(win_arena);
                 if(!plr->GetRandomWinner())
+                {
                     plr->SetRandomWinner(true);
+                }
             }
             plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, 1);
         }
@@ -943,7 +951,9 @@ void BattleGround::EndBattleGround(Team winner)
         {
             RewardMark(plr, ITEM_LOSER_COUNT);
             if (IsRandom() || BattleGroundMgr::IsBGWeekend(GetTypeID()))
+            {
                 UpdatePlayerScore(plr, SCORE_BONUS_HONOR, GetBonusHonorFromKill(loos_kills*4));
+            }
         }
 
         plr->CombatStopWithPets(true);
@@ -1273,7 +1283,9 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
                     ArenaTeam* winner_arena_team = sObjectMgr.GetArenaTeamById(GetArenaTeamIdForTeam(GetOtherTeam(team)));
                     ArenaTeam* loser_arena_team = sObjectMgr.GetArenaTeamById(GetArenaTeamIdForTeam(team));
                     if (winner_arena_team && loser_arena_team)
+                    {
                         loser_arena_team->MemberLost(plr, winner_arena_team->GetRating());
+                    }
                 }
             }
             if (SendPacket)
@@ -1295,7 +1307,9 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
                 ArenaTeam* others_arena_team = sObjectMgr.GetArenaTeamById(GetArenaTeamIdForTeam(GetOtherTeam(team)));
                 ArenaTeam* players_arena_team = sObjectMgr.GetArenaTeamById(GetArenaTeamIdForTeam(team));
                 if (others_arena_team && players_arena_team)
+                {
                     players_arena_team->OfflineMemberLost(guid, others_arena_team->GetRating());
+                }
             }
         }
 
@@ -1401,7 +1415,9 @@ void BattleGround::StartTimedAchievement(AchievementCriteriaTypes type, uint32 e
 {
     for (BattleGroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
         if (Player* pPlayer = GetBgMap()->GetPlayer(itr->first))
+        {
             pPlayer->GetAchievementMgr().StartTimedAchievementCriteria(type, entry);
+        }
 
 #ifdef ENABLE_ELUNA
     sEluna->OnBGStart(this, GetTypeID(), GetInstanceID());
@@ -1479,7 +1495,9 @@ void BattleGround::AddPlayer(Player* plr)
     else
     {
         if (GetStatus() == STATUS_WAIT_JOIN)                // not started yet
+        {
             plr->CastSpell(plr, SPELL_PREPARATION, true);   // reduces all mana cost of spells.
+        }
 
         plr->CastSpell(plr, SPELL_BATTLEGROUND_DAMPENING, true);
     }
@@ -1568,7 +1586,9 @@ void BattleGround::EventPlayerLoggedOut(Player* player)
         // 1 player is logging out, if it is the last, then end arena!
         if (isArena())
             if (GetAlivePlayersCountByTeam(player->GetTeam()) <= 1 && GetPlayersCountByTeam(GetOtherTeam(player->GetTeam())))
+            {
                 EndBattleGround(GetOtherTeam(player->GetTeam()));
+            }
     }
 }
 

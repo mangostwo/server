@@ -713,7 +713,9 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_ALWAYS_MAX_SKILL_FOR_LEVEL, "AlwaysMaxSkillForLevel", false);
 
     if (configNoReload(reload, CONFIG_UINT32_EXPANSION, "Expansion", MAX_EXPANSION))
+    {
         setConfigMinMax(CONFIG_UINT32_EXPANSION, "Expansion", MAX_EXPANSION, 0, MAX_EXPANSION);
+    }
 
     setConfig(CONFIG_UINT32_CHATFLOOD_MESSAGE_COUNT, "ChatFlood.MessageCount", 10);
     setConfig(CONFIG_UINT32_CHATFLOOD_MESSAGE_DELAY, "ChatFlood.MessageDelay", 1);
@@ -767,9 +769,13 @@ void World::LoadConfigSettings(bool reload)
 
     // always use declined names in the russian client
     if (getConfig(CONFIG_UINT32_REALM_ZONE) == REALM_ZONE_RUSSIAN)
+    {
         setConfig(CONFIG_BOOL_DECLINED_NAMES_USED, true);
+    }
     else
+    {
         setConfig(CONFIG_BOOL_DECLINED_NAMES_USED, "DeclinedNames", false);
+    }
 
     setConfig(CONFIG_BOOL_BATTLEGROUND_CAST_DESERTER,                  "Battleground.CastDeserter", true);
     setConfigMinMax(CONFIG_UINT32_BATTLEGROUND_QUEUE_ANNOUNCER_JOIN,   "Battleground.QueueAnnouncer.Join", 0, 0, 2);
@@ -811,7 +817,9 @@ void World::LoadConfigSettings(bool reload)
             sLog.outString("Client cache version set to: %u", clientCacheId);
         }
         else
+        {
             sLog.outError("ClientCacheVersion can't be negative %d, ignored.", clientCacheId);
+        }
     }
 
     setConfig(CONFIG_UINT32_INSTANT_LOGOUT, "InstantLogout", SEC_MODERATOR);
@@ -971,7 +979,9 @@ void World::LoadConfigSettings(bool reload)
 
 #ifdef ENABLE_ELUNA
     if (reload)
+    {
         sEluna->OnConfigLoad(reload);
+    }
 #endif /* ENABLE_ELUNA */
     sLog.outString();
 }
@@ -1751,15 +1761,21 @@ void World::Update(uint32 diff)
 
     /// Handle weekly quests reset time
     if (m_gameTime > m_NextWeeklyQuestReset)
+    {
         ResetWeeklyQuests();
+    }
 
     /// Handle monthly quests reset time
     if (m_gameTime > m_NextMonthlyQuestReset)
+    {
         ResetMonthlyQuests();
+    }
 
     /// Handle random battlegrounds reset time
     if (m_gameTime > m_NextRandomBGReset)
+    {
         ResetRandomBG();
+    }
 
     /// <ul><li> Handle auctions when the timer has passed
     if (m_timers[WUPDATE_AUCTIONS].Passed())
@@ -2334,9 +2350,13 @@ void World::InitWeeklyQuestResetTime()
 {
     QueryResult* result = CharacterDatabase.Query("SELECT `NextWeeklyQuestResetTime` FROM `saved_variables`");
     if (!result)
+    {
         m_NextWeeklyQuestReset = time_t(time(NULL));        // game time not yet init
+    }
     else
+    {
         m_NextWeeklyQuestReset = time_t((*result)[0].GetUInt64());
+    }
 
     // generate time by config
     time_t curTime = time(NULL);
@@ -2353,24 +2373,34 @@ void World::InitWeeklyQuestResetTime()
 
     // next reset time before current moment
     if (curTime >= nextWeekResetTime)
+    {
         nextWeekResetTime += WEEK;
+    }
 
     // normalize reset time
     m_NextWeeklyQuestReset = m_NextWeeklyQuestReset < curTime ? nextWeekResetTime - WEEK : nextWeekResetTime;
 
     if (!result)
+    {
         CharacterDatabase.PExecute("INSERT INTO `saved_variables` (`NextWeeklyQuestResetTime`) VALUES ('" UI64FMTD "')", uint64(m_NextWeeklyQuestReset));
+    }
     else
+    {
         delete result;
+    }
 }
 
 void World::InitDailyQuestResetTime()
 {
     QueryResult* result = CharacterDatabase.Query("SELECT `NextDailyQuestResetTime` FROM `saved_variables`");
     if (!result)
+    {
         m_NextDailyQuestReset = time_t(time(NULL));         // game time not yet init
+    }
     else
+    {
         m_NextDailyQuestReset = time_t((*result)[0].GetUInt64());
+    }
 
     // generate time by config
     time_t curTime = time(NULL);
@@ -2384,15 +2414,21 @@ void World::InitDailyQuestResetTime()
 
     // next reset time before current moment
     if (curTime >= nextDayResetTime)
+    {
         nextDayResetTime += DAY;
+    }
 
     // normalize reset time
     m_NextDailyQuestReset = m_NextDailyQuestReset < curTime ? nextDayResetTime - DAY : nextDayResetTime;
 
     if (!result)
+    {
         CharacterDatabase.PExecute("INSERT INTO `saved_variables` (`NextDailyQuestResetTime`) VALUES ('" UI64FMTD "')", uint64(m_NextDailyQuestReset));
+    }
     else
+    {
         delete result;
+    }
 }
 
 void World::SetMonthlyQuestResetTime(bool initialize)
@@ -2402,9 +2438,13 @@ void World::SetMonthlyQuestResetTime(bool initialize)
         QueryResult* result = CharacterDatabase.Query("SELECT `NextMonthlyQuestResetTime` FROM `saved_variables`");
 
         if (!result)
+        {
             m_NextMonthlyQuestReset = time_t(time(NULL));
+        }
         else
+        {
             m_NextMonthlyQuestReset = time_t((*result)[0].GetUInt64());
+        }
 
         delete result;
     }
@@ -2445,9 +2485,13 @@ void World::InitRandomBGResetTime()
 {
     QueryResult * result = CharacterDatabase.Query("SELECT `NextRandomBGResetTime` FROM `saved_variables`");
     if (!result)
+    {
         m_NextRandomBGReset = time_t(time(NULL));         // game time not yet init
+    }
     else
+    {
         m_NextRandomBGReset = time_t((*result)[0].GetUInt64());
+    }
 
     // generate time by config
     time_t curTime = time(NULL);
@@ -2461,14 +2505,20 @@ void World::InitRandomBGResetTime()
 
     // next reset time before current moment
     if (curTime >= nextDayResetTime)
+    {
         nextDayResetTime += DAY;
+    }
 
     // normalize reset time
     m_NextRandomBGReset = m_NextRandomBGReset < curTime ? nextDayResetTime - DAY : nextDayResetTime;
     if (!result)
+    {
         CharacterDatabase.PExecute("INSERT INTO `saved_variables` (`NextRandomBGResetTime`) VALUES ('" UI64FMTD "')", uint64(m_NextRandomBGReset));
+    }
     else
+    {
         delete result;
+    }
 }
 
 void World::ResetDailyQuests()
@@ -2477,7 +2527,9 @@ void World::ResetDailyQuests()
     CharacterDatabase.Execute("DELETE FROM `character_queststatus_daily`");
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
         if (itr->second->GetPlayer())
+        {
             itr->second->GetPlayer()->ResetDailyQuestStatus();
+        }
 
     m_NextDailyQuestReset = time_t(m_NextDailyQuestReset + DAY);
     CharacterDatabase.PExecute("UPDATE `saved_variables` SET `NextDailyQuestResetTime` = '" UI64FMTD "'", uint64(m_NextDailyQuestReset));
@@ -2489,7 +2541,9 @@ void World::ResetRandomBG()
     CharacterDatabase.Execute("DELETE FROM `character_battleground_random`");
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
         if (itr->second->GetPlayer())
+        {
             itr->second->GetPlayer()->SetRandomWinner(false);
+        }
 
     m_NextRandomBGReset = time_t(m_NextRandomBGReset + DAY);
     CharacterDatabase.PExecute("UPDATE `saved_variables` SET `NextRandomBGResetTime` = '" UI64FMTD "'", uint64(m_NextRandomBGReset));
@@ -2501,7 +2555,9 @@ void World::ResetWeeklyQuests()
     CharacterDatabase.Execute("DELETE FROM `character_queststatus_weekly`");
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
         if (itr->second->GetPlayer())
+        {
             itr->second->GetPlayer()->ResetWeeklyQuestStatus();
+        }
 
     m_NextWeeklyQuestReset = time_t(m_NextWeeklyQuestReset + WEEK);
     CharacterDatabase.PExecute("UPDATE `saved_variables` SET `NextWeeklyQuestResetTime` = '" UI64FMTD "'", uint64(m_NextWeeklyQuestReset));
@@ -2514,7 +2570,9 @@ void World::ResetMonthlyQuests()
 
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
         if (itr->second->GetPlayer())
+        {
             itr->second->GetPlayer()->ResetMonthlyQuestStatus();
+        }
 
     SetMonthlyQuestResetTime(false);
 }
@@ -2781,7 +2839,9 @@ void World::LoadBroadcastStrings()
 
         uint32 ratio = fields[2].GetUInt32();
         if (ratio == 0)
-          continue;
+        {
+            continue;
+        }
 
         m_broadcastWeight += ratio;
 
@@ -2816,7 +2876,9 @@ void World::AutoBroadcast()
         for (it = m_broadcastList.begin(); it != m_broadcastList.end(); ++it)
         {
             if (rn <= it->freq)
-            break;
+            {
+                break;
+            }
         }
         SendWorldText(LANG_AUTOBROADCAST, it->text.c_str());
     }

@@ -283,7 +283,9 @@ void ObjectMgr::AddLocaleString(std::string const& s, LocaleConstant locale, Str
     if (!s.empty())
     {
         if (data.size() <= size_t(locale))
+        {
             data.resize(locale + 1);
+        }
 
         data[locale] = s;
     }
@@ -550,7 +552,9 @@ void ObjectMgr::LoadCreatureTemplates()
         for (uint32 diff = 0; diff < MAX_DIFFICULTY - 1 && ok; ++diff)
         {
             if (!cInfo->DifficultyEntry[diff])
+            {
                 continue;
+            }
             ok = false;                                     // will be set to true at the end of this loop again
 
             CreatureInfo const* difficultyInfo = GetCreatureTemplate(cInfo->DifficultyEntry[diff]);
@@ -586,7 +590,9 @@ void ObjectMgr::LoadCreatureTemplates()
                 ok2 = true;
             }
             if (!ok2)
+            {
                 continue;
+            }
 
             if (cInfo->UnitClass != difficultyInfo->UnitClass)
             {
@@ -644,7 +650,9 @@ void ObjectMgr::LoadCreatureTemplates()
             ok = true;
         }
         if (!ok)
+        {
             continue;
+        }
 
         FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->FactionAlliance);
         if (!factionTemplate)
@@ -697,7 +705,9 @@ void ObjectMgr::LoadCreatureTemplates()
         }
 
         if (!displayScaleEntry)
+        {
             sLog.outErrorDb("Creature (Entry: %u) has nonexistent modelid in modelid_1/modelid_2/modelid_3/modelid_4", cInfo->Entry);
+        }
 
         if (!cInfo->MinLevel)
         {
@@ -831,7 +841,9 @@ void ObjectMgr::LoadCreatureTemplates()
         if (cInfo->VendorTemplateId > 0)
         {
             if (!(cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR))
+            {
                 sLog.outErrorDb("Table `creature_template` have creature (Entry: %u) with VendorTemplateId %u but not have flag UNIT_NPC_FLAG_VENDOR (%u), vendor items will ignored.", cInfo->Entry, cInfo->VendorTemplateId, UNIT_NPC_FLAG_VENDOR);
+            }
         }
 
         /// if not set custom creature scale then load scale from CreatureDisplayInfo.dbc
@@ -1185,7 +1197,9 @@ uint32 ObjectMgr::GetModelForRace(uint32 sourceModelId, uint32 racemask)
     for (CreatureModelRaceMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
     {
         if (!(itr->second.racemask & racemask))
+        {
             continue;
+        }
 
         if (itr->second.creature_entry)
         {
@@ -1483,7 +1497,9 @@ void ObjectMgr::LoadCreatures()
         if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
             for (uint32 diff = 0; diff < MAX_DIFFICULTY - 1; ++diff)
                 if (cInfo->DifficultyEntry[diff])
+                {
                     difficultyCreatures[diff].insert(cInfo->DifficultyEntry[diff]);
+                }
 
     // build single time for check spawnmask
     std::map<uint32, uint32> spawnMasks;
@@ -1491,7 +1507,9 @@ void ObjectMgr::LoadCreatures()
         if (sMapStore.LookupEntry(i))
             for (int k = 0; k < MAX_DIFFICULTY; ++k)
                 if (GetMapDifficultyData(i, Difficulty(k)))
+                {
                     spawnMasks[i] |= (1 << k);
+                }
 
     BarGoLink bar(result->GetRowCount());
 
@@ -1560,7 +1578,9 @@ void ObjectMgr::LoadCreatures()
             }
         }
         if (!ok)
+        {
             continue;
+        }
 
         if (data.modelid_override > 0 && !sCreatureDisplayInfoStore.LookupEntry(data.modelid_override))
         {
@@ -1714,7 +1734,9 @@ void ObjectMgr::LoadGameObjects()
         if (sMapStore.LookupEntry(i))
             for (int k = 0; k < MAX_DIFFICULTY; ++k)
                 if (GetMapDifficultyData(i, Difficulty(k)))
+                {
                     spawnMasks[i] |= (1 << k);
+                }
 
     BarGoLink bar(result->GetRowCount());
 
@@ -2092,7 +2114,9 @@ void ObjectMgr::LoadItemPrototypes()
         {
             /* to many errors, and possible not all items really used in game
             if (dbcitem)
+            {
                 sLog.outErrorDb("Item (Entry: %u) doesn't exists in DB, but must exist.",i);
+            }
             */
             continue;
         }
@@ -2285,7 +2309,9 @@ void ObjectMgr::LoadItemPrototypes()
             }
         }
         else if (proto->RequiredReputationRank > MIN_REPUTATION_RANK)
+        {
             sLog.outErrorDb("Item (Entry: %u) has RequiredReputationFaction ==0 but RequiredReputationRank > 0, rank setting is useless.", i);
+        }
 
         if (proto->MaxCount < -1)
         {
@@ -2438,7 +2464,9 @@ void ObjectMgr::LoadItemPrototypes()
                 else if (proto->Spells[j].SpellTrigger == ITEM_SPELLTRIGGER_CHANCE_ON_HIT)
                 {
                     if (proto->Class != ITEM_CLASS_WEAPON)
+                    {
                         sLog.outErrorDb("Item (Entry: %u) isn't weapon (Class: %u) but has on hit spelltrigger_%d (%u), it will not triggered.", i, proto->Class, j + 1, proto->Spells[j].SpellTrigger);
+                    }
                 }
 
                 if (proto->Spells[j].SpellId)
@@ -2526,7 +2554,9 @@ void ObjectMgr::LoadItemPrototypes()
             {
                 uint32 mask = 1 << j;
                 if (!(proto->BagFamily & mask))
+                {
                     continue;
+                }
 
                 ItemBagFamilyEntry const* bf = sItemBagFamilyStore.LookupEntry(j + 1);
                 if (!bf)
@@ -2549,7 +2579,9 @@ void ObjectMgr::LoadItemPrototypes()
         }
 
         if (proto->TotemCategory && !sTotemCategoryStore.LookupEntry(proto->TotemCategory))
+        {
             sLog.outErrorDb("Item (Entry: %u) has wrong TotemCategory (%u)", i, proto->TotemCategory);
+        }
 
         for (int j = 0; j < MAX_ITEM_PROTO_SOCKETS; ++j)
         {
@@ -2561,7 +2593,9 @@ void ObjectMgr::LoadItemPrototypes()
         }
 
         if (proto->GemProperties && !sGemPropertiesStore.LookupEntry(proto->GemProperties))
+        {
             sLog.outErrorDb("Item (Entry: %u) has wrong GemProperties (%u)", i, proto->GemProperties);
+        }
 
         if (proto->RequiredDisenchantSkill < -1)
         {
@@ -2607,7 +2641,9 @@ void ObjectMgr::LoadItemPrototypes()
         {
             // lot DB cases
             if (proto->RequiredDisenchantSkill >= 0)
+            {
                 ERROR_DB_STRICT_LOG("Item (Entry: %u) marked as disenchantable by RequiredDisenchantSkill, but not have disenchanting loot id.", i);
+            }
         }
 
         if (proto->FoodType >= MAX_PET_DIET)
@@ -3552,11 +3588,15 @@ void ObjectMgr::LoadPlayerInfo()
 
             // skip expansion races if not playing with expansion
             if (sWorld.getConfig(CONFIG_UINT32_EXPANSION) < EXPANSION_TBC && (race == RACE_BLOODELF || race == RACE_DRAENEI))
+            {
                 continue;
+            }
 
             // skip expansion classes if not playing with expansion
             if (sWorld.getConfig(CONFIG_UINT32_EXPANSION) < EXPANSION_WOTLK && class_ == CLASS_DEATH_KNIGHT)
+            {
                 continue;
+            }
 
             // fatal error if no level 1 data
             if (!pInfo->levelInfo || pInfo->levelInfo[0].stats[0] == 0)
@@ -4099,7 +4139,9 @@ void ObjectMgr::LoadQuests()
     {
         // skip post-loading checks for disabled quests
         if (DisableMgr::IsDisabledFor(DISABLE_TYPE_QUEST, iter->first))
+        {
             continue;
+        }
 
         Quest* qinfo = iter->second;
 
@@ -4531,7 +4573,9 @@ void ObjectMgr::LoadQuests()
             if (qinfo->RewRepFaction[j])
             {
                 if (abs(qinfo->RewRepValueId[j]) > 9)
+                {
                     sLog.outErrorDb("Quest %u has RewRepValueId%d = %i but value is not valid.", qinfo->GetQuestId(), j + 1, qinfo->RewRepValueId[j]);
+                }
 
                 if (!sFactionStore.LookupEntry(qinfo->RewRepFaction[j]))
                 {
@@ -4850,7 +4894,9 @@ void ObjectMgr::LoadQuestLocales()
                 if (idx >= 0)
                 {
                     if ((int32)data.CompletedText.size() <= idx)
+                    {
                         data.CompletedText.resize(idx + 1);
+                    }
 
                     data.CompletedText[idx] = str;
                 }
@@ -6339,7 +6385,9 @@ void ObjectMgr::LoadGameObjectLocales()
                 if (idx >= 0)
                 {
                     if ((int32)data.Name.size() <= idx)
+                    {
                         data.Name.resize(idx + 1);
+                    }
 
                     data.Name[idx] = str;
                 }
@@ -6355,7 +6403,9 @@ void ObjectMgr::LoadGameObjectLocales()
                 if (idx >= 0)
                 {
                     if ((int32)data.CastBarCaption.size() <= idx)
+                    {
                         data.CastBarCaption.resize(idx + 1);
+                    }
 
                     data.CastBarCaption[idx] = str;
                 }
@@ -6542,7 +6592,9 @@ void ObjectMgr::LoadGameobjectInfo()
                 }
                 /* disable check for while, too many nonexistent spells
                 if (goInfo->trap.spellId)                   // spell
+                {
                     CheckGOSpellId(goInfo,goInfo->trap.spellId,3);
+                }
                 */
                 break;
             }
@@ -6581,7 +6633,9 @@ void ObjectMgr::LoadGameobjectInfo()
                 }
                 /* disable check for while, too many nonexistent spells
                 if (goInfo->goober.spellId)                 // spell
+                {
                     CheckGOSpellId(goInfo,goInfo->goober.spellId,10);
+                }
                 */
                 CheckGONoDamageImmuneId(goInfo, goInfo->goober.noDamageImmune, 11);
                 if (goInfo->goober.linkedTrapId)            // linked trap
@@ -7236,7 +7290,9 @@ void ObjectMgr::LoadQuestPOI()
             for (QuestPOIVector::iterator itr = vect.begin(); itr != vect.end(); ++itr)
             {
                 if (itr->PoiId != poiId)
+                {
                     continue;
+                }
 
                 QuestPOIPoint point(x, y);
                 itr->points.push_back(point);
@@ -7546,9 +7602,13 @@ struct SQLSpellLoader : public SQLStorageLoaderBase<SQLSpellLoader, SQLHashStora
     void default_fill(uint32 field_pos, S src, D& dst)
     {
         if (field_pos == LOADED_SPELLDBC_FIELD_POS_EQUIPPED_ITEM_CLASS)
+        {
             dst = D(-1);
+        }
         else
+        {
             dst = D(src);
+        }
     }
 
     void default_fill_to_str(uint32 field_pos, char const* /*src*/, char*& dst)
@@ -7578,7 +7638,9 @@ void ObjectMgr::LoadSpellTemplate()
         // check data correctness
         SpellEntry const* spellEntry = sSpellTemplate.LookupEntry<SpellEntry>(i);
         if (!spellEntry)
+        {
             continue;
+        }
 
         // insert serverside spell data
         if (sSpellStore.GetNumRows() <= i)
@@ -7587,7 +7649,9 @@ void ObjectMgr::LoadSpellTemplate()
             continue;
         }
         else
+        {
             sSpellStore.InsertEntry(const_cast<SpellEntry*>(spellEntry), i);
+        }
     }
 }
 
@@ -8660,7 +8724,9 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
         case CONDITION_COMPLETED_ENCOUNTER:
         {
             if (!map)
+            {
                 map = player ? player->GetMap() : source->GetMap();
+            }
             if (!map->IsDungeon())
             {
                 sLog.outErrorDb("CONDITION_COMPLETED_ENCOUNTER (entry %u) is used outside of a dungeon (on Map %u) by %s", m_entry, player->GetMapId(), player->GetGuidStr().c_str());
@@ -8678,9 +8744,13 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
             }
             // Select matching difficulties
             if (map->GetDifficulty() != Difficulty(dbcEntry1->Difficulty))
+            {
                 dbcEntry1 = NULL;
+            }
             if (dbcEntry2 && map->GetDifficulty() != Difficulty(dbcEntry2->Difficulty))
+            {
                 dbcEntry2 = NULL;
+            }
 
             return completedEncounterMask & ((dbcEntry1 ? 1 << dbcEntry1->encounterIndex : 0) | (dbcEntry2 ? 1 << dbcEntry2->encounterIndex : 0));
         }
@@ -9225,7 +9295,9 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
             }
 
             if (value2)
+            {
                 sLog.outErrorDb("XP user condition (entry %u, type %u) has useless data in value2 (%u)!", entry, condition, value2);
+            }
 
             break;
         }
@@ -9710,7 +9782,9 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
                     sLog.outErrorDb("Table `%s` (Entry: %u) has wrong redundant reqlevel %u (<>prof reqlevel %u) for spell %u", tableName, entry, trainerSpell.reqLevel, minLevel, spell);
             }
             else
+            {
                 trainerSpell.reqLevel = minLevel;
+            }
         }
         // for non-prof. spell use spellLevel if not provided any
         else
@@ -9721,7 +9795,9 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
                     ERROR_DB_STRICT_LOG("Table `%s` (Entry: %u) has redundant reqlevel %u (=spell level) for spell %u", tableName, entry, trainerSpell.reqLevel, spell);
             }
             else
+            {
                 trainerSpell.reqLevel = learnSpellinfo->spellLevel;
+            }
         }
 
         ++count;
@@ -9905,7 +9981,9 @@ void ObjectMgr::LoadGossipMenu(std::set<uint32>& gossipScriptSet)
         {
             ScriptChainMap const* scm = sScriptMgr.GetScriptChainMap(DBS_ON_GOSSIP);
             if (!scm)
+            {
                 continue;
+            }
 
             if (scm->find(gMenu.script_id) == scm->end())
             {
@@ -10107,7 +10185,9 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
         {
             ScriptChainMap const* scm = sScriptMgr.GetScriptChainMap(DBS_ON_GOSSIP);
             if (!scm)
+            {
                 continue;
+            }
 
             if (scm->find(gMenuItem.action_script_id) == scm->end())
             {
@@ -10259,7 +10339,9 @@ bool ObjectMgr::IsVendorItemValid(bool isTemplate, char const* tableName, uint32
     if (ExtendedCost && !sItemExtendedCostStore.LookupEntry(ExtendedCost))
     {
         if (pl)
+        {
             ChatHandler(pl).PSendSysMessage(LANG_EXTENDED_COST_NOT_EXIST, ExtendedCost);
+        }
         else
             sLog.outErrorDb("Table `%s` contain item (Entry: %u) with wrong ExtendedCost (%u) for %s %u, ignoring",
                             tableName, item_id, ExtendedCost, idStr, vendor_entry);
@@ -10299,12 +10381,16 @@ bool ObjectMgr::IsVendorItemValid(bool isTemplate, char const* tableName, uint32
     VendorItemData const* tItems = isTemplate ? NULL : GetNpcVendorTemplateItemList(vendor_entry);
 
     if (!vItems && !tItems)
-        { return true; }                                        // later checks for non-empty lists
+    {
+        return true;                                         // later checks for non-empty lists
+    }
 
     if (vItems && vItems->FindItemCostPair(item_id, ExtendedCost))
     {
         if (pl)
+        {
             ChatHandler(pl).PSendSysMessage(LANG_ITEM_ALREADY_IN_LIST, item_id, ExtendedCost);
+        }
         else
             sLog.outErrorDb("Table `%s` has duplicate items %u (with extended cost %u) for %s %u, ignoring",
                             tableName, item_id, ExtendedCost, idStr, vendor_entry);
@@ -10316,7 +10402,9 @@ bool ObjectMgr::IsVendorItemValid(bool isTemplate, char const* tableName, uint32
         if (tItems && tItems->FindItemCostPair(item_id, ExtendedCost))
         {
             if (pl)
+            {
                 ChatHandler(pl).PSendSysMessage(LANG_ITEM_ALREADY_IN_LIST, item_id, ExtendedCost);
+            }
             else
             {
                 if (!cInfo->VendorTemplateId)

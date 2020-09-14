@@ -77,6 +77,7 @@ Log::Log() :
 #ifdef ENABLE_ELUNA
     elunaErrLogfile(NULL),
 #endif /* ENABLE_ELUNA */
+
     eventAiErLogfile(NULL), scriptErrLogFile(NULL), worldLogfile(NULL), wardenLogfile(NULL), m_colored(false),
     m_includeTime(false), m_gmlog_per_account(false), m_scriptLibName(NULL)
 {
@@ -124,27 +125,21 @@ void Log::SetColor(bool stdout_stream, Color color)
 
     static WORD WinColorFG[Color_count] =
     {
-        0,                                                  // BLACK
-        FOREGROUND_RED,                                     // RED
-        FOREGROUND_GREEN,                                   // GREEN
-        FOREGROUND_RED | FOREGROUND_GREEN,                  // BROWN
-        FOREGROUND_BLUE,                                    // BLUE
-        FOREGROUND_RED |                    FOREGROUND_BLUE,// MAGENTA
-        FOREGROUND_GREEN | FOREGROUND_BLUE,                 // CYAN
-        FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE,// WHITE
-        // YELLOW
-        FOREGROUND_RED | FOREGROUND_GREEN |                   FOREGROUND_INTENSITY,
-        // RED_BOLD
-        FOREGROUND_RED |                                      FOREGROUND_INTENSITY,
-        // GREEN_BOLD
-        FOREGROUND_GREEN |                   FOREGROUND_INTENSITY,
-        FOREGROUND_BLUE | FOREGROUND_INTENSITY,             // BLUE_BOLD
-        // MAGENTA_BOLD
-        FOREGROUND_RED |                    FOREGROUND_BLUE | FOREGROUND_INTENSITY,
-        // CYAN_BOLD
-        FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
-        // WHITE_BOLD
-        FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY
+        0,                                                                         // BLACK
+        FOREGROUND_RED,                                                            // RED
+        FOREGROUND_GREEN,                                                          // GREEN
+        FOREGROUND_RED | FOREGROUND_GREEN,                                         // BROWN
+        FOREGROUND_BLUE,                                                           // BLUE
+        FOREGROUND_RED |                    FOREGROUND_BLUE,                       // MAGENTA
+        FOREGROUND_GREEN | FOREGROUND_BLUE,                                        // CYAN
+        FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE,                       // WHITE
+        FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY,                  // YELLOW
+        FOREGROUND_RED | FOREGROUND_INTENSITY,                                     // RED_BOLD
+        FOREGROUND_GREEN | FOREGROUND_INTENSITY,                                   // GREEN_BOLD
+        FOREGROUND_BLUE | FOREGROUND_INTENSITY,                                    // BLUE_BOLD
+        FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY,                   // MAGENTA_BOLD
+        FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY,                 // CYAN_BOLD
+        FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY // WHITE_BOLD
     };
 
     HANDLE hConsole = GetStdHandle(stdout_stream ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE);
@@ -192,6 +187,7 @@ void Log::SetColor(bool stdout_stream, Color color)
 
     fprintf((stdout_stream ? stdout : stderr), "\x1b[%d%sm", UnixColorFG[color], (color >= YELLOW && color < Color_count ? ";1" : ""));
 #endif
+
 }
 
 void Log::ResetColor(bool stdout_stream)
@@ -202,6 +198,7 @@ void Log::ResetColor(bool stdout_stream)
 #else
     fprintf((stdout_stream ? stdout : stderr), "\x1b[0m");
 #endif
+
 }
 
 void Log::SetLogLevel(char* level)
@@ -299,6 +296,7 @@ void Log::Initialize()
 #ifdef ENABLE_ELUNA
     elunaErrLogfile = openLogFile("ElunaErrorLogFile", NULL, "a");
 #endif /* ENABLE_ELUNA */
+
     eventAiErLogfile = openLogFile("EventAIErrorLogFile", NULL, "a");
     raLogfile = openLogFile("RaLogFile", NULL, "a");
     worldLogfile = openLogFile("WorldLogFile", "WorldLogTimestamp", "a");
@@ -595,7 +593,9 @@ void Log::outErrorDb(const char* err, ...)
 void Log::outErrorEluna()
 {
     if (m_includeTime)
+    {
         outTime();
+    }
 
     fprintf(stderr, "\n");
 
@@ -629,10 +629,14 @@ void Log::outErrorEluna(const char* err, ...)
     }
 
     if (m_colored)
+    {
         SetColor(false, m_colors[LogError]);
+    }
 
     if (m_includeTime)
+    {
         outTime();
+    }
 
     va_list ap;
 
@@ -641,7 +645,9 @@ void Log::outErrorEluna(const char* err, ...)
     va_end(ap);
 
     if (m_colored)
+    {
         ResetColor(false);
+    }
 
     fprintf(stderr, "\n");
 
@@ -859,7 +865,6 @@ void Log::outDetail(const char* str, ...)
 
 void Log::outDebug(const char* str, ...)
 {
-#ifdef MANGOS_DEBUG
     if (!str)
     {
         return;
@@ -904,7 +909,6 @@ void Log::outDebug(const char* str, ...)
     }
 
     fflush(stdout);
-#endif
 }
 
 void Log::outCommand(uint32 account, const char* str, ...)
@@ -1000,32 +1004,36 @@ void Log::outWarden(const char* str, ...)
     {
         return;
     }
-
-    if (m_colored)
+    if (m_logLevel >= LOG_LVL_DETAIL)
     {
-        SetColor(true, m_colors[LogNormal]);
+        if (m_colored)
+        {
+            SetColor(true, m_colors[LogNormal]);
+        }
+
+        if (m_includeTime)
+        {
+            outTime();
+        }
+
+        va_list ap;
+
+        va_start(ap, str);
+        vutf8printf(stdout, str, &ap);
+        va_end(ap);
+
+        if (m_colored)
+        {
+            ResetColor(true);
+        }
+
+        printf("\n");
     }
 
-    if (m_includeTime)
+    if (wardenLogfile && m_logFileLevel >= LOG_LVL_DETAIL)
     {
-        outTime();
-    }
+        va_list ap;
 
-    va_list ap;
-
-    va_start(ap, str);
-    vutf8printf(stdout, str, &ap);
-    va_end(ap);
-
-    if (m_colored)
-    {
-        ResetColor(true);
-    }
-
-    printf("\n");
-
-    if (wardenLogfile)
-    {
         outTimestamp(wardenLogfile);
         fprintf(wardenLogfile, "[Warden]: ");
 
@@ -1169,7 +1177,7 @@ void Log::outWorldPacketDump(uint32 socket, uint32 opcode, char const* opcodeNam
 
     outTimestamp(worldLogfile);
 
-    fprintf(worldLogfile, "\n%s:\nSOCKET: %u\nLENGTH: %lu\nOPCODE: %s (0x%.4X)\nDATA:\n",
+    fprintf(worldLogfile, "\n%s:\nSOCKET: %u\nLENGTH: " SIZEFMTD "\nOPCODE: %s (0x%.4X)\nDATA:\n",
             incoming ? "CLIENT" : "SERVER",
             socket, packet->size(), opcodeName, opcode);
 

@@ -94,7 +94,9 @@ void WorldSession::SendAuctionCommandResult(AuctionEntry* auc, AuctionAction Act
     {
         case AUCTION_OK:
             if (Action == AUCTION_BID_PLACED)
-                { data << uint32(auc->GetAuctionOutBid()); }    // new AuctionOutBid?
+            {
+                data << uint32(auc->GetAuctionOutBid());     // new AuctionOutBid?
+            }
             break;
         case AUCTION_ERR_INVENTORY:
             data << uint32(invError);
@@ -185,7 +187,9 @@ void WorldSession::SendAuctionOutbiddedMail(AuctionEntry* auction)
         msgAuctionOutbiddedSubject << auction->itemTemplate << ":" << auction->itemRandomPropertyId << ":" << AUCTION_OUTBIDDED << ":" << auction->Id << ":" << auction->itemCount;
 
         if (oldBidder)
+        {
             oldBidder->GetSession()->SendAuctionBidderNotification(auction);
+        }
 
         MailDraft(msgAuctionOutbiddedSubject.str(), "")     // TODO: fix body
         .SetMoney(auction->bid)
@@ -287,7 +291,9 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recv_data)
     recv_data >> etime;
 
     if (!bid || !etime)
-        { return; }                                             // check for cheaters
+    {
+        return;                                              // check for cheaters
+    }
 
     Player* pl = GetPlayer();
 
@@ -325,7 +331,9 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recv_data)
         ObjectGuid itemGuid = guids[i];
 
         if (!itemGuid)
+        {
             continue;
+        }
 
         uint32 stackSize = stackSizes[i];
 
@@ -373,13 +381,19 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recv_data)
     }
 
         if (stackSize == 0)
+        {
             stackSize = 1;
+        }
 
         if (stackSize > it->GetMaxStackCount())             // too big stack size
+        {
             stackSize = it->GetMaxStackCount();
+        }
 
         if (!pl->HasItemCount(it->GetEntry(), stackSize))   // not enough items
+        {
             continue;
+        }
 
         Item* newItem = it->CloneItem(stackSize);
 
@@ -415,7 +429,9 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recv_data)
     recv_data >> auctionId >> price;
 
     if (!auctionId || !price)
-        { return; }                                             // check for cheaters
+    {
+        return;                                              // check for cheaters
+    }
 
     AuctionHouseEntry const* auctionHouseEntry = GetCheckedAuctionHouseForAuctioneer(auctioneerGuid);
     if (!auctionHouseEntry)
@@ -486,9 +502,13 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recv_data)
     SendAuctionCommandResult(auction, AUCTION_BID_PLACED, AUCTION_OK);
 
     if (auction->UpdateBid(price, pl))
+    {
         pl->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_AUCTION_BID, price);
+    }
     else
+    {
         pl->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_AUCTION_BID, auction->buyout);
+    }
 }
 
 // this void is called when auction_owner cancels his auction

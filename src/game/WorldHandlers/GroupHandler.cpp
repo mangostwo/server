@@ -565,7 +565,9 @@ void WorldSession::HandleRaidTargetUpdateOpcode(WorldPacket& recv_data)
         if (group->isRaidGroup() &&
                 !group->IsLeader(GetPlayer()->GetObjectGuid()) &&
                 !group->IsAssistant(GetPlayer()->GetObjectGuid()))
-            { return; }
+                {
+                    return;
+                }
 
         ObjectGuid guid;
         recv_data >> guid;
@@ -621,7 +623,9 @@ void WorldSession::HandleGroupChangeSubGroupOpcode(WorldPacket& recv_data)
     /** error handling **/
     if (!group->IsLeader(GetPlayer()->GetObjectGuid()) &&
         !group->IsAssistant(GetPlayer()->GetObjectGuid()))
-        { return; }
+        {
+            return;
+        }
 
     if (!group->HasFreeSlotSubGroup(groupNr))
     {
@@ -708,9 +712,13 @@ void WorldSession::HandlePartyAssignmentOpcode(WorldPacket& recv_data)
     else
     {
         if (group->GetMainTankGuid() == guid)
+        {
             group->SetMainTank(ObjectGuid());
+        }
         if (group->GetMainAssistantGuid() == guid)
+        {
             group->SetMainAssistant(ObjectGuid());
+        }
     }
 }
 
@@ -727,7 +735,9 @@ void WorldSession::HandleRaidReadyCheckOpcode(WorldPacket& recv_data)
         /** error handling **/
         if (!group->IsLeader(GetPlayer()->GetObjectGuid()) &&
             !group->IsAssistant(GetPlayer()->GetObjectGuid()))
-            { return; }
+            {
+                return;
+            }
         /********************/
 
         // everything is fine, do it
@@ -796,16 +806,24 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     if (mask & GROUP_UPDATE_FLAG_STATUS)
     {
         if (player->IsPvP())
+        {
             *data << uint16(MEMBER_STATUS_ONLINE | MEMBER_STATUS_PVP);
+        }
         else
+        {
             *data << uint16(MEMBER_STATUS_ONLINE);
+        }
     }
 
     if (mask & GROUP_UPDATE_FLAG_CUR_HP)
+    {
         *data << uint32(player->GetHealth());
+    }
 
     if (mask & GROUP_UPDATE_FLAG_MAX_HP)
+    {
         *data << uint32(player->GetMaxHealth());
+    }
 
     Powers powerType = player->GetPowerType();
     if (mask & GROUP_UPDATE_FLAG_POWER_TYPE)
@@ -886,17 +904,25 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     if (mask & GROUP_UPDATE_FLAG_PET_CUR_HP)
     {
         if (pet)
+        {
             *data << uint32(pet->GetHealth());
+        }
         else
+        {
             *data << uint32(0);
+        }
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_MAX_HP)
     {
         if (pet)
+        {
             *data << uint32(pet->GetMaxHealth());
+        }
         else
+        {
             *data << uint32(0);
+        }
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_POWER_TYPE)
@@ -952,15 +978,21 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
             }
         }
         else
+        {
             *data << uint64(0);
+        }
     }
 
     if (mask & GROUP_UPDATE_FLAG_VEHICLE_SEAT)
     {
         if (player->GetTransportInfo())
+        {
             *data << uint32(((Unit*)player->GetTransportInfo()->GetTransport())->GetVehicleInfo()->GetVehicleEntry()->m_seatID[player->GetTransportInfo()->GetTransportSeat()]);
+        }
         else
+        {
             *data << uint32(0);
+        }
     }
 }
 
@@ -991,7 +1023,9 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
 
     uint32 mask1 = 0x00040BFF;                              // common mask, real flags used 0x000040BFF
     if (pet)
-        { mask1 = 0x7FFFFFFF; }                                 // for hunters and other classes with pets
+    {
+        mask1 = 0x7FFFFFFF;                                  // for hunters and other classes with pets
+    }
 
     Powers powerType = player->GetPowerType();
     data << uint32(mask1);                                  // group update mask
@@ -1077,7 +1111,9 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
     }
 
     if (player->GetTransportInfo())                         // GROUP_UPDATE_FLAG_VEHICLE_SEAT
+    {
         data << uint32(((Unit*)player->GetTransportInfo()->GetTransport())->GetVehicleInfo()->GetVehicleEntry()->m_seatID[player->GetTransportInfo()->GetTransportSeat()]);
+    }
 
     SendPacket(&data);
 }

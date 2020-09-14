@@ -910,7 +910,9 @@ bool ChatHandler::HandleNpcSetPhaseCommand(char* args)
     pCreature->SetPhaseMask(phasemask, true);
 
     if (pCreature->HasStaticDBSpawnData())
+    {
         pCreature->SaveToDB();
+    }
 
     return true;
 }
@@ -1124,7 +1126,9 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     uint32 diff = 1;
     for (; diff < MAX_DIFFICULTY; ++diff)
         if (baseInfo->DifficultyEntry[diff - 1] == target->GetCreatureInfo()->Entry)
+        {
             break;
+        }
 
     if (diff < MAX_DIFFICULTY)
         PSendSysMessage(LANG_NPCINFO_CHAR_DIFFICULTY, target->GetGuidStr().c_str(), faction, npcflags,

@@ -65,7 +65,9 @@ void OutdoorPvPTF::FillInitialWorldStates(WorldPacket& data, uint32& count)
         }
     }
     else
+    {
         UpdateTimerWorldState();
+    }
 }
 
 void OutdoorPvPTF::SendRemoveWorldStates(Player* player)
@@ -87,7 +89,9 @@ void OutdoorPvPTF::HandlePlayerEnterZone(Player* player, bool isMainZone)
 
     // Handle the buffs
     if (player->GetTeam() == m_zoneOwner)
+    {
         player->CastSpell(player, SPELL_AUCHINDOUN_BLESSING, true);
+    }
 }
 
 void OutdoorPvPTF::HandlePlayerLeaveZone(Player* player, bool isMainZone)
@@ -138,7 +142,9 @@ void OutdoorPvPTF::HandleObjectiveComplete(uint32 eventId, std::list<Player*> pl
                 for (std::list<Player*>::iterator itr = players.begin(); itr != players.end(); ++itr)
                 {
                     if ((*itr) && (*itr)->GetTeam() == team)
+                    {
                         (*itr)->AreaExploredOrEventHappens(team == ALLIANCE ? QUEST_SPIRITS_OF_AUCHINDOUM_ALLIANCE : QUEST_SPIRITS_OF_AUCHINDOUM_HORDE);
+                    }
                 }
                 return;
             }
@@ -305,7 +311,9 @@ void OutdoorPvPTF::UnlockZone()
     {
         // Find player who is in main zone (Terokkar Forest) to get correct map reference
         if (!itr->second)
+        {
             continue;
+        }
 
         if (Player* player = sObjectMgr.GetPlayer(itr->first))
         {
@@ -336,7 +344,9 @@ void OutdoorPvPTF::Update(uint32 diff)
                 m_zoneUpdateTimer = TIMER_TF_UPDATE_TIME;
             }
             else
-                m_zoneUpdateTimer -= diff;*/
+            {
+                m_zoneUpdateTimer -= diff;
+            }*/
 
             m_zoneLockTimer -= diff;
         }
@@ -362,7 +372,9 @@ void OutdoorPvPTF::LockTowers(const WorldObject* objRef)
     for (uint8 i = 0; i < MAX_TF_TOWERS; ++i)
     {
         if (GameObject* go = objRef->GetMap()->GetGameObject(m_towerBanners[i]))
+        {
             go->SetLootState(GO_JUST_DEACTIVATED);
+        }
         else
         {
             // if grid is unloaded, changing the saved slider value is enough

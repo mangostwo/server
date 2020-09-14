@@ -221,7 +221,9 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
     // notify group after successful teleport
     if (_player->GetGroup())
+    {
         _player->SetGroupUpdateFlag(GROUP_UPDATE_FULL);
+    }
 }
 
 void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)

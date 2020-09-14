@@ -185,7 +185,9 @@ class SpellAuraHolder
             m_procCharges = charges;
 
             if (update)
+            {
                 SendAuraUpdate(false);
+            }
         }
         bool DropAuraCharge()                               // return true if last charge dropped
         {

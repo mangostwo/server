@@ -231,9 +231,13 @@ struct Glyph
         else if (newId == 0)
         {
             if (uState == GLYPH_NEW)                        // delete before add new -> no change
+            {
                 uState = GLYPH_UNCHANGED;
+            }
             else                                            // delete existing data
+            {
                 uState = GLYPH_DELETED;
+            }
         }
         else if (uState != GLYPH_NEW)                       // if not new data, change current data
         {
@@ -373,9 +377,13 @@ struct Runes
     void SetRuneState(uint8 index, bool set = true)
     {
         if (set)
+        {
             runeState |= (1 << index);                      // usable
+        }
         else
+        {
             runeState &= ~(1 << index);                     // on cooldown
+        }
     }
 };
 

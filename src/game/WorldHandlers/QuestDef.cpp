@@ -234,19 +234,25 @@ uint32 Quest::XPValue(Player* pPlayer) const
         // formula can possibly be organized better, using less if's and simplify some.
 
         if (QuestLevel != -1)
+        {
             baseLevel = QuestLevel;
+        }
 
         if (((baseLevel - playerLevel) + 10) * 2 > 10)
         {
             baseLevel = playerLevel;
 
             if (QuestLevel != -1)
+            {
                 baseLevel = QuestLevel;
+            }
 
             if (((baseLevel - playerLevel) + 10) * 2 <= 10)
             {
                 if (QuestLevel == -1)
+                {
                     baseLevel = playerLevel;
+                }
 
                 xpMultiplier = 2 * (baseLevel - playerLevel) + 20;
             }
@@ -260,19 +266,25 @@ uint32 Quest::XPValue(Player* pPlayer) const
             baseLevel = playerLevel;
 
             if (QuestLevel != -1)
+            {
                 baseLevel = QuestLevel;
+            }
 
             if (((baseLevel - playerLevel) + 10) * 2 >= 1)
             {
                 baseLevel = playerLevel;
 
                 if (QuestLevel != -1)
+                {
                     baseLevel = QuestLevel;
+                }
 
                 if (((baseLevel - playerLevel) + 10) * 2 <= 10)
                 {
                     if (QuestLevel == -1)
+                    {
                         baseLevel = playerLevel;
+                    }
 
                     xpMultiplier = 2 * (baseLevel - playerLevel) + 20;
                 }
@@ -294,13 +306,21 @@ uint32 Quest::XPValue(Player* pPlayer) const
 
             // round values
             if (rawXP > 1000)
+            {
                 realXP = ((rawXP + 25) / 50 * 50);
+            }
             else if (rawXP > 500)
+            {
                 realXP = ((rawXP + 12) / 25 * 25);
+            }
             else if (rawXP > 100)
+            {
                 realXP = ((rawXP + 5) / 10 * 10);
+            }
             else
+            {
                 realXP = ((rawXP + 2) / 5 * 5);
+            }
         }
 
         return realXP;
@@ -332,7 +352,9 @@ bool Quest::IsAllowedInRaid() const
 uint32 Quest::CalculateRewardHonor(uint32 level) const
 {
     if (level > GT_MAX_LEVEL)
+    {
         level = GT_MAX_LEVEL;
+    }
 
     uint32 honor = 0;
 

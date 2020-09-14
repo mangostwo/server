@@ -189,7 +189,9 @@ bool ChatHandler::HandleModifyPhaseCommand(char* args)
 
     Unit* target = getSelectedUnit();
     if (!target)
+    {
         target = m_session->GetPlayer();
+    }
 
     // check online security
     else if (target->GetTypeId() == TYPEID_PLAYER && HasLowerSecurity((Player*)target))
@@ -1613,7 +1615,9 @@ bool ChatHandler::HandleModifyRunicPowerCommand(char* args)
 
     PSendSysMessage(LANG_YOU_CHANGE_RUNIC_POWER, GetNameLink(chr).c_str(), rune / 10, runem / 10);
     if (needReportToTarget(chr))
+    {
         ChatHandler(chr).PSendSysMessage(LANG_YOURS_RUNIC_POWER_CHANGED, GetNameLink().c_str(), rune / 10, runem / 10);
+    }
 
     chr->SetMaxPower(POWER_RUNIC_POWER, runem);
     chr->SetPower(POWER_RUNIC_POWER, rune);
@@ -2324,10 +2328,14 @@ bool ChatHandler::HandleModifyDrunkCommand(char* args)
 
     uint8 drunkValue = (uint8)atoi(args);
     if (drunkValue > 100)
+    {
         drunkValue = 100;
+    }
 
     if (Player* target = getSelectedPlayer())
+    {
         target->SetDrunkValue(drunkValue);
+    }
 
     return true;
 }

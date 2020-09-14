@@ -81,7 +81,9 @@ void OutdoorPvPNA::HandlePlayerEnterZone(Player* player, bool isMainZone)
 
     // buff the player if same team is controlling the zone
     if (player->GetTeam() == m_zoneOwner)
+    {
         player->CastSpell(player, SPELL_STRENGTH_HALAANI, true);
+    }
 }
 
 void OutdoorPvPNA::HandlePlayerLeaveZone(Player* player, bool isMainZone)
@@ -99,7 +101,9 @@ void OutdoorPvPNA::HandleObjectiveComplete(uint32 eventId, std::list<Player*> pl
         for (std::list<Player*>::iterator itr = players.begin(); itr != players.end(); ++itr)
         {
             if ((*itr) && (*itr)->GetTeam() == team)
+            {
                 (*itr)->KilledMonsterCredit(NPC_HALAA_COMBATANT);
+            }
         }
     }
 }
@@ -115,7 +119,9 @@ void OutdoorPvPNA::HandlePlayerKillInsideArea(Player* player)
         {
             // check capture point team
             if (player->GetTeam() == m_zoneOwner)
+            {
                 player->CastSpell(player, player->GetTeam() == ALLIANCE ? SPELL_NAGRAND_TOKEN_ALLIANCE : SPELL_NAGRAND_TOKEN_HORDE, true);
+            }
 
             return;
         }
@@ -177,7 +183,9 @@ void OutdoorPvPNA::HandleCreatureDeath(Creature* creature)
 
     // set the respawn timer after the last guard died - 5 min for the first time, or 1 hour if the city is under siege
     if (!m_soldiersRespawnTimer)
+    {
         m_soldiersRespawnTimer = m_isUnderSiege ? HOUR * IN_MILLISECONDS : 5 * MINUTE * IN_MILLISECONDS;
+    }
 
     // decrease the counter
     --m_guardsLeft;
@@ -418,7 +426,9 @@ void OutdoorPvPNA::DespawnVendors(const WorldObject* objRef)
     for (GuidList::const_iterator itr = m_teamVendors.begin(); itr != m_teamVendors.end(); ++itr)
     {
         if (Creature* soldier = objRef->GetMap()->GetCreature(*itr))
+        {
             soldier->ForcedDespawn();
+        }
     }
     m_teamVendors.clear();
 }
@@ -531,12 +541,18 @@ void OutdoorPvPNA::Update(uint32 diff)
 
             // if all the guards are respawned, stop the timer, else resume the timer depending on the siege state
             if (m_guardsLeft == MAX_NA_GUARDS)
+            {
                 m_soldiersRespawnTimer = 0;
+            }
             else
+            {
                 m_soldiersRespawnTimer = m_isUnderSiege ? HOUR * IN_MILLISECONDS : 5 * MINUTE * IN_MILLISECONDS;
+            }
         }
         else
+        {
             m_soldiersRespawnTimer -= diff;
+        }
     }
 }
 
@@ -547,7 +563,9 @@ void OutdoorPvPNA::RespawnSoldier()
     {
         // Find player who is in main zone (Nagrand) to get correct map reference
         if (!itr->second)
+        {
             continue;
+        }
 
         if (Player* player = sObjectMgr.GetPlayer(itr->first))
         {
@@ -564,7 +582,9 @@ void OutdoorPvPNA::RespawnSoldier()
 void OutdoorPvPNA::LockHalaa(const WorldObject* objRef)
 {
     if (GameObject* go = objRef->GetMap()->GetGameObject(m_capturePoint))
+    {
         go->SetLootState(GO_JUST_DEACTIVATED);
+    }
     else
     {
         // if grid is unloaded, changing the saved slider value is enough
@@ -577,7 +597,9 @@ void OutdoorPvPNA::LockHalaa(const WorldObject* objRef)
 void OutdoorPvPNA::UnlockHalaa(const WorldObject* objRef)
 {
     if (GameObject* go = objRef->GetMap()->GetGameObject(m_capturePoint))
+    {
         go->SetLootState(GO_ACTIVATED);
+    }
     else
     {
         // if grid is unloaded, changing the saved slider value is enough
