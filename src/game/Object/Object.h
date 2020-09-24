@@ -272,6 +272,12 @@ class Object
             SetFloatValue(index, GetFloatValue(index) * (apply ? (100.0f + val) / 100.0f : 100.0f / (100.0f + val)));
         }
 
+        /**
+        * method to force the update of a given flag to the client. The method is checking the index before indicating the flags need an update.
+        *
+        * \param index uint16 of the flag to be updated.
+        */
+        void MarkFlagUpdateForClient(uint16 index);
         void SetFlag(uint16 index, uint32 newFlag);
         void RemoveFlag(uint16 index, uint32 oldFlag);
 

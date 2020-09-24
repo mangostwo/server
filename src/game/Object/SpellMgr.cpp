@@ -862,6 +862,8 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                 case 62488:                                 // Activate Construct
                 case 64503:                                 // Water
                     return true;
+                case 5249 : // Ice Block - fixed trap dire maul
+                    return false;
                 default:
                     break;
             }
@@ -1116,6 +1118,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
             }
             break;
         }
+
         default:
             break;
     }

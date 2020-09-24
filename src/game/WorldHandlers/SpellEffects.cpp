@@ -1190,6 +1190,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     pGameObj->SetSpellId(m_spellInfo->Id);
 
                     map->Add(pGameObj);
+                    pGameObj->AIM_Initialize();
 
                     return;
                 }
@@ -1276,6 +1277,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     DEBUG_LOG("AddObject at SpellEfects.cpp EffectDummy");
                     map->Add(pGameObj);
+                    pGameObj->AIM_Initialize();
 
                     return;
                 }
@@ -8473,6 +8475,32 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
         {
             switch (m_spellInfo->Id)
             {
+                case 1509:                                  // GM Mode OFF
+                {
+                    if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        ((Player*)unitTarget)->SetGameMaster(false);
+                    }
+                    break;
+                }
+                case 18139:                                 // GM Mode ON
+                {
+                    if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        ((Player*)unitTarget)->SetGameMaster(true);
+                    }
+                    break;
+                }
+
+                case 5249:                                  // Ice Lock
+                {
+                    if (unitTarget)
+                    {
+                        m_caster->CastSpell(unitTarget, 22856, true);
+                        sLog.outString("EffectScriptEffect : %s target of spell 5249", unitTarget->GetName());
+                    }
+                    break;
+                }
                 case 8856:                                  // Bending Shinbone
                 {
                     if (!itemTarget && m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -11837,6 +11865,7 @@ void Spell::EffectDuel(SpellEffectIndex eff_idx)
 
     m_caster->AddGameObject(pGameObj);
     map->Add(pGameObj);
+    pGameObj->AIM_Initialize();
     // END
 
     // Send request
@@ -13160,6 +13189,7 @@ void Spell::EffectTransmitted(SpellEffectIndex eff_idx)
     // m_ObjToDel.push_back(pGameObj);
 
     cMap->Add(pGameObj);
+    pGameObj->AIM_Initialize();
 
     pGameObj->SummonLinkedTrapIfAny();
 

@@ -52,8 +52,8 @@
 #include "Chat.h"
 
 #ifdef ENABLE_ELUNA
-# include "LuaEngine.h"
-# include "ElunaEventMgr.h"
+#include "LuaEngine.h"
+#include "ElunaEventMgr.h"
 #endif /* ENABLE_ELUNA */
 
 Object::Object()
@@ -902,6 +902,14 @@ void Object::ApplyModPositiveFloatValue(uint16 index, float  val, bool apply)
         cur = 0;
     }
     SetFloatValue(index, cur);
+}
+
+void Object::MarkFlagUpdateForClient(uint16 index)
+{
+    MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
+
+    m_changedValues[index] = true;
+    MarkForClientUpdate();
 }
 
 void Object::SetFlag(uint16 index, uint32 newFlag)
@@ -1851,6 +1859,7 @@ GameObject* WorldObject::SummonGameObject(uint32 id, float x, float y, float z, 
     pGameObj->SetRespawnTime(despwtime/IN_MILLISECONDS);
 
     map->Add(pGameObj);
+    pGameObj->AIM_Initialize();
 
     return pGameObj;
 }
