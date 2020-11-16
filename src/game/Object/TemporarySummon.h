@@ -35,7 +35,7 @@ class TemporarySummon : public Creature
         virtual ~TemporarySummon() {};
 
         void Update(uint32 update_diff, uint32 time) override;
-        void Summon(TempSummonType type, uint32 lifetime);
+        void Summon(TempSpawnType type, uint32 lifetime);
         void  UnSummon();
         void SaveToDB();
         ObjectGuid const& GetSummonerGuid() const { return m_summoner ; }
@@ -50,7 +50,7 @@ class TemporarySummon : public Creature
             MANGOS_ASSERT(false);
         }
 
-        TempSummonType m_type;
+        TempSpawnType m_type;
         uint32 m_timer;
         uint32 m_lifetime;
         ObjectGuid m_summoner;
