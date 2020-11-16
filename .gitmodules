@@ -1,19 +1,15 @@
-[submodule "src/game/LuaEngine"]
-	path = src/game/LuaEngine
-
-	url = https://github.com/ElunaLuaEngine/Eluna.git
-[submodule "src/realmd"]
-	path = src/realmd
-	url = https://github.com/mangos/realmd.git
 [submodule "dep"]
 	path = dep
-	url = https://github.com/mangos/mangosDeps.git
+	url = https://github.com/mangos/mangosDeps
+[submodule "src/realmd"]
+	path = src/realmd
+	url = https://github.com/mangos/realmd
 [submodule "src/modules/Eluna"]
 	path = src/modules/Eluna
-	url = https://github.com/ElunaLuaEngine/Eluna.git
+	url = https://github.com/MangosServer/Eluna.git
 [submodule "src/modules/SD3"]
 	path = src/modules/SD3
-	url = https://github.com/mangos/ScriptDev3
+	url = https://github.com/mangos/ScriptDev3.git
 [submodule "src/tools/Extractor_projects"]
 	path = src/tools/Extractor_projects
 	url = https://github.com/mangos/Extractor_projects.git
