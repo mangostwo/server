@@ -24,7 +24,7 @@
 
 #ifndef MANGOS_H_REVISION
 #define MANGOS_H_REVISION
-    #define REVISION_NR "2111075"
+    #define REVISION_NR "2112055"
 
     #define REALMD_DB_VERSION_NR 21
     #define REALMD_DB_STRUCTURE_NR 2
@@ -38,6 +38,6 @@
 
     #define WORLD_DB_VERSION_NR 21
     #define WORLD_DB_STRUCTURE_NR 12
-    #define WORLD_DB_CONTENT_NR 001
-    #define WORLD_DB_UPDATE_DESCRIPTION "GM_Commands_localization"
+    #define WORLD_DB_CONTENT_NR 055
+    #define WORLD_DB_UPDATE_DESCRIPTION "NPC_1434_Position_Fix"
 #endif // __REVISION_H__
