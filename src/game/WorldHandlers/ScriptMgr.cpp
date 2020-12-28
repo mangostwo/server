@@ -418,7 +418,6 @@ void ScriptMgr::LoadScripts(DBScriptType type)
             case SCRIPT_COMMAND_CLOSE_DOOR:                 // 12
             {
                 uint32 goEntry = 0;
-
                 if (!tmp.GetGOGuid())
                 {
                     if (!tmp.buddyEntry)
@@ -756,7 +755,7 @@ void ScriptMgr::LoadScripts(DBScriptType type)
             }
             default:
             {
-                sLog.outErrorDb("Table `db_scripts [type = %d]` unknown command %u, skipping.", type, tmp.command);
+                sLog.outErrorDb("Table `db_scripts [type = %d]` uses unknown command %u, skipping.", type, tmp.command);
                 continue;
             }
             case SCRIPT_COMMAND_RESET_GO:                     // 43
@@ -2071,13 +2070,13 @@ bool ScriptAction::HandleScriptStep()
             ((Creature*)pSource)->AI()->SendAIEventAround(AIEventType(m_script->sendAIEvent.eventType), (Unit*)pTarget, 0, float(m_script->sendAIEvent.radius));
             break;
         }
-        case SCRIPT_COMMAND_TURN_TO:                 // 36
+        case SCRIPT_COMMAND_TURN_TO:                        // 36
         {
             if (LogIfNotUnit(pSource))
             {
                 break;
             }
-
+            //note for self: this command has different impl. and usage in other core(s)
             ((Unit*)pSource)->SetFacingTo(pSource->GetAngle(pTarget));
             break;
         }
@@ -2458,11 +2457,11 @@ CreatureAI* ScriptMgr::GetCreatureAI(Creature* pCreature)
 GameObjectAI* ScriptMgr::GetGameObjectAI(GameObject* pGo)
 {
     // TODO - expose in ELuna
-#ifdef ENABLE_SD3
-    return SD3::GetGameObjectAI(pGo);
-#else
-    return NULL;
-#endif
+    #ifdef ENABLE_SD3
+        return SD3::GetGameObjectAI(pGo);
+    #else
+        return NULL;
+    #endif
 }
 
 InstanceData* ScriptMgr::CreateInstanceData(Map* pMap)
@@ -2503,6 +2502,20 @@ bool ScriptMgr::OnGossipHello(Player* pPlayer, GameObject* pGameObject)
 
 #ifdef ENABLE_SD3
     return SD3::GOGossipHello(pPlayer, pGameObject);
+#else
+    return false;
+#endif
+}
+
+bool ScriptMgr::OnGossipHello(Player* pPlayer, Item* pItem)
+{
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+// TODO ELUNA handler
+#endif /* ENABLE_ELUNA */
+
+#ifdef ENABLE_SD3
+    return SD3::ItemGossipHello(pPlayer, pItem);
 #else
     return false;
 #endif
@@ -2571,6 +2584,27 @@ bool ScriptMgr::OnGossipSelect(Player* pPlayer, GameObject* pGameObject, uint32 
     else
     {
         return SD3::GOGossipSelect(pPlayer, pGameObject, sender, action);
+    }
+#else
+    return false;
+#endif
+}
+
+bool ScriptMgr::OnGossipSelect(Player* pPlayer, Item* pItem, uint32 sender, uint32 action, const char* code)
+{
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+// TODO Add Eluna handlers
+#endif /* ENABLE_ELUNA */
+
+#ifdef ENABLE_SD3
+    if (code)
+    {
+        return SD3::ItemGossipSelectWithCode(pPlayer, pItem, sender, action, code);
+    }
+    else
+    {
+        return SD3::ItemGossipSelect(pPlayer, pItem, sender, action);
     }
 #else
     return false;
@@ -2716,6 +2750,7 @@ bool ScriptMgr::OnGameObjectUse(Unit* pUnit, GameObject* pGameObject)
     return false;
 #endif
 }
+
 bool ScriptMgr::OnItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)
 {
     // Used by Eluna

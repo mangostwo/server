@@ -53,8 +53,7 @@ void GossipMenu::AddMenuItem(uint8 Icon, const std::string& Message, uint32 dtSe
     gItem.m_gSender     = dtSender;
     gItem.m_gOptionId   = dtAction;
     gItem.m_gBoxMessage = BoxMessage;
-    gItem.m_gBoxMoney   = BoxMoney;
-
+    gItem.m_gBoxMoney = BoxMoney;
     m_gItems.push_back(gItem);
 }
 
@@ -79,19 +78,24 @@ void GossipMenu::AddMenuItem(uint8 Icon, char const* Message, bool Coded)
     AddMenuItem(Icon, std::string(Message ? Message : ""), Coded);
 }
 
+void GossipMenu::AddMenuItem(uint8 Icon, char const* Message, uint32 dtSender, uint32 dtAction, bool Coded)
+{
+    AddMenuItem(Icon, std::string(Message ? Message : ""), dtSender, dtAction, "", 0,Coded);
+}
+
 void GossipMenu::AddMenuItem(uint8 Icon, char const* Message, uint32 dtSender, uint32 dtAction, char const* BoxMessage, uint32 BoxMoney, bool Coded)
 {
     AddMenuItem(Icon, std::string(Message ? Message : ""), dtSender, dtAction, std::string(BoxMessage ? BoxMessage : ""), BoxMoney, Coded);
 }
 
-void GossipMenu::AddMenuItem(uint8 Icon, int32 itemText, uint32 dtSender, uint32 dtAction, int32 boxText, uint32 BoxMoney, bool Coded)
+void GossipMenu::AddMenuItem(uint8 Icon, int32 itemText, uint32 dtSender, uint32 dtAction, int32 boxText, bool Coded)
 {
     uint32 loc_idx = m_session->GetSessionDbLocaleIndex();
 
     char const* item_text = itemText ? sObjectMgr.GetMangosString(itemText, loc_idx) : "";
     char const* box_text = boxText ? sObjectMgr.GetMangosString(boxText, loc_idx) : "";
 
-    AddMenuItem(Icon, std::string(item_text), dtSender, dtAction, std::string(box_text), BoxMoney, Coded);
+    AddMenuItem(Icon, std::string(item_text), dtSender, dtAction, std::string(box_text), Coded);
 }
 
 uint32 GossipMenu::MenuItemSender(unsigned int ItemId)
@@ -410,7 +414,7 @@ void PlayerMenu::SendQuestGiverQuestList(QEmote eEmote, const std::string& Title
     data << uint32(eEmote._Emote);                          // NPC emote
 
     size_t count_pos = data.wpos();
-    data << uint8(mQuestMenu.MenuItemCount());
+    data << uint8(mQuestMenu.MenuItemCount());              // TODO maximum 32 entries
     uint32 count = 0;
     for (; count < mQuestMenu.MenuItemCount(); ++count)
     {
