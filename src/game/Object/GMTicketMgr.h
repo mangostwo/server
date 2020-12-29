@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,7 +88,13 @@ class GMTicket
         explicit GMTicket() : m_lastUpdate(0)
         {}
 
-
+        /**
+         * Initializes this \ref GMTicket, much like the constructor would.
+         * @param guid guid for the \ref Player that created the ticket
+         * @param text the question text
+         * @param responsetext the response to the question if any
+         * @param update the last time the ticket was updated by either \ref Player or GM
+         */
         void Init(ObjectGuid guid, const std::string& text, const std::string& responsetext, time_t update)
         {
             m_guid = guid;
@@ -106,16 +112,27 @@ class GMTicket
             return m_guid;
         }
 
+        /**
+         * Get the tickets question
+         * @return the question this ticket had
+         */
         const char* GetText() const
         {
             return m_text.c_str();
         }
 
+        /**
+         * Get the response given to this ticket, if any
+         * @return the response that was made to this tickets question
+         */
         const char* GetResponse() const
         {
             return m_responseText.c_str();
         }
-
+        /**
+         * Tells us when the last update was done as a UNIX timestamp.
+         * @return Time since last update in seconds since UNIX epoch
+         */
         uint64 GetLastUpdate() const
         {
             return m_lastUpdate;
@@ -135,6 +152,11 @@ class GMTicket
             CharacterDatabase.PExecute("UPDATE `character_ticket` SET `ticket_text` = '%s' WHERE `guid` = '%u'", escapedString.c_str(), m_guid.GetCounter());
         }
 
+        /**
+         * Changes the response to the ticket
+         * @param text the response to give
+         * \deprecated
+         */
         void SetResponseText(const char* text)
         {
             m_responseText = text ? text : "";
@@ -145,6 +167,12 @@ class GMTicket
             CharacterDatabase.PExecute("UPDATE `character_ticket` SET `response_text` = '%s' WHERE `guid` = '%u'", escapedString.c_str(), m_guid.GetCounter());
         }
 
+        /**
+         * Has this ticket gotten a response?
+         * @return true if there's some kind of response to this ticket, false otherwise
+         * \deprecated
+         * \todo Change to resolved/not resolved instead, via the check in db
+         */
         bool HasResponse() { return !m_responseText.empty(); }
 
         void DeleteFromDB() const

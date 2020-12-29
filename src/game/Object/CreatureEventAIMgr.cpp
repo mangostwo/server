@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -145,15 +145,15 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Summons(bool check_entry_use)
             CheckUnusedAISummons();
         }
 
-        sLog.outString();
         sLog.outString(">> Loaded %u CreatureEventAI summon definitions", Count);
+        sLog.outString();
     }
     else
     {
         BarGoLink bar(1);
         bar.step();
-        sLog.outString();
         sLog.outString(">> Loaded 0 CreatureEventAI Summon definitions. DB table `creature_ai_summons` is empty.");
+        sLog.outString();
     }
 }
 
@@ -198,7 +198,7 @@ void CreatureEventAIMgr::CheckUnusedAISummons()
     }
 }
 
-/// Helper function to check if a target-suite is suitable for the event-type
+/// Helper function to check if a target-type is suitable for the event-type
 bool IsValidTargetType(EventAI_Type eventType, EventAI_ActionType actionType, uint32 targetType, uint32 eventId, uint8 action)
 {
     switch (targetType)
@@ -1058,6 +1058,8 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                             sLog.outErrorEventAI("Event %u Action %u uses invalid movement type %u (must be smaller than %u)", i, j + 1, action.changeMovement.movementType, MAX_DB_MOTION_TYPE);
                             continue;
                         }
+                        break;
+
                     default:
                         sLog.outErrorEventAI("Event %u Action %u have currently not checked at load action type (%u). Need check code update?", i, j + 1, temp.action[j].type);
                         break;
@@ -1094,14 +1096,14 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
         CheckUnusedAITexts();
         CheckUnusedAISummons();
 
-        sLog.outString();
         sLog.outString(">> Loaded %u CreatureEventAI scripts", Count);
+        sLog.outString();
     }
     else
     {
         BarGoLink bar(1);
         bar.step();
-        sLog.outString();
         sLog.outString(">> Loaded 0 CreatureEventAI scripts. DB table `creature_ai_scripts` is empty.");
+        sLog.outString();
     }
 }

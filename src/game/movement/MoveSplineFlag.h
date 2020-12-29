@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -128,11 +128,28 @@ namespace Movement
              */
             bool isSmooth() const { return raw() & Mask_CatmullRom;}
             bool isLinear() const { return !isSmooth();}
+            /**
+             * @brief
+             *
+             * @return bool
+             */
             bool isFacing() const { return raw() & Mask_Final_Facing;}
 
             uint8 getAnimationId() const { return animId;}
+            /**
+             * @brief
+             *
+             * @param f
+             * @return bool
+             */
             bool hasAllFlags(uint32 f) const { return (raw() & f) == f;}
             bool hasFlag(uint32 f) const { return (raw() & f) != 0;}
+            /**
+             * @brief
+             *
+             * @param f
+             * @return uint32 operator
+             */
             uint32 operator & (uint32 f) const { return (raw() & f);}
             /**
              * @brief
@@ -168,6 +185,10 @@ namespace Movement
             void EnableFalling()             { raw() = (raw() & ~(Mask_Animations | Parabolic | Animation)) | Falling;}
             void EnableFlying()              { raw() = (raw() & ~Catmullrom)                                | Flying; }
             void EnableCatmullRom()          { raw() = (raw() & ~Flying)                                    | Catmullrom; }
+            /**
+             * @brief
+             *
+             */
             void EnableFacingPoint()    { raw() = (raw() & ~Mask_Final_Facing) | Final_Point;}
             /**
              * @brief

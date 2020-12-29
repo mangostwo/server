@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -159,6 +159,7 @@ class Pet : public Creature
         bool LoadPetFromDB(Player* owner, uint32 petentry = 0, uint32 petnumber = 0, bool current = false);
         void SavePetToDB(PetSaveMode mode);
         void Unsummon(PetSaveMode mode, Unit* owner = NULL);
+
         static void DeleteFromDB(uint32 guidlow, bool separate_transaction = true);
 
         void SetDeathState(DeathState s) override;          // overwrite virtual Creature::SetDeathState and Unit::SetDeathState
@@ -171,10 +172,10 @@ class Pet : public Creature
             {
                 return 0;
             }
-    else
-    {
-        return m_autospells[pos];
-    }
+            else
+            {
+                return m_autospells[pos];
+            }
         }
 
         bool CanSwim() const
@@ -184,10 +185,10 @@ class Pet : public Creature
             {
                 return owner->GetTypeId() == TYPEID_PLAYER ? true : ((Creature const*)owner)->CanSwim();
             }
-        else
-        {
-            return Creature::CanSwim();
-        }
+            else
+            {
+                return Creature::CanSwim();
+            }
         }
 
         bool CanFly() const { return false; } // pet are not able to fly. TODO: check if this is right

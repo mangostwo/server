@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -296,7 +296,9 @@ void BattleGroundQueue::PlayerInvitedToBGUpdateAverageWaitTime(GroupQueueInfo* g
     else
     {
         if (ginfo->IsRated)
+        {
             team_index = TEAM_INDEX_HORDE;                     // for rated arenas use TEAM_INDEX_HORDE
+        }
     }
 
     // store pointer to arrayindex of player that was added first
@@ -325,7 +327,9 @@ uint32 BattleGroundQueue::GetAverageQueueWaitTime(GroupQueueInfo* ginfo, BattleG
     else
     {
         if (ginfo->IsRated)
+        {
             team_index = TEAM_INDEX_HORDE;                     // for rated arenas use TEAM_INDEX_HORDE
+        }
     }
     // check if there is enought values(we always add values > 0)
     if (m_WaitTimes[team_index][bracket_id][COUNT_OF_PLAYERS_TO_AVERAGE_WAIT_TIME - 1])
@@ -797,10 +801,12 @@ bool BattleGroundQueue::CheckSkirmishForSameFaction(BattleGroundBracketId bracke
     // set itr_team to group that was added to selection pool latest
     GroupsQueueType::iterator itr_team = m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE + teamIdx].begin();
     for (; itr_team != m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE + teamIdx].end(); ++itr_team)
+    {
         if (ginfo == *itr_team)
         {
             break;
         }
+    }
     if (itr_team == m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE + teamIdx].end())
     {
         return false;
@@ -856,9 +862,9 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
         m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].empty() &&
         m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE].empty() &&
         m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_HORDE].empty())
-        {
-            return;
-        }
+    {
+        return;
+    }
 
     // battleground with free slot for player should be always in the beggining of the queue
     // maybe it would be better to create bgfreeslotqueue for each bracket_id
@@ -1201,8 +1207,8 @@ bool BGQueueRemoveEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 {
     Player* plr = sObjectMgr.GetPlayer(m_PlayerGuid);
     if (!plr)
-        // player logged off (we should do nothing, he is correctly removed from queue in another procedure)
     {
+        // player logged off (we should do nothing, he is correctly removed from queue in another procedure)
         return true;
     }
 
@@ -1224,7 +1230,9 @@ bool BGQueueRemoveEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
             // update queues if battleground isn't ended
             if (bg && bg->isBattleGround() && bg->GetStatus() != STATUS_WAIT_LEAVE)
             {
+
                 sBattleGroundMgr.ScheduleQueueUpdate(0, ARENA_TYPE_NONE, m_BgQueueTypeId, m_BgTypeId, bg->GetBracketId());
+
             }
 
             WorldPacket data;
@@ -1424,7 +1432,6 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
             }
         }
     }
-
     if (bg->GetStatus() != STATUS_WAIT_LEAVE)
     {
         *data << uint8(0);                                  // bg not ended
@@ -1453,11 +1460,12 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
         {
             Team team = bg->GetPlayerTeam(itr->first);
             if (!team)
+            {
                 if (Player* player = sObjectMgr.GetPlayer(itr->first))
                 {
                     team = player->GetTeam();
                 }
-
+            }
             if (bg->GetWinner() == team && team != TEAM_NONE)
             {
                 *data << uint8(1);
@@ -1800,11 +1808,9 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
-
-        sLog.outString();
         sLog.outErrorDb(">> Loaded 0 battlegrounds. DB table `battleground_template` is empty.");
+        sLog.outString();
         return;
     }
 
@@ -1910,8 +1916,8 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
 
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded %u battlegrounds", count);
+    sLog.outString();
 }
 
 void BattleGroundMgr::InitAutomaticArenaPointDistribution()
@@ -2249,9 +2255,8 @@ void BattleGroundMgr::LoadBattleMastersEntry()
     {
         BarGoLink bar(1);
         bar.step();
-
-        sLog.outString();
         sLog.outString(">> Loaded 0 battlemaster entries - table is empty!");
+        sLog.outString();
         return;
     }
 
@@ -2278,8 +2283,8 @@ void BattleGroundMgr::LoadBattleMastersEntry()
 
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded %u battlemaster entries", count);
+    sLog.outString();
 }
 
 HolidayIds BattleGroundMgr::BGTypeToWeekendHolidayId(BattleGroundTypeId bgTypeId)
@@ -2361,9 +2366,8 @@ void BattleGroundMgr::LoadBattleEventIndexes()
     {
         BarGoLink bar(1);
         bar.step();
-
-        sLog.outString();
         sLog.outErrorDb(">> Loaded 0 battleground eventindexes.");
+        sLog.outString();
         return;
     }
 
@@ -2428,7 +2432,7 @@ void BattleGroundMgr::LoadBattleEventIndexes()
     }
     while (result->NextRow());
 
-    sLog.outString();
     sLog.outString(">> Loaded %u battleground eventindexes", count);
+    sLog.outString();
     delete result;
 }

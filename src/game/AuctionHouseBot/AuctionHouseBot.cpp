@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -740,7 +740,7 @@ uint32 AuctionBotBuyer::GetBuyableEntry(AHB_Buyer_Config& config)
             ItemPrototype const* prototype = item->GetProto();
             if (prototype)
             {
-                BuyerItemInfo& buyerItem = config.SameItemInfo[item->GetEntry()];    // Structure constructor will make sure Element are correctly initialised if entry is created here.
+                BuyerItemInfo& buyerItem = config.SameItemInfo[item->GetEntry()];  // Structure constructor will make sure Element are correctly initialised if entry is created here.
                 ++buyerItem.ItemCount;
                 buyerItem.BuyPrice = buyerItem.BuyPrice + (Aentry->buyout / item->GetCount());
                 buyerItem.BidPrice = buyerItem.BidPrice + (Aentry->startbid / item->GetCount());
@@ -766,7 +766,7 @@ uint32 AuctionBotBuyer::GetBuyableEntry(AHB_Buyer_Config& config)
 
                 if (Aentry->owner == sAuctionBotConfig.GetAHBotId())
                 {
-                    if ((Aentry->bid != 0) && Aentry->bidder) // Add bided by player
+                    if ((Aentry->bid != 0) && Aentry->bidder)                      // Add bided by player
                     {
                         config.CheckedEntry[Aentry->Id].LastExist = Now;
                         config.CheckedEntry[Aentry->Id].AuctionId = Aentry->Id;
@@ -1889,13 +1889,13 @@ void AuctionBotSeller::SetPricesOfItem(AHB_Seller_Config& config, uint32& buyp, 
     double temp_buyp = buyp * stackcnt *
                        (itemQuality < MAX_AUCTION_QUALITY ? config.GetPriceRatioPerQuality(AuctionQuality(itemQuality)) : 1) ;
 
-    double randrange = temp_buyp * 0.4;    
+    double randrange = temp_buyp * 0.4;
 
     uint32 buypMin = (uint32)temp_buyp - (uint32)randrange;
     uint32 buypMax = ((uint32)temp_buyp + (uint32)randrange) < temp_buyp ? ACE_Numeric_Limits<uint32>::max() : temp_buyp + randrange;
-    
+
     buyp = (urand(buypMin, buypMax) / 100) + 1;
-    
+
     double urandrange = buyp * 40;
     double temp_bidp = buyp * 50;
     uint32 bidPmin = (uint32)temp_bidp - (uint32)urandrange;
@@ -2199,10 +2199,12 @@ void AuctionHouseBot::Rebuild(bool all)
         {
             AuctionEntry* entry = itr->second;
             if (entry->owner == sAuctionBotConfig.GetAHBotId())                                    // ahbot auction
+            {
                 if (all || entry->bid == 0)                                                        // expire auction now if no bid or forced
                 {
                     entry->expireTime = sWorld.GetGameTime();
                 }
+            }
         }
     }
 }

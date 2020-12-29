@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,9 +29,10 @@
 #include "Log.h"
 #include "ObjectMgr.h"
 #include "ProgressBar.h"
+#include "Util.h"
+
 #include <list>
 #include <vector>
-#include "Util.h"
 
 struct EnchStoreItem
 {
@@ -81,14 +82,13 @@ void LoadRandomEnchantmentsTable()
 
         delete result;
 
-        sLog.outString();
         sLog.outString(">> Loaded %u Item Enchantment definitions", count);
     }
     else
     {
-        sLog.outString();
         sLog.outErrorDb(">> Loaded 0 Item Enchantment definitions. DB table `item_enchantment_template` is empty.");
     }
+    sLog.outString();
 }
 
 uint32 GetItemEnchantMod(uint32 entry)
@@ -109,7 +109,8 @@ uint32 GetItemEnchantMod(uint32 entry)
     double dRoll = rand_chance();
     float fCount = 0;
 
-    for (EnchStoreList::const_iterator ench_iter = tab->second.begin(); ench_iter != tab->second.end(); ++ench_iter)
+    const EnchStoreList &enchantList = tab->second;
+    for (EnchStoreList::const_iterator ench_iter = enchantList.begin(); ench_iter != enchantList.end(); ++ench_iter)
     {
         fCount += ench_iter->chance;
 
@@ -123,7 +124,7 @@ uint32 GetItemEnchantMod(uint32 entry)
     dRoll = (irand(0, (int)floor(fCount * 100) + 1)) / 100;
     fCount = 0;
 
-    for (EnchStoreList::const_iterator ench_iter = tab->second.begin(); ench_iter != tab->second.end(); ++ench_iter)
+    for (EnchStoreList::const_iterator ench_iter = enchantList.begin(); ench_iter != enchantList.end(); ++ench_iter)
     {
         fCount += ench_iter->chance;
 

@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,8 +49,7 @@ ObjectAccessor::GetUnit(WorldObject const& u, ObjectGuid guid)
     return u.GetMap()->GetAnyTypeCreature(guid);
 }
 
-Player*
-ObjectAccessor::FindPlayer(ObjectGuid guid, bool inWorld /*= true*/)
+Player* ObjectAccessor::FindPlayer(ObjectGuid guid, bool inWorld /*= true*/)
 {
     if (!guid)
     {
@@ -63,8 +62,7 @@ ObjectAccessor::FindPlayer(ObjectGuid guid, bool inWorld /*= true*/)
     });
 }
 
-Player*
-ObjectAccessor::FindPlayerByName(const char* name)
+Player* ObjectAccessor::FindPlayerByName(const char* name)
 {
     return m_playersMap.FindWith([name](const ObjectGuid& g, Player* plr)->bool
     {
@@ -72,8 +70,7 @@ ObjectAccessor::FindPlayerByName(const char* name)
     });
 }
 
-void
-ObjectAccessor::SaveAllPlayers()
+void ObjectAccessor::SaveAllPlayers()
 {
     for (auto const& iter : sWorld.GetAllSessions())
     {
@@ -87,8 +84,7 @@ ObjectAccessor::SaveAllPlayers()
     }
 }
 
-void
-ObjectAccessor::KickPlayer(ObjectGuid guid)
+void ObjectAccessor::KickPlayer(ObjectGuid guid)
 {
     if (Player* p = FindPlayer(guid, false))
     {
@@ -99,14 +95,12 @@ ObjectAccessor::KickPlayer(ObjectGuid guid)
 }
 
 
-Corpse*
-ObjectAccessor::FindCorpse(ObjectGuid guid)
+Corpse* ObjectAccessor::FindCorpse(ObjectGuid guid)
 {
     return m_corpsesMap.Find(guid);
 }
 
-Corpse*
-ObjectAccessor::GetCorpseInMap(ObjectGuid guid, uint32 mapid)
+Corpse* ObjectAccessor::GetCorpseInMap(ObjectGuid guid, uint32 mapid)
 {
     Corpse* ret = m_corpsesMap.Find(guid);
     if (!ret)
@@ -120,8 +114,7 @@ ObjectAccessor::GetCorpseInMap(ObjectGuid guid, uint32 mapid)
     return ret;
 }
 
-Corpse*
-ObjectAccessor::GetCorpseForPlayerGUID(ObjectGuid guid)
+Corpse* ObjectAccessor::GetCorpseForPlayerGUID(ObjectGuid guid)
 {
     Corpse* c = m_player2corpse.Find(guid);
 
@@ -155,16 +148,14 @@ void Player2Corpse::Remove(Corpse* corpse)
 }
 
 
-void
-ObjectAccessor::RemoveCorpse(Corpse* corpse)
+void ObjectAccessor::RemoveCorpse(Corpse* corpse)
 {
     MANGOS_ASSERT(corpse && corpse->GetType() != CORPSE_BONES);
     m_player2corpse.Remove(corpse);
 
 }
 
-void
-Player2Corpse::Insert(Corpse* corpse)
+void Player2Corpse::Insert(Corpse* corpse)
 {
     ACE_WRITE_GUARD(LockType, guard, i_lock)
     m_objectMap[corpse->GetOwnerGuid()] = corpse;
@@ -175,15 +166,13 @@ Player2Corpse::Insert(Corpse* corpse)
     sObjectMgr.AddCorpseCellData(corpse->GetMapId(), cell_id, corpse->GetOwnerGuid().GetCounter(), corpse->GetInstanceId());
 }
 
-void
-ObjectAccessor::AddCorpse(Corpse* corpse)
+void ObjectAccessor::AddCorpse(Corpse* corpse)
 {
     MANGOS_ASSERT(corpse && corpse->GetType() != CORPSE_BONES);
     m_player2corpse.Insert(corpse);
 }
 
-void
-ObjectAccessor::AddCorpsesToGrid(GridPair const& gridpair, GridType& grid, Map* map)
+void ObjectAccessor::AddCorpsesToGrid(GridPair const& gridpair, GridType& grid, Map* map)
 {
     m_player2corpse.Do([&gridpair, &grid, map](Corpse* c) -> void
     {
@@ -205,12 +194,14 @@ ObjectAccessor::AddCorpsesToGrid(GridPair const& gridpair, GridType& grid, Map* 
     });
 }
 
-Corpse*
-ObjectAccessor::ConvertCorpseForPlayer(ObjectGuid player_guid, bool insignia)
+Corpse* ObjectAccessor::ConvertCorpseForPlayer(ObjectGuid player_guid, bool insignia)
 {
     Corpse* corpse = GetCorpseForPlayerGUID(player_guid);
     if (!corpse)
     {
+        // in fact this function is called from several places
+        // even when player doesn't have a corpse, not an error
+        // sLog.outError("Try remove corpse that not in map for GUID %ul", player_guid);
         return nullptr;
     }
 
@@ -233,8 +224,8 @@ ObjectAccessor::ConvertCorpseForPlayer(ObjectGuid player_guid, bool insignia)
     Corpse* bones = nullptr;
     // create the bones only if the map and the grid is loaded at the corpse's location
     // ignore bones creating option in case insignia
-    if ( map &&
-        (insignia || (map->IsBattleGroundOrArena() ? sWorld.getConfig(CONFIG_BOOL_DEATH_BONES_BG_OR_ARENA) : sWorld.getConfig(CONFIG_BOOL_DEATH_BONES_WORLD))) &&
+    if (map && (insignia ||
+                (map->IsBattleGroundOrArena() ? sWorld.getConfig(CONFIG_BOOL_DEATH_BONES_BG_OR_ARENA) : sWorld.getConfig(CONFIG_BOOL_DEATH_BONES_WORLD))) &&
         !map->IsRemovalGrid(corpse->GetPositionX(), corpse->GetPositionY()))
     {
         // Create bones, don't change Corpse
@@ -247,6 +238,9 @@ ObjectAccessor::ConvertCorpseForPlayer(ObjectGuid player_guid, bool insignia)
         }
 
         bones->SetGrid(corpse->GetGrid());
+        // bones->m_time = m_time;                          // don't overwrite time
+        // bones->m_inWorld = m_inWorld;                    // don't overwrite world state
+        // bones->m_type = m_type;                          // don't overwrite type
         bones->Relocate(corpse->GetPositionX(), corpse->GetPositionY(), corpse->GetPositionZ(), corpse->GetOrientation());
         bones->SetPhaseMask(corpse->GetPhaseMask(), false);
         bones->SetUInt32Value(CORPSE_FIELD_FLAGS, CORPSE_FLAG_UNK2 | CORPSE_FLAG_BONES);
@@ -270,8 +264,7 @@ ObjectAccessor::ConvertCorpseForPlayer(ObjectGuid player_guid, bool insignia)
     return bones;
 }
 
-void
-ObjectAccessor::RemoveOldCorpses()
+void ObjectAccessor::RemoveOldCorpses()
 {
     time_t now = time(NULL);
     std::forward_list<ObjectGuid> expired_corpses{};

@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@
 // those generic events should get a high event id
 #define BG_EVENT_DOOR 254
 // only arena event
-// cause this buff apears 90sec after start in every bg i implement it here
+// cause this buff to appear 90secs after start in every bg i implement it here
 #define ARENA_BUFF_EVENT 253
 
 

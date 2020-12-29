@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2020 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ namespace MaNGOS
             /// <param name="textId">The text id.</param>
             /// <param name="source">The source.</param>
             /// <param name="args">The args.</param>
-            BattleGroundChatBuilder(ChatMsg msgtype, int32 textId, Player const* source, va_list* args = NULL)
+            BattleGroundChatBuilder(ChatMsg msgtype, int32 textId, Player const* source, va_list* args = nullptr)
                 : i_msgtype(msgtype), i_textId(textId), i_source(source), i_args(args) {}
             void operator()(WorldPacket& data, int32 loc_idx)
             {
@@ -1115,10 +1115,12 @@ void BattleGround::RewardItem(Player* plr, uint32 item_id, uint32 count)
     }
 
     if (count != 0 && !dest.empty())                        // can add some
+    {
         if (Item* item = plr->StoreNewItem(dest, item_id, true, 0))
         {
             plr->SendNewItem(item, count, true, false);
         }
+    }
 
     if (no_space_count > 0)
     {
@@ -1532,10 +1534,12 @@ void BattleGround::AddOrSetPlayerToCorrectBgGroup(Player* plr, ObjectGuid plr_gu
         {
             group->AddMember(plr_guid, plr->GetName());
             if (Group* originalGroup = plr->GetOriginalGroup())
+            {
                 if (originalGroup->IsLeader(plr_guid))
                 {
                     group->ChangeLeader(plr_guid);
                 }
+            }
         }
     }
     else                                                    // first player joined
@@ -1585,10 +1589,12 @@ void BattleGround::EventPlayerLoggedOut(Player* player)
 
         // 1 player is logging out, if it is the last, then end arena!
         if (isArena())
+        {
             if (GetAlivePlayersCountByTeam(player->GetTeam()) <= 1 && GetPlayersCountByTeam(GetOtherTeam(player->GetTeam())))
             {
                 EndBattleGround(GetOtherTeam(player->GetTeam()));
             }
+        }
     }
 }
 
