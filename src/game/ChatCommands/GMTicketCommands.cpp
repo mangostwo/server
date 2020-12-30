@@ -226,11 +226,20 @@ bool ChatHandler::HandleDelTicketCommand(char* args)
     }
 
     uint32 num;
+    Player* target;
+    ObjectGuid target_guid;
+    std::string target_name;
 
     // delticket #num
     if (ExtractUInt32(&px, num))
     {
         if (num == 0)
+        {
+            return false;
+        }
+
+
+        if (!ExtractPlayerTarget(&px, NULL, &target_guid, &target_name))
         {
             return false;
         }
@@ -245,15 +254,13 @@ bool ChatHandler::HandleDelTicketCommand(char* args)
             return false;
         }
 
-        ObjectGuid guid = ticket->GetPlayerGuid();
-
-        sTicketMgr.Delete(guid);
-
-        // notify player
-        if (Player* pl = sObjectMgr.GetPlayer(guid))
+        if (!ExtractPlayerTarget(&args, NULL, &target_guid, &target_name))
         {
-            pl->GetSession()->SendGMTicketGetTicket(0x0A);
-            PSendSysMessage(LANG_COMMAND_TICKETPLAYERDEL, GetNameLink(pl).c_str());
+            if (Player* pl = sObjectMgr.GetPlayer(ticket->GetPlayerGuid()))
+            {
+                pl->GetSession()->SendGMTicketGetTicket(0x0A);
+                PSendSysMessage(LANG_COMMAND_TICKETPLAYERDEL, GetNameLink(pl).c_str());
+            }
         }
         else
         {
@@ -263,9 +270,6 @@ bool ChatHandler::HandleDelTicketCommand(char* args)
         return true;
     }
 
-    Player* target;
-    ObjectGuid target_guid;
-    std::string target_name;
     if (!ExtractPlayerTarget(&px, &target, &target_guid, &target_name))
     {
         return false;
@@ -285,4 +289,3 @@ bool ChatHandler::HandleDelTicketCommand(char* args)
     PSendSysMessage(LANG_COMMAND_TICKETPLAYERDEL, nameLink.c_str());
     return true;
 }
-
