@@ -29,7 +29,7 @@ for the community.
 
 Authors
 -------
-Prior to Release 0.20, the following helped get Mangos to where it was.
+Prior to Release 0.21, the following helped get Mangos to where it was.
 
 * *TeamPython*, *Wow Python* and *WoWd* teams
 * 123qwe

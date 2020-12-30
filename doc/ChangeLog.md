@@ -3,18 +3,501 @@ MaNGOS Two Changelog
 This change log references the relevant changes (bug and security fixes) done
 in recent versions.
 
-0.21 (2016-04-01) - "The Battle for Northrend"
----------------------------------------------
+0.22 (2021-01-01 to now) - "Echo of Nostalgia"
+----------------------------------------------
+* Initial Release 22 Commit
+
+
+0.21 (2016-04-01 to 2021-01-01) - "The Battle for Northrend"
+------------------------------------------------------------
 Many Thanks to all the groups and individuals who contributed to this release.
 - 625+ Commits since the previous release.
 
+Code Changes:
+=============
 * Removed the old SD2 scripts and Added the new unified SD3 Submodule
 * Removed the individual extractor projects and added a unified Extractors Submodule
 
-* TODO: Add full list of fixes from Rel20 to 21 for both Server, Scripts and Database
+* (from cab's repo) added UpdateSpeed function
+* [Appveyor] Remove no-longer needed file
+* [Build] Add OpemSSL1.0.2j installers
+* [Build] Added MySQL 5.7 support
+* [Build] Enhanced Build System
+* [Build] Force building SOAP and PlayerBots in testing
+* [Build] move core definition into cmake
+* [Build] Updated build system, based on the work of H0zen (#161)
+* [Cleanup] Remove tabs which have crept into the source
+* [Core] Add a debug command to show all possible random point for selected creature. [c12813]
+* [Core] Allow GAMEOBJECT_TYPE_TRAP/BUTTON respawn using SCRIPT_COMMAND_RESPAWN_GAMEOBJECT [c12815] [c12837]
+* [Core] Blink improved. [ct12819]
+* [Core] Fix charged items auctioneering.
+* [Core] Fix GO 190769 use animation. [c12829]
+* [Core] Fix hunter traps.
+* [Core] Fix spell 19714 is buff instead of debuff. May fix also other spell that use same aura. [ct12831]
+* [Core] Implement spells effects required for first encounter in Toc5 Spells 64101, 62552, 62575, 68282, 63010, 68307, 68504, 63119 and 64192 [ct12830]
+* [Core] Improve random movement generator. [c12811]
+* [Core] Minor changes in prep for release
+* [Core] Restore build on Mac OS X. [ct12824]
+* [CORE] Restrict debug logs to debug builds only
+* [Core] Traditional include fix for gcc et al. [c12820]
+* [Core] Waypoint and movement generator system rewrite
+* [Core][SD2] ..and binding of InstanceScript
+* [Core][SD2] Correct binding of ZoneScript
+* [Core][SD2] The first start with a proper DB (not included for now)
+* [Core][SD2]Refactoring of Northrend scripts
+* [CRITICAL] Fixed dumb logic in ObjectAccessor
+* [DB] Set min db levels
+* [DbDocs] The Big DB documentation update
+* [DEP] Fix simultaneous connection contention issue
+* [DEP] Update Stormlib v9.21
+* [DEP] Updated ACE to 6.5.9
+* [Dep] Updated Dep submodule
+* [Dep] Updated submodule
+* [Deps] Dep library updated. Thanks H0zen/xfury
+* [DEPS] Update zlib version to 1.2.8
+* [Docs] Fix some broken links
+* [Docs] Updated extraction readme
+* [EasyBuild] Add support for newer MySQL/MariaDB versions
+* [EasyBuild] Fix cmake crash on French OS
+* [EasyBuild] Fix some more French OS crashes
+* [Easybuild] Fixed a crash. Thanks MadMaxMangos for finding.
+* [EasyBuild] Hotfix Revert OpenSSL binaries.
+* [EasyBuild] ignore easybuild created debug files
+* [EasyBuild] Minor update to include some additional checks
+* [EASYBUILD] Move the source of the downloads from external sites to internal
+* [Easybuild] Reactivate VS2019 support
+* [EasyBuild] Remove static files
+* [EasyBuild] Updated base versions of libraries
+* [EasyBuild] Updated MySQL and Cmake library locations
+* [Easybuild] Updated to include VS2015 support
+* [EasyBuild] Updated to remove some build options
+* [EasyBuild] Updated to Support modified build system and enhancements
+* [Eluna] Add conditionals around code
+* [Eluna] Fix crash when accessing players not on any map
+* [Eluna] Fix uint32_t errors (VS 2013)
+* [Eluna] Remove Eluna Submodule URL
+* [ELUNA] SpellAttr fixes and more #120
+* [Extractors] Fix file locations
+* [EXTRACTORS] Improvement made to getBuildNumber()
+* [Extractors] Minor cleanup to fix some warning messages
+* [Extractors] removed useless code
+* [Extractors] Updated extractors to fix movement bug. Will need to reextract
+* [FIX] Fix server crash
+* [FIX] Fixed a logic error in EasyBuild
+* [Fix] non initialised variable. Thanks xfury
+* [Fix] Updated Realmdb
+* [Install] Port changes from Zero
+* [Linux] Fix playerbots in getmangos.sh. Thanks Tom Peters
+* [OSX] activate MAC OS build testing
+* [Phase1] Prep part 1
+* [Realm] fix account table errors
+* [REALM] Updated submodule
+* [Realmd] Fixed Broken Patching system
+* [Realmd] Resolve SRP6a authentication bypass issue. Thanks 
+* [realmd] Resolved authentication bypass. Thanks namreeb
+* [Scripts] Allow SD3 scripted dummy and script spelleffects upon players
+* [Scripts] Fix typo in boss_thermaplugg script.
+* [SD2] minor cleaning
+* [SD2] Refactoring complete
+* [SD2] Restoring several overlooked creature AIs
+* [SD2] The first build since refactoring
+* [SD3] Correct typo
+* [SD3] Fix BRD issues and server crash. Thanks H0zen
+* [SD3] Fix deeprun rat roundout crash
+* [SD3] Fix error in submodule
+* [SD3] Fix item_petrov_cluster_bombs
+* [SD3] fix Quest 7603 - Kroshius
+* [SD3] Fix quest Kodo Roundup (#69)
+* [SD3] Fix SD3::CreateInstanceData to work with non-instantiable maps
+* [SD3] Fix server crash on quest 4021
+* [SD3] Fix sleeping peon in durotar
+* [SD3] Fix Stratholme Unforgiven spawn location
+* [SD3] Initial SD3 implementation and removal of SD2
+* [SD3] MC: correct spawning of Majordomo
+* [SD3] Missing pointers added back
+* [SD3] Naxx: Gothik - redesign
+* [SD3] ScriptDev3 Updates
+* [SD3] SpellAttr fixes and more #120
+* [SD3] SpellAttr fixes and more for mangosOne #120
+* [SD3] Step back SD3 until eluna is ready
+* [SD3] The Endless Hunger script update
+* [SD3] Update UBRS door logic
+* [SD3] Updated for BRD arena fix
+* [SD3] Updated TAQ
+* [Submodules] Updated submodules
+* [Sync] Added another chunk of project sync
+* [Sync] Added more project sync
+* [Sync] Minor project sync
+* [Sync] Remove unused MANGOS_DLL_DECL statement
+* [Sync] Some adjustments from Zero
+* [Sync] Some project sync up
+* [Sync] Some sync from Zero
+* [Sync] Update build system to match Zero
+* [Tool] Merged vmaps extract/assembler. Updated scripts
+* [TOOLS] Added unified extractor submodule
+* [Tools] Extractor updates
+* [Tools] Fix vmap-extractor crash.
+* [TOOLS] Fixed mmap extractor binary name used in MoveMapGen.sh
+* [TOOLS] Fixed mmap extractor binary name used in various scripts
+* [Tools] Updated Extractor
+* [TOOLS] Updated extractor submodule
+* [Tools] Updated extractors
+* [Tools] Updated Unified Extractor subModule
+* [Warden] Fix OS check on Login
+* [Warden] Refactor to match other cores
+* Add Codacy badge and status
+* Add Core support for Franklin the Amiable / Klinfran the crazed (#118)
+* Add Disables table based on the work of olion on Zero
+* Add game event hooks and update eluna version
+* Add mangosd full versioning information on windows
+* add new mangos 'family' icons. Thanks UnkleNuke for the original design
+* Add possibility to write cmangos command via a whisp.
+* Add realmd full versioning information on windows
+* Add spell school prohibition to interrupts Creatures now honor spell cooldowns for both behavior and event AI Fix setting both shadow and arcane resistance from arcane resistance template value
+* Add state for GM command completed quests. Thanks H0zen for assistance
+* Add support for new comment column
+* Add support for spell 28352
+* Add Ubuntu 19.04 case for Prerequisites install (#77)
+* Added AppVeyor Build Status
+* Added MySql 8.0 support, see notes
+* Added support for openssl on OSX systems running OpenSSL 1.0.2g (installed using homebrew). (#115)
+* Adding new distribution support (Fedora) (#16)
+* Adding support for Player Bots submodule in installer. (#20)
+* Adding support for Ubuntu: Curl dependencies added - Adding support when several WoW clients path are detected. Only the first one is selected - Adding support for database updates. Only last folder (alphabetically sorted) will be takenxw
+* Adding support of several known Linux distribution for dependancies setup (#175)
+* Adds custom emote to wyrmthalak script
+* Adjust the source code and build enviornment so that Mangos Zero will build on ARM32. (#79)
+* Ammend Core name
+* Another rogue stealth tweak.
+* Apply style fix
+* Apply VMAP updates and other fixes from MangosOne
+* Appveyor supplied fix for openSSL 1.0
+* Attempt to correct tabing
+* Attempt to fix Mutanus the Devourer event.
+* Auction House Seller Option, ported from Zero
+* AuctionHouse Bot fixes (#170)
+* Autobroadcast should be disabled by default
+* AutoBroadcast system.
+* Base SD2 files updated
+* Battlegrounds updated
+* BRD Grimm Guzzler related updates
+* Change world DB structure for refactored scripts
+* Changed email return for item that can't be equiped anymore. Before the email was sent with an empty body and the subject was to long to be displayed in the player email. Now the Email is sent with the subject 'Item could not be loaded to inventory.' and the body as the subject message before. (#71)
+* Chest with quest loot deactivation (2622b33)
+* Clean up readme a little
+* Correct .EXE release number back to Rel21
+* Correct a self only spell error
+* Correct invalid parameter
+* Correct Typo for default status
+* Corrected a typo
+* Corrected website URL
+* Corrections to the build system.
+* Cosmetic fixes of previous commit (#158)
+* Create a docker container image and runing it with docker-compose (#164)
+* Database revision refactor
+* DB version tracking: less includes to minimize rebuild at revision change
+* debug recv Command added
+* Description of the meaning of the format strings added
+* Disable OSX build checking until we have an OSX dev to get them fixed
+* Eluna update version - Fix duplicate timer update
+* ensure bins are marked as executable (#108)
+* Expected Base DB updated to Rel21_12_055
+* Extend pvp team indexes to global use
+* Final cleanup
+* Finkle Einhorn is now spawned after skinning The Beast in UBRS.
+* Fix .gobject add #guid
+* Fix a typo in Level2.cpp
+* Fix ACHIEVEMENT_CRITERIA_TYPE_OWN_ITEM
+* Fix add event gameobjects appearing at once
+* Fix AH notification before Auction sold
+* Fix AHBot SetPricesOfItem (#87)
+* Fix appveyor link
+* Fix bag swapping
+* Fix Blood Draining enchant aura
+* Fix build
+* Fix build and tidy up file
+* Fix build error due to 226f27f.
+* Fix build system - part 2.
+* Fix build system - part 3
+* Fix build system 3.
+* Fix build system 5.
+* Fix character login issue
+* Fix cmake config dir variable
+* Fix Compile with Latest SD3 : GameObjectAI methods - and some Dire Maul things #95
+* Fix crash at startUp due to command localization loading
+* Fix crash in BIH module due to uninitialized member variable. (#172)
+* Fix crash on taming rare creatures.
+* Fix crash when using command helps (#93)
+* Fix Deeprun spell used on player
+* Fix Eluna and OS X build
+* Fix Eluna build
+* Fix encoding of mangos.conf file. Thanks Wolverine for pointing
+* Fix Feral Swiftness talent
+* Fix Fishing
+* Fix floating point model for VS 2015 (#52)
+* Fix Gameobject spawns. Hopefully for real this time
+* Fix Go Rotations. Thanks H0zen
+* Fix instance cleanup at startup (#99)
+* fix linux shell script error. (#82)
+* Fix logo Url
+* Fix mac build
+* Fix non PCH build and update Eluna
+* Fix OpenSSL travis for mac
+* Fix part of NPC localized text cannot be displayed.
+* Fix pdump write command and add check to pdump load (#106)
+* Fix possible problem with 'allow two side interaction' and loot.
+* Fix potential NullPointerException on C'Thun (#107)
+* Fix proc system.
+* Fix quest rewards appearing twice in chat
+* Fix quests 4512 & 4513
+* fix reference to dockerFiles to match with real files name (#92)
+* Fix rpath for world server on Linux
+* Fix send mail and send item commands
+* Fix server crash. Thank H0zen/mpfans
+* Fix Simone the seductress (#121)
+* Fix SOAP build
+* Fix some codacy detected issues
+* Fix some compiler warnings and project sync
+* Fix some conflicts.
+* Fix some startup (fake) errors
+* Fix stock unit frames displaying group members as offline after teleport
+* Fix tabs
+* Fix typo in VMap BIH generation
+* Fix up for Phase1 changes
+* Fix VS debug build
+* Fix VS2017 build. Needs cmake 3.8.0 minimum
+* Fix whisper blocking (#160)
+* Fix wrong use of uninitialized locks. Whenever ACE_XXX_Thread_Mutexes are used, there are 3 fundamental rules to obey: 1. Always make sure the lock is initialized before use; 2. Never put 2 locks each other in memory (false sharing effect); 3. Always verify that the lock is really acquired - use ACE_XXX_GUARD macros;
+* FIX-CENTOS-BUILD Added epel repo
+* FIX-CENTOS-BUILD Fixed centos 7 build
+* Fixed a bug where destroying a channeling object would crash the server. (#165)
+* Fixed build
+* Fixed build for previous commit
+* Fixed instant 'Failed attempt' on gathering
+* Fixed memory issue with msbuild build
+* Fixed OpenSSL location (#118)
+* Fixed server Crash
+* Fixed spell 56626 and ranks
+* Fixed to allow some auras to stack
+* Fixes Error "There is no game at this location" (#172)
+* Format specifiers was not correct in lootmgr
+* g++ was not installed without build-essential (#80)
+* Gossip Item Script support (#124)
+* GroupHandler: prevent cheater self-invite
+* Hai'shulud script updated.
+* Hunter Pet speed
+* Implement command localization
+* Implement DBscript  SCRIPT_COMMAND_RESET_GO
+* Implement OpenSSL 1.1.x support
+* Implement quest_relations table. Based on work by 
+* Implement spell effects 34653 and 36920
+* Implement spell effects required for the Twin Val'kyrs encounter in ToC25
+* Improving Build system and removing Common.h clutter
+* InstantFlightPaths, ported from Zero
+* Lazt Peons will now call players by name.
+* Lazy Peon SpellId Information
+* Lich king added another profession bringing the total to 11 (#167)
+* linux/getmangos.sh: default to build client tools (#19)
+* Major battleground update
+* Make GM max speed customisable through mangosd.conf (#89)
+* Make Mangos compatible with newer MySQL.
+* Master of Subtlety
+* Minor  pet/Spell update
+* Minor changes to previous commit.
+* Minor styling tidy up
+* Minor typo corrected (#184)
+* Minor typo tidy up
+* Missed spot
+* Missing delimiter (#168)
+* More fixes
+* More lock fixes. Also fix the .character level command
+* More minor corrections
+* More robust checks on mutex acquire.     - When using ACE_xxx_Guard, the caller must ensure the internal lock is really acquired before entering the critical section (see http://www.dre.vanderbilt.edu/Doxygen/6.0.1/html/libace-doc/a00186.html#_details - Warnings paragraph)
+* More SQL delimiting for modern servers (#166)
+* Move DB revision struct to cpp
+* Move the license file
+* Moved mail expiry delay into configuration file
+* moved SendShowMailBox to MailHandler.cpp, related to mangosthree/server
+* New SD3 script file added: scholomance.cpp
+* New thread pool reactor implementation and refactoring world daemon. (#8)
+* Not so bright warning if DB content newer than core awaits
+* Now we can inspect player when GM mode is ON (#98)
+* Ogre Brew scripts replaced
+* Outland - Auchindoun and Black Temple
+* Perform DB Rollup to Rel21_11_075
+* PLAYER_EVENT_ON_LOOT_ITEM fix for eluna. Thanks mostlikey
+* Ported multithreaded map updater from ZERO
+* Prevent duplicate Auction Expired mails
+* Project tidy up and sync
+* Quality of life code update
+* Refactored db_scripts The unity! - Based on the original work of H0zen for Zero.
+* Regex requires gcc 4.9 or higher
+* Remove last reminents of obsolete npc_gossip table
+* remove obsolete code. Thanks H0zen
+* Remove obsolete project and files
+* Remove Remnants of Two obsolete tables: npc_trainer_template & npc_vendor_template
+* Removed OpenSSL1.1.x blocker
+* Removed SD2 database binding
+* Renamed goname/namego commands to appear/summon.
+* Replacing aptitude by apt-get on Ubuntu by default. Added support for Red Har 'Experimental'
+* Revert "[SD3] Updated for BRD arena fix"
+* Revert "Changed email return for item that can't be equiped anymore. Before the email was sent with an empty body and the subject was to long to be displayed in the player email. Now the Email is sent with the subject 'Item could not be loaded to inventory.' and the body as the subject message before. (#71)"
+* Revert "Final cleanup"
+* Revert "Fix VS debug build"
+* Revert "Remove Remnants of Two obsolete tables: npc_trainer_template & npc_vendor_template"
+* Revert [0935b66]. Breaks Eluna.
+* Reverted 'Updated ACE to 6.5.9'
+* Reverting back to the previous version of the code.
+* Revision updated (World DB)
+* Rogue Stealth corrections
+* SD3 fix linux compile and reference latest SD3 commit
+* Server Banner and Status redone
+* Server-owned world channel
+* Several major improvements to Linux installer. (#15)
+* Some minor code / text tidying up
+* Some styling cleanup
+* Spell 1961 support
+* Spell class - Fix for inaccessible class data
+* Spell ID 51173 support.
+* Spell target update.
+* Spell updates
+* SpellAttr fixes and more for MangosTwo #120
+* Style cleanup from the Mangos Futures Team
+* Summon Spell corrections
+* Supress Travis build on OS X until a fix is found.
+* Swapped 'dbscripts_on_creature_movement' warning with 'dbscripts' â€¦ (#97)
+* Switch off non-existing playerbots
+* Synchronized Conf files for easier comparison
+* Syncing with the lower cores.
+* Tab cleanup
+* The Big Command Files Reorganization. Based on the work of Elmsroth (#170)
+* Trimming Ubuntu dependencies (#17)
+* Type conversion mismatch correction
+* Undying Resolve buff wont see opposite faction
+* Update Appveyor and Travis build files
+* Update cmake macros
+* update deeprun rat roundup script
+* Update deprecated row_format_fixed
+* Update getmangos.sh
+* Update mangosd.conf.dist.in
+* Update maps expected version number
+* Update missed year changes
+* Update notes on DK talent Butchery
+* Update revision.h
+* Update SD3 to fix gossip scripts
+* Update SpellMgr.cpp
+* Updated ACE to latest version and fixed appveyor
+* Updated databases version.
+* Updated Readme.md and icons
+* Updated submodules
+* Updated submodules: SD3 and Realmd
+* Updated to latest version of SD3's master branch
+* Updating Debian Sources (#169)
+* Updating to latest version of SD3
+* Upgrading checks for Database::CheckDatabaseVersion (#86)
+* URL update
+* use canonical target names for zlib and bzip2
+* Use pet level modifiers for SPELL_EFFECT_SUMMON_PET (56)
+* Various Fix
+* Various Spell Implementation.
+* well fed buff
+* World Scripts
  
-0.20 (2015)
------------
+DB Changes:
+===========
+* [French] Updated Translations
+* [Locale] Fix 'replace_BaseEnglish_with_xxx' file
+* [Locale] Fix up installation script
+* [Locales] Add multi translations. Thanks Elmsroth and Gromchek
+* [Locales] Added Achievement Locale loading
+* [Localisation] Added Achievement Locale loading
+* [Localisation] Format updates and minor changes. Thanks all authors
+* [Localisation] Minor update from magnet
+* [Localisation] Multiple updates. Thanks Gromchek and everyone else
+* [Localisation] Updated Quest texts
+* [Localisation] Updated various texts
+* [Localisation] various Text translations. Thanks Gromcheck/Elmsroth
+* [Localisation] Various updates. Thanks galathil and other contributors
+* [Realm] fix account table errors
+* [Realm] fix missing comma
+* [Russian] Added some new translations
+* Add missing creature script text
+* Add missing Fel Fire aura to Warbringer Arix'Amal.
+* Add missing spawns of NPC 12125
+* Add missing Spirit Healer
+* Add missing table to backup scripts
+* Add script for NPC 14488 EventAI.
+* Add script for Plagued Dragonflayers.
+* Add Velendris Whitemorn gossip.
+* Add XT:9 pathing
+* Added missing item 13325
+* Added Tracker Val'zij spawn.
+* Area 52 Big Bruiser 20484 EventAI.
+* Area 52 Bruiser 20485 EventAI.
+* Asghar 22025 EventAI
+* Attempt to fix 21_20_001 not applying
+* Base DB Rollup to Rel21_12_055
+* Bishop Street 27246
+* Brainwashed Noble 596
+* carriage returns - quest
+* carriage returns gossip_menu_option
+* Clefthoof Calf 19183 EventAI added.
+* Dangerous! - object
+* DB script for command localization
+* Durkot Wolfbrother & Armorer Orkuruk
+* Felfire Diemetradon 21408 AI.
+* Fix a few spawndist errors caused in previous updates.
+* Fix another start up error with movement / spawndist
+* Fix broken update file
+* Fix for the quest 7636 (#110)
+* Fix position of a Menethil Sentry.
+* Fix quest 3861 - CLUCK
+* fix some startup errors
+* Fix target for  Empty cursed jar, Empty tainted jar and Empty pure sample jar.
+* Fix Terrorclaw Respawn Time.
+* Fix texts for quest 6461
+* Fix type in creature_ai_text
+* Fix typo 'Skuller' -> 'Skulker'
+* Fix upper case in OfferRewardText for quest 8288
+* Fixed a creature_ai_texts typo
+* Fixed an error from last commit
+* Fixed gossip of NPC 14741
+* Fixed text for item 10022
+* Frostmane Troll Whelp.
+* Illidari Jailor AI script
+* Implement script for Warbringer Arix'Amal.
+* Improve Broken Skeleton 16805.
+* Laris Geardawdl complete rework.
+* Merge branch 'master' of https://github.com/mangostwo/database
+* Missing spawn, dbscript and WP for  En'kilah Necromancers.
+* Moaki Bottom Thresher 26511
+* Overlord Gorefist 18160
+* q.11593 'The Honored Dead'
+* q.12182 'To Venomspite!'
+* q.354 'Deaths in the Family'
+* q.770 Should only be available to horde.
+* Quick fix to Velendris Whitemorn gossip update.
+* Remove comment from previous commit to avoid confusion.
+* Remove obsolete file
+* Remove unnecessary spacing from mangos_string
+* River Thresher 27617
+* Skyguard Rations and Enriched Terocone Juice.
+* Slaag 22199 - Frenzy should be used at any HP%
+* Support for quest 7636.
+* Target type for Empty pure sample jar - Part 2.
+* The Big Command Help Sync Pt2
+* The big Command help syncup
+* This fixes some issues a pervious update attempted to fix
+* Update barrel locations
+* Update deprecated row_format_fixed
+* Updates to InstallDatabases.sh (#112)
+* Venomspite quest relations.
+* WIP: Setup database with docker (#166)
+* Wrath Lord 20929
+
+
+0.20 (2015-02-31) - Points of departure
+---------------------------------------
 * Internal version, only used for restructuring to new system
 
 0.19 (2014-10-31) - Untitled
