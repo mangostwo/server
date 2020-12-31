@@ -1492,6 +1492,7 @@ void BattleGround::AddPlayer(Player* plr)
         {
             plr->CastSpell(plr, SPELL_ARENA_PREPARATION, true);
         }
+
         plr->CastSpell(plr, SPELL_ARENA_DAMPENING, true);
     }
     else

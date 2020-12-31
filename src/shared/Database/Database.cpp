@@ -555,7 +555,7 @@ void PrintYouNeedDatabaseVersionExpectedByCore(const DBVersion& core_db_requirem
 bool Database::CheckDatabaseVersion(DatabaseTypes database)
 {
     const DBVersion& core_db_requirements = databaseVersions[database];
-   
+
     // Fetch the database version table information
     QueryResult* result = Query("SELECT `version`, `structure`, `content`, `description` FROM `db_version` ORDER BY `version` DESC, `structure` DESC, `content` DESC LIMIT 1");
 
@@ -599,12 +599,12 @@ bool Database::CheckDatabaseVersion(DatabaseTypes database)
 	bool db_vs_core_content_version_mismatch = false;
 
     // DB is not up to date, but structure is correct.
-	// The 'content' version in the 'db_version' table can be < from the one required by the core
-	// See  enum values for :
-	//  WORLD_DB_CONTENT_NR 
-	//  CHAR_DB_CONTENT_NR
-	//  REALMD_DB_CONTENT_NR
-	// for more information.
+    // The 'content' version in the 'db_version' table can be < from the one required by the core
+    // See  enum values for :
+    //  WORLD_DB_CONTENT_NR
+    //  CHAR_DB_CONTENT_NR
+    //  REALMD_DB_CONTENT_NR
+    // for more information.
     if (current_db_content < core_db_requirements.minimal_expected_content)
     {
         // TODO : Should not display with error color but warning (e.g YELLOW) => Create a sLog.outWarningDb() and sLog.outWarning()
@@ -618,16 +618,16 @@ bool Database::CheckDatabaseVersion(DatabaseTypes database)
 	// Else if the 'content' version in the 'db_version' table is > to the on expected by the core
     else if (current_db_content > core_db_requirements.minimal_expected_content)
     {
-        // TODO : Should not display with error color but warning (e.g YELLOW) => Create a sLog.outWarningDb() and sLog.outWarning()        
+        // TODO : Should not display with error color but warning (e.g YELLOW) => Create a sLog.outWarningDb() and sLog.outWarning()
         sLog.outErrorDb("You have content updates beyond the expected core version.");
         sLog.outErrorDb("Check if the core you are running is built from the latest sources.");
         sLog.outErrorDb("If so, DO NOT PANIC ! This message will disappear when the next DB Roll-Up will be released.");
         db_vs_core_content_version_mismatch = true;
     };
 
-	// In anys cases if there are differences in content : output a recap of the differences : 
-	if (db_vs_core_content_version_mismatch)
-	{
+    // In anys cases if there are differences in content : output a recap of the differences :
+    if (db_vs_core_content_version_mismatch)
+    {
         // TODO : Should not display with error color but warning (e.g YELLOW) => Create a sLog.outWarningDb() and sLog.outWarning()
         sLog.outErrorDb("The table `db_version` indicates that your [%s] database does not match the expected version!", core_db_requirements.dbname.c_str());
         sLog.outErrorDb();

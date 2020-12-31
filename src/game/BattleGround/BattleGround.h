@@ -127,6 +127,10 @@ enum BattleGroundSpells
     SPELL_BATTLEGROUND_DAMPENING    = 74411,                // Battleground - Dampening
 };
 
+/**
+ * @brief
+ *
+ */
 enum BattleGroundTimeIntervals
 {
     RESURRECTION_INTERVAL           = 30000,                // ms
@@ -241,6 +245,11 @@ enum BattleGroundQueueTypeId
  * @brief
  *
  */
+
+/**
+ * @brief
+ *
+ */
 enum ScoreType
 {
     SCORE_KILLING_BLOWS         = 1,
@@ -341,10 +350,10 @@ class BattleGroundScore
          */
         virtual ~BattleGroundScore() {}
 
-        uint32 KillingBlows;
-        uint32 Deaths;
-        uint32 HonorableKills;
-        uint32 BonusHonor;
+        uint32 KillingBlows; /**< TODO */
+        uint32 Deaths; /**< TODO */
+        uint32 HonorableKills; /**< TODO */
+        uint32 BonusHonor; /**< TODO */
         uint32 DamageDone;
         uint32 HealingDone;
 };
@@ -1103,7 +1112,6 @@ class BattleGround
          * @brief
          *
          * @param player
-         * @param plr_guid
          */
         void EventPlayerLoggedIn(Player* player);
         /**
@@ -1288,7 +1296,7 @@ class BattleGround
         bool IsPlayerInBattleGround(ObjectGuid guid);
 
         /* virtual score-array - get's used in bg-subclasses */
-        int32 m_TeamScores[PVP_TEAM_COUNT]; /**< TODO */
+        int32 m_TeamScores[PVP_TEAM_COUNT];
 
         /**
          * @brief

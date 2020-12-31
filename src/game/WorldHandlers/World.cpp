@@ -1897,9 +1897,9 @@ namespace MaNGOS
                     do_helper(data_list, &str[0]);
                 }
                 else
-            {
-                do_helper(data_list, (char*)text);
-            }
+                {
+                    do_helper(data_list, (char*)text);
+                }
             }
         private:
             char* lineFromMessage(char*& pos)
