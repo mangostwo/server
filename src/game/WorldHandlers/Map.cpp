@@ -68,6 +68,13 @@ Map::~Map()
         m_persistentState->SetUsedByMapState(NULL);          // field pointer can be deleted after this
     }
 
+#ifdef ENABLE_ELUNA
+    if (Instanceable())
+    {
+        sEluna->FreeInstanceId(GetInstanceId());
+    }
+#endif /* ENABLE_ELUNA */
+
     delete i_data;
     i_data = NULL;
 
@@ -1322,6 +1329,10 @@ void Map::CreateInstanceData(bool load)
     {
         return;
     }
+
+#ifdef ENABLE_ELUNA
+    i_data = sEluna->GetInstanceData(this);
+#endif /* ENABLE_ELUNA */
 
     uint32 i_script_id = GetScriptId();
 

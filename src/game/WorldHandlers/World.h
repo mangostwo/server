@@ -736,7 +736,7 @@ class World
         std::string m_DBVersion;
 
         // List of Maps that should be force-loaded on startup
-        std::set<uint32>* m_configForceLoadMapIds;
+        std::set<uint32> m_configForceLoadMapIds;
 };
 
 extern uint32 realmID;

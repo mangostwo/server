@@ -53,6 +53,7 @@
 #include "MapManager.h"
 #include "ScriptMgr.h"
 #include "CreatureAIRegistry.h"
+#include "ProgressBar.h"
 #include "Policies/Singleton.h"
 #include "BattleGround/BattleGroundMgr.h"
 #include "OutdoorPvP/OutdoorPvP.h"
@@ -61,7 +62,6 @@
 #include "MoveMap.h"
 #include "GameEventMgr.h"
 #include "PoolManager.h"
-#include "ProgressBar.h"
 #include "Database/DatabaseImpl.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
@@ -75,10 +75,10 @@
 #include "Calendar.h"
 #include "Weather.h"
 #include "LFGMgr.h"
-#include "revision.h"
-#include "Language.h"
 #include "DisableMgr.h"
+#include "Language.h"
 #include "CommandMgr.h"
+#include "revision.h"
 
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
@@ -168,10 +168,14 @@ World::~World()
         delete command;
     }
 
+    WorldSession* session = NULL;
+    while (addSessQueue.next(session))
+    {
+        delete session;
+    }
+
     VMAP::VMapFactory::clear();
     MMAP::MMapFactory::clear();
-
-    // TODO free addSessQueue
 }
 
 /// Cleanups before world stop
@@ -836,7 +840,7 @@ void World::LoadConfigSettings(bool reload)
 
     setConfig(CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT,      "PetUnsummonAtMount", true);
 
-    // Warden
+    // WARDEN
 
     setConfig(CONFIG_BOOL_WARDEN_WIN_ENABLED, "Warden.WinEnabled", true);
     setConfig(CONFIG_BOOL_WARDEN_OSX_ENABLED, "Warden.OSXEnabled", false);
@@ -1640,7 +1644,7 @@ void World::showFooter()
         modules_.insert("                Warden : Disabled");
     }
 
-    std::string thisClientVersion = EXPECTED_MANGOSD_CLIENT_VERSION;
+    std::string thisClientVersion (EXPECTED_MANGOSD_CLIENT_VERSION);
     std::string thisClientBuilds = AcceptableClientBuildsListStr();
 
     std::string sModules;

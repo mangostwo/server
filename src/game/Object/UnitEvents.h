@@ -105,12 +105,14 @@ class ThreatRefStatusChangeEvent : public UnitBaseEvent
 
         ThreatRefStatusChangeEvent(uint32 pType, HostileReference* pHostileReference, float pValue) : UnitBaseEvent(pType)
         {
-            iHostileReference = pHostileReference; iFValue = pValue;
+            iHostileReference = pHostileReference;
+            iFValue = pValue;
         }
 
         ThreatRefStatusChangeEvent(uint32 pType, HostileReference* pHostileReference, bool pValue) : UnitBaseEvent(pType)
         {
-            iHostileReference = pHostileReference; iBValue = pValue;
+            iHostileReference = pHostileReference;
+            iBValue = pValue;
         }
 
         int32 getIValue() const { return iIValue; }

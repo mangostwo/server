@@ -1411,6 +1411,10 @@ void BattleGround::StartBattleGround()
     // This must be done here, because we need to have already invited some players when first BG::Update() method is executed
     // and it doesn't matter if we call StartBattleGround() more times, because m_BattleGrounds is a map and instance id never changes
     sBattleGroundMgr.AddBattleGround(GetInstanceID(), GetTypeID(), this);
+
+#ifdef ENABLE_ELUNA
+    sEluna->OnBGStart(this, GetTypeID(), GetInstanceID());
+#endif /* ENABLE_ELUNA */
 }
 
 void BattleGround::StartTimedAchievement(AchievementCriteriaTypes type, uint32 entry)
@@ -1420,10 +1424,6 @@ void BattleGround::StartTimedAchievement(AchievementCriteriaTypes type, uint32 e
         {
             pPlayer->GetAchievementMgr().StartTimedAchievementCriteria(type, entry);
         }
-
-#ifdef ENABLE_ELUNA
-    sEluna->OnBGStart(this, GetTypeID(), GetInstanceID());
-#endif /* ENABLE_ELUNA */
 }
 
 /// <summary>
@@ -1619,11 +1619,12 @@ void BattleGround::RemoveFromBGFreeSlotQueue()
 {
     // set to be able to re-add if needed
     m_InBGFreeSlotQueue = false;
-    for (BGFreeSlotQueueType::iterator itr = sBattleGroundMgr.BGFreeSlotQueue[m_TypeID].begin(); itr != sBattleGroundMgr.BGFreeSlotQueue[m_TypeID].end(); ++itr)
+    BGFreeSlotQueueType& bgFreeSlot = sBattleGroundMgr.BGFreeSlotQueue[m_TypeID];
+    for (BGFreeSlotQueueType::iterator itr = bgFreeSlot.begin(); itr != bgFreeSlot.end(); ++itr)
     {
         if ((*itr)->GetInstanceID() == GetInstanceID())
         {
-            sBattleGroundMgr.BGFreeSlotQueue[m_TypeID].erase(itr);
+            bgFreeSlot.erase(itr);
             return;
         }
     }
