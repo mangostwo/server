@@ -466,7 +466,7 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     }
                 }
 
-                // Only despawn object if there are charges to "consume" 
+                // Only despawn object if there are charges to "consume"
                 // it means (all GO with charges = 0 in DB should never be despawned)
                 // Check : https://www.getmangos.eu/wiki/referenceinfo/dbinfo/mangosdb/mangoszeroworlddb/gameobject_template-r1047
                 // for more information about charges field in db depending on object type
@@ -493,9 +493,13 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     if (true)
                     {
                         if (!loot.empty())
+                        {
                             m_despawnTimer = time(nullptr) + 5 * MINUTE; // TODO:: need to add a define?
+                        }
                         else if (m_despawnTimer != 0 && m_despawnTimer <= time(nullptr))
+                        {
                             m_lootState = GO_JUST_DEACTIVATED;
+                        }
 
                         // TODO : Missing Loot::Update() method found in CMangos
                     }

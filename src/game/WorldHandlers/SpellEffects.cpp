@@ -9106,7 +9106,9 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 case 36920:                                 // Fireball (h)
                 {
                     if (!unitTarget)
+                    {
                         return;
+                    }
 
                     unitTarget->CastSpell(unitTarget, unitTarget->GetMap()->IsRegularDifficulty() ? 23971 : 30928, true, NULL, NULL, m_caster->GetObjectGuid());
                     return;
