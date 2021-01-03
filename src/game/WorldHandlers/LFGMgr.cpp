@@ -160,7 +160,8 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
     //       - look into splitting this into 2 fns- one for player case, one for group
     Group* pGroup = plr->GetGroup();
     ObjectGuid guid = (pGroup) ? pGroup->GetObjectGuid() : plr->GetObjectGuid();
-    uint32 randomDungeonID; // used later if random dungeon has been chosen
+    // store the current dungeon id (replaced into the dungeon set later)
+    uint32 randomDungeonID = *dungeons.begin();    // used later if random dungeon has been chosen
 
     LFGPlayers* currentInfo = GetPlayerOrPartyData(guid);
 
@@ -241,8 +242,6 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
     {
         if (isRandom)
         {
-            // store the current dungeon id (replaced into the dungeon set later)
-            randomDungeonID = *dungeons.begin();
             // fetch all dungeons with our groupID and add to set
             LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(*dungeons.begin());
 
