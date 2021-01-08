@@ -40,7 +40,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x005*/ { "SMSG_QUERY_OBJECT_POSITION",                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x006*/ { "CMSG_QUERY_OBJECT_ROTATION",                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x007*/ { "SMSG_QUERY_OBJECT_ROTATION",                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x008*/ { "CMSG_WORLD_TELEPORT",                          STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleWorldTeleportOpcode       },
+    /*0x008*/ { "CMSG_WORLD_TELEPORT",                          STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::WorldTeleportHandler            },
     /*0x009*/ { "CMSG_TELEPORT_TO_UNIT",                        STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x00A*/ { "CMSG_ZONE_MAP",                                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x00B*/ { "SMSG_ZONE_MAP",                                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
