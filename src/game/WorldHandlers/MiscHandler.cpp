@@ -1273,44 +1273,38 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
     SendPacket(&data);
 }
 
-void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
+
+/****************************************/
+/* This function handles the 'worldport' and 'movecharacter' client commands. */
+/* Usage: worldport <continentID> [x y z] [facing] */
+/****************************************/
+void WorldSession::WorldTeleportHandler(WorldPacket& recv_data)
 {
-    DEBUG_LOG("WORLD: Received opcode CMSG_WORLD_TELEPORT from %s", GetPlayer()->GetGuidStr().c_str());
+    const char *commandName = (recv_data.GetOpcode() == CMSG_WORLD_TELEPORT) ? "worldport" : "movecharacter";
+    DEBUG_LOG("WORLD: Received %s command from account %d:", commandName, GetAccountId());
 
-    // write in client console: worldport 469 452 6454 2536 180 or /console worldport 469 452 6454 2536 180
-    // Received opcode CMSG_WORLD_TELEPORT
-    // Time is ***, map=469, x=452.000000, y=6454.000000, z=2536.000000, orient=3.141593
-
-    uint32 time;
-    uint32 mapid;
-    float PositionX;
-    float PositionY;
-    float PositionZ;
-    float Orientation;
-
-    recv_data >> time;                                      // time in m.sec.
-    recv_data >> mapid;
-    recv_data >> PositionX;
-    recv_data >> PositionY;
-    recv_data >> PositionZ;
-    recv_data >> Orientation;                               // o (3.141593 = 180 degrees)
-
-    // DEBUG_LOG("Received opcode CMSG_WORLD_TELEPORT");
-
-    if (GetPlayer()->IsTaxiFlying())
+    /* Check that we have permission to perform the function */
+    if (GetSecurity() != SEC_PLAYER)
     {
-        DEBUG_LOG("Player '%s' (GUID: %u) in flight, ignore worldport command.", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow());
-        return;
-    }
+        uint32 timeMs = time(NULL);  /* Truncated time stamp: Used for time value ONLY. */
+        uint32 continentID = NULL;
+        uint64 characterGUID = NULL;    /* This is used ONLY for CMSG_MOVE_CHARACTER_CHEAT. Hardcoded to 0 for other cases. */
+        Position position = Position();
 
-    DEBUG_LOG("Time %u sec, map=%u, x=%f, y=%f, z=%f, orient=%f", time / 1000, mapid, PositionX, PositionY, PositionZ, Orientation);
+        recv_data >> timeMs;
+        recv_data >> continentID;
+        recv_data >> characterGUID;
+        recv_data >> position.x;
+        recv_data >> position.y;
+        recv_data >> position.z;
+        recv_data >> position.o;
 
-    if (GetSecurity() >= SEC_ADMINISTRATOR)
-    {
-        GetPlayer()->TeleportTo(mapid, PositionX, PositionY, PositionZ, Orientation);
+        DEBUG_LOG("Porting %s(%s): continentID=%u, x=%f, y=%f, z=%f, facing=%f...", GetPlayerName(), GetPlayer()->GetGuidStr().c_str(), continentID, position.x, position.y, position.z, position.o);
+        GetPlayer()->TeleportTo(continentID, position.x, position.y, position.z, position.o, TELE_TO_GM_MODE, NULL);
     }
     else
     {
+        DEBUG_LOG("Permission denied.");
         SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
     }
 }
