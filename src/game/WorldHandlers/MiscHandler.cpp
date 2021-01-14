@@ -1280,7 +1280,7 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
 /****************************************/
 void WorldSession::WorldTeleportHandler(WorldPacket& recv_data)
 {
-    char* commandName = (recv_data.GetOpcode() == CMSG_WORLD_TELEPORT) ? "worldport" : "movecharacter";
+    const char *commandName = (recv_data.GetOpcode() == CMSG_WORLD_TELEPORT) ? "worldport" : "movecharacter";
     DEBUG_LOG("WORLD: Received %s command from account %d:", commandName, GetAccountId());
 
     /* Check that we have permission to perform the function */
