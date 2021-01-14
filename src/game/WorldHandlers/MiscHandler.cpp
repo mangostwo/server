@@ -1273,31 +1273,40 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
     SendPacket(&data);
 }
 
+
+/****************************************/
+/* This function handles the 'worldport' and 'movecharacter' client commands. */
+/* Usage: worldport <continentID> [x y z] [facing] */
+/****************************************/
 void WorldSession::WorldTeleportHandler(WorldPacket& recv_data)
 {
-    DEBUG_LOG("WORLD: Received opcode CMSG_WORLD_TELEPORT from %s:", GetPlayer()->GetGuidStr().c_str());
+    char* commandName = (recv_data.GetOpcode() == CMSG_WORLD_TELEPORT) ? "worldport" : "movecharacter";
+    DEBUG_LOG("WORLD: Received %s command from account %d:", commandName, GetAccountId());
 
+    /* Check that we have permission to perform the function */
     if (GetSecurity() != SEC_PLAYER)
     {
-        uint32 timeMs = time(NULL); // Client-side command timestamp: Used for performance tracking?
-        uint32 worldID = NULL;
-        uint64 mapDBPtr = NULL; // Pointer to the WorldSafeLoc entry, if it exists.
+        uint32 timeMs = time(NULL);  /* Truncated time stamp: Used for time value ONLY. */
+        uint32 continentID = NULL;
+        uint64 characterGUID = NULL;    /* This is used ONLY for CMSG_MOVE_CHARACTER_CHEAT. Hardcoded to 0 for other cases. */
         Position position = Position();
 
         recv_data >> timeMs;
-        recv_data >> worldID;
-        recv_data >> mapDBPtr;
+        recv_data >> continentID;
+        recv_data >> characterGUID;
         recv_data >> position.x;
         recv_data >> position.y;
         recv_data >> position.z;
         recv_data >> position.o;
 
-        DEBUG_LOG("Time %u sec, worldID=%u, x=%f, y=%f, z=%f, orient=%f", timeMs, worldID, position.x, position.y, position.z, position.o);
-
-        GetPlayer()->TeleportTo(worldID, position.x, position.y, position.z, position.o, TELE_TO_GM_MODE, NULL);
+        DEBUG_LOG("Porting %s(%s): continentID=%u, x=%f, y=%f, z=%f, facing=%f...", GetPlayerName(), GetPlayer()->GetGuidStr().c_str(), continentID, position.x, position.y, position.z, position.o);
+        GetPlayer()->TeleportTo(continentID, position.x, position.y, position.z, position.o, TELE_TO_GM_MODE, NULL);
     }
     else
+    {
+        DEBUG_LOG("Permission denied.");
         SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+    }
 }
 
 void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
