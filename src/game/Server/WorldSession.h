@@ -251,6 +251,9 @@ class WorldSession
         void SendSetPhaseShift(uint32 phaseShift);
         void SendQueryTimeResponse();
         void SendRedirectClient(std::string& ip, uint16 port);
+        void SendPlayerNotFoundFailureResponse();
+        void SendGmResurrectFailureResponse();
+        void SendGmResurrectSuccessResponse();
 
         AccountTypes GetSecurity() const
         {
@@ -826,6 +829,7 @@ class WorldSession
 
         void HandleWardenDataOpcode(WorldPacket& recv_data);
         void WorldTeleportHandler(WorldPacket& recv_data);
+        void GmResurrectHandler(WorldPacket &msg);
         void HandleMinimapPingOpcode(WorldPacket& recv_data);
         void HandleRandomRollOpcode(WorldPacket& recv_data);
         void HandleFarSightOpcode(WorldPacket& recv_data);

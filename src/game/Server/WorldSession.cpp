@@ -1086,6 +1086,24 @@ void WorldSession::SendRedirectClient(std::string& ip, uint16 port)
     SendPacket(&pkt);
 }
 
+void WorldSession::SendPlayerNotFoundFailureResponse()
+{
+    WorldPacket msg = WorldPacket(SMSG_PLAYER_NOT_FOUND_FAILURE, 0);
+    SendPacket(&msg);
+}
+
+void WorldSession::SendGmResurrectFailureResponse()
+{
+    WorldPacket msg = WorldPacket(SMSG_GM_RESURRECT_FAILURE, 0);
+    SendPacket(&msg);
+}
+
+void WorldSession::SendGmResurrectSuccessResponse()
+{
+	WorldPacket msg = WorldPacket(SMSG_GM_RESURRECT_SUCCESS, 0);
+	SendPacket(&msg);
+}
+
 void WorldSession::ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket* packet)
 {
 #ifdef ENABLE_ELUNA

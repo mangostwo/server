@@ -1309,6 +1309,57 @@ void WorldSession::WorldTeleportHandler(WorldPacket& recv_data)
     }
 }
 
+/****************************************/
+/* This function handles the 'resurrect' client command. */
+/* Usage: resurrect <player name>
+/****************************************/
+void WorldSession::GmResurrectHandler(WorldPacket &msg)
+{
+    DEBUG_LOG("WORLD: received resurrect command from account %d:", GetAccountId());
+
+    /* Check that we have permission to perform the function */
+    if (GetSecurity() != SEC_PLAYER)
+    {
+        std::string name = "";
+        Player *pPlayer = 0;
+
+        msg >> name;
+        normalizePlayerName(name);
+
+        pPlayer = sObjectMgr.GetPlayer(name.c_str());
+        if (pPlayer)
+        {
+            if (pPlayer->IsAlive())
+            {
+                /* Player is already alive: Sending down failure response to client... */
+                DEBUG_LOG("resurrect failed");
+                SendGmResurrectFailureResponse();
+            }
+            else
+            {
+                /* Resurrect the player with full health and power... */
+				pPlayer->ResurrectPlayer(1.0f, false);
+                Powers power = pPlayer->GetPowerType();
+                uint32 maxPower = pPlayer->GetMaxPower(power);
+                pPlayer->SetPower(power, maxPower);
+                SendGmResurrectSuccessResponse();
+                DEBUG_LOG("Player resurrected");
+            }
+        }
+        else
+        {
+            /* Player not found */
+            DEBUG_LOG("Player not found");
+            SendPlayerNotFoundFailureResponse();
+        }
+    }
+    else
+    {
+        DEBUG_LOG("Permission denied.");
+        SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+    }
+}
+
 void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_WHOIS");
