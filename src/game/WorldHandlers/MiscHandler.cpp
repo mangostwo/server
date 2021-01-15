@@ -1338,7 +1338,7 @@ void WorldSession::GmResurrectHandler(WorldPacket &msg)
             else
             {
                 /* Resurrect the player with full health and power... */
-				pPlayer->ResurrectPlayer(1.0f, false);
+                pPlayer->ResurrectPlayer(1.0f, false);
                 Powers power = pPlayer->GetPowerType();
                 uint32 maxPower = pPlayer->GetMaxPower(power);
                 pPlayer->SetPower(power, maxPower);
