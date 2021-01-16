@@ -2994,6 +2994,15 @@ void Player::SetFreeTalentPoints(uint32 points)
     SetUInt32Value(PLAYER_CHARACTER_POINTS1, points);
 }
 
+/****************************************/
+/* DO NOT REMOVE: */
+/* Used for Eluna compatibility */
+/****************************************/
+void Player::GiveLevel(uint32 level)
+{
+    return SetLevel(level);
+}
+
 void Player::UpdateFreeTalentPoints(bool resetIfNeed)
 {
     uint32 level = getLevel();
