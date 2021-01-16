@@ -619,7 +619,7 @@ void ChatHandler::HandleCharacterLevel(Player* player, ObjectGuid player_guid, u
 {
     if (player)
     {
-        player->GiveLevel(newlevel);
+        player->SetLevel(newlevel);
         player->InitTalentForLevel();
         player->SetUInt32Value(PLAYER_XP, 0);
 
