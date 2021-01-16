@@ -1311,7 +1311,7 @@ void WorldSession::WorldTeleportHandler(WorldPacket& recv_data)
 
 /****************************************/
 /* This function handles the 'resurrect' client command. */
-/* Usage: resurrect <player name>
+/* Usage: resurrect <player name> */
 /****************************************/
 void WorldSession::GmResurrectHandler(WorldPacket &msg)
 {
