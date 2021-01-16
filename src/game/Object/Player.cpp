@@ -2876,7 +2876,7 @@ void Player::GiveXP(uint32 xp, Unit* victim)
 
         if (level < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
         {
-            GiveLevel(level + 1);
+            SetLevel(level + 1);
         }
 
         level = getLevel();
@@ -2886,15 +2886,21 @@ void Player::GiveXP(uint32 xp, Unit* victim)
     SetUInt32Value(PLAYER_XP, newXP);
 }
 
-// Update player to next level
-// Current player experience not update (must be update by caller)
-void Player::GiveLevel(uint32 level)
+/****************************************/
+/* Sets the player level if greater than 0 */
+/* and lesser than or equal to DEFAULT_MAX_LEVEL */
+/****************************************/
+void Player::SetLevel(uint32 level)
 {
-    uint8 oldLevel = getLevel();
+	uint8 oldLevel = getLevel();
+	if (level == oldLevel || level > DEFAULT_MAX_LEVEL)
+		return;
 
-    if (level == getLevel())
+	SetUInt32Value(UNIT_FIELD_LEVEL, level);
+    SetUInt32Value(PLAYER_XP, 0);
+    if (GetGroup())
     {
-        return;
+        SetGroupUpdateFlag(GROUP_UPDATE_FLAG_LEVEL);
     }
 
     PlayerLevelInfo info;
@@ -2929,9 +2935,6 @@ void Player::GiveLevel(uint32 level)
     m_Played_time[PLAYED_TIME_LEVEL] = 0;                   // Level Played Time reset
 
     _ApplyAllLevelScaleItemMods(false);
-
-    SetLevel(level);
-
     UpdateSkillsForLevel();
 
     // save base values (bonuses already included in stored stats
@@ -2989,6 +2992,15 @@ void Player::SetFreeTalentPoints(uint32 points)
     sEluna->OnFreeTalentPointsChanged(this, points);
 #endif
     SetUInt32Value(PLAYER_CHARACTER_POINTS1, points);
+}
+
+/****************************************/
+/* DO NOT REMOVE: */
+/* Used for Eluna compatibility */
+/****************************************/
+void Player::GiveLevel(uint32 level)
+{
+    return SetLevel(level);
 }
 
 void Player::UpdateFreeTalentPoints(bool resetIfNeed)

@@ -830,6 +830,7 @@ class WorldSession
         void HandleWardenDataOpcode(WorldPacket& recv_data);
         void WorldTeleportHandler(WorldPacket& recv_data);
         void GmResurrectHandler(WorldPacket &msg);
+        void LevelCheatHandler(WorldPacket& msg);
         void HandleMinimapPingOpcode(WorldPacket& recv_data);
         void HandleRandomRollOpcode(WorldPacket& recv_data);
         void HandleFarSightOpcode(WorldPacket& recv_data);

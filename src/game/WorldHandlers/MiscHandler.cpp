@@ -1311,7 +1311,7 @@ void WorldSession::WorldTeleportHandler(WorldPacket& recv_data)
 
 /****************************************/
 /* This function handles the 'resurrect' client command. */
-/* Usage: resurrect <player name>
+/* Usage: resurrect <player name> */
 /****************************************/
 void WorldSession::GmResurrectHandler(WorldPacket &msg)
 {
@@ -1351,6 +1351,36 @@ void WorldSession::GmResurrectHandler(WorldPacket &msg)
             /* Player not found */
             DEBUG_LOG("Player not found");
             SendPlayerNotFoundFailureResponse();
+        }
+    }
+    else
+    {
+        DEBUG_LOG("Permission denied.");
+        SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+    }
+}
+
+/****************************************/
+/* This function handles the 'level' client command. */
+/****************************************/
+void WorldSession::LevelCheatHandler(WorldPacket& msg)
+{
+    DEBUG_LOG("WORLD: Received %s message from account %d:", msg.GetOpcodeName(), GetAccountId());
+
+    /* Check that we have permission to perform the function */
+    if (GetSecurity() > SEC_PLAYER)
+    {
+        uint32 curLevel = GetPlayer()->getLevel();
+        uint32 newLevel = 0;
+
+        msg >> newLevel;
+
+        /* Check that the level value is greater than 0 and smaller than the server's max player level for its expansion level */
+        /* and that we have a different level than the one requested... */
+        if ((newLevel != 0 && newLevel <= DEFAULT_MAX_LEVEL) && newLevel != curLevel)
+        {
+            DEBUG_LOG("Leveling player %s from level %d to %d", GetPlayerName(), curLevel, newLevel);
+            GetPlayer()->SetLevel(newLevel);
         }
     }
     else

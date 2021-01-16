@@ -69,7 +69,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x022*/ { "CMSG_GODMODE",                                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x023*/ { "SMSG_GODMODE",                                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x024*/ { "CMSG_CHEAT_SETMONEY",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x025*/ { "CMSG_LEVEL_CHEAT",                             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
+    /*0x025*/ { "CMSG_LEVEL_CHEAT",                             STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::LevelCheatHandler               },
     /*0x026*/ { "CMSG_PET_LEVEL_CHEAT",                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x027*/ { "CMSG_SET_WORLDSTATE",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x028*/ { "CMSG_COOLDOWN_CHEAT",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
