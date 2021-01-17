@@ -1363,7 +1363,7 @@ void WorldSession::GmResurrectHandler(WorldPacket &msg)
 /****************************************/
 /* This function handles the 'level' client command. */
 /****************************************/
-void WorldSession::LevelCheatHandler(WorldPacket& msg)
+void WorldSession::LevelCheatHandler(WorldPacket &msg)
 {
     DEBUG_LOG("WORLD: Received %s message from account %d:", msg.GetOpcodeName(), GetAccountId());
 
@@ -1388,6 +1388,24 @@ void WorldSession::LevelCheatHandler(WorldPacket& msg)
         DEBUG_LOG("Permission denied.");
         SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
     }
+}
+
+/****************************************/
+/* Forcefully removes us from the server */
+/****************************************/
+void WorldSession::BootMeHandler(WorldPacket& msg)
+{
+    DEBUG_LOG("Received CMSG_BOOTME from account %d:", GetAccountId());
+    if (GetSecurity() > SEC_PLAYER)
+    {
+        KickPlayer();
+        DEBUG_LOG("Account disconnected, reason = \"User sent BOOTME command\"");
+    }
+	else
+	{
+		DEBUG_LOG("Permission denied.");
+		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+	}
 }
 
 void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)

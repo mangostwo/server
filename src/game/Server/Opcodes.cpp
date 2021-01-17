@@ -33,7 +33,7 @@
 OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
 {
     /*0x000*/ { "MSG_NULL_ACTION",                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x001*/ { "CMSG_BOOTME",                                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
+    /*0x001*/ { "CMSG_BOOTME",                                  STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::BootMeHandler                   },
     /*0x002*/ { "CMSG_DBLOOKUP",                                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x003*/ { "SMSG_DBLOOKUP",                                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x004*/ { "CMSG_QUERY_OBJECT_POSITION",                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
