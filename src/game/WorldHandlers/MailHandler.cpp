@@ -190,6 +190,13 @@ void WorldSession::HandleSendMail(WorldPacket& recv_data)
 
     uint32 cost = items_count ? 30 * items_count : 30;      // price hardcoded in client
 
+    // safeguard against possible money dupe
+    if (money && COD)
+    {
+        pl->SendMailResult(0, MAIL_SEND, MAIL_ERR_INTERNAL_ERROR);
+        return;
+    }
+
     uint32 reqmoney = cost + money;
 
     if (pl->GetMoney() < reqmoney)
