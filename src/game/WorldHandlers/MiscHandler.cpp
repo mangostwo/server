@@ -1408,6 +1408,69 @@ void WorldSession::BootMeHandler(WorldPacket& msg)
 	}
 }
 
+/****************************************/
+/* Creates a game object by ID */
+/* at the player's current location */
+/****************************************/
+void WorldSession::CreateGameObjectHandler(WorldPacket &msg)
+{
+	DEBUG_LOG("WORLD: Received %s message from account %d:", msg.GetOpcodeName(), GetAccountId());
+
+	/* Check that we have permission to perform the function */
+	if (GetSecurity() > SEC_PLAYER)
+	{
+        uint32 gameObjectId = 0;
+        Player *pPlayer = GetPlayer();
+        Position position = pPlayer->GetPosition();
+        Map *pMap = pPlayer->GetMap();
+
+        msg >> gameObjectId;
+        if (gameObjectId)
+        {
+			const GameObjectInfo *gInfo = ObjectMgr::GetGameObjectInfo(gameObjectId);
+			if (!gInfo)
+			{
+                SendNotification("Game object not found");
+				return;
+			}
+
+            /* Is this check really necessary? */
+			if (gInfo->displayId && !sGameObjectDisplayInfoStore.LookupEntry(gInfo->displayId))
+			{
+				sLog.outErrorDb("Game object %u has invalid display ID %u", gameObjectId, gInfo->displayId);
+				return;
+			}
+
+			/* GUID can be zero if the server limit has been reached */
+			uint32 db_lowGUID = sObjectMgr.GenerateStaticGameObjectLowGuid();
+			if (!db_lowGUID)
+			{
+                SendNotification(LANG_NO_FREE_STATIC_GUID_FOR_SPAWN);
+                return;
+			}
+
+			GameObject *pGameObj = new GameObject;  /* Object is freed from memory in Map::Remove */
+			if (!pGameObj->Create(db_lowGUID, gInfo->id, pMap, pPlayer->GetPhaseMaskForSpawn(), position.x, position.y, position.z, position.o))
+			{
+				delete pGameObj;
+                SendNotification("Failed to create game object");
+                return;
+			}
+
+            pGameObj->SaveToDB(pMap->GetId(), (1 << pMap->GetSpawnMode()), pPlayer->GetPhaseMaskForSpawn()); /* Call this first or the server shits a brick */
+			pMap->Add(pGameObj);
+			pGameObj->AIM_Initialize();
+			sObjectMgr.AddGameobjectToGrid(db_lowGUID, sObjectMgr.GetGOData(db_lowGUID));
+            DEBUG_LOG("Created game object %d", gameObjectId);
+        }
+	}
+	else
+	{
+		DEBUG_LOG("Permission denied.");
+		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+	}
+}
+
 void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_WHOIS");

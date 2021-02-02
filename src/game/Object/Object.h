@@ -540,6 +540,11 @@ class WorldObject : public Object
         {
             loc.mapid = m_mapId; GetPosition(loc.coord_x, loc.coord_y, loc.coord_z); loc.orientation = GetOrientation();
         }
+        Position GetPosition() const
+        {
+            Position position = { m_position.x, m_position.y, m_position.z, m_position.o };
+            return position;
+        }
         float GetOrientation() const { return m_position.o; }
 
         /// Gives a 2d-point in distance distance2d in direction absAngle around the current position (point-to-point)
