@@ -1,12 +1,14 @@
 [<img src='https://www.getmangos.eu/!assets_mangos/currentlogo.gif' width="48" border=0>](https://www.getmangos.eu)
 [<img src='https://www.getmangos.eu/!assets_mangos/logo.png' border=0>](https://www.getmangos.eu)
 
-Build Status:<br><b>Linux/MAC:</b>
-[<img src='https://travis-ci.org/mangostwo/server.png' border=0 valign="middle">](https://travis-ci.org/mangostwo/server/builds)
-<b>Windows:</b>
-[<img src='https://ci.appveyor.com/api/projects/status/github/mangostwo/server?branch=master&svg=true' border=0 valign="middle">](https://ci.appveyor.com/project/MaNGOS/server-l6b0u/history)
- <b>Codacy Status:</b> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B>Build Status:</b>
+ Linux/MAC: [<img src='https://travis-ci.org/mangostwo/server.png' border=0 valign="middle">](https://travis-ci.org/mangostwo/server/builds)
+ Windows: [<img src='https://ci.appveyor.com/api/projects/status/github/mangostwo/server?branch=master&svg=true' border=0 valign="middle">](https://ci.appveyor.com/project/MaNGOS/server-l6b0u/history)
+ <br><b>Repository Status:</b> 
 [<img src='https://api.codacy.com/project/badge/Grade/3beb2a2614334f1fa62283cf2f6509d2' border=0 valign="middle"/>](https://app.codacy.com/gh/mangostwo/server/dashboard)
+[<img src='https://www.codefactor.io/repository/github/mangostwo/server/badge' border=0 valign="middle"/>](https://www.codefactor.io/repository/github/mangostwo/server)
+[<img src='https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat' border=0 valign="middle"/>](http://makeapullrequest.com)
+[<img src='https://img.shields.io/discord/286167585270005763.svg' border=0 valign="middle"/>](https://discord.gg/fPxMjHS8xs "Our community hub on Discord")
 
 ---
 
@@ -64,24 +66,14 @@ a few awesome, but less known libraries to prevent us from inventing the wheel a
 **Please note that Linux and Mac OS X users should install packages using
 their systems package management instead of source packages.**
 
-* **MySQL** / **MariaDB**: to store content, and user data, we rely on
-  [MySQL][40]/[MariaDB][41] to handle data.
-* **ACE**: the [ADAPTIVE Communication Environment][43] aka. *ACE* provides us
-  with a solid cross-platform framework for abstracting operating system
-  specific details.
-* **Recast**: in order to create navigation data from the client's map files,
-  we use [Recast][44] to do the dirty work. It provides functions for
-  rendering, pathing, etc.
-* **G3D**: the [G3D][45] engine provides the basic framework for handling 3D
-  data, and is used to handle basic map data.
-* **Stormlib**: [Stormlib][46] provides an abstraction layer for reading from the
-  client's data files.
-* **Zlib**: [Zlib][53] ([Zlib for Windows][51]) provides compression algorithms
-  used in both MPQ archive handling and the client/server protocol.
-* **Bzip2**: [Bzip2][54] ([Bzip2 for Windows][52]) provides compression
-  algorithms used in MPQ archives.
-* **OpenSSL**: [OpenSSL][48] ([OpenSSL for Windows][55]) provides encryption
-  algorithms used when authenticating clients.
+* **[MySQL][40]** / **[MariaDB][41]**: These databases are used to store content and user data.
+* **[ACE][43]**: aka Adaptive Communication Environment, provides us with a solid cross-platform framework for abstracting operating system specific details.
+* **[Recast][44]**: In order to create navigation data from the client's map files Recast is userd to do the dirty work. It provides functions for rendering, pathing, etc.
+* **[G3D][45]**: This engine provides the basic framework for handling 3D data and is used to handle basic map data.
+* **[Stormlib][46]**: Provides an abstraction layer for reading from the client's data files.
+* **[Zlib][53]/[Zlib for Windows][51]** provides compression algorithms used in both MPQ archive handling and the client/server protocol.
+* **[Bzip2][54]/[Bzip2 for Windows][52]** provides compression algorithms used in MPQ archives.
+* **[OpenSSL][48]/[OpenSSL for Windows][55]** provides encryption algorithms used when authenticating clients.
 
 **ACE**, **Recast**, **G3D**, **Stormlib**, **Zlib** and **Bzip2** are included in the standard distribution as
 we rely on specific versions.
@@ -106,7 +98,10 @@ We welcome anyone who is interested in enjoying older versions of wow or contrib
 
 **Discord Server**
 ----
-[![Widget for the Discord API guild](https://discord.com/api/guilds/286167585270005763/widget.png?style=banner2)](https://discord.gg/CzXcBXq) 
+
+We also have a Discord server where many of us hang out and discuss Mangos related stuff.
+
+* [**Discord Server**](https://discord.gg/fPxMjHS8xs) 
 
 **Main Wiki**
 ----
