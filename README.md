@@ -167,7 +167,7 @@ World of Warcraft, and all related art, images, and lore are copyright [Blizzard
 [12]: https://github.com/mangostwo "MaNGOS Two · github organization"
 [13]: https://github.com/mangostwo/server "MaNGOS Two · server repository"
 [15]: https://github.com/mangostwo/database "MaNGOS Two · content database repository"
-[16]: https://travis-ci.org/mangosone/server "Travis CI · Linux/MAC build status"
+[16]: https://travis-ci.org/mangostwo/server "Travis CI · Linux/MAC build status"
 [17]: https://ci.appveyor.com/ "AppVeyor Scan · Windows build status"
 [19]: http://www.cmake.org/ "CMake · Cross Platform Make"
 [20]: http://windows.microsoft.com/ "Microsoft Windows"
