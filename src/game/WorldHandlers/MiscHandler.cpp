@@ -1401,11 +1401,11 @@ void WorldSession::BootMeHandler(WorldPacket& msg)
         KickPlayer();
         DEBUG_LOG("Account disconnected, reason = \"User sent BOOTME command\"");
     }
-	else
-	{
-		DEBUG_LOG("Permission denied.");
-		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
-	}
+    else
+    {
+        DEBUG_LOG("Permission denied.");
+        SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+    }
 }
 
 void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)

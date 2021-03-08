@@ -1100,8 +1100,8 @@ void WorldSession::SendGmResurrectFailureResponse()
 
 void WorldSession::SendGmResurrectSuccessResponse()
 {
-	WorldPacket msg = WorldPacket(SMSG_GM_RESURRECT_SUCCESS, 0);
-	SendPacket(&msg);
+    WorldPacket msg = WorldPacket(SMSG_GM_RESURRECT_SUCCESS, 0);
+    SendPacket(&msg);
 }
 
 void WorldSession::ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket* packet)
