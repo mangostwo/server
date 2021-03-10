@@ -1326,7 +1326,7 @@ void ChatHandler::ExecuteCommand(const char* text)
                         int loc_idx = m_session->GetSessionDbLocaleIndex();
                         sCommandMgr.GetCommandHelpLocaleString(command->Id, loc_idx, &helpText);
                     }
-                   
+
                     SendSysMessage(helpText.c_str());
                 }
                 else

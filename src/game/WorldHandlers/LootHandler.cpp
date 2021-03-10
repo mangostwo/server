@@ -189,7 +189,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
 #ifdef ENABLE_ELUNA
         sEluna->OnLootItem(player, newitem, item->count, lguid);
 #endif /* ENABLE_ELUNA */
-        
+
         player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM, item->itemid, item->count);
         player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_TYPE, loot->loot_type, item->count);
         player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_EPIC_ITEM, item->itemid, item->count);
