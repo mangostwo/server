@@ -57,6 +57,7 @@
 #include "movement/MoveSplineInit.h"
 #include "movement/MoveSpline.h"
 #include "CreatureLinkingMgr.h"
+#include "GameTime.h"
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #include "ElunaEventMgr.h"
@@ -64,17 +65,6 @@
 
 #include <math.h>
 #include <stdarg.h>
-
-#ifdef WIN32
-inline uint32 getMSTime() { return GetTickCount(); }
-#else
-inline uint32 getMSTime()
-{
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
-}
-#endif
 
 float baseMoveSpeed[MAX_MOVE_TYPE] =
 {
@@ -193,12 +183,12 @@ void MovementInfo::Write(ByteBuffer& data) const
 bool GlobalCooldownMgr::HasGlobalCooldown(SpellEntry const* spellInfo) const
 {
     GlobalCooldownList::const_iterator itr = m_GlobalCooldowns.find(spellInfo->StartRecoveryCategory);
-    return itr != m_GlobalCooldowns.end() && itr->second.duration && WorldTimer::getMSTimeDiff(itr->second.cast_time, WorldTimer::getMSTime()) < itr->second.duration;
+    return itr != m_GlobalCooldowns.end() && itr->second.duration && getMSTimeDiff(itr->second.cast_time, GameTime::GetGameTimeMS()) < itr->second.duration;
 }
 
 void GlobalCooldownMgr::AddGlobalCooldown(SpellEntry const* spellInfo, uint32 gcd)
 {
-    m_GlobalCooldowns[spellInfo->StartRecoveryCategory] = GlobalCooldown(gcd, WorldTimer::getMSTime());
+    m_GlobalCooldowns[spellInfo->StartRecoveryCategory] = GlobalCooldown(gcd, GameTime::GetGameTimeMS());
 }
 
 void GlobalCooldownMgr::CancelGlobalCooldown(SpellEntry const* spellInfo)
@@ -531,7 +521,7 @@ bool Unit::haveOffhandWeapon() const
 
 void Unit::SendHeartBeat()
 {
-    m_movementInfo.UpdateTime(WorldTimer::getMSTime());
+    m_movementInfo.UpdateTime(GameTime::GetGameTimeMS());
     WorldPacket data(MSG_MOVE_HEARTBEAT, 64);
     data << GetPackGUID();
     data << m_movementInfo;
@@ -934,15 +924,16 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             ((Creature*)this)->AI()->KilledUnit(pVictim);
         }
 
-#ifdef ENABLE_ELUNA
         if (Creature* killer = ToCreature())
         {
+            // Used by Eluna
+#ifdef ENABLE_ELUNA
             if (Player* killed = pVictim->ToPlayer())
             {
                 sEluna->OnPlayerKilledByCreature(killer, killed);
             }
+#endif /* ENABLE_ELUNA */
         }
-#endif
 
         // Call AI OwnerKilledUnit (for any current summoned minipet/guardian/protector)
         PetOwnerKilledUnit(pVictim);
@@ -1018,9 +1009,10 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
                     }
                 }
 
+                // Used by Eluna
 #ifdef ENABLE_ELUNA
                 sEluna->OnPVPKill(player_tap, playerVictim);
-#endif
+#endif /* ENABLE_ELUNA */
             }
         }
         else                                                // Killed creature
@@ -3788,7 +3780,10 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell)
     {
         HitChance =  100;
     }
-    if (HitChance > 10000) HitChance = 10000;
+    if (HitChance > 10000)
+    {
+        HitChance = 10000;
+    }
 
     int32 tmp = spell->HasAttribute(SPELL_ATTR_EX3_CANT_MISS) ? 0 : (10000 - HitChance);
 
@@ -4102,11 +4097,11 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit* pVict
     {
         switch (attackType)
         {
-            case BASE_ATTACK:
-                crit = GetFloatValue(PLAYER_CRIT_PERCENTAGE);
-                break;
             case OFF_ATTACK:
                 crit = GetFloatValue(PLAYER_OFFHAND_CRIT_PERCENTAGE);
+                break;
+            case BASE_ATTACK:
+                crit = GetFloatValue(PLAYER_CRIT_PERCENTAGE);
                 break;
             case RANGED_ATTACK:
                 crit = GetFloatValue(PLAYER_RANGED_CRIT_PERCENTAGE);
@@ -5091,9 +5086,12 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
     uint32 spellId = holder->GetId();
 
     // passive spell special case (only non stackable with ranks)
-    if (IsPassiveSpell(spellProto) && IsPassiveSpellStackableWithRanks(spellProto))
+    if (IsPassiveSpell(spellProto))
     {
-        return true;
+        if (IsPassiveSpellStackableWithRanks(spellProto))
+        {
+            return true;
+        }
     }
 
     SpellSpecific spellId_spec = GetSpellSpecific(spellId);
@@ -9546,12 +9544,13 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
         }
     }
 
+    // Used by Eluna
 #ifdef ENABLE_ELUNA
     if (GetTypeId() == TYPEID_PLAYER)
     {
         sEluna->OnPlayerEnterCombat(ToPlayer(), enemy);
     }
-#endif
+#endif /* ENABLE_ELUNA */
 }
 
 void Unit::ClearInCombat()
@@ -9564,12 +9563,13 @@ void Unit::ClearInCombat()
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
     }
 
+    // Used by Eluna
 #ifdef ENABLE_ELUNA
     if (GetTypeId() == TYPEID_PLAYER)
     {
         sEluna->OnPlayerLeaveCombat(ToPlayer());
     }
-#endif
+#endif /* ENABLE_ELUNA */
 
     // Player's state will be cleared in Player::UpdateContestedPvP
     if (GetTypeId() == TYPEID_UNIT)
@@ -9617,8 +9617,6 @@ bool Unit::IsTargetableForAttack(bool inverseAlive /*=false*/) const
 
 int32 Unit::ModifyHealth(int32 dVal)
 {
-    int32 gain = 0;
-
     if (dVal == 0)
     {
         return 0;
@@ -9635,6 +9633,7 @@ int32 Unit::ModifyHealth(int32 dVal)
 
     int32 maxHealth = (int32)GetMaxHealth();
 
+    int32 gain;
     if (val < maxHealth)
     {
         SetHealth(val);
@@ -9651,8 +9650,6 @@ int32 Unit::ModifyHealth(int32 dVal)
 
 int32 Unit::ModifyPower(Powers power, int32 dVal)
 {
-    int32 gain = 0;
-
     if (dVal == 0)
     {
         return 0;
@@ -9669,6 +9666,7 @@ int32 Unit::ModifyPower(Powers power, int32 dVal)
 
     int32 maxPower = (int32)GetMaxPower(power);
 
+    int32 gain;
     if (val < maxPower)
     {
         SetPower(power, val);
@@ -10856,7 +10854,7 @@ DiminishingLevels Unit::GetDiminishing(DiminishingGroup group)
         }
 
         // If last spell was casted more than 15 seconds ago - reset the count.
-        if (i->stack == 0 && WorldTimer::getMSTimeDiff(i->hitTime, WorldTimer::getMSTime()) > 15 * IN_MILLISECONDS)
+        if (i->stack == 0 && getMSTimeDiff(i->hitTime, GameTime::GetGameTimeMS()) > 15 * IN_MILLISECONDS)
         {
             i->hitCount = DIMINISHING_LEVEL_1;
             return DIMINISHING_LEVEL_1;
@@ -10885,7 +10883,7 @@ void Unit::IncrDiminishing(DiminishingGroup group)
         }
         return;
     }
-    m_Diminishing.push_back(DiminishingReturn(group, WorldTimer::getMSTime(), DIMINISHING_LEVEL_2));
+    m_Diminishing.push_back(DiminishingReturn(group, GameTime::GetGameTimeMS(), DIMINISHING_LEVEL_2));
 }
 
 void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32& duration, Unit* caster, DiminishingLevels Level, int32 limitduration, bool isReflected)
@@ -10950,7 +10948,7 @@ void Unit::ApplyDiminishingAura(DiminishingGroup group, bool apply)
             // Remember time after last aura from group removed
             if (i->stack == 0)
             {
-                i->hitTime = WorldTimer::getMSTime();
+                i->hitTime = GameTime::GetGameTimeMS();
             }
         }
         break;
@@ -12226,8 +12224,8 @@ void Unit::SetConfused(bool apply, ObjectGuid casterGuid, uint32 spellID)
 
          if (GetTypeId() == TYPEID_UNIT)
          {
-                 SetTargetGuid(ObjectGuid());
-                 GetMotionMaster()->MoveConfused();
+             SetTargetGuid(ObjectGuid());
+             GetMotionMaster()->MoveConfused();
          }
     }
     else

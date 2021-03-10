@@ -225,7 +225,7 @@ class ThreatManager
     private:
         HostileReference* iCurrentVictim;
         Unit* iOwner;
-        ShortTimeTracker iUpdateTimer;
+        TimeTracker iUpdateTimer;
         bool iUpdateNeed;
         ThreatContainer iThreatContainer;
         ThreatContainer iThreatOfflineContainer;
