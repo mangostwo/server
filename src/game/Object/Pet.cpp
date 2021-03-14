@@ -528,7 +528,7 @@ void Pet::DeleteFromDB(uint32 guidlow, bool separate_transaction)
 void Pet::SetDeathState(DeathState s)                       // overwrite virtual Creature::SetDeathState and Unit::SetDeathState
 {
     Creature::SetDeathState(s);
-    if (getDeathState() == CORPSE)
+    if (GetDeathState() == CORPSE)
     {
         // remove summoned pet (no corpse)
         if (getPetType() == SUMMON_PET)
@@ -552,7 +552,7 @@ void Pet::SetDeathState(DeathState s)                       // overwrite virtual
             SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
         }
     }
-    else if (getDeathState() == ALIVE)
+    else if (GetDeathState() == ALIVE)
     {
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
         CastPetAuras(true);

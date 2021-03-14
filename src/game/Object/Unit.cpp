@@ -1763,7 +1763,7 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, Weapo
     }
 
     // Physical Immune check
-    if (damageInfo->target->IsImmunedToDamage(damageInfo->damageSchoolMask))
+    if (damageInfo->target->IsImmuneToDamage(damageInfo->damageSchoolMask))
     {
         damageInfo->HitInfo       |= HITINFO_NORMALSWING;
         damageInfo->TargetState    = VICTIMSTATE_IS_IMMUNE;
@@ -3845,7 +3845,7 @@ SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool 
     }
 
     // Check for immune (use charges)
-    if (pVictim->IsImmunedToDamage(GetSpellSchoolMask(spell)))
+    if (pVictim->IsImmuneToDamage(GetSpellSchoolMask(spell)))
     {
         return SPELL_MISS_IMMUNE;
     }
@@ -8705,7 +8705,7 @@ int32 Unit::SpellBaseHealingBonusTaken(SpellSchoolMask schoolMask)
     return AdvertisedBenefit;
 }
 
-bool Unit::IsImmunedToDamage(SpellSchoolMask shoolMask)
+bool Unit::IsImmuneToDamage(SpellSchoolMask shoolMask)
 {
     // If m_immuneToSchool type contain this school type, IMMUNE damage.
     SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
@@ -9766,7 +9766,7 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     // IsInvisibleForAlive() those units can only be seen by dead or if other
     // unit is also invisible for alive.. if an isinvisibleforalive unit dies we
     // should be able to see it too
-    if (u->IsAlive() && IsAlive() && isInvisibleForAlive() != u->isInvisibleForAlive())
+    if (u->IsAlive() && IsAlive() && IsInvisibleForAlive() != u->IsInvisibleForAlive())
         if (u->GetTypeId() != TYPEID_PLAYER || !((Player*)u)->isGameMaster())
         {
             return false;
@@ -9811,9 +9811,9 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
                 // Invisible units, always are visible for units under same invisibility type
                 (m_invisibilityMask & u->m_invisibilityMask) != 0 ||
                 // Invisible units, always are visible for unit that can detect this invisibility (have appropriate level for detect)
-                u->canDetectInvisibilityOf(this) ||
+                u->CanDetectInvisibilityOf(this) ||
                 // Units that can detect invisibility always are visible for units that can be detected
-                canDetectInvisibilityOf(u)))
+                CanDetectInvisibilityOf(u)))
     {
         invisible = false;
     }
@@ -9993,7 +9993,7 @@ void Unit::SetVisibility(UnitVisibility x)
     }
 }
 
-bool Unit::canDetectInvisibilityOf(Unit const* u) const
+bool Unit::CanDetectInvisibilityOf(Unit const* u) const
 {
     if (uint32 mask = (m_detectInvisibilityMask & u->m_invisibilityMask))
     {
@@ -10152,7 +10152,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
     // for player case, we look for some custom rates
     else
     {
-        if (getDeathState() == CORPSE)
+        if (GetDeathState() == CORPSE)
         {
             speed *= sWorld.getConfig(((Player*)this)->InBattleGround() ? CONFIG_FLOAT_GHOST_RUN_SPEED_BG : CONFIG_FLOAT_GHOST_RUN_SPEED_WORLD);
         }
@@ -10213,7 +10213,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
     {
         m_speed_rate[mtype] = rate;
 
-        propagateSpeedChange();
+        PropagateSpeedChange();
 
         const uint16 SetSpeed2Opc_table[MAX_MOVE_TYPE][2] =
         {
@@ -10519,7 +10519,7 @@ bool Unit::IsSecondChoiceTarget(Unit* pTarget, bool checkThreatArea) const
     MANGOS_ASSERT(pTarget && GetTypeId() == TYPEID_UNIT);
 
     return
-        pTarget->IsImmunedToDamage(GetMeleeDamageSchoolMask()) ||
+        pTarget->IsImmuneToDamage(GetMeleeDamageSchoolMask()) ||
         pTarget->hasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_DAMAGE) ||
         checkThreatArea && ((Creature*)this)->IsOutOfThreatArea(pTarget);
 }
@@ -10961,7 +10961,7 @@ bool Unit::IsVisibleForInState(Player const* u, WorldObject const* viewPoint, bo
 }
 
 /// returns true if creature can't be seen by alive units
-bool Unit::isInvisibleForAlive() const
+bool Unit::IsInvisibleForAlive() const
 {
     if (m_AuraFlags & UNIT_AURAFLAG_ALIVE_INVISIBLE)
     {
@@ -12360,7 +12360,7 @@ void Unit::SetStandState(uint8 state)
 
 bool Unit::IsPolymorphed() const
 {
-    return GetSpellSpecific(getTransForm()) == SPELL_MAGE_POLYMORPH;
+    return GetSpellSpecific(GetTransform()) == SPELL_MAGE_POLYMORPH;
 }
 
 void Unit::SetDisplayId(uint32 modelId)

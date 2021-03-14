@@ -243,7 +243,7 @@ void Creature::RemoveCorpse(bool inPlace)
         }
     }
 
-    if ((getDeathState() != CORPSE && !m_IsDeadByDefault) || (getDeathState() != ALIVE && m_IsDeadByDefault))
+    if ((GetDeathState() != CORPSE && !m_IsDeadByDefault) || (GetDeathState() != ALIVE && m_IsDeadByDefault))
     {
         return;
     }

@@ -1529,7 +1529,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         }
     }
 
-    if(!IsAlive() && !HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST) && getDeathState() != GHOULED)
+    if(!IsAlive() && !HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST) && GetDeathState() != GHOULED)
     {
         SetHealth(0);
     }
@@ -1594,7 +1594,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
     }
 
     // Not auto-free ghost from body in instances; also check for resurrection prevention
-    if (m_deathTimer > 0  && !GetMap()->Instanceable() && getDeathState() != GHOULED && !HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
+    if (m_deathTimer > 0  && !GetMap()->Instanceable() && GetDeathState() != GHOULED && !HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
     {
         if (p_time >= m_deathTimer)
         {
@@ -2538,7 +2538,7 @@ Creature* Player::GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask)
         return NULL;
     }
 
-    if (IsAlive() && unit->isInvisibleForAlive())
+    if (IsAlive() && unit->IsInvisibleForAlive())
     {
         return NULL;
     }
@@ -5174,7 +5174,7 @@ void Player::BuildPlayerRepop()
     GetMap()->Add(corpse);
 
     // convert player body to ghost
-    if(getDeathState() != GHOULED)
+    if(GetDeathState() != GHOULED)
     {
         SetHealth(1);
     }
@@ -5188,7 +5188,7 @@ void Player::BuildPlayerRepop()
     // BG - remove insignia related
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
-    if(getDeathState() != GHOULED)
+    if(GetDeathState() != GHOULED)
     {
         SendCorpseReclaimDelay();
     }
@@ -25578,7 +25578,7 @@ void Player::HandleFall(MovementInfo const& movementInfo)
     // 14.57 can be calculated by resolving damageperc formula below to 0
     if (z_diff >= 14.57f && !IsDead() && !isGameMaster() && !HasMovementFlag(MOVEFLAG_ONTRANSPORT) &&
             !HasAuraType(SPELL_AURA_HOVER) && !HasAuraType(SPELL_AURA_FEATHER_FALL) &&
-            !HasAuraType(SPELL_AURA_FLY) && !IsImmunedToDamage(SPELL_SCHOOL_MASK_NORMAL))
+            !HasAuraType(SPELL_AURA_FLY) && !IsImmuneToDamage(SPELL_SCHOOL_MASK_NORMAL))
     {
         // Safe fall, fall height reduction
         int32 safe_fall = GetTotalAuraModifier(SPELL_AURA_SAFE_FALL);

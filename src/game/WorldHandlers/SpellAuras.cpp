@@ -2973,7 +2973,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             {
                 if (m_removeMode == AURA_REMOVE_BY_DEFAULT)
                 {
-                    if (target->getDeathState() != CORPSE)
+                    if (target->GetDeathState() != CORPSE)
                     {
                         return;
                     }
@@ -3952,7 +3952,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             // and polymorphic affects
             if (target->IsPolymorphed())
             {
-                target->RemoveAurasDueToSpell(target->getTransForm());
+                target->RemoveAurasDueToSpell(target->GetTransform());
             }
 
             break;
@@ -4397,9 +4397,9 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
         }
 
         // update active transform spell only not set or not overwriting negative by positive case
-        if (!target->getTransForm() || !IsPositiveSpell(GetId()) || IsPositiveSpell(target->getTransForm()))
+        if (!target->GetTransform() || !IsPositiveSpell(GetId()) || IsPositiveSpell(target->GetTransform()))
         {
-            target->setTransForm(GetId());
+            target->SetTransform(GetId());
         }
 
         // polymorph case
@@ -4422,7 +4422,7 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
     else                                                    // !apply
     {
         // ApplyModifier(true) will reapply it if need
-        target->setTransForm(0);
+        target->SetTransform(0);
         target->SetDisplayId(target->GetNativeDisplayId());
 
         // apply default equipment for creature case
@@ -8333,7 +8333,7 @@ void Aura::PeriodicTick()
                 }
 
             // Check for immune (not use charges)
-            if (target->IsImmunedToDamage(GetSpellSchoolMask(spellProto)))
+            if (target->IsImmuneToDamage(GetSpellSchoolMask(spellProto)))
             {
                 return;
             }
@@ -8514,7 +8514,7 @@ void Aura::PeriodicTick()
                 }
 
             // Check for immune
-            if (target->IsImmunedToDamage(GetSpellSchoolMask(spellProto)))
+            if (target->IsImmuneToDamage(GetSpellSchoolMask(spellProto)))
             {
                 return;
             }
@@ -8768,7 +8768,7 @@ void Aura::PeriodicTick()
                 }
 
             // Check for immune (not use charges)
-            if (target->IsImmunedToDamage(GetSpellSchoolMask(spellProto)))
+            if (target->IsImmuneToDamage(GetSpellSchoolMask(spellProto)))
             {
                 return;
             }
@@ -8952,7 +8952,7 @@ void Aura::PeriodicTick()
             }
 
             // Check for immune (not use charges)
-            if (target->IsImmunedToDamage(GetSpellSchoolMask(spellProto)))
+            if (target->IsImmuneToDamage(GetSpellSchoolMask(spellProto)))
             {
                 return;
             }
@@ -9673,7 +9673,7 @@ void Aura::PeriodicDummyTick()
                     // Killing Spree
                 case 51690:
                 {
-                    if (target->hasUnitState(UNIT_STAT_STUNNED) || target->isFeared())
+                    if (target->hasUnitState(UNIT_STAT_STUNNED) || target->IsFeared())
                     {
                         return;
                     }
@@ -11568,7 +11568,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 case 48979:                                 // Butchery, rank 1
                 case 49483:                                 // Butchery, rank 2
                 {
-                    if (!m_target || m_target->getDeathState() != JUST_DIED)
+                    if (!m_target || m_target->GetDeathState() != JUST_DIED)
                     {
                         return;
                     }

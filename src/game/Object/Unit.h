@@ -2671,7 +2671,7 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
          * \see Unit::HasAuraType
          * \see AuraType
          */
-        bool isFeared()  const { return HasAuraType(SPELL_AURA_MOD_FEAR); }
+        bool IsFeared()  const { return HasAuraType(SPELL_AURA_MOD_FEAR); }
         /**
          * Check if this \ref Unit has a rooting \ref Aura modifier applied. Ie, is it stuck in
          * some way?
@@ -2686,7 +2686,7 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
          * Is this \ref Unit polymorphed?
          * @return true if this \ref Unit is polymorphed, false otherwise
          * \see GetSpellSpecific
-         * \see Unit::GetTransform
+         * \see Unit::GetTransform()
          * \todo Move the implementation to .h file exactly as the earlier ones?
          */
         bool IsPolymorphed() const;
@@ -2723,7 +2723,7 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
          * @return true if the target can be attacked, false otherwise
          * \see UnitState
          */
-        bool IsTargetableForAttack(bool inversAlive = false) const;
+        bool IsTargetableForAttack(bool inverseAlive = false) const;
         /**
          * Simply checks if this \ref Unit has the flag (\ref Unit::HasFlag)
          * \ref UnitFlags::UNIT_FLAG_PASSIVE in \ref EUnitFields::UNIT_FIELD_FLAGS
@@ -3147,7 +3147,7 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
          * Returns the current \ref DeathState for this \ref Unit.
          * @return the value of the member \ref Unit::m_deathState
          */
-        DeathState getDeathState() const { return m_deathState; };
+        DeathState GetDeathState() const { return m_deathState; };
         /**
          * Changes the \ref DeathState for this \ref Unit and making sure that some things that should
          * happen when that changes happen, ie: you just died, then you're auras should be removed,
@@ -3668,14 +3668,14 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
 
         // common function for visibility checks for player/creatures with detection code
         bool IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList = false, bool is3dDistance = true) const;
-        bool canDetectInvisibilityOf(Unit const* u) const;
+        bool CanDetectInvisibilityOf(Unit const* u) const;
         void SetPhaseMask(uint32 newPhaseMask, bool update) override;// overwrite WorldObject::SetPhaseMask
 
         // virtual functions for all world objects types
         bool IsVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const override;
         // function for low level grid visibility checks in player/creature cases
         virtual bool IsVisibleInGridForPlayer(Player* pl) const = 0;
-        bool isInvisibleForAlive() const;
+        bool IsInvisibleForAlive() const;
 
         TrackedAuraTargetMap&       GetTrackedAuraTargets(TrackedAuraType type)       { return m_trackedAuraTargets[type]; }
         TrackedAuraTargetMap const& GetTrackedAuraTargets(TrackedAuraType type) const { return m_trackedAuraTargets[type]; }
@@ -3694,8 +3694,8 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         ObjectGuid GetFixateTargetGuid() const { return m_fixateTargetGuid; }
         ThreatManager& GetThreatManager() { return m_ThreatManager; }
         ThreatManager const& GetThreatManager() const { return m_ThreatManager; }
-        void addHatedBy(HostileReference* pHostileReference) { m_HostileRefManager.insertFirst(pHostileReference); };
-        void removeHatedBy(HostileReference* /*pHostileReference*/) { /* nothing to do yet */ }
+        void AddHatedBy(HostileReference* pHostileReference) { m_HostileRefManager.insertFirst(pHostileReference); };
+        void RemoveHatedBy(HostileReference* /*pHostileReference*/) { /* nothing to do yet */ }
         HostileRefManager& GetHostileRefManager() { return m_HostileRefManager; }
 
         uint32 GetVisibleAura(uint8 slot) const
@@ -3765,8 +3765,8 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         void SetDisplayId(uint32 modelId);
         uint32 GetNativeDisplayId() const { return GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID); }
         void SetNativeDisplayId(uint32 modelId) { SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, modelId); }
-        void setTransForm(uint32 spellid) { m_transform = spellid;}
-        uint32 getTransForm() const { return m_transform;}
+        void SetTransform(uint32 spellid) { m_transform = spellid;}
+        uint32 GetTransform() const { return m_transform;}
 
         // at any changes to scale and/or displayId
         void UpdateModelData();
@@ -3863,7 +3863,7 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         void ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply);
         void ApplySpellDispelImmunity(const SpellEntry* spellProto, DispelType type, bool apply);
         virtual bool IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf);
-        bool IsImmunedToDamage(SpellSchoolMask meleeSchoolMask);
+        bool IsImmuneToDamage(SpellSchoolMask meleeSchoolMask);
         virtual bool IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const;
 
         uint32 CalcArmorReducedDamage(Unit* pVictim, const uint32 damage);
@@ -3913,7 +3913,7 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         void SendPetAIReaction();
         ///----------End of Pet responses methods----------
 
-        void propagateSpeedChange() { GetMotionMaster()->propagateSpeedChange(); }
+        void PropagateSpeedChange() { GetMotionMaster()->PropagateSpeedChange(); }
 
         // reactive attacks
         void ClearAllReactives();

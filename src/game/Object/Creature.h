@@ -536,8 +536,8 @@ class Creature : public Unit
         bool IsTotem() const { return m_subtype == CREATURE_SUBTYPE_TOTEM; }
         bool IsTemporarySummon() const { return m_subtype == CREATURE_SUBTYPE_TEMPORARY_SUMMON; }
 
-        bool IsCorpse() const { return getDeathState() ==  CORPSE; }
-        bool IsDespawned() const { return getDeathState() ==  DEAD; }
+        bool IsCorpse() const { return GetDeathState() ==  CORPSE; }
+        bool IsDespawned() const { return GetDeathState() ==  DEAD; }
         void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
         uint32 GetCorpseDelay() const { return m_corpseDelay; }
         bool IsRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
