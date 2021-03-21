@@ -1414,11 +1414,11 @@ void WorldSession::BootMeHandler(WorldPacket& msg)
 /****************************************/
 void WorldSession::CreateGameObjectHandler(WorldPacket &msg)
 {
-	DEBUG_LOG("WORLD: Received %s message from account %d:", msg.GetOpcodeName(), GetAccountId());
+    DEBUG_LOG("WORLD: Received %s message from account %d:", msg.GetOpcodeName(), GetAccountId());
 
-	/* Check that we have permission to perform the function */
-	if (GetSecurity() > SEC_PLAYER)
-	{
+    /* Check that we have permission to perform the function */
+    if (GetSecurity() > SEC_PLAYER)
+    {
         uint32 gameObjectId = 0;
         Player *pPlayer = GetPlayer();
         Position position = pPlayer->GetPosition();
@@ -1427,48 +1427,48 @@ void WorldSession::CreateGameObjectHandler(WorldPacket &msg)
         msg >> gameObjectId;
         if (gameObjectId)
         {
-			const GameObjectInfo *gInfo = ObjectMgr::GetGameObjectInfo(gameObjectId);
-			if (!gInfo)
-			{
+            const GameObjectInfo *gInfo = ObjectMgr::GetGameObjectInfo(gameObjectId);
+            if (!gInfo)
+            {
                 SendNotification("Game object not found");
-				return;
-			}
+                return;
+            }
 
             /* Is this check really necessary? */
-			if (gInfo->displayId && !sGameObjectDisplayInfoStore.LookupEntry(gInfo->displayId))
-			{
-				sLog.outErrorDb("Game object %u has invalid display ID %u", gameObjectId, gInfo->displayId);
-				return;
-			}
+            if (gInfo->displayId && !sGameObjectDisplayInfoStore.LookupEntry(gInfo->displayId))
+            {
+                sLog.outErrorDb("Game object %u has invalid display ID %u", gameObjectId, gInfo->displayId);
+                return;
+            }
 
-			/* GUID can be zero if the server limit has been reached */
-			uint32 db_lowGUID = sObjectMgr.GenerateStaticGameObjectLowGuid();
-			if (!db_lowGUID)
-			{
+            /* GUID can be zero if the server limit has been reached */
+            uint32 db_lowGUID = sObjectMgr.GenerateStaticGameObjectLowGuid();
+            if (!db_lowGUID)
+            {
                 SendNotification(LANG_NO_FREE_STATIC_GUID_FOR_SPAWN);
                 return;
-			}
+            }
 
-			GameObject *pGameObj = new GameObject;  /* Object is freed from memory in Map::Remove */
-			if (!pGameObj->Create(db_lowGUID, gInfo->id, pMap, pPlayer->GetPhaseMaskForSpawn(), position.x, position.y, position.z, position.o))
-			{
-				delete pGameObj;
+            GameObject *pGameObj = new GameObject;  /* Object is freed from memory in Map::Remove */
+            if (!pGameObj->Create(db_lowGUID, gInfo->id, pMap, pPlayer->GetPhaseMaskForSpawn(), position.x, position.y, position.z, position.o))
+            {
+                delete pGameObj;
                 SendNotification("Failed to create game object");
                 return;
-			}
+            }
 
             pGameObj->SaveToDB(pMap->GetId(), (1 << pMap->GetSpawnMode()), pPlayer->GetPhaseMaskForSpawn()); /* Call this first or the server shits a brick */
-			pMap->Add(pGameObj);
-			pGameObj->AIM_Initialize();
-			sObjectMgr.AddGameobjectToGrid(db_lowGUID, sObjectMgr.GetGOData(db_lowGUID));
+            pMap->Add(pGameObj);
+            pGameObj->AIM_Initialize();
+            sObjectMgr.AddGameobjectToGrid(db_lowGUID, sObjectMgr.GetGOData(db_lowGUID));
             DEBUG_LOG("Created game object %d", gameObjectId);
         }
-	}
-	else
-	{
+    }
+    else
+    {
 		DEBUG_LOG("Permission denied.");
 		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
-	}
+    }
 }
 
 void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
