@@ -832,6 +832,7 @@ class WorldSession
         void GmResurrectHandler(WorldPacket &msg);
         void LevelCheatHandler(WorldPacket &msg);
         void BootMeHandler(WorldPacket &msg);
+        void CreateGameObjectHandler(WorldPacket &msg);
         void HandleMinimapPingOpcode(WorldPacket& recv_data);
         void HandleRandomRollOpcode(WorldPacket& recv_data);
         void HandleFarSightOpcode(WorldPacket& recv_data);

@@ -52,7 +52,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x011*/ { "CMSG_CREATEMONSTER",                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x012*/ { "CMSG_DESTROYMONSTER",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x013*/ { "CMSG_CREATEITEM",                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x014*/ { "CMSG_CREATEGAMEOBJECT",                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
+    /*0x014*/ { "CMSG_CREATEGAMEOBJECT",                        STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::CreateGameObjectHandler         },
     /*0x015*/ { "SMSG_CHECK_FOR_BOTS",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x016*/ { "CMSG_MAKEMONSTERATTACKGUID",                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x017*/ { "CMSG_BOT_DETECTED2",                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
