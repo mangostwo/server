@@ -1471,6 +1471,31 @@ void WorldSession::CreateGameObjectHandler(WorldPacket &msg)
     }
 }
 
+/****************************************/
+/* Sets the money value for the active player */
+/****************************************/
+void WorldSession::SetMoneyHandler(WorldPacket &msg)
+{
+    DEBUG_LOG("WORLD: Received %s message from account %d:", msg.GetOpcodeName(), GetAccountId());
+    if (GetSecurity() > SEC_PLAYER)
+    {
+        Player *pPlayer = GetPlayer();
+        int32 money = 0;
+
+        msg >> money;
+        if (money < 0)
+            money = 0x7FFFFFFF;    /* Money limit */
+
+        DEBUG_LOG("Setting money on %s from %d to %d", pPlayer->GetName(), pPlayer->GetMoney(), money); /*TODO: Log this appropriately*/
+        GetPlayer()->SetMoney(money);
+    }
+    else
+    {
+        DEBUG_LOG("Permission denied.");
+        SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+    }
+}
+
 void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_WHOIS");
