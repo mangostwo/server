@@ -1466,8 +1466,8 @@ void WorldSession::CreateGameObjectHandler(WorldPacket &msg)
     }
     else
     {
-		DEBUG_LOG("Permission denied.");
-		SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+	    DEBUG_LOG("Permission denied.");
+	    SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
     }
 }
 
