@@ -829,6 +829,7 @@ class WorldSession
 
         void HandleWardenDataOpcode(WorldPacket& recv_data);
         void WorldTeleportHandler(WorldPacket& recv_data);
+        void CreateMonsterHandler(WorldPacket &msg);
         void GmResurrectHandler(WorldPacket &msg);
         void LevelCheatHandler(WorldPacket &msg);
         void BootMeHandler(WorldPacket &msg);

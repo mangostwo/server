@@ -1310,6 +1310,61 @@ void WorldSession::WorldTeleportHandler(WorldPacket& recv_data)
 }
 
 /****************************************/
+/* Creates a monster (spawn) by ID */
+/* Optionally at a given location (see note below) */
+/****************************************/
+void WorldSession::CreateMonsterHandler(WorldPacket &msg)
+{
+    DEBUG_LOG("WORLD: %s command from account %d:", msg.GetOpcodeName(), GetAccountId());
+    if (GetSecurity() > SEC_MODERATOR)
+    {
+        Player *pPlayer = GetPlayer();
+        uint32 monsterID = 0;
+        Position position = pPlayer->GetPosition();
+
+        msg >> monsterID;
+        /* Note: In the future, we may want to specify the spawn coordinates */
+        /* (implemented in newer client versions) */
+        //msg >> position.x;
+        //msg >> position.y;
+        //msg >> position.z;
+        //position.o = pPlayer-GetOrientation();
+
+        if (monsterID)
+        {
+            CreatureInfo const *cinfo = ObjectMgr::GetCreatureTemplate(monsterID);
+            if (!cinfo)
+            {
+                sLog.outDebug("%s: Monster ID %d doesn't exist. Check your database entries.", __FUNCTION__, monsterID);
+                return;
+            }
+
+            Creature *pCreature = new Creature();
+            CreatureCreatePos monsterPosition(pPlayer->GetMap(), position.x, position.y, position.z, position.o, pPlayer->GetPhaseMask());
+
+            if (!pCreature->Create(pPlayer->GetMap()->GenerateLocalLowGuid(cinfo->GetHighGuid()), monsterPosition, cinfo))
+            {
+                delete pCreature;
+                return;
+            }
+
+            uint32 db_guid = pCreature->GetGUIDLow();
+            pCreature->SaveToDB(pPlayer->GetMapId(), (1 << pPlayer->GetMap()->GetSpawnMode()), pPlayer->GetPhaseMaskForSpawn());
+
+            /* To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells(); */
+            pCreature->LoadFromDB(db_guid, pPlayer->GetMap());
+            pCreature->SetActiveObjectState(true);
+            sObjectMgr.AddCreatureToGrid(db_guid, sObjectMgr.GetCreatureData(db_guid));
+        }
+    }
+    else
+    {
+        DEBUG_LOG("Permission denied.");
+        SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+    }
+}
+
+/****************************************/
 /* This function handles the 'resurrect' client command. */
 /* Usage: resurrect <player name> */
 /****************************************/

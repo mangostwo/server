@@ -49,7 +49,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x00E*/ { "SMSG_MOVE_CHARACTER_CHEAT",                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x00F*/ { "CMSG_RECHARGE",                                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x010*/ { "CMSG_LEARN_SPELL",                             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x011*/ { "CMSG_CREATEMONSTER",                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
+    /*0x011*/ { "CMSG_CREATEMONSTER",                           STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::CreateMonsterHandler            },
     /*0x012*/ { "CMSG_DESTROYMONSTER",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x013*/ { "CMSG_CREATEITEM",                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x014*/ { "CMSG_CREATEGAMEOBJECT",                        STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::CreateGameObjectHandler         },
