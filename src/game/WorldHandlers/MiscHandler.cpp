@@ -371,9 +371,17 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recv_data*/)
     LogoutRequest(time(NULL));
 }
 
-void WorldSession::HandlePlayerLogoutOpcode(WorldPacket& /*recv_data*/)
+void WorldSession::HandlePlayerLogout(WorldPacket &msg)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_PLAYER_LOGOUT Message");
+    if (GetSecurity() > SEC_PLAYER)
+    {
+        LogoutPlayer(true);
+    }
+    else
+    {
+        SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+    }
 }
 
 void WorldSession::HandleLogoutCancelOpcode(WorldPacket& /*recv_data*/)

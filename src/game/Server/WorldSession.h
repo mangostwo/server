@@ -509,7 +509,7 @@ class WorldSession
         void HandleLootMasterGiveOpcode(WorldPacket& recvPacket);
         void HandleWhoOpcode(WorldPacket& recvPacket);
         void HandleLogoutRequestOpcode(WorldPacket& recvPacket);
-        void HandlePlayerLogoutOpcode(WorldPacket& recvPacket);
+        void HandlePlayerLogout(WorldPacket &msg);
         void HandleLogoutCancelOpcode(WorldPacket& recvPacket);
 
         void HandleGMTicketGetTicketOpcode(WorldPacket& recvPacket);

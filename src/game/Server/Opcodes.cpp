@@ -106,7 +106,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x047*/ { "SMSG_GAMESPEED_SET",                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x048*/ { "CMSG_SERVERTIME",                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x049*/ { "SMSG_SERVERTIME",                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x04A*/ { "CMSG_PLAYER_LOGOUT",                           STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandlePlayerLogoutOpcode        },
+    /*0x04A*/ { "CMSG_PLAYER_LOGOUT",                           STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandlePlayerLogout        },
     /*0x04B*/ { "CMSG_LOGOUT_REQUEST",                          STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleLogoutRequestOpcode       },
     /*0x04C*/ { "SMSG_LOGOUT_RESPONSE",                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x04D*/ { "SMSG_LOGOUT_COMPLETE",                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
