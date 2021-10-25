@@ -122,7 +122,7 @@ WorldSession::~WorldSession()
     ///- unload player if not unloaded
     if (_player)
     {
-        LogoutPlayer(true);
+        CharacterLogout();
     }
 
     /// - If have unclosed socket, close it
@@ -370,7 +370,7 @@ bool WorldSession::Update(PacketFilter& updater)
         time_t currTime = time(NULL);
         if (!m_Socket || (ShouldLogOut(currTime) && !m_playerLoading))
         {
-            LogoutPlayer(true);
+            CharacterLogout();
         }
 
         // Warden
@@ -388,8 +388,14 @@ bool WorldSession::Update(PacketFilter& updater)
     return true;
 }
 
-/// %Log the player out
+/// DEPRECATED: Kept for Eluna compatibility
 void WorldSession::LogoutPlayer(bool Save)
+{
+    CharacterLogout();
+}
+
+// Logs out the currently logged in character
+void WorldSession::CharacterLogout()
 {
     // finish pending transfers before starting the logout
     while (_player && _player->IsBeingTeleportedFar())
@@ -398,11 +404,11 @@ void WorldSession::LogoutPlayer(bool Save)
     }
 
     m_playerLogout = true;
-    m_playerSave = Save;
+    m_playerSave = true;
 
     if (_player)
     {
-        sLog.outChar("Account: %d (IP: %s) Logout Character:[%s] (guid: %u)", GetAccountId(), GetRemoteAddress().c_str(), _player->GetName() , _player->GetGUIDLow());
+        sLog.outChar("Account: %d (IP: %s) Logout Character:[%s] (guid: %u)", GetAccountId(), GetRemoteAddress().c_str(), _player->GetName(), _player->GetGUIDLow());
 
         if (ObjectGuid lootGuid = GetPlayer()->GetLootGuid())
         {
@@ -424,20 +430,20 @@ void WorldSession::LogoutPlayer(bool Save)
             _player->RemoveAllAurasOnDeath();
 
             // build set of player who attack _player or who have pet attacking of _player
-            std::set<Player*> aset;
+            std::set<Player *> aset;
             for (Unit::AttackerSet::const_iterator itr = _player->getAttackers().begin(); itr != _player->getAttackers().end(); ++itr)
             {
-                Unit* owner = (*itr)->GetOwner();           // including player controlled case
+                Unit *owner = (*itr)->GetOwner();           // including player controlled case
                 if (owner)
                 {
                     if (owner->GetTypeId() == TYPEID_PLAYER)
                     {
-                        aset.insert((Player*)owner);
+                        aset.insert((Player *)owner);
                     }
                 }
                 else if ((*itr)->GetTypeId() == TYPEID_PLAYER)
                 {
-                    aset.insert((Player*)(*itr));
+                    aset.insert((Player *)(*itr));
                 }
             }
 
@@ -447,7 +453,7 @@ void WorldSession::LogoutPlayer(bool Save)
             _player->RepopAtGraveyard();
 
             // give honor to all attackers from set like group case
-            for (std::set<Player*>::const_iterator itr = aset.begin(); itr != aset.end(); ++itr)
+            for (std::set<Player *>::const_iterator itr = aset.begin(); itr != aset.end(); ++itr)
             {
                 (*itr)->RewardHonor(_player, aset.size());
             }
@@ -455,7 +461,7 @@ void WorldSession::LogoutPlayer(bool Save)
             // give bg rewards and update counters like kill by first from attackers
             // this can't be called for all attackers.
             if (!aset.empty())
-                if (BattleGround* bg = _player->GetBattleGround())
+                if (BattleGround *bg = _player->GetBattleGround())
                 {
                     bg->HandleKillPlayer(_player, *aset.begin());
                 }
@@ -470,7 +476,7 @@ void WorldSession::LogoutPlayer(bool Save)
             _player->RepopAtGraveyard();
         }
         // drop a flag if player is carrying it
-        if (BattleGround* bg = _player->GetBattleGround())
+        if (BattleGround *bg = _player->GetBattleGround())
         {
             bg->EventPlayerLoggedOut(_player);
         }
@@ -495,7 +501,7 @@ void WorldSession::LogoutPlayer(bool Save)
             if (BattleGroundQueueTypeId bgQueueTypeId = _player->GetBattleGroundQueueTypeId(i))
             {
                 _player->RemoveBattleGroundQueueId(bgQueueTypeId);
-                sBattleGroundMgr.m_BattleGroundQueues[ bgQueueTypeId ].RemovePlayer(_player->GetObjectGuid(), true);
+                sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId].RemovePlayer(_player->GetObjectGuid(), true);
             }
         }
 
@@ -508,9 +514,9 @@ void WorldSession::LogoutPlayer(bool Save)
         stmt.PExecute(uint32(0), GetAccountId());
 
         ///- If the player is in a guild, update the guild roster and broadcast a logout message to other guild members
-        if (Guild* guild = sGuildMgr.GetGuildById(_player->GetGuildId()))
+        if (Guild *guild = sGuildMgr.GetGuildById(_player->GetGuildId()))
         {
-            if (MemberSlot* slot = guild->GetMemberSlot(_player->GetObjectGuid()))
+            if (MemberSlot *slot = guild->GetMemberSlot(_player->GetObjectGuid()))
             {
                 slot->SetMemberStats(_player);
                 slot->UpdateLogoutTime();
@@ -524,10 +530,7 @@ void WorldSession::LogoutPlayer(bool Save)
 
         ///- empty buyback items and save the player in the database
         // some save parts only correctly work in case player present in map/player_lists (pets, etc)
-        if (Save)
-        {
-            _player->SaveToDB();
-        }
+        _player->SaveToDB();
 
         ///- Leave all channels before player delete...
         _player->CleanupChannels();
@@ -562,7 +565,7 @@ void WorldSession::LogoutPlayer(bool Save)
         // calls to GetMap in this case may cause crashes
         if (_player->IsInWorld())
         {
-            Map* _map = _player->GetMap();
+            Map *_map = _player->GetMap();
             _map->Remove(_player, true);
         }
         else
@@ -571,7 +574,7 @@ void WorldSession::LogoutPlayer(bool Save)
             Map::DeleteFromWorld(_player);
         }
 
-        SetPlayer(NULL);                                    // deleted in Remove/DeleteFromWorld call
+        SetPlayer(NULL);    // deleted in Remove/DeleteFromWorld call
 
         ///- Send the 'logout complete' packet to the client
         WorldPacket data(SMSG_LOGOUT_COMPLETE, 0);

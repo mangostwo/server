@@ -347,7 +347,7 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recv_data*/)
     if (GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) || GetPlayer()->IsTaxiFlying() ||
         GetSecurity() >= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_INSTANT_LOGOUT))
     {
-        LogoutPlayer(true);
+        CharacterLogout();
         return;
     }
 
@@ -376,7 +376,7 @@ void WorldSession::HandlePlayerLogout(WorldPacket &msg)
     DEBUG_LOG("WORLD: Received opcode CMSG_PLAYER_LOGOUT Message");
     if (GetSecurity() > SEC_PLAYER)
     {
-        LogoutPlayer(true);
+        CharacterLogout();
     }
     else
     {

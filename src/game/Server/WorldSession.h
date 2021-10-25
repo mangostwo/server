@@ -306,7 +306,11 @@ class WorldSession
             return (_logoutTime > 0 && currTime >= _logoutTime + 20);
         }
 
+        // This method is kept for compatibility with Eluna;
+        // The player is always saved before logging out!
         void LogoutPlayer(bool Save);
+
+        void CharacterLogout();
         void KickPlayer();
 
         void QueuePacket(WorldPacket* new_packet);

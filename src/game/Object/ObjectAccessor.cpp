@@ -86,11 +86,11 @@ void ObjectAccessor::SaveAllPlayers()
 
 void ObjectAccessor::KickPlayer(ObjectGuid guid)
 {
-    if (Player* p = FindPlayer(guid, false))
+    if (Player *pPlayer = FindPlayer(guid, false))
     {
-        WorldSession* s = p->GetSession();
-        s->KickPlayer();                            // mark session to remove at next session list update
-        s->LogoutPlayer(false);                     // logout player without waiting next session list update
+        WorldSession *pSession = pPlayer->GetSession();
+        pSession->KickPlayer();
+        pSession->CharacterLogout();
     }
 }
 
