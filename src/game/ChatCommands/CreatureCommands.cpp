@@ -1125,8 +1125,8 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     {
         curRespawnDelay = 0;
     }
-    std::string curRespawnDelayStr = secsToTimeString(curRespawnDelay, true);
-    std::string defRespawnDelayStr = secsToTimeString(target->GetRespawnDelay(), true);
+    std::string curRespawnDelayStr = secsToTimeString(curRespawnDelay, TimeFormat::ShortText);
+    std::string defRespawnDelayStr = secsToTimeString(target->GetRespawnDelay(), TimeFormat::ShortText);
 
     // Send information dependend on difficulty mode
     CreatureInfo const* baseInfo = ObjectMgr::GetCreatureTemplate(Entry);
