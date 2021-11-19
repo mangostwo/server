@@ -24,7 +24,7 @@
 
 #ifndef MANGOS_H_REVISION
 #define MANGOS_H_REVISION
-    #define REVISION_NR "2201001"
+    #define REVISION_NR "2202001"
 
     #define REALMD_DB_VERSION_NR 22
     #define REALMD_DB_STRUCTURE_NR 1
@@ -37,7 +37,7 @@
     #define CHAR_DB_UPDATE_DESCRIPTION "Release 22"
 
     #define WORLD_DB_VERSION_NR 22
-    #define WORLD_DB_STRUCTURE_NR 1
-    #define WORLD_DB_CONTENT_NR 013
-    #define WORLD_DB_UPDATE_DESCRIPTION "Q_7166_and_7171_details_text"
+    #define WORLD_DB_STRUCTURE_NR 2
+    #define WORLD_DB_CONTENT_NR 001
+    #define WORLD_DB_UPDATE_DESCRIPTION "GMTicket Updates"
 #endif // __REVISION_H__
