@@ -963,7 +963,9 @@ enum MangosStrings
 
     // Reserved for old client release branches specific strings
     // Room for old clients 2.x           1300-1399 not used
-    // Room for old clients 1.x           1400-1499 not used
+    // Room for old clients 1.x           1400-1439 not used
+    LANG_COMMAND_TICKETUPDATED          = 1440,
+    // Room for old clients 1.x           1441-1499 not used
 
     // Level 2 (continue)
     LANG_POOL_CHANCE_POOL_LIST_CONSOLE  = 1500,
@@ -976,7 +978,19 @@ enum MangosStrings
     LANG_NPC_EVENTAI_MOVE               = 1507,
     LANG_NPC_EVENTAI_COMBAT             = 1508,
     LANG_POOL_ENTRY_LOWER_MAX_POOL      = 1509,
-    // Room for more Level 2              1510-1599 not used
+    LANG_COMMAND_TICKETCLOSED_NAME      = 1510,
+    LANG_COMMAND_TICKETS_SYSTEM_ON      = 1511,
+    LANG_COMMAND_TICKETS_SYSTEM_OFF     = 1512,
+    LANG_COMMAND_TICKET_CANT_CLOSE      = 1513,
+    LANG_COMMAND_TICKET_BRIEF_INFO      = 1514,
+    LANG_COMMAND_TICKET_COUNT_ONLINE    = 1515,
+    LANG_COMMAND_TICKET_OFFLINE_INFO    = 1516,
+    LANG_COMMAND_TICKET_COUNT_ALL       = 1517,
+    LANG_COMMAND_TICKET_ACCEPT_STATE    = 1518,
+    LANG_COMMAND_TICKET_RESPOND_MAIL_SUBJECT = 1519,
+    LANG_COMMAND_TICKET_RESPOND_MAIL_SIGNATURE = 1520,
+    LANG_COMMAND_TICKETCLOSED_PLAYER_NOTIF  = 1521,
+    // Room for more Level 2              1522-1599 not used
 
     // Outdoor PvP
     LANG_OPVP_EP_CAPTURE_NPT_H          = 1600,
@@ -1034,4 +1048,5 @@ enum MangosStrings
     // `db_script_string` table index     2000000000-2000999999 (MIN_DB_SCRIPT_STRING_ID-MAX_DB_SCRIPT_STRING_ID)
     // For other tables maybe             2001000000-2147483647 (max index)
 };
+
 #endif

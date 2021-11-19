@@ -936,7 +936,10 @@ class ObjectMgr
         {
             return m_GuildIds.Generate();
         }
-        // uint32 GenerateItemTextID() { return m_ItemGuids.Generate(); }
+        //uint32 GenerateItemTextID()
+        //{
+        //    return m_ItemTextGuids.Generate();
+        //}
         uint32 GenerateMailID()
         {
             return m_MailIds.Generate();
@@ -1368,6 +1371,7 @@ class ObjectMgr
         // first free low guid for selected guid type
         ObjectGuidGenerator<HIGHGUID_PLAYER>     m_CharGuids;
         ObjectGuidGenerator<HIGHGUID_ITEM>       m_ItemGuids;
+//        ObjectGuidGenerator<HIGHGUID_ITEM>       m_ItemTextGuids;
         ObjectGuidGenerator<HIGHGUID_CORPSE>     m_CorpseGuids;
         ObjectGuidGenerator<HIGHGUID_INSTANCE>   m_InstanceGuids;
         ObjectGuidGenerator<HIGHGUID_GROUP>      m_GroupGuids;

@@ -515,11 +515,11 @@ class WorldSession
         void HandleGMTicketGetTicketOpcode(WorldPacket& recvPacket);
         void HandleGMTicketCreateOpcode(WorldPacket& recvPacket);
         void HandleGMTicketSystemStatusOpcode(WorldPacket& recvPacket);
-
+        void SendGMTicketStatusUpdate(GMTicketStatus statusCode);
         void HandleGMTicketDeleteTicketOpcode(WorldPacket& recvPacket);
         void HandleGMTicketUpdateTextOpcode(WorldPacket& recvPacket);
 
-        void HandleGMSurveySubmitOpcode(WorldPacket& recvPacket);
+        void HandleGMTicketSurveySubmitOpcode(WorldPacket& recvPacket);
         void HandleGMResponseResolveOpcode(WorldPacket& recv_data);
 
         void HandleTogglePvP(WorldPacket& recvPacket);
@@ -984,5 +984,6 @@ class WorldSession
         AddonsList m_addonsList;
         ACE_Based::LockedQueue<WorldPacket*, ACE_Thread_Mutex> _recvQueue;
 };
+
 #endif
 /// @}
