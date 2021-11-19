@@ -1168,6 +1168,15 @@ Channel.SilentlyGMJoin          = 0
 #                 0 (disable)
 #                 1 (enable)
 #
+#    GM.TicketListSize
+#        Number of tickets shown to a GM by .ticket list/onlinelist.
+#        Default: 30
+#
+#    GM.TicketOfflineClosing
+#        Is GM ticket close available for teh offline players or not.
+#        Default: 0 (false) closing denied
+#                 1 (true) closing enabled
+#
 #    GM.Chat
 #        GM chat mode at login
 #        Default: 2 (last save state)
@@ -1227,6 +1236,8 @@ Channel.SilentlyGMJoin          = 0
 GM.LoginState            = 2
 GM.Visible               = 2
 GM.AcceptTickets         = 2
+GM.TicketListSize        = 30
+GM.TicketOfflineClosing  = 1
 GM.Chat                  = 2
 GM.WhisperingTo          = 2
 GM.InGMList.Level        = 3
