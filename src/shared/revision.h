@@ -24,7 +24,7 @@
 
 #ifndef MANGOS_H_REVISION
 #define MANGOS_H_REVISION
-    #define REVISION_NR "2202001"
+    #define REVISION_NR "2203001"
 
     #define REALMD_DB_VERSION_NR 22
     #define REALMD_DB_STRUCTURE_NR 1

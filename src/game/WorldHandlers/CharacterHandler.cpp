@@ -47,7 +47,7 @@
 #include "SpellMgr.h"
 #include "Calendar.h"
 #include "GameTime.h"
-
+#include "Timer.h"
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
@@ -490,6 +490,10 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
     }
 
     Player* pNewChar = new Player(this);
+    // Sets the createdTime of the character which is UNIX timestamp
+    uint32 createdDate = GetUnixTimeStamp(); // Unix Timestamp in seconds
+    pNewChar->SetCreatedDate(createdDate); // TODO get currentTimeStamp for createdTime
+
     if (!pNewChar->Create(sObjectMgr.GeneratePlayerLowGuid(), name, race_, class_, gender, skin, face, hairStyle, hairColor, facialHair, outfitId))
     {
         // Player not create (race/class problem?)

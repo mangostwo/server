@@ -40,6 +40,7 @@ void WorldSession::SendGMTicketGetTicket(uint32 status, GMTicket* ticket /*= NUL
     data << uint32(status);                                 // standard 0x0A, 0x06 if text present
     if (status == 6)
     {
+        data << uint32(123);                                // unk
         data << text;                                       // ticket text
         data << uint8(0x7);                                 // ticket category
         data << float(0);                                   // tickets in queue?
@@ -151,6 +152,7 @@ void WorldSession::HandleGMTicketCreateOpcode(WorldPacket& recv_data)
     uint8 category;
     float x, y, z;
     std::string ticketText = "";
+    uint8 isFollowup;
     recv_data >> category ;
     recv_data >> mapId >> x >> y >> z;                        // last check 2.4.3
     recv_data >> ticketText;
