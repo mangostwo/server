@@ -871,7 +871,10 @@ class ObjectMgr
         std::string GeneratePetName(uint32 entry);
         uint32 GetBaseXP(uint32 level) const;
         uint32 GetXPForLevel(uint32 level) const;
-        uint32 GetXPForPetLevel(uint32 level) const { return GetXPForLevel(level) / 20; }
+        uint32 GetXPForPetLevel(uint32 level) const
+        {
+            return GetXPForLevel(level) / 20;
+        }
 
         int32 GetFishingBaseSkillLevel(uint32 entry) const
         {
