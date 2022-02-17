@@ -53,7 +53,7 @@ class Unit;
 
 class ChatCommand
 {
-public:
+    public:
     uint32             Id;
     const char* Name;
     uint32             SecurityLevel;                   // function pointer required correct align (use uint32)
