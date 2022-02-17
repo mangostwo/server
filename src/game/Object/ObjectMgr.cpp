@@ -531,6 +531,9 @@ void ObjectMgr::LoadCreatureTemplates()
     SQLCreatureLoader loader;
     loader.Load(sCreatureStorage);
 
+    sLog.outString(">> Loaded %u creature definitions", sCreatureStorage.GetRecordCount());
+    sLog.outString();
+
     std::set<uint32> difficultyEntries[MAX_DIFFICULTY - 1]; // already loaded difficulty 1 value in creatures
     std::set<uint32> hasDifficultyEntries[MAX_DIFFICULTY - 1]; // already loaded creatures with difficulty 1  values
 
@@ -7511,7 +7514,7 @@ void ObjectMgr::LoadNPCSpellClickSpells()
         }
 
         // spell can be 0 for special or custom cases
-        if(info.spellId)
+        if (info.spellId)
         {
             SpellEntry const* spellinfo = sSpellStore.LookupEntry(info.spellId);
             if (!spellinfo)
@@ -9358,7 +9361,8 @@ SkillRangeType GetSkillRangeType(SkillLineEntry const* pSkill, bool racial)
 {
     switch (pSkill->categoryId)
     {
-        case SKILL_CATEGORY_LANGUAGES: return SKILL_RANGE_LANGUAGE;
+        case SKILL_CATEGORY_LANGUAGES:
+            return SKILL_RANGE_LANGUAGE;
         case SKILL_CATEGORY_WEAPON:
             if (pSkill->id != SKILL_FIST_WEAPONS)
             {
@@ -9779,6 +9783,7 @@ void ObjectMgr::LoadTrainerTemplates()
 
     // post loading check
     std::set<uint32> trainer_ids;
+    bool hasErrored = false;
 
     for (CacheTrainerSpellMap::const_iterator tItr = m_mCacheTrainerTemplateSpellMap.begin(); tItr != m_mCacheTrainerTemplateSpellMap.end(); ++tItr)
     {
@@ -9798,6 +9803,7 @@ void ObjectMgr::LoadTrainerTemplates()
                 else
                 {
                    sLog.outErrorDb("Creature (Entry: %u) has `TrainerTemplateId` = %u for nonexistent trainer template", cInfo->Entry, cInfo->TrainerTemplateId);
+                    hasErrored = true;
                 }
             }
         }
@@ -9806,6 +9812,11 @@ void ObjectMgr::LoadTrainerTemplates()
     for (std::set<uint32>::const_iterator tItr = trainer_ids.begin(); tItr != trainer_ids.end(); ++tItr)
     {
         sLog.outErrorDb("Table `npc_trainer_template` has trainer template %u not used by any trainers ", *tItr);
+    }
+
+    if (hasErrored || !trainer_ids.empty())                 // Append extra line in case of reported errors
+    {
+        sLog.outString();
     }
 }
 

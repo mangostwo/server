@@ -251,9 +251,13 @@ void LootStore::CheckLootRefs(LootIdSet* ref_set) const
 void LootStore::ReportUnusedIds(LootIdSet const& ids_set) const
 {
     // all still listed ids isn't referenced
-    for (LootIdSet::const_iterator itr = ids_set.begin(); itr != ids_set.end(); ++itr)
+    if (!ids_set.empty())
     {
-        sLog.outErrorDb("Table '%s' entry %d isn't %s and not referenced from loot, and then useless.", GetName(), *itr, GetEntryName());
+        for (LootIdSet::const_iterator itr = ids_set.begin(); itr != ids_set.end(); ++itr)
+        {
+            sLog.outErrorDb("Table '%s' entry %d isn't %s and not referenced from loot, and then useless.", GetName(), *itr, GetEntryName());
+        }
+        sLog.outString();
     }
 }
 
@@ -323,7 +327,7 @@ bool LootStoreItem::IsValid(LootStore const& store, uint32 entry) const
             return false;
         }
 
-        if (maxcount < mincountOrRef)                       // wrong max count
+        if (maxcount < (uint32)mincountOrRef)                       // wrong max count
         {
             sLog.outErrorDb("Table '%s' entry %d item %d: max count (%u) less that min count (%i) - skipped", store.GetName(), entry, itemid, uint32(maxcount), mincountOrRef);
             return false;

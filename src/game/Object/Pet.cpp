@@ -143,7 +143,6 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
         return false;
     }
 
-
     uint32 summon_spell_id = fields[17].GetUInt32();
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(summon_spell_id);
 
@@ -2107,7 +2106,6 @@ void Pet::UpdateFreeTalentPoints(bool resetIfNeed)
         if (resetIfNeed)
         {
             Unit* owner = GetOwner();
-
             if (!owner || owner->GetTypeId() != TYPEID_PLAYER || ((Player*)owner)->GetSession()->GetSecurity() < SEC_ADMINISTRATOR)
             {
                 resetTalents(true);

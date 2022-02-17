@@ -140,7 +140,7 @@ struct MangosStringLocale
     uint32 SoundId;
     uint8  Type;
     Language LanguageId;
-    uint32 Emote;
+    uint32 Emote;                       // 0 -> default, i -> i-1 locale index
 };
 
 typedef UNORDERED_MAP<uint32, CreatureData> CreatureDataMap;

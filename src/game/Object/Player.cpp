@@ -1423,7 +1423,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
                 RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
             }
         }
-    }
+    }// Speed collect rest bonus (section/in hour)
 
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
     {
@@ -2378,7 +2378,8 @@ void Player::Regenerate(Powers power, uint32 diff)
         {
             float RunicPowerDecreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_RUNICPOWER_LOSS);
             addvalue = 30 * RunicPowerDecreaseRate;         // 3 RunicPower by tick
-        }   break;
+            break;
+        }
         case POWER_RUNE:
         {
             if (getClass() != CLASS_DEATH_KNIGHT)
@@ -2401,7 +2402,8 @@ void Player::Regenerate(Powers power, uint32 diff)
                     SetRuneCooldown(rune, (cd < cd_diff) ? 0 : cd - cd_diff);
                 }
             }
-        }   break;
+            break;
+        }
         case POWER_FOCUS:
         case POWER_HAPPINESS:
         case POWER_HEALTH:
@@ -2832,9 +2834,10 @@ void Player::GiveXP(uint32 xp, Unit* victim)
 
     uint32 level = getLevel();
 
+    // Used by Eluna
 #ifdef ENABLE_ELUNA
     sEluna->OnGiveXP(this, xp, victim);
-#endif
+#endif /* ENABLE_ELUNA */
 
     // XP to money conversion processed in Player::RewardQuest
     if (level >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
@@ -2981,16 +2984,18 @@ void Player::SetLevel(uint32 level)
 
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL);
 
+    // Used by Eluna
 #ifdef ENABLE_ELUNA
     sEluna->OnLevelChanged(this, oldLevel);
-#endif
+#endif /* ENABLE_ELUNA */
 }
 
 void Player::SetFreeTalentPoints(uint32 points)
 {
+    // Used by Eluna
 #ifdef ENABLE_ELUNA
     sEluna->OnFreeTalentPointsChanged(this, points);
-#endif
+#endif /* ENABLE_ELUNA */
     SetUInt32Value(PLAYER_CHARACTER_POINTS1, points);
 }
 
@@ -4078,19 +4083,20 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank, bo
             PlayerSpellMap::iterator prev_itr = m_spells.find(prev_id);
             if (prev_itr != m_spells.end())
             {
-                if (prev_itr->second.dependent != cur_dependent)
+                PlayerSpell& spell = prev_itr->second;
+                if (spell.dependent != cur_dependent)
                 {
-                    prev_itr->second.dependent = cur_dependent;
-                    if (prev_itr->second.state != PLAYERSPELL_NEW)
+                    spell.dependent = cur_dependent;
+                    if (spell.state != PLAYERSPELL_NEW)
                     {
-                        prev_itr->second.state = PLAYERSPELL_CHANGED;
+                        spell.state = PLAYERSPELL_CHANGED;
                     }
                 }
 
                 // now re-learn if need re-activate
-                if (cur_active && !prev_itr->second.active && learn_low_rank)
+                if (cur_active && !spell.active && learn_low_rank)
                 {
-                    if (addSpell(prev_id, true, false, prev_itr->second.dependent, prev_itr->second.disabled))
+                    if (addSpell(prev_id, true, false, spell.dependent, spell.disabled))
                     {
                         // downgrade spell ranks in spellbook and action bar
                         WorldPacket data(SMSG_SUPERCEDED_SPELL, 4 + 4);
@@ -4317,9 +4323,10 @@ uint32 Player::resetTalentsCost() const
 
 bool Player::resetTalents(bool no_cost, bool all_specs)
 {
+    // Used by Eluna
 #ifdef ENABLE_ELUNA
     sEluna->OnTalentsReset(this, no_cost);
-#endif
+#endif /* ENABLE_ELUNA */
 
     // not need after this call
     if (HasAtLoginFlag(AT_LOGIN_RESET_TALENTS) && all_specs)
@@ -5250,7 +5257,7 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
 
 #ifdef ENABLE_ELUNA
     sEluna->OnResurrect(this);
-#endif
+#endif /* ENABLE_ELUNA */
 
     if (!applySickness)
     {
@@ -9951,7 +9958,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
     size_t count_pos = data.wpos();
     data << uint16(0);                                      // count of uint64 blocks, placeholder
 
-    // Current arena seaso
+    // Current arena season
     FillInitialWorldState(data, count, 0xC77, sWorld.getConfig(CONFIG_UINT32_ARENA_SEASON_ID));
     // Previous arena season
     FillInitialWorldState(data, count, 0xF3D, sWorld.getConfig(CONFIG_UINT32_ARENA_SEASON_PREVIOUS_ID));
@@ -9995,7 +10002,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             {
                 bg->FillInitialWorldStates(data, count);
             }
-           break;
+            break;
         case 3820:                                          // EY
             if (bg && bg->GetTypeID(true) == BATTLEGROUND_EY)
             {
@@ -10210,13 +10217,13 @@ uint8 Player::FindEquipSlot(ItemPrototype const* proto, uint32 slot, bool swap) 
             slots[0] = EQUIPMENT_SLOT_MAINHAND;
 
             // suggest offhand slot only if know dual wielding
-            // (this will be replace mainhand weapon at auto equip instead unwonted "you don't known dual wielding" ...
+            // (this will be replace mainhand weapon at auto equip instead unwanted "you don't known dual wielding" ...
             if (CanDualWield())
             {
                 slots[1] = EQUIPMENT_SLOT_OFFHAND;
             }
             break;
-        };
+        }
         case INVTYPE_SHIELD:
             slots[0] = EQUIPMENT_SLOT_OFFHAND;
             break;
@@ -13226,9 +13233,10 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
 
         ApplyEquipCooldown(pItem2);
 
+        // Used by Eluna
 #ifdef ENABLE_ELUNA
         sEluna->OnEquip(this, pItem2, bag, slot);
-#endif
+#endif /* ENABLE_ELUNA */
 
         return pItem2;
     }
@@ -13241,10 +13249,10 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
     // only for full equip instead adding to stack
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_ITEM, pItem->GetEntry());
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_EPIC_ITEM, slot + 1);
-
+    // Used by Eluna
 #ifdef ENABLE_ELUNA
     sEluna->OnEquip(this, pItem, bag, slot);
-#endif
+#endif /* ENABLE_ELUNA */
 
     return pItem;
 }
@@ -15908,10 +15916,10 @@ bool Player::CanCompleteQuest(uint32 quest_id) const
     {
         // a few checks, not all "satisfy" is needed
         if (SatisfyQuestPreviousQuest(qInfo, false) && SatisfyQuestLevel(qInfo, false) &&
-            SatisfyQuestSkill(qInfo, false) && SatisfyQuestRace(qInfo, false) && SatisfyQuestClass(qInfo, false))
-            {
-                return true;
-            }
+                SatisfyQuestSkill(qInfo, false) && SatisfyQuestRace(qInfo, false) && SatisfyQuestClass(qInfo, false))
+        {
+            return true;
+        }
 
         return false;
     }
@@ -15995,11 +16003,16 @@ bool Player::CanCompleteRepeatableQuest(Quest const* pQuest) const
     }
 
     if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAG_DELIVER))
+    {
         for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
+        {
             if (pQuest->ReqItemId[i] && pQuest->ReqItemCount[i] && !HasItemCount(pQuest->ReqItemId[i], pQuest->ReqItemCount[i]))
             {
                 return false;
             }
+        }
+
+    }
 
     if (!CanRewardQuest(pQuest, false))
     {
@@ -16846,7 +16859,7 @@ bool Player::SatisfyQuestExclusiveGroup(Quest const* qInfo, bool msg) const
 
         // alternative quest already started or completed
         if (i_exstatus != mQuestStatus.end() &&
-            (i_exstatus->second.m_status == QUEST_STATUS_COMPLETE || i_exstatus->second.m_status == QUEST_STATUS_INCOMPLETE))
+           (i_exstatus->second.m_status == QUEST_STATUS_COMPLETE || i_exstatus->second.m_status == QUEST_STATUS_INCOMPLETE))
         {
             if (msg)
             {
@@ -16870,7 +16883,7 @@ bool Player::SatisfyQuestNextChain(Quest const* qInfo, bool msg) const
     // next quest in chain already started or completed
     QuestStatusMap::const_iterator itr = mQuestStatus.find(qInfo->GetNextQuestInChain());
     if (itr != mQuestStatus.end() &&
-        (itr->second.m_status == QUEST_STATUS_COMPLETE || itr->second.m_status == QUEST_STATUS_INCOMPLETE))
+       (itr->second.m_status == QUEST_STATUS_COMPLETE || itr->second.m_status == QUEST_STATUS_INCOMPLETE))
     {
         if (msg)
         {
@@ -17336,6 +17349,7 @@ void Player::ItemRemovedQuestCheck(uint32 entry, uint32 count)
             }
         }
     }
+
     UpdateForQuestWorldObjects();
 }
 
@@ -18889,6 +18903,7 @@ void Player::_LoadGlyphs(QueryResult* result)
         if (!gp)
         {
             sLog.outError("Player %s has not existing glyph entry %u on index %u, spec %u", m_name.c_str(), glyph, slot, spec);
+            CharacterDatabase.PExecute("DELETE FROM `character_glyphs` WHERE `glyph` = %u", glyph);
             continue;
         }
 
@@ -18896,12 +18911,14 @@ void Player::_LoadGlyphs(QueryResult* result)
         if (!gs)
         {
             sLog.outError("Player %s has not existing glyph slot entry %u on index %u, spec %u", m_name.c_str(), GetGlyphSlot(slot), slot, spec);
+            CharacterDatabase.PExecute("DELETE FROM `character_glyphs` WHERE `slot` = %u AND `spec` = %u AND `guid` = %u", slot, spec, GetGUIDLow());
             continue;
         }
 
         if (gp->TypeFlags != gs->TypeFlags)
         {
             sLog.outError("Player %s has glyph with typeflags %u in slot with typeflags %u, removing.", m_name.c_str(), gp->TypeFlags, gs->TypeFlags);
+            CharacterDatabase.PExecute("DELETE FROM `character_glyphs` WHERE `slot` = %u AND `spec` = %u AND `guid` = %u", slot, spec, GetGUIDLow());
             continue;
         }
 
@@ -20348,7 +20365,7 @@ void Player::_SaveAuras()
         bool selfCastHolder = holder->GetCasterGuid() == GetObjectGuid();
         TrackedAuraType trackedType = holder->GetTrackedAuraType();
         if (!holder->IsPassive() && !IsChanneledSpell(holder->GetSpellProto()) &&
-            (trackedType == TRACK_AURA_TYPE_NOT_TRACKED || (trackedType == TRACK_AURA_TYPE_SINGLE_TARGET && selfCastHolder)))
+           (trackedType == TRACK_AURA_TYPE_NOT_TRACKED || (trackedType == TRACK_AURA_TYPE_SINGLE_TARGET && selfCastHolder)))
         {
             int32  damage[MAX_EFFECT_INDEX];
             uint32 periodicTime[MAX_EFFECT_INDEX];
@@ -23637,6 +23654,7 @@ void Player::learnQuestRewardedSpells(Quest const* quest)
 
     // prevent learn non first rank unknown profession and second specialization for same profession)
     uint32 learned_0 = spellInfo->EffectTriggerSpell[EFFECT_INDEX_0];
+
     if (sSpellMgr.GetSpellRank(learned_0) > 1 && !HasSpell(learned_0))
     {
         // not have first rank learned (unlearned prof?)
@@ -23758,10 +23776,15 @@ void Player::learnSkillRewardedSpells(uint32 skill_id, uint32 skill_value)
 
 void Player::SendAurasForTarget(Unit* target)
 {
+    Unit::VisibleAuraMap const& visibleAuras = target->GetVisibleAuras();
+    if (visibleAuras.empty())
+    {
+        return;
+    }
+
     WorldPacket data(SMSG_AURA_UPDATE_ALL);
     data << target->GetPackGUID();
 
-    Unit::VisibleAuraMap const& visibleAuras = target->GetVisibleAuras();
     for (Unit::VisibleAuraMap::const_iterator itr = visibleAuras.begin(); itr != visibleAuras.end(); ++itr)
     {
         SpellAuraHolderConstBounds bounds = target->GetSpellAuraHolderBounds(itr->second);
@@ -23931,8 +23954,8 @@ bool Player::IsSpellFitByClassAndRace(uint32 spell_id, uint32* pReqlevel /*= NUL
             continue;
         }
 
-        SkillRaceClassInfoMapBounds bounds = sSpellMgr.GetSkillRaceClassInfoMapBounds(abilityEntry->skillId);
-        for (SkillRaceClassInfoMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
+        SkillRaceClassInfoMapBounds raceBounds = sSpellMgr.GetSkillRaceClassInfoMapBounds(abilityEntry->skillId);
+        for (SkillRaceClassInfoMap::const_iterator itr = raceBounds.first; itr != raceBounds.second; ++itr)
         {
             SkillRaceClassInfoEntry const* skillRCEntry = itr->second;
             if ((skillRCEntry->raceMask & racemask) && (skillRCEntry->classMask & classmask))
@@ -24323,11 +24346,11 @@ bool Player::isHonorOrXPTarget(Unit* pVictim) const
     {
         Creature* pVictimAsCreature = reinterpret_cast<Creature*>(pVictim);
         if (pVictimAsCreature->IsTotem() ||
-                pVictimAsCreature->IsPet() ||
-                pVictimAsCreature->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_NO_XP_AT_KILL)
-                {
-                    return false;
-                }
+            pVictimAsCreature->IsPet() ||
+            pVictimAsCreature->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_NO_XP_AT_KILL)
+        {
+            return false;
+        }
     }
     return true;
 }
@@ -26725,6 +26748,7 @@ bool Player::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex
         default:
             break;
     }
+
     return Unit::IsImmuneToSpellEffect(spellInfo, index, castOnSelf);
 }
 
@@ -27220,7 +27244,7 @@ float Player::GetCollisionHeight(bool mounted) const
         }
 
         CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
-        if(!modelData)
+        if (!modelData)
         {
             sLog.outError("GetCollisionHeight::Unable to find CreatureModelDataEntry for %u", displayInfo->ModelId);
             return 0;
@@ -27234,14 +27258,14 @@ float Player::GetCollisionHeight(bool mounted) const
     {
         // use native model collision height in dismounted case
         CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(GetNativeDisplayId());
-        if(!displayInfo)
+        if (!displayInfo)
         {
             sLog.outError("GetCollisionHeight::Unable to find CreatureDisplayInfoEntry for %u", GetNativeDisplayId());
             return 0;
         }
 
         CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
-        if(!modelData)
+        if (!modelData)
         {
             sLog.outError("GetCollisionHeight::Unable to find CreatureModelDataEntry for %u", displayInfo->ModelId);
             return 0;
