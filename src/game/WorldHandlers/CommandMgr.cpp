@@ -70,7 +70,7 @@ void CommandMgr::LoadCommandHelpLocale()
         uint32 commandId = fields[0].GetUInt32(); // to assign with db data
 
         CommandHelpLocale& data = m_CommandHelpLocaleMap[commandId];
-        for (int i = 1; i < MAX_LOCALE; ++i)
+        for (int i = 1; i <= MAX_LOCALE; ++i)
         {
             std::string str = fields[i].GetCppString();
             if (!str.empty())
