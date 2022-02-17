@@ -129,9 +129,11 @@ Group::~Group()
     // will be unloaded first so we must be prepared for both cases
     // this may unload some dungeon persistent state
     for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
-    for (BoundInstancesMap::iterator itr2 = m_boundInstances[i].begin(); itr2 != m_boundInstances[i].end(); ++itr2)
     {
-        itr2->second.state->RemoveGroup(this);
+        for (BoundInstancesMap::iterator itr2 = m_boundInstances[i].begin(); itr2 != m_boundInstances[i].end(); ++itr2)
+        {
+            itr2->second.state->RemoveGroup(this);
+        }
     }
 
     // Sub group counters clean up
@@ -973,7 +975,6 @@ void Group::EndRoll()
 void Group::CountTheRoll(Rolls::iterator& rollI)
 {
     Roll* roll = *rollI;
-
 
     if (!roll->isValid())                                   // is loot already deleted ?
     {
