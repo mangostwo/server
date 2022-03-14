@@ -34,6 +34,7 @@ char const* localeNames[MAX_LOCALE] =
     "zhTW",
     "esES",
     "esMX",
+    "ruMX",
 };
 
 // used for search by name or iterate all names
