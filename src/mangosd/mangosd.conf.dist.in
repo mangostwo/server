@@ -676,6 +676,10 @@ SD3ErrorLogFile              = "scriptdev3-errors.log"
 #        Default: 0 (not allowed)
 #                 1 (allowed)
 #
+#    Guild.PetitionCost
+#        The cost for guild petition charter (in copper)
+#        Default: 1000 (10 silver)
+#
 #    Guild.EventLogRecordsCount
 #        Count of guild event log records stored in guild_eventlog table
 #        Increase to store more guild events in table, minimum is 100
@@ -867,6 +871,7 @@ Quests.Daily.ResetHour                    = 6
 Quests.Weekly.ResetWeekDay                = 3
 Quests.Weekly.ResetHour                   = 6
 Quests.IgnoreRaid                         = 0
+Guild.PetitionCost                        = 1000
 Guild.EventLogRecordsCount                = 100
 Guild.BankEventLogRecordsCount            = 25
 TimerBar.Fatigue.GMLevel                  = 4
