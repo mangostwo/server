@@ -1008,50 +1008,55 @@ void WorldSession::SendPetitionShowList(ObjectGuid guid)
     }
 
     WorldPacket data(SMSG_PETITION_SHOWLIST, 8 + 1 + 4 * 6);
-    data << ObjectGuid(guid);                               // npc guid
-    data << uint8(count);                                   // count
-    if (count == 1)
+    data << guid;                           // npc guid
+
+    if (pCreature->IsTabardDesigner())
     {
-        data << uint32(1);                                  // index
-        data << uint32(GUILD_CHARTER);                      // charter entry
-        data << uint32(CHARTER_DISPLAY_ID);                 // charter display id
-        data << uint32(GUILD_CHARTER_COST);                 // charter cost
-        data << uint32(0);                                  // unknown
-        data << uint32(9);                                  // required signs?
+        data << uint8(1);                   // count
+        data << uint32(1);                  // index
+        data << uint32(GUILD_CHARTER);      // charter entry
+        data << uint32(CHARTER_DISPLAY_ID); // charter display id
+        data << uint32(GUILD_CHARTER_COST); // charter cost
+        data << uint32(0);                  // unknown
+        data << uint32(4);                  // required signs
     }
     else
     {
-        // 2v2
-        data << uint32(1);                                  // index
-        data << uint32(ARENA_TEAM_CHARTER_2v2);             // charter entry
-        data << uint32(CHARTER_DISPLAY_ID);                 // charter display id
-        data << uint32(ARENA_TEAM_CHARTER_2v2_COST);        // charter cost
-        data << uint32(2);                                  // unknown
-        data << uint32(2);                                  // required signs?
-        // 3v3
-        data << uint32(2);                                  // index
-        data << uint32(ARENA_TEAM_CHARTER_3v3);             // charter entry
-        data << uint32(CHARTER_DISPLAY_ID);                 // charter display id
-        data << uint32(ARENA_TEAM_CHARTER_3v3_COST);        // charter cost
-        data << uint32(3);                                  // unknown
-        data << uint32(3);                                  // required signs?
-        // 5v5
-        data << uint32(3);                                  // index
-        data << uint32(ARENA_TEAM_CHARTER_5v5);             // charter entry
-        data << uint32(CHARTER_DISPLAY_ID);                 // charter display id
-        data << uint32(ARENA_TEAM_CHARTER_5v5_COST);        // charter cost
-        data << uint32(5);                                  // unknown
-        data << uint32(5);                                  // required signs?
+        data << uint8(count);                                   // count
+        if (count == 1)
+        {
+            data << uint32(1);                                  // index
+            data << uint32(GUILD_CHARTER);                      // charter entry
+            data << uint32(CHARTER_DISPLAY_ID);                 // charter display id
+            data << uint32(GUILD_CHARTER_COST);                 // charter cost
+            data << uint32(0);                                  // unknown
+            data << uint32(9);                                  // required signs?
+        }
+        else
+        {
+            // 2v2
+            data << uint32(1);                                  // index
+            data << uint32(ARENA_TEAM_CHARTER_2v2);             // charter entry
+            data << uint32(CHARTER_DISPLAY_ID);                 // charter display id
+            data << uint32(ARENA_TEAM_CHARTER_2v2_COST);        // charter cost
+            data << uint32(2);                                  // unknown
+            data << uint32(2);                                  // required signs?
+            // 3v3
+            data << uint32(2);                                  // index
+            data << uint32(ARENA_TEAM_CHARTER_3v3);             // charter entry
+            data << uint32(CHARTER_DISPLAY_ID);                 // charter display id
+            data << uint32(ARENA_TEAM_CHARTER_3v3_COST);        // charter cost
+            data << uint32(3);                                  // unknown
+            data << uint32(3);                                  // required signs?
+            // 5v5
+            data << uint32(3);                                  // index
+            data << uint32(ARENA_TEAM_CHARTER_5v5);             // charter entry
+            data << uint32(CHARTER_DISPLAY_ID);                 // charter display id
+            data << uint32(ARENA_TEAM_CHARTER_5v5_COST);        // charter cost
+            data << uint32(5);                                  // unknown
+            data << uint32(5);                                  // required signs?
+        }
     }
-    // for(uint8 i = 0; i < count; ++i)
-    //{
-    //    data << uint32(i);                        // index
-    //    data << uint32(GUILD_CHARTER);            // charter entry
-    //    data << uint32(CHARTER_DISPLAY_ID);       // charter display id
-    //    data << uint32(GUILD_CHARTER_COST+i);     // charter cost
-    //    data << uint32(0);                        // unknown
-    //    data << uint32(9);                        // required signs?
-    //}
     SendPacket(&data);
     DEBUG_LOG("Sent SMSG_PETITION_SHOWLIST");
 }
