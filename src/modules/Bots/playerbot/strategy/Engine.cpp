@@ -513,7 +513,10 @@ void Engine::LogAction(const char* format, ...)
 
     va_list ap;
     va_start(ap, format);
-    vsprintf(buf, format, ap);
+    if (sizeof(buf) <= 1024)
+    {
+        vsprintf(buf, format, ap);
+    }
     va_end(ap);
     lastAction = buf;
 
