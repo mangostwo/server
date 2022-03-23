@@ -2575,7 +2575,7 @@ class Player : public Unit
         MapReference& GetMapRef() { return m_mapRef; }
 
         bool isAllowedToLoot(Creature* creature);
-        
+
 #ifdef ENABLE_PLAYERBOTS
         //EquipmentSets& GetEquipmentSets() { return m_EquipmentSets; }
         void SetPlayerbotAI(PlayerbotAI* ai) { assert(!m_playerbotAI && !m_playerbotMgr); m_playerbotAI = ai; }

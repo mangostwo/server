@@ -49,12 +49,12 @@ bool BuyAction::Execute(Event event)
         {
             if (tItems->GetItem(slot)->item == *i)
             {
-                bot->BuyItemFromVendor(vendorguid, *i, 1, NULL_BAG, NULL_SLOT);
+                // bot->BuyItemFromVendor(vendorguid, *i, 1, NULL_BAG, NULL_SLOT);
+                bot->BuyItemFromVendorSlot(vendorguid, slot, *i, 1, NULL_BAG, NULL_SLOT);
                 ai->TellMaster("Bought item");
             }
         }
     }
-BuyAction.cpp:(.text+0x247): undefined reference to `Player::BuyItemFromVendor(ObjectGuid, unsigned int, unsigned char, unsigned char, unsigned char)'
 
     return true;
 }
