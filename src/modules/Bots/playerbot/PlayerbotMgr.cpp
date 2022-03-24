@@ -127,8 +127,18 @@ void PlayerbotHolder::OnBotLogin(Player * const bot)
 
 bool PlayerbotHolder::ProcessBotCommand(string cmd, ObjectGuid guid, bool admin, uint32 masterAccountId)
 {
-    if (!sPlayerbotAIConfig.enabled || guid.IsEmpty())
+    // if (!sPlayerbotAIConfig.enabled || guid.IsEmpty())
+    // {
+    //     return false;
+    // }
+    if (!sPlayerbotAIConfig.enabled)
     {
+        sLog.outError("AI Config is not enabled.");
+        return false;
+    }
+    if (guid.IsEmpty())
+    {
+        sLog.outError("gUID is empty.");
         return false;
     }
 

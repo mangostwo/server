@@ -581,6 +581,24 @@ set(BOT_SRCS
     playerbot/strategy/warrior/WarriorMultipliers.h
     playerbot/strategy/warrior/WarriorTriggers.cpp
     playerbot/strategy/warrior/WarriorTriggers.h
+    playerbot/strategy/deathknight/BloodDKStrategy.cpp
+    playerbot/strategy/deathknight/BloodDKStrategy.h
+    playerbot/strategy/deathknight/DKActions.cpp
+    playerbot/strategy/deathknight/DKActions.h
+    playerbot/strategy/deathknight/DKAiObjectContext.cpp
+    playerbot/strategy/deathknight/DKAiObjectContext.h
+    playerbot/strategy/deathknight/DKMultipliers.cpp
+    playerbot/strategy/deathknight/DKMultipliers.h
+    playerbot/strategy/deathknight/DKTriggers.cpp
+    playerbot/strategy/deathknight/DKTriggers.h
+    playerbot/strategy/deathknight/FrostDKStrategy.cpp
+    playerbot/strategy/deathknight/FrostDKStrategy.h
+    playerbot/strategy/deathknight/GenericDKNonCombatStrategy.cpp
+    playerbot/strategy/deathknight/GenericDKNonCombatStrategy.h
+    playerbot/strategy/deathknight/GenericDKStrategy.cpp
+    playerbot/strategy/deathknight/GenericDKStrategy.h
+    playerbot/strategy/deathknight/UnholyDKStrategy.cpp
+    playerbot/strategy/deathknight/UnholyDKStrategy.h
 )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/playerbot FILES ${BOT_SRCS})

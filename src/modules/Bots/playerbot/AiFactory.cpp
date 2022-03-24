@@ -12,6 +12,7 @@
 #include "strategy/druid/DruidAiObjectContext.h"
 #include "strategy/hunter/HunterAiObjectContext.h"
 #include "strategy/rogue/RogueAiObjectContext.h"
+#include "strategy/deathknight/DKAiObjectContext.h"
 #include "Player.h"
 #include "PlayerbotAIConfig.h"
 #include "RandomPlayerbotMgr.h"
@@ -48,6 +49,10 @@ AiObjectContext* AiFactory::createAiObjectContext(Player* player, PlayerbotAI* a
     case CLASS_ROGUE:
         return new RogueAiObjectContext(ai);
         break;
+    /* TODO: Implement DK AI */
+    // case CLASS_DEATH_KNIGHT:
+    //     return new DKAiObjectContext(ai);
+    //     break;
     }
     return new AiObjectContext(ai);
 }
@@ -234,6 +239,21 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
             }
 
             engine->addStrategy("flee");
+            break;
+        case CLASS_DEATH_KNIGHT:
+            if (tab == 0)
+            {
+                engine->addStrategies("blood", NULL);
+            }
+            else if (tab == 1)
+            {
+                engine->addStrategies("frost", "frost aoe", "dps assist", "threat", NULL);
+            }
+            else
+            {
+                engine->addStrategies("frost", "frost aoe", "dps assist", "threat", NULL);
+            }
+            engine->addStrategies("dps assist", "flee", "close", "cc", NULL);
             break;
     }
 

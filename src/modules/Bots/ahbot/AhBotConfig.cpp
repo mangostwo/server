@@ -29,9 +29,13 @@ void LoadSet(string value, T &res)
 
 bool AhBotConfig::Initialize()
 {
-    if (!config.SetSource(AUCTIONHOUSEBOT_CONFIG_NAME))
+    sLog.outString("Initializing AhBot by ike3, based on the original Playerbot by blueboy");
+
+    const char* cfg_file = SYSCONFDIR"ahbot.conf";
+
+    if (!config.SetSource(cfg_file))
     {
-        sLog.outString("AhBot is Disabled. Unable to open configuration file ahbot.conf");
+        sLog.outString("AhBot is Disabled in %s", cfg_file);
         return false;
     }
 

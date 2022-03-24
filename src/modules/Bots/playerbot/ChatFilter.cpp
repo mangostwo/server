@@ -230,7 +230,7 @@ class ClassChatFilter : public ChatFilter
 public:
     ClassChatFilter(PlayerbotAI* ai) : ChatFilter(ai)
     {
-        //classNames["@death_knight"] = CLASS_DEATH_KNIGHT;
+        classNames["@death_knight"] = CLASS_DEATH_KNIGHT;
         classNames["@druid"] = CLASS_DRUID;
         classNames["@hunter"] = CLASS_HUNTER;
         classNames["@mage"] = CLASS_MAGE;

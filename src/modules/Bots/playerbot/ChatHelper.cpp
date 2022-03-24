@@ -139,6 +139,11 @@ ChatHelper::ChatHelper(PlayerbotAI* ai) : PlayerbotAIAware(ai)
     specs[CLASS_WARRIOR][1] = "fury";
     specs[CLASS_WARRIOR][2] = "protection";
 
+    classes[CLASS_DEATH_KNIGHT] = "dk";
+    specs[CLASS_DEATH_KNIGHT][0] = "blood";
+    specs[CLASS_DEATH_KNIGHT][1] = "frost";
+    specs[CLASS_DEATH_KNIGHT][2] = "unholy";
+
     races[RACE_DWARF] = "Dwarf";
     races[RACE_GNOME] = "Gnome";
     races[RACE_HUMAN] = "Human";
@@ -147,6 +152,8 @@ ChatHelper::ChatHelper(PlayerbotAI* ai) : PlayerbotAIAware(ai)
     races[RACE_TAUREN] = "Tauren";
     races[RACE_TROLL] = "Troll";
     races[RACE_UNDEAD] = "Undead";
+    races[RACE_BLOODELF] = "Blood Elf";
+    races[RACE_DRAENEI] = "Draenei";
 }
 
 string ChatHelper::formatMoney(uint32 copper)

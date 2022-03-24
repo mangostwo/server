@@ -207,7 +207,7 @@ class CharacterHandler
             // The bot's WorldSession is owned by the bot's Player object
             // The bot's WorldSession is deleted by PlayerbotMgr::LogoutPlayerBot
             uint32 botAccountId = lqh->GetAccountId();
-            WorldSession *botSession = new WorldSession(botAccountId, NULL, SEC_PLAYER, masterSession->Expansion(), 0, LOCALE_enUS);
+            WorldSession *botSession = new WorldSession(botAccountId, NULL, SEC_PLAYER, 2, 0, LOCALE_enUS);
             botSession->m_Address = "bot";
             botSession->HandlePlayerLogin(lqh); // will delete lqh
             Player* bot = botSession->GetPlayer();
