@@ -875,6 +875,16 @@ void RandomPlayerbotMgr::PrintStats()
                 dps++;
             }
             break;
+        case CLASS_DEATH_KNIGHT:
+            if (spec == 0)
+            {
+                tank++;
+            }
+            else
+            {
+                dps++;
+            }
+            break;
         default:
             dps++;
             break;

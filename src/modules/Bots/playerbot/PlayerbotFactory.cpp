@@ -400,6 +400,12 @@ bool PlayerbotFactory::CheckItemStats(uint8 sp, uint8 ap, uint8 tank)
             return false;
         }
         break;
+    case CLASS_DEATH_KNIGHT:
+        if((!ap && !tank) || sp > ap || sp > tank)
+        {
+            return false;
+        }
+        break;
     }
 
     return sp || ap || tank;
@@ -547,6 +553,15 @@ bool PlayerbotFactory::CanEquipWeapon(ItemPrototype const* proto)
                 proto->SubClass != ITEM_SUBCLASS_WEAPON_BOW &&
                 proto->SubClass != ITEM_SUBCLASS_WEAPON_THROWN)
             return false;
+        break;
+    case CLASS_DEATH_KNIGHT:
+        if (proto->SubClass != ITEM_SUBCLASS_WEAPON_MACE2 &&
+            proto->SubClass != ITEM_SUBCLASS_WEAPON_POLEARM &&
+            proto->SubClass != ITEM_SUBCLASS_WEAPON_SWORD2 &&
+            proto->SubClass != ITEM_SUBCLASS_WEAPON_AXE2)
+        {
+            return false;
+        }
         break;
     }
 
@@ -1052,6 +1067,7 @@ void PlayerbotFactory::InitTradeSkills()
     {
     case CLASS_WARRIOR:
     case CLASS_PALADIN:
+    case CLASS_DEATH_KNIGHT:
         firstSkills.push_back(SKILL_MINING);
         secondSkills.push_back(SKILL_BLACKSMITHING);
         secondSkills.push_back(SKILL_ENGINEERING);
@@ -1148,7 +1164,7 @@ void PlayerbotFactory::InitSkills()
     uint32 skillLevel = bot->getLevel() < 40 ? 0 : 1;
     switch (bot->getClass())
     {
-    //case CLASS_DEATH_KNIGHT:
+    case CLASS_DEATH_KNIGHT:
     case CLASS_WARRIOR:
     case CLASS_PALADIN:
         bot->SetSkill(SKILL_PLATE_MAIL, skillLevel, skillLevel);

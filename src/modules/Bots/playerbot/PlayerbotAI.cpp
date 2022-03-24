@@ -189,7 +189,7 @@ void PlayerbotAI::HandleTeleportAck()
     if (bot->IsBeingTeleportedNear())
     {
         WorldPacket p = WorldPacket(MSG_MOVE_TELEPORT_ACK, 8 + 4 + 4);
-        p << bot->GetObjectGuid();
+        p << bot->GetObjectGuid().WriteAsPacked();
         p << (uint32)0; // supposed to be flags? not used currently
         p << (uint32)time(0); // time - not currently used
         bot->GetSession()->HandleMoveTeleportAckOpcode(p);
@@ -583,7 +583,7 @@ bool PlayerbotAI::IsRanged(Player* player)
 
     switch (player->getClass())
     {
-    //case CLASS_DEATH_KNIGHT:
+    case CLASS_DEATH_KNIGHT:
     case CLASS_PALADIN:
     case CLASS_WARRIOR:
     case CLASS_ROGUE:
@@ -604,7 +604,7 @@ bool PlayerbotAI::IsTank(Player* player)
 
     switch (player->getClass())
     {
-    //case CLASS_DEATH_KNIGHT:
+    case CLASS_DEATH_KNIGHT:
     case CLASS_PALADIN:
     case CLASS_WARRIOR:
         return true;
@@ -1165,7 +1165,6 @@ void PlayerbotAI::InterruptSpell()
 
     SpellInterrupted(lastSpell.id);
 }
-
 
 void PlayerbotAI::RemoveAura(string name)
 {
