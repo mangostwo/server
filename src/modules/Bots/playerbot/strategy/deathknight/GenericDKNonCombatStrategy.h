@@ -1,5 +1,7 @@
 #pragma once
 
+#include <list>
+#include <string>
 #include "GenericDKStrategy.h"
 #include "../generic/NonCombatStrategy.h"
 
