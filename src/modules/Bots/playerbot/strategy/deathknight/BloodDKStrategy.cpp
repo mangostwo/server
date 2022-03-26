@@ -53,7 +53,6 @@ private:
             /*A*/ NULL,
             /*C*/ NULL);
     }
-    
 };
 
 BloodDKStrategy::BloodDKStrategy(PlayerbotAI* ai) : GenericDKStrategy(ai)
@@ -94,7 +93,4 @@ triggers.push_back(new TriggerNode(
         new NextAction("blood tap", ACTION_HIGH + 5),
         new NextAction("vampiric blood", ACTION_HIGH + 3),
         new NextAction("death strike", ACTION_HIGH + 4), NULL)));
-
-
-
 }

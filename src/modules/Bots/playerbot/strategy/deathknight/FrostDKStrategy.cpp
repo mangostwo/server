@@ -30,49 +30,47 @@ public:
     }
 
     private:
-        
-        
         static ActionNode* obliterate(PlayerbotAI* ai)
         {
-        return new ActionNode("obliterate",
+            return new ActionNode("obliterate",
             /*P*/ NextAction::array(0, new NextAction("blood presence"), NULL),
             /*A*/ NextAction::array(0, new NextAction("frost strike"), NULL),
             /*C*/ NULL);
         }
         static ActionNode* rune_strike(PlayerbotAI* ai)
         {
-        return new ActionNode("rune strike",
+            return new ActionNode("rune strike",
             /*P*/ NextAction::array(0, new NextAction("blood presence"), NULL),
             /*A*/ NextAction::array(0, new NextAction("melee"), NULL),
             /*C*/ NULL);
         }
         static ActionNode* frost_strike(PlayerbotAI* ai)
         {
-        return new ActionNode("frost strike",
+            return new ActionNode("frost strike",
             /*P*/ NextAction::array(0, new NextAction("blood presence"), NULL),
             /*A*/ NULL,
             /*C*/ NULL);
         }
         static ActionNode* howling_blast(PlayerbotAI* ai)
         {
-        return new ActionNode("howling blast",
+            return new ActionNode("howling blast",
             /*P*/ NextAction::array(0, new NextAction("blood presence"), NULL),
             /*A*/ NextAction::array(0, new NextAction("icy touch"), NULL),
-            /*C*/ NULL);    
+            /*C*/ NULL);
         }
 };
 
-    FrostDKStrategy::FrostDKStrategy(PlayerbotAI* ai) : GenericDKStrategy(ai)
-    {
+FrostDKStrategy::FrostDKStrategy(PlayerbotAI* ai) : GenericDKStrategy(ai)
+{
     actionNodeFactories.Add(new FrostDKStrategyActionNodeFactory());
-    }
+}
 
 
-    NextAction** FrostDKStrategy::getDefaultActions()
-    {
+NextAction** FrostDKStrategy::getDefaultActions()
+{
     return NextAction::array(0, new NextAction("melee", ACTION_NORMAL), new NextAction("frost strike", ACTION_NORMAL + 5),
         new NextAction("obliterate", ACTION_NORMAL + 4), NULL);
-    }
+}
 
 void FrostDKStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 {

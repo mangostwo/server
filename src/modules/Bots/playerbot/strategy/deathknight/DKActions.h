@@ -4,22 +4,26 @@
 
 namespace ai
 {
-    class CastBloodPresenceAction : public CastBuffSpellAction {
+    class CastBloodPresenceAction : public CastBuffSpellAction
+    {
     public:
         CastBloodPresenceAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "blood presence") {}
     };
 
-    class CastFrostPresenceAction : public CastBuffSpellAction {
+    class CastFrostPresenceAction : public CastBuffSpellAction
+    {
     public:
         CastFrostPresenceAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "frost presence") {}
     };
 
-    class CastUnholyPresenceAction : public CastBuffSpellAction {
+    class CastUnholyPresenceAction : public CastBuffSpellAction
+    {
     public:
         CastUnholyPresenceAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "unholy presence") {}
     };
 
-    class CastDeathchillAction : public CastBuffSpellAction {
+    class CastDeathchillAction : public CastBuffSpellAction
+    {
     public:
         CastDeathchillAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "deathchill") {}
         virtual NextAction** getPrerequisites() {
@@ -27,7 +31,8 @@ namespace ai
         }
     };
 
-    class CastDarkCommandAction : public CastBuffSpellAction {
+    class CastDarkCommandAction : public CastBuffSpellAction
+    {
     public:
         CastDarkCommandAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "dark command") {}
         virtual NextAction** getPrerequisites() {
@@ -49,7 +54,8 @@ namespace ai
 
 
     // Frost presence
-    class CastFrostMeleeSpellAction : public CastMeleeSpellAction {
+    class CastFrostMeleeSpellAction : public CastMeleeSpellAction
+    {
     public:
         CastFrostMeleeSpellAction(PlayerbotAI* ai, string spell) : CastMeleeSpellAction(ai, spell) {}
         virtual NextAction** getPrerequisites() {
@@ -58,15 +64,17 @@ namespace ai
     };
 
     // Blood presence
-    class CastBloodMeleeSpellAction : public CastMeleeSpellAction {
+    class CastBloodMeleeSpellAction : public CastMeleeSpellAction
+    {
     public:
         CastBloodMeleeSpellAction(PlayerbotAI* ai, string spell) : CastMeleeSpellAction(ai, spell) {}
         virtual NextAction** getPrerequisites() {
             return NextAction::merge(NextAction::array(0, new NextAction("blood presence"), NULL), CastMeleeSpellAction::getPrerequisites());
         }
     };
-        // a
-    class CastRuneStrikeAction : public CastMeleeSpellAction {
+    // a
+    class CastRuneStrikeAction : public CastMeleeSpellAction
+    {
     public:
     CastRuneStrikeAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "rune strike") {}
     };
@@ -83,7 +91,7 @@ namespace ai
     END_SPELL_ACTION()
 
 
-        class CastIcyTouchOnAttackerAction : public CastDebuffSpellOnAttackerAction
+    class CastIcyTouchOnAttackerAction : public CastDebuffSpellOnAttackerAction
     {
     public:
         CastIcyTouchOnAttackerAction(PlayerbotAI* ai) : CastDebuffSpellOnAttackerAction(ai, "icy touch") {}
@@ -94,7 +102,7 @@ namespace ai
     END_SPELL_ACTION()
 
 
-        class CastPlagueStrikeOnAttackerAction : public CastDebuffSpellOnAttackerAction
+    class CastPlagueStrikeOnAttackerAction : public CastDebuffSpellOnAttackerAction
     {
     public:
         CastPlagueStrikeOnAttackerAction(PlayerbotAI* ai) : CastDebuffSpellOnAttackerAction(ai, "plague strike") {}
@@ -104,25 +112,25 @@ namespace ai
     BEGIN_DEBUFF_ACTION(CastMarkOfBloodAction, "mark of blood")
     END_SPELL_ACTION()
 
-        class CastMarkOfBloodOnAttackerAction : public CastDebuffSpellOnAttackerAction
+    class CastMarkOfBloodOnAttackerAction : public CastDebuffSpellOnAttackerAction
     {
     public:
         CastMarkOfBloodOnAttackerAction(PlayerbotAI* ai) : CastDebuffSpellOnAttackerAction(ai, "mark of blood") {}
     };
 
-        class CastUnholyBlightAction : public CastBuffSpellAction
+    class CastUnholyBlightAction : public CastBuffSpellAction
     {
     public:
         CastUnholyBlightAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "unholy blight") {}
     };
 
-        class CastSummonGargoyleAction : public CastBuffSpellAction
+    class CastSummonGargoyleAction : public CastBuffSpellAction
     {
     public:
         CastSummonGargoyleAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "summon gargoyle") {}
     };
 
-        class CastGhoulFrenzyAction : public CastBuffSpellAction
+    class CastGhoulFrenzyAction : public CastBuffSpellAction
     {
     public:
         CastGhoulFrenzyAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "ghoul frenzy") {}
@@ -139,57 +147,68 @@ namespace ai
     END_SPELL_ACTION()
 
 
-    class CastChainsOfIceAction : public CastSpellAction {
+    class CastChainsOfIceAction : public CastSpellAction
+    {
     public:
         CastChainsOfIceAction(PlayerbotAI* ai) : CastSpellAction(ai, "chains of ice") {}
     };
 
-    class CastHungeringColdAction : public CastMeleeSpellAction {
+    class CastHungeringColdAction : public CastMeleeSpellAction
+    {
     public:
         CastHungeringColdAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "hungering cold") {}
     };
 
-    class CastHeartStrikeAction : public CastMeleeSpellAction {
+    class CastHeartStrikeAction : public CastMeleeSpellAction
+    {
     public:
         CastHeartStrikeAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "heart strike") {}
     };
 
-    class CastBloodStrikeAction : public CastMeleeSpellAction {
+    class CastBloodStrikeAction : public CastMeleeSpellAction
+    {
     public:
         CastBloodStrikeAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "blood strike") {}
     };
-    
-    class CastFrostStrikeAction : public CastMeleeSpellAction {
+
+    class CastFrostStrikeAction : public CastMeleeSpellAction
+    {
     public:
         CastFrostStrikeAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "frost strike") {}
     };
 
-    class CastObliterateAction : public CastMeleeSpellAction {
+    class CastObliterateAction : public CastMeleeSpellAction
+    {
     public:
         CastObliterateAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "obliterate") {}
     };
 
-    class CastDeathStrikeAction : public CastMeleeSpellAction {
+    class CastDeathStrikeAction : public CastMeleeSpellAction
+    {
     public:
         CastDeathStrikeAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "death strike") {}
     };
 
-    class CastScourgeStrikeAction : public CastMeleeSpellAction {
+    class CastScourgeStrikeAction : public CastMeleeSpellAction
+    {
     public:
         CastScourgeStrikeAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "scorgue strike") {}
     };
 
-    class CastDeathCoilAction : public CastSpellAction {
+    class CastDeathCoilAction : public CastSpellAction
+    {
     public:
         CastDeathCoilAction(PlayerbotAI* ai) : CastSpellAction(ai, "death coill") {}
     };
 
-    class CastBloodBoilAction : public CastBuffSpellAction {
+    class CastBloodBoilAction : public CastBuffSpellAction
+    {
     public:
         CastBloodBoilAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "blood boil") {}
     };
 
-    class CastDeathAndDecayAction : public CastSpellAction {
+    class CastDeathAndDecayAction : public CastSpellAction
+    {
     public:
         CastDeathAndDecayAction(PlayerbotAI* ai) : CastSpellAction(ai, "death and decay") {}
     };
@@ -242,7 +261,6 @@ namespace ai
         CastArmyOfTheDeadAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "army of the dead") {}
     };
 
-
     class CastRaiseDeadAction : public CastBuffSpellAction
     {
     public:
@@ -272,13 +290,15 @@ namespace ai
     public:
         CastVampiricBloodAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "vampiric blood") {}
     };
-    
-    class CastMindFreezeAction : public CastMeleeSpellAction {
+
+    class CastMindFreezeAction : public CastMeleeSpellAction
+    {
     public:
         CastMindFreezeAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "mind freeze") {}
     };
 
-    class CastStrangulateAction : public CastMeleeSpellAction {
+    class CastStrangulateAction : public CastMeleeSpellAction
+    {
     public:
         CastStrangulateAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "strangulate") {}
     };
@@ -289,12 +309,14 @@ namespace ai
         CastMindFreezeOnEnemyHealerAction(PlayerbotAI* ai) : CastSpellOnEnemyHealerAction(ai, "mind freeze") {}
     };
 
-    class CastRuneTapAction : public CastMeleeSpellAction {
+    class CastRuneTapAction : public CastMeleeSpellAction
+    {
     public:
         CastRuneTapAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "rune tap") {}
-
     };
-    class CastBloodTapAction : public CastMeleeSpellAction {
+
+    class CastBloodTapAction : public CastMeleeSpellAction
+    {
     public:
         CastBloodTapAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "blood tap") {}
     };

@@ -13,7 +13,6 @@
 
 using namespace ai;
 
-
 namespace ai
 {
     namespace DK
@@ -61,7 +60,6 @@ namespace ai
         public:
             DKBuffStrategyFactoryInternal() : NamedObjectContext<Strategy>(false, true)
             {
-                
                 creators["bdps"] = &DK::DKBuffStrategyFactoryInternal::bdps;
             }
 
@@ -81,7 +79,7 @@ namespace ai
         class TriggerFactoryInternal : public NamedObjectContext<Trigger>
         {
         public:
-            TriggerFactoryInternal()  
+            TriggerFactoryInternal()
             {
                 creators["bone shield"] = &TriggerFactoryInternal::bone_shield;
                 creators["pestilence"] = &TriggerFactoryInternal::pestilence;
@@ -121,8 +119,6 @@ namespace ai
             static Trigger* blood_tap(PlayerbotAI* ai) { return new BloodTapTrigger(ai); }
             static Trigger* raise_dead(PlayerbotAI* ai) { return new RaiseDeadTrigger(ai); }
             static Trigger* chains_of_ice(PlayerbotAI* ai) { return new ChainsOfIceSnareTrigger(ai); }
-
-
         };
     };
 };
@@ -139,7 +135,6 @@ namespace ai
         public:
             AiObjectContextInternal()
             {
-                
                 // Unholy
                 creators["bone shield"] = &AiObjectContextInternal::bone_shield;
                 creators["plague strike"] = &AiObjectContextInternal::plague_strike;
@@ -196,7 +191,6 @@ namespace ai
             }
 
         private:
-            
             // Unholy
             static Action* bone_shield(PlayerbotAI* ai) { return new CastBoneShieldAction(ai); }
             static Action* plague_strike(PlayerbotAI* ai) { return new CastPlagueStrikeAction(ai); }
@@ -251,7 +245,6 @@ namespace ai
             static Action* dancing_weapon(PlayerbotAI* ai) { return new CastDancingWeaponAction(ai); }
             static Action* dark_command(PlayerbotAI* ai) { return new CastDarkCommandAction(ai); }
             static Action* mind_freeze_on_enemy_healer(PlayerbotAI* ai) { return new CastMindFreezeOnEnemyHealerAction(ai); }
-            
         };
     };
 };

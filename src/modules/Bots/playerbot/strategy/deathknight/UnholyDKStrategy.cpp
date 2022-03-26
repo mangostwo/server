@@ -29,8 +29,6 @@ public:
         creators["corpse explosion"] = &corpse_explosion;
     }
 private:
-    
-    
     static ActionNode* death_strike(PlayerbotAI* ai)
     {
         return new ActionNode("death strike",
@@ -54,11 +52,10 @@ private:
     }
 };
 
-
-    NextAction** UnholyDKStrategy::getDefaultActions()
-    {
+NextAction** UnholyDKStrategy::getDefaultActions()
+{
     return NextAction::array(0, new NextAction("melee", ACTION_NORMAL), new NextAction("scourge strike" , ACTION_NORMAL + 3), NULL);
-    }
+}
 
 void UnholyDKStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 {
@@ -73,7 +70,6 @@ void UnholyDKStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
         NextAction::array(0, new NextAction("death pact", ACTION_EMERGENCY + 1), NULL)));
 }
 
-
 void UnholyDKAoeStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 {
     triggers.push_back(new TriggerNode(
@@ -85,4 +81,3 @@ void UnholyDKAoeStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
         NextAction::array(0, new NextAction("death and decay", ACTION_NORMAL + 3),
             new NextAction("corpse explosion", ACTION_NORMAL + 3), NULL)));
 }
-
