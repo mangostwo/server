@@ -14,7 +14,7 @@ bool CheckMountStateAction::Execute(Event event)
         return false;
     }
 
-    if (bot->IsTaxiFlying())
+    if (bot->IsTaxiFlying() || master->IsTaxiFlying())
     {
         return false;
     }

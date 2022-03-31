@@ -26,6 +26,9 @@
 /*.sublime-project
 /*.sublime-workspace
 
+# VSCode
+/.vscode
+
 # Numerous always-ignore extensions
 *.a
 *.bak
