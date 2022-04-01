@@ -87,7 +87,7 @@
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_PLAYERBOTS
-
+#include "AhBotConfig.h"
 #include "PlayerbotAIConfig.h"
 #include "RandomPlayerbotMgr.h"
 #endif
@@ -1602,6 +1602,7 @@ void World::SetInitialWorldSettings()
 #endif
 
 #ifdef ENABLE_PLAYERBOTS
+    auctionbot.Initialize();
     sPlayerbotAIConfig.Initialize();
 #endif
 

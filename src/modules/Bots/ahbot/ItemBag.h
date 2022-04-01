@@ -26,7 +26,7 @@ namespace ahbot
     void Shuffle(vector<T>& items)
     {
         uint32 count = items.size();
-        for (uint32 i = 0; i < count * 5; i++)
+        for (uint32 i = 0; i < count * 5; ++i)
         {
             int i1 = urand(0, count - 1);
             int i2 = urand(0, count - 1);

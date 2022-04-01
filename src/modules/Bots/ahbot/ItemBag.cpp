@@ -59,7 +59,7 @@ CategoryList::~CategoryList()
 
 ItemBag::ItemBag()
 {
-    for (int i = 0; i < CategoryList::instance.size(); i++)
+    for (int i = 0; i < CategoryList::instance.size(); ++i)
     {
         content[CategoryList::instance[i]] = vector<uint32>();
     }
@@ -77,7 +77,7 @@ void ItemBag::Init(bool silent)
 
     Load();
 
-    for (int i = 0; i < CategoryList::instance.size(); i++)
+    for (int i = 0; i < CategoryList::instance.size(); ++i)
     {
         Category* category = CategoryList::instance[i];
         Shuffle(content[category]);
@@ -94,7 +94,7 @@ int32 ItemBag::GetCount(Category* category, uint32 item)
     {
         if (*i == item)
         {
-            count++;
+            ++count;
         }
     }
 
@@ -128,7 +128,7 @@ bool ItemBag::Add(ItemPrototype const* proto)
         return false;
     }
 
-    for (int i = 0; i < CategoryList::instance.size(); i++)
+    for (int i = 0; i < CategoryList::instance.size(); ++i)
     {
         if (CategoryList::instance[i]->Contains(proto))
         {
