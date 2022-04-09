@@ -12,7 +12,7 @@ bool EquipAction::Execute(Event event)
 
     ItemIds ids = chat->parseItems(text);
 
-    for (ItemIds::iterator i =ids.begin(); i != ids.end(); i++)
+    for (ItemIds::iterator i =ids.begin(); i != ids.end(); ++i)
     {
         FindItemByIdVisitor visitor(*i);
         EquipItem(&visitor);

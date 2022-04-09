@@ -5,7 +5,7 @@ namespace ai
     class CastComboAction : public CastMeleeSpellAction
     {
     public:
-        CastComboAction(PlayerbotAI* ai, string name) : CastMeleeSpellAction(ai, name) {}
+        CastComboAction(PlayerbotAI* ai, const string& name) : CastMeleeSpellAction(ai, name) {}
 
         virtual bool isUseful()
         {

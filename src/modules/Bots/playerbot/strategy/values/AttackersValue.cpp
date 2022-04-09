@@ -24,7 +24,7 @@ list<ObjectGuid> AttackersValue::Calculate()
     RemoveNonThreating(targets);
 
     list<ObjectGuid> result;
-    for (set<Unit*>::iterator i = targets.begin(); i != targets.end(); i++)
+    for (set<Unit*>::iterator i = targets.begin(); i != targets.end(); ++i)
     {
         result.push_back((*i)->GetObjectGuid());
     }
@@ -63,7 +63,7 @@ void AttackersValue::AddAttackersOf(Player* player, set<Unit*>& targets)
     MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(player, sPlayerbotAIConfig.sightDistance);
     MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(units, u_check);
     Cell::VisitAllObjects(player, searcher, sPlayerbotAIConfig.sightDistance);
-    for (list<Unit*>::iterator i = units.begin(); i != units.end(); i++)
+    for (list<Unit*>::iterator i = units.begin(); i != units.end(); ++i)
     {
         targets.insert(*i);
     }

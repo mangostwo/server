@@ -49,7 +49,7 @@ namespace ai
     class WarlockConjuredItemTrigger : public ItemCountTrigger
     {
     public:
-        WarlockConjuredItemTrigger(PlayerbotAI* ai, string item) : ItemCountTrigger(ai, item, 1) {}
+        WarlockConjuredItemTrigger(PlayerbotAI* ai, const string& item) : ItemCountTrigger(ai, item, 1) {}
 
         virtual bool IsActive() { return ItemCountTrigger::IsActive() && AI_VALUE2(uint8, "item count", "soul shard") > 0; }
     };

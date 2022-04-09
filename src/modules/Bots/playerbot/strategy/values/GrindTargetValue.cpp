@@ -33,7 +33,7 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
     Player* master = GetMaster();
 
     list<ObjectGuid> attackers = context->GetValue<list<ObjectGuid> >("attackers")->Get();
-    for (list<ObjectGuid>::iterator i = attackers.begin(); i != attackers.end(); i++)
+    for (list<ObjectGuid>::iterator i = attackers.begin(); i != attackers.end(); ++i)
     {
         Unit* unit = ai->GetUnit(*i);
         if (!unit || !unit->IsAlive())
@@ -53,7 +53,7 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
 
     float distance = 0;
     Unit* result = NULL;
-    for(list<ObjectGuid>::iterator tIter = targets.begin(); tIter != targets.end(); tIter++)
+    for(list<ObjectGuid>::iterator tIter = targets.begin(); tIter != targets.end(); ++tIter)
     {
         Unit* unit = ai->GetUnit(*tIter);
         if (!unit)

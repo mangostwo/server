@@ -11,7 +11,7 @@ bool DestroyItemAction::Execute(Event event)
     string text = event.getParam();
     ItemIds ids = chat->parseItems(text);
 
-    for (ItemIds::iterator i =ids.begin(); i != ids.end(); i++)
+    for (ItemIds::iterator i =ids.begin(); i != ids.end(); ++i)
     {
         FindItemByIdVisitor visitor(*i);
         DestroyItem(&visitor);

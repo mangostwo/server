@@ -45,7 +45,7 @@ namespace ahbot
     class PricingStrategyFactory
     {
     public:
-        static PricingStrategy* Create(string name, Category* category)
+        static PricingStrategy* Create(const string& name, Category* category)
         {
             if (name == "buyOnlyRare")
             {

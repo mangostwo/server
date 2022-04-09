@@ -82,7 +82,7 @@ private:
 class ChatCommandHolder
 {
 public:
-    ChatCommandHolder(string command, Player* owner = NULL, uint32 type = CHAT_MSG_WHISPER) : command(command), owner(owner), type(type) {}
+    ChatCommandHolder(const string &command, Player* owner = NULL, uint32 type = CHAT_MSG_WHISPER) : command(command), owner(owner), type(type) {}
     ChatCommandHolder(ChatCommandHolder const& other)
     {
         this->command = other.command;

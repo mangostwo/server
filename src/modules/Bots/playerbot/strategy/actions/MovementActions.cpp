@@ -322,7 +322,7 @@ bool MoveRandomAction::Execute(Event event)
     if (!(rand() % 3))
     {
         list<ObjectGuid> npcs = AI_VALUE(list<ObjectGuid>, "nearest npcs");
-        for (list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); i++)
+        for (list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); ++i)
         {
             target = ai->GetUnit(*i);
 
@@ -336,7 +336,7 @@ bool MoveRandomAction::Execute(Event event)
     if (!target || !(rand() % 3))
     {
         list<ObjectGuid> gos = AI_VALUE(list<ObjectGuid>, "nearest game objects");
-        for (list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); i++)
+        for (list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); ++i)
         {
             target = ai->GetGameObject(*i);
 

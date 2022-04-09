@@ -16,7 +16,7 @@ Engine::Engine(PlayerbotAI* ai, AiObjectContext *factory) : PlayerbotAIAware(ai)
 bool ActionExecutionListeners::Before(Action* action, Event event)
 {
     bool result = true;
-    for (list<ActionExecutionListener*>::iterator i = listeners.begin(); i!=listeners.end(); i++)
+    for (list<ActionExecutionListener*>::iterator i = listeners.begin(); i!=listeners.end(); ++i)
     {
         result &= (*i)->Before(action, event);
     }
@@ -25,7 +25,7 @@ bool ActionExecutionListeners::Before(Action* action, Event event)
 
 void ActionExecutionListeners::After(Action* action, bool executed, Event event)
 {
-    for (list<ActionExecutionListener*>::iterator i = listeners.begin(); i!=listeners.end(); i++)
+    for (list<ActionExecutionListener*>::iterator i = listeners.begin(); i!=listeners.end(); ++i)
     {
         (*i)->After(action, executed, event);
     }
@@ -34,7 +34,7 @@ void ActionExecutionListeners::After(Action* action, bool executed, Event event)
 bool ActionExecutionListeners::OverrideResult(Action* action, bool executed, Event event)
 {
     bool result = executed;
-    for (list<ActionExecutionListener*>::iterator i = listeners.begin(); i!=listeners.end(); i++)
+    for (list<ActionExecutionListener*>::iterator i = listeners.begin(); i!=listeners.end(); ++i)
     {
         result = (*i)->OverrideResult(action, result, event);
     }
@@ -44,7 +44,7 @@ bool ActionExecutionListeners::OverrideResult(Action* action, bool executed, Eve
 bool ActionExecutionListeners::AllowExecution(Action* action, Event event)
 {
     bool result = true;
-    for (list<ActionExecutionListener*>::iterator i = listeners.begin(); i!=listeners.end(); i++)
+    for (list<ActionExecutionListener*>::iterator i = listeners.begin(); i!=listeners.end(); ++i)
     {
         result &= (*i)->AllowExecution(action, event);
     }
@@ -53,7 +53,7 @@ bool ActionExecutionListeners::AllowExecution(Action* action, Event event)
 
 ActionExecutionListeners::~ActionExecutionListeners()
 {
-    for (list<ActionExecutionListener*>::iterator i = listeners.begin(); i!=listeners.end(); i++)
+    for (list<ActionExecutionListener*>::iterator i = listeners.begin(); i!=listeners.end(); ++i)
     {
         delete *i;
     }
@@ -77,14 +77,14 @@ void Engine::Reset()
         delete action;
     } while (action);
 
-    for (list<TriggerNode*>::iterator i = triggers.begin(); i != triggers.end(); i++)
+    for (list<TriggerNode*>::iterator i = triggers.begin(); i != triggers.end(); ++i)
     {
         TriggerNode* trigger = *i;
         delete trigger;
     }
     triggers.clear();
 
-    for (list<Multiplier*>::iterator i = multipliers.begin(); i != multipliers.end(); i++)
+    for (list<Multiplier*>::iterator i = multipliers.begin(); i != multipliers.end(); ++i)
     {
         Multiplier* multiplier = *i;
         delete multiplier;
@@ -96,7 +96,7 @@ void Engine::Init()
 {
     Reset();
 
-    for (map<string, Strategy*>::iterator i = strategies.begin(); i != strategies.end(); i++)
+    for (map<string, Strategy*>::iterator i = strategies.begin(); i != strategies.end(); ++i)
     {
         Strategy* strategy = i->second;
         strategy->InitMultipliers(multipliers);
@@ -152,7 +152,7 @@ bool Engine::DoNextAction(Unit* unit, int depth)
             }
             else if (action->isUseful())
             {
-                for (list<Multiplier*>::iterator i = multipliers.begin(); i!= multipliers.end(); i++)
+                for (list<Multiplier*>::iterator i = multipliers.begin(); i!= multipliers.end(); ++i)
                 {
                     Multiplier* multiplier = *i;
                     relevance *= multiplier->GetValue(action);
@@ -230,7 +230,7 @@ bool Engine::DoNextAction(Unit* unit, int depth)
 
 ActionNode* Engine::CreateActionNode(string name)
 {
-    for (map<string, Strategy*>::iterator i = strategies.begin(); i != strategies.end(); i++)
+    for (map<string, Strategy*>::iterator i = strategies.begin(); i != strategies.end(); ++i)
     {
         Strategy* strategy = i->second;
         ActionNode* node = strategy->GetAction(name);
@@ -283,7 +283,7 @@ bool Engine::MultiplyAndPush(NextAction** actions, float forceRelevance, bool sk
     return pushed;
 }
 
-ActionResult Engine::ExecuteAction(string name)
+ActionResult Engine::ExecuteAction(const string& name)
 {
     bool result = false;
 
@@ -327,7 +327,7 @@ void Engine::addStrategy(string name)
     if (strategy)
     {
         set<string> siblings = aiObjectContext->GetSiblingStrategy(name);
-        for (set<string>::iterator i = siblings.begin(); i != siblings.end(); i++)
+        for (set<string>::iterator i = siblings.begin(); i != siblings.end(); ++i)
         {
             removeStrategy(*i);
         }
@@ -379,7 +379,7 @@ void Engine::removeAllStrategies()
     Init();
 }
 
-void Engine::toggleStrategy(string name)
+void Engine::toggleStrategy(const string& name)
 {
     if (!removeStrategy(name))
     {
@@ -394,7 +394,7 @@ bool Engine::HasStrategy(string name)
 
 void Engine::ProcessTriggers()
 {
-    for (list<TriggerNode*>::iterator i = triggers.begin(); i != triggers.end(); i++)
+    for (list<TriggerNode*>::iterator i = triggers.begin(); i != triggers.end(); ++i)
     {
         TriggerNode* node = *i;
         if (!node)
@@ -426,7 +426,7 @@ void Engine::ProcessTriggers()
             MultiplyAndPush(node->getHandlers(), 0.0f, false, event);
         }
     }
-    for (list<TriggerNode*>::iterator i = triggers.begin(); i != triggers.end(); i++)
+    for (list<TriggerNode*>::iterator i = triggers.begin(); i != triggers.end(); ++i)
     {
         Trigger* trigger = (*i)->getTrigger();
         if (trigger) trigger->Reset();
@@ -435,7 +435,7 @@ void Engine::ProcessTriggers()
 
 void Engine::PushDefaultActions()
 {
-    for (map<string, Strategy*>::iterator i = strategies.begin(); i != strategies.end(); i++)
+    for (map<string, Strategy*>::iterator i = strategies.begin(); i != strategies.end(); ++i)
     {
         Strategy* strategy = i->second;
         Event emptyEvent;
@@ -452,7 +452,7 @@ string Engine::ListStrategies()
         return s;
     }
 
-    for (map<string, Strategy*>::iterator i = strategies.begin(); i != strategies.end(); i++)
+    for (map<string, Strategy*>::iterator i = strategies.begin(); i != strategies.end(); ++i)
     {
         s.append(i->first);
         s.append(", ");
@@ -460,7 +460,7 @@ string Engine::ListStrategies()
     return s.substr(0, s.length() - 2);
 }
 
-void Engine::PushAgain(ActionNode* actionNode, float relevance, Event event)
+void Engine::PushAgain(ActionNode* actionNode, float relevance, const Event& event)
 {
     NextAction** nextAction = new NextAction*[2];
     nextAction[0] = new NextAction(actionNode->getName(), relevance);
@@ -471,7 +471,7 @@ void Engine::PushAgain(ActionNode* actionNode, float relevance, Event event)
 
 bool Engine::ContainsStrategy(StrategyType type)
 {
-    for (map<string, Strategy*>::iterator i = strategies.begin(); i != strategies.end(); i++)
+    for (map<string, Strategy*>::iterator i = strategies.begin(); i != strategies.end(); ++i)
     {
         Strategy* strategy = i->second;
         if (strategy->GetType() & type)
@@ -539,10 +539,10 @@ void Engine::LogAction(const char* format, ...)
     }
 }
 
-void Engine::ChangeStrategy(string names)
+void Engine::ChangeStrategy(const string& names)
 {
     vector<string> splitted = split(names, ',');
-    for (vector<string>::iterator i = splitted.begin(); i != splitted.end(); i++)
+    for (vector<string>::iterator i = splitted.begin(); i != splitted.end(); ++i)
     {
         const char* name = i->c_str();
         switch (name[0])

@@ -33,7 +33,7 @@ float PassiveMultiplier::GetValue(Action* action) {
 
     string name = action->getName();
 
-    for (list<string>::iterator i = allowedActions.begin(); i != allowedActions.end(); i++)
+    for (list<string>::iterator i = allowedActions.begin(); i != allowedActions.end(); ++i)
     {
         if (name == *i)
         {
@@ -41,7 +41,7 @@ float PassiveMultiplier::GetValue(Action* action) {
         }
     }
 
-    for (list<string>::iterator i = allowedParts.begin(); i != allowedParts.end(); i++)
+    for (list<string>::iterator i = allowedParts.begin(); i != allowedParts.end(); ++i)
     {
         if (name.find(*i) != string::npos)
         {

@@ -26,7 +26,7 @@ namespace ai
 
     class OutOfRangeTrigger : public Trigger {
     public:
-        OutOfRangeTrigger(PlayerbotAI* ai, string name, float distance) : Trigger(ai, name)
+        OutOfRangeTrigger(PlayerbotAI* ai, const string &name, float distance) : Trigger(ai, name)
         {
             this->distance = distance;
         }
@@ -62,7 +62,7 @@ namespace ai
 
     class FarFromMasterTrigger : public Trigger {
     public:
-        FarFromMasterTrigger(PlayerbotAI* ai, string name = "far from master", float distance = 12.0f, int checkInterval = 1) : Trigger(ai, name, checkInterval), distance(distance) {}
+        FarFromMasterTrigger(PlayerbotAI* ai, const string &name = "far from master", float distance = 12.0f, int checkInterval = 1) : Trigger(ai, name, checkInterval), distance(distance) {}
 
         virtual bool IsActive()
         {

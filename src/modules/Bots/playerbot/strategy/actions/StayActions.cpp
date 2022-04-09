@@ -67,7 +67,7 @@ bool StayActionBase::StaySingleLine(vector<Player*> line, float diff, float cx, 
     float y = cy + sin(angle) * (range * floor(count / 2.0f) + diff);
 
     int index = 0;
-    for (vector<Player*>::iterator i = line.begin(); i != line.end(); i++)
+    for (vector<Player*>::iterator i = line.begin(); i != line.end(); ++i)
     {
         Player* member = *i;
 

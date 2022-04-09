@@ -37,7 +37,7 @@ void FindTargetStrategy::GetPlayerCount(Unit* creature, int* tankCount, int* dps
     *dpsCount = 0;
 
     Unit::AttackerSet attackers(creature->getAttackers());
-    for (set<Unit*>::const_iterator i = attackers.begin(); i != attackers.end(); i++)
+    for (set<Unit*>::const_iterator i = attackers.begin(); i != attackers.end(); ++i)
     {
         Unit* attacker = *i;
         if (!attacker || !attacker->IsAlive() || attacker == bot)

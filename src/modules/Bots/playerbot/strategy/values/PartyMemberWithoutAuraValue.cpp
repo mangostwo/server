@@ -7,7 +7,7 @@ using namespace ai;
 class PlayerWithoutAuraPredicate : public FindPlayerPredicate, public PlayerbotAIAware
 {
 public:
-    PlayerWithoutAuraPredicate(PlayerbotAI* ai, string aura) :
+    PlayerWithoutAuraPredicate(PlayerbotAI* ai, const string& aura) :
         PlayerbotAIAware(ai), FindPlayerPredicate(), aura(aura) {}
 
 public:

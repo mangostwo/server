@@ -32,7 +32,7 @@ uint32 PlayerbotChatHandler::extractQuestId(string str)
     return cId ? atol(cId) : 0;
 }
 
-void PacketHandlingHelper::AddHandler(uint16 opcode, string handler)
+void PacketHandlingHelper::AddHandler(uint16 opcode, const string &handler)
 {
     handlers[opcode] = handler;
 }
@@ -246,7 +246,7 @@ void PlayerbotAI::HandleCommand(uint32 type, const string& text, Player& fromPla
     string filtered = text;
     if (!sPlayerbotAIConfig.commandPrefix.empty())
     {
-        if (filtered.find(sPlayerbotAIConfig.commandPrefix) != 0)
+        if (filtered.starts_with(sPlayerbotAIConfig.commandPrefix))
         {
             return;
         }
@@ -260,7 +260,7 @@ void PlayerbotAI::HandleCommand(uint32 type, const string& text, Player& fromPla
         return;
     }
 
-    if (filtered.find("who") != 0 && !GetSecurity()->CheckLevelFor(PLAYERBOT_SECURITY_ALLOW_ALL, type != CHAT_MSG_WHISPER, &fromPlayer))
+    if (filtered.starts_with("who") && !GetSecurity()->CheckLevelFor(PLAYERBOT_SECURITY_ALLOW_ALL, type != CHAT_MSG_WHISPER, &fromPlayer))
     {
         return;
     }
@@ -710,7 +710,7 @@ Creature* PlayerbotAI::GetCreature(ObjectGuid guid)
     MaNGOS::UnitListSearcher<MaNGOS::UnitByGuidInRangeCheck> searcher(targets, u_check);
     Cell::VisitAllObjects(bot, searcher, sPlayerbotAIConfig.sightDistance);
 
-    for(list<Unit *>::iterator i = targets.begin(); i != targets.end(); i++)
+    for(list<Unit *>::iterator i = targets.begin(); i != targets.end(); ++i)
     {
         Creature* creature = dynamic_cast<Creature*>(*i);
         if (creature)
@@ -735,7 +735,7 @@ GameObject* PlayerbotAI::GetGameObject(ObjectGuid guid)
     MaNGOS::GameObjectListSearcher<MaNGOS::GameObjectByGuidInRangeCheck> searcher(targets, u_check);
     Cell::VisitAllObjects(bot, searcher, sPlayerbotAIConfig.sightDistance);
 
-    for(list<GameObject*>::iterator i = targets.begin(); i != targets.end(); i++)
+    for(list<GameObject*>::iterator i = targets.begin(); i != targets.end(); ++i)
     {
         GameObject* go = *i;
         if (go && go->isSpawned())
@@ -769,7 +769,7 @@ bool PlayerbotAI::TellMasterNoFacing(string text, PlayerbotSecurityLevel securit
     return true;
 }
 
-bool PlayerbotAI::TellMaster(string text, PlayerbotSecurityLevel securityLevel)
+bool PlayerbotAI::TellMaster(const string &text, PlayerbotSecurityLevel securityLevel)
 {
     if (!TellMasterNoFacing(text, securityLevel))
     {
@@ -839,7 +839,7 @@ bool PlayerbotAI::HasAura(string name, Unit* unit)
     for (uint32 auraType = SPELL_AURA_BIND_SIGHT; auraType < TOTAL_AURAS; auraType++)
     {
         Unit::AuraList const& auras = unit->GetAurasByType((AuraType)auraType);
-        for (Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); i++)
+        for (Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); ++i)
         {
             Aura* aura = *i;
             if (!aura)

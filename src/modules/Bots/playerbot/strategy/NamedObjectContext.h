@@ -10,7 +10,7 @@ namespace ai
         Qualified() {};
 
     public:
-        void Qualify(string qualifier) { this->qualifier = qualifier; }
+        void Qualify(const string &qualifier) { this->qualifier = qualifier; }
 
     protected:
         string qualifier;
@@ -57,7 +57,7 @@ namespace ai
         set<string> supports()
         {
             set<string> keys;
-            for (typename map<string, ActionCreator>::iterator it = creators.begin(); it != creators.end(); it++)
+            for (typename map<string, ActionCreator>::iterator it = creators.begin(); it != creators.end(); ++it)
             {
                 keys.insert(it->first);
             }
@@ -89,7 +89,7 @@ namespace ai
 
         void Clear()
         {
-            for (typename map<string, T*>::iterator i = created.begin(); i != created.end(); i++)
+            for (typename map<string, T*>::iterator i = created.begin(); i != created.end(); ++i)
             {
                 if (i->second)
                 {
@@ -102,7 +102,7 @@ namespace ai
 
         void Update()
         {
-            for (typename map<string, T*>::iterator i = created.begin(); i != created.end(); i++)
+            for (typename map<string, T*>::iterator i = created.begin(); i != created.end(); ++i)
             {
                 if (i->second)
                 {
@@ -113,7 +113,7 @@ namespace ai
 
         void Reset()
         {
-            for (typename map<string, T*>::iterator i = created.begin(); i != created.end(); i++)
+            for (typename map<string, T*>::iterator i = created.begin(); i != created.end(); ++i)
             {
                 if (i->second)
                 {
@@ -128,7 +128,7 @@ namespace ai
         set<string> GetCreated()
         {
             set<string> keys;
-            for (typename map<string, T*>::iterator it = created.begin(); it != created.end(); it++)
+            for (typename map<string, T*>::iterator it = created.begin(); it != created.end(); ++it)
             {
                 keys.insert(it->first);
             }

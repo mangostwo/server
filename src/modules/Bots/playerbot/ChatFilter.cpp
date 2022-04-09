@@ -180,7 +180,7 @@ public:
         }
 
         bool found = false;
-        for (list<string>::iterator i = rtis.begin(); i != rtis.end(); i++)
+        for (list<string>::iterator i = rtis.begin(); i != rtis.end(); ++i)
         {
             string rti = *i;
 
@@ -247,7 +247,7 @@ public:
         Player* bot = ai->GetBot();
 
         bool found = false;
-        for (map<string, uint8>::iterator i = classNames.begin(); i != classNames.end(); i++)
+        for (map<string, uint8>::iterator i = classNames.begin(); i != classNames.end(); ++i)
         {
             bool isClass = message.find(i->first) == 0;
             if (isClass && bot->getClass() != i->second)
@@ -286,7 +286,7 @@ CompositeChatFilter::CompositeChatFilter(PlayerbotAI* ai) : ChatFilter(ai)
 
 CompositeChatFilter::~CompositeChatFilter()
 {
-    for (list<ChatFilter*>::iterator i = filters.begin(); i != filters.end(); i++)
+    for (list<ChatFilter*>::iterator i = filters.begin(); i != filters.end(); ++i)
     {
         delete (*i);
     }
@@ -296,7 +296,7 @@ string CompositeChatFilter::Filter(string message)
 {
     for (int j = 0; j < filters.size(); ++j)
     {
-        for (list<ChatFilter*>::iterator i = filters.begin(); i != filters.end(); i++)
+        for (list<ChatFilter*>::iterator i = filters.begin(); i != filters.end(); ++i)
         {
             message = (*i)->Filter(message);
             if (message.empty())

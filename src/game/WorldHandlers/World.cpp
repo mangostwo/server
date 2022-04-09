@@ -1602,7 +1602,7 @@ void World::SetInitialWorldSettings()
 #endif
 
 #ifdef ENABLE_PLAYERBOTS
-    auctionbot.Initialize();
+    sAhBotConfig.Initialize();
     sPlayerbotAIConfig.Initialize();
 #endif
 

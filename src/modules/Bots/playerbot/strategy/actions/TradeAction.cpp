@@ -25,7 +25,7 @@ bool TradeAction::Execute(Event event)
         return false;
     }
 
-    for (list<Item*>::iterator i = found.begin(); i != found.end(); i++)
+    for (list<Item*>::iterator i = found.begin(); i != found.end(); ++i)
     {
         TradeItem(**i, slot);
     }

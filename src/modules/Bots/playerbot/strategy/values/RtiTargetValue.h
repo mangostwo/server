@@ -10,7 +10,7 @@ namespace ai
         {}
 
     public:
-        static int GetRtiIndex(string rti)
+        static int GetRtiIndex(const string &rti)
         {
             int index = -1;
             if(rti == "star")

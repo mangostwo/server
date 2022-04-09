@@ -7,7 +7,7 @@ namespace ai
 {
     class LeaveGroupAction : public Action {
     public:
-        LeaveGroupAction(PlayerbotAI* ai, string name = "leave") : Action(ai, name) {}
+        LeaveGroupAction(PlayerbotAI* ai, const string& name = "leave") : Action(ai, name) {}
 
         virtual bool Execute(Event event)
         {

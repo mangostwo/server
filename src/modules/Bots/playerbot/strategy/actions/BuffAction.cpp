@@ -34,7 +34,7 @@ public:
             proto->SubClass != ITEM_SUBCLASS_ITEM_ENHANCEMENT)
             return true;
 
-        for (int i=0; i<MAX_ITEM_PROTO_SPELLS; i++)
+        for (int i=0; i<MAX_ITEM_PROTO_SPELLS; ++i)
         {
             uint32 spellId = proto->Spells[i].SpellId;
             if (!spellId)

@@ -134,7 +134,7 @@ void QueryItemUsageAction::QueryItemPrice(ItemPrototype const *item)
 
 void QueryItemUsageAction::QueryItemsUsage(ItemIds items)
 {
-    for (ItemIds::iterator i = items.begin(); i != items.end(); i++)
+    for (ItemIds::iterator i = items.begin(); i != items.end(); ++i)
     {
         ItemPrototype const *item = sItemStorage.LookupEntry<ItemPrototype>(*i);
         QueryItemUsage(item);
@@ -147,7 +147,7 @@ void QueryItemUsageAction::QueryQuestItem(uint32 itemId)
 {
     Player *bot = ai->GetBot();
     QuestStatusMap& questMap = bot->getQuestStatusMap();
-    for (QuestStatusMap::const_iterator i = questMap.begin(); i != questMap.end(); i++)
+    for (QuestStatusMap::const_iterator i = questMap.begin(); i != questMap.end(); ++i)
     {
         const Quest *questTemplate = sObjectMgr.GetQuestTemplate( i->first );
         if( !questTemplate )

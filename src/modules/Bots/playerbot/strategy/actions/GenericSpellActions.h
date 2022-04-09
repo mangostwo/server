@@ -47,7 +47,7 @@ namespace ai
     class CastSpellAction : public Action
     {
     public:
-        CastSpellAction(PlayerbotAI* ai, string spell) : Action(ai, spell),
+        CastSpellAction(PlayerbotAI* ai, const string &spell) : Action(ai, spell),
             range(sPlayerbotAIConfig.spellDistance)
         {
             this->spell = spell;
@@ -84,7 +84,7 @@ namespace ai
     class CastAuraSpellAction : public CastSpellAction
     {
     public:
-        CastAuraSpellAction(PlayerbotAI* ai, string spell) : CastSpellAction(ai, spell) {}
+        CastAuraSpellAction(PlayerbotAI* ai, const string &spell) : CastSpellAction(ai, spell) {}
 
         virtual bool isUseful();
     };
@@ -93,7 +93,7 @@ namespace ai
     class CastMeleeSpellAction : public CastSpellAction
     {
     public:
-        CastMeleeSpellAction(PlayerbotAI* ai, string spell) : CastSpellAction(ai, spell) {
+        CastMeleeSpellAction(PlayerbotAI* ai, const string &spell) : CastSpellAction(ai, spell) {
             range = ATTACK_DISTANCE;
         }
     };
@@ -102,13 +102,13 @@ namespace ai
     class CastDebuffSpellAction : public CastAuraSpellAction
     {
     public:
-        CastDebuffSpellAction(PlayerbotAI* ai, string spell) : CastAuraSpellAction(ai, spell) {}
+        CastDebuffSpellAction(PlayerbotAI* ai, const string &spell) : CastAuraSpellAction(ai, spell) {}
     };
 
     class CastDebuffSpellOnAttackerAction : public CastAuraSpellAction
     {
     public:
-        CastDebuffSpellOnAttackerAction(PlayerbotAI* ai, string spell) : CastAuraSpellAction(ai, spell) {}
+        CastDebuffSpellOnAttackerAction(PlayerbotAI* ai, const string &spell) : CastAuraSpellAction(ai, spell) {}
         Value<Unit*>* GetTargetValue()
         {
             return context->GetValue<Unit*>("attacker without aura", spell);
@@ -120,7 +120,7 @@ namespace ai
     class CastBuffSpellAction : public CastAuraSpellAction
     {
     public:
-        CastBuffSpellAction(PlayerbotAI* ai, string spell) : CastAuraSpellAction(ai, spell)
+        CastBuffSpellAction(PlayerbotAI* ai, const string &spell) : CastAuraSpellAction(ai, spell)
         {
             range = sPlayerbotAIConfig.spellDistance;
         }
@@ -131,7 +131,7 @@ namespace ai
     class CastEnchantItemAction : public CastSpellAction
     {
     public:
-        CastEnchantItemAction(PlayerbotAI* ai, string spell) : CastSpellAction(ai, spell)
+        CastEnchantItemAction(PlayerbotAI* ai, const string &spell) : CastSpellAction(ai, spell)
         {
             range = sPlayerbotAIConfig.spellDistance;
         }
@@ -145,7 +145,7 @@ namespace ai
     class CastHealingSpellAction : public CastAuraSpellAction
     {
     public:
-        CastHealingSpellAction(PlayerbotAI* ai, string spell, uint8 estAmount = 15.0f) : CastAuraSpellAction(ai, spell)
+        CastHealingSpellAction(PlayerbotAI* ai, const string &spell, uint8 estAmount = 15.0f) : CastAuraSpellAction(ai, spell)
         {
             this->estAmount = estAmount;
             range = sPlayerbotAIConfig.spellDistance;
@@ -161,7 +161,7 @@ namespace ai
     class CastAoeHealSpellAction : public CastHealingSpellAction
     {
     public:
-        CastAoeHealSpellAction(PlayerbotAI* ai, string spell, uint8 estAmount = 15.0f) : CastHealingSpellAction(ai, spell, estAmount) {}
+        CastAoeHealSpellAction(PlayerbotAI* ai, const string &spell, uint8 estAmount = 15.0f) : CastHealingSpellAction(ai, spell, estAmount) {}
         virtual string GetTargetName() { return "party member to heal"; }
         virtual bool isUseful();
     };
@@ -169,7 +169,7 @@ namespace ai
     class CastCureSpellAction : public CastSpellAction
     {
     public:
-        CastCureSpellAction(PlayerbotAI* ai, string spell) : CastSpellAction(ai, spell)
+        CastCureSpellAction(PlayerbotAI* ai, const string &spell) : CastSpellAction(ai, spell)
         {
             range = sPlayerbotAIConfig.spellDistance;
         }
@@ -179,11 +179,7 @@ namespace ai
 
     class PartyMemberActionNameSupport {
     public:
-        PartyMemberActionNameSupport(string spell)
-        {
-            name = string(spell) + " on party";
-        }
-
+        PartyMemberActionNameSupport(const string &spell): name(string(spell) + " on party") {}
         virtual string getName() { return name; }
 
     private:
@@ -193,7 +189,7 @@ namespace ai
     class HealPartyMemberAction : public CastHealingSpellAction, public PartyMemberActionNameSupport
     {
     public:
-        HealPartyMemberAction(PlayerbotAI* ai, string spell, uint8 estAmount = 15.0f) :
+        HealPartyMemberAction(PlayerbotAI* ai, const string &spell, uint8 estAmount = 15.0f) :
             CastHealingSpellAction(ai, spell, estAmount), PartyMemberActionNameSupport(spell) {}
 
         virtual string GetTargetName() { return "party member to heal"; }
@@ -203,7 +199,7 @@ namespace ai
     class ResurrectPartyMemberAction : public CastSpellAction
     {
     public:
-        ResurrectPartyMemberAction(PlayerbotAI* ai, string spell) : CastSpellAction(ai, spell) {}
+        ResurrectPartyMemberAction(PlayerbotAI* ai, const string &spell) : CastSpellAction(ai, spell) {}
 
         virtual string GetTargetName() { return "party member to resurrect"; }
     };
@@ -212,7 +208,7 @@ namespace ai
     class CurePartyMemberAction : public CastSpellAction, public PartyMemberActionNameSupport
     {
     public:
-        CurePartyMemberAction(PlayerbotAI* ai, string spell, uint32 dispelType) :
+        CurePartyMemberAction(PlayerbotAI* ai, const string &spell, uint32 dispelType) :
             CastSpellAction(ai, spell), PartyMemberActionNameSupport(spell)
         {
             this->dispelType = dispelType;
@@ -230,7 +226,7 @@ namespace ai
     class BuffOnPartyAction : public CastBuffSpellAction, public PartyMemberActionNameSupport
     {
     public:
-        BuffOnPartyAction(PlayerbotAI* ai, string spell) :
+        BuffOnPartyAction(PlayerbotAI* ai, const string &spell) :
             CastBuffSpellAction(ai, spell), PartyMemberActionNameSupport(spell) {}
     public:
         virtual Value<Unit*>* GetTargetValue();
@@ -267,7 +263,7 @@ namespace ai
     class CastSpellOnEnemyHealerAction : public CastSpellAction
     {
     public:
-        CastSpellOnEnemyHealerAction(PlayerbotAI* ai, string spell) : CastSpellAction(ai, spell) {}
+        CastSpellOnEnemyHealerAction(PlayerbotAI* ai, const string &spell) : CastSpellAction(ai, spell) {}
         Value<Unit*>* GetTargetValue()
         {
             return context->GetValue<Unit*>("enemy healer target", spell);

@@ -6,7 +6,7 @@ namespace ai
 {
     class UseItemAction : public Action {
     public:
-        UseItemAction(PlayerbotAI* ai, string name = "use", bool selfOnly = false) : Action(ai, name), selfOnly(selfOnly) {}
+        UseItemAction(PlayerbotAI* ai, const string &name = "use", bool selfOnly = false) : Action(ai, name), selfOnly(selfOnly) {}
 
     public:
         virtual bool Execute(Event event);
@@ -26,7 +26,7 @@ namespace ai
 
     class UseSpellItemAction : public UseItemAction {
     public:
-        UseSpellItemAction(PlayerbotAI* ai, string name, bool selfOnly = false) : UseItemAction(ai, name, selfOnly) {}
+        UseSpellItemAction(PlayerbotAI* ai, const string &name, bool selfOnly = false) : UseItemAction(ai, name, selfOnly) {}
 
     public:
         virtual bool isUseful();

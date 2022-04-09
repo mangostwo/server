@@ -43,7 +43,7 @@ bool BuyAction::Execute(Event event)
         return false;
     }
 
-    for (ItemIds::iterator i = itemIds.begin(); i != itemIds.end(); i++)
+    for (ItemIds::iterator i = itemIds.begin(); i != itemIds.end(); ++i)
     {
         for (uint32 slot = 0; slot < tItems->GetItemCount(); slot++)
         {

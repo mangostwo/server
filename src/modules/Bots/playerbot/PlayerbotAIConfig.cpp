@@ -14,10 +14,10 @@ PlayerbotAIConfig::PlayerbotAIConfig()
 }
 
 template <class T>
-void LoadList(string value, T &list)
+void LoadList(const string &value, T &list)
 {
     vector<string> ids = split(value, ',');
-    for (vector<string>::iterator i = ids.begin(); i != ids.end(); i++)
+    for (vector<string>::iterator i = ids.begin(); i != ids.end(); ++i)
     {
         uint32 id = atoi((*i).c_str());
         if (!id)
@@ -144,7 +144,7 @@ bool PlayerbotAIConfig::IsInRandomQuestItemList(uint32 id)
     return find(randomBotQuestItems.begin(), randomBotQuestItems.end(), id) != randomBotQuestItems.end();
 }
 
-string PlayerbotAIConfig::GetValue(string name)
+string PlayerbotAIConfig::GetValue(const string &name)
 {
     ostringstream out;
 
@@ -211,7 +211,7 @@ string PlayerbotAIConfig::GetValue(string name)
     return out.str();
 }
 
-void PlayerbotAIConfig::SetValue(string name, string value)
+void PlayerbotAIConfig::SetValue(const string &name, string value)
 {
     istringstream out(value, istringstream::in);
 

@@ -21,7 +21,7 @@ bool LootStrategyAction::Execute(Event event)
         out << LootStrategy2string(lootStrategy->Get());
         out << ", always loot items: ";
 
-        for (set<uint32>::iterator i = alwaysLootItems.begin(); i != alwaysLootItems.end(); i++)
+        for (set<uint32>::iterator i = alwaysLootItems.begin(); i != alwaysLootItems.end(); ++i)
         {
             ItemPrototype const *proto = sItemStorage.LookupEntry<ItemPrototype>(*i);
             if (!proto)
@@ -47,7 +47,7 @@ bool LootStrategyAction::Execute(Event event)
         }
 
         bool remove = strategy.size() > 1 && strategy.substr(0, 1) == "-";
-        for (ItemIds::iterator i = items.begin(); i != items.end(); i++)
+        for (ItemIds::iterator i = items.begin(); i != items.end(); ++i)
         {
             uint32 itemid = *i;
             if (remove)
@@ -72,7 +72,7 @@ bool LootStrategyAction::Execute(Event event)
 }
 
 
-LootStrategy LootStrategyAction::String2LootStrategy(string strategy)
+LootStrategy LootStrategyAction::String2LootStrategy(const string& strategy)
 {
     if (strategy == "*" || strategy == "all")
     {

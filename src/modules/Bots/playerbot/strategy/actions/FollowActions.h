@@ -7,7 +7,7 @@ namespace ai
 {
     class FollowAction : public MovementAction {
     public:
-        FollowAction(PlayerbotAI* ai, string name) : MovementAction(ai, name) {}
+        FollowAction(PlayerbotAI* ai, const string& name) : MovementAction(ai, name) {}
     };
 
     class FollowLineAction : public FollowAction {

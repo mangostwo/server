@@ -46,7 +46,7 @@ namespace ai
     // Unholy presence
     class CastUnholyMeleeSpellAction : public CastMeleeSpellAction {
     public:
-        CastUnholyMeleeSpellAction(PlayerbotAI* ai, string spell) : CastMeleeSpellAction(ai, spell) {}
+        CastUnholyMeleeSpellAction(PlayerbotAI* ai, const string& spell) : CastMeleeSpellAction(ai, spell) {}
         virtual NextAction** getPrerequisites() {
             return NextAction::merge(NextAction::array(0, new NextAction("unholy presence"), NULL), CastMeleeSpellAction::getPrerequisites());
         }
@@ -57,7 +57,7 @@ namespace ai
     class CastFrostMeleeSpellAction : public CastMeleeSpellAction
     {
     public:
-        CastFrostMeleeSpellAction(PlayerbotAI* ai, string spell) : CastMeleeSpellAction(ai, spell) {}
+        CastFrostMeleeSpellAction(PlayerbotAI* ai, const string& spell) : CastMeleeSpellAction(ai, spell) {}
         virtual NextAction** getPrerequisites() {
             return NextAction::merge(NextAction::array(0, new NextAction("frost presence"), NULL), CastMeleeSpellAction::getPrerequisites());
         }
@@ -67,7 +67,7 @@ namespace ai
     class CastBloodMeleeSpellAction : public CastMeleeSpellAction
     {
     public:
-        CastBloodMeleeSpellAction(PlayerbotAI* ai, string spell) : CastMeleeSpellAction(ai, spell) {}
+        CastBloodMeleeSpellAction(PlayerbotAI* ai, const string& spell) : CastMeleeSpellAction(ai, spell) {}
         virtual NextAction** getPrerequisites() {
             return NextAction::merge(NextAction::array(0, new NextAction("blood presence"), NULL), CastMeleeSpellAction::getPrerequisites());
         }

@@ -25,22 +25,22 @@ public:
     float underPriceProbability;
     std::set<uint32> ignoreItemIds;
 
-    float GetSellPriceMultiplier(string category)
+    float GetSellPriceMultiplier(const string& category)
     {
         return GetCategoryParameter(sellPriceMultipliers, "PriceMultiplier.Sell", category, 1.0f);
     }
 
-    float GetBuyPriceMultiplier(string category)
+    float GetBuyPriceMultiplier(const string& category)
     {
         return GetCategoryParameter(buyPriceMultipliers, "PriceMultiplier.Buy", category, 1.0f);
     }
 
-    float GetItemPriceMultiplier(string name)
+    float GetItemPriceMultiplier(const string& name)
     {
         return GetCategoryParameter(itemPriceMultipliers, "PriceMultiplier.Item", name, 1.0f);
     }
 
-    int32 GetMaxAllowedAuctionCount(string category)
+    int32 GetMaxAllowedAuctionCount(const string& category)
     {
         return (int32)GetCategoryParameter(maxAuctionCount, "MaxAuctionCount", category, 5);
     }
@@ -66,7 +66,7 @@ public:
     }
 
 private:
-    float GetCategoryParameter(map<string, float>& cache, string type, string category, float defaultValue)
+    float GetCategoryParameter(map<string, float>& cache, const string& type, const string& category, float defaultValue)
     {
         if (cache.find(category) == cache.end())
         {

@@ -9,7 +9,7 @@ namespace ai
 
         virtual void InitTriggers(std::list<TriggerNode*> &triggers)
         {
-            for (list<string>::iterator i = supported.begin(); i != supported.end(); i++)
+            for (list<string>::iterator i = supported.begin(); i != supported.end(); ++i)
             {
                 string s = i->c_str();
 

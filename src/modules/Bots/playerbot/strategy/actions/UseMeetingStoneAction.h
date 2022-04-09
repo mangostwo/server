@@ -8,7 +8,7 @@ namespace ai
     class SummonAction : public MovementAction
     {
     public:
-        SummonAction(PlayerbotAI* ai, string name = "summon") : MovementAction(ai, name) {}
+        SummonAction(PlayerbotAI* ai, const string& name = "summon") : MovementAction(ai, name) {}
 
         virtual bool Execute(Event event);
 

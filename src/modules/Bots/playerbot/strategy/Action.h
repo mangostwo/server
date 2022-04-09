@@ -8,7 +8,7 @@ namespace ai
     class NextAction
     {
     public:
-        NextAction(string name, float relevance = 0.0f)
+        NextAction(const string &name, float relevance = 0.0f)
         {
             this->name = name;
             this->relevance = relevance;
@@ -49,7 +49,7 @@ namespace ai
     class Action : public AiNamedObject
     {
     public:
-        Action(PlayerbotAI* ai, string name = "action") : verbose(false), AiNamedObject(ai, name) { }
+        Action(PlayerbotAI* ai, const string &name = "action") : verbose(false), AiNamedObject(ai, name) { }
         virtual ~Action(void) {}
 
     public:
@@ -74,7 +74,7 @@ namespace ai
     class ActionNode
     {
     public:
-        ActionNode(string name, NextAction** prerequisites = NULL, NextAction** alternatives = NULL, NextAction** continuers = NULL)
+        ActionNode(const string &name, NextAction** prerequisites = NULL, NextAction** alternatives = NULL, NextAction** continuers = NULL)
         {
             this->action = NULL;
             this->name = name;
@@ -112,7 +112,7 @@ namespace ai
     class ActionBasket
     {
     public:
-        ActionBasket(ActionNode* action, float relevance, bool skipPrerequisites, Event event) :
+        ActionBasket(ActionNode* action, float relevance, bool skipPrerequisites, const Event &event) :
           action(action), relevance(relevance), skipPrerequisites(skipPrerequisites), event(event) {}
         virtual ~ActionBasket(void) {}
     public:

@@ -6,7 +6,7 @@ namespace ai
     // battle
     class CastBattleMeleeSpellAction : public CastMeleeSpellAction {
     public:
-        CastBattleMeleeSpellAction(PlayerbotAI* ai, string spell) : CastMeleeSpellAction(ai, spell) {}
+        CastBattleMeleeSpellAction(PlayerbotAI* ai, const string& spell) : CastMeleeSpellAction(ai, spell) {}
         virtual NextAction** getPrerequisites() {
             return NextAction::merge( NextAction::array(0, new NextAction("battle stance"), NULL), CastMeleeSpellAction::getPrerequisites());
         }
@@ -15,7 +15,7 @@ namespace ai
     // defensive
     class CastDefensiveMeleeSpellAction : public CastMeleeSpellAction {
     public:
-        CastDefensiveMeleeSpellAction(PlayerbotAI* ai, string spell) : CastMeleeSpellAction(ai, spell) {}
+        CastDefensiveMeleeSpellAction(PlayerbotAI* ai, const string& spell) : CastMeleeSpellAction(ai, spell) {}
         virtual NextAction** getPrerequisites() {
             return NextAction::merge( NextAction::array(0, new NextAction("defensive stance"), NULL), CastMeleeSpellAction::getPrerequisites());
         }

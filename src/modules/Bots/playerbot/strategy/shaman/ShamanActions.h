@@ -60,7 +60,7 @@ namespace ai
     class CastTotemAction : public CastBuffSpellAction
     {
     public:
-        CastTotemAction(PlayerbotAI* ai, string spell) : CastBuffSpellAction(ai, spell) {}
+        CastTotemAction(PlayerbotAI* ai, const string& spell) : CastBuffSpellAction(ai, spell) {}
         virtual bool isUseful() { return CastBuffSpellAction::isUseful() && !AI_VALUE2(bool, "has totem", name); }
     };
 

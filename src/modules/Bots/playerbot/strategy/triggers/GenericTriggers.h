@@ -28,7 +28,7 @@ namespace ai
     class StatAvailable : public Trigger
     {
     public:
-        StatAvailable(PlayerbotAI* ai, int amount, string name = "stat available") : Trigger(ai, name)
+        StatAvailable(PlayerbotAI* ai, int amount, const string &name = "stat available") : Trigger(ai, name)
         {
             this->amount = amount;
         }
@@ -109,7 +109,7 @@ namespace ai
     class SpellTrigger : public Trigger
     {
     public:
-        SpellTrigger(PlayerbotAI* ai, string spell, int checkInterval = 1) : Trigger(ai, spell, checkInterval)
+        SpellTrigger(PlayerbotAI* ai, const string &spell, int checkInterval = 1) : Trigger(ai, spell, checkInterval)
         {
             this->spell = spell;
         }
@@ -125,7 +125,7 @@ namespace ai
     class SpellCanBeCastTrigger : public SpellTrigger
     {
     public:
-        SpellCanBeCastTrigger(PlayerbotAI* ai, string spell) : SpellTrigger(ai, spell) {}
+        SpellCanBeCastTrigger(PlayerbotAI* ai, const string &spell) : SpellTrigger(ai, spell) {}
         virtual bool IsActive();
     };
 
@@ -133,7 +133,7 @@ namespace ai
     class InterruptSpellTrigger : public SpellTrigger
     {
     public:
-        InterruptSpellTrigger(PlayerbotAI* ai, string spell) : SpellTrigger(ai, spell) {}
+        InterruptSpellTrigger(PlayerbotAI* ai, const string &spell) : SpellTrigger(ai, spell) {}
         virtual bool IsActive();
     };
 
@@ -227,7 +227,7 @@ namespace ai
     class BuffTrigger : public SpellTrigger
     {
     public:
-        BuffTrigger(PlayerbotAI* ai, string spell) : SpellTrigger(ai, spell, 5) {}
+        BuffTrigger(PlayerbotAI* ai, const string &spell) : SpellTrigger(ai, spell, 5) {}
     public:
         virtual string GetTargetName() { return "self target"; }
         virtual bool IsActive();
@@ -236,7 +236,7 @@ namespace ai
     class BuffOnPartyTrigger : public BuffTrigger
     {
     public:
-        BuffOnPartyTrigger(PlayerbotAI* ai, string spell) : BuffTrigger(ai, spell) {}
+        BuffOnPartyTrigger(PlayerbotAI* ai, const string &spell) : BuffTrigger(ai, spell) {}
     public:
         virtual Value<Unit*>* GetTargetValue();
     };
@@ -259,7 +259,7 @@ namespace ai
     class DebuffTrigger : public BuffTrigger
     {
     public:
-        DebuffTrigger(PlayerbotAI* ai, string spell) : BuffTrigger(ai, spell) {
+        DebuffTrigger(PlayerbotAI* ai, const string &spell) : BuffTrigger(ai, spell) {
             checkInterval = 1;
         }
     public:
@@ -270,7 +270,7 @@ namespace ai
     class DebuffOnAttackerTrigger : public DebuffTrigger
     {
     public:
-        DebuffOnAttackerTrigger(PlayerbotAI* ai, string spell) : DebuffTrigger(ai, spell) {}
+        DebuffOnAttackerTrigger(PlayerbotAI* ai, const string &spell) : DebuffTrigger(ai, spell) {}
     public:
         virtual Value<Unit*>* GetTargetValue();
         virtual string getName() { return spell + " on attacker"; }
@@ -279,7 +279,7 @@ namespace ai
     class BoostTrigger : public BuffTrigger
     {
     public:
-        BoostTrigger(PlayerbotAI* ai, string spell, float balance = 50) : BuffTrigger(ai, spell)
+        BoostTrigger(PlayerbotAI* ai, const string &spell, float balance = 50) : BuffTrigger(ai, spell)
         {
             this->balance = balance;
         }
@@ -344,7 +344,7 @@ namespace ai
     class SnareTargetTrigger : public DebuffTrigger
     {
     public:
-        SnareTargetTrigger(PlayerbotAI* ai, string aura) : DebuffTrigger(ai, aura) {}
+        SnareTargetTrigger(PlayerbotAI* ai, const string &aura) : DebuffTrigger(ai, aura) {}
     public:
         virtual bool IsActive();
         virtual string getName() { return "target is moving"; }
@@ -383,7 +383,7 @@ namespace ai
 
     class ItemCountTrigger : public Trigger {
     public:
-        ItemCountTrigger(PlayerbotAI* ai, string item, int count) : Trigger(ai, item, 5) {
+        ItemCountTrigger(PlayerbotAI* ai, const string &item, int count) : Trigger(ai, item, 5) {
             this->item = item;
             this->count = count;
         }
@@ -398,7 +398,7 @@ namespace ai
 
     class HasAuraTrigger : public Trigger {
     public:
-        HasAuraTrigger(PlayerbotAI* ai, string spell) : Trigger(ai, spell, 5) {}
+        HasAuraTrigger(PlayerbotAI* ai, const string &spell) : Trigger(ai, spell, 5) {}
 
         virtual string GetTargetName() { return "self target"; }
         virtual bool IsActive();
@@ -445,7 +445,7 @@ namespace ai
     class HasCcTargetTrigger : public Trigger
     {
     public:
-        HasCcTargetTrigger(PlayerbotAI* ai, string name) : Trigger(ai, name) {}
+        HasCcTargetTrigger(PlayerbotAI* ai, const string &name) : Trigger(ai, name) {}
 
     public:
         virtual bool IsActive();
@@ -454,7 +454,7 @@ namespace ai
     class NoMovementTrigger : public Trigger
     {
     public:
-        NoMovementTrigger(PlayerbotAI* ai, string name) : Trigger(ai, name) {}
+        NoMovementTrigger(PlayerbotAI* ai, const string &name) : Trigger(ai, name) {}
 
     public:
         virtual bool IsActive();
@@ -509,7 +509,7 @@ namespace ai
     class HasItemForSpellTrigger : public Trigger
     {
     public:
-        HasItemForSpellTrigger(PlayerbotAI* ai, string spell) : Trigger(ai, spell) {}
+        HasItemForSpellTrigger(PlayerbotAI* ai, const string &spell) : Trigger(ai, spell) {}
 
     public:
         virtual bool IsActive();
@@ -527,7 +527,7 @@ namespace ai
     class InterruptEnemyHealerTrigger : public SpellTrigger
     {
     public:
-        InterruptEnemyHealerTrigger(PlayerbotAI* ai, string spell) : SpellTrigger(ai, spell) {}
+        InterruptEnemyHealerTrigger(PlayerbotAI* ai, const string &spell) : SpellTrigger(ai, spell) {}
     public:
         virtual Value<Unit*>* GetTargetValue();
         virtual string getName() { return spell + " on enemy healer"; }

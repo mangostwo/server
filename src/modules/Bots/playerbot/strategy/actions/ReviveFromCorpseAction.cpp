@@ -40,7 +40,7 @@ bool SpiritHealerAction::Execute(Event event)
     }
 
     list<ObjectGuid> npcs = AI_VALUE(list<ObjectGuid>, "nearest npcs");
-    for (list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); i++)
+    for (list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); ++i)
     {
         Unit* unit = ai->GetUnit(*i);
         if (unit && unit->IsSpiritHealer())

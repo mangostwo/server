@@ -125,7 +125,7 @@ void PlayerbotHolder::OnBotLogin(Player * const bot)
     ai->TellMaster("Hello!");
 }
 
-bool PlayerbotHolder::ProcessBotCommand(string cmd, ObjectGuid guid, bool admin, uint32 masterAccountId)
+bool PlayerbotHolder::ProcessBotCommand(const string &cmd, ObjectGuid guid, bool admin, uint32 masterAccountId)
 {
     // if (!sPlayerbotAIConfig.enabled || guid.IsEmpty())
     // {
@@ -325,7 +325,7 @@ list<string> PlayerbotHolder::HandlePlayerbotCommand(char* args, Player* master)
     }
 
     vector<string> chars = split(charnameStr, ',');
-    for (vector<string>::iterator i = chars.begin(); i != chars.end(); i++)
+    for (vector<string>::iterator i = chars.begin(); i != chars.end(); ++i)
     {
         string s = *i;
 

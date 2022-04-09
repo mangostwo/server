@@ -7,7 +7,7 @@ namespace ai
 {
     class QueryItemUsageAction : public InventoryAction {
     public:
-        QueryItemUsageAction(PlayerbotAI* ai, string name = "query item usage") : InventoryAction(ai, name) {}
+        QueryItemUsageAction(PlayerbotAI* ai, const string& name = "query item usage") : InventoryAction(ai, name) {}
         virtual bool Execute(Event event);
 
     protected:

@@ -10,7 +10,7 @@ void Queue::Push(ActionBasket *action)
 {
     if (action)
     {
-        for (std::list<ActionBasket*>::iterator iter = actions.begin(); iter != actions.end(); iter++)
+        for (std::list<ActionBasket*>::iterator iter = actions.begin(); iter != actions.end(); ++iter)
         {
             ActionBasket* basket = *iter;
             if (action->getAction()->getName() == basket->getAction()->getName())
@@ -42,7 +42,7 @@ ActionNode* Queue::Pop()
 {
     float max = -1;
     ActionBasket* selection = NULL;
-    for (std::list<ActionBasket*>::iterator iter = actions.begin(); iter != actions.end(); iter++)
+    for (std::list<ActionBasket*>::iterator iter = actions.begin(); iter != actions.end(); ++iter)
     {
         ActionBasket* basket = *iter;
         if (basket->getRelevance() > max)
@@ -65,7 +65,7 @@ ActionBasket* Queue::Peek()
 {
     float max = -1;
     ActionBasket* selection = NULL;
-    for (std::list<ActionBasket*>::iterator iter = actions.begin(); iter != actions.end(); iter++)
+    for (std::list<ActionBasket*>::iterator iter = actions.begin(); iter != actions.end(); ++iter)
     {
         ActionBasket* basket = *iter;
         if (basket->getRelevance() > max)

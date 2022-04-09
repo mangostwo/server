@@ -18,7 +18,7 @@ namespace ai
     class MoveToPositionAction : public MovementAction
     {
     public:
-        MoveToPositionAction(PlayerbotAI* ai, string qualifier) : MovementAction(ai, "move to position"), qualifier(qualifier)
+        MoveToPositionAction(PlayerbotAI* ai, const string& qualifier) : MovementAction(ai, "move to position"), qualifier(qualifier)
         {}
 
         virtual bool Execute(Event event);

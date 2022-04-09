@@ -151,7 +151,7 @@ bool compare_items_by_level(const Item* item1, const Item* item2)
 void InventoryAction::TellItems(map<uint32, int> itemMap)
 {
     list<ItemPrototype const*> items;
-    for (map<uint32, int>::iterator i = itemMap.begin(); i != itemMap.end(); i++)
+    for (map<uint32, int>::iterator i = itemMap.begin(); i != itemMap.end(); ++i)
     {
         items.push_back(sItemStorage.LookupEntry<ItemPrototype>(i->first));
     }
@@ -159,7 +159,7 @@ void InventoryAction::TellItems(map<uint32, int> itemMap)
     items.sort(compare_items);
 
     uint32 oldClass = -1;
-    for (list<ItemPrototype const*>::iterator i = items.begin(); i != items.end(); i++)
+    for (list<ItemPrototype const*>::iterator i = items.begin(); i != items.end(); ++i)
     {
         ItemPrototype const *proto = *i;
 
@@ -289,7 +289,7 @@ list<Item*> InventoryAction::parseItems(string text)
     }
 
     ItemIds ids = chat->parseItems(text);
-    for (ItemIds::iterator i = ids.begin(); i != ids.end(); i++)
+    for (ItemIds::iterator i = ids.begin(); i != ids.end(); ++i)
     {
         FindItemByIdVisitor visitor(*i);
         IterateItems(&visitor, ITERATE_ALL_ITEMS);

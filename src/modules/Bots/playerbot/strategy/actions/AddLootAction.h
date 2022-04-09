@@ -13,7 +13,7 @@ namespace ai
 
     class AddAllLootAction : public Action {
     public:
-        AddAllLootAction(PlayerbotAI* ai, string name = "add all loot") : Action(ai, name) {}
+        AddAllLootAction(PlayerbotAI* ai, const string &name = "add all loot") : Action(ai, name) {}
         virtual bool Execute(Event event);
         virtual bool isUseful();
 

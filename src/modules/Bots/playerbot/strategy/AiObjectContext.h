@@ -22,13 +22,13 @@ namespace ai
         virtual UntypedValue* GetUntypedValue(string name) { return valueContexts.GetObject(name, ai); }
 
         template<class T>
-        Value<T>* GetValue(string name)
+        Value<T>* GetValue(const string &name)
         {
             return dynamic_cast<Value<T>*>(GetUntypedValue(name));
         }
 
         template<class T>
-        Value<T>* GetValue(string name, string param)
+        Value<T>* GetValue(const string &name, const string &param)
         {
             return GetValue<T>((string(name) + "::" + param));
         }

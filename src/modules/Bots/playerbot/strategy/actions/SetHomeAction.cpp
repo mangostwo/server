@@ -32,7 +32,7 @@ bool SetHomeAction::Execute(Event event)
     }
 
     list<ObjectGuid> npcs = AI_VALUE(list<ObjectGuid>, "nearest npcs");
-    for (list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); i++)
+    for (list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); ++i)
     {
         Creature *unit = bot->GetNPCIfCanInteractWith(*i, UNIT_NPC_FLAG_INNKEEPER);
         if (!unit)

@@ -7,7 +7,7 @@ namespace ai
     class ValueInRangeTrigger : public Trigger
     {
     public:
-        ValueInRangeTrigger(PlayerbotAI* ai, string name, float maxValue, float minValue) : Trigger(ai, name) {
+        ValueInRangeTrigger(PlayerbotAI* ai, const string &name, float maxValue, float minValue) : Trigger(ai, name) {
             this->maxValue = maxValue;
             this->minValue = minValue;
         }
@@ -25,7 +25,7 @@ namespace ai
     class HealthInRangeTrigger : public ValueInRangeTrigger
     {
     public:
-        HealthInRangeTrigger(PlayerbotAI* ai, string name, float maxValue, float minValue = 0) :
+        HealthInRangeTrigger(PlayerbotAI* ai, const string &name, float maxValue, float minValue = 0) :
           ValueInRangeTrigger(ai, name, maxValue, minValue) {}
 
         virtual bool IsActive()
@@ -39,7 +39,7 @@ namespace ai
     class LowHealthTrigger : public HealthInRangeTrigger
     {
     public:
-        LowHealthTrigger(PlayerbotAI* ai, string name = "low health",
+        LowHealthTrigger(PlayerbotAI* ai, const string &name = "low health",
             float value = sPlayerbotAIConfig.lowHealth, float minValue = sPlayerbotAIConfig.criticalHealth) :
             HealthInRangeTrigger(ai, name, value, minValue) {}
 
@@ -70,7 +70,7 @@ namespace ai
     class PartyMemberLowHealthTrigger : public HealthInRangeTrigger
     {
     public:
-        PartyMemberLowHealthTrigger(PlayerbotAI* ai, string name = "party member low health", float value = sPlayerbotAIConfig.lowHealth, float minValue = sPlayerbotAIConfig.criticalHealth) :
+        PartyMemberLowHealthTrigger(PlayerbotAI* ai, const string &name = "party member low health", float value = sPlayerbotAIConfig.lowHealth, float minValue = sPlayerbotAIConfig.criticalHealth) :
             HealthInRangeTrigger(ai, name, value, minValue) {}
 
         virtual string GetTargetName() { return "party member to heal"; }
@@ -126,7 +126,7 @@ namespace ai
 
     class AoeHealTrigger : public Trigger {
     public:
-        AoeHealTrigger(PlayerbotAI* ai, string name, string type, int count) :
+        AoeHealTrigger(PlayerbotAI* ai, const string &name, const string &type, int count) :
             Trigger(ai, name), type(type), count(count) {}
     public:
         virtual bool IsActive();

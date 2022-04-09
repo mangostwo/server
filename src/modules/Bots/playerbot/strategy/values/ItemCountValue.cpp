@@ -11,7 +11,7 @@ list<Item*> InventoryItemValueBase::Find(string qualifier)
     Player* bot = InventoryAction::ai->GetBot();
 
     list<Item*> items = InventoryAction::parseItems(qualifier);
-    for (list<Item*>::iterator i = items.begin(); i != items.end(); i++)
+    for (list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
     {
         result.push_back(*i);
     }

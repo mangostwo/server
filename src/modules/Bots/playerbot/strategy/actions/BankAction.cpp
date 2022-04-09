@@ -12,7 +12,7 @@ bool BankAction::Execute(Event event)
     string text = event.getParam();
 
     list<ObjectGuid> npcs = AI_VALUE(list<ObjectGuid>, "nearest npcs");
-    for (list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); i++)
+    for (list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); ++i)
     {
         Unit* npc = ai->GetUnit(*i);
         if (!npc || !bot->GetNPCIfCanInteractWith(npc->GetObjectGuid(), UNIT_NPC_FLAG_BANKER))
@@ -39,7 +39,7 @@ bool BankAction::Execute(string text, Unit* bank)
     if (text[0] == '-')
     {
         ItemIds found = chat->parseItems(text);
-        for (ItemIds::iterator i = found.begin(); i != found.end(); i++)
+        for (ItemIds::iterator i = found.begin(); i != found.end(); ++i)
         {
             uint32 itemId = *i;
             result &= Withdraw(itemId);
@@ -53,7 +53,7 @@ bool BankAction::Execute(string text, Unit* bank)
             return false;
         }
 
-        for (list<Item*>::iterator i = found.begin(); i != found.end(); i++)
+        for (list<Item*>::iterator i = found.begin(); i != found.end(); ++i)
         {
             Item* item = *i;
             if (!item)

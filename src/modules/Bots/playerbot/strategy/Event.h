@@ -5,17 +5,11 @@ namespace ai
     class Event
     {
     public:
-        Event(Event const& other)
-        {
-            source = other.source;
-            param = other.param;
-            packet = other.packet;
-            owner = other.owner;
-        }
+        Event(Event const& other): source(other.source), param(other.param), packet(other.packet), owner(other.owner) {}
         Event() {}
-        Event(string source) : source(source) {}
-        Event(string source, string param, Player* owner = NULL) : source(source), param(param), owner(owner) {}
-        Event(string source, WorldPacket &packet, Player* owner = NULL) : source(source), packet(packet), owner(owner) {}
+        Event(const string &source) : source(source) {}
+        Event(const string &source, const string &param, Player* owner = NULL) : source(source), param(param), owner(owner) {}
+        Event(const string &source, WorldPacket &packet, Player* owner = NULL) : source(source), packet(packet), owner(owner) {}
         virtual ~Event() {}
 
     public:

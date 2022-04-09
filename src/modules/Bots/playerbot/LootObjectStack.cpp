@@ -11,11 +11,7 @@ LootTarget::LootTarget(ObjectGuid guid) : guid(guid), asOfTime(time(0))
 {
 }
 
-LootTarget::LootTarget(LootTarget const& other)
-{
-    guid = other.guid;
-    asOfTime = other.asOfTime;
-}
+LootTarget::LootTarget(LootTarget const& other): guid(other.guid), asOfTime(other.asOfTime) {};
 
 LootTarget& LootTarget::operator=(LootTarget const& other)
 {
@@ -143,13 +139,7 @@ WorldObject* LootObject::GetWorldObject(Player* bot)
     return NULL;
 }
 
-LootObject::LootObject(const LootObject& other)
-{
-    guid = other.guid;
-    skillId = other.skillId;
-    reqSkillValue = other.reqSkillValue;
-    reqItem = other.reqItem;
-}
+LootObject::LootObject(const LootObject& other): guid(other.guid), skillId(other.skillId), reqSkillValue(other.reqSkillValue), reqItem(other.reqItem) {};
 
 bool LootObject::IsLootPossible(Player* bot)
 {
@@ -247,7 +237,7 @@ vector<LootObject> LootObjectStack::OrderByDistance(float maxDistance)
 
     map<float, LootObject> sortedMap;
     LootTargetList safeCopy(availableLoot);
-    for (LootTargetList::iterator i = safeCopy.begin(); i != safeCopy.end(); i++)
+    for (LootTargetList::iterator i = safeCopy.begin(); i != safeCopy.end(); ++i)
     {
         ObjectGuid guid = i->guid;
         LootObject lootObject(bot, guid);
@@ -264,7 +254,7 @@ vector<LootObject> LootObjectStack::OrderByDistance(float maxDistance)
     }
 
     vector<LootObject> result;
-    for (map<float, LootObject>::iterator i = sortedMap.begin(); i != sortedMap.end(); i++)
+    for (map<float, LootObject>::iterator i = sortedMap.begin(); i != sortedMap.end(); ++i)
     {
         result.push_back(i->second);
     }

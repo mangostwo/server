@@ -22,7 +22,7 @@ namespace ai
     class Trigger : public AiNamedObject
     {
     public:
-        Trigger(PlayerbotAI* ai, string name = "trigger", int checkInterval = 1) : AiNamedObject(ai, name) {
+        Trigger(PlayerbotAI* ai, const string &name = "trigger", int checkInterval = 1) : AiNamedObject(ai, name) {
             this->checkInterval = checkInterval;
             ticksElapsed = 0;
         }
@@ -59,7 +59,7 @@ namespace ai
     class TriggerNode
     {
     public:
-        TriggerNode(string name, NextAction** handlers = NULL)
+        TriggerNode(const string &name, NextAction** handlers = NULL)
         {
             this->name = name;
             this->handlers = handlers;

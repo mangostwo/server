@@ -91,7 +91,7 @@ void FleeManager::calculatePossibleDestinations(list<FleePoint*> &points)
 
 void FleeManager::cleanup(list<FleePoint*> &points)
 {
-    for (list<FleePoint*>::iterator i = points.begin(); i != points.end(); i++)
+    for (list<FleePoint*>::iterator i = points.begin(); i != points.end(); ++i)
     {
         FleePoint* point = *i;
         delete point;
@@ -124,7 +124,7 @@ bool FleePoint::isBetterByAll(FleePoint* other)
 FleePoint* FleeManager::selectOptimalDestination(list<FleePoint*> &points)
 {
     FleePoint* byCreatures = NULL;
-    for (list<FleePoint*>::iterator i = points.begin(); i != points.end(); i++)
+    for (list<FleePoint*>::iterator i = points.begin(); i != points.end(); ++i)
     {
         FleePoint* point = *i;
         if (point->isReasonable() && (!byCreatures || point->isBetterByCreatures(byCreatures)))
@@ -134,7 +134,7 @@ FleePoint* FleeManager::selectOptimalDestination(list<FleePoint*> &points)
     }
 
     FleePoint* byAll = NULL;
-    for (list<FleePoint*>::iterator i = points.begin(); i != points.end(); i++)
+    for (list<FleePoint*>::iterator i = points.begin(); i != points.end(); ++i)
     {
         FleePoint* point = *i;
         if (point->isReasonable() && (!byAll || point->isBetterByAll(byAll)))

@@ -186,7 +186,7 @@ namespace ai
     class QueryNamedItemCountVisitor : public QueryItemCountVisitor
     {
     public:
-        QueryNamedItemCountVisitor(string name) : QueryItemCountVisitor(0)
+        QueryNamedItemCountVisitor(const string &name) : QueryItemCountVisitor(0)
         {
             this->name = name;
         }
@@ -208,7 +208,7 @@ namespace ai
 
     class FindUsableNamedItemVisitor : public FindUsableItemVisitor {
     public:
-        FindUsableNamedItemVisitor(Player* bot, string name) : FindUsableItemVisitor(bot)
+        FindUsableNamedItemVisitor(Player* bot, const string &name) : FindUsableItemVisitor(bot)
         {
             this->name = name;
         }

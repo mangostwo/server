@@ -40,7 +40,7 @@ void TellLosAction::ListUnits(string title, list<ObjectGuid> units)
 {
     ai->TellMaster(title);
 
-    for (list<ObjectGuid>::iterator i = units.begin(); i != units.end(); i++)
+    for (list<ObjectGuid>::iterator i = units.begin(); i != units.end(); ++i)
     {
         Unit* unit = ai->GetUnit(*i);
         if (unit)
@@ -54,7 +54,7 @@ void TellLosAction::ListGameObjects(string title, list<ObjectGuid> gos)
 {
     ai->TellMaster(title);
 
-    for (list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); i++)
+    for (list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); ++i)
     {
         GameObject* go = ai->GetGameObject(*i);
         if (go)

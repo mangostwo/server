@@ -23,7 +23,7 @@ bool TaxiAction::Execute(Event event)
     }
 
     list<ObjectGuid> units = *context->GetValue<list<ObjectGuid> >("nearest npcs");
-    for (list<ObjectGuid>::iterator i = units.begin(); i != units.end(); i++)
+    for (list<ObjectGuid>::iterator i = units.begin(); i != units.end(); ++i)
     {
         Creature *npc = bot->GetNPCIfCanInteractWith(*i, UNIT_NPC_FLAG_FLIGHTMASTER);
         if (!npc)
@@ -31,6 +31,10 @@ bool TaxiAction::Execute(Event event)
             continue;
         }
 
+        // If master in flight -> copy movement nodes
+        // If master not in flight -> Get taxi nodes from:
+        //   player->m_taxi?
+        //   `bool PlayerTaxi::LoadTaxiDestinationsFromString(const std::string& values, Team team)`
         if (movement.taxiNodes.empty())
         {
             ostringstream out;

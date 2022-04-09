@@ -15,17 +15,15 @@ namespace ai
             lastFollow = NULL;
         }
 
-        LastMovement(LastMovement& other)
-        {
-            taxiNodes = other.taxiNodes;
-            taxiMaster = other.taxiMaster;
-            lastFollow = other.lastFollow;
-            lastAreaTrigger = other.lastAreaTrigger;
-            lastMoveToX = other.lastMoveToX;
-            lastMoveToY = other.lastMoveToY;
-            lastMoveToZ = other.lastMoveToZ;
-            lastMoveToOri = other.lastMoveToOri;
-        }
+        LastMovement(LastMovement& other):
+            taxiNodes(other.taxiNodes),
+            taxiMaster(other.taxiMaster),
+            lastFollow(other.lastFollow),
+            lastAreaTrigger(other.lastAreaTrigger),
+            lastMoveToX(other.lastMoveToX),
+            lastMoveToY(other.lastMoveToY),
+            lastMoveToZ(other.lastMoveToZ),
+            lastMoveToOri(other.lastMoveToOri) {};
 
         void Set(Unit* lastFollow)
         {
