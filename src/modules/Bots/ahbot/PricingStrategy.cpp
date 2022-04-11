@@ -61,7 +61,7 @@ string PricingStrategy::ExplainSellPrice(ItemPrototype const* proto, uint32 auct
     uint32 untilTime = time(0);
     out << sAhBotConfig.GetItemPriceMultiplier(proto->Name1) << " (item const) * " <<
         auctionbot.GetCategoryMultiplier(category->GetName()) << " (random) * " <<
-        GetRarityPriceMultiplier(proto->ItemId) << " (rariry) * " <<
+        GetRarityPriceMultiplier(proto->ItemId) << " (rarity) * " <<
         GetCategoryPriceMultiplier(untilTime, auctionHouse) << " (category) * " <<
         GetItemPriceMultiplier(proto, untilTime, auctionHouse) << " (item) * " <<
         sAhBotConfig.GetSellPriceMultiplier(category->GetName()) << " (sell) * " <<

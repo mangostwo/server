@@ -114,6 +114,8 @@ bool PlayerbotAIConfig::Initialize()
     randomBotCombatStrategies = sConfig.GetStringDefault("AiPlayerbot.RandomBotCombatStrategies", "+dps,+attack weak");
     randomBotNonCombatStrategies = sConfig.GetStringDefault("AiPlayerbot.RandomBotNonCombatStrategies", "+grind,+move random,+loot");
 
+    spellDump = sConfig.GetBoolDefault("AiPlayerbot.SpellDump", false);
+
     commandPrefix = sConfig.GetStringDefault("AiPlayerbot.CommandPrefix", "");
 
     commandServerPort = sConfig.GetIntDefault("AiPlayerbot.CommandServerPort", 0);
@@ -127,12 +129,14 @@ bool PlayerbotAIConfig::Initialize()
         }
     }
 
-    CreateRandomBots();
+    if (sConfig.GetBoolDefault("AiPlayerbot.RandomBotAutoCreate", false))
+    {
+        CreateRandomBots();
+    }
     sLog.outString("AI Playerbot configuration loaded");
 
     return true;
 }
-
 
 bool PlayerbotAIConfig::IsInRandomAccountList(uint32 id)
 {
@@ -275,7 +279,6 @@ void PlayerbotAIConfig::SetValue(const string &name, string value)
         out >> iterationsPerTick;
     }
 }
-
 
 void PlayerbotAIConfig::CreateRandomBots()
 {

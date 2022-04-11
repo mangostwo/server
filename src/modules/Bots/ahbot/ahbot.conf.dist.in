@@ -20,6 +20,9 @@ AhBot.Enabled = 1
 # Should be used only if random bots are disabled
 # AhBot.GUID = 0
 
+AhBot.UpdateIntervalInSeconds = 300
+AhBot.History.Days = 30
+
 # 199 for 80, 80 for 70, 70 for 60, ..., 25 for 20
 AhBot.MaxItemLevel = 199
 # Same as level cap
@@ -28,10 +31,12 @@ AhBot.MaxRequiredLevel = 80
 # Ignore items by ID
 AhBot.IgnoreItemIds = 49283,52200,8494,6345,6891,2460
 
-AhBot.PriceMultiplier = 1.0
-AhBot.DefaultMinPrice = 20
-AhBot.PriceQualityMultiplier = 1.0
 AhBot.AlwaysAvailableMoney = 2000000
+AhBot.DefaultMinPrice = 20
+AhBot.MaxSellInterval = 28800 # 8 hours
+AhBot.PriceMultiplier = 1.0
+AhBot.PriceQualityMultiplier = 1.0
+AhBot.UnderPriceProbability = 0.05
 
 # Buy/sell delays
 AhBot.ItemBuyMinInterval = 7200

@@ -109,7 +109,7 @@ string WhoAction::QuerySkill(string text)
     return out.str();
 }
 
-string WhoAction::QuerySpec(const string& text)
+string WhoAction::QuerySpec(const string &text)
 {
     ostringstream out;
 

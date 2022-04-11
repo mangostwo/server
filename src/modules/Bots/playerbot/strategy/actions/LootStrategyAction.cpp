@@ -72,7 +72,7 @@ bool LootStrategyAction::Execute(Event event)
 }
 
 
-LootStrategy LootStrategyAction::String2LootStrategy(const string& strategy)
+LootStrategy LootStrategyAction::String2LootStrategy(const string &strategy)
 {
     if (strategy == "*" || strategy == "all")
     {

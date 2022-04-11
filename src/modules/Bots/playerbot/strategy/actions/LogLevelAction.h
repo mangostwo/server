@@ -11,7 +11,7 @@ namespace ai
 
     public:
         static string logLevel2string(LogLevel level);
-        static LogLevel string2logLevel(string level);
+        static LogLevel string2logLevel(const string &level);
     };
 
 }

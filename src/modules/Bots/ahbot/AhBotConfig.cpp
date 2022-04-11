@@ -7,13 +7,7 @@ using namespace std;
 
 INSTANTIATE_SINGLETON_1(AhBotConfig);
 
-AhBotConfig::AhBotConfig()
-{
-    enabled = false;
-    priceMultiplier = 1.0f;
-    priceQualityMultiplier = 1.0f;
-    underPriceProbability = 0.05f;
-}
+AhBotConfig::AhBotConfig(): enabled(false) {};
 
 template <class T>
 void LoadSet(const string& value, T &res)
@@ -33,13 +27,11 @@ void LoadSet(const string& value, T &res)
 
 bool AhBotConfig::Initialize()
 {
-    sLog.outString("Initializing AhBot by ike3, based on the original Playerbot by blueboy");
-
     const char* cfg_file = SYSCONFDIR"ahbot.conf";
 
     if (!config.SetSource(cfg_file))
     {
-        sLog.outString("AhBot is Disabled in %s", cfg_file);
+        sLog.outString("Failed to load config file %s", cfg_file);
         return false;
     }
 
@@ -63,11 +55,11 @@ bool AhBotConfig::Initialize()
         priceQualityMultiplier = config.GetFloatDefault("AhBot.PriceQualityMultiplier", 1.0f);
         underPriceProbability = config.GetFloatDefault("AhBot.UnderPriceProbability", 0.05f);
         LoadSet<set<uint32> >(config.GetStringDefault("AhBot.IgnoreItemIds", "49283,52200,8494,6345,6891,2460,37164,34835"), ignoreItemIds);
-        sLog.outString("AhBot loaded");
+        sLog.outString("AhBot module config loaded");
     }
     else
     {
-        sLog.outString("AhBot is Disabled in ahbot.conf");
+        sLog.outString("AhBot module is disabled in ahbot.conf");
     }
     return enabled;
 }

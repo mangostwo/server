@@ -29,7 +29,9 @@
 #include "Chat.h"
 #include "Language.h"
 #include "AuctionHouseBot/AuctionHouseBot.h"
-
+#ifdef ENABLE_PLAYERBOTS
+#include "AhBot.h"
+#endif
 
  /**********************************************************************
      Useful constants definition
@@ -49,6 +51,11 @@ static uint32 ahbotQualityIds[MAX_AUCTION_QUALITY] =
 
 bool ChatHandler::HandleAHBotRebuildCommand(char* args)
 {
+    if (!sAuctionBot.Enabled())
+    {
+        return false;
+    }
+
     bool all = false;
     if (*args)
     {

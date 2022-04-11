@@ -283,7 +283,7 @@ bool Engine::MultiplyAndPush(NextAction** actions, float forceRelevance, bool sk
     return pushed;
 }
 
-ActionResult Engine::ExecuteAction(const string& name)
+ActionResult Engine::ExecuteAction(const string &name)
 {
     bool result = false;
 
@@ -539,7 +539,7 @@ void Engine::LogAction(const char* format, ...)
     }
 }
 
-void Engine::ChangeStrategy(const string& names)
+void Engine::ChangeStrategy(const string &names)
 {
     vector<string> splitted = split(names, ',');
     for (vector<string>::iterator i = splitted.begin(); i != splitted.end(); ++i)

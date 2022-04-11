@@ -28,6 +28,10 @@ AiPlayerbot.RandomClassSpecProbability.4.2 = 10
 AiPlayerbot.RandomClassSpecProbability.5.0 = 40
 AiPlayerbot.RandomClassSpecProbability.5.1 = 40
 AiPlayerbot.RandomClassSpecProbability.5.2 = 20
+# Death Knight
+AiPlayerbot.RandomClassSpecProbability.6.0 = 10
+AiPlayerbot.RandomClassSpecProbability.6.1 = 5
+AiPlayerbot.RandomClassSpecProbability.6.2 = 5
 # Shaman
 AiPlayerbot.RandomClassSpecProbability.7.0 = 10
 AiPlayerbot.RandomClassSpecProbability.7.1 = 45
@@ -143,6 +147,8 @@ AiPlayerbot.RandomBotTeleLevel = 3
 #AiPlayerbot.MaxRandomBotInWorldTime = 1209600
 #AiPlayerbot.MinRandomBotRandomizeTime = 7200
 #AiPlayerbot.MaxRandomRandomizeTime = 1209600
+#AiPlayerbot.MinRandomBotReviveTime = 60
+#AiPlayerbot.MaxRandomReviveTime = 300
 #AiPlayerbot.MinRandomBotsPerInterval = 50
 #AiPlayerbot.MaxRandomBotsPerInterval = 100
 #AiPlayerbot.MinRandomBotsPriceChangeInterval = 7200
@@ -155,10 +161,11 @@ AiPlayerbot.RandomBotTeleLevel = 3
 #AiPlayerbot.RandomBotTeleportDistance = 1000
 
 # Debug switches
-#AiPlayerbot.SpellDump = 0
+#AiPlayerbot.DebugWhisper = 0
 #AiPlayerbot.LogInGroupOnly = 1
 #AiPlayerbot.LogValuesPerTick = 0
 #AiPlayerbot.RandomChangeMultiplier = 1
+#AiPlayerbot.SpellDump = 0
 
 # Command server port, 0 - disabled
 #AiPlayerbot.CommandServerPort = 8888

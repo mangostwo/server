@@ -70,7 +70,7 @@ enum BotState
 class PacketHandlingHelper
 {
 public:
-    void AddHandler(uint16 opcode, string handler);
+    void AddHandler(uint16 opcode, const string &handler);
     void Handle(ExternalEventHelper &helper);
     void AddPacket(const WorldPacket& packet);
 
@@ -132,7 +132,7 @@ public:
     Unit* GetUnit(ObjectGuid guid);
     GameObject* GetGameObject(ObjectGuid guid);
     bool TellMaster(ostringstream &stream, PlayerbotSecurityLevel securityLevel = PLAYERBOT_SECURITY_ALLOW_ALL) { return TellMaster(stream.str(), securityLevel); }
-    bool TellMaster(string text, PlayerbotSecurityLevel securityLevel = PLAYERBOT_SECURITY_ALLOW_ALL);
+    bool TellMaster(const string &text, PlayerbotSecurityLevel securityLevel = PLAYERBOT_SECURITY_ALLOW_ALL);
     bool TellMasterNoFacing(string text, PlayerbotSecurityLevel securityLevel = PLAYERBOT_SECURITY_ALLOW_ALL);
     void SpellInterrupted(uint32 spellid);
     uint32 CalculateGlobalCooldown(uint32 spellid);

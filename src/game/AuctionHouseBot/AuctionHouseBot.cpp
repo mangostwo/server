@@ -2212,7 +2212,7 @@ void AuctionHouseBot::Rebuild(bool all)
 void AuctionHouseBot::Update()
 {
     // nothing do...
-    if (!m_Buyer && !m_Seller)
+    if (!Enabled())
     {
         return;
     }
@@ -2249,5 +2249,10 @@ void AuctionHouseBot::Update()
             break;
         }
     }
+}
+
+bool AuctionHouseBot::Enabled()
+{
+    return (m_Buyer != NULL || m_Seller != NULL);
 }
 /** @} */

@@ -26,46 +26,46 @@ namespace ahbot
         virtual ~AhBot();
 
     public:
-        ObjectGuid GetAHBplayerGUID();
         void Init();
+        ObjectGuid GetAHBplayerGUID();
         void Update();
+        void ActivateNewThread();
+        void ExpireAll();
         void ForceUpdate();
-        void HandleCommand(string command);
-        void Won(AuctionEntry* entry) { AddToHistory(entry); }
-        void Expired(AuctionEntry* entry) {}
-
         double GetCategoryMultiplier(string category)
         {
             return categoryMultipliers[category];
         }
-
-        int32 GetSellPrice(const ItemPrototype* proto);
         int32 GetBuyPrice(const ItemPrototype* proto);
         double GetRarityPriceMultiplier(const ItemPrototype* proto);
+        int32 GetSellPrice(const ItemPrototype* proto);
+        string LookupItem(uint32 itemId);
+        string PrintAllStats();
+        void Won(AuctionEntry* entry) { AddToHistory(entry); }
 
     private:
         int Answer(int auction, Category* category, ItemBag* inAuctionItems);
         int AddAuctions(int auction, Category* category, ItemBag* inAuctionItems);
         int AddAuction(int auction, Category* category, const ItemPrototype* proto);
-        void Expire(int auction);
-        void PrintStats(int auction);
         void AddToHistory(AuctionEntry* entry, uint32 won = 0);
-        void CleanupHistory();
-        uint32 GetAvailableMoney(uint32 auctionHouse);
         void CheckCategoryMultipliers();
-        void updateMarketPrice(uint32 itemId, double price, uint32 auctionHouse);
-        bool IsBotAuction(uint32 bidder);
-        uint32 GetRandomBidder(uint32 auctionHouse);
-        void LoadRandomBots();
-        uint32 GetAnswerCount(uint32 itemId, uint32 auctionHouse, uint32 withinTime);
-        vector<AuctionEntry*> LoadAuctions(const AuctionHouseObject::AuctionEntryMap& auctionEntryMap, Category*& category,
-                int& auction);
+        void CleanupHistory();
+        void Expire(int auction);
         void FindMinPrice(const AuctionHouseObject::AuctionEntryMap& auctionEntryMap, AuctionEntry*& entry, Item*& item, uint32* minBid,
                 uint32* minBuyout);
+        uint32 GetAnswerCount(uint32 itemId, uint32 auctionHouse, uint32 withinTime);
+        uint32 GetAvailableMoney(uint32 auctionHouse);
         uint32 GetBuyTime(uint32 entry, uint32 itemId, uint32 auctionHouse, Category*& category, double priceLevel);
-        uint32 GetTime(string category, uint32 id, uint32 auctionHouse, uint32 type);
-        void SetTime(string category, uint32 id, uint32 auctionHouse, uint32 type, uint32 value);
+        uint32 GetRandomBidder(uint32 auctionHouse);
         uint32 GetSellTime(uint32 itemId, uint32 auctionHouse, Category*& category);
+        uint32 GetTime(string category, uint32 id, uint32 auctionHouse, uint32 type);
+        bool IsBotAuction(uint32 bidder);
+        vector<AuctionEntry*> LoadAuctions(const AuctionHouseObject::AuctionEntryMap& auctionEntryMap, Category*& category,
+                int& auction);
+        void LoadRandomBots();
+        string PrintStats(int auction);
+        void SetTime(string category, uint32 id, uint32 auctionHouse, uint32 type, uint32 value);
+        void updateMarketPrice(uint32 itemId, double price, uint32 auctionHouse);
 
     public:
         static uint32 auctionIds[MAX_AUCTIONS];

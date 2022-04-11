@@ -38,7 +38,7 @@ string LogLevelAction::logLevel2string(LogLevel level)
         return "debug";
     }
 }
-LogLevel LogLevelAction::string2logLevel(const string& level)
+LogLevel LogLevelAction::string2logLevel(const string &level)
 {
     if (level == "debug")
     {

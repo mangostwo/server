@@ -49,7 +49,7 @@ AiObjectContext* AiFactory::createAiObjectContext(Player* player, PlayerbotAI* a
     case CLASS_ROGUE:
         return new RogueAiObjectContext(ai);
         break;
-    /* TODO: Implement DK AI */
+    /* TODO: Implement Death Knights */
     // case CLASS_DEATH_KNIGHT:
     //     return new DKAiObjectContext(ai);
     //     break;

@@ -246,7 +246,7 @@ void PlayerbotAI::HandleCommand(uint32 type, const string& text, Player& fromPla
     string filtered = text;
     if (!sPlayerbotAIConfig.commandPrefix.empty())
     {
-        if (filtered.starts_with(sPlayerbotAIConfig.commandPrefix))
+        if (filtered.find(sPlayerbotAIConfig.commandPrefix) != 0)
         {
             return;
         }
@@ -260,7 +260,7 @@ void PlayerbotAI::HandleCommand(uint32 type, const string& text, Player& fromPla
         return;
     }
 
-    if (filtered.starts_with("who") && !GetSecurity()->CheckLevelFor(PLAYERBOT_SECURITY_ALLOW_ALL, type != CHAT_MSG_WHISPER, &fromPlayer))
+    if (filtered.find("who") != 0 && !GetSecurity()->CheckLevelFor(PLAYERBOT_SECURITY_ALLOW_ALL, type != CHAT_MSG_WHISPER, &fromPlayer))
     {
         return;
     }

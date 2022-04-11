@@ -49,6 +49,7 @@ public:
     std::string randomBotCombatStrategies, randomBotNonCombatStrategies;
     uint32 randomBotMinLevel, randomBotMaxLevel;
     float randomChangeMultiplier;
+    bool spellDump;
     uint32 specProbability[MAX_CLASSES][3];
     std::string commandPrefix;
 
@@ -56,8 +57,8 @@ public:
 
     int commandServerPort;
 
-    std::string GetValue(std::string name);
-    void SetValue(std::string name, std::string value);
+    std::string GetValue(const std::string &name);
+    void SetValue(const std::string &name, std::string value);
 
 private:
     void CreateRandomBots();
