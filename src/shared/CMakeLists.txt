@@ -40,8 +40,8 @@ set(SRC_GRP_COMMON
   Common/Common.cpp
   Common/Common.h
   Common/ServerDefines.h
-  Common/Gitrevision.cpp
-  Common/Gitrevision.h
+  Common/GitRevision.cpp
+  Common/GitRevision.h
 )
 source_group("Common" FILES ${SRC_GRP_COMMON})
 
