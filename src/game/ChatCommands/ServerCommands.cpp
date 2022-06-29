@@ -28,9 +28,7 @@
 #include "Config.h"
 #include "GitRevision.h"
 #include "SystemConfig.h"
-#include "BattleGroundMgr.h"
 #include "UpdateTime.h"
-#include "revision.h"
 #include "revision_data.h"
 
  /**********************************************************************
@@ -48,7 +46,7 @@ bool ChatHandler::HandleServerInfoCommand(char* /*args*/)
     uint32 updateTime = sWorldUpdateTime.GetLastUpdateTime();
 
     char const* full;
-    full = REVISION_NR;
+    full = GitRevision::GetProjectRevision();
     SendSysMessage(full);
 
     if (sScriptMgr.IsScriptLibraryLoaded())

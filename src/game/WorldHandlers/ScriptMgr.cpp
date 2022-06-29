@@ -48,8 +48,6 @@
 
 #include <cstring> /* std::strcmp */
 
-#include "revision.h"
-
 INSTANTIATE_SINGLETON_1(ScriptMgr);
 
 ScriptMgr::ScriptMgr() : m_scheduledScripts(0)
