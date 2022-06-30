@@ -1022,7 +1022,7 @@ void ChatHandler::SendSysMessage(const char* str)
     delete[] buf;
 }
 
-void ChatHandler::SendGlobalSysMessage(const char* str)
+void ChatHandler::SendGlobalSysMessage(const char* str, AccountTypes minSec)
 {
     // Chat output
     WorldPacket data;
@@ -1030,12 +1030,19 @@ void ChatHandler::SendGlobalSysMessage(const char* str)
     // need copy to prevent corruption by strtok call in LineFromMessage original string
     char* buf = mangos_strdup(str);
     char* pos = buf;
-    ObjectGuid guid = m_session ? m_session->GetPlayer()->GetObjectGuid() : ObjectGuid();
+    ObjectGuid senderGuid = m_session ? m_session->GetPlayer()->GetObjectGuid() : ObjectGuid();
 
     while (char* line = LineFromMessage(pos))
     {
-        ChatHandler::BuildChatPacket(data, CHAT_MSG_SYSTEM, line, LANG_UNIVERSAL, CHAT_TAG_NONE, guid);
-        sWorld.SendGlobalMessage(&data);
+        // m_session == null when we're accessing these command from the console.
+        ObjectGuid senderGuid;
+        if (m_session)
+        {
+            senderGuid = m_session->GetPlayer()->GetObjectGuid();
+        }
+
+        ChatHandler::BuildChatPacket(data, CHAT_MSG_SYSTEM, line, LANG_UNIVERSAL, CHAT_TAG_NONE, senderGuid);
+        sWorld.SendGlobalMessage(&data, minSec);
     }
 
     delete[] buf;
