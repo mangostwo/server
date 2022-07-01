@@ -552,9 +552,10 @@ void WorldSession::LogoutPlayer(bool Save)
         sSocialMgr.SendFriendStatus(_player, FRIEND_OFFLINE, _player->GetObjectGuid(), true);
         sSocialMgr.RemovePlayerSocial(_player->GetGUIDLow());
 
+        ///- Used by Eluna
 #ifdef ENABLE_ELUNA
         sEluna->OnLogout(_player);
-#endif
+#endif /* ENABLE_ELUNA */
 
         ///- Remove the player from the world
         // the player may not be in the world when logging out
@@ -1111,7 +1112,7 @@ void WorldSession::ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket* pac
     {
         return;
     }
-#endif
+#endif /* ENABLE_ELUNA */
 
     // need prevent do internal far teleports in handlers because some handlers do lot steps
     // or call code that can do far teleports in some conditions unexpectedly for generic way work code
