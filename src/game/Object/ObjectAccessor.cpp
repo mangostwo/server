@@ -27,9 +27,7 @@
 
 #include <forward_list>
 
-
-Unit*
-ObjectAccessor::GetUnit(WorldObject const& u, ObjectGuid guid)
+Unit* ObjectAccessor::GetUnit(WorldObject const& u, ObjectGuid guid)
 {
     if (!guid)
     {
