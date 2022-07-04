@@ -323,8 +323,7 @@ int WorldSocket::handle_input(ACE_HANDLE)
     {
         case -1 :
         {
-            if ((errno == EWOULDBLOCK) ||
-                (errno == EAGAIN))
+            if ((errno == EWOULDBLOCK) || (errno == EAGAIN))
             {
                 return Update();                            // interesting line ,isn't it ?
             }

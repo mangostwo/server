@@ -839,6 +839,8 @@ ChatCommand* ChatHandler::getCommandTable()
         { "repairitems",    SEC_GAMEMASTER,     true,  &ChatHandler::HandleRepairitemsCommand,         "", NULL },
         { "stable",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleStableCommand,              "", NULL },
         { "waterwalk",      SEC_GAMEMASTER,     false, &ChatHandler::HandleWaterwalkCommand,           "", NULL },
+        { "freezeplayer",   SEC_GAMEMASTER,     false, &ChatHandler::HandleFreezePlayerCommand,        "", NULL },
+        { "unfreezeplayer", SEC_GAMEMASTER,     false, &ChatHandler::HandleUnfreezePlayerCommand,      "", NULL },
         { "quit",           SEC_CONSOLE,        true,  &ChatHandler::HandleQuitCommand,                "", NULL },
         { "gearscore",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleShowGearScoreCommand,       "", NULL },
         { "mmap",           SEC_GAMEMASTER,     false, NULL,                                           "", mmapCommandTable },
@@ -1027,7 +1029,7 @@ void ChatHandler::SendSysMessage(const char* str)
     delete[] buf;
 }
 
-void ChatHandler::SendGlobalSysMessage(const char* str)
+void ChatHandler::SendGlobalSysMessage(const char* str, AccountTypes minSec)
 {
     // Chat output
     WorldPacket data;
@@ -1035,12 +1037,19 @@ void ChatHandler::SendGlobalSysMessage(const char* str)
     // need copy to prevent corruption by strtok call in LineFromMessage original string
     char* buf = mangos_strdup(str);
     char* pos = buf;
-    ObjectGuid guid = m_session ? m_session->GetPlayer()->GetObjectGuid() : ObjectGuid();
+    ObjectGuid senderGuid = m_session ? m_session->GetPlayer()->GetObjectGuid() : ObjectGuid();
 
     while (char* line = LineFromMessage(pos))
     {
-        ChatHandler::BuildChatPacket(data, CHAT_MSG_SYSTEM, line, LANG_UNIVERSAL, CHAT_TAG_NONE, guid);
-        sWorld.SendGlobalMessage(&data);
+        // m_session == null when we're accessing these command from the console.
+        ObjectGuid senderGuid;
+        if (m_session)
+        {
+            senderGuid = m_session->GetPlayer()->GetObjectGuid();
+        }
+
+        ChatHandler::BuildChatPacket(data, CHAT_MSG_SYSTEM, line, LANG_UNIVERSAL, CHAT_TAG_NONE, senderGuid);
+        sWorld.SendGlobalMessage(&data, minSec);
     }
 
     delete[] buf;
@@ -3726,7 +3735,7 @@ uint32 ChatHandler::ExtractAccountId(char** args, std::string* accountName /*= N
     else
     {
         account_name = account_str;
-        if (!AccountMgr::normalizeString(account_name))
+        if (!Utf8ToUpperOnlyLatin(account_name))
         {
             PSendSysMessage(LANG_ACCOUNT_NOT_EXIST, account_name.c_str());
             SetSentErrorMessage(true);
@@ -4266,3 +4275,37 @@ template void ChatHandler::ShowNpcOrGoSpawnInformation<GameObject>(uint32 guid);
 
 template std::string ChatHandler::PrepareStringNpcOrGoSpawnInformation<Creature>(uint32 guid);
 template std::string ChatHandler::PrepareStringNpcOrGoSpawnInformation<GameObject>(uint32 guid);
+
+bool AddAuraToPlayer(const SpellEntry* spellInfo, Unit* target, WorldObject* caster)
+{
+    // We assume the spellInfo has been checked and teh spell has aura effects
+    /*
+        if (!IsSpellAppliesAura(spellInfo, (1 << EFFECT_INDEX_0) | (1 << EFFECT_INDEX_1) | (1 << EFFECT_INDEX_2)) &&
+        !spellInfo->HasSpellEffect(SPELL_EFFECT_PERSISTENT_AREA_AURA))
+    */
+    if (!spellInfo)
+    {
+        return false;
+    }
+
+    SpellAuraHolder* holder = CreateSpellAuraHolder(spellInfo, target, caster);
+
+    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        uint8 eff = spellInfo->Effect[i];
+        if (eff >= TOTAL_SPELL_EFFECTS)
+        {
+            continue;
+        }
+        if (IsAreaAuraEffect(eff) ||
+            eff == SPELL_EFFECT_APPLY_AURA ||
+            eff == SPELL_EFFECT_PERSISTENT_AREA_AURA)
+        {
+            Aura* aur = CreateAura(spellInfo, SpellEffectIndex(i), NULL, holder, target);
+            holder->AddAura(aur, SpellEffectIndex(i));
+        }
+    }
+    target->AddSpellAuraHolder(holder);
+
+    return true;
+}

@@ -78,7 +78,7 @@
 #include "DisableMgr.h"
 #include "Language.h"
 #include "CommandMgr.h"
-#include "revision.h"
+#include "GitRevision.h"
 #include "UpdateTime.h"
 #include "GameTime.h"
 
@@ -1688,14 +1688,15 @@ void World::showFooter()
         "_______________________________________________________\n"
         "\n"
         "        Server Version : %s\n"
-        "      Database Version : Rel%i.%i.%i\n"
+        "      Database Version : Rel%s.%s.%s\n"
         "\n"
         "    Supporting Clients : %s\n"
         "                Builds : %s\n"
         "\n"
         "         Module Status -\n%s\n"
         "_______________________________________________________\n"
-        , REVISION_NR, WORLD_DB_VERSION_NR, WORLD_DB_STRUCTURE_NR, WORLD_DB_CONTENT_NR, thisClientVersion.c_str(), thisClientBuilds.c_str(), sModules.c_str());
+        , GitRevision::GetProductVersionStr(), GitRevision::GetWorldDBVersion(), GitRevision::GetWorldDBStructure(), GitRevision::GetWorldDBContent(),
+            thisClientVersion.c_str(), thisClientBuilds.c_str(), sModules.c_str());
 }
 
 void World::DetectDBCLang()
@@ -1988,13 +1989,17 @@ void World::SendWorldText(int32 string_id, ...)
     va_end(ap);
 }
 
-/// Sends a packet to all players with optional team and instance restrictions
-void World::SendGlobalMessage(WorldPacket* packet)
+/// Sends a packet to all players with optional account access level restrictions
+void World::SendGlobalMessage(WorldPacket* packet, AccountTypes minSec)
 {
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
     {
         if (WorldSession* session = itr->second)
         {
+            if (session->GetSecurity() < minSec)
+            {
+                continue;
+            }
             Player* player = session->GetPlayer();
             if (player && player->IsInWorld())
             {

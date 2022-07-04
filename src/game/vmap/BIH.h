@@ -25,17 +25,17 @@
 #ifndef MANGOS_H_BIH
 #define MANGOS_H_BIH
 
+#include <G3D/Vector3.h>
+#include <G3D/Ray.h>
+#include <G3D/AABox.h>
+
+#include <Platform/Define.h>
+
 #include <stdexcept>
 #include <vector>
 #include <algorithm>
 #include <limits>
 #include <cmath>
-
-#include <Platform/Define.h>
-
-#include <G3D/Vector3.h>
-#include <G3D/Ray.h>
-#include <G3D/AABox.h>
 
 #define MAX_STACK_SIZE 64
 
@@ -188,12 +188,11 @@ class BIH
         {
             float intervalMin = -1.f;
             float intervalMax = -1.f;
-            Vector3 org = r.origin();
-            Vector3 dir = r.direction();
-            Vector3 invDir;
+            Vector3 const& org = r.origin();
+            Vector3 const& dir = r.direction();
+            Vector3 const& invDir = r.invDirection();
             for (int i = 0; i < 3; ++i)
             {
-                invDir[i] = 1.f / dir[i];
                 if (G3D::fuzzyNe(dir[i], 0.0f))
                 {
                     float t1 = (bounds.low()[i]  - org[i]) * invDir[i];

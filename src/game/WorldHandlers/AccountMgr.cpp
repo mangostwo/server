@@ -35,12 +35,26 @@ extern DatabaseType LoginDatabase;
 
 INSTANTIATE_SINGLETON_1(AccountMgr);
 
+/**
+ * The AccountMgr constructor
+ */
 AccountMgr::AccountMgr()
 {}
 
+/**
+ * The AccountMgr destructor
+ */
 AccountMgr::~AccountMgr()
 {}
 
+/**
+ * It creates an account
+ *
+ * @param username The username of the account to create.
+ * @param password The password you want to set for the account.
+ *
+ * @return AOR_OK
+ */
 AccountOpResult AccountMgr::CreateAccount(std::string username, std::string password)
 {
     if (utf8length(username) > MAX_ACCOUNT_STR)
@@ -48,8 +62,8 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
         return AOR_NAME_TOO_LONG;                            // username's too long
     }
 
-    normalizeString(username);
-    normalizeString(password);
+    Utf8ToUpperOnlyLatin(username);
+    Utf8ToUpperOnlyLatin(password);
 
     if (GetId(username))
     {
@@ -67,6 +81,15 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
     return AOR_OK;                                          // everything's fine
 }
 
+/**
+ * It creates an account
+ *
+ * @param username The username of the account to create.
+ * @param password The password you want to set for the account.
+ * @param expansion 0 = Classic, 1 = TBC, 2 = WOTLK, 3 = Cataclysm
+ *
+ * @return AOR_OK
+ */
 AccountOpResult AccountMgr::CreateAccount(std::string username, std::string password, uint32 expansion)
 {
     if (utf8length(username) > MAX_ACCOUNT_STR)
@@ -74,8 +97,8 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
         return AOR_NAME_TOO_LONG;                           // username's too long
     }
 
-    normalizeString(username);
-    normalizeString(password);
+    Utf8ToUpperOnlyLatin(username);
+    Utf8ToUpperOnlyLatin(password);
 
     if (GetId(username))
     {
@@ -91,6 +114,13 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
     return AOR_OK;                                          // everything's fine
 }
 
+/**
+ * It deletes an account from the database
+ *
+ * @param accid The account ID of the account to delete.
+ *
+ * @return AOR_OK
+ */
 AccountOpResult AccountMgr::DeleteAccount(uint32 accid)
 {
     QueryResult* result = LoginDatabase.PQuery("SELECT 1 FROM `account` WHERE `id`='%u'", accid);
@@ -138,6 +168,15 @@ AccountOpResult AccountMgr::DeleteAccount(uint32 accid)
     return AOR_OK;
 }
 
+/**
+ * It changes the username and password of an account
+ *
+ * @param accid The account ID of the account you want to change the username of.
+ * @param new_uname The new username
+ * @param new_passwd The new password for the account.
+ *
+ * @return AOR_OK
+ */
 AccountOpResult AccountMgr::ChangeUsername(uint32 accid, std::string new_uname, std::string new_passwd)
 {
     QueryResult* result = LoginDatabase.PQuery("SELECT 1 FROM `account` WHERE `id`='%u'", accid);
@@ -157,8 +196,8 @@ AccountOpResult AccountMgr::ChangeUsername(uint32 accid, std::string new_uname, 
         return AOR_PASS_TOO_LONG;
     }
 
-    normalizeString(new_uname);
-    normalizeString(new_passwd);
+    Utf8ToUpperOnlyLatin(new_uname);
+    Utf8ToUpperOnlyLatin(new_passwd);
 
     std::string safe_new_uname = new_uname;
     LoginDatabase.escape_string(safe_new_uname);
@@ -172,6 +211,14 @@ AccountOpResult AccountMgr::ChangeUsername(uint32 accid, std::string new_uname, 
     return AOR_OK;
 }
 
+/**
+ * It takes a username and password, and updates the database with the new password
+ *
+ * @param accid The account ID of the account you want to change the password of.
+ * @param new_passwd The new password to set for the account.
+ *
+ * @return AOR_OK
+ */
 AccountOpResult AccountMgr::ChangePassword(uint32 accid, std::string new_passwd)
 {
     std::string username;
@@ -186,8 +233,8 @@ AccountOpResult AccountMgr::ChangePassword(uint32 accid, std::string new_passwd)
         return AOR_PASS_TOO_LONG;
     }
 
-    normalizeString(username);
-    normalizeString(new_passwd);
+    Utf8ToUpperOnlyLatin(username);
+    Utf8ToUpperOnlyLatin(new_passwd);
 
     // also reset s and v to force update at next realmd login
     if (!LoginDatabase.PExecute("UPDATE `account` SET `v`='0', `s`='0', `sha_pass_hash`='%s' WHERE `id`='%u'",
@@ -199,6 +246,13 @@ AccountOpResult AccountMgr::ChangePassword(uint32 accid, std::string new_passwd)
     return AOR_OK;
 }
 
+/**
+ * It returns the account ID of the account with the given username.
+ *
+ * @param username The username of the account you want to get the ID of.
+ *
+ * @return The account id of the account with the username that was passed in.
+ */
 uint32 AccountMgr::GetId(std::string username)
 {
     LoginDatabase.escape_string(username);
@@ -215,6 +269,13 @@ uint32 AccountMgr::GetId(std::string username)
     }
 }
 
+/**
+ * It returns the security level of the account with the given account ID
+ *
+ * @param acc_id The account ID of the account you want to get the security level of.
+ *
+ * @return The security level of the account.
+ */
 AccountTypes AccountMgr::GetSecurity(uint32 acc_id)
 {
     QueryResult* result = LoginDatabase.PQuery("SELECT `gmlevel` FROM `account` WHERE `id` = '%u'", acc_id);
@@ -228,6 +289,14 @@ AccountTypes AccountMgr::GetSecurity(uint32 acc_id)
     return SEC_PLAYER;
 }
 
+/**
+ * It gets the account name from the database
+ *
+ * @param acc_id The account ID of the account you want to get the name of.
+ * @param name The name of the account to be checked.
+ *
+ * @return The name of the account.
+ */
 bool AccountMgr::GetName(uint32 acc_id, std::string& name)
 {
     QueryResult* result = LoginDatabase.PQuery("SELECT `username` FROM `account` WHERE `id` = '%u'", acc_id);
@@ -241,6 +310,13 @@ bool AccountMgr::GetName(uint32 acc_id, std::string& name)
     return false;
 }
 
+/**
+ * It returns the number of characters on an account.
+ *
+ * @param acc_id The account ID of the account you want to check.
+ *
+ * @return The number of characters on the account.
+ */
 uint32 AccountMgr::GetCharactersCount(uint32 acc_id)
 {
     // check character count
@@ -258,6 +334,14 @@ uint32 AccountMgr::GetCharactersCount(uint32 acc_id)
     }
 }
 
+/**
+ * It takes a username and password, and returns true if the password is correct
+ *
+ * @param accid The account ID of the account you want to check the password for.
+ * @param passwd The password that the user entered.
+ *
+ * @return The account id of the account that is being logged in.
+ */
 bool AccountMgr::CheckPassword(uint32 accid, std::string passwd)
 {
     std::string username;
@@ -266,8 +350,8 @@ bool AccountMgr::CheckPassword(uint32 accid, std::string passwd)
         return false;
     }
 
-    normalizeString(passwd);
-    normalizeString(username);
+    Utf8ToUpperOnlyLatin(passwd);
+    Utf8ToUpperOnlyLatin(username);
 
     QueryResult* result = LoginDatabase.PQuery("SELECT 1 FROM `account` WHERE `id`='%u' AND `sha_pass_hash`='%s'", accid, CalculateShaPassHash(username, passwd).c_str());
     if (result)
@@ -279,24 +363,15 @@ bool AccountMgr::CheckPassword(uint32 accid, std::string passwd)
     return false;
 }
 
-bool AccountMgr::normalizeString(std::string& utf8str)
-{
-    wchar_t wstr_buf[MAX_ACCOUNT_STR + 1];
-    size_t wstr_len = MAX_ACCOUNT_STR;
-
-    if (!Utf8toWStr(utf8str, wstr_buf, wstr_len))
-    {
-        return false;
-    }
-
-    for (uint32 i = 0; i <= wstr_len; ++i)
-    {
-        wstr_buf[i] = wcharToUpperOnlyLatin(wstr_buf[i]);
-    }
-
-    return WStrToUtf8(wstr_buf, wstr_len, utf8str);
-}
-
+/**
+ * It takes a username and password, concatenates them with a colon, and then hashes the result with
+ * SHA1
+ *
+ * @param name The account name
+ * @param password The password you want to use for the account.
+ *
+ * @return The SHA1 hash of the username and password.
+ */
 std::string AccountMgr::CalculateShaPassHash(std::string& name, std::string& password)
 {
     Sha1Hash sha;

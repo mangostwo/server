@@ -34,11 +34,12 @@
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "Config/Config.h"
+#include "GitRevision.h"
 #include "ProgressBar.h"
 #include "Log.h"
 #include "SystemConfig.h"
 #include "AuctionHouseBot.h"
-#include "revision.h"
+#include "revision_data.h"
 #include "World.h"
 #include "Util.h"
 #include "DBCStores.h"
@@ -298,7 +299,7 @@ int main(int argc, char** argv)
                 cfg_file = cmd_opts.opt_arg();
                 break;
             case 'v':
-                printf("%s\n", REVISION_NR);
+                printf("%s\n", GitRevision::GetProjectRevision());
                 return 0;
             case 's':
             {
@@ -384,11 +385,12 @@ int main(int argc, char** argv)
     }
 #endif
 
-    sLog.outString("%s [world-daemon]", REVISION_NR);
+    sLog.outString("%s [world-daemon]", GitRevision::GetProjectRevision());
+    sLog.outString("%s", GitRevision::GetFullRevision());
     print_banner();
     sLog.outString("Using configuration file %s.", cfg_file);
 
-    DETAIL_LOG("%s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
+    DETAIL_LOG("Using SSL version: %s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
     if (SSLeay() < 0x009080bfL)
     {
         DETAIL_LOG("WARNING: Outdated version of OpenSSL lib. Logins to server may not work!");

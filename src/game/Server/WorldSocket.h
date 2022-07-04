@@ -67,8 +67,8 @@ typedef ACE_Acceptor< WorldSocket, ACE_SOCK_ACCEPTOR > WorldAcceptor;
  * The class uses reference counting.
  *
  * For output the class uses one buffer (64K usually) and
- * a queue where it stores packet if there is no place on
- * the queue. The reason this is done, is because the server
+ * a queue where it stores packet if there is no space left on
+ * the buffer. The reason this is done, is because the server
  * does really a lot of small-size writes to it, and it doesn't
  * scale well to allocate memory for every. When something is
  * written to the output buffer the socket is not immediately
