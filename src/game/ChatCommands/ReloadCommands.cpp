@@ -392,7 +392,7 @@ bool ChatHandler::HandleReloadLootTemplatesProspectingCommand(char* /*args*/)
     sLog.outString("Re-Loading Loot Tables... (`prospecting_loot_template`)");
     LoadLootTemplates_Prospecting();
     LootTemplates_Prospecting.CheckLootRefs();
-    SendGlobalSysMessage("DB table `prospecting_loot_template` reloaded.");
+    SendGlobalSysMessage("DB table `prospecting_loot_template` reloaded.", SEC_MODERATOR);
     return true;
 }
 
@@ -988,7 +988,7 @@ bool ChatHandler::HandleReloadMailLevelRewardCommand(char* /*args*/)
 {
     sLog.outString("Re-Loading Player level dependent mail rewards...");
     sObjectMgr.LoadMailLevelRewards();
-    SendGlobalSysMessage("DB table `mail_level_reward` reloaded.");
+    SendGlobalSysMessage("DB table `mail_level_reward` reloaded.", SEC_MODERATOR);
     return true;
 }
 
