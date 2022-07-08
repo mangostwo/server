@@ -1,8 +1,12 @@
 [<img src='https://www.getmangos.eu/!assets_mangos/currentlogo.gif' width="48" border=0>][8]
 [<img src='https://www.getmangos.eu/!assets_mangos/logo2.png' border=0>][3]
+[<img alt="Latest GitHub release" src="https://img.shields.io/github/release/mangostwo/server.svg?style=flat-square" border=0 valign="top"/>][60]
+[<img src="https://img.shields.io/github/last-commit/mangostwo/server.svg?style=flat-square&logo=github&logoColor=white"
+alt="GitHub last commit" border=0 valign="top"/>][61]
+[<img alt="Downloads on GitHub" src="https://img.shields.io/github/downloads/mangostwo/server/total.svg?style=flat-square" border=0 valign="top"/>][61]
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B>Build Status:</b>
- Linux/MAC: [<img src='https://travis-ci.com/mangostwo/server.png' border=0 valign="middle">][10]
+ Linux/MAC: [<img src='https://github.com/mangostwo/server/actions/workflows/core_build.yml/badge.svg' border=0 valign="middle">][10]
  Windows: [<img src='https://ci.appveyor.com/api/projects/status/github/mangostwo/server?branch=master&svg=true' border=0 valign="middle">][11]
  <br><b>Repository Status:</b> 
 [<img src='https://api.codacy.com/project/badge/Grade/3beb2a2614334f1fa62283cf2f6509d2' border=0 valign="middle"/>][12]
@@ -203,3 +207,6 @@ World of Warcraft, and all related art, images, and lore are copyright [Blizzard
 [53]: http://www.zlib.net/ "Zlib"
 [54]: http://www.bzip.org/ "Bzip2"
 [55]: http://slproweb.com/products/Win32OpenSSL.html "OpenSSL for Windows"
+[60]: https://github.com/mangostwo/server/releases/latest
+[61]: https://github.com/mangostwo/server/releases
+[62]: https://github.com/mangostwo/server/commits/master
