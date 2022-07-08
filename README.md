@@ -175,7 +175,7 @@ World of Warcraft, and all related art, images, and lore are copyright [Blizzard
 [7]: http://www.cppreference.com/ "C / C++ reference"
 [8]: https://github.com/mangos/MaNGOS/blob/master/mangosFamily.md "The MaNGOS family of Icons"
 [9]: https://discord.gg/fPxMjHS8xs "Our community hub on Discord"
-[10]: https://travis-ci.com/github/mangostwo/server/builds "Travis CI - Linux/MAC build status"
+[10]: https://github.com/mangostwo/server/actions/workflows/core_build.yml "Github Actions - Linux/MAC build status"
 [11]: https://ci.appveyor.com/project/MaNGOS/server-l6b0u/history "AppVeyor Scan - Windows build status"
 [12]: https://app.codacy.com/gh/mangostwo/server/dashboard "Codacy Code Status"
 [13]: https://www.codefactor.io/repository/github/mangostwo/server "Codefactor Code Status"
