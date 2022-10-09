@@ -30,24 +30,31 @@
 #ifdef PACKAGE
 #undef PACKAGE
 #endif // PACKAGE
+
 #ifdef PACKAGE_BUGREPORT
 #undef PACKAGE_BUGREPORT
 #endif // PACKAGE_BUGREPORT
+
 #ifdef PACKAGE_NAME
 #undef PACKAGE_NAME
 #endif // PACKAGE_NAME
+
 #ifdef PACKAGE_STRING
 #undef PACKAGE_STRING
 #endif // PACKAGE_STRING
+
 #ifdef PACKAGE_TARNAME
 #undef PACKAGE_TARNAME
 #endif // PACKAGE_TARNAME
+
 #ifdef PACKAGE_VERSION
 #undef PACKAGE_VERSION
 #endif // PACKAGE_VERSION
+
 #ifdef VERSION
 #undef VERSION
 #endif // VERSION
+
 #undef PACKAGE
 #undef PACKAGE_BUGREPORT
 #undef PACKAGE_NAME
@@ -65,6 +72,7 @@
 #  pragma warning(disable:4244)                             // 'argument' : conversion from 'type1' to 'type2', possible loss of data
 #  pragma warning(disable:4355)                             // 'this' : used in base member initializer list
 #endif                                                      // __SHOW_STUPID_WARNINGS__
+
 #endif                                                      // __GNUC__
 
 #include "Utilities/UnorderedMapSet.h"
@@ -217,7 +225,7 @@ enum LocaleConstant
     LOCALE_zhTW = 5,
     LOCALE_esES = 6,
     LOCALE_esMX = 7,
-    LOCALE_ruRU = 8,
+    LOCALE_ruRU = 8
 };
 
 #define MAX_LOCALE 9

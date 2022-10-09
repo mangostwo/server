@@ -41,6 +41,7 @@
 #else
 #define WINADVAPI
 #endif
+
 #endif
 
 extern int main(int argc, char** argv);

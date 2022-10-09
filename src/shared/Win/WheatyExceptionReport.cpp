@@ -361,6 +361,7 @@ void WheatyExceptionReport::GenerateExceptionReport(
              pExceptionRecord->ExceptionAddress,
              section, offset, szFaultingModule);
 #endif
+
 #ifdef _M_X64
     _tprintf(_T("Fault address:  %016I64X %02X:%016I64X %s\r\n"),
              pExceptionRecord->ExceptionAddress,
@@ -639,9 +640,11 @@ void WheatyExceptionReport::WriteStackDetails(
 #ifdef _M_IX86
             _tprintf(_T("%04X:%08X %s"), section, offset, szModule);
 #endif
+
 #ifdef _M_X64
             _tprintf(_T("%04X:%016I64X %s"), section, offset, szModule);
 #endif
+
         }
 
         // Get the source line for this stack frame entry
