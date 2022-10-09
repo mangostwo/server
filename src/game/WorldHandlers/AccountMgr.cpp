@@ -62,6 +62,11 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
         return AOR_NAME_TOO_LONG;                            // username's too long
     }
 
+    if (utf8length(password) > MAX_PASSWORD_STR)
+    {
+        return AOR_PASS_TOO_LONG;                            // password too long
+    }
+
     Utf8ToUpperOnlyLatin(username);
     Utf8ToUpperOnlyLatin(password);
 
@@ -191,7 +196,7 @@ AccountOpResult AccountMgr::ChangeUsername(uint32 accid, std::string new_uname, 
         return AOR_NAME_TOO_LONG;
     }
 
-    if (utf8length(new_passwd) > MAX_ACCOUNT_STR)
+    if (utf8length(new_passwd) > MAX_PASSWORD_STR)
     {
         return AOR_PASS_TOO_LONG;
     }
@@ -228,7 +233,7 @@ AccountOpResult AccountMgr::ChangePassword(uint32 accid, std::string new_passwd)
         return AOR_NAME_NOT_EXIST;                           // account doesn't exist
     }
 
-    if (utf8length(new_passwd) > MAX_ACCOUNT_STR)
+    if (utf8length(new_passwd) > MAX_PASSWORD_STR)
     {
         return AOR_PASS_TOO_LONG;
     }

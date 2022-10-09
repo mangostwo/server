@@ -26,8 +26,6 @@
 #define MANGOS_H_ACCMGR
 
 #include "Common.h"
-#include "Policies/Singleton.h"
-#include <string>
 
 /* An enumeration of the possible results of an account operation. */
 enum AccountOpResult
@@ -41,6 +39,7 @@ enum AccountOpResult
 };
 
 #define MAX_ACCOUNT_STR 16
+#define MAX_PASSWORD_STR 16
 
 /* A class that is used to manage accounts. */
 class AccountMgr
