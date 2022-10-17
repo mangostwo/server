@@ -59,12 +59,13 @@ namespace VMAP
     {
         public:
             AreaInfoCallback(ModelInstance* val): prims(val) {}
+
             void operator()(const Vector3& point, uint32 entry)
             {
 #ifdef VMAP_DEBUG
                 DEBUG_LOG("trying to intersect '%s'", prims[entry].name.c_str());
 #endif
-                prims[entry].intersectPoint(point, aInfo);
+                prims[entry].GetAreaInfo(point, aInfo);
             }
 
             ModelInstance* prims;
@@ -75,6 +76,7 @@ namespace VMAP
     {
         public:
             LocationInfoCallback(ModelInstance* val, LocationInfo& info): prims(val), locInfo(info), result(false) {}
+
             void operator()(const Vector3& point, uint32 entry)
             {
 #ifdef VMAP_DEBUG
@@ -196,7 +198,6 @@ namespace VMAP
 
     bool StaticMapTree::getObjectHitPos(const Vector3& pPos1, const Vector3& pPos2, Vector3& pResultHitPos, float pModifyDist) const
     {
-        bool result = false;
         float maxDist = (pPos2 - pPos1).magnitude();
         // valid map coords should *never ever* produce float overflow, but this would produce NaNs too:
         MANGOS_ASSERT(maxDist < std::numeric_limits<float>::max());
@@ -227,14 +228,13 @@ namespace VMAP
             {
                 pResultHitPos = pResultHitPos + dir * pModifyDist;
             }
-            result = true;
+            return true;
         }
         else
         {
             pResultHitPos = pPos2;
-            result = false;
         }
-        return result;
+        return false;
     }
 
     //=========================================================
@@ -438,13 +438,11 @@ namespace VMAP
                     size_t fileRead = fread(&referencedVal, sizeof(uint32), 1, tf);
                     if (!iLoadedSpawns.count(referencedVal) || fileRead <= 0)
                     {
-#ifdef VMAP_DEBUG
                         if (referencedVal > iNTreeValues)
                         {
-                            DEBUG_LOG("invalid tree element! (%u/%u)", referencedVal, iNTreeValues);
+                            ERROR_LOG("invalid tree element! (%u/%u)", referencedVal, iNTreeValues);
                             continue;
                         }
-#endif
                         iTreeValues[referencedVal] = ModelInstance(spawn, model);
                         iLoadedSpawns[referencedVal] = 1;
                     }

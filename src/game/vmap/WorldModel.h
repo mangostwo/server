@@ -25,13 +25,13 @@
 #ifndef MANGOS_H_WORLDMODEL
 #define MANGOS_H_WORLDMODEL
 
-#include <G3D/HashTrait.h>
+#include "Platform/Define.h"
+
 #include <G3D/Vector3.h>
 #include <G3D/AABox.h>
 #include <G3D/Ray.h>
 #include "BIH.h"
 
-#include "Platform/Define.h"
 
 namespace VMAP
 {
@@ -152,6 +152,7 @@ namespace VMAP
              *
              */
             WmoLiquid(): iHeight(0), iFlags(0) {};
+
             uint32 iTilesX;  /**< number of tiles in x direction, each */
             uint32 iTilesY;  /**< TODO */
             Vector3 iCorner; /**< the lower corner */
@@ -209,7 +210,7 @@ namespace VMAP
              *
              * @param liquid
              */
-            void setLiquidData(WmoLiquid*& liquid) { iLiquid = liquid; liquid = NULL; }
+            void SetLiquidData(WmoLiquid*& liquid) { iLiquid = liquid; liquid = NULL; }
             /**
              * @brief
              *
@@ -325,37 +326,46 @@ namespace VMAP
             /**
              * @brief
              *
-             * @param p
-             * @param down
+             * @param point
+             * @param dir
              * @param dist
              * @param info
              * @return bool
              */
-            bool GetAreaInfo(const G3D::Vector3& p, const G3D::Vector3& down, float& dist, AreaInfo& info) const;
+            bool GetAreaInfo(const G3D::Vector3& point, const G3D::Vector3& dir, float& dist, AreaInfo& info) const;
             /**
              * @brief
              *
-             * @param p
-             * @param down
+             * @param point
+             * @param dir
              * @param dist
              * @param info
              * @return bool
              */
-            bool GetLocationInfo(const G3D::Vector3& p, const G3D::Vector3& down, float& dist, LocationInfo& info) const;
+            bool GetLocationInfo(const G3D::Vector3& point, const G3D::Vector3& dir, float& dist, LocationInfo& info) const;
+            /**
+             * @brief
+             *
+             * @param point
+             * @param dir
+             * @param dist
+             * @return bool
+             */
+            bool GetContactPoint(const G3D::Vector3& point, const G3D::Vector3& dir, float& dist) const;
             /**
              * @brief
              *
              * @param filename
              * @return bool
              */
-            bool writeFile(const std::string& filename);
+            bool WriteFile(const std::string& filename);
             /**
              * @brief
              *
              * @param filename
              * @return bool
              */
-            bool readFile(const std::string& filename);
+            bool ReadFile(const std::string& filename);
             uint32 Flags;
         protected:
             uint32 RootWMOID; /**< TODO */

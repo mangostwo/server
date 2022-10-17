@@ -68,13 +68,10 @@ namespace VMAP
         return hit;
     }
 
-    void ModelInstance::intersectPoint(const G3D::Vector3& p, AreaInfo& info) const
+    void ModelInstance::GetAreaInfo(const G3D::Vector3& p, AreaInfo& info) const
     {
         if (!iModel)
         {
-#ifdef VMAP_DEBUG
-            DEBUG_LOG("<object not loaded>");
-#endif
             return;
         }
 
@@ -83,10 +80,12 @@ namespace VMAP
         {
             return;
         }
+
         if (!iBound.contains(p))
         {
             return;
         }
+
         // child bounds are defined in object space:
         Vector3 pModel = iInvRot * (p - iPos) * iInvScale;
         Vector3 zDirModel = iInvRot * Vector3(0.f, 0.f, -1.f);
@@ -110,9 +109,6 @@ namespace VMAP
     {
         if (!iModel)
         {
-#ifdef VMAP_DEBUG
-            DEBUG_LOG("<object not loaded>");
-#endif
             return false;
         }
 
@@ -121,10 +117,12 @@ namespace VMAP
         {
             return false;
         }
+
         if (!iBound.contains(p))
         {
             return false;
         }
+
         // child bounds are defined in object space:
         Vector3 pModel = iInvRot * (p - iPos) * iInvScale;
         Vector3 zDirModel = iInvRot * Vector3(0.f, 0.f, -1.f);
