@@ -25,12 +25,13 @@
 #ifndef MANGOS_H_MODELINSTANCE
 #define MANGOS_H_MODELINSTANCE
 
+#include "Platform/Define.h"
+
 #include <G3D/Matrix3.h>
 #include <G3D/Vector3.h>
 #include <G3D/AABox.h>
 #include <G3D/Ray.h>
 
-#include "Platform/Define.h"
 
 namespace VMAP
 {
@@ -139,7 +140,7 @@ namespace VMAP
              * @param p
              * @param info
              */
-            void intersectPoint(const G3D::Vector3& p, AreaInfo& info) const;
+            void GetAreaInfo(const G3D::Vector3& p, AreaInfo& info) const;
             /**
              * @brief
              *

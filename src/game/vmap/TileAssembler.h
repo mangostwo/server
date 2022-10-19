@@ -27,6 +27,7 @@
 
 #include <G3D/Vector3.h>
 #include <G3D/Matrix3.h>
+
 #include <map>
 #include <set>
 
@@ -218,27 +219,6 @@ namespace VMAP
              * @return bool
              */
             bool convertRawFile(const std::string& pModelFilename, const char *RAW_VMAP_MAGIC);
-            /**
-             * @brief
-             *
-             * @param )
-             */
-            void setModelNameFilterMethod(bool (*pFilterMethod)(char* pName)) { iFilterMethod = pFilterMethod; }
-            /**
-             * @brief
-             *
-             * @param pMapId
-             * @param pModPosName
-             * @return std::string
-             */
-            std::string getDirEntryNameFromModName(unsigned int pMapId, const std::string& pModPosName);
-            /**
-             * @brief
-             *
-             * @param pName
-             * @return unsigned int
-             */
-            unsigned int getUniqueNameId(const std::string pName);
     };
 }
 #endif

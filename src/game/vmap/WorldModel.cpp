@@ -25,6 +25,7 @@
 #include "WorldModel.h"
 #include "VMapDefinitions.h"
 #include "MapTree.h"
+#include <string.h>
 
 using G3D::Vector3;
 using G3D::Ray;
@@ -546,6 +547,7 @@ namespace VMAP
         {
             return false;
         }
+
         GModelRayCallback callback(triangles, vertices);
         meshTree.intersectRay(ray, callback, distance, stopAtFirstHit);
         return callback.hit;
@@ -557,7 +559,7 @@ namespace VMAP
         {
             return false;
         }
-        GModelRayCallback callback(triangles, vertices);
+
         Vector3 rPos = pos - 0.1f * down;
         float dist = G3D::inf();
         G3D::Ray ray(rPos, down);
@@ -614,17 +616,9 @@ namespace VMAP
     bool WorldModel::IntersectRay(const G3D::Ray& ray, float& distance, bool stopAtFirstHit) const
     {
         // M2 models are not taken into account for LoS calculation
-        if (Flags & MOD_M2)
-        {
-            return false;
-        }
-        // small M2 workaround, maybe better make separate class with virtual intersection funcs
-        // in any case, there's no need to use a bound tree if we only have one submodel
-        if (groupModels.size() == 1)
-        {
-            return groupModels[0].IntersectRay(ray, distance, stopAtFirstHit);
-        }
-
+        // if (Flags & MOD_M2)
+        //    return false;
+        //
         WModelRayCallBack isc(groupModels);
         groupTree.intersectRay(ray, isc, distance, stopAtFirstHit);
         return isc.hit;
@@ -643,28 +637,14 @@ namespace VMAP
             void operator()(const Vector3& point, uint32 entry)
             {
                 float group_Z;
-                // float pVol = prims[entry].GetBound().volume();
-                // if(pVol < minVol)
-                //{
-                /* if (prims[entry].iBound.contains(point)) */
                 if (prims[entry].IsInsideObject(point, zVec, group_Z))
                 {
-                    // minVol = pVol;
-                    // hit = prims + entry;
                     if (group_Z < zDist)
                     {
                         zDist = group_Z;
                         hit = prims + entry;
                     }
-#ifdef VMAP_DEBUG
-                    const GroupModel& gm = prims[entry];
-                    printf("%10u %8X %7.3f,%7.3f,%7.3f | %7.3f,%7.3f,%7.3f | z=%f, p_z=%f\n", gm.GetWmoID(), gm.GetMogpFlags(),
-                           gm.GetBound().low().x, gm.GetBound().low().y, gm.GetBound().low().z,
-                           gm.GetBound().high().x, gm.GetBound().high().y, gm.GetBound().high().z, group_Z, point.z);
-#endif
                 }
-                //}
-                // std::cout << "trying to intersect '" << prims[entry].name << "'\n";
             }
     };
 
@@ -674,6 +654,7 @@ namespace VMAP
         {
             return false;
         }
+
         WModelAreaCallback callback(groupModels, down);
         groupTree.intersectPoint(p, callback);
         if (callback.hit != groupModels.end())
@@ -694,6 +675,7 @@ namespace VMAP
         {
             return false;
         }
+
         WModelAreaCallback callback(groupModels, down);
         groupTree.intersectPoint(p, callback);
         if (callback.hit != groupModels.end())
@@ -705,7 +687,25 @@ namespace VMAP
         return false;
     }
 
-    bool WorldModel::writeFile(const std::string& filename)
+    bool WorldModel::GetContactPoint(const G3D::Vector3& point, const G3D::Vector3& dir, float& dist) const
+    {
+        if (groupModels.empty())
+        {
+            return false;
+        }
+
+        WModelAreaCallback callback(groupModels, dir);
+        groupTree.intersectPoint(point, callback);
+        if (callback.hit != groupModels.end())
+        {
+            dist = callback.zDist;
+            return true;
+        }
+        return false;
+    }
+
+
+    bool WorldModel::WriteFile(const std::string& filename)
     {
         FILE* wf = fopen(filename.c_str(), "wb");
         if (!wf)
@@ -763,7 +763,7 @@ namespace VMAP
         return result;
     }
 
-    bool WorldModel::readFile(const std::string& filename)
+    bool WorldModel::ReadFile(const std::string& filename)
     {
         FILE* rf = fopen(filename.c_str(), "rb");
         if (!rf)

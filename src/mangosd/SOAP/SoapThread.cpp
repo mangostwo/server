@@ -22,205 +22,106 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include <ace/OS.h>
-#include <ace/Message_Block.h>
-
 #include "SoapThread.h"
-#include "soapH.h"
+
+#include "AccountMgr.h"
+#include "Log.h"
+#include "World.h"
+
 #include "soapStub.h"
 
-#include "World.h"
-#include "Log.h"
-#include "AccountMgr.h"
-
-
-/// WARNING! This code needs serious reviewing
-
-
-struct SOAPCommand
+void SoapThread(const std::string& host, uint16 port)
 {
-    public:
-        void appendToPrintBuffer(const char* msg)
-        {
-            m_printBuffer += msg;
-        }
-
-        void setCommandSuccess(bool val)
-        {
-            m_success = val;
-        }
-
-        bool hasCommandSucceeded()
-        {
-            return m_success;
-        }
-
-        static void print(void* callbackArg, const char* msg)
-        {
-            ((SOAPCommand*)callbackArg)->appendToPrintBuffer(msg);
-        }
-
-        static void commandFinished(void* callbackArg, bool success);
-
-        bool m_success;
-        std::string m_printBuffer;
-};
-
-
-class SoapPool : public ACE_Task<ACE_MT_SYNCH>
-{
-    public:
-        virtual int svc(void) override
-        {
-            while (1)
-            {
-                ACE_Message_Block* mb = 0;
-                if (this->getq(mb) == -1)
-                {
-                    break;
-                }
-
-                // Process the message.
-                process_message(mb);
-            }
-            return 0;
-        }
-
-    private:
-        void process_message(ACE_Message_Block* mb)
-        {
-            struct soap* soap;
-            ACE_OS::memcpy(&soap, mb->rd_ptr(), sizeof(struct soap*));
-            mb->release();
-
-            soap_serve(soap);
-
-            soap_destroy(soap); // dealloc C++ data
-            soap_end(soap); // dealloc data and clean up
-            soap_done(soap); // detach soap struct
-            free(soap);
-        }
-};
-
-
-
-SoapThread::~SoapThread()
-{
-  if(pool_)
-  {
-      delete pool_;
-  }
-}
-
-int SoapThread::open(void* unused)
-{
-    // create pool
-    pool_ = new SoapPool;
-    pool_->activate(THR_NEW_LWP | THR_JOINABLE, SOAP_THREADS);
-
-    int m;
-    soap_init(&soap_);
-    soap_set_imode(&soap_, SOAP_C_UTFSTRING);
-    soap_set_omode(&soap_, SOAP_C_UTFSTRING);
-    m = soap_bind(&soap_, host_, port_, 100);
-
-    if (m < 0)
-    {
-        sLog.outError("SoapThread: couldn't bind to %s:%d", host_, port_);
-        return -1;
-    }
+    struct soap soap;
+    soap_init(&soap);
+    soap_set_imode(&soap, SOAP_C_UTFSTRING);
+    soap_set_omode(&soap, SOAP_C_UTFSTRING);
 
     // check every 3 seconds if world ended
-    soap_.accept_timeout = 3;
-    soap_.recv_timeout = 5;
-    soap_.send_timeout = 5;
+    soap.accept_timeout = 3;
+    soap.recv_timeout = 5;
+    soap.send_timeout = 5;
 
-    activate();
-    return 0;
-}
-
-
-int SoapThread::svc()
-{
-    int s;
-    sLog.outString("SOAP Thread started (listening on %s:%d)", host_, port_);
-    while (!World::IsStopped())
+    if (!soap_valid_socket(soap_bind(&soap, host.c_str(), port, 100)))
     {
-        s = soap_accept(&soap_);
-
-        if (s < 0)
-        {
-            // ran into an accept timeout
-            continue;
-        }
-
-        struct soap* thread_soap = soap_copy(&soap_);// make a safe copy
-
-        ACE_Message_Block* mb = new ACE_Message_Block(sizeof(struct soap*));
-        ACE_OS::memcpy(mb->wr_ptr(), &thread_soap, sizeof(struct soap*));
-        pool_->putq(mb);
+        sLog.outError("SoapThread: couldn't bind to %s:%d", host.c_str(), port);
+        exit(-1);
     }
 
-    pool_->msg_queue()->deactivate();
-    pool_->wait();
+    sLog.outString("SoapThread: Bound to http://%s:%d", host.c_str(), port);
 
-    soap_done(&soap_);
-    sLog.outString("SOAP Thread stopped");
-    return 0;
+    while (!World::IsStopped())
+    {
+        if (!soap_valid_socket(soap_accept(&soap)))
+        {
+            continue; // ran into an accept timeout
+        }
+
+        sLog.outString("Accepted connection from IP %d.%d.%d.%d", (int)(soap.ip >> 24) & 0xFF, (int)(soap.ip >> 16) & 0xFF, (int)(soap.ip >> 8) & 0xFF, (int)soap.ip & 0xFF);
+        struct soap* thread_soap = soap_copy(&soap); // make a safe copy
+        process_message(thread_soap);
+    }
+
+    soap_destroy(&soap);
+    soap_end(&soap);
+    soap_done(&soap);
 }
 
-
-/*
-Code used for generating stubs:
-
-int ns1__executeCommand(char* command, char** result);
-*/
+void process_message(struct soap* soap_message)
+{
+    soap_serve(soap_message);
+    soap_destroy(soap_message); // dealloc C++ data
+    soap_end(soap_message);     // dealloc data and clean up
+    soap_free(soap_message);    // detach soap struct and free up memory
+}
 
 int ns1__executeCommand(soap* soap, char* command, char** result)
 {
     // security check
     if (!soap->userid || !soap->passwd)
     {
-        DEBUG_LOG("MaNGOSsoap: Client didn't provide login information");
+        sLog.outString("SoapThread: Client didn't provide login information");
         return 401;
     }
 
     uint32 accountId = sAccountMgr.GetId(soap->userid);
     if (!accountId)
     {
-        DEBUG_LOG("MaNGOSsoap: Client used invalid username '%s'", soap->userid);
+        sLog.outString("SoapThread: Client used invalid username %s", soap->userid);
         return 401;
     }
 
     if (!sAccountMgr.CheckPassword(accountId, soap->passwd))
     {
-        DEBUG_LOG("MaNGOSsoap: invalid password for account '%s'", soap->userid);
+        sLog.outString("SoapThread: Client sent an invalid password for account %s", soap->passwd);
         return 401;
     }
 
+    /* ToDo: Add realm check */
     if (sAccountMgr.GetSecurity(accountId) < SEC_ADMINISTRATOR)
     {
-        DEBUG_LOG("MaNGOSsoap: %s's gmlevel is too low", soap->userid);
+        sLog.outString("SoapThread: %s's account security level is to low", soap->userid);
         return 403;
     }
 
     if (!command || !*command)
     {
-        return soap_sender_fault(soap, "Command mustn't be empty", "The supplied command was an empty string");
+        return soap_sender_fault(soap, "Command can not be empty", "The supplied command was an empty string");
     }
 
-    DEBUG_LOG("MaNGOSsoap: got command '%s'", command);
+    sLog.outString("SoapThread: Recieved command %s", command);
     SOAPCommand connection;
 
-    // commands are executed in the world thread. We have to wait for them to be completed
+    // commands are executed in the world thread and have to wait till they are completed.
     {
-        // CliCommandHolder will be deleted from world, accessing after queueing is NOT save
         CliCommandHolder* cmd = new CliCommandHolder(accountId, SEC_CONSOLE, &connection, command, &SOAPCommand::print, &SOAPCommand::commandFinished);
         sWorld.QueueCliCommand(cmd);
     }
 
-    ACE_OS::sleep(1);
+    // wait until the command has finished executing
+    connection.finishedPromise.get_future().wait();
 
+    // the command has finished executing already
     char* printBuffer = soap_strdup(soap, connection.m_printBuffer.c_str());
     if (connection.hasCommandSucceeded())
     {

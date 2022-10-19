@@ -97,12 +97,12 @@ int WorldThread::svc()
             std::this_thread::sleep_for(std::chrono::milliseconds(WORLD_SLEEP_CONST - executionTimeDiff));
         }
 #ifdef _WIN32
-        if (m_ServiceStatus == 0) //service stopped
+        if (m_ServiceStatus == 0) // service stopped
         {
             World::StopNow(SHUTDOWN_EXIT_CODE);
         }
 
-        while (m_ServiceStatus == 2) //service paused
+        while (m_ServiceStatus == 2) // service paused
             Sleep(1000);
 #endif
     }

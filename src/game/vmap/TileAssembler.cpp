@@ -22,15 +22,15 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <set>
+#include <iomanip>
+#include <sstream>
+
 #include "TileAssembler.h"
 #include "MapTree.h"
 #include "BIH.h"
 #include "VMapDefinitions.h"
 
-#include <set>
-#include <iomanip>
-#include <sstream>
-#include <iomanip>
 
 using G3D::Vector3;
 using G3D::AABox;
@@ -253,14 +253,13 @@ namespace VMAP
             return false;
         }
         printf("Read coordinate mapping...\n");
-        uint32 mapID, tileX, tileY, check = 0;
+        uint32 mapID, tileX, tileY;
         G3D::Vector3 v1, v2;
         ModelSpawn spawn;
         while (!feof(dirf))
         {
-            check = 0;
             // read mapID, tileX, tileY, Flags, adtID, ID, Pos, Rot, Scale, Bound_lo, Bound_hi, name
-            check += fread(&mapID, sizeof(uint32), 1, dirf);
+            uint32 check = fread(&mapID, sizeof(uint32), 1, dirf);
             if (check == 0) // EoF...
             {
                 break;
@@ -353,7 +352,6 @@ namespace VMAP
     //=================================================================
     bool TileAssembler::convertRawFile(const std::string& pModelFilename, const char *RAW_VMAP_MAGIC)
     {
-        bool success = true;
         std::string filename = iSrcDir;
         if (filename.length() > 0)
         {
@@ -380,16 +378,13 @@ namespace VMAP
                 GroupModel_Raw& raw_group = raw_model.groupsArray[g];
                 groupsArray.push_back(GroupModel(raw_group.mogpflags, raw_group.GroupWMOID, raw_group.bounds));
                 groupsArray.back().SetMeshData(raw_group.vertexArray, raw_group.triangles);
-                groupsArray.back().setLiquidData(raw_group.liquid);
+                groupsArray.back().SetLiquidData(raw_group.liquid);
             }
 
             model.SetGroupModels(groupsArray);
         }
 
-        success = model.writeFile(iDestDir + "/" + pModelFilename + ".vmo");
-
-        //std::cout << "readRawFile2: '" << pModelFilename << "' tris: " << nElements << " nodes: " << nNodes << std::endl;
-        return success;
+        return model.WriteFile(iDestDir + "/" + pModelFilename + ".vmo");
     }
 
     void TileAssembler::exportGameobjectModels(const char *RAW_VMAP_MAGIC)
