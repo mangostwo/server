@@ -4392,6 +4392,13 @@ void Spell::finish(bool ok)
     {
         ((DungeonMap*)map)->GetPersistanceState()->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, m_spellInfo->Id);
     }
+    
+#ifdef ENABLE_PLAYERBOTS
+    if(!m_caster->GetMapId())
+    {
+        return;
+    }
+#endif
 }
 
 void Spell::SendCastResult(SpellCastResult result)
