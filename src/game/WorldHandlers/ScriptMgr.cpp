@@ -1929,6 +1929,7 @@ bool ScriptAction::HandleScriptStep()
             if (m_script->terminateScript.npcEntry)
             {
                 WorldObject* pSearcher = pSource ? pSource : pTarget;
+                if (!pSearcher) break;
                 if (pSearcher->GetTypeId() == TYPEID_PLAYER && pTarget && pTarget->GetTypeId() != TYPEID_PLAYER)
                 {
                     pSearcher = pTarget;

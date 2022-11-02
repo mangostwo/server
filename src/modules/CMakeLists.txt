@@ -21,3 +21,11 @@
 if(SCRIPT_LIB_SD3)
     add_subdirectory(SD3)
 endif()
+
+# Include Player Bots if enabled
+if(PLAYERBOTS)
+    add_subdirectory(Bots)
+endif()
+if(IMMERSIVE)
+    add_subdirectory(Immersive)
+endif()

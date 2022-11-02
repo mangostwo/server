@@ -86,6 +86,15 @@
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
 
+#ifdef ENABLE_PLAYERBOTS
+#include "AhBot.h"
+#include "PlayerbotAIConfig.h"
+#include "RandomPlayerbotMgr.h"
+#endif
+#ifdef ENABLE_IMMERSIVE
+#include "immersive.h"
+#endif
+
 // WARDEN
 #include "WardenCheckMgr.h"
 
@@ -1576,6 +1585,11 @@ void World::SetInitialWorldSettings()
 
 #ifdef ENABLE_PLAYERBOTS
     sPlayerbotAIConfig.Initialize();
+    auctionbot.Init();
+#endif
+
+#ifdef ENABLE_IMMERSIVE
+    sImmersiveConfig.Initialize();
 #endif
 
     showFooter();
@@ -1808,8 +1822,16 @@ void World::Update(uint32 diff)
     if (m_timers[WUPDATE_AHBOT].Passed())
     {
         sAuctionBot.Update();
+#ifdef ENABLE_PLAYERBOTS
+        auctionbot.Update();
+#endif
         m_timers[WUPDATE_AHBOT].Reset();
     }
+
+#ifdef ENABLE_PLAYERBOTS
+    sRandomPlayerbotMgr.UpdateAI(diff);
+    sRandomPlayerbotMgr.UpdateSessions(diff);
+#endif
 
     /// <li> Update Dungeon Finder
     if (m_timers[WUPDATE_LFGMGR].Passed())
@@ -2225,6 +2247,9 @@ void World::ShutdownServ(uint32 time, uint32 options, uint8 exitcode)
         m_ShutdownTimer = time;
         ShutdownMsg(true);
     }
+#ifdef ENABLE_PLAYERBOTS
+    sRandomPlayerbotMgr.LogoutAllBots();
+#endif
 
     ///- Used by Eluna
 #ifdef ENABLE_ELUNA

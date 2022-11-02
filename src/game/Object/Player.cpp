@@ -77,6 +77,12 @@
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
+#ifdef ENABLE_PLAYERBOTS
+#include "playerbot.h"
+#endif
+#ifdef ENABLE_IMMERSIVE
+#include "immersive.h"
+#endif
 
 #include <cmath>
 
@@ -434,6 +440,9 @@ void TradeData::SetAccepted(bool state, bool crosssend /*= false*/)
 UpdateMask Player::updateVisualBits;
 
 Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_achievementMgr(this), m_reputationMgr(this)
+#ifdef ENABLE_PLAYERBOTS
+,m_playerbotAI(NULL), m_playerbotMgr(NULL)
+#endif
 {
     m_transport = 0;
 
@@ -666,6 +675,20 @@ Player::~Player()
     {
         delete ItemSetEff[x];
     }
+
+#ifdef ENABLE_PLAYERBOTS
+    if (m_playerbotAI)
+    {
+        delete m_playerbotAI;
+    }
+    m_playerbotAI = 0;
+
+    if (m_playerbotMgr)
+    {
+        delete m_playerbotMgr;
+    }
+    m_playerbotMgr = 0;
+#endif
 
     // clean up player-instance binds, may unload some instance saves
     for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
@@ -1624,6 +1647,16 @@ void Player::Update(uint32 update_diff, uint32 p_time)
     {
         TeleportTo(m_teleport_dest, m_teleport_options);
     }
+#ifdef ENABLE_PLAYERBOTS
+    if (m_playerbotAI)
+    {
+        m_playerbotAI->UpdateAI(p_time);
+    }
+    if (m_playerbotMgr)
+    {
+        m_playerbotMgr->UpdateAI(p_time);
+    }
+#endif
 }
 
 void Player::SetDeathState(DeathState s)
@@ -2838,6 +2871,9 @@ void Player::GiveXP(uint32 xp, Unit* victim)
 #ifdef ENABLE_ELUNA
     sEluna->OnGiveXP(this, xp, victim);
 #endif /* ENABLE_ELUNA */
+#ifdef ENABLE_IMMERSIVE
+    sImmersive.OnGiveXP(this, xp, victim);
+#endif /* ENABLE_IMMERSIVE */
 
     // XP to money conversion processed in Player::RewardQuest
     if (level >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
@@ -2908,6 +2944,9 @@ void Player::SetLevel(uint32 level)
 
     PlayerLevelInfo info;
     sObjectMgr.GetPlayerLevelInfo(getRace(), getClass(), level, &info);
+#ifdef ENABLE_IMMERSIVE
+    sImmersive.GetPlayerLevelInfo(this, &info);
+#endif
 
     PlayerClassLevelInfo classInfo;
     sObjectMgr.GetPlayerClassLevelInfo(getClass(), level, &classInfo);
@@ -3070,6 +3109,9 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
     PlayerLevelInfo info;
     sObjectMgr.GetPlayerLevelInfo(getRace(), getClass(), getLevel(), &info);
+#ifdef ENABLE_IMMERSIVE
+    sImmersive.GetPlayerLevelInfo(this, &info);
+#endif
 
     SetUInt32Value(PLAYER_FIELD_MAX_LEVEL, sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
     SetUInt32Value(PLAYER_NEXT_LEVEL_XP, sObjectMgr.GetXPForLevel(getLevel()));
@@ -5708,6 +5750,10 @@ void Player::RepopAtGraveyard()
             UpdateVisibilityAndView();
         }
     }
+#ifdef ENABLE_IMMERSIVE
+    sImmersive.OnDeath(this);
+#endif
+
 }
 
 void Player::JoinedChannel(Channel* c)
@@ -15259,6 +15305,9 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
                 case GOSSIP_OPTION_TABARDDESIGNER:
                 case GOSSIP_OPTION_AUCTIONEER:
                 case GOSSIP_OPTION_MAILBOX:
+#ifdef ENABLE_IMMERSIVE
+                case GOSSIP_OPTION_IMMERSIVE:
+#endif
                     break;                                  // no checks
                 default:
                     sLog.outErrorDb("Creature entry %u have unknown gossip option %u for menu %u", pCreature->GetEntry(), itr->second.option_id, itr->second.menu_id);
@@ -15524,6 +15573,13 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
             GetSession()->SendBattlegGroundList(guid, bgTypeId);
             break;
         }
+#ifdef ENABLE_IMMERSIVE
+        case GOSSIP_OPTION_IMMERSIVE:
+            sImmersive.OnGossipSelect(this, gossipListId, &pMenuData);
+            PlayerTalkClass->CloseGossip();
+            break;
+#endif
+
     }
 
     if (pMenuData.m_gAction_script)
@@ -16522,6 +16578,10 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     {
         itr->second->ApplyOrRemoveSpellIfCan(this, zone, area, false);
     }
+#ifdef ENABLE_IMMERSIVE
+    sImmersive.OnRewardQuest(this, pQuest);
+#endif /* ENABLE_IMMERSIVE */
+
 }
 
 void Player::FailQuest(uint32 questId)
@@ -20265,6 +20325,9 @@ void Player::SaveToDB()
     {
         pet->SavePetToDB(PET_SAVE_AS_CURRENT);
     }
+#ifdef ENABLE_PLAYERBOTS
+    if (m_playerbotAI) sPlayerbotDbStore.Save(m_playerbotAI);
+#endif
 }
 
 // fast save function for item/money cheating preventing - save only inventory and money state
@@ -25603,7 +25666,13 @@ void Player::HandleFall(MovementInfo const& movementInfo)
 
     // Players with low fall distance, Feather Fall or physical immunity (charges used) are ignored
     // 14.57 can be calculated by resolving damageperc formula below to 0
-    if (z_diff >= 14.57f && !IsDead() && !isGameMaster() && !HasMovementFlag(MOVEFLAG_ONTRANSPORT) &&
+    if (
+#ifdef ENABLE_IMMERSIVE
+        z_diff >= 4.57f &&
+#else
+        z_diff >= 14.57f &&
+#endif
+            !IsDead() && !isGameMaster() && !HasMovementFlag(MOVEFLAG_ONTRANSPORT) &&
             !HasAuraType(SPELL_AURA_HOVER) && !HasAuraType(SPELL_AURA_FEATHER_FALL) &&
             !HasAuraType(SPELL_AURA_FLY) && !IsImmuneToDamage(SPELL_SCHOOL_MASK_NORMAL))
     {
@@ -25611,6 +25680,9 @@ void Player::HandleFall(MovementInfo const& movementInfo)
         int32 safe_fall = GetTotalAuraModifier(SPELL_AURA_SAFE_FALL);
 
         float damageperc = 0.018f * (z_diff - safe_fall) - 0.2426f;
+#ifdef ENABLE_IMMERSIVE
+        damageperc = sImmersive.GetFallDamage(z_diff - safe_fall);
+#endif
 
         if (damageperc > 0)
         {
@@ -26655,6 +26727,9 @@ void Player::ModifyMoney(int32 d)
 #ifdef ENABLE_ELUNA
     sEluna->OnMoneyChanged(this, d);
 #endif
+#ifdef ENABLE_IMMERSIVE
+    sImmersive.OnModifyMoney(this, d);
+#endif /* ENABLE_IMMERSIVE */
 
     if (d < 0)
     {

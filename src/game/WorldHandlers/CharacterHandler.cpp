@@ -51,6 +51,10 @@
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
+#ifdef ENABLE_PLAYERBOTS
+#include "playerbot.h"
+#include "PlayerbotAIConfig.h"
+#endif
 
 // config option SkipCinematics supported values
 enum CinematicsSkipMode
@@ -72,6 +76,23 @@ class LoginQueryHolder : public SqlQueryHolder
         uint32 GetAccountId() const { return m_accountId; }
         bool Initialize();
 };
+
+#ifdef ENABLE_PLAYERBOTS
+class PlayerbotLoginQueryHolder : public LoginQueryHolder
+{
+private:
+    uint32 masterAccountId;
+    PlayerbotHolder* playerbotHolder;
+
+public:
+    PlayerbotLoginQueryHolder(PlayerbotHolder* playerbotHolder, uint32 masterAccount, uint32 accountId, ObjectGuid guid)
+        : LoginQueryHolder(accountId, guid), masterAccountId(masterAccount), playerbotHolder(playerbotHolder) { }
+
+public:
+    uint32 GetMasterAccountId() const { return masterAccountId; }
+    PlayerbotHolder* GetPlayerbotHolder() { return playerbotHolder; }
+};
+#endif
 
 bool LoginQueryHolder::Initialize()
 {
@@ -152,8 +173,93 @@ class CharacterHandler
                 return;
             }
             session->HandlePlayerLogin((LoginQueryHolder*)holder);
+#ifdef ENABLE_PLAYERBOTS
+            ObjectGuid guid = ((LoginQueryHolder*)holder)->GetGuid();
+            Player* player = sObjectMgr.GetPlayer(guid, true);
+            if (player && !player->GetPlayerbotAI())
+            {
+                player->SetPlayerbotMgr(new PlayerbotMgr(player));
+                player->GetPlayerbotMgr()->OnPlayerLogin(player);
+            }
+            if (player) sRandomPlayerbotMgr.OnPlayerLogin(player);
+#endif
         }
 } chrHandler;
+
+#ifdef ENABLE_PLAYERBOTS
+void PlayerbotHolder::HandlePlayerBotLoginCallback(QueryResult * dummy, SqlQueryHolder * holder)
+{
+    if (!holder)
+        return;
+
+    PlayerbotLoginQueryHolder* lqh = (PlayerbotLoginQueryHolder*)holder;
+    uint32 masterAccount = lqh->GetMasterAccountId();
+
+    WorldSession* masterSession = masterAccount ? sWorld.FindSession(masterAccount) : NULL;
+    uint32 botAccountId = lqh->GetAccountId();
+    WorldSession *botSession = new WorldSession(botAccountId, NULL, SEC_PLAYER,
+#ifdef MANGOSBOT_TWO
+        2,
+#endif
+        0, LOCALE_enUS);
+
+    botSession->HandlePlayerLogin(lqh); // will delete lqh
+
+    Player* bot = botSession->GetPlayer();
+    if (!bot)
+    {
+        sLog.outError("Error logging in bot %d, please try to reset all random bots", lqh->GetGuid().GetRawValue());
+        return;
+    }
+    PlayerbotMgr *mgr = bot->GetPlayerbotMgr();
+    bot->SetPlayerbotMgr(NULL);
+    delete mgr;
+    sRandomPlayerbotMgr.OnPlayerLogin(bot);
+
+    bool allowed = false;
+    if (botAccountId == masterAccount)
+        allowed = true;
+    else if (masterSession && sPlayerbotAIConfig.allowGuildBots && bot->GetGuildId() == masterSession->GetPlayer()->GetGuildId())
+        allowed = true;
+    else if (sPlayerbotAIConfig.IsInRandomAccountList(botAccountId))
+        allowed = true;
+
+    if (allowed)
+    {
+        OnBotLogin(bot);
+        return;
+    }
+
+    if (masterSession)
+    {
+        ChatHandler ch(masterSession);
+        ch.PSendSysMessage("You are not allowed to control bot %s", bot->GetName());
+    }
+    sLog.outError("Attempt to add not allowed bot %s, please try to reset all random bots", bot->GetName());
+    LogoutPlayerBot(bot->GetObjectGuid());
+}
+void PlayerbotHolder::AddPlayerBot(uint64 playerGuid, uint32 masterAccount)
+{
+    // has bot already been added?
+    Player* bot = sObjectMgr.GetPlayer(ObjectGuid(playerGuid));
+
+    if (bot && bot->IsInWorld())
+        return;
+
+    uint32 accountId = sObjectMgr.GetPlayerAccountIdByGUID(ObjectGuid(playerGuid));
+    if (accountId == 0)
+        return;
+
+    PlayerbotLoginQueryHolder *holder = new PlayerbotLoginQueryHolder(this, masterAccount, accountId, ObjectGuid(playerGuid));
+    if (!holder->Initialize())
+    {
+        delete holder;                                      // delete all unprocessed queries
+        return;
+    }
+
+    CharacterDatabase.DelayQueryHolder(this, &PlayerbotHolder::HandlePlayerBotLoginCallback, holder);
+}
+#endif
 
 void WorldSession::HandleCharEnum(QueryResult* result)
 {
@@ -845,9 +951,15 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     SqlStatement stmt = CharacterDatabase.CreateStatement(updChars, "UPDATE `characters` SET `online` = 1 WHERE `guid` = ?");
     stmt.PExecute(pCurrChar->GetGUIDLow());
 
+#ifdef ENABLE_PLAYERBOTS
+    if (pCurrChar->GetSession()->GetRemoteAddress() != "bot")
+    {
+#endif
     stmt = LoginDatabase.CreateStatement(updAccount, "UPDATE `account` SET `active_realm_id` = ? WHERE `id` = ?");
     stmt.PExecute(realmID, GetAccountId());
-
+#ifdef ENABLE_PLAYERBOTS
+    }
+#endif
     /* Sync player's in-game time with server time */
     pCurrChar->SetInGameTime(GameTime::GetGameTimeMS());
 

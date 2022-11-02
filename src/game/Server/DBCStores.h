@@ -103,6 +103,13 @@ PvPDifficultyEntry const* GetBattlegroundBracketById(uint32 mapid, BattleGroundB
 uint32 GetCreatureModelRace(uint32 modelId);
 float GetModelMidpoint(uint32 modelId);
 
+#ifdef ENABLE_PLAYERBOTS
+ EmotesTextSoundEntry const* FindTextSoundEmoteFor(uint32 emote, uint32 race, uint32 gender);
+ CharSectionsEntry const* GetCharSectionEntry(uint8 race, CharSectionType genType, uint8 gender, uint8 type, uint8 color);
+ typedef std::multimap<uint32, CharSectionsEntry const*> CharSectionsMap;
+ extern CharSectionsMap sCharSectionMap;
+#endif
+
 extern DBCStorage <AchievementEntry>             sAchievementStore;
 extern DBCStorage <AchievementCriteriaEntry>     sAchievementCriteriaStore;
 extern DBCStorage <AreaTableEntry>               sAreaStore;// recommend access using functions
@@ -112,7 +119,11 @@ extern DBCStorage <AuctionHouseEntry>            sAuctionHouseStore;
 extern DBCStorage <BankBagSlotPricesEntry>       sBankBagSlotPricesStore;
 extern DBCStorage <BarberShopStyleEntry>         sBarberShopStyleStore;
 extern DBCStorage <BattlemasterListEntry>        sBattlemasterListStore;
+#ifdef ENABLE_PLAYERBOTS
+extern DBCStorage <ChatChannelsEntry>            sChatChannelsStore; //has function for access aswell
+#else
 // extern DBCStorage <ChatChannelsEntry>           sChatChannelsStore; -- accessed using function, no usable index
+#endif
 extern DBCStorage <CharStartOutfitEntry>         sCharStartOutfitStore;
 extern DBCStorage <CharTitlesEntry>              sCharTitlesStore;
 extern DBCStorage <ChrClassesEntry>              sChrClassesStore;

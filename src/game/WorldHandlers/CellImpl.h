@@ -132,6 +132,7 @@ template<class T, class CONTAINER>
 inline void
 Cell::VisitCircle(TypeContainerVisitor<T, CONTAINER> &visitor, Map& m, const CellPair& begin_cell, const CellPair& end_cell) const
 {
+    if ((int32)end_cell.x_coord < (int32)begin_cell.x_coord || (int32)end_cell.y_coord < (int32)begin_cell.y_coord) return;
     // here is an algorithm for 'filling' circum-squared octagon
     uint32 x_shift = (uint32)ceilf((end_cell.x_coord - begin_cell.x_coord) * 0.3f - 0.5f);
     // lets calculate x_start/x_end coords for central strip...

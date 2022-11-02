@@ -4386,6 +4386,13 @@ void Spell::finish(bool ok)
         m_caster->AttackStop();
     }
 
+#ifdef ENABLE_PLAYERBOTS
+    if(!m_caster->GetMapId())
+    {
+        return;
+    }
+#endif
+
     // update encounter state if needed
     Map* map = m_caster->GetMap();
     if (map->IsDungeon())
