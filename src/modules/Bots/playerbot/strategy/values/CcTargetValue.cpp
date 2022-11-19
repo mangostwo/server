@@ -9,7 +9,7 @@ using namespace ai;
 class FindTargetForCcStrategy : public FindTargetStrategy
 {
 public:
-    FindTargetForCcStrategy(PlayerbotAI* ai, string spell) : FindTargetStrategy(ai)
+    FindTargetForCcStrategy(PlayerbotAI* ai, string& spell) : FindTargetStrategy(ai)
     {
         this->spell = spell;
         maxDistance = 0;

@@ -66,9 +66,6 @@ bool RewardAction::Reward(uint32 itemId, Object* questGiver)
                 {
                     bot->RewardQuest(pQuest, rewardIdx, questGiver, false);
 
-                    string questTitle  = pQuest->GetTitle();
-                    string itemName = pRewardItem->Name1;
-
                     ostringstream out; out << chat->formatItem(pRewardItem) << " rewarded";
                     ai->TellMaster(out);
                     return true;

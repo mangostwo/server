@@ -113,7 +113,6 @@ bool SendMailAction::Execute(Event event)
                 continue;
             }
 
-            ItemPrototype const *proto = item->GetProto();
             bot->MoveItemFromInventory(item->GetBagSlot(), item->GetSlot(), true);
             item->DeleteFromInventoryDB();
             item->SetOwnerGuid(master->GetObjectGuid());

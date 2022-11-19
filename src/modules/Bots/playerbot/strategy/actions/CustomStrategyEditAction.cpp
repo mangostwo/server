@@ -12,9 +12,9 @@ bool CustomStrategyEditAction::Execute(Event event)
     string text = event.getParam();
     int pos = text.find(" ");
     if (pos == string::npos) return PrintHelp();
-    {
-        string name = text.substr(0, pos);
-    }
+
+    string name = text.substr(0, pos);
+
     text = text.substr(pos + 1);
 
     pos = text.find(" ");
@@ -115,7 +115,7 @@ bool CustomStrategyEditAction::Edit(string name, uint32 idx, string command)
     return true;
 }
 
-bool CustomStrategyEditAction::PrintActionLine(uint32 idx, string command)
+bool CustomStrategyEditAction::PrintActionLine(uint32 idx, string& command)
 {
     ostringstream out; out << "#" << idx << " " << command;
     ai->TellMaster(out.str());

@@ -58,7 +58,7 @@ LootStrategy *LootStrategyValue::gray = new GrayLootStrategy();
 LootStrategy *LootStrategyValue::disenchant = new DisenchantLootStrategy();
 LootStrategy *LootStrategyValue::all = new AllLootStrategy();
 
-LootStrategy* LootStrategyValue::instance(string strategy)
+LootStrategy* LootStrategyValue::instance(string& strategy)
 {
     if (strategy == "*" || strategy == "all")
     {

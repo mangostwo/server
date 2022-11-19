@@ -97,8 +97,6 @@ void BuffAction::TellHeader(uint32 subClass)
 
 bool BuffAction::Execute(Event event)
 {
-    string text = event.getParam();
-
     FindBuffVisitor visitor(bot);
     IterateItems(&visitor);
 

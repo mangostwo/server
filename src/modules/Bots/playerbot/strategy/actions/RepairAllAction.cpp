@@ -22,7 +22,6 @@ bool RepairAllAction::Execute(Event event)
         }
 
         bot->SetFacingToObject(unit);
-        float discountMod = bot->GetReputationPriceDiscount(unit);
         uint32 totalCost = bot->DurabilityRepairAll(true, 1.0f, false);
 
         ostringstream out;

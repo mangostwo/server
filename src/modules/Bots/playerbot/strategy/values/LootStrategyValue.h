@@ -11,6 +11,6 @@ namespace ai
         virtual ~LootStrategyValue() { delete defaultValue; }
 
         static LootStrategy *normal, *gray, *all, *disenchant;
-        static LootStrategy* instance(string name);
+        static LootStrategy* instance(string& name);
     };
 }

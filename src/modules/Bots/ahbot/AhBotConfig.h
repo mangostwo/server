@@ -7,7 +7,6 @@ using namespace std;
 class AhBotConfig
 {
 public:
-    AhBotConfig();
     static AhBotConfig& instance()
     {
         static AhBotConfig instance;

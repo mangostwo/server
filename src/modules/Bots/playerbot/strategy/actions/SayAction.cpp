@@ -65,7 +65,6 @@ bool SayAction::Execute(Event event)
     vector<string> &strings = stringTable[qualifier];
     if (strings.empty()) return false;
 
-    time_t lastSaid = AI_VALUE2(time_t, "last said", qualifier);
     ai->GetAiObjectContext()->GetValue<time_t>("last said", qualifier)->Set(time(0) + urand(1, 60));
 
     uint32 probability = probabilityTable[qualifier];

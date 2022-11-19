@@ -121,22 +121,19 @@ void BankAction::ListItems()
     map<uint32, bool> soulbound;
     for (int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; ++i)
         if (Item* pItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-            if (pItem)
-            {
+        {
                 items[pItem->GetProto()->ItemId] += pItem->GetCount();
                 soulbound[pItem->GetProto()->ItemId] = pItem->IsSoulBound();
-            }
+        }
 
     for (int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; ++i)
         if (Bag* pBag = (Bag*)bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-            if (pBag)
-                for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
-                    if (Item* pItem = pBag->GetItemByPos(j))
-                        if (pItem)
-                        {
-                            items[pItem->GetProto()->ItemId] += pItem->GetCount();
-                            soulbound[pItem->GetProto()->ItemId] = pItem->IsSoulBound();
-                        }
+            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+                if (Item* pItem = pBag->GetItemByPos(j))
+                {
+                    items[pItem->GetProto()->ItemId] += pItem->GetCount();
+                    soulbound[pItem->GetProto()->ItemId] = pItem->IsSoulBound();
+                }
 
     TellItems(items, soulbound);
 }
