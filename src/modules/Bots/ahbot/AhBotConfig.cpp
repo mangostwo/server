@@ -7,10 +7,6 @@ using namespace std;
 
 INSTANTIATE_SINGLETON_1(AhBotConfig);
 
-AhBotConfig::AhBotConfig()
-{
-}
-
 template <class T>
 void LoadSet(string value, T &res)
 {

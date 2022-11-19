@@ -17,9 +17,9 @@ namespace ai
         ItemIds parseItems(string outfit);
 
         void List();
-        ItemIds Find(string name);
-        void Save(string name, ItemIds outfit);
-        void Update(string name);
+        ItemIds Find(string& name);
+        void Save(string& name, ItemIds outfit);
+        void Update(string& name);
     };
 
 }

@@ -108,7 +108,7 @@ string WhoAction::QuerySkill(string text)
     return out.str();
 }
 
-string WhoAction::QuerySpec(string text)
+string WhoAction::QuerySpec(string& text)
 {
     ostringstream out;
 
@@ -142,7 +142,6 @@ string WhoAction::QuerySpec(string text)
         {
             out << "|h|cff00ff00" << visitor.count[ITEM_QUALITY_UNCOMMON] << "|h|cffffffff";
         }
-        needSlash = true;
     }
 
     out << ")";

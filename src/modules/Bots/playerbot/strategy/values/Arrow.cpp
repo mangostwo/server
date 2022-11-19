@@ -14,7 +14,6 @@ WorldLocation ArrowFormation::GetLocationInternal()
     int tankLines = 1 + tanks.Size() / 6;
     int meleeLines = 1 + melee.Size() / 6;
     int rangedLines = 1 + ranged.Size() / 6;
-    int healerLines = 1 + healers.Size() / 6;
     float offset = 0;
 
     Player* master = ai->GetMaster();
@@ -150,8 +149,6 @@ UnitPosition MultiLineUnitPlacer::Place(FormationUnit *unit, uint32 index, uint3
     int lineNo = index / 6;
     int indexInLine = index % 6;
     int lineSize = max(count - lineNo * 6, uint32(6));
-    float x = cos(orientation) * sPlayerbotAIConfig.followDistance * lineNo;
-    float y = sin(orientation) * sPlayerbotAIConfig.followDistance * lineNo;
     return placer.Place(unit, indexInLine, lineSize);
 }
 

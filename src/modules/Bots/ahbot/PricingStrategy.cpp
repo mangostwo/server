@@ -211,8 +211,6 @@ uint32 PricingStrategy::GetDefaultBuyPrice(ItemPrototype const* proto)
     uint32 level = max(proto->ItemLevel, proto->RequiredLevel);
     if (proto->Class == ITEM_CLASS_QUEST)
     {
-        double result = 1.0;
-
         QueryResult* results = WorldDatabase.PQuery(
             "select max(QuestLevel), max(MinLevel) from quest_template where ReqItemId1 = %u or ReqItemId2 = %u or ReqItemId3 = %u or ReqItemId4 = %u",
             proto->ItemId, proto->ItemId, proto->ItemId, proto->ItemId);

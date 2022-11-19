@@ -137,7 +137,6 @@ bool SummonAction::Summon(Player *summoner, Player *player)
 
 bool SummonAction::Teleport(Player *summoner, Player *player)
 {
-    Player* master = GetMaster();
     if (!summoner->IsBeingTeleported() && !player->IsBeingTeleported())
     {
         float followAngle = GetFollowAngle();

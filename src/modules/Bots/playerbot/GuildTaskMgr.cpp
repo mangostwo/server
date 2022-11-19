@@ -782,7 +782,6 @@ bool GuildTaskMgr::HandleConsoleCommand(ChatHandler* handler, char const* args)
 
             } while (result->NextRow());
 
-            Field* fields = result->Fetch();
             delete result;
         }
 
@@ -847,7 +846,6 @@ bool GuildTaskMgr::HandleConsoleCommand(ChatHandler* handler, char const* args)
                 }
             } while (result->NextRow());
 
-            Field* fields = result->Fetch();
             delete result;
             return true;
         }

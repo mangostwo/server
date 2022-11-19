@@ -97,7 +97,7 @@ bool OutfitAction::Execute(Event event)
     return true;
 }
 
-void OutfitAction::Save(string name, ItemIds items)
+void OutfitAction::Save(string& name, ItemIds items)
 {
     list<string>& outfits = AI_VALUE(list<string>&, "outfit list");
     for (list<string>::iterator i = outfits.begin(); i != outfits.end(); ++i)
@@ -125,7 +125,7 @@ void OutfitAction::Save(string name, ItemIds items)
     outfits.push_back(out.str());
 }
 
-ItemIds OutfitAction::Find(string name)
+ItemIds OutfitAction::Find(string& name)
 {
     list<string>& outfits = AI_VALUE(list<string>&, "outfit list");
     for (list<string>::iterator i = outfits.begin(); i != outfits.end(); ++i)
@@ -197,7 +197,7 @@ ItemIds OutfitAction::parseItems(string text)
     return itemIds;
 }
 
-void OutfitAction::Update(string name)
+void OutfitAction::Update(string& name)
 {
     ListItemsVisitor visitor;
     IterateItems(&visitor, ITERATE_ITEMS_IN_EQUIP);

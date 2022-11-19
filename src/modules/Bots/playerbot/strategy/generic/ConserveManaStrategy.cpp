@@ -17,8 +17,6 @@ float ConserveManaMultiplier::GetValue(Action* action)
     bool hasMana = AI_VALUE2(bool, "has mana", "self target");
     bool mediumMana = hasMana && mana < sPlayerbotAIConfig.mediumMana;
 
-    string name = action->getName();
-
     if (health < sPlayerbotAIConfig.lowHealth)
     {
         return 1.0f;

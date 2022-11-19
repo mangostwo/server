@@ -11,7 +11,7 @@ namespace ai
 
     private:
         bool PrintHelp();
-        bool PrintActionLine(uint32 idx, string command);
+        bool PrintActionLine(uint32 idx, string& command);
         bool Print(string name);
         bool Edit(string name, uint32 idx, string command);
     };

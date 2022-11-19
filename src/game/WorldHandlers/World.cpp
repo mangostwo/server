@@ -2276,7 +2276,7 @@ void World::ShutdownServ(uint32 time, uint32 options, uint8 exitcode)
         m_ShutdownTimer = time;
         ShutdownMsg(true);
     }
-    
+
 #ifdef ENABLE_PLAYERBOTS
     sRandomPlayerbotMgr.LogoutAllBots();
 #endif

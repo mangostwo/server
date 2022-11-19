@@ -7,7 +7,7 @@ using namespace ai;
 class FindCurrentCcTargetStrategy : public FindTargetStrategy
 {
 public:
-    FindCurrentCcTargetStrategy(PlayerbotAI* ai, string spell) : FindTargetStrategy(ai)
+    FindCurrentCcTargetStrategy(PlayerbotAI* ai, string& spell) : FindTargetStrategy(ai)
     {
         this->spell = spell;
     }

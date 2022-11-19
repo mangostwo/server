@@ -93,10 +93,7 @@ bool MovementAction::MoveTo(Unit* target, float distance)
 
     float bx = bot->GetPositionX();
     float by = bot->GetPositionY();
-    float bz = bot->GetPositionZ();
 
-    float tx = target->GetPositionX();
-    float ty = target->GetPositionY();
     float tz = target->GetPositionZ();
 
     float distanceToTarget = bot->GetDistance2d(target);
