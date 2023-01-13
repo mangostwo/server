@@ -196,7 +196,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
 
     // DEBUG_LOG("BuildCreateUpdate: update-type: %u, object-type: %u got updateFlags: %X", updatetype, m_objectTypeId, updateFlags);
 
-    ByteBuffer buf(500);
+    ByteBuffer& buf = data->GetBuffer();
     buf << uint8(updatetype);
     buf << GetPackGUID();
     buf << uint8(m_objectTypeId);
@@ -207,7 +207,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
     updateMask.SetCount(m_valuesCount);
     _SetCreateBits(&updateMask, target);
     BuildValuesUpdate(updatetype, &buf, &updateMask, target);
-    data->AddUpdateBlock(buf);
+    data->AddUpdateBlock();
 }
 
 void Object::SendCreateUpdateToPlayer(Player* player)
@@ -223,7 +223,7 @@ void Object::SendCreateUpdateToPlayer(Player* player)
 
 void Object::BuildValuesUpdateBlockForPlayer(UpdateData* data, Player* target) const
 {
-    ByteBuffer buf(500);
+    ByteBuffer& buf = data->GetBuffer();
 
     buf << uint8(UPDATETYPE_VALUES);
     buf << GetPackGUID();
@@ -234,7 +234,7 @@ void Object::BuildValuesUpdateBlockForPlayer(UpdateData* data, Player* target) c
     _SetUpdateBits(&updateMask, target);
     BuildValuesUpdate(UPDATETYPE_VALUES, &buf, &updateMask, target);
 
-    data->AddUpdateBlock(buf);
+    data->AddUpdateBlock();
 }
 
 void Object::BuildOutOfRangeUpdateBlock(UpdateData* data) const
