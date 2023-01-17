@@ -1057,17 +1057,6 @@ void WorldSession::SendAddonsInfo()
     SendPacket(&data);
 }
 
-void WorldSession::SetPlayer(Player* plr)
-{
-    _player = plr;
-
-    // set m_GUID that can be used while player loggined and later until m_playerRecentlyLogout not reset
-    if (_player)
-    {
-        m_GUIDLow = _player->GetGUIDLow();
-    }
-}
-
 void WorldSession::SendRedirectClient(std::string& ip, uint16 port)
 {
     uint32 ip2 = ACE_OS::inet_addr(ip.c_str());

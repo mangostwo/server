@@ -42,8 +42,10 @@
 #include "AchievementMgr.h"
 #include "ReputationMgr.h"
 #include "BattleGround.h"
+#include "DBCStores.h"
 #include "SharedDefines.h"
 #include "Chat.h"
+#include "GMTicketMgr.h"
 
 #include<string>
 #include<vector>
@@ -1261,6 +1263,18 @@ class Player : public Unit
         void Say(const std::string& text, const uint32 language);
         void Yell(const std::string& text, const uint32 language);
         void TextEmote(const std::string& text);
+        /**
+         * This will log a whisper depending on the setting LogWhispers in mangosd.conf, for a list
+         * of available levels please see \ref WhisperLoggingLevels. The logging is done to database
+         * in the table characters.character_whispers and includes to/from, text and when the whisper
+         * was sent.
+         *
+         * @param text the text that was sent
+         * @param receiver guid of the receiver of the message
+         * \see WhisperLoggingLevels
+         * \see eConfigUInt32Values::CONFIG_UINT32_LOG_WHISPERS
+         */
+        void LogWhisper(const std::string& text, ObjectGuid receiver);
         void Whisper(const std::string& text, const uint32 language, ObjectGuid receiver);
 
         /*********************************************************/

@@ -123,6 +123,7 @@ class ChatHandler
         void SendSysMessage(int32     entry);
         void PSendSysMessage(const char* format, ...) ATTR_PRINTF(2, 3);
         void PSendSysMessage(int32     entry, ...);
+        void PSendSysMessageMultiline(int32 entry, ...);
 
         bool ParseCommands(const char* text);
         ChatCommand const* FindCommand(char const* text);
@@ -645,8 +646,17 @@ class ChatHandler
         bool HandleKickPlayerCommand(char* args);
         bool HandleMailBoxCommand(char* args);
 
-        bool HandleTicketCommand(char* args);
-        bool HandleDelTicketCommand(char* args);
+        bool HandleTicketAcceptCommand(char* args);
+        bool HandleTicketCloseCommand(char* args);
+        bool HandleTicketDeleteCommand(char* args);
+        bool HandleTicketInfoCommand(char* args);
+        bool HandleTicketListCommand(char* args);
+        bool HandleTicketMeAcceptCommand(char* args);
+        bool HandleTicketOnlineListCommand(char* args);
+        bool HandleTicketRespondCommand(char* args);
+        bool HandleTicketShowCommand(char* args);
+        bool HandleTickerSurveyClose(char* args);
+
         bool HandleMaxSkillCommand(char* args);
         bool HandleSetSkillCommand(char* args);
         bool HandleRespawnCommand(char* args);

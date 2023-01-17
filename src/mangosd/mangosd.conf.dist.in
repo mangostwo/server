@@ -296,6 +296,12 @@ CleanCharacterDB                  = 1
 #        Default: 0 - include in log if log level permit
 #                 1 - not include with any log level
 #
+#    LogWhispers
+#        Log whispers between players to database, character.character_whispers
+#                 0 - Don't log anything
+#        Default: 1 - Only log GM tickets responses and the following conversation until closing the ticket
+#                 2 - Log all whispers
+#
 #    WorldLogFile
 #        Packet logging file for the worldserver
 #        Default: ""          - no log file created
@@ -395,6 +401,7 @@ LogFilter_Damage             = 0
 LogFilter_Combat             = 0
 LogFilter_SpellCast          = 0
 LogFilter_Calendar           = 1
+LogWhispers                  = 1
 WorldLogFile                 = "world-packets.log"
 WorldLogTimestamp            = 0
 DBErrorLogFile               = "world-database.log"
@@ -1173,6 +1180,15 @@ Channel.SilentlyGMJoin          = 0
 #                 0 (disable)
 #                 1 (enable)
 #
+#    GM.TicketListSize
+#        Number of tickets shown to a GM by .ticket list/onlinelist.
+#        Default: 30
+#
+#    GM.TicketOfflineClosing
+#        Is GM ticket close available for teh offline players or not.
+#        Default: 0 (false) closing denied
+#                 1 (true) closing enabled
+#
 #    GM.Chat
 #        GM chat mode at login
 #        Default: 2 (last save state)
@@ -1232,6 +1248,8 @@ Channel.SilentlyGMJoin          = 0
 GM.LoginState            = 2
 GM.Visible               = 2
 GM.AcceptTickets         = 2
+GM.TicketListSize        = 30
+GM.TicketOfflineClosing  = 1
 GM.Chat                  = 2
 GM.WhisperingTo          = 2
 GM.InGMList.Level        = 3

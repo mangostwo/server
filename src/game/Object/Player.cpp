@@ -4766,6 +4766,11 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
  */
 void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRealmChars, bool deleteFinally)
 {
+    //Make sure to delete unresolved tickets so they don't take up place in the open tickets list
+    CharacterDatabase.PExecute("DELETE FROM `character_ticket` "
+                               "WHERE `resolved` = 0 AND `guid` = %u",
+                               playerguid.GetCounter());
+
     // for nonexistent account avoid update realm
     if (accountId == 0)
     {
@@ -21314,6 +21319,57 @@ void Player::TextEmote(const std::string& text)
     SendMessageToSetInRange(&data, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_TEXTEMOTE), true, !sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_CHAT));
 }
 
+void Player::LogWhisper(const std::string& text, ObjectGuid receiver)
+{
+    WhisperLoggingLevels loggingLevel = WhisperLoggingLevels(sWorld.getConfig(CONFIG_UINT32_LOG_WHISPERS));
+
+    if (loggingLevel == WHISPER_LOGGING_NONE)
+    {
+        return;
+    }
+
+    //Try to find ticket by either this player or the receiver
+    GMTicket* ticket = sTicketMgr.GetGMTicket(GetObjectGuid());
+    if (!ticket)
+    {
+        ticket = sTicketMgr.GetGMTicket(receiver);
+    }
+
+    uint32 ticketId = 0;
+    if (ticket)
+    {
+        ticketId = ticket->GetId();
+    }
+
+    bool isSomeoneGM = false;
+
+    //Find out if at least one of them is a GM for ticket logging
+    if (GetSession()->GetSecurity() >= SEC_GAMEMASTER)
+    {
+        isSomeoneGM = true;
+    }
+    else
+    {
+        Player* pRecvPlayer = sObjectMgr.GetPlayer(receiver);
+        if (pRecvPlayer && pRecvPlayer->GetSession()->GetSecurity() >= SEC_GAMEMASTER)
+        {
+            isSomeoneGM = true;
+        }
+    }
+
+    if ((loggingLevel == WHISPER_LOGGING_TICKETS && ticket && isSomeoneGM)
+        || loggingLevel == WHISPER_LOGGING_EVERYTHING)
+    {
+        static SqlStatementID wlog;
+        SqlStatement stmt = CharacterDatabase.CreateStatement(wlog, "INSERT INTO `character_whispers` (`to_guid`, `from_guid`, `message`, `regarding_ticket_id`) VALUES (?, ?, ?, ?)");
+        stmt.addUInt32(receiver.GetCounter());          // to_guid
+        stmt.addUInt32(GetObjectGuid().GetCounter());   // from_guid
+        stmt.addString(text.c_str());                   // message
+        stmt.addUInt32(ticketId);                       // regarding_ticket_id
+        stmt.Execute();
+    }
+}
+
 void Player::Whisper(const std::string& text, uint32 language, ObjectGuid receiver)
 {
     if (language != LANG_ADDON)                             // if not addon data
@@ -21331,7 +21387,8 @@ void Player::Whisper(const std::string& text, uint32 language, ObjectGuid receiv
     if (language != LANG_ADDON)
     {
         data.clear();
-        ChatHandler::BuildChatPacket(data, CHAT_MSG_WHISPER_INFORM, text.c_str(), Language(language), CHAT_TAG_NONE, rPlayer->GetObjectGuid());
+        ChatHandler::BuildChatPacket(data, CHAT_MSG_WHISPER, text.c_str(), Language(language), CHAT_TAG_NONE, rPlayer->GetObjectGuid());
+        LogWhisper(text, receiver);
         GetSession()->SendPacket(&data);
     }
 
