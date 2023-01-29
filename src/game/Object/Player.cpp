@@ -22420,6 +22420,12 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
         count = 1;
     }
 
+    // cheating attempt
+    if (bag != NULL_BAG && bag != INVENTORY_SLOT_BAG_0 && slot > MAX_BAG_SIZE && slot != NULL_SLOT)
+    {
+        return false;
+    }
+
     if (!IsAlive())
     {
         return false;
