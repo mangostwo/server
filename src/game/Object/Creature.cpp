@@ -202,12 +202,20 @@ void Creature::AddToWorld()
     }
 
     Unit::AddToWorld();
+
+    // Make active if required
+    if (sWorld.isForceLoadMap(GetMapId()) || (GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_ACTIVE))
+    {
+        SetActiveObjectState(true);
+    }
+
 #ifdef ENABLE_ELUNA
     if (!inWorld)
     {
         sEluna->OnAddToWorld(this);
     }
 #endif /* ENABLE_ELUNA */
+
 }
 
 void Creature::RemoveFromWorld()

@@ -321,6 +321,17 @@ bool Map::EnsureGridLoaded(const Cell& cell)
     return false;
 }
 
+void Map::ForceLoadGrid(float x, float y)
+{
+    if (!IsLoaded(x, y))
+    {
+        CellPair p = MaNGOS::ComputeCellPair(x, y);
+        Cell cell(p);
+        EnsureGridLoadedAtEnter(cell);
+        getNGrid(cell.GridX(), cell.GridY())->setUnloadExplicitLock(true);
+    }
+}
+
 void Map::LoadGrid(const Cell& cell, bool no_unload)
 {
     EnsureGridLoaded(cell);

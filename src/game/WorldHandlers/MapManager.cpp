@@ -63,6 +63,7 @@ void
 MapManager::Initialize()
 {
     int num_threads(sWorld.getConfig(CONFIG_UINT32_NUMTHREADS));
+
     if (num_threads > 0 && m_updater.activate(num_threads) == -1)
     {
         abort();
@@ -104,6 +105,7 @@ void MapManager::InitializeVisibilityDistanceInfo()
     }
 }
 
+/// @param id - MapId of the to be created map. @param obj WorldObject for which the map is to be created. Must be player for Instancable maps.
 Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
 {
     ACE_GUARD_RETURN(LOCK_TYPE, _guard, m_lock, NULL)
@@ -124,6 +126,8 @@ Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
         {
             m = CreateInstance(id, (Player*)obj);
         }
+        // Load active objects for this map
+        sObjectMgr.LoadActiveEntities(m);
     }
     else
     {
