@@ -19,5 +19,5 @@ void NearestNonBotPlayersValue::FindUnits(list<Unit*> &targets)
 bool NearestNonBotPlayersValue::AcceptUnit(Unit* unit)
 {
     ObjectGuid guid = unit->GetObjectGuid();
-    return guid.IsPlayer() && !((Player*)unit)->GetPlayerbotAI();
+    return guid.IsPlayer() && !(static_cast<Player*>(unit)->GetPlayerbotAI());
 }
