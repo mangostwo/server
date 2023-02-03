@@ -871,9 +871,9 @@ bool PlayerbotAI::HasAura(uint32 spellId, const Unit* unit)
 
     for (uint32 effect = EFFECT_INDEX_0; effect <= EFFECT_INDEX_2; effect++)
     {
-        Aura* aura = ((Unit*)unit)->GetAura(spellId, (SpellEffectIndex)effect);
+        Aura* aura = const_cast<Unit*>(unit)->GetAura(spellId, (SpellEffectIndex)effect);
 
-        if (IsRealAura(bot, aura, (Unit*)unit))
+        if (IsRealAura(bot, aura, const_cast<Unit*>(unit)))
         {
             return true;
         }

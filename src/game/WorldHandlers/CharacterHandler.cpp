@@ -173,7 +173,7 @@ class CharacterHandler
                 return;
             }
 #ifdef ENABLE_PLAYERBOTS
-            ObjectGuid guid = ((LoginQueryHolder*)holder)->GetGuid();
+            ObjectGuid guid = static_cast<LoginQueryHolder*>(holder)->GetGuid();
 #endif
             session->HandlePlayerLogin((LoginQueryHolder*)holder);
 #ifdef ENABLE_PLAYERBOTS
@@ -193,7 +193,7 @@ class CharacterHandler
                 return;
             }
 
-            PlayerbotLoginQueryHolder* lqh = (PlayerbotLoginQueryHolder*)holder;
+            PlayerbotLoginQueryHolder* lqh = static_cast<PlayerbotLoginQueryHolder*>(holder);
             if (sObjectMgr.GetPlayer(lqh->GetGuid()))
             {
                 delete holder;

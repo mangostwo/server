@@ -57,7 +57,7 @@ Unit* PartyMemberToHeal::Calculate()
             }
         }
     }
-    return (Unit*)calc.param;
+    return static_cast<Unit*>(calc.param);
 }
 
 bool PartyMemberToHeal::CanHealPet(Pet* pet)

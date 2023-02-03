@@ -43,6 +43,7 @@ bool GossipHelloAction::Execute(Event event)
  }
 
     string text = event.getParam();
+    int menuToSelect = -1;
     if (text.empty())
     {
         WorldPacket p1;

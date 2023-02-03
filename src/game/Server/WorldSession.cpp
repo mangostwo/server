@@ -621,10 +621,6 @@ void WorldSession::LogoutPlayer(bool Save)
         sSocialMgr.SendFriendStatus(_player, FRIEND_OFFLINE, _player->GetObjectGuid(), true);
         sSocialMgr.RemovePlayerSocial(_player->GetGUIDLow());
 
-#ifdef ENABLE_PLAYERBOTS
-        uint32 guid = GetPlayer()->GetGUIDLow();
-#endif
-
         ///- Used by Eluna
 #ifdef ENABLE_ELUNA
         sEluna->OnLogout(_player);
