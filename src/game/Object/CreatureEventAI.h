@@ -103,7 +103,7 @@ enum EventAI_ActionType
     ACTION_T_INC_PHASE                  = 23,               // Value (may be negative to decrement phase, should not be 0)
     ACTION_T_EVADE                      = 24,               // No Params
     ACTION_T_FLEE_FOR_ASSIST            = 25,               // No Params
-    ACTION_T_QUEST_EVENT_ALL            = 26,               // QuestID
+    ACTION_T_QUEST_EVENT_ALL            = 26,               // QuestID, UseThreatList (1 = true, 0 = false)
     ACTION_T_CAST_EVENT_ALL             = 27,               // CreatureId, SpellId
     ACTION_T_REMOVEAURASFROMSPELL       = 28,               // Target, Spellid
     ACTION_T_RANGED_MOVEMENT            = 29,               // Distance, Angle
@@ -128,6 +128,7 @@ enum EventAI_ActionType
     ACTION_T_CHANGE_MOVEMENT            = 48,               // MovementType, WanderDistance, unused
     ACTION_T_SUMMON_UNIQUE              = 49,               // CreatureId, Target, SpawnId
     ACTION_T_EMOTE_TARGET               = 50,               // EmoteId, TargetGuid
+    ACTION_T_DYNAMIC_MOVEMENT           = 51,               // EnableDynamicMovement (1 = on; 0 = off)
 
     ACTION_T_END
 };
@@ -152,6 +153,8 @@ enum Target
     // Hostile targets (including pets)
     TARGET_T_HOSTILE_RANDOM_PLAYER          = 8,            // Just any random player on our threat list
     TARGET_T_HOSTILE_RANDOM_NOT_TOP_PLAYER  = 9,            // Any random player from threat list except top threat
+
+    TARGET_T_END
 };
 
 enum EventFlags
@@ -298,6 +301,7 @@ struct CreatureEventAI_Action
         struct
         {
             uint32 questId;
+            uint32 useThreatList;                           // bool: 1 = true; 0 = false
         } quest_event_all;
         // ACTION_T_CAST_EVENT_ALL                          = 27
         struct
@@ -435,6 +439,14 @@ struct CreatureEventAI_Action
             uint32 emoteId;
             uint32 targetGuid;
         } emoteTarget;
+        // ACTION_T_DYNAMIC_MOVEMENT                        = 49
+        struct
+        {
+            uint32 state;                                   // bool: 1 = on; 0 = off
+            uint32 unused1;
+            uint32 unused2;
+        } dynamicMovement;
+
         // RAW
         struct
         {
@@ -683,6 +695,7 @@ class CreatureEventAI : public CreatureAI
     protected:
         uint32 m_EventUpdateTime;                           // Time between event updates
         uint32 m_EventDiff;                                 // Time between the last event call
+        bool   m_bEmptyList;
 
         // Variables used by Events themselves
         typedef std::vector<CreatureEventAIHolder> CreatureEventAIList;
@@ -690,12 +703,15 @@ class CreatureEventAI : public CreatureAI
 
         uint8  m_Phase;                                     // Current phase, max 32 phases
         bool   m_MeleeEnabled;                              // If we allow melee auto attack
+        bool   m_DynamicMovement;                           // Core will control creatures movement if this is enabled
+        bool   m_HasOOCLoSEvent;                            // Cache if a OOC-LoS Event exists
         uint32 m_InvinceabilityHpLevel;                     // Minimal health level allowed at damage apply
 
         uint32 m_throwAIEventMask;                          // Automatically throw AIEvents that are encoded into this mask
         // Note that Step 100 means that AI_EVENT_GOT_FULL_HEALTH was sent
         // Steps 0..2 correspond to AI_EVENT_LOST_SOME_HEALTH(90%), AI_EVENT_LOST_HEALTH(50%), AI_EVENT_CRITICAL_HEALTH(10%)
         uint32 m_throwAIEventStep;                          // Used for damage taken/ received heal
+        float m_LastSpellMaxRange;                          // Maximum spell range that was cast during dynamic movement
 };
 
 #endif

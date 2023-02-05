@@ -418,13 +418,15 @@ void TradeData::SetAccepted(bool state, bool crosssend /*= false*/)
 
     if (!state)
     {
+        TradeStatusInfo info;
+        info.Status = TRADE_STATUS_BACK_TO_TRADE;
         if (crosssend)
         {
-            m_trader->GetSession()->SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
+            m_trader->GetSession()->SendTradeStatus(info);
         }
         else
         {
-            m_player->GetSession()->SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
+            m_player->GetSession()->SendTradeStatus(info);
         }
     }
 }
@@ -3964,10 +3966,12 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank, bo
 
     // remove pet auras
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
         if (PetAura const* petSpell = sSpellMgr.GetPetAura(spell_id, SpellEffectIndex(i)))
         {
             RemovePetAura(petSpell);
         }
+    }
 
     TalentSpellPos const* talentPos = GetTalentSpellPos(spell_id);
     if (talentPos)
@@ -7318,12 +7322,14 @@ void Player::SendCinematicStart(uint32 CinematicSequenceId)
     SendDirectMessage(&data);
 }
 
+#if defined (WOTLK) || defined (CATA) || defined (MISTS)
 void Player::SendMovieStart(uint32 MovieId)
 {
     WorldPacket data(SMSG_TRIGGER_MOVIE, 4);
     data << uint32(MovieId);
     SendDirectMessage(&data);
 }
+#endif
 
 void Player::CheckAreaExploreAndOutdoor()
 {

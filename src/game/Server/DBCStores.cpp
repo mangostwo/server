@@ -587,7 +587,10 @@ void LoadDBCStores(const std::string& dataPath)
     for (unsigned int i = 0; i < sTalentStore.GetNumRows(); ++i)
     {
         TalentEntry const* talentInfo = sTalentStore.LookupEntry(i);
-        if (!talentInfo) continue;
+        if (!talentInfo)
+        {
+            continue;
+        }
         for (int j = 0; j < MAX_TALENT_RANK; ++j)
             if (talentInfo->RankID[j])
             {
@@ -937,7 +940,7 @@ ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)
     return NULL;
 }
 
-static ChatChannelsEntry worldCh = { 26, 4, {"world"} };
+static ChatChannelsEntry worldCh = { 26, 4, "world" };
 
 ChatChannelsEntry const* GetChannelEntryFor(const std::string& name)
 {
@@ -1085,12 +1088,15 @@ PvPDifficultyEntry const* GetBattlegroundBracketByLevel(uint32 mapid, uint32 lev
 PvPDifficultyEntry const* GetBattlegroundBracketById(uint32 mapid, BattleGroundBracketId id)
 {
     for (uint32 i = 0; i < sPvPDifficultyStore.GetNumRows(); ++i)
+    {
         if (PvPDifficultyEntry const* entry = sPvPDifficultyStore.LookupEntry(i))
+        {
             if (entry->mapId == mapid && entry->GetBracketId() == id)
             {
                 return entry;
             }
-
+        }
+    }
     return NULL;
 }
 
@@ -1138,8 +1144,8 @@ bool IsPointInAreaTriggerZone(AreaTriggerEntry const* atEntry, uint32 mapid, flo
         float dx = rotPlayerX - atEntry->x;
         float dy = rotPlayerY - atEntry->y;
         if ((fabs(dx) > atEntry->box_x / 2 + delta) ||
-                (fabs(dy) > atEntry->box_y / 2 + delta) ||
-                (fabs(dz) > atEntry->box_z / 2 + delta))
+            (fabs(dy) > atEntry->box_y / 2 + delta) ||
+            (fabs(dz) > atEntry->box_z / 2 + delta))
         {
             return false;
         }
