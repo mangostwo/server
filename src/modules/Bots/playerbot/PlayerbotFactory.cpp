@@ -340,7 +340,7 @@ void PlayerbotFactory::InitTalents()
 class DestroyItemsVisitor : public IterateItemsVisitor
 {
 public:
-    DestroyItemsVisitor(Player* bot) : IterateItemsVisitor(), bot(bot) {}
+    explicit DestroyItemsVisitor(Player* bot) : IterateItemsVisitor(), bot(bot) {}
 
     virtual bool Visit(Item* item)
     {
@@ -1778,7 +1778,6 @@ void PlayerbotFactory::InitInventorySkill()
 
 Item* PlayerbotFactory::StoreItem(uint32 itemId, uint32 count)
 {
-    ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
     ItemPosCountVec sDest;
     InventoryResult msg = bot->CanStoreNewItem(INVENTORY_SLOT_BAG_0, NULL_SLOT, sDest, itemId, count);
     if (msg != EQUIP_ERR_OK)

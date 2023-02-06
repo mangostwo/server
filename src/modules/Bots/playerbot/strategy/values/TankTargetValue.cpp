@@ -7,7 +7,7 @@ using namespace ai;
 class FindTargetForTankStrategy : public FindTargetStrategy
 {
 public:
-    FindTargetForTankStrategy(PlayerbotAI* ai) : FindTargetStrategy(ai)
+    explicit FindTargetForTankStrategy(PlayerbotAI* ai) : FindTargetStrategy(ai)
     {
         minThreat = 0;
         minTankCount = 0;

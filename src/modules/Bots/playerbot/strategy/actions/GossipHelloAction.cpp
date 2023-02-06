@@ -43,7 +43,6 @@ bool GossipHelloAction::Execute(Event event)
  }
 
     string text = event.getParam();
-    int menuToSelect = -1;
     if (text.empty())
     {
         WorldPacket p1;
@@ -63,7 +62,7 @@ bool GossipHelloAction::Execute(Event event)
     }
     else
     {
-        menuToSelect = atoi(text.c_str());
+        int menuToSelect = atoi(text.c_str());
         if (menuToSelect > 0) menuToSelect--;
      {
          ProcessGossip(menuToSelect);

@@ -9,7 +9,7 @@ using namespace std;
 class FindLeastHpTargetStrategy : public FindTargetStrategy
 {
 public:
-    FindLeastHpTargetStrategy(PlayerbotAI* ai) : FindTargetStrategy(ai)
+    explicit FindLeastHpTargetStrategy(PlayerbotAI* ai) : FindTargetStrategy(ai)
     {
         minHealth = 0;
     }

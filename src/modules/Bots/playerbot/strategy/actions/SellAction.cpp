@@ -8,7 +8,7 @@ using namespace ai;
 class SellItemsVisitor : public IterateItemsVisitor
 {
 public:
-    SellItemsVisitor(SellAction* action) : IterateItemsVisitor()
+    explicit SellItemsVisitor(SellAction* action) : IterateItemsVisitor()
     {
         this->action = action;
     }
@@ -26,7 +26,7 @@ private:
 class SellGrayItemsVisitor : public SellItemsVisitor
 {
 public:
-    SellGrayItemsVisitor(SellAction* action) : SellItemsVisitor(action) {}
+    explicit SellGrayItemsVisitor(SellAction* action) : SellItemsVisitor(action) {}
 
     virtual bool Visit(Item* item)
     {
