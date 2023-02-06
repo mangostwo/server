@@ -116,7 +116,7 @@ class AhbotThread: public ACE_Task <ACE_MT_SYNCH>
 private:
     AhBot* bot;
 public:
-    AhbotThread(AhBot* bot) : bot(bot) {}
+    explicit AhbotThread(AhBot* bot) : bot(bot) {}
     int svc(void) { bot->ForceUpdate(); return 0; }
 };
 

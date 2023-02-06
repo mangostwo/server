@@ -62,21 +62,21 @@ namespace ai
     class MeleeFormation : public FollowFormation
     {
     public:
-        MeleeFormation(PlayerbotAI* ai) : FollowFormation(ai, "melee") {}
+        explicit MeleeFormation(PlayerbotAI* ai) : FollowFormation(ai, "melee") {}
         virtual string GetTargetName() { return "master target"; }
     };
 
     class QueueFormation : public FollowFormation
     {
     public:
-        QueueFormation(PlayerbotAI* ai) : FollowFormation(ai, "queue") {}
+        explicit QueueFormation(PlayerbotAI* ai) : FollowFormation(ai, "queue") {}
         virtual string GetTargetName() { return "line target"; }
     };
 
     class NearFormation : public MoveAheadFormation
     {
     public:
-        NearFormation(PlayerbotAI* ai) : MoveAheadFormation(ai, "near") {}
+        explicit NearFormation(PlayerbotAI* ai) : MoveAheadFormation(ai, "near") {}
         virtual WorldLocation GetLocationInternal()
         {
             Player* master = GetMaster();
@@ -106,7 +106,7 @@ namespace ai
     class ChaosFormation : public MoveAheadFormation
     {
     public:
-        ChaosFormation(PlayerbotAI* ai) : MoveAheadFormation(ai, "chaos"), lastChangeTime(0) {}
+        explicit ChaosFormation(PlayerbotAI* ai) : MoveAheadFormation(ai, "chaos"), lastChangeTime(0) {}
         virtual WorldLocation GetLocationInternal()
         {
             Player* master = GetMaster();
@@ -150,7 +150,7 @@ namespace ai
     class CircleFormation : public MoveFormation
     {
     public:
-        CircleFormation(PlayerbotAI* ai) : MoveFormation(ai, "circle") {}
+        explicit CircleFormation(PlayerbotAI* ai) : MoveFormation(ai, "circle") {}
         virtual WorldLocation GetLocation()
         {
             float range = 2.0f;
@@ -206,7 +206,7 @@ namespace ai
     class LineFormation : public MoveAheadFormation
     {
     public:
-        LineFormation(PlayerbotAI* ai) : MoveAheadFormation(ai, "line") {}
+        explicit LineFormation(PlayerbotAI* ai) : MoveAheadFormation(ai, "line") {}
         virtual WorldLocation GetLocationInternal()
         {
             Group* group = bot->GetGroup();
@@ -250,7 +250,7 @@ namespace ai
     class ShieldFormation : public MoveFormation
     {
     public:
-        ShieldFormation(PlayerbotAI* ai) : MoveFormation(ai, "shield") {}
+        explicit ShieldFormation(PlayerbotAI* ai) : MoveFormation(ai, "shield") {}
         virtual WorldLocation GetLocation()
         {
             Group* group = bot->GetGroup();

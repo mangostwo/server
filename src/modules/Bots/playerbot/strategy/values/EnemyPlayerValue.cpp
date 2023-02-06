@@ -9,7 +9,7 @@ using namespace std;
 class FindEnemyPlayerStrategy : public FindTargetStrategy
 {
 public:
-    FindEnemyPlayerStrategy(PlayerbotAI* ai) : FindTargetStrategy(ai)
+    explicit FindEnemyPlayerStrategy(PlayerbotAI* ai) : FindTargetStrategy(ai)
     {
     }
 

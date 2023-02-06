@@ -24,7 +24,7 @@ public:
 class FindDeadPlayer : public FindPlayerPredicate
 {
 public:
-    FindDeadPlayer(PartyMemberValue* value) : value(value) {}
+    explicit FindDeadPlayer(PartyMemberValue* value) : value(value) {}
 
     virtual bool Check(Unit* unit)
     {

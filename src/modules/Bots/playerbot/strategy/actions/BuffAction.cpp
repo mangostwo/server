@@ -8,7 +8,7 @@ using namespace ai;
 
 class FindBuffVisitor : public IterateItemsVisitor {
 public:
-    FindBuffVisitor(Player* bot) : IterateItemsVisitor(), bot(bot)
+    explicit FindBuffVisitor(Player* bot) : IterateItemsVisitor(), bot(bot)
     {
     }
 

@@ -19,7 +19,7 @@ string ChatFilter::Filter(string message)
 class StrategyChatFilter : public ChatFilter
 {
 public:
-    StrategyChatFilter(PlayerbotAI* ai) : ChatFilter(ai) {}
+    explicit StrategyChatFilter(PlayerbotAI* ai) : ChatFilter(ai) {}
 
     virtual string Filter(string message)
     {
@@ -55,7 +55,7 @@ public:
 class LevelChatFilter : public ChatFilter
 {
 public:
-    LevelChatFilter(PlayerbotAI* ai) : ChatFilter(ai) {}
+    explicit LevelChatFilter(PlayerbotAI* ai) : ChatFilter(ai) {}
 
     virtual string Filter(string message)
     {
@@ -92,7 +92,7 @@ public:
 class CombatTypeChatFilter : public ChatFilter
 {
 public:
-    CombatTypeChatFilter(PlayerbotAI* ai) : ChatFilter(ai) {}
+    explicit CombatTypeChatFilter(PlayerbotAI* ai) : ChatFilter(ai) {}
 
     virtual string Filter(string message)
     {
@@ -158,7 +158,7 @@ public:
 class RtiChatFilter : public ChatFilter
 {
 public:
-    RtiChatFilter(PlayerbotAI* ai) : ChatFilter(ai)
+    explicit RtiChatFilter(PlayerbotAI* ai) : ChatFilter(ai)
     {
         rtis.push_back("@star");
         rtis.push_back("@circle");
@@ -228,7 +228,7 @@ private:
 class ClassChatFilter : public ChatFilter
 {
 public:
-    ClassChatFilter(PlayerbotAI* ai) : ChatFilter(ai)
+    explicit ClassChatFilter(PlayerbotAI* ai) : ChatFilter(ai)
     {
         //classNames["@death_knight"] = CLASS_DEATH_KNIGHT;
         classNames["@druid"] = CLASS_DRUID;

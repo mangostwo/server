@@ -212,7 +212,7 @@ void SuggestWhatToDoAction::spam(string msg)
 class FindTradeItemsVisitor : public IterateItemsVisitor
 {
 public:
-    FindTradeItemsVisitor(uint32 quality) : quality(quality), IterateItemsVisitor() {}
+    explicit FindTradeItemsVisitor(uint32 quality) : quality(quality), IterateItemsVisitor() {}
 
     virtual bool Visit(Item* item)
     {
