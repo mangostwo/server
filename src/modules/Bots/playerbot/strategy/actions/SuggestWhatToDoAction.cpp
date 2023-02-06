@@ -7,7 +7,7 @@
 
 using namespace ai;
 
-SuggestWhatToDoAction::SuggestWhatToDoAction(PlayerbotAI* ai, string name) : InventoryAction(ai, name)
+SuggestWhatToDoAction::SuggestWhatToDoAction(PlayerbotAI* ai, const string name) : InventoryAction(ai, name)
 {
     suggestions.push_back(&SuggestWhatToDoAction::instance);
     suggestions.push_back(&SuggestWhatToDoAction::specificQuest);

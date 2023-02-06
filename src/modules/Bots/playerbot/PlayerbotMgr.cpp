@@ -138,7 +138,7 @@ void PlayerbotHolder::OnBotLogin(Player * const bot)
     else sLog.outString("Bot %s logged in", bot->GetName());
 }
 
-string PlayerbotHolder::ProcessBotCommand(string cmd, ObjectGuid guid, bool admin, uint32 masterAccountId, uint32 masterGuildId)
+string PlayerbotHolder::ProcessBotCommand(const string cmd, ObjectGuid guid, bool admin, uint32 masterAccountId, uint32 masterGuildId)
 {
     if (!sPlayerbotAIConfig.enabled || guid.IsEmpty())
     {

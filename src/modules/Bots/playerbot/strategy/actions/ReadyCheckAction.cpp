@@ -11,7 +11,7 @@ using namespace ai;
 
 using namespace ai;
 
-string formatPercent(string name, uint8 value, float percent)
+string formatPercent(const string& name, uint8 value, float percent)
 {
     ostringstream out;
 
@@ -122,7 +122,7 @@ public:
 class ItemCountChecker : public ReadyChecker
 {
 public:
-    ItemCountChecker(string item, string name) { this->item = item; this->name = name; }
+    ItemCountChecker(const string& item, const string& name) { this->item = item; this->name = name; }
 
     virtual bool Check(PlayerbotAI *ai, AiObjectContext* context)
     {
@@ -137,7 +137,7 @@ private:
 class ManaPotionChecker : public ItemCountChecker
 {
 public:
-    ManaPotionChecker(string item, string name) : ItemCountChecker(item, name) {}
+    ManaPotionChecker(const string& item, const string& name) : ItemCountChecker(item, name) {}
 
     virtual bool Check(PlayerbotAI *ai, AiObjectContext* context)
     {

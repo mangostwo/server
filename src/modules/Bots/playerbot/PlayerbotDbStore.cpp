@@ -104,7 +104,7 @@ void PlayerbotDbStore::Save(PlayerbotAI *ai)
     }
 }
 
-string PlayerbotDbStore::FormatStrategies(string type, list<string> strategies)
+string PlayerbotDbStore::FormatStrategies(const string type, list<string> strategies)
 {
     ostringstream out;
     out << type << " ";

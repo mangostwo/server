@@ -23,7 +23,7 @@ NextAction* toNextAction(string action)
     return NULL;
 }
 
-NextAction** toNextActionArray(string actions)
+NextAction** toNextActionArray(const string& actions)
 {
     vector<string> tokens = split(actions, ',');
     NextAction** res = new NextAction*[tokens.size() + 1];

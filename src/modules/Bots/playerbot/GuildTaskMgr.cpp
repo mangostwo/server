@@ -1027,7 +1027,7 @@ void GuildTaskMgr::CheckKillTask(Player* player, Unit* victim)
     }
 }
 
-void GuildTaskMgr::SendCompletionMessage(Player* player, string verb)
+void GuildTaskMgr::SendCompletionMessage(Player* player, const string verb)
 {
     ostringstream out; out << player->GetName() << " has " << verb << " a guild task";
 

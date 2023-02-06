@@ -289,7 +289,7 @@ bool Engine::MultiplyAndPush(NextAction** actions, float forceRelevance, bool sk
     return pushed;
 }
 
-ActionResult Engine::ExecuteAction(string name)
+ActionResult Engine::ExecuteAction(const string name)
 {
     bool result = false;
 
@@ -386,7 +386,7 @@ void Engine::removeAllStrategies()
     Init();
 }
 
-void Engine::toggleStrategy(string name)
+void Engine::toggleStrategy(const string name)
 {
     if (!removeStrategy(name))
     {
@@ -491,7 +491,7 @@ list<string> Engine::GetStrategies()
     return result;
 }
 
-void Engine::PushAgain(ActionNode* actionNode, float relevance, Event event)
+void Engine::PushAgain(ActionNode* actionNode, float relevance, const Event& event)
 {
     NextAction** nextAction = new NextAction*[2];
     nextAction[0] = new NextAction(actionNode->getName(), relevance);
@@ -574,7 +574,7 @@ void Engine::LogAction(const char* format, ...)
     }
 }
 
-void Engine::ChangeStrategy(string names)
+void Engine::ChangeStrategy(const string names)
 {
     vector<string> splitted = split(names, ',');
     for (vector<string>::iterator i = splitted.begin(); i != splitted.end(); i++)
