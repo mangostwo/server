@@ -38,7 +38,7 @@ uint32 PlayerbotChatHandler::extractQuestId(string str)
     return cId ? atol(cId) : 0;
 }
 
-void PacketHandlingHelper::AddHandler(uint16 opcode, string handler)
+void PacketHandlingHelper::AddHandler(uint16 opcode, const string handler)
 {
     handlers[opcode] = handler;
 }
@@ -774,7 +774,7 @@ bool PlayerbotAI::TellMasterNoFacing(string text, PlayerbotSecurityLevel securit
     return true;
 }
 
-bool PlayerbotAI::TellMaster(string text, PlayerbotSecurityLevel securityLevel)
+bool PlayerbotAI::TellMaster(const string text, PlayerbotSecurityLevel securityLevel)
 {
     if (!TellMasterNoFacing(text, securityLevel))
     {
@@ -1539,7 +1539,7 @@ void PlayerbotAI::_fillGearScoreData(Player *player, Item* item, std::vector<uin
     }
 }
 
-string PlayerbotAI::HandleRemoteCommand(string command)
+string PlayerbotAI::HandleRemoteCommand(const string command)
 {
     if (command == "state")
     {

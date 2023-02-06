@@ -5,7 +5,7 @@
 
 using namespace ai;
 
-void TellPosition(PlayerbotAI* ai, string name, ai::Position pos)
+void TellPosition(PlayerbotAI* ai, const string& name, ai::Position pos)
 {
     ostringstream out; out << "Position " << name;
     if (pos.isSet())

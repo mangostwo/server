@@ -8,7 +8,7 @@ using namespace std;
 INSTANTIATE_SINGLETON_1(AhBotConfig);
 
 template <class T>
-void LoadSet(string value, T &res)
+void LoadSet(const string& value, T &res)
 {
     vector<string> ids = split(value, ',');
     for (vector<string>::iterator i = ids.begin(); i != ids.end(); i++)

@@ -97,7 +97,7 @@ namespace ai
         void Reset();
         void ProcessTriggers();
         void PushDefaultActions();
-        void PushAgain(ActionNode* actionNode, float relevance, Event event);
+        void PushAgain(ActionNode* actionNode, float relevance, const Event& event);
         ActionNode* CreateActionNode(string name);
         Action* InitializeAction(ActionNode* actionNode);
         bool ListenAndExecute(Action* action, Event event);
