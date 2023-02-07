@@ -9,7 +9,6 @@ class ChatHandler;
 class PlayerbotAIConfig
 {
 public:
-    PlayerbotAIConfig();
     static PlayerbotAIConfig& instance()
     {
         static PlayerbotAIConfig instance;

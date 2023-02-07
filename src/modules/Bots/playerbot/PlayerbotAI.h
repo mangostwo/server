@@ -104,7 +104,6 @@ private:
 class PlayerbotAI : public PlayerbotAIBase
 {
 public:
-    PlayerbotAI();
     PlayerbotAI(Player* bot);
     virtual ~PlayerbotAI();
 
