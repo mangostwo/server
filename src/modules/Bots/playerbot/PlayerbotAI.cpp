@@ -60,16 +60,6 @@ void PacketHandlingHelper::AddPacket(const WorldPacket& packet)
     }
 }
 
-
-PlayerbotAI::PlayerbotAI() : PlayerbotAIBase(), bot(NULL), aiObjectContext(NULL),
-    currentEngine(NULL), chatHelper(this), chatFilter(this), accountId(0), security(NULL), master(NULL)
-{
-    for (int i = 0 ; i < BOT_STATE_MAX; i++)
-    {
-        engines[i] = NULL;
-    }
-}
-
 PlayerbotAI::PlayerbotAI(Player* bot) :
     PlayerbotAIBase(), chatHelper(this), chatFilter(this), security(bot), master(NULL),
       accountId(sObjectMgr.GetPlayerAccountIdByGUID(bot->GetObjectGuid()))

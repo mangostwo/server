@@ -9,10 +9,6 @@ using namespace std;
 
 INSTANTIATE_SINGLETON_1(PlayerbotAIConfig);
 
-PlayerbotAIConfig::PlayerbotAIConfig()
-{
-}
-
 template <class T>
 void LoadList(const string& value, T &list)
 {
