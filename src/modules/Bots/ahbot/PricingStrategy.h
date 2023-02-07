@@ -1,4 +1,6 @@
-#pragma once
+#ifndef AHBOT_PRICING_STRATEGY_H
+#define AHBOT_PRICING_STRATEGY_H
+
 #include "Config.h"
 #include "ItemPrototype.h"
 
@@ -58,3 +60,5 @@ namespace ahbot
         }
     };
 };
+
+#endif

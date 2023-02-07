@@ -1,4 +1,6 @@
-#pragma once
+#ifndef AHBOT_CATEGORY_H
+#define AHBOT_CATEGORY_H
+
 #include "Config.h"
 #include "PricingStrategy.h"
 #include "ItemPrototype.h"
@@ -350,3 +352,5 @@ namespace ahbot
         string combinedName;
     };
 };
+
+#endif
