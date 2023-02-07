@@ -1,4 +1,6 @@
-#pragma once
+#ifndef AHBOT_CONSUMABLE_CATEGORY_H
+#define AHBOT_CONSUMABLE_CATEGORY_H
+
 #include "Config/Config.h"
 #include "Category.h"
 
@@ -85,3 +87,5 @@ namespace ahbot
         virtual string GetName() { return "OtherConsumable"; }
     };
 };
+
+#endif

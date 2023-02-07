@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AHBOT_CONFIG_H
+#define AHBOT_CONFIG_H
 
 #include "../../shared/Config/Config.h"
 
@@ -91,3 +92,5 @@ private:
 };
 
 #define sAhBotConfig MaNGOS::Singleton<AhBotConfig>::Instance()
+
+#endif

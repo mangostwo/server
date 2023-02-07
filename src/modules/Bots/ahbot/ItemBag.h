@@ -1,4 +1,6 @@
-#pragma once
+#ifndef AHBOT_ITEM_BAG_H
+#define AHBOT_ITEM_BAG_H
+
 #include "Category.h"
 
 namespace ahbot
@@ -80,3 +82,5 @@ namespace ahbot
         uint32 auctionId;
     };
 };
+
+#endif

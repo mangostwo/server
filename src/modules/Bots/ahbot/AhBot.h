@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AHBOT_H
+#define AHBOT_H
 
 #include "Category.h"
 #include "ItemBag.h"
@@ -96,3 +97,4 @@ namespace ahbot
 
 #define auctionbot MaNGOS::Singleton<ahbot::AhBot>::Instance()
 
+#endif

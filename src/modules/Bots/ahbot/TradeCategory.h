@@ -1,4 +1,6 @@
-#pragma once
+#ifndef AHBOT_TRADE_CATEGORY_H
+#define AHBOT_TRADE_CATEGORY_H
+
 #include "Category.h"
 
 using namespace std;
@@ -40,3 +42,5 @@ namespace ahbot
         virtual string GetLabel() { return "devices and explosives"; }
     };
 };
+
+#endif
