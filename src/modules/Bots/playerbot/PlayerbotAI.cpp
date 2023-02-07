@@ -71,11 +71,10 @@ PlayerbotAI::PlayerbotAI() : PlayerbotAIBase(), bot(NULL), aiObjectContext(NULL)
 }
 
 PlayerbotAI::PlayerbotAI(Player* bot) :
-    PlayerbotAIBase(), chatHelper(this), chatFilter(this), security(bot), master(NULL)
+    PlayerbotAIBase(), chatHelper(this), chatFilter(this), security(bot), master(NULL),
+      accountId(sObjectMgr.GetPlayerAccountIdByGUID(bot->GetObjectGuid()))
 {
     this->bot = bot;
-
-    accountId = sObjectMgr.GetPlayerAccountIdByGUID(bot->GetObjectGuid());
 
     aiObjectContext = AiFactory::createAiObjectContext(bot, this);
 
@@ -235,7 +234,7 @@ void PlayerbotAI::HandleCommand(uint32 type, const string& text, Player& fromPla
     string filtered = text;
     if (!sPlayerbotAIConfig.commandPrefix.empty())
     {
-        if (filtered.find(sPlayerbotAIConfig.commandPrefix) != 0)
+        if (!strncmp(filtered.c_str(), sPlayerbotAIConfig.commandPrefix.c_str(), sPlayerbotAIConfig.commandPrefix.size()))
         {
             return;
         }
@@ -254,7 +253,7 @@ void PlayerbotAI::HandleCommand(uint32 type, const string& text, Player& fromPla
     currentChat = pair<ChatMsg, time_t>(CHAT_MSG_WHISPER, 0);
     for (map<string,ChatMsg>::iterator i = chatMap.begin(); i != chatMap.end(); ++i)
     {
-        if (filtered.find(i->first) == 0)
+        if (strncmp(filtered.c_str(), i->first.c_str(), i->first.size()))
         {
             filtered = filtered.substr(3);
             currentChat = pair<ChatMsg, time_t>(i->second, time(0) + 2);
@@ -278,7 +277,7 @@ void PlayerbotAI::HandleCommand(uint32 type, const string& text, Player& fromPla
         return;
     }
 
-    if (filtered.find("who") != 0 && !GetSecurity()->CheckLevelFor(PLAYERBOT_SECURITY_ALLOW_ALL, type != CHAT_MSG_WHISPER, &fromPlayer))
+    if (!strncmp(filtered.c_str(), "who", 3) && !GetSecurity()->CheckLevelFor(PLAYERBOT_SECURITY_ALLOW_ALL, type != CHAT_MSG_WHISPER, &fromPlayer))
     {
         return;
     }

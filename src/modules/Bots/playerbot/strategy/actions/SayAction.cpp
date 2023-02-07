@@ -101,7 +101,7 @@ bool SayAction::Execute(Event event)
         }
     }
 
-    if (text.find("/y ") == 0)
+    if (strncmp(text.c_str(), "/y ", 3))
     {
         bot->Yell(text.substr(3), LANG_UNIVERSAL);
     }
