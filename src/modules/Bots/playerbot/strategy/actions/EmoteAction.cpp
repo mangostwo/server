@@ -22,7 +22,7 @@ bool EmoteAction::Execute(Event event)
     string param = event.getParam();
     if (param.empty()) param = qualifier;
 
-    if (!param.empty() && textEmotes.find(param) != emotes.end())
+    if (!param.empty() && textEmotes.find(param) != textEmotes.end())
     {
         return ai->PlaySound(textEmotes[param]);
     }
@@ -30,9 +30,9 @@ bool EmoteAction::Execute(Event event)
     {
         int index = rand() % emotes.size();
         for (map<string, uint32>::iterator i = emotes.begin(); i != emotes.end() && index; ++i, --index)
-  {
-      emote = i->second;
-  }
+        {
+            emote = i->second;
+        }
     }
     else
     {
