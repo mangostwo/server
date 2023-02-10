@@ -5,9 +5,12 @@
 
 using namespace ai;
 
-HelpAction::HelpAction(PlayerbotAI* ai) : Action(ai, "help")
+HelpAction::HelpAction(PlayerbotAI* ai) : Action(ai, "help"), chatContext(new ChatActionContext())
 {
-    chatContext = new ChatActionContext();
+}
+
+HelpAction::HelpAction(const HelpAction& other) : Action(ai, "help"), chatContext(new ChatActionContext())
+{
 }
 
 HelpAction::~HelpAction()
