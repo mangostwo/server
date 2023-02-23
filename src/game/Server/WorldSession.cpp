@@ -424,7 +424,7 @@ void WorldSession::HandleBotPackets()
     while (_recvQueue.next(packet))
     {
         OpcodeHandler const& opHandle = opcodeTable[packet->GetOpcode()];
-        (this->*opHandle.handler)(*packet);
+        ExecuteOpcode(opHandle, packet);
         delete packet;
     }
 }
