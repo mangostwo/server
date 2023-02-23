@@ -161,8 +161,8 @@ void PlayerbotAI::HandleTeleportAck()
     bot->InterruptMoving(1);
     if (bot->IsBeingTeleportedNear())
     {
-        WorldPacket p = WorldPacket(MSG_MOVE_TELEPORT_ACK, 8 + 4 + 4);
-        p << bot->GetObjectGuid();
+        WorldPacket p = WorldPacket(MSG_MOVE_TELEPORT_ACK, sizeof(PackedGuid) + 4 + 4);
+        p << bot->GetPackGUID();
         p << (uint32) 0; // supposed to be flags? not used currently
         p << (uint32) time(0); // time - not currently used
         bot->GetSession()->HandleMoveTeleportAckOpcode(p);

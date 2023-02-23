@@ -29,7 +29,7 @@ void PlayerbotHolder::UpdateAIInternal(uint32 elapsed)
 
 void PlayerbotHolder::UpdateSessions(uint32 elapsed)
 {
-    for (PlayerBotMap::const_iterator itr = GetPlayerBotsBegin(); itr != GetPlayerBotsEnd(); ++itr)
+    for (PlayerBotMap::const_iterator itr = playerBots.begin(); itr != playerBots.end(); ++itr)
     {
         Player* const bot = itr->second;
         if (bot->IsBeingTeleported())

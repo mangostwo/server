@@ -100,14 +100,14 @@ bool UseItemAction::UseItem(Item* item, ObjectGuid goGuid, Item* itemTarget)
     }
     uint8 bagIndex = item->GetBagSlot();
     uint8 slot = item->GetSlot();
-    uint8 spell_count = 0;
     uint8 cast_count = 1;
-    uint64 item_guid = item->GetObjectGuid().GetRawValue();
-    //uint32 glyphIndex = 0;
-    //uint8 unk_flags = 0;
+    uint32 spellid = item->GetSpell();
+    ObjectGuid item_guid = item->GetObjectGuid();
+    uint32 glyphIndex = 0;
+    uint8 unk_flags = 0;
 
-    WorldPacket* const packet = new WorldPacket(CMSG_USE_ITEM, 1 + 1 + 1 + 4 + 8 + 4 + 1 + 8 + 1);
-    *packet << bagIndex << slot << spell_count << cast_count << item_guid; //<< glyphIndex << unk_flags;
+    WorldPacket* const packet = new WorldPacket(CMSG_USE_ITEM, 64);
+    *packet << bagIndex << slot << cast_count << spellid << item_guid << glyphIndex << unk_flags;
 
     bool targetSelected = false;
     ostringstream out; out << "Using " << chat->formatItem(item->GetProto());
@@ -179,11 +179,11 @@ bool UseItemAction::UseItem(Item* item, ObjectGuid goGuid, Item* itemTarget)
         Quest const* qInfo = sObjectMgr.GetQuestTemplate(questid);
         if (qInfo)
         {
-            WorldPacket* const packet = new WorldPacket(CMSG_QUESTGIVER_ACCEPT_QUEST, 8 + 4 + 4);
-            *packet << item_guid;
-            *packet << questid;
-            *packet << uint32(0);
-            bot->GetSession()->QueuePacket(packet); // queue the packet to get around race condition
+            WorldPacket* const qpacket = new WorldPacket(CMSG_QUESTGIVER_ACCEPT_QUEST, 8 + 4 + 4);
+            *qpacket << item_guid;
+            *qpacket << questid;
+            *qpacket << uint32(0);
+            bot->GetSession()->QueuePacket(qpacket); // queue the qpacket to get around race condition
             ostringstream out; out << "Got quest " << chat->formatQuest(qInfo);
             ai->TellMaster(out);
             return true;
