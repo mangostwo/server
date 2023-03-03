@@ -1,5 +1,5 @@
-#ifndef _RandomPlayerbotFactory_H
-#define _RandomPlayerbotFactory_H
+#ifndef RandomPlayerbotFactory_H
+#define RandomPlayerbotFactory_H
 
 #include "Common.h"
 #include "PlayerbotAIBase.h"
@@ -15,21 +15,22 @@ using namespace std;
 class RandomPlayerbotFactory
 {
     public:
-        RandomPlayerbotFactory(uint32 accountId);
-        virtual ~RandomPlayerbotFactory() {}
+        explicit RandomPlayerbotFactory(uint32 accountId);
+        virtual ~RandomPlayerbotFactory() = default;
 
     public:
-        bool CreateRandomBot(uint8 cls);
+        bool CreateRandomBot(uint8 cls) const;
         static void CreateRandomBots();
         static void CreateRandomGuilds();
+        static void DeleteRandomBots();
+        static void DeleteRandomGuilds();
 
     private:
-        string CreateRandomBotName();
-        static string CreateRandomGuildName();
+        static bool CreateRandomBotName(string& name);
+        static bool CreateRandomGuildName(string& guildName);
 
     private:
         uint32 accountId;
-        static map<uint8, vector<uint8> > availableRaces;
 };
 
 #endif
