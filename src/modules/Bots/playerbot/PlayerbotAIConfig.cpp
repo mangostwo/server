@@ -150,8 +150,17 @@ bool PlayerbotAIConfig::Initialize()
     randomBotShowCloak = config.GetBoolDefault("AiPlayerbot.RandomBotShowCloak", false);
     randomBotShowHelmet = config.GetBoolDefault("AiPlayerbot.RandomBotShowHelmet", false);
 
+    if (sPlayerbotAIConfig.deleteRandomBotAccounts)
+    {
+        RandomPlayerbotFactory::DeleteRandomBots();
+    }
+    else if (sPlayerbotAIConfig.deleteRandomBotGuilds)
+    {
+        RandomPlayerbotFactory::DeleteRandomGuilds();
+    }
+
     RandomPlayerbotFactory::CreateRandomBots();
-    sLog.outString("AI Playerbot configuration loaded");
+    BASIC_LOG("AI Playerbot configuration loaded");
 
     return true;
 }
