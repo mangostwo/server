@@ -1627,7 +1627,7 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
 
 bool ChatHandler::HandleRandomPlayerbotCommand(char* args)
 {
-    return RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(this, args);
+    return RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(args);
 }
 
 bool ChatHandler::HandleAhBotCommand(char* args)
