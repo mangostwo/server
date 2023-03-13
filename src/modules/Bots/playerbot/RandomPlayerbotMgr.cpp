@@ -1,6 +1,5 @@
 #include "Config/Config.h"
 #include "../botpch.h"
-#include "playerbot.h"
 #include "PlayerbotAIConfig.h"
 #include "PlayerbotFactory.h"
 #include "AccountMgr.h"
@@ -15,25 +14,23 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
-#include "FleeManager.h"
 
 using namespace ai;
 using namespace MaNGOS;
 
 INSTANTIATE_SINGLETON_1(RandomPlayerbotMgr);
 
+map<uint8, vector<WorldLocation> > RandomPlayerbotMgr::locsPerLevelCache;
 
-RandomPlayerbotMgr::RandomPlayerbotMgr() : PlayerbotHolder(), processTicks(0)
+RandomPlayerbotMgr::RandomPlayerbotMgr() : PlayerbotHolder()
 {
     sPlayerbotCommandServer.Start();
-    //PrepareTeleportCache();
 }
 
 RandomPlayerbotMgr::~RandomPlayerbotMgr()
-{
-}
+= default;
 
-int RandomPlayerbotMgr::GetMaxAllowedBotCount()
+uint32 RandomPlayerbotMgr::GetMaxAllowedBotCount()
 {
     return GetEventValue(0, "bot_count");
 }
@@ -44,10 +41,11 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed)
 
     if (!sPlayerbotAIConfig.randomBotAutologin || !sPlayerbotAIConfig.enabled)
     {
+        DEBUG_LOG("Random bots are disabled. Check config.");
         return;
     }
 
-    int maxAllowedBotCount = GetEventValue(0, "bot_count");
+    uint32 maxAllowedBotCount = GetMaxAllowedBotCount();
     if (!maxAllowedBotCount)
     {
         maxAllowedBotCount = urand(sPlayerbotAIConfig.minRandomBots, sPlayerbotAIConfig.maxRandomBots);
@@ -55,75 +53,63 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed)
             urand(sPlayerbotAIConfig.randomBotCountChangeMinInterval, sPlayerbotAIConfig.randomBotCountChangeMaxInterval));
     }
 
-    list<uint32> bots = GetBots();
-    int botCount = bots.size();
-    int randomBotsPerInterval = (int)urand(sPlayerbotAIConfig.minRandomBotsPerInterval, sPlayerbotAIConfig.maxRandomBotsPerInterval);
-    if (!processTicks)
-    {
-        if (sPlayerbotAIConfig.randomBotLoginAtStartup)
-        {
-            randomBotsPerInterval = bots.size();
-        }
-    }
+    set<uint32> bots;
+    GetBots(bots);
+    uint32 botCount = bots.size();
+    DEBUG_LOG("%u random bots are currently available.", botCount);
 
     if (botCount < maxAllowedBotCount)
     {
-        AddRandomBots();
+        AddRandomBots(bots);
     }
 
-    int botProcessed = 0;
-    for (list<uint32>::iterator i = bots.begin(); i != bots.end(); ++i)
-    {
-        uint32 bot = *i;
-        if (ProcessBot(bot))
-        {
-            botProcessed++;
-        }
+    botCount = bots.size();
+    uint32 randomBotsPerInterval = sPlayerbotAIConfig.randomBotLoginAtStartup ? botCount :
+                                   urand(sPlayerbotAIConfig.minRandomBotsPerInterval, sPlayerbotAIConfig.maxRandomBotsPerInterval);
+    DEBUG_LOG("%u random bots are available, %u bots will be logged in.", botCount, randomBotsPerInterval);
 
+    uint32 botProcessed = 0;
+    for (uint32 bot : bots)
+    {
         if (botProcessed >= randomBotsPerInterval)
         {
             break;
         }
+
+        if (ProcessBot(bot))
+        {
+            botProcessed++;
+        }
     }
 
-    ostringstream out; out << "Random bots are now scheduled to be processed in the background. Next re-schedule in " << sPlayerbotAIConfig.randomBotUpdateInterval << " seconds";
-    sLog.outString(out.str().c_str());
-    sWorld.SendWorldText(3, out.str().c_str());
+    string out = "Random bots are now scheduled to be processed in the background. Next re-schedule in " +
+            to_string(sPlayerbotAIConfig.randomBotUpdateInterval) + " seconds";
+    DETAIL_LOG("%s", out.c_str());
+    sWorld.SendWorldText(3, out.c_str());
 
-    PrintStats();
+    if (sLog.GetLogLevel() >= LOG_LVL_DETAIL) {
+        PrintStats();
+    }
 }
 
-uint32 RandomPlayerbotMgr::AddRandomBots()
+void RandomPlayerbotMgr::AddRandomBots(set<uint32> &bots)
 {
-    set<uint32> bots;
-
-    QueryResult* results = CharacterDatabase.PQuery(
-        "select `bot` from ai_playerbot_random_bots where event = 'add'");
-
-    if (results)
-    {
-        do
-        {
-            Field* fields = results->Fetch();
-            uint32 bot = fields[0].GetUInt32();
-            bots.insert(bot);
-        } while (results->NextRow());
-        delete results;
-    }
+    DETAIL_LOG("Adding random bots...");
 
     vector<uint32> guids;
-    int maxAllowedBotCount = GetEventValue(0, "bot_count");
-    for (list<uint32>::iterator i = sPlayerbotAIConfig.randomBotAccounts.begin(); i != sPlayerbotAIConfig.randomBotAccounts.end(); i++)
+    uint32 maxAllowedBotCount = GetMaxAllowedBotCount();
+    for (auto accountId : sPlayerbotAIConfig.randomBotAccounts)
     {
-        uint32 accountId = *i;
         if (!sAccountMgr.GetCharactersCount(accountId))
         {
+            DEBUG_LOG("No character in rndbot account %d.", accountId);
             continue;
         }
 
         QueryResult* result = CharacterDatabase.PQuery("SELECT guid, race FROM characters WHERE account = '%u'", accountId);
         if (!result)
         {
+            DEBUG_LOG("Unable to fetch characters for rndbot account %d", accountId);
             continue;
         }
 
@@ -138,19 +124,16 @@ uint32 RandomPlayerbotMgr::AddRandomBots()
                     )))
             {
                 guids.push_back(guid);
-                uint32 bot = guid;
-                SetEventValue(bot, "add", 1, urand(sPlayerbotAIConfig.minRandomBotInWorldTime, sPlayerbotAIConfig.maxRandomBotInWorldTime));
+                SetEventValue(guid, "add", 1, urand(sPlayerbotAIConfig.minRandomBotInWorldTime, sPlayerbotAIConfig.maxRandomBotInWorldTime));
                 uint32 randomTime = 30 + urand(sPlayerbotAIConfig.randomBotUpdateInterval, sPlayerbotAIConfig.randomBotUpdateInterval * 3);
-                ScheduleRandomize(bot, randomTime);
-                bots.insert(bot);
-                sLog.outString("New random bot %d added", bot);
+                ScheduleRandomize(guid, randomTime);
+                bots.insert(guid);
+                DEBUG_LOG("Random bot %d is now available for login.", guid);
                 if (bots.size() >= maxAllowedBotCount) break;
             }
         } while (result->NextRow());
         delete result;
     }
-
-    return guids.size();
 }
 
 void RandomPlayerbotMgr::ScheduleRandomize(uint32 bot, uint32 time)
@@ -170,20 +153,20 @@ void RandomPlayerbotMgr::ScheduleTeleport(uint32 bot, uint32 time)
 
 bool RandomPlayerbotMgr::ProcessBot(uint32 bot)
 {
-    uint32 isValid = GetEventValue(bot, "add");
-    if (!isValid)
+    DEBUG_LOG("Processing bot %d", bot);
+    Player* player = GetPlayerBot(bot);
+    if (!IsRandomBot(bot))
     {
-        Player* player = GetPlayerBot(bot);
         if (!player || !player->GetGroup())
         {
-            sLog.outString("Bot %d expired", bot);
-            SetEventValue(bot, "add", 0, 0);
+            DETAIL_LOG("Bot %d expired", bot);
         }
         return true;
     }
 
-    if (!GetPlayerBot(bot))
+    if (!player)
     {
+        DETAIL_LOG("Bot %d is not online. Logging in...", bot);
         AddPlayerBot(bot, 0);
         if (!GetEventValue(bot, "online"))
         {
@@ -191,12 +174,6 @@ bool RandomPlayerbotMgr::ProcessBot(uint32 bot)
             ScheduleTeleport(bot, 30);
         }
         return true;
-    }
-
-    Player* player = GetPlayerBot(bot);
-    if (!player)
-    {
-        return false;
     }
 
     PlayerbotAI* ai = player->GetPlayerbotAI();
@@ -207,7 +184,7 @@ bool RandomPlayerbotMgr::ProcessBot(uint32 bot)
 
     if (player->GetGroup())
     {
-        sLog.outString("Skipping bot %d as it is in group", bot);
+        DEBUG_LOG("Skipping bot %d as it is in group", bot);
         return false;
     }
 
@@ -220,11 +197,12 @@ bool RandomPlayerbotMgr::ProcessBot(Player* player)
     player->GetPlayerbotAI()->GetAiObjectContext()->GetValue<bool>("random bot update")->Set(false);
 
     uint32 bot = player->GetGUIDLow();
+    DEBUG_LOG("Processing random bot %d", bot);
     if (player->IsDead())
     {
         if (!GetEventValue(bot, "dead"))
         {
-            sLog.outDetail("Setting dead flag for bot %d", bot);
+            DEBUG_LOG("Setting dead flag for bot %d", bot);
             uint32 randomTime = urand(sPlayerbotAIConfig.minRandomBotReviveTime, sPlayerbotAIConfig.maxRandomBotReviveTime);
             SetEventValue(bot, "dead", 1, randomTime);
             SetEventValue(bot, "revive", 1, randomTime - 60);
@@ -244,36 +222,32 @@ bool RandomPlayerbotMgr::ProcessBot(Player* player)
     {
         Guild* guild = sGuildMgr.GetGuildById(player->GetGuildId());
         if (guild->GetLeaderGuid().GetRawValue() == player->GetObjectGuid().GetRawValue()) {
-            for (vector<Player*>::iterator i = players.begin(); i != players.end(); ++i)
+            for (auto & i : players)
             {
-                sGuildTaskMgr.Update(*i, player);
+                sGuildTaskMgr.Update(i, player);
             }
         }
     }
 
-    uint32 randomize = GetEventValue(bot, "randomize");
-    if (!randomize)
+    if (!GetEventValue(bot, "randomize"))
     {
-        sLog.outString("Randomizing bot %d", bot);
+        DEBUG_LOG("Randomizing bot %d", bot);
         Randomize(player);
-        uint32 randomTime = urand(sPlayerbotAIConfig.minRandomBotRandomizeTime, sPlayerbotAIConfig.maxRandomBotRandomizeTime);
-        ScheduleRandomize(bot, randomTime);
+        ScheduleRandomize(bot, urand(sPlayerbotAIConfig.minRandomBotRandomizeTime, sPlayerbotAIConfig.maxRandomBotRandomizeTime));
         return true;
     }
 
-    uint32 logout = GetEventValue(bot, "logout");
-    if (!logout)
+    if (!GetEventValue(bot, "logout"))
     {
-        sLog.outString("Logging out bot %d", bot);
+        DEBUG_LOG("Logging out bot %d", bot);
         LogoutPlayerBot(bot);
         SetEventValue(bot, "logout", 1, sPlayerbotAIConfig.maxRandomBotInWorldTime);
         return true;
     }
 
-    uint32 teleport = GetEventValue(bot, "teleport");
-    if (!teleport)
+    if (!GetEventValue(bot, "teleport"))
     {
-        sLog.outDetail("Random teleporting bot %d", bot);
+        DEBUG_LOG("Random teleporting bot %d", bot);
         RandomTeleportForLevel(player);
         SetEventValue(bot, "teleport", 1, sPlayerbotAIConfig.maxRandomBotInWorldTime);
         return true;
@@ -285,7 +259,7 @@ bool RandomPlayerbotMgr::ProcessBot(Player* player)
 void RandomPlayerbotMgr::Revive(Player* player)
 {
     uint32 bot = player->GetGUIDLow();
-    sLog.outDetail("Reviving dead bot %d", bot);
+    DETAIL_LOG("Reviving dead bot %d", bot);
     SetEventValue(bot, "dead", 0, 0);
     SetEventValue(bot, "revive", 0, 0);
     RandomTeleportForLevel(player);
@@ -305,12 +279,11 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, vector<WorldLocation> &locs
         return;
     }
 
-    for (int attemtps = 0; attemtps < 10; ++attemtps)
+    for (auto attempts = 0; attempts < 10; ++attempts)
     {
-        int index = urand(0, locs.size() - 1);
-        WorldLocation loc = locs[index];
-        float x = loc.coord_x + urand(0, sPlayerbotAIConfig.grindDistance) - sPlayerbotAIConfig.grindDistance / 2;
-        float y = loc.coord_y + urand(0, sPlayerbotAIConfig.grindDistance) - sPlayerbotAIConfig.grindDistance / 2;
+        WorldLocation loc = locs[urand(0, locs.size() - 1)];
+        float x = loc.coord_x + frand(0, sPlayerbotAIConfig.grindDistance) - sPlayerbotAIConfig.grindDistance / 2;
+        float y = loc.coord_y + frand(0, sPlayerbotAIConfig.grindDistance) - sPlayerbotAIConfig.grindDistance / 2;
         float z = loc.coord_z;
 
         Map * map = sMapMgr.FindMap(loc.mapid);
@@ -325,7 +298,7 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, vector<WorldLocation> &locs
             +terrain->IsInWater(x, y, z))
             continue;
 
-        sLog.outDetail("Random teleporting bot %s to %u %f,%f,%f", bot->GetName(), loc.mapid, x, y, z);
+        DETAIL_LOG("Random teleporting bot %s to %s %f,%f,%f", bot->GetName(), map->GetMapName(), x, y, z);
         z = 0.05f + map->GetTerrain()->GetHeightStatic(x, y, 0.05f + z, true, MAX_HEIGHT);
         bot->TeleportTo(loc.mapid, x, y, z, 0);
         return;
@@ -336,32 +309,31 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, vector<WorldLocation> &locs
 
 void RandomPlayerbotMgr::RandomTeleportForLevel(Player* bot)
 {
-    vector<WorldLocation> locs;
-    QueryResult * results = WorldDatabase.PQuery("select map, position_x, position_y, position_z "
-         "from (select map, position_x, position_y, position_z, avg(t.maxlevel), avg(t.minlevel), "
-         "(avg(t.maxlevel) + avg(t.minlevel)) / 2 - %u delta "
-         "from creature c inner join creature_template t on c.id = t.entry group by t.entry) q "
-         "where delta >= 0 and delta <= 1 and map in (%s)",
-        bot->getLevel(), sPlayerbotAIConfig.randomBotMapsAsString.c_str());
-    if (results)
-    {
-        do
-        {
-            Field* fields = results->Fetch();
-            uint32 mapId = fields[0].GetUInt32();
-            float x = fields[1].GetFloat();
-            float y = fields[2].GetFloat();
-            float z = fields[3].GetFloat();
-            WorldLocation loc(mapId, x, y, z, 0);
-            locs.push_back(loc);
-        } while (results->NextRow());
-        delete results;
+    if (locsPerLevelCache[bot->getLevel()].empty()) {
+        QueryResult *results = WorldDatabase.PQuery("select map, position_x, position_y, position_z "
+                                                    "from (select map, position_x, position_y, position_z, avg(t.maxlevel), avg(t.minlevel), "
+                                                    "(avg(t.maxlevel) + avg(t.minlevel)) / 2 - %u delta "
+                                                    "from creature c inner join creature_template t on c.id = t.entry group by t.entry) q "
+                                                    "where delta >= 0 and delta <= 1 and map in (%s)",
+                                                    bot->getLevel(), sPlayerbotAIConfig.randomBotMapsAsString.c_str());
+        if (results) {
+            do {
+                Field *fields = results->Fetch();
+                uint32 mapId = fields[0].GetUInt32();
+                float x = fields[1].GetFloat();
+                float y = fields[2].GetFloat();
+                float z = fields[3].GetFloat();
+                WorldLocation loc(mapId, x, y, z, 0);
+                locsPerLevelCache[bot->getLevel()].push_back(loc);
+            } while (results->NextRow());
+            delete results;
+        }
     }
 
-    RandomTeleport(bot, locs);
+    RandomTeleport(bot, locsPerLevelCache[bot->getLevel()]);
 }
 
-void RandomPlayerbotMgr::RandomTeleport(Player* bot, uint32 mapId, float teleX, float teleY, float teleZ)
+/*void RandomPlayerbotMgr::RandomTeleport(Player* bot, uint32 mapId, float teleX, float teleY, float teleZ)
 {
     Refresh(bot);
 
@@ -384,7 +356,7 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, uint32 mapId, float teleX, 
 
     RandomTeleport(bot, locs);
     Refresh(bot);
-}
+}*/
 
 void RandomPlayerbotMgr::Randomize(Player* bot)
 {
@@ -400,6 +372,7 @@ void RandomPlayerbotMgr::Randomize(Player* bot)
 
 void RandomPlayerbotMgr::IncreaseLevel(Player* bot)
 {
+    DETAIL_LOG("Increasing level for bot %s", bot->GetName());
     uint32 maxLevel = sPlayerbotAIConfig.randomBotMaxLevel;
     if (maxLevel > sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
     {
@@ -429,14 +402,14 @@ void RandomPlayerbotMgr::RandomizeFirst(Player* bot)
 
     for (int attempt = 0; attempt < 100; ++attempt)
     {
-        int index = urand(0, sPlayerbotAIConfig.randomBotMaps.size() - 1);
+        uint32 index = urand(0, sPlayerbotAIConfig.randomBotMaps.size() - 1);
         uint32 mapId = sPlayerbotAIConfig.randomBotMaps[index];
 
         vector<GameTele const*> locs;
         GameTeleMap const & teleMap = sObjectMgr.GetGameTeleMap();
-        for (GameTeleMap::const_iterator itr = teleMap.begin(); itr != teleMap.end(); ++itr)
+        for (const auto & itr : teleMap)
         {
-            GameTele const* tele = &itr->second;
+            GameTele const* tele = &itr.second;
             if (tele->mapId == mapId)
             {
                 locs.push_back(tele);
@@ -449,7 +422,7 @@ void RandomPlayerbotMgr::RandomizeFirst(Player* bot)
             return;
         }
         GameTele const* tele = locs[index];
-        uint32 level = GetZoneLevel(tele->mapId, tele->position_x, tele->position_y, tele->position_z);
+        uint32 level = GetZoneLevel(tele->mapId, tele->position_x, tele->position_y);
         if (level > maxLevel + 5)
         {
             continue;
@@ -458,7 +431,7 @@ void RandomPlayerbotMgr::RandomizeFirst(Player* bot)
         level = min(level, maxLevel);
         if (!level) level = 1;
 
-        if (urand(0, 100) < 100 * sPlayerbotAIConfig.randomBotMaxLevelChance)
+        if (frand(0, 100) < 100 * sPlayerbotAIConfig.randomBotMaxLevelChance)
         {
             level = maxLevel;
         }
@@ -475,11 +448,8 @@ void RandomPlayerbotMgr::RandomizeFirst(Player* bot)
     }
 }
 
-uint32 RandomPlayerbotMgr::GetZoneLevel(uint16 mapId, float teleX, float teleY, float teleZ)
+uint32 RandomPlayerbotMgr::GetZoneLevel(uint16 mapId, float teleX, float teleY)
 {
-    uint32 maxLevel = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
-
-    uint32 level;
     QueryResult* results = WorldDatabase.PQuery("select avg(t.minlevel) minlevel, avg(t.maxlevel) maxlevel from creature c "
         "inner join creature_template t on c.id = t.entry "
         "where map = '%u' and minlevel > 1 and abs(position_x - '%f') < '%u' and abs(position_y - '%f') < '%u'",
@@ -488,26 +458,23 @@ uint32 RandomPlayerbotMgr::GetZoneLevel(uint16 mapId, float teleX, float teleY, 
     if (results)
     {
         Field* fields = results->Fetch();
-        uint8 minLevel = fields[0].GetUInt8();
-        uint8 maxLevel = fields[1].GetUInt8();
-        level = urand(minLevel, maxLevel);
-        if (level > maxLevel)
-        {
-            level = maxLevel;
-        }
         delete results;
+
+        uint8 minLevel = fields[0].GetUInt8();
+        uint8 maxLevel = min(static_cast<uint32>(fields[1].GetUInt8()), sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
+
+        return urand(minLevel, maxLevel);
+
     }
     else
     {
-        level = urand(1, maxLevel);
+        return urand(1, sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
     }
-
-    return level;
 }
 
-void RandomPlayerbotMgr::Refresh(Player* bot)
+/*void RandomPlayerbotMgr::Refresh(Player* bot)
 {
-    sLog.outDetail("Refreshing bot %s", bot->GetName());
+    DETAIL_LOG("Refreshing bot %s", bot->GetName());
     if (bot->IsDead())
     {
         bot->ResurrectPlayer(1.0f);
@@ -522,7 +489,6 @@ void RandomPlayerbotMgr::Refresh(Player* bot)
     {
         ThreatManager *threatManager = ref->getSource();
         Unit *unit = threatManager->getOwner();
-        float threat = ref->getThreat();
 
         unit->RemoveAllAttackers();
         unit->ClearInCombat();
@@ -546,7 +512,7 @@ void RandomPlayerbotMgr::Refresh(Player* bot)
     {
         bot->SetPower(POWER_ENERGY, bot->GetMaxPower(POWER_ENERGY));
     }
-}
+}*/
 
 
 bool RandomPlayerbotMgr::IsRandomBot(Player* bot)
@@ -559,10 +525,8 @@ bool RandomPlayerbotMgr::IsRandomBot(uint32 bot)
     return GetEventValue(bot, "add");
 }
 
-list<uint32> RandomPlayerbotMgr::GetBots()
+void RandomPlayerbotMgr::GetBots(set<uint32> &bots)
 {
-    list<uint32> bots;
-
     QueryResult* results = CharacterDatabase.Query(
         "select bot from ai_playerbot_random_bots where owner = 0 and event = 'add'");
 
@@ -572,20 +536,18 @@ list<uint32> RandomPlayerbotMgr::GetBots()
         {
             Field* fields = results->Fetch();
             uint32 bot = fields[0].GetUInt32();
-            bots.push_back(bot);
+            bots.insert(bot);
         } while (results->NextRow());
         delete results;
     }
-
-    return bots;
 }
 
-uint32 RandomPlayerbotMgr::GetEventValue(uint32 bot, string event)
+uint32 RandomPlayerbotMgr::GetEventValue(uint32 bot, const string& event)
 {
     uint32 value = 0;
 
     QueryResult* results = CharacterDatabase.PQuery(
-        "select `value`, `time`, validIn from ai_playerbot_random_bots where owner = 0 and bot = '%u' and event = '%s'",
+        "SELECT `value`, `time`, `validIn` FROM `ai_playerbot_random_bots` WHERE `owner` = '0' AND `bot` = '%u' AND `event` = '%s'",
         bot, event.c_str());
 
     if (results)
@@ -594,7 +556,7 @@ uint32 RandomPlayerbotMgr::GetEventValue(uint32 bot, string event)
         value = fields[0].GetUInt32();
         uint32 lastChangeTime = fields[1].GetUInt32();
         uint32 validIn = fields[2].GetUInt32();
-        if ((time(0) - lastChangeTime) >= validIn)
+        if ((time(nullptr) - lastChangeTime) >= validIn)
         {
             value = 0;
         }
@@ -604,22 +566,23 @@ uint32 RandomPlayerbotMgr::GetEventValue(uint32 bot, string event)
     return value;
 }
 
-uint32 RandomPlayerbotMgr::SetEventValue(uint32 bot, string event, uint32 value, uint32 validIn)
+uint32 RandomPlayerbotMgr::SetEventValue(uint32 bot, const string& event, uint32 value, uint32 validIn)
 {
-    CharacterDatabase.PExecute("delete from ai_playerbot_random_bots where owner = 0 and bot = '%u' and event = '%s'",
+    CharacterDatabase.PExecute("DELETE FROM `ai_playerbot_random_bots` WHERE `owner` = '0' AND `bot` = '%u' AND `event` = '%s'",
         bot, event.c_str());
     if (value)
     {
         CharacterDatabase.PExecute(
-            "insert into ai_playerbot_random_bots (owner, bot, `time`, validIn, event, `value`) values ('%u', '%u', '%u', '%u', '%s', '%u')",
-            0, bot, (uint32)time(0), validIn, event.c_str(), value);
+            "INSERT INTO `ai_playerbot_random_bots` (`owner`, `bot`, `time`, `validIn`, `event`, `value`) VALUES ('%u', '%u', '%ld', '%u', '%s', '%u')",
+            0, bot, time(nullptr), validIn, event.c_str(), value);
     }
 
     return value;
 }
 
-bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, char const* args)
+bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(char const *args)
 {
+    DEBUG_LOG("Handling rnd bot command: %s", args);
     if (!sPlayerbotAIConfig.enabled)
     {
         sLog.outError("Playerbot system is currently disabled!");
@@ -652,11 +615,10 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
     }
     else if (cmd == "init" || cmd == "refresh" || cmd == "teleport" || cmd == "revive")
     {
-        sLog.outString("Randomizing bots for %d accounts", sPlayerbotAIConfig.randomBotAccounts.size());
+        sLog.outString("Randomizing bots for %zu accounts", sPlayerbotAIConfig.randomBotAccounts.size());
         list<uint32> botIds;
-        for (list<uint32>::iterator i = sPlayerbotAIConfig.randomBotAccounts.begin(); i != sPlayerbotAIConfig.randomBotAccounts.end(); ++i)
+        for (auto account: sPlayerbotAIConfig.randomBotAccounts)
         {
-            uint32 account = *i;
             if (QueryResult* results = CharacterDatabase.PQuery("SELECT guid FROM characters where account = '%u'", account))
             {
                 do
@@ -678,16 +640,16 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
         }
 
         int processed = 0;
-        for (list<uint32>::iterator i = botIds.begin(); i != botIds.end(); ++i)
+        for (auto botId : botIds)
         {
-            ObjectGuid guid = ObjectGuid(HIGHGUID_PLAYER, *i);
+            ObjectGuid guid = ObjectGuid(HIGHGUID_PLAYER, botId);
             Player* bot = sObjectMgr.GetPlayer(guid);
             if (!bot)
             {
                 continue;
             }
 
-            sLog.outString("[%u/%u] Processing command '%s' for bot '%s'",
+            sLog.outString("[%u/%zu] Processing command '%s' for bot '%s'",
                 processed++, botIds.size(), cmd.c_str(), bot->GetName());
 
             if (cmd == "init")
@@ -708,29 +670,27 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
                 sRandomPlayerbotMgr.IncreaseLevel(bot);
             }
             uint32 randomTime = urand(sPlayerbotAIConfig.minRandomBotRandomizeTime, sPlayerbotAIConfig.maxRandomBotRandomizeTime);
-            CharacterDatabase.PExecute("update ai_playerbot_random_bots set validIn = '%u' where event = 'randomize' and bot = '%u'",
+            CharacterDatabase.PExecute("UPDATE ai_playerbot_random_bots SET validIn = '%u' WHERE event = 'randomize' AND bot = '%u'",
                 randomTime, bot->GetGUIDLow());
-            CharacterDatabase.PExecute("update ai_playerbot_random_bots set validIn = '%u' where event = 'logout' and bot = '%u'",
+            CharacterDatabase.PExecute("UPDATE ai_playerbot_random_bots SET validIn = '%u' WHERE event = 'logout' AND bot = '%u'",
                 sPlayerbotAIConfig.maxRandomBotInWorldTime, bot->GetGUIDLow());
         }
         return true;
     }
     else
     {
-        list<string> messages = sRandomPlayerbotMgr.HandlePlayerbotCommand(args, NULL);
-        for (list<string>::iterator i = messages.begin(); i != messages.end(); ++i)
+        list<string> messages = sRandomPlayerbotMgr.HandlePlayerbotCommand(args, nullptr);
+        for (auto & message : messages)
         {
-            sLog.outString(i->c_str());
+            sLog.outError("%s", message.c_str());
         }
         return true;
     }
-
-    return false;
 }
 
 void RandomPlayerbotMgr::HandleCommand(uint32 type, const string& text, Player& fromPlayer)
 {
-    for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+    for (auto it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
     {
         Player* const bot = it->second;
         bot->GetPlayerbotAI()->HandleCommand(type, text, fromPlayer);
@@ -739,18 +699,18 @@ void RandomPlayerbotMgr::HandleCommand(uint32 type, const string& text, Player& 
 
 void RandomPlayerbotMgr::OnPlayerLogout(Player* player)
 {
-    for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+    for (auto it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
     {
         Player* const bot = it->second;
         PlayerbotAI* ai = bot->GetPlayerbotAI();
         if (player == ai->GetMaster())
         {
-            ai->SetMaster(NULL);
+            ai->SetMaster(nullptr);
             ai->ResetStrategies();
         }
     }
 
-    vector<Player*>::iterator i = find(players.begin(), players.end(), player);
+    auto i = find(players.begin(), players.end(), player);
     if (i != players.end())
     {
         players.erase(i);
@@ -759,7 +719,7 @@ void RandomPlayerbotMgr::OnPlayerLogout(Player* player)
 
 void RandomPlayerbotMgr::OnPlayerLogin(Player* player)
 {
-    for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+    for (auto it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
     {
         Player* const bot = it->second;
         if (player == bot || player->GetPlayerbotAI())
@@ -790,7 +750,7 @@ void RandomPlayerbotMgr::OnPlayerLogin(Player* player)
     if (!IsRandomBot(player))
     {
         players.push_back(player);
-        sLog.outDebug("Including non-random bot player %s into random bot update", player->GetName());
+        DEBUG_LOG("Including non-random bot player %s into random bot update", player->GetName());
     }
 }
 
@@ -798,7 +758,7 @@ Player* RandomPlayerbotMgr::GetRandomPlayer()
 {
     if (players.empty())
     {
-        return NULL;
+        return nullptr;
     }
 
     uint32 index = urand(0, players.size() - 1);
@@ -807,16 +767,16 @@ Player* RandomPlayerbotMgr::GetRandomPlayer()
 
 void RandomPlayerbotMgr::PrintStats()
 {
-    sLog.outString("%d Random Bots online", playerBots.size());
+    sLog.outString("%zu Random Bots online", playerBots.size());
 
-    map<uint32, int> alliance, horde;
+    map<uint32, uint32> alliance, horde;
     for (uint32 i = 0; i < 10; ++i)
     {
         alliance[i] = 0;
         horde[i] = 0;
     }
 
-    map<uint8, int> perRace, perClass;
+    map<uint8, uint32> perRace, perClass;
     for (uint8 race = RACE_HUMAN; race < MAX_RACES; ++race)
     {
         perRace[race] = 0;
@@ -826,10 +786,10 @@ void RandomPlayerbotMgr::PrintStats()
         perClass[cls] = 0;
     }
 
-    int dps = 0, heal = 0, tank = 0, active = 0;
-    for (PlayerBotMap::iterator i = playerBots.begin(); i != playerBots.end(); ++i)
+    uint32 dps = 0, heal = 0, tank = 0, active = 0;
+    for (auto & playerBot : playerBots)
     {
-        Player* bot = i->second;
+        Player* bot = playerBot.second;
         if (IsAlliance(bot->getRace()))
         {
             alliance[bot->getLevel() / 10]++;
@@ -961,7 +921,7 @@ double RandomPlayerbotMgr::GetBuyMultiplier(Player* bot)
         SetEventValue(id, "buymultiplier", value, validIn);
     }
 
-    return (double)value / 100.0;
+    return static_cast<double>(value) / 100.0;
 }
 
 double RandomPlayerbotMgr::GetSellMultiplier(Player* bot)
@@ -975,7 +935,7 @@ double RandomPlayerbotMgr::GetSellMultiplier(Player* bot)
         SetEventValue(id, "sellmultiplier", value, validIn);
     }
 
-    return (double)value / 100.0;
+    return static_cast<double>(value) / 100.0;
 }
 
 uint32 RandomPlayerbotMgr::GetLootAmount(Player* bot)
@@ -1001,8 +961,7 @@ string RandomPlayerbotMgr::HandleRemoteCommand(string request)
     string::iterator pos = find(request.begin(), request.end(), ',');
     if (pos == request.end())
     {
-        ostringstream out; out << "invalid request: " << request;
-        return out.str();
+        return "invalid request: " + request;
     }
 
     string command = string(request.begin(), pos);

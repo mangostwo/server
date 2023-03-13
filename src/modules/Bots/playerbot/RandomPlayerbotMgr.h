@@ -1,5 +1,5 @@
-#ifndef _RandomPlayerbotMgr_H
-#define _RandomPlayerbotMgr_H
+#ifndef RandomPlayerbotMgr_H
+#define RandomPlayerbotMgr_H
 
 #include "Common.h"
 #include "PlayerbotAIBase.h"
@@ -17,60 +17,58 @@ class RandomPlayerbotMgr : public PlayerbotHolder
 {
     public:
         RandomPlayerbotMgr();
-        virtual ~RandomPlayerbotMgr();
+        ~RandomPlayerbotMgr() override;
         static RandomPlayerbotMgr& instance()
         {
             static RandomPlayerbotMgr instance;
             return instance;
         }
 
-        virtual void UpdateAIInternal(uint32 elapsed);
+        void UpdateAIInternal(uint32 elapsed) override;
 
     public:
-        static bool HandlePlayerbotConsoleCommand(ChatHandler* handler, char const* args);
-        bool IsRandomBot(Player* bot);
-        bool IsRandomBot(uint32 bot);
-        void Randomize(Player* bot);
-        void RandomizeFirst(Player* bot);
-        void IncreaseLevel(Player* bot);
-        void ScheduleTeleport(uint32 bot, uint32 time = 0);
+        static bool HandlePlayerbotConsoleCommand(char const *args);
+        static bool IsRandomBot(Player* bot);
+        static bool IsRandomBot(uint32 bot);
+        static void Randomize(Player* bot);
+        static void RandomizeFirst(Player* bot);
+        static void IncreaseLevel(Player* bot);
+        static void ScheduleTeleport(uint32 bot, uint32 time = 0);
         void HandleCommand(uint32 type, const string& text, Player& fromPlayer);
         string HandleRemoteCommand(string request);
         void OnPlayerLogout(Player* player);
         void OnPlayerLogin(Player* player);
         Player* GetRandomPlayer();
         void PrintStats();
-        double GetBuyMultiplier(Player* bot);
-        double GetSellMultiplier(Player* bot);
-        uint32 GetLootAmount(Player* bot);
-        void SetLootAmount(Player* bot, uint32 value);
-        uint32 GetTradeDiscount(Player* bot);
-        void Refresh(Player* bot);
-        void RandomTeleportForLevel(Player* bot);
-        void RandomTeleport(Player * bot, uint32 mapId, float teleX, float teleY, float teleZ);
-        int GetMaxAllowedBotCount();
+        static double GetBuyMultiplier(Player* bot);
+        static double GetSellMultiplier(Player* bot);
+        static uint32 GetLootAmount(Player* bot);
+        static void SetLootAmount(Player* bot, uint32 value);
+        static uint32 GetTradeDiscount(Player* bot);
+    //    static void Refresh(Player* bot);
+        static void RandomTeleportForLevel(Player* bot);
+    //    void RandomTeleport(Player * bot, uint32 mapId, float teleX, float teleY, float teleZ);
+        static uint32 GetMaxAllowedBotCount();
         bool ProcessBot(Player* player);
-        void Revive(Player* player);
+        static void Revive(Player* player);
 
     protected:
-        virtual void OnBotLoginInternal(Player * const bot) {}
+        void OnBotLoginInternal(Player * const bot) override {}
 
     private:
-        uint32 GetEventValue(uint32 bot, string event);
-        uint32 SetEventValue(uint32 bot, string event, uint32 value, uint32 validIn);
-        list<uint32> GetBots();
-        uint32 AddRandomBots();
+        static uint32 GetEventValue(uint32 bot, const string& event);
+        static uint32 SetEventValue(uint32 bot, const string& event, uint32 value, uint32 validIn);
+        static void GetBots(set<uint32> &bots);
+        static void AddRandomBots(set<uint32> &bots);
         bool ProcessBot(uint32 bot);
-        void ScheduleRandomize(uint32 bot, uint32 time);
+        static void ScheduleRandomize(uint32 bot, uint32 time);
         //void RandomTeleport(Player* bot);
-        void RandomTeleport(Player* bot, vector<WorldLocation> &locs);
-        uint32 GetZoneLevel(uint16 mapId, float teleX, float teleY, float teleZ);
-        //void PrepareTeleportCache();
+        static void RandomTeleport(Player* bot, vector<WorldLocation> &locs);
+        static uint32 GetZoneLevel(uint16 mapId, float teleX, float teleY);
 
     private:
         vector<Player*> players;
-        int processTicks;
-        map<uint8, vector<WorldLocation> > locsPerLevelCache;
+        static map<uint8, vector<WorldLocation> > locsPerLevelCache;
 };
 
 #define sRandomPlayerbotMgr RandomPlayerbotMgr::instance()
