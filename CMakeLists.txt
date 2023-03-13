@@ -56,7 +56,6 @@ message(
     BUILD_MANGOSD           Build the main server
     BUILD_REALMD            Build the login server
     BUILD_TOOLS             Build the map/vmap/mmap extractors
-    USE_STORMLIB            Use StormLib for reading MPQs
     SOAP                    Enable remote access via SOAP
     PCH                     Enable use of precompiled headers
     DEBUG                   Debug build, only for systems without IDE (Linux, *BSD)
