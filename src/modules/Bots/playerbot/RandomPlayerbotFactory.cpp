@@ -178,7 +178,7 @@ bool RandomPlayerbotFactory::CreateRandomBotName(string& name)
 
 void RandomPlayerbotFactory::CreateRandomBots()
 {
-    for (int accountNumber = 0; accountNumber < sPlayerbotAIConfig.randomBotAccountCount; ++accountNumber)
+    for (uint32 accountNumber = 0; accountNumber < sPlayerbotAIConfig.randomBotAccountCount; ++accountNumber)
     {
         string accountName = sPlayerbotAIConfig.randomBotAccountPrefix + to_string(accountNumber);
         QueryResult* results = LoginDatabase.PQuery("SELECT id FROM account where username = '%s'", accountName.c_str());
@@ -207,7 +207,7 @@ void RandomPlayerbotFactory::CreateRandomBots()
     LoginDatabase.PExecute("UPDATE account SET expansion = '%u' WHERE expansion < '%u' AND username LIKE '%s%%'", MAX_EXPANSION, MAX_EXPANSION, sPlayerbotAIConfig.randomBotAccountPrefix.c_str());
 
     uint32 totalRandomBotChars = 0;
-    for (int accountNumber = 0; accountNumber < sPlayerbotAIConfig.randomBotAccountCount; ++accountNumber)
+    for (uint32 accountNumber = 0; accountNumber < sPlayerbotAIConfig.randomBotAccountCount; ++accountNumber)
     {
         string accountName = sPlayerbotAIConfig.randomBotAccountPrefix + to_string(accountNumber);
 
@@ -243,7 +243,7 @@ void RandomPlayerbotFactory::CreateRandomBots()
         DEBUG_LOG("Created %d bots for account %s.", sAccountMgr.GetCharactersCount(accountId) - count, accountName.c_str());
     }
 
-    BASIC_LOG("%d random bot accounts with %d characters available", sPlayerbotAIConfig.randomBotAccounts.size(), totalRandomBotChars);
+    BASIC_LOG("%zu random bot accounts with %d characters available", sPlayerbotAIConfig.randomBotAccounts.size(), totalRandomBotChars);
 }
 
 
@@ -264,8 +264,8 @@ void RandomPlayerbotFactory::CreateRandomGuilds()
             {
                 do
                 {
-                    Field* fields = results2->Fetch();
-                    uint32 guid = fields[0].GetUInt32();
+                    Field* fields2 = results2->Fetch();
+                    uint32 guid = fields2[0].GetUInt32();
                     randomBots.push_back(guid);
                 } while (results2->NextRow());
                 delete results2;
@@ -275,7 +275,7 @@ void RandomPlayerbotFactory::CreateRandomGuilds()
         delete results;
     }
 
-    int guildNumber = 0;
+    uint32 guildNumber = 0;
     vector<ObjectGuid> availableLeaders;
     for (uint32& i : randomBots)
     {
@@ -315,7 +315,7 @@ void RandomPlayerbotFactory::CreateRandomGuilds()
         Player* player = sObjectMgr.GetPlayer(leader);
         if (!player)
         {
-            sLog.outError("Cannot find player for guild leader %u", leader);
+            sLog.outError("Cannot find player for guild leader %u", leader.GetEntry());
             break;
         }
 
@@ -399,8 +399,8 @@ void RandomPlayerbotFactory::DeleteRandomGuilds()
             {
                 do
                 {
-                    Field* fields = results2->Fetch();
-                    uint32 guid = fields[0].GetUInt32();
+                    Field* fields2 = results2->Fetch();
+                    uint32 guid = fields2[0].GetUInt32();
                     randomBots.push_back(guid);
                 } while (results2->NextRow());
                 delete results2;

@@ -106,7 +106,7 @@ void RandomPlayerbotMgr::AddRandomBots(set<uint32> &bots)
             continue;
         }
 
-        QueryResult* result = CharacterDatabase.PQuery("SELECT guid, race FROM characters WHERE account = '%u'", accountId);
+        QueryResult* result = CharacterDatabase.PQuery("SELECT 'guid', 'race', 'class' FROM characters WHERE account = '%u'", accountId);
         if (!result)
         {
             DEBUG_LOG("Unable to fetch characters for rndbot account %d", accountId);
@@ -118,10 +118,16 @@ void RandomPlayerbotMgr::AddRandomBots(set<uint32> &bots)
             Field* fields = result->Fetch();
             uint32 guid = fields[0].GetUInt32();
             uint8 race = fields[1].GetUInt8();
+            uint8 cls = fields[2].GetUInt8();
             bool alliance = guids.size() % 2 == 0;
+
+            if (cls == 6 && sPlayerbotAIConfig.randomBotMaxLevel < sWorld.getConfig(CONFIG_UINT32_START_HEROIC_PLAYER_LEVEL))
+            {
+                continue;
+            }
+
             if (bots.find(guid) == bots.end() &&
-                ((alliance && IsAlliance(race)) || ((!alliance && !IsAlliance(race))
-                    )))
+            ((alliance && IsAlliance(race)) || ((!alliance && !IsAlliance(race)))))
             {
                 guids.push_back(guid);
                 SetEventValue(guid, "add", 1, urand(sPlayerbotAIConfig.minRandomBotInWorldTime, sPlayerbotAIConfig.maxRandomBotInWorldTime));
@@ -360,7 +366,8 @@ void RandomPlayerbotMgr::RandomTeleportForLevel(Player* bot)
 
 void RandomPlayerbotMgr::Randomize(Player* bot)
 {
-    if (bot->getLevel() == 1)
+    if (bot->getLevel() == 1 ||
+    (bot->getClass() == 6 && bot->getLevel() == sWorld.getConfig(CONFIG_UINT32_START_HEROIC_PLAYER_LEVEL)))
     {
         RandomizeFirst(bot);
     }
