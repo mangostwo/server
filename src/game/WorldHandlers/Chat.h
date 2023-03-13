@@ -30,6 +30,7 @@
 #include "ObjectGuid.h"
 #include "Language.h"
 
+
 struct AchievementEntry;
 struct AchievementCriteriaEntry;
 struct AreaTrigger;
@@ -38,7 +39,7 @@ struct FactionEntry;
 struct FactionState;
 struct GameTele;
 struct SpellEntry;
-
+class WorldObject;
 class QueryResult;
 class ChatHandler;
 class WorldSession;
@@ -97,6 +98,7 @@ enum PlayerChatTag
     CHAT_TAG_COM                = 0x08,                     // Commentator
     CHAT_TAG_DEV                = 0x10,                     // Developer
 };
+
 typedef uint32 ChatTagFlags;
 
 static uint32 ReputationRankStrIndex[MAX_REPUTATION_RANK] =

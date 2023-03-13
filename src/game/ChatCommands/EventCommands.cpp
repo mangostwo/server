@@ -26,6 +26,7 @@
 #include "Language.h"
 #include "GameEventMgr.h"
 #include "GameEventMgr.h"
+#include "ObjectMgr.h"
 
  /**********************************************************************
      CommandTable : eventCommandTable

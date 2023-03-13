@@ -28,6 +28,7 @@
 #include "AccountMgr.h"
 #include "Util.h"
 #include "ObjectMgr.h"
+#include "ace/OS_NS_time.h"
 
  /**********************************************************************
      CommandTable : banCommandTable
@@ -90,7 +91,7 @@ bool ChatHandler::HandleBanListHelper(QueryResult* result)
                 {
                     time_t timeBan = fields2[0].GetUInt64();
                     tm tmBan;
-                    localtime_r(&timeBan, &tmBan);
+                    ACE_OS::localtime_r(&timeBan, &tmBan);
 
                     if (fields2[0].GetUInt64() == fields2[1].GetUInt64())
                     {
@@ -102,7 +103,7 @@ bool ChatHandler::HandleBanListHelper(QueryResult* result)
                     {
                         time_t timeUnban = fields2[1].GetUInt64();
                         tm tmUnban;
-                        localtime_r(&timeUnban, &tmUnban);
+                        ACE_OS::localtime_r(&timeUnban, &tmUnban);
 
                         PSendSysMessage("|%-15.15s|%02d-%02d-%02d %02d:%02d|%02d-%02d-%02d %02d:%02d|%-15.15s|%-15.15s|",
                                         account_name.c_str(), tmBan.tm_year % 100, tmBan.tm_mon + 1, tmBan.tm_mday, tmBan.tm_hour, tmBan.tm_min,

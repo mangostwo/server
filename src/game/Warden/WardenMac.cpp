@@ -30,7 +30,7 @@
 #include "Log.h"
 #include "Opcodes.h"
 #include "ByteBuffer.h"
-#include <openssl/md5.h>
+#include "Auth/md5.h"
 #include "World.h"
 #include "Player.h"
 #include "Util.h"
@@ -88,10 +88,9 @@ ClientWardenModule* WardenMac::GetModuleForClient()
     memcpy(mod->Key, Module_0DBBF209A27B1E279A9FEC5C168A15F7_Key, 16);
 
     // md5 hash
-    MD5_CTX ctx;
-    MD5_Init(&ctx);
-    MD5_Update(&ctx, mod->CompressedData, len);
-    MD5_Final((uint8*)&mod->Id, &ctx);
+    MD5 ctx;
+    ctx.UpdateData(mod->CompressedData, len);
+    ctx.Finalize((uint8*)&mod->Id);
 
     return mod;
 }
@@ -241,16 +240,14 @@ void WardenMac::HandleData(ByteBuffer &buff)
         found = true;
     }
 
-    MD5_CTX ctx;
-    MD5_Init(&ctx);
-    MD5_Update(&ctx, str.c_str(), str.size());
-    uint8 ourMD5Hash[16];
-    MD5_Final(ourMD5Hash, &ctx);
+    MD5 ctx;
+    ctx.UpdateData((uint8*)str.c_str(), str.size());
+    ctx.Finalize();
 
     uint8 theirsMD5Hash[16];
     buff.read(theirsMD5Hash, 16);
 
-    if (memcmp(ourMD5Hash, theirsMD5Hash, 16) != 0)
+    if (memcmp(ctx.GetDigest(), theirsMD5Hash, 16) != 0)
     {
         sLog.outWarden("Handle data failed: MD5 hash is wrong!");
         found = true;

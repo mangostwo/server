@@ -513,9 +513,8 @@ int WorldSocket::Update(void)
 
 int WorldSocket::handle_input_header(void)
 {
-    MANGOS_ASSERT(m_RecvWPct == NULL);
-
-    MANGOS_ASSERT(m_Header.length() == sizeof(ClientPktHeader));
+    //MANGOS_ASSERT(m_RecvWPct == NULL);
+    //MANGOS_ASSERT(m_Header.length() == sizeof(ClientPktHeader));
 
     m_Crypt.DecryptRecv((uint8*) m_Header.rd_ptr(), sizeof(ClientPktHeader));
 
@@ -894,15 +893,12 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     s.SetHexStr(fields[6].GetString());
     m_s = s;
 
-    const char* sStr = s.AsHexStr();                        // Must be freed by OPENSSL_free()
-    const char* vStr = v.AsHexStr();                        // Must be freed by OPENSSL_free()
+    const unsigned char* sStr = s.AsHexStr();                        // Must be freed by OPENSSL_free()
+    const unsigned char* vStr = v.AsHexStr();                        // Must be freed by OPENSSL_free()
 
     DEBUG_LOG("WorldSocket::HandleAuthSession: (s,v) check s: %s v: %s",
               sStr,
               vStr);
-
-    OPENSSL_free((void*) sStr);
-    OPENSSL_free((void*) vStr);
 
     ///- Re-check ip locking (same check as in realmd).
     if (fields[4].GetUInt8() == 1)  // if ip is locked

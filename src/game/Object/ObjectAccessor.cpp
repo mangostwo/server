@@ -24,6 +24,8 @@
 
 #include "ObjectAccessor.h"
 #include "World.h"
+#include "ObjectMgr.h"
+#include "MapManager.h"
 
 #include <forward_list>
 

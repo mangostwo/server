@@ -1287,8 +1287,8 @@ void WorldSession::WorldTeleportHandler(WorldPacket& recv_data)
     if (GetSecurity() != SEC_PLAYER)
     {
         uint32 timeMs = time(NULL);  /* Truncated time stamp: Used for time value ONLY. */
-        uint32 continentID = NULL;
-        uint64 characterGUID = NULL;    /* This is used ONLY for CMSG_MOVE_CHARACTER_CHEAT. Hardcoded to 0 for other cases. */
+        uint32 continentID = 0;
+        uint64 characterGUID = 0;    /* This is used ONLY for CMSG_MOVE_CHARACTER_CHEAT. Hardcoded to 0 for other cases. */
         Position position = Position();
 
         recv_data >> timeMs;

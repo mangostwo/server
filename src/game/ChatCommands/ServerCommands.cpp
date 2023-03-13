@@ -29,7 +29,8 @@
 #include "GitRevision.h"
 #include "SystemConfig.h"
 #include "UpdateTime.h"
-#include "revision_data.h"
+#include "ObjectMgr.h"
+
 
  /**********************************************************************
      CommandTable : serverCommandTable

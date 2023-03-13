@@ -24,7 +24,6 @@
 
 #include "AuthCrypt.h"
 #include "HMACSHA1.h"
-#include "Log/Log.h"
 #include "BigNumber.h"
 
 AuthCrypt::AuthCrypt() : _clientDecrypt(SHA_DIGEST_LENGTH), _serverEncrypt(SHA_DIGEST_LENGTH)
@@ -74,7 +73,6 @@ void AuthCrypt::DecryptRecv(uint8* data, size_t len)
     {
         return;
     }
-
     _clientDecrypt.UpdateData(len, data);
 }
 
@@ -84,6 +82,5 @@ void AuthCrypt::EncryptSend(uint8* data, size_t len)
     {
         return;
     }
-
     _serverEncrypt.UpdateData(len, data);
 }

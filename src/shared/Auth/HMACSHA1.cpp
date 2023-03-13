@@ -24,25 +24,28 @@
 
 #include "Auth/HMACSHA1.h"
 #include "BigNumber.h"
+#include "tomcrypt.h"
+
+
+struct HMACSHA1::_internal
+{
+    hmac_state _hs;
+    hmac_state* hstate() { return &_hs; }
+    uint8 mdigest[SHA_DIGEST_LENGTH];
+
+};
+
 
 HMACSHA1::HMACSHA1(uint32 len, uint8 *seed)
 {
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-    HMAC_CTX_init(&m_ctx);
-    HMAC_Init_ex(&m_ctx, seed, len, EVP_sha1(), NULL);
-#else
-    m_ctx = HMAC_CTX_new();
-    HMAC_Init_ex(m_ctx, seed, len, EVP_sha1(), NULL);
-#endif
+    pstate = new _internal();
+    register_hash(&sha1_desc);
+    hmac_init(pstate->hstate(), find_hash("sha1"), seed, len);
 }
 
 HMACSHA1::~HMACSHA1()
 {
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-    HMAC_CTX_cleanup(&m_ctx);
-#else
-    HMAC_CTX_free(m_ctx);
-#endif
+    delete pstate;
 }
 
 void HMACSHA1::UpdateBigNumber(BigNumber *bn)
@@ -52,36 +55,28 @@ void HMACSHA1::UpdateBigNumber(BigNumber *bn)
 
 void HMACSHA1::UpdateData(const uint8 *data, int length)
 {
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-    HMAC_Update(&m_ctx, data, length);
-#else
-    HMAC_Update(m_ctx, data, length);
-#endif
+    hmac_process(pstate->hstate(), data, length);
 }
 
-void HMACSHA1::UpdateData(const std::string &str)
+void HMACSHA1::UpdateData(const std::string& str)
 {
-    UpdateData((uint8 const*)str.c_str(), str.length());
+    hmac_process(pstate->hstate(), (uint8*)str.c_str(), str.length());
 }
 
 void HMACSHA1::Finalize()
 {
-    uint32 length = 0;
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-    HMAC_Final(&m_ctx, (uint8*)m_digest, &length);
-#else
-    HMAC_Final(m_ctx, (uint8*)m_digest, &length);
-#endif
-    MANGOS_ASSERT(length == SHA_DIGEST_LENGTH);
+    unsigned long length = SHA_DIGEST_LENGTH;
+    hmac_done(pstate->hstate(), pstate->mdigest, &length);
 }
 
 uint8 *HMACSHA1::ComputeHash(BigNumber *bn)
 {
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-    HMAC_Update(&m_ctx, bn->AsByteArray(), bn->GetNumBytes());
-#else
-    HMAC_Update(m_ctx, bn->AsByteArray(), bn->GetNumBytes());
-#endif
+    UpdateBigNumber(bn);
     Finalize();
-    return (uint8*)m_digest;
+    return pstate->mdigest;
+}
+
+uint8* HMACSHA1::GetDigest()
+{
+    return pstate->mdigest;
 }

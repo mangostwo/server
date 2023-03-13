@@ -30,7 +30,7 @@
 #include "Opcodes.h"
 #include "Player.h"
 #include "ByteBuffer.h"
-#include <openssl/sha.h>
+#include "Sha1.h"
 #include "World.h"
 #include "Util.h"
 #include "Warden.h"
@@ -246,7 +246,11 @@ struct keyData {
 uint32 Warden::BuildChecksum(const uint8* data, uint32 length)
 {
     keyData hash;
-    SHA1(data, length, hash.bytes.bytes);
+
+    Sha1Hash sh1;
+    sh1.UpdateData(data, length);
+    sh1.Finalize(hash.bytes.bytes);
+
     uint32 checkSum = 0;
     for (uint8 i = 0; i < 5; ++i)
     {

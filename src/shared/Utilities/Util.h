@@ -79,12 +79,6 @@ float GetFloatValueFromArray(Tokens const& data, uint16 index);
  */
 void stripLineInvisibleChars(std::string& src);
 
-struct tm* localtime_r(const time_t* time, struct tm* result);
-
-time_t LocalTimeToUTCTime(time_t time);
-time_t GetLocalHourTimestamp(time_t time, uint8 hour, bool onlyAfterTime = true);
-tm TimeBreakdown(time_t t);
-
 /**
  * @brief
  *
@@ -109,6 +103,7 @@ uint32 TimeStringToSecs(const std::string& timestring);
  */
 std::string TimeToTimestampStr(time_t t);
 
+time_t LocalTimeToUTCTime(time_t local);
 
 time_t timeBitFieldsToSecs(uint32 packedDate);
 
@@ -136,9 +131,10 @@ inline std::string& ltrim(std::string& s)
     return s;
 }
 
-inline std::string& rtrim(std::string& s)
-{
-    s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+inline std::string& rtrim(std::string& s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }).base(), s.end());
     return s;
 }
 

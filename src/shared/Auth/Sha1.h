@@ -26,76 +26,29 @@
 #define _AUTH_SHA1_H
 
 #include "Common/Common.h"
-#include <openssl/sha.h>
-#include <openssl/crypto.h>
+#include <string>
+
+#define SHA_DIGEST_LENGTH 20
+
 
 class BigNumber;
 
-/**
- * @brief
- *
- */
 class Sha1Hash
 {
     public:
-        /**
-         * @brief
-         *
-         */
         Sha1Hash();
-        /**
-         * @brief
-         *
-         */
+        Sha1Hash(const Sha1Hash&) = delete;
+        Sha1Hash(Sha1Hash&&) = delete;
         ~Sha1Hash();
-
-        /**
-         * @brief
-         *
-         * @param bn0...
-         */
         void UpdateBigNumbers(BigNumber* bn0, ...);
-
-        /**
-         * @brief
-         *
-         * @param dta
-         * @param len
-         */
         void UpdateData(const uint8* dta, int len);
-        /**
-         * @brief
-         *
-         * @param str
-         */
         void UpdateData(const std::string& str);
-
-        /**
-         * @brief
-         *
-         */
         void Initialize();
-        /**
-         * @brief
-         *
-         */
-        void Finalize();
-
-        /**
-         * @brief
-         *
-         * @return uint8
-         */
-        uint8* GetDigest(void) { return mDigest; };
-        /**
-         * @brief
-         *
-         * @return int
-         */
+        void Finalize(uint8* dest = nullptr);
+        uint8* GetDigest(void);
         int GetLength(void) { return SHA_DIGEST_LENGTH; };
-
     private:
-        SHA_CTX mC; /**< TODO */
-        uint8 mDigest[SHA_DIGEST_LENGTH]; /**< TODO */
+        struct _internal;
+        _internal *pstate;
 };
 #endif

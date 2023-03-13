@@ -26,8 +26,8 @@
 #include "Language.h"
 #include "World.h"
 #include "MapManager.h"
+#include "ObjectMgr.h"
 #include "CellImpl.h"
-
 
 #ifdef _DEBUG_VMAPS
 #include "VMapFactory.h"

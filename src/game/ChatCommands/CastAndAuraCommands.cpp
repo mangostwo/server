@@ -24,8 +24,10 @@
 
 #include "Chat.h"
 #include "Language.h"
+#include "ObjectMgr.h" //<-- order dependent build - FIX ASAP
 #include "SpellAuras.h"
 #include "SpellMgr.h"
+
 
 /**********************************************************************
     CommandTable : castCommandTable

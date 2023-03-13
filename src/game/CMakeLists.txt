@@ -269,6 +269,7 @@ target_compile_definitions(game
         $<$<BOOL:${SCRIPT_LIB_SD3}>:ENABLE_SD3>
         $<$<BOOL:${PLAYERBOTS}>:ENABLE_PLAYERBOTS>
         $<$<BOOL:${SCRIPT_LIB_ELUNA}>:ENABLE_ELUNA>
+        $<$<BOOL:${SCRIPT_LIB_SD3}>:ENABLE_SD3>
 )
 
 target_link_libraries(game
@@ -277,8 +278,8 @@ target_link_libraries(game
         RecastNavigation::Detour
         ZLIB::ZLIB
         g3dlite
-        $<$<BOOL:${SCRIPT_LIB_SD3}>:mangosscript>
         $<$<BOOL:${SCRIPT_LIB_ELUNA}>:lualib>
+        $<$<BOOL:${SCRIPT_LIB_SD3}>:mangosscript>
 )
 
 # Generate precompiled header

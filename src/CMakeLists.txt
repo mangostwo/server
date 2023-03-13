@@ -19,7 +19,6 @@
 
 # Build the mangos shared library
 add_subdirectory(shared)
-
 add_subdirectory(genrev)
 
 # Needs to link against mangos_world.lib

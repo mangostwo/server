@@ -63,7 +63,6 @@ target_include_directories(mangosd
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_BINARY_DIR}
-        ${OPENSSL_INCLUDE_DIR}
 )
 
 target_compile_definitions(mangosd
@@ -76,7 +75,6 @@ target_link_libraries(mangosd
         game
         $<$<BOOL:${SOAP}>:gsoap>
         Threads::Threads
-        ${OPENSSL_LIBRARIES}
 )
 
 install(

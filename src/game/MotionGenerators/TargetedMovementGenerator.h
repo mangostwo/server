@@ -27,8 +27,7 @@
 
 #include "MovementGenerator.h"
 #include "FollowerReference.h"
-
-class PathFinder;
+#include "PathFinder.h"
 
 class TargetedMovementGeneratorBase
 {

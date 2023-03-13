@@ -34,6 +34,8 @@
 #include "WorldPacket.h"
 #include "Log.h"
 #include "Util.h"
+#include "ace/OS_NS_time.h"
+
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /*ENABLE_ELUNA*/
@@ -109,7 +111,7 @@ bool Weather::ReGenerate()
     // season source http://aa.usno.navy.mil/data/docs/EarthSeasons.html
     time_t gtime = sWorld.GetGameTime();
     struct tm ltime;
-    localtime_r(&gtime, &ltime);
+    ACE_OS::localtime_r(&gtime, &ltime);
     uint32 season = ((ltime.tm_yday - 78 + 365) / 91) % 4;
 
     static char const* seasonName[WEATHER_SEASONS] = { "spring", "summer", "fall", "winter" };

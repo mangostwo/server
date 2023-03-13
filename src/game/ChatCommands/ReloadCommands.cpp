@@ -34,6 +34,7 @@
 #include "SkillDiscovery.h"
 #include "ItemEnchantmentMgr.h"
 #include "CommandMgr.h"
+#include "ObjectMgr.h"
 
 /**********************************************************************
     CommandTable : reloadCommandTable

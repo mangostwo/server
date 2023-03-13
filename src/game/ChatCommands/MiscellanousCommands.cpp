@@ -27,6 +27,7 @@
 #include "World.h"
 #include "BattleGroundMgr.h"
 #include "PlayerDump.h"
+#include "ObjectMgr.h"
 
  /**********************************************************************
      CommandTable : commandTable

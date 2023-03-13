@@ -31,7 +31,7 @@ set(SRC_GRP_AUTH
   Auth/Sha1.cpp
   Auth/Sha1.h
   Auth/WardenKeyGeneration.h
-  Auth/md5.c
+  Auth/md5.cpp
   Auth/md5.h
 )
 source_group("Auth" FILES ${SRC_GRP_AUTH})
@@ -216,7 +216,6 @@ target_include_directories(shared
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_BINARY_DIR}
-        ${OPENSSL_INCLUDE_DIR}
         ${TGT_INCL}
 )
 
@@ -235,5 +234,6 @@ target_link_libraries(shared
         utf8
         MySQL::MySQL
         DL::DL
-        ${OPENSSL_LIBRARIES}
+        libtomcrypt
+        libtommath
 )

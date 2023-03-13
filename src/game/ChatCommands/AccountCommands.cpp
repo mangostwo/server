@@ -30,7 +30,7 @@
 #include "Chat.h"
 #include "Language.h"
 #include "AccountMgr.h"
-
+#include "ObjectMgr.h"
 
 /**********************************************************************
     CommandTable : accountCommandTable

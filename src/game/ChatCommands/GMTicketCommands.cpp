@@ -27,7 +27,7 @@
 #include "World.h"
 #include "GMTicketMgr.h"
 #include "Mail.h"
-
+#include "ObjectMgr.h"
 
 // show ticket (helper)
 void ChatHandler::ShowTicket(GMTicket const* ticket)

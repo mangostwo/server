@@ -22,73 +22,49 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Sha1.h"
-#include "BigNumber.h"
+#include "md5.h"
 #include "tomcrypt.h"
 
-#include <stdarg.h>
 
-
-struct Sha1Hash::_internal
+struct MD5::_internal
 {
     hash_state _hs;
-    uint8 mDigest[SHA_DIGEST_LENGTH];
+    uint8 mDigest[MD5_DIGEST_LENGTH];
     hash_state* hstate() { return &_hs; }
 };
 
 
-Sha1Hash::Sha1Hash() : pstate(nullptr)
+MD5::MD5()
 {
     pstate = new _internal();
-    sha1_init(pstate->hstate());
+    Initialize();
 
 }
 
-Sha1Hash::~Sha1Hash()
+MD5::~MD5()
 {
-    if(pstate)
-        delete pstate;
+    delete pstate;
 }
 
-void Sha1Hash::UpdateData(const uint8* dta, int len)
+void MD5::UpdateData(const uint8* dta, int len)
 {
-    sha1_process(pstate->hstate(), dta, len);
+    md5_process(pstate->hstate(), dta, len);
 }
 
 
-void Sha1Hash::UpdateData(const std::string& str)
+void MD5::Initialize()
 {
-    UpdateData((const uint8*)str.c_str(), str.length());
+    md5_init(pstate->hstate());
 }
 
-void Sha1Hash::UpdateBigNumbers(BigNumber* bn0, ...)
+void MD5::Finalize(uint8* dest)
 {
-    va_list v;
-    BigNumber* bn;
-
-    va_start(v, bn0);
-    bn = bn0;
-    while (bn)
-    {
-        UpdateData(bn->AsByteArray(), bn->GetNumBytes());
-        bn = va_arg(v, BigNumber*);
-    }
-    va_end(v);
-}
-
-void Sha1Hash::Initialize()
-{
-    sha1_init(pstate->hstate());
-}
-
-void Sha1Hash::Finalize(uint8* dest)
-{
-    sha1_done(pstate->hstate(), pstate->mDigest);
+    md5_done(pstate->hstate(), pstate->mDigest);
     if (dest)
-        memcpy(dest, pstate->mDigest, SHA_DIGEST_LENGTH);
+        memcpy(dest, pstate->mDigest, MD5_DIGEST_LENGTH);
 }
 
-uint8* Sha1Hash::GetDigest(void)
+uint8* MD5::GetDigest(void)
 {
     return pstate->mDigest;
 }

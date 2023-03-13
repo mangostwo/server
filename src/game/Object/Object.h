@@ -666,8 +666,8 @@ class WorldObject : public Object
         void SendObjectDeSpawnAnim(ObjectGuid guid);
         void SendGameObjectCustomAnim(ObjectGuid guid, uint32 animId = 0);
 
-        virtual bool IsHostileTo(Unit const* unit) const = 0;
-        virtual bool IsFriendlyTo(Unit const* unit) const = 0;
+        virtual bool IsHostileTo(Unit const* unit) const { return false; };
+        virtual bool IsFriendlyTo(Unit const* unit) const { return false; };
         bool IsControlledByPlayer() const;
 
         virtual void SaveRespawnTime() {}
@@ -680,7 +680,7 @@ class WorldObject : public Object
         bool IsVisibleFor(Player const* u, WorldObject const* viewPoint) const { return IsVisibleForInState(u, viewPoint, false); }
 
         // low level function for visibility change code, must be define in all main world object subclasses
-        virtual bool IsVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const = 0;
+        virtual bool IsVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const { return false; };
 
         void SetMap(Map* map);
         Map* GetMap() const { MANGOS_ASSERT(m_currMap); return m_currMap; }

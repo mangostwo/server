@@ -25,6 +25,7 @@
 #include "Chat.h"
 #include "Language.h"
 #include "World.h"
+#include "ObjectMgr.h"
 
 
 bool ChatHandler::HandleLookupTitleCommand(char* args)

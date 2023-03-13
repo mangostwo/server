@@ -24,35 +24,35 @@
  */
 
 #include "ARC4.h"
+#include "tomcrypt.h"
 
-ARC4::ARC4(uint8 len) : m_ctx()
+struct ARC4::_internal
 {
-    m_ctx = EVP_CIPHER_CTX_new();
-    EVP_EncryptInit_ex(m_ctx, EVP_rc4(), NULL, NULL, NULL);
-    EVP_CIPHER_CTX_set_key_length(m_ctx, len);
-}
+    rc4_state _rc4;
+    uint8 seed[256];
+    uint8 key_len;
+    _internal() :_rc4{}, key_len(0), seed{0}{}
+    rc4_state* rc4() { return &_rc4; }
+};
 
-ARC4::ARC4(uint8 *seed, uint8 len) : m_ctx()
+ARC4::ARC4(uint8 len)
 {
-    m_ctx = EVP_CIPHER_CTX_new();
-    EVP_EncryptInit_ex(m_ctx, EVP_rc4(), NULL, NULL, NULL);
-    EVP_CIPHER_CTX_set_key_length(m_ctx, len);
-    EVP_EncryptInit_ex(m_ctx, NULL, NULL, seed, NULL);
+    pstate = new _internal();
+    pstate->key_len = len;
 }
 
 ARC4::~ARC4()
 {
-    EVP_CIPHER_CTX_free(m_ctx);
+    delete pstate;
 }
 
 void ARC4::Init(uint8 *seed)
 {
-    EVP_EncryptInit_ex(m_ctx, NULL, NULL, seed, NULL);
+    memcpy(pstate->seed, seed, pstate->key_len);
+    rc4_stream_setup(pstate->rc4(), seed, pstate->key_len);
 }
 
 void ARC4::UpdateData(int len, uint8 *data)
 {
-    int outlen = 0;
-    EVP_EncryptUpdate(m_ctx, data, &outlen, data, len);
-    EVP_EncryptFinal_ex(m_ctx, data, &outlen);
+    rc4_stream_crypt(pstate->rc4(), data, len, data);
 }

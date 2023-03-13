@@ -26,14 +26,9 @@
 #define MANGOSSERVER_ERRORS_H
 
 #include "Common/Common.h"
+#include <ace/Stack_Trace.h>
 
-
-#ifdef HAVE_ACE_STACK_TRACE_H
-#  include <ace/Stack_Trace.h>
-#endif
-
-#ifdef HAVE_ACE_STACK_TRACE_H
-// Normal assert.
+ // Normal assert.
 #define WPError(CONDITION) \
     if (!(CONDITION)) \
     { \
@@ -51,25 +46,12 @@
         printf("%s:%i: Warning: Assertion in %s failed: %s\nStack Trace:\n%s",\
                __FILE__, __LINE__, __FUNCTION__, STRINGIZE(CONDITION), st.c_str()); \
     }
+
+#ifdef _DEBUG
+#define MANGOS_ASSERT WPError
+#define MANGOS_ASSERTW WPWarning
 #else
-// Normal assert.
-#define WPError(CONDITION) \
-    if (!(CONDITION)) \
-    { \
-        printf("%s:%i: Error: Assertion in %s failed: %s", \
-               __FILE__, __LINE__, __FUNCTION__, STRINGIZE(CONDITION)); \
-        assert(STRINGIZE(CONDITION) && 0); \
-    }
-
-// Just warn.
-#define WPWarning(CONDITION) \
-    if (!(CONDITION)) \
-    { \
-        printf("%s:%i: Warning: Assertion in %s failed: %s",\
-               __FILE__, __LINE__, __FUNCTION__, STRINGIZE(CONDITION)); \
-    }
+#define MANGOS_ASSERT(x)
+#define MANGOS_ASSERTW(x)
 #endif
-
-#define MANGOS_ASSERT WPError                             // Error even if in release mode.
-
 #endif

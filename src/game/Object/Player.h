@@ -1145,6 +1145,7 @@ class Player : public Unit
         {
             return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DND);
         }
+
         ChatTagFlags GetChatTag() const;
         std::string autoReplyMsg;
 

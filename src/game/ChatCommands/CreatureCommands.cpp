@@ -32,6 +32,7 @@
 #include "WaypointManager.h"
 #include "PathFinder.h"                                     // for mmap commands
 #include "Totem.h"
+#include "ObjectMgr.h"
 
 #ifdef _DEBUG_VMAPS
 #include "VMapFactory.h"

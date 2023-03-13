@@ -26,6 +26,7 @@
 #include "Language.h"
 #include "Mail.h"
 #include "MassMailMgr.h"
+#include "ObjectMgr.h"
 
  /**********************************************************************
       CommandTable : mailCommandTable
