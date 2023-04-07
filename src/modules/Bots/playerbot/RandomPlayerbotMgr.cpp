@@ -25,6 +25,8 @@ map<uint8, vector<WorldLocation> > RandomPlayerbotMgr::locsPerLevelCache;
 RandomPlayerbotMgr::RandomPlayerbotMgr() : PlayerbotHolder()
 {
     sPlayerbotCommandServer.Start();
+    CharacterDatabase.PExecute("DELETE FROM ai_playerbot_random_bots WHERE `validIn` < (SELECT MAX(`time`) FROM ai_playerbot_random_bots)");
+    CharacterDatabase.PExecute("UPDATE ai_playerbot_random_bots SET `validIn` = validIn - (SELECT MAX(`time`) FROM ai_playerbot_random_bots), `time` = '0' ");
 }
 
 RandomPlayerbotMgr::~RandomPlayerbotMgr()
@@ -35,7 +37,7 @@ uint32 RandomPlayerbotMgr::GetMaxAllowedBotCount()
     return GetEventValue(0, "bot_count");
 }
 
-void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed)
+void RandomPlayerbotMgr::UpdateAIInternal(__attribute__((unused)) uint32 elapsed)
 {
     SetNextCheckDelay(sPlayerbotAIConfig.randomBotUpdateInterval * 1000);
 
@@ -102,14 +104,14 @@ void RandomPlayerbotMgr::AddRandomBots(set<uint32> &bots)
     {
         if (!sAccountMgr.GetCharactersCount(accountId))
         {
-            DEBUG_LOG("No character in rndbot account %d.", accountId);
+            DEBUG_LOG("No character in rndbot account %u.", accountId);
             continue;
         }
 
-        QueryResult* result = CharacterDatabase.PQuery("SELECT 'guid', 'race', 'class' FROM characters WHERE account = '%u'", accountId);
+        QueryResult* result = CharacterDatabase.PQuery("SELECT guid, race, class FROM characters WHERE account = '%u'", accountId);
         if (!result)
         {
-            DEBUG_LOG("Unable to fetch characters for rndbot account %d", accountId);
+            DEBUG_LOG("Unable to fetch characters for rndbot account %u", accountId);
             continue;
         }
 
@@ -123,6 +125,7 @@ void RandomPlayerbotMgr::AddRandomBots(set<uint32> &bots)
 
             if (cls == 6 && sPlayerbotAIConfig.randomBotMaxLevel < sWorld.getConfig(CONFIG_UINT32_START_HEROIC_PLAYER_LEVEL))
             {
+                DEBUG_LOG("Max player level lower than minimum heroic level.");
                 continue;
             }
 
@@ -160,7 +163,7 @@ void RandomPlayerbotMgr::ScheduleTeleport(uint32 bot, uint32 time)
 bool RandomPlayerbotMgr::ProcessBot(uint32 bot)
 {
     DEBUG_LOG("Processing bot %d", bot);
-    Player* player = GetPlayerBot(bot);
+    Player* player = GetBotByGUID(bot);
     if (!IsRandomBot(bot))
     {
         if (!player || !player->GetGroup())
@@ -563,7 +566,7 @@ uint32 RandomPlayerbotMgr::GetEventValue(uint32 bot, const string& event)
         value = fields[0].GetUInt32();
         uint32 lastChangeTime = fields[1].GetUInt32();
         uint32 validIn = fields[2].GetUInt32();
-        if ((time(nullptr) - lastChangeTime) >= validIn)
+        if (((GameTime::GetGameTimeMS() / 1000) - lastChangeTime) >= validIn)
         {
             value = 0;
         }
@@ -580,8 +583,8 @@ uint32 RandomPlayerbotMgr::SetEventValue(uint32 bot, const string& event, uint32
     if (value)
     {
         CharacterDatabase.PExecute(
-            "INSERT INTO `ai_playerbot_random_bots` (`owner`, `bot`, `time`, `validIn`, `event`, `value`) VALUES ('%u', '%u', '%ld', '%u', '%s', '%u')",
-            0, bot, time(nullptr), validIn, event.c_str(), value);
+            "INSERT INTO `ai_playerbot_random_bots` (`owner`, `bot`, `time`, `validIn`, `event`, `value`) VALUES ('%u', '%u', '%u', '%u', '%s', '%u')",
+            0, bot, GameTime::GetGameTimeMS() / 1000, validIn, event.c_str(), value);
     }
 
     return value;
@@ -697,18 +700,18 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(char const *args)
 
 void RandomPlayerbotMgr::HandleCommand(uint32 type, const string& text, Player& fromPlayer)
 {
-    for (auto it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+    for (auto it : playerBots)
     {
-        Player* const bot = it->second;
+        Player* const bot = it.second;
         bot->GetPlayerbotAI()->HandleCommand(type, text, fromPlayer);
     }
 }
 
 void RandomPlayerbotMgr::OnPlayerLogout(Player* player)
 {
-    for (auto it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+    for (auto it : playerBots)
     {
-        Player* const bot = it->second;
+        Player* const bot = it.second;
         PlayerbotAI* ai = bot->GetPlayerbotAI();
         if (player == ai->GetMaster())
         {
@@ -726,9 +729,9 @@ void RandomPlayerbotMgr::OnPlayerLogout(Player* player)
 
 void RandomPlayerbotMgr::OnPlayerLogin(Player* player)
 {
-    for (auto it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+    for (auto it : playerBots)
     {
-        Player* const bot = it->second;
+        Player* const bot = it.second;
         if (player == bot || player->GetPlayerbotAI())
         {
             continue;
@@ -973,7 +976,7 @@ string RandomPlayerbotMgr::HandleRemoteCommand(string request)
 
     string command = string(request.begin(), pos);
     uint64 guid = atoi(string(pos + 1, request.end()).c_str());
-    Player* bot = GetPlayerBot(guid);
+    Player* bot = GetBotByGUID(guid);
     if (!bot)
     {
         return "invalid guid";

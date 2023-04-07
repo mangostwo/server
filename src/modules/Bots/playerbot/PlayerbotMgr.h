@@ -1,5 +1,5 @@
-#ifndef _PLAYERBOTMGR_H
-#define _PLAYERBOTMGR_H
+#ifndef PLAYERBOTMGR_H
+#define PLAYERBOTMGR_H
 
 #include "Common.h"
 #include "PlayerbotAIBase.h"
@@ -20,26 +20,26 @@ public:
     virtual ~PlayerbotHolder();
 
     void AddPlayerBot(uint64 guid, uint32 masterAccountId);
-    void HandlePlayerBotLoginCallback(QueryResult * dummy, SqlQueryHolder * holder);
+//    void HandlePlayerBotLoginCallback(QueryResult * dummy, SqlQueryHolder * holder);
 
     void LogoutPlayerBot(uint64 guid);
-    Player* GetPlayerBot (uint64 guid) const;
+    Player* GetBotByGUID (uint64 playerGuid) const;
     PlayerBotMap::const_iterator GetPlayerBotsBegin() const { return playerBots.begin(); }
     PlayerBotMap::const_iterator GetPlayerBotsEnd()   const { return playerBots.end();   }
 
-    virtual void UpdateAIInternal(uint32 elapsed);
-    void UpdateSessions(uint32 elapsed);
+    void UpdateAIInternal(__attribute__((unused)) uint32 elapsed) override;
+    void UpdateSessions(__attribute__((unused)) uint32 elapsed);
 
     void LogoutAllBots();
-    void OnBotLogin(Player * const bot);
+    void OnBotLogin(Player* bot);
 
-    list<string> HandlePlayerbotCommand(char const* args, Player* master = NULL);
-    string ProcessBotCommand(string cmd, ObjectGuid guid, bool admin, uint32 masterAccountId, uint32 masterGuildId);
-    uint32 GetAccountId(string name);
-    string ListBots(Player* master);
+    list<string> HandlePlayerbotCommand(char const* args, Player* master = nullptr);
+    string ProcessBotCommand(const string& cmd, ObjectGuid guid, bool admin, uint32 masterAccountId, uint32 masterGuildId);
+    static uint32 GetAccountId(const string& name);
+    string ListBots(Player* master) const;
 
 protected:
-    virtual void OnBotLoginInternal(Player * const bot) = 0;
+    __attribute__((unused)) virtual void OnBotLoginInternal(Player* bot) = 0;
 
 protected:
     PlayerBotMap playerBots;
@@ -48,23 +48,24 @@ protected:
 class PlayerbotMgr : public PlayerbotHolder
 {
 public:
-    PlayerbotMgr(Player* const master);
-    virtual ~PlayerbotMgr();
+    explicit PlayerbotMgr(Player* master);
+    ~PlayerbotMgr() override;
 
     static bool HandlePlayerbotMgrCommand(ChatHandler* handler, char const* args);
     void HandleMasterIncomingPacket(const WorldPacket& packet);
     void HandleMasterOutgoingPacket(const WorldPacket& packet);
     void HandleCommand(uint32 type, const string& text);
-    void OnPlayerLogin(Player* player);
 
-    virtual void UpdateAIInternal(uint32 elapsed);
+    __attribute__((unused)) void OnPlayerLogin(Player* player);
+
+    void UpdateAIInternal(uint32 elapsed) override;
 
     Player* GetMaster() const { return master; };
 
     void SaveToDB();
 
 protected:
-    virtual void OnBotLoginInternal(Player * const bot);
+    void OnBotLoginInternal(Player* bot) override;
 
 private:
     Player* const master;

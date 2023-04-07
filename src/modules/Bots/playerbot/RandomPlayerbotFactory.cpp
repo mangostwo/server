@@ -415,6 +415,7 @@ void RandomPlayerbotFactory::DeleteRandomGuilds()
         ObjectGuid leader(HIGHGUID_PLAYER, randomBot);
         Guild* guild = sGuildMgr.GetGuildByLeader(leader);
         if (guild) guild->Disband();
+        delete guild;
     }
     BASIC_LOG("Random bot guilds deleted");
 }
