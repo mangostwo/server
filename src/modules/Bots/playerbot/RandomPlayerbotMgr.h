@@ -24,7 +24,7 @@ class RandomPlayerbotMgr : public PlayerbotHolder
             return instance;
         }
 
-        void UpdateAIInternal(uint32 elapsed) override;
+        void UpdateAIInternal(__attribute__((unused)) uint32 elapsed) override;
 
     public:
         static bool HandlePlayerbotConsoleCommand(char const *args);
@@ -53,7 +53,7 @@ class RandomPlayerbotMgr : public PlayerbotHolder
         static void Revive(Player* player);
 
     protected:
-        void OnBotLoginInternal(Player * const bot) override {}
+       void OnBotLoginInternal(__attribute__((unused)) Player * const bot) override {}
 
     private:
         static uint32 GetEventValue(uint32 bot, const string& event);
