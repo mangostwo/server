@@ -456,6 +456,13 @@ class AuctionHouseBot
          *
          */
         void Initialize();
+        /**
+         * @brief Whether the AuctionHouseBot is enabled
+         *
+         * @return true if buyer or seller agent exists
+         * @return false if neither buyer nor seller agents exist
+         */
+        bool Enabled();
 
         // Followed method is mainly used by level3.cpp for ingame/console command
         /**

@@ -89,7 +89,7 @@ endif()
 
 if(PLAYERBOTS)
 
-#Base files
+#Playerbot Module group
 file(GLOB Playerbot_Source ${CMAKE_SOURCE_DIR}/src/modules/Bots/playerbot/*.cpp ${CMAKE_SOURCE_DIR}/src/modules/Bots/playerbot/*.h)
 source_group("Player Bot" FILES ${Playerbot_Source})
 file(GLOB AHbot_Source ${CMAKE_SOURCE_DIR}/src/modules/Bots/ahbot/*.cpp ${CMAKE_SOURCE_DIR}/src/modules/Bots/ahbot/*.h)
@@ -126,6 +126,11 @@ source_group("Player Bot\\Strategies\\Values" FILES ${Playerbot_Values})
 LIST(APPEND SRC_GRP_BOTS ${Playerbot_Values})
 
 ## Class files
+#Deathknight AI
+file(GLOB Playerbot_Druid ${CMAKE_SOURCE_DIR}/src/modules/Bots/playerbot/strategy/deathknight/*.cpp ${CMAKE_SOURCE_DIR}/src/modules/Bots/playerbot/strategy/deathknight/*.h)
+source_group("Player Bot\\Strategies\\Druid" FILES ${Playerbot_Death_Knight})
+LIST(APPEND SRC_GRP_BOTS ${Playerbot_Death_Knight})
+
 #Druid AI
 file(GLOB Playerbot_Druid ${CMAKE_SOURCE_DIR}/src/modules/Bots/playerbot/strategy/druid/*.cpp ${CMAKE_SOURCE_DIR}/src/modules/Bots/playerbot/strategy/druid/*.h)
 source_group("Player Bot\\Strategies\\Druid" FILES ${Playerbot_Druid})
@@ -172,6 +177,7 @@ source_group("Player Bot\\Strategies\\Warrior" FILES ${Playerbot_Warrior})
 LIST(APPEND SRC_GRP_BOTS ${Playerbot_Warrior})
 
 configure_file(${CMAKE_SOURCE_DIR}/src/modules/Bots/playerbot/aiplayerbot.conf.dist.in ${CMAKE_CURRENT_BINARY_DIR}/aiplayerbot.conf.dist)
+configure_file(${CMAKE_SOURCE_DIR}/src/modules/Bots/ahbot/ahbot.conf.dist.in ${CMAKE_CURRENT_BINARY_DIR}/AuctionHouseBot/ahplayerbot.conf.dist)
 
 endif()
 
