@@ -16397,7 +16397,7 @@ void Player::AddQuest(Quest const* pQuest, Object* questGiver)
     }
 
     UpdateForQuestWorldObjects();
-    
+
     if (sWorld.getConfig(CONFIG_BOOL_ENABLE_QUEST_TRACKER)) // check if Quest Tracker is enabled
     {
         DEBUG_LOG("QUEST TRACKER: Quest Added.");
@@ -16435,7 +16435,7 @@ void Player::CompleteQuest(uint32 quest_id, QuestStatus status)
             }
         }
     }
-    
+
     if (sWorld.getConfig(CONFIG_BOOL_ENABLE_QUEST_TRACKER)) // check if Quest Tracker is enabled
     {
         DEBUG_LOG("QUEST TRACKER: Quest Completed.");
