@@ -45,8 +45,8 @@
 
     #define WORLD_DB_VERSION_NR         "22"
     #define WORLD_DB_STRUCTURE_NR       "3"
-    #define WORLD_DB_CONTENT_NR         "1"
-    #define WORLD_DB_UPDATE_DESCRIPT    "Remove_wpguid"
+    #define WORLD_DB_CONTENT_NR         "14"
+    #define WORLD_DB_UPDATE_DESCRIPT    "Fix_Autonumber_settings"
 
     #define VER_COMPANY_NAME_STR        "MaNGOS Developers"
     #define VER_LEGALCOPYRIGHT_STR      "(c)2005-@rev_year@ MaNGOS"
