@@ -14,7 +14,7 @@ RUN mkdir /mangoserver/build
 WORKDIR /mangoserver/build
 
 #Install mangos
-RUN cmake .. -DCMAKE_INSTALL_PREFIX=/mangos -DBUILD_MANGOSD=1 -DBUILD_REALMD=0 -DBUILD_TOOLS=0
+RUN cmake .. -DCMAKE_INSTALL_PREFIX=/mangos -DBUILD_MANGOSD=1 -DBUILD_REALMD=0 -DBUILD_TOOLS=0 -DPLAYERBOTS=0
 RUN make -j4
 RUN make install
 
@@ -25,7 +25,7 @@ RUN apt-get -y update && apt-get -y upgrade
 RUN apt-get -y install libmysqlclient20 openssl
 
 COPY --from=build-step /mangos /mangos
-COPY --from=build-step /etc/mangosd.conf.dist ../etc/mangosd.conf.dist
+COPY --from=build-step /etc/*.conf.dist /mangos/etc/
 WORKDIR /mangos/bin
 RUN chmod +x mangosd
 
