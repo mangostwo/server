@@ -219,7 +219,7 @@ class WorldSocket : protected WorldHandler
         /// True if the socket is registered with the reactor for output
         bool m_OutActive;
 
-        uint32 m_Seed;
+        const uint32 m_Seed;
 
         BigNumber m_s;
 };

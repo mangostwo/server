@@ -1829,8 +1829,17 @@ struct TargetDistanceOrderNear
 };
 
 // Helper for targets furthest away to the spell target
+
+template <class Arg1, class Arg2, class Result>
+struct binary_function
+{
+    typedef Arg1   first_argument_type;
+    typedef Arg2   second_argument_type;
+    typedef Result result_type;
+};
+
 // The spell target is always first unless there is a target at _completely_ the same position (unbelievable case)
-struct TargetDistanceOrderFarAway : public std::binary_function<const Unit, const Unit, bool>
+struct TargetDistanceOrderFarAway : public binary_function<const Unit, const Unit, bool>
 {
     const Unit* MainTarget;
     TargetDistanceOrderFarAway(const Unit* Target) : MainTarget(Target) {};
@@ -1961,7 +1970,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(m_caster, max_range);
                     MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(tempTargetUnitMap, u_check);
                     Cell::VisitAllObjects(m_caster, searcher, max_range);
-                     break;
+                    break;
                 }
                 case TARGET_RANDOM_FRIEND_CHAIN_IN_AREA:
                 {

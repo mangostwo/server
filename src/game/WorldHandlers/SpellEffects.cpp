@@ -65,9 +65,11 @@
 #include "CellImpl.h"
 #include "Vehicle.h"
 #include "G3D/Vector3.h"
+#include <random>
+
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
-#endif /*ENABLE_ELUNA*/
+#endif /* ENABLE_ELUNA */
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
 {
@@ -1220,7 +1222,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     {
                         m_caster->CastSpell(m_caster, 20578, false, NULL);
                     }
-
                     return;
                 }
                 case 21147:                                 // Arcane Vacuum
@@ -1619,7 +1620,10 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     uint32 possibleSpells[] = {36693, 36694, 36695, 36696, 36697, 36698, 36699, 36700} ;
                     std::vector<uint32> spellPool(possibleSpells, possibleSpells + countof(possibleSpells));
-                    std::random_shuffle(spellPool.begin(), spellPool.end());
+
+                    //std::random_shuffle(spellPool.begin(), spellPool.end());
+                    std::mt19937 rng(std::time(nullptr));
+                    std::shuffle(spellPool.begin(), spellPool.end(), rng);
 
                     for (uint8 i = 0; i < (m_caster->GetMap()->IsRegularDifficulty() ? 2 : 4); ++i)
                     {
