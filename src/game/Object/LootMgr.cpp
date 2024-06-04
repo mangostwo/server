@@ -185,7 +185,7 @@ void LootStore::LoadLootTable()
         Verify();                                           // Checks validity of the loot store
 
         sLog.outString();
-        sLog.outString(">> Loaded %u loot definitions (" SIZEFMTD " templates)", count, m_LootTemplates.size());
+        sLog.outString(">> Loaded %u loot definitions (%zu templates) from table %s", count, m_LootTemplates.size(), GetName());
     }
     else
     {

@@ -50,7 +50,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
     sCalendarMgr.GetPlayerInvitesList(guid, invites);
 
     data << uint32(invites.size());
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Sending > " SIZEFMTD " invites", invites.size());
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Sending > %zu invites", invites.size());
 
     for (CalendarInvitesList::const_iterator itr = invites.begin(); itr != invites.end(); ++itr)
     {
@@ -72,7 +72,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
     sCalendarMgr.GetPlayerEventsList(guid, events);
 
     data << uint32(events.size());
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Sending > " SIZEFMTD " events", events.size());
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Sending > %zu events", events.size());
 
     for (CalendarEventsList::const_iterator itr = events.begin(); itr != events.end(); ++itr)
     {
