@@ -4010,7 +4010,7 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank, bo
         UpdateFreeTalentPoints(false);
     }
 
-    // update free primary prof.points (if any, can be none in case GM .learn prof. learning)
+    // update free primary prof.points (if not overflow setting, can be in case GM use before .learn prof. learning)
     if (sSpellMgr.IsPrimaryProfessionFirstRankSpell(spell_id))
     {
         uint32 freeProfs = GetFreePrimaryProfessionPoints() + 1;
@@ -4744,6 +4744,17 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
         return TRAINER_SPELL_RED;
     }
 
+    bool prof = SpellMgr::IsProfessionSpell(trainer_spell->learnedSpell);
+
+    // check level requirement
+    if (!prof || GetSession()->GetSecurity() < AccountTypes(sWorld.getConfig(CONFIG_UINT32_TRADE_SKILL_GMIGNORE_LEVEL)))
+    {
+        if (getLevel() < reqLevel)
+        {
+            return TRAINER_SPELL_RED;
+        }
+    }
+
     if (SpellChainNode const* spell_chain = sSpellMgr.GetSpellChainNode(trainer_spell->learnedSpell))
     {
         // check prev.rank requirement
@@ -4759,18 +4770,12 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
         }
     }
 
-    // check level requirement
-    bool prof = SpellMgr::IsProfessionSpell(trainer_spell->spell);
-    if (prof || trainer_spell->reqLevel && (trainer_spell->reqLevel) < reqLevel)
-    {
-        return TRAINER_SPELL_RED;
-    }
-
     // check skill requirement
-    if (prof || trainer_spell->reqSkill && GetBaseSkillValue(trainer_spell->reqSkill) < trainer_spell->reqSkillValue)
-    {
-        return TRAINER_SPELL_RED;
-    }
+    if (!prof || GetSession()->GetSecurity() < AccountTypes(sWorld.getConfig(CONFIG_UINT32_TRADE_SKILL_GMIGNORE_SKILL)))
+        if (trainer_spell->reqSkill && GetBaseSkillValue(trainer_spell->reqSkill) < trainer_spell->reqSkillValue)
+        {
+            return TRAINER_SPELL_RED;
+        }
 
     // exist, already checked at loading
     SpellEntry const* spell = sSpellStore.LookupEntry(trainer_spell->learnedSpell);
