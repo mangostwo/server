@@ -821,7 +821,6 @@ void AuctionBotBuyer::PrepareListOfEntry(AHB_Buyer_Config& config)
 
 bool AuctionBotBuyer::IsBuyableEntry(uint32 buyoutPrice, double InGame_BuyPrice, double MaxBuyablePrice, uint32 MinBuyPrice, uint32 MaxChance, uint32 ChanceRatio)
 {
-    double ratio = 0;
     uint32 Chance = 0;
 
     if (buyoutPrice <= MinBuyPrice)

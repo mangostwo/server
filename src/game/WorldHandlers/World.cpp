@@ -86,6 +86,12 @@
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
 
+#ifdef ENABLE_PLAYERBOTS
+
+#include "PlayerbotAIConfig.h"
+#include "RandomPlayerbotMgr.h"
+#endif
+
 // WARDEN
 #include "WardenCheckMgr.h"
 
@@ -1624,20 +1630,19 @@ void World::showFooter()
     modules_.insert("      ScriptDev3 (SD3) : Enabled");
 #endif
 
-    // PLAYERBOTS can be included or excluded but also disabled via mangos.conf
+    // PLAYERBOTS can be included or excluded but also disabled via aiplayerbot.conf
 #ifdef ENABLE_PLAYERBOTS
-    bool playerBotActive = sConfig.GetBoolDefault("PlayerbotAI.DisableBots", true);
-    if (playerBotActive)
-    {
-        modules_.insert("            PlayerBots : Disabled");
-    }
-    else
+    if (sPlayerbotAIConfig.enabled)
     {
         modules_.insert("            PlayerBots : Enabled");
     }
+    else
+    {
+        modules_.insert("            PlayerBots : Disabled");
+    }
 #endif
 
-    // Remote Access can be activated / deactivated via mangos.conf
+    // Remote Access can be activated / deactivated via mangosd.conf
     bool raActive = sConfig.GetBoolDefault("Ra.Enable", false);
     if (raActive)
     {
@@ -1648,7 +1653,7 @@ void World::showFooter()
         modules_.insert("    Remote Access (RA) : Disabled");
     }
 
-    // SOAP can be included or excluded but also disabled via mangos.conf
+    // SOAP can be included or excluded but also disabled via mangosd.conf
 #ifdef ENABLE_SOAP
     bool soapActive = sConfig.GetBoolDefault("SOAP.Enabled", false);
     if (soapActive)
@@ -1661,7 +1666,7 @@ void World::showFooter()
     }
 #endif
 
-    // Warden is always included, set active or disabled via mangos.conf
+    // Warden is always included, set active or disabled via mangosd.conf
     bool wardenActive = (sWorld.getConfig(CONFIG_BOOL_WARDEN_WIN_ENABLED) || sWorld.getConfig(CONFIG_BOOL_WARDEN_OSX_ENABLED));
     if (wardenActive)
     {
@@ -1835,6 +1840,11 @@ void World::Update(uint32 diff)
         sAuctionBot.Update();
         m_timers[WUPDATE_AHBOT].Reset();
     }
+
+#ifdef ENABLE_PLAYERBOTS
+    sRandomPlayerbotMgr.UpdateAI(diff);
+    sRandomPlayerbotMgr.UpdateSessions(diff);
+#endif
 
     /// <li> Update Dungeon Finder
     if (m_timers[WUPDATE_LFGMGR].Passed())
@@ -2250,6 +2260,10 @@ void World::ShutdownServ(uint32 time, uint32 options, uint8 exitcode)
         m_ShutdownTimer = time;
         ShutdownMsg(true);
     }
+
+#ifdef ENABLE_PLAYERBOTS
+    sRandomPlayerbotMgr.LogoutAllBots();
+#endif
 
     ///- Used by Eluna
 #ifdef ENABLE_ELUNA
