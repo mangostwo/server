@@ -2913,7 +2913,9 @@ void Player::SetLevel(uint32 level)
 {
     uint8 oldLevel = getLevel();
     if (level == oldLevel || level > DEFAULT_MAX_LEVEL)
+    {
         return;
+    }
 
     SetUInt32Value(UNIT_FIELD_LEVEL, level);
     SetUInt32Value(PLAYER_XP, 0);

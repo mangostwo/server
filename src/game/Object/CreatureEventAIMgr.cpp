@@ -1042,7 +1042,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                         }
                         break;
 
-                    case ACTION_T_SUMMON_UNIQUE:                                          //47
+                    case ACTION_T_SUMMON_UNIQUE:                                          //49
                         if (!sCreatureStorage.LookupEntry<CreatureInfo>(action.summon_unique.creatureId))
                         {
                             sLog.outErrorEventAI("Event %u Action %u uses nonexistent creature entry %u.", i, j + 1, action.summon_unique.creatureId);

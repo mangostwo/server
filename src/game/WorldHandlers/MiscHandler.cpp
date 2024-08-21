@@ -1484,7 +1484,9 @@ void WorldSession::SetMoneyHandler(WorldPacket &msg)
 
         msg >> money;
         if (money < 0)
+        {
             money = 0x7FFFFFFF;    /* Money limit */
+        }
 
         DEBUG_LOG("Setting money on %s from %d to %d", pPlayer->GetName(), pPlayer->GetMoney(), money); /*TODO: Log this appropriately*/
         GetPlayer()->SetMoney(money);
