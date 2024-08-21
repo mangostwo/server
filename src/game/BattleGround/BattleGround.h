@@ -420,7 +420,10 @@ class BattleGround
          *
          * @return BattleGroundTypeId
          */
-        BattleGroundTypeId GetTypeID(bool GetRandom = false) const { return GetRandom ? m_RandomTypeID : m_TypeID; }
+        BattleGroundTypeId GetTypeID(bool GetRandom = false) const
+        {
+            return GetRandom ? m_RandomTypeID : m_TypeID;
+        }
         /**
          * @brief
          *
@@ -524,7 +527,11 @@ class BattleGround
          * @return uint32
          */
         uint32 GetBonusHonorFromKill(uint32 kills) const;
-        bool IsRandom() { return m_IsRandom; }
+
+        bool IsRandom()
+        {
+            return m_IsRandom;
+        }
 
         // Set methods:
         /**

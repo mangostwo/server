@@ -49,7 +49,7 @@ class BattleGroundSA : public BattleGround
          *
          * @param plr
          */
-        virtual void AddPlayer(Player* plr) override;
+        void AddPlayer(Player* plr) override;
 
         /* Scorekeeping */
         void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;

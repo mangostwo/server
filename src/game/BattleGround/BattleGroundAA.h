@@ -43,6 +43,6 @@ class BattleGroundAA : public BattleGround
         BattleGroundAA();
 
         /* inherited from BattlegroundClass */
-        virtual void AddPlayer(Player* plr) override;
+        void AddPlayer(Player* plr) override;
 };
 #endif

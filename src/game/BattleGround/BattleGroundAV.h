@@ -400,20 +400,20 @@ class BattleGroundAV : public BattleGround
          *
          * @param plr
          */
-        virtual void AddPlayer(Player* plr) override;
+        void AddPlayer(Player* plr) override;
 
         /**
          * @brief
          *
          */
-        virtual void StartingEventOpenDoors() override;
+        void StartingEventOpenDoors() override;
         /**
          * @brief  world states
          *
          * @param data
          * @param count
          */
-        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+        void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
 
         /**
          * @brief
@@ -426,7 +426,7 @@ class BattleGroundAV : public BattleGround
          * @brief
          *
          */
-        virtual void Reset() override;
+        void Reset() override;
 
         /*general stuff*/
         /**
@@ -452,7 +452,7 @@ class BattleGroundAV : public BattleGround
          * @param source
          * @param target_obj
          */
-        virtual void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
+        void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
         /**
          * @brief
          *
@@ -496,14 +496,14 @@ class BattleGroundAV : public BattleGround
          * @param plr
          * @return const WorldSafeLocsEntry
          */
-        virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* plr) override;
+        WorldSafeLocsEntry const* GetClosestGraveYard(Player* plr) override;
 
         /**
          * @brief
          *
          * @return Team
          */
-        virtual Team GetPrematureWinner() override;
+        Team GetPrematureWinner() override;
 
         /**
          * @brief

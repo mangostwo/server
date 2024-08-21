@@ -47,6 +47,6 @@ class BattleGroundDS : public BattleGround
          *
          * @param plr
          */
-        virtual void AddPlayer(Player* plr) override;
+        void AddPlayer(Player* plr) override;
 };
 #endif
