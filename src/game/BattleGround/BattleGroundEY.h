@@ -283,7 +283,7 @@ class BattleGroundEY : public BattleGround
         /* achievement req. */
         bool IsAllNodesControlledByTeam(Team team) const override;
 
-        virtual Team GetPrematureWinner() override;
+        Team GetPrematureWinner() override;
 
     private:
         // process capture events
