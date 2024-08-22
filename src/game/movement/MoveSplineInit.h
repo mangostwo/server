@@ -116,6 +116,15 @@ namespace Movement
              * @param maxPathRange
              */
             void MoveTo(const Vector3& destination, bool generatePath = false, bool forceDestination = false);
+            /**
+             * @brief
+             *
+             * @param x
+             * @param y
+             * @param z
+             * @param generatePath
+             * @param forceDestination
+             */
             void MoveTo(float x, float y, float z, bool generatePath = false, bool forceDestination = false);
 
             /**
@@ -161,7 +170,9 @@ namespace Movement
              */
             void SetOrientationFixed(bool enable);
 
-            /* Sets the velocity (in case you want to have custom movement velocity)
+            /**
+             * @brief Sets the velocity (in case you want to have custom movement velocity)
+             *
              * if no set, speed will be selected based on unit's speeds and current movement mode
              * Has no effect if falling mode enabled
              *
@@ -177,6 +188,11 @@ namespace Movement
              */
             void SetExitVehicle();
 
+            /**
+             * @brief
+             *
+             * @return PointsArray
+             */
             PointsArray& Path() { return args.path; }
 
         protected:
@@ -185,32 +201,73 @@ namespace Movement
             Unit&  unit; /**< TODO */
     };
 
+    /**
+     * @brief
+     *
+     */
     inline void MoveSplineInit::SetFly() { args.flags.EnableFlying();}
-
+    /**
+     * @brief
+     *
+     * @param enable
+     */
     inline void MoveSplineInit::SetWalk(bool enable) { args.flags.walkmode = enable;}
     inline void MoveSplineInit::SetSmooth() { args.flags.EnableCatmullRom();}
+    /**
+     * @brief
+     *
+     */
     inline void MoveSplineInit::SetCyclic() { args.flags.cyclic = true;}
-
+    /**
+     * @brief
+     *
+     */
     inline void MoveSplineInit::SetFall() { args.flags.EnableFalling();}
-
+    /**
+     * @brief
+     *
+     * @param vel
+     */
     inline void MoveSplineInit::SetVelocity(float vel) { args.velocity = vel;}
     inline void MoveSplineInit::SetOrientationInversed() { args.flags.orientationInversed = true;}
     inline void MoveSplineInit::SetOrientationFixed(bool enable) { args.flags.orientationFixed = enable;}
     inline void MoveSplineInit::SetBoardVehicle() { args.flags.EnableBoardVehicle(); }
     inline void MoveSplineInit::SetExitVehicle() { args.flags.EnableExitVehicle(); }
 
+    /**
+     * @brief
+     *
+     * @param controls
+     * @param path_offset
+     */
     inline void MoveSplineInit::MovebyPath(const PointsArray& controls, int32 path_offset)
     {
         args.path_Idx_offset = path_offset;
         args.path.assign(controls.begin(), controls.end());
     }
 
+    /**
+     * @brief
+     *
+     * @param x
+     * @param y
+     * @param z
+     * @param generatePath
+     * @param forceDestination
+     */
     inline void MoveSplineInit::MoveTo(float x, float y, float z, bool generatePath, bool forceDestination)
     {
         Vector3 v(x, y, z);
         MoveTo(v, generatePath, forceDestination);
     }
 
+    /**
+     * @brief
+     *
+     * @param dest
+     * @param generatePath
+     * @param forceDestination
+     */
     inline void MoveSplineInit::MoveTo(const Vector3& dest, bool generatePath, bool forceDestination)
     {
         if (generatePath)
@@ -240,6 +297,11 @@ namespace Movement
         args.flags.EnableAnimation((uint8)anim);
     }
 
+    /**
+     * @brief
+     *
+     * @param spot
+     */
     inline void MoveSplineInit::SetFacing(Vector3 const& spot)
     {
         args.facing.f.x = spot.x;
