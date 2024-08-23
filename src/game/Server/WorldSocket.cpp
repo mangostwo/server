@@ -811,7 +811,6 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     // NOTE: ATM the socket is singlethread, have this in mind ...
     uint8 digest[SHA_DIGEST_LENGTH];
     uint32 clientSeed;
-    uint32 unk2;
     uint32 BuiltNumberClient;
     uint8 expansion = 0;
     std::string account;
@@ -988,7 +987,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     sha.UpdateBigNumbers(&K, nullptr);
     sha.Finalize();
 
-    if (sha.GetDigest() != digest)
+    if (memcmp(sha.GetDigest(), digest, 20))
     {
         WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
         packet << uint8(AUTH_FAILED);
