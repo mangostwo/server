@@ -39,5 +39,7 @@
 #include "GuildMgr.h"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
+#include <map>
+#include <vector>
 
 #endif

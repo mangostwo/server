@@ -259,7 +259,7 @@ target_include_directories(game
         $<$<BOOL:${SCRIPT_LIB_ELUNA}>:
             ${CMAKE_SOURCE_DIR}/src/modules/Eluna
             ${CMAKE_SOURCE_DIR}/src/modules/Eluna/Mangos
-            >
+        >
         $<$<BOOL:${PLAYERBOTS}>:
             ${CMAKE_SOURCE_DIR}/src/modules/Bots
             ${CMAKE_SOURCE_DIR}/src/modules/Bots/playerbot
