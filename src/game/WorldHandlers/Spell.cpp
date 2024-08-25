@@ -598,14 +598,14 @@ void Spell::FillTargetMap()
                         case TARGET_SCRIPT:                 // B-target only used with CheckCast here
                             SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/]);
                             break;
-                        case TARGET_AREAEFFECT_INSTANT:     // use B case that not dependent from from A in fact
+                        case TARGET_AREAEFFECT_INSTANT:     // use B case that not dependent from A in fact
                             if ((m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) == 0)
                             {
                                 m_targets.setDestination(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ());
                             }
                             SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitLists[i /*==effToIndex[i]*/]);
                             break;
-                        case TARGET_BEHIND_VICTIM:          // use B case that not dependent from from A in fact
+                        case TARGET_BEHIND_VICTIM:          // use B case that not dependent from A in fact
                             SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitLists[i /*==effToIndex[i]*/]);
                             break;
                         default:
@@ -621,7 +621,7 @@ void Spell::FillTargetMap()
                         case TARGET_EFFECT_SELECT:
                             SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/]);
                             break;
-                            // dest point setup required
+                        // dest point setup required
                         case TARGET_AREAEFFECT_INSTANT:
                         case TARGET_AREAEFFECT_CUSTOM:
                         case TARGET_ALL_ENEMY_IN_AREA:
@@ -1212,10 +1212,12 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     {
         // mark effects that were already handled in Spell::HandleDelayedSpellLaunch on spell launch as processed
         for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+        {
             if (IsEffectHandledOnDelayedSpellLaunch(m_spellInfo, SpellEffectIndex(i)))
             {
                 mask &= ~(1 << i);
             }
+        }
 
         // maybe used in effects that are handled on hit
         m_damage += target->damage;
@@ -1239,7 +1241,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         {
             // can cause back attack (if detected)
             if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !IsPositiveSpell(m_spellInfo->Id) &&
-                    m_caster->IsVisibleForOrDetect(unit, unit, false))
+                m_caster->IsVisibleForOrDetect(unit, unit, false))
             {
                 if (!unit->IsInCombat() && unit->GetTypeId() != TYPEID_PLAYER && ((Creature*)unit)->AI())
                 {
@@ -1457,7 +1459,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
         {
             // for delayed spells ignore not visible explicit target
             if (speed > 0.0f && unit == m_targets.getUnitTarget() &&
-                    !unit->IsVisibleForOrDetect(m_caster, m_caster, false))
+                !unit->IsVisibleForOrDetect(m_caster, m_caster, false))
             {
                 realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
                 ResetEffectDamageAndHeal();
@@ -1472,7 +1474,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
 
             // can cause back attack (if detected), stealth removed at Spell::cast if spell break it
             if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !IsPositiveSpell(m_spellInfo->Id) &&
-                    m_caster->IsVisibleForOrDetect(unit, unit, false))
+                m_caster->IsVisibleForOrDetect(unit, unit, false))
             {
                 // use speedup check to avoid re-remove after above lines
                 if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_BREAK_STEALTH))
@@ -2698,6 +2700,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         case TARGET_NARROW_FRONTAL_CONE:
         {
             SpellTargets targetB = SPELL_TARGETS_AOE_DAMAGE;
+
             if (m_spellInfo->Effect[effIndex] == SPELL_EFFECT_SCRIPT_EFFECT)
             {
                 targetB = SPELL_TARGETS_ALL;
@@ -3616,11 +3619,12 @@ void Spell::cancel()
             {
                 SendCastResult(SPELL_FAILED_INTERRUPTED);
             }
-        break;
+            break;
         }
         default:
         {
-        } break;
+            break;
+        }
     }
 
     finish(false);
@@ -3945,7 +3949,7 @@ void Spell::cast(bool skipCheck)
 
 #ifdef ENABLE_ELUNA
         sEluna->OnSpellCast(m_caster->ToPlayer(), this, skipCheck);
-#endif
+#endif /* ENABLE_ELUNA */
     }
 
     FillTargetMap();
@@ -5704,7 +5708,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     }
 
     if (!m_IsTriggeredSpell && IsNonCombatSpell(m_spellInfo) &&
-            m_caster->IsInCombat() && !m_caster->IsIgnoreUnitState(m_spellInfo, IGNORE_UNIT_COMBAT_STATE))
+        m_caster->IsInCombat() && !m_caster->IsIgnoreUnitState(m_spellInfo, IGNORE_UNIT_COMBAT_STATE))
     {
         return SPELL_FAILED_AFFECTING_COMBAT;
     }
@@ -6360,13 +6364,17 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     if (!m_IsTriggeredSpell)
     {
-        SpellCastResult castResult = CheckRange(strict);
-        if (castResult != SPELL_CAST_OK)
+        if (!m_triggeredByAuraSpell)
         {
-            return castResult;
+            SpellCastResult castResult = CheckRange(strict);
+            if (castResult != SPELL_CAST_OK)
+            {
+                return castResult;
+            }
         }
     }
 
+    if (!m_IsTriggeredSpell)                                // triggered spell does not use power
     {
         SpellCastResult castResult = CheckPower();
         if (castResult != SPELL_CAST_OK)
@@ -6822,6 +6830,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                 // chance for fail at orange mining/herb/LockPicking gathering attempt
                 // second check prevent fail at rechecks
+                // Check must be executed at the end of  the cast.
                 if (m_spellState != SPELL_STATE_CREATED && skillId != SKILL_NONE && skillId != SKILL_HERBALISM && skillId != SKILL_MINING)
                 {
                     bool canFailAtMax = skillId != SKILL_HERBALISM && skillId != SKILL_MINING;
@@ -7516,7 +7525,7 @@ SpellCastResult Spell::CheckCasterAuras() const
             bool is_stun_mechanic = true;
             Unit::AuraList const& stunAuras = m_caster->GetAurasByType(SPELL_AURA_MOD_STUN);
             for (Unit::AuraList::const_iterator itr = stunAuras.begin(); itr != stunAuras.end(); ++itr)
-            {            
+            {
                 if (!(*itr)->HasMechanic(MECHANIC_STUN))
                 {
                     is_stun_mechanic = false;
@@ -8724,19 +8733,19 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
         // unselectable targets skipped in all cases except TARGET_SCRIPT targeting or vehicle passengers
         // in case TARGET_SCRIPT target selected by server always and can't be cheated
         if ((!m_IsTriggeredSpell || target != m_targets.getUnitTarget()) &&
-                target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE) &&
-                (!target->GetTransportInfo() || (target->GetTransportInfo() &&
-                !((Unit*)target->GetTransportInfo()->GetTransport())->IsVehicle())) &&
-                m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SCRIPT &&
-                m_spellInfo->EffectImplicitTargetB[eff] != TARGET_SCRIPT &&
-                m_spellInfo->EffectImplicitTargetA[eff] != TARGET_AREAEFFECT_INSTANT &&
-                m_spellInfo->EffectImplicitTargetB[eff] != TARGET_AREAEFFECT_INSTANT &&
-                m_spellInfo->EffectImplicitTargetA[eff] != TARGET_AREAEFFECT_CUSTOM &&
-                m_spellInfo->EffectImplicitTargetB[eff] != TARGET_AREAEFFECT_CUSTOM &&
-                m_spellInfo->EffectImplicitTargetA[eff] != TARGET_NARROW_FRONTAL_CONE &&
-                m_spellInfo->EffectImplicitTargetB[eff] != TARGET_NARROW_FRONTAL_CONE &&
-                m_spellInfo->EffectImplicitTargetA[eff] != TARGET_NARROW_FRONTAL_CONE_2 &&
-                m_spellInfo->EffectImplicitTargetB[eff] != TARGET_NARROW_FRONTAL_CONE_2)
+            target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE) &&
+            (!target->GetTransportInfo() || (target->GetTransportInfo() &&
+            !((Unit*)target->GetTransportInfo()->GetTransport())->IsVehicle())) &&
+            m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SCRIPT &&
+            m_spellInfo->EffectImplicitTargetB[eff] != TARGET_SCRIPT &&
+            m_spellInfo->EffectImplicitTargetA[eff] != TARGET_AREAEFFECT_INSTANT &&
+            m_spellInfo->EffectImplicitTargetB[eff] != TARGET_AREAEFFECT_INSTANT &&
+            m_spellInfo->EffectImplicitTargetA[eff] != TARGET_AREAEFFECT_CUSTOM &&
+            m_spellInfo->EffectImplicitTargetB[eff] != TARGET_AREAEFFECT_CUSTOM &&
+            m_spellInfo->EffectImplicitTargetA[eff] != TARGET_NARROW_FRONTAL_CONE &&
+            m_spellInfo->EffectImplicitTargetB[eff] != TARGET_NARROW_FRONTAL_CONE &&
+            m_spellInfo->EffectImplicitTargetA[eff] != TARGET_NARROW_FRONTAL_CONE_2 &&
+            m_spellInfo->EffectImplicitTargetB[eff] != TARGET_NARROW_FRONTAL_CONE_2)
         {
             return false;
         }
@@ -8798,6 +8807,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
                 // all ok by some way or another, skip normal check
                 break;
             default:                                            // normal case
+            {
                 // Get GO cast coordinates if original caster -> GO
                 if (target != m_caster)
                 {
@@ -8810,6 +8820,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
                     }
                 }
                 break;
+            }
         }
     }
 
