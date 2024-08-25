@@ -3225,7 +3225,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     }
 
     // AT APPLY & REMOVE
-
     switch (GetSpellProto()->SpellFamilyName)
     {
         case SPELLFAMILY_GENERIC:
@@ -3635,6 +3634,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             break;
         }
         case SPELLFAMILY_ROGUE:
+        {
             switch (GetId())
             {
                 case 57934:                                 // Tricks of the Trade, main spell
@@ -3655,6 +3655,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 }
             }
             break;
+        }
         case SPELLFAMILY_HUNTER:
         {
             switch (GetId())
@@ -3679,6 +3680,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             break;
         }
         case SPELLFAMILY_PALADIN:
+        {
             switch (GetId())
             {
                 case 20911:                                 // Blessing of Sanctuary
@@ -3696,6 +3698,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 }
             }
             break;
+        }
         case SPELLFAMILY_SHAMAN:
         {
             switch (GetId())
