@@ -9017,13 +9017,21 @@ void Spell::FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, Unit* 
             {
                 if ((Target == center || center->IsWithinDistInMap(Target, radius)) &&
                         (withcaster || Target != m_caster))
+                {
                     targetUnitMap.push_back(Target);
+                }
 
                 if (withPets)
+                {
                     if (Pet* pet = Target->GetPet())
+                    {
                         if ((pet == center || center->IsWithinDistInMap(pet, radius)) &&
                                 (withcaster || pet != m_caster))
+                        {
                             targetUnitMap.push_back(pet);
+                        }
+                    }
+                }
             }
         }
     }
@@ -9032,14 +9040,21 @@ void Spell::FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, Unit* 
         Unit* ownerOrSelf = pMember ? pMember : member->GetCharmerOrOwnerOrSelf();
         if ((ownerOrSelf == center || center->IsWithinDistInMap(ownerOrSelf, radius)) &&
                 (withcaster || ownerOrSelf != m_caster))
+        {
             targetUnitMap.push_back(ownerOrSelf);
+        }
 
         if (withPets)
         {
             if (Pet* pet = ownerOrSelf->GetPet())
+            {
                 if ((pet == center || center->IsWithinDistInMap(pet, radius)) &&
                         (withcaster || pet != m_caster))
+                {
                     targetUnitMap.push_back(pet);
+                }
+            }
+        }
     }
 }
 
@@ -9049,11 +9064,12 @@ void Spell::FillRaidOrPartyManaPriorityTargets(UnitList& targetUnitMap, Unit* me
 
     PrioritizeManaUnitQueue manaUsers;
     for (UnitList::const_iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end(); ++itr)
+    {
         if ((*itr)->GetPowerType() == POWER_MANA && !(*itr)->IsDead())
         {
             manaUsers.push(PrioritizeManaUnitWraper(*itr));
         }
-
+    }
     targetUnitMap.clear();
     while (!manaUsers.empty() && targetUnitMap.size() < count)
     {
@@ -9068,10 +9084,12 @@ void Spell::FillRaidOrPartyHealthPriorityTargets(UnitList& targetUnitMap, Unit* 
 
     PrioritizeHealthUnitQueue healthQueue;
     for (UnitList::const_iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end(); ++itr)
+    {
         if (!(*itr)->IsDead())
         {
             healthQueue.push(PrioritizeHealthUnitWraper(*itr));
         }
+    }
 
     targetUnitMap.clear();
     while (!healthQueue.empty() && targetUnitMap.size() < count)
