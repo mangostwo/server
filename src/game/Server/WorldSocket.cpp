@@ -197,10 +197,12 @@ int WorldSocket::SendPacket(const WorldPacket& pkt)
         }
 
         if (!pct.empty())
+        {
             if (m_OutBuffer->copy((char*) pct.contents(), pct.size()) == -1)
             {
                 MANGOS_ASSERT(false);
             }
+        }
     }
     else
     {
@@ -745,6 +747,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
                     sLog.outError("WorldSocket::ProcessIncoming: Player send CMSG_AUTH_SESSION again");
                     return -1;
                 }
+
 #ifdef ENABLE_ELUNA
                 if (!sEluna->OnPacketReceive(m_Session, *new_pct))
                 {
@@ -839,6 +842,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     {
         WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
         packet << uint8(AUTH_VERSION_MISMATCH);
+
         SendPacket(packet);
 
         sLog.outError("WorldSocket::HandleAuthSession: Sent Auth Response (version mismatch).");
@@ -872,6 +876,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     {
         WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
         packet << uint8(AUTH_UNKNOWN_ACCOUNT);
+
         SendPacket(packet);
 
         sLog.outError("WorldSocket::HandleAuthSession: Sent Auth Response (unknown account).");
@@ -958,6 +963,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     {
         WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
         packet << uint8(AUTH_UNAVAILABLE);
+
         SendPacket(packet);
 
         BASIC_LOG("WorldSocket::HandleAuthSession: User tries to login but his security level is not enough");
@@ -991,6 +997,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     {
         WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
         packet << uint8(AUTH_FAILED);
+
         SendPacket(packet);
 
         sLog.outError("WorldSocket::HandleAuthSession: Sent Auth Response (authentification failed).");
