@@ -768,6 +768,57 @@ void BattleGround::RewardReputationToTeam(uint32 faction_id, uint32 Reputation, 
 }
 
 /// <summary>
+/// Rewards the XP to team.
+/// </summary>
+/// <param name="event">The battleground event.</param>
+/// <param name="teamId">The team id.</param>
+void BattleGround::RewardXPToTeam(uint8 event, Team teamId)
+{
+    enum BGEvent
+    {
+        WS_FLAG_CAPTURE                   = 1,
+        WS_WIN                            = 2,
+    };
+
+    for (BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+    {
+        if (itr->second.OfflineRemoveTime)
+        {
+            continue;
+        }
+
+        Player* plr = sObjectMgr.GetPlayer(itr->first);
+
+        if (!plr)
+        {
+            sLog.outError("BattleGround:RewardXPToTeam: %s not found!", itr->first.GetString().c_str());
+            continue;
+        }
+
+        Team team = itr->second.PlayerTeam;
+        if (!team)
+        {
+            team = plr->GetTeam();
+        }
+
+        if (team == teamId)
+        {
+            uint32 xp;
+            switch (event)
+            {
+                case WS_FLAG_CAPTURE:
+                    xp = 74 + (4.01 * plr->getLevel()) + (1.19 * pow(plr->getLevel(),2));         // This XP curve is a WIP, was established with a limited dataset pulled from various videos. -fyre
+                    break;
+                case WS_WIN:
+                    xp = (74 + (4.01 * plr->getLevel()) + (1.19 * pow(plr->getLevel(),2)))/2;         // Half of a flag capture. Complete guess. -fyre
+                    break;
+            }
+            plr->GiveXP(xp, nullptr);
+        }
+    }
+}
+
+/// <summary>
 /// Updates the state of the world.
 /// </summary>
 /// <param name="Field">The field.</param>

@@ -226,6 +226,7 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player* source)
         }
         PlaySoundToAll(BG_WS_SOUND_FLAG_CAPTURED_ALLIANCE);
         RewardReputationToTeam(890, m_ReputationCapture, ALLIANCE);
+        RewardXPToTeam(1, ALLIANCE);                        // event = WS_FLAG_CAPTURE
     }
     else
     {
@@ -244,6 +245,7 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player* source)
         }
         PlaySoundToAll(BG_WS_SOUND_FLAG_CAPTURED_HORDE);
         RewardReputationToTeam(889, m_ReputationCapture, HORDE);
+        RewardXPToTeam(1, HORDE);                        // event = WS_FLAG_CAPTURE
     }
     // for flag capture is reward 2 honorable kills
     RewardHonorToTeam(GetBonusHonorFromKill(2), source->GetTeam());
@@ -606,10 +608,25 @@ void BattleGroundWS::EndBattleGround(Team winner)
     if (winner == ALLIANCE)
     {
         RewardHonorToTeam(GetBonusHonorFromKill(m_HonorWinKills), ALLIANCE);
+
+        // Earn XP for any remaining flags not captured by the Horde.
+        for (uint8 i = 0; i < (3 - m_TeamScores[TEAM_INDEX_HORDE]); ++i)
+        {
+            RewardXPToTeam(1, ALLIANCE);                        // event = WS_FLAG_CAPTURE
+        }
+        RewardXPToTeam(2, ALLIANCE);                        // event = WS_WIN
     }
     if (winner == HORDE)
     {
         RewardHonorToTeam(GetBonusHonorFromKill(m_HonorWinKills), HORDE);
+
+        // Earn XP for any remaining flags not captured by the Horde.
+        for (uint8 i = 0; i < (3 - m_TeamScores[TEAM_INDEX_ALLIANCE]); ++i)
+        {
+            RewardXPToTeam(1, HORDE);                            // event = WS_FLAG_CAPTURE
+        }
+        RewardXPToTeam(2, HORDE);                            // event = WS_WIN
+
     }
     // complete map_end rewards (even if no team wins)
     RewardHonorToTeam(GetBonusHonorFromKill(m_HonorEndKills), ALLIANCE);
