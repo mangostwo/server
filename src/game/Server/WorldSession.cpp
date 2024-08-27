@@ -167,6 +167,12 @@ void WorldSession::SendPacket(WorldPacket const* packet)
         return;
     }
 
+    if (opcodeTable[packet->GetOpcode()].status == STATUS_UNHANDLED)
+    {
+        sLog.outError("SESSION: tried to send an unhandled opcode 0x%.4X", packet->GetOpcode());
+        return;
+    }
+
 #ifdef MANGOS_DEBUG
 
     // Code for network use statistic

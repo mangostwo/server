@@ -30,6 +30,7 @@
 #define MANGOS_H_OPCODES
 
 #include "Common.h"
+#include "Policies/Singleton.h"
 
 // Note: this include need for be sure have full definition of class WorldSession
 //       if this class definition not complite then VS for x64 release use different size for
@@ -49,7 +50,7 @@
  * \see WorldPacket
  * \todo Replace the Pack GUID part with a packed GUID, ie: it's shorter than usual?
  */
-enum Opcodes
+enum OpcodesList
 {
     MSG_NULL_ACTION                                 = 0x000,
     CMSG_BOOTME                                     = 0x001,
@@ -521,7 +522,7 @@ enum Opcodes
     CMSG_WRAP_ITEM                                  = 0x1D3,
     SMSG_LEVELUP_INFO                               = 0x1D4,
     MSG_MINIMAP_PING                                = 0x1D5,
-    SMSG_RESISTLOG                                  = 0x1D6,
+    SMSG_RESISTLOG                                  = 0x1D6,// GUID, GUID, int32, float, float, int32, int32
     SMSG_ENCHANTMENTLOG                             = 0x1D7,
     CMSG_SET_SKILL_CHEAT                            = 0x1D8,
     SMSG_START_MIRROR_TIMER                         = 0x1D9,
@@ -1362,21 +1363,25 @@ enum Opcodes
     SMSG_COMMENTATOR_SKIRMISH_QUEUE_RESULT1         = 0x51C,// event EVENT_COMMENTATOR_SKIRMISH_QUEUE_REQUEST, CGCommentator::QueueNode
     SMSG_COMMENTATOR_SKIRMISH_QUEUE_RESULT2         = 0x51D,// event EVENT_COMMENTATOR_SKIRMISH_QUEUE_REQUEST
     SMSG_COMPRESSED_UNKNOWN_1310                    = 0x51E,// some compressed packet
-    SMSG_PLAYER_NOT_FOUND_FAILURE = 0x523,
-    SMSG_GM_RESURRECT_FAILURE = 0x524,
-    SMSG_GM_RESURRECT_SUCCESS = 0x528,
-    NUM_MSG_TYPES
+    SMSG_PLAYER_NOT_FOUND_FAILURE                   = 0x523,
+    SMSG_GM_RESURRECT_FAILURE                       = 0x524,
+    SMSG_GM_RESURRECT_SUCCESS                       = 0x528,
 };
+
+// Don't forget to change this value and add opcode name to Opcodes.cpp when you add new opcode!
+#define NUM_MSG_TYPES 0x529
+
+extern void InitializeOpcodes();
 
 /// Player state
 enum SessionStatus
 {
-    STATUS_AUTHED = 0,                                      ///< Player authenticated (_player==NULL, m_playerRecentlyLogout = false or will be reset before handler call, m_GUID have garbage)
-    STATUS_LOGGEDIN,                                        ///< Player in game (_player!=NULL, m_GUID == _player->GetGUID(), inWorld())
-    STATUS_TRANSFER,                                        ///< Player transferring to another map (_player!=NULL, m_GUID == _player->GetGUID(), !inWorld())
-    STATUS_LOGGEDIN_OR_RECENTLY_LOGGEDOUT,                  ///< _player!= NULL or _player==NULL && m_playerRecentlyLogout, m_GUID store last _player guid)
-    STATUS_NEVER,                                           ///< Opcode not accepted from client (deprecated or server side only)
-    STATUS_UNHANDLED                                        ///< We don' handle this opcode yet
+    STATUS_AUTHED = 0,                     ///< Player authenticated (_player==NULL, m_playerRecentlyLogout = false or will be reset before handler call)
+    STATUS_LOGGEDIN,                       ///< Player in game (_player!=NULL, inWorld())
+    STATUS_TRANSFER,                       ///< Player transferring to another map (_player!=NULL, !inWorld())
+    STATUS_LOGGEDIN_OR_RECENTLY_LOGGEDOUT, ///< _player!= NULL or _player==NULL && m_playerRecentlyLogout)
+    STATUS_NEVER,                          ///< Opcode not accepted from client (deprecated or server side only)
+    STATUS_UNHANDLED                       ///< We don' handle this opcode yet
 };
 
 /**

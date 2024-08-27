@@ -538,7 +538,7 @@ int WorldSocket::handle_input_header(void)
 
     header.size -= 4;
 
-    ACE_NEW_RETURN(m_RecvWPct, WorldPacket(Opcodes(header.cmd), header.size), -1);
+    ACE_NEW_RETURN(m_RecvWPct, WorldPacket(OpcodesList(header.cmd), header.size), -1);
 
     if (header.size > 0)
     {
@@ -997,7 +997,6 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     {
         WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
         packet << uint8(AUTH_FAILED);
-
         SendPacket(packet);
 
         sLog.outError("WorldSocket::HandleAuthSession: Sent Auth Response (authentification failed).");
