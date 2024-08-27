@@ -608,7 +608,7 @@ void BattleGroundWS::EndBattleGround(Team winner)
     if (winner == ALLIANCE)
     {
         RewardHonorToTeam(GetBonusHonorFromKill(m_HonorWinKills), ALLIANCE);
-                
+
         // Earn XP for any remaining flags not captured by the Horde.
         for (uint8 i = 0; i < (3 - m_TeamScores[TEAM_INDEX_HORDE]); ++i)
         {
@@ -619,7 +619,7 @@ void BattleGroundWS::EndBattleGround(Team winner)
     if (winner == HORDE)
     {
         RewardHonorToTeam(GetBonusHonorFromKill(m_HonorWinKills), HORDE);
-        
+
         // Earn XP for any remaining flags not captured by the Horde.
         for (uint8 i = 0; i < (3 - m_TeamScores[TEAM_INDEX_ALLIANCE]); ++i)
         {
