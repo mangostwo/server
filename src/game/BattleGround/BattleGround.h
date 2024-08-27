@@ -873,6 +873,13 @@ class BattleGround
         /**
          * @brief
          *
+         * @param event
+         * @param team
+         */
+        void RewardXPToTeam(uint8 event, Team team);
+        /**
+         * @brief
+         *
          * @param plr
          * @param count
          */
