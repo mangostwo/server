@@ -6534,13 +6534,21 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
 #ifdef ENABLE_ELUNA
             if (Unit* summoner = m_caster->ToUnit())
             {
-                sEluna->OnSummoned(itr->creature, summoner);
+                if (Eluna* e = summoner->GetEluna())
+                {
+                    e->OnSummoned(itr->creature, summoner);
+                }
             }
             else if (m_originalCaster)
+            {
                 if (Unit* summoner = m_originalCaster->ToUnit())
                 {
-                    sEluna->OnSummoned(itr->creature, summoner);
+                    if (Eluna* e = summoner->GetEluna())
+                    {
+                        e->OnSummoned(itr->creature, summoner);
+                    }
                 }
+            }
 #endif
         }
     }
@@ -6578,7 +6586,10 @@ bool Spell::DoSummonWild(CreatureSummonPositions& list, SummonPropertiesEntry co
 #ifdef ENABLE_ELUNA
                 if (Unit* summoner = m_originalCaster->ToUnit())
                 {
-                    sEluna->OnSummoned(summon, summoner);
+                    if (Eluna* e = summoner->GetEluna())
+                    {
+                        e->OnSummoned(summon, summoner);
+                    }
                 }
 #endif
             }
@@ -6660,12 +6671,18 @@ bool Spell::DoSummonCritter(CreatureSummonPositions& list, SummonPropertiesEntry
 #ifdef ENABLE_ELUNA
     if (Unit* summoner = m_caster->ToUnit())
     {
-        sEluna->OnSummoned(critter, summoner);
+        if (Eluna* e = summoner->GetEluna())
+        {
+            e->OnSummoned(critter, summoner);
+        }
     }
     if (m_originalCaster)
         if (Unit* summoner = m_originalCaster->ToUnit())
         {
-            sEluna->OnSummoned(critter, summoner);
+            if (Eluna* e = summoner->GetEluna())
+            {
+                e->OnSummoned(critter, summoner);
+            }
         }
 #endif
 
@@ -6751,13 +6768,21 @@ bool Spell::DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntr
 #ifdef ENABLE_ELUNA
         if (Unit* summoner = m_caster->ToUnit())
         {
-            sEluna->OnSummoned(spawnCreature, summoner);
+            if (Eluna* e = summoner->GetEluna())
+            {
+                e->OnSummoned(spawnCreature, summoner);
+            }
         }
         if (m_originalCaster)
+        {
             if (Unit* summoner = m_originalCaster->ToUnit())
             {
-                sEluna->OnSummoned(spawnCreature, summoner);
+                if (Eluna* e = summoner->GetEluna())
+                {
+                    e->OnSummoned(spawnCreature, summoner);
+                }
             }
+        }
 #endif
     }
 
@@ -6910,7 +6935,10 @@ bool Spell::DoSummonPossessed(CreatureSummonPositions& list, SummonPropertiesEnt
 #ifdef ENABLE_ELUNA
         if (Unit* summoner = m_originalCaster->ToUnit())
         {
-            sEluna->OnSummoned(spawnCreature, summoner);
+            if (Eluna* e = summoner->GetEluna())
+            {
+                e->OnSummoned(spawnCreature, summoner);
+            }
         }
 #endif
     }
@@ -7028,12 +7056,18 @@ bool Spell::DoSummonPet(SpellEffectIndex eff_idx)
 #ifdef ENABLE_ELUNA
     if (Unit* summoner = m_caster->ToUnit())
     {
-        sEluna->OnSummoned(spawnCreature, summoner);
+        if (Eluna* e = summoner->GetEluna())
+        {
+            e->OnSummoned(spawnCreature, summoner);
+        }
     }
     if (m_originalCaster)
         if (Unit* summoner = m_originalCaster->ToUnit())
         {
-            sEluna->OnSummoned(spawnCreature, summoner);
+            if (Eluna* e = summoner->GetEluna())
+            {
+                e->OnSummoned(spawnCreature, summoner);
+            }
         }
 #endif
 
@@ -7096,7 +7130,10 @@ bool Spell::DoSummonVehicle(CreatureSummonPositions& list, SummonPropertiesEntry
     if (m_originalCaster)
         if (Unit* summoner = m_originalCaster->ToUnit())
         {
-            sEluna->OnSummoned(spawnCreature, summoner);
+            if (Eluna* e = summoner->GetEluna())
+            {
+                e->OnSummoned(spawnCreature, summoner);
+            }
         }
 #endif
 
@@ -11943,8 +11980,11 @@ void Spell::EffectDuel(SpellEffectIndex eff_idx)
     target->SetGuidValue(PLAYER_DUEL_ARBITER, pGameObj->GetObjectGuid());
 
 #ifdef ENABLE_ELUNA
-    sEluna->OnDuelRequest(target, caster);
-#endif
+    if (Eluna* e = caster->GetEluna())
+    {
+        e->OnDuelRequest(target, caster);
+    }
+#endif /* ENABLE_ELUNA */
 }
 
 void Spell::EffectStuck(SpellEffectIndex /*eff_idx*/)
@@ -12197,6 +12237,17 @@ void Spell::EffectApplyGlyph(SpellEffectIndex eff_idx)
             player->SendTalentsInfoData(false);
         }
     }
+// TODO: ELUNAFIX NEEDED
+//#ifdef ENABLE_ELUNA
+//    if (Unit* summoner = m_originalCaster->ToUnit())
+//    {
+//        if (Eluna* e = player->GetEluna())
+//        {
+//            e->OnSummoned(spawnCreature, summoner);
+//        }
+//    }
+//#endif /* ENABLE_ELUNA */
+
 }
 
 void Spell::EffectEnchantHeldItem(SpellEffectIndex eff_idx)

@@ -187,7 +187,10 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
 
         player->SendNewItem(newitem, uint32(item->count), false, false, true);
 #ifdef ENABLE_ELUNA
-        sEluna->OnLootItem(player, newitem, item->count, lguid);
+        if (Eluna* e = player->GetEluna())
+        {
+            e->OnLootItem(player, newitem, item->count, lguid);
+        }
 #endif /* ENABLE_ELUNA */
 
         player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM, item->itemid, item->count);
@@ -235,6 +238,14 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
             if (bones && bones->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
             {
                 pLoot = &bones->loot;
+
+                // Used by Eluna
+                #ifdef ENABLE_ELUNA
+                if (Eluna* e = player->GetEluna())
+                {
+                    e->OnLootMoney(player, pLoot->gold);
+                }
+                #endif /* ENABLE_ELUNA */
             }
 
             break;
@@ -317,7 +328,10 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
 
         // Used by Eluna
 #ifdef ENABLE_ELUNA
-        sEluna->OnLootMoney(player, pLoot->gold);
+        if (Eluna* e = player->GetEluna())
+        {
+            e->OnLootMoney(player, pLoot->gold);
+        }
 #endif /* ENABLE_ELUNA */
 
         pLoot->gold = 0;
@@ -676,7 +690,10 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
 
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->OnLootItem(target, newitem, item.count, lootguid);
+    if (Eluna* e = target->GetEluna())
+    {
+        e->OnLootItem(target, newitem, item.count, lootguid);
+    }
 #endif /* ENABLE_ELUNA */
 
     // mark as looted

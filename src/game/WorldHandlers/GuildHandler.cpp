@@ -1003,7 +1003,11 @@ void WorldSession::HandleGuildBankDepositMoney(WorldPacket& recv_data)
     pGuild->LogBankEvent(GUILD_BANK_LOG_DEPOSIT_MONEY, uint8(0), GetPlayer()->GetGUIDLow(), money);
 
 #ifdef ENABLE_ELUNA
-    sEluna->OnMemberDepositMoney(pGuild, GetPlayer(), money);
+    // TODO: ELUNAFIX NEEDED
+    //if (Eluna* e = xxx->GetEluna())
+    //{
+    //    e->OnMemberDepositMoney(pGuild, GetPlayer(), money);
+    //}
 #endif
 
     pGuild->DisplayGuildBankTabsInfo(this);

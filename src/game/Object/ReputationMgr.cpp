@@ -261,8 +261,11 @@ void ReputationMgr::Initialize()
 void ReputationMgr::SetReputation(FactionEntry const* factionEntry, int32 standing, bool incremental)
 {
 #ifdef ENABLE_ELUNA
-    sEluna->OnReputationChange(m_player, factionEntry->ID, standing, incremental);
-#endif
+    if (Eluna* e = m_player->GetEluna())
+    {
+        e->OnReputationChange(m_player, factionEntry->ID, standing, incremental);
+    }
+#endif /* ENABLE_ELUNA */
 
     bool anyRankIncreased = false;
     // if spillover definition exists in DB, override DBC

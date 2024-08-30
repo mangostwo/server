@@ -459,7 +459,10 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recv_data)
 
         // Used by Eluna
 #ifdef ENABLE_ELUNA
-        sEluna->HandleGossipSelectOption(GetPlayer(), item, GetPlayer()->PlayerTalkClass->GossipOptionSender(gossipListId), GetPlayer()->PlayerTalkClass->GossipOptionAction(gossipListId), code);
+        if (Eluna* e = GetPlayer()->GetEluna())
+        {
+            e->HandleGossipSelectOption(GetPlayer(), item, GetPlayer()->PlayerTalkClass->GossipOptionSender(gossipListId), GetPlayer()->PlayerTalkClass->GossipOptionAction(gossipListId), code);
+        }
 #endif /* ENABLE_ELUNA */
     }
     else if (guid.IsPlayer())
@@ -472,7 +475,10 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recv_data)
 
         // Used by Eluna
 #ifdef ENABLE_ELUNA
-        sEluna->HandleGossipSelectOption(GetPlayer(), menuId, GetPlayer()->PlayerTalkClass->GossipOptionSender(gossipListId), GetPlayer()->PlayerTalkClass->GossipOptionAction(gossipListId), code);
+        if (Eluna* e = GetPlayer()->GetEluna())
+        {
+            e->HandleGossipSelectOption(GetPlayer(), menuId, GetPlayer()->PlayerTalkClass->GossipOptionSender(gossipListId), GetPlayer()->PlayerTalkClass->GossipOptionAction(gossipListId), code);
+        }
 #endif /* ENABLE_ELUNA */
     }
 }

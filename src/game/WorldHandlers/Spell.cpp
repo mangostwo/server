@@ -3946,11 +3946,17 @@ void Spell::cast(bool skipCheck)
         }
 
         ((Player*)m_caster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL, m_spellInfo->Id);
+    }
 
 #ifdef ENABLE_ELUNA
-        sEluna->OnSpellCast(m_caster->ToPlayer(), this, skipCheck);
-#endif /* ENABLE_ELUNA */
+    if (Eluna* e = m_caster->GetEluna())
+    {
+        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            e->OnSpellCast(m_caster->ToPlayer(), this, skipCheck);
+        }
     }
+#endif /* ENABLE_ELUNA */
 
     FillTargetMap();
 

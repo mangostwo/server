@@ -161,7 +161,10 @@ bool Guild::Create(Player* leader, std::string gname)
 
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->OnCreate(this, leader, gname.c_str());
+    if (Eluna* e = sWorld.GetEluna())
+    {
+        e->OnCreate(this, leader, gname.c_str());
+    }
 #endif /* ENABLE_ELUNA */
 
     return AddMember(m_LeaderGuid, (uint32)GR_GUILDMASTER);
@@ -274,7 +277,10 @@ bool Guild::AddMember(ObjectGuid plGuid, uint32 plRank)
 
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->OnAddMember(this, pl, newmember.RankId);
+    if (Eluna* e = sWorld.GetEluna())
+    {
+        e->OnAddMember(this, pl, newmember.RankId);
+    }
 #endif /* ENABLE_ELUNA */
 
     return true;
@@ -290,7 +296,10 @@ void Guild::SetMOTD(std::string motd)
 
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->OnMOTDChanged(this, motd);
+    if (Eluna* e = sWorld.GetEluna())
+    {
+        e->OnMOTDChanged(this, motd);
+    }
 #endif /* ENABLE_ELUNA */
 }
 
@@ -304,7 +313,10 @@ void Guild::SetGINFO(std::string ginfo)
 
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->OnInfoChanged(this, ginfo);
+    if (Eluna* e = sWorld.GetEluna())
+    {
+        e->OnInfoChanged(this, ginfo);
+    }
 #endif /* ENABLE_ELUNA */
 }
 
@@ -644,7 +656,10 @@ bool Guild::DelMember(ObjectGuid guid, bool isDisbanding)
 
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->OnRemoveMember(this, player, isDisbanding); // IsKicked not a part of Mangos, implement?
+    if (Eluna* e = sWorld.GetEluna())
+    {
+        e->OnRemoveMember(this, player, isDisbanding); // IsKicked not a part of Mangos, implement?
+    }
 #endif /* ENABLE_ELUNA */
 
     return members.empty();
@@ -897,7 +912,10 @@ void Guild::Disband()
 
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->OnDisband(this);
+    if (Eluna* e = sWorld.GetEluna())
+    {
+        e->OnDisband(this);
+    }
 #endif /* ENABLE_ELUNA */
 
     sGuildMgr.RemoveGuild(m_Id);
@@ -1466,7 +1484,10 @@ bool Guild::MemberMoneyWithdraw(uint32 amount, uint32 LowGuid)
 
 #ifdef ENABLE_ELUNA
     Player* player = sObjectMgr.GetPlayer(ObjectGuid(HIGHGUID_PLAYER, LowGuid));
-    sEluna->OnMemberWitdrawMoney(this, player, amount, false); // IsRepair not a part of Mangos, implement?
+    if (Eluna* e = sWorld.GetEluna())
+    {
+        e->OnMemberWitdrawMoney(this, player, amount, false); // IsRepair not a part of Mangos, implement?
+    }
 #endif
 
     return true;
@@ -1918,7 +1939,10 @@ void Guild::LogBankEvent(uint8 EventType, uint8 TabId, uint32 PlayerGuidLow, uin
     }
 
 #ifdef ENABLE_ELUNA
-    sEluna->OnBankEvent(this, EventType, TabId, PlayerGuidLow, ItemOrMoney, ItemStackCount, DestTabId);
+    if (Eluna* e = sWorld.GetEluna())
+    {
+        e->OnBankEvent(this, EventType, TabId, PlayerGuidLow, ItemOrMoney, ItemStackCount, DestTabId);
+    }
 #endif
 
     // save event to database

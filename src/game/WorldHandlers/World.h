@@ -38,6 +38,9 @@
 #include <set>
 #include <list>
 
+#ifdef ENABLE_ELUNA
+class Eluna;
+#endif /* ENABLE_ELUNA */
 class Object;
 class ObjectGuid;
 class WorldPacket;
@@ -370,7 +373,6 @@ enum eConfigBoolValues
     CONFIG_BOOL_VMAP_INDOOR_CHECK,
     CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT,
     CONFIG_BOOL_MMAP_ENABLED,
-    CONFIG_BOOL_ELUNA_ENABLED,
     CONFIG_BOOL_PLAYER_COMMANDS,
     CONFIG_BOOL_ENABLE_QUEST_TRACKER,
 
@@ -645,6 +647,11 @@ class World
         * Access: public
         **/
         void InvalidatePlayerDataToAllClient(ObjectGuid guid);
+
+#ifdef ENABLE_ELUNA
+        Eluna* GetEluna() const { return eluna; }
+        Eluna* eluna;
+#endif /* ENABLE_ELUNA */
 
     protected:
         void _UpdateGameTime();

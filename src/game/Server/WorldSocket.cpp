@@ -179,10 +179,14 @@ int WorldSocket::SendPacket(const WorldPacket& pkt)
     sLog.outWorldPacketDump(uint32(get_handle()), pct.GetOpcode(), pct.GetOpcodeName(), &pct, false);
 
 #ifdef ENABLE_ELUNA
-    if (!sEluna->OnPacketSend(m_Session, pct))
-    {
-        return 0;
-    }
+    // TODO: ELUNAFIX NEEDED
+    //if (Eluna* e = pkt>GetEluna())
+    //{
+    //    if (!e->OnPacketSend(m_Session, pct))
+    //    {
+    //        return 0;
+    //    }
+    //}
 #endif
 
     ServerPktHeader header(pct.size() + 2, pct.GetOpcode());
@@ -749,9 +753,12 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
                 }
 
 #ifdef ENABLE_ELUNA
-                if (!sEluna->OnPacketReceive(m_Session, *new_pct))
+                if (Eluna* e = sWorld.GetEluna())
                 {
-                    return 0;
+                    if (!e->OnPacketReceive(m_Session, *new_pct))
+                    {
+                        return 0;
+                    }
                 }
 #endif /* ENABLE_ELUNA */
                 return HandleAuthSession(*new_pct);
@@ -759,7 +766,10 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
                 DEBUG_LOG("CMSG_KEEP_ALIVE ,size: %zu ", new_pct->size());
 
 #ifdef ENABLE_ELUNA
-                sEluna->OnPacketReceive(m_Session, *new_pct);
+                if (Eluna* e = sWorld.GetEluna())
+                {
+                    e->OnPacketReceive(m_Session, *new_pct);
+                }
 #endif /* ENABLE_ELUNA */
                 return 0;
             default:
