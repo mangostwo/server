@@ -1178,7 +1178,7 @@ void LFGMgr::SendQueueStatus()
                             playerWaitTime = m_dpsWaitTime[dungeonId].time;
                             break;
                         default:
-                            playerWaitTime = 0; //is this the right default?
+                            playerWaitTime = m_avgWaitTime[dungeonId].time;
                             break;
                     }
 
