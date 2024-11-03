@@ -1025,7 +1025,7 @@ void LFGMgr::FindSpecificQueueMatches(ObjectGuid guid)
                 bool fullyCompatible = false;
                 std::set<uint32> compatibleDungeons;
 
-                for (std::set<uint32>::iterator dItr = matchInfo->dungeonList.begin(); dItr != matchInfo->dungeonList.end(); ++itr)
+                for (std::set<uint32>::iterator dItr = matchInfo->dungeonList.begin(); dItr != matchInfo->dungeonList.end(); ++dItr)
                 {
                     if (queueInfo->dungeonList.find(*dItr) != queueInfo->dungeonList.end())
                     {
@@ -1176,6 +1176,9 @@ void LFGMgr::SendQueueStatus()
                             break;
                         case PLAYER_ROLE_DAMAGE:
                             playerWaitTime = m_dpsWaitTime[dungeonId].time;
+                            break;
+                        default:
+                            playerWaitTime = 0; //is this the right default?
                             break;
                     }
 
@@ -1421,7 +1424,25 @@ void LFGMgr::SendDungeonProposal(LFGPlayers* lfgGroup)
     if (premadeGroup)
     {
         Player* pGroupLeader = sObjectAccessor.FindPlayer(ObjectGuid(newProposal.groupLeaderGuid));
-        pGroupLeader->GetGroup()->SetAsLfgGroup();
+        
+        if (pGroupLeader)
+        {
+            Group* pGroup = pGroupLeader->GetGroup();
+            if (pGroup)
+            {
+                pGroup->SetAsLfgGroup();
+            }
+            else
+            {
+                // Log an error: group not found for group leader
+                // In the future, we should determine the right actions for this scenario.
+            }
+        }
+        else
+        {
+            // Log an error: group leader not found
+            // In the future, we should determine the right actions for this scenario.
+        }
     }
 
     // also save the proposal
@@ -1580,7 +1601,7 @@ void LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
         return;
     }
 
-    Group* pGroup;
+    Group* pGroup = nullptr;
 
     if (!proposal->groupRawGuid)
     {
@@ -1597,12 +1618,16 @@ void LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
             ObjectGuid pGroupPlrGuid = it->first;
             Player* pGroupPlr = sObjectAccessor.FindPlayer(pGroupPlrGuid);
 
-            if (it->second)
+            if (pGroupPlr && it->second)
             {
-                pGroupPlr->GetGroup()->RemoveMember(pGroupPlrGuid, 0);
+                Group* existingGroup = pGroupPlr->GetGroup();
+                if (existingGroup)
+                {
+                    existingGroup->RemoveMember(pGroupPlrGuid, 0);
+                }
             }
 
-            if (!leaderIsSet)
+            if (pGroupPlr && !leaderIsSet)
             {
                 bool currentPlrIsLeader = false;
                 if (leaderRoleIsSet)
@@ -1614,11 +1639,10 @@ void LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
                             leaderGuid = itr->first;
                             Player* leaderRef = sObjectAccessor.FindPlayer(leaderGuid);
 
-                            pGroup->Create(leaderRef->GetObjectGuid(), leaderRef->GetName());
-
-                            if (pGroupPlrGuid == leaderGuid)
+                            if (leaderRef)
                             {
-                                currentPlrIsLeader = true;
+                                pGroup->Create(leaderRef->GetObjectGuid(), leaderRef->GetName());
+                                currentPlrIsLeader = (pGroupPlrGuid == leaderGuid);
                             }
                         }
                     }
@@ -1635,27 +1659,80 @@ void LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
 
                 leaderIsSet = true;
             }
-            else if (leaderIsSet && pGroupPlrGuid != leaderGuid)
+            else if (leaderIsSet && pGroupPlr && pGroupPlrGuid != leaderGuid)
             {
                 pGroup->AddMember(pGroupPlrGuid, pGroupPlr->GetName());
             }
         }
-            pGroup->SetAsLfgGroup();
+        pGroup->SetAsLfgGroup();
     }
     else
     {
         Player* pGroupLeader = sObjectAccessor.FindPlayer(ObjectGuid(proposal->groupLeaderGuid));
-        pGroup = pGroupLeader->GetGroup();
+        
+        // Check if the group leader was found before accessing their group
+        if (pGroupLeader)
+        {
+            pGroup = pGroupLeader->GetGroup();
+        }
+        else
+        {
+            // Log that the group leader is missing and fall back to creating a new group
+            // In the future, we should determine the right actions for this scenario.
+            // LOG_ERROR("LFGMgr::CreateDungeonGroup", "Group leader with GUID %u not found. Creating new group.", proposal->groupLeaderGuid);
+
+            // Attempt to create a new group using the first available player in the proposal group
+            if (!proposal->groups.empty())
+            {
+                ObjectGuid fallbackLeaderGuid = proposal->groups.begin()->first;
+                Player* fallbackLeader = sObjectAccessor.FindPlayer(fallbackLeaderGuid);
+
+                if (fallbackLeader)
+                {
+                    pGroup = new Group();
+                    pGroup->Create(fallbackLeader->GetObjectGuid(), fallbackLeader->GetName());
+                    pGroup->SetAsLfgGroup();
+
+                    // Add remaining members to the new group
+                    for (playerGroupMap::iterator it = proposal->groups.begin(); it != proposal->groups.end(); ++it)
+                    {
+                        ObjectGuid pGroupPlrGuid = it->first;
+                        if (pGroupPlrGuid != fallbackLeaderGuid)
+                        {
+                            Player* pGroupPlr = sObjectAccessor.FindPlayer(pGroupPlrGuid);
+                            if (pGroupPlr)
+                            {
+                                pGroup->AddMember(pGroupPlrGuid, pGroupPlr->GetName());
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // If no valid players are found, we return without proceeding
+                    // In the future, we should determine the right actions for this scenario.
+                    // LOG_ERROR("LFGMgr::CreateDungeonGroup", "No valid players found to create a fallback group.");
+                    return;
+                }
+            }
+            else
+            {
+                // Log if there are no players in the proposal groups map
+                // In the future, we should determine the right actions for this scenario.
+                // LOG_ERROR("LFGMgr::CreateDungeonGroup", "Proposal groups map is empty, cannot create fallback group.");
+                return;
+            }
+        }
     }
 
-    // set dungeon difficulty for group
+    // Set dungeon difficulty for group
     LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(proposal->dungeonID);
-    if (!dungeon)
+    if (!dungeon || !pGroup)
     {
         return;
     }
 
-    pGroup->SetDungeonDifficulty(Difficulty(dungeon->difficulty)); //todo: check for raids and if so call setraiddifficulty
+    pGroup->SetDungeonDifficulty(Difficulty(dungeon->difficulty));
 
     // Add group to our group set and group map, then teleport to the dungeon
     ObjectGuid groupGuid = pGroup->GetObjectGuid();
