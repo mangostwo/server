@@ -1424,7 +1424,7 @@ void LFGMgr::SendDungeonProposal(LFGPlayers* lfgGroup)
     if (premadeGroup)
     {
         Player* pGroupLeader = sObjectAccessor.FindPlayer(ObjectGuid(newProposal.groupLeaderGuid));
-        
+
         if (pGroupLeader)
         {
             Group* pGroup = pGroupLeader->GetGroup();
@@ -1669,7 +1669,7 @@ void LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
     else
     {
         Player* pGroupLeader = sObjectAccessor.FindPlayer(ObjectGuid(proposal->groupLeaderGuid));
-        
+
         // Check if the group leader was found before accessing their group
         if (pGroupLeader)
         {
