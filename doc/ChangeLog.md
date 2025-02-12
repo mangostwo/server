@@ -621,7 +621,7 @@ Many Thanks to all the groups and individuals who contributed to this release.
  * [12463] Handle GO Trap triggering like GO handling is expected
  * [12462] Fix order of gossip menu options. Thanks to X-Savior for testing
  * [12461] Add stacking exception for spells 57494 and 57492
- * add new mangos icons created by zlxppp thank you. NOTE:     http://getmangos.eu/bb/post/8015
+ * add new mangos icons created by zlxppp thank you. NOTE:     https://www.getmangos.eu/bb/post/8015
  * [12460] GO_FLAG_INTERACT_COND should not reset in instances
  * [12459] Add positive exception for spell 38449
  * [12458] Implement some spells used in Sunwell Plateau
