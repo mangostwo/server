@@ -20835,7 +20835,6 @@ void Player::_SaveMail()
         if (m->state == MAIL_STATE_CHANGED)
         {
             SqlStatement stmt = CharacterDatabase.CreateStatement(updateMail, "UPDATE `mail` SET `has_items` = ?, `expire_time` = ?, `deliver_time` = ?, `money` = ?, `cod` = ?, `checked` = ? WHERE `id` = ?");
-            stmt.addString(m->body.c_str());
             stmt.addUInt32(m->HasItems() ? 1 : 0);
             stmt.addUInt64(uint64(m->expire_time));
             stmt.addUInt64(uint64(m->deliver_time));
