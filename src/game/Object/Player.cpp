@@ -535,56 +535,82 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
     m_drunkTimer = 0;
     m_restTime = 0;
     m_deathTimer = 0;
+    // Initialize death expire time to 0
     m_deathExpireTime = 0;
 
+    // Initialize swing error message to 0
     m_swingErrorMsg = 0;
 
+    // Initialize detection invisibility timer to 1 millisecond
     m_DetectInvTimer = 1 * IN_MILLISECONDS;
 
+    // Initialize battleground queue IDs and invited instances
     for (int j = 0; j < PLAYER_MAX_BATTLEGROUND_QUEUES; ++j)
     {
         m_bgBattleGroundQueueID[j].bgQueueTypeId  = BATTLEGROUND_QUEUE_NONE;
         m_bgBattleGroundQueueID[j].invitedToInstance = 0;
     }
 
+    // Set login time to current time
     m_logintime = time(NULL);
+    // Set last tick time to login time
     m_Last_tick = m_logintime;
+    // Initialize weapon proficiency to 0
     m_WeaponProficiency = 0;
+    // Initialize armor proficiency to 0
     m_ArmorProficiency = 0;
+    // Initialize parry ability to false
     m_canParry = false;
+    // Initialize block ability to false
     m_canBlock = false;
+    // Initialize dual wield ability to false
     m_canDualWield = false;
     m_canTitanGrip = false;
     m_ammoDPS = 0.0f;
 
+    // Initialize temporary unsummoned pet number to 0
     m_temporaryUnsummonedPetNumber = 0;
 
     //////////////////// Rest System/////////////////////
+    // Initialize time of entering inn to 0
     time_inn_enter = 0;
+    // Initialize inn trigger ID to 0
     inn_trigger_id = 0;
+    // Initialize rest bonus to 0
     m_rest_bonus = 0;
+    // Initialize rest type to no rest
     rest_type = REST_TYPE_NO;
     //////////////////// Rest System/////////////////////
 
+    // Initialize mails updated flag to false
     m_mailsUpdated = false;
+    // Initialize unread mails count to 0
     unReadMails = 0;
+    // Initialize next mail delivery time to 0
     m_nextMailDelivereTime = 0;
 
+    // Initialize reset talents cost to 0
     m_resetTalentsCost = 0;
+    // Initialize reset talents time to 0
     m_resetTalentsTime = 0;
+    // Initialize item update queue blocked flag to false
     m_itemUpdateQueueBlocked = false;
 
+    // Initialize forced speed changes for all move types to 0
     for (int i = 0; i < MAX_MOVE_TYPE; ++i)
     {
         m_forced_speed_changes[i] = 0;
     }
 
+    // Initialize stable slots to 0
     m_stableSlots = 0;
 
     /////////////////// Instance System /////////////////////
-
+    // Initialize homebind timer to 0
     m_HomebindTimer = 0;
+    // Initialize instance validity to true
     m_InstanceValid = true;
+    // Initialize dungeon difficulty to normal
     m_dungeonDifficulty = DUNGEON_DIFFICULTY_NORMAL;
     m_raidDifficulty = RAID_DIFFICULTY_10MAN_NORMAL;
 
@@ -593,12 +619,14 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
     m_activeSpec = 0;
     m_specsCount = 1;
 
+    // Initialize aura base modifiers
     for (int i = 0; i < BASEMOD_END; ++i)
     {
         m_auraBaseMod[i][FLAT_MOD] = 0.0f;
         m_auraBaseMod[i][PCT_MOD] = 1.0f;
     }
 
+    // Initialize base rating values to 0
     for (int i = 0; i < MAX_COMBAT_RATING; ++i)
     {
         m_baseRatingValue[i] = 0;
@@ -611,23 +639,31 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
     m_spellPenetrationItemMod = 0;
 
     // Honor System
+    // Set last honor update time to current time
     m_lastHonorUpdateTime = time(NULL);
 
     m_IsBGRandomWinner = false;
 
     // Player summoning
+    // Initialize summon expire time to 0
     m_summon_expire = 0;
+    // Initialize summon map ID to 0
     m_summon_mapid = 0;
+    // Initialize summon coordinates to (0.0f, 0.0f, 0.0f)
     m_summon_x = 0.0f;
     m_summon_y = 0.0f;
     m_summon_z = 0.0f;
 
+    // Initialize contested PvP timer to 0
     m_contestedPvPTimer = 0;
 
+    // Initialize declined name to NULL
     m_declinedname = NULL;
     m_runes = NULL;
 
+    // Initialize last fall time to 0
     m_lastFallTime = 0;
+    // Initialize last fall Z coordinate to 0
     m_lastFallZ = 0;
 
     m_cachedGS = 0;
@@ -635,36 +671,43 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
 
 Player::~Player()
 {
+    // Perform cleanup before deleting the player object
     CleanupsBeforeDelete();
 
-    // it must be unloaded already in PlayerLogout and accessed only for loggined player
+    // Ensure the social object is unloaded (should already be done in PlayerLogout)
     // m_social = NULL;
 
-    // Note: buy back item already deleted from DB when player was saved
+    // Delete all items in the player's inventory
     for (int i = 0; i < PLAYER_SLOTS_COUNT; ++i)
     {
         delete m_items[i];
     }
+
+    // Clean up communication channels
     CleanupChannels();
 
-    // all mailed items should be deleted, also all mail should be deallocated
-    for (PlayerMails::const_iterator itr =  m_mail.begin(); itr != m_mail.end(); ++itr)
+    // Delete all mailed items and deallocate mail objects
+    for (PlayerMails::const_iterator itr = m_mail.begin(); itr != m_mail.end(); ++itr)
     {
         delete *itr;
     }
 
+    // Delete all items in the player's item map
     for (ItemMap::const_iterator iter = mMitems.begin(); iter != mMitems.end(); ++iter)
     {
-        delete iter->second; // if item is duplicated... then server may crash ... but that item should be deallocated
+        delete iter->second; // Ensure no duplicated items to avoid crashes
     }
 
+    // Delete the player's talk class
     delete PlayerTalkClass;
 
+    // Remove the player from any transport they are on
     if (m_transport)
     {
         m_transport->RemovePassenger(this);
     }
 
+    // Delete all item set effects
     for (size_t x = 0; x < ItemSetEff.size(); ++x)
     {
         delete ItemSetEff[x];
@@ -683,33 +726,41 @@ Player::~Player()
 
 void Player::CleanupsBeforeDelete()
 {
-    if (m_uint32Values)                                     // only for fully created Object
+    // Perform cleanup only if the object is fully created
+    if (m_uint32Values)
     {
+        // Cancel any ongoing trade
         TradeCancel(false);
+        // Complete any ongoing duel
         DuelComplete(DUEL_FLED);
     }
 
-    // notify zone scripts for player logout
+    // Notify zone scripts that the player is leaving the zone
     sOutdoorPvPMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
 
+    // Perform unit-specific cleanup
     Unit::CleanupsBeforeDelete();
 }
 
 bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 class_, uint8 gender, uint8 skin, uint8 face, uint8 hairStyle, uint8 hairColor, uint8 facialHair, uint8 /*outfitId */)
 {
-    // FIXME: outfitId not used in player creating
+    // FIXME: outfitId not used in player creation
 
+    // Create the player object with the given GUID
     Object::_Create(guidlow, 0, HIGHGUID_PLAYER);
 
+    // Set the player's name
     m_name = name;
 
+    // Get player info based on race and class
     PlayerInfo const* info = sObjectMgr.GetPlayerInfo(race, class_);
     if (!info)
     {
-        sLog.outError("Player have incorrect race/class pair. Can't be loaded.");
+        sLog.outError("Player has incorrect race/class pair. Can't be loaded.");
         return false;
     }
 
+    // Get class entry from DBC
     ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(class_);
     if (!cEntry)
     {
@@ -717,33 +768,40 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
         return false;
     }
 
-    // player store gender in single bit
+    // Validate gender
     if (gender != uint8(GENDER_MALE) && gender != uint8(GENDER_FEMALE))
     {
-        sLog.outError("Invalid gender %u at player creating", uint32(gender));
+        sLog.outError("Invalid gender %u at player creation", uint32(gender));
         return false;
     }
 
+    // Initialize player items to NULL
     for (int i = 0; i < PLAYER_SLOTS_COUNT; ++i)
     {
         m_items[i] = NULL;
     }
 
+    // Set player's initial location
     SetLocationMapId(info->mapId);
     Relocate(info->positionX, info->positionY, info->positionZ, info->orientation);
 
+    // Set the player's map
     SetMap(sMapMgr.CreateMap(info->mapId, this));
 
+    // Set player's power type based on class
     uint8 powertype = cEntry->powerType;
 
+    // Set player's faction based on race
     setFactionForRace(race);
 
+    // Set player's race, class, gender, and power type
     SetByteValue(UNIT_FIELD_BYTES_0, 0, race);
     SetByteValue(UNIT_FIELD_BYTES_0, 1, class_);
     SetByteValue(UNIT_FIELD_BYTES_0, 2, gender);
     SetByteValue(UNIT_FIELD_BYTES_0, 3, powertype);
 
-    InitDisplayIds();                                       // model, scale and model data
+    // Initialize player's display IDs (model, scale, and model data)
+    InitDisplayIds();
 
     SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_PVP);
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
@@ -751,19 +809,21 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
     SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);               // fix cast time showed in spell tooltip on client
     SetFloatValue(UNIT_FIELD_HOVERHEIGHT, 1.0f);            // default for players in 3.0.3
 
-    SetInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, -1);  // -1 is default value
+    // Set default watched faction index
+    SetInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, -1); // -1 is default value
 
+    // Set player's appearance (skin, face, hair style, hair color, facial hair)
     SetByteValue(PLAYER_BYTES, 0, skin);
     SetByteValue(PLAYER_BYTES, 1, face);
     SetByteValue(PLAYER_BYTES, 2, hairStyle);
     SetByteValue(PLAYER_BYTES, 3, hairColor);
-
     SetByteValue(PLAYER_BYTES_2, 0, facialHair);
     SetByteValue(PLAYER_BYTES_2, 3, REST_STATE_NORMAL);
 
     SetByteValue(PLAYER_BYTES_3, 0, gender);
     SetByteValue(PLAYER_BYTES_3, 3, 0);                     // BattlefieldArenaFaction (0 or 1)
 
+    // Initialize player's guild information
     SetUInt32Value(PLAYER_GUILDID, 0);
     SetUInt32Value(PLAYER_GUILDRANK, 0);
     SetUInt32Value(PLAYER_GUILD_TIMESTAMP, 0);
@@ -774,6 +834,7 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
     }
     SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
 
+    // Initialize player's kill counts and contributions
     SetUInt32Value(PLAYER_FIELD_KILLS, 0);
     SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 0);
     SetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, 0);
@@ -801,25 +862,25 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
     SetHonorPoints(sWorld.getConfig(CONFIG_UINT32_START_HONOR_POINTS));
     SetArenaPoints(sWorld.getConfig(CONFIG_UINT32_START_ARENA_POINTS));
 
-    // Played time
+    // Initialize played time
     m_Last_tick = time(NULL);
     m_Played_time[PLAYED_TIME_TOTAL] = 0;
     m_Played_time[PLAYED_TIME_LEVEL] = 0;
 
-    // base stats and related field values
+    // Initialize base stats and related field values
     InitStatsForLevel();
     InitTaxiNodesForLevel();
     InitGlyphsForLevel();
     InitTalentForLevel();
-    InitPrimaryProfessions();                               // to max set before any spell added
+    InitPrimaryProfessions(); // To max set before any spell added
 
-    // apply original stats mods before spell loading or item equipment that call before equip _RemoveStatsMods()
-    UpdateMaxHealth();                                      // Update max Health (for add bonus from stamina)
+    // Apply original stats mods before spell loading or item equipment
+    UpdateMaxHealth(); // Update max Health (for add bonus from stamina)
     SetHealth(GetMaxHealth());
 
     if (GetPowerType() == POWER_MANA)
     {
-        UpdateMaxPower(POWER_MANA);                         // Update max Mana (for add bonus from intellect)
+        UpdateMaxPower(POWER_MANA); // Update max Mana (for add bonus from intellect)
         SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
     }
 
@@ -832,13 +893,13 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
     // original spells
     learnDefaultSpells();
 
-    // original action bar
+    // Initialize action bar with default actions
     for (PlayerCreateInfoActions::const_iterator action_itr = info->action.begin(); action_itr != info->action.end(); ++action_itr)
     {
         addActionButton(0, action_itr->button, action_itr->action, action_itr->type);
     }
 
-    // original items
+    // Initialize player's starting items
     uint32 raceClassGender = GetUInt32Value(UNIT_FIELD_BYTES_0) & 0x00FFFFFF;
 
     CharStartOutfitEntry const* oEntry = NULL;
@@ -865,7 +926,7 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
 
             uint32 item_id = oEntry->ItemId[j];
 
-            // just skip, reported in ObjectMgr::LoadItemPrototypes
+            // Just skip, reported in ObjectMgr::LoadItemPrototypes
             ItemPrototype const* iProto = ObjectMgr::GetItemPrototype(item_id);
             if (!iProto)
             {
@@ -875,7 +936,7 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
             // BuyCount by default
             int32 count = iProto->BuyCount;
 
-            // special amount for foor/drink
+            // Special amount for food/drink
             if (iProto->Class == ITEM_CLASS_CONSUMABLE && iProto->SubClass == ITEM_SUBCLASS_FOOD)
             {
                 switch (iProto->Spells[0].SpellCategory)
@@ -902,22 +963,22 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
         StoreNewItemInBestSlots(item_id_itr->item_id, item_id_itr->item_amount);
     }
 
-    // bags and main-hand weapon must equipped at this moment
-    // now second pass for not equipped (offhand weapon/shield if it attempt equipped before main-hand weapon)
+    // Equip bags and main-hand weapon
+    // Second pass for not equipped items (offhand weapon/shield if it attempted to equip before main-hand weapon)
     // or ammo not equipped in special bag
     for (int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
     {
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
         {
             uint16 eDest;
-            // equip offhand weapon/shield if it attempt equipped before main-hand weapon
+            // Equip offhand weapon/shield if it attempted to equip before main-hand weapon
             InventoryResult msg = CanEquipItem(NULL_SLOT, eDest, pItem, false);
             if (msg == EQUIP_ERR_OK)
             {
                 RemoveItem(INVENTORY_SLOT_BAG_0, i, true);
                 EquipItem(eDest, pItem, true);
             }
-            // move other items to more appropriate slots (ammo not equipped in special bag)
+            // Move other items to more appropriate slots (ammo not equipped in special bag)
             else
             {
                 ItemPosCountVec sDest;
@@ -928,7 +989,7 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
                     pItem = StoreItem(sDest, pItem, true);
                 }
 
-                // if  this is ammo then use it
+                // If this is ammo then use it
                 msg = CanUseAmmo(pItem->GetEntry());
                 if (msg == EQUIP_ERR_OK)
                 {
@@ -937,7 +998,7 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
             }
         }
     }
-    // all item positions resolved
+    // All item positions resolved
 
     return true;
 }
@@ -946,7 +1007,7 @@ bool Player::StoreNewItemInBestSlots(uint32 titem_id, uint32 titem_amount)
 {
     DEBUG_LOG("STORAGE: Creating initial item, itemId = %u, count = %u", titem_id, titem_amount);
 
-    // attempt equip by one
+    // Attempt to equip the item one by one
     while (titem_amount > 0)
     {
         uint16 eDest;
@@ -956,6 +1017,7 @@ bool Player::StoreNewItemInBestSlots(uint32 titem_id, uint32 titem_amount)
             break;
         }
 
+        // Equip the new item
         EquipNewItem(eDest, titem_id, true);
         AutoUnequipOffhandIfNeed();
         --titem_amount;
@@ -963,25 +1025,25 @@ bool Player::StoreNewItemInBestSlots(uint32 titem_id, uint32 titem_amount)
 
     if (titem_amount == 0)
     {
-        return true; // equipped
+        return true; // All items equipped
     }
 
-    // attempt store
+    // Attempt to store the remaining items
     ItemPosCountVec sDest;
-    // store in main bag to simplify second pass (special bags can be not equipped yet at this moment)
+    // Store in the main bag to simplify the second pass (special bags may not be equipped yet)
     uint8 msg = CanStoreNewItem(INVENTORY_SLOT_BAG_0, NULL_SLOT, sDest, titem_id, titem_amount);
     if (msg == EQUIP_ERR_OK)
     {
         StoreNewItem(sDest, titem_id, true, Item::GenerateItemRandomPropertyId(titem_id));
-        return true;                                        // stored
+        return true; // Items stored
     }
 
-    // item can't be added
+    // Item cannot be added
     sLog.outError("STORAGE: Can't equip or store initial item %u for race %u class %u , error msg = %u", titem_id, getRace(), getClass(), msg);
     return false;
 }
 
-// helper function, mainly for script side, but can be used for simple task in mangos also.
+// Helper function, mainly for script side, but can be used for simple tasks in MaNGOS as well
 Item* Player::StoreNewItemInInventorySlot(uint32 itemEntry, uint32 amount)
 {
     ItemPosCountVec vDest;
@@ -1015,7 +1077,7 @@ void Player::SendMirrorTimer(MirrorTimerType Type, uint32 MaxValue, uint32 Curre
     data << MaxValue;
     data << Regen;
     data << (uint8)0;
-    data << (uint32)0;                                      // spell id
+    data << (uint32)0; // Spell ID
     GetSession()->SendPacket(&data);
 }
 
@@ -1034,7 +1096,7 @@ uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
         return 0;
     }
 
-    // Absorb, resist some environmental damage type
+    // Absorb and resist some environmental damage types
     uint32 absorb = 0;
     uint32 resist = 0;
     if (type == DAMAGE_LAVA)
@@ -1097,9 +1159,9 @@ int32 Player::getMaxTimer(MirrorTimerType timer)
         {
             if (!IsAlive() || HasAuraType(SPELL_AURA_WATER_BREATHING) ||
                 GetSession()->GetSecurity() >= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_TIMERBAR_BREATH_GMLEVEL))
-                {
-                    return DISABLED_MIRROR_TIMER;
-                }
+            {
+                return DISABLED_MIRROR_TIMER;
+            }
             int32 UnderWaterTime = sWorld.getConfig(CONFIG_UINT32_TIMERBAR_BREATH_MAX) * IN_MILLISECONDS;
             AuraList const& mModWaterBreathing = GetAurasByType(SPELL_AURA_MOD_WATER_BREATHING);
             for (AuraList::const_iterator i = mModWaterBreathing.begin(); i != mModWaterBreathing.end(); ++i)
@@ -1133,15 +1195,16 @@ void Player::UpdateMirrorTimers()
 
 void Player::HandleDrowning(uint32 time_diff)
 {
+    // If no mirror timer flags are set, return early
     if (!m_MirrorTimerFlags)
     {
         return;
     }
 
-    // In water
+    // Check if the player is in water
     if (m_MirrorTimerFlags & UNDERWATER_INWATER)
     {
-        // Breath timer not activated - activate it
+        // If the breath timer is not activated, activate it
         if (m_MirrorTimer[BREATH_TIMER] == DISABLED_MIRROR_TIMER)
         {
             m_MirrorTimer[BREATH_TIMER] = getMaxTimer(BREATH_TIMER);
@@ -1149,23 +1212,24 @@ void Player::HandleDrowning(uint32 time_diff)
         }
         else
         {
+            // Decrease the breath timer
             m_MirrorTimer[BREATH_TIMER] -= time_diff;
-            // Timer limit - need deal damage
+            // If the timer reaches the limit, deal damage
             if (m_MirrorTimer[BREATH_TIMER] < 0)
             {
                 m_MirrorTimer[BREATH_TIMER] += 2 * IN_MILLISECONDS;
-                // Calculate and deal damage
+                // Calculate and deal drowning damage
                 // TODO: Check this formula
                 uint32 damage = GetMaxHealth() / 5 + urand(0, getLevel() - 1);
                 EnvironmentalDamage(DAMAGE_DROWNING, damage);
             }
-            else if (!(m_MirrorTimerFlagsLast & UNDERWATER_INWATER))      // Update time in client if need
+            else if (!(m_MirrorTimerFlagsLast & UNDERWATER_INWATER)) // Update time in client if needed
             {
                 SendMirrorTimer(BREATH_TIMER, getMaxTimer(BREATH_TIMER), m_MirrorTimer[BREATH_TIMER], -1);
             }
         }
     }
-    else if (m_MirrorTimer[BREATH_TIMER] != DISABLED_MIRROR_TIMER)        // Regen timer
+    else if (m_MirrorTimer[BREATH_TIMER] != DISABLED_MIRROR_TIMER) // Regenerate breath timer
     {
         int32 UnderWaterTime = getMaxTimer(BREATH_TIMER);
         // Need breath regen
@@ -1180,10 +1244,10 @@ void Player::HandleDrowning(uint32 time_diff)
         }
     }
 
-    // In dark water
+    // Check if the player is in dark water
     if (m_MirrorTimerFlags & UNDERWATER_INDARKWATER)
     {
-        // Fatigue timer not activated - activate it
+        // If the fatigue timer is not activated, activate it
         if (m_MirrorTimer[FATIGUE_TIMER] == DISABLED_MIRROR_TIMER)
         {
             m_MirrorTimer[FATIGUE_TIMER] = getMaxTimer(FATIGUE_TIMER);
@@ -1191,17 +1255,18 @@ void Player::HandleDrowning(uint32 time_diff)
         }
         else
         {
+            // Decrease the fatigue timer
             m_MirrorTimer[FATIGUE_TIMER] -= time_diff;
-            // Timer limit - need deal damage or teleport ghost to graveyard
+            // If the timer reaches the limit, deal damage or teleport ghost to graveyard
             if (m_MirrorTimer[FATIGUE_TIMER] < 0)
             {
                 m_MirrorTimer[FATIGUE_TIMER] += 2 * IN_MILLISECONDS;
-                if (IsAlive())                              // Calculate and deal damage
+                if (IsAlive()) // Calculate and deal exhaustion damage
                 {
                     uint32 damage = GetMaxHealth() / 5 + urand(0, getLevel() - 1);
                     EnvironmentalDamage(DAMAGE_EXHAUSTED, damage);
                 }
-                else if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))       // Teleport ghost to graveyard
+                else if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST)) // Teleport ghost to graveyard
                 {
                     RepopAtGraveyard();
                 }
@@ -1212,7 +1277,7 @@ void Player::HandleDrowning(uint32 time_diff)
             }
         }
     }
-    else if (m_MirrorTimer[FATIGUE_TIMER] != DISABLED_MIRROR_TIMER)       // Regen timer
+    else if (m_MirrorTimer[FATIGUE_TIMER] != DISABLED_MIRROR_TIMER) // Regenerate fatigue timer
     {
         int32 DarkWaterTime = getMaxTimer(FATIGUE_TIMER);
         m_MirrorTimer[FATIGUE_TIMER] += 10 * time_diff;
@@ -1226,27 +1291,29 @@ void Player::HandleDrowning(uint32 time_diff)
         }
     }
 
+    // Check if the player is in lava or slime
     if (m_MirrorTimerFlags & (UNDERWATER_INLAVA /*| UNDERWATER_INSLIME*/) && !(m_lastLiquid && m_lastLiquid->SpellId))
     {
-        // Breath timer not activated - activate it
+        // If the fire timer is not activated, activate it
         if (m_MirrorTimer[FIRE_TIMER] == DISABLED_MIRROR_TIMER)
         {
             m_MirrorTimer[FIRE_TIMER] = getMaxTimer(FIRE_TIMER);
         }
         else
         {
+            // Decrease the fire timer
             m_MirrorTimer[FIRE_TIMER] -= time_diff;
             if (m_MirrorTimer[FIRE_TIMER] < 0)
             {
                 m_MirrorTimer[FIRE_TIMER] += 2 * IN_MILLISECONDS;
-                // Calculate and deal damage
+                // Calculate and deal fire damage
                 // TODO: Check this formula
                 uint32 damage = urand(600, 700);
                 if (m_MirrorTimerFlags & UNDERWATER_INLAVA)
                 {
                     EnvironmentalDamage(DAMAGE_LAVA, damage);
                 }
-                // need to skip Slime damage in Undercity,
+                // Skip slime damage in Undercity
                 // maybe someone can find better way to handle environmental damage
                 //else if (m_zoneUpdateId != 1497)
                 //    EnvironmentalDamage(DAMAGE_SLIME, damage);
@@ -1317,7 +1384,7 @@ void Player::SetDrunkValue(uint8 newDrunkValue, uint32 itemId /*= 0*/)
 
     uint32 newDrunkenState = Player::GetDrunkenstateByValue(newDrunkValue);
 
-    // special drunk invisibility detection
+    // Special drunk invisibility detection
     if (newDrunkenState >= DRUNKEN_DRUNK)
     {
         m_detectInvisibilityMask |= (1 << 6);
@@ -1327,11 +1394,13 @@ void Player::SetDrunkValue(uint8 newDrunkValue, uint32 itemId /*= 0*/)
         m_detectInvisibilityMask &= ~(1 << 6);
     }
 
+    // If the drunken state has not changed, return early
     if (newDrunkenState == oldDrunkenState)
     {
         return;
     }
 
+    // Send a packet to update the drunken state
     WorldPacket data(SMSG_CROSSED_INEBRIATION_THRESHOLD, (8 + 4 + 4));
     data << GetObjectGuid();
     data << uint32(newDrunkenState);
@@ -1342,6 +1411,7 @@ void Player::SetDrunkValue(uint8 newDrunkValue, uint32 itemId /*= 0*/)
 
 void Player::Update(uint32 update_diff, uint32 p_time)
 {
+    // If the player is not in the world, return early
     if (!IsInWorld())
     {
         return;
@@ -1365,7 +1435,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
     Unit::Update(update_diff, p_time);
     SetCanDelayTeleport(false);
 
-    // Update player only attacks
+    // Update player-only attacks
     if (uint32 ranged_att = getAttackTimer(RANGED_ATTACK))
     {
         setAttackTimer(RANGED_ATTACK, (update_diff >= ranged_att ? 0 : ranged_att - update_diff));
@@ -1373,22 +1443,28 @@ void Player::Update(uint32 update_diff, uint32 p_time)
 
     time_t now = time(NULL);
 
+    // Update PvP flag
     UpdatePvPFlag(now);
 
+    // Update contested PvP state
     UpdateContestedPvP(update_diff);
 
+    // Update duel flag
     UpdateDuelFlag(now);
 
+    // Check duel distance
     CheckDuelDistance(now);
 
+    // Update AFK report
     UpdateAfkReport(now);
 
-    // Update items that have just a limited lifetime
+    // Update items with limited lifetime
     if (now > m_Last_tick)
     {
         UpdateItemDuration(uint32(now - m_Last_tick));
     }
 
+    // Update timed quests
     if (!m_timedquests.empty())
     {
         QuestSet::iterator iter = m_timedquests.begin();
@@ -1398,7 +1474,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
             if (q_status.m_timer <= update_diff)
             {
                 uint32 quest_id  = *iter;
-                ++iter;                                     // Current iter will be removed in FailQuest
+                ++iter; // Current iter will be removed in FailQuest
                 FailQuest(quest_id);
             }
             else
@@ -1413,6 +1489,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         }
     }
 
+    // Update melee attacking state
     if (hasUnitState(UNIT_STAT_MELEE_ATTACKING))
     {
         UpdateMeleeAttackingState();
@@ -1427,14 +1504,15 @@ void Player::Update(uint32 update_diff, uint32 p_time)
                 RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
             }
         }
-    }// Speed collect rest bonus (section/in hour)
+    }
 
+    // Speed collect rest bonus (section/in hour)
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
     {
-        if (GetTimeInnEnter() > 0)                          // Freeze update
+        if (GetTimeInnEnter() > 0) // Freeze update
         {
             time_t time_inn = now - GetTimeInnEnter();
-            if (time_inn >= 10)                             // Freeze update
+            if (time_inn >= 10) // Freeze update
             {
                 SetRestBonus(GetRestBonus() + ComputeRest(time_inn));
                 UpdateInnerTime(now);
@@ -1442,6 +1520,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         }
     }
 
+    // Update regeneration timer
     if (m_regenTimer)
     {
         if (update_diff >= m_regenTimer)
@@ -1454,6 +1533,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         }
     }
 
+    // Update position status timer
     if (m_positionStatusUpdateTimer)
     {
         if (update_diff >= m_positionStatusUpdateTimer)
@@ -1466,6 +1546,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         }
     }
 
+    // Update weapon change timer
     if (m_weaponChangeTimer > 0)
     {
         if (update_diff >= m_weaponChangeTimer)
@@ -1478,6 +1559,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         }
     }
 
+    // Update zone timer
     if (m_zoneUpdateTimer > 0)
     {
         if (update_diff >= m_zoneUpdateTimer)
@@ -1492,7 +1574,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
             else
             {
                 // Use area updates as well
-                // Needed for free for all arenas for example
+                // Needed for free-for-all arenas, for example
                 if (m_areaUpdateId != newarea)
                 {
                     UpdateArea(newarea);
@@ -1507,6 +1589,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         }
     }
 
+    // Update time sync timer
     if (m_timeSyncTimer > 0)
     {
         if (update_diff >= m_timeSyncTimer)
@@ -1519,6 +1602,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         }
     }
 
+    // Regenerate all if the player is alive
     if (IsAlive())
     {
         // if no longer casting, set regen power as soon as it is up.
@@ -1538,16 +1622,18 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         SetHealth(0);
     }
 
+    // Handle player death
     if (m_deathState == JUST_DIED)
     {
         KillPlayer();
     }
 
+    // Handle periodic saving
     if (m_nextSave > 0)
     {
         if (update_diff >= m_nextSave)
         {
-            // m_nextSave reseted in SaveToDB call
+            // m_nextSave reset in SaveToDB call
             // Used by Eluna
 #ifdef ENABLE_ELUNA
             if (Eluna* e = GetEluna())
@@ -1564,7 +1650,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         }
     }
 
-    // Handle Water/drowning
+    // Handle water/drowning
     HandleDrowning(update_diff);
 
     // Handle detect stealth players
@@ -1581,12 +1667,12 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         }
     }
 
-    // Played time
+    // Update played time
     if (now > m_Last_tick)
     {
         uint32 elapsed = uint32(now - m_Last_tick);
-        m_Played_time[PLAYED_TIME_TOTAL] += elapsed;        // Total played time
-        m_Played_time[PLAYED_TIME_LEVEL] += elapsed;        // Level played time
+        m_Played_time[PLAYED_TIME_TOTAL] += elapsed; // Total played time
+        m_Played_time[PLAYED_TIME_LEVEL] += elapsed; // Level played time
         m_Last_tick = now;
     }
 
@@ -1615,18 +1701,23 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         }
     }
 
+    // Update enchant time
     UpdateEnchantTime(update_diff);
+
+    // Update homebind time
     UpdateHomebindTime(update_diff);
 
     // Group update
     SendUpdateToOutOfRangeGroupMembers();
 
+    // Handle pet unsummoning if out of range
     Pet* pet = GetPet();
     if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityDistance()) && (GetCharmGuid() && (pet->GetObjectGuid() != GetCharmGuid())))
     {
         pet->Unsummon(PET_SAVE_REAGENTS, this);
     }
 
+    // Handle delayed teleport
     if (IsHasDelayedTeleport())
     {
         TeleportTo(m_teleport_dest, m_teleport_options);
@@ -2542,7 +2633,7 @@ Creature* Player::GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask)
         return NULL;
     }
 
-    if (npcflagmask == UNIT_NPC_FLAG_STABLEMASTER)
+    if (npcflagmask & UNIT_NPC_FLAG_STABLEMASTER)
     {
         if (getClass() != CLASS_HUNTER)
         {
@@ -14370,7 +14461,7 @@ void Player::SwapItem(uint16 src, uint16 dst)
     }
 
     // impossible merge/fill, do real swap
-    InventoryResult msg;
+    InventoryResult msg = EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM; // Initialize msg with a default value which will never be used
 
     // check src->dest move possibility
     ItemPosCountVec sDest;
@@ -15632,6 +15723,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
     switch (gossipOptionId)
     {
         case GOSSIP_OPTION_GOSSIP:
+        {
             if (menuData.m_gAction_poi)
             {
                 PlayerTalkClass->SendPointOfInterest(menuData.m_gAction_poi);
@@ -15650,6 +15742,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
             }
 
             break;
+        }
         case GOSSIP_OPTION_SPIRITHEALER:
             if (IsDead())
             {
@@ -23781,6 +23874,7 @@ void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaLockS
                 break;
             }
             // No break here!
+            [[fallthrough]];
         case AREA_LOCKSTATUS_MISSING_ITEM:
             GetSession()->SendTransferAborted(mapEntry->MapID, TRANSFER_ABORT_DIFFICULTY, GetDifficulty(mapEntry->IsRaid()));
             break;
