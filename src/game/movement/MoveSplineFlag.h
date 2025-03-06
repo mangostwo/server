@@ -37,15 +37,13 @@ namespace Movement
 #endif
 
     /**
-     * @brief
-     *
+     * @brief Class representing movement spline flags.
      */
     class MoveSplineFlag
     {
         public:
             /**
-             * @brief
-             *
+             * @brief Enum for movement spline flags.
              */
             enum eFlags
             {
@@ -80,7 +78,7 @@ namespace Movement
                 Mask_Final_Facing = Final_Point | Final_Target | Final_Angle,
                 // animation ids stored here, see AnimType enum, used with Animation flag
                 Mask_Animations = 0xFF,
-                // flags that shouldn't be appended into SMSG_MONSTER_MOVE\SMSG_MONSTER_MOVE_TRANSPORT packet, should be more probably
+                // Flags that shouldn't be appended into SMSG_MONSTER_MOVE\SMSG_MONSTER_MOVE_TRANSPORT packet
                 Mask_No_Monster_Move = Mask_Final_Facing | Mask_Animations | Done,
                 // CatmullRom interpolation mode used
                 Mask_CatmullRom = Flying | Catmullrom,
@@ -89,94 +87,81 @@ namespace Movement
             };
 
             /**
-             * @brief
-             *
-             * @return uint32
+             * @brief Gets the raw flag value.
+             * @return uint32& Reference to the raw flag value.
              */
             inline uint32& raw() { return (uint32&) * this;}
             /**
-             * @brief
-             *
-             * @return const uint32
+             * @brief Gets the raw flag value.
+             * @return const uint32& Reference to the raw flag value.
              */
             inline const uint32& raw() const { return (const uint32&) * this;}
 
             /**
-             * @brief
-             *
+             * @brief Default constructor for MoveSplineFlag.
              */
             MoveSplineFlag() { raw() = 0; }
             /**
-             * @brief
-             *
-             * @param f
+             * @brief Constructor for MoveSplineFlag with a flag value.
+             * @param f The flag value.
              */
             MoveSplineFlag(uint32 f) { raw() = f; }
             /**
-             * @brief
-             *
-             * @param f
+             * @brief Copy constructor for MoveSplineFlag.
+             * @param f The MoveSplineFlag to copy.
              */
             MoveSplineFlag(const MoveSplineFlag& f) { raw() = f.raw(); }
 
             // Constant interface
 
             /**
-             * @brief
-             *
-             * @return bool
+             * @brief Checks if the movement is smooth.
+             * @return bool True if the movement is smooth, false otherwise.
              */
             bool isSmooth() const { return raw() & Mask_CatmullRom;}
             bool isLinear() const { return !isSmooth();}
             /**
-             * @brief
-             *
-             * @return bool
+             * @brief Checks if the movement has a final facing.
+             * @return bool True if the movement has a final facing, false otherwise.
              */
             bool isFacing() const { return raw() & Mask_Final_Facing;}
 
             uint8 getAnimationId() const { return animId;}
             /**
-             * @brief
-             *
-             * @param f
-             * @return bool
+             * @brief Checks if all specified flags are set.
+             * @param f The flags to check.
+             * @return bool True if all specified flags are set, false otherwise.
              */
             bool hasAllFlags(uint32 f) const { return (raw() & f) == f;}
             bool hasFlag(uint32 f) const { return (raw() & f) != 0;}
             /**
-             * @brief
-             *
-             * @param f
-             * @return uint32 operator
+             * @brief Bitwise AND operator for flags.
+             * @param f The flags to AND.
+             * @return uint32 The result of the AND operation.
              */
             uint32 operator & (uint32 f) const { return (raw() & f);}
             /**
-             * @brief
-             *
-             * @param f
-             * @return uint32 operator
+             * @brief Bitwise OR operator for flags.
+             * @param f The flags to OR.
+             * @return uint32 The result of the OR operation.
              */
             uint32 operator | (uint32 f) const { return (raw() | f);}
             /**
-             * @brief
-             *
-             * @return std::string
+             * @brief Converts the flags to a string representation.
+             * @return std::string The string representation of the flags.
              */
             std::string ToString() const;
 
             // Not constant interface
 
             /**
-             * @brief
-             *
-             * @param f
+             * @brief Bitwise AND assignment operator for flags.
+             * @param f The flags to AND.
              */
             void operator &= (uint32 f) { raw() &= f;}
             /**
-             * @brief
-             *
-             * @param f
+             * @brief Bitwise OR assignment operator for flags.
+             * @param f The flags to OR.
              */
             void operator |= (uint32 f) { raw() |= f;}
 
@@ -186,18 +171,15 @@ namespace Movement
             void EnableFlying()              { raw() = (raw() & ~Catmullrom)                                | Flying; }
             void EnableCatmullRom()          { raw() = (raw() & ~Flying)                                    | Catmullrom; }
             /**
-             * @brief
-             *
+             * @brief Enables facing a point.
              */
             void EnableFacingPoint()    { raw() = (raw() & ~Mask_Final_Facing) | Final_Point;}
             /**
-             * @brief
-             *
+             * @brief Enables facing an angle.
              */
             void EnableFacingAngle()    { raw() = (raw() & ~Mask_Final_Facing) | Final_Angle;}
             /**
-             * @brief
-             *
+             * @brief Enables facing a target.
              */
             void EnableFacingTarget()   { raw() = (raw() & ~Mask_Final_Facing) | Final_Target;}
             void EnableBoardVehicle()        { raw() = (raw() & ~(Catmullrom | ExitVehicle))                | BoardVehicle; }
@@ -237,3 +219,4 @@ namespace Movement
 }
 
 #endif // MANGOSSERVER_MOVESPLINEFLAG_H
+
