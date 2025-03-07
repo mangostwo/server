@@ -37,7 +37,13 @@
 
 #include <cassert>
 
-//-----------------------------------------------//
+/**
+ * @brief Loads the waypoint path for the creature.
+ * @param creature Reference to the creature.
+ * @param pathId ID of the waypoint path.
+ * @param wpOrigin Origin of the waypoint path.
+ * @param overwriteEntry Entry to overwrite.
+ */
 void WaypointMovementGenerator<Creature>::LoadPath(Creature& creature, int32 pathId, WaypointPathOrigin wpOrigin, uint32 overwriteEntry)
 {
     DETAIL_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "LoadPath: loading waypoint path for %s", creature.GetGuidStr().c_str());
@@ -81,12 +87,24 @@ void WaypointMovementGenerator<Creature>::LoadPath(Creature& creature, int32 pat
     m_lastReachedWaypoint = 0;
 }
 
+/**
+ * @brief Initializes the WaypointMovementGenerator.
+ * @param creature Reference to the creature.
+ */
 void WaypointMovementGenerator<Creature>::Initialize(Creature& creature)
 {
     creature.addUnitState(UNIT_STAT_ROAMING);
     creature.clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
 }
 
+/**
+ * @brief Initializes the waypoint path for the creature.
+ * @param u Reference to the creature.
+ * @param id ID of the waypoint path.
+ * @param wpSource Source of the waypoint path.
+ * @param initialDelay Initial delay before starting the movement.
+ * @param overwriteEntry Entry to overwrite.
+ */
 void WaypointMovementGenerator<Creature>::InitializeWaypointPath(Creature& u, int32 id, WaypointPathOrigin wpSource, uint32 initialDelay, uint32 overwriteEntry)
 {
     LoadPath(u, id, wpSource, overwriteEntry);
@@ -95,12 +113,20 @@ void WaypointMovementGenerator<Creature>::InitializeWaypointPath(Creature& u, in
     StartMove(u);
 }
 
+/**
+ * @brief Finalizes the WaypointMovementGenerator.
+ * @param creature Reference to the creature.
+ */
 void WaypointMovementGenerator<Creature>::Finalize(Creature& creature)
 {
     creature.clearUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
     creature.SetWalk(!creature.hasUnitState(UNIT_STAT_RUNNING_STATE), false);
 }
 
+/**
+ * @brief Interrupts the WaypointMovementGenerator.
+ * @param creature Reference to the creature.
+ */
 void WaypointMovementGenerator<Creature>::Interrupt(Creature& creature)
 {
     creature.InterruptMoving();
@@ -108,12 +134,20 @@ void WaypointMovementGenerator<Creature>::Interrupt(Creature& creature)
     creature.SetWalk(!creature.hasUnitState(UNIT_STAT_RUNNING_STATE), false);
 }
 
+/**
+ * @brief Resets the WaypointMovementGenerator.
+ * @param creature Reference to the creature.
+ */
 void WaypointMovementGenerator<Creature>::Reset(Creature& creature)
 {
     creature.addUnitState(UNIT_STAT_ROAMING);
     StartMove(creature);
 }
 
+/**
+ * @brief Called when the creature arrives at a waypoint.
+ * @param creature Reference to the creature.
+ */
 void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
 {
     if (!i_path || i_path->empty())
@@ -204,6 +238,10 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
     Stop(node.delay);
 }
 
+/**
+ * @brief Starts moving the creature along the waypoint path.
+ * @param creature Reference to the creature.
+ */
 void WaypointMovementGenerator<Creature>::StartMove(Creature& creature)
 {
     if (!i_path || i_path->empty())
@@ -280,6 +318,12 @@ void WaypointMovementGenerator<Creature>::StartMove(Creature& creature)
     init.Launch();
 }
 
+/**
+ * @brief Updates the WaypointMovementGenerator.
+ * @param creature Reference to the creature.
+ * @param diff Time difference.
+ * @return True if the update was successful, false otherwise.
+ */
 bool WaypointMovementGenerator<Creature>::Update(Creature& creature, const uint32& diff)
 {
     // Waypoint movement can be switched on/off
@@ -290,7 +334,7 @@ bool WaypointMovementGenerator<Creature>::Update(Creature& creature, const uint3
         return true;
     }
 
-    // prevent a crash at empty waypoint path.
+    // Prevent a crash at empty waypoint path.
     if (!i_path || i_path->empty())
     {
         creature.clearUnitState(UNIT_STAT_ROAMING_MOVE);
@@ -319,11 +363,22 @@ bool WaypointMovementGenerator<Creature>::Update(Creature& creature, const uint3
     return true;
 }
 
+/**
+ * @brief Checks if the creature is stopped.
+ * @param u Reference to the creature.
+ * @return True if the creature is stopped, false otherwise.
+ */
 bool WaypointMovementGenerator<Creature>::Stopped(Creature& u)
 {
     return !i_nextMoveTime.Passed() || u.hasUnitState(UNIT_STAT_WAYPOINT_PAUSED);
 }
 
+/**
+ * @brief Checks if the creature can move.
+ * @param diff Time difference.
+ * @param u Reference to the creature.
+ * @return True if the creature can move, false otherwise.
+ */
 bool WaypointMovementGenerator<Creature>::CanMove(int32 diff, Creature& u)
 {
     i_nextMoveTime.Update(diff);
@@ -335,9 +390,17 @@ bool WaypointMovementGenerator<Creature>::CanMove(int32 diff, Creature& u)
     return i_nextMoveTime.Passed() && !u.hasUnitState(UNIT_STAT_WAYPOINT_PAUSED);
 }
 
+/**
+ * @brief Gets the reset position for the creature.
+ * @param x Reference to the X-coordinate.
+ * @param y Reference to the Y-coordinate.
+ * @param z Reference to the Z-coordinate.
+ * @param o Reference to the orientation.
+ * @return True if the reset position was successfully obtained, false otherwise.
+ */
 bool WaypointMovementGenerator<Creature>::GetResetPosition(Creature&, float& x, float& y, float& z, float& o) const
 {
-    // prevent a crash at empty waypoint path.
+    // Prevent a crash at empty waypoint path.
     if (!i_path || i_path->empty())
     {
         return false;
@@ -385,12 +448,20 @@ bool WaypointMovementGenerator<Creature>::GetResetPosition(Creature&, float& x, 
     return true;
 }
 
+/**
+ * @brief Gets the waypoint path information.
+ * @param oss Output stream to store the waypoint path information.
+ */
 void WaypointMovementGenerator<Creature>::GetPathInformation(std::ostringstream& oss) const
 {
     oss << "WaypointMovement: Last Reached WP: " << m_lastReachedWaypoint << " ";
     oss << "(Loaded path " << m_pathId << " from " << WaypointManager::GetOriginString(m_PathOrigin) << ")\n";
 }
 
+/**
+ * @brief Adds time to the waypoint pause time.
+ * @param waitTimeDiff Time difference to add.
+ */
 void WaypointMovementGenerator<Creature>::AddToWaypointPauseTime(int32 waitTimeDiff)
 {
     i_nextMoveTime.Update(waitTimeDiff);
@@ -401,6 +472,11 @@ void WaypointMovementGenerator<Creature>::AddToWaypointPauseTime(int32 waitTimeD
     }
 }
 
+/**
+ * @brief Sets the next waypoint for the creature.
+ * @param pointId ID of the next waypoint.
+ * @return True if the next waypoint was successfully set, false otherwise.
+ */
 bool WaypointMovementGenerator<Creature>::SetNextWaypoint(uint32 pointId)
 {
     if (!i_path || i_path->empty())
@@ -426,6 +502,10 @@ bool WaypointMovementGenerator<Creature>::SetNextWaypoint(uint32 pointId)
 }
 
 //----------------------------------------------------//
+/**
+ * @brief Gets the path at the end of the map.
+ * @return The path at the end of the map.
+ */
 uint32 FlightPathMovementGenerator::GetPathAtMapEnd() const
 {
     if (i_currentNode >= i_path->size())
@@ -446,14 +526,22 @@ uint32 FlightPathMovementGenerator::GetPathAtMapEnd() const
     return i_path->size();
 }
 
+/**
+ * @brief Initializes the FlightPathMovementGenerator.
+ * @param player Reference to the player.
+ */
 void FlightPathMovementGenerator::Initialize(Player& player)
 {
     Reset(player);
 }
 
+/**
+ * @brief Finalizes the FlightPathMovementGenerator.
+ * @param player Reference to the player.
+ */
 void FlightPathMovementGenerator::Finalize(Player& player)
 {
-    // remove flag to prevent send object build movement packets for flight state and crash (movement generator already not at top of stack)
+    // Remove flag to prevent send object build movement packets for flight state and crash (movement generator already not at top of stack)
     player.clearUnitState(UNIT_STAT_TAXI_FLIGHT);
 
     player.Unmount();
@@ -467,13 +555,17 @@ void FlightPathMovementGenerator::Finalize(Player& player)
             player.CastSpell(&player, 2479, true);
         }
 
-        // update z position to ground and orientation for landing point
-        // this prevent cheating with landing  point at lags
-        // when client side flight end early in comparison server side
+        // Update z position to ground and orientation for landing point
+        // This prevent cheating with landing  point at lags
+        // When client side flight end early in comparison server side
         player.StopMoving(true);
     }
 }
 
+/**
+ * @brief Interrupts the FlightPathMovementGenerator.
+ * @param player Reference to the player.
+ */
 void FlightPathMovementGenerator::Interrupt(Player& player)
 {
     player.clearUnitState(UNIT_STAT_TAXI_FLIGHT);
@@ -481,12 +573,21 @@ void FlightPathMovementGenerator::Interrupt(Player& player)
 
 #define PLAYER_FLIGHT_SPEED        32.0f
 
+/**
+ * @brief Resets the FlightPathMovementGenerator.
+ * @param player Reference to the player.
+ */
 void FlightPathMovementGenerator::Reset(Player& player)
 {
+    // Set the player to offline state for hostile references
     player.GetHostileRefManager().setOnlineOfflineState(false);
+    // Add the taxi flight state to the player
     player.addUnitState(UNIT_STAT_TAXI_FLIGHT);
+
+    // Set the client control lost and taxi flight flags
     player.SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
 
+    // Initialize the movement spline for the player
     Movement::MoveSplineInit init(player);
     uint32 end = GetPathAtMapEnd();
     for (uint32 i = GetCurrentNode(); i != end; ++i)
@@ -500,6 +601,12 @@ void FlightPathMovementGenerator::Reset(Player& player)
     init.Launch();
 }
 
+/**
+ * @brief Updates the FlightPathMovementGenerator.
+ * @param player Reference to the player.
+ * @param diff Time difference.
+ * @return True if the update was successful, false otherwise.
+ */
 bool FlightPathMovementGenerator::Update(Player& player, const uint32& /*diff*/)
 {
     uint32 pointId = (uint32)player.movespline->currentPathIdx();
@@ -522,6 +629,9 @@ bool FlightPathMovementGenerator::Update(Player& player, const uint32& /*diff*/)
     return i_currentNode < (i_path->size() - 1);
 }
 
+/**
+ * @brief Sets the current node after teleporting the player.
+ */
 void FlightPathMovementGenerator::SetCurrentNodeAfterTeleport()
 {
     if (i_path->empty())
@@ -550,6 +660,15 @@ void FlightPathMovementGenerator::DoEventIfAny(Player& player, TaxiPathNodeEntry
     }
 }
 
+/**
+ * @brief Gets the reset position for the player.
+ * @param player Reference to the player.
+ * @param x Reference to the X-coordinate.
+ * @param y Reference to the Y-coordinate.
+ * @param z Reference to the Z-coordinate.
+ * @param o Reference to the orientation.
+ * @return True if the reset position was successfully obtained, false otherwise.
+ */
 bool FlightPathMovementGenerator::GetResetPosition(Player&, float& x, float& y, float& z, float& o) const
 {
     const TaxiPathNodeEntry& node = (*i_path)[i_currentNode];
