@@ -130,12 +130,6 @@ class AssistanceMovementGenerator
         MovementGeneratorType GetMovementGeneratorType() const override { return ASSISTANCE_MOTION_TYPE; }
 
         /**
-         * @brief Initializes the movement generator.
-         * @param owner Reference to the unit.
-         */
-        void Initialize(Unit& owner) override;
-
-        /**
          * @brief Finalizes the movement generator.
          * @param owner Reference to the unit.
          */
