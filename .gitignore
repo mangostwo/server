@@ -45,6 +45,7 @@
 *.swo
 *.swp
 *.vi
+*.pch
 *~
 callgrind.out.*
 
