@@ -16,3 +16,12 @@
 [submodule "src/modules/Eluna"]
 	path = src/modules/Eluna
 	url = https://github.com/ElunaLuaEngine/Eluna
+[submodule "src/modules/Bots"]
+	path = src/modules/Bots
+	url = git@github.com:ike3/mangosbot-bots.git
+[submodule "src/modules/Immersive"]
+	path = src/modules/Immersive
+	url = git@github.com:ike3/mangosbot-immersive.git
+[submodule "src/test"]
+	path = src/test
+	url = git@github.com:ike3/mangosbot-test.git

@@ -34,6 +34,9 @@
 #include "ScriptMgr.h"
 #include "Totem.h"
 #include "SpellAuras.h"
+#ifdef ENABLE_IMMERSIVE
+#include "immersive.h"
+#endif
 
 void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 {
@@ -326,6 +329,9 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
     }
 
     obj->Use(_player);
+#ifdef ENABLE_IMMERSIVE
+    sImmersive.OnGoUse(_player, obj);
+#endif
 }
 
 void WorldSession::HandleGameobjectReportUse(WorldPacket& recvPacket)

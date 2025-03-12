@@ -30,6 +30,9 @@
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /*ENABLE_ELUNA*/
+#ifdef ENABLE_IMMERSIVE
+#include "immersive.h"
+#endif
 
 const int32 ReputationMgr::PointsInRank[MAX_REPUTATION_RANK] = {36000, 3000, 3000, 3000, 6000, 12000, 21000, 1000};
 
@@ -266,6 +269,9 @@ void ReputationMgr::SetReputation(FactionEntry const* factionEntry, int32 standi
         e->OnReputationChange(m_player, factionEntry->ID, standing, incremental);
     }
 #endif /* ENABLE_ELUNA */
+#ifdef ENABLE_IMMERSIVE
+    sImmersive.OnReputationChange(m_player, factionEntry, standing, incremental);
+#endif /* ENABLE_IMMERSIVE */
 
     bool anyRankIncreased = false;
     // if spillover definition exists in DB, override DBC

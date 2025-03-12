@@ -44,6 +44,9 @@
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
+#ifdef ENABLE_IMMERSIVE
+#include "immersive.h"
+#endif
 
 enum StableResultCode
 {
@@ -383,6 +386,9 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket& recv_data)
         _player->PrepareGossipMenu(pCreature, pCreature->GetCreatureInfo()->GossipMenuId);
         _player->SendPreparedGossip(pCreature);
     }
+#ifdef ENABLE_IMMERSIVE
+    sImmersive.OnGossipHello(_player, pCreature);
+#endif
 }
 
 void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recv_data)

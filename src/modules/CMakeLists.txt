@@ -25,3 +25,11 @@ endif()
 if(SCRIPT_LIB_ELUNA)
     add_subdirectory(Eluna)
 endif()
+
+# Include Player Bots if enabled
+if(PLAYERBOTS)
+    add_subdirectory(Bots)
+endif()
+if(IMMERSIVE)
+    add_subdirectory(Immersive)
+endif()

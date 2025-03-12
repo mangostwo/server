@@ -46,9 +46,11 @@ option(BUILD_TOOLS          "Build the map/vmap/mmap extractors"            ON)
 option(USE_STORMLIB         "Use StormLib for reading MPQs"                 ON)
 option(SCRIPT_LIB_ELUNA     "Compile with support for Eluna scripts"        ON)
 option(SCRIPT_LIB_SD3       "Compile with support for ScriptDev3 scripts"   ON)
-option(PLAYERBOTS           "Enable Player Bots"                            OFF)
+option(PLAYERBOTS           "Enable Player Bots"                            ON)
+option(IMMERSIVE            "Enable Immersive"                              ON)
 option(SOAP                 "Enable remote access via SOAP"                 OFF)
 option(PCH                  "Enable precompiled headers"                    ON)
+option(TESTS                "Build AI CppUnit Tests"                        ON)
 option(DEBUG                "Enable debug build (only on non IDEs)"         OFF)
 #==================================================================================
 message("")
@@ -111,6 +113,20 @@ find_package(DL      REQUIRED)
 
 find_package(ZLIB  QUIET)
 find_package(BZip2 QUIET)
+
+if(PLAYERBOTS)
+    message(STATUS "Enable Player Bots    : Yes (default)")
+    add_definitions(-DENABLE_PLAYERBOTS)
+else()
+    message(STATUS "Enable Player Bots    : No")
+endif()
+
+if(IMMERSIVE)
+    message(STATUS "Enable Immersive      : Yes (default)")
+    add_definitions(-DENABLE_IMMERSIVE)
+else()
+    message(STATUS "Enable Immersive      : No")
+endif()
 
 find_package(OpenSSL REQUIRED)
 

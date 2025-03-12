@@ -54,6 +54,9 @@
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
+#ifdef ENABLE_IMMERSIVE
+#include "immersive.h"
+#endif
 
 enum
 {
@@ -1700,6 +1703,9 @@ void GameObject::Use(Unit* user)
 
                     // normal chance
                     bool success = skill >= zone_skill && chance >= roll;
+#ifdef ENABLE_IMMERSIVE
+                    success = sImmersive.OnFishing(player, success);
+#endif
                     GameObject* fishingHole = NULL;
 
                     // overwrite fail in case fishhole if allowed (after 3.3.0)
