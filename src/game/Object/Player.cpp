@@ -15863,13 +15863,6 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
             GetSession()->SendBattlegGroundList(guid, bgTypeId);
             break;
         }
-#ifdef ENABLE_IMMERSIVE
-        case GOSSIP_OPTION_IMMERSIVE:
-            sImmersive.OnGossipSelect(this, gossipListId, &pMenuData);
-            PlayerTalkClass->CloseGossip();
-            break;
-#endif
-
     }
 
     if (pMenuData && menuData.m_gAction_script)
