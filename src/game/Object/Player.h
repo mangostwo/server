@@ -2108,9 +2108,6 @@ class Player : public Unit
 
         // Load the player from the database
         bool LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder);
-#ifdef ENABLE_PLAYERBOTS
-        bool MinimalLoadFromDB(QueryResult *result, uint32 guid);
-#endif
 
         // Get the zone ID from the database
         static uint32 GetZoneIdFromDB(ObjectGuid guid);

@@ -1,5 +1,4 @@
 #include "../botpch.h"
-#include "../ahbot/AhBot.h"
 #include "PlayerbotAIConfig.h"
 #include "playerbot.h"
 #include "RandomPlayerbotFactory.h"
@@ -183,7 +182,6 @@ bool PlayerbotAIConfig::Initialize()
     RandomPlayerbotFactory::CreateRandomBots();
     PlayerbotFactory::Init();
     sRandomItemMgr.Init();
-    auctionbot.Init();
     sRandomItemMgr.InitAfterAhBot();
 
     sLog.outString("---------------------------------------");

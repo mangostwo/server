@@ -3,7 +3,6 @@
 #include "WhoAction.h"
 #include "../../AiFactory.h"
 #include "../ItemVisitors.h"
-#include "../../../ahbot/AhBot.h"
 #include "../../RandomPlayerbotMgr.h"
 
 using namespace ai;
@@ -68,7 +67,7 @@ string WhoAction::QueryTrade(string text)
     for (list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
     {
         Item* sell = *i;
-        int32 sellPrice = auctionbot.GetSellPrice(sell->GetProto()) * sRandomPlayerbotMgr.GetSellMultiplier(bot) * sell->GetCount();
+        int32 sellPrice = sRandomPlayerbotMgr.GetSellMultiplier(bot) * sell->GetCount();
         if (!sellPrice)
             continue;
 

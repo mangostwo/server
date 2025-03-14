@@ -23,7 +23,6 @@ enum PerformanceMetric
     PERF_MON_VALUE,
     PERF_MON_ACTION,
     PERF_MON_RNDBOT,
-    PERF_MON_AHBOT,
     PERF_MON_TOTAL
 };
 

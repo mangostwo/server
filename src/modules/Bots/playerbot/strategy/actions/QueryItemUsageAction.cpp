@@ -1,7 +1,6 @@
 #include "botpch.h"
 #include "../../playerbot.h"
 #include "QueryItemUsageAction.h"
-#include "../../../ahbot/AhBot.h"
 #include "../values/ItemUsageValue.h"
 #include "../../RandomPlayerbotMgr.h"
 
@@ -130,7 +129,7 @@ string QueryItemUsageAction::QueryItemPrice(ItemPrototype const *item)
         for (list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
         {
             Item* sell = *i;
-            int32 price = sell->GetCount() * auctionbot.GetSellPrice(sell->GetProto()) * sRandomPlayerbotMgr.GetSellMultiplier(bot);
+            int32 price = sell->GetCount() * sRandomPlayerbotMgr.GetSellMultiplier(bot);
             if (!sellPrice || sellPrice > price) sellPrice = price;
         }
     }
@@ -141,7 +140,7 @@ string QueryItemUsageAction::QueryItemPrice(ItemPrototype const *item)
     if (usage == ITEM_USAGE_NONE)
         return msg.str();
 
-    int32 buyPrice = auctionbot.GetBuyPrice(item) * sRandomPlayerbotMgr.GetBuyMultiplier(bot);
+    int32 buyPrice = sRandomPlayerbotMgr.GetBuyMultiplier(bot);
     if (buyPrice)
     {
         if (sellPrice) msg << " ";

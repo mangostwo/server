@@ -3,7 +3,6 @@
 #include "../../playerbot.h"
 #include "SendMailAction.h"
 
-#include "../../../ahbot/AhBot.h"
 #include "../../PlayerbotAIConfig.h"
 
 using namespace ai;
@@ -128,7 +127,7 @@ bool SendMailAction::Execute(Event event)
             draft.AddItem(item);
             if (randomBot)
             {
-                uint32 price = item->GetCount() * auctionbot.GetSellPrice(proto);
+                uint32 price = item->GetCount();
                 if (!price)
                 {
                     ostringstream out;

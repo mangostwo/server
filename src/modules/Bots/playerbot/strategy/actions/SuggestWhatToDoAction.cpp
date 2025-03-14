@@ -2,14 +2,10 @@
 #include "../../playerbot.h"
 #include "SuggestWhatToDoAction.h"
 
-#include "../../../ahbot/AhBot.h"
-#include "../../../ahbot/PricingStrategy.h"
 #include "../../AiFactory.h"
 #include "ChannelMgr.h"
 #include "../../PlayerbotAIConfig.h"
 #include "../../PlayerbotTextMgr.h"
-
-using ahbot::PricingStrategy;
 
 using namespace ai;
 
@@ -22,7 +18,6 @@ SuggestWhatToDoAction::SuggestWhatToDoAction(PlayerbotAI* ai, string name) : Inv
 {
     suggestions.push_back(&SuggestWhatToDoAction::instance);
     suggestions.push_back(&SuggestWhatToDoAction::specificQuest);
-    suggestions.push_back(&SuggestWhatToDoAction::grindMaterials);
     suggestions.push_back(&SuggestWhatToDoAction::grindReputation);
     suggestions.push_back(&SuggestWhatToDoAction::something);
 }
@@ -141,58 +136,6 @@ void SuggestWhatToDoAction::specificQuest()
     placeholders["%quest"] = chat->formatQuest(quest);
 
     spam(sPlayerbotTextMgr.Format("suggest_quest", placeholders));
-}
-
-void SuggestWhatToDoAction::grindMaterials()
-{
-    if (bot->getLevel() <= 5)
-        return;
-
-    if (categories.empty() || time(0) - categoriesUpdated > sAhBotConfig.updateInterval)
-    {
-        QueryResult *result = CharacterDatabase.PQuery("SELECT distinct category, multiplier FROM ahbot_category where category not in ('other', 'quest', 'trade', 'reagent') and multiplier > 3 order by multiplier desc limit 10");
-        if (!result)
-            return;
-        do
-        {
-            Field* fields = result->Fetch();
-            categories[fields[0].GetCppString()] = fields[1].GetFloat();
-        } while (result->NextRow());
-        delete result;
-
-        categoriesUpdated = time(0);
-    }
-
-    PerformanceMonitorOperation *pmo = sPerformanceMonitor.start(PERF_MON_ACTION, "suggest grind materials");
-    for (map<string, double>::iterator i = categories.begin(); i != categories.end(); ++i)
-    {
-        if (urand(0, 10) < 3) {
-            string name = i->first;
-            double multiplier = i->second;
-
-            for (int j = 0; j < ahbot::CategoryList::instance.size(); j++)
-            {
-                ahbot::Category* category = ahbot::CategoryList::instance[j];
-                if (name == category->GetName())
-                {
-                    string item = category->GetLabel();
-                    transform(item.begin(), item.end(), item.begin(), tolower);
-                    ostringstream itemout;
-                    itemout << "|c0000b000" << item << "|r";
-                    item = itemout.str();
-
-                    map<string, string> placeholders;
-                    placeholders["%role"] = chat->formatClass(bot, AiFactory::GetPlayerSpecTab(bot));
-                    placeholders["%category"] = item;
-
-                    spam(sPlayerbotTextMgr.Format("suggest_trade", placeholders));
-                    if (pmo) pmo->finish();
-                    return;
-                }
-            }
-        }
-    }
-    if (pmo) pmo->finish();
 }
 
 void SuggestWhatToDoAction::grindReputation()
@@ -386,7 +329,7 @@ bool SuggestTradeAction::Execute(Event event)
     if (!proto)
         return false;
 
-    uint32 price = PricingStrategy::RoundPrice(auctionbot.GetSellPrice(proto) * sRandomPlayerbotMgr.GetSellMultiplier(bot) * count);
+    uint32 price = sRandomPlayerbotMgr.GetSellMultiplier(bot) * count;
     if (!price)
         return false;
 

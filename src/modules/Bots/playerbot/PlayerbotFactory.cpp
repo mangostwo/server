@@ -2,14 +2,12 @@
 #include "playerbot.h"
 #include "PlayerbotFactory.h"
 
-#include "../ahbot/AhBotConfig.h"
 #include "SQLStorages.h"
 #include "ItemPrototype.h"
 #include "PlayerbotAIConfig.h"
 #include "AccountMgr.h"
 #include "DBCStore.h"
 #include "SharedDefines.h"
-#include "ahbot/AhBot.h"
 #include "RandomItemMgr.h"
 #include "RandomPlayerbotFactory.h"
 #include "ServerFacade.h"
@@ -669,7 +667,6 @@ void PlayerbotFactory::InitEquipment(bool incremental)
         do
         {
             vector<uint32> ids = sRandomItemMgr.Query(level, bot->getClass(), slot, quality);
-            if (!ids.empty()) ahbot::Shuffle(ids);
             for (uint32 index = 0; index < ids.size(); ++index)
             {
                 uint32 newItemId = ids[index];
@@ -1488,7 +1485,7 @@ void PlayerbotFactory::InitInventoryTrade()
     {
     case ITEM_QUALITY_NORMAL:
         count = proto->GetMaxStackSize();
-        stacks = urand(1, 3) / auctionbot.GetRarityPriceMultiplier(proto);
+        stacks = urand(1, 3);
         break;
     case ITEM_QUALITY_UNCOMMON:
         stacks = 1;

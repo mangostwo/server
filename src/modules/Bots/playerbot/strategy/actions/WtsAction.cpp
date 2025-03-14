@@ -3,12 +3,8 @@
 #include "WtsAction.h"
 #include "../../AiFactory.h"
 #include "../ItemVisitors.h"
-#include "../../../ahbot/AhBot.h"
-#include "../../../ahbot/PricingStrategy.h"
 #include "../../RandomPlayerbotMgr.h"
 #include "../values/ItemUsageValue.h"
-
-using ahbot::PricingStrategy;
 
 using namespace ai;
 
@@ -42,7 +38,7 @@ bool WtsAction::Execute(Event event)
         if (usage == ITEM_USAGE_NONE)
             continue;
 
-        int32 buyPrice = PricingStrategy::RoundPrice(auctionbot.GetBuyPrice(proto) * sRandomPlayerbotMgr.GetBuyMultiplier(bot));
+        int32 buyPrice = sRandomPlayerbotMgr.GetBuyMultiplier(bot);
         if (!buyPrice)
             continue;
 

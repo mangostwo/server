@@ -16,7 +16,6 @@ namespace ai
         vector<Suggestion> suggestions;
         void instance();
         void specificQuest();
-        void grindMaterials();
         void grindReputation();
         void something();
         void trade();

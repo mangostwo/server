@@ -9,7 +9,6 @@
 #include "PlayerbotAI.h"
 #include "Player.h"
 #include "AiFactory.h"
-#include "GuildTaskMgr.h"
 #include "PlayerbotCommandServer.h"
 
 #include "GridNotifiers.h"
@@ -264,15 +263,6 @@ bool RandomPlayerbotMgr::ProcessBot(Player* player)
         uint32 randomTime = urand(sPlayerbotAIConfig.minRandomBotReviveTime, sPlayerbotAIConfig.maxRandomBotReviveTime);
         SetEventValue(bot, "dead", 1, randomTime);
         return false;
-    }
-
-    if (player->GetGuildId())
-    {
-		Guild* guild = sGuildMgr.GetGuildById(player->GetGuildId());
-		if (guild->GetLeaderGuid().GetRawValue() == player->GetObjectGuid().GetRawValue()) {
-			for (vector<Player*>::iterator i = players.begin(); i != players.end(); ++i)
-				sGuildTaskMgr.Update(*i, player);
-		}
     }
 
     uint32 randomize = GetEventValue(bot, "randomize");

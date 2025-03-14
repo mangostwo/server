@@ -2,7 +2,6 @@
 #include "../../playerbot.h"
 #include "SetCraftAction.h"
 
-#include "../../../ahbot/AhBotConfig.h"
 #include "../../ServerFacade.h"
 #include "../values/CraftValue.h"
 using namespace ai;
@@ -154,5 +153,5 @@ uint32 SetCraftAction::GetCraftFee(CraftData& data)
         return 0;
 
     uint32 level = max(proto->ItemLevel, proto->RequiredLevel);
-    return sAhBotConfig.defaultMinPrice * level * level / 40;
+    return level * level / 40;
 }

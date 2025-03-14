@@ -3,11 +3,8 @@
 #include "PlayerbotAIConfig.h"
 #include "PerformanceMonitor.h"
 
-#include "../../modules/Bots/ahbot/AhBot.h"
 #include "DatabaseEnv.h"
 #include "PlayerbotAI.h"
-
-#include "../../modules/Bots/ahbot/AhBotConfig.h"
 
 PerformanceMonitor::PerformanceMonitor() {}
 PerformanceMonitor::~PerformanceMonitor()
@@ -44,7 +41,6 @@ void PerformanceMonitor::PrintStats()
         case PERF_MON_ACTION: key = "A"; break;
         case PERF_MON_RNDBOT: key = "RndBot"; break;
         case PERF_MON_TOTAL: key = "Total"; break;
-        case PERF_MON_AHBOT: key = "AhBot"; break;
         default: key = "?";
         }
 

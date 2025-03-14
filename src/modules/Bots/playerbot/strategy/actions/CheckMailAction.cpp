@@ -3,7 +3,6 @@
 #include "CheckMailAction.h"
 #include "Mail.h"
 
-#include "../../GuildTaskMgr.h"
 #include "../../PlayerbotAIConfig.h"
 using namespace ai;
 
@@ -51,21 +50,6 @@ bool CheckMailAction::Execute(Event event)
 
 void CheckMailAction::ProcessMail(Mail* mail, Player* owner)
 {
-    if (mail->items.empty())
-    {
-#ifdef MANGOSBOT_TWO
-        if (!mail->body.empty())
-        {
-            sGuildTaskMgr.CheckTaskTransfer(mail->body, owner, bot);
-        }
-#else
-        if (mail->itemTextId)
-        {
-            sGuildTaskMgr.CheckTaskTransfer(sObjectMgr.GetItemText(mail->itemTextId), owner, bot);
-        }
-#endif
-        return;
-    }
 
     if (mail->subject.find("Item(s) you asked for") != string::npos)
         return;
@@ -75,23 +59,6 @@ void CheckMailAction::ProcessMail(Mail* mail, Player* owner)
         Item *item = bot->GetMItem(i->item_guid);
         if (!item)
             continue;
-
-        if (!sGuildTaskMgr.CheckItemTask(i->item_template, item->GetCount(), owner, bot, true))
-        {
-            ostringstream body;
-            body << "Hello, " << owner->GetName() << ",\n";
-            body << "\n";
-            body << "Here are the item(s) you've sent me by mistake";
-            body << "\n";
-            body << "Thanks,\n";
-            body << bot->GetName() << "\n";
-
-            MailDraft draft("Item(s) you've sent me", body.str());
-            draft.AddItem(item);
-            bot->RemoveMItem(i->item_guid);
-            draft.SendMailTo(MailReceiver(owner), MailSender(bot));
-            return;
-        }
 
         bot->RemoveMItem(i->item_guid);
         item->DestroyForPlayer(bot);

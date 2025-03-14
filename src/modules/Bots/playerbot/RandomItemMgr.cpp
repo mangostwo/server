@@ -4,11 +4,9 @@
 #include "RandomItemMgr.h"
 
 #include "DBCStore.h"
-#include "../../modules/Bots/ahbot/AhBot.h"
 #include "DatabaseEnv.h"
 #include "PlayerbotAI.h"
 
-#include "../../modules/Bots/ahbot/AhBotConfig.h"
 #include "ServerFacade.h"
 
 char * strstri (const char* str1, const char* str2);
@@ -212,16 +210,10 @@ void RandomItemMgr::BuildRandomItemCache()
             if (proto->Duration & 0x80000000)
                 continue;
 
-            if (sAhBotConfig.ignoreItemIds.find(proto->ItemId) != sAhBotConfig.ignoreItemIds.end())
-                continue;
-
             if (strstri(proto->Name1, "qa") || strstri(proto->Name1, "test") || strstri(proto->Name1, "deprecated"))
                 continue;
 
-            if (!proto->ItemLevel || (proto->RequiredLevel && proto->RequiredLevel > sAhBotConfig.maxRequiredLevel) || proto->ItemLevel > sAhBotConfig.maxItemLevel)
-                continue;
-
-            if (!auctionbot.GetSellPrice(proto))
+            if (!proto->ItemLevel || proto->RequiredLevel)
                 continue;
 
             uint32 level = proto->ItemLevel;
@@ -680,9 +672,6 @@ void RandomItemMgr::BuildPotionCache()
                 if (proto->Duration & 0x80000000)
                     continue;
 
-                if (sAhBotConfig.ignoreItemIds.find(proto->ItemId) != sAhBotConfig.ignoreItemIds.end())
-                    continue;
-
                 for (int j = 0; j < MAX_ITEM_PROTO_SPELLS; j++)
                 {
                     const SpellEntry* const spellInfo = sServerFacade.LookupSpellInfo(proto->Spells[j].SpellId);
@@ -750,9 +739,6 @@ void RandomItemMgr::BuildFoodCache()
                     continue;
 
                 if (proto->Duration & 0x80000000)
-                    continue;
-
-                if (sAhBotConfig.ignoreItemIds.find(proto->ItemId) != sAhBotConfig.ignoreItemIds.end())
                     continue;
 
                 foodCache[level / 10][category].push_back(itemId);
@@ -868,13 +854,10 @@ void RandomItemMgr::BuildRarityCache()
             if (proto->Quality == ITEM_QUALITY_POOR)
                 continue;
 
-            if (sAhBotConfig.ignoreItemIds.find(proto->ItemId) != sAhBotConfig.ignoreItemIds.end())
-                continue;
-
             if (strstri(proto->Name1, "qa") || strstri(proto->Name1, "test") || strstri(proto->Name1, "deprecated"))
                 continue;
 
-            if (!proto->ItemLevel || (proto->RequiredLevel && proto->RequiredLevel > sAhBotConfig.maxRequiredLevel) || proto->ItemLevel > sAhBotConfig.maxItemLevel)
+            if (!proto->ItemLevel || proto->RequiredLevel)
                 continue;
 
             QueryResult* results = WorldDatabase.PQuery(

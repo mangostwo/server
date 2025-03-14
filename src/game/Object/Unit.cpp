@@ -65,7 +65,6 @@
 #endif /* ENABLE_ELUNA */
 #ifdef ENABLE_PLAYERBOTS
 #include "playerbot.h"
-#include "GuildTaskMgr.h"
 #endif
 
 #include <math.h>
@@ -1248,10 +1247,7 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
             bg->HandleKillUnit(victim, responsiblePlayer);
         }
 
-#ifdef ENABLE_PLAYERBOTS
-        sGuildTaskMgr.CheckKillTask(responsiblePlayer, victim);
-#endif
-            // Used by Eluna
+        // Used by Eluna   
 #ifdef ENABLE_ELUNA
         if (Eluna* e = responsiblePlayer->GetEluna())
         {

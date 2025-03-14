@@ -47,9 +47,7 @@
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
 #ifdef ENABLE_PLAYERBOTS
-#include "../../../modules/Bots/ahbot/AhBot.h"
 #include "../../../modules/Bots/playerbot/playerbot.h"
-#include "../../../modules/Bots/playerbot/GuildTaskMgr.h"
 #endif
 
 // Supported shift-links (client generated and server side)
@@ -773,9 +771,6 @@ ChatCommand* ChatHandler::getCommandTable()
         { "account",        SEC_PLAYER,         true,  NULL,                                           "", accountCommandTable  },
         { "achievement",    SEC_ADMINISTRATOR,  true,  NULL,                                           "", achievementCommandTable },
         { "auction",        SEC_ADMINISTRATOR,  false, NULL,                                           "", auctionCommandTable  },
-#ifndef ENABLE_PLAYERBOTS
-        { "ahbot",          SEC_ADMINISTRATOR,  true,  NULL,                                           "", ahbotCommandTable    },
-#endif
         { "cast",           SEC_ADMINISTRATOR,  false, NULL,                                           "", castCommandTable     },
         { "character",      SEC_GAMEMASTER,     true,  NULL,                                           "", characterCommandTable},
         { "debug",          SEC_MODERATOR,      true,  NULL,                                           "", debugCommandTable    },
@@ -866,10 +861,8 @@ ChatCommand* ChatHandler::getCommandTable()
         { "gearscore",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleShowGearScoreCommand,       "", NULL },
         { "mmap",           SEC_GAMEMASTER,     false, NULL,                                           "", mmapCommandTable },
 #ifdef ENABLE_PLAYERBOTS
-        { "ahbot",            SEC_GAMEMASTER,    true,  &ChatHandler::HandleAhBotCommand,                      "", NULL },
         { "rndbot",           SEC_GAMEMASTER,    true,  &ChatHandler::HandleRandomPlayerbotCommand,     "", NULL },
         { "bot",              SEC_PLAYER,        false, &ChatHandler::HandlePlayerbotCommand,               "", NULL },
-        { "gtask",            SEC_GAMEMASTER,    true,  &ChatHandler::HandleGuildTaskCommand,           "", NULL },
         { "pmon",             SEC_GAMEMASTER,    true,  &ChatHandler::HandlePerfMonCommand,           "", NULL },
 #endif
 

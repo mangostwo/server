@@ -4,10 +4,8 @@
 
 #include "../../LootObjectStack.h"
 #include "../../PlayerbotAIConfig.h"
-#include "../../../ahbot/AhBot.h"
 #include "../../RandomPlayerbotMgr.h"
 #include "../values/ItemUsageValue.h"
-#include "../../GuildTaskMgr.h"
 #include "../../ServerFacade.h"
 #include "../values/LootStrategyValue.h"
 #include "../../ServerFacade.h"
@@ -290,19 +288,9 @@ bool StoreLootAction::Execute(Event event)
         Player* master = ai->GetMaster();
         if (sRandomPlayerbotMgr.IsRandomBot(bot) && master)
         {
-            uint32 price = itemcount * auctionbot.GetBuyPrice(proto) * sRandomPlayerbotMgr.GetBuyMultiplier(bot) + gold;
+            uint32 price = itemcount * sRandomPlayerbotMgr.GetBuyMultiplier(bot) + gold;
             if (price)
                 sRandomPlayerbotMgr.AddTradeDiscount(bot, master, price);
-
-            Group* group = bot->GetGroup();
-            if (group)
-            {
-                for (GroupReference *ref = group->GetFirstMember(); ref; ref = ref->next())
-                {
-                    if( ref->getSource() != bot)
-                        sGuildTaskMgr.CheckItemTask(itemid, itemcount, ref->getSource(), bot);
-                }
-            }
         }
 
         WorldPacket packet(CMSG_AUTOSTORE_LOOT_ITEM, 1);

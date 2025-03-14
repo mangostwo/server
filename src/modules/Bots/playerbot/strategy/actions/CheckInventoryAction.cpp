@@ -1,12 +1,7 @@
 #include "botpch.h"
 #include "../../playerbot.h"
 #include "CheckInventoryAction.h"
-
-#include "../../../ahbot/AhBot.h"
-#include "../../../ahbot/PricingStrategy.h"
 #include "../values/ItemUsageValue.h"
-
-using ahbot::PricingStrategy;
 
 using namespace ai;
 
@@ -97,7 +92,7 @@ void CheckInventoryAction::HandleEquip(Item* item, bool randomBot)
 
 void CheckInventoryAction::HandleTrade(Item* item, bool randomBot)
 {
-    uint32 price = PricingStrategy::RoundPrice(item->GetCount() * auctionbot.GetBuyPrice(item->GetProto()));
+    uint32 price = item->GetCount();
     if (price <= item->GetProto()->SellPrice)
     {
         HandleVendor(item, randomBot);

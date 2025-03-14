@@ -4,9 +4,7 @@
 
 #include "../ItemVisitors.h"
 #include "../../PlayerbotAIConfig.h"
-#include "../../../ahbot/AhBot.h"
 #include "../../RandomPlayerbotMgr.h"
-#include "../../GuildTaskMgr.h"
 #include "../../ServerFacade.h"
 #include "../values/CraftValue.h"
 #include "../values/ItemUsageValue.h"
@@ -82,8 +80,6 @@ bool TradeStatusAction::Execute(Event event)
                 {
                     craftData.AddObtained(itemId, count);
                 }
-
-                sGuildTaskMgr.CheckItemTask(itemId, count, master, bot);
             }
 
 
@@ -161,7 +157,7 @@ bool TradeStatusAction::CheckTrade()
     for (uint32 slot = 0; slot < TRADE_SLOT_TRADED_COUNT; ++slot)
     {
         Item* item = bot->GetTradeData()->GetItem((TradeSlots)slot);
-        if (item && !auctionbot.GetSellPrice(item->GetProto()))
+        if (item)
         {
             ostringstream out;
             out << chat->formatItem(item->GetProto()) << " - This is not for sale";
@@ -175,7 +171,7 @@ bool TradeStatusAction::CheckTrade()
         {
             ostringstream out; out << item->GetProto()->ItemId;
             ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", out.str());
-            if (botMoney && (!auctionbot.GetBuyPrice(item->GetProto()) || usage == ITEM_USAGE_NONE))
+            if (botMoney && usage == ITEM_USAGE_NONE)
             {
                 CraftData& data = AI_VALUE(CraftData&, "craft");
                 if (!data.IsRequired(item->GetProto()->ItemId))
@@ -287,11 +283,11 @@ int32 TradeStatusAction::CalculateCost(Player* player, bool sell)
 
         if (sell)
         {
-            sum += item->GetCount() * auctionbot.GetSellPrice(proto) * sRandomPlayerbotMgr.GetSellMultiplier(bot);
+            sum += item->GetCount() * sRandomPlayerbotMgr.GetSellMultiplier(bot);
         }
         else
         {
-            sum += item->GetCount() * auctionbot.GetBuyPrice(proto) * sRandomPlayerbotMgr.GetBuyMultiplier(bot);
+            sum += item->GetCount() * sRandomPlayerbotMgr.GetBuyMultiplier(bot);
         }
     }
 

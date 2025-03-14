@@ -18,8 +18,6 @@
 #include "Group.h"
 #include "Pet.h"
 #include "SpellAuras.h"
-#include "../AhBot/ahbot.h"
-#include "GuildTaskMgr.h"
 #include "PlayerbotDbStore.h"
 #include "strategy/values/PositionValue.h"
 #include "ServerFacade.h"
@@ -1651,16 +1649,6 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
 bool ChatHandler::HandleRandomPlayerbotCommand(char* args)
 {
     return RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(this, args);
-}
-
-bool ChatHandler::HandleAhBotCommand(char* args)
-{
-    return ahbot::AhBot::HandleAhBotCommand(this, args);
-}
-
-bool ChatHandler::HandleGuildTaskCommand(char* args)
-{
-    return GuildTaskMgr::HandleConsoleCommand(this, args);
 }
 
 float PlayerbotAI::GetRange(string type)

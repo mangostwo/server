@@ -1,9 +1,6 @@
 #include "botpch.h"
 #include "../../playerbot.h"
 #include "ItemUsageValue.h"
-
-#include "../../../ahbot/AhBot.h"
-#include "../../GuildTaskMgr.h"
 #include "../../RandomItemMgr.h"
 using namespace ai;
 
@@ -26,9 +23,6 @@ ItemUsage ItemUsageValue::Calculate()
     case ITEM_CLASS_CONSUMABLE:
         return ITEM_USAGE_USE;
     }
-
-    if (bot->GetGuildId() && sGuildTaskMgr.IsGuildTaskItem(itemId, bot->GetGuildId()))
-        return ITEM_USAGE_GUILD_TASK;
 
     ItemUsage equip = QueryItemUsageForEquip(proto);
     if (equip != ITEM_USAGE_NONE)
@@ -99,53 +93,39 @@ bool ItemUsageValue::IsItemUsefulForSkill(ItemPrototype const * proto)
     case ITEM_CLASS_MISC:
     case ITEM_CLASS_REAGENT:
         {
-            if (ai->HasSkill(SKILL_TAILORING) && auctionbot.IsUsedBySkill(proto, SKILL_TAILORING))
+            if (ai->HasSkill(SKILL_TAILORING))
                 return true;
-            if (ai->HasSkill(SKILL_LEATHERWORKING) && auctionbot.IsUsedBySkill(proto, SKILL_LEATHERWORKING))
+            if (ai->HasSkill(SKILL_LEATHERWORKING))
                 return true;
-            if (ai->HasSkill(SKILL_ENGINEERING) && auctionbot.IsUsedBySkill(proto, SKILL_ENGINEERING))
+            if (ai->HasSkill(SKILL_ENGINEERING))
                 return true;
-            if (ai->HasSkill(SKILL_BLACKSMITHING) && auctionbot.IsUsedBySkill(proto, SKILL_BLACKSMITHING))
+            if (ai->HasSkill(SKILL_BLACKSMITHING))
                 return true;
-            if (ai->HasSkill(SKILL_ALCHEMY) && auctionbot.IsUsedBySkill(proto, SKILL_ALCHEMY))
+            if (ai->HasSkill(SKILL_ALCHEMY))
                 return true;
-            if (ai->HasSkill(SKILL_ENCHANTING) && auctionbot.IsUsedBySkill(proto, SKILL_ENCHANTING))
+            if (ai->HasSkill(SKILL_ENCHANTING))
                 return true;
-            if (ai->HasSkill(SKILL_FISHING) && auctionbot.IsUsedBySkill(proto, SKILL_FISHING))
+            if (ai->HasSkill(SKILL_FISHING))
                 return true;
-            if (ai->HasSkill(SKILL_FIRST_AID) && auctionbot.IsUsedBySkill(proto, SKILL_FIRST_AID))
+            if (ai->HasSkill(SKILL_FIRST_AID))
                 return true;
-            if (ai->HasSkill(SKILL_COOKING) && auctionbot.IsUsedBySkill(proto, SKILL_COOKING))
+            if (ai->HasSkill(SKILL_COOKING))
                 return true;
 #ifdef MANGOSBOT_ONE
-            if (ai->HasSkill(SKILL_JEWELCRAFTING) && auctionbot.IsUsedBySkill(proto, SKILL_JEWELCRAFTING))
+            if (ai->HasSkill(SKILL_JEWELCRAFTING))
                 return true;
 #endif
 #ifdef MANGOSBOT_TWO
-            if (ai->HasSkill(SKILL_JEWELCRAFTING) && auctionbot.IsUsedBySkill(proto, SKILL_JEWELCRAFTING))
+            if (ai->HasSkill(SKILL_JEWELCRAFTING))
                 return true;
-            if (ai->HasSkill(SKILL_INSCRIPTION) && auctionbot.IsUsedBySkill(proto, SKILL_INSCRIPTION))
+            if (ai->HasSkill(SKILL_INSCRIPTION))
                 return true;
 #endif
-            if (ai->HasSkill(SKILL_MINING) &&
-                    (
-                            auctionbot.IsUsedBySkill(proto, SKILL_MINING) ||
-                            auctionbot.IsUsedBySkill(proto, SKILL_BLACKSMITHING) ||
-#ifdef MANGOSBOT_ONE
-                            auctionbot.IsUsedBySkill(proto, SKILL_JEWELCRAFTING) ||
-#endif
-#ifdef MANGOSBOT_TWO
-                            auctionbot.IsUsedBySkill(proto, SKILL_JEWELCRAFTING) ||
-                            auctionbot.IsUsedBySkill(proto, SKILL_INSCRIPTION) ||
-#endif
-                            auctionbot.IsUsedBySkill(proto, SKILL_ENGINEERING)
-                    ))
+            if (ai->HasSkill(SKILL_MINING))
                 return true;
-            if (ai->HasSkill(SKILL_SKINNING) &&
-                    (auctionbot.IsUsedBySkill(proto, SKILL_SKINNING) || auctionbot.IsUsedBySkill(proto, SKILL_LEATHERWORKING)))
+            if (ai->HasSkill(SKILL_SKINNING))
                 return true;
-            if (ai->HasSkill(SKILL_HERBALISM) &&
-                    (auctionbot.IsUsedBySkill(proto, SKILL_HERBALISM) || auctionbot.IsUsedBySkill(proto, SKILL_ALCHEMY)))
+            if (ai->HasSkill(SKILL_HERBALISM))
                 return true;
 
             return false;

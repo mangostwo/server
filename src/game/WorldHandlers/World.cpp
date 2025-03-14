@@ -89,7 +89,6 @@
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_PLAYERBOTS
-#include "AhBot.h"
 #include "PlayerbotAIConfig.h"
 #include "RandomPlayerbotMgr.h"
 #endif
@@ -1640,7 +1639,6 @@ void World::SetInitialWorldSettings()
 
 #ifdef ENABLE_PLAYERBOTS
     sPlayerbotAIConfig.Initialize();
-    auctionbot.Init();
 #endif
 
 #ifdef ENABLE_IMMERSIVE
@@ -1877,9 +1875,6 @@ void World::Update(uint32 diff)
     if (m_timers[WUPDATE_AHBOT].Passed())
     {
         sAuctionBot.Update();
-#ifdef ENABLE_PLAYERBOTS
-        auctionbot.Update();
-#endif
         m_timers[WUPDATE_AHBOT].Reset();
     }
 
