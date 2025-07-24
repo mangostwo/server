@@ -1718,6 +1718,8 @@ void World::showFooter()
         "_______________________________________________________\n"
         "\n"
         "        Server Version : %s\n"
+        "         Eluna Version : %s\n"
+        "           SD3 Version : %s\n"
         "      Database Version : Rel%s.%s.%s\n"
         "\n"
         "    Supporting Clients : %s\n"
@@ -1725,7 +1727,7 @@ void World::showFooter()
         "\n"
         "         Module Status -\n%s\n"
         "_______________________________________________________\n"
-        , GitRevision::GetProductVersionStr(), GitRevision::GetWorldDBVersion(), GitRevision::GetWorldDBStructure(), GitRevision::GetWorldDBContent(),
+        , GitRevision::GetProductVersionStr(), GitRevision::GetDepElunaFullRevision(), GitRevision::GetDepSD3FullRevision(), GitRevision::GetWorldDBVersion(), GitRevision::GetWorldDBStructure(), GitRevision::GetWorldDBContent(),
             thisClientVersion.c_str(), thisClientBuilds.c_str(), sModules.c_str());
 }
 
