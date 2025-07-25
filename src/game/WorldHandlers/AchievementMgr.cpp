@@ -1482,7 +1482,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     continue;
                 }
                 // check item count
-                if(!miscvalue2)
+                if (!miscvalue2)
                 {
                     continue;
                 }

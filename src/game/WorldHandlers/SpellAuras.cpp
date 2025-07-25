@@ -10593,7 +10593,7 @@ void SpellAuraHolder::_RemoveSpellAuraHolder()
 
     // passive auras do not get put in slots - said who? ;)
     // Note: but totem can be not accessible for aura target in time remove (to far for find in grid)
-    // if(m_isPassive && !(caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->IsTotem()))
+    // if (m_isPassive && !(caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->IsTotem()))
     //    return;
 
     uint8 slot = GetAuraSlot();
@@ -11577,11 +11577,11 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     }
 
                     //todo: 2 runic power per 5 sec in combat (ranks 1 and 2)
-                    if(GetId() == 48979) // rank 1, 10 runic power.
+                    if (GetId() == 48979) // rank 1, 10 runic power.
                     {
                         m_target->ModifyPower(POWER_RUNIC_POWER, (int32)10);
                     }
-                    else if(GetId() == 49483) // rank 2
+                    else if (GetId() == 49483) // rank 2
                     {
                         m_target->ModifyPower(POWER_RUNIC_POWER, (int32)20);
                     }

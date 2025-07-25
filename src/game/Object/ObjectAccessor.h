@@ -62,7 +62,7 @@ class HashMapHolder
             ACE_READ_GUARD_RETURN (LockType, guard, i_lock, nullptr)
             for(auto const& itr : m_objectMap)
             {
-                if(std::forward<F>(pred)(itr.first, itr.second))
+                if (std::forward<F>(pred)(itr.first, itr.second))
                 {
                     return itr.second;
                 }

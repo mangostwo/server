@@ -959,7 +959,7 @@ void BattleGround::EndBattleGround(Team winner)
         }
 
         // this line is obsolete - team is set ALWAYS
-        // if(!team) team = plr->GetTeam();
+        // if (!team) team = plr->GetTeam();
 
         // per player calculation
         if (isArena() && isRated() && winner_arena_team && loser_arena_team)
@@ -1003,7 +1003,7 @@ void BattleGround::EndBattleGround(Team winner)
             {
                 UpdatePlayerScore(plr, SCORE_BONUS_HONOR, GetBonusHonorFromKill(win_kills*4));
                 plr->ModifyArenaPoints(win_arena);
-                if(!plr->GetRandomWinner())
+                if (!plr->GetRandomWinner())
                 {
                     plr->SetRandomWinner(true);
                 }

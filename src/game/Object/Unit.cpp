@@ -331,7 +331,7 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
         return;
     }
 
-    /*if(p_time > m_AurasCheck)
+    /*if (p_time > m_AurasCheck)
     {
     m_AurasCheck = 2000;
     _UpdateAura();
@@ -3413,7 +3413,7 @@ void Unit::SendMeleeAttackStop(Unit* victim)
     SendMessageToSet(&data, true);
     DETAIL_FILTER_LOG(LOG_FILTER_COMBAT, "%s %u stopped attacking %s %u", (GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), GetGUIDLow(), (victim->GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), victim->GetGUIDLow());
 
-    /*if(victim->GetTypeId() == TYPEID_UNIT)
+    /*if (victim->GetTypeId() == TYPEID_UNIT)
     ((Creature*)victim)->AI().EnterEvadeMode(this);*/
 }
 
@@ -13226,7 +13226,7 @@ class RelocationNotifyEvent : public BasicEvent
                 MaNGOS::PlayerRelocationNotifier notify((Player&)m_owner);
                 Cell::VisitAllObjects(&m_owner, notify, radius);
             }
-            else // if(m_owner.GetTypeId() == TYPEID_UNIT)
+            else // if (m_owner.GetTypeId() == TYPEID_UNIT)
             {
                 MaNGOS::CreatureRelocationNotifier notify((Creature&)m_owner);
                 Cell::VisitAllObjects(&m_owner, notify, radius);

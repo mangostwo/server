@@ -182,7 +182,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
     {
         ++count;
 
-        if(clientcount == 50)
+        if (clientcount == 50)
         {
             return;
         }
@@ -878,7 +878,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
 
     if (BattleGround* bg = player->GetBattleGround())
     {
-        if(bg->HandleAreaTrigger(player, Trigger_ID))
+        if (bg->HandleAreaTrigger(player, Trigger_ID))
         {
             return;
         }
@@ -1151,7 +1151,7 @@ void WorldSession::HandleMoveUnRootAck(WorldPacket& recv_data)
         recv_data >> guid;
 
         // now can skip not our packet
-        if(_player->GetGUID() != guid)
+        if (_player->GetGUID() != guid)
         {
             recv_data.rpos(recv_data.wpos());               // prevent warnings spam
             return;
@@ -1175,7 +1175,7 @@ void WorldSession::HandleMoveRootAck(WorldPacket& recv_data)
         recv_data >> guid;
 
         // now can skip not our packet
-        if(_player->GetObjectGuid() != guid)
+        if (_player->GetObjectGuid() != guid)
         {
             recv_data.rpos(recv_data.wpos());               // prevent warnings spam
             return;

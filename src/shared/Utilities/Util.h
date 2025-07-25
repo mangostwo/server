@@ -128,7 +128,7 @@ inline uint32 secsToTimeBitFields(time_t secs)
 
 inline std::string& ltrim(std::string& s)
 {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch)
+    s.erase(s.begin(), std::find_if (s.begin(), s.end(), [](unsigned char ch)
     {
         return !std::isspace(ch);
     }));
@@ -137,7 +137,7 @@ inline std::string& ltrim(std::string& s)
 
 inline std::string& rtrim(std::string& s)
 {
-    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch)
+    s.erase(std::find_if (s.rbegin(), s.rend(), [](unsigned char ch)
         {
             return !std::isspace(ch);
         }).base(), s.end());

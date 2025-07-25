@@ -955,9 +955,9 @@ bool GameObject::IsVisibleForInState(Player const* u, WorldObject const* viewPoi
 
         // special invisibility cases
         /* TODO: implement trap stealth, take look at spell 2836
-        if(GetGOInfo()->type == GAMEOBJECT_TYPE_TRAP && GetGOInfo()->trap.stealthed && u->IsHostileTo(GetOwner()))
+        if (GetGOInfo()->type == GAMEOBJECT_TYPE_TRAP && GetGOInfo()->trap.stealthed && u->IsHostileTo(GetOwner()))
         {
-            if(check stuff here)
+            if (check stuff here)
             {
                 return false;
             }
@@ -2854,7 +2854,7 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
         {
             DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DestructibleGO: %s got destroyed", GetGuidStr().c_str());
 #ifdef ENABLE_ELUNA
-            if(caster && caster->ToPlayer())
+            if (caster && caster->ToPlayer())
             {
                 if (Eluna* e = caster->GetEluna())
                 {

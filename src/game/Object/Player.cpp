@@ -1617,7 +1617,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         }
     }
 
-    if(!IsAlive() && !HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST) && GetDeathState() != GHOULED)
+    if (!IsAlive() && !HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST) && GetDeathState() != GHOULED)
     {
         SetHealth(0);
     }
@@ -4602,9 +4602,9 @@ bool Player::resetTalents(bool no_cost, bool all_specs)
     // FIXME: remove pet before or after unlearn spells? for now after unlearn to allow removing of talent related, pet affecting auras
     RemovePet(PET_SAVE_REAGENTS);
     /* when prev line will dropped use next line
-    if(Pet* pet = GetPet())
+    if (Pet* pet = GetPet())
     {
-        if(pet->getPetType()==HUNTER_PET && !pet->GetCreatureInfo()->isTameable(CanTameExoticPets()))
+        if (pet->getPetType()==HUNTER_PET && !pet->GetCreatureInfo()->isTameable(CanTameExoticPets()))
         {
             pet->Unsummon(PET_SAVE_REAGENTS, this);
         }
@@ -5353,7 +5353,7 @@ void Player::BuildPlayerRepop()
     GetMap()->Add(corpse);
 
     // convert player body to ghost
-    if(GetDeathState() != GHOULED)
+    if (GetDeathState() != GHOULED)
     {
         SetHealth(1);
     }
@@ -5367,7 +5367,7 @@ void Player::BuildPlayerRepop()
     // BG - remove insignia related
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
-    if(GetDeathState() != GHOULED)
+    if (GetDeathState() != GHOULED)
     {
         SendCorpseReclaimDelay();
     }
@@ -13152,7 +13152,7 @@ InventoryResult Player::CanUseAmmo(uint32 item) const
     {
         return EQUIP_ERR_YOU_ARE_DEAD;
     }
-    // if( isStunned() )
+    // if ( isStunned() )
     //    return EQUIP_ERR_YOU_ARE_STUNNED;
     ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(item);
     if (pProto)
@@ -17243,7 +17243,7 @@ bool Player::SatisfyQuestPrevChain(Quest const* qInfo, bool msg) const
 
         // check for all quests further down the chain
         // only necessary if there are quest chains with more than one quest that can be skipped
-        // if( !SatisfyQuestPrevChain( prevId, msg ) )
+        // if ( !SatisfyQuestPrevChain( prevId, msg ) )
         //    return false;
     }
 
@@ -19459,7 +19459,7 @@ void Player::_LoadInventory(QueryResult* result, uint32 timediff)
         }
     }
 
-    // if(IsAlive())
+    // if (IsAlive())
     _ApplyAllItemMods();
 }
 
