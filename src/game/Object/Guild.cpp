@@ -139,6 +139,13 @@ bool Guild::Create(Player* leader, std::string gname)
     m_Id = sObjectMgr.GenerateGuildId();
     m_CreatedDate = time(0);
 
+    // creating data
+    time_t now = time(0);
+    std::tm local = safe_localtime(now);
+    //m_CreatedDay   = local.tm_mday;
+    //m_CreatedMonth = local.tm_mon + 1;
+    //m_CreatedYear  = local.tm_year + 1900;
+
     DEBUG_LOG("GUILD: creating guild %s to leader: %s", gname.c_str(), m_LeaderGuid.GetString().c_str());
 
     // gname already assigned to Guild::name, use it to encode string for DB
@@ -354,6 +361,14 @@ bool Guild::LoadGuildFromDB(QueryResult* guildDataResult)
     for (uint8 i = 0; i < purchasedTabs; ++i)
     {
         m_TabListMap[i] = new GuildBankTab;
+    }
+
+    if (time > 0)
+    {
+        std::tm local  = safe_localtime(m_CreatedDate);
+        //m_CreatedDay   = local.tm_mday;
+        //m_CreatedMonth = local.tm_mon + 1;
+        //m_CreatedYear  = local.tm_year + 1900;
     }
 
     return true;

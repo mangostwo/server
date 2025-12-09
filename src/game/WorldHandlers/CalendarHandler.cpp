@@ -36,6 +36,7 @@
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "ArenaTeam.h"
+#include "Util.h"
 
 void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
 {
@@ -302,7 +303,8 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket& recv_data)
     recv_data >> unkPackedTime;
     recv_data >> flags;
 
-    eventPackedTime = uint32(LocalTimeToUTCTime(eventPackedTime));
+    //eventPackedTime = uint32(LocalTimeToUTCTime(eventPackedTime));
+    eventPackedTime = GetLocalHourTimestamp(eventPackedTime, 0, true);
 
     // prevent events in the past
     if (time_t(eventPackedTime) < (GameTime::GetGameTime() - time_t(86400L)))
@@ -364,7 +366,8 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recv_data)
     recv_data >> UnknownPackedTime;
     recv_data >> flags;
 
-    eventPackedTime = uint32(LocalTimeToUTCTime(eventPackedTime));
+    //eventPackedTime = uint32(LocalTimeToUTCTime(eventPackedTime));
+    eventPackedTime = GetLocalHourTimestamp(eventPackedTime, 0, true);
 
     // prevent events in the past
     if (time_t(eventPackedTime) < (GameTime::GetGameTime() - time_t(86400L)))
@@ -451,8 +454,8 @@ void WorldSession::HandleCalendarCopyEvent(WorldPacket& recv_data)
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId [" UI64FMTD "] inviteId [" UI64FMTD "]",
                      eventId, inviteId);
 
-    packedTime = uint32(LocalTimeToUTCTime(packedTime));
-
+    //packedTime = uint32(LocalTimeToUTCTime(packedTime));
+    packedTime = GetLocalHourTimestamp(packedTime, 0, true);
     // prevent events in the past
     if (time_t(packedTime) < (GameTime::GetGameTime() - time_t(86400L)))
     {

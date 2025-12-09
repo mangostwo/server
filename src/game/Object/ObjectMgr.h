@@ -39,9 +39,9 @@
 #include "Database/DatabaseEnv.h"
 #include "Map.h"
 #include "MapPersistentStateMgr.h"
-#include "ObjectAccessor.h"
 #include "ObjectGuid.h"
 #include "Policies/Singleton.h"
+#include "ObjectAccessor.h"
 
 #include <string>
 #include <map>
