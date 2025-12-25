@@ -34,6 +34,7 @@
 #include "SkillDiscovery.h"
 #include "ItemEnchantmentMgr.h"
 #include "CommandMgr.h"
+#include "ObjectMgr.h"
 
 /**********************************************************************
     CommandTable : reloadCommandTable
@@ -698,7 +699,6 @@ bool ChatHandler::HandleReloadBattleEventCommand(char* /*args*/)
 
 bool ChatHandler::HandleReloadEventAITextsCommand(char* /*args*/)
 {
-
     sLog.outString("Re-Loading Texts from `creature_ai_texts`...");
     sEventAIMgr.LoadCreatureEventAI_Texts(true);
     SendGlobalSysMessage("DB table `creature_ai_texts` reloaded.", SEC_MODERATOR);
