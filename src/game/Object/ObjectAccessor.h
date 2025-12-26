@@ -29,6 +29,7 @@
 #include "Player.h"
 #include "Corpse.h"
 #include "ObjectMgr.h"
+#include "MapManager.h"
 
 template <class T>
 class HashMapHolder
