@@ -28,6 +28,7 @@
 #include <ace/RW_Thread_Mutex.h>
 #include "Player.h"
 #include "Corpse.h"
+#include "ObjectMgr.h"
 
 template <class T>
 class HashMapHolder
