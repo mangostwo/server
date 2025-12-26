@@ -21,6 +21,7 @@
 #define TRINITY_DISABLEMGR_H
 
 #include "VMapManager2.h"
+#include "ProgressBar.h"
 
 class Unit;
 
