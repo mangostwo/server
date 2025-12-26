@@ -39,7 +39,7 @@
 
  /**********************************************************************
      CommandTable : commandTable
- /***********************************************************************/
+  **********************************************************************/
 
 /*
 ComeToMe command REQUIRED for 3rd party scripting library to have access to PointMovementGenerator

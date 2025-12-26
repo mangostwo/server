@@ -35,7 +35,7 @@
 
 /**********************************************************************
     CommandTable : accountCommandTable
-/***********************************************************************/
+ **********************************************************************/
 
 bool ChatHandler::HandleAccountCommand(char* args)
 {
@@ -278,7 +278,7 @@ bool ChatHandler::HandleAccountCharactersCommand(char* args)
 
 /**********************************************************************
     CommandTable : accountSetCommandTable
-/***********************************************************************/
+ **********************************************************************/
 
 /// Set/Unset the expansion level for an account
 bool ChatHandler::HandleAccountSetAddonCommand(char* args)
