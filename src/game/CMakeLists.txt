@@ -180,7 +180,7 @@ file(GLOB Playerbot_Warrior ${CMAKE_SOURCE_DIR}/src/modules/Bots/playerbot/strat
 source_group("Player Bot\\Strategies\\Warrior" FILES ${Playerbot_Warrior})
 LIST(APPEND SRC_GRP_BOTS ${Playerbot_Warrior})
 
-configure_file(${CMAKE_SOURCE_DIR}/src/modules/Bots/playerbot/aiplayerbot.conf.dist.in ${CMAKE_CURRENT_BINARY_DIR}/aiplayerbot.conf.dist)
+#configure_file(${CMAKE_SOURCE_DIR}/src/modules/Bots/playerbot/aiplayerbot.conf.dist.in ${CMAKE_CURRENT_BINARY_DIR}/aiplayerbot.conf.dist)
 
 endif()
 
