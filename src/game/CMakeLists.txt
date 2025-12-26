@@ -1,7 +1,7 @@
 # MaNGOS is a full featured server for World of Warcraft, supporting
 # the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
 #
-# Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+# Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -83,7 +83,16 @@ source_group("World\\Handlers" FILES ${SRC_GRP_WORLD_HANDLERS})
 
 # Build the Eluna library if enabled
 if(SCRIPT_LIB_ELUNA)
-    file(GLOB SRC_GRP_ELUNA ${CMAKE_SOURCE_DIR}/src/modules/Eluna/*.cpp ${CMAKE_SOURCE_DIR}/src/modules/Eluna/*.h)
+    file(GLOB SRC_GRP_ELUNA
+        ${CMAKE_SOURCE_DIR}/src/modules/Eluna/*.cpp
+        ${CMAKE_SOURCE_DIR}/src/modules/Eluna/*.h
+        ${CMAKE_SOURCE_DIR}/src/modules/Eluna/hooks/*.cpp
+        ${CMAKE_SOURCE_DIR}/src/modules/Eluna/hooks/*.h
+        ${CMAKE_SOURCE_DIR}/src/modules/Eluna/methods/*.cpp
+        ${CMAKE_SOURCE_DIR}/src/modules/Eluna/methods/*.h
+        ${CMAKE_SOURCE_DIR}/src/modules/Eluna/methods/Mangos/*.cpp
+        ${CMAKE_SOURCE_DIR}/src/modules/Eluna/methods/Mangos/*.h
+    )
     source_group("Eluna" FILES ${SRC_GRP_ELUNA})
 endif()
 
@@ -237,10 +246,6 @@ add_library(game STATIC
     ${SRC_GRP_WORLD_HANDLERS}
     $<$<BOOL:${SCRIPT_LIB_ELUNA}>:${SRC_GRP_ELUNA}>
     $<$<BOOL:${PLAYERBOTS}>:${SRC_GRP_BOTS}>
-    $<$<BOOL:${PCH}>:
-        pchdef.h
-        pchdef.cpp
-    >
 )
 
 target_include_directories(game
@@ -261,7 +266,11 @@ target_include_directories(game
         Warden
         Warden/Modules
         WorldHandlers
-        $<$<BOOL:${SCRIPT_LIB_ELUNA}>:${CMAKE_SOURCE_DIR}/src/modules/Eluna>
+        $<$<BOOL:${SCRIPT_LIB_ELUNA}>:
+            ${CMAKE_SOURCE_DIR}/src/modules/Eluna
+            ${CMAKE_SOURCE_DIR}/src/modules/Eluna/hooks
+            ${CMAKE_SOURCE_DIR}/src/modules/Eluna/methods/Mangos
+        >
         $<$<BOOL:${PLAYERBOTS}>:
             ${CMAKE_SOURCE_DIR}/src/modules/Bots
             ${CMAKE_SOURCE_DIR}/src/modules/Bots/playerbot
@@ -274,7 +283,7 @@ target_compile_definitions(game
         $<$<BOOL:${SOAP}>:ENABLE_SOAP>
         $<$<BOOL:${SCRIPT_LIB_SD3}>:ENABLE_SD3>
         $<$<BOOL:${PLAYERBOTS}>:ENABLE_PLAYERBOTS>
-        $<$<BOOL:${SCRIPT_LIB_ELUNA}>:ENABLE_ELUNA>
+        $<$<BOOL:${SCRIPT_LIB_ELUNA}>:ENABLE_ELUNA ELUNA_EXPANSION=2 ELUNA_MANGOS>
 )
 
 target_link_libraries(game
@@ -289,7 +298,7 @@ target_link_libraries(game
 
 # Generate precompiled header
 if(PCH)
-    ADD_CXX_PCH(game ${CMAKE_CURRENT_SOURCE_DIR}/pchdef.h ${CMAKE_CURRENT_SOURCE_DIR}/pchdef.cpp)
+    add_cxx_pch(game pchdef.h pchdef.cpp)
 endif()
 
 install(

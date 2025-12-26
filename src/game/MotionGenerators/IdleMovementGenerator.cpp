@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,38 +26,59 @@
 #include "CreatureAI.h"
 #include "Creature.h"
 
+// Global instance of IdleMovementGenerator
 IdleMovementGenerator si_idleMovement;
 
-void
-IdleMovementGenerator::Reset(Unit& /*owner*/)
+/**
+ * @brief Resets the IdleMovementGenerator.
+ * @param owner Reference to the unit.
+ */
+void IdleMovementGenerator::Reset(Unit& /*owner*/)
 {
 }
 
-void
-DistractMovementGenerator::Initialize(Unit& owner)
+/**
+ * @brief Initializes the DistractMovementGenerator.
+ * @param owner Reference to the unit.
+ */
+void DistractMovementGenerator::Initialize(Unit& owner)
 {
     owner.addUnitState(UNIT_STAT_DISTRACTED);
 }
 
-void
-DistractMovementGenerator::Finalize(Unit& owner)
+/**
+ * @brief Finalizes the DistractMovementGenerator.
+ * @param owner Reference to the unit.
+ */
+void DistractMovementGenerator::Finalize(Unit& owner)
 {
     owner.clearUnitState(UNIT_STAT_DISTRACTED);
 }
 
-void
-DistractMovementGenerator::Reset(Unit& owner)
+/**
+ * @brief Resets the DistractMovementGenerator.
+ * @param owner Reference to the unit.
+ */
+void DistractMovementGenerator::Reset(Unit& owner)
 {
     Initialize(owner);
 }
 
-void
-DistractMovementGenerator::Interrupt(Unit& /*owner*/)
+/**
+ * @brief Interrupts the DistractMovementGenerator.
+ * @param owner Reference to the unit.
+ */
+void DistractMovementGenerator::Interrupt(Unit& /*owner*/)
 {
 }
 
-bool
-DistractMovementGenerator::Update(Unit& /*owner*/, const uint32& time_diff)
+/**
+ * @brief Updates the DistractMovementGenerator.
+ * @param owner Reference to the unit.
+ * @param time_diff Time difference.
+ * @return True if the update was successful, false otherwise.
+ */
+bool DistractMovementGenerator::Update(Unit& /*owner*/, const uint32& time_diff)
 {
     if (time_diff > m_timer)
     {
@@ -68,8 +89,11 @@ DistractMovementGenerator::Update(Unit& /*owner*/, const uint32& time_diff)
     return true;
 }
 
-void
-AssistanceDistractMovementGenerator::Finalize(Unit& unit)
+/**
+ * @brief Finalizes the AssistanceDistractMovementGenerator.
+ * @param unit Reference to the unit.
+ */
+void AssistanceDistractMovementGenerator::Finalize(Unit& unit)
 {
     unit.clearUnitState(UNIT_STAT_DISTRACTED);
     if (Unit* victim = unit.getVictim())

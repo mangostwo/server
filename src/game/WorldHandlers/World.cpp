@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,6 +84,8 @@
 
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
+#include "ElunaConfig.h"
+#include "ElunaLoader.h"
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_PLAYERBOTS
@@ -163,6 +165,12 @@ World::World()
 /// World destructor
 World::~World()
 {
+#ifdef ENABLE_ELUNA
+    // Delete world Eluna state
+    delete eluna;
+    eluna = nullptr;
+#endif /* ENABLE_ELUNA */
+
     ///- Empty the kicked session set
     while (!m_sessions.empty())
     {
@@ -193,9 +201,6 @@ void World::CleanupsBeforeStop()
     KickAll();                                       // save and kick all players
     UpdateSessions(1);                               // real players unload required UpdateSessions call
     sBattleGroundMgr.DeleteAllBattleGrounds();       // unload battleground templates before different singletons destroyed
-#ifdef ENABLE_ELUNA
-    Eluna::Uninitialize();
-#endif
 }
 
 /// Find a session by its id
@@ -555,6 +560,17 @@ void World::LoadConfigSettings(bool reload)
         m_broadcastTimer.SetInterval(getConfig(CONFIG_UINT32_AUTOBROADCAST_INTERVAL) * IN_MILLISECONDS);
     }
 
+
+    std::string forceLoadGridOnMaps = sConfig.GetStringDefault("LoadAllGridsOnMaps", "");
+    if (!forceLoadGridOnMaps.empty())
+    {
+        unsigned int pos = 0;
+        unsigned int id;
+        VMAP::VMapFactory::chompAndTrim(forceLoadGridOnMaps);
+        while (VMAP::VMapFactory::getNextId(forceLoadGridOnMaps, pos, id))
+            m_configForceLoadMapIds.insert(id);
+    }
+
     setConfig(CONFIG_UINT32_INTERVAL_SAVE, "PlayerSave.Interval", 15 * MINUTE * IN_MILLISECONDS);
     setConfigMinMax(CONFIG_UINT32_MIN_LEVEL_STAT_SAVE, "PlayerSave.Stats.MinLevel", 0, 0, MAX_LEVEL);
     setConfig(CONFIG_BOOL_STATS_SAVE_ONLY_ON_LOGOUT, "PlayerSave.Stats.SaveOnlyOnLogout", true);
@@ -665,6 +681,8 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_GM_LOGIN_STATE,          "GM.LoginState",      2);
     setConfig(CONFIG_UINT32_GM_VISIBLE_STATE,        "GM.Visible",         2);
     setConfig(CONFIG_UINT32_GM_ACCEPT_TICKETS,       "GM.AcceptTickets",   2);
+    setConfig(CONFIG_UINT32_GM_TICKET_LIST_SIZE,     "GM.TicketListSize", 30);
+    setConfig(CONFIG_BOOL_GM_TICKET_OFFLINE_CLOSING, "GM.TicketOfflineClosing", false);
     setConfig(CONFIG_UINT32_GM_CHAT,                 "GM.Chat",            2);
     setConfig(CONFIG_UINT32_GM_WISPERING_TO,         "GM.WhisperingTo",    2);
 
@@ -848,6 +866,8 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_TIMERBAR_FIRE_GMLEVEL,    "TimerBar.Fire.GMLevel", SEC_CONSOLE);
     setConfig(CONFIG_UINT32_TIMERBAR_FIRE_MAX,        "TimerBar.Fire.Max", 1);
 
+    setConfig(CONFIG_UINT32_LOG_WHISPERS,             "LogWhispers", 1);
+
     setConfig(CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT,      "PetUnsummonAtMount", true);
 
 #ifdef ENABLE_PLAYERBOTS
@@ -860,6 +880,8 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_FLOAT_PLAYERBOT_MAXDISTANCE, "PlayerbotAI.FollowDistanceMax", 1.0f);
 #endif
 
+    setConfig(CONFIG_BOOL_ENABLE_QUEST_TRACKER,        "QuestTracker.Enable", 0);
+
     // WARDEN
 
     setConfig(CONFIG_BOOL_WARDEN_WIN_ENABLED, "Warden.WinEnabled", true);
@@ -871,6 +893,10 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_WARDEN_CLIENT_FAIL_ACTION, "Warden.ClientCheckFailAction", 0);
     setConfig(CONFIG_UINT32_WARDEN_CLIENT_RESPONSE_DELAY, "Warden.ClientResponseDelay", 600);
     setConfig(CONFIG_UINT32_WARDEN_DB_LOGLEVEL, "Warden.DBLogLevel", 0);
+
+    // Recommended Or New Flag
+    setConfig(CONFIG_BOOL_REALM_RECOMMENDED_OR_NEW_ENABLED, "Realm.RecommendedOrNew.Enabled", false);
+    setConfig(CONFIG_BOOL_REALM_RECOMMENDED_OR_NEW, "Realm.RecommendedOrNew", false);
 
     m_relocation_ai_notify_delay = sConfig.GetIntDefault("Visibility.AIRelocationNotifyDelay", 1000u);
     m_relocation_lower_limit_sq  = pow(sConfig.GetFloatDefault("Visibility.RelocationLowerLimit", 10), 2);
@@ -999,12 +1025,13 @@ void World::LoadConfigSettings(bool reload)
     MMAP::MMapFactory::preventPathfindingOnMaps(ignoreMapIds.c_str());
     sLog.outString("WORLD: MMap pathfinding %sabled", getConfig(CONFIG_BOOL_MMAP_ENABLED) ? "en" : "dis");
 
-    setConfig(CONFIG_BOOL_ELUNA_ENABLED, "Eluna.Enabled", true);
-
 #ifdef ENABLE_ELUNA
     if (reload)
     {
-        sEluna->OnConfigLoad(reload);
+        if (Eluna* e = GetEluna())
+        {
+            e->OnConfigLoad(reload);
+        }
     }
 #endif /* ENABLE_ELUNA */
     sLog.outString();
@@ -1106,8 +1133,19 @@ void World::SetInitialWorldSettings()
 
 #ifdef ENABLE_ELUNA
     ///- Initialize Lua Engine
-    sLog.outString("Initialize Eluna Lua Engine...");
-    Eluna::Initialize();
+
+    // lua state begins uninitialized
+    eluna = nullptr;
+
+    sLog.outString("Loading Eluna config...");
+    sElunaConfig->Initialize();
+
+    if (sElunaConfig->IsElunaEnabled())
+    {
+        ///- Initialize Lua Engine
+        sLog.outString("Loading Lua scripts...");
+        sElunaLoader->LoadScripts();
+    }
 #endif /* ENABLE_ELUNA */
 
     sLog.outString("Loading Page Texts...");
@@ -1425,6 +1463,17 @@ void World::SetInitialWorldSettings()
     sLog.outString("Returning old mails...");
     sObjectMgr.ReturnOrDeleteOldMails(false);
 
+#ifdef ENABLE_ELUNA
+    if (sElunaConfig->IsElunaEnabled())
+    {
+        ///- Run eluna scripts.
+        sLog.outString("Starting Eluna world state...");
+        // use map id -1 for the global Eluna state
+        eluna = new Eluna(nullptr, sElunaConfig->IsElunaCompatibilityMode());
+        sLog.outString();
+    }
+#endif /*ENABLE_ELUNA*/
+
     ///- Load and initialize DBScripts Engine
     sLog.outString("Loading DB-Scripts Engine...");
     sScriptMgr.LoadDbScripts(DBS_ON_QUEST_START);           // must be after load Creature/Gameobject(Template/Data) and QuestTemplate
@@ -1477,10 +1526,8 @@ void World::SetInitialWorldSettings()
     m_gameTime = time(NULL);
     m_startTime = m_gameTime;
 
-    tm local;
-    time_t curr;
-    time(&curr);
-    local = *(localtime(&curr));                            // dereference and assign
+    std::tm local;
+    local = safe_localtime(time(nullptr));
     char isoDate[128];
     sprintf(isoDate, "%04d-%02d-%02d %02d:%02d:%02d",
             local.tm_year + 1900, local.tm_mon + 1, local.tm_mday, local.tm_hour, local.tm_min, local.tm_sec);
@@ -1520,7 +1567,9 @@ void World::SetInitialWorldSettings()
     // to set mailtimer to return mails every day between 4 and 5 am
     // mailtimer is increased when updating auctions
     // one second is 1000 -(tested on win system)
-    mail_timer = uint32((((localtime(&m_gameTime)->tm_hour + 20) % 24) * HOUR * IN_MILLISECONDS) / m_timers[WUPDATE_AUCTIONS].GetInterval());
+
+    std::tm ltm = safe_localtime(m_gameTime);
+    mail_timer = uint32((((ltm.tm_hour + 20) % 24) * HOUR * IN_MILLISECONDS) / m_timers[WUPDATE_AUCTIONS].GetInterval());
     // 1440
     mail_timer_expires = uint32((DAY * IN_MILLISECONDS) / (m_timers[WUPDATE_AUCTIONS].GetInterval()));
     DEBUG_LOG("Mail timer set to: %u, mail return is called every %u minutes", mail_timer, mail_timer_expires);
@@ -1577,6 +1626,10 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);    // depend on next event
     sLog.outString();
 
+    sLog.outString("Loading grids for active creatures or transports...");
+    sObjectMgr.LoadActiveEntities(NULL);
+    sLog.outString();
+
     // Delete all characters which have been deleted X days before
     Player::DeleteOldCharacters();
 
@@ -1587,8 +1640,10 @@ void World::SetInitialWorldSettings()
 #ifdef ENABLE_ELUNA
     ///- Run eluna scripts.
     // in multithread foreach: run scripts
-    sEluna->RunScripts();
-    sEluna->OnConfigLoad(false); // Must be done after Eluna is initialized and scripts have run.
+    if (Eluna* e = GetEluna())
+    {
+        e->OnConfigLoad(false); // Must be done after Eluna is initialized and scripts have run.
+    }
 #endif
 
 #ifdef ENABLE_PLAYERBOTS
@@ -1688,6 +1743,8 @@ void World::showFooter()
         "_______________________________________________________\n"
         "\n"
         "        Server Version : %s\n"
+        "         Eluna Version : %s\n"
+        "           SD3 Version : %s\n"
         "      Database Version : Rel%s.%s.%s\n"
         "\n"
         "    Supporting Clients : %s\n"
@@ -1695,7 +1752,7 @@ void World::showFooter()
         "\n"
         "         Module Status -\n%s\n"
         "_______________________________________________________\n"
-        , GitRevision::GetProductVersionStr(), GitRevision::GetWorldDBVersion(), GitRevision::GetWorldDBStructure(), GitRevision::GetWorldDBContent(),
+        , GitRevision::GetProductVersionStr(), GitRevision::GetDepElunaFullRevision(), GitRevision::GetDepSD3FullRevision(), GitRevision::GetWorldDBVersion(), GitRevision::GetWorldDBStructure(), GitRevision::GetWorldDBContent(),
             thisClientVersion.c_str(), thisClientBuilds.c_str(), sModules.c_str());
 }
 
@@ -1870,7 +1927,11 @@ void World::Update(uint32 diff)
 
     ///- Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->OnWorldUpdate(diff);
+    if (Eluna* e = GetEluna())
+    {
+        e->UpdateEluna(diff);
+        e->OnWorldUpdate(diff);
+    }
 #endif /* ENABLE_ELUNA */
 
     ///- Delete all characters which have been deleted X days before
@@ -2264,7 +2325,10 @@ void World::ShutdownServ(uint32 time, uint32 options, uint8 exitcode)
 
     ///- Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->OnShutdownInitiate(ShutdownExitCode(exitcode), ShutdownMask(options));
+    if (Eluna* e = GetEluna())
+    {
+        e->OnShutdownInitiate(ShutdownExitCode(exitcode), ShutdownMask(options));
+    }
 #endif /* ENABLE_ELUNA */
 }
 
@@ -2314,7 +2378,10 @@ void World::ShutdownCancel()
 
     ///- Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->OnShutdownCancel();
+    if (Eluna* e = GetEluna())
+    {
+        e->OnShutdownCancel();
+    }
 #endif /* ENABLE_ELUNA */
 }
 
@@ -2413,7 +2480,7 @@ void World::InitWeeklyQuestResetTime()
 
     // generate time by config
     time_t curTime = time(NULL);
-    tm localTm = *localtime(&curTime);
+    tm localTm = safe_localtime(curTime);
 
     int week_day_offset = localTm.tm_wday - int(getConfig(CONFIG_UINT32_QUEST_WEEKLY_RESET_WEEK_DAY));
 
@@ -2457,7 +2524,8 @@ void World::InitDailyQuestResetTime()
 
     // generate time by config
     time_t curTime = time(NULL);
-    tm localTm = *localtime(&curTime);
+    tm localTm = safe_localtime(curTime);
+
     localTm.tm_hour = getConfig(CONFIG_UINT32_QUEST_DAILY_RESET_HOUR);
     localTm.tm_min  = 0;
     localTm.tm_sec  = 0;
@@ -2504,7 +2572,7 @@ void World::SetMonthlyQuestResetTime(bool initialize)
 
     // generate time
     time_t currentTime = time(NULL);
-    tm localTm = *localtime(&currentTime);
+    tm localTm = safe_localtime(currentTime);
 
     int month = localTm.tm_mon;
     int year = localTm.tm_year;
@@ -2548,7 +2616,8 @@ void World::InitRandomBGResetTime()
 
     // generate time by config
     time_t curTime = time(NULL);
-    tm localTm = *localtime(&curTime);
+    tm localTm = safe_localtime(curTime);
+
     localTm.tm_hour = getConfig(CONFIG_UINT32_RANDOM_BG_RESET_HOUR);
     localTm.tm_min  = 0;
     localTm.tm_sec  = 0;
@@ -2912,7 +2981,7 @@ void World::LoadBroadcastStrings()
     }
     else
     {
-        sLog.outString(">> Loaded " SIZEFMTD " broadcast strings.", m_broadcastList.size());
+        sLog.outString(">> Loaded %zu broadcast strings.", m_broadcastList.size());
     }
 }
 

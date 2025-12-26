@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,17 @@ struct WaypointBehavior
     uint32 model2;
 
     bool isEmpty();
-    WaypointBehavior() {}
+    WaypointBehavior()
+    {
+        emote = 0;
+        spell = 0;
+        model1 = 0;
+        model2 = 0;
+        for (uint32 i = 0; i < MAX_WAYPOINT_TEXT; ++i)
+        {
+            textid[i] = 0;
+        }
+    }
     WaypointBehavior(const WaypointBehavior& b);
 };
 

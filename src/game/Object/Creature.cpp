@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -202,12 +202,23 @@ void Creature::AddToWorld()
     }
 
     Unit::AddToWorld();
+
+    // Make active if required
+    if (sWorld.isForceLoadMap(GetMapId()) || (GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_ACTIVE))
+    {
+        SetActiveObjectState(true);
+    }
+
 #ifdef ENABLE_ELUNA
     if (!inWorld)
     {
-        sEluna->OnAddToWorld(this);
+        if (Eluna* e = GetEluna())
+        {
+            e->OnAddToWorld(this);
+        }
     }
 #endif /* ENABLE_ELUNA */
+
 }
 
 void Creature::RemoveFromWorld()
@@ -215,7 +226,10 @@ void Creature::RemoveFromWorld()
 #ifdef ENABLE_ELUNA
     if (IsInWorld())
     {
-        sEluna->OnRemoveFromWorld(this);
+        if (Eluna* e = GetEluna())
+        {
+            e->OnRemoveFromWorld(this);
+        }
     }
 #endif /* ENABLE_ELUNA */
 
@@ -1708,8 +1722,8 @@ bool Creature::LoadFromDB(uint32 guidlow, Map* map)
     if (IsAlive() && sWorld.getConfig(CONFIG_UINT32_RABBIT_DAY))
     {
         time_t rabbit_day = time_t(sWorld.getConfig(CONFIG_UINT32_RABBIT_DAY));
-        tm rabbit_day_tm = *localtime(&rabbit_day);
-        tm now_tm = *localtime(&sWorld.GetGameTime());
+        std::tm rabbit_day_tm = safe_localtime(rabbit_day);
+        std::tm now_tm = safe_localtime(sWorld.GetGameTime());
 
         if (now_tm.tm_mon == rabbit_day_tm.tm_mon && now_tm.tm_mday == rabbit_day_tm.tm_mday)
         {
@@ -2059,7 +2073,7 @@ SpellEntry const* Creature::ReachWithSpellAttack(Unit* pVictim)
 
         float dist = GetCombatDistance(pVictim, spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT);
 
-        // if(!IsInFront( pVictim, range ) && spellInfo->AttributesEx )
+        // if (!IsInFront( pVictim, range ) && spellInfo->AttributesEx )
         //    continue;
         if (dist > range || dist < minrange)
         {
@@ -2122,7 +2136,7 @@ SpellEntry const* Creature::ReachWithSpellCure(Unit* pVictim)
 
         float dist = GetCombatDistance(pVictim, spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT);
 
-        // if(!IsInFront( pVictim, range ) && spellInfo->AttributesEx )
+        // if (!IsInFront( pVictim, range ) && spellInfo->AttributesEx )
         //    continue;
         if (dist > range || dist < minrange)
         {

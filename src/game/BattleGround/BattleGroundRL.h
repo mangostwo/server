@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,9 +43,9 @@ class BattleGroundRL : public BattleGround
         BattleGroundRL();
 
         /* inherited from BattlegroundClass */
-        virtual void AddPlayer(Player* plr) override;
-        virtual void FillInitialWorldStates(WorldPacket& d, uint32& count) override;
-        virtual void StartingEventOpenDoors() override;
+        void AddPlayer(Player* plr) override;
+        void FillInitialWorldStates(WorldPacket& d, uint32& count) override;
+        void StartingEventOpenDoors() override;
 
         void RemovePlayer(Player* plr, ObjectGuid guid) override;
         void HandleKillPlayer(Player* player, Player* killer) override;

@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -120,8 +120,11 @@ void Totem::Summon(Unit* owner)
         ((Creature*)owner)->AI()->JustSummoned((Creature*)this);
     }
 #ifdef ENABLE_ELUNA
-    sEluna->OnSummoned(this, owner);
-#endif
+    if (Eluna* e = this->GetEluna())
+    {
+        e->OnSummoned(this, owner);
+    }
+#endif /* ENABLE_ELUNA */
 
     // there are some totems, which exist just for their visual appeareance
     if (!GetSpell())

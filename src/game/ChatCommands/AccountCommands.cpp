@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,13 +28,14 @@
 
 #include "World.h"
 #include "Chat.h"
-#include "Language.h"
 #include "AccountMgr.h"
+#include "Database/DatabaseEnv.h"
+#include "Player.h"
 
 
 /**********************************************************************
     CommandTable : accountCommandTable
-/***********************************************************************/
+ **********************************************************************/
 
 bool ChatHandler::HandleAccountCommand(char* args)
 {
@@ -223,7 +224,7 @@ bool ChatHandler::HandleAccountCreateCommand(char* args)
 
     AccountOpResult result;
     uint32 expansion = 0;
-    if(ExtractUInt32(&args, expansion))
+    if (ExtractUInt32(&args, expansion))
     {
         // No point in assigning to result as it's never used on this side of the if/else branch
         sAccountMgr.CreateAccount(account_name, password, expansion);
@@ -277,7 +278,7 @@ bool ChatHandler::HandleAccountCharactersCommand(char* args)
 
 /**********************************************************************
     CommandTable : accountSetCommandTable
-/***********************************************************************/
+ **********************************************************************/
 
 /// Set/Unset the expansion level for an account
 bool ChatHandler::HandleAccountSetAddonCommand(char* args)

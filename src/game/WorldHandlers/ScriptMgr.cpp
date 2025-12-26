@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 #include "ObjectMgr.h"
 #include "WaypointManager.h"
 #include "World.h"
+#include <DBCStores.h>
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "Cell.h"
@@ -38,10 +39,14 @@
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "WaypointMovementGenerator.h"
 #include "Mail.h"
+#if defined(CLASSIC)
+#include "LFGMgr.h"
+#endif
 
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
+
 #ifdef ENABLE_SD3
 #include "system/ScriptDevMgr.h"
 #endif
@@ -50,7 +55,7 @@
 
 INSTANTIATE_SINGLETON_1(ScriptMgr);
 
-ScriptMgr::ScriptMgr() : m_scheduledScripts(0)
+ScriptMgr::ScriptMgr() : m_scheduledScripts(0), m_lock(0)
 {
     m_dbScripts.resize(DBS_END);
 
@@ -67,30 +72,65 @@ ScriptMgr::~ScriptMgr()
     m_dbScripts.clear();
 }
 
+ScriptChainMap const* ScriptMgr::GetScriptChainMap(DBScriptType type)
+{
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, _guard, m_lock, NULL)
+    if ((type != DBS_INTERNAL) && type < DBS_END)
+    {
+        return &m_dbScripts[type];
+    }
+
+    return NULL;
+}
+
+
 // /////////////////////////////////////////////////////////
 //              DB SCRIPTS (loaders of static data)
 // /////////////////////////////////////////////////////////
 // returns priority (0 == can not start script)
 uint8 GetSpellStartDBScriptPriority(SpellEntry const* spellinfo, SpellEffectIndex effIdx)
 {
+#if defined (CATA)
+    SpellEffectEntry const* spellEffect = spellinfo->GetSpellEffect(effIdx);
+    if (!spellEffect)
+    {
+        return 0;
+    }
+#endif
+#if defined (CATA)
+    if (spellEffect->Effect == SPELL_EFFECT_SCRIPT_EFFECT)
+#else
     if (spellinfo->Effect[effIdx] == SPELL_EFFECT_SCRIPT_EFFECT)
+#endif
     {
         return 10;
     }
 
+#if defined (CATA)
+    if (spellEffect->Effect == SPELL_EFFECT_DUMMY)
+#else
     if (spellinfo->Effect[effIdx] == SPELL_EFFECT_DUMMY)
+#endif
     {
         return 9;
     }
 
     // NonExisting triggered spells can also start DB-Spell-Scripts
+#if defined (CATA)
+    if (spellEffect->Effect == SPELL_EFFECT_TRIGGER_SPELL && !sSpellStore.LookupEntry(spellEffect->EffectTriggerSpell))
+#else
     if (spellinfo->Effect[effIdx] == SPELL_EFFECT_TRIGGER_SPELL && !sSpellStore.LookupEntry(spellinfo->EffectTriggerSpell[effIdx]))
+#endif
     {
         return 5;
     }
 
     // NonExisting trigger missile spells can also start DB-Spell-Scripts
+#if defined (CATA)
+    if (spellEffect->Effect == SPELL_EFFECT_TRIGGER_MISSILE && !sSpellStore.LookupEntry(spellEffect->EffectTriggerSpell))
+#else
     if (spellinfo->Effect[effIdx] == SPELL_EFFECT_TRIGGER_MISSILE && !sSpellStore.LookupEntry(spellinfo->EffectTriggerSpell[effIdx]))
+#endif
     {
         return 4;
     }
@@ -357,15 +397,14 @@ void ScriptMgr::LoadScripts(DBScriptType type)
                 }
                 break;
             }
-            case SCRIPT_COMMAND_RESPAWN_GAMEOBJECT:         // 9
+            case SCRIPT_COMMAND_RESPAWN_GO:                 // 9
             {
-                uint32 goEntry = 0;
-
+                uint32 goEntry;
                 if (!tmp.GetGOGuid())
                 {
                     if (!tmp.buddyEntry)
                     {
-                        sLog.outErrorDb("Table `db_scripts [type = %d]` has no gameobject nor buddy defined in SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id %u", type, tmp.id);
+                        sLog.outErrorDb("Table `db_scripts [type = %d]` has no gameobject nor buddy defined in SCRIPT_COMMAND_RESPAWN_GO for script id %u", type, tmp.id);
                         continue;
                     }
                     goEntry = tmp.buddyEntry;
@@ -375,7 +414,7 @@ void ScriptMgr::LoadScripts(DBScriptType type)
                     GameObjectData const* data = sObjectMgr.GetGOData(tmp.GetGOGuid());
                     if (!data)
                     {
-                        sLog.outErrorDb("Table `db_scripts [type = %d]` has invalid gameobject (GUID: %u) in SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id %u", type, tmp.GetGOGuid(), tmp.id);
+                        sLog.outErrorDb("Table `db_scripts [type = %d]` has invalid gameobject (GUID: %u) in SCRIPT_COMMAND_RESPAWN_GO for script id %u", type, tmp.GetGOGuid(), tmp.id);
                         continue;
                     }
                     goEntry = data->id;
@@ -384,7 +423,7 @@ void ScriptMgr::LoadScripts(DBScriptType type)
                 GameObjectInfo const* info = ObjectMgr::GetGameObjectInfo(goEntry);
                 if (!info)
                 {
-                    sLog.outErrorDb("Table `db_scripts [type = %d]` has gameobject with invalid entry (GUID: %u Entry: %u) in SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id %u", type, tmp.GetGOGuid(), goEntry, tmp.id);
+                    sLog.outErrorDb("Table `db_scripts [type = %d]` has gameobject with invalid entry (GUID: %u Entry: %u) in SCRIPT_COMMAND_RESPAWN_GO for script id %u", type, tmp.GetGOGuid(), goEntry, tmp.id);
                     continue;
                 }
 
@@ -392,7 +431,7 @@ void ScriptMgr::LoadScripts(DBScriptType type)
                         info->type == GAMEOBJECT_TYPE_FISHINGHOLE ||
                         info->type == GAMEOBJECT_TYPE_DOOR)
                 {
-                    sLog.outErrorDb("Table `db_scripts [type = %d]` have gameobject type (%u) unsupported by command SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id %u", type, info->type, tmp.id);
+                    sLog.outErrorDb("Table `db_scripts [type = %d]` have gameobject type (%u) unsupported by command SCRIPT_COMMAND_RESPAWN_GO for script id %u", type, info->type, tmp.id);
                     continue;
                 }
                 break;
@@ -415,7 +454,7 @@ void ScriptMgr::LoadScripts(DBScriptType type)
             case SCRIPT_COMMAND_OPEN_DOOR:                  // 11
             case SCRIPT_COMMAND_CLOSE_DOOR:                 // 12
             {
-                uint32 goEntry = 0;
+                uint32 goEntry;
                 if (!tmp.GetGOGuid())
                 {
                     if (!tmp.buddyEntry)
@@ -529,6 +568,11 @@ void ScriptMgr::LoadScripts(DBScriptType type)
             }
             case SCRIPT_COMMAND_PLAY_MOVIE:                 // 19
             {
+#if defined(CLASSIC)
+                sLog.outErrorDb("Table `db_scripts [type = %d]` use unsupported SCRIPT_COMMAND_PLAY_MOVIE for script id %u",
+                                type, tmp.id);
+                continue;
+#else
                 if (!sMovieStore.LookupEntry(tmp.playMovie.movieId))
                 {
                     sLog.outErrorDb("Table `db_scripts [type = %d]` use non-existing movie_id (id: %u) in SCRIPT_COMMAND_PLAY_MOVIE for script id %u",
@@ -536,6 +580,7 @@ void ScriptMgr::LoadScripts(DBScriptType type)
                     continue;
                 }
                 break;
+#endif
             }
             case SCRIPT_COMMAND_MOVEMENT:                   // 20
             {
@@ -566,7 +611,7 @@ void ScriptMgr::LoadScripts(DBScriptType type)
                 {
                     if (tmp.morph.creatureOrModelEntry && !sCreatureDisplayInfoStore.LookupEntry(tmp.morph.creatureOrModelEntry))
                     {
-                        sLog.outErrorDb("Table `db_scripts [type = %d]` has datalong2 = %u in SCRIPT_COMMAND_MORPH_TO_ENTRY_OR_MODEL for script id %u, but this model does not exist.", type, tmp.morph.creatureOrModelEntry, tmp.id);
+                        sLog.outErrorDb("Table `db_scripts [type = %d]` has datalong = %u in SCRIPT_COMMAND_MORPH_TO_ENTRY_OR_MODEL for script id %u, but this model does not exist.", type, tmp.morph.creatureOrModelEntry, tmp.id);
                         continue;
                     }
                 }
@@ -574,7 +619,7 @@ void ScriptMgr::LoadScripts(DBScriptType type)
                 {
                     if (tmp.morph.creatureOrModelEntry && !ObjectMgr::GetCreatureTemplate(tmp.morph.creatureOrModelEntry))
                     {
-                        sLog.outErrorDb("Table `db_scripts [type = %d]` has datalong2 = %u in SCRIPT_COMMAND_MORPH_TO_ENTRY_OR_MODEL for script id %u, but this creature_template does not exist.", type, tmp.morph.creatureOrModelEntry, tmp.id);
+                        sLog.outErrorDb("Table `db_scripts [type = %d]` has datalong = %u in SCRIPT_COMMAND_MORPH_TO_ENTRY_OR_MODEL for script id %u, but this creature_template does not exist.", type, tmp.morph.creatureOrModelEntry, tmp.id);
                         continue;
                     }
                 }
@@ -587,7 +632,7 @@ void ScriptMgr::LoadScripts(DBScriptType type)
                 {
                     if (tmp.mount.creatureOrModelEntry && !sCreatureDisplayInfoStore.LookupEntry(tmp.mount.creatureOrModelEntry))
                     {
-                        sLog.outErrorDb("Table `db_scripts [type = %d]` has datalong2 = %u in SCRIPT_COMMAND_MOUNT_TO_ENTRY_OR_MODEL for script id %u, but this model does not exist.", type, tmp.mount.creatureOrModelEntry, tmp.id);
+                        sLog.outErrorDb("Table `db_scripts [type = %d]` has datalong = %u in SCRIPT_COMMAND_MOUNT_TO_ENTRY_OR_MODEL for script id %u, but this model does not exist.", type, tmp.mount.creatureOrModelEntry, tmp.id);
                         continue;
                     }
                 }
@@ -595,7 +640,7 @@ void ScriptMgr::LoadScripts(DBScriptType type)
                 {
                     if (tmp.mount.creatureOrModelEntry && !ObjectMgr::GetCreatureTemplate(tmp.mount.creatureOrModelEntry))
                     {
-                        sLog.outErrorDb("Table `db_scripts [type = %d]` has datalong2 = %u in SCRIPT_COMMAND_MOUNT_TO_ENTRY_OR_MODEL for script id %u, but this creature_template does not exist.", type, tmp.mount.creatureOrModelEntry, tmp.id);
+                        sLog.outErrorDb("Table `db_scripts [type = %d]` has datalong = %u in SCRIPT_COMMAND_MOUNT_TO_ENTRY_OR_MODEL for script id %u, but this creature_template does not exist.", type, tmp.mount.creatureOrModelEntry, tmp.id);
                         continue;
                     }
                 }
@@ -648,7 +693,17 @@ void ScriptMgr::LoadScripts(DBScriptType type)
                         if (SpellEntry const* spell = sSpellStore.LookupEntry(i))
                             for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
                             {
+#if defined (CATA)
+                                SpellEffectEntry const* spellEffect = spell->GetSpellEffect(SpellEffectIndex(j));
+                                if (!spellEffect)
+                                {
+                                    continue;
+                                }
+
+                                if (spellEffect->Effect == SPELL_EFFECT_SEND_TAXI && spellEffect->EffectMiscValue == tmp.sendTaxiPath.taxiPathId)
+#else
                                 if (spell->Effect[j] == SPELL_EFFECT_SEND_TAXI && spell->EffectMiscValue[j] == int32(tmp.sendTaxiPath.taxiPathId))
+#endif
                                 {
                                     taxiSpell = i;
                                     break;
@@ -675,7 +730,8 @@ void ScriptMgr::LoadScripts(DBScriptType type)
             }
             case SCRIPT_COMMAND_PAUSE_WAYPOINTS:            // 32
                 break;
-            case SCRIPT_COMMAND_XP_USER:                    // 33
+            case SCRIPT_COMMAND_JOIN_LFG:                   // 33
+                //Only currently used in Zero
                 break;
             case SCRIPT_COMMAND_TERMINATE_COND:             // 34
             {
@@ -751,13 +807,54 @@ void ScriptMgr::LoadScripts(DBScriptType type)
 
                 break;
             }
+            case SCRIPT_COMMAND_RESPAWN:                      // 41
+                break;
+            case SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS:          // 42
+            {
+                if (tmp.textId[0] < 0 || tmp.textId[1] < 0 || tmp.textId[2] < 0)
+                {
+                    sLog.outErrorDb("Table `db_scripts [type = %d]` has invalid equipment slot (dataint = %u, dataint2 = %u dataint3 = %u) in SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS for script id %u", type, tmp.textId[0], tmp.textId[1], tmp.textId[2], tmp.id);
+                    continue;
+                }
+                break;
+            }
+            case SCRIPT_COMMAND_RESET_GO:                     // 43
+                break;
+            case SCRIPT_COMMAND_UPDATE_TEMPLATE:              // 44
+            {
+#if defined(CLASSIC) || defined(TBC) || defined(WOTLK)
+                if (tmp.updateTemplate.entry && !ObjectMgr::GetCreatureTemplate(tmp.updateTemplate.entry))
+#else
+                if (!sCreatureStorage.LookupEntry<CreatureInfo>(tmp.updateTemplate.entry))
+#endif
+                {
+                    sLog.outErrorDb("Table `db_scripts [type = %d]` has datalong = %u in SCRIPT_COMMAND_UPDATE_TEMPLATE for script id %u, but this creature_template does not exist.", type, tmp.updateTemplate.entry, tmp.id);
+                    continue;
+                }
+#if defined(CLASSIC) || defined(TBC) || defined(WOTLK)
+                if (tmp.updateTemplate.faction > 1)
+#else
+                if (tmp.updateTemplate.faction != 0 && tmp.updateTemplate.faction != 1)
+#endif
+                {
+                    sLog.outErrorDb("Table `db_scripts [type = %d]` uses invalid faction team (datalong2 = %u, must be 0 or 1) in SCRIPT_COMMAND_UPDATE_TEMPLATE for script id %u", type, tmp.updateTemplate.faction, tmp.id);
+                    continue;
+                }
+                break;
+            }
+            case SCRIPT_COMMAND_XP_USER:                      // 53
+            {
+                break;
+            }
+            case SCRIPT_COMMAND_SET_FLY:                      // 59
+            {
+                break;
+            }
             default:
             {
                 sLog.outErrorDb("Table `db_scripts [type = %d]` uses unknown command %u, skipping.", type, tmp.command);
                 continue;
             }
-            case SCRIPT_COMMAND_RESET_GO:                     // 43
-                break;
         }
 
         if (m_dbScripts[type].find(tmp.id) == m_dbScripts[type].end())
@@ -786,7 +883,11 @@ void ScriptMgr::LoadDbScripts(DBScriptType t)
         CollectPossibleEventIds(eventIds);
     }
 
-    LoadScripts(t);
+    {
+        ACE_GUARD(ACE_Thread_Mutex, _g, m_lock)
+        LoadScripts(t);
+    }
+
     ScriptChainMap& scm = m_dbScripts[t];
 
     for (ScriptChainMap::const_iterator itr = scm.begin(); itr != scm.end(); ++itr)
@@ -930,7 +1031,9 @@ bool ScriptAction::GetScriptCommandObject(const ObjectGuid guid, bool includeIte
     switch (guid.GetHigh())
     {
         case HIGHGUID_UNIT:
+#if defined(WOTLK) || defined(CATA) || defined(MISTS)
         case HIGHGUID_VEHICLE:
+#endif
             resultObject = m_map->GetCreature(guid);
             break;
         case HIGHGUID_PET:
@@ -1032,16 +1135,25 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject
             {
                 Creature* pCreatureBuddy = NULL;
 
-                MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*pSearcher, m_script->buddyEntry, true, false, m_script->searchRadiusOrGuid, true);
-                MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pCreatureBuddy, u_check);
-
-                if (m_script->data_flags & SCRIPT_FLAG_BUDDY_IS_PET)
+                if (m_script->data_flags & SCRIPT_FLAG_BUDDY_IS_DESPAWNED)
                 {
-                    Cell::VisitWorldObjects(pSearcher, searcher, m_script->searchRadiusOrGuid);
-                }
-                else                                        // Normal Creature
-                {
+                    MaNGOS::AllCreaturesOfEntryInRangeCheck u_check(pSearcher, m_script->buddyEntry, m_script->searchRadiusOrGuid);
+                    MaNGOS::CreatureLastSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(pCreatureBuddy, u_check);
                     Cell::VisitGridObjects(pSearcher, searcher, m_script->searchRadiusOrGuid);
+                }
+                else
+                {
+                    MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*pSearcher, m_script->buddyEntry, true, false, m_script->searchRadiusOrGuid, true);
+                    MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pCreatureBuddy, u_check);
+
+                    if (m_script->data_flags & SCRIPT_FLAG_BUDDY_IS_PET)
+                    {
+                        Cell::VisitWorldObjects(pSearcher, searcher, m_script->searchRadiusOrGuid);
+                    }
+                    else                                        // Normal Creature
+                    {
+                        Cell::VisitGridObjects(pSearcher, searcher, m_script->searchRadiusOrGuid);
+                    }
                 }
 
                 pBuddy = pCreatureBuddy;
@@ -1414,11 +1526,9 @@ bool ScriptAction::HandleScriptStep()
 
             break;
         }
-        case SCRIPT_COMMAND_RESPAWN_GAMEOBJECT:             // 9
+        case SCRIPT_COMMAND_RESPAWN_GO:                     // 9
         {
-            GameObject* pGo = NULL;
-            uint32 time_to_despawn = m_script->respawnGo.despawnDelay < 5 ? 5 : m_script->respawnGo.despawnDelay;
-
+            GameObject* pGo;
             if (m_script->respawnGo.goGuid)
             {
                 GameObjectData const* goData = sObjectMgr.GetGOData(m_script->respawnGo.goGuid);
@@ -1458,6 +1568,8 @@ bool ScriptAction::HandleScriptStep()
                 break;                                       // gameobject already spawned
             }
 
+            uint32 time_to_despawn = m_script->respawnGo.despawnDelay < 5 ? 5 : m_script->respawnGo.despawnDelay;
+
             pGo->SetLootState(GO_READY);
             pGo->SetRespawnTime(time_to_despawn);           // despawn object in ? seconds
             pGo->Refresh();
@@ -1476,7 +1588,7 @@ bool ScriptAction::HandleScriptStep()
             float z = m_script->z;
             float o = m_script->o;
 
-            Creature* pCreature = pSource->SummonCreature(m_script->summonCreature.creatureEntry, x, y, z, o, m_script->summonCreature.despawnDelay ? TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN : TEMPSPAWN_DEAD_DESPAWN, m_script->summonCreature.despawnDelay, (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL) ? true : false);
+            Creature* pCreature = pSource->SummonCreature(m_script->summonCreature.creatureEntry, x, y, z, o, m_script->summonCreature.despawnDelay ? TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN : TEMPSPAWN_DEAD_DESPAWN, m_script->summonCreature.despawnDelay, (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL) ? true : false, m_script->textId[0] != 0);
             if (!pCreature)
             {
                 sLog.outErrorDb(" DB-SCRIPTS: Process table `db_scripts [type = %d]` id %u, command %u failed for creature (entry: %u).", m_type, m_script->id, m_script->command, m_script->summonCreature.creatureEntry);
@@ -1673,6 +1785,7 @@ bool ScriptAction::HandleScriptStep()
         }
         case SCRIPT_COMMAND_PLAY_MOVIE:                     // 19
         {
+#if defined(WOTLK) || defined (CATA) || defined (MISTS)
             Player* pPlayer = GetPlayerTargetOrSourceAndLog(pSource, pTarget);
             if (!pPlayer)
             {
@@ -1680,7 +1793,7 @@ bool ScriptAction::HandleScriptStep()
             }
 
             pPlayer->SendMovieStart(m_script->playMovie.movieId);
-
+#endif
             break;                                      // must be skipped at loading
         }
         case SCRIPT_COMMAND_MOVEMENT:                       // 20
@@ -1987,22 +2100,9 @@ bool ScriptAction::HandleScriptStep()
             }
             break;
         }
-        case SCRIPT_COMMAND_XP_USER:                        // 33
+        case SCRIPT_COMMAND_JOIN_LFG:                       // 33
         {
-            Player* pPlayer = GetPlayerTargetOrSourceAndLog(pSource, pTarget);
-            if (!pPlayer)
-            {
-                break;
-            }
-
-            if (m_script->xpDisabled.flags)
-            {
-                pPlayer->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_XP_USER_DISABLED);
-            }
-            else
-            {
-                pPlayer->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_XP_USER_DISABLED);
-            }
+            //Not supported
             break;
         }
         case SCRIPT_COMMAND_TERMINATE_COND:                 // 34
@@ -2065,7 +2165,20 @@ bool ScriptAction::HandleScriptStep()
                 break;
             }
 
+#if defined(CLASSIC) || defined(TBC) || defined(WOTLK)
             ((Creature*)pSource)->AI()->SendAIEventAround(AIEventType(m_script->sendAIEvent.eventType), (Unit*)pTarget, 0, float(m_script->sendAIEvent.radius));
+#else
+            // if radius is provided send AI event around
+            if (m_script->sendAIEvent.radius)
+            {
+                ((Creature*)pSource)->AI()->SendAIEventAround(AIEventType(m_script->sendAIEvent.eventType), (Unit*)pTarget, 0, float(m_script->sendAIEvent.radius));
+            }
+            // else if no radius and target is creature send AI event to target
+            else if (pTarget->GetTypeId() == TYPEID_UNIT)
+            {
+                ((Creature*)pSource)->AI()->SendAIEvent(AIEventType(m_script->sendAIEvent.eventType), NULL, (Creature*)pTarget);
+            }
+#endif
             break;
         }
         case SCRIPT_COMMAND_TURN_TO:                        // 36
@@ -2179,10 +2292,50 @@ bool ScriptAction::HandleScriptStep()
 
             break;
         }
-
-        default:
-            sLog.outErrorDb(" DB-SCRIPTS: Process table `db_scripts [type = %d]` id %u, command %u unknown command used.", m_type, m_script->id, m_script->command);
+        case SCRIPT_COMMAND_RESPAWN:                        // 41
+        {
+            if (LogIfNotCreature(pTarget))
+            {
+                break;
+            }
+            ((Creature*)pTarget)->Respawn();
             break;
+        }
+        case SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS:            // 42
+        {
+            if (LogIfNotCreature(pSource))
+            {
+                break;
+            }
+
+            Creature* pCSource = static_cast<Creature*>(pSource);
+
+            // reset default
+            if (m_script->setEquipment.resetDefault)
+            {
+                pCSource->LoadEquipment(pCSource->GetCreatureInfo()->EquipmentTemplateId, true);
+                break;
+            }
+
+            // main hand
+            if (m_script->textId[0] >= 0)
+            {
+                pCSource->SetVirtualItem(VIRTUAL_ITEM_SLOT_0, m_script->textId[0]);
+            }
+
+            // off hand
+            if (m_script->textId[1] >= 0)
+            {
+                pCSource->SetVirtualItem(VIRTUAL_ITEM_SLOT_1, m_script->textId[1]);
+            }
+
+            // ranged
+            if (m_script->textId[2] >= 0)
+            {
+                pCSource->SetVirtualItem(VIRTUAL_ITEM_SLOT_2, m_script->textId[2]);
+            }
+            break;
+        }
         case SCRIPT_COMMAND_RESET_GO:                       // 43
         {
             if (LogIfNotGameObject(pTarget))
@@ -2194,16 +2347,88 @@ bool ScriptAction::HandleScriptStep()
 
             switch (pGoTarget->GetGoType())
             {
-            case GAMEOBJECT_TYPE_DOOR:
-            case GAMEOBJECT_TYPE_BUTTON:
-                pGoTarget->ResetDoorOrButton();
-                break;
-            default:
-                sLog.outErrorDb(" DB-SCRIPTS: Process table `db_scripts [type = %d]` id %u, command %u failed: GO(buddyEntry) %u is not a door or button", m_type, m_script->id, m_script->command, m_script->buddyEntry);
-                break;
+                case GAMEOBJECT_TYPE_DOOR:
+                case GAMEOBJECT_TYPE_BUTTON:
+                    pGoTarget->ResetDoorOrButton();
+                    break;
+                default:
+                    sLog.outErrorDb(" DB-SCRIPTS: Process table `db_scripts [type = %d]` id %u, command %u failed for gameobject(buddyEntry: %u). Gameobject is not a door or button", m_type, m_script->id, m_script->command, m_script->buddyEntry);
+                    break;
             }
             break;
         }
+        case SCRIPT_COMMAND_UPDATE_TEMPLATE:                // 44
+        {
+            if (LogIfNotCreature(pSource))
+            {
+                break;
+            }
+
+            Creature* pCre = static_cast<Creature*>(pSource);
+
+            if (pCre->GetEntry() != m_script->updateTemplate.entry)
+            {
+                pCre->UpdateEntry(m_script->updateTemplate.entry, m_script->updateTemplate.faction ? HORDE : ALLIANCE);
+            }
+            else
+            {
+                sLog.outErrorDb(" DB-SCRIPTS: Process table `db_scripts [type = %d]` id %u, command %u: source creature already has the specified creature entry %u", m_type, m_script->id, m_script->command, m_script->updateTemplate.entry);
+            }
+            break;
+        }
+        case SCRIPT_COMMAND_XP_USER:                        // 53
+        {
+            Player* pPlayer = GetPlayerTargetOrSourceAndLog(pSource, pTarget);
+            if (!pPlayer)
+            {
+                break;
+            }
+
+            if (m_script->xpDisabled.flags)
+            {
+                pPlayer->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_XP_USER_DISABLED);
+            }
+            else
+            {
+                pPlayer->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_XP_USER_DISABLED);
+            }
+            break;
+        }
+
+        case SCRIPT_COMMAND_SET_FLY:                        // 59
+        {
+            if (LogIfNotCreature(pSource))
+            {
+                break;
+            }
+
+            // enable / disable the fly anim flag
+            if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
+            {
+                if (m_script->fly.enable)
+                {
+#if defined(CLASSIC) || defined(TBC) || defined(WOTLK)
+                    pSource->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+#else
+                    pSource->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+#endif
+                }
+                else
+                {
+#if defined(CLASSIC) || defined(TBC) || defined(WOTLK)
+                    pSource->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+#else
+                    pSource->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+#endif
+                }
+            }
+
+            ((Creature*)pSource)->SetLevitate((m_script->fly.enable == 0) ? false : true);
+            break;
+        }
+        default:
+            sLog.outErrorDb(" DB-SCRIPTS: Process table `db_scripts [type = %d]` id %u, command %u unknown command used.", m_type, m_script->id, m_script->command);
+            break;
     }
 
     return false;
@@ -2439,9 +2664,12 @@ CreatureAI* ScriptMgr::GetCreatureAI(Creature* pCreature)
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (CreatureAI* luaAI = sEluna->GetAI(pCreature))
+    if (Eluna* e = pCreature->GetEluna())
     {
-        return luaAI;
+        if (CreatureAI* luaAI = e->GetAI(pCreature))
+        {
+            return luaAI;
+        }
     }
 #endif /* ENABLE_ELUNA */
 
@@ -2475,9 +2703,12 @@ bool ScriptMgr::OnGossipHello(Player* pPlayer, Creature* pCreature)
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (sEluna->OnGossipHello(pPlayer, pCreature))
+    if (Eluna* e = pPlayer->GetEluna())
     {
-        return true;
+        if (e->OnGossipHello(pPlayer, pCreature))
+        {
+            return true;
+        }
     }
 #endif /* ENABLE_ELUNA */
 
@@ -2492,9 +2723,12 @@ bool ScriptMgr::OnGossipHello(Player* pPlayer, GameObject* pGameObject)
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (sEluna->OnGossipHello(pPlayer, pGameObject))
+    if (Eluna* e = pPlayer->GetEluna())
     {
-        return true;
+        if (e->OnGossipHello(pPlayer, pGameObject))
+        {
+            return true;
+        }
     }
 #endif /* ENABLE_ELUNA */
 
@@ -2522,20 +2756,21 @@ bool ScriptMgr::OnGossipHello(Player* pPlayer, Item* pItem)
 bool ScriptMgr::OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 sender, uint32 action, const char* code)
 {
 #ifdef ENABLE_ELUNA
-    if (code)
+    if (Eluna* e = pPlayer->GetEluna())
     {
-        // Used by Eluna
-        if (sEluna->OnGossipSelectCode(pPlayer, pCreature, sender, action, code))
+        if (code)
         {
-            return true;
+            if (e->OnGossipSelectCode(pPlayer, pCreature, sender, action, code))
+            {
+                return true;
+            }
         }
-    }
-    else
-    {
-        // Used by Eluna
-        if (sEluna->OnGossipSelect(pPlayer, pCreature, sender, action))
+        else
         {
-            return true;
+            if (e->OnGossipSelect(pPlayer, pCreature, sender, action))
+            {
+                return true;
+            }
         }
     }
 #endif /* ENABLE_ELUNA */
@@ -2558,18 +2793,22 @@ bool ScriptMgr::OnGossipSelect(Player* pPlayer, GameObject* pGameObject, uint32 
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (code)
+    if (Eluna* e = pPlayer->GetEluna())
     {
-        if (sEluna->OnGossipSelectCode(pPlayer, pGameObject, sender, action, code))
+
+        if (code)
         {
-            return true;
+            if (e->OnGossipSelectCode(pPlayer, pGameObject, sender, action, code))
+            {
+                return true;
+            }
         }
-    }
-    else
-    {
-        if (sEluna->OnGossipSelect(pPlayer, pGameObject, sender, action))
+        else
         {
-            return true;
+            if (e->OnGossipSelect(pPlayer, pGameObject, sender, action))
+            {
+                return true;
+            }
         }
     }
 #endif /* ENABLE_ELUNA */
@@ -2613,9 +2852,12 @@ bool ScriptMgr::OnQuestAccept(Player* pPlayer, Creature* pCreature, Quest const*
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (sEluna->OnQuestAccept(pPlayer, pCreature, pQuest))
+    if (Eluna* e = pPlayer->GetEluna())
     {
-        return true;
+        if (e->OnQuestAccept(pPlayer, pCreature, pQuest))
+        {
+            return true;
+        }
     }
 #endif /* ENABLE_ELUNA */
 
@@ -2630,9 +2872,12 @@ bool ScriptMgr::OnQuestAccept(Player* pPlayer, GameObject* pGameObject, Quest co
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (sEluna->OnQuestAccept(pPlayer, pGameObject, pQuest))
+    if (Eluna* e = pPlayer->GetEluna())
     {
-        return true;
+        if (e->OnQuestAccept(pPlayer, pGameObject, pQuest))
+        {
+            return true;
+        }
     }
 #endif /* ENABLE_ELUNA */
 
@@ -2647,9 +2892,12 @@ bool ScriptMgr::OnQuestAccept(Player* pPlayer, Item* pItem, Quest const* pQuest)
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (sEluna->OnQuestAccept(pPlayer, pItem, pQuest))
+    if (Eluna* e = pPlayer->GetEluna())
     {
-        return true;
+        if (e->OnQuestAccept(pPlayer, pItem, pQuest))
+        {
+            return true;
+        }
     }
 #endif /* ENABLE_ELUNA */
 
@@ -2664,9 +2912,12 @@ bool ScriptMgr::OnQuestRewarded(Player* pPlayer, Creature* pCreature, Quest cons
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (sEluna->OnQuestReward(pPlayer, pCreature, pQuest, reward))
+    if (Eluna* e = pPlayer->GetEluna())
     {
-        return true;
+        if (e->OnQuestReward(pPlayer, pCreature, pQuest, reward))
+        {
+            return true;
+        }
     }
 #endif /* ENABLE_ELUNA */
 
@@ -2681,9 +2932,12 @@ bool ScriptMgr::OnQuestRewarded(Player* pPlayer, GameObject* pGameObject, Quest 
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (sEluna->OnQuestReward(pPlayer, pGameObject, pQuest, reward))
+    if (Eluna* e = pPlayer->GetEluna())
     {
-        return true;
+        if (e->OnQuestReward(pPlayer, pGameObject, pQuest, reward))
+        {
+            return true;
+        }
     }
 #endif /* ENABLE_ELUNA */
 
@@ -2698,7 +2952,10 @@ uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, Creature* pCreature)
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->GetDialogStatus(pPlayer, pCreature);
+    if (Eluna* e = pPlayer->GetEluna())
+    {
+        e->GetDialogStatus(pPlayer, pCreature);
+    }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2712,7 +2969,10 @@ uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, GameObject* pGameObject)
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->GetDialogStatus(pPlayer, pGameObject);
+    if (Eluna* e = pPlayer->GetEluna())
+    {
+        e->GetDialogStatus(pPlayer, pGameObject);
+    }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2725,9 +2985,12 @@ uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, GameObject* pGameObject)
 bool ScriptMgr::OnGameObjectUse(Player* pPlayer, GameObject* pGameObject)
 {
 #ifdef ENABLE_ELUNA
-    if (sEluna->OnGameObjectUse(pPlayer, pGameObject))
+    if (Eluna* e = pPlayer->GetEluna())
     {
-        return true;
+        if (e->OnGameObjectUse(pPlayer, pGameObject))
+        {
+            return true;
+        }
     }
 #endif /* ENABLE_ELUNA */
 
@@ -2753,9 +3016,12 @@ bool ScriptMgr::OnItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& 
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (!sEluna->OnUse(pPlayer, pItem, targets))
+    if (Eluna* e = pPlayer->GetEluna())
     {
-        return true;
+        if (!e->OnUse(pPlayer, pItem, targets))
+        {
+            return true;
+        }
     }
 #endif /* ENABLE_ELUNA */
 
@@ -2770,9 +3036,12 @@ bool ScriptMgr::OnAreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry)
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (sEluna->OnAreaTrigger(pPlayer, atEntry))
+    if (Eluna* e = pPlayer->GetEluna())
     {
-        return true;
+        if (e->OnAreaTrigger(pPlayer, atEntry))
+        {
+            return true;
+        }
     }
 #endif /* ENABLE_ELUNA */
 
@@ -2807,7 +3076,10 @@ bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex ef
 #ifdef ENABLE_ELUNA
     if (Creature* creature = pTarget->ToCreature())
     {
-        sEluna->OnDummyEffect(pCaster, spellId, effIndex, creature);
+        if (Eluna* e = pCaster->GetEluna())
+        {
+            e->OnDummyEffect(pCaster, spellId, effIndex, creature);
+        }
     }
 
 #endif /* ENABLE_ELUNA */
@@ -2823,7 +3095,10 @@ bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex ef
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-        sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget);
+    if (Eluna* e = pCaster->GetEluna())
+    {
+        e->OnDummyEffect(pCaster, spellId, effIndex, pTarget);
+    }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2837,7 +3112,10 @@ bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex ef
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget);
+    if (Eluna* e = pCaster->GetEluna())
+    {
+        e->OnDummyEffect(pCaster, spellId, effIndex, pTarget);
+    }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2914,12 +3192,14 @@ void ScriptMgr::CollectPossibleEventIds(std::set<uint32>& eventIds)
                 eventIds.insert(itr->capturePoint.winEventID1);
                 eventIds.insert(itr->capturePoint.winEventID2);
                 break;
+#if defined(WOTLK) || defined (CATA) || defined (MISTS)
             case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
                 eventIds.insert(itr->destructibleBuilding.damagedEvent);
                 eventIds.insert(itr->destructibleBuilding.destroyedEvent);
                 eventIds.insert(itr->destructibleBuilding.intactEvent);
                 eventIds.insert(itr->destructibleBuilding.rebuildingEvent);
                 break;
+#endif
             default:
                 break;
         }
@@ -2933,6 +3213,21 @@ void ScriptMgr::CollectPossibleEventIds(std::set<uint32>& eventIds)
         {
             for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
             {
+#if defined (CATA)
+                SpellEffectEntry const* spellEffect = spell->GetSpellEffect(SpellEffectIndex(j));
+                if (!spellEffect)
+                {
+                    continue;
+                }
+
+                if (spellEffect->Effect == SPELL_EFFECT_SEND_EVENT)
+                {
+                    if (spellEffect->EffectMiscValue)
+                    {
+                        eventIds.insert(spellEffect->EffectMiscValue);
+                    }
+                }
+#else
                 if (spell->Effect[j] == SPELL_EFFECT_SEND_EVENT)
                 {
                     if (spell->EffectMiscValue[j])
@@ -2940,10 +3235,11 @@ void ScriptMgr::CollectPossibleEventIds(std::set<uint32>& eventIds)
                         eventIds.insert(spell->EffectMiscValue[j]);
                     }
                 }
+#endif
             }
         }
     }
-#if defined(TBC) || defined (WOTLK)
+#if defined(TBC) || defined (WOTLK) || defined (CATA)
     // Load all possible event entries from taxi path nodes
     for (size_t path_idx = 0; path_idx < sTaxiPathNodesByPath.size(); ++path_idx)
     {

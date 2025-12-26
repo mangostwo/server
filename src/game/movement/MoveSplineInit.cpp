@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,11 @@
 
 namespace Movement
 {
+    /**
+     * @brief Selects the appropriate speed type based on movement flags.
+     * @param moveFlags The movement flags.
+     * @return The selected UnitMoveType.
+     */
     UnitMoveType SelectSpeedType(uint32 moveFlags)
     {
         if (moveFlags & MOVEFLAG_FLYING)
@@ -67,6 +72,10 @@ namespace Movement
         return MOVE_RUN;
     }
 
+    /**
+     * @brief Final pass of initialization that launches spline movement.
+     * @return int32 duration - estimated travel time
+     */
     int32 MoveSplineInit::Launch()
     {
         MoveSpline& move_spline = *unit.movespline;
@@ -93,7 +102,7 @@ namespace Movement
             MoveTo(real_position);
         }
 
-        // corrent first vertex
+        // correct first vertex
         args.path[0] = real_position;
         args.initialOrientation = real_position.orientation;
 
@@ -138,6 +147,9 @@ namespace Movement
         return move_spline.Duration();
     }
 
+    /**
+     * @brief Stops any creature movement.
+     */
     void MoveSplineInit::Stop()
     {
         MoveSpline& move_spline = *unit.movespline;
@@ -195,6 +207,10 @@ namespace Movement
         unit.SendMessageToSet(&data, true);
     }
 
+    /**
+     * @brief Constructor that initializes the MoveSplineInit with a reference to a Unit.
+     * @param m Reference to the Unit to be moved.
+     */
     MoveSplineInit::MoveSplineInit(Unit& m) : unit(m)
     {
         // mix existing state into new
@@ -202,12 +218,22 @@ namespace Movement
         args.flags.flying = unit.m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_CAN_FLY | MOVEFLAG_FLYING | MOVEFLAG_LEVITATING));
     }
 
+    /**
+     * @brief Sets unit's facing to a specified target after all path done.
+     * @param target The target to face.
+     */
     void MoveSplineInit::SetFacing(const Unit* target)
     {
         args.flags.EnableFacingTarget();
         args.facing.target = target->GetObjectGuid().GetRawValue();
     }
 
+    /**
+     * @brief Adds final facing animation.
+     * Sets unit's facing to specified point/angle after all path done.
+     * You can have only one final facing: previous will be overridden.
+     * @param angle The angle to face.
+     */
     void MoveSplineInit::SetFacing(float angle)
     {
         args.facing.angle = G3D::wrap(angle, 0.f, (float)G3D::twoPi());

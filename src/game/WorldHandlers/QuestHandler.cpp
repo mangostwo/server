@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -400,9 +400,25 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
 
             _player->SetQuestStatus(quest, QUEST_STATUS_NONE);
 
+            if (sWorld.getConfig(CONFIG_BOOL_ENABLE_QUEST_TRACKER)) // check if Quest Tracker is enabled
+            {
+                DEBUG_LOG("QUEST TRACKER: Quest Abandoned.");
+                static SqlStatementID CHAR_UPD_QUEST_TRACK_ABANDON_TIME;
+                // prepare Quest Tracker datas
+                SqlStatement stmt = CharacterDatabase.CreateStatement(CHAR_UPD_QUEST_TRACK_ABANDON_TIME, "UPDATE `quest_tracker` SET `quest_abandon_time` = NOW() WHERE `id` = ? AND `character_guid` = ? ORDER BY `quest_accept_time` DESC LIMIT 1");
+                stmt.addUInt32(quest);
+                stmt.addUInt32(_player->GetGUIDLow());
+
+                // add to Quest Tracker
+                stmt.Execute();
+            }
+
 #ifdef ENABLE_ELUNA
-            sEluna->OnQuestAbandon(_player, quest);
-#endif
+            if (Eluna* e = _player->GetEluna())
+            {
+                e->OnQuestAbandon(_player, quest);
+            }
+#endif /* ENABLE_ELUNA */
         }
 
         _player->SetQuestSlot(slot, 0);

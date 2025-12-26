@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -459,7 +459,10 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recv_data)
 
         // Used by Eluna
 #ifdef ENABLE_ELUNA
-        sEluna->HandleGossipSelectOption(GetPlayer(), item, GetPlayer()->PlayerTalkClass->GossipOptionSender(gossipListId), GetPlayer()->PlayerTalkClass->GossipOptionAction(gossipListId), code);
+        if (Eluna* e = GetPlayer()->GetEluna())
+        {
+            e->HandleGossipSelectOption(GetPlayer(), item, GetPlayer()->PlayerTalkClass->GossipOptionSender(gossipListId), GetPlayer()->PlayerTalkClass->GossipOptionAction(gossipListId), code);
+        }
 #endif /* ENABLE_ELUNA */
     }
     else if (guid.IsPlayer())
@@ -472,7 +475,10 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recv_data)
 
         // Used by Eluna
 #ifdef ENABLE_ELUNA
-        sEluna->HandleGossipSelectOption(GetPlayer(), menuId, GetPlayer()->PlayerTalkClass->GossipOptionSender(gossipListId), GetPlayer()->PlayerTalkClass->GossipOptionAction(gossipListId), code);
+        if (Eluna* e = GetPlayer()->GetEluna())
+        {
+            e->HandleGossipSelectOption(GetPlayer(), menuId, GetPlayer()->PlayerTalkClass->GossipOptionSender(gossipListId), GetPlayer()->PlayerTalkClass->GossipOptionAction(gossipListId), code);
+        }
 #endif /* ENABLE_ELUNA */
     }
 }

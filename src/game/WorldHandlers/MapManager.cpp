@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,10 @@
 #include "Corpse.h"
 #include "ObjectMgr.h"
 
+#ifdef ENABLE_ELUNA
+#include "ElunaConfig.h"
+#endif /* ENABLE_ELUNA */
+
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<MapManager, ACE_Recursive_Thread_Mutex>
 INSTANTIATE_SINGLETON_2(MapManager, CLASS_LOCK);
 INSTANTIATE_CLASS_MUTEX(MapManager, ACE_Recursive_Thread_Mutex);
@@ -63,6 +67,17 @@ void
 MapManager::Initialize()
 {
     int num_threads(sWorld.getConfig(CONFIG_UINT32_NUMTHREADS));
+
+#ifdef ENABLE_ELUNA
+    if (sElunaConfig->IsElunaEnabled() && sElunaConfig->IsElunaCompatibilityMode() && num_threads > 1)
+    {
+        // Force 1 thread for Eluna if compatibility mode is enabled. Compatibility mode is single state and does not allow more update threads.
+        sLog.outError("Map update threads set to %i, when Eluna in compatibility mode only allows 1, changing to 1", num_threads);
+        num_threads = 1;
+    }
+#endif /* ENABLE_ELUNA */
+
+    // Start mtmaps if needed.
     if (num_threads > 0 && m_updater.activate(num_threads) == -1)
     {
         abort();
@@ -104,6 +119,7 @@ void MapManager::InitializeVisibilityDistanceInfo()
     }
 }
 
+/// @param id - MapId of the to be created map. @param obj WorldObject for which the map is to be created. Must be player for Instancable maps.
 Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
 {
     ACE_GUARD_RETURN(LOCK_TYPE, _guard, m_lock, NULL)
@@ -124,6 +140,8 @@ Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
         {
             m = CreateInstance(id, (Player*)obj);
         }
+        // Load active objects for this map
+        sObjectMgr.LoadActiveEntities(m);
     }
     else
     {
@@ -421,4 +439,12 @@ BattleGroundMap* MapManager::CreateBattleGroundMap(uint32 id, uint32 InstanceId,
     map->CreateInstanceData(false);
 
     return map;
+}
+
+void MapManager::DoForAllMaps(const std::function<void(Map*)>& worker)
+{
+    for (MapMapType::const_iterator itr = i_maps.begin(); itr != i_maps.end(); ++itr)
+    {
+        worker(itr->second);
+    }
 }

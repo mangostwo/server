@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -108,8 +108,8 @@ bool Weather::ReGenerate()
     // 78 days between January 1st and March 20nd; 365/4=91 days by season
     // season source http://aa.usno.navy.mil/data/docs/EarthSeasons.html
     time_t gtime = sWorld.GetGameTime();
-    struct tm* ltime = localtime(&gtime);
-    uint32 season = ((ltime->tm_yday - 78 + 365) / 91) % 4;
+    std::tm ltime = safe_localtime(gtime);
+    uint32 season = ((ltime.tm_yday - 78 + 365) / 91) % 4;
 
     static char const* seasonName[WEATHER_SEASONS] = { "spring", "summer", "fall", "winter" };
 
@@ -249,7 +249,10 @@ bool Weather::SendWeatherForPlayersInZone(Map const* _map)
     ///- Log the event
     LogWeatherState(state);
 #ifdef ENABLE_ELUNA
-    sEluna->OnChange(this, m_zone, GetWeatherState(), m_grade);
+    if (Eluna* e = sWorld.GetEluna())
+    {
+        e->OnChange(this, m_zone, GetWeatherState(), m_grade);
+    }
 #endif /* ENABLE_ELUNA */
 
     return true;

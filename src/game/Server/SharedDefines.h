@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -3147,8 +3147,60 @@ enum TeleportLocation
     TELEPORT_LOCATION_BG_ENTRY_POINT = 1,
 };
 
-   //  Creature entries for more readable code
-   enum CreatureEntriesConsts
+/**
+ * Some statuses that can be sent with the \ref OpcodesList::SMSG_GM_TICKET_STATUS_UPDATE opcode
+ * to change what the client is currently showing about your open ticket.
+ * \see WorldSession::SendGMTicketStatusUpdate
+ */
+enum GMTicketStatus
+{
+    /**
+     * This code is used when the client closed the ticket itself and we shouldn't send an update
+     * message to it */
+    GM_TICKET_STATUS_DO_NOTHING = -1,
+    /** On this client responds by CMSG_GMTICKET_GETTICKET, updating the local ticket copy
+    */
+    GM_TICKET_STATUS_ASK_UPDATE = 1,
+    /** Should close the window in the top right corner telling you that you have a
+     * ticket open */
+    GM_TICKET_STATUS_CLOSE = 2,
+    /** Should close the window telling you you have an open ticket and query you for
+     * answers on a survey, how good did the GM perform?
+     * \see GMTicket::SaveSurveyData
+     */
+    GM_TICKET_STATUS_SURVEY = 3
+};
+
+/**
+ * This denotes the different levels of whisper logging that can be active via configuration, the
+ * string for this in the config file is LogWhispers, the config enum is
+ * \ref eConfigUInt32Values::CONFIG_UINT32_LOG_WHISPERS and the default value is 1, ie: we only
+ * log whispers related to tickets.
+ *
+ * The database table that everything is logged to is character.character_whispers
+ * \see Player::LogWhisper
+ */
+enum WhisperLoggingLevels
+{
+    /**
+     * When this is the level used no logging of whispers at all is done
+     */
+    WHISPER_LOGGING_NONE = 0,
+    /**
+     * When this level is used we log everything related to GM-tickets, ie: when a GM first whispers
+     * the holder of a ticket until that ticket is closed
+     */
+    WHISPER_LOGGING_TICKETS = 1,
+    /**
+     * This will log all whispers made between players, GM-tickets included
+     */
+    WHISPER_LOGGING_EVERYTHING = 2
+};
+
+    /*
+    Creature entries for more readable code
+    */
+enum CreatureEntriesConsts
 {
     CREATURE_TAINTED_OOZE = 7092,
     CREATURE_CURSED_OOZE = 7086,

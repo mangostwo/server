@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -160,8 +160,17 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         // get list of all maps
         const MapMapType& Maps() const { return i_maps; }
 
+        template<typename Do> void DoForAllMaps(Do& _do)
+        {
+            for (auto& mapData : i_maps)
+            {
+                _do(mapData.second);
+            }
+        }
+
         template<typename Do>
         void DoForAllMapsWithMapId(uint32 mapId, Do& _do);
+        void DoForAllMaps(const std::function<void(Map*)>& worker);
 
     private:
 

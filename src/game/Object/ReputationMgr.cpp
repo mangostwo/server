@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -261,8 +261,11 @@ void ReputationMgr::Initialize()
 void ReputationMgr::SetReputation(FactionEntry const* factionEntry, int32 standing, bool incremental)
 {
 #ifdef ENABLE_ELUNA
-    sEluna->OnReputationChange(m_player, factionEntry->ID, standing, incremental);
-#endif
+    if (Eluna* e = m_player->GetEluna())
+    {
+        e->OnReputationChange(m_player, factionEntry->ID, standing, incremental);
+    }
+#endif /* ENABLE_ELUNA */
 
     bool anyRankIncreased = false;
     // if spillover definition exists in DB, override DBC

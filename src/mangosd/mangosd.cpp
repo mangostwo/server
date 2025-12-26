@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,9 @@
 
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+#  include <openssl/provider.h>
+#endif
 #include <ace/Version.h>
 #include <ace/Get_Opt.h>
 
@@ -112,7 +115,7 @@ static bool start_db()
     }
 
     ///- Check the World database version
-    if(!WorldDatabase.CheckDatabaseVersion(DATABASE_WORLD))
+    if (!WorldDatabase.CheckDatabaseVersion(DATABASE_WORLD))
     {
         ///- Wait for already started DB delay threads to end
         WorldDatabase.HaltDelayThread();
@@ -387,15 +390,44 @@ int main(int argc, char** argv)
 
     sLog.outString("%s [world-daemon]", GitRevision::GetProjectRevision());
     sLog.outString("%s", GitRevision::GetFullRevision());
+    sLog.outString("%s", GitRevision::GetDepElunaFullRevisionStr());
+    sLog.outString("%s", GitRevision::GetDepSD3FullRevisionStr());
     print_banner();
     sLog.outString("Using configuration file %s.", cfg_file);
 
     DETAIL_LOG("Using SSL version: %s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
-    if (SSLeay() < 0x009080bfL)
-    {
-        DETAIL_LOG("WARNING: Outdated version of OpenSSL lib. Logins to server may not work!");
-        DETAIL_LOG("WARNING: Minimal required version [OpenSSL 0.9.8k]");
+
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+    OSSL_PROVIDER* legacy;
+    OSSL_PROVIDER* deflt;
+
+    /* Load Multiple providers into the default (NULL) library context */
+    legacy = OSSL_PROVIDER_load(NULL, "legacy");
+    if (legacy == NULL) {
+        sLog.outError("Failed to load OpenSSL 3.x Legacy provider\n");
+#ifdef WIN32
+        sLog.outError("\nPlease check you have set the following Enviroment Varible:\n");
+        sLog.outError("OPENSSL_MODULES=C:\\OpenSSL-Win64\\bin\n");
+        sLog.outError("(where C:\\OpenSSL-Win64\\bin is the location you installed OpenSSL\n");
+#endif
+        Log::WaitBeforeContinueIfNeed();
+        return 0;
     }
+    deflt = OSSL_PROVIDER_load(NULL, "default");
+    if (deflt == NULL) {
+        sLog.outError("Failed to load OpenSSL 3.x Default provider\n");
+        OSSL_PROVIDER_unload(legacy);
+        Log::WaitBeforeContinueIfNeed();
+        return 0;
+    }
+#else
+    if (SSLeay() < 0x10100000L || SSLeay() > 0x10200000L)
+    {
+        DETAIL_LOG("WARNING: OpenSSL version may be out of date or unsupported. Logins to server may not work!");
+        DETAIL_LOG("WARNING: Minimal required version [OpenSSL 1.1.x] and Maximum supported version [OpenSSL 1.2]");
+    }
+#endif
+
 
     DETAIL_LOG("Using ACE: %s", ACE_VERSION);
 
@@ -434,10 +466,14 @@ int main(int argc, char** argv)
     detachDaemon();
 #endif
 
+    // set realm flag by configuration boolean
+    uint8 recommendedornew = sWorld.getConfig(CONFIG_BOOL_REALM_RECOMMENDED_OR_NEW) ? REALM_FLAG_NEW_PLAYERS : REALM_FLAG_RECOMMENDED;
+    uint8 realmstatus = sWorld.getConfig(CONFIG_BOOL_REALM_RECOMMENDED_OR_NEW_ENABLED) ? recommendedornew : uint8(REALM_FLAG_NONE);
+
     // set realmbuilds depend on mangosd expected builds, and set server online
     std::string builds = AcceptableClientBuildsListStr();
     LoginDatabase.escape_string(builds);
-    LoginDatabase.DirectPExecute("UPDATE `realmlist` SET `realmflags` = `realmflags` & ~(%u), `population` = 0, `realmbuilds` = '%s'  WHERE `id` = '%u'", REALM_FLAG_OFFLINE, builds.c_str(), realmID);
+    LoginDatabase.DirectPExecute("UPDATE `realmlist` SET `realmflags` = %u, `population` = 0, `realmbuilds` = '%s'  WHERE `id` = '%u'", realmstatus, builds.c_str(), realmID);
 
     // server loaded successfully => enable async DB requests
     // this is done to forbid any async transactions during server startup!
@@ -480,13 +516,14 @@ int main(int argc, char** argv)
     // 3. Start the SOAP listener thread, if enabled
     //************************************************************************************************************************
 #ifdef ENABLE_SOAP
-    SoapThread* soapThread = NULL;
+    std::shared_ptr<std::thread> soapThread;
     if (sConfig.GetBoolDefault("SOAP.Enabled", false))
     {
-        host = sConfig.GetStringDefault("SOAP.IP", "127.0.0.1");
-        port = sConfig.GetIntDefault("SOAP.Port", 7878);
-        soapThread = new SoapThread(port, host.c_str());
-        soapThread->open(0);
+        soapThread.reset(new std::thread(SoapThread, sConfig.GetStringDefault("SOAP.IP", "127.0.0.1"), uint16(sConfig.GetIntDefault("SOAP.Port", 7878))), [](std::thread* thread)
+        {
+            thread->join();
+            delete thread;
+        });
     }
 #else /* ENABLE_SOAP */
     if (sConfig.GetBoolDefault("SOAP.Enabled", false))
@@ -535,12 +572,6 @@ int main(int argc, char** argv)
         delete freezeThread;
     }
 
-#ifdef ENABLE_SOAP
-    if (soapThread)
-    {
-        delete soapThread;
-    }
-#endif
     if (raThread)
     {
         delete raThread;

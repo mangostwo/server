@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 #define MANGOS_H_WORLD
 
 #include "Common.h"
+#include "Utilities/Util.h"
 #include "Timer.h"
 #include "Policies/Singleton.h"
 #include "SharedDefines.h"
@@ -37,6 +38,12 @@
 #include <map>
 #include <set>
 #include <list>
+
+#ifdef ENABLE_ELUNA
+#include "Player.h"
+
+class Eluna;
+#endif /* ENABLE_ELUNA */
 
 class Object;
 class ObjectGuid;
@@ -131,6 +138,7 @@ enum eConfigUInt32Values
     CONFIG_UINT32_GM_LOGIN_STATE,
     CONFIG_UINT32_GM_VISIBLE_STATE,
     CONFIG_UINT32_GM_ACCEPT_TICKETS,
+    CONFIG_UINT32_GM_TICKET_LIST_SIZE,
     CONFIG_UINT32_GM_CHAT,
     CONFIG_UINT32_GM_WISPERING_TO,
     CONFIG_UINT32_GM_LEVEL_IN_GM_LIST,
@@ -203,6 +211,7 @@ enum eConfigUInt32Values
     CONFIG_UINT32_MIN_LEVEL_FOR_RAID,
     CONFIG_UINT32_CREATURE_RESPAWN_AGGRO_DELAY,
     CONFIG_UINT32_RANDOM_BG_RESET_HOUR,
+    CONFIG_UINT32_LOG_WHISPERS,
     // Warden
     CONFIG_UINT32_WARDEN_CLIENT_RESPONSE_DELAY,
     CONFIG_UINT32_WARDEN_CLIENT_CHECK_HOLDOFF,
@@ -333,6 +342,7 @@ enum eConfigBoolValues
     CONFIG_BOOL_GM_LOG_TRADE,
     CONFIG_BOOL_GM_LOWER_SECURITY,
     CONFIG_BOOL_GM_ALLOW_ACHIEVEMENT_GAINS,
+    CONFIG_BOOL_GM_TICKET_OFFLINE_CLOSING,
     CONFIG_BOOL_SKILL_PROSPECTING,
     CONFIG_BOOL_ALWAYS_MAX_SKILL_FOR_LEVEL,
     CONFIG_BOOL_WEATHER,
@@ -376,7 +386,6 @@ enum eConfigBoolValues
     CONFIG_BOOL_VMAP_INDOOR_CHECK,
     CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT,
     CONFIG_BOOL_MMAP_ENABLED,
-    CONFIG_BOOL_ELUNA_ENABLED,
     CONFIG_BOOL_PLAYER_COMMANDS,
 #ifdef ENABLE_PLAYERBOTS
     CONFIG_BOOL_PLAYERBOT_ENABLE,
@@ -385,6 +394,10 @@ enum eConfigBoolValues
     // Warden
     CONFIG_BOOL_WARDEN_WIN_ENABLED,
     CONFIG_BOOL_WARDEN_OSX_ENABLED,
+
+    // Recommended Or New Flag
+    CONFIG_BOOL_REALM_RECOMMENDED_OR_NEW_ENABLED,
+    CONFIG_BOOL_REALM_RECOMMENDED_OR_NEW,
     CONFIG_BOOL_VALUE_COUNT
 };
 
@@ -550,6 +563,20 @@ class World
         time_t GetNextWeeklyQuestsResetTime() const { return m_NextWeeklyQuestReset; }
         time_t GetNextRandomBGResetTime() const { return m_NextRandomBGReset; }
 
+        uint32 GetDateByLocalTime(const std::tm now) const { return uint32(now.tm_year*365 + (now.tm_year-1)/4 + now.tm_yday); }
+        uint32 GetDateToday() const {   return GetDateByLocalTime(safe_localtime(m_gameTime)); }
+        uint32 GetDateThisWeekBegin() const {   return GetDateToday() - safe_localtime(m_gameTime).tm_wday; }
+
+#if defined(CLASSIC)
+        uint32 GetDateLastMaintenanceDay() const
+        {
+            uint32 today = GetDateToday();
+            uint32 mDay  = getConfig(CONFIG_UINT32_MAINTENANCE_DAY);
+            std::tm date     = safe_localtime(m_gameTime);
+            // formula to find last mDay of gregorian calendary
+            return today - ((date.tm_wday - mDay  + 7) % 7);
+        }
+#endif
         /// Get the maximum skill level a player can reach
         uint16 GetConfigMaxSkillValue() const
         {
@@ -599,6 +626,9 @@ class World
         /// Get a server configuration element (see #eConfigBoolValues)
         bool getConfig(eConfigBoolValues index) const { return m_configBoolValues[index]; }
 
+        /// Get configuration about force-loaded maps
+        bool isForceLoadMap(uint32 id) const { return m_configForceLoadMapIds.find(id) != m_configForceLoadMapIds.end(); }
+
         /// Are we on a "Player versus Player" server?
         bool IsPvPRealm() { return (getConfig(CONFIG_UINT32_GAME_TYPE) == REALM_TYPE_PVP || getConfig(CONFIG_UINT32_GAME_TYPE) == REALM_TYPE_RPPVP || getConfig(CONFIG_UINT32_GAME_TYPE) == REALM_TYPE_FFA_PVP); }
         bool IsFFAPvPRealm() { return getConfig(CONFIG_UINT32_GAME_TYPE) == REALM_TYPE_FFA_PVP; }
@@ -646,6 +676,11 @@ class World
         * Access: public
         **/
         void InvalidatePlayerDataToAllClient(ObjectGuid guid);
+
+#ifdef ENABLE_ELUNA
+        Eluna* GetEluna() const { return eluna; }
+        Eluna* eluna;
+#endif /* ENABLE_ELUNA */
 
     protected:
         void _UpdateGameTime();

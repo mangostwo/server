@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -234,7 +234,7 @@ class BattleGroundAB : public BattleGround
          * @brief
          *
          */
-        virtual void StartingEventOpenDoors() override;
+        void StartingEventOpenDoors() override;
         /**
          * @brief
          *
@@ -253,7 +253,7 @@ class BattleGroundAB : public BattleGround
          * @brief
          *
          */
-        virtual void Reset() override;
+        void Reset() override;
         /**
          * @brief
          *
@@ -266,7 +266,7 @@ class BattleGroundAB : public BattleGround
          * @param player
          * @return const WorldSafeLocsEntry
          */
-        virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
+        WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
 
         /* Scorekeeping */
         /**
@@ -276,7 +276,7 @@ class BattleGroundAB : public BattleGround
          * @param type
          * @param value
          */
-        virtual void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
+        void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
 
         /**
          * @brief
@@ -284,7 +284,7 @@ class BattleGroundAB : public BattleGround
          * @param data
          * @param count
          */
-        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+        void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
 
         /* Nodes occupying */
         /**
@@ -293,7 +293,7 @@ class BattleGroundAB : public BattleGround
          * @param source
          * @param target_obj
          */
-        virtual void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
+        void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
 
         /* achievement req. */
         bool IsAllNodesControlledByTeam(Team team) const override;
@@ -304,7 +304,7 @@ class BattleGroundAB : public BattleGround
          * @brief
          *
          */
-        virtual Team GetPrematureWinner() override;
+        Team GetPrematureWinner() override;
 
     private:
         /* Gameobject spawning/despawning */

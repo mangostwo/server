@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,7 +81,10 @@ void WorldSession::HandleRepopRequestOpcode(WorldPacket& recv_data)
 
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->OnRepop(GetPlayer());
+    if (Eluna* e = GetPlayer()->GetEluna())
+    {
+        e->OnRepop(GetPlayer());
+    }
 #endif /* ENABLE_ELUNA */
 
     // this is spirit release confirm?
@@ -179,7 +182,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
     {
         ++count;
 
-        if(clientcount == 50)
+        if (clientcount == 50)
         {
             return;
         }
@@ -875,7 +878,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
 
     if (BattleGround* bg = player->GetBattleGround())
     {
-        if(bg->HandleAreaTrigger(player, Trigger_ID))
+        if (bg->HandleAreaTrigger(player, Trigger_ID))
         {
             return;
         }
@@ -1148,7 +1151,7 @@ void WorldSession::HandleMoveUnRootAck(WorldPacket& recv_data)
         recv_data >> guid;
 
         // now can skip not our packet
-        if(_player->GetGUID() != guid)
+        if (_player->GetGUID() != guid)
         {
             recv_data.rpos(recv_data.wpos());               // prevent warnings spam
             return;
@@ -1172,7 +1175,7 @@ void WorldSession::HandleMoveRootAck(WorldPacket& recv_data)
         recv_data >> guid;
 
         // now can skip not our packet
-        if(_player->GetObjectGuid() != guid)
+        if (_player->GetObjectGuid() != guid)
         {
             recv_data.rpos(recv_data.wpos());               // prevent warnings spam
             return;
@@ -1484,7 +1487,9 @@ void WorldSession::SetMoneyHandler(WorldPacket &msg)
 
         msg >> money;
         if (money < 0)
+        {
             money = 0x7FFFFFFF;    /* Money limit */
+        }
 
         DEBUG_LOG("Setting money on %s from %d to %d", pPlayer->GetName(), pPlayer->GetMoney(), money); /*TODO: Log this appropriately*/
         GetPlayer()->SetMoney(money);

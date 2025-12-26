@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,11 +80,24 @@ float GetFloatValueFromArray(Tokens const& data, uint16 index);
 void stripLineInvisibleChars(std::string& src);
 
 /**
- * @brief
+ * @brief Thread safe, portable localtime_s/localtime_r replacement
  *
- * @param localtime
+ * @param time - local time
  */
-std::tm localtime_r(const time_t& time);
+
+inline std::tm safe_localtime(const time_t time)
+{
+    std::tm _ltm{};
+#if PLATFORM == PLATFORM_WINDOWS
+    localtime_s(&_ltm, &time);
+#else
+    localtime_r(&time, &_ltm);
+#endif
+    return _ltm;
+}
+
+time_t GetLocalHourTimestamp(time_t time, uint8 hour, bool onlyAfterTime = true);
+
 
 /**
  * @brief
@@ -122,24 +135,27 @@ time_t timeBitFieldsToSecs(uint32 packedDate);
  */
 inline uint32 secsToTimeBitFields(time_t secs)
 {
-    tm* lt = localtime(&secs);
-    return (lt->tm_year - 100) << 24 | lt->tm_mon  << 20 | (lt->tm_mday - 1) << 14 | lt->tm_wday << 11 | lt->tm_hour << 6 | lt->tm_min;
+    std::tm lt = safe_localtime(secs);
+    return (lt.tm_year - 100) << 24 | lt.tm_mon  << 20
+         | (lt.tm_mday - 1) << 14 | lt.tm_wday << 11 | lt.tm_hour << 6 | lt.tm_min;
 }
 
 
 inline std::string& ltrim(std::string& s)
 {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch)
+    s.erase(s.begin(), std::find_if (s.begin(), s.end(), [](unsigned char ch)
     {
         return !std::isspace(ch);
     }));
-
     return s;
 }
 
 inline std::string& rtrim(std::string& s)
 {
-    s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+    s.erase(std::find_if (s.rbegin(), s.rend(), [](unsigned char ch)
+        {
+            return !std::isspace(ch);
+        }).base(), s.end());
     return s;
 }
 
@@ -894,4 +910,6 @@ int return_iCoreNumber();
 * @brief Display the startup banner
 */
 void print_banner();
+
+char* strstri(const std::string& str1, const std::string& str2);
 #endif

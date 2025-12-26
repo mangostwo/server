@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,10 +26,11 @@
 #define MANGOS_H_SCRIPTMGR
 
 #include "Common.h"
-#include "Policies/Singleton.h"
 #include "ObjectGuid.h"
 #include "DBCEnums.h"
 #include <ace/Atomic_Op.h>
+#include <ace/Thread_Mutex.h>
+#include <ace/Guard_T.h>
 
 struct AreaTriggerEntry;
 struct SpellEntry;
@@ -60,7 +61,8 @@ enum DBScriptType
     DBS_ON_GO_USE             = 6,
     DBS_ON_GOT_USE            = 7,
     DBS_ON_EVENT              = 8,
-    DBS_END                   = 9,
+    DBS_ON_CREATURE_SPELL     = 9,
+    DBS_END                   = 10,
 };
 #define DBS_START DBS_ON_QUEST_START
 
@@ -103,9 +105,10 @@ enum DBScriptCommand                                        // resSource, resTar
     SCRIPT_COMMAND_TELEPORT_TO              = 6,            // source or target with Player, datalong2 = map_id, x/y/z
     SCRIPT_COMMAND_QUEST_EXPLORED           = 7,            // one from source or target must be Player, another GO/Creature, datalong=quest_id, datalong2=distance or 0
     SCRIPT_COMMAND_KILL_CREDIT              = 8,            // source or target with Player, datalong = creature entry (or 0 for target-entry), datalong2 = bool (0=personal credit, 1=group credit)
-    SCRIPT_COMMAND_RESPAWN_GAMEOBJECT       = 9,            // source = any, datalong=db_guid, datalong2=despawn_delay
+    SCRIPT_COMMAND_RESPAWN_GO               = 9,            // source = any, datalong=db_guid, datalong2=despawn_delay
     SCRIPT_COMMAND_TEMP_SUMMON_CREATURE     = 10,           // source = any, datalong=creature entry, datalong2=despawn_delay
                                                             // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL = summon active
+                                                            // dataint = (bool) setRun; 0 = off (default), 1 = on
     SCRIPT_COMMAND_OPEN_DOOR                = 11,           // datalong=db_guid (or not provided), datalong2=reset_delay
     SCRIPT_COMMAND_CLOSE_DOOR               = 12,           // datalong=db_guid (or not provided), datalong2=reset_delay
     SCRIPT_COMMAND_ACTIVATE_OBJECT          = 13,           // source = unit, target=GO
@@ -146,7 +149,7 @@ enum DBScriptCommand                                        // resSource, resTar
                                                             // dataint=diff to change a waittime of current Waypoint Movement
     SCRIPT_COMMAND_PAUSE_WAYPOINTS          = 32,           // resSource = Creature
                                                             // datalong = 0: unpause waypoint 1: pause waypoint
-    SCRIPT_COMMAND_XP_USER                  = 33,           // source or target with Player, datalong = bool (0=off, 1=on)
+    SCRIPT_COMMAND_JOIN_LFG                 = 33,           // datalong = zoneId;
     SCRIPT_COMMAND_TERMINATE_COND           = 34,           // datalong = condition_id, datalong2 = if != 0 then quest_id of quest that will be failed for player's group if the script is terminated
                                                             // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL terminate when condition is false ELSE terminate when condition is true
     SCRIPT_COMMAND_SEND_AI_EVENT_AROUND     = 35,           // resSource = Creature, resTarget = Unit
@@ -156,7 +159,7 @@ enum DBScriptCommand                                        // resSource, resTar
     SCRIPT_COMMAND_MOVE_DYNAMIC             = 37,           // resSource = Creature, resTarget Worldobject.
                                                             // datalong = 0: Move resSource towards resTarget
                                                             // datalong != 0: Move resSource to a random point between datalong2..datalong around resTarget.
-                                                            //      orientation != 0: Obtain a random point around resTarget in direction of orientation
+                                                            // orientation != 0: Obtain a random point around resTarget in direction of orientation
                                                             // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL Obtain a random point around resTarget in direction of resTarget->GetOrientation + orientation
                                                             // for resTarget == resSource and orientation == 0 this will mean resSource moving forward
     SCRIPT_COMMAND_SEND_MAIL                = 38,           // resSource WorldObject, can be NULL, resTarget Player
@@ -166,7 +169,18 @@ enum DBScriptCommand                                        // resSource, resTar
     SCRIPT_COMMAND_CHANGE_ENTRY             = 39,           // resSource = Creature, datalong=creature entry
                                                             // dataint1 = entry
     SCRIPT_COMMAND_DESPAWN_GO               = 40,           // resTarget = GameObject
+    SCRIPT_COMMAND_RESPAWN                  = 41,           // resSource = Creature. Requires SCRIPT_FLAG_BUDDY_IS_DESPAWNED to find dead or despawned targets
+    SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS      = 42,           // resSource = Creature, datalong = reset default 0(false) | 1(true)
+                                                            // dataint = main hand slot, dataint2 = offhand slot, dataint3 = ranged slot
     SCRIPT_COMMAND_RESET_GO                 = 43,           // resTarget = GameObject
+    SCRIPT_COMMAND_UPDATE_TEMPLATE          = 44,           // resSource = Creature
+                                                            // datalong = new Creature entry
+                                                            // datalong2 = Alliance(0) Horde(1), other values throw error
+    SCRIPT_COMMAND_XP_USER                  = 53,           // source or target with Player, datalong = bool (0=off, 1=on)
+    SCRIPT_COMMAND_SET_FLY                  = 59,           // resSource = Creature
+                                                            // datalong = bool 0=off, 1=on
+                                                            // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL set/unset byte flag UNIT_BYTE1_FLAG_FLY_ANIM
+                                                            // dataint1: Delay (>= 0) in Seconds
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK, SCRIPT_COMMAND_EMOTE, SCRIPT_COMMAND_CAST_SPELL, SCRIPT_COMMAND_TERMINATE_SCRIPT
@@ -180,8 +194,9 @@ enum ScriptInfoDataFlags
     SCRIPT_FLAG_COMMAND_ADDITIONAL          = 0x08,         // command dependend
     SCRIPT_FLAG_BUDDY_BY_GUID               = 0x10,         // take the buddy by guid
     SCRIPT_FLAG_BUDDY_IS_PET                = 0x20,         // buddy is a pet
+    SCRIPT_FLAG_BUDDY_IS_DESPAWNED          = 0x40,         // buddy is dead or despawned
 };
-#define MAX_SCRIPT_FLAG_VALID               (2 * SCRIPT_FLAG_BUDDY_IS_PET - 1)
+#define MAX_SCRIPT_FLAG_VALID               (2 * SCRIPT_FLAG_BUDDY_IS_DESPAWNED - 1)
 
 struct ScriptInfo
 {
@@ -378,11 +393,10 @@ struct ScriptInfo
             uint32 empty;
         } pauseWaypoint;
 
-        struct                                              // SCRIPT_COMMAND_XP_USER (33)
+        struct                                              // SCRIPT_COMMAND_JOIN_LFG (33)
         {
-            uint32 flags;                                   // datalong
-            uint32 empty;                                   // datalong2
-        } xpDisabled;
+            uint32 areaId;                                  // datalong
+        } joinLfg;
 
         struct                                              // SCRIPT_COMMAND_TERMINATE_COND (34)
         {
@@ -414,7 +428,7 @@ struct ScriptInfo
             uint32 altSender;                               // datalong2;
         } sendMail;
 
-        struct                                              // SCRIPT_COMMAND_MORPH_TO_ENTRY_OR_MODEL (23)
+        struct                                              // SCRIPT_COMMAND_MORPH_TO_ENTRY_OR_MODEL (39)
         {
             uint32 creatureEntry;                           // datalong
             uint32 empty1;                                  // datalong2
@@ -425,12 +439,38 @@ struct ScriptInfo
             uint32 goGuid;                                  //datalong
             uint32 respawnTime;                             //datalong2
         } despawnGo;
+        // datalong unused                                  // SCRIPT_COMMAND_RESPAWN (41)
+
+        struct                                              // SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS (42)
+        {
+            uint32 resetDefault;                            // datalong
+            uint32 empty;                                   // datalong2
+        } setEquipment;
+
+        // datalong unused                                  // SCRIPT_COMMAND_RESET_GO (43)
+
+        struct                                              // SCRIPT_COMMAND_UPDATE_TEMPLATE (44)
+        {
+            uint32 entry;                                   // datalong
+            uint32 faction;                                 // datalong2
+        } updateTemplate;
+
+        struct                                              // SCRIPT_COMMAND_XP_USER (53)
+        {
+            uint32 flags;                                   // datalong
+            uint32 empty;                                   // datalong2
+        } xpDisabled;
+
+        struct                                              // SCRIPT_COMMAND_SET_FLY (59)
+        {
+            uint32 enable;                                  // datalong
+            uint32 empty;                                   // datalong2
+        } fly;
 
         struct
         {
             uint32 data[2];
         } raw;
-        // datalong unused                                  // SCRIPT_COMMAND_RESET_GO (43)
     };
 
     // Buddy system (entry can be npc or go entry, depending on command)
@@ -450,13 +490,13 @@ struct ScriptInfo
     {
         switch (command)
         {
-            case SCRIPT_COMMAND_RESPAWN_GAMEOBJECT:
+            case SCRIPT_COMMAND_RESPAWN_GO:
                 return respawnGo.goGuid;
+            case SCRIPT_COMMAND_DESPAWN_GO:
+                return despawnGo.goGuid;
             case SCRIPT_COMMAND_OPEN_DOOR:
             case SCRIPT_COMMAND_CLOSE_DOOR:
                 return changeDoor.goGuid;
-            case SCRIPT_COMMAND_DESPAWN_GO:
-                return despawnGo.goGuid;
             default:
                 return 0;
         }
@@ -466,11 +506,12 @@ struct ScriptInfo
     {
         switch (command)
         {
-            case SCRIPT_COMMAND_RESPAWN_GAMEOBJECT:
+            case SCRIPT_COMMAND_RESPAWN_GO:
             case SCRIPT_COMMAND_OPEN_DOOR:
             case SCRIPT_COMMAND_CLOSE_DOOR:
             case SCRIPT_COMMAND_ACTIVATE_OBJECT:
             case SCRIPT_COMMAND_GO_LOCK_STATE:
+            case SCRIPT_COMMAND_DESPAWN_GO:
             case SCRIPT_COMMAND_RESET_GO:
                 return false;
             default:
@@ -493,6 +534,7 @@ struct ScriptInfo
             case SCRIPT_COMMAND_TERMINATE_COND:
             case SCRIPT_COMMAND_TURN_TO:
             case SCRIPT_COMMAND_MOVE_DYNAMIC:
+            case SCRIPT_COMMAND_SET_FLY:
                 return true;
             default:
                 return false;
@@ -586,17 +628,12 @@ class ScriptMgr
         void LoadEventIdScripts();
         void LoadSpellIdScripts();
 
+        uint32 GetAreaTriggerScriptId(uint32 triggerId) const;
+        uint32 GetEventIdScriptId(uint32 eventId) const;
+
         bool ReloadScriptBinding();
 
-        ScriptChainMap const* GetScriptChainMap(DBScriptType type)
-        {
-            if ((type != DBS_INTERNAL) && type < DBS_END)
-            {
-                return &m_dbScripts[type];
-            }
-
-            return NULL;
-        }
+        ScriptChainMap const* GetScriptChainMap(DBScriptType type);
 
         const char* GetScriptName(uint32 id) const
         {
@@ -691,6 +728,8 @@ class ScriptMgr
 #endif /* _DEBUG */
         // atomic op counter for active scripts amount
         ACE_Atomic_Op<ACE_Thread_Mutex, long> m_scheduledScripts;
+        char __cache_guard[1024];
+        ACE_Thread_Mutex m_lock;
 };
 
 // Starters for events
@@ -701,6 +740,8 @@ bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool
 uint32 GetScriptId(const char* name);
 char const* GetScriptName(uint32 id);
 uint32 GetScriptIdsCount();
+uint32 GetAreaTriggerScriptId(uint32 triggerId);
+uint32 GetEventIdScriptId(uint32 eventId);
 void SetExternalWaypointTable(char const* tableName);
 bool AddWaypointFromExternal(uint32 entry, int32 pathId, uint32 pointId, float x, float y, float z, float o, uint32 waittime);
 

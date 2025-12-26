@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 #include "Config/Config.h"
 #include "Database/SqlOperations.h"
 #include "GitRevision.h"
-
+#include "Utilities/Util.h"
 #include <ctime>
 #include <iostream>
 #include <fstream>
@@ -318,9 +318,8 @@ bool Database::PExecuteLog(const char* format, ...)
     if (m_logSQL)
     {
         time_t curr;
-        tm local;
         time(&curr);                                        // get current time_t value
-        local = *(localtime(&curr));                        // dereference and assign
+        std::tm local = safe_localtime(curr);                        // dereference and assign
         char fName[128];
         sprintf(fName, "%04d-%02d-%02d_logSQL.sql", local.tm_year + 1900, local.tm_mon + 1, local.tm_mday);
 
@@ -542,7 +541,7 @@ void PrintNormalYouHaveDatabaseVersion(std::string current_db_version, std::stri
     sLog.outString("                    Description: %s", description.c_str());
 }
 
-void PrintErrorYouHaveDatabaseVersion(std::string current_db_version, std::string current_db_structure, std::string current_db_content, std::string description)
+void PrintErrorYouHaveDatabaseVersion(std::string &current_db_version, std::string current_db_structure, std::string current_db_content, std::string description)
 {
     sLog.outErrorDb("  [A] You have database Version: %s", current_db_version.c_str());
     sLog.outErrorDb("                      Structure: %s", current_db_structure.c_str());
@@ -697,7 +696,7 @@ bool Database::ExecuteStmt(const SqlStatementID& id, SqlStmtParameters* params)
 bool Database::DirectExecuteStmt(const SqlStatementID& id, SqlStmtParameters* params)
 {
     MANGOS_ASSERT(params);
-    std::auto_ptr<SqlStmtParameters> p(params);
+    std::shared_ptr<SqlStmtParameters> p(params);
     // execute statement
     SqlConnection::Lock _guard(getAsyncConnection());
     return _guard->ExecuteStmt(id.ID(), *params);

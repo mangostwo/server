@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -276,7 +276,7 @@ bool ChatHandler::HandleDebugSendOpcodeCommand(char* /*args*/)
         return false;
     }
 
-    WorldPacket data(Opcodes(opcode), 0);
+    WorldPacket data(OpcodesList(opcode), 0);
 
     std::string type;
     while (stream >> type)
@@ -330,7 +330,7 @@ bool ChatHandler::HandleDebugSendOpcodeCommand(char* /*args*/)
         {
             data << unit->GetObjectGuid();
         }
-        else if(type == "mypguid")
+        else if (type == "mypguid")
         {
             data << m_session->GetPlayer()->GetPackGUID();
         }
@@ -823,7 +823,7 @@ bool ChatHandler::HandleDebugGetItemStateCommand(char* args)
 
             if (item->GetOwnerGuid() != player->GetObjectGuid())
             {
-                PSendSysMessage("queue(" SIZEFMTD "): %s has the owner (%s) and inventory owner (%s) don't match!",
+                PSendSysMessage("queue(%zu): %s has the owner (%s) and inventory owner (%s) don't match!",
                                 i, item->GetGuidStr().c_str(),
                                 item->GetOwnerGuid().GetString().c_str(), player->GetGuidStr().c_str());
                 error = true; continue;
@@ -831,7 +831,7 @@ bool ChatHandler::HandleDebugGetItemStateCommand(char* args)
 
             if (item->GetQueuePos() != i)
             {
-                PSendSysMessage("queue(" SIZEFMTD "): %s has queuepos doesn't match it's position in the queue!",
+                PSendSysMessage("queue(%zu): %s has queuepos doesn't match it's position in the queue!",
                                 i, item->GetGuidStr().c_str());
                 error = true; continue;
             }
@@ -844,14 +844,14 @@ bool ChatHandler::HandleDebugGetItemStateCommand(char* args)
 
             if (test == NULL)
             {
-                PSendSysMessage("queue(" SIZEFMTD "): %s has incorrect (bag %u slot %u) values, the player doesn't have an item at that position!",
+                PSendSysMessage("queue(%zu): %s has incorrect (bag %u slot %u) values, the player doesn't have an item at that position!",
                                 i, item->GetGuidStr().c_str(), item->GetBagSlot(), item->GetSlot());
                 error = true; continue;
             }
 
             if (test != item)
             {
-                PSendSysMessage("queue(" SIZEFMTD "): %s has incorrect (bag %u slot %u) values, the %s is there instead!",
+                PSendSysMessage("queue(%zu): %s has incorrect (bag %u slot %u) values, the %s is there instead!",
                                 i, item->GetGuidStr().c_str(), item->GetBagSlot(), item->GetSlot(),
                                 test->GetGuidStr().c_str());
                 error = true; continue;
@@ -1436,7 +1436,7 @@ bool ChatHandler::HandleDebugSpellModsCommand(char* args)
         return false;
     }
 
-    Opcodes opcode;
+    OpcodesList opcode;
     if (strncmp(typeStr, "flat", strlen(typeStr)) == 0)
     {
         opcode = SMSG_SET_FLAT_SPELL_MODIFIER;

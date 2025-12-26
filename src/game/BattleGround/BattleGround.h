@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -420,7 +420,10 @@ class BattleGround
          *
          * @return BattleGroundTypeId
          */
-        BattleGroundTypeId GetTypeID(bool GetRandom = false) const { return GetRandom ? m_RandomTypeID : m_TypeID; }
+        BattleGroundTypeId GetTypeID(bool GetRandom = false) const
+        {
+            return GetRandom ? m_RandomTypeID : m_TypeID;
+        }
         /**
          * @brief
          *
@@ -524,7 +527,11 @@ class BattleGround
          * @return uint32
          */
         uint32 GetBonusHonorFromKill(uint32 kills) const;
-        bool IsRandom() { return m_IsRandom; }
+
+        bool IsRandom()
+        {
+            return m_IsRandom;
+        }
 
         // Set methods:
         /**
@@ -863,6 +870,13 @@ class BattleGround
          * @param team
          */
         void RewardReputationToTeam(uint32 faction_id, uint32 Reputation, Team team);
+        /**
+         * @brief
+         *
+         * @param event
+         * @param team
+         */
+        void RewardXPToTeam(uint8 event, Team team);
         /**
          * @brief
          *

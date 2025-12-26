@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,16 @@
     #define REVISION_DATE               "@rev_date@"
     #define REVISION_BRANCH             "@rev_branch@"
 
+    #define DEP_ELUNA_REVISION_HASH     "@dep_eluna_rev_hash@"
+    #define DEP_ELUNA_REVISION_DATE     "@dep_eluna_rev_date@"
+    #define DEP_ELUNA_REVISION_BRANCH   "@dep_eluna_rev_branch@"
+    #define DEP_ELUNA_REVISION_STR      "@dep_eluna_rev_hash@ @dep_eluna_rev_date@ (@dep_eluna_rev_branch@ branch)"
+
+    #define DEP_SD3_REVISION_HASH       "@dep_sd3_rev_hash@"
+    #define DEP_SD3_REVISION_DATE       "@dep_sd3_rev_date@"
+    #define DEP_SD3_REVISION_BRANCH     "@dep_sd3_rev_branch@"
+    #define DEP_SD3_REVISION_STR        "@dep_sd3_rev_hash@ @dep_sd3_rev_date@ (@dep_sd3_rev_branch@ branch)"
+
     #define CMAKE_VERSION               R"(@CMAKE_VERSION@)"
     #define CMAKE_HOST_SYSTEM           R"(@CMAKE_HOST_SYSTEM_NAME@ @CMAKE_HOST_SYSTEM_VERSION@)"
 
@@ -39,14 +49,14 @@
     #define REALMD_DB_UPDATE_DESCRIPT   "Release 22"
 
     #define CHAR_DB_VERSION_NR          "22"
-    #define CHAR_DB_STRUCTURE_NR        "2"
+    #define CHAR_DB_STRUCTURE_NR        "5"
     #define CHAR_DB_CONTENT_NR          "1"
-    #define CHAR_DB_UPDATE_DESCRIPT     "add_character_createdDate_col"
+    #define CHAR_DB_UPDATE_DESCRIPT     "Add_Quest_Tracker_Table"
 
     #define WORLD_DB_VERSION_NR         "22"
-    #define WORLD_DB_STRUCTURE_NR       "2"
-    #define WORLD_DB_CONTENT_NR         "1"
-    #define WORLD_DB_UPDATE_DESCRIPT    "Alter_conditions_char_length"
+    #define WORLD_DB_STRUCTURE_NR       "3"
+    #define WORLD_DB_CONTENT_NR         "14"
+    #define WORLD_DB_UPDATE_DESCRIPT    "Fix_Autonumber_settings"
 
     #define VER_COMPANY_NAME_STR        "MaNGOS Developers"
     #define VER_LEGALCOPYRIGHT_STR      "(c)2005-@rev_year@ MaNGOS"

@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,9 +63,6 @@ int WorldThread::open(void* unused)
         World::StopNow(ERROR_EXIT_CODE);
         return -1;
     }
-#ifdef ENABLE_ELUNA
-    sEluna->OnStartup();
-#endif /* ENABLE_ELUNA */
 
     activate();
     return 0;
@@ -97,29 +94,20 @@ int WorldThread::svc()
             std::this_thread::sleep_for(std::chrono::milliseconds(WORLD_SLEEP_CONST - executionTimeDiff));
         }
 #ifdef _WIN32
-        if (m_ServiceStatus == 0) //service stopped
+        if (m_ServiceStatus == 0) // service stopped
         {
             World::StopNow(SHUTDOWN_EXIT_CODE);
         }
 
-        while (m_ServiceStatus == 2) //service paused
+        while (m_ServiceStatus == 2) // service paused
             Sleep(1000);
 #endif
     }
-#ifdef ENABLE_ELUNA
-    sEluna->OnShutdown();
-#endif /* ENABLE_ELUNA */
     sWorld.KickAll();                                       // save and kick all players
     sWorld.UpdateSessions(1);                               // real players unload required UpdateSessions call
     sWorldSocketMgr->StopNetwork();
 
     sMapMgr.UnloadAll();                                    // unload all grids (including locked in memory)
-
-#ifdef ENABLE_ELUNA
-    // Eluna must be unloaded after Maps, since ~Map calls sEluna->OnDestroy,
-    //   and must be unloaded before the DB, since it can access the DB.
-    Eluna::Uninitialize();
-#endif /* ENABLE_ELUNA */
 
     sLog.outString("World Updater Thread stopped");
     return 0;

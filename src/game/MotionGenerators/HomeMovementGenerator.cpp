@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,15 +30,27 @@
 #include "movement/MoveSplineInit.h"
 #include "movement/MoveSpline.h"
 
+/**
+ * @brief Initializes the HomeMovementGenerator by setting the target location for the creature.
+ * @param owner Reference to the creature.
+ */
 void HomeMovementGenerator<Creature>::Initialize(Creature& owner)
 {
     _setTargetLocation(owner);
 }
 
+/**
+ * @brief Resets the HomeMovementGenerator.
+ * @param owner Reference to the creature.
+ */
 void HomeMovementGenerator<Creature>::Reset(Creature&)
 {
 }
 
+/**
+ * @brief Sets the target location for the creature to move to its home position.
+ * @param owner Reference to the creature.
+ */
 void HomeMovementGenerator<Creature>::_setTargetLocation(Creature& owner)
 {
     if (owner.hasUnitState(UNIT_STAT_NOT_MOVE))
@@ -48,7 +60,7 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature& owner)
 
     Movement::MoveSplineInit init(owner);
     float x, y, z, o;
-    // at apply we can select more nice return points base at current movegen
+    // If the motion master is empty or cannot get the reset position, use the respawn coordinates
     if (owner.GetMotionMaster()->empty() || !owner.GetMotionMaster()->top()->GetResetPosition(owner, x, y, z, o))
     {
         owner.GetRespawnCoord(x, y, z, &o);
@@ -63,12 +75,22 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature& owner)
     owner.clearUnitState(UNIT_STAT_ALL_DYN_STATES);
 }
 
+/**
+ * @brief Updates the HomeMovementGenerator.
+ * @param owner Reference to the creature.
+ * @param time_diff Time difference.
+ * @return True if the update was successful, false otherwise.
+ */
 bool HomeMovementGenerator<Creature>::Update(Creature& owner, const uint32& /*time_diff*/)
 {
     arrived = owner.movespline->Finalized();
     return !arrived;
 }
 
+/**
+ * @brief Finalizes the HomeMovementGenerator.
+ * @param owner Reference to the creature.
+ */
 void HomeMovementGenerator<Creature>::Finalize(Creature& owner)
 {
     if (arrived)

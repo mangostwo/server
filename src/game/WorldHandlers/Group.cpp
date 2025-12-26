@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -199,7 +199,10 @@ bool Group::Create(ObjectGuid guid, const char* name)
 
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->OnCreate(this, m_leaderGuid, m_groupType);
+    if (Eluna* e = sWorld.GetEluna())
+    {
+        e->OnCreate(this, m_leaderGuid, m_groupType);
+    }
 #endif /* ENABLE_ELUNA */
 
     return true;
@@ -318,7 +321,10 @@ bool Group::AddInvite(Player* player)
 
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->OnInviteMember(this, player->GetObjectGuid());
+    if (Eluna* e = sWorld.GetEluna())
+    {
+        e->OnInviteMember(this, player->GetObjectGuid());
+    }
 #endif /* ENABLE_ELUNA */
 
     return true;
@@ -414,7 +420,10 @@ bool Group::AddMember(ObjectGuid guid, const char* name)
 
         // Used by Eluna
 #ifdef ENABLE_ELUNA
-        sEluna->OnAddMember(this, player->GetObjectGuid());
+        if (Eluna* e = sWorld.GetEluna())
+        {
+            e->OnAddMember(this, player->GetObjectGuid());
+        }
 #endif /* ENABLE_ELUNA */
 
         // quest related GO state dependent from raid membership
@@ -427,7 +436,7 @@ bool Group::AddMember(ObjectGuid guid, const char* name)
     return true;
 }
 
-uint32 Group::RemoveMember(ObjectGuid guid, uint8 method)
+uint32 Group::RemoveMember(ObjectGuid guid, uint8 removeMethod)
 {
     // remove member and change leader (if need) only if strong more 2 members _before_ member remove
     if (GetMembersCount() > uint32(isBGGroup() ? 1 : 2))    // in BG group case allow 1 members group
@@ -444,7 +453,7 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 method)
 
             WorldPacket data;
 
-            if (method == 1)
+            if (removeMethod == 1)
             {
                 data.Initialize(SMSG_GROUP_UNINVITE, 0);
                 player->GetSession()->SendPacket(&data);
@@ -483,7 +492,10 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 method)
 
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->OnRemoveMember(this, guid, method); // Kicker and Reason not a part of Mangos, implement?
+    if (Eluna* e = sWorld.GetEluna())
+    {
+        e->OnRemoveMember(this, guid, removeMethod); // Kicker and Reason not a part of Mangos, implement?
+    }
 #endif /* ENABLE_ELUNA */
 
     return m_memberSlots.size();
@@ -499,7 +511,10 @@ void Group::ChangeLeader(ObjectGuid guid)
 
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->OnChangeLeader(this, guid, GetLeaderGuid());
+    if (Eluna* e = sWorld.GetEluna())
+    {
+        e->OnChangeLeader(this, guid, GetLeaderGuid());
+    }
 #endif /* ENABLE_ELUNA */
 
     _setLeader(guid);
@@ -591,7 +606,10 @@ void Group::Disband(bool hideDestroy)
 
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->OnDisband(this);
+    if (Eluna* e = sWorld.GetEluna())
+    {
+        e->OnDisband(this);
+    }
 #endif /* ENABLE_ELUNA */
 
     m_leaderGuid.Clear();
@@ -1838,7 +1856,7 @@ void Group::UpdateLooterGuid(WorldObject* pSource, bool ifneed)
                 {
                     bool refresh = pl->GetLootGuid() == pSource->GetObjectGuid();
 
-                    // if(refresh)                          // update loot for new looter
+                    // if (refresh)                          // update loot for new looter
                     //    pl->GetSession()->DoLootRelease(pl->GetLootGUID());
                     SetLooterGuid(pl->GetObjectGuid());
                     SendUpdate();
@@ -1861,7 +1879,7 @@ void Group::UpdateLooterGuid(WorldObject* pSource, bool ifneed)
             {
                 bool refresh = pl->GetLootGuid() == pSource->GetObjectGuid();
 
-                // if(refresh)                              // update loot for new looter
+                // if (refresh)                              // update loot for new looter
                 //    pl->GetSession()->DoLootRelease(pl->GetLootGUID());
                 SetLooterGuid(pl->GetObjectGuid());
                 SendUpdate();

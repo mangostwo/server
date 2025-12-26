@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,6 +60,11 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
     if (utf8length(username) > MAX_ACCOUNT_STR)
     {
         return AOR_NAME_TOO_LONG;                            // username's too long
+    }
+
+    if (utf8length(password) > MAX_PASSWORD_STR)
+    {
+        return AOR_PASS_TOO_LONG;                            // password too long
     }
 
     Utf8ToUpperOnlyLatin(username);
@@ -191,7 +196,7 @@ AccountOpResult AccountMgr::ChangeUsername(uint32 accid, std::string new_uname, 
         return AOR_NAME_TOO_LONG;
     }
 
-    if (utf8length(new_passwd) > MAX_ACCOUNT_STR)
+    if (utf8length(new_passwd) > MAX_PASSWORD_STR)
     {
         return AOR_PASS_TOO_LONG;
     }
@@ -228,7 +233,7 @@ AccountOpResult AccountMgr::ChangePassword(uint32 accid, std::string new_passwd)
         return AOR_NAME_NOT_EXIST;                           // account doesn't exist
     }
 
-    if (utf8length(new_passwd) > MAX_ACCOUNT_STR)
+    if (utf8length(new_passwd) > MAX_PASSWORD_STR)
     {
         return AOR_PASS_TOO_LONG;
     }

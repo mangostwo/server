@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -3225,7 +3225,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     }
 
     // AT APPLY & REMOVE
-
     switch (GetSpellProto()->SpellFamilyName)
     {
         case SPELLFAMILY_GENERIC:
@@ -3635,6 +3634,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             break;
         }
         case SPELLFAMILY_ROGUE:
+        {
             switch (GetId())
             {
                 case 57934:                                 // Tricks of the Trade, main spell
@@ -3655,6 +3655,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 }
             }
             break;
+        }
         case SPELLFAMILY_HUNTER:
         {
             switch (GetId())
@@ -3679,6 +3680,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             break;
         }
         case SPELLFAMILY_PALADIN:
+        {
             switch (GetId())
             {
                 case 20911:                                 // Blessing of Sanctuary
@@ -3696,6 +3698,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 }
             }
             break;
+        }
         case SPELLFAMILY_SHAMAN:
         {
             switch (GetId())
@@ -10590,7 +10593,7 @@ void SpellAuraHolder::_RemoveSpellAuraHolder()
 
     // passive auras do not get put in slots - said who? ;)
     // Note: but totem can be not accessible for aura target in time remove (to far for find in grid)
-    // if(m_isPassive && !(caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->IsTotem()))
+    // if (m_isPassive && !(caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->IsTotem()))
     //    return;
 
     uint8 slot = GetAuraSlot();
@@ -11574,11 +11577,11 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     }
 
                     //todo: 2 runic power per 5 sec in combat (ranks 1 and 2)
-                    if(GetId() == 48979) // rank 1, 10 runic power.
+                    if (GetId() == 48979) // rank 1, 10 runic power.
                     {
                         m_target->ModifyPower(POWER_RUNIC_POWER, (int32)10);
                     }
-                    else if(GetId() == 49483) // rank 2
+                    else if (GetId() == 49483) // rank 2
                     {
                         m_target->ModifyPower(POWER_RUNIC_POWER, (int32)20);
                     }

@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,6 +69,7 @@ void BarGoLink::init(int row_count)
 #else
     printf("[");
 #endif
+
     for (int i = 0; i < indic_len; ++i)
     {
         printf(empty);
@@ -78,6 +79,7 @@ void BarGoLink::init(int row_count)
 #else
     printf("] 0%%\r[");
 #endif
+
     fflush(stdout);
 }
 
@@ -103,6 +105,7 @@ void BarGoLink::step()
 #else
         printf("\r[");
 #endif
+
         for (i = 0; i < n; ++i)
         {
             printf(full);
@@ -117,6 +120,7 @@ void BarGoLink::step()
 #else
         printf("] %i%%  \r[", (int)percent);
 #endif
+
         fflush(stdout);
 
         rec_pos = n;

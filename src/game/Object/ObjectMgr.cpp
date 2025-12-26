@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -359,7 +359,7 @@ void ObjectMgr::LoadCreatureLocales()
 
     delete result;
 
-    sLog.outString(">> Loaded " SIZEFMTD " creature locale strings", mCreatureLocaleMap.size());
+    sLog.outString(">> Loaded %zu creature locale strings", mCreatureLocaleMap.size());
     sLog.outString();
 }
 
@@ -454,7 +454,7 @@ void ObjectMgr::LoadGossipMenuItemsLocales()
 
     delete result;
 
-    sLog.outString(">> Loaded " SIZEFMTD " gossip_menu_option locale strings", mGossipMenuItemsLocaleMap.size());
+    sLog.outString(">> Loaded %zu gossip_menu_option locale strings", mGossipMenuItemsLocaleMap.size());
     sLog.outString();
 }
 
@@ -513,7 +513,7 @@ void ObjectMgr::LoadPointOfInterestLocales()
 
     delete result;
 
-    sLog.outString(">> Loaded " SIZEFMTD " points_of_interest locale strings", mPointOfInterestLocaleMap.size());
+    sLog.outString(">> Loaded %zu points_of_interest locale strings", mPointOfInterestLocaleMap.size());
     sLog.outString();
 }
 
@@ -1658,6 +1658,12 @@ void ObjectMgr::LoadCreatures()
         if (gameEvent == 0 && GuidPoolId == 0 && EntryPoolId == 0) // if not this is to be managed by GameEvent System or Pool system
         {
             AddCreatureToGrid(guid, &data);
+
+            if (cInfo->ExtraFlags & CREATURE_FLAG_EXTRA_ACTIVE)
+            {
+                sLog.outString("Adding `creature` with Active Flag: Map: %u, Guid %u", data.mapid, guid);
+                m_activeCreatures.insert(ActiveCreatureGuidsOnMap::value_type(data.mapid, guid));
+            }
         }
 
         ++count;
@@ -1666,7 +1672,7 @@ void ObjectMgr::LoadCreatures()
 
     delete result;
 
-    sLog.outString(">> Loaded " SIZEFMTD " creatures", mCreatureDataMap.size());
+    sLog.outString(">> Loaded %zu creatures", mCreatureDataMap.size());
     sLog.outString();
 }
 
@@ -1878,7 +1884,7 @@ void ObjectMgr::LoadGameObjects()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded " SIZEFMTD " gameobjects", mGameObjectDataMap.size());
+    sLog.outString(">> Loaded %zu gameobjects", mGameObjectDataMap.size());
 }
 
 void ObjectMgr::AddGameobjectToGrid(uint32 guid, GameObjectData const* data)
@@ -2084,7 +2090,7 @@ void ObjectMgr::LoadItemLocales()
 
     delete result;
 
-    sLog.outString(">> Loaded " SIZEFMTD " Item locale strings", mItemLocaleMap.size());
+    sLog.outString(">> Loaded %zu Item locale strings", mItemLocaleMap.size());
     sLog.outString();
 }
 
@@ -2129,7 +2135,7 @@ void ObjectMgr::LoadItemPrototypes()
             }
             /* disabled: have some strange wrong cases for Subclass values.
                for enable also uncomment Subclass field in ItemEntry structure and in Itemfmt[]
-            if(proto->SubClass != dbcitem->SubClass)
+            if (proto->SubClass != dbcitem->SubClass)
             {
                 sLog.outErrorDb("Item (Entry: %u) not correct (Class: %u, Sub: %u) pair, must be (Class: %u, Sub: %u) (still using DB value).",i,proto->Class,proto->SubClass,dbcitem->Class,dbcitem->SubClass);
                 // It safe let use Subclass from DB
@@ -4748,7 +4754,7 @@ void ObjectMgr::LoadQuests()
         }
     }
 
-    sLog.outString(">> Loaded " SIZEFMTD " quests definitions", mQuestTemplates.size());
+    sLog.outString(">> Loaded %zu quests definitions", mQuestTemplates.size());
     sLog.outString();
 }
 
@@ -4917,7 +4923,7 @@ void ObjectMgr::LoadQuestLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded " SIZEFMTD " Quest locale strings", mQuestLocaleMap.size());
+    sLog.outString(">> Loaded %zu Quest locale strings", mQuestLocaleMap.size());
 }
 
 void ObjectMgr::LoadPageTexts()
@@ -5023,7 +5029,7 @@ void ObjectMgr::LoadPageTextLocales()
 
     delete result;
 
-    sLog.outString(">> Loaded " SIZEFMTD " PageText locale strings", mPageTextLocaleMap.size());
+    sLog.outString(">> Loaded %zu PageText locale strings", mPageTextLocaleMap.size());
     sLog.outString();
 }
 
@@ -5097,7 +5103,7 @@ void ObjectMgr::LoadInstanceEncounters()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded " SIZEFMTD " Instance Encounters", m_DungeonEncounters.size());
+    sLog.outString(">> Loaded %zu Instance Encounters", m_DungeonEncounters.size());
 }
 
 struct SQLInstanceLoader : public SQLStorageLoaderBase<SQLInstanceLoader, SQLStorage>
@@ -5343,7 +5349,7 @@ void ObjectMgr::LoadGossipTextLocales()
 
     delete result;
 
-    sLog.outString(">> Loaded " SIZEFMTD " NpcText locale strings", mNpcTextLocaleMap.size());
+    sLog.outString(">> Loaded %zu NpcText locale strings", mNpcTextLocaleMap.size());
     sLog.outString();
 }
 
@@ -5351,8 +5357,11 @@ void ObjectMgr::LoadGossipTextLocales()
 /// @param serverUp true if the server is already running, false when the server is started
 void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
 {
-    time_t basetime = time(NULL);
-    DEBUG_LOG("Returning mails current time: hour: %d, minute: %d, second: %d ", localtime(&basetime)->tm_hour, localtime(&basetime)->tm_min, localtime(&basetime)->tm_sec);
+    time_t curTime = time(NULL);
+    std::tm lt = safe_localtime(curTime);
+    uint64 basetime(curTime);
+    sLog.outString("Returning mails current time: hour: %d, minute: %d, second: %d ", lt.tm_hour, lt.tm_min, lt.tm_sec);
+
     // delete all old mails without item and without body immediately, if starting server
     if (!serverUp)
     {
@@ -6395,7 +6404,7 @@ void ObjectMgr::LoadGameObjectLocales()
 
     delete result;
 
-    sLog.outString(">> Loaded " SIZEFMTD " gameobject locale strings", mGameObjectLocaleMap.size());
+    sLog.outString(">> Loaded %zu gameobject locale strings", mGameObjectLocaleMap.size());
     sLog.outString();
 }
 
@@ -9912,6 +9921,64 @@ void ObjectMgr::LoadVendorTemplates()
     }
 }
 
+/* This function is supposed to take care of three things:
+ *  1) Load Transports on Map or on Continents
+ *  2) Load Active Npcs on Map or Continents
+ *  3) Load Everything dependend on config setting LoadAllGridsOnMaps
+ *
+ *  This function is currently WIP, hence parts exist only as draft.
+ */
+void ObjectMgr::LoadActiveEntities(Map* _map)
+{
+    // Special case on startup - load continents
+    if (!_map)
+    {
+        uint32 continents[] = {0, 1, 369, 530};
+        for (int i = 0; i < countof(continents); ++i)
+        {
+            _map = sMapMgr.FindMap(continents[i]);
+            if (!_map)
+            {
+                _map = sMapMgr.CreateMap(continents[i], NULL);
+            }
+
+            if (_map)
+            {
+                LoadActiveEntities(_map);
+            }
+            else
+            {
+                sLog.outError("ObjectMgr::LoadActiveEntities - Unable to create Map %u", continents[i]);
+            }
+        }
+
+        return;
+    }
+
+    // Load active objects for _map
+    if (sWorld.isForceLoadMap(_map->GetId()))
+    {
+        for (CreatureDataMap::const_iterator itr = mCreatureDataMap.begin(); itr != mCreatureDataMap.end(); ++itr)
+        {
+            if (itr->second.mapid == _map->GetId())
+            {
+                _map->ForceLoadGrid(itr->second.posX, itr->second.posY);
+            }
+        }
+    }
+    else                                                    // Normal case - Load all npcs that are active
+    {
+        std::pair<ActiveCreatureGuidsOnMap::const_iterator, ActiveCreatureGuidsOnMap::const_iterator> bounds = m_activeCreatures.equal_range(_map->GetId());
+        for (ActiveCreatureGuidsOnMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
+        {
+            CreatureData const& data = mCreatureDataMap[itr->second];
+            {
+                _map->ForceLoadGrid(data.posX, data.posY);
+            }
+        }
+    }
+}
+
 void ObjectMgr::LoadGossipMenu(std::set<uint32>& gossipScriptSet)
 {
     m_mGossipMenusMap.clear();
@@ -10369,7 +10436,7 @@ bool ObjectMgr::IsVendorItemValid(bool isTemplate, char const* tableName, uint32
 
     if (!vItems && !tItems)
     {
-        return true;                                         // later checks for non-empty lists
+        return true;                                        // later checks for non-empty lists
     }
 
     if (vItems && vItems->FindItemCostPair(item_id, ExtendedCost))

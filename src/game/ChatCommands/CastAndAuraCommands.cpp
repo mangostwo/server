@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 
 /**********************************************************************
     CommandTable : castCommandTable
-/***********************************************************************/
+ **********************************************************************/
 
 bool AddAuraToPlayer(const SpellEntry* spellInfo, Unit* target, WorldObject* caster);
 
@@ -245,7 +245,7 @@ bool ChatHandler::HandleCastSelfCommand(char* args)
 
 /**********************************************************************
     CommandTable : Aura commands
-/***********************************************************************/
+ **********************************************************************/
 
 bool ChatHandler::HandleAuraCommand(char* args)
 {
@@ -327,7 +327,7 @@ bool ChatHandler::HandleUnAuraCommand(char* args)
 
 /**********************************************************************
     CommandTable : Main Command table
-/***********************************************************************/
+ **********************************************************************/
 
 bool ChatHandler::HandleAuraGroupCommand(char* args)
 {
@@ -421,7 +421,7 @@ bool ChatHandler::HandleAuraGroupCommand(char* args)
 bool ChatHandler::HandleUnAuraGroupCommand(char* args)
 {
     // Must have args : spellId or "all"
-    if(!*args)
+    if (!*args)
     {
         return false;
     }
@@ -532,4 +532,3 @@ bool ChatHandler::HandleUnAuraGroupCommand(char* args)
         return true;
     }
 }
-

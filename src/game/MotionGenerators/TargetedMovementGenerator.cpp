@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,14 @@
 #include "movement/MoveSplineInit.h"
 #include "movement/MoveSpline.h"
 
-//-----------------------------------------------//
+/**
+ * @brief Set the target location for the owner.
+ *
+ * @tparam T The type of the owner.
+ * @tparam D The type of the derived class.
+ * @param owner The owner.
+ * @param updateDestination Whether to update the destination.
+ */
 template<class T, typename D>
 void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool updateDestination)
 {
@@ -107,6 +114,16 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool up
     init.Launch();
 }
 
+/**
+ * @brief Update the movement generator.
+ *
+ * @tparam T The type of the owner.
+ * @tparam D The type of the derived class.
+ * @param owner The owner.
+ * @param time_diff The time difference.
+ * @return true If the update was successful.
+ * @return false Otherwise.
+ */
 template<class T, typename D>
 bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_diff)
 {
@@ -179,12 +196,32 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
     return true;
 }
 
+/**
+ * @brief Check if the target is reachable.
+ *
+ * @tparam T The type of the owner.
+ * @tparam D The type of the derived class.
+ * @return true If the target is reachable.
+ * @return false Otherwise.
+ */
 template<class T, typename D>
 bool TargetedMovementGeneratorMedium<T, D>::IsReachable() const
 {
     return (i_path) ? (i_path->getPathType() & PATHFIND_NORMAL) : true;
 }
 
+/**
+ * @brief Check if a new position is required for the owner.
+ *
+ * @tparam T The type of the owner.
+ * @tparam D The type of the derived class.
+ * @param owner The owner.
+ * @param x The x-coordinate.
+ * @param y The y-coordinate.
+ * @param z The z-coordinate.
+ * @return true If a new position is required.
+ * @return false Otherwise.
+ */
 template<class T, typename D>
 bool TargetedMovementGeneratorMedium<T, D>::RequiresNewPosition(T& owner, float x, float y, float z) const
 {
@@ -199,18 +236,44 @@ bool TargetedMovementGeneratorMedium<T, D>::RequiresNewPosition(T& owner, float 
     }
 }
 
-//-----------------------------------------------//
+/**
+ * @brief Clear the chase movement state for the owner.
+ *
+ * @tparam T The type of the owner.
+ * @param u The owner.
+ */
 template<class T>
 void ChaseMovementGenerator<T>::_clearUnitStateMove(T& u) { u.clearUnitState(UNIT_STAT_CHASE_MOVE); }
+
+/**
+ * @brief Add the chase movement state for the owner.
+ *
+ * @tparam T The type of the owner.
+ * @param u The owner.
+ */
 template<class T>
 void ChaseMovementGenerator<T>::_addUnitStateMove(T& u) { u.addUnitState(UNIT_STAT_CHASE_MOVE); }
 
+/**
+ * @brief Check if the owner has lost the target.
+ *
+ * @tparam T The type of the owner.
+ * @param u The owner.
+ * @return true If the owner has lost the target.
+ * @return false Otherwise.
+ */
 template<class T>
 bool ChaseMovementGenerator<T>::_lostTarget(T& u) const
 {
     return u.getVictim() != this->GetTarget();
 }
 
+/**
+ * @brief Handle reaching the target for the owner.
+ *
+ * @tparam T The type of the owner.
+ * @param owner The owner.
+ */
 template<class T>
 void ChaseMovementGenerator<T>::_reachTarget(T& owner)
 {
@@ -220,6 +283,11 @@ void ChaseMovementGenerator<T>::_reachTarget(T& owner)
     }
 }
 
+/**
+ * @brief Initialize the chase movement generator for the player.
+ *
+ * @param owner The player.
+ */
 template<>
 void ChaseMovementGenerator<Player>::Initialize(Player& owner)
 {
@@ -227,6 +295,11 @@ void ChaseMovementGenerator<Player>::Initialize(Player& owner)
     _setTargetLocation(owner, true);
 }
 
+/**
+ * @brief Initialize the chase movement generator for the creature.
+ *
+ * @param owner The creature.
+ */
 template<>
 void ChaseMovementGenerator<Creature>::Initialize(Creature& owner)
 {
@@ -235,12 +308,24 @@ void ChaseMovementGenerator<Creature>::Initialize(Creature& owner)
     _setTargetLocation(owner, true);
 }
 
+/**
+ * @brief Finalize the chase movement generator for the owner.
+ *
+ * @tparam T The type of the owner.
+ * @param owner The owner.
+ */
 template<class T>
 void ChaseMovementGenerator<T>::Finalize(T& owner)
 {
     owner.clearUnitState(UNIT_STAT_CHASE | UNIT_STAT_CHASE_MOVE);
 }
 
+/**
+ * @brief Interrupt the chase movement generator for the owner.
+ *
+ * @tparam T The type of the owner.
+ * @param owner The owner.
+ */
 template<class T>
 void ChaseMovementGenerator<T>::Interrupt(T& owner)
 {
@@ -248,6 +333,12 @@ void ChaseMovementGenerator<T>::Interrupt(T& owner)
     owner.clearUnitState(UNIT_STAT_CHASE | UNIT_STAT_CHASE_MOVE);
 }
 
+/**
+ * @brief Reset the chase movement generator for the owner.
+ *
+ * @tparam T The type of the owner.
+ * @param owner The owner.
+ */
 template<class T>
 void ChaseMovementGenerator<T>::Reset(T& owner)
 {
@@ -258,6 +349,14 @@ void ChaseMovementGenerator<T>::Reset(T& owner)
 #define CHASE_DEFAULT_RANGE_FACTOR                        0.5f
 #define CHASE_RECHASE_RANGE_FACTOR                        0.75f
 
+/**
+ * @brief Get the dynamic target distance for the owner.
+ *
+ * @tparam T The type of the owner.
+ * @param owner The owner.
+ * @param forRangeCheck Whether the distance is for range check.
+ * @return float The dynamic target distance.
+ */
 template<class T>
 float ChaseMovementGenerator<T>::GetDynamicTargetDistance(T& owner, bool forRangeCheck) const
 {
@@ -269,30 +368,64 @@ float ChaseMovementGenerator<T>::GetDynamicTargetDistance(T& owner, bool forRang
     return CHASE_RECHASE_RANGE_FACTOR * this->i_target->GetCombatReach(&owner) - this->i_target->GetObjectBoundingRadius();
 }
 
-//-----------------------------------------------//
+/**
+ * @brief Clear the follow movement state for the owner.
+ *
+ * @tparam T The type of the owner.
+ * @param u The owner.
+ */
 template<class T>
 void FollowMovementGenerator<T>::_clearUnitStateMove(T& u) { u.clearUnitState(UNIT_STAT_FOLLOW_MOVE); }
+
+/**
+ * @brief Add the follow movement state for the owner.
+ *
+ * @tparam T The type of the owner.
+ * @param u The owner.
+ */
 template<class T>
 void FollowMovementGenerator<T>::_addUnitStateMove(T& u) { u.addUnitState(UNIT_STAT_FOLLOW_MOVE); }
 
+/**
+ * @brief Enable walking for the creature.
+ *
+ * @return true If walking is enabled.
+ * @return false Otherwise.
+ */
 template<>
 bool FollowMovementGenerator<Creature>::EnableWalking() const
 {
     return i_target.isValid() && i_target->IsWalking();
 }
 
+/**
+ * @brief Enable walking for the player.
+ *
+ * @return true If walking is enabled.
+ * @return false Otherwise.
+ */
 template<>
 bool FollowMovementGenerator<Player>::EnableWalking() const
 {
     return false;
 }
 
+/**
+ * @brief Update the speed for the player.
+ *
+ * @param u The player.
+ */
 template<>
 void FollowMovementGenerator<Player>::_updateSpeed(Player& /*u*/)
 {
     // nothing to do for Player
 }
 
+/**
+ * @brief Update the speed for the creature.
+ *
+ * @param u The creature.
+ */
 template<>
 void FollowMovementGenerator<Creature>::_updateSpeed(Creature& u)
 {
@@ -307,6 +440,11 @@ void FollowMovementGenerator<Creature>::_updateSpeed(Creature& u)
     u.UpdateSpeed(MOVE_SWIM, true);
 }
 
+/**
+ * @brief Initialize the follow movement generator for the player.
+ *
+ * @param owner The player.
+ */
 template<>
 void FollowMovementGenerator<Player>::Initialize(Player& owner)
 {
@@ -315,6 +453,11 @@ void FollowMovementGenerator<Player>::Initialize(Player& owner)
     _setTargetLocation(owner, true);
 }
 
+/**
+ * @brief Initialize the follow movement generator for the creature.
+ *
+ * @param owner The creature.
+ */
 template<>
 void FollowMovementGenerator<Creature>::Initialize(Creature& owner)
 {
@@ -323,6 +466,12 @@ void FollowMovementGenerator<Creature>::Initialize(Creature& owner)
     _setTargetLocation(owner, true);
 }
 
+/**
+ * @brief Finalize the follow movement generator for the owner.
+ *
+ * @tparam T The type of the owner.
+ * @param owner The owner.
+ */
 template<class T>
 void FollowMovementGenerator<T>::Finalize(T& owner)
 {
@@ -330,6 +479,12 @@ void FollowMovementGenerator<T>::Finalize(T& owner)
     _updateSpeed(owner);
 }
 
+/**
+ * @brief Interrupt the follow movement generator for the owner.
+ *
+ * @tparam T The type of the owner.
+ * @param owner The owner.
+ */
 template<class T>
 void FollowMovementGenerator<T>::Interrupt(T& owner)
 {
@@ -338,6 +493,12 @@ void FollowMovementGenerator<T>::Interrupt(T& owner)
     _updateSpeed(owner);
 }
 
+/**
+ * @brief Reset the follow movement generator for the owner.
+ *
+ * @tparam T The type of the owner.
+ * @param owner The owner.
+ */
 template<class T>
 void FollowMovementGenerator<T>::Reset(T& owner)
 {
@@ -352,6 +513,14 @@ void FollowMovementGenerator<T>::Reset(T& owner)
 // This factor defines how much of the follow-distance will be used as sloppyness value (if the above distance is exceeded)
 #define FOLLOW_DIST_RECALCULATE_FACTOR                    1.0f
 
+/**
+ * @brief Get the dynamic target distance for the owner.
+ *
+ * @tparam T The type of the owner.
+ * @param owner The owner.
+ * @param forRangeCheck Whether the distance is for range check.
+ * @return float The dynamic target distance.
+ */
 template<class T>
 float FollowMovementGenerator<T>::GetDynamicTargetDistance(T& owner, bool forRangeCheck) const
 {
@@ -370,42 +539,274 @@ float FollowMovementGenerator<T>::GetDynamicTargetDistance(T& owner, bool forRan
     return allowed_dist;
 }
 
-//-----------------------------------------------//
+/**
+ * @brief Template specialization for setting the target location for a player using ChaseMovementGenerator.
+ * @param owner The player.
+ * @param updateDestination Whether to update the destination.
+ */
 template void TargetedMovementGeneratorMedium<Player, ChaseMovementGenerator<Player> >::_setTargetLocation(Player&, bool);
+
+/**
+ * @brief Template specialization for setting the target location for a player using FollowMovementGenerator.
+ * @param owner The player.
+ * @param updateDestination Whether to update the destination.
+ */
 template void TargetedMovementGeneratorMedium<Player, FollowMovementGenerator<Player> >::_setTargetLocation(Player&, bool);
+
+/**
+ * @brief Template specialization for setting the target location for a creature using ChaseMovementGenerator.
+ * @param owner The creature.
+ * @param updateDestination Whether to update the destination.
+ */
 template void TargetedMovementGeneratorMedium<Creature, ChaseMovementGenerator<Creature> >::_setTargetLocation(Creature&, bool);
+
+/**
+ * @brief Template specialization for setting the target location for a creature using FollowMovementGenerator.
+ * @param owner The creature.
+ * @param updateDestination Whether to update the destination.
+ */
 template void TargetedMovementGeneratorMedium<Creature, FollowMovementGenerator<Creature> >::_setTargetLocation(Creature&, bool);
+
+/**
+ * @brief Updates the movement generator for the player using ChaseMovementGenerator.
+ * @param owner The player.
+ * @param time_diff The time difference.
+ * @return true If the update was successful.
+ * @return false Otherwise.
+ */
 template bool TargetedMovementGeneratorMedium<Player, ChaseMovementGenerator<Player> >::Update(Player&, const uint32&);
+
+/**
+ * @brief Updates the movement generator for the player using FollowMovementGenerator.
+ * @param owner The player.
+ * @param time_diff The time difference.
+ * @return true If the update was successful.
+ * @return false Otherwise.
+ */
 template bool TargetedMovementGeneratorMedium<Player, FollowMovementGenerator<Player> >::Update(Player&, const uint32&);
+
+/**
+ * @brief Updates the movement generator for the creature using ChaseMovementGenerator.
+ * @param owner The creature.
+ * @param time_diff The time difference.
+ * @return true If the update was successful.
+ * @return false Otherwise.
+ */
 template bool TargetedMovementGeneratorMedium<Creature, ChaseMovementGenerator<Creature> >::Update(Creature&, const uint32&);
+
+/**
+ * @brief Updates the movement generator for the creature using FollowMovementGenerator.
+ * @param owner The creature.
+ * @param time_diff The time difference.
+ * @return true If the update was successful.
+ * @return false Otherwise.
+ */
 template bool TargetedMovementGeneratorMedium<Creature, FollowMovementGenerator<Creature> >::Update(Creature&, const uint32&);
+
+/**
+ * @brief Checks if the target is reachable for the player using ChaseMovementGenerator.
+ * @return true If the target is reachable.
+ * @return false Otherwise.
+ */
 template bool TargetedMovementGeneratorMedium<Player, ChaseMovementGenerator<Player> >::IsReachable() const;
+
+/**
+ * @brief Checks if the target is reachable for the player using FollowMovementGenerator.
+ * @return true If the target is reachable.
+ * @return false Otherwise.
+ */
 template bool TargetedMovementGeneratorMedium<Player, FollowMovementGenerator<Player> >::IsReachable() const;
+
+/**
+ * @brief Checks if the target is reachable for the creature using ChaseMovementGenerator.
+ * @return true If the target is reachable.
+ * @return false Otherwise.
+ */
 template bool TargetedMovementGeneratorMedium<Creature, ChaseMovementGenerator<Creature> >::IsReachable() const;
+
+/**
+ * @brief Checks if the target is reachable for the creature using FollowMovementGenerator.
+ * @return true If the target is reachable.
+ * @return false Otherwise.
+ */
 template bool TargetedMovementGeneratorMedium<Creature, FollowMovementGenerator<Creature> >::IsReachable() const;
 
+/**
+ * @brief Clears the chase movement state for the player.
+ * @param u The player.
+ */
 template void ChaseMovementGenerator<Player>::_clearUnitStateMove(Player& u);
+
+/**
+ * @brief Adds the chase movement state for the creature.
+ * @param u The creature.
+ */
 template void ChaseMovementGenerator<Creature>::_addUnitStateMove(Creature& u);
+
+/**
+ * @brief Checks if the player has lost the target.
+ * @param u The player.
+ * @return true If the player has lost the target.
+ * @return false Otherwise.
+ */
 template bool ChaseMovementGenerator<Player>::_lostTarget(Player& u) const;
+
+/**
+ * @brief Checks if the creature has lost the target.
+ * @param u The creature.
+ * @return true If the creature has lost the target.
+ * @return false Otherwise.
+ */
 template bool ChaseMovementGenerator<Creature>::_lostTarget(Creature& u) const;
+
+/**
+ * @brief Handles reaching the target for the player.
+ * @param owner The player.
+ */
 template void ChaseMovementGenerator<Player>::_reachTarget(Player&);
+
+/**
+ * @brief Handles reaching the target for the creature.
+ * @param owner The creature.
+ */
 template void ChaseMovementGenerator<Creature>::_reachTarget(Creature&);
+
+/**
+ * @brief Finalizes the chase movement generator for the player.
+ * @param owner The player.
+ */
 template void ChaseMovementGenerator<Player>::Finalize(Player&);
+
+/**
+ * @brief Finalizes the chase movement generator for the creature.
+ * @param owner The creature.
+ */
 template void ChaseMovementGenerator<Creature>::Finalize(Creature&);
+
+/**
+ * @brief Initializes the chase movement generator for the player.
+ * @param owner The player.
+ */
+template void ChaseMovementGenerator<Player>::Initialize(Player&);
+
+/**
+ * @brief Initializes the chase movement generator for the creature.
+ * @param owner The creature.
+ */
+template void ChaseMovementGenerator<Creature>::Initialize(Creature&);
+
+/**
+ * @brief Interrupts the chase movement generator for the player.
+ * @param owner The player.
+ */
 template void ChaseMovementGenerator<Player>::Interrupt(Player&);
+
+/**
+ * @brief Interrupts the chase movement generator for the creature.
+ * @param owner The creature.
+ */
 template void ChaseMovementGenerator<Creature>::Interrupt(Creature&);
+
+/**
+ * @brief Resets the chase movement generator for the player.
+ * @param owner The player.
+ */
 template void ChaseMovementGenerator<Player>::Reset(Player&);
+
+/**
+ * @brief Resets the chase movement generator for the creature.
+ * @param owner The creature.
+ */
 template void ChaseMovementGenerator<Creature>::Reset(Creature&);
+
+/**
+ * @brief Gets the dynamic target distance for the creature.
+ * @param owner The creature.
+ * @param forRangeCheck Whether the distance is for range check.
+ * @return float The dynamic target distance.
+ */
 template float ChaseMovementGenerator<Creature>::GetDynamicTargetDistance(Creature&, bool) const;
+
+/**
+ * @brief Gets the dynamic target distance for the player.
+ * @param owner The player.
+ * @param forRangeCheck Whether the distance is for range check.
+ * @return float The dynamic target distance.
+ */
 template float ChaseMovementGenerator<Player>::GetDynamicTargetDistance(Player&, bool) const;
 
+/**
+ * @brief Clears the follow movement state for the player.
+ * @param u The player.
+ */
 template void FollowMovementGenerator<Player>::_clearUnitStateMove(Player& u);
+
+/**
+ * @brief Adds the follow movement state for the creature.
+ * @param u The creature.
+ */
 template void FollowMovementGenerator<Creature>::_addUnitStateMove(Creature& u);
+
+/**
+ * @brief Finalizes the follow movement generator for the player.
+ * @param owner The player.
+ */
 template void FollowMovementGenerator<Player>::Finalize(Player&);
+
+/**
+ * @brief Finalizes the follow movement generator for the creature.
+ * @param owner The creature.
+ */
 template void FollowMovementGenerator<Creature>::Finalize(Creature&);
+
+/**
+ * @brief Initializes the follow movement generator for the player.
+ * @param owner The player.
+ */
+template void FollowMovementGenerator<Player>::Initialize(Player&);
+
+/**
+ * @brief Initializes the follow movement generator for the creature.
+ * @param owner The creature.
+ */
+template void FollowMovementGenerator<Creature>::Initialize(Creature&);
+
+/**
+ * @brief Interrupts the follow movement generator for the player.
+ * @param owner The player.
+ */
 template void FollowMovementGenerator<Player>::Interrupt(Player&);
+
+/**
+ * @brief Interrupts the follow movement generator for the creature.
+ * @param owner The creature.
+ */
 template void FollowMovementGenerator<Creature>::Interrupt(Creature&);
+
+/**
+ * @brief Resets the follow movement generator for the player.
+ * @param owner The player.
+ */
 template void FollowMovementGenerator<Player>::Reset(Player&);
+
+/**
+ * @brief Resets the follow movement generator for the creature.
+ * @param owner The creature.
+ */
 template void FollowMovementGenerator<Creature>::Reset(Creature&);
+
+/**
+ * @brief Gets the dynamic target distance for the creature.
+ * @param owner The creature.
+ * @param forRangeCheck Whether the distance is for range check.
+ * @return float The dynamic target distance.
+ */
 template float FollowMovementGenerator<Creature>::GetDynamicTargetDistance(Creature&, bool) const;
+
+/**
+ * @brief Gets the dynamic target distance for the player.
+ * @param owner The player.
+ * @param forRangeCheck Whether the distance is for range check.
+ * @return float The dynamic target distance.
+ */
 template float FollowMovementGenerator<Player>::GetDynamicTargetDistance(Player&, bool) const;

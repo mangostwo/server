@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,12 @@
 #include "Log/Log.h"
 
 #include <iomanip>
+#include <cctype>
+#include <cstring>
+#include <string>
+#include <charconv>   // for std::to_chars
+
+#include <array>
 
 //////////////////////////////////////////////////////////////////////////
 int32 irand(int32 min, int32 max)
@@ -154,133 +160,118 @@ void stripLineInvisibleChars(std::string& str)
     }
 }
 
-std::tm localtime_r(const time_t& time)
+/**
+ * "Get the timestamp of the next time the given hour occurs in the local timezone."
+ *
+ * The function takes a timestamp, an hour, and a boolean. The timestamp is the time you want to find
+ * the next occurrence of the given hour. The hour is the hour you want to find the next occurrence of.
+ * The boolean is whether or not you want to find the next occurrence of the hour after the given
+ * timestamp
+ *
+ * @param time The time you want to get the hour timestamp for.
+ * @param hour The hour of the day you want to get the timestamp for.
+ * @param onlyAfterTime If true, the function will return the next hour after the current time. If
+ * false, it will return the current hour.
+ *
+ * @return A timestamp for the given hour of the day.
+ */
+time_t GetLocalHourTimestamp(time_t time, uint8 hour, bool onlyAfterTime)
 {
-    std::tm tm_snapshot;
-#if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
-    localtime_s(&tm_snapshot, &time);
-#else
-    localtime_r(&time, &tm_snapshot); // POSIX
-#endif
-    return tm_snapshot;
+    std::tm timeLocal = safe_localtime(time);
+    timeLocal.tm_hour = 0;
+    timeLocal.tm_min  = 0;
+    timeLocal.tm_sec  = 0;
+
+    time_t midnightLocal = mktime(&timeLocal);
+    time_t hourLocal = midnightLocal + hour * HOUR;
+
+    if (onlyAfterTime && hourLocal < time)
+    {
+        hourLocal += DAY;
+    }
+
+    return hourLocal;
 }
+
 
 std::string secsToTimeString(time_t timeInSecs, TimeFormat timeFormat, bool hoursOnly)
 {
-    time_t secs    = timeInSecs % MINUTE;
-    time_t minutes = timeInSecs % HOUR / MINUTE;
-    time_t hours   = timeInSecs % DAY  / HOUR;
-    time_t days    = timeInSecs / DAY;
+    const time_t secs = timeInSecs % MINUTE;
+    const time_t minutes = (timeInSecs % HOUR) / MINUTE;
+    const time_t hours = (timeInSecs % DAY) / HOUR;
+    const time_t days = timeInSecs / DAY;
 
-    std::ostringstream ss;
+    std::string out;
+    out.reserve(64); // to avoid reallocations
+
+    auto append_number = [&](time_t value, bool pad2 = false)
+        {
+            std::array<char, 16> buf{};
+            auto [ptr, ec] = std::to_chars(buf.data(), buf.data() + buf.size(), value);
+            if (pad2 && (ptr - buf.data()) == 1)  // pad single-digit numbers
+                out.push_back('0');
+            out.append(buf.data(), ptr);
+        };
+
+    // --- Days ---
     if (days)
     {
-        ss << days;
+        append_number(days);
         if (timeFormat == TimeFormat::Numeric)
-        {
-            ss << ":";
-        }
+            out += ':';
         else if (timeFormat == TimeFormat::ShortText)
-        {
-            ss << "d";
-        }
-        else // if (timeFormat == TimeFormat::FullText)
-        {
-            if (days == 1)
-            {
-                ss << " Day ";
-            }
-            else
-            {
-                ss << " Days ";
-            }
-        }
+            out += 'd';
+        else
+            out += (days == 1 ? " Day " : " Days ");
     }
 
+    // --- Hours ---
     if (hours || hoursOnly)
     {
-        ss << hours;
+        append_number(hours);
         if (timeFormat == TimeFormat::Numeric)
-        {
-            ss << ":";
-        }
+            out += ':';
         else if (timeFormat == TimeFormat::ShortText)
-        {
-            ss << "h";
-        }
-        else // if (timeFormat == TimeFormat::FullText)
-        {
-            if (hours <= 1)
-            {
-                ss << " Hour ";
-            }
-            else
-            {
-                ss << " Hours ";
-            }
-        }
+            out += 'h';
+        else
+            out += (hours == 1 ? " Hour " : " Hours ");
     }
 
+    // --- Minutes ---
     if (!hoursOnly)
     {
-        ss << minutes;
+        append_number(minutes);
         if (timeFormat == TimeFormat::Numeric)
-        {
-            ss << ":";
-        }
+            out += ':';
         else if (timeFormat == TimeFormat::ShortText)
-        {
-            ss << "m";
-        }
-        else // if (timeFormat == TimeFormat::FullText)
-        {
-            if (minutes == 1)
-            {
-                ss << " Minute ";
-            }
-            else
-            {
-                ss << " Minutes ";
-            }
-        }
+            out += 'm';
+        else
+            out += (minutes == 1 ? " Minute " : " Minutes ");
     }
-    else
+    else if (timeFormat == TimeFormat::Numeric)
     {
-        if (timeFormat == TimeFormat::Numeric)
-        {
-            ss << "0:";
-        }
+        // add “0:” when hoursOnly requested
+        out += "0:";
     }
 
+    // --- Seconds ---
     if (secs || (!days && !hours && !minutes))
     {
-        ss << std::setw(2) << std::setfill('0') << secs;
+        // Always pad seconds to 2 digits in numeric format
+        append_number(secs, timeFormat == TimeFormat::Numeric);
         if (timeFormat == TimeFormat::ShortText)
-        {
-            ss << "s";
-        }
+            out += 's';
         else if (timeFormat == TimeFormat::FullText)
-        {
-            if (secs <= 1)
-            {
-                ss << " Second.";
-            }
-            else
-            {
-                ss << " Seconds.";
-            }
-        }
+            out += (secs == 1 ? " Second." : " Seconds.");
     }
-    else
+    else if (timeFormat == TimeFormat::Numeric)
     {
-        if (timeFormat == TimeFormat::Numeric)
-        {
-            ss << "00";
-        }
+        out += "00";
     }
 
-    return ss.str();
+    return out;
 }
+
 
 uint32 TimeStringToSecs(const std::string& timestring)
 {
@@ -316,16 +307,41 @@ uint32 TimeStringToSecs(const std::string& timestring)
 
 std::string TimeToTimestampStr(time_t t)
 {
-    tm aTm = localtime_r(t);
     //       YYYY   year
     //       MM     month (2 digits 01-12)
     //       DD     day (2 digits 01-31)
     //       HH     hour (2 digits 00-23)
     //       MM     minutes (2 digits 00-59)
     //       SS     seconds (2 digits 00-59)
-    char buf[20];
-    snprintf(buf, 20, "%04d-%02d-%02d_%02d-%02d-%02d", aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec);
-    return std::string(buf);
+
+    std::tm aTm = safe_localtime(t);
+    std::array<char, 20> buf; // "YYYY-MM-DD_HH-MM-SS" = 19 chars + '\0'
+    char* p = buf.data();
+
+    auto append_2d = [&](int v) {
+        *p++ = char('0' + v / 10);
+        *p++ = char('0' + v % 10);
+        };
+    auto append_4d = [&](int v) {
+        *p++ = char('0' + (v / 1000) % 10);
+        *p++ = char('0' + (v / 100) % 10);
+        *p++ = char('0' + (v / 10) % 10);
+        *p++ = char('0' + v % 10);
+        };
+
+    append_4d(aTm.tm_year + 1900);
+    *p++ = '-';
+    append_2d(aTm.tm_mon + 1);
+    *p++ = '-';
+    append_2d(aTm.tm_mday);
+    *p++ = '_';
+    append_2d(aTm.tm_hour);
+    *p++ = '-';
+    append_2d(aTm.tm_min);
+    *p++ = '-';
+    append_2d(aTm.tm_sec);
+
+    return std::string(buf.data(), p);
 }
 
 time_t timeBitFieldsToSecs(uint32 packedDate)
@@ -454,7 +470,9 @@ size_t utf8limit(std::string& utf8str, size_t bytes)
 
             // Fix UTF8 if it was corrupted by bytes truncated
             if (itr != end)
+            {
                 bytes = std::distance(utf8str.cbegin(), itr);
+            }
 
             utf8str.resize(bytes);
             utf8str.shrink_to_fit();
@@ -893,4 +911,25 @@ void print_banner()
             "\n");
         break;
     }
+}
+
+// Used by Playerbot
+
+// Function to perform a case-insensitive search of str2 in str1
+char* strstri(const std::string& str1, const std::string& str2)
+{
+    // Convert both strings to lowercase for case-insensitive comparison
+    std::string lowerStr1 = str1;
+    std::string lowerStr2 = str2;
+    std::transform(lowerStr1.begin(), lowerStr1.end(), lowerStr1.begin(), ::tolower);
+    std::transform(lowerStr2.begin(), lowerStr2.end(), lowerStr2.begin(), ::tolower);
+
+    // Find the first occurrence of lowerStr2 in lowerStr1
+    size_t pos = lowerStr1.find(lowerStr2);
+    if (pos != std::string::npos)
+    {
+        // Return the pointer to the first occurrence in the original string
+        return (char*)str1.c_str() + pos;
+    }
+    return nullptr;
 }

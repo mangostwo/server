@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -135,16 +135,16 @@ class WorldSocket : protected WorldHandler
         virtual ~WorldSocket(void);
 
         /// Called on open ,the void* is the acceptor.
-        virtual int open(void*) override;
+        int open(void*) override;
 
         /// Called on failures inside of the acceptor, don't call from your code.
         virtual int close(int);
 
         /// Called when we can read from the socket.
-        virtual int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE) override;
+        int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE) override;
 
         /// Called when the socket can write.
-        virtual int handle_output(ACE_HANDLE = ACE_INVALID_HANDLE) override;
+        int handle_output(ACE_HANDLE = ACE_INVALID_HANDLE) override;
 
         /// Called when connection is closed or error happens.
         virtual int handle_close(ACE_HANDLE = ACE_INVALID_HANDLE,
@@ -219,7 +219,7 @@ class WorldSocket : protected WorldHandler
         /// True if the socket is registered with the reactor for output
         bool m_OutActive;
 
-        uint32 m_Seed;
+        const uint32 m_Seed;
 
         BigNumber m_s;
 };

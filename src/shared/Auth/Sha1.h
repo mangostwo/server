@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,9 @@
 #include "Common/Common.h"
 #include <openssl/sha.h>
 #include <openssl/crypto.h>
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+#  include <openssl/provider.h>
+#endif
 
 class BigNumber;
 
@@ -96,6 +99,6 @@ class Sha1Hash
 
     private:
         SHA_CTX mC; /**< TODO */
-        uint8 mDigest[SHA_DIGEST_LENGTH]; /**< TODO */
+        uint8 mDigest[SHA_DIGEST_LENGTH]{ 0 }; /**< TODO */
 };
 #endif

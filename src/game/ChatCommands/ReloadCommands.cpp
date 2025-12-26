@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
 #include "SkillDiscovery.h"
 #include "ItemEnchantmentMgr.h"
 #include "CommandMgr.h"
+#include "ObjectMgr.h"
 
 /**********************************************************************
     CommandTable : reloadCommandTable
@@ -439,6 +440,16 @@ bool ChatHandler::HandleReloadMangosStringCommand(char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleReloadNpcGossipCommand(char* args)
+{
+    sLog.outString("Re-Loading 'gossip_menus' Table!");
+    sObjectMgr.LoadGossipMenus();
+    sLog.outString("Re-Loading 'gossip_text' Table!");
+    sObjectMgr.LoadGossipText();
+    SendGlobalSysMessage("DB tables `Gossip_menu` and `gossip_text` reloaded.", SEC_MODERATOR);
+    return true;
+}
+
 bool ChatHandler::HandleReloadNpcTextCommand(char* /*args*/)
 {
     sLog.outString("Re-Loading `npc_text` Table!");
@@ -688,7 +699,6 @@ bool ChatHandler::HandleReloadBattleEventCommand(char* /*args*/)
 
 bool ChatHandler::HandleReloadEventAITextsCommand(char* /*args*/)
 {
-
     sLog.outString("Re-Loading Texts from `creature_ai_texts`...");
     sEventAIMgr.LoadCreatureEventAI_Texts(true);
     SendGlobalSysMessage("DB table `creature_ai_texts` reloaded.", SEC_MODERATOR);

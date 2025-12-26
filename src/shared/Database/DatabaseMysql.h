@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,21 +64,21 @@ class MySqlPreparedStatement : public SqlPreparedStatement
          *
          * @return bool
          */
-        virtual bool prepare() override;
+        bool prepare() override;
 
         /**
          * @brief bind input parameters
          *
          * @param holder
          */
-        virtual void bind(const SqlStmtParameters& holder) override;
+        void bind(const SqlStmtParameters& holder) override;
 
         /**
          * @brief execute DML statement
          *
          * @return bool
          */
-        virtual bool execute() override;
+        bool execute() override;
 
     protected:
         /**
@@ -259,11 +259,12 @@ class DatabaseMysql : public Database
          *
          * @return SqlConnection
          */
-        virtual SqlConnection* CreateConnection() override;
+        SqlConnection* CreateConnection() override;
 
     private:
         static size_t db_count; /**< TODO */
 };
 
 #endif
+
 #endif

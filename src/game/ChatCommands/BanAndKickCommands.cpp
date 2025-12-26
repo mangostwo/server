@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 
  /**********************************************************************
      CommandTable : banCommandTable
- /***********************************************************************/
+  **********************************************************************/
 
 
 bool ChatHandler::HandleBanListHelper(QueryResult* result)
@@ -88,22 +88,23 @@ bool ChatHandler::HandleBanListHelper(QueryResult* result)
                 Field* fields2 = banInfo->Fetch();
                 do
                 {
-                    time_t t_ban = fields2[0].GetUInt64();
-                    tm* aTm_ban = localtime(&t_ban);
+                    time_t timeBan = fields2[0].GetUInt64();
+                    std::tm tmBan = safe_localtime(timeBan);
 
                     if (fields2[0].GetUInt64() == fields2[1].GetUInt64())
                     {
                         PSendSysMessage("|%-15.15s|%02d-%02d-%02d %02d:%02d|   permanent  |%-15.15s|%-15.15s|",
-                                        account_name.c_str(), aTm_ban->tm_year % 100, aTm_ban->tm_mon + 1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min,
+                                        account_name.c_str(), tmBan.tm_year % 100, tmBan.tm_mon + 1, tmBan.tm_mday, tmBan.tm_hour, tmBan.tm_min,
                                         fields2[2].GetString(), fields2[3].GetString());
                     }
                     else
                     {
-                        time_t t_unban = fields2[1].GetUInt64();
-                        tm* aTm_unban = localtime(&t_unban);
+                        time_t timeUnban = fields2[1].GetUInt64();
+                        tm tmUnban = safe_localtime(timeUnban);
+
                         PSendSysMessage("|%-15.15s|%02d-%02d-%02d %02d:%02d|%02d-%02d-%02d %02d:%02d|%-15.15s|%-15.15s|",
-                                        account_name.c_str(), aTm_ban->tm_year % 100, aTm_ban->tm_mon + 1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min,
-                                        aTm_unban->tm_year % 100, aTm_unban->tm_mon + 1, aTm_unban->tm_mday, aTm_unban->tm_hour, aTm_unban->tm_min,
+                                        account_name.c_str(), tmBan.tm_year % 100, tmBan.tm_mon + 1, tmBan.tm_mday, tmBan.tm_hour, tmBan.tm_min,
+                                        tmUnban.tm_year % 100, tmUnban.tm_mon + 1, tmUnban.tm_mday, tmUnban.tm_hour, tmUnban.tm_min,
                                         fields2[2].GetString(), fields2[3].GetString());
                     }
                 }
@@ -225,7 +226,7 @@ bool ChatHandler::HandleBanAccountCommand(char* args)
 
  /**********************************************************************
      CommandTable : baninfoCommandTable
- /***********************************************************************/
+  **********************************************************************/
 
 bool ChatHandler::HandleBanInfoHelper(uint32 accountid, char const* accountname)
 {
@@ -335,7 +336,7 @@ bool ChatHandler::HandleBanInfoAccountCommand(char* args)
 
  /**********************************************************************
      CommandTable : banlistCommandTable
- /***********************************************************************/
+  **********************************************************************/
 
 bool ChatHandler::HandleBanListIPCommand(char* args)
 {
@@ -388,20 +389,20 @@ bool ChatHandler::HandleBanListIPCommand(char* args)
             SendSysMessage("-------------------------------------------------------------------------------");
             Field* fields = result->Fetch();
             time_t t_ban = fields[1].GetUInt64();
-            tm* aTm_ban = localtime(&t_ban);
+            std::tm aTm_ban = safe_localtime(t_ban);
             if (fields[1].GetUInt64() == fields[2].GetUInt64())
             {
                 PSendSysMessage("|%-15.15s|%02d-%02d-%02d %02d:%02d|   permanent  |%-15.15s|%-15.15s|",
-                                fields[0].GetString(), aTm_ban->tm_year % 100, aTm_ban->tm_mon + 1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min,
+                                fields[0].GetString(), aTm_ban.tm_year % 100, aTm_ban.tm_mon + 1, aTm_ban.tm_mday, aTm_ban.tm_hour, aTm_ban.tm_min,
                                 fields[3].GetString(), fields[4].GetString());
             }
             else
             {
                 time_t t_unban = fields[2].GetUInt64();
-                tm* aTm_unban = localtime(&t_unban);
+                std::tm aTm_unban = safe_localtime(t_unban);
                 PSendSysMessage("|%-15.15s|%02d-%02d-%02d %02d:%02d|%02d-%02d-%02d %02d:%02d|%-15.15s|%-15.15s|",
-                                fields[0].GetString(), aTm_ban->tm_year % 100, aTm_ban->tm_mon + 1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min,
-                                aTm_unban->tm_year % 100, aTm_unban->tm_mon + 1, aTm_unban->tm_mday, aTm_unban->tm_hour, aTm_unban->tm_min,
+                                fields[0].GetString(), aTm_ban.tm_year % 100, aTm_ban.tm_mon + 1, aTm_ban.tm_mday, aTm_ban.tm_hour, aTm_ban.tm_min,
+                                aTm_unban.tm_year % 100, aTm_unban.tm_mon + 1, aTm_unban.tm_mday, aTm_unban.tm_hour, aTm_unban.tm_min,
                                 fields[3].GetString(), fields[4].GetString());
             }
         }
@@ -468,7 +469,7 @@ bool ChatHandler::HandleBanListAccountCommand(char* args)
 
 /**********************************************************************
     CommandTable : unbanCommandTable
-/***********************************************************************/
+ **********************************************************************/
 
 bool ChatHandler::HandleUnBanHelper(BanMode mode, char* args)
 {
@@ -540,7 +541,7 @@ bool ChatHandler::HandleUnBanIPCommand(char* args)
 
 /**********************************************************************
     CommandTable : commandTable
-/***********************************************************************/
+ **********************************************************************/
 
 // kick player
 bool ChatHandler::HandleKickPlayerCommand(char* args)

@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,20 +44,40 @@ namespace ACE_Based
             StorageType _queue; /**< Storage backing the queue. */
 
         public:
-            LockedQueue(): _lock(), _queue()
+
+            /**
+             * @brief Create a LockedQueue.
+             *
+             */
+            LockedQueue() : _lock(), _queue()
             {
             }
 
+            /**
+             * @brief Destroy a LockedQueue.
+             *
+             */
             virtual ~LockedQueue()
             {
             }
 
+            /**
+             * @brief Adds an item to the queue.
+             *
+             * @param item
+             */
             void add(const T& item)
             {
                 ACE_GUARD (LockType, g, this->_lock);
                 _queue.push_back(item);
             }
 
+            /**
+             * @brief Gets the next result in the queue, if any.
+             *
+             * @param result
+             * @return bool
+             */
             bool next(T& result)
             {
                 ACE_GUARD_RETURN(LockType, g, this->_lock, false);
@@ -74,6 +94,13 @@ namespace ACE_Based
             }
 
             template<class Checker>
+            /**
+             * @brief
+             *
+             * @param result
+             * @param check
+             * @return bool
+             */
             bool next(T& result, Checker& check)
             {
                 ACE_GUARD_RETURN(LockType, g, this->_lock, false);
@@ -93,6 +120,12 @@ namespace ACE_Based
                 return true;
             }
 
+
+            /**
+             * @brief Checks if we're empty or not with locks held
+             *
+             * @return bool
+             */
             bool empty()
             {
                 ACE_GUARD_RETURN (LockType, g, this->_lock, false);

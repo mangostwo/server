@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -380,14 +380,14 @@ void PlayerDumpWriter::DumpTableContent(std::string& dump, uint32 guid, char con
             wherestr = GenerateWhereStr(fieldname, guid);
         }
 
-        //fetch table columns
+        // fetch table columns
         std::string tableColumnNamesStr = "";
         QueryNamedResult* resNames = CharacterDatabase.PQueryNamed("SELECT * FROM `%s` LIMIT 1", tableFrom);
         if (!resNames)
         {
             return;
         }
-        // There will be a result since if not teh code does not hit lines before... so no check needed
+        // There will be a result since if not the code does not hit lines before... so no check needed
         QueryFieldNames const& namesMap = resNames->GetFieldNames();
 
         for (QueryFieldNames::const_iterator itr = namesMap.begin(); itr != namesMap.end(); ++itr)
@@ -396,7 +396,10 @@ void PlayerDumpWriter::DumpTableContent(std::string& dump, uint32 guid, char con
         }
         // remove last character of tableColumnNamesStr = ","
         tableColumnNamesStr.pop_back();
-        namesMap.empty();
+
+        // Create a non-const copy of namesMap to clear it
+        QueryFieldNames nonConstNamesMap = namesMap;
+        nonConstNamesMap.clear(); // Clear the contents of the vector
 
         // fetch results of the table
         QueryResult* result = CharacterDatabase.PQuery("SELECT %s FROM `%s` WHERE %s", tableColumnNamesStr.c_str(), tableFrom, wherestr.c_str());
@@ -404,6 +407,8 @@ void PlayerDumpWriter::DumpTableContent(std::string& dump, uint32 guid, char con
         {
             return;
         }
+
+
 
         do
         {

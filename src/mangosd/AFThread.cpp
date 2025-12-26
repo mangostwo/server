@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@
 #include "World.h"
 #include "Log.h"
 
-
 AntiFreezeThread::AntiFreezeThread(uint32 delay) : delaytime_(delay)
 {
     m_loops = 0;
@@ -49,7 +48,7 @@ int AntiFreezeThread::svc(void)
         return 0;
     }
 
-    sLog.outString("AntiFreeze Thread started (%u seconds max stuck time)", delaytime_/1000);
+    sLog.outString("AntiFreeze Thread started (%u seconds max stuck time)", delaytime_ / 1000);
     while (!World::IsStopped())
     {
         ACE_OS::sleep(1);
@@ -69,6 +68,7 @@ int AntiFreezeThread::svc(void)
             *((uint32 volatile*)NULL) = 0;          // bang crash
         }
     }
+
     sLog.outString("AntiFreeze Thread stopped.");
     return 0;
 }

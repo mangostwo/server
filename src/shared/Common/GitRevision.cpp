@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,37 @@ char const* GitRevision::GetBranch()
 {
     return REVISION_BRANCH;
 }
+
+char const* GitRevision::GetDepElunaHash()
+{
+    return DEP_ELUNA_REVISION_HASH;
+}
+
+char const* GitRevision::GetDepElunaDate()
+{
+    return DEP_ELUNA_REVISION_DATE;
+}
+
+char const* GitRevision::GetDepElunaBranch()
+{
+    return DEP_ELUNA_REVISION_BRANCH;
+}
+
+char const* GitRevision::GetDepSD3Hash()
+{
+    return DEP_SD3_REVISION_HASH;
+}
+
+char const* GitRevision::GetDepSD3Date()
+{
+    return DEP_SD3_REVISION_DATE;
+}
+
+char const* GitRevision::GetDepSD3Branch()
+{
+    return DEP_SD3_REVISION_BRANCH;
+}
+
 
 char const* GitRevision::GetCMakeVersion()
 {
@@ -135,6 +166,26 @@ char const* GitRevision::GetWorldDBUpdateDescription()
 char const* GitRevision::GetFullRevision()
 {
     return "Mangos revision: " VER_PRODUCTVERSION_STR;
+}
+
+char const* GitRevision::GetDepElunaFullRevision()
+{
+    return DEP_ELUNA_REVISION_STR;
+}
+
+char const* GitRevision::GetDepElunaFullRevisionStr()
+{
+    return "Eluna submodule revision: " DEP_ELUNA_REVISION_STR;
+}
+
+char const* GitRevision::GetDepSD3FullRevision()
+{
+    return DEP_SD3_REVISION_STR;
+}
+
+char const* GitRevision::GetDepSD3FullRevisionStr()
+{
+    return "SD3 submodule revision: " DEP_SD3_REVISION_STR;
 }
 
 char const* GitRevision::GetRunningSystem()

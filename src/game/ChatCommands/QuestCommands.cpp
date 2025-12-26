@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@
  */
 
 #include "Chat.h"
-#include "Language.h"
 #include "ObjectMgr.h"
+#include "World.h"
 #include "SQLStorages.h"
 
 bool ChatHandler::HandleQuestAddCommand(char* args)
@@ -230,6 +230,19 @@ bool ChatHandler::HandleQuestCompleteCommand(char* args)
     if (ReqOrRewMoney < 0)
     {
         player->ModifyMoney(-ReqOrRewMoney);
+    }
+
+    if (sWorld.getConfig(CONFIG_BOOL_ENABLE_QUEST_TRACKER)) // check if Quest Tracker is enabled
+    {
+        DEBUG_LOG("QUEST TRACKER: Quest Completed by GM.");
+        static SqlStatementID CHAR_UPD_QUEST_TRACK_GM_COMPLETE;
+        // prepare Quest Tracker datas
+        SqlStatement stmt = CharacterDatabase.CreateStatement(CHAR_UPD_QUEST_TRACK_GM_COMPLETE, "UPDATE `quest_tracker` SET `completed_by_gm` = 1 WHERE `id` = ? AND `character_guid` = ? ORDER BY `quest_accept_time` DESC LIMIT 1");
+        stmt.addUInt32(pQuest->GetQuestId());
+        stmt.addUInt32(player->GetGUIDLow());
+
+        // add to Quest Tracker
+        stmt.Execute();
     }
 
     player->CompleteQuest(entry, QUEST_STATUS_FORCE_COMPLETE);

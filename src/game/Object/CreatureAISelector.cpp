@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -121,7 +121,7 @@ namespace FactorySelector
         MovementGeneratorCreator const* mv_factory = mv_registry.GetRegistryItem(
                     creature->GetOwnerGuid().IsPlayer() ? FOLLOW_MOTION_TYPE : creature->GetDefaultMovementType());
 
-        /* if( mv_factory == NULL  )
+        /* if ( mv_factory == NULL  )
         {
             int best_val = -1;
             std::vector<std::string> l;
@@ -132,7 +132,7 @@ namespace FactorySelector
             const SelectableMovement *p = dynamic_cast<const SelectableMovement *>(factory);
             ASSERT( p != NULL );
             int val = p->Permit(creature);
-            if( val > best_val )
+            if ( val > best_val )
             {
                 best_val = val;
                 mv_factory = p;

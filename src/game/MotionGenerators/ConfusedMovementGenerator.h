@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,22 +27,60 @@
 
 #include "MovementGenerator.h"
 
+/**
+ * @brief ConfusedMovementGenerator is a movement generator that makes a unit move in a confused manner.
+ */
 template<class T>
 class ConfusedMovementGenerator
     : public MovementGeneratorMedium< T, ConfusedMovementGenerator<T> >
 {
     public:
-        explicit ConfusedMovementGenerator() : i_nextMoveTime(0) {}
+        /**
+         * @brief Constructor for ConfusedMovementGenerator.
+         */
+        explicit ConfusedMovementGenerator() : i_nextMoveTime(0), i_x(0.0f), i_y(0.0f), i_z(0.0f) {}
 
-        void Initialize(T&);
-        void Finalize(T&);
-        void Interrupt(T&);
-        void Reset(T&);
-        bool Update(T&, const uint32&);
+        /**
+         * @brief Initializes the movement generator.
+         * @param owner Reference to the unit.
+         */
+        void Initialize(T& owner);
 
-        MovementGeneratorType GetMovementGeneratorType() const { return CONFUSED_MOTION_TYPE; }
+        /**
+         * @brief Finalizes the movement generator.
+         * @param owner Reference to the unit.
+         */
+        void Finalize(T& owner);
+
+        /**
+         * @brief Interrupts the movement generator.
+         * @param owner Reference to the unit.
+         */
+        void Interrupt(T& owner);
+
+        /**
+         * @brief Resets the movement generator.
+         * @param owner Reference to the unit.
+         */
+        void Reset(T& owner);
+
+        /**
+         * @brief Updates the movement generator.
+         * @param owner Reference to the unit.
+         * @param diff Time difference.
+         * @return True if the update was successful, false otherwise.
+         */
+        bool Update(T& owner, const uint32& diff);
+
+        /**
+         * @brief Gets the type of the movement generator.
+         * @return The type of the movement generator.
+         */
+        MovementGeneratorType GetMovementGeneratorType() const override { return CONFUSED_MOTION_TYPE; }
+
     private:
-        TimeTracker i_nextMoveTime;
-        float i_x, i_y, i_z;
+        TimeTracker i_nextMoveTime; ///< Time tracker for the next move.
+        float i_x, i_y, i_z; ///< Coordinates for the next move.
 };
-#endif
+
+#endif // MANGOS_CONFUSEDMOVEMENTGENERATOR_H

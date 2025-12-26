@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -687,9 +687,9 @@ void WorldSession::HandlePartyAssignmentOpcode(WorldPacket& recv_data)
         return;
     }
 
-    // if(flag1) Main Assist
+    // if (flag1) Main Assist
     //     0x4
-    // if(flag2) Main Tank
+    // if (flag2) Main Tank
     //     0x2
 
     /** error handling **/
@@ -769,10 +769,10 @@ void WorldSession::HandleRaidReadyCheckOpcode(WorldPacket& recv_data)
 void WorldSession::HandleRaidReadyCheckFinishedOpcode(WorldPacket& /*recv_data*/)
 {
     // Group* group = GetPlayer()->GetGroup();
-    // if(!group)
+    // if (!group)
     //    return;
 
-    // if(!group->IsLeader(GetPlayer()->GetGUID()) && !group->IsAssistant(GetPlayer()->GetGUID()))
+    // if (!group->IsLeader(GetPlayer()->GetGUID()) && !group->IsAssistant(GetPlayer()->GetGUID()))
     //    return;
 
     // Is any reaction need?

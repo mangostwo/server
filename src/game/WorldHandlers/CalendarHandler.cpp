@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "ArenaTeam.h"
+#include "Util.h"
 
 void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
 {
@@ -50,7 +51,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
     sCalendarMgr.GetPlayerInvitesList(guid, invites);
 
     data << uint32(invites.size());
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Sending > " SIZEFMTD " invites", invites.size());
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Sending > %zu invites", invites.size());
 
     for (CalendarInvitesList::const_iterator itr = invites.begin(); itr != invites.end(); ++itr)
     {
@@ -72,7 +73,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
     sCalendarMgr.GetPlayerEventsList(guid, events);
 
     data << uint32(events.size());
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Sending > " SIZEFMTD " events", events.size());
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Sending > %zu events", events.size());
 
     for (CalendarEventsList::const_iterator itr = events.begin(); itr != events.end(); ++itr)
     {
@@ -302,6 +303,16 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket& recv_data)
     recv_data >> unkPackedTime;
     recv_data >> flags;
 
+    //eventPackedTime = uint32(LocalTimeToUTCTime(eventPackedTime));
+    eventPackedTime = GetLocalHourTimestamp(eventPackedTime, 0, true);
+
+    // prevent events in the past
+    if (time_t(eventPackedTime) < (GameTime::GetGameTime() - time_t(86400L)))
+    {
+        recv_data.rfinish();
+        return;
+    }
+
     // 946684800 is 01/01/2000 00:00:00 - default response time
     CalendarEvent* cal =  sCalendarMgr.AddEvent(_player->GetObjectGuid(), title, description, type, repeatable, maxInvites, dungeonId, timeBitFieldsToSecs(eventPackedTime), timeBitFieldsToSecs(unkPackedTime), flags);
 
@@ -354,6 +365,16 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recv_data)
     recv_data >> eventPackedTime;
     recv_data >> UnknownPackedTime;
     recv_data >> flags;
+
+    //eventPackedTime = uint32(LocalTimeToUTCTime(eventPackedTime));
+    eventPackedTime = GetLocalHourTimestamp(eventPackedTime, 0, true);
+
+    // prevent events in the past
+    if (time_t(eventPackedTime) < (GameTime::GetGameTime() - time_t(86400L)))
+    {
+        recv_data.rfinish();
+        return;
+    }
 
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId [" UI64FMTD "], InviteId [" UI64FMTD "] Title %s, Description %s, type %u "
                      "Repeatable %u, MaxInvites %u, Dungeon ID %d, Flags %u", eventId, inviteId, title.c_str(),
@@ -432,6 +453,15 @@ void WorldSession::HandleCalendarCopyEvent(WorldPacket& recv_data)
     recv_data >> packedTime;
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId [" UI64FMTD "] inviteId [" UI64FMTD "]",
                      eventId, inviteId);
+
+    //packedTime = uint32(LocalTimeToUTCTime(packedTime));
+    packedTime = GetLocalHourTimestamp(packedTime, 0, true);
+    // prevent events in the past
+    if (time_t(packedTime) < (GameTime::GetGameTime() - time_t(86400L)))
+    {
+        recv_data.rfinish();
+        return;
+    }
 
     sCalendarMgr.CopyEvent(eventId, timeBitFieldsToSecs(packedTime), guid);
 }

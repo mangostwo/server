@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,9 @@
 
 class Creature;
 
+/**
+ * @brief HomeMovementGenerator is a movement generator that returns a creature to its home position.
+ */
 template < class T >
 class HomeMovementGenerator;
 
@@ -37,19 +40,62 @@ class HomeMovementGenerator<Creature>
     : public MovementGeneratorMedium< Creature, HomeMovementGenerator<Creature> >
 {
     public:
-
+        /**
+         * @brief Constructor for HomeMovementGenerator.
+         */
         HomeMovementGenerator() : arrived(false) {}
+
+        /**
+         * @brief Destructor for HomeMovementGenerator.
+         */
         ~HomeMovementGenerator() {}
 
+        /**
+         * @brief Initializes the movement generator.
+         * @param creature Reference to the creature.
+         */
         void Initialize(Creature&);
+
+        /**
+         * @brief Finalizes the movement generator.
+         * @param creature Reference to the creature.
+         */
         void Finalize(Creature&);
+
+        /**
+         * @brief Interrupts the movement generator.
+         * @param creature Reference to the creature.
+         */
         void Interrupt(Creature&) {}
+
+        /**
+         * @brief Resets the movement generator.
+         * @param creature Reference to the creature.
+         */
         void Reset(Creature&);
+
+        /**
+         * @brief Updates the movement generator.
+         * @param creature Reference to the creature.
+         * @param diff Time difference.
+         * @return True if the update was successful, false otherwise.
+         */
         bool Update(Creature&, const uint32&);
+
+        /**
+         * @brief Gets the type of the movement generator.
+         * @return The type of the movement generator.
+         */
         MovementGeneratorType GetMovementGeneratorType() const override { return HOME_MOTION_TYPE; }
 
     private:
+        /**
+         * @brief Sets the target location for the creature.
+         * @param creature Reference to the creature.
+         */
         void _setTargetLocation(Creature&);
-        bool arrived;
+
+        bool arrived; ///< Indicates whether the creature has arrived at its home position.
 };
-#endif
+
+#endif // MANGOS_HOMEMOVEMENTGENERATOR_H

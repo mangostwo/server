@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@
 
  /**********************************************************************
      CommandTable : commandTable
- /***********************************************************************/
+  **********************************************************************/
 
 /*
 ComeToMe command REQUIRED for 3rd party scripting library to have access to PointMovementGenerator
@@ -1199,7 +1199,7 @@ bool ChatHandler::HandleNpcAddWeaponCommand(char* /*args*/)
 
     Creature *pCreature = sObjectAccessor.GetCreature(*m_session->GetPlayer(), guid);
 
-    if(!pCreature)
+    if (!pCreature)
     {
         SendSysMessage(LANG_SELECT_CREATURE);
         return true;
@@ -1223,7 +1223,7 @@ bool ChatHandler::HandleNpcAddWeaponCommand(char* /*args*/)
     ItemPrototype* tmpItem = ObjectMgr::GetItemPrototype(ItemID);
 
     bool added = false;
-    if(tmpItem)
+    if (tmpItem)
     {
         switch(SlotID)
         {
@@ -1245,7 +1245,7 @@ bool ChatHandler::HandleNpcAddWeaponCommand(char* /*args*/)
                 break;
         }
 
-        if(added)
+        if (added)
         {
             PSendSysMessage(LANG_ITEM_ADDED_TO_SLOT,ItemID,tmpItem->Name1,SlotID);
         }
