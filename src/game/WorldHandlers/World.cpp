@@ -2444,7 +2444,7 @@ void World::InitWeeklyQuestResetTime()
 
     // generate time by config
     time_t curTime = time(NULL);
-	tm localTm = safe_localtime(curTime);
+    tm localTm = safe_localtime(curTime);
 
     int week_day_offset = localTm.tm_wday - int(getConfig(CONFIG_UINT32_QUEST_WEEKLY_RESET_WEEK_DAY));
 
@@ -2536,7 +2536,7 @@ void World::SetMonthlyQuestResetTime(bool initialize)
 
     // generate time
     time_t currentTime = time(NULL);
-	tm localTm = safe_localtime(currentTime);
+    tm localTm = safe_localtime(currentTime);
 
     int month = localTm.tm_mon;
     int year = localTm.tm_year;
@@ -2580,7 +2580,7 @@ void World::InitRandomBGResetTime()
 
     // generate time by config
     time_t curTime = time(NULL);
-	tm localTm = safe_localtime(curTime);
+    tm localTm = safe_localtime(curTime);
 
     localTm.tm_hour = getConfig(CONFIG_UINT32_RANDOM_BG_RESET_HOUR);
     localTm.tm_min  = 0;
