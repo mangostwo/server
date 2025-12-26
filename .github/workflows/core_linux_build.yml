@@ -63,7 +63,7 @@ jobs:
             -DSOAP=1 \
             -DSCRIPT_LIB_ELUNA=1 \
             -DSCRIPT_LIB_SD3_GATE=1 \
-            -DPLAYERBOTS=1 \
+            -DPLAYERBOTS=0 \
             -DUSE_STORMLIB=1 \
             -DPCH=0
 
