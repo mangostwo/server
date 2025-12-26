@@ -363,13 +363,13 @@ bool Guild::LoadGuildFromDB(QueryResult* guildDataResult)
         m_TabListMap[i] = new GuildBankTab;
     }
 
-    if (time > 0)
-    {
-        std::tm local  = safe_localtime(m_CreatedDate);
+    //if (time > 0)
+    //{
+        //std::tm local  = safe_localtime(m_CreatedDate);
         //m_CreatedDay   = local.tm_mday;
         //m_CreatedMonth = local.tm_mon + 1;
         //m_CreatedYear  = local.tm_year + 1900;
-    }
+    //}
 
     return true;
 }
