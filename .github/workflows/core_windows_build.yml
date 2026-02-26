@@ -1,5 +1,8 @@
 name: Windows Build (MSVC)
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [ master , devel ]

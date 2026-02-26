@@ -1,4 +1,6 @@
 name: Codestyle Checks
+permissions:
+  contents: read
 on:
   push:
       branches: [ master ]
