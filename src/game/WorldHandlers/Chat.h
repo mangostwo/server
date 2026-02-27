@@ -683,6 +683,11 @@ class ChatHandler
         bool HandleMmapTestArea(char* args);
         bool HandleMmapTestHeight(char* args);
 
+#ifdef ENABLE_PLAYERBOTS
+        bool HandlePlayerbotCommand(char* args);
+        bool HandlePlayerbotConsoleCommand(char* args);
+        bool HandleAhBotCommand(char* args);
+#endif
         bool HandleFreezePlayerCommand(char* args);
         bool HandleUnfreezePlayerCommand(char* args);
 

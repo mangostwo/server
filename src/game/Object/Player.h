@@ -65,6 +65,11 @@ class Item;
 
 struct AreaTrigger;
 
+#ifdef ENABLE_PLAYERBOTS
+class PlayerbotAI;
+class PlayerbotMgr;
+#endif
+
 typedef std::deque<Mail*> PlayerMails;
 
 #define PLAYER_MAX_SKILLS           127
@@ -2103,6 +2108,9 @@ class Player : public Unit
 
         // Load the player from the database
         bool LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder);
+#ifdef ENABLE_PLAYERBOTS
+        bool MinimalLoadFromDB(QueryResult *result, uint32 guid);
+#endif
 
         // Get the zone ID from the database
         static uint32 GetZoneIdFromDB(ObjectGuid guid);
@@ -3780,6 +3788,16 @@ class Player : public Unit
 
         bool isAllowedToLoot(Creature* creature);
 
+#ifdef ENABLE_PLAYERBOTS
+        //EquipmentSets& GetEquipmentSets() { return m_EquipmentSets; }
+        void SetPlayerbotAI(PlayerbotAI* ai) { assert(!m_playerbotAI && !m_playerbotMgr); m_playerbotAI = ai; }
+        PlayerbotAI* GetPlayerbotAI() { return m_playerbotAI; }
+        void SetPlayerbotMgr(PlayerbotMgr* mgr) { assert(!m_playerbotAI && !m_playerbotMgr); m_playerbotMgr = mgr; }
+        PlayerbotMgr* GetPlayerbotMgr() { return m_playerbotMgr; }
+        void SetBotDeathTimer() { m_deathTimer = 0; }
+        //PlayerTalentMap& GetTalentMap(uint8 spec) { return m_talents[spec]; }
+#endif
+
         DeclinedName const* GetDeclinedNames() const { return m_declinedname; }
 
         // Rune functions, need check  getClass() == CLASS_DEATH_KNIGHT before access
@@ -4166,6 +4184,10 @@ class Player : public Unit
         // Map reference for the player
         MapReference m_mapRef;
 
+#ifdef ENABLE_PLAYERBOTS
+        PlayerbotAI* m_playerbotAI;
+        PlayerbotMgr* m_playerbotMgr;
+#endif
         // Homebind coordinates
         uint32 m_homebindMapId; // Map ID of the homebind location
         uint16 m_homebindAreaId; // Area ID of the homebind location
