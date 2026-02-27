@@ -31,7 +31,7 @@
 
  /**********************************************************************
      CommandTable : characterCommandTable
- /***********************************************************************/
+  **********************************************************************/
 
 bool ChatHandler::HandleCharacterAchievementsCommand(char* args)
 {
@@ -265,7 +265,7 @@ bool ChatHandler::HandleCharacterReputationCommand(char* args)
 
 /**********************************************************************
     CommandTable : characterDeletedCommandTable
-/***********************************************************************/
+ **********************************************************************/
 
 /**
  * Collects all GUIDs (and related info) from deleted characters which are still in the database.
@@ -611,7 +611,7 @@ bool ChatHandler::HandleCharacterDeletedOldCommand(char* args)
 
 /**********************************************************************
     CommandTable : commandTable
-/***********************************************************************/
+ **********************************************************************/
 
 void ChatHandler::HandleCharacterLevel(Player* player, ObjectGuid player_guid, uint32 oldlevel, uint32 newlevel)
 {

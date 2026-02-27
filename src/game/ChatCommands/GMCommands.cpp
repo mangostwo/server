@@ -28,10 +28,9 @@
 #include "Weather.h"
 #include "SpellMgr.h"
 
-
  /**********************************************************************
      CommandTable : commandTable
- /***********************************************************************/
+  **********************************************************************/
 
 // show info of player
 bool ChatHandler::HandlePInfoCommand(char* args)

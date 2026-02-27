@@ -30,7 +30,7 @@
 
  /**********************************************************************
      CommandTable : gobjectCommandTable
- /***********************************************************************/
+  **********************************************************************/
 
 void ChatHandler::ShowAchievementListHelper(AchievementEntry const* achEntry, LocaleConstant loc, time_t const* date /*= NULL*/, Player* target /*= NULL */)
 {

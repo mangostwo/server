@@ -130,7 +130,7 @@ bool ChatHandler::HandleGoHelper(Player* player, uint32 mapid, float x, float y,
 
  /**********************************************************************
      CommandTable : commandTable
- /***********************************************************************/
+  **********************************************************************/
 
  // Summon Player
 bool ChatHandler::HandleSummonCommand(char* args)
@@ -819,7 +819,7 @@ bool ChatHandler::HandleNearGraveCommand(char* args)
 
 /**********************************************************************
     CommandTable : goCommandTable
-/***********************************************************************/
+ **********************************************************************/
 
 bool ChatHandler::HandleGoTaxinodeCommand(char* args)
 {
