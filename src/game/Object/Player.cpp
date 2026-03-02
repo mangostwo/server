@@ -78,6 +78,9 @@
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
+#ifdef ENABLE_PLAYERBOTS
+#include "playerbot.h"
+#endif
 
 #include <cmath>
 
@@ -438,6 +441,11 @@ UpdateMask Player::updateVisualBits;
 
 Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_achievementMgr(this), m_reputationMgr(this)
 {
+#ifdef ENABLE_PLAYERBOTS
+    m_playerbotAI = 0;
+    m_playerbotMgr = 0;
+#endif
+
     m_transport = 0;
 
     m_speakTime = 0;
@@ -667,6 +675,11 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
     m_lastFallZ = 0;
 
     m_cachedGS = 0;
+#ifdef ENABLE_PLAYERBOTS
+    m_playerbotAI = NULL;
+    m_playerbotMgr = NULL;
+#endif
+
 }
 
 Player::~Player()
@@ -712,6 +725,21 @@ Player::~Player()
     {
         delete ItemSetEff[x];
     }
+
+#ifdef ENABLE_PLAYERBOTS
+    if (m_playerbotAI) {
+    {
+        delete m_playerbotAI;
+    }
+        m_playerbotAI = 0;
+    }
+    if (m_playerbotMgr) {
+    {
+        delete m_playerbotMgr;
+    }
+        m_playerbotMgr = 0;
+    }
+#endif
 
     // clean up player-instance binds, may unload some instance saves
     for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
@@ -1722,6 +1750,18 @@ void Player::Update(uint32 update_diff, uint32 p_time)
     {
         TeleportTo(m_teleport_dest, m_teleport_options);
     }
+
+#ifdef ENABLE_PLAYERBOTS
+    if (m_playerbotAI)
+    {
+        m_playerbotAI->UpdateAI(p_time);
+    }
+    if (m_playerbotMgr)
+    {
+        m_playerbotMgr->UpdateAI(p_time);
+    }
+#endif
+
 }
 
 void Player::SetDeathState(DeathState s)
@@ -22616,6 +22656,32 @@ void Player::TakeExtendedCost(uint32 extendedCostId, uint32 count)
 }
 
 // Return true is the bought item has a max count to force refresh of window by caller
+bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, uint8 bag, uint8 slot)
+{
+    Creature* pCreature = GetNPCIfCanInteractWith(vendorGuid, UNIT_NPC_FLAG_VENDOR);
+    if (!pCreature)
+    {
+        return false;
+    }
+
+    VendorItemData const* vItems = pCreature->GetVendorItems();
+    VendorItemData const* tItems = pCreature->GetVendorTemplateItems();
+    uint32 vCount = vItems ? vItems->GetItemCount() : 0;
+    uint32 tCount = tItems ? tItems->GetItemCount() : 0;
+
+    for (uint32 i = 0; i < vCount + tCount; ++i)
+    {
+        VendorItem const* crItem = i < vCount ? vItems->GetItem(i) : tItems->GetItem(i - vCount);
+        if (crItem && crItem->item == item)
+        {
+            return BuyItemFromVendorSlot(vendorGuid, i, item, count, bag, slot);
+        }
+    }
+
+    SendBuyError(BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
+    return false;
+}
+
 bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot)
 {
     // cheating attempt
