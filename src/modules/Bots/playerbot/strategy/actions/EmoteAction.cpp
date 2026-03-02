@@ -53,7 +53,7 @@ bool EmoteAction::Execute(Event event)
 
 void EmoteAction::InitEmotes()
 {
-    emotes["dance"] = EMOTE_ONESHOT_DANCE;
+    emotes["dance_oneshot"] = EMOTE_ONESHOT_DANCE;
     emotes["drown"] = EMOTE_ONESHOT_DROWN;
     emotes["land"] = EMOTE_ONESHOT_LAND;
     emotes["laugh_nosheathe"] = EMOTE_ONESHOT_LAUGH_NOSHEATHE;
@@ -61,7 +61,7 @@ void EmoteAction::InitEmotes()
     emotes["loot"] = EMOTE_ONESHOT_LOOT;
     emotes["no"] = EMOTE_ONESHOT_NO;
     emotes["point_nosheathe"] = EMOTE_ONESHOT_POINT_NOSHEATHE;
-    emotes["roar"] = EMOTE_STATE_ROAR;
+    emotes["roar_state"] = EMOTE_STATE_ROAR;
     emotes["salute"] = EMOTE_ONESHOT_SALUTE;
     emotes["stomp"] = EMOTE_ONESHOT_STOMP;
     emotes["train"] = EMOTE_ONESHOT_TRAIN;

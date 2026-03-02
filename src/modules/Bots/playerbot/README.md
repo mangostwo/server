@@ -1,6 +1,6 @@
 # Player Bot Module
 
-The Playerbot module integrates with Mangos to provide user-controll AI characters for groups and raids.  This is especially helpful on low-activity servers.
+The Playerbot module integrates with Mangos to provide user-controlled AI characters for groups and raids.  This is especially helpful on low-activity servers.
 
 ## Player Bots
 
@@ -86,7 +86,7 @@ There are some of master's actions bot can react. For example:
 
 **HINT**: you can create key-binded macros for any of this command for quick usage, e.g.
 
-| Key | Macro | Decription |
+| Key | Macro | Description |
 | --- | --- | --- |
 | F   | /p follow | Follow me |
 | G   | /p stay | Stay |
@@ -98,4 +98,4 @@ There are some of master's actions bot can react. For example:
 
 */p* can be replaced with */r* if you are in raid group.
 
-To learn about other commands tell bot someting invalid and it will enlist all the commands and stategies available.
+To learn about other commands tell bot something invalid and it will list all the commands and strategies available.

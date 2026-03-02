@@ -31,7 +31,7 @@ void Queue::Push(ActionBasket **actions)
 {
     if (actions)
     {
-        for (int i=0; i<sizeof(actions)/sizeof(ActionBasket*); i++)
+        for (int i=0; actions[i] != NULL; i++)
         {
             Push(actions[i]);
         }

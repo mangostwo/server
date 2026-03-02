@@ -5,7 +5,6 @@
 #include "EmoteAction.h"
 #include "AddLootAction.h"
 #include "LootAction.h"
-#include "AddLootAction.h"
 #include "StayActions.h"
 #include "FollowActions.h"
 #include "ChangeStrategyAction.h"

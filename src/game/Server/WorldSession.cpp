@@ -448,13 +448,6 @@ void WorldSession::LogoutPlayer(bool Save)
 
     if (_player)
     {
-#ifdef ENABLE_PLAYERBOTS
-        if (GetPlayer()->GetPlayerbotMgr())
-        {
-            GetPlayer()->GetPlayerbotMgr()->LogoutAllBots();
-        }
-#endif
-
         sLog.outChar("Account: %d (IP: %s) Logout Character:[%s] (guid: %u)", GetAccountId(), GetRemoteAddress().c_str(), _player->GetName() , _player->GetGUIDLow());
 
         if (ObjectGuid lootGuid = GetPlayer()->GetLootGuid())
