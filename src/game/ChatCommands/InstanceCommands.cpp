@@ -29,7 +29,7 @@
 
  /**********************************************************************
      CommandTable : instanceCommandTable
-  **********************************************************************/
+  ***********************************************************************/
 
 bool ChatHandler::HandleInstanceListBindsCommand(char* /*args*/)
 {
@@ -53,7 +53,9 @@ bool ChatHandler::HandleInstanceListBindsCommand(char* /*args*/)
                                 state->GetDifficulty(), state->CanReset() ? "yes" : "no", timeleft.c_str());
             }
             else
+            {
                 PSendSysMessage("bound for a nonexistent map %u", itr->first);
+            }
             ++counter;
         }
     }
@@ -71,13 +73,15 @@ bool ChatHandler::HandleInstanceListBindsCommand(char* /*args*/)
                 std::string timeleft = secsToTimeString(state->GetResetTime() - time(NULL), TimeFormat::ShortText);
                 if (const MapEntry* entry = sMapStore.LookupEntry(itr->first))
                 {
-                    PSendSysMessage("map: %d (%s) inst: %d perm: %s diff: %d canReset: %s TTR: %s",
+                    PSendSysMessage("map: %d (%s) inst: %d perm: %s diff: %s canReset: %s TTR: %s",
                                     itr->first, entry->name[GetSessionDbcLocale()], state->GetInstanceId(), itr->second.perm ? "yes" : "no",
                                     state->GetDifficulty(), state->CanReset() ? "yes" : "no", timeleft.c_str());
                 }
                 else
+                {
                     PSendSysMessage("bound for a nonexistent map %u", itr->first);
-                ++counter;
+                }
+                counter++;
             }
         }
     }
@@ -130,7 +134,7 @@ bool ChatHandler::HandleInstanceUnbindCommand(char* args)
 
                 if (const MapEntry* entry = sMapStore.LookupEntry(itr->first))
                 {
-                    PSendSysMessage("unbinding map: %d (%s) inst: %d perm: %s diff: %d canReset: %s TTR: %s",
+                    PSendSysMessage("unbinding map: %d (%s) inst: %d perm: %s diff: %s canReset: %s TTR: %s",
                                     itr->first, entry->name[GetSessionDbcLocale()], save->GetInstanceId(), itr->second.perm ? "yes" : "no",
                                     save->GetDifficulty(), save->CanReset() ? "yes" : "no", timeleft.c_str());
                 }
@@ -182,4 +186,3 @@ bool ChatHandler::HandleInstanceSaveDataCommand(char* /*args*/)
     iData->SaveToDB();
     return true;
 }
-

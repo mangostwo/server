@@ -26,10 +26,9 @@
 #include "ObjectMgr.h"
 #include "GameEventMgr.h"
 
-
  /**********************************************************************
      CommandTable : eventCommandTable
-  **********************************************************************/
+  ***********************************************************************/
 
 bool ChatHandler::HandleEventListCommand(char* args)
 {
@@ -217,4 +216,3 @@ bool ChatHandler::HandleEventStopCommand(char* args)
     sGameEventMgr.StopEvent(event_id, true);
     return true;
 }
-

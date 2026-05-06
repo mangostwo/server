@@ -32,7 +32,7 @@
 
  /**********************************************************************
       CommandTable : commandTable
-  **********************************************************************/
+  ***********************************************************************/
 
 // demorph player or unit
 bool ChatHandler::HandleDeMorphCommand(char* /*args*/)
@@ -241,7 +241,7 @@ bool ChatHandler::HandleMovegensCommand(char* /*args*/)
 
             case CHASE_MOTION_TYPE:
             {
-                Unit* target = NULL;
+                Unit* target;
                 if (unit->GetTypeId() == TYPEID_PLAYER)
                 {
                     target = static_cast<ChaseMovementGenerator<Player> const*>(*itr)->GetTarget();
@@ -267,7 +267,7 @@ bool ChatHandler::HandleMovegensCommand(char* /*args*/)
             }
             case FOLLOW_MOTION_TYPE:
             {
-                Unit* target = NULL;
+                Unit* target;
                 if (unit->GetTypeId() == TYPEID_PLAYER)
                 {
                     target = static_cast<FollowMovementGenerator<Player> const*>(*itr)->GetTarget();
