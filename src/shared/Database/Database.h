@@ -52,30 +52,47 @@ enum DatabaseTypes
 };
 
 /**
- * @brief
+ * @brief Abstract base class for database connections
  *
+ * SqlConnection provides the interface for all database operations in MaNGOS.
+ * It handles connection management, query execution, and transaction support.
+ * This is the base class that specific database implementations (MySQL, etc.)
+ * must inherit from.
+ *
+ * Features:
+ * - Database connection initialization and management
+ * - SQL query execution with result handling
+ * - Transaction support (begin/commit/rollback)
+ * - Prepared statement support for performance
+ * - Thread-safe operations with locking mechanism
+ * - String escaping for SQL injection prevention
+ *
+ * @note This is an abstract class - use concrete implementations like DatabaseMysql
+ * @note All database operations should use the Lock class for thread safety
  */
 class SqlConnection
 {
     public:
         /**
-         * @brief
-         *
+         * @brief Virtual destructor for proper cleanup of derived classes
          */
         virtual ~SqlConnection() {}
 
         /**
-         * @brief method for initializing DB connection
-         *
-         * @param infoString
-         * @return bool
+         * @brief Initialize database connection with connection string
+         * @param infoString Database connection string (host:port,user,password,database)
+         * @return true if connection successful, false otherwise
          */
         virtual bool Initialize(const char* infoString) = 0;
+
         /**
-         * @brief public methods for making queries
+         * @brief Execute SQL query and return results
          *
-         * @param sql
-         * @return QueryResult
+         * This method executes a SELECT query and returns the result set.
+         * Used for queries that return data (SELECT, SHOW, etc.).
+         *
+         * @param sql SQL query string to execute
+         * @return QueryResult pointer containing result data, NULL if error
          */
         virtual QueryResult* Query(const char* sql) = 0;
         /**

@@ -77,17 +77,30 @@ struct Unused
 };
 
 /**
- * @brief
+ * @brief Binary buffer for network packet serialization and deserialization
  *
+ * ByteBuffer provides a container for binary data with methods to read/write
+ * various data types in network byte order. It's essential for World of Warcraft
+ * protocol handling, allowing proper serialization of client-server packets.
+ *
+ * Features:
+ * - Automatic network byte order conversion (little-endian)
+ * - Read/write position tracking
+ * - Exception handling for buffer overflows
+ * - Support for all basic C++ types and strings
+ * - Packed GUID support for efficient network transmission
+ *
+ * @note This is the primary class used for all WoW protocol communication
+ * @note All write operations advance the write position, all reads advance read position
  */
 class ByteBuffer
 {
     public:
-        const static size_t DEFAULT_SIZE = 0x1000; /**< TODO */
+        /** Default buffer size for new ByteBuffer instances (4KB) */
+        const static size_t DEFAULT_SIZE = 0x1000;
 
         /**
-         * @brief constructor
-         *
+         * @brief Construct an empty ByteBuffer with default capacity
          */
         ByteBuffer(): _rpos(0), _wpos(0)
         {
@@ -95,9 +108,8 @@ class ByteBuffer
         }
 
         /**
-         * @brief constructor
-         *
-         * @param res
+         * @brief Construct an empty ByteBuffer with specified capacity
+         * @param res Initial capacity of the buffer in bytes
          */
         ByteBuffer(size_t res): _rpos(0), _wpos(0)
         {
@@ -112,8 +124,10 @@ class ByteBuffer
         ByteBuffer(const ByteBuffer& buf): _rpos(buf._rpos), _wpos(buf._wpos), _storage(buf._storage) { }
 
         /**
-         * @brief
+         * @brief Clear the buffer and reset positions
          *
+         * Removes all data from the buffer and resets both read and write
+         * positions to zero. Equivalent to creating a new empty buffer.
          */
         void clear()
         {
@@ -122,10 +136,13 @@ class ByteBuffer
         }
 
         /**
-         * @brief
+         * @brief Insert value at specific position in buffer
          *
-         * @param pos
-         * @param value
+         * Places a value at the specified position without affecting current
+         * read/write positions. Useful for modifying existing data.
+         *
+         * @param pos Position in buffer where to insert value
+         * @param value Value to insert (will be endian-converted)
          */
         template <typename T> void put(size_t pos, T value)
         {
@@ -134,10 +151,13 @@ class ByteBuffer
         }
 
         /**
-         * @brief
+         * @brief Append uint8 value to buffer
          *
-         * @param value
-         * @return ByteBuffer &operator
+         * Stream operator for convenient appending of uint8 values.
+         * Advances write position by 1 byte.
+         *
+         * @param value Byte value to append
+         * @return Reference to this ByteBuffer for chaining
          */
         ByteBuffer& operator<<(uint8 value)
         {
@@ -146,10 +166,13 @@ class ByteBuffer
         }
 
         /**
-         * @brief
+         * @brief Append uint16 value to buffer
          *
-         * @param value
-         * @return ByteBuffer &operator
+         * Stream operator for convenient appending of uint16 values.
+         * Value is automatically endian-converted. Advances write position by 2 bytes.
+         *
+         * @param value 16-bit value to append
+         * @return Reference to this ByteBuffer for chaining
          */
         ByteBuffer& operator<<(uint16 value)
         {
