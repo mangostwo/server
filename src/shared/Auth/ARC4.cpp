@@ -25,7 +25,7 @@
 
 #include "ARC4.h"
 #include "OpenSSLProvider.h"
-#include "log.h"
+#include "Log/Log.h"
 #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
 #include <openssl/provider.h>
 #endif
