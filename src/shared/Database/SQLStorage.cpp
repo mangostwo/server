@@ -110,9 +110,20 @@ void SQLStorageBase::Free()
                 offset += sizeof(float);
                 break;
             case DBC_FF_NA_POINTER:
-                // TODO- possible (and small) memleak here possible
+            {
+                // Free allocated memory for NA_POINTER fields
+                for (uint32 recordItr = 0; recordItr < m_recordCount; ++recordItr)
+                {
+                    char** ptrPtr = (char**)((char*)(m_data + (recordItr * m_recordSize)) + offset);
+                    if (*ptrPtr)
+                    {
+                        delete[] *ptrPtr;
+                        *ptrPtr = NULL;
+                    }
+                }
                 offset += sizeof(char*);
                 break;
+            }
             case DBC_FF_IND:
             case DBC_FF_SORT:
                 assert(false && "SQL storage not have sort field types");
