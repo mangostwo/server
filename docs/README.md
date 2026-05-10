@@ -1,6 +1,6 @@
-# MaNGOS Zero API Documentation
+# MaNGOS Two API Documentation
 
-This directory contains comprehensive API documentation for the MaNGOS Zero server project.
+This directory contains comprehensive API documentation for the MaNGOS Two server project.
 
 ## Generated Documentation
 
@@ -17,7 +17,7 @@ The latest API documentation is available in the following formats:
 - [ByteBuffer](html/classByteBuffer.html) - Network packet serialization and binary data handling
 - [Database Layer](html/classSqlConnection.html) - Database abstraction and query execution
 
-### Game Systems  
+### Game Systems
 - [Player](html/classPlayer.html) - Player character management and gameplay
 - [Creature](html/classCreature.html) - NPC and monster behavior
 - [GameObject](html/classGameObject.html) - Interactive world objects
@@ -131,7 +131,7 @@ make docs
 # HTML only
 make html_docs
 
-# PDF only  
+# PDF only
 make pdf_docs
 
 # With custom config
@@ -142,7 +142,7 @@ doxygen custom_doxyfile
 
 ### Coverage Metrics
 - **Public APIs**: 95% documented
-- **Classes**: 92% with class-level documentation  
+- **Classes**: 92% with class-level documentation
 - **Methods**: 88% with parameter documentation
 - **Examples**: 45+ code examples included
 

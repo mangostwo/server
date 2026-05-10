@@ -1,6 +1,6 @@
 # API Documentation Generation Workflow
 
-This document describes the workflow for generating comprehensive API documentation for the MaNGOS Zero server using Doxygen.
+This document describes the workflow for generating comprehensive API documentation for the MaNGOS Two server using Doxygen.
 
 ## Prerequisites
 
@@ -63,14 +63,14 @@ The Doxygen configuration is controlled by `Doxyfile.in` which is processed by C
 ```cpp
 /**
  * @brief Brief description of the class
- * 
+ *
  * Detailed description of the class purpose, usage, and important
  * implementation details. Include:
  * - Main functionality
  * - Usage examples
  * - Thread safety notes
  * - Performance considerations
- * 
+ *
  * @note Important implementation notes
  * @warning Critical warnings for users
  */
@@ -84,10 +84,10 @@ class MyClass
 ```cpp
 /**
  * @brief Brief description of method purpose
- * 
+ *
  * Detailed description including algorithm explanation,
  * parameter constraints, and return value details.
- * 
+ *
  * @param param1 Description of first parameter
  * @param param2 Description of second parameter
  * @return Description of return value
@@ -102,10 +102,10 @@ int myMethod(int param1, std::string param2);
 /**
  * @file filename.h
  * @brief Brief description of file contents
- * 
+ *
  * Detailed description of the file's purpose and the main
  * classes/functions it contains.
- * 
+ *
  * @author Author Name
  * @date YYYY-MM-DD
  */
@@ -120,16 +120,16 @@ find_package(Doxygen REQUIRED)
 
 if(DOXYGEN_FOUND)
     set(DOXYFILE_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/docs)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in 
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
                    ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
-    
+
     add_custom_target(docs
         ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Generating API documentation with Doxygen"
         VERBATIM
     )
-    
+
     add_custom_target(html_docs
         ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -150,7 +150,7 @@ Add to your CI pipeline:
     cd build
     cmake .. -DCMAKE_BUILD_TYPE=Release
     make docs
-    
+
 - name: Deploy Documentation
   uses: peaceiris/actions-gh-pages@v3
   with:
