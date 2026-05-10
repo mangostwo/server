@@ -28,6 +28,9 @@
 
 #include <openssl/evp.h>
 #include "Common/Common.h"
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+#include "OpenSSLProvider.h"
+#endif
 
 class ARC4
 {
@@ -38,7 +41,10 @@ class ARC4
         void Init(uint8 *seed);
         void UpdateData(int len, uint8 *data);
     private:
-        EVP_CIPHER_CTX* m_ctx;
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+        OpenSSLProviderManager m_providerManager;  /**< RAII provider management */
+#endif
+        OpenSSLCipherContext m_cipherContext;        /**< RAII cipher context */
 };
 
 #endif

@@ -24,46 +24,77 @@
  */
 
 #include "ARC4.h"
+#include "OpenSSLProvider.h"
+#include "log.h"
 #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
 #include <openssl/provider.h>
 #endif
 
-ARC4::ARC4(uint8 len) : m_ctx()
+ARC4::ARC4(uint8 len) : m_cipherContext()
 {
 #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
-    OSSL_PROVIDER_load(NULL, "legacy");
+    // Provider management is now handled by OpenSSLProviderManager
+    if (!m_providerManager.IsInitialized())
+    {
+        sLog.outError("ARC4: Failed to initialize OpenSSL providers");
+        return;
+    }
 #endif
 
-    m_ctx = EVP_CIPHER_CTX_new();
-    EVP_EncryptInit_ex(m_ctx, EVP_rc4(), NULL, NULL, NULL);
-    EVP_CIPHER_CTX_set_key_length(m_ctx, len);
+    if (!m_cipherContext.IsValid())
+    {
+        sLog.outError("ARC4: Failed to create cipher context");
+        return;
+    }
+
+    EVP_EncryptInit_ex(m_cipherContext.Get(), EVP_rc4(), NULL, NULL, NULL);
+    EVP_CIPHER_CTX_set_key_length(m_cipherContext.Get(), len);
 }
 
-ARC4::ARC4(uint8 *seed, uint8 len) : m_ctx()
+ARC4::ARC4(uint8 *seed, uint8 len) : m_cipherContext()
 {
 #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
-    OSSL_PROVIDER_load(NULL, "legacy");
+    // Provider management is now handled by OpenSSLProviderManager
+    if (!m_providerManager.IsInitialized())
+    {
+        sLog.outError("ARC4: Failed to initialize OpenSSL providers");
+        return;
+    }
 #endif
 
-    m_ctx = EVP_CIPHER_CTX_new();
-    EVP_EncryptInit_ex(m_ctx, EVP_rc4(), NULL, NULL, NULL);
-    EVP_CIPHER_CTX_set_key_length(m_ctx, len);
-    EVP_EncryptInit_ex(m_ctx, NULL, NULL, seed, NULL);
+    if (!m_cipherContext.IsValid())
+    {
+        sLog.outError("ARC4: Failed to create cipher context");
+        return;
+    }
+
+    EVP_EncryptInit_ex(m_cipherContext.Get(), EVP_rc4(), NULL, NULL, NULL);
+    EVP_CIPHER_CTX_set_key_length(m_cipherContext.Get(), len);
+    EVP_EncryptInit_ex(m_cipherContext.Get(), NULL, NULL, seed, NULL);
 }
 
 ARC4::~ARC4()
 {
-    EVP_CIPHER_CTX_free(m_ctx);
+    // Cleanup is now handled automatically by RAII wrappers
 }
 
 void ARC4::Init(uint8 *seed)
 {
-    EVP_EncryptInit_ex(m_ctx, NULL, NULL, seed, NULL);
+    if (m_cipherContext.IsValid())
+    {
+        EVP_EncryptInit_ex(m_cipherContext.Get(), NULL, NULL, seed, NULL);
+    }
 }
 
 void ARC4::UpdateData(int len, uint8 *data)
 {
+    if (!m_cipherContext.IsValid())
+    {
+        sLog.outError("ARC4: Invalid cipher context, cannot update data");
+        return;
+    }
+
     int outlen = 0;
-    EVP_EncryptUpdate(m_ctx, data, &outlen, data, len);
-    EVP_EncryptFinal_ex(m_ctx, data, &outlen);
+    EVP_EncryptUpdate(m_cipherContext.Get(), data, &outlen, data, len);
+    EVP_EncryptFinal_ex(m_cipherContext.Get(), data, &outlen);
 }

@@ -30,6 +30,7 @@
 #include <openssl/crypto.h>
 #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
 #  include <openssl/provider.h>
+#  include "Auth/OpenSSLProvider.h"
 #endif
 #include <ace/Version.h>
 #include <ace/Get_Opt.h>
@@ -403,25 +404,11 @@ int main(int argc, char** argv)
     DETAIL_LOG("Using SSL version: %s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
 
 #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
-    OSSL_PROVIDER* legacy;
-    OSSL_PROVIDER* deflt;
+    // RAII provider management - automatically handles cleanup
+    OpenSSLProviderManager providerManager;
 
-    /* Load Multiple providers into the default (NULL) library context */
-    legacy = OSSL_PROVIDER_load(NULL, "legacy");
-    if (legacy == NULL) {
-        sLog.outError("Failed to load OpenSSL 3.x Legacy provider\n");
-#ifdef WIN32
-        sLog.outError("\nPlease check you have set the following Enviroment Varible:\n");
-        sLog.outError("OPENSSL_MODULES=C:\\OpenSSL-Win64\\bin\n");
-        sLog.outError("(where C:\\OpenSSL-Win64\\bin is the location you installed OpenSSL\n");
-#endif
-        Log::WaitBeforeContinueIfNeed();
-        return 0;
-    }
-    deflt = OSSL_PROVIDER_load(NULL, "default");
-    if (deflt == NULL) {
-        sLog.outError("Failed to load OpenSSL 3.x Default provider\n");
-        OSSL_PROVIDER_unload(legacy);
+    if (!providerManager.IsInitialized())
+    {
         Log::WaitBeforeContinueIfNeed();
         return 0;
     }
