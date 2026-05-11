@@ -22,6 +22,23 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file Object.cpp
+ * @brief Base implementation for all game objects
+ *
+ * This file implements the Object class, which is the base class for all
+ * entities in the game world. It provides:
+ * - Update field management (synchronized with clients)
+ * - Object GUID handling
+ * - Update data building for network transmission
+ * - Object visibility and spawning
+ * - Type identification
+ *
+ * The Object class uses an array of uint32 values (update fields) that
+ * mirror the client's object state. Changes to these values are sent to
+ * players who can see the object.
+ */
+
 #include "Object.h"
 #include "SharedDefines.h"
 #include "WorldPacket.h"
@@ -58,6 +75,17 @@
 #include "ElunaEventMgr.h"
 #endif /* ENABLE_ELUNA */
 
+/**
+ * @brief Construct a new Object
+ *
+ * Initializes the object to a default state:
+ * - Type set to TYPEID_OBJECT (base type)
+ * - Type mask set to TYPEMASK_OBJECT
+ * - Update fields array set to NULL (allocated by derived classes)
+ * - Not in world, not marked for update
+ *
+ * @note Derived classes must call _InitValues() to allocate update fields
+ */
 Object::Object()
 {
     m_objectTypeId      = TYPEID_OBJECT;
@@ -70,6 +98,18 @@ Object::Object()
     m_objectUpdated     = false;
 }
 
+/**
+ * @brief Destroy the Object
+ *
+ * Validates object state before destruction:
+ * - Asserts that object is not in world (must be removed first)
+ * - Asserts that object is not marked for update (must be cleared first)
+ *
+ * If either condition fails, an error is logged and the server asserts
+ * to prevent memory corruption or undefined behavior.
+ *
+ * @warning Objects MUST be removed from world before destruction
+ */
 Object::~Object()
 {
     if (IsInWorld())
@@ -88,6 +128,16 @@ Object::~Object()
     delete[] m_uint32Values;
 }
 
+/**
+ * @brief Initialize update field values array
+ *
+ * Allocates the uint32 array that stores all update field values
+ * and initializes them to zero. Also initializes the changed values
+ * tracking bitset.
+ *
+ * @note m_valuesCount must be set by derived class before calling
+ * @note This should only be called once per object lifetime
+ */
 void Object::_InitValues()
 {
     m_uint32Values = new uint32[ m_valuesCount ];
@@ -98,6 +148,18 @@ void Object::_InitValues()
     m_objectUpdated = false;
 }
 
+/**
+ * @brief Create object with specific GUID
+ * @param guidlow Low part of GUID (counter)
+ * @param entry Entry ID from database (0 for objects without entry)
+ * @param guidhigh High GUID type (item, creature, gameobject, etc.)
+ *
+ * Initializes the object's GUID and type. Creates the ObjectGuid
+ * from components and stores it in update fields. Also sets up the
+ * packed GUID for network transmission.
+ *
+ * @note This is the primary method for spawning new objects
+ */
 void Object::_Create(uint32 guidlow, uint32 entry, HighGuid guidhigh)
 {
     if (!m_uint32Values)
@@ -111,11 +173,30 @@ void Object::_Create(uint32 guidlow, uint32 entry, HighGuid guidhigh)
     m_PackGUID.Set(guid);
 }
 
+/**
+ * @brief Set object visual scale
+ * @param newScale Scale factor (1.0 = normal size)
+ *
+ * Changes the object's visual scale. Affects how the object appears
+ * in the game world. Scale changes are sent to all visible players.
+ *
+ * @note Values outside reasonable range may cause visual issues
+ */
 void Object::SetObjectScale(float newScale)
 {
     SetFloatValue(OBJECT_FIELD_SCALE_X, newScale);
 }
 
+/**
+ * @brief Force immediate update transmission to all viewers
+ *
+ * Sends all pending update changes immediately rather than waiting
+ * for the next update tick. This is used for urgent updates that
+ * must be visible immediately (e.g., combat state changes).
+ *
+ * The method builds update data for all nearby players and sends
+ * it immediately, then removes the object from the pending update list.
+ */
 void Object::SendForcedObjectUpdate()
 {
     if (!m_inWorld || !m_objectUpdated)

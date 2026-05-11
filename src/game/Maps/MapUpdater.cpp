@@ -22,6 +22,17 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file MapUpdater.cpp
+ * @brief Implementation of the MapUpdater class for managing map update requests.
+ *
+ * This file contains the implementation of the MapUpdater class which is responsible
+ * for managing and scheduling map updates. It includes:
+ * - Map update request scheduling
+ * - Thread management for concurrent map updates
+ * - Synchronization mechanisms for pending requests
+ */
+
 #include "MapUpdater.h"
 #include "DelayExecutor.h"
 #include "Map.h"
