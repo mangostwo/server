@@ -22,10 +22,26 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file TriggerCommands.cpp
+ * @brief Implementation of area trigger management chat commands.
+ *
+ * This file contains chat command handlers for trigger operations including:
+ * - Area trigger listing and information
+ * - Trigger data modification
+ * - Trigger testing
+ */
+
 #include "Chat.h"
 #include "ObjectMgr.h"
 
-
+/**
+ * @brief Helper function to display trigger target information.
+ *
+ * @param id The trigger ID.
+ * @param at Pointer to the area trigger data.
+ * @param subpart Whether this is a sub-part of the trigger.
+ */
 void ChatHandler::ShowTriggerTargetListHelper(uint32 id, AreaTrigger const* at, bool subpart /*= false*/)
 {
     if (m_session)
@@ -73,6 +89,12 @@ void ChatHandler::ShowTriggerListHelper(AreaTriggerEntry const* atEntry)
     }
 }
 
+/**
+ * @brief Handler for HandleTriggerCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleTriggerCommand(char* args)
 {
     AreaTriggerEntry const* atEntry = NULL;
@@ -212,6 +234,12 @@ bool ChatHandler::HandleTriggerCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleTriggerActiveCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleTriggerActiveCommand(char* /*args*/)
 {
     uint32 counter = 0;                                     // Counter for figure out that we found smth.
@@ -245,6 +273,12 @@ bool ChatHandler::HandleTriggerActiveCommand(char* /*args*/)
     return true;
 }
 
+/**
+ * @brief Handler for HandleTriggerNearCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleTriggerNearCommand(char* args)
 {
     float distance = (!*args) ? 10.0f : (float)atof(args);

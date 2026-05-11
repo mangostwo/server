@@ -22,17 +22,28 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file GMCommands.cpp
+ * @brief Implementation of general GM (Game Master) utility chat commands.
+ *
+ * This file contains chat command handlers for basic GM operations including:
+ * - Help and command information display
+ * - GM level and security queries
+ * - General purpose administrative utilities
+ */
+
 #include "Chat.h"
 #include "ObjectMgr.h"
 #include "World.h"
 #include "Weather.h"
 #include "SpellMgr.h"
 
- /**********************************************************************
-     CommandTable : commandTable
-  **********************************************************************/
-
-// show info of player
+/**
+ * @brief Handler for HandlePInfoCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandlePInfoCommand(char* args)
 {
     Player* target;
@@ -133,10 +144,36 @@ bool ChatHandler::HandlePInfoCommand(char* args)
     uint32 silv = (money % GOLD) / SILVER;
     uint32 copp = (money % GOLD) % SILVER;
     PSendSysMessage(LANG_PINFO_LEVEL, timeStr.c_str(), level, gold, silv, copp);
-
+//    if (target)
+//    {
+//        uint32 mapId = target->GetMapId();
+//        uint32 zoneId = target->GetZoneId();
+//        float posX = target->GetPositionX();
+//        float posY = target->GetPositionY();
+//        float posZ = target->GetPositionZ();
+//        float orientation = target->GetOrientation();
+//
+//        MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
+//        AreaTableEntry const* zoneEntry = GetAreaEntryByAreaID(zoneId);
+//
+//        PSendSysMessage("Location: Map %u (%s), Zone %u (%s)",
+//                        mapId,
+//                        (mapEntry ? mapEntry->name[GetSessionDbcLocale()] : "<unknown>"),
+//                        zoneId,
+//                        (zoneEntry ? zoneEntry->area_name[GetSessionDbcLocale()] : "<unknown>"));
+//
+//        PSendSysMessage("Coordinates: X=%.2f Y=%.2f Z=%.2f O=%.2f",
+//                        posX, posY, posZ, orientation);
+//    }
     return true;
 }
 
+/**
+ * @brief Handler for HandleWaterwalkCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleWaterwalkCommand(char* args)
 {
     bool value;
@@ -179,7 +216,12 @@ bool ChatHandler::HandleWaterwalkCommand(char* args)
     return true;
 }
 
-// Enable\Dissable GM Mode
+/**
+ * @brief Handler for HandleGMCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGMCommand(char* args)
 {
     if (!*args)
@@ -226,7 +268,12 @@ bool ChatHandler::HandleGMCommand(char* args)
     return false;
 }
 
-// Enable\Dissable Invisible mode
+/**
+ * @brief Handler for HandleGMVisibleCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGMVisibleCommand(char* args)
 {
     if (!*args)
@@ -272,6 +319,12 @@ bool ChatHandler::HandleGMVisibleCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleGMFlyCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGMFlyCommand(char* args)
 {
     bool value;
@@ -288,11 +341,20 @@ bool ChatHandler::HandleGMFlyCommand(char* args)
         target = m_session->GetPlayer();
     }
 
+    // [-ZERO] Need reimplement in another way
+    // GM fly wil be achieved with the swimming moveflag
+    // Warning : Still buggy when Jump
     target->SetCanFly(value);
     PSendSysMessage(LANG_COMMAND_FLYMODE_STATUS, GetNameLink(target).c_str(), args);
     return true;
 }
 
+/**
+ * @brief Handler for HandleGMListIngameCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGMListIngameCommand(char* /*args*/)
 {
     std::list< std::pair<std::string, bool> > names;
@@ -325,7 +387,12 @@ bool ChatHandler::HandleGMListIngameCommand(char* /*args*/)
     return true;
 }
 
-/// Display the list of GMs
+/**
+ * @brief Handler for HandleGMListFullCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGMListFullCommand(char* /*args*/)
 {
     ///- Get the accounts with GM Level >0
@@ -355,7 +422,12 @@ bool ChatHandler::HandleGMListFullCommand(char* /*args*/)
     return true;
 }
 
-// change standstate
+/**
+ * @brief Handler for HandleModifyStandStateCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleModifyStandStateCommand(char* args)
 {
     uint32 anim_id;
@@ -374,6 +446,12 @@ bool ChatHandler::HandleModifyStandStateCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleChangeWeatherCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleChangeWeatherCommand(char* args)
 {
     // Weather is OFF
@@ -433,7 +511,12 @@ void unFreezePlayer(Player* player)
     player->RemoveAurasDueToSpell(SPELL_GM_FREEZE);
 }
 
-
+/**
+ * @brief Handler for HandleFreezePlayerCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleFreezePlayerCommand(char* args)
 {
     Player* targetPlayer = nullptr;
@@ -497,7 +580,12 @@ bool ChatHandler::HandleFreezePlayerCommand(char* args)
     return true;
 }
 
-
+/**
+ * @brief Handler for HandleUnfreezePlayerCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleUnfreezePlayerCommand(char* args)
 {
 
@@ -540,4 +628,3 @@ bool ChatHandler::HandleUnfreezePlayerCommand(char* args)
 
     return true;
 }
-

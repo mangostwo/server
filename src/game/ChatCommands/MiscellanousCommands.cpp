@@ -22,16 +22,28 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file MiscellanousCommands.cpp
+ * @brief Implementation of miscellaneous utility chat commands.
+ *
+ * This file contains chat command handlers for various utilities including:
+ * - Help and command information
+ * - Player dumping and restoration
+ * - Misc administrative operations
+ */
+
 #include "Chat.h"
 #include "ObjectMgr.h"
 #include "World.h"
 #include "BattleGroundMgr.h"
 #include "PlayerDump.h"
 
- /**********************************************************************
-     CommandTable : commandTable
-  ***********************************************************************/
-
+/**
+ * @brief Handler for HandleHelpCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleHelpCommand(char* args)
 {
     if (!*args)
@@ -50,12 +62,24 @@ bool ChatHandler::HandleHelpCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleCommandsCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleCommandsCommand(char* /*args*/)
 {
     ShowHelpForCommand(getCommandTable(), "");
     return true;
 }
 
+/**
+ * @brief Handler for HandleGUIDCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGUIDCommand(char* /*args*/)
 {
     ObjectGuid guid = m_session->GetPlayer()->GetSelectionGuid();
@@ -71,6 +95,12 @@ bool ChatHandler::HandleGUIDCommand(char* /*args*/)
     return true;
 }
 
+/**
+ * @brief Handler for HandleLoadScriptsCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleLoadScriptsCommand(char* args)
 {
     if (!*args)
@@ -98,6 +128,12 @@ bool ChatHandler::HandleLoadScriptsCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandlePDumpLoadCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandlePDumpLoadCommand(char* args)
 {
     char* file = ExtractQuotedOrLiteralArg(&args);
@@ -187,6 +223,12 @@ bool ChatHandler::HandlePDumpLoadCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandlePDumpWriteCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandlePDumpWriteCommand(char* args)
 {
     if (!*args)
@@ -255,11 +297,10 @@ bool ChatHandler::HandlePDumpWriteCommand(char* args)
     return true;
 }
 
-// Misc COmmands
+// Misc Commands
 
 bool ChatHandler::HandleFlushArenaPointsCommand(char* /*args*/)
 {
     sBattleGroundMgr.DistributeArenaPoints();
     return true;
 }
-

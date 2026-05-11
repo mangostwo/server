@@ -22,6 +22,16 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file MMapCommands.cpp
+ * @brief Implementation of movement map and pathfinding chat commands.
+ *
+ * This file contains chat command handlers for MMap operations including:
+ * - Movement map testing and validation
+ * - Pathfinding debugging
+ * - Path generation and verification
+ */
+
 #include "Chat.h"
 #include "ObjectMgr.h"
 #include "World.h"
@@ -36,6 +46,12 @@
 #include <map>
 #include <typeinfo>
 
+/**
+ * @brief Handler for HandleMmapPathCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleMmapPathCommand(char* args)
 {
     if (!MMAP::MMapFactory::createOrGetMMapManager()->GetNavMesh(m_session->GetPlayer()->GetMapId()))
@@ -145,6 +161,12 @@ bool ChatHandler::HandleMmapPathCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleMmapLocCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleMmapLocCommand(char* /*args*/)
 {
     PSendSysMessage("mmap tileloc:");
@@ -206,6 +228,12 @@ bool ChatHandler::HandleMmapLocCommand(char* /*args*/)
     return true;
 }
 
+/**
+ * @brief Handler for HandleMmapLoadedTilesCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleMmapLoadedTilesCommand(char* /*args*/)
 {
     uint32 mapid = m_session->GetPlayer()->GetMapId();
@@ -234,6 +262,12 @@ bool ChatHandler::HandleMmapLoadedTilesCommand(char* /*args*/)
     return true;
 }
 
+/**
+ * @brief Handler for HandleMmapStatsCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleMmapStatsCommand(char* /*args*/)
 {
     PSendSysMessage("mmap stats:");
@@ -283,6 +317,12 @@ bool ChatHandler::HandleMmapStatsCommand(char* /*args*/)
     return true;
 }
 
+/**
+ * @brief Handler for HandleMmap command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleMmap(char* args)
 {
     bool on;
@@ -307,6 +347,12 @@ bool ChatHandler::HandleMmap(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleMmapTestArea command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleMmapTestArea(char* args)
 {
     float radius = 40.0f;
@@ -345,7 +391,13 @@ bool ChatHandler::HandleMmapTestArea(char* args)
     return true;
 }
 
-// use ".mmap testheight 10" selecting any creature/player
+/**
+ * @brief Handler for HandleMmapTestHeight command.
+ * use ".mmap testheight 10" selecting any creature/player
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleMmapTestHeight(char* args)
 {
     float radius = 0.0f;

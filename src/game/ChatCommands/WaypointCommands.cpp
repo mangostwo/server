@@ -22,6 +22,17 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file WaypointCommands.cpp
+ * @brief Implementation of waypoint path editing chat commands.
+ *
+ * This file contains chat command handlers for waypoint operations including:
+ * - Waypoint path creation and editing
+ * - Waypoint property modification
+ * - Path movement testing
+ * - NPC path assignment
+ */
+
 #include "Chat.h"
 #include "Language.h"
 #include "PointMovementGenerator.h"
@@ -763,7 +774,12 @@ bool ChatHandler::HandleWpShowCommand(char* args)
     return false;
 }                                                           // HandleWpShowCommand
 
-/// [Guid if no selected unit] <filename> [pathId [wpOrigin] ]
+/**
+ * @brief Handler for HandleWpExportCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleWpExportCommand(char* args)
 {
     if (!*args)

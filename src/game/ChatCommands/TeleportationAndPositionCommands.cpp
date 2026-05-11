@@ -22,12 +22,22 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file TeleportationAndPositionCommands.cpp
+ * @brief Implementation of player teleportation and position chat commands.
+ *
+ * This file contains chat command handlers for movement operations including:
+ * - Player teleportation
+ * - Waypoint editing
+ * - Coordinate-based movement
+ * - Location saving and loading
+ */
+
 #include "Chat.h"
 #include "ObjectMgr.h"
 #include "World.h"
 #include "MapManager.h"
 #include "CellImpl.h"
-
 
 #ifdef _DEBUG_VMAPS
 #include "VMapFactory.h"
@@ -75,6 +85,12 @@ static char const* const areatriggerKeys[] =
     NULL
 };
 
+/**
+ * @brief Handler for HandleGoHelper command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGoHelper(Player* player, uint32 mapid, float x, float y, float const* zPtr, float const* ortPtr)
 {
     float z;
@@ -128,11 +144,12 @@ bool ChatHandler::HandleGoHelper(Player* player, uint32 mapid, float x, float y,
     return true;
 }
 
- /**********************************************************************
-     CommandTable : commandTable
-  ***********************************************************************/
-
- // Summon Player
+/**
+ * @brief Handler for HandleSummonCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleSummonCommand(char* args)
 {
     Player* target;
@@ -264,7 +281,12 @@ bool ChatHandler::HandleSummonCommand(char* args)
     return true;
 }
 
-// Teleport to Player
+/**
+ * @brief Handler for HandleAppearCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleAppearCommand(char* args)
 {
     Player* target;
@@ -432,7 +454,12 @@ bool ChatHandler::HandleAppearCommand(char* args)
     return true;
 }
 
-// Summon group of player
+/**
+ * @brief Handler for HandleGroupgoCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGroupgoCommand(char* args)
 {
     Player* target;
@@ -537,7 +564,12 @@ bool ChatHandler::HandleGroupgoCommand(char* args)
     return true;
 }
 
-// Teleport player to last position
+/**
+ * @brief Handler for HandleRecallCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleRecallCommand(char* args)
 {
     Player* target;
@@ -562,6 +594,12 @@ bool ChatHandler::HandleRecallCommand(char* args)
     return HandleGoHelper(target, target->m_recallMap, target->m_recallX, target->m_recallY, &target->m_recallZ, &target->m_recallO);
 }
 
+/**
+ * @brief Handler for HandleGPSCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGPSCommand(char* args)
 {
     WorldObject* obj = NULL;
@@ -684,6 +722,12 @@ bool ChatHandler::HandleGPSCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleGetDistanceCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGetDistanceCommand(char* args)
 {
     WorldObject* obj = NULL;
@@ -726,6 +770,12 @@ bool ChatHandler::HandleGetDistanceCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleNearGraveCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNearGraveCommand(char* args)
 {
     Team g_team;
@@ -817,10 +867,12 @@ bool ChatHandler::HandleNearGraveCommand(char* args)
     return true;
 }
 
-/**********************************************************************
-    CommandTable : goCommandTable
- ***********************************************************************/
-
+/**
+ * @brief Handler for HandleGoTaxinodeCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGoTaxinodeCommand(char* args)
 {
     Player* _player = m_session->GetPlayer();
@@ -849,6 +901,12 @@ bool ChatHandler::HandleGoTaxinodeCommand(char* args)
     return HandleGoHelper(_player, node->map_id, node->x, node->y, &node->z);
 }
 
+/**
+ * @brief Handler for HandleGoCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGoCommand(char* args)
 {
     if (!*args)
@@ -888,7 +946,12 @@ bool ChatHandler::HandleGoCommand(char* args)
     return HandleGoHelper(_player, mapid, x, y, &z);
 }
 
-// teleport at coordinates
+/**
+ * @brief Handler for HandleGoXYCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGoXYCommand(char* args)
 {
     Player* _player = m_session->GetPlayer();
@@ -914,7 +977,12 @@ bool ChatHandler::HandleGoXYCommand(char* args)
     return HandleGoHelper(_player, mapid, x, y);
 }
 
-// teleport at coordinates, including Z
+/**
+ * @brief Handler for HandleGoXYZCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGoXYZCommand(char* args)
 {
     Player* _player = m_session->GetPlayer();
@@ -946,7 +1014,12 @@ bool ChatHandler::HandleGoXYZCommand(char* args)
     return HandleGoHelper(_player, mapid, x, y, &z);
 }
 
-// teleport at coordinates
+/**
+ * @brief Handler for HandleGoZoneXYCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGoZoneXYCommand(char* args)
 {
     Player* _player = m_session->GetPlayer();
@@ -1009,7 +1082,12 @@ bool ChatHandler::HandleGoZoneXYCommand(char* args)
     return HandleGoHelper(_player, mapEntry->MapID, x, y);
 }
 
-// teleport to grid
+/**
+ * @brief Handler for HandleGoGridCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGoGridCommand(char* args)
 {
     Player* _player = m_session->GetPlayer();
@@ -1049,7 +1127,13 @@ bool ChatHandler::HandleGoGridCommand(char* args)
 *                             Warning: If there is more than one mob with this "id"
 *                                      you will be teleported to the first one that is found.
 */
-// teleport to creature
+
+/**
+ * @brief Handler for HandleGoCreatureCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGoCreatureCommand(char* args)
 {
     if (!*args)
@@ -1128,6 +1212,7 @@ bool ChatHandler::HandleGoCreatureCommand(char* args)
             }
 
             data = sObjectMgr.GetCreatureData(lowguid);
+
             if (!data)
             {
                 SendSysMessage(LANG_COMMAND_GOCREATNOTFOUND);
@@ -1142,6 +1227,7 @@ bool ChatHandler::HandleGoCreatureCommand(char* args)
             if (ExtractUInt32(&pParam1, lowguid))
             {
                 data = sObjectMgr.GetCreatureData(lowguid);
+
                 if (!data)
                 {
                     SendSysMessage(LANG_COMMAND_GOCREATNOTFOUND);
@@ -1198,7 +1284,12 @@ bool ChatHandler::HandleGoCreatureCommand(char* args)
     return HandleGoHelper(_player, data->mapid, data->posX, data->posY, &data->posZ);
 }
 
-// teleport to gameobject
+/**
+ * @brief Handler for HandleGoObjectCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGoObjectCommand(char* args)
 {
     Player* _player = m_session->GetPlayer();
@@ -1344,6 +1435,12 @@ bool ChatHandler::HandleGoObjectCommand(char* args)
     return HandleGoHelper(_player, data->mapid, data->posX, data->posY, &data->posZ);
 }
 
+/**
+ * @brief Handler for HandleGoGraveyardCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGoGraveyardCommand(char* args)
 {
     Player* _player = m_session->GetPlayer();
@@ -1365,6 +1462,12 @@ bool ChatHandler::HandleGoGraveyardCommand(char* args)
     return HandleGoHelper(_player, gy->map_id, gy->x, gy->y, &gy->z);
 }
 
+/**
+ * @brief Handler for HandleGoTriggerCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGoTriggerCommand(char* args)
 {
     Player* _player = m_session->GetPlayer();
@@ -1423,6 +1526,12 @@ bool ChatHandler::HandleGoTriggerCommand(char* args)
     }
 }
 
+/**
+ * @brief Handler for HandleTeleDelCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleTeleDelCommand(char* args)
 {
     if (!*args)
@@ -1443,6 +1552,12 @@ bool ChatHandler::HandleTeleDelCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleTeleAddCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleTeleAddCommand(char* args)
 {
     if (!*args)
@@ -1487,7 +1602,12 @@ bool ChatHandler::HandleTeleAddCommand(char* args)
     return true;
 }
 
-// teleport player to given game_tele.entry
+/**
+ * @brief Handler for HandleTeleNameCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleTeleNameCommand(char* args)
 {
     char* nameStr = ExtractOptNotLastArg(&args);
@@ -1553,7 +1673,12 @@ bool ChatHandler::HandleTeleNameCommand(char* args)
     return true;
 }
 
-
+/**
+ * @brief Handler for HandleTeleCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleTeleCommand(char* args)
 {
     if (!*args)
@@ -1576,7 +1701,12 @@ bool ChatHandler::HandleTeleCommand(char* args)
     return HandleGoHelper(_player, tele->mapId, tele->position_x, tele->position_y, &tele->position_z, &tele->orientation);
 }
 
-// Teleport group to given game_tele.entry
+/**
+ * @brief Handler for HandleTeleGroupCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleTeleGroupCommand(char* args)
 {
     if (!*args)

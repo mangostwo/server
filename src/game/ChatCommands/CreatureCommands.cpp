@@ -22,6 +22,17 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file CreatureCommands.cpp
+ * @brief Implementation of creature spawning and management chat commands.
+ *
+ * This file contains chat command handlers for creature operations including:
+ * - Creature spawning and removal
+ * - Creature property modification
+ * - Creature behavior control
+ * - Creature database management
+ */
+
 #include "Chat.h"
 #include "Language.h"
 #include "World.h"
@@ -63,6 +74,12 @@ bool ChatHandler::HandleComeToMeCommand(char* /*args*/)
     return true;
 }
 
+/**
+ * @brief Handler for HandleRespawnCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleRespawnCommand(char* /*args*/)
 {
     Player* pl = m_session->GetPlayer();
@@ -91,7 +108,12 @@ bool ChatHandler::HandleRespawnCommand(char* /*args*/)
     return true;
 }
 
-// Edit Creature Faction
+/**
+ * @brief Handler for HandleModifyFactionCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleModifyFactionCommand(char* args)
 {
     Creature* chr = getSelectedCreature();
@@ -164,8 +186,12 @@ bool ChatHandler::HandleModifyFactionCommand(char* args)
 }
 
 
-//-----------------------Npc Commands-----------------------
-// add spawn of creature
+/**
+ * @brief Handler for HandleNpcAddCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNpcAddCommand(char* args)
 {
     if (!*args)
@@ -220,7 +246,12 @@ bool ChatHandler::HandleNpcAddCommand(char* args)
     return true;
 }
 
-// add item in vendorlist
+/**
+ * @brief Handler for HandleNpcAddVendorItemCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNpcAddVendorItemCommand(char* args)
 {
     uint32 itemId;
@@ -267,7 +298,12 @@ bool ChatHandler::HandleNpcAddVendorItemCommand(char* args)
     return true;
 }
 
-// del item from vendor list
+/**
+ * @brief Handler for HandleNpcDelVendorItemCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNpcDelVendorItemCommand(char* args)
 {
     if (!*args)
@@ -304,7 +340,12 @@ bool ChatHandler::HandleNpcDelVendorItemCommand(char* args)
     return true;
 }
 
-// show info about AI
+/**
+ * @brief Handler for HandleNpcAIInfoCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNpcAIInfoCommand(char* /*args*/)
 {
     Creature* pTarget = getSelectedCreature();
@@ -326,6 +367,8 @@ bool ChatHandler::HandleNpcAIInfoCommand(char* /*args*/)
                     strAI.empty() ? " - " : strAI.c_str(),
                     cstrAIClass ? cstrAIClass : " - ",
                     strScript.empty() ? " - " : strScript.c_str());
+    //PSendSysMessage("Motion Type: %u", pTarget->GetMotionMaster()->GetCurrentMovementGeneratorType());
+    //PSendSysMessage("Casting Spell: %s", pTarget->IsNonMeleeSpellCasted(true) ? "yes" : "no");
 
     if (pTarget->AI())
     {
@@ -335,7 +378,12 @@ bool ChatHandler::HandleNpcAIInfoCommand(char* /*args*/)
     return true;
 }
 
-// change level of creature or pet
+/**
+ * @brief Handler for HandleNpcChangeLevelCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNpcChangeLevelCommand(char* args)
 {
     if (!*args)
@@ -378,7 +426,12 @@ bool ChatHandler::HandleNpcChangeLevelCommand(char* args)
     return true;
 }
 
-// set npcflag of creature
+/**
+ * @brief Handler for HandleNpcFlagCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNpcFlagCommand(char* args)
 {
     if (!*args)
@@ -406,6 +459,12 @@ bool ChatHandler::HandleNpcFlagCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleNpcDeleteCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNpcDeleteCommand(char* args)
 {
     Creature* unit = NULL;
@@ -475,7 +534,12 @@ bool ChatHandler::HandleNpcDeleteCommand(char* args)
     return true;
 }
 
-// move selected creature
+/**
+ * @brief Handler for HandleNpcMoveCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNpcMoveCommand(char* args)
 {
     uint32 lowguid = 0;
@@ -658,7 +722,12 @@ bool ChatHandler::HandleNpcSetMoveTypeCommand(char* args)
     return true;
 }
 
-// set model of creature
+/**
+ * @brief Handler for HandleNpcSetModelCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNpcSetModelCommand(char* args)
 {
     if (!*args)
@@ -695,7 +764,12 @@ bool ChatHandler::HandleNpcSetModelCommand(char* args)
     return true;
 }
 
-// set faction of creature
+/**
+ * @brief Handler for HandleNpcFactionIdCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNpcFactionIdCommand(char* args)
 {
     if (!*args)
@@ -738,7 +812,12 @@ bool ChatHandler::HandleNpcFactionIdCommand(char* args)
     return true;
 }
 
-// set spawn dist of creature
+/**
+ * @brief Handler for HandleNpcSpawnDistCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNpcSpawnDistCommand(char* args)
 {
     if (!*args)
@@ -784,7 +863,13 @@ bool ChatHandler::HandleNpcSpawnDistCommand(char* args)
     PSendSysMessage(LANG_COMMAND_SPAWNDIST, option);
     return true;
 }
-// spawn time handling
+
+/**
+ * @brief Handler for HandleNpcSpawnTimeCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNpcSpawnTimeCommand(char* args)
 {
     uint32 stime;
@@ -809,7 +894,13 @@ bool ChatHandler::HandleNpcSpawnTimeCommand(char* args)
 
     return true;
 }
-// npc follow handling
+
+/**
+ * @brief Handler for HandleNpcFollowCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNpcFollowCommand(char* /*args*/)
 {
     Player* player = m_session->GetPlayer();
@@ -828,7 +919,13 @@ bool ChatHandler::HandleNpcFollowCommand(char* /*args*/)
     PSendSysMessage(LANG_CREATURE_FOLLOW_YOU_NOW, creature->GetName());
     return true;
 }
-// npc unfollow handling
+
+/**
+ * @brief Handler for HandleNpcUnFollowCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNpcUnFollowCommand(char* /*args*/)
 {
     Player* player = m_session->GetPlayer();
@@ -865,7 +962,13 @@ bool ChatHandler::HandleNpcUnFollowCommand(char* /*args*/)
     PSendSysMessage(LANG_CREATURE_NOT_FOLLOW_YOU_NOW, creature->GetName());
     return true;
 }
-// npc tame handling
+
+/**
+ * @brief Handler for HandleNpcTameCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNpcTameCommand(char* /*args*/)
 {
     Creature* creatureTarget = getSelectedCreature();
@@ -889,6 +992,7 @@ bool ChatHandler::HandleNpcTameCommand(char* /*args*/)
     player->CastSpell(creatureTarget, 13481, true);         // Tame Beast, triggered effect
     return true;
 }
+
 // npc phasemask handling
 // change phasemask of creature or pet
 bool ChatHandler::HandleNpcSetPhaseCommand(char* args)
@@ -923,7 +1027,13 @@ bool ChatHandler::HandleNpcSetPhaseCommand(char* args)
 
     return true;
 }
-// npc deathstate handling
+
+/**
+ * @brief Handler for HandleNpcSetDeathStateCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNpcSetDeathStateCommand(char* args)
 {
     bool value;
@@ -959,6 +1069,12 @@ bool ChatHandler::HandleNpcSetDeathStateCommand(char* args)
 
 // TODO: NpcCommands that need to be fixed :
 
+/**
+ * @brief Handler for HandleNpcNameCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNpcNameCommand(char* /*args*/)
 {
     /* Temp. disabled
@@ -1007,6 +1123,12 @@ bool ChatHandler::HandleNpcNameCommand(char* /*args*/)
     return true;
 }
 
+/**
+ * @brief Handler for HandleNpcSubNameCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNpcSubNameCommand(char* /*args*/)
 {
     /* Temp. disabled
@@ -1054,7 +1176,12 @@ bool ChatHandler::HandleNpcSubNameCommand(char* /*args*/)
     return true;
 }
 
-//-----------------------Npc Commands-----------------------
+/**
+ * @brief Handler for HandleNpcAllowMovementCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNpcAllowMovementCommand(char* /*args*/)
 {
     if (sWorld.getAllowMovement())
@@ -1070,6 +1197,12 @@ bool ChatHandler::HandleNpcAllowMovementCommand(char* /*args*/)
     return true;
 }
 
+/**
+ * @brief Handler for HandleNpcChangeEntryCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNpcChangeEntryCommand(char* args)
 {
     if (!*args)
@@ -1102,6 +1235,12 @@ bool ChatHandler::HandleNpcChangeEntryCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleNpcInfoCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
 {
     Creature* target = getSelectedCreature();
@@ -1131,16 +1270,21 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     // Send information dependend on difficulty mode
     CreatureInfo const* baseInfo = ObjectMgr::GetCreatureTemplate(Entry);
     uint32 diff = 1;
-    for (; diff < MAX_DIFFICULTY; ++diff)
+    // TODO: The following for loop looks really wrong
+    for (;diff < MAX_DIFFICULTY; ++diff)
+    {
         if (baseInfo->DifficultyEntry[diff - 1] == target->GetCreatureInfo()->Entry)
         {
             break;
         }
+    }
 
     if (diff < MAX_DIFFICULTY)
+    {
         PSendSysMessage(LANG_NPCINFO_CHAR_DIFFICULTY, target->GetGuidStr().c_str(), faction, npcflags,
                         Entry, target->GetCreatureInfo()->Entry, diff,
                         displayid, nativeid);
+    }
     else
     {
         PSendSysMessage(LANG_NPCINFO_CHAR, target->GetGuidStr().c_str(), faction, npcflags, Entry, displayid, nativeid);
@@ -1166,7 +1310,12 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     return true;
 }
 
-// play npc emote
+/**
+ * @brief Handler for HandleNpcPlayEmoteCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNpcPlayEmoteCommand(char* args)
 {
     uint32 emote = atoi(args);
@@ -1185,6 +1334,13 @@ bool ChatHandler::HandleNpcPlayEmoteCommand(char* args)
 }
 
 // TODO: NpcCommands that needs to be fixed :
+
+/**
+ * @brief Handler for HandleNpcAddWeaponCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleNpcAddWeaponCommand(char* /*args*/)
 {
     /*if (!*args)
@@ -1258,4 +1414,3 @@ bool ChatHandler::HandleNpcAddWeaponCommand(char* /*args*/)
     */
     return true;
 }
-//----------------------------------------------------------
