@@ -22,6 +22,23 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file LFGHandler.cpp
+ * @brief Looking For Group (Meeting Stone) opcode handlers
+ *
+ * This file handles player interactions with meeting stones (LFG system).
+ * Meeting stones allow players/groups to queue for dungeons and be matched
+ * with other players automatically.
+ *
+ * Opcodes handled:
+ * - CMSG_MEETINGSTONE_JOIN: Join LFG queue at a meeting stone
+ * - CMSG_MEETINGSTONE_LEAVE: Leave LFG queue
+ * - CMSG_MEETINGSTONE_INFO: Request current queue status
+ *
+ * @see LFGMgr for the queue management implementation
+ * @see LFGQueue for matching algorithm
+ */
+
 #include "WorldSession.h"
 #include "LFGMgr.h"
 #include "Log.h"

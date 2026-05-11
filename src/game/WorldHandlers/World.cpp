@@ -22,9 +22,25 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/** \file
-    \ingroup world
-*/
+/**
+ * @file World.cpp
+ * @brief Core world server implementation
+ *
+ * This file implements the World class, which is the central hub of the
+ * MaNGOS game server. It manages:
+ * - Server configuration and settings
+ * - Game time and world updates
+ * - Player sessions and limits
+ * - All game systems initialization (maps, spells, quests, etc.)
+ * - Server shutdown and restart procedures
+ * - In-game announcements and events
+ * - Various utility functions for the game world
+ *
+ * The World class is a singleton accessed via sWorld, and runs the main
+ * server loop that processes all game logic.
+ *
+ * @ingroup world
+ */
 
 #include "World.h"
 #include "Database/DatabaseEnv.h"
@@ -114,7 +130,22 @@ float World::m_VisibleObjectGreyDistance      = 0;
 float  World::m_relocation_lower_limit_sq     = 10.f * 10.f;
 uint32 World::m_relocation_ai_notify_delay    = 1000u;
 
-/// World constructor
+/**
+ * @brief World class constructor
+ *
+ * Initializes all world state variables to their default values:
+ * - Player limit set to 0 (unlimited)
+ * - Movement allowed
+ * - Shutdown mask and timer cleared
+ * - Game time set to current system time
+ * - Session counts zeroed
+ * - All config arrays cleared
+ * - DBC locale set to enUS
+ * - Broadcast system disabled
+ *
+ * This is called once when the server starts, before any configuration
+ * is loaded or systems initialized.
+ */
 World::World()
 {
     m_playerLimit = 0;

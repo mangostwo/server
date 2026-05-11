@@ -1,3 +1,22 @@
+/**
+ * @file DisableMgr.cpp
+ * @brief Content disabling system for server management
+ *
+ * This file implements the DisableMgr namespace which allows server
+ * administrators to disable specific game content through database
+ * configuration. Supports disabling:
+ * - Spells (cast or learned)
+ * - Quests (available or completable)
+ * - Maps/Instances (entry restriction)
+ * - Battlegrounds
+ * - Outdoor PvP areas
+ * - Vendors (specific items)
+ * - GameObjects (use interaction)
+ *
+ * Configuration is loaded from `disables` table with flags controlling
+ * the exact nature of the disable (e.g., disable casting vs learning).
+ */
+
 /*
  * Copyright (C) 2015-2025 MaNGOS <https://www.getmangos.eu>
  * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
@@ -30,20 +49,62 @@ namespace DisableMgr
 
 namespace
 {
+    /**
+     * @struct DisableData
+     * @brief Stores disable configuration for a single entry
+     *
+     * Contains flags controlling the disable behavior and optional
+     * parameter sets for conditional disables (e.g., spell disabled
+     * only in specific maps or areas).
+     */
     struct DisableData
     {
-        uint8 flags;
-        std::set<uint32> params[2];                             // data
+        uint8 flags;                                            ///< Disable behavior flags
+        std::set<uint32> params[2];                             ///< Optional data (map IDs, area IDs, etc.)
     };
 
-    // single disables here with optional data
+    /**
+     * @typedef DisableTypeMap
+     * @brief Map of entry IDs to disable data for a specific type
+     */
     typedef std::map<uint32, DisableData> DisableTypeMap;
-    // global disable map by source
+
+    /**
+     * @typedef DisableMap
+     * @brief Global disable storage by source type
+     *
+     * Top-level map organizing disables by category (spells, quests, maps, etc.)
+     */
     typedef std::map<DisableType, DisableTypeMap> DisableMap;
 
+    /**
+     * @var m_DisableMap
+     * @brief Global disable data storage
+     *
+     * Maps disable types to their respective entry maps. Loaded from
+     * `disables` database table during server startup.
+     */
     DisableMap m_DisableMap;
 }
 
+/**
+ * @def CONTINUE
+ * @brief Helper macro for early loop continuation
+ *
+ * Cleans up allocated DisableData if present, then continues to next iteration.
+ */
+#define CONTINUE if (newData) delete data; continue
+
+/**
+ * @brief Load all disable entries from database
+ *
+ * Reads the `disables` table and populates m_DisableMap with configured
+ * disable entries. Validates that referenced entries exist in DBC/data.
+ *
+ * Supports reload - clears existing data before loading.
+ *
+ * @note Called during server startup and on .reload disables command
+ */
 void LoadDisables()
 {
     // reload case

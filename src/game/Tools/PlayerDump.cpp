@@ -22,6 +22,32 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file PlayerDump.cpp
+ * @brief Character dump/restore system for player data migration
+ *
+ * This file implements the PlayerDump system which allows exporting and
+ * importing character data as SQL scripts. Used for:
+ * - Character transfers between servers
+ * - Character backups
+ * - Database maintenance and migration
+ *
+ * Key features:
+ * - Dumps character data to SQL INSERT statements
+ * - Handles GUID remapping during restore
+ * - Supports multiple related tables (character, inventory, pets, etc.)
+ * - Maintains referential integrity
+ *
+ * Tables handled:
+ * - characters, character_action, character_aura, character_homebind
+ * - character_inventory, character_pet, character_queststatus
+ * - character_reputation, character_skills, character_spell
+ * - mail, item_instance, pet_aura, pet_spell, etc.
+ *
+ * @see PlayerDumpWriter for export functionality
+ * @see PlayerDumpReader for import functionality
+ */
+
 #include "Common.h"
 #include "PlayerDump.h"
 #include "Database/DatabaseEnv.h"
@@ -30,13 +56,19 @@
 #include "ObjectMgr.h"
 #include "AccountMgr.h"
 
-// Character Dump tables
+/**
+ * @struct DumpTable
+ * @brief Definition of a table to include in character dumps
+ *
+ * Maps table names to their dump type category for proper
+ * ordering and handling during dump/restore operations.
+ */
 struct DumpTable
 {
-    char const* name;
-    DumpTableType type;
+    char const* name;           ///< Database table name
+    DumpTableType type;         ///< Category type for processing order
 
-    // helpers
+    /// @brief Check if this entry is valid (not end marker)
     bool isValid() const { return name != NULL; }
 };
 
@@ -74,6 +106,16 @@ static DumpTable dumpTables[] =
 };
 
 // Low level functions
+/**
+ * @brief Find nth token in a space-separated string
+ * @param str String to search
+ * @param n Token index (1-based)
+ * @param s Output: start position of token
+ * @param e Output: end position of token
+ * @return true if token found
+ *
+ * Used to parse space-separated SQL values.
+ */
 static bool findtoknth(std::string& str, int n, std::string::size_type& s, std::string::size_type& e)
 {
     int i; s = e = 0;
@@ -92,6 +134,12 @@ static bool findtoknth(std::string& str, int n, std::string::size_type& s, std::
     return e != std::string::npos;
 }
 
+/**
+ * @brief Get nth token from space-separated string
+ * @param str Source string
+ * @param n Token index (1-based)
+ * @return Token string or empty if not found
+ */
 std::string gettoknth(std::string& str, int n)
 {
     std::string::size_type s = 0, e = 0;
@@ -103,6 +151,16 @@ std::string gettoknth(std::string& str, int n)
     return str.substr(s, e - s);
 }
 
+/**
+ * @brief Find nth value in SQL VALUES clause
+ * @param str SQL INSERT statement
+ * @param n Value index (1-based)
+ * @param s Output: start position
+ * @param e Output: end position
+ * @return true if value found
+ *
+ * Parses VALUES ('val1', 'val2', ...) to locate specific fields.
+ */
 bool findnth(std::string& str, int n, std::string::size_type& s, std::string::size_type& e)
 {
     s = str.find("VALUES ('") + 9;
@@ -137,6 +195,13 @@ bool findnth(std::string& str, int n, std::string::size_type& s, std::string::si
     return true;
 }
 
+/**
+ * @brief Extract table name from SQL INSERT statement
+ * @param str SQL statement
+ * @return Table name or empty string
+ *
+ * Parses "INSERT INTO `tablename` ..." to extract the table name.
+ */
 std::string gettablename(std::string& str)
 {
     std::string::size_type s = 13;
@@ -149,6 +214,15 @@ std::string gettablename(std::string& str)
     return str.substr(s, e - s);
 }
 
+/**
+ * @brief Replace nth value in SQL VALUES clause
+ * @param str SQL statement to modify
+ * @param n Value index to change (1-based)
+ * @param with New value string
+ * @param insert If true, insert instead of replace
+ * @param nonzero If true, skip if current value is "0"
+ * @return true if change succeeded
+ */
 bool changenth(std::string& str, int n, const char* with, bool insert = false, bool nonzero = false)
 {
     std::string::size_type s, e;

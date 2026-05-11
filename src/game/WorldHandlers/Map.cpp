@@ -22,6 +22,25 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file Map.cpp
+ * @brief Implementation of game world map system
+ *
+ * This file implements the Map class which manages individual game maps
+ * (continents, instances, battlegrounds). Key responsibilities include:
+ * - Grid-based map data loading and management
+ * - Game object and creature spawning
+ * - Player movement and visibility
+ * - Instance data management
+ * - Transport systems (boats, zeppelins)
+ * - Weather systems
+ * - Script execution
+ *
+ * Maps are divided into grids (64x64) that can be loaded/unloaded dynamically
+ * to manage memory usage. Each map instance handles its own lifecycle,
+ * including loading terrain data, spawning objects, and cleanup.
+ */
+
 #include "Map.h"
 #include "MapManager.h"
 #include "Player.h"
@@ -52,6 +71,22 @@
 #include "ElunaLoader.h"
 #endif /* ENABLE_ELUNA */
 
+/**
+ * @brief Map destructor
+ *
+ * Cleans up all resources associated with the map:
+ * - Triggers Eluna OnDestroy callback if enabled
+ * - Unloads all grids and objects
+ * - Cleans up scheduled scripts
+ * - Releases persistent state reference
+ * - Deletes instance data
+ * - Removes all transports
+ * - Unloads MMAP navigation data
+ * - Releases terrain data reference
+ * - Deletes weather system
+ *
+ * @note This is called when an instance is unloaded or server shuts down
+ */
 Map::~Map()
 {
 #ifdef ENABLE_ELUNA
@@ -100,6 +135,17 @@ Map::~Map()
     m_weatherSystem = NULL;
 }
 
+/**
+ * @brief Load map and VMap data for a specific grid
+ * @param gx Grid X coordinate (0-63)
+ * @param gy Grid Y coordinate (0-63)
+ *
+ * Loads terrain data and visual maps for the specified grid coordinates.
+ * This is called on-demand when players enter a grid area. The loaded
+ * data includes height maps, liquid data, and collision information.
+ *
+ * @note If the grid is already loaded, this function returns immediately
+ */
 void Map::LoadMapAndVMap(int gx, int gy)
 {
     if (m_bLoadedGrids[gx][gy])
@@ -113,6 +159,22 @@ void Map::LoadMapAndVMap(int gx, int gy)
     }
 }
 
+/**
+ * @brief Construct a new Map instance
+ * @param id Map ID from Map.dbc
+ * @param expiry Time before grid expires (0 for permanent maps)
+ * @param InstanceId Instance ID (0 for continents, unique for instances)
+ * @param SpawnMode
+ *
+ * Initializes a map instance with:
+ * - Map entry lookup from DBC
+ * - Terrain data loading
+ * - Grid state initialization
+ * - GUID generators for temporary objects
+ * - Eluna Lua state (if enabled)
+ *
+ * @note This constructor is used for both continents and instanced maps
+ */
 Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode)
     : i_mapEntry(sMapStore.LookupEntry(id)), i_spawnMode(SpawnMode),
       i_id(id), i_InstanceId(InstanceId), m_unloadTimer(0),
