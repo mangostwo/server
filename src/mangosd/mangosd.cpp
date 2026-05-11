@@ -22,9 +22,25 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/// \addtogroup mangosd Mangos Daemon
-/// @{
-/// \file
+/**
+ * @file mangosd.cpp
+ * @brief World server daemon entry point
+ *
+ * This file implements the main entry point for the MaNGOS world server
+ * daemon (mangosd). It handles:
+ * - Command line argument parsing
+ * - Service/daemon mode initialization
+ * - Database connections (World, Character, Login)
+ * - Server subsystem initialization
+ * - Multiple thread management (World, CLI, Auto-freeze, SOAP)
+ * - Main event loop and shutdown
+ *
+ * The world server is responsible for running the game simulation,
+ * handling player connections, and managing game state.
+ *
+ * @addtogroup mangosd Mangos Daemon
+ * @{
+ */
 
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
@@ -72,16 +88,21 @@
  #include "PosixDaemon.h"
 #endif
 
-//*******************************************************************************************************//
 DatabaseType WorldDatabase;                                 ///< Accessor to the world database
 DatabaseType CharacterDatabase;                             ///< Accessor to the character database
 DatabaseType LoginDatabase;                                 ///< Accessor to the realm/login database
 
 uint32 realmID = 0;                                         ///< Id of the realm
-//*******************************************************************************************************//
 
-
-/// Clear 'online' status for all accounts with characters in this realm
+/**
+ * @brief Clear online status for realm accounts on startup
+ *
+ * Resets the 'online' status for all accounts that were marked as
+ * connected to this realm. This handles cases where the server
+ * crashed without properly logging out all players.
+ *
+ * Also resets character online status and battleground instance data.
+ */
 static void clear_online_accounts()
 {
     // Cleanup online status for characters hosted at current realm
@@ -95,7 +116,18 @@ static void clear_online_accounts()
 }
 
 
-/// Initialize connection to the databases
+/**
+ * @brief Initialize database connections
+ * @return true if all databases connected successfully, false otherwise
+ *
+ * Connects to three databases:
+ * - World Database: Contains game data (creatures, items, quests, etc.)
+ * - Character Database: Contains player character data
+ * - Login Database: References realm authentication data
+ *
+ * Validates database versions and connection counts from configuration.
+ * On failure, properly cleans up any connections that were established.
+ */
 static bool start_db()
 {
     ///- Get world database info from configuration file
