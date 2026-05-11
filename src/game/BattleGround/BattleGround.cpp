@@ -22,6 +22,20 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file BattleGround.cpp
+ * @brief Core implementation of the battleground system.
+ *
+ * This file contains the implementation of the BattleGround base class, which provides:
+ * - Battleground state management (waiting, in-progress, finished)
+ * - Player management (joining, leaving, tracking)
+ * - Event handling and broadcasting
+ * - Reward distribution and scoring
+ * - World state synchronization
+ * - Team management and raid groups
+ * - Creature and game object spawning
+ */
+
 #include "Object.h"
 #include "Player.h"
 #include "BattleGround.h"

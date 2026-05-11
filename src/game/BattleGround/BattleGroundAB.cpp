@@ -22,6 +22,23 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file BattleGroundAB.cpp
+ * @brief Implementation of Arathi Basin battleground.
+ *
+ * This file contains the implementation of the Arathi Basin battleground (BattleGroundAB),
+ * which includes:
+ * - Node capture and control mechanics
+ * - Resource generation based on controlled nodes
+ * - World state management for resource tracking
+ * - Victory point calculation and team scoring
+ * - Banner spawning and visual effects
+ * - Integration with the base BattleGround class
+ *
+ * Arathi Basin features 5 capture points (Stables, Farm, Lumbermill, Mine, Blacksmith)
+ * where teams compete to control them and generate resources toward victory.
+ */
+
 #include "Object.h"
 #include "Player.h"
 #include "BattleGround.h"
@@ -35,9 +52,12 @@
 #include "MapManager.h"
 #include "DBCStores.h"                                   // TODO REMOVE this when graveyard handling for pvp is updated
 
-/// <summary>
-/// Initializes a new instance of the <see cref="BattleGroundAB"/> class.
-/// </summary>
+/**
+ * @brief Constructor for BattleGroundAB.
+ *
+ * Initializes node states, banner timers, scoring variables, and message IDs
+ * for Arathi Basin. Sets up neutral node ownership and zero timers for all nodes.
+ */
 BattleGroundAB::BattleGroundAB()
 {
     m_StartMessageIds[BG_STARTING_EVENT_FIRST]  = 0;
@@ -53,10 +73,15 @@ BattleGroundAB::~BattleGroundAB()
 {
 }
 
-/// <summary>
-/// Updates the specified diff.
-/// </summary>
-/// <param name="diff">The diff.</param>
+/**
+ * @brief Updates Arathi Basin battleground state.
+ *
+ * Processes banner timers, node state transitions from contested to occupied,
+ * accumulates team points based on controlled nodes, and rewards honor/reputation
+ * for point generation. Also handles near-victory notifications.
+ *
+ * @param diff The time differential in milliseconds since the last update.
+ */
 void BattleGroundAB::Update(uint32 diff)
 {
     BattleGround::Update(diff);
@@ -196,9 +221,12 @@ void BattleGroundAB::Update(uint32 diff)
     }
 }
 
-/// <summary>
-/// Startings the event open doors.
-/// </summary>
+/**
+ * @brief Opens the doors at the start of the battleground.
+ *
+ * Triggers the opening of all entrance doors, allowing players to begin interacting
+ * with the arena and objective nodes.
+ */
 void BattleGroundAB::StartingEventOpenDoors()
 {
     OpenDoorEvent(BG_EVENT_DOOR);
@@ -207,10 +235,14 @@ void BattleGroundAB::StartingEventOpenDoors()
     StartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, AB_EVENT_START_BATTLE);
 }
 
-/// <summary>
-/// Adds the player.
-/// </summary>
-/// <param name="plr">The PLR.</param>
+/**
+ * @brief Adds a player to the Arathi Basin battleground.
+ *
+ * Initializes the player's score entry and adds them to the battleground.
+ * Creates a new BattleGroundABScore structure with default values.
+ *
+ * @param plr Pointer to the player to add.
+ */
 void BattleGroundAB::AddPlayer(Player* plr)
 {
     BattleGround::AddPlayer(plr);
@@ -220,20 +252,28 @@ void BattleGroundAB::AddPlayer(Player* plr)
     m_PlayerScores[plr->GetObjectGuid()] = sc;
 }
 
-/// <summary>
-/// Removes the player.
-/// </summary>
-/// <param name="">The .</param>
-/// <param name="">The .</param>
+/**
+ * @brief Removes a player from the Arathi Basin battleground.
+ *
+ * Handles cleanup when a player leaves the battleground.
+ *
+ * @param plr Pointer to the player to remove.
+ * @param guid The GUID of the player to remove.
+ */
 void BattleGroundAB::RemovePlayer(Player * /*plr*/, ObjectGuid /*guid*/)
 {
 }
 
-/// <summary>
-/// Handles the area trigger.
-/// </summary>
-/// <param name="source">The source.</param>
-/// <param name="trigger">The trigger.</param>
+/**
+ * @brief Handles area trigger entry/exit points.
+ *
+ * Processes when a player enters an area trigger, typically used for battleground
+ * exits. Validates team affiliation and allows leaving the battleground.
+ *
+ * @param source Pointer to the player entering the trigger.
+ * @param trigger The trigger ID.
+ * @return true if the trigger was handled, false otherwise.
+ */
 bool BattleGroundAB::HandleAreaTrigger(Player* source, uint32 trigger)
 {
     switch (trigger)
@@ -294,11 +334,15 @@ void BattleGroundAB::_CreateBanner(uint8 node, uint8 type, uint8 teamIndex, bool
     SpawnEvent(node, type, true);                           // will automaticly despawn other events
 }
 
-/// <summary>
-/// _s the get node name id.
-/// </summary>
-/// <param name="node">The node.</param>
-/// <returns></returns>
+/**
+ * @brief Gets the language entry ID for a node name.
+ *
+ * Returns the language string ID corresponding to the node's name
+ * (e.g., LANG_BG_AB_NODE_STABLES).
+ *
+ * @param node The node index.
+ * @return The language entry ID for the node name.
+ */
 int32 BattleGroundAB::_GetNodeNameId(uint8 node)
 {
     switch (node)
@@ -314,11 +358,15 @@ int32 BattleGroundAB::_GetNodeNameId(uint8 node)
     return 0;
 }
 
-/// <summary>
-/// Fills the initial world states.
-/// </summary>
-/// <param name="data">The data.</param>
-/// <param name="count">The count.</param>
+/**
+ * @brief Fills the initial world states for all Arathi Basin players.
+ *
+ * Initializes all world state variables sent to clients when they enter the battleground,
+ * including node icons, ownership states, team base counts, and resource scores.
+ *
+ * @param data The packet to write world state data to.
+ * @param count Reference to the count of world state entries.
+ */
 void BattleGroundAB::FillInitialWorldStates(WorldPacket& data, uint32& count)
 {
     const uint8 plusArray[] = {0, 2, 3, 0, 1};
@@ -397,11 +445,16 @@ void BattleGroundAB::_SendNodeUpdate(uint8 node)
     UpdateWorldState(BG_AB_OP_OCCUPIED_BASES_HORDE, horde);
 }
 
-/// <summary>
-/// _s the node occupied.
-/// </summary>
-/// <param name="node">The node.</param>
-/// <param name="team">The team.</param>
+/**
+ * @brief Handles a node occupation event in Arathi Basin.
+ *
+ * Called when a node transitions from contested to occupied by a team.
+ * Checks if the team now controls enough bases to trigger quest rewards
+ * (4 bases or 5 bases completions).
+ *
+ * @param node The node index being occupied.
+ * @param team The team that now controls the node.
+ */
 void BattleGroundAB::_NodeOccupied(uint8 node, Team team)
 {
     uint8 capturedNodes = 0;
@@ -422,12 +475,15 @@ void BattleGroundAB::_NodeOccupied(uint8 node, Team team)
     }
 }
 
-/* Invoked if a player used a banner as a gameobject */
-/// <summary>
-/// Events the player clicked on flag.
-/// </summary>
-/// <param name="source">The source.</param>
-/// <param name="target_obj">The target_obj.</param>
+/**
+ * @brief Handles a player interacting with a banner flag.
+ *
+ * Processes when a player clicks on a node banner (flag), either to assault or defend.
+ * Only works if the player is on the team attempting the capture and the node is available.
+ *
+ * @param source The player attempting to capture/defend the flag.
+ * @param target_obj The banner game object being interacted with.
+ */
 void BattleGroundAB::EventPlayerClickedOnFlag(Player* source, GameObject* target_obj)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
@@ -595,10 +651,13 @@ void BattleGroundAB::Reset()
     }
 }
 
-/// <summary>
-/// Ends the battle ground.
-/// </summary>
-/// <param name="winner">The winner.</param>
+/**
+ * @brief Ends the Arathi Basin battleground.
+ *
+ * Rewards the winning team with honor and calls the parent class to finish the battleground.
+ *
+ * @param winner The winning team (ALLIANCE or HORDE).
+ */
 void BattleGroundAB::EndBattleGround(Team winner)
 {
     // win reward
@@ -617,11 +676,15 @@ void BattleGroundAB::EndBattleGround(Team winner)
     BattleGround::EndBattleGround(winner);
 }
 
-/// <summary>
-/// Gets the closest grave yard.
-/// </summary>
-/// <param name="player">The player.</param>
-/// <returns></returns>
+/**
+ * @brief Gets the closest graveyard for a player.
+ *
+ * Finds the nearest graveyard location for the player, prioritizing nodes controlled
+ * by their team. Searches through occupied bases to find the closest spawn point.
+ *
+ * @param player Pointer to the player.
+ * @return Pointer to the closest graveyard location entry, or NULL if none found.
+ */
 WorldSafeLocsEntry const* BattleGroundAB::GetClosestGraveYard(Player* player)
 {
     PvpTeamIndex teamIndex = GetTeamIndexByTeamId(player->GetTeam());
@@ -667,12 +730,16 @@ WorldSafeLocsEntry const* BattleGroundAB::GetClosestGraveYard(Player* player)
     return good_entry;
 }
 
-/// <summary>
-/// Updates the player score.
-/// </summary>
-/// <param name="source">The source.</param>
-/// <param name="type">The type.</param>
-/// <param name="value">The value.</param>
+/**
+ * @brief Updates Arathi Basin-specific player scores.
+ *
+ * Tracks player achievements including bases captured/assaulted, defended, and visits.
+ * Delegates unknown score types to the base battleground class.
+ *
+ * @param source Pointer to the player.
+ * @param type The score type to update (e.g., SCORE_BASES_CAPTURED).
+ * @param value The value to add to the score.
+ */
 void BattleGroundAB::UpdatePlayerScore(Player* source, uint32 type, uint32 value)
 {
     BattleGroundScoreMap::iterator itr = m_PlayerScores.find(source->GetObjectGuid());
@@ -705,9 +772,14 @@ bool BattleGroundAB::IsAllNodesControlledByTeam(Team team) const
     return true;
 }
 
-/// <summary>
-/// Gets the premature finish winning team.
-/// </summary>
+/**
+ * @brief Determines the premature winner if Arathi Basin ends early.
+ *
+ * Compares team resource scores to determine which team would win if the battleground
+ * ended prematurely (e.g., due to disconnections).
+ *
+ * @return The winning team (ALLIANCE or HORDE), or TEAM_NONE if tied.
+ */
 Team BattleGroundAB::GetPrematureWinner()
 {
     int32 hordeScore = m_TeamScores[TEAM_INDEX_HORDE];

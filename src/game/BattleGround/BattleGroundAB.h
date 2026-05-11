@@ -22,6 +22,51 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
+ */
+
+/**
+ * @file BattleGroundAB.h
+ * @brief Arathi Basin battleground header
+ *
+ * This header defines the Arathi Basin battleground implementation including:
+ *
+ * - Node control and capture mechanics
+ * - Resource generation and scoring
+ * - World state management
+ * - Banner and visual effects
+ *
+ * Key features:
+ * - 5 capture points (Stables, Farm, LM, Mine, BS)
+ * - Resource generation based on controlled nodes
+ * - Victory points and scoring system
+ * - Team-based resource tracking
+ *
+ * @see BattleGroundAB for implementation
+ * @see BattleGround for base class
+ */
+
 #ifndef MANGOS_H_BATTLEGROUNDAB
 #define MANGOS_H_BATTLEGROUNDAB
 
@@ -84,7 +129,7 @@ const uint32 BG_AB_OP_NODEICONS[5]  =    {1842, 1846, 1845, 1844, 1843}; /**< TO
  */
 enum BG_AB_Timers
 {
-    BG_AB_FLAG_CAPTURING_TIME           = 60000
+    BG_AB_FLAG_CAPTURING_TIME = 60000    ///< Flag capture time (ms)
 };
 
 /**
@@ -93,8 +138,8 @@ enum BG_AB_Timers
  */
 enum BG_AB_Score
 {
-    BG_AB_WARNING_NEAR_VICTORY_SCORE    = 1400,
-    BG_AB_MAX_TEAM_SCORE                = 1600
+    BG_AB_WARNING_NEAR_VICTORY_SCORE = 1400,    ///< Near victory warning score
+    BG_AB_MAX_TEAM_SCORE = 1600                 ///< Maximum team score
 };
 
 /* do NOT change the order, else wrong behaviour */
@@ -172,9 +217,9 @@ const float BG_AB_BuffPositions[BG_AB_NODES_MAX][4] = /**< TODO */
  */
 struct BG_AB_BannerTimer
 {
-    uint32      timer; /**< TODO */
-    uint8       type; /**< TODO */
-    uint8       teamIndex; /**< TODO */
+    uint32      timer;      ///< Timer for the banner
+    uint8       type;       ///< Type of the banner
+    uint8       teamIndex;  ///< Team index for the banner
 };
 
 /**

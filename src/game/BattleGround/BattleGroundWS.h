@@ -22,6 +22,27 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file BattleGroundWS.h
+ * @brief Warsong Gulch battleground header
+ *
+ * This header defines the Warsong Gulch battleground implementation including:
+ * - Flag capture and control mechanics
+ * - Flag state management (on base, wait respawn, on player, on ground)
+ * - Team-based flag possession and delivery
+ * - Scoring system based on flag captures
+ * - World state updates for client synchronization
+ *
+ * Key features:
+ * - 2-flag capture points (Silverwing, Gold Mine)
+ * - Flag pickup and drop mechanics
+ * - Team-based scoring (first to 3 captures wins)
+ * - Respawn timers for flags
+ *
+ * @see BattleGroundWS for implementation
+ * @see BattleGround for base class
+ */
+
 #ifndef MANGOS_H_BATTLEGROUNDWS
 #define MANGOS_H_BATTLEGROUNDWS
 
@@ -38,13 +59,13 @@
  */
 enum BG_WS_Sound
 {
-    BG_WS_SOUND_FLAG_CAPTURED_ALLIANCE  = 8173,
-    BG_WS_SOUND_FLAG_CAPTURED_HORDE     = 8213,
-    BG_WS_SOUND_FLAG_PLACED             = 8232,
-    BG_WS_SOUND_FLAG_RETURNED           = 8192,
-    BG_WS_SOUND_HORDE_FLAG_PICKED_UP    = 8212,
-    BG_WS_SOUND_ALLIANCE_FLAG_PICKED_UP = 8174,
-    BG_WS_SOUND_FLAGS_RESPAWNED         = 8232
+    BG_WS_SOUND_FLAG_CAPTURED_ALLIANCE  = 8173,     ///< Alliance flag captured
+    BG_WS_SOUND_FLAG_CAPTURED_HORDE     = 8213,     ///< Horde flag captured
+    BG_WS_SOUND_FLAG_PLACED             = 8232,     ///< Flag placed at base
+    BG_WS_SOUND_FLAG_RETURNED           = 8192,     ///< Flag returned to base
+    BG_WS_SOUND_HORDE_FLAG_PICKED_UP    = 8212,     ///< Horde picked up Alliance flag
+    BG_WS_SOUND_ALLIANCE_FLAG_PICKED_UP = 8174,     ///< Alliance picked up Horde flag
+    BG_WS_SOUND_FLAGS_RESPAWNED         = 8232      ///< Both flags respawned
 };
 
 /**
@@ -52,10 +73,10 @@ enum BG_WS_Sound
  */
 enum BG_WS_SpellId
 {
-    BG_WS_SPELL_WARSONG_FLAG            = 23333,
-    BG_WS_SPELL_WARSONG_FLAG_DROPPED    = 23334,
-    BG_WS_SPELL_SILVERWING_FLAG         = 23335,
-    BG_WS_SPELL_SILVERWING_FLAG_DROPPED = 23336
+    BG_WS_SPELL_WARSONG_FLAG            = 23333,     ///< Warsong Flag spell
+    BG_WS_SPELL_WARSONG_FLAG_DROPPED    = 23334,     ///< Warsong Flag Dropped spell
+    BG_WS_SPELL_SILVERWING_FLAG         = 23335,     ///< Silverwing Flag spell
+    BG_WS_SPELL_SILVERWING_FLAG_DROPPED = 23336      ///< Silverwing Flag Dropped spell
 };
 
 /**
@@ -63,14 +84,14 @@ enum BG_WS_SpellId
  */
 enum BG_WS_WorldStates
 {
-    BG_WS_FLAG_UNK_ALLIANCE       = 1545,
-    BG_WS_FLAG_UNK_HORDE          = 1546,
-    // BG_FLAG_UNK                   = 1547,
-    BG_WS_FLAG_CAPTURES_ALLIANCE  = 1581,
-    BG_WS_FLAG_CAPTURES_HORDE     = 1582,
-    BG_WS_FLAG_CAPTURES_MAX       = 1601,
-    BG_WS_FLAG_STATE_HORDE        = 2338,
-    BG_WS_FLAG_STATE_ALLIANCE     = 2339,
+    BG_WS_FLAG_UNK_ALLIANCE       = 1545,       ///< Alliance flag unknown
+    BG_WS_FLAG_UNK_HORDE          = 1546,       ///< Horde flag unknown
+    // BG_FLAG_UNK                = 1547,
+    BG_WS_FLAG_CAPTURES_ALLIANCE  = 1581,       ///< Alliance flag captures
+    BG_WS_FLAG_CAPTURES_HORDE     = 1582,       ///< Horde flag captures
+    BG_WS_FLAG_CAPTURES_MAX       = 1601,       ///< Maximum flag captures reached
+    BG_WS_FLAG_STATE_HORDE        = 2338,       ///< Horde flag state
+    BG_WS_FLAG_STATE_ALLIANCE     = 2339,       ///< Alliance flag state
     BG_WS_TIME_ENABLED            = 4247,
     BG_WS_TIME_REMAINING          = 4248
 };
@@ -80,10 +101,10 @@ enum BG_WS_WorldStates
  */
 enum BG_WS_FlagState
 {
-    BG_WS_FLAG_STATE_ON_BASE      = 0,
-    BG_WS_FLAG_STATE_WAIT_RESPAWN = 1,
-    BG_WS_FLAG_STATE_ON_PLAYER    = 2,
-    BG_WS_FLAG_STATE_ON_GROUND    = 3
+    BG_WS_FLAG_STATE_ON_BASE      = 0,        ///< Flag at base
+    BG_WS_FLAG_STATE_WAIT_RESPAWN = 1,        ///< Flag waiting to respawn
+    BG_WS_FLAG_STATE_ON_PLAYER    = 2,        ///< Flag carried by player
+    BG_WS_FLAG_STATE_ON_GROUND    = 3         ///< Flag dropped on ground
 };
 
 /**
@@ -91,14 +112,18 @@ enum BG_WS_FlagState
  */
 enum BG_WS_Graveyards
 {
-    WS_GRAVEYARD_FLAGROOM_ALLIANCE = 769,
-    WS_GRAVEYARD_FLAGROOM_HORDE    = 770,
-    WS_GRAVEYARD_MAIN_ALLIANCE     = 771,
-    WS_GRAVEYARD_MAIN_HORDE        = 772
+    WS_GRAVEYARD_FLAGROOM_ALLIANCE = 769,     ///< Alliance flag room graveyard
+    WS_GRAVEYARD_FLAGROOM_HORDE    = 770,     ///< Horde flag room graveyard
+    WS_GRAVEYARD_MAIN_ALLIANCE     = 771,     ///< Alliance main graveyard
+    WS_GRAVEYARD_MAIN_HORDE        = 772      ///< Horde main graveyard
 };
 
 /**
  * @brief Class for storing Warsong Gulch score.
+ *
+ * Extends BattleGroundScore with WS-specific attributes:
+ * - Flag captures and returns
+ * - Team-based scoring
  */
 class BattleGroundWGScore : public BattleGroundScore
 {
@@ -111,12 +136,16 @@ class BattleGroundWGScore : public BattleGroundScore
          * @brief Destructor for BattleGroundWGScore.
          */
         virtual ~BattleGroundWGScore() {};
-        uint32 FlagCaptures; /**< Number of flag captures. */
-        uint32 FlagReturns; /**< Number of flag returns. */
+
+        // Accessors for WS-specific attributes
+        uint32 FlagCaptures;  ///< Number of flag captures
+        uint32 FlagReturns;   ///< Number of flag returns
 };
 
 /**
  * @brief Enum for Warsong Gulch events.
+ *
+ * Defines event IDs used in Warsong Gulch battleground.
  */
 enum BG_WS_Events
 {
@@ -127,7 +156,16 @@ enum BG_WS_Events
 };
 
 /**
- * @brief Class for managing Warsong Gulch battleground.
+ * @brief Class for Warsong Gulch battleground.
+ *
+ * Extends BattleGround with WS-specific mechanics:
+ * - Flag capture and return system
+ * - Team-based scoring (first to 3 captures wins)
+ * - Flag respawn timers
+ * - Graveyard management
+ *
+ * @see BattleGround for base class
+ * @see BattleGroundWGScore for scoring
  */
 class BattleGroundWS : public BattleGround
 {

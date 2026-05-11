@@ -22,6 +22,34 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file BattleGroundMgr.h
+ * @brief Battleground manager header
+ *
+ * This header defines the BattleGroundMgr singleton class which manages:
+ *
+ * - Battleground instance creation and destruction
+ * - Player queuing and matchmaking
+ * - Team balancing and selection pools
+ * - Queue status tracking
+ * - Event handling and timing
+ *
+ * The manager supports multiple battleground types:
+ * - Warsong Gulch (WS) - flag capture
+ * - Arathi Basin (AB) - resource control
+ * - Alterac Valley (AV) - large scale PvP
+ *
+ * Key features:
+ * - Multi-bracket support (level ranges)
+ * - Group and solo queue handling
+ * - Average wait time calculation
+ * - Premature ending detection
+ *
+ * @see BattleGroundMgr for implementation
+ * @see BattleGround for base battleground class
+ * @see Specific battleground classes for extensions
+ */
+
 #ifndef MANGOS_H_BATTLEGROUNDMGR
 #define MANGOS_H_BATTLEGROUNDMGR
 

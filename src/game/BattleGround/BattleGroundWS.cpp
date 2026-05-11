@@ -22,6 +22,23 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file BattleGroundWS.cpp
+ * @brief Implementation of Warsong Gulch battleground.
+ *
+ * This file contains the implementation of the Warsong Gulch battleground (BattleGroundWS),
+ * which features:
+ * - Flag capture and control mechanics
+ * - Flag return and respawn logic
+ * - Flag drop and pickup handling
+ * - Team-based flag possession tracking
+ * - Victory condition (first to 3 flag captures)
+ * - Integration with the base BattleGround class
+ *
+ * Warsong Gulch is a team-based battleground focused on capturing and delivering
+ * the opposing team's flag to achieve victory points.
+ */
+
 #include "Object.h"
 #include "Player.h"
 #include "BattleGround.h"
@@ -34,6 +51,11 @@
 #include "Language.h"
 #include "MapManager.h"
 
+/**
+ * @brief Constructor for BattleGroundWS.
+ *
+ * Initializes Warsong Gulch with default start messages and game state.
+ */
 BattleGroundWS::BattleGroundWS()
 {
     m_StartMessageIds[BG_STARTING_EVENT_FIRST]  = 0;
@@ -42,6 +64,14 @@ BattleGroundWS::BattleGroundWS()
     m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_WS_HAS_BEGUN;
 }
 
+/**
+ * @brief Updates the Warsong Gulch battleground.
+ *
+ * Handles flag state transitions, respawn timers for dropped flags, and checks for victory.
+ * Called once per world tick while the battleground is in progress.
+ *
+ * @param diff The time elapsed since the last update in milliseconds.
+ */
 void BattleGroundWS::Update(uint32 diff)
 {
     BattleGround::Update(diff);
@@ -119,6 +149,11 @@ void BattleGroundWS::Update(uint32 diff)
     }
 }
 
+/**
+ * @brief Opens doors and spawns initial Warsong Gulch objects.
+ *
+ * Triggers door opening and spawns the flags and spirit guides at the start of the battleground.
+ */
 void BattleGroundWS::StartingEventOpenDoors()
 {
     OpenDoorEvent(BG_EVENT_DOOR);
@@ -133,6 +168,13 @@ void BattleGroundWS::StartingEventOpenDoors()
     StartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, BG_WS_EVENT_START_BATTLE);
 }
 
+/**
+ * @brief Adds a player to the Warsong Gulch battleground.
+ *
+ * Initializes the player's score entry for this battleground.
+ *
+ * @param plr Pointer to the player to add.
+ */
 void BattleGroundWS::AddPlayer(Player* plr)
 {
     BattleGround::AddPlayer(plr);
@@ -142,6 +184,15 @@ void BattleGroundWS::AddPlayer(Player* plr)
     m_PlayerScores[plr->GetObjectGuid()] = sc;
 }
 
+/**
+ * @brief Respawns a flag at its base location.
+ *
+ * Resets a captured or dropped flag back to its base and broadcasts the respawn event
+ * to all players. Handles the initial placement message and sound.
+ *
+ * @param team The team whose flag to respawn (ALLIANCE or HORDE).
+ * @param captured Whether the flag was captured (true) or merely dropped (false).
+ */
 void BattleGroundWS::RespawnFlag(Team team, bool captured)
 {
     if (team == ALLIANCE)
@@ -199,6 +250,15 @@ void BattleGroundWS::RespawnDroppedFlag(Team team)
     ClearDroppedFlagGuid(team);
 }
 
+/**
+ * @brief Processes a flag capture event in Warsong Gulch.
+ *
+ * Called when a player successfully carries the enemy flag back to their base.
+ * Updates team score, removes the flag aura from the carrier, spawns the captured flag
+ * for respawn, and grants reputation/honor rewards.
+ *
+ * @param source The player who captured the flag.
+ */
 void BattleGroundWS::EventPlayerCapturedFlag(Player* source)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
@@ -293,6 +353,15 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player* source)
     }
 }
 
+/**
+ * @brief Processes a flag drop event in Warsong Gulch.
+ *
+ * Called when a flag carrier dies or leaves the battleground, dropping the flag.
+ * Spawns the flag on the ground, sets the flag drop timer, and removes the flag carrier status.
+ * Resets the flag respawn timer for the other team.
+ *
+ * @param source The player dropping the flag.
+ */
 void BattleGroundWS::EventPlayerDroppedFlag(Player* source)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
@@ -379,6 +448,15 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player* source)
     }
 }
 
+/**
+ * @brief Handles flag pickup by a player.
+ *
+ * Processes when a player picks up a flag, applying the appropriate aura and updating
+ * the flag state. Prevents pickup if the flag is not in a valid state.
+ *
+ * @param source Pointer to the player picking up the flag.
+ * @param target_obj Pointer to the flag game object.
+ */
 void BattleGroundWS::EventPlayerClickedOnFlag(Player* source, GameObject* target_obj)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
@@ -531,6 +609,13 @@ void BattleGroundWS::UpdateFlagState(Team team, uint32 value)
     }
 }
 
+/**
+ * @brief Updates the team score display for Warsong Gulch.
+ *
+ * Updates the world state to display the current flag capture count for each team.
+ *
+ * @param team The team whose score to update (ALLIANCE or HORDE).
+ */
 void BattleGroundWS::UpdateTeamScore(Team team)
 {
     if (team == ALLIANCE)
@@ -543,6 +628,16 @@ void BattleGroundWS::UpdateTeamScore(Team team)
     }
 }
 
+/**
+ * @brief Handles area trigger entry points for Warsong Gulch.
+ *
+ * Processes when players enter capture zones or exit portals. Handles flag capture
+ * detection, team validation, and battleground exit triggers.
+ *
+ * @param source Pointer to the player entering the trigger.
+ * @param trigger The trigger ID.
+ * @return true if the trigger was handled, false otherwise.
+ */
 bool BattleGroundWS::HandleAreaTrigger(Player* source, uint32 trigger)
 {
     // this is wrong way to implement these things. On official it done by gameobject spell cast.
@@ -602,6 +697,13 @@ void BattleGroundWS::Reset()
     m_LastCapturedFlagTeam = TEAM_NONE;
 }
 
+/**
+ * @brief Ends the Warsong Gulch battleground.
+ *
+ * Rewards the winning team with honor and calls parent class to finish.
+ *
+ * @param winner The winning team (ALLIANCE or HORDE).
+ */
 void BattleGroundWS::EndBattleGround(Team winner)
 {
     // win reward
@@ -635,6 +737,14 @@ void BattleGroundWS::EndBattleGround(Team winner)
     BattleGround::EndBattleGround(winner);
 }
 
+/**
+ * @brief Handles a player death in Warsong Gulch.
+ *
+ * Processes player kills and drops flags if the killed player was carrying one.
+ *
+ * @param player Pointer to the killed player.
+ * @param killer Pointer to the player who killed them.
+ */
 void BattleGroundWS::HandleKillPlayer(Player* player, Player* killer)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
@@ -669,6 +779,16 @@ void BattleGroundWS::UpdatePlayerScore(Player* source, uint32 type, uint32 value
     }
 }
 
+/**
+ * @brief Gets the closest graveyard for a player in Warsong Gulch.
+ *
+ * Returns the appropriate graveyard based on game status. During preparation,
+ * returns the flagroom graveyard to prevent exploiting. During battle, returns
+ * the main graveyards.
+ *
+ * @param player Pointer to the player.
+ * @return Pointer to the closest graveyard entry, or NULL if none found.
+ */
 WorldSafeLocsEntry const* BattleGroundWS::GetClosestGraveYard(Player* player)
 {
     // if status in progress, it returns main graveyards with spiritguides
@@ -700,6 +820,15 @@ WorldSafeLocsEntry const* BattleGroundWS::GetClosestGraveYard(Player* player)
     }
 }
 
+/**
+ * @brief Fills initial world state values for Warsong Gulch.
+ *
+ * Sends all initial world state values to clients when they enter, including
+ * flag positions, capture counts, and flag carrier information.
+ *
+ * @param data The packet to write world state data to.
+ * @param count Reference to the count of world state entries.
+ */
 void BattleGroundWS::FillInitialWorldStates(WorldPacket& data, uint32& count)
 {
     FillInitialWorldState(data, count, BG_WS_FLAG_CAPTURES_ALLIANCE, m_TeamScores[TEAM_INDEX_ALLIANCE]);
@@ -755,6 +884,14 @@ void BattleGroundWS::FillInitialWorldStates(WorldPacket& data, uint32& count)
     FillInitialWorldState(data, count, BG_WS_TIME_REMAINING, GetRemainingTimeInMinutes());
 }
 
+/**
+ * @brief Determines the premature winner if Warsong Gulch ends early.
+ *
+ * Compares flag capture scores to determine which team would win if the battleground
+ * ended prematurely (e.g., due to one team disconnecting).
+ *
+ * @return The winning team, or TEAM_NONE if tied.
+ */
 Team BattleGroundWS::GetPrematureWinner()
 {
     int32 hordeScore = m_TeamScores[TEAM_INDEX_HORDE];

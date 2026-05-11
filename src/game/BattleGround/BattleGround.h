@@ -22,6 +22,27 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file BattleGround.h
+ * @brief Base battleground system header
+ *
+ * This header defines the core battleground system including:
+ *
+ * - Base BattleGround class interface
+ * - Battleground type definitions
+ * - Event and sound enums
+ * - Quest and mark constants
+ * - Player scoring structures
+ *
+ * The system supports multiple battleground types:
+ * - Warsong Gulch (capture the flag)
+ * - Arathi Basin (resource control)
+ * - Alterac Valley (large scale PvP)
+ *
+ * @see BattleGround for the base implementation
+ * @see Specific battleground classes for extensions
+ */
+
 #ifndef MANGOS_H_BATTLEGROUND
 #define MANGOS_H_BATTLEGROUND
 
@@ -66,51 +87,47 @@ struct BattleGroundEventIdx
  */
 enum BattleGroundSounds
 {
-    SOUND_HORDE_WINS                = 8454,
-    SOUND_ALLIANCE_WINS             = 8455,
-    SOUND_BG_START                  = 3439
+    SOUND_HORDE_WINS = 8454,     ///< Horde victory sound
+    SOUND_ALLIANCE_WINS = 8455,   ///< Alliance victory sound
+    SOUND_BG_START = 3439         ///< Battleground start sound
 };
 
 /**
- * @brief
- *
+ * @brief Enum for battleground quest spells.
  */
 enum BattleGroundQuests
 {
-    SPELL_WS_QUEST_REWARD           = 43483,
-    SPELL_AB_QUEST_REWARD           = 43484,
-    SPELL_AV_QUEST_REWARD           = 43475,
-    SPELL_AV_QUEST_KILLED_BOSS      = 23658,
-    SPELL_EY_QUEST_REWARD           = 43477,
-    SPELL_AB_QUEST_REWARD_4_BASES   = 24061,
-    SPELL_AB_QUEST_REWARD_5_BASES   = 24064
+    SPELL_WS_QUEST_REWARD = 43483,         ///< Warsong Gulch quest reward spell
+    SPELL_AB_QUEST_REWARD = 43484,         ///< Arathi Basin quest reward spell
+    SPELL_AV_QUEST_REWARD = 43475,         ///< Alterac Valley quest reward spell
+    SPELL_AV_QUEST_KILLED_BOSS = 23658,    ///< AV boss kill quest spell
+    SPELL_EY_QUEST_REWARD = 43477,
+    SPELL_AB_QUEST_REWARD_4_BASES = 24061, ///< AB 4 bases quest reward
+    SPELL_AB_QUEST_REWARD_5_BASES = 24064  ///< AB 5 bases quest reward
 };
 
 /**
- * @brief
- *
+ * @brief Enum for battleground mark spells.
  */
 enum BattleGroundMarks
 {
-    SPELL_WS_MARK_LOSER             = 24950,                // not create marks now
-    SPELL_WS_MARK_WINNER            = 24951,                // not create marks now
-    SPELL_AB_MARK_LOSER             = 24952,                // not create marks now
-    SPELL_AB_MARK_WINNER            = 24953,                // not create marks now
-    SPELL_AV_MARK_LOSER             = 24954,                // not create marks now
-    SPELL_AV_MARK_WINNER            = 24955,                // not create marks now
-
-    SPELL_WG_MARK_VICTORY           = 24955,                // honor + mark
-    SPELL_WG_MARK_DEFEAT            = 58494,                // honor + mark
+    SPELL_WS_MARK_LOSER = 24950,      ///< Warsong Gulch loser mark
+    SPELL_WS_MARK_WINNER = 24951,     ///< Warsong Gulch winner mark
+    SPELL_AB_MARK_LOSER = 24952,      ///< Arathi Basin loser mark
+    SPELL_AB_MARK_WINNER = 24953,     ///< Arathi Basin winner mark
+    SPELL_AV_MARK_LOSER = 24954,      ///< Alterac Valley loser mark
+    SPELL_AV_MARK_WINNER = 24955,     ///< Alterac Valley winner mark
+    SPELL_WG_MARK_VICTORY = 24955,    ///< honor + mark
+    SPELL_WG_MARK_DEFEAT = 58494,     ///< honor + mark
 };
 
 /**
- * @brief
- *
+ * @brief Enum for battleground mark item counts.
  */
 enum BattleGroundMarksCount
 {
-    ITEM_WINNER_COUNT               = 3,
-    ITEM_LOSER_COUNT                = 1
+    ITEM_WINNER_COUNT = 3,  ///< Winner receives 3 marks
+    ITEM_LOSER_COUNT = 1   ///< Loser receives 1 mark
 };
 
 enum BattleGroundSpells
@@ -133,15 +150,16 @@ enum BattleGroundSpells
  */
 enum BattleGroundTimeIntervals
 {
-    RESURRECTION_INTERVAL           = 30000,                // ms
-    INVITATION_REMIND_TIME          = 20000,                // ms
-    INVITE_ACCEPT_WAIT_TIME         = 60000,                // ms
-    TIME_TO_AUTOREMOVE              = 120000,               // ms
-    MAX_OFFLINE_TIME                = 300,                  // secs
-    RESPAWN_ONE_DAY                 = 86400,                // secs
-    RESPAWN_IMMEDIATELY             = 0,                    // secs
-    BUFF_RESPAWN_TIME               = 180,                  // secs
-    ARENA_SPAWN_BUFF_OBJECTS        = 90000,                // ms - 90sec after start
+    //CHECK_PLAYER_POSITION_INVERVAL = 1000,  ///< Check player position interval (ms)
+    RESURRECTION_INTERVAL = 30000,          ///< Resurrection interval (ms)
+    INVITATION_REMIND_TIME = 20000,         ///< Invitation reminder time (ms)
+    INVITE_ACCEPT_WAIT_TIME = 60000,        ///< Invitation accept wait time (ms)
+    TIME_TO_AUTOREMOVE = 120000,            ///< Auto-remove time (ms)
+    MAX_OFFLINE_TIME = 300,                 ///< Max offline time (secs)
+    RESPAWN_ONE_DAY = 86400,                ///< Respawn one day (secs)
+    RESPAWN_IMMEDIATELY = 0,                ///< Respawn immediately (secs)
+    BUFF_RESPAWN_TIME = 180,                ///< Buff respawn time (secs)
+    ARENA_SPAWN_BUFF_OBJECTS = 90000,       ///< ms - 90sec after start
 };
 
 /**
@@ -150,11 +168,11 @@ enum BattleGroundTimeIntervals
  */
 enum BattleGroundStartTimeIntervals
 {
-    BG_START_DELAY_2M               = 120000,               // ms (2 minutes)
-    BG_START_DELAY_1M               = 60000,                // ms (1 minute)
-    BG_START_DELAY_30S              = 30000,                // ms (30 seconds)
-    BG_START_DELAY_15S              = 15000,                // ms (15 seconds) Used only in arena
-    BG_START_DELAY_NONE             = 0,                    // ms
+    BG_START_DELAY_2M = 120000,             ///< 2 minutes delay (ms)
+    BG_START_DELAY_1M = 60000,              ///< 1 minute delay (ms)
+    BG_START_DELAY_30S = 30000,             ///< 30 seconds delay (ms)
+    BG_START_DELAY_15S = 15000,             ///< ms (15 seconds) Used only in arena
+    BG_START_DELAY_NONE = 0,                ///< No delay (ms)
 };
 
 /**
@@ -163,9 +181,9 @@ enum BattleGroundStartTimeIntervals
  */
 enum BattleGroundBuffObjects
 {
-    BG_OBJECTID_SPEEDBUFF_ENTRY     = 179871,
-    BG_OBJECTID_REGENBUFF_ENTRY     = 179904,
-    BG_OBJECTID_BERSERKERBUFF_ENTRY = 179905
+    BG_OBJECTID_SPEEDBUFF_ENTRY = 179871,     ///< Speed buff object
+    BG_OBJECTID_REGENBUFF_ENTRY = 179904,     ///< Regeneration buff object
+    BG_OBJECTID_BERSERKERBUFF_ENTRY = 179905  ///< Berserker buff object
 };
 
 enum BattleGroundRandomRewards
@@ -186,11 +204,11 @@ const uint32 Buff_Entries[3] = { BG_OBJECTID_SPEEDBUFF_ENTRY, BG_OBJECTID_REGENB
  */
 enum BattleGroundStatus
 {
-    STATUS_NONE         = 0,                                // first status, should mean bg is not instance
-    STATUS_WAIT_QUEUE   = 1,                                // means bg is empty and waiting for queue
-    STATUS_WAIT_JOIN    = 2,                                // this means, that BG has already started and it is waiting for more players
-    STATUS_IN_PROGRESS  = 3,                                // means bg is running
-    STATUS_WAIT_LEAVE   = 4                                 // means some faction has won BG and it is ending
+    STATUS_NONE = 0,                          ///< BG not instantiated
+    STATUS_WAIT_QUEUE = 1,                    ///< BG empty, waiting for queue
+    STATUS_WAIT_JOIN = 2,                     ///< BG started, waiting for players
+    STATUS_IN_PROGRESS = 3,                   ///< BG running
+    STATUS_WAIT_LEAVE = 4                     ///< BG ending (faction won)
 };
 
 /**
@@ -199,8 +217,8 @@ enum BattleGroundStatus
  */
 struct BattleGroundPlayer
 {
-    time_t  OfflineRemoveTime;                              /**< for tracking and removing offline players from queue after 5 minutes */
-    Team    PlayerTeam;                                     /**< Player's team */
+    time_t  OfflineRemoveTime;                /**< Offline player removal time (5 minutes) */
+    Team    PlayerTeam;                       /**< Player's team affiliation */
 };
 
 /**
@@ -226,51 +244,45 @@ struct BattleGroundObjectInfo
  */
 enum BattleGroundQueueTypeId
 {
-    BATTLEGROUND_QUEUE_NONE     = 0,
-    BATTLEGROUND_QUEUE_AV       = 1,
-    BATTLEGROUND_QUEUE_WS       = 2,
-    BATTLEGROUND_QUEUE_AB       = 3,
-    BATTLEGROUND_QUEUE_EY       = 4,
-    BATTLEGROUND_QUEUE_SA       = 5,
-    BATTLEGROUND_QUEUE_IC       = 6,
-    BATTLEGROUND_QUEUE_RB       = 7,
-    BATTLEGROUND_QUEUE_2v2      = 8,
-    BATTLEGROUND_QUEUE_3v3      = 9,
-    BATTLEGROUND_QUEUE_5v5      = 10
+    BATTLEGROUND_QUEUE_NONE = 0,            ///< No queue type
+    BATTLEGROUND_QUEUE_AV = 1,              ///< Alterac Valley queue
+    BATTLEGROUND_QUEUE_WS = 2,              ///< Warsong Gulch queue
+    BATTLEGROUND_QUEUE_AB = 3,              ///< Arathi Basin queue
+    BATTLEGROUND_QUEUE_EY = 4,
+    BATTLEGROUND_QUEUE_SA = 5,
+    BATTLEGROUND_QUEUE_IC = 6,
+    BATTLEGROUND_QUEUE_RB = 7,
+    BATTLEGROUND_QUEUE_2v2 = 8,
+    BATTLEGROUND_QUEUE_3v3 = 9,
+    BATTLEGROUND_QUEUE_5v5 = 10
 };
 
 #define MAX_BATTLEGROUND_QUEUE_TYPES 11
 
 /**
- * @brief
- *
- */
-
-/**
- * @brief
- *
+ * @brief Enum for battleground score types.
  */
 enum ScoreType
 {
-    SCORE_KILLING_BLOWS         = 1,
-    SCORE_DEATHS                = 2,
-    SCORE_HONORABLE_KILLS       = 3,
-    SCORE_BONUS_HONOR           = 4,
+    SCORE_KILLING_BLOWS = 1,               ///< Killing blows
+    SCORE_DEATHS = 2,                      ///< Deaths
+    SCORE_HONORABLE_KILLS = 3,             ///< Honorable kills
+    SCORE_BONUS_HONOR = 4,                 ///< Bonus honor
     // EY, but in MSG_PVP_LOG_DATA opcode!
-    SCORE_DAMAGE_DONE           = 5,
-    SCORE_HEALING_DONE          = 6,
-    // WS
-    SCORE_FLAG_CAPTURES         = 7,
-    SCORE_FLAG_RETURNS          = 8,
-    // AB
-    SCORE_BASES_ASSAULTED       = 9,
-    SCORE_BASES_DEFENDED        = 10,
-    // AV
-    SCORE_GRAVEYARDS_ASSAULTED  = 11,
-    SCORE_GRAVEYARDS_DEFENDED   = 12,
-    SCORE_TOWERS_ASSAULTED      = 13,
-    SCORE_TOWERS_DEFENDED       = 14,
-    SCORE_SECONDARY_OBJECTIVES  = 15
+    SCORE_DAMAGE_DONE = 5,
+    SCORE_HEALING_DONE = 6,
+    // Warsong Gulch
+    SCORE_FLAG_CAPTURES = 7,               ///< Flag captures
+    SCORE_FLAG_RETURNS = 8,                ///< Flag returns
+    // Arathi Basin
+    SCORE_BASES_ASSAULTED = 9,             ///< Bases assaulted
+    SCORE_BASES_DEFENDED = 10,             ///< Bases defended
+    // Alterac Valley
+    SCORE_GRAVEYARDS_ASSAULTED = 11,       ///< Graveyards assaulted
+    SCORE_GRAVEYARDS_DEFENDED = 12,        ///< Graveyards defended
+    SCORE_TOWERS_ASSAULTED = 13,           ///< Towers assaulted
+    SCORE_TOWERS_DEFENDED = 14,            ///< Towers defended
+    SCORE_SECONDARY_OBJECTIVES = 15        ///< Secondary objectives
 };
 
 enum BattleGroundType
@@ -285,11 +297,11 @@ enum BattleGroundType
  */
 enum BattleGroundStartingEvents
 {
-    BG_STARTING_EVENT_NONE  = 0x00,
-    BG_STARTING_EVENT_1     = 0x01,
-    BG_STARTING_EVENT_2     = 0x02,
-    BG_STARTING_EVENT_3     = 0x04,
-    BG_STARTING_EVENT_4     = 0x08
+    BG_STARTING_EVENT_NONE = 0x00,  ///< No event
+    BG_STARTING_EVENT_1 = 0x01,     ///< First event
+    BG_STARTING_EVENT_2 = 0x02,     ///< Second event
+    BG_STARTING_EVENT_3 = 0x04,     ///< Third event
+    BG_STARTING_EVENT_4 = 0x08      ///< Fourth event
 };
 
 /**
@@ -298,10 +310,10 @@ enum BattleGroundStartingEvents
  */
 enum BattleGroundStartingEventsIds
 {
-    BG_STARTING_EVENT_FIRST     = 0,
-    BG_STARTING_EVENT_SECOND    = 1,
-    BG_STARTING_EVENT_THIRD     = 2,
-    BG_STARTING_EVENT_FOURTH    = 3
+    BG_STARTING_EVENT_FIRST = 0,      ///< First starting event
+    BG_STARTING_EVENT_SECOND = 1,     ///< Second starting event
+    BG_STARTING_EVENT_THIRD = 2,      ///< Third starting event
+    BG_STARTING_EVENT_FOURTH = 3      ///< Fourth starting event
 };
 #define BG_STARTING_EVENT_COUNT 4
 
@@ -331,8 +343,10 @@ enum GroupJoinBattlegroundResult
 };
 
 /**
- * @brief
+ * @brief Class to hold battleground score information.
  *
+ * Base class for battleground scoring. Extended by specific
+ * battleground implementations to track unique statistics.
  */
 class BattleGroundScore
 {
@@ -350,10 +364,10 @@ class BattleGroundScore
          */
         virtual ~BattleGroundScore() {}
 
-        uint32 KillingBlows; /**< TODO */
-        uint32 Deaths; /**< TODO */
-        uint32 HonorableKills; /**< TODO */
-        uint32 BonusHonor; /**< TODO */
+        uint32 KillingBlows; /**< Number of killing blows */
+        uint32 Deaths; /**< Number of deaths */
+        uint32 HonorableKills; /**< Number of honorable kills */
+        uint32 BonusHonor; /**< Amount of bonus honor */
         uint32 DamageDone;
         uint32 HealingDone;
 };
