@@ -29,8 +29,6 @@
 #include <openssl/evp.h>
 #include "Common/Common.h"
 #include "OpenSSLProvider.h"
-#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
-#endif
 
 class ARC4
 {
