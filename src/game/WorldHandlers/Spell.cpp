@@ -4455,10 +4455,16 @@ void Spell::finish(bool ok)
     }
 
     // update encounter state if needed
-    Map* map = m_caster->GetMap();
-    if (map->IsDungeon())
+    // Caster may have left the world during the cast pipeline (e.g. a
+    // DB-script-triggered cast targeting a unit that despawned mid-step);
+    // without this guard GetMap() would assert on a NULL m_currMap.
+    if (m_caster->IsInWorld())
     {
-        ((DungeonMap*)map)->GetPersistanceState()->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, m_spellInfo->Id);
+        Map* map = m_caster->GetMap();
+        if (map->IsDungeon())
+        {
+            ((DungeonMap*)map)->GetPersistanceState()->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, m_spellInfo->Id);
+        }
     }
 }
 
