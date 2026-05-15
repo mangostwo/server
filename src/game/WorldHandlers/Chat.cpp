@@ -22,6 +22,25 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file Chat.cpp
+ * @brief Chat system implementation
+ *
+ * This file implements the chat system including:
+ * - Message formatting and color codes
+ * - Shift-link parsing (item, spell, quest links)
+ * - Channel message routing
+ * - Whisper, say, yell, emote handling
+ * - GM command parsing and execution
+ * - Language filtering
+ *
+ * The chat system supports various message types with different
+ * visibility ranges and formatting requirements.
+ *
+ * @see ChatHandler for command handling
+ * @see Channel for channel chat
+ */
+
 #include "Chat.h"
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
@@ -77,6 +96,11 @@
 
 bool ChatHandler::load_command_table = true;
 
+/**
+ * @brief Builds and returns the root command table used by the chat handler.
+ *
+ * @return ChatCommand* The top-level command table.
+ */
 ChatCommand* ChatHandler::getCommandTable()
 {
     static ChatCommand accountSetCommandTable[] =
@@ -893,37 +917,78 @@ ChatHandler::ChatHandler(Player* player) : m_session(player->GetSession()) {}
 
 ChatHandler::~ChatHandler() {}
 
+/**
+ * @brief Returns a localized MaNGOS string for the current session.
+ *
+ * @param entry The string table entry identifier.
+ * @return const char* The localized string.
+ */
 const char* ChatHandler::GetMangosString(int32 entry) const
 {
     return m_session->GetMangosString(entry);
 }
 
+/**
+ * @brief Returns the localized on or off label.
+ *
+ * @param value The boolean value to convert.
+ * @return const char* The localized on/off string.
+ */
 const char* ChatHandler::GetOnOffStr(bool value) const
 {
     return value ?  GetMangosString(LANG_ON) : GetMangosString(LANG_OFF);
 }
 
+/**
+ * @brief Returns the account id associated with this chat handler.
+ *
+ * @return uint32 The current account id.
+ */
 uint32 ChatHandler::GetAccountId() const
 {
     return m_session->GetAccountId();
 }
 
+/**
+ * @brief Returns the security level of the current session.
+ *
+ * @return AccountTypes The current access level.
+ */
 AccountTypes ChatHandler::GetAccessLevel() const
 {
     return m_session->GetSecurity();
 }
 
+/**
+ * @brief Checks whether a command is available at the current access level.
+ *
+ * @param cmd The command to test.
+ * @return true if the command is available; otherwise false.
+ */
 bool ChatHandler::isAvailable(ChatCommand const& cmd) const
 {
     // check security level only for simple  command (without child commands)
     return GetAccessLevel() >= (AccountTypes)cmd.SecurityLevel;
 }
 
+/**
+ * @brief Builds a clickable name link for the current player.
+ *
+ * @return std::string The formatted player link.
+ */
 std::string ChatHandler::GetNameLink() const
 {
     return GetNameLink(m_session->GetPlayer());
 }
 
+/**
+ * @brief Checks whether the handler has lower security than a target player or account.
+ *
+ * @param target The online target player, if available.
+ * @param guid The target player GUID when no player pointer is available.
+ * @param strong True to require strictly greater access.
+ * @return true if the handler lacks sufficient security; otherwise false.
+ */
 bool ChatHandler::HasLowerSecurity(Player* target, ObjectGuid guid, bool strong)
 {
     WorldSession* target_session = NULL;
@@ -948,6 +1013,14 @@ bool ChatHandler::HasLowerSecurity(Player* target, ObjectGuid guid, bool strong)
     return HasLowerSecurityAccount(target_session, target_account, strong);
 }
 
+/**
+ * @brief Checks whether the handler has lower security than a target account or session.
+ *
+ * @param target The online target session, if available.
+ * @param target_account The target account id when no session is available.
+ * @param strong True to require strictly greater access.
+ * @return true if the handler lacks sufficient security; otherwise false.
+ */
 bool ChatHandler::HasLowerSecurityAccount(WorldSession* target, uint32 target_account, bool strong)
 {
     AccountTypes target_sec;
@@ -981,6 +1054,13 @@ bool ChatHandler::HasLowerSecurityAccount(WorldSession* target, uint32 target_ac
     return false;
 }
 
+/**
+ * @brief Checks whether one string is a valid abbreviation of another.
+ *
+ * @param name The full command name.
+ * @param part The abbreviation to test.
+ * @return true if the abbreviation matches; otherwise false.
+ */
 bool ChatHandler::hasStringAbbr(const char* name, const char* part)
 {
     // non "" command
@@ -1014,6 +1094,11 @@ bool ChatHandler::hasStringAbbr(const char* name, const char* part)
     return true;
 }
 
+/**
+ * @brief Sends a system message to the current session, splitting multiline text.
+ *
+ * @param str The message text to send.
+ */
 void ChatHandler::SendSysMessage(const char* str)
 {
     WorldPacket data;
@@ -1038,6 +1123,12 @@ void ChatHandler::SendSysMessage(const char* str)
     delete[] buf;
 }
 
+/**
+ * @brief Sends a global system message to all sessions meeting the minimum security level.
+ *
+ * @param str The message text to send.
+ * @param minSec The minimum security level required to receive the message.
+ */
 void ChatHandler::SendGlobalSysMessage(const char* str, AccountTypes minSec)
 {
     // Chat output
@@ -1064,11 +1155,21 @@ void ChatHandler::SendGlobalSysMessage(const char* str, AccountTypes minSec)
     delete[] buf;
 }
 
+/**
+ * @brief Sends a localized system message by string table entry.
+ *
+ * @param entry The string table entry identifier.
+ */
 void ChatHandler::SendSysMessage(int32 entry)
 {
     SendSysMessage(GetMangosString(entry));
 }
 
+/**
+ * @brief Formats and sends a localized system message.
+ *
+ * @param entry The string table entry identifier.
+ */
 void ChatHandler::PSendSysMessage(int32 entry, ...)
 {
     const char* format = GetMangosString(entry);
@@ -1080,6 +1181,11 @@ void ChatHandler::PSendSysMessage(int32 entry, ...)
     SendSysMessage(str);
 }
 
+/**
+ * @brief Formats and sends a localized multiline system message using @@ separators.
+ *
+ * @param entry The string table entry identifier.
+ */
 void  ChatHandler::PSendSysMessageMultiline(int32 entry, ...)
 {
     uint32 linecount = 0;
@@ -1119,6 +1225,11 @@ void  ChatHandler::PSendSysMessageMultiline(int32 entry, ...)
     }
 }
 
+/**
+ * @brief Formats and sends a raw system message.
+ *
+ * @param format The printf-style format string.
+ */
 void ChatHandler::PSendSysMessage(const char* format, ...)
 {
     va_list ap;
@@ -1129,6 +1240,12 @@ void ChatHandler::PSendSysMessage(const char* format, ...)
     SendSysMessage(str);
 }
 
+/**
+ * @brief Validates command table structure and reports inconsistencies.
+ *
+ * @param table The command table to validate.
+ * @param parentCommand The parent command, or NULL for the root table.
+ */
 void ChatHandler::CheckIntegrity(ChatCommand* table, ChatCommand* parentCommand)
 {
     for (uint32 i = 0; table[i].Name != NULL; ++i)
@@ -1499,6 +1616,12 @@ bool ChatHandler::SetDataForCommandInTable(ChatCommand* commandTable, uint32 id,
     return false;
 }
 
+/**
+ * @brief Detects and executes a command entered through chat or console input.
+ *
+ * @param text The raw input text.
+ * @return true if the text was treated as a command; otherwise false.
+ */
 bool ChatHandler::ParseCommands(const char* text)
 {
     MANGOS_ASSERT(text);
@@ -1541,6 +1664,13 @@ bool ChatHandler::ParseCommands(const char* text)
     return true;
 }
 
+/**
+ * @brief Displays the available subcommands for a command table.
+ *
+ * @param table The subcommand table to display.
+ * @param cmd The parent command name.
+ * @return true if any subcommands were shown; otherwise false.
+ */
 bool ChatHandler::ShowHelpForSubCommands(ChatCommand* table, char const* cmd)
 {
     std::string list;
@@ -1587,6 +1717,13 @@ bool ChatHandler::ShowHelpForSubCommands(ChatCommand* table, char const* cmd)
     return true;
 }
 
+/**
+ * @brief Displays help text and subcommands for a command path.
+ *
+ * @param table The command table to search.
+ * @param cmd The command path to resolve.
+ * @return true if help content was shown; otherwise false.
+ */
 bool ChatHandler::ShowHelpForCommand(ChatCommand* table, const char* cmd)
 {
     char const* oldCmd = cmd;
@@ -1655,6 +1792,12 @@ bool ChatHandler::ShowHelpForCommand(ChatCommand* table, const char* cmd)
     return command || childCommands;
 }
 
+/**
+ * @brief Validates chat text and embedded shift-links against configured strictness rules.
+ *
+ * @param message The message text to validate.
+ * @return true if the message is valid; otherwise false.
+ */
 bool ChatHandler::isValidChatMessage(const char* message)
 {
     /*
@@ -2337,6 +2480,11 @@ bool ChatHandler::isValidChatMessage(const char* message)
     return validSequence == validSequenceIterator;
 }
 
+/**
+ * @brief Returns the currently selected player, or the session player if nothing is selected.
+ *
+ * @return Player* The selected player, or NULL when no player can be resolved.
+ */
 Player* ChatHandler::getSelectedPlayer()
 {
     if (!m_session)
@@ -2354,6 +2502,11 @@ Player* ChatHandler::getSelectedPlayer()
     return sObjectMgr.GetPlayer(guid);
 }
 
+/**
+ * @brief Returns the currently selected unit, or the session player if nothing is selected.
+ *
+ * @return Unit* The selected unit, or NULL when no unit can be resolved.
+ */
 Unit* ChatHandler::getSelectedUnit()
 {
     if (!m_session)
@@ -2372,6 +2525,11 @@ Unit* ChatHandler::getSelectedUnit()
     return sObjectAccessor.GetUnit(*m_session->GetPlayer(), guid);
 }
 
+/**
+ * @brief Returns the currently selected creature on the player's map.
+ *
+ * @return Creature* The selected creature, or NULL if selection is not a creature.
+ */
 Creature* ChatHandler::getSelectedCreature()
 {
     if (!m_session)
@@ -3157,6 +3315,13 @@ bool ChatHandler::ExtractUint32KeyFromLink(char** text, char const* linkType, ui
     return ExtractUInt32(&arg, value);
 }
 
+/**
+ * @brief Retrieves a game object on the current map by low GUID and entry.
+ *
+ * @param lowguid The game object low GUID.
+ * @param entry The game object entry identifier.
+ * @return GameObject* The matching game object, or NULL if not found.
+ */
 GameObject* ChatHandler::GetGameObjectWithGuid(uint32 lowguid, uint32 entry)
 {
     if (!m_session)
@@ -3189,6 +3354,12 @@ static char const* const spellKeys[] =
     NULL
 };
 
+/**
+ * @brief Extracts a spell id from a raw argument or supported spell-related link.
+ *
+ * @param text The argument text pointer to parse.
+ * @return uint32 The extracted spell id, or 0 on failure.
+ */
 uint32 ChatHandler::ExtractSpellIdFromLink(char** text)
 {
     // number or [name] Shift-click form |color|Henchant:recipe_spell_id|h[prof_name: recipe_name]|h|r
@@ -3257,6 +3428,12 @@ uint32 ChatHandler::ExtractSpellIdFromLink(char** text)
     return 0;
 }
 
+/**
+ * @brief Extracts a game teleport definition from a raw argument or teleport link.
+ *
+ * @param text The argument text pointer to parse.
+ * @return GameTele const* The matching teleport definition, or NULL on failure.
+ */
 GameTele const* ChatHandler::ExtractGameTeleFromLink(char** text)
 {
     // id, or string, or [name] Shift-click form |color|Htele:id|h[name]|h|r
@@ -3294,6 +3471,12 @@ static char const* const guidKeys[] =
     NULL
 };
 
+/**
+ * @brief Extracts a player, creature, or game object GUID from a raw argument or link.
+ *
+ * @param text The argument text pointer to parse.
+ * @return ObjectGuid The extracted GUID, or an empty GUID on failure.
+ */
 ObjectGuid ChatHandler::ExtractGuidFromLink(char** text)
 {
     int type = 0;
@@ -3393,6 +3576,16 @@ static char const* const locationKeys[] =
     NULL
 };
 
+/**
+ * @brief Extracts map coordinates from a supported location-like link or player reference.
+ *
+ * @param text The argument text pointer to parse.
+ * @param mapid Receives the destination map id.
+ * @param x Receives the destination X coordinate.
+ * @param y Receives the destination Y coordinate.
+ * @param z Receives the destination Z coordinate.
+ * @return true if a location was extracted; otherwise false.
+ */
 bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, float& y, float& z)
 {
     int type = 0;
@@ -3643,6 +3836,12 @@ bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, 
     return false;
 }
 
+/**
+ * @brief Extracts and normalizes a player name from a player link.
+ *
+ * @param text The argument text pointer to parse.
+ * @return std::string The normalized player name, or an empty string on failure.
+ */
 std::string ChatHandler::ExtractPlayerNameFromLink(char** text)
 {
     // |color|Hplayer:name|h[name]|h|r
@@ -3739,6 +3938,14 @@ bool ChatHandler::ExtractPlayerTarget(char** args, Player** player /*= NULL*/, O
     return true;
 }
 
+/**
+ * @brief Extracts an account id from an argument or selected player fallback.
+ *
+ * @param args The argument text pointer to parse.
+ * @param accountName Optional output for the resolved account name.
+ * @param targetIfNullArg Optional output for the selected player when no argument is given.
+ * @return uint32 The extracted account id, or 0 on failure.
+ */
 uint32 ChatHandler::ExtractAccountId(char** args, std::string* accountName /*= NULL*/, Player** targetIfNullArg /*= NULL*/)
 {
     uint32 account_id = 0;
@@ -3847,6 +4054,14 @@ static RaceMaskName const raceMaskNames[] =
     { NULL, 0 }
 };
 
+/**
+ * @brief Extracts a race mask from a numeric value or named preset.
+ *
+ * @param text The argument text pointer to parse.
+ * @param raceMask Receives the resulting race mask.
+ * @param maskName Optional output for the resolved preset name.
+ * @return true if a race mask was extracted; otherwise false.
+ */
 bool ChatHandler::ExtractRaceMask(char** text, uint32& raceMask, char const** maskName /*=NULL*/)
 {
     if (ExtractUInt32(text, raceMask))
@@ -3881,42 +4096,86 @@ bool ChatHandler::ExtractRaceMask(char** text, uint32& raceMask, char const** ma
     return true;
 }
 
+/**
+ * @brief Builds a clickable name link for a specific player.
+ *
+ * @param chr The player to represent.
+ * @return std::string The formatted player link.
+ */
 std::string ChatHandler::GetNameLink(Player* chr) const
 {
     return playerLink(chr->GetName());
 }
 
+/**
+ * @brief Checks whether command output should also be reported to the target player.
+ *
+ * @param chr The target player.
+ * @return true if the target should receive a report; otherwise false.
+ */
 bool ChatHandler::needReportToTarget(Player* chr) const
 {
     Player* pl = m_session->GetPlayer();
     return pl != chr && pl->IsVisibleGloballyFor(chr);
 }
 
+/**
+ * @brief Returns the DBC locale used by the current session.
+ *
+ * @return LocaleConstant The session DBC locale.
+ */
 LocaleConstant ChatHandler::GetSessionDbcLocale() const
 {
     return m_session->GetSessionDbcLocale();
 }
 
+/**
+ * @brief Returns the database locale index used by the current session.
+ *
+ * @return int The session database locale index.
+ */
 int ChatHandler::GetSessionDbLocaleIndex() const
 {
     return m_session->GetSessionDbLocaleIndex();
 }
 
+/**
+ * @brief Returns a localized MaNGOS string for console output.
+ *
+ * @param entry The string table entry identifier.
+ * @return const char* The localized string.
+ */
 const char* CliHandler::GetMangosString(int32 entry) const
 {
     return sObjectMgr.GetMangosStringForDBCLocale(entry);
 }
 
+/**
+ * @brief Returns the account id associated with the CLI handler.
+ *
+ * @return uint32 The CLI account id.
+ */
 uint32 CliHandler::GetAccountId() const
 {
     return m_accountId;
 }
 
+/**
+ * @brief Returns the console login access level.
+ *
+ * @return AccountTypes The CLI access level.
+ */
 AccountTypes CliHandler::GetAccessLevel() const
 {
     return m_loginAccessLevel;
 }
 
+/**
+ * @brief Checks whether a command is available to the console handler.
+ *
+ * @param cmd The command to test.
+ * @return true if the command can be used from console at the current access level; otherwise false.
+ */
 bool CliHandler::isAvailable(ChatCommand const& cmd) const
 {
     // skip non-console commands in console case
@@ -3929,27 +4188,53 @@ bool CliHandler::isAvailable(ChatCommand const& cmd) const
     return GetAccessLevel() >= (AccountTypes)cmd.SecurityLevel;
 }
 
+/**
+ * @brief Sends a system message to the CLI output callback.
+ *
+ * @param str The message text to print.
+ */
 void CliHandler::SendSysMessage(const char* str)
 {
     m_print(m_callbackArg, str);
     m_print(m_callbackArg, "\r\n");
 }
 
+/**
+ * @brief Returns the localized console command source label.
+ *
+ * @return std::string The console label.
+ */
 std::string CliHandler::GetNameLink() const
 {
     return GetMangosString(LANG_CONSOLE_COMMAND);
 }
 
+/**
+ * @brief Indicates that CLI commands always report output to the target context.
+ *
+ * @param chr Unused target player pointer.
+ * @return true Always true for CLI handling.
+ */
 bool CliHandler::needReportToTarget(Player* /*chr*/) const
 {
     return true;
 }
 
+/**
+ * @brief Returns the default DBC locale used for console output.
+ *
+ * @return LocaleConstant The default DBC locale.
+ */
 LocaleConstant CliHandler::GetSessionDbcLocale() const
 {
     return sWorld.GetDefaultDbcLocale();
 }
 
+/**
+ * @brief Returns the database locale index used for console output.
+ *
+ * @return int The console database locale index.
+ */
 int CliHandler::GetSessionDbLocaleIndex() const
 {
     return sObjectMgr.GetDBCLocaleIndex();
@@ -3957,6 +4242,12 @@ int CliHandler::GetSessionDbLocaleIndex() const
 
 // Check/ Output if a NPC or GO (by guid) is part of a pool or game event
 template <typename T>
+/**
+ * @brief Reports pool and game event ownership information for a creature or game object spawn.
+ *
+ * @tparam T The spawn type, such as Creature or GameObject.
+ * @param guid The low GUID of the spawn.
+ */
 void ChatHandler::ShowNpcOrGoSpawnInformation(uint32 guid)
 {
     if (uint16 pool_id = sPoolMgr.IsPartOfAPool<T>(guid))
@@ -4004,6 +4295,13 @@ void ChatHandler::ShowNpcOrGoSpawnInformation(uint32 guid)
 
 // Prepare ShortString for a NPC or GO (by guid) with pool or game event IDs
 template <typename T>
+/**
+ * @brief Builds a short descriptive string about pool or game event ownership for a spawn.
+ *
+ * @tparam T The spawn type, such as Creature or GameObject.
+ * @param guid The low GUID of the spawn.
+ * @return std::string The formatted ownership description, or an empty string.
+ */
 std::string ChatHandler::PrepareStringNpcOrGoSpawnInformation(uint32 guid)
 {
     std::string str = "";
@@ -4036,6 +4334,11 @@ std::string ChatHandler::PrepareStringNpcOrGoSpawnInformation(uint32 guid)
     return str;
 }
 
+/**
+ * @brief Logs an executed command together with its execution context.
+ *
+ * @param fullcmd The full command text.
+ */
 void ChatHandler::LogCommand(char const* fullcmd)
 {
     // chat case
@@ -4188,6 +4491,14 @@ void ChatHandler::ShowFactionListHelper(FactionEntry const* factionEntry, Locale
 
     SendSysMessage(ss.str().c_str());
 }
+
+/**
+ * @brief Formats and sends one spell entry line for spell list style commands.
+ *
+ * @param target The target player whose spell state is being inspected.
+ * @param spellInfo The spell definition to display.
+ * @param loc The locale used for spell names.
+ */
 void ChatHandler::ShowSpellListHelper(Player* target, SpellEntry const* spellInfo, LocaleConstant loc)
 {
     uint32 id = spellInfo->Id;
@@ -4255,6 +4566,15 @@ void ChatHandler::ShowSpellListHelper(Player* target, SpellEntry const* spellInf
     SendSysMessage(ss.str().c_str());
 }
 
+/**
+ * @brief Displays a player list query result in chat or console format.
+ *
+ * @param result The query result containing player rows.
+ * @param limit Optional maximum row count to display.
+ * @param title True to print console table headers.
+ * @param error True to emit an error message when no rows are found.
+ * @return true if any output was produced; otherwise false.
+ */
 bool ChatHandler::ShowPlayerListHelper(QueryResult* result, uint32* limit, bool title, bool error)
 {
     if (!result)
@@ -4330,6 +4650,14 @@ template void ChatHandler::ShowNpcOrGoSpawnInformation<GameObject>(uint32 guid);
 template std::string ChatHandler::PrepareStringNpcOrGoSpawnInformation<Creature>(uint32 guid);
 template std::string ChatHandler::PrepareStringNpcOrGoSpawnInformation<GameObject>(uint32 guid);
 
+/**
+ * @brief Creates and applies all aura effects from a spell entry to a target unit.
+ *
+ * @param spellInfo The spell definition containing aura effects.
+ * @param target The target unit receiving the aura holder.
+ * @param caster The world object treated as the aura caster.
+ * @return true if the aura holder was created and applied; otherwise false.
+ */
 bool AddAuraToPlayer(const SpellEntry* spellInfo, Unit* target, WorldObject* caster)
 {
     // We assume the spellInfo has been checked and teh spell has aura effects

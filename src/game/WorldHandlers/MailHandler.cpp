@@ -23,12 +23,21 @@
  */
 
 /**
- * @addtogroup mailing
- * @{
- *
  * @file MailHandler.cpp
- * This file contains handlers for mail opcodes.
+ * @brief Mail system opcode handlers
  *
+ * This file handles mail-related opcodes including:
+ * - CMSG_SEND_MAIL: Send mail to another player
+ * - CMSG_MAIL_DELETE: Delete mail
+ * - CMSG_MAIL_RETURN: Return mail to sender
+ * - CMSG_MAIL_MARK_AS_READ: Mark mail as read
+ * - CMSG_MAIL_CREATE_TEXT_ITEM: Create item from mail text
+ * - CMSG_MAIL_TAKE_ITEM: Take item from mail
+ * - CMSG_MAIL_TAKE_MONEY: Take money from mail
+ * - CMSG_MAIL_QUERY_NEXT_TIME: Query next mail delivery time
+ *
+ * Mail operations require proper validation of recipient, money,
+ * and item attachments.
  */
 
 #include "Mail.h"
@@ -44,6 +53,12 @@
 #include "Opcodes.h"
 #include "Chat.h"
 
+/**
+ * @brief Verifies that the player can legally access the requested mailbox.
+ *
+ * @param guid The mailbox guid or player guid used for mailbox access.
+ * @return true if mailbox access is allowed; otherwise false.
+ */
 bool WorldSession::CheckMailBox(ObjectGuid guid)
 {
     // GM case

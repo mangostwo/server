@@ -34,6 +34,11 @@
 #include "Path.h"
 #include "WaypointMovementGenerator.h"
 
+/**
+ * @brief Handles a client request for the known status of a taxi node.
+ *
+ * @param recv_data The incoming taxi node status packet.
+ */
 void WorldSession::HandleTaxiNodeStatusQueryOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_TAXINODE_STATUS_QUERY");
@@ -44,6 +49,11 @@ void WorldSession::HandleTaxiNodeStatusQueryOpcode(WorldPacket& recv_data)
     SendTaxiStatus(guid);
 }
 
+/**
+ * @brief Sends whether the nearest taxi node for a flight master is known to the player.
+ *
+ * @param guid The flight master guid.
+ */
 void WorldSession::SendTaxiStatus(ObjectGuid guid)
 {
     // cheating checks
@@ -72,6 +82,11 @@ void WorldSession::SendTaxiStatus(ObjectGuid guid)
     DEBUG_LOG("WORLD: Sent SMSG_TAXINODE_STATUS");
 }
 
+/**
+ * @brief Handles a request to open a flight master's available taxi menu.
+ *
+ * @param recv_data The incoming taxi query packet.
+ */
 void WorldSession::HandleTaxiQueryAvailableNodes(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_TAXIQUERYAVAILABLENODES");
@@ -103,6 +118,11 @@ void WorldSession::HandleTaxiQueryAvailableNodes(WorldPacket& recv_data)
     SendTaxiMenu(unit);
 }
 
+/**
+ * @brief Sends the taxi route selection menu for a flight master.
+ *
+ * @param unit The flight master creature.
+ */
 void WorldSession::SendTaxiMenu(Creature* unit)
 {
     // find current node
@@ -125,6 +145,13 @@ void WorldSession::SendTaxiMenu(Creature* unit)
     DEBUG_LOG("WORLD: Sent SMSG_SHOWTAXINODES");
 }
 
+/**
+ * @brief Starts taxi flight movement for the player.
+ *
+ * @param mountDisplayId The taxi mount display id.
+ * @param path The taxi path id.
+ * @param pathNode The starting node index.
+ */
 void WorldSession::SendDoFlight(uint32 mountDisplayId, uint32 path, uint32 pathNode)
 {
     // remove fake death
@@ -146,6 +173,12 @@ void WorldSession::SendDoFlight(uint32 mountDisplayId, uint32 path, uint32 pathN
     GetPlayer()->GetMotionMaster()->MoveTaxiFlight(path, pathNode);
 }
 
+/**
+ * @brief Learns a newly discovered taxi node and notifies the client.
+ *
+ * @param unit The flight master creature.
+ * @return true if the node was newly learned or no valid node existed; otherwise false.
+ */
 bool WorldSession::SendLearnNewTaxiNode(Creature* unit)
 {
     // find current node
@@ -174,6 +207,11 @@ bool WorldSession::SendLearnNewTaxiNode(Creature* unit)
     }
 }
 
+/**
+ * @brief Sends the result of a taxi activation attempt.
+ *
+ * @param reply The taxi activation status.
+ */
 void WorldSession::SendActivateTaxiReply(ActivateTaxiReply reply)
 {
     WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
@@ -183,6 +221,11 @@ void WorldSession::SendActivateTaxiReply(ActivateTaxiReply reply)
     DEBUG_LOG("WORLD: Sent SMSG_ACTIVATETAXIREPLY");
 }
 
+/**
+ * @brief Handles a multi-node taxi activation request.
+ *
+ * @param recv_data The incoming taxi express packet.
+ */
 void WorldSession::HandleActivateTaxiExpressOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_ACTIVATETAXIEXPRESS");
@@ -217,6 +260,11 @@ void WorldSession::HandleActivateTaxiExpressOpcode(WorldPacket& recv_data)
     GetPlayer()->ActivateTaxiPathTo(nodes, npc);
 }
 
+/**
+ * @brief Handles taxi spline completion, including map changes and chained destinations.
+ *
+ * @param recv_data The incoming move-spline-done packet.
+ */
 void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_MOVE_SPLINE_DONE");
@@ -298,6 +346,11 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
     }
 }
 
+/**
+ * @brief Handles a standard two-node taxi activation request.
+ *
+ * @param recv_data The incoming taxi activation packet.
+ */
 void WorldSession::HandleActivateTaxiOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_ACTIVATETAXI");

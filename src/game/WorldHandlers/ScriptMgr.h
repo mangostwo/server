@@ -737,12 +737,39 @@ bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool
 
 #define sScriptMgr MaNGOS::Singleton<ScriptMgr>::Instance()
 
+/**
+ * Returns the numeric script identifier for the specified script name.
+ */
 uint32 GetScriptId(const char* name);
+
+/**
+ * Returns the script name associated with the specified script identifier.
+ */
 char const* GetScriptName(uint32 id);
+
+/**
+ * Returns the number of registered script identifiers.
+ */
 uint32 GetScriptIdsCount();
+
+/**
+ * Returns the script identifier bound to the specified area trigger.
+ */
 uint32 GetAreaTriggerScriptId(uint32 triggerId);
+
+/**
+ * Returns the script identifier bound to the specified event id.
+ */
 uint32 GetEventIdScriptId(uint32 eventId);
+
+/**
+ * Sets the external waypoint table used for loading script waypoints.
+ */
 void SetExternalWaypointTable(char const* tableName);
+
+/**
+ * Adds a waypoint definition from the external waypoint source.
+ */
 bool AddWaypointFromExternal(uint32 entry, int32 pathId, uint32 pointId, float x, float y, float z, float o, uint32 waittime);
 
 #endif

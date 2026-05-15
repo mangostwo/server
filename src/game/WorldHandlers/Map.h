@@ -22,6 +22,32 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file Map.h
+ * @brief Map class representing a game world or instance.
+ *
+ * This file defines the Map class which represents a playable game world or instance.
+ * Maps are divided into grids for efficient spatial partitioning and object management.
+ *
+ * Key responsibilities:
+ * - Grid and cell-based spatial management
+ * - Object tracking and visibility updates
+ * - Dynamic object loading/unloading
+ * - Player and creature management
+ * - Area effect and broadcast messaging
+ * - Instance-specific scripting and state management
+ * - Weather and environmental effects
+ * - Transport system management
+ *
+ * The file also contains InstanceTemplate structure for storing instance configuration
+ * data from the DBC files.
+ *
+ * @see Map for the main map implementation
+ * @see GridMap for grid-based terrain and collision data
+ * @see Cell for the cell structure
+ * @see InstanceTemplate for instance configuration
+ */
+
 #ifndef MANGOS_MAP_H
 #define MANGOS_MAP_H
 
@@ -77,14 +103,23 @@ class WeatherSystem;
 #pragma pack(push,1)
 #endif
 
+/// @brief Instance template configuration structure.
+///
+/// Contains static configuration data for dungeon/raid instances loaded from DBC files.
+/// Defines instance properties like player limits, reset times, level requirements, and
+/// entrance locations for resurrection.
+///
+/// @note Data is loaded from DBC at server startup and is read-only during runtime
 struct InstanceTemplate
 {
-    uint32 map;                                             // instance map
-    uint32 parent;                                          // non-continent parent instance (for instance with entrance in another instances)
-    // or 0 (not related to continent 0 map id)
-    uint32 levelMin;
-    uint32 levelMax;
-    uint32 script_id;
+    uint32 map;               ///> Map ID of the instance
+    /// Parent instance map ID (for nested instances, 0 for continent-rooted instances)
+    /// Non-continent parent instance (for instance with entrance in another instances)
+    /// or 0 (not related to continent 0 map id)
+    uint32 parent;
+    uint32 levelMin;          ///> Minimum level recommended for the instance
+    uint32 levelMax;          ///> Maximum level for players in the instance (scaling cap)
+    uint32 script_id;         ///> Script ID for instance-specific scripting
 };
 
 struct WorldTemplate

@@ -219,6 +219,11 @@ bool Weather::ReGenerate()
     return m_type != old_type || m_grade != old_grade;
 }
 
+/**
+ * @brief Sends the current weather state to a single player.
+ *
+ * @param player The player receiving the weather update.
+ */
 void Weather::SendWeatherUpdateToPlayer(Player* player)
 {
     NormalizeGrade();
@@ -332,6 +337,9 @@ WeatherState Weather::GetWeatherState() const
     }
 }
 
+/**
+ * @brief Clamps the weather intensity grade into the valid runtime range.
+ */
 void Weather::NormalizeGrade()
 {
     if (m_grade >= 1)

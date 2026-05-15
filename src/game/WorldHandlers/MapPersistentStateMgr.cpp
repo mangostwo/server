@@ -22,6 +22,27 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file MapPersistentStateMgr.cpp
+ * @brief Instance persistence manager implementation
+ *
+ * This file implements MapPersistentStateManager which manages
+ * instance state persistence for dungeons and raids. Key features:
+ *
+ * - Instance ID allocation and management
+ * - Instance reset timer tracking
+ * - Instance binding to groups/players
+ * - Instance data persistence to database
+ * - Instance cleanup and unloading
+ * - Reset event scheduling
+ *
+ * Instance states are persisted to the `instance` table and restored
+ * when players re-enter the instance.
+ *
+ * @see MapPersistentStateManager for the manager class
+ * @see MapPersistentState for individual instance state
+ */
+
 #include "MapPersistentStateMgr.h"
 
 #include "SQLStorages.h"
@@ -59,6 +80,11 @@ MapPersistentState::~MapPersistentState()
 {
 }
 
+/**
+ * @brief Returns the DBC entry for this persistent state's map.
+ *
+ * @return The map entry, or null if not found.
+ */
 MapEntry const* MapPersistentState::GetMapEntry() const
 {
     return sMapStore.LookupEntry(m_mapid);
@@ -78,6 +104,12 @@ bool MapPersistentState::UnloadIfEmpty()
     }
 }
 
+/**
+ * @brief Saves a creature respawn time in memory and in the database.
+ *
+ * @param loguid The creature spawn guid.
+ * @param t The respawn time.
+ */
 void MapPersistentState::SaveCreatureRespawnTime(uint32 loguid, time_t t)
 {
     SetCreatureRespawnTime(loguid, t);
@@ -105,6 +137,12 @@ void MapPersistentState::SaveCreatureRespawnTime(uint32 loguid, time_t t)
     CharacterDatabase.CommitTransaction();
 }
 
+/**
+ * @brief Saves a gameobject respawn time in memory and in the database.
+ *
+ * @param loguid The gameobject spawn guid.
+ * @param t The respawn time.
+ */
 void MapPersistentState::SaveGORespawnTime(uint32 loguid, time_t t)
 {
     SetGORespawnTime(loguid, t);
@@ -132,6 +170,12 @@ void MapPersistentState::SaveGORespawnTime(uint32 loguid, time_t t)
     CharacterDatabase.CommitTransaction();
 }
 
+/**
+ * @brief Updates the cached creature respawn time for a spawn.
+ *
+ * @param loguid The creature spawn guid.
+ * @param t The respawn time.
+ */
 void MapPersistentState::SetCreatureRespawnTime(uint32 loguid, time_t t)
 {
     if (t > sWorld.GetGameTime())
@@ -145,6 +189,12 @@ void MapPersistentState::SetCreatureRespawnTime(uint32 loguid, time_t t)
     }
 }
 
+/**
+ * @brief Updates the cached gameobject respawn time for a spawn.
+ *
+ * @param loguid The gameobject spawn guid.
+ * @param t The respawn time.
+ */
 void MapPersistentState::SetGORespawnTime(uint32 loguid, time_t t)
 {
     if (t > sWorld.GetGameTime())
@@ -158,6 +208,9 @@ void MapPersistentState::SetGORespawnTime(uint32 loguid, time_t t)
     }
 }
 
+/**
+ * @brief Clears all cached respawn times for this state.
+ */
 void MapPersistentState::ClearRespawnTimes()
 {
     m_goRespawnTimes.clear();
@@ -166,6 +219,12 @@ void MapPersistentState::ClearRespawnTimes()
     UnloadIfEmpty();
 }
 
+/**
+ * @brief Registers a creature spawn in the owning grid cache.
+ *
+ * @param guid The creature spawn guid.
+ * @param data The creature spawn data.
+ */
 void MapPersistentState::AddCreatureToGrid(uint32 guid, CreatureData const* data)
 {
     CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
@@ -174,6 +233,12 @@ void MapPersistentState::AddCreatureToGrid(uint32 guid, CreatureData const* data
     m_gridObjectGuids[cell_id].creatures.insert(guid);
 }
 
+/**
+ * @brief Removes a creature spawn from the owning grid cache.
+ *
+ * @param guid The creature spawn guid.
+ * @param data The creature spawn data.
+ */
 void MapPersistentState::RemoveCreatureFromGrid(uint32 guid, CreatureData const* data)
 {
     CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
@@ -182,6 +247,12 @@ void MapPersistentState::RemoveCreatureFromGrid(uint32 guid, CreatureData const*
     m_gridObjectGuids[cell_id].creatures.erase(guid);
 }
 
+/**
+ * @brief Registers a gameobject spawn in the owning grid cache.
+ *
+ * @param guid The gameobject spawn guid.
+ * @param data The gameobject spawn data.
+ */
 void MapPersistentState::AddGameobjectToGrid(uint32 guid, GameObjectData const* data)
 {
     CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
@@ -190,6 +261,12 @@ void MapPersistentState::AddGameobjectToGrid(uint32 guid, GameObjectData const* 
     m_gridObjectGuids[cell_id].gameobjects.insert(guid);
 }
 
+/**
+ * @brief Removes a gameobject spawn from the owning grid cache.
+ *
+ * @param guid The gameobject spawn guid.
+ * @param data The gameobject spawn data.
+ */
 void MapPersistentState::RemoveGameobjectFromGrid(uint32 guid, GameObjectData const* data)
 {
     CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
@@ -198,6 +275,9 @@ void MapPersistentState::RemoveGameobjectFromGrid(uint32 guid, GameObjectData co
     m_gridObjectGuids[cell_id].gameobjects.erase(guid);
 }
 
+/**
+ * @brief Initializes pool and game-event state for this persistent state.
+ */
 void MapPersistentState::InitPools()
 {
     // pool system initialized already for persistent state (can be shared by map states)
@@ -212,6 +292,11 @@ void MapPersistentState::InitPools()
 //== WorldPersistentState functions ========================
 SpawnedPoolData WorldPersistentState::m_sharedSpawnedPoolData;
 
+/**
+ * @brief Indicates whether a world persistent state may be unloaded.
+ *
+ * @return Always false for world states.
+ */
 bool WorldPersistentState::CanBeUnload() const
 {
     // prevent unload if used for loaded map
@@ -235,6 +320,9 @@ DungeonPersistentState::~DungeonPersistentState()
     UnbindThisState();
 }
 
+/**
+ * @brief Unbinds all players and groups from this dungeon state.
+ */
 void DungeonPersistentState::UnbindThisState()
 {
     while (!m_playerList.empty())
@@ -249,6 +337,11 @@ void DungeonPersistentState::UnbindThisState()
     }
 }
 
+/**
+ * @brief Indicates whether a dungeon persistent state may be unloaded.
+ *
+ * @return true if no bindings or respawn data remain; otherwise false.
+ */
 bool DungeonPersistentState::CanBeUnload() const
 {
     // prevent unload if any bounded groups or online bounded player still exists
@@ -276,6 +369,9 @@ void DungeonPersistentState::SaveToDB()
     CharacterDatabase.PExecute("INSERT INTO `instance` VALUES ('%u', '%u', '" UI64FMTD "', '%u', '%u', '%s')", GetInstanceId(), GetMapId(), (uint64)GetResetTimeForDB(), GetDifficulty(), GetCompletedEncountersMask(), data.c_str());
 }
 
+/**
+ * @brief Deletes all saved respawn times for this instance.
+ */
 void DungeonPersistentState::DeleteRespawnTimes()
 {
     CharacterDatabase.BeginTransaction();
@@ -286,6 +382,9 @@ void DungeonPersistentState::DeleteRespawnTimes()
     ClearRespawnTimes();                                    // state can be deleted at call if only respawn data prevent unload
 }
 
+/**
+ * @brief Deletes this instance save from the database.
+ */
 void DungeonPersistentState::DeleteFromDB()
 {
     MapPersistentStateManager::DeleteInstanceFromDB(GetInstanceId());
@@ -297,6 +396,11 @@ InstanceTemplate const* DungeonPersistentState::GetTemplate() const
     return ObjectMgr::GetInstanceTemplate(GetMapId());
 }
 
+/**
+ * @brief Returns the reset time value that should be stored in the database.
+ *
+ * @return The persisted reset time, or 0 for raid maps.
+ */
 time_t DungeonPersistentState::GetResetTimeForDB() const
 {
     // only state the reset time for normal instances
@@ -364,6 +468,13 @@ uint32 DungeonResetScheduler::GetMaxResetTimeFor(MapDifficultyEntry const* mapDi
     return delay;
 }
 
+/**
+ * @brief Calculates the next global reset time for an instance template.
+ *
+ * @param temp The instance template.
+ * @param prevResetTime The previous reset time.
+ * @return The next reset timestamp.
+ */
 time_t DungeonResetScheduler::CalculateNextResetTime(MapDifficultyEntry const* mapDiff, time_t prevResetTime)
 {
     uint32 diff = sWorld.getConfig(CONFIG_UINT32_INSTANCE_RESET_TIME_HOUR) * HOUR;
@@ -371,6 +482,9 @@ time_t DungeonResetScheduler::CalculateNextResetTime(MapDifficultyEntry const* m
     return ((prevResetTime + MINUTE) / DAY * DAY) + period + diff;
 }
 
+/**
+ * @brief Loads and schedules persisted dungeon reset times.
+ */
 void DungeonResetScheduler::LoadResetTimes()
 {
     time_t now = time(NULL);
@@ -534,6 +648,13 @@ void DungeonResetScheduler::LoadResetTimes()
     }
 }
 
+/**
+ * @brief Adds or removes a dungeon reset event from the scheduler.
+ *
+ * @param add True to add the event, false to cancel it.
+ * @param time The event time.
+ * @param event The event descriptor.
+ */
 void DungeonResetScheduler::ScheduleReset(bool add, time_t time, DungeonResetEvent event)
 {
     if (add)
@@ -574,6 +695,9 @@ void DungeonResetScheduler::ScheduleReset(bool add, time_t time, DungeonResetEve
     }
 }
 
+/**
+ * @brief Processes due dungeon reset and warning events.
+ */
 void DungeonResetScheduler::Update()
 {
     time_t now = time(NULL), t;
@@ -627,6 +751,9 @@ void DungeonResetScheduler::Update()
     }
 }
 
+/**
+ * @brief Forces all raid reset events to restart from the forced warning sequence.
+ */
 void DungeonResetScheduler::ResetAllRaid()
 {
     time_t now = time(NULL);
@@ -742,6 +869,13 @@ MapPersistentState* MapPersistentStateManager::AddPersistentState(MapEntry const
     return state;
 }
 
+/**
+ * @brief Retrieves a persistent state by map and instance id.
+ *
+ * @param mapId The map id.
+ * @param instanceId The instance id.
+ * @return The matching persistent state, or null if none exists.
+ */
 MapPersistentState* MapPersistentStateManager::GetPersistentState(uint32 mapId, uint32 instanceId)
 {
     if (instanceId)
@@ -756,6 +890,11 @@ MapPersistentState* MapPersistentStateManager::GetPersistentState(uint32 mapId, 
     }
 }
 
+/**
+ * @brief Deletes all database records associated with an instance id.
+ *
+ * @param instanceid The instance id to delete.
+ */
 void MapPersistentStateManager::DeleteInstanceFromDB(uint32 instanceid)
 {
     if (instanceid)
@@ -770,6 +909,12 @@ void MapPersistentStateManager::DeleteInstanceFromDB(uint32 instanceid)
     }
 }
 
+/**
+ * @brief Removes a persistent state from the manager and persists final data if needed.
+ *
+ * @param mapId The map id for non-instance states.
+ * @param instanceId The instance id for instanced states.
+ */
 void MapPersistentStateManager::RemovePersistentState(uint32 mapId, uint32 instanceId)
 {
     if (lock_instLists)
@@ -802,6 +947,14 @@ void MapPersistentStateManager::RemovePersistentState(uint32 mapId, uint32 insta
     }
 }
 
+/**
+ * @brief Deletes rows selected by a query tail from a table.
+ *
+ * @param db The database connection.
+ * @param fields The field list used to build delete predicates.
+ * @param table The table name.
+ * @param queryTail The trailing query clause.
+ */
 void MapPersistentStateManager::_DelHelper(DatabaseType& db, const char* fields, const char* table, const char* queryTail, ...)
 {
     Tokens fieldTokens = StrSplit(fields, ", ");
@@ -834,6 +987,9 @@ void MapPersistentStateManager::_DelHelper(DatabaseType& db, const char* fields,
     }
 }
 
+/**
+ * @brief Cleans invalid instance bindings and orphaned respawn data from the database.
+ */
 void MapPersistentStateManager::CleanupInstances()
 {
     BarGoLink bar(2);
@@ -869,6 +1025,9 @@ void MapPersistentStateManager::CleanupInstances()
     sLog.outString(">> Instances cleaned up");
 }
 
+/**
+ * @brief Renumbers instance ids to a compact contiguous range.
+ */
 void MapPersistentStateManager::PackInstances()
 {
     // this routine renumbers player instance associations in such a way so they start from 1 and go up
@@ -921,6 +1080,12 @@ void MapPersistentStateManager::PackInstances()
     sLog.outString();
 }
 
+/**
+ * @brief Deletes and erases a persistent state iterator from a holder.
+ *
+ * @param holder The state container.
+ * @param itr The iterator to remove.
+ */
 void MapPersistentStateManager::_ResetSave(PersistentStateMap& holder, PersistentStateMap::iterator& itr)
 {
     // unbind all players bound to the instance
@@ -931,6 +1096,12 @@ void MapPersistentStateManager::_ResetSave(PersistentStateMap& holder, Persisten
     lock_instLists = false;
 }
 
+/**
+ * @brief Resets a single instance state and removes its saved data.
+ *
+ * @param mapid The map id.
+ * @param instanceId The instance id.
+ */
 void MapPersistentStateManager::_ResetInstance(uint32 mapid, uint32 instanceId)
 {
     DEBUG_LOG("MapPersistentStateManager::_ResetInstance %u, %u", mapid, instanceId);
@@ -977,6 +1148,13 @@ struct MapPersistantStateWarnWorker
     time_t timeLeft;
 };
 
+/**
+ * @brief Resets or warns all instances for a map.
+ *
+ * @param mapid The map id.
+ * @param warn True to send warnings instead of resetting.
+ * @param timeLeft Seconds remaining until reset.
+ */
 void MapPersistentStateManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficulty, bool warn, uint32 timeLeft)
 {
     // global reset for all instances of the given map
@@ -1027,6 +1205,13 @@ void MapPersistentStateManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficu
     sMapMgr.DoForAllMapsWithMapId(mapid, worker);
 }
 
+/**
+ * @brief Collects statistics about loaded instance states and bindings.
+ *
+ * @param numStates Receives the number of dungeon states.
+ * @param numBoundPlayers Receives the number of bound players.
+ * @param numBoundGroups Receives the number of bound groups.
+ */
 void MapPersistentStateManager::GetStatistics(uint32& numStates, uint32& numBoundPlayers, uint32& numBoundGroups)
 {
     numStates = 0;
@@ -1047,12 +1232,20 @@ void MapPersistentStateManager::GetStatistics(uint32& numStates, uint32& numBoun
     }
 }
 
+/**
+ * @brief Removes expired instances whose reset times have passed.
+ *
+ * @param t The cutoff time.
+ */
 void MapPersistentStateManager::_CleanupExpiredInstancesAtTime(time_t t)
 {
     _DelHelper(CharacterDatabase, "id, map, instance.difficulty", "instance", "LEFT JOIN instance_reset ON mapid = map AND instance.difficulty =  instance_reset.difficulty WHERE (instance.resettime < '" UI64FMTD "' AND instance.resettime > '0') OR (NOT instance_reset.resettime IS NULL AND instance_reset.resettime < '" UI64FMTD "')", (uint64)t, (uint64)t);
 }
 
 
+/**
+ * @brief Creates persistent states for all non-instanceable world maps.
+ */
 void MapPersistentStateManager::InitWorldMaps()
 {
     MapPersistentState* state = NULL;                       // need any from created for shared pool state
@@ -1069,6 +1262,9 @@ void MapPersistentStateManager::InitWorldMaps()
     }
 }
 
+/**
+ * @brief Loads creature respawn timers into persistent states.
+ */
 void MapPersistentStateManager::LoadCreatureRespawnTimes()
 {
     // remove outdated data
@@ -1154,6 +1350,9 @@ void MapPersistentStateManager::LoadCreatureRespawnTimes()
     sLog.outString();
 }
 
+/**
+ * @brief Loads gameobject respawn timers into persistent states.
+ */
 void MapPersistentStateManager::LoadGameobjectRespawnTimes()
 {
     // remove outdated data

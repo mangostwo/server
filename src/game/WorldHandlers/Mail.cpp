@@ -23,12 +23,24 @@
  */
 
 /**
- * @addtogroup mailing
- * @{
- *
  * @file Mail.cpp
- * This file contains the code needed for MaNGOS to handle mails.
+ * @brief Mail system implementation
  *
+ * This file implements the Mail class which manages in-game mail:
+ *
+ * - Mail creation and sending
+ * - Mail with items and money
+ * - Mail expiration and deletion
+ * - COD (Cash on Delivery) payments
+ * - Mail reading and item retrieval
+ * - Auction house mail notifications
+ *
+ * Mails are stored in the `mail` database table and loaded
+ * when players log in. System mails can be sent for various
+ * game events (auctions, GM messages, etc.).
+ *
+ * @see Mail for the mail class
+ * @see MailHandler for network opcode handling
  */
 
 #include "Mail.h"

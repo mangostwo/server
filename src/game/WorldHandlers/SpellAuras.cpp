@@ -22,6 +22,26 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file SpellAuras.cpp
+ * @brief Spell aura implementation
+ *
+ * This file implements the SpellAura class which handles spell auras:
+ * - Aura application and removal
+ * - Aura effect processing (stat modifiers, DoTs, HoTs, etc.)
+ * - Aura stacking rules
+ * - Aura dispelling mechanics
+ * - Aura periodic effects
+ * - Aura duration management
+ * - Aura visual effects
+ *
+ * Auras are persistent effects applied by spells that modify
+ * unit stats, deal damage over time, or provide other benefits.
+ *
+ * @see SpellAura for the aura class
+ * @see Spell for spell casting
+ */
+
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -550,11 +570,28 @@ SingleEnemyTargetAura::~SingleEnemyTargetAura()
 {
 }
 
+/**
+ * @brief Resolves the cached enemy target selected by the original caster.
+ *
+ * @return The cached trigger target, or null if it no longer exists.
+ */
 Unit* SingleEnemyTargetAura::GetTriggerTarget() const
 {
     return sObjectAccessor.GetUnit(*(m_spellAuraHolder->GetTarget()), m_castersTargetGuid);
 }
 
+/**
+ * @brief Creates the appropriate aura instance for a spell effect.
+ *
+ * @param spellproto The spell prototype.
+ * @param eff The effect index.
+ * @param currentBasePoints The current base point value.
+ * @param holder The aura holder that owns the aura.
+ * @param target The aura target.
+ * @param caster The unit caster.
+ * @param castItem The item used to cast the spell, if any.
+ * @return A newly created aura instance.
+ */
 Aura* CreateAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster, Item* castItem)
 {
     if (IsAreaAuraEffect(spellproto->Effect[eff]))
@@ -574,11 +611,28 @@ Aura* CreateAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* curr
     return new Aura(spellproto, eff, currentBasePoints, holder, target, caster, castItem);
 }
 
+/**
+ * @brief Creates a spell aura holder for a target.
+ *
+ * @param spellproto The spell prototype.
+ * @param target The target that will own the holder.
+ * @param caster The caster world object.
+ * @param castItem The item used to cast the spell, if any.
+ * @return A newly created spell aura holder.
+ */
 SpellAuraHolder* CreateSpellAuraHolder(SpellEntry const* spellproto, Unit* target, WorldObject* caster, Item* castItem)
 {
     return new SpellAuraHolder(spellproto, target, caster, castItem);
 }
 
+/**
+ * @brief Sets the aura modifier data used by the handler logic.
+ *
+ * @param t The aura type.
+ * @param a The modifier amount.
+ * @param pt The periodic timer interval.
+ * @param miscValue Additional aura-specific data.
+ */
 void Aura::SetModifier(AuraType t, int32 a, uint32 pt, int32 miscValue)
 {
     m_modifier.m_auraname = t;
@@ -587,6 +641,11 @@ void Aura::SetModifier(AuraType t, int32 a, uint32 pt, int32 miscValue)
     m_modifier.periodictime = pt;
 }
 
+/**
+ * @brief Updates periodic aura timing and triggers ticks when due.
+ *
+ * @param diff The elapsed update time in milliseconds.
+ */
 void Aura::Update(uint32 diff)
 {
     if (m_isPeriodic)
@@ -602,6 +661,11 @@ void Aura::Update(uint32 diff)
     }
 }
 
+/**
+ * @brief Updates area aura application and range validation.
+ *
+ * @param diff The elapsed update time in milliseconds.
+ */
 void AreaAura::Update(uint32 diff)
 {
     // update for the caster of the aura
@@ -922,6 +986,11 @@ void AreaAura::Update(uint32 diff)
     }
 }
 
+/**
+ * @brief Updates a persistent area aura and removes it when its source becomes invalid.
+ *
+ * @param diff The elapsed update time in milliseconds.
+ */
 void PersistentAreaAura::Update(uint32 diff)
 {
     bool remove = false;
@@ -957,6 +1026,12 @@ void PersistentAreaAura::Update(uint32 diff)
     }
 }
 
+/**
+ * @brief Dispatches the aura modifier handler for apply or remove operations.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real True when this is a real application rather than a recalculation pass.
+ */
 void Aura::ApplyModifier(bool apply, bool Real)
 {
     AuraType aura = m_modifier.m_auraname;
@@ -972,6 +1047,12 @@ void Aura::ApplyModifier(bool apply, bool Real)
     GetHolder()->SetInUse(false);
 }
 
+/**
+ * @brief Checks whether the aura's spell modifier affects a given spell.
+ *
+ * @param spell The spell to test.
+ * @return True if the spell is affected; otherwise, false.
+ */
 bool Aura::isAffectedOnSpell(SpellEntry const* spell) const
 {
     return spell->IsFitToFamily(SpellFamily(GetSpellProto()->SpellFamilyName), GetAuraSpellClassMask());
@@ -1035,6 +1116,11 @@ bool Aura::CanProcFrom(SpellEntry const* spell, uint32 /*procFlag*/, uint32 Even
     }
 }
 
+/**
+ * @brief Recasts passive auras on a target that are affected by this aura's spell mods.
+ *
+ * @param target The unit whose passive auras should be refreshed.
+ */
 void Aura::ReapplyAffectedPassiveAuras(Unit* target, bool owner_mode)
 {
     // we need store cast item guids for self casted spells
@@ -1098,6 +1184,9 @@ struct ReapplyAffectedPassiveAurasHelper
     Aura* aura;
 };
 
+/**
+ * @brief Reapplies affected passive auras on the target and controlled units.
+ */
 void Aura::ReapplyAffectedPassiveAuras()
 {
     // not reapply spell mods with charges (use original value because processed and at remove)
@@ -1196,6 +1285,9 @@ void Aura::HandleAddModifier(bool apply, bool Real)
     ReapplyAffectedPassiveAuras();
 }
 
+/**
+ * @brief Triggers the spell associated with the aura effect.
+ */
 void Aura::TriggerSpell()
 {
     ObjectGuid casterGUID = GetCasterGuid();
@@ -3764,6 +3856,12 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Applies or removes a mounted display from the target.
+ *
+ * @param apply True to mount; false to unmount.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraMounted(bool apply, bool Real)
 {
     // only at real add/remove aura
@@ -3819,6 +3917,12 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Applies or removes water walking on the target.
+ *
+ * @param apply True to enable water walking; false to disable it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraWaterWalk(bool apply, bool Real)
 {
     // only at real add/remove aura
@@ -3830,6 +3934,12 @@ void Aura::HandleAuraWaterWalk(bool apply, bool Real)
     GetTarget()->SetWaterWalk(apply);
 }
 
+/**
+ * @brief Applies or removes feather fall on the target.
+ *
+ * @param apply True to enable feather fall; false to disable it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraFeatherFall(bool apply, bool Real)
 {
     // only at real add/remove aura
@@ -3841,6 +3951,12 @@ void Aura::HandleAuraFeatherFall(bool apply, bool Real)
     GetTarget()->SetFeatherFall(apply);
 }
 
+/**
+ * @brief Applies or removes hovering movement state.
+ *
+ * @param apply True to enable hover; false to disable it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraHover(bool apply, bool Real)
 {
     // only at real add/remove aura
@@ -3852,6 +3968,12 @@ void Aura::HandleAuraHover(bool apply, bool Real)
     GetTarget()->SetHover(apply);
 }
 
+/**
+ * @brief Refreshes client breathing timers for the target.
+ *
+ * @param apply Unused.
+ * @param Real Unused.
+ */
 void Aura::HandleWaterBreathing(bool /*apply*/, bool /*Real*/)
 {
     // update timers in client
@@ -3861,6 +3983,12 @@ void Aura::HandleWaterBreathing(bool /*apply*/, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Applies or removes a shapeshift form and its related state changes.
+ *
+ * @param apply True to enter the form; false to leave it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 {
     if (!Real)
@@ -4140,6 +4268,12 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Applies or removes a transform model effect.
+ *
+ * @param apply True to apply the transform; false to remove it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraTransform(bool apply, bool Real)
 {
     Unit* target = GetTarget();
@@ -4474,6 +4608,12 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Applies or removes a forced reputation reaction for a player.
+ *
+ * @param apply True to apply the forced reaction; false to remove it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleForceReaction(bool apply, bool Real)
 {
     if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
@@ -4501,6 +4641,12 @@ void Aura::HandleForceReaction(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Applies or removes a player skill bonus from the aura.
+ *
+ * @param apply True to apply the bonus; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraModSkill(bool apply, bool /*Real*/)
 {
     if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
@@ -4518,6 +4664,12 @@ void Aura::HandleAuraModSkill(bool apply, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Awards the configured item when a channel-death aura ends by death.
+ *
+ * @param apply True on application; false on removal.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleChannelDeathItem(bool apply, bool Real)
 {
     if (Real && !apply)
@@ -4587,6 +4739,12 @@ void Aura::HandleChannelDeathItem(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Redirects the caster camera to the target while the aura is active.
+ *
+ * @param apply True to bind sight; false to restore normal view.
+ * @param Real Unused.
+ */
 void Aura::HandleBindSight(bool apply, bool /*Real*/)
 {
     Unit* caster = GetCaster();
@@ -4606,6 +4764,12 @@ void Aura::HandleBindSight(bool apply, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Redirects the caster camera for farsight while the aura is active.
+ *
+ * @param apply True to enable farsight; false to restore normal view.
+ * @param Real Unused.
+ */
 void Aura::HandleFarSight(bool apply, bool /*Real*/)
 {
     Unit* caster = GetCaster();
@@ -4625,6 +4789,12 @@ void Aura::HandleFarSight(bool apply, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Applies or removes creature tracking flags on a player.
+ *
+ * @param apply True to enable tracking; false to disable it.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraTrackCreatures(bool apply, bool /*Real*/)
 {
     if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
@@ -4647,6 +4817,12 @@ void Aura::HandleAuraTrackCreatures(bool apply, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Applies or removes resource tracking flags on a player.
+ *
+ * @param apply True to enable tracking; false to disable it.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraTrackResources(bool apply, bool /*Real*/)
 {
     if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
@@ -4669,6 +4845,12 @@ void Aura::HandleAuraTrackResources(bool apply, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Applies or removes stealthed-unit tracking on a player.
+ *
+ * @param apply True to enable tracking; false to disable it.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraTrackStealthed(bool apply, bool /*Real*/)
 {
     if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
@@ -4684,12 +4866,24 @@ void Aura::HandleAuraTrackStealthed(bool apply, bool /*Real*/)
     GetTarget()->ApplyModByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_TRACK_STEALTHED, apply);
 }
 
+/**
+ * @brief Applies or removes a scale modifier and refreshes model data.
+ *
+ * @param apply True to apply the scale change; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraModScale(bool apply, bool /*Real*/)
 {
     GetTarget()->ApplyPercentModFloatValue(OBJECT_FIELD_SCALE_X, float(m_modifier.m_amount), apply);
     GetTarget()->UpdateModelData();
 }
 
+/**
+ * @brief Applies or removes direct possession control over the target.
+ *
+ * @param apply True to possess the target; false to release it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleModPossess(bool apply, bool Real)
 {
     if (!Real)
@@ -4800,6 +4994,12 @@ void Aura::HandleModPossess(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Applies or removes possession control over a pet.
+ *
+ * @param apply True to possess the pet; false to release it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleModPossessPet(bool apply, bool Real)
 {
     if (!Real)
@@ -4890,6 +5090,12 @@ void Aura::HandleAuraModPetTalentsPoints(bool /*Apply*/, bool Real)
     }
 }
 
+/**
+ * @brief Applies or removes charm control over the target.
+ *
+ * @param apply True to charm the target; false to release it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleModCharm(bool apply, bool Real)
 {
     if (!Real)
@@ -5031,6 +5237,12 @@ void Aura::HandleModCharm(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Applies or removes the confused control state.
+ *
+ * @param apply True to apply confusion; false to remove it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleModConfuse(bool apply, bool Real)
 {
     if (!Real)
@@ -5041,6 +5253,12 @@ void Aura::HandleModConfuse(bool apply, bool Real)
     GetTarget()->SetConfused(apply, GetCasterGuid(), GetId());
 }
 
+/**
+ * @brief Applies or removes the feared control state.
+ *
+ * @param apply True to apply fear; false to remove it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleModFear(bool apply, bool Real)
 {
     if (!Real)
@@ -5051,6 +5269,12 @@ void Aura::HandleModFear(bool apply, bool Real)
     GetTarget()->SetFeared(apply, GetCasterGuid(), GetId());
 }
 
+/**
+ * @brief Applies or removes feign death handling on the target.
+ *
+ * @param apply True to apply feign death; false to remove it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleFeignDeath(bool apply, bool Real)
 {
     if (!Real)
@@ -5061,6 +5285,12 @@ void Aura::HandleFeignDeath(bool apply, bool Real)
     GetTarget()->SetFeignDeath(apply, GetCasterGuid());
 }
 
+/**
+ * @brief Applies or removes the disarmed state and updates attack timing.
+ *
+ * @param apply True to disarm; false to remove disarm.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraModDisarm(bool apply, bool Real)
 {
     if (!Real)
@@ -5130,6 +5360,12 @@ void Aura::HandleAuraModDisarm(bool apply, bool Real)
     target->UpdateDamagePhysical(attack_type);
 }
 
+/**
+ * @brief Applies or removes the stunned state and related frozen handling.
+ *
+ * @param apply True to stun; false to remove stun.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraModStun(bool apply, bool Real)
 {
     if (!Real)
@@ -5268,6 +5504,12 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Applies or removes stealth flags and visibility changes.
+ *
+ * @param apply True to enter stealth; false to leave it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleModStealth(bool apply, bool Real)
 {
     Unit* target = GetTarget();
@@ -5366,6 +5608,12 @@ void Aura::HandleModStealth(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Applies or removes invisibility state and visibility flags.
+ *
+ * @param apply True to apply invisibility; false to remove it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleInvisibility(bool apply, bool Real)
 {
     Unit* target = GetTarget();
@@ -5427,6 +5675,12 @@ void Aura::HandleInvisibility(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Applies or removes invisibility detection masks.
+ *
+ * @param apply True to apply detection; false to remove it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleInvisibilityDetect(bool apply, bool Real)
 {
     Unit* target = GetTarget();
@@ -5451,11 +5705,23 @@ void Aura::HandleInvisibilityDetect(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Applies or removes the detect amore player flag.
+ *
+ * @param apply True to apply the flag; false to remove it.
+ * @param real Unused.
+ */
 void Aura::HandleDetectAmore(bool apply, bool /*real*/)
 {
     GetTarget()->ApplyModByteFlag(PLAYER_FIELD_BYTES2, 3, (PLAYER_FIELD_BYTE2_DETECT_AMORE_0 << m_modifier.m_amount), apply);
 }
 
+/**
+ * @brief Applies or removes the root state and related frozen handling.
+ *
+ * @param apply True to root the target; false to unroot it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraModRoot(bool apply, bool Real)
 {
     // only at real add/remove aura
@@ -5532,6 +5798,12 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Applies or removes the silenced state and interrupts affected casts.
+ *
+ * @param apply True to apply silence; false to remove it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraModSilence(bool apply, bool Real)
 {
     // only at real add/remove aura
@@ -5566,6 +5838,12 @@ void Aura::HandleAuraModSilence(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Applies or removes school-based threat generation modifiers.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleModThreat(bool apply, bool Real)
 {
     // only at real add/remove aura
@@ -5610,6 +5888,12 @@ void Aura::HandleModThreat(bool apply, bool Real)
             }
 }
 
+/**
+ * @brief Adds or removes a flat threat amount toward the caster.
+ *
+ * @param apply True to add threat; false to subtract it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraModTotalThreat(bool apply, bool Real)
 {
     // only at real add/remove aura
@@ -5637,6 +5921,12 @@ void Aura::HandleAuraModTotalThreat(bool apply, bool Real)
     target->GetHostileRefManager().threatAssist(caster, threatMod, GetSpellProto());
 }
 
+/**
+ * @brief Applies or removes taunt behavior on the target.
+ *
+ * @param apply True to taunt the target; false to fade the taunt.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleModTaunt(bool apply, bool Real)
 {
     // only at real add/remove aura
@@ -5705,6 +5995,12 @@ void Aura::HandleAuraModIncreaseSpeed(bool /*apply*/, bool Real)
     GetTarget()->UpdateSpeed(MOVE_RUN, true);
 }
 
+/**
+ * @brief Refreshes mounted movement speed after aura changes.
+ *
+ * @param apply Unused.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraModIncreaseMountedSpeed(bool apply, bool Real)
 {
     // all applied/removed only at real aura add/remove
@@ -5789,6 +6085,12 @@ void Aura::HandleAuraModIncreaseFlightSpeed(bool apply, bool Real)
     target->UpdateSpeed(MOVE_FLIGHT, true);
 }
 
+/**
+ * @brief Refreshes swim speed after aura changes.
+ *
+ * @param apply Unused.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraModIncreaseSwimSpeed(bool /*apply*/, bool Real)
 {
     // all applied/removed only at real aura add/remove
@@ -5800,6 +6102,12 @@ void Aura::HandleAuraModIncreaseSwimSpeed(bool /*apply*/, bool Real)
     GetTarget()->UpdateSpeed(MOVE_SWIM, true);
 }
 
+/**
+ * @brief Applies or removes movement slowing effects and refreshes speeds.
+ *
+ * @param apply True to apply the slow; false to remove it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraModDecreaseSpeed(bool apply, bool Real)
 {
     // all applied/removed only at real aura add/remove
@@ -5827,6 +6135,12 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply, bool Real)
     target->UpdateSpeed(MOVE_FLIGHT, true);
 }
 
+/**
+ * @brief Refreshes movement to normal-speed handling after aura changes.
+ *
+ * @param apply Unused.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraModUseNormalSpeed(bool /*apply*/, bool Real)
 {
     // all applied/removed only at real aura add/remove
@@ -5905,6 +6219,12 @@ void Aura::HandleModMechanicImmunity(bool apply, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Applies or removes immunity to a mechanic mask.
+ *
+ * @param apply True to apply immunity; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleModMechanicImmunityMask(bool apply, bool /*Real*/)
 {
     uint32 mechanic  = m_modifier.m_miscvalue;
@@ -5940,6 +6260,12 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool /*Real*/)
     target->ApplySpellImmune(GetId(), IMMUNITY_EFFECT, m_modifier.m_miscvalue, apply);
 }
 
+/**
+ * @brief Applies or removes immunity to a specific aura state.
+ *
+ * @param apply True to apply immunity; false to remove it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraModStateImmunity(bool apply, bool Real)
 {
     if (apply && Real && GetSpellProto()->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))
@@ -5962,6 +6288,12 @@ void Aura::HandleAuraModStateImmunity(bool apply, bool Real)
     GetTarget()->ApplySpellImmune(GetId(), IMMUNITY_STATE, m_modifier.m_miscvalue, apply);
 }
 
+/**
+ * @brief Applies or removes spell school immunity and clears affected auras when needed.
+ *
+ * @param apply True to apply immunity; false to remove it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraModSchoolImmunity(bool apply, bool Real)
 {
     Unit* target = GetTarget();
@@ -6015,11 +6347,23 @@ void Aura::HandleAuraModSchoolImmunity(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Applies or removes immunity to a damage school mask.
+ *
+ * @param apply True to apply immunity; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraModDmgImmunity(bool apply, bool /*Real*/)
 {
     GetTarget()->ApplySpellImmune(GetId(), IMMUNITY_DAMAGE, m_modifier.m_miscvalue, apply);
 }
 
+/**
+ * @brief Applies or removes dispel immunity for the aura's dispel type.
+ *
+ * @param apply True to apply immunity; false to remove it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraModDispelImmunity(bool apply, bool Real)
 {
     // all applied/removed only at real aura add/remove
@@ -6031,6 +6375,12 @@ void Aura::HandleAuraModDispelImmunity(bool apply, bool Real)
     GetTarget()->ApplySpellDispelImmunity(GetSpellProto(), DispelType(m_modifier.m_miscvalue), apply);
 }
 
+/**
+ * @brief Applies special proc-trigger spell setup for specific aura spells.
+ *
+ * @param apply True to apply the proc aura; false to remove it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
 {
     if (!Real)
@@ -6067,6 +6417,12 @@ void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Applies or removes the tracked-unit dynamic flag.
+ *
+ * @param apply True to mark the unit as tracked; false to clear it.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraModStalked(bool apply, bool /*Real*/)
 {
     // used by spells: Hunter's Mark, Mind Vision, Syndicate Tracker (MURP) DND
@@ -6139,11 +6495,23 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Enables or disables periodic trigger handling with an explicit value.
+ *
+ * @param apply True to enable periodic processing; false to disable it.
+ * @param Real Unused.
+ */
 void Aura::HandlePeriodicTriggerSpellWithValue(bool apply, bool /*Real*/)
 {
     m_isPeriodic = apply;
 }
 
+/**
+ * @brief Enables or disables periodic energize processing.
+ *
+ * @param apply True to enable periodic processing; false to disable it.
+ * @param Real Unused.
+ */
 void Aura::HandlePeriodicEnergize(bool apply, bool Real)
 {
     if (!Real)
@@ -6197,6 +6565,12 @@ void Aura::HandlePeriodicEnergize(bool apply, bool Real)
     m_isPeriodic = apply;
 }
 
+/**
+ * @brief Enables or disables periodic power burn processing.
+ *
+ * @param apply True to enable periodic processing; false to disable it.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraPowerBurn(bool apply, bool /*Real*/)
 {
     m_isPeriodic = apply;
@@ -6259,6 +6633,12 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
     m_isPeriodic = apply;
 }
 
+/**
+ * @brief Enables periodic healing and precalculates healing bonuses when applied.
+ *
+ * @param apply True to enable periodic healing; false to disable it.
+ * @param Real Unused.
+ */
 void Aura::HandlePeriodicHeal(bool apply, bool /*Real*/)
 {
     m_isPeriodic = apply;
@@ -6346,6 +6726,12 @@ void Aura::HandleDamagePercentTaken(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Enables periodic damage and precalculates damage bonuses when applied.
+ *
+ * @param apply True to enable periodic damage; false to disable it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandlePeriodicDamage(bool apply, bool Real)
 {
     // spells required only Real aura add/remove
@@ -6492,11 +6878,23 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Enables or disables periodic percentage-based damage processing.
+ *
+ * @param apply True to enable periodic processing; false to disable it.
+ * @param Real Unused.
+ */
 void Aura::HandlePeriodicDamagePCT(bool apply, bool /*Real*/)
 {
     m_isPeriodic = apply;
 }
 
+/**
+ * @brief Enables periodic health leech and precalculates spell bonuses when applied.
+ *
+ * @param apply True to enable periodic leeching; false to disable it.
+ * @param Real Unused.
+ */
 void Aura::HandlePeriodicLeech(bool apply, bool /*Real*/)
 {
     m_isPeriodic = apply;
@@ -6522,11 +6920,23 @@ void Aura::HandlePeriodicLeech(bool apply, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Enables or disables periodic mana leech processing.
+ *
+ * @param apply True to enable periodic processing; false to disable it.
+ * @param Real Unused.
+ */
 void Aura::HandlePeriodicManaLeech(bool apply, bool /*Real*/)
 {
     m_isPeriodic = apply;
 }
 
+/**
+ * @brief Enables periodic health funnel processing and precalculates bonuses when applied.
+ *
+ * @param apply True to enable periodic processing; false to disable it.
+ * @param Real Unused.
+ */
 void Aura::HandlePeriodicHealthFunnel(bool apply, bool /*Real*/)
 {
     m_isPeriodic = apply;
@@ -6575,6 +6985,12 @@ void Aura::HandleAuraModResistanceExclusive(bool apply, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Applies or removes flat resistance modifiers.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraModResistance(bool apply, bool /*Real*/)
 {
     for (int8 x = SPELL_SCHOOL_NORMAL; x < MAX_SPELL_SCHOOL; ++x)
@@ -6590,6 +7006,12 @@ void Aura::HandleAuraModResistance(bool apply, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Applies or removes percentage modifiers to base resistances.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraModBaseResistancePCT(bool apply, bool /*Real*/)
 {
     // only players have base stats
@@ -6613,6 +7035,12 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Applies or removes percentage modifiers to total resistances.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleModResistancePercent(bool apply, bool /*Real*/)
 {
     Unit* target = GetTarget();
@@ -6631,6 +7059,12 @@ void Aura::HandleModResistancePercent(bool apply, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Applies or removes flat modifiers to base resistances.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleModBaseResistance(bool apply, bool /*Real*/)
 {
     // only players have base stats
@@ -6679,6 +7113,12 @@ void Aura::HandleAuraModStat(bool apply, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Applies or removes percentage modifiers to player base stats.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleModPercentStat(bool apply, bool /*Real*/)
 {
     if (m_modifier.m_miscvalue < -1 || m_modifier.m_miscvalue > 4)
@@ -6702,6 +7142,12 @@ void Aura::HandleModPercentStat(bool apply, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Refreshes player spell damage and healing data derived from stats.
+ *
+ * @param apply Unused.
+ * @param Real Unused.
+ */
 void Aura::HandleModSpellDamagePercentFromStat(bool /*apply*/, bool /*Real*/)
 {
     if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
@@ -6715,6 +7161,12 @@ void Aura::HandleModSpellDamagePercentFromStat(bool /*apply*/, bool /*Real*/)
     ((Player*)GetTarget())->UpdateSpellDamageAndHealingBonus();
 }
 
+/**
+ * @brief Refreshes player healing data derived from stats.
+ *
+ * @param apply Unused.
+ * @param Real Unused.
+ */
 void Aura::HandleModSpellHealingPercentFromStat(bool /*apply*/, bool /*Real*/)
 {
     if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
@@ -6763,6 +7215,12 @@ void Aura::HandleModSpellHealingPercentFromAttackPower(bool /*apply*/, bool /*Re
     ((Player*)GetTarget())->UpdateSpellDamageAndHealingBonus();
 }
 
+/**
+ * @brief Refreshes player healing bonus data exposed to the client.
+ *
+ * @param apply Unused.
+ * @param Real Unused.
+ */
 void Aura::HandleModHealingDone(bool /*apply*/, bool /*Real*/)
 {
     if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
@@ -6774,6 +7232,12 @@ void Aura::HandleModHealingDone(bool /*apply*/, bool /*Real*/)
     ((Player*)GetTarget())->UpdateSpellDamageAndHealingBonus();
 }
 
+/**
+ * @brief Applies or removes percentage modifiers to total stats and preserves health ratios when required.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleModTotalPercentStat(bool apply, bool /*Real*/)
 {
     if (m_modifier.m_miscvalue < -1 || m_modifier.m_miscvalue > 4)
@@ -6809,6 +7273,12 @@ void Aura::HandleModTotalPercentStat(bool apply, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Refreshes armor-from-stat style resistance data for players.
+ *
+ * @param apply Unused.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraModResistenceOfStatPercent(bool /*apply*/, bool /*Real*/)
 {
     if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
@@ -6836,6 +7306,12 @@ void Aura::HandleAuraModTotalHealthPercentRegen(bool apply, bool /*Real*/)
     m_isPeriodic = apply;
 }
 
+/**
+ * @brief Enables periodic total mana regeneration using a one-second tick when needed.
+ *
+ * @param apply True to enable the periodic effect; false to disable it.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraModTotalManaPercentRegen(bool apply, bool /*Real*/)
 {
     if (m_modifier.periodictime == 0)
@@ -6889,6 +7365,12 @@ void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
     m_isPeriodic = apply;
 }
 
+/**
+ * @brief Refreshes player mana regeneration after percentage-based regen changes.
+ *
+ * @param apply Unused.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleModPowerRegenPCT(bool /*apply*/, bool Real)
 {
     // spells required only Real aura add/remove
@@ -6938,6 +7420,12 @@ void Aura::HandleComprehendLanguage(bool apply, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Applies or removes maximum health increases, including special temporary-health cases.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
 {
     Unit* target = GetTarget();
@@ -7015,6 +7503,12 @@ void  Aura::HandleAuraModIncreaseMaxHealth(bool apply, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Applies or removes a flat increase to the current power type's maximum value.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraModIncreaseEnergy(bool apply, bool Real)
 {
     Unit* target = GetTarget();
@@ -7042,6 +7536,12 @@ void Aura::HandleAuraModIncreaseEnergy(bool apply, bool Real)
     target->HandleStatModifier(unitMod, TOTAL_VALUE, float(m_modifier.m_amount), apply);
 }
 
+/**
+ * @brief Applies or removes a percentage increase to the current power type.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraModIncreaseEnergyPercent(bool apply, bool /*Real*/)
 {
     Powers powerType = GetTarget()->GetPowerType();
@@ -7055,6 +7555,12 @@ void Aura::HandleAuraModIncreaseEnergyPercent(bool apply, bool /*Real*/)
     GetTarget()->HandleStatModifier(unitMod, TOTAL_PCT, float(m_modifier.m_amount), apply);
 }
 
+/**
+ * @brief Applies or removes a percentage increase to maximum health.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraModIncreaseHealthPercent(bool apply, bool /*Real*/)
 {
     Unit* target = GetTarget();
@@ -7093,6 +7599,12 @@ void Aura::HandleAuraModParryPercent(bool /*apply*/, bool /*Real*/)
     ((Player*)GetTarget())->UpdateParryPercentage();
 }
 
+/**
+ * @brief Refreshes player dodge percentage after aura changes.
+ *
+ * @param apply Unused.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraModDodgePercent(bool /*apply*/, bool /*Real*/)
 {
     if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
@@ -7104,6 +7616,12 @@ void Aura::HandleAuraModDodgePercent(bool /*apply*/, bool /*Real*/)
     // sLog.outError("BONUS DODGE CHANCE: + %f", float(m_modifier.m_amount));
 }
 
+/**
+ * @brief Refreshes player block percentage after aura changes.
+ *
+ * @param apply Unused.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraModBlockPercent(bool /*apply*/, bool /*Real*/)
 {
     if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
@@ -7115,6 +7633,12 @@ void Aura::HandleAuraModBlockPercent(bool /*apply*/, bool /*Real*/)
     // sLog.outError("BONUS BLOCK CHANCE: + %f", float(m_modifier.m_amount));
 }
 
+/**
+ * @brief Refreshes player mana regeneration rules after regen-interrupt changes.
+ *
+ * @param apply Unused.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraModRegenInterrupt(bool /*apply*/, bool Real)
 {
     // spells required only Real aura add/remove
@@ -7131,6 +7655,12 @@ void Aura::HandleAuraModRegenInterrupt(bool /*apply*/, bool Real)
     ((Player*)GetTarget())->UpdateManaRegen();
 }
 
+/**
+ * @brief Applies or removes melee and ranged critical strike bonuses.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraModCritPercent(bool apply, bool Real)
 {
     Unit* target = GetTarget();
@@ -7166,6 +7696,12 @@ void Aura::HandleAuraModCritPercent(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Applies or removes melee and ranged hit chance modifiers.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleModHitChance(bool apply, bool /*Real*/)
 {
     Unit* target = GetTarget();
@@ -7182,6 +7718,12 @@ void Aura::HandleModHitChance(bool apply, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Applies or removes spell hit chance modifiers.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleModSpellHitChance(bool apply, bool /*Real*/)
 {
     if (GetTarget()->GetTypeId() == TYPEID_PLAYER)
@@ -7194,6 +7736,12 @@ void Aura::HandleModSpellHitChance(bool apply, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Applies or removes spell critical strike chance bonuses.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleModSpellCritChance(bool apply, bool Real)
 {
     // spells required only Real aura add/remove
@@ -7212,6 +7760,12 @@ void Aura::HandleModSpellCritChance(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Refreshes per-school spell critical strike chance for players.
+ *
+ * @param apply Unused.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleModSpellCritChanceShool(bool /*apply*/, bool Real)
 {
     // spells required only Real aura add/remove
@@ -7258,11 +7812,23 @@ void Aura::HandleModCombatSpeedPct(bool apply, bool /*Real*/)
     target->ApplyAttackTimePercentMod(RANGED_ATTACK, float(m_modifier.m_amount), apply);
 }
 
+/**
+ * @brief Applies or removes haste effects to main-hand attack speed.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleModAttackSpeed(bool apply, bool /*Real*/)
 {
     GetTarget()->ApplyAttackTimePercentMod(BASE_ATTACK, float(m_modifier.m_amount), apply);
 }
 
+/**
+ * @brief Applies or removes haste effects to both melee attack speeds.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleModMeleeSpeedPct(bool apply, bool /*Real*/)
 {
     Unit* target = GetTarget();
@@ -7270,11 +7836,23 @@ void Aura::HandleModMeleeSpeedPct(bool apply, bool /*Real*/)
     target->ApplyAttackTimePercentMod(OFF_ATTACK, float(m_modifier.m_amount), apply);
 }
 
+/**
+ * @brief Applies or removes haste effects to ranged attack speed.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraModRangedHaste(bool apply, bool /*Real*/)
 {
     GetTarget()->ApplyAttackTimePercentMod(RANGED_ATTACK, float(m_modifier.m_amount), apply);
 }
 
+/**
+ * @brief Applies or removes ammo-based ranged haste when the equipped weapon uses ammunition.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleRangedAmmoHaste(bool apply, bool /*Real*/)
 {
     if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
@@ -7293,6 +7871,12 @@ void Aura::HandleAuraModAttackPower(bool apply, bool /*Real*/)
     GetTarget()->HandleStatModifier(UNIT_MOD_ATTACK_POWER, TOTAL_VALUE, float(m_modifier.m_amount), apply);
 }
 
+/**
+ * @brief Applies or removes flat ranged attack power bonuses.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraModRangedAttackPower(bool apply, bool /*Real*/)
 {
     if ((GetTarget()->getClassMask() & CLASSMASK_WAND_USERS) != 0)
@@ -7303,12 +7887,24 @@ void Aura::HandleAuraModRangedAttackPower(bool apply, bool /*Real*/)
     GetTarget()->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_VALUE, float(m_modifier.m_amount), apply);
 }
 
+/**
+ * @brief Applies or removes percentage modifiers to melee attack power.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraModAttackPowerPercent(bool apply, bool /*Real*/)
 {
     // UNIT_FIELD_ATTACK_POWER_MULTIPLIER = multiplier - 1
     GetTarget()->HandleStatModifier(UNIT_MOD_ATTACK_POWER, TOTAL_PCT, float(m_modifier.m_amount), apply);
 }
 
+/**
+ * @brief Applies or removes percentage modifiers to ranged attack power.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraModRangedAttackPowerPercent(bool apply, bool /*Real*/)
 {
     if ((GetTarget()->getClassMask() & CLASSMASK_WAND_USERS) != 0)
@@ -7464,6 +8060,12 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Applies or removes percentage damage bonuses for physical and magical damage.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleModDamagePercentDone(bool apply, bool Real)
 {
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "AURA MOD DAMAGE type:%u negative:%u", m_modifier.m_miscvalue, m_positive ? 0 : 1);
@@ -7532,6 +8134,12 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
         }
 }
 
+/**
+ * @brief Applies or removes percentage damage bonuses to offhand attacks.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleModOffhandDamagePercent(bool apply, bool Real)
 {
     // spells required only Real aura add/remove
@@ -7565,6 +8173,12 @@ void Aura::HandleModPowerCostPCT(bool apply, bool Real)
         }
 }
 
+/**
+ * @brief Applies or removes flat spell power cost modifiers by school.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleModPowerCost(bool apply, bool Real)
 {
     // spells required only Real aura add/remove
@@ -7909,6 +8523,12 @@ void Aura::HandleShapeshiftBoosts(bool apply)
     }
 }
 
+/**
+ * @brief Applies or removes the empathy special-info flag for supported targets.
+ *
+ * @param apply True to apply the flag; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraEmpathy(bool apply, bool /*Real*/)
 {
     Unit* target = GetTarget();
@@ -7921,6 +8541,12 @@ void Aura::HandleAuraEmpathy(bool apply, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Applies or removes the untrackable unit byte flag.
+ *
+ * @param apply True to apply the flag; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraUntrackable(bool apply, bool /*Real*/)
 {
     if (apply)
@@ -7933,6 +8559,12 @@ void Aura::HandleAuraUntrackable(bool apply, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Applies or removes the pacified unit flag.
+ *
+ * @param apply True to pacify; false to remove pacify.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraModPacify(bool apply, bool /*Real*/)
 {
     if (apply)
@@ -7945,12 +8577,24 @@ void Aura::HandleAuraModPacify(bool apply, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Applies or removes both pacify and silence effects together.
+ *
+ * @param apply True to apply the effects; false to remove them.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraModPacifyAndSilence(bool apply, bool Real)
 {
     HandleAuraModPacify(apply, Real);
     HandleAuraModSilence(apply, Real);
 }
 
+/**
+ * @brief Applies or removes the ghost player flag.
+ *
+ * @param apply True to apply the flag; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleAuraGhost(bool apply, bool /*Real*/)
 {
     if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
@@ -8069,6 +8713,12 @@ void Aura::HandleModTargetResistance(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Applies or removes shield block value modifiers.
+ *
+ * @param apply True to apply the modifier; false to remove it.
+ * @param Real Unused.
+ */
 void Aura::HandleShieldBlockValue(bool apply, bool /*Real*/)
 {
     BaseModType modType = FLAT_MOD;
@@ -8083,6 +8733,12 @@ void Aura::HandleShieldBlockValue(bool apply, bool /*Real*/)
     }
 }
 
+/**
+ * @brief Preserves or removes combo points retained by the aura.
+ *
+ * @param apply True to apply the retention aura; false to remove it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleAuraRetainComboPoints(bool apply, bool Real)
 {
     // spells required only Real aura add/remove
@@ -8107,6 +8763,12 @@ void Aura::HandleAuraRetainComboPoints(bool apply, bool Real)
         }
 }
 
+/**
+ * @brief Applies or removes the non-attackable state.
+ *
+ * @param Apply True to make the target unattackable; false to remove the state.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleModUnattackable(bool Apply, bool Real)
 {
     if (Real && Apply)
@@ -8117,6 +8779,12 @@ void Aura::HandleModUnattackable(bool Apply, bool Real)
     GetTarget()->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE, Apply);
 }
 
+/**
+ * @brief Handles Spirit of Redemption setup and forced death on expiration.
+ *
+ * @param apply True to enter the spirit state; false to end it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleSpiritOfRedemption(bool apply, bool Real)
 {
     // spells required only Real aura add/remove
@@ -8151,6 +8819,12 @@ void Aura::HandleSpiritOfRedemption(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Calculates absorb shield bonuses for school absorb effects.
+ *
+ * @param apply True to apply the absorb aura; false to remove it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleSchoolAbsorb(bool apply, bool Real)
 {
     if (!Real)
@@ -8307,6 +8981,9 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Executes one periodic tick for the active aura effect.
+ */
 void Aura::PeriodicTick()
 {
     Unit* target = GetTarget();
@@ -9074,6 +9751,9 @@ void Aura::PeriodicTick()
     }
 }
 
+/**
+ * @brief Executes scripted periodic behavior for dummy aura effects.
+ */
 void Aura::PeriodicDummyTick()
 {
     SpellEntry const* spell = GetSpellProto();
@@ -9827,6 +10507,12 @@ void Aura::PeriodicDummyTick()
     }
 }
 
+/**
+ * @brief Applies or removes prevention of fleeing on feared targets.
+ *
+ * @param apply True to prevent fleeing; false to restore it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandlePreventFleeing(bool apply, bool Real)
 {
     if (!Real)
@@ -9848,6 +10534,12 @@ void Aura::HandlePreventFleeing(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Calculates bonus absorb values for mana shield effects.
+ *
+ * @param apply True to apply the shield; false to remove it.
+ * @param Real True when processing the real aura state change.
+ */
 void Aura::HandleManaShield(bool apply, bool Real)
 {
     if (!Real)
@@ -10315,6 +11007,11 @@ void Aura::HandleTriggerLinkedAura(bool apply, bool Real)
     }
 }
 
+/**
+ * @brief Checks whether this aura is the last remaining effect on its holder.
+ *
+ * @return True if no other aura effects remain on the holder; otherwise, false.
+ */
 bool Aura::IsLastAuraOnHolder()
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
@@ -10408,18 +11105,35 @@ SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit* target, Wor
     }
 }
 
+/**
+ * @brief Stores an aura instance in the holder at the given effect index.
+ *
+ * @param aura The aura instance to store.
+ * @param index The effect index slot.
+ */
 void SpellAuraHolder::AddAura(Aura* aura, SpellEffectIndex index)
 {
     m_auras[index] = aura;
     m_auraFlags |= (1 << index);
 }
 
+/**
+ * @brief Clears the aura entry stored at the given effect index.
+ *
+ * @param index The effect index slot to clear.
+ */
 void SpellAuraHolder::RemoveAura(SpellEffectIndex index)
 {
     m_auras[index] = NULL;
     m_auraFlags &= ~(1 << index);
 }
 
+/**
+ * @brief Applies or removes all aura modifiers owned by the holder.
+ *
+ * @param apply True to apply modifiers; false to remove them.
+ * @param real True when processing real application state.
+ */
 void SpellAuraHolder::ApplyAuraModifiers(bool apply, bool real)
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX && !IsDeleted(); ++i)
@@ -10429,6 +11143,9 @@ void SpellAuraHolder::ApplyAuraModifiers(bool apply, bool real)
         }
 }
 
+/**
+ * @brief Registers the aura holder on the target and assigns visible aura data.
+ */
 void SpellAuraHolder::_AddSpellAuraHolder()
 {
     if (!GetId())
@@ -10566,6 +11283,9 @@ void SpellAuraHolder::_AddSpellAuraHolder()
     }
 }
 
+/**
+ * @brief Unregisters the aura holder and clears its visible aura data.
+ */
 void SpellAuraHolder::_RemoveSpellAuraHolder()
 {
     // Remove all triggered by aura spells vs unlimited duration
@@ -10737,6 +11457,9 @@ void SpellAuraHolder::_RemoveSpellAuraHolder()
     }
 }
 
+/**
+ * @brief Removes unlimited-duration spells triggered by this aura holder.
+ */
 void SpellAuraHolder::CleanupTriggeredSpells()
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
@@ -10775,6 +11498,12 @@ void SpellAuraHolder::CleanupTriggeredSpells()
     }
 }
 
+/**
+ * @brief Modifies the current stack amount within spell-defined limits.
+ *
+ * @param num The stack delta to apply.
+ * @return True if the aura should be removed after the change; otherwise, false.
+ */
 bool SpellAuraHolder::ModStackAmount(int32 num)
 {
     uint32 protoStackAmount = m_spellProto->StackAmount;
@@ -10802,6 +11531,11 @@ bool SpellAuraHolder::ModStackAmount(int32 num)
     return false;
 }
 
+/**
+ * @brief Sets the holder stack amount and refreshes dependent aura values.
+ *
+ * @param stackAmount The new stack amount.
+ */
 void SpellAuraHolder::SetStackAmount(uint32 stackAmount)
 {
     Unit* target = GetTarget();
@@ -10843,6 +11577,11 @@ void SpellAuraHolder::SetStackAmount(uint32 stackAmount)
         SendAuraUpdate(false);
 }
 
+/**
+ * @brief Resolves the current caster unit for the aura holder.
+ *
+ * @return The caster unit, or null if it cannot be found.
+ */
 Unit* SpellAuraHolder::GetCaster() const
 {
     if (GetCasterGuid() == m_target->GetObjectGuid())
@@ -10853,6 +11592,12 @@ Unit* SpellAuraHolder::GetCaster() const
     return sObjectAccessor.GetUnit(*m_target, m_casterGuid);// player will search at any maps
 }
 
+/**
+ * @brief Checks whether this weapon buff can coexist with another one on a different weapon.
+ *
+ * @param ref The other aura holder to compare against.
+ * @return True if the buffs can coexist; otherwise, false.
+ */
 bool SpellAuraHolder::IsWeaponBuffCoexistableWith(SpellAuraHolder const* ref) const
 {
     // only item casted spells
@@ -10902,6 +11647,12 @@ bool SpellAuraHolder::IsWeaponBuffCoexistableWith(SpellAuraHolder const* ref) co
     return ref->GetCastItemGuid() && ref->GetCastItemGuid() != GetCastItemGuid();
 }
 
+/**
+ * @brief Determines whether the holder needs a visible aura slot.
+ *
+ * @param caster The caster unit, if available.
+ * @return True if the aura should occupy a visible slot; otherwise, false.
+ */
 bool SpellAuraHolder::IsNeedVisibleSlot(Unit const* caster) const
 {
     bool totemAura = caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->IsTotem();
@@ -10969,6 +11720,11 @@ void SpellAuraHolder::SendAuraUpdate(bool remove) const
     m_target->SendMessageToSet(&data, true);
 }
 
+/**
+ * @brief Applies or removes spell-specific linked boost behavior.
+ *
+ * @param apply True to apply boosts; false to remove them.
+ */
 void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
 {
     bool cast_at_remove = false;                            // if spell must be casted at last aura from stack remove
@@ -11851,6 +12607,11 @@ SpellAuraHolder::~SpellAuraHolder()
         }
 }
 
+/**
+ * @brief Updates holder duration, periodic costs, heartbeat checks, and child auras.
+ *
+ * @param diff The elapsed update time in milliseconds.
+ */
 void SpellAuraHolder::Update(uint32 diff)
 {
     if (m_duration > 0)
@@ -11922,12 +12683,20 @@ void SpellAuraHolder::Update(uint32 diff)
     }
 }
 
+/**
+ * @brief Refreshes the holder duration to its maximum and updates client state.
+ */
 void SpellAuraHolder::RefreshHolder()
 {
     SetAuraDuration(GetAuraMaxDuration());
     SendAuraUpdate(false);
 }
 
+/**
+ * @brief Sets the maximum aura duration and updates permanence when needed.
+ *
+ * @param duration The new maximum duration.
+ */
 void SpellAuraHolder::SetAuraMaxDuration(int32 duration)
 {
     m_maxDuration = duration;
@@ -11948,6 +12717,12 @@ void SpellAuraHolder::SetAuraMaxDuration(int32 duration)
     }
 }
 
+/**
+ * @brief Checks whether the holder or any effect uses a given mechanic.
+ *
+ * @param mechanic The mechanic to test.
+ * @return True if the mechanic is present; otherwise, false.
+ */
 bool SpellAuraHolder::HasMechanic(uint32 mechanic) const
 {
     if (mechanic == m_spellProto->Mechanic)
@@ -11963,6 +12738,12 @@ bool SpellAuraHolder::HasMechanic(uint32 mechanic) const
     return false;
 }
 
+/**
+ * @brief Checks whether the holder matches any mechanic in a mask.
+ *
+ * @param mechanicMask The mechanic mask to test.
+ * @return True if any mechanic matches; otherwise, false.
+ */
 bool SpellAuraHolder::HasMechanicMask(uint32 mechanicMask) const
 {
     if (mechanicMask & (1 << (m_spellProto->Mechanic - 1)))
@@ -11978,6 +12759,11 @@ bool SpellAuraHolder::HasMechanicMask(uint32 mechanicMask) const
     return false;
 }
 
+/**
+ * @brief Checks whether any aura in the holder is persistent.
+ *
+ * @return True if the holder contains a persistent aura; otherwise, false.
+ */
 bool SpellAuraHolder::IsPersistent() const
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
@@ -11989,6 +12775,11 @@ bool SpellAuraHolder::IsPersistent() const
     return false;
 }
 
+/**
+ * @brief Checks whether any aura in the holder is an area aura.
+ *
+ * @return True if the holder contains an area aura; otherwise, false.
+ */
 bool SpellAuraHolder::IsAreaAura() const
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
@@ -12000,6 +12791,11 @@ bool SpellAuraHolder::IsAreaAura() const
     return false;
 }
 
+/**
+ * @brief Checks whether all aura effects in the holder are positive.
+ *
+ * @return True if all contained auras are positive; otherwise, false.
+ */
 bool SpellAuraHolder::IsPositive() const
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
@@ -12011,6 +12807,11 @@ bool SpellAuraHolder::IsPositive() const
     return true;
 }
 
+/**
+ * @brief Checks whether the holder currently contains no aura effects.
+ *
+ * @return True if no aura slots are populated; otherwise, false.
+ */
 bool SpellAuraHolder::IsEmptyHolder() const
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
@@ -12021,6 +12822,9 @@ bool SpellAuraHolder::IsEmptyHolder() const
     return true;
 }
 
+/**
+ * @brief Unregisters this holder from tracked-aura bookkeeping.
+ */
 void SpellAuraHolder::UnregisterAndCleanupTrackedAuras()
 {
     TrackedAuraType trackedType = GetTrackedAuraType();

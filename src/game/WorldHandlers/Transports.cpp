@@ -36,6 +36,9 @@
 #include "ProgressBar.h"
 #include "ScriptMgr.h"
 
+/**
+ * @brief Loads and initializes all configured global transports.
+ */
 void MapManager::LoadTransports()
 {
     QueryResult* result = WorldDatabase.Query("SELECT `entry`, `name`, `period` FROM `transports`");
@@ -222,6 +225,11 @@ struct keyFrame
     float tFrom, tTo;
 };
 
+/**
+ * @brief Builds the waypoint timeline used by a global transport route.
+ *
+ * @return true if waypoint generation succeeded.
+ */
 bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
 {
     if (pathid >= sTaxiPathNodesByPath.size())
@@ -468,6 +476,9 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
     return true;
 }
 
+/**
+ * @brief Advances the current and next transport waypoint pointers.
+ */
 void Transport::MoveToNextWayPoint()
 {
     m_curr = m_next;
@@ -479,6 +490,14 @@ void Transport::MoveToNextWayPoint()
     }
 }
 
+/**
+ * @brief Teleports the transport and its player passengers to another map position.
+ *
+ * @param newMapid The destination map id.
+ * @param x The destination X coordinate.
+ * @param y The destination Y coordinate.
+ * @param z The destination Z coordinate.
+ */
 void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
 {
     Map const* oldMap = GetMap();
@@ -539,6 +558,12 @@ bool Transport::RemovePassenger(Player* passenger)
     return true;
 }
 
+/**
+ * @brief Updates global transport position along its generated path.
+ *
+ * @param update_diff The elapsed update time.
+ * @param p_time The current path time parameter.
+ */
 void Transport::Update(uint32 update_diff, uint32 /*p_time*/)
 {
     if (m_WayPoints.size() <= 1)
@@ -585,6 +610,11 @@ void Transport::Update(uint32 update_diff, uint32 /*p_time*/)
     }
 }
 
+/**
+ * @brief Sends create or out-of-range updates for this transport to players on a map.
+ *
+ * @param targetMap The map whose players should receive transport visibility updates.
+ */
 void Transport::UpdateForMap(Map const* targetMap)
 {
     Map::PlayerList const& pl = targetMap->GetPlayers();

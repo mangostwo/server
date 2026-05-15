@@ -818,6 +818,9 @@ class CliHandler : public ChatHandler
         Print* m_print;
 };
 
+/**
+ * Applies an aura spell directly to the target using the provided caster context.
+ */
 bool AddAuraToPlayer(const SpellEntry* spellInfo, Unit* target, WorldObject* caster);
 
 #endif

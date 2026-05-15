@@ -177,6 +177,9 @@ std::string GuildMgr::GetGuildNameById(uint32 guildId) const
     return "";
 }
 
+/**
+ * @brief Loads guild definitions and their persisted state from the character database.
+ */
 void GuildMgr::LoadGuilds()
 {
     uint32 count = 0;

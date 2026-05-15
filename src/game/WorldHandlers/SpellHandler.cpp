@@ -22,6 +22,22 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file SpellHandler.cpp
+ * @brief Spell casting opcode handlers
+ *
+ * This file handles spell-related opcodes including:
+ * - CMSG_USE_ITEM: Use item (cast item spell)
+ * - CMSG_CAST_SPELL: Cast spell
+ * - CMSG_CANCEL_CAST: Cancel spell cast
+ * - CMSG_CANCEL_AURA: Cancel aura
+ * - CMSG_CANCEL_CHANNELING: Cancel channeled spell
+ * - CMSG_SELF_RES: Self resurrection
+ *
+ * Spell handlers validate cast requirements, initiate spell casting,
+ * and manage spell cancellation.
+ */
+
 #include "Common.h"
 #include "DBCStores.h"
 #include "WorldPacket.h"
@@ -35,6 +51,11 @@
 #include "Totem.h"
 #include "SpellAuras.h"
 
+/**
+ * @brief Handles use-item requests and casts the item's use spell.
+ *
+ * @param recvPacket The incoming use-item packet.
+ */
 void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 {
     uint8 bagIndex, slot;
@@ -198,6 +219,11 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 #define OPEN_BOOTY_CHEST 5107
 #define OPEN_STRONGBOX 8517
 
+/**
+ * @brief Handles opening wrapped or lootable inventory items.
+ *
+ * @param recvPacket The incoming open-item packet.
+ */
 void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
 {
     DETAIL_LOG("WORLD: CMSG_OPEN_ITEM packet, data length = %zu", recvPacket.size());
@@ -284,6 +310,11 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
     }
 }
 
+/**
+ * @brief Handles direct use of a nearby game object.
+ *
+ * @param recv_data The incoming gameobject-use packet.
+ */
 void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
 {
     ObjectGuid guid;
@@ -355,6 +386,11 @@ void WorldSession::HandleGameobjectReportUse(WorldPacket& recvPacket)
     _player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_USE_GAMEOBJECT, go->GetEntry());
 }
 
+/**
+ * @brief Handles a player or controlled-unit spell cast request.
+ *
+ * @param recvPacket The incoming cast-spell packet.
+ */
 void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 {
     uint32 spellId;
@@ -446,6 +482,11 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     spell->prepare(&targets, triggeredByAura);
 }
 
+/**
+ * @brief Handles cancelling an actively cast non-melee spell.
+ *
+ * @param recvPacket The incoming cancel-cast packet.
+ */
 void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
 {
     uint32 spellId;
@@ -472,6 +513,11 @@ void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
     }
 }
 
+/**
+ * @brief Handles player aura cancellation requests.
+ *
+ * @param recvPacket The incoming cancel-aura packet.
+ */
 void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
 {
     uint32 spellId;
@@ -545,6 +591,11 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
     _player->RemoveAurasDueToSpellByCancel(spellId);
 }
 
+/**
+ * @brief Handles cancellation of an aura on a controlled pet or charm.
+ *
+ * @param recvPacket The incoming pet cancel-aura packet.
+ */
 void WorldSession::HandlePetCancelAuraOpcode(WorldPacket& recvPacket)
 {
     ObjectGuid guid;
@@ -591,11 +642,21 @@ void WorldSession::HandlePetCancelAuraOpcode(WorldPacket& recvPacket)
     pet->AddCreatureSpellCooldown(spellId);
 }
 
+/**
+ * @brief Handles the legacy cancel-growth-aura opcode.
+ *
+ * @param recvPacket The unused incoming packet.
+ */
 void WorldSession::HandleCancelGrowthAuraOpcode(WorldPacket& /*recvPacket*/)
 {
     // nothing do
 }
 
+/**
+ * @brief Cancels the current auto-repeat spell.
+ *
+ * @param recvPacket The unused incoming packet.
+ */
 void WorldSession::HandleCancelAutoRepeatSpellOpcode(WorldPacket& /*recvPacket*/)
 {
     // cancel and prepare for deleting
@@ -603,6 +664,11 @@ void WorldSession::HandleCancelAutoRepeatSpellOpcode(WorldPacket& /*recvPacket*/
     _player->GetMover()->InterruptSpell(CURRENT_AUTOREPEAT_SPELL, true, false);
 }
 
+/**
+ * @brief Handles cancellation of the current channeled spell.
+ *
+ * @param recv_data The incoming cancel-channel packet.
+ */
 void WorldSession::HandleCancelChanneling(WorldPacket& recv_data)
 {
     recv_data.read_skip<uint32>();                          // spellid, not used
@@ -617,6 +683,11 @@ void WorldSession::HandleCancelChanneling(WorldPacket& recv_data)
     mover->InterruptSpell(CURRENT_CHANNELED_SPELL);
 }
 
+/**
+ * @brief Handles manual destruction of a player totem.
+ *
+ * @param recvPacket The incoming totem-destroyed packet.
+ */
 void WorldSession::HandleTotemDestroyed(WorldPacket& recvPacket)
 {
     uint8 slotId;
@@ -640,6 +711,11 @@ void WorldSession::HandleTotemDestroyed(WorldPacket& recvPacket)
     }
 }
 
+/**
+ * @brief Handles use of the player's self-resurrection spell.
+ *
+ * @param recv_data The unused incoming packet.
+ */
 void WorldSession::HandleSelfResOpcode(WorldPacket& /*recv_data*/)
 {
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: CMSG_SELF_RES");                  // empty opcode

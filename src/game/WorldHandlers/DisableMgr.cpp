@@ -324,6 +324,9 @@ void LoadDisables()
     sLog.outString(">> Loaded %u disables", total_count);
 }
 
+/**
+ * @brief Validates quest disable entries against loaded quest templates.
+ */
 void CheckQuestDisables()
 {
     uint32 count = m_DisableMap[DISABLE_TYPE_QUEST].size();
@@ -351,6 +354,16 @@ void CheckQuestDisables()
     sLog.outString(">> Checked %u quest disables", count);
 }
 
+/**
+ * @brief Checks whether a feature entry is disabled for the given runtime context.
+ *
+ * @param type The disable category.
+ * @param entry The entry identifier to test.
+ * @param unit The contextual unit, when applicable.
+ * @param flags Additional disable flags to test.
+ * @param adData Additional lookup data such as spawn guid.
+ * @return true if the entry is disabled in the provided context; otherwise false.
+ */
 bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags)
 {
     MANGOS_ASSERT(type < MAX_DISABLE_TYPES);
@@ -467,11 +480,24 @@ bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags
     return false;
 }
 
+/**
+ * @brief Checks whether VMAP processing is disabled for a specific entry and flag set.
+ *
+ * @param entry The map or model entry.
+ * @param flags The VMAP disable flags.
+ * @return true if VMAP is disabled; otherwise false.
+ */
 bool IsVMAPDisabledFor(uint32 entry, uint8 flags)
 {
     return IsDisabledFor(DISABLE_TYPE_VMAP, entry, NULL, flags);
 }
 
+/**
+ * @brief Checks whether mmap pathfinding is enabled for a map.
+ *
+ * @param mapId The map identifier.
+ * @return true if pathfinding is enabled; otherwise false.
+ */
 bool IsPathfindingEnabled(uint32 mapId)
 {
     return sWorld.getConfig(CONFIG_BOOL_MMAP_ENABLED)

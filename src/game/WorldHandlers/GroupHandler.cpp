@@ -22,6 +22,25 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file GroupHandler.cpp
+ * @brief Group/party opcode handlers
+ *
+ * This file handles group-related opcodes including:
+ * - CMSG_GROUP_INVITE: Invite player to group
+ * - CMSG_GROUP_ACCEPT: Accept group invitation
+ * - CMSG_GROUP_DECLINE: Decline group invitation
+ * - CMSG_GROUP_UNINVITE: Remove member from group
+ * - CMSG_GROUP_LEAVE: Leave group
+ * - CMSG_GROUP_DISBAND: Disband group
+ * - CMSG_GROUP_CHANGE_LEADER: Transfer leadership
+ * - CMSG_GROUP_SET_LEADER: Set new leader
+ * - CMSG_LOOT_METHOD: Set loot method
+ * - CMSG_MINIMAP_PING: Send minimap ping
+ *
+ * Group operations require proper permission checks and state validation.
+ */
+
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "Opcodes.h"
@@ -48,6 +67,13 @@
     -FIX sending PartyMemberStats
 */
 
+/**
+ * @brief Sends a party operation result packet to the client.
+ *
+ * @param operation The party operation being reported.
+ * @param member The related member name.
+ * @param res The result code to send.
+ */
 void WorldSession::SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res)
 {
     WorldPacket data(SMSG_PARTY_COMMAND_RESULT, (4 + member.size() + 1 + 4 + 4));
@@ -73,6 +99,11 @@ void WorldSession::SendGroupInvite(Player* player, bool alreadyInGroup /*= false
     player->GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Handles a request to invite a player into a party.
+ *
+ * @param recv_data The received opcode packet.
+ */
 void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
 {
     std::string membername;
@@ -199,6 +230,11 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
     SendPartyResult(PARTY_OP_INVITE, membername, ERR_PARTY_RESULT_OK);
 }
 
+/**
+ * @brief Accepts a pending group invite.
+ *
+ * @param recv_data The received opcode packet.
+ */
 void WorldSession::HandleGroupAcceptOpcode(WorldPacket& recv_data)
 {
     recv_data.read_skip<uint32>();                          // roles mask?
@@ -255,6 +291,11 @@ void WorldSession::HandleGroupAcceptOpcode(WorldPacket& recv_data)
     }
 }
 
+/**
+ * @brief Declines a pending group invite.
+ *
+ * @param recv_data The received opcode packet.
+ */
 void WorldSession::HandleGroupDeclineOpcode(WorldPacket& /*recv_data*/)
 {
     Group*  group  = GetPlayer()->GetGroupInvite();
@@ -280,6 +321,11 @@ void WorldSession::HandleGroupDeclineOpcode(WorldPacket& /*recv_data*/)
     leader->GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Uninvites a group member or invitee by guid.
+ *
+ * @param recv_data The received opcode packet.
+ */
 void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket& recv_data)
 {
     ObjectGuid kickerGuid = GetPlayer()->GetObjectGuid();
@@ -324,6 +370,11 @@ void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket& recv_data)
     SendPartyResult(PARTY_OP_LEAVE, "", ERR_TARGET_NOT_IN_GROUP_S);
 }
 
+/**
+ * @brief Uninvites a group member or invitee by player name.
+ *
+ * @param recv_data The received opcode packet.
+ */
 void WorldSession::HandleGroupUninviteOpcode(WorldPacket& recv_data)
 {
     ObjectGuid kickerGuid = GetPlayer()->GetObjectGuid();
@@ -371,6 +422,11 @@ void WorldSession::HandleGroupUninviteOpcode(WorldPacket& recv_data)
     SendPartyResult(PARTY_OP_LEAVE, membername, ERR_TARGET_NOT_IN_GROUP_S);
 }
 
+/**
+ * @brief Changes the leader of the current group.
+ *
+ * @param recv_data The received opcode packet.
+ */
 void WorldSession::HandleGroupSetLeaderOpcode(WorldPacket& recv_data)
 {
     ObjectGuid guid;
@@ -395,6 +451,11 @@ void WorldSession::HandleGroupSetLeaderOpcode(WorldPacket& recv_data)
     group->ChangeLeader(guid);
 }
 
+/**
+ * @brief Handles a request to leave or disband the current group.
+ *
+ * @param recv_data The received opcode packet.
+ */
 void WorldSession::HandleGroupDisbandOpcode(WorldPacket& /*recv_data*/)
 {
     if (!GetPlayer()->GetGroup())
@@ -417,6 +478,11 @@ void WorldSession::HandleGroupDisbandOpcode(WorldPacket& /*recv_data*/)
     GetPlayer()->RemoveFromGroup();
 }
 
+/**
+ * @brief Updates the group's loot rules.
+ *
+ * @param recv_data The received opcode packet.
+ */
 void WorldSession::HandleLootMethodOpcode(WorldPacket& recv_data)
 {
     uint32 lootMethod;
@@ -444,6 +510,11 @@ void WorldSession::HandleLootMethodOpcode(WorldPacket& recv_data)
     group->SendUpdate();
 }
 
+/**
+ * @brief Handles a player's loot roll choice.
+ *
+ * @param recv_data The received opcode packet.
+ */
 void WorldSession::HandleLootRoll(WorldPacket& recv_data)
 {
     ObjectGuid lootedTarget;
@@ -484,6 +555,11 @@ void WorldSession::HandleLootRoll(WorldPacket& recv_data)
     }
 }
 
+/**
+ * @brief Broadcasts a minimap ping to the player's group.
+ *
+ * @param recv_data The received opcode packet.
+ */
 void WorldSession::HandleMinimapPingOpcode(WorldPacket& recv_data)
 {
     float x, y;
@@ -508,6 +584,11 @@ void WorldSession::HandleMinimapPingOpcode(WorldPacket& recv_data)
     GetPlayer()->GetGroup()->BroadcastPacket(&data, true, -1, GetPlayer()->GetObjectGuid());
 }
 
+/**
+ * @brief Rolls a random value and broadcasts it to the party if applicable.
+ *
+ * @param recv_data The received opcode packet.
+ */
 void WorldSession::HandleRandomRollOpcode(WorldPacket& recv_data)
 {
     uint32 minimum, maximum, roll;
@@ -541,6 +622,11 @@ void WorldSession::HandleRandomRollOpcode(WorldPacket& recv_data)
     }
 }
 
+/**
+ * @brief Handles raid target icon queries and updates.
+ *
+ * @param recv_data The received opcode packet.
+ */
 void WorldSession::HandleRaidTargetUpdateOpcode(WorldPacket& recv_data)
 {
     uint8  x;
@@ -575,6 +661,11 @@ void WorldSession::HandleRaidTargetUpdateOpcode(WorldPacket& recv_data)
     }
 }
 
+/**
+ * @brief Converts the current party into a raid group.
+ *
+ * @param recv_data The received opcode packet.
+ */
 void WorldSession::HandleGroupRaidConvertOpcode(WorldPacket& /*recv_data*/)
 {
     Group* group = GetPlayer()->GetGroup();
@@ -600,6 +691,11 @@ void WorldSession::HandleGroupRaidConvertOpcode(WorldPacket& /*recv_data*/)
     group->ConvertToRaid();
 }
 
+/**
+ * @brief Moves a raid member into another subgroup.
+ *
+ * @param recv_data The received opcode packet.
+ */
 void WorldSession::HandleGroupChangeSubGroupOpcode(WorldPacket& recv_data)
 {
     std::string name;
@@ -647,6 +743,11 @@ void WorldSession::HandleGroupChangeSubGroupOpcode(WorldPacket& recv_data)
     }
 }
 
+/**
+ * @brief Sets or clears the assistant leader flag for a raid member.
+ *
+ * @param recv_data The received opcode packet.
+ */
 void WorldSession::HandleGroupAssistantLeaderOpcode(WorldPacket& recv_data)
 {
     ObjectGuid guid;
@@ -671,6 +772,11 @@ void WorldSession::HandleGroupAssistantLeaderOpcode(WorldPacket& recv_data)
     group->SetAssistant(guid, (flag == 0 ? false : true));
 }
 
+/**
+ * @brief Updates main tank or main assist raid assignments.
+ *
+ * @param recv_data The received opcode packet.
+ */
 void WorldSession::HandlePartyAssignmentOpcode(WorldPacket& recv_data)
 {
     uint8 role;
@@ -722,6 +828,11 @@ void WorldSession::HandlePartyAssignmentOpcode(WorldPacket& recv_data)
     }
 }
 
+/**
+ * @brief Starts or answers a raid ready check.
+ *
+ * @param recv_data The received opcode packet.
+ */
 void WorldSession::HandleRaidReadyCheckOpcode(WorldPacket& recv_data)
 {
     if (recv_data.empty())                                  // request
@@ -766,6 +877,11 @@ void WorldSession::HandleRaidReadyCheckOpcode(WorldPacket& recv_data)
     }
 }
 
+/**
+ * @brief Handles the completion of a raid ready check.
+ *
+ * @param recv_data The received opcode packet.
+ */
 void WorldSession::HandleRaidReadyCheckFinishedOpcode(WorldPacket& /*recv_data*/)
 {
     // Group* group = GetPlayer()->GetGroup();
@@ -778,6 +894,12 @@ void WorldSession::HandleRaidReadyCheckFinishedOpcode(WorldPacket& /*recv_data*/
     // Is any reaction need?
 }
 
+/**
+ * @brief Builds a party member stats update packet.
+ *
+ * @param player The player whose stats are being serialized.
+ * @param data The packet receiving the serialized fields.
+ */
 void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket* data)
 {
     uint32 mask = player->GetGroupUpdateFlag();
@@ -1118,12 +1240,22 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
     SendPacket(&data);
 }
 
+/**
+ * @brief Sends the saved raid instance information to the client.
+ *
+ * @param recv_data The received opcode packet.
+ */
 void WorldSession::HandleRequestRaidInfoOpcode(WorldPacket& /*recv_data*/)
 {
     // every time the player checks the character screen
     _player->SendRaidInfo();
 }
 
+/**
+ * @brief Handles the client's opt-out-of-loot setting.
+ *
+ * @param recv_data The received opcode packet.
+ */
 void WorldSession::HandleOptOutOfLootOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_OPT_OUT_OF_LOOT");

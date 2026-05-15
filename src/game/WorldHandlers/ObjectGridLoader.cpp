@@ -181,10 +181,23 @@ class ObjectWorldLoader
         uint32 i_corpses;               ///< Count of loaded corpses
 };
 
+/**
+ * @brief Default helper that leaves unit cell state unchanged for unsupported object types.
+ *
+ * @tparam T The object type.
+ * @param obj The object being loaded.
+ * @param cell_pair The destination cell coordinates.
+ */
 template<class T> void addUnitState(T* /*obj*/, CellPair const& /*cell_pair*/)
 {
 }
 
+/**
+ * @brief Assigns the current cell to a creature being loaded into a grid.
+ *
+ * @param obj The creature being loaded.
+ * @param cell_pair The destination cell coordinates.
+ */
 template<> void addUnitState(Creature* obj, CellPair const& cell_pair)
 {
     Cell cell(cell_pair);
@@ -193,6 +206,17 @@ template<> void addUnitState(Creature* obj, CellPair const& cell_pair)
 }
 
 template <class T>
+/**
+ * @brief Loads database-backed grid objects of a specific type into a cell.
+ *
+ * @tparam T The object type to load.
+ * @param guid_set The guids to load.
+ * @param cell The destination cell.
+ * @param m The type map container.
+ * @param count Receives the number of loaded objects.
+ * @param map The owning map.
+ * @param grid The target grid cell container.
+ */
 void LoadHelper(CellGuidSet const& guid_set, CellPair& cell, GridRefManager<T>& /*m*/, uint32& count, Map* map, GridType& grid)
 {
     BattleGround* bg = map->IsBattleGroundOrArena() ? ((BattleGroundMap*)map)->GetBG() : NULL;
@@ -230,6 +254,16 @@ void LoadHelper(CellGuidSet const& guid_set, CellPair& cell, GridRefManager<T>& 
     }
 }
 
+/**
+ * @brief Loads corpse objects for a cell into the world grid.
+ *
+ * @param cell_corpses The corpse ownership and instance mapping.
+ * @param cell The destination cell.
+ * @param m The corpse map container.
+ * @param count Receives the number of loaded corpses.
+ * @param map The owning map.
+ * @param grid The target grid cell container.
+ */
 void LoadHelper(CellCorpseSet const& cell_corpses, CellPair& cell, CorpseMapType& /*m*/, uint32& count, Map* map, GridType& grid)
 {
     if (cell_corpses.empty())
@@ -326,6 +360,9 @@ ObjectGridLoader::Load(GridType& grid)
     }
 }
 
+/**
+ * @brief Loads all cells in the current grid and reports loaded object counts.
+ */
 void ObjectGridLoader::LoadN(void)
 {
     i_gameObjects = 0; i_creatures = 0; i_corpses = 0;
@@ -343,6 +380,9 @@ void ObjectGridLoader::LoadN(void)
     DEBUG_LOG("%u GameObjects, %u Creatures, and %u Corpses/Bones loaded for grid %u on map %u", i_gameObjects, i_creatures, i_corpses, i_grid.GetGridId(), i_map->GetId());
 }
 
+/**
+ * @brief Moves respawnable objects in every cell of the grid back to their respawn state.
+ */
 void ObjectGridUnloader::MoveToRespawnN()
 {
     for (unsigned int x = 0; x < MAX_NUMBER_OF_CELLS; ++x)

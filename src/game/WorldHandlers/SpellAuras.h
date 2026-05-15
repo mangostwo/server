@@ -596,6 +596,13 @@ class SingleEnemyTargetAura : public Aura
         ObjectGuid m_castersTargetGuid;
 };
 
+/**
+ * Creates an aura instance for the specified spell effect and target context.
+ */
 Aura* CreateAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = NULL, Item* castItem = NULL);
+
+/**
+ * Creates the aura holder that owns aura effects for a spell application.
+ */
 SpellAuraHolder* CreateSpellAuraHolder(SpellEntry const* spellproto, Unit* target, WorldObject* caster, Item* castItem = NULL);
 #endif

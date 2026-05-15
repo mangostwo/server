@@ -22,6 +22,23 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file LootHandler.cpp
+ * @brief Loot interaction opcode handlers
+ *
+ * This file handles loot-related opcodes including:
+ * - CMSG_AUTOSTORE_LOOT_ITEM: Auto-loot item to inventory
+ * - CMSG_LOOT: Open loot window
+ * - CMSG_LOOT_MONEY: Loot money
+ * - CMSG_LOOT_RELEASE: Close loot window
+ * - CMSG_LOOT_ROLL: Roll for loot item
+ * - CMSG_MASTER_LOOT_ITEM: Master looter distributes item
+ *
+ * Loot can come from creatures, gameobjects, fishing, and mail.
+ * Different loot methods (Free for All, Round Robin, Master Looter, Group Loot)
+ * determine how items are distributed among party members.
+ */
+
 #include "Common.h"
 #include "WorldPacket.h"
 #include "Log.h"
@@ -203,6 +220,11 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
     }
 }
 
+/**
+ * @brief Handles looting money from the player's current loot target.
+ *
+ * @param recv_data The unused incoming packet.
+ */
 void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
 {
     DEBUG_LOG("WORLD: CMSG_LOOT_MONEY");
@@ -343,6 +365,11 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
     }
 }
 
+/**
+ * @brief Starts a loot interaction for the requested object guid.
+ *
+ * @param recv_data The incoming loot request packet.
+ */
 void WorldSession::HandleLootOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: CMSG_LOOT");
@@ -359,6 +386,11 @@ void WorldSession::HandleLootOpcode(WorldPacket& recv_data)
     GetPlayer()->SendLoot(guid, LOOT_CORPSE);
 }
 
+/**
+ * @brief Handles a client request to close the active loot window.
+ *
+ * @param recv_data The incoming loot release packet.
+ */
 void WorldSession::HandleLootReleaseOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: CMSG_LOOT_RELEASE");
@@ -373,6 +405,11 @@ void WorldSession::HandleLootReleaseOpcode(WorldPacket& recv_data)
     }
 }
 
+/**
+ * @brief Finalizes loot state updates when a player releases a loot target.
+ *
+ * @param lguid The guid of the released loot source.
+ */
 void WorldSession::DoLootRelease(ObjectGuid lguid)
 {
     Player*  player = GetPlayer();
@@ -608,6 +645,11 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
     loot->RemoveLooter(player->GetObjectGuid());
 }
 
+/**
+ * @brief Handles master-loot assignment of a specific loot slot to another player.
+ *
+ * @param recv_data The incoming master-loot packet.
+ */
 void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
 {
     uint8 slotid;

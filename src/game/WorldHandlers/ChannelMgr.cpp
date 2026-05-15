@@ -161,6 +161,11 @@ Channel* ChannelMgr::GetChannel(std::string name, Player* p, bool pkt)
     }
 }
 
+/**
+ * @brief Removes an empty non-constant channel after a player leaves it.
+ *
+ * @param name The channel name.
+ */
 void ChannelMgr::LeftChannel(std::string name)
 {
     std::wstring wname;
