@@ -922,6 +922,15 @@ dtStatus PathFinder::findSmoothPath(const float* startPos, const float* endPos,
     return nsmoothPath < MAX_POINT_PATH_LENGTH ? DT_SUCCESS : DT_FAILURE;
 }
 
+/**
+ * @brief Checks whether two YZX points are within horizontal range and vertical tolerance.
+ *
+ * @param v1 The first point.
+ * @param v2 The second point.
+ * @param r The maximum horizontal range.
+ * @param h The maximum vertical difference.
+ * @return true if the points are within range; otherwise false.
+ */
 bool PathFinder::inRangeYZX(const float* v1, const float* v2, float r, float h) const
 {
     const float dx = v2[0] - v1[0];
@@ -930,12 +939,28 @@ bool PathFinder::inRangeYZX(const float* v1, const float* v2, float r, float h) 
     return (dx * dx + dz * dz) < r * r && fabsf(dy) < h;
 }
 
+/**
+ * @brief Checks whether two path points are within horizontal range and vertical tolerance.
+ *
+ * @param p1 The first point.
+ * @param p2 The second point.
+ * @param r The maximum horizontal range.
+ * @param h The maximum vertical difference.
+ * @return true if the points are within range; otherwise false.
+ */
 bool PathFinder::inRange(const Vector3& p1, const Vector3& p2, float r, float h) const
 {
     Vector3 d = p1 - p2;
     return (d.x * d.x + d.y * d.y) < r * r && fabsf(d.z) < h;
 }
 
+/**
+ * @brief Returns the squared three-dimensional distance between two points.
+ *
+ * @param p1 The first point.
+ * @param p2 The second point.
+ * @return float The squared distance.
+ */
 float PathFinder::dist3DSqr(const Vector3& p1, const Vector3& p2) const
 {
     return (p1 - p2).squaredLength();

@@ -30,11 +30,12 @@
 #include "movement/MoveSpline.h"
 #include "PathFinder.h"
 
-/**
- * @brief Initializes the ConfusedMovementGenerator.
- * @param unit Reference to the unit.
- */
 template<class T>
+/**
+ * @brief Initializes the confused movement state for a unit.
+ *
+ * @param unit The unit using the movement generator.
+ */
 void ConfusedMovementGenerator<T>::Initialize(T& unit)
 {
     unit.addUnitState(UNIT_STAT_CONFUSED);
@@ -51,11 +52,12 @@ void ConfusedMovementGenerator<T>::Initialize(T& unit)
     unit.addUnitState(UNIT_STAT_CONFUSED_MOVE);
 }
 
-/**
- * @brief Interrupts the ConfusedMovementGenerator.
- * @param unit Reference to the unit.
- */
 template<class T>
+/**
+ * @brief Interrupts confused movement while preserving the confused state.
+ *
+ * @param unit The unit using the movement generator.
+ */
 void ConfusedMovementGenerator<T>::Interrupt(T& unit)
 {
     unit.InterruptMoving();
@@ -63,11 +65,12 @@ void ConfusedMovementGenerator<T>::Interrupt(T& unit)
     unit.clearUnitState(UNIT_STAT_CONFUSED_MOVE);
 }
 
-/**
- * @brief Resets the ConfusedMovementGenerator.
- * @param unit Reference to the unit.
- */
 template<class T>
+/**
+ * @brief Resets confused movement timing and movement flags.
+ *
+ * @param unit The unit using the movement generator.
+ */
 void ConfusedMovementGenerator<T>::Reset(T& unit)
 {
     i_nextMoveTime.Reset(0);
@@ -81,13 +84,14 @@ void ConfusedMovementGenerator<T>::Reset(T& unit)
     unit.addUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_CONFUSED_MOVE);
 }
 
-/**
- * @brief Updates the ConfusedMovementGenerator.
- * @param unit Reference to the unit.
- * @param diff Time difference.
- * @return True if the update was successful, false otherwise.
- */
 template<class T>
+/**
+ * @brief Updates confused movement and launches new random short walks as needed.
+ *
+ * @param unit The unit using the movement generator.
+ * @param diff The elapsed update time in milliseconds.
+ * @return true if the generator remains active; otherwise false.
+ */
 bool ConfusedMovementGenerator<T>::Update(T& unit, const uint32& diff)
 {
     // Ignore in case other no reaction state
@@ -138,22 +142,24 @@ bool ConfusedMovementGenerator<T>::Update(T& unit, const uint32& diff)
     return true;
 }
 
-/**
- * @brief Finalizes the ConfusedMovementGenerator for a Player.
- * @param unit Reference to the player.
- */
 template<>
+/**
+ * @brief Finalizes confused movement for a player and stops active movement.
+ *
+ * @param unit The player using the movement generator.
+ */
 void ConfusedMovementGenerator<Player>::Finalize(Player& unit)
 {
     unit.clearUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_CONFUSED_MOVE);
     unit.StopMoving(true);
 }
 
-/**
- * @brief Finalizes the ConfusedMovementGenerator for a Creature.
- * @param unit Reference to the creature.
- */
 template<>
+/**
+ * @brief Finalizes confused movement for a creature.
+ *
+ * @param unit The creature using the movement generator.
+ */
 void ConfusedMovementGenerator<Creature>::Finalize(Creature& unit)
 {
     unit.clearUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_CONFUSED_MOVE);
