@@ -219,6 +219,12 @@ namespace MaNGOS
 }                                                           // namespace MaNGOS
 
 template<class Do>
+
+/**
+ * @brief Broadcasts a worker function to all players in the battleground.
+ *
+ * @param _do The worker function.
+ */
 void BattleGround::BroadcastWorker(Do& _do)
 {
     for (BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)

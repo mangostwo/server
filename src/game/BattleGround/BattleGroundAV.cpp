@@ -635,6 +635,16 @@ void BattleGroundAV::EventPlayerDestroyedPoint(BG_AV_Nodes node)
     }
 }
 
+/**
+ * @brief Changes ownership of an Alterac Valley mine.
+ *
+ * Updates mine ownership state, refreshes mine-related world states, spawns the
+ * correct mine events for the new owner, and announces the capture when a team
+ * successfully takes control.
+ *
+ * @param mine The mine index to update.
+ * @param teamIdx The team that will own the mine after the change.
+ */
 void BattleGroundAV::ChangeMineOwner(uint8 mine, BattleGroundAVTeamIndex teamIdx)
 {
     m_Mine_Timer[mine] = BG_AV_MINE_TICK_TIMER;
@@ -665,6 +675,16 @@ void BattleGroundAV::ChangeMineOwner(uint8 mine, BattleGroundAVTeamIndex teamIdx
     }
 }
 
+/**
+ * @brief Checks whether a player can interact with a mine quest object.
+ *
+ * Validates ownership of the north or south mine against the player's team.
+ * Non-mine objects are treated as valid.
+ *
+ * @param GOId The game object entry identifier.
+ * @param team The player's team.
+ * @return true if the player can use the quest object; otherwise, false.
+ */
 bool BattleGroundAV::PlayerCanDoMineQuest(int32 GOId, Team team)
 {
     if (GOId == BG_AV_OBJECTID_MINE_N)
@@ -897,6 +917,14 @@ void BattleGroundAV::FillInitialWorldStates(WorldPacket& data, uint32& count)
     }
 }
 
+/**
+ * @brief Updates the displayed world state for a single node.
+ *
+ * Adds the current node state to the client world state display and removes the
+ * previous one, including special handling for the neutral Snowfall graveyard.
+ *
+ * @param node The node whose world state should be refreshed.
+ */
 void BattleGroundAV::UpdateNodeWorldState(BG_AV_Nodes node)
 {
     UpdateWorldState(BG_AV_NodeWorldStates[node][GetWorldStateType(m_Nodes[node].State, m_Nodes[node].Owner)], WORLD_STATE_ADD);
@@ -929,6 +957,16 @@ void BattleGroundAV::SendMineWorldStates(uint32 mine)
     }
 }
 
+/**
+ * @brief Finds the closest valid graveyard for a player.
+ *
+ * Searches all controlled graveyards for the player's team and returns the nearest
+ * available location. If no controlled graveyard is available, the team cave spawn
+ * is used as a fallback.
+ *
+ * @param plr The player requesting a graveyard location.
+ * @return Pointer to the closest valid graveyard entry.
+ */
 WorldSafeLocsEntry const* BattleGroundAV::GetClosestGraveYard(Player* plr)
 {
     float x = plr->GetPositionX();
@@ -1042,6 +1080,16 @@ void BattleGroundAV::DestroyNode(BG_AV_Nodes node)
     m_Nodes[node].Timer      = 0;
 }
 
+/**
+ * @brief Initializes a node to its starting ownership and state.
+ *
+ * Sets the initial owner, previous owner, control state, timer, and active event
+ * data for a node when Alterac Valley is reset or created.
+ *
+ * @param node The node to initialize.
+ * @param teamIdx The starting owner of the node.
+ * @param tower true if the node is a tower; otherwise, false.
+ */
 void BattleGroundAV::InitNode(BG_AV_Nodes node, BattleGroundAVTeamIndex teamIdx, bool tower)
 {
     m_Nodes[node].TotalOwner = teamIdx;

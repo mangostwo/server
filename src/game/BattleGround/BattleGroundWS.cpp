@@ -218,6 +218,14 @@ void BattleGroundWS::RespawnFlag(Team team, bool captured)
     }
 }
 
+/**
+ * @brief Respawns a flag that was dropped on the ground.
+ *
+ * Restores the specified team's flag to its base, broadcasts the proper message,
+ * removes the dropped flag object from the map, and clears the stored dropped-flag GUID.
+ *
+ * @param team The team whose dropped flag should be respawned.
+ */
 void BattleGroundWS::RespawnDroppedFlag(Team team)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
@@ -566,6 +574,15 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player* source, GameObject* target
     source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
 }
 
+/**
+ * @brief Removes a player from Warsong Gulch flag tracking.
+ *
+ * Ensures that any flag carried by the leaving or disconnected player is dropped
+ * or respawned correctly before the player is fully removed from the battleground.
+ *
+ * @param plr Pointer to the player, or NULL if the player is offline.
+ * @param guid The GUID of the player being removed.
+ */
 void BattleGroundWS::RemovePlayer(Player* plr, ObjectGuid guid)
 {
     // sometimes flag aura not removed :(
@@ -597,6 +614,15 @@ void BattleGroundWS::RemovePlayer(Player* plr, ObjectGuid guid)
     }
 }
 
+/**
+ * @brief Updates the displayed flag state for a team.
+ *
+ * Writes the current flag state value into the appropriate Warsong Gulch world
+ * state field for the specified team.
+ *
+ * @param team The team whose flag state is being updated.
+ * @param value The new world state value.
+ */
 void BattleGroundWS::UpdateFlagState(Team team, uint32 value)
 {
     if (team == ALLIANCE)
@@ -668,6 +694,12 @@ bool BattleGroundWS::HandleAreaTrigger(Player* source, uint32 trigger)
     return true;
 }
 
+/**
+ * @brief Resets Warsong Gulch to its initial state.
+ *
+ * Clears active events, resets team scores, restores flag states to base,
+ * clears carrier and dropped-flag tracking, and recalculates weekend reward values.
+ */
 void BattleGroundWS::Reset()
 {
     // call parent's class reset
@@ -757,6 +789,16 @@ void BattleGroundWS::HandleKillPlayer(Player* player, Player* killer)
     BattleGround::HandleKillPlayer(player, killer);
 }
 
+/**
+ * @brief Updates a player's Warsong Gulch score entry.
+ *
+ * Applies score changes specific to flag captures and returns, delegating all
+ * other score updates to the base battleground implementation.
+ *
+ * @param source The player whose score is being updated.
+ * @param type The score category to modify.
+ * @param value The amount to add to the score category.
+ */
 void BattleGroundWS::UpdatePlayerScore(Player* source, uint32 type, uint32 value)
 {
     BattleGroundScoreMap::iterator itr = m_PlayerScores.find(source->GetObjectGuid());

@@ -359,8 +359,8 @@ class BattleGroundScore
             BonusHonor(0), DamageDone(0), HealingDone(0)
         {}
         /**
-         * @brief virtual destructor is used when deleting score from scores map
-         *
+         * @brief Virtual destructor for BattleGroundScore.
+         * Used when deleting score from scores map.
          */
         virtual ~BattleGroundScore() {}
 
