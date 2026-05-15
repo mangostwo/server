@@ -30,6 +30,9 @@
 #include "OpenSSLProvider.h"
 #include "Log/Log.h"
 
+/**
+ * Creates a new OpenSSL cipher context wrapper.
+ */
 OpenSSLCipherContext::OpenSSLCipherContext()
     : m_ctx(nullptr)
 {
@@ -40,6 +43,9 @@ OpenSSLCipherContext::OpenSSLCipherContext()
     }
 }
 
+/**
+ * Releases the owned OpenSSL cipher context.
+ */
 OpenSSLCipherContext::~OpenSSLCipherContext()
 {
     if (m_ctx)
@@ -74,6 +80,9 @@ OpenSSLCipherContext& OpenSSLCipherContext::operator=(OpenSSLCipherContext&& oth
 
 #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
 
+/**
+ * Loads the named OpenSSL provider into the specified library context.
+ */
 OpenSSLProvider::OpenSSLProvider(const char* name, OSSL_LIB_CTX* libraryContext)
     : m_provider(nullptr), m_providerName(name ? name : "")
 {
@@ -90,6 +99,9 @@ OpenSSLProvider::OpenSSLProvider(const char* name, OSSL_LIB_CTX* libraryContext)
     }
 }
 
+/**
+ * Unloads the owned OpenSSL provider instance.
+ */
 OpenSSLProvider::~OpenSSLProvider()
 {
     if (m_provider)
@@ -123,6 +135,9 @@ OpenSSLProvider& OpenSSLProvider::operator=(OpenSSLProvider&& other) noexcept
     return *this;
 }
 
+/**
+ * Initializes the OpenSSL provider manager and loads required providers.
+ */
 OpenSSLProviderManager::OpenSSLProviderManager()
     : m_legacyProvider("legacy"), m_defaultProvider("default"), m_initialized(false)
 {
@@ -153,6 +168,9 @@ OpenSSLProviderManager::OpenSSLProviderManager()
     }
 }
 
+/**
+ * Logs provider shutdown when the OpenSSL provider manager is destroyed.
+ */
 OpenSSLProviderManager::~OpenSSLProviderManager()
 {
     if (m_initialized)

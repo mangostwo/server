@@ -31,54 +31,52 @@
 class BigNumber;
 
 /**
- * @brief
+ * @brief Authentication encryption/decryption for World of Warcraft protocol
  *
+ * AuthCrypt handles the session key-based encryption and decryption of
+ * World of Warcraft client-server packets using a modified version of ARC4.
+ * It maintains separate encryption and decryption states for bidirectional
+ * communication.
  */
 class AuthCrypt
 {
     public:
         /**
-         * @brief
-         *
+         * @brief Constructor - initializes the crypt object
          */
         AuthCrypt();
         /**
-         * @brief
-         *
+         * @brief Destructor
          */
         ~AuthCrypt();
 
 
         /**
-         * @brief
-         *
+         * @brief Initialize the encryption/decryption state
          */
         void Init(BigNumber* K);
         /**
-         * @brief
-         *
-         * @param
-         * @param size_t
+         * @brief Decrypt received data from client
+         * @param data Pointer to data buffer to decrypt
+         * @param len Length of data to decrypt
          */
         void DecryptRecv(uint8*, size_t);
         /**
-         * @brief
-         *
-         * @param
-         * @param size_t
+         * @brief Encrypt data to send to client
+         * @param data Pointer to data buffer to encrypt
+         * @param len Length of data to encrypt
          */
         void EncryptSend(uint8*, size_t);
 
         /**
-         * @brief
-         *
-         * @return bool
+         * @brief Check if the crypt object is initialized
+         * @return True if initialized, false otherwise
          */
         bool IsInitialized() { return _initialized; }
 
     private:
         ARC4 _clientDecrypt;
         ARC4 _serverEncrypt;
-        bool _initialized; /**< TODO */
+        bool _initialized; /**< Initialization status */
 };
 #endif

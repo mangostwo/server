@@ -96,6 +96,9 @@ inline std::tm safe_localtime(const time_t time)
     return _ltm;
 }
 
+/**
+ * Returns the timestamp for the specified local hour, optionally requiring it to be after the input time.
+ */
 time_t GetLocalHourTimestamp(time_t time, uint8 hour, bool onlyAfterTime = true);
 
 
@@ -896,7 +899,14 @@ uint32 CreatePIDFile(const std::string& filename);
  */
 void hexEncodeByteArray(uint8* bytes, uint32 arrayLen, std::string& result);
 
+/**
+ * Converts a byte array into a hexadecimal string representation.
+ */
 std::string ByteArrayToHexStr(uint8 const* bytes, uint32 length, bool reverse = false);
+
+/**
+ * Converts a hexadecimal string into a byte array.
+ */
 void HexStrToByteArray(std::string const& str, uint8* out, bool reverse = false);
 
 /**
@@ -911,5 +921,8 @@ int return_iCoreNumber();
 */
 void print_banner();
 
+/**
+ * Performs a case-insensitive substring search and returns a pointer to the first match.
+ */
 char* strstri(const std::string& str1, const std::string& str2);
 #endif

@@ -124,6 +124,9 @@ LONG WINAPI WheatyExceptionReport::WheatyUnhandledExceptionFilter(
     }
 }
 
+/**
+ * Retrieves the processor name string from the Windows registry.
+ */
 BOOL WheatyExceptionReport::_GetProcessorName(TCHAR* sProcessorName, DWORD maxcount)
 {
     if (!sProcessorName)
@@ -159,6 +162,9 @@ BOOL WheatyExceptionReport::_GetProcessorName(TCHAR* sProcessorName, DWORD maxco
     return TRUE;
 }
 
+/**
+ * Formats the current Windows version into a human-readable string.
+ */
 BOOL WheatyExceptionReport::_GetWindowsVersion(TCHAR* szVersion, DWORD cntMax)
 {
     // Try calling GetVersionEx using the OSVERSIONINFOEX structure.
@@ -248,6 +254,9 @@ BOOL WheatyExceptionReport::_GetWindowsVersion(TCHAR* szVersion, DWORD cntMax)
     return TRUE;
 }
 
+/**
+ * Prints basic operating system, processor, and memory information.
+ */
 void WheatyExceptionReport::PrintSystemInfo()
 {
     SYSTEM_INFO SystemInfo;
@@ -944,6 +953,9 @@ char* WheatyExceptionReport::FormatOutputValue(char* pszCurrBuffer,
 }
 
 BasicType
+/**
+ * Resolves the basic type metadata for a symbol type index.
+ */
 WheatyExceptionReport::GetBasicType(DWORD typeIndex, DWORD64 modBase)
 {
     BasicType basicType;

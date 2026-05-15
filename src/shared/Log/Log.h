@@ -32,20 +32,27 @@ class Config;
 class ByteBuffer;
 
 /**
- * @brief various levels for logging
+ * @brief Logging severity levels for message filtering
  *
+ * Defines the verbosity levels for logging output. Messages are only logged
+ * if their severity level is less than or equal to the configured threshold.
  */
 enum LogLevel
 {
-    LOG_LVL_MINIMAL = 0,
-    LOG_LVL_BASIC   = 1,
-    LOG_LVL_DETAIL  = 2,
-    LOG_LVL_DEBUG   = 3
+    LOG_LVL_MINIMAL = 0,  /**< Only critical errors */
+    LOG_LVL_BASIC   = 1,  /**< Basic information and errors */
+    LOG_LVL_DETAIL  = 2,  /**< Detailed diagnostic information */
+    LOG_LVL_DEBUG   = 3   /**< Full debug output */
 };
 
 /**
- * @brief bitmask (not forgot update logFilterData content)
+ * @brief Bitmask flags for selective logging of different subsystems
  *
+ * Allows fine-grained control over which types of events are logged.
+ * Each flag represents a specific subsystem or type of event that can be
+ * independently enabled or disabled. Multiple flags can be combined using bitwise OR.
+ *
+ * @note When adding new filters, update logFilterData array and LOG_FILTER_COUNT
  */
 enum LogFilters
 {
@@ -74,59 +81,77 @@ enum LogFilters
 #define LOG_FILTER_COUNT            20
 
 /**
- * @brief
+ * @brief Configuration data for individual log filters
  *
+ * Defines the display name, configuration file parameter name, and default
+ * state for each log filter. This structure is used to manage filter settings
+ * from configuration files.
  */
 struct LogFilterData
 {
-    char const* name; /**< TODO */
-    char const* configName; /**< TODO */
-    bool defaultState; /**< TODO */
+    char const* name; /**< Display name for the log filter */
+    char const* configName; /**< Configuration file parameter name */
+    bool defaultState; /**< Default enabled/disabled state */
 };
 
-extern LogFilterData logFilterData[LOG_FILTER_COUNT]; /**< TODO */
+extern LogFilterData logFilterData[LOG_FILTER_COUNT]; /**< Array of log filter configuration data **/
 
 /**
- * @brief
+ * @brief Console text color enumeration
  *
+ * Defines the available colors for console output on supported platforms.
+ * Used to colorize log messages for improved readability in terminal windows.
  */
 enum Color
 {
-    BLACK,
-    RED,
-    GREEN,
-    BROWN,
-    BLUE,
-    MAGENTA,
-    CYAN,
-    GREY,
-    YELLOW,
-    LRED,
-    LGREEN,
-    LBLUE,
-    LMAGENTA,
-    LCYAN,
-    WHITE
+    BLACK,    /**< Black text */
+    RED,      /**< Red text */
+    GREEN,    /**< Green text */
+    BROWN,    /**< Brown/Yellow text */
+    BLUE,     /**< Blue text */
+    MAGENTA,  /**< Magenta text */
+    CYAN,     /**< Cyan text */
+    GREY,     /**< Grey text */
+    YELLOW,   /**< Bright yellow text */
+    LRED,     /**< Light red text */
+    LGREEN,   /**< Light green text */
+    LBLUE,    /**< Light blue text */
+    LMAGENTA, /**< Light magenta text */
+    LCYAN,    /**< Light cyan text */
+    WHITE     /**< White text */
 };
 
-const int Color_count = int(WHITE) + 1; /**< TODO */
+const int Color_count = int(WHITE) + 1; /**< Total number of available colors **/
 
 /**
- * @brief
+ * @brief Singleton log manager for server-wide logging
  *
+ * Log provides thread-safe, singleton-based logging functionality for the MaNGOS server.
+ * It manages multiple log files (standard, GM, character, debug) and provides various
+ * logging methods with filtering capabilities. Supports different log levels and selective
+ * output based on event type bitmasks.
+ *
+ * Features:
+ * - Multiple output files (main, GM commands, character actions, debug)
+ * - Configurable log levels and filters
+ * - Thread-safe singleton implementation
+ * - Console color support for improved readability
+ * - Formatted output with timestamps
  */
 class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ACE_Thread_Mutex> >
 {
         friend class MaNGOS::OperatorNew<Log>;
         /**
-         * @brief
+         * @brief Constructs the Log singleton instance
          *
+         * Initializes all log file handles and filter settings.
          */
         Log();
 
         /**
-         * @brief
+         * @brief Destructs the Log instance and closes all open files
          *
+         * Ensures all log files are properly closed and file handles are cleaned up.
          */
         ~Log()
         {

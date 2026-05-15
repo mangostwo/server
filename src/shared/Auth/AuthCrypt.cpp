@@ -27,6 +27,9 @@
 #include "Log/Log.h"
 #include "BigNumber.h"
 
+/**
+ * Initializes the authentication crypt state in an uninitialized state.
+ */
 AuthCrypt::AuthCrypt() : _clientDecrypt(SHA_DIGEST_LENGTH), _serverEncrypt(SHA_DIGEST_LENGTH)
 {
     _initialized = false;
@@ -68,6 +71,9 @@ void AuthCrypt::Init(BigNumber* K)
     _initialized = true;
 }
 
+/**
+ * Decrypts the fixed-size encrypted receive header in place.
+ */
 void AuthCrypt::DecryptRecv(uint8* data, size_t len)
 {
     if (!_initialized)
@@ -78,6 +84,9 @@ void AuthCrypt::DecryptRecv(uint8* data, size_t len)
     _clientDecrypt.UpdateData(len, data);
 }
 
+/**
+ * Encrypts the fixed-size outgoing packet header in place.
+ */
 void AuthCrypt::EncryptSend(uint8* data, size_t len)
 {
     if (!_initialized)
