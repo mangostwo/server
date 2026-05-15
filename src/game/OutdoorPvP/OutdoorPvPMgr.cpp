@@ -77,6 +77,12 @@ void OutdoorPvPMgr::InitOutdoorPvP()
     sLog.outString(">> Loaded %u Outdoor PvP zones", counter);
 }
 
+/**
+ * @brief Returns the outdoor PvP script that directly owns a zone.
+ *
+ * @param zoneId The zone identifier.
+ * @return OutdoorPvP* The matching outdoor PvP script, or NULL if none exists.
+ */
 OutdoorPvP* OutdoorPvPMgr::GetScript(uint32 zoneId)
 {
     switch (zoneId)
@@ -100,6 +106,12 @@ OutdoorPvP* OutdoorPvPMgr::GetScript(uint32 zoneId)
     }
 }
 
+/**
+ * @brief Returns the outdoor PvP script that affects an indirectly related zone.
+ *
+ * @param zoneId The affected zone identifier.
+ * @return OutdoorPvP* The matching outdoor PvP script, or NULL if none exists.
+ */
 OutdoorPvP* OutdoorPvPMgr::GetScriptOfAffectedZone(uint32 zoneId)
 {
     switch (zoneId)
@@ -169,6 +181,11 @@ void OutdoorPvPMgr::HandlePlayerLeaveZone(Player* player, uint32 zoneId)
     }
 }
 
+/**
+ * @brief Updates all active outdoor PvP scripts on the manager timer.
+ *
+ * @param diff The elapsed update time in milliseconds.
+ */
 void OutdoorPvPMgr::Update(uint32 diff)
 {
     m_updateTimer.Update(diff);

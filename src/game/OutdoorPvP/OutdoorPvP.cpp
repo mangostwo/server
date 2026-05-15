@@ -84,6 +84,11 @@ void OutdoorPvP::SendUpdateWorldState(uint32 field, uint32 value)
     }
 }
 
+/**
+ * @brief Applies outdoor PvP initialization state to a newly created game object.
+ *
+ * @param go The created game object.
+ */
 void OutdoorPvP::HandleGameObjectCreate(GameObject* go)
 {
     // set initial data and activate capture points
@@ -102,6 +107,11 @@ void OutdoorPvP::HandleGameObjectCreate(GameObject* go)
     }
 }
 
+/**
+ * @brief Persists outdoor PvP state from a game object before it is removed.
+ *
+ * @param go The removed game object.
+ */
 void OutdoorPvP::HandleGameObjectRemove(GameObject* go)
 {
     // save capture point slider value (negative value if locked)
@@ -175,6 +185,15 @@ void OutdoorPvP::BuffTeam(Team team, uint32 spellId, bool remove /*= false*/)
     }
 }
 
+/**
+ * @brief Selects the banner art kit for a controlling team.
+ *
+ * @param team The controlling team.
+ * @param artKitAlliance The alliance art kit id.
+ * @param artKitHorde The horde art kit id.
+ * @param artKitNeutral The neutral art kit id.
+ * @return uint32 The selected banner art kit id.
+ */
 uint32 OutdoorPvP::GetBannerArtKit(Team team, uint32 artKitAlliance /*= CAPTURE_ARTKIT_ALLIANCE*/, uint32 artKitHorde /*= CAPTURE_ARTKIT_HORDE*/, uint32 artKitNeutral /*= CAPTURE_ARTKIT_NEUTRAL*/)
 {
     switch (team)
@@ -188,6 +207,14 @@ uint32 OutdoorPvP::GetBannerArtKit(Team team, uint32 artKitAlliance /*= CAPTURE_
     }
 }
 
+/**
+ * @brief Resolves a banner game object by guid and updates its visual state.
+ *
+ * @param objRef A world object providing map context.
+ * @param goGuid The banner game object guid.
+ * @param artKit The art kit to apply.
+ * @param animId The animation id to play.
+ */
 void OutdoorPvP::SetBannerVisual(const WorldObject* objRef, ObjectGuid goGuid, uint32 artKit, uint32 animId)
 {
     if (GameObject* go = objRef->GetMap()->GetGameObject(goGuid))
@@ -196,6 +223,13 @@ void OutdoorPvP::SetBannerVisual(const WorldObject* objRef, ObjectGuid goGuid, u
     }
 }
 
+/**
+ * @brief Updates a banner game object's animation and art kit.
+ *
+ * @param go The banner game object.
+ * @param artKit The art kit to apply.
+ * @param animId The animation id to play.
+ */
 void OutdoorPvP::SetBannerVisual(GameObject* go, uint32 artKit, uint32 animId)
 {
     go->SendGameObjectCustomAnim(go->GetObjectGuid(), animId);
@@ -203,6 +237,13 @@ void OutdoorPvP::SetBannerVisual(GameObject* go, uint32 artKit, uint32 animId)
     go->Refresh();
 }
 
+/**
+ * @brief Toggles respawn state for an outdoor PvP game object.
+ *
+ * @param objRef A world object providing map context.
+ * @param goGuid The game object guid.
+ * @param respawn True to refresh the game object, false to despawn it.
+ */
 void OutdoorPvP::RespawnGO(const WorldObject* objRef, ObjectGuid goGuid, bool respawn)
 {
     if (GameObject* go = objRef->GetMap()->GetGameObject(goGuid))
