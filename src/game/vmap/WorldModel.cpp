@@ -22,6 +22,24 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file WorldModel.cpp
+ * @brief World model implementation for VMap system
+ *
+ * This file implements WorldModel which represents the 3D geometry
+ * of a WMO (World Model Object) or M2 model loaded from VMap data.
+ * It provides triangle-level intersection testing for collision.
+ *
+ * Key features:
+ * - Triangle mesh representation
+ * - Ray-triangle intersection
+ * - Group model organization
+ * - Bounding box hierarchy
+ *
+ * @see WorldModel for the model class
+ * @see GroupModel for grouped triangles
+ */
+
 #include "WorldModel.h"
 #include "VMapDefinitions.h"
 #include "MapTree.h"

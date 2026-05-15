@@ -37,62 +37,58 @@ This is the minimum interface to the VMapMamager.
 namespace VMAP
 {
     /**
-     * @brief
-     *
+     * @brief VMAP load result enumeration
      */
     enum VMAPLoadResult
     {
-        VMAP_LOAD_RESULT_ERROR,
-        VMAP_LOAD_RESULT_OK,
-        VMAP_LOAD_RESULT_IGNORED
+        VMAP_LOAD_RESULT_ERROR,  ///< Load error
+        VMAP_LOAD_RESULT_OK,     ///< Load successful
+        VMAP_LOAD_RESULT_IGNORED ///< Load ignored
     };
 
-#define VMAP_INVALID_HEIGHT       -100000.0f            // for check
-#define VMAP_INVALID_HEIGHT_VALUE -200000.0f            // real assigned value in unknown height case
+#define VMAP_INVALID_HEIGHT -100000.0f       ///< Invalid height for check
+#define VMAP_INVALID_HEIGHT_VALUE -200000.0f ///< Real assigned value in unknown height case
 
     //===========================================================
     /**
-     * @brief
+     * @brief Interface for VMap manager
      *
+     * This is the minimum interface to the VMapManager.
      */
     class IVMapManager
     {
         private:
-            bool iEnableLineOfSightCalc; /**< TODO */
-            bool iEnableHeightCalc; /**< TODO */
+            bool iEnableLineOfSightCalc; ///< Enable line of sight calculation
+            bool iEnableHeightCalc; ///< Enable height calculation
 
         public:
             /**
-             * @brief
-             *
+             * @brief Constructor
              */
             IVMapManager() : iEnableLineOfSightCalc(true), iEnableHeightCalc(true) {}
 
             /**
-             * @brief
-             *
+             * @brief Virtual destructor
              */
             virtual ~IVMapManager(void) {}
 
             /**
-             * @brief
-             *
-             * @param pBasePath
-             * @param pMapId
-             * @param x
-             * @param y
-             * @return VMAPLoadResult
+             * @brief Load map
+             * @param pBasePath Base path
+             * @param pMapId Map ID
+             * @param x X coordinate
+             * @param y Y coordinate
+             * @return VMAP load result
              */
             virtual VMAPLoadResult loadMap(const char* pBasePath, unsigned int pMapId, int x, int y) = 0;
 
             /**
-             * @brief
-             *
-             * @param pBasePath
-             * @param pMapId
-             * @param x
-             * @param y
-             * @return bool
+             * @brief Check if map exists
+             * @param pBasePath Base path
+             * @param pMapId Map ID
+             * @param x X coordinate
+             * @param y Y coordinate
+             * @return True if map exists
              */
             virtual bool existsMap(const char* pBasePath, unsigned int pMapId, int x, int y) = 0;
 
