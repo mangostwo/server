@@ -29,9 +29,12 @@
 #include <map>
 #include <set>
 
+/**
+ * @brief Dump table type enumeration
+ */
 enum DumpTableType
 {
-    DTT_CHARACTER,      //    -> guid, name                 // characters
+    DTT_CHARACTER,    ///< Character data (guid, name) -> characters
 
     DTT_CHAR_TABLE,     //                                  // character_account_data, character_achievement,
     // character_achievement_progress, character_action,
@@ -44,65 +47,130 @@ enum DumpTableType
 
     DTT_EQSET_TABLE,    // <- guid                          // character_equipmentsets
 
-    DTT_INVENTORY,      //    -> item guids collection      // character_inventory
+    DTT_INVENTORY,    ///< Inventory data (item guids collection) -> character_inventory
+    DTT_MAIL,         ///< Mail data (mail ids collection) -> mail, item_text
+                      ///<    -> item_text
 
-    DTT_MAIL,           //    -> mail ids collection        // mail
-    //    -> item_text
+    DTT_MAIL_ITEM,    ///< Mail item data (mail ids) -> mail_items, item guids collection
+                      ///<    -> item guids collection
 
-    DTT_MAIL_ITEM,      // <- mail ids                      // mail_items
-    //    -> item guids collection
+    DTT_ITEM,         ///< Item data (item guids) -> item_instance, item_text
+                      ///<    -> item_text
 
-    DTT_ITEM,           // <- item guids                    // item_instance
+    DTT_ITEM_GIFT,    ///< Item gift data (item guids) -> character_gifts
 
-    DTT_ITEM_GIFT,      // <- item guids                    // character_gifts
+    DTT_ITEM_LOOT,    ///< Item loot data (item guids) -> item_loot
 
-    DTT_ITEM_LOOT,      // <- item guids                    // item_loot
-
-    DTT_PET,            //    -> pet guids collection       // character_pet
-    DTT_PET_TABLE,      // <- pet guids                     // pet_aura, pet_spell, pet_spell_cooldown
-    DTT_PET_DECL,       // <- pet guids                     // character_pet_declinedname
+    DTT_PET,          ///< Pet data (pet guids collection) -> character_pet
+    DTT_PET_TABLE,    ///< Pet table data (pet guids) -> pet_aura, pet_spell, pet_spell_cooldown
+    DTT_PET_DECL,     ///< <- pet guids                     // character_pet_declinedname
 };
 
+/**
+ * @brief Dump return enumeration
+ */
 enum DumpReturn
 {
-    DUMP_SUCCESS,
-    DUMP_FILE_OPEN_ERROR,
-    DUMP_TOO_MANY_CHARS,
-    DUMP_UNEXPECTED_END,
-    DUMP_FILE_BROKEN,
-    DUMP_DB_VERSION_MISMATCH
+    DUMP_SUCCESS,            ///< Success
+    DUMP_FILE_OPEN_ERROR,    ///< File open error
+    DUMP_TOO_MANY_CHARS,     ///< Too many characters
+    DUMP_UNEXPECTED_END,     ///< Unexpected end of file
+    DUMP_FILE_BROKEN,        ///< File broken
+    DUMP_DB_VERSION_MISMATCH ///< Database version mismatch
 };
 
+/**
+ * @brief Player dump base class
+ */
 class PlayerDump
 {
     protected:
+        /**
+         * @brief Constructor
+         */
         PlayerDump() {}
 };
 
+/**
+ * @brief Player dump writer class
+ */
 class PlayerDumpWriter : public PlayerDump
 {
     public:
+        /**
+         * @brief Constructor
+         */
         PlayerDumpWriter() {}
 
+        /**
+         * @brief Get dump string
+         * @param guid Player GUID
+         * @return Dump string
+         */
         std::string GetDump(uint32 guid);
+
+        /**
+         * @brief Write dump to file
+         * @param file File path
+         * @param guid Player GUID
+         * @return Dump return code
+         */
         DumpReturn WriteDump(const std::string& file, uint32 guid);
+
     private:
         typedef std::set<uint32> GUIDs;
 
+        /**
+         * @brief Dump table content
+         * @param dump Dump string output
+         * @param guid Player GUID
+         * @param tableFrom Source table
+         * @param tableTo Destination table
+         * @param type Dump table type
+         */
         void DumpTableContent(std::string& dump, uint32 guid, char const* tableFrom, char const* tableTo, DumpTableType type);
+
+        /**
+         * @brief Generate WHERE string for GUIDs
+         * @param field Field name
+         * @param guids GUIDs set
+         * @param itr Iterator
+         * @return WHERE string
+         */
         std::string GenerateWhereStr(char const* field, GUIDs const& guids, GUIDs::const_iterator& itr);
+
+        /**
+         * @brief Generate WHERE string for single GUID
+         * @param field Field name
+         * @param guid GUID
+         * @return WHERE string
+         */
         std::string GenerateWhereStr(char const* field, uint32 guid);
 
-        GUIDs pets;
-        GUIDs mails;
-        GUIDs items;
+        GUIDs pets; ///< Pet GUIDs
+        GUIDs mails; ///< Mail GUIDs
+        GUIDs items; ///< Item GUIDs
 };
 
+/**
+ * @brief Player dump reader class
+ */
 class PlayerDumpReader : public PlayerDump
 {
     public:
+        /**
+         * @brief Constructor
+         */
         PlayerDumpReader() {}
 
+        /**
+         * @brief Load dump from file
+         * @param file File path
+         * @param account Account ID
+         * @param name Character name
+         * @param guid Player GUID
+         * @return Dump return code
+         */
         DumpReturn LoadDump(const std::string& file, uint32 account, std::string name, uint32 guid);
 };
 

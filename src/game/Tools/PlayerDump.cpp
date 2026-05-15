@@ -247,6 +247,13 @@ bool changenth(std::string& str, int n, const char* with, bool insert = false, b
     return true;
 }
 
+/**
+ * @brief Returns the nth comma-separated field from a dump row string.
+ *
+ * @param str The source string.
+ * @param n The zero-based field index.
+ * @return std::string The extracted field, or an empty string if not found.
+ */
 std::string getnth(std::string& str, int n)
 {
     std::string::size_type s, e;
@@ -258,6 +265,16 @@ std::string getnth(std::string& str, int n)
     return str.substr(s, e - s);
 }
 
+/**
+ * @brief Replaces the nth tokenized value in a dump row string.
+ *
+ * @param str The source string.
+ * @param n The zero-based token index.
+ * @param with The replacement text.
+ * @param insert True to insert instead of replace.
+ * @param nonzero True to ignore zero-valued tokens.
+ * @return true if the token was updated or intentionally skipped.
+ */
 bool changetoknth(std::string& str, int n, const char* with, bool insert = false, bool nonzero = false)
 {
     std::string::size_type s = 0, e = 0;
@@ -281,6 +298,14 @@ bool changetoknth(std::string& str, int n, const char* with, bool insert = false
     return true;
 }
 
+/**
+ * @brief Registers or retrieves a remapped guid during dump import.
+ *
+ * @param oldGuid The original guid from the dump.
+ * @param guidMap The old-to-new guid mapping.
+ * @param hiGuid The starting guid base.
+ * @return uint32 The remapped guid.
+ */
 uint32 registerNewGuid(uint32 oldGuid, std::map<uint32, uint32>& guidMap, uint32 hiGuid)
 {
     std::map<uint32, uint32>::const_iterator itr = guidMap.find(oldGuid);
@@ -294,6 +319,16 @@ uint32 registerNewGuid(uint32 oldGuid, std::map<uint32, uint32>& guidMap, uint32
     return newguid;
 }
 
+/**
+ * @brief Rewrites the nth field in a dump row as a remapped guid.
+ *
+ * @param str The source string.
+ * @param n The zero-based field index.
+ * @param guidMap The old-to-new guid mapping.
+ * @param hiGuid The starting guid base.
+ * @param nonzero True to ignore zero values.
+ * @return true if the field was updated or intentionally skipped.
+ */
 bool changeGuid(std::string& str, int n, std::map<uint32, uint32>& guidMap, uint32 hiGuid, bool nonzero = false)
 {
     char chritem[20];
@@ -309,6 +344,16 @@ bool changeGuid(std::string& str, int n, std::map<uint32, uint32>& guidMap, uint
     return changenth(str, n, chritem, false, nonzero);
 }
 
+/**
+ * @brief Rewrites the nth token in a dump row as a remapped guid.
+ *
+ * @param str The source string.
+ * @param n The zero-based token index.
+ * @param guidMap The old-to-new guid mapping.
+ * @param hiGuid The starting guid base.
+ * @param nonzero True to ignore zero values.
+ * @return true if the token was updated or intentionally skipped.
+ */
 bool changetokGuid(std::string& str, int n, std::map<uint32, uint32>& guidMap, uint32 hiGuid, bool nonzero = false)
 {
     char chritem[20];
@@ -324,6 +369,14 @@ bool changetokGuid(std::string& str, int n, std::map<uint32, uint32>& guidMap, u
     return changetoknth(str, n, chritem, false, nonzero);
 }
 
+/**
+ * @brief Builds an INSERT statement for the current query row.
+ *
+ * @param tableName The destination table name.
+ * @param tableColumnNamesAsChars The serialized column list.
+ * @param result The current query result row.
+ * @return std::string The generated INSERT statement.
+ */
 std::string CreateDumpString(char const* tableName, char const* tableColumnNamesAsChars, QueryResult* result)
 {
     if (!tableName || !result)
@@ -357,6 +410,13 @@ std::string CreateDumpString(char const* tableName, char const* tableColumnNames
     return ss.str();
 }
 
+/**
+ * @brief Builds a WHERE clause for a single guid field.
+ *
+ * @param field The guid column name.
+ * @param guid The guid value.
+ * @return std::string The generated WHERE clause.
+ */
 std::string PlayerDumpWriter::GenerateWhereStr(char const* field, uint32 guid)
 {
     std::ostringstream wherestr;
@@ -364,6 +424,14 @@ std::string PlayerDumpWriter::GenerateWhereStr(char const* field, uint32 guid)
     return wherestr.str();
 }
 
+/**
+ * @brief Builds a WHERE IN clause for a batch of guid values.
+ *
+ * @param field The guid column name.
+ * @param guids The guid set.
+ * @param itr The current iterator position, advanced as text is generated.
+ * @return std::string The generated WHERE clause.
+ */
 std::string PlayerDumpWriter::GenerateWhereStr(char const* field, GUIDs const& guids, GUIDs::const_iterator& itr)
 {
     std::ostringstream wherestr;
@@ -388,6 +456,13 @@ std::string PlayerDumpWriter::GenerateWhereStr(char const* field, GUIDs const& g
     return wherestr.str();
 }
 
+/**
+ * @brief Stores a guid field from the current query row into a guid set.
+ *
+ * @param result The current query row.
+ * @param field The field index containing the guid.
+ * @param guids The destination guid set.
+ */
 void StoreGUID(QueryResult* result, uint32 field, std::set<uint32>& guids)
 {
     Field* fields = result->Fetch();
@@ -398,6 +473,14 @@ void StoreGUID(QueryResult* result, uint32 field, std::set<uint32>& guids)
     }
 }
 
+/**
+ * @brief Stores a tokenized guid extracted from a string field into a guid set.
+ *
+ * @param result The current query row.
+ * @param data The field index containing tokenized data.
+ * @param field The token index containing the guid.
+ * @param guids The destination guid set.
+ */
 void StoreGUID(QueryResult* result, uint32 data, uint32 field, std::set<uint32>& guids)
 {
     Field* fields = result->Fetch();
@@ -510,6 +593,12 @@ void PlayerDumpWriter::DumpTableContent(std::string& dump, uint32 guid, char con
     while (guids && guids_itr != guids->end());             // not set case iterate single time, set case iterate for all guids
 }
 
+/**
+ * @brief Builds the full text dump for a player character.
+ *
+ * @param guid The character guid.
+ * @return std::string The serialized player dump text.
+ */
 std::string PlayerDumpWriter::GetDump(uint32 guid)
 {
     std::string dump;
@@ -551,6 +640,13 @@ std::string PlayerDumpWriter::GetDump(uint32 guid)
     return dump;
 }
 
+/**
+ * @brief Writes a player dump to a file.
+ *
+ * @param file The destination filename.
+ * @param guid The character guid.
+ * @return DumpReturn The dump operation result.
+ */
 DumpReturn PlayerDumpWriter::WriteDump(const std::string& file, uint32 guid)
 {
     FILE* fout = fopen(file.c_str(), "w");
@@ -569,6 +665,15 @@ DumpReturn PlayerDumpWriter::WriteDump(const std::string& file, uint32 guid)
 // Reading - High-level functions
 #define ROLLBACK(DR) {CharacterDatabase.RollbackTransaction(); fclose(fin); return (DR);}
 
+/**
+ * @brief Loads a player dump file into an account under a target character name or guid.
+ *
+ * @param file The source dump filename.
+ * @param account The destination account id.
+ * @param name The destination character name.
+ * @param guid The optional destination guid.
+ * @return DumpReturn The import operation result.
+ */
 DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, std::string name, uint32 guid)
 {
     bool nameInvalidated = false;                           // set when name changed or will requested changed at next login

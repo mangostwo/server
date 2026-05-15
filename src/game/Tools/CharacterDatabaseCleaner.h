@@ -27,26 +27,57 @@
 
 namespace CharacterDatabaseCleaner
 {
+    /**
+     * @brief Cleaning flags enumeration
+     */
     enum CleaningFlags
     {
-        CLEANING_FLAG_ACHIEVEMENT_PROGRESS  = 0x1,
-        CLEANING_FLAG_SKILLS                = 0x2,
-        CLEANING_FLAG_SPELLS                = 0x4,
-        CLEANING_FLAG_TALENTS               = 0x8
+        CLEANING_FLAG_ACHIEVEMENT_PROGRESS = 0x1,  ///< Clean Achievements
+        CLEANING_FLAG_SKILLS = 0x2,                ///< Clean skills
+        CLEANING_FLAG_SPELLS = 0x4,                ///< Clean spells
+        CLEANING_FLAG_TALENTS = 0x8                ///< Clean Talents
     };
 
-
+    /**
+     * @brief Clean the character database
+     */
     void CleanDatabase();
 
+    /**
+     * @brief Check unique values
+     * @param column Column name
+     * @param table Table name
+     * @param check Check function
+     */
     void CheckUnique(const char* column, const char* table, bool (*check)(uint32));
 
     bool AchievementProgressCheck(uint32 criteria);
+
+    /**
+     * @brief Check skill validity
+     * @param skill Skill ID
+     * @return True if valid
+     */
     bool SkillCheck(uint32 skill);
+
+    /**
+     * @brief Check spell validity
+     * @param spell_id Spell ID
+     * @return True if valid
+     */
     bool SpellCheck(uint32 spell_id);
     bool TalentCheck(uint32 talent_id);
 
     void CleanCharacterAchievementProgress();
+
+    /**
+     * @brief Clean character skills
+     */
     void CleanCharacterSkills();
+
+    /**
+     * @brief Clean character spells
+     */
     void CleanCharacterSpell();
     void CleanCharacterTalent();
 }
