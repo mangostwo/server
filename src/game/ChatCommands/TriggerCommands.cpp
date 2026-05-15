@@ -65,6 +65,11 @@ void ChatHandler::ShowTriggerTargetListHelper(uint32 id, AreaTrigger const* at, 
                         subpart ? " -> " : "", id, at->target_mapId, at->target_X, at->target_Y, at->target_Z);
 }
 
+/**
+ * @brief Displays summary information for an area trigger entry.
+ *
+ * @param atEntry The area trigger entry to display.
+ */
 void ChatHandler::ShowTriggerListHelper(AreaTriggerEntry const* atEntry)
 {
     char const* tavern = sObjectMgr.IsTavernAreaTrigger(atEntry->id) ? GetMangosString(LANG_TRIGGER_TAVERN) : "";

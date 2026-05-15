@@ -70,6 +70,12 @@ inline Creature* Helper_CreateWaypointFor(Creature* wpOwner, WaypointPathOrigin 
     return wpCreature;
 }
 
+/**
+ * @brief Despawns temporary visual waypoint creatures owned by a player.
+ *
+ * @param player The player used as the center of the search.
+ * @param ownerGuid The owner guid assigned to the visual waypoints.
+ */
 inline void UnsummonVisualWaypoints(Player const* player, ObjectGuid ownerGuid)
 {
     std::list<Creature*> waypoints;

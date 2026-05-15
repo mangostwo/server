@@ -1116,6 +1116,12 @@ bool ChatHandler::HandleLearnCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Teaches all recipes tied to a profession or skill line.
+ *
+ * @param player The player learning the recipes.
+ * @param skill_id The skill line identifier to scan.
+ */
 void ChatHandler::HandleLearnSkillRecipesHelper(Player* player, uint32 skill_id)
 {
     uint32 classmask = player->getClassMask();

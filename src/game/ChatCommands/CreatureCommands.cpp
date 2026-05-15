@@ -52,11 +52,15 @@
      CommandTable : commandTable
   ***********************************************************************/
 
-/*
-ComeToMe command REQUIRED for 3rd party scripting library to have access to PointMovementGenerator
-Without this function 3rd party scripting library will get linking errors (unresolved external)
-when attempting to use the PointMovementGenerator
-*/
+/**
+ * @brief Moves the selected creature to the handler's location.
+ *
+ * This command is kept available for external scripting libraries that depend on
+ * PointMovementGenerator linkage.
+ *
+ * @param args Unused command arguments.
+ * @return true if the command completed successfully; otherwise false.
+ */
 bool ChatHandler::HandleComeToMeCommand(char* /*args*/)
 {
     Creature* caster = getSelectedCreature();

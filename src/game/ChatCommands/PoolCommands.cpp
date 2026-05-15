@@ -35,6 +35,11 @@
 #include "Chat.h"
 #include "ObjectMgr.h"
 
+/**
+ * @brief Displays summary information for a pool template.
+ *
+ * @param pool_id The pool identifier to display.
+ */
 void ChatHandler::ShowPoolListHelper(uint16 pool_id)
 {
     PoolTemplateData const& pool_template = sPoolMgr.GetPoolTemplate(pool_id);

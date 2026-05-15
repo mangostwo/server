@@ -104,6 +104,13 @@ bool ChatHandler::LookupPlayerSearchCommand(QueryResult* result, uint32* limit)
     return true;
 }
 
+/**
+ * @brief Displays a localized quest summary line.
+ *
+ * @param questId The quest identifier to display.
+ * @param loc_idx The locale index used for localized strings.
+ * @param target Optional player used to show quest progress status.
+ */
 void ChatHandler::ShowQuestListHelper(uint32 questId, int32 loc_idx, Player* target /*= NULL*/)
 {
     Quest const* qinfo = sObjectMgr.GetQuestTemplate(questId);
@@ -148,6 +155,13 @@ void ChatHandler::ShowQuestListHelper(uint32 questId, int32 loc_idx, Player* tar
     }
 }
 
+/**
+ * @brief Displays a localized item summary line.
+ *
+ * @param itemId The item identifier to display.
+ * @param loc_idx The locale index used for localized strings.
+ * @param target Optional player used to evaluate item usability.
+ */
 void ChatHandler::ShowItemListHelper(uint32 itemId, int loc_idx, Player* target /*=NULL*/)
 {
     ItemPrototype const* itemProto = sItemStorage.LookupEntry<ItemPrototype >(itemId);
