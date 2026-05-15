@@ -234,7 +234,14 @@ class LootValidatorRefManager : public RefManager<Loot, LootValidatorRef>
 //=====================================================
 struct LootView;
 
+/**
+ * Serializes a loot item entry into a byte buffer.
+ */
 ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li);
+
+/**
+ * Serializes a loot view into a byte buffer.
+ */
 ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv);
 
 struct Loot
@@ -350,18 +357,57 @@ extern LootStore LootTemplates_Disenchant;
 extern LootStore LootTemplates_Prospecting;
 extern LootStore LootTemplates_Spell;
 
+/**
+ * Loads creature loot templates.
+ */
 void LoadLootTemplates_Creature();
+
+/**
+ * Loads fishing loot templates.
+ */
 void LoadLootTemplates_Fishing();
+
+/**
+ * Loads gameobject loot templates.
+ */
 void LoadLootTemplates_Gameobject();
+
+/**
+ * Loads item loot templates.
+ */
 void LoadLootTemplates_Item();
+
+/**
+ * Loads mail loot templates.
+ */
 void LoadLootTemplates_Mail();
+
+/**
+ * Loads milling loot templates.
+ */
 void LoadLootTemplates_Milling();
+
+/**
+ * Loads pickpocketing loot templates.
+ */
 void LoadLootTemplates_Pickpocketing();
+
+/**
+ * Loads skinning loot templates.
+ */
 void LoadLootTemplates_Skinning();
+
+/**
+ * Loads disenchant loot templates.
+ */
 void LoadLootTemplates_Disenchant();
 void LoadLootTemplates_Prospecting();
 
 void LoadLootTemplates_Spell();
+
+/**
+ * Loads reference loot templates used by other loot tables.
+ */
 void LoadLootTemplates_Reference();
 
 inline void LoadLootTables()

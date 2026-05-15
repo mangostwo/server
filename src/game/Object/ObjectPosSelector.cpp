@@ -28,6 +28,15 @@
 // The bigger this value, the more space npcs require around their target
 #define OCCUPY_POS_ANGLE_ATAN_FACTOR                      1.8f
 
+/**
+ * @brief Initializes a position selector around a target point.
+ *
+ * @param x The center x coordinate.
+ * @param y The center y coordinate.
+ * @param dist The search radius from the center.
+ * @param searchedForSize The size of the searching object.
+ * @param searchPosFor Optional object whose occupied space may be ignored.
+ */
 ObjectPosSelector::ObjectPosSelector(float x, float y, float dist, float searchedForSize, WorldObject const* searchPosFor) :
     m_centerX(x), m_centerY(y), m_searcherDist(dist), m_searchPosFor(searchPosFor)
 {
@@ -62,6 +71,13 @@ ObjectPosSelector::ObjectPosSelector(float x, float y, float dist, float searche
  *
  * Used circles data stored as projections to searcher dist size circle as angle coordinate and half angle size
  */
+/**
+ * @brief Adds an occupied area that should be excluded from candidate positions.
+ *
+ * @param obj The object occupying the area.
+ * @param angle The angle of the occupied area relative to the search line.
+ * @param dist The distance from the center point to the occupied area.
+ */
 void ObjectPosSelector::AddUsedArea(WorldObject const* obj, float angle, float dist)
 {
     MANGOS_ASSERT(obj);
@@ -94,6 +110,14 @@ void ObjectPosSelector::AddUsedArea(WorldObject const* obj, float angle, float d
  *
  * @return true, if used circle not intercepted with searcher circle in terms projection angles
  */
+/**
+ * @brief Checks whether a candidate angle conflicts with an occupied area.
+ *
+ * @param usedArea The occupied area projection.
+ * @param side The side being tested.
+ * @param angle The candidate angle.
+ * @return true if the angle is free; otherwise, false.
+ */
 bool ObjectPosSelector::CheckAngle(UsedArea const& usedArea, UsedAreaSide side, float angle) const
 {
     float used_angle = usedArea.first * SignOf(side);
@@ -107,6 +131,11 @@ bool ObjectPosSelector::CheckAngle(UsedArea const& usedArea, UsedAreaSide side, 
  *
  * @return true, if 0.0f angle with m_searcher_halfangle*2 angle size not intercept with used circles
  */
+/**
+ * @brief Checks whether the forward-facing angle is available.
+ *
+ * @return true if the zero angle is not blocked; otherwise, false.
+ */
 bool ObjectPosSelector::CheckOriginalAngle() const
 {
     // check first left/right used angles if exists
@@ -117,6 +146,9 @@ bool ObjectPosSelector::CheckOriginalAngle() const
 /**
  * Initialize data for search angles starting from first possible angle at both sides
  */
+/**
+ * @brief Initializes angle iteration state for both sides of the search arc.
+ */
 void ObjectPosSelector::InitializeAngle()
 {
     InitializeAngle(USED_POS_PLUS);
@@ -125,6 +157,11 @@ void ObjectPosSelector::InitializeAngle()
 
 /**
  * Initialize data for search angles starting from first possible angle at side
+ */
+/**
+ * @brief Initializes angle iteration state for one side of the search arc.
+ *
+ * @param side The side to initialize.
  */
 void ObjectPosSelector::InitializeAngle(UsedAreaSide side)
 {
@@ -151,6 +188,12 @@ void ObjectPosSelector::InitializeAngle(UsedAreaSide side)
  * @param angle    Return at success found angle
  *
  * @return true, if angle found
+ */
+/**
+ * @brief Finds the next available free angle on either side.
+ *
+ * @param angle Receives the found angle.
+ * @return true if an angle was found; otherwise, false.
  */
 bool ObjectPosSelector::NextAngle(float& angle)
 {
@@ -234,6 +277,12 @@ bool ObjectPosSelector::NextSideAngle(UsedAreaSide side, float& angle)
  * @param angle    Return at success found angle
  *
  * @return true, if angle found
+ */
+/**
+ * @brief Finds the next angle inside previously occupied areas.
+ *
+ * @param angle Receives the found angle.
+ * @return true if an occupied-angle fallback was found; otherwise, false.
  */
 bool ObjectPosSelector::NextUsedAngle(float& angle)
 {

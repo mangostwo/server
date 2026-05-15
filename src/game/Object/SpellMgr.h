@@ -82,12 +82,26 @@ enum SpellSpecific
     SPELL_UA_IMMOLATE       = 23,                           // Unstable Affliction and Immolate
 };
 
+/**
+ * Returns the spell-specific classification for the specified spell id.
+ */
 SpellSpecific GetSpellSpecific(uint32 spellId);
 
 // Different spell properties
 inline float GetSpellRadius(SpellRadiusEntry const* radius) { return (radius ? radius->Radius : 0); }
+/**
+ * Returns the effective cast time for the specified spell.
+ */
 uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell = NULL);
+
+/**
+ * Returns the cast time used when calculating spell coefficient bonuses.
+ */
 uint32 GetSpellCastTimeForBonus(SpellEntry const* spellProto, DamageEffectType damagetype);
+
+/**
+ * Calculates the default spell power coefficient for the specified spell effect type.
+ */
 float CalculateDefaultCoefficient(SpellEntry const* spellProto, DamageEffectType const damagetype);
 inline float GetSpellMinRange(SpellRangeEntry const* range, bool friendly = false)
 {
@@ -106,11 +120,34 @@ inline float GetSpellMaxRange(SpellRangeEntry const* range, bool friendly = fals
     return (friendly ? range->maxRangeFriendly : range->maxRange);
 }
 inline uint32 GetSpellRecoveryTime(SpellEntry const* spellInfo) { return spellInfo->RecoveryTime > spellInfo->CategoryRecoveryTime ? spellInfo->RecoveryTime : spellInfo->CategoryRecoveryTime; }
+/**
+ * Returns the base duration of the specified spell.
+ */
 int32 GetSpellDuration(SpellEntry const* spellInfo);
+
+/**
+ * Returns the maximum duration of the specified spell.
+ */
 int32 GetSpellMaxDuration(SpellEntry const* spellInfo);
+
+/**
+ * Calculates the spell duration after caster-based modifiers are applied.
+ */
 int32 CalculateSpellDuration(SpellEntry const* spellInfo, Unit const* caster = NULL);
+
+/**
+ * Returns the maximum number of aura ticks produced by the specified spell.
+ */
 uint16 GetSpellAuraMaxTicks(SpellEntry const* spellInfo);
+
+/**
+ * Returns the maximum number of aura ticks produced by the specified spell id.
+ */
 uint16 GetSpellAuraMaxTicks(uint32 spellId);
+
+/**
+ * Returns the weapon attack type used by the specified spell.
+ */
 WeaponAttackType GetWeaponAttackType(SpellEntry const* spellInfo);
 
 inline bool IsSpellHaveEffect(SpellEntry const* spellInfo, SpellEffects effect)
@@ -202,6 +239,9 @@ inline bool IsSpellLastAuraEffect(SpellEntry const* spellInfo, SpellEffectIndex 
     return true;
 }
 
+/**
+ * Checks whether two auras are prevented from stacking because of their aura definitions.
+ */
 bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 spellId_2);
 
 inline bool IsSealSpell(SpellEntry const* spellInfo)
@@ -234,14 +274,31 @@ inline bool IsLootCraftingSpell(SpellEntry const* spellInfo)
              (spellInfo->TotemCategory[0] != 0 || spellInfo->EffectItemType[0] == 0 || spellInfo->Id == 62941)));
 }
 
+/**
+ * Compares two aura ranks and returns their relative ordering.
+ */
 int32 CompareAuraRanks(uint32 spellId_1, uint32 spellId_2);
 
 // order from less to more strict
 bool IsSingleFromSpellSpecificPerTargetPerCaster(SpellSpecific spellSpec1, SpellSpecific spellSpec2);
+/**
+ * Checks whether two spell specifics are restricted to a single ranked aura per target.
+ */
 bool IsSingleFromSpellSpecificSpellRanksPerTarget(SpellSpecific spellSpec1, SpellSpecific spellSpec2);
+
+/**
+ * Checks whether two spell specifics are restricted to a single aura per target.
+ */
 bool IsSingleFromSpellSpecificPerTarget(SpellSpecific spellSpec1, SpellSpecific spellSpec2);
 
+/**
+ * Checks whether the specified spell id is passive.
+ */
 bool IsPassiveSpell(uint32 spellId);
+
+/**
+ * Checks whether the specified spell entry is passive.
+ */
 bool IsPassiveSpell(SpellEntry const* spellProto);
 
 inline bool IsPassiveSpellStackableWithRanks(SpellEntry const* spellProto)
@@ -277,15 +334,44 @@ inline bool IsNonCombatSpell(SpellEntry const* spellInfo)
     return spellInfo->HasAttribute(SPELL_ATTR_CANT_USED_IN_COMBAT);
 }
 
+/**
+ * Checks whether the specified spell id is considered positive.
+ */
 bool IsPositiveSpell(uint32 spellId);
+
+/**
+ * Checks whether the specified spell entry is considered positive.
+ */
 bool IsPositiveSpell(SpellEntry const* spellproto);
+
+/**
+ * Checks whether the specified spell effect is considered positive.
+ */
 bool IsPositiveEffect(SpellEntry const* spellInfo, SpellEffectIndex effIndex);
+
+/**
+ * Checks whether the target descriptors represent a positive target selection.
+ */
 bool IsPositiveTarget(uint32 targetA, uint32 targetB);
 
+/**
+ * Checks whether the target descriptor is explicitly positive.
+ */
 bool IsExplicitPositiveTarget(uint32 targetA);
+
+/**
+ * Checks whether the target descriptor is explicitly negative.
+ */
 bool IsExplicitNegativeTarget(uint32 targetA);
 
+/**
+ * Checks whether the spell is limited to a single target.
+ */
 bool IsSingleTargetSpell(SpellEntry const* spellInfo);
+
+/**
+ * Checks whether two spells should be treated as sharing a single-target restriction.
+ */
 bool IsSingleTargetSpells(SpellEntry const* spellInfo1, SpellEntry const* spellInfo2);
 
 inline bool IsCasterSourceTarget(uint32 target)
@@ -526,6 +612,9 @@ inline bool IsSpellRequiresRangedAP(SpellEntry const* spellInfo)
     return (spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && spellInfo->DmgClass != SPELL_DAMAGE_CLASS_MELEE);
 }
 
+/**
+ * Returns the cast error produced when attempting to cast a spell in the specified form.
+ */
 SpellCastResult GetErrorAtShapeshiftedCast(SpellEntry const* spellInfo, uint32 form);
 
 inline bool IsChanneledSpell(SpellEntry const* spellInfo)
@@ -627,7 +716,14 @@ inline uint32 GetDispellMask(DispelType dispel)
 
 // Diminishing Returns interaction with spells
 DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto, bool triggered);
+/**
+ * Checks whether the specified diminishing returns group has a limited duration.
+ */
 bool IsDiminishingReturnsGroupDurationLimited(DiminishingGroup group);
+
+/**
+ * Returns the diminishing returns behavior type for the specified group.
+ */
 DiminishingReturnsType GetDiminishingReturnsGroupType(DiminishingGroup group);
 int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry const* spellproto);
 
@@ -949,6 +1045,9 @@ struct PetDefaultSpellsEntry
 // < 0 for petspelldata id, > 0 for creature_id
 typedef std::map<int32, PetDefaultSpellsEntry> PetDefaultSpellsMap;
 
+/**
+ * Checks whether the specified skill is a primary profession.
+ */
 bool IsPrimaryProfessionSkill(uint32 skill);
 
 inline bool IsProfessionSkill(uint32 skill)

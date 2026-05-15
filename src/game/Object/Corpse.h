@@ -22,6 +22,29 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file Corpse.h
+ * @brief Corpse (player death) class definition.
+ *
+ * This file defines the Corpse class which represents the remains of a dead player.
+ * Corpses can be in different states (bones, resurrectable for PvE/PvP) and have
+ * specific mechanics around resurrection, loot, and decay.
+ *
+ * Key functionality includes:
+ * - Corpse creation on player death
+ * - Corpse persistence and database storage
+ * - Corpse decay and expiration
+ * - Resurrection mechanics and timers
+ * - Loot management for corpse contents
+ * - PvP corpse handling and resurrection rules
+ * - Corpse visibility and ghosting
+ * - Bones vs. resurrectable corpse states
+ *
+ * @see Corpse for the main corpse implementation
+ * @see Player for player death handling
+ * @see ObjectAccessor for corpse registry
+ */
+
 #ifndef MANGOSSERVER_CORPSE_H
 #define MANGOSSERVER_CORPSE_H
 
@@ -31,6 +54,9 @@
 #include "GridDefines.h"
 #include "LootMgr.h"
 
+/// @brief Corpse type enumeration.
+///
+/// Indicates what state the corpse is in and under what resurrection rules.
 enum CorpseType
 {
     CORPSE_BONES             = 0,
@@ -39,9 +65,12 @@ enum CorpseType
 };
 #define MAX_CORPSE_TYPE        3
 
-// Value equal client resurrection dialog show radius.
+// Value equal to client resurrection dialog show radius (in game units)
 #define CORPSE_RECLAIM_RADIUS 39
 
+/// @brief Corpse display and behavior flags.
+///
+/// Controls how the corpse appears and what actions are available.
 enum CorpseFlags
 {
     CORPSE_FLAG_NONE        = 0x00,
@@ -53,6 +82,10 @@ enum CorpseFlags
     CORPSE_FLAG_LOOTABLE    = 0x20
 };
 
+/// @brief Player corpse class.
+///
+/// Represents a player's remains after death. Corpses can be resurrected and
+/// contain the player's items for recovery or looting.
 class Corpse : public WorldObject
 {
     public:

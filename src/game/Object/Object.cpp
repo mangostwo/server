@@ -218,6 +218,15 @@ void Object::SendForcedObjectUpdate()
     }
 }
 
+/**
+ * @brief Build create update block for player
+ * @param data Update data buffer
+ * @param target Target player
+ *
+ * Builds the update packet data needed to create this object
+ * for the specified player. Includes movement data and
+ * all update field values.
+ */
 void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) const
 {
     if (!target)
@@ -292,6 +301,13 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
     data->AddUpdateBlock();
 }
 
+/**
+ * @brief Send create update to player
+ * @param player Target player
+ *
+ * Sends the create update packet to the specified player,
+ * causing the object to appear in their game world.
+ */
 void Object::SendCreateUpdateToPlayer(Player* player)
 {
     // send create update to player
@@ -303,6 +319,14 @@ void Object::SendCreateUpdateToPlayer(Player* player)
     player->GetSession()->SendPacket(&packet);
 }
 
+/**
+ * @brief Build values update block for player
+ * @param data Update data buffer
+ * @param target Target player
+ *
+ * Builds the update packet data for changed field values
+ * to send to the specified player.
+ */
 void Object::BuildValuesUpdateBlockForPlayer(UpdateData* data, Player* target) const
 {
     ByteBuffer& buf = data->GetBuffer();
@@ -319,11 +343,25 @@ void Object::BuildValuesUpdateBlockForPlayer(UpdateData* data, Player* target) c
     data->AddUpdateBlock();
 }
 
+/**
+ * @brief Build out of range update block
+ * @param data Update data buffer
+ *
+ * Adds this object's GUID to the out-of-range list,
+ * indicating it should be removed from the client's view.
+ */
 void Object::BuildOutOfRangeUpdateBlock(UpdateData* data) const
 {
     data->AddOutOfRangeGUID(GetObjectGuid());
 }
 
+/**
+ * @brief Destroy object for player
+ * @param target Target player
+ *
+ * Sends a destroy packet to the specified player,
+ * removing this object from their game world.
+ */
 void Object::DestroyForPlayer(Player* target, bool anim) const
 {
     MANGOS_ASSERT(target);
@@ -334,6 +372,15 @@ void Object::DestroyForPlayer(Player* target, bool anim) const
     target->GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Build movement update block
+ * @param data Byte buffer to write to
+ * @param updateFlags Update flags
+ *
+ * Builds the movement data portion of the update packet.
+ * Includes position, orientation, movement flags, and speeds
+ * for living objects, or just position for static objects.
+ */
 void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
 {
     // uint16 moveFlags2 = (isType(TYPEMASK_UNIT) ? ((Unit*)this)->m_movementInfo.GetMovementFlags2() : MOVEFLAG2_NONE);
@@ -524,6 +571,16 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
     }
 }
 
+/**
+ * @brief Build values update data
+ * @param updatetype Update type (create or values)
+ * @param data Byte buffer to write to
+ * @param updateMask Update mask indicating which fields changed
+ * @param target Target player
+ *
+ * Builds the actual field value data for the update packet.
+ * Handles special cases for gameobjects and units.
+ */
 void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* updateMask, Player* target) const
 {
     if (!target)
@@ -774,6 +831,13 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
     }
 }
 
+/**
+ * @brief Clear update mask
+ * @param remove If true, remove from client update list
+ *
+ * Clears all changed value flags and optionally removes
+ * the object from the pending update list.
+ */
 void Object::ClearUpdateMask(bool remove)
 {
     if (m_uint32Values)
@@ -794,6 +858,14 @@ void Object::ClearUpdateMask(bool remove)
     }
 }
 
+/**
+ * @brief Load values from data string
+ * @param data Data string to load from
+ * @return True if successful
+ *
+ * Loads update field values from a character data string.
+ * Used when loading objects from database.
+ */
 bool Object::LoadValues(const char* data)
 {
     if (!m_uint32Values)
@@ -818,6 +890,13 @@ bool Object::LoadValues(const char* data)
     return true;
 }
 
+/**
+ * @brief Set update bits in mask
+ * @param updateMask Update mask to modify
+ * @param target Target player (unused)
+ *
+ * Sets bits in the update mask for all fields that have changed.
+ */
 void Object::_SetUpdateBits(UpdateMask* updateMask, Player* /*target*/) const
 {
     for (uint16 index = 0; index < m_valuesCount; ++index)
@@ -827,6 +906,14 @@ void Object::_SetUpdateBits(UpdateMask* updateMask, Player* /*target*/) const
         }
 }
 
+/**
+ * @brief Set create bits in mask
+ * @param updateMask Update mask to modify
+ * @param target Target player (unused)
+ *
+ * Sets bits in the update mask for all non-zero fields.
+ * Used when creating a new object for a player.
+ */
 void Object::_SetCreateBits(UpdateMask* updateMask, Player* /*target*/) const
 {
     for (uint16 index = 0; index < m_valuesCount; ++index)
@@ -836,6 +923,13 @@ void Object::_SetCreateBits(UpdateMask* updateMask, Player* /*target*/) const
         }
 }
 
+/**
+ * @brief Set signed 32-bit value
+ * @param index Field index
+ * @param value Value to set
+ *
+ * Sets a signed 32-bit field value and marks it as changed.
+ */
 void Object::SetInt32Value(uint16 index, int32 value)
 {
     MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
@@ -848,6 +942,13 @@ void Object::SetInt32Value(uint16 index, int32 value)
     }
 }
 
+/**
+ * @brief Set unsigned 32-bit value
+ * @param index Field index
+ * @param value Value to set
+ *
+ * Sets an unsigned 32-bit field value and marks it as changed.
+ */
 void Object::SetUInt32Value(uint16 index, uint32 value)
 {
     MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
@@ -860,6 +961,14 @@ void Object::SetUInt32Value(uint16 index, uint32 value)
     }
 }
 
+/**
+ * @brief Update unsigned 32-bit value
+ * @param index Field index
+ * @param value Value to set
+ *
+ * Sets an unsigned 32-bit field value and marks it as changed.
+ * Does not check if value differs from current.
+ */
 void Object::UpdateUInt32Value(uint16 index, uint32 value)
 {
     MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
@@ -868,6 +977,14 @@ void Object::UpdateUInt32Value(uint16 index, uint32 value)
     m_changedValues[index] = true;
 }
 
+/**
+ * @brief Set unsigned 64-bit value
+ * @param index Field index (uses two consecutive fields)
+ * @param value Value to set
+ *
+ * Sets a 64-bit field value across two consecutive 32-bit fields
+ * and marks both as changed.
+ */
 void Object::SetUInt64Value(uint16 index, const uint64& value)
 {
     MANGOS_ASSERT(index + 1 < m_valuesCount || PrintIndexError(index, true));
@@ -881,6 +998,13 @@ void Object::SetUInt64Value(uint16 index, const uint64& value)
     }
 }
 
+/**
+ * @brief Set float value
+ * @param index Field index
+ * @param value Value to set
+ *
+ * Sets a floating-point field value and marks it as changed.
+ */
 void Object::SetFloatValue(uint16 index, float value)
 {
     MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
@@ -893,6 +1017,14 @@ void Object::SetFloatValue(uint16 index, float value)
     }
 }
 
+/**
+ * @brief Set byte value
+ * @param index Field index
+ * @param offset Byte offset within the field
+ * @param value Value to set
+ *
+ * Sets a single byte within a 32-bit field and marks it as changed.
+ */
 void Object::SetByteValue(uint16 index, uint8 offset, uint8 value)
 {
     MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
@@ -912,6 +1044,14 @@ void Object::SetByteValue(uint16 index, uint8 offset, uint8 value)
     }
 }
 
+/**
+ * @brief Set unsigned 16-bit value
+ * @param index Field index
+ * @param offset 16-bit offset within the field (0 or 1)
+ * @param value Value to set
+ *
+ * Sets a 16-bit value within a 32-bit field and marks it as changed.
+ */
 void Object::SetUInt16Value(uint16 index, uint8 offset, uint16 value)
 {
     MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
@@ -931,6 +1071,13 @@ void Object::SetUInt16Value(uint16 index, uint8 offset, uint16 value)
     }
 }
 
+/**
+ * @brief Set stat float value
+ * @param index Field index
+ * @param value Value to set
+ *
+ * Sets a floating-point stat value, clamping to minimum 0.
+ */
 void Object::SetStatFloatValue(uint16 index, float value)
 {
     if (value < 0)
@@ -941,6 +1088,13 @@ void Object::SetStatFloatValue(uint16 index, float value)
     SetFloatValue(index, value);
 }
 
+/**
+ * @brief Set stat int32 value
+ * @param index Field index
+ * @param value Value to set
+ *
+ * Sets an integer stat value, clamping to minimum 0.
+ */
 void Object::SetStatInt32Value(uint16 index, int32 value)
 {
     if (value < 0)
@@ -951,6 +1105,14 @@ void Object::SetStatInt32Value(uint16 index, int32 value)
     SetUInt32Value(index, uint32(value));
 }
 
+/**
+ * @brief Apply modifier to unsigned 32-bit value
+ * @param index Field index
+ * @param val Modifier value
+ * @param apply If true, add modifier; if false, subtract
+ *
+ * Applies a modifier to a field value, clamping to minimum 0.
+ */
 void Object::ApplyModUInt32Value(uint16 index, int32 val, bool apply)
 {
     int32 cur = GetUInt32Value(index);
@@ -962,6 +1124,14 @@ void Object::ApplyModUInt32Value(uint16 index, int32 val, bool apply)
     SetUInt32Value(index, cur);
 }
 
+/**
+ * @brief Apply modifier to signed 32-bit value
+ * @param index Field index
+ * @param val Modifier value
+ * @param apply If true, add modifier; if false, subtract
+ *
+ * Applies a modifier to a signed field value.
+ */
 void Object::ApplyModInt32Value(uint16 index, int32 val, bool apply)
 {
     int32 cur = GetInt32Value(index);
@@ -969,6 +1139,14 @@ void Object::ApplyModInt32Value(uint16 index, int32 val, bool apply)
     SetInt32Value(index, cur);
 }
 
+/**
+ * @brief Apply modifier to signed float value
+ * @param index Field index
+ * @param val Modifier value
+ * @param apply If true, add modifier; if false, subtract
+ *
+ * Applies a modifier to a floating-point field value.
+ */
 void Object::ApplyModSignedFloatValue(uint16 index, float  val, bool apply)
 {
     float cur = GetFloatValue(index);
@@ -976,6 +1154,15 @@ void Object::ApplyModSignedFloatValue(uint16 index, float  val, bool apply)
     SetFloatValue(index, cur);
 }
 
+/**
+ * @brief Apply modifier to positive float value
+ * @param index Field index
+ * @param val Modifier value
+ * @param apply If true, add modifier; if false, subtract
+ *
+ * Applies a modifier to a floating-point field value,
+ * clamping to minimum 0.
+ */
 void Object::ApplyModPositiveFloatValue(uint16 index, float  val, bool apply)
 {
     float cur = GetFloatValue(index);
@@ -987,6 +1174,12 @@ void Object::ApplyModPositiveFloatValue(uint16 index, float  val, bool apply)
     SetFloatValue(index, cur);
 }
 
+/**
+ * @brief Mark flag field for client update
+ * @param index Field index
+ *
+ * Marks a flag field as changed and schedules client update.
+ */
 void Object::MarkFlagUpdateForClient(uint16 index)
 {
     MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
@@ -995,6 +1188,13 @@ void Object::MarkFlagUpdateForClient(uint16 index)
     MarkForClientUpdate();
 }
 
+/**
+ * @brief Set flag in field
+ * @param index Field index
+ * @param newFlag Flag to set
+ *
+ * Sets a flag bit in a field using OR operation.
+ */
 void Object::SetFlag(uint16 index, uint32 newFlag)
 {
     MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
@@ -1009,6 +1209,13 @@ void Object::SetFlag(uint16 index, uint32 newFlag)
     }
 }
 
+/**
+ * @brief Remove flag from field
+ * @param index Field index
+ * @param oldFlag Flag to remove
+ *
+ * Removes a flag bit from a field using AND with inverted mask.
+ */
 void Object::RemoveFlag(uint16 index, uint32 oldFlag)
 {
     MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
@@ -1023,6 +1230,14 @@ void Object::RemoveFlag(uint16 index, uint32 oldFlag)
     }
 }
 
+/**
+ * @brief Set byte flag in field
+ * @param index Field index
+ * @param offset Byte offset within the field
+ * @param newFlag Flag to set
+ *
+ * Sets a flag bit within a byte of a field.
+ */
 void Object::SetByteFlag(uint16 index, uint8 offset, uint8 newFlag)
 {
     MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
@@ -1041,6 +1256,14 @@ void Object::SetByteFlag(uint16 index, uint8 offset, uint8 newFlag)
     }
 }
 
+/**
+ * @brief Remove byte flag from field
+ * @param index Field index
+ * @param offset Byte offset within the field
+ * @param oldFlag Flag to remove
+ *
+ * Removes a flag bit within a byte of a field.
+ */
 void Object::RemoveByteFlag(uint16 index, uint8 offset, uint8 oldFlag)
 {
     MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
@@ -1059,6 +1282,14 @@ void Object::RemoveByteFlag(uint16 index, uint8 offset, uint8 oldFlag)
     }
 }
 
+/**
+ * @brief Set short flag in field
+ * @param index Field index
+ * @param highpart If true, use high 16 bits; if false, use low 16 bits
+ * @param newFlag Flag to set
+ *
+ * Sets a flag bit within a 16-bit portion of a field.
+ */
 void Object::SetShortFlag(uint16 index, bool highpart, uint16 newFlag)
 {
     MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
@@ -1071,6 +1302,14 @@ void Object::SetShortFlag(uint16 index, bool highpart, uint16 newFlag)
     }
 }
 
+/**
+ * @brief Remove short flag from field
+ * @param index Field index
+ * @param highpart If true, use high 16 bits; if false, use low 16 bits
+ * @param oldFlag Flag to remove
+ *
+ * Removes a flag bit within a 16-bit portion of a field.
+ */
 void Object::RemoveShortFlag(uint16 index, bool highpart, uint16 oldFlag)
 {
     MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
@@ -1083,6 +1322,14 @@ void Object::RemoveShortFlag(uint16 index, bool highpart, uint16 oldFlag)
     }
 }
 
+/**
+ * @brief Print index error
+ * @param index Field index that caused error
+ * @param set If true, was a set operation; if false, was a get operation
+ * @return Always false
+ *
+ * Logs an error when attempting to access a nonexistent field.
+ */
 bool Object::PrintIndexError(uint32 index, bool set) const
 {
     sLog.outError("Attempt %s nonexistent value field: %u (count: %u) for object typeid: %u type mask: %u", (set ? "set value to" : "get value from"), index, m_valuesCount, GetTypeId(), m_objectType);
@@ -1091,6 +1338,13 @@ bool Object::PrintIndexError(uint32 index, bool set) const
     return false;
 }
 
+/**
+ * @brief Print entry error
+ * @param descr Description of the invalid operation
+ * @return Always false
+ *
+ * Logs an error when an invalid operation is performed on this object.
+ */
 bool Object::PrintEntryError(char const* descr) const
 {
     sLog.outError("Object Type %u, Entry %u (lowguid %u) with invalid call for %s", GetTypeId(), GetEntry(), GetObjectGuid().GetCounter(), descr);
@@ -1099,6 +1353,14 @@ bool Object::PrintEntryError(char const* descr) const
     return false;
 }
 
+/**
+ * @brief Build update data for player
+ * @param pl Target player
+ * @param update_players Map of players to their update data
+ *
+ * Builds update data for the specified player, adding them
+ * to the update map if not already present.
+ */
 void Object::BuildUpdateDataForPlayer(Player* pl, UpdateDataMapType& update_players)
 {
     UpdateDataMapType::iterator iter = update_players.find(pl);
@@ -1113,24 +1375,49 @@ void Object::BuildUpdateDataForPlayer(Player* pl, UpdateDataMapType& update_play
     BuildValuesUpdateBlockForPlayer(&iter->second, iter->first);
 }
 
+/**
+ * @brief Add to client update list
+ *
+ * Base implementation logs error and asserts.
+ * Derived classes should override this method.
+ */
 void Object::AddToClientUpdateList()
 {
     sLog.outError("Unexpected call of Object::AddToClientUpdateList for object (TypeId: %u Update fields: %u)", GetTypeId(), m_valuesCount);
     MANGOS_ASSERT(false);
 }
 
+/**
+ * @brief Remove from client update list
+ *
+ * Base implementation logs error and asserts.
+ * Derived classes should override this method.
+ */
 void Object::RemoveFromClientUpdateList()
 {
     sLog.outError("Unexpected call of Object::RemoveFromClientUpdateList for object (TypeId: %u Update fields: %u)", GetTypeId(), m_valuesCount);
     MANGOS_ASSERT(false);
 }
 
+/**
+ * @brief Build update data
+ * @param update_players Map of players to their update data
+ *
+ * Base implementation logs error and asserts.
+ * Derived classes should override this method.
+ */
 void Object::BuildUpdateData(UpdateDataMapType& /*update_players */)
 {
     sLog.outError("Unexpected call of Object::BuildUpdateData for object (TypeId: %u Update fields: %u)", GetTypeId(), m_valuesCount);
     MANGOS_ASSERT(false);
 }
 
+/**
+ * @brief Mark object for client update
+ *
+ * Adds the object to the client update list if it's in world
+ * and not already marked for update.
+ */
 void Object::MarkForClientUpdate()
 {
     if (m_inWorld)
@@ -1143,6 +1430,11 @@ void Object::MarkForClientUpdate()
     }
 }
 
+/**
+ * @brief WorldObject constructor
+ *
+ * Initializes a new WorldObject with default values.
+ */
 WorldObject::WorldObject() :
 #ifdef ENABLE_ELUNA
     elunaEvents(nullptr),
@@ -1154,6 +1446,11 @@ WorldObject::WorldObject() :
 {
 }
 
+/**
+ * @brief WorldObject destructor
+ *
+ * Cleans up Eluna events if enabled.
+ */
 WorldObject::~WorldObject()
 {
 #ifdef ENABLE_ELUNA
@@ -1162,11 +1459,23 @@ WorldObject::~WorldObject()
 #endif /* ENABLE_ELUNA */
 }
 
+/**
+ * @brief Cleanups before delete
+ *
+ * Removes the object from the world before deletion.
+ */
 void WorldObject::CleanupsBeforeDelete()
 {
     RemoveFromWorld();
 }
 
+/**
+ * @brief Update world object
+ * @param update_diff Time since last update
+ * @param time_diff Time parameter (unused)
+ *
+ * Updates Eluna events if enabled.
+ */
 void WorldObject::Update(uint32 update_diff, uint32 time_diff)
 {
 #ifdef ENABLE_ELUNA
@@ -1177,12 +1486,29 @@ void WorldObject::Update(uint32 update_diff, uint32 time_diff)
 #endif /* ENABLE_ELUNA */
 }
 
+/**
+ * @brief Create world object
+ * @param guidlow Low GUID
+ * @param guidhigh High GUID type
+ *
+ * Creates the world object with the specified GUID.
+ */
 void WorldObject::_Create(uint32 guidlow, HighGuid guidhigh, uint32 phaseMask)
 {
     Object::_Create(guidlow, 0, guidhigh);
     m_phaseMask = phaseMask;
 }
 
+/**
+ * @brief Relocate world object
+ * @param x X coordinate
+ * @param y Y coordinate
+ * @param z Z coordinate
+ * @param orientation Orientation
+ *
+ * Moves the object to a new position and orientation.
+ * Updates movement info for units.
+ */
 void WorldObject::Relocate(float x, float y, float z, float orientation)
 {
     m_position.x = x;
@@ -1196,6 +1522,15 @@ void WorldObject::Relocate(float x, float y, float z, float orientation)
     }
 }
 
+/**
+ * @brief Relocate world object (position only)
+ * @param x X coordinate
+ * @param y Y coordinate
+ * @param z Z coordinate
+ *
+ * Moves the object to a new position without changing orientation.
+ * Updates movement info for units.
+ */
 void WorldObject::Relocate(float x, float y, float z)
 {
     m_position.x = x;
@@ -1208,6 +1543,12 @@ void WorldObject::Relocate(float x, float y, float z)
     }
 }
 
+/**
+ * @brief Set orientation
+ * @param orientation New orientation
+ *
+ * Sets the object's orientation and updates movement info for units.
+ */
 void WorldObject::SetOrientation(float orientation)
 {
     m_position.o = MapManager::NormalizeOrientation(orientation);
@@ -1218,27 +1559,59 @@ void WorldObject::SetOrientation(float orientation)
     }
 }
 
+/**
+ * @brief Get zone ID
+ * @return Zone ID
+ *
+ * Returns the zone ID based on the object's position.
+ */
 uint32 WorldObject::GetZoneId() const
 {
     return GetTerrain()->GetZoneId(m_position.x, m_position.y, m_position.z);
 }
 
+/**
+ * @brief Get area ID
+ * @return Area ID
+ *
+ * Returns the area ID based on the object's position.
+ */
 uint32 WorldObject::GetAreaId() const
 {
     return GetTerrain()->GetAreaId(m_position.x, m_position.y, m_position.z);
 }
 
+/**
+ * @brief Get zone and area IDs
+ * @param zoneid Output zone ID
+ * @param areaid Output area ID
+ *
+ * Returns both zone and area IDs based on the object's position.
+ */
 void WorldObject::GetZoneAndAreaId(uint32& zoneid, uint32& areaid) const
 {
     GetTerrain()->GetZoneAndAreaId(zoneid, areaid, m_position.x, m_position.y, m_position.z);
 }
 
+/**
+ * @brief Get instance data
+ * @return Instance data pointer
+ *
+ * Returns the instance data for the map this object is on.
+ */
 InstanceData* WorldObject::GetInstanceData() const
 {
     return GetMap()->GetInstanceData();
 }
 
-// slow
+/**
+ * @brief Get distance to another object
+ * @param obj Target object
+ * @return Distance between objects
+ *
+ * Calculates the 3D distance between this object and another,
+ * accounting for bounding radii.
+ */
 float WorldObject::GetDistance(const WorldObject* obj) const
 {
     float dx = GetPositionX() - obj->GetPositionX();
@@ -1249,6 +1622,15 @@ float WorldObject::GetDistance(const WorldObject* obj) const
     return (dist > 0 ? dist : 0);
 }
 
+/**
+ * @brief Get 2D distance to point
+ * @param x X coordinate
+ * @param y Y coordinate
+ * @return 2D distance to point
+ *
+ * Calculates the 2D distance between this object and a point,
+ * accounting for bounding radius.
+ */
 float WorldObject::GetDistance2d(float x, float y) const
 {
     float dx = GetPositionX() - x;
@@ -1258,6 +1640,16 @@ float WorldObject::GetDistance2d(float x, float y) const
     return (dist > 0 ? dist : 0);
 }
 
+/**
+ * @brief Get 3D distance to point
+ * @param x X coordinate
+ * @param y Y coordinate
+ * @param z Z coordinate
+ * @return 3D distance to point
+ *
+ * Calculates the 3D distance between this object and a point,
+ * accounting for bounding radius.
+ */
 float WorldObject::GetDistance(float x, float y, float z) const
 {
     float dx = GetPositionX() - x;
@@ -1268,6 +1660,14 @@ float WorldObject::GetDistance(float x, float y, float z) const
     return (dist > 0 ? dist : 0);
 }
 
+/**
+ * @brief Get 2D distance to another object
+ * @param obj Target object
+ * @return 2D distance to object
+ *
+ * Calculates the 2D distance between this object and another,
+ * accounting for bounding radii.
+ */
 float WorldObject::GetDistance2d(const WorldObject* obj) const
 {
     float dx = GetPositionX() - obj->GetPositionX();
@@ -1277,6 +1677,14 @@ float WorldObject::GetDistance2d(const WorldObject* obj) const
     return (dist > 0 ? dist : 0);
 }
 
+/**
+ * @brief Get vertical distance to another object
+ * @param obj Target object
+ * @return Vertical distance to object
+ *
+ * Calculates the vertical (Z-axis) distance between this object
+ * and another, accounting for bounding radii.
+ */
 float WorldObject::GetDistanceZ(const WorldObject* obj) const
 {
     float dz = fabs(GetPositionZ() - obj->GetPositionZ());
@@ -1285,6 +1693,17 @@ float WorldObject::GetDistanceZ(const WorldObject* obj) const
     return (dist > 0 ? dist : 0);
 }
 
+/**
+ * @brief Check if within 3D distance of point
+ * @param x X coordinate
+ * @param y Y coordinate
+ * @param z Z coordinate
+ * @param dist2compare Distance to compare against
+ * @return True if within distance
+ *
+ * Checks if this object is within the specified 3D distance
+ * of the given point.
+ */
 bool WorldObject::IsWithinDist3d(float x, float y, float z, float dist2compare) const
 {
     float dx = GetPositionX() - x;
@@ -1298,6 +1717,16 @@ bool WorldObject::IsWithinDist3d(float x, float y, float z, float dist2compare) 
     return distsq < maxdist * maxdist;
 }
 
+/**
+ * @brief Check if within 2D distance of point
+ * @param x X coordinate
+ * @param y Y coordinate
+ * @param dist2compare Distance to compare against
+ * @return True if within distance
+ *
+ * Checks if this object is within the specified 2D distance
+ * of the given point.
+ */
 bool WorldObject::IsWithinDist2d(float x, float y, float dist2compare) const
 {
     float dx = GetPositionX() - x;
@@ -1310,6 +1739,15 @@ bool WorldObject::IsWithinDist2d(float x, float y, float dist2compare) const
     return distsq < maxdist * maxdist;
 }
 
+/**
+ * @brief Internal check if within distance of object
+ * @param obj Target object
+ * @param dist2compare Distance to compare against
+ * @param is3D If true, check 3D distance; if false, check 2D
+ * @return True if within distance
+ *
+ * Internal helper for distance checking with optional 3D.
+ */
 bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D) const
 {
     float dx = GetPositionX() - obj->GetPositionX();
@@ -1326,6 +1764,14 @@ bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool
     return distsq < maxdist * maxdist;
 }
 
+/**
+ * @brief Check if within line of sight in map
+ * @param obj Target object
+ * @return True if within line of sight
+ *
+ * Checks if this object has line of sight to the target object
+ * within the same map.
+ */
 bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
 {
     if (!IsInMap(obj))
@@ -1337,6 +1783,15 @@ bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
     return(IsWithinLOS(ox, oy, oz));
 }
 
+/**
+ * @brief Check if within line of sight to point
+ * @param ox Target X coordinate
+ * @param oy Target Y coordinate
+ * @param oz Target Z coordinate
+ * @return True if within line of sight
+ *
+ * Checks if this object has line of sight to the specified point.
+ */
 bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
 {
     float x, y, z;
@@ -1344,6 +1799,15 @@ bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
     return GetMap()->IsInLineOfSight(x, y, z + 2.0f, ox, oy, oz + 2.0f, GetPhaseMask());
 }
 
+/**
+ * @brief Compare distance order to two objects
+ * @param obj1 First object
+ * @param obj2 Second object
+ * @param is3D If true, use 3D distance; if false, use 2D
+ * @return True if obj1 is closer than obj2
+ *
+ * Compares distances to two objects to determine which is closer.
+ */
 bool WorldObject::GetDistanceOrder(WorldObject const* obj1, WorldObject const* obj2, bool is3D /* = true */) const
 {
     float dx1 = GetPositionX() - obj1->GetPositionX();
@@ -1367,6 +1831,17 @@ bool WorldObject::GetDistanceOrder(WorldObject const* obj1, WorldObject const* o
     return distsq1 < distsq2;
 }
 
+/**
+ * @brief Check if within range of object
+ * @param obj Target object
+ * @param minRange Minimum distance
+ * @param maxRange Maximum distance
+ * @param is3D If true, use 3D distance; if false, use 2D
+ * @return True if within range
+ *
+ * Checks if this object is within the specified distance range
+ * of the target object.
+ */
 bool WorldObject::IsInRange(WorldObject const* obj, float minRange, float maxRange, bool is3D /* = true */) const
 {
     float dx = GetPositionX() - obj->GetPositionX();
@@ -1394,6 +1869,17 @@ bool WorldObject::IsInRange(WorldObject const* obj, float minRange, float maxRan
     return distsq < maxdist * maxdist;
 }
 
+/**
+ * @brief Check if within 2D range of point
+ * @param x X coordinate
+ * @param y Y coordinate
+ * @param minRange Minimum distance
+ * @param maxRange Maximum distance
+ * @return True if within range
+ *
+ * Checks if this object is within the specified 2D distance range
+ * of the target point.
+ */
 bool WorldObject::IsInRange2d(float x, float y, float minRange, float maxRange) const
 {
     float dx = GetPositionX() - x;
@@ -1416,6 +1902,18 @@ bool WorldObject::IsInRange2d(float x, float y, float minRange, float maxRange) 
     return distsq < maxdist * maxdist;
 }
 
+/**
+ * @brief Check if within 3D range of point
+ * @param x X coordinate
+ * @param y Y coordinate
+ * @param z Z coordinate
+ * @param minRange Minimum distance
+ * @param maxRange Maximum distance
+ * @return True if within range
+ *
+ * Checks if this object is within the specified 3D distance range
+ * of the target point.
+ */
 bool WorldObject::IsInRange3d(float x, float y, float z, float minRange, float maxRange) const
 {
     float dx = GetPositionX() - x;
@@ -1439,6 +1937,13 @@ bool WorldObject::IsInRange3d(float x, float y, float z, float minRange, float m
     return distsq < maxdist * maxdist;
 }
 
+/**
+ * @brief Get angle to object
+ * @param obj Target object
+ * @return Angle in radians (0 to 2*PI)
+ *
+ * Returns the angle from this object to the target object.
+ */
 float WorldObject::GetAngle(const WorldObject* obj) const
 {
     if (!obj)
@@ -1456,7 +1961,14 @@ float WorldObject::GetAngle(const WorldObject* obj) const
     return GetAngle(obj->GetPositionX(), obj->GetPositionY());
 }
 
-// Return angle in range 0..2*pi
+/**
+ * @brief Get angle to point
+ * @param x X coordinate
+ * @param y Y coordinate
+ * @return Angle in radians (0 to 2*PI)
+ *
+ * Returns the angle from this object to the specified point.
+ */
 float WorldObject::GetAngle(const float x, const float y) const
 {
     float dx = x - GetPositionX();
@@ -1467,6 +1979,15 @@ float WorldObject::GetAngle(const float x, const float y) const
     return ang;
 }
 
+/**
+ * @brief Check if object is within arc
+ * @param arcangle Arc angle in radians
+ * @param obj Target object
+ * @return True if object is within arc
+ *
+ * Checks if the target object is within the specified arc
+ * in front of this object.
+ */
 bool WorldObject::HasInArc(const float arcangle, const WorldObject* obj) const
 {
     // always have self in arc
@@ -1495,26 +2016,81 @@ bool WorldObject::HasInArc(const float arcangle, const WorldObject* obj) const
     return ((angle >= lborder) && (angle <= rborder));
 }
 
+/**
+ * @brief Check if target is in front in same map
+ * @param target Target object
+ * @param distance Maximum distance
+ * @param arc Arc angle in radians
+ * @return True if target is in front
+ *
+ * Checks if the target is in front of this object within
+ * the specified distance and arc, in the same map.
+ */
 bool WorldObject::IsInFrontInMap(WorldObject const* target, float distance,  float arc) const
 {
     return IsWithinDistInMap(target, distance) && HasInArc(arc, target);
 }
 
+/**
+ * @brief Check if target is in back in same map
+ * @param target Target object
+ * @param distance Maximum distance
+ * @param arc Arc angle in radians
+ * @return True if target is in back
+ *
+ * Checks if the target is behind this object within
+ * the specified distance and arc, in the same map.
+ */
 bool WorldObject::IsInBackInMap(WorldObject const* target, float distance, float arc) const
 {
     return IsWithinDistInMap(target, distance) && !HasInArc(2 * M_PI_F - arc, target);
 }
 
+/**
+ * @brief Check if target is in front
+ * @param target Target object
+ * @param distance Maximum distance
+ * @param arc Arc angle in radians
+ * @return True if target is in front
+ *
+ * Checks if the target is in front of this object within
+ * the specified distance and arc.
+ */
 bool WorldObject::IsInFront(WorldObject const* target, float distance,  float arc) const
 {
     return IsWithinDist(target, distance) && HasInArc(arc, target);
 }
 
+/**
+ * @brief Check if target is in back
+ * @param target Target object
+ * @param distance Maximum distance
+ * @param arc Arc angle in radians
+ * @return True if target is in back
+ *
+ * Checks if the target is behind this object within
+ * the specified distance and arc.
+ */
 bool WorldObject::IsInBack(WorldObject const* target, float distance, float arc) const
 {
     return IsWithinDist(target, distance) && !HasInArc(2 * M_PI_F - arc, target);
 }
 
+/**
+ * @brief Get random point near position
+ * @param x Center X coordinate
+ * @param y Center Y coordinate
+ * @param z Center Z coordinate
+ * @param distance Maximum distance from center
+ * @param rand_x Output random X coordinate
+ * @param rand_y Output random Y coordinate
+ * @param rand_z Output random Z coordinate
+ * @param minDist Minimum distance from center
+ * @param ori Optional orientation to use instead of random
+ *
+ * Generates a random point within the specified distance
+ * of the center position.
+ */
 void WorldObject::GetRandomPoint(float x, float y, float z, float distance, float& rand_x, float& rand_y, float& rand_z, float minDist /*=0.0f*/, float const* ori /*=NULL*/) const
 {
     if (distance == 0)
@@ -1555,6 +2131,15 @@ void WorldObject::GetRandomPoint(float x, float y, float z, float distance, floa
     UpdateGroundPositionZ(rand_x, rand_y, rand_z);          // update to LOS height if available
 }
 
+/**
+ * @brief Update ground position Z
+ * @param x X coordinate
+ * @param y Y coordinate
+ * @param z Z-coordinate to update
+ *
+ * Updates the Z-coordinate to the ground height at the
+ * specified position.
+ */
 void WorldObject::UpdateGroundPositionZ(float x, float y, float& z) const
 {
     float new_z = GetMap()->GetHeight(GetPhaseMask(), x, y, z);
@@ -1564,6 +2149,16 @@ void WorldObject::UpdateGroundPositionZ(float x, float y, float& z) const
     }
 }
 
+/**
+ * @brief Update allowed position Z
+ * @param x X coordinate
+ * @param y Y coordinate
+ * @param z Z-coordinate to update
+ * @param atMap Map to use for height calculation (optional)
+ *
+ * Updates the Z-coordinate to a valid height based on the
+ * object's movement capabilities (flying, swimming, etc.).
+ */
 void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap /*=NULL*/) const
 {
     if (!atMap)
@@ -1647,11 +2242,25 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap 
     }
 }
 
+/**
+ * @brief Check if position is valid
+ * @return True if position is valid
+ *
+ * Checks if the object's current position is valid.
+ */
 bool WorldObject::IsPositionValid() const
 {
     return MaNGOS::IsValidMapCoord(m_position.x, m_position.y, m_position.z, m_position.o);
 }
 
+/**
+ * @brief Send monster say message
+ * @param text Text to say
+ * @param language Language (unused)
+ * @param target Target unit
+ *
+ * Sends a monster say message to nearby players.
+ */
 void WorldObject::MonsterSay(const char* text, uint32 language, Unit const* target) const
 {
     WorldPacket data;
@@ -1660,6 +2269,14 @@ void WorldObject::MonsterSay(const char* text, uint32 language, Unit const* targ
     SendMessageToSetInRange(&data, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY), true);
 }
 
+/**
+ * @brief Send monster yell message
+ * @param text Text to yell
+ * @param language Language (unused)
+ * @param target Target unit
+ *
+ * Sends a monster yell message to nearby players.
+ */
 void WorldObject::MonsterYell(const char* text, uint32 language, Unit const* target) const
 {
     WorldPacket data;
@@ -1668,6 +2285,14 @@ void WorldObject::MonsterYell(const char* text, uint32 language, Unit const* tar
     SendMessageToSetInRange(&data, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_YELL), true);
 }
 
+/**
+ * @brief Send monster text emote message
+ * @param text Text to emote
+ * @param target Target unit
+ * @param IsBossEmote If true, use boss emote range
+ *
+ * Sends a monster text emote message to nearby players.
+ */
 void WorldObject::MonsterTextEmote(const char* text, Unit const* target, bool IsBossEmote) const
 {
     WorldPacket data;
@@ -1676,6 +2301,14 @@ void WorldObject::MonsterTextEmote(const char* text, Unit const* target, bool Is
     SendMessageToSetInRange(&data, sWorld.getConfig(IsBossEmote ? CONFIG_FLOAT_LISTEN_RANGE_YELL : CONFIG_FLOAT_LISTEN_RANGE_TEXTEMOTE), true);
 }
 
+/**
+ * @brief Send monster whisper message
+ * @param text Text to whisper
+ * @param target Target unit
+ * @param IsBossWhisper If true, use boss whisper
+ *
+ * Sends a monster whisper message to the target player.
+ */
 void WorldObject::MonsterWhisper(const char* text, Unit const* target, bool IsBossWhisper) const
 {
     if (!target || target->GetTypeId() != TYPEID_PLAYER)
@@ -1691,11 +2324,30 @@ void WorldObject::MonsterWhisper(const char* text, Unit const* target, bool IsBo
 
 namespace MaNGOS
 {
+    /**
+     * @brief Monster chat builder functor
+     *
+     * Builds localized chat packets for monster messages.
+     */
     class MonsterChatBuilder
     {
         public:
+            /**
+             * @brief Constructor
+             * @param obj Source object
+             * @param msgtype Chat message type
+             * @param textData Localized text data
+             * @param language Language
+             * @param target Target unit
+             */
             MonsterChatBuilder(WorldObject const& obj, ChatMsg msgtype, MangosStringLocale const* textData, Language language, Unit const* target)
                 : i_object(obj), i_msgtype(msgtype), i_textData(textData), i_language(language), i_target(target) {}
+
+            /**
+             * @brief Build chat packet
+             * @param data Packet to build
+             * @param loc_idx Locale index
+             */
             void operator()(WorldPacket& data, int32 loc_idx)
             {
                 char const* text = NULL;
@@ -1713,15 +2365,35 @@ namespace MaNGOS
             }
 
         private:
-            WorldObject const& i_object;
-            ChatMsg i_msgtype;
-            MangosStringLocale const* i_textData;
-            Language i_language;
-            Unit const* i_target;
+            WorldObject const& i_object; ///< Source object
+            ChatMsg i_msgtype; ///< Chat message type
+            MangosStringLocale const* i_textData; ///< Localized text data
+            Language i_language; ///< Language
+            Unit const* i_target; ///< Target unit
     };
 }                                                           // namespace MaNGOS
 
-/// Helper function to create localized around a source
+/**
+ * @brief Send localized text around source
+ * @param source Source object
+ * @param textData Localized text data
+ * @param msgtype Chat message type
+ * @param language Language
+ * @param target Target unit
+ * @param range Range to send message
+ *
+ * Helper function to create localized chat around a source.
+ */
+/**
+ * @brief Sends localized monster chat packets to players around a source object.
+ *
+ * @param source The source world object.
+ * @param textData The localized text definition.
+ * @param msgtype The chat packet type.
+ * @param language The chat language.
+ * @param target Optional target unit.
+ * @param range Broadcast range.
+ */
 void _DoLocalizedTextAround(WorldObject const* source, MangosStringLocale const* textData, ChatMsg msgtype, Language language, Unit const* target, float range)
 {
     MaNGOS::MonsterChatBuilder say_build(*source, msgtype, textData, language, target);
@@ -1730,7 +2402,20 @@ void _DoLocalizedTextAround(WorldObject const* source, MangosStringLocale const*
     Cell::VisitWorldObjects(source, say_worker, range);
 }
 
-/// Function that sends a text associated to a MangosString
+/**
+ * @brief Send monster text
+ * @param textData Localized text data
+ * @param target Target unit
+ *
+ * Sends a text message associated with a MangosString,
+ * localized for each player's locale.
+ */
+/**
+ * @brief Sends a localized monster text defined by a Mangos string entry.
+ *
+ * @param textData The localized text definition.
+ * @param target Optional target unit.
+ */
 void WorldObject::MonsterText(MangosStringLocale const* textData, Unit const* target) const
 {
     MANGOS_ASSERT(textData);
@@ -1787,6 +2472,19 @@ void WorldObject::MonsterText(MangosStringLocale const* textData, Unit const* ta
     }
 }
 
+/**
+ * @brief Send message to set
+ * @param data Packet to send
+ * @param bToSelf If true, send to self (unused)
+ *
+ * Broadcasts a packet to all players who can see this object.
+ */
+/**
+ * @brief Broadcasts a packet to all players in the object's visibility set.
+ *
+ * @param data The packet to send.
+ * @param bToSelf Unused self-delivery flag.
+ */
 void WorldObject::SendMessageToSet(WorldPacket* data, bool /*bToSelf*/) const
 {
     // if object is in world, map for it already created!
@@ -1796,6 +2494,22 @@ void WorldObject::SendMessageToSet(WorldPacket* data, bool /*bToSelf*/) const
     }
 }
 
+/**
+ * @brief Send message to set in range
+ * @param data Packet to send
+ * @param dist Maximum distance
+ * @param bToSelf If true, send to self (unused)
+ *
+ * Broadcasts a packet to all players within the specified distance
+ * who can see this object.
+ */
+/**
+ * @brief Broadcasts a packet to players within a specified range.
+ *
+ * @param data The packet to send.
+ * @param dist The broadcast distance.
+ * @param bToSelf Unused self-delivery flag.
+ */
 void WorldObject::SendMessageToSetInRange(WorldPacket* data, float dist, bool /*bToSelf*/) const
 {
     // if object is in world, map for it already created!
@@ -1805,6 +2519,20 @@ void WorldObject::SendMessageToSetInRange(WorldPacket* data, float dist, bool /*
     }
 }
 
+/**
+ * @brief Send message to set except receiver
+ * @param data Packet to send
+ * @param skipped_receiver Player to skip
+ *
+ * Broadcasts a packet to all players who can see this object
+ * except the specified player.
+ */
+/**
+ * @brief Broadcasts a packet to visible players except one receiver.
+ *
+ * @param data The packet to send.
+ * @param skipped_receiver The player to exclude.
+ */
 void WorldObject::SendMessageToSetExcept(WorldPacket* data, Player const* skipped_receiver) const
 {
     // if object is in world, map for it already created!
@@ -1830,6 +2558,11 @@ void WorldObject::SendGameObjectCustomAnim(ObjectGuid guid, uint32 animId /*= 0*
     SendMessageToSet(&data, true);
 }
 
+/**
+ * @brief Assigns the current map context to the world object.
+ *
+ * @param map The map to assign.
+ */
 void WorldObject::SetMap(Map* map)
 {
     MANGOS_ASSERT(map);
@@ -1839,6 +2572,14 @@ void WorldObject::SetMap(Map* map)
     m_InstanceId = map->GetInstanceId();
 }
 
+/**
+ * @brief Reset map
+ *
+ * Resets the map reference for this object.
+ */
+/**
+ * @brief Resets the world object's map state.
+ */
 void WorldObject::ResetMap()
 {
     m_currMap = NULL;
@@ -1850,11 +2591,48 @@ TerrainInfo const* WorldObject::GetTerrain() const
     return m_currMap->GetTerrain();
 }
 
+/**
+ * @brief Add object to remove list
+ *
+ * Adds this object to the map's remove list for cleanup.
+ */
+/**
+ * @brief Schedules the object for removal from the map.
+ */
 void WorldObject::AddObjectToRemoveList()
 {
     GetMap()->AddObjectToRemoveList(this);
 }
 
+/**
+ * @brief Summon creature
+ * @param id Creature entry ID
+ * @param x X coordinate
+ * @param y Y coordinate
+ * @param z Z coordinate
+ * @param ang Orientation
+ * @param spwtype Temporary spawn type
+ * @param despwtime Despawn time
+ * @param asActiveObject If true, set as active object
+ * @param setRun If true, set run mode
+ * @return Summoned creature pointer or NULL
+ *
+ * Summons a creature at the specified position.
+ */
+/**
+ * @brief Summons a temporary creature near or at the requested position.
+ *
+ * @param id The creature template id.
+ * @param x The summon x coordinate.
+ * @param y The summon y coordinate.
+ * @param z The summon z coordinate.
+ * @param ang The summon orientation.
+ * @param spwtype The temporary spawn type.
+ * @param despwtime The despawn time in milliseconds.
+ * @param asActiveObject true to mark the summon as active.
+ * @param setRun true to make the summon run.
+ * @return The summoned creature, or null on failure.
+ */
 Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, float ang, TempSpawnType spwtype, uint32 despwtime, bool asActiveObject, bool setRun)
 {
     CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(id);
@@ -1920,6 +2698,29 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
     return pCreature;
 }
 
+/**
+ * @brief Summon game object
+ * @param id Game object entry ID
+ * @param x X coordinate
+ * @param y Y coordinate
+ * @param z Z coordinate
+ * @param angle Orientation
+ * @param despwtime Despawn time in milliseconds
+ * @return Summoned game object pointer or NULL
+ *
+ * Summons a game object at the specified position.
+ */
+/**
+ * @brief Summons a temporary game object at the requested position.
+ *
+ * @param id The gameobject entry id.
+ * @param x The summon x coordinate.
+ * @param y The summon y coordinate.
+ * @param z The summon z coordinate.
+ * @param angle The summon orientation.
+ * @param despwtime The despawn time in milliseconds.
+ * @return The summoned game object, or null on failure.
+ */
 GameObject* WorldObject::SummonGameObject(uint32 id, float x, float y, float z, float angle, uint32 despwtime)
 {
     GameObject* pGameObj = new GameObject;
@@ -1950,15 +2751,31 @@ GameObject* WorldObject::SummonGameObject(uint32 id, float x, float y, float z, 
 
 namespace MaNGOS
 {
+    /**
+     * @brief Near used position functor
+     *
+     * Checks for used positions near an object for position selection.
+     */
     class NearUsedPosDo
     {
         public:
+            /**
+             * @brief Constructor
+             * @param obj Source object
+             * @param searcher Object searching for position
+             * @param absAngle Absolute angle
+             * @param selector Position selector
+             */
             NearUsedPosDo(WorldObject const& obj, WorldObject const* searcher, float absAngle, ObjectPosSelector& selector)
                 : i_object(obj), i_searcher(searcher), i_absAngle(MapManager::NormalizeOrientation(absAngle)), i_selector(selector) {}
 
             void operator()(Corpse*) const {}
             void operator()(DynamicObject*) const {}
 
+            /**
+             * @brief Process creature
+             * @param c Creature to process
+             */
             void operator()(Creature* c) const
             {
                 // skip self or target
@@ -1978,6 +2795,10 @@ namespace MaNGOS
                 add(c, x, y);
             }
 
+            /**
+             * @brief Process generic unit
+             * @param u Unit to process
+             */
             template<class T>
             void operator()(T* u) const
             {
@@ -1995,7 +2816,14 @@ namespace MaNGOS
                 add(u, x, y);
             }
 
-            // we must add used pos that can fill places around center
+            /**
+             * @brief Add used position
+             * @param u Object to add
+             * @param x X coordinate
+             * @param y Y coordinate
+             *
+             * Adds a used position to the selector.
+             */
             void add(WorldObject* u, float x, float y) const
             {
                 float dx = i_object.GetPositionX() - x;
@@ -2041,6 +2869,24 @@ namespace MaNGOS
 
 //===================================================================================================
 
+/**
+ * @brief Get 2D point near object
+ * @param x Output X coordinate
+ * @param y Output Y coordinate
+ * @param distance2d Distance from object
+ * @param absAngle Absolute angle
+ *
+ * Calculates a 2D point at the specified distance and angle
+ * from this object.
+ */
+/**
+ * @brief Computes a 2D point at a given distance and angle from the object.
+ *
+ * @param x Receives the resulting x coordinate.
+ * @param y Receives the resulting y coordinate.
+ * @param distance2d The radial distance.
+ * @param absAngle The absolute angle.
+ */
 void WorldObject::GetNearPoint2D(float& x, float& y, float distance2d, float absAngle) const
 {
     x = GetPositionX() + distance2d * cos(absAngle);
@@ -2050,6 +2896,30 @@ void WorldObject::GetNearPoint2D(float& x, float& y, float distance2d, float abs
     MaNGOS::NormalizeMapCoord(y);
 }
 
+/**
+ * @brief Get point near object with collision detection
+ * @param searcher Object searching for position
+ * @param x Output X coordinate
+ * @param y Output Y coordinate
+ * @param z Output Z coordinate
+ * @param searcher_bounding_radius Bounding radius of searcher
+ * @param distance2d Distance from object
+ * @param absAngle Absolute angle
+ *
+ * Calculates a point at the specified distance and angle
+ * from this object, accounting for collision detection.
+ */
+/**
+ * @brief Finds a nearby point while accounting for collisions and line of sight.
+ *
+ * @param searcher The object requesting the position.
+ * @param x Receives the resulting x coordinate.
+ * @param y Receives the resulting y coordinate.
+ * @param z Receives the resulting z coordinate.
+ * @param searcher_bounding_radius The requester's bounding radius.
+ * @param distance2d The desired distance from this object.
+ * @param absAngle The preferred absolute angle.
+ */
 void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, float& z, float searcher_bounding_radius, float distance2d, float absAngle) const
 {
     GetNearPoint2D(x, y, distance2d, absAngle);
@@ -2199,6 +3069,12 @@ void WorldObject::SetPhaseMask(uint32 newPhaseMask, bool update)
     }
 }
 
+/**
+ * @brief Plays a positional sound for one player or nearby players.
+ *
+ * @param sound_id The sound entry id.
+ * @param target Optional single-player target.
+ */
 void WorldObject::PlayDistanceSound(uint32 sound_id, Player const* target /*= NULL*/) const
 {
     WorldPacket data(SMSG_PLAY_OBJECT_SOUND, 4 + 8);
@@ -2214,6 +3090,12 @@ void WorldObject::PlayDistanceSound(uint32 sound_id, Player const* target /*= NU
     }
 }
 
+/**
+ * @brief Plays a direct sound for one player or nearby players.
+ *
+ * @param sound_id The sound entry id.
+ * @param target Optional single-player target.
+ */
 void WorldObject::PlayDirectSound(uint32 sound_id, Player const* target /*= NULL*/) const
 {
     WorldPacket data(SMSG_PLAY_SOUND, 4);
@@ -2228,6 +3110,12 @@ void WorldObject::PlayDirectSound(uint32 sound_id, Player const* target /*= NULL
     }
 }
 
+/**
+ * @brief Plays music for one player or nearby players.
+ *
+ * @param sound_id The music entry id.
+ * @param target Optional single-player target.
+ */
 void WorldObject::PlayMusic(uint32 sound_id, Player const* target /*= NULL*/) const
 {
     WorldPacket data(SMSG_PLAY_MUSIC, 4);
@@ -2242,6 +3130,9 @@ void WorldObject::PlayMusic(uint32 sound_id, Player const* target /*= NULL*/) co
     }
 }
 
+/**
+ * @brief Refreshes both visibility and viewpoint-dependent visibility state.
+ */
 void WorldObject::UpdateVisibilityAndView()
 {
     GetViewPoint().Call_UpdateVisibilityForOwner();
@@ -2249,6 +3140,9 @@ void WorldObject::UpdateVisibilityAndView()
     GetViewPoint().Event_ViewPointVisibilityChanged();
 }
 
+/**
+ * @brief Recomputes this object's visibility for nearby clients.
+ */
 void WorldObject::UpdateObjectVisibility()
 {
     CellPair p = MaNGOS::ComputeCellPair(GetPositionX(), GetPositionY());
@@ -2257,20 +3151,39 @@ void WorldObject::UpdateObjectVisibility()
     GetMap()->UpdateObjectVisibility(this, cell, p);
 }
 
+/**
+ * @brief Adds the world object to the map's update queue.
+ */
 void WorldObject::AddToClientUpdateList()
 {
     GetMap()->AddUpdateObject(this);
 }
 
+/**
+ * @brief Remove from client update list
+ *
+ * Removes this object from the map's update list.
+ */
 void WorldObject::RemoveFromClientUpdateList()
 {
     GetMap()->RemoveUpdateObject(this);
 }
 
+/**
+ * @brief World object change accumulator
+ *
+ * Accumulates update data for a world object and nearby players.
+ */
 struct WorldObjectChangeAccumulator
 {
-    UpdateDataMapType& i_updateDatas;
-    WorldObject& i_object;
+    UpdateDataMapType& i_updateDatas; ///< Update data map
+    WorldObject& i_object; ///< World object
+
+    /**
+     * @brief Constructor
+     * @param obj World object
+     * @param d Update data map
+     */
     WorldObjectChangeAccumulator(WorldObject& obj, UpdateDataMapType& d) : i_updateDatas(d), i_object(obj)
     {
         // send self fields changes in another way, otherwise
@@ -2281,6 +3194,12 @@ struct WorldObjectChangeAccumulator
         }
     }
 
+    /**
+     * @brief Visit cameras
+     * @param m Camera map
+     *
+ * Builds update data for all camera owners that can see this object.
+     */
     void Visit(CameraMapType& m)
     {
         for (CameraMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
@@ -2293,9 +3212,18 @@ struct WorldObjectChangeAccumulator
         }
     }
 
+    /**
+     * @brief Visit other grid references (no-op)
+     */
     template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
 };
 
+/**
+ * @brief Build update data
+ * @param update_players Map of players to their update data
+ *
+ * Builds update data for all players who can see this object.
+ */
 void WorldObject::BuildUpdateData(UpdateDataMapType& update_players)
 {
     WorldObjectChangeAccumulator notifier(*this, update_players);
@@ -2322,12 +3250,28 @@ bool WorldObject::IsControlledByPlayer() const
     }
 }
 
+/**
+ * @brief Print coordinates error
+ * @param x X coordinate
+ * @param y Y coordinate
+ * @param z Z coordinate
+ * @param descr Description of the operation
+ * @return Always false
+ *
+ * Logs an error when invalid coordinates are encountered.
+ */
 bool WorldObject::PrintCoordinatesError(float x, float y, float z, char const* descr) const
 {
     sLog.outError("%s with invalid %s coordinates: mapid = %uu, x = %f, y = %f, z = %f", GetGuidStr().c_str(), descr, GetMapId(), x, y, z);
     return false;                                           // always false for continue assert fail
 }
 
+/**
+ * @brief Set active object state
+ * @param active If true, set as active object
+ *
+ * Sets whether this object is an active object (updated even when no players nearby).
+ */
 void WorldObject::SetActiveObjectState(bool active)
 {
     if (m_isActiveObject == active || (isType(TYPEMASK_PLAYER) && !active))  // player shouldn't became inactive, never
@@ -2352,6 +3296,12 @@ void WorldObject::SetActiveObjectState(bool active)
 }
 
 #ifdef ENABLE_ELUNA
+/**
+ * @brief Get Eluna instance
+ * @return Eluna instance pointer or nullptr
+ *
+ * Returns the Eluna scripting engine instance for this object's map.
+ */
 Eluna* WorldObject::GetEluna() const
 {
     if (IsInWorld())

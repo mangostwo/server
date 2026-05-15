@@ -31,8 +31,13 @@
 
 #define REACTOR_VISIBLE_RANGE (26.46f)
 
-int
-ReactorAI::Permissible(const Creature* creature)
+/**
+ * @brief Checks whether ReactorAI should be used for a creature.
+ *
+ * @param creature The creature being evaluated.
+ * @return The AI permissibility score.
+ */
+int ReactorAI::Permissible(const Creature* creature)
 {
     if (creature->IsCivilian() || creature->IsNeutralToAll())
     {
@@ -42,13 +47,21 @@ ReactorAI::Permissible(const Creature* creature)
     return PERMIT_BASE_NO;
 }
 
-void
-ReactorAI::MoveInLineOfSight(Unit*)
+/**
+ * @brief Ignores passive line-of-sight reactions for reactor AI.
+ *
+ * @param Unused line-of-sight unit.
+ */
+void ReactorAI::MoveInLineOfSight(Unit*)
 {
 }
 
-void
-ReactorAI::AttackStart(Unit* p)
+/**
+ * @brief Starts combat against a target and records the victim.
+ *
+ * @param p The target to attack.
+ */
+void ReactorAI::AttackStart(Unit* p)
 {
     if (!p || !m_creature->CanInitiateAttack())
     {
@@ -68,14 +81,23 @@ ReactorAI::AttackStart(Unit* p)
     }
 }
 
-bool
-ReactorAI::IsVisible(Unit*) const
+/**
+ * @brief Checks whether a unit is visible to this AI.
+ *
+ * @param Unused target unit.
+ * @return Always false for reactor AI visibility checks here.
+ */
+bool ReactorAI::IsVisible(Unit*) const
 {
     return false;
 }
 
-void
-ReactorAI::UpdateAI(const uint32 /*time_diff*/)
+/**
+ * @brief Updates victim tracking, spell timers, and melee attacks.
+ *
+ * @param diff The elapsed update time in milliseconds.
+ */
+void ReactorAI::UpdateAI(const uint32 /*time_diff*/)
 {
     // update i_victimGuid if i_creature.getVictim() !=0 and changed
     if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -88,8 +110,10 @@ ReactorAI::UpdateAI(const uint32 /*time_diff*/)
     DoMeleeAttackIfReady();
 }
 
-void
-ReactorAI::EnterEvadeMode()
+/**
+ * @brief Clears combat state and returns the creature home when evading.
+ */
+void ReactorAI::EnterEvadeMode()
 {
     if (!m_creature->IsAlive())
     {

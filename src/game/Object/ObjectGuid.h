@@ -257,10 +257,24 @@ class ObjectGuidGenerator
         uint32 m_nextGuid;
 };
 
+/**
+ * Serializes an object guid into a byte buffer.
+ */
 ByteBuffer& operator<< (ByteBuffer& buf, ObjectGuid const& guid);
+
+/**
+ * Deserializes an object guid from a byte buffer.
+ */
 ByteBuffer& operator>> (ByteBuffer& buf, ObjectGuid&       guid);
 
+/**
+ * Serializes a packed guid into a byte buffer.
+ */
 ByteBuffer& operator<< (ByteBuffer& buf, PackedGuid const& guid);
+
+/**
+ * Deserializes a packed guid reader from a byte buffer.
+ */
 ByteBuffer& operator>> (ByteBuffer& buf, PackedGuidReader const& guid);
 
 inline PackedGuid ObjectGuid::WriteAsPacked() const { return PackedGuid(*this); }

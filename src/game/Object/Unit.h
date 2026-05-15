@@ -23,10 +23,37 @@
  */
 
 /**
- * \addtogroup game
- * @{
- * \file
+ * @file Unit.h
+ * @brief Unit (player, creature) base class definition and related structures.
+ *
+ * This file defines the Unit class which is the base class for all combatant entities
+ * in the game world including players, creatures, pets, and other combat-capable objects.
+ *
+ * Key functionality includes:
+ * - Health, mana, and resource management
+ * - Combat and threat management
+ * - Spell casting and interruption
+ * - Aura and spell effect application
+ * - Damage calculation and resistance
+ * - Crowd control effects (stuns, slows, roots)
+ * - Movement and pathfinding control
+ * - Combat AI state machines
+ * - Summon and pet mechanics
+ * - In-combat event broadcasting
+ * - Stat calculation and modification
+ * - Power regeneration systems
+ *
+ * Derived classes include:
+ * - Creature: Non-player characters with AI
+ * - Player: Playable character with inventory and skills
+ * - Pet: Player-controlled pets and minions
+ *
+ * @see Unit for the main unit class
+ * @see Player for player-specific implementation
+ * @see Creature for NPC-specific implementation
+ * @see Pet for summoned pet implementation
  */
+
 #ifndef MANGOS_H_UNIT
 #define MANGOS_H_UNIT
 
@@ -50,92 +77,117 @@
 
 #include <list>
 
+/**
+ * @brief Spell interrupt flags
+ *
+ * Flags that determine what can interrupt a spell cast.
+ */
 enum SpellInterruptFlags
 {
-    SPELL_INTERRUPT_FLAG_MOVEMENT     = 0x01,
-    SPELL_INTERRUPT_FLAG_DAMAGE       = 0x02,
-    SPELL_INTERRUPT_FLAG_INTERRUPT    = 0x04,
-    SPELL_INTERRUPT_FLAG_AUTOATTACK   = 0x08,
-    SPELL_INTERRUPT_FLAG_ABORT_ON_DMG = 0x10               // _complete_ interrupt on direct damage
-    // SPELL_INTERRUPT_UNK               = 0x20               // unk, 564 of 727 spells having this spell start with "Glyph"
+    SPELL_INTERRUPT_FLAG_MOVEMENT = 0x01,    ///< Interrupted by movement
+    SPELL_INTERRUPT_FLAG_DAMAGE = 0x02,      ///< Interrupted by damage
+    SPELL_INTERRUPT_FLAG_INTERRUPT = 0x04,   ///< Interrupted by interrupt ability
+    SPELL_INTERRUPT_FLAG_AUTOATTACK = 0x08,  ///< Interrupted by auto-attack
+    SPELL_INTERRUPT_FLAG_ABORT_ON_DMG = 0x10 ///< Complete interrupt on direct damage
+    // SPELL_INTERRUPT_UNK = 0x20            ///< Unknown flag (564 of 727 spells having this spell start with "Glyph")
 };
 
+/**
+ * @brief Spell channel interrupt flags
+ *
+ * Flags that determine what can interrupt a channeled spell.
+ */
 enum SpellChannelInterruptFlags
 {
-    CHANNEL_FLAG_DAMAGE      = 0x0002,
-    CHANNEL_FLAG_MOVEMENT    = 0x0008,
-    CHANNEL_FLAG_TURNING     = 0x0010,
-    CHANNEL_FLAG_DAMAGE2     = 0x0080,
-    CHANNEL_FLAG_DELAY       = 0x4000
+    CHANNEL_FLAG_DAMAGE = 0x0002,   ///< Interrupted by damage
+    CHANNEL_FLAG_MOVEMENT = 0x0008, ///< Interrupted by movement
+    CHANNEL_FLAG_TURNING = 0x0010,  ///< Interrupted by turning
+    CHANNEL_FLAG_DAMAGE2 = 0x0080,  ///< Interrupted by damage (secondary)
+    CHANNEL_FLAG_DELAY = 0x4000     ///< Interrupted by delay
 };
 
+/**
+ * @brief Spell aura interrupt flags
+ *
+ * Flags that determine what can interrupt an aura effect.
+ */
 enum SpellAuraInterruptFlags
 {
-    AURA_INTERRUPT_FLAG_UNK0                        = 0x00000001,   // 0    removed when getting hit by a negative spell?
-    AURA_INTERRUPT_FLAG_DAMAGE                      = 0x00000002,   // 1    removed by any damage
-    AURA_INTERRUPT_FLAG_UNK2                        = 0x00000004,   // 2
-    AURA_INTERRUPT_FLAG_MOVE                        = 0x00000008,   // 3    removed by any movement
-    AURA_INTERRUPT_FLAG_TURNING                     = 0x00000010,   // 4    removed by any turning
-    AURA_INTERRUPT_FLAG_ENTER_COMBAT                = 0x00000020,   // 5    removed by entering combat
-    AURA_INTERRUPT_FLAG_NOT_MOUNTED                 = 0x00000040,   // 6    removed by unmounting
-    AURA_INTERRUPT_FLAG_NOT_ABOVEWATER              = 0x00000080,   // 7    removed by entering water
-    AURA_INTERRUPT_FLAG_NOT_UNDERWATER              = 0x00000100,   // 8    removed by leaving water
-    AURA_INTERRUPT_FLAG_NOT_SHEATHED                = 0x00000200,   // 9    removed by unsheathing
-    AURA_INTERRUPT_FLAG_UNK10                       = 0x00000400,   // 10
-    AURA_INTERRUPT_FLAG_UNK11                       = 0x00000800,   // 11
-    AURA_INTERRUPT_FLAG_UNK12                       = 0x00001000,   // 12   removed by attack?
-    AURA_INTERRUPT_FLAG_UNK13                       = 0x00002000,   // 13
-    AURA_INTERRUPT_FLAG_UNK14                       = 0x00004000,   // 14
-    AURA_INTERRUPT_FLAG_UNK15                       = 0x00008000,   // 15   removed by casting a spell?
-    AURA_INTERRUPT_FLAG_UNK16                       = 0x00010000,   // 16
-    AURA_INTERRUPT_FLAG_MOUNTING                    = 0x00020000,   // 17   removed by mounting
-    AURA_INTERRUPT_FLAG_NOT_SEATED                  = 0x00040000,   // 18   removed by standing up (used by food and drink mostly and sleep/Fake Death like)
-    AURA_INTERRUPT_FLAG_CHANGE_MAP                  = 0x00080000,   // 19   leaving map/getting teleported
-    AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION    = 0x00100000,   // 20   removed by auras that make you invulnerable, or make other to loose selection on you
-    AURA_INTERRUPT_FLAG_UNK21                       = 0x00200000,   // 21
-    AURA_INTERRUPT_FLAG_UNK22                       = 0x00400000,   // 22
-    AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT            = 0x00800000,   // 23   removed by entering pvp combat
-    AURA_INTERRUPT_FLAG_DIRECT_DAMAGE               = 0x01000000    // 24   removed by any direct damage
+    AURA_INTERRUPT_FLAG_UNK0 = 0x00000001,                     ///< Unknown (removed when getting hit by a negative spell?)
+    AURA_INTERRUPT_FLAG_DAMAGE = 0x00000002,                   ///< Removed by any damage
+    AURA_INTERRUPT_FLAG_UNK2 = 0x00000004,                     ///< Unknown
+    AURA_INTERRUPT_FLAG_MOVE = 0x00000008,                     ///< Removed by any movement
+    AURA_INTERRUPT_FLAG_TURNING = 0x00000010,                  ///< Removed by any turning
+    AURA_INTERRUPT_FLAG_ENTER_COMBAT = 0x00000020,             ///< Removed by entering combat
+    AURA_INTERRUPT_FLAG_NOT_MOUNTED = 0x00000040,              ///< Removed by unmounting
+    AURA_INTERRUPT_FLAG_NOT_ABOVEWATER = 0x00000080,           ///< Removed by entering water
+    AURA_INTERRUPT_FLAG_NOT_UNDERWATER = 0x00000100,           ///< Removed by leaving water
+    AURA_INTERRUPT_FLAG_NOT_SHEATHED = 0x00000200,             ///< Removed by unsheathing
+    AURA_INTERRUPT_FLAG_UNK10 = 0x00000400,                    ///< Unknown
+    AURA_INTERRUPT_FLAG_UNK11 = 0x00000800,                    ///< Unknown
+    AURA_INTERRUPT_FLAG_UNK12 = 0x00001000,                    ///< Removed by melee attacks
+    AURA_INTERRUPT_FLAG_UNK13 = 0x00002000,                    ///< Unknown
+    AURA_INTERRUPT_FLAG_UNK14 = 0x00004000,                    ///< Unknown
+    AURA_INTERRUPT_FLAG_UNK15 = 0x00008000,                    ///< Unknown (removed by casting a spell?)
+    AURA_INTERRUPT_FLAG_UNK16 = 0x00010000,                    ///< Unknown
+    AURA_INTERRUPT_FLAG_MOUNTING = 0x00020000,                 ///< Removed by mounting
+    AURA_INTERRUPT_FLAG_NOT_SEATED = 0x00040000,               ///< Removed by standing up (used by food, drink, sleep, Fake Death)
+    AURA_INTERRUPT_FLAG_CHANGE_MAP = 0x00080000,               ///< Removed by leaving map/getting teleported
+    AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION = 0x00100000, ///< Removed by invulnerability or lost selection
+    AURA_INTERRUPT_FLAG_UNK21 = 0x00200000,                    ///< Unknown
+    AURA_INTERRUPT_FLAG_UNK22 = 0x00400000,                    ///< Unknown
+    AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT = 0x00800000,         ///< Removed by entering PvP combat
+    AURA_INTERRUPT_FLAG_DIRECT_DAMAGE = 0x01000000             ///< Removed by any direct damage
 };
 
+/**
+ * @brief Spell modifier operation enumeration
+ *
+ * Defines the different operations that can be modified on spells.
+ */
 enum SpellModOp
 {
-    SPELLMOD_DAMAGE                 = 0,
-    SPELLMOD_DURATION               = 1,
-    SPELLMOD_THREAT                 = 2,
-    SPELLMOD_EFFECT1                = 3,
-    SPELLMOD_CHARGES                = 4,
-    SPELLMOD_RANGE                  = 5,
-    SPELLMOD_RADIUS                 = 6,
-    SPELLMOD_CRITICAL_CHANCE        = 7,
-    SPELLMOD_ALL_EFFECTS            = 8,
-    SPELLMOD_NOT_LOSE_CASTING_TIME  = 9,
-    SPELLMOD_CASTING_TIME           = 10,
-    SPELLMOD_COOLDOWN               = 11,
-    SPELLMOD_EFFECT2                = 12,
+    SPELLMOD_DAMAGE = 0,                ///< Damage modifier
+    SPELLMOD_DURATION = 1,              ///< Duration modifier
+    SPELLMOD_THREAT = 2,                ///< Threat modifier
+    SPELLMOD_EFFECT1 = 3,               ///< Attack power modifier
+    SPELLMOD_CHARGES = 4,               ///< Charges modifier
+    SPELLMOD_RANGE = 5,                 ///< Range modifier
+    SPELLMOD_RADIUS = 6,                ///< Radius modifier
+    SPELLMOD_CRITICAL_CHANCE = 7,       ///< Critical chance modifier
+    SPELLMOD_ALL_EFFECTS = 8,           ///< All effects modifier
+    SPELLMOD_NOT_LOSE_CASTING_TIME = 9, ///< Don't lose casting time modifier
+    SPELLMOD_CASTING_TIME = 10,         ///< Casting time modifier
+    SPELLMOD_COOLDOWN = 11,             ///< Cooldown modifier
+    SPELLMOD_EFFECT2 = 12,              ///< Speed modifier
     // spellmod 13 unused
-    SPELLMOD_COST                   = 14,
-    SPELLMOD_CRIT_DAMAGE_BONUS      = 15,
-    SPELLMOD_RESIST_MISS_CHANCE     = 16,
-    SPELLMOD_JUMP_TARGETS           = 17,
-    SPELLMOD_CHANCE_OF_SUCCESS      = 18,                   // Only used with SPELL_AURA_ADD_FLAT_MODIFIER and affects proc spells
-    SPELLMOD_ACTIVATION_TIME        = 19,
-    SPELLMOD_EFFECT_PAST_FIRST      = 20,
-    SPELLMOD_GLOBAL_COOLDOWN        = 21,
-    SPELLMOD_DOT                    = 22,
-    SPELLMOD_EFFECT3                = 23,
-    SPELLMOD_SPELL_BONUS_DAMAGE     = 24,
+    SPELLMOD_COST = 14,                 ///< Cost modifier
+    SPELLMOD_CRIT_DAMAGE_BONUS = 15,    ///< Critical damage bonus modifier
+    SPELLMOD_RESIST_MISS_CHANCE = 16,   ///< Resist miss chance modifier
+    SPELLMOD_JUMP_TARGETS = 17,         ///< Jump targets modifier
+    SPELLMOD_CHANCE_OF_SUCCESS = 18,    ///< Chance of success (only used with SPELL_AURA_ADD_FLAT_MODIFIER and affects proc spells)
+    SPELLMOD_ACTIVATION_TIME = 19,      ///< Activation time modifier
+    SPELLMOD_EFFECT_PAST_FIRST = 20,    ///< Effect past first modifier
+    SPELLMOD_GLOBAL_COOLDOWN = 21,      ///< Casting time old modifier
+    SPELLMOD_DOT = 22,                  ///< DoT modifier
+    SPELLMOD_EFFECT3 = 23,              ///< Haste modifier
+    SPELLMOD_SPELL_BONUS_DAMAGE = 24,   ///< Spell bonus damage modifier
     // spellmod 25 unused
-    SPELLMOD_FREQUENCY_OF_SUCCESS   = 26,                   // Only used with SPELL_AURA_ADD_PCT_MODIFIER and affects used on proc spells
-    SPELLMOD_MULTIPLE_VALUE         = 27,
-    SPELLMOD_RESIST_DISPEL_CHANCE   = 28
+    SPELLMOD_FREQUENCY_OF_SUCCESS = 26, ///< Only used with SPELL_AURA_ADD_PCT_MODIFIER and affects used on proc spells
+    SPELLMOD_MULTIPLE_VALUE = 27,       ///< Multiple value modifier
+    SPELLMOD_RESIST_DISPEL_CHANCE = 28  ///< Resist dispel chance modifier
 };
 
 #define MAX_SPELLMOD 32
 
+/**
+ * @brief Spell facing flags enumeration
+ *
+ * Flags that determine facing requirements for spells.
+ */
 enum SpellFacingFlags
 {
-    SPELL_FACING_FLAG_INFRONT = 0x0001
+    SPELL_FACING_FLAG_INFRONT = 0x0001 ///< Target must be in front
 };
 
 #define BASE_MELEERANGE_OFFSET 1.33f
@@ -1010,6 +1062,9 @@ struct SpellPeriodicAuraLogInfo
     bool   critical;
 };
 
+/**
+ * Creates the extended proc mask for a spell damage event and miss result.
+ */
 uint32 createProcExtendMask(SpellNonMeleeDamage* damageInfo, SpellMissInfo missCondition);
 
 enum SpellAuraProcResult

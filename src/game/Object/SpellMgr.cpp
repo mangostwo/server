@@ -35,6 +35,12 @@
 #include "MapManager.h"
 #include "Unit.h"
 
+/**
+ * @brief Checks whether a skill line is a primary profession.
+ *
+ * @param skill The skill line id.
+ * @return true if the skill belongs to the profession category; otherwise false.
+ */
 bool IsPrimaryProfessionSkill(uint32 skill)
 {
     SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(skill);
@@ -51,20 +57,37 @@ bool IsPrimaryProfessionSkill(uint32 skill)
     return true;
 }
 
+/**
+ * @brief Initializes the spell manager.
+ */
 SpellMgr::SpellMgr()
 {
 }
 
+/**
+ * @brief Destroys the spell manager.
+ */
 SpellMgr::~SpellMgr()
 {
 }
 
+/**
+ * @brief Returns the global SpellMgr singleton instance.
+ *
+ * @return Reference to the shared spell manager.
+ */
 SpellMgr& SpellMgr::Instance()
 {
     static SpellMgr spellMgr;
     return spellMgr;
 }
 
+/**
+ * @brief Returns the base duration of a spell.
+ *
+ * @param spellInfo The spell entry.
+ * @return The base duration in milliseconds, or 0 if unavailable.
+ */
 int32 GetSpellDuration(SpellEntry const* spellInfo)
 {
     if (!spellInfo)
@@ -79,6 +102,12 @@ int32 GetSpellDuration(SpellEntry const* spellInfo)
     return (du->Duration[0] == -1) ? -1 : abs(du->Duration[0]);
 }
 
+/**
+ * @brief Returns the maximum duration of a spell.
+ *
+ * @param spellInfo The spell entry.
+ * @return The maximum duration in milliseconds, or 0 if unavailable.
+ */
 int32 GetSpellMaxDuration(SpellEntry const* spellInfo)
 {
     if (!spellInfo)
@@ -93,6 +122,13 @@ int32 GetSpellMaxDuration(SpellEntry const* spellInfo)
     return (du->Duration[2] == -1) ? -1 : abs(du->Duration[2]);
 }
 
+/**
+ * @brief Calculates the effective spell duration for a caster.
+ *
+ * @param spellInfo The spell entry.
+ * @param caster The unit casting the spell.
+ * @return The adjusted duration in milliseconds.
+ */
 int32 CalculateSpellDuration(SpellEntry const* spellInfo, Unit const* caster)
 {
     int32 duration = GetSpellDuration(spellInfo);
@@ -120,6 +156,13 @@ int32 CalculateSpellDuration(SpellEntry const* spellInfo, Unit const* caster)
     return duration;
 }
 
+/**
+ * @brief Returns the effective cast time of a spell.
+ *
+ * @param spellInfo The spell entry.
+ * @param spell The spell instance, if available.
+ * @return The cast time in milliseconds.
+ */
 uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
 {
     if (spell)
@@ -178,6 +221,13 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
     return (castTime > 0) ? uint32(castTime) : 0;
 }
 
+/**
+ * @brief Calculates the cast time value used for spell bonus coefficients.
+ *
+ * @param spellProto The spell entry.
+ * @param damagetype The damage effect type being evaluated.
+ * @return The normalized cast time in milliseconds.
+ */
 uint32 GetSpellCastTimeForBonus(SpellEntry const* spellProto, DamageEffectType damagetype)
 {
     uint32 CastingTime = !IsChanneledSpell(spellProto) ? GetSpellCastTime(spellProto) : GetSpellDuration(spellProto);
@@ -308,6 +358,12 @@ uint32 GetSpellCastTimeForBonus(SpellEntry const* spellProto, DamageEffectType d
     return CastingTime;
 }
 
+/**
+ * @brief Calculates the maximum number of periodic ticks for a spell.
+ *
+ * @param spellInfo The spell entry.
+ * @return The maximum tick count.
+ */
 uint16 GetSpellAuraMaxTicks(SpellEntry const* spellInfo)
 {
     int32 DotDuration = GetSpellDuration(spellInfo);
@@ -340,6 +396,12 @@ uint16 GetSpellAuraMaxTicks(SpellEntry const* spellInfo)
     return 6;
 }
 
+/**
+ * @brief Calculates the maximum number of periodic ticks for a spell id.
+ *
+ * @param spellId The spell id.
+ * @return The maximum tick count.
+ */
 uint16 GetSpellAuraMaxTicks(uint32 spellId)
 {
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
@@ -352,6 +414,13 @@ uint16 GetSpellAuraMaxTicks(uint32 spellId)
     return GetSpellAuraMaxTicks(spellInfo);
 }
 
+/**
+ * @brief Calculates the default bonus coefficient for a spell effect.
+ *
+ * @param spellProto The spell entry.
+ * @param damagetype The damage effect type being evaluated.
+ * @return The default coefficient value.
+ */
 float CalculateDefaultCoefficient(SpellEntry const* spellProto, DamageEffectType const damagetype)
 {
     // Damage over Time spells bonus calculation
@@ -375,6 +444,12 @@ float CalculateDefaultCoefficient(SpellEntry const* spellProto, DamageEffectType
     return coeff * DotFactor;
 }
 
+/**
+ * @brief Determines which weapon attack type a spell uses.
+ *
+ * @param spellInfo The spell entry.
+ * @return The associated weapon attack type.
+ */
 WeaponAttackType GetWeaponAttackType(SpellEntry const* spellInfo)
 {
     if (!spellInfo)
@@ -411,6 +486,12 @@ WeaponAttackType GetWeaponAttackType(SpellEntry const* spellInfo)
     }
 }
 
+/**
+ * @brief Checks whether a spell id is passive.
+ *
+ * @param spellId The spell id.
+ * @return true if the spell is passive; otherwise false.
+ */
 bool IsPassiveSpell(uint32 spellId)
 {
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
@@ -421,11 +502,24 @@ bool IsPassiveSpell(uint32 spellId)
     return IsPassiveSpell(spellInfo);
 }
 
+/**
+ * @brief Checks whether a spell entry is passive.
+ *
+ * @param spellInfo The spell entry.
+ * @return true if the spell is passive; otherwise false.
+ */
 bool IsPassiveSpell(SpellEntry const* spellInfo)
 {
     return spellInfo->HasAttribute(SPELL_ATTR_PASSIVE);
 }
 
+/**
+ * @brief Checks whether two spells cannot stack because of matching aura data.
+ *
+ * @param spellId_1 The first spell id.
+ * @param spellId_2 The second spell id.
+ * @return true if the aura data conflicts; otherwise false.
+ */
 bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 spellId_2)
 {
     SpellEntry const* spellInfo_1 = sSpellStore.LookupEntry(spellId_1);
@@ -458,6 +552,13 @@ bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 spellId_2)
     return false;
 }
 
+/**
+ * @brief Compares the effect strength of two aura ranks.
+ *
+ * @param spellId_1 The first spell id.
+ * @param spellId_2 The second spell id.
+ * @return A positive or negative difference value, or 0 if not comparable.
+ */
 int32 CompareAuraRanks(uint32 spellId_1, uint32 spellId_2)
 {
     SpellEntry const* spellInfo_1 = sSpellStore.LookupEntry(spellId_1);
@@ -489,6 +590,12 @@ int32 CompareAuraRanks(uint32 spellId_1, uint32 spellId_2)
     return 0;
 }
 
+/**
+ * @brief Classifies a spell into a spell-specific category.
+ *
+ * @param spellId The spell id.
+ * @return The derived spell-specific classification.
+ */
 SpellSpecific GetSpellSpecific(uint32 spellId)
 {
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
@@ -766,6 +873,13 @@ bool IsSingleFromSpellSpecificPerTarget(SpellSpecific spellSpec1, SpellSpecific 
     }
 }
 
+/**
+ * @brief Determines whether a target pair is considered positive.
+ *
+ * @param targetA The primary implicit target type.
+ * @param targetB The secondary implicit target type.
+ * @return true if the target selection is positive; otherwise false.
+ */
 bool IsPositiveTarget(uint32 targetA, uint32 targetB)
 {
     switch (targetA)
@@ -793,6 +907,12 @@ bool IsPositiveTarget(uint32 targetA, uint32 targetB)
     return true;
 }
 
+/**
+ * @brief Checks whether a target type is explicitly positive.
+ *
+ * @param targetA The implicit target type.
+ * @return true if the target requires an explicit positive target; otherwise false.
+ */
 bool IsExplicitPositiveTarget(uint32 targetA)
 {
     // positive targets that in target selection code expect target in m_targers, so not that auto-select target by spell data by m_caster and etc
@@ -810,6 +930,12 @@ bool IsExplicitPositiveTarget(uint32 targetA)
     return false;
 }
 
+/**
+ * @brief Checks whether a target type is explicitly negative.
+ *
+ * @param targetA The implicit target type.
+ * @return true if the target requires an explicit negative target; otherwise false.
+ */
 bool IsExplicitNegativeTarget(uint32 targetA)
 {
     // non-positive targets that in target selection code expect target in m_targers, so not that auto-select target by spell data by m_caster and etc
@@ -825,6 +951,13 @@ bool IsExplicitNegativeTarget(uint32 targetA)
     return false;
 }
 
+/**
+ * @brief Determines whether a spell effect should be treated as positive.
+ *
+ * @param spellproto The spell entry.
+ * @param effIndex The effect index to evaluate.
+ * @return true if the effect is positive; otherwise false.
+ */
 bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
 {
     switch (spellproto->Effect[effIndex])
@@ -1139,6 +1272,12 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
     return true;
 }
 
+/**
+ * @brief Determines whether a spell id is positive.
+ *
+ * @param spellId The spell id.
+ * @return true if all active effects are positive; otherwise false.
+ */
 bool IsPositiveSpell(uint32 spellId)
 {
     SpellEntry const* spellproto = sSpellStore.LookupEntry(spellId);
@@ -1150,6 +1289,12 @@ bool IsPositiveSpell(uint32 spellId)
     return IsPositiveSpell(spellproto);
 }
 
+/**
+ * @brief Determines whether a spell entry is positive.
+ *
+ * @param spellproto The spell entry.
+ * @return true if all active effects are positive; otherwise false.
+ */
 bool IsPositiveSpell(SpellEntry const* spellproto)
 {
     // spells with at least one negative effect are considered negative
@@ -1162,6 +1307,12 @@ bool IsPositiveSpell(SpellEntry const* spellproto)
     return true;
 }
 
+/**
+ * @brief Checks whether a spell is treated as single-target.
+ *
+ * @param spellInfo The spell entry.
+ * @return true if the spell is single-target; otherwise false.
+ */
 bool IsSingleTargetSpell(SpellEntry const* spellInfo)
 {
     // all other single target spells have if it has AttributesEx5
@@ -1190,6 +1341,13 @@ bool IsSingleTargetSpell(SpellEntry const* spellInfo)
     return false;
 }
 
+/**
+ * @brief Checks whether two spells belong to the same single-target family.
+ *
+ * @param spellInfo1 The first spell entry.
+ * @param spellInfo2 The second spell entry.
+ * @return true if the spells are treated as equivalent single-target spells; otherwise false.
+ */
 bool IsSingleTargetSpells(SpellEntry const* spellInfo1, SpellEntry const* spellInfo2)
 {
     // TODO - need better check
@@ -1219,6 +1377,13 @@ bool IsSingleTargetSpells(SpellEntry const* spellInfo1, SpellEntry const* spellI
     return false;
 }
 
+/**
+ * @brief Returns the cast error produced by the current shapeshift form.
+ *
+ * @param spellInfo The spell entry.
+ * @param form The shapeshift form id.
+ * @return The spell cast result for the stance check.
+ */
 SpellCastResult GetErrorAtShapeshiftedCast(SpellEntry const* spellInfo, uint32 form)
 {
     // talents that learn spells can have stance requirements that need ignore
@@ -1276,6 +1441,9 @@ SpellCastResult GetErrorAtShapeshiftedCast(SpellEntry const* spellInfo, uint32 f
     return SPELL_CAST_OK;
 }
 
+/**
+ * @brief Loads spell target destination coordinates from the database.
+ */
 void SpellMgr::LoadSpellTargetPositions()
 {
     mSpellTargetPositions.clear();                          // need for reload case
@@ -1579,6 +1747,9 @@ struct DoSpellProcEvent
     uint32 count;
 };
 
+/**
+ * @brief Loads spell proc event condition overrides from the database.
+ */
 void SpellMgr::LoadSpellProcEvents()
 {
     mSpellProcEventMap.clear();                             // need for reload case
@@ -1643,6 +1814,9 @@ struct DoSpellProcItemEnchant
     float ppm;
 };
 
+/**
+ * @brief Loads proc-per-minute data for spell item enchant procs.
+ */
 void SpellMgr::LoadSpellProcItemEnchant()
 {
     mSpellProcItemEnchantMap.clear();                       // need for reload case
@@ -1750,6 +1924,9 @@ struct DoSpellBonuses
     SpellBonusEntry const& spellBonus;
 };
 
+/**
+ * @brief Loads spell bonus coefficient overrides from the database.
+ */
 void SpellMgr::LoadSpellBonuses()
 {
     mSpellBonusMap.clear();                             // need for reload case
@@ -1918,6 +2095,16 @@ void SpellMgr::LoadSpellBonuses()
     sLog.outString();
 }
 
+/**
+ * @brief Checks whether a proc event definition can be triggered by a proc context.
+ *
+ * @param spellProcEvent The proc event definition to evaluate.
+ * @param EventProcFlag The event flag being tested.
+ * @param procSpell The spell that caused the proc, if any.
+ * @param procFlags The proc flags of the current event.
+ * @param procExtra Additional proc result flags.
+ * @return true if the proc event can trigger; otherwise, false.
+ */
 bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellProcEvent, uint32 EventProcFlag, SpellEntry const* procSpell, uint32 procFlags, uint32 procExtra)
 {
     // No extra req need
@@ -1996,6 +2183,9 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellPr
     return false;
 }
 
+/**
+ * @brief Loads elixir classification data from the database.
+ */
 void SpellMgr::LoadSpellElixirs()
 {
     mSpellElixirs.clear();                                  // need for reload case
@@ -2105,6 +2295,9 @@ struct DoSpellThreat
     uint32 count;
 };
 
+/**
+ * @brief Loads custom spell threat definitions from the database.
+ */
 void SpellMgr::LoadSpellThreats()
 {
     mSpellThreatMap.clear();                                // need for reload case
@@ -2149,6 +2342,13 @@ void SpellMgr::LoadSpellThreats()
     sLog.outString();
 }
 
+/**
+ * @brief Checks whether one spell is a rank of another spell.
+ *
+ * @param spellInfo_1 The first spell entry.
+ * @param spellId_2 The second spell identifier.
+ * @return true if both spells belong to the same rank chain; otherwise, false.
+ */
 bool SpellMgr::IsRankSpellDueToSpell(SpellEntry const* spellInfo_1, uint32 spellId_2) const
 {
     SpellEntry const* spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
@@ -2164,6 +2364,12 @@ bool SpellMgr::IsRankSpellDueToSpell(SpellEntry const* spellInfo_1, uint32 spell
     return GetFirstSpellInChain(spellInfo_1->Id) == GetFirstSpellInChain(spellId_2);
 }
 
+/**
+ * @brief Checks whether ranked spells may coexist in the spell book.
+ *
+ * @param spellInfo The spell entry to inspect.
+ * @return true if multiple ranks may stack in the spell book; otherwise, false.
+ */
 bool SpellMgr::canStackSpellRanksInSpellBook(SpellEntry const* spellInfo) const
 {
     if (IsPassiveSpell(spellInfo))                          // ranked passive spell
@@ -2222,6 +2428,13 @@ bool SpellMgr::canStackSpellRanksInSpellBook(SpellEntry const* spellInfo) const
     return true;
 }
 
+/**
+ * @brief Checks whether two spells should not stack.
+ *
+ * @param spellId_1 The first spell identifier.
+ * @param spellId_2 The second spell identifier.
+ * @return true if the spells should not stack; otherwise, false.
+ */
 bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) const
 {
     SpellEntry const* spellInfo_1 = sSpellStore.LookupEntry(spellId_1);
@@ -3100,6 +3313,12 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
     return true;
 }
 
+/**
+ * @brief Checks whether a spell teaches a profession or riding skill.
+ *
+ * @param spellId The spell identifier.
+ * @return true if the spell teaches a profession or riding skill; otherwise, false.
+ */
 bool SpellMgr::IsProfessionOrRidingSpell(uint32 spellId)
 {
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
@@ -3118,6 +3337,12 @@ bool SpellMgr::IsProfessionOrRidingSpell(uint32 spellId)
     return IsProfessionOrRidingSkill(skill);
 }
 
+/**
+ * @brief Checks whether a spell teaches a profession skill.
+ *
+ * @param spellId The spell identifier.
+ * @return true if the spell teaches a profession skill; otherwise, false.
+ */
 bool SpellMgr::IsProfessionSpell(uint32 spellId)
 {
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
@@ -3136,6 +3361,12 @@ bool SpellMgr::IsProfessionSpell(uint32 spellId)
     return IsProfessionSkill(skill);
 }
 
+/**
+ * @brief Checks whether a spell teaches a primary profession skill.
+ *
+ * @param spellId The spell identifier.
+ * @return true if the spell teaches a primary profession; otherwise, false.
+ */
 bool SpellMgr::IsPrimaryProfessionSpell(uint32 spellId)
 {
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
@@ -3194,11 +3425,23 @@ uint32 SpellMgr::GetProfessionSpellMinLevel(uint32 spellId)
     }
 }
 
+/**
+ * @brief Checks whether a spell is the first rank of a primary profession.
+ *
+ * @param spellId The spell identifier.
+ * @return true if the spell is the first rank of a primary profession; otherwise, false.
+ */
 bool SpellMgr::IsPrimaryProfessionFirstRankSpell(uint32 spellId) const
 {
     return IsPrimaryProfessionSpell(spellId) && GetSpellRank(spellId) == 1;
 }
 
+/**
+ * @brief Checks whether a spell grants a profession skill bonus tier.
+ *
+ * @param spellId The spell identifier.
+ * @return true if the spell is a skill-bonus spell; otherwise, false.
+ */
 bool SpellMgr::IsSkillBonusSpell(uint32 spellId) const
 {
     SkillLineAbilityMapBounds bounds = GetSkillLineAbilityMapBounds(spellId);
@@ -3220,6 +3463,13 @@ bool SpellMgr::IsSkillBonusSpell(uint32 spellId) const
     return false;
 }
 
+/**
+ * @brief Selects the most suitable positive aura rank for a target level.
+ *
+ * @param spellInfo The reference spell entry.
+ * @param level The target unit level.
+ * @return Pointer to the chosen rank spell entry.
+ */
 SpellEntry const* SpellMgr::SelectAuraRankForLevel(SpellEntry const* spellInfo, uint32 level) const
 {
     // fast case
@@ -3279,6 +3529,15 @@ SpellEntry const* SpellMgr::SelectAuraRankForLevel(SpellEntry const* spellInfo, 
 
 typedef UNORDERED_MAP<uint32, uint32> AbilitySpellPrevMap;
 
+/**
+ * @brief Recursively builds spell chain links from ability rank data.
+ *
+ * @param chainMap The spell chain map being populated.
+ * @param prevRanks The previous-rank lookup table.
+ * @param spell_id The current spell id.
+ * @param prev_id The previous spell id in the chain.
+ * @param deep The remaining recursion depth guard.
+ */
 static void LoadSpellChains_AbilityHelper(SpellChainMap& chainMap, AbilitySpellPrevMap const& prevRanks, uint32 spell_id, uint32 prev_id, uint32 deep = 30)
 {
     // spell already listed in chains store
@@ -3346,6 +3605,9 @@ static void LoadSpellChains_AbilityHelper(SpellChainMap& chainMap, AbilitySpellP
     chainMap[spell_id] = node;
 }
 
+/**
+ * @brief Loads spell rank chain data from DBC and database sources.
+ */
 void SpellMgr::LoadSpellChains()
 {
     mSpellChains.clear();                                   // need for reload case
@@ -3739,6 +4001,9 @@ void SpellMgr::LoadSpellChains()
     sLog.outString();
 }
 
+/**
+ * @brief Builds the spell-to-skill-learning map from DBC data.
+ */
 void SpellMgr::LoadSpellLearnSkills()
 {
     mSpellLearnSkills.clear();                              // need for reload case
@@ -3784,6 +4049,9 @@ void SpellMgr::LoadSpellLearnSkills()
     sLog.outString();
 }
 
+/**
+ * @brief Loads explicit and DBC-derived learned-spell relationships.
+ */
 void SpellMgr::LoadSpellLearnSpells()
 {
     mSpellLearnSpells.clear();                              // need for reload case
@@ -3899,6 +4167,9 @@ void SpellMgr::LoadSpellLearnSpells()
     sLog.outString();
 }
 
+/**
+ * @brief Loads and validates scripted spell targets.
+ */
 void SpellMgr::LoadSpellScriptTarget()
 {
     sSpellScriptTargetStorage.Load();
@@ -4026,6 +4297,9 @@ void SpellMgr::LoadSpellScriptTarget()
     }
 }
 
+/**
+ * @brief Loads spell pet aura mappings from the database.
+ */
 void SpellMgr::LoadSpellPetAuras()
 {
     mSpellPetAuraMap.clear();                               // need for reload case
@@ -4414,6 +4688,9 @@ bool SpellMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
     return true;
 }
 
+/**
+ * @brief Loads spell area requirement records from the database.
+ */
 void SpellMgr::LoadSpellAreas()
 {
     mSpellAreaMap.clear();                                  // need for reload case
@@ -4637,6 +4914,16 @@ void SpellMgr::LoadSpellAreas()
     sLog.outString();
 }
 
+/**
+ * @brief Checks whether a spell is allowed in a given location.
+ *
+ * @param spellInfo The spell entry to validate.
+ * @param map_id The current map identifier.
+ * @param zone_id The current zone identifier.
+ * @param area_id The current area identifier.
+ * @param player The player attempting the cast, if any.
+ * @return The spell cast failure code, or SPELL_CAST_OK when allowed.
+ */
 SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const* spellInfo, uint32 map_id, uint32 zone_id, uint32 area_id, Player const* player)
 {
     // normal case
@@ -4805,6 +5092,9 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const* spell
     return SPELL_CAST_OK;
 }
 
+/**
+ * @brief Builds the skill-line ability multimap from DBC data.
+ */
 void SpellMgr::LoadSkillLineAbilityMap()
 {
     mSkillLineAbilityMap.clear();
@@ -4829,6 +5119,9 @@ void SpellMgr::LoadSkillLineAbilityMap()
     sLog.outString();
 }
 
+/**
+ * @brief Builds the skill race/class requirement multimap from DBC data.
+ */
 void SpellMgr::LoadSkillRaceClassInfoMap()
 {
     mSkillRaceClassInfoMap.clear();
@@ -4860,6 +5153,11 @@ void SpellMgr::LoadSkillRaceClassInfoMap()
     sLog.outString();
 }
 
+/**
+ * @brief Validates spell references used by a custom spell-related database table.
+ *
+ * @param table The table name to inspect.
+ */
 void SpellMgr::CheckUsedSpells(char const* table)
 {
     uint32 countSpells = 0;
@@ -5134,6 +5432,13 @@ void SpellMgr::CheckUsedSpells(char const* table)
     sLog.outString(">> Checked %u spells and %u spell masks", countSpells, countMasks);
 }
 
+/**
+ * @brief Returns the diminishing returns group for a spell.
+ *
+ * @param spellproto The spell entry.
+ * @param triggered Whether the spell was triggered instead of directly cast.
+ * @return The diminishing returns group.
+ */
 DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto, bool triggered)
 {
     // Explicit Diminishing Groups
@@ -5340,6 +5645,12 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry cons
     return 10000;
 }
 
+/**
+ * @brief Checks whether a diminishing returns group has a PvP duration limit.
+ *
+ * @param group The diminishing returns group.
+ * @return true if the group's duration is limited; otherwise false.
+ */
 bool IsDiminishingReturnsGroupDurationLimited(DiminishingGroup group)
 {
     switch (group)
@@ -5362,6 +5673,12 @@ bool IsDiminishingReturnsGroupDurationLimited(DiminishingGroup group)
     return false;
 }
 
+/**
+ * @brief Returns the application scope used for a diminishing returns group.
+ *
+ * @param group The diminishing returns group.
+ * @return The diminishing returns type.
+ */
 DiminishingReturnsType GetDiminishingReturnsGroupType(DiminishingGroup group)
 {
     switch (group)
@@ -5388,6 +5705,14 @@ DiminishingReturnsType GetDiminishingReturnsGroupType(DiminishingGroup group)
     return DRTYPE_NONE;
 }
 
+/**
+ * @brief Checks whether a player satisfies a spell-area requirement record.
+ *
+ * @param player The player being evaluated.
+ * @param newZone The current zone identifier.
+ * @param newArea The current area identifier.
+ * @return true if all requirements are met; otherwise, false.
+ */
 bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32 newArea) const
 {
     if (conditionId)
@@ -5467,6 +5792,14 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
     return true;
 }
 
+/**
+ * @brief Applies or removes an area-based spell according to requirements.
+ *
+ * @param player The player to update.
+ * @param newZone The current zone identifier.
+ * @param newArea The current area identifier.
+ * @param onlyApply true to skip aura removal when requirements fail.
+ */
 void SpellArea::ApplyOrRemoveSpellIfCan(Player* player, uint32 newZone, uint32 newArea, bool onlyApply) const
 {
     MANGOS_ASSERT(player);

@@ -32,10 +32,18 @@
 
 static_assert(MAXIMAL_AI_EVENT_EVENTAI <= 32, "Maximal 32 AI_EVENTs supported with EventAI");
 
+/**
+ * @brief Destroys the creature AI instance.
+ */
 CreatureAI::~CreatureAI()
 {
 }
 
+/**
+ * @brief Reacts to being attacked.
+ *
+ * @param attacker The unit that attacked the creature.
+ */
 void CreatureAI::AttackedBy(Unit* attacker)
 {
     if (!m_creature->getVictim())
@@ -44,6 +52,14 @@ void CreatureAI::AttackedBy(Unit* attacker)
     }
 }
 
+/**
+ * @brief Checks whether the creature can cast a spell on a target.
+ *
+ * @param pTarget The intended target.
+ * @param pSpell The spell entry being evaluated.
+ * @param isTriggered true if the cast is triggered.
+ * @return The cast validation result.
+ */
 CanCastResult CreatureAI::CanCastSpell(Unit* pTarget, const SpellEntry* pSpell, bool isTriggered)
 {
     // If not triggered, we check
@@ -112,6 +128,15 @@ CanCastResult CreatureAI::CanCastSpell(Unit* pTarget, const SpellEntry* pSpell, 
     }
 }
 
+/**
+ * @brief Attempts to cast a spell if all conditions are met.
+ *
+ * @param pTarget The intended target.
+ * @param uiSpell The spell identifier.
+ * @param uiCastFlags Casting behavior flags.
+ * @param uiOriginalCasterGUID The original caster GUID for forwarded casts.
+ * @return The cast validation or execution result.
+ */
 CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32 uiCastFlags, ObjectGuid uiOriginalCasterGUID)
 {
     Unit* pCaster = m_creature;
@@ -167,6 +192,11 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32
     }
 }
 
+/**
+ * @brief Performs a melee attack if the creature is ready.
+ *
+ * @return true if an attack action was processed; otherwise, false.
+ */
 bool CreatureAI::DoMeleeAttackIfReady()
 {
     return m_creature->UpdateMeleeAttackingState();
@@ -198,6 +228,11 @@ void CreatureAI::SetCombatMovement(bool enable, bool stopOrStartMovement /*=fals
     }
 }
 
+/**
+ * @brief Adjusts movement state when combat begins.
+ *
+ * @param victim The unit being attacked.
+ */
 void CreatureAI::HandleMovementOnAttackStart(Unit* victim)
 {
     MotionMaster* creatureMotion = m_creature->GetMotionMaster();
@@ -268,6 +303,15 @@ class AiDelayEventAround : public BasicEvent
         GuidVector m_receiverGuids;
 };
 
+/**
+ * @brief Sends an AI event to nearby creatures after an optional delay.
+ *
+ * @param eventType The event type to broadcast.
+ * @param pInvoker The unit that triggered the event.
+ * @param uiDelay The delay before delivery in milliseconds.
+ * @param fRadius The search radius for receivers.
+ * @param miscValue Additional event data.
+ */
 void CreatureAI::SendAIEventAround(AIEventType eventType, Unit* pInvoker, uint32 uiDelay, float fRadius, uint32 miscValue /*=0*/) const
 {
     if (fRadius > 0)
@@ -297,6 +341,14 @@ void CreatureAI::SendAIEventAround(AIEventType eventType, Unit* pInvoker, uint32
     }
 }
 
+/**
+ * @brief Sends an AI event directly to a specific creature.
+ *
+ * @param eventType The event type to send.
+ * @param pInvoker The unit that triggered the event.
+ * @param pReceiver The creature receiving the event.
+ * @param miscValue Additional event data.
+ */
 void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, Creature* pReceiver, uint32 miscValue /*=0*/) const
 {
     MANGOS_ASSERT(pReceiver);

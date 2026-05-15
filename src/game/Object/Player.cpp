@@ -154,6 +154,12 @@ PlayerTaxi::PlayerTaxi()
     memset(m_taximask, 0, sizeof(m_taximask));
 }
 
+/**
+ * @brief Initializes known taxi nodes for a newly created player.
+ *
+ * @param race The player race id.
+ * @param level Unused player level.
+ */
 void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint32 level)
 {
     // class specific initial known nodes
@@ -199,6 +205,11 @@ void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint32 leve
     }
 }
 
+/**
+ * @brief Loads the known taxi-node bitmask from a serialized string.
+ *
+ * @param data The serialized taxi mask data.
+ */
 void PlayerTaxi::LoadTaxiMask(const char* data)
 {
     Tokens tokens = StrSplit(data, " ");
@@ -212,6 +223,12 @@ void PlayerTaxi::LoadTaxiMask(const char* data)
     }
 }
 
+/**
+ * @brief Appends the player's taxi-node mask to a packet buffer.
+ *
+ * @param data The destination packet buffer.
+ * @param all true to append all existing nodes instead of only known nodes.
+ */
 void PlayerTaxi::AppendTaximaskTo(ByteBuffer& data, bool all)
 {
     if (all)
@@ -230,6 +247,13 @@ void PlayerTaxi::AppendTaximaskTo(ByteBuffer& data, bool all)
     }
 }
 
+/**
+ * @brief Loads active taxi destinations from a serialized path string.
+ *
+ * @param values The serialized taxi destination list.
+ * @param team The player's faction team.
+ * @return true if the taxi route is valid; otherwise, false.
+ */
 bool PlayerTaxi::LoadTaxiDestinationsFromString(const std::string& values, Team team)
 {
     ClearTaxiDestinations();
@@ -273,6 +297,11 @@ bool PlayerTaxi::LoadTaxiDestinationsFromString(const std::string& values, Team 
     return true;
 }
 
+/**
+ * @brief Serializes the current taxi destination list.
+ *
+ * @return The serialized taxi destination string.
+ */
 std::string PlayerTaxi::SaveTaxiDestinationsToString()
 {
     if (m_TaxiDestinations.empty())
@@ -290,6 +319,11 @@ std::string PlayerTaxi::SaveTaxiDestinationsToString()
     return ss.str();
 }
 
+/**
+ * @brief Gets the taxi path id for the current first route segment.
+ *
+ * @return The current taxi path id, or 0 if no valid route exists.
+ */
 uint32 PlayerTaxi::GetCurrentTaxiPath() const
 {
     if (m_TaxiDestinations.size() < 2)
@@ -305,6 +339,13 @@ uint32 PlayerTaxi::GetCurrentTaxiPath() const
     return path;
 }
 
+/**
+ * @brief Serializes the player's discovered taxi mask into a stream.
+ *
+ * @param ss The destination output stream.
+ * @param taxi The taxi data to serialize.
+ * @return The output stream.
+ */
 std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi)
 {
     for (int i = 0; i < TaxiMaskSize; ++i)
@@ -320,11 +361,23 @@ TradeData* TradeData::GetTraderData() const
     return m_trader->GetTradeData();
 }
 
+/**
+ * @brief Gets the item placed in a trade slot.
+ *
+ * @param slot The trade slot.
+ * @return The item in the slot, or null if empty.
+ */
 Item* TradeData::GetItem(TradeSlots slot) const
 {
     return m_items[slot] ? m_player->GetItemByGuid(m_items[slot]) : NULL;
 }
 
+/**
+ * @brief Checks whether a specific item is part of the current trade.
+ *
+ * @param item_guid The item GUID to test.
+ * @return true if the item is present in a trade slot; otherwise, false.
+ */
 bool TradeData::HasItem(ObjectGuid item_guid) const
 {
     for (int i = 0; i < TRADE_SLOT_COUNT; ++i)
@@ -336,11 +389,22 @@ bool TradeData::HasItem(ObjectGuid item_guid) const
 }
 
 
+/**
+ * @brief Gets the item used as the current trade spell reagent.
+ *
+ * @return The spell-cast item, or null if none is set.
+ */
 Item* TradeData::GetSpellCastItem() const
 {
     return m_spellCastItem ?  m_player->GetItemByGuid(m_spellCastItem) : NULL;
 }
 
+/**
+ * @brief Sets the item assigned to a trade slot and refreshes trade state.
+ *
+ * @param slot The trade slot to update.
+ * @param item The item to place in the slot, or null to clear it.
+ */
 void TradeData::SetItem(TradeSlots slot, Item* item)
 {
     ObjectGuid itemGuid = item ? item->GetObjectGuid() : ObjectGuid();
@@ -367,6 +431,12 @@ void TradeData::SetItem(TradeSlots slot, Item* item)
     SetSpell(0);
 }
 
+/**
+ * @brief Sets the spell cast through the trade window.
+ *
+ * @param spell_id The spell identifier.
+ * @param castItem The optional reagent item used for the spell.
+ */
 void TradeData::SetSpell(uint32 spell_id, Item* castItem /*= NULL*/)
 {
     ObjectGuid itemGuid = castItem ? castItem->GetObjectGuid() : ObjectGuid();
@@ -386,6 +456,11 @@ void TradeData::SetSpell(uint32 spell_id, Item* castItem /*= NULL*/)
     Update(false);                                          // send spell info to caster self
 }
 
+/**
+ * @brief Sets the trade money offer and refreshes trade state.
+ *
+ * @param money The offered money amount.
+ */
 void TradeData::SetMoney(uint32 money)
 {
     if (m_money == money)
@@ -401,6 +476,11 @@ void TradeData::SetMoney(uint32 money)
     Update();
 }
 
+/**
+ * @brief Sends the current trade state to one side of the trade.
+ *
+ * @param for_trader true to update the trader view; false to update the player view.
+ */
 void TradeData::Update(bool for_trader /*= true*/)
 {
     if (for_trader)
@@ -413,6 +493,12 @@ void TradeData::Update(bool for_trader /*= true*/)
     }
 }
 
+/**
+ * @brief Sets the accepted state for the trade and optionally notifies the other trader.
+ *
+ * @param state The new accepted state.
+ * @param crosssend true to send the status to the trader instead of the owner.
+ */
 void TradeData::SetAccepted(bool state, bool crosssend /*= false*/)
 {
     m_accepted = state;
@@ -436,6 +522,11 @@ void TradeData::SetAccepted(bool state, bool crosssend /*= false*/)
 
 UpdateMask Player::updateVisualBits;
 
+/**
+ * @brief Initializes a player instance and its runtime state.
+ *
+ * @param session The owning world session.
+ */
 Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_achievementMgr(this), m_reputationMgr(this)
 {
     m_transport = 0;
@@ -669,6 +760,9 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
     m_cachedGS = 0;
 }
 
+/**
+ * @brief Destroys the player and releases owned resources.
+ */
 Player::~Player()
 {
     // Perform cleanup before deleting the player object
@@ -724,6 +818,9 @@ Player::~Player()
     delete m_runes;
 }
 
+/**
+ * @brief Performs pre-destruction cleanup for trade, duel, zone, and unit state.
+ */
 void Player::CleanupsBeforeDelete()
 {
     // Perform cleanup only if the object is fully created
@@ -742,6 +839,22 @@ void Player::CleanupsBeforeDelete()
     Unit::CleanupsBeforeDelete();
 }
 
+/**
+ * @brief Creates a new player character with starting data and equipment.
+ *
+ * @param guidlow The low GUID for the player.
+ * @param name The player name.
+ * @param race The race id.
+ * @param class_ The class id.
+ * @param gender The gender id.
+ * @param skin The skin customization id.
+ * @param face The face customization id.
+ * @param hairStyle The hairstyle customization id.
+ * @param hairColor The hair color customization id.
+ * @param facialHair The facial hair customization id.
+ * @param outfitId Unused outfit identifier.
+ * @return true if the player was initialized successfully; otherwise, false.
+ */
 bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 class_, uint8 gender, uint8 skin, uint8 face, uint8 hairStyle, uint8 hairColor, uint8 facialHair, uint8 /*outfitId */)
 {
     // FIXME: outfitId not used in player creation
@@ -1003,6 +1116,13 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
     return true;
 }
 
+/**
+ * @brief Equips or stores a newly created item in the best available slots.
+ *
+ * @param titem_id The item entry id.
+ * @param titem_amount The amount to create.
+ * @return true if all remaining items were equipped or stored; otherwise, false.
+ */
 bool Player::StoreNewItemInBestSlots(uint32 titem_id, uint32 titem_amount)
 {
     DEBUG_LOG("STORAGE: Creating initial item, itemId = %u, count = %u", titem_id, titem_amount);
@@ -1061,6 +1181,14 @@ Item* Player::StoreNewItemInInventorySlot(uint32 itemEntry, uint32 amount)
     return NULL;
 }
 
+/**
+ * @brief Sends a mirror timer update to the client.
+ *
+ * @param Type The mirror timer type.
+ * @param MaxValue The maximum timer value.
+ * @param CurrentValue The current timer value.
+ * @param Regen The regeneration rate.
+ */
 void Player::SendMirrorTimer(MirrorTimerType Type, uint32 MaxValue, uint32 CurrentValue, int32 Regen)
 {
     if (int(MaxValue) == DISABLED_MIRROR_TIMER)
@@ -1081,6 +1209,11 @@ void Player::SendMirrorTimer(MirrorTimerType Type, uint32 MaxValue, uint32 Curre
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Stops a client mirror timer and clears its tracked value.
+ *
+ * @param Type The mirror timer type to stop.
+ */
 void Player::StopMirrorTimer(MirrorTimerType Type)
 {
     m_MirrorTimer[Type] = DISABLED_MIRROR_TIMER;
@@ -1089,6 +1222,13 @@ void Player::StopMirrorTimer(MirrorTimerType Type)
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Applies environmental damage to the player.
+ *
+ * @param type The environmental damage type.
+ * @param damage The incoming damage amount.
+ * @return The final damage dealt after mitigation.
+ */
 uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
 {
     if (!IsAlive() || isGameMaster())
@@ -1145,6 +1285,12 @@ uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
     return final_damage;
 }
 
+/**
+ * @brief Gets the maximum value for a mirror timer type.
+ *
+ * @param timer The mirror timer type.
+ * @return The maximum timer value, or DISABLED_MIRROR_TIMER when inactive.
+ */
 int32 Player::getMaxTimer(MirrorTimerType timer)
 {
     switch (timer)
@@ -1184,6 +1330,9 @@ int32 Player::getMaxTimer(MirrorTimerType timer)
     return 0;
 }
 
+/**
+ * @brief Marks mirror timers for refresh during the next drowning update.
+ */
 void Player::UpdateMirrorTimers()
 {
     // Desync flags for update on next HandleDrowning
@@ -1193,6 +1342,11 @@ void Player::UpdateMirrorTimers()
     }
 }
 
+/**
+ * @brief Updates drowning, fatigue, and fire mirror timers.
+ *
+ * @param time_diff The elapsed update time in milliseconds.
+ */
 void Player::HandleDrowning(uint32 time_diff)
 {
     // If no mirror timer flags are set, return early
@@ -1349,6 +1503,12 @@ void Player::HandleSobering()
     }
 }
 
+/**
+ * @brief Converts a drunk value to the corresponding drunken state.
+ *
+ * @param value The raw drunk value.
+ * @return The resulting drunken state.
+ */
 DrunkenState Player::GetDrunkenstateByValue(uint8 value)
 {
     if (value >= 90)
@@ -1366,6 +1526,12 @@ DrunkenState Player::GetDrunkenstateByValue(uint8 value)
     return DRUNKEN_SOBER;
 }
 
+/**
+ * @brief Sets the player's drunk value and updates related visibility effects.
+ *
+ * @param newDrunkenValue The new drunk value.
+ * @param itemId Unused source item identifier.
+ */
 void Player::SetDrunkValue(uint8 newDrunkValue, uint32 itemId /*= 0*/)
 {
     if (newDrunkValue > 100)
@@ -1409,6 +1575,12 @@ void Player::SetDrunkValue(uint8 newDrunkValue, uint32 itemId /*= 0*/)
     SendMessageToSet(&data, true);
 }
 
+/**
+ * @brief Updates player state, timers, combat, saving, and delayed actions.
+ *
+ * @param update_diff The elapsed update time in milliseconds.
+ * @param p_time The elapsed update time used by some player timers.
+ */
 void Player::Update(uint32 update_diff, uint32 p_time)
 {
     // If the player is not in the world, return early
@@ -1724,6 +1896,11 @@ void Player::Update(uint32 update_diff, uint32 p_time)
     }
 }
 
+/**
+ * @brief Changes the player's death state and handles player-specific death logic.
+ *
+ * @param s The new death state.
+ */
 void Player::SetDeathState(DeathState s)
 {
     uint32 ressSpellId = 0;
@@ -1785,6 +1962,13 @@ void Player::SetDeathState(DeathState s)
     }
 }
 
+/**
+ * @brief Builds character-enumeration data for the character selection screen.
+ *
+ * @param result The database row for the character.
+ * @param p_data The packet being populated.
+ * @return true if the enum data was built successfully; otherwise, false.
+ */
 bool Player::BuildEnumData(QueryResult* result, WorldPacket* p_data)
 {
     //             0               1                2                3                 4                  5                       6                        7
@@ -1947,6 +2131,9 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket* p_data)
     return true;
 }
 
+/**
+ * @brief Toggles AFK status and leaves battlegrounds when entering AFK.
+ */
 void Player::ToggleAFK()
 {
     ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK);
@@ -1958,11 +2145,19 @@ void Player::ToggleAFK()
     }
 }
 
+/**
+ * @brief Toggles DND status.
+ */
 void Player::ToggleDND()
 {
     ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_DND);
 }
 
+/**
+ * @brief Gets the active chat tag displayed for the player.
+ *
+ * @return The chat tag flags for GM, AFK, DND, or none.
+ */
 ChatTagFlags Player::GetChatTag() const
 {
     ChatTagFlags tag = CHAT_TAG_NONE;
@@ -1991,6 +2186,18 @@ ChatTagFlags Player::GetChatTag() const
     return tag;
 }
 
+/**
+ * @brief Teleports the player to a target location, handling near and far cases.
+ *
+ * @param mapid The destination map id.
+ * @param x The destination x coordinate.
+ * @param y The destination y coordinate.
+ * @param z The destination z coordinate.
+ * @param orientation The destination orientation.
+ * @param options Teleport option flags.
+ * @param allowNoDelay true to bypass delayed-teleport deferral when possible.
+ * @return true if teleport setup succeeded; otherwise, false.
+ */
 bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options /*=0*/, AreaTrigger const* at /*=NULL*/)
 {
     if (!MapManager::IsValidMapCoord(mapid, x, y, z, orientation))
@@ -2264,6 +2471,11 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     return true;
 }
 
+/**
+ * @brief Teleports the player back to the saved battleground entry point.
+ *
+ * @return true if the teleport was initiated successfully; otherwise, false.
+ */
 bool Player::TeleportToBGEntryPoint()
 {
     ScheduleDelayedOperation(DELAYED_BG_MOUNT_RESTORE);
@@ -2271,6 +2483,9 @@ bool Player::TeleportToBGEntryPoint()
     return TeleportTo(m_bgData.joinPos);
 }
 
+/**
+ * @brief Executes queued delayed player operations.
+ */
 void Player::ProcessDelayedOperations()
 {
     if (m_DelayedOperations == 0)
@@ -2341,6 +2556,9 @@ void Player::ProcessDelayedOperations()
     m_DelayedOperations = 0;
 }
 
+/**
+ * @brief Adds the player and equipped items to the world.
+ */
 void Player::AddToWorld()
 {
     ///- Do not add/remove the player from the object storage
@@ -2357,6 +2575,9 @@ void Player::AddToWorld()
     }
 }
 
+/**
+ * @brief Removes the player and equipped items from the world.
+ */
 void Player::RemoveFromWorld()
 {
     for (int i = PLAYER_SLOT_START; i < PLAYER_SLOT_END; ++i)
@@ -2378,6 +2599,12 @@ void Player::RemoveFromWorld()
     Unit::RemoveFromWorld();
 }
 
+/**
+ * @brief Awards rage generated from dealing or receiving damage.
+ *
+ * @param damage The raw damage amount used for rage generation.
+ * @param attacker True when the player dealt the damage; false when the player received it.
+ */
 void Player::RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacker)
 {
     float addRage;
@@ -2407,6 +2634,9 @@ void Player::RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacke
     ModifyPower(POWER_RAGE, uint32(addRage * 10));
 }
 
+/**
+ * @brief Regenerates the player's health and power resources for the current tick.
+ */
 void Player::RegenerateAll(uint32 diff)
 {
     // Not in combat or they have regeneration
@@ -2436,6 +2666,11 @@ void Player::RegenerateAll(uint32 diff)
     m_regenTimer = REGEN_TIME_FULL;
 }
 
+/**
+ * @brief Regenerates or decays a specific player power type.
+ *
+ * @param power The power type to update.
+ */
 // diff contains the time in milliseconds since last regen.
 void Player::Regenerate(Powers power, uint32 diff)
 {
@@ -2551,6 +2786,9 @@ void Player::Regenerate(Powers power, uint32 diff)
     SetPower(power, curValue);
 }
 
+/**
+ * @brief Regenerates the player's health based on state, auras, and rates.
+ */
 void Player::RegenerateHealth(uint32 diff)
 {
     uint32 curValue = GetHealth();
@@ -2606,6 +2844,13 @@ void Player::RegenerateHealth(uint32 diff)
     ModifyHealth(int32(addvalue));
 }
 
+/**
+ * @brief Gets an NPC the player can currently interact with.
+ *
+ * @param guid The target creature GUID.
+ * @param npcflagmask Optional NPC flag mask that must be present on the creature.
+ * @return The interactable creature, or null if interaction is not allowed.
+ */
 Creature* Player::GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask)
 {
     // some basic checks
@@ -2673,6 +2918,13 @@ Creature* Player::GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask)
     return unit;
 }
 
+/**
+ * @brief Gets a game object the player can currently interact with.
+ *
+ * @param guid The target game object GUID.
+ * @param gameobject_type The required game object type, or MAX_GAMEOBJECT_TYPE for any type.
+ * @return The interactable game object, or null if interaction is not allowed.
+ */
 GameObject* Player::GetGameObjectIfCanInteractWith(ObjectGuid guid, uint32 gameobject_type) const
 {
     // some basic checks
@@ -2720,11 +2972,21 @@ GameObject* Player::GetGameObjectIfCanInteractWith(ObjectGuid guid, uint32 gameo
     return NULL;
 }
 
+/**
+ * @brief Checks whether the player is currently underwater.
+ *
+ * @return True if the player is underwater; otherwise, false.
+ */
 bool Player::IsUnderWater() const
 {
     return GetTerrain()->IsUnderWater(GetPositionX(), GetPositionY(), GetPositionZ() + 2);
 }
 
+/**
+ * @brief Updates the player's in-water state.
+ *
+ * @param apply True if the player is entering water; false if leaving it.
+ */
 void Player::SetInWater(bool apply)
 {
     if (m_isInWater == apply)
@@ -2766,6 +3028,11 @@ struct SetGameMasterOffHelper
     uint32 faction;
 };
 
+/**
+ * @brief Enables or disables game master mode for the player.
+ *
+ * @param on True to enable GM mode; false to disable it.
+ */
 void Player::SetGameMaster(bool on)
 {
     if (on)
@@ -2827,6 +3094,11 @@ void Player::SetGameMaster(bool on)
     UpdateForQuestWorldObjects();
 }
 
+/**
+ * @brief Sets whether a game master is visible to other players.
+ *
+ * @param on True to make the GM visible; false to hide them.
+ */
 void Player::SetGMVisible(bool on)
 {
     if (on)
@@ -2858,6 +3130,12 @@ void Player::SetGMVisible(bool on)
     }
 }
 
+/**
+ * @brief Checks whether another player should be visible through group visibility rules.
+ *
+ * @param p The player to test visibility against.
+ * @return True if the player is group-visible; otherwise, false.
+ */
 bool Player::IsGroupVisibleFor(Player* p) const
 {
     switch (sWorld.getConfig(CONFIG_UINT32_GROUP_VISIBILITY))
@@ -2871,6 +3149,12 @@ bool Player::IsGroupVisibleFor(Player* p) const
     }
 }
 
+/**
+ * @brief Checks whether this player and another player are in the same subgroup.
+ *
+ * @param p The other player to compare.
+ * @return True if both players share the same group context; otherwise, false.
+ */
 bool Player::IsInSameGroupWith(Player const* p) const
 {
     return (p == this || (GetGroup() != NULL &&
@@ -2905,6 +3189,13 @@ void Player::UninviteFromGroup()
     }
 }
 
+/**
+ * @brief Removes a member from a group and disposes of the group if it becomes empty.
+ *
+ * @param group The group to remove the member from.
+ * @param guid The GUID of the member to remove.
+ * @param removeMethod The group removal method to apply.
+ */
 void Player::RemoveFromGroup(Group* group, ObjectGuid guid, ObjectGuid kicker, std::string reason)
 {
     if (group)
@@ -2923,6 +3214,13 @@ void Player::RemoveFromGroup(Group* group, ObjectGuid guid, ObjectGuid kicker, s
     }
 }
 
+/**
+ * @brief Sends the experience gain log packet to the client.
+ *
+ * @param GivenXP The base amount of experience awarded.
+ * @param victim The kill source, or null for non-kill experience.
+ * @param RestXP The rested bonus experience amount.
+ */
 void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP)
 {
     WorldPacket data(SMSG_LOG_XPGAIN, 21);
@@ -2938,6 +3236,12 @@ void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP)
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Awards experience to the player and handles level-ups.
+ *
+ * @param xp The experience amount to award.
+ * @param victim The unit responsible for kill-based experience, if any.
+ */
 void Player::GiveXP(uint32 xp, Unit* victim)
 {
     if (xp < 1)
@@ -3015,10 +3319,11 @@ void Player::GiveXP(uint32 xp, Unit* victim)
     SetUInt32Value(PLAYER_XP, newXP);
 }
 
-/****************************************/
-/* Sets the player level if greater than 0 */
-/* and lesser than or equal to DEFAULT_MAX_LEVEL */
-/****************************************/
+/**
+ * @brief Advances the player to a new level and reapplies level-based stats.
+ *
+ * @param level The new level to assign.
+ */
 void Player::SetLevel(uint32 level)
 {
     uint8 oldLevel = getLevel();
@@ -3121,6 +3426,11 @@ void Player::SetLevel(uint32 level)
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL);
 }
 
+/**
+ * @brief Sets the number of free talent points available to the player.
+ *
+ * @param points The free talent point count.
+ */
 void Player::SetFreeTalentPoints(uint32 points)
 {
     // Used by Eluna
@@ -3143,6 +3453,11 @@ void Player::GiveLevel(uint32 level)
     return SetLevel(level);
 }
 
+/**
+ * @brief Recalculates the player's free talent points for the current level.
+ *
+ * @param resetIfNeed True to reset talents when the allocation is invalid.
+ */
 void Player::UpdateFreeTalentPoints(bool resetIfNeed)
 {
     uint32 level = getLevel();
@@ -3183,6 +3498,9 @@ void Player::UpdateFreeTalentPoints(bool resetIfNeed)
     }
 }
 
+/**
+ * @brief Initializes level-based talent availability for the player.
+ */
 void Player::InitTalentForLevel()
 {
     UpdateFreeTalentPoints();
@@ -3193,6 +3511,11 @@ void Player::InitTalentForLevel()
     }
 }
 
+/**
+ * @brief Initializes the player's base stats and resources for the current level.
+ *
+ * @param reapplyMods True to remove and reapply stat modifiers during initialization.
+ */
 void Player::InitStatsForLevel(bool reapplyMods)
 {
     if (reapplyMods)                                        // reapply stats values only on .reset stats (level) command
@@ -3372,6 +3695,9 @@ void Player::InitStatsForLevel(bool reapplyMods)
 }
 
 /* Used during Player::SendInitialPacketsBeforeAddToMap */
+/**
+ * @brief Sends the initial spellbook and cooldown state to the client.
+ */
 void Player::SendInitialSpells()
 {
     time_t curTime = time(NULL);
@@ -3463,6 +3789,11 @@ void Player::SendInitialSpells()
     DETAIL_LOG("CHARACTER: Sent Initial Spells");
 }
 
+/**
+ * @brief Removes a mail entry from the player's in-memory mailbox.
+ *
+ * @param id The message identifier to remove.
+ */
 void Player::RemoveMail(uint32 id)
 {
     for (PlayerMails::iterator itr = m_mail.begin(); itr != m_mail.end(); ++itr)
@@ -3476,6 +3807,16 @@ void Player::RemoveMail(uint32 id)
     }
 }
 
+/**
+ * @brief Sends the result of a mail operation to the client.
+ *
+ * @param mailId The mail message identifier.
+ * @param mailAction The mail action that was processed.
+ * @param mailError The result code for the action.
+ * @param equipError The equipment error code used for equip-related failures.
+ * @param item_guid The related item GUID low part.
+ * @param item_count The related item count.
+ */
 void Player::SendMailResult(uint32 mailId, MailResponseType mailAction, MailResponseResult mailError, uint32 equipError, uint32 item_guid, uint32 item_count)
 {
     WorldPacket data(SMSG_SEND_MAIL_RESULT, (4 + 4 + 4 + (mailError == MAIL_ERR_EQUIP_ERROR ? 4 : (mailAction == MAIL_ITEM_TAKEN ? 4 + 4 : 0))));
@@ -3494,6 +3835,9 @@ void Player::SendMailResult(uint32 mailId, MailResponseType mailAction, MailResp
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Notifies the client that new mail is available.
+ */
 void Player::SendNewMail()
 {
     // deliver undelivered mail
@@ -3502,6 +3846,9 @@ void Player::SendNewMail()
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Recalculates unread mail count and the next pending delivery time.
+ */
 void Player::UpdateNextMailTimeAndUnreads()
 {
     // calculate next delivery time (min. from non-delivered mails
@@ -3525,6 +3872,11 @@ void Player::UpdateNextMailTimeAndUnreads()
     }
 }
 
+/**
+ * @brief Tracks a newly scheduled mail delivery time.
+ *
+ * @param deliver_time The time when the mail should be delivered.
+ */
 void Player::AddNewMailDeliverTime(time_t deliver_time)
 {
     if (deliver_time <= time(NULL))                         // ready now
@@ -3541,6 +3893,16 @@ void Player::AddNewMailDeliverTime(time_t deliver_time)
     }
 }
 
+/**
+ * @brief Adds or updates a spell entry in the player's spellbook.
+ *
+ * @param spell_id The spell identifier to add.
+ * @param active True if the spell should be active in the spellbook.
+ * @param learning True if the spell is being learned now rather than loaded.
+ * @param dependent True if the spell is learned as a dependency.
+ * @param disabled True if the spell should remain disabled.
+ * @return True if the spell should be reported to the client as newly learned.
+ */
 bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependent, bool disabled)
 {
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);
@@ -3974,6 +4336,12 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
     return active && !disabled && !superceded_old;
 }
 
+/**
+ * @brief Determines whether a learned spell must be cast immediately like a passive.
+ *
+ * @param spellInfo The spell being evaluated.
+ * @return True if the spell should be cast on learn; otherwise, false.
+ */
 bool Player::IsNeedCastPassiveLikeSpellAtLearn(SpellEntry const* spellInfo) const
 {
     ShapeshiftForm form = GetShapeshiftForm();
@@ -3996,6 +4364,12 @@ bool Player::IsNeedCastPassiveLikeSpellAtLearn(SpellEntry const* spellInfo) cons
     return need_cast && (!spellInfo->CasterAuraState || HasAuraState(AuraState(spellInfo->CasterAuraState)));
 }
 
+/**
+ * @brief Learns a spell and notifies the client when appropriate.
+ *
+ * @param spell_id The spell identifier to learn.
+ * @param dependent True if the spell is being learned as a dependency.
+ */
 void Player::learnSpell(uint32 spell_id, bool dependent)
 {
     PlayerSpellMap::iterator itr = m_spells.find(spell_id);
@@ -4029,6 +4403,13 @@ void Player::learnSpell(uint32 spell_id, bool dependent)
     }
 }
 
+/**
+ * @brief Removes or disables a spell and updates dependent spell state.
+ *
+ * @param spell_id The spell identifier to remove.
+ * @param disabled True to disable the spell instead of fully removing it.
+ * @param learn_low_rank True to reactivate lower ranks when appropriate.
+ */
 void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank, bool sendUpdate)
 {
     PlayerSpellMap::iterator itr = m_spells.find(spell_id);
@@ -4303,6 +4684,12 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank, bo
     }
 }
 
+/**
+ * @brief Removes a cooldown entry for a specific spell.
+ *
+ * @param spell_id The spell identifier whose cooldown should be removed.
+ * @param update True to notify the client that the cooldown was cleared.
+ */
 void Player::RemoveSpellCooldown(uint32 spell_id, bool update /* = false */)
 {
     m_spellCooldowns.erase(spell_id);
@@ -4313,6 +4700,12 @@ void Player::RemoveSpellCooldown(uint32 spell_id, bool update /* = false */)
     }
 }
 
+/**
+ * @brief Removes cooldowns for all spells in a cooldown category.
+ *
+ * @param cat The spell category identifier.
+ * @param update True to notify the client for cleared cooldowns.
+ */
 void Player::RemoveSpellCategoryCooldown(uint32 cat, bool update /* = false */)
 {
     SpellCategoryStore::const_iterator ct = sSpellCategoryStore.find(cat);
@@ -4356,6 +4749,9 @@ void Player::RemoveArenaSpellCooldowns()
     }
 }
 
+/**
+ * @brief Clears all tracked spell cooldowns for the player.
+ */
 void Player::RemoveAllSpellCooldown()
 {
     if (!m_spellCooldowns.empty())
@@ -4369,6 +4765,11 @@ void Player::RemoveAllSpellCooldown()
     }
 }
 
+/**
+ * @brief Loads persisted spell cooldowns from the database query result.
+ *
+ * @param result The query result containing cooldown rows.
+ */
 void Player::_LoadSpellCooldowns(QueryResult* result)
 {
     // some cooldowns can be already set at aura loading...
@@ -4409,6 +4810,9 @@ void Player::_LoadSpellCooldowns(QueryResult* result)
     }
 }
 
+/**
+ * @brief Saves active spell cooldowns to the database.
+ */
 void Player::_SaveSpellCooldowns()
 {
     static SqlStatementID deleteSpellCooldown ;
@@ -4440,6 +4844,11 @@ void Player::_SaveSpellCooldowns()
     }
 }
 
+/**
+ * @brief Calculates the current cost to reset the player's talents.
+ *
+ * @return The reset cost in copper.
+ */
 uint32 Player::resetTalentsCost() const
 {
     // The first time reset costs 1 gold
@@ -4481,6 +4890,12 @@ uint32 Player::resetTalentsCost() const
     }
 }
 
+/**
+ * @brief Resets all learned talents for the player's class.
+ *
+ * @param no_cost True to skip charging the reset fee.
+ * @return True if talents were reset; otherwise, false.
+ */
 bool Player::resetTalents(bool no_cost, bool all_specs)
 {
     // Used by Eluna
@@ -4613,6 +5028,12 @@ bool Player::resetTalents(bool no_cost, bool all_specs)
     return true;
 }
 
+/**
+ * @brief Finds a mail entry by message identifier.
+ *
+ * @param id The message identifier to search for.
+ * @return The matching mail entry, or null if none exists.
+ */
 Mail* Player::GetMail(uint32 id)
 {
     for (PlayerMails::iterator itr = m_mail.begin(); itr != m_mail.end(); ++itr)
@@ -4625,6 +5046,12 @@ Mail* Player::GetMail(uint32 id)
     return NULL;
 }
 
+/**
+ * @brief Populates the create update mask for a target player.
+ *
+ * @param updateMask The update mask being built.
+ * @param target The player receiving the create data.
+ */
 void Player::_SetCreateBits(UpdateMask* updateMask, Player* target) const
 {
     if (target == this)
@@ -4643,6 +5070,12 @@ void Player::_SetCreateBits(UpdateMask* updateMask, Player* target) const
     }
 }
 
+/**
+ * @brief Populates the incremental update mask for a target player.
+ *
+ * @param updateMask The update mask being built.
+ * @param target The player receiving the update data.
+ */
 void Player::_SetUpdateBits(UpdateMask* updateMask, Player* target) const
 {
     if (target == this)
@@ -4656,6 +5089,9 @@ void Player::_SetUpdateBits(UpdateMask* updateMask, Player* target) const
     }
 }
 
+/**
+ * @brief Initializes the set of player fields visible to other clients.
+ */
 void Player::InitVisibleBits()
 {
     updateVisualBits.SetCount(PLAYER_END);
@@ -4748,6 +5184,12 @@ void Player::InitVisibleBits()
     updateVisualBits.SetBit(PLAYER_CHOSEN_TITLE);
 }
 
+/**
+ * @brief Builds the create update block for a player observer.
+ *
+ * @param data The update data buffer to append to.
+ * @param target The player receiving the create block.
+ */
 void Player::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) const
 {
     if (target == this)
@@ -4784,6 +5226,11 @@ void Player::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
     Unit::BuildCreateUpdateBlockForPlayer(data, target);
 }
 
+/**
+ * @brief Builds destroy updates for the player and visible inventory objects.
+ *
+ * @param target The player that should receive the destroy updates.
+ */
 void Player::DestroyForPlayer(Player* target, bool anim) const
 {
     Unit::DestroyForPlayer(target, anim);
@@ -4821,6 +5268,12 @@ void Player::DestroyForPlayer(Player* target, bool anim) const
     }
 }
 
+/**
+ * @brief Checks whether the player knows a spell.
+ *
+ * @param spell The spell identifier to test.
+ * @return True if the spell exists and is not removed or disabled; otherwise, false.
+ */
 bool Player::HasSpell(uint32 spell) const
 {
     PlayerSpellMap::const_iterator itr = m_spells.find(spell);
@@ -4834,6 +5287,12 @@ bool Player::HasTalent(uint32 spell, uint8 spec) const
     return (itr != m_talents[spec].end() && itr->second.state != PLAYERSPELL_REMOVED);
 }
 
+/**
+ * @brief Checks whether the player has a spell active in the spellbook.
+ *
+ * @param spell The spell identifier to test.
+ * @return True if the spell is known, active, and not disabled; otherwise, false.
+ */
 bool Player::HasActiveSpell(uint32 spell) const
 {
     PlayerSpellMap::const_iterator itr = m_spells.find(spell);
@@ -4841,6 +5300,13 @@ bool Player::HasActiveSpell(uint32 spell) const
             itr->second.active && !itr->second.disabled);
 }
 
+/**
+ * @brief Evaluates whether a trainer spell can be learned by the player.
+ *
+ * @param trainer_spell The trainer spell entry being checked.
+ * @param reqLevel An optional override for the required level.
+ * @return The trainer spell state to display to the client.
+ */
 TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell, uint32 reqLevel) const
 {
     if (!trainer_spell)
@@ -5216,6 +5682,11 @@ void Player::DeleteOldCharacters(uint32 keepDays)
     sLog.outString();
 }
 
+/**
+ * @brief Forces or clears rooted movement for the player.
+ *
+ * @param enable True to root the player; false to unroot them.
+ */
 void Player::SetRoot(bool enable)
 {
     WorldPacket data(enable ? SMSG_FORCE_MOVE_ROOT : SMSG_FORCE_MOVE_UNROOT, GetPackGUID().size() + 4);
@@ -5224,6 +5695,11 @@ void Player::SetRoot(bool enable)
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Enables or disables water walking for the player.
+ *
+ * @param enable True to enable water walking; false to restore normal movement.
+ */
 void Player::SetWaterWalk(bool enable)
 {
     WorldPacket data(enable ? SMSG_MOVE_WATER_WALK : SMSG_MOVE_LAND_WALK, GetPackGUID().size() + 4);
@@ -5232,6 +5708,11 @@ void Player::SetWaterWalk(bool enable)
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Placeholder for levitation support on this client version.
+ *
+ * @param enable Unused levitation state flag.
+ */
 void Player::SetLevitate(bool enable)
 {
     WorldPacket data;
@@ -5254,6 +5735,11 @@ void Player::SetLevitate(bool enable)
     SendMessageToSet(&data, false);
 }
 
+/**
+ * @brief Enables or disables flying movement flags for the player.
+ *
+ * @param enable True to enable flight-related movement flags; false to clear them.
+ */
 void Player::SetCanFly(bool enable)
 {
     WorldPacket data;
@@ -5276,6 +5762,11 @@ void Player::SetCanFly(bool enable)
     SendMessageToSet(&data, false);
 }
 
+/**
+ * @brief Enables or disables feather fall movement for the player.
+ *
+ * @param enable True to enable feather fall; false to restore normal falling.
+ */
 void Player::SetFeatherFall(bool enable)
 {
     WorldPacket data;
@@ -5299,6 +5790,11 @@ void Player::SetFeatherFall(bool enable)
     }
 }
 
+/**
+ * @brief Enables or disables hover movement for the player.
+ *
+ * @param enable True to enable hovering; false to disable it.
+ */
 void Player::SetHover(bool enable)
 {
     WorldPacket data;
@@ -5381,6 +5877,12 @@ void Player::BuildPlayerRepop()
     SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
 }
 
+/**
+ * @brief Restores the player to life and reapplies post-resurrection effects.
+ *
+ * @param restore_percent The fraction of health and resources to restore.
+ * @param applySickness True to apply resurrection sickness when appropriate.
+ */
 void Player::ResurrectPlayer(float restore_percent, bool applySickness)
 {
     WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4 * 4);        // remove spirit healer position
@@ -5464,6 +5966,9 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
     }
 }
 
+/**
+ * @brief Transitions the player into the corpse state after death.
+ */
 void Player::KillPlayer()
 {
     SetRoot(true);
@@ -5487,6 +5992,11 @@ void Player::KillPlayer()
     UpdateObjectVisibility();
 }
 
+/**
+ * @brief Creates a corpse object for the player's current death state.
+ *
+ * @return The created corpse, or null if creation failed.
+ */
 Corpse* Player::CreateCorpse()
 {
     // prevent existence 2 corpse for player
@@ -5561,6 +6071,9 @@ Corpse* Player::CreateCorpse()
     return corpse;
 }
 
+/**
+ * @brief Converts an existing corpse into bones and persists the ghost state if needed.
+ */
 void Player::SpawnCorpseBones()
 {
     if (sObjectAccessor.ConvertCorpseForPlayer(GetObjectGuid()))
@@ -5570,11 +6083,22 @@ void Player::SpawnCorpseBones()
         }
 }
 
+/**
+ * @brief Gets the player's current corpse object.
+ *
+ * @return The player's corpse, or null if none exists.
+ */
 Corpse* Player::GetCorpse() const
 {
     return sObjectAccessor.GetCorpseForPlayerGUID(GetObjectGuid());
 }
 
+/**
+ * @brief Applies percentage-based durability loss to equipped items and optionally inventory items.
+ *
+ * @param percent The fraction of maximum durability to remove.
+ * @param inventory True to include inventory and bag contents.
+ */
 void Player::DurabilityLossAll(double percent, bool inventory)
 {
     for (int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
@@ -5607,6 +6131,12 @@ void Player::DurabilityLossAll(double percent, bool inventory)
     }
 }
 
+/**
+ * @brief Applies percentage-based durability loss to a single item.
+ *
+ * @param item The item to damage.
+ * @param percent The fraction of maximum durability to remove.
+ */
 void Player::DurabilityLoss(Item* item, double percent)
 {
     if (!item)
@@ -5631,6 +6161,12 @@ void Player::DurabilityLoss(Item* item, double percent)
     DurabilityPointsLoss(item, pDurabilityLoss);
 }
 
+/**
+ * @brief Applies flat durability loss to equipped items and optionally inventory items.
+ *
+ * @param points The number of durability points to remove.
+ * @param inventory True to include inventory and bag contents.
+ */
 void Player::DurabilityPointsLossAll(int32 points, bool inventory)
 {
     for (int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
@@ -5664,6 +6200,12 @@ void Player::DurabilityPointsLossAll(int32 points, bool inventory)
     }
 }
 
+/**
+ * @brief Applies flat durability loss to a single item.
+ *
+ * @param item The item to damage.
+ * @param points The number of durability points to remove.
+ */
 void Player::DurabilityPointsLoss(Item* item, int32 points)
 {
     int32 pMaxDurability = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
@@ -5699,6 +6241,11 @@ void Player::DurabilityPointsLoss(Item* item, int32 points)
     }
 }
 
+/**
+ * @brief Removes one durability point from an equipped item slot.
+ *
+ * @param slot The equipment slot to damage.
+ */
 void Player::DurabilityPointLossForEquipSlot(EquipmentSlots slot)
 {
     if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
@@ -5707,6 +6254,13 @@ void Player::DurabilityPointLossForEquipSlot(EquipmentSlots slot)
     }
 }
 
+/**
+ * @brief Repairs all eligible equipped and carried items.
+ *
+ * @param cost True to charge the player for repairs.
+ * @param discountMod The vendor discount multiplier to apply.
+ * @return The total repair cost.
+ */
 uint32 Player::DurabilityRepairAll(bool cost, float discountMod, bool guildBank)
 {
     uint32 TotalCost = 0;
@@ -5727,6 +6281,14 @@ uint32 Player::DurabilityRepairAll(bool cost, float discountMod, bool guildBank)
     return TotalCost;
 }
 
+/**
+ * @brief Repairs a single item to full durability.
+ *
+ * @param pos The packed inventory position of the item.
+ * @param cost True to charge the player for the repair.
+ * @param discountMod The vendor discount multiplier to apply.
+ * @return The repair cost for the item.
+ */
 uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod, bool guildBank)
 {
     Item* item = GetItemByPos(pos);
@@ -5835,6 +6397,9 @@ uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod, bool g
     return TotalCost;
 }
 
+/**
+ * @brief Moves the player to the nearest valid graveyard.
+ */
 void Player::RepopAtGraveyard()
 {
     // note: this can be called also when the player is alive
@@ -5886,16 +6451,29 @@ void Player::RepopAtGraveyard()
     }
 }
 
+/**
+ * @brief Registers a joined chat channel on the player.
+ *
+ * @param c The channel that was joined.
+ */
 void Player::JoinedChannel(Channel* c)
 {
     m_channels.push_back(c);
 }
 
+/**
+ * @brief Removes a chat channel from the player's joined channel list.
+ *
+ * @param c The channel that was left.
+ */
 void Player::LeftChannel(Channel* c)
 {
     m_channels.remove(c);
 }
 
+/**
+ * @brief Leaves and cleans up all channels currently joined by the player.
+ */
 void Player::CleanupChannels()
 {
     while (!m_channels.empty())
@@ -5911,6 +6489,11 @@ void Player::CleanupChannels()
     DEBUG_LOG("Player: channels cleaned up!");
 }
 
+/**
+ * @brief Updates built-in local channels after a zone change.
+ *
+ * @param newZone The new area identifier used for localized channel names.
+ */
 void Player::UpdateLocalChannels(uint32 newZone)
 {
     if (m_channels.empty())
@@ -5972,6 +6555,9 @@ void Player::UpdateLocalChannels(uint32 newZone)
     DEBUG_LOG("Player: channels cleaned up!");
 }
 
+/**
+ * @brief Leaves the currently joined looking-for-group channel, if any.
+ */
 void Player::LeaveLFGChannel()
 {
     for (JoinedChannelsList::iterator i = m_channels.begin(); i != m_channels.end(); ++i)
@@ -5984,6 +6570,9 @@ void Player::LeaveLFGChannel()
     }
 }
 
+/**
+ * @brief Attempts to improve defense skill and refresh defense-derived bonuses.
+ */
 void Player::UpdateDefense()
 {
     uint32 defense_skill_gain = sWorld.getConfig(CONFIG_UINT32_SKILL_GAIN_DEFENSE);
@@ -5995,6 +6584,14 @@ void Player::UpdateDefense()
     }
 }
 
+/**
+ * @brief Applies or removes a base modifier affecting derived combat values.
+ *
+ * @param modGroup The modifier group to update.
+ * @param modType The modifier type to apply.
+ * @param amount The modifier amount.
+ * @param apply True to apply the modifier; false to remove it.
+ */
 void Player::HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, float amount, bool apply)
 {
     if (modGroup >= BASEMOD_END || modType >= MOD_END)
@@ -6036,6 +6633,13 @@ void Player::HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, floa
     }
 }
 
+/**
+ * @brief Gets a stored base modifier value.
+ *
+ * @param modGroup The modifier group to query.
+ * @param modType The modifier type to query.
+ * @return The stored modifier value.
+ */
 float Player::GetBaseModValue(BaseModGroup modGroup, BaseModType modType) const
 {
     if (modGroup >= BASEMOD_END || modType > MOD_END)
@@ -6052,6 +6656,12 @@ float Player::GetBaseModValue(BaseModGroup modGroup, BaseModType modType) const
     return m_auraBaseMod[modGroup][modType];
 }
 
+/**
+ * @brief Gets the combined flat and percentage base modifier value for a group.
+ *
+ * @param modGroup The modifier group to query.
+ * @return The total effective modifier value.
+ */
 float Player::GetTotalBaseModValue(BaseModGroup modGroup) const
 {
     if (modGroup >= BASEMOD_END)
@@ -6068,6 +6678,11 @@ float Player::GetTotalBaseModValue(BaseModGroup modGroup) const
     return m_auraBaseMod[modGroup][FLAT_MOD] * m_auraBaseMod[modGroup][PCT_MOD];
 }
 
+/**
+ * @brief Computes the player's current shield block value.
+ *
+ * @return The effective shield block amount.
+ */
 uint32 Player::GetShieldBlockValue() const
 {
     float value = (m_auraBaseMod[SHIELD_BLOCK_VALUE][FLAT_MOD] + GetStat(STAT_STRENGTH) * 0.5f - 10) * m_auraBaseMod[SHIELD_BLOCK_VALUE][PCT_MOD];
@@ -6077,6 +6692,11 @@ uint32 Player::GetShieldBlockValue() const
     return uint32(value);
 }
 
+/**
+ * @brief Calculates melee critical strike chance gained from agility.
+ *
+ * @return The melee crit contribution from agility.
+ */
 float Player::GetMeleeCritFromAgility()
 {
     uint32 level = getLevel();
@@ -6095,6 +6715,9 @@ float Player::GetMeleeCritFromAgility()
     return crit * 100.0f;
 }
 
+/**
+ * @brief Calculates dodge chance gained from agility.
+ */
 void Player::GetDodgeFromAgility(float& diminishing, float& nondiminishing)
 {
     // Table for base dodge values
@@ -6148,6 +6771,11 @@ void Player::GetDodgeFromAgility(float& diminishing, float& nondiminishing)
     nondiminishing = 100.0f * (dodge_base[pclass - 1] + base_agility * dodgeRatio->ratio * crit_to_dodge[pclass - 1]);
 }
 
+/**
+ * @brief Calculates spell critical strike chance gained from intellect.
+ *
+ * @return The spell crit contribution from intellect.
+ */
 float Player::GetSpellCritFromIntellect()
 {
     uint32 level = getLevel();
@@ -6202,6 +6830,11 @@ float Player::GetExpertiseDodgeOrParryReduction(WeaponAttackType attType) const
     return 0.0f;
 }
 
+/**
+ * @brief Calculates health regeneration per spirit tick.
+ *
+ * @return The health regeneration value based on spirit and class.
+ */
 float Player::OCTRegenHPPerSpirit()
 {
     uint32 level = getLevel();
@@ -6228,6 +6861,11 @@ float Player::OCTRegenHPPerSpirit()
     return regen;
 }
 
+/**
+ * @brief Calculates mana regeneration per spirit tick.
+ *
+ * @return The mana regeneration value based on spirit and class.
+ */
 float Player::OCTRegenMPPerSpirit()
 {
     uint32 level = getLevel();
@@ -6385,6 +7023,9 @@ void Player::UpdateAllRatings()
     }
 }
 
+/**
+ * @brief Restores attack timers from currently equipped weapon delays.
+ */
 void Player::SetRegularAttackTime()
 {
     for (int i = 0; i < MAX_ATTACK; ++i)
@@ -6456,6 +7097,15 @@ bool Player::UpdateSkill(uint32 skill_id, uint32 step)
     return false;
 }
 
+/**
+ * @brief Calculates the configured chance to gain a skill point at the current value.
+ *
+ * @param SkillValue The player's current skill value.
+ * @param GrayLevel The value at which gains become gray.
+ * @param GreenLevel The value at which gains become green.
+ * @param YellowLevel The value at which gains become yellow.
+ * @return The gain chance scaled by ten.
+ */
 inline int SkillGainChance(uint32 SkillValue, uint32 GrayLevel, uint32 GreenLevel, uint32 YellowLevel)
 {
     if (SkillValue >= GrayLevel)
@@ -6473,6 +7123,12 @@ inline int SkillGainChance(uint32 SkillValue, uint32 GrayLevel, uint32 GreenLeve
     return sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_ORANGE) * 10;
 }
 
+/**
+ * @brief Attempts to increase a crafting skill based on a spell cast.
+ *
+ * @param spellid The crafting spell identifier.
+ * @return True if the skill increased; otherwise, false.
+ */
 bool Player::UpdateCraftSkill(uint32 spellid)
 {
     DEBUG_LOG("UpdateCraftSkill spellid %d", spellid);
@@ -6508,6 +7164,15 @@ bool Player::UpdateCraftSkill(uint32 spellid)
     return false;
 }
 
+/**
+ * @brief Attempts to increase a gathering skill using profession-specific gain rules.
+ *
+ * @param SkillId The skill identifier to update.
+ * @param SkillValue The current skill value.
+ * @param RedLevel The red difficulty threshold for the source.
+ * @param Multiplicator An additional gain chance multiplier.
+ * @return True if the skill increased; otherwise, false.
+ */
 bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLevel, uint32 Multiplicator)
 {
     DEBUG_LOG("UpdateGatherSkill(SkillId %d SkillLevel %d RedLevel %d)", SkillId, SkillValue, RedLevel);
@@ -6544,6 +7209,11 @@ bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLeve
     return false;
 }
 
+/**
+ * @brief Attempts to increase the player's fishing skill.
+ *
+ * @return True if the skill increased; otherwise, false.
+ */
 bool Player::UpdateFishingSkill()
 {
     DEBUG_LOG("UpdateFishingSkill");
@@ -6562,6 +7232,14 @@ bool Player::UpdateFishingSkill()
 // Used only to avoid scan DBC at each skill grow
 static uint32 bonusSkillLevels[] = {75, 150, 225, 300, 375, 450};
 
+/**
+ * @brief Attempts to increase a skill using an explicit percentage chance.
+ *
+ * @param SkillId The skill identifier to update.
+ * @param Chance The gain chance in tenths of a percent.
+ * @param step The amount to increase the skill by.
+ * @return True if the skill increased; otherwise, false.
+ */
 bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step)
 {
     DEBUG_LOG("UpdateSkillPro(SkillId %d, Chance %3.1f%%)", SkillId, Chance / 10.0);
@@ -6632,6 +7310,11 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step)
     return false;
 }
 
+/**
+ * @brief Attempts to improve the player's weapon skill for an attack type.
+ *
+ * @param attType The attack type whose weapon skill should be updated.
+ */
 void Player::UpdateWeaponSkill(WeaponAttackType attType)
 {
     // no skill gain in pvp
@@ -6666,6 +7349,13 @@ void Player::UpdateWeaponSkill(WeaponAttackType attType)
     UpdateAllCritPercentages();
 }
 
+/**
+ * @brief Attempts to improve weapon or defense skills from combat.
+ *
+ * @param pVictim The opposing unit involved in combat.
+ * @param attType The attack type used for offensive skill checks.
+ * @param defence True to evaluate defense gain; false for weapon skill gain.
+ */
 void Player::UpdateCombatSkills(Unit* pVictim, WeaponAttackType attType, bool defence)
 {
     uint32 plevel = getLevel();                             // if defense than pVictim == attacker
@@ -6721,6 +7411,13 @@ void Player::UpdateCombatSkills(Unit* pVictim, WeaponAttackType attType, bool de
     }
 }
 
+/**
+ * @brief Modifies the temporary or permanent bonus for a skill.
+ *
+ * @param skillid The skill identifier to modify.
+ * @param val The bonus amount to add or remove.
+ * @param talent True for permanent talent-based bonuses; false for temporary bonuses.
+ */
 void Player::ModifySkillBonus(uint32 skillid, int32 val, bool talent)
 {
     SkillStatusMap::const_iterator itr = mSkillStatus.find(skillid);
@@ -6745,6 +7442,9 @@ void Player::ModifySkillBonus(uint32 skillid, int32 val, bool talent)
     }
 }
 
+/**
+ * @brief Updates level-scaled skills to match the player's current level cap.
+ */
 void Player::UpdateSkillsForLevel()
 {
     uint16 maxconfskill = sWorld.GetConfigMaxSkillValue();
@@ -6803,6 +7503,9 @@ void Player::UpdateSkillsForLevel()
     }
 }
 
+/**
+ * @brief Raises non-profession skills to their current maximum values.
+ */
 void Player::UpdateSkillsToMaxSkillsForLevel()
 {
     for (SkillStatusMap::iterator itr = mSkillStatus.begin(); itr != mSkillStatus.end(); ++itr)
@@ -6954,6 +7657,12 @@ void Player::SetSkill(uint16 id, uint16 currVal, uint16 maxVal, uint16 step /*=0
     }
 }
 
+/**
+ * @brief Checks whether the player currently has a skill line.
+ *
+ * @param skill The skill identifier to test.
+ * @return True if the skill exists and is not deleted; otherwise, false.
+ */
 bool Player::HasSkill(uint32 skill) const
 {
     if (!skill)
@@ -6965,6 +7674,12 @@ bool Player::HasSkill(uint32 skill) const
     return (itr != mSkillStatus.end() && itr->second.uState != SKILL_DELETED);
 }
 
+/**
+ * @brief Gets the total current value of a skill including bonuses.
+ *
+ * @param skill The skill identifier to query.
+ * @return The current effective skill value.
+ */
 uint16 Player::GetSkillValue(uint32 skill) const
 {
     if (!skill)
@@ -6992,6 +7707,12 @@ uint16 Player::GetSkillValue(uint32 skill) const
     return result < 0 ? 0 : result;
 }
 
+/**
+ * @brief Gets the total maximum value of a skill including bonuses.
+ *
+ * @param skill The skill identifier to query.
+ * @return The effective maximum skill value.
+ */
 uint16 Player::GetMaxSkillValue(uint32 skill) const
 {
     if (!skill)
@@ -7019,6 +7740,12 @@ uint16 Player::GetMaxSkillValue(uint32 skill) const
     return result < 0 ? 0 : result;
 }
 
+/**
+ * @brief Gets the unmodified maximum value of a skill.
+ *
+ * @param skill The skill identifier to query.
+ * @return The stored maximum skill value without bonuses.
+ */
 uint16 Player::GetPureMaxSkillValue(uint32 skill) const
 {
     if (!skill)
@@ -7041,6 +7768,12 @@ uint16 Player::GetPureMaxSkillValue(uint32 skill) const
     return SKILL_MAX(GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(skillStatus.pos)));
 }
 
+/**
+ * @brief Gets the base value of a skill including permanent bonuses.
+ *
+ * @param skill The skill identifier to query.
+ * @return The base skill value with permanent bonuses applied.
+ */
 uint16 Player::GetBaseSkillValue(uint32 skill) const
 {
     if (!skill)
@@ -7065,6 +7798,12 @@ uint16 Player::GetBaseSkillValue(uint32 skill) const
     return result < 0 ? 0 : result;
 }
 
+/**
+ * @brief Gets the raw stored value of a skill without bonuses.
+ *
+ * @param skill The skill identifier to query.
+ * @return The raw stored skill value.
+ */
 uint16 Player::GetPureSkillValue(uint32 skill) const
 {
     if (!skill)
@@ -7087,6 +7826,12 @@ uint16 Player::GetPureSkillValue(uint32 skill) const
     return SKILL_VALUE(GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(skillStatus.pos)));
 }
 
+/**
+ * @brief Gets the permanent bonus value applied to a skill.
+ *
+ * @param skill The skill identifier to query.
+ * @return The permanent skill bonus.
+ */
 int16 Player::GetSkillPermBonusValue(uint32 skill) const
 {
     if (!skill)
@@ -7109,6 +7854,12 @@ int16 Player::GetSkillPermBonusValue(uint32 skill) const
     return SKILL_PERM_BONUS(GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(skillStatus.pos)));
 }
 
+/**
+ * @brief Gets the temporary bonus value applied to a skill.
+ *
+ * @param skill The skill identifier to query.
+ * @return The temporary skill bonus.
+ */
 int16 Player::GetSkillTempBonusValue(uint32 skill) const
 {
     if (!skill)
@@ -7132,6 +7883,9 @@ int16 Player::GetSkillTempBonusValue(uint32 skill) const
 }
 
 /* Called from Player::SendInitialPacketsBeforeAddToMap */
+/**
+ * @brief Sends the player's initial action bar state to the client.
+ */
 void Player::SendInitialActionButtons() const
 {
     DETAIL_LOG("Initializing Action Buttons for '%u' spec '%u'", GetGUIDLow(), m_activeSpec);
@@ -7171,6 +7925,15 @@ void Player::SendLockActionButtons() const
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Validates action bar data before it is stored or loaded.
+ *
+ * @param button The action bar button index.
+ * @param action The action identifier assigned to the button.
+ * @param type The action button type.
+ * @param player The player being validated for, or null for template data.
+ * @return True if the action button data is valid; otherwise, false.
+ */
 bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type, Player* player, bool msg)
 {
     if (button >= MAX_ACTION_BUTTONS)
@@ -7269,6 +8032,14 @@ bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type, Pl
     return true;
 }
 
+/**
+ * @brief Adds or updates an action bar button entry.
+ *
+ * @param button The action bar button index.
+ * @param action The action identifier to bind.
+ * @param type The action button type.
+ * @return The updated action button, or null if validation fails.
+ */
 ActionButton* Player::addActionButton(uint8 spec, uint8 button, uint32 action, uint8 type)
 {
     // check action only for active spec (so not check at copy/load passive spec)
@@ -7287,6 +8058,11 @@ ActionButton* Player::addActionButton(uint8 spec, uint8 button, uint32 action, u
     return &ab;
 }
 
+/**
+ * @brief Removes an action bar button entry.
+ *
+ * @param button The action bar button index to remove.
+ */
 void Player::removeActionButton(uint8 spec, uint8 button)
 {
     ActionButtonList& currentActionButtonList = m_actionButtons[spec];
@@ -7320,6 +8096,16 @@ ActionButton const* Player::GetActionButton(uint8 button)
     return &buttonItr->second;
 }
 
+/**
+ * @brief Moves the player to a new position and updates related state.
+ *
+ * @param x The destination X coordinate.
+ * @param y The destination Y coordinate.
+ * @param z The destination Z coordinate.
+ * @param orientation The destination facing angle.
+ * @param teleport True if the move should be treated as a teleport.
+ * @return True if the position update succeeded; otherwise, false.
+ */
 bool Player::SetPosition(float x, float y, float z, float orientation, bool teleport)
 {
     // prevent crash when a bad coord is sent by the client
@@ -7384,6 +8170,9 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
     return true;
 }
 
+/**
+ * @brief Saves the player's current position as the recall location.
+ */
 void Player::SaveRecallPosition()
 {
     m_recallMap = GetMapId();
@@ -7393,6 +8182,12 @@ void Player::SaveRecallPosition()
     m_recallO = GetOrientation();
 }
 
+/**
+ * @brief Broadcasts a packet to nearby clients and optionally to the player.
+ *
+ * @param data The packet to send.
+ * @param self True to also send the packet to the player session.
+ */
 void Player::SendMessageToSet(WorldPacket* data, bool self) const
 {
     if (IsInWorld())
@@ -7408,6 +8203,13 @@ void Player::SendMessageToSet(WorldPacket* data, bool self) const
     }
 }
 
+/**
+ * @brief Broadcasts a packet to nearby clients within a distance and optionally to the player.
+ *
+ * @param data The packet to send.
+ * @param dist The maximum broadcast distance.
+ * @param self True to also send the packet to the player session.
+ */
 void Player::SendMessageToSetInRange(WorldPacket* data, float dist, bool self) const
 {
     if (IsInWorld())
@@ -7421,6 +8223,14 @@ void Player::SendMessageToSetInRange(WorldPacket* data, float dist, bool self) c
     }
 }
 
+/**
+ * @brief Broadcasts a packet within range with optional team filtering.
+ *
+ * @param data The packet to send.
+ * @param dist The maximum broadcast distance.
+ * @param self True to also send the packet to the player session.
+ * @param own_team_only True to restrict delivery to the player's team.
+ */
 void Player::SendMessageToSetInRange(WorldPacket* data, float dist, bool self, bool own_team_only) const
 {
     if (IsInWorld())
@@ -7434,11 +8244,21 @@ void Player::SendMessageToSetInRange(WorldPacket* data, float dist, bool self, b
     }
 }
 
+/**
+ * @brief Sends a packet directly to the player's session.
+ *
+ * @param data The packet to send.
+ */
 void Player::SendDirectMessage(WorldPacket* data) const
 {
     GetSession()->SendPacket(data);
 }
 
+/**
+ * @brief Starts a cinematic sequence for the player client.
+ *
+ * @param CinematicSequenceId The cinematic sequence identifier.
+ */
 void Player::SendCinematicStart(uint32 CinematicSequenceId)
 {
     WorldPacket data(SMSG_TRIGGER_CINEMATIC, 4);
@@ -7447,6 +8267,11 @@ void Player::SendCinematicStart(uint32 CinematicSequenceId)
 }
 
 #if defined (WOTLK) || defined (CATA) || defined (MISTS)
+/**
+ * @brief Starts a movie sequence for the player client.
+ *
+ * @param MovieId The movie identifier.
+ */
 void Player::SendMovieStart(uint32 MovieId)
 {
     WorldPacket data(SMSG_TRIGGER_MOVIE, 4);
@@ -7455,6 +8280,9 @@ void Player::SendMovieStart(uint32 MovieId)
 }
 #endif
 
+/**
+ * @brief Updates outdoor-only effects and exploration discovery for the current position.
+ */
 void Player::CheckAreaExploreAndOutdoor()
 {
     if (!IsAlive())
@@ -7574,6 +8402,12 @@ void Player::CheckAreaExploreAndOutdoor()
     }
 }
 
+/**
+ * @brief Gets the faction team associated with a race.
+ *
+ * @param race The race identifier to evaluate.
+ * @return The team assigned to the race.
+ */
 Team Player::TeamForRace(uint8 race)
 {
     ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(race);
@@ -7593,6 +8427,12 @@ Team Player::TeamForRace(uint8 race)
     return TEAM_NONE;
 }
 
+/**
+ * @brief Gets the faction template associated with a race.
+ *
+ * @param race The race identifier to evaluate.
+ * @return The faction template identifier for the race.
+ */
 uint32 Player::getFactionForRace(uint8 race)
 {
     ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(race);
@@ -7605,12 +8445,23 @@ uint32 Player::getFactionForRace(uint8 race)
     return rEntry->FactionID;
 }
 
+/**
+ * @brief Sets the player's team and faction from the specified race.
+ *
+ * @param race The race identifier to apply.
+ */
 void Player::setFactionForRace(uint8 race)
 {
     m_team = TeamForRace(race);
     setFaction(getFactionForRace(race));
 }
 
+/**
+ * @brief Gets the player's current reputation rank with a faction.
+ *
+ * @param faction The faction identifier to query.
+ * @return The current reputation rank.
+ */
 ReputationRank Player::GetReputationRank(uint32 faction) const
 {
     FactionEntry const* factionEntry = sFactionStore.LookupEntry(faction);
@@ -8064,6 +8915,12 @@ void Player::ModifyArenaPoints(int32 value)
     SetArenaPoints(newValue);
 }
 
+/**
+ * @brief Loads a player's guild identifier from the database.
+ *
+ * @param guid The player GUID to query.
+ * @return The guild identifier, or zero if none is found.
+ */
 uint32 Player::GetGuildIdFromDB(ObjectGuid guid)
 {
     uint32 lowguid = guid.GetCounter();
@@ -8079,6 +8936,12 @@ uint32 Player::GetGuildIdFromDB(ObjectGuid guid)
     return id;
 }
 
+/**
+ * @brief Loads a player's guild rank from the database.
+ *
+ * @param guid The player GUID to query.
+ * @return The guild rank, or zero if none is found.
+ */
 uint32 Player::GetRankFromDB(ObjectGuid guid)
 {
     QueryResult* result = CharacterDatabase.PQuery("SELECT `rank` FROM `guild_member` WHERE `guid`='%u'", guid.GetCounter());
@@ -8107,6 +8970,12 @@ uint32 Player::GetArenaTeamIdFromDB(ObjectGuid guid, ArenaType type)
     return id;
 }
 
+/**
+ * @brief Loads or derives a player's saved zone identifier from the database.
+ *
+ * @param guid The player GUID to query.
+ * @return The resolved zone identifier, or zero on failure.
+ */
 uint32 Player::GetZoneIdFromDB(ObjectGuid guid)
 {
     uint32 lowguid = guid.GetCounter();
@@ -8145,6 +9014,12 @@ uint32 Player::GetZoneIdFromDB(ObjectGuid guid)
     return zone;
 }
 
+/**
+ * @brief Loads a player's level from the database.
+ *
+ * @param guid The player GUID to query.
+ * @return The stored level, or zero on failure.
+ */
 uint32 Player::GetLevelFromDB(ObjectGuid guid)
 {
     uint32 lowguid = guid.GetCounter();
@@ -8162,6 +9037,11 @@ uint32 Player::GetLevelFromDB(ObjectGuid guid)
     return level;
 }
 
+/**
+ * @brief Updates area-specific player state and auras.
+ *
+ * @param newArea The new area identifier.
+ */
 void Player::UpdateArea(uint32 newArea)
 {
     m_areaUpdateId    = newArea;
@@ -8203,6 +9083,11 @@ void Player::UpdateArea(uint32 newArea)
     UpdateAreaDependentAuras();
 }
 
+/**
+ * @brief Checks whether the player is eligible to interact with a capture point.
+ *
+ * @return True if the player can use the capture point; otherwise, false.
+ */
 bool Player::CanUseCapturePoint()
 {
     return IsAlive() &&                                     // living
@@ -8214,6 +9099,12 @@ bool Player::CanUseCapturePoint()
            !isGameMaster();
 }
 
+/**
+ * @brief Updates zone and area state after the player changes location.
+ *
+ * @param newZone The new zone identifier.
+ * @param newArea The new area identifier.
+ */
 void Player::UpdateZone(uint32 newZone, uint32 newArea)
 {
     /* If we're trying to update into a zone that doesn't exist, just return */
@@ -8375,6 +9266,11 @@ void Player::CheckDuelDistance(time_t currTime)
     }
 }
 
+/**
+ * @brief Finalizes an active duel and cleans up all duel state.
+ *
+ * @param type The duel completion result.
+ */
 void Player::DuelComplete(DuelCompleteType type)
 {
     // duel not requested
@@ -8532,6 +9428,13 @@ void Player::_ApplyItemMods(Item* item, uint8 slot, bool apply)
     DEBUG_LOG("_ApplyItemMods complete.");
 }
 
+/**
+ * @brief Applies or removes stat bonuses from an equipped item prototype.
+ *
+ * @param proto The item prototype supplying the bonuses.
+ * @param slot The equipment slot receiving the bonuses.
+ * @param apply True to apply the bonuses; false to remove them.
+ */
 void Player::_ApplyItemBonuses(ItemPrototype const* proto, uint8 slot, bool apply, bool only_level_scale /*= false*/)
 {
     if (slot >= INVENTORY_SLOT_BAG_END || !proto)
@@ -8896,6 +9799,13 @@ void Player::_ApplyItemBonuses(ItemPrototype const* proto, uint8 slot, bool appl
     }
 }
 
+/**
+ * @brief Applies or removes weapon-specific aura modifiers for an equipped weapon.
+ *
+ * @param item The equipped weapon item.
+ * @param attackType The attack type affected by the weapon.
+ * @param apply True to apply modifiers; false to remove them.
+ */
 void Player::_ApplyWeaponDependentAuraMods(Item* item, WeaponAttackType attackType, bool apply)
 {
     AuraList const& auraCritList = GetAurasByType(SPELL_AURA_MOD_CRIT_PERCENT);
@@ -8917,6 +9827,14 @@ void Player::_ApplyWeaponDependentAuraMods(Item* item, WeaponAttackType attackTy
     }
 }
 
+/**
+ * @brief Applies or removes a weapon-dependent critical strike aura modifier.
+ *
+ * @param item The equipped weapon item.
+ * @param attackType The affected attack type.
+ * @param aura The aura providing the modifier.
+ * @param apply True to apply the modifier; false to remove it.
+ */
 void Player::_ApplyWeaponDependentAuraCritMod(Item* item, WeaponAttackType attackType, Aura* aura, bool apply)
 {
     // generic not weapon specific case processes in aura code
@@ -8940,6 +9858,14 @@ void Player::_ApplyWeaponDependentAuraCritMod(Item* item, WeaponAttackType attac
     }
 }
 
+/**
+ * @brief Applies or removes a weapon-dependent damage aura modifier.
+ *
+ * @param item The equipped weapon item.
+ * @param attackType The affected attack type.
+ * @param aura The aura providing the modifier.
+ * @param apply True to apply the modifier; false to remove it.
+ */
 void Player::_ApplyWeaponDependentAuraDamageMod(Item* item, WeaponAttackType attackType, Aura* aura, bool apply)
 {
     // ignore spell mods for not wands
@@ -8978,6 +9904,13 @@ void Player::_ApplyWeaponDependentAuraDamageMod(Item* item, WeaponAttackType att
     }
 }
 
+/**
+ * @brief Applies or removes all item spells associated with an equipped item.
+ *
+ * @param item The equipped item to process.
+ * @param apply True to apply item equip effects; false to remove them.
+ * @param form_change True if the update is caused by a shapeshift form change.
+ */
 void Player::ApplyItemEquipSpell(Item* item, bool apply, bool form_change)
 {
     if (!item)
@@ -9031,6 +9964,14 @@ void Player::ApplyItemEquipSpell(Item* item, bool apply, bool form_change)
     }
 }
 
+/**
+ * @brief Applies or removes a single equipment-derived spell effect.
+ *
+ * @param spellInfo The spell entry to process.
+ * @param item The source item, or null for item set bonuses.
+ * @param apply True to apply the spell effect; false to remove it.
+ * @param form_change True if the update is caused by a shapeshift form change.
+ */
 void Player::ApplyEquipSpell(SpellEntry const* spellInfo, Item* item, bool apply, bool form_change)
 {
     if (apply)
@@ -9093,6 +10034,9 @@ void Player::ApplyEquipSpell(SpellEntry const* spellInfo, Item* item, bool apply
     }
 }
 
+/**
+ * @brief Re-evaluates equipment and item set spells after a form change.
+ */
 void Player::UpdateEquipSpellsAtFormChange()
 {
     for (int i = 0; i < INVENTORY_SLOT_BAG_END; ++i)
@@ -9267,6 +10211,12 @@ void Player::_HandleDeadlyPoison(Unit* Target, WeaponAttackType attType, SpellEn
     }
 }
 
+/**
+ * @brief Triggers item and enchantment combat procs for an attack.
+ *
+ * @param Target The unit struck by the attack.
+ * @param attType The attack type that caused the proc check.
+ */
 void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
 {
     Item* item = GetWeaponForAttack(attType, true, false);
@@ -9389,6 +10339,12 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
     }
 }
 
+/**
+ * @brief Casts all on-use spells provided by an item.
+ *
+ * @param item The item being used.
+ * @param targets The prepared spell targets for the cast.
+ */
 void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8 cast_count, uint32 glyphIndex)
 {
     ItemPrototype const* proto = item->GetProto();
@@ -9485,6 +10441,9 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
     }
 }
 
+/**
+ * @brief Removes all item-derived modifiers, enchantments, and equip effects.
+ */
 void Player::_RemoveAllItemMods()
 {
     DEBUG_LOG("_RemoveAllItemMods start.");
@@ -9547,6 +10506,9 @@ void Player::_RemoveAllItemMods()
     DEBUG_LOG("_RemoveAllItemMods complete.");
 }
 
+/**
+ * @brief Applies all item-derived modifiers, set bonuses, enchantments, and equip effects.
+ */
 void Player::_ApplyAllItemMods()
 {
     DEBUG_LOG("_ApplyAllItemMods start.");
@@ -9632,6 +10594,9 @@ void Player::_ApplyAllLevelScaleItemMods(bool apply)
     }
 }
 
+/**
+ * @brief Updates ranged damage bonuses from the currently selected ammo.
+ */
 void Player::_ApplyAmmoBonuses()
 {
     // check ammo
@@ -9666,6 +10631,12 @@ void Player::_ApplyAmmoBonuses()
     }
 }
 
+/**
+ * @brief Checks whether a projectile item is compatible with the equipped ranged weapon.
+ *
+ * @param ammo_proto The ammo item prototype to validate.
+ * @return True if the ammo can be used with the equipped ranged weapon; otherwise, false.
+ */
 bool Player::CheckAmmoCompatibility(const ItemPrototype* ammo_proto) const
 {
     if (!ammo_proto)
@@ -9709,8 +10680,11 @@ bool Player::CheckAmmoCompatibility(const ItemPrototype* ammo_proto) const
     return true;
 }
 
-/*  If in a battleground a player dies, and an enemy removes the insignia, the player's bones is lootable
-    Called by remove insignia spell effect    */
+/**
+ * @brief Converts the player's battleground corpse into lootable bones after insignia removal.
+ *
+ * @param looterPlr The player removing the insignia.
+ */
 void Player::RemovedInsignia(Player* looterPlr)
 {
     if (!GetBattleGroundId())
@@ -9750,6 +10724,11 @@ void Player::RemovedInsignia(Player* looterPlr)
     looterPlr->SendLoot(bones->GetObjectGuid(), LOOT_INSIGNIA);
 }
 
+/**
+ * @brief Sends a loot release response for a loot object.
+ *
+ * @param guid The GUID of the released loot source.
+ */
 void Player::SendLootRelease(ObjectGuid guid)
 {
     WorldPacket data(SMSG_LOOT_RELEASE_RESPONSE, (8 + 1));
@@ -9758,6 +10737,12 @@ void Player::SendLootRelease(ObjectGuid guid)
     SendDirectMessage(&data);
 }
 
+/**
+ * @brief Opens and sends loot contents for a supported loot source.
+ *
+ * @param guid The GUID of the loot source.
+ * @param loot_type The requested loot interaction type.
+ */
 void Player::SendLoot(ObjectGuid guid, LootType loot_type)
 {
     if (ObjectGuid lootGuid = GetLootGuid())
@@ -10187,12 +11172,20 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
     }
 }
 
+/**
+ * @brief Notifies the client that money was removed from the current loot.
+ */
 void Player::SendNotifyLootMoneyRemoved()
 {
     WorldPacket data(SMSG_LOOT_CLEAR_MONEY, 0);
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Notifies the client that a loot slot was removed.
+ *
+ * @param lootSlot The loot slot index that was removed.
+ */
 void Player::SendNotifyLootItemRemoved(uint8 lootSlot)
 {
     WorldPacket data(SMSG_LOOT_REMOVED, 1);
@@ -10200,6 +11193,12 @@ void Player::SendNotifyLootItemRemoved(uint8 lootSlot)
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Sends a single world state update to the client.
+ *
+ * @param Field The world state field identifier.
+ * @param Value The new field value.
+ */
 void Player::SendUpdateWorldState(uint32 Field, uint32 Value)
 {
     WorldPacket data(SMSG_UPDATE_WORLD_STATE, 8);
@@ -10208,6 +11207,11 @@ void Player::SendUpdateWorldState(uint32 Field, uint32 Value)
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Sends the initial world state set for the player's current zone.
+ *
+ * @param zoneid The zone identifier used to select world states.
+ */
 void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
 {
     // data depends on zoneid/mapid...
@@ -10322,6 +11326,12 @@ void Player::FillBGWeekendWorldStates(WorldPacket& data, uint32& count)
     }
 }
 
+/**
+ * @brief Consumes and returns the rested experience bonus for an XP award.
+ *
+ * @param xp The base experience amount being awarded.
+ * @return The rested bonus experience amount.
+ */
 uint32 Player::GetXPRestBonus(uint32 xp)
 {
     uint32 rested_bonus = (uint32)GetRestBonus();           // xp for each rested bonus
@@ -10337,6 +11347,11 @@ uint32 Player::GetXPRestBonus(uint32 xp)
     return rested_bonus;
 }
 
+/**
+ * @brief Sends a bind point confirmation prompt to the client.
+ *
+ * @param guid The binder NPC GUID.
+ */
 void Player::SetBindPoint(ObjectGuid guid)
 {
     WorldPacket data(SMSG_BINDER_CONFIRM, 8);
@@ -10344,6 +11359,11 @@ void Player::SetBindPoint(ObjectGuid guid)
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Sends a talent reset confirmation prompt to the client.
+ *
+ * @param guid The trainer or source GUID for the confirmation.
+ */
 void Player::SendTalentWipeConfirm(ObjectGuid guid)
 {
     WorldPacket data(MSG_TALENT_WIPE_CONFIRM, (8 + 4));
@@ -10352,6 +11372,9 @@ void Player::SendTalentWipeConfirm(ObjectGuid guid)
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Sends a pet talent reset confirmation prompt to the client.
+ */
 void Player::SendPetSkillWipeConfirm()
 {
     Pet* pet = GetPet();
@@ -10369,6 +11392,12 @@ void Player::SendPetSkillWipeConfirm()
 /***                    STORAGE SYSTEM                 ***/
 /*********************************************************/
 
+/**
+ * @brief Updates a visible virtual weapon slot and consumes temporary enchant charges when needed.
+ *
+ * @param i The virtual slot index.
+ * @param item The item to reflect in the virtual slot.
+ */
 void Player::SetVirtualItemSlot(uint8 i, Item* item)
 {
     MANGOS_ASSERT(i < 3);
@@ -10395,6 +11424,11 @@ void Player::SetVirtualItemSlot(uint8 i, Item* item)
     }
 }
 
+/**
+ * @brief Updates the player's sheathed weapon state and visible weapon slots.
+ *
+ * @param sheathed The new sheath state.
+ */
 void Player::SetSheath(SheathState sheathed)
 {
     switch (sheathed)
@@ -10424,6 +11458,14 @@ void Player::SetSheath(SheathState sheathed)
     Unit::SetSheath(sheathed);                              // this must visualize Sheath changing for other players...
 }
 
+/**
+ * @brief Finds an appropriate equipment slot for an item prototype.
+ *
+ * @param proto The item prototype to equip.
+ * @param slot The preferred slot, or NULL_SLOT to auto-select.
+ * @param swap True to allow replacing an occupied slot.
+ * @return The chosen slot, or NULL_SLOT if none fits.
+ */
 uint8 Player::FindEquipSlot(ItemPrototype const* proto, uint32 slot, bool swap) const
 {
     uint8 pClass = getClass();
@@ -10611,6 +11653,13 @@ uint8 Player::FindEquipSlot(ItemPrototype const* proto, uint32 slot, bool swap) 
     return NULL_SLOT;
 }
 
+/**
+ * @brief Checks whether enough matching items can be unequipped or removed.
+ *
+ * @param item The item entry to search for.
+ * @param count The required total item count.
+ * @return The inventory result describing whether the request is allowed.
+ */
 InventoryResult Player::CanUnequipItems(uint32 item, uint32 count) const
 {
     Item* pItem;
@@ -10687,6 +11736,14 @@ InventoryResult Player::CanUnequipItems(uint32 item, uint32 count) const
     return res;
 }
 
+/**
+ * @brief Counts matching items owned by the player.
+ *
+ * @param item The item entry to count.
+ * @param inBankAlso True to include bank storage.
+ * @param skipItem An item instance to exclude from the count.
+ * @return The total matching item count.
+ */
 uint32 Player::GetItemCount(uint32 item, bool inBankAlso, Item* skipItem) const
 {
     uint32 count = 0;
@@ -10801,6 +11858,12 @@ uint32 Player::GetItemCountWithLimitCategory(uint32 limitCategory, Item* skipIte
     return count;
 }
 
+/**
+ * @brief Finds the first owned item matching an entry identifier.
+ *
+ * @param item The item entry to search for.
+ * @return The first matching item, or null if none is found.
+ */
 Item* Player::GetItemByEntry(uint32 item) const
 {
     for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
@@ -10853,6 +11916,12 @@ Item* Player::GetItemByLimitedCategory(uint32 limitedCategory) const
     return NULL;
 }
 
+/**
+ * @brief Finds an owned item by GUID across inventory and bank storage.
+ *
+ * @param guid The item GUID to search for.
+ * @return The matching item, or null if none is found.
+ */
 Item* Player::GetItemByGuid(ObjectGuid guid) const
 {
     for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
@@ -10897,6 +11966,12 @@ Item* Player::GetItemByGuid(ObjectGuid guid) const
     return NULL;
 }
 
+/**
+ * @brief Gets an item from a packed inventory position.
+ *
+ * @param pos The packed bag and slot position.
+ * @return The item at that position, or null if empty.
+ */
 Item* Player::GetItemByPos(uint16 pos) const
 {
     uint8 bag = pos >> 8;
@@ -10904,6 +11979,13 @@ Item* Player::GetItemByPos(uint16 pos) const
     return GetItemByPos(bag, slot);
 }
 
+/**
+ * @brief Gets an item from a specific bag and slot location.
+ *
+ * @param bag The bag identifier.
+ * @param slot The slot within the bag or inventory.
+ * @return The item at that position, or null if empty.
+ */
 Item* Player::GetItemByPos(uint8 bag, uint8 slot) const
 {
     if (bag == INVENTORY_SLOT_BAG_0 && (slot < BANK_SLOT_BAG_END || (slot >= KEYRING_SLOT_START && slot < CURRENCYTOKEN_SLOT_END)))
@@ -10934,6 +12016,14 @@ uint32 Player::GetItemDisplayIdInSlot(uint8 bag, uint8 slot) const
     return pItem->GetProto()->DisplayInfoID;
 }
 
+/**
+ * @brief Gets the equipped weapon used for a specific attack type.
+ *
+ * @param attackType The attack type to inspect.
+ * @param nonbroken True to reject broken weapons.
+ * @param useable True to require the weapon to be currently usable.
+ * @return The weapon item, or null if none qualifies.
+ */
 Item* Player::GetWeaponForAttack(WeaponAttackType attackType, bool nonbroken, bool useable) const
 {
     uint8 slot;
@@ -10964,6 +12054,12 @@ Item* Player::GetWeaponForAttack(WeaponAttackType attackType, bool nonbroken, bo
     return item;
 }
 
+/**
+ * @brief Gets the equipped shield item, if any.
+ *
+ * @param useable True to require the shield to be usable and not broken.
+ * @return The shield item, or null if none qualifies.
+ */
 Item* Player::GetShield(bool useable) const
 {
     Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
@@ -10985,6 +12081,12 @@ Item* Player::GetShield(bool useable) const
     return item;
 }
 
+/**
+ * @brief Maps an equipment slot to its corresponding attack type.
+ *
+ * @param slot The equipment slot to inspect.
+ * @return The mapped attack type, or MAX_ATTACK if not weapon-related.
+ */
 uint32 Player::GetAttackBySlot(uint8 slot)
 {
     switch (slot)
@@ -10996,6 +12098,13 @@ uint32 Player::GetAttackBySlot(uint8 slot)
     }
 }
 
+/**
+ * @brief Checks whether a bag and slot refer to normal inventory storage.
+ *
+ * @param bag The bag identifier.
+ * @param slot The slot identifier.
+ * @return True if the position is an inventory position; otherwise, false.
+ */
 bool Player::IsInventoryPos(uint8 bag, uint8 slot)
 {
     if (bag == INVENTORY_SLOT_BAG_0 && slot == NULL_SLOT)
@@ -11017,6 +12126,13 @@ bool Player::IsInventoryPos(uint8 bag, uint8 slot)
     return false;
 }
 
+/**
+ * @brief Checks whether a bag and slot refer to an equipment position.
+ *
+ * @param bag The bag identifier.
+ * @param slot The slot identifier.
+ * @return True if the position is an equipment position; otherwise, false.
+ */
 bool Player::IsEquipmentPos(uint8 bag, uint8 slot)
 {
     if (bag == INVENTORY_SLOT_BAG_0 && (slot < EQUIPMENT_SLOT_END))
@@ -11030,6 +12146,13 @@ bool Player::IsEquipmentPos(uint8 bag, uint8 slot)
     return false;
 }
 
+/**
+ * @brief Checks whether a bag and slot refer to bank storage.
+ *
+ * @param bag The bag identifier.
+ * @param slot The slot identifier.
+ * @return True if the position is in bank storage; otherwise, false.
+ */
 bool Player::IsBankPos(uint8 bag, uint8 slot)
 {
     if (bag == INVENTORY_SLOT_BAG_0 && (slot >= BANK_SLOT_ITEM_START && slot < BANK_SLOT_ITEM_END))
@@ -11047,6 +12170,12 @@ bool Player::IsBankPos(uint8 bag, uint8 slot)
     return false;
 }
 
+/**
+ * @brief Checks whether a packed position refers to a bag slot.
+ *
+ * @param pos The packed bag and slot position.
+ * @return True if the position is a bag slot; otherwise, false.
+ */
 bool Player::IsBagPos(uint16 pos)
 {
     uint8 bag = pos >> 8;
@@ -11062,6 +12191,14 @@ bool Player::IsBagPos(uint16 pos)
     return false;
 }
 
+/**
+ * @brief Checks whether a bag and slot form a valid player storage position.
+ *
+ * @param bag The bag identifier.
+ * @param slot The slot identifier.
+ * @param explicit_pos True if the caller requires an explicit fixed position.
+ * @return True if the position is valid; otherwise, false.
+ */
 bool Player::IsValidPos(uint8 bag, uint8 slot, bool explicit_pos) const
 {
     // post selected
@@ -11157,6 +12294,14 @@ bool Player::IsValidPos(uint8 bag, uint8 slot, bool explicit_pos) const
     return false;
 }
 
+/**
+ * @brief Checks whether the player owns at least a given count of an item.
+ *
+ * @param item The item entry to count.
+ * @param count The required quantity.
+ * @param inBankAlso True to include bank storage in the search.
+ * @return True if enough items are present; otherwise, false.
+ */
 bool Player::HasItemCount(uint32 item, uint32 count, bool inBankAlso) const
 {
     uint32 tempcount = 0;
@@ -11330,6 +12475,15 @@ bool Player::HasItemOrGemWithLimitCategoryEquipped(uint32 limitCategory, uint32 
     return false;
 }
 
+/**
+ * @brief Checks whether the player can carry more copies of a limited item.
+ *
+ * @param entry The item entry to evaluate.
+ * @param count The additional quantity to add.
+ * @param pItem An item instance to exclude from current ownership checks.
+ * @param no_space_count Optional output for the quantity that exceeds the limit.
+ * @return The inventory result describing the carry-limit check.
+ */
 InventoryResult Player::_CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item* pItem, uint32* no_space_count) const
 {
     ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(entry);
@@ -11388,6 +12542,12 @@ InventoryResult Player::_CanTakeMoreSimilarItems(uint32 entry, uint32 count, Ite
     return EQUIP_ERR_OK;
 }
 
+/**
+ * @brief Checks whether the player has an item from a required totem category.
+ *
+ * @param TotemCategory The required totem category identifier.
+ * @return True if a matching item is present; otherwise, false.
+ */
 bool Player::HasItemTotemCategory(uint32 TotemCategory) const
 {
     Item* pItem;
@@ -11424,6 +12584,18 @@ bool Player::HasItemTotemCategory(uint32 TotemCategory) const
     return false;
 }
 
+/**
+ * @brief Checks whether item count can be stored in a specific slot.
+ *
+ * @param bag The destination bag identifier.
+ * @param slot The destination slot identifier.
+ * @param dest The accumulated destination positions.
+ * @param pProto The item prototype being stored.
+ * @param count The remaining quantity to place.
+ * @param swap True to allow occupying an already used slot.
+ * @param pSrcItem The source item being moved.
+ * @return The inventory result for the slot check.
+ */
 InventoryResult Player::_CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemPrototype const* pProto, uint32& count, bool swap, Item* pSrcItem) const
 {
     Item* pItem2 = GetItemByPos(bag, slot);
@@ -11515,6 +12687,20 @@ InventoryResult Player::_CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, Item
     return EQUIP_ERR_OK;
 }
 
+/**
+ * @brief Searches a bag for valid storage positions for an item.
+ *
+ * @param bag The bag identifier to search.
+ * @param dest The accumulated destination positions.
+ * @param pProto The item prototype being stored.
+ * @param count The remaining quantity to place.
+ * @param merge True to search existing stacks; false to search empty slots.
+ * @param non_specialized True to restrict search to plain containers.
+ * @param pSrcItem The source item being moved.
+ * @param skip_bag A bag identifier to skip.
+ * @param skip_slot A slot identifier to skip.
+ * @return The inventory result for the bag search.
+ */
 InventoryResult Player::_CanStoreItem_InBag(uint8 bag, ItemPosCountVec& dest, ItemPrototype const* pProto, uint32& count, bool merge, bool non_specialized, Item* pSrcItem, uint8 skip_bag, uint8 skip_slot) const
 {
     // skip specific bag already processed in first called _CanStoreItem_InBag
@@ -11604,6 +12790,20 @@ InventoryResult Player::_CanStoreItem_InBag(uint8 bag, ItemPosCountVec& dest, It
     return EQUIP_ERR_OK;
 }
 
+/**
+ * @brief Searches a range of inventory slots for valid storage positions.
+ *
+ * @param slot_begin The first slot in the search range.
+ * @param slot_end One past the last slot in the search range.
+ * @param dest The accumulated destination positions.
+ * @param pProto The item prototype being stored.
+ * @param count The remaining quantity to place.
+ * @param merge True to search existing stacks; false to search empty slots.
+ * @param pSrcItem The source item being moved.
+ * @param skip_bag A bag identifier to skip.
+ * @param skip_slot A slot identifier to skip.
+ * @return The inventory result for the slot-range search.
+ */
 InventoryResult Player::_CanStoreItem_InInventorySlots(uint8 slot_begin, uint8 slot_end, ItemPosCountVec& dest, ItemPrototype const* pProto, uint32& count, bool merge, Item* pSrcItem, uint8 skip_bag, uint8 skip_slot) const
 {
     for (uint32 j = slot_begin; j < slot_end; ++j)
@@ -11663,6 +12863,19 @@ InventoryResult Player::_CanStoreItem_InInventorySlots(uint8 slot_begin, uint8 s
     return EQUIP_ERR_OK;
 }
 
+/**
+ * @brief Computes valid destinations for storing an item stack in inventory.
+ *
+ * @param bag The preferred destination bag, or NULL_BAG for auto-placement.
+ * @param slot The preferred destination slot, or NULL_SLOT for auto-placement.
+ * @param dest The accumulated destination positions.
+ * @param entry The item entry being stored.
+ * @param count The quantity to store.
+ * @param pItem The source item being moved.
+ * @param swap True to allow swapping with occupied slots.
+ * @param no_space_count Optional output for the quantity that could not be placed.
+ * @return The inventory result for the storage search.
+ */
 InventoryResult Player::_CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 entry, uint32 count, Item* pItem, bool swap, uint32* no_space_count) const
 {
     DEBUG_LOG("STORAGE: CanStoreItem bag = %u, slot = %u, item = %u, count = %u", bag, slot, entry, count);
@@ -12506,6 +13719,16 @@ InventoryResult Player::CanEquipNewItem(uint8 slot, uint16& dest, uint32 item, b
     return EQUIP_ERR_ITEM_NOT_FOUND;
 }
 
+/**
+ * @brief Checks whether an item can be equipped and resolves its destination slot.
+ *
+ * @param slot The preferred equipment slot.
+ * @param dest Output packed destination slot.
+ * @param pItem The item to equip.
+ * @param swap True to allow replacing an existing item.
+ * @param direct_action True if this is an immediate player action.
+ * @return The inventory result for the equip attempt.
+ */
 InventoryResult Player::CanEquipItem(uint8 slot, uint16& dest, Item* pItem, bool swap, bool direct_action) const
 {
     dest = 0;
@@ -12686,6 +13909,13 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16& dest, Item* pItem, bool
     return !swap ? EQUIP_ERR_ITEM_NOT_FOUND : EQUIP_ERR_ITEMS_CANT_BE_SWAPPED;
 }
 
+/**
+ * @brief Checks whether an equipped or banked item can be unequipped.
+ *
+ * @param pos The packed item position.
+ * @param swap True if the item is being swapped rather than simply removed.
+ * @return The inventory result for the unequip check.
+ */
 InventoryResult Player::CanUnequipItem(uint16 pos, bool swap) const
 {
     // Applied only to equipped items and bank bags
@@ -12747,6 +13977,17 @@ InventoryResult Player::CanUnequipItem(uint16 pos, bool swap) const
     return EQUIP_ERR_OK;
 }
 
+/**
+ * @brief Checks whether an item can be stored in the bank and resolves destinations.
+ *
+ * @param bag The preferred destination bag, or NULL_BAG for auto-placement.
+ * @param slot The preferred destination slot, or NULL_SLOT for auto-placement.
+ * @param dest The accumulated destination positions.
+ * @param pItem The item to bank.
+ * @param swap True to allow swapping with occupied slots.
+ * @param not_loading True when validating an active player action instead of load-time state.
+ * @return The inventory result for the bank storage check.
+ */
 InventoryResult Player::CanBankItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, Item* pItem, bool swap, bool not_loading) const
 {
     if (!pItem)
@@ -12995,6 +14236,13 @@ InventoryResult Player::CanBankItem(uint8 bag, uint8 slot, ItemPosCountVec& dest
     return EQUIP_ERR_BANK_FULL;
 }
 
+/**
+ * @brief Checks whether a specific item instance can currently be used or equipped.
+ *
+ * @param pItem The item instance to validate.
+ * @param direct_action True if the check is for an immediate player action.
+ * @return The inventory result for the use check.
+ */
 InventoryResult Player::CanUseItem(Item* pItem, bool direct_action) const
 {
     if (pItem)
@@ -13086,6 +14334,13 @@ InventoryResult Player::CanUseItem(Item* pItem, bool direct_action) const
     return EQUIP_ERR_ITEM_NOT_FOUND;
 }
 
+/**
+ * @brief Checks whether an item prototype is usable by the player.
+ *
+ * @param pProto The item prototype to validate.
+ * @param direct_action True if the check is for an immediate player action.
+ * @return The inventory result for the use check.
+ */
 InventoryResult Player::CanUseItem(ItemPrototype const* pProto) const
 {
     // Used by group, function NeedBeforeGreed, to know if a prototype can be used by a player
@@ -13145,6 +14400,12 @@ InventoryResult Player::CanUseItem(ItemPrototype const* pProto) const
     return EQUIP_ERR_ITEM_NOT_FOUND;
 }
 
+/**
+ * @brief Checks whether a specific ammo item can be equipped as ammunition.
+ *
+ * @param item The ammo item entry.
+ * @return The inventory result for the ammo check.
+ */
 InventoryResult Player::CanUseAmmo(uint32 item) const
 {
     DEBUG_LOG("STORAGE: CanUseAmmo item = %u", item);
@@ -13183,6 +14444,11 @@ InventoryResult Player::CanUseAmmo(uint32 item) const
     return EQUIP_ERR_ITEM_NOT_FOUND;
 }
 
+/**
+ * @brief Sets the player's active ammo item and refreshes ranged bonuses.
+ *
+ * @param item The ammo item entry to equip.
+ */
 void Player::SetAmmo(uint32 item)
 {
     if (!item)
@@ -13212,6 +14478,9 @@ void Player::SetAmmo(uint32 item)
     _ApplyAmmoBonuses();
 }
 
+/**
+ * @brief Clears the player's active ammo and removes ranged ammo bonuses.
+ */
 void Player::RemoveAmmo()
 {
     SetUInt32Value(PLAYER_AMMO_ID, 0);
@@ -13244,6 +14513,14 @@ Item* Player::StoreNewItem(ItemPosCountVec const& dest, uint32 item, bool update
     return pItem;
 }
 
+/**
+ * @brief Stores an item into one or more resolved destination positions.
+ *
+ * @param dest The destination positions and quantities.
+ * @param pItem The item to store.
+ * @param update True to send world updates for the storage change.
+ * @return The final stored item instance.
+ */
 Item* Player::StoreItem(ItemPosCountVec const& dest, Item* pItem, bool update)
 {
     if (!pItem)
@@ -13391,6 +14668,14 @@ Item* Player::_StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool
     }
 }
 
+/**
+ * @brief Creates and equips a new item into a destination slot.
+ *
+ * @param pos The packed destination position.
+ * @param item The item entry to create.
+ * @param update True to send world updates for the equip action.
+ * @return The equipped item, or null on failure.
+ */
 Item* Player::EquipNewItem(uint16 pos, uint32 item, bool update)
 {
     if (Item* pItem = Item::CreateItem(item, 1, this))
@@ -13403,6 +14688,14 @@ Item* Player::EquipNewItem(uint16 pos, uint32 item, bool update)
     return NULL;
 }
 
+/**
+ * @brief Equips an item into the specified destination position.
+ *
+ * @param pos The packed destination position.
+ * @param pItem The item to equip.
+ * @param update True to send world updates for the equip action.
+ * @return The equipped or merged item instance.
+ */
 Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
 {
     AddEnchantmentDurations(pItem);
@@ -13536,6 +14829,12 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
     return pItem;
 }
 
+/**
+ * @brief Equips an item without full validation, typically during loading.
+ *
+ * @param pos The packed destination position.
+ * @param pItem The item to equip.
+ */
 void Player::QuickEquipItem(uint16 pos, Item* pItem)
 {
     if (pItem)
@@ -13563,6 +14862,12 @@ void Player::QuickEquipItem(uint16 pos, Item* pItem)
     }
 }
 
+/**
+ * @brief Updates the visible equipment fields for an equipment slot.
+ *
+ * @param slot The equipment slot to update.
+ * @param pItem The item to display, or null to clear the slot.
+ */
 void Player::SetVisibleItemSlot(uint8 slot, Item* pItem)
 {
     if (pItem)
@@ -13578,6 +14883,12 @@ void Player::SetVisibleItemSlot(uint8 slot, Item* pItem)
     }
 }
 
+/**
+ * @brief Places an item into an equipment slot and updates visible state.
+ *
+ * @param slot The destination equipment slot.
+ * @param pItem The item to visualize.
+ */
 void Player::VisualizeItem(uint8 slot, Item* pItem)
 {
     if (!pItem)
@@ -13608,6 +14919,13 @@ void Player::VisualizeItem(uint8 slot, Item* pItem)
     pItem->SetState(ITEM_CHANGED, this);
 }
 
+/**
+ * @brief Temporarily removes an item from player storage without deleting it.
+ *
+ * @param bag The bag containing the item.
+ * @param slot The slot containing the item.
+ * @param update True to send inventory updates to the client.
+ */
 void Player::RemoveItem(uint8 bag, uint8 slot, bool update)
 {
     // note: removeitem does not actually change the item
@@ -13753,6 +15071,13 @@ void Player::MoveItemToInventory(ItemPosCountVec const& dest, Item* pItem, bool 
     }
 }
 
+/**
+ * @brief Permanently destroys an item from player storage.
+ *
+ * @param bag The bag containing the item.
+ * @param slot The slot containing the item.
+ * @param update True to send inventory updates to the client.
+ */
 void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
 {
     Item* pItem = GetItemByPos(bag, slot);
@@ -13857,6 +15182,17 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
     }
 }
 
+/**
+ * @brief Destroys up to a requested count of an item across player storage.
+ *
+ * @param item The item entry to destroy.
+ * @param count The requested quantity to destroy.
+ * @param update True to send inventory updates to the client.
+ * @param unequip_check True to validate equipped items before destroying them.
+ * @param delete_from_bank True to include bank storage in the search.
+ * @param delete_from_buyback True to include vendor buyback slots in the search.
+ * @return The number of items removed.
+ */
 void Player::DestroyItemCount(uint32 item, uint32 count, bool update, bool unequip_check, bool inBankAlso)
 {
     DEBUG_LOG("STORAGE: DestroyItemCount item = %u, count = %u", item, count);
@@ -14069,6 +15405,12 @@ void Player::DestroyItemCount(uint32 item, uint32 count, bool update, bool unequ
     }
 }
 
+/**
+ * @brief Destroys items that are no longer valid in the player's current zone or map.
+ *
+ * @param update True to send inventory updates to the client.
+ * @param new_zone The zone identifier to validate against.
+ */
 void Player::DestroyZoneLimitedItem(bool update, uint32 new_zone)
 {
     DEBUG_LOG("STORAGE: DestroyZoneLimitedItem in map %u and area %u", GetMapId(), new_zone);
@@ -14107,6 +15449,11 @@ void Player::DestroyZoneLimitedItem(bool update, uint32 new_zone)
             }
 }
 
+/**
+ * @brief Destroys conjured consumables from player storage.
+ *
+ * @param update True to send inventory updates to the client.
+ */
 void Player::DestroyConjuredItems(bool update)
 {
     // used when entering arena
@@ -14140,6 +15487,13 @@ void Player::DestroyConjuredItems(bool update)
             }
 }
 
+/**
+ * @brief Destroys or decrements a specific item instance by a requested count.
+ *
+ * @param pItem The item instance to modify.
+ * @param count The remaining quantity to destroy; updated by the call.
+ * @param update True to send inventory updates to the client.
+ */
 void Player::DestroyItemCount(Item* pItem, uint32& count, bool update)
 {
     if (!pItem)
@@ -14168,6 +15522,13 @@ void Player::DestroyItemCount(Item* pItem, uint32& count, bool update)
     }
 }
 
+/**
+ * @brief Splits a stack into a new destination position.
+ *
+ * @param src The packed source position.
+ * @param dst The packed destination position.
+ * @param count The quantity to split from the source stack.
+ */
 void Player::SplitItem(uint16 src, uint16 dst, uint32 count)
 {
     uint8 srcbag = src >> 8;
@@ -14281,6 +15642,12 @@ void Player::SplitItem(uint16 src, uint16 dst, uint32 count)
     }
 }
 
+/**
+ * @brief Moves, merges, or swaps items between two storage positions.
+ *
+ * @param src The packed source position.
+ * @param dst The packed destination position.
+ */
 void Player::SwapItem(uint16 src, uint16 dst)
 {
     uint8 srcbag = src >> 8;
@@ -14622,6 +15989,11 @@ void Player::SwapItem(uint16 src, uint16 dst)
     AutoUnequipOffhandIfNeed();
 }
 
+/**
+ * @brief Adds an item to the vendor buyback list.
+ *
+ * @param pItem The item to place into a buyback slot.
+ */
 void Player::AddItemToBuyBackSlot(Item* pItem)
 {
     if (pItem)
@@ -14682,6 +16054,12 @@ void Player::AddItemToBuyBackSlot(Item* pItem)
     }
 }
 
+/**
+ * @brief Gets an item from a vendor buyback slot.
+ *
+ * @param slot The buyback slot index.
+ * @return The item in the slot, or null if none exists.
+ */
 Item* Player::GetItemFromBuyBackSlot(uint32 slot)
 {
     DEBUG_LOG("STORAGE: GetItemFromBuyBackSlot slot = %u", slot);
@@ -14692,6 +16070,12 @@ Item* Player::GetItemFromBuyBackSlot(uint32 slot)
     return NULL;
 }
 
+/**
+ * @brief Removes an item from a vendor buyback slot.
+ *
+ * @param slot The buyback slot index.
+ * @param del True to mark the removed item for deletion.
+ */
 void Player::RemoveItemFromBuyBackSlot(uint32 slot, bool del)
 {
     DEBUG_LOG("STORAGE: RemoveItemFromBuyBackSlot slot = %u", slot);
@@ -14719,6 +16103,14 @@ void Player::RemoveItemFromBuyBackSlot(uint32 slot, bool del)
     }
 }
 
+/**
+ * @brief Sends an inventory error packet to the client.
+ *
+ * @param msg The inventory error code.
+ * @param pItem The primary item involved in the error.
+ * @param pItem2 The secondary item involved in the error.
+ * @param itemid An optional item entry used for some error variants.
+ */
 void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint32 itemid /*= 0*/) const
 {
     DEBUG_LOG("WORLD: Sent SMSG_INVENTORY_CHANGE_FAILURE (%u)", msg);
@@ -14776,6 +16168,14 @@ void Player::SendBuyError(BuyResult msg, Creature* pCreature, uint32 item, uint3
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Sends a sell failure result to the client.
+ *
+ * @param msg The sell failure code.
+ * @param pCreature The vendor involved in the transaction.
+ * @param itemGuid The item GUID that failed to sell.
+ * @param param Unused extra parameter.
+ */
 void Player::SendSellError(SellResult msg, Creature* pCreature, ObjectGuid itemGuid, uint32 param)
 {
     DEBUG_LOG("WORLD: Sent SMSG_SELL_ITEM");
@@ -14790,6 +16190,11 @@ void Player::SendSellError(SellResult msg, Creature* pCreature, ObjectGuid itemG
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Cancels the current trade and clears trade state for both players.
+ *
+ * @param sendback True to send a cancel notification to this player as well.
+ */
 void Player::TradeCancel(bool sendback)
 {
     if (m_trade)
@@ -14812,6 +16217,12 @@ void Player::TradeCancel(bool sendback)
     }
 }
 
+/**
+ * @brief Updates durations for items tracked by the player.
+ *
+ * @param time The elapsed time in milliseconds.
+ * @param realtimeonly True to update only items using real-time duration tracking.
+ */
 void Player::UpdateItemDuration(uint32 time, bool realtimeonly)
 {
     if (m_itemDuration.empty())
@@ -14833,6 +16244,11 @@ void Player::UpdateItemDuration(uint32 time, bool realtimeonly)
     }
 }
 
+/**
+ * @brief Updates remaining durations for temporary item enchantments.
+ *
+ * @param time The elapsed time in milliseconds.
+ */
 void Player::UpdateEnchantTime(uint32 time)
 {
     for (EnchantDurationList::iterator itr = m_enchantDuration.begin(), next; itr != m_enchantDuration.end(); itr = next)
@@ -14857,6 +16273,11 @@ void Player::UpdateEnchantTime(uint32 time)
     }
 }
 
+/**
+ * @brief Registers timed enchantments from an item for duration tracking.
+ *
+ * @param item The item whose enchantments should be tracked.
+ */
 void Player::AddEnchantmentDurations(Item* item)
 {
     for (int x = 0; x < MAX_ENCHANTMENT_SLOT; ++x)
@@ -14874,6 +16295,11 @@ void Player::AddEnchantmentDurations(Item* item)
     }
 }
 
+/**
+ * @brief Removes an item's enchantments from duration tracking and stores remaining time.
+ *
+ * @param item The item whose enchantments should be untracked.
+ */
 void Player::RemoveEnchantmentDurations(Item* item)
 {
     for (EnchantDurationList::iterator itr = m_enchantDuration.begin(); itr != m_enchantDuration.end();)
@@ -14891,6 +16317,11 @@ void Player::RemoveEnchantmentDurations(Item* item)
     }
 }
 
+/**
+ * @brief Removes all enchantments of a given slot type from equipped and stored items.
+ *
+ * @param slot The enchantment slot type to clear.
+ */
 void Player::RemoveAllEnchantments(EnchantmentSlot slot)
 {
     // remove enchantments from equipped items first to clean up the m_enchantDuration list
@@ -14965,6 +16396,12 @@ void Player::AddEnchantmentDuration(Item* item, EnchantmentSlot slot, uint32 dur
     }
 }
 
+/**
+ * @brief Applies or removes all enchantments on an equipped item.
+ *
+ * @param item The item whose enchantments should be processed.
+ * @param apply True to apply enchantments; false to remove them.
+ */
 void Player::ApplyEnchantment(Item* item, bool apply)
 {
     for (uint32 slot = 0; slot < MAX_ENCHANTMENT_SLOT; ++slot)
@@ -14973,6 +16410,15 @@ void Player::ApplyEnchantment(Item* item, bool apply)
     }
 }
 
+/**
+ * @brief Applies or removes a specific enchantment slot on an equipped item.
+ *
+ * @param item The equipped item whose enchantment should be processed.
+ * @param slot The enchantment slot to process.
+ * @param apply True to apply the enchantment; false to remove it.
+ * @param apply_dur True to update tracked enchantment duration state.
+ * @param ignore_condition Unused flag for conditional processing.
+ */
 void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool apply_dur, bool ignore_condition)
 {
     if (!item)
@@ -15351,6 +16797,9 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
     }
 }
 
+/**
+ * @brief Sends all active enchantment duration timers to the client.
+ */
 void Player::SendEnchantmentDurations()
 {
     for (EnchantDurationList::const_iterator itr = m_enchantDuration.begin(); itr != m_enchantDuration.end(); ++itr)
@@ -15359,6 +16808,9 @@ void Player::SendEnchantmentDurations()
     }
 }
 
+/**
+ * @brief Sends all tracked item duration timers to the client.
+ */
 void Player::SendItemDurations()
 {
     for (ItemDurationList::const_iterator itr = m_itemDuration.begin(); itr != m_itemDuration.end(); ++itr)
@@ -15367,6 +16819,16 @@ void Player::SendItemDurations()
     }
 }
 
+/**
+ * @brief Sends an item push notification for a newly received or created item.
+ *
+ * @param item The item instance being reported.
+ * @param count The quantity gained.
+ * @param received True if the item was received rather than looted.
+ * @param created True if the item was created rather than simply received.
+ * @param broadcast True to broadcast the message to the player's group.
+ * @param showInChat True to show the gain in chat.
+ */
 void Player::SendNewItem(Item* item, uint32 count, bool received, bool created, bool broadcast /*=false*/, bool showInChat /*=true*/)
 {
     if (!item)                                              // prevent crash
@@ -15403,6 +16865,12 @@ void Player::SendNewItem(Item* item, uint32 count, bool received, bool created, 
 /***                    GOSSIP SYSTEM                  ***/
 /*********************************************************/
 
+/**
+ * @brief Builds the current gossip menu for a source object.
+ *
+ * @param pSource The gossip source object.
+ * @param menuId The gossip menu identifier to prepare.
+ */
 void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
 {
     PlayerMenu* pMenu = PlayerTalkClass;
@@ -15628,6 +17096,11 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
     }*/
 }
 
+/**
+ * @brief Sends the prepared gossip or quest menu for a source object.
+ *
+ * @param pSource The source object whose prepared menu should be sent.
+ */
 void Player::SendPreparedGossip(WorldObject* pSource)
 {
     if (!pSource)
@@ -15667,6 +17140,12 @@ void Player::SendPreparedGossip(WorldObject* pSource)
     PlayerTalkClass->SendGossipMenu(textId, pSource->GetObjectGuid());
 }
 
+/**
+ * @brief Handles selection of a gossip menu option.
+ *
+ * @param pSource The gossip source object.
+ * @param gossipListId The selected menu item index.
+ */
 void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 menuId)
 {
     GossipMenu& gossipmenu = PlayerTalkClass->GetGossipMenu();
@@ -15829,6 +17308,12 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
     }
 }
 
+/**
+ * @brief Gets the default gossip text identifier for a source object.
+ *
+ * @param pSource The gossip source object.
+ * @return The gossip text identifier to display.
+ */
 uint32 Player::GetGossipTextId(WorldObject* pSource)
 {
     if (!pSource || pSource->GetTypeId() != TYPEID_UNIT)
@@ -15844,6 +17329,13 @@ uint32 Player::GetGossipTextId(WorldObject* pSource)
     return DEFAULT_GOSSIP_MESSAGE;
 }
 
+/**
+ * @brief Resolves the gossip text identifier for a specific gossip menu.
+ *
+ * @param menuId The gossip menu identifier.
+ * @param pSource The gossip source object.
+ * @return The resolved gossip text identifier.
+ */
 uint32 Player::GetGossipTextId(uint32 menuId, WorldObject* pSource)
 {
     uint32 textId = DEFAULT_GOSSIP_MESSAGE;
@@ -15880,6 +17372,12 @@ uint32 Player::GetGossipTextId(uint32 menuId, WorldObject* pSource)
     return textId;
 }
 
+/**
+ * @brief Gets the default gossip menu identifier for a source object.
+ *
+ * @param pSource The gossip source object.
+ * @return The default gossip menu identifier, or zero if none exists.
+ */
 uint32 Player::GetDefaultGossipMenuForSource(WorldObject* pSource)
 {
     if (pSource->GetTypeId() == TYPEID_UNIT)
@@ -15898,6 +17396,11 @@ uint32 Player::GetDefaultGossipMenuForSource(WorldObject* pSource)
 /***                    QUEST SYSTEM                   ***/
 /*********************************************************/
 
+/**
+ * @brief Builds the current quest menu for a creature or game object.
+ *
+ * @param guid The GUID of the quest source.
+ */
 void Player::PrepareQuestMenu(ObjectGuid guid)
 {
     QuestRelationsMapBounds rbounds;
@@ -15981,6 +17484,11 @@ void Player::PrepareQuestMenu(ObjectGuid guid)
     }
 }
 
+/**
+ * @brief Sends the prepared quest dialog or quest list for a source.
+ *
+ * @param guid The GUID of the quest source.
+ */
 void Player::SendPreparedQuest(ObjectGuid guid)
 {
     QuestMenu& questMenu = PlayerTalkClass->GetQuestMenu();
@@ -16060,6 +17568,12 @@ void Player::SendPreparedQuest(ObjectGuid guid)
     }
 }
 
+/**
+ * @brief Checks whether a quest is currently active in the player's log.
+ *
+ * @param quest_id The quest identifier to check.
+ * @return True if the quest is active; otherwise, false.
+ */
 bool Player::IsActiveQuest(uint32 quest_id) const
 {
     QuestStatusMap::const_iterator itr = mQuestStatus.find(quest_id);
@@ -16067,6 +17581,13 @@ bool Player::IsActiveQuest(uint32 quest_id) const
     return itr != mQuestStatus.end() && itr->second.m_status != QUEST_STATUS_NONE;
 }
 
+/**
+ * @brief Checks whether a quest is currently active with a specific completion state.
+ *
+ * @param quest_id The quest identifier to check.
+ * @param completed_or_not The completion-state filter.
+ * @return True if the quest matches the requested state; otherwise, false.
+ */
 bool Player::IsCurrentQuest(uint32 quest_id, uint8 completed_or_not) const
 {
     QuestStatusMap::const_iterator itr = mQuestStatus.find(quest_id);
@@ -16088,6 +17609,13 @@ bool Player::IsCurrentQuest(uint32 quest_id, uint8 completed_or_not) const
     }
 }
 
+/**
+ * @brief Finds the next quest in a chain offered by a specific source.
+ *
+ * @param guid The GUID of the quest source.
+ * @param pQuest The current quest in the chain.
+ * @return The next quest in the chain, or null if unavailable.
+ */
 Quest const* Player::GetNextQuest(ObjectGuid guid, Quest const* pQuest)
 {
     QuestRelationsMapBounds rbounds;
@@ -16150,6 +17678,13 @@ bool Player::CanSeeStartQuest(Quest const* pQuest) const
     return false;
 }
 
+/**
+ * @brief Checks whether the player can accept a quest.
+ *
+ * @param pQuest The quest to validate.
+ * @param msg True to emit failure feedback when checks fail.
+ * @return True if the quest can be taken; otherwise, false.
+ */
 bool Player::CanTakeQuest(Quest const* pQuest, bool msg) const
 {
     return !DisableMgr::IsDisabledFor(DISABLE_TYPE_QUEST, pQuest->GetQuestId(), this) &&
@@ -16162,6 +17697,13 @@ bool Player::CanTakeQuest(Quest const* pQuest, bool msg) const
            pQuest->IsActive();
 }
 
+/**
+ * @brief Checks whether the player can add a quest to the quest log.
+ *
+ * @param pQuest The quest to validate.
+ * @param msg True to emit failure feedback when checks fail.
+ * @return True if the quest can be added; otherwise, false.
+ */
 bool Player::CanAddQuest(Quest const* pQuest, bool msg) const
 {
     if (!SatisfyQuestLog(msg))
@@ -16177,6 +17719,12 @@ bool Player::CanAddQuest(Quest const* pQuest, bool msg) const
     return true;
 }
 
+/**
+ * @brief Checks whether the player currently meets all completion requirements for a quest.
+ *
+ * @param quest_id The quest identifier to validate.
+ * @return True if the quest can be completed; otherwise, false.
+ */
 bool Player::CanCompleteQuest(uint32 quest_id) const
 {
     if (!quest_id)
@@ -16282,6 +17830,12 @@ bool Player::CanCompleteQuest(uint32 quest_id) const
     return true;
 }
 
+/**
+ * @brief Checks whether a repeatable quest can currently be turned in.
+ *
+ * @param pQuest The repeatable quest to validate.
+ * @return True if the quest can be completed; otherwise, false.
+ */
 bool Player::CanCompleteRepeatableQuest(Quest const* pQuest) const
 {
     // Solve problem that player don't have the quest and try complete it.
@@ -16312,6 +17866,13 @@ bool Player::CanCompleteRepeatableQuest(Quest const* pQuest) const
     return true;
 }
 
+/**
+ * @brief Checks whether a completed quest can currently be rewarded.
+ *
+ * @param pQuest The quest to validate.
+ * @param msg True to emit failure feedback when checks fail.
+ * @return True if the quest reward can be claimed; otherwise, false.
+ */
 bool Player::CanRewardQuest(Quest const* pQuest, bool msg) const
 {
     // not auto complete quest and not completed quest (only cheating case, then ignore without message)
@@ -16359,6 +17920,14 @@ bool Player::CanRewardQuest(Quest const* pQuest, bool msg) const
     return true;
 }
 
+/**
+ * @brief Checks whether a specific quest reward choice can be granted.
+ *
+ * @param pQuest The quest to validate.
+ * @param reward The selected optional reward index.
+ * @param msg True to emit failure feedback when checks fail.
+ * @return True if the selected reward can be granted; otherwise, false.
+ */
 bool Player::CanRewardQuest(Quest const* pQuest, uint32 reward, bool msg) const
 {
     // prevent receive reward with quest items in bank or for not completed quest
@@ -16401,6 +17970,11 @@ bool Player::CanRewardQuest(Quest const* pQuest, uint32 reward, bool msg) const
     return true;
 }
 
+/**
+ * @brief Sends a pet taming failure reason to the client.
+ *
+ * @param reason The taming failure reason code.
+ */
 void Player::SendPetTameFailure(PetTameFailureReason reason)
 {
     WorldPacket data(SMSG_PET_TAME_FAILURE, 1);
@@ -16408,6 +17982,12 @@ void Player::SendPetTameFailure(PetTameFailureReason reason)
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Adds a quest to the player's log and initializes its tracking state.
+ *
+ * @param pQuest The quest to add.
+ * @param questGiver The object that granted the quest.
+ */
 void Player::AddQuest(Quest const* pQuest, Object* questGiver)
 {
     uint16 log_slot = FindQuestSlot(0);
@@ -16566,6 +18146,12 @@ void Player::AddQuest(Quest const* pQuest, Object* questGiver)
     }
 }
 
+/**
+ * @brief Marks a quest as complete and updates quest tracker data.
+ *
+ * @param quest_id The quest identifier to complete.
+ * @param status The completion status to apply.
+ */
 void Player::CompleteQuest(uint32 quest_id, QuestStatus status)
 {
     if (quest_id)
@@ -16601,6 +18187,11 @@ void Player::CompleteQuest(uint32 quest_id, QuestStatus status)
     }
 }
 
+/**
+ * @brief Restores a quest to the incomplete state.
+ *
+ * @param quest_id The quest identifier to update.
+ */
 void Player::IncompleteQuest(uint32 quest_id)
 {
     if (quest_id)
@@ -16615,6 +18206,14 @@ void Player::IncompleteQuest(uint32 quest_id)
     }
 }
 
+/**
+ * @brief Grants quest rewards, updates quest state, and triggers reward-side effects.
+ *
+ * @param pQuest The rewarded quest.
+ * @param reward The selected optional reward index.
+ * @param questGiver The object granting the reward.
+ * @param announce True to send the quest reward packet to the client.
+ */
 void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver, bool announce)
 {
     uint32 quest_id = pQuest->GetQuestId();
@@ -16873,6 +18472,13 @@ void Player::FailQuest(uint32 questId)
     }
 }
 
+/**
+ * @brief Checks whether the player meets a quest's required skill threshold.
+ *
+ * @param qInfo The quest to validate.
+ * @param msg True to emit failure feedback when checks fail.
+ * @return True if the skill requirement is met; otherwise, false.
+ */
 bool Player::SatisfyQuestSkill(Quest const* qInfo, bool msg) const
 {
     uint32 skill = qInfo->GetRequiredSkill();
@@ -16897,6 +18503,13 @@ bool Player::SatisfyQuestSkill(Quest const* qInfo, bool msg) const
     return true;
 }
 
+/**
+ * @brief Checks whether the player meets a quest's minimum level requirement.
+ *
+ * @param qInfo The quest to validate.
+ * @param msg True to emit failure feedback when checks fail.
+ * @return True if the level requirement is met; otherwise, false.
+ */
 bool Player::SatisfyQuestLevel(Quest const* qInfo, bool msg) const
 {
     if (getLevel() < qInfo->GetMinLevel())
@@ -16912,6 +18525,12 @@ bool Player::SatisfyQuestLevel(Quest const* qInfo, bool msg) const
     return true;
 }
 
+/**
+ * @brief Checks whether the player has free space in the quest log.
+ *
+ * @param msg True to emit failure feedback when checks fail.
+ * @return True if a free quest log slot exists; otherwise, false.
+ */
 bool Player::SatisfyQuestLog(bool msg) const
 {
     // exist free slot
@@ -16929,6 +18548,13 @@ bool Player::SatisfyQuestLog(bool msg) const
     return false;
 }
 
+/**
+ * @brief Checks whether previous-quest requirements for a quest are satisfied.
+ *
+ * @param qInfo The quest to validate.
+ * @param msg True to emit failure feedback when checks fail.
+ * @return True if previous-quest requirements are met; otherwise, false.
+ */
 bool Player::SatisfyQuestPreviousQuest(Quest const* qInfo, bool msg) const
 {
     // No previous quest (might be first quest in a series)
@@ -17037,6 +18663,13 @@ bool Player::SatisfyQuestPreviousQuest(Quest const* qInfo, bool msg) const
     return false;
 }
 
+/**
+ * @brief Checks whether the player's class can accept a quest.
+ *
+ * @param qInfo The quest to validate.
+ * @param msg True to emit failure feedback when checks fail.
+ * @return True if the class requirement is met; otherwise, false.
+ */
 bool Player::SatisfyQuestClass(Quest const* qInfo, bool msg) const
 {
     uint32 reqClass = qInfo->GetRequiredClasses();
@@ -17059,6 +18692,13 @@ bool Player::SatisfyQuestClass(Quest const* qInfo, bool msg) const
     return true;
 }
 
+/**
+ * @brief Checks whether the player's race can accept a quest.
+ *
+ * @param qInfo The quest to validate.
+ * @param msg True to emit failure feedback when checks fail.
+ * @return True if the race requirement is met; otherwise, false.
+ */
 bool Player::SatisfyQuestRace(Quest const* qInfo, bool msg) const
 {
     uint32 reqraces = qInfo->GetRequiredRaces();
@@ -17081,6 +18721,13 @@ bool Player::SatisfyQuestRace(Quest const* qInfo, bool msg) const
     return true;
 }
 
+/**
+ * @brief Checks whether the player's reputation meets quest requirements.
+ *
+ * @param qInfo The quest to validate.
+ * @param msg True to emit failure feedback when checks fail.
+ * @return True if reputation requirements are met; otherwise, false.
+ */
 bool Player::SatisfyQuestReputation(Quest const* qInfo, bool msg) const
 {
     uint32 fIdMin = qInfo->GetRequiredMinRepFaction();      // Min required rep
@@ -17108,6 +18755,13 @@ bool Player::SatisfyQuestReputation(Quest const* qInfo, bool msg) const
     return true;
 }
 
+/**
+ * @brief Checks whether the quest is not already active in the player's log.
+ *
+ * @param qInfo The quest to validate.
+ * @param msg True to emit failure feedback when checks fail.
+ * @return True if the quest status allows accepting it; otherwise, false.
+ */
 bool Player::SatisfyQuestStatus(Quest const* qInfo, bool msg) const
 {
     QuestStatusMap::const_iterator itr = mQuestStatus.find(qInfo->GetQuestId());
@@ -17125,6 +18779,13 @@ bool Player::SatisfyQuestStatus(Quest const* qInfo, bool msg) const
     return true;
 }
 
+/**
+ * @brief Checks whether the player can accept another timed quest.
+ *
+ * @param qInfo The quest to validate.
+ * @param msg True to emit failure feedback when checks fail.
+ * @return True if timed-quest rules allow acceptance; otherwise, false.
+ */
 bool Player::SatisfyQuestTimed(Quest const* qInfo, bool msg) const
 {
     if (!m_timedquests.empty() && qInfo->HasSpecialFlag(QUEST_SPECIAL_FLAG_TIMED))
@@ -17140,6 +18801,13 @@ bool Player::SatisfyQuestTimed(Quest const* qInfo, bool msg) const
     return true;
 }
 
+/**
+ * @brief Checks whether exclusive-group rules allow the quest to be accepted.
+ *
+ * @param qInfo The quest to validate.
+ * @param msg True to emit failure feedback when checks fail.
+ * @return True if exclusive-group requirements are met; otherwise, false.
+ */
 bool Player::SatisfyQuestExclusiveGroup(Quest const* qInfo, bool msg) const
 {
     // non positive exclusive group, if > 0 then can be start if any other quest in exclusive group already started/completed
@@ -17192,6 +18860,13 @@ bool Player::SatisfyQuestExclusiveGroup(Quest const* qInfo, bool msg) const
     return true;
 }
 
+/**
+ * @brief Checks whether later quests in the chain do not block acceptance.
+ *
+ * @param qInfo The quest to validate.
+ * @param msg True to emit failure feedback when checks fail.
+ * @return True if next-chain requirements are met; otherwise, false.
+ */
 bool Player::SatisfyQuestNextChain(Quest const* qInfo, bool msg) const
 {
     if (!qInfo->GetNextQuestInChain())
@@ -17218,6 +18893,13 @@ bool Player::SatisfyQuestNextChain(Quest const* qInfo, bool msg) const
     return true;
 }
 
+/**
+ * @brief Checks whether previous-chain quests do not block acceptance.
+ *
+ * @param qInfo The quest to validate.
+ * @param msg True to emit failure feedback when checks fail.
+ * @return True if previous-chain requirements are met; otherwise, false.
+ */
 bool Player::SatisfyQuestPrevChain(Quest const* qInfo, bool msg) const
 {
     // No previous quest in chain
@@ -17308,6 +18990,13 @@ bool Player::SatisfyQuestMonth(Quest const* qInfo) const
     return m_monthlyquests.find(qInfo->GetQuestId()) == m_monthlyquests.end();
 }
 
+/**
+ * @brief Checks whether required quest source items can be granted to the player.
+ *
+ * @param pQuest The quest whose source item is being evaluated.
+ * @param dest Optional output describing where the item can be stored.
+ * @return True if the source item can be granted or is not needed; otherwise, false.
+ */
 bool Player::CanGiveQuestSourceItemIfNeed(Quest const* pQuest, ItemPosCountVec* dest) const
 {
     if (uint32 srcitem = pQuest->GetSrcItemId())
@@ -17348,6 +19037,11 @@ bool Player::CanGiveQuestSourceItemIfNeed(Quest const* pQuest, ItemPosCountVec* 
     return true;
 }
 
+/**
+ * @brief Grants quest source items required when a quest is accepted.
+ *
+ * @param pQuest The quest whose source item should be granted.
+ */
 void Player::GiveQuestSourceItemIfNeed(Quest const* pQuest)
 {
     ItemPosCountVec dest;
@@ -17365,6 +19059,13 @@ void Player::GiveQuestSourceItemIfNeed(Quest const* pQuest)
 }
 
 
+/**
+ * @brief Removes a quest source item when the quest flow requires it.
+ *
+ * @param quest_id The quest identifier whose source item should be removed.
+ * @param msg True to emit failure feedback when removal is not possible.
+ * @return True if the source item was removed or not needed; otherwise, false.
+ */
 bool Player::TakeQuestSourceItem(uint32 quest_id, bool msg)
 {
     Quest const* qInfo = sObjectMgr.GetQuestTemplate(quest_id);
@@ -17397,6 +19098,12 @@ bool Player::TakeQuestSourceItem(uint32 quest_id, bool msg)
     return true;
 }
 
+/**
+ * @brief Checks whether a quest reward has already been claimed.
+ *
+ * @param quest_id The quest identifier to query.
+ * @return True if the quest reward is marked as claimed; otherwise, false.
+ */
 bool Player::GetQuestRewardStatus(uint32 quest_id) const
 {
     Quest const* qInfo = sObjectMgr.GetQuestTemplate(quest_id);
@@ -17415,6 +19122,12 @@ bool Player::GetQuestRewardStatus(uint32 quest_id) const
     return false;
 }
 
+/**
+ * @brief Gets the player's current status for a quest.
+ *
+ * @param quest_id The quest identifier to query.
+ * @return The current quest status.
+ */
 QuestStatus Player::GetQuestStatus(uint32 quest_id) const
 {
     if (quest_id)
@@ -17432,6 +19145,12 @@ QuestStatus Player::GetQuestStatus(uint32 quest_id) const
     return QUEST_STATUS_NONE;
 }
 
+/**
+ * @brief Checks whether a quest can currently be shared with other players.
+ *
+ * @param quest_id The quest identifier to query.
+ * @return True if the quest is active and sharable; otherwise, false.
+ */
 bool Player::CanShareQuest(uint32 quest_id) const
 {
     if (Quest const* qInfo = sObjectMgr.GetQuestTemplate(quest_id))
@@ -17443,6 +19162,12 @@ bool Player::CanShareQuest(uint32 quest_id) const
     return false;
 }
 
+/**
+ * @brief Updates the stored status for a quest and refreshes quest world objects.
+ *
+ * @param quest_id The quest identifier to update.
+ * @param status The new quest status.
+ */
 void Player::SetQuestStatus(uint32 quest_id, QuestStatus status)
 {
     if (sObjectMgr.GetQuestTemplate(quest_id))
@@ -17478,6 +19203,12 @@ uint32 Player::GetReqKillOrCastCurrentCount(uint32 quest_id, int32 entry)
     return 0;
 }
 
+/**
+ * @brief Synchronizes quest item objective counts with the player's inventory.
+ *
+ * @param pQuest The quest whose requirements should be synchronized.
+ * @param questStatusData The quest status record to update.
+ */
 void Player::AdjustQuestReqItemCount(Quest const* pQuest, QuestStatusData& questStatusData)
 {
     if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAG_DELIVER))
@@ -17499,6 +19230,12 @@ void Player::AdjustQuestReqItemCount(Quest const* pQuest, QuestStatusData& quest
     }
 }
 
+/**
+ * @brief Finds the quest log slot for a specific quest identifier.
+ *
+ * @param quest_id The quest identifier to search for.
+ * @return The quest log slot index, or MAX_QUEST_LOG_SIZE if not found.
+ */
 uint16 Player::FindQuestSlot(uint32 quest_id) const
 {
     for (uint16 i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
@@ -17510,6 +19247,11 @@ uint16 Player::FindQuestSlot(uint32 quest_id) const
     return MAX_QUEST_LOG_SIZE;
 }
 
+/**
+ * @brief Updates quest progress for exploration or scripted event objectives.
+ *
+ * @param questId The quest identifier to update.
+ */
 void Player::AreaExploredOrEventHappens(uint32 questId)
 {
     if (questId)
@@ -17560,6 +19302,12 @@ void Player::GroupEventHappens(uint32 questId, WorldObject const* pEventObject)
     }
 }
 
+/**
+ * @brief Updates quest item objectives after items are added to the player's inventory.
+ *
+ * @param entry The item entry that was added.
+ * @param count The quantity added.
+ */
 void Player::ItemAddedQuestCheck(uint32 entry, uint32 count)
 {
     for (int i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
@@ -17617,6 +19365,12 @@ void Player::ItemAddedQuestCheck(uint32 entry, uint32 count)
     UpdateForQuestWorldObjects();
 }
 
+/**
+ * @brief Updates quest item objectives after items are removed from the player's inventory.
+ *
+ * @param entry The item entry that was removed.
+ * @param count The quantity removed.
+ */
 void Player::ItemRemovedQuestCheck(uint32 entry, uint32 count)
 {
     for (int i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
@@ -17672,6 +19426,12 @@ void Player::ItemRemovedQuestCheck(uint32 entry, uint32 count)
     UpdateForQuestWorldObjects();
 }
 
+/**
+ * @brief Awards kill credit for a slain creature and any linked credit entries.
+ *
+ * @param cInfo The slain creature's info record.
+ * @param guid The GUID of the credited creature.
+ */
 void Player::KilledMonster(CreatureInfo const* cInfo, ObjectGuid guid)
 {
     if (cInfo->Entry)
@@ -17686,6 +19446,12 @@ void Player::KilledMonster(CreatureInfo const* cInfo, ObjectGuid guid)
         }
 }
 
+/**
+ * @brief Applies quest kill credit for a specific creature entry.
+ *
+ * @param entry The creature entry granting credit.
+ * @param guid The GUID of the credited creature.
+ */
 void Player::KilledMonsterCredit(uint32 entry, ObjectGuid guid)
 {
     uint32 addkillcount = 1;
@@ -17755,6 +19521,14 @@ void Player::KilledMonsterCredit(uint32 entry, ObjectGuid guid)
     }
 }
 
+/**
+ * @brief Applies quest credit for casting a required spell on a creature or game object.
+ *
+ * @param entry The target entry identifier.
+ * @param guid The GUID of the affected target.
+ * @param spell_id The spell identifier that was cast.
+ * @param original_caster True if this player was the original caster.
+ */
 void Player::CastedCreatureOrGO(uint32 entry, ObjectGuid guid, uint32 spell_id, bool original_caster)
 {
     bool isCreature = guid.IsCreatureOrVehicle();
@@ -17850,6 +19624,12 @@ void Player::CastedCreatureOrGO(uint32 entry, ObjectGuid guid, uint32 spell_id, 
     }
 }
 
+/**
+ * @brief Applies quest credit for talking to a required creature.
+ *
+ * @param entry The creature entry identifier.
+ * @param guid The GUID of the creature spoken to.
+ */
 void Player::TalkedToCreature(uint32 entry, ObjectGuid guid)
 {
     uint32 addTalkCount = 1;
@@ -17921,6 +19701,11 @@ void Player::TalkedToCreature(uint32 entry, ObjectGuid guid)
     }
 }
 
+/**
+ * @brief Re-evaluates money-based quest objectives after the player's money changes.
+ *
+ * @param count The player's current money amount.
+ */
 void Player::MoneyChanged(uint32 count)
 {
     for (int i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
@@ -17957,6 +19742,11 @@ void Player::MoneyChanged(uint32 count)
     }
 }
 
+/**
+ * @brief Re-evaluates reputation-based quest objectives after a faction reputation change.
+ *
+ * @param factionEntry The faction whose reputation changed.
+ */
 void Player::ReputationChanged(FactionEntry const* factionEntry)
 {
     for (int i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
@@ -17989,6 +19779,12 @@ void Player::ReputationChanged(FactionEntry const* factionEntry)
     }
 }
 
+/**
+ * @brief Checks whether an item is still needed for any active quest objective.
+ *
+ * @param itemid The item entry to test.
+ * @return True if the item is needed for an active quest; otherwise, false.
+ */
 bool Player::HasQuestForItem(uint32 itemid) const
 {
     for (int i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
@@ -18075,6 +19871,12 @@ void Player::SendQuestCompleteEvent(uint32 quest_id)
     }
 }
 
+/**
+ * @brief Sends the quest reward summary packet to the client.
+ *
+ * @param pQuest The rewarded quest.
+ * @param XP The experience amount shown in the reward packet.
+ */
 void Player::SendQuestReward(Quest const* pQuest, uint32 XP)
 {
     uint32 questid = pQuest->GetQuestId();
@@ -18099,6 +19901,11 @@ void Player::SendQuestReward(Quest const* pQuest, uint32 XP)
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Sends a quest failure update to the client.
+ *
+ * @param quest_id The failed quest identifier.
+ */
 void Player::SendQuestFailed(uint32 quest_id, InventoryResult reason)
 {
     if (quest_id)
@@ -18111,6 +19918,11 @@ void Player::SendQuestFailed(uint32 quest_id, InventoryResult reason)
     }
 }
 
+/**
+ * @brief Sends a timed quest failure update to the client.
+ *
+ * @param quest_id The failed timed quest identifier.
+ */
 void Player::SendQuestTimerFailed(uint32 quest_id)
 {
     if (quest_id)
@@ -18122,6 +19934,11 @@ void Player::SendQuestTimerFailed(uint32 quest_id)
     }
 }
 
+/**
+ * @brief Sends a quest acceptance failure reason to the client.
+ *
+ * @param msg The invalid-reason code to report.
+ */
 void Player::SendCanTakeQuestResponse(uint32 msg) const
 {
     WorldPacket data(SMSG_QUESTGIVER_QUEST_INVALID, 4);
@@ -18130,6 +19947,12 @@ void Player::SendCanTakeQuestResponse(uint32 msg) const
     DEBUG_LOG("WORLD: Sent SMSG_QUESTGIVER_QUEST_INVALID");
 }
 
+/**
+ * @brief Sends a quest-share acceptance confirmation prompt to another player.
+ *
+ * @param pQuest The shared quest.
+ * @param pReceiver The player receiving the confirmation prompt.
+ */
 void Player::SendQuestConfirmAccept(const Quest* pQuest, Player* pReceiver)
 {
     if (pReceiver)
@@ -18148,6 +19971,12 @@ void Player::SendQuestConfirmAccept(const Quest* pQuest, Player* pReceiver)
     }
 }
 
+/**
+ * @brief Sends the result of a quest share push to the client.
+ *
+ * @param pPlayer The player targeted by the share attempt.
+ * @param msg The quest share result code.
+ */
 void Player::SendPushToPartyResponse(Player* pPlayer, uint32 msg)
 {
     if (pPlayer)
@@ -18160,6 +19989,13 @@ void Player::SendPushToPartyResponse(Player* pPlayer, uint32 msg)
     }
 }
 
+/**
+ * @brief Sends a quest item progress update to the client.
+ *
+ * @param pQuest The quest being updated.
+ * @param item_idx The item objective index.
+ * @param count The updated collected count.
+ */
 void Player::SendQuestUpdateAddItem(Quest const* pQuest, uint32 item_idx, uint32 count)
 {
     DEBUG_LOG("WORLD: Sent SMSG_QUESTUPDATE_ADD_ITEM");
@@ -18169,6 +20005,14 @@ void Player::SendQuestUpdateAddItem(Quest const* pQuest, uint32 item_idx, uint32
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Sends a creature or gameobject quest progress update to the client.
+ *
+ * @param pQuest The quest being updated.
+ * @param guid The GUID of the credited target.
+ * @param creatureOrGO_idx The objective index.
+ * @param count The updated progress count.
+ */
 void Player::SendQuestUpdateAddCreatureOrGo(Quest const* pQuest, ObjectGuid guid, uint32 creatureOrGO_idx, uint32 count)
 {
     MANGOS_ASSERT(count < 65536 && "mob/GO count store in 16 bits 2^16 = 65536 (0..65536)");
@@ -18298,6 +20142,11 @@ void Player::_LoadEquipmentSets(QueryResult* result)
     delete result;
 }
 
+/**
+ * @brief Loads battleground return and participation data from the database.
+ *
+ * @param result The query result containing battleground data.
+ */
 void Player::_LoadBGData(QueryResult* result)
 {
     if (!result)
@@ -18322,6 +20171,18 @@ void Player::_LoadBGData(QueryResult* result)
     delete result;
 }
 
+/**
+ * @brief Loads a character position directly from the database.
+ *
+ * @param guid The player GUID to query.
+ * @param mapid Output map identifier.
+ * @param x Output X coordinate.
+ * @param y Output Y coordinate.
+ * @param z Output Z coordinate.
+ * @param o Output orientation.
+ * @param in_flight Output flag indicating whether the character was in flight.
+ * @return True if the position was loaded successfully; otherwise, false.
+ */
 bool Player::LoadPositionFromDB(ObjectGuid guid, uint32& mapid, float& x, float& y, float& z, float& o, bool& in_flight)
 {
     QueryResult* result = CharacterDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`taxi_path` FROM `characters` WHERE `guid` = '%u'", guid.GetCounter());
@@ -18343,6 +20204,13 @@ bool Player::LoadPositionFromDB(ObjectGuid guid, uint32& mapid, float& x, float&
     return true;
 }
 
+/**
+ * @brief Loads serialized uint32 values into the player's update field array.
+ *
+ * @param data The serialized space-separated field data.
+ * @param startOffset The first update-field offset to populate.
+ * @param count The number of uint32 values expected.
+ */
 void Player::_LoadIntoDataField(const char* data, uint32 startOffset, uint32 count)
 {
     if (!data)
@@ -18365,6 +20233,13 @@ void Player::_LoadIntoDataField(const char* data, uint32 startOffset, uint32 cou
     }
 }
 
+/**
+ * @brief Loads the player's persisted state from the database and initializes runtime data.
+ *
+ * @param guid The player GUID to load.
+ * @param holder The query holder containing login query results.
+ * @return True if the player was loaded successfully; otherwise, false.
+ */
 bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 {
     //       0     1        2     3     4      5       6      7   8      9            10            11
@@ -19018,6 +20893,12 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     return true;
 }
 
+/**
+ * @brief Checks whether a creature is tapped by this player or the player's group.
+ *
+ * @param creature The creature to test.
+ * @return True if the tap belongs to this player or group; otherwise, false.
+ */
 bool Player::isAllowedToLoot(Creature* creature)
 {
     // never tapped by any (mob solo kill)
@@ -19045,13 +20926,17 @@ bool Player::isAllowedToLoot(Creature* creature)
         }
         return false;
     }
-    else
-        // prevent other players from looting if the recipient got disconnected
+    else // prevent other players from looting if the recipient got disconnected
     {
         return !creature->HasLootRecipient();
     }
 }
 
+/**
+ * @brief Loads action bar bindings from the database.
+ *
+ * @param result The query result containing action bindings.
+ */
 void Player::_LoadActions(QueryResult* result)
 {
     for (int i = 0; i < MAX_TALENT_SPEC_COUNT; ++i)
@@ -19090,6 +20975,12 @@ void Player::_LoadActions(QueryResult* result)
     }
 }
 
+/**
+ * @brief Loads saved auras from the database and restores their remaining durations.
+ *
+ * @param result The query result containing aura data.
+ * @param timediff The elapsed offline time used to age aura durations.
+ */
 void Player::_LoadAuras(QueryResult* result, uint32 timediff)
 {
     // RemoveAllAuras(); -- some spells casted before aura load, for example in LoadSkills, aura list explicitly cleaned early
@@ -19248,6 +21139,9 @@ void Player::_LoadGlyphs(QueryResult* result)
     delete result;
 }
 
+/**
+ * @brief Restores corpse state for a dead player or cleans it up for a living one.
+ */
 void Player::LoadCorpse()
 {
     if (IsAlive())
@@ -19268,6 +21162,12 @@ void Player::LoadCorpse()
     }
 }
 
+/**
+ * @brief Loads inventory, bank, and equipped items from the database.
+ *
+ * @param result The query result containing item inventory rows.
+ * @param timediff The elapsed offline time used for time-sensitive item checks.
+ */
 void Player::_LoadInventory(QueryResult* result, uint32 timediff)
 {
     // QueryResult *result = CharacterDatabase.PQuery("SELECT `data`,`text`,`bag`,`slot`,`item`,`item_template` FROM `character_inventory` JOIN `item_instance` ON `character_inventory`.`item` = `item_instance`.`guid` WHERE `character_inventory`.`guid` = '%u' ORDER BY `bag`,`slot`", GetGUIDLow());
@@ -19463,6 +21363,11 @@ void Player::_LoadInventory(QueryResult* result, uint32 timediff)
     _ApplyAllItemMods();
 }
 
+/**
+ * @brief Loads persisted item loot contents for the player's items.
+ *
+ * @param result The query result containing saved item loot rows.
+ */
 void Player::_LoadItemLoot(QueryResult* result)
 {
     // QueryResult *result = CharacterDatabase.PQuery("SELECT `guid`,`itemid`,`amount`,`suffix`,`property` FROM `item_loot` WHERE `guid` = '%u'", GetGUIDLow());
@@ -19544,6 +21449,11 @@ void Player::_LoadMailedItems(QueryResult* result)
     delete result;
 }
 
+/**
+ * @brief Loads the player's mailbox headers from the database.
+ *
+ * @param result The query result containing mail records.
+ */
 void Player::_LoadMails(QueryResult* result)
 {
     m_mail.clear();
@@ -19592,6 +21502,9 @@ void Player::_LoadMails(QueryResult* result)
     delete result;
 }
 
+/**
+ * @brief Loads the player's currently active pet from the database when possible.
+ */
 void Player::LoadPet()
 {
     // fixme: the pet should still be loaded if the player is not in world
@@ -19606,6 +21519,11 @@ void Player::LoadPet()
     }
 }
 
+/**
+ * @brief Loads quest status records and rebuilds the in-memory quest log state.
+ *
+ * @param result The query result containing quest status rows.
+ */
 void Player::_LoadQuestStatus(QueryResult* result)
 {
     mQuestStatus.clear();
@@ -19851,6 +21769,11 @@ void Player::_LoadMonthlyQuestStatus(QueryResult* result)
     m_MonthlyQuestChanged = false;
 }
 
+/**
+ * @brief Loads known spells from the database.
+ *
+ * @param result The query result containing learned spell rows.
+ */
 void Player::_LoadSpells(QueryResult* result)
 {
     // QueryResult *result = CharacterDatabase.PQuery("SELECT `spell`,`active`,`disabled` FROM `character_spell` WHERE `guid` = '%u'",GetGUIDLow());
@@ -19959,6 +21882,11 @@ void Player::_LoadTalents(QueryResult* result)
     }
 }
 
+/**
+ * @brief Loads the player's current group membership from the database.
+ *
+ * @param result The query result containing the group identifier.
+ */
 void Player::_LoadGroup(QueryResult* result)
 {
     // QueryResult *result = CharacterDatabase.PQuery("SELECT `groupId` FROM `group_member` WHERE `memberGuid`='%u'", GetGUIDLow());
@@ -19981,6 +21909,11 @@ void Player::_LoadGroup(QueryResult* result)
     }
 }
 
+/**
+ * @brief Loads the player's saved dungeon and raid instance bindings.
+ *
+ * @param result The query result containing character instance bind rows.
+ */
 void Player::_LoadBoundInstances(QueryResult* result)
 {
     for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
@@ -20050,6 +21983,12 @@ void Player::_LoadBoundInstances(QueryResult* result)
     }
 }
 
+/**
+ * @brief Finds the player's instance bind for a specific map.
+ *
+ * @param mapid The map identifier to look up.
+ * @return The matching bind entry, or NULL if none exists.
+ */
 InstancePlayerBind* Player::GetBoundInstance(uint32 mapid, Difficulty difficulty)
 {
     // some instances only have one difficulty
@@ -20070,12 +22009,24 @@ InstancePlayerBind* Player::GetBoundInstance(uint32 mapid, Difficulty difficulty
     }
 }
 
+/**
+ * @brief Removes the player's instance bind for a map.
+ *
+ * @param mapid The bound map identifier.
+ * @param unload True when called during load or unload paths that should skip DB deletion.
+ */
 void Player::UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload)
 {
     BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
     UnbindInstance(itr, difficulty, unload);
 }
 
+/**
+ * @brief Removes the instance bind referenced by an iterator.
+ *
+ * @param itr Iterator pointing at the bind to remove.
+ * @param unload True when called during load or unload paths that should skip DB deletion.
+ */
 void Player::UnbindInstance(BoundInstancesMap::iterator& itr, Difficulty difficulty, bool unload)
 {
     if (itr != m_boundInstances[difficulty].end())
@@ -20091,6 +22042,14 @@ void Player::UnbindInstance(BoundInstancesMap::iterator& itr, Difficulty difficu
     }
 }
 
+/**
+ * @brief Binds the player to a dungeon persistent state.
+ *
+ * @param state The persistent instance state to bind.
+ * @param permanent True for a permanent lock, false for a temporary one.
+ * @param load True when rebuilding the bind from saved data.
+ * @return The resulting bind entry, or NULL if the state was invalid.
+ */
 InstancePlayerBind* Player::BindToInstance(DungeonPersistentState* state, bool permanent, bool load)
 {
     if (state)
@@ -20146,6 +22105,12 @@ InstancePlayerBind* Player::BindToInstance(DungeonPersistentState* state, bool p
     }
 }
 
+/**
+ * @brief Resolves the instance save that applies to the player or the player's group.
+ *
+ * @param mapid The map identifier to inspect.
+ * @return The applicable persistent state, or NULL if none exists.
+ */
 DungeonPersistentState* Player::GetBoundInstanceSaveForSelfOrGroup(uint32 mapid)
 {
     MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
@@ -20173,6 +22138,9 @@ DungeonPersistentState* Player::GetBoundInstanceSaveForSelfOrGroup(uint32 mapid)
     return state;
 }
 
+/**
+ * @brief Sends the player's permanent raid instance lock information to the client.
+ */
 void Player::SendRaidInfo()
 {
     uint32 counter = 0;
@@ -20312,6 +22280,12 @@ void Player::ConvertInstancesToGroup(Player* player, Group* group, ObjectGuid pl
     }
 }
 
+/**
+ * @brief Loads and validates the player's home bind location.
+ *
+ * @param result The query result containing home bind data.
+ * @return True if a valid home bind was loaded or defaulted successfully; otherwise, false.
+ */
 bool Player::_LoadHomeBind(QueryResult* result)
 {
     PlayerInfo const* info = sObjectMgr.GetPlayerInfo(getRace(), getClass());
@@ -20607,6 +22581,9 @@ void Player::SaveInventoryAndGoldToDB()
     SaveGoldToDB();
 }
 
+/**
+ * @brief Persists the player's current money value to the database.
+ */
 void Player::SaveGoldToDB()
 {
     static SqlStatementID updateGold ;
@@ -20615,6 +22592,9 @@ void Player::SaveGoldToDB()
     stmt.PExecute(GetMoney(), GetGUIDLow());
 }
 
+/**
+ * @brief Saves changed action bar bindings to the database.
+ */
 void Player::_SaveActions()
 {
     static SqlStatementID insertAction ;
@@ -20671,6 +22651,9 @@ void Player::_SaveActions()
     }
 }
 
+/**
+ * @brief Saves eligible active aura state to the database.
+ */
 void Player::_SaveAuras()
 {
     static SqlStatementID deleteAuras ;
@@ -20791,6 +22774,9 @@ void Player::_SaveGlyphs()
     }
 }
 
+/**
+ * @brief Saves inventory state changes and queued item records to the database.
+ */
 void Player::_SaveInventory()
 {
     // force items in buyback slots to new state
@@ -20911,6 +22897,9 @@ void Player::_SaveInventory()
     m_itemUpdateQueue.clear();
 }
 
+/**
+ * @brief Saves changed mail records and deletes removed mail from the database.
+ */
 void Player::_SaveMail()
 {
     static SqlStatementID updateMail ;
@@ -20986,6 +22975,9 @@ void Player::_SaveMail()
     m_mailsUpdated = false;
 }
 
+/**
+ * @brief Saves tracked quest status progress to the database.
+ */
 void Player::_SaveQuestStatus()
 {
     static SqlStatementID insertQuestStatus ;
@@ -21124,6 +23116,9 @@ void Player::_SaveMonthlyQuestStatus()
     m_MonthlyQuestChanged = false;
 }
 
+/**
+ * @brief Saves skill value changes to the database.
+ */
 void Player::_SaveSkills()
 {
     static SqlStatementID delSkills ;
@@ -21176,6 +23171,9 @@ void Player::_SaveSkills()
     }
 }
 
+/**
+ * @brief Saves learned spell state changes to the database.
+ */
 void Player::_SaveSpells()
 {
     static SqlStatementID delSpells ;
@@ -21299,6 +23297,9 @@ void Player::_SaveStats()
     stmt.Execute();
 }
 
+/**
+ * @brief Writes the player's current combat and stat values to the debug log.
+ */
 void Player::outDebugStatsValues() const
 {
     // optimize disabled debug output
@@ -21363,6 +23364,11 @@ void Player::UpdateSpeakTime()
     m_speakTime = current + sWorld.getConfig(CONFIG_UINT32_CHATFLOOD_MESSAGE_DELAY);
 }
 
+/**
+ * @brief Checks whether the player is currently allowed to send chat messages.
+ *
+ * @return True if the player's mute timer has expired; otherwise, false.
+ */
 bool Player::CanSpeak() const
 {
     return  GetSession()->m_muteTime <= time(NULL);
@@ -21378,6 +23384,17 @@ void Player::SendAttackSwingNotInRange()
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Writes a character position directly to the database.
+ *
+ * @param guid The character GUID to update.
+ * @param mapid The destination map identifier.
+ * @param x The X coordinate.
+ * @param y The Y coordinate.
+ * @param z The Z coordinate.
+ * @param o The orientation.
+ * @param zone The zone identifier.
+ */
 void Player::SavePositionInDB(ObjectGuid guid, uint32 mapid, float x, float y, float z, float o, uint32 zone)
 {
     std::ostringstream ss;
@@ -21389,6 +23406,13 @@ void Player::SavePositionInDB(ObjectGuid guid, uint32 mapid, float x, float y, f
     CharacterDatabase.Execute(ss.str().c_str());
 }
 
+/**
+ * @brief Replaces a tokenized uint32 field value in a serialized array.
+ *
+ * @param tokens The token array to modify.
+ * @param index The token index to replace.
+ * @param value The new uint32 value.
+ */
 void Player::SetUInt32ValueInArray(Tokens& tokens, uint16 index, uint32 value)
 {
     char buf[11];
@@ -21422,30 +23446,45 @@ void Player::Customize(ObjectGuid guid, uint8 gender, uint8 skin, uint8 face, ui
     delete result;
 }
 
+/**
+ * @brief Sends the error packet for attempting to attack a dead target.
+ */
 void Player::SendAttackSwingDeadTarget()
 {
     WorldPacket data(SMSG_ATTACKSWING_DEADTARGET, 0);
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Sends the error packet for a general inability to attack the target.
+ */
 void Player::SendAttackSwingCantAttack()
 {
     WorldPacket data(SMSG_ATTACKSWING_CANT_ATTACK, 0);
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Sends the packet that cancels the player's current attack.
+ */
 void Player::SendAttackSwingCancelAttack()
 {
     WorldPacket data(SMSG_CANCEL_COMBAT, 0);
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Sends the error packet for attempting to attack while facing the wrong direction.
+ */
 void Player::SendAttackSwingBadFacingAttack()
 {
     WorldPacket data(SMSG_ATTACKSWING_BADFACING, 0);
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Sends the packet that cancels auto-repeat attacks for the client.
+ */
 void Player::SendAutoRepeatCancel(Unit* target)
 {
     WorldPacket data(SMSG_CANCEL_AUTO_REPEAT, target->GetPackGUID().size());
@@ -21453,6 +23492,12 @@ void Player::SendAutoRepeatCancel(Unit* target)
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Sends an exploration experience reward packet to the client.
+ *
+ * @param Area The explored area identifier.
+ * @param Experience The awarded experience amount.
+ */
 void Player::SendExplorationExperience(uint32 Area, uint32 Experience)
 {
     WorldPacket data(SMSG_EXPLORATION_EXPERIENCE, 8);
@@ -21481,6 +23526,11 @@ void Player::SendRaidDifficulty(bool IsInGroup)
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Sends a reset-failed notification for an instance map.
+ *
+ * @param mapid The map identifier that failed to reset.
+ */
 void Player::SendResetFailedNotify(uint32 mapid)
 {
     WorldPacket data(SMSG_RESET_FAILED_NOTIFY, 4);
@@ -21537,6 +23587,11 @@ void Player::ResetInstances(InstanceResetMethod method, bool isRaid)
     }
 }
 
+/**
+ * @brief Sends a successful instance reset notification to the client.
+ *
+ * @param MapId The reset map identifier.
+ */
 void Player::SendResetInstanceSuccess(uint32 MapId)
 {
     WorldPacket data(SMSG_INSTANCE_RESET, 4);
@@ -21544,6 +23599,12 @@ void Player::SendResetInstanceSuccess(uint32 MapId)
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Sends an instance reset failure message to the client.
+ *
+ * @param reason The reset failure reason code.
+ * @param MapId The map identifier that failed to reset.
+ */
 void Player::SendResetInstanceFailed(uint32 reason, uint32 MapId)
 {
     // TODO: find what other fail reasons there are besides players in the instance
@@ -21583,6 +23644,11 @@ void Player::UpdateContestedPvP(uint32 diff)
     }
 }
 
+/**
+ * @brief Updates and clears the player's PvP flag when the timeout expires.
+ *
+ * @param currTime The current server time.
+ */
 void Player::UpdatePvPFlag(time_t currTime)
 {
     if (!IsPvP())
@@ -21597,6 +23663,11 @@ void Player::UpdatePvPFlag(time_t currTime)
     UpdatePvP(false);
 }
 
+/**
+ * @brief Starts an active duel once the duel countdown completes.
+ *
+ * @param currTime The current server time.
+ */
 void Player::UpdateDuelFlag(time_t currTime)
 {
     if (!duel || duel->startTimer == 0 || currTime < duel->startTimer + 3)
@@ -21621,6 +23692,11 @@ void Player::UpdateDuelFlag(time_t currTime)
     duel->opponent->duel->startTime  = currTime;
 }
 
+/**
+ * @brief Unsummons the player's current pet using the requested save mode.
+ *
+ * @param mode The persistence mode to use when removing the pet.
+ */
 void Player::RemovePet(PetSaveMode mode)
 {
     if (Pet* pet = GetPet())
@@ -21629,6 +23705,12 @@ void Player::RemovePet(PetSaveMode mode)
     }
 }
 
+/**
+ * @brief Sends a say chat message from the player to nearby listeners.
+ *
+ * @param text The message text.
+ * @param language The language used for the chat packet.
+ */
 void Player::Say(const std::string& text, const uint32 language)
 {
     WorldPacket data;
@@ -21636,6 +23718,12 @@ void Player::Say(const std::string& text, const uint32 language)
     SendMessageToSetInRange(&data, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY), true);
 }
 
+/**
+ * @brief Sends a yell chat message from the player to nearby listeners.
+ *
+ * @param text The message text.
+ * @param language The language used for the chat packet.
+ */
 void Player::Yell(const std::string& text, const uint32 language)
 {
     WorldPacket data;
@@ -21643,6 +23731,11 @@ void Player::Yell(const std::string& text, const uint32 language)
     SendMessageToSetInRange(&data, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_YELL), true);
 }
 
+/**
+ * @brief Sends a text emote message from the player to nearby listeners.
+ *
+ * @param text The emote text.
+ */
 void Player::TextEmote(const std::string& text)
 {
     WorldPacket data;
@@ -21650,6 +23743,12 @@ void Player::TextEmote(const std::string& text)
     SendMessageToSetInRange(&data, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_TEXTEMOTE), true, !sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_CHAT));
 }
 
+/**
+ * @brief Logs a whisper to the database when whisper logging is enabled.
+ *
+ * @param text The whisper text.
+ * @param receiver The recipient player GUID.
+ */
 void Player::LogWhisper(const std::string& text, ObjectGuid receiver)
 {
     WhisperLoggingLevels loggingLevel = WhisperLoggingLevels(sWorld.getConfig(CONFIG_UINT32_LOG_WHISPERS));
@@ -21701,6 +23800,13 @@ void Player::LogWhisper(const std::string& text, ObjectGuid receiver)
     }
 }
 
+/**
+ * @brief Sends a whisper to another player and handles local response messages.
+ *
+ * @param text The whisper text.
+ * @param language The requested chat language.
+ * @param receiver The recipient player GUID.
+ */
 void Player::Whisper(const std::string& text, uint32 language, ObjectGuid receiver)
 {
     if (language != LANG_ADDON)                             // if not addon data
@@ -21740,6 +23846,9 @@ void Player::Whisper(const std::string& text, uint32 language, ObjectGuid receiv
     }
 }
 
+/**
+ * @brief Sends the controlled pet's spell bar and cooldown state to the client.
+ */
 void Player::PetSpellInitialize()
 {
     Pet* pet = GetPet();
@@ -21827,6 +23936,9 @@ void Player::SendPetGUIDs()
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Sends the possessed unit's action bar state to the client.
+ */
 void Player::PossessSpellInitialize()
 {
     Unit* charm = GetCharm();
@@ -21858,6 +23970,9 @@ void Player::PossessSpellInitialize()
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Sends the charmed unit's available actions and spells to the client.
+ */
 void Player::CharmSpellInitialize()
 {
     Unit* charm = GetCharm();
@@ -21927,6 +24042,9 @@ void Player::CharmSpellInitialize()
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Clears the pet action bar on the client.
+ */
 void Player::RemovePetActionBar()
 {
     WorldPacket data(SMSG_PET_SPELLS, 8);
@@ -21934,6 +24052,12 @@ void Player::RemovePetActionBar()
     SendDirectMessage(&data);
 }
 
+/**
+ * @brief Applies or removes a spell modifier and notifies the client.
+ *
+ * @param mod The modifier to add or remove.
+ * @param apply True to apply the modifier; false to remove it.
+ */
 void Player::AddSpellMod(Aura* aura, bool apply)
 {
     Modifier const* mod = aura->GetModifier();
@@ -22041,6 +24165,11 @@ void Player::SendProficiency(ItemClass itemClass, uint32 itemSubclassMask)
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Removes petition ownership and signatures associated with a player.
+ *
+ * @param guid The player GUID whose petition data should be removed.
+ */
 void Player::RemovePetitionsAndSigns(ObjectGuid guid, uint32 type)
 {
     uint32 lowguid = guid.GetCounter();
@@ -22121,6 +24250,11 @@ void Player::LeaveAllArenaTeams(ObjectGuid guid)
     delete result;
 }
 
+/**
+ * @brief Sets the player's accumulated rested experience bonus.
+ *
+ * @param rest_bonus_new The new rested bonus amount.
+ */
 void Player::SetRestBonus(float rest_bonus_new)
 {
     // Prevent resting on max level
@@ -22159,6 +24293,9 @@ void Player::SetRestBonus(float rest_bonus_new)
     SetUInt32Value(PLAYER_REST_STATE_EXPERIENCE, uint32(m_rest_bonus));
 }
 
+/**
+ * @brief Updates visibility of nearby stealthed units based on detection checks.
+ */
 void Player::HandleStealthedUnitsDetection()
 {
     std::list<Unit*> stealthedUnits;
@@ -22208,6 +24345,14 @@ void Player::HandleStealthedUnitsDetection()
     }
 }
 
+/**
+ * @brief Starts a taxi flight across a sequence of taxi nodes.
+ *
+ * @param nodes The ordered taxi node path to travel.
+ * @param npc The taxi master providing the route, or NULL for spell/scripted travel.
+ * @param spellid The spell initiating the taxi flight, if any.
+ * @return True if the flight started successfully; otherwise, false.
+ */
 bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc /*= NULL*/, uint32 spellid /*= 0*/)
 {
     if (nodes.size() < 2)
@@ -22401,6 +24546,13 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     return true;
 }
 
+/**
+ * @brief Starts a taxi flight using a direct taxi path identifier.
+ *
+ * @param taxi_path_id The taxi path identifier to use.
+ * @param spellid The spell initiating the taxi flight, if any.
+ * @return True if the flight started successfully; otherwise, false.
+ */
 bool Player::ActivateTaxiPathTo(uint32 taxi_path_id, uint32 spellid /*= 0*/)
 {
     TaxiPathEntry const* entry = sTaxiPathStore.LookupEntry(taxi_path_id);
@@ -22418,6 +24570,9 @@ bool Player::ActivateTaxiPathTo(uint32 taxi_path_id, uint32 spellid /*= 0*/)
     return ActivateTaxiPathTo(nodes, NULL, spellid);
 }
 
+/**
+ * @brief Resumes an interrupted taxi flight from the nearest path node.
+ */
 void Player::ContinueTaxiFlight()
 {
     uint32 sourceNode = m_taxi.GetTaxiSource();
@@ -22475,6 +24630,12 @@ void Player::ContinueTaxiFlight()
     GetSession()->SendDoFlight(mountDisplayId, path, startNode);
 }
 
+/**
+ * @brief Applies cooldown lockouts to spells in the specified school mask.
+ *
+ * @param idSchoolMask The spell school mask to prohibit.
+ * @param unTimeMs The prohibition duration in milliseconds.
+ */
 void Player::ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs)
 {
     // last check 2.0.10
@@ -22508,6 +24669,11 @@ void Player::ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs)
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Reinitializes player combat data for the current shapeshift form.
+ *
+ * @param reapplyMods True when reapplying modifiers without a real form change.
+ */
 void Player::InitDataForForm(bool reapplyMods)
 {
     ShapeshiftForm form = GetShapeshiftForm();
@@ -22564,6 +24730,9 @@ void Player::InitDataForForm(bool reapplyMods)
     UpdateAttackPowerAndDamage(true);
 }
 
+/**
+ * @brief Initializes the player's native and current display identifiers.
+ */
 void Player::InitDisplayIds()
 {
     PlayerInfo const* info = sObjectMgr.GetPlayerInfo(getRace(), getClass());
@@ -22869,6 +25038,11 @@ uint32 Player::GetMaxPersonalArenaRatingRequirement(uint32 minarenaslot)
     return max_personal_rating;
 }
 
+/**
+ * @brief Updates the invalid-instance homebind timer and teleports when it expires.
+ *
+ * @param time The elapsed update time in milliseconds.
+ */
 void Player::UpdateHomebindTime(uint32 time)
 {
     // GMs never get homebind timer online
@@ -22910,6 +25084,12 @@ void Player::UpdateHomebindTime(uint32 time)
     }
 }
 
+/**
+ * @brief Sets or clears the player's PvP state with timeout-aware handling.
+ *
+ * @param state True to enable PvP; false to disable it.
+ * @param ovrride True to bypass the delayed PvP timeout behavior.
+ */
 void Player::UpdatePvP(bool state, bool ovrride)
 {
     if (!state || ovrride)
@@ -22930,6 +25110,14 @@ void Player::UpdatePvP(bool state, bool ovrride)
     }
 }
 
+/**
+ * @brief Applies personal and category cooldowns for a spell cast.
+ *
+ * @param spellInfo The spell entry that triggered the cooldown.
+ * @param itemId The casting item entry, if any.
+ * @param spell The active spell instance.
+ * @param infinityCooldown True to apply a long-lived cooldown marker.
+ */
 void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 itemId, Spell* spell, bool infinityCooldown)
 {
     // init cooldown values
@@ -23040,6 +25228,13 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
     }
 }
 
+/**
+ * @brief Stores a cooldown entry for a spell.
+ *
+ * @param spellid The spell identifier.
+ * @param itemid The associated item identifier, if any.
+ * @param end_time The server time when the cooldown ends.
+ */
 void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, time_t end_time)
 {
     SpellCooldown sc;
@@ -23048,6 +25243,13 @@ void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, time_t end_time)
     m_spellCooldowns[spellid] = sc;
 }
 
+/**
+ * @brief Applies cooldowns and notifies the client about a spell cooldown event.
+ *
+ * @param spellInfo The spell entry that triggered the cooldown.
+ * @param itemId The associated item entry, if any.
+ * @param spell The active spell instance.
+ */
 void Player::SendCooldownEvent(SpellEntry const* spellInfo, uint32 itemId, Spell* spell)
 {
     // start cooldowns at server side, if any
@@ -23287,6 +25489,11 @@ void Player::ToggleMetaGemsActive(uint8 exceptslot, bool apply)
     }
 }
 
+/**
+ * @brief Stores the location used to return the player after leaving a battleground.
+ *
+ * @param leader The group leader to mirror entry positioning from, or NULL.
+ */
 void Player::SetBattleGroundEntryPoint()
 {
     // Taxi path store
@@ -23347,6 +25554,11 @@ void Player::SetBattleGroundEntryPoint()
     m_bgData.m_needSave = true;
 }
 
+/**
+ * @brief Removes the player from the battleground and handles deserter penalties.
+ *
+ * @param teleportToEntryPoint True to teleport the player back to the saved entry point.
+ */
 void Player::LeaveBattleground(bool teleportToEntryPoint)
 {
     if (BattleGround* bg = GetBattleGround())
@@ -23371,6 +25583,11 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
     }
 }
 
+/**
+ * @brief Checks whether the player may currently join a battleground.
+ *
+ * @return True if the player can join; otherwise, false.
+ */
 bool Player::CanJoinToBattleground() const
 {
     // check Deserter debuff
@@ -23416,6 +25633,12 @@ void Player::ReportedAfkBy(Player* reporter)
     }
 }
 
+/**
+ * @brief Checks whether this player should be visible to another player in grid range.
+ *
+ * @param pl The observing player.
+ * @return True if this player should be visible; otherwise, false.
+ */
 bool Player::IsVisibleInGridForPlayer(Player* pl) const
 {
     // gamemaster in GM mode see all, including ghosts
@@ -23459,6 +25682,12 @@ bool Player::IsVisibleInGridForPlayer(Player* pl) const
     return false;
 }
 
+/**
+ * @brief Checks whether this player should appear in global player visibility contexts.
+ *
+ * @param u The player attempting to see this player.
+ * @return True if this player is globally visible; otherwise, false.
+ */
 bool Player::IsVisibleGloballyFor(Player* u) const
 {
     if (!u)
@@ -23508,6 +25737,12 @@ inline void BeforeVisibilityDestroy<Creature>(Creature* t, Player* p)
     }
 }
 
+/**
+ * @brief Updates visibility of a single world object for the player.
+ *
+ * @param viewPoint The viewpoint used for visibility checks.
+ * @param target The target object whose visibility is being updated.
+ */
 void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* target)
 {
     if (HaveAtClient(target))
@@ -23624,11 +25859,17 @@ void Player::SetPhaseMask(uint32 newPhaseMask, bool update)
     GetSession()->SendSetPhaseShift(GetPhaseMask());
 }
 
+/**
+ * @brief Initializes the number of primary professions the player may learn.
+ */
 void Player::InitPrimaryProfessions()
 {
     SetFreePrimaryProfessions(sWorld.getConfig(CONFIG_UINT32_MAX_PRIMARY_TRADE_SKILL));
 }
 
+/**
+ * @brief Sends the current combo point target and value to the client fields.
+ */
 void Player::SendComboPoints()
 {
     Unit* combotarget = sObjectAccessor.GetUnit(*this, m_comboTargetGuid);
@@ -23648,6 +25889,12 @@ void Player::SendComboPoints()
     }*/
 }
 
+/**
+ * @brief Adds combo points on a target and updates combo point ownership.
+ *
+ * @param target The unit receiving combo points.
+ * @param count The number of combo points to add.
+ */
 void Player::AddComboPoints(Unit* target, int8 count)
 {
     if (!count)
@@ -23688,6 +25935,9 @@ void Player::AddComboPoints(Unit* target, int8 count)
     SendComboPoints();
 }
 
+/**
+ * @brief Clears the player's combo points and current combo target.
+ */
 void Player::ClearComboPoints()
 {
     if (!m_comboTargetGuid)
@@ -23710,6 +25960,12 @@ void Player::ClearComboPoints()
     m_comboTargetGuid.Clear();
 }
 
+/**
+ * @brief Assigns the player to a group and subgroup.
+ *
+ * @param group The group to join, or NULL to clear membership.
+ * @param subgroup The subgroup index when joining a group.
+ */
 void Player::SetGroup(Group* group, int8 subgroup)
 {
     if (group == NULL)
@@ -23786,6 +26042,9 @@ void Player::SendInitialPacketsBeforeAddToMap()
     SetMover(this);
 }
 
+/**
+ * @brief Sends map-dependent initialization packets after the player is added to the world.
+ */
 void Player::SendInitialPacketsAfterAddToMap()
 {
     // update zone
@@ -23826,6 +26085,9 @@ void Player::SendInitialPacketsAfterAddToMap()
     SendItemDurations();                                    // must be after add to map
 }
 
+/**
+ * @brief Flushes pending group update data to out-of-range group members.
+ */
 void Player::SendUpdateToOutOfRangeGroupMembers()
 {
     if (m_groupUpdateMask == GROUP_UPDATE_FLAG_NONE)
@@ -23845,6 +26107,14 @@ void Player::SendUpdateToOutOfRangeGroupMembers()
     }
 }
 
+/**
+ * @brief Sends the appropriate transfer-aborted feedback for an area lock failure.
+ *
+ * @param mapEntry The destination map entry.
+ * @param at The triggering area trigger, if any.
+ * @param lockStatus The evaluated area lock status.
+ * @param miscRequirement Extra requirement data used by some messages.
+ */
 void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaLockStatus lockStatus, uint32 miscRequirement)
 {
     MANGOS_ASSERT(mapEntry);
@@ -23910,6 +26180,12 @@ void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaLockS
     }
 }
 
+/**
+ * @brief Sends an instance reset warning message to the client.
+ *
+ * @param mapid The map identifier being reset.
+ * @param time The remaining time until reset in seconds.
+ */
 void Player::SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time)
 {
     // type of warning, based on the time remaining until reset
@@ -23944,6 +26220,11 @@ void Player::SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint3
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Applies the default equip cooldown for item use spells.
+ *
+ * @param pItem The item whose on-use spells should receive equip cooldowns.
+ */
 void Player::ApplyEquipCooldown(Item* pItem)
 {
     if (pItem->GetProto()->Flags & ITEM_FLAG_NO_EQUIP_COOLDOWN)
@@ -23976,6 +26257,9 @@ void Player::ApplyEquipCooldown(Item* pItem)
     }
 }
 
+/**
+ * @brief Resets the player's learned spells and restores default and quest rewards.
+ */
 void Player::resetSpells()
 {
     // not need after this call
@@ -23997,6 +26281,9 @@ void Player::resetSpells()
     learnQuestRewardedSpells();
 }
 
+/**
+ * @brief Teaches the player's default race and class spells.
+ */
 void Player::learnDefaultSpells()
 {
     // learn default race/class spells
@@ -24016,6 +26303,11 @@ void Player::learnDefaultSpells()
     }
 }
 
+/**
+ * @brief Teaches a quest reward spell if the quest grants a learnable spell.
+ *
+ * @param quest The rewarded quest to inspect.
+ */
 void Player::learnQuestRewardedSpells(Quest const* quest)
 {
     uint32 spell_id = quest->GetRewSpellCast();
@@ -24108,6 +26400,9 @@ void Player::learnQuestRewardedSpells(Quest const* quest)
     CastSpell(this, spell_id, true);
 }
 
+/**
+ * @brief Reapplies all quest reward spells from previously rewarded quests.
+ */
 void Player::learnQuestRewardedSpells()
 {
     // learn spells received from quest completing
@@ -24129,6 +26424,12 @@ void Player::learnQuestRewardedSpells()
     }
 }
 
+/**
+ * @brief Learns or removes spells unlocked by a profession or skill value.
+ *
+ * @param skill_id The skill line identifier.
+ * @param skill_value The current skill value.
+ */
 void Player::learnSkillRewardedSpells(uint32 skill_id, uint32 skill_value)
 {
     uint32 raceMask  = getRaceMask();
@@ -24171,6 +26472,11 @@ void Player::learnSkillRewardedSpells(uint32 skill_id, uint32 skill_value)
     }
 }
 
+/**
+ * @brief Sends visible aura duration updates for a target to the player.
+ *
+ * @param target The unit whose aura durations should be sent.
+ */
 void Player::SendAurasForTarget(Unit* target)
 {
     Unit::VisibleAuraMap const& visibleAuras = target->GetVisibleAuras();
@@ -24254,6 +26560,11 @@ void Player::ResetMonthlyQuestStatus()
     m_MonthlyQuestChanged = false;
 }
 
+/**
+ * @brief Gets the battleground instance the player is currently associated with.
+ *
+ * @return The active battleground instance, or NULL if none exists.
+ */
 BattleGround* Player::GetBattleGround() const
 {
     if (GetBattleGroundId() == 0)
@@ -24275,6 +26586,12 @@ bool Player::InArena() const
     return true;
 }
 
+/**
+ * @brief Checks whether the player's level fits a battleground's allowed range.
+ *
+ * @param bgTypeId The battleground type to evaluate.
+ * @return True if the player's level is within range; otherwise, false.
+ */
 bool Player::GetBGAccessByLevel(BattleGroundTypeId bgTypeId) const
 {
     // get a template bg instead of running one
@@ -24299,6 +26616,12 @@ bool Player::GetBGAccessByLevel(BattleGroundTypeId bgTypeId) const
     return true;
 }
 
+/**
+ * @brief Calculates the vendor price discount earned from reputation and rank.
+ *
+ * @param pCreature The vendor creature.
+ * @return The price multiplier applied to vendor costs.
+ */
 float Player::GetReputationPriceDiscount(Creature const* pCreature) const
 {
     FactionTemplateEntry const* vendor_faction = pCreature->getFactionTemplateEntry();
@@ -24386,6 +26709,12 @@ bool Player::IsSpellFitByClassAndRace(uint32 spell_id, uint32* pReqlevel /*= NUL
     return false;
 }
 
+/**
+ * @brief Checks whether a gameobject is still needed for any active quest objective.
+ *
+ * @param GOId The gameobject entry identifier.
+ * @return True if the gameobject is needed for a quest; otherwise, false.
+ */
 bool Player::HasQuestForGO(int32 GOId) const
 {
     for (int i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
@@ -24434,6 +26763,9 @@ bool Player::HasQuestForGO(int32 GOId) const
     return false;
 }
 
+/**
+ * @brief Refreshes visible quest-related world objects for the player.
+ */
 void Player::UpdateForQuestWorldObjects()
 {
     if (m_clientGUIDs.empty())
@@ -24481,6 +26813,11 @@ void Player::UpdateForQuestWorldObjects()
     GetSession()->SendPacket(&packet);
 }
 
+/**
+ * @brief Accepts or declines a pending summon and teleports when valid.
+ *
+ * @param agree True to accept the summon; false to decline it.
+ */
 void Player::SummonIfPossible(bool agree)
 {
     if (!agree)
@@ -24516,6 +26853,11 @@ void Player::SummonIfPossible(bool agree)
     TeleportTo(m_summon_mapid, m_summon_x, m_summon_y, m_summon_z, GetOrientation());
 }
 
+/**
+ * @brief Removes an item from the list of items with active duration tracking.
+ *
+ * @param item The item to stop tracking.
+ */
 void Player::RemoveItemDurations(Item* item)
 {
     for (ItemDurationList::iterator itr = m_itemDuration.begin(); itr != m_itemDuration.end(); ++itr)
@@ -24528,6 +26870,11 @@ void Player::RemoveItemDurations(Item* item)
     }
 }
 
+/**
+ * @brief Adds an item to the list of items with active duration tracking.
+ *
+ * @param item The item to track.
+ */
 void Player::AddItemDurations(Item* item)
 {
     if (item->GetUInt32Value(ITEM_FIELD_DURATION))
@@ -24537,6 +26884,9 @@ void Player::AddItemDurations(Item* item)
     }
 }
 
+/**
+ * @brief Automatically unequips the offhand item when a two-handed weapon requires it.
+ */
 void Player::AutoUnequipOffhandIfNeed()
 {
     Item* offItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
@@ -24572,6 +26922,13 @@ void Player::AutoUnequipOffhandIfNeed()
     }
 }
 
+/**
+ * @brief Checks whether the player has an equipped item that satisfies a spell requirement.
+ *
+ * @param spellInfo The spell entry defining the equipment requirement.
+ * @param ignoreItem An equipped item to ignore during the search.
+ * @return True if a valid item is equipped; otherwise, false.
+ */
 bool Player::HasItemFitToSpellReqirements(SpellEntry const* spellInfo, Item const* ignoreItem)
 {
     if (spellInfo->EquippedItemClass < 0)
@@ -24627,6 +26984,12 @@ bool Player::HasItemFitToSpellReqirements(SpellEntry const* spellInfo, Item cons
     return false;
 }
 
+/**
+ * @brief Checks whether the player may cast a spell without consuming reagents.
+ *
+ * @param spellInfo The spell being cast.
+ * @return True if reagents can be ignored; otherwise, false.
+ */
 bool Player::CanNoReagentCast(SpellEntry const* spellInfo) const
 {
     // don't take reagents for spells with SPELL_ATTR_EX5_NO_REAGENT_WHILE_PREP
@@ -24646,6 +27009,11 @@ bool Player::CanNoReagentCast(SpellEntry const* spellInfo) const
     return false;
 }
 
+/**
+ * @brief Removes auras and interrupts casts that depend on a removed item.
+ *
+ * @param pItem The item being removed or invalidated.
+ */
 void Player::RemoveItemDependentAurasAndCasts(Item* pItem)
 {
     SpellAuraHolderMap& auras = GetSpellAuraHolderMap();
@@ -24682,6 +27050,11 @@ void Player::RemoveItemDependentAurasAndCasts(Item* pItem)
             }
 }
 
+/**
+ * @brief Chooses the resurrection spell currently available to the player.
+ *
+ * @return The resurrection spell identifier, or 0 if none is available.
+ */
 uint32 Player::GetResurrectionSpellId()
 {
     // search priceless resurrection possibilities
@@ -24752,6 +27125,11 @@ bool Player::isHonorOrXPTarget(Unit* pVictim) const
     return true;
 }
 
+/**
+ * @brief Rewards the player for killing a unit outside group reward distribution.
+ *
+ * @param pVictim The killed unit.
+ */
 void Player::RewardSinglePlayerAtKill(Unit* pVictim)
 {
     bool PvP = pVictim->IsCharmedOwnedByPlayerOrPlayer();
@@ -24780,6 +27158,12 @@ void Player::RewardSinglePlayerAtKill(Unit* pVictim)
     }
 }
 
+/**
+ * @brief Grants event kill credit to the player or nearby group members.
+ *
+ * @param creature_id The credited creature entry identifier.
+ * @param pRewardSource The world object used for distance checks.
+ */
 void Player::RewardPlayerAndGroupAtEvent(uint32 creature_id, WorldObject* pRewardSource)
 {
     MANGOS_ASSERT((!GetGroup() || pRewardSource) && "Player::RewardPlayerAndGroupAtEvent called for Group-Case but no source for range searching provided");
@@ -24815,6 +27199,12 @@ void Player::RewardPlayerAndGroupAtEvent(uint32 creature_id, WorldObject* pRewar
     }
 }
 
+/**
+ * @brief Grants quest cast credit to the player or nearby group members.
+ *
+ * @param pRewardSource The credited creature or gameobject.
+ * @param spellid The spell that granted the credit.
+ */
 void Player::RewardPlayerAndGroupAtCast(WorldObject* pRewardSource, uint32 spellid)
 {
     // prepare data for near group iteration
@@ -24846,6 +27236,12 @@ void Player::RewardPlayerAndGroupAtCast(WorldObject* pRewardSource, uint32 spell
     }
 }
 
+/**
+ * @brief Checks whether the player or corpse is close enough for shared rewards.
+ *
+ * @param pRewardSource The source object used for the distance check.
+ * @return True if the player qualifies for group reward range; otherwise, false.
+ */
 bool Player::IsAtGroupRewardDistance(WorldObject const* pRewardSource) const
 {
     if (pRewardSource->IsWithinDistInMap(this, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE)))
@@ -24867,6 +27263,12 @@ bool Player::IsAtGroupRewardDistance(WorldObject const* pRewardSource) const
     return pRewardSource->IsWithinDistInMap(corpse, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE));
 }
 
+/**
+ * @brief Gets the player's base weapon skill for an attack type.
+ *
+ * @param attType The attack type to evaluate.
+ * @return The corresponding base weapon skill value.
+ */
 uint32 Player::GetBaseWeaponSkillValue(WeaponAttackType attType) const
 {
     Item* item = GetWeaponForAttack(attType, true, true);
@@ -24882,6 +27284,9 @@ uint32 Player::GetBaseWeaponSkillValue(WeaponAttackType attType) const
     return GetBaseSkillValue(skill);
 }
 
+/**
+ * @brief Resurrects the player using the pending resurrection request data.
+ */
 void Player::ResurectUsingRequestData()
 {
     /// Teleport before resurrecting by player, otherwise the player might get attacked from creatures near his corpse
@@ -24925,6 +27330,12 @@ void Player::ResurectUsingRequestData()
     SpawnCorpseBones();
 }
 
+/**
+ * @brief Sends a client-control state update for a unit.
+ *
+ * @param target The unit whose control state is being updated.
+ * @param allowMove Nonzero to allow movement; zero to disable it.
+ */
 void Player::SetClientControl(Unit* target, uint8 allowMove)
 {
     WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, target->GetPackGUID().size() + 1);
@@ -24933,6 +27344,9 @@ void Player::SetClientControl(Unit* target, uint8 allowMove)
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Applies or removes auras that depend on the player's current zone.
+ */
 void Player::UpdateZoneDependentAuras()
 {
     // Some spells applied at enter into zone (with subzones), aura removed in UpdateAreaDependentAuras that called always at zone->area update
@@ -24943,6 +27357,9 @@ void Player::UpdateZoneDependentAuras()
     }
 }
 
+/**
+ * @brief Applies or removes auras that depend on the player's current subzone.
+ */
 void Player::UpdateAreaDependentAuras()
 {
     // remove auras from spells with area limitations
@@ -24992,6 +27409,12 @@ void Player::UpdateZoneDependentPets()
     CallForAllControlledUnits(UpdateZoneDependentPetsHelper(this, m_zoneUpdateId, m_areaUpdateId), CONTROLLED_PET | CONTROLLED_GUARDIANS | CONTROLLED_MINIPET);
 }
 
+/**
+ * @brief Gets the current corpse reclaim delay for PvE or PvP death.
+ *
+ * @param pvp True for PvP death rules; false for PvE death rules.
+ * @return The reclaim delay in seconds.
+ */
 uint32 Player::GetCorpseReclaimDelay(bool pvp) const
 {
     if ((pvp && !sWorld.getConfig(CONFIG_BOOL_DEATH_CORPSE_RECLAIM_DELAY_PVP)) ||
@@ -25006,6 +27429,9 @@ uint32 Player::GetCorpseReclaimDelay(bool pvp) const
     return corpseReclaimDelay[count];
 }
 
+/**
+ * @brief Advances the corpse reclaim delay escalation after death.
+ */
 void Player::UpdateCorpseReclaimDelay()
 {
     bool pvp = m_ExtraFlags & PLAYER_EXTRA_PVP_DEATH;
@@ -25036,6 +27462,11 @@ void Player::UpdateCorpseReclaimDelay()
     }
 }
 
+/**
+ * @brief Sends the current corpse reclaim delay to the client.
+ *
+ * @param load True when restoring the delay from saved corpse state.
+ */
 void Player::SendCorpseReclaimDelay(bool load)
 {
     Corpse* corpse = GetCorpse();
@@ -25090,6 +27521,12 @@ void Player::SendCorpseReclaimDelay(bool load)
     GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Selects a random nearby raid member within a radius.
+ *
+ * @param radius The maximum search radius.
+ * @return A random eligible raid member, or NULL if none are found.
+ */
 Player* Player::GetNextRandomRaidMember(float radius)
 {
     Group* pGroup = GetGroup();
@@ -25122,6 +27559,11 @@ Player* Player::GetNextRandomRaidMember(float radius)
     return nearMembers[randTarget];
 }
 
+/**
+ * @brief Checks whether the player is allowed to uninvite someone from the group.
+ *
+ * @return The party result code describing whether uninvite is allowed.
+ */
 PartyResult Player::CanUninviteFromGroup() const
 {
     const Group* grp = GetGroup();
@@ -25143,6 +27585,12 @@ PartyResult Player::CanUninviteFromGroup() const
     return ERR_PARTY_RESULT_OK;
 }
 
+/**
+ * @brief Moves the player into a battleground raid group.
+ *
+ * @param group The battleground raid group.
+ * @param subgroup The battleground subgroup index.
+ */
 void Player::SetBattleGroundRaid(Group* group, int8 subgroup)
 {
     // we must move references from m_group to m_originalGroup
@@ -25153,6 +27601,9 @@ void Player::SetBattleGroundRaid(Group* group, int8 subgroup)
     m_group.setSubGroup((uint8)subgroup);
 }
 
+/**
+ * @brief Restores the player's original group after leaving a battleground raid.
+ */
 void Player::RemoveFromBattleGroundRaid()
 {
     // remove existing reference
@@ -25165,6 +27616,12 @@ void Player::RemoveFromBattleGroundRaid()
     SetOriginalGroup(NULL);
 }
 
+/**
+ * @brief Stores the player's original non-battleground group reference.
+ *
+ * @param group The original group, or NULL to clear it.
+ * @param subgroup The original subgroup index.
+ */
 void Player::SetOriginalGroup(Group* group, int8 subgroup)
 {
     if (group == NULL)
@@ -25180,6 +27637,14 @@ void Player::SetOriginalGroup(Group* group, int8 subgroup)
     }
 }
 
+/**
+ * @brief Updates liquid auras and mirror timers based on the player's position.
+ *
+ * @param m The current map.
+ * @param x The X coordinate.
+ * @param y The Y coordinate.
+ * @param z The Z coordinate.
+ */
 void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
 {
     GridMapLiquidData liquid_status;
@@ -25301,6 +27766,11 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
     }
 }
 
+/**
+ * @brief Enables or disables the player's ability to parry.
+ *
+ * @param value True to allow parry; false to disable it.
+ */
 void Player::SetCanParry(bool value)
 {
     if (m_canParry == value)
@@ -25312,6 +27782,11 @@ void Player::SetCanParry(bool value)
     UpdateParryPercentage();
 }
 
+/**
+ * @brief Enables or disables the player's ability to block.
+ *
+ * @param value True to allow block; false to disable it.
+ */
 void Player::SetCanBlock(bool value)
 {
     if (m_canBlock == value)
@@ -25323,6 +27798,12 @@ void Player::SetCanBlock(bool value)
     UpdateBlockPercentage();
 }
 
+/**
+ * @brief Checks whether this item position entry exists in a vector of positions.
+ *
+ * @param vec The vector of item positions to search.
+ * @return True if an entry with the same position exists; otherwise, false.
+ */
 bool ItemPosCount::isContainedIn(ItemPosCountVec const& vec) const
 {
     for (ItemPosCountVec::const_iterator itr = vec.begin(); itr != vec.end(); ++itr)
@@ -25334,6 +27815,11 @@ bool ItemPosCount::isContainedIn(ItemPosCountVec const& vec) const
     return false;
 }
 
+/**
+ * @brief Checks whether the player can interact with a battleground object.
+ *
+ * @return True if the player can use the object; otherwise, false.
+ */
 bool Player::CanUseBattleGroundObject()
 {
     // TODO : some spells gives player ForceReaction to one faction (ReputationMgr::ApplyForceReaction)
@@ -25462,6 +27948,11 @@ void Player::ApplyGlyphs(bool apply)
     }
 }
 
+/**
+ * @brief Checks whether the player is immune to all spell schools.
+ *
+ * @return True if total immunity is active; otherwise, false.
+ */
 bool Player::isTotalImmune()
 {
     AuraList const& immune = GetAurasByType(SPELL_AURA_SCHOOL_IMMUNITY);
@@ -25611,6 +28102,16 @@ bool Player::IsBaseRuneSlotsOnCooldown(RuneType runeType) const
     return true;
 }
 
+/**
+ * @brief Builds temporary loot data and stores all eligible loot automatically.
+ *
+ * @param lootTarget The object owning the loot.
+ * @param loot_id The loot template identifier.
+ * @param store The loot store to use.
+ * @param broadcast True to broadcast item gains.
+ * @param bag The preferred destination bag.
+ * @param slot The preferred destination slot.
+ */
 void Player::AutoStoreLoot(WorldObject const* lootTarget, uint32 loot_id, LootStore const& store, bool broadcast, uint8 bag, uint8 slot)
 {
     Loot loot(lootTarget);
@@ -25619,6 +28120,14 @@ void Player::AutoStoreLoot(WorldObject const* lootTarget, uint32 loot_id, LootSt
     AutoStoreLoot(loot, broadcast, bag, slot);
 }
 
+/**
+ * @brief Stores all eligible loot entries directly into the player's inventory.
+ *
+ * @param loot The loot container to process.
+ * @param broadcast True to broadcast item gains.
+ * @param bag The preferred destination bag.
+ * @param slot The preferred destination slot.
+ */
 void Player::AutoStoreLoot(Loot& loot, bool broadcast, uint8 bag, uint8 slot)
 {
     uint32 max_slot = loot.GetMaxSlotInLootFor(this);
@@ -25647,6 +28156,13 @@ void Player::AutoStoreLoot(Loot& loot, bool broadcast, uint8 bag, uint8 slot)
     }
 }
 
+/**
+ * @brief Replaces an item with another item while preserving transferable state.
+ *
+ * @param item The original item.
+ * @param newItemId The new item entry identifier.
+ * @return The converted item, or NULL if conversion failed.
+ */
 Item* Player::ConvertItem(Item* item, uint32 newItemId)
 {
     uint16 pos = item->GetPos();
@@ -25713,6 +28229,11 @@ Item* Player::ConvertItem(Item* item, uint32 newItemId)
     return NULL;
 }
 
+/**
+ * @brief Calculates the total talent points available for the player's level.
+ *
+ * @return The number of talent points granted by level and rate settings.
+ */
 uint32 Player::CalculateTalentsPoints() const
 {
     uint32 base_level = getClass() == CLASS_DEATH_KNIGHT ? 55 : 9;
@@ -25756,6 +28277,11 @@ struct DoPlayerLearnSpell
     Player& player;
 };
 
+/**
+ * @brief Learns a spell and all higher ranks linked in its rank chain.
+ *
+ * @param spellid The base spell identifier.
+ */
 void Player::learnSpellHighRank(uint32 spellid)
 {
     learnSpell(spellid, false);
@@ -25764,6 +28290,11 @@ void Player::learnSpellHighRank(uint32 spellid)
     sSpellMgr.doForHighRanks(spellid, worker);
 }
 
+/**
+ * @brief Loads skill values from the database and initializes related rewards.
+ *
+ * @param result The query result containing saved skill rows.
+ */
 void Player::_LoadSkills(QueryResult* result)
 {
     //                                                           0      1      2
@@ -25911,6 +28442,13 @@ uint32 Player::GetPhaseMaskForSpawn() const
     return PHASEMASK_NORMAL;
 }
 
+/**
+ * @brief Checks whether a concrete item can be equipped under unique-equip rules.
+ *
+ * @param pItem The item to test.
+ * @param eslot The equipment slot being considered.
+ * @return The inventory result describing whether equipping is allowed.
+ */
 InventoryResult Player::CanEquipUniqueItem(Item* pItem, uint8 eslot, uint32 limit_count) const
 {
     ItemPrototype const* pProto = pItem->GetProto();
@@ -25954,6 +28492,13 @@ InventoryResult Player::CanEquipUniqueItem(Item* pItem, uint8 eslot, uint32 limi
     return EQUIP_ERR_OK;
 }
 
+/**
+ * @brief Checks whether an item prototype can be equipped under unique-equip rules.
+ *
+ * @param itemProto The item prototype to test.
+ * @param except_slot An equipment slot to ignore during the check.
+ * @return The inventory result describing whether equipping is allowed.
+ */
 InventoryResult Player::CanEquipUniqueItem(ItemPrototype const* itemProto, uint8 except_slot, uint32 limit_count) const
 {
     // check unique-equipped on item
@@ -25992,6 +28537,11 @@ InventoryResult Player::CanEquipUniqueItem(ItemPrototype const* itemProto, uint8
     return EQUIP_ERR_OK;
 }
 
+/**
+ * @brief Calculates and applies fall damage from movement updates.
+ *
+ * @param movementInfo The movement packet information containing fall data.
+ */
 void Player::HandleFall(MovementInfo const& movementInfo)
 {
     // calculate total z distance of the fall
@@ -26081,6 +28631,12 @@ SpellEntry const* Player::GetKnownTalentRankById(int32 talentId) const
     }
 }
 
+/**
+ * @brief Learns a specific talent rank if all requirements are satisfied.
+ *
+ * @param talentId The talent entry identifier.
+ * @param talentRank The requested talent rank index.
+ */
 void Player::LearnTalent(uint32 talentId, uint32 talentRank)
 {
     uint32 CurTalentPoints = GetFreeTalentPoints();
@@ -26380,6 +28936,12 @@ void Player::UpdateKnownCurrencies(uint32 itemId, bool apply)
     }
 }
 
+/**
+ * @brief Refreshes stored fall tracking data when movement indicates a new fall state.
+ *
+ * @param minfo The current movement information.
+ * @param opcode The movement opcode being processed.
+ */
 void Player::UpdateFallInformationIfNeed(MovementInfo const& minfo, uint16 opcode)
 {
     if (m_lastFallTime >= minfo.GetFallTime() || m_lastFallZ <= minfo.GetPos()->z || opcode == MSG_MOVE_FALL_LAND)
@@ -26388,6 +28950,9 @@ void Player::UpdateFallInformationIfNeed(MovementInfo const& minfo, uint16 opcod
     }
 }
 
+/**
+ * @brief Temporarily unsummons the current pet when the player's state requires it.
+ */
 void Player::UnsummonPetTemporaryIfAny()
 {
     Pet* pet = GetPet();
@@ -26404,6 +28969,9 @@ void Player::UnsummonPetTemporaryIfAny()
     pet->Unsummon(PET_SAVE_AS_CURRENT, this);
 }
 
+/**
+ * @brief Resummons a pet that was temporarily unsummoned earlier.
+ */
 void Player::ResummonPetTemporaryUnSummonedIfAny()
 {
     if (!m_temporaryUnsummonedPetNumber)
@@ -26431,6 +28999,12 @@ void Player::ResummonPetTemporaryUnSummonedIfAny()
     m_temporaryUnsummonedPetNumber = 0;
 }
 
+/**
+ * @brief Checks whether the player can currently see spell-click interaction on a creature.
+ *
+ * @param c The creature to evaluate.
+ * @return True if spell-click should be visible; otherwise, false.
+ */
 bool Player::canSeeSpellClickOn(Creature const* c) const
 {
     if (!c->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK))
@@ -26802,6 +29376,9 @@ void Player::_SaveEquipmentSets()
     }
 }
 
+/**
+ * @brief Saves battleground return position and instance data to the database.
+ */
 void Player::_SaveBGData()
 {
     // nothing save
@@ -27050,6 +29627,11 @@ void Player::UpdateSpecCount(uint8 count)
     SendTalentsInfoData(false);
 }
 
+/**
+ * @brief Adds or removes money from the player while clamping to valid limits.
+ *
+ * @param d The signed money delta.
+ */
 void Player::ModifyMoney(int32 d)
 {
 #ifdef ENABLE_ELUNA
@@ -27075,6 +29657,12 @@ void Player::ModifyMoney(int32 d)
     }
 }
 
+/**
+ * @brief Clears an at-login flag from the player and optionally from the database.
+ *
+ * @param f The flag to remove.
+ * @param in_db_also True to persist the removal to the database immediately.
+ */
 void Player::RemoveAtLoginFlag(AtLoginFlags f, bool in_db_also /*= false*/)
 {
     m_atLoginFlags &= ~f;
@@ -27085,6 +29673,12 @@ void Player::RemoveAtLoginFlag(AtLoginFlags f, bool in_db_also /*= false*/)
     }
 }
 
+/**
+ * @brief Sends a packet that clears a spell cooldown on the client.
+ *
+ * @param spell_id The spell whose cooldown is being cleared.
+ * @param target The target unit associated with the cooldown clear.
+ */
 void Player::SendClearCooldown(uint32 spell_id, Unit* target)
 {
     WorldPacket data(SMSG_CLEAR_COOLDOWN, 4 + 8);
@@ -27093,6 +29687,15 @@ void Player::SendClearCooldown(uint32 spell_id, Unit* target)
     SendDirectMessage(&data);
 }
 
+/**
+ * @brief Builds a teleport acknowledgement packet using a destination position.
+ *
+ * @param data The packet to populate.
+ * @param x The destination X coordinate.
+ * @param y The destination Y coordinate.
+ * @param z The destination Z coordinate.
+ * @param ang The destination orientation.
+ */
 void Player::BuildTeleportAckMsg(WorldPacket& data, float x, float y, float z, float ang) const
 {
     MovementInfo mi = m_movementInfo;
@@ -27104,6 +29707,12 @@ void Player::BuildTeleportAckMsg(WorldPacket& data, float x, float y, float z, f
     data << mi;
 }
 
+/**
+ * @brief Checks whether the player's movement info currently contains a flag.
+ *
+ * @param f The movement flag to test.
+ * @return True if the flag is present; otherwise, false.
+ */
 bool Player::HasMovementFlag(MovementFlags f) const
 {
     return m_movementInfo.HasMovementFlag(f);
@@ -27155,6 +29764,12 @@ bool Player::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex
     return Unit::IsImmuneToSpellEffect(spellInfo, index, castOnSelf);
 }
 
+/**
+ * @brief Sets the player's home bind location and persists it to the database.
+ *
+ * @param loc The new home bind world location.
+ * @param area_id The associated area identifier.
+ */
 void Player::SetHomebindToLocation(WorldLocation const& loc, uint32 area_id)
 {
     m_homebindMapId = loc.mapid;
@@ -27168,6 +29783,13 @@ void Player::SetHomebindToLocation(WorldLocation const& loc, uint32 area_id)
                                m_homebindMapId, m_homebindAreaId, m_homebindX, m_homebindY, m_homebindZ, GetGUIDLow());
 }
 
+/**
+ * @brief Resolves an object GUID to a world object constrained by a type mask.
+ *
+ * @param guid The object GUID to resolve.
+ * @param typemask The allowed object type mask.
+ * @return The matching object, or NULL if not found or disallowed.
+ */
 Object* Player::GetObjectByTypeMask(ObjectGuid guid, TypeMask typemask)
 {
     switch (guid.GetHigh())
@@ -27225,6 +29847,12 @@ Object* Player::GetObjectByTypeMask(ObjectGuid guid, TypeMask typemask)
     return NULL;
 }
 
+/**
+ * @brief Updates the player's current resting state.
+ *
+ * @param n_r_type The new rest type.
+ * @param areaTriggerId The inn or rest area trigger identifier, if applicable.
+ */
 void Player::SetRestType(RestType n_r_type, uint32 areaTriggerId /*= 0*/)
 {
     rest_type = n_r_type;
@@ -27462,6 +30090,13 @@ void Player::_fillGearScoreData(Item* item, GearScoreVec* gearScore, uint32& two
     }
 }
 
+/**
+ * @brief Evaluates whether the player can use an area trigger into another map.
+ *
+ * @param at The area trigger being used.
+ * @param miscRequirement Output requirement data for failure messaging.
+ * @return The evaluated area lock status.
+ */
 AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, Difficulty difficulty, uint32& miscRequirement)
 {
     miscRequirement = 0;
@@ -27595,6 +30230,14 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, Difficult
     return AREA_LOCKSTATUS_OK;
 };
 
+/**
+ * @brief Computes rested experience gained over a period of time.
+ *
+ * @param timePassed The elapsed time in seconds.
+ * @param offline True when the gain is being computed for offline time.
+ * @param inRestPlace True when the player is in a rest area while offline.
+ * @return The amount of rested experience bonus gained.
+ */
 float Player::ComputeRest(time_t timePassed, bool offline /*= false*/, bool inRestPlace /*= false*/)
 {
     // Every 8h in resting zone we gain a bubble

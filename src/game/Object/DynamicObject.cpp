@@ -34,6 +34,9 @@
 #include "SpellMgr.h"
 #include "DBCStores.h"
 
+/**
+ * @brief Creates an empty dynamic object instance.
+ */
 DynamicObject::DynamicObject() : WorldObject()
 {
     m_objectType |= TYPEMASK_DYNAMICOBJECT;
@@ -44,6 +47,9 @@ DynamicObject::DynamicObject() : WorldObject()
     m_valuesCount = DYNAMICOBJECT_END;
 }
 
+/**
+ * @brief Adds the dynamic object to the world and lookup store.
+ */
 void DynamicObject::AddToWorld()
 {
     ///- Register the dynamicObject for guid lookup
@@ -55,6 +61,9 @@ void DynamicObject::AddToWorld()
     Object::AddToWorld();
 }
 
+/**
+ * @brief Removes the dynamic object from the world and lookup store.
+ */
 void DynamicObject::RemoveFromWorld()
 {
     ///- Remove the dynamicObject from the accessor
@@ -67,6 +76,21 @@ void DynamicObject::RemoveFromWorld()
     Object::RemoveFromWorld();
 }
 
+/**
+ * @brief Creates a dynamic object for a spell effect.
+ *
+ * @param guidlow The low part of the dynamic object GUID.
+ * @param caster The unit creating the object.
+ * @param spellId The spell identifier.
+ * @param effIndex The spell effect index.
+ * @param x The X position.
+ * @param y The Y position.
+ * @param z The Z position.
+ * @param duration The lifetime in milliseconds.
+ * @param radius The effect radius.
+ * @param type The dynamic object visual type.
+ * @return true if creation succeeded; otherwise, false.
+ */
 bool DynamicObject::Create(uint32 guidlow, Unit* caster, uint32 spellId, SpellEffectIndex effIndex, float x, float y, float z, int32 duration, float radius, DynamicObjectType type)
 {
     WorldObject::_Create(guidlow, HIGHGUID_DYNAMICOBJECT, caster->GetPhaseMask());
@@ -117,12 +141,23 @@ bool DynamicObject::Create(uint32 guidlow, Unit* caster, uint32 spellId, SpellEf
     return true;
 }
 
+/**
+ * @brief Retrieves the caster that owns this dynamic object.
+ *
+ * @return Pointer to the caster, or NULL if not found.
+ */
 Unit* DynamicObject::GetCaster() const
 {
     // can be not found in some cases
     return sObjectAccessor.GetUnit(*this, GetCasterGuid());
 }
 
+/**
+ * @brief Updates the dynamic object lifetime and periodic effect processing.
+ *
+ * @param update_diff The elapsed time since the last update in milliseconds.
+ * @param p_time The world update time used for lifetime reduction.
+ */
 void DynamicObject::Update(uint32 /*update_diff*/, uint32 p_time)
 {
     // caster can be not in world at time dynamic object update, but dynamic object not yet deleted in Unit destructor
@@ -159,12 +194,20 @@ void DynamicObject::Update(uint32 /*update_diff*/, uint32 p_time)
     }
 }
 
+/**
+ * @brief Deletes the dynamic object from the world.
+ */
 void DynamicObject::Delete()
 {
     SendObjectDeSpawnAnim(GetObjectGuid());
     AddObjectToRemoveList();
 }
 
+/**
+ * @brief Delays the dynamic object lifetime and matching aura durations.
+ *
+ * @param delaytime The delay amount in milliseconds.
+ */
 void DynamicObject::Delay(int32 delaytime)
 {
     m_aliveDuration -= delaytime;
@@ -206,6 +249,14 @@ void DynamicObject::Delay(int32 delaytime)
     }
 }
 
+/**
+ * @brief Checks whether the dynamic object is visible to a player in the current state.
+ *
+ * @param u The player evaluating visibility.
+ * @param viewPoint The viewpoint used for visibility checks.
+ * @param inVisibleList true when the object is already in the visible list.
+ * @return true if the object should be visible; otherwise, false.
+ */
 bool DynamicObject::IsVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const
 {
     if (!IsInWorld() || !u->IsInWorld())
@@ -223,6 +274,12 @@ bool DynamicObject::IsVisibleForInState(Player const* u, WorldObject const* view
     return IsWithinDistInMap(viewPoint, GetMap()->GetVisibilityDistance() + (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false);
 }
 
+/**
+ * @brief Checks whether the caster is hostile to a unit.
+ *
+ * @param unit The unit to test against.
+ * @return true if the caster is hostile to the unit; otherwise, false.
+ */
 bool DynamicObject::IsHostileTo(Unit const* unit) const
 {
     if (Unit* owner = GetCaster())
@@ -235,6 +292,12 @@ bool DynamicObject::IsHostileTo(Unit const* unit) const
     }
 }
 
+/**
+ * @brief Checks whether the caster is friendly to a unit.
+ *
+ * @param unit The unit to test against.
+ * @return true if the caster is friendly to the unit; otherwise, false.
+ */
 bool DynamicObject::IsFriendlyTo(Unit const* unit) const
 {
     if (Unit* owner = GetCaster())

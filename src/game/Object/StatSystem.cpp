@@ -35,6 +35,12 @@
 ########                         ########
 #######################################*/
 
+/**
+ * @brief Recalculates one player stat and dependent values.
+ *
+ * @param stat The stat to update.
+ * @return true if the stat was updated; otherwise, false.
+ */
 bool Player::UpdateStats(Stats stat)
 {
     if (stat > STAT_SPIRIT)
@@ -117,6 +123,9 @@ void Player::ApplySpellPowerBonus(int32 amount, bool apply)
     }
 }
 
+/**
+ * @brief Updates player spell damage and healing bonus fields.
+ */
 void Player::UpdateSpellDamageAndHealingBonus()
 {
     // Magic damage modifiers implemented in Unit::SpellDamageBonusDone
@@ -130,6 +139,11 @@ void Player::UpdateSpellDamageAndHealingBonus()
     }
 }
 
+/**
+ * @brief Recalculates all player stats and derived combat values.
+ *
+ * @return true.
+ */
 bool Player::UpdateAllStats()
 {
     for (int i = STAT_STRENGTH; i < MAX_STATS; ++i)
@@ -166,6 +180,11 @@ bool Player::UpdateAllStats()
     return true;
 }
 
+/**
+ * @brief Updates player resistances for one school.
+ *
+ * @param school The spell school to update.
+ */
 void Player::UpdateResistances(uint32 school)
 {
     if (school > SPELL_SCHOOL_NORMAL)
@@ -185,6 +204,9 @@ void Player::UpdateResistances(uint32 school)
     }
 }
 
+/**
+ * @brief Recalculates player armor.
+ */
 void Player::UpdateArmor()
 {
     float value;
@@ -219,6 +241,11 @@ void Player::UpdateArmor()
     UpdateAttackPowerAndDamage();                           // armor dependent auras update for SPELL_AURA_MOD_ATTACK_POWER_OF_ARMOR
 }
 
+/**
+ * @brief Computes bonus health gained from stamina.
+ *
+ * @return The health bonus from stamina.
+ */
 float Player::GetHealthBonusFromStamina()
 {
     float stamina = GetStat(STAT_STAMINA);
@@ -229,6 +256,11 @@ float Player::GetHealthBonusFromStamina()
     return baseStam + (moreStam * 10.0f);
 }
 
+/**
+ * @brief Computes bonus mana gained from intellect.
+ *
+ * @return The mana bonus from intellect.
+ */
 float Player::GetManaBonusFromIntellect()
 {
     float intellect = GetStat(STAT_INTELLECT);
@@ -239,6 +271,9 @@ float Player::GetManaBonusFromIntellect()
     return baseInt + (moreInt * 15.0f);
 }
 
+/**
+ * @brief Recalculates player maximum health.
+ */
 void Player::UpdateMaxHealth()
 {
     UnitMods unitMod = UNIT_MOD_HEALTH;
@@ -251,6 +286,11 @@ void Player::UpdateMaxHealth()
     SetMaxHealth((uint32)value);
 }
 
+/**
+ * @brief Recalculates player maximum power for one resource type.
+ *
+ * @param power The power type to update.
+ */
 void Player::UpdateMaxPower(Powers power)
 {
     UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + power);
@@ -274,6 +314,11 @@ void Player::ApplyFeralAPBonus(int32 amount, bool apply)
     UpdateAttackPowerAndDamage();
 }
 
+/**
+ * @brief Recalculates player attack power and derived damage.
+ *
+ * @param ranged true to update ranged attack power; otherwise, melee.
+ */
 void Player::UpdateAttackPowerAndDamage(bool ranged)
 {
     float val2 = 0.0f;
@@ -445,6 +490,14 @@ void Player::UpdateShieldBlockValue()
     SetUInt32Value(PLAYER_SHIELD_BLOCK, GetShieldBlockValue());
 }
 
+/**
+ * @brief Calculates the player's minimum and maximum weapon damage.
+ *
+ * @param attType The attack type to evaluate.
+ * @param normalized true to use normalized attack speed.
+ * @param min_damage Receives the minimum damage value.
+ * @param max_damage Receives the maximum damage value.
+ */
 void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, float& min_damage, float& max_damage)
 {
     UnitMods unitMod;
@@ -503,6 +556,11 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, fl
     max_damage = ((base_value + weapon_maxdamage) * base_pct + total_value) * total_pct;
 }
 
+/**
+ * @brief Updates the player's physical damage display for one attack type.
+ *
+ * @param attType The attack type to update.
+ */
 void Player::UpdateDamagePhysical(WeaponAttackType attType)
 {
     float mindamage;
@@ -528,6 +586,9 @@ void Player::UpdateDamagePhysical(WeaponAttackType attType)
     }
 }
 
+/**
+ * @brief Recalculates player defensive percentage bonuses.
+ */
 void Player::UpdateDefenseBonusesMod()
 {
     UpdateBlockPercentage();
@@ -535,6 +596,9 @@ void Player::UpdateDefenseBonusesMod()
     UpdateDodgePercentage();
 }
 
+/**
+ * @brief Recalculates player block chance.
+ */
 void Player::UpdateBlockPercentage()
 {
     // No block
@@ -554,6 +618,11 @@ void Player::UpdateBlockPercentage()
     SetStatFloatValue(PLAYER_BLOCK_PERCENTAGE, value);
 }
 
+/**
+ * @brief Recalculates player crit chance for one attack type.
+ *
+ * @param attType The attack type to update.
+ */
 void Player::UpdateCritPercentage(WeaponAttackType attType)
 {
     BaseModGroup modGroup;
@@ -587,6 +656,9 @@ void Player::UpdateCritPercentage(WeaponAttackType attType)
     SetStatFloatValue(index, value);
 }
 
+/**
+ * @brief Recalculates all player melee and ranged crit values.
+ */
 void Player::UpdateAllCritPercentages()
 {
     float value = GetMeleeCritFromAgility();
@@ -615,6 +687,9 @@ const float Player::m_diminishing_k[MAX_CLASSES] =
     0.9720f   // Druid
 };
 
+/**
+ * @brief Recalculates player parry chance.
+ */
 void Player::UpdateParryPercentage()
 {
     const float parry_cap[MAX_CLASSES] =
@@ -654,6 +729,9 @@ void Player::UpdateParryPercentage()
     SetStatFloatValue(PLAYER_PARRY_PERCENTAGE, value);
 }
 
+/**
+ * @brief Recalculates player dodge chance.
+ */
 void Player::UpdateDodgePercentage()
 {
     const float dodge_cap[MAX_CLASSES] =
@@ -689,6 +767,11 @@ void Player::UpdateDodgePercentage()
     SetStatFloatValue(PLAYER_DODGE_PERCENTAGE, value);
 }
 
+/**
+ * @brief Recalculates spell crit chance for one school.
+ *
+ * @param school The spell school to update.
+ */
 void Player::UpdateSpellCritChance(uint32 school)
 {
     // For normal school set zero crit chance
@@ -732,6 +815,9 @@ void Player::UpdateSpellHitChances()
     m_modSpellHitChance += GetRatingBonusValue(CR_HIT_SPELL);
 }
 
+/**
+ * @brief Recalculates spell crit chance for all schools.
+ */
 void Player::UpdateAllSpellCritChances()
 {
     for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
@@ -812,6 +898,9 @@ void Player::ApplyManaRegenBonus(int32 amount, bool apply)
     UpdateManaRegen();
 }
 
+/**
+ * @brief Recalculates player mana regeneration values.
+ */
 void Player::UpdateManaRegen()
 {
     float Intellect = GetStat(STAT_INTELLECT);
@@ -843,6 +932,9 @@ void Player::UpdateManaRegen()
     SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, power_regen_mp5 + power_regen);
 }
 
+/**
+ * @brief Applies all aura and item stat bonuses, then updates derived stats.
+ */
 void Player::_ApplyAllStatBonuses()
 {
     SetCanModifyStats(false);
@@ -855,6 +947,9 @@ void Player::_ApplyAllStatBonuses()
     UpdateAllStats();
 }
 
+/**
+ * @brief Removes all aura and item stat bonuses, then updates derived stats.
+ */
 void Player::_RemoveAllStatBonuses()
 {
     SetCanModifyStats(false);
@@ -873,11 +968,22 @@ void Player::_RemoveAllStatBonuses()
 ########                         ########
 #######################################*/
 
+/**
+ * @brief Creature stat updates are handled elsewhere.
+ *
+ * @param stat The stat to update.
+ * @return true.
+ */
 bool Creature::UpdateStats(Stats /*stat*/)
 {
     return true;
 }
 
+/**
+ * @brief Recalculates all creature stats and derived combat values.
+ *
+ * @return true.
+ */
 bool Creature::UpdateAllStats()
 {
     UpdateMaxHealth();
@@ -896,6 +1002,11 @@ bool Creature::UpdateAllStats()
     return true;
 }
 
+/**
+ * @brief Updates creature resistances for one school.
+ *
+ * @param school The spell school to update.
+ */
 void Creature::UpdateResistances(uint32 school)
 {
     if (school > SPELL_SCHOOL_NORMAL)
@@ -909,18 +1020,29 @@ void Creature::UpdateResistances(uint32 school)
     }
 }
 
+/**
+ * @brief Recalculates creature armor.
+ */
 void Creature::UpdateArmor()
 {
     float value = GetTotalAuraModValue(UNIT_MOD_ARMOR);
     SetArmor(int32(value));
 }
 
+/**
+ * @brief Recalculates creature maximum health.
+ */
 void Creature::UpdateMaxHealth()
 {
     float value = GetTotalAuraModValue(UNIT_MOD_HEALTH);
     SetMaxHealth((uint32)value);
 }
 
+/**
+ * @brief Recalculates creature maximum power for one resource type.
+ *
+ * @param power The power type to update.
+ */
 void Creature::UpdateMaxPower(Powers power)
 {
     UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + power);
@@ -929,6 +1051,11 @@ void Creature::UpdateMaxPower(Powers power)
     SetMaxPower(power, uint32(value));
 }
 
+/**
+ * @brief Recalculates creature attack power and derived damage.
+ *
+ * @param ranged true to update ranged attack power; otherwise, melee.
+ */
 void Creature::UpdateAttackPowerAndDamage(bool ranged)
 {
     UnitMods unitMod = ranged ? UNIT_MOD_ATTACK_POWER_RANGED : UNIT_MOD_ATTACK_POWER;
@@ -962,6 +1089,11 @@ void Creature::UpdateAttackPowerAndDamage(bool ranged)
     UpdateDamagePhysical(OFF_ATTACK);
 }
 
+/**
+ * @brief Updates creature physical damage values for one attack type.
+ *
+ * @param attType The attack type to update.
+ */
 void Creature::UpdateDamagePhysical(WeaponAttackType attType)
 {
     if (attType > OFF_ATTACK)
@@ -995,6 +1127,12 @@ void Creature::UpdateDamagePhysical(WeaponAttackType attType)
 ########                         ########
 #######################################*/
 
+/**
+ * @brief Recalculates one pet stat and dependent values.
+ *
+ * @param stat The stat to update.
+ * @return true if the stat was updated; otherwise, false.
+ */
 bool Pet::UpdateStats(Stats stat)
 {
     if (stat > STAT_SPIRIT)
@@ -1038,6 +1176,11 @@ bool Pet::UpdateStats(Stats stat)
     return true;
 }
 
+/**
+ * @brief Recalculates all pet stats and derived values.
+ *
+ * @return true.
+ */
 bool Pet::UpdateAllStats()
 {
     for (int i = STAT_STRENGTH; i < MAX_STATS; ++i)
@@ -1058,6 +1201,11 @@ bool Pet::UpdateAllStats()
     return true;
 }
 
+/**
+ * @brief Updates pet resistances for one school.
+ *
+ * @param school The spell school to update.
+ */
 void Pet::UpdateResistances(uint32 school)
 {
     if (school > SPELL_SCHOOL_NORMAL)
@@ -1079,6 +1227,9 @@ void Pet::UpdateResistances(uint32 school)
     }
 }
 
+/**
+ * @brief Recalculates pet armor.
+ */
 void Pet::UpdateArmor()
 {
     float value = 0.0f;
@@ -1101,6 +1252,9 @@ void Pet::UpdateArmor()
     SetArmor(int32(value));
 }
 
+/**
+ * @brief Recalculates pet maximum health.
+ */
 void Pet::UpdateMaxHealth()
 {
     UnitMods unitMod = UNIT_MOD_HEALTH;
@@ -1114,6 +1268,11 @@ void Pet::UpdateMaxHealth()
     SetMaxHealth((uint32)value);
 }
 
+/**
+ * @brief Recalculates pet maximum power for one resource type.
+ *
+ * @param power The power type to update.
+ */
 void Pet::UpdateMaxPower(Powers power)
 {
     UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + power);
@@ -1128,6 +1287,11 @@ void Pet::UpdateMaxPower(Powers power)
     SetMaxPower(power, uint32(value));
 }
 
+/**
+ * @brief Recalculates pet attack power and derived damage.
+ *
+ * @param ranged true to update ranged attack power; otherwise, melee.
+ */
 void Pet::UpdateAttackPowerAndDamage(bool ranged)
 {
     if (ranged)
@@ -1198,6 +1362,11 @@ void Pet::UpdateAttackPowerAndDamage(bool ranged)
     UpdateDamagePhysical(BASE_ATTACK);
 }
 
+/**
+ * @brief Updates pet physical damage for the main attack.
+ *
+ * @param attType The attack type to update.
+ */
 void Pet::UpdateDamagePhysical(WeaponAttackType attType)
 {
     if (attType > BASE_ATTACK)

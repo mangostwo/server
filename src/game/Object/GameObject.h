@@ -22,6 +22,32 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file GameObject.h
+ * @brief Game object (GO) declarations and template structures.
+ *
+ * This file defines the GameObject class which represents static or interactive objects
+ * in the game world. Game objects include doors, buttons, chests, traps, banners, chairs,
+ * and various interactive environmental elements.
+ *
+ * Key functionality includes:
+ * - Interactive object state management (opened/closed, activated/deactivated)
+ * - Loot container mechanics
+ * - Trap and spell effect triggers
+ * - Capture point and control zone mechanics
+ * - Door and transport system integration
+ * - AI-driven game object behavior
+ * - Animation and state synchronization
+ * - Custom model and animation support
+ *
+ * The file also contains GameObjectInfo struct which stores template data for all
+ * game object types, with type-specific field unions for different GO behaviors.
+ *
+ * @see GameObject for the main game object implementation
+ * @see GameObjectInfo for template data structure
+ * @see GameObjectAI for behavior control
+ */
+
 #ifndef MANGOSSERVER_GAMEOBJECT_H
 #define MANGOSSERVER_GAMEOBJECT_H
 
@@ -42,19 +68,50 @@
 
 class GameObjectAI;
 
-// from `gameobject_template`
+/// @brief Game object template structure.
+///
+/// Contains static configuration data for all game object instances loaded from
+/// the `gameobject_template` DBC and database. Each game object type has different
+/// data requirements, stored in the `data` union with type-specific nested structures.
+///
+/// The data union is indexed by the `type` field and contains configuration for:
+/// - DOOR: Door mechanics (locks, auto-close)
+/// - BUTTON: Buttons with linked traps
+/// - QUESTGIVER: Quest and gossip NPCs (game objects)
+/// - CHEST: Treasure and loot containers
+/// - GENERIC: Generic interactive objects
+/// - TRAP: Harmful triggered areas
+/// - CHAIR: Sitting objects with slots
+/// - SPELL_FOCUS: Focus objects for spellcasting
+/// - TEXT: Readable text objects
+/// - GOOBER: Complex interactive objects
+/// - TRANSPORT: Fixed transport (elevators, etc.)
+/// - AREADAMAGE: Damage zones
+/// - CAMERA: Camera trigger points
+/// - MAPOBJECT: Generic map objects
+/// - MO_TRANSPORT: Moving transport (ships, zeppelins)
+/// - DUELFLAG: Duel flag placement
+/// - FISHINGNODE: Fishing pool
+/// - SUMMONING_RITUAL: Summoning circle
+/// - MAILBOX: Mail access point
+/// - AUCTIONHOUSE: Auction house access
+/// - GUARDPOST: Guard post structures
+/// - SPELLCASTER: Spell casting object
+/// - MEETINGSTONE: Dungeon meeting stones
+///
+/// @note Template data is read from DBC at server startup and is static
 struct GameObjectInfo
 {
-    uint32  id;
-    uint32  type;
-    uint32  displayId;
-    char*   name;
+    uint32  id;          ///> Game object entry ID (unique identifier)
+    uint32  type;        ///> Game object type (enum GameObjectTypes)
+    uint32  displayId;   ///> Display model ID
+    char*   name;        ///> Game object name
     char*   IconName;
     char*   castBarCaption;
     char*   unk1;
-    uint32  faction;
-    uint32  flags;
-    float   size;
+    uint32  faction;     ///> Faction ID (determines PvP rules and attacking)
+    uint32  flags;       ///> Flags (enum GameObjectFlags)
+    float   size;        ///> Display scale factor
     uint32  questItems[6];
     union                                                   // different GO types have different data field
     {

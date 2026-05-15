@@ -22,6 +22,33 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file Pet.h
+ * @brief Pet (summon and hunter pet) class definition.
+ *
+ * This file defines the Pet class which represents player-controlled pets and minions
+ * including summoned creatures, hunter pets, guardians, and companion pets.
+ *
+ * Key functionality includes:
+ * - Pet summoning and despawning
+ * - Hunter pet taming and stabling
+ * - Pet ability and talent management
+ * - Pet happiness/loyalty tracking
+ * - Pet training and spell learning
+ * - Pet aggression and assistance control
+ * - Pet resurrection and revival mechanics
+ * - Pet death and resurrection
+ * - Pet experience and leveling
+ * - Reactive ability triggers
+ *
+ * Pets can be of different types (summon, hunter, guardian, mini-pet) and have
+ * different behaviors, training mechanisms, and longevity depending on their type.
+ *
+ * @see Pet for the main pet implementation
+ * @see Creature for the base creature class
+ * @see Unit for combat mechanics
+ */
+
 #ifndef MANGOSSERVER_PET_H
 #define MANGOSSERVER_PET_H
 
@@ -30,6 +57,9 @@
 #include "Creature.h"
 #include "Unit.h"
 
+/// @brief Pet type enumeration.
+///
+/// Defines the different categories of pets with distinct mechanics and rules.
 enum PetType
 {
     SUMMON_PET              = 0,
@@ -42,7 +72,10 @@ enum PetType
 
 #define MAX_PET_STABLES         4
 
-// stored in character_pet.slot
+// Pet storage location
+/// @brief Pet save mode enumeration.
+///
+/// Stored in character_pet.slot, indicates where/how a pet is saved in database.
 enum PetSaveMode
 {
     PET_SAVE_AS_DELETED        = -1,                        // not saved in fact
@@ -54,6 +87,9 @@ enum PetSaveMode
 };
 
 // There might be a lot more
+/// @brief Pet mode flags enumeration.
+///
+/// Controls pet behavior and enabled actions.
 enum PetModeFlags
 {
     PET_MODE_UNKNOWN_0         = 0x0000001,
@@ -61,9 +97,13 @@ enum PetModeFlags
     PET_MODE_DISABLE_ACTIONS   = 0x8000000,
 
     // autoset in client at summon
+    /// @brief Default pet mode flags (autoset by client at summon)
     PET_MODE_DEFAULT           = PET_MODE_UNKNOWN_0 | PET_MODE_UNKNOWN_2,
 };
 
+/// @brief Pet happiness state enumeration.
+///
+/// Represents hunter pet loyalty and happiness level affecting XP gains.
 enum HappinessState
 {
     UNHAPPY = 1,

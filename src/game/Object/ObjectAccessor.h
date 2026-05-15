@@ -22,6 +22,28 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file ObjectAccessor.h
+ * @brief Global object accessor singleton for player and corpse lookup.
+ *
+ * This file contains the ObjectAccessor singleton class which provides centralized
+ * access to all players and corpses in the game world. It maintains hash maps for
+ * fast GUID-based lookups with thread-safe access using ACE synchronization primitives.
+ *
+ * Key responsibilities:
+ * - Global player lookups by GUID or name
+ * - Corpse management and access
+ * - Thread-safe object registry for players and corpses
+ * - Conversion of player corpses to insignia for PvP
+ * - Saving all players to database
+ *
+ * The accessor uses templated HashMapHolder for reusable container management
+ * and provides both thread-safe and lock-based access patterns.
+ *
+ * @see ObjectAccessor for the singleton implementation
+ * @see HashMapHolder for the thread-safe container template
+ */
+
 #ifndef MANGOS_OBJECTACCESSOR_H
 #define MANGOS_OBJECTACCESSOR_H
 
@@ -106,7 +128,6 @@ class Player2Corpse: public HashMapHolder<Corpse>
         void Remove(Corpse* o);
 };
 
-
 class ObjectAccessor
 {
         ObjectAccessor(const ObjectAccessor&) = delete;
@@ -116,14 +137,60 @@ class ObjectAccessor
         ObjectAccessor(): m_playersMap{}, m_corpsesMap{}, m_player2corpse{}
         {}
 
-        // Search player at any map in world and other objects at same map with `obj`
-        // Note: recommended use Map::GetUnit version if player also expected at same map only
+        /// @brief Get a unit by GUID from any map in the world.
+        ///
+        /// Searches for a unit (player or creature) with the specified GUID
+        /// across all maps. If the unit is found, it's returned regardless of
+        /// which map it's on.
+        ///
+        /// @param obj Reference object used for context
+        /// @param guid GUID of the unit to find
+        /// @return Pointer to the unit if found, nullptr otherwise
+        ///
+        /// @note For players, use FindPlayer() instead if appropriate
+        /// @note If unit is on same map as obj, consider using Map::GetUnit()
+        /// @see FindPlayer() for player-specific lookups
         Unit* GetUnit(WorldObject const& obj, ObjectGuid guid);
 
         // Player access
-        Player* FindPlayer(ObjectGuid guid, bool inWorld = true);// if need player at specific map better use Map::GetPlayer
+        /// @brief Find a player by GUID.
+        ///
+        /// Searches for an online player with the specified GUID.
+        /// Can optionally restrict search to players currently in the world.
+        ///
+        /// @param guid Player GUID to search for
+        /// @param inWorld If true (default), only returns players in world; if false, includes offline players
+        /// @return Pointer to the player if found, nullptr otherwise
+        ///
+        /// @note If player is on a specific map, consider using Map::GetPlayer() instead
+        /// @note This is faster than FindPlayerByName() for GUID-based lookups
+        Player* FindPlayer(ObjectGuid guid, bool inWorld = true);
+
+        /// @brief Find a player by character name.
+        ///
+        /// Performs a linear search through all players to find one matching
+        /// the given character name.
+        ///
+        /// @param name Character name to search for (case-insensitive)
+        /// @return Pointer to the player if found, nullptr otherwise
+        ///
+        /// @note This is O(n) and slower than GUID-based lookups
+        /// @note Name matching is case-insensitive
         Player* FindPlayerByName(const char* name);
+
+        /// @brief Kick a player from the game by GUID.
+        ///
+        /// Disconnects and removes a player from the world.
+        ///
+        /// @param guid GUID of the player to kick
         void KickPlayer(ObjectGuid guid);
+
+        /// @brief Save all online players to the database.
+        ///
+        /// Iterates through all online players and persists their data
+        /// to the character database.
+        ///
+        /// @note This is called periodically and on server shutdown
         void SaveAllPlayers();
 
         template <typename F>
@@ -133,19 +200,68 @@ class ObjectAccessor
         }
 
         // Corpse access
+        /// @brief Find a corpse by GUID.
+        ///
+        /// @param guid Corpse GUID to search for
+        /// @return Pointer to the corpse if found, nullptr otherwise
         Corpse* FindCorpse(ObjectGuid guid);
+
+        /// @brief Remove a corpse from the object accessor.
+        ///
+        /// @param corpse Pointer to the corpse to remove
         void RemoveCorpse(Corpse* corpse);
+
+        /// @brief Add a corpse to the object accessor.
+        ///
+        /// @param corpse Pointer to the corpse to add
         void AddCorpse(Corpse* corpse);
+
+        /// @brief Add corpses to a grid for area visibility.
+        ///
+        /// @param gridpair Grid coordinates
+        /// @param grid Reference to the grid to populate
+        /// @param map Pointer to the map containing the grid
         void AddCorpsesToGrid(GridPair const& gridpair, GridType& grid, Map* map);
         Corpse* GetCorpseForPlayerGUID(ObjectGuid guid);
         Corpse* GetCorpseInMap(ObjectGuid guid, uint32 mapid);
+
+        /// @brief Convert a player corpse to insignia for PvP purposes.
+        ///
+        /// Transforms the corpse into an insignia item if appropriate.
+        ///
+        /// @param player_guid GUID of the player whose corpse to convert
+        /// @param insignia If true, convert to insignia; if false, standard conversion
+        /// @return Pointer to the converted corpse
         Corpse* ConvertCorpseForPlayer(ObjectGuid player_guid, bool insignia = false);
+
+        /// @brief Remove old/expired corpses from the world.
+        ///
+        /// Cleans up corpses that have exceeded their decay timers.
         void RemoveOldCorpses();
 
         // For call from Player/Corpse AddToWorld/RemoveFromWorld only
+        /// @brief Add a corpse to the global registry.
+        ///
+        /// @param object Pointer to the corpse
+        /// @note Internal use only - called by Corpse::AddToWorld()
         void AddObject(Corpse* object) { m_corpsesMap.Insert(object); }
+
+        /// @brief Add a player to the global registry.
+        ///
+        /// @param object Pointer to the player
+        /// @note Internal use only - called by Player::AddToWorld()
         void AddObject(Player* object) { m_playersMap.Insert(object); }
+
+        /// @brief Remove a corpse from the global registry.
+        ///
+        /// @param object Pointer to the corpse
+        /// @note Internal use only - called by Corpse::RemoveFromWorld()
         void RemoveObject(Corpse* object) { m_corpsesMap.Remove(object); }
+
+        /// @brief Remove a player from the global registry.
+        ///
+        /// @param object Pointer to the player
+        /// @note Internal use only - called by Player::RemoveFromWorld()
         void RemoveObject(Player* object) { m_playersMap.Remove(object); }
 
         static ObjectAccessor& Instance()
@@ -162,6 +278,8 @@ class ObjectAccessor
         Player2Corpse         m_player2corpse;
 };
 
+/// @brief Singleton accessor macro for ObjectAccessor instance
+/// @see ObjectAccessor for the class definition
 #define sObjectAccessor ObjectAccessor::Instance()
 
 #endif
