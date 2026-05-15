@@ -31,25 +31,67 @@
 
 #include <list>
 
+/**
+ * Checks whether the specified client build is supported by the server.
+ */
 bool IsAcceptableClientBuild(uint32 build);
+
+/**
+ * Returns a formatted list of supported client builds.
+ */
 std::string AcceptableClientBuildsListStr();
 
 typedef std::list<uint32> SimpleFactionsList;
 
+/**
+ * Returns the faction team membership list for the specified faction id.
+ */
 SimpleFactionsList const* GetFactionTeamList(uint32 faction);
+
+/**
+ * Returns the localized pet family name for the specified family and locale.
+ */
 char const* GetPetName(uint32 petfamily, uint32 dbclang);
+
+/**
+ * Returns the talent point cost of the specified talent spell.
+ */
 uint32 GetTalentSpellCost(uint32 spellId);
+
+/**
+ * Returns the talent point cost for the specified talent spell position.
+ */
 uint32 GetTalentSpellCost(TalentSpellPos const* pos);
+
+/**
+ * Returns the talent spell position metadata for the specified spell id.
+ */
 TalentSpellPos const* GetTalentSpellPos(uint32 spellId);
 
 int32 GetAreaFlagByAreaID(uint32 area_id);                  // -1 if not found
+/**
+ * Returns the default area flag associated with the specified map id.
+ */
 uint32 GetAreaFlagByMapId(uint32 mapid);
 
+/**
+ * Returns the WMO area entry matching the specified root, adt, and group identifiers.
+ */
 WMOAreaTableEntry const* GetWMOAreaTableEntryByTripple(int32 rootid, int32 adtid, int32 groupid);
 
+/**
+ * Returns the area table entry for the specified area id.
+ */
 AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id);
+
+/**
+ * Returns the area table entry for the specified area flag on the given map.
+ */
 AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag, uint32 map_id);
 
+/**
+ * Returns the virtual map id that should be used for the specified map and zone.
+ */
 uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId);
 
 enum ContentLevels
@@ -60,12 +102,26 @@ enum ContentLevels
 };
 ContentLevels GetContentLevelsForMapAndZone(uint32 mapid, uint32 zoneId);
 
+/**
+ * Returns the chat channel entry for the specified channel identifier.
+ */
 ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id);
+
+/**
+ * Returns the chat channel entry matching the specified channel name.
+ */
 ChatChannelsEntry const* GetChannelEntryFor(const std::string& name);
 
 bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredTotemCategoryId);
 
+/**
+ * Converts local zone coordinates into map coordinates for the specified zone.
+ */
 bool Zone2MapCoordinates(float& x, float& y, uint32 zone);
+
+/**
+ * Converts map coordinates into local zone coordinates for the specified zone.
+ */
 bool Map2ZoneCoordinates(float& x, float& y, uint32 zone);
 
 typedef std::map<uint32/*pair32(map,diff)*/, MapDifficultyEntry const*> MapDifficultyMap;
@@ -95,6 +151,9 @@ inline Difficulty GetPrevDifficulty(Difficulty diff, bool isRaid)
 
 uint32 const* /*[3]*/ GetTalentTabPages(uint32 cls);
 
+/**
+ * Checks whether a point lies inside the specified area trigger zone.
+ */
 bool IsPointInAreaTriggerZone(AreaTriggerEntry const* atEntry, uint32 mapid, float x, float y, float z, float delta = 0.0f);
 
 PvPDifficultyEntry const* GetBattlegroundBracketByLevel(uint32 mapid, uint32 level);
@@ -212,6 +271,9 @@ extern DBCStorage <WMOAreaTableEntry>            sWMOAreaTableStore;
 extern DBCStorage <WorldMapOverlayEntry>         sWorldMapOverlayStore;
 extern DBCStorage <WorldSafeLocsEntry>           sWorldSafeLocsStore;
 
+/**
+ * Loads all required DBC stores from the specified data path.
+ */
 void LoadDBCStores(const std::string& dataPath);
 
 // script support functions
