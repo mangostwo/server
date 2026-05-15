@@ -23,6 +23,24 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file WardenCheckMgr.cpp
+ * @brief Warden check manager implementation
+ *
+ * This file implements WardenCheckMgr which manages the database
+ * of Warden anti-cheat checks. It loads checks from the database
+ * and stores check results for analysis.
+ *
+ * Check types supported:
+ * - Memory checks (PAGE_CHECK_A, PAGE_CHECK_B)
+ * - Driver checks (DRIVER_CHECK)
+ * - Lua checks (LUA_CHECK)
+ * - Timing checks (TIMING_CHECK)
+ *
+ * @see WardenCheckMgr for the manager class
+ * @see WardenCheck for individual check definitions
+ */
+
 #include "Common.h"
 #include "World.h"
 #include "WorldPacket.h"
@@ -32,8 +50,18 @@
 #include "WardenCheckMgr.h"
 #include "Warden.h"
 
+/**
+ * @brief WardenCheckMgr constructor
+ *
+ * Initializes the check manager with empty stores.
+ */
 WardenCheckMgr::WardenCheckMgr() : m_lock(0), CheckStore(), CheckResultStore() { }
 
+/**
+ * @brief WardenCheckMgr destructor
+ *
+ * Cleans up all check and check result objects.
+ */
 WardenCheckMgr::~WardenCheckMgr()
 {
     for (CheckMap::iterator it = CheckStore.begin(); it != CheckStore.end(); ++it)
@@ -50,6 +78,13 @@ WardenCheckMgr::~WardenCheckMgr()
     CheckResultStore.clear();
 }
 
+/**
+ * @brief Load Warden checks from database
+ *
+ * Loads all Warden checks from the `warden` table in the
+ * world database. Checks are organized by client build number.
+ * Skips loading if Warden is disabled in config.
+ */
 void WardenCheckMgr::LoadWardenChecks()
 {
     // Check if Warden is enabled by config before loading anything
@@ -155,6 +190,9 @@ void WardenCheckMgr::LoadWardenChecks()
     delete result;
 }
 
+/**
+ * @brief Loads per-check Warden action overrides from the character database.
+ */
 void WardenCheckMgr::LoadWardenOverrides()
 {
     // Check if Warden is enabled by config before loading anything
@@ -210,6 +248,13 @@ void WardenCheckMgr::LoadWardenOverrides()
     sLog.outString(">> Loaded %u warden action overrides.", count);
 }
 
+/**
+ * @brief Finds a Warden check definition by client build and check id.
+ *
+ * @param build The client build.
+ * @param id The Warden check id.
+ * @return WardenCheck* The matching Warden check, or NULL if not found.
+ */
 WardenCheck* WardenCheckMgr::GetWardenDataById(uint16 build, uint16 id)
 {
     WardenCheck* result = NULL;
@@ -226,6 +271,13 @@ WardenCheck* WardenCheckMgr::GetWardenDataById(uint16 build, uint16 id)
     return result;
 }
 
+/**
+ * @brief Finds an expected Warden check result by client build and check id.
+ *
+ * @param build The client build.
+ * @param id The Warden result id.
+ * @return WardenCheckResult* The matching expected result, or NULL if not found.
+ */
 WardenCheckResult* WardenCheckMgr::GetWardenResultById(uint16 build, uint16 id)
 {
     WardenCheckResult* result = NULL;
@@ -242,6 +294,13 @@ WardenCheckResult* WardenCheckMgr::GetWardenResultById(uint16 build, uint16 id)
     return result;
 }
 
+/**
+ * @brief Collects Warden check ids for a client build by memory or non-memory category.
+ *
+ * @param isMemCheck True to collect memory-related checks; false for other checks.
+ * @param build The client build.
+ * @param idl The list that receives matching check ids.
+ */
 void WardenCheckMgr::GetWardenCheckIds(bool isMemCheck, uint16 build, std::list<uint16>& idl)
 {
     idl.clear(); //just to be sure

@@ -23,6 +23,23 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file WardenWin.cpp
+ * @brief Windows-specific Warden implementation
+ *
+ * This file implements WardenWin which provides the Windows-specific
+ * implementation of the Warden anti-cheat system for Windows clients.
+ *
+ * Key features:
+ * - Module loading and initialization
+ * - Memory scanning checks
+ * - Timing-based checks
+ * - Server tick tracking
+ *
+ * @see WardenWin for the Windows-specific class
+ * @see Warden for the base class
+ */
+
 #include "HMACSHA1.h"
 #include "WardenKeyGeneration.h"
 #include "Common.h"
@@ -41,10 +58,28 @@
 #include "WardenCheckMgr.h"
 #include "GameTime.h"
 
+/**
+ * @brief WardenWin constructor
+ *
+ * Initializes the Windows-specific Warden implementation.
+ */
 WardenWin::WardenWin() : Warden(), _serverTicks(0) {}
 
+/**
+ * @brief WardenWin destructor
+ */
 WardenWin::~WardenWin() { }
 
+/**
+ * @brief Initialize Windows Warden
+ * @param session Client session
+ * @param k Session key
+ *
+ * Initializes the Windows-specific Warden with:
+ * - SHA1-based key generation from session key
+ * - Module-specific seed
+ * - Windows-specific module loading
+ */
 void WardenWin::Init(WorldSession* session, BigNumber* k)
 {
     _session = session;
@@ -70,6 +105,13 @@ void WardenWin::Init(WorldSession* session, BigNumber* k)
     RequestModule();
 }
 
+/**
+ * @brief Get Windows Warden module
+ * @return Client Warden module
+ *
+ * Returns the Windows-specific Warden module with its
+ * compressed data, key, and MD5 hash.
+ */
 ClientWardenModule* WardenWin::GetModuleForClient()
 {
     ClientWardenModule *mod = new ClientWardenModule;
@@ -91,6 +133,11 @@ ClientWardenModule* WardenWin::GetModuleForClient()
     return mod;
 }
 
+/**
+ * @brief Initialize Windows Warden module
+ *
+ * Initializes the Windows-specific Warden module on the client.
+ */
 void WardenWin::InitializeModule()
 {
     sLog.outWarden("Initialize module");
@@ -137,6 +184,11 @@ void WardenWin::InitializeModule()
     Warden::InitializeModule();
 }
 
+/**
+ * @brief Validates the Windows client hash reply and initializes the session crypto keys.
+ *
+ * @param buff The received Warden payload buffer.
+ */
 void WardenWin::HandleHashResult(ByteBuffer &buff)
 {
     buff.rpos(buff.wpos());
@@ -160,6 +212,9 @@ void WardenWin::HandleHashResult(ByteBuffer &buff)
     _previousTimestamp = GameTime::GetGameTimeMS();
 }
 
+/**
+ * @brief Builds and sends the current batch of Windows Warden checks.
+ */
 void WardenWin::RequestData()
 {
     sLog.outWarden("Request data");
@@ -326,6 +381,11 @@ void WardenWin::RequestData()
     Warden::RequestData();
 }
 
+/**
+ * @brief Processes a Windows Warden data response and validates the reported checks.
+ *
+ * @param buff The received Warden payload buffer.
+ */
 void WardenWin::HandleData(ByteBuffer &buff)
 {
     sLog.outWarden("Handle data");
