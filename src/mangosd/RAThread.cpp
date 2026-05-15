@@ -373,7 +373,9 @@ class RASocket: protected ACE_Svc_Handler < ACE_SOCK_STREAM, ACE_NULL_SYNCH>
         }
 };
 
-
+/**
+ * Initializes the remote access listener thread with the configured host and port.
+ */
 RAThread::RAThread(uint16 port, const char* host) : listen_addr(port, host)
 {
     ACE_Reactor_Impl* imp = 0;
@@ -385,12 +387,18 @@ RAThread::RAThread(uint16 port, const char* host) : listen_addr(port, host)
     m_Acceptor = new RAAcceptor;
 }
 
+/**
+ * Releases the remote access reactor and acceptor resources.
+ */
 RAThread::~RAThread()
 {
     delete m_Reactor;
     delete m_Acceptor;
 }
 
+/**
+ * Opens the remote access listener socket and activates the thread.
+ */
 int RAThread::open(void* unused)
 {
     if (m_Acceptor->open(listen_addr, m_Reactor, ACE_NONBLOCK) == -1)
@@ -402,6 +410,9 @@ int RAThread::open(void* unused)
     return 0;
 }
 
+/**
+ * Runs the remote access reactor event loop until shutdown.
+ */
 int RAThread::svc()
 {
     sLog.outString("Remote Access Thread started (listening on %s:%d)",

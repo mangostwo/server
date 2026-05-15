@@ -50,10 +50,16 @@
   extern int m_ServiceStatus;
 #endif
 
+/**
+ * Initializes the world thread listener with the configured host and port.
+ */
 WorldThread::WorldThread(uint16 port, const char* host) : listen_addr(port, host)
 {
 }
 
+/**
+ * Starts the world socket network listener and activates the world thread.
+ */
 int WorldThread::open(void* unused)
 {
     if (sWorldSocketMgr->StartNetwork(listen_addr) == -1)

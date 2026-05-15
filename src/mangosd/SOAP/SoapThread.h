@@ -31,7 +31,14 @@
 #include <future>
 #include <string>
 
+/**
+ * Processes a single incoming SOAP request message.
+ */
 void process_message(struct soap* soap_message);
+
+/**
+ * Runs the SOAP listener thread on the specified host and port.
+ */
 void SoapThread(const std::string& host, uint16 port);
 
 class SOAPCommand

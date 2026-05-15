@@ -36,6 +36,9 @@
   #include <windows.h>
 #endif
 
+/**
+ * Prints the interactive mangosd console prompt.
+ */
 static void prompt(void* callback = NULL, bool status = true)
 {
     printf("mangos>");
@@ -44,6 +47,9 @@ static void prompt(void* callback = NULL, bool status = true)
 
 // Non-blocking keypress detector, when return pressed, return 1, else always return 0
 #if (PLATFORM != PLATFORM_WINDOWS)
+/**
+ * Checks whether console input is ready without blocking on non-Windows platforms.
+ */
 static int kb_hit_return()
 {
     struct timeval tv;
@@ -58,6 +64,9 @@ static int kb_hit_return()
 #endif
 
 
+/**
+ * Initializes the CLI thread with optional console beep support.
+ */
 CliThread::CliThread(bool beep) : beep_(beep)
 {
 }
@@ -123,6 +132,9 @@ int CliThread::svc()
     return 0;
 }
 
+/**
+ * Unblocks the CLI thread during server shutdown.
+ */
 void CliThread::cli_shutdown()
 {
 #ifdef _WIN32
