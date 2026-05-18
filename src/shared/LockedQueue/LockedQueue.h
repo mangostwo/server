@@ -95,29 +95,40 @@ namespace ACE_Based
 
             template<class Checker>
             /**
-             * @brief
+             * @brief Pops the first queued item the checker accepts.
              *
-             * @param result
-             * @param check
-             * @return bool
+             * Walks from the front of the queue and returns the first item
+             * for which @c check.Process(item) returns true. Items the
+             * checker rejects are left in place at their original positions;
+             * this preserves FIFO order within each accepted class while
+             * allowing a caller that owns one classification to make
+             * progress without being blocked by a head-of-queue item that
+             * belongs to another classification (e.g. a Map worker draining
+             * thread-safe packets while a thread-unsafe packet sits at the
+             * head of the same queue, awaiting the World thread).
+             *
+             * @param result Out parameter; receives the popped item on success.
+             * @param check Functor with bool Process(const T&). Invoked under
+             *              the queue lock.
+             * @return true if an accepted item was popped into @c result;
+             *         false if the queue is empty or no item satisfied the
+             *         checker.
              */
             bool next(T& result, Checker& check)
             {
                 ACE_GUARD_RETURN(LockType, g, this->_lock, false);
 
-                if (_queue.empty())
+                for (typename StorageType::iterator it = _queue.begin(); it != _queue.end(); ++it)
                 {
-                    return false;
+                    if (check.Process(*it))
+                    {
+                        result = *it;
+                        _queue.erase(it);
+                        return true;
+                    }
                 }
 
-                result = _queue.front();
-                if (!check.Process(result))
-                {
-                    return false;
-                }
-
-                _queue.pop_front();
-                return true;
+                return false;
             }
 
 
