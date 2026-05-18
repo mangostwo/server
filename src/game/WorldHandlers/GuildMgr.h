@@ -28,6 +28,8 @@
 #include "Common.h"
 #include "Policies/Singleton.h"
 
+#include <mutex>
+
 class Guild;
 class ObjectGuid;
 
@@ -36,6 +38,14 @@ class GuildMgr
         typedef UNORDERED_MAP<uint32, Guild*> GuildMap;
 
         GuildMap m_GuildMap;
+        // Serializes structural access to m_GuildMap. Required because
+        // Map workers (e.g. AchievementMgr::SendAchievementEarned during
+        // Player::Update -> Unit aura tick) read this singleton while
+        // WorldThread can erase entries via Guild::Disband ->
+        // sGuildMgr.RemoveGuild. Mutable so const Get* methods can lock.
+        // Note: protects only the map itself; Guild* lifetime across
+        // concurrent Get / RemoveGuild callers is a separate concern.
+        mutable std::mutex m_GuildMapLock;
     public:
         GuildMgr();
         ~GuildMgr();
