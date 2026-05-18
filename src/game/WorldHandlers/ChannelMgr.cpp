@@ -113,6 +113,8 @@ Channel* ChannelMgr::GetJoinChannel(std::string name, uint32 channelId)
     Utf8toWStr(name, wname);
     wstrToLower(wname);
 
+    std::lock_guard<std::mutex> guard(channels_lock);
+
     if (channels.find(wname) == channels.end())
     {
         Channel* nchan = new Channel(name, channelId);
@@ -142,9 +144,17 @@ Channel* ChannelMgr::GetChannel(std::string name, Player* p, bool pkt)
     Utf8toWStr(name, wname);
     wstrToLower(wname);
 
-    ChannelMap::const_iterator i = channels.find(wname);
+    Channel* found = NULL;
+    {
+        std::lock_guard<std::mutex> guard(channels_lock);
+        ChannelMap::const_iterator i = channels.find(wname);
+        if (i != channels.end())
+        {
+            found = i->second;
+        }
+    }
 
-    if (i == channels.end())
+    if (!found)
     {
         if (pkt)
         {
@@ -155,10 +165,8 @@ Channel* ChannelMgr::GetChannel(std::string name, Player* p, bool pkt)
 
         return NULL;
     }
-    else
-    {
-        return i->second;
-    }
+
+    return found;
 }
 
 /**
@@ -171,6 +179,8 @@ void ChannelMgr::LeftChannel(std::string name)
     std::wstring wname;
     Utf8toWStr(name, wname);
     wstrToLower(wname);
+
+    std::lock_guard<std::mutex> guard(channels_lock);
 
     ChannelMap::const_iterator i = channels.find(wname);
 

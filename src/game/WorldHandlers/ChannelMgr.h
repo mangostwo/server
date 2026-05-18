@@ -30,6 +30,7 @@
 #include "Policies/Singleton.h"
 
 #include <map>
+#include <mutex>
 #include <string>
 
 class ChannelMgr
@@ -44,6 +45,14 @@ class ChannelMgr
         void LeftChannel(std::string name);
     private:
         ChannelMap channels;
+        // Serializes structural access to `channels`. Required because the
+        // singleton is shared across all players of a faction and is
+        // touched concurrently from MapUpdateThreads >= 2 workers (via
+        // Player::Update -> Player::UpdateZone -> UpdateLocalChannels).
+        // Note: this protects only the map itself; Channel* lifetime
+        // across concurrent GetChannel/LeftChannel callers is a separate,
+        // unaddressed concern.
+        std::mutex channels_lock;
         void MakeNotOnPacket(WorldPacket* data, std::string name);
 };
 
