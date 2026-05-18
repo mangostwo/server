@@ -99,6 +99,7 @@ void GuildMgr::AddGuild(Guild* guild)
  */
 void GuildMgr::RemoveGuild(uint32 guildId)
 {
+    std::lock_guard<std::mutex> guard(m_GuildMapLock);
     m_GuildMap.erase(guildId);
 }
 
@@ -111,6 +112,7 @@ void GuildMgr::RemoveGuild(uint32 guildId)
  */
 Guild* GuildMgr::GetGuildById(uint32 guildId) const
 {
+    std::lock_guard<std::mutex> guard(m_GuildMapLock);
     GuildMap::const_iterator itr = m_GuildMap.find(guildId);
     if (itr != m_GuildMap.end())
     {
@@ -130,6 +132,7 @@ Guild* GuildMgr::GetGuildById(uint32 guildId) const
  */
 Guild* GuildMgr::GetGuildByName(std::string const& name) const
 {
+    std::lock_guard<std::mutex> guard(m_GuildMapLock);
     for (GuildMap::const_iterator itr = m_GuildMap.begin(); itr != m_GuildMap.end(); ++itr)
         if (itr->second->GetName() == name)
         {
@@ -149,6 +152,7 @@ Guild* GuildMgr::GetGuildByName(std::string const& name) const
  */
 Guild* GuildMgr::GetGuildByLeader(ObjectGuid const& guid) const
 {
+    std::lock_guard<std::mutex> guard(m_GuildMapLock);
     for (GuildMap::const_iterator itr = m_GuildMap.begin(); itr != m_GuildMap.end(); ++itr)
         if (itr->second->GetLeaderGuid() == guid)
         {
@@ -168,6 +172,7 @@ Guild* GuildMgr::GetGuildByLeader(ObjectGuid const& guid) const
  */
 std::string GuildMgr::GetGuildNameById(uint32 guildId) const
 {
+    std::lock_guard<std::mutex> guard(m_GuildMapLock);
     GuildMap::const_iterator itr = m_GuildMap.find(guildId);
     if (itr != m_GuildMap.end())
     {
