@@ -419,6 +419,7 @@ class ChatHandler
         bool HandleNpcTameCommand(char* args);
         bool HandleNpcTextEmoteCommand(char* args);
         bool HandleNpcUnFollowCommand(char* args);
+        bool HandleNpcWatchCommand(char* args);
         bool HandleNpcWhisperCommand(char* args);
         bool HandleNpcYellCommand(char* args);
 
