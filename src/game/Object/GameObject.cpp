@@ -51,6 +51,7 @@
 #include "SQLStorages.h"
 #include "GameObjectAI.h"
 #include <memory>
+
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
@@ -140,6 +141,7 @@ void GameObject::AddToWorld()
         }
     }
 #endif /* ENABLE_ELUNA */
+
 }
 
 /**
@@ -3213,6 +3215,31 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
 uint32 GameObject::GetScriptId()
 {
     return sScriptMgr.GetBoundScriptId(SCRIPTED_GAMEOBJECT, -int32(GetGUIDLow())) ? sScriptMgr.GetBoundScriptId(SCRIPTED_GAMEOBJECT, -int32(GetGUIDLow())) : sScriptMgr.GetBoundScriptId(SCRIPTED_GAMEOBJECT, GetEntry());
+}
+
+/**
+ * @brief Gets the interaction distance for this game object type.
+ *
+ * @return The maximum interaction distance.
+ */
+float GameObject::GetInteractionDistance() const
+{
+    float maxdist = INTERACTION_DISTANCE;
+    switch (GetGoType())
+    {
+        // TODO: find out how the client calculates the maximal usage distance to spellless working
+        // gameobjects like mailboxes - 10.0 is a just an abitrary chosen number
+        case GAMEOBJECT_TYPE_MAILBOX:
+            maxdist = 10.0f;
+            break;
+        case GAMEOBJECT_TYPE_FISHINGHOLE:
+        case GAMEOBJECT_TYPE_FISHINGNODE:
+            maxdist = 20.0f + CONTACT_DISTANCE;     // max spell range
+            break;
+        default:
+            break;
+    }
+    return maxdist;
 }
 
 /**

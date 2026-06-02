@@ -743,8 +743,8 @@ class GameObject : public WorldObject
         bool isSpawned() const
         {
             return m_respawnDelayTime == 0 ||
-                   (m_respawnTime > 0 && !m_spawnedByDefault) ||
-                   (m_respawnTime == 0 && m_spawnedByDefault);
+                (m_respawnTime > 0 && !m_spawnedByDefault) ||
+                (m_respawnTime == 0 && m_spawnedByDefault);
         }
         bool isSpawnedByDefault() const { return m_spawnedByDefault; }
         void SetSpawnedByDefault(bool b) { m_spawnedByDefault = b; }
@@ -777,7 +777,10 @@ class GameObject : public WorldObject
 
         void AddToSkillupList(Player* player);
         bool IsInSkillupList(Player* player) const;
-        void ClearSkillupList() { m_SkillupSet.clear(); }
+        void ClearSkillupList()
+        {
+            m_SkillupSet.clear();
+        }
         void ClearAllUsesData()
         {
             ClearSkillupList();
@@ -787,7 +790,10 @@ class GameObject : public WorldObject
         }
 
         void AddUniqueUse(Player* player);
-        void AddUse() { ++m_useTimes; }
+        void AddUse()
+        {
+            ++m_useTimes;
+        }
 
         uint32 GetUseCount() const { return m_useTimes; }
         uint32 GetUniqueUseCount() const { return m_UniqueUsers.size(); }
@@ -836,13 +842,18 @@ class GameObject : public WorldObject
         void SetCapturePointSlider(float value, bool isLocked);
         float GetCapturePointSliderValue() const { return m_captureSlider; }
 
+        float GetInteractionDistance() const;              // Get the maximum distance for a GO to interact with
+
         uint32 GetScriptId();
 
         bool AIM_Initialize();
 
         GameObjectAI* AI() const { return m_AI.get(); }
 
-        GridReference<GameObject>& GetGridRef() { return m_gridRef; }
+        GridReference<GameObject>& GetGridRef()
+        {
+            return m_gridRef;
+        }
 
         GameObjectModel* m_model;
 
@@ -881,7 +892,7 @@ class GameObject : public WorldObject
         ObjectGuid m_lootRecipientGuid;                     // player who will have rights for looting if m_lootGroupRecipient==0 or group disbanded
         uint32 m_lootGroupRecipientId;                      // group who will have rights for looting if set and exist
 
-                 // Used for trap type
+         // Used for trap type
         time_t m_rearmTimer;                                // timer to rearm the trap once disarmed
 
         // Used for chest type

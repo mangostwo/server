@@ -90,6 +90,7 @@ namespace Movement
                 c.orientation = -c.orientation;
             }
         }
+        c.orientation = G3D::wrap(c.orientation, 0.f, (float)G3D::twoPi());
         return c;
     }
 
@@ -281,6 +282,7 @@ namespace Movement
 
 // MONSTER_MOVE packet format limitation for not CatmullRom movement:
 // each vertex offset packed into 11 bytes
+
     /**
      * @brief Checks the bounds of the path for non-CatmullRom movement.
      * @return True if the path bounds are valid, false otherwise.

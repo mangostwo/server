@@ -51,6 +51,7 @@
 
 namespace Movement
 {
+
     /**
      * @namespace Movement
      * @brief Movement system namespace
@@ -58,6 +59,7 @@ namespace Movement
      * Contains all movement-related classes and functions for
      * spline-based movement and packet construction.
      */
+
     /**
      * @brief Overloads the << operator to write a Vector3 to a ByteBuffer.
      * @param b The ByteBuffer to write to.
@@ -230,17 +232,17 @@ namespace Movement
 
             data << splineFlags.raw();
 
-            if (splineFlags.final_angle)
+            if (splineFlags.final_point)
             {
-                data << move_spline.facing.angle;
+                data << move_spline.facing.f.x << move_spline.facing.f.y << move_spline.facing.f.z;
             }
             else if (splineFlags.final_target)
             {
                 data << move_spline.facing.target;
             }
-            else if (splineFlags.final_point)
+            else if (splineFlags.final_angle)
             {
-                data << move_spline.facing.f.x << move_spline.facing.f.y << move_spline.facing.f.z;
+                data << move_spline.facing.angle;
             }
 
             data << move_spline.timePassed();
