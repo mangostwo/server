@@ -255,7 +255,7 @@ GroupQueueInfo* BattleGroundQueue::AddGroup(Player* leader, Group* grp, BattleGr
 
     if (ginfo->GroupTeam == HORDE)
     {
-        ++index;                                             // BG_QUEUE_*_ALLIANCE -> BG_QUEUE_*_HORDE
+        ++index; // BG_QUEUE_*_ALLIANCE -> BG_QUEUE_*_HORDE
     }
 
     DEBUG_LOG("Adding Group to BattleGroundQueue bgTypeId : %u, bracket_id : %u, index : %u", BgTypeId, bracketId, index);
@@ -278,7 +278,7 @@ GroupQueueInfo* BattleGroundQueue::AddGroup(Player* leader, Group* grp, BattleGr
                 Player* member = itr->getSource();
                 if (!member)
                 {
-                    continue;    // this should never happen
+                    continue; // this should never happen
                 }
                 PlayerQueueInfo& pl_info = m_QueuedPlayers[member->GetObjectGuid()];
                 pl_info.LastOnlineTime   = lastOnlineTime;
@@ -366,7 +366,7 @@ void BattleGroundQueue::PlayerInvitedToBGUpdateAverageWaitTime(GroupQueueInfo* g
     {
         if (ginfo->IsRated)
         {
-            team_index = TEAM_INDEX_HORDE;                     // for rated arenas use TEAM_INDEX_HORDE
+            team_index = TEAM_INDEX_HORDE;                     // for rated arenas use BG_TEAM_HORDE
         }
     }
 
@@ -396,7 +396,7 @@ void BattleGroundQueue::PlayerInvitedToBGUpdateAverageWaitTime(GroupQueueInfo* g
  */
 uint32 BattleGroundQueue::GetAverageQueueWaitTime(GroupQueueInfo* ginfo, BattleGroundBracketId bracket_id)
 {
-    uint8 team_index = TEAM_INDEX_ALLIANCE;                    // default set to TEAM_INDEX_ALLIANCE - or non rated arenas!
+    uint8 team_index = TEAM_INDEX_ALLIANCE;                    // default set to BG_TEAM_ALLIANCE - or non rated arenas!
     if (ginfo->arenaType == ARENA_TYPE_NONE)
     {
         if (ginfo->GroupTeam == HORDE)
@@ -408,7 +408,7 @@ uint32 BattleGroundQueue::GetAverageQueueWaitTime(GroupQueueInfo* ginfo, BattleG
     {
         if (ginfo->IsRated)
         {
-            team_index = TEAM_INDEX_HORDE;                     // for rated arenas use TEAM_INDEX_HORDE
+            team_index = TEAM_INDEX_HORDE;                     // for rated arenas use BG_TEAM_HORDE
         }
     }
     // check if there is enought values(we always add values > 0)
@@ -1529,10 +1529,14 @@ void BattleGroundMgr::Update(uint32 diff)
             // forced update for rated arenas (scan all, but skipped non rated)
             DEBUG_LOG("BattleGroundMgr: UPDATING ARENA QUEUES");
             for (uint8 qtype = BATTLEGROUND_QUEUE_2v2; qtype <= BATTLEGROUND_QUEUE_5v5; ++qtype)
+            {
                 for (uint8 bracket = BG_BRACKET_ID_FIRST; bracket < MAX_BATTLEGROUND_BRACKETS; ++bracket)
+                {
                     m_BattleGroundQueues[qtype].Update(
                         BATTLEGROUND_AA, BattleGroundBracketId(bracket),
                         BattleGroundMgr::BGArenaType(BattleGroundQueueTypeId(qtype)), true, 0);
+                }
+            }
 
             m_NextRatingDiscardUpdate = sWorld.getConfig(CONFIG_UINT32_ARENA_RATING_DISCARD_TIMER);
         }
@@ -1577,7 +1581,7 @@ void BattleGroundMgr::Update(uint32 diff)
  */
 void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket* data, BattleGround* bg, uint8 QueueSlot, uint8 StatusID, uint32 Time1, uint32 Time2, ArenaType arenatype, Team arenaTeam)
 {
-    // we can be in 2 queues in same time...
+    // we can be in 3 queues in same time...
 
     if (StatusID == 0 || !bg)
     {
@@ -1939,7 +1943,7 @@ uint32 BattleGroundMgr::CreateClientVisibleInstanceId(BattleGroundTypeId bgTypeI
 {
     if (IsArenaType(bgTypeId))
     {
-        return 0;                                           // arenas don't have client-instanceids
+        return 0; // arenas don't have client-instanceids
     }
 
     // we create here an instanceid, which is just for
@@ -2110,7 +2114,7 @@ BattleGround* BattleGroundMgr::CreateNewBattleGround(BattleGroundTypeId bgTypeId
  * @param StartMaxDist Maximum distance from spawn location for initial positioning.
  * @return The instance ID of the created template battleground.
  */
-uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, bool IsArena, uint32 MinPlayersPerTeam, uint32 MaxPlayersPerTeam, uint32 LevelMin, uint32 LevelMax, char const* BattleGroundName, uint32 MapID, float Team1StartLocX, float Team1StartLocY, float Team1StartLocZ, float Team1StartLocO, float Team2StartLocX, float Team2StartLocY, float Team2StartLocZ, float Team2StartLocO)
+uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, bool IsArena, uint32 MinPlayersPerTeam, uint32 MaxPlayersPerTeam, uint32 LevelMin, uint32 LevelMax, char const* BattleGroundName, uint32 MapID, float Team1StartLocX, float Team1StartLocY, float Team1StartLocZ, float Team1StartLocO, float Team2StartLocX, float Team2StartLocY, float Team2StartLocZ, float Team2StartLocO, float StartMaxDist)
 {
     // Create the BG
     BattleGround* bg = NULL;
@@ -2142,6 +2146,7 @@ uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, bool IsA
     bg->SetName(BattleGroundName);
     bg->SetTeamStartLoc(ALLIANCE, Team1StartLocX, Team1StartLocY, Team1StartLocZ, Team1StartLocO);
     bg->SetTeamStartLoc(HORDE,    Team2StartLocX, Team2StartLocY, Team2StartLocZ, Team2StartLocO);
+    bg->SetStartMaxDist(StartMaxDist);
     bg->SetLevelRange(LevelMin, LevelMax);
 
     // add bg to update list
@@ -2162,8 +2167,8 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
 {
     uint32 count = 0;
 
-    //                                                 0     1                   2                   3                  4                5               6
-    QueryResult* result = WorldDatabase.Query("SELECT `id`, `MinPlayersPerTeam`,`MaxPlayersPerTeam`,`AllianceStartLoc`,`AllianceStartO`,`HordeStartLoc`,`HordeStartO` FROM `battleground_template`");
+    //                                                 0     1                   2                   3                  4                5               6              7
+    QueryResult* result = WorldDatabase.Query("SELECT `id`, `MinPlayersPerTeam`,`MaxPlayersPerTeam`,`AllianceStartLoc`,`AllianceStartO`,`HordeStartLoc`,`HordeStartO`, `StartMaxDist` FROM `battleground_template`");
 
     if (!result)
     {
@@ -2264,8 +2269,9 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
             continue;
         }
 
+        float startMaxDist = fields[7].GetFloat();
         // sLog.outDetail("Creating battleground %s, %u-%u", bl->name[sWorld.GetDBClang()], MinLvl, MaxLvl);
-        if (!CreateBattleGround(bgTypeID, IsArena, MinPlayersPerTeam, MaxPlayersPerTeam, bl->minLevel, bl->maxLevel, bl->name[sWorld.GetDefaultDbcLocale()], bl->mapid[0], AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3]))
+        if (!CreateBattleGround(bgTypeID, IsArena, MinPlayersPerTeam, MaxPlayersPerTeam, bl->minLevel, bl->maxLevel, bl->name[sWorld.GetDefaultDbcLocale()], bl->mapid[0], AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3], startMaxDist))
         {
             continue;
         }
@@ -2844,7 +2850,7 @@ void BattleGroundMgr::LoadBattleEventIndexes()
         Field* fields = result->Fetch();
         if (fields[2].GetUInt8() == BG_EVENT_NONE || fields[3].GetUInt8() == BG_EVENT_NONE)
         {
-            continue;                                        // we don't need to add those to the eventmap
+            continue; // we don't need to add those to the eventmap
         }
 
         bool gameobject         = (fields[0].GetUInt8() == 1);
