@@ -1663,7 +1663,11 @@ void World::SetInitialWorldSettings()
     sLog.outString();
 
     sLog.outString("Loading grids for active creatures or transports...");
-    sObjectMgr.LoadActiveEntities(NULL);
+    uint32 loadContinentsBegin = GameTime::GetGameTimeMS();
+    ObjectMgr::LivingWorldStartupStats lwStats = sObjectMgr.LoadActiveEntities(NULL);
+    uint32 loadContinentsMs = GetMSTimeDiffToNow(loadContinentsBegin);
+    sLog.outString("[LivingWorld] startup summary: maps-forced=%u, total-unique-grids=%u, total-newly-loaded=%u, total-map-transports=%u, LoadContinents=%u ms",
+                   lwStats.forcedMaps, lwStats.totalUniqueGrids, lwStats.totalNewlyLoaded, lwStats.totalMapTransports, loadContinentsMs);
     sLog.outString();
 
     // Delete all characters which have been deleted X days before

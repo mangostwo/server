@@ -57,8 +57,13 @@
 #include "DisableMgr.h"
 
 #include <limits>
+#include <set>
 
 INSTANTIATE_SINGLETON_1(ObjectMgr);
+
+// Temporary startup accumulator for LivingWorld observability (written during LoadActiveEntities(NULL) only)
+static ObjectMgr::LivingWorldStartupStats s_livingWorldStats;
+static bool s_livingWorldStartupPass = false;
 
 /**
  * @brief Normalizes a player name to the server's canonical casing.
@@ -10583,11 +10588,14 @@ void ObjectMgr::LoadVendorTemplates()
  *
  *  This function is currently WIP, hence parts exist only as draft.
  */
-void ObjectMgr::LoadActiveEntities(Map* _map)
+ObjectMgr::LivingWorldStartupStats ObjectMgr::LoadActiveEntities(Map* _map)
 {
     // Special case on startup - load continents
     if (!_map)
     {
+        s_livingWorldStats = ObjectMgr::LivingWorldStartupStats();
+        s_livingWorldStartupPass = true;
+
         uint32 continents[] = {0, 1, 369, 530};
         for (int i = 0; i < countof(continents); ++i)
         {
@@ -10607,16 +10615,60 @@ void ObjectMgr::LoadActiveEntities(Map* _map)
             }
         }
 
-        return;
+        s_livingWorldStartupPass = false;
+        return s_livingWorldStats;
+    }
+
+    bool collectLivingWorldStats = s_livingWorldStartupPass;
+    bool forceLoad = sWorld.isForceLoadMap(_map->GetId());
+
+    uint32 mapTransportCount = 0;
+    uint32 forceLoadRequests = 0;
+    uint32 uniqueGridCount = 0;
+    uint32 newlyLoaded = 0;
+    uint32 alreadyLoaded = 0;
+    uint32 activeCreatureGuids = 0;
+
+    std::set<std::pair<uint32, uint32> > uniqueGrids;
+
+    if (collectLivingWorldStats)
+    {
+        MapManager::TransportMap::const_iterator transportMapItr = sMapMgr.m_TransportsByMap.find(_map->GetId());
+        if (transportMapItr != sMapMgr.m_TransportsByMap.end())
+        {
+            mapTransportCount = uint32(transportMapItr->second.size());
+        }
+
+        std::pair<ActiveCreatureGuidsOnMap::const_iterator, ActiveCreatureGuidsOnMap::const_iterator> activeBounds = m_activeCreatures.equal_range(_map->GetId());
+        for (ActiveCreatureGuidsOnMap::const_iterator itr = activeBounds.first; itr != activeBounds.second; ++itr)
+        {
+            ++activeCreatureGuids;
+        }
     }
 
     // Load active objects for _map
-    if (sWorld.isForceLoadMap(_map->GetId()))
+    if (forceLoad)
     {
         for (CreatureDataMap::const_iterator itr = mCreatureDataMap.begin(); itr != mCreatureDataMap.end(); ++itr)
         {
             if (itr->second.mapid == _map->GetId())
             {
+                if (collectLivingWorldStats)
+                {
+                    ++forceLoadRequests;
+                    GridPair gridPair = MaNGOS::ComputeGridPair(itr->second.posX, itr->second.posY);
+                    uniqueGrids.insert(std::make_pair(gridPair.x_coord, gridPair.y_coord));
+
+                    if (_map->IsLoaded(itr->second.posX, itr->second.posY))
+                    {
+                        ++alreadyLoaded;
+                    }
+                    else
+                    {
+                        ++newlyLoaded;
+                    }
+                }
+
                 _map->ForceLoadGrid(itr->second.posX, itr->second.posY);
             }
         }
@@ -10628,10 +10680,52 @@ void ObjectMgr::LoadActiveEntities(Map* _map)
         {
             CreatureData const& data = mCreatureDataMap[itr->second];
             {
+                if (collectLivingWorldStats)
+                {
+                    ++forceLoadRequests;
+                    GridPair gridPair = MaNGOS::ComputeGridPair(data.posX, data.posY);
+                    uniqueGrids.insert(std::make_pair(gridPair.x_coord, gridPair.y_coord));
+
+                    if (_map->IsLoaded(data.posX, data.posY))
+                    {
+                        ++alreadyLoaded;
+                    }
+                    else
+                    {
+                        ++newlyLoaded;
+                    }
+                }
+
                 _map->ForceLoadGrid(data.posX, data.posY);
             }
         }
     }
+
+    if (collectLivingWorldStats)
+    {
+        uniqueGridCount = uint32(uniqueGrids.size());
+
+        s_livingWorldStats.totalUniqueGrids += uniqueGridCount;
+        s_livingWorldStats.totalNewlyLoaded += newlyLoaded;
+        s_livingWorldStats.totalMapTransports += mapTransportCount;
+        if (forceLoad)
+        {
+            ++s_livingWorldStats.forcedMaps;
+        }
+
+        if (forceLoad)
+        {
+            sLog.outString("[LivingWorld] map %u: force-load=ON, creature-rows=%u, ForceLoadGrid-requests=%u, unique-grids=%u, newly-loaded=%u (explicit-locks-set), already-loaded=%u, extra-active-creatures=%u, map-transports=%u",
+                           _map->GetId(), forceLoadRequests, forceLoadRequests, uniqueGridCount, newlyLoaded, alreadyLoaded, activeCreatureGuids, mapTransportCount);
+        }
+        else
+        {
+            sLog.outString("[LivingWorld] map %u: force-load=OFF, extra-active-creatures=%u, ForceLoadGrid-requests=%u, unique-grids=%u, newly-loaded=%u (explicit-locks-set), already-loaded=%u, map-transports=%u",
+                           _map->GetId(), activeCreatureGuids, forceLoadRequests, uniqueGridCount, newlyLoaded, alreadyLoaded, mapTransportCount);
+        }
+    }
+
+    return ObjectMgr::LivingWorldStartupStats();
 }
 
 /**

@@ -873,8 +873,16 @@ class ObjectMgr
             LoadTrainers("npc_trainer", false);
         }
 
+        struct LivingWorldStartupStats
+        {
+            uint32 forcedMaps = 0;
+            uint32 totalUniqueGrids = 0;
+            uint32 totalNewlyLoaded = 0;
+            uint32 totalMapTransports = 0;
+        };
+
         /// @param _map Map* of the map for which to load active entities. If NULL active entities on continents are loaded
-        void LoadActiveEntities(Map* _map);
+        LivingWorldStartupStats LoadActiveEntities(Map* _map);
 
         void LoadVehicleAccessory();
 
