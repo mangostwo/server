@@ -146,19 +146,21 @@ namespace Movement
      */
     void WriteLinearPath(const Spline<int32>& spline, ByteBuffer& data)
     {
-        Movement::SplineBase::ControlArray const& pathPoint = spline.getPoints(); // get ref of whole path points array
+        uint32 last_idx = spline.getPointCount() - 3;
+        const Vector3* real_path = &spline.getPoint(1);
 
-        uint32 pathSize = spline.last() - spline.first() - 1; // -1 as we send destination first and last index is destination
-        MANGOS_ASSERT(pathSize >= 0);                       // should never be less than 0
-
-        Vector3 destination = pathPoint[spline.last()];     // destination of this path should be send right after path size
-        data << pathSize;
-        data << destination;
-
-        for (uint32 i = spline.first(); i < spline.first() + pathSize; i++) // from first real index (this array contain also special data)
+        data << last_idx;
+        data << real_path[last_idx];   // destination
+        if (last_idx > 1)
         {
-            Vector3 offset = destination - pathPoint[i];    // we have to send offset relative to destination instead of directly path point.
-            data.appendPackXYZ(offset.x, offset.y, offset.z); // we have to pack x,y,z before send
+            Vector3 middle = (real_path[0] + real_path[last_idx]) / 2.f;
+            Vector3 offset;
+            // first and last points already appended
+            for (uint32 i = 1; i < last_idx; ++i)
+            {
+                offset = middle - real_path[i];
+                data.appendPackXYZ(offset.x, offset.y, offset.z);
+            }
         }
     }
 
