@@ -544,16 +544,32 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
  */
 void PathFinder::BuildShortcut()
 {
-    DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ PathFinder::BuildShortcut :: making shortcut\n");
+    DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ PathFinder::BuildShortcut :: making shortcut for %s\n", m_sourceUnit->GetGuidStr().c_str());
 
     clear();
 
-    // make two point path, our curr pos is the start, and dest is the end
-    m_pathPoints.resize(2);
+    Vector3 start = getStartPosition();
+    Vector3 end = getActualEndPosition();
 
-    // set start and a default next position
-    m_pathPoints[0] = getStartPosition();
-    m_pathPoints[1] = getActualEndPosition();
+    // Subdivide the shortcut into segments so that each point can be snapped
+    // to terrain height. This prevents the "bunny hop" effect on steep
+    // slopes when no navmesh is available.
+    const float segmentLength = 5.0f;
+    float dist = sqrt(dist3DSqr(start, end));
+    uint32 segments = std::max(1u, uint32(dist / segmentLength));
+    uint32 size = segments + 1;
+
+    m_pathPoints.resize(size);
+    m_pathPoints[0] = start;
+    m_pathPoints[size - 1] = end;
+
+    for (uint32 i = 1; i < size - 1; ++i)
+    {
+        float t = float(i) / float(segments);
+        Vector3 point = start + (end - start) * t;
+        m_sourceUnit->UpdateAllowedPositionZ(point.x, point.y, point.z);
+        m_pathPoints[i] = point;
+    }
 
     m_type = PATHFIND_SHORTCUT;
 }
