@@ -605,10 +605,12 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
         // amount of real actions
         uint32 count = 0;
         for (uint32 j = 0; j < MAX_ACTIONS; ++j)
+        {
             if (pHolder.Event.action[j].type != ACTION_T_NONE)
             {
                 ++count;
             }
+        }
 
         if (count)
         {
@@ -887,10 +889,12 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
         {
             ThreatList const& threatList = m_creature->GetThreatManager().getThreatList();
             for (ThreatList::const_iterator i = threatList.begin(); i != threatList.end(); ++i)
+            {
                 if (Unit* Temp = m_creature->GetMap()->GetUnit((*i)->getUnitGuid()))
                 {
                     m_creature->GetThreatManager().modifyThreatPercent(Temp, action.threat_all_pct.percent);
                 }
+            }
             break;
         }
         case ACTION_T_QUEST_EVENT:          //15
@@ -1022,10 +1026,12 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
         {
             ThreatList const& threatList = m_creature->GetThreatManager().getThreatList();
             for (ThreatList::const_iterator i = threatList.begin(); i != threatList.end(); ++i)
+            {
                 if (Player* temp = m_creature->GetMap()->GetPlayer((*i)->getUnitGuid()))
                 {
                     temp->CastedCreatureOrGO(action.cast_event_all.creatureId, m_creature->GetObjectGuid(), action.cast_event_all.spellId);
                 }
+            }
             break;
         }
         case ACTION_T_REMOVEAURASFROMSPELL:     //28

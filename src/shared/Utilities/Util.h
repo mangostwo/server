@@ -573,10 +573,12 @@ inline bool isNumericOrSpace(wchar_t wchar)
 inline bool isNumeric(char const* str)
 {
     for (char const* c = str; *c; ++c)
+    {
         if (!isNumeric(*c))
         {
             return false;
         }
+    }
 
     return true;
 }
@@ -590,10 +592,12 @@ inline bool isNumeric(char const* str)
 inline bool isNumeric(std::string const& str)
 {
     for (std::string::const_iterator itr = str.begin(); itr != str.end(); ++itr)
+    {
         if (!isNumeric(*itr))
         {
             return false;
         }
+    }
 
     return true;
 }
@@ -607,10 +611,12 @@ inline bool isNumeric(std::string const& str)
 inline bool isNumeric(std::wstring const& str)
 {
     for (std::wstring::const_iterator itr = str.begin(); itr != str.end(); ++itr)
+    {
         if (!isNumeric(*itr))
         {
             return false;
         }
+    }
 
     return true;
 }
@@ -625,10 +631,12 @@ inline bool isNumeric(std::wstring const& str)
 inline bool isBasicLatinString(const std::wstring &wstr, bool numericOrSpace)
 {
     for (size_t i = 0; i < wstr.size(); ++i)
+    {
         if (!isBasicLatinCharacter(wstr[i]) && (!numericOrSpace || !isNumericOrSpace(wstr[i])))
         {
             return false;
         }
+    }
     return true;
 }
 
@@ -642,10 +650,12 @@ inline bool isBasicLatinString(const std::wstring &wstr, bool numericOrSpace)
 inline bool isExtendedLatinString(const std::wstring &wstr, bool numericOrSpace)
 {
     for (size_t i = 0; i < wstr.size(); ++i)
+    {
         if (!isExtendedLatinCharacter(wstr[i]) && (!numericOrSpace || !isNumericOrSpace(wstr[i])))
         {
             return false;
         }
+    }
     return true;
 }
 
@@ -659,10 +669,12 @@ inline bool isExtendedLatinString(const std::wstring &wstr, bool numericOrSpace)
 inline bool isCyrillicString(const std::wstring &wstr, bool numericOrSpace)
 {
     for (size_t i = 0; i < wstr.size(); ++i)
+    {
         if (!isCyrillicCharacter(wstr[i]) && (!numericOrSpace || !isNumericOrSpace(wstr[i])))
         {
             return false;
         }
+    }
     return true;
 }
 
@@ -676,10 +688,12 @@ inline bool isCyrillicString(const std::wstring &wstr, bool numericOrSpace)
 inline bool isEastAsianString(const std::wstring &wstr, bool numericOrSpace)
 {
     for (size_t i = 0; i < wstr.size(); ++i)
+    {
         if (!isEastAsianCharacter(wstr[i]) && (!numericOrSpace || !isNumericOrSpace(wstr[i])))
         {
             return false;
         }
+    }
     return true;
 }
 

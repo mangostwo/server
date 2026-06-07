@@ -1481,10 +1481,12 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
         }
 
         for (int j = i + 1; j < MAX_GEM_SOCKETS; ++j)
+        {
             if (gemGuids[j] == gemGuid)
             {
                 return;
             }
+        }
     }
 
     Item* itemTarget = _player->GetItemByGuid(itemGuid);

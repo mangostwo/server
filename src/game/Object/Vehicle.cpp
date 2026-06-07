@@ -488,10 +488,12 @@ bool VehicleInfo::CanBoard(Unit* passenger) const
 Unit* VehicleInfo::GetPassenger(uint8 seat) const
 {
     for (PassengerMap::const_iterator itr = m_passengers.begin(); itr != m_passengers.end(); ++itr)
+    {
         if (itr->second->GetTransportSeat() == seat)
         {
             return (Unit*)itr->first;
         }
+    }
 
     return NULL;
 }
@@ -554,10 +556,12 @@ bool VehicleInfo::GetUsableSeatFor(Unit* passenger, uint8& seat) const
     seat = 0;
 
     for (uint8 i = 1; seat < MAX_VEHICLE_SEAT; i <<= 1, ++seat)
+    {
         if (possibleSeats & i)
         {
             return true;
         }
+    }
 
     return false;
 }

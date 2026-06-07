@@ -389,10 +389,12 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                     {
                         uint32 count = 0;
                         for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+                        {
                             if (ihit->effectMask & (1 << effect_idx))
                             {
                                 ++count;
                             }
+                        }
 
                         damage /= count;                    // divide to all targets
                         break;
@@ -562,10 +564,12 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                     uint32 counter = 0;
                     Unit::AuraList const& dotAuras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
                     for (Unit::AuraList::const_iterator itr = dotAuras.begin(); itr != dotAuras.end(); ++itr)
+                    {
                         if ((*itr)->GetCasterGuid() == owner->GetObjectGuid())
                         {
                             ++counter;
                         }
+                    }
 
                     if (counter)
                     {
@@ -3880,10 +3884,12 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     // Improved Life Tap mod
                     Unit::AuraList const& auraDummy = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
                     for (Unit::AuraList::const_iterator itr = auraDummy.begin(); itr != auraDummy.end(); ++itr)
+                    {
                         if ((*itr)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && (*itr)->GetSpellProto()->SpellIconID == 208)
                         {
                             mana = ((*itr)->GetModifier()->m_amount + 100) * mana / 100;
                         }
+                    }
 
                     m_caster->CastCustomSpell(unitTarget, 31818, &mana, NULL, NULL, true);
 
@@ -4350,11 +4356,13 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         // Restorative Totems
                         Unit::AuraList const& mDummyAuras = owner->GetAurasByType(SPELL_AURA_DUMMY);
                         for (Unit::AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
+                        {
                             // only its have dummy with specific icon
                             if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN && (*i)->GetSpellProto()->SpellIconID == 338)
                             {
                                 damage += (*i)->GetModifier()->m_amount * damage / 100;
                             }
+                        }
 
                         // Glyph of Healing Stream Totem
                         if (Aura* dummy = owner->GetDummyAura(55456))
@@ -5561,10 +5569,12 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
             int damageAmount = 0;
             Unit::AuraList const& mDummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
             for (Unit::AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
+            {
                 if ((*i)->GetId() == 45062)
                 {
                     damageAmount += (*i)->GetModifier()->m_amount;
                 }
+            }
             if (damageAmount)
             {
                 m_caster->RemoveAurasDueToSpell(45062);
@@ -6702,6 +6712,7 @@ bool Spell::DoSummonWild(CreatureSummonPositions& list, SummonPropertiesEntry co
     TempSpawnType summonType = (m_duration == 0) ? TEMPSPAWN_DEAD_DESPAWN : TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN;
 
     for (CreatureSummonPositions::iterator itr = list.begin(); itr != list.end(); ++itr)
+    {
         if (Creature* summon = m_caster->SummonCreature(creature_entry, itr->x, itr->y, itr->z, m_caster->GetOrientation(), summonType, m_duration))
         {
             itr->creature = summon;
@@ -6731,6 +6742,7 @@ bool Spell::DoSummonWild(CreatureSummonPositions& list, SummonPropertiesEntry co
         {
             return false;
         }
+    }
 
     return true;
 }
@@ -8345,10 +8357,12 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
                 {
                     uint32 count = 0;
                     for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+                    {
                         if (ihit->effectMask & (1 << eff_idx))
                         {
                             ++count;
                         }
+                    }
 
                     totalDamagePercentMod /= float(count);  // divide to all targets
                     break;
@@ -9134,10 +9148,12 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     // check presence
                     for (int j = 0; j < 4; ++j)
+                    {
                         if (unitTarget->HasAura(spells[j], EFFECT_INDEX_0))
                         {
                             return;
                         }
+                    }
 
                     // cast
                     unitTarget->CastSpell(unitTarget, spells[urand(0, 3)], true);
@@ -11950,10 +11966,12 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     // don't overwrite an existing aura
                     for (uint8 i = 0; i < 5; ++i)
+                    {
                         if (unitTarget->HasAura(spellid + i, EFFECT_INDEX_0))
                         {
                             return;
                         }
+                    }
 
                     unitTarget->CastSpell(unitTarget, spellid + urand(0, 4), true);
                     break;
@@ -13420,12 +13438,14 @@ void Spell::EffectSummonAllTotems(SpellEffectIndex eff_idx)
     int32 amount_buttons = m_spellInfo->EffectMiscValueB[eff_idx];
 
     for (int32 slot = 0; slot < amount_buttons; ++slot)
+    {
         if (ActionButton const* actionButton = ((Player*)m_caster)->GetActionButton(start_button + slot))
             if (actionButton->GetType() == ACTION_BUTTON_SPELL)
                 if (uint32 spell_id = actionButton->GetAction())
                 {
                     m_caster->CastSpell(unitTarget, spell_id, true);
                 }
+    }
 }
 
 /**

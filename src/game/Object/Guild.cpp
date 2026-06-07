@@ -1857,11 +1857,13 @@ void Guild::SetBankRightsAndSlots(uint32 rankId, uint8 TabId, uint32 right, uint
     if (db)
     {
         for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
+        {
             if (itr->second.RankId == rankId)
                 for (int i = 0; i < GUILD_BANK_MAX_TABS; ++i)
                 {
                     itr->second.BankResetTimeTab[i] = 0;
                 }
+        }
 
         CharacterDatabase.PExecute("DELETE FROM `guild_bank_right` WHERE `guildid`='%u' AND `TabId`='%u' AND `rid`='%u'", m_Id, uint32(TabId), rankId);
         CharacterDatabase.PExecute("INSERT INTO `guild_bank_right` (`guildid`,`TabId`,`rid`,`gbright`,`SlotPerDay`) VALUES "
@@ -3069,10 +3071,12 @@ void Guild::DeleteGuildBankItems(bool alsoInDB /*= false*/)
 bool GuildItemPosCount::isContainedIn(GuildItemPosCountVec const& vec) const
 {
     for (GuildItemPosCountVec::const_iterator itr = vec.begin(); itr != vec.end(); ++itr)
+    {
         if (itr->Slot == this->Slot)
         {
             return true;
         }
+    }
 
     return false;
 }

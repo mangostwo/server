@@ -47,10 +47,12 @@ bool WaypointBehavior::isEmpty()
     }
 
     for (int i = 0; i < MAX_WAYPOINT_TEXT; ++i)
+    {
         if (textid[i])
         {
             return false;
         }
+    }
 
     return true;
 }
@@ -816,18 +818,22 @@ void WaypointManager::CheckTextsExistance(std::set<int32>& ids)
     for (WaypointPathMap::const_iterator pmItr = m_pathMap.begin(); pmItr != m_pathMap.end(); ++pmItr)
     {
         for (WaypointPath::const_iterator pItr = pmItr->second.begin(); pItr != pmItr->second.end(); ++pItr)
+        {
             if (pItr->second.behavior)
             {
                 CheckWPText(false, pmItr->first, pItr->first, pItr->second.behavior, ids);
             }
+        }
     }
 
     for (WaypointPathMap::const_iterator pmItr = m_pathTemplateMap.begin(); pmItr != m_pathTemplateMap.end(); ++pmItr)
     {
         for (WaypointPath::const_iterator pItr = pmItr->second.begin(); pItr != pmItr->second.end(); ++pItr)
+        {
             if (pItr->second.behavior)
             {
                 CheckWPText(true, pmItr->first, pItr->first, pItr->second.behavior, ids);
             }
+        }
     }
 }

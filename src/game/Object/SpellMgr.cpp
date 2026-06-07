@@ -252,10 +252,12 @@ uint32 GetSpellCastTimeForBonus(SpellEntry const* spellProto, DamageEffectType d
     bool AreaEffect   = false;
 
     for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
         if (IsAreaEffectTarget(Targets(spellProto->EffectImplicitTargetA[i])) || IsAreaEffectTarget(Targets(spellProto->EffectImplicitTargetB[i])))
         {
             AreaEffect = true;
         }
+    }
 
     for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
@@ -1300,10 +1302,12 @@ bool IsPositiveSpell(SpellEntry const* spellproto)
     // spells with at least one negative effect are considered negative
     // some self-applied spells have negative effects but in self casting case negative check ignored.
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
         if (spellproto->Effect[i] && !IsPositiveEffect(spellproto, SpellEffectIndex(i)))
         {
             return false;
         }
+    }
     return true;
 }
 
@@ -1566,10 +1570,12 @@ struct SpellRankHelper
     {
         // check that first rank added for custom ranks
         for (std::set<uint32>::const_iterator itr = firstRankSpellsWithCustomRanks.begin(); itr != firstRankSpellsWithCustomRanks.end(); ++itr)
+        {
             if (!worker.HasEntry(*itr))
             {
                 sLog.outErrorDb("Spell %u must be listed in `%s` as first rank for listed custom ranks of spell but not found!", *itr, worker.TableName());
             }
+        }
 
         // fill absent non first ranks data base at first rank data
         for (std::set<uint32>::const_iterator itr = firstRankSpells.begin(); itr != firstRankSpells.end(); ++itr)
@@ -1903,10 +1909,12 @@ bool IsCastEndProcModifierAura(SpellEntry const* spellInfo, SpellEffectIndex eff
         case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE:
         {
             for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+            {
                 if (IsEffectHandledOnDelayedSpellLaunch(procSpell, SpellEffectIndex(i)))
                 {
                     return true;
                 }
+            }
 
             return false;
         }
@@ -4935,10 +4943,12 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const* spell
         while (groupEntry)
         {
             for (uint32 i = 0; i < 6; ++i)
+            {
                 if (groupEntry->AreaId[i] == zone_id || groupEntry->AreaId[i] == area_id)
                 {
                     found = true;
                 }
+            }
             if (found || !groupEntry->nextGroup)
             {
                 break;

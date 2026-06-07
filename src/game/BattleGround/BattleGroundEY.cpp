@@ -663,10 +663,12 @@ WorldSafeLocsEntry const* BattleGroundEY::GetClosestGraveYard(Player* player)
 bool BattleGroundEY::IsAllNodesControlledByTeam(Team team) const
 {
     for (uint8 i = 0; i < EY_NODES_MAX; ++i)
+    {
         if (m_towerOwner[i] != team)
         {
             return false;
         }
+    }
 
     return true;
 }

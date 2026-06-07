@@ -193,10 +193,12 @@ void BattleGroundAV::HandleQuestComplete(uint32 questid, Player* player)
             {
                 DEBUG_LOG("BattleGroundAV: Quest %i completed starting with unit upgrading..", questid);
                 for (BG_AV_Nodes i = BG_AV_NODES_FIRSTAID_STATION; i <= BG_AV_NODES_FROSTWOLF_HUT; ++i)
+                {
                     if (m_Nodes[i].Owner == teamIdx && m_Nodes[i].State == POINT_CONTROLLED)
                     {
                         PopulateNode(i);
                     }
+                }
             }
             break;
         case BG_AV_QUEST_A_COMMANDER1:
@@ -450,30 +452,38 @@ void BattleGroundAV::EndBattleGround(Team winner)
     uint32 mines_owned[PVP_TEAM_COUNT]     = {0, 0};
     // towers all not destroyed:
     for (BG_AV_Nodes i = BG_AV_NODES_DUNBALDAR_SOUTH; i <= BG_AV_NODES_STONEHEART_BUNKER; ++i)
+    {
         if (m_Nodes[i].State == POINT_CONTROLLED)
             if (m_Nodes[i].TotalOwner == BG_AV_TEAM_ALLIANCE)
             {
                 ++tower_survived[TEAM_INDEX_ALLIANCE];
             }
+    }
     for (BG_AV_Nodes i = BG_AV_NODES_ICEBLOOD_TOWER; i <= BG_AV_NODES_FROSTWOLF_WTOWER; ++i)
+    {
         if (m_Nodes[i].State == POINT_CONTROLLED)
             if (m_Nodes[i].TotalOwner == BG_AV_TEAM_HORDE)
             {
                 ++tower_survived[TEAM_INDEX_HORDE];
             }
+    }
 
     // graves all controlled
     for (BG_AV_Nodes i = BG_AV_NODES_FIRSTAID_STATION; i < BG_AV_NODES_MAX; ++i)
+    {
         if (m_Nodes[i].State == POINT_CONTROLLED && m_Nodes[i].Owner != BG_AV_TEAM_NEUTRAL)
         {
             ++graves_owned[m_Nodes[i].Owner];
         }
+    }
 
     for (uint8 i = 0; i < BG_AV_MAX_MINES; ++i)
+    {
         if (m_Mine_Owner[i] != BG_AV_TEAM_NEUTRAL)
         {
             ++mines_owned[m_Mine_Owner[i]];
         }
+    }
 
     // now we have the values give the honor/reputation to the teams:
     Team team[PVP_TEAM_COUNT]      = { ALLIANCE, HORDE };

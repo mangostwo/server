@@ -311,15 +311,19 @@ GroupQueueInfo* BattleGroundQueue::AddGroup(Player* leader, Group* grp, BattleGr
                 uint32 q_max_level = bracketEntry->maxLevel;
                 GroupsQueueType::const_iterator itr;
                 for (itr = m_QueuedGroups[bracketId][BG_QUEUE_NORMAL_ALLIANCE].begin(); itr != m_QueuedGroups[bracketId][BG_QUEUE_NORMAL_ALLIANCE].end(); ++itr)
+                {
                     if (!(*itr)->IsInvitedToBGInstanceGUID)
                     {
                         qAlliance += (*itr)->Players.size();
                     }
+                }
                 for (itr = m_QueuedGroups[bracketId][BG_QUEUE_NORMAL_HORDE].begin(); itr != m_QueuedGroups[bracketId][BG_QUEUE_NORMAL_HORDE].end(); ++itr)
+                {
                     if (!(*itr)->IsInvitedToBGInstanceGUID)
                     {
                         qHorde += (*itr)->Players.size();
                     }
+                }
 
                 // Show queue status to player only (when joining queue)
                 if (sWorld.getConfig(CONFIG_UINT32_BATTLEGROUND_QUEUE_ANNOUNCER_JOIN) == 1)
@@ -809,15 +813,19 @@ bool BattleGroundQueue::CheckPremadeMatch(BattleGroundBracketId bracket_id, uint
         // if groups aren't invited
         GroupsQueueType::const_iterator ali_group, horde_group;
         for (ali_group = m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].begin(); ali_group != m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].end(); ++ali_group)
+        {
             if (!(*ali_group)->IsInvitedToBGInstanceGUID)
             {
                 break;
             }
+        }
         for (horde_group = m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].begin(); horde_group != m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].end(); ++horde_group)
+        {
             if (!(*horde_group)->IsInvitedToBGInstanceGUID)
             {
                 break;
             }
+        }
 
         if (ali_group != m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].end() && horde_group != m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].end())
         {
@@ -1125,10 +1133,12 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
             }
             // invite those selection pools
             for (uint8 i = 0; i < PVP_TEAM_COUNT; ++i)
+            {
                 for (GroupsQueueType::const_iterator citr = m_SelectionPools[TEAM_INDEX_ALLIANCE + i].SelectedGroups.begin(); citr != m_SelectionPools[TEAM_INDEX_ALLIANCE + i].SelectedGroups.end(); ++citr)
                 {
                     InviteGroupToBG((*citr), bg2, (*citr)->GroupTeam);
                 }
+            }
             // start bg
             bg2->StartBattleGround();
             // clear structures
@@ -1154,10 +1164,12 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
 
             // invite those selection pools
             for (uint8 i = 0; i < PVP_TEAM_COUNT; ++i)
+            {
                 for (GroupsQueueType::const_iterator citr = m_SelectionPools[TEAM_INDEX_ALLIANCE + i].SelectedGroups.begin(); citr != m_SelectionPools[TEAM_INDEX_ALLIANCE + i].SelectedGroups.end(); ++citr)
                 {
                     InviteGroupToBG((*citr), bg2, (*citr)->GroupTeam);
                 }
+            }
             // start bg
             bg2->StartBattleGround();
         }
