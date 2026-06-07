@@ -342,10 +342,12 @@ class NGrid
         void Visit(TypeContainerVisitor<T, TT>& visitor)
         {
             for (uint32 x = 0; x < N; ++x)
+            {
                 for (uint32 y = 0; y < N; ++y)
                 {
                     i_cells[x][y].Visit(visitor);
                 }
+            }
         }
 
         template<class T, class TT>
@@ -371,10 +373,12 @@ class NGrid
         {
             uint32 count = 0;
             for (uint32 x = 0; x < N; ++x)
+            {
                 for (uint32 y = 0; y < N; ++y)
                 {
                     count += i_cells[x][y].ActiveObjectsInGrid();
                 }
+            }
 
             return count;
         }
