@@ -120,9 +120,12 @@ static bool findtoknth(std::string& str, int n, std::string::size_type& s, std::
 {
     int i; s = e = 0;
     std::string::size_type size = str.size();
-    for (i = 1; s < size && i < n; ++s) if (str[s] == ' ')
+    for (i = 1; s < size && i < n; ++s)
     {
-        ++i;
+        if (str[s] == ' ')
+        {
+            ++i;
+        }
     }
     if (i < n)
     {
@@ -1086,10 +1089,12 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
                     ROLLBACK(DUMP_FILE_BROKEN);             // character_equipmentsets.setguid
                 }
                 for (int i = 0; i < 19; ++i)                // character_equipmentsets.item0..item18
+                {
                     if (!changeGuid(line, 6 + i, items, sObjectMgr.m_ItemGuids.GetNextAfterMaxUsed()))
                     {
                         ROLLBACK(DUMP_FILE_BROKEN);
                     }
+                }
                 break;
             }
             default:

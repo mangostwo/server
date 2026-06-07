@@ -1103,11 +1103,13 @@ void CalendarMgr::SendPacketToAllEventRelatives(WorldPacket packet, CalendarEven
     // Send packet to all invitees if event is non-guild, in other case only to non-guild invitees (packet was broadcasted for them)
     CalendarInviteMap const* cInvMap = event->GetInviteMap();
     for (CalendarInviteMap::const_iterator itr = cInvMap->begin(); itr != cInvMap->end(); ++itr)
+    {
         if (Player* player = sObjectMgr.GetPlayer(itr->second->InviteeGuid))
             if (!event->IsGuildEvent() || (event->IsGuildEvent() && player->GetGuildId() != event->GuildId))
             {
                 player->SendDirectMessage(&packet);
             }
+    }
 }
 
 void CalendarMgr::SendCalendarRaidLockoutRemove(Player* player, DungeonPersistentState const* save)

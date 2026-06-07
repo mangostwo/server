@@ -1011,10 +1011,12 @@ void ScriptMgr::LoadDbScriptStrings()
     std::set<int32> ids;
 
     for (int32 i = MIN_DB_SCRIPT_STRING_ID; i < MAX_DB_SCRIPT_STRING_ID; ++i)
+    {
         if (sObjectMgr.GetMangosStringLocale(i))
         {
             ids.insert(i);
         }
+    }
 
     CheckScriptTexts(ids);
     sWaypointMgr.CheckTextsExistance(ids);

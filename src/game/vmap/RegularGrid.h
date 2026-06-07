@@ -105,10 +105,12 @@ class RegularGrid2D
         ~RegularGrid2D()
         {
             for (int x = 0; x < CELL_NUMBER; ++x)
+            {
                 for (int y = 0; y < CELL_NUMBER; ++y)
                 {
                     delete nodes[x][y];
                 }
+            }
         }
 
         /**
@@ -144,11 +146,15 @@ class RegularGrid2D
         void balance()
         {
             for (int x = 0; x < CELL_NUMBER; ++x)
+            {
                 for (int y = 0; y < CELL_NUMBER; ++y)
+                {
                     if (Node* n = nodes[x][y])
                     {
                         n->balance();
                     }
+                }
+            }
         }
 
         /**

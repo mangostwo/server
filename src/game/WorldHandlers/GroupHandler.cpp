@@ -916,10 +916,12 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
 
     uint32 byteCount = 0;
     for (int i = 1; i < GROUP_UPDATE_FLAGS_COUNT; ++i)
+    {
         if (mask & (1 << i))
         {
             byteCount += GroupUpdateLength[i];
         }
+    }
 
     data->Initialize(SMSG_PARTY_MEMBER_STATS, 8 + 4 + byteCount);
     *data << player->GetPackGUID();

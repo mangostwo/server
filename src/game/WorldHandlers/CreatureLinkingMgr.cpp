@@ -442,10 +442,12 @@ void CreatureLinkingHolder::AddMasterToHolder(Creature* pCreature)
     // Check, if already stored
     BossGuidMapBounds bounds = m_masterGuid.equal_range(pCreature->GetEntry());
     for (BossGuidMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
+    {
         if (itr->second == pCreature->GetObjectGuid())
         {
             return;                                          // Already added
         }
+    }
 
     m_masterGuid.insert(BossGuidMap::value_type(pCreature->GetEntry(), pCreature->GetObjectGuid()));
 }

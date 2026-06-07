@@ -191,11 +191,13 @@ uint32 GetExplicitDiscoverySpell(uint32 spellId, Player* player)
 
     float full_chance = 0;
     for (SkillDiscoveryList::const_iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
+    {
         if (item_iter->reqSkillValue <= skillvalue)
             if (!player->HasSpell(item_iter->spellId))
             {
                 full_chance += item_iter->chance;
             }
+    }
 
     float rate = full_chance / 100.0f;
     float roll = rand_chance_f() * rate;                    // roll now in range 0..full_chance

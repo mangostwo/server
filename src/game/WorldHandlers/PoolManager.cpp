@@ -1338,10 +1338,12 @@ void PoolManager::Initialize(MapPersistentState* state)
 {
     // spawn pools for expected map or for not initialized shared pools state for non-instanceable maps
     for (uint16 pool_entry = 0; pool_entry < mPoolTemplate.size(); ++pool_entry)
+    {
         if (mPoolTemplate[pool_entry].AutoSpawn)
         {
             InitSpawnPool(*state, pool_entry);
         }
+    }
 }
 
 // Call to spawn a pool, if cache if true the method will spawn only if cached entry is different

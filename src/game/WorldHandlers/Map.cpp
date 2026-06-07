@@ -1468,10 +1468,12 @@ void Map::SendRemoveTransports(Player* player)
 
     // except used transport
     for (MapManager::TransportSet::const_iterator i = tset.begin(); i != tset.end(); ++i)
+    {
         if ((*i) != player->GetTransport() && (*i)->GetMapId() != i_id)
         {
             (*i)->BuildOutOfRangeUpdateBlock(&transData);
         }
+    }
 
     WorldPacket packet;
     transData.BuildPacket(&packet);
@@ -1582,10 +1584,12 @@ uint32 Map::GetPlayersCountExceptGMs() const
 {
     uint32 count = 0;
     for (MapRefManager::const_iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
+    {
         if (!itr->getSource()->isGameMaster())
         {
             ++count;
         }
+    }
     return count;
 }
 
@@ -2771,10 +2775,12 @@ void Map::PlayDirectSoundToMap(uint32 soundId, uint32 zoneId /*=0*/) const
 
     Map::PlayerList const& pList = GetPlayers();
     for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
+    {
         if (!zoneId || itr->getSource()->GetZoneId() == zoneId)
         {
             itr->getSource()->SendDirectMessage(&data);
         }
+    }
 }
 
 /**

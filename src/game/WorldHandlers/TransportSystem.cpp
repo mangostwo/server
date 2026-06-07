@@ -90,8 +90,10 @@ void TransportBase::UpdateGlobalPositions()
 
     // Update global positions
     for (PassengerMap::const_iterator itr = m_passengers.begin(); itr != m_passengers.end(); ++itr)
+    {
         UpdateGlobalPositionOf(itr->first, itr->second->GetLocalPositionX(), itr->second->GetLocalPositionY(),
                                itr->second->GetLocalPositionZ(), itr->second->GetLocalOrientation());
+    }
 
     m_lastPosition = pos;
 }

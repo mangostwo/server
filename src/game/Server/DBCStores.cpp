@@ -211,10 +211,12 @@ bool IsAcceptableClientBuild(uint32 build)
 {
     int accepted_versions[] = EXPECTED_MANGOSD_CLIENT_BUILD;
     for (int i = 0; accepted_versions[i]; ++i)
+    {
         if (int(build) == accepted_versions[i])
         {
             return true;
         }
+    }
 
     return false;
 }
@@ -532,10 +534,12 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sMapDifficultyStore,       dbcPath, "MapDifficulty.dbc");
     // fill data
     for (uint32 i = 1; i < sMapDifficultyStore.GetNumRows(); ++i)
+    {
         if (MapDifficultyEntry const* entry = sMapDifficultyStore.LookupEntry(i))
         {
             sMapDifficultyMap[MAKE_PAIR32(entry->MapId, entry->Difficulty)] = entry;
         }
+    }
 
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sMovieStore,               dbcPath, "Movie.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sOverrideSpellDataStore,   dbcPath, "OverrideSpellData.dbc");
@@ -545,11 +549,13 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sPowerDisplayStore,        dbcPath, "PowerDisplay.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sPvPDifficultyStore,       dbcPath, "PvpDifficulty.dbc");
     for (uint32 i = 0; i < sPvPDifficultyStore.GetNumRows(); ++i)
+    {
         if (PvPDifficultyEntry const* entry = sPvPDifficultyStore.LookupEntry(i))
             if (entry->bracketId > MAX_BATTLEGROUND_BRACKETS)
             {
                 MANGOS_ASSERT(false && "Need update MAX_BATTLEGROUND_BRACKETS by DBC data");
             }
+    }
 
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sRandomPropertiesPointsStore, dbcPath, "RandPropPoints.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sScalingStatDistributionStore, dbcPath, "ScalingStatDistribution.dbc");
@@ -627,10 +633,12 @@ void LoadDBCStores(const std::string& dataPath)
             continue;
         }
         for (int j = 0; j < MAX_TALENT_RANK; ++j)
+        {
             if (talentInfo->RankID[j])
             {
                 sTalentSpellPosMap[talentInfo->RankID[j]] = TalentSpellPos(i, j);
             }
+        }
     }
 
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sTalentTabStore,           dbcPath, "TalentTab.dbc");
@@ -667,10 +675,12 @@ void LoadDBCStores(const std::string& dataPath)
 
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sTaxiPathStore,            dbcPath, "TaxiPath.dbc");
     for (uint32 i = 1; i < sTaxiPathStore.GetNumRows(); ++i)
+    {
         if (TaxiPathEntry const* entry = sTaxiPathStore.LookupEntry(i))
         {
             sTaxiPathSetBySource[entry->from][entry->to] = TaxiPathBySourceAndDestination(entry->ID, entry->price);
         }
+    }
     uint32 pathCount = sTaxiPathStore.GetNumRows();
 
     //## TaxiPathNode.dbc ## Loaded only for initialization different structures
@@ -679,6 +689,7 @@ void LoadDBCStores(const std::string& dataPath)
     std::vector<uint32> pathLength;
     pathLength.resize(pathCount);                           // 0 and some other indexes not used
     for (uint32 i = 1; i < sTaxiPathNodeStore.GetNumRows(); ++i)
+    {
         if (TaxiPathNodeEntry const* entry = sTaxiPathNodeStore.LookupEntry(i))
         {
             if (pathLength[entry->path] < entry->index + 1)
@@ -686,6 +697,7 @@ void LoadDBCStores(const std::string& dataPath)
                 pathLength[entry->path] = entry->index + 1;
             }
         }
+    }
     // Set path length
     sTaxiPathNodesByPath.resize(pathCount);                 // 0 and some other indexes not used
     for (uint32 i = 1; i < sTaxiPathNodesByPath.size(); ++i)
@@ -694,22 +706,28 @@ void LoadDBCStores(const std::string& dataPath)
     }
     // fill data (pointers to sTaxiPathNodeStore elements
     for (uint32 i = 1; i < sTaxiPathNodeStore.GetNumRows(); ++i)
+    {
         if (TaxiPathNodeEntry const* entry = sTaxiPathNodeStore.LookupEntry(i))
         {
             sTaxiPathNodesByPath[entry->path].set(entry->index, entry);
         }
+    }
 
     // Initialize global taxinodes mask
     // include existing nodes that have at least single not spell base (scripted) path
     {
         std::set<uint32> spellPaths;
         for (uint32 i = 1; i < sSpellStore.GetNumRows(); ++i)
+        {
             if (SpellEntry const* sInfo = sSpellStore.LookupEntry(i))
                 for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
+                {
                     if (sInfo->Effect[j] == 123 /*SPELL_EFFECT_SEND_TAXI*/)
                     {
                         spellPaths.insert(sInfo->EffectMiscValue[j]);
                     }
+                }
+        }
 
         memset(sTaxiNodesMask, 0, sizeof(sTaxiNodesMask));
         memset(sOldContinentsNodesMask, 0, sizeof(sTaxiNodesMask));
