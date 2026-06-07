@@ -96,17 +96,21 @@ bool Player::UpdateStats(Stats stat)
     uint32 mask = 0;
     AuraList const& modRatingFromStat = GetAurasByType(SPELL_AURA_MOD_RATING_FROM_STAT);
     for (AuraList::const_iterator i = modRatingFromStat.begin(); i != modRatingFromStat.end(); ++i)
+    {
         if (Stats((*i)->GetMiscBValue()) == stat)
         {
             mask |= (*i)->GetMiscValue();
         }
+    }
     if (mask)
     {
         for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
+        {
             if (mask & (1 << rating))
             {
                 ApplyRatingMod(CombatRating(rating), 0, true);
             }
+        }
     }
     return true;
 }
@@ -454,8 +458,10 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
 
         AuraList const& mAPbyArmor = GetAurasByType(SPELL_AURA_MOD_ATTACK_POWER_OF_ARMOR);
         for (AuraList::const_iterator iter = mAPbyArmor.begin(); iter != mAPbyArmor.end(); ++iter)
+        {
             // always: ((*i)->GetModifier()->m_miscvalue == 1 == SPELL_SCHOOL_MASK_NORMAL)
             attPowerMod += int32(GetArmor() / (*iter)->GetModifier()->m_amount);
+        }
     }
 
     float attPowerMultiplier = GetModifierValue(unitMod, TOTAL_PCT) - 1.0f;

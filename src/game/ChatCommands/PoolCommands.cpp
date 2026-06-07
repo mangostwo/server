@@ -117,19 +117,23 @@ bool ChatHandler::HandlePoolSpawnsCommand(char* args)
 
     SpawnedPoolObjects const& crSpawns = spawns.GetSpawnedCreatures();
     for (SpawnedPoolObjects::const_iterator itr = crSpawns.begin(); itr != crSpawns.end(); ++itr)
+    {
         if (!pool_id || pool_id == sPoolMgr.IsPartOfAPool<Creature>(*itr))
             if (CreatureData const* data = sObjectMgr.GetCreatureData(*itr))
                 if (CreatureInfo const* info = ObjectMgr::GetCreatureTemplate(data->id))
                     PSendSysMessage(LANG_CREATURE_LIST_CHAT, *itr, PrepareStringNpcOrGoSpawnInformation<Creature>(*itr).c_str(),
                                     *itr, info->Name, data->posX, data->posY, data->posZ, data->mapid);
+    }
 
     SpawnedPoolObjects const& goSpawns = spawns.GetSpawnedGameobjects();
     for (SpawnedPoolObjects::const_iterator itr = goSpawns.begin(); itr != goSpawns.end(); ++itr)
+    {
         if (!pool_id || pool_id == sPoolMgr.IsPartOfAPool<GameObject>(*itr))
             if (GameObjectData const* data = sObjectMgr.GetGOData(*itr))
                 if (GameObjectInfo const* info = ObjectMgr::GetGameObjectInfo(data->id))
                     PSendSysMessage(LANG_GO_LIST_CHAT, *itr, PrepareStringNpcOrGoSpawnInformation<GameObject>(*itr).c_str(),
                                     *itr, info->name, data->posX, data->posY, data->posZ, data->mapid);
+    }
 
     return true;
 }

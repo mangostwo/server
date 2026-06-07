@@ -733,10 +733,12 @@ bool CalendarMgr::CanAddEvent(ObjectGuid const& guid)
     uint32 totalEvents = 0;
     // count all event created by guid
     for (CalendarEventStore::iterator itr = m_EventStore.begin(); itr != m_EventStore.end(); ++itr)
+    {
         if ((itr->second.CreatorGuid == guid) && (++totalEvents >= CALENDAR_MAX_EVENTS))
         {
             return false;
         }
+    }
     return true;
 }
 
@@ -751,10 +753,12 @@ bool CalendarMgr::CanAddGuildEvent(uint32 guildId)
     uint32 totalEvents = 0;
     // count all guild events in a guild
     for (CalendarEventStore::iterator itr = m_EventStore.begin(); itr != m_EventStore.end(); ++itr)
+    {
         if ((itr->second.GuildId == guildId) && (++totalEvents >= CALENDAR_MAX_GUILD_EVENTS))
         {
             return false;
         }
+    }
     return true;
 }
 

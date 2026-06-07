@@ -140,10 +140,12 @@ void BattleGroundAB::Update(uint32 diff)
             }
 
             for (uint8 team = 0; team < PVP_TEAM_COUNT; ++team)
+            {
                 if (m_Nodes[node] == team + BG_AB_NODE_TYPE_OCCUPIED)
                 {
                     ++team_points[team];
                 }
+            }
         }
 
         // Accumulate points
@@ -379,14 +381,17 @@ void BattleGroundAB::FillInitialWorldStates(WorldPacket& data, uint32& count)
 
     // Node occupied states
     for (uint8 node = 0; node < BG_AB_NODES_MAX; ++node)
+    {
         for (uint8 i = 1; i < BG_AB_NODES_MAX; ++i)
         {
             FillInitialWorldState(data, count, BG_AB_OP_NODESTATES[node] + plusArray[i], m_Nodes[node] == i);
         }
+    }
 
     // How many bases each team owns
     uint8 ally = 0, horde = 0;
     for (uint8 node = 0; node < BG_AB_NODES_MAX; ++node)
+    {
         if (m_Nodes[node] == BG_AB_NODE_STATUS_ALLY_OCCUPIED)
         {
             ++ally;
@@ -395,6 +400,7 @@ void BattleGroundAB::FillInitialWorldStates(WorldPacket& data, uint32& count)
         {
             ++horde;
         }
+    }
 
     FillInitialWorldState(data, count, BG_AB_OP_OCCUPIED_BASES_ALLY, ally);
     FillInitialWorldState(data, count, BG_AB_OP_OCCUPIED_BASES_HORDE, horde);
@@ -432,6 +438,7 @@ void BattleGroundAB::_SendNodeUpdate(uint8 node)
     // How many bases each team owns
     uint8 ally = 0, horde = 0;
     for (uint8 i = 0; i < BG_AB_NODES_MAX; ++i)
+    {
         if (m_Nodes[i] == BG_AB_NODE_STATUS_ALLY_OCCUPIED)
         {
             ++ally;
@@ -440,6 +447,7 @@ void BattleGroundAB::_SendNodeUpdate(uint8 node)
         {
             ++horde;
         }
+    }
 
     UpdateWorldState(BG_AB_OP_OCCUPIED_BASES_ALLY, ally);
     UpdateWorldState(BG_AB_OP_OCCUPIED_BASES_HORDE, horde);
@@ -692,10 +700,12 @@ WorldSafeLocsEntry const* BattleGroundAB::GetClosestGraveYard(Player* player)
     // Is there any occupied node for this team?
     std::vector<uint8> nodes;
     for (uint8 i = 0; i < BG_AB_NODES_MAX; ++i)
+    {
         if (m_Nodes[i] == teamIndex + 3)
         {
             nodes.push_back(i);
         }
+    }
 
     WorldSafeLocsEntry const* good_entry = NULL;
     // If so, select the closest node to place ghost on
@@ -765,9 +775,11 @@ void BattleGroundAB::UpdatePlayerScore(Player* source, uint32 type, uint32 value
 bool BattleGroundAB::IsAllNodesControlledByTeam(Team team) const
 {
     for (uint8 i = 0; i < BG_AB_NODES_MAX; ++i)
+    {
         if ((team == ALLIANCE && m_Nodes[i] != BG_AB_NODE_STATUS_ALLY_OCCUPIED) ||
                 (team == HORDE && m_Nodes[i] != BG_AB_NODE_STATUS_HORDE_OCCUPIED))
             return false;
+    }
 
     return true;
 }

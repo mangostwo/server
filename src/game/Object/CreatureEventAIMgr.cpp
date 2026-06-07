@@ -68,10 +68,12 @@ void CreatureEventAIMgr::CheckUnusedAITexts()
 
     std::set<int32> idx_set;
     for (int32 i = MAX_CREATURE_AI_TEXT_STRING_ID + 1; i <= MIN_CREATURE_AI_TEXT_STRING_ID; ++i)
+    {
         if (sObjectMgr.GetMangosStringLocale(i))
         {
             idx_set.insert(i);
         }
+    }
 
     for (CreatureEventAI_Event_Map::const_iterator itr = m_CreatureEventAI_Event_Map.begin(); itr != m_CreatureEventAI_Event_Map.end(); ++itr)
     {
@@ -90,10 +92,12 @@ void CreatureEventAIMgr::CheckUnusedAITexts()
                         // ACTION_T_CHANCED_TEXT contains a chance value in first param
                         int k = action.type == ACTION_T_TEXT ? 0 : 1;
                         for (; k < 3; ++k)
+                        {
                             if (action.text.TextId[k])
                             {
                                 idx_set.erase(action.text.TextId[k]);
                             }
+                        }
                         break;
                     }
                     default: break;

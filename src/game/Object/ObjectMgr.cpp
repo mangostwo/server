@@ -302,10 +302,12 @@ ArenaTeam* ObjectMgr::GetArenaTeamById(uint32 arenateamid) const
 ArenaTeam* ObjectMgr::GetArenaTeamByName(const std::string& arenateamname) const
 {
     for (ArenaTeamMap::const_iterator itr = mArenaTeamMap.begin(); itr != mArenaTeamMap.end(); ++itr)
+    {
         if (itr->second->GetName() == arenateamname)
         {
             return itr->second;
         }
+    }
 
     return NULL;
 }
@@ -313,10 +315,12 @@ ArenaTeam* ObjectMgr::GetArenaTeamByName(const std::string& arenateamname) const
 ArenaTeam* ObjectMgr::GetArenaTeamByCaptain(ObjectGuid guid) const
 {
     for (ArenaTeamMap::const_iterator itr = mArenaTeamMap.begin(); itr != mArenaTeamMap.end(); ++itr)
+    {
         if (itr->second->GetCaptainGuid() == guid)
         {
             return itr->second;
         }
+    }
 
     return NULL;
 }
@@ -1603,22 +1607,30 @@ void ObjectMgr::LoadCreatures()
     // build single time for check creature data
     std::set<uint32> difficultyCreatures[MAX_DIFFICULTY - 1];
     for (uint32 i = 0; i < sCreatureStorage.GetMaxEntry(); ++i)
+    {
         if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
             for (uint32 diff = 0; diff < MAX_DIFFICULTY - 1; ++diff)
+            {
                 if (cInfo->DifficultyEntry[diff])
                 {
                     difficultyCreatures[diff].insert(cInfo->DifficultyEntry[diff]);
                 }
+            }
+    }
 
     // build single time for check spawnmask
     std::map<uint32, uint32> spawnMasks;
     for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
+    {
         if (sMapStore.LookupEntry(i))
             for (int k = 0; k < MAX_DIFFICULTY; ++k)
+            {
                 if (GetMapDifficultyData(i, Difficulty(k)))
                 {
                     spawnMasks[i] |= (1 << k);
                 }
+            }
+    }
 
     BarGoLink bar(result->GetRowCount());
 
@@ -1859,12 +1871,16 @@ void ObjectMgr::LoadGameObjects()
     // build single time for check spawnmask
     std::map<uint32, uint32> spawnMasks;
     for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
+    {
         if (sMapStore.LookupEntry(i))
             for (int k = 0; k < MAX_DIFFICULTY; ++k)
+            {
                 if (GetMapDifficultyData(i, Difficulty(k)))
                 {
                     spawnMasks[i] |= (1 << k);
                 }
+            }
+    }
 
     BarGoLink bar(result->GetRowCount());
 
@@ -8595,10 +8611,12 @@ int ObjectMgr::GetIndexForLocale(LocaleConstant loc)
     }
 
     for (size_t i = 0; i < m_LocalForIndex.size(); ++i)
+    {
         if (m_LocalForIndex[i] == loc)
         {
             return i;
         }
+    }
 
     return -1;
 }
@@ -8633,10 +8651,12 @@ int ObjectMgr::GetOrNewIndexForLocale(LocaleConstant loc)
     }
 
     for (size_t i = 0; i < m_LocalForIndex.size(); ++i)
+    {
         if (m_LocalForIndex[i] == loc)
         {
             return i;
         }
+    }
 
     m_LocalForIndex.push_back(loc);
     return m_LocalForIndex.size() - 1;
@@ -9124,10 +9144,12 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
         {
             Unit::SpellAuraHolderMap const& auras = player->GetSpellAuraHolderMap();
             for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+            {
                 if ((itr->second->GetSpellProto()->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_MOUNTED) || itr->second->GetSpellProto()->HasAttribute(SPELL_ATTR_ABILITY)) && itr->second->GetSpellProto()->SpellVisual[0] == 3580)
                 {
                     return true;
                 }
+            }
             return false;
         }
         case CONDITION_NO_AURA:
@@ -10118,6 +10140,7 @@ GameTele const* ObjectMgr::GetGameTele(const std::string& name) const
     // Alternative first GameTele what contains wnameLow as substring in case no GameTele location found
     const GameTele* alt = NULL;
     for (GameTeleMap::const_iterator itr = m_GameTeleMap.begin(); itr != m_GameTeleMap.end(); ++itr)
+    {
         if (itr->second.wnameLow == wname)
         {
             return &itr->second;
@@ -10126,6 +10149,7 @@ GameTele const* ObjectMgr::GetGameTele(const std::string& name) const
         {
             alt = &itr->second;
         }
+    }
 
     return alt;
 }
@@ -10141,10 +10165,12 @@ bool ObjectMgr::AddGameTele(GameTele& tele)
     // find max id
     uint32 new_id = 0;
     for (GameTeleMap::const_iterator itr = m_GameTeleMap.begin(); itr != m_GameTeleMap.end(); ++itr)
+    {
         if (itr->first > new_id)
         {
             new_id = itr->first;
         }
+    }
 
     // use next
     ++new_id;
@@ -10870,16 +10896,20 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
     if (!sLog.HasLogFilter(LOG_FILTER_DB_STRICTED_CHECK))   // check unused menu ids only in strict mode
     {
         for (GossipMenusMap::const_iterator itr = m_mGossipMenusMap.begin(); itr != m_mGossipMenusMap.end(); ++itr)
+        {
             if (itr->first)
             {
                 menu_ids.insert(itr->first);
             }
+        }
 
         for (SQLStorageBase::SQLSIterator<GameObjectInfo> itr = sGOStorage.getDataBegin<GameObjectInfo>(); itr < sGOStorage.getDataEnd<GameObjectInfo>(); ++itr)
+        {
             if (uint32 menuid = itr->GetGossipMenuId())
             {
                 menu_ids.erase(menuid);
             }
+        }
     }
 
     // loading
@@ -10891,6 +10921,7 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
     typedef  std::multimap<uint32, const CreatureInfo*> Menu2CInfoMap;
     Menu2CInfoMap menu2CInfoMap;
     for (uint32 i = 1;  i < sCreatureStorage.GetMaxEntry(); ++i)
+    {
         if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
             if (cInfo->GossipMenuId)
             {
@@ -10902,6 +10933,7 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
                     menu_ids.erase(cInfo->GossipMenuId);
                 }
             }
+    }
 
     do
     {
@@ -11396,17 +11428,21 @@ void ObjectMgr::GetNpcTextLocaleStringsAll(uint32 entry, int32 loc_idx, ObjectMg
         {
             if (text0_Ptr)
                 for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
+                {
                     if (nl->Text_0[i].size() > (size_t)loc_idx && !nl->Text_0[i][loc_idx].empty())
                     {
                         (*text0_Ptr)[i] = nl->Text_0[i][loc_idx];
                     }
+                }
 
             if (text1_Ptr)
                 for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
+                {
                     if (nl->Text_1[i].size() > (size_t)loc_idx && !nl->Text_1[i][loc_idx].empty())
                     {
                         (*text1_Ptr)[i] = nl->Text_1[i][loc_idx];
                     }
+                }
         }
     }
 }

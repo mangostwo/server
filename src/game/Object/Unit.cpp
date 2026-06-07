@@ -1441,10 +1441,12 @@ void Unit::PetOwnerKilledUnit(Unit* pVictim)
 void Unit::CastStop(uint32 except_spellid)
 {
     for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
+    {
         if (m_currentSpells[i] && m_currentSpells[i]->m_spellInfo->Id != except_spellid)
         {
             InterruptSpell(CurrentSpellTypes(i), false);
         }
+    }
 }
 
 /**
@@ -2430,19 +2432,23 @@ uint32 Unit::CalcNotIgnoreAbsorbDamage(uint32 damage, SpellSchoolMask damageScho
     float absorb_affected_rate = 1.0f;
     Unit::AuraList const& ignoreAbsorbSchool = GetAurasByType(SPELL_AURA_MOD_IGNORE_ABSORB_SCHOOL);
     for (Unit::AuraList::const_iterator i = ignoreAbsorbSchool.begin(); i != ignoreAbsorbSchool.end(); ++i)
+    {
         if ((*i)->GetMiscValue() & damageSchoolMask)
         {
             absorb_affected_rate *= (100.0f - (*i)->GetModifier()->m_amount) / 100.0f;
         }
+    }
 
     if (spellInfo)
     {
         Unit::AuraList const& ignoreAbsorbForSpell = GetAurasByType(SPELL_AURA_MOD_IGNORE_ABSORB_FOR_SPELL);
         for (Unit::AuraList::const_iterator citr = ignoreAbsorbForSpell.begin(); citr != ignoreAbsorbForSpell.end(); ++citr)
+        {
             if ((*citr)->isAffectedOnSpell(spellInfo))
             {
                 absorb_affected_rate *= (100.0f - (*citr)->GetModifier()->m_amount) / 100.0f;
             }
+        }
     }
 
     return absorb_affected_rate <= 0.0f ? 0 : (absorb_affected_rate < 1.0f  ? uint32(damage * absorb_affected_rate) : damage);
@@ -2453,10 +2459,12 @@ uint32 Unit::CalcNotIgnoreDamageReduction(uint32 damage, SpellSchoolMask damageS
     float absorb_affected_rate = 1.0f;
     Unit::AuraList const& ignoreAbsorb = GetAurasByType(SPELL_AURA_MOD_IGNORE_DAMAGE_REDUCTION_SCHOOL);
     for (Unit::AuraList::const_iterator i = ignoreAbsorb.begin(); i != ignoreAbsorb.end(); ++i)
+    {
         if ((*i)->GetMiscValue() & damageSchoolMask)
         {
             absorb_affected_rate *= (100.0f - (*i)->GetModifier()->m_amount) / 100.0f;
         }
+    }
 
     return absorb_affected_rate <= 0.0f ? 0 : (absorb_affected_rate < 1.0f  ? uint32(damage * absorb_affected_rate) : damage);
 }
@@ -4145,10 +4153,13 @@ SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool 
         int32 reflectchance = pVictim->GetTotalAuraModifier(SPELL_AURA_REFLECT_SPELLS);
         Unit::AuraList const& mReflectSpellsSchool = pVictim->GetAurasByType(SPELL_AURA_REFLECT_SPELLS_SCHOOL);
         for (Unit::AuraList::const_iterator i = mReflectSpellsSchool.begin(); i != mReflectSpellsSchool.end(); ++i)
+        {
             if ((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spell))
             {
                 reflectchance += (*i)->GetModifier()->m_amount;
             }
+        }
+
         if (reflectchance > 0 && roll_chance_i(reflectchance))
         {
             // Start triggers for remove charges if need (trigger only for victim, and mark as active spell)
@@ -4867,10 +4878,12 @@ void Unit::InterruptNonMeleeSpells(bool withDelayed, uint32 spell_id)
 Spell* Unit::FindCurrentSpellBySpellId(uint32 spell_id) const
 {
     for (uint32 i = 0; i < CURRENT_MAX_SPELL; ++i)
+    {
         if (m_currentSpells[i] && m_currentSpells[i]->m_spellInfo->Id == spell_id)
         {
             return m_currentSpells[i];
         }
+    }
     return NULL;
 }
 
@@ -5009,10 +5022,12 @@ int32 Unit::GetMaxPositiveAuraModifier(AuraType auratype) const
 
     AuraList const& mTotalAuraList = GetAurasByType(auratype);
     for (AuraList::const_iterator i = mTotalAuraList.begin(); i != mTotalAuraList.end(); ++i)
+    {
         if ((*i)->GetModifier()->m_amount > modifier)
         {
             modifier = (*i)->GetModifier()->m_amount;
         }
+    }
 
     return modifier;
 }
@@ -5029,10 +5044,12 @@ int32 Unit::GetMaxNegativeAuraModifier(AuraType auratype) const
 
     AuraList const& mTotalAuraList = GetAurasByType(auratype);
     for (AuraList::const_iterator i = mTotalAuraList.begin(); i != mTotalAuraList.end(); ++i)
+    {
         if ((*i)->GetModifier()->m_amount < modifier)
         {
             modifier = (*i)->GetModifier()->m_amount;
         }
+    }
 
     return modifier;
 }
@@ -5451,10 +5468,12 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                         // find minimal effect-index that applies an aura
                         uint8 i = EFFECT_INDEX_0;
                         for (; i < MAX_EFFECT_INDEX; ++i)
+                        {
                             if (IsAuraApplyEffect(aurSpellInfo, SpellEffectIndex(i)))
                             {
                                 break;
                             }
+                        }
 
                         // Remove auras when first holder is applied
                         if ((1 << i) & holder->GetAuraFlags())
@@ -5508,10 +5527,12 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
     m_spellAuraHolders.insert(SpellAuraHolderMap::value_type(holder->GetId(), holder));
 
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
         if (Aura* aur = holder->GetAuraByEffectIndex(SpellEffectIndex(i)))
         {
             AddAuraToModList(aur);
         }
+    }
 
     holder->ApplyAuraModifiers(true, true);                 // This is the place where auras are actually applied onto the target
     DEBUG_LOG("Holder of spell %u now is in use", holder->GetId());
@@ -5653,17 +5674,21 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
         bool is_triggered_by_spell = false;
         // prevent triggering aura of removing aura that triggered it
         for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
+        {
             if (i_spellProto->EffectTriggerSpell[j] == spellId)
             {
                 is_triggered_by_spell = true;
             }
+        }
 
         // prevent triggered aura of removing aura that triggering it (triggered effect early some aura of parent spell
         for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
+        {
             if (spellProto->EffectTriggerSpell[j] == i_spellId)
             {
                 is_triggered_by_spell = true;
             }
+        }
 
         if (is_triggered_by_spell)
         {
@@ -6631,11 +6656,13 @@ Aura* Unit::GetAura(AuraType type, SpellFamily family, uint64 familyFlag, uint32
 {
     AuraList const& auras = GetAurasByType(type);
     for (AuraList::const_iterator i = auras.begin(); i != auras.end(); ++i)
+    {
         if ((*i)->GetSpellProto()->IsFitToFamily(family, familyFlag, familyFlag2) &&
             (!casterGuid || (*i)->GetCasterGuid() == casterGuid))
         {
             return *i;
         }
+    }
 
     return NULL;
 }
@@ -6675,10 +6702,12 @@ bool Unit::HasAura(uint32 spellId, SpellEffectIndex effIndex) const
     //Find all auras with corresponding spellid, can be more than one
     SpellAuraHolderConstBounds spair = GetSpellAuraHolderBounds(spellId);
     for (SpellAuraHolderMap::const_iterator i_holder = spair.first; i_holder != spair.second; ++i_holder)
+    {
         if (i_holder->second->GetAuraByEffectIndex(effIndex))
         {
             return true;
         }
+    }
 
     return false;
 }
@@ -6812,10 +6841,12 @@ DynamicObject* Unit::GetDynObject(uint32 spellId)
 GameObject* Unit::GetGameObject(uint32 spellId) const
 {
     for (GameObjectList::const_iterator i = m_gameObj.begin(); i != m_gameObj.end(); ++i)
+    {
         if ((*i)->GetSpellId() == spellId)
         {
             return *i;
         }
+    }
 
     WildGameObjectMap::const_iterator find = m_wildGameObjs.find(spellId);
     if (find != m_wildGameObjs.end())
@@ -8282,11 +8313,13 @@ void Unit::RemoveGuardians()
 Pet* Unit::FindGuardianWithEntry(uint32 entry)
 {
     for (GuidSet::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end(); ++itr)
+    {
         if (Pet* pet = GetMap()->GetPet(*itr))
             if (pet->GetEntry() == entry)
             {
                 return pet;
             }
+    }
 
     return NULL;
 }
@@ -8294,11 +8327,13 @@ Pet* Unit::FindGuardianWithEntry(uint32 entry)
 Pet* Unit::GetProtectorPet()
 {
     for (GuidSet::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end(); ++itr)
+    {
         if (Pet* pet = GetMap()->GetPet(*itr))
             if (pet->getPetType() == PROTECTOR_PET)
             {
                 return pet;
             }
+    }
 
     return NULL;
 }
@@ -8339,10 +8374,12 @@ Totem* Unit::GetTotem(TotemSlot slot) const
 bool Unit::IsAllTotemSlotsUsed() const
 {
     for (int i = 0; i < MAX_TOTEM_SLOT; ++i)
+    {
         if (!m_TotemSlot[i])
         {
             return false;
         }
+    }
     return true;
 }
 
@@ -8380,10 +8417,12 @@ void Unit::_RemoveTotem(Totem* totem)
 void Unit::UnsummonAllTotems()
 {
     for (int i = 0; i < MAX_TOTEM_SLOT; ++i)
+    {
         if (Totem* totem = GetTotem(TotemSlot(i)))
         {
             totem->UnSummon();
         }
+    }
 }
 
 /**
@@ -9557,9 +9596,11 @@ uint32 Unit::SpellHealingBonusDone(Unit* pVictim, SpellEntry const* spellProto, 
 
                 Unit::AuraList const& RejorRegr = pVictim->GetAurasByType(SPELL_AURA_PERIODIC_HEAL);
                 for (Unit::AuraList::const_iterator i = RejorRegr.begin(); i != RejorRegr.end(); ++i)
+                {
                     if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID &&
                             (*i)->GetCasterGuid() == GetObjectGuid())
                         ++ownHotCount;
+                }
 
                 if (ownHotCount)
                 {
@@ -9588,9 +9629,11 @@ uint32 Unit::SpellHealingBonusDone(Unit* pVictim, SpellEntry const* spellProto, 
             int ownHotCount = 0;                        // counted HoT types amount, not stacks
             Unit::AuraList const& RejorRegr = pVictim->GetAurasByType(SPELL_AURA_PERIODIC_HEAL);
             for (Unit::AuraList::const_iterator i = RejorRegr.begin(); i != RejorRegr.end(); ++i)
+            {
                 if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID &&
                         (*i)->GetCasterGuid() == GetObjectGuid())
                     ++ownHotCount;
+            }
 
             if (ownHotCount)
             {
@@ -9683,10 +9726,12 @@ uint32 Unit::SpellHealingBonusTaken(Unit* pCaster, SpellEntry const* spellProto,
 
     AuraList const& mHealingGet = GetAurasByType(SPELL_AURA_MOD_HEALING_RECEIVED);
     for (AuraList::const_iterator i = mHealingGet.begin(); i != mHealingGet.end(); ++i)
+    {
         if ((*i)->isAffectedOnSpell(spellProto))
         {
             TakenTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
         }
+    }
 
     // use float as more appropriate for negative values and percent applying
     float heal = (healamount + TakenTotal * int32(stack)) * TakenTotalMod;
@@ -9706,10 +9751,12 @@ int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
 
     AuraList const& mHealingDone = GetAurasByType(SPELL_AURA_MOD_HEALING_DONE);
     for (AuraList::const_iterator i = mHealingDone.begin(); i != mHealingDone.end(); ++i)
+    {
         if (!(*i)->GetModifier()->m_miscvalue || ((*i)->GetModifier()->m_miscvalue & schoolMask) != 0)
         {
             AdvertisedBenefit += (*i)->GetModifier()->m_amount;
         }
+    }
 
     // Healing bonus of spirit, intellect and strength
     if (GetTypeId() == TYPEID_PLAYER)
@@ -9729,10 +9776,12 @@ int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
         // ... and attack power
         AuraList const& mHealingDonebyAP = GetAurasByType(SPELL_AURA_MOD_SPELL_HEALING_OF_ATTACK_POWER);
         for (AuraList::const_iterator i = mHealingDonebyAP.begin(); i != mHealingDonebyAP.end(); ++i)
+        {
             if ((*i)->GetModifier()->m_miscvalue & schoolMask)
             {
                 AdvertisedBenefit += int32(GetTotalAttackPowerValue(BASE_ATTACK) * (*i)->GetModifier()->m_amount / 100.0f);
             }
+        }
     }
     return AdvertisedBenefit;
 }
@@ -9748,10 +9797,12 @@ int32 Unit::SpellBaseHealingBonusTaken(SpellSchoolMask schoolMask)
     int32 AdvertisedBenefit = 0;
     AuraList const& mDamageTaken = GetAurasByType(SPELL_AURA_MOD_HEALING);
     for (AuraList::const_iterator i = mDamageTaken.begin(); i != mDamageTaken.end(); ++i)
+    {
         if ((*i)->GetModifier()->m_miscvalue & schoolMask)
         {
             AdvertisedBenefit += (*i)->GetModifier()->m_amount;
         }
+    }
 
     return AdvertisedBenefit;
 }
@@ -9767,18 +9818,22 @@ bool Unit::IsImmuneToDamage(SpellSchoolMask shoolMask)
     // If m_immuneToSchool type contain this school type, IMMUNE damage.
     SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
     for (SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
+    {
         if (itr->type & shoolMask)
         {
             return true;
         }
+    }
 
     // If m_immuneToDamage type contain magic, IMMUNE damage.
     SpellImmuneList const& damageList = m_spellImmune[IMMUNITY_DAMAGE];
     for (SpellImmuneList::const_iterator itr = damageList.begin(); itr != damageList.end(); ++itr)
+    {
         if (itr->type & shoolMask)
         {
             return true;
         }
+    }
 
     return false;
 }
@@ -9802,38 +9857,46 @@ bool Unit::IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf)
 
     SpellImmuneList const& dispelList = m_spellImmune[IMMUNITY_DISPEL];
     for (SpellImmuneList::const_iterator itr = dispelList.begin(); itr != dispelList.end(); ++itr)
+    {
         if (itr->type == spellInfo->Dispel)
         {
             return true;
         }
+    }
 
     if (!spellInfo->HasAttribute(SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE) &&          // unaffected by school immunity
         !spellInfo->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))           // can remove immune (by dispell or immune it)
     {
         SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
         for (SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
+        {
             if (!(IsPositiveSpell(itr->spellId) && IsPositiveSpell(spellInfo->Id)) &&
                 (itr->type & GetSpellSchoolMask(spellInfo)))
             {
                 return true;
             }
+        }
     }
 
     if (uint32 mechanic = spellInfo->Mechanic)
     {
         SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
         for (SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
+        {
             if (itr->type == mechanic)
             {
                 return true;
             }
+        }
 
         AuraList const& immuneAuraApply = GetAurasByType(SPELL_AURA_MECHANIC_IMMUNITY_MASK);
         for (AuraList::const_iterator iter = immuneAuraApply.begin(); iter != immuneAuraApply.end(); ++iter)
+        {
             if ((*iter)->GetModifier()->m_miscvalue & (1 << (mechanic - 1)))
             {
                 return true;
             }
+        }
     }
 
     return false;
@@ -9853,36 +9916,44 @@ bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex i
     uint32 effect = spellInfo->Effect[index];
     SpellImmuneList const& effectList = m_spellImmune[IMMUNITY_EFFECT];
     for (SpellImmuneList::const_iterator itr = effectList.begin(); itr != effectList.end(); ++itr)
+    {
         if (itr->type == effect)
         {
             return true;
         }
+    }
 
     if (uint32 mechanic = spellInfo->EffectMechanic[index])
     {
         SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
         for (SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
+        {
             if (itr->type == mechanic)
             {
                 return true;
             }
+        }
 
         AuraList const& immuneAuraApply = GetAurasByType(SPELL_AURA_MECHANIC_IMMUNITY_MASK);
         for (AuraList::const_iterator iter = immuneAuraApply.begin(); iter != immuneAuraApply.end(); ++iter)
+        {
             if ((*iter)->GetModifier()->m_miscvalue & (1 << (mechanic - 1)))
             {
                 return true;
             }
+        }
     }
 
     if (uint32 aura = spellInfo->EffectApplyAuraName[index])
     {
         SpellImmuneList const& list = m_spellImmune[IMMUNITY_STATE];
         for (SpellImmuneList::const_iterator itr = list.begin(); itr != list.end(); ++itr)
+        {
             if (itr->type == aura)
             {
                 return true;
             }
+        }
 
         // Check for immune to application of harmful magical effects
         AuraList const& immuneAuraApply = GetAurasByType(SPELL_AURA_MOD_IMMUNE_AURA_APPLY_SCHOOL);
@@ -9893,10 +9964,12 @@ bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex i
             // Check school
             SpellSchoolMask schoolMask = GetSpellSchoolMask(spellInfo);
             for (AuraList::const_iterator iter = immuneAuraApply.begin(); iter != immuneAuraApply.end(); ++iter)
+            {
                 if ((*iter)->GetModifier()->m_miscvalue & schoolMask)
                 {
                     return true;
                 }
+            }
         }
     }
     return false;
@@ -10638,11 +10711,13 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
 
     // interrupt all delayed non-combat casts
     for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
+    {
         if (Spell* spell = GetCurrentSpell(CurrentSpellTypes(i)))
             if (IsNonCombatSpell(spell->m_spellInfo))
             {
                 InterruptSpell(CurrentSpellTypes(i), false);
             }
+    }
 
     if (creatureNotInCombat)
     {
@@ -11014,10 +11089,12 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
             // Hunter mark functionality
             AuraList const& auras = GetAurasByType(SPELL_AURA_MOD_STALKED);
             for (AuraList::const_iterator iter = auras.begin(); iter != auras.end(); ++iter)
+            {
                 if ((*iter)->GetCasterGuid() == u->GetObjectGuid())
                 {
                     return true;
                 }
+            }
 
             // else apply detecting check for stealth
         }
@@ -11195,19 +11272,23 @@ bool Unit::CanDetectInvisibilityOf(Unit const* u) const
             int32 invLevel = 0;
             Unit::AuraList const& iAuras = u->GetAurasByType(SPELL_AURA_MOD_INVISIBILITY);
             for (Unit::AuraList::const_iterator itr = iAuras.begin(); itr != iAuras.end(); ++itr)
+            {
                 if ((*itr)->GetModifier()->m_miscvalue == i && invLevel < (*itr)->GetModifier()->m_amount)
                 {
                     invLevel = (*itr)->GetModifier()->m_amount;
                 }
+            }
 
             // find invisibility detect level
             int32 detectLevel = 0;
             Unit::AuraList const& dAuras = GetAurasByType(SPELL_AURA_MOD_INVISIBILITY_DETECTION);
             for (Unit::AuraList::const_iterator itr = dAuras.begin(); itr != dAuras.end(); ++itr)
+            {
                 if ((*itr)->GetModifier()->m_miscvalue == i && detectLevel < (*itr)->GetModifier()->m_amount)
                 {
                     detectLevel = (*itr)->GetModifier()->m_amount;
                 }
+            }
 
             if (i == 6 && GetTypeId() == TYPEID_PLAYER)     // special drunk detection case
             {
@@ -13128,10 +13209,12 @@ void CharmInfo::ToggleCreatureAutocast(uint32 spellid, bool apply)
     }
 
     for (uint32 x = 0; x < CREATURE_MAX_SPELLS; ++x)
+    {
         if (spellid == m_charmspells[x].GetAction())
         {
             m_charmspells[x].SetType(apply ? ACT_ENABLED : ACT_DISABLED);
         }
+    }
 }
 
 /**
@@ -14289,10 +14372,12 @@ Aura* Unit::GetDummyAura(uint32 spell_id) const
 {
     Unit::AuraList const& mDummy = GetAurasByType(SPELL_AURA_DUMMY);
     for (Unit::AuraList::const_iterator itr = mDummy.begin(); itr != mDummy.end(); ++itr)
+    {
         if ((*itr)->GetId() == spell_id)
         {
             return *itr;
         }
+    }
 
     return NULL;
 }
@@ -14808,10 +14893,12 @@ SpellAuraHolder* Unit::GetSpellAuraHolder(uint32 spellid, ObjectGuid casterGuid)
 {
     SpellAuraHolderConstBounds bounds = GetSpellAuraHolderBounds(spellid);
     for (SpellAuraHolderMap::const_iterator iter = bounds.first; iter != bounds.second; ++iter)
+    {
         if (iter->second->GetCasterGuid() == casterGuid)
         {
             return iter->second;
         }
+    }
 
     return NULL;
 }

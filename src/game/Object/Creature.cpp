@@ -1420,10 +1420,12 @@ Player* Creature::GetLootRecipient() const
 
     // find any in group
     for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+    {
         if (Player* p = itr->getSource())
         {
             return p;
         }
+    }
 
     return NULL;
 }
@@ -3003,11 +3005,13 @@ Unit* Creature::SelectAttackingTarget(AttackingTarget target, uint32 position, S
             suitableUnits.reserve(threatlist.size() - position);
             advance(itr, position);
             for (; itr != threatlist.end(); ++itr)
+            {
                 if (Unit* pTarget = GetMap()->GetUnit((*itr)->getUnitGuid()))
                     if (!selectFlags || MeetsSelectAttackingRequirement(pTarget, pSpellInfo, selectFlags))
                     {
                         suitableUnits.push_back(pTarget);
                     }
+            }
 
             if (!suitableUnits.empty())
             {
@@ -3020,11 +3024,13 @@ Unit* Creature::SelectAttackingTarget(AttackingTarget target, uint32 position, S
         {
             advance(itr, position);
             for (; itr != threatlist.end(); ++itr)
+            {
                 if (Unit* pTarget = GetMap()->GetUnit((*itr)->getUnitGuid()))
                     if (!selectFlags || MeetsSelectAttackingRequirement(pTarget, pSpellInfo, selectFlags))
                     {
                         return pTarget;
                     }
+            }
 
             break;
         }
@@ -3032,11 +3038,13 @@ Unit* Creature::SelectAttackingTarget(AttackingTarget target, uint32 position, S
         {
             advance(ritr, position);
             for (; ritr != threatlist.rend(); ++ritr)
+            {
                 if (Unit* pTarget = GetMap()->GetUnit((*itr)->getUnitGuid()))
                     if (!selectFlags || MeetsSelectAttackingRequirement(pTarget, pSpellInfo, selectFlags))
                     {
                         return pTarget;
                     }
+            }
 
             break;
         }
@@ -3207,10 +3215,12 @@ bool Creature::HasSpell(uint32 spellID) const
 {
     uint8 i;
     for (i = 0; i < CREATURE_MAX_SPELLS; ++i)
+    {
         if (spellID == m_spells[i])
         {
             break;
         }
+    }
     return i < CREATURE_MAX_SPELLS;                         // break before end of iteration of known spells
 }
 
@@ -3431,10 +3441,12 @@ uint32 Creature::GetVendorItemCurrentCount(VendorItem const* vItem)
 
     VendorItemCounts::iterator itr = m_vendorItemCounts.begin();
     for (; itr != m_vendorItemCounts.end(); ++itr)
+    {
         if (itr->itemId == vItem->item)
         {
             break;
         }
+    }
 
     if (itr == m_vendorItemCounts.end())
     {
@@ -3479,10 +3491,12 @@ uint32 Creature::UpdateVendorItemCurrentCount(VendorItem const* vItem, uint32 us
 
     VendorItemCounts::iterator itr = m_vendorItemCounts.begin();
     for (; itr != m_vendorItemCounts.end(); ++itr)
+    {
         if (itr->itemId == vItem->item)
         {
             break;
         }
+    }
 
     if (itr == m_vendorItemCounts.end())
     {

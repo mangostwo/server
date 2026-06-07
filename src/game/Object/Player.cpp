@@ -381,10 +381,12 @@ Item* TradeData::GetItem(TradeSlots slot) const
 bool TradeData::HasItem(ObjectGuid item_guid) const
 {
     for (int i = 0; i < TRADE_SLOT_COUNT; ++i)
+    {
         if (m_items[i] == item_guid)
         {
             return true;
         }
+    }
     return false;
 }
 
@@ -811,10 +813,12 @@ Player::~Player()
 
     // clean up player-instance binds, may unload some instance saves
     for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
+    {
         for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
         {
             itr->second.state->RemovePlayer(this);
         }
+    }
 
     delete m_declinedname;
     delete m_runes;
@@ -1484,11 +1488,13 @@ void Player::HandleDrowning(uint32 time_diff)
     // Recheck timers flag
     m_MirrorTimerFlags &= ~UNDERWATER_EXIST_TIMERS;
     for (int i = 0; i < MAX_TIMERS; ++i)
+    {
         if (m_MirrorTimer[i] != DISABLED_MIRROR_TIMER)
         {
             m_MirrorTimerFlags |= UNDERWATER_EXIST_TIMERS;
             break;
         }
+    }
     m_MirrorTimerFlagsLast = m_MirrorTimerFlags;
 }
 
@@ -2754,10 +2760,12 @@ void Player::Regenerate(Powers power, uint32 diff)
                     uint32 cd_diff = diff;
                     AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
                     for (AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
+                    {
                         if ((*i)->GetModifier()->m_miscvalue == int32(power) && (*i)->GetMiscBValue() == GetCurrentRune(rune))
                         {
                             cd_diff = cd_diff * ((*i)->GetModifier()->m_amount + 100) / 100;
                         }
+                    }
 
                     SetRuneCooldown(rune, (cd < cd_diff) ? 0 : cd - cd_diff);
                 }
@@ -2778,10 +2786,12 @@ void Player::Regenerate(Powers power, uint32 diff)
     {
         AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
         for (AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
+        {
             if ((*i)->GetModifier()->m_miscvalue == int32(power))
             {
                 addvalue *= ((*i)->GetModifier()->m_amount + 100) / 100.0f;
             }
+        }
     }
 
     // addvalue computed on a 2sec basis. => update to diff time
@@ -4435,10 +4445,12 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank, bo
     // unlearn non talent higher ranks (recursive)
     SpellChainMapNext const& nextMap = sSpellMgr.GetSpellChainNext();
     for (SpellChainMapNext::const_iterator itr2 = nextMap.lower_bound(spell_id); itr2 != nextMap.upper_bound(spell_id); ++itr2)
+    {
         if (HasSpell(itr2->second) && !GetTalentSpellPos(itr2->second))
         {
             removeSpell(itr2->second, disabled, false);
         }
+    }
 
     // re-search, it can be corrupted in prev loop
     itr = m_spells.find(spell_id);
@@ -4973,10 +4985,12 @@ bool Player::resetTalents(bool no_cost, bool all_specs)
         }
 
         for (int j = 0; j < MAX_TALENT_RANK; ++j)
+        {
             if (talentInfo->RankID[j])
             {
                 removeSpell(talentInfo->RankID[j], !IsPassiveSpell(talentInfo->RankID[j]), false);
             }
+        }
 
         iter = m_talents[m_activeSpec].begin();
     }
@@ -6110,10 +6124,12 @@ Corpse* Player::GetCorpse() const
 void Player::DurabilityLossAll(double percent, bool inventory)
 {
     for (int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
+    {
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
         {
             DurabilityLoss(pItem, percent);
         }
+    }
 
     if (inventory)
     {
@@ -6121,21 +6137,27 @@ void Player::DurabilityLossAll(double percent, bool inventory)
         // for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
 
         for (int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+        {
             if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             {
                 DurabilityLoss(pItem, percent);
             }
+        }
 
         // keys not have durability
         // for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
 
         for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+        {
             if (Bag* pBag = reinterpret_cast<Bag*>(GetItemByPos(INVENTORY_SLOT_BAG_0, i)))
                 for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+                {
                     if (Item* pItem = GetItemByPos(i, j))
                     {
                         DurabilityLoss(pItem, percent);
                     }
+                }
+        }
     }
 }
 
@@ -6190,21 +6212,27 @@ void Player::DurabilityPointsLossAll(int32 points, bool inventory)
         // for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
 
         for (int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+        {
             if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             {
                 DurabilityPointsLoss(pItem, points);
             }
+        }
 
         // keys not have durability
         // for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
 
         for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+        {
             if (Bag* pBag = reinterpret_cast<Bag*>(GetItemByPos(INVENTORY_SLOT_BAG_0, i)))
                 for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+                {
                     if (Item* pItem = GetItemByPos(i, j))
                     {
                         DurabilityPointsLoss(pItem, points);
                     }
+                }
+        }
     }
 }
 
@@ -6282,10 +6310,12 @@ uint32 Player::DurabilityRepairAll(bool cost, float discountMod, bool guildBank)
 
     // items in inventory bags
     for (int j = INVENTORY_SLOT_BAG_START; j < INVENTORY_SLOT_BAG_END; ++j)
+    {
         for (int i = 0; i < MAX_BAG_SIZE; ++i)
         {
             TotalCost += DurabilityRepair(((j << 8) | i), cost, discountMod, guildBank);
         }
+    }
     return TotalCost;
 }
 
@@ -6934,10 +6964,12 @@ void Player::UpdateRating(CombatRating cr)
     // stat used stored in miscValueB for this aura
     AuraList const& modRatingFromStat = GetAurasByType(SPELL_AURA_MOD_RATING_FROM_STAT);
     for (AuraList::const_iterator i = modRatingFromStat.begin(); i != modRatingFromStat.end(); ++i)
+    {
         if ((*i)->GetMiscValue() & (1 << cr))
         {
             amount += int32(GetStat(Stats((*i)->GetMiscBValue())) * (*i)->GetModifier()->m_amount / 100.0f);
         }
+    }
     if (amount < 0)
     {
         amount = 0;
@@ -7602,11 +7634,13 @@ void Player::SetSkill(uint16 id, uint16 currVal, uint16 maxVal, uint16 step /*=0
 
             // remove all spells that related to this skill
             for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
+            {
                 if (SkillLineAbilityEntry const* pAbility = sSkillLineAbilityStore.LookupEntry(j))
                     if (pAbility->skillId == id)
                     {
                         removeSpell(sSpellMgr.GetFirstSpellInChain(pAbility->spellId));
                     }
+            }
         }
     }
     else if (currVal)                                       // add
@@ -7644,18 +7678,22 @@ void Player::SetSkill(uint16 id, uint16 currVal, uint16 maxVal, uint16 step /*=0
                 // temporary bonuses
                 AuraList const& mModSkill = GetAurasByType(SPELL_AURA_MOD_SKILL);
                 for (AuraList::const_iterator j = mModSkill.begin(); j != mModSkill.end(); ++j)
+                {
                     if ((*j)->GetModifier()->m_miscvalue == int32(id))
                     {
                         (*j)->ApplyModifier(true);
                     }
+                }
 
                 // permanent bonuses
                 AuraList const& mModSkillTalent = GetAurasByType(SPELL_AURA_MOD_SKILL_TALENT);
                 for (AuraList::const_iterator j = mModSkillTalent.begin(); j != mModSkillTalent.end(); ++j)
+                {
                     if ((*j)->GetModifier()->m_miscvalue == int32(id))
                     {
                         (*j)->ApplyModifier(true);
                     }
+                }
 
                 // Learn all spells for skill
                 learnSkillRewardedSpells(id, currVal);
@@ -11831,37 +11869,47 @@ uint32 Player::GetItemCountWithLimitCategory(uint32 limitCategory, Item* skipIte
 {
     uint32 count = 0;
     for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             if (pItem->GetProto()->ItemLimitCategory == limitCategory && pItem != skipItem)
             {
                 count += pItem->GetCount();
             }
+    }
 
     for (int i = KEYRING_SLOT_START; i < CURRENCYTOKEN_SLOT_END; ++i)
+    {
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             if (pItem->GetProto()->ItemLimitCategory == limitCategory && pItem != skipItem)
             {
                 count += pItem->GetCount();
             }
+    }
 
     for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
         if (Bag* pBag = reinterpret_cast<Bag*>(GetItemByPos(INVENTORY_SLOT_BAG_0, i)))
         {
             count += pBag->GetItemCountWithLimitCategory(limitCategory, skipItem);
         }
+    }
 
     for (int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; ++i)
+    {
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             if (pItem->GetProto()->ItemLimitCategory == limitCategory && pItem != skipItem)
             {
                 count += pItem->GetCount();
             }
+    }
 
     for (int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; ++i)
+    {
         if (Bag* pBag = reinterpret_cast<Bag*>(GetItemByPos(INVENTORY_SLOT_BAG_0, i)))
         {
             count += pBag->GetItemCountWithLimitCategory(limitCategory, skipItem);
         }
+    }
 
     return count;
 }
@@ -11875,25 +11923,31 @@ uint32 Player::GetItemCountWithLimitCategory(uint32 limitCategory, Item* skipIte
 Item* Player::GetItemByEntry(uint32 item) const
 {
     for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             if (pItem->GetEntry() == item)
             {
                 return pItem;
             }
+    }
 
     for (int i = KEYRING_SLOT_START; i < CURRENCYTOKEN_SLOT_END; ++i)
+    {
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             if (pItem->GetEntry() == item)
             {
                 return pItem;
             }
+    }
 
     for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
         if (Bag* pBag = reinterpret_cast<Bag*>(GetItemByPos(INVENTORY_SLOT_BAG_0, i)))
             if (Item* itemPtr = pBag->GetItemByEntry(item))
             {
                 return itemPtr;
             }
+    }
 
     return NULL;
 }
@@ -11901,25 +11955,31 @@ Item* Player::GetItemByEntry(uint32 item) const
 Item* Player::GetItemByLimitedCategory(uint32 limitedCategory) const
 {
     for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             if (pItem->GetProto()->ItemLimitCategory == limitedCategory)
             {
                 return pItem;
             }
+    }
 
     for (int i = KEYRING_SLOT_START; i < CURRENCYTOKEN_SLOT_END; ++i)
+    {
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             if (pItem->GetProto()->ItemLimitCategory == limitedCategory)
             {
                 return pItem;
             }
+    }
 
     for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
         if (Bag* pBag = reinterpret_cast<Bag*>(GetItemByPos(INVENTORY_SLOT_BAG_0, i)))
             if (Item* itemPtr = pBag->GetItemByLimitedCategory(limitedCategory))
             {
                 return itemPtr;
             }
+    }
 
     return NULL;
 }
@@ -11933,43 +11993,57 @@ Item* Player::GetItemByLimitedCategory(uint32 limitedCategory) const
 Item* Player::GetItemByGuid(ObjectGuid guid) const
 {
     for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             if (pItem->GetObjectGuid() == guid)
             {
                 return pItem;
             }
+    }
 
     for (int i = KEYRING_SLOT_START; i < CURRENCYTOKEN_SLOT_END; ++i)
+    {
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             if (pItem->GetObjectGuid() == guid)
             {
                 return pItem;
             }
+    }
 
     for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
         if (Bag* pBag = reinterpret_cast<Bag*>(GetItemByPos(INVENTORY_SLOT_BAG_0, i)))
             for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+            {
                 if (Item* pItem = pBag->GetItemByPos(j))
                     if (pItem->GetObjectGuid() == guid)
                     {
                         return pItem;
                     }
+            }
+    }
 
     for (int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; ++i)
+    {
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             if (pItem->GetObjectGuid() == guid)
             {
                 return pItem;
             }
+    }
 
     for (int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; ++i)
+    {
         if (Bag* pBag = reinterpret_cast<Bag*>(GetItemByPos(INVENTORY_SLOT_BAG_0, i)))
             for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+            {
                 if (Item* pItem = pBag->GetItemByPos(j))
                     if (pItem->GetObjectGuid() == guid)
                     {
                         return pItem;
                     }
+            }
+    }
 
     return NULL;
 }
@@ -15425,36 +15499,46 @@ void Player::DestroyZoneLimitedItem(bool update, uint32 new_zone)
 
     // in inventory
     for (int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             if (pItem->IsLimitedToAnotherMapOrZone(GetMapId(), new_zone))
             {
                 DestroyItem(INVENTORY_SLOT_BAG_0, i, update);
             }
+    }
 
     for (int i = KEYRING_SLOT_START; i < CURRENCYTOKEN_SLOT_END; ++i)
+    {
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             if (pItem->IsLimitedToAnotherMapOrZone(GetMapId(), new_zone))
             {
                 DestroyItem(INVENTORY_SLOT_BAG_0, i, update);
             }
+    }
 
     // in inventory bags
     for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
         if (Bag* pBag = reinterpret_cast<Bag*>(GetItemByPos(INVENTORY_SLOT_BAG_0, i)))
             for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+            {
                 if (Item* pItem = pBag->GetItemByPos(j))
                     if (pItem->IsLimitedToAnotherMapOrZone(GetMapId(), new_zone))
                     {
                         DestroyItem(i, j, update);
                     }
+            }
+    }
 
     // in equipment and bag list
     for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             if (pItem->IsLimitedToAnotherMapOrZone(GetMapId(), new_zone))
             {
                 DestroyItem(INVENTORY_SLOT_BAG_0, i, update);
             }
+    }
 }
 
 /**
@@ -15470,29 +15554,37 @@ void Player::DestroyConjuredItems(bool update)
 
     // in inventory
     for (int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             if (pItem->IsConjuredConsumable())
             {
                 DestroyItem(INVENTORY_SLOT_BAG_0, i, update);
             }
+    }
 
     // in inventory bags
     for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
         if (Bag* pBag = reinterpret_cast<Bag*>(GetItemByPos(INVENTORY_SLOT_BAG_0, i)))
             for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+            {
                 if (Item* pItem = pBag->GetItemByPos(j))
                     if (pItem->IsConjuredConsumable())
                     {
                         DestroyItem(i, j, update);
                     }
+            }
+    }
 
     // in equipment and bag list
     for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             if (pItem->IsConjuredConsumable())
             {
                 DestroyItem(INVENTORY_SLOT_BAG_0, i, update);
             }
+    }
 }
 
 /**
@@ -16358,21 +16450,27 @@ void Player::RemoveAllEnchantments(EnchantmentSlot slot)
     // NOTE: no need to remove these from stats, since these aren't equipped
     // in inventory
     for (int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             if (pItem->GetEnchantmentId(slot))
             {
                 pItem->ClearEnchantment(slot);
             }
+    }
 
     // in inventory bags
     for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
         if (Bag* pBag = reinterpret_cast<Bag*>(GetItemByPos(INVENTORY_SLOT_BAG_0, i)))
             for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+            {
                 if (Item* pItem = pBag->GetItemByPos(j))
                     if (pItem->GetEnchantmentId(slot))
                     {
                         pItem->ClearEnchantment(slot);
                     }
+            }
+    }
 }
 
 // duration == 0 will remove item enchant
@@ -19203,10 +19301,12 @@ uint32 Player::GetReqKillOrCastCurrentCount(uint32 quest_id, int32 entry)
     }
 
     for (int j = 0; j < QUEST_OBJECTIVES_COUNT; ++j)
+    {
         if (qInfo->ReqCreatureOrGOId[j] == entry)
         {
             return mQuestStatus[quest_id].m_creatureOrGOcount[j];
         }
+    }
 
     return 0;
 }
@@ -19247,10 +19347,12 @@ void Player::AdjustQuestReqItemCount(Quest const* pQuest, QuestStatusData& quest
 uint16 Player::FindQuestSlot(uint32 quest_id) const
 {
     for (uint16 i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
+    {
         if (GetQuestSlotQuestId(i) == quest_id)
         {
             return i;
         }
+    }
 
     return MAX_QUEST_LOG_SIZE;
 }
@@ -19448,10 +19550,12 @@ void Player::KilledMonster(CreatureInfo const* cInfo, ObjectGuid guid)
     }
 
     for (int i = 0; i < MAX_KILL_CREDIT; ++i)
+    {
         if (cInfo->KillCredit[i])
         {
             KilledMonsterCredit(cInfo->KillCredit[i], guid);
         }
+    }
 }
 
 /**
@@ -21627,10 +21731,12 @@ void Player::_LoadQuestStatus(QueryResult* result)
                     }
 
                     for (uint8 idx = 0; idx < QUEST_OBJECTIVES_COUNT; ++idx)
+                    {
                         if (questStatusData.m_creatureOrGOcount[idx])
                         {
                             SetQuestSlotCounter(slot, idx, questStatusData.m_creatureOrGOcount[idx]);
                         }
+                    }
 
                     ++slot;
                 }
@@ -23066,10 +23172,12 @@ void Player::_SaveDailyQuestStatus()
     stmtDel.PExecute(GetGUIDLow());
 
     for (uint32 quest_daily_idx = 0; quest_daily_idx < PLAYER_MAX_DAILY_QUESTS; ++quest_daily_idx)
+    {
         if (GetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + quest_daily_idx))
         {
             stmtIns.PExecute(GetGUIDLow(), GetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + quest_daily_idx));
         }
+    }
 
     m_DailyQuestChanged = false;
 }
@@ -25284,11 +25392,13 @@ void Player::UpdatePotionCooldown(Spell* spell)
         // spell/item pair let set proper cooldown (except nonexistent charged spell cooldown spellmods for potions)
         if (ItemPrototype const* proto = ObjectMgr::GetItemPrototype(m_lastPotionId))
             for (int idx = 0; idx < 5; ++idx)
+            {
                 if (proto->Spells[idx].SpellId && proto->Spells[idx].SpellTrigger == ITEM_SPELLTRIGGER_ON_USE)
                     if (SpellEntry const* spellInfo = sSpellStore.LookupEntry(proto->Spells[idx].SpellId))
                     {
                         SendCooldownEvent(spellInfo, m_lastPotionId);
                     }
+            }
     }
     // from spell cases (m_lastPotionId set in Spell::SendSpellCooldown)
     else
@@ -26951,22 +27061,26 @@ bool Player::HasItemFitToSpellReqirements(SpellEntry const* spellInfo, Item cons
         case ITEM_CLASS_WEAPON:
         {
             for (int i = EQUIPMENT_SLOT_MAINHAND; i < EQUIPMENT_SLOT_TABARD; ++i)
+            {
                 if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
                     if (item != ignoreItem && item->IsFitToSpellRequirements(spellInfo))
                     {
                         return true;
                     }
+            }
             break;
         }
         case ITEM_CLASS_ARMOR:
         {
             // tabard not have dependent spells
             for (int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_MAINHAND; ++i)
+            {
                 if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
                     if (item != ignoreItem && item->IsFitToSpellRequirements(spellInfo))
                     {
                         return true;
                     }
+            }
 
             // shields can be equipped to offhand slot
             if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
@@ -27051,11 +27165,13 @@ void Player::RemoveItemDependentAurasAndCasts(Item* pItem)
 
     // currently casted spells can be dependent from item
     for (uint32 i = 0; i < CURRENT_MAX_SPELL; ++i)
+    {
         if (Spell* spell = GetCurrentSpell(CurrentSpellTypes(i)))
             if (spell->getState() != SPELL_STATE_DELAYED && !HasItemFitToSpellReqirements(spell->m_spellInfo, pItem))
             {
                 InterruptSpell(CurrentSpellTypes(i));
             }
+    }
 }
 
 /**
@@ -27815,10 +27931,12 @@ void Player::SetCanBlock(bool value)
 bool ItemPosCount::isContainedIn(ItemPosCountVec const& vec) const
 {
     for (ItemPosCountVec::const_iterator itr = vec.begin(); itr != vec.end(); ++itr)
+    {
         if (itr->pos == pos)
         {
             return true;
         }
+    }
 
     return false;
 }
@@ -27894,11 +28012,13 @@ uint32 Player::GetBarberShopCost(uint8 newhairstyle, uint8 newhaircolor, uint8 n
 void Player::InitGlyphsForLevel()
 {
     for (uint32 i = 0; i < sGlyphSlotStore.GetNumRows(); ++i)
+    {
         if (GlyphSlotEntry const* gs = sGlyphSlotStore.LookupEntry(i))
             if (gs->Order)
             {
                 SetGlyphSlot(gs->Order - 1, gs->Id);
             }
+    }
 
     uint32 level = getLevel();
     uint32 value = 0;
@@ -28102,10 +28222,12 @@ void Player::InitRunes()
 bool Player::IsBaseRuneSlotsOnCooldown(RuneType runeType) const
 {
     for (uint32 i = 0; i < MAX_RUNES; ++i)
+    {
         if (GetBaseRune(i) == runeType && GetRuneCooldown(i) == 0)
         {
             return false;
         }
+    }
 
     return true;
 }
@@ -28728,10 +28850,12 @@ void Player::LearnTalent(uint32 talentId, uint32 talentRank)
     if (talentInfo->Row > 0)
     {
         for (PlayerTalentMap::const_iterator iter = m_talents[m_activeSpec].begin(); iter != m_talents[m_activeSpec].end(); ++iter)
+        {
             if (iter->second.state != PLAYERSPELL_REMOVED && iter->second.talentEntry->TalentTab == tTab)
             {
                 spentPoints += iter->second.currentRank + 1;
             }
+        }
     }
 
     // not have required min points spent in talent tree
@@ -29022,10 +29146,12 @@ bool Player::canSeeSpellClickOn(Creature const* c) const
 
     SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(c->GetEntry());
     for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
+    {
         if (itr->second.IsFitToRequirements(this, c))
         {
             return true;
         }
+    }
 
     return false;
 }
@@ -29489,10 +29615,12 @@ void Player::ActivateSpec(uint8 specNum)
             TalentEntry const* talentInfo = talent.talentEntry;
 
             for (int r = 0; r < MAX_TALENT_RANK; ++r)
+            {
                 if (talentInfo->RankID[r])
                 {
                     removeSpell(talentInfo->RankID[r], !IsPassiveSpell(talentInfo->RankID[r]), false);
                 }
+            }
 
             specIter = m_talents[m_activeSpec].begin();
         }

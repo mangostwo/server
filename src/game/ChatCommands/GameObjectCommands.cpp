@@ -75,10 +75,12 @@ void ChatHandler::ShowAchievementListHelper(AchievementEntry const* achEntry, Lo
                 if (AchievementMgr const* mgr = target ? &target->GetAchievementMgr() : NULL)
                     if (AchievementCriteriaEntryList const* criteriaList = sAchievementMgr.GetAchievementCriteriaByAchievement(achEntry->ID))
                         for (AchievementCriteriaEntryList::const_iterator itr = criteriaList->begin(); itr != criteriaList->end(); ++itr)
+                        {
                             if (mgr->IsCompletedCriteria(*itr, achEntry))
                             {
                                 criteriaMask[((*itr)->showOrder - 1) / 32] |= (1 << (((*itr)->showOrder - 1) % 32));
                             }
+                        }
 
                 for (int i = 0; i < 4; ++i)
                 {
