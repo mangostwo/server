@@ -265,9 +265,6 @@ namespace MMAP
 
         // read header
         MmapTileHeader fileHeader;
-<<<<<<< HEAD
-        fread(&fileHeader, sizeof(MmapTileHeader), 1, file);
-=======
         size_t file_read = fread(&fileHeader, sizeof(MmapTileHeader), 1, file);
 
         if (file_read <= 0)
@@ -278,7 +275,6 @@ namespace MMAP
             fclose(file);
             return false;
         }
->>>>>>> 0bfa3c7c7 (Fix mmap tile filename coordinate order)
 
         if (fileHeader.mmapMagic != MMAP_MAGIC)
         {
