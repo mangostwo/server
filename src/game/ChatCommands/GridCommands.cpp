@@ -229,12 +229,11 @@ bool ChatHandler::HandleGridAnchorsCommand(char* args)
     // Startup-active anchor set restricted to the player's current map. This is the
     // *enabled* startup anchor set (extra-active + enabled LivingWorld anchors), not
     // every possible DB anchor. Dedupe to unique anchor grids and tally anchors per grid.
-    ActiveCreatureGuidsOnMap const* activeGuids = sObjectMgr.GetActiveCreatureGuids();
+    ObjectMgr::ActiveCreatureGuidsOnMap const* activeGuids = sObjectMgr.GetActiveCreatureGuids();
 
     std::map<std::pair<uint32, uint32>, uint32> anchorGridSpawnCount;
-    std::pair<ActiveCreatureGuidsOnMap::const_iterator, ActiveCreatureGuidsOnMap::const_iterator> range =
-        activeGuids->equal_range(mapId);
-    for (ActiveCreatureGuidsOnMap::const_iterator itr = range.first; itr != range.second; ++itr)
+    auto range = activeGuids->equal_range(mapId);
+    for (auto itr = range.first; itr != range.second; ++itr)
     {
         CreatureData const* data = sObjectMgr.GetCreatureData(itr->second);
         if (!data)
@@ -263,7 +262,7 @@ bool ChatHandler::HandleGridAnchorsCommand(char* args)
     std::vector<uint32> occupancies;
     occupancies.reserve(anchorGridSpawnCount.size());
 
-    for (std::map<std::pair<uint32, uint32>, uint32>::const_iterator itr = anchorGridSpawnCount.begin();
+    for (auto itr = anchorGridSpawnCount.begin();
          itr != anchorGridSpawnCount.end(); ++itr)
     {
         uint32 gridX = itr->first.first;

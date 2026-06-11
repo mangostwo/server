@@ -584,6 +584,8 @@ class ObjectMgr
 
         typedef UNORDERED_MAP<uint32, PointOfInterest> PointOfInterestMap;
 
+        typedef std::multimap<uint32 /*mapId*/, uint32 /*guid*/> ActiveCreatureGuidsOnMap;
+
         void LoadGameobjectInfo();
         void AddGameobjectInfo(GameObjectInfo* goinfo);
 
@@ -1021,6 +1023,11 @@ class ObjectMgr
                     break;
                 }
             }
+        }
+
+        ActiveCreatureGuidsOnMap const* GetActiveCreatureGuids() const
+        {
+            return &m_activeCreatures;
         }
 
         CreatureLocale const* GetCreatureLocale(uint32 entry) const
@@ -1514,8 +1521,6 @@ class ObjectMgr
         typedef std::map<uint32, std::vector<std::string> > HalfNameMap;
         HalfNameMap PetHalfName0;
         HalfNameMap PetHalfName1;
-
-        typedef std::multimap<uint32 /*mapId*/, uint32 /*guid*/> ActiveCreatureGuidsOnMap;
 
         // Array to store creature stats, Max creature level + 1 (for data alignement with in game level)
         CreatureClassLvlStats m_creatureClassLvlStats[DEFAULT_MAX_CREATURE_LEVEL + 1][MAX_CREATURE_CLASS][MAX_EXPANSION + 1];
