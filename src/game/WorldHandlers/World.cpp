@@ -1004,6 +1004,14 @@ void World::LoadConfigSettings(bool reload)
         m_MaxVisibleDistanceInFlight = MAX_VISIBILITY_DISTANCE - m_VisibleObjectGreyDistance;
     }
 
+    ///- Load cinematic flyover options (first-login intro visibility)
+    setConfig(CONFIG_BOOL_CINEMATIC_FLYOVER_ENABLE, "CinematicFlyover.Enable", true);
+    setConfig(CONFIG_BOOL_CINEMATIC_FLYOVER_DEBUG, "CinematicFlyover.Debug", false);
+    setConfigMinMax(CONFIG_FLOAT_CINEMATIC_FLYOVER_VISIBILITY_DISTANCE, "CinematicFlyover.VisibilityDistance", 250.0f, 45.0f, 333.0f);
+    setConfigMinMax(CONFIG_UINT32_CINEMATIC_FLYOVER_UPDATE_INTERVAL_MS, "CinematicFlyover.UpdateIntervalMs", 200, 50, 5000);
+    setConfigMinMax(CONFIG_UINT32_CINEMATIC_FLYOVER_TIMEOUT_SEC, "CinematicFlyover.TimeoutSec", 120, 1, 600);
+    setConfig(CONFIG_UINT32_CINEMATIC_FLYOVER_BODY_ENTRY, "CinematicFlyover.BodyEntry", 12999);
+
     ///- Load the CharDelete related config options
     setConfigMinMax(CONFIG_UINT32_CHARDELETE_METHOD, "CharDelete.Method", 0, 0, 1);
     setConfigMinMax(CONFIG_UINT32_CHARDELETE_MIN_LEVEL, "CharDelete.MinLevel", 0, 0, getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
