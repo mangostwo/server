@@ -49,6 +49,7 @@
 #include "World.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "CinematicFlyover.h"
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "UpdateMask.h"
@@ -837,20 +838,28 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     // Show cinematic at the first time that player login (TODO: activate world grids first, then cinematic)
     // move this code past the "SendInitialPacketsAfterAddToMap();" line?
-    if (!pCurrChar->getCinematic())
+    bool isFirstLogin = !pCurrChar->getCinematic();
+    uint32 cinematicSequenceId = 0;
+    if (isFirstLogin)
     {
         pCurrChar->setCinematic(1);
 
+        // Class cinematic (Death Knight) takes precedence; fall back to the race intro
         if (ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(pCurrChar->getClass()))
         {
             if (cEntry->CinematicSequence)
             {
-                pCurrChar->SendCinematicStart(cEntry->CinematicSequence);
+                cinematicSequenceId = cEntry->CinematicSequence;
             }
             else if (ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(pCurrChar->getRace()))
             {
-                pCurrChar->SendCinematicStart(rEntry->CinematicSequence);
+                cinematicSequenceId = rEntry->CinematicSequence;
             }
+        }
+
+        if (cinematicSequenceId)
+        {
+            pCurrChar->SendCinematicStart(cinematicSequenceId);
         }
     }
 
@@ -895,6 +904,17 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     // DEBUG_LOG("Player %s added to Map.",pCurrChar->GetName());
 
     pCurrChar->SendInitialPacketsAfterAddToMap();
+
+    /* If it's the player's first login, create the cinematic flyover if enabled */
+    /* Note: isFirstLogin was captured before setCinematic(1) mutated the flag */
+    /* The flyover is created after the player is fully in-world; it arms here */
+    /* and begins on the first CMSG_NEXT_CINEMATIC_CAMERA */
+    if (isFirstLogin && cinematicSequenceId &&
+        sWorld.getConfig(CONFIG_BOOL_CINEMATIC_FLYOVER_ENABLE))
+    {
+        pCurrChar->SetCinematicFlyover(
+            std::make_unique<CinematicFlyover>(pCurrChar, cinematicSequenceId));
+    }
 
     /* Mark player as online in the database */
     static SqlStatementID updChars;
