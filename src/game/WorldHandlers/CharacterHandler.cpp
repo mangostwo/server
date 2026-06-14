@@ -909,7 +909,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     /* Note: isFirstLogin was captured before setCinematic(1) mutated the flag */
     /* The flyover is created after the player is fully in-world; it arms here */
     /* and begins on the first CMSG_NEXT_CINEMATIC_CAMERA */
-    if (isFirstLogin && cinematicSequenceId &&
+    /* Exclude Death Knight (sequence 165) - use old client-side cinematic system */
+    /* since there are no spawns along the route and the camera starts in a sparse area */
+    if (isFirstLogin && cinematicSequenceId && cinematicSequenceId != 165 &&
         sWorld.getConfig(CONFIG_BOOL_CINEMATIC_FLYOVER_ENABLE))
     {
         pCurrChar->SetCinematicFlyover(
