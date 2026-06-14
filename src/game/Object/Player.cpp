@@ -32,6 +32,7 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "UpdateMask.h"
+#include "CinematicFlyover.h"
 #include "SkillDiscovery.h"
 #include "QuestDef.h"
 #include "GossipDef.h"
@@ -829,6 +830,13 @@ Player::~Player()
  */
 void Player::CleanupsBeforeDelete()
 {
+    // Stop cinematic flyover if active (must happen before camera dtor)
+    if (m_cinematicFlyover && m_cinematicFlyover->IsActive())
+    {
+        m_cinematicFlyover->Stop();
+    }
+    m_cinematicFlyover.reset();
+
     // Perform cleanup only if the object is fully created
     if (m_uint32Values)
     {
@@ -1637,6 +1645,12 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         }
     }
 
+    // Update cinematic flyover if active
+    if (m_cinematicFlyover && m_cinematicFlyover->IsActive())
+    {
+        m_cinematicFlyover->Update(update_diff);
+    }
+
     // Update player-only attacks
     if (uint32 ranged_att = getAttackTimer(RANGED_ATTACK))
     {
@@ -2230,6 +2244,12 @@ ChatTagFlags Player::GetChatTag() const
  */
 bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options /*=0*/, AreaTrigger const* at /*=NULL*/)
 {
+    // Stop cinematic flyover on teleport (body is map-bound)
+    if (m_cinematicFlyover && m_cinematicFlyover->IsActive())
+    {
+        m_cinematicFlyover->Stop();
+    }
+
     if (!MapManager::IsValidMapCoord(mapid, x, y, z, orientation))
     {
         sLog.outError("TeleportTo: invalid map %d or absent instance template.", mapid);

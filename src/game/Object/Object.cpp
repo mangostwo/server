@@ -1446,7 +1446,8 @@ WorldObject::WorldObject() :
     m_transportInfo(NULL),
     m_currMap(NULL),
     m_mapId(0), m_InstanceId(0), m_phaseMask(PHASEMASK_NORMAL),
-    m_isActiveObject(false)
+    m_isActiveObject(false),
+    m_visibilityDistanceOverride(0.0f)
 {
 }
 
@@ -2545,7 +2546,7 @@ void WorldObject::SendMessageToSetExcept(WorldPacket* data, Player const* skippe
     if (IsInWorld())
     {
         MaNGOS::MessageDelivererExcept notifier(this, data, skipped_receiver);
-        Cell::VisitWorldObjects(this, notifier, GetMap()->GetVisibilityDistance());
+        Cell::VisitWorldObjects(this, notifier, GetMap()->GetBroadcastRadius());
     }
 }
 
@@ -3233,7 +3234,7 @@ struct WorldObjectChangeAccumulator
 void WorldObject::BuildUpdateData(UpdateDataMapType& update_players)
 {
     WorldObjectChangeAccumulator notifier(*this, update_players);
-    Cell::VisitWorldObjects(this, notifier, GetMap()->GetVisibilityDistance());
+    Cell::VisitWorldObjects(this, notifier, GetMap()->GetBroadcastRadius());
 
     ClearUpdateMask(false);
 }

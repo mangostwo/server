@@ -55,6 +55,7 @@
 #include "Player.h"
 #include "ObjectMgr.h"
 #include "Group.h"
+#include "CinematicFlyover.h"
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "World.h"
@@ -456,6 +457,15 @@ void WorldSession::LogoutPlayer(bool Save)
 
     if (_player)
     {
+        // Stop cinematic flyover if active
+        if (CinematicFlyover* flyover = _player->GetCinematicFlyover())
+        {
+            if (flyover->IsActive())
+            {
+                flyover->Stop();
+            }
+        }
+
         sLog.outChar("Account: %d (IP: %s) Logout Character:[%s] (guid: %u)", GetAccountId(), GetRemoteAddress().c_str(), _player->GetName() , _player->GetGUIDLow());
 
         if (ObjectGuid lootGuid = GetPlayer()->GetLootGuid())
