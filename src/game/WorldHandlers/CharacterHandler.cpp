@@ -883,9 +883,23 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         }
     }
 
+    bool createCinematicFlyover = isFirstLogin && cinematicSequenceId &&
+        sWorld.getConfig(CONFIG_BOOL_CINEMATIC_FLYOVER_ENABLE);
+    bool createEarlyDkCinematicFlyover = createCinematicFlyover &&
+        cinematicSequenceId == 165 && pCurrChar->GetMapId() == 609;
+
+    // Death Knight sequence 165 needs the cinematic visibility radius before
+    // Map::Add performs the initial player-centered visibility pass. Other
+    // flyovers keep the existing post-add arming path.
+    if (lockStatus == AREA_LOCKSTATUS_OK && createEarlyDkCinematicFlyover)
+        pCurrChar->SetCinematicFlyover(
+            std::make_unique<CinematicFlyover>(pCurrChar, cinematicSequenceId));
+
     /* This code is run if we can not add the player to the map for some reason */
     if (lockStatus != AREA_LOCKSTATUS_OK || !pCurrChar->GetMap()->Add(pCurrChar))
     {
+        pCurrChar->SetCinematicFlyover(nullptr);
+
         /* Attempt to find an areatrigger to teleport the player for us */
         AreaTrigger const* at = sObjectMgr.GetGoBackTrigger(pCurrChar->GetMapId());
         if (at)
@@ -907,14 +921,12 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     /* If it's the player's first login, create the cinematic flyover if enabled */
     /* Note: isFirstLogin was captured before setCinematic(1) mutated the flag */
-    /* The flyover is created after the player is fully in-world; it arms here */
-    /* and begins on the first CMSG_NEXT_CINEMATIC_CAMERA */
-    if (isFirstLogin && cinematicSequenceId &&
-        sWorld.getConfig(CONFIG_BOOL_CINEMATIC_FLYOVER_ENABLE))
-    {
+    /* Non-DK flyovers arm after the player is fully in-world; the DK flyover */
+    /* may already exist so its visibility lease affected Map::Add above. */
+    /* Begin still waits for the first CMSG_NEXT_CINEMATIC_CAMERA. */
+    if (createCinematicFlyover && !pCurrChar->GetCinematicFlyover())
         pCurrChar->SetCinematicFlyover(
             std::make_unique<CinematicFlyover>(pCurrChar, cinematicSequenceId));
-    }
 
     /* Mark player as online in the database */
     static SqlStatementID updChars;

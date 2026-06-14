@@ -182,7 +182,7 @@ class Map : public GridRefManager<NGridType>
         void MessageDistBroadcast(Player const*, WorldPacket*, float dist, bool to_self, bool own_team_only = false);
         void MessageDistBroadcast(WorldObject const*, WorldPacket*, float dist);
 
-        float GetVisibilityDistance() const { return m_VisibleDistance; }
+        float GetVisibilityDistance() const;
         // function for setting up visibility distance for maps on per-type/per-Id basis
         virtual void InitVisibilityDistance();
 
@@ -200,6 +200,10 @@ class Map : public GridRefManager<NGridType>
         /// radius is the largest among the currently registered viewers.
         void AddCinematicViewer(float radius);
         void RemoveCinematicViewer(float radius);
+        /// Register a temporary map-wide cinematic visibility lease.
+        void AddCinematicVisibility(float radius);
+        /// Release a temporary map-wide cinematic visibility lease.
+        void RemoveCinematicVisibility(float radius);
 
         void PlayerRelocation(Player*, float x, float y, float z, float angl);
         void CreatureRelocation(Creature* creature, float x, float y, float z, float orientation);
@@ -436,6 +440,10 @@ class Map : public GridRefManager<NGridType>
         float m_VisibleDistance;
         std::multiset<float> m_cinematicViewerRadii;  ///< radii of active cinematic flyover viewers on this map
         float m_cinematicViewerRadius;                ///< cached largest of m_cinematicViewerRadii (0 when none)
+        /// Radii of active cinematic map-visibility leases.
+        std::multiset<float> m_cinematicVisibilityRadii;
+        /// Cached largest cinematic visibility radius, or 0 when none.
+        float m_cinematicVisibilityRadius;
         MapPersistentState* m_persistentState;
 
         MapRefManager m_mapRefManager;

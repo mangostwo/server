@@ -179,7 +179,8 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode)
     : i_mapEntry(sMapStore.LookupEntry(id)), i_spawnMode(SpawnMode),
       i_id(id), i_InstanceId(InstanceId), m_unloadTimer(0),
       m_VisibleDistance(DEFAULT_VISIBILITY_DISTANCE),
-      m_cinematicViewerRadius(0.0f), m_persistentState(NULL),
+      m_cinematicViewerRadius(0.0f), m_cinematicVisibilityRadius(0.0f),
+      m_persistentState(NULL),
       m_activeNonPlayersIter(m_activeNonPlayers.end()),
       i_gridExpiry(expiry), m_TerrainData(sTerrainMgr.LoadTerrain(id)),
       i_data(NULL), i_script_id(0)
@@ -236,12 +237,28 @@ void Map::InitVisibilityDistance()
 }
 
 /**
+ * @brief Returns the effective map visibility distance, including temporary
+ * cinematic visibility leases that must affect initial player population.
+ */
+float Map::GetVisibilityDistance() const
+{
+    if (m_cinematicVisibilityRadius > m_VisibleDistance)
+        return m_cinematicVisibilityRadius;
+
+    return m_VisibleDistance;
+}
+
+/**
  * @brief Returns the packet broadcast radius: the map visibility distance,
  * extended to the largest registered cinematic flyover viewer radius.
  */
 float Map::GetBroadcastRadius() const
 {
-    return m_cinematicViewerRadius > m_VisibleDistance ? m_cinematicViewerRadius : m_VisibleDistance;
+    float visibilityDistance = GetVisibilityDistance();
+    if (m_cinematicViewerRadius > visibilityDistance)
+        return m_cinematicViewerRadius;
+
+    return visibilityDistance;
 }
 
 /**
@@ -274,6 +291,40 @@ void Map::RemoveCinematicViewer(float radius)
 
     m_cinematicViewerRadii.erase(itr);
     m_cinematicViewerRadius = m_cinematicViewerRadii.empty() ? 0.0f : *m_cinematicViewerRadii.rbegin();
+}
+
+/**
+ * @brief Registers a temporary map visibility lease. This widens
+ * GetVisibilityDistance() while active, affecting grid population decisions
+ * such as the initial Map::Add visibility pass.
+ *
+ * @param radius The effective visibility distance in yards.
+ */
+void Map::AddCinematicVisibility(float radius)
+{
+    m_cinematicVisibilityRadii.insert(radius);
+    m_cinematicVisibilityRadius = *m_cinematicVisibilityRadii.rbegin();
+}
+
+/**
+ * @brief Releases a temporary map visibility lease.
+ *
+ * @param radius The radius this lease was registered with.
+ */
+void Map::RemoveCinematicVisibility(float radius)
+{
+    std::multiset<float>::iterator itr =
+        m_cinematicVisibilityRadii.find(radius);
+    if (itr == m_cinematicVisibilityRadii.end())
+    {
+        sLog.outError("Map::RemoveCinematicVisibility: no lease registered "
+                      "with radius %.1f on map %u", radius, GetId());
+        return;
+    }
+
+    m_cinematicVisibilityRadii.erase(itr);
+    m_cinematicVisibilityRadius = m_cinematicVisibilityRadii.empty() ?
+        0.0f : *m_cinematicVisibilityRadii.rbegin();
 }
 
 // Template specialization of utility methods

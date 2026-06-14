@@ -30,9 +30,10 @@
 
 CinematicFlyover::CinematicFlyover(Player* player, uint32 cinematicSequenceId)
     : m_player(player), m_route(nullptr), m_viewerMap(nullptr),
-      m_viewerRadius(0.0f), m_bodyEntry(0), m_elapsedMs(0),
-      m_updateTimer(0), m_timeoutMs(0), m_armed(false), m_begun(false),
-      m_active(false)
+      m_viewerRadius(0.0f), m_visibilityMap(nullptr),
+      m_visibilityRadius(0.0f), m_bodyEntry(0), m_elapsedMs(0),
+      m_updateTimer(0), m_timeoutMs(0), m_armed(false),
+      m_begun(false), m_active(false)
 {
     // Validate config is enabled
     if (!sWorld.getConfig(CONFIG_BOOL_CINEMATIC_FLYOVER_ENABLE))
@@ -88,6 +89,27 @@ CinematicFlyover::CinematicFlyover(Player* player, uint32 cinematicSequenceId)
     // control window and breaks the intro control-handover sequence.
     m_armed = true;
 
+    // The Death Knight intro needs the cinematic visibility radius before the
+    // initial Map::Add visibility pass. Packet comparisons showed the working
+    // global-250 run preloaded the neighboring Ebon Hold grids before the
+    // flyover began, while the failing run widened only after login.
+    if (m_route->sequenceId == 165 && m_route->mapId == 609)
+    {
+        m_visibilityMap = m_player->GetMap();
+        if (m_visibilityMap)
+        {
+            float radius = sWorld.getConfig(
+                CONFIG_FLOAT_CINEMATIC_FLYOVER_VISIBILITY_DISTANCE);
+            m_visibilityRadius = radius;
+            m_visibilityMap->AddCinematicVisibility(m_visibilityRadius);
+
+            sLog.outDebug("CinematicFlyover: Added early DK visibility "
+                          "lease %.1f on map %u for player %s",
+                          m_visibilityRadius, m_route->mapId,
+                          m_player->GetName());
+        }
+    }
+
     sLog.outDebug("CinematicFlyover: Armed for player %s (sequence %u), "
                   "awaiting cinematic start", m_player->GetName(),
                   cinematicSequenceId);
@@ -106,7 +128,7 @@ void CinematicFlyover::Begin()
         m_route->mapId != m_player->GetMapId())
     {
         sLog.outDebug("CinematicFlyover: Begin aborted, player not on route map");
-        m_armed = false;
+        Stop();
         return;
     }
 
@@ -125,7 +147,7 @@ void CinematicFlyover::Begin()
     if (!body)
     {
         sLog.outError("CinematicFlyover: Failed to summon body creature entry %u", m_bodyEntry);
-        m_armed = false;
+        Stop();
         return;
     }
 
@@ -168,10 +190,42 @@ CinematicFlyover::~CinematicFlyover()
     Stop();
 }
 
+void CinematicFlyover::ReleaseEarlyVisibility()
+{
+    if (!m_visibilityMap)
+        return;
+
+    m_visibilityMap->RemoveCinematicVisibility(m_visibilityRadius);
+
+    if (sWorld.getConfig(CONFIG_BOOL_CINEMATIC_FLYOVER_DEBUG))
+        sLog.outDebug("CinematicFlyover: Removed early DK visibility "
+                      "lease %.1f on map %u for player %s",
+                      m_visibilityRadius, m_visibilityMap->GetId(),
+                      m_player ? m_player->GetName() : "<unknown>");
+
+    m_visibilityMap = nullptr;
+    m_visibilityRadius = 0.0f;
+}
+
 void CinematicFlyover::Update(uint32 updateDiff)
 {
     if (!m_active)
     {
+        if (m_visibilityMap)
+        {
+            m_elapsedMs += updateDiff;
+            uint32 waitTimeoutSec = sWorld.getConfig(
+                CONFIG_UINT32_CINEMATIC_FLYOVER_TIMEOUT_SEC);
+            uint32 waitTimeoutMs = waitTimeoutSec * 1000;
+            if (m_elapsedMs > waitTimeoutMs)
+            {
+                sLog.outDebug("CinematicFlyover: Early DK visibility "
+                              "lease timeout after %u ms",
+                              m_elapsedMs);
+                Stop();
+            }
+        }
+
         return;
     }
 
@@ -245,6 +299,7 @@ void CinematicFlyover::Stop()
 
     if (!m_active)
     {
+        ReleaseEarlyVisibility();
         return;
     }
 
@@ -270,7 +325,10 @@ void CinematicFlyover::Stop()
         m_viewerRadius = 0.0f;
     }
 
-    // Step 4: Clear references
+    // Step 4: Release the pre-Map::Add visibility lease, if this route used one
+    ReleaseEarlyVisibility();
+
+    // Step 5: Clear references
     m_bodyGuid.Clear();
     m_active = false;
 }

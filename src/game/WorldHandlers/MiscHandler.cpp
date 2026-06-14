@@ -1249,17 +1249,14 @@ void WorldSession::HandleCompleteCinematic(WorldPacket& /*recv_data*/)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_COMPLETE_CINEMATIC");
 
-    // Stop cinematic flyover if active
-    if (Player* player = GetPlayer())
-    {
-        if (CinematicFlyover* flyover = player->GetCinematicFlyover())
-        {
-            if (flyover->IsActive())
-            {
-                flyover->Stop();
-            }
-        }
-    }
+    // Stop cinematic flyover if present; DK may hold an early
+    // visibility lease before the flyover becomes active.
+    Player* player = GetPlayer();
+    if (!player)
+        return;
+
+    if (CinematicFlyover* flyover = player->GetCinematicFlyover())
+        flyover->Stop();
 }
 
 /**
@@ -1274,13 +1271,12 @@ void WorldSession::HandleNextCinematicCamera(WorldPacket& /*recv_data*/)
     // The client sends this when it enters the cinematic. Begin the flyover now
     // (summon body + bind camera) so farsight binds in sync with the client's
     // cinematic rather than during the login control window. Begin() is guarded.
-    if (Player* player = GetPlayer())
-    {
-        if (CinematicFlyover* flyover = player->GetCinematicFlyover())
-        {
-            flyover->Begin();
-        }
-    }
+    Player* player = GetPlayer();
+    if (!player)
+        return;
+
+    if (CinematicFlyover* flyover = player->GetCinematicFlyover())
+        flyover->Begin();
 }
 
 void WorldSession::HandleMoveTimeSkippedOpcode(WorldPacket& recv_data)
