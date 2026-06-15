@@ -220,15 +220,19 @@ CinematicFlyover::~CinematicFlyover()
 void CinematicFlyover::ReleaseEarlyVisibility()
 {
     if (!m_visibilityMap)
+    {
         return;
+    }
 
     m_visibilityMap->RemoveCinematicVisibility(m_visibilityRadius);
 
     if (sWorld.getConfig(CONFIG_BOOL_CINEMATIC_FLYOVER_DEBUG))
+    {
         sLog.outDebug("CinematicFlyover: Removed early DK visibility "
                       "lease %.1f on map %u for player %s",
                       m_visibilityRadius, m_visibilityMap->GetId(),
                       m_player ? m_player->GetName() : "<unknown>");
+    }
 
     m_visibilityMap = nullptr;
     m_visibilityRadius = 0.0f;

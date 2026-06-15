@@ -892,8 +892,10 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     // Map::Add performs the initial player-centered visibility pass. Other
     // flyovers keep the existing post-add arming path.
     if (lockStatus == AREA_LOCKSTATUS_OK && createEarlyDkCinematicFlyover)
+    {
         pCurrChar->SetCinematicFlyover(
             std::make_unique<CinematicFlyover>(pCurrChar, cinematicSequenceId));
+    }
 
     /* This code is run if we can not add the player to the map for some reason */
     if (lockStatus != AREA_LOCKSTATUS_OK || !pCurrChar->GetMap()->Add(pCurrChar))
@@ -925,8 +927,10 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     /* may already exist so its visibility lease affected Map::Add above. */
     /* Begin still waits for the first CMSG_NEXT_CINEMATIC_CAMERA. */
     if (createCinematicFlyover && !pCurrChar->GetCinematicFlyover())
+    {
         pCurrChar->SetCinematicFlyover(
             std::make_unique<CinematicFlyover>(pCurrChar, cinematicSequenceId));
+    }
 
     /* Mark player as online in the database */
     static SqlStatementID updChars;

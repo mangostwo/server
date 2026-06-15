@@ -460,7 +460,9 @@ void WorldSession::LogoutPlayer(bool Save)
         // Stop cinematic flyover if present; DK may hold an early
         // visibility lease before the flyover becomes active.
         if (CinematicFlyover* flyover = _player->GetCinematicFlyover())
+        {
             flyover->Stop();
+        }
 
         sLog.outChar("Account: %d (IP: %s) Logout Character:[%s] (guid: %u)", GetAccountId(), GetRemoteAddress().c_str(), _player->GetName() , _player->GetGUIDLow());
 

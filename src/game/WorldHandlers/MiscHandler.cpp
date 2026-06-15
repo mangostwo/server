@@ -1253,10 +1253,14 @@ void WorldSession::HandleCompleteCinematic(WorldPacket& /*recv_data*/)
     // visibility lease before the flyover becomes active.
     Player* player = GetPlayer();
     if (!player)
+    {
         return;
+    }
 
     if (CinematicFlyover* flyover = player->GetCinematicFlyover())
+    {
         flyover->Stop();
+    }
 
     // The flyover has stopped, so DK intro-deferred state can now be applied (the
     // player is in-world at the intro spawn): area-exploration discovery/XP and
@@ -1279,10 +1283,14 @@ void WorldSession::HandleNextCinematicCamera(WorldPacket& /*recv_data*/)
     // cinematic rather than during the login control window. Begin() is guarded.
     Player* player = GetPlayer();
     if (!player)
+    {
         return;
+    }
 
     if (CinematicFlyover* flyover = player->GetCinematicFlyover())
+    {
         flyover->Begin();
+    }
 }
 
 void WorldSession::HandleMoveTimeSkippedOpcode(WorldPacket& recv_data)
