@@ -171,8 +171,35 @@ void CinematicFlyover::Begin()
     m_viewerRadius = visDist;
     m_viewerMap->AddCinematicViewer(m_viewerRadius);
 
-    // Bind player camera to body (farsight), now that the client is in the cinematic
-    m_player->GetCamera().SetView(body, true);
+    // Bind the server-side camera source to the body so visibility/streaming
+    // follows the route, but do NOT push the PLAYER_FARSIGHT field to the client
+    // (update_far_sight_field = false). Pushing that field mid-cinematic makes the
+    // Wrath client snap its camera off the cinematic to the player's real position
+    // for 1-2 frames (the "flash to start area"). The cinematic camera renders the
+    // streamed route NPCs regardless of the farsight field, so leaving it unset
+    // removes the flash without losing the populated world.
+    m_player->GetCamera().SetView(body, false);
+
+    // Non-DK: pre-load only the grids along the cinematic route (route-local) so
+    // the moving body does not trigger burst grid-loads (frame jumps) as it flies
+    // into cold grids. LoadGrid() spawns each grid's content without a permanent
+    // unload lock, so grids unload normally after the cinematic. Unlike a map
+    // visibility lease this does NOT widen the whole continent's visibility, so
+    // other players on the map are unaffected. DK keeps its map-609 lease (Arm),
+    // which already covers the dense citadel before Map::Add.
+    if (!(m_route->sequenceId == 165 && m_route->mapId == 609))
+    {
+        if (Map* map = m_player->GetMap())
+        {
+            for (uint32 i = 0; i < m_route->keyframeCount; ++i)
+            {
+                CellPair cp = MaNGOS::ComputeCellPair(m_route->keyframes[i].x,
+                                                      m_route->keyframes[i].y);
+                Cell cell(cp);
+                map->LoadGrid(cell, false);
+            }
+        }
+    }
 
     // Start the route clock from the cinematic's actual start
     m_elapsedMs = 0;

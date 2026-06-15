@@ -54,6 +54,11 @@ public:
     /// Check if Player::Update should tick this flyover.
     bool NeedsUpdate() const { return m_active || m_visibilityMap != nullptr; }
 
+    /// True while this DK intro flyover is in progress (armed or active, cleared
+    /// on Stop). Used to defer intro effects (exploration XP, PvP flag) to the end.
+    bool IsIntroInProgress() const
+    { return m_route && m_route->sequenceId == 165 && (m_armed || m_active); }
+
 private:
     /// Resolve body from GUID (returns nullptr if body no longer exists)
     Creature* ResolveBody() const;

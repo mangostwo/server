@@ -236,17 +236,7 @@ void Map::InitVisibilityDistance()
     m_VisibleDistance = World::GetMaxVisibleDistanceOnContinents();
 }
 
-/**
- * @brief Returns the effective map visibility distance, including temporary
- * cinematic visibility leases that must affect initial player population.
- */
-float Map::GetVisibilityDistance() const
-{
-    if (m_cinematicVisibilityRadius > m_VisibleDistance)
-        return m_cinematicVisibilityRadius;
-
-    return m_VisibleDistance;
-}
+// Map::GetVisibilityDistance() is defined inline in Map.h (hot path).
 
 /**
  * @brief Returns the packet broadcast radius: the map visibility distance,
@@ -255,10 +245,8 @@ float Map::GetVisibilityDistance() const
 float Map::GetBroadcastRadius() const
 {
     float visibilityDistance = GetVisibilityDistance();
-    if (m_cinematicViewerRadius > visibilityDistance)
-        return m_cinematicViewerRadius;
-
-    return visibilityDistance;
+    return m_cinematicViewerRadius > visibilityDistance ?
+        m_cinematicViewerRadius : visibilityDistance;
 }
 
 /**

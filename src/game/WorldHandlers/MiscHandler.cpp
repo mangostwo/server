@@ -1257,6 +1257,12 @@ void WorldSession::HandleCompleteCinematic(WorldPacket& /*recv_data*/)
 
     if (CinematicFlyover* flyover = player->GetCinematicFlyover())
         flyover->Stop();
+
+    // The flyover has stopped, so DK intro-deferred state can now be applied (the
+    // player is in-world at the intro spawn): area-exploration discovery/XP and
+    // the hostile-area PvP flag. Both are no-ops for races.
+    player->CheckAreaExploreAndOutdoor();
+    player->ApplyDeferredIntroPvP();
 }
 
 /**

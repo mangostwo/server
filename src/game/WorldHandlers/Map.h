@@ -182,7 +182,11 @@ class Map : public GridRefManager<NGridType>
         void MessageDistBroadcast(Player const*, WorldPacket*, float dist, bool to_self, bool own_team_only = false);
         void MessageDistBroadcast(WorldObject const*, WorldPacket*, float dist);
 
-        float GetVisibilityDistance() const;
+        float GetVisibilityDistance() const
+        {
+            return m_cinematicVisibilityRadius > m_VisibleDistance ?
+                m_cinematicVisibilityRadius : m_VisibleDistance;
+        }
         // function for setting up visibility distance for maps on per-type/per-Id basis
         virtual void InitVisibilityDistance();
 
