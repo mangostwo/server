@@ -24,6 +24,7 @@
 #include "Creature.h"
 #include "ObjectMgr.h"
 #include "Map.h"
+#include "CellImpl.h"
 #include "Camera.h"
 #include "Log.h"
 #include "World.h"
