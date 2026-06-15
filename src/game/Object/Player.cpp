@@ -830,8 +830,9 @@ Player::~Player()
  */
 void Player::CleanupsBeforeDelete()
 {
-    // Stop cinematic flyover if active (must happen before camera dtor)
-    if (m_cinematicFlyover && m_cinematicFlyover->IsActive())
+    // Stop cinematic flyover if present (must happen before camera dtor).
+    // DK may hold an early visibility lease before the flyover is active.
+    if (m_cinematicFlyover)
     {
         m_cinematicFlyover->Stop();
     }
@@ -1645,8 +1646,9 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         }
     }
 
-    // Update cinematic flyover if active
-    if (m_cinematicFlyover && m_cinematicFlyover->IsActive())
+    // Update cinematic flyover while active, or while it owns pre-begin state
+    // such as the DK early visibility lease.
+    if (m_cinematicFlyover && m_cinematicFlyover->NeedsUpdate())
     {
         m_cinematicFlyover->Update(update_diff);
     }
@@ -2244,8 +2246,9 @@ ChatTagFlags Player::GetChatTag() const
  */
 bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options /*=0*/, AreaTrigger const* at /*=NULL*/)
 {
-    // Stop cinematic flyover on teleport (body is map-bound)
-    if (m_cinematicFlyover && m_cinematicFlyover->IsActive())
+    // Stop cinematic flyover on teleport (body and any early visibility lease
+    // are map-bound).
+    if (m_cinematicFlyover)
     {
         m_cinematicFlyover->Stop();
     }
@@ -8347,6 +8350,27 @@ void Player::SendMovieStart(uint32 MovieId)
 #endif
 
 /**
+ * @brief True while a DK intro cinematic/flyover is in progress for this player.
+ */
+bool Player::IsCinematicIntroActive() const
+{
+    return m_cinematicFlyover && m_cinematicFlyover->IsIntroInProgress();
+}
+
+/**
+ * @brief Applies the DK intro PvP flag that was deferred during the cinematic.
+ */
+void Player::ApplyDeferredIntroPvP()
+{
+    // The intro cinematic deferred the hostile-area PvP flag (see UpdateZone) so
+    // its flag sound would not play mid-cinematic; apply it now, at the end.
+    if (pvpInfo.inHostileArea && !IsPvP())
+    {
+        UpdatePvP(true, true);
+    }
+}
+
+/**
  * @brief Updates outdoor-only effects and exploration discovery for the current position.
  */
 void Player::CheckAreaExploreAndOutdoor()
@@ -8357,6 +8381,13 @@ void Player::CheckAreaExploreAndOutdoor()
     }
 
     if (IsTaxiFlying())
+    {
+        return;
+    }
+
+    // Defer area-exploration discovery/XP while a DK intro flyover is in progress;
+    // it is granted on cinematic complete (see HandleCompleteCinematic).
+    if (IsCinematicIntroActive())
     {
         return;
     }
@@ -9231,7 +9262,10 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
 
     if (pvpInfo.inHostileArea)                              // in hostile area
     {
-        if (!IsPvP() || pvpInfo.endTimer != 0)
+        // Defer the PvP flag while a DK intro flyover is in progress so its flag
+        // sound does not play mid-cinematic; ApplyDeferredIntroPvP() (called from
+        // HandleCompleteCinematic) sets it at the cinematic's end instead.
+        if ((!IsPvP() || pvpInfo.endTimer != 0) && !IsCinematicIntroActive())
         {
             UpdatePvP(true, true);
         }

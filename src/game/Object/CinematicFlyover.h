@@ -51,6 +51,14 @@ public:
     /// Check if flyover is active
     bool IsActive() const { return m_active; }
 
+    /// Check if Player::Update should tick this flyover.
+    bool NeedsUpdate() const { return m_active || m_visibilityMap != nullptr; }
+
+    /// True while this DK intro flyover is in progress (armed or active, cleared
+    /// on Stop). Used to defer intro effects (exploration XP, PvP flag) to the end.
+    bool IsIntroInProgress() const
+    { return m_route && m_route->sequenceId == 165 && (m_armed || m_active); }
+
 private:
     /// Resolve body from GUID (returns nullptr if body no longer exists)
     Creature* ResolveBody() const;
@@ -58,10 +66,15 @@ private:
     /// Interpolate route position at the given route time (ms)
     bool InterpolatePosition(uint32 atMs, float& x, float& y, float& z, float& o);
 
+    /// Release the early map visibility lease, if one was acquired.
+    void ReleaseEarlyVisibility();
+
     Player* m_player;
     const CinematicFlyoverRoute* m_route;
     Map* m_viewerMap;       // map the broadcast-radius viewer was registered on
     float m_viewerRadius;   // radius it was registered with (for paired removal)
+    Map* m_visibilityMap;       ///< map holding the early visibility lease
+    float m_visibilityRadius;   ///< radius registered for paired removal
     ObjectGuid m_bodyGuid;
     uint32 m_bodyEntry;
     uint32 m_elapsedMs;

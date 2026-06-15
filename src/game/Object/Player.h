@@ -3712,6 +3712,12 @@ class Player : public Unit
         // Get the cinematic flyover manager
         CinematicFlyover* GetCinematicFlyover() { return m_cinematicFlyover.get(); }
 
+        // True while a DK intro cinematic is active (defers intro effects to its end)
+        bool IsCinematicIntroActive() const;
+
+        // Apply intro-cinematic-deferred state (PvP flag) at cinematic end
+        void ApplyDeferredIntroPvP();
+
         // Set the cinematic flyover manager
         void SetCinematicFlyover(std::unique_ptr<CinematicFlyover> flyover) { m_cinematicFlyover = std::move(flyover); }
 
