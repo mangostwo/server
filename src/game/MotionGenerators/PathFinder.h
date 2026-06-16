@@ -44,6 +44,7 @@ class Unit;
 
 #define SMOOTH_PATH_STEP_SIZE   4.0f
 #define SMOOTH_PATH_SLOP        0.3f
+#define SMOOTH_PATH_HEIGHT      1.0f
 
 #define VERTEX_SIZE       3
 #define INVALID_POLYREF   0
@@ -87,6 +88,20 @@ class PathFinder
          * @return True if a new path was calculated, false otherwise (no change needed).
          */
         bool calculate(float destX, float destY, float destZ, bool forceDest = false);
+
+        /**
+         * @brief Calculate the path from an explicit start position to given destination.
+         * @param startX X-coordinate of the start position.
+         * @param startY Y-coordinate of the start position.
+         * @param startZ Z-coordinate of the start position.
+         * @param destX X-coordinate of the destination.
+         * @param destY Y-coordinate of the destination.
+         * @param destZ Z-coordinate of the destination.
+         * @param forceDest Whether to force the destination.
+         * @return True if a new path was calculated, false otherwise (no change needed).
+         */
+        bool calculate(float startX, float startY, float startZ, float destX,
+                      float destY, float destZ, bool forceDest = false);
 
         // Option setters - use optional
         /**
