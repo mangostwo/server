@@ -18,10 +18,10 @@ constexpr size_t WAYPOINT_SMOOTHING_MAX_LOOKAHEAD = 32;
  * Smoothed splines are sent as a linear path in SMSG_MONSTER_MOVE, whose
  * intermediate points are encoded as offsets from the destination, packed at
  * 0.25yd granularity into signed 11-bit (X/Y) and 10-bit (Z) fields (see
- * ByteBuffer::appendPackXYZ / PacketBuilder::WriteLinearPath). That caps
- * the representable offset at roughly +/-256yd (X/Y) and +/-128yd (Z);
- * beyond it the value wraps and the client renders a wild jump. These spans
- * stay well inside those limits so no offset can wrap.
+ * ByteBuffer::appendPackXYZ / PacketBuilder::WriteLinearPath). That caps the
+ * representable offset at roughly +/-256yd (X/Y) and +/-128yd (Z); beyond it
+ * the value wraps and the client renders a wild jump. These spans stay well
+ * inside those limits so no offset can wrap.
  */
 constexpr float WAYPOINT_SMOOTHING_MAX_XY_SPAN = 200.0f;
 
@@ -78,13 +78,12 @@ bool IsWaypointSmoothingSafe(WaypointSmoothingNode const& node);
  * @param endpointPathIndex Path-point index recorded for the waypoint.
  * @return True once the spline index has reached or passed the endpoint.
  */
-bool HasReachedWaypointEndpoint(int32 currentPathIdx,
-                                size_t endpointPathIndex);
+bool HasReachedWaypointEndpoint(int32 currentPathIdx, size_t endpointPathIndex);
 
 /**
- * @brief Classifies an in-progress segment, giving a force-stop precedence over a finished spline.
+ * @brief Classifies an in-progress segment, giving finalized precedence over stopped.
  * @param splineFinalized Whether the spline has completed.
- * @param creatureStopped Whether the unit is stopped (sampled before arrival handling).
+ * @param creatureStopped Whether the unit is currently stopped.
  * @return The resulting WaypointSegmentUpdateState.
  */
 WaypointSegmentUpdateState GetWaypointSegmentUpdateState(bool splineFinalized, bool creatureStopped);

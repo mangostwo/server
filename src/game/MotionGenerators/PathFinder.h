@@ -100,8 +100,7 @@ class PathFinder
          * @param forceDest Whether to force the destination.
          * @return True if a new path was calculated, false otherwise (no change needed).
          */
-        bool calculate(float startX, float startY, float startZ, float destX,
-                      float destY, float destZ, bool forceDest = false);
+        bool calculate(float startX, float startY, float startZ, float destX, float destY, float destZ, bool forceDest = false);
 
         // Option setters - use optional
         /**

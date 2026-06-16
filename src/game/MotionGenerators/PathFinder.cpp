@@ -87,7 +87,7 @@ bool PathFinder::calculate(float destX, float destY, float destZ, bool forceDest
  * @param destY The Y-coordinate of the destination.
  * @param destZ The Z-coordinate of the destination.
  * @param forceDest Whether to force the destination.
- * @return True if a new path was calculated, false otherwise (no change needed).
+ * @return True if the path was successfully calculated, false otherwise.
  */
 bool PathFinder::calculate(float startX, float startY, float startZ, float destX, float destY, float destZ, bool forceDest)
 {
