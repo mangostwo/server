@@ -54,7 +54,7 @@
 
 INSTANTIATE_SINGLETON_1(Log);
 
-LogFilterData logFilterData[LOG_FILTER_COUNT] =
+LogFilterData logFilterData[21] =
 {
     { "transport_moves",     "LogFilter_TransportMoves",     true  },
     { "creature_moves",      "LogFilter_CreatureMoves",      true  },
@@ -76,6 +76,7 @@ LogFilterData logFilterData[LOG_FILTER_COUNT] =
     { "map_loading",         "LogFilter_MapLoading",         true  },
     { "event_ai_dev",        "LogFilter_EventAiDev",         true  },
     { "calendar",            "LogFilter_Calendar",           true  },
+    { "cell_envelope",       "LogFilter_CellEnvelope",       true  },
 };
 
 enum LogType
