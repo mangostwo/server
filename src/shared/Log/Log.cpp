@@ -54,7 +54,7 @@
 
 INSTANTIATE_SINGLETON_1(Log);
 
-LogFilterData logFilterData[21] =
+LogFilterData logFilterData[LOG_FILTER_COUNT] =
 {
     { "transport_moves",     "LogFilter_TransportMoves",     true  },
     { "creature_moves",      "LogFilter_CreatureMoves",      true  },
