@@ -232,6 +232,10 @@ void WorldSession::HandleCalendarGuildFilter(WorldPacket& recv_data)
     {
         guild->MassInviteToEvent(this, minLevel, maxLevel, minRank);
     }
+    else
+    {
+        sCalendarMgr.SendCalendarCommandResult(_player, CALENDAR_ERROR_GUILD_PLAYER_NOT_IN_GUILD);
+    }
 
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Min level [%u], Max level [%u], Min rank [%u]", minLevel, maxLevel, minRank);
 }
@@ -276,6 +280,10 @@ void WorldSession::HandleCalendarArenaTeam(WorldPacket& recv_data)
     {
         team->MassInviteToEvent(this);
     }
+    else
+    {
+        sCalendarMgr.SendCalendarCommandResult(_player, CALENDAR_ERROR_INTERNAL);
+    }
 }
 
 void WorldSession::HandleCalendarAddEvent(WorldPacket& recv_data)
@@ -303,18 +311,13 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket& recv_data)
     recv_data >> unkPackedTime;
     recv_data >> flags;
 
-    //eventPackedTime = uint32(LocalTimeToUTCTime(eventPackedTime));
-    eventPackedTime = GetLocalHourTimestamp(eventPackedTime, 0, true);
+    // Client sends the event time as a packed bit-field, not UNIX seconds
+    // (see timeBitFieldsToSecs).
+    time_t eventTime = timeBitFieldsToSecs(eventPackedTime);
 
-    // prevent events in the past
-    if (time_t(eventPackedTime) < (GameTime::GetGameTime() - time_t(86400L)))
-    {
-        recv_data.rfinish();
-        return;
-    }
-
-    // 946684800 is 01/01/2000 00:00:00 - default response time
-    CalendarEvent* cal =  sCalendarMgr.AddEvent(_player->GetObjectGuid(), title, description, type, repeatable, maxInvites, dungeonId, timeBitFieldsToSecs(eventPackedTime), timeBitFieldsToSecs(unkPackedTime), flags);
+    // AddEvent() validates date/title/guild/quota and replies with the matching
+    // CALENDAR_ERROR_* on failure, so the handler needs no past-event guard.
+    CalendarEvent* cal =  sCalendarMgr.AddEvent(_player->GetObjectGuid(), title, description, type, repeatable, maxInvites, dungeonId, eventTime, timeBitFieldsToSecs(unkPackedTime), flags);
 
     if (cal)
     {
@@ -341,6 +344,11 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket& recv_data)
         }
         sCalendarMgr.SendCalendarEvent(_player, cal, CALENDAR_SENDTYPE_ADD);
     }
+    else
+    {
+        // AddEvent() rejected and already replied; drop the trailing invite list.
+        recv_data.rfinish();
+    }
 }
 
 void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recv_data)
@@ -366,15 +374,9 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recv_data)
     recv_data >> UnknownPackedTime;
     recv_data >> flags;
 
-    //eventPackedTime = uint32(LocalTimeToUTCTime(eventPackedTime));
-    eventPackedTime = GetLocalHourTimestamp(eventPackedTime, 0, true);
-
-    // prevent events in the past
-    if (time_t(eventPackedTime) < (GameTime::GetGameTime() - time_t(86400L)))
-    {
-        recv_data.rfinish();
-        return;
-    }
+    // Client sends the event time as a packed bit-field, not UNIX seconds
+    // (see timeBitFieldsToSecs).
+    time_t eventTime = timeBitFieldsToSecs(eventPackedTime);
 
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId [" UI64FMTD "], InviteId [" UI64FMTD "] Title %s, Description %s, type %u "
                      "Repeatable %u, MaxInvites %u, Dungeon ID %d, Flags %u", eventId, inviteId, title.c_str(),
@@ -399,11 +401,19 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recv_data)
             }
         }
 
+        // Reject past dates after the existence/permission checks so the client
+        // gets the correct error instead of a silent drop.
+        if (eventTime < (GameTime::GetGameTime() - time_t(86400L)))
+        {
+            sCalendarMgr.SendCalendarCommandResult(_player, CALENDAR_ERROR_INVALID_DATE);
+            return;
+        }
+
         oldEventTime = event->EventTime;
 
         event->Type = CalendarEventType(type);
         event->Flags = flags;
-        event->EventTime = timeBitFieldsToSecs(eventPackedTime);
+        event->EventTime = eventTime;
         event->UnknownTime = timeBitFieldsToSecs(UnknownPackedTime);
         event->DungeonId = dungeonId;
         event->Title = title;
@@ -454,16 +464,12 @@ void WorldSession::HandleCalendarCopyEvent(WorldPacket& recv_data)
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId [" UI64FMTD "] inviteId [" UI64FMTD "]",
                      eventId, inviteId);
 
-    //packedTime = uint32(LocalTimeToUTCTime(packedTime));
-    packedTime = GetLocalHourTimestamp(packedTime, 0, true);
-    // prevent events in the past
-    if (time_t(packedTime) < (GameTime::GetGameTime() - time_t(86400L)))
-    {
-        recv_data.rfinish();
-        return;
-    }
+    // Client sends the event time as a packed bit-field, not UNIX seconds
+    // (see timeBitFieldsToSecs). CopyEvent() -> AddEvent() validates the date and
+    // replies with the matching CALENDAR_ERROR_* on failure.
+    time_t newTime = timeBitFieldsToSecs(packedTime);
 
-    sCalendarMgr.CopyEvent(eventId, timeBitFieldsToSecs(packedTime), guid);
+    sCalendarMgr.CopyEvent(eventId, newTime, guid);
 }
 
 void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)

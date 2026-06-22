@@ -355,6 +355,9 @@ time_t timeBitFieldsToSecs(uint32 packedDate)
     lt.tm_mday = ((packedDate >> 14) & 0x3F) + 1;
     lt.tm_mon = (packedDate >> 20) & 0xF;
     lt.tm_year = ((packedDate >> 24) & 0x1F) + 100;
+    // -1 lets mktime resolve DST for this date; memset had forced 0 (standard
+    // time), which shifted summer dates forward by the DST offset.
+    lt.tm_isdst = -1;
 
     return time_t(mktime(&lt));
 }
