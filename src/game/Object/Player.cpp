@@ -9407,98 +9407,6 @@ void Player::InitPrimaryProfessions()
     SetFreePrimaryProfessions(sWorld.getConfig(CONFIG_UINT32_MAX_PRIMARY_TRADE_SKILL));
 }
 
-/**
- * @brief Sends the current combo point target and value to the client fields.
- */
-void Player::SendComboPoints()
-{
-    Unit* combotarget = sObjectAccessor.GetUnit(*this, m_comboTargetGuid);
-    if (combotarget)
-    {
-        WorldPacket data(SMSG_UPDATE_COMBO_POINTS, combotarget->GetPackGUID().size() + 1);
-        data << combotarget->GetPackGUID();
-        data << uint8(m_comboPoints);
-        GetSession()->SendPacket(&data);
-    }
-    /*else
-    {
-        // can be NULL, and then points=0. Use unknown; to reset points of some sort?
-        data << PackedGuid();
-        data << uint8(0);
-        GetSession()->SendPacket(&data);
-    }*/
-}
-
-/**
- * @brief Adds combo points on a target and updates combo point ownership.
- *
- * @param target The unit receiving combo points.
- * @param count The number of combo points to add.
- */
-void Player::AddComboPoints(Unit* target, int8 count)
-{
-    if (!count)
-    {
-        return;
-    }
-
-    // without combo points lost (duration checked in aura)
-    RemoveSpellsCausingAura(SPELL_AURA_RETAIN_COMBO_POINTS);
-
-    if (target->GetObjectGuid() == m_comboTargetGuid)
-    {
-        m_comboPoints += count;
-    }
-    else
-    {
-        if (m_comboTargetGuid)
-            if (Unit* target2 = sObjectAccessor.GetUnit(*this, m_comboTargetGuid))
-            {
-                target2->RemoveComboPointHolder(GetGUIDLow());
-            }
-
-        m_comboTargetGuid = target->GetObjectGuid();
-        m_comboPoints = count;
-
-        target->AddComboPointHolder(GetGUIDLow());
-    }
-
-    if (m_comboPoints > 5)
-    {
-        m_comboPoints = 5;
-    }
-    if (m_comboPoints < 0)
-    {
-        m_comboPoints = 0;
-    }
-
-    SendComboPoints();
-}
-
-/**
- * @brief Clears the player's combo points and current combo target.
- */
-void Player::ClearComboPoints()
-{
-    if (!m_comboTargetGuid)
-    {
-        return;
-    }
-
-    // without combopoints lost (duration checked in aura)
-    RemoveSpellsCausingAura(SPELL_AURA_RETAIN_COMBO_POINTS);
-
-    m_comboPoints = 0;
-
-    SendComboPoints();
-
-    if (Unit* target = sObjectAccessor.GetUnit(*this, m_comboTargetGuid))
-    {
-        target->RemoveComboPointHolder(GetGUIDLow());
-    }
-
-    m_comboTargetGuid.Clear();
-}
 
 /**
  * @brief Assigns the player to a group and subgroup.
@@ -13424,6 +13332,7 @@ void Player::_LoadRandomBGStatus(QueryResult *result)
         delete result;
     }
 }
+
 
 
 
