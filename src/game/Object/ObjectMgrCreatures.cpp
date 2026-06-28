@@ -1276,7 +1276,7 @@ void ObjectMgr::LoadCreatures()
                           |  GetLivingWorldDefenderCategory(cInfo, mapEntry, lwIsWaypoint)) & lwAnchorMask;
             if ((cInfo->ExtraFlags & CREATURE_FLAG_EXTRA_ACTIVE) || lwCats != 0)
             {
-                sLog.outString("Adding `creature` with Active Flag: Map: %u, Guid %u", data.mapid, guid);
+                BASIC_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Adding `creature` with Active Flag: Map: %u, Guid %u", data.mapid, guid);
                 m_activeCreatures.insert(ActiveCreatureGuidsOnMap::value_type(data.mapid, guid));
 
                 if (lwCats != 0)
