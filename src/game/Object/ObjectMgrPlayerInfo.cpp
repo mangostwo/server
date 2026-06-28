@@ -85,7 +85,7 @@ void ObjectMgr::LoadPetLevelInfo()
                 }
                 else
                 {
-                    DETAIL_LOG("Unused (> MaxPlayerLevel in mangosd.conf) level %u in `pet_levelstats` table, ignoring.", current_level);
+                    DETAIL_FILTER_LOG(LOG_FILTER_DB_STRICTED_CHECK, "Unused (> MaxPlayerLevel in mangosd.conf) level %u in `pet_levelstats` table, ignoring.", current_level);
                     ++count;                                // make result loading percent "expected" correct in case disabled detail mode for example.
                 }
                 continue;
@@ -506,7 +506,7 @@ void ObjectMgr::LoadPlayerInfo()
                 }
                 else
                 {
-                    DETAIL_LOG("Unused (> MaxPlayerLevel in mangosd.conf) level %u in `player_classlevelstats` table, ignoring.", current_level);
+                    DETAIL_FILTER_LOG(LOG_FILTER_DB_STRICTED_CHECK, "Unused (> MaxPlayerLevel in mangosd.conf) level %u in `player_classlevelstats` table, ignoring.", current_level);
                     ++count;                                // make result loading percent "expected" correct in case disabled detail mode for example.
                 }
                 continue;
@@ -615,7 +615,7 @@ void ObjectMgr::LoadPlayerInfo()
                 }
                 else
                 {
-                    DETAIL_LOG("Unused (> MaxPlayerLevel in mangosd.conf) level %u in `player_levelstats` table, ignoring.", current_level);
+                    DETAIL_FILTER_LOG(LOG_FILTER_DB_STRICTED_CHECK, "Unused (> MaxPlayerLevel in mangosd.conf) level %u in `player_levelstats` table, ignoring.", current_level);
                     ++count;                                // make result loading percent "expected" correct in case disabled detail mode for example.
                 }
                 continue;
@@ -744,7 +744,7 @@ void ObjectMgr::LoadPlayerInfo()
                 }
                 else
                 {
-                    DETAIL_LOG("Unused (> MaxPlayerLevel in mangosd.conf) level %u in `player_xp_for_levels` table, ignoring.", current_level);
+                    DETAIL_FILTER_LOG(LOG_FILTER_DB_STRICTED_CHECK, "Unused (> MaxPlayerLevel in mangosd.conf) level %u in `player_xp_for_levels` table, ignoring.", current_level);
                     ++count;                                // make result loading percent "expected" correct in case disabled detail mode for example.
                 }
                 continue;

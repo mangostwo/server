@@ -240,8 +240,11 @@ int WorldSocket::SendPacket(const WorldPacket& pkt)
 
     WorldPacket pct = pkt;
 
-    // Dump outgoing packet.
-    sLog.outWorldPacketDump(uint32(get_handle()), pct.GetOpcode(), pct.GetOpcodeName(), &pct, false);
+    // Dump outgoing packet (opt-in via PacketLoggingEnabled; off by default).
+    if (sLog.IsPacketLoggingEnabled())
+    {
+        sLog.outWorldPacketDump(uint32(get_handle()), pct.GetOpcode(), pct.GetOpcodeName(), &pct, false);
+    }
 
 #ifdef ENABLE_ELUNA
     // TODO: ELUNAFIX NEEDED
@@ -859,8 +862,11 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
         return -1;
     }
 
-    // Dump received packet.
-    sLog.outWorldPacketDump(uint32(get_handle()), new_pct->GetOpcode(), new_pct->GetOpcodeName(), new_pct, true);
+    // Dump received packet (opt-in via PacketLoggingEnabled; off by default).
+    if (sLog.IsPacketLoggingEnabled())
+    {
+        sLog.outWorldPacketDump(uint32(get_handle()), new_pct->GetOpcode(), new_pct->GetOpcodeName(), new_pct, true);
+    }
 
     try
     {
