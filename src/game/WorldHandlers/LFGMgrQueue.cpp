@@ -84,12 +84,13 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
 
     // used for upcoming checks
     bool isRandom  = false;
-    bool isRaid    = false;
-    bool isDungeon = false;
 
     LfgJoinResult result = GetJoinResult(plr);
     if (result == ERR_LFG_OK)
     {
+        bool isRaid    = false;
+        bool isDungeon = false;
+
         // additional checks on dungeon selection
         for (std::set<uint32>::iterator it = dungeons.begin(); it != dungeons.end(); ++it)
         {

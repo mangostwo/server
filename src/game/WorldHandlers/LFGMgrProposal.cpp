@@ -303,6 +303,7 @@ bool LFGMgr::IsProposalSameGroup(LFGProposal const& proposal)
             if (firstLoop)
             {
                 priorGroupGuid = grpGuid;
+                firstLoop = false;
             }
             else
             {
@@ -408,8 +409,6 @@ void LFGMgr::ProposalUpdate(uint32 proposalID, ObjectGuid plrGuid, bool accepted
         proposalPlrStatus.updateType = LFG_UPDATE_LEAVE;
         SendLfgUpdate(proposalPlrGuid, proposalPlrStatus, false);
         SendLfgUpdate(proposalPlrGuid, proposalPlrStatus, true);
-
-        proposalPlrStatus.state = LFG_STATE_IN_DUNGEON;
     }
 
     CreateDungeonGroup(proposal);
@@ -678,9 +677,14 @@ void LFGMgr::TeleportPlayer(Player* pPlayer, bool out)
 {
     // Fetch necessary data first
     Group* pGroup = pPlayer->GetGroup();
-    LFGGroupStatus* status = GetGroupStatus(pGroup->GetObjectGuid());
+    if (!pGroup)
+    {
+        pPlayer->GetSession()->SendLfgTeleportError((uint8)LFG_TELEPORTERROR_INVALID_LOCATION);
+        return;
+    }
 
-    if (!pGroup || !status)
+    LFGGroupStatus* status = GetGroupStatus(pGroup->GetObjectGuid());
+    if (!status)
     {
         pPlayer->GetSession()->SendLfgTeleportError((uint8)LFG_TELEPORTERROR_INVALID_LOCATION);
         return;
@@ -845,11 +849,14 @@ void LFGMgr::UpdateWaitMap(LFGRoles role, uint32 dungeonID, time_t waitTime)
 void LFGMgr::HandleBossKilled(Player* pPlayer)
 {
     Group* pGroup = pPlayer->GetGroup();
+    if (!pGroup)
+    {
+        return;
+    }
 
     ObjectGuid groupGuid = pGroup->GetObjectGuid();
     LFGGroupStatus* status = GetGroupStatus(groupGuid);
-
-    if (!pGroup || !status)
+    if (!status)
     {
         return;
     }
