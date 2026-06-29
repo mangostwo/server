@@ -735,8 +735,7 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
     }
     else
     {
-        if (caster &&
-                // Power Word: Shield
+        if (// Power Word: Shield
                 spellProto->SpellFamilyName == SPELLFAMILY_PRIEST && spellProto->Mechanic == MECHANIC_SHIELD &&
                 (spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000001)) &&
                 // completely absorbed or dispelled
