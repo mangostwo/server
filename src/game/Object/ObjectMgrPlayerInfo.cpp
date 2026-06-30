@@ -772,3 +772,141 @@ void ObjectMgr::LoadPlayerInfo()
         }
     }
 }
+
+/**
+ * @brief Gets class-based level info for a player class and level.
+ *
+ * @param class_ The player class id.
+ * @param level The player level.
+ * @param info Receives the class level info.
+ */
+void ObjectMgr::GetPlayerClassLevelInfo(uint32 class_, uint32 level, PlayerClassLevelInfo* info) const
+{
+    if (level < 1 || class_ >= MAX_CLASSES)
+    {
+        return;
+    }
+
+    PlayerClassInfo const* pInfo = &playerClassInfo[class_];
+
+    if (level > sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+    {
+        level = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
+    }
+
+    *info = pInfo->levelInfo[level - 1];
+}
+
+/**
+ * @brief Gets full player level info for a race, class, and level.
+ *
+ * @param race The player race id.
+ * @param class_ The player class id.
+ * @param level The requested player level.
+ * @param info Receives the computed level info.
+ */
+void ObjectMgr::GetPlayerLevelInfo(uint32 race, uint32 class_, uint32 level, PlayerLevelInfo* info) const
+{
+    if (level < 1 || race   >= MAX_RACES || class_ >= MAX_CLASSES)
+    {
+        return;
+    }
+
+    PlayerInfo const* pInfo = &playerInfo[race][class_];
+    if (pInfo->displayId_m == 0 || pInfo->displayId_f == 0)
+    {
+        return;
+    }
+
+    if (level <= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+    {
+        *info = pInfo->levelInfo[level - 1];
+    }
+    else
+    {
+        BuildPlayerLevelInfo(race, class_, level, info);
+    }
+}
+
+/**
+ * @brief Builds extrapolated player level stats beyond the stored base tables.
+ *
+ * @param race The player race id.
+ * @param _class The player class id.
+ * @param level The target player level.
+ * @param info Receives the computed level info.
+ */
+void ObjectMgr::BuildPlayerLevelInfo(uint8 race, uint8 _class, uint8 level, PlayerLevelInfo* info) const
+{
+    // base data (last known level)
+    *info = playerInfo[race][_class].levelInfo[sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL) - 1];
+
+    for (int lvl = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL) - 1; lvl < level; ++lvl)
+    {
+        switch (_class)
+        {
+            case CLASS_WARRIOR:
+                info->stats[STAT_STRENGTH]  += (lvl > 23 ? 2 : (lvl > 1  ? 1 : 0));
+                info->stats[STAT_STAMINA]   += (lvl > 23 ? 2 : (lvl > 1  ? 1 : 0));
+                info->stats[STAT_AGILITY]   += (lvl > 36 ? 1 : (lvl > 6 && (lvl % 2) ? 1 : 0));
+                info->stats[STAT_INTELLECT] += (lvl > 9 && !(lvl % 2) ? 1 : 0);
+                info->stats[STAT_SPIRIT]    += (lvl > 9 && !(lvl % 2) ? 1 : 0);
+                break;
+            case CLASS_PALADIN:
+                info->stats[STAT_STRENGTH]  += (lvl > 3  ? 1 : 0);
+                info->stats[STAT_STAMINA]   += (lvl > 33 ? 2 : (lvl > 1 ? 1 : 0));
+                info->stats[STAT_AGILITY]   += (lvl > 38 ? 1 : (lvl > 7 && !(lvl % 2) ? 1 : 0));
+                info->stats[STAT_INTELLECT] += (lvl > 6 && (lvl % 2) ? 1 : 0);
+                info->stats[STAT_SPIRIT]    += (lvl > 7 ? 1 : 0);
+                break;
+            case CLASS_HUNTER:
+                info->stats[STAT_STRENGTH]  += (lvl > 4  ? 1 : 0);
+                info->stats[STAT_STAMINA]   += (lvl > 4  ? 1 : 0);
+                info->stats[STAT_AGILITY]   += (lvl > 33 ? 2 : (lvl > 1 ? 1 : 0));
+                info->stats[STAT_INTELLECT] += (lvl > 8 && (lvl % 2) ? 1 : 0);
+                info->stats[STAT_SPIRIT]    += (lvl > 38 ? 1 : (lvl > 9 && !(lvl % 2) ? 1 : 0));
+                break;
+            case CLASS_ROGUE:
+                info->stats[STAT_STRENGTH]  += (lvl > 5  ? 1 : 0);
+                info->stats[STAT_STAMINA]   += (lvl > 4  ? 1 : 0);
+                info->stats[STAT_AGILITY]   += (lvl > 16 ? 2 : (lvl > 1 ? 1 : 0));
+                info->stats[STAT_INTELLECT] += (lvl > 8 && !(lvl % 2) ? 1 : 0);
+                info->stats[STAT_SPIRIT]    += (lvl > 38 ? 1 : (lvl > 9 && !(lvl % 2) ? 1 : 0));
+                break;
+            case CLASS_PRIEST:
+                info->stats[STAT_STRENGTH]  += (lvl > 9 && !(lvl % 2) ? 1 : 0);
+                info->stats[STAT_STAMINA]   += (lvl > 5  ? 1 : 0);
+                info->stats[STAT_AGILITY]   += (lvl > 38 ? 1 : (lvl > 8 && (lvl % 2) ? 1 : 0));
+                info->stats[STAT_INTELLECT] += (lvl > 22 ? 2 : (lvl > 1 ? 1 : 0));
+                info->stats[STAT_SPIRIT]    += (lvl > 3  ? 1 : 0);
+                break;
+            case CLASS_SHAMAN:
+                info->stats[STAT_STRENGTH]  += (lvl > 34 ? 1 : (lvl > 6 && (lvl % 2) ? 1 : 0));
+                info->stats[STAT_STAMINA]   += (lvl > 4 ? 1 : 0);
+                info->stats[STAT_AGILITY]   += (lvl > 7 && !(lvl % 2) ? 1 : 0);
+                info->stats[STAT_INTELLECT] += (lvl > 5 ? 1 : 0);
+                info->stats[STAT_SPIRIT]    += (lvl > 4 ? 1 : 0);
+                break;
+            case CLASS_MAGE:
+                info->stats[STAT_STRENGTH]  += (lvl > 9 && !(lvl % 2) ? 1 : 0);
+                info->stats[STAT_STAMINA]   += (lvl > 5  ? 1 : 0);
+                info->stats[STAT_AGILITY]   += (lvl > 9 && !(lvl % 2) ? 1 : 0);
+                info->stats[STAT_INTELLECT] += (lvl > 24 ? 2 : (lvl > 1 ? 1 : 0));
+                info->stats[STAT_SPIRIT]    += (lvl > 33 ? 2 : (lvl > 2 ? 1 : 0));
+                break;
+            case CLASS_WARLOCK:
+                info->stats[STAT_STRENGTH]  += (lvl > 9 && !(lvl % 2) ? 1 : 0);
+                info->stats[STAT_STAMINA]   += (lvl > 38 ? 2 : (lvl > 3 ? 1 : 0));
+                info->stats[STAT_AGILITY]   += (lvl > 9 && !(lvl % 2) ? 1 : 0);
+                info->stats[STAT_INTELLECT] += (lvl > 33 ? 2 : (lvl > 2 ? 1 : 0));
+                info->stats[STAT_SPIRIT]    += (lvl > 38 ? 2 : (lvl > 3 ? 1 : 0));
+                break;
+            case CLASS_DRUID:
+                info->stats[STAT_STRENGTH]  += (lvl > 38 ? 2 : (lvl > 6 && (lvl % 2) ? 1 : 0));
+                info->stats[STAT_STAMINA]   += (lvl > 32 ? 2 : (lvl > 4 ? 1 : 0));
+                info->stats[STAT_AGILITY]   += (lvl > 38 ? 2 : (lvl > 8 && (lvl % 2) ? 1 : 0));
+                info->stats[STAT_INTELLECT] += (lvl > 38 ? 3 : (lvl > 4 ? 1 : 0));
+                info->stats[STAT_SPIRIT]    += (lvl > 38 ? 3 : (lvl > 5 ? 1 : 0));
+        }
+    }
+}

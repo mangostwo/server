@@ -338,3 +338,11 @@ void ObjectMgr::LoadInstanceEncounters()
     sLog.outString();
     sLog.outString(">> Loaded %zu Instance Encounters", m_DungeonEncounters.size());
 }
+
+/**
+ * @brief Gets instance template data by map id.
+ *
+ * @param map The instance map id.
+ * @return The instance template, or null if missing.
+ */
+InstanceTemplate const* ObjectMgr::GetInstanceTemplate(uint32 map) { return sInstanceTemplate.LookupEntry<InstanceTemplate>(map); }
