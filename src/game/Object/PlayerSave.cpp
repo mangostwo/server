@@ -2333,3 +2333,114 @@ void Player::ContinueTaxiFlight()
     GetSession()->SendDoFlight(mountDisplayId, path, startNode);
 }
 
+void Player::_SaveEquipmentSets()
+{
+    static SqlStatementID updSets ;
+    static SqlStatementID insSets ;
+    static SqlStatementID delSets ;
+
+    for (EquipmentSets::iterator itr = m_EquipmentSets.begin(); itr != m_EquipmentSets.end();)
+    {
+        uint32 index = itr->first;
+        EquipmentSet& eqset = itr->second;
+        switch (eqset.state)
+        {
+            case EQUIPMENT_SET_UNCHANGED:
+                ++itr;
+                break;                                      // nothing do
+            case EQUIPMENT_SET_CHANGED:
+            {
+                SqlStatement stmt = CharacterDatabase.CreateStatement(updSets, "UPDATE `character_equipmentsets` SET `name`=?, `iconname`=?, `ignore_mask`=?, `item0`=?, `item1`=?, `item2`=?, `item3`=?, `item4`=?, "
+                                    "`item5`=?, `item6`=?, `item7`=?, `item8`=?, `item9`=?, `item10`=?, `item11`=?, `item12`=?, `item13`=?, `item14`=?, "
+                                    "`item15`=?, `item16`=?, `item17`=?, `item18`=? WHERE `guid`=? AND `setguid`=? AND `setindex`=?");
+
+                stmt.addString(eqset.Name);
+                stmt.addString(eqset.IconName);
+                stmt.addUInt32(eqset.IgnoreMask);
+
+                for (int i = 0; i < EQUIPMENT_SLOT_END; ++i)
+                {
+                    stmt.addUInt32(eqset.Items[i]);
+                }
+
+                stmt.addUInt32(GetGUIDLow());
+                stmt.addUInt64(eqset.Guid);
+                stmt.addUInt32(index);
+
+                stmt.Execute();
+
+                eqset.state = EQUIPMENT_SET_UNCHANGED;
+                ++itr;
+                break;
+            }
+            case EQUIPMENT_SET_NEW:
+            {
+                SqlStatement stmt = CharacterDatabase.CreateStatement(insSets, "INSERT INTO `character_equipmentsets` VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                stmt.addUInt32(GetGUIDLow());
+                stmt.addUInt64(eqset.Guid);
+                stmt.addUInt32(index);
+                stmt.addString(eqset.Name);
+                stmt.addString(eqset.IconName);
+                stmt.addUInt32(eqset.IgnoreMask);
+
+                for (int i = 0; i < EQUIPMENT_SLOT_END; ++i)
+                {
+                    stmt.addUInt32(eqset.Items[i]);
+                }
+
+                stmt.Execute();
+
+                eqset.state = EQUIPMENT_SET_UNCHANGED;
+                ++itr;
+                break;
+            }
+            case EQUIPMENT_SET_DELETED:
+            {
+                SqlStatement stmt = CharacterDatabase.CreateStatement(delSets, "DELETE FROM `character_equipmentsets` WHERE `setguid` = ?");
+                stmt.PExecute(eqset.Guid);
+                m_EquipmentSets.erase(itr++);
+                break;
+            }
+        }
+    }
+}
+
+/**
+ * @brief Saves battleground return position and instance data to the database.
+ */
+void Player::_SaveBGData()
+{
+    // nothing save
+    if (!m_bgData.m_needSave)
+    {
+        return;
+    }
+
+    static SqlStatementID delBGData ;
+    static SqlStatementID insBGData ;
+
+    SqlStatement stmt =  CharacterDatabase.CreateStatement(delBGData, "DELETE FROM `character_battleground_data` WHERE `guid` = ?");
+
+    stmt.PExecute(GetGUIDLow());
+
+    if (m_bgData.bgInstanceID)
+    {
+        stmt = CharacterDatabase.CreateStatement(insBGData, "INSERT INTO `character_battleground_data` VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        /* guid, bgInstanceID, bgTeam, x, y, z, o, map, taxi[0], taxi[1], mountSpell */
+        stmt.addUInt32(GetGUIDLow());
+        stmt.addUInt32(m_bgData.bgInstanceID);
+        stmt.addUInt32(uint32(m_bgData.bgTeam));
+        stmt.addFloat(m_bgData.joinPos.coord_x);
+        stmt.addFloat(m_bgData.joinPos.coord_y);
+        stmt.addFloat(m_bgData.joinPos.coord_z);
+        stmt.addFloat(m_bgData.joinPos.orientation);
+        stmt.addUInt32(m_bgData.joinPos.mapid);
+        stmt.addUInt32(m_bgData.taxiPath[0]);
+        stmt.addUInt32(m_bgData.taxiPath[1]);
+        stmt.addUInt32(m_bgData.mountSpell);
+
+        stmt.Execute();
+    }
+
+    m_bgData.m_needSave = false;
+}
