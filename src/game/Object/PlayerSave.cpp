@@ -498,44 +498,6 @@ void Player::_SaveAuras()
     }
 }
 
-void Player::_SaveGlyphs()
-{
-    static SqlStatementID insertGlyph ;
-    static SqlStatementID updateGlyph ;
-    static SqlStatementID deleteGlyph ;
-
-    for (uint8 spec = 0; spec < m_specsCount; ++spec)
-    {
-        for (uint8 slot = 0; slot < MAX_GLYPH_SLOT_INDEX; ++slot)
-        {
-            switch (m_glyphs[spec][slot].uState)
-            {
-                case GLYPH_NEW:
-                {
-                    SqlStatement stmt = CharacterDatabase.CreateStatement(insertGlyph, "INSERT INTO `character_glyphs` (`guid`, `spec`, `slot`, `glyph`) VALUES (?, ?, ?, ?)");
-                    stmt.PExecute(GetGUIDLow(), spec, slot, m_glyphs[spec][slot].GetId());
-                }
-                break;
-                case GLYPH_CHANGED:
-                {
-                    SqlStatement stmt = CharacterDatabase.CreateStatement(updateGlyph, "UPDATE `character_glyphs` SET `glyph` = ? WHERE `guid` = ? AND `spec` = ? AND `slot` = ?");
-                    stmt.PExecute(m_glyphs[spec][slot].GetId(), GetGUIDLow(), spec, slot);
-                }
-                break;
-                case GLYPH_DELETED:
-                {
-                    SqlStatement stmt = CharacterDatabase.CreateStatement(deleteGlyph, "DELETE FROM `character_glyphs` WHERE `guid` = ? AND `spec` = ? AND `slot` = ?");
-                    stmt.PExecute(GetGUIDLow(), spec, slot);
-                }
-                break;
-                case GLYPH_UNCHANGED:
-                    break;
-            }
-            m_glyphs[spec][slot].uState = GLYPH_UNCHANGED;
-        }
-    }
-}
-
 /**
  * @brief Saves inventory state changes and queued item records to the database.
  */

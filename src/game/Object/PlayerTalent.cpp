@@ -466,7 +466,7 @@ void Player::BuildPlayerTalentsInfoData(WorldPacket* data)
             // GlyphProperties.dbc
             for (uint8 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
             {
-                *data << uint16(m_glyphs[specIdx][i].GetId());
+                *data << uint16(m_glyphMgr.GetGlyph(specIdx, i));
             }
         }
     }
