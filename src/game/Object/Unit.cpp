@@ -4672,77 +4672,8 @@ uint32 Unit::GetCreatureType() const
     }
 }
 
-/**
- * @brief Maps a resistance unit modifier group to its spell school.
- *
- * @param unitMod The unit modifier group.
- * @return The associated spell school.
- */
-SpellSchools Unit::GetSpellSchoolByAuraGroup(UnitMods unitMod) const
-{
-    SpellSchools school = SPELL_SCHOOL_NORMAL;
 
-    switch (unitMod)
-    {
-        case UNIT_MOD_RESISTANCE_HOLY:     school = SPELL_SCHOOL_HOLY;          break;
-        case UNIT_MOD_RESISTANCE_FIRE:     school = SPELL_SCHOOL_FIRE;          break;
-        case UNIT_MOD_RESISTANCE_NATURE:   school = SPELL_SCHOOL_NATURE;        break;
-        case UNIT_MOD_RESISTANCE_FROST:    school = SPELL_SCHOOL_FROST;         break;
-        case UNIT_MOD_RESISTANCE_SHADOW:   school = SPELL_SCHOOL_SHADOW;        break;
-        case UNIT_MOD_RESISTANCE_ARCANE:   school = SPELL_SCHOOL_ARCANE;        break;
 
-        default:
-            break;
-    }
-
-    return school;
-}
-
-/**
- * @brief Maps a stat unit modifier group to its primary stat.
- *
- * @param unitMod The unit modifier group.
- * @return The associated stat.
- */
-Stats Unit::GetStatByAuraGroup(UnitMods unitMod) const
-{
-    Stats stat = STAT_STRENGTH;
-
-    switch (unitMod)
-    {
-        case UNIT_MOD_STAT_STRENGTH:    stat = STAT_STRENGTH;      break;
-        case UNIT_MOD_STAT_AGILITY:     stat = STAT_AGILITY;       break;
-        case UNIT_MOD_STAT_STAMINA:     stat = STAT_STAMINA;       break;
-        case UNIT_MOD_STAT_INTELLECT:   stat = STAT_INTELLECT;     break;
-        case UNIT_MOD_STAT_SPIRIT:      stat = STAT_SPIRIT;        break;
-
-        default:
-            break;
-    }
-
-    return stat;
-}
-
-/**
- * @brief Maps a power unit modifier group to its power type.
- *
- * @param unitMod The unit modifier group.
- * @return The associated power type.
- */
-Powers Unit::GetPowerTypeByAuraGroup(UnitMods unitMod) const
-{
-    switch (unitMod)
-    {
-        case UNIT_MOD_MANA:       return POWER_MANA;
-        case UNIT_MOD_RAGE:       return POWER_RAGE;
-        case UNIT_MOD_FOCUS:      return POWER_FOCUS;
-        case UNIT_MOD_ENERGY:     return POWER_ENERGY;
-        case UNIT_MOD_HAPPINESS:  return POWER_HAPPINESS;
-        case UNIT_MOD_RUNE:       return POWER_RUNE;
-        case UNIT_MOD_RUNIC_POWER: return POWER_RUNIC_POWER;
-        default:                  return POWER_MANA;
-    }
-}
 
 /**
  * @brief Sets the unit level and updates group state when needed.
