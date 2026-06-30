@@ -526,7 +526,7 @@ UpdateMask Player::updateVisualBits;
  *
  * @param session The owning world session.
  */
-Player::Player(WorldSession* session): Unit(), m_honorMgr(this), m_glyphMgr(this), m_mover(this), m_camera(this), m_achievementMgr(this), m_reputationMgr(this)
+Player::Player(WorldSession* session): Unit(), m_honorMgr(this), m_glyphMgr(this), m_mover(this), m_camera(this), m_petMgr(this), m_achievementMgr(this), m_reputationMgr(this)
 {
     m_transport = 0;
 
@@ -660,8 +660,7 @@ Player::Player(WorldSession* session): Unit(), m_honorMgr(this), m_glyphMgr(this
     m_canTitanGrip = false;
     m_ammoDPS = 0.0f;
 
-    // Initialize temporary unsummoned pet number to 0
-    m_temporaryUnsummonedPetNumber = 0;
+    // temporary unsummoned pet number is owned by m_petMgr; initialized in its ctor.
 
     //////////////////// Rest System/////////////////////
     // Initialize time of entering inn to 0
@@ -694,8 +693,7 @@ Player::Player(WorldSession* session): Unit(), m_honorMgr(this), m_glyphMgr(this
         m_forced_speed_changes[i] = 0;
     }
 
-    // Initialize stable slots to 0
-    m_stableSlots = 0;
+    // stable slots are owned by m_petMgr; initialized in its ctor.
 
     /////////////////// Instance System /////////////////////
     // Initialize homebind timer to 0
@@ -5922,62 +5920,6 @@ void Player::UpdateKnownCurrencies(uint32 itemId, bool apply)
         }
     }
 }
-
-
-/**
- * @brief Temporarily unsummons the current pet when the player's state requires it.
- */
-void Player::UnsummonPetTemporaryIfAny()
-{
-    Pet* pet = GetPet();
-    if (!pet)
-    {
-        return;
-    }
-
-    if (!m_temporaryUnsummonedPetNumber && pet->isControlled() && !pet->isTemporarySummoned())
-    {
-        m_temporaryUnsummonedPetNumber = pet->GetCharmInfo()->GetPetNumber();
-    }
-
-    pet->Unsummon(PET_SAVE_AS_CURRENT, this);
-}
-
-/**
- * @brief Resummons a pet that was temporarily unsummoned earlier.
- */
-void Player::ResummonPetTemporaryUnSummonedIfAny()
-{
-    if (!m_temporaryUnsummonedPetNumber)
-    {
-        return;
-    }
-
-    // not resummon in not appropriate state
-    if (IsPetNeedBeTemporaryUnsummoned())
-    {
-        return;
-    }
-
-    if (GetPetGuid())
-    {
-        return;
-    }
-
-    Pet* NewPet = new Pet;
-    if (!NewPet->LoadPetFromDB(this, 0, m_temporaryUnsummonedPetNumber, true))
-    {
-        delete NewPet;
-    }
-
-    m_temporaryUnsummonedPetNumber = 0;
-}
-
-
-
-
-
-
 
 
 void Player::_SaveEquipmentSets()
