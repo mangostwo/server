@@ -228,7 +228,7 @@ void Player::SaveToDB()
 
     uberInsert.addUInt32(m_ExtraFlags);
 
-    uberInsert.addUInt32(uint32(m_stableSlots));            // to prevent save uint8 as char
+    uberInsert.addUInt32(uint32(GetStableSlots()));         // to prevent save uint8 as char
 
     uberInsert.addUInt32(uint32(m_atLoginFlags));
 
@@ -1419,19 +1419,6 @@ void Player::UpdateDuelFlag(time_t currTime)
 }
 
 /**
- * @brief Unsummons the player's current pet using the requested save mode.
- *
- * @param mode The persistence mode to use when removing the pet.
- */
-void Player::RemovePet(PetSaveMode mode)
-{
-    if (Pet* pet = GetPet())
-    {
-        pet->Unsummon(mode, this);
-    }
-}
-
-/**
  * @brief Sends a say chat message from the player to nearby listeners.
  *
  * @param text The message text.
@@ -1766,16 +1753,6 @@ void Player::CharmSpellInitialize()
     data << uint8(0);                                       // cooldowns count
 
     GetSession()->SendPacket(&data);
-}
-
-/**
- * @brief Clears the pet action bar on the client.
- */
-void Player::RemovePetActionBar()
-{
-    WorldPacket data(SMSG_PET_SPELLS, 8);
-    data << ObjectGuid();
-    SendDirectMessage(&data);
 }
 
 /**

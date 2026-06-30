@@ -56,6 +56,10 @@
 #include "Unit.h"
 #include "Item.h"
 #include "GlyphMgr.h"   // GlyphMgr is held by value on Player; brings in Glyph struct + GlyphUpdateState enum
+#include "HonorMgr.h"   // HonorMgr is held by value on Player; owns daily-kill rollover + RewardHonor calculation
+#include "PetMgr.h"     // PetMgr is held by value on Player; owns stable slots + temporary-unsummon lifecycle
+#include "RuneMgr.h"    // RuneMgr is held by value on Player; brings in Rune structs + owns death-knight rune state
+#include "SpellCooldownMgr.h"   // SpellCooldownMgr is held by value on Player; brings in SpellCooldown struct + owns the cooldown map
 
 #include "Database/DatabaseEnv.h"
 #include "NPCHandler.h"
@@ -170,16 +174,7 @@ struct PlayerTalent
 typedef UNORDERED_MAP<uint32, PlayerSpell> PlayerSpellMap;
 typedef UNORDERED_MAP<uint32, PlayerTalent> PlayerTalentMap;
 
-/**
- * @brief Structure to hold spell cooldown information
- */
-struct SpellCooldown
-{
-    time_t end;    ///< End time of the cooldown
-    uint16 itemid; ///< Item ID associated with the cooldown
-};
-
-typedef std::map<uint32, SpellCooldown> SpellCooldowns;
+// SpellCooldown struct and SpellCooldowns typedef moved to SpellCooldownMgr.h.
 
 /**
  * @brief Trainer spell state enumeration
@@ -371,42 +366,7 @@ struct Areas
     float y2;        // Y2 coordinate
 };
 
-#define MAX_RUNES               6
-#define RUNE_COOLDOWN           (2*5*IN_MILLISECONDS)       // msec
-
-enum RuneType
-{
-    RUNE_BLOOD                  = 0,
-    RUNE_UNHOLY                 = 1,
-    RUNE_FROST                  = 2,
-    RUNE_DEATH                  = 3,
-    NUM_RUNE_TYPES              = 4
-};
-
-struct RuneInfo
-{
-    uint8  BaseRune;
-    uint8  CurrentRune;
-    uint16 Cooldown;                                        // msec
-};
-
-struct Runes
-{
-    RuneInfo runes[MAX_RUNES];
-    uint8 runeState;                                        // mask of available runes
-
-    void SetRuneState(uint8 index, bool set = true)
-    {
-        if (set)
-        {
-            runeState |= (1 << index);                      // usable
-        }
-        else
-        {
-            runeState &= ~(1 << index);                     // on cooldown
-        }
-    }
-};
+// MAX_RUNES, RUNE_COOLDOWN, RuneType, RuneInfo and Runes moved to RuneMgr.h.
 
 struct EnchantDuration
 {
@@ -1432,7 +1392,7 @@ class Player : public Unit
         }
 
         // Remove the player's pet
-        void RemovePet(PetSaveMode mode);
+        void RemovePet(PetSaveMode mode) { m_petMgr.Remove(mode); }
 
         uint32 GetPhaseMaskForSpawn() const;                // used for proper set phase for DB at GM-mode creature/GO spawn
 
@@ -1819,7 +1779,7 @@ class Player : public Unit
         // Load the player's pet
         void LoadPet();
 
-        uint32 m_stableSlots; // Number of stable slots
+        // m_stableSlots now owned by m_petMgr; access via GetStableSlots() / SetStableSlots().
 
         uint32 GetEquipGearScore(bool withBags = true, bool withBank = false);
         void ResetCachedGearScore() { m_cachedGS = 0; }
@@ -2312,7 +2272,7 @@ class Player : public Unit
         void PossessSpellInitialize();
 
         // Remove the pet action bar
-        void RemovePetActionBar();
+        void RemovePetActionBar() { m_petMgr.RemoveActionBar(); }
 
         // Check if the player has a specific spell
         bool HasSpell(uint32 spell) const override;
@@ -2429,11 +2389,9 @@ class Player : public Unit
             return m_spells;
         }
 
+        // Spell-cooldown API — thin delegating wrappers around m_spellCooldownMgr.
         // Get the player's spell cooldown map
-        SpellCooldowns const& GetSpellCooldownMap() const
-        {
-            return m_spellCooldowns;
-        }
+        SpellCooldowns const& GetSpellCooldownMap() const { return m_spellCooldownMgr.GetSpellCooldownMap(); }
 
         PlayerTalent const* GetKnownTalentById(int32 talentId) const;
         SpellEntry const* GetKnownTalentRankById(int32 talentId) const;
@@ -2445,37 +2403,28 @@ class Player : public Unit
         static uint32 const infinityCooldownDelayCheck = MONTH / 2;
 
         // Check if the player has a spell cooldown
-        bool HasSpellCooldown(uint32 spell_id) const
-        {
-            SpellCooldowns::const_iterator itr = m_spellCooldowns.find(spell_id);
-            return itr != m_spellCooldowns.end() && itr->second.end > time(NULL);
-        }
+        bool HasSpellCooldown(uint32 spell_id) const { return m_spellCooldownMgr.HasSpellCooldown(spell_id); }
 
         // Get the delay for a spell cooldown
-        time_t GetSpellCooldownDelay(uint32 spell_id) const
-        {
-            SpellCooldowns::const_iterator itr = m_spellCooldowns.find(spell_id);
-            time_t t = time(NULL);
-            return itr != m_spellCooldowns.end() && itr->second.end > t ? itr->second.end - t : 0;
-        }
+        time_t GetSpellCooldownDelay(uint32 spell_id) const { return m_spellCooldownMgr.GetSpellCooldownDelay(spell_id); }
 
         // Add spell and category cooldowns
-        void AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 itemId, Spell* spell = NULL, bool infinityCooldown = false);
+        void AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 itemId, Spell* spell = NULL, bool infinityCooldown = false) { m_spellCooldownMgr.AddSpellAndCategoryCooldowns(spellInfo, itemId, spell, infinityCooldown); }
 
         // Add a spell cooldown
-        void AddSpellCooldown(uint32 spell_id, uint32 itemid, time_t end_time);
+        void AddSpellCooldown(uint32 spell_id, uint32 itemid, time_t end_time) { m_spellCooldownMgr.AddSpellCooldown(spell_id, itemid, end_time); }
 
         // Send a cooldown event to the client
-        void SendCooldownEvent(SpellEntry const* spellInfo, uint32 itemId = 0, Spell* spell = NULL);
+        void SendCooldownEvent(SpellEntry const* spellInfo, uint32 itemId = 0, Spell* spell = NULL) { m_spellCooldownMgr.SendCooldownEvent(spellInfo, itemId, spell); }
 
         // Prohibit a spell school for a specific duration
         void ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs) override;
 
         // Remove a spell cooldown
-        void RemoveSpellCooldown(uint32 spell_id, bool update = false);
+        void RemoveSpellCooldown(uint32 spell_id, bool update = false) { m_spellCooldownMgr.RemoveSpellCooldown(spell_id, update); }
 
         // Remove a spell category cooldown
-        void RemoveSpellCategoryCooldown(uint32 cat, bool update = false);
+        void RemoveSpellCategoryCooldown(uint32 cat, bool update = false) { m_spellCooldownMgr.RemoveSpellCategoryCooldown(cat, update); }
 
         // Send a clear cooldown message to the client
         void SendClearCooldown(uint32 spell_id, Unit* target);
@@ -2487,19 +2436,19 @@ class Player : public Unit
         }
 
         // Remove all arena spell cooldowns
-        void RemoveArenaSpellCooldowns();
+        void RemoveArenaSpellCooldowns() { m_spellCooldownMgr.RemoveArenaSpellCooldowns(); }
 
         // Remove all spell cooldowns
-        void RemoveAllSpellCooldown();
+        void RemoveAllSpellCooldown() { m_spellCooldownMgr.RemoveAllSpellCooldown(); }
 
         // Load spell cooldowns from the database
-        void _LoadSpellCooldowns(QueryResult* result);
+        void _LoadSpellCooldowns(QueryResult* result) { m_spellCooldownMgr.LoadFromDB(result); }
 
         // Save spell cooldowns to the database
-        void _SaveSpellCooldowns();
+        void _SaveSpellCooldowns() { m_spellCooldownMgr.SaveToDB(); }
         void SetLastPotionId(uint32 item_id) { m_lastPotionId = item_id; }
         uint32 GetLastPotionId() { return m_lastPotionId; }
-        void UpdatePotionCooldown(Spell* spell = NULL);
+        void UpdatePotionCooldown(Spell* spell = NULL) { m_spellCooldownMgr.UpdatePotionCooldown(spell); }
 
         // Set resurrect request data
         void setResurrectRequestData(ObjectGuid guid, uint32 mapId, float X, float Y, float Z, uint32 health, uint32 mana)
@@ -3139,11 +3088,12 @@ class Player : public Unit
         // Update arena fields
         void UpdateArenaFields();
 
+        // Honor API — thin delegating wrappers around m_honorMgr.
         // Update honor fields
-        void UpdateHonorFields();
+        void UpdateHonorFields() { m_honorMgr.UpdateKills(); }
 
         // Reward honor for killing a unit
-        bool RewardHonor(Unit* pVictim, uint32 groupsize, float honor = -1);
+        bool RewardHonor(Unit* pVictim, uint32 groupsize, float honor = -1) { return m_honorMgr.Reward(pVictim, groupsize, honor); }
 
         // Get the player's honor points
         uint32 GetHonorPoints() const { return GetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY); }
@@ -3693,10 +3643,13 @@ class Player : public Unit
         void RemoveAtLoginFlag(AtLoginFlags f, bool in_db_also = false);
 
         // Temporarily removed pet cache
-        uint32 GetTemporaryUnsummonedPetNumber() const { return m_temporaryUnsummonedPetNumber; }
-        void SetTemporaryUnsummonedPetNumber(uint32 petnumber) { m_temporaryUnsummonedPetNumber = petnumber; }
-        void UnsummonPetTemporaryIfAny();
-        void ResummonPetTemporaryUnSummonedIfAny();
+        // Pet ownership API — thin delegating wrappers around m_petMgr.
+        uint32 GetTemporaryUnsummonedPetNumber() const { return m_petMgr.GetTemporaryUnsummonedPetNumber(); }
+        void SetTemporaryUnsummonedPetNumber(uint32 petnumber) { m_petMgr.SetTemporaryUnsummonedPetNumber(petnumber); }
+        void UnsummonPetTemporaryIfAny() { m_petMgr.UnsummonTemporaryIfAny(); }
+        void ResummonPetTemporaryUnSummonedIfAny() { m_petMgr.ResummonTemporaryUnsummonedIfAny(); }
+        uint32 GetStableSlots() const { return m_petMgr.GetStableSlots(); }
+        void SetStableSlots(uint32 slots) { m_petMgr.SetStableSlots(slots); }
         bool IsPetNeedBeTemporaryUnsummoned() const { return !IsInWorld() || !IsAlive() || IsMounted() /*+in flight*/; }
 
         // Send cinematic start to the client
@@ -3822,20 +3775,21 @@ class Player : public Unit
 
         DeclinedName const* GetDeclinedNames() const { return m_declinedname; }
 
-        // Rune functions, need check  getClass() == CLASS_DEATH_KNIGHT before access
-        uint8 GetRunesState() const { return m_runes->runeState; }
-        RuneType GetBaseRune(uint8 index) const { return RuneType(m_runes->runes[index].BaseRune); }
-        RuneType GetCurrentRune(uint8 index) const { return RuneType(m_runes->runes[index].CurrentRune); }
-        uint16 GetRuneCooldown(uint8 index) const { return m_runes->runes[index].Cooldown; }
-        bool IsBaseRuneSlotsOnCooldown(RuneType runeType) const;
-        void SetBaseRune(uint8 index, RuneType baseRune) { m_runes->runes[index].BaseRune = baseRune; }
-        void SetCurrentRune(uint8 index, RuneType currentRune) { m_runes->runes[index].CurrentRune = currentRune; }
-        void SetRuneCooldown(uint8 index, uint16 cooldown) { m_runes->runes[index].Cooldown = cooldown; m_runes->SetRuneState(index, (cooldown == 0) ? true : false); }
-        void ConvertRune(uint8 index, RuneType newType);
-        bool ActivateRunes(RuneType type, uint32 count);
-        void ResyncRunes();
-        void AddRunePower(uint8 index);
-        void InitRunes();
+        // Rune API — thin delegating wrappers around m_runeMgr.
+        // Need check getClass() == CLASS_DEATH_KNIGHT before access.
+        uint8 GetRunesState() const { return m_runeMgr.GetRunesState(); }
+        RuneType GetBaseRune(uint8 index) const { return m_runeMgr.GetBaseRune(index); }
+        RuneType GetCurrentRune(uint8 index) const { return m_runeMgr.GetCurrentRune(index); }
+        uint16 GetRuneCooldown(uint8 index) const { return m_runeMgr.GetRuneCooldown(index); }
+        bool IsBaseRuneSlotsOnCooldown(RuneType runeType) const { return m_runeMgr.IsBaseRuneSlotsOnCooldown(runeType); }
+        void SetBaseRune(uint8 index, RuneType baseRune) { m_runeMgr.SetBaseRune(index, baseRune); }
+        void SetCurrentRune(uint8 index, RuneType currentRune) { m_runeMgr.SetCurrentRune(index, currentRune); }
+        void SetRuneCooldown(uint8 index, uint16 cooldown) { m_runeMgr.SetRuneCooldown(index, cooldown); }
+        void ConvertRune(uint8 index, RuneType newType) { m_runeMgr.ConvertRune(index, newType); }
+        bool ActivateRunes(RuneType type, uint32 count) { return m_runeMgr.ActivateRunes(type, count); }
+        void ResyncRunes() { m_runeMgr.ResyncRunes(); }
+        void AddRunePower(uint8 index) { m_runeMgr.AddRunePower(index); }
+        void InitRunes() { m_runeMgr.InitRunes(); }
 
         AchievementMgr const& GetAchievementMgr() const { return m_achievementMgr; }
         AchievementMgr& GetAchievementMgr() { return m_achievementMgr; }
@@ -4000,7 +3954,7 @@ class Player : public Unit
         /***                  HONOR SYSTEM                     ***/
         /*********************************************************/
 
-        time_t m_lastHonorUpdateTime; // Last honor update time
+        HonorMgr m_honorMgr;   // daily / yesterday kill rollover + RewardHonor calculation
 
         // Output debug stats values
         void outDebugStatsValues() const;
@@ -4035,7 +3989,7 @@ class Player : public Unit
         PlayerMails m_mail;
         PlayerSpellMap m_spells;
         PlayerTalentMap m_talents[MAX_TALENT_SPEC_COUNT];
-        SpellCooldowns m_spellCooldowns;
+        SpellCooldownMgr m_spellCooldownMgr;   // owns the spell-cooldown map + load/save/apply lifecycle
         uint32 m_lastPotionId;                              // last used health/mana potion in combat, that block next potion use
         uint32 m_GuildIdInvited; // Guild ID invited
         uint32 m_ArenaTeamIdInvited; // Arena team ID invited
@@ -4136,7 +4090,7 @@ class Player : public Unit
         float m_summon_z; // Summon Z coordinate
 
         DeclinedName* m_declinedname;
-        Runes* m_runes;
+        RuneMgr m_runeMgr;   // owns death-knight rune state + lifecycle
         EquipmentSets m_EquipmentSets;
 
         /// class dependent melee diminishing constant for dodge/parry/missed chances
@@ -4248,7 +4202,7 @@ class Player : public Unit
         uint32 m_DetectInvTimer;
 
         // Temporary removed pet cache
-        uint32 m_temporaryUnsummonedPetNumber;
+        PetMgr m_petMgr;  // owns m_stableSlots + m_temporaryUnsummonedPetNumber + pet-lifecycle helpers
 
         AchievementMgr m_achievementMgr;
         ReputationMgr  m_reputationMgr;

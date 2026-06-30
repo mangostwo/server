@@ -142,7 +142,6 @@ enum CharacterCustomizeFlags
 };
 
 
-
 //== PlayerTaxi ================================================
 
 PlayerTaxi::PlayerTaxi()
@@ -526,7 +525,7 @@ UpdateMask Player::updateVisualBits;
  *
  * @param session The owning world session.
  */
-Player::Player(WorldSession* session): Unit(), m_glyphMgr(this), m_mover(this), m_camera(this), m_achievementMgr(this), m_reputationMgr(this)
+Player::Player(WorldSession* session): Unit(), m_honorMgr(this), m_spellCooldownMgr(this), m_glyphMgr(this), m_runeMgr(this), m_mover(this), m_camera(this), m_petMgr(this), m_achievementMgr(this), m_reputationMgr(this)
 {
     m_transport = 0;
 
@@ -660,8 +659,7 @@ Player::Player(WorldSession* session): Unit(), m_glyphMgr(this), m_mover(this), 
     m_canTitanGrip = false;
     m_ammoDPS = 0.0f;
 
-    // Initialize temporary unsummoned pet number to 0
-    m_temporaryUnsummonedPetNumber = 0;
+    // temporary unsummoned pet number is owned by m_petMgr; initialized in its ctor.
 
     //////////////////// Rest System/////////////////////
     // Initialize time of entering inn to 0
@@ -694,8 +692,7 @@ Player::Player(WorldSession* session): Unit(), m_glyphMgr(this), m_mover(this), 
         m_forced_speed_changes[i] = 0;
     }
 
-    // Initialize stable slots to 0
-    m_stableSlots = 0;
+    // stable slots are owned by m_petMgr; initialized in its ctor.
 
     /////////////////// Instance System /////////////////////
     // Initialize homebind timer to 0
@@ -730,9 +727,7 @@ Player::Player(WorldSession* session): Unit(), m_glyphMgr(this), m_mover(this), 
     m_armorPenetrationPct = 0.0f;
     m_spellPenetrationItemMod = 0;
 
-    // Honor System
-    // Set last honor update time to current time
-    m_lastHonorUpdateTime = time(NULL);
+    // Honor System: last honor update time is owned by m_honorMgr, initialized in its ctor.
 
     m_IsBGRandomWinner = false;
 
@@ -751,7 +746,7 @@ Player::Player(WorldSession* session): Unit(), m_glyphMgr(this), m_mover(this), 
 
     // Initialize declined name to NULL
     m_declinedname = NULL;
-    m_runes = NULL;
+    // rune state is owned by m_runeMgr; initialized in its ctor (NULL until InitRunes for a death knight).
 
     // Initialize last fall time to 0
     m_lastFallTime = 0;
@@ -818,7 +813,7 @@ Player::~Player()
     }
 
     delete m_declinedname;
-    delete m_runes;
+    // m_runes is owned by m_runeMgr and freed in its destructor.
 }
 
 /**
@@ -2242,9 +2237,6 @@ void Player::RemoveFromWorld()
 }
 
 
-
-
-
 /**
  * @brief Gets an NPC the player can currently interact with.
  *
@@ -3010,7 +3002,7 @@ void Player::SendInitialSpells()
      * * * * * * * * * * * * * * * * */
     uint16 spellCount = 0;
 
-    WorldPacket data(SMSG_INITIAL_SPELLS, (1 + 2 + 4 * m_spells.size() + 2 + m_spellCooldowns.size() * (2 + 2 + 2 + 4 + 4)));
+    WorldPacket data(SMSG_INITIAL_SPELLS, (1 + 2 + 4 * m_spells.size() + 2 + GetSpellCooldownMap().size() * (2 + 2 + 2 + 4 + 4)));
     data << uint8(0);
 
     /* * * * * * * * * * * * * * * * *
@@ -3046,9 +3038,9 @@ void Player::SendInitialSpells()
     data.put<uint16>(countPos, spellCount);                 // write real count value
 
     /* For each spell the player has on cooldown */
-    uint16 spellCooldowns = m_spellCooldowns.size();
+    uint16 spellCooldowns = GetSpellCooldownMap().size();
     data << uint16(spellCooldowns);
-    for (SpellCooldowns::const_iterator itr = m_spellCooldowns.begin(); itr != m_spellCooldowns.end(); ++itr)
+    for (SpellCooldowns::const_iterator itr = GetSpellCooldownMap().begin(); itr != GetSpellCooldownMap().end(); ++itr)
     {
         /* If the spell doesn't exist in the spellbook, just ignore it */
         SpellEntry const* sEntry = sSpellStore.LookupEntry(itr->first);
@@ -3090,11 +3082,6 @@ void Player::SendInitialSpells()
 
     DETAIL_LOG("CHARACTER: Sent Initial Spells");
 }
-
-
-
-
-
 
 
 /**
@@ -3396,12 +3383,6 @@ void Player::DeleteOldCharacters(uint32 keepDays)
 }
 
 
-
-
-
-
-
-
 /**
  * @brief Attempts to improve defense skill and refresh defense-derived bonuses.
  */
@@ -3678,198 +3659,9 @@ void Player::setFactionForRace(uint8 race)
 }
 
 
-
-
-
 void Player::UpdateArenaFields(void)
 {
     /* arena calcs go here */
-}
-
-void Player::UpdateHonorFields()
-{
-    /// called when rewarding honor and at each save
-    time_t now = time(NULL);
-    time_t today = (time(NULL) / DAY) * DAY;
-
-    if (m_lastHonorUpdateTime < today)
-    {
-        time_t yesterday = today - DAY;
-
-        uint16 kills_today = PAIR32_LOPART(GetUInt32Value(PLAYER_FIELD_KILLS));
-
-        // update yesterday's contribution
-        if (m_lastHonorUpdateTime >= yesterday)
-        {
-            SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, GetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION));
-
-            // this is the first update today, reset today's contribution
-            SetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, 0);
-            SetUInt32Value(PLAYER_FIELD_KILLS, MAKE_PAIR32(0, kills_today));
-        }
-        else
-        {
-            // no honor/kills yesterday or today, reset
-            SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, 0);
-            SetUInt32Value(PLAYER_FIELD_KILLS, 0);
-        }
-    }
-
-    m_lastHonorUpdateTime = now;
-}
-
-/// Calculate the amount of honor gained based on the victim
-/// and the size of the group for which the honor is divided
-/// An exact honor value can also be given (overriding the calcs)
-bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, float honor)
-{
-    // do not reward honor in arenas, but enable onkill spellproc
-    if (InArena())
-    {
-        if (!uVictim || uVictim == this || uVictim->GetTypeId() != TYPEID_PLAYER)
-        {
-            return false;
-        }
-
-        if (GetBGTeam() == (reinterpret_cast<Player*>(uVictim))->GetBGTeam())
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    // 'Inactive' this aura prevents the player from gaining honor points and battleground tokens
-    if (GetDummyAura(SPELL_AURA_PLAYER_INACTIVE))
-    {
-        return false;
-    }
-
-    ObjectGuid victim_guid;
-    uint32 victim_rank = 0;
-
-    // need call before fields update to have chance move yesterday data to appropriate fields before today data change.
-    UpdateHonorFields();
-
-    if (honor <= 0)
-    {
-        if (!uVictim || uVictim == this || uVictim->HasAuraType(SPELL_AURA_NO_PVP_CREDIT))
-        {
-            return false;
-        }
-
-        victim_guid = uVictim->GetObjectGuid();
-
-        if (uVictim->GetTypeId() == TYPEID_PLAYER)
-        {
-            Player* pVictim = reinterpret_cast<Player*>(uVictim);
-
-            if (GetTeam() == pVictim->GetTeam() && !sWorld.IsFFAPvPRealm())
-            {
-                return false;
-            }
-
-            float f = 1;                                    // need for total kills (?? need more info)
-            uint32 k_grey = 0;
-            uint32 k_level = getLevel();
-            uint32 v_level = pVictim->getLevel();
-
-            {
-                // PLAYER_CHOSEN_TITLE VALUES DESCRIPTION
-                //  [0]      Just name
-                //  [1..14]  Alliance honor titles and player name
-                //  [15..28] Horde honor titles and player name
-                //  [29..38] Other title and player name
-                //  [39+]    Nothing
-                uint32 victim_title = pVictim->GetUInt32Value(PLAYER_CHOSEN_TITLE);
-                // Get Killer titles, CharTitlesEntry::bit_index
-                // Ranks:
-                //  title[1..14]  -> rank[5..18]
-                //  title[15..28] -> rank[5..18]
-                //  title[other]  -> 0
-                if (victim_title == 0)
-                {
-                    victim_guid.Clear();                    // Don't show HK: <rank> message, only log.
-                }
-                else if (victim_title < 15)
-                {
-                    victim_rank = victim_title + 4;
-                }
-                else if (victim_title < 29)
-                {
-                    victim_rank = victim_title - 14 + 4;
-                }
-                else
-                {
-                    victim_guid.Clear();                    // Don't show HK: <rank> message, only log.
-                }
-            }
-
-            k_grey = MaNGOS::XP::GetGrayLevel(k_level);
-
-            if (v_level <= k_grey)
-            {
-                return false;
-            }
-
-            float diff_level = (k_level == k_grey) ? 1 : ((float(v_level) - float(k_grey)) / (float(k_level) - float(k_grey)));
-
-            int32 v_rank = 1;                               // need more info
-
-            honor = ((f * diff_level * (190 + v_rank * 10)) / 6);
-            honor *= float(k_level) / 70.0f;                // factor of dependence on levels of the killer
-
-            // count the number of playerkills in one day
-            ApplyModUInt32Value(PLAYER_FIELD_KILLS, 1, true);
-            // and those in a lifetime
-            ApplyModUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 1, true);
-            UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EARN_HONORABLE_KILL);
-            UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HK_CLASS, pVictim->getClass());
-            UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HK_RACE, pVictim->getRace());
-        }
-        else
-        {
-            Creature* cVictim = reinterpret_cast<Creature*>(uVictim);
-
-            if (!cVictim->IsRacialLeader())
-            {
-                return false;
-            }
-
-            honor = 100;                                    // ??? need more info
-            victim_rank = 19;                               // HK: Leader
-        }
-    }
-
-    if (uVictim != NULL)
-    {
-        honor *= sWorld.getConfig(CONFIG_FLOAT_RATE_HONOR);
-        honor *= (GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HONOR_GAIN) + 100.0f) / 100.0f;
-
-        if (groupsize > 1)
-        {
-            honor /= groupsize;
-        }
-
-        honor *= (((float)urand(8, 12)) / 10);              // approx honor: 80% - 120% of real honor
-    }
-
-    // honor - for show honor points in log
-    // victim_guid - for show victim name in log
-    // victim_rank [1..4]  HK: <dishonored rank>
-    // victim_rank [5..19] HK: <alliance\horde rank>
-    // victim_rank [0,20+] HK: <>
-    WorldPacket data(SMSG_PVP_CREDIT, 4 + 8 + 4);
-    data << uint32(honor);
-    data << ObjectGuid(victim_guid);
-    data << uint32(victim_rank);
-    GetSession()->SendPacket(&data);
-
-    // add honor points
-    ModifyHonorPoints(int32(honor));
-
-    ApplyModUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, uint32(honor), true);
-    return true;
 }
 
 void Player::SetHonorPoints(uint32 value)
@@ -3917,7 +3709,6 @@ void Player::ModifyArenaPoints(int32 value)
 }
 
 
-
 /**
  * @brief Checks whether the player is eligible to interact with a capture point.
  *
@@ -3935,15 +3726,7 @@ bool Player::CanUseCapturePoint()
 }
 
 
-
 //---------------------------------------------------------//
-
-
-
-
-
-
-
 
 
 /**
@@ -3958,20 +3741,6 @@ bool Player::CanUseCapturePoint()
  * functions for item final remove/destroy from inventory. If new RemoveItem calls added need be sure that
  * function will call after it in some way if need.
  */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 /**
@@ -4089,8 +3858,6 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
 }
 
 
-
-
 /**
  * @brief Sends a bind point confirmation prompt to the client.
  *
@@ -4142,17 +3909,6 @@ void Player::SendPetSkillWipeConfirm()
  * @param i The virtual slot index.
  * @param item The item to reflect in the virtual slot.
  */
-
-
-
-
-
-
-
-
-
-
-
 
 
 /*********************************************************/
@@ -4293,206 +4049,6 @@ void Player::InitDisplayIds()
 }
 
 
-
-
-
-
-/**
- * @brief Applies personal and category cooldowns for a spell cast.
- *
- * @param spellInfo The spell entry that triggered the cooldown.
- * @param itemId The casting item entry, if any.
- * @param spell The active spell instance.
- * @param infinityCooldown True to apply a long-lived cooldown marker.
- */
-void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 itemId, Spell* spell, bool infinityCooldown)
-{
-    // init cooldown values
-    uint32 cat   = 0;
-    int32 rec    = -1;
-    int32 catrec = -1;
-
-    // some special item spells without correct cooldown in SpellInfo
-    // cooldown information stored in item prototype
-    // This used in same way in WorldSession::HandleItemQuerySingleOpcode data sending to client.
-
-    if (itemId)
-    {
-        if (ItemPrototype const* proto = ObjectMgr::GetItemPrototype(itemId))
-        {
-            for (int idx = 0; idx < MAX_ITEM_PROTO_SPELLS; ++idx)
-            {
-                if (proto->Spells[idx].SpellId == spellInfo->Id)
-                {
-                    cat    = proto->Spells[idx].SpellCategory;
-                    rec    = proto->Spells[idx].SpellCooldown;
-                    catrec = proto->Spells[idx].SpellCategoryCooldown;
-                    break;
-                }
-            }
-        }
-    }
-
-    // if no cooldown found above then base at DBC data
-    if (rec < 0 && catrec < 0)
-    {
-        cat = spellInfo->Category;
-        rec = spellInfo->RecoveryTime;
-        catrec = spellInfo->CategoryRecoveryTime;
-    }
-
-    time_t curTime = time(NULL);
-
-    time_t catrecTime;
-    time_t recTime;
-
-    // overwrite time for selected category
-    if (infinityCooldown)
-    {
-        // use +MONTH as infinity mark for spell cooldown (will checked as MONTH/2 at save ans skipped)
-        // but not allow ignore until reset or re-login
-        catrecTime = catrec > 0 ? curTime + infinityCooldownDelay : 0;
-        recTime    = rec    > 0 ? curTime + infinityCooldownDelay : catrecTime;
-    }
-    else
-    {
-        // shoot spells used equipped item cooldown values already assigned in GetAttackTime(RANGED_ATTACK)
-        // prevent 0 cooldowns set by another way
-        if (rec <= 0 && catrec <= 0 && (cat == 76 || (IsAutoRepeatRangedSpell(spellInfo) && spellInfo->Id != SPELL_ID_AUTOSHOT)))
-        {
-            rec = GetAttackTime(RANGED_ATTACK);
-        }
-
-        // Now we have cooldown data (if found any), time to apply mods
-        if (rec > 0)
-        {
-            ApplySpellMod(spellInfo->Id, SPELLMOD_COOLDOWN, rec);
-        }
-
-        if (catrec > 0)
-        {
-            ApplySpellMod(spellInfo->Id, SPELLMOD_COOLDOWN, catrec);
-        }
-
-        // replace negative cooldowns by 0
-        if (rec < 0) rec = 0;
-        {
-            if (catrec < 0) catrec = 0;
-        }
-
-        // no cooldown after applying spell mods
-        if (rec == 0 && catrec == 0)
-        {
-            return;
-        }
-
-        catrecTime = catrec ? curTime + catrec / IN_MILLISECONDS : 0;
-        recTime    = rec ? curTime + rec / IN_MILLISECONDS : catrecTime;
-    }
-
-    // self spell cooldown
-    if (recTime > 0)
-    {
-        AddSpellCooldown(spellInfo->Id, itemId, recTime);
-    }
-
-    // category spells
-    if (cat && catrec > 0)
-    {
-        SpellCategoryStore::const_iterator i_scstore = sSpellCategoryStore.find(cat);
-        if (i_scstore != sSpellCategoryStore.end())
-        {
-            for (SpellCategorySet::const_iterator i_scset = i_scstore->second.begin(); i_scset != i_scstore->second.end(); ++i_scset)
-            {
-                if (*i_scset == spellInfo->Id)              // skip main spell, already handled above
-                {
-                    continue;
-                }
-
-                AddSpellCooldown(*i_scset, itemId, catrecTime);
-            }
-        }
-    }
-}
-
-/**
- * @brief Stores a cooldown entry for a spell.
- *
- * @param spellid The spell identifier.
- * @param itemid The associated item identifier, if any.
- * @param end_time The server time when the cooldown ends.
- */
-void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, time_t end_time)
-{
-    SpellCooldown sc;
-    sc.end = end_time;
-    sc.itemid = itemid;
-    m_spellCooldowns[spellid] = sc;
-}
-
-/**
- * @brief Applies cooldowns and notifies the client about a spell cooldown event.
- *
- * @param spellInfo The spell entry that triggered the cooldown.
- * @param itemId The associated item entry, if any.
- * @param spell The active spell instance.
- */
-void Player::SendCooldownEvent(SpellEntry const* spellInfo, uint32 itemId, Spell* spell)
-{
-    // start cooldowns at server side, if any
-    AddSpellAndCategoryCooldowns(spellInfo, itemId, spell);
-
-    // Send activate cooldown timer (possible 0) at client side
-    WorldPacket data(SMSG_COOLDOWN_EVENT, (4 + 8));
-    data << uint32(spellInfo->Id);
-    data << GetObjectGuid();
-    SendDirectMessage(&data);
-}
-
-void Player::UpdatePotionCooldown(Spell* spell)
-{
-    // no potion used in combat or still in combat
-    if (!m_lastPotionId || IsInCombat())
-    {
-        return;
-    }
-
-    // Call not from spell cast, send cooldown event for item spells if no in combat
-    if (!spell)
-    {
-        // spell/item pair let set proper cooldown (except nonexistent charged spell cooldown spellmods for potions)
-        if (ItemPrototype const* proto = ObjectMgr::GetItemPrototype(m_lastPotionId))
-            for (int idx = 0; idx < 5; ++idx)
-            {
-                if (proto->Spells[idx].SpellId && proto->Spells[idx].SpellTrigger == ITEM_SPELLTRIGGER_ON_USE)
-                    if (SpellEntry const* spellInfo = sSpellStore.LookupEntry(proto->Spells[idx].SpellId))
-                    {
-                        SendCooldownEvent(spellInfo, m_lastPotionId);
-                    }
-            }
-    }
-    // from spell cases (m_lastPotionId set in Spell::SendSpellCooldown)
-    else
-    {
-        SendCooldownEvent(spell->m_spellInfo, m_lastPotionId, spell);
-    }
-
-    m_lastPotionId = 0;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void Player::SetPhaseMask(uint32 newPhaseMask, bool update)
 {
     // GM-mode have mask PHASEMASK_ANYWHERE always
@@ -4518,7 +4074,6 @@ void Player::InitPrimaryProfessions()
 {
     SetFreePrimaryProfessions(sWorld.getConfig(CONFIG_UINT32_MAX_PRIMARY_TRADE_SKILL));
 }
-
 
 
 void Player::SendInitialPacketsBeforeAddToMap()
@@ -4626,7 +4181,6 @@ void Player::SendInitialPacketsAfterAddToMap()
 }
 
 
-
 /**
  * @brief Applies the default equip cooldown for item use spells.
  *
@@ -4665,10 +4219,6 @@ void Player::ApplyEquipCooldown(Item* pItem)
 }
 
 
-
-
-
-
 /**
  * @brief Sends visible aura duration updates for a target to the player.
  *
@@ -4696,8 +4246,6 @@ void Player::SendAurasForTarget(Unit* target)
 
     GetSession()->SendPacket(&data);
 }
-
-
 
 
 /**
@@ -5088,10 +4636,6 @@ uint32 Player::GetResurrectionSpellId()
 }
 
 
-
-
-
-
 /**
  * @brief Gets the player's base weapon skill for an attack type.
  *
@@ -5172,10 +4716,6 @@ void Player::SetClientControl(Unit* target, uint8 allowMove)
     data << uint8(allowMove);
     GetSession()->SendPacket(&data);
 }
-
-
-
-
 
 
 /**
@@ -5470,99 +5010,6 @@ void Player::SetTitle(CharTitlesEntry const* title, bool lost)
     data << uint32(title->bit_index);
     data << uint32(lost ? 0 : 1);                           // 1 - earned, 0 - lost
     GetSession()->SendPacket(&data);
-}
-
-void Player::ConvertRune(uint8 index, RuneType newType)
-{
-    SetCurrentRune(index, newType);
-
-    WorldPacket data(SMSG_CONVERT_RUNE, 2);
-    data << uint8(index);
-    data << uint8(newType);
-    GetSession()->SendPacket(&data);
-}
-
-bool Player::ActivateRunes(RuneType type, uint32 count)
-{
-    bool modify = false;
-    for (uint32 j = 0; count > 0 && j < MAX_RUNES; ++j)
-    {
-        if (GetRuneCooldown(j) && GetCurrentRune(j) == type)
-        {
-            SetRuneCooldown(j, 0);
-            --count;
-            modify = true;
-        }
-    }
-
-    return modify;
-}
-
-void Player::ResyncRunes()
-{
-    WorldPacket data(SMSG_RESYNC_RUNES, 4 + MAX_RUNES * 2);
-    data << uint32(MAX_RUNES);
-    for (uint32 i = 0; i < MAX_RUNES; ++i)
-    {
-        data << uint8(GetCurrentRune(i));                   // rune type
-        data << uint8(255 - ((GetRuneCooldown(i) / REGEN_TIME_FULL) * 51));     // passed cooldown time (0-255)
-    }
-    GetSession()->SendPacket(&data);
-}
-
-void Player::AddRunePower(uint8 index)
-{
-    WorldPacket data(SMSG_ADD_RUNE_POWER, 4);
-    data << uint32(1 << index);                             // mask (0x00-0x3F probably)
-    GetSession()->SendPacket(&data);
-}
-
-static RuneType runeSlotTypes[MAX_RUNES] =
-{
-    /*0*/ RUNE_BLOOD,
-    /*1*/ RUNE_BLOOD,
-    /*2*/ RUNE_UNHOLY,
-    /*3*/ RUNE_UNHOLY,
-    /*4*/ RUNE_FROST,
-    /*5*/ RUNE_FROST
-};
-
-void Player::InitRunes()
-{
-    if (getClass() != CLASS_DEATH_KNIGHT)
-    {
-        return;
-    }
-
-    m_runes = new Runes;
-
-    m_runes->runeState = 0;
-
-    for (uint32 i = 0; i < MAX_RUNES; ++i)
-    {
-        SetBaseRune(i, runeSlotTypes[i]);                   // init base types
-        SetCurrentRune(i, runeSlotTypes[i]);                // init current types
-        SetRuneCooldown(i, 0);                              // reset cooldowns
-        m_runes->SetRuneState(i);
-    }
-
-    for (uint32 i = 0; i < NUM_RUNE_TYPES; ++i)
-    {
-        SetFloatValue(PLAYER_RUNE_REGEN_1 + i, 0.1f);
-    }
-}
-
-bool Player::IsBaseRuneSlotsOnCooldown(RuneType runeType) const
-{
-    for (uint32 i = 0; i < MAX_RUNES; ++i)
-    {
-        if (GetBaseRune(i) == runeType && GetRuneCooldown(i) == 0)
-        {
-            return false;
-        }
-    }
-
-    return true;
 }
 
 /**
@@ -6095,7 +5542,6 @@ SpellEntry const* Player::GetKnownTalentRankById(int32 talentId) const
 }
 
 
-
 void Player::UpdateKnownCurrencies(uint32 itemId, bool apply)
 {
     if (CurrencyTypesEntry const* ctEntry = sCurrencyTypesStore.LookupEntry(itemId))
@@ -6110,62 +5556,6 @@ void Player::UpdateKnownCurrencies(uint32 itemId, bool apply)
         }
     }
 }
-
-
-/**
- * @brief Temporarily unsummons the current pet when the player's state requires it.
- */
-void Player::UnsummonPetTemporaryIfAny()
-{
-    Pet* pet = GetPet();
-    if (!pet)
-    {
-        return;
-    }
-
-    if (!m_temporaryUnsummonedPetNumber && pet->isControlled() && !pet->isTemporarySummoned())
-    {
-        m_temporaryUnsummonedPetNumber = pet->GetCharmInfo()->GetPetNumber();
-    }
-
-    pet->Unsummon(PET_SAVE_AS_CURRENT, this);
-}
-
-/**
- * @brief Resummons a pet that was temporarily unsummoned earlier.
- */
-void Player::ResummonPetTemporaryUnSummonedIfAny()
-{
-    if (!m_temporaryUnsummonedPetNumber)
-    {
-        return;
-    }
-
-    // not resummon in not appropriate state
-    if (IsPetNeedBeTemporaryUnsummoned())
-    {
-        return;
-    }
-
-    if (GetPetGuid())
-    {
-        return;
-    }
-
-    Pet* NewPet = new Pet;
-    if (!NewPet->LoadPetFromDB(this, 0, m_temporaryUnsummonedPetNumber, true))
-    {
-        delete NewPet;
-    }
-
-    m_temporaryUnsummonedPetNumber = 0;
-}
-
-
-
-
-
-
 
 
 void Player::_SaveEquipmentSets()
@@ -6279,8 +5669,6 @@ void Player::_SaveBGData()
 
     m_bgData.m_needSave = false;
 }
-
-
 
 
 /**
@@ -6498,10 +5886,6 @@ Object* Player::GetObjectByTypeMask(ObjectGuid guid, TypeMask typemask)
 }
 
 
-
-
-
-
 float Player::GetCollisionHeight(bool mounted) const
 {
     if (mounted)
@@ -6577,14 +5961,4 @@ void Player::_LoadRandomBGStatus(QueryResult *result)
         delete result;
     }
 }
-
-
-
-
-
-
-
-
-
-
 
