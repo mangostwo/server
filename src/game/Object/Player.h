@@ -58,6 +58,7 @@
 #include "GlyphMgr.h"   // GlyphMgr is held by value on Player; brings in Glyph struct + GlyphUpdateState enum
 #include "HonorMgr.h"   // HonorMgr is held by value on Player; owns daily-kill rollover + RewardHonor calculation
 #include "PetMgr.h"     // PetMgr is held by value on Player; owns stable slots + temporary-unsummon lifecycle
+#include "RuneMgr.h"    // RuneMgr is held by value on Player; brings in Rune structs + owns death-knight rune state
 
 #include "Database/DatabaseEnv.h"
 #include "NPCHandler.h"
@@ -373,42 +374,7 @@ struct Areas
     float y2;        // Y2 coordinate
 };
 
-#define MAX_RUNES               6
-#define RUNE_COOLDOWN           (2*5*IN_MILLISECONDS)       // msec
-
-enum RuneType
-{
-    RUNE_BLOOD                  = 0,
-    RUNE_UNHOLY                 = 1,
-    RUNE_FROST                  = 2,
-    RUNE_DEATH                  = 3,
-    NUM_RUNE_TYPES              = 4
-};
-
-struct RuneInfo
-{
-    uint8  BaseRune;
-    uint8  CurrentRune;
-    uint16 Cooldown;                                        // msec
-};
-
-struct Runes
-{
-    RuneInfo runes[MAX_RUNES];
-    uint8 runeState;                                        // mask of available runes
-
-    void SetRuneState(uint8 index, bool set = true)
-    {
-        if (set)
-        {
-            runeState |= (1 << index);                      // usable
-        }
-        else
-        {
-            runeState &= ~(1 << index);                     // on cooldown
-        }
-    }
-};
+// MAX_RUNES, RUNE_COOLDOWN, RuneType, RuneInfo and Runes moved to RuneMgr.h.
 
 struct EnchantDuration
 {
@@ -3828,20 +3794,21 @@ class Player : public Unit
 
         DeclinedName const* GetDeclinedNames() const { return m_declinedname; }
 
-        // Rune functions, need check  getClass() == CLASS_DEATH_KNIGHT before access
-        uint8 GetRunesState() const { return m_runes->runeState; }
-        RuneType GetBaseRune(uint8 index) const { return RuneType(m_runes->runes[index].BaseRune); }
-        RuneType GetCurrentRune(uint8 index) const { return RuneType(m_runes->runes[index].CurrentRune); }
-        uint16 GetRuneCooldown(uint8 index) const { return m_runes->runes[index].Cooldown; }
-        bool IsBaseRuneSlotsOnCooldown(RuneType runeType) const;
-        void SetBaseRune(uint8 index, RuneType baseRune) { m_runes->runes[index].BaseRune = baseRune; }
-        void SetCurrentRune(uint8 index, RuneType currentRune) { m_runes->runes[index].CurrentRune = currentRune; }
-        void SetRuneCooldown(uint8 index, uint16 cooldown) { m_runes->runes[index].Cooldown = cooldown; m_runes->SetRuneState(index, (cooldown == 0) ? true : false); }
-        void ConvertRune(uint8 index, RuneType newType);
-        bool ActivateRunes(RuneType type, uint32 count);
-        void ResyncRunes();
-        void AddRunePower(uint8 index);
-        void InitRunes();
+        // Rune API — thin delegating wrappers around m_runeMgr.
+        // Need check getClass() == CLASS_DEATH_KNIGHT before access.
+        uint8 GetRunesState() const { return m_runeMgr.GetRunesState(); }
+        RuneType GetBaseRune(uint8 index) const { return m_runeMgr.GetBaseRune(index); }
+        RuneType GetCurrentRune(uint8 index) const { return m_runeMgr.GetCurrentRune(index); }
+        uint16 GetRuneCooldown(uint8 index) const { return m_runeMgr.GetRuneCooldown(index); }
+        bool IsBaseRuneSlotsOnCooldown(RuneType runeType) const { return m_runeMgr.IsBaseRuneSlotsOnCooldown(runeType); }
+        void SetBaseRune(uint8 index, RuneType baseRune) { m_runeMgr.SetBaseRune(index, baseRune); }
+        void SetCurrentRune(uint8 index, RuneType currentRune) { m_runeMgr.SetCurrentRune(index, currentRune); }
+        void SetRuneCooldown(uint8 index, uint16 cooldown) { m_runeMgr.SetRuneCooldown(index, cooldown); }
+        void ConvertRune(uint8 index, RuneType newType) { m_runeMgr.ConvertRune(index, newType); }
+        bool ActivateRunes(RuneType type, uint32 count) { return m_runeMgr.ActivateRunes(type, count); }
+        void ResyncRunes() { m_runeMgr.ResyncRunes(); }
+        void AddRunePower(uint8 index) { m_runeMgr.AddRunePower(index); }
+        void InitRunes() { m_runeMgr.InitRunes(); }
 
         AchievementMgr const& GetAchievementMgr() const { return m_achievementMgr; }
         AchievementMgr& GetAchievementMgr() { return m_achievementMgr; }
@@ -4142,7 +4109,7 @@ class Player : public Unit
         float m_summon_z; // Summon Z coordinate
 
         DeclinedName* m_declinedname;
-        Runes* m_runes;
+        RuneMgr m_runeMgr;   // owns death-knight rune state + lifecycle
         EquipmentSets m_EquipmentSets;
 
         /// class dependent melee diminishing constant for dodge/parry/missed chances

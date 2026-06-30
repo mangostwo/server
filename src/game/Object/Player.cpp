@@ -526,7 +526,7 @@ UpdateMask Player::updateVisualBits;
  *
  * @param session The owning world session.
  */
-Player::Player(WorldSession* session): Unit(), m_honorMgr(this), m_glyphMgr(this), m_mover(this), m_camera(this), m_petMgr(this), m_achievementMgr(this), m_reputationMgr(this)
+Player::Player(WorldSession* session): Unit(), m_honorMgr(this), m_glyphMgr(this), m_runeMgr(this), m_mover(this), m_camera(this), m_petMgr(this), m_achievementMgr(this), m_reputationMgr(this)
 {
     m_transport = 0;
 
@@ -747,7 +747,7 @@ Player::Player(WorldSession* session): Unit(), m_honorMgr(this), m_glyphMgr(this
 
     // Initialize declined name to NULL
     m_declinedname = NULL;
-    m_runes = NULL;
+    // rune state is owned by m_runeMgr; initialized in its ctor (NULL until InitRunes for a death knight).
 
     // Initialize last fall time to 0
     m_lastFallTime = 0;
@@ -814,7 +814,7 @@ Player::~Player()
     }
 
     delete m_declinedname;
-    delete m_runes;
+    // m_runes is owned by m_runeMgr and freed in its destructor.
 }
 
 /**
@@ -5280,99 +5280,6 @@ void Player::SetTitle(CharTitlesEntry const* title, bool lost)
     data << uint32(title->bit_index);
     data << uint32(lost ? 0 : 1);                           // 1 - earned, 0 - lost
     GetSession()->SendPacket(&data);
-}
-
-void Player::ConvertRune(uint8 index, RuneType newType)
-{
-    SetCurrentRune(index, newType);
-
-    WorldPacket data(SMSG_CONVERT_RUNE, 2);
-    data << uint8(index);
-    data << uint8(newType);
-    GetSession()->SendPacket(&data);
-}
-
-bool Player::ActivateRunes(RuneType type, uint32 count)
-{
-    bool modify = false;
-    for (uint32 j = 0; count > 0 && j < MAX_RUNES; ++j)
-    {
-        if (GetRuneCooldown(j) && GetCurrentRune(j) == type)
-        {
-            SetRuneCooldown(j, 0);
-            --count;
-            modify = true;
-        }
-    }
-
-    return modify;
-}
-
-void Player::ResyncRunes()
-{
-    WorldPacket data(SMSG_RESYNC_RUNES, 4 + MAX_RUNES * 2);
-    data << uint32(MAX_RUNES);
-    for (uint32 i = 0; i < MAX_RUNES; ++i)
-    {
-        data << uint8(GetCurrentRune(i));                   // rune type
-        data << uint8(255 - ((GetRuneCooldown(i) / REGEN_TIME_FULL) * 51));     // passed cooldown time (0-255)
-    }
-    GetSession()->SendPacket(&data);
-}
-
-void Player::AddRunePower(uint8 index)
-{
-    WorldPacket data(SMSG_ADD_RUNE_POWER, 4);
-    data << uint32(1 << index);                             // mask (0x00-0x3F probably)
-    GetSession()->SendPacket(&data);
-}
-
-static RuneType runeSlotTypes[MAX_RUNES] =
-{
-    /*0*/ RUNE_BLOOD,
-    /*1*/ RUNE_BLOOD,
-    /*2*/ RUNE_UNHOLY,
-    /*3*/ RUNE_UNHOLY,
-    /*4*/ RUNE_FROST,
-    /*5*/ RUNE_FROST
-};
-
-void Player::InitRunes()
-{
-    if (getClass() != CLASS_DEATH_KNIGHT)
-    {
-        return;
-    }
-
-    m_runes = new Runes;
-
-    m_runes->runeState = 0;
-
-    for (uint32 i = 0; i < MAX_RUNES; ++i)
-    {
-        SetBaseRune(i, runeSlotTypes[i]);                   // init base types
-        SetCurrentRune(i, runeSlotTypes[i]);                // init current types
-        SetRuneCooldown(i, 0);                              // reset cooldowns
-        m_runes->SetRuneState(i);
-    }
-
-    for (uint32 i = 0; i < NUM_RUNE_TYPES; ++i)
-    {
-        SetFloatValue(PLAYER_RUNE_REGEN_1 + i, 0.1f);
-    }
-}
-
-bool Player::IsBaseRuneSlotsOnCooldown(RuneType runeType) const
-{
-    for (uint32 i = 0; i < MAX_RUNES; ++i)
-    {
-        if (GetBaseRune(i) == runeType && GetRuneCooldown(i) == 0)
-        {
-            return false;
-        }
-    }
-
-    return true;
 }
 
 /**
