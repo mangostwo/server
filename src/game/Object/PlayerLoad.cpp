@@ -667,7 +667,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 
     // Honor system
     // Update Honor kills data
-    m_lastHonorUpdateTime = logoutTime;
+    m_honorMgr.SetLastKillUpdate(logoutTime);
     UpdateHonorFields();
 
     m_deathExpireTime = (time_t)fields[36].GetUInt64();

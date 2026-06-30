@@ -56,6 +56,7 @@
 #include "Unit.h"
 #include "Item.h"
 #include "GlyphMgr.h"   // GlyphMgr is held by value on Player; brings in Glyph struct + GlyphUpdateState enum
+#include "HonorMgr.h"   // HonorMgr is held by value on Player; owns daily-kill rollover + RewardHonor calculation
 
 #include "Database/DatabaseEnv.h"
 #include "NPCHandler.h"
@@ -3139,11 +3140,12 @@ class Player : public Unit
         // Update arena fields
         void UpdateArenaFields();
 
+        // Honor API — thin delegating wrappers around m_honorMgr.
         // Update honor fields
-        void UpdateHonorFields();
+        void UpdateHonorFields() { m_honorMgr.UpdateKills(); }
 
         // Reward honor for killing a unit
-        bool RewardHonor(Unit* pVictim, uint32 groupsize, float honor = -1);
+        bool RewardHonor(Unit* pVictim, uint32 groupsize, float honor = -1) { return m_honorMgr.Reward(pVictim, groupsize, honor); }
 
         // Get the player's honor points
         uint32 GetHonorPoints() const { return GetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY); }
@@ -4000,7 +4002,7 @@ class Player : public Unit
         /***                  HONOR SYSTEM                     ***/
         /*********************************************************/
 
-        time_t m_lastHonorUpdateTime; // Last honor update time
+        HonorMgr m_honorMgr;   // daily / yesterday kill rollover + RewardHonor calculation
 
         // Output debug stats values
         void outDebugStatsValues() const;
