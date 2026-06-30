@@ -526,7 +526,7 @@ UpdateMask Player::updateVisualBits;
  *
  * @param session The owning world session.
  */
-Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_achievementMgr(this), m_reputationMgr(this)
+Player::Player(WorldSession* session): Unit(), m_glyphMgr(this), m_mover(this), m_camera(this), m_achievementMgr(this), m_reputationMgr(this)
 {
     m_transport = 0;
 
@@ -5407,73 +5407,6 @@ uint32 Player::GetBarberShopCost(uint8 newhairstyle, uint8 newhaircolor, uint8 n
     }
 
     return uint32(cost);
-}
-
-void Player::InitGlyphsForLevel()
-{
-    for (uint32 i = 0; i < sGlyphSlotStore.GetNumRows(); ++i)
-    {
-        if (GlyphSlotEntry const* gs = sGlyphSlotStore.LookupEntry(i))
-            if (gs->Order)
-            {
-                SetGlyphSlot(gs->Order - 1, gs->Id);
-            }
-    }
-
-    uint32 level = getLevel();
-    uint32 value = 0;
-
-    // 0x3F = 0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20 for 80 level
-    if (level >= 15)
-    {
-        value |= (0x01 | 0x02);
-    }
-    if (level >= 30)
-    {
-        value |= 0x08;
-    }
-    if (level >= 50)
-    {
-        value |= 0x04;
-    }
-    if (level >= 70)
-    {
-        value |= 0x10;
-    }
-    if (level >= 80)
-    {
-        value |= 0x20;
-    }
-
-    SetUInt32Value(PLAYER_GLYPHS_ENABLED, value);
-}
-
-void Player::ApplyGlyph(uint8 slot, bool apply)
-{
-    if (uint32 glyph = GetGlyph(slot))
-    {
-        if (GlyphPropertiesEntry const* gp = sGlyphPropertiesStore.LookupEntry(glyph))
-        {
-            if (apply)
-            {
-                CastSpell(this, gp->SpellId, true);
-                SetUInt32Value(PLAYER_FIELD_GLYPHS_1 + slot, glyph);
-            }
-            else
-            {
-                RemoveAurasDueToSpell(gp->SpellId);
-                SetUInt32Value(PLAYER_FIELD_GLYPHS_1 + slot, 0);
-            }
-        }
-    }
-}
-
-void Player::ApplyGlyphs(bool apply)
-{
-    for (uint8 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
-    {
-        ApplyGlyph(i, apply);
-    }
 }
 
 /**
