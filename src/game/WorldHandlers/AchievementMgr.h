@@ -330,6 +330,8 @@ class AchievementGlobalMgr
         void LoadAchievementCriteriaRequirements();
         void LoadAchievementReferenceList();
         void LoadCompletedAchievements();
+        /// Remove `character_achievement_progress` rows whose criteria no longer exists in DBC
+        void CleanupOrphanedCriteriaProgress();
         void LoadRewards();
         void LoadRewardLocales();
 
