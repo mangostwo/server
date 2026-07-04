@@ -368,6 +368,44 @@ void AchievementGlobalMgr::LoadCompletedAchievements()
     sLog.outString(">> Loaded %zu realm completed achievements.", m_allCompletedAchievements.size());
 }
 
+void AchievementGlobalMgr::CleanupOrphanedCriteriaProgress()
+{
+    QueryResult* result = CharacterDatabase.Query("SELECT DISTINCT `criteria` FROM `character_achievement_progress`");
+
+    if (!result)
+    {
+        BarGoLink bar(1);
+        bar.step();
+
+        sLog.outString();
+        sLog.outString(">> Removed 0 orphaned criteria data. DB table `character_achievement_progress` is empty.");
+        return;
+    }
+
+    uint32 count = 0;
+    BarGoLink bar(result->GetRowCount());
+    do
+    {
+        bar.step();
+        Field* fields = result->Fetch();
+
+        uint32 criteria_id = fields[0].GetUInt32();
+        if (!sAchievementCriteriaStore.LookupEntry(criteria_id))
+        {
+            // we will remove nonexistent criteria for all characters
+            sLog.outError("Nonexistent achievement criteria %u data removed from table `character_achievement_progress`.", criteria_id);
+            CharacterDatabase.PExecute("DELETE FROM `character_achievement_progress` WHERE `criteria` = %u", criteria_id);
+            ++count;
+        }
+    }
+    while (result->NextRow());
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString(">> Removed %u orphaned criteria data from table `character_achievement_progress`.", count);
+}
+
 void AchievementGlobalMgr::LoadRewards()
 {
     m_achievementRewards.clear();                           // need for reload case

@@ -666,6 +666,7 @@ void World::SetInitialWorldSettings()
     sAchievementMgr.LoadRewards();
     sAchievementMgr.LoadRewardLocales();
     sAchievementMgr.LoadCompletedAchievements();
+    sAchievementMgr.CleanupOrphanedCriteriaProgress();
     sLog.outString(">>> Achievements loaded");
     sLog.outString();
 
