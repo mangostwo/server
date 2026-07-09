@@ -174,7 +174,7 @@ void Player::CheckAreaExploreAndOutdoor()
         {
             sLog.outError("PLAYER: Player %u discovered unknown area (x: %f y: %f map: %u", GetGUIDLow(), GetPositionX(), GetPositionY(), GetMapId());
         }
-        else if (p->area_level > 0)
+        else if (p->ExplorationLevel > 0)
         {
             uint32 area = p->ID;
             if (getLevel() >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
@@ -183,7 +183,7 @@ void Player::CheckAreaExploreAndOutdoor()
             }
             else
             {
-                int32 diff = int32(getLevel()) - p->area_level;
+                int32 diff = int32(getLevel()) - p->ExplorationLevel;
                 uint32 XP = 0;
                 if (diff < -5)
                 {
@@ -201,11 +201,11 @@ void Player::CheckAreaExploreAndOutdoor()
                         exploration_percent = 0;
                     }
 
-                    XP = uint32(sObjectMgr.GetBaseXP(p->area_level) * exploration_percent / 100 * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_EXPLORE));
+                    XP = uint32(sObjectMgr.GetBaseXP(p->ExplorationLevel) * exploration_percent / 100 * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_EXPLORE));
                 }
                 else
                 {
-                    XP = uint32(sObjectMgr.GetBaseXP(p->area_level) * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_EXPLORE));
+                    XP = uint32(sObjectMgr.GetBaseXP(p->ExplorationLevel) * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_EXPLORE));
                 }
 
                 GiveXP(XP, NULL);
@@ -229,7 +229,7 @@ void Player::UpdateArea(uint32 newArea)
 
     // FFA_PVP flags are area and not zone id dependent
     // so apply them accordingly
-    if (area && (area->flags & AREA_FLAG_ARENA))
+    if (area && (area->Flags & AREA_FLAG_ARENA))
     {
         if (!isGameMaster())
         {
@@ -249,7 +249,7 @@ void Player::UpdateArea(uint32 newArea)
     if (area)
     {
         // Dalaran restricted flight zone
-        if ((area->flags & AREA_FLAG_CANNOT_FLY) && IsFreeFlying() && !isGameMaster() && !HasAura(58600))
+        if ((area->Flags & AREA_FLAG_CANNOT_FLY) && IsFreeFlying() && !isGameMaster() && !HasAura(58600))
         {
             CastSpell(this, 58600, true);                   // Restricted Flight Area
         }
@@ -309,13 +309,13 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
 
     // in PvP, any not controlled zone (except zone->team == 6, default case)
     // in PvE, only opposition team capital
-    switch (zone->team)
+    switch (zone->FactionGroupMask)
     {
         case AREATEAM_ALLY:
-            pvpInfo.inHostileArea = GetTeam() != ALLIANCE && (sWorld.IsPvPRealm() || zone->flags & AREA_FLAG_CAPITAL);
+            pvpInfo.inHostileArea = GetTeam() != ALLIANCE && (sWorld.IsPvPRealm() || zone->Flags & AREA_FLAG_CAPITAL);
             break;
         case AREATEAM_HORDE:
-            pvpInfo.inHostileArea = GetTeam() != HORDE && (sWorld.IsPvPRealm() || zone->flags & AREA_FLAG_CAPITAL);
+            pvpInfo.inHostileArea = GetTeam() != HORDE && (sWorld.IsPvPRealm() || zone->Flags & AREA_FLAG_CAPITAL);
             break;
         case AREATEAM_NONE:
             // overwrite for battlegrounds, maybe batter some zone flags but current known not 100% fit to this
@@ -344,7 +344,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         }
     }
 
-    if (zone->flags & AREA_FLAG_SANCTUARY)                  // in sanctuary
+    if (zone->Flags & AREA_FLAG_SANCTUARY)                  // in sanctuary
     {
         SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
         if (sWorld.IsFFAPvPRealm())
@@ -357,7 +357,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
     }
 
-    if (zone->flags & AREA_FLAG_CAPITAL)                    // in capital city
+    if (zone->Flags & AREA_FLAG_CAPITAL)                    // in capital city
     {
         SetRestType(REST_TYPE_IN_CITY);
     }

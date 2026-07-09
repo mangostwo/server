@@ -49,7 +49,7 @@ bool IsPrimaryProfessionSkill(uint32 skill)
         return false;
     }
 
-    if (pSkill->categoryId != SKILL_CATEGORY_PROFESSION)
+    if (pSkill->CategoryID != SKILL_CATEGORY_PROFESSION)
     {
         return false;
     }

@@ -104,7 +104,7 @@ class ReputationMgr
 
         ReputationRank const* GetForcedRankIfAny(FactionTemplateEntry const* factionTemplateEntry) const
         {
-            ForcedReactions::const_iterator forceItr = m_forcedReactions.find(factionTemplateEntry->faction);
+            ForcedReactions::const_iterator forceItr = m_forcedReactions.find(factionTemplateEntry->Faction);
             return forceItr != m_forcedReactions.end() ? &forceItr->second : NULL;
         }
 

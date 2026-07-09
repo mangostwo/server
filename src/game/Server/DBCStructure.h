@@ -519,20 +519,20 @@ struct AchievementCriteriaEntry
 struct AreaTableEntry
 {
     uint32  ID;                                             // 0        m_ID - ID of the Area within the DBC.
-    uint32  mapid;                                          // 1        m_ContinentID - ID of the Continent in DBC (0 = Azeroth, 1 = Kalimdor, ...)
-    uint32  zone;                                           // 2        m_ParentAreaID - ID of the parent area.
-    uint32  exploreFlag;                                    // 3        m_AreaBit -
-    uint32  flags;                                          // 4        m_flags -
+    uint32  ContinentID;                                          // 1        m_ContinentID - ID of the Continent in DBC (0 = Azeroth, 1 = Kalimdor, ...)
+    uint32  ParentAreaID;                                           // 2        m_ParentAreaID - ID of the parent area.
+    uint32  AreaBit;                                    // 3        m_AreaBit -
+    uint32  Flags;                                          // 4        m_flags -
     // 5        m_SoundProviderPref
     // 6        m_SoundProviderPrefUnderwater
     // 7        m_AmbienceID
     // 8        m_ZoneMusic
     // 9        m_IntroSound
-    int32   area_level;                                     // 10       m_ExplorationLevel
-    char*   area_name[16];                                  // 11-26    m_AreaName_lang
-    // 27 string flags
-    uint32  team;                                           // 28       m_factionGroupMask
-    uint32  LiquidTypeOverride[4];                          // 29-32    m_liquidTypeID[4]
+    int32   ExplorationLevel;                                     // 10       m_ExplorationLevel
+    char*   AreaName_lang[16];                                  // 11-26    m_AreaName_lang
+    // 27 string Flags
+    uint32  FactionGroupMask;                                           // 28       m_factionGroupMask
+    uint32  LiquidTypeID[4];                          // 29-32    m_liquidTypeID[4]
     // 33       m_minElevation
     // 34       m_ambient_multiplier
     // 35       m_lightid
@@ -551,16 +551,16 @@ struct AreaGroupEntry
 */
 struct AreaTriggerEntry
 {
-    uint32    id;                                           // 0 - ID of the Area within the DBC.
-    uint32    mapid;                                        // 1 - ID of the Continent in DBC (0 = Azeroth, 1 = Kalimdor, ...)
-    float     x;                                            // 2 - X position of the Area Trigger Entry.
-    float     y;                                            // 3 - Y position of the Area Trigger Entry.
-    float     z;                                            // 4 - Z position of the Area Trigger Entry.
-    float     radius;                                       // 5 - Radius around the Area Trigger point.
-    float     box_x;                                        // 6 - extent x edge
-    float     box_y;                                        // 7 - extent y edge
-    float     box_z;                                        // 8 - extent z edge
-    float     box_orientation;                              // 9 - extent rotation by about z axis
+    uint32    ID;                                           // 0 - ID of the Area within the DBC.
+    uint32    ContinentID;                                        // 1 - ID of the Continent in DBC (0 = Azeroth, 1 = Kalimdor, ...)
+    float     Pos_0;                                            // 2 - X position of the Area Trigger Entry.
+    float     Pos_1;                                            // 3 - Y position of the Area Trigger Entry.
+    float     Pos_2;                                            // 4 - Z position of the Area Trigger Entry.
+    float     Radius;                                       // 5 - Radius around the Area Trigger point.
+    float     Box_length;                                        // 6 - extent Pos_0 edge
+    float     Box_width;                                        // 7 - extent Pos_1 edge
+    float     Box_height;                                        // 8 - extent Pos_2 edge
+    float     Box_yaw;                              // 9 - extent rotation by about Pos_2 axis
 };
 
 /**
@@ -685,21 +685,21 @@ struct ChatChannelsEntry
 */
 struct ChrClassesEntry
 {
-    uint32  ClassID;                                        // 0        m_ID - ID of the Char Class in DBC.
+    uint32  ID;                                        // 0        m_ID - ID of the Char Class in DBC.
     // uint32 flags;                                        // 1 unknown
-    uint32  powerType;                                      // 2        m_DisplayPower
+    uint32  DisplayPower;                                      // 2        m_DisplayPower
     // 3        m_petNameToken
-    char const* name[16];                                   // 4-19     m_name_lang
+    char const* Name_lang[16];                                   // 4-19     m_name_lang
     // 20 string flags
     // char*       nameFemale[16];                          // 21-36    m_name_female_lang
     // 37 string flags
     // char*       nameNeutralGender[16];                   // 38-53    m_name_male_lang
     // 54 string flags
     // 55       m_filename
-    uint32  spellfamily;                                    // 56       m_spellClassSet
+    uint32  SpellClassSet;                                    // 56       m_spellClassSet
     // uint32 flags2;                                       // 57       m_flags (0x08 HasRelicSlot)
-    uint32  CinematicSequence;                              // 58       m_cinematicSequenceID
-    uint32  expansion;                                      // 59       m_required_expansion
+    uint32  CinematicSequenceID;                              // 58       m_cinematicSequenceID
+    uint32  Required_expansion;                                      // 59       m_required_expansion
 };
 
 /**
@@ -708,21 +708,21 @@ struct ChrClassesEntry
 */
 struct ChrRacesEntry
 {
-    uint32      RaceID;                                     // 0        m_ID - ID of the Char Race in DBC.
+    uint32      ID;                                     // 0        m_ID - ID of the Char Race in DBC.
     // 1        m_flags
     uint32      FactionID;                                  // 2        m_factionID - ID of the faction in DBC. (See Faction.dbc)
     // 3        m_ExplorationSoundID
-    uint32      model_m;                                    // 4        m_MaleDisplayId - ID of the Male Display.
-    uint32      model_f;                                    // 5        m_FemaleDisplayId - ID of the Female Display.
+    uint32      MaleDisplayID;                                    // 4        m_MaleDisplayId - ID of the Male Display.
+    uint32      FemaleDisplayID;                                    // 5        m_FemaleDisplayId - ID of the Female Display.
     // 6        m_ClientPrefix
-    uint32      TeamID;                                     // 7        m_BaseLanguage (7-Alliance 1-Horde)
+    uint32      BaseLanguage;                                     // 7        m_BaseLanguage (7-Alliance 1-Horde)
     // 8        m_creatureType
     // 9        m_ResSicknessSpellID
     // 10       m_SplashSoundID
     // 11       m_clientFileString
-    uint32      CinematicSequence;                          // 12       m_cinematicSequenceID
+    uint32      CinematicSequenceID;                          // 12       m_cinematicSequenceID
     // uint32    unk_322;                                   // 13       m_alliance (0 alliance, 1 horde, 2 not available?)
-    char*       name[16];                                   // 14-29    m_name_lang used for DBC language detection/selection
+    char*       Name_lang[16];                                   // 14-29    m_name_lang used for DBC language detection/selection
     // 30 string flags
     // char*       nameFemale[16];                          // 31-46    m_name_female_lang
     // 47 string flags
@@ -730,7 +730,7 @@ struct ChrRacesEntry
     // 64 string flags
     // 65-66    m_facialHairCustomization[2]
     // 67       m_hairCustomization
-    uint32      expansion;                                  // 68       m_required_expansion
+    uint32      Required_expansion;                                  // 68       m_required_expansion
 };
 
 /*struct CinematicCameraEntry
@@ -1010,29 +1010,29 @@ struct FactionTemplateEntry
     /// 0
     uint32      ID;
     /// 1
-    uint32      faction;
-    /// 2 specific flags for that faction
-    uint32      factionFlags;
-    /// 3 if mask set (see FactionMasks) then faction included in masked team
-    uint32      ourMask;
-    /// 4 if mask set (see FactionMasks) then faction friendly to masked team
-    uint32      friendlyMask;
-    /// 5 if mask set (see FactionMasks) then faction hostile to masked team
-    uint32      hostileMask;
+    uint32      Faction;
+    /// 2 specific flags for that Faction
+    uint32      Flags;
+    /// 3 if mask set (see FactionMasks) then Faction included in masked team
+    uint32      FactionGroup;
+    /// 4 if mask set (see FactionMasks) then Faction friendly to masked team
+    uint32      FriendGroup;
+    /// 5 if mask set (see FactionMasks) then Faction hostile to masked team
+    uint32      EnemyGroup;
     /// 6-9
-    uint32      enemyFaction[4];
+    uint32      Enemies[4];
     /// 10-13
-    uint32      friendFaction[4];
+    uint32      Friend[4];
     //-------------------------------------------------------  end structure
 
     // helpers
     bool IsFriendlyTo(FactionTemplateEntry const& entry) const
     {
-        if (entry.faction)
+        if (entry.Faction)
         {
             for (int i = 0; i < 4; ++i)
             {
-                if (enemyFaction[i]  == entry.faction)
+                if (Enemies[i]  == entry.Faction)
                 {
                     return false;
                 }
@@ -1040,21 +1040,21 @@ struct FactionTemplateEntry
 
             for (int i = 0; i < 4; ++i)
             {
-                if (friendFaction[i] == entry.faction)
+                if (Friend[i] == entry.Faction)
                 {
                     return true;
                 }
             }
         }
-        return (friendlyMask & entry.ourMask) || (ourMask & entry.friendlyMask);
+        return (FriendGroup & entry.FactionGroup) || (FactionGroup & entry.FriendGroup);
     }
     bool IsHostileTo(FactionTemplateEntry const& entry) const
     {
-        if (entry.faction)
+        if (entry.Faction)
         {
             for (int i = 0; i < 4; ++i)
             {
-                if (enemyFaction[i]  == entry.faction)
+                if (Enemies[i]  == entry.Faction)
                 {
                     return true;
                 }
@@ -1062,27 +1062,27 @@ struct FactionTemplateEntry
 
             for (int i = 0; i < 4; ++i)
             {
-                if (friendFaction[i] == entry.faction)
+                if (Friend[i] == entry.Faction)
                 {
                     return false;
                 }
             }
         }
-        return (hostileMask & entry.ourMask) != 0;
+        return (EnemyGroup & entry.FactionGroup) != 0;
     }
-    bool IsHostileToPlayers() const { return (hostileMask & FACTION_MASK_PLAYER) != 0; }
+    bool IsHostileToPlayers() const { return (EnemyGroup & FACTION_MASK_PLAYER) != 0; }
     bool IsNeutralToAll() const
     {
         for (int i = 0; i < 4; ++i)
         {
-            if (enemyFaction[i] != 0)
+            if (Enemies[i] != 0)
             {
                 return false;
             }
         }
-        return hostileMask == 0 && friendlyMask == 0;
+        return EnemyGroup == 0 && FriendGroup == 0;
     }
-    bool IsContestedGuardFaction() const { return (factionFlags & FACTION_TEMPLATE_FLAG_CONTESTED_GUARD) != 0; }
+    bool IsContestedGuardFaction() const { return (Flags & FACTION_TEMPLATE_FLAG_CONTESTED_GUARD) != 0; }
 };
 
 /**
@@ -1310,19 +1310,19 @@ struct ItemRandomPropertiesEntry
 {
     uint32    ID;                                           // 0        m_ID
     // char*     internalName                               // 1        m_Name
-    uint32    enchant_id[5];                                // 2-6      m_Enchantment
-    char*     nameSuffix[16];                               // 7-22     m_name_lang
+    uint32    Enchantment[5];                                // 2-6      m_Enchantment
+    char*     Name_lang[16];                               // 7-22     m_name_lang
     // 23 string flags
 };
 
 struct ItemRandomSuffixEntry
 {
     uint32    ID;                                           // 0        m_ID
-    char*     nameSuffix[16];                               // 1-16     m_name_lang
+    char*     Name_lang[16];                               // 1-16     m_name_lang
     // 17 string flags
     // 18       m_internalName
-    uint32    enchant_id[5];                                // 19-21    m_enchantment
-    uint32    prefix[5];                                    // 22-24    m_allocationPct
+    uint32    Enchantment[5];                                // 19-21    m_enchantment
+    uint32    AllocationPct[5];                                    // 22-24    m_allocationPct
 };
 
 /**
@@ -1783,17 +1783,17 @@ struct SkillRaceClassInfoEntry
 */
 struct SkillLineEntry
 {
-    uint32    id;                                           // 0        m_ID
-    int32     categoryId;                                   // 1        m_categoryID
+    uint32    ID;                                           // 0        m_ID
+    int32     CategoryID;                                   // 1        m_categoryID
     // uint32    skillCostID;                               // 2        m_skillCostsID
-    char*     name[16];                                     // 3-18     m_displayName_lang
+    char*     DisplayName_lang[16];                                     // 3-18     m_displayName_lang
     // 19 string flags
     // char*     description[16];                           // 20-35    m_description_lang
     // 36 string flags
-    uint32    spellIcon;                                    // 37       m_spellIconID
+    uint32    SpellIconID;                                    // 37       m_spellIconID
     // char*     alternateVerb[16];                         // 38-53    m_alternateVerb_lang
     // 54 string flags
-    uint32    canLink;                                      // 55       m_canLink (prof. with recipes)
+    uint32    CanLink;                                      // 55       m_canLink (prof. with recipes)
 };
 
 /**
@@ -2184,10 +2184,10 @@ struct SpellRadiusEntry
 struct SpellRangeEntry
 {
     uint32    ID;                                           // 0        m_ID
-    float     minRange;                                     // 1        m_rangeMin[2]
-    float     minRangeFriendly;                             // 2
-    float     maxRange;                                     // 3        m_rangeMax[2]
-    float     maxRangeFriendly;                             // 4
+    float     RangeMin_0;                                     // 1        m_rangeMin[2]
+    float     RangeMin_1;                             // 2
+    float     RangeMax_0;                                     // 3        m_rangeMax[2]
+    float     RangeMax_1;                             // 4
     // uint32  Flags;                                       // 5        m_flags
     // char*   Name[16];                                    // 6-21     m_displayName_lang
     // uint32  NameFlags;                                   // 22 string flags
@@ -2351,11 +2351,11 @@ struct TalentTabEntry
 struct TaxiNodesEntry
 {
     uint32    ID;                                           // 0        ID - ID of the Taxi Node in DBC.
-    uint32    map_id;                                       // 1        m_ContinentID - ID of the Continent in DBC (0 = Azeroth, 1 = Kalimdor, 30 = Alterac Valley)
+    uint32    ContinentID;                                       // 1        m_ContinentID - ID of the Continent in DBC (0 = Azeroth, 1 = Kalimdor, 30 = Alterac Valley)
     float     x;                                            // 2        m_x - X position of the Taxi Node.
     float     y;                                            // 3        m_y - Y position of the Taxi Node.
     float     z;                                            // 4        m_z - Z position of the Taxi Node.
-    char*     name[16];                                     // 5-21     m_Name_lang
+    char*     Name_lang[16];                                     // 5-21     m_Name_lang
     // 22 string flags
     uint32    MountCreatureID[2];                           // 23-24    m_MountCreatureID[2]
 };
@@ -2370,9 +2370,9 @@ struct TaxiNodesEntry
 struct TaxiPathEntry
 {
     uint32    ID;                                            // 0        ID - ID of the Taxi Path in DBC.
-    uint32    from;                                          // 1        m_from - ID of the Starting Taxi Node of the travel.
-    uint32    to;                                            // 2        m_to - ID of the Ending Taxi Node of the travel.
-    uint32    price;                                         // 3        m_price - Basic Price of the travel (Unit : Copper).
+    uint32    FromTaxiNode;                                          // 1        m_from - ID of the Starting Taxi Node of the travel.
+    uint32    ToTaxiNode;                                            // 2        m_to - ID of the Ending Taxi Node of the travel.
+    uint32    Cost;                                         // 3        m_price - Basic Price of the travel (Unit : Copper).
 };
 
 /**
@@ -2382,16 +2382,16 @@ struct TaxiPathEntry
 struct TaxiPathNodeEntry
 {
     // 0        m_ID - ID in the DBC.
-    uint32    path;                                         // 1        m_PathID - ID of the path in the DBC.
-    uint32    index;                                        // 2        m_NodeIndex - Index of the Node in the path.
-    uint32    mapid;                                        // 3        m_ContinentID - ID of the Continent in DBC (0 = Azeroth, 1 = Kalimdor, 30 = Alterac Valley)
-    float     x;                                            // 4        m_LocX - X position of the Node.
-    float     y;                                            // 5        m_LocY - Y position of the Node.
-    float     z;                                            // 6        m_LocZ - Z position of the Node.
-    uint32    actionFlag;                                   // 7        m_flags - Unknown usage.
-    uint32    delay;                                        // 8        m_delay - Unknown usage.
-    uint32    arrivalEventID;                               // 9        m_arrivalEventID
-    uint32    departureEventID;                             // 10       m_departureEventID
+    uint32    PathID;                                         // 1        m_PathID - ID of the PathID in the DBC.
+    uint32    NodeIndex;                                        // 2        m_NodeIndex - Index of the Node in the PathID.
+    uint32    ContinentID;                                        // 3        m_ContinentID - ID of the Continent in DBC (0 = Azeroth, 1 = Kalimdor, 30 = Alterac Valley)
+    float     LocX;                                            // 4        m_LocX - X position of the Node.
+    float     LocY;                                            // 5        m_LocY - Y position of the Node.
+    float     LocZ;                                            // 6        m_LocZ - Z position of the Node.
+    uint32    Flags;                                   // 7        m_flags - Unknown usage.
+    uint32    Delay;                                        // 8        m_delay - Unknown usage.
+    uint32    ArrivalEventID;                               // 9        m_arrivalEventID
+    uint32    DepartureEventID;                             // 10       m_departureEventID
 };
 
 struct TeamContributionPoints
@@ -2413,35 +2413,35 @@ struct TotemCategoryEntry
 
 struct VehicleEntry
 {
-    uint32  m_ID;                                           // 0
-    uint32  m_flags;                                        // 1
-    float   m_turnSpeed;                                    // 2
-    float   m_pitchSpeed;                                   // 3
-    float   m_pitchMin;                                     // 4
-    float   m_pitchMax;                                     // 5
-    uint32  m_seatID[MAX_VEHICLE_SEAT];                     // 6-13
-    float   m_mouseLookOffsetPitch;                         // 14
-    float   m_cameraFadeDistScalarMin;                      // 15
-    float   m_cameraFadeDistScalarMax;                      // 16
-    float   m_cameraPitchOffset;                            // 17
-    float   m_facingLimitRight;                             // 18
-    float   m_facingLimitLeft;                              // 19
-    float   m_msslTrgtTurnLingering;                        // 20
-    float   m_msslTrgtPitchLingering;                       // 21
-    float   m_msslTrgtMouseLingering;                       // 22
-    float   m_msslTrgtEndOpacity;                           // 23
-    float   m_msslTrgtArcSpeed;                             // 24
-    float   m_msslTrgtArcRepeat;                            // 25
-    float   m_msslTrgtArcWidth;                             // 26
-    float   m_msslTrgtImpactRadius[2];                      // 27-28
-    char*   m_msslTrgtArcTexture;                           // 29
-    char*   m_msslTrgtImpactTexture;                        // 30
-    char*   m_msslTrgtImpactModel[2];                       // 31-32
-    float   m_cameraYawOffset;                              // 33
-    uint32  m_uiLocomotionType;                             // 34
-    float   m_msslTrgtImpactTexRadius;                      // 35
-    uint32  m_uiSeatIndicatorType;                          // 36       m_vehicleUIIndicatorID
-    uint32  m_powerDisplayID;                               // 37
+    uint32  ID;                                           // 0
+    uint32  Flags;                                        // 1
+    float   TurnSpeed;                                    // 2
+    float   PitchSpeed;                                   // 3
+    float   PitchMin;                                     // 4
+    float   PitchMax;                                     // 5
+    uint32  SeatID[MAX_VEHICLE_SEAT];                     // 6-13
+    float   MouseLookOffsetPitch;                         // 14
+    float   CameraFadeDistScalarMin;                      // 15
+    float   CameraFadeDistScalarMax;                      // 16
+    float   CameraPitchOffset;                            // 17
+    float   FacingLimitRight;                             // 18
+    float   FacingLimitLeft;                              // 19
+    float   MsslTrgtTurnLingering;                        // 20
+    float   MsslTrgtPitchLingering;                       // 21
+    float   MsslTrgtMouseLingering;                       // 22
+    float   MsslTrgtEndOpacity;                           // 23
+    float   MsslTrgtArcSpeed;                             // 24
+    float   MsslTrgtArcRepeat;                            // 25
+    float   MsslTrgtArcWidth;                             // 26
+    float   MsslTrgtImpactRadius[2];                      // 27-28
+    char*   MsslTrgtArcTexture;                           // 29
+    char*   MsslTrgtImpactTexture;                        // 30
+    char*   MsslTrgtImpactModel[2];                       // 31-32
+    float   CameraYawOffset;                              // 33
+    uint32  UiLocomotionType;                             // 34
+    float   MsslTrgtImpactTexRadius;                      // 35
+    uint32  VehicleUIIndicatorID;                          // 36       m_vehicleUIIndicatorID
+    uint32  PowerDisplayID_0;                               // 37
     // 38 new in 3.1
     // 39 new in 3.1
 };

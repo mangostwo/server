@@ -141,7 +141,7 @@ bool ChatHandler::HandleLinkGraveCommand(char* args)
     uint32 zoneId = player->GetZoneId();
 
     AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(zoneId);
-    if (!areaEntry || areaEntry->zone != 0)
+    if (!areaEntry || areaEntry->ParentAreaID != 0)
     {
         PSendSysMessage(LANG_COMMAND_GRAVEYARDWRONGZONE, g_id, zoneId);
         SetSentErrorMessage(true);
@@ -843,7 +843,7 @@ bool ChatHandler::HandleSetSkillCommand(char* args)
 
     if (!target->GetSkillValue(skill))
     {
-        PSendSysMessage(LANG_SET_SKILL_ERROR, tNameLink.c_str(), skill, sl->name[GetSessionDbcLocale()]);
+        PSendSysMessage(LANG_SET_SKILL_ERROR, tNameLink.c_str(), skill, sl->DisplayName_lang[GetSessionDbcLocale()]);
         SetSentErrorMessage(true);
         return false;
     }
@@ -854,7 +854,7 @@ bool ChatHandler::HandleSetSkillCommand(char* args)
     }
 
     target->SetSkill(skill, level, maxskill);
-    PSendSysMessage(LANG_SET_SKILL, skill, sl->name[GetSessionDbcLocale()], tNameLink.c_str(), level, maxskill);
+    PSendSysMessage(LANG_SET_SKILL, skill, sl->DisplayName_lang[GetSessionDbcLocale()], tNameLink.c_str(), level, maxskill);
 
     return true;
 }

@@ -302,7 +302,7 @@ bool ChatHandler::HandleLookupAreaCommand(char* args)
         if (areaEntry)
         {
             int loc = GetSessionDbcLocale();
-            std::string name = areaEntry->area_name[loc];
+            std::string name = areaEntry->AreaName_lang[loc];
             if (name.empty())
             {
                 continue;
@@ -318,7 +318,7 @@ bool ChatHandler::HandleLookupAreaCommand(char* args)
                         continue;
                     }
 
-                    name = areaEntry->area_name[loc];
+                    name = areaEntry->AreaName_lang[loc];
                     if (name.empty())
                     {
                         continue;
@@ -1031,7 +1031,7 @@ bool ChatHandler::HandleLookupSkillCommand(char* args)
         if (skillInfo)
         {
             int loc = GetSessionDbcLocale();
-            std::string name = skillInfo->name[loc];
+            std::string name = skillInfo->DisplayName_lang[loc];
             if (name.empty())
             {
                 continue;
@@ -1047,7 +1047,7 @@ bool ChatHandler::HandleLookupSkillCommand(char* args)
                         continue;
                     }
 
-                    name = skillInfo->name[loc];
+                    name = skillInfo->DisplayName_lang[loc];
                     if (name.empty())
                     {
                         continue;
@@ -1416,7 +1416,7 @@ bool ChatHandler::HandleLookupTaxiNodeCommand(char* args)
         if (nodeEntry)
         {
             int loc = GetSessionDbcLocale();
-            std::string name = nodeEntry->name[loc];
+            std::string name = nodeEntry->Name_lang[loc];
             if (name.empty())
             {
                 continue;
@@ -1432,7 +1432,7 @@ bool ChatHandler::HandleLookupTaxiNodeCommand(char* args)
                         continue;
                     }
 
-                    name = nodeEntry->name[loc];
+                    name = nodeEntry->Name_lang[loc];
                     if (name.empty())
                     {
                         continue;
@@ -1450,10 +1450,10 @@ bool ChatHandler::HandleLookupTaxiNodeCommand(char* args)
                 // send taxinode in "id - [name] (Map:m X:x Y:y Z:z)" format
                 if (m_session)
                     PSendSysMessage(LANG_TAXINODE_ENTRY_LIST_CHAT, id, id, name.c_str(), localeNames[loc],
-                                    nodeEntry->map_id, nodeEntry->x, nodeEntry->y, nodeEntry->z);
+                                    nodeEntry->ContinentID, nodeEntry->x, nodeEntry->y, nodeEntry->z);
                 else
                     PSendSysMessage(LANG_TAXINODE_ENTRY_LIST_CONSOLE, id, name.c_str(), localeNames[loc],
-                                    nodeEntry->map_id, nodeEntry->x, nodeEntry->y, nodeEntry->z);
+                                    nodeEntry->ContinentID, nodeEntry->x, nodeEntry->y, nodeEntry->z);
                 ++counter;
             }
         }

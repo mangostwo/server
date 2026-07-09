@@ -109,7 +109,7 @@ VehicleInfo::VehicleInfo(Unit* owner, VehicleEntry const* vehicleEntry, uint32 o
     // Initial fill of available seats for the vehicle
     for (uint8 i = 0; i < MAX_VEHICLE_SEAT; ++i)
     {
-        if (uint32 seatId = vehicleEntry->m_seatID[i])
+        if (uint32 seatId = vehicleEntry->SeatID[i])
         {
             if (VehicleSeatEntry const* seatEntry = sVehicleSeatStore.LookupEntry(seatId))
             {
@@ -163,7 +163,7 @@ void VehicleInfo::Initialize()
     }
 
     // Initialize movement limitations
-    uint32 vehicleFlags = GetVehicleEntry()->m_flags;
+    uint32 vehicleFlags = GetVehicleEntry()->Flags;
     Unit* pVehicle = (Unit*)m_owner;
 
     if (vehicleFlags & VEHICLE_FLAG_NO_STRAFE)
@@ -190,7 +190,7 @@ void VehicleInfo::Initialize()
     // Initialize power type based on DBC values (creatures only)
     if (pVehicle->GetTypeId() == TYPEID_UNIT)
     {
-        if (PowerDisplayEntry const* powerEntry = sPowerDisplayStore.LookupEntry(GetVehicleEntry()->m_powerDisplayID))
+        if (PowerDisplayEntry const* powerEntry = sPowerDisplayStore.LookupEntry(GetVehicleEntry()->PowerDisplayID_0))
         {
             pVehicle->SetPowerType(Powers(powerEntry->ActualType));
         }
@@ -300,7 +300,7 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     DEBUG_LOG("VehicleInfo::SwitchSeat: passenger: %s try to switch to seat %u", passenger->GetGuidStr().c_str(), seat);
 
     // Switching seats is not possible
-    if (m_vehicleEntry->m_flags & VEHICLE_FLAG_DISABLE_SWITCH)
+    if (m_vehicleEntry->Flags & VEHICLE_FLAG_DISABLE_SWITCH)
     {
         return;
     }
@@ -423,7 +423,7 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
         // TODO: Guesswork, but seems to be fairly near correct
         // Only if the passenger was on control seat? Also depending on some flags
         if ((seatEntry->Flags & SEAT_FLAG_CAN_CONTROL) &&
-                !(m_vehicleEntry->m_flags & (VEHICLE_FLAG_UNK4 | VEHICLE_FLAG_UNK20)))
+                !(m_vehicleEntry->Flags & (VEHICLE_FLAG_UNK4 | VEHICLE_FLAG_UNK20)))
         {
             if (((Creature*)m_owner)->IsTemporarySummon())
             {

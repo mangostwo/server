@@ -468,25 +468,25 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                 continue;
             }
 
-            if (HasSkill(pSkill->id))
+            if (HasSkill(pSkill->ID))
             {
                 continue;
             }
 
             if (_spell_idx->second->AcquireMethod == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL ||
                     // lockpicking/runeforging special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
-                    ((pSkill->id == SKILL_LOCKPICKING || pSkill->id == SKILL_RUNEFORGING) && _spell_idx->second->TrivialSkillLineRankHigh == 0))
+                    ((pSkill->ID == SKILL_LOCKPICKING || pSkill->ID == SKILL_RUNEFORGING) && _spell_idx->second->TrivialSkillLineRankHigh == 0))
             {
                 switch (GetSkillRangeType(pSkill, _spell_idx->second->RaceMask != 0))
                 {
                     case SKILL_RANGE_LANGUAGE:
-                        SetSkill(pSkill->id, 300, 300);
+                        SetSkill(pSkill->ID, 300, 300);
                         break;
                     case SKILL_RANGE_LEVEL:
-                        SetSkill(pSkill->id, 1, GetMaxSkillValueForLevel());
+                        SetSkill(pSkill->ID, 1, GetMaxSkillValueForLevel());
                         break;
                     case SKILL_RANGE_MONO:
-                        SetSkill(pSkill->id, 1, 1);
+                        SetSkill(pSkill->ID, 1, 1);
                         break;
                     default:
                         break;
@@ -774,18 +774,18 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank, bo
             }
 
             if ((skillAbility->AcquireMethod == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL &&
-                    pSkill->categoryId != SKILL_CATEGORY_CLASS) ||// not unlearn class skills (spellbook/talent pages)
+                    pSkill->CategoryID != SKILL_CATEGORY_CLASS) ||// not unlearn class skills (spellbook/talent pages)
                     // lockpicking/runeforging special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
-                    ((pSkill->id == SKILL_LOCKPICKING || pSkill->id == SKILL_RUNEFORGING) && skillAbility->TrivialSkillLineRankHigh == 0))
+                    ((pSkill->ID == SKILL_LOCKPICKING || pSkill->ID == SKILL_RUNEFORGING) && skillAbility->TrivialSkillLineRankHigh == 0))
             {
                 // not reset skills for professions and racial abilities
-                if ((pSkill->categoryId == SKILL_CATEGORY_SECONDARY || pSkill->categoryId == SKILL_CATEGORY_PROFESSION) &&
-                        (IsProfessionSkill(pSkill->id) || skillAbility->RaceMask != 0))
+                if ((pSkill->CategoryID == SKILL_CATEGORY_SECONDARY || pSkill->CategoryID == SKILL_CATEGORY_PROFESSION) &&
+                        (IsProfessionSkill(pSkill->ID) || skillAbility->RaceMask != 0))
                 {
                     continue;
                 }
 
-                SetSkill(pSkill->id, 0, 0);
+                SetSkill(pSkill->ID, 0, 0);
             }
         }
     }

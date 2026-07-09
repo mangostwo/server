@@ -803,7 +803,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
         else                                                // have start node, to it
         {
             sLog.outError("Character %u have too short taxi destination list, teleport to original node.", GetGUIDLow());
-            SetLocationMapId(nodeEntry->map_id);
+            SetLocationMapId(nodeEntry->ContinentID);
             Relocate(nodeEntry->x, nodeEntry->y, nodeEntry->z, 0.0f);
         }
 
@@ -820,7 +820,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
         // save source node as recall coord to prevent recall and fall from sky
         TaxiNodesEntry const* nodeEntry = sTaxiNodesStore.LookupEntry(node_id);
         MANGOS_ASSERT(nodeEntry);                           // checked in m_taxi.LoadTaxiDestinationsFromString
-        m_recallMap = nodeEntry->map_id;
+        m_recallMap = nodeEntry->ContinentID;
         m_recallX = nodeEntry->x;
         m_recallY = nodeEntry->y;
         m_recallZ = nodeEntry->z;

@@ -109,7 +109,7 @@ inline float GetSpellMinRange(SpellRangeEntry const* range, bool friendly = fals
     {
         return 0;
     }
-    return (friendly ? range->minRangeFriendly : range->minRange);
+    return (friendly ? range->RangeMin_1 : range->RangeMin_0);
 }
 inline float GetSpellMaxRange(SpellRangeEntry const* range, bool friendly = false)
 {
@@ -117,7 +117,7 @@ inline float GetSpellMaxRange(SpellRangeEntry const* range, bool friendly = fals
     {
         return 0;
     }
-    return (friendly ? range->maxRangeFriendly : range->maxRange);
+    return (friendly ? range->RangeMax_1 : range->RangeMax_0);
 }
 inline uint32 GetSpellRecoveryTime(SpellEntry const* spellInfo) { return spellInfo->RecoveryTime > spellInfo->CategoryRecoveryTime ? spellInfo->RecoveryTime : spellInfo->CategoryRecoveryTime; }
 /**

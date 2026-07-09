@@ -1986,7 +1986,7 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
             WorldObject const* searcher = source ? source : player;
             if (AreaTableEntry const* pAreaEntry = GetAreaEntryByAreaID(searcher->GetAreaId()))
             {
-                if ((!m_value1 || (pAreaEntry->flags & m_value1)) && (!m_value2 || !(pAreaEntry->flags & m_value2)))
+                if ((!m_value1 || (pAreaEntry->Flags & m_value1)) && (!m_value2 || !(pAreaEntry->Flags & m_value2)))
                 {
                     return true;
                 }
@@ -2836,12 +2836,12 @@ bool PlayerCondition::CanBeUsedWithoutPlayer(uint16 entry)
  */
 SkillRangeType GetSkillRangeType(SkillLineEntry const* pSkill, bool racial)
 {
-    switch (pSkill->categoryId)
+    switch (pSkill->CategoryID)
     {
         case SKILL_CATEGORY_LANGUAGES:
             return SKILL_RANGE_LANGUAGE;
         case SKILL_CATEGORY_WEAPON:
-            if (pSkill->id != SKILL_FIST_WEAPONS)
+            if (pSkill->ID != SKILL_FIST_WEAPONS)
             {
                 return SKILL_RANGE_LEVEL;
             }
@@ -2851,7 +2851,7 @@ SkillRangeType GetSkillRangeType(SkillLineEntry const* pSkill, bool racial)
             }
         case SKILL_CATEGORY_ARMOR:
         case SKILL_CATEGORY_CLASS:
-            if (pSkill->id != SKILL_LOCKPICKING)
+            if (pSkill->ID != SKILL_LOCKPICKING)
             {
                 return SKILL_RANGE_MONO;
             }
@@ -2862,7 +2862,7 @@ SkillRangeType GetSkillRangeType(SkillLineEntry const* pSkill, bool racial)
         case SKILL_CATEGORY_SECONDARY:
         case SKILL_CATEGORY_PROFESSION:
             // not set skills for professions and racial abilities
-            if (IsProfessionSkill(pSkill->id))
+            if (IsProfessionSkill(pSkill->ID))
             {
                 return SKILL_RANGE_RANK;
             }

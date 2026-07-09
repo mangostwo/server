@@ -186,7 +186,7 @@ bool Unit::IsHostileTo(Unit const* unit) const
     // PvC forced reaction and reputation case
     if (tester->GetTypeId() == TYPEID_PLAYER)
     {
-        if (target_faction->faction)
+        if (target_faction->Faction)
         {
             // forced reaction
             if (ReputationRank const* force = ((Player*)tester)->GetReputationMgr().GetForcedRankIfAny(target_faction))
@@ -195,7 +195,7 @@ bool Unit::IsHostileTo(Unit const* unit) const
             }
 
             // if faction have reputation then hostile state for tester at 100% dependent from at_war state
-            if (FactionEntry const* raw_target_faction = sFactionStore.LookupEntry(target_faction->faction))
+            if (FactionEntry const* raw_target_faction = sFactionStore.LookupEntry(target_faction->Faction))
                 if (FactionState const* factionState = ((Player*)tester)->GetReputationMgr().GetState(raw_target_faction))
                 {
                     return (factionState->Flags & FACTION_FLAG_AT_WAR);
@@ -205,7 +205,7 @@ bool Unit::IsHostileTo(Unit const* unit) const
     // CvP forced reaction and reputation case
     else if (target->GetTypeId() == TYPEID_PLAYER)
     {
-        if (tester_faction->faction)
+        if (tester_faction->Faction)
         {
             // forced reaction
             if (ReputationRank const* force = ((Player*)target)->GetReputationMgr().GetForcedRankIfAny(tester_faction))
@@ -214,7 +214,7 @@ bool Unit::IsHostileTo(Unit const* unit) const
             }
 
             // apply reputation state
-            FactionEntry const* raw_tester_faction = sFactionStore.LookupEntry(tester_faction->faction);
+            FactionEntry const* raw_tester_faction = sFactionStore.LookupEntry(tester_faction->Faction);
             if (raw_tester_faction && raw_tester_faction->ReputationIndex >= 0)
             {
                 return ((Player const*)target)->GetReputationMgr().GetRank(raw_tester_faction) <= REP_HOSTILE;
@@ -340,7 +340,7 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
     // PvC forced reaction and reputation case
     if (tester->GetTypeId() == TYPEID_PLAYER)
     {
-        if (target_faction->faction)
+        if (target_faction->Faction)
         {
             // forced reaction
             if (ReputationRank const* force = ((Player*)tester)->GetReputationMgr().GetForcedRankIfAny(target_faction))
@@ -349,7 +349,7 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
             }
 
             // if faction have reputation then friendly state for tester at 100% dependent from at_war state
-            if (FactionEntry const* raw_target_faction = sFactionStore.LookupEntry(target_faction->faction))
+            if (FactionEntry const* raw_target_faction = sFactionStore.LookupEntry(target_faction->Faction))
                 if (FactionState const* factionState = ((Player*)tester)->GetReputationMgr().GetState(raw_target_faction))
                 {
                     return !(factionState->Flags & FACTION_FLAG_AT_WAR);
@@ -359,7 +359,7 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
     // CvP forced reaction and reputation case
     else if (target->GetTypeId() == TYPEID_PLAYER)
     {
-        if (tester_faction->faction)
+        if (tester_faction->Faction)
         {
             // forced reaction
             if (ReputationRank const* force = ((Player*)target)->GetReputationMgr().GetForcedRankIfAny(tester_faction))
@@ -368,7 +368,7 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
             }
 
             // apply reputation state
-            if (FactionEntry const* raw_tester_faction = sFactionStore.LookupEntry(tester_faction->faction))
+            if (FactionEntry const* raw_tester_faction = sFactionStore.LookupEntry(tester_faction->Faction))
                 if (raw_tester_faction->ReputationIndex >= 0)
                 {
                     return ((Player const*)target)->GetReputationMgr().GetRank(raw_tester_faction) >= REP_FRIENDLY;
@@ -388,12 +388,12 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
 bool Unit::IsHostileToPlayers() const
 {
     FactionTemplateEntry const* my_faction = getFactionTemplateEntry();
-    if (!my_faction || !my_faction->faction)
+    if (!my_faction || !my_faction->Faction)
     {
         return false;
     }
 
-    FactionEntry const* raw_faction = sFactionStore.LookupEntry(my_faction->faction);
+    FactionEntry const* raw_faction = sFactionStore.LookupEntry(my_faction->Faction);
     if (raw_faction && raw_faction->ReputationIndex >= 0)
     {
         return false;
@@ -410,12 +410,12 @@ bool Unit::IsHostileToPlayers() const
 bool Unit::IsNeutralToAll() const
 {
     FactionTemplateEntry const* my_faction = getFactionTemplateEntry();
-    if (!my_faction || !my_faction->faction)
+    if (!my_faction || !my_faction->Faction)
     {
         return true;
     }
 
-    FactionEntry const* raw_faction = sFactionStore.LookupEntry(my_faction->faction);
+    FactionEntry const* raw_faction = sFactionStore.LookupEntry(my_faction->Faction);
     if (raw_faction && raw_faction->ReputationIndex >= 0)
     {
         return false;

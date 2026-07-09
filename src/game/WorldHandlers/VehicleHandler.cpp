@@ -149,7 +149,7 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket& recvPacket)
         }
 
         // Change vehicle is not possible
-        if (destVehicle->GetVehicleInfo()->GetVehicleEntry()->m_flags & VEHICLE_FLAG_DISABLE_SWITCH)
+        if (destVehicle->GetVehicleInfo()->GetVehicleEntry()->Flags & VEHICLE_FLAG_DISABLE_SWITCH)
         {
             return;
         }

@@ -297,7 +297,7 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
     TaxiNodesEntry const* curDestNode = sTaxiNodesStore.LookupEntry(curDest);
 
     // far teleport case
-    if (curDestNode && curDestNode->map_id != _player->GetMapId())
+    if (curDestNode && curDestNode->ContinentID != _player->GetMapId())
     {
         if (_player->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE)
         {
@@ -310,7 +310,7 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
             TaxiPathNodeEntry const& node = flight->GetPath()[flight->GetCurrentNode()];
             flight->SkipCurrentNode();
 
-            _player->TeleportTo(curDestNode->map_id, node.x, node.y, node.z, _player->GetOrientation());
+            _player->TeleportTo(curDestNode->ContinentID, node.LocX, node.LocY, node.LocZ, _player->GetOrientation());
         }
         return;
     }

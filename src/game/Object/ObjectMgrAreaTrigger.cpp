@@ -194,7 +194,7 @@ AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 map_id) const
         {
             ghostTrigger.push_back(&itr->second);
             // First run, only consider AreaTrigger that teleport in the proper map
-            if ((!compareTrigger || itr->second.IsLessOrEqualThan(compareTrigger)) && sAreaTriggerStore.LookupEntry(itr->first)->mapid == map_id)
+            if ((!compareTrigger || itr->second.IsLessOrEqualThan(compareTrigger)) && sAreaTriggerStore.LookupEntry(itr->first)->ContinentID == map_id)
             {
                 if (itr->second.IsMinimal())
                 {

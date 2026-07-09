@@ -581,8 +581,8 @@ bool ChatHandler::isValidChatMessage(const char* message)
 
                             for (uint8 i = 0; i < MAX_LOCALE; ++i)
                             {
-                                uint32 skillLineNameLength = strlen(skillLine->name[i]);
-                                if (skillLineNameLength > 0 && strncmp(skillLine->name[i], buffer, skillLineNameLength) == 0)
+                                uint32 skillLineNameLength = strlen(skillLine->DisplayName_lang[i]);
+                                if (skillLineNameLength > 0 && strncmp(skillLine->DisplayName_lang[i], buffer, skillLineNameLength) == 0)
                                 {
                                     // found the prefix, remove it to perform spellname validation below
                                     // -2 = strlen(": ")
@@ -635,7 +635,7 @@ bool ChatHandler::isValidChatMessage(const char* message)
                     }
                     else if (linkedItem)
                     {
-                        char* const* suffix = itemSuffix ? itemSuffix->nameSuffix : (itemProperty ? itemProperty->nameSuffix : NULL);
+                        char* const* suffix = itemSuffix ? itemSuffix->Name_lang : (itemProperty ? itemProperty->Name_lang : NULL);
 
                         std::string expectedName = std::string(linkedItem->Name1);
                         if (suffix)

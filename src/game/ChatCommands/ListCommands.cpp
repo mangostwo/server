@@ -831,8 +831,8 @@ bool ChatHandler::ShowPlayerListHelper(QueryResult* result, uint32* limit, bool 
             ChrRacesEntry const* raceEntry = sChrRacesStore.LookupEntry(race);
             ChrClassesEntry const* classEntry = sChrClassesStore.LookupEntry(class_);
 
-            char const* race_name = raceEntry ? raceEntry->name[GetSessionDbcLocale()] : "<?>";
-            char const* class_name = classEntry ? classEntry->name[GetSessionDbcLocale()] : "<?>";
+            char const* race_name = raceEntry ? raceEntry->Name_lang[GetSessionDbcLocale()] : "<?>";
+            char const* class_name = classEntry ? classEntry->Name_lang[GetSessionDbcLocale()] : "<?>";
 
             if (!m_session)
             {

@@ -729,7 +729,7 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
     SetMap(sMapMgr.CreateMap(info->mapId, this));
 
     // Set player's power type based on class
-    uint8 powertype = cEntry->powerType;
+    uint8 powertype = cEntry->DisplayPower;
 
     // Set player's faction based on race
     setFactionForRace(race);
@@ -3439,13 +3439,13 @@ Team Player::TeamForRace(uint8 race)
         return ALLIANCE;
     }
 
-    switch (rEntry->TeamID)
+    switch (rEntry->BaseLanguage)
     {
         case 7: return ALLIANCE;
         case 1: return HORDE;
     }
 
-    sLog.outError("Race %u have wrong teamid %u in DBC: wrong DBC files?", uint32(race), rEntry->TeamID);
+    sLog.outError("Race %u have wrong teamid %u in DBC: wrong DBC files?", uint32(race), rEntry->BaseLanguage);
     return TEAM_NONE;
 }
 
@@ -3818,9 +3818,9 @@ void Player::InitDataForForm(bool reapplyMods)
         default:                                            // 0, for example
         {
             ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(getClass());
-            if (cEntry && cEntry->powerType < MAX_POWERS && uint32(GetPowerType()) != cEntry->powerType)
+            if (cEntry && cEntry->DisplayPower < MAX_POWERS && uint32(GetPowerType()) != cEntry->DisplayPower)
             {
-                SetPowerType(Powers(cEntry->powerType));
+                SetPowerType(Powers(cEntry->DisplayPower));
             }
             break;
         }
@@ -4077,12 +4077,12 @@ void Player::SendAurasForTarget(Unit* target)
 float Player::GetReputationPriceDiscount(Creature const* pCreature) const
 {
     FactionTemplateEntry const* vendor_faction = pCreature->getFactionTemplateEntry();
-    if (!vendor_faction || !vendor_faction->faction)
+    if (!vendor_faction || !vendor_faction->Faction)
     {
         return 1.0f;
     }
 
-    ReputationRank rank = GetReputationRank(vendor_faction->faction);
+    ReputationRank rank = GetReputationRank(vendor_faction->Faction);
     if (rank <= REP_NEUTRAL)
     {
         return 1.0f;
@@ -4992,7 +4992,7 @@ bool Player::CanStartFlyInArea(uint32 mapid, uint32 zone, uint32 area) const
     // (no other zones currently has areas with AREA_FLAG_CANNOT_FLY)
     if (AreaTableEntry const* atEntry = GetAreaEntryByAreaID(area))
     {
-        return (!(atEntry->flags & AREA_FLAG_CANNOT_FLY));
+        return (!(atEntry->Flags & AREA_FLAG_CANNOT_FLY));
     }
 
     // TODO: disallow mounting in wintergrasp too when battle is in progress

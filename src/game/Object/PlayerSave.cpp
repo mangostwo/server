@@ -2136,7 +2136,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     // check node starting pos data set case if provided
     if (node->x != 0.0f || node->y != 0.0f || node->z != 0.0f)
     {
-        if (node->map_id != GetMapId() ||
+        if (node->ContinentID != GetMapId() ||
                 (node->x - GetPositionX()) * (node->x - GetPositionX()) +
                 (node->y - GetPositionY()) * (node->y - GetPositionY()) +
                 (node->z - GetPositionZ()) * (node->z - GetPositionZ()) >
@@ -2238,7 +2238,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     {
         TaxiNodesEntry const* lastnode = sTaxiNodesStore.LookupEntry(nodes[nodes.size() - 1]);
         m_taxi.ClearTaxiDestinations();
-        TeleportTo(lastnode->map_id, lastnode->x, lastnode->y, lastnode->z, GetOrientation());
+        TeleportTo(lastnode->ContinentID, lastnode->x, lastnode->y, lastnode->z, GetOrientation());
         return false;
     }
     else
@@ -2267,8 +2267,8 @@ bool Player::ActivateTaxiPathTo(uint32 taxi_path_id, uint32 spellid /*= 0*/)
     std::vector<uint32> nodes;
 
     nodes.resize(2);
-    nodes[0] = entry->from;
-    nodes[1] = entry->to;
+    nodes[0] = entry->FromTaxiNode;
+    nodes[1] = entry->ToTaxiNode;
 
     return ActivateTaxiPathTo(nodes, NULL, spellid);
 }
@@ -2296,9 +2296,9 @@ void Player::ContinueTaxiFlight()
 
     float distPrev = MAP_SIZE * MAP_SIZE;
     float distNext =
-        (nodeList[0].x - GetPositionX()) * (nodeList[0].x - GetPositionX()) +
-        (nodeList[0].y - GetPositionY()) * (nodeList[0].y - GetPositionY()) +
-        (nodeList[0].z - GetPositionZ()) * (nodeList[0].z - GetPositionZ());
+        (nodeList[0].LocX - GetPositionX()) * (nodeList[0].LocX - GetPositionX()) +
+        (nodeList[0].LocY - GetPositionY()) * (nodeList[0].LocY - GetPositionY()) +
+        (nodeList[0].LocZ - GetPositionZ()) * (nodeList[0].LocZ - GetPositionZ());
 
     for (uint32 i = 1; i < nodeList.size(); ++i)
     {
@@ -2306,7 +2306,7 @@ void Player::ContinueTaxiFlight()
         TaxiPathNodeEntry const& prevNode = nodeList[i - 1];
 
         // skip nodes at another map
-        if (node.mapid != GetMapId())
+        if (node.ContinentID != GetMapId())
         {
             continue;
         }
@@ -2314,14 +2314,14 @@ void Player::ContinueTaxiFlight()
         distPrev = distNext;
 
         distNext =
-            (node.x - GetPositionX()) * (node.x - GetPositionX()) +
-            (node.y - GetPositionY()) * (node.y - GetPositionY()) +
-            (node.z - GetPositionZ()) * (node.z - GetPositionZ());
+            (node.LocX - GetPositionX()) * (node.LocX - GetPositionX()) +
+            (node.LocY - GetPositionY()) * (node.LocY - GetPositionY()) +
+            (node.LocZ - GetPositionZ()) * (node.LocZ - GetPositionZ());
 
         float distNodes =
-            (node.x - prevNode.x) * (node.x - prevNode.x) +
-            (node.y - prevNode.y) * (node.y - prevNode.y) +
-            (node.z - prevNode.z) * (node.z - prevNode.z);
+            (node.LocX - prevNode.LocX) * (node.LocX - prevNode.LocX) +
+            (node.LocY - prevNode.LocY) * (node.LocY - prevNode.LocY) +
+            (node.LocZ - prevNode.LocZ) * (node.LocZ - prevNode.LocZ);
 
         if (distNext + distPrev < distNodes)
         {

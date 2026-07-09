@@ -1163,7 +1163,7 @@ bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, 
             {
                 return false;
             }
-            mapid = node->map_id;
+            mapid = node->ContinentID;
             x = node->x;
             y = node->y;
             z = node->z;
@@ -1291,10 +1291,10 @@ bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, 
                 return false;
             }
 
-            mapid = atEntry->mapid;
-            x = atEntry->x;
-            y = atEntry->y;
-            z = atEntry->z;
+            mapid = atEntry->ContinentID;
+            x = atEntry->Pos_0;
+            y = atEntry->Pos_1;
+            z = atEntry->Pos_2;
             return true;
         }
         case LOCATION_LINK_AREATRIGGER_TARGET:
