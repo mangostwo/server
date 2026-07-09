@@ -1014,10 +1014,10 @@ void WorldSession::HandleBuyStableSlot(WorldPacket& recv_data)
     if (GetPlayer()->GetStableSlots() < MAX_PET_STABLES)
     {
         StableSlotPricesEntry const* SlotPrice = sStableSlotPricesStore.LookupEntry(GetPlayer()->GetStableSlots() + 1);
-        if (_player->GetMoney() >= SlotPrice->Price)
+        if (_player->GetMoney() >= SlotPrice->Cost)
         {
             GetPlayer()->SetStableSlots(GetPlayer()->GetStableSlots() + 1);
-            _player->ModifyMoney(-int32(SlotPrice->Price));
+            _player->ModifyMoney(-int32(SlotPrice->Cost));
             SendStableResult(STABLE_SUCCESS_BUY_SLOT);
         }
         else

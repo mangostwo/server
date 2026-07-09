@@ -3119,7 +3119,7 @@ bool Unit::CanInitiateAttack() const
         {
             if (VehicleSeatEntry const* seatEntry = sVehicleSeatStore.LookupEntry(seatId))
             {
-                if (seatEntry->m_flags & SEAT_FLAG_CAN_CONTROL)
+                if (seatEntry->Flags & SEAT_FLAG_CAN_CONTROL)
                 {
                     return false;
                 }

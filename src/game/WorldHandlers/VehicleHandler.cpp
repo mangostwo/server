@@ -76,7 +76,7 @@ void WorldSession::HandleRequestVehicleExit(WorldPacket& recvPacket)
 
     // Check for exit flag
     if (VehicleSeatEntry const* seatEntry = vehicle->GetVehicleInfo()->GetSeatEntry(transportInfo->GetTransportSeat()))
-        if (seatEntry->m_flags & SEAT_FLAG_CAN_EXIT)
+        if (seatEntry->Flags & SEAT_FLAG_CAN_EXIT)
         {
             vehicle->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, _player->GetObjectGuid());
         }
@@ -224,7 +224,7 @@ void WorldSession::HandleEjectPassenger(WorldPacket& recvPacket)
 
     // Check for eject flag
     if (VehicleSeatEntry const* seatEntry = vehicleInfo->GetSeatEntry(passenger->GetTransportInfo()->GetTransportSeat()))
-        if (seatEntry->m_flagsB & SEAT_FLAG_B_EJECTABLE)
+        if (seatEntry->FlagsB & SEAT_FLAG_B_EJECTABLE)
         {
             _player->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, passengerGuid);
         }

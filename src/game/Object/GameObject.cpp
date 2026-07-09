@@ -1496,9 +1496,9 @@ float GameObject::GetObjectBoundingRadius() const
     // 2. In some cases this must be only interactive size, not GO size, current way can affect creature target point auto-selection in strange ways for big underground/virtual GOs
     if (m_displayInfo)
     {
-        float dx = m_displayInfo->geoBoxMaxX - m_displayInfo->geoBoxMinX;
-        float dy = m_displayInfo->geoBoxMaxY - m_displayInfo->geoBoxMinY;
-        float dz = m_displayInfo->geoBoxMaxZ - m_displayInfo->geoBoxMinZ;
+        float dx = m_displayInfo->GeoBoxMax_0 - m_displayInfo->GeoBoxMin_0;
+        float dy = m_displayInfo->GeoBoxMax_1 - m_displayInfo->GeoBoxMin_1;
+        float dz = m_displayInfo->GeoBoxMax_2 - m_displayInfo->GeoBoxMin_2;
 
         return (std::abs(dx) + std::abs(dy) + std::abs(dz)) / 2 * GetObjectScale();
     }

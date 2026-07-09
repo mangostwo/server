@@ -228,7 +228,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         Difficulty diff = GetPlayer()->GetDifficulty(mEntry->IsRaid());
         if (MapDifficultyEntry const* mapDiff = GetMapDifficultyData(mEntry->MapID, diff))
         {
-            if (mapDiff->resetTime)
+            if (mapDiff->RaidDuration)
             {
                 if (time_t timeReset = sMapPersistentStateMgr.GetScheduler().GetResetTimeFor(mEntry->MapID, diff))
                 {

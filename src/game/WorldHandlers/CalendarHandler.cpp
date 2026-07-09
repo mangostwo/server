@@ -133,7 +133,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
         MapDifficultyEntry const* mapDiff = itr->second;
 
         // skip mapDiff without global reset time
-        if (!mapDiff->resetTime)
+        if (!mapDiff->RaidDuration)
         {
             continue;
         }

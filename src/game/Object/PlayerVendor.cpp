@@ -89,20 +89,20 @@ void Player::TakeExtendedCost(uint32 extendedCostId, uint32 count)
 {
     ItemExtendedCostEntry const* extendedCost = sItemExtendedCostStore.LookupEntry(extendedCostId);
 
-    if (extendedCost->reqhonorpoints)
+    if (extendedCost->HonorPoints)
     {
-        ModifyHonorPoints(-int32(extendedCost->reqhonorpoints * count));
+        ModifyHonorPoints(-int32(extendedCost->HonorPoints * count));
     }
-    if (extendedCost->reqarenapoints)
+    if (extendedCost->ArenaPoints)
     {
-        ModifyArenaPoints(-int32(extendedCost->reqarenapoints * count));
+        ModifyArenaPoints(-int32(extendedCost->ArenaPoints * count));
     }
 
     for (uint8 i = 0; i < MAX_EXTENDED_COST_ITEMS; ++i)
     {
-        if (extendedCost->reqitem[i])
+        if (extendedCost->ItemID[i])
         {
-            DestroyItemCount(extendedCost->reqitem[i], extendedCost->reqitemcount[i] * count, true);
+            DestroyItemCount(extendedCost->ItemID[i], extendedCost->ItemCount[i] * count, true);
         }
     }
 }
@@ -211,14 +211,14 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
         }
 
         // honor points price
-        if (GetHonorPoints() < (iece->reqhonorpoints * count))
+        if (GetHonorPoints() < (iece->HonorPoints * count))
         {
             SendEquipError(EQUIP_ERR_NOT_ENOUGH_HONOR_POINTS, NULL, NULL);
             return false;
         }
 
         // arena points price
-        if (GetArenaPoints() < (iece->reqarenapoints * count))
+        if (GetArenaPoints() < (iece->ArenaPoints * count))
         {
             SendEquipError(EQUIP_ERR_NOT_ENOUGH_ARENA_POINTS, NULL, NULL);
             return false;
@@ -227,7 +227,7 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
         // item base price
         for (uint8 i = 0; i < MAX_EXTENDED_COST_ITEMS; ++i)
         {
-            if (iece->reqitem[i] && !HasItemCount(iece->reqitem[i], iece->reqitemcount[i] * count))
+            if (iece->ItemID[i] && !HasItemCount(iece->ItemID[i], iece->ItemCount[i] * count))
             {
                 SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
                 return false;
@@ -235,7 +235,7 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
         }
 
         // check for personal arena rating requirement
-        if (GetMaxPersonalArenaRatingRequirement(iece->reqarenaslot) < iece->reqpersonalarenarating)
+        if (GetMaxPersonalArenaRatingRequirement(iece->ArenaBracket) < iece->RequiredArenaRating)
         {
             // probably not the proper equip err
             SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK, NULL, NULL);

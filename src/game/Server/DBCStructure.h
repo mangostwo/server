@@ -760,11 +760,11 @@ struct CinematicSequencesEntry
 */
 struct CreatureDisplayInfoEntry
 {
-    uint32      Displayid;                                  // 0        m_ID - ID in DBC.
-    uint32      ModelId;                                    // 1        m_modelID
+    uint32      ID;                                  // 0        m_ID - ID in DBC.
+    uint32      ModelID;                                    // 1        m_modelID
     // 2        m_soundID
     uint32      ExtendedDisplayInfoID;                      // 3        m_extendedDisplayInfoID - Extended info (see CreatureDisplayInfoExtraEntry).
-    float       scale;                                      // 4        m_creatureModelScale - Scale of the Creature.
+    float       CreatureModelScale;                                      // 4        m_creatureModelScale - Scale of the Creature.
     // 5        m_creatureModelAlpha
     // 6-8      m_textureVariation[3]
     // 9        m_portraitTextureName
@@ -875,7 +875,7 @@ struct CurrencyCategoryEntry
 struct CurrencyTypesEntry
 {
     // uint32    ID;                                        // 0        m_ID
-    uint32    ItemId;                                       // 1        m_itemID used as real index
+    uint32    ItemID;                                       // 1        m_itemID used as real index
     // uint32    Category;                                  // 2        m_categoryID may be category
     uint32    BitIndex;                                     // 3        m_bitIndex bit index in PLAYER_FIELD_KNOWN_CURRENCIES (1 << (index-1))
 };
@@ -1091,25 +1091,25 @@ struct FactionTemplateEntry
 */
 struct GameObjectDisplayInfoEntry
 {
-    uint32      Displayid;                                  // 0        m_ID - ID in DBC.
-    char*       filename;                                   // 1        m_modelName - File name for  the object.
+    uint32      ID;                                  // 0        m_ID - ID in DBC.
+    char*       ModelName;                                   // 1        m_modelName - File name for  the object.
     // uint32   m_Sound[10];                                // 2-11     m_Sound
-    float geoBoxMinX;                                       // 12 m_geoBoxMinX (use first value as interact dist, mostly in hacks way)
-    float geoBoxMinY;                                       // 13 m_geoBoxMinY
-    float geoBoxMinZ;                                       // 14 m_geoBoxMinZ
-    float geoBoxMaxX;                                       // 15 m_geoBoxMaxX
-    float geoBoxMaxY;                                       // 16 m_geoBoxMaxY
-    float geoBoxMaxZ;                                       // 17 m_geoBoxMaxZ
+    float GeoBoxMin_0;                                       // 12 m_geoBoxMinX (use first value as interact dist, mostly in hacks way)
+    float GeoBoxMin_1;                                       // 13 m_geoBoxMinY
+    float GeoBoxMin_2;                                       // 14 m_geoBoxMinZ
+    float GeoBoxMax_0;                                       // 15 m_geoBoxMaxX
+    float GeoBoxMax_1;                                       // 16 m_geoBoxMaxY
+    float GeoBoxMax_2;                                       // 17 m_geoBoxMaxZ
     // uint32 unknown18; // 18 m_objectEffectPackageID
 };
 
 struct GemPropertiesEntry
 {
     uint32      ID;                                         //          m_id
-    uint32      spellitemenchantement;                      //          m_enchant_id
+    uint32      EnchantID;                      //          m_enchant_id
     //          m_maxcount_inv
     //          m_maxcount_item
-    uint32      color;                                      //          m_type
+    uint32      Type;                                      //          m_type
 };
 
 struct GlyphPropertiesEntry
@@ -1139,7 +1139,7 @@ struct GtBarberShopCostBaseEntry
 
 struct GtCombatRatingsEntry
 {
-    float    ratio;
+    float    Data;
 };
 
 struct GtChanceToMeleeCritBaseEntry
@@ -1149,7 +1149,7 @@ struct GtChanceToMeleeCritBaseEntry
 
 struct GtChanceToMeleeCritEntry
 {
-    float    ratio;
+    float    Data;
 };
 
 struct GtChanceToSpellCritBaseEntry
@@ -1159,17 +1159,17 @@ struct GtChanceToSpellCritBaseEntry
 
 struct GtChanceToSpellCritEntry
 {
-    float    ratio;
+    float    Data;
 };
 
 struct GtOCTClassCombatRatingScalarEntry
 {
-    float    ratio;
+    float    Data;
 };
 
 struct GtOCTRegenHPEntry
 {
-    float    ratio;
+    float    Data;
 };
 
 // struct GtOCTRegenMPEntry
@@ -1184,7 +1184,7 @@ struct GtRegenHPPerSptEntry
 
 struct GtRegenMPPerSptEntry
 {
-    float    ratio;
+    float    Data;
 };
 
 /*struct HolidayDescriptionsEntry
@@ -1284,12 +1284,12 @@ struct ItemDisplayInfoEntry
 struct ItemExtendedCostEntry
 {
     uint32      ID;                                         // 0        m_ID
-    uint32      reqhonorpoints;                             // 1        m_honorPoints
-    uint32      reqarenapoints;                             // 2        m_arenaPoints
-    uint32      reqarenaslot;                               // 4        m_arenaBracket
-    uint32      reqitem[MAX_EXTENDED_COST_ITEMS];           // 5-8      m_itemID
-    uint32      reqitemcount[MAX_EXTENDED_COST_ITEMS];      // 9-13     m_itemCount
-    uint32      reqpersonalarenarating;                     // 14       m_requiredArenaRating
+    uint32      HonorPoints;                             // 1        m_honorPoints
+    uint32      ArenaPoints;                             // 2        m_arenaPoints
+    uint32      ArenaBracket;                               // 4        m_arenaBracket
+    uint32      ItemID[MAX_EXTENDED_COST_ITEMS];           // 5-8      m_itemID
+    uint32      ItemCount[MAX_EXTENDED_COST_ITEMS];      // 9-13     m_itemCount
+    uint32      RequiredArenaRating;                     // 14       m_requiredArenaRating
     // 15       m_itemPurchaseGroup
 };
 
@@ -1298,8 +1298,8 @@ struct ItemLimitCategoryEntry
     uint32      ID;                                         // 0 Id     m_ID
     // char*     name[16]                                   // 1-16     m_name_lang
     // 17 string flags
-    uint32      maxCount;                                   // 18       m_quantity max allowed equipped as item or in gem slot
-    uint32      mode;                                       // 19       m_flags 0 = have, 1 = equip (enum ItemLimitCategoryMode)
+    uint32      Quantity;                                   // 18       m_quantity max allowed equipped as item or in gem slot
+    uint32      Flags;                                       // 19       m_flags 0 = have, 1 = equip (enum ItemLimitCategoryMode)
 };
 
 /**
@@ -1501,8 +1501,8 @@ struct MapDifficultyEntry
     uint32      Difficulty;                                 // 2        m_difficulty (for arenas: arena slot)
     // char*       areaTriggerText[16];                     // 3-18     m_message_lang (text showed when transfer to map failed)
     // uint32      textFlags;                               // 19
-    uint32      resetTime;                                  // 20       m_raidDuration in secs, 0 if no fixed reset time
-    uint32      maxPlayers;                                 // 21       m_maxPlayers some heroic versions have 0 when expected same amount as in normal version
+    uint32      RaidDuration;                                  // 20       m_raidDuration in secs, 0 if no fixed reset time
+    uint32      MaxPlayers;                                 // 21       m_maxPlayers some heroic versions have 0 when expected same amount as in normal version
     // char*       difficultyString;                        // 22       m_difficultystring
 };
 
@@ -2268,11 +2268,11 @@ struct SpellItemEnchantmentEntry
 struct SpellItemEnchantmentConditionEntry
 {
     uint32  ID;                                             // 0        m_ID
-    uint8   Color[5];                                       // 1-5      m_lt_operandType[5]
+    uint8   Lt_OperandType[5];                                       // 1-5      m_lt_operandType[5]
     // uint32  LT_Operand[5];                               // 6-10     m_lt_operand[5]
-    uint8   Comparator[5];                                  // 11-15    m_operator[5]
-    uint8   CompareColor[5];                                // 15-20    m_rt_operandType[5]
-    uint32  Value[5];                                       // 21-25    m_rt_operand[5]
+    uint8   Operator[5];                                  // 11-15    m_operator[5]
+    uint8   Rt_OperandType[5];                                // 15-20    m_rt_operandType[5]
+    uint32  Rt_Operand[5];                                       // 21-25    m_rt_operand[5]
     // uint8   Logic[5]                                     // 25-30    m_logic[5]
 };
 
@@ -2282,8 +2282,8 @@ struct SpellItemEnchantmentConditionEntry
 */
 struct StableSlotPricesEntry
 {
-    uint32 Slot;                                            //          m_ID
-    uint32 Price;                                           //          m_cost
+    uint32 ID;                                            //          m_ID
+    uint32 Cost;                                           //          m_cost
 };
 
 struct SummonPropertiesEntry
@@ -2448,52 +2448,52 @@ struct VehicleEntry
 
 struct VehicleSeatEntry
 {
-    uint32  m_ID;                                           // 0
-    uint32  m_flags;                                        // 1
-    int32   m_attachmentID;                                 // 2
-    float   m_attachmentOffsetX;                            // 3
-    float   m_attachmentOffsetY;                            // 4
-    float   m_attachmentOffsetZ;                            // 5
-    float   m_enterPreDelay;                                // 6
-    float   m_enterSpeed;                                   // 7
-    float   m_enterGravity;                                 // 8
-    float   m_enterMinDuration;                             // 9
-    float   m_enterMaxDuration;                             // 10
-    float   m_enterMinArcHeight;                            // 11
-    float   m_enterMaxArcHeight;                            // 12
-    int32   m_enterAnimStart;                               // 13
-    int32   m_enterAnimLoop;                                // 14
-    int32   m_rideAnimStart;                                // 15
-    int32   m_rideAnimLoop;                                 // 16
-    int32   m_rideUpperAnimStart;                           // 17
-    int32   m_rideUpperAnimLoop;                            // 18
-    float   m_exitPreDelay;                                 // 19
-    float   m_exitSpeed;                                    // 20
-    float   m_exitGravity;                                  // 21
-    float   m_exitMinDuration;                              // 22
-    float   m_exitMaxDuration;                              // 23
-    float   m_exitMinArcHeight;                             // 24
-    float   m_exitMaxArcHeight;                             // 25
-    int32   m_exitAnimStart;                                // 26
-    int32   m_exitAnimLoop;                                 // 27
-    int32   m_exitAnimEnd;                                  // 28
-    float   m_passengerYaw;                                 // 29
-    float   m_passengerPitch;                               // 30
-    float   m_passengerRoll;                                // 31
-    int32   m_passengerAttachmentID;                        // 32
-    int32   m_vehicleEnterAnim;                             // 33
-    int32   m_vehicleExitAnim;                              // 34
-    int32   m_vehicleRideAnimLoop;                          // 35
-    int32   m_vehicleEnterAnimBone;                         // 36
-    int32   m_vehicleExitAnimBone;                          // 37
-    int32   m_vehicleRideAnimLoopBone;                      // 38
-    float   m_vehicleEnterAnimDelay;                        // 39
-    float   m_vehicleExitAnimDelay;                         // 40
-    uint32  m_vehicleAbilityDisplay;                        // 41
-    uint32  m_enterUISoundID;                               // 42
-    uint32  m_exitUISoundID;                                // 43
-    int32   m_uiSkin;                                       // 44
-    uint32  m_flagsB;                                       // 45
+    uint32  ID;                                           // 0
+    uint32  Flags;                                        // 1
+    int32   AttachmentID;                                 // 2
+    float   AttachmentOffsetX;                            // 3
+    float   AttachmentOffsetY;                            // 4
+    float   AttachmentOffsetZ;                            // 5
+    float   EnterPreDelay;                                // 6
+    float   EnterSpeed;                                   // 7
+    float   EnterGravity;                                 // 8
+    float   EnterMinDuration;                             // 9
+    float   EnterMaxDuration;                             // 10
+    float   EnterMinArcHeight;                            // 11
+    float   EnterMaxArcHeight;                            // 12
+    int32   EnterAnimStart;                               // 13
+    int32   EnterAnimLoop;                                // 14
+    int32   RideAnimStart;                                // 15
+    int32   RideAnimLoop;                                 // 16
+    int32   RideUpperAnimStart;                           // 17
+    int32   RideUpperAnimLoop;                            // 18
+    float   ExitPreDelay;                                 // 19
+    float   ExitSpeed;                                    // 20
+    float   ExitGravity;                                  // 21
+    float   ExitMinDuration;                              // 22
+    float   ExitMaxDuration;                              // 23
+    float   ExitMinArcHeight;                             // 24
+    float   ExitMaxArcHeight;                             // 25
+    int32   ExitAnimStart;                                // 26
+    int32   ExitAnimLoop;                                 // 27
+    int32   ExitAnimEnd;                                  // 28
+    float   PassengerYaw;                                 // 29
+    float   PassengerPitch;                               // 30
+    float   PassengerRoll;                                // 31
+    int32   PassengerAttachmentID;                        // 32
+    int32   VehicleEnterAnim;                             // 33
+    int32   VehicleExitAnim;                              // 34
+    int32   VehicleRideAnimLoop;                          // 35
+    int32   VehicleEnterAnimBone;                         // 36
+    int32   VehicleExitAnimBone;                          // 37
+    int32   VehicleRideAnimLoopBone;                      // 38
+    float   VehicleEnterAnimDelay;                        // 39
+    float   VehicleExitAnimDelay;                         // 40
+    uint32  VehicleAbilityDisplay;                        // 41
+    uint32  EnterUISoundID;                               // 42
+    uint32  ExitUISoundID;                                // 43
+    int32   UiSkin;                                       // 44
+    uint32  FlagsB;                                       // 45
     // 46       m_cameraEnteringDelay
     // 47       m_cameraEnteringDuration
     // 48       m_cameraExitingDelay
@@ -2536,14 +2536,14 @@ struct WMOAreaTableEntry
 struct WorldMapAreaEntry
 {
     // uint32  ID;                                          // 0        m_ID
-    uint32  map_id;                                         // 1        m_mapID
-    uint32  area_id;                                        // 2        m_areaID index (continent 0 areas ignored)
+    uint32  MapID;                                         // 1        m_mapID
+    uint32  AreaID;                                        // 2        m_areaID index (continent 0 areas ignored)
     // char* internal_name                                  // 3        m_areaName
-    float   y1;                                             // 4        m_locLeft
-    float   y2;                                             // 5        m_locRight
-    float   x1;                                             // 6        m_locTop
-    float   x2;                                             // 7        m_locBottom
-    int32   virtual_map_id;                                 // 8        m_displayMapID -1 (map_id have correct map) other: virtual map where zone show (map_id - where zone in fact internally)
+    float   LocLeft;                                             // 4        m_locLeft
+    float   LocRight;                                             // 5        m_locRight
+    float   LocTop;                                             // 6        m_locTop
+    float   LocBottom;                                             // 7        m_locBottom
+    int32   DisplayMapID;                                 // 8        m_displayMapID -1 (MapID have correct map) other: virtual map where zone show (MapID - where zone in fact internally)
     // int32   dungeonMap_id;                               // 9        m_defaultDungeonFloor (DungeonMap.dbc)
     // uint32  someMapID;                                   // 10       m_parentWorldMapID
 };

@@ -453,12 +453,12 @@ bool BattleGroundPersistentState::CanBeUnload() const
 
 uint32 DungeonResetScheduler::GetMaxResetTimeFor(MapDifficultyEntry const* mapDiff)
 {
-    if (!mapDiff || !mapDiff->resetTime)
+    if (!mapDiff || !mapDiff->RaidDuration)
     {
         return 0;
     }
 
-    uint32 delay = uint32(mapDiff->resetTime / DAY * sWorld.getConfig(CONFIG_FLOAT_RATE_INSTANCE_RESET_TIME)) * DAY;
+    uint32 delay = uint32(mapDiff->RaidDuration / DAY * sWorld.getConfig(CONFIG_FLOAT_RATE_INSTANCE_RESET_TIME)) * DAY;
 
     if (delay < DAY)                                        // the reset_delay must be at least one day
     {
@@ -606,7 +606,7 @@ void DungeonResetScheduler::LoadResetTimes()
         MapDifficultyEntry const* mapDiff = itr->second;
 
         // skip mapDiff without global reset time
-        if (!mapDiff->resetTime)
+        if (!mapDiff->RaidDuration)
         {
             continue;
         }
@@ -1175,7 +1175,7 @@ void MapPersistentStateManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficu
     if (!warn)
     {
         MapDifficultyEntry const* mapDiff = GetMapDifficultyData(mapid, difficulty);
-        if (!mapDiff || !mapDiff->resetTime)
+        if (!mapDiff || !mapDiff->RaidDuration)
         {
             sLog.outError("MapPersistentStateManager::ResetOrWarnAll: not valid difficulty or no reset delay for map %d", mapid);
             return;
